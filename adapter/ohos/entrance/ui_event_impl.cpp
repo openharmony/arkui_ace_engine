@@ -25,6 +25,7 @@
 #include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/base/simplified_inspector.h"
+#include "core/components_ng/pattern/page_translate/page_translate_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
@@ -41,7 +42,9 @@ std::string GetWebLanguageByNodeId(int32_t nodeId)
     CHECK_NULL_RETURN(node, "");
     auto pattern = node->GetPattern();
     CHECK_NULL_RETURN(pattern, "");
-    return pattern->GetCurrentLanguage();
+    auto translateNode = AceType::DynamicCast<NG::PageTranslateNode>(pattern);
+    CHECK_NULL_RETURN(translateNode, "");
+    return translateNode->GetCurrentLanguage();
 }
 
 std::string GetCurrentPageParam()

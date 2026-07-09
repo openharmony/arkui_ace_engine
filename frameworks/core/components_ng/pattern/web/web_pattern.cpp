@@ -10426,6 +10426,13 @@ std::string WebPattern::GetCurrentLanguage()
     return result;
 }
 
+int32_t WebPattern::GetPageTranslateNodeId() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    return host->GetId();
+}
+
 void WebPattern::OnEnableFollowSystemFontWeightUpdate(bool value)
 {
     if (delegate_) {

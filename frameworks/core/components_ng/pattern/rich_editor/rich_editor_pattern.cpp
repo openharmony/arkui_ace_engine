@@ -1497,16 +1497,16 @@ int32_t RichEditorPattern::OnInjectionEvent(const std::string& command)
 
 void RichEditorPattern::ReportCommandExecution(int32_t nodeId, const std::string& command)
 {
-    auto eventObj = InspectorJsonUtil::Create();
+    auto eventObj = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(eventObj);
     eventObj->Put("event", command.c_str());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
 }
 
 void RichEditorPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& str, int32_t start, int32_t end)
 {
-    auto eventObj = InspectorJsonUtil::Create();
+    auto eventObj = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(eventObj);
     std::string value = selectOverlay_->GetSelectedText();
     CHECK_NULL_VOID(lastReportSelectionText_ != value);
@@ -1515,26 +1515,26 @@ void RichEditorPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::st
     eventObj->Put("value", value.c_str());
     eventObj->Put("start", start);
     eventObj->Put("end", end);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
 }
 
 void RichEditorPattern::ReportCaretPositionChangeEvent(int32_t nodeId, int32_t position)
 {
-    auto eventObj = InspectorJsonUtil::Create();
+    auto eventObj = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(eventObj);
     eventObj->Put("event", "caretPositionChange");
     eventObj->Put("position", position);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
 }
 
 void RichEditorPattern::ReportRichEditorRequestKeyboardEvent(int32_t nodeId)
 {
-    auto eventObj = InspectorJsonUtil::Create();
+    auto eventObj = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(eventObj);
     eventObj->Put("event", "RichEditor.requestKeyboard");
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", eventObj->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
 }
 
@@ -14341,10 +14341,10 @@ void RichEditorPattern::ReportComponentChangeEvent() {
         GetContentBySpans(u16Str);
         str = UtfUtils::Str16DebugToStr8(u16Str);
     }
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(value);
     value->Put("text", str.c_str());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameId_, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameId_, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}d",
         frameId_, static_cast<int32_t>(str.length()));

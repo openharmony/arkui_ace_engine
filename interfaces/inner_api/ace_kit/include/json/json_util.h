@@ -76,6 +76,7 @@ public:
     bool Put(const char* key, int64_t value) override;
     bool Put(const char* key, double value) override;
     bool Put(const char* key, bool value) override;
+    bool Put(double value);
     virtual bool Put(const char* key, const std::unique_ptr<JsonValue>& value);
     bool Put(const std::unique_ptr<JsonValue>& value);
     bool Put(const std::shared_ptr<JsonValue>& value);

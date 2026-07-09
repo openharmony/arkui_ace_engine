@@ -1291,17 +1291,17 @@ bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string&
 {
     auto dataJson = JsonUtil::ParseJsonString(eventData);
     CHECK_NULL_RETURN(dataJson, false);
-    auto params = InspectorJsonUtil::CreateObject();
+    auto params = JsonUtil::Create();
     CHECK_NULL_RETURN(params, false);
     params->Put("year", static_cast<int32_t>(dataJson->GetUInt("year")));
     params->Put("month", static_cast<int32_t>(dataJson->GetUInt("month") + 1)); // month: 1-12
     params->Put("day", static_cast<int32_t>(dataJson->GetUInt("day")));
 
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put(compName.c_str(), eventName.c_str());
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
 }
@@ -1317,7 +1317,7 @@ bool DatePickerPattern::ReportDialogDateChangeEvent(int32_t nodeId, const std::s
         return false;
     }
 
-    auto params = InspectorJsonUtil::CreateObject();
+    auto params = JsonUtil::Create();
     CHECK_NULL_RETURN(params, false);
     params->Put("year", static_cast<int32_t>(dataJson->GetUInt("year")));
     params->Put("month", static_cast<int32_t>(dataJson->GetUInt("month") + 1));
@@ -1326,11 +1326,11 @@ bool DatePickerPattern::ReportDialogDateChangeEvent(int32_t nodeId, const std::s
     params->Put("minute", static_cast<int32_t>(dataJson->GetUInt("minute")));
     params->Put("second", 0);
 
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put(compName.c_str(), eventName.c_str());
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
 }
@@ -3542,7 +3542,7 @@ bool DatePickerPattern::IsJsonObject(const std::unique_ptr<JsonValue>& json)
 bool DatePickerPattern::ReportCommandResult(int32_t nodeId, const std::string& event,
     const std::string& result, const std::string& reason)
 {
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put("event", event.c_str());
     value->Put("result", result.c_str());
@@ -3550,7 +3550,7 @@ bool DatePickerPattern::ReportCommandResult(int32_t nodeId, const std::string& e
         value->Put("reason", reason.c_str());
     }
 
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "DatePickerResult", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "DatePickerResult", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
 }

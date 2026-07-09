@@ -26,9 +26,11 @@
 #include <memory>
 #include <optional>
 #include <set>
+#include <unordered_map>
 
 namespace OHOS::Ace::NG {
 class FrameNode;
+class PageTranslateNode;
 #ifndef IS_RELEASE_VERSION
 class ContentChangeDumpManager;
 #endif
@@ -48,6 +50,13 @@ public:
     void StopContentChangeReport();
     void AddOnContentChangeNode(WeakPtr<FrameNode> node);
     void RemoveOnContentChangeNode(WeakPtr<FrameNode> node);
+    void StartTextTranslateReport();
+    void StopTextTranslateReport();
+    void StartTextTranslateSnapshotReport();
+    void ReportTranslateTextNode(const WeakPtr<PageTranslateNode>& node, const std::string& text);
+    void ReportTranslateTextFrameNode(const WeakPtr<FrameNode>& node, bool isContinuous = true);
+    bool ApplyTranslateResult(int32_t nodeId, const std::string& result, int64_t version);
+    void ResetTranslateTextNode(int32_t nodeId = -1);
     bool IsContentChangeDetectEnable() const
     {
         return currentContentChangeConfig_.has_value();
@@ -90,8 +99,26 @@ private:
     void RemoveImageReportTask();
     void PostImageReportTask(uint32_t delay);
     bool IsInTransitionDelayWindow() const;
+    bool IsTextTranslateActive() const;
+    int64_t UpdateTranslateVersionIfNeeded(int32_t nodeId, const std::string& text);
+    void ReportTranslateTextSnapshotNode(const WeakPtr<PageTranslateNode>& node, const std::string& text);
+    void ClearTranslateTextSnapshotCache();
+    int64_t NextTranslateTextSnapshotVersion();
+    bool HasTranslateResultVersion(const std::unordered_map<int32_t, std::pair<size_t, int64_t>>& versions,
+        int32_t nodeId, int64_t version) const;
+    bool ApplyTranslateResultToNode(const RefPtr<PageTranslateNode>& node, const std::string& result, int64_t version);
+    bool ApplyTranslateResultWithCache(const std::set<WeakPtr<PageTranslateNode>>& nodes,
+        const std::unordered_map<int32_t, std::pair<size_t, int64_t>>& versions, int32_t nodeId,
+        const std::string& result, int64_t version);
+    void ResetTranslateNode(const RefPtr<PageTranslateNode>& node);
 
     std::set<WeakPtr<FrameNode>> onContentChangeNodes_;
+    std::set<WeakPtr<PageTranslateNode>> translateTextNodes_;
+    std::unordered_map<int32_t, std::pair<size_t, int64_t>> translateTextVersions_;
+    std::set<WeakPtr<PageTranslateNode>> translateTextSnapshotNodes_;
+    std::unordered_map<int32_t, std::pair<size_t, int64_t>> translateTextSnapshotVersions_;
+    int64_t translateTextSnapshotVersion_ = 0;
+    bool textTranslateActive_ = false;
     std::optional<ContentChangeConfig> currentContentChangeConfig_;
 
     static constexpr uint64_t NS_PER_MS = 1000000;

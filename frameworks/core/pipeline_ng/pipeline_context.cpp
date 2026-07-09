@@ -7889,6 +7889,63 @@ std::shared_ptr<UiTranslateManagerImpl> PipelineContext::GetUiTranslateManagerIm
     return uiTranslateManager_;
 }
 
+void PipelineContext::RegisterListenerForTranslate(const WeakPtr<NG::FrameNode> node)
+{
+    CHECK_NULL_VOID(uiTranslateManager_);
+    uiTranslateManager_->AddTranslateListener(node);
+    CHECK_NULL_VOID(contentChangeMgr_);
+    contentChangeMgr_->ReportTranslateTextFrameNode(node);
+}
+
+void PipelineContext::UnRegisterListenerForTranslate(int32_t nodeId)
+{
+    CHECK_NULL_VOID(uiTranslateManager_);
+    uiTranslateManager_->RemoveTranslateListener(nodeId);
+}
+
+void PipelineContext::GetArkUIPageTranslateText(bool isContinuous)
+{
+    CHECK_NULL_VOID(uiTranslateManager_);
+    CHECK_NULL_VOID(contentChangeMgr_);
+    if (isContinuous) {
+        contentChangeMgr_->StartTextTranslateReport();
+    } else {
+        contentChangeMgr_->StartTextTranslateSnapshotReport();
+    }
+    uiTranslateManager_->ForEachArkUITranslateFrameNode(
+        [contentChangeManager = contentChangeMgr_, isContinuous](const WeakPtr<NG::FrameNode>& node) {
+            contentChangeManager->ReportTranslateTextFrameNode(node, isContinuous);
+        });
+}
+
+void PipelineContext::EndArkUIPageTranslate()
+{
+    CHECK_NULL_VOID(contentChangeMgr_);
+    contentChangeMgr_->StopTextTranslateReport();
+}
+
+void PipelineContext::ResetArkUIPageTranslate(int32_t nodeId)
+{
+    CHECK_NULL_VOID(contentChangeMgr_);
+    contentChangeMgr_->ResetTranslateTextNode(nodeId);
+}
+
+void PipelineContext::SendArkUIPageTranslateResult(const std::vector<TranslateResult>& translateResults)
+{
+    CHECK_NULL_VOID(contentChangeMgr_);
+    size_t appliedCount = 0;
+    for (const auto& translateResult : translateResults) {
+        if (contentChangeMgr_->ApplyTranslateResult(
+            translateResult.nodeId, translateResult.translatedText, translateResult.version)) {
+            ++appliedCount;
+            continue;
+        }
+        LOGW("SendArkUIPageTranslateResult apply failed nodeId:%{public}d version:%{public}" PRId64,
+            translateResult.nodeId, translateResult.version);
+    }
+    LOGI("SendArkUIPageTranslateResult apply count:%{public}zu/%{public}zu", appliedCount, translateResults.size());
+}
+
 void PipelineContext::SetDisplayWindowRectInfo(const Rect& displayWindowRectInfo)
 {
     auto offSetPosX_ = displayWindowRectInfo_.Left() - displayWindowRectInfo.Left();

@@ -20,7 +20,7 @@
 #include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
 #include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
-#include "interfaces/inner_api/ui_session/ui_translate_request_util.h"
+#include "adapter/ohos/entrance/ui_session/ui_translate_request_util.h"
 
 namespace OHOS::Ace {
 int32_t UIContentServiceProxy::GetInspectorTree(
@@ -1276,7 +1276,7 @@ int32_t UIContentServiceProxy::SendPageTranslateResult(const std::string& result
     MessageParcel data;
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    std::vector<PageTranslateRequestUtil::TranslateResult> translateResults;
+    std::vector<TranslateResult> translateResults;
     if (!PageTranslateRequestUtil::ParseTranslateResults(result, translateResults)) {
         LOGW("SendPageTranslateResult invalid result");
         return PARAM_INVALID;

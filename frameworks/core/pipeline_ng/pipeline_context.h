@@ -21,8 +21,10 @@
 #include <list>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "interfaces/inner_api/ace/arkui_rect.h"
+#include "interfaces/inner_api/ui_session/ui_translate_type.h"
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/frame_info.h"
@@ -1086,15 +1088,12 @@ public:
         uiTranslateManager_ = uiTranslateManager;
     }
 
-    void RegisterListenerForTranslate(const WeakPtr<NG::FrameNode> node)
-    {
-        uiTranslateManager_->AddTranslateListener(node);
-    }
-
-    void UnRegisterListenerForTranslate(int32_t nodeId)
-    {
-        uiTranslateManager_->RemoveTranslateListener(nodeId);
-    }
+    void RegisterListenerForTranslate(const WeakPtr<NG::FrameNode> node);
+    void UnRegisterListenerForTranslate(int32_t nodeId);
+    void GetArkUIPageTranslateText(bool isContinuous);
+    void EndArkUIPageTranslate();
+    void ResetArkUIPageTranslate(int32_t nodeId);
+    void SendArkUIPageTranslateResult(const std::vector<TranslateResult>& translateResults);
 
     void SetEnableSwipeBack(bool isEnable) override;
     void SetIsRecycleInvisibleImageMemory(bool isEnable) override

@@ -176,13 +176,13 @@ void SwiperUISessionAdapter::ReportComponentChangeEvent(bool result, SwiperComma
 
 void SwiperUISessionAdapter::ReportSelectChangeData(int32_t nodeId, int index)
 {
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(json);
 
     json->Put("event", "Swiper.onChange");
     json->Put("currentIndex", std::to_string(index).c_str());
 
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(json),
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json->ToString(),
         ComponentEventType::COMPONENT_EVENT_SWIPER);
 }
 

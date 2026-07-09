@@ -59,7 +59,7 @@ void WebAgentEventReporter::AddEvent(const std::string& jsonString)
 
 void WebAgentEventReporter::AddTapEvent(const std::unique_ptr<JsonValue>& tapEventJson)
 {
-    auto jsonValue = InspectorJsonUtil::Create();
+    auto jsonValue = JsonUtil::CreateSharedPtrJson();
     jsonValue->Put(REPORT_EVENT_IDENTIFIER, "Tap");
     jsonValue->Put("id", tapEventJson->GetInt("id"));
     RectF pointRect;
@@ -72,7 +72,7 @@ void WebAgentEventReporter::AddTapEvent(const std::unique_ptr<JsonValue>& tapEve
         return;
     }
     pointRect = ConvertToWindow(pointRect);
-    auto pointArray = InspectorJsonUtil::CreateArray();
+    auto pointArray = JsonUtil::CreateArray();
     pointArray->Put(pointRect.Left());
     pointArray->Put(pointRect.Top());
     jsonValue->Put("point", pointArray);
@@ -82,7 +82,7 @@ void WebAgentEventReporter::AddTapEvent(const std::unique_ptr<JsonValue>& tapEve
 
 void WebAgentEventReporter::AddLongPressEvent(const std::unique_ptr<JsonValue>& longPressEventJson)
 {
-    auto jsonValue = InspectorJsonUtil::Create();
+    auto jsonValue = JsonUtil::CreateSharedPtrJson();
     jsonValue->Put(REPORT_EVENT_IDENTIFIER, "LongPress");
     jsonValue->Put("id", longPressEventJson->GetInt("id"));
     RectF pointRect;
@@ -95,7 +95,7 @@ void WebAgentEventReporter::AddLongPressEvent(const std::unique_ptr<JsonValue>& 
         return;
     }
     pointRect = ConvertToWindow(pointRect);
-    auto pointArray = InspectorJsonUtil::CreateArray();
+    auto pointArray = JsonUtil::CreateArray();
     pointArray->Put(pointRect.Left());
     pointArray->Put(pointRect.Top());
     jsonValue->Put("point", pointArray);
@@ -112,7 +112,7 @@ void WebAgentEventReporter::AddLongPressEvent(const std::unique_ptr<JsonValue>& 
 
 void WebAgentEventReporter::AddPinchEvent(const std::unique_ptr<JsonValue>& pinchEventJson)
 {
-    auto jsonValue = InspectorJsonUtil::Create();
+    auto jsonValue = JsonUtil::CreateSharedPtrJson();
     jsonValue->Put(REPORT_EVENT_IDENTIFIER, pinchEventJson->GetString(EVENT_IDENTIFIER).c_str());
     jsonValue->Put("id", pinchEventJson->GetInt("id"));
     double scale = pinchEventJson->GetDouble("scale");
@@ -169,13 +169,13 @@ void WebAgentEventReporter::AddScrollEvent(const std::unique_ptr<JsonValue>& scr
     ProcessScrollQueue();
 }
 
-std::shared_ptr<InspectorJsonValue> WebAgentEventReporter::ScrollEventInfo::GetInspectorJsonValue() const
+std::shared_ptr<JsonValue> WebAgentEventReporter::ScrollEventInfo::GetJsonValue() const
 {
-    auto jsonValue = InspectorJsonUtil::Create();
+    auto jsonValue = JsonUtil::CreateSharedPtrJson();
     jsonValue->Put(REPORT_EVENT_IDENTIFIER, eventType.c_str());
     jsonValue->Put("id", id);
 
-    auto offsetArray = InspectorJsonUtil::CreateArray();
+    auto offsetArray = JsonUtil::CreateArray();
     offsetArray->Put(scrollRect.Left());
     offsetArray->Put(scrollRect.Top());
 
@@ -256,7 +256,7 @@ void WebAgentEventReporter::ReportAndAdvanceScrollQueue(const ScrollEventInfo& i
         startRecords_.erase(info.id);
         startRecords_.erase(LAST_START_RECORD_INDEX); // clear last start record
     }
-    auto jsonValue = info.GetInspectorJsonValue();
+    auto jsonValue = info.GetJsonValue();
     scrollQueue_.pop();
     ReportEventImediately(jsonValue);
 }
@@ -315,14 +315,15 @@ void WebAgentEventReporter::ProcessScrollQueue()
 }
 // ===== scroll event process end =====
 
-void WebAgentEventReporter::ReportEventImediately(const std::shared_ptr<InspectorJsonValue>& eventJson)
+void WebAgentEventReporter::ReportEventImediately(const std::shared_ptr<JsonValue>& eventJson)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "WebAgentEventReporter::ReportEventImediately");
+    CHECK_NULL_VOID(eventJson);
     auto pattern = DynamicCast<WebPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", eventJson,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", eventJson->ToString(),
         ComponentEventType::COMPONENT_EVENT_WEB);
 }
 

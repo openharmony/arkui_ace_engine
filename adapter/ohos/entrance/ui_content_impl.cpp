@@ -6255,6 +6255,59 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     RegisterSelectTextCallback(taskExecutor);
     SaveGetStateMgmtInfoFunction(taskExecutor);
     SaveGetWebInfoByRequestFunction(taskExecutor);
+    SaveArkUIPageTranslateFunctions(taskExecutor);
+}
+
+void UIContentImpl::SaveArkUIPageTranslateFunctions(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+    auto getTextFunction = [weakTaskExecutor = taskExecutor](bool isContinuous) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [isContinuous]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->GetArkUIPageTranslateText(isContinuous);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionGetArkUIPageTranslateText");
+    };
+    auto startFunction = getTextFunction;
+    auto endFunction = [weakTaskExecutor = taskExecutor]() {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            []() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->EndArkUIPageTranslate();
+            },
+            TaskExecutor::TaskType::UI, "UiSessionEndArkUIPageTranslate");
+    };
+    auto resetFunction = [weakTaskExecutor = taskExecutor](int32_t nodeId) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [nodeId]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->ResetArkUIPageTranslate(nodeId);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionResetArkUIPageTranslate");
+    };
+    auto resultFunction = [weakTaskExecutor = taskExecutor](const std::vector<TranslateResult>& translateResults) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [translateResults]() {
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->SendArkUIPageTranslateResult(translateResults);
+            },
+            TaskExecutor::TaskType::UI, "UiSessionSendArkUIPageTranslateResult");
+    };
+    UiSessionManager::GetInstance()->SaveArkUIPageTranslateFunctions(
+        std::move(getTextFunction), std::move(startFunction), std::move(endFunction),
+        std::move(resetFunction), std::move(resultFunction));
 }
 
 void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor)

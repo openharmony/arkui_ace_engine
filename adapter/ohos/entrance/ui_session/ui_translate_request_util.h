@@ -13,16 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACE_UI_TRANSLATE_REQUEST_UTIL_H
-#define FOUNDATION_ACE_INTERFACE_UI_TRANSLATE_REQUEST_UTIL_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_UI_SESSION_UI_TRANSLATE_REQUEST_UTIL_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_UI_SESSION_UI_TRANSLATE_REQUEST_UTIL_H
 
 #include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "iremote_object.h"
-#include "ui_content_service_interface.h"
+#include "interfaces/inner_api/ui_session/ui_translate_type.h"
 
 namespace OHOS::Ace::PageTranslateRequestUtil {
 inline constexpr int32_t ARKWEB_TRANSLATE_SCOPE = static_cast<int32_t>(TranslateContentScope::ARKWEB_ONLY);
@@ -32,12 +31,6 @@ inline constexpr int32_t CANVAS_TRANSLATE_SCOPE = static_cast<int32_t>(Translate
 inline constexpr int32_t ARKUI_ARKWEB_TRANSLATE_SCOPE = static_cast<int32_t>(TranslateContentScope::ARKUI_ARKWEB);
 inline constexpr int32_t PAGE_ALL_TRANSLATE_SCOPE = static_cast<int32_t>(TranslateContentScope::PAGE_ALL);
 
-struct TranslateResult {
-    int32_t nodeId = -1;
-    int64_t version = 0;
-    std::string translatedText;
-};
-
 bool IsTranslateScopeValid(int32_t scope);
 bool IsPageTranslateRequestValid(const std::string& request);
 std::string DecodeJsonUnicodeEscapes(const std::string& text);
@@ -45,4 +38,4 @@ std::vector<std::pair<int32_t, int64_t>> ParseTranslateResultIdentities(const st
 bool ParseTranslateResults(const std::string& content, std::vector<TranslateResult>& results);
 } // namespace OHOS::Ace::PageTranslateRequestUtil
 
-#endif // FOUNDATION_ACE_INTERFACE_UI_TRANSLATE_REQUEST_UTIL_H
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_UI_SESSION_UI_TRANSLATE_REQUEST_UTIL_H

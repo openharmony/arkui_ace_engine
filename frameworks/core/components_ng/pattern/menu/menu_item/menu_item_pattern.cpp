@@ -3938,14 +3938,14 @@ void MenuItemPattern::ReportEvent()
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
     auto content = itemProperty->GetContent().value_or("");
-    auto result = InspectorJsonUtil::CreateObject();
+    auto result = JsonUtil::Create();
     result->Put("event", "onchange");
     result->Put("id", host->GetId());
     result->Put("type", host->GetTag().c_str());
     result->Put("status", isSelected_ ? "Selected" : "UnSelected");
     result->Put("text", content.c_str());
     result->Put("description", host->GetAutoEventParamValue("").c_str());
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::CreateSharedPtrJson();
     json->Put("onchangeResult", result);
     std::string jsString = json->ToString();
     TAG_LOGD(AceLogTag::ACE_MENU, "[menuitem ReportComponentChangeEvent] result %{public}s", jsString.c_str());

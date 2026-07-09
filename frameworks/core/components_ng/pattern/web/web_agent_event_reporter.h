@@ -24,7 +24,7 @@
 #include "core/components/web/web_property.h"
 
 namespace OHOS::Ace {
-class InspectorJsonValue;
+class JsonValue;
 }
 
 namespace OHOS::Ace::NG {
@@ -38,7 +38,7 @@ public:
 
     void AddEvent(const std::string& jsonString);
 
-    virtual void ReportEventImediately(const std::shared_ptr<InspectorJsonValue>& eventJson);
+    virtual void ReportEventImediately(const std::shared_ptr<JsonValue>& eventJson);
 
     virtual void AddTapEvent(const std::unique_ptr<JsonValue>& tapEventJson);
 
@@ -86,7 +86,7 @@ protected:
         RectF scrollRect;
         int retry = 0;
 
-        std::shared_ptr<InspectorJsonValue> GetInspectorJsonValue() const;
+        std::shared_ptr<JsonValue> GetJsonValue() const;
     };
     std::queue<ScrollEventInfo> scrollQueue_;
     std::unordered_map<int32_t, ScrollEventInfo> startRecords_;

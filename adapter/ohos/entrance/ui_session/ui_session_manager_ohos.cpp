@@ -15,7 +15,8 @@
 
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_trace.h"
-#include "interfaces/inner_api/ui_session/ui_translate_request_util.h"
+#include "adapter/ohos/entrance/ui_session/ui_translate_request_util.h"
+#include "interfaces/inner_api/ui_session/ui_session_json_util.h"
 
 namespace OHOS::Ace {
 constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 131072;
@@ -27,6 +28,11 @@ struct PageTranslateRequestInfo {
     std::string extraData;
     bool valid = true;
 };
+
+bool HasScope(int32_t scope, int32_t target)
+{
+    return (scope & target) != 0;
+}
 
 PageTranslateRequestInfo ParsePageTranslateRequest(const std::string& request)
 {
@@ -130,7 +136,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
 }
 
 void UiSessionManagerOhos::ReportComponentChangeEvent(
-    int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value, uint32_t eventType)
+    int32_t nodeId, const std::string& key, const std::string& value, uint32_t eventType)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
@@ -139,7 +145,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
             NeedComponentChangeTypeReporting(eventType)) {
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
-            data->Put(key.data(), value->ToString().data());
+            data->Put(key.data(), value.data());
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
             LOGW("report component event failed, process id:%{public}d", pair.first);
@@ -641,6 +647,30 @@ void UiSessionManagerOhos::RemoveSaveGetCurrentInstanceId(int32_t instanceId)
     translateManagerMap_.erase(instanceId);
 }
 
+void UiSessionManagerOhos::SaveArkUIPageTranslateFunctions(PageTranslateTextFunction&& getTextFunction,
+    PageTranslateTextFunction&& startFunction, PageTranslateEndFunction&& endFunction,
+    PageTranslateResetFunction&& resetFunction, PageTranslateResultFunction&& resultFunction)
+{
+    std::lock_guard<std::mutex> lock(arkUIPageTranslateFunctionMutex_);
+    getArkUIPageTranslateTextFunction_ = std::move(getTextFunction);
+    startArkUIPageTranslateFunction_ = std::move(startFunction);
+    endArkUIPageTranslateFunction_ = std::move(endFunction);
+    resetArkUIPageTranslateFunction_ = std::move(resetFunction);
+    sendArkUIPageTranslateResultFunction_ = std::move(resultFunction);
+}
+
+void UiSessionManagerOhos::GetArkUIPageTranslateFunctions(PageTranslateTextFunction& getTextFunction,
+    PageTranslateTextFunction& startFunction, PageTranslateEndFunction& endFunction,
+    PageTranslateResetFunction& resetFunction, PageTranslateResultFunction& resultFunction)
+{
+    std::lock_guard<std::mutex> lock(arkUIPageTranslateFunctionMutex_);
+    getTextFunction = getArkUIPageTranslateTextFunction_;
+    startFunction = startArkUIPageTranslateFunction_;
+    endFunction = endArkUIPageTranslateFunction_;
+    resetFunction = resetArkUIPageTranslateFunction_;
+    resultFunction = sendArkUIPageTranslateResultFunction_;
+}
+
 std::shared_ptr<UiTranslateManager> UiSessionManagerOhos::GetCurrentTranslateManager()
 {
     std::function<int32_t()> getInstanceIdCallback;
@@ -870,9 +900,18 @@ int32_t UiSessionManagerOhos::GetPageTranslateText(const std::string& request)
         LOGW("GetPageTranslateText invalid request scope");
         return PARAM_INVALID;
     }
+    PageTranslateTextFunction getTextFunction;
+    PageTranslateTextFunction startFunction;
+    PageTranslateEndFunction endFunction;
+    PageTranslateResetFunction resetFunction;
+    PageTranslateResultFunction resultFunction;
+    GetArkUIPageTranslateFunctions(getTextFunction, startFunction, endFunction, resetFunction, resultFunction);
     if (!PostToCurrentTranslateManager("GetPageTranslateText",
-        [requestInfo](const std::shared_ptr<UiTranslateManager>& translateManager) {
+        [requestInfo, getTextFunction](const std::shared_ptr<UiTranslateManager>& translateManager) {
             translateManager->GetPageTranslateText(requestInfo.scope, requestInfo.extraData);
+            if (HasScope(requestInfo.scope, PageTranslateRequestUtil::ARKUI_TRANSLATE_SCOPE) && getTextFunction) {
+                getTextFunction(false);
+            }
         })) {
         return FAILED;
     }
@@ -897,8 +936,17 @@ int32_t UiSessionManagerOhos::StartPageTranslate(const std::string& request)
         pageTranslateStarted_ = true;
         pageTranslateOwnerPid_ = -1;
     }
-    currentTranslateManager->PostToUI([currentTranslateManager, requestInfo]() {
+    PageTranslateTextFunction getTextFunction;
+    PageTranslateTextFunction startFunction;
+    PageTranslateEndFunction endFunction;
+    PageTranslateResetFunction resetFunction;
+    PageTranslateResultFunction resultFunction;
+    GetArkUIPageTranslateFunctions(getTextFunction, startFunction, endFunction, resetFunction, resultFunction);
+    currentTranslateManager->PostToUI([currentTranslateManager, requestInfo, startFunction]() {
         currentTranslateManager->StartPageTranslate(requestInfo.scope, requestInfo.extraData);
+        if (HasScope(requestInfo.scope, PageTranslateRequestUtil::ARKUI_TRANSLATE_SCOPE) && startFunction) {
+            startFunction(true);
+        }
     });
     return NO_ERROR;
 }
@@ -913,25 +961,57 @@ void UiSessionManagerOhos::EndPageTranslate()
         pageTranslateScope_ = 0;
         pageTranslateOwnerPid_ = -1;
     }
+    PageTranslateTextFunction getTextFunction;
+    PageTranslateTextFunction startFunction;
+    PageTranslateEndFunction endFunction;
+    PageTranslateResetFunction resetFunction;
+    PageTranslateResultFunction resultFunction;
+    GetArkUIPageTranslateFunctions(getTextFunction, startFunction, endFunction, resetFunction, resultFunction);
     PostToCurrentTranslateManager(
-        "EndPageTranslate", [scope](const std::shared_ptr<UiTranslateManager>& translateManager) {
+        "EndPageTranslate", [scope, endFunction](const std::shared_ptr<UiTranslateManager>& translateManager) {
             translateManager->EndPageTranslate(scope);
+            if (HasScope(scope, PageTranslateRequestUtil::ARKUI_TRANSLATE_SCOPE) && endFunction) {
+                endFunction();
+            }
         });
 }
 
 void UiSessionManagerOhos::ResetPageTranslate(int32_t nodeId)
 {
+    PageTranslateTextFunction getTextFunction;
+    PageTranslateTextFunction startFunction;
+    PageTranslateEndFunction endFunction;
+    PageTranslateResetFunction resetFunction;
+    PageTranslateResultFunction resultFunction;
+    GetArkUIPageTranslateFunctions(getTextFunction, startFunction, endFunction, resetFunction, resultFunction);
     PostToCurrentTranslateManager("ResetPageTranslate",
-        [nodeId](const std::shared_ptr<UiTranslateManager>& translateManager) {
+        [nodeId, resetFunction](const std::shared_ptr<UiTranslateManager>& translateManager) {
             translateManager->ResetPageTranslate(nodeId);
+            if (resetFunction) {
+                resetFunction(nodeId);
+            }
         });
 }
 
 void UiSessionManagerOhos::SendPageTranslateResult(const std::string& result)
 {
+    std::vector<TranslateResult> translateResults;
+    if (!PageTranslateRequestUtil::ParseTranslateResults(result, translateResults)) {
+        LOGW("SendPageTranslateResult parse result failed");
+        return;
+    }
+    PageTranslateTextFunction getTextFunction;
+    PageTranslateTextFunction startFunction;
+    PageTranslateEndFunction endFunction;
+    PageTranslateResetFunction resetFunction;
+    PageTranslateResultFunction resultFunction;
+    GetArkUIPageTranslateFunctions(getTextFunction, startFunction, endFunction, resetFunction, resultFunction);
     PostToCurrentTranslateManager("SendPageTranslateResult",
-        [result](const std::shared_ptr<UiTranslateManager>& translateManager) {
-            translateManager->SendPageTranslateResult(result);
+        [translateResults, resultFunction](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->SendPageTranslateResult(translateResults);
+            if (resultFunction) {
+                resultFunction(translateResults);
+            }
         });
 }
 

@@ -2631,7 +2631,7 @@ void SelectPattern::ReportInjectResult(const std::string& event, bool success, c
     auto manager = UiSessionManager::GetInstance();
     CHECK_NULL_VOID(manager);
     manager->ReportComponentChangeEvent(nodeId, "inject_result",
-        std::move(jsonResult), ComponentEventType::COMPONENT_EVENT_SELECT);
+        jsonResult->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
 }
 
 bool SelectPattern::ReportOnSelectEvent(int32_t index, const std::string& value)
@@ -2647,7 +2647,7 @@ bool SelectPattern::ReportOnSelectEvent(int32_t index, const std::string& value)
     CHECK_NULL_RETURN(result, false);
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "fire onSelect event:%{public}s, nodeId:%{public}d",
         result->ToString().c_str(), nodeId);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(result),
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SELECT);
     return true;
 }

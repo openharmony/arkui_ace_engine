@@ -25,12 +25,12 @@
 #include "frameworks/core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
-std::shared_ptr<InspectorJsonValue> TapJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> TapJsonReport::GetJsonData() const
 {
-    auto touchValue = InspectorJsonUtil::CreateArray();
+    auto touchValue = JsonUtil::CreateArray();
     touchValue->Put(GetPoint().GetX());
     touchValue->Put(GetPoint().GetY());
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     value->Put("GestureType", "Tap");
     value->Put("id", GetId());
     value->Put("point", touchValue);
@@ -39,14 +39,14 @@ std::shared_ptr<InspectorJsonValue> TapJsonReport::GetJsonData() const
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> LongPressJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> LongPressJsonReport::GetJsonData() const
 {
     int32_t convertToMs = 1000000;
     int64_t duration = duration_ / convertToMs;
-    auto touchValue = InspectorJsonUtil::CreateArray();
+    auto touchValue = JsonUtil::CreateArray();
     touchValue->Put(GetPoint().GetX());
     touchValue->Put(GetPoint().GetY());
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     value->Put("GestureType", "LongPress");
     value->Put("id", GetId());
     value->Put("action", "end");
@@ -55,12 +55,12 @@ std::shared_ptr<InspectorJsonValue> LongPressJsonReport::GetJsonData() const
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> PanJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> PanJsonReport::GetJsonData() const
 {
-    auto touchValue = InspectorJsonUtil::CreateArray();
+    auto touchValue = JsonUtil::CreateArray();
     touchValue->Put(GetPoint().GetX());
     touchValue->Put(GetPoint().GetY());
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     switch (GetCallBackType()) {
         case GestureCallbackType::START:
             value->Put("GestureType", "Pan");
@@ -86,13 +86,13 @@ std::shared_ptr<InspectorJsonValue> PanJsonReport::GetJsonData() const
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> PinchJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> PinchJsonReport::GetJsonData() const
 {
-    auto value = InspectorJsonUtil::Create();
-    auto touchValue = InspectorJsonUtil::CreateArray();
+    auto value = JsonUtil::CreateSharedPtrJson();
+    auto touchValue = JsonUtil::CreateArray();
     for (auto& fingerList : GetFingerList()) {
         auto point = fingerList.globalLocation_;
-        auto touchValueChild = InspectorJsonUtil::CreateArray();
+        auto touchValueChild = JsonUtil::CreateArray();
         touchValueChild->Put(point.GetX());
         touchValueChild->Put(point.GetY());
         touchValue->Put(touchValueChild);
@@ -123,17 +123,17 @@ std::shared_ptr<InspectorJsonValue> PinchJsonReport::GetJsonData() const
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> RotationJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> RotationJsonReport::GetJsonData() const
 {
-    auto touchValue = InspectorJsonUtil::CreateArray();
+    auto touchValue = JsonUtil::CreateArray();
     for (auto& fingerList : GetFingerList()) {
         auto point = fingerList.globalLocation_;
-        auto touchValueChild = InspectorJsonUtil::CreateArray();
+        auto touchValueChild = JsonUtil::CreateArray();
         touchValueChild->Put(point.GetX());
         touchValueChild->Put(point.GetY());
         touchValue->Put(touchValueChild);
     }
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     switch (GetCallBackType()) {
         case GestureCallbackType::START:
             value->Put("GestureType", "Rotation");
@@ -160,27 +160,27 @@ std::shared_ptr<InspectorJsonValue> RotationJsonReport::GetJsonData() const
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> SwipeJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> SwipeJsonReport::GetJsonData() const
 {
     double speed = Dimension(speed_, DimensionUnit::PX).ConvertToVp();
     double resultSpeed = Dimension(actualSpeed_, DimensionUnit::PX).ConvertToVp();
-    auto upValue = InspectorJsonUtil::CreateArray();
+    auto upValue = JsonUtil::CreateArray();
     for (auto& fingerList : GetFingerList()) {
         auto point = fingerList.globalLocation_;
-        auto upTouchValueChild = InspectorJsonUtil::CreateArray();
+        auto upTouchValueChild = JsonUtil::CreateArray();
         upTouchValueChild->Put(point.GetX());
         upTouchValueChild->Put(point.GetY());
         upValue->Put(upTouchValueChild);
     }
-    auto downValue = InspectorJsonUtil::CreateArray();
+    auto downValue = JsonUtil::CreateArray();
     for (auto& downEvent : touchEvents_) {
         auto point = downEvent.second;
-        auto downTouchValueChild = InspectorJsonUtil::CreateArray();
+        auto downTouchValueChild = JsonUtil::CreateArray();
         downTouchValueChild->Put(point.x);
         downTouchValueChild->Put(point.y);
         downValue->Put(downTouchValueChild);
     }
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     value->Put("GestureType", "Swipe");
     value->Put("id", GetId());
     value->Put("upPoint", upValue);
@@ -195,12 +195,12 @@ std::shared_ptr<InspectorJsonValue> SwipeJsonReport::GetJsonData() const
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> ClickJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> ClickJsonReport::GetJsonData() const
 {
-    auto touchValue = InspectorJsonUtil::CreateArray();
+    auto touchValue = JsonUtil::CreateArray();
     touchValue->Put(GetPoint().GetX());
     touchValue->Put(GetPoint().GetY());
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     value->Put("GestureType", "Click");
     value->Put("id", GetId());
     value->Put("point", touchValue);
@@ -209,11 +209,11 @@ std::shared_ptr<InspectorJsonValue> ClickJsonReport::GetJsonData() const
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> DragJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> DragJsonReport::GetJsonData() const
 {
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     if (pharse_ == DragReporterPharse::DRAG_START) {
-        auto touchValue = InspectorJsonUtil::CreateArray();
+        auto touchValue = JsonUtil::CreateArray();
         touchValue->Put(startPoint_.GetX());
         touchValue->Put(startPoint_.GetY());
         value->Put("GestureType", "DragStart");
@@ -222,7 +222,7 @@ std::shared_ptr<InspectorJsonValue> DragJsonReport::GetJsonData() const
         value->Put("hostName", hostName_.c_str());
         value->Put("actualDuration", actualDuration_);
     } else {
-        auto touchValue = InspectorJsonUtil::CreateArray();
+        auto touchValue = JsonUtil::CreateArray();
         touchValue->Put(endPoint_.GetX());
         touchValue->Put(endPoint_.GetY());
         value->Put("GestureType", "DrageEnd");
@@ -238,88 +238,88 @@ std::shared_ptr<InspectorJsonValue> DragJsonReport::GetJsonData() const
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> TouchJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> TouchJsonReport::GetJsonData() const
 {
-    auto touchValue = InspectorJsonUtil::CreateArray();
+    auto touchValue = JsonUtil::CreateArray();
     touchValue->Put(GetPoint().GetX());
     touchValue->Put(GetPoint().GetY());
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     value->Put("type", "event");
     value->Put("eventType", "Touch");
     value->Put("action", action_.c_str());
     value->Put("time", static_cast<int64_t>(time_.time_since_epoch().count()));
     value->Put("windowId", windowID_);
-    auto dataValue = InspectorJsonUtil::CreateObject();
+    auto dataValue = JsonUtil::Create();
     dataValue->Put("point", touchValue);
     value->Put("data", dataValue);
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> MouseJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> MouseJsonReport::GetJsonData() const
 {
-    auto mousePoint = InspectorJsonUtil::CreateArray();
+    auto mousePoint = JsonUtil::CreateArray();
     mousePoint->Put(GetPoint().GetX());
     mousePoint->Put(GetPoint().GetY());
 
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     value->Put("type", "event");
     value->Put("eventType", "Mouse");
     value->Put("action", action_.c_str());
     value->Put("time", static_cast<int64_t>(time_.time_since_epoch().count()));
     value->Put("windowId", windowID_);
-    auto dataValue = InspectorJsonUtil::CreateObject();
+    auto dataValue = JsonUtil::Create();
     dataValue->Put("point", mousePoint);
     dataValue->Put("mouseButton", mouseButton_.c_str());
     value->Put("data", dataValue);
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> KeyJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> KeyJsonReport::GetJsonData() const
 {
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     value->Put("type", "event");
     value->Put("eventType", "Key");
     value->Put("action", action_.c_str());
     value->Put("time", static_cast<int64_t>(time_.time_since_epoch().count()));
     value->Put("windowId", windowID_);
-    auto dataValue = InspectorJsonUtil::CreateObject();
+    auto dataValue = JsonUtil::Create();
     dataValue->Put("keyCode", keyCode_);
     value->Put("data", dataValue);
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> AxisJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> AxisJsonReport::GetJsonData() const
 {
-    auto axisPoint = InspectorJsonUtil::CreateArray();
+    auto axisPoint = JsonUtil::CreateArray();
     axisPoint->Put(static_cast<double>(point_.GetX()));
     axisPoint->Put(static_cast<double>(point_.GetY()));
-    auto axisValuesObj = InspectorJsonUtil::CreateObject();
+    auto axisValuesObj = JsonUtil::Create();
     axisValuesObj->Put("horizontalAxis", axisValues_.horizontalAxis);
     axisValuesObj->Put("verticalAxis", axisValues_.verticalAxis);
     axisValuesObj->Put("pinchAxisScale", axisValues_.pinchAxisScale);
     axisValuesObj->Put("rotateAxisAngle", axisValues_.rotateAxisAngle);
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     value->Put("type", "event");
     value->Put("eventType", eventType_.c_str());
     value->Put("action", action_.c_str());
     value->Put("time", static_cast<int64_t>(time_.time_since_epoch().count()));
     value->Put("windowId", windowID_);
-    auto dataValue = InspectorJsonUtil::CreateObject();
+    auto dataValue = JsonUtil::Create();
     dataValue->Put("point", axisPoint);
     dataValue->Put("axisValues", axisValuesObj);
     value->Put("data", dataValue);
     return value;
 }
 
-std::shared_ptr<InspectorJsonValue> FocusJsonReport::GetJsonData() const
+std::shared_ptr<JsonValue> FocusJsonReport::GetJsonData() const
 {
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     value->Put("type", "event");
     value->Put("eventType", "WindowFocus");
     value->Put("action", action_.c_str());
     value->Put("windowId", windowID_);
     value->Put("time", static_cast<int64_t>(time_.time_since_epoch().count()));
-    auto dataValue = InspectorJsonUtil::CreateObject();
+    auto dataValue = JsonUtil::Create();
     dataValue->Put("isFocus", isFocus_);
     value->Put("data", dataValue);
     return value;

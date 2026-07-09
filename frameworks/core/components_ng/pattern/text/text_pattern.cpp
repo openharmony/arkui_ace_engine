@@ -1653,10 +1653,10 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
 
 bool TextPattern::ReportCommandResult(int32_t nodeId, const std::string& event)
 {
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put("event", event.c_str());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     return true;
 }
@@ -1716,13 +1716,13 @@ int32_t TextPattern::OnInjectionEvent(const std::string& command)
 void TextPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr,
     const std::string& value, int32_t start, int32_t end)
 {
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(json);
     json->Put("event", dataStr.c_str());
     json->Put("value", value.c_str());
     json->Put("start", start);
     json->Put("end", end);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
 }
 

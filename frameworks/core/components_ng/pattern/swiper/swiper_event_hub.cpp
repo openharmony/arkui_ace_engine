@@ -246,7 +246,7 @@ void SwiperEventHub::FireJSChangeEvent(int32_t preIndex, int32_t index)
 void SwiperEventHub::ReportComponentChangeEvent(
     const std::string& type, int32_t currentIndex, float offset) const
 {
-    auto result = InspectorJsonUtil::Create();
+    auto result = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(result);
     
     std::string key = tabsId_.has_value() ? "Tabs." + type : "Swiper." + type;
@@ -258,7 +258,7 @@ void SwiperEventHub::ReportComponentChangeEvent(
         result->Put("currentOffset", offsetStr.c_str());
     }
     auto nodeId = tabsId_.has_value() ? tabsId_.value() : swiperId_;
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(result),
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SWIPER);
 }
 

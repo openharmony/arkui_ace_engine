@@ -2773,13 +2773,13 @@ bool TimePickerRowPattern::ReportTimeChangeEvent(int32_t nodeId, const std::stri
     int32_t minute = dataJson->GetInt("minute");
     int32_t second = dataJson->GetInt("second");
 
-    auto params = InspectorJsonUtil::CreateObject();
+    auto params = JsonUtil::Create();
     CHECK_NULL_RETURN(params, false);
     params->Put("hour", hour);
     params->Put("minute", minute);
     params->Put("second", second);
 
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
 
     if (GetIsShowInDialog()) {
@@ -2793,7 +2793,7 @@ bool TimePickerRowPattern::ReportTimeChangeEvent(int32_t nodeId, const std::stri
     }
     value->Put("params", params);
 
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
 }
@@ -2801,7 +2801,7 @@ bool TimePickerRowPattern::ReportTimeChangeEvent(int32_t nodeId, const std::stri
 bool TimePickerRowPattern::ReportCommandResult(int32_t nodeId, const std::string& event,
     const std::string& result, const std::string& reason)
 {
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put("event", event.c_str());
     value->Put("result", result.c_str());
@@ -2809,7 +2809,7 @@ bool TimePickerRowPattern::ReportCommandResult(int32_t nodeId, const std::string
         value->Put("reason", reason.c_str());
     }
 
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "TimePickerResult", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "TimePickerResult", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
 }

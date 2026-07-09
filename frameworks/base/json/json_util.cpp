@@ -175,6 +175,16 @@ bool JsonValue::Put(const char* key, const char* value)
     return true;
 }
 
+bool JsonValue::Put(double value)
+{
+    cJSON* child = cJSON_CreateNumber(value);
+    if (child == nullptr) {
+        return false;
+    }
+    cJSON_AddItemToArray(object_, child);
+    return true;
+}
+
 bool JsonValue::PutFixedAttr(const char* key, const char* value,
     const NG::InspectorFilter& filter, NG::FixedAttrBit attr)
 {

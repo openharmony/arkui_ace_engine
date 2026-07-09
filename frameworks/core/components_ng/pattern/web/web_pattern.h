@@ -39,6 +39,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
+#include "core/components_ng/pattern/page_translate/page_translate_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/web/touch_event_listener.h"
@@ -194,9 +195,11 @@ using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS:
 class WebPattern : public NestableScrollContainer,
                    public TextBase,
                    public Magnifier,
+                   public PageTranslateNode,
                    public virtual StatusBarClickListener,
                    public Recorder::WebEventRecorder {
-    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier, Recorder::WebEventRecorder);
+    DECLARE_ACE_TYPE(WebPattern, NestableScrollContainer, TextBase, Magnifier, PageTranslateNode,
+        Recorder::WebEventRecorder);
 
 public:
     using SetWebIdCallback = std::function<void(int32_t)>;
@@ -1020,6 +1023,7 @@ public:
     void WebOverlayRequestFocus();
 
     std::string GetCurrentLanguage() override;
+    int32_t GetPageTranslateNodeId() const override;
     void GetTranslateTextCallback(const std::string& result);
     void RegisterTranslateTextJavaScript();
     void InitTranslateText();

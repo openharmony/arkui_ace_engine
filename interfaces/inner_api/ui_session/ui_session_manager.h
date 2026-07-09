@@ -19,17 +19,19 @@
 #include <cstdint>
 #include <functional>
 #include <map>
-#include <unordered_map>
-#include <set>
+#include <memory>
 #include <mutex>
+#include <set>
 #include <shared_mutex>
+#include <unordered_map>
+#include <vector>
 
 #include "base/utils/macros.h"
 
 #include "param_config.h"
 #include "ui_content_errors.h"
 #include "ui_content_proxy_error_code.h"
-#include "ui_session_json_util.h"
+#include "ui_translate_type.h"
 #include "ui_translate_manager.h"
 
 namespace OHOS {
@@ -41,6 +43,7 @@ class PixelMap;
 } // namespace Media
 } // namespace OHOS
 namespace OHOS::Ace {
+class InspectorJsonValue;
 class ACE_FORCE_EXPORT UiSessionManager {
 public:
     using InspectorFunction = std::function<void(bool onlyNeedVisible, ParamConfig config)>;
@@ -60,6 +63,10 @@ public:
 
     using GetWebInfoByRequestFunction = std::function<void(int32_t, const std::string&)>;
     using GetAbilityLanguageInfoFunction = std::function<int32_t(std::string&, std::string&)>;
+    using PageTranslateTextFunction = std::function<void(bool)>;
+    using PageTranslateEndFunction = std::function<void()>;
+    using PageTranslateResetFunction = std::function<void(int32_t)>;
+    using PageTranslateResultFunction = std::function<void(const std::vector<TranslateResult>&)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -95,7 +102,7 @@ public:
      * @description: execute click callback when page some component change occurs
      */
     virtual void ReportComponentChangeEvent(int32_t nodeId, const std::string& key,
-        const std::shared_ptr<InspectorJsonValue>& value, uint32_t eventType) {};
+        const std::string& value, uint32_t eventType) {};
 
     /**
      * @description: execute callback when scroll event occurs
@@ -193,6 +200,9 @@ public:
         int32_t instanceId) {};
     virtual void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) {};
     virtual void RemoveSaveGetCurrentInstanceId(int32_t instanceId) {};
+    virtual void SaveArkUIPageTranslateFunctions(PageTranslateTextFunction&& getTextFunction,
+        PageTranslateTextFunction&& startFunction, PageTranslateEndFunction&& endFunction,
+        PageTranslateResetFunction&& resetFunction, PageTranslateResultFunction&& resultFunction) {};
     virtual std::shared_ptr<UiTranslateManager> GetCurrentTranslateManager() {
         std::shared_ptr<UiTranslateManager> currentTranslateManager = nullptr;
         return currentTranslateManager;
@@ -335,6 +345,12 @@ protected:
     std::mutex getWebInfoByRequestCallbackMutex_;
     GetAbilityLanguageInfoFunction getAbilityLanguageInfoCallback_;
     std::mutex getAbilityLanguageInfoCallbackMutex_;
+    PageTranslateTextFunction getArkUIPageTranslateTextFunction_;
+    PageTranslateTextFunction startArkUIPageTranslateFunction_;
+    PageTranslateEndFunction endArkUIPageTranslateFunction_;
+    PageTranslateResetFunction resetArkUIPageTranslateFunction_;
+    PageTranslateResultFunction sendArkUIPageTranslateResultFunction_;
+    std::mutex arkUIPageTranslateFunctionMutex_;
     RelaxedCommandFunction relaxedCommandFunction_ = nullptr;
 };
 } // namespace OHOS::Ace

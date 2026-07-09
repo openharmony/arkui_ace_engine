@@ -521,10 +521,10 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 
 bool TextFieldPattern::ReportCommandResult(int32_t nodeId, const std::string& event)
 {
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put("event", event.c_str());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     return true;
 }
@@ -532,7 +532,7 @@ bool TextFieldPattern::ReportCommandResult(int32_t nodeId, const std::string& ev
 void TextFieldPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, int32_t start,
     int32_t end)
 {
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(json);
     auto valueStr = contentController_->GetSelectedValue(start, end);
     std::string value = UtfUtils::Str16DebugToStr8(valueStr);
@@ -542,37 +542,37 @@ void TextFieldPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::str
         json->Put("value", value.c_str());
         json->Put("start", start);
         json->Put("end", end);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json,
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json->ToString(),
             ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     }
 }
 
 void TextFieldPattern::ReportCaretPositionChangeEvent(int32_t nodeId, int32_t position)
 {
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(value);
     value->Put("event", "caretPositionChange");
     value->Put("position", position);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
 }
 
 void TextFieldPattern::ReportRequestKeyboardEvent(const RefPtr<FrameNode>& frameNode)
 {
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(value);
     if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
         value->Put("event", "TextInput.requestKeyboard");
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(),
-            "event", value, ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+            "event", value->ToString(), ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     } else if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
         value->Put("event", "TextArea.requestKeyboard");
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(),
-            "event", value, ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+            "event", value->ToString(), ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     } else if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
         value->Put("event", "Search.requestKeyboard");
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(),
-            "event", value, ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+            "event", value->ToString(), ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     }
 }
 
@@ -11774,11 +11774,11 @@ void TextFieldPattern::ReportEvents()
         UiSessionManager::GetInstance()->ReportSearchEvent(data->ToString());
     }
     if (!IsInPasswordMode()) {
-        auto value = InspectorJsonUtil::Create();
+        auto value = JsonUtil::CreateSharedPtrJson();
         CHECK_NULL_VOID(value);
         auto textString = GetTextValue();
         value->Put("text", textString.c_str());
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", value,
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", value->ToString(),
             ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
         SEC_TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextField reportComponentChangeEvent %{public}zu",
             host->GetId(), textString.length());
