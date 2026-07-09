@@ -70,6 +70,8 @@ constexpr float INPUT_HEIGHT = 40.0f;
 const std::string TEST_PAGE_NAME = "pages/Index";
 const std::string TEST_RULE_SET_ID = "default_scene_rules";
 const std::string TEST_RULE_ID = "text_editor_rule_001";
+const std::string TEXT_EDITOR_EVENT = "TEXT_EDITOR";
+const std::string TEXT_EDITOR_EXIT_EVENT = "TEXT_EDITOR_EXIT";
 const std::string FIRST_INPUT_TEXT = "account";
 const std::string SECOND_INPUT_TEXT = "password";
 const std::string FIRST_PLACEHOLDER_TEXT = "input account";
@@ -469,5 +471,59 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene005, Tes
     ASSERT_TRUE(secondNode);
     EXPECT_EQ(firstNode->GetString("text"), FIRST_PLACEHOLDER_TEXT);
     EXPECT_EQ(secondNode->GetString("text"), SECOND_INPUT_TEXT);
+}
+
+/**
+ * @tc.name: PageSceneRuleManager_MatchPageScene006
+ * @tc.desc: Test exit event is reported once after a reported TEXT_EDITOR scene becomes unmatched.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene006, TestSize.Level1)
+{
+    auto unmatchedRoot = CreatePageRoot();
+    AddChild(unmatchedRoot, CreateTextInputNode(
+        TEST_TEXT_INPUT_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+
+    PageSceneRuleManager manager;
+    auto initialUnmatchedResult = manager.MatchPageScene(
+        TEST_PROCESS_ID, BuildRuleJson(), unmatchedRoot, TEST_PAGE_NAME, false);
+    ASSERT_TRUE(initialUnmatchedResult.has_value());
+    EXPECT_FALSE(initialUnmatchedResult->matched);
+    EXPECT_EQ(initialUnmatchedResult->eventName, TEXT_EDITOR_EXIT_EVENT);
+    EXPECT_FALSE(manager.ShouldReport(TEST_PROCESS_ID, initialUnmatchedResult.value()));
+
+    auto matchedRoot = CreatePageRoot();
+    AddChild(matchedRoot, CreateTextInputNode(
+        TEST_TEXT_INPUT_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+    AddChild(matchedRoot, CreateTextInputNode(
+        TEST_TEXT_AREA_ID, RectF(SECOND_NODE_X, SECOND_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+    auto matchedResult = manager.MatchPageScene(TEST_PROCESS_ID, BuildRuleJson(), matchedRoot, TEST_PAGE_NAME, false);
+    ASSERT_TRUE(matchedResult.has_value());
+    EXPECT_TRUE(matchedResult->matched);
+    EXPECT_EQ(matchedResult->eventName, TEXT_EDITOR_EVENT);
+    EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, matchedResult.value()));
+
+    auto exitResult = manager.MatchPageScene(TEST_PROCESS_ID, BuildRuleJson(), unmatchedRoot, TEST_PAGE_NAME, false);
+    ASSERT_TRUE(exitResult.has_value());
+    EXPECT_FALSE(exitResult->matched);
+    EXPECT_EQ(exitResult->matchedCount, ONE_MATCHED_NODE);
+    EXPECT_EQ(exitResult->eventName, TEXT_EDITOR_EXIT_EVENT);
+    auto exitJson = JsonUtil::ParseJsonString(exitResult->sceneJson);
+    ASSERT_TRUE(exitJson);
+    EXPECT_FALSE(exitJson->GetBool("matched"));
+    EXPECT_EQ(exitJson->GetString("eventName"), TEXT_EDITOR_EXIT_EVENT);
+    EXPECT_EQ(exitJson->GetInt("matchedCount"), ONE_MATCHED_NODE);
+    EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, exitResult.value()));
+    EXPECT_FALSE(manager.ShouldReport(TEST_PROCESS_ID, exitResult.value()));
+
+    auto getResult = manager.MatchPageScene(TEST_PROCESS_ID, BuildRuleJson(), unmatchedRoot, TEST_PAGE_NAME, true);
+    ASSERT_TRUE(getResult.has_value());
+    EXPECT_FALSE(getResult->matched);
+    EXPECT_EQ(getResult->eventName, TEXT_EDITOR_EVENT);
+
+    auto reenterResult = manager.MatchPageScene(TEST_PROCESS_ID, BuildRuleJson(), matchedRoot, TEST_PAGE_NAME, false);
+    ASSERT_TRUE(reenterResult.has_value());
+    EXPECT_TRUE(reenterResult->matched);
+    EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, reenterResult.value()));
 }
 } // namespace OHOS::Ace::NG

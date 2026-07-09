@@ -38,6 +38,7 @@ constexpr int32_t PAGE_SCENE_NO_ERROR = 0;
 constexpr int32_t PAGE_SCENE_PARAM_INVALID = 4;
 constexpr int32_t PAGE_SCENE_LAST_UNFINISH = 5;
 const char TEXT_EDITOR_SCENE[] = "TEXT_EDITOR";
+const char EXIT_EVENT_SUFFIX[] = "_EXIT";
 const char COUNT_GTE_OPERATOR[] = "COUNT_GTE";
 const char SOURCE_ARKUI[] = "ARKUI";
 const char SEARCH_FIELD_TAG[] = "SearchField";
@@ -148,6 +149,14 @@ std::string ExtractInputText(const RefPtr<FrameNode>& node)
         return ExtractRichEditorText(node);
     }
     return "";
+}
+
+std::string BuildPageSceneEventName(const std::string& sceneType, bool matched, bool forceReportUnmatched)
+{
+    if (!matched && !forceReportUnmatched) {
+        return sceneType + EXIT_EVENT_SUFFIX;
+    }
+    return sceneType;
 }
 } // namespace
 
@@ -328,6 +337,7 @@ std::optional<PageSceneMatchResult> PageSceneRuleManager::MatchPageScene(
     if (!ruleSet.has_value() || !ruleSet->arkuiEnabled || !pageRoot) {
         return std::nullopt;
     }
+    std::optional<PageSceneMatchResult> unmatchedResult;
     for (const auto& rule : ruleSet->rules) {
         if (!rule.enabled || rule.sceneType != TEXT_EDITOR_SCENE) {
             continue;
@@ -336,35 +346,44 @@ std::optional<PageSceneMatchResult> PageSceneRuleManager::MatchPageScene(
         tracker.Initialize(ruleSet.value(), rule, pageRoot);
         const auto& nodes = tracker.GetVisibleInputNodes();
         bool matched = static_cast<int32_t>(nodes.size()) >= rule.threshold;
-        if (!matched && !forceReportUnmatched) {
-            continue;
-        }
         PageSceneMatchResult result;
         result.ruleSetId = ruleSet->ruleSetId;
         result.ruleId = rule.ruleId;
         result.sceneType = rule.sceneType;
-        result.eventName = TEXT_EDITOR_SCENE;
+        result.eventName = BuildPageSceneEventName(rule.sceneType, matched, forceReportUnmatched);
         result.pageName = pageName;
         result.matched = matched;
         result.matchedCount = static_cast<int32_t>(nodes.size());
         result.minReportIntervalMs = rule.minReportIntervalMs;
         result.deduplicate = rule.deduplicate;
         result.signature = BuildSignature(ruleSet.value(), rule, pageName, nodes);
-        result.sceneJson = BuildSceneJson(ruleSet.value(), rule, pageName, nodes, matched);
-        return result;
+        result.sceneJson = BuildSceneJson(ruleSet.value(), rule, pageName, nodes, matched, result.eventName);
+        if (matched || forceReportUnmatched) {
+            return result;
+        }
+        if (!unmatchedResult.has_value()) {
+            unmatchedResult = result;
+        }
+    }
+    if (unmatchedResult.has_value()) {
+        return unmatchedResult;
     }
     return std::nullopt;
 }
 
 bool PageSceneRuleManager::ShouldReport(int32_t processId, const PageSceneMatchResult& result)
 {
-    if (!result.matched) {
-        return true;
-    }
     std::lock_guard<std::mutex> lock(mutex_);
     auto key = std::to_string(processId) + ":" + result.ruleSetId + ":" + result.ruleId + ":" + SOURCE_ARKUI;
-    auto now = std::chrono::steady_clock::now();
     auto iter = reportStates_.find(key);
+    if (!result.matched) {
+        if (iter == reportStates_.end()) {
+            return false;
+        }
+        reportStates_.erase(iter);
+        return true;
+    }
+    auto now = std::chrono::steady_clock::now();
     if (iter != reportStates_.end()) {
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.second).count();
         if (result.deduplicate && iter->second.first == result.signature) {
@@ -501,13 +520,14 @@ std::optional<PageSceneRule> PageSceneRuleManager::ParseRule(const std::unique_p
 }
 
 std::string PageSceneRuleManager::BuildSceneJson(const PageSceneRuleSet& ruleSet, const PageSceneRule& rule,
-    const std::string& pageName, const std::vector<PageSceneNodeInfo>& nodes, bool matched) const
+    const std::string& pageName, const std::vector<PageSceneNodeInfo>& nodes, bool matched,
+    const std::string& eventName) const
 {
     auto root = JsonUtil::Create(true);
     root->Put("ruleSetId", ruleSet.ruleSetId.c_str());
     root->Put("ruleId", rule.ruleId.c_str());
     root->Put("sceneType", rule.sceneType.c_str());
-    root->Put("eventName", TEXT_EDITOR_SCENE);
+    root->Put("eventName", eventName.c_str());
     root->Put("currentPageName", pageName.c_str());
     auto source = JsonUtil::Create(true);
     source->Put("type", SOURCE_ARKUI);

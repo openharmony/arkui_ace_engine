@@ -699,6 +699,7 @@ hdc shell hidumper -s 16666 -a "GetCurrentAbilityLanguageInfo"
 6. Web / UIExtension 当前只作为子来源接收宿主透传的规则生命周期请求；其中 Web 注册透传使用 `webRules`，UIExtension 透传规则生命周期请求；不设计、不实现、不验证子来源内部匹配、命中结果回传和 `source.type=WEB/UI_EXTENSION` 上报。
 7. PageScene 注册后，ArkUI 侧把输入类节点上下树变化先记为待检测规则，真正检测统一收敛到页面稳定点：`ContentChangeManager::OnVsyncEnd` 调用 `FlushPageSceneNodeChanged`，并在滚动、Swiper 滚动或页面转场未稳定时延后。Pipeline 只调用 `ContentChangeManager::OnVsyncEnd`，不直接依赖 PageScene 规则判断。
 8. PageScene 只复用 ContentChange 的页面级稳定上报点：页面切换结束、滚动结束、Swiper/Tabs 切换结束、弹窗显示隐藏结束。即使只注册 PageScene、未注册 ContentChange，这些稳定点也会触发 PageScene 待检测规则；Text/Image 这类具体控件 ContentChange 事件仍只在 ContentChange 注册后生效，不作为 PageScene-only 的检测入口。
+9. 若同一 `TEXT_EDITOR` 规则已上报过命中事件，后续页面稳定点检查发现当前页面不再满足规则，需要额外上报一次 `TEXT_EDITOR_EXIT`，其中 `sceneType=TEXT_EDITOR`、`matched=false`、`matchedCount` 为当前参与统计的输入控件数量；退出事件上报后清理命中态，连续未命中不重复上报，主动 `GetPageScene` 未命中结果仍使用 `eventName=TEXT_EDITOR`。
 
 按现有 UISession 扩展步骤，后续实现需要修改 `IUiContentService` transaction 和方法、`UiContentStub::OnRemoteRequest` 分发、`UIContentServiceStubImpl` 转发、`UiSessionManager` 状态、`UiSessionManagerOhos` 上报路由、`ReportService` 回调以及 `UIContentImpl::InitUISessionManagerCallbacks` 中的 UI 线程回调注册。相关源码入口：`interfaces/inner_api/ui_session/ui_content_service_interface.h:82`、`adapter/ohos/entrance/ui_session/ui_content_stub.cpp:42`、`interfaces/inner_api/ui_session/ui_session_manager.h:277`、`adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h:150`、`adapter/ohos/entrance/ui_content_impl.cpp:6209`。
 

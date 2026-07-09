@@ -129,7 +129,8 @@ private:
     std::optional<PageSceneRuleSet> ParseRuleSet(const std::string& ruleJson) const;
     std::optional<PageSceneRule> ParseRule(const std::unique_ptr<JsonValue>& ruleJson) const;
     std::string BuildSceneJson(const PageSceneRuleSet& ruleSet, const PageSceneRule& rule,
-        const std::string& pageName, const std::vector<PageSceneNodeInfo>& nodes, bool matched) const;
+        const std::string& pageName, const std::vector<PageSceneNodeInfo>& nodes, bool matched,
+        const std::string& eventName) const;
     std::string BuildSignature(
         const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const std::string& pageName,
         const std::vector<PageSceneNodeInfo>& nodes) const;

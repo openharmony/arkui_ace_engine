@@ -58,7 +58,8 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | AC-3.1 | GIVEN 已注册 `TEXT_EDITOR` 规则且 `policy.reportOnTextInputAttached=true`，WHEN 文本输入类控件上树且满足可见性/可获焦规则，THEN 宿主将该控件加入页面输入控件计数并挂起待检测规则；不得仅因数量达到阈值立即上报 | 正常 |
 | AC-3.2 | GIVEN `policy.deduplicate=true` 且同一页面、同一规则、同一命中节点集合已上报，WHEN 再次触发匹配且命中集合未变化，THEN 不重复上报 | 边界 |
 | AC-3.3 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 命中节点集合变化或当前页面名变化且页面已稳定，THEN 可以重新上报新的命中结果 | 正常 |
-| AC-3.4 | GIVEN 已注册 `TEXT_EDITOR` 规则且页面内已计数某个文本输入类控件，WHEN 该控件下树，THEN 宿主从页面输入控件计数中移除该控件；若数量低于阈值，首版不补发未命中事件 | 边界 |
+| AC-3.4 | GIVEN 已注册 `TEXT_EDITOR` 规则且页面内已计数某个文本输入类控件，WHEN 该控件下树，THEN 宿主从页面输入控件计数中移除该控件，并挂起待检测规则等待页面稳定点检查 | 边界 |
+| AC-3.5 | GIVEN 已注册 `TEXT_EDITOR` 规则且同一规则曾上报过命中事件，WHEN 后续页面稳定点检查发现当前页面不再满足规则，THEN 宿主额外上报一次场景退出事件 `TEXT_EDITOR_EXIT`；若此前未上报过命中或已上报过退出，则不得重复上报退出事件 | 正常 |
 
 ### 1.4 US-4：SA 主动查询当前页面场景
 
@@ -121,7 +122,8 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | R-8 | 行为 | 文本输入类控件上树 | 按规则加入页面输入控件计数，并挂起对应规则待检测任务 | 不因达到阈值立即上报 | AC-3.1 | 单测/集成测试 | 动态添加 TextInput/TextArea/Search/RichEditor，确认未稳定前不回调 | P0 |
 | R-9 | 边界 | 重复命中集合 | 不重复上报 | 页面名、规则、来源、节点集合构成签名 | AC-3.2 | 单测 | 连续相同节点集合触发 3 次 | P0 |
 | R-10 | 行为 | 命中集合或页面名变化 | 页面稳定后允许重新上报 | 满足最小间隔 | AC-3.3 | 集成测试 | 增加一个输入框、切换页面名，再触发稳定点 | P1 |
-| R-10A | 边界 | 已计数文本输入类控件下树 | 从页面输入控件计数中移除；数量低于阈值时不上报未命中 | 防止销毁节点继续贡献计数 | AC-3.4 | 单测/集成 | 2 个输入框命中后移除 1 个 | P0 |
+| R-10A | 边界 | 已计数文本输入类控件下树 | 从页面输入控件计数中移除，并挂起待检测规则等待页面稳定点检查 | 防止销毁节点继续贡献计数 | AC-3.4 | 单测/集成 | 2 个输入框命中后移除 1 个 | P0 |
+| R-10B | 行为 | 同一规则已上报过命中，后续稳定点检查不再命中 | 上报一次 `TEXT_EDITOR_EXIT`，`matched=false`，`matchedCount` 为当前计数；上报后清理命中态，后续未命中不重复上报退出 | 退出事件不受命中去重和最小命中上报间隔抑制；再次命中后可重新上报 `TEXT_EDITOR` | AC-3.5 | 单测/集成 | 2 个输入框命中后移除到 1 个，再重复稳定点检查，再重新添加到 2 个 | P0 |
 | R-11 | 行为 | 合法 Get 且无 pending 请求 | 返回本次匹配结果 | 一次性规则不长期保存 | AC-4.1 | 单测/sample | `ruleSetId` 查询、临时 ruleJson 查询 | P0 |
 | R-12 | 异常 | Get 未返回时再次 Get | 返回 busy，不启动新扫描 | 防并发查询 | AC-4.4, AC-8.2 | 并发测试 | 两次连续 Get，首个回调延迟 | P0 |
 | R-13 | 行为 | 规则允许 Web 来源且 `webRules` 存在 | 宿主向 Web 控件透传 `webRules` 及反注册/查询请求 | `webRules` 内部规格不在本特性设计；不要求 Web 内部匹配和回传 | AC-1.4, AC-4.2, AC-5.1, AC-5.3, AC-5.4, AC-5.5 | mock/单测 | Web enabled/disabled、webRules 原样透传、register/unregister/get | P1 |
@@ -236,7 +238,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 
 | 规格描述 | 验证指标 | 验证方式 |
 |----------|----------|----------|
-| WHEN 文本输入类控件频繁上下树触发计数变化 THEN 只维护计数和待检测规则，页面稳定后再 check 并按 `policy.minReportIntervalMs` / `deduplicate` 限制重复上报 | 未稳定前无上报；稳定后同一规则相同命中集合不重复上报；上报间隔不小于配置值 | 单测/集成测试 |
+| WHEN 文本输入类控件频繁上下树触发计数变化 THEN 只维护计数和待检测规则，页面稳定后再 check 并按 `policy.minReportIntervalMs` / `deduplicate` 限制重复命中上报，且已命中后不再命中时补发一次退出事件 | 未稳定前无上报；稳定后同一规则相同命中集合不重复上报；命中上报间隔不小于配置值；退出事件每次命中态到未命中态只上报一次 | 单测/集成测试 |
 | WHEN 当前页面节点较多 THEN 只采集规则所需字段，不生成完整树 | 上报 JSON 不包含完整树 | 单测/JSON 检查 |
 
 ### 6.2 功耗指标
@@ -313,7 +315,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | 注册接口 | 首次合法注册、非法 JSON、空 callback、未 Connect、重复注册、注册期间并发注册 |
 | 首次扫描 | 0/1/2/3 个文本输入控件、`reportOnRegister=false`、页面名变化 |
 | 节点过滤 | visible/hidden/offscreen、focusable true/false、rect 开关、focusable 开关 |
-| 上下树触发 | 动态添加 TextInput/TextArea/Search/RichEditor、控件下树移除计数、未稳定前不立即上报、稳定后触发检测、重复触发去重、最小间隔 |
+| 上下树触发 | 动态添加 TextInput/TextArea/Search/RichEditor、控件下树移除计数、未稳定前不立即上报、稳定后触发检测、重复触发去重、最小间隔、命中后跌出阈值上报一次 `TEXT_EDITOR_EXIT` |
 | 稳定点调度 | PageScene-only 注册下 Page/Scroll/Dialog 稳定点触发、Swiper 延迟到 VSync、滚动/转场/Swiper 滚动中不 flush、Pipeline 不直接依赖 PageScene flush、Text/Image 不触发 PageScene-only |
 | 主动查询 | ruleSetId 查询、一次性 ruleJson 查询、非法参数、pending Get busy |
 | Web 透传 | `webRules` 注册透传、反注册透传、查询请求透传、透传失败隔离；不验证 `webRules` 内部规格、Web 内部匹配和回传 |
