@@ -107,6 +107,11 @@ if (defined(global_parts_info.graphic_graphic_3d)) {
 } else {
   model_component_support = false
 }
+if (is_arkui_x) {
+    image_analyzer_support = false
+} else {
+    image_analyzer_support = true
+}
 
 window_scene_support = true
 dynamic_component_support = true
@@ -208,6 +213,10 @@ if (use_build_in_js_engine) {
 
 if (window_scene_support) {
   defines += [ "WINDOW_SCENE_SUPPORTED" ]
+}
+
+if (image_analyzer_support) {
+  defines += [ "SUPPORT_IMAGE_ANALYZER" ]
 }
 
 if (enable_drag_framework) {
