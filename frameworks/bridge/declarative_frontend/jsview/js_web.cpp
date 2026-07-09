@@ -29,7 +29,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_interface/include/ohos_nweb/nweb.h"
 #include "base/web/webview/arkweb_utils/arkweb_utils.h"
@@ -1389,8 +1388,8 @@ public:
         JSRef<JSArray> headers = JSRef<JSArray>::New();
         for (iterator = map.begin(); iterator != map.end(); ++iterator) {
             JSRef<JSObject> header = JSRef<JSObject>::New();
-            header->SetProperty(static_cast<int32_t>(ArkUIIndex::HEADER_KEY), iterator->first);
-            header->SetProperty(static_cast<int32_t>(ArkUIIndex::HEADER_VALUE), iterator->second);
+            header->SetProperty("headerKey", iterator->first);
+            header->SetProperty("headerValue", iterator->second);
             headers->SetValueAt(index++, header);
         }
         args.SetReturnValue(headers);
@@ -1623,8 +1622,8 @@ public:
         JSRef<JSArray> headers = JSRef<JSArray>::New();
         for (iterator = map.begin(); iterator != map.end(); ++iterator) {
             JSRef<JSObject> header = JSRef<JSObject>::New();
-            header->SetProperty(static_cast<int32_t>(ArkUIIndex::HEADER_KEY), iterator->first);
-            header->SetProperty(static_cast<int32_t>(ArkUIIndex::HEADER_VALUE), iterator->second);
+            header->SetProperty("headerKey", iterator->first);
+            header->SetProperty("headerValue", iterator->second);
             headers->SetValueAt(index++, header);
         }
         args.SetReturnValue(headers);

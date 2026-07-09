@@ -105,44 +105,14 @@ namespace OHOS::Ace::Framework {
     FUNCTION("$refreshing", $REFRESHING)       \
     FUNCTION("changeEvent", CHANGE_EVENT)       \
     FUNCTION("refreshingContent", REFRESHING_CONTENT)       \
-    FUNCTION("headerKey", HEADER_KEY)       \
-    FUNCTION("headerValue", HEADER_VALUE)       \
     FUNCTION("pos", POS)       \
     FUNCTION("position", POSITION)       \
     FUNCTION("globalPos", GLOBAL_POS)       \
     FUNCTION("globalPosition", GLOBAL_POSITION)       \
-    FUNCTION("timestamp", TIMESTAMP)       \
-    FUNCTION("target", TARGET)       \
-    FUNCTION("pressure", PRESSURE)       \
-    FUNCTION("deviceId", DEVICE_ID)       \
-    FUNCTION("tiltX", TILT_X)       \
-    FUNCTION("tiltY", TILT_Y)       \
-    FUNCTION("rollAngle", ROLL_ANGLE)       \
-    FUNCTION("sourceTool", SOURCE_TOOL)       \
-    FUNCTION("touches", TOUCHES)       \
-    FUNCTION("changedTouches", CHANGED_TOUCHES)       \
-    FUNCTION("stopPropagation", STOP_PROPAGATION)       \
-    FUNCTION("getHistoricalPoints", GET_HISTORICAL_POINTS)       \
-    FUNCTION("axisVertical", AXIS_VERTICAL)       \
-    FUNCTION("axisHorizontal", AXIS_HORIZONTAL)       \
-    FUNCTION("axisPinch", AXIS_PINCH)       \
-    FUNCTION("preventDefault", PREVENT_DEFAULT)       \
-    FUNCTION("getModifierKeyState", GET_MODIFIER_KEY_STATE)       \
-    FUNCTION("targetDisplayId", TARGET_DISPLAY_ID)       \
-    FUNCTION("eventHandleId", EVENT_HANDLE_ID)       \
-    FUNCTION("getCurrentLocalPosition", GET_CURRENT_LOCAL_POSITION)       \
-    FUNCTION("displayX", DISPLAY_X)       \
-    FUNCTION("displayY", DISPLAY_Y)       \
-    FUNCTION("windowX", WINDOW_X)       \
-    FUNCTION("windowY", WINDOW_Y)       \
-    FUNCTION("screenX", SCREEN_X)       \
-    FUNCTION("screenY", SCREEN_Y)       \
-    FUNCTION("pressedTime", PRESSED_TIME)       \
-    FUNCTION("hand", HAND)       \
-    FUNCTION("globalDisplayX", GLOBAL_DISPLAY_X)       \
-    FUNCTION("globalDisplayY", GLOBAL_DISPLAY_Y)       \
     FUNCTION("builderNode_", BUILDER_NODE)       \
-    FUNCTION("nodePtr_", NODEPTR)
+    FUNCTION("nodePtr_", NODEPTR)       \
+    FUNCTION("nodeId", NODE_ID)       \
+    FUNCTION("nodePtr", NODE_PTR)
 
 #define PROPERTY_NAME_INDEX(propertyName, index) index,
 enum class ArkUIIndex : uint32_t {

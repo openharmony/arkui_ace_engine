@@ -135,7 +135,7 @@ const std::string EXT_BUNDLE = "@bundle:";
 #ifdef PREVIEW
 constexpr uint32_t PREFIX_LETTER_NUMBER = 4;
 #endif
-constexpr uint32_t MAX_STRING_CACHE_SIZE = 150;
+constexpr uint32_t MAX_STRING_CACHE_SIZE = 100;
 
 // native implementation for js function: perfutil.print()
 shared_ptr<JsValue> JsPerfPrint(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& thisObj,
