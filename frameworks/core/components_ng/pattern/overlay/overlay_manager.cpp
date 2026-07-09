@@ -3895,9 +3895,16 @@ void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
     if (!showInSubWindow) {
         auto topOrderNode = GetTopOrderNode();
         auto topFocusableNode = GetTopFocusableNode();
+        auto sheetWrapperFocusHub = sheetWrapper->GetFocusHub();
+        bool isWrapperCurrentFocus = sheetWrapperFocusHub && sheetWrapperFocusHub->IsCurrentFocus();
         PopLevelOrder(sheetWrapper->GetId());
         wrapperParent->RemoveChild(sheetWrapper);
         wrapperParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        if (!isWrapperCurrentFocus) {
+            if (auto parentFocusHub = DynamicCast<FrameNode>(wrapperParent)->GetFocusHub()) {
+                parentFocusHub->CheckScopeFocusDependence();
+            }
+        }
         FocusNextOrderNode(topFocusableNode);
         SendAccessibilityEventToNextOrderNode(topOrderNode);
         return;

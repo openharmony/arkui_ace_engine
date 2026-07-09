@@ -1065,4 +1065,201 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg_ParentSortChildrenByZIndex_003, TestSize
 
     focusHub->ParentSortChildrenByZIndex(childNode);
 }
+
+/**
+ * @tc.name: FocusHubTestNg_CheckScopeFocusDependence_001
+ * @tc.desc: Test CheckScopeFocusDependence when lastWeakFocusNode_ is not null, should do nothing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg_CheckScopeFocusDependence_001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct tree.
+     * - Page(FocusView)
+     *   - Column(rootScope, lastWeakFocusNode_ = Button)
+     *     - Button
+     */
+    auto rootNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNodeOnTree::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    rootNode->AddChild(pageNode);
+
+    auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
+    auto columnNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);
+    auto columnFocusHub = columnNode->GetOrCreateFocusHub();
+
+    auto buttonNode = FrameNodeOnTree::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto buttonFocusHub = buttonNode->GetOrCreateFocusHub();
+
+    pageNode->AddChild(columnNode);
+    columnNode->AddChild(buttonNode);
+
+    /**
+     * @tc.steps: step2. columnFocusHub has valid lastWeakFocusNode_ (buttonFocusHub).
+     */
+    columnFocusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(buttonFocusHub));
+    pagePattern->isViewRootScopeFocused_ = false;
+
+    /**
+     * @tc.steps: step3. call CheckScopeFocusDependence on columnFocusHub.
+     * @tc.expected: does nothing because lastWeakFocusNode_ is not null.
+     */
+    columnFocusHub->CheckScopeFocusDependence();
+    EXPECT_FALSE(pagePattern->isViewRootScopeFocused_);
+}
+
+/**
+ * @tc.name: FocusHubTestNg_CheckScopeFocusDependence_002
+ * @tc.desc: Test CheckScopeFocusDependence when lastWeakFocusNode_ is null and ancestor is FocusView,
+ *           should set isViewRootScopeFocused to true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg_CheckScopeFocusDependence_002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct tree.
+     * - Page(FocusView)
+     *   - Column(rootScope, lastWeakFocusNode_ = null)
+     */
+    auto rootNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNodeOnTree::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    rootNode->AddChild(pageNode);
+
+    auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
+    auto columnNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);
+    auto columnFocusHub = columnNode->GetOrCreateFocusHub();
+
+    pageNode->AddChild(columnNode);
+
+    /**
+     * @tc.steps: step2. columnFocusHub has null lastWeakFocusNode_.
+     */
+    columnFocusHub->lastWeakFocusNode_ = nullptr;
+    pagePattern->isViewRootScopeFocused_ = false;
+
+    /**
+     * @tc.steps: step3. call CheckScopeFocusDependence on columnFocusHub.
+     * @tc.expected: isViewRootScopeFocused_ set to true because column is rootScope of page FocusView.
+     */
+    columnFocusHub->CheckScopeFocusDependence();
+    EXPECT_TRUE(pagePattern->isViewRootScopeFocused_);
+    EXPECT_EQ(columnFocusHub->focusDepend_, FocusDependence::SELF);
+}
+
+/**
+ * @tc.name: FocusHubTestNg_CheckScopeFocusDependence_003
+ * @tc.desc: Test CheckScopeFocusDependence when no FocusView found in ancestors, should do nothing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg_CheckScopeFocusDependence_003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct tree without FocusView.
+     * - Column
+     *   - Button
+     */
+    auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
+    auto columnNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);
+    auto columnFocusHub = columnNode->GetOrCreateFocusHub();
+
+    auto buttonNode = FrameNodeOnTree::CreateFrameNode(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    columnNode->AddChild(buttonNode);
+
+    /**
+     * @tc.steps: step2. columnFocusHub has null lastWeakFocusNode_ but no FocusView ancestor.
+     */
+    columnFocusHub->lastWeakFocusNode_ = nullptr;
+
+    /**
+     * @tc.steps: step3. call CheckScopeFocusDependence.
+     * @tc.expected: no crash, no side effect.
+     */
+    columnFocusHub->CheckScopeFocusDependence();
+    EXPECT_NE(columnFocusHub, nullptr);
+}
+
+/**
+ * @tc.name: FocusHubTestNg_CheckScopeFocusDependence_004
+ * @tc.desc: Test CheckScopeFocusDependence when FocusView is the node itself (not rootScope).
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg_CheckScopeFocusDependence_004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct tree.
+     * - Page(FocusView, lastWeakFocusNode_ = null)
+     *   - Column
+     */
+    auto rootNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNodeOnTree::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    auto pageFocusHub = pageNode->GetOrCreateFocusHub();
+    rootNode->AddChild(pageNode);
+
+    auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
+    auto columnNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);
+    pageNode->AddChild(columnNode);
+
+    /**
+     * @tc.steps: step2. pageFocusHub itself has null lastWeakFocusNode_, and it is FocusView.
+     */
+    pageFocusHub->lastWeakFocusNode_ = nullptr;
+    pagePattern->isViewRootScopeFocused_ = false;
+
+    /**
+     * @tc.steps: step3. call CheckScopeFocusDependence on pageFocusHub.
+     * @tc.expected: finds FocusView (itself) immediately, calls SetIsViewRootScopeFocused(true).
+     */
+    pageFocusHub->CheckScopeFocusDependence();
+    EXPECT_TRUE(pagePattern->isViewRootScopeFocused_);
+}
+
+/**
+ * @tc.name: FocusHubTestNg_CheckScopeFocusDependence_005
+ * @tc.desc: Test CheckScopeFocusDependence finds FocusView through multiple levels.
+ *           - Page(FocusView) -> Navigation -> Column(rootScope, lastWeakFocusNode_ = null)
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg_CheckScopeFocusDependence_005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct tree.
+     * - Page(FocusView)
+     *   - Navigation
+     *     - Column(lastWeakFocusNode_ = null)
+     */
+    auto rootNode = FrameNodeOnTree::CreateFrameNode(V2::ROOT_ETS_TAG, -1, AceType::MakeRefPtr<RootPattern>());
+
+    auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
+    auto pageNode = FrameNodeOnTree::CreateFrameNode(V2::PAGE_ETS_TAG, -1, pagePattern);
+    rootNode->AddChild(pageNode);
+
+    auto navNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    navNode->GetOrCreateFocusHub();
+
+    auto columnPattern = AceType::MakeRefPtr<LinearLayoutPattern>(true);
+    auto columnNode = FrameNodeOnTree::CreateFrameNode(V2::COLUMN_ETS_TAG, -1, columnPattern);
+    auto columnFocusHub = columnNode->GetOrCreateFocusHub();
+
+    pageNode->AddChild(navNode);
+    navNode->AddChild(columnNode);
+
+    /**
+     * @tc.steps: step2. columnFocusHub has null lastWeakFocusNode_, FocusView is 2 levels up.
+     */
+    columnFocusHub->lastWeakFocusNode_ = nullptr;
+    pagePattern->isViewRootScopeFocused_ = false;
+
+    /**
+     * @tc.steps: step3. call CheckScopeFocusDependence on columnFocusHub.
+     * @tc.expected: traverses up through navNode, finds pageNode's FocusView, sets isViewRootScopeFocused(true).
+     */
+    columnFocusHub->CheckScopeFocusDependence();
+    EXPECT_TRUE(pagePattern->isViewRootScopeFocused_);
+}
 } // namespace OHOS::Ace::NG
