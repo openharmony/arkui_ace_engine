@@ -22,6 +22,16 @@ void RichEditorBaseController::SetPattern(const WeakPtr<RichEditorPattern>& patt
     pattern_ = pattern;
 }
 
+void RichEditorBaseController::SetHost(const WeakPtr<FrameNode>& host)
+{
+    host_ = host;
+}
+
+RefPtr<FrameNode> RichEditorBaseController::GetHost()
+{
+    return host_.Upgrade();
+}
+
 WeakPtr<LayoutInfoInterface> RichEditorBaseController::GetLayoutInfoInterface()
 {
     auto richEditorPattern = pattern_.Upgrade();
