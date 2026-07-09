@@ -114,7 +114,7 @@ public:
     static Color GetColor(FrameNode* frameNode);
     static double GetTotal(FrameNode* frameNode);
     static NG::ProgressType GetType(FrameNode* frameNode);
-    static void SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&& jsMake);
+    ACE_FORCE_EXPORT static void SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&& jsMake);
     static void ProgressInitialize(
         FrameNode* frameNode, double min, double value, double cachedValue, double max, NG::ProgressType type);
     static void SetBorderRadius(FrameNode* frameNode, const Dimension& value);

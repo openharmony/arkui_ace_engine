@@ -30,7 +30,9 @@
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/loading_progress/bridge/content_modifier_helper.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
-#include "core/components_ng/pattern/progress/progress_model_ng.h"
+#include "core/components_ng/pattern/progress/bridge/progress_custom_modifier.h"
+#include "core/components_ng/pattern/progress/progress_date.h"
+#include "core/interfaces/native/node/progress_modifier.h"
 #include "core/components_ng/pattern/radio/bridge/radio_content_modifier_helper.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/rating/bridge/rating_content_modifier_helper.h"
@@ -41,6 +43,7 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/text_clock/bridge/text_clock_content_modifier_helper.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/components_ng/pattern/texttimer/bridge/text_timer_content_modifier_helper.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/toggle/bridge/toggle_content_modifier_helper.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -186,6 +189,20 @@ const ArkUILoadingProgressContentModifier* GetLoadingProgressContentModifier()
     return cachedModifier;
 }
 
+const ArkUITextTimerContentModifier* GetTextTimerContentModifier()
+{
+    static const ArkUITextTimerContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextTimer");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find texttimer dynamic module");
+        }
+        cachedModifier = reinterpret_cast<const ArkUITextTimerContentModifier*>(
+            module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+}
+
 RefPtr<FrameNode> GetOrCreateContentBoxNode(Ark_NativePointer node)
 {
     auto boxNode = GeneratedApiImpl::GetContentNode(node);
@@ -305,6 +322,21 @@ void ResetContentModifierLoadingProgressImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(modifier);
     modifier->resetContentModifierLoadingProgressImpl(node);
 }
+void ContentModifierTextTimerImpl(
+    Ark_NativePointer node, const Ark_Object* contentModifier, const TextTimerModifierBuilder* builder)
+{
+    CHECK_NULL_VOID(node);
+    auto* modifier = GetTextTimerContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierTextTimerImpl(node, contentModifier, builder);
+}
+void ResetContentModifierTextTimerImpl(Ark_NativePointer node)
+{
+    CHECK_NULL_VOID(node);
+    auto* modifier = GetTextTimerContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierTextTimerImpl(node);
+}
 void ContentModifierProgressImpl(Ark_NativePointer node,
                                  const Ark_Object* contentModifier,
                                  const ProgressModifierBuilder* builder)
@@ -326,13 +358,17 @@ void ContentModifierProgressImpl(Ark_NativePointer node,
             }, node, arkConfig);
         return boxNode;
     };
-    ProgressModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    auto progressModifier = NG::NodeModifier::GetProgressCustomModifier();
+    CHECK_NULL_VOID(progressModifier);
+    progressModifier->setBuilderFuncToModelNG(frameNode, std::move(builderFunc));
 }
 void ResetContentModifierProgressImpl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ProgressModelNG::SetBuilderFunc(frameNode, nullptr);
+    auto progressModifier = NG::NodeModifier::GetProgressCustomModifier();
+    CHECK_NULL_VOID(progressModifier);
+    progressModifier->setBuilderFuncToModelNG(frameNode, nullptr);
 }
 void ContentModifierRadioImpl(Ark_NativePointer node,
                               const Ark_Object* contentModifier,
@@ -482,38 +518,7 @@ void ResetContentModifierTextClockImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(modifier);
     modifier->resetContentModifierTextClockImpl(node);
 }
-void ContentModifierTextTimerImpl(Ark_NativePointer node,
-                                  const Ark_Object* contentModifier,
-                                  const TextTimerModifierBuilder* builder)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        TextTimerConfiguration config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_TextTimerConfiguration arkConfig;
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.count = Converter::ArkValue<Ark_Int64>(config.count_);
-        arkConfig.isCountDown = Converter::ArkValue<Ark_Boolean>(config.isCountDown_);
-        arkConfig.started = Converter::ArkValue<Ark_Boolean>(config.started_);
-        arkConfig.elapsedTime = Converter::ArkValue<Ark_Int64>(static_cast<int32_t>(config.elapsedTime_));
-        arkConfig.startTime = Converter::ArkValue<Opt_Int32>(config.startTime_);
-        auto boxNode = GetOrCreateContentBoxNode(node);
-        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            ReplaceContentBoxNodeChild(boxNode, uiNode);
-            }, node, arkConfig);
-        return boxNode;
-    };
-    TextTimerModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
-}
-void ResetContentModifierTextTimerImpl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextTimerModelNG::SetBuilderFunc(frameNode, nullptr);
-}
+
 void ContentModifierToggleImpl(
     Ark_NativePointer node, const Ark_Object* contentModifier, const ToggleModifierBuilder* builder)
 {

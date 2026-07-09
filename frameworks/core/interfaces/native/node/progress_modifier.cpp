@@ -17,6 +17,7 @@
 
 #include "ui/base/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/progress/bridge/progress_custom_modifier.h"
 namespace OHOS::Ace::NG {
 
 namespace NodeModifier {
@@ -41,5 +42,17 @@ const CJUIProgressModifier* GetCJUIProgressModifier()
     }
     return cachedModifier;
 }
+
+const ArkUIProgressCustomModifier* GetProgressCustomModifier()
+{
+    static const ArkUIProgressCustomModifier* cachedCustomModifier = nullptr;
+    if (cachedCustomModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Progress");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedCustomModifier = reinterpret_cast<const ArkUIProgressCustomModifier*>(module->GetCustomModifier());
+    }
+    return cachedCustomModifier;
+}
+
 } // namespace NodeModifier
 }

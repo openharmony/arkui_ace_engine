@@ -20,6 +20,7 @@
 
 #include "core/components_ng/pattern/progress/bridge/arkts_native_progress_bridge.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
+#include "core/components_ng/pattern/progress/bridge/progress_custom_modifier.h"
 
 
 #ifdef INCLUDE_GENERATED_SOURCES
@@ -37,6 +38,7 @@ namespace NG {
 namespace NodeModifier {
 const ArkUIProgressModifier* GetProgressModifier();
 const CJUIProgressModifier* GetCJUIProgressModifier();
+const ArkUIProgressCustomModifier* GetProgressCustomModifier();
 }
 #ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
@@ -73,6 +75,11 @@ void* ProgressDynamicModule::GetModel()
 {
     static NG::ProgressModelNG model;
     return &model;
+}
+
+const void* ProgressDynamicModule::GetCustomModifier(const std::string& name)
+{
+    return NG::NodeModifier::GetProgressCustomModifier();
 }
 
 } // namespace OHOS::Ace

@@ -16,13 +16,18 @@
 
 #include "core/interfaces/native/node/progress_modifier.h"
 
+#include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
+#include "core/components_ng/pattern/progress/progress_model_static.h"
 #include "core/components_ng/pattern/progress/progress_paint_property.h"
+#include "core/components_ng/pattern/progress/progress_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
@@ -37,13 +42,9 @@ ProgressModel* GetProgressModelImpl()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+namespace {
 constexpr double DEFAULT_PROGRESS_VALUE = 0;
 constexpr double DEFAULT_PROGRESS_TOTAL = 100;
-constexpr int32_t MIN_COLOR_STOPS_VALUE_INDEX = 0;
-constexpr int32_t MIN_COLOR_STOPS_HAS_DIMENSION_INDEX = 1;
-constexpr int32_t MIN_COLOR_STOPS_DIMENSION_INDEX = 2;
-constexpr int32_t MIN_COLOR_STOPS_LENGTH = 3;
-constexpr double PERCENT_100 = 100;
 constexpr int32_t DEFAULT_SCALE_COUNT = 120;
 constexpr double DEFAULT_STROKE_WIDTH = 4;
 constexpr double DEFAULT_BORDER_WIDTH = 1;
@@ -55,38 +56,11 @@ const int32_t ERROR_INT_CODE = -1;
 constexpr float STROKEWIDTH_DEFAULT_VALUE = 4.0f;
 constexpr ArkUI_Uint32 MAX_FONT_FAMILY_LENGTH = Infinity<ArkUI_Uint32>();
 
+namespace {
 FrameNode* GetFrameNode(ArkUINodeHandle node)
 {
     return node ? reinterpret_cast<FrameNode*>(node) : ViewStackProcessor::GetInstance()->GetMainFrameNode();
 }
-
-/**
- * @param colors color value
- * colors[0], colors[1], colors[2] : color[0](color, hasDimension, dimension)
- * colors[3], colors[4], colors[5] : color[1](color, hasDimension, dimension)
- * ...
- * @param colorsLength colors length
- */
-void SetGradientColors(NG::Gradient& gradient, const ArkUI_Float32* colors, int32_t colorsLength)
-{
-    if ((colors == nullptr) || (colorsLength % MIN_COLOR_STOPS_LENGTH) != 0) {
-        return;
-    }
-    for (int32_t index = 0; index < colorsLength; index += MIN_COLOR_STOPS_LENGTH) {
-        auto colorValue = colors[index + MIN_COLOR_STOPS_VALUE_INDEX];
-        auto colorHasDimension = colors[index + MIN_COLOR_STOPS_HAS_DIMENSION_INDEX];
-        auto colorDimension = colors[index + MIN_COLOR_STOPS_DIMENSION_INDEX];
-        auto color = static_cast<uint32_t>(colorValue);
-        auto hasDimension = static_cast<bool>(colorHasDimension);
-        auto dimension = colorDimension;
-        NG::GradientColor gradientColor;
-        gradientColor.SetColor(Color(color));
-        gradientColor.SetHasValue(hasDimension);
-        if (hasDimension) {
-            gradientColor.SetDimension(CalcDimension(dimension * PERCENT_100, DimensionUnit::PERCENT));
-        }
-        gradient.AddColor(gradientColor);
-    }
 }
 
 void SetProgressValue(ArkUINodeHandle node, ArkUI_Float32 value)
@@ -839,6 +813,7 @@ void SetBackgroundColorForHDR(
 
     ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
 }
+} // namespace
 
 namespace NodeModifier {
 const ArkUIProgressModifier* GetProgressModifier()
@@ -951,6 +926,57 @@ const CJUIProgressModifier* GetCJUIProgressModifier()
         .resetProgressBackgroundColorWithColorSpace = ResetProgressBackgroundColorWithColorSpace,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+    return &modifier;
+}
+
+static RefPtr<FrameNode> CreateProgressNodeForLinearIndicator(int32_t nodeId)
+{
+    auto progressNode = FrameNode::GetOrCreateFrameNode(
+        PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ProgressPattern>(); });
+    return progressNode;
+}
+
+static void UpdateProgressPropertiesForLinearIndicator(const RefPtr<FrameNode>& targetNode,
+    const LinearIndicatorProgressConfig& config)
+{
+    auto paintProperty = targetNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    if (paintProperty) {
+        paintProperty->UpdateColor(config.color);
+        paintProperty->UpdateBackgroundColor(config.backgroundColor);
+        paintProperty->UpdateStrokeRadius(config.strokeRadius);
+        if (config.isInitialCreate) {
+            paintProperty->UpdateEnableSmoothEffect(false);
+        }
+    }
+    auto layoutProperty = targetNode->GetLayoutProperty<NG::ProgressLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->UpdateStrokeWidth(config.strokeWidth);
+        layoutProperty->UpdateLayoutDirection(static_cast<TextDirection>(config.direction));
+        if (config.isInitialCreate) {
+            layoutProperty->UpdateLayoutWeight(1);
+        }
+    }
+    targetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+static void SetBackgroundColorToModelStaticForCapi(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    ProgressModelStatic::SetBackgroundColor(frameNode, value);
+}
+
+static void SetBuilderFuncToModelNGForCapi(FrameNode* frameNode, ProgressMakeCallback&& makeFunc)
+{
+    ProgressModelNG::SetBuilderFunc(frameNode, std::move(makeFunc));
+}
+
+const ArkUIProgressCustomModifier* GetProgressCustomModifier()
+{
+    static const ArkUIProgressCustomModifier modifier = {
+        .createProgressNode = CreateProgressNodeForLinearIndicator,
+        .updateProgressProperties = UpdateProgressPropertiesForLinearIndicator,
+        .setBackgroundColorToModelStatic = SetBackgroundColorToModelStaticForCapi,
+        .setBuilderFuncToModelNG = SetBuilderFuncToModelNGForCapi,
+    };
     return &modifier;
 }
 }

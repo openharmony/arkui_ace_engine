@@ -14,6 +14,8 @@
  */
 #include "core/interfaces/native/node/progress_modifier.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
+#include "core/components_ng/pattern/progress/progress_model_static.h"
+#include "core/components_ng/pattern/progress/bridge/progress_custom_modifier.h"
 namespace OHOS::Ace::NG {
 ArkUINodeHandle CreateProgressFrameNode(ArkUI_Uint32 nodeId, ArkUI_Float32 value, ArkUI_Float32 max, ArkUI_Int32 type)
 {
@@ -22,11 +24,31 @@ ArkUINodeHandle CreateProgressFrameNode(ArkUI_Uint32 nodeId, ArkUI_Float32 value
     frameNode->IncRefCount();
     return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
 }
+
+static void SetBackgroundColorToModelStaticForMock(FrameNode* frameNode,
+    const std::optional<Color>& value)
+{
+    ProgressModelStatic::SetBackgroundColor(frameNode, value);
+}
+
+static void SetBuilderFuncToModelNGForMock(FrameNode* frameNode, ProgressMakeCallback&& makeFunc)
+{
+    ProgressModelNG::SetBuilderFunc(frameNode, std::move(makeFunc));
+}
 namespace NodeModifier {
 const ArkUIProgressModifier* GetProgressModifier()
 {
     static const ArkUIProgressModifier modifier = {
         .createProgressFrameNode = CreateProgressFrameNode,
+    };
+    return &modifier;
+}
+
+const ArkUIProgressCustomModifier* GetProgressCustomModifier()
+{
+    static const ArkUIProgressCustomModifier modifier = {
+        .setBackgroundColorToModelStatic = SetBackgroundColorToModelStaticForMock,
+        .setBuilderFuncToModelNG = SetBuilderFuncToModelNGForMock,
     };
     return &modifier;
 }

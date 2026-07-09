@@ -988,6 +988,9 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest001, TestSize.Level0)
  */
 HWTEST_F(TextTimerTestNg, TextTimerPatternTest002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: Create framenode and Init.
+     */
     auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
@@ -1013,11 +1016,17 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest002, TestSize.Level0)
  */
 HWTEST_F(TextTimerTestNg, TextTimerPatternTest003, TestSize.Level0)
 {
+    /**
+     * @tc.steps: Create framenode and Init.
+     */
     auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     ASSERT_NE(pattern, nullptr);
 
+    /**
+     * @tc.steps: Test with different font size
+     */
     const double testSizeValue = 20.0;
     Dimension testSize(testSizeValue, DimensionUnit::VP);
     pattern->UpdateFontSize(testSize, true);
