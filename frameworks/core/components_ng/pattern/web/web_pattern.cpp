@@ -23,6 +23,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <sstream>
 #include <string_ex.h>
 #include <unordered_map>
@@ -125,25 +126,25 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
-const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
-const std::string AUTO_FILL_VIEW_DATA_PAGE_URL = "autofill_viewdata_origin_pageurl";
-const std::string AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT = "autofill_viewdata_other_account";
-const std::string AUTO_FILL_START_POPUP_WINDOW = "persist.sys.abilityms.autofill.is_passwd_popup_window";
-const std::string COMMAND_ACTION_JSON = "persist.sys.abilityms.command.action.book.info";
-const std::string WEB_INFO_PC = "8";
-const std::string WEB_INFO_TABLET = "4";
-const std::string WEB_INFO_PHONE = "2";
-const std::string WEB_INFO_DEFAULT = "1";
-const std::string WEB_SNAPSHOT_PATH_PREFIX = "/data/storage/el2/base/cache/web/snapshot/web_frame_";
-const std::string WEB_SNAPSHOT_PATH_PNG_SUFFIX = ".png";
-const std::string WEB_SNAPSHOT_PATH_HEIC_SUFFIX = ".heic";
+constexpr std::string_view IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
+constexpr std::string_view IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
+constexpr std::string_view AUTO_FILL_VIEW_DATA_PAGE_URL = "autofill_viewdata_origin_pageurl";
+constexpr std::string_view AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT = "autofill_viewdata_other_account";
+constexpr std::string_view AUTO_FILL_START_POPUP_WINDOW = "persist.sys.abilityms.autofill.is_passwd_popup_window";
+constexpr std::string_view COMMAND_ACTION_JSON = "persist.sys.abilityms.command.action.book.info";
+constexpr std::string_view WEB_INFO_PC = "8";
+constexpr std::string_view WEB_INFO_TABLET = "4";
+constexpr std::string_view WEB_INFO_PHONE = "2";
+constexpr std::string_view WEB_INFO_DEFAULT = "1";
+constexpr std::string_view WEB_SNAPSHOT_PATH_PREFIX = "/data/storage/el2/base/cache/web/snapshot/web_frame_";
+constexpr std::string_view WEB_SNAPSHOT_PATH_PNG_SUFFIX = ".png";
+constexpr std::string_view WEB_SNAPSHOT_PATH_HEIC_SUFFIX = ".heic";
 const char INJECTION_SEND_COMMAND_ERROR[] = "INJECTION_SEND_COMMAND_ERROR";
 const char INJECTION_TYPE_JSON_INVALID[] = "INJECTION_EVENT_JSON_INVALID";
 const char INJECTION_TYPE_TARGET_NODE_NOT_FOUND[] = "INJECTION_EVENT_TARGET_NODE_NOT_FOUND";
 const char INJECTION_TYPE_SEND_COMMAND_ERROR[] = "INJECTION_EVENT_SEND_COMMAND_ERROR";
-const std::string ACC_PAGE_MODE_FULL = "FULL_SILENT";
-const std::string ACC_PAGE_MODE_SEMI = "SEMI_SILENT";
+constexpr std::string_view ACC_PAGE_MODE_FULL = "FULL_SILENT";
+constexpr std::string_view ACC_PAGE_MODE_SEMI = "SEMI_SILENT";
 const Matrix4 WEB_SNAPSHOT_IMAGE_SCALE_MATRIX = Matrix4::CreateScale(2.0, 2.0, 1.0); // scale width and height
 constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 constexpr int32_t AUTOFILL_DELAY_TIME = 200;
@@ -326,7 +327,7 @@ std::string ParseTextJsonValue(const std::string& textJson)
     return "";
 }
 
-const std::string NWEB_AUTOFILL_TYPE_OFF = "off";
+constexpr std::string_view NWEB_AUTOFILL_TYPE_OFF = "off";
 const std::map<std::string, AceAutoFillType> NWEB_AUTOFILL_TYPE_TO_ACE = {
     {OHOS::NWeb::NWEB_AUTOFILL_STREET_ADDRESS, AceAutoFillType::ACE_FULL_STREET_ADDRESS},
     {OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_LEVEL_3, AceAutoFillType::ACE_DISTRICT_ADDRESS},
@@ -632,11 +633,11 @@ constexpr float TOOLTIP_MAX_PORTION = 0.35f;
 constexpr float TOOLTIP_DELAY_MS = 700;
 constexpr uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 constexpr int32_t FIT_CONTENT_LIMIT_LENGTH = 8000;
-const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
-const std::string BUFFER_USAGE_WEB = "web";
-const std::string BUFFER_USAGE_SURFACE = "web-surface-";
-const std::string BUFFER_USAGE_TEXTURE = "web-texture-";
-const std::string DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
+constexpr std::string_view PATTERN_TYPE_WEB = "WEBPATTERN";
+constexpr std::string_view BUFFER_USAGE_WEB = "web";
+constexpr std::string_view BUFFER_USAGE_SURFACE = "web-surface-";
+constexpr std::string_view BUFFER_USAGE_TEXTURE = "web-texture-";
+constexpr std::string_view DEFAULT_WEB_TEXT_ENCODING_FORMAT = "UTF-8";
 constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE_AND_PC = 5;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_OTHERS = 4;
@@ -671,15 +672,14 @@ constexpr char ACCESSIBILITY_IMAGE[] = "image";
 constexpr char ACCESSIBILITY_PARAGRAPH[] = "paragraph";
 constexpr char WEB_NODE_URL[] = "url";
 
-const std::string IS_HINT_TYPE = "{\"isHint2Type\": true}";
-const std::string STRING_LF = "\n";
-const std::string DRAG_DATA_TYPE_TEXT = "general.plain-text";
-const std::string DRAG_DATA_TYPE_HTML = "general.html";
-const std::string DRAG_DATA_TYPE_APP_DEF = "ApplicationDefinedType";
+constexpr std::string_view STRING_LF = "\n";
+constexpr std::string_view DRAG_DATA_TYPE_TEXT = "general.plain-text";
+constexpr std::string_view DRAG_DATA_TYPE_HTML = "general.html";
+constexpr std::string_view DRAG_DATA_TYPE_APP_DEF = "ApplicationDefinedType";
 const std::set<std::string> FILE_TYPE_SET = {"general.file", "general.audio", "general.video", "general.image"};
-const std::string DRAG_DATA_TYPE_LINK = "general.hyperlink";
-const std::string FAKE_DRAG_DATA_VAL = " ";
-const std::string FAKE_LINK_VAL = "https://xxx.xxx.xxx";
+constexpr std::string_view DRAG_DATA_TYPE_LINK = "general.hyperlink";
+constexpr std::string_view FAKE_DRAG_DATA_VAL = " ";
+constexpr std::string_view FAKE_LINK_VAL = "https://xxx.xxx.xxx";
 
 #define WEB_ACCESSIBILITY_DELAY_TIME 100
 #define GPU_ABNORMAL_VALUE (32 * 1024)
@@ -3453,20 +3453,20 @@ void WebPattern::SetFakeDragData(const RefPtr<OHOS::Ace::DragEvent>& info)
         std::map<std::string, int64_t>::iterator iter;
         for (iter = dragDataSummary.begin(); iter != dragDataSummary.end(); iter++) {
             if (FILE_TYPE_SET.find(iter->first) != FILE_TYPE_SET.end()) {
-                delegate_->dragData_->SetFileUri(FAKE_DRAG_DATA_VAL);
+                delegate_->dragData_->SetFileUri(std::string(FAKE_DRAG_DATA_VAL));
             } else if (DRAG_DATA_TYPE_TEXT == iter->first) {
-                delegate_->dragData_->SetFragmentText(FAKE_DRAG_DATA_VAL);
+                delegate_->dragData_->SetFragmentText(std::string(FAKE_DRAG_DATA_VAL));
             } else if (DRAG_DATA_TYPE_HTML == iter->first || DRAG_DATA_TYPE_APP_DEF == iter->first) {
-                delegate_->dragData_->SetFragmentHtml(FAKE_DRAG_DATA_VAL);
+                delegate_->dragData_->SetFragmentHtml(std::string(FAKE_DRAG_DATA_VAL));
             } else if (DRAG_DATA_TYPE_LINK == iter->first) {
-                delegate_->dragData_->SetLinkURL(FAKE_LINK_VAL);
-                delegate_->dragData_->SetLinkTitle(FAKE_LINK_VAL);
+                delegate_->dragData_->SetLinkURL(std::string(FAKE_LINK_VAL));
+                delegate_->dragData_->SetLinkTitle(std::string(FAKE_LINK_VAL));
             }
         }
         return;
     }
-    delegate_->dragData_->SetFragmentText(FAKE_DRAG_DATA_VAL);
-    delegate_->dragData_->SetFragmentHtml(FAKE_DRAG_DATA_VAL);
+    delegate_->dragData_->SetFragmentText(std::string(FAKE_DRAG_DATA_VAL));
+    delegate_->dragData_->SetFragmentHtml(std::string(FAKE_DRAG_DATA_VAL));
 }
 
 void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
@@ -4186,7 +4186,7 @@ void WebPattern::OnInitialScaleUpdate(float value)
 void WebPattern::OnMultiWindowAccessEnabledUpdate(bool value)
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "Get json config ");
-    std::string json = OHOS::system::GetParameter(COMMAND_ACTION_JSON, "");
+    std::string json = OHOS::system::GetParameter(std::string(COMMAND_ACTION_JSON), "");
     if (json != "") {
         TAG_LOGI(AceLogTag::ACE_WEB, "Get json config success. Content: %{public}s", json.c_str());
         OnInjectionEvent(json);
@@ -4599,14 +4599,14 @@ void WebPattern::OnModifyDone()
             renderSurface_->SetRenderContext(host->GetRenderContext());
             if (renderMode_ == RenderMode::SYNC_RENDER) {
                 renderSurface_->SetIsTexture(true);
-                renderSurface_->SetBufferTypeLeak(BUFFER_USAGE_TEXTURE + GetInspectorId());
-                renderSurface_->SetPatternType(PATTERN_TYPE_WEB);
+                renderSurface_->SetBufferTypeLeak(std::string(BUFFER_USAGE_TEXTURE) + GetInspectorId());
+                renderSurface_->SetPatternType(std::string(PATTERN_TYPE_WEB));
                 renderSurface_->SetSurfaceQueueSize(SYNC_SURFACE_QUEUE_SIZE);
                 renderContextForSurface_->SetOpacity(0.0f);
             } else {
                 renderSurface_->SetIsTexture(false);
-                renderSurface_->SetBufferUsage(BUFFER_USAGE_WEB);
-                renderSurface_->SetBufferTypeLeak(BUFFER_USAGE_SURFACE + GetInspectorId());
+                renderSurface_->SetBufferUsage(std::string(BUFFER_USAGE_WEB));
+                renderSurface_->SetBufferTypeLeak(std::string(BUFFER_USAGE_SURFACE) + GetInspectorId());
                 renderSurface_->SetSurfaceQueueSize(GetBufferSizeByDeviceType());
                 renderSurface_->SetRenderContext(renderContextForSurface_);
             }
@@ -4716,7 +4716,8 @@ void WebPattern::OnModifyDone()
         if (HasDefaultFontSize()) {
             delegate_->UpdateDefaultFontSize(GetDefaultFontSizeValue(DEFAULT_FONT_SIZE));
         }
-        delegate_->UpdateDefaultTextEncodingFormat(GetDefaultTextEncodingFormatValue(DEFAULT_WEB_TEXT_ENCODING_FORMAT));
+        delegate_->UpdateDefaultTextEncodingFormat(GetDefaultTextEncodingFormatValue(
+            std::string(DEFAULT_WEB_TEXT_ENCODING_FORMAT)));
         if (HasMinFontSize()) {
             delegate_->UpdateMinFontSize(GetMinFontSizeValue(DEFAULT_MINIMUM_FONT_SIZE));
         }
@@ -5948,9 +5949,9 @@ void WebPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
     }
 
     auto pageUrl = viewDataWrap->GetPageUrl();
-    jsonNode->Put(AUTO_FILL_VIEW_DATA_PAGE_URL.c_str(), pageUrl.c_str());
+    jsonNode->Put(AUTO_FILL_VIEW_DATA_PAGE_URL.data(), pageUrl.c_str());
     auto otherAccount = viewDataWrap->GetOtherAccount();
-    jsonNode->Put(AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT.c_str(), otherAccount);
+    jsonNode->Put(AUTO_FILL_VIEW_DATA_OTHER_ACCOUNT.data(), otherAccount);
     delegate_->NotifyAutoFillViewData(jsonNode->ToString(), ConvertAceAutoFillTriggerType(triggerType));
 
     // shift focus after autofill
@@ -6262,7 +6263,7 @@ bool WebPattern::HandleAutoFillEvent()
     auto eventType = viewDataCommon_->GetEventType();
     if (eventType == OHOS::NWeb::NWebAutofillEvent::FILL) {
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST;
-        if (isPasswordFill_ && !system::GetBoolParameter(AUTO_FILL_START_POPUP_WINDOW, false)) {
+        if (isPasswordFill_ && !system::GetBoolParameter(std::string(AUTO_FILL_START_POPUP_WINDOW), false)) {
             return RequestAutoFill(GetFocusedType(), triggerType);
         }
         auto host = GetHost();
@@ -6796,11 +6797,11 @@ void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::Curs
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     if (type == NWeb::CursorType::CT_CONTEXTMENU) {
         MouseFormat pointStyle = MouseFormat::CONTEXT_MENU;
-        pixelMap = CreatePixelMapFromString(IMAGE_POINTER_CONTEXT_MENU_PATH);
+        pixelMap = CreatePixelMapFromString(std::string(IMAGE_POINTER_CONTEXT_MENU_PATH));
         mouseStyle->SetMouseIcon(windowId, pointStyle, pixelMap);
     } else if (type == NWeb::CursorType::CT_ALIAS) {
         MouseFormat pointStyle = MouseFormat::ALIAS;
-        pixelMap = CreatePixelMapFromString(IMAGE_POINTER_ALIAS_PATH);
+        pixelMap = CreatePixelMapFromString(std::string(IMAGE_POINTER_ALIAS_PATH));
         mouseStyle->SetMouseIcon(windowId, pointStyle, pixelMap);
     }
 }

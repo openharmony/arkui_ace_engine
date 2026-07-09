@@ -16,6 +16,7 @@
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/accessibility/accessibility_manager.h"
 
+#include <string_view>
 #include "base/error/error_code.h"
 #include "base/utils/multi_thread.h"
 #include "core/common/ace_engine.h"
@@ -47,9 +48,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
-const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
-const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
+constexpr std::string_view BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
+constexpr std::string_view BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
+constexpr std::string_view ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME =
+    "sys.float.ohos_id_point_light_illuminated_border_width";
 constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
 constexpr char KEY_MENU[] = "Menu";
 constexpr float DEFAULT_BIAS = 0.5f;
@@ -1133,8 +1135,8 @@ void ViewAbstractModelStatic::SetBloom(FrameNode *frameNode, const std::optional
     } else {
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Bloom, frameNode);
     }
-    double bloomRadius = themeConstants->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
-    Color bloomColor = themeConstants->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
+    double bloomRadius = themeConstants->GetDoubleByName(std::string(BLOOM_RADIUS_SYS_RES_NAME));
+    Color bloomColor = themeConstants->GetColorByName(std::string(BLOOM_COLOR_SYS_RES_NAME));
     Shadow shadow;
     shadow.SetBlurRadius(value.value_or(-1.0f) * bloomRadius);
     shadow.SetColor(bloomColor);
@@ -1158,7 +1160,8 @@ void ViewAbstractModelStatic::SetLightIlluminated(FrameNode *frameNode, const st
     } else {
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, LightIlluminated, frameNode);
     }
-    auto illuminatedBorderWidth = themeConstants->GetDimensionByName(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME);
+    auto illuminatedBorderWidth = themeConstants->GetDimensionByName(
+        std::string(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME));
     ViewAbstractModelStatic::SetIlluminatedBorderWidth(frameNode, illuminatedBorderWidth);
 }
 

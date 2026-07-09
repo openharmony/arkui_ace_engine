@@ -133,7 +133,7 @@ public:
         viewId_ = viewId;
     }
 
-    static bool HasInspectorFinished(std::string tag);
+    static bool HasInspectorFinished(const std::string& tag);
     static std::string GetEtsTag(const std::string& tag);
     static RefPtr<AccessibilityManager> GetAccessibilityManager();
     static RefPtr<AccessibilityNode> CreateAccessibilityNode(

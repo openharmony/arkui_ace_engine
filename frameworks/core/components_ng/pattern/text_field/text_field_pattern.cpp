@@ -101,10 +101,9 @@ constexpr uint32_t OBSCURE_SHOW_TICKS = 1;
 constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
-const std::string NEWLINE = "\n";
-const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
-const std::string INSPECTOR_PREFIX = "__SearchField__";
-const std::string ERRORNODE_PREFIX = "ErrorNodeField__";
+constexpr std::string_view NEWLINE = "\n";
+const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(std::string(NEWLINE));
+constexpr std::string_view INSPECTOR_PREFIX = "__SearchField__";
 const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 constexpr Dimension FLOATING_CARET_SHOW_ORIGIN_CARET_DISTANCE = 10.0_vp;
 #if defined(ENABLE_STANDARD_INPUT)
@@ -114,21 +113,15 @@ constexpr size_t MAX_ABILITY_NAME_SIZE = 127;
 #endif
 
 // need to be moved to formatter
-const std::string DIGIT_WHITE_LIST = "[0-9]";
-const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
-const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
-const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
-const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
-const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
-const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
-const std::string AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
-const std::string FIELD_TEXT_CHANGE_EVENT = "textChange";
-const std::string FIELD_BLUR_EVENT = "blur";
-const std::string FIELD_FOCUS_EVENT = "focus";
+constexpr std::string_view SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
+constexpr std::string_view HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
+constexpr std::string_view FIELD_TEXT_CHANGE_EVENT = "textChange";
+constexpr std::string_view FIELD_BLUR_EVENT = "blur";
+constexpr std::string_view FIELD_FOCUS_EVENT = "focus";
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t PREVIEW_TEXT_RANGE_DEFAULT = -1;
-const std::string PREVIEW_STYLE_NORMAL = "normal";
-const std::string PREVIEW_STYLE_UNDERLINE = "underline";
+constexpr std::string_view PREVIEW_STYLE_NORMAL = "normal";
+constexpr std::string_view PREVIEW_STYLE_UNDERLINE = "underline";
 
 constexpr int32_t PREVIEW_NO_ERROR = 0;
 constexpr int32_t PREVIEW_NULL_POINTER = 1;
@@ -1505,7 +1498,7 @@ void TextFieldPattern::HandleFocusEvent()
     RequestKeyboardByFocusSwitch();
     ResetFirstClickAfterGetFocus();
     SetFocusStyle();
-    ReportTextChangeEvent(FIELD_FOCUS_EVENT);
+    ReportTextChangeEvent(std::string(FIELD_FOCUS_EVENT));
 
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -2034,7 +2027,7 @@ void TextFieldPattern::HandleBlurEvent()
         RestoreDefaultMouseState();
     }
     ReportEvents();
-    ReportTextChangeEvent(FIELD_BLUR_EVENT);
+    ReportTextChangeEvent(std::string(FIELD_BLUR_EVENT));
     ScheduleDisappearDelayTask();
     requestFocusReason_ = RequestFocusReason::UNKNOWN;
     ClearFocusStyle();
@@ -4713,7 +4706,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     AddTextFireOnChange();
-    ReportTextChangeEvent(FIELD_TEXT_CHANGE_EVENT);
+    ReportTextChangeEvent(std::string(FIELD_TEXT_CHANGE_EVENT));
     auto context = host->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
@@ -9144,7 +9137,7 @@ std::string TextFieldPattern::GetShowResultImageSrc() const
     if (showImageSource && !showImageSource->GetSrc().empty()) {
         return showImageSource->GetSrc();
     }
-    return SHOW_PASSWORD_SVG;
+    return std::string(SHOW_PASSWORD_SVG);
 }
 
 std::string TextFieldPattern::GetNormalUnderlineColorStr() const
@@ -9189,7 +9182,7 @@ std::string TextFieldPattern::GetHideResultImageSrc() const
     if (hideSourceInfo && !hideSourceInfo->GetSrc().empty()) {
         return hideSourceInfo->GetSrc();
     }
-    return HIDE_PASSWORD_SVG;
+    return std::string(HIDE_PASSWORD_SVG);
 }
 
 void TextFieldPattern::RestorePreInlineStates()

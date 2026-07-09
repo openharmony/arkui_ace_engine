@@ -40,7 +40,7 @@ constexpr int32_t WORD_LIMIT_RETURN = 2;
 constexpr int32_t BEYOND_LIMIT_RETURN = 4;
 constexpr int32_t DEFAULT_RETURN_VALUE = -1;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
-const std::u16string DEFAULT_TEXT_U16 = u"abcdefghijklmnopqrstuvwxyz";
+static constexpr char16_t DEFAULT_TEXT_U16[] = u"abcdefghijklmnopqrstuvwxyz";
 const InputStyle DEFAULT_INPUT_STYLE = InputStyle::INLINE;
 struct ExpectParagraphParams {
     float height = 50.f;
