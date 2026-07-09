@@ -289,6 +289,7 @@ ohos_static_library("ace_components_base") {
     "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
     "$ace_root/frameworks/core/components_ng/base/xbar_proxy_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/lazy_container_item_helper.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.cpp",
     "$ace_root/frameworks/core/components_ng/token_theme/token_theme_storage.cpp",
     "$ace_root/interfaces/inner_api/ace_kit/src/view/theme/token_colors.cpp",
