@@ -3096,6 +3096,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         taskExecutor_->PostTask(setupRootElementTask, TaskExecutor::TaskType::UI, "ArkUISetupRootElement");
     }
 
+    if (fontManager) {
+        fontManager->UpdateStyleOptimizeFlagInCurrentLanguage();
+    }
+
     aceView_->Launch();
 
 #ifdef NG_BUILD
