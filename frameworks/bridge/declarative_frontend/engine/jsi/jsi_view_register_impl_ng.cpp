@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient_binding.h"
 #include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient_binding.h"
+#include "bridge/declarative_frontend/jsview/js_column.h"
 #include "bridge/declarative_frontend/jsview/js_mock.h"
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
