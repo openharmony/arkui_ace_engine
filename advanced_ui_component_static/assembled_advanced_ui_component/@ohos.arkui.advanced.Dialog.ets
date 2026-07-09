@@ -117,7 +117,7 @@ const MAX_FONT_SCALE: number = 2;
 const FADEOUT_GRADIENT_WIDTH: number = 32;
 const FADEOUT_ENABLE: string = 'true';
 
-const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: number = 125836945;
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: long = 125836945;
 const PUNCTUATION_OVERFLOW_DEFAULT_VALUE: boolean = true;
 
 // 'sys.float.alert_container_max_width'

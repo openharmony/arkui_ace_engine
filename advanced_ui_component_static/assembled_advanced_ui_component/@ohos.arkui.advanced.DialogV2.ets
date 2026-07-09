@@ -97,7 +97,7 @@ import {
 const SCROLL_BAR_OFFSET: number = 20;
 const SELECT_DIALOG_SCROLL_BAR_OFFSET: number = 4;
 
-const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: number = 125836945;
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: long = 125836945;
 const PUNCTUATION_OVERFLOW_DEFAULT_VALUE: boolean = true;
 
 export type AdvancedDialogV2OnCheckedChange = (checked: boolean) => void;

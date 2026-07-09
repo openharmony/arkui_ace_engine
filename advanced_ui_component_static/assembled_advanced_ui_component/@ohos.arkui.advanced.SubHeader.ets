@@ -65,7 +65,7 @@ const SINGLE_ICON_REGION_X: number = -12;
 const SINGLE_ICON_NUMBER: number = 1;
 const PADDING_LEFT: number = 2;
 
-const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: number = 125836945;
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: long = 125836945;
 const PUNCTUATION_OVERFLOW_DEFAULT_VALUE: boolean = true;
 
 export enum OperationType {
