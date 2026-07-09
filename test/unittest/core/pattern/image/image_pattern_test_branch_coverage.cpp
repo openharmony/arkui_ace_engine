@@ -1117,6 +1117,7 @@ HWTEST_F(ImagePatternBranchCoverageTestNg, CreateModifierFirstTime001, TestSize.
     EXPECT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     EXPECT_NE(pattern, nullptr);
+    pattern->SetCopyOption(CopyOptions::InApp);
     
     auto contentModBefore = pattern->contentMod_;
     auto overlayModBefore = pattern->overlayMod_;

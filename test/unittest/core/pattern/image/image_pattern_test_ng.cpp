@@ -3341,6 +3341,7 @@ HWTEST_F(ImagePatternTestNg, CreateModifier001, TestSize.Level0)
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
+    imagePattern->SetCopyOption(CopyOptions::InApp);
 
     imagePattern->CreateModifier();
     EXPECT_NE(imagePattern->contentMod_, nullptr);
@@ -3376,6 +3377,7 @@ HWTEST_F(ImagePatternTestNg, CreateNodePaintMethod002, TestSize.Level0)
     ASSERT_NE(frameNode, nullptr);
     auto imagePattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(imagePattern, nullptr);
+    imagePattern->SetCopyOption(CopyOptions::InApp);
 
     EXPECT_EQ(imagePattern->contentMod_, nullptr);
     EXPECT_EQ(imagePattern->overlayMod_, nullptr);

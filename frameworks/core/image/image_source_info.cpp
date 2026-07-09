@@ -585,7 +585,7 @@ void ImageSourceInfo::SetImageDfxConfig(const NG::ImageDfxConfig& imageDfxConfig
     imageDfxConfig_ = imageDfxConfig;
 }
 
-NG::ImageDfxConfig ImageSourceInfo::GetImageDfxConfig() const
+const NG::ImageDfxConfig& ImageSourceInfo::GetImageDfxConfig() const
 {
     return imageDfxConfig_;
 }

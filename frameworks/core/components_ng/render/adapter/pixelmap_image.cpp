@@ -231,8 +231,7 @@ bool PixelMapImage::StretchImageWithLattice(
         PrintDrawingLatticeConfig(*lattice, dstRect);
     }
     recordingCanvas.AttachBrush(brush);
-    auto dfxConfig = GetImageDfxConfig();
-    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap, dstRect);
+    NotifyDrawCompletion(pixmap, dstRect);
     recordingCanvas.DrawImageLattice(rsImage.get(), *lattice, dstRect, filterMode);
     recordingCanvas.DetachBrush();
     return true;
@@ -277,8 +276,7 @@ bool PixelMapImage::StretchImageWithSlice(
     std::shared_ptr<RSImage> rsImage = DrawingImage::MakeRSImageFromPixmap(pixmap);
     CHECK_NULL_RETURN(rsImage, false);
     recordingCanvas.AttachBrush(brush);
-    auto dfxConfig = GetImageDfxConfig();
-    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap, dstRect);
+    NotifyDrawCompletion(pixmap, dstRect);
     recordingCanvas.DrawImageNine(rsImage.get(), rsCenterRect, dstRect, filterMode, &brush);
     recordingCanvas.DetachBrush();
     return true;
@@ -305,8 +303,7 @@ bool PixelMapImage::CheckIfNeedForStretching(
     return false;
 }
 
-void PixelMapImage::NotifyDrawCompletion(
-    const std::string& srcInfo, const RefPtr<PixelMap>& pixmap, const RSRect& dstRect)
+void PixelMapImage::NotifyDrawCompletion(const RefPtr<PixelMap>& pixmap, const RSRect& dstRect)
 {
     FireDrawCompleteCallback(RenderedImageInfo { .renderSuccess = true,
         .width = pixmap->GetWidth(),
@@ -319,7 +316,6 @@ void PixelMapImage::NotifyDrawCompletion(
         .pixelFormat = pixmap->GetPixelFormat(),
         .allocatorType = pixmap->GetAllocatorType(),
         .pixelMapId = pixmap->GetId(),
-        .srcInfo = srcInfo,
         .dstRectInfo = dstRect.ToString() });
 }
 
@@ -366,7 +362,7 @@ void PixelMapImage::DrawToRSCanvas(
             GetDynamicModeString(config.dynamicMode).c_str());
         pixmap->SavePixelMapToFile(dfxConfig.ToStringWithoutSrc() + "_ToRS_");
     }
-    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap, dstRect);
+    NotifyDrawCompletion(pixmap, dstRect);
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 }

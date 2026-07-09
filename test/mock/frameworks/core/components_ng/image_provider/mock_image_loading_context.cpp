@@ -22,8 +22,7 @@
 namespace OHOS::Ace::NG {
 ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad,
     bool isSceneBoardWindow, const ImageDfxConfig& imageDfxConfig)
-    : src_(src), notifiers_(std::move(loadNotifier)), syncLoad_(syncLoad), isSceneBoardWindow_(isSceneBoardWindow),
-      imageDfxConfig_(imageDfxConfig)
+    : src_(src), notifiers_(std::move(loadNotifier)), syncLoad_(syncLoad), isSceneBoardWindow_(isSceneBoardWindow)
 {}
 
 ImageLoadingContext::~ImageLoadingContext() = default;

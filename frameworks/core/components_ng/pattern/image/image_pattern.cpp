@@ -1036,7 +1036,7 @@ void ImagePattern::CreateModifier()
     if (!contentMod_) {
         contentMod_ = MakeRefPtr<ImageContentModifier>(WeakClaim(this));
     }
-    if (!overlayMod_) {
+    if (!overlayMod_ && copyOption_ != CopyOptions::None) {
         overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
     }
     if (!imagePaintMethod_) {

@@ -76,12 +76,12 @@ public:
 
     void SetImageDfxConfig(const ImageDfxConfig& imageDfxConfig)
     {
-        imageDfxConfig_ = imageDfxConfig;
+        src_.SetImageDfxConfig(imageDfxConfig);
     }
 
-    ImageDfxConfig GetImageDfxConfig()
+    const ImageDfxConfig& GetImageDfxConfig() const
     {
-        return imageDfxConfig_;
+        return src_.GetImageDfxConfig();
     }
 
     void SetIsYUVDecode(bool isYUVDecode)
@@ -115,7 +115,6 @@ protected:
     size_t fileSize_ = 0; // size of file in bytes
     size_t imageDataSize_ = 0; // size of image data in bytes
     int32_t frameCount_ = 1;
-    ImageDfxConfig imageDfxConfig_;
     bool isYUVDecode_ = false;
     // Mutex for controlling access to prepareImageData operations.
     // This is a timed mutex to prevent long blocking, allowing a maximum wait time of 1000ms for acquiring the lock.

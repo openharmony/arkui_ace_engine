@@ -89,7 +89,6 @@ struct RenderedImageInfo {
     PixelFormat pixelFormat = PixelFormat::UNKNOWN;
     AllocatorType allocatorType = AllocatorType::DEFAULT;
     std::string pixelMapId;
-    std::string srcInfo;
     std::string dstRectInfo;
 
     std::string ToString() const;
