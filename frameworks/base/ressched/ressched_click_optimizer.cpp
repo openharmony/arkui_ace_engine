@@ -19,8 +19,6 @@
 #include "base/thread/background_task_executor.h"
 
 namespace OHOS::Ace {
-std::atomic_bool ResSchedClickOptimizer::clickExtEnabled_{false};
-
 namespace {
 constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_DEPTH = 5;
 constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_NODES = 20;
@@ -88,6 +86,10 @@ void ResSchedClickOptimizer::Init()
 
 void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, const GestureEvent& gestureEvent)
 {
+    auto currentTimestamp = gestureEvent.GetTimeStamp();
+    CHECK_EQUAL_VOID(currentTimestamp, lastClickReportedTimestamp_);
+    lastClickReportedTimestamp_ = currentTimestamp;
+
     std::unordered_map<std::string, std::string> payload;
     if (!BuildComponentPayload(weakNode, payload, GetDepth())) {
         ResSchedReport::GetInstance().ResSchedDataReport("click");
