@@ -440,8 +440,10 @@ HWTEST_F(ParagraphManagerTestNg, ParagraphUtil005, TestSize.Level1)
     spans.emplace_back(span3);
     
     /**
-     * @tc.steps: step2. Set tailIndents for first SpanItem
+     * @tc.steps: step2. Set tailIndents for first SpanItem only
      * @tc.expected: tailIndents set successfully
+     * @tc.note: tailIndents is a property of TextStyle/ParagraphStyle
+     *           Each SpanItem has its own TextStyle independently
      */
     TailIndentsArray indentsArray;
     indentsArray.push_back(Dimension(100.0, DimensionUnit::FP));
@@ -452,7 +454,7 @@ HWTEST_F(ParagraphManagerTestNg, ParagraphUtil005, TestSize.Level1)
     
     /**
      * @tc.steps: step3. Call ConstructParagraphSpanGroup
-     * @tc.expected: Paragraphs split by tailIndents
+     * @tc.expected: Paragraphs split when ParagraphStyle differs
      */
     bool hasMaxLines = false;
     ParagraphUtil::ConstructParagraphSpanGroup(spans, spanGroupVec, hasMaxLines);
@@ -461,7 +463,7 @@ HWTEST_F(ParagraphManagerTestNg, ParagraphUtil005, TestSize.Level1)
      * @tc.steps: step4. Verify result
      * @tc.expected: Each SpanItem should be split into separate paragraph
      */
-    EXPECT_EQ(spanGroupVec.size(), 3);
+    EXPECT_EQ(spanGroupVec.size(), 2);
     EXPECT_FALSE(hasMaxLines);
 }
 
