@@ -1,0 +1,10 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/PageAccessibility",
+    "pages/PageAccessibilityMultiple",
+    "pages/PageNoCustom",
+    "pages/PageCustomDialog",
+    "pages/PageCustomDialogSubWindow"
+  ]
+}
