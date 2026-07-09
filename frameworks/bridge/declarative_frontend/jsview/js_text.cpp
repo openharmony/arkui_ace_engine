@@ -1929,69 +1929,17 @@ void JSText::SetIncrementalUpdatePolicy(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetIncrementalUpdatePolicy(policy);
 }
 
-void JSText::SetTailIndents(const JSCallbackInfo& info)
-{
-    JSRef<JSVal> args = info[0];
-    UnRegisterResource("TailIndents");
-
-    NG::TailIndents tailIndents;
-    RefPtr<ResourceObject> firstResObj;
-    NG::TailIndentsArray indentsArray;
-
-    auto parseDimension = [&firstResObj, &indentsArray, isFirst = true](const JSRef<JSVal>& value) mutable {
-        CalcDimension dimension;
-        RefPtr<ResourceObject> resObj;
-        bool parsed = value->IsObject() &&
-            JSViewAbstract::ParseJsLengthMetricsVpWithResObj(JSRef<JSObject>::Cast(value), dimension, resObj);
-        if (!parsed) {
-            parsed = ParseJsDimensionFpNG(value, dimension, resObj);
-        }
-        if (parsed) {
-            if (dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
-                dimension.Reset();
-            }
-            indentsArray.emplace_back(static_cast<Dimension>(dimension));
-            if (isFirst && resObj) {
-                firstResObj = resObj;
-                isFirst = false;
-            }
-        } else {
-            dimension.Reset();
-            indentsArray.emplace_back(dimension);
-        }
-    };
-
-    if (args->IsArray()) {
-        JSRef<JSArray> array = JSRef<JSArray>::Cast(args);
-        for (size_t i = 0; i < array->Length(); i++) {
-            parseDimension(array->GetValueAt(i));
-        }
-    } else {
-        parseDimension(args);
-    }
-
-    tailIndents.indentsArray = indentsArray;
-
-    if (SystemProperties::ConfigChangePerform() && firstResObj) {
-        RegisterResource<NG::TailIndents>("TailIndents", firstResObj, tailIndents);
-    }
-    TextModel::GetInstance()->SetTailIndents(tailIndents);
-}
-
-void JSText::ParseTailIndentDimension(const JSRef<JSVal>& value, 
+void JSText::ParseTailIndentDimension(const JSRef<JSVal>& value,
     NG::TailIndentsArray& indentsArray,
     std::vector<RefPtr<ResourceObject>>& allResObjs)
 {
     CalcDimension dimension;
     RefPtr<ResourceObject> resObj;
-    
     bool parsed = value->IsObject() &&
         JSViewAbstract::ParseJsLengthMetricsVpWithResObj(JSRef<JSObject>::Cast(value), dimension, resObj);
-    
     if (!parsed) {
         parsed = ParseJsDimensionFpNG(value, dimension, resObj);
     }
-    
     if (parsed) {
         if (dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
             TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: invalid dimension (negative or PERCENT), reset");
@@ -2008,7 +1956,7 @@ void JSText::ParseTailIndentDimension(const JSRef<JSVal>& value,
     }
 }
 
-void JSText::UpdateTailIndentsFromResources(const RefPtr<NG::FrameNode>& node, 
+void JSText::UpdateTailIndentsFromResources(const RefPtr<NG::FrameNode>& node,
     const std::vector<RefPtr<ResourceObject>>& resObjArray)
 {
     CHECK_NULL_VOID(node);
@@ -2019,7 +1967,6 @@ void JSText::UpdateTailIndentsFromResources(const RefPtr<NG::FrameNode>& node,
     for (size_t i = 0; i < resObjArray.size(); i++) {
         CalcDimension dimension;
         bool parsed = ResourceParseUtils::ParseResDimensionFpNG(resObjArray[i], dimension);
-        
         if (parsed) {
             if (dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
                 TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: [%{public}zu] invalid dimension, reset", i);
@@ -2032,7 +1979,7 @@ void JSText::UpdateTailIndentsFromResources(const RefPtr<NG::FrameNode>& node,
             TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: [%{public}zu] parse failed, using default", i);
         }
     }
-    
+
     NG::TailIndents newTailIndent;
     newTailIndent.indentsArray = newIndentsArray;
     layoutProperty->UpdateTailIndents(newTailIndent);
