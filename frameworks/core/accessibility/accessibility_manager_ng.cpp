@@ -480,16 +480,28 @@ HandleHoverRet AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     bool transformHover = false;
     if (lastHoveringId != INVALID_NODE_ID && lastHoveringId != currentHoveringId) {
         lastHovering->OnAccessibilityEvent(AccessibilityEventType::HOVER_EXIT_EVENT);
-        transformHover = NotifyHoverEventToNodeSession(lastHovering, root, param.point,
+        auto virtualTrans = NotifyHoverEventToVirtualNode(lastHovering, root, param.point,
             sourceType, AccessibilityHoverEventType::EXIT, time);
+        if (!virtualTrans) {
+            transformHover = NotifyHoverEventToNodeSession(lastHovering, root, param.point,
+                sourceType, AccessibilityHoverEventType::EXIT, time);
+        } else {
+            transformHover = true;
+        }
     }
     if (currentHovering && (currentHoveringId != INVALID_NODE_ID)) {
-        if (currentHoveringId != lastHoveringId && (!IgnoreCurrentHoveringNode(currentHovering))) {
+        auto virtualTrans = NotifyHoverEventToVirtualNode(currentHovering, root, param.point,
+            sourceType, eventType, time);
+        if (currentHoveringId != lastHoveringId && (!IgnoreCurrentHoveringNode(currentHovering)) && !virtualTrans) {
             CheckAndSendHoverEnterEvent(currentHovering);
             sendHoverEnter = true;
         }
-        transformHover = NotifyHoverEventToNodeSession(currentHovering, root, param.point,
-            sourceType, eventType, time);
+        if (!virtualTrans) {
+            transformHover = NotifyHoverEventToNodeSession(
+                currentHovering, root, param.point, sourceType, eventType, time);
+        } else {
+            transformHover = true;
+        }
     }
 
     if (!sendHoverEnter && (eventType == AccessibilityHoverEventType::ENTER)) {

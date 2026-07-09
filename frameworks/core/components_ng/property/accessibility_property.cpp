@@ -92,6 +92,16 @@ const std::string& CustomAccessibilityProperty::GetRole() const
     return role_;
 }
 
+void CustomAccessibilityProperty::SetAccessibilityRole(const std::string& accessibilityRole)
+{
+    accessibilityRole_ = accessibilityRole;
+}
+
+const std::string& CustomAccessibilityProperty::GetAccessibilityRole() const
+{
+    return accessibilityRole_;
+}
+
 void CustomAccessibilityProperty::SetCheckable(bool checkable)
 {
     checkable_ = checkable;
@@ -130,6 +140,36 @@ void CustomAccessibilityProperty::SetSelected(bool selected)
 bool CustomAccessibilityProperty::GetSelected() const
 {
     return isSelected_;
+}
+
+void CustomAccessibilityProperty::SetText(const std::string& text)
+{
+    text_ = text;
+}
+
+const std::string& CustomAccessibilityProperty::GetText() const
+{
+    return text_;
+}
+
+void CustomAccessibilityProperty::SetClickable(bool clickable)
+{
+    clickable_ = clickable;
+}
+
+bool CustomAccessibilityProperty::GetClickable() const
+{
+    return clickable_;
+}
+
+void CustomAccessibilityProperty::SetSupprtAction(uint64_t action)
+{
+    supportActions_ = action;
+}
+
+uint64_t CustomAccessibilityProperty::GetSupportAction() const
+{
+    return supportActions_;
 }
 
 std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
@@ -423,6 +463,9 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
         return;
     }
     auto level = GetAccessibilityLevel();
+    if (customAccessibilityProperty_ && !customAccessibilityProperty_->GetAccessibilityLevel().empty()) {
+        level = customAccessibilityProperty_->GetAccessibilityLevel();
+    }
     if (level == Level::AUTO || level == Level::YES_STR) {
         std::string accessibilityText = GetAccessibilityText();
         auto nodeText = preferAccessibilityText && !accessibilityText.empty() ? accessibilityText : GetText();
@@ -434,8 +477,12 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
         return;
     }
     // Do not change text if level is no
+    bool isGroup = IsAccessibilityGroup();
+    if (customAccessibilityProperty_) {
+        isGroup = customAccessibilityProperty_->GetAccessibilityGroup();
+    }
 
-    if (!(forceGetChildren || IsAccessibilityGroup())) {
+    if (!(forceGetChildren || isGroup)) {
         return;
     }
     auto& children = node->GetFrameChildren();
@@ -711,6 +758,10 @@ bool AccessibilityProperty::HoverTestRecursive(
         && CheckHoverConsumeByComponent(node, selfPoint - rect.GetOffset())) {
         hitTarget = true;
         path.push_back(node);
+        auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty && accessibilityProperty->HasVirtualNodeTreeRoot()) {
+            return true;
+        }
     }
     bool hasClip = renderContext->GetClipEdge().value_or(false);
     if (hasClip && !hitSelf) {
@@ -835,6 +886,66 @@ static const std::set<std::string> TAGS_FOCUSABLE_SEARCH_SELF = {
     V2::VIDEO_ETS_TAG
 };
 
+// Resolves the node's accessibility level/group/text and decides shouldSearchSelf/shouldSearchChildren
+// based on the level. Returns true when the strategy is finalized and node-state checks can be skipped.
+static bool ResolveStrategyByLevel(const RefPtr<AccessibilityProperty>& accessibilityProperty,
+    std::string& level, bool& currentGroupFlag,
+    bool& shouldSearchSelf, bool& shouldSearchChildren)
+{
+    if (accessibilityProperty == nullptr) {
+        return false;
+    }
+    if (accessibilityProperty->HasVirtualNodeTreeRoot()) {
+        shouldSearchSelf = true;
+        return true;
+    }
+    level = accessibilityProperty->GetAccessibilityLevel();
+    auto customProperty = accessibilityProperty->GetCustomAccessibilityProperty();
+    if (customProperty && !customProperty->GetAccessibilityLevel().empty()) {
+        level = customProperty->GetAccessibilityLevel();
+    }
+    if (customProperty) {
+        currentGroupFlag = customProperty->GetAccessibilityGroup();
+    } else {
+        currentGroupFlag = accessibilityProperty->IsAccessibilityGroup();
+    }
+    bool hasAccessibilityText = accessibilityProperty->HasAccessibilityTextOrDescription();
+    if (customProperty && !customProperty->GetAccessibilityText().empty()) {
+        hasAccessibilityText = true;
+    }
+    if (level == AccessibilityProperty::Level::YES_STR) {
+        return true;
+    } else if (level == AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
+        shouldSearchSelf = false;
+        shouldSearchChildren = false;
+        return true;
+    } else if (level == AccessibilityProperty::Level::NO_STR) {
+        shouldSearchSelf = false;
+    } else if (hasAccessibilityText) {
+        // shouldSearchSelf is true here
+        return true;
+    }
+    return false;
+}
+
+// Updates the search strategy based on the node's enabled state, hit-test mode and virtual node.
+static void UpdateStrategyByNodeState(const RefPtr<FrameNode>& node,
+    const RefPtr<AccessibilityProperty>& accessibilityProperty,
+    bool& shouldSearchSelf, bool& shouldSearchChildren)
+{
+    auto eventHub = node->GetEventHub<EventHub>();
+    if (!eventHub->IsEnabled()) {
+        shouldSearchChildren = false;
+        // Fall through to update `shouldSearchSelf`
+    }
+    HitTestMode hitTestMode = node->GetHitTestMode();
+    UpdateSearchStrategyByHitTestMode(hitTestMode, shouldSearchSelf, shouldSearchChildren);
+    if (accessibilityProperty != nullptr && accessibilityProperty->HasAccessibilityVirtualNode() &&
+        accessibilityProperty->GetAccessibilityLevel() != AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
+        shouldSearchChildren = true;
+    }
+}
+
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
     bool& ancestorGroupFlag)
 {
@@ -842,41 +953,13 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
     bool shouldSearchChildren = true;
     bool currentGroupFlag = false;
     auto level = AccessibilityProperty::Level::AUTO;
-    do {
-        auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        if (accessibilityProperty != nullptr) {
-            level = accessibilityProperty->GetAccessibilityLevel();
-            currentGroupFlag = accessibilityProperty->IsAccessibilityGroup();
-            bool hasAccessibilityText = accessibilityProperty->HasAccessibilityTextOrDescription();
-            if (level == AccessibilityProperty::Level::YES_STR) {
-                break;
-            } else if (level == AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
-                shouldSearchSelf = false;
-                shouldSearchChildren = false;
-                break;
-            } else {
-                if (level == AccessibilityProperty::Level::NO_STR) {
-                    shouldSearchSelf = false;
-                } else {
-                    // shouldSearchSelf is true here
-                    if (hasAccessibilityText) {
-                        break;
-                    }
-                }
-            }
-        }
-        auto eventHub = node->GetEventHub<EventHub>();
-        if (!eventHub->IsEnabled()) {
-            shouldSearchChildren = false;
-            // Fall through to update `shouldSearchSelf`
-        }
-        HitTestMode hitTestMode = node->GetHitTestMode();
-        UpdateSearchStrategyByHitTestMode(hitTestMode, shouldSearchSelf, shouldSearchChildren);
-        if (accessibilityProperty != nullptr && accessibilityProperty->HasAccessibilityVirtualNode() &&
-            accessibilityProperty->GetAccessibilityLevel() != AccessibilityProperty::Level::NO_HIDE_DESCENDANTS) {
-            shouldSearchChildren = true;
-        }
-    } while (0);
+
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    if (!ResolveStrategyByLevel(accessibilityProperty, level, currentGroupFlag,
+        shouldSearchSelf, shouldSearchChildren)) {
+        UpdateStrategyByNodeState(node, accessibilityProperty, shouldSearchSelf, shouldSearchChildren);
+    }
+
     shouldSearchSelf = IsTagInSubTreeComponent(node, node->GetTag()) ? true : shouldSearchSelf;
     shouldSearchSelf = (TAGS_FOCUSABLE_SEARCH_SELF.find(node->GetTag()) != TAGS_FOCUSABLE_SEARCH_SELF.end()) ?
         true : shouldSearchSelf;
@@ -962,31 +1045,57 @@ bool AccessibilityProperty::IsAccessibilityFocusableDebug(const RefPtr<FrameNode
     return focusable;
 }
 
+bool RootNodeAccessibilityFocusable(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    return (accessibilityProperty && accessibilityProperty->HasVirtualNodeTreeRoot());
+}
+
+bool CanAccessibilityFocusByCustomAndLevel(const RefPtr<NG::AccessibilityProperty>& accessibilityProperty)
+{
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+
+    if (accessibilityProperty->HasVirtualNodeTreeRoot()) {
+        return true;
+    }
+
+    auto customProperty = accessibilityProperty->GetCustomAccessibilityProperty();
+    if (customProperty &&
+        (customProperty->GetAccessibilityGroup() || !customProperty->GetAccessibilityText().empty())) {
+        return true;
+    }
+
+    std::string level;
+    if (customProperty && !customProperty->GetAccessibilityLevel().empty()) {
+        level = customProperty->GetAccessibilityLevel();
+    } else {
+        level = accessibilityProperty->GetAccessibilityLevel();
+    }
+    return (level == AccessibilityProperty::Level::YES_STR);
+}
 
 bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
-    CHECK_EQUAL_RETURN(node->IsRootNode(), true, false);
+    if (node->IsRootNode()) {
+        return RootNodeAccessibilityFocusable(node);
+    }
+
     bool focusable = false;
     do {
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        if (accessibilityProperty != nullptr) {
-            auto level = accessibilityProperty->GetAccessibilityLevel();
-            if (level == AccessibilityProperty::Level::YES_STR) {
-                focusable = true;
-                break;
-            }
-            if (level == AccessibilityProperty::Level::NO_STR) {
-                break;
-            }
-            if (accessibilityProperty->IsAccessibilityGroup() ||
-                accessibilityProperty->HasAccessibilityVirtualNode() ||
-                accessibilityProperty->HasAction() ||
-                accessibilityProperty->HasAccessibilityTextOrDescription() ||
-                !accessibilityProperty->GetText().empty()) {
-                focusable = true;
-                break;
-            }
+        if (CanAccessibilityFocusByCustomAndLevel(accessibilityProperty)) {
+            focusable = true;
+            break;
+        } else if ((accessibilityProperty != nullptr) &&
+            (accessibilityProperty->IsAccessibilityGroup() ||
+            accessibilityProperty->HasAccessibilityVirtualNode() ||
+            accessibilityProperty->HasAction() ||
+            accessibilityProperty->HasAccessibilityTextOrDescription() ||
+            !accessibilityProperty->GetText().empty())) {
+            focusable = true;
+            break;
         }
 
         auto eventHub = node->GetEventHub<EventHub>();

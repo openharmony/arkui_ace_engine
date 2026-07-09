@@ -89,24 +89,63 @@ void LogAccessibilityEventInfo(
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "%{public}s", printStr.c_str());
 }
 
+void ApplyThirdCustomPropertyToElementInfo(int64_t elementId,
+    const std::unordered_map<int64_t, RefPtr<NG::CustomAccessibilityProperty>>& customProperties,
+    Accessibility::AccessibilityElementInfo& info)
+{
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(elementId, splitElementId, splitTreeId);
+
+    auto it = customProperties.find(splitElementId);
+    if (it == customProperties.end()) {
+        return;
+    }
+
+    auto& property = it->second;
+    if (!property->GetAccessibilityText().empty()) {
+        info.SetAccessibilityText(property->GetAccessibilityText());
+    }
+    if (!property->GetAccessibilityLevel().empty()) {
+        info.SetAccessibilityLevel(property->GetAccessibilityLevel());
+    }
+    if (!property->GetRole().empty()) {
+        info.SetComponentType(property->GetRole());
+    }
+
+    info.SetAccessibilityGroup(property->GetAccessibilityGroup());
+    info.SetCheckable(property->GetCheckable());
+    info.SetChecked(property->GetChecked());
+    info.SetEnabled(property->GetEnabled());
+    info.SetSelected(property->GetSelected());
+}
+
 void CopyNativeInfoToAccessibilityElementInfo(
     const ArkUI_AccessibilityElementInfo& elementInfo,
     const NodeConfig& config,
-    Accessibility::AccessibilityElementInfo& info)
+    Accessibility::AccessibilityElementInfo& info,
+    const std::unordered_map<int64_t, RefPtr<NG::CustomAccessibilityProperty>>* customProperties = nullptr)
 {
     AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(elementInfo, info);
     JsThirdProviderInteractionOperation::FillNodeConfig(config, info);
+    if (customProperties) {
+        ApplyThirdCustomPropertyToElementInfo(info.GetAccessibilityId(), *customProperties, info);
+    }
 }
 
 void CopyNativeInfosToAccessibilityElementInfos(
     const std::vector<ArkUI_AccessibilityElementInfo>& nativeInfos,
     const NodeConfig& config,
-    std::list<Accessibility::AccessibilityElementInfo>& infos)
+    std::list<Accessibility::AccessibilityElementInfo>& infos,
+    const std::unordered_map<int64_t, RefPtr<NG::CustomAccessibilityProperty>>* customProperties = nullptr)
 {
     for (const auto& nativeInfo : nativeInfos) {
         Accessibility::AccessibilityElementInfo info;
         AccessibilityThirdProviderUtils::TransformAccessibilityElementInfo(nativeInfo, info);
         JsThirdProviderInteractionOperation::FillNodeConfig(config, info);
+        if (customProperties) {
+            ApplyThirdCustomPropertyToElementInfo(info.GetAccessibilityId(), *customProperties, info);
+        }
         infos.push_back(info);
     }
 }
@@ -359,7 +398,7 @@ bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByIdFromProv
     NodeConfig config;
     config.ignoreHostOffset = ignoreHostOffset;
     GetNodeConfig(config);
-    CopyNativeInfosToAccessibilityElementInfos(nativeInfos, config, infos);
+    CopyNativeInfosToAccessibilityElementInfos(nativeInfos, config, infos, &thirdCustomProperties_);
     return !infos.empty();
 }
 
@@ -463,7 +502,7 @@ bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByTextFromPr
 
     NodeConfig config;
     GetNodeConfig(config);
-    CopyNativeInfosToAccessibilityElementInfos(nativeInfos, config, infos);
+    CopyNativeInfosToAccessibilityElementInfos(nativeInfos, config, infos, &thirdCustomProperties_);
     return true;
 }
 
@@ -531,7 +570,7 @@ bool JsThirdProviderInteractionOperation::FindFocusedElementInfoFromProvider(
 
     NodeConfig config;
     GetNodeConfig(config);
-    CopyNativeInfoToAccessibilityElementInfo(nativeInfo, config, info);
+    CopyNativeInfoToAccessibilityElementInfo(nativeInfo, config, info, &thirdCustomProperties_);
     return true;
 }
 
@@ -600,7 +639,7 @@ bool JsThirdProviderInteractionOperation::FocusMoveSearchProvider(
 
     NodeConfig config;
     GetNodeConfig(config);
-    CopyNativeInfoToAccessibilityElementInfo(nativeInfo, config, info);
+    CopyNativeInfoToAccessibilityElementInfo(nativeInfo, config, info, &thirdCustomProperties_);
     return true;
 }
 
@@ -898,12 +937,13 @@ void JsThirdProviderInteractionOperation::UpdateCustomAccessibilityProperty(
     auto customProperty = AceType::MakeRefPtr<NG::CustomAccessibilityProperty>();
     customProperty->SetAccessibilityText(accessibilityVirtualNode.GetAccessibilityText());
     customProperty->SetAccessibilityLevel(accessibilityVirtualNode.GetAccessibilityLevel());
-    customProperty->SetRole(accessibilityVirtualNode.GetCustomComponentType());
+    customProperty->SetAccessibilityRole(accessibilityVirtualNode.GetCustomComponentType());
     customProperty->SetCheckable(accessibilityVirtualNode.GetCheckable());
     customProperty->SetChecked(accessibilityVirtualNode.GetChecked());
     customProperty->SetEnabled(accessibilityVirtualNode.GetEnabled());
     customProperty->SetSelected(accessibilityVirtualNode.GetSelected());
     customProperty->SetAccessibilityGroup(accessibilityVirtualNode.GetAccessibilityGroup());
+    customProperty->SetClickable(accessibilityVirtualNode.GetClickable());
 
     SetThirdCustomProperty(splitElementId, customProperty);
     callback.SetUpdateCustomAccessibilityPropertyResult(Accessibility::OperateVirtualNodeResult::SUCCESS, requestId);
