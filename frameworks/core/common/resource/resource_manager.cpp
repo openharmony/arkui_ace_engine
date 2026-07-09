@@ -15,6 +15,8 @@
 
 #include "core/common/resource/resource_manager.h"
 
+#include <string_view>
+
 #include <mutex>
 #include <utility>
 #include <vector>
@@ -29,8 +31,8 @@
 
 namespace OHOS::Ace {
 namespace {
-const std::string DEFAULT_BUNDLE_NAME = "";
-const std::string DEFAULT_MODULE_NAME = "";
+constexpr std::string_view DEFAULT_BUNDLE_NAME = "";
+constexpr std::string_view DEFAULT_MODULE_NAME = "";
 } // namespace
 
 ResourceErrorInfo::ResourceErrorInfo(
@@ -67,7 +69,7 @@ RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr
         int32_t actualInstanceId = instanceId;
         resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName, actualInstanceId);
         if (!resourceAdapter) {
-            return GetResourceAdapter(DEFAULT_BUNDLE_NAME, DEFAULT_MODULE_NAME, instanceId);
+            return GetResourceAdapter(std::string(DEFAULT_BUNDLE_NAME), std::string(DEFAULT_MODULE_NAME), instanceId);
         }
         AddResourceAdapter(bundleName, moduleName, actualInstanceId, resourceAdapter);
     }

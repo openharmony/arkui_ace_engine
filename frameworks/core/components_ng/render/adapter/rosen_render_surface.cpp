@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/render/adapter/rosen_render_surface.h"
 
+#include <string_view>
+
 #include "render_service_client/core/ui/rs_surface_node.h"
 #include "surface_utils.h"
 #include "transaction/rs_interfaces.h"
@@ -45,11 +47,11 @@ namespace {
 const char* const SURFACE_STRIDE_ALIGNMENT = "8";
 constexpr int32_t EXT_SURFACE_DEFAULT_SIZE = 1;
 constexpr int32_t MAX_BUFFER_SIZE = 3;
-const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
+constexpr std::string_view PATTERN_TYPE_WEB = "WEBPATTERN";
 const uint32_t ADJUST_WEB_DRAW_LENGTH = 3000;
 const uint32_t DEFAULT_WEB_DRAW_LENGTH = 6167;
-const std::string SURFACE_WIDTH = "surface_width";
-const std::string SURFACE_HEIGHT = "surface_height";
+constexpr std::string_view SURFACE_WIDTH = "surface_width";
+constexpr std::string_view SURFACE_HEIGHT = "surface_height";
 const int32_t SIZE_LIMIT = 5999;
 const int32_t PERMITTED_DIFFERENCE = 100;
 const int32_t FAILED_LIMIT = 3;
@@ -273,8 +275,8 @@ void RosenRenderSurface::AdjustNativeWindowSize(uint32_t width, uint32_t height)
 void RosenRenderSurface::UpdateSurfaceSizeInUserData(uint32_t width, uint32_t height)
 {
     CHECK_NULL_VOID(producerSurface_);
-    producerSurface_->SetUserData(SURFACE_WIDTH, std::to_string(width));
-    producerSurface_->SetUserData(SURFACE_HEIGHT, std::to_string(height));
+    producerSurface_->SetUserData(std::string(SURFACE_WIDTH), std::to_string(width));
+    producerSurface_->SetUserData(std::string(SURFACE_HEIGHT), std::to_string(height));
 }
 
 std::string RosenRenderSurface::GetUniqueId() const
@@ -316,10 +318,10 @@ void RosenRenderSurface::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(
         std::string("UserData[surface_width]: ")
-            .append(producerSurface_ ? producerSurface_->GetUserData(SURFACE_WIDTH) : "NoSurface"));
+            .append(producerSurface_ ? producerSurface_->GetUserData(std::string(SURFACE_WIDTH)) : "NoSurface"));
     DumpLog::GetInstance().AddDesc(
         std::string("UserData[surface_height]: ")
-            .append(producerSurface_ ? producerSurface_->GetUserData(SURFACE_HEIGHT) : "NoSurface"));
+            .append(producerSurface_ ? producerSurface_->GetUserData(std::string(SURFACE_HEIGHT)) : "NoSurface"));
 }
 
 void RosenRenderSurface::SetSurfaceDefaultSize(int32_t width, int32_t height)

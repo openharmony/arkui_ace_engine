@@ -18,6 +18,7 @@
 #include "core/accessibility/accessibility_manager.h"
 
 #include <cstdint>
+#include <string_view>
 #include "base/geometry/dimension.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
@@ -73,7 +74,7 @@ constexpr int32_t TOUCH_DURATION = 250;
 const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
 const char IMAGE_ETS_TAG[] = "Image";
 
-const std::string INSPECTOR_PREFIX = "__SearchField__";
+constexpr std::string_view INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
     "Button__" };
 } // namespace
@@ -2597,7 +2598,8 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
     }
     layoutProperty->UpdateMaxFontScale(maxFontScale);
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
-    iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
+    iconFrameNode->UpdateInspectorId(
+        std::string(INSPECTOR_PREFIX) + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
 
     if (isFromModifier) {
         UpdateSymbolIconProperties(iconFrameNode, index);
@@ -2949,7 +2951,8 @@ void SearchPattern::UpdateImageIconProperties(RefPtr<FrameNode>& iconFrameNode, 
 
         imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
         auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
-        iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
+        iconFrameNode->UpdateInspectorId(std::string(INSPECTOR_PREFIX) +
+            SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
         auto imageRenderProperty = iconFrameNode->GetPaintProperty<ImageRenderProperty>();
         CHECK_NULL_VOID(imageRenderProperty);
         imageSourceInfo.SetFillColor(iconOptions.GetColor().value_or(searchTheme->GetSearchIconColor()));
@@ -2979,7 +2982,8 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
         { index == SEARCH_IMAGE_INDEX ? GetSearchNode()->GetSearchSymbolIconColor()
                                       : GetSearchNode()->GetCancelSymbolIconColor() });
     auto parentInspector = GetSearchNode()->GetInspectorIdValue("");
-    iconFrameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
+    iconFrameNode->UpdateInspectorId(
+        std::string(INSPECTOR_PREFIX) + SPECICALIZED_INSPECTOR_INDEXS[index] + parentInspector);
 
     UpdateSymbolLayoutProperty(iconFrameNode, index, layoutProperty, symbolLayoutProperty);
     // reset symbol effect

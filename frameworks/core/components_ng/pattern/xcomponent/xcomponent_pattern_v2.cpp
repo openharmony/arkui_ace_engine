@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 #include "core/accessibility/accessibility_manager.h"
 
+#include <string_view>
+
 #include "base/display_manager/display_manager.h"
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
@@ -42,7 +44,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+constexpr std::string_view BUFFER_USAGE_XCOMPONENT = "xcomponent";
 
 inline std::string BoolToString(bool value)
 {
@@ -319,9 +321,9 @@ void XComponentPatternV2::InitSurface()
 
     renderSurface_ = RenderSurface::Create();
     renderSurface_->SetInstanceId(GetHostInstanceId());
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
+    renderSurface_->SetBufferUsage(std::string(BUFFER_USAGE_XCOMPONENT));
     std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
-    renderSurface_->SetBufferTypeLeak(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
+    renderSurface_->SetBufferTypeLeak(std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext(host->IsThreadSafeNode());
         renderSurface_->SetRenderContext(renderContextForSurface_);

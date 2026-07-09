@@ -17,6 +17,7 @@
 #include "core/common/container.h"
 #include <cmath>
 #include <regex>
+#include <string_view>
 
 #include "canvas_renderer_peer_impl.h"
 
@@ -77,7 +78,8 @@ const std::map<std::string, LineJoinStyle> LINE_JOIN_MAP = {
     { "miter", LineJoinStyle::MITER },
     { "round", LineJoinStyle::ROUND },
 };
-const std::string ERROR_STRING = "";
+const double ERROR_VALUE = 0;
+constexpr std::string_view ERROR_STRING = "";
 const auto MULTI_BY_2 = 2;
 constexpr size_t EVEN_BY_2 = 2;
 const double DEFAULT_MITER_LIMIT = 10.0;
@@ -1137,7 +1139,7 @@ void CanvasRendererPeerImpl::SetDensity()
 std::string CanvasRendererPeerImpl::ToDataURL(
     const std::optional<std::string>& optType, const std::optional<float>& optQuality)
 {
-    CHECK_NULL_RETURN(renderingContext2DModel_, ERROR_STRING);
+    CHECK_NULL_RETURN(renderingContext2DModel_, std::string(ERROR_STRING));
     std::string type;
     double quality = DEFAULT_QUALITY;
     if (optType) {
