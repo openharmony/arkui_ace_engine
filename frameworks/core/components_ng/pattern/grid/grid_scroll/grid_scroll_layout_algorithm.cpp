@@ -1356,9 +1356,6 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     auto isScrollableSpringMotionRunning = pattern->IsScrollableSpringMotionRunning();
     while (LessNotEqual(mainLength, mainSize) ||
                 (NearEqual(mainLength, mainSize) && IsNextExistLineHeightZero(currentMainLineIndex_))) {
-        if (NearEqual(mainLength, mainSize)) {
-            TAG_LOGI(AceLogTag::ACE_GRID, "Measure next grid item with height zero.");
-        }
         if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, isScrollableSpringMotionRunning)) {
             runOutOfRecord = true;
             break;
