@@ -39,6 +39,7 @@ import {
   import resourceManager from '@ohos.resourceManager';
   import { KeyCode } from '@ohos.multimodalInput.keyCode';
   import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
+  import { BusinessError } from '@ohos.base';
   
   const TITLE_MAX_LINES: int = 2;
   const HORIZON_BUTTON_MAX_COUNT: int = 2;
