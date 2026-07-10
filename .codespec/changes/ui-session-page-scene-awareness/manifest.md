@@ -23,7 +23,7 @@ status: designed
 owner: "ACE/UISession owner"
 source_issue: "TBD"
 created_at: 2026-06-18
-updated_at: 2026-07-06
+updated_at: 2026-07-10
 related: []
 related_tasks:
   - TASK-001: UISession IPC / ReportService 接口扩展
@@ -36,7 +36,7 @@ related_tasks:
 related_decisions:
   - DEC-001: 页面场景感知独立于 ContentChange / ComponentChange
   - DEC-002: 首批 sceneType 为 TEXT_EDITOR，首版 operator 为 COUNT_GTE
-  - DEC-003: Web / UIExtension 当前只做规则透传通路，内部匹配、回传和验证延期
+  - DEC-003: Web / UIExtension 提供规则生命周期透传通路
   - DEC-004: 输入类控件上下树只维护计数并挂起检测，PageScene 检测统一在 ContentChangeManager 页面稳定点执行；Pipeline 不直接依赖 PageScene flush
 code_refs:
   - interfaces/inner_api/ui_session

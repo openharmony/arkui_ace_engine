@@ -19,7 +19,7 @@
 
 ### 原始描述
 
-UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通过 UISession 下发 `ruleJson`，宿主 ArkUI 按规则匹配场景并通过 UISession 上报给 SA；Web / UIExtension 当前只做宿主到控件的规则透传通路，不做子来源内部匹配、回传和验证。
+UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通过 UISession 下发 `ruleJson`，宿主 ArkUI 按规则匹配场景并通过 UISession 上报给 SA；Web / UIExtension 提供宿主到控件的规则透传通路。
 
 本能力与现有 `ContentChange` 和 `ComponentChange` 分离；场景由 SA 与 ArkUI 共同定义的一系列规则描述，不复用现有变化事件语义。
 
@@ -31,7 +31,7 @@ UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通
 - 命中语义：当前 ArkUI 宿主页面内存在 2 个及以上文本输入类控件时，上报 `TEXT_EDITOR` 场景事件。
 - 文本输入类控件范围：
   - ArkUI：`TextInput`、`TextArea`、`Search`、`RichEditor`
-  - Web / UIExtension：当前只透传规则，不要求内部匹配
+  - Web / UIExtension：规则注册、反注册、查询请求透传
 
 ### 初始范围
 
@@ -39,19 +39,11 @@ UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通
 
 - 新增 UISession 页面场景规则注册、反注册、一次性查询和异步上报能力。
 - 使用 `ruleJson` 描述场景规则，首版支持 `TEXT_EDITOR`。
-- `ruleJson` 预留 `webRules` 字段；Web 来源启用时宿主将 `webRules` 原样透传给 Web 控件，`webRules` 具体规格不在本特性中设计。
+- `ruleJson` 预留 `webRules` 字段；Web 来源启用时宿主将 `webRules` 原样透传给 Web 控件。
 - 支持 ArkUI 宿主控件树场景匹配。
-- Web / UIExtension 提供内部接口接收规则生命周期请求，当前不要求将命中结果回传宿主。
+- Web / UIExtension 提供内部接口接收规则生命周期请求。
 - 最终只由宿主 UISession 向 SA 上报。
-- 当前上报来源只验证 `ARKUI`；`WEB`、`UI_EXTENSION` 来源上报延期。
 - 上报命中节点的 `nodeId`、`nodeType`、`focusable`、`rect`，并带 `currentPageName`。
-
-不包含：
-
-- 不新增 ArkTS/Public API。
-- 不把场景感知设计为 `ContentChange` 或 `ComponentChange` 的扩展。
-- 不默认上报文本内容、图片内容、完整控件树或状态管理数据。
-- 不由 SA 直接连接 Web / UIExtension 子内容源；当前也不要求子内容源回传宿主。
 
 ## 二、澄清记录
 
@@ -64,8 +56,8 @@ UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通
 | Q-5 | 是否上报文本位置大小 | 由 `report.includeRect` 控制，节点上报包含 `rect` | 已澄清 |
 | Q-6 | 是否上报控件可获焦状态 | 由 `report.includeFocusable` 控制，节点上报包含 `focusable` | 已澄清 |
 | Q-7 | 是否带当前页面名 | 上报结果必须带 `currentPageName` | 已澄清 |
-| Q-8 | Web / UIExtension 如何接入 | 当前仅宿主向内部控件透传规则注册、反注册和查询请求；Web 注册透传使用 `webRules`；不做内部匹配和回传 | 已澄清 |
-| Q-9 | 上报如何区分来源 | 当前只验证 `source.type=ARKUI`；`WEB`、`UI_EXTENSION` 来源上报延期 | 已澄清 |
+| Q-8 | Web / UIExtension 如何接入 | 宿主向内部控件透传规则注册、反注册和查询请求；Web 注册透传使用 `webRules` | 已澄清 |
+| Q-9 | 上报如何区分来源 | ArkUI 宿主上报使用 `source.type=ARKUI`；Web/UIExtension 通过宿主透传接口接入 | 已澄清 |
 
 ## 三、需求基线
 
@@ -92,13 +84,13 @@ UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通
 - AC-6: WHEN `scope.onlyVisible=true` THEN 不可见或屏幕范围外控件不参与计数。
 - AC-7: WHEN `globalConfig.includeUnfocusableTextInput=false` THEN 不可获焦文本输入类控件不参与计数。
 
-#### US-3: 文本输入类控件上树后检测
+#### US-3: 文本输入类控件上下树后稳定检测
 
-作为系统 SA，我想在文本输入类控件上树时收到新的场景命中结果。
+作为系统 SA，我想在文本输入类控件上下树后于页面稳定点收到新的场景结果。
 
 验收标准：
 
-- AC-8: WHEN 文本输入类控件上树且 `policy.reportOnTextInputAttached=true` THEN 触发一次 `TEXT_EDITOR` 匹配。
+- AC-8: WHEN 文本输入类控件上树且 `policy.reportOnTextInputAttached=true` THEN 维护输入控件计数并在页面稳定点触发 `TEXT_EDITOR` 匹配。
 - AC-9: WHEN 同一页面、同一规则、同一命中节点集合已上报且 `policy.deduplicate=true` THEN 不重复上报。
 
 #### US-4: Web / UIExtension 规则透传
@@ -109,7 +101,6 @@ UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通
 
 - AC-10: WHEN 规则允许 Web 来源参与 THEN 宿主向 Web 控件透传规则注册、反注册和查询请求。
 - AC-11: WHEN 规则允许 UIExtension 来源参与 THEN 宿主向 UIExtension 控件透传规则注册、反注册和查询请求。
-- AC-12: WHEN Web / UIExtension 控件收到规则 THEN 本特性不要求其完成内部匹配、命中上报或端到端验证。
 
 #### US-5: 上报结果脱敏
 
@@ -117,10 +108,9 @@ UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通
 
 验收标准：
 
-- AC-14: WHEN `report.includeText=false` THEN 上报结果不得包含文本内容。
-- AC-15: WHEN 构造页面场景上报结果 THEN 本阶段不包含完整控件树，ruleJson 不设计完整树上报开关。
-- AC-16: WHEN `report.includeRect=true` THEN 命中节点包含 `rect`。
-- AC-17: WHEN `report.includeFocusable=true` THEN 命中节点包含 `focusable`。
+- AC-12: WHEN `report.includeText=false` THEN 上报结果不得包含文本内容。
+- AC-13: WHEN `report.includeRect=true` THEN 命中节点包含 `rect`。
+- AC-14: WHEN `report.includeFocusable=true` THEN 命中节点包含 `focusable`。
 
 ## 四、Stage 1 结论
 

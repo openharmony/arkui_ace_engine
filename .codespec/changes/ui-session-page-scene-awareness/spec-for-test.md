@@ -19,18 +19,18 @@
 | 状态 | Draft |
 | 复杂度 | 标准 + 安全/DFX专项 |
 | 创建日期 | 2026-06-18 |
-| 最后更新 | 2026-07-06 |
+| 最后更新 | 2026-07-10 |
 
 ## 一、需求目标与规格 `[源: spec.md]`
 
-UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UISession 下发 `ruleJson`，宿主 ArkUI 按规则匹配场景并统一上报给 SA；Web / UIExtension 当前只做宿主到控件的规则透传通路，不做子来源内部匹配、回传和验证。本能力不复用、不绑定 `ContentChange` / `ComponentChange` 事件语义，但 PageScene 检测时机复用 `ContentChangeManager` 的页面级稳定点。
+UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UISession 下发 `ruleJson`，宿主 ArkUI 按规则匹配场景并统一上报给 SA；Web / UIExtension 提供宿主到控件的规则透传通路。本能力不复用、不绑定 `ContentChange` / `ComponentChange` 事件语义，但 PageScene 检测时机复用 `ContentChangeManager` 的页面级稳定点。
 
 首批场景：
 
 - `sceneType`: `TEXT_EDITOR`
 - 命中规则：当前页面或子内容源内存在 2 个及以上文本输入类控件。
 - ArkUI 文本输入类控件：`TextInput`、`TextArea`、`Search`、`RichEditor`
-- Web / UIExtension：首版只要求规则注册、反注册、查询请求透传，不要求内部匹配和上报
+- Web / UIExtension：规则注册、反注册、查询请求透传
 
 ### 1.1 US-1：SA 注册页面场景规则
 
@@ -39,7 +39,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | AC-1.1 | GIVEN SA 已通过 UISession 连接宿主应用，WHEN SA 调用 `RegisterPageSceneRules(ruleJson, eventCallback)` 且 `ruleJson` 合法、`eventCallback` 非空、当前 SA 无未注销页面场景规则，THEN 宿主保存规则并返回成功，后续命中结果通过回调返回 | 正常 |
 | AC-1.2 | GIVEN SA 已连接宿主应用，WHEN `ruleJson` 非法或 `eventCallback` 为空，THEN 接口返回参数错误，不保存规则，不触发匹配 | 异常 |
 | AC-1.3 | GIVEN 同一 SA 已成功注册页面场景规则且未调用 `UnregisterPageSceneRules`，WHEN 再次调用 `RegisterPageSceneRules` 注册新规则，THEN 接口返回重复注册错误，不覆盖已有规则，不触发子来源下发 | 异常 |
-| AC-1.4 | GIVEN 合法规则允许 Web 来源参与且 `ruleJson.webRules` 存在，WHEN 注册成功，THEN 宿主向页面内 Web 控件透传 `webRules`；宿主不解析 `webRules` 内部规格 | 正常 |
+| AC-1.4 | GIVEN 合法规则允许 Web 来源参与且 `ruleJson.webRules` 存在，WHEN 注册成功，THEN 宿主向页面内 Web 控件原样透传 `webRules` | 正常 |
 | AC-1.5 | GIVEN 合法规则允许 UIExtension 来源参与，WHEN 注册成功，THEN 宿主向页面内 UIExtension 控件下发原始 `ruleJson` | 正常 |
 
 ### 1.2 US-2：首次注册后检测 TEXT_EDITOR 场景
@@ -66,7 +66,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | AC编号 | 验收标准 | 类型 |
 |--------|----------|------|
 | AC-4.1 | GIVEN SA 已连接宿主应用，WHEN SA 调用 `GetPageScene(ruleJsonOrRuleSetId, eventCallback)` 且参数合法、`eventCallback` 非空、当前 SA 无未完成 `GetPageScene` 请求，THEN 宿主执行一次匹配并通过回调返回本次结果 | 正常 |
-| AC-4.2 | GIVEN 主动查询规则允许 Web 或 UIExtension 来源参与，WHEN SA 调用 `GetPageScene`，THEN 宿主可通过 `GetPageSceneForSubSource` 向对应控件透传查询请求；当前不等待、不验证子来源匹配结果 | 正常 |
+| AC-4.2 | GIVEN 主动查询规则允许 Web 或 UIExtension 来源参与，WHEN SA 调用 `GetPageScene`，THEN 宿主可通过 `GetPageSceneForSubSource` 向对应控件透传查询请求 | 正常 |
 | AC-4.3 | GIVEN `GetPageScene` 参数非法或 `eventCallback` 为空，WHEN SA 发起主动查询，THEN 接口返回参数错误，不触发匹配 | 异常 |
 | AC-4.4 | GIVEN 同一 SA 已有 `GetPageScene` 请求尚未返回结果，WHEN 再次调用 `GetPageScene`，THEN 接口返回请求忙错误，不启动新的扫描或子来源查询 | 异常 |
 
@@ -77,8 +77,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | AC-5.1 | GIVEN 合法规则允许 Web 来源参与且 `ruleJson.webRules` 存在，WHEN 注册规则成功，THEN 宿主向页面内 Web 控件透传 `webRules` | 正常 |
 | AC-5.2 | GIVEN 合法规则允许 UIExtension 来源参与，WHEN 注册规则成功，THEN 宿主向页面内 UIExtension 控件透传原始 `ruleJson` | 正常 |
 | AC-5.3 | GIVEN 已向 Web 或 UIExtension 透传过规则，WHEN SA 调用 `UnregisterPageSceneRules(ruleSetId)` 或 SA 死亡，THEN 宿主向对应控件透传反注册请求 | 恢复 |
-| AC-5.4 | GIVEN SA 调用 `GetPageScene` 且规则允许 Web 或 UIExtension 来源参与，WHEN 宿主发起当前页面查询，THEN 宿主向对应控件透传查询请求；当前不要求子来源返回结果 | 边界 |
-| AC-5.5 | GIVEN Web 或 UIExtension 接收到规则透传，WHEN 子来源内部存在可匹配控件，THEN 本特性不要求 Web/UIExtension 完成内部匹配、上报回传或端到端验证 | 边界 |
+| AC-5.4 | GIVEN SA 调用 `GetPageScene` 且规则允许 Web 或 UIExtension 来源参与，WHEN 宿主发起当前页面查询，THEN 宿主向对应控件透传查询请求 | 边界 |
 
 ### 1.6 US-6：上报结果脱敏
 
@@ -88,7 +87,6 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | AC-6.2 | GIVEN 规则中 `report.includeText=true`，WHEN 上报 `TEXT_EDITOR` 场景结果，THEN 每个命中文本输入类控件在 `nodes[]` 中携带 `text` 字段，字段值优先为用户已输入文本，输入为空时为框内占位提示文本 | 正常 |
 | AC-6.3 | GIVEN 规则中 `report.includeRect=true`，WHEN 上报命中节点，THEN 每个命中节点包含 `rect.x`、`rect.y`、`rect.width`、`rect.height` | 正常 |
 | AC-6.4 | GIVEN 规则中 `report.includeFocusable=true`，WHEN 上报命中节点，THEN 每个命中节点包含 `focusable` 字段 | 正常 |
-| AC-6.5 | GIVEN 本阶段规则配置和上报规格，WHEN 解析 `ruleJson` 或构造上报结果，THEN 不设计、不输出完整控件树字段 | 安全 |
 
 ### 1.7 US-7：页面稳定点触发 PageScene 检测
 
@@ -126,12 +124,11 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | R-10B | 行为 | 同一规则已上报过命中，后续稳定点检查不再命中 | 上报一次 `TEXT_EDITOR_EXIT`，`matched=false`，`matchedCount` 为当前计数；上报后清理命中态，后续未命中不重复上报退出 | 退出事件不受命中去重和最小命中上报间隔抑制；再次命中后可重新上报 `TEXT_EDITOR` | AC-3.5 | 单测/集成 | 2 个输入框命中后移除到 1 个，再重复稳定点检查，再重新添加到 2 个 | P0 |
 | R-11 | 行为 | 合法 Get 且无 pending 请求 | 返回本次匹配结果 | 一次性规则不长期保存 | AC-4.1 | 单测/sample | `ruleSetId` 查询、临时 ruleJson 查询 | P0 |
 | R-12 | 异常 | Get 未返回时再次 Get | 返回 busy，不启动新扫描 | 防并发查询 | AC-4.4, AC-8.2 | 并发测试 | 两次连续 Get，首个回调延迟 | P0 |
-| R-13 | 行为 | 规则允许 Web 来源且 `webRules` 存在 | 宿主向 Web 控件透传 `webRules` 及反注册/查询请求 | `webRules` 内部规格不在本特性设计；不要求 Web 内部匹配和回传 | AC-1.4, AC-4.2, AC-5.1, AC-5.3, AC-5.4, AC-5.5 | mock/单测 | Web enabled/disabled、webRules 原样透传、register/unregister/get | P1 |
-| R-14 | 行为 | 规则允许 UIExtension 来源 | 宿主向 UIExtension 控件透传注册、反注册或查询请求 | 不要求 UIExtension 内部匹配和回传 | AC-1.5, AC-4.2, AC-5.2, AC-5.3, AC-5.4, AC-5.5 | mock/单测 | UIExtension enabled/disabled、register/unregister/get | P2 |
-| R-15 | 边界 | Web / UIExtension 控件不存在或透传失败 | 记录来源级摘要错误，不影响 ArkUI 宿主匹配 | 不做子来源端到端验证 | AC-5.5 | mock | no web/uie、透传失败 | P2 |
+| R-13 | 行为 | 规则允许 Web 来源且 `webRules` 存在 | 宿主向 Web 控件透传 `webRules` 及反注册/查询请求 | `webRules` 按原始 JSON 值透传 | AC-1.4, AC-4.2, AC-5.1, AC-5.3, AC-5.4 | mock/单测 | Web enabled/disabled、webRules 原样透传、register/unregister/get | P1 |
+| R-14 | 行为 | 规则允许 UIExtension 来源 | 宿主向 UIExtension 控件透传注册、反注册或查询请求 | 原始 `ruleJson` 生命周期透传 | AC-1.5, AC-4.2, AC-5.2, AC-5.3, AC-5.4 | mock/单测 | UIExtension enabled/disabled、register/unregister/get | P2 |
+| R-15 | 边界 | Web / UIExtension 控件不存在或透传失败 | 记录来源级摘要错误，不影响 ArkUI 宿主匹配 | ArkUI 宿主匹配独立完成 | AC-5.1, AC-5.2, AC-5.3, AC-5.4 | mock | no web/uie、透传失败 | P2 |
 | R-16 | 边界 | `includeText=false` | ArkUI 宿主来源不上报文本正文 | 日志也不得打印正文 | AC-6.1 | 单测/日志检查 | 输入框含敏感文本 `password123` | P0 |
 | R-16A | 行为 | `includeText=true` | ArkUI 宿主来源在命中节点 `nodes[]` 中上报 `text` 字段，优先为用户已输入文本，输入为空时为框内占位提示文本 | 日志仍只打印摘要；sample 通过 `-tofile` 保存完整结果用于验证 | AC-6.2 | 单测/sample | 输入框固定文本 `account/password` 和占位提示 `input account` | P0 |
-| R-16B | 边界 | 本阶段规则和上报规格 | 不设计、不上报完整控件树，也不提供完整树上报开关 | 防止完整树透出 | AC-6.5 | JSON 检查 | ruleJson/report JSON | P0 |
 | R-17 | 行为 | `includeRect=true` / `includeFocusable=true` | ArkUI 宿主来源节点包含 rect/focusable | rect 四字段完整 | AC-6.3, AC-6.4 | 单测 | include 开关 true/false | P0 |
 | R-18 | 恢复 | 反注册、SA 死亡或断连 | 清理所有该 SA 状态 | 不影响其他 SA | AC-8.3, AC-8.4 | 单测/死亡监听测试 | unregister、remote death、disconnect | P0 |
 | R-19 | 行为 | PageScene 已注册且页面级稳定点到达 | `ContentChangeManager` 检查并 flush PageScene 待检测规则 | PageScene-only 时不得发送 ContentChange 事件 | AC-7.1 | 单测 | Page/Scroll/Dialog 稳定点，PageScene-only 注册 | P0 |
@@ -148,7 +145,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | `RegisterPageSceneRules` | System innerAPI | `ruleJson`、`PageSceneEventCallback` | `int32_t` | 成功、参数错误、重复注册、请求忙、IPC 错误 | 注册页面场景规则 | AC-1.1, AC-1.2, AC-1.3 |
 | `UnregisterPageSceneRules` | System innerAPI | `ruleSetId` | `int32_t` | 成功、参数错误、未注册、请求忙、IPC 错误 | 反注册页面场景规则 | AC-8.3, AC-8.4 |
 | `GetPageScene` | System innerAPI | `ruleJsonOrRuleSetId`、`PageSceneEventCallback` | `int32_t` | 成功、参数错误、请求忙、IPC 错误 | 主动查询一次页面场景 | AC-4.1, AC-4.3, AC-4.4 |
-| `ReportPageSceneEvent` | ReportService callback | `sceneJson` | void | N/A | UI 侧向 SA 回传 ArkUI 宿主来源场景命中结果 | AC-2.2 |
+| `ReportPageSceneEvent` | ReportService callback | `sceneJson` | void | 无返回错误码 | UI 侧向 SA 回传 ArkUI 宿主来源场景命中或退出结果 | AC-2.2, AC-3.5 |
 
 ### 3.2 测试补充信息
 
@@ -219,8 +216,6 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | 手机 | 按当前窗口可见区域计算 `onlyVisible` 和 `rect` | 是 |
 | Pad | 多窗口/分屏验证当前宿主窗口页面名、rect、可见性 | 是 |
 | PC | 窗口尺寸变化和焦点场景验证 rect 与 focusable | 是 |
-| 穿戴/智慧屏/座舱 | 首版无强制差异 | 否 |
-| 其他 | Web / UIExtension 仅验证规则透传入口 | 是 |
 
 ### 5.11 是否涉及适老化
 
@@ -239,7 +234,6 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | 规格描述 | 验证指标 | 验证方式 |
 |----------|----------|----------|
 | WHEN 文本输入类控件频繁上下树触发计数变化 THEN 只维护计数和待检测规则，页面稳定后再 check 并按 `policy.minReportIntervalMs` / `deduplicate` 限制重复命中上报，且已命中后不再命中时补发一次退出事件 | 未稳定前无上报；稳定后同一规则相同命中集合不重复上报；命中上报间隔不小于配置值；退出事件每次命中态到未命中态只上报一次 | 单测/集成测试 |
-| WHEN 当前页面节点较多 THEN 只采集规则所需字段，不生成完整树 | 上报 JSON 不包含完整树 | 单测/JSON 检查 |
 
 ### 6.2 功耗指标
 
@@ -263,9 +257,8 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 
 | 类型 | 规格描述 |
 |------|----------|
-| 隐私合规 | WHEN `report.includeText=false` THEN ArkUI 宿主来源上报 JSON 不包含输入文本正文 |
+| 隐私合规 | WHEN `report.includeText=false` THEN ArkUI 宿主来源上报 JSON 省略输入文本正文 |
 | 功能验证 | WHEN `report.includeText=true` THEN ArkUI 宿主来源上报 JSON 的命中节点包含 `text`，字段值为用户已输入文本或输入为空时的占位提示文本 |
-| 隐私合规 | WHEN 构造上报 JSON THEN 不包含完整控件树；ruleJson 不设计完整树上报开关 |
 | 信息安全 | WHEN 非 native SA 或 interface token 不匹配 THEN UISession 拒绝调用 |
 | 代码实现 | WHEN 打印日志 THEN 只打印 ruleId、sceneType、source、matchedCount、错误码等摘要 |
 
@@ -295,7 +288,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 
 | 交互类型 | 触发条件 | 预期结果 | UX 效果图 |
 |----------|----------|----------|-----------|
-| 焦点属性采集 | WHEN 命中文本输入类控件且 `report.includeFocusable=true` | THEN 上报节点包含 `focusable`，用于区分可自由输入和可能拉起 picker 的表单入口 | N/A |
+| 焦点属性采集 | WHEN 命中文本输入类控件且 `report.includeFocusable=true` | THEN 上报节点包含 `focusable`，用于区分可自由输入和可能拉起 picker 的表单入口 | JSON 字段检查 |
 
 ### 7.4 是否涉及用户数据
 
@@ -303,7 +296,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 
 | 测试场景 | 触发条件 | 预期结果 |
 |----------|----------|----------|
-| 数据使用 | WHEN 场景匹配并上报 | THEN 仅使用控件类型、可获焦状态、rect、节点 ID 等结构化数据，不上报输入文本正文 |
+| 数据使用 | WHEN `report.includeText=false` 且场景匹配并上报 | THEN 仅使用控件类型、可获焦状态、rect、节点 ID 等结构化数据 |
 | 数据存储 | WHEN 宿主保存 `ruleJson` | THEN 仅保存规则配置和回调状态，反注册或 SA 死亡后清理 |
 | 重启恢复 | WHEN 应用进程重启或 SA 断连 | THEN 旧规则状态不残留，不向死亡 SA 上报 |
 | 版本升级 | WHEN 系统升级 | THEN 不涉及应用数据迁移 |
@@ -318,8 +311,8 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | 上下树触发 | 动态添加 TextInput/TextArea/Search/RichEditor、控件下树移除计数、未稳定前不立即上报、稳定后触发检测、重复触发去重、最小间隔、命中后跌出阈值上报一次 `TEXT_EDITOR_EXIT` |
 | 稳定点调度 | PageScene-only 注册下 Page/Scroll/Dialog 稳定点触发、Swiper 延迟到 VSync、滚动/转场/Swiper 滚动中不 flush、Pipeline 不直接依赖 PageScene flush、Text/Image 不触发 PageScene-only |
 | 主动查询 | ruleSetId 查询、一次性 ruleJson 查询、非法参数、pending Get busy |
-| Web 透传 | `webRules` 注册透传、反注册透传、查询请求透传、透传失败隔离；不验证 `webRules` 内部规格、Web 内部匹配和回传 |
-| UIExtension 透传 | 规则注册透传、反注册透传、查询请求透传、透传失败隔离；不验证 UIExtension 内部匹配和回传 |
+| Web 透传 | `webRules` 注册透传、反注册透传、查询请求透传、透传失败隔离 |
+| UIExtension 透传 | 规则注册透传、反注册透传、查询请求透传、透传失败隔离 |
 | 隐私安全 | 输入敏感文本时 JSON/日志不含正文；非 SA 调用失败 |
 | 生命周期 | 反注册后不上报、SA death 清理、断连清理、多 SA 隔离 |
 
