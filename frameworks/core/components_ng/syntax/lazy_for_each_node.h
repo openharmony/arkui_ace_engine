@@ -305,6 +305,8 @@ private:
 
     bool IsCachedCountReduced(int32_t cacheStart, int32_t cacheEnd);
 
+    void TryTriggleAdditionalLayout();
+
     // The index values of the start and end of the current children nodes and the corresponding keys.
     std::list<std::optional<std::string>> ids_;
     std::list<int32_t> predictItems_;
@@ -317,6 +319,8 @@ private:
     mutable std::list<RefPtr<UINode>> children_;
     mutable bool needPredict_ = false;
     mutable std::list<RefPtr<UINode>> childrenWithCache_;
+    mutable int32_t childrenDepth_ = 0;
+    bool hasSetActiveChildRangeInGetChildren_ = false;
     bool needMarkParent_ = true;
     bool isActive_ = true;
     int32_t startIndex_ = 0;
