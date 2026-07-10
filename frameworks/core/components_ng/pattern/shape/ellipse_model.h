@@ -21,6 +21,7 @@
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
+constexpr char ELLIPSE_ETS_TAG[] = "Ellipse";
 class ACE_FORCE_EXPORT EllipseModel {
 public:
     static EllipseModel* GetInstance();

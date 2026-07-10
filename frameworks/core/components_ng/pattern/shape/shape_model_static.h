@@ -30,8 +30,8 @@ public:
     static void SetFillOpacity(FrameNode* frameNode, const std::optional<double>& fillOpacity);
     static void SetStrokeOpacity(FrameNode* frameNode, const std::optional<double>& strokeOpacity);
     static void SetStrokeWidth(FrameNode* frameNode, const std::optional<Ace::Dimension>& strokeWidth);
-    static void SetStroke(FrameNode* frameNode, const std::optional<Color>& color);
-    static void SetFill(FrameNode* frameNode, const std::optional<Color>& color);
+    ACE_FORCE_EXPORT static void SetStroke(FrameNode* frameNode, const std::optional<Color>& color);
+    ACE_FORCE_EXPORT static void SetFill(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetStrokeDashOffset(FrameNode* frameNode, const std::optional<Ace::Dimension>& dashOffset);
     static void SetStrokeLineCap(FrameNode* frameNode, const std::optional<int>& lineCapStyle);
     static void SetStrokeLineJoin(FrameNode* frameNode, const std::optional<int>& lineJoinStyle);

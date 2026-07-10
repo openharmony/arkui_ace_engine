@@ -17,14 +17,31 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_polyline_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/shape/polygon_model_ng.h"
 
 using namespace OHOS::Ace;
 
+namespace {
+NG::PolygonModelNG* GetPolygonModel()
+{
+    static NG::PolygonModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Polygon");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find polygon dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::PolygonModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+} // namespace
+
 extern "C" {
 void FfiOHOSAceFrameworkPolygonCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
-    PolygonModel::GetInstance()->Create(true);
+    GetPolygonModel()->Create(true);
     if (width > 0.0) {
         FfiOHOSAceFrameworkShapeSetWidth(width, widthUnit);
     }

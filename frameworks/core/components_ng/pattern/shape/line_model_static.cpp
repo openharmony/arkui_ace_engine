@@ -18,13 +18,12 @@
 #include "core/components_ng/pattern/shape/line_model_static.h"
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 #include "core/components_ng/pattern/shape/line_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
 RefPtr<FrameNode> LineModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    return FrameNode::CreateFrameNode(V2::LINE_ETS_TAG, nodeId, AceType::MakeRefPtr<LinePattern>());
+    return FrameNode::CreateFrameNode(LINE_ETS_TAG, nodeId, AceType::MakeRefPtr<LinePattern>());
 }
 
 } // namespace OHOS::Ace::NG

@@ -427,7 +427,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapS
 }
 
 template<>
-void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src)
 {
     switch (src) {
         case ARK_LINE_CAP_STYLE_BUTT: dst = LineCapStyle::BUTT; break;
@@ -438,7 +438,7 @@ void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src)
 }
 
 template<>
-void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src)
 {
     switch (src) {
         case ARK_LINE_JOIN_STYLE_MITER: dst = LineJoinStyle::MITER; break;

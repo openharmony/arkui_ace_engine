@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_method.h"
 #include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
-#include "core/components_ng/render/line_painter.h"
+#include "core/components_ng/pattern/shape/line_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -36,31 +36,7 @@ public:
         : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier)
     {}
     ~LinePaintMethod() override = default;
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(paintWrapper, nullptr);
-        auto paintProperty = paintWrapper->GetPaintProperty();
-        CHECK_NULL_RETURN(paintProperty, nullptr);
-        auto linePaintProperty = DynamicCast<LinePaintProperty>(paintProperty->Clone());
-        CHECK_NULL_RETURN(linePaintProperty, nullptr);
-
-        if (propertiesFromAncestor_) {
-            linePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
-        }
-        if (!linePaintProperty->GetStartPoint() || !linePaintProperty->GetEndPoint()) {
-            return nullptr;
-        }
-        const auto& geometryNode = paintWrapper->GetGeometryNode();
-        const auto& contentSize = geometryNode->GetContentSize();
-        if (!contentSize.IsPositive()) {
-            return nullptr;
-        }
-        auto offset = paintWrapper->GetContentOffset();
-        return [linePaintProperty, offset, paintWrapper](RSCanvas& canvas) {
-                    LinePainter::DrawLine(canvas, *linePaintProperty, offset);
-                    paintWrapper->FlushOverlayModifier();
-                };
-    }
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(LinePaintMethod);
 };

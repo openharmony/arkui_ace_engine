@@ -10,6 +10,7 @@
         "src/calendar_picker_modifier.ts",
         "src/checkbox_modifier.ts",
         "src/checkboxgroup_modifier.ts",
+        "src/common_shape_modifier.ts",
         "src/circle_modifier.ts",
         "src/common_modifier.ts",
         "src/column_modifier.ts",

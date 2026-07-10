@@ -25,11 +25,7 @@ class JSRect : public JSShapeAbstract {
     DECLARE_ACE_TYPE(JSRect, JSShapeAbstract);
 
 public:
-    static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
-    static void JsRadiusWidth(const JSCallbackInfo& info);
-    static void JsRadiusHeight(const JSCallbackInfo& info);
-    static void SetRadius(const JSCallbackInfo& info);
 
     static void ConstructorCallback(const JSCallbackInfo& info);
     static void DestructorCallback(JSRect* obj);
@@ -43,8 +39,6 @@ private:
         const RefPtr<ShapeRect>& shapeRect, const CalcDimension& radiusX, const CalcDimension& radiusY, int32_t index);
     static void SetRadiusWithArrayValue(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal);
     static void SetRadiusWithJsVal(const RefPtr<ShapeRect>& shapeRect, const JSRef<JSVal>& jsVal);
-    static void SetRadiusWidth(const JSRef<JSVal>& jsVal);
-    static void SetRadiusHeight(const JSRef<JSVal>& jsVal);
     static void ParseRectObjBelowApi12(const RefPtr<ShapeRect>& rect, const JSRef<JSObject>& obj);
     static void ParseRectObjAboveApi12(const RefPtr<ShapeRect>& rect, const JSRef<JSObject>& obj);
 };

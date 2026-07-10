@@ -291,6 +291,34 @@ interface GridItemComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface RectComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface ShapeComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface PathComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface LineComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface PolylineComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface PolygonComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface CircleComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 declare class TextForegroundColorModifier extends ModifierWithKey<object> {
     constructor(value: object);
 }

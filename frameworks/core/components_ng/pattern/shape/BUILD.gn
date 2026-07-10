@@ -1,0 +1,184 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_ext.gni")
+import(
+    "//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
+
+build_component_ng("shape_pattern_ng") {
+  is_component_model = true
+
+  sources = [
+    # Shape model
+    "shape_model_ng.cpp",
+    "shape_model_static.cpp",
+    "bridge/shape_model_impl.cpp",
+    # Shape container
+    "shape_container_pattern.cpp",
+    "shape_container_layout_algorithm.cpp",
+    "shape_container_modifier.cpp",
+    "shape_container_paint_method.cpp",
+    # Shape base
+    "shape_pattern.cpp",
+    "shape_abstract_model_ng.cpp",
+    "bridge/shape_abstract_model_impl.cpp",
+    "shape_abstract_model_static.cpp",
+    "shape_layout_algorithm.cpp",
+    "shape_paint_property.cpp",
+    "shape_overlay_modifier.cpp",
+    "shape_paint_method.cpp",
+    "shape_painter.cpp",
+    "drawing_painter.cpp",
+  ]
+
+  # Circle
+  sources += [
+    "bridge/circle_model_impl.cpp",
+    "circle_model_ng.cpp",
+    "circle_painter.cpp",
+    "circle_paint_method.cpp",
+  ]
+
+  # Ellipse
+  sources += [
+    "bridge/ellipse_model_impl.cpp",
+    "ellipse_model_ng.cpp",
+    "ellipse_model_static.cpp",
+    "ellipse_painter.cpp",
+    "ellipse_paint_method.cpp",
+  ]
+
+  # Line
+  sources += [
+    "bridge/line_model_impl.cpp",
+    "line_model_ng.cpp",
+    "line_model_static.cpp",
+    "line_layout_algorithm.cpp",
+    "line_painter.cpp",
+    "line_paint_method.cpp",
+  ]
+
+  # Polyline/Polygon
+  sources += [
+    "bridge/polygon_model_impl.cpp",
+    "polygon_model_ng.cpp",
+    "polygon_model_static.cpp",
+    "polygon_painter.cpp",
+    "polygon_paint_method.cpp",
+  ]
+
+  # Path
+  sources += [
+    "path_model_ng.cpp",
+    "path_model_static.cpp",
+    "bridge/path_model_impl.cpp",
+    "path_layout_algorithm.cpp",
+    "path_painter.cpp",
+    "path_pattern.cpp",
+    "path_paint_method.cpp",
+  ]
+
+  # Rect
+  sources += [
+    "rect_model_ng.cpp",
+    "rect_model_static.cpp",
+    "rect_pattern.cpp",
+    "bridge/rect_model_impl.cpp",
+    "rect_painter.cpp",
+    "rect_paint_method.cpp",
+  ]
+
+  ark_sources = [
+    "bridge/arkts_native_common_shape_bridge.cpp",
+    "bridge/arkts_native_shape_bridge.cpp",
+    "bridge/common_shape_dynamic_modifier.cpp",
+    "bridge/common_shape_dynamic_module.cpp",
+    "bridge/shape_dynamic_modifier.cpp",
+    "bridge/shape_dynamic_module.cpp",
+    "bridge/shape_static_ani_modifier.cpp",
+  ]
+
+  # Circle
+  ark_sources += [
+    "bridge/arkts_native_circle_bridge.cpp",
+    "bridge/circle_dynamic_modifier.cpp",
+    "bridge/circle_dynamic_module.cpp",
+  ]
+
+  # Ellipse
+  ark_sources += [
+    "bridge/arkts_native_ellipse_bridge.cpp",
+    "bridge/ellipse_dynamic_modifier.cpp",
+    "bridge/ellipse_dynamic_module.cpp",
+  ]
+
+  # Line
+  ark_sources += [
+    "bridge/arkts_native_line_bridge.cpp",
+    "bridge/line_dynamic_modifier.cpp",
+    "bridge/line_dynamic_module.cpp",
+  ]
+
+  # Polyline
+  ark_sources += [
+    "bridge/arkts_native_polyline_bridge.cpp",
+    "bridge/polyline_dynamic_modifier.cpp",
+    "bridge/polyline_dynamic_module.cpp",
+  ]
+
+  # Path
+  ark_sources += [
+    "bridge/arkts_native_path_bridge.cpp",
+    "bridge/path_custom_modifier.cpp",
+    "bridge/path_dynamic_modifier.cpp",
+    "bridge/path_dynamic_module.cpp",
+  ]
+
+  # Polygon
+  ark_sources += [
+    "bridge/arkts_native_polygon_bridge.cpp",
+    "bridge/polygon_dynamic_modifier.cpp",
+    "bridge/polygon_dynamic_module.cpp",
+  ]
+
+  # Rect
+  ark_sources += [
+    "bridge/arkts_native_rect_bridge.cpp",
+    "bridge/rect_dynamic_modifier.cpp",
+    "bridge/rect_dynamic_module.cpp",
+  ]
+
+  # Static modifiers
+  if (!is_arkui_x) {
+    if (!ace_engine_feature_wearable) {
+      ark_sources += [
+        "bridge/shape_static_modifier.cpp",
+        "bridge/circle_static_modifier.cpp",
+        "bridge/common_shape_static_modifier.cpp",
+        "bridge/ellipse_static_modifier.cpp",
+        "bridge/line_static_modifier.cpp",
+        "bridge/polyline_static_modifier.cpp",
+        "bridge/path_static_modifier.cpp",
+        "bridge/polygon_static_modifier.cpp",
+        "bridge/rect_static_modifier.cpp",
+      ]
+    }
+  }
+
+  if (!build_ohos_sdk) {
+    if (!is_arkui_x) {
+      deps = [ "${ace_root}/interfaces/inner_api/ui_session:ui_session" ]
+    }
+  }
+}

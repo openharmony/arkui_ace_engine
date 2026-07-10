@@ -13,82 +13,29 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/shape/polygon_model_ng.h"
-#include "core/components_ng/pattern/shape/polygon_model_static.h"
-#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
-#include "core/components_ng/pattern/shape/shape_abstract_model_static.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/validators.h"
-#include "arkoala_api_generated.h"
+#include "ui/base/utils/utils.h"
 
-namespace OHOS::Ace::NG {
-struct PolygonOptions {
-    std::optional<Dimension> width;
-    std::optional<Dimension> height;
-};
-namespace {
-    constexpr int POINTS_NUMBER_MIN = 2;
-}
-} // OHOS::Ace::NG
-
-namespace OHOS::Ace::NG::Converter {
-template<>
-PolygonOptions Convert(const Ark_PolygonOptions& src)
-{
-    PolygonOptions options;
-    options.width = Converter::OptConvert<Dimension>(src.width);
-    options.height = Converter::OptConvert<Dimension>(src.height);
-    return options;
-}
-}
+#include "core/common/dynamic_module_helper.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace PolygonModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = PolygonModelStatic::CreateFrameNode(id, true);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // PolygonModifier
-namespace PolygonInterfaceModifier {
-void SetPolygonOptionsImpl(Ark_NativePointer node,
-                           const Opt_PolygonOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvertPtr<PolygonOptions>(options);
-    CHECK_NULL_VOID(opt);
-    Validator::ValidateNonNegative(opt->width);
-    ShapeAbstractModelStatic::SetWidth(frameNode, opt->width);
-    Validator::ValidateNonNegative(opt->height);
-    ShapeAbstractModelStatic::SetHeight(frameNode, opt->height);
-}
-} // PolygonInterfaceModifier
-namespace PolygonAttributeModifier {
-void SetPointsImpl(Ark_NativePointer node,
-                   const Opt_Array_ShapePoint* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto points = Converter::OptConvertPtr<ShapePoints>(value);
-    if (points && points->size() < POINTS_NUMBER_MIN) {
-        points.reset();
-    }
-    PolygonModelStatic::SetPoints(frameNode, points);
-}
-} // PolygonAttributeModifier
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUIPolygonModifier* GetPolygonStaticModifier();
+#endif
 const GENERATED_ArkUIPolygonModifier* GetPolygonModifier()
 {
-    static const GENERATED_ArkUIPolygonModifier ArkUIPolygonModifierImpl {
-        PolygonModifier::ConstructImpl,
-        PolygonInterfaceModifier::SetPolygonOptionsImpl,
-        PolygonAttributeModifier::SetPointsImpl,
-    };
-    return &ArkUIPolygonModifierImpl;
-}
+    static const GENERATED_ArkUIPolygonModifier* cachedModifier = nullptr;
 
+    if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetPolygonStaticModifier();
+#else
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Polygon");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIPolygonModifier*>(module->GetStaticModifier());
+#endif
+    }
+
+    return cachedModifier;
 }
+} // namespace OHOS::Ace::NG::GeneratedModifier

@@ -14,80 +14,30 @@
  */
 #include "core/interfaces/native/node/polyline_modifier.h"
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/shape/polygon_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG {
-
-void SetPoints(ArkUINodeHandle node, const ArkUI_Float32* pointX, const ArkUI_Float32* pointY, int32_t length,
-    void* xResObjArray, void* yResObjArray)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("PolygonPoints");
-    ShapePoint shapePoint;
-    ShapePoints shapePoints;
-    std::vector<RefPtr<ResourceObject>> xResObjArrayResult;
-    std::vector<RefPtr<ResourceObject>> yResObjArrayResult;
-    RefPtr<ResourceObject>* xResObjPtr = static_cast<RefPtr<ResourceObject>*>(xResObjArray);
-    RefPtr<ResourceObject>* yResObjPtr = static_cast<RefPtr<ResourceObject>*>(yResObjArray);
-    bool hasResObj = false;
-    for (int32_t i = 0; i < length; i++) {
-        auto xVal = pointX[i];
-        auto yVal = pointY[i];
-        if (xResObjPtr[i] || yResObjPtr[i]) {
-            hasResObj = true;
-        }
-        xResObjArrayResult.push_back(xResObjPtr[i]);
-        yResObjArrayResult.push_back(yResObjPtr[i]);
-        shapePoint.first = Dimension(xVal, DimensionUnit::VP);
-        shapePoint.second = Dimension(yVal, DimensionUnit::VP);
-        shapePoints.push_back(shapePoint);
-    }
-    if (SystemProperties::ConfigChangePerform() && hasResObj) {
-        PolygonModelNG::SetPoints(frameNode, shapePoints, xResObjArrayResult, yResObjArrayResult);
-    }
-
-    PolygonModelNG::SetPoints(frameNode, shapePoints);
-}
-
-void ResetPoints(ArkUINodeHandle node)
-{
-    ShapePoints points;
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    PolygonModelNG::SetPoints(frameNode, points);
-    auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    pattern->UnRegisterResource("PolygonPoints");
-}
-
 namespace NodeModifier {
 const ArkUIPolylineModifier* GetPolylineModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIPolylineModifier modifier = {
-        .setPoints = SetPoints,
-        .resetPoints = ResetPoints,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const ArkUIPolylineModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Polyline");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIPolylineModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
 
 const CJUIPolylineModifier* GetCJUIPolylineModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUIPolylineModifier modifier = {
-        .setPoints = SetPoints,
-        .resetPoints = ResetPoints,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const CJUIPolylineModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Polyline");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUIPolylineModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
 }
-}
-}
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG

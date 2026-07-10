@@ -800,7 +800,7 @@ namespace Converter {
     template<> ShadowColorStrategy Convert(const Ark_arkui_component_enums_Color& src);
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);
     template<> ShadowColorStrategy Convert(const Ark_String& src);
-    template<> ShapePoint Convert(const Ark_ShapePoint& src);
+    template<> ACE_FORCE_EXPORT ShapePoint Convert(const Ark_ShapePoint& src);
     template<> SheetHeight Convert(const Ark_DoubleLengthDetents& src);
     template<> SheetHeight Convert(const Ark_Float64& src);
     template<> SheetHeight Convert(const Ark_Resource& src);
@@ -839,7 +839,7 @@ namespace Converter {
     template<> std::string Convert(const Ark_CommandPath& src);
     template<> std::tuple<Ark_Float32, Ark_Int32> Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT std::u16string Convert(const Ark_String& src);
-    template<> std::vector<Dimension> Convert(const Array_Length& src);
+    template<> ACE_FORCE_EXPORT std::vector<Dimension> Convert(const Array_Length& src);
     template<> std::vector<ImageAnalyzerType> Convert(const Array_ImageAnalyzerType& src);
     template<> std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src);
     template<> std::vector<NG::BarItem> Convert(const Array_ToolbarItem& src);
@@ -989,9 +989,9 @@ namespace Converter {
     template<>
     ACE_FORCE_EXPORT void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrategy& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<LineCap>& dst, const Ark_LineCapStyle& src);
-    template<> void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<LineCapStyle>& dst, const Ark_LineCapStyle& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src);
-    template<> void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<LineJoinStyle>& dst, const Ark_LineJoinStyle& src);
     template<> void AssignCast(std::optional<ListItemGroupArea>& dst, const Ark_ListItemGroupArea& src);
     template<> void AssignCast(std::optional<ListItemSwipeActionDirection>& dst, const Ark_ListItemSwipeActionDirection& src);
     template<> void AssignCast(std::optional<Matrix4>& dst, const Ark_matrix4_Matrix4Transit& src);
@@ -1133,7 +1133,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_String& src);
-    template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<float>& dst, const Ark_String& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src);
     template<> void AssignCast(std::optional<int32_t>& dst, const Ark_UIContext& src);
     template<> void AssignCast(std::optional<SuperscriptStyle>& dst, const Ark_SuperscriptStyle& src);

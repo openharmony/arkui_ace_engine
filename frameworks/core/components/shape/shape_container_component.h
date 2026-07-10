@@ -108,7 +108,7 @@ private:
     AnimatableDimension height_ = AnimatableDimension(-1.0);
 };
 
-class ACE_EXPORT ShapeContainerComponent : public ComponentGroup {
+class ACE_FORCE_EXPORT ShapeContainerComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(ShapeContainerComponent, ComponentGroup);
 
 public:

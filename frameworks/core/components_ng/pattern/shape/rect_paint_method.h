@@ -21,7 +21,8 @@
 #include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/rect_painter.h"
+#include "core/components_ng/pattern/shape/rect_painter.h"
+
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT RectPaintMethod : public ShapePaintMethod {
@@ -34,34 +35,7 @@ public:
         : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier)
     {}
     ~RectPaintMethod() override = default;
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(paintWrapper, nullptr);
-        auto rectPaintProperty = DynamicCast<RectPaintProperty>(paintWrapper->GetPaintProperty()->Clone());
-        CHECK_NULL_RETURN(rectPaintProperty, nullptr);
-
-        if (propertiesFromAncestor_) {
-            if (!rectPaintProperty->HasFill() && propertiesFromAncestor_->HasFill()) {
-                auto renderContext = paintWrapper->GetRenderContext();
-                renderContext->UpdateForegroundColor(propertiesFromAncestor_->GetFillValue());
-                renderContext->ResetForegroundColorStrategy();
-            }
-            rectPaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
-        }
-        if (paintWrapper->HasForegroundColor()) {
-            rectPaintProperty->UpdateFill(paintWrapper->GetForegroundColor());
-        } else if (paintWrapper->HasForegroundColorStrategy()) {
-            rectPaintProperty->UpdateFill(Color::FOREGROUND);
-            rectPaintProperty->ResetFillOpacity();
-        }
-        rect_.SetSize(rectPaintProperty->GetContentSize());
-        rect_.SetOffset(rectPaintProperty->GetContentOffset());
-
-        return [rect = rect_, rectPaintProperty, paintWrapper](RSCanvas& canvas) {
-                    RectPainter::DrawRect(canvas, rect, *rectPaintProperty);
-                    paintWrapper->FlushOverlayModifier();
-                };
-    }
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
 private:
     RectF rect_;

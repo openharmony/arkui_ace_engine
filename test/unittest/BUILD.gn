@@ -574,22 +574,22 @@ ohos_static_library("ace_components_render") {
   sources = [
     "$ace_root/frameworks/core/components_ng/animation/geometry_transition.cpp",
     "$ace_root/frameworks/core/components_ng/render/border_image_painter.cpp",
-    "$ace_root/frameworks/core/components_ng/render/circle_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/circle_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/debug_boundary_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/divider_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/drawing_prop_convertor.cpp",
-    "$ace_root/frameworks/core/components_ng/render/ellipse_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/ellipse_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/gesture_debug_boundary_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/image_painter.cpp",
-    "$ace_root/frameworks/core/components_ng/render/line_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/line_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/render/paint_wrapper.cpp",
-    "$ace_root/frameworks/core/components_ng/render/polygon_painter.cpp",
-    "$ace_root/frameworks/core/components_ng/render/rect_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/polygon_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/rect_painter.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_context.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_context_multi_thread.cpp",
     "$ace_root/frameworks/core/components_ng/render/render_property.cpp",
-    "$ace_root/frameworks/core/components_ng/render/shape_painter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/shape/shape_painter.cpp",
   ]
   deps = []
   configs = [ ":ace_unittest_config" ]

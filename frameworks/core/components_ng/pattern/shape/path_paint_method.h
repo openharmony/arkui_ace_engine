@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_ng/render/path_painter.h"
+#include "core/components_ng/pattern/shape/path_painter.h"
 
 namespace OHOS::Ace::NG {
 
@@ -38,38 +38,7 @@ public:
     {}
     ~PathPaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(paintWrapper, nullptr);
-        auto paintProperty = paintWrapper->GetPaintProperty();
-        CHECK_NULL_RETURN(paintProperty, nullptr);
-        auto shapePaintProperty = DynamicCast<PathPaintProperty>(paintProperty->Clone());
-        CHECK_NULL_RETURN(shapePaintProperty, nullptr);
-
-        if (propertiesFromAncestor_) {
-            if (!shapePaintProperty->HasFill() && propertiesFromAncestor_->HasFill()) {
-                auto renderContext = paintWrapper->GetRenderContext();
-                renderContext->UpdateForegroundColor(propertiesFromAncestor_->GetFillValue());
-                renderContext->ResetForegroundColorStrategy();
-            }
-            shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
-        }
-        if (paintWrapper->HasForegroundColor()) {
-            shapePaintProperty->UpdateFill(paintWrapper->GetForegroundColor());
-        } else if (paintWrapper->HasForegroundColorStrategy()) {
-            shapePaintProperty->UpdateFill(Color::FOREGROUND);
-            shapePaintProperty->ResetFillOpacity();
-        }
-        const auto& geometryNode = paintWrapper->GetGeometryNode();
-        const auto& contentSize = geometryNode->GetContentSize();
-        if (!contentSize.IsPositive()) {
-            return nullptr;
-        }
-        return [shapePaintProperty, paintWrapper](RSCanvas& canvas) {
-                    PathPainter::DrawPath(canvas, *shapePaintProperty);
-                    paintWrapper->FlushOverlayModifier();
-                };
-    }
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
 
     ACE_DISALLOW_COPY_AND_MOVE(PathPaintMethod);
 };

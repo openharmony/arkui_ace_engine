@@ -28,6 +28,7 @@
 #include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/interfaces/native/node/grid_modifier.h"
+#include "core/interfaces/native/node/circle_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
@@ -67,7 +68,6 @@
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
-#include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
@@ -487,10 +487,9 @@ void* createFlowItemNode(ArkUI_Int32 nodeId)
 
 void* createCircleNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CircleModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NG::NodeModifier::GetCircleModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createCircleFrameNode(nodeId);
 }
 
 void* createRelativeContainerNode(ArkUI_Int32 nodeId)

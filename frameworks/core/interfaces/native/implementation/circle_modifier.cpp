@@ -13,81 +13,29 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
-#include "core/components_ng/pattern/shape/circle_model_ng.h"
-#include "core/components_ng/pattern/shape/shape_model_static.h"
-#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
-
-namespace OHOS::Ace::NG::Converter {
-struct CircleOptions {
-    std::optional<Dimension> width;
-    std::optional<Dimension> height;
-};
-
-template<>
-inline CircleOptions Convert(const Ark_CircleOptions& src)
-{
-    CircleOptions circleOptions;
-    circleOptions.width = Converter::OptConvert<Dimension>(src.width);
-    circleOptions.height = Converter::OptConvert<Dimension>(src.height);
-    return circleOptions;
-}
-} // namespace OHOS::Ace::NG::Converter
+#include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace CircleModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = CircleModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // CircleModifier
-namespace CircleInterfaceModifier {
-void SetCircleOptionsImpl(Ark_NativePointer node,
-                          const Opt_CircleOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto circleOptions = Converter::OptConvertPtr<Converter::CircleOptions>(options);
-    if (circleOptions && circleOptions.value().width) {
-        ShapeAbstractModelNG::SetWidth(frameNode, circleOptions.value().width.value());
-    }
-    if (circleOptions && circleOptions.value().height) {
-        ShapeAbstractModelNG::SetHeight(frameNode, circleOptions.value().height.value());
-    }
-}
-} // CircleInterfaceModifier
-namespace CircleAttributeModifier {
-void SetStrokeImpl(Ark_NativePointer node,
-                   const Opt_Union_ResourceColor_ColorMetricsExt* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ShapeModelStatic::SetStroke(frameNode, Converter::OptConvertPtr<Color>(value));
-}
-
-void SetFillImpl(Ark_NativePointer node,
-                 const Opt_Union_ResourceColor_ColorMetricsExt* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value));
-}
-} // CircleAttributeModifier
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUICircleModifier* GetCircleStaticModifier();
+#endif
 const GENERATED_ArkUICircleModifier* GetCircleModifier()
 {
-    static const GENERATED_ArkUICircleModifier ArkUICircleModifierImpl {
-        CircleModifier::ConstructImpl,
-        CircleInterfaceModifier::SetCircleOptionsImpl,
-        CircleAttributeModifier::SetStrokeImpl,
-        CircleAttributeModifier::SetFillImpl,
-    };
-    return &ArkUICircleModifierImpl;
-}
+    static const GENERATED_ArkUICircleModifier* cachedModifier = nullptr;
 
+    if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetCircleStaticModifier();
+#else
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Circle");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUICircleModifier*>(module->GetStaticModifier());
+#endif
+    }
+
+    return cachedModifier;
+}
 }

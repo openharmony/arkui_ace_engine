@@ -34,7 +34,7 @@ ACE_FORCE_EXPORT void ClampByRange(std::optional<float>& opt, const float& left,
 ACE_FORCE_EXPORT void ValidateNonNegative(std::optional<Dimension>& opt);
 ACE_FORCE_EXPORT void ValidateNonPercent(std::optional<Dimension>& opt);
 ACE_FORCE_EXPORT void ValidatePositive(std::optional<Dimension>& opt);
-void ValidateOpacity(std::optional<float>& opt);
+ACE_FORCE_EXPORT void ValidateOpacity(std::optional<float>& opt);
 ACE_FORCE_EXPORT void ValidatePositive(std::optional<float>& value);
 ACE_FORCE_EXPORT void ValidateNonNegative(std::optional<float>& value);
 ACE_FORCE_EXPORT void ValidateGreatOrEqual(std::optional<float>& opt, const float& right);

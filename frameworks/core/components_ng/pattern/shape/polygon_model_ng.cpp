@@ -23,7 +23,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/polygon_paint_property.h"
 #include "core/components_ng/pattern/shape/polygon_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -31,9 +30,9 @@ void PolygonModelNG::Create(bool isPolygon)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", isPolygon ? V2::POLYGON_ETS_TAG : V2::POLYLINE_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", isPolygon ? POLYGON_ETS_TAG : POLYLINE_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        isPolygon ? V2::POLYGON_ETS_TAG : V2::POLYLINE_ETS_TAG,
+        isPolygon ? POLYGON_ETS_TAG : POLYLINE_ETS_TAG,
         nodeId, [isPolygon]() { return AceType::MakeRefPtr<PolygonPattern>(isPolygon); });
     stack->Push(frameNode);
 }

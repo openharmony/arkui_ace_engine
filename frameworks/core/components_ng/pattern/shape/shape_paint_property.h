@@ -112,7 +112,7 @@ public:
         json->PutExtAttr("antiAlias", propAntiAlias_.value_or(ANTIALIAS_DEFAULT) ? "true" : "false", filter);
     }
 
-    void UpdateShapeProperty(const RefPtr<ShapePaintProperty>& target);
+    ACE_FORCE_EXPORT void UpdateShapeProperty(const RefPtr<ShapePaintProperty>& target);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Fill, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FillOpacity, double, PROPERTY_UPDATE_RENDER);

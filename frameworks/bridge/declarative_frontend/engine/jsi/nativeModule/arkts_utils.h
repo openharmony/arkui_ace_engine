@@ -209,8 +209,8 @@ public:
         const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value,
         CalcDimension& result, RefPtr<ResourceObject>& resourceObject, bool enableCheckInvalidvalue = true);
-    static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
-        DimensionUnit defaultUnit, bool isSupportPercent = true);
+    ACE_FORCE_EXPORT static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue,
+        CalcDimension &result, DimensionUnit defaultUnit, bool isSupportPercent = true);
     static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, RefPtr<ResourceObject>& resourceObject, bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,

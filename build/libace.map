@@ -125,6 +125,7 @@
       "OHOS::Ace::AnimatableDimension::operator=(OHOS::Ace::Dimension const&)";
       "OHOS::Ace::AnimatableDimension::SetContextAndCallback(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, std::__h::function<void ()> const&)";
       "OHOS::Ace::AnimationOption OHOS::Ace::NG::Converter::Convert<OHOS::Ace::AnimationOption, Ark_AnimateParam>(Ark_AnimateParam const&)";
+      "OHOS::Ace::AnimatablePath::operator=(OHOS::Ace::AnimatablePath const&)";
       "OHOS::Ace::AnimationUtils::AddDurationKeyFrame(int, OHOS::Ace::RefPtr<OHOS::Ace::Curve> const&, std::__h::function<void ()> const&, OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase> const&)";
       "OHOS::Ace::AnimationUtils::AddKeyFrame(float, OHOS::Ace::RefPtr<OHOS::Ace::Curve> const&, std::__h::function<void ()> const&, OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase> const&)";
       "OHOS::Ace::AnimationUtils::Animate(OHOS::Ace::AnimationOption const&, std::__h::function<void ()> const&, std::__h::function<void ()> const&, std::__h::function<void ()> const&, OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase> const&)";
@@ -679,6 +680,7 @@
       "OHOS::Ace::Framework::ViewStackProcessor::GetTouchListenerComponent()";
       "OHOS::Ace::Framework::ViewStackProcessor::HasClickGestureListenerComponent() const";
       "OHOS::Ace::Framework::ViewStackProcessor::HasTouchListenerComponent() const";
+      "OHOS::Ace::Framework::ViewStackProcessor::GetImplicitAnimationOption() const";
       "OHOS::Ace::Framework::ViewStackProcessor::Pop()";
       "OHOS::Ace::Framework::ViewStackProcessor::Push(OHOS::Ace::RefPtr<OHOS::Ace::Component> const&, bool)";
       "OHOS::Ace::g_DOMAIN_CONTENTS_MAP";
@@ -1012,6 +1014,8 @@
       "OHOS::Ace::NG::ArkTSUtils::ParseJsResponseRegion(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, float*, int*, unsigned int)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsString(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsString(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseJsStringFromResource(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
+      "OHOS::Ace::NG::ArkTSUtils::ParseJsStringFromResource(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsSymbolColorAlpha(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::Color&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&, OHOS::Ace::NG::NodeInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsSymbolFontFamilyName(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsSymbolId(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, unsigned int&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
@@ -1200,6 +1204,7 @@
       "OHOS::Ace::NG::CommonBridge::ReportClickEvent(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> const&, std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>>)";
       "OHOS::Ace::NG::CommonBridge::ResetMargin(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonBridge::ResetWidth(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::NG::CommonBridge::ResetHeight(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonBridge::SetBorder(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonBridge::SetMargin(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::CommonBridge::SetOnClick(panda::JsiRuntimeCallInfo*)";
@@ -1282,6 +1287,7 @@
       "OHOS::Ace::NG::Converter::TextDecorationOptions OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::TextDecorationOptions, Ark_TextDecorationOptions>(Ark_TextDecorationOptions const&)";
       "OHOS::Ace::NG::Converter::OptConvertFromArkNumResStr(Ark_Union_F64_ResourceStr const&, OHOS::Ace::DimensionUnit)";
       "OHOS::Ace::NG::ConvertToLinearGradientDirection(std::__h::shared_ptr<OHOS::Ace::NG::LinearGradient>)";
+      "std::__h::pair<OHOS::Ace::Dimension, OHOS::Ace::Dimension> OHOS::Ace::NG::Converter::Convert<std::__h::pair<OHOS::Ace::Dimension, OHOS::Ace::Dimension>, Ark_ShapePoint>(Ark_ShapePoint const&)";
       "OHOS::Ace::NG::ConvertToMarginPropertyF(OHOS::Ace::NG::PaddingPropertyT<OHOS::Ace::NG::CalcLength> const&, OHOS::Ace::NG::ScaleProperty const&, float, bool)";
       "OHOS::Ace::NG::ConvertToOptionalSize(OHOS::Ace::NG::CalcSize const&, OHOS::Ace::NG::ScaleProperty const&, OHOS::Ace::NG::SizeT<float> const&, std::__h::pair<std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>> const&)";
       "OHOS::Ace::NG::ConvertToPx(OHOS::Ace::Dimension const&, OHOS::Ace::NG::ScaleProperty const&, float)";
@@ -1740,6 +1746,7 @@
       "OHOS::Ace::NG::MagnifierController::SetLocalOffset(OHOS::Ace::NG::OffsetT<float> const&, std::__h::optional<OHOS::Ace::NG::OffsetT<float>> const&)";
       "OHOS::Ace::NG::MagnifierController::SetLocalOffset(OHOS::Ace::NG::OffsetT<float> const&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1ll, 1000000000ll>>> const&, OHOS::Ace::TouchType, std::__h::optional<OHOS::Ace::NG::OffsetT<float>> const&)";
       "OHOS::Ace::NG::MagnifierController::SetLocalOffset(OHOS::Ace::NG::OffsetT<float> const&, std::__h::chrono::time_point<std::__h::chrono::steady_clock, std::__h::chrono::duration<long long, std::__h::ratio<1l, 1000000000l>>> const&, OHOS::Ace::TouchType, std::__h::optional<OHOS::Ace::NG::OffsetT<float>> const&)";
+      "OHOS::Ace::NG::MeasureLayoutPolicySize(OHOS::Ace::NG::LayoutConstraintT<float> const&, OHOS::Ace::NG::LayoutWrapper*, OHOS::Ace::NG::SizeT<float>&)";
       "OHOS::Ace::NG::MeasureProperty::UpdateMaxSizeWithCheck(OHOS::Ace::NG::CalcSize const&)";
       "OHOS::Ace::NG::MeasureProperty::UpdateMinSizeWithCheck(OHOS::Ace::NG::CalcSize const&)";
       "OHOS::Ace::NG::MenuOptionsParam OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::MenuOptionsParam, Ark_TextMenuItem>(Ark_TextMenuItem const&)";
@@ -1919,6 +1926,9 @@
       "OHOS::Ace::NG::PaintProperty::UpdatePaintPropertyHost(OHOS::Ace::NG::PaintProperty const*)";
       "OHOS::Ace::NG::PaintWrapper::FlushContentModifier()";
       "OHOS::Ace::NG::PaintWrapper::FlushOverlayModifier()";
+      "OHOS::Ace::NG::PaintWrapper::GetForegroundColor() const";
+      "OHOS::Ace::NG::PaintWrapper::HasForegroundColor() const";
+      "OHOS::Ace::NG::PaintWrapper::HasForegroundColorStrategy() const";
       "OHOS::Ace::NG::PaintWrapper::GetRenderContext() const";
       "OHOS::Ace::NG::Paragraph::Create(OHOS::Ace::NG::ParagraphStyle const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FontCollection> const&)";
       "OHOS::Ace::NG::Paragraph::CreateRichEditorParagraph(OHOS::Ace::NG::ParagraphStyle const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FontCollection> const&, bool)";
@@ -1929,8 +1939,6 @@
       "OHOS::Ace::NG::ParseTemplateArgs(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, double, double, int)";
       "OHOS::Ace::NG::PasteButtonModelNG::CreateNode(int, int, int, bool, unsigned int)";
       "OHOS::Ace::NG::PasteButtonModelNG::GetInstance()";
-      "OHOS::Ace::NG::PathPainter::DrawPath(OHOS::Rosen::Drawing::Canvas&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::NG::OffsetT<float> const&)";
-      "OHOS::Ace::NG::PathPainter::GetPathSize(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::Pattern::AddResCache(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::Pattern::AddResObj(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&)>&&)";
       "OHOS::Ace::NG::Pattern::GetFocusPattern() const";
@@ -2814,6 +2822,7 @@
       "OHOS::Ace::NG::Validator::ValidateNonPercent(std::__h::optional<OHOS::Ace::Dimension>&)";
       "OHOS::Ace::NG::Validator::ValidatePositive(std::__h::optional<float>&)";
       "OHOS::Ace::NG::Validator::ValidatePositive(std::__h::optional<OHOS::Ace::Dimension>&)";
+      "OHOS::Ace::NG::Validator::ValidateOpacity(std::__h::optional<float>&)";
       "OHOS::Ace::NG::VibratorUtils::StartVibraFeedback()";
       "OHOS::Ace::NG::VibratorUtils::StartVibraFeedback(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::VibratorUtils::StartViratorDirectly(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
@@ -3848,6 +3857,7 @@
       "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<OHOS::Ace::Dimension, OHOS::Ace::ScrollState>(panda::ecmascript::EcmaVM const*, OHOS::Ace::Dimension, OHOS::Ace::ScrollState)";
       "std::__h::vector<panda::Local<panda::JSValueRef>, std::__h::allocator<panda::Local<panda::JSValueRef>>> OHOS::Ace::NG::ArkTSUtils::ConvertToJSValues<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, double>(panda::ecmascript::EcmaVM const*, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, double)";
       "std::__h::vector<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>, std::__h::allocator<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>>> OHOS::Ace::NG::Converter::Convert<std::__h::vector<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>, std::__h::allocator<std::__h::pair<OHOS::Ace::PickerDate, OHOS::Ace::PickerDate>>>, Array_DateRange>(Array_DateRange const&)";
+      "std::__h::vector<OHOS::Ace::Dimension, std::__h::allocator<OHOS::Ace::Dimension>> OHOS::Ace::NG::Converter::Convert<std::__h::vector<OHOS::Ace::Dimension, std::__h::allocator<OHOS::Ace::Dimension>>, Array_Length>(Array_Length const&)";
       "OHOS::Ace::GetProgressColorSpace(OHOS::Ace::Color const&)";
       "OHOS::Ace::NG::Converter::OptConvertFromArkLength(Ark_Length const&, OHOS::Ace::DimensionUnit)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::CalcDimension, Ark_Resource>(std::__h::optional<OHOS::Ace::CalcDimension>&, Ark_Resource const&)";
@@ -4476,6 +4486,7 @@
       OHOS::Ace::RenderRelativeContainer::Create*;
       OHOS::Ace::RenderElement::*;
       OHOS::Ace::RenderStack::*;
+      OHOS::Ace::RenderBox::Create;
       OHOS::Ace::ResourceManager::*;
       OHOS::Ace::RichEditorModel::*;
       OHOS::Ace::RichTextModel::*;
@@ -4729,6 +4740,9 @@
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??UserUnderlineColor??Ark?UnderlineColor??std????h??optional?OHOS??Ace??UserUnderlineColor????Ark?UnderlineColor?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??WordBreak??Ark?WordBreak??std????h??optional?OHOS??Ace??WordBreak????Ark?WordBreak?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?std????h??basic?string?char16?t??std????h??char?traits?char16?t???std????h??allocator?char16?t????Ark?Resource??std????h??optional?std????h??basic?string?char16?t??std????h??char?traits?char16?t???std????h??allocator?char16?t??????Ark?Resource?const??;
+      void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??LineCapStyle??Ark?LineCapStyle??std????h??optional?OHOS??Ace??LineCapStyle????Ark?LineCapStyle?const??;
+      void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??LineJoinStyle??Ark?LineJoinStyle??std????h??optional?OHOS??Ace??LineJoinStyle????Ark?LineJoinStyle?const??;
+      void?OHOS??Ace??NG??Converter??AssignCast?float??InteropString??std????h??optional?float????InteropString?const??;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??AvoidanceMode??Ark?AvoidanceMode??std????h??optional?OHOS??Ace??AvoidanceMode????Ark?AvoidanceMode?const??;
       vtable?for?OHOS::Ace::AceApplicationInfo;
       vtable?for?OHOS::Ace::AnimatedDrawableDescriptor;
@@ -4887,6 +4901,8 @@
       vtable?for?OHOS::Ace::TriangleComponent;
       vtable?for?OHOS::Ace::UIContentImpl;
       vtable?for?OHOS::Ace::UiMaterial;
+      vtable?for?OHOS::Ace::ShapeComponent;
+      vtable?for?OHOS::Ace::ShapeContainerComponent;
       vtable?for?OHOS::Ace::V2::GridEventInfo;
       vtable?for?OHOS::Ace::V2::GridPositionController;
       vtable?for?OHOS::Ace::V2::IndexerComponent;
@@ -5038,6 +5054,8 @@
       VTT?for?OHOS::Ace::V2::WaterFlowComponent;
       VTT?for?OHOS::Ace::V2::WaterFlowItemComponent;
       VTT?for?OHOS::Ace::V2::WaterFlowPositionController;
+      VTT?for?OHOS::Ace::ShapeComponent;
+      VTT?for?OHOS::Ace::ShapeContainerComponent;
       OHOS::Ace::NG::LazyLayoutUtils*;
       OHOS::Ace::NG::HeaderFooterUtils*;
       "OHOS::Ace::NG::NodeModifier::GetButtonModifier()";

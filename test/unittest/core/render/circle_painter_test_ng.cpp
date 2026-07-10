@@ -21,10 +21,10 @@
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
-#include "core/components_ng/render/circle_painter.h"
+#include "core/components_ng/pattern/shape/circle_painter.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/shape_painter.h"
+#include "core/components_ng/pattern/shape/shape_painter.h"
 
 #undef private
 #undef protected

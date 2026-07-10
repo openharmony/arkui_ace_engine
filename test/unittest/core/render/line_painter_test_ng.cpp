@@ -22,8 +22,8 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/line_painter.h"
-#include "core/components_ng/render/shape_painter.h"
+#include "core/components_ng/pattern/shape/line_painter.h"
+#include "core/components_ng/pattern/shape/shape_painter.h"
 
 #undef private
 #undef protected

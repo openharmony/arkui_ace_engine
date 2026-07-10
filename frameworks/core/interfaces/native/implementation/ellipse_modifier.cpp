@@ -13,63 +13,29 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/shape/ellipse_model_ng.h"
-#include "core/components_ng/pattern/shape/ellipse_model_static.h"
-#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
-namespace OHOS::Ace::NG::Converter {
-struct EllipseOptions {
-    std::optional<Dimension> width;
-    std::optional<Dimension> height;
-};
-
-template<>
-inline EllipseOptions Convert(const Ark_EllipseOptions& src)
-{
-    EllipseOptions ellipseOptions;
-    ellipseOptions.width = Converter::OptConvert<Dimension>(src.width);
-    ellipseOptions.height = Converter::OptConvert<Dimension>(src.height);
-    return ellipseOptions;
-}
-} // namespace OHOS::Ace::NG::Converter
+#include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace EllipseModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = EllipseModelStatic::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // EllipseModifier
-namespace EllipseInterfaceModifier {
-void SetEllipseOptionsImpl(Ark_NativePointer node,
-                           const Opt_EllipseOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvertPtr<Converter::EllipseOptions>(options);
-
-    if (opt && opt->width) {
-        ShapeAbstractModelNG::SetWidth(frameNode, *opt->width);
-    }
-    if (opt && opt->height) {
-        ShapeAbstractModelNG::SetHeight(frameNode, *opt->height);
-    }
-}
-} // EllipseInterfaceModifier
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUIEllipseModifier* GetEllipseStaticModifier();
+#endif
 const GENERATED_ArkUIEllipseModifier* GetEllipseModifier()
 {
-    static const GENERATED_ArkUIEllipseModifier ArkUIEllipseModifierImpl {
-        EllipseModifier::ConstructImpl,
-        EllipseInterfaceModifier::SetEllipseOptionsImpl,
-    };
-    return &ArkUIEllipseModifierImpl;
-}
+    static const GENERATED_ArkUIEllipseModifier* cachedModifier = nullptr;
 
+    if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetEllipseStaticModifier();
+#else
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Ellipse");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIEllipseModifier*>(module->GetStaticModifier());
+#endif
+    }
+
+    return cachedModifier;
+}
 }

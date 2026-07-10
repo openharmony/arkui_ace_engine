@@ -18,6 +18,7 @@
 
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"
@@ -35,20 +36,33 @@ const std::vector<LineCapStyle> LINE_CAP_STYLE_LIST = { LineCapStyle::BUTT, Line
 const std::vector<LineJoinStyle> LINE_JOIN_STYLE_LIST = { LineJoinStyle::MITER, LineJoinStyle::ROUND,
     LineJoinStyle::BEVEL };
 const char* COLOR_STRATEGY_INVERT = "invert";
+
+OHOS::Ace::NG::ShapeModelNG* GetShapeModel()
+{
+    static OHOS::Ace::NG::ShapeModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = OHOS::Ace::DynamicModuleHelper::GetInstance().GetDynamicModule("Shape");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find shape dynamic module");
+        }
+        cachedModel = reinterpret_cast<OHOS::Ace::NG::ShapeModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
 } // namespace
 extern "C" {
 void FfiOHOSAceFrameworkShapeCreate()
 {
-    ShapeModel::GetInstance()->Create();
+    GetShapeModel()->Create();
     ViewAbstractModel::GetInstance()->SetFocusable(true);
     RefPtr<PixelMap> pixMapOhos = nullptr;
-    ShapeModel::GetInstance()->InitBox(pixMapOhos);
+    GetShapeModel()->InitBox(pixMapOhos);
 }
 
 void FfiOHOSAceFrameworkShapeCreateWithPixelMap(int64_t pixelMapId)
 {
 #ifndef _NON_OHOS_
-    ShapeModel::GetInstance()->Create();
+    GetShapeModel()->Create();
     ViewAbstractModel::GetInstance()->SetFocusable(true);
     RefPtr<PixelMap> pixMapOhos = nullptr;
     do {
@@ -72,7 +86,7 @@ void FfiOHOSAceFrameworkShapeCreateWithPixelMap(int64_t pixelMapId)
             break;
         }
     } while (false);
-    ShapeModel::GetInstance()->InitBox(pixMapOhos);
+    GetShapeModel()->InitBox(pixMapOhos);
 #endif
 }
 
@@ -82,12 +96,12 @@ void FfiOHOSAceFrameworkShapeSetViewPort(FFIAtCViewPort viewPort)
     Dimension dimTop(viewPort.y, static_cast<DimensionUnit>(viewPort.unitY));
     Dimension dimWidth(viewPort.width, static_cast<DimensionUnit>(viewPort.unitWidth));
     Dimension dimHeight(viewPort.height, static_cast<DimensionUnit>(viewPort.unitHeight));
-    ShapeModel::GetInstance()->SetViewPort(dimLeft, dimTop, dimWidth, dimHeight);
+    GetShapeModel()->SetViewPort(dimLeft, dimTop, dimWidth, dimHeight);
 }
 
 void FfiOHOSAceFrameworkShapeSetFill(uint32_t color)
 {
-    ShapeModel::GetInstance()->SetFill(Color(color));
+    GetShapeModel()->SetFill(Color(color));
 }
 
 void FfiOHOSAceFrameworkShapeSetFillOpacity(double fillOpacity)
@@ -96,12 +110,12 @@ void FfiOHOSAceFrameworkShapeSetFillOpacity(double fillOpacity)
     if (fillOpacity < 0.0f) {
         fillOpacity = 0.0f;
     }
-    ShapeModel::GetInstance()->SetFillOpacity(fillOpacity);
+    GetShapeModel()->SetFillOpacity(fillOpacity);
 }
 
 CJ_EXPORT void FfiOHOSAceFrameworkShapeSetForegroundColor(uint32_t color)
 {
-    ShapeModel::GetInstance()->SetFill(Color(color));
+    GetShapeModel()->SetFill(Color(color));
     ViewAbstractModel::GetInstance()->SetForegroundColor(Color(color));
 }
 
@@ -109,21 +123,21 @@ void FfiOHOSAceFrameworkShapeSetForegroundColorV2(uint32_t color)
 {
     Color foregroundColor = Color(color);
     ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
-    ShapeModel::GetInstance()->SetForegroundColor(foregroundColor);
+    GetShapeModel()->SetForegroundColor(foregroundColor);
 }
 
 void FfiOHOSAceFrameworkShapeSetForegroundColorStrategy(char* strategy)
 {
     if (strategy != nullptr && strcmp(strategy, COLOR_STRATEGY_INVERT) == 0) {
         ForegroundColorStrategy cStrategy = ForegroundColorStrategy::INVERT;
-        ShapeModel::GetInstance()->SetFill(Color::FOREGROUND);
+        GetShapeModel()->SetFill(Color::FOREGROUND);
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(cStrategy);
     }
 }
 
 void FfiOHOSAceFrameworkShapeSetStroke(uint32_t color)
 {
-    ShapeModel::GetInstance()->SetStroke(Color(color));
+    GetShapeModel()->SetStroke(Color(color));
 }
 
 void FfiOHOSAceFrameworkShapeSetStrokeDashArray(VectorFloat64Ptr vecValue, VectorInt32Ptr vecUnit)
@@ -145,13 +159,13 @@ void FfiOHOSAceFrameworkShapeSetStrokeDashArray(VectorFloat64Ptr vecValue, Vecto
             dashArray.emplace_back(dashArray[i]);
         }
     }
-    ShapeModel::GetInstance()->SetStrokeDashArray(dashArray);
+    GetShapeModel()->SetStrokeDashArray(dashArray);
 }
 
 void FfiOHOSAceFrameworkShapeSetStrokeDashOffset(double offset, int32_t offsetUnit)
 {
     Dimension dimOffset(offset, static_cast<DimensionUnit>(offsetUnit));
-    ShapeModel::GetInstance()->SetStrokeDashOffset(dimOffset);
+    GetShapeModel()->SetStrokeDashOffset(dimOffset);
 }
 
 void FfiOHOSAceFrameworkShapeSetStrokeLineCap(int32_t lineCap)
@@ -159,7 +173,7 @@ void FfiOHOSAceFrameworkShapeSetStrokeLineCap(int32_t lineCap)
     if (lineCap < 0 || lineCap >= static_cast<int32_t>(LINE_CAP_STYLE_LIST.size())) {
         return;
     }
-    ShapeModel::GetInstance()->SetStrokeLineCap(static_cast<int32_t>(LINE_CAP_STYLE_LIST[lineCap]));
+    GetShapeModel()->SetStrokeLineCap(static_cast<int32_t>(LINE_CAP_STYLE_LIST[lineCap]));
 }
 
 void FfiOHOSAceFrameworkShapeSetStrokeLineJoin(int32_t lineJoin)
@@ -167,12 +181,12 @@ void FfiOHOSAceFrameworkShapeSetStrokeLineJoin(int32_t lineJoin)
     if (lineJoin < 0 || lineJoin >= static_cast<int32_t>(LINE_JOIN_STYLE_LIST.size())) {
         return;
     }
-    ShapeModel::GetInstance()->SetStrokeLineJoin(static_cast<int32_t>(LINE_JOIN_STYLE_LIST[lineJoin]));
+    GetShapeModel()->SetStrokeLineJoin(static_cast<int32_t>(LINE_JOIN_STYLE_LIST[lineJoin]));
 }
 
 void FfiOHOSAceFrameworkShapeSetStrokeMiterLimit(double miterLimit)
 {
-    ShapeModel::GetInstance()->SetStrokeMiterLimit(miterLimit);
+    GetShapeModel()->SetStrokeMiterLimit(miterLimit);
 }
 
 void FfiOHOSAceFrameworkShapeSetStrokeOpacity(double strokeOpacity)
@@ -181,18 +195,18 @@ void FfiOHOSAceFrameworkShapeSetStrokeOpacity(double strokeOpacity)
     if (strokeOpacity < 0.0f) {
         strokeOpacity = 0.0f;
     }
-    ShapeModel::GetInstance()->SetStrokeOpacity(strokeOpacity);
+    GetShapeModel()->SetStrokeOpacity(strokeOpacity);
 }
 
 void FfiOHOSAceFrameworkShapeSetStrokeWidth(double strokeWidth, int32_t widthUnit)
 {
     Dimension dimStrokeWidth(strokeWidth, static_cast<DimensionUnit>(widthUnit));
-    ShapeModel::GetInstance()->SetStrokeWidth(dimStrokeWidth);
+    GetShapeModel()->SetStrokeWidth(dimStrokeWidth);
 }
 
 void FfiOHOSAceFrameworkShapeSetAntiAlias(bool antiAlias)
 {
-    ShapeModel::GetInstance()->SetAntiAlias(antiAlias);
+    GetShapeModel()->SetAntiAlias(antiAlias);
 }
 
 void FfiOHOSAceFrameworkShapeSetMesh(VectorFloat64Handle vecValue, uint32_t column, uint32_t row)
@@ -204,26 +218,26 @@ void FfiOHOSAceFrameworkShapeSetMesh(VectorFloat64Handle vecValue, uint32_t colu
     auto meshValue = reinterpret_cast<std::vector<double>*>(vecValue);
     auto tempMeshSize = static_cast<uint64_t>(column + 1) * (row + 1) * 2;
     if (tempMeshSize != meshValue->size()) {
-        ShapeModel::GetInstance()->SetBitmapMesh(std::vector<float>(), 0, 0);
+        GetShapeModel()->SetBitmapMesh(std::vector<float>(), 0, 0);
         return;
     }
     std::vector<float> mesh;
     for (size_t i = 0; i < meshValue->size(); ++i) {
         mesh.emplace_back(static_cast<float>((*meshValue)[i]));
     }
-    ShapeModel::GetInstance()->SetBitmapMesh(mesh, static_cast<int32_t>(column), static_cast<int32_t>(row));
+    GetShapeModel()->SetBitmapMesh(mesh, static_cast<int32_t>(column), static_cast<int32_t>(row));
 }
 
 void FfiOHOSAceFrameworkShapeSetWidth(double width, int32_t unit)
 {
     FfiOHOSAceFrameworkViewAbstractSetWidth(width, unit);
-    ShapeModel::GetInstance()->SetWidth();
+    GetShapeModel()->SetWidth();
 }
 
 void FfiOHOSAceFrameworkShapeSetHeight(double height, int32_t unit)
 {
     FfiOHOSAceFrameworkViewAbstractSetHeight(height, unit);
-    ShapeModel::GetInstance()->SetHeight();
+    GetShapeModel()->SetHeight();
 }
 
 void FfiOHOSAceFrameworkShapeSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)

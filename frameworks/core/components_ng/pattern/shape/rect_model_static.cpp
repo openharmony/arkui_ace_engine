@@ -19,13 +19,12 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
 RefPtr<FrameNode> RectModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    return FrameNode::CreateFrameNode(V2::RECT_ETS_TAG, nodeId, AceType::MakeRefPtr<RectPattern>());
+    return FrameNode::CreateFrameNode(RECT_ETS_TAG, nodeId, AceType::MakeRefPtr<RectPattern>());
 }
 
 } // namespace OHOS::Ace::NG

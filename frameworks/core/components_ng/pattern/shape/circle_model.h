@@ -21,6 +21,7 @@
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
+constexpr char CIRCLE_ETS_TAG[] = "Circle";
 class ACE_FORCE_EXPORT CircleModel {
 public:
     static CircleModel* GetInstance();

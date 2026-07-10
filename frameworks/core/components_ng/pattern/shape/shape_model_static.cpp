@@ -148,7 +148,7 @@ void ShapeModelStatic::SetViewPort(FrameNode* frameNode,
 RefPtr<NG::FrameNode> ShapeModelStatic::CreateFrameNode(int32_t nodeId)
 {
     return FrameNode::CreateFrameNode(
-        V2::SHAPE_ETS_TAG, nodeId, AceType::MakeRefPtr<ShapeContainerPattern>());
+        SHAPE_ETS_TAG, nodeId, AceType::MakeRefPtr<ShapeContainerPattern>());
 }
 
 } // namespace OHOS::Ace::NG

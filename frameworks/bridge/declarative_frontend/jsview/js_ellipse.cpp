@@ -14,37 +14,9 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
-
-#include "bridge/declarative_frontend/jsview/models/ellipse_model_impl.h"
 #include "core/common/container.h"
-#include "core/components_ng/pattern/shape/ellipse_model.h"
-#include "core/components_ng/pattern/shape/ellipse_model_ng.h"
-
-namespace OHOS::Ace {
-EllipseModel* EllipseModel::GetInstance()
-{
-#ifdef NG_BUILD
-    static NG::EllipseModelNG instance;
-    return &instance;
-#else
-    if (Container::IsCurrentUseNewPipeline()) {
-        static NG::EllipseModelNG instance;
-        return &instance;
-    } else {
-        static Framework::EllipseModelImpl instance;
-        return &instance;
-    }
-#endif
-}
-} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
-void JSEllipse::Create(const JSCallbackInfo& info)
-{
-    EllipseModel::GetInstance()->Create();
-    JSShapeAbstract::SetSize(info);
-}
 
 void JSEllipse::ConstructorCallback(const JSCallbackInfo& info)
 {
@@ -86,23 +58,13 @@ void JSEllipse::DestructorCallback(JSEllipse* jsEllipse)
 
 void JSEllipse::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSEllipse>::Declare("Ellipse");
-    MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSEllipse>::StaticMethod("create", &JSEllipse::Create, opt);
-
+    JSClass<JSEllipse>::Declare("__Ellipse__");
     JSClass<JSEllipse>::CustomMethod("width", &JSShapeAbstract::ObjectWidth);
     JSClass<JSEllipse>::CustomMethod("height", &JSShapeAbstract::ObjectHeight);
     JSClass<JSEllipse>::CustomMethod("size", &JSShapeAbstract::ObjectSize);
     JSClass<JSEllipse>::CustomMethod("offset", &JSShapeAbstract::ObjectOffset);
     JSClass<JSEllipse>::CustomMethod("fill", &JSShapeAbstract::ObjectFill);
     JSClass<JSEllipse>::CustomMethod("position", &JSShapeAbstract::ObjectPosition);
-
-    JSClass<JSEllipse>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSEllipse>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
-    JSClass<JSEllipse>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSEllipse>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSEllipse>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSEllipse>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSEllipse>::InheritAndBind<JSShapeAbstract>(
         globalObj, JSEllipse::ConstructorCallback, JSEllipse::DestructorCallback);

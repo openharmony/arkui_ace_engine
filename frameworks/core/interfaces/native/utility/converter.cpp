@@ -2227,7 +2227,7 @@ RenderingContextOptions Convert(const Ark_RenderingContextOptions& src)
 }
 
 template<>
-void AssignCast(std::optional<float>& dst, const Ark_String& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<float>& dst, const Ark_String& src)
 {
     auto value = Convert<std::string>(src);
     double result;

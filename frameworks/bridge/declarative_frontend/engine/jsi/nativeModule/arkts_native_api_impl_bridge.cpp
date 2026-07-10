@@ -47,17 +47,10 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_particle_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_selection_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollable_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_shape_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_shape_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rect_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_container_span_bridge.h"
@@ -560,6 +553,15 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "SymbolSpan" },
         { "MenuItemGroup" },
         { "LazyColumnLayout" },
+        { "CommonShape" },
+        { "Rect" },
+        { "Shape" },
+        { "Path" },
+        { "Circle" },
+        { "Ellipse" },
+        { "Polygon" },
+        { "Line" },
+        { "Polyline" },
         { "Toggle" },
         { "ImageAnimator" },
         { "DatePicker" },
@@ -835,16 +837,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterNodeContainerAttributes(object, vm);
     RegisterRenderNodeAttributes(object, vm);
     RegisterFrameNodeAttributes(object, vm);
-    RegisterLineAttributes(object, vm);
-    RegisterPathAttributes(object, vm);
-    RegisterPolygonAttributes(object, vm);
-    RegisterPolylineAttributes(object, vm);
     RegisterThemeAttributes(object, vm);
     RegisterScrollAttributes(object, vm);
     RegisterScrollableAttributes(object, vm);
-    RegisterCommonShapeAttributes(object, vm);
-    RegisterShapeAttributes(object, vm);
-    RegisterRectAttributes(object, vm);
     RegisterListAttributes(object, vm);
     RegisterListItemGroupAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
@@ -1447,50 +1442,6 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"), frameNode);
 }
 
-void ArkUINativeModule::RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto line = panda::ObjectRef::New(vm);
-    line->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStartPoint"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LineBridge::SetStartPoint));
-    line->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStartPoint"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LineBridge::ResetStartPoint));
-    line->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEndPoint"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LineBridge::SetEndPoint));
-    line->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEndPoint"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LineBridge::ResetEndPoint));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "line"), line);
-}
-
-void ArkUINativeModule::RegisterPathAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto path = panda::ObjectRef::New(vm);
-    path->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPathCommands"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PathBridge::SetPathCommands));
-    path->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPathCommands"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PathBridge::ResetPathCommands));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "path"), path);
-}
-
-void ArkUINativeModule::RegisterPolygonAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto polygon = panda::ObjectRef::New(vm);
-    polygon->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPolygonPoints"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolygonBridge::SetPolygonPoints));
-    polygon->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPolygonPoints"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolygonBridge::ResetPolygonPoints));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "polygon"), polygon);
-}
-
-void ArkUINativeModule::RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto polyline = panda::ObjectRef::New(vm);
-    polyline->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPoints"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolylineBridge::SetPoints));
-    polyline->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPoints"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolylineBridge::ResetPoints));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "polyline"), polyline);
-}
-
 void ArkUINativeModule::RegisterSelectionContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto selectionContainer = panda::ObjectRef::New(vm);
@@ -1842,105 +1793,6 @@ void ArkUINativeModule::RegisterPluginAttributes(Local<panda::ObjectRef> object,
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "plugin"), plugin);
 }
 #endif
-
-void ArkUINativeModule::RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto commonShape = panda::ObjectRef::New(vm);
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeDashArray"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetStrokeDashArray));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeDashArray"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetStrokeDashArray));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeMiterLimit"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetStrokeMiterLimit));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeMiterLimit"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetStrokeMiterLimit));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFillOpacity"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetFillOpacity));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFillOpacity"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetFillOpacity));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeOpacity"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetStrokeOpacity));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeOpacity"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetStrokeOpacity));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetStrokeWidth));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetStrokeWidth));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAntiAlias"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetAntiAlias));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAntiAlias"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetAntiAlias));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStroke"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetStroke));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStroke"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetStroke));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFill"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetFill));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFill"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetFill));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeDashOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetStrokeDashOffset));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeDashOffset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetStrokeDashOffset));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeLineCap"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetStrokeLineCap));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeLineCap"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetStrokeLineCap));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStrokeLineJoin"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetStrokeLineJoin));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStrokeLineJoin"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetStrokeLineJoin));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetHeight));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetHeight));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetWidth));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetWidth));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setForegroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::SetForegroundColor));
-    commonShape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetForegroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonShapeBridge::ResetForegroundColor));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "commonShape"), commonShape);
-}
-
-void ArkUINativeModule::RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto shape = panda::ObjectRef::New(vm);
-    shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShapeViewPort"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::SetViewPort));
-    shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShapeViewPort"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::ResetViewPort));
-    shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShapeMesh"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::SetMesh));
-    shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShapeMesh"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::ResetMesh));
-    shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShapeInitialize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::SetShapeInitialize));
-    shape->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShapeInitialize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ShapeBridge::ResetShapeInitialize));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "shape"), shape);
-}
-
-void ArkUINativeModule::RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto rect = panda::ObjectRef::New(vm);
-    rect->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRectRadiusWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RectBridge::SetRadiusWidth));
-    rect->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRectRadiusWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RectBridge::ResetRadiusWidth));
-    rect->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRectRadiusHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RectBridge::SetRadiusHeight));
-    rect->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRectRadiusHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RectBridge::ResetRadiusHeight));
-    rect->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRectRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RectBridge::SetRadius));
-    rect->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRectRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RectBridge::ResetRadius));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "rect"), rect);
-}
-
 
 void ArkUINativeModule::RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
@@ -3080,18 +2932,11 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
         RegisterArkUINativeModuleFormLite(object, vm);
     }
     RegisterCanvasAttributes(object, vm);
-    RegisterCommonShapeAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
-    RegisterLineAttributes(object, vm);
     RegisterListAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
-    RegisterPathAttributes(object, vm);
-    RegisterPolygonAttributes(object, vm);
-    RegisterPolylineAttributes(object, vm);
-    RegisterRectAttributes(object, vm);
     RegisterScrollableAttributes(object, vm);
     RegisterSpanAttributes(object, vm);
-    RegisterShapeAttributes(object, vm);
     auto frameNodeValue = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "frameNode"));
     if (frameNodeValue.IsNull() || frameNodeValue->IsUndefined() || !frameNodeValue->IsObject(vm)) {
         return;

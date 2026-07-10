@@ -20,7 +20,6 @@
 #include "core/components_ng/pattern/shape/ellipse_model.h"
 
 namespace OHOS::Ace::NG {
-
 class ACE_EXPORT EllipseModelNG : public OHOS::Ace::EllipseModel {
 public:
     void Create() override;

@@ -23,7 +23,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
 #include "core/components_ng/pattern/shape/path_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
@@ -31,9 +30,9 @@ void PathModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PATH_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", PATH_ETS_TAG, nodeId);
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(V2::PATH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PathPattern>(); });
+        FrameNode::GetOrCreateFrameNode(PATH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PathPattern>(); });
     stack->Push(frameNode);
 }
 

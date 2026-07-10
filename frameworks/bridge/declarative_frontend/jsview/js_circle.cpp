@@ -15,37 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 #include <memory>
-
-#include "bridge/declarative_frontend/jsview/models/circle_model_impl.h"
 #include "core/common/container.h"
-#include "core/components_ng/pattern/shape/circle_model.h"
-#include "core/components_ng/pattern/shape/circle_model_ng.h"
-
-namespace OHOS::Ace {
-CircleModel* CircleModel::GetInstance()
-{
-#ifdef NG_BUILD
-    static NG::CircleModelNG instance;
-    return &instance;
-#else
-    if (Container::IsCurrentUseNewPipeline()) {
-        static NG::CircleModelNG instance;
-        return &instance;
-    } else {
-        static Framework::CircleModelImpl instance;
-        return &instance;
-    }
-#endif
-}
-} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
-
-void JSCircle::Create(const JSCallbackInfo& info)
-{
-    CircleModel::GetInstance()->Create();
-    JSShapeAbstract::SetSize(info);
-}
 
 void JSCircle::ConstructorCallback(const JSCallbackInfo& info)
 {
@@ -87,23 +59,13 @@ void JSCircle::DestructorCallback(JSCircle* jsCircle)
 
 void JSCircle::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSCircle>::Declare("Circle");
-    MethodOptions opt = MethodOptions::NONE;
-    JSClass<JSCircle>::StaticMethod("create", &JSCircle::Create, opt);
-
+    JSClass<JSCircle>::Declare("__Circle__");
     JSClass<JSCircle>::CustomMethod("width", &JSShapeAbstract::ObjectWidth);
     JSClass<JSCircle>::CustomMethod("height", &JSShapeAbstract::ObjectHeight);
     JSClass<JSCircle>::CustomMethod("size", &JSShapeAbstract::ObjectSize);
     JSClass<JSCircle>::CustomMethod("offset", &JSShapeAbstract::ObjectOffset);
     JSClass<JSCircle>::CustomMethod("fill", &JSShapeAbstract::ObjectFill);
     JSClass<JSCircle>::CustomMethod("position", &JSShapeAbstract::ObjectPosition);
-
-    JSClass<JSCircle>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSCircle>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
-    JSClass<JSCircle>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
-    JSClass<JSCircle>::StaticMethod("onDeleteEvent", &JSInteractableView::JsOnDelete);
-    JSClass<JSCircle>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
-    JSClass<JSCircle>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
     JSClass<JSCircle>::InheritAndBind<JSShapeAbstract>(
         globalObj, JSCircle::ConstructorCallback, JSCircle::DestructorCallback);

@@ -305,6 +305,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
             "arkui.components.arkimageanimator",
             "arkui.components.arkprogress",
             "arkui.components.arktexttimer",
+            "arkui.components.arkcommonshape",
             "arkui.components.arkcircle",
             "arkui.components.arkellipse",
             "arkui.components.arkline",

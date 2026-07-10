@@ -18,14 +18,30 @@
 
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 
 using namespace OHOS::Ace;
 
+namespace {
+OHOS::Ace::NG::RectModelNG* GetRectModel()
+{
+    static OHOS::Ace::NG::RectModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = OHOS::Ace::DynamicModuleHelper::GetInstance().GetDynamicModule("Rect");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find rect dynamic module");
+        }
+        cachedModel = reinterpret_cast<OHOS::Ace::NG::RectModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+} // namespace
+
 extern "C" {
 void FfiOHOSAceFrameworkRectCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
-    RectModel::GetInstance()->Create();
+    GetRectModel()->Create();
     if (width > 0.0) {
         FfiOHOSAceFrameworkShapeSetWidth(width, widthUnit);
     }
@@ -48,20 +64,20 @@ int64_t FfiOHOSAceFrameworkRectInsCreate(double width, int32_t widthUnit, double
 void FfiOHOSAceFrameworkRectSetRadiusWidth(double radiusWidth, int32_t radiusWidthUnit)
 {
     Dimension value(radiusWidth, static_cast<DimensionUnit>(radiusWidthUnit));
-    RectModel::GetInstance()->SetRadiusWidth(value);
+    GetRectModel()->SetRadiusWidth(value);
 }
 
 void FfiOHOSAceFrameworkRectSetRadiusHeight(double radiusHeight, int32_t radiusHeightUnit)
 {
     Dimension value(radiusHeight, static_cast<DimensionUnit>(radiusHeightUnit));
-    RectModel::GetInstance()->SetRadiusHeight(value);
+    GetRectModel()->SetRadiusHeight(value);
 }
 
 void FfiOHOSAceFrameworkRectSetRadius(double radius, int32_t radiusUnit)
 {
     Dimension value(radius, static_cast<DimensionUnit>(radiusUnit));
-    RectModel::GetInstance()->SetRadiusWidth(value);
-    RectModel::GetInstance()->SetRadiusHeight(value);
+    GetRectModel()->SetRadiusWidth(value);
+    GetRectModel()->SetRadiusHeight(value);
 }
 
 void FfiOHOSAceFrameworkRectSetRadiusArray(VectorDoubleHandle voidValue, VectorInt32Handle voidUnit)
@@ -81,7 +97,7 @@ void FfiOHOSAceFrameworkRectSetRadiusArray(VectorDoubleHandle voidValue, VectorI
         }
 
         Dimension value(vecValue->at(i), static_cast<DimensionUnit>(unit));
-        RectModel::GetInstance()->SetRadiusValue(value, value, i);
+        GetRectModel()->SetRadiusValue(value, value, i);
     }
 }
 
@@ -113,7 +129,7 @@ void FfiOHOSAceFrameworkRectSetRadiusTupleArray(VectorDoubleHandle voidWidthValu
         Dimension width(vecWidthValue->at(i), widthUnit);
         Dimension height(vecHeightValue->at(i), heightUnit);
 
-        RectModel::GetInstance()->SetRadiusValue(width, height, i);
+        GetRectModel()->SetRadiusValue(width, height, i);
     }
 }
 

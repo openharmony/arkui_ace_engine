@@ -21,7 +21,8 @@
 #include "core/components_ng/pattern/slider/slider_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
-#include "core/components_ng/render/path_painter.h"
+#include "core/components_ng/pattern/shape/bridge/path_custom_modifier.h"
+#include "core/common/dynamic_module_helper.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
@@ -37,6 +38,17 @@ constexpr float SPRING_MOTION_DAMPING_FRACTION = 0.95f;
 constexpr double DEFAULT_SCALE_VALUE = 1.0;
 constexpr float MAX_BLOCK_SCALE_FOR_MATERIAL = 3.0f;
 constexpr int32_t STEPS_MIN_NUMBER = 2;
+
+const ArkUIPathCustomModifier* GetPathCustomModifier()
+{
+    static const ArkUIPathCustomModifier* cachedCustomModifier = nullptr;
+    if (cachedCustomModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Path");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedCustomModifier = reinterpret_cast<const ArkUIPathCustomModifier*>(module->GetCustomModifier());
+    }
+    return cachedCustomModifier;
+}
 } // namespace
 SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     UpdateImageCenterCallback updateImageCenterCallback, const RefPtr<SliderTheme>& theme)
@@ -1120,7 +1132,7 @@ void SliderContentModifier::DrawBlockShapePath(DrawingContext& context, RefPtr<P
     auto blockBorderWidth = blockBorderWidth_->Get();
 
     auto blockCenter = GetBlockCenter();
-    SizeF shapeSize = PathPainter::GetPathSize(path->GetValue());
+    SizeF shapeSize = GetPathCustomModifier()->getPathSize(path->GetValue());
     if (NearZero(shapeSize.Width()) || NearZero(shapeSize.Height())) {
         return;
     }
@@ -1146,7 +1158,7 @@ void SliderContentModifier::DrawBlockShapePath(DrawingContext& context, RefPtr<P
     CreateShapePathBlockBrush(brush, shapeSize, blockCenter);
     canvas.AttachBrush(brush);
     OffsetF offset(blockCenter.GetX() - shapeSize.Width() * HALF, blockCenter.GetY() - shapeSize.Height() * HALF);
-    PathPainter::DrawPath(canvas, path->GetValue(), offset);
+    GetPathCustomModifier()->drawPath(canvas, path->GetValue(), offset);
     canvas.DetachBrush();
     canvas.DetachPen();
     canvas.Restore();

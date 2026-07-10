@@ -21,7 +21,7 @@
 #include "core/components_ng/pattern/shape/shape_paint_method.h"
 #include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
-#include "core/components_ng/render/circle_painter.h"
+#include "core/components_ng/pattern/shape/circle_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -37,92 +37,12 @@ public:
     {}
     ~CirclePaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(paintWrapper, nullptr);
-        auto paintProperty = paintWrapper->GetPaintProperty();
-        CHECK_NULL_RETURN(paintProperty, nullptr);
-        auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintProperty->Clone());
-        CHECK_NULL_RETURN(shapePaintProperty, nullptr);
-
-        if (propertiesFromAncestor_) {
-            if (!shapePaintProperty->HasFill() && propertiesFromAncestor_->HasFill()) {
-                auto renderContext = paintWrapper->GetRenderContext();
-                CHECK_NULL_RETURN(renderContext, nullptr);
-                renderContext->UpdateForegroundColor(propertiesFromAncestor_->GetFillValue());
-                renderContext->ResetForegroundColorStrategy();
-            }
-            shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
-        }
-        if (paintWrapper->HasForegroundColor()) {
-            shapePaintProperty->UpdateFill(paintWrapper->GetForegroundColor());
-        } else if (paintWrapper->HasForegroundColorStrategy()) {
-            shapePaintProperty->UpdateFill(Color::FOREGROUND);
-            shapePaintProperty->ResetFillOpacity();
-        }
-        UpdateFillHDRColorHeadRoom(paintWrapper, *shapePaintProperty);
-        float height = paintWrapper->GetContentSize().Height();
-        float width = paintWrapper->GetContentSize().Width();
-        float radius = (width > height ? height : width) * 0.5;
-        UpdateStrokeHDRColorHeadRoom(paintWrapper, *shapePaintProperty);
-        return
-            [radiusValue = radius, offsetValue = paintWrapper->GetContentOffset(), shapePaintProperty, paintWrapper](
-                RSCanvas& canvas) {
-                    CirclePainter::DrawCircle(canvas, radiusValue, offsetValue, *shapePaintProperty);
-                    paintWrapper->FlushOverlayModifier();
-                };
-    }
-
-    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(paintWrapper, nullptr);
-        CHECK_NULL_RETURN(shapeOverlayModifier_, nullptr);
-        auto paintProperty = paintWrapper->GetPaintProperty();
-        CHECK_NULL_RETURN(paintProperty, nullptr);
-        auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintProperty->Clone());
-        CHECK_NULL_RETURN(shapePaintProperty, nullptr);
-
-        if (propertiesFromAncestor_) {
-            shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
-        }
-        float height = paintWrapper->GetContentSize().Height();
-        float width = paintWrapper->GetContentSize().Width();
-        auto offset = paintWrapper->GetContentOffset();
-        float strokeWidth =
-            shapePaintProperty->GetStrokeWidthValue(ShapePaintProperty::STROKE_WIDTH_DEFAULT).ConvertToPx();
-        RectF boundsRect = { (offset.GetX() - strokeWidth), (offset.GetY() - strokeWidth), (width + strokeWidth * 2),
-            (height + strokeWidth * 2) };
-        shapeOverlayModifier_->SetBoundsRect(boundsRect);
-        return shapeOverlayModifier_;
-    }
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    void UpdateFillHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const
-    {
-        CHECK_NULL_VOID(paintWrapper);
-        constexpr float DEFAULT_SDR_HEADROOM = 1.0f;
-        auto renderContext = paintWrapper->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto fillColor = shapePaintProperty.HasFill() ? shapePaintProperty.GetFillValue() : Color::BLACK;
-        auto headRoomColor = fillColor.GetHeadRoomColor();
-        renderContext->SetHDRColorHeadRoom(
-            headRoomColor.has_value() ? headRoomColor.value().headRoom : DEFAULT_SDR_HEADROOM);
-    }
-
-    void UpdateStrokeHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const
-    {
-        CHECK_NULL_VOID(paintWrapper);
-        if (!shapePaintProperty.HasStroke()) {
-            return;
-        }
-        auto headRoomColor = shapePaintProperty.GetStrokeValue().GetHeadRoomColor();
-        if (!headRoomColor.has_value()) {
-            return;
-        }
-        auto renderContext = paintWrapper->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->SetHDRColorHeadRoom(headRoomColor.value().headRoom);
-    }
+    void UpdateFillHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const;
+    void UpdateStrokeHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const;
 
     ACE_DISALLOW_COPY_AND_MOVE(CirclePaintMethod);
 };

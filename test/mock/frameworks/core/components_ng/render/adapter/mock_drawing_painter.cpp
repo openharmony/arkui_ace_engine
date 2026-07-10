@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/adapter/drawing_painter.h"
+#include "core/components_ng/pattern/shape/drawing_painter.h"
 
 namespace OHOS::Ace::NG {
 void DrawingPainter::DrawPath(

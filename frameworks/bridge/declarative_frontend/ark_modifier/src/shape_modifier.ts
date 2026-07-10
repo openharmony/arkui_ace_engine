@@ -13,11 +13,37 @@
  * limitations under the License.
  */
 
-class ShapeModifier extends ArkShapeComponent implements AttributeModifier<ShapeAttribute> {
+class LazyArkShapeComponent extends LazyArkCommonShapeComponent {
+  static module: ShapeComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkShapeComponent.module === undefined) {
+      LazyArkShapeComponent.module = globalThis.requireNapi('arkui.components.arkshape');
+    }
+    this.lazyComponent = LazyArkShapeComponent.module.createComponent(nativePtr, classType);
+  }
+
+  viewPort(value: ViewportRect): this {
+    this.lazyComponent.viewPort(value);
+    return this;
+  }
+
+  mesh(value: Array<any>, column: number, row: number): this {
+    this.lazyComponent.mesh(value, column, row);
+    return this;
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+}
+
+class ShapeModifier extends LazyArkShapeComponent implements AttributeModifier<ShapeAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: ShapeAttribute): void {

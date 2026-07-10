@@ -31,29 +31,8 @@ public:
         : shapeContainerModifier_(modifier)
     {}
 
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_VOID(shapeContainerModifier_);
-        CHECK_NULL_VOID(paintWrapper);
-        auto paintProperty = DynamicCast<ShapeContainerPaintProperty>(paintWrapper->GetPaintProperty());
-        CHECK_NULL_VOID(paintProperty);
-        auto mesh = paintProperty->GetImageMeshValue(ImageMesh());
-        shapeContainerModifier_->SetColumn(mesh.GetColumn());
-        shapeContainerModifier_->SetRow(mesh.GetRow());
-        const auto& meshVector = mesh.GetMesh();
-        auto linearMesh = LinearVector<float>();
-        for (const float& value : meshVector) {
-            linearMesh.emplace_back(value);
-        }
-        shapeContainerModifier_->SetMesh(linearMesh);
-        auto pixelMapInfo = paintProperty->GetPixelMapInfoValue(ImageSourceInfo());
-        shapeContainerModifier_->UpdatePixelMap(pixelMapInfo.GetPixmap());
-    }
-
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* /* paintWrapper */) override
-    {
-        return shapeContainerModifier_;
-    }
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
 
 private:
     RefPtr<ShapeContainerModifier> shapeContainerModifier_;
