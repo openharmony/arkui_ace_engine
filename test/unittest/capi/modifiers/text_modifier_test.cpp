@@ -1530,8 +1530,7 @@ HWTEST_F(TextModifierTest, setMarqueeOptionsTestEmpty, TestSize.Level1)
 HWTEST_F(TextModifierTest, setTailIndentsTest001, TestSize.Level1)
 {
     auto lengthMetrics = Converter::ArkValue<Ark_LengthMetrics>(Dimension(50.0, DimensionUnit::VP));
-    auto tailIndentUnion =
-        Converter::ArkUnion<Opt_Union_LengthMetrics_Array_LengthMetrics, Ark_LengthMetrics>(lengthMetrics);
+    auto tailIndentUnion = Converter::ArkUnion<Opt_Union_LengthMetrics_Array_LengthMetrics, Ark_LengthMetrics>(lengthMetrics);
     modifier_->setTailIndents(node_, &tailIndentUnion);
     
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -1541,8 +1540,9 @@ HWTEST_F(TextModifierTest, setTailIndentsTest001, TestSize.Level1)
     
     auto tailIndents = layoutProperty->GetTailIndents();
     ASSERT_TRUE(tailIndents.has_value());
-    EXPECT_EQ(tailIndents->indentsArray.size(), 1);
-    EXPECT_DOUBLE_EQ(tailIndents->indentsArray[0].Value(), 50.0);
+    ASSERT_TRUE(tailIndents->indentsArray.has_value());
+    EXPECT_EQ(tailIndents->indentsArray->size(), 1);
+    EXPECT_DOUBLE_EQ(tailIndents->indentsArray.value()[0].Value(), 50.0);
 }
 
 /**
@@ -1558,10 +1558,8 @@ HWTEST_F(TextModifierTest, setTailIndentsTest002, TestSize.Level1)
     metricsArray.push_back(Converter::ArkValue<Ark_LengthMetrics>(Dimension(30.0, DimensionUnit::PERCENT)));
     metricsArray.push_back(Converter::ArkValue<Ark_LengthMetrics>(Dimension(20.0, DimensionUnit::VP)));
     
-    Array_LengthMetrics arrayData =
-        { .array = metricsArray.data(), .length = static_cast<Ark_Int32>(metricsArray.size()) };
-    auto tailIndentUnion =
-        Converter::ArkUnion<Opt_Union_LengthMetrics_Array_LengthMetrics, Array_LengthMetrics>(arrayData);
+    Array_LengthMetrics arrayData = { .array = metricsArray.data(), .length = static_cast<Ark_Int32>(metricsArray.size()) };
+    auto tailIndentUnion = Converter::ArkUnion<Opt_Union_LengthMetrics_Array_LengthMetrics, Array_LengthMetrics>(arrayData);
     modifier_->setTailIndents(node_, &tailIndentUnion);
     
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -1571,10 +1569,11 @@ HWTEST_F(TextModifierTest, setTailIndentsTest002, TestSize.Level1)
     
     auto tailIndents = layoutProperty->GetTailIndents();
     ASSERT_TRUE(tailIndents.has_value());
-    EXPECT_EQ(tailIndents->indentsArray.size(), 4);
-    EXPECT_DOUBLE_EQ(tailIndents->indentsArray[0].Value(), 50.0);
-    EXPECT_DOUBLE_EQ(tailIndents->indentsArray[1].Value(), 0.0);
-    EXPECT_DOUBLE_EQ(tailIndents->indentsArray[2].Value(), 0.0);
-    EXPECT_DOUBLE_EQ(tailIndents->indentsArray[3].Value(), 20.0);
+    ASSERT_TRUE(tailIndents->indentsArray.has_value());
+    EXPECT_EQ(tailIndents->indentsArray->size(), 4);
+    EXPECT_DOUBLE_EQ(tailIndents->indentsArray.value()[0].Value(), 50.0);
+    EXPECT_DOUBLE_EQ(tailIndents->indentsArray.value()[1].Value(), 0.0);
+    EXPECT_DOUBLE_EQ(tailIndents->indentsArray.value()[2].Value(), 0.0);
+    EXPECT_DOUBLE_EQ(tailIndents->indentsArray.value()[3].Value(), 20.0);
 }
 }
