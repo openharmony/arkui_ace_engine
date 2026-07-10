@@ -371,11 +371,6 @@ public:
         return needToRequestKeyboardOnFocus_;
     }
 
-    bool NeedReadFontScaleFromEnv() override
-    {
-        return true;
-    }
-
     bool CheckBlurReason();
 
     bool NeedSetScrollRect();

@@ -26,9 +26,11 @@
 namespace OHOS::Ace::NG {
 
 using DirectionEnvReader = std::pair<std::optional<TextDirection>, bool>;
+using FontScaleEnvReader = std::pair<std::optional<float>, bool>;
 
 struct EnvReaderCache {
     DirectionEnvReader direction = { std::nullopt, true };
+    FontScaleEnvReader fontScale = { std::nullopt, true };
 
     void Reset()
     {
@@ -39,6 +41,8 @@ struct EnvReaderCache {
     {
         if (key == ENV_KEY_DIRECTION) {
             direction.second = true;
+        } else if (key == ENV_KEY_FONT_SCALE) {
+            fontScale.second = true;
         }
     }
 };

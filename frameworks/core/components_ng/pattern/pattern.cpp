@@ -116,15 +116,6 @@ FocusPattern Pattern::GetFocusPattern() const
     return {};
 }
 
-void Pattern::ReadFontScaleFromEnv()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    envFontScale_ = pipeline->ResolveFontScaleFromEnv(host);
-}
-
 GestureEventFunc Pattern::GetLongPressEventRecorder()
 {
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {

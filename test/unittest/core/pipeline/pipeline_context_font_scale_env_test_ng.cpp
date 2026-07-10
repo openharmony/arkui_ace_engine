@@ -15,6 +15,7 @@
 
 #include "test/unittest/core/pipeline/pipeline_context_test_ng.h"
 
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/with_env_node.h"
 #include "core/pipeline_ng/environment_manager.h"
@@ -27,46 +28,54 @@ namespace NG {
 
 namespace {
 
+class TestableLayoutProperty : public LayoutProperty {
+    DECLARE_ACE_TYPE(TestableLayoutProperty, LayoutProperty);
+
+public:
+    bool NeedReadFontScaleFromEnv() const override
+    {
+        return true;
+    }
+};
+
 class TestablePattern : public Pattern {
     DECLARE_ACE_TYPE(TestablePattern, Pattern);
 
 public:
-    bool NeedReadFontScaleFromEnv() override
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
-        return true;
+        return MakeRefPtr<TestableLayoutProperty>();
     }
 };
 
 } // namespace
 
 /**
- * @tc.name: ReadFontScaleFromEnv001
- * @tc.desc: ReadFontScaleFromEnv returns nullopt when no WithEnv ancestor exists
+ * @tc.name: GetEnvFontScaleLazyRead001
+ * @tc.desc: GetEnvFontScale returns nullopt when no WithEnv ancestor exists
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, ReadFontScaleFromEnv001, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, GetEnvFontScaleLazyRead001, TestSize.Level1)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::CreateFrameNode("test", nodeId, AceType::MakeRefPtr<TestablePattern>());
     ASSERT_NE(frameNode, nullptr);
 
-    auto pattern = frameNode->GetPattern<TestablePattern>();
-    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TestableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
-    pattern->ReadFontScaleFromEnv();
-
-    auto envFontScale = pattern->GetEnvFontScale();
+    auto envFontScale = layoutProperty->GetEnvFontScale();
     EXPECT_FALSE(envFontScale.has_value());
 
     frameNode = nullptr;
 }
 
 /**
- * @tc.name: ReadFontScaleFromEnv002
- * @tc.desc: ReadFontScaleFromEnv returns the value when WithEnv ancestor defines fontScale
+ * @tc.name: GetEnvFontScaleLazyRead002
+ * @tc.desc: GetEnvFontScale returns the value when WithEnv ancestor defines fontScale
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, ReadFontScaleFromEnv002, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, GetEnvFontScaleLazyRead002, TestSize.Level1)
 {
     auto envNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto withEnvNode = WithEnvNode::GetOrCreateWithEnvNode(envNodeId);
@@ -78,12 +87,10 @@ HWTEST_F(PipelineContextTestNg, ReadFontScaleFromEnv002, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     frameNode->SetParent(withEnvNode);
 
-    auto pattern = frameNode->GetPattern<TestablePattern>();
-    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TestableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
-    pattern->ReadFontScaleFromEnv();
-
-    auto envFontScale = pattern->GetEnvFontScale();
+    auto envFontScale = layoutProperty->GetEnvFontScale();
     ASSERT_TRUE(envFontScale.has_value());
     EXPECT_FLOAT_EQ(envFontScale.value(), 2.5f);
 
@@ -92,7 +99,7 @@ HWTEST_F(PipelineContextTestNg, ReadFontScaleFromEnv002, TestSize.Level1)
 
 /**
  * @tc.name: LayoutFontScaleEnvCallback001
- * @tc.desc: Manually read fontScale via ReadFontScaleFromEnv works correctly
+ * @tc.desc: fontScale handler marks layout property dirty and lazy getter resolves updated value
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextTestNg, LayoutFontScaleEnvCallback001, TestSize.Level1)
@@ -104,19 +111,23 @@ HWTEST_F(PipelineContextTestNg, LayoutFontScaleEnvCallback001, TestSize.Level1)
     auto envNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto withEnvNode = WithEnvNode::GetOrCreateWithEnvNode(envNodeId);
     ASSERT_NE(withEnvNode, nullptr);
-    withEnvNode->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(1.5));
+    withEnvNode->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(1.0));
 
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::CreateFrameNode("test", nodeId, AceType::MakeRefPtr<TestablePattern>());
     ASSERT_NE(frameNode, nullptr);
     withEnvNode->AddChild(frameNode);
 
-    auto pattern = frameNode->GetPattern<TestablePattern>();
-    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TestableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
-    pattern->ReadFontScaleFromEnv();
+    auto initialEnvFontScale = layoutProperty->GetEnvFontScale();
+    ASSERT_TRUE(initialEnvFontScale.has_value());
+    EXPECT_FLOAT_EQ(initialEnvFontScale.value(), 1.0f);
 
-    auto envFontScale = pattern->GetEnvFontScale();
+    ASSERT_TRUE(envManager->SetSystemEnvValue(withEnvNode, ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(1.5)));
+
+    auto envFontScale = layoutProperty->GetEnvFontScale();
     ASSERT_TRUE(envFontScale.has_value());
     EXPECT_FLOAT_EQ(envFontScale.value(), 1.5f);
 
@@ -137,19 +148,21 @@ HWTEST_F(PipelineContextTestNg, OnModifyDoneNoReadFontScale001, TestSize.Level1)
     auto envNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto withEnvNode = WithEnvNode::GetOrCreateWithEnvNode(envNodeId);
     ASSERT_NE(withEnvNode, nullptr);
-    withEnvNode->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(3.0));
+    withEnvNode->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(4.0));
     withEnvNode->AddChild(frameNode);
 
     auto pattern = frameNode->GetPattern<TestablePattern>();
     ASSERT_NE(pattern, nullptr);
-
-    auto envFontScaleBefore = pattern->GetEnvFontScale();
-    EXPECT_FALSE(envFontScaleBefore.has_value());
+    auto layoutProperty = frameNode->GetLayoutProperty<TestableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
 
     pattern->OnModifyDone();
 
-    auto envFontScaleAfter = pattern->GetEnvFontScale();
-    EXPECT_FALSE(envFontScaleAfter.has_value());
+    withEnvNode->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(4.0));
+
+    auto envFontScaleAfter = layoutProperty->GetEnvFontScale();
+    ASSERT_TRUE(envFontScaleAfter.has_value());
+    EXPECT_FLOAT_EQ(envFontScaleAfter.value(), 4.0f);
 
     frameNode = nullptr;
 }
@@ -172,9 +185,9 @@ HWTEST_F(PipelineContextTestNg, GetFontScaleFromEnvFallback001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("test", nodeId, AceType::MakeRefPtr<TestablePattern>());
     ASSERT_NE(frameNode, nullptr);
 
-    auto pattern = frameNode->GetPattern<TestablePattern>();
-    ASSERT_NE(pattern, nullptr);
-    EXPECT_FALSE(pattern->GetEnvFontScale().has_value());
+    auto layoutProperty = frameNode->GetLayoutProperty<TestableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetEnvFontScale().has_value());
 
     result = context_->GetFontScaleFromEnv(frameNode);
     EXPECT_FLOAT_EQ(result, systemFontScale);
@@ -197,18 +210,15 @@ HWTEST_F(PipelineContextTestNg, GetFontScaleFromEnvWithEnvValue001, TestSize.Lev
     auto frameNode = FrameNode::CreateFrameNode("test", nodeId, AceType::MakeRefPtr<TestablePattern>());
     ASSERT_NE(frameNode, nullptr);
 
-    auto pattern = frameNode->GetPattern<TestablePattern>();
-    ASSERT_NE(pattern, nullptr);
-
     auto envNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto withEnvNode = WithEnvNode::GetOrCreateWithEnvNode(envNodeId);
     ASSERT_NE(withEnvNode, nullptr);
     withEnvNode->SetSystemEnvProperty(ENV_KEY_FONT_SCALE, SystemEnvValue::FromDouble(2.0));
     withEnvNode->AddChild(frameNode);
 
-    pattern->ReadFontScaleFromEnv();
-
-    auto envFontScale = pattern->GetEnvFontScale();
+    auto layoutProperty = frameNode->GetLayoutProperty<TestableLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto envFontScale = layoutProperty->GetEnvFontScale();
     ASSERT_TRUE(envFontScale.has_value());
     EXPECT_FLOAT_EQ(envFontScale.value(), 2.0f);
 

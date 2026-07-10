@@ -1391,83 +1391,11 @@ HWTEST_F(ParagraphCacheTestNg, LayoutParagraphsSameNonZeroWidth001, TestSize.Lev
 }
 
 // ==================== ConvertToPxDistributeWithEnv (UPDATE_DIMENSION_STYLE_TO_PX) Tests ====================
-
-/**
- * @tc.name: UpdateTextStyleFromPropertyEnvFontScale001
- * @tc.desc: Test UpdateTextStyleFromProperty uses pattern envFontScale when converting FP font size to PX
- * @tc.type: FUNC
- */
-HWTEST_F(ParagraphCacheTestNg, UpdateTextStyleFromPropertyEnvFontScale001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    pattern->SetEnvFontScale(2.0f);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    constexpr double fpFontSize = 10.0;
-    layoutProperty->UpdateFontSize(Dimension(fpFontSize, DimensionUnit::FP));
-
-    auto textTheme = AceType::MakeRefPtr<TextTheme>();
-    TextStyle textStyle;
-    UpdateTextStyleFromProperty(layoutProperty, textTheme, textStyle, pattern);
-    // envFontScale=2.0, dipScale=1.0 => px = 10.0 * 1.0 * 2.0 = 20.0
-    EXPECT_EQ(textStyle.GetFontSize().Unit(), DimensionUnit::PX);
-    EXPECT_DOUBLE_EQ(textStyle.GetFontSize().Value(), fpFontSize * 2.0);
-}
-
-/**
- * @tc.name: UpdateTextStyleFromPropertyEnvFontScaleClamped001
- * @tc.desc: Test envFontScale is clamped by MinFontScale/MaxFontScale during PX conversion
- * @tc.type: FUNC
- */
-HWTEST_F(ParagraphCacheTestNg, UpdateTextStyleFromPropertyEnvFontScaleClamped001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    pattern->SetEnvFontScale(5.0f);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    constexpr double fpFontSize = 10.0;
-    layoutProperty->UpdateFontSize(Dimension(fpFontSize, DimensionUnit::FP));
-    constexpr float minFontScale = 0.0f;
-    constexpr float maxFontScale = 2.0f;
-    layoutProperty->UpdateMinFontScale(minFontScale);
-    layoutProperty->UpdateMaxFontScale(maxFontScale);
-
-    auto textTheme = AceType::MakeRefPtr<TextTheme>();
-    TextStyle textStyle;
-    UpdateTextStyleFromProperty(layoutProperty, textTheme, textStyle, pattern);
-    // envFontScale=5.0 clamped to [0.0, 2.0] => 2.0 => px = 10.0 * 1.0 * 2.0 = 20.0
-    EXPECT_EQ(textStyle.GetFontSize().Unit(), DimensionUnit::PX);
-    EXPECT_DOUBLE_EQ(textStyle.GetFontSize().Value(), fpFontSize * maxFontScale);
-}
-
-/**
- * @tc.name: UpdateTextStyleFromPropertyEnvFontScaleNoScale001
- * @tc.desc: Test envFontScale is ignored when AllowScale is false
- * @tc.type: FUNC
- */
-HWTEST_F(ParagraphCacheTestNg, UpdateTextStyleFromPropertyEnvFontScaleNoScale001, TestSize.Level1)
-{
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    pattern->SetEnvFontScale(2.0f);
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
-    ASSERT_NE(frameNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    constexpr double fpFontSize = 10.0;
-    layoutProperty->UpdateFontSize(Dimension(fpFontSize, DimensionUnit::FP));
-    layoutProperty->UpdateAllowScale(false);
-
-    auto textTheme = AceType::MakeRefPtr<TextTheme>();
-    TextStyle textStyle;
-    UpdateTextStyleFromProperty(layoutProperty, textTheme, textStyle, pattern);
-    // allowScale=false => px = value * dipScale = 10.0 * 1.0 = 10.0 (envFontScale ignored)
-    EXPECT_EQ(textStyle.GetFontSize().Unit(), DimensionUnit::PX);
-    EXPECT_DOUBLE_EQ(textStyle.GetFontSize().Value(), fpFontSize);
-}
+// Note: envFontScale PX-conversion tests (UpdateTextStyleFromPropertyEnvFontScale001/Clamped/NoScale)
+// previously relied on Pattern::SetEnvFontScale which has been removed. The envFontScale is now
+// resolved lazily via LayoutProperty::GetEnvFontScale from the environment manager. Coverage of
+// the FP->PX conversion path with environment-driven fontScale is provided by
+// pipeline_context_font_scale_env_test_ng.cpp.
 
 // ==================== ConvertToPxDistributeWithEnv (CreateSpanParagraphStyle) Tests ====================
 

@@ -302,19 +302,6 @@ void SearchPattern::SetAccessibilityClearAction()
     textAccessibilityProperty->SetAccessibilityText(hasContent ? textFieldPattern->GetCancelButton() : "");
 }
 
-void SearchPattern::OnAttachToMainTree()
-{
-    if (!GetEnvFontScale()) {
-        ReadFontScaleFromEnv();
-        if (GetEnvFontScale()) {
-            auto host = GetHost();
-            if (host) {
-                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            }
-        }
-    }
-}
-
 void SearchPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -3000,8 +2987,9 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     symbolEffectOptions.SetIsTxtActive(false);
     symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
     auto fontSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
+    auto envFontScale = layoutProperty->GetEnvFontScale();
     if (GreatOrEqualCustomPrecision(fontSize.ConvertToPxDistributeWithEnv(GetMinFontScale(), GetMaxFontScale(), true,
-        GetEnvFontScale()),
+        envFontScale),
         ICON_MAX_SIZE.ConvertToPx())) {
         symbolLayoutProperty->UpdateFontSize(ICON_MAX_SIZE);
     }
@@ -3061,16 +3049,19 @@ const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSi
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, iconSizeValue);
+    auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, iconSizeValue);
+    auto envFontScale = layoutProperty->GetEnvFontScale();
     auto maxFontScale = GetMaxFontScale();
     auto minFontScale = GetMinFontScale();
     if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true,
-        GetEnvFontScale()),
+        envFontScale),
         ICON_MAX_SIZE.ConvertToPx())) {
         return ICON_MAX_SIZE;
     }
     if (iconSizeValue.Unit() != DimensionUnit::VP) {
         return Dimension(
-            iconSizeValue.ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true, GetEnvFontScale()));
+            iconSizeValue.ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true, envFontScale));
     } else {
         return iconSizeValue;
     }
