@@ -1306,6 +1306,10 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
         } else if (CanSupportNestedLazy(wrapper->GetHostNode(), layoutWrapper->GetHostNode(), GetLanes())) {
             MeasureLazyChild(wrapper, currentIndex, startPos, true);
         } else if (expandSafeArea_ || CheckNeedMeasure(wrapper)) {
+            // Non-group child: ListItem, a custom list-child, or any arbitrary component (Text/Row/Button).
+            // CheckNeedMeasure returns true for every non-group child (IsListLanesEqual yields true when the
+            // child lacks ListItemGroupLayoutProperty), so generic children are always measured here.
+            // UpdateListItemEditModeCheckBoxSpace queries ListItemPattern and no-ops for non-ListItem.
             ACE_SCOPED_TRACE("ListLayoutAlgorithm::MeasureListItem:%d, %f", currentIndex, startPos);
             UpdateListItemEditModeCheckBoxSpace(wrapper);
             wrapper->Measure(childLayoutConstraint_);
@@ -2367,14 +2371,15 @@ void ListLayoutAlgorithm::SetListItemIndex(const RefPtr<LayoutWrapper>& layoutWr
 {
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    auto listItem = host->GetPattern<ListItemPattern>();
-    if (listItem) {
-        listItem->SetIndexInList(index);
-        return;
+    // Write the index into the child's own LazyContainerItemHelper (held on the base Pattern). This covers
+    // ListItem, ListItemGroup and any generic child (Text/Row/Button/...) uniformly — each carries its
+    // own index and is destroyed together with it, so no stale entries accumulate on recycling.
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    const auto& helper = pattern->GetOrCreateLazyContainerItemHelper();
+    if (helper) {
+        helper->SetIndexInList(index);
     }
-    auto listItemGroup = host->GetPattern<ListItemGroupPattern>();
-    CHECK_NULL_VOID(listItemGroup);
-    listItemGroup->SetIndexInList(index);
 }
 
 void ListLayoutAlgorithm::CheckListItemGroupRecycle(LayoutWrapper* layoutWrapper, int32_t index,

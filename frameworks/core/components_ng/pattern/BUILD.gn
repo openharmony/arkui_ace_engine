@@ -217,6 +217,7 @@ build_component_ng("pattern_ng") {
     "particle/particle_model_ng.cpp",
     "particle/particle_pattern.cpp",
     "pattern.cpp",
+    "lazy_container_item_helper.cpp",
     "picker_utils/picker_column_pattern.cpp",
     "picker_utils/picker_column_pattern_multi_thread.cpp",
     "picker_utils/toss_animation_controller.cpp",
