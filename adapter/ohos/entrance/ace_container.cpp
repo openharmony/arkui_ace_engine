@@ -1812,7 +1812,7 @@ UIContentErrorCode AceContainer::RunPage(
                 // Manually triggered PageFault here.To be modifier
                 DynamicModuleHelper::GetInstance().TriggerPageFaultForPreLoad();
             },
-            TaskExecutor::TaskType::UI, "ArkUITriggerPageFaultForPreLoad");
+            TaskExecutor::TaskType::BACKGROUND, "ArkUITriggerPageFaultForPreLoad");
     } else {
         LOGW("Failed to get context or task executor, cannot trigger page fault for preload.");
     }
