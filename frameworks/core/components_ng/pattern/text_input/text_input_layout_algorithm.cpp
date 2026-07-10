@@ -18,7 +18,9 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
 #include "core/components_ng/pattern/text_field/auto_fill_controller.h"
+#endif
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/position_property.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -284,6 +286,7 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
         textStyle.GetFontSize().ConvertToPxDistributeWithEnv(textStyle.GetMinFontScale(),
         textStyle.GetMaxFontScale(), true, textStyle.GetEnvFontScale());
     auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto autofillController = pattern->GetOrCreateAutoFillController();
     CHECK_NULL_RETURN(autofillController, false);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
@@ -292,6 +295,7 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
             pattern->GetNakedCharPosition(), paragraphData);
         autofillController->SetAutoFillOriginTextColor(textStyle.GetTextColor());
     } else {
+#endif
         if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
             CreateParagraph(textStyle, pattern->GetDragContents(), content,
                 isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_, paragraphData);
@@ -299,7 +303,9 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
             CreateParagraph(textStyle, content, isPasswordType && pattern->GetTextObscured() && !showPlaceHolder_,
                 pattern->GetNakedCharPosition(), paragraphData);
         }
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     }
+#endif
     return true;
 }
 
@@ -328,6 +334,7 @@ LayoutConstraintF TextInputLayoutAlgorithm::BuildLayoutConstraintWithoutResponse
     return newLayoutConstraint;
 }
 
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
 void TextInputLayoutAlgorithm::MeasureAutoFillIcon(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -419,6 +426,10 @@ void TextInputLayoutAlgorithm::LayoutAutoFillIcon(LayoutWrapper* layoutWrapper, 
     iconGeometryNode->SetMarginFrameOffset(iconOffset);
     childWrapper->Layout();
 }
+#else
+void TextInputLayoutAlgorithm::MeasureAutoFillIcon(LayoutWrapper* layoutWrapper) {}
+void TextInputLayoutAlgorithm::LayoutAutoFillIcon(LayoutWrapper* layoutWrapper, float unitNodeWidth) {}
+#endif
 
 void TextInputLayoutAlgorithm::MeasureCounterWithPolicy(LayoutWrapper* layoutWrapper, float nonContentWidth)
 {

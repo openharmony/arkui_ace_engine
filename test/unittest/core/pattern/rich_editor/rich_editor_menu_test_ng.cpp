@@ -1479,6 +1479,9 @@ HWTEST_F(RichEditorMenuTestNg, SetPreviewMenuParam003, TestSize.Level0)
  */
 HWTEST_F(RichEditorMenuTestNg, ProcessAutoFill001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create richEditor.
+     */
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
 
@@ -1487,6 +1490,9 @@ HWTEST_F(RichEditorMenuTestNg, ProcessAutoFill001, TestSize.Level0)
     auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. Execute autofill when paste request is received.
+     */
     auto flag = richEditorPattern->ProcessAutoFill(AceAutoFillTriggerType::PASTE_REQUEST);
     EXPECT_FALSE(flag);
 }
@@ -1498,9 +1504,15 @@ HWTEST_F(RichEditorMenuTestNg, ProcessAutoFill001, TestSize.Level0)
  */
 HWTEST_F(RichEditorMenuTestNg, ProcessAutoFill002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Create MockContainer.
+     */
     auto mockContainer = AceType::MakeRefPtr<MockContainer>();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 
+    /**
+     * @tc.steps: step2. Execute autofill when paste request is received.
+     */
     auto savedContainer = Container::Current();
     RichEditorModelNG richEditorModel;
     richEditorModel.Create();
