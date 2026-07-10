@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
+#include <chrono>
 #include <cstdint>
 #include <sstream>
 #include <string>
@@ -1931,7 +1932,8 @@ void JSText::SetIncrementalUpdatePolicy(const JSCallbackInfo& info)
 
 void JSText::ParseTailIndentDimension(const JSRef<JSVal>& value,
     NG::TailIndentsArray& indentsArray,
-    std::vector<RefPtr<ResourceObject>>& allResObjs)
+    std::vector<RefPtr<ResourceObject>>& allResObjs,
+    std::vector<size_t>& resourceIndexes)
 {
     CalcDimension dimension;
     RefPtr<ResourceObject> resObj;
@@ -1945,9 +1947,11 @@ void JSText::ParseTailIndentDimension(const JSRef<JSVal>& value,
             TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: invalid dimension (negative or PERCENT), reset");
             dimension.Reset();
         }
+        size_t currentIndex = indentsArray.size();
         indentsArray.emplace_back(static_cast<Dimension>(dimension));
         if (resObj) {
             allResObjs.push_back(resObj);
+            resourceIndexes.push_back(currentIndex);  // Record resource position
         }
     } else {
         dimension.Reset();
@@ -1957,26 +1961,33 @@ void JSText::ParseTailIndentDimension(const JSRef<JSVal>& value,
 }
 
 void JSText::UpdateTailIndentsFromResources(const RefPtr<NG::FrameNode>& node,
-    const std::vector<RefPtr<ResourceObject>>& resObjArray)
+    const NG::TailIndentsArray& originalArray,
+    const std::vector<RefPtr<ResourceObject>>& resObjArray,
+    const std::vector<size_t>& resourceIndexes)
 {
     CHECK_NULL_VOID(node);
     auto layoutProperty = node->GetLayoutProperty<NG::TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    
-    NG::TailIndentsArray newIndentsArray;
-    for (size_t i = 0; i < resObjArray.size(); i++) {
+
+    // Rebuild complete array: copy original values, then update resource positions
+    NG::TailIndentsArray newIndentsArray = originalArray;
+    for (size_t i = 0; i < resObjArray.size() && i < resourceIndexes.size(); i++) {
+        size_t targetIndex = resourceIndexes[i];
+        if (targetIndex >= newIndentsArray.size()) {
+            TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: index out of range [%{public}zu]", targetIndex);
+            continue;
+        }
         CalcDimension dimension;
         bool parsed = ResourceParseUtils::ParseResDimensionFpNG(resObjArray[i], dimension);
         if (parsed) {
             if (dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
-                TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: [%{public}zu] invalid dimension, reset", i);
+                TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: [%{public}zu] invalid dimension, reset", targetIndex);
                 dimension.Reset();
             }
-            newIndentsArray.emplace_back(static_cast<Dimension>(dimension));
+            newIndentsArray[targetIndex] = static_cast<Dimension>(dimension);
         } else {
-            dimension.Reset();
-            newIndentsArray.emplace_back(dimension);
-            TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: [%{public}zu] parse failed, using default", i);
+            newIndentsArray[targetIndex] = Dimension(0.0);
+            TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: [%{public}zu] parse failed, using default", targetIndex);
         }
     }
 
@@ -1987,34 +1998,54 @@ void JSText::UpdateTailIndentsFromResources(const RefPtr<NG::FrameNode>& node,
 }
 
 void JSText::RegisterTailIndentsResources(NG::FrameNode* frameNode,
-    const std::vector<RefPtr<ResourceObject>>& allResObjs)
+    const NG::TailIndentsArray& originalArray,
+    const std::vector<RefPtr<ResourceObject>>& allResObjs,
+    const std::vector<size_t>& resourceIndexes)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    
+
     std::string countStr = pattern->GetResCacheMapByKey("TailIndents_Count");
     int32_t oldCount = 0;
     if (!countStr.empty()) {
         oldCount = std::stoi(countStr);
     }
-    
+
     for (int32_t i = 0; i < oldCount; i++) {
         pattern->RemoveResObj("TailIndents_" + std::to_string(i));
     }
-    
-    WeakPtr<NG::FrameNode> weakNode = AceType::WeakClaim(frameNode);
-    std::vector<RefPtr<ResourceObject>> resObjArrayCopy = allResObjs;
 
-    auto updateFunc = [weakNode, resObjArrayCopy](const RefPtr<ResourceObject>& resObj) {
+    if (allResObjs.empty()) {
+        pattern->AddResCache("TailIndents_Count", "0");
+        return;
+    }
+
+    WeakPtr<NG::FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    NG::TailIndentsArray arrayCopy = originalArray;
+    std::vector<RefPtr<ResourceObject>> resObjArrayCopy = allResObjs;
+    std::vector<size_t> indexCopy = resourceIndexes;
+
+    // Deduplication mechanism to avoid N redundant rebuilds
+    constexpr int64_t RESOURCE_UPDATE_DEDUP_INTERVAL_MS = 10;  // 10ms deduplication window
+    auto lastUpdateTime = std::make_shared<int64_t>(0);
+    auto updateFunc = [weakNode, arrayCopy, resObjArrayCopy, indexCopy, lastUpdateTime]
+        (const RefPtr<ResourceObject>& resObj) {
+        auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count();
+        // Skip if already updated within dedup interval
+        if (now - *lastUpdateTime < RESOURCE_UPDATE_DEDUP_INTERVAL_MS) {
+            return;
+        }
+        *lastUpdateTime = now;
         auto node = weakNode.Upgrade();
         if (node) {
-            UpdateTailIndentsFromResources(node, resObjArrayCopy);
+            UpdateTailIndentsFromResources(node, arrayCopy, resObjArrayCopy, indexCopy);
         } else {
             TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents updateFunc: weakNode.Upgrade() failed");
         }
     };
-    
+
     int32_t newCount = static_cast<int32_t>(allResObjs.size());
     for (int32_t i = 0; i < newCount; i++) {
         std::string key = "TailIndents_" + std::to_string(i);
@@ -2030,22 +2061,24 @@ void JSText::SetTailIndents(const JSCallbackInfo& info)
     NG::TailIndents tailIndents;
     NG::TailIndentsArray indentsArray;
     std::vector<RefPtr<ResourceObject>> allResObjs;
+    std::vector<size_t> resourceIndexes;
     
     if (args->IsArray()) {
         JSRef<JSArray> array = JSRef<JSArray>::Cast(args);
         for (size_t i = 0; i < array->Length(); i++) {
-            ParseTailIndentDimension(array->GetValueAt(i), indentsArray, allResObjs);
+            ParseTailIndentDimension(array->GetValueAt(i), indentsArray, allResObjs, resourceIndexes);
         }
     } else {
-        ParseTailIndentDimension(args, indentsArray, allResObjs);
+        ParseTailIndentDimension(args, indentsArray, allResObjs, resourceIndexes);
     }
     
     tailIndents.indentsArray = indentsArray;
     
-    if (SystemProperties::ConfigChangePerform() && !allResObjs.empty()) {
+    // Always register resources (handles both new registration and cleanup of old ones)
+    if (SystemProperties::ConfigChangePerform()) {
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         if (frameNode) {
-            RegisterTailIndentsResources(frameNode, allResObjs);
+            RegisterTailIndentsResources(frameNode, indentsArray, allResObjs, resourceIndexes);
         }
     }
     
