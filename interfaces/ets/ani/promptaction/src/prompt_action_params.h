@@ -27,7 +27,7 @@
 
 #include "ani_utils.h"
 #include "core/common/container.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/common/properties/ui_material.h"
@@ -140,7 +140,7 @@ void CompleteResourceParamV1(ani_env *env, ani_object object);
 void CompleteResourceParamV2(ani_env *env, ani_object object);
 void CompleteResourceParam(ani_env *env, ani_object object);
 bool GetResourceParam(ani_env *env, ani_object object, ResourceInfo& result);
-OHOS::Ace::RefPtr<OHOS::Ace::ResourceWrapper> CreateResourceWrapper(const ResourceInfo& result);
+OHOS::Ace::RefPtr<OHOS::Ace::ResourceAdapter> CreateResourceAdapter(const ResourceInfo& result);
 void ReplaceHolder(std::string& originStr, const std::vector<std::string>& params, uint32_t containCount);
 std::string DimensionToString(OHOS::Ace::Dimension dimension);
 bool ResourceToString(const ResourceInfo resourceInfo, std::string& result);

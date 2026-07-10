@@ -39,7 +39,6 @@ class StateResource;
 
 using ResRawValue = std::variant<Color, Dimension, int32_t, uint32_t, double, InternalResource::ResourceId, std::string,
     RefPtr<ThemeStyle>, RefPtr<StateResource>>;
-using BlendAlpha = std::variant<double, uint32_t>;
 
 enum class ThemeConstantsType {
     // Error type for check if key is match with value
@@ -49,7 +48,6 @@ enum class ThemeConstantsType {
     INT,
     DOUBLE,
     RESOURCE_ID,
-    REFERENCE,
     REFERENCE_ATTR,
     STRING,
     PATTERN,
@@ -70,13 +68,7 @@ struct ResValueWrapper {
 
     ThemeConstantsType type { ThemeConstantsType::COLOR };
     ResRawValue value;
-    // Whether style value is public to app.
-    bool isPublic { false };
-    // Extra alpha needs to blend with color(uint means an ID reference, double means an alpha value).
-    BlendAlpha blendAlpha { 1.0 };
 };
-
-using ThemeConstantsMap = std::unordered_map<uint32_t, ResValueWrapper>;
 
 class ThemeStyle : public virtual AceType {
     DECLARE_ACE_TYPE(ThemeStyle, AceType);

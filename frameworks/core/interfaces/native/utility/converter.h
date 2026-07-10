@@ -63,6 +63,7 @@
 namespace OHOS::Ace {
 // SORTED_SECTION
 class DrawableDescriptor;
+class ResourceAdapter;
 class SpanBase;
 class ResponseRegion;
 class UiMaterial;
@@ -292,8 +293,7 @@ namespace Converter {
             std::optional<int32_t> GetIntegerResource();
             std::optional<double> GetFloatResource();
 
-            RefPtr<ThemeConstants> themeConstants_;
-            RefPtr<ResourceWrapper> resWrapper_;
+            RefPtr<ResourceAdapter> resAdapter_;
             ResourceType type_;
             std::string bundleName_;
             std::string moduleName_;

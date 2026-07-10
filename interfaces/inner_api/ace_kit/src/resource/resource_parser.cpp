@@ -21,11 +21,10 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace::Kit {
-static RefPtr<Ace::ResourceAdapter> CreateResourceWrapper(const ResourceInfo& info)
+static RefPtr<Ace::ResourceAdapter> CreateResourceAdapter(const ResourceInfo& info)
 {
     auto bundleName = info.bundleName;
     auto moduleName = info.moduleName;
@@ -43,8 +42,8 @@ static RefPtr<Ace::ResourceAdapter> CreateResourceWrapper(const ResourceInfo& in
 
 bool ResourceParser::GetDimension(const ResourceInfo& resourceInfo, Ace::CalcDimension& dimension)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
@@ -56,26 +55,26 @@ bool ResourceParser::GetDimension(const ResourceInfo& resourceInfo, Ace::CalcDim
 
         auto param = resourceInfo.params[0];
         if (resType == static_cast<int32_t>(ResourceType::STRING)) {
-            auto value = resourceWrapper->GetStringByName(param);
+            auto value = resourceAdapter->GetStringByName(param);
             return StringUtils::StringToCalcDimensionNG(value, dimension, false, DimensionUnit::VP);
         }
         if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
-            auto value = std::to_string(resourceWrapper->GetIntByName(param));
+            auto value = std::to_string(resourceAdapter->GetIntByName(param));
             return StringUtils::StringToDimensionWithUnitNG(value, dimension, DimensionUnit::VP);
         }
-        dimension = resourceWrapper->GetDimensionByName(param);
+        dimension = resourceAdapter->GetDimensionByName(param);
         return true;
     } else {
         if (resType == static_cast<int32_t>(ResourceType::STRING)) {
-            auto value = resourceWrapper->GetString(static_cast<uint32_t>(resourceInfo.resId));
+            auto value = resourceAdapter->GetString(static_cast<uint32_t>(resourceInfo.resId));
             return StringUtils::StringToCalcDimensionNG(value, dimension, false, DimensionUnit::VP);
         }
         if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
-            auto value = std::to_string(resourceWrapper->GetInt(static_cast<uint32_t>(resourceInfo.resId)));
+            auto value = std::to_string(resourceAdapter->GetInt(static_cast<uint32_t>(resourceInfo.resId)));
             return StringUtils::StringToDimensionWithUnitNG(value, dimension, DimensionUnit::VP);
         }
         if (resType == static_cast<int32_t>(ResourceType::FLOAT)) {
-            dimension = resourceWrapper->GetDimension(static_cast<uint32_t>(resourceInfo.resId));
+            dimension = resourceAdapter->GetDimension(static_cast<uint32_t>(resourceInfo.resId));
             return true;
         }
     }
@@ -84,166 +83,166 @@ bool ResourceParser::GetDimension(const ResourceInfo& resourceInfo, Ace::CalcDim
 
 bool ResourceParser::GetColor(const ResourceInfo& resourceInfo, Ace::Color& color)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        color = resourceWrapper->GetColorByName(resourceInfo.params[0]);
+        color = resourceAdapter->GetColorByName(resourceInfo.params[0]);
     } else {
-        color = resourceWrapper->GetColor(resourceInfo.resId);
+        color = resourceAdapter->GetColor(resourceInfo.resId);
     }
     return true;
 }
 
 bool ResourceParser::GetString(const ResourceInfo& resourceInfo, std::string& str)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        str = resourceWrapper->GetStringByName(resourceInfo.params[0]);
+        str = resourceAdapter->GetStringByName(resourceInfo.params[0]);
     } else {
-        str = resourceWrapper->GetString(resourceInfo.resId);
+        str = resourceAdapter->GetString(resourceInfo.resId);
     }
     return true;
 }
 
 bool ResourceParser::GetMediaPath(const ResourceInfo& resourceInfo, std::string& mediaPath)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        mediaPath = resourceWrapper->GetMediaPathByName(resourceInfo.params[0]);
+        mediaPath = resourceAdapter->GetMediaPathByName(resourceInfo.params[0]);
     } else {
-        mediaPath = resourceWrapper->GetMediaPath(resourceInfo.resId);
+        mediaPath = resourceAdapter->GetMediaPath(resourceInfo.resId);
     }
     return true;
 }
 
 bool ResourceParser::GetInt(const ResourceInfo& resourceInfo, int32_t& intRes)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        intRes = resourceWrapper->GetIntByName(resourceInfo.params[0]);
+        intRes = resourceAdapter->GetIntByName(resourceInfo.params[0]);
     } else {
-        intRes = resourceWrapper->GetInt(resourceInfo.resId);
+        intRes = resourceAdapter->GetInt(resourceInfo.resId);
     }
     return true;
 }
 
 bool ResourceParser::GetDouble(const ResourceInfo& resourceInfo, double& doubleRes)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        doubleRes = resourceWrapper->GetDoubleByName(resourceInfo.params[0]);
+        doubleRes = resourceAdapter->GetDoubleByName(resourceInfo.params[0]);
     } else {
-        doubleRes = resourceWrapper->GetDouble(resourceInfo.resId);
+        doubleRes = resourceAdapter->GetDouble(resourceInfo.resId);
     }
     return true;
 }
 
 bool ResourceParser::GetPluralString(const ResourceInfo& resourceInfo, int count, std::string& str)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        str = resourceWrapper->GetPluralStringByName(resourceInfo.params[0], count);
+        str = resourceAdapter->GetPluralStringByName(resourceInfo.params[0], count);
     } else {
-        str = resourceWrapper->GetPluralString(resourceInfo.resId, count);
+        str = resourceAdapter->GetPluralString(resourceInfo.resId, count);
     }
     return true;
 }
 
 bool ResourceParser::GetBoolean(const ResourceInfo& resourceInfo, bool& boolRes)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        boolRes = resourceWrapper->GetBooleanByName(resourceInfo.params[0]);
+        boolRes = resourceAdapter->GetBooleanByName(resourceInfo.params[0]);
     } else {
-        boolRes = resourceWrapper->GetBoolean(resourceInfo.resId);
+        boolRes = resourceAdapter->GetBoolean(resourceInfo.resId);
     }
     return true;
 }
 
 bool ResourceParser::GetIntArray(const ResourceInfo& resourceInfo, std::vector<uint32_t>& intArray)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        intArray = resourceWrapper->GetIntArrayByName(resourceInfo.params[0]);
+        intArray = resourceAdapter->GetIntArrayByName(resourceInfo.params[0]);
     } else {
-        intArray = resourceWrapper->GetIntArray(resourceInfo.resId);
+        intArray = resourceAdapter->GetIntArray(resourceInfo.resId);
     }
     return true;
 }
 
 bool ResourceParser::GetStringArray(const ResourceInfo& resourceInfo, std::vector<std::string>& strArray)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        strArray = resourceWrapper->GetStringArrayByName(resourceInfo.params[0]);
+        strArray = resourceAdapter->GetStringArrayByName(resourceInfo.params[0]);
     } else {
-        strArray = resourceWrapper->GetStringArray(resourceInfo.resId);
+        strArray = resourceAdapter->GetStringArray(resourceInfo.resId);
     }
     return true;
 }
 
 bool ResourceParser::GetSymbol(const ResourceInfo& resourceInfo, uint32_t& symbolRes)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        symbolRes = resourceWrapper->GetSymbolByName(resourceInfo.params[0].c_str());
+        symbolRes = resourceAdapter->GetSymbolByName(resourceInfo.params[0].c_str());
     } else {
-        symbolRes = resourceWrapper->GetSymbolById(resourceInfo.resId);
+        symbolRes = resourceAdapter->GetSymbolById(resourceInfo.resId);
     }
     return true;
 }
 
 bool ResourceParser::GetMediaData(const ResourceInfo& resourceInfo, size_t& len, std::unique_ptr<uint8_t[]>& dest)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (!resourceAdapter) {
         return false;
     }
 
     // resourceId is invalid
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        return resourceWrapper->GetMediaData(resourceInfo.params[0].c_str(), len, dest);
+        return resourceAdapter->GetMediaData(resourceInfo.params[0].c_str(), len, dest);
     }
-    return resourceWrapper->GetMediaData(resourceInfo.resId, len, dest);
+    return resourceAdapter->GetMediaData(resourceInfo.resId, len, dest);
 }
 
 } // namespace OHOS::Ace::Kit

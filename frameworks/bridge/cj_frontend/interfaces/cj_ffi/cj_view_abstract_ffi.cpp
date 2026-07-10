@@ -3474,7 +3474,7 @@ RefPtr<PixelMap> ParseDragPreviewPixelMap(int64_t pixelMapId)
 
 bool CheckDarkResource(const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::GetResourceDecoupling() || !resObj) {
+    if (!resObj) {
         return false;
     }
     auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);

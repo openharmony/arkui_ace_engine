@@ -26,7 +26,7 @@
 
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/shadow_theme.h"
 #include "base/geometry/shape.h"
@@ -108,9 +108,7 @@ ResourceStruct CheckResourceStruct(ani_env* env, ani_object value);
 std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str);
 void ReplaceHolder(std::string& originStr, const std::vector<std::string>& params, uint32_t containCount);
 bool ParseString(const ResourceInfo& info, std::string& result);
-OHOS::Ace::RefPtr<OHOS::Ace::ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info);
-OHOS::Ace::RefPtr<OHOS::Ace::ThemeConstants> GetThemeConstants(
-    const std::optional<std::string>& bundleName, const std::optional<std::string>& moduleName);
+OHOS::Ace::RefPtr<OHOS::Ace::ResourceAdapter> CreateResourceAdapter(const ResourceInfo& info);
 std::string DimensionToString(OHOS::Ace::Dimension dimension);
 void ModifyResourceParam(ani_env* env, ani_object value, const ResourceType& resType, const std::string& resName);
 void processResourceType(ani_env* env, ani_object value, ani_ref params_ref, size_t length, std::string resName);

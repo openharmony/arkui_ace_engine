@@ -28,7 +28,7 @@
 
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"

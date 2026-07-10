@@ -134,7 +134,7 @@ public:
         const WeakPtr<PipelineBase>& context = nullptr) override;
 };
 
-class ResourceWrapper;
+class ResourceAdapter;
 
 class ResourceImageLoader final : public ImageLoader {
 public:

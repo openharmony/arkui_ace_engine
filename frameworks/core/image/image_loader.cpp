@@ -38,7 +38,6 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_configuration.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
@@ -681,32 +680,24 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(const ImageSourceInfo
 
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moudleName, instanceId);
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        auto adapterInCache = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        CHECK_NULL_RETURN(adapterInCache, nullptr);
-        ResourceConfiguration resConfig;
-        if (imageSourceInfo.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
-            resConfig.SetColorMode(imageSourceInfo.GetLocalColorMode());
-        } else {
-            resConfig.SetColorMode(Container::CurrentColorMode());
-        }
-        ConfigurationChange configChange { .colorModeUpdate = true };
-        resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
+    auto adapterInCache = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+    CHECK_NULL_RETURN(adapterInCache, nullptr);
+    ResourceConfiguration resConfig;
+    if (imageSourceInfo.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
+        resConfig.SetColorMode(imageSourceInfo.GetLocalColorMode());
     } else {
-        auto themeManager = PipelineBase::CurrentThemeManager();
-        CHECK_NULL_RETURN(themeManager, nullptr);
-        themeConstants = themeManager->GetThemeConstants();
-        CHECK_NULL_RETURN(themeConstants, nullptr);
+        resConfig.SetColorMode(Container::CurrentColorMode());
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+    ConfigurationChange configChange { .colorModeUpdate = true };
+    resourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
+    CHECK_NULL_RETURN(resourceAdapter, nullptr);
 
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
     std::string rawFile;
     if (GetResourceId(uri, rawFile)) {
         // must fit raw file firstly, as file name may contains number
-        if (!resourceWrapper->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
+        if (!resourceAdapter->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, rawFile:%{private}s",
                 uri.c_str(), rawFile.c_str());
             errorInfo = { ImageErrorCode::GET_IMAGE_RESOURCE_GET_DATA_BY_NAME_FAILED,
@@ -719,7 +710,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(const ImageSourceInfo
     }
     uint32_t resId = 0;
     if (!imageSourceInfo.GetIsUriPureNumber() && GetResourceId(uri, resId)) {
-        if (resourceWrapper->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
+        if (resourceAdapter->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
             auto drawingData = std::make_shared<RSData>();
             drawingData->BuildWithCopy(data.get(), dataLen);
             return drawingData;
@@ -731,7 +722,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(const ImageSourceInfo
     }
     std::string resName;
     if (GetResourceName(uri, resName)) {
-        if (!resourceWrapper->GetMediaData(resName, dataLen, data, bundleName, moudleName)) {
+        if (!resourceAdapter->GetMediaData(resName, dataLen, data, bundleName, moudleName)) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, resName:%{private}s",
                 uri.c_str(), resName.c_str());
             errorInfo = { ImageErrorCode::GET_IMAGE_RESOURCE_GET_DATA_BY_NAME_FAILED,

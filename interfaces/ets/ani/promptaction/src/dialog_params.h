@@ -27,7 +27,7 @@
 #include "prompt_action_params.h"
 
 #include "core/common/container.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/theme/shadow_theme.h"

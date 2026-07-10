@@ -124,7 +124,6 @@ uint32_t SystemProperties::canvasDebugMode_ = 1;
 
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
-bool g_isResourceDecoupling = true;
 bool g_isConfigChangePerform = false;
 bool g_isMultiInstanceEnabled = false;
 UiMaterialLevel g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
@@ -351,11 +350,6 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 bool SystemProperties::IsNeedSymbol()
 {
     return g_isNeedSymbol;
-}
-
-bool SystemProperties::GetResourceDecoupling()
-{
-    return g_isResourceDecoupling;
 }
 
 bool SystemProperties::IsPCMode()

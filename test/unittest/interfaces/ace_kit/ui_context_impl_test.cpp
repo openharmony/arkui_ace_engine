@@ -921,26 +921,6 @@ HWTEST_F(UIContextImplTest, HasDarkResourceTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HasDarkResourceTest002
- * @tc.desc: Test HasDarkResource with resource decoupling disabled
- * @tc.type: FUNC
- */
-HWTEST_F(UIContextImplTest, HasDarkResourceTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Disable resource decoupling and create a ResourceObject
-     */
-    g_isResourceDecoupling = false;
-    auto resObj = AceType::MakeRefPtr<ResourceObject>();
-    /**
-     * @tc.steps: step2. Call HasDarkResource with decoupling disabled
-     * @tc.expected: step2. Should return false
-     */
-    EXPECT_FALSE(uiContext_->HasDarkResource(resObj));
-    g_isResourceDecoupling = true;
-}
-
-/**
  * @tc.name: GetInvertFuncTest001
  * @tc.desc: Test GetInvertFunc returns a callable function
  * @tc.type: FUNC
