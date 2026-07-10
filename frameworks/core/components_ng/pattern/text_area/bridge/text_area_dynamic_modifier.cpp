@@ -138,15 +138,16 @@ void ResetTextAreaStyle(ArkUINodeHandle node)
     TextFieldModelNG::SetInputStyle(frameNode, DEFAULT_TEXT_AREA_STYLE);
 }
 
-void CreateTextArea(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
+ArkUINodeHandle CreateTextArea(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
     const ArkUITextEditCreateResourceParams* resParams)
 {
     static TextFieldModelNG model;
-    model.CreateTextArea(placeholder, stringValue);
+    auto controller = model.CreateTextArea(placeholder, stringValue);
+    CHECK_NULL_RETURN(controller, nullptr);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_RETURN(pattern, nullptr);
     if (SystemProperties::ConfigChangePerform()) {
         if (resParams && resParams->parseValueResult && resParams->stringValueRawPtr) {
             auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resParams->stringValueRawPtr));
@@ -163,6 +164,8 @@ void CreateTextArea(std::optional<std::u16string>& stringValue, std::optional<st
             pattern->UnRegisterResource("placeholder");
         }
     }
+    auto nodecontroller = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(controller));
+    return nodecontroller;
 }
 
 void SetTextAreaFocusableAndFocusNode()
@@ -3395,10 +3398,12 @@ void SetTextAreaBackBorder(ArkUINodeHandle node)
 }
 
 #ifndef CROSS_PLATFORM
-void CreateTextAreaImpl(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
-    const ArkUITextEditCreateResourceParams* resParams)
+ArkUINodeHandle CreateTextAreaImpl(std::optional<std::u16string>& stringValue,
+    std::optional<std::u16string>& placeholder, const ArkUITextEditCreateResourceParams* resParams)
 {
-    GetTextFieldModelImpl()->CreateTextArea(placeholder, stringValue);
+    auto controller = GetTextFieldModelImpl()->CreateTextArea(placeholder, stringValue);
+    auto nodecontroller = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(controller));
+    return nodecontroller;
 }
 
 void SetTextAreaTypeImpl(ArkUINodeHandle node, ArkUI_Int32 type)
