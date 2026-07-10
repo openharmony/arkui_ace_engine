@@ -287,8 +287,8 @@ HWTEST_F(RichEditorTextStyleTestNg, CreateTextSpanNode001, TestSize.Level0)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto typingStyle = richEditorPattern->typingStyle_;
-    auto typingTextStyle = richEditorPattern->typingTextStyle_;
+    auto typingStyle = richEditorPattern->GetTypingStyle();
+    auto typingTextStyle = richEditorPattern->styleManager_->GetTypingTextStyle();
 
     /**
      * @tc.steps: step2. Parameter declaration
@@ -302,33 +302,31 @@ HWTEST_F(RichEditorTextStyleTestNg, CreateTextSpanNode001, TestSize.Level0)
     /**
      * @tc.steps: step3. test CreateTextSpanNode
      */
-    richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->typingTextStyle_ = textStyle;
+    richEditorPattern->SetTypingStyle(updateSpanStyle, textStyle);
     updateSpanStyle.useThemeFontColor = false;
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
     EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
     updateSpanStyle.updateTextColor = Color::RED;
-    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->SetTypingStyle(updateSpanStyle, richEditorPattern->styleManager_->GetTypingTextStyle());
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
-    EXPECT_FALSE(richEditorPattern->typingStyle_->updateStrokeColor.has_value());
+    EXPECT_FALSE(richEditorPattern->GetTypingStyle()->updateStrokeColor.has_value());
 
     updateSpanStyle.strokeColorFollowFontColor = true;
-    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->SetTypingStyle(updateSpanStyle, richEditorPattern->styleManager_->GetTypingTextStyle());
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
-    EXPECT_TRUE(richEditorPattern->typingStyle_->updateStrokeColor.has_value());
+    EXPECT_TRUE(richEditorPattern->GetTypingStyle()->updateStrokeColor.has_value());
 
     updateSpanStyle.updateTextColor = std::nullopt;
     updateSpanStyle.updateStrokeColor = std::nullopt;
-    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->SetTypingStyle(updateSpanStyle, richEditorPattern->styleManager_->GetTypingTextStyle());
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
-    EXPECT_FALSE(richEditorPattern->typingStyle_->updateStrokeColor.has_value());
+    EXPECT_FALSE(richEditorPattern->GetTypingStyle()->updateStrokeColor.has_value());
 
     /**
      * @tc.steps: step4. reset typingStyle and typingTextStyle
      */
-    richEditorPattern->typingStyle_ = typingStyle;
-    richEditorPattern->typingTextStyle_ = typingTextStyle;
+    richEditorPattern->SetTypingStyle(typingStyle, typingTextStyle);
 }
 
 /**

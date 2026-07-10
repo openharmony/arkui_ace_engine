@@ -855,23 +855,19 @@ HWTEST_F(RichEditorStyledStringTestNg, InsertValueInStyledString001, TestSize.Le
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
 
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
     richEditorPattern->InsertValueInStyledString(u"abc");
 
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = style;
+    richEditorPattern->SetTypingStyle(std::nullopt, style);
     richEditorPattern->InsertValueInStyledString(u"abc");
 
-    richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->SetTypingStyle(updateSpanStyle, std::nullopt);
     richEditorPattern->InsertValueInStyledString(u"abc");
 
-    richEditorPattern->typingStyle_ = updateSpanStyle;
-    richEditorPattern->typingTextStyle_ = style;
+    richEditorPattern->SetTypingStyle(updateSpanStyle, style);
     richEditorPattern->InsertValueInStyledString(u"abc");
 
-    ASSERT_EQ(richEditorPattern->typingTextStyle_.has_value(), true);
+    ASSERT_EQ(richEditorPattern->styleManager_->HasTypingTextStyle(), true);
 }
 
 /**

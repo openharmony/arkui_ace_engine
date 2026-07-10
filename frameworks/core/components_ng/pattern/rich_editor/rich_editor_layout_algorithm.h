@@ -133,7 +133,6 @@ private:
     RichEditorParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;
     std::optional<RectF> richTextRect_;
-    std::optional<TextStyle> typingTextStyle_;
     LRUMap<uint64_t, RefPtr<Paragraph>>* const paraMapPtr_;
     std::unique_ptr<StyleManager>& styleManager_;
     bool needShowPlaceholder_ = false;

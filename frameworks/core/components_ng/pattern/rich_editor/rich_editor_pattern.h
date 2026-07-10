@@ -1371,8 +1371,6 @@ private:
     RefPtr<RichEditorStyledStringController> richEditorStyledStringController_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
     RectF frameRect_;
-    std::optional<struct UpdateSpanStyle> typingStyle_;
-    std::optional<TextStyle> typingTextStyle_;
     std::list<ResultObject> dragResultObjects_;
     std::optional<Color> caretColor_;
     std::optional<Color> selectedBackgroundColor_;

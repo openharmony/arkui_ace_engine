@@ -281,6 +281,54 @@ public:
     {
         typingFontStyle_ = typingStyle;
         typingTextStyle_ = textStyle;
+        ResetTypingStyleGroupCompareId();
+    }
+
+    const std::optional<struct UpdateSpanStyle>& GetTypingFontStyle() const
+    {
+        return typingFontStyle_;
+    }
+
+    const std::optional<TextStyle>& GetTypingTextStyle() const
+    {
+        return typingTextStyle_;
+    }
+
+    bool HasTypingFontStyle() const
+    {
+        return typingFontStyle_.has_value();
+    }
+
+    bool HasTypingTextStyle() const
+    {
+        return typingTextStyle_.has_value();
+    }
+
+    void ResetTypingStyleGroupCompareId()
+    {
+        if (typingFontStyle_.has_value() && typingTextStyle_.has_value()) {
+            IF_TRUE(typingFontStyle_->updateTextBackgroundStyle,
+                typingFontStyle_->updateTextBackgroundStyle->needCompareGroupId = false);
+            auto textBackgroundStyle = typingTextStyle_->GetTextBackgroundStyle();
+            if (textBackgroundStyle) {
+                textBackgroundStyle->needCompareGroupId = false;
+                typingTextStyle_->SetTextBackgroundStyle(textBackgroundStyle);
+            }
+        }
+    }
+
+    void SyncStrokeColorFollowFontColor()
+    {
+        if (typingFontStyle_.has_value() && typingTextStyle_.has_value() &&
+            typingFontStyle_->strokeColorFollowFontColor && typingFontStyle_->updateTextColor.has_value()) {
+            typingFontStyle_->updateStrokeColor = typingTextStyle_.value().GetTextColor();
+        }
+    }
+
+    void ReloadTypingResources()
+    {
+        IF_PRESENT(typingFontStyle_, ReloadResources());
+        IF_PRESENT(typingTextStyle_, ReloadResources());
     }
 
     void SetTypingParagraphStyle(std::optional<struct UpdateParagraphStyle>& typingParagraphStyle)

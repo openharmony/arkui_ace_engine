@@ -1144,8 +1144,7 @@ HWTEST_F(RichEditorMouseTest, MouseDoubleClickParagraphEnd001, TestSize.Level0)
     richEditorPattern->undoManager_ =
         std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
 
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
     richEditorPattern->InsertValueInStyledString(content);
 
     richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;

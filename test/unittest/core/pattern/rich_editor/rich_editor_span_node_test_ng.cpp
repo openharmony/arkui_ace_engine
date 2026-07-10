@@ -22,6 +22,7 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/style_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -95,29 +96,26 @@ HWTEST_F(RichEditorSpanNodeTestNg, RichEditorPatternTestCreateTextSpanNode001, T
 
     updateSpanStyle.useThemeFontColor = false;
 
-    auto typingStyle = richEditorPattern->typingStyle_;
-    auto typingTextStyle = richEditorPattern->typingTextStyle_;
+    auto typingStyle = richEditorPattern->GetTypingStyle();
+    auto typingTextStyle = richEditorPattern->styleManager_->GetTypingTextStyle();
 
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
     EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
-    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->SetTypingStyle(updateSpanStyle, richEditorPattern->styleManager_->GetTypingTextStyle());
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
     EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
-    richEditorPattern->typingStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = textStyle;
+    richEditorPattern->SetTypingStyle(std::nullopt, textStyle);
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
     EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
-    richEditorPattern->typingStyle_ = updateSpanStyle;
+    richEditorPattern->SetTypingStyle(updateSpanStyle, richEditorPattern->styleManager_->GetTypingTextStyle());
     richEditorPattern->CreateTextSpanNode(spanNode, info, insertValue);
     EXPECT_EQ(spanNode->GetSpanItem()->useThemeDecorationColor, true);
 
-    richEditorPattern->typingStyle_ = typingStyle;
-    richEditorPattern->typingTextStyle_ = typingTextStyle;
+    richEditorPattern->SetTypingStyle(typingStyle, typingTextStyle);
 }
 
 /**

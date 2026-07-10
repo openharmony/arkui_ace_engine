@@ -439,7 +439,7 @@ HWTEST_F(RichEditorStyleTestNg, SetTypingStyle001, TestSize.Level0)
     UpdateSpanStyle typingStyle;
     richEditorPattern->SetTypingStyle(typingStyle, style);
     TextSpanOptions options1;
-    options1.style = richEditorPattern->typingTextStyle_;
+    options1.style = richEditorPattern->styleManager_->GetTypingTextStyle();
     AddSpan(INIT_VALUE_1);
     auto info1 = richEditorController->GetSpansInfo(1, 5);
     ASSERT_NE(info1.selection_.resultObjects.size(), 0);
@@ -480,7 +480,7 @@ HWTEST_F(RichEditorStyleTestNg, SetTypingStyle002, TestSize.Level0)
     UpdateSpanStyle typingStyle;
     richEditorPattern->SetTypingStyle(typingStyle, style);
     TextSpanOptions options1;
-    options1.style = richEditorPattern->typingTextStyle_;
+    options1.style = richEditorPattern->styleManager_->GetTypingTextStyle();
     auto info1 = richEditorController->GetSpansInfo(1, 5);
     ASSERT_NE(info1.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle2 = info1.selection_.resultObjects.front().textStyle;
@@ -542,22 +542,22 @@ HWTEST_F(RichEditorStyleTestNg, HasSameTypingStyle001, TestSize.Level0)
     auto spanItem = it->GetSpanItem();
 
     spanItem->textStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->SetTypingStyle(richEditorPattern->GetTypingStyle(), std::nullopt);
     auto ret = richEditorPattern->HasSameTypingStyle(it);
     EXPECT_TRUE(ret);
 
     spanItem->textStyle_ = TextStyle();
-    richEditorPattern->typingTextStyle_ = std::nullopt;
+    richEditorPattern->SetTypingStyle(richEditorPattern->GetTypingStyle(), std::nullopt);
     ret = richEditorPattern->HasSameTypingStyle(it);
     EXPECT_FALSE(ret);
 
     spanItem->textStyle_ = std::nullopt;
-    richEditorPattern->typingTextStyle_ = TextStyle();
+    richEditorPattern->SetTypingStyle(richEditorPattern->GetTypingStyle(), TextStyle());
     ret = richEditorPattern->HasSameTypingStyle(it);
     EXPECT_FALSE(ret);
 
     spanItem->textStyle_ = TextStyle();
-    richEditorPattern->typingTextStyle_ = TextStyle();
+    richEditorPattern->SetTypingStyle(richEditorPattern->GetTypingStyle(), TextStyle());
     ret = richEditorPattern->HasSameTypingStyle(it);
     EXPECT_TRUE(ret);
 

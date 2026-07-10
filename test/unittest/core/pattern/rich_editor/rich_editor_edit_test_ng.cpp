@@ -1214,7 +1214,7 @@ HWTEST_F(RichEditorEditTestNg, InsertValueOperation001, TestSize.Level0)
 
     richEditorPattern->InsertValueOperation(insertValue, &record, OperationType::DEFAULT);
 
-    EXPECT_TRUE(richEditorPattern->typingStyle_.has_value());
+    EXPECT_TRUE(richEditorPattern->GetTypingStyle().has_value());
 }
 
 /**
