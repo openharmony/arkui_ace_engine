@@ -22,7 +22,6 @@
 
 #include "ui/resource/resource_parse_utils.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
@@ -51,8 +50,6 @@ class ACE_FORCE_EXPORT ResourceParseUtils final : public ResourceParseUtilsBase 
 public:
     using ResourceParseUtilsBase::ParseResInteger;
 
-    static RefPtr<ThemeConstants> GetThemeConstants(const RefPtr<ResourceObject>& resObj);
-
     static void SetNeedReload(bool needReload)
     {
         needReload_ = needReload;
@@ -72,18 +69,17 @@ public:
         auto resIdNum = resObj->GetId();
         auto type = resObj->GetType();
         auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-        RefPtr<ThemeConstants> themeConstants = nullptr;
-        auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+        CHECK_NULL_RETURN(resourceAdapter, false);
         if (resIdNum == -1) {
             auto param = resObj->GetParams()[0];
             if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-                result = static_cast<T>(resourceWrapper->GetIntByName(param.value.value()));
+                result = static_cast<T>(resourceAdapter->GetIntByName(param.value.value()));
                 return true;
             }
             return false;
         }
         if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-            result = static_cast<T>(resourceWrapper->GetInt(resIdNum));
+            result = static_cast<T>(resourceAdapter->GetInt(resIdNum));
             return true;
         }
         return false;

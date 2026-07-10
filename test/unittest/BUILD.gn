@@ -207,7 +207,6 @@ ohos_static_library("ace_components_deps") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -260,7 +259,6 @@ ohos_static_library("ace_components_base") {
     "$ace_root/frameworks/core/common/resource/pattern_resource_manager.cpp",
     "$ace_root/frameworks/core/common/resource/resource_manager.cpp",
     "$ace_root/frameworks/core/common/resource/resource_parse_utils.cpp",
-    "$ace_root/frameworks/core/common/resource/resource_wrapper.cpp",
     "$ace_root/frameworks/core/components/theme/shadow_theme.cpp",
     "$ace_root/frameworks/core/components_ng/base/distributed_ui.cpp",
     "$ace_root/frameworks/core/components_ng/base/extension_handler.cpp",

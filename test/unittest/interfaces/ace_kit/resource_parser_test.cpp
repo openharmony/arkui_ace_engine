@@ -22,7 +22,7 @@
 #include "ui/resource/resource_parser.h"
 
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -410,7 +410,7 @@ HWTEST_F(ResourceParserTest, ResourceParserTestTest021, TestSize.Level1)
 
 /**
  * @tc.name: ResourceParserTestTest022
- * @tc.desc: Test GetDouble when resourceWrapper is null
+ * @tc.desc: Test GetDouble when resourceAdapter is null
  * @tc.type: Func
  */
 HWTEST_F(ResourceParserTest, ResourceParserTestTest022, TestSize.Level1)

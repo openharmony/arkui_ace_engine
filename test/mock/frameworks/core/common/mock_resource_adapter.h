@@ -185,8 +185,7 @@ public:
      */
     MOCK_CONST_METHOD1(GetStringArray, std::vector<std::string>(uint32_t resId));
     
-    // Add missing GetName methods that are required by ResourceWrapper
-    // These methods allow resource lookup by name instead of ID
+    // These methods allow resource lookup by name instead of ID.
     
     /**
      * @brief Get color resource by resource name

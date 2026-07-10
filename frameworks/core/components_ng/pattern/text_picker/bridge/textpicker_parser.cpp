@@ -25,6 +25,7 @@
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/common/resource/resource_object.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
@@ -642,8 +643,8 @@ bool TextPickerParser::ParseJsStrArray(const EcmaVM* vm, const Local<JSValueRef>
         return false;
     }
     resObj = ArkTSUtils::GetResourceObject(vm, jsObj);
-    auto resourceWrapper = ArkTSUtils::CreateJsResourceWrapper(vm, jsValue, resObj);
-    if (!resourceWrapper) {
+    auto resourceAdapter = ArkTSUtils::CreateResourceAdapter(resObj);
+    if (!resourceAdapter) {
         return false;
     }
     if (resIdNum == -1) {
@@ -657,13 +658,13 @@ bool TextPickerParser::ParseJsStrArray(const EcmaVM* vm, const Local<JSValueRef>
         auto params = panda::Local<panda::ArrayRef>(args);
         auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
         if (resType == static_cast<int32_t>(ResourceType::STRARRAY)) {
-            result = resourceWrapper->GetStringArrayByName(param->ToString(vm)->ToString(vm));
+            result = resourceAdapter->GetStringArrayByName(param->ToString(vm)->ToString(vm));
             return true;
         }
         return false;
     }
     if (resType == static_cast<int32_t>(ResourceType::STRARRAY)) {
-        result = resourceWrapper->GetStringArray(static_cast<uint32_t>(resIdNum));
+        result = resourceAdapter->GetStringArray(static_cast<uint32_t>(resIdNum));
         return true;
     }
     return false;

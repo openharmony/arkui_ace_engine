@@ -22,7 +22,6 @@
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_model_static.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

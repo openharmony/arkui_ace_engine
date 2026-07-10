@@ -110,7 +110,6 @@ public:
         accessor_ = accessors_ ? (accessors_->*GetAccessorFunc)() : nullptr;
         MockPipelineContext::SetUp();
 
-        g_isResourceDecoupling = false;
         themeManager_ = AceType::MakeRefPtr<NiceMock<MockThemeManager>>();
         ASSERT_TRUE(MockPipelineContext::GetCurrent());
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);

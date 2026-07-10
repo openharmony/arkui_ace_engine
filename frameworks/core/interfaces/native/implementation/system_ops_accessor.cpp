@@ -19,7 +19,6 @@
 #include "base/log/container_scope_wrapper.h"
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -120,22 +119,13 @@ void SetFrameCallbackImpl(const Callback_Long_Void* onFrameCallback,
     };
     context->AddFrameCallback(std::move(onFrameCallbackFunc), std::move(onIdleCallbackFunc), delayTimeInt);
 }
-RefPtr<ResourceWrapper> CreateResourceWrapper(const std::string& bundleName, const std::string& moduleName)
+RefPtr<ResourceAdapter> CreateResourceAdapter(const std::string& bundleName, const std::string& moduleName)
 {
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, Container::CurrentIdSafely());
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        CHECK_NULL_RETURN(resourceAdapter, nullptr);
-    } else {
-        auto themeManager = PipelineBase::CurrentThemeManager();
-        CHECK_NULL_RETURN(themeManager, nullptr);
-        themeConstants = themeManager->GetThemeConstants();
-        CHECK_NULL_RETURN(themeConstants, nullptr);
-    }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
+    resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+    CHECK_NULL_RETURN(resourceAdapter, nullptr);
+    return resourceAdapter;
 }
 Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
 {
@@ -145,8 +135,8 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
     auto resId = Converter::Convert<int64_t>(res->id);
     auto bundleName = Converter::Convert<std::string>(res->bundleName);
     auto moduleName = Converter::Convert<std::string>(res->moduleName);
-    auto resourceWrapper = CreateResourceWrapper(bundleName, moduleName);
-    CHECK_NULL_RETURN(resourceWrapper, errValue);
+    auto resourceAdapter = CreateResourceAdapter(bundleName, moduleName);
+    CHECK_NULL_RETURN(resourceAdapter, errValue);
     if (resId == -1) {
         auto optParams = Converter::OptConvert<std::vector<Ark_Union_String_I32_I64_F64_Resource>>(res->params);
 
@@ -158,7 +148,7 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
             return errValue;
         }
         auto params0 = Converter::Convert<std::string>(params[0].value0);
-        result = resourceWrapper->GetDimensionByName(params0);
+        result = resourceAdapter->GetDimensionByName(params0);
         return Converter::ArkValue<Ark_LengthMetricsCustom>(result);
     }
     auto resType = Converter::OptConvert<int32_t>(res->type);
@@ -167,15 +157,15 @@ Ark_LengthMetricsCustom ResourceToLengthMetricsImpl(const Ark_Resource* res)
     }
     auto typeValue = resType.value();
     if (typeValue == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resId);
+        auto value = resourceAdapter->GetString(resId);
         StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
     }
     if (typeValue == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(resId));
+        auto value = std::to_string(resourceAdapter->GetInt(resId));
         StringUtils::StringToDimensionWithUnitNG(value, result, DimensionUnit::VP);
     }
     if (typeValue == static_cast<int32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDimension(resId);
+        result = resourceAdapter->GetDimension(resId);
     }
     return Converter::ArkValue<Ark_LengthMetricsCustom>(result);
 }

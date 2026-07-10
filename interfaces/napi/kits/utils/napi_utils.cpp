@@ -175,56 +175,23 @@ bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_val
     return false;
 }
 
-RefPtr<ThemeConstants> GetThemeConstants(const std::optional<std::string>& bundleName = std::nullopt,
-    const std::optional<std::string>& moduleName = std::nullopt)
-{
-    auto container = Container::Current();
-    if (!container) {
-        LOGW("container is null");
-        return nullptr;
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        LOGE("pipelineContext is null!");
-        return nullptr;
-    }
-    auto themeManager = pipelineContext->GetThemeManager();
-    if (!themeManager) {
-        LOGE("themeManager is null!");
-        return nullptr;
-    }
-    if (bundleName.has_value() && moduleName.has_value()) {
-        return themeManager->GetThemeConstants(bundleName.value_or(""), moduleName.value_or(""));
-    }
-    return themeManager->GetThemeConstants();
-}
-
-RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info)
+RefPtr<ResourceAdapter> CreateResourceAdapter(const ResourceInfo& info)
 {
     auto bundleName = info.bundleName;
     auto moduleName = info.moduleName;
 
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        if (bundleName.has_value() && moduleName.has_value()) {
-            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
-                bundleName.value_or(""), moduleName.value_or(""), Container::CurrentIdSafely());
-            resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        } else {
-            resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
-        }
-        if (!resourceAdapter) {
-            return nullptr;
-        }
+    if (bundleName.has_value() && moduleName.has_value()) {
+        auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+            bundleName.value_or(""), moduleName.value_or(""), Container::CurrentIdSafely());
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
     } else {
-        themeConstants = GetThemeConstants(info.bundleName, info.moduleName);
-        if (!themeConstants) {
-            return nullptr;
-        }
+        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
+    if (!resourceAdapter) {
+        return nullptr;
+    }
+    return resourceAdapter;
 }
 
 napi_value CreateNapiString(napi_env env, const std::string& rawStr)
@@ -615,17 +582,17 @@ bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorRe
         LOGE("Parse color from resource failed");
         return false;
     }
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (resourceWrapper == nullptr) {
-        LOGE("resourceWrapper is nullptr");
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (resourceAdapter == nullptr) {
+        LOGE("resourceAdapter is nullptr");
         return false;
     }
     if (resourceInfo.type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto colorString = resourceWrapper->GetString(resourceInfo.resId);
+        auto colorString = resourceAdapter->GetString(resourceInfo.resId);
         return Color::ParseColorString(colorString, colorResult);
     }
     if (resourceInfo.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto colorInt = resourceWrapper->GetInt(resourceInfo.resId);
+        auto colorInt = resourceAdapter->GetInt(resourceInfo.resId);
         colorResult = Color(CompleteColorAlphaIfIncomplete(colorInt));
         return true;
     }
@@ -634,9 +601,9 @@ bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorRe
             LOGE("resourceParams is empty");
             return false;
         }
-        colorResult = resourceWrapper->GetColorByName(resourceInfo.params[0]);
+        colorResult = resourceAdapter->GetColorByName(resourceInfo.params[0]);
     } else {
-        colorResult = resourceWrapper->GetColor(resourceInfo.resId);
+        colorResult = resourceAdapter->GetColor(resourceInfo.resId);
     }
     return true;
 }
@@ -966,17 +933,17 @@ std::string DimensionToString(Dimension dimension)
 
 bool ParseString(const ResourceInfo& info, std::string& result)
 {
-    auto resourceWrapper = CreateResourceWrapper(info);
-    CHECK_NULL_RETURN(resourceWrapper, true);
+    auto resourceAdapter = CreateResourceAdapter(info);
+    CHECK_NULL_RETURN(resourceAdapter, true);
     if (info.type == static_cast<int>(ResourceType::PLURAL)) {
         std::string pluralResults;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             auto count = StringUtils::StringToInt(info.params[1]);
-            pluralResults = resourceWrapper->GetPluralStringByName(info.params[0], count);
+            pluralResults = resourceAdapter->GetPluralStringByName(info.params[0], count);
             ReplaceHolder(pluralResults, info.params, 2); // plural holder in index 2
         } else {
             auto count = StringUtils::StringToInt(info.params[0]);
-            pluralResults = resourceWrapper->GetPluralString(info.resId, count);
+            pluralResults = resourceAdapter->GetPluralString(info.resId, count);
             int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
             ReplaceHolder(pluralResults, info.params, startIndex + 1);
         }
@@ -985,24 +952,24 @@ bool ParseString(const ResourceInfo& info, std::string& result)
     }
     if (info.type == static_cast<int>(ResourceType::RAWFILE)) {
         auto fileName = info.params[0];
-        result = resourceWrapper->GetRawfile(fileName);
+        result = resourceAdapter->GetRawfile(fileName);
         return true;
     }
     if (info.type == static_cast<int>(ResourceType::FLOAT)) {
         if (info.resId == UNKNOWN_RESOURCE_ID) {
-            result = DimensionToString(resourceWrapper->GetDimensionByName(info.params[0]));
+            result = DimensionToString(resourceAdapter->GetDimensionByName(info.params[0]));
         } else {
-            result = DimensionToString(resourceWrapper->GetDimension(info.resId));
+            result = DimensionToString(resourceAdapter->GetDimension(info.resId));
         }
         return true;
     }
     if (info.type == static_cast<int>(ResourceType::STRING)) {
         std::string originStr;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
-            originStr = resourceWrapper->GetStringByName(info.params[0]);
+            originStr = resourceAdapter->GetStringByName(info.params[0]);
             ReplaceHolder(originStr, info.params, 1);
         } else {
-            originStr = resourceWrapper->GetString(info.resId);
+            originStr = resourceAdapter->GetString(info.resId);
             int32_t startIndex = GetStringFormatStartIndex(info.hasGetter);
             ReplaceHolder(originStr, info.params, startIndex);
         }
@@ -1010,11 +977,11 @@ bool ParseString(const ResourceInfo& info, std::string& result)
         return true;
     }
     if (info.type == static_cast<int>(ResourceType::COLOR)) {
-        result = resourceWrapper->GetColor(info.resId).ColorToString();
+        result = resourceAdapter->GetColor(info.resId).ColorToString();
         return true;
     }
     if (info.type == static_cast<int>(ResourceType::INTEGER)) {
-        result = std::to_string(resourceWrapper->GetInt(info.resId));
+        result = std::to_string(resourceAdapter->GetInt(info.resId));
         return true;
     }
     return true;
@@ -1063,13 +1030,13 @@ std::optional<Color> GetOptionalColor(napi_env env, napi_value argv, napi_valuet
 
 bool ParseIntegerToString(const ResourceInfo& info, std::string& result)
 {
-    auto resourceWrapper = CreateResourceWrapper(info);
-    CHECK_NULL_RETURN(resourceWrapper, true);
+    auto resourceAdapter = CreateResourceAdapter(info);
+    CHECK_NULL_RETURN(resourceAdapter, true);
     if (info.type == static_cast<int>(ResourceType::INTEGER)) {
         if (info.resId == UNKNOWN_RESOURCE_ID) {
-            result = std::to_string(resourceWrapper->GetIntByName(info.params[0]));
+            result = std::to_string(resourceAdapter->GetIntByName(info.params[0]));
         } else {
-            result = std::to_string(resourceWrapper->GetInt(info.resId));
+            result = std::to_string(resourceAdapter->GetInt(info.resId));
         }
         return true;
     }
@@ -1166,7 +1133,7 @@ bool ParseNapiDimensionNG(
 
 bool CheckDarkResource(const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::GetResourceDecoupling() || !resObj) {
+    if (!resObj) {
         return false;
     }
     auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
