@@ -462,6 +462,11 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
             this.__root!.__parent = this.__builderProxyNode;
             this.__builderProxyNode!.hasChild = true;
             this.__builderProxyNode?.peer?.addChild(this.__root!.getPeerPtr());
+            if (!this.__isWeak && !(this.__buildOptions?.useParallel)) {
+                this.__builderProxyNode?.registerDestroyEvent((nodeId: int) => {
+                    this.onDestroy();
+                });
+            }
             this.__builderRootNode = this.__builderProxyNode;
         } else {
             this.__builderRootNode = findPeerNode(this.__root!);
@@ -693,16 +698,26 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__isDisposed = true;
     }
 
+    public onDestroy(): void {
+        try {
+            this.__root = undefined;
+            this.__rootStage?.dispose();
+            this.__rootStage = undefined;
+            this.__manager?.reset();
+        } catch (e) {
+            InteropNativeModule._NativeLog("scope dispose message: " + e.message)
+        }
+    }
+
     private disposeAll(): void {
         super.disposeNode();
         this.__managerGlobal = undefined;
-        this.__root = undefined;
-        this.__rootStage?.dispose();
-        this.__rootStage = undefined;
+        if (this.__isWeak || (this.__buildOptions?.useParallel)) {
+            this.onDestroy();
+        }
         this.__builderProxyNode?.dispose();
         this.__builderProxyNode = undefined;
         this.__builderRootNode = undefined;
-        this.__manager?.reset();
     }
 
     public dispose(): void {

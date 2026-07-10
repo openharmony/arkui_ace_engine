@@ -279,7 +279,14 @@ ani_long BuilderProxyNodeMockConstruct(ArkUI_Int32 id)
     auto node = AceType::MakeRefPtr<NG::DetachedFreeRootProxyNode>(id);
     CHECK_NULL_RETURN(node, 0);
     node->IncRefCount();
-return reinterpret_cast<ani_long>(AceType::RawPtr(node));
+    return reinterpret_cast<ani_long>(AceType::RawPtr(node));
+}
+
+void SetOnNodeDestroyEvent(ArkUINodeHandle node, std::function<void(int32_t)>&& event)
+{
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetOnNodeDestroyCallback(std::move(event));
 }
 
 ani_ref GetSharedLocalStorage()
@@ -1332,6 +1339,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .isEasySplit = OHOS::Ace::NG::IsEasySplit,
         .dumpLogPrint = OHOS::Ace::NG::DumpLogPrintImpl,
         .fireArkUIObjectLifecycleCallback = OHOS::Ace::NG::FireArkUIObjectLifecycleCallbackImpl,
+        .setOnNodeDestroyEvent = OHOS::Ace::NG::SetOnNodeDestroyEvent,
     };
     return &impl;
 }

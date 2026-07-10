@@ -691,6 +691,7 @@ struct ArkUIAniCommonModifier {
     ani_boolean(*isEasySplit)(ArkUI_Int32 instanceId);
     void(*dumpLogPrint)(int32_t depth, const char* content);
     void(*fireArkUIObjectLifecycleCallback)(ani_long nodePtr, const std::string& className, void* data);
+    void (*setOnNodeDestroyEvent)(ArkUINodeHandle node, std::function<void(int32_t)>&& event);
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;
