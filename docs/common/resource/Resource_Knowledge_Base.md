@@ -43,7 +43,7 @@
 
 | 特性 | 说明 |
 |------|------|
-| **设计模式** | 单例模式 + 适配器模式 + 包装器模式 |
+| **设计模式** | 单例模式 + 适配器模式 |
 | **缓存策略** | LRU（Least Recently Used）缓存 |
 | **线程安全** | `std::shared_mutex` 读写锁 |
 | **资源隔离** | 按 bundleName.moduleName.instanceId 三元组隔离 |
@@ -54,7 +54,6 @@
 ```
 frameworks/core/common/resource/    # 核心资源管理
 ├── resource_manager.h/cpp         # 资源管理器（单例）
-├── resource_wrapper.h/cpp         # 资源包装器
 ├── resource_parse_utils.h/cpp     # 资源解析工具
 ├── pattern_resource_manager.h/cpp # Pattern 层资源管理
 └── resource_object.h              # 资源对象定义
@@ -112,11 +111,6 @@ interfaces/napi/kits/utils/        # NAPI 接口
 │  └────────────────────────────────────────────────────────┘    │
 │                                 ↓                                │
 │  ┌────────────────────────────────────────────────────────┐    │
-│  │              ResourceWrapper (统一访问接口)              │    │
-│  │  - GetColor/GetString/GetMedia/GetRawfile...           │    │
-│  └────────────────────────────────────────────────────────┘    │
-│                                 ↓                                │
-│  ┌────────────────────────────────────────────────────────┐    │
 │  │          ResourceParseUtils (解析工具)                   │    │
 │  │  - ParseResColor/ParseResString/ParseResDimension...    │    │
 │  └────────────────────────────────────────────────────────┘    │
@@ -126,16 +120,14 @@ interfaces/napi/kits/utils/        # NAPI 接口
 ┌─────────────────────────────────────────────────────────────────┐
 │                  平台适配层 (Adapter Layer)                       │
 │                                                                  │
-│  ┌──────────────────────┐  ┌──────────────────────────────┐    │
-│  │  ResourceAdapter     │  │  ThemeConstants              │    │
-│  │  (资源解耦模式)       │  │  (传统主题模式)               │    │
-│  │                      │  │                              │    │
-│  │  - GetColorById      │  │  - GetColor                  │    │
-│  │  - GetStringByName   │  │  - GetDimension              │    │
-│  │  - GetMediaPath      │  │  - GetString                 │    │
-│  └──────────┬───────────┘  └────────────┬─────────────────┘    │
-│             │                            │                       │
-│             ↓                            ↓                       │
+│  ┌────────────────────────────────────────────────────┐        │
+│  │  ResourceAdapter                                  │        │
+│  │  - GetColorById                                   │        │
+│  │  - GetStringByName                                │        │
+│  │  - GetMediaPath                                   │        │
+│  └───────────────────────┬────────────────────────────┘        │
+│                          │                                      │
+│                          ↓                                      │
 │  ┌────────────────────────────────────────────────────┐        │
 │  │     ResourceAdapterImpl / ResourceAdapterImplV2    │        │
 │  │     (OHOS 平台实现 - GlobalResourceManager)        │        │
@@ -161,8 +153,6 @@ AceType (基础类型)
     ├── ResourceAdapter (虚接口)
     │     ├── ResourceAdapterImpl (OHOS 实现)
     │     └── ResourceAdapterImplV2 (OHOS V2 实现)
-    │
-    ├── ResourceWrapper (统一资源访问)
     │
     ├── ResourceObject (资源对象)
     │
@@ -399,44 +389,28 @@ static RefPtr<ResourceAdapter> CreateNewResourceAdapter(
 
 ---
 
-### 3. ResourceWrapper（资源包装器）
-
-**源码位置**：`frameworks/core/common/resource/resource_wrapper.h:34`
+### 3. ResourceAdapter 直接访问
 
 #### 核心职责
 
-- 统一 ResourceAdapter 和 ThemeConstants 的访问接口
-- 支持资源解耦模式（`SystemProperties::GetResourceDecoupling()`）
-- 运行时选择使用 ResourceAdapter 或 ThemeConstants
+- ResourceManager 负责按 bundle/module/instanceId 获取或创建 ResourceAdapter
+- ResourceParseUtils、JS/CJ/NAPI 资源解析入口直接调用 ResourceAdapter
+- 为颜色、尺寸、字符串、媒体等资源提供统一读取能力
 
 #### 设计模式
 
 ```cpp
-class ResourceWrapper : public AceType {
-public:
-    ResourceWrapper(RefPtr<ThemeConstants>& themeConstants,
-                   RefPtr<ResourceAdapter>& resourceAdapter);
-
-    // 所有资源访问方法都遵循以下模式：
-    Color GetColor(uint32_t key) const {
-        if (SystemProperties::GetResourceDecoupling()) {
-            CHECK_NULL_RETURN(resourceAdapter_, Color());
-            return resourceAdapter_->GetColor(key);
-        }
-        CHECK_NULL_RETURN(themeConstants_, Color());
-        return themeConstants_->GetColor(key);
-    }
-
-    // ... 其余方法类似
-};
+auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+CHECK_NULL_RETURN(resourceAdapter, false);
+auto color = resourceAdapter->GetColor(resId);
 ```
 
-#### 模式切换机制
+#### 资源访问路径
 
-| 模式 | 使用的底层接口 | 配置开关 |
+| 场景 | 底层接口 | 失败处理 |
 |------|---------------|---------|
-| **资源解耦模式** | ResourceAdapter | `SystemProperties::GetResourceDecoupling() == true` |
-| **传统主题模式** | ThemeConstants | `SystemProperties::GetResourceDecoupling() == false` |
+| 资源读取 | ResourceAdapter | adapter 为空时返回默认值 |
+| bundle/module 资源读取 | ResourceManager 创建或复用 ResourceAdapter | adapter 创建失败时返回空结果 |
 
 ---
 
@@ -484,12 +458,14 @@ struct ResourceObjectParams {
 ```cpp
 // 场景 1: 按 ID 访问资源
 ResourceObject obj(resId, resType, params, bundleName, moduleName, instanceId);
-Color color = ResourceWrapper->GetColor(obj.GetId());
+auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(obj);
+Color color = resourceAdapter->GetColor(obj.GetId());
 
 // 场景 2: 按名称访问资源（id = -1）
 ResourceObject obj(bundleName, moduleName, instanceId);
 obj.GetParams()[0].value = "app.color.primary";
-Color color = ResourceWrapper->GetColorByName(obj.GetParams()[0].value.value());
+auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(obj);
+Color color = resourceAdapter->GetColorByName(obj.GetParams()[0].value.value());
 ```
 
 ---
@@ -769,12 +745,11 @@ OpenHarmony 支持的资源限定词（影响资源匹配）：
 └──────────────────────────┬──────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────────┐
-│  步骤 4: 创建 ResourceWrapper                               │
+│  步骤 4: 直接使用 ResourceAdapter                           │
 │  源码：resource_parse_utils.cpp                             │
 │                                                             │
-│  auto resourceWrapper =                                     │
-│      AceType::MakeRefPtr<ResourceWrapper>(                  │
-│          themeConstants, resourceAdapter);                  │
+│  auto resourceAdapter =                                     │
+│      ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject); │
 └──────────────────────────┬──────────────────────────────────┘
                            ↓
 ┌─────────────────────────────────────────────────────────────┐
@@ -783,7 +758,7 @@ OpenHarmony 支持的资源限定词（影响资源匹配）：
 │                                                             │
 │  ResourceParseUtils::ParseResColor(resourceObject, color)   │
 │    ↓                                                        │
-│  resourceWrapper->GetColorByName("app.color.primary")       │
+│  resourceAdapter->GetColorByName("app.color.primary")       │
 │    ↓                                                        │
 │  ResourceAdapter::GetColorByName(resName)                   │
 │    ↓                                                        │
@@ -959,7 +934,7 @@ JSViewAbstract::ParseJsColor()
 // arkts_utils.cpp:229
 bool ArkTSUtils::CheckDarkResource(const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::GetResourceDecoupling() || !resObj) {
+    if (!resObj) {
         return false;
     }
 
@@ -1103,44 +1078,32 @@ bool ParseDollarResource(
 std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 ```
 
-##### CreateResourceWrapper
+##### CreateResourceAdapter
 
 ```cpp
 // napi_utils.cpp:196
-RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info)
+RefPtr<ResourceAdapter> CreateResourceAdapter(const ResourceInfo& info)
 {
     auto bundleName = info.bundleName;
     auto moduleName = info.moduleName;
 
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
 
-    if (SystemProperties::GetResourceDecoupling()) {
-        if (bundleName.has_value() && moduleName.has_value()) {
-            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
-                bundleName.value_or(""),
-                moduleName.value_or(""),
-                Container::CurrentIdSafely());
-            resourceAdapter = ResourceManager::GetInstance()
-                .GetOrCreateResourceAdapter(resourceObject);
-        } else {
-            resourceAdapter = ResourceManager::GetInstance()
-                .GetResourceAdapter(Container::CurrentIdSafely());
-        }
-
-        if (!resourceAdapter) {
-            return nullptr;
-        }
+    if (bundleName.has_value() && moduleName.has_value()) {
+        auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+            bundleName.value_or(""),
+            moduleName.value_or(""),
+            Container::CurrentIdSafely());
+        resourceAdapter = ResourceManager::GetInstance()
+            .GetOrCreateResourceAdapter(resourceObject);
     } else {
-        themeConstants = GetThemeConstants(info.bundleName, info.moduleName);
-        if (!themeConstants) {
-            return nullptr;
-        }
+        resourceAdapter = ResourceManager::GetInstance()
+            .GetResourceAdapter(Container::CurrentIdSafely());
     }
-
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(
-        themeConstants, resourceAdapter);
-    return resourceWrapper;
+    if (!resourceAdapter) {
+        return nullptr;
+    }
+    return resourceAdapter;
 }
 ```
 
@@ -1521,7 +1484,7 @@ void PatternResourceManager::ReloadResources()
 | `virtual ColorMode GetResourceColorMode() const` | 获取当前颜色模式 |
 | `virtual void UpdateResourceManager(const std::string&, const std::string&)` | 更新资源管理器 |
 
-### ResourceWrapper API
+### ResourceAdapter 资源访问 API
 
 | 方法签名 | 说明 |
 |---------|------|
@@ -1590,35 +1553,27 @@ void PatternResourceManager::ReloadResources()
 
 ## 关键实现细节
 
-### 1. 资源解耦模式（Resource Decoupling）
+### 1. ResourceAdapter 单一路径
 
-**源码位置**：`resource_wrapper.h:52`
+**源码位置**：`frameworks/core/components/theme/resource_adapter.h`
 
-#### 模式切换逻辑
+#### 资源读取逻辑
 
 ```cpp
-Color GetColor(uint32_t key) const {
-    if (SystemProperties::GetResourceDecoupling()) {
-        // 新模式：使用 ResourceAdapter
-        CHECK_NULL_RETURN(resourceAdapter_, Color());
-        return resourceAdapter_->GetColor(key);
-    }
-    // 旧模式：使用 ThemeConstants
-    CHECK_NULL_RETURN(themeConstants_, Color());
-    return themeConstants_->GetColor(key);
-}
+auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+CHECK_NULL_RETURN(resourceAdapter, false);
+auto color = resourceAdapter->GetColor(resId);
 ```
 
-#### 两种模式对比
+#### 当前资源路径
 
-| 特性 | 资源解耦模式（ResourceAdapter） | 传统主题模式（ThemeConstants） |
-|------|------------------------------|------------------------------|
-| **底层接口** | Global::ResourceManager | ThemeManager |
-| **资源隔离** | 支持（按 bundle/module） | 不支持 |
-| **配置变化响应** | 实时更新 | 需要重新构建主题 |
-| **HSP 支持** | 完整支持 | 有限支持 |
-| **深色模式** | 自动切换 | 需要手动切换 |
-| **推荐使用** | ✅ 是（API 10+） | ❌ 否（兼容性保留） |
+| 特性 | ResourceAdapter |
+|------|-----------------|
+| **底层接口** | Global::ResourceManager |
+| **资源隔离** | 支持按 bundle/module 访问 |
+| **配置变化响应** | 通过 ResourceManager/ResourceAdapter 更新 |
+| **HSP 支持** | 支持 |
+| **深色模式** | 通过 ResourceAdapter 查询深色资源 |
 
 ---
 
@@ -1958,7 +1913,7 @@ struct ItemList {
 
 ```cpp
 // 1. 获取复数字符串
-std::string result = resourceWrapper->GetPluralStringByName(
+std::string result = resourceAdapter->GetPluralStringByName(
     "app.plural.items", 5);
 // → 返回："5 items"
 
@@ -2028,7 +1983,7 @@ std::string rawFile = "config.json";
 size_t len;
 std::unique_ptr<uint8_t[]> data;
 
-bool success = resourceWrapper->GetRawFileData(rawFile, len, data);
+bool success = resourceAdapter->GetRawFileData(rawFile, len, data);
 // → resourceAdapter->GetRawFileData("config.json", len, data)
 
 // 2. 使用数据
@@ -2116,19 +2071,19 @@ static napi_value GetResourceString(napi_env env, napi_callback_info info) {
         return jsValue;
     }
 
-    // 3. 创建 ResourceWrapper
+    // 3. 获取 ResourceAdapter
     ResourceInfo info;
     info.moduleName = moduleName;
 
-    auto resourceWrapper = CreateResourceWrapper(info);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(info);
+    if (!resourceAdapter) {
         return nullptr;
     }
 
     // 4. 获取字符串值
     std::string result;
     if (resType == ResourceType::STRING) {
-        result = resourceWrapper->GetStringByName(resName);
+        result = resourceAdapter->GetStringByName(resName);
     }
 
     // 5. 返回 JS 字符串
@@ -2307,27 +2262,19 @@ patternResourceManager->ReloadResources();
 
 ## 常见问题
 
-### Q1: 何时使用 ResourceAdapter vs ThemeConstants？
+### Q1: 资源解析入口使用哪个资源接口？
 
-**使用 ResourceAdapter**（推荐）：
-- API 10+ 新项目
-- 需要跨模块资源访问（HSP）
-- 需要动态资源更新
-- 需要完整的深色模式支持
+资源解析入口统一使用 ResourceAdapter：
 
-**使用 ThemeConstants**（兼容性）：
-- API 9 旧项目维护
-- 不需要动态更新
-- 简单单模块应用
+- bundle/module 资源通过 ResourceManager 创建或复用 ResourceAdapter
+- 当前实例资源通过 ResourceManager 获取当前容器的 ResourceAdapter
+- adapter 获取失败时返回空结果或默认值
 
-**切换控制**：
 ```cpp
-// 系统属性控制
-if (SystemProperties::GetResourceDecoupling()) {
-    return resourceAdapter;  // 新模式
-} else {
-    return themeConstants;   // 旧模式
+if (!resourceAdapter) {
+    return nullptr;
 }
+return resourceAdapter;
 ```
 
 ---
@@ -2528,7 +2475,7 @@ resources/
 | 模块 | 文件路径 | 说明 |
 |------|---------|------|
 | **核心管理** | frameworks/core/common/resource/resource_manager.h/cpp | ResourceManager 单例 |
-| **资源包装** | frameworks/core/common/resource/resource_wrapper.h/cpp | ResourceWrapper 统一接口 |
+| **资源适配** | frameworks/core/components/theme/resource_adapter.h | ResourceAdapter 统一接口 |
 | **资源解析** | frameworks/core/common/resource/resource_parse_utils.h/cpp | ResourceParseUtils 工具类 |
 | **Pattern 管理** | frameworks/core/common/resource/pattern_resource_manager.h/cpp | PatternResourceManager |
 | **资源对象** | interfaces/inner_api/ace_kit/include/ui/resource/resource_object.h | ResourceObject 定义 |

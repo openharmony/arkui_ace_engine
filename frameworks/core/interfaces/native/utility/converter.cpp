@@ -383,16 +383,9 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
     bundleName_ = Convert<std::string>(resource.bundleName);
     moduleName_ = Convert<std::string>(resource.moduleName);
     params_ = OptConvert<std::vector<ParamType>>(resource.params).value_or(std::vector<ParamType>{});
-    themeConstants_ = GetThemeConstants(nullptr, bundleName_.c_str(), moduleName_.c_str());
-    if (!themeConstants_) {
-        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-        auto themeManager = context->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        themeConstants_ = themeManager->GetThemeConstants(bundleName_.c_str(), moduleName_.c_str());
-    }
     auto resObj = AceType::MakeRefPtr<ResourceObject>(bundleName_, moduleName_, Container::CurrentIdSafely());
     auto resAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-    resWrapper_ = AceType::MakeRefPtr<ResourceWrapper>(themeConstants_, resAdapter);
+    resAdapter_ = resAdapter;
 }
 
 std::optional<std::string> ResourceConverter::GetResourceName()
@@ -411,10 +404,10 @@ std::optional<std::string> ResourceConverter::GetStringResource()
 {
     std::optional<std::string> result;
     if (id_ != -1) {
-        result = resWrapper_->GetString(id_);
+        result = resAdapter_->GetString(id_);
         ReplaceHolder(result, params_, 0);
     } else if (auto name = GetResourceName(); name) {
-        result = resWrapper_->GetStringByName(*name);
+        result = resAdapter_->GetStringByName(*name);
         ReplaceHolder(result, params_, 1);
     } else {
         LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
@@ -426,7 +419,7 @@ std::optional<std::string> ResourceConverter::GetRawfilePath()
 {
     std::optional<std::string> result;
     if (auto name = GetResourceName(); name) {
-        result = resWrapper_->GetRawfile(*name);
+        result = resAdapter_->GetRawfile(*name);
     }
     return result;
 }
@@ -435,9 +428,9 @@ std::optional<std::string> ResourceConverter::GetMediaPath()
 {
     std::optional<std::string> result;
     if (id_ != -1) {
-        result = resWrapper_->GetMediaPath(id_);
+        result = resAdapter_->GetMediaPath(id_);
     } else if (auto name = GetResourceName(); name) {
-        result = resWrapper_->GetMediaPathByName(*name);
+        result = resAdapter_->GetMediaPathByName(*name);
     }
     return result;
 }
@@ -457,12 +450,12 @@ std::optional<std::string> ResourceConverter::GetPluralResource()
     std::optional<std::string> result;
     if (id_ != -1) {
         if (auto count = GetIntParam(params_, 0); count) {
-            result = resWrapper_->GetPluralString(id_, *count);
+            result = resAdapter_->GetPluralString(id_, *count);
             ReplaceHolder(result, params_, 1);
         }
     } else if (auto name = GetResourceName(); name) {
         if (auto count = GetIntParam(params_, 1); count) {
-            result = resWrapper_->GetPluralStringByName(*name, *count);
+            result = resAdapter_->GetPluralStringByName(*name, *count);
             ReplaceHolder(result, params_, 2);  // 2 means data get from params_[2]
         }
     } else {
@@ -475,9 +468,9 @@ std::optional<int32_t> ResourceConverter::GetIntegerResource()
 {
     std::optional<int32_t> result;
     if (id_ != -1) {
-        result = resWrapper_->GetInt(id_);
+        result = resAdapter_->GetInt(id_);
     } else if (auto name = GetResourceName(); name) {
-        result = resWrapper_->GetIntByName(*name);
+        result = resAdapter_->GetIntByName(*name);
     } else {
         LOGE("Unknown INTEGER value OHOS::Ace::NG::Converter::ResourceConverter");
     }
@@ -488,9 +481,9 @@ std::optional<double> ResourceConverter::GetFloatResource()
 {
     std::optional<double> result;
     if (id_ != -1) {
-        result = resWrapper_->GetDouble(id_);
+        result = resAdapter_->GetDouble(id_);
     } else if (auto name = GetResourceName(); name) {
-        result = resWrapper_->GetDoubleByName(*name);
+        result = resAdapter_->GetDoubleByName(*name);
     } else {
         LOGE("Unknown FLOAT value OHOS::Ace::NG::Converter::ResourceConverter");
     }
@@ -500,7 +493,7 @@ std::optional<double> ResourceConverter::GetFloatResource()
 std::optional<std::string> ResourceConverter::ToString()
 {
     std::optional<std::string> result;
-    CHECK_NULL_RETURN(resWrapper_, result);
+    CHECK_NULL_RETURN(resAdapter_, result);
 
     if (type_ == ResourceType::STRING) {
         result = GetStringResource();
@@ -524,12 +517,12 @@ std::optional<std::string> ResourceConverter::ToString()
 
 std::optional<StringArray> ResourceConverter::ToStringArray()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::STRARRAY) {
         if (id_ != -1) {
-            return resWrapper_->GetStringArray(id_);
+            return resAdapter_->GetStringArray(id_);
         } else if (auto name = GetResourceName(); name) {
-            return resWrapper_->GetStringArrayByName(*name);
+            return resAdapter_->GetStringArrayByName(*name);
         } else {
             LOGE("Unknown STRARRAY value OHOS::Ace::NG::Converter::ResourceConverter");
         }
@@ -539,13 +532,13 @@ std::optional<StringArray> ResourceConverter::ToStringArray()
 
 std::optional<StringArray> ResourceConverter::ToFontFamilies()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::STRING) {
         std::optional<std::string> str;
         if (id_ != -1) {
-            str = resWrapper_->GetString(id_);
+            str = resAdapter_->GetString(id_);
         } else if (auto name = GetResourceName(); name) {
-            str = resWrapper_->GetStringByName(*name);
+            str = resAdapter_->GetStringByName(*name);
         } else {
             LOGE("ResourceConverter::ToFontFamilies Unknown resource value");
         }
@@ -572,16 +565,16 @@ std::optional<CalcDimension> ResourceConverter::ToCalcDimension()
 
 std::optional<CalcDimension> ResourceConverter::GetDimensionInner()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::INTEGER) {
         auto resource = GetIntegerResource();
         if (!resource) return std::nullopt;
         return Dimension(*resource, DimensionUnit::VP);
     } else if (type_ == ResourceType::FLOAT) {
         if (id_ != -1) {
-            return resWrapper_->GetDimension(id_);
+            return resAdapter_->GetDimension(id_);
         } else if (auto name = GetResourceName(); name) {
-            return resWrapper_->GetDimensionByName(*name);
+            return resAdapter_->GetDimensionByName(*name);
         } else {
             LOGE("ResourceConverter::ToCalcDimension Unknown resource value");
         }
@@ -597,7 +590,7 @@ std::optional<CalcDimension> ResourceConverter::GetDimensionInner()
 
 std::optional<CalcLength> ResourceConverter::ToCalcLength()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     auto dimOpt = ToCalcDimension();
     if (!dimOpt.has_value()) {
         return std::nullopt;
@@ -611,26 +604,26 @@ std::optional<CalcLength> ResourceConverter::ToCalcLength()
 std::optional<float> ResourceConverter::ToFloat()
 {
     std::optional<float> optFloat = std::nullopt;
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::FLOAT) {
         if (id_ != -1) {
-            optFloat = static_cast<float>(resWrapper_->GetDouble(id_));
+            optFloat = static_cast<float>(resAdapter_->GetDouble(id_));
         } else if (auto name = GetResourceName(); name) {
-            optFloat = static_cast<float>(resWrapper_->GetDoubleByName(*name));
+            optFloat = static_cast<float>(resAdapter_->GetDoubleByName(*name));
         }
     } else if (type_ == ResourceType::INTEGER) {
         if (id_ != -1) {
-            optFloat = static_cast<float>(resWrapper_->GetInt(id_));
+            optFloat = static_cast<float>(resAdapter_->GetInt(id_));
         } else if (auto name = GetResourceName(); name) {
-            optFloat = static_cast<float>(resWrapper_->GetIntByName(*name));
+            optFloat = static_cast<float>(resAdapter_->GetIntByName(*name));
         }
     } else if (type_ == ResourceType::STRING) {
         std::optional<std::string> result;
         if (id_ != -1) {
-            result = resWrapper_->GetString(id_);
+            result = resAdapter_->GetString(id_);
             ReplaceHolder(result, params_, 0);
         } else if (auto name = GetResourceName(); name) {
-            result = resWrapper_->GetStringByName(*name);
+            result = resAdapter_->GetStringByName(*name);
             ReplaceHolder(result, params_, 1);
         }
         if (result.has_value()) {
@@ -645,7 +638,7 @@ std::optional<float> ResourceConverter::ToFloat()
 
 std::optional<int32_t> ResourceConverter::ToInt()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::INTEGER) {
         return GetIntegerResource();
     }
@@ -654,7 +647,7 @@ std::optional<int32_t> ResourceConverter::ToInt()
 
 std::optional<uint32_t> ResourceConverter::ToSymbol()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::STRING) {
         auto result = GetStringResource();
         if (result.has_value() && !result.value().empty()) {
@@ -663,9 +656,9 @@ std::optional<uint32_t> ResourceConverter::ToSymbol()
         }
     }
     if (id_ != -1 && type_ == ResourceType::SYMBOL) {
-        return resWrapper_->GetSymbolById(id_);
+        return resAdapter_->GetSymbolById(id_);
     } else if (auto name = GetResourceName(); name) {
-        return resWrapper_->GetSymbolByName(name->c_str());
+        return resAdapter_->GetSymbolByName(name->c_str());
     }
     return std::nullopt;
 }
@@ -673,7 +666,7 @@ std::optional<uint32_t> ResourceConverter::ToSymbol()
 std::optional<Color> ResourceConverter::ToColor()
 {
     std::optional<Color> result;
-    CHECK_NULL_RETURN(resWrapper_, result);
+    CHECK_NULL_RETURN(resAdapter_, result);
     switch (type_) {
         case ResourceType::STRING: {
             Color color;
@@ -691,9 +684,9 @@ std::optional<Color> ResourceConverter::ToColor()
 
         case ResourceType::COLOR:
             if (id_ != -1) {
-                result = resWrapper_->GetColor(id_);
+                result = resAdapter_->GetColor(id_);
             } else if (auto name = GetResourceName(); name) {
-                result = resWrapper_->GetColorByName(*name);
+                result = resAdapter_->GetColorByName(*name);
             }
             break;
 
@@ -706,9 +699,9 @@ std::optional<Color> ResourceConverter::ToColor()
 
 std::optional<bool> ResourceConverter::ToBoolean()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::BOOLEAN) {
-        return resWrapper_->GetBoolean(id_);
+        return resAdapter_->GetBoolean(id_);
     }
     return std::nullopt;
 }

@@ -588,8 +588,6 @@ public:
 
     static bool IsFormAnimationLimited();
 
-    static bool GetResourceDecoupling();
-
     static bool IsPCMode();
 
     static bool IsAutoFillSupport();
@@ -867,7 +865,6 @@ private:
     static int32_t imageFileCacheConvertAstcThreshold_;
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
-    static bool resourceDecoupling_;
     static bool configChangePerform_;
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;

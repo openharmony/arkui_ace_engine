@@ -45,11 +45,6 @@ public:
     explicit ThemeConstants(RefPtr<ResourceAdapter> resourceAdapter);
     ~ThemeConstants() override;
 
-    /*
-     * Init properties at platform.
-     */
-    static void InitDeviceType();
-
     void InitResource(const ResourceInfo& resourceInfo);
 
     void UpdateConfig(const ResourceConfiguration& config);
@@ -301,8 +296,6 @@ public:
 
     bool GetResourceIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const;
 
-    void LoadCustomStyle(const RefPtr<AssetManager>& assetManager);
-
     /*
      * Load theme from system resource.
      */
@@ -311,8 +304,6 @@ public:
     RefPtr<ThemeStyle> GetThemeStyle() const;
 
     void SetColorScheme(ColorScheme colorScheme);
-
-    bool HasCustomStyle(uint32_t key) const;
 
     void UpdateThemeConstants(const std::string& bundleName, const std::string& moduleName);
 
@@ -324,25 +315,8 @@ public:
 
     RefPtr<ThemeStyle> GetPatternByName(const std::string& patternName);
 private:
-    static const ResValueWrapper* GetPlatformConstants(uint32_t key);
-    static const ResValueWrapper* styleMapDefault[];
-    static uint32_t DefaultMapCount;
-#ifdef WEARABLE_PRODUCT
-    static const ResValueWrapper* styleMapWatch[];
-    static uint32_t WatchMapCount;
-#else
-    static const ResValueWrapper* styleMapTv[];
-    static uint32_t TvMapCount;
-#endif
-
-    ResValueWrapper GetValue(uint32_t key) const;
-    double GetBlendAlpha(const BlendAlpha& blendAlpha) const;
-    void ParseCustomStyle(const std::string& content);
-    void LoadFile(const RefPtr<Asset>& asset);
-
     RefPtr<ResourceAdapter> resAdapter_;
     RefPtr<ThemeStyle> currentThemeStyle_;
-    ThemeConstantsMap customStyleMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ThemeConstants);
 };

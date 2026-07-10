@@ -199,43 +199,24 @@ RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const NativeResourceOb
     return resourceObject;
 }
 
-RefPtr<ResourceWrapper> CreateResourceWrapper(const NativeResourceObject& obj, RefPtr<ResourceObject>& resourceObject)
+RefPtr<ResourceAdapter> CreateResourceAdapter(RefPtr<ResourceObject>& resourceObject)
 {
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        if (!resourceAdapter) {
-            return nullptr;
-        }
-    } else {
-        CHECK_NULL_RETURN(obj.moduleName, nullptr);
-        themeConstants = ViewAbstract::GetThemeConstants(obj.bundleName, obj.moduleName);
-        if (!themeConstants) {
-            return nullptr;
-        }
+    resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+    if (!resourceAdapter) {
+        return nullptr;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
+    return resourceAdapter;
 }
 
-RefPtr<ResourceWrapper> CreateResourceWrapper()
+RefPtr<ResourceAdapter> CreateResourceAdapter()
 {
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
-        if (!resourceAdapter) {
-            return nullptr;
-        }
-    } else {
-        themeConstants = ViewAbstract::GetThemeConstants();
-        if (!themeConstants) {
-            return nullptr;
-        }
+    resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
+    if (!resourceAdapter) {
+        return nullptr;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
+    return resourceAdapter;
 }
 
 RefPtr<ThemeConstants> ViewAbstract::GetThemeConstants(const std::string& bundleName, const std::string& moduleName)
@@ -349,8 +330,8 @@ bool ViewAbstract::ParseCjString(NativeResourceObject& obj, std::string& result)
         return false;
     }
     auto resourceObject = GetResourceObjectByBundleAndModule(obj);
-    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceObject);
+    if (!resourceAdapter) {
         return false;
     }
     auto params = JsonUtil::ParseJsonString(obj.paramsJsonStr);
@@ -364,7 +345,7 @@ bool ViewAbstract::ParseCjString(NativeResourceObject& obj, std::string& result)
         }
         auto param = params->GetArrayItem(0);
         if (obj.type == static_cast<int32_t>(ResourceType::STRING)) {
-            auto originStr = resourceWrapper->GetStringByName(param->GetString());
+            auto originStr = resourceAdapter->GetStringByName(param->GetString());
             ReplaceHolder(originStr, params, 1);
             result = originStr;
         } else if (obj.type == static_cast<int32_t>(ResourceType::PLURAL)) {
@@ -373,7 +354,7 @@ bool ViewAbstract::ParseCjString(NativeResourceObject& obj, std::string& result)
                 return false;
             }
             int count = countVal->GetInt();
-            auto pluralStr = resourceWrapper->GetPluralStringByName(param->GetString(), count);
+            auto pluralStr = resourceAdapter->GetPluralStringByName(param->GetString(), count);
             // cangjie remains consistent with arkts
             ReplaceHolder(pluralStr, params, 2);
             result = pluralStr;
@@ -383,7 +364,7 @@ bool ViewAbstract::ParseCjString(NativeResourceObject& obj, std::string& result)
         return true;
     }
     if (obj.type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto originStr = resourceWrapper->GetString(static_cast<uint32_t>(obj.id));
+        auto originStr = resourceAdapter->GetString(static_cast<uint32_t>(obj.id));
         ReplaceHolder(originStr, params, 0);
         result = originStr;
     } else if (obj.type == static_cast<int32_t>(ResourceType::PLURAL)) {
@@ -392,13 +373,13 @@ bool ViewAbstract::ParseCjString(NativeResourceObject& obj, std::string& result)
             return false;
         }
         int count = countVal->GetInt();
-        auto pluralStr = resourceWrapper->GetPluralString(static_cast<uint32_t>(obj.id), count);
+        auto pluralStr = resourceAdapter->GetPluralString(static_cast<uint32_t>(obj.id), count);
         ReplaceHolder(pluralStr, params, 1);
         result = pluralStr;
     } else if (obj.type == static_cast<int32_t>(ResourceType::FLOAT)) {
-        result = std::to_string(resourceWrapper->GetDouble(static_cast<uint32_t>(obj.id)));
+        result = std::to_string(resourceAdapter->GetDouble(static_cast<uint32_t>(obj.id)));
     } else if (obj.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        result = std::to_string(resourceWrapper->GetInt(static_cast<uint32_t>(obj.id)));
+        result = std::to_string(resourceAdapter->GetInt(static_cast<uint32_t>(obj.id)));
     } else {
         return false;
     }
@@ -419,8 +400,8 @@ bool ViewAbstract::ParseCjMediaInternal(NativeResourceObject& obj, std::string& 
         return false;
     }
     auto resourceObject = GetResourceObjectByBundleAndModule(obj);
-    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceObject);
+    if (!resourceAdapter) {
         return false;
     }
     if (obj.type == static_cast<int32_t>(ResourceType::RAWFILE)) {
@@ -433,7 +414,7 @@ bool ViewAbstract::ParseCjMediaInternal(NativeResourceObject& obj, std::string& 
             return false;
         }
         auto fileName = param->GetString();
-        result = resourceWrapper->GetRawfile(fileName);
+        result = resourceAdapter->GetRawfile(fileName);
         return true;
     }
     if (obj.id == -1) {
@@ -446,19 +427,19 @@ bool ViewAbstract::ParseCjMediaInternal(NativeResourceObject& obj, std::string& 
         }
         auto param = params->GetArrayItem(0);
         if (obj.type == static_cast<int32_t>(ResourceType::MEDIA)) {
-            result = resourceWrapper->GetMediaPathByName(param->GetString());
+            result = resourceAdapter->GetMediaPathByName(param->GetString());
             return true;
         }
         if (obj.type == static_cast<int32_t>(ResourceType::STRING)) {
-            result = resourceWrapper->GetStringByName(param->GetString());
+            result = resourceAdapter->GetStringByName(param->GetString());
             return true;
         }
         return false;
     } else if (obj.type == static_cast<int32_t>(ResourceType::MEDIA)) {
-        result = resourceWrapper->GetMediaPath(static_cast<uint32_t>(obj.id));
+        result = resourceAdapter->GetMediaPath(static_cast<uint32_t>(obj.id));
         return true;
     } else if (obj.type == static_cast<int32_t>(ResourceType::STRING)) {
-        result = resourceWrapper->GetString(static_cast<uint32_t>(obj.id));
+        result = resourceAdapter->GetString(static_cast<uint32_t>(obj.id));
         return true;
     }
     return false;
@@ -473,8 +454,8 @@ bool ViewAbstract::ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result)
         return false;
     }
     auto resourceObject = GetResourceObjectByBundleAndModule(obj);
-    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceObject);
+    if (!resourceAdapter) {
         return false;
     }
     if (obj.id == -1) {
@@ -486,7 +467,7 @@ bool ViewAbstract::ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result)
             return false;
         }
         auto param = params->GetArrayItem(0);
-        auto symbol = resourceWrapper->GetSymbolByName(param->GetString().c_str());
+        auto symbol = resourceAdapter->GetSymbolByName(param->GetString().c_str());
         if (!symbol) {
             return false;
         }
@@ -494,7 +475,7 @@ bool ViewAbstract::ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result)
         return true;
     }
     if (obj.type == static_cast<int32_t>(ResourceType::SYMBOL)) {
-        result = resourceWrapper->GetSymbolById(static_cast<uint32_t>(obj.id));
+        result = resourceAdapter->GetSymbolById(static_cast<uint32_t>(obj.id));
         return true;
     }
     return false;
@@ -509,8 +490,8 @@ bool ViewAbstract::ParseCjColor(NativeResourceObject& obj, Color& result)
         return false;
     }
     auto resourceObject = GetResourceObjectByBundleAndModule(obj);
-    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceObject);
+    if (!resourceAdapter) {
         return false;
     }
     if (obj.id == -1) {
@@ -522,20 +503,20 @@ bool ViewAbstract::ParseCjColor(NativeResourceObject& obj, Color& result)
             return false;
         }
         auto param = params->GetArrayItem(0);
-        result = resourceWrapper->GetColorByName(param->GetString());
+        result = resourceAdapter->GetColorByName(param->GetString());
         return true;
     }
     if (obj.type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(static_cast<uint32_t>(obj.id));
+        auto value = resourceAdapter->GetString(static_cast<uint32_t>(obj.id));
         return Color::ParseColorString(value, result);
     }
     if (obj.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = resourceWrapper->GetInt(static_cast<uint32_t>(obj.id));
+        auto value = resourceAdapter->GetInt(static_cast<uint32_t>(obj.id));
         result = Color(ColorAlphaAdapt(value));
         return true;
     }
     if (obj.type == static_cast<int32_t>(ResourceType::COLOR)) {
-        result = resourceWrapper->GetColor(static_cast<uint32_t>(obj.id));
+        result = resourceAdapter->GetColor(static_cast<uint32_t>(obj.id));
         result.SetResourceId(static_cast<uint32_t>(obj.id));
         return true;
     }
@@ -552,8 +533,8 @@ bool ViewAbstract::ParseCjDimension(
         return false;
     }
     auto resourceObject = GetResourceObjectByBundleAndModule(obj);
-    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceObject);
+    if (!resourceAdapter) {
         return false;
     }
     if (obj.id == -1) {
@@ -566,26 +547,26 @@ bool ViewAbstract::ParseCjDimension(
         }
         auto param = params->GetArrayItem(0);
         if (obj.type == static_cast<int32_t>(ResourceType::STRING)) {
-            auto value = resourceWrapper->GetStringByName(param->GetString());
+            auto value = resourceAdapter->GetStringByName(param->GetString());
             return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
         }
         if (obj.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-            auto value = std::to_string(resourceWrapper->GetIntByName(param->GetString()));
+            auto value = std::to_string(resourceAdapter->GetIntByName(param->GetString()));
             return StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
         }
-        result = resourceWrapper->GetDimensionByName(param->GetString());
+        result = resourceAdapter->GetDimensionByName(param->GetString());
         return true;
     }
     if (obj.type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(static_cast<uint32_t>(obj.id));
+        auto value = resourceAdapter->GetString(static_cast<uint32_t>(obj.id));
         return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     }
     if (obj.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(static_cast<uint32_t>(obj.id)));
+        auto value = std::to_string(resourceAdapter->GetInt(static_cast<uint32_t>(obj.id)));
         return StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
     }
     if (obj.type == static_cast<int32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDimension(static_cast<uint32_t>(obj.id));
+        result = resourceAdapter->GetDimension(static_cast<uint32_t>(obj.id));
         return true;
     }
     return false;
@@ -610,8 +591,8 @@ bool ViewAbstract::ParseCjDouble(NativeResourceObject& obj, double& result)
         return false;
     }
     auto resourceObject = GetResourceObjectByBundleAndModule(obj);
-    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceObject);
+    if (!resourceAdapter) {
         return false;
     }
     if (obj.id == -1) {
@@ -624,29 +605,29 @@ bool ViewAbstract::ParseCjDouble(NativeResourceObject& obj, double& result)
         }
         auto param = params->GetArrayItem(0);
         if (obj.type == static_cast<int32_t>(ResourceType::STRING)) {
-            auto value = resourceWrapper->GetStringByName(param->GetString());
+            auto value = resourceAdapter->GetStringByName(param->GetString());
             return StringUtils::StringToDouble(value, result);
         }
         if (obj.type == static_cast<int32_t>(ResourceType::FLOAT)) {
-            result = resourceWrapper->GetDoubleByName(param->GetString());
+            result = resourceAdapter->GetDoubleByName(param->GetString());
             return true;
         }
         if (obj.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-            result = resourceWrapper->GetIntByName(param->GetString());
+            result = resourceAdapter->GetIntByName(param->GetString());
             return true;
         }
         return false;
     }
     if (obj.type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(static_cast<uint32_t>(obj.id));
+        auto value = resourceAdapter->GetString(static_cast<uint32_t>(obj.id));
         return StringUtils::StringToDouble(value, result);
     }
     if (obj.type == static_cast<int32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDouble(static_cast<uint32_t>(obj.id));
+        result = resourceAdapter->GetDouble(static_cast<uint32_t>(obj.id));
         return true;
     }
     if (obj.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        result = resourceWrapper->GetInt(static_cast<uint32_t>(obj.id));
+        result = resourceAdapter->GetInt(static_cast<uint32_t>(obj.id));
         return true;
     }
     return false;
@@ -671,8 +652,8 @@ bool ViewAbstract::ParseCjBool(NativeResourceObject& obj, bool& result)
         return false;
     }
     auto resourceObject = GetResourceObjectByBundleAndModule(obj);
-    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceObject);
+    if (!resourceAdapter) {
         return false;
     }
     if (obj.id == -1) {
@@ -685,14 +666,14 @@ bool ViewAbstract::ParseCjBool(NativeResourceObject& obj, bool& result)
         }
         auto param = params->GetArrayItem(0);
         if (obj.type == static_cast<int32_t>(ResourceType::BOOLEAN)) {
-            result = resourceWrapper->GetBooleanByName(param->GetString());
+            result = resourceAdapter->GetBooleanByName(param->GetString());
             return true;
         }
         return false;
     }
 
     if (obj.type == static_cast<int32_t>(ResourceType::BOOLEAN)) {
-        result = resourceWrapper->GetBoolean(static_cast<uint32_t>(obj.id));
+        result = resourceAdapter->GetBoolean(static_cast<uint32_t>(obj.id));
         return true;
     }
     return false;
@@ -707,8 +688,8 @@ bool ViewAbstract::ParseCjIntegerArray(NativeResourceObject& obj, std::vector<ui
         return false;
     }
     auto resourceObject = GetResourceObjectByBundleAndModule(obj);
-    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceObject);
+    if (!resourceAdapter) {
         return false;
     }
     if (obj.id == -1) {
@@ -721,13 +702,13 @@ bool ViewAbstract::ParseCjIntegerArray(NativeResourceObject& obj, std::vector<ui
         }
         auto param = params->GetArrayItem(0);
         if (obj.type == static_cast<int32_t>(ResourceType::INTARRAY)) {
-            result = resourceWrapper->GetIntArrayByName(param->GetString());
+            result = resourceAdapter->GetIntArrayByName(param->GetString());
             return true;
         }
         return false;
     }
     if (obj.type == static_cast<int32_t>(ResourceType::INTARRAY)) {
-        result = resourceWrapper->GetIntArray(static_cast<uint32_t>(obj.id));
+        result = resourceAdapter->GetIntArray(static_cast<uint32_t>(obj.id));
         return true;
     }
     return false;
@@ -742,8 +723,8 @@ bool ViewAbstract::ParseCjStringArray(NativeResourceObject& obj, std::vector<std
         return false;
     }
     auto resourceObject = GetResourceObjectByBundleAndModule(obj);
-    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
-    if (!resourceWrapper) {
+    auto resourceAdapter = CreateResourceAdapter(resourceObject);
+    if (!resourceAdapter) {
         return false;
     }
     if (obj.id == -1) {
@@ -756,13 +737,13 @@ bool ViewAbstract::ParseCjStringArray(NativeResourceObject& obj, std::vector<std
         }
         auto param = params->GetArrayItem(0);
         if (obj.type == static_cast<int32_t>(ResourceType::STRARRAY)) {
-            result = resourceWrapper->GetStringArrayByName(param->GetString());
+            result = resourceAdapter->GetStringArrayByName(param->GetString());
             return true;
         }
         return false;
     }
     if (obj.type == static_cast<int32_t>(ResourceType::STRARRAY)) {
-        result = resourceWrapper->GetStringArray(static_cast<uint32_t>(obj.id));
+        result = resourceAdapter->GetStringArray(static_cast<uint32_t>(obj.id));
         return true;
     }
     return false;

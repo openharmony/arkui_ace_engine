@@ -361,56 +361,23 @@ bool GetResourceParam(ani_env *env, ani_object object, ResourceInfo& result)
     return true;
 }
 
-OHOS::Ace::RefPtr<OHOS::Ace::ThemeConstants> GetThemeConstants(
-    const std::optional<std::string>& bundleName, const std::optional<std::string>& moduleName)
-{
-    auto container = OHOS::Ace::Container::Current();
-    if (!container) {
-        return nullptr;
-    }
-
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        return nullptr;
-    }
-
-    auto themeManager = pipelineContext->GetThemeManager();
-    if (!themeManager) {
-        return nullptr;
-    }
-
-    if (bundleName.has_value() && moduleName.has_value()) {
-        return themeManager->GetThemeConstants(bundleName.value_or(""), moduleName.value_or(""));
-    }
-    return themeManager->GetThemeConstants();
-}
-
-OHOS::Ace::RefPtr<OHOS::Ace::ResourceWrapper> CreateResourceWrapper(const ResourceInfo& result)
+OHOS::Ace::RefPtr<OHOS::Ace::ResourceAdapter> CreateResourceAdapter(const ResourceInfo& result)
 {
     OHOS::Ace::RefPtr<OHOS::Ace::ResourceAdapter> resourceAdapter = nullptr;
-    OHOS::Ace::RefPtr<OHOS::Ace::ThemeConstants> themeConstants = nullptr;
-    if (OHOS::Ace::SystemProperties::GetResourceDecoupling()) {
-        if (result.bundleName.has_value() && result.moduleName.has_value()) {
-            auto bundleName = result.bundleName.value_or("");
-            auto moduleName = result.moduleName.value_or("");
-            auto resourceObject = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::ResourceObject>(
-                bundleName, moduleName, OHOS::Ace::Container::CurrentIdSafely());
-            resourceAdapter = OHOS::Ace::ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        } else {
-            resourceAdapter = OHOS::Ace::ResourceManager::GetInstance().GetResourceAdapter(
-                OHOS::Ace::Container::CurrentIdSafely());
-        }
-        if (!resourceAdapter) {
-            return nullptr;
-        }
+    if (result.bundleName.has_value() && result.moduleName.has_value()) {
+        auto bundleName = result.bundleName.value_or("");
+        auto moduleName = result.moduleName.value_or("");
+        auto resourceObject = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::ResourceObject>(
+            bundleName, moduleName, OHOS::Ace::Container::CurrentIdSafely());
+        resourceAdapter = OHOS::Ace::ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
     } else {
-        themeConstants = GetThemeConstants(result.bundleName, result.moduleName);
-        if (!themeConstants) {
-            return nullptr;
-        }
+        resourceAdapter = OHOS::Ace::ResourceManager::GetInstance().GetResourceAdapter(
+            OHOS::Ace::Container::CurrentIdSafely());
     }
-    auto resourceWrapper = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
+    if (!resourceAdapter) {
+        return nullptr;
+    }
+    return resourceAdapter;
 }
 
 void ReplaceHolder(std::string& originStr, const std::vector<std::string>& params, uint32_t containCount)
@@ -484,16 +451,17 @@ std::string DimensionToString(OHOS::Ace::Dimension dimension)
 
 bool ResourceToString(const ResourceInfo resourceInfo, std::string& result)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    CHECK_NULL_RETURN(resourceAdapter, false);
     if (resourceInfo.type == static_cast<int>(ResourceType::PLURAL)) {
         std::string pluralResults;
         if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
             auto count = OHOS::Ace::StringUtils::StringToInt(resourceInfo.params[1]);
-            pluralResults = resourceWrapper->GetPluralStringByName(resourceInfo.params[0], count);
+            pluralResults = resourceAdapter->GetPluralStringByName(resourceInfo.params[0], count);
             ReplaceHolder(pluralResults, resourceInfo.params, PLURAL_HOLDER_INDEX);
         } else {
             auto count = OHOS::Ace::StringUtils::StringToInt(resourceInfo.params[0]);
-            pluralResults = resourceWrapper->GetPluralString(resourceInfo.resId, count);
+            pluralResults = resourceAdapter->GetPluralString(resourceInfo.resId, count);
             ReplaceHolder(pluralResults, resourceInfo.params, 1);
         }
         result = pluralResults;
@@ -502,15 +470,15 @@ bool ResourceToString(const ResourceInfo resourceInfo, std::string& result)
 
     if (resourceInfo.type == static_cast<int>(ResourceType::RAWFILE)) {
         auto fileName = resourceInfo.params[0];
-        result = resourceWrapper->GetRawfile(fileName);
+        result = resourceAdapter->GetRawfile(fileName);
         return true;
     }
 
     if (resourceInfo.type == static_cast<int>(ResourceType::FLOAT)) {
         if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-            result = DimensionToString(resourceWrapper->GetDimensionByName(resourceInfo.params[0]));
+            result = DimensionToString(resourceAdapter->GetDimensionByName(resourceInfo.params[0]));
         } else {
-            result = DimensionToString(resourceWrapper->GetDimension(resourceInfo.resId));
+            result = DimensionToString(resourceAdapter->GetDimension(resourceInfo.resId));
         }
         return true;
     }
@@ -518,10 +486,10 @@ bool ResourceToString(const ResourceInfo resourceInfo, std::string& result)
     if (resourceInfo.type == static_cast<int>(ResourceType::STRING)) {
         std::string originStr;
         if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-            originStr = resourceWrapper->GetStringByName(resourceInfo.params[0]);
+            originStr = resourceAdapter->GetStringByName(resourceInfo.params[0]);
             ReplaceHolder(originStr, resourceInfo.params, 1);
         } else {
-            originStr = resourceWrapper->GetString(resourceInfo.resId);
+            originStr = resourceAdapter->GetString(resourceInfo.resId);
             ReplaceHolder(originStr, resourceInfo.params, 0);
         }
         result = originStr;
@@ -529,12 +497,12 @@ bool ResourceToString(const ResourceInfo resourceInfo, std::string& result)
     }
 
     if (resourceInfo.type == static_cast<int>(ResourceType::COLOR)) {
-        result = resourceWrapper->GetColor(resourceInfo.resId).ColorToString();
+        result = resourceAdapter->GetColor(resourceInfo.resId).ColorToString();
         return true;
     }
 
     if (resourceInfo.type == static_cast<int>(ResourceType::INTEGER)) {
-        result = std::to_string(resourceWrapper->GetInt(resourceInfo.resId));
+        result = std::to_string(resourceAdapter->GetInt(resourceInfo.resId));
         return true;
     }
     return false;
@@ -725,21 +693,21 @@ bool GetRadiusNumberToDouble(ani_env *env, ani_object object, double& result)
 
 bool ResourceToDimension(const ResourceInfo resource, OHOS::Ace::CalcDimension& result)
 {
-    auto resourceWrapper = CreateResourceWrapper(resource);
-    CHECK_NULL_RETURN(resourceWrapper, false);
+    auto resourceAdapter = CreateResourceAdapter(resource);
+    CHECK_NULL_RETURN(resourceAdapter, false);
     if (resource.type == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resource.resId);
+        auto value = resourceAdapter->GetString(resource.resId);
         return OHOS::Ace::StringUtils::StringToCalcDimensionNG(value, result, false);
     }
 
     if (resource.type == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(resource.resId));
+        auto value = std::to_string(resourceAdapter->GetInt(resource.resId));
         OHOS::Ace::StringUtils::StringToDimensionWithUnitNG(value, result);
         return true;
     }
 
     if (resource.type == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDimension(resource.resId);
+        result = resourceAdapter->GetDimension(resource.resId);
         return true;
     }
     return false;
@@ -877,8 +845,9 @@ bool GetShadowOptionsOffset(ani_env *env, ani_ref ref, double& result)
     }
 
     bool isRtl = OHOS::Ace::AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    auto offsetValue = resourceWrapper->GetDimension(resourceInfo.resId);
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    CHECK_NULL_RETURN(resourceAdapter, false);
+    auto offsetValue = resourceAdapter->GetDimension(resourceInfo.resId);
     result = isRtl ? offsetValue.Value() * (-1) : offsetValue.Value();
     return true;
 }
@@ -953,15 +922,16 @@ bool GetShadowParamOpt(ani_env *env, ani_object object, std::optional<OHOS::Ace:
 
 bool ResourceIntegerToString(const ResourceInfo& resourceInfo, std::string& result)
 {
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
     if (resourceInfo.type != static_cast<int>(ResourceType::INTEGER)) {
         return true;
     }
 
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    CHECK_NULL_RETURN(resourceAdapter, false);
     if (resourceInfo.resId == UNKNOWN_RESOURCE_ID) {
-        result = std::to_string(resourceWrapper->GetIntByName(resourceInfo.params[0]));
+        result = std::to_string(resourceAdapter->GetIntByName(resourceInfo.params[0]));
     } else {
-        result = std::to_string(resourceWrapper->GetInt(resourceInfo.resId));
+        result = std::to_string(resourceAdapter->GetInt(resourceInfo.resId));
     }
     return true;
 }

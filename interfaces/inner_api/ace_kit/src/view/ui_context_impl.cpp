@@ -282,7 +282,7 @@ int32_t UIContextImpl::GetInstanceId()
 
 bool UIContextImpl::HasDarkResource(const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::GetResourceDecoupling() || !resObj) {
+    if (!resObj) {
         return false;
     }
     auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);

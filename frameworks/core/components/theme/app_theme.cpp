@@ -40,10 +40,9 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
     if (color != Color(0xff000000)) {
         theme->focusColor_ = color;
     } else {
-        if (SystemProperties::GetResourceDecoupling()) {
-            auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
-            theme->focusColor_ = resAdapter->GetColor(FOCUS_COLOR);
-        }
+        auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
+        CHECK_NULL_RETURN(resAdapter, theme);
+        theme->focusColor_ = resAdapter->GetColor(FOCUS_COLOR);
     }
 
     auto hoverColor = themeStyle->GetAttr<Color>(THEME_ATTR_HOVER_COLOR, Color::FromRGBO(0, 0, 0, 0.05));

@@ -7778,23 +7778,14 @@ ArkUINativeModuleValue CommonBridge::ResetKeyBoardShortCutAll(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
-RefPtr<ResourceWrapper> CreateResourceWrapper()
+RefPtr<ResourceAdapter> CreateResourceAdapter()
 {
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
-        if (!resourceAdapter) {
-            return nullptr;
-        }
-    } else {
-        themeConstants = JSViewAbstract::GetThemeConstants();
-        if (!themeConstants) {
-            return nullptr;
-        }
+    resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
+    if (!resourceAdapter) {
+        return nullptr;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
+    return resourceAdapter;
 }
 
 bool ParseLightPosition(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM* vm, ArkUISizeType& dimPosX,
@@ -7884,11 +7875,11 @@ ArkUINativeModuleValue CommonBridge::SetPointLightStyle(ArkUIRuntimeCallInfo *ru
 
     ParseLightSource(runtimeCallInfo, vm, nativeNode);
 
-    auto resourceWrapper = CreateResourceWrapper();
+    auto resourceAdapter = CreateResourceAdapter();
     Local<JSValueRef> illuminatedArg = runtimeCallInfo->GetCallArgRef(NUM_6);
-    if (illuminatedArg->IsNumber() || !resourceWrapper) {
+    if (illuminatedArg->IsNumber() || !resourceAdapter) {
         auto illuminatedValue = static_cast<ArkUI_Uint32>(illuminatedArg->ToNumber(vm)->Value());
-        Dimension illuminatedBorderWidth = resourceWrapper->GetDimensionByName(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME);
+        Dimension illuminatedBorderWidth = resourceAdapter->GetDimensionByName(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME);
         struct ArkUISizeType illuminatedBorderWidthValue = { 0.0, 0 };
         illuminatedBorderWidthValue.value = illuminatedBorderWidth.Value();
         illuminatedBorderWidthValue.unit = static_cast<int8_t>(illuminatedBorderWidth.Unit());
@@ -7899,10 +7890,10 @@ ArkUINativeModuleValue CommonBridge::SetPointLightStyle(ArkUIRuntimeCallInfo *ru
     }
 
     Local<JSValueRef> bloomArg = runtimeCallInfo->GetCallArgRef(NUM_7);
-    if (bloomArg->IsNumber() || !resourceWrapper) {
+    if (bloomArg->IsNumber() || !resourceAdapter) {
         auto bloomValue = static_cast<ArkUI_Float32>(bloomArg->ToNumber(vm)->Value());
-        double bloomRadius = resourceWrapper->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
-        Color bloomColor = resourceWrapper->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
+        double bloomRadius = resourceAdapter->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
+        Color bloomColor = resourceAdapter->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
         GetArkUINodeModifiers()->getCommonModifier()->setPointLightBloom(nativeNode, bloomValue,
             static_cast<ArkUI_Float32>(bloomRadius), static_cast<ArkUI_Uint32>(bloomColor.GetValue()));
     } else {
