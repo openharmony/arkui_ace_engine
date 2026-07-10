@@ -46,8 +46,8 @@ void SequencedRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc
     if (callback && *callback) {
         GestureEvent info;
         // callback may be overwritten in its invoke so we copy it first
- 	  	auto callbackFunction = *callback;
- 	  	callbackFunction(info);
+        auto callbackFunction = *callback;
+        callbackFunction(info);
     }
 }
 
