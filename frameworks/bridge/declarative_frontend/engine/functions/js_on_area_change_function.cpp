@@ -29,11 +29,8 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 template<typename Rect, typename Offset>
-JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
+JSRef<JSObject> CreateAreaObject(const EcmaVM* vm, const Rect& rect, const Offset& origin)
 {
-    auto runtime = std::static_pointer_cast<ArkJSRuntime>(
-        JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    auto vm = runtime->GetEcmaVm();
     auto localOffset = rect.GetOffset();
 
     // offset: { x, y }
@@ -83,7 +80,7 @@ JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
     };
     auto areaObj = panda::ObjectRef::NewWithProperties(vm, 6, areaKeys, areaAttrs);
 
-    return JSRef<JSObject>::Make(areaObj);
+    return JSRef<JSObject>::FastMake(vm, areaObj);
 }
 
 } // namespace
@@ -91,9 +88,10 @@ JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
 void JsOnAreaChangeFunction::Execute(
     const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)
 {
-    panda::JsiFastNativeScope fastNativeScope(jsFunction_->GetEcmaVM());
-    auto oldArea = CreateAreaObject<Rect, Offset>(oldRect, oldOrigin);
-    auto area = CreateAreaObject<Rect, Offset>(rect, origin);
+    auto vm = jsFunction_->GetEcmaVM();
+    panda::JsiFastNativeScope fastNativeScope(vm);
+    auto oldArea = CreateAreaObject(vm, oldRect, oldOrigin);
+    auto area = CreateAreaObject(vm, rect, origin);
     JSRef<JSVal> params[2];
     params[0] = oldArea;
     params[1] = area;
@@ -103,9 +101,10 @@ void JsOnAreaChangeFunction::Execute(
 void JsOnAreaChangeFunction::Execute(
     const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect, const NG::OffsetF& origin)
 {
-    panda::JsiFastNativeScope fastNativeScope(jsFunction_->GetEcmaVM());
-    auto oldArea = CreateAreaObject<NG::RectF, NG::OffsetF>(oldRect, oldOrigin);
-    auto area = CreateAreaObject<NG::RectF, NG::OffsetF>(rect, origin);
+    auto vm = jsFunction_->GetEcmaVM();
+    panda::JsiFastNativeScope fastNativeScope(vm);
+    auto oldArea = CreateAreaObject(vm, oldRect, oldOrigin);
+    auto area = CreateAreaObject(vm, rect, origin);
     JSRef<JSVal> params[2];
     params[0] = oldArea;
     params[1] = area;
