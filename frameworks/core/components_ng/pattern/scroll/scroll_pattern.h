@@ -428,6 +428,7 @@ private:
     bool IsScrollOutOnEdge(float delta) const;
     void HandleCrashTop();
     void HandleCrashBottom();
+    bool IsScrollReachEdge() const override;
 
     void RegisterScrollBarEventTask();
     void HandleScrollEffect();

@@ -220,6 +220,15 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             ((config.frameSizeChange || config.contentSizeChange) && paintProperty->GetContentClip().has_value());
 }
 
+bool ScrollPattern::IsScrollReachEdge() const
+{
+    if (scrollEdgeType_ == ScrollEdgeType::SCROLL_BOTTOM || scrollEdgeType_ == ScrollEdgeType::SCROLL_RIGHT) {
+        return LessOrEqual(currentOffset_, -scrollableDistance_ - contentEndOffset_);
+    } else {
+        return LessOrEqual(currentOffset_, contentStartOffset_);
+    }
+}
+
 bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty, const RefPtr<FrameNode>& host)
 {
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
