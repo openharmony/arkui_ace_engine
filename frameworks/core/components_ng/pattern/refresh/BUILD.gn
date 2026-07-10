@@ -32,8 +32,15 @@ build_component_ng("refresh_pattern_ng") {
     "bridge/arkts_native_refresh_bridge.cpp",
     "bridge/refresh_dynamic_modifier.cpp",
     "bridge/refresh_dynamic_module.cpp",
-    "bridge/refresh_static_modifier.cpp",
   ]
+
+  if (!is_arkui_x) {
+    if (!ace_engine_feature_wearable) {
+      if (include_generated_sources) {
+        ark_sources += [ "bridge/refresh_static_modifier.cpp" ]
+      }
+    }
+  }
 
   if (!is_arkui_x) {
     deps = [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]
