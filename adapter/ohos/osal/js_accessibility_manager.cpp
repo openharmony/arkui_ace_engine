@@ -84,6 +84,7 @@ constexpr int64_t INVALID_NODE_ID = -1;
 constexpr int32_t ACCESSIBILITY_FOCUS_WITHOUT_EVENT = -2100001;
 constexpr uint64_t WEB_MAX_ELEMENT_ID = 0xFFFFFFFFFF;
 constexpr int32_t WEB_TREE_MODE = 8;
+constexpr uint32_t WEB_FOCUS_MOVE_SEARCH_MAX_DEPTH = 8;
 constexpr size_t MAX_DUMP_INFO_SIZE = 5000;
 constexpr char DETACH_FOCUS_LOG_PREFIX[] = "[DetachFocusFallback]";
 constexpr char WEB_ACC_ID_PARAM[] = "-webAccId";
@@ -7944,19 +7945,30 @@ void JsAccessibilityManager::WebFocusMoveSearch(const int64_t elementId, const i
 
 void JsAccessibilityManager::WebFocusMoveSearchByComponent(AccessibilityElementInfo& nodeInfo,
     const RefPtr<NG::WebPattern>& webPattern, const int32_t direction, RefPtr<PipelineBase> context,
-    FocusMoveResult& result, int32_t focusRuleType)
+    FocusMoveResult& result, int32_t focusRuleType, uint32_t searchDepth)
 {
     if (!IsTagInEmbedComponent(nodeInfo.GetComponentType())) {
         return;
     }
     int64_t accessibilityId = nodeInfo.GetAccessibilityId();
     result = BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_FAIL);
+    if (searchDepth >= WEB_FOCUS_MOVE_SEARCH_MAX_DEPTH) {
+        TAG_LOGW(AceLogTag::ACE_WEB,
+            "WebFocusMoveSearchByComponent reach max depth, accessibilityId: %{public}" PRId64
+            ", direction: %{public}d, focusRuleType: %{public}d",
+            accessibilityId, direction, focusRuleType);
+        return;
+    }
     CHECK_NULL_VOID(webPattern);
     std::shared_ptr<NG::TransitionalNodeInfo> transitionalNodeInfo =
         webPattern->GetTransitionalNodeById(accessibilityId);
     CHECK_NULL_VOID(transitionalNodeInfo);
     std::string surfaceId = webPattern->GetSurfaceIdByHtmlElementId(transitionalNodeInfo->GetHtmlElementId());
     if (surfaceId == "") {
+        result = WebFocusMoveSearchWithConditionNG(
+            accessibilityId, direction, focusRuleType, nodeInfo, context, webPattern);
+        WebFocusMoveSearchByComponent(
+            nodeInfo, webPattern, direction, context, result, focusRuleType, searchDepth + 1);
         return;
     }
     std::list<AccessibilityElementInfo> embedNodeTreeInfo;
@@ -7969,7 +7981,8 @@ void JsAccessibilityManager::WebFocusMoveSearchByComponent(AccessibilityElementI
     if (searchSurfaceIdRet != SearchSurfaceIdRet::SEARCH_SUCCESS || embedNodeTreeInfo.empty()) {
         result = WebFocusMoveSearchWithConditionNG(
             accessibilityId, direction, focusRuleType, nodeInfo, context, webPattern);
-        WebFocusMoveSearchByComponent(nodeInfo, webPattern, direction, context, result, focusRuleType);
+        WebFocusMoveSearchByComponent(
+            nodeInfo, webPattern, direction, context, result, focusRuleType, searchDepth + 1);
     } else {
         nodeInfo = embedNodeTreeInfo.front();
         result = BuildWebFocusMoveResult(FocusMoveResultType::SEARCH_SUCCESS);
