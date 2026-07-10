@@ -131,6 +131,18 @@ config("ace_config") {
       "-fno-omit-frame-pointer",
     ]
   }
+
+  if (ace_engine_enable_reduce_eh_frame && target_os == "ios") {
+    cflags -= [ "-Os" ]
+    cflags += [
+      "-Oz",
+    ]
+
+    cflags_cc -= [ "-Os" ]
+    cflags_cc += [
+      "-Oz",
+    ]
+  }
 }
 
 config("ace_test_config") {
