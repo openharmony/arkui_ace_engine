@@ -6163,8 +6163,8 @@ struct ArkUINavDestinationModifier {
 };
 
 struct ArkUITextAreaModifier {
-    void (*createTextArea)(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
-        const ArkUITextEditCreateResourceParams* resParams);
+    ArkUINodeHandle (*createTextArea)(std::optional<std::u16string>& stringValue,
+        std::optional<std::u16string>& placeholder, const ArkUITextEditCreateResourceParams* resParams);
     void (*setTextAreaFocusableAndFocusNode)();
     ArkUINodeHandle (*getTextAreaController)(ArkUINodeHandle node);
     void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
@@ -6442,7 +6442,7 @@ struct ArkUITextAreaModifier {
 };
 
 struct ArkUITextInputModifier {
-    void (*createTextInput)(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
+    ArkUINodeHandle (*createTextInput)(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
         const ArkUITextEditCreateResourceParams* resParams);
     void (*setTextInputOnChangeEvent)(void* callback);
     void (*setTextInputFocusableAndFocusNode)();

@@ -94,15 +94,15 @@ const std::vector<EllipsisMode> ELLIPSIS_MODES = { EllipsisMode::HEAD, EllipsisM
 const std::vector<TextDirection> TEXT_DIRECTIONS = { TextDirection::LTR, TextDirection::RTL, TextDirection::INHERIT,
     TextDirection::AUTO };
 
-void CreateTextInput(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
+ArkUINodeHandle CreateTextInput(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
     const ArkUITextEditCreateResourceParams* resParams)
 {
     static TextFieldModelNG model;
-    model.CreateTextInput(placeholder, stringValue);
+    auto controller = model.CreateTextInput(placeholder, stringValue);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_RETURN(pattern, nullptr);
     if (SystemProperties::ConfigChangePerform()) {
         if (resParams && resParams->parseValueResult && resParams->stringValueRawPtr) {
             auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resParams->stringValueRawPtr));
@@ -119,6 +119,8 @@ void CreateTextInput(std::optional<std::u16string>& stringValue, std::optional<s
             pattern->UnRegisterResource("placeholder");
         }
     }
+    auto nodecontroller = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(controller));
+    return nodecontroller;
 }
 
 void SetTextInputOnChangeEvent(void* callback)
@@ -3330,10 +3332,12 @@ void SetUserAccessibilityText(ArkUINodeHandle node)
 }
 
 #ifndef CROSS_PLATFORM
-void CreateTextInputImpl(std::optional<std::u16string>& stringValue, std::optional<std::u16string>& placeholder,
-    const ArkUITextEditCreateResourceParams* resParams)
+ArkUINodeHandle CreateTextInputImpl(std::optional<std::u16string>& stringValue,
+    std::optional<std::u16string>& placeholder, const ArkUITextEditCreateResourceParams* resParams)
 {
-    GetTextFieldModelImpl()->CreateTextInput(placeholder, stringValue);
+    auto controller = GetTextFieldModelImpl()->CreateTextInput(placeholder, stringValue);
+    auto nodecontroller = reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(controller));
+    return nodecontroller;
 }
 
 void SetTextInputTypeImpl(ArkUINodeHandle node, ArkUI_Int32 type)

@@ -794,10 +794,16 @@ HWTEST_F(TextFieldControllerTest, FontFeature003, TestSize.Level1)
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.expected: Check fontFeature value.
+     */
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     textFieldModelNG.SetFontFeature(FONT_FEATURE_VALUE_0);
     EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
 
+    /**
+     * @tc.expected: Check fontFeature value.
+     */
     layoutProperty->UpdateFontFeature(ParseFontFeatureSettings("\"ss01\" 1"));
     TextFieldModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_0);
     EXPECT_EQ(layoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_0);
