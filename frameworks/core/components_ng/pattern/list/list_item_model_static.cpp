@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 #include "core/interfaces/native/node/node_arc_list_item_modifier.h"
 
 namespace OHOS::Ace::NG {
@@ -65,8 +66,13 @@ RefPtr<FrameNode> ListItemModelStatic::CreateFrameNode(int32_t nodeId, bool isCr
                 []() { return CreateArcListItemPattern(); });
         }
     } else {
-        frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
-            []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+        if (!isCreateArc) {
+            frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+                []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+        } else {
+            frameNode = FrameNode::GetOrCreateFrameNode(V2::ARC_LIST_ITEM_ETS_TAG, nodeId,
+                []() { return AceType::MakeRefPtr<ArcListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
+        }
     }
     return frameNode;
 }
