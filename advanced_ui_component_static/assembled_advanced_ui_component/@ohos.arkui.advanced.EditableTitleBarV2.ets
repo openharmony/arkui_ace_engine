@@ -830,6 +830,11 @@ export struct ImageMenuItemV2 {
       builder: this.composeTitleBarDialogBuilder,
       maskColor: Color.Transparent,
       isModal: true,
+      backgroundBlurStyle: BlurStyle.COMPONENT_ULTRA_THICK,
+      backgroundColor: Color.Transparent,
+      shadow: ShadowStyle.OUTER_DEFAULT_LG,
+      cornerRadius: $r('sys.float.corner_radius_level10'),
+      width: this.fontSizeInternalV2 === DIALOG_MAX_FONT_SIZE_V2 ? MAX_DIALOG_V2 : MIN_DIALOG_V2,
     } as promptAction.CustomDialogOptions).then((id: int) => {
       this.dialogIdV2 = id;
       if (this.isDialogClosingV2) {
