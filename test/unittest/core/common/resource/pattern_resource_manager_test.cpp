@@ -326,4 +326,188 @@ HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest012, TestSize.Lev
     manager->ParsePropertyValue(resObj, valueBase);
     EXPECT_EQ(valueBase->GetValueType(), ValueType::UNKNOWN);
 }
+
+/**
+ * @tc.name: PatternResourceManagerTest013
+ * @tc.desc: Test RemoveResource with TailIndents key - precise removal without clearing entire cache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add TailIndents resources and other properties.
+     * @tc.expect: resCacheMap_ size is 3
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto func = [](const RefPtr<ResourceObject>& resObj) { return; };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    
+    manager->AddResource("TailIndents_0", resObj, func);
+    manager->AddResource("TailIndents_1", resObj, func);
+    manager->AddResource("FontSize", resObj, func);
+    manager->AddResCache("TailIndents_0", "50");
+    manager->AddResCache("TailIndents_1", "30");
+    manager->AddResCache("FontSize", "14");
+    EXPECT_EQ(manager->resCacheMap_.size(), 3);
+
+    /**
+     * @tc.steps: step2. Remove TailIndents_0 - should use precise removal.
+     * @tc.expect: TailIndents_0 cache removed, but FontSize cache preserved
+     */
+    manager->RemoveResource("TailIndents_0");
+    EXPECT_EQ(manager->resMap_.size(), 2);
+    EXPECT_EQ(manager->resCacheMap_.size(), 2);  // TailIndents_1 and FontSize preserved
+    EXPECT_FALSE(manager->GetResCacheMapByKey("TailIndents_0").empty() == false);
+    
+    /**
+     * @tc.steps: step3. Remove TailIndents_1 - should use precise removal.
+     * @tc.expect: TailIndents_1 cache removed, but FontSize cache preserved
+     */
+    manager->RemoveResource("TailIndents_1");
+    EXPECT_EQ(manager->resMap_.size(), 1);
+    EXPECT_EQ(manager->resCacheMap_.size(), 1);  // Only FontSize preserved
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest014
+ * @tc.desc: Test RemoveResource with non-TailIndents key - should clear entire cache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add multiple properties including TailIndents.
+     * @tc.expect: resCacheMap_ size is 3
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto func = [](const RefPtr<ResourceObject>& resObj) { return; };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    
+    manager->AddResource("TailIndents_0", resObj, func);
+    manager->AddResource("FontSize", resObj, func);
+    manager->AddResource("FontColor", resObj, func);
+    manager->AddResCache("TailIndents_0", "50");
+    manager->AddResCache("FontSize", "14");
+    manager->AddResCache("FontColor", "#FF000000");
+    EXPECT_EQ(manager->resCacheMap_.size(), 3);
+
+    /**
+     * @tc.steps: step2. Remove FontSize - should clear entire cache (backward compatible).
+     * @tc.expect: Entire cache cleared
+     */
+    manager->RemoveResource("FontSize");
+    EXPECT_EQ(manager->resMap_.size(), 2);
+    EXPECT_EQ(manager->resCacheMap_.size(), 0);  // Entire cache cleared
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest015
+ * @tc.desc: Test RemoveResource with TailIndents key not in cache.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add resources with cache.
+     * @tc.expect: resCacheMap_ size is 2
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto func = [](const RefPtr<ResourceObject>& resObj) { return; };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    
+    manager->AddResource("TailIndents_0", resObj, func);
+    manager->AddResource("FontSize", resObj, func);
+    manager->AddResCache("TailIndents_0", "50");
+    manager->AddResCache("FontSize", "14");
+    EXPECT_EQ(manager->resCacheMap_.size(), 2);
+
+    /**
+     * @tc.steps: step2. Remove TailIndents_1 (not in cache).
+     * @tc.expect: Cache unchanged
+     */
+    manager->RemoveResource("TailIndents_1");
+    EXPECT_EQ(manager->resMap_.size(), 2);
+    EXPECT_EQ(manager->resCacheMap_.size(), 2);  // Cache unchanged
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest016
+ * @tc.desc: Test RemoveResource with mixed TailIndents and non-TailIndents keys.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add multiple TailIndents and other properties.
+     * @tc.expect: resCacheMap_ size is 4
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto func = [](const RefPtr<ResourceObject>& resObj) { return; };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    
+    manager->AddResource("TailIndents_0", resObj, func);
+    manager->AddResource("TailIndents_1", resObj, func);
+    manager->AddResource("FontSize", resObj, func);
+    manager->AddResource("FontColor", resObj, func);
+    manager->AddResCache("TailIndents_0", "50");
+    manager->AddResCache("TailIndents_1", "30");
+    manager->AddResCache("FontSize", "14");
+    manager->AddResCache("FontColor", "#FF000000");
+    EXPECT_EQ(manager->resCacheMap_.size(), 4);
+
+    /**
+     * @tc.steps: step2. Remove TailIndents_0 - precise removal.
+     * @tc.expect: TailIndents_0 cache removed, others preserved
+     */
+    manager->RemoveResource("TailIndents_0");
+    EXPECT_EQ(manager->resCacheMap_.size(), 3);  // TailIndents_1, FontSize, FontColor preserved
+    
+    /**
+     * @tc.steps: step3. Remove TailIndents_1 - precise removal.
+     * @tc.expect: TailIndents_1 cache removed, others preserved
+     */
+    manager->RemoveResource("TailIndents_1");
+    EXPECT_EQ(manager->resCacheMap_.size(), 2);  // FontSize, FontColor preserved
+    
+    /**
+     * @tc.steps: step4. Remove FontSize - clear entire cache.
+     * @tc.expect: Entire cache cleared
+     */
+    manager->RemoveResource("FontSize");
+    EXPECT_EQ(manager->resCacheMap_.size(), 0);  // Entire cache cleared
+}
+
+/**
+ * @tc.name: PatternResourceManagerTest017
+ * @tc.desc: Test RemoveResource with TailIndents_ key prefix matching.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternResourceManagerTest, PatternResourceManagerTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Add resources with various key patterns.
+     * @tc.expect: resCacheMap_ size is 3
+     */
+    auto manager = AceType::MakeRefPtr<PatternResourceManager>();
+    auto func = [](const RefPtr<ResourceObject>& resObj) { return; };
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
+    
+    manager->AddResource("TailIndents_0", resObj, func);
+    manager->AddResource("TailIndents_10", resObj, func);
+    manager->AddResource("FontSize", resObj, func);
+    manager->AddResCache("TailIndents_0", "50");
+    manager->AddResCache("TailIndents_10", "100");
+    manager->AddResCache("FontSize", "14");
+    EXPECT_EQ(manager->resCacheMap_.size(), 3);
+
+    /**
+     * @tc.steps: step2. Remove TailIndents_0 and TailIndents_10.
+     * @tc.expect: Both TailIndents removed precisely, FontSize preserved
+     */
+    manager->RemoveResource("TailIndents_0");
+    EXPECT_EQ(manager->resCacheMap_.size(), 2);  // TailIndents_10, FontSize preserved
+    
+    manager->RemoveResource("TailIndents_10");
+    EXPECT_EQ(manager->resCacheMap_.size(), 1);  // Only FontSize preserved
+}
 } // namespace OHOS::Ace
