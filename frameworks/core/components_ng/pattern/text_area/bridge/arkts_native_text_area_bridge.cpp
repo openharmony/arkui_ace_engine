@@ -776,15 +776,13 @@ void TextAreaBridge::RegisterTextAreaAttributes(Local<panda::ObjectRef> object, 
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
 }
 
-ArkUINativeModuleValue SetJsTextAreaController(EcmaVM* vm, Framework::JSTextEditableController *jsController)
+ArkUINativeModuleValue SetJsTextAreaController(
+    EcmaVM* vm, Framework::JSTextEditableController* jsController, ArkUINodeHandle& controller)
 {
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    ArkUINodeHandle mainFrameNode =
-        reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto nodePtr = nodeModifiers->getTextAreaModifier()->getTextAreaController(mainFrameNode);
-    auto node = AceType::Claim(reinterpret_cast<OHOS::Ace::TextFieldControllerBase*>(nodePtr));
-
+    auto rawController = reinterpret_cast<OHOS::Ace::TextFieldControllerBase*>(controller);
+    auto node = AceType::Claim(rawController);
     if (jsController) {
         jsController->SetController(node);
         auto styledString = jsController->GetPlaceholderStyledString();
@@ -836,9 +834,10 @@ ArkUINativeModuleValue TextAreaBridge::CreateTextArea(ArkUIRuntimeCallInfo* runt
     }
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getTextAreaModifier()->createTextArea(stringValueOption, placeholderOption, &resParams);
+    auto controller =
+        nodeModifiers->getTextAreaModifier()->createTextArea(stringValueOption, placeholderOption, &resParams);
 
-    SetJsTextAreaController(vm, jsController);
+    SetJsTextAreaController(vm, jsController, controller);
     if (changeEventValIsValid) {
         TextInputBridge::ParseTextFieldTextObject(vm, changeEventVal);
     }

@@ -705,14 +705,13 @@ void TextInputBridge::ParseTextFieldTextObject(EcmaVM* vm, const Local<JSValueRe
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnChangeEvent(reinterpret_cast<void*>(&onChangeEvent));
 }
 
-ArkUINativeModuleValue SetJsTextInputController(EcmaVM* vm, Framework::JSTextEditableController *jsController)
+ArkUINativeModuleValue SetJsTextInputController(
+    EcmaVM* vm, Framework::JSTextEditableController* jsController, ArkUINodeHandle& controller)
 {
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    ArkUINodeHandle mainFrameNode =
-        reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto nodePtr = nodeModifiers->getTextInputModifier()->getTextInputController(mainFrameNode);
-    auto node = AceType::Claim(reinterpret_cast<OHOS::Ace::TextFieldControllerBase*>(nodePtr));
+    auto rawController = reinterpret_cast<OHOS::Ace::TextFieldControllerBase*>(controller);
+    auto node = AceType::Claim(rawController);
 
     if (jsController) {
         jsController->SetController(node);
@@ -765,9 +764,10 @@ ArkUINativeModuleValue TextInputBridge::CreateTextInput(ArkUIRuntimeCallInfo* ru
     }
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    nodeModifiers->getTextInputModifier()->createTextInput(stringValueOption, placeholderOption, &resParams);
+    auto controller =
+        nodeModifiers->getTextInputModifier()->createTextInput(stringValueOption, placeholderOption, &resParams);
 
-    SetJsTextInputController(vm, jsController);
+    SetJsTextInputController(vm, jsController, controller);
     if (changeEventValIsValid) {
         ParseTextFieldTextObject(vm, changeEventVal);
     }
