@@ -122,9 +122,6 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     MeasureHeaderFooter(layoutWrapper);
     totalMainSize_ = std::max(totalMainSize_, headerMainSize_ + footerMainSize_);
-    if (isStackFromEnd_) {
-        std::swap(headerMainSize_, footerMainSize_);
-    }
     if (childrenSize_) {
         posMap_->UpdateGroupPosMap(totalItemCount_, GetLanes(), spaceWidth_, childrenSize_,
             headerMainSize_, footerMainSize_);
@@ -137,6 +134,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         ReverseLayoutedItemInfo(prevTotalItemCount_, prevTotalMainSize_);
     } else {
         recycledItemPosition_.insert(itemPosition_.begin(), itemPosition_.end());
+        ReverseLayoutedItemInfo(totalItemCount_, totalMainSize_);
     }
 
     if (cacheParam_) {
@@ -315,14 +313,18 @@ void ListItemGroupLayoutAlgorithm::MeasureHeaderFooter(LayoutWrapper* layoutWrap
         layoutWrapper->GetOrCreateChildByIndex(headerIndex_) : nullptr;
     RefPtr<LayoutWrapper> footerWrapper = footerIndex_ >= 0 ?
         layoutWrapper->GetOrCreateChildByIndex(footerIndex_) : nullptr;
+    auto headerMainSize = 0.0f;
+    auto footerMainSize = 0.0f;
     if (headerWrapper) {
         headerWrapper->Measure(headerFooterLayoutConstraint);
-        headerMainSize_ = GetMainAxisSize(headerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
+        headerMainSize = GetMainAxisSize(headerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     }
     if (footerWrapper) {
         footerWrapper->Measure(headerFooterLayoutConstraint);
-        footerMainSize_ = GetMainAxisSize(footerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
+        footerMainSize = GetMainAxisSize(footerWrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     }
+    headerMainSize_ = !isStackFromEnd_ ? headerMainSize : footerMainSize;
+    footerMainSize_ = !isStackFromEnd_ ? footerMainSize : headerMainSize;
 }
 
 void ListItemGroupLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper, int32_t cacheCount, bool show)
