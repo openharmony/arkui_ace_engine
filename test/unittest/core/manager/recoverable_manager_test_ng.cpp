@@ -337,26 +337,30 @@ HWTEST_F(RecoverableManagerTestNg, SetNavigationHomeInfoTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetNavigationHomeInfoExistingTest
- * @tc.desc: GetNavigationHomeInfo should return stored info for existing navigationId
+ * @tc.name: TakeNavigationHomeInfoExistingTest
+ * @tc.desc: TakeNavigationHomeInfo should return stored info for existing navigationId
  * @tc.type: FUNC
  */
-HWTEST_F(RecoverableManagerTestNg, GetNavigationHomeInfoExistingTest, TestSize.Level1)
+HWTEST_F(RecoverableManagerTestNg, TakeNavigationHomeInfoExistingTest, TestSize.Level1)
 {
     manager_->SetNavigationHomeInfo(NAVIGATION_ID, HOME_INFO);
 
-    std::string result = manager_->GetNavigationHomeInfo(NAVIGATION_ID);
+    std::string result = manager_->TakeNavigationHomeInfo(NAVIGATION_ID);
     EXPECT_EQ(result, HOME_INFO);
+    EXPECT_TRUE(manager_->homeNavigationInfo_.find(NAVIGATION_ID) == manager_->homeNavigationInfo_.end());
+
+    std::string result2 = manager_->TakeNavigationHomeInfo(NAVIGATION_ID);
+    EXPECT_TRUE(result2.empty());
 }
 
 /**
- * @tc.name: GetNavigationHomeInfoNonExistingTest
- * @tc.desc: GetNavigationHomeInfo should return empty string for non-existing navigationId
+ * @tc.name: TakeNavigationHomeInfoNonExistingTest
+ * @tc.desc: TakeNavigationHomeInfo should return empty string for non-existing navigationId
  * @tc.type: FUNC
  */
-HWTEST_F(RecoverableManagerTestNg, GetNavigationHomeInfoNonExistingTest, TestSize.Level1)
+HWTEST_F(RecoverableManagerTestNg, TakeNavigationHomeInfoNonExistingTest, TestSize.Level1)
 {
-    std::string result = manager_->GetNavigationHomeInfo("nonexistent");
+    std::string result = manager_->TakeNavigationHomeInfo("nonexistent");
     EXPECT_TRUE(result.empty());
 }
 
@@ -371,7 +375,7 @@ HWTEST_F(RecoverableManagerTestNg, SetNavigationHomeInfoOverwriteTest, TestSize.
     std::string newHomeInfo = "{\"homeIndex\":5}";
     manager_->SetNavigationHomeInfo(NAVIGATION_ID, newHomeInfo);
 
-    std::string result = manager_->GetNavigationHomeInfo(NAVIGATION_ID);
+    std::string result = manager_->TakeNavigationHomeInfo(NAVIGATION_ID);
     EXPECT_EQ(result, newHomeInfo);
 }
 
@@ -594,5 +598,47 @@ HWTEST_F(RecoverableManagerTestNg, AddThenRemoveThenAddSamePageTest, TestSize.Le
 
     std::string result;
     EXPECT_TRUE(manager_->GetRestoreByPage(false, PAGE_ID_1, result));
+}
+
+/**
+ * @tc.name: TakeNavigationHomeInfoEraseAfterConsumptionTest
+ * @tc.desc: TakeNavigationHomeInfo should erase entry after return (one-time consumption)
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecoverableManagerTestNg, TakeNavigationHomeInfoEraseAfterConsumptionTest, TestSize.Level1)
+{
+    manager_->SetNavigationHomeInfo(NAVIGATION_ID, HOME_INFO);
+
+    std::string result1 = manager_->TakeNavigationHomeInfo(NAVIGATION_ID);
+    EXPECT_EQ(result1, HOME_INFO);
+    EXPECT_TRUE(manager_->homeNavigationInfo_.find(NAVIGATION_ID) == manager_->homeNavigationInfo_.end());
+
+    std::string result2 = manager_->TakeNavigationHomeInfo(NAVIGATION_ID);
+    EXPECT_TRUE(result2.empty());
+}
+
+/**
+ * @tc.name: TakeNavigationHomeInfoEraseNotAffectOtherNavigationTest
+ * @tc.desc: Erasing one navigation's home info should not affect another navigation's data
+ * @tc.type: FUNC
+ */
+HWTEST_F(RecoverableManagerTestNg, TakeNavigationHomeInfoEraseNotAffectOtherNavigationTest, TestSize.Level1)
+{
+    const std::string NAV_ID_A = "nav_a";
+    const std::string NAV_ID_B = "nav_b";
+    const std::string HOME_INFO_A = "{\"homeIndex\":1}";
+    const std::string HOME_INFO_B = "{\"homeIndex\":2}";
+
+    manager_->SetNavigationHomeInfo(NAV_ID_A, HOME_INFO_A);
+    manager_->SetNavigationHomeInfo(NAV_ID_B, HOME_INFO_B);
+
+    std::string resultA = manager_->TakeNavigationHomeInfo(NAV_ID_A);
+    EXPECT_EQ(resultA, HOME_INFO_A);
+    EXPECT_TRUE(manager_->homeNavigationInfo_.find(NAV_ID_A) == manager_->homeNavigationInfo_.end());
+    EXPECT_TRUE(manager_->homeNavigationInfo_.find(NAV_ID_B) != manager_->homeNavigationInfo_.end());
+
+    std::string resultB = manager_->TakeNavigationHomeInfo(NAV_ID_B);
+    EXPECT_EQ(resultB, HOME_INFO_B);
+    EXPECT_TRUE(manager_->homeNavigationInfo_.find(NAV_ID_B) == manager_->homeNavigationInfo_.end());
 }
 } // namespace OHOS::Ace::NG

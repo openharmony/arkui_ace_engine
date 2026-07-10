@@ -5297,11 +5297,13 @@ void NavigationPattern::RestoreJsStackIfNeeded()
     CHECK_NULL_VOID(recoverableMgr);
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto homeInfo = recoverableMgr->GetNavigationHomeInfo(hostNode->GetCurId());
+    auto homeInfo = recoverableMgr->TakeNavigationHomeInfo(hostNode->GetCurId());
     if (!homeInfo.empty()) {
         auto homeDestination = AceType::DynamicCast<NavDestinationNodeBase>(hostNode->GetNavBarOrHomeDestinationNode());
         if (homeDestination) {
             homeDestination->SetRestoreInfo(homeInfo);
+        } else {
+            SetPendingHomeRestoreInfo(homeInfo);
         }
     }
     auto navigationManager = pipeline->GetNavigationManager();
@@ -5309,6 +5311,25 @@ void NavigationPattern::RestoreJsStackIfNeeded()
     auto navdestinationsInfo = navigationManager->GetNavigationRecoveryInfo(hostNode->GetCurId());
     if (!navdestinationsInfo.empty()) {
         navigationStack_->SetPathArray(navdestinationsInfo);
+    }
+}
+
+void NavigationPattern::SetPendingHomeRestoreInfo(const std::string& info)
+{
+    pendingHomeRestoreInfo_ = info;
+}
+
+void NavigationPattern::ApplyHomeRestoreInfo()
+{
+    if (pendingHomeRestoreInfo_.empty()) {
+        return;
+    }
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto homeDestination = AceType::DynamicCast<NavDestinationNodeBase>(hostNode->GetNavBarOrHomeDestinationNode());
+    if (homeDestination) {
+        homeDestination->SetRestoreInfo(pendingHomeRestoreInfo_);
+        pendingHomeRestoreInfo_.clear();
     }
 }
 

@@ -116,14 +116,16 @@ bool RecoverableManager::GetRestoreByPage(bool isNavigationType, int32_t pageId,
     return true;
 }
 
-std::string RecoverableManager::GetNavigationHomeInfo(const std::string& navigationId)
+std::string RecoverableManager::TakeNavigationHomeInfo(const std::string& navigationId)
 {
     std::string result;
     auto homeIter = homeNavigationInfo_.find(navigationId);
     if (homeIter == homeNavigationInfo_.end()) {
         return "";
     }
-    return homeIter->second;
+    result = homeIter->second;
+    homeNavigationInfo_.erase(homeIter);
+    return result;
 }
 
 void RecoverableManager::SetNavigationHomeInfo(const std::string& navigationId, const std::string& homeInfo)
