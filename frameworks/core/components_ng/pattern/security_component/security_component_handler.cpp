@@ -20,6 +20,7 @@
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/geometry/dimension.h"
+#include "base/resource/data_provider_manager.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
@@ -52,6 +53,17 @@ static std::vector<uintptr_t> g_callList = {
 SecurityComponentProbe SecurityComponentHandler::probe;
 SecurityComponent::SecCompUiRegister uiRegister(g_callList, &SecurityComponentHandler::probe);
 
+bool SecurityComponentHandler::QuerySmartEdgeState()
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto dataProviderManager = pipeline->GetDataProviderManager();
+    CHECK_NULL_RETURN(dataProviderManager, false);
+    return dataProviderManager->QuerySmartEdgeState();
+}
+
 bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY)
 {
     double x = node->GetPaintRectOffsetNG().GetX();
@@ -67,13 +79,16 @@ bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double&
 }
 
 bool SecurityComponentHandler::GetWindowRect(RefPtr<FrameNode>& node,
-    OHOS::Security::SecurityComponent::SecCompRect& winRect)
+    OHOS::Security::SecurityComponent::SecCompRect& winRect, bool isSmartEdgeState)
 {
     auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto rect = pipelineContext->GetDisplayWindowRectInfo();
+    if (isSmartEdgeState && container->IsUIExtensionWindow()) {
+        rect = container->GetUIExtensionHostWindowRect();
+    }
     winRect.x_ = rect.Left();
     winRect.y_ = rect.Top();
     winRect.width_ = rect.Right() - rect.Left();
@@ -835,7 +850,8 @@ bool SecurityComponentHandler::InitButtonRect(OHOS::Security::SecurityComponent:
         return false;
     }
 
-    if (!GetWindowRect(node, buttonInfo.windowRect_)) {
+    buttonInfo.isSmartEdgeState_ = QuerySmartEdgeState();
+    if (!GetWindowRect(node, buttonInfo.windowRect_, buttonInfo.isSmartEdgeState_)) {
         SC_LOG_WARN("InitBaseInfoWarning: Get window rect failed");
         return false;
     }

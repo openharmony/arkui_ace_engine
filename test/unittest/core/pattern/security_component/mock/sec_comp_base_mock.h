@@ -137,6 +137,7 @@ public:
     bool isCustomizable_ = false;
     TipPosition tipPosition_ = TipPosition::ABOVE_BOTTOM;
     bool isArkuiComponent_ = false;
+    bool isSmartEdgeState_ = false;
 };
 }  // namespace SecurityComponent
 }  // namespace Security
