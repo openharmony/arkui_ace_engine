@@ -15,7 +15,10 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 
+#include "jsnapi_expo.h"
+
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
@@ -28,24 +31,59 @@ namespace {
 template<typename Rect, typename Offset>
 JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
 {
-    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-    JSRef<JSObject> area = objectTemplate->NewInstance();
-    JSRef<JSObject> offset = objectTemplate->NewInstance();
-    JSRef<JSObject> globalOffset = objectTemplate->NewInstance();
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(
+        JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    auto vm = runtime->GetEcmaVm();
     auto localOffset = rect.GetOffset();
-    offset->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    offset->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-    globalOffset->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() + origin.GetX()));
-    globalOffset->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY()));
-    // keep compatible, need remove after
-    area->SetPropertyObject("pos", offset);
-    area->SetPropertyObject("position", offset);
-    // keep compatible, need remove after
-    area->SetPropertyObject("globalPos", globalOffset);
-    area->SetPropertyObject("globalPosition", globalOffset);
-    area->SetProperty<double>("width", PipelineBase::Px2VpWithCurrentDensity(rect.Width()));
-    area->SetProperty<double>("height", PipelineBase::Px2VpWithCurrentDensity(rect.Height()));
-    return area;
+
+    // offset: { x, y }
+    Local<JSValueRef> offsetKeys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::X)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::Y)),
+    };
+    panda::PropertyAttribute offsetAttrs[] = {
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX())), true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY())), true, true, true),
+    };
+    auto offsetObj = panda::ObjectRef::NewWithProperties(vm, 2, offsetKeys, offsetAttrs);
+
+    // globalOffset: { x, y }
+    Local<JSValueRef> globalKeys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::X)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::Y)),
+    };
+    panda::PropertyAttribute globalAttrs[] = {
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() + origin.GetX())), true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY())), true, true, true),
+    };
+    auto globalOffsetObj = panda::ObjectRef::NewWithProperties(vm, 2, globalKeys, globalAttrs);
+
+    // area: { pos, position, globalPos, globalPosition, width, height }
+    Local<JSValueRef> areaKeys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::POS)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::POSITION)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::GLOBAL_POS)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::GLOBAL_POSITION)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::WIDTH)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::HEIGHT)),
+    };
+    panda::PropertyAttribute areaAttrs[] = {
+        panda::PropertyAttribute(offsetObj, true, true, true),
+        panda::PropertyAttribute(offsetObj, true, true, true),
+        panda::PropertyAttribute(globalOffsetObj, true, true, true),
+        panda::PropertyAttribute(globalOffsetObj, true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            PipelineBase::Px2VpWithCurrentDensity(rect.Width())), true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            PipelineBase::Px2VpWithCurrentDensity(rect.Height())), true, true, true),
+    };
+    auto areaObj = panda::ObjectRef::NewWithProperties(vm, 6, areaKeys, areaAttrs);
+
+    return JSRef<JSObject>::Make(areaObj);
 }
 
 } // namespace

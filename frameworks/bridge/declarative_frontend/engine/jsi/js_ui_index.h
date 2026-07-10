@@ -105,8 +105,14 @@ namespace OHOS::Ace::Framework {
     FUNCTION("$refreshing", $REFRESHING)       \
     FUNCTION("changeEvent", CHANGE_EVENT)       \
     FUNCTION("refreshingContent", REFRESHING_CONTENT)       \
+    FUNCTION("pos", POS)       \
+    FUNCTION("position", POSITION)       \
+    FUNCTION("globalPos", GLOBAL_POS)       \
+    FUNCTION("globalPosition", GLOBAL_POSITION)       \
     FUNCTION("builderNode_", BUILDER_NODE)       \
-    FUNCTION("nodePtr_", NODEPTR)
+    FUNCTION("nodePtr_", NODEPTR)       \
+    FUNCTION("nodeId", NODE_ID)       \
+    FUNCTION("nodePtr", NODE_PTR)
 
 #define PROPERTY_NAME_INDEX(propertyName, index) index,
 enum class ArkUIIndex : uint32_t {

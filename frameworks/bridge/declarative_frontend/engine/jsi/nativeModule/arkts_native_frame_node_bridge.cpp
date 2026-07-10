@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
@@ -275,11 +276,16 @@ ArkUINativeModuleValue FrameNodeBridge::IsModifiable(ArkUIRuntimeCallInfo* runti
 
 ArkUINativeModuleValue FrameNodeBridge::MakeFrameNodeInfo(EcmaVM* vm, ArkUINodeHandle frameNode)
 {
-    const char* keys[] = { "nodeId", "nodePtr" };
     auto nodeId = GetArkUINodeModifiers()->getFrameNodeModifier()->getIdByNodePtr(frameNode);
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), panda::NativePointerRef::New(vm, frameNode) };
-    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-    return obj;
+    Local<JSValueRef> keys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::NODE_ID)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::NODE_PTR)),
+    };
+    panda::PropertyAttribute attrs[] = {
+        panda::PropertyAttribute(panda::NumberRef::New(vm, nodeId), true, true, true),
+        panda::PropertyAttribute(panda::NativePointerRef::New(vm, frameNode), true, true, true),
+    };
+    return panda::ObjectRef::NewWithProperties(vm, ArraySize(keys), keys, attrs);
 }
 
 ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
