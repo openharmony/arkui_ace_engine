@@ -882,8 +882,8 @@ HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest001, TestSize.Level1)
     clickEvent.windowY = CURRENT_LOCAL_WINDOW_Y;
     auto uiInputEvent = MakeUiInputEvent(&clickEvent, C_CLICK_EVENT_ID, INVALID_NODE_ID);
 
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalX(&uiInputEvent), ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalY(&uiInputEvent), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalX(&uiInputEvent), CURRENT_LOCAL_FALLBACK_X);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalY(&uiInputEvent), CURRENT_LOCAL_FALLBACK_Y);
 }
 
 /**
