@@ -317,16 +317,23 @@ void MovingPhotoPattern::InitEvent()
     }
 
     if (touchEvent_) {
-        gestureHub->AddTouchEvent(touchEvent_);
+        if (isEnableAnalyzer_) {
+            gestureHub->RemoveTouchEvent(touchEvent_);
+            touchEvent_ = nullptr;
+        } else {
+            gestureHub->AddTouchEvent(touchEvent_);
+        }
         return;
     }
-    auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleTouchEvent(info);
-    };
-    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
-    gestureHub->AddTouchEvent(touchEvent_);
+    if (!isEnableAnalyzer_) {
+        auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleTouchEvent(info);
+        };
+        touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+        gestureHub->AddTouchEvent(touchEvent_);
+    }
 }
 
 void MovingPhotoPattern::LongPressEventModify(bool status)
@@ -2245,6 +2252,7 @@ void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
         mediaPlayer_->GetDuration(duration);
         SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
+    isGestureTriggeredLongPress_ = true;
     Start();
 }
 
@@ -2269,11 +2277,8 @@ void MovingPhotoPattern::Start()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (cameraPostprocessingEnabled_) {
-        if (isGestureTriggeredLongPress_) {
-            mediaPlayer_->SetCameraPostprocessing(true);
-            isGestureTriggeredLongPress_ = false;
-        }
-        mediaPlayer_->SetCameraPostprocessing(false);
+        mediaPlayer_->SetCameraPostprocessing(isGestureTriggeredLongPress_);
+        isGestureTriggeredLongPress_ = false;
     }
 
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
