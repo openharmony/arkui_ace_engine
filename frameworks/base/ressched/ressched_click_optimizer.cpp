@@ -86,9 +86,9 @@ void ResSchedClickOptimizer::Init()
 
 void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, const GestureEvent& gestureEvent)
 {
-    auto currentTimestamp = gestureEvent.GetTimeStamp();
-    CHECK_EQUAL_VOID(currentTimestamp, lastClickReportedTimestamp_);
-    lastClickReportedTimestamp_ = currentTimestamp;
+    auto currentTimestamp = gestureEvent.GetTimeStamp().time_since_epoch().count();
+    CHECK_EQUAL_VOID(currentTimestamp, lastClickReportedTimestamp_.load(std::memory_order_relaxed));
+    lastClickReportedTimestamp_.store(currentTimestamp, std::memory_order_relaxed);
 
     std::unordered_map<std::string, std::string> payload;
     if (!BuildComponentPayload(weakNode, payload, GetDepth())) {

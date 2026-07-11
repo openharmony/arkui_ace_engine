@@ -62,7 +62,7 @@ private:
     bool isInit_ = false;
     std::atomic_bool clickExtEnabled_ = false;
     std::atomic<int32_t> depth_ = DEFAULT_DEPTH;
-    TimeStamp lastClickReportedTimestamp_;
+    std::atomic<uint64_t> lastClickReportedTimestamp_ = 0;
 
     static constexpr int32_t MAX_DEPTH = 20;
     static constexpr int32_t DEFAULT_DEPTH = 5;
