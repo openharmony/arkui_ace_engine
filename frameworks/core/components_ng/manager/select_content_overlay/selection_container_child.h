@@ -137,6 +137,7 @@ public:
     virtual void UpdateChildHandleGlobalOffset() {}
     virtual OffsetF GetChildHandleGlobalOffset() const { return {}; }
     bool SelectOverlayIsOn();
+    bool HasSelection();
     void MarkChildSortDirty();
     void ResetAllSelection();
     bool HandleOnCopy();

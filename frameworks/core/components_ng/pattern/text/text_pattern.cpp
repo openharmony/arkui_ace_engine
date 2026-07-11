@@ -1591,6 +1591,21 @@ bool TextPattern::SelectOverlayIsOn()
     return selectOverlay && selectOverlay->SelectOverlayIsOn();
 }
 
+bool TextPattern::HasAnySelectionInContainer()
+{
+    return selectionChild_ && selectionChild_->HasSelection();
+}
+
+bool TextPattern::IsSelfSelectedInContainer()
+{
+    return selectionChild_ && !selectionChild_->GetSelectionText().empty();
+}
+
+bool TextPattern::HasOwnSelection()
+{
+    return !selectionChild_ || !selectionChild_->GetSelectionText().empty();
+}
+
 bool TextPattern::IsSelectOverlayUsingMouse()
 {
     if (selectionChild_) {
@@ -2000,7 +2015,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
 
 void TextPattern::HandleClickOnTextAndSpan(GestureEvent& info)
 {
-    if ((textSelector_.IsValid() || (selectionChild_ && SelectOverlayIsOn())) &&
+    if ((textSelector_.IsValid() || HasAnySelectionInContainer()) &&
         mouseStatus_ != MouseStatus::MOVE && !isMousePressed_) {
         CloseSelectOverlay(true);
         ResetSelection();
@@ -3047,7 +3062,7 @@ void TextPattern::RecoverCopyOption(CopyOptions copyOption)
         return;
     }
     if (copyOption_ == CopyOptions::None) {
-        if (!selectionChild_ || !selectionChild_->GetSelectionText().empty()) {
+        if (HasOwnSelection()) {
             CloseSelectOverlay();
             ResetSelection();
         }
@@ -4711,7 +4726,7 @@ void TextPattern::OnModifyDone()
             ParseOriText(textForDisplay_);
         }
         // textForDisplay_ is updated by ParseOriText
-        if ((GetSelectOverlay() || (selectionChild_ && !selectionChild_->GetSelectionText().empty())) &&
+        if ((GetSelectOverlay() || IsSelfSelectedInContainer()) &&
             textCache != textForDisplay_ && !IsTriggerParentToScroll()) {
             CloseSelectOverlay();
             ResetSelection();
@@ -5076,8 +5091,10 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
             host->GetId(), start, end, textSize, placeholderCount_);
     }
     if (start >= end) {
-        ResetSelection();
-        CloseSelectOverlay();
+        if (HasOwnSelection()) {
+            ResetSelection();
+            CloseSelectOverlay();
+        }
         return;
     }
     HandleSelectionChange(start, end);
@@ -7105,8 +7122,12 @@ void TextPattern::UnBindPreviewMenuByCopyOption()
 
 void TextPattern::CloseSelectionMenu()
 {
-    SetTextResponseType(TextResponseType::NONE);
-    CloseSelectOverlay(true);
+    // Only close this text own menu. A container child without its own selection must not
+    // close another text menu or disturb the container response type.
+    if (HasOwnSelection()) {
+        SetTextResponseType(TextResponseType::NONE);
+        CloseSelectOverlay(true);
+    }
 }
 
 std::shared_ptr<SelectionMenuParams> TextPattern::GetMenuParams(TextSpanType spanType, TextResponseType responseType)
@@ -7432,8 +7453,10 @@ void TextPattern::ActSetSelectionFlag(int32_t selectionStart, int32_t selectionE
     selectionStart = std::clamp(selectionStart, 0, length);
     selectionEnd = std::clamp(selectionEnd, 0, length);
     if (selectionStart >= selectionEnd) {
-        ResetSelection();
-        CloseSelectOverlay();
+        if (HasOwnSelection()) {
+            ResetSelection();
+            CloseSelectOverlay();
+        }
         return;
     }
     HandleSelectionChange(selectionStart, selectionEnd);

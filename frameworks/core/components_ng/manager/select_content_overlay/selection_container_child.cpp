@@ -675,6 +675,19 @@ bool SelectionContainerChild::SelectOverlayIsOn()
     return container->SelectOverlayIsOn();
 }
 
+bool SelectionContainerChild::HasSelection()
+{
+    auto parentContainer = GetSelectionContainer();
+    if (parentContainer) {
+        return parentContainer->HasSelection();
+    }
+
+    auto node = GetHostNode();
+    auto container = GetSelectionContainerFromNode(node);
+    CHECK_NULL_RETURN(container, false);
+    return container->HasSelection();
+}
+
 void SelectionContainerChild::ResetAllSelection()
 {
     auto parentContainer = GetSelectionContainer();

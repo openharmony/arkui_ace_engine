@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/selection_container/selection_container_layout_property.h"
 #include "core/components_ng/pattern/selection_container/selection_container_event_hub.h"
 #include "core/components_ng/manager/select_content_overlay/selection_container_child.h"
+#include "core/components_ng/pattern/selection_container/selection_container_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "base/json/json_util.h"
@@ -1754,5 +1755,53 @@ HWTEST_F(SelectionContainerPatternTest, SelectionContainerToJsonValueTest001, Te
     EXPECT_TRUE(json->Contains("caretColor"));
     EXPECT_TRUE(json->Contains("bindSelectionMenu"));
     EXPECT_TRUE(json->Contains("content"));
+}
+
+/**
+ * @tc.name: CloseSelectionMenuTest001
+ * @tc.desc: Test SelectionContainerPattern::CloseSelectionMenu is idempotent and crash-safe
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, CloseSelectionMenuTest001, TestSize.Level1)
+{
+    ASSERT_NE(pattern_, nullptr);
+    // step1: close when no menu is shown (no-op, must not crash)
+    pattern_->CloseSelectionMenu();
+    // step2: idempotent
+    pattern_->CloseSelectionMenu();
+}
+
+/**
+ * @tc.name: CloseSelectionMenuModelTest001
+ * @tc.desc: Test SelectionContainerModelNG::CloseSelectionMenu by frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, CloseSelectionMenuModelTest001, TestSize.Level1)
+{
+    ASSERT_NE(containerNode_, nullptr);
+    SelectionContainerModelNG::CloseSelectionMenu(AceType::RawPtr(containerNode_));
+}
+
+/**
+ * @tc.name: ClearTextSelectionTest001
+ * @tc.desc: Test SelectionContainerPattern::ClearTextSelection is idempotent and crash-safe
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, ClearTextSelectionTest001, TestSize.Level1)
+{
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->ClearTextSelection();
+    pattern_->ClearTextSelection();
+}
+
+/**
+ * @tc.name: ClearTextSelectionModelTest001
+ * @tc.desc: Test SelectionContainerModelNG::ClearTextSelection by frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, ClearTextSelectionModelTest001, TestSize.Level1)
+{
+    ASSERT_NE(containerNode_, nullptr);
+    SelectionContainerModelNG::ClearTextSelection(AceType::RawPtr(containerNode_));
 }
 } // namespace OHOS::Ace::NG

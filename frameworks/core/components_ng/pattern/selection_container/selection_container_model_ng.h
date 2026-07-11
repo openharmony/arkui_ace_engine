@@ -49,6 +49,8 @@ public:
         std::function<void()>& menuBuilder, const SelectMenuParam& menuParam) override;
 
     // Node-specific static methods (bypass ViewStackProcessor)
+    static void CloseSelectionMenu(FrameNode* frameNode);
+    static void ClearTextSelection(FrameNode* frameNode);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions copyOption);
     static void ResetCopyOption(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);

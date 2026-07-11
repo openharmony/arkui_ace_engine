@@ -564,6 +564,9 @@ protected:
     bool CheckAndClick(const RefPtr<SpanItem>& item);
     bool CalculateClickedSpanPosition(const PointF& textOffset);
     bool SelectOverlayIsOn();
+    bool HasAnySelectionInContainer();
+    bool IsSelfSelectedInContainer();
+    bool HasOwnSelection();
     bool IsSelectOverlayUsingMouse();
     void HideSelectionMenu(bool noAnimation = false, bool showSubMenu = false);
     void HiddenMenu();
