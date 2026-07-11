@@ -142,11 +142,10 @@ HWTEST_F(ResSchedClickOptimizerTest, GetComponentTextRecursiveTest001, TestSize.
      */
     std::string text1 = "";
     int32_t maxNodes = INT_MAX;
-    auto pipelineBase = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineBase);
-    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineBase);
+    auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto clickOptimizer = pipeline->GetClickOptimizer();
+    CHECK_NULL_VOID(clickOptimizer);
     clickOptimizer->GetComponentTextRecursive(host, text1, 0, maxNodes);
     EXPECT_EQ(text1, "");
 
