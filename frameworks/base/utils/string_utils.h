@@ -123,7 +123,7 @@ bool UnstringifyCalcDimension(
 
 ACE_FORCE_EXPORT std::string ReplaceChar(std::string str, char old_char, char new_char);
 
-double StringToDegree(const std::string& value);
+ACE_FORCE_EXPORT double StringToDegree(const std::string& value);
 // StringToDegree with check. If the string is valid, change result and return true, otherwise return false.
 bool StringToDegree(const std::string& value, double& result);
 

@@ -62,10 +62,6 @@
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h"
 #endif
-#ifdef XCOMPONENT_SUPPORTED
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_node_bridge.h"
-#endif
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h"
 #endif
@@ -562,6 +558,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Polygon" },
         { "Line" },
         { "Polyline" },
+        { "XComponent" },
         { "Toggle" },
         { "ImageAnimator" },
         { "DatePicker" },
@@ -846,10 +843,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterSelectionContainerAttributes(object, vm);
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     RegisterPluginAttributes(object, vm);
-#endif
-#ifdef XCOMPONENT_SUPPORTED
-    RegisterXComponentAttributes(object, vm);
-    RegisterXComponentNodeAttributes(object, vm);
 #endif
 
 #if defined(FORM_SUPPORTED) || defined(PREVIEW)
@@ -2037,74 +2030,6 @@ void ArkUINativeModule::RegisterListItemGroupAttributes(Local<panda::ObjectRef> 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListItemGroupBridge::ResetListItemGroupInitialize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItemGroup"), listItemGroup);
 }
-
-#ifdef XCOMPONENT_SUPPORTED
-void ArkUINativeModule::RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto xComponent = panda::ObjectRef::New(vm);
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setXComponentInitialize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetXComponentInitialize));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetXComponentInitialize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetXComponentInitialize));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetBackgroundColor));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetBackgroundColor));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOpacity"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetOpacity));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOpacity"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetOpacity));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setGrayscale"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetGrayscale));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGrayscale"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetGrayscale));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnLoad"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetOnLoad));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnLoad"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetOnLoad));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnDestroy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetOnDestroy));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnDestroy"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetOnDestroy));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAnalyzer"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetEnableAnalyzer));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAnalyzer"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetEnableAnalyzer));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableSecure"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetEnableSecure));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableSecure"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetEnableSecure));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHdrBrightness"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetHdrBrightness));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHdrBrightness"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetHdrBrightness));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableTransparentLayer"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetEnableTransparentLayer));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableTransparentLayer"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetEnableTransparentLayer));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRenderFit"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetRenderFit));
-    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRenderFit"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetRenderFit));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "xComponent"), xComponent);
-}
-
-void ArkUINativeModule::RegisterXComponentNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto xcomponentNode = panda::ObjectRef::New(vm);
-    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::Create));
-    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNode"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::GetFrameNode));
-    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerOnCreateCallback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::RegisterOnCreateCallback));
-    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerOnDestroyCallback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::RegisterOnDestroyCallback));
-    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "changeRenderType"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::ChangeRenderType));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "xcomponentNode"), xcomponentNode);
-}
-#endif
 
 void ArkUINativeModule::RegisterResourceAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {

@@ -248,6 +248,7 @@ if (is_ohos_standard_system) {
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkpanel",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgridrow",
       "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkgridcol",
+      "${ace_root}/frameworks/bridge/declarative_frontend/ark_direct_component:arkxcomponent",
     ]
     if (!ace_engine_feature_wearable) { 
       deps += [
@@ -332,6 +333,7 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkgrid.abc",
       "${out_path}/arkui/ace_engine/arkgriditem.abc",
       "${out_path}/arkui/ace_engine/arkpanel.abc",
+      "${out_path}/arkui/ace_engine/arkxcomponent.abc",
     ]
     if (!ace_engine_feature_wearable) { 
       sources += [

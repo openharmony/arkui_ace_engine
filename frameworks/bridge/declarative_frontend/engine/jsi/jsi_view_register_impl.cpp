@@ -157,8 +157,7 @@
 #endif
 
 #if defined(XCOMPONENT_SUPPORTED)
-#include "bridge/declarative_frontend/jsview/js_xcomponent.h"
-#include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
+#include "bridge/declarative_frontend/jsview/js_xcomponent_controller_binding.h"
 #endif
 
 #if defined(PREVIEW)
@@ -564,8 +563,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #endif
 #if defined(XCOMPONENT_SUPPORTED)
-    { "XComponent", JSXComponent::JSBind },
-    { "XComponentController", JSXComponentController::JSBind },
+    { "XComponentController", JSXComponentControllerBinding::JSBind },
 #endif
     { "MagnifierController", JSMagnifierController::JSBind },
     { "Gesture", JSGesture::JSBind },
@@ -622,8 +620,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "EmbeddedComponent", JSEmbeddedComponent::JSBind },
     { "FormComponent", JSForm::JSBind },
     { "IsolatedComponent", JSIsolatedComponent::JSBind },
-    { "XComponent", JSXComponent::JSBind },
-    { "XComponentController", JSXComponentController::JSBind },
+    { "XComponentController", JSXComponentControllerBinding::JSBind },
     { "RemoteWindow", JSRemoteWindow::JSBind },
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_LINEAR_LAYOUT_LINEAR_LAYOUT_UTILS_H
 
 #include "base/geometry/ng/offset_t.h"
+#include "base/utils/macros.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
@@ -45,7 +46,7 @@ struct LayoutConditions {
 };
 
 // BoxLayout is the class for box type measure, layout.
-class LinearLayoutUtils {
+class ACE_FORCE_EXPORT LinearLayoutUtils {
 public:
     LinearLayoutUtils() = delete;
     ~LinearLayoutUtils() = delete;

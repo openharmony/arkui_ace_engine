@@ -69,6 +69,7 @@ component_modules = [
   "grid",
   "bubble",
   "panel",
+  "xcomponent",
 ]
 
 if (!ace_engine_feature_wearable) {
@@ -109,6 +110,10 @@ foreach(module, component_modules) {
       "$ace_root/build:libace_compatible",
       "$ace_root/frameworks/core:ace_container_scope"
     ]
+
+    if (module == "xcomponent") {
+      deps += [ "$ace_root/interfaces/inner_api/ace:ace_uicontent" ]
+    }
 
     part_name = ace_engine_part
     subsystem_name = ace_engine_subsystem

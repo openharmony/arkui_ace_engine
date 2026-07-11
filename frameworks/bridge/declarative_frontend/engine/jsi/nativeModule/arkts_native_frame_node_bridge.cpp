@@ -28,7 +28,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -36,12 +35,14 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/syntax/node_content.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/extension_custom_node.h"
+#include "core/interfaces/native/node/node_xcomponent_modifier.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "frameworks/core/components_ng/pattern/xcomponent/bridge/arkts_native_xcomponent_bridge.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -471,11 +472,16 @@ static void HandleNodeParams(
     ArkUINodeHandle nodePtr = nullptr;
     if (nodeType == ARKUI_XCOMPONENT) {
 #ifdef XCOMPONENT_SUPPORTED
-        ArkUI_XComponent_Params params;
-        XComponentBridge::ParseParams(runtimeCallInfo, params);
-        params.nodeType = ARKUI_XCOMPONENT;
-        nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
-        XComponentBridge::SetControllerCallback(runtimeCallInfo, reinterpret_cast<FrameNode*>(nodePtr));
+        auto xcomponentModifier = NG::NodeModifier::GetXComponentModifier();
+        if (xcomponentModifier && xcomponentModifier->parseParams && xcomponentModifier->setControllerCallback) {
+            ArkUI_XComponent_Params params;
+            xcomponentModifier->parseParams(runtimeCallInfo, params);
+            params.nodeType = ARKUI_XCOMPONENT;
+            nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
+            xcomponentModifier->setControllerCallback(runtimeCallInfo, &nodePtr);
+        } else {
+            nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
+        }
 #else
         nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
 #endif

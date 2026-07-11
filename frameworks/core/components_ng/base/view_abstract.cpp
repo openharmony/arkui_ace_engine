@@ -1091,6 +1091,11 @@ void ViewAbstract::SetBackgroundImagePosition(
 void ViewAbstract::ClearResObj(const std::string resObjName)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ClearResObj(frameNode, resObjName);
+}
+
+void ViewAbstract::ClearResObj(FrameNode* frameNode, const std::string resObjName)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -8116,6 +8121,14 @@ void ViewAbstract::CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& re
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CreateWithOpacityResourceObj(frameNode, resObj);
+}
+
+void ViewAbstract::CreateWithOpacityResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
     CHECK_NULL_VOID(frameNode);
 
     auto pattern = frameNode->GetPattern();
@@ -8129,12 +8142,12 @@ void ViewAbstract::CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& re
         double result;
         ResourceParseUtils::ParseResDouble(resObj, result);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                result = std::clamp(result, 0.0, 1.0);
-            } else {
-                if (result > 1.0 || LessNotEqual(result, 0.0)) {
-                    result = 1.0;
-                }
+            result = std::clamp(result, 0.0, 1.0);
+        } else {
+            if (result > 1.0 || LessNotEqual(result, 0.0)) {
+                result = 1.0;
             }
+        }
         if (viewAbstractOpacity.empty()) {
             pattern->AddResCache("viewAbstract.opacity", std::to_string(result));
         } else {

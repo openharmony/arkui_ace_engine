@@ -20,18 +20,49 @@
 
 #include "base/utils/string_utils.h"
 #include "cj_lambda.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/interfaces/cjui/cjui_api.h"
+#include "core/interfaces/native/node/node_xcomponent_modifier.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::NG;
 using namespace OHOS::Ace::Framework;
 
+namespace {
+NG::XComponentModelNG* GetXComponentModel()
+{
+    static NG::XComponentModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("XComponent");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find xcomponent dynamic module");
+        }
+        model = reinterpret_cast<NG::XComponentModelNG*>(module->GetModel());
+    }
+    return model;
+}
+
+const NG::NodeModifier::ArkUIXComponentCustomModifier* GetXComponentCustomModifier()
+{
+    static auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("XComponent");
+    CHECK_NULL_RETURN(module, nullptr);
+    auto* modifier =
+        reinterpret_cast<const NG::NodeModifier::ArkUIXComponentCustomModifier*>(module->GetCustomModifier());
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier;
+}
+} // namespace
+
 namespace OHOS::Ace::Framework {
 NativeXComponentController::NativeXComponentController() : FFIData()
 {
-    auto controller = std::make_shared<NG::XComponentControllerNG>();
+    std::shared_ptr<InnerXComponentController> controller;
+    auto* modifier = GetXComponentCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(modifier->createController);
+    modifier->createController(&controller);
     CHECK_NULL_VOID(controller);
     SetController(controller);
     LOGI("Native XComponent Controller constructed: %{public}" PRId64, GetID());
@@ -58,7 +89,7 @@ void NativeXComponentController::SetXComponentControllerOnCreated(
         }
         func(remoteId, surfaceIdLongInt);
     };
-    XComponentModel::GetInstance()->SetControllerOnCreated(std::move(onSurfaceCreated));
+    GetXComponentModel()->SetControllerOnCreated(std::move(onSurfaceCreated));
 }
 
 void NativeXComponentController::SetXComponentControllerOnChanged(
@@ -82,7 +113,7 @@ void NativeXComponentController::SetXComponentControllerOnChanged(
         }
         func(remoteId, surfaceIdLongInt, rectRes);
     };
-    XComponentModel::GetInstance()->SetControllerOnChanged(std::move(onSurfaceChanged));
+    GetXComponentModel()->SetControllerOnChanged(std::move(onSurfaceChanged));
 }
 
 void NativeXComponentController::SetXComponentControllerOnDestroyed(
@@ -106,7 +137,7 @@ void NativeXComponentController::SetXComponentControllerOnDestroyed(
         }
         func(remoteId, surfaceIdLongInt);
     };
-    XComponentModel::GetInstance()->SetControllerOnDestroyed(std::move(onSurfaceDestroyed));
+    GetXComponentModel()->SetControllerOnDestroyed(std::move(onSurfaceDestroyed));
 }
 
 void NativeXComponentController::SetXComponentControllerCallback(int64_t controllerId)
@@ -224,10 +255,11 @@ void FfiOHOSAceFrameworkXComponentCreate(
     const char* id, int32_t xcomponentType, const char* libraryName, int64_t controllerId)
 {
     auto controller = FFIData::GetData<NativeXComponentController>(controllerId);
+    CHECK_NULL_VOID(controller);
     CHECK_NULL_VOID(controller->GetInnerController());
     std::optional<std::string> libraryNameOpt = std::nullopt;
 
-    XComponentModel::GetInstance()->Create(
+    GetXComponentModel()->Create(
         id, static_cast<XComponentType>(xcomponentType), libraryNameOpt, controller->GetInnerController());
     controller->SetXComponentControllerCallback(controller->GetID());
 }
@@ -263,11 +295,11 @@ bool FfiOHOSAceFrameworkXComponentControllerGetSurfaceRotation(int64_t selfID)
 
 void FfiOHOSAceFrameworkXComponentEnableSecure(bool isSecure)
 {
-    auto type = XComponentModel::GetInstance()->GetType();
+    auto type = GetXComponentModel()->GetType();
     if (type != XComponentType::SURFACE) {
         return;
     }
-    XComponentModel::GetInstance()->EnableSecure(isSecure);
+    GetXComponentModel()->EnableSecure(isSecure);
 }
 
 void FfiOHOSAceFrameworkXComponentOnLoad(void (*callback)(const char* surfaceId)) {}

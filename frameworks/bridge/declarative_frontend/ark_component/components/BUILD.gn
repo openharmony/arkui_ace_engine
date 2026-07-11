@@ -146,6 +146,7 @@ special_components = [
   "arkgridrow",
   "arkgridcol",
   "arktoolbaritem",
+  "arkxcomponent",
 ]
 
 if (qrcodegen_support) {

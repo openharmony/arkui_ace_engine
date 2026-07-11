@@ -417,6 +417,19 @@ void JSXComponentController::JSBind(BindingTarget globalObj)
 
 void JSXComponentController::Mock(const JSCallbackInfo& info) {}
 
+void JSXComponentControllerBinding::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSXComponentControllerBinding>::Declare("XComponentController");
+    JSClass<JSXComponentControllerBinding>::StaticMethod(
+        "getXComponentSurfaceId", &JSXComponentControllerBinding::Mock);
+    JSClass<JSXComponentControllerBinding>::StaticMethod("getXComponentContext", &JSXComponentControllerBinding::Mock);
+    JSClass<JSXComponentControllerBinding>::StaticMethod(
+        "setXComponentSurfaceSize", &JSXComponentControllerBinding::Mock);
+    JSClass<JSXComponentControllerBinding>::Bind(globalObj);
+}
+
+void JSXComponentControllerBinding::Mock(const JSCallbackInfo& info) {}
+
 void JSVideo::Create(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0 || !info[0]->IsObject()) {

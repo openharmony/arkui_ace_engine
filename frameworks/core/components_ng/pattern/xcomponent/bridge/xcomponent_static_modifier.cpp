@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,15 +19,10 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components/common/layout/constants.h"
-#ifdef XCOMPONENT_SUPPORTED
+#include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_static.h"
-#endif // XCOMPONENT_SUPPORTED
-#if defined(PREVIEW)
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/interfaces/native/utility/preview_placeholder.h"
-#endif
-#include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
+#include "core/components_ng/pattern/xcomponent/bridge/xcomponent_controller_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -41,6 +36,11 @@ HdrType ConvertHdrType(Ark_HdrType type)
 {
     return static_cast<HdrType>(static_cast<int32_t>(type));
 }
+
+std::shared_ptr<InnerXComponentController> GetInnerController(const std::shared_ptr<XComponentController>& controller)
+{
+    return std::static_pointer_cast<InnerXComponentController>(controller);
+}
 #endif // XCOMPONENT_SUPPORTED
 }
 namespace XComponentModifier {
@@ -50,11 +50,6 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 #ifdef XCOMPONENT_SUPPORTED
     ACE_UINODE_TRACE(id);
     auto frameNode = XComponentModelStatic::CreateFrameNode(id, false);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-#elif defined(PREVIEW)
-    auto frameNode = CreatePreviewPlaceholder(V2::XCOMPONENT_ETS_TAG, id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 #else
@@ -85,7 +80,7 @@ void SetXComponentOptionsImpl(Ark_NativePointer node,
             if (src.controller.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
                 auto peerImpl = reinterpret_cast<XComponentControllerNativePeerImpl*>(src.controller.value.nativeObj);
                 CHECK_NULL_VOID(peerImpl);
-                XComponentModelStatic::SetXComponentController(frameNode, peerImpl->controller);
+                XComponentModelStatic::SetXComponentController(frameNode, GetInnerController(peerImpl->controller));
             }
             XComponentModelStatic::InitParams(frameNode);
         },
@@ -98,7 +93,8 @@ void SetXComponentOptionsImpl(Ark_NativePointer node,
             peerImpl->SetOnSurfaceCreatedEvent(src.controller.onSurfaceCreated);
             peerImpl->SetOnSurfaceChangedEvent(src.controller.onSurfaceChanged);
             peerImpl->SetOnSurfaceDestroyedEvent(src.controller.onSurfaceDestroyed);
-            bool isUpdated = XComponentModelStatic::SetXComponentController(frameNode, peerImpl->controller);
+            bool isUpdated =
+                XComponentModelStatic::SetXComponentController(frameNode, GetInnerController(peerImpl->controller));
             CHECK_EQUAL_VOID(isUpdated, false);
             XComponentModelNG::SetControllerOnCreated(frameNode, std::move(peerImpl->onSurfaceCreatedEvent));
             XComponentModelNG::SetControllerOnChanged(frameNode, std::move(peerImpl->onSurfaceChangedEvent));
@@ -211,11 +207,9 @@ void SetHdrBrightness1Impl(Ark_NativePointer node, const Opt_Float64* brightness
     CHECK_NULL_VOID(frameNode);
     ACE_UINODE_TRACE(frameNode);
 #ifdef XCOMPONENT_SUPPORTED
-    // Extract and normalize brightness value with default 1.0f
     auto convBrightness = Converter::OptConvertPtr<float>(brightness);
     float hdrBrightness = convBrightness ? std::clamp(*convBrightness, 0.0f, 1.0f) : 1.0f;
 
-    // Check if type parameter is provided
     if (type && type->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         HdrType hdrType = ConvertHdrType(type->value);
         XComponentModelNG::HdrBrightness(frameNode, hdrBrightness, hdrType);
@@ -236,7 +230,7 @@ void SetEnableTransparentLayerImpl(Ark_NativePointer node,
     #endif // XCOMPONENT_SUPPORTED
 }
 } // XComponentAttributeModifier
-const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
+const GENERATED_ArkUIXComponentModifier* GetXComponentStaticModifier()
 {
     static const GENERATED_ArkUIXComponentModifier ArkUIXComponentModifierImpl {
         XComponentModifier::ConstructImpl,
@@ -252,4 +246,4 @@ const GENERATED_ArkUIXComponentModifier* GetXComponentModifier()
     return &ArkUIXComponentModifierImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier
