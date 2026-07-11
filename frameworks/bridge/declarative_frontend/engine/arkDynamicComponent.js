@@ -946,6 +946,20 @@ if (globalThis.TabContent === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.XComponent === undefined) {
+  globalThis.XComponent = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('XComponent');
+      let module = globalThis.requireNapi('arkui.components.arkxcomponent');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().xComponent.create(params);
+    },
+    name: 'JSXComponent'
+  }
+}
+
+// @ts-ignore
 if (globalThis.LazyColumnLayout === undefined) {
   globalThis.LazyColumnLayout = {
     create: function () {

@@ -14,7 +14,7 @@
  */
 
 #include "accessor_test_base.h"
-#include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
+#include "core/components_ng/pattern/xcomponent/bridge/xcomponent_controller_peer_impl.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "gmock/gmock.h"

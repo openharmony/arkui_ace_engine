@@ -107,7 +107,7 @@ struct StatisticEventInfo {
     int32_t eventCount = 1;
 };
 
-class StatisticEventReporter : public std::enable_shared_from_this<StatisticEventReporter> {
+class ACE_FORCE_EXPORT StatisticEventReporter : public std::enable_shared_from_this<StatisticEventReporter> {
 public:
     StatisticEventReporter();
     explicit StatisticEventReporter(int32_t instanceId);

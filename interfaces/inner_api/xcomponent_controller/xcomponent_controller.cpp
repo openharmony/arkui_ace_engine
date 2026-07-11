@@ -23,7 +23,8 @@
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
-#include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
+#include "core/components_ng/pattern/xcomponent/bridge/xcomponent_controller_peer_impl.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace {
 namespace {

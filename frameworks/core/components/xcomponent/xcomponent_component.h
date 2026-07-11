@@ -65,7 +65,7 @@ public:
     }
 
     void SetRenderNode(const WeakPtr<RenderXComponent>& renderNode);
-    void NativeXComponentInit(
+    ACE_FORCE_EXPORT void NativeXComponentInit(
         OH_NativeXComponent* nativeXComponent, WeakPtr<NativeXComponentImpl> nativeXComponentImpl);
 
     WeakPtr<XComponentComponent> component_;
@@ -77,7 +77,7 @@ private:
 };
 
 // A component can show different native view.
-class ACE_EXPORT XComponentComponent : public RenderComponent {
+class ACE_FORCE_EXPORT XComponentComponent : public RenderComponent {
     DECLARE_ACE_TYPE(XComponentComponent, RenderComponent);
 
 public:

@@ -31,7 +31,8 @@ XComponentResolutionConfig::~XComponentResolutionConfig() noexcept
 {
 }
 
-void XComponentResolutionConfig::GetApsSdrRatio(const std::string &pkgName, int32_t indexForUsingClient)
+void XComponentResolutionConfig::GetApsSdrRatio(
+    const std::string& pkgName, int32_t indexForUsingClient, float apsSdrRatio)
 {
     if (indexForUsingClient < static_cast<int32_t>(IndexForUsingClient::XCOMPONENT_SIZE) ||
         indexForUsingClient > static_cast<int32_t>(IndexForUsingClient::XCOMPONENT_TOUCH)) {
@@ -47,7 +48,7 @@ void XComponentResolutionConfig::GetApsSdrRatio(const std::string &pkgName, int3
         std::numeric_limits<float>::epsilon()) {
         return;
     }
-    SDR_RATIOS[sdrRatioVectorIndex] = ApsMonitorImpl::GetInstance().GetApsSdrRatio(pkgName, indexForUsingClient);
+    SDR_RATIOS[sdrRatioVectorIndex] = apsSdrRatio;
     if (SDR_RATIOS[sdrRatioVectorIndex] <= std::numeric_limits<float>::epsilon()) {
         SDR_RATIOS[sdrRatioVectorIndex] = static_cast<float>(RatioValue::RATIO_DEFAULT);
     }

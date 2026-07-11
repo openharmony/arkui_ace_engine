@@ -71,6 +71,7 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
+#include "core/interfaces/native/node/node_xcomponent_modifier.h"
 #include "core/pipeline/container_window_manager.h"
 
 #if !defined(ACE_UNITTEST)
@@ -2223,10 +2224,19 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     std::call_once(onceFlag, std::bind(&UIContentImpl::SetAceApplicationInfo, this, std::ref(context)));
     AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
     AceNewPipeJudgement::InitAceNewPipeConfig();
-    NG::XComponentResolutionConfig::GetInstance().GetApsSdrRatio(context->GetBundleName(),
-        static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE));
-    NG::XComponentResolutionConfig::GetInstance().GetApsSdrRatio(context->GetBundleName(),
-        static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH));
+    auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
+    if (xcomponentModifier && xcomponentModifier->getApsSdrRatio) {
+        auto apsSdrRatioSize = ApsMonitorImpl::GetInstance().GetApsSdrRatio(
+            context->GetBundleName().c_str(), static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE));
+        xcomponentModifier->getApsSdrRatio(context->GetBundleName().c_str(),
+            static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE), apsSdrRatioSize);
+        auto apsSdrRatioTouch = ApsMonitorImpl::GetInstance().GetApsSdrRatio(
+            context->GetBundleName().c_str(), static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH));
+        xcomponentModifier->getApsSdrRatio(context->GetBundleName().c_str(),
+            static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH), apsSdrRatioTouch);
+    } else {
+        LOGW("XComponent is not loaded");
+    }
     LOGD("GetApsSdrRatio XCOMPONENT_SIZE_RATIO:%{public}f, XCOMPONENT_TOUCH_RATIO:%{public}f",
         NG::SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_SIZE) - 1],
         NG::SDR_RATIOS[static_cast<int32_t>(NG::IndexForUsingClient::XCOMPONENT_TOUCH) - 1]);

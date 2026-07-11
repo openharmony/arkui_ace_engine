@@ -9405,12 +9405,65 @@ struct ArkUIXComponentModifier {
     // cannot be completed.
     void (*setXComponentEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
     void (*resetXComponentEnableAnalyzer)(ArkUINodeHandle node);
-    void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Bool isJsView);
     void (*setXComponentBackgroundColorWithColorSpace)(
-        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
-    void (*resetXComponentBackgroundColor)(ArkUINodeHandle node);
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, ArkUI_Bool isJsView);
+    void (*setXComponentBackgroundColorForHDR)(ArkUINodeHandle node, ArkUI_Int32 colorSpace,
+        const ArkUI_Float32* hdrValues, void* bgColorRawPtr, ArkUI_Bool isJsView);
+    void (*resetXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Bool isJsView);
+    void (*setBackgroundImage)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle,
+        ArkUI_CharPtr module, void* bgImageRawPtr, void* theme);
+    void (*setBackgroundImageSyncMode)(ArkUINodeHandle node, ArkUI_Bool syncMode);
+    void (*setBackgroundImagePixelMapByPixelMapPtr)(ArkUINodeHandle node, void* pixelMapPtr);
+    void (*setBackgroundImageRepeat)(ArkUINodeHandle node, ArkUI_Int32 repeatIndex);
+    void (*clearResObj)(ArkUINodeHandle node, ArkUI_CharPtr src);
+    void (*setBackgroundImageSize)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
+        ArkUI_Int32 typeWidth, ArkUI_Int32 typeHeight, void* bgImageSizeWidthRawPtr,
+        void* bgImageSizeHeightRawPtr);
+    void (*resetBackgroundImageSize)(ArkUINodeHandle node);
+    void (*setBackgroundImagePosition)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* types,
+        ArkUI_Bool isAlign, ArkUI_Int32 size, void* bgImageXRawPtr, void* bgImageYRawPtr);
+    void (*resetBackgroundImagePosition)(ArkUINodeHandle node);
     void (*setXComponentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*resetXComponentOpacity)(ArkUINodeHandle node);
+    void (*setBlur)(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
+        ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation);
+    void (*resetBlur)(ArkUINodeHandle node);
+    void (*setBackdropBlur)(ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues,
+        ArkUI_Int32 blurValuesSize, ArkUI_Bool disableSystemAdaptation);
+    void (*resetBackdropBlur)(ArkUINodeHandle node);
+    void (*setBrightness)(ArkUINodeHandle node, ArkUI_Float64 brightness, ArkUI_Int32 unit);
+    void (*resetBrightness)(ArkUINodeHandle node);
+    void (*setSaturate)(ArkUINodeHandle node, ArkUI_Float32 saturate, ArkUI_Int32 unit);
+    void (*resetSaturate)(ArkUINodeHandle node);
+    void (*setContrast)(ArkUINodeHandle node, ArkUI_Float64 contrast, ArkUI_Int32 unit);
+    void (*resetContrast)(ArkUINodeHandle node);
+    void (*setInvert)(ArkUINodeHandle node, ArkUI_Float32* invert, ArkUI_Int32 length);
+    void (*resetInvert)(ArkUINodeHandle node);
+    void (*setSepia)(ArkUINodeHandle node, ArkUI_Float32 sepia);
+    void (*resetSepia)(ArkUINodeHandle node);
+    void (*setHueRotate)(ArkUINodeHandle node, ArkUI_Float32 deg);
+    void (*resetHueRotate)(ArkUINodeHandle node);
+    void (*setSphericalEffect)(ArkUINodeHandle node, ArkUI_Float64 radio);
+    void (*resetSphericalEffect)(ArkUINodeHandle node);
+    void (*setLightUpEffect)(ArkUINodeHandle node, ArkUI_Float32 radio);
+    void (*resetLightUpEffect)(ArkUINodeHandle node);
+    void (*setColorBlend)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorBlendRawPtr);
+    void (*resetColorBlend)(ArkUINodeHandle node);
+    void (*setPixelStretchEffect)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units,
+        ArkUI_Int32 length, void* rawPtr);
+    void (*resetPixelStretchEffect)(ArkUINodeHandle node);
+    void (*setLinearGradientBlur)(ArkUINodeHandle node, void* blurPara);
+    void (*resetLinearGradientBlur)(ArkUINodeHandle node);
+    void (*disableOnAttach)(ArkUINodeHandle node);
+    void (*disableOnDetach)(ArkUINodeHandle node);
+    void (*disableOnClick)(ArkUINodeHandle node);
+    void (*disableOnTouch)(ArkUINodeHandle node);
+    void (*disableOnKeyEvent)(ArkUINodeHandle node);
+    void (*disableOnMouse)(ArkUINodeHandle node);
+    void (*disableOnHover)(ArkUINodeHandle node);
+    void (*disableOnFocus)(ArkUINodeHandle node);
+    void (*disableOnBlur)(ArkUINodeHandle node);
     void (*setXComponentId)(ArkUINodeHandle node, ArkUI_CharPtr id);
     void (*setXComponentType)(ArkUINodeHandle node, ArkUI_Uint32 type);
     void (*setXComponentSurfaceSize)(ArkUINodeHandle node, ArkUI_Uint32 width, ArkUI_Uint32 height);
@@ -9456,6 +9509,24 @@ struct ArkUIXComponentModifier {
     ArkUI_Int32 (*setNeedSoftKeyboard)(ArkUINodeHandle node, bool needSoftKeyboard);
     void* (*createAccessibilityProvider)(ArkUINodeHandle node);
     void (*disposeAccessibilityProvider)(void* provider);
+    void (*setXComponentOnLoad)(ArkUINodeHandle node, void* callback);
+    void (*setXComponentOnDestroy)(ArkUINodeHandle node, void* callback);
+    void (*setXComponentControllerOnCreated)(ArkUINodeHandle node, void* callback);
+    void (*setXComponentControllerOnChanged)(ArkUINodeHandle node, void* callback);
+    void (*setXComponentControllerOnDestroyed)(ArkUINodeHandle node, void* callback);
+    ArkUI_Bool (*isCommonEventAvailable)(ArkUINodeHandle node);
+    void (*createXComponent)(ArkUI_Int32 type);
+    void (*createXComponentWithParam)(ArkUI_CharPtr id, ArkUI_Int32 type, ArkUI_CharPtr libraryName,
+        void* controller);
+    void (*setXComponentDetachCallback)(ArkUINodeHandle node, void* callback);
+    void (*setXComponentSoPath)(ArkUI_CharPtr soPath);
+    void (*setXComponentScreenId)(ArkUI_Uint64 screenId);
+    void (*setXComponentBlendMode)(ArkUINodeHandle node, ArkUI_Int32 blendMode, ArkUI_Int32 blendApplyTypeValue);
+    void (*resetXComponentBlendMode)(ArkUINodeHandle node);
+    void (*setXComponentBlendApplyType)(ArkUINodeHandle node, ArkUI_Int32 blendApplyTypeValue);
+    void (*createWithOpacityResourceObj)(ArkUINodeHandle node, void* opacityResObj);
+    void (*parseParams)(void* runtimeCallInfo, ArkUI_Params& params);
+    void (*setControllerCallback)(void* runtimeCallInfo, ArkUINodeHandle* node);
 };
 
 struct ArkUIStateModifier {

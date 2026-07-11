@@ -362,8 +362,8 @@ generated_sources = [
   "implementation/web_resource_response_accessor.cpp",
   "implementation/window_scene_modifier.cpp",
   "implementation/with_theme_modifier.cpp",
-  "implementation/x_component_controller_accessor.cpp",
-  "implementation/x_component_controller_extender_accessor.cpp",
-  "implementation/x_component_modifier.cpp",
+  "implementation/xcomponent_controller_accessor.cpp",
+  "implementation/xcomponent_controller_extender_accessor.cpp",
+  "implementation/xcomponent_modifier.cpp",
   "utility/converter.cpp",
 ]

@@ -145,6 +145,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Select", "select" },
         { "Bubble", "bubble" },
         { "Panel", "panel" },
+        { "XComponent", "xcomponent" },
 #if defined(CROSS_PLATFORM)
         { "ArcScrollBar", "arcscrollbar" },
         { "ArcList", "arclist" },

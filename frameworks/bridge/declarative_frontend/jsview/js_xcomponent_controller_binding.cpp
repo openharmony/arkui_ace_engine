@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller_binding.h"
 
 #include "canvas_napi/js_canvas.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
@@ -27,7 +27,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/components/xcomponent/xcomponent_controller_impl.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
+#include "core/interfaces/native/node/node_xcomponent_modifier.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 
 namespace OHOS::Ace::Framework {
@@ -122,42 +122,59 @@ void SendStatisticEvent(StatisticEventType type)
     StatisticEventReporter->SendEvent(type);
 }
 } // namespace
-void JSXComponentController::JSBind(BindingTarget globalObj)
+
+void JSXComponentController::Destructor(JSXComponentController* xcomponentController)
 {
-    JSClass<JSXComponentController>::Declare("XComponentController");
-    JSClass<JSXComponentController>::CustomMethod("getXComponentSurfaceId", &JSXComponentController::GetSurfaceId);
-    JSClass<JSXComponentController>::CustomMethod(
-        "getXComponentContext", &JSXComponentController::GetXComponentContext);
-    JSClass<JSXComponentController>::CustomMethod(
-        "setXComponentSurfaceSize", &JSXComponentController::SetSurfaceConfig);
-    JSClass<JSXComponentController>::CustomMethod(
-        "getXComponentSurfaceRect", &JSXComponentController::GetXComponentSurfaceRect);
-    JSClass<JSXComponentController>::CustomMethod(
-        "setXComponentSurfaceRect", &JSXComponentController::SetXComponentSurfaceRect);
-    JSClass<JSXComponentController>::CustomMethod("startImageAnalyzer", &JSXComponentController::StartImageAnalyzer);
-    JSClass<JSXComponentController>::CustomMethod("stopImageAnalyzer", &JSXComponentController::StopImageAnalyzer);
-    JSClass<JSXComponentController>::CustomMethod(
-        "setXComponentSurfaceRotation", &JSXComponentController::SetXComponentSurfaceRotation);
-    JSClass<JSXComponentController>::CustomMethod(
-        "getXComponentSurfaceRotation", &JSXComponentController::GetXComponentSurfaceRotation);
-    JSClass<JSXComponentController>::CustomMethod("lockCanvas", &JSXComponentController::LockCanvas);
-    JSClass<JSXComponentController>::CustomMethod("unlockCanvasAndPost", &JSXComponentController::UnlockCanvasAndPost);
-    JSClass<JSXComponentController>::CustomMethod(
-        "setXComponentSurfaceConfig", &JSXComponentController::SetXComponentSurfaceConfig);
-    JSClass<JSXComponentController>::Bind(
-        globalObj, JSXComponentController::Constructor, JSXComponentController::Destructor);
+    CHECK_NULL_VOID(xcomponentController);
+    xcomponentController->DecRefCount();
 }
 
-void JSXComponentController::Constructor(const JSCallbackInfo& args)
+void JSXComponentControllerBinding::JSBind(BindingTarget globalObj)
 {
-    auto xcomponentController = Referenced::MakeRefPtr<JSXComponentController>();
+    JSClass<JSXComponentController>::Declare("XComponentController");
+    JSClass<JSXComponentController>::CustomMethod(
+        "getXComponentSurfaceId", &JSXComponentControllerBinding::GetSurfaceId);
+    JSClass<JSXComponentController>::CustomMethod(
+        "getXComponentContext", &JSXComponentControllerBinding::GetXComponentContext);
+    JSClass<JSXComponentController>::CustomMethod(
+        "setXComponentSurfaceSize", &JSXComponentControllerBinding::SetSurfaceConfig);
+    JSClass<JSXComponentController>::CustomMethod(
+        "getXComponentSurfaceRect", &JSXComponentControllerBinding::GetXComponentSurfaceRect);
+    JSClass<JSXComponentController>::CustomMethod(
+        "setXComponentSurfaceRect", &JSXComponentControllerBinding::SetXComponentSurfaceRect);
+    JSClass<JSXComponentController>::CustomMethod(
+        "startImageAnalyzer", &JSXComponentControllerBinding::StartImageAnalyzer);
+    JSClass<JSXComponentController>::CustomMethod(
+        "stopImageAnalyzer", &JSXComponentControllerBinding::StopImageAnalyzer);
+    JSClass<JSXComponentController>::CustomMethod(
+        "setXComponentSurfaceRotation", &JSXComponentControllerBinding::SetXComponentSurfaceRotation);
+    JSClass<JSXComponentController>::CustomMethod(
+        "getXComponentSurfaceRotation", &JSXComponentControllerBinding::GetXComponentSurfaceRotation);
+    JSClass<JSXComponentController>::CustomMethod("lockCanvas", &JSXComponentControllerBinding::LockCanvas);
+    JSClass<JSXComponentController>::CustomMethod(
+        "unlockCanvasAndPost", &JSXComponentControllerBinding::UnlockCanvasAndPost);
+    JSClass<JSXComponentController>::CustomMethod(
+        "setXComponentSurfaceConfig", &JSXComponentControllerBinding::SetXComponentSurfaceConfig);
+    JSClass<JSXComponentController>::Bind(
+        globalObj, JSXComponentControllerBinding::Constructor, JSXComponentController::Destructor);
+}
+
+void JSXComponentControllerBinding::Constructor(const JSCallbackInfo& args)
+{
+    auto xcomponentController = Referenced::MakeRefPtr<JSXComponentControllerBinding>();
     xcomponentController->IncRefCount();
     std::shared_ptr<InnerXComponentController> controller;
 #ifdef NG_BUILD
-    controller = std::make_shared<NG::XComponentControllerNG>();
+    auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
+    if (xcomponentModifier && xcomponentModifier->createController) {
+        xcomponentModifier->createController(&controller);
+    }
 #else
     if (Container::IsCurrentUseNewPipeline()) {
-        controller = std::make_shared<NG::XComponentControllerNG>();
+        auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
+        if (xcomponentModifier && xcomponentModifier->createController) {
+            xcomponentModifier->createController(&controller);
+        }
     } else {
         controller = std::make_shared<XComponentControllerImpl>();
     }
@@ -166,23 +183,18 @@ void JSXComponentController::Constructor(const JSCallbackInfo& args)
     args.SetReturnValue(Referenced::RawPtr(xcomponentController));
 }
 
-void JSXComponentController::Destructor(JSXComponentController* xcomponentController)
+void JSXComponentControllerBinding::GetSurfaceId(const JSCallbackInfo& args)
 {
-    CHECK_NULL_VOID(xcomponentController);
-    xcomponentController->DecRefCount();
-}
-
-void JSXComponentController::GetSurfaceId(const JSCallbackInfo& args)
-{
-    CHECK_NULL_VOID(xcomponentController_);
-    auto surfaceId = xcomponentController_->GetSurfaceId();
+    auto innerCtrl = GetController();
+    CHECK_NULL_VOID(innerCtrl);
+    auto surfaceId = innerCtrl->GetSurfaceId();
     auto returnValue = JSVal(ToJSValue(surfaceId));
     auto returnPtr = JSRef<JSVal>::Make(returnValue);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "Controller GetSurfaceId:%{public}s", surfaceId.c_str());
     args.SetReturnValue(returnPtr);
 }
 
-void JSXComponentController::SetSurfaceConfig(const JSCallbackInfo& args)
+void JSXComponentControllerBinding::SetSurfaceConfig(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
         LOGW("Invalid params");
@@ -198,20 +210,22 @@ void JSXComponentController::SetSurfaceConfig(const JSCallbackInfo& args)
         return;
     }
     SendStatisticEvent(StatisticEventType::XCOMPONENT_SET_SURFACE_SIZE);
-    CHECK_NULL_VOID(xcomponentController_);
-    xcomponentController_->ConfigSurface(surfaceWidth, surfaceHeight);
+    auto innerCtrl = GetController();
+    CHECK_NULL_VOID(innerCtrl);
+    innerCtrl->ConfigSurface(surfaceWidth, surfaceHeight);
 }
 
-void JSXComponentController::GetXComponentSurfaceRect(const JSCallbackInfo& args)
+void JSXComponentControllerBinding::GetXComponentSurfaceRect(const JSCallbackInfo& args)
 {
-    CHECK_NULL_VOID(xcomponentController_);
+    auto innerCtrl = GetController();
+    CHECK_NULL_VOID(innerCtrl);
     auto retObj = JSRef<JSObject>::New();
     float offsetX = 0.0f;
     float offsetY = 0.0f;
     float width = 0.0f;
     float height = 0.0f;
-    xcomponentController_->GetSurfaceOffset(offsetX, offsetY);
-    xcomponentController_->GetSurfaceSize(width, height);
+    innerCtrl->GetSurfaceOffset(offsetX, offsetY);
+    innerCtrl->GetSurfaceSize(width, height);
     retObj->SetProperty("offsetX", offsetX);
     retObj->SetProperty("offsetY", offsetY);
     retObj->SetProperty("surfaceWidth", width);
@@ -219,12 +233,13 @@ void JSXComponentController::GetXComponentSurfaceRect(const JSCallbackInfo& args
     args.SetReturnValue(retObj);
 }
 
-void JSXComponentController::SetXComponentSurfaceRect(const JSCallbackInfo& args)
+void JSXComponentControllerBinding::SetXComponentSurfaceRect(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
-    CHECK_NULL_VOID(xcomponentController_);
+    auto innerCtrl = GetController();
+    CHECK_NULL_VOID(innerCtrl);
 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     auto jsSurfaceWidth = obj->GetProperty("surfaceWidth");
@@ -237,28 +252,28 @@ void JSXComponentController::SetXComponentSurfaceRect(const JSCallbackInfo& args
     if (!ParseSurfaceRectParam(jsSurfaceHeight, surfaceHeight) || !surfaceHeight.IsValid()) {
         return;
     }
-    xcomponentController_->SetIdealSurfaceWidth(static_cast<float>(surfaceWidth.ConvertToPx()));
-    xcomponentController_->SetIdealSurfaceHeight(static_cast<float>(surfaceHeight.ConvertToPx()));
+    innerCtrl->SetIdealSurfaceWidth(static_cast<float>(surfaceWidth.ConvertToPx()));
+    innerCtrl->SetIdealSurfaceHeight(static_cast<float>(surfaceHeight.ConvertToPx()));
 
     auto jsOffsetX = obj->GetProperty("offsetX");
     CalcDimension offsetX;
     if (ParseSurfaceRectParam(jsOffsetX, offsetX)) {
-        xcomponentController_->SetIdealSurfaceOffsetX(static_cast<float>(offsetX.ConvertToPx()));
+        innerCtrl->SetIdealSurfaceOffsetX(static_cast<float>(offsetX.ConvertToPx()));
     } else {
-        xcomponentController_->ClearIdealSurfaceOffset(true);
+        innerCtrl->ClearIdealSurfaceOffset(true);
     }
     auto jsOffsetY = obj->GetProperty("offsetY");
     CalcDimension offsetY;
     if (ParseSurfaceRectParam(jsOffsetY, offsetY)) {
-        xcomponentController_->SetIdealSurfaceOffsetY(static_cast<float>(offsetY.ConvertToPx()));
+        innerCtrl->SetIdealSurfaceOffsetY(static_cast<float>(offsetY.ConvertToPx()));
     } else {
-        xcomponentController_->ClearIdealSurfaceOffset(false);
+        innerCtrl->ClearIdealSurfaceOffset(false);
     }
 
-    xcomponentController_->UpdateSurfaceBounds();
+    innerCtrl->UpdateSurfaceBounds();
 }
 
-void JSXComponentController::StartImageAnalyzer(const JSCallbackInfo& args)
+void JSXComponentControllerBinding::StartImageAnalyzer(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
     auto engine = EngineHelper::GetCurrentEngine();
@@ -294,19 +309,21 @@ void JSXComponentController::StartImageAnalyzer(const JSCallbackInfo& args)
         ctx->isImageAnalyzing_ = false;
     };
     isImageAnalyzing_ = true;
-    CHECK_NULL_VOID(xcomponentController_);
-    xcomponentController_->StartImageAnalyzer(configNativeValue, onAnalyzed_);
+    auto innerCtrl = GetController();
+    CHECK_NULL_VOID(innerCtrl);
+    innerCtrl->StartImageAnalyzer(configNativeValue, onAnalyzed_);
     ReturnPromise(args, promise);
 }
 
-void JSXComponentController::StopImageAnalyzer(const JSCallbackInfo& args)
+void JSXComponentControllerBinding::StopImageAnalyzer(const JSCallbackInfo& args)
 {
     ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID(xcomponentController_);
-    xcomponentController_->StopImageAnalyzer();
+    auto innerCtrl = GetController();
+    CHECK_NULL_VOID(innerCtrl);
+    innerCtrl->StopImageAnalyzer();
 }
 
-void JSXComponentController::SetXComponentSurfaceRotation(const JSCallbackInfo& args)
+void JSXComponentControllerBinding::SetXComponentSurfaceRotation(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
         return;
@@ -315,26 +332,29 @@ void JSXComponentController::SetXComponentSurfaceRotation(const JSCallbackInfo& 
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     bool lock = false;
     ConvertFromJSValue(obj->GetProperty("lock"), lock);
-    CHECK_NULL_VOID(xcomponentController_);
-    xcomponentController_->SetSurfaceRotation(lock);
+    auto innerCtrl = GetController();
+    CHECK_NULL_VOID(innerCtrl);
+    innerCtrl->SetSurfaceRotation(lock);
 }
 
-void JSXComponentController::GetXComponentSurfaceRotation(const JSCallbackInfo& args)
+void JSXComponentControllerBinding::GetXComponentSurfaceRotation(const JSCallbackInfo& args)
 {
     auto retObj = JSRef<JSObject>::New();
-    CHECK_NULL_VOID(xcomponentController_);
-    bool lock = xcomponentController_->GetSurfaceRotation();
+    auto innerCtrl = GetController();
+    CHECK_NULL_VOID(innerCtrl);
+    bool lock = innerCtrl->GetSurfaceRotation();
     retObj->SetProperty("lock", lock);
     args.SetReturnValue(retObj);
 }
 
-void JSXComponentController::LockCanvas(const JSCallbackInfo& args)
+void JSXComponentControllerBinding::LockCanvas(const JSCallbackInfo& args)
 {
-    if (xcomponentController_ == nullptr) {
+    auto innerCtrl = GetController();
+    if (innerCtrl == nullptr) {
         args.SetReturnValue(JSVal::Null());
         return;
     }
-    auto rsCanvas = xcomponentController_->LockCanvas();
+    auto rsCanvas = innerCtrl->LockCanvas();
     if (rsCanvas == nullptr) {
         args.SetReturnValue(JSVal::Null());
         return;
@@ -352,7 +372,7 @@ void JSXComponentController::LockCanvas(const JSCallbackInfo& args)
     args.SetReturnValue(jsCanvasVal);
 }
 
-void JSXComponentController::UnlockCanvasAndPost(const JSCallbackInfo& args)
+void JSXComponentControllerBinding::UnlockCanvasAndPost(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
@@ -367,11 +387,12 @@ void JSXComponentController::UnlockCanvasAndPost(const JSCallbackInfo& args)
     napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
     CHECK_NULL_VOID(unwrapCanvas);
     auto rsCanvas = unwrapCanvas->GetCanvas();
-    CHECK_NULL_VOID(xcomponentController_);
-    xcomponentController_->UnlockCanvasAndPost(rsCanvas);
+    auto innerCtrl = GetController();
+    CHECK_NULL_VOID(innerCtrl);
+    innerCtrl->UnlockCanvasAndPost(rsCanvas);
 }
 
-void JSXComponentController::SetXComponentSurfaceConfig(const JSCallbackInfo& args)
+void JSXComponentControllerBinding::SetXComponentSurfaceConfig(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
         return;
@@ -380,7 +401,8 @@ void JSXComponentController::SetXComponentSurfaceConfig(const JSCallbackInfo& ar
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     bool isOpaque = false;
     ConvertFromJSValue(obj->GetProperty("isOpaque"), isOpaque);
-    CHECK_NULL_VOID(xcomponentController_);
-    xcomponentController_->SetSurfaceConfig(isOpaque);
+    auto innerCtrl = GetController();
+    CHECK_NULL_VOID(innerCtrl);
+    innerCtrl->SetSurfaceConfig(isOpaque);
 }
 } // namespace OHOS::Ace::Framework

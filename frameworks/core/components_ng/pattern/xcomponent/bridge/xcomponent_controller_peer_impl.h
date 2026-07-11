@@ -12,22 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_X_COMPONENT_CONTROLLER_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_X_COMPONENT_CONTROLLER_PEER_IMPL_H
+#ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_BRIDGE_X_COMPONENT_CONTROLLER_PEER_IMPL_H
+#define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_BRIDGE_X_COMPONENT_CONTROLLER_PEER_IMPL_H
 
+#include <functional>
+#include <memory>
+#include <string>
+
+#include "interfaces/inner_api/xcomponent_controller/xcomponent_controller.h"
+
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 
 #ifdef XCOMPONENT_SUPPORTED
-#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
+
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #endif // XCOMPONENT_SUPPORTED
 
+struct drawing_CanvasPeer;
 namespace OHOS::Ace::NG::GeneratedModifier {
+using SurfaceCreatedEvent = std::function<void(const std::string&, const std::string&)>;
+using SurfaceChangedEvent = std::function<void(const std::string&, const RectF&)>;
+using SurfaceDestroyedEvent = std::function<void(const std::string&, const std::string&)>;
 struct XComponentControllerNativePeerImpl : public Referenced {
-    std::shared_ptr<XComponentControllerNG> controller;
+    std::shared_ptr<OHOS::Ace::XComponentController> controller;
 #ifdef XCOMPONENT_SUPPORTED
     void TriggerStartImageAnalyzer(Ark_VMContext vmContext, Ark_AsyncWorkerPtr asyncWorker,
         const Ark_ImageAnalyzerConfig* config, const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
@@ -50,7 +59,6 @@ struct XComponentControllerNativePeerImpl : public Referenced {
 
 } // namespace OHOS::Ace::NG::GeneratedModifier
 
-struct XComponentControllerNativePeer : public OHOS::Ace::NG::GeneratedModifier::XComponentControllerNativePeerImpl {
-};
+struct XComponentControllerNativePeer : public OHOS::Ace::NG::GeneratedModifier::XComponentControllerNativePeerImpl {};
 
-#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_X_COMPONENT_CONTROLLER_PEER_IMPL_H
+#endif // FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_BRIDGE_X_COMPONENT_CONTROLLER_PEER_IMPL_H

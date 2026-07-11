@@ -227,6 +227,7 @@ public:
         BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction);
     static void SetBackgroundImagePosition(BackgroundImagePosition &bgImgPosition);
     static void ClearResObj(const std::string resObjName);
+    static void ClearResObj(FrameNode* frameNode, const std::string resObjName);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetMotionBlur(const MotionBlurOption& motionBlurOption);
     static void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
@@ -288,6 +289,7 @@ public:
     static void CheckNodeBorderDashWidthLPX(FrameNode* frameNode, const BorderWidthProperty& value);
     static void SetOpacity(double opacity);
     static void CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resobj);
+    static void CreateWithOpacityResourceObj(FrameNode* framenode, const RefPtr<ResourceObject>& resobj);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
     static void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier);
     static void* GetFrameNode();

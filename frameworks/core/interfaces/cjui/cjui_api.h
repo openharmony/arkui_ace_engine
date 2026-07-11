@@ -3590,10 +3590,10 @@ struct CJUIXComponentModifier {
     ArkUI_CharPtr (*getXComponentSurfaceId)(ArkUIXComponentControllerHandle controller);
     ArkUIXComponentControllerHandle (*getXComponentController)(ArkUINodeHandle node);
 
-    void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Bool isJsView);
     void (*setXComponentBackgroundColorWithColorSpace)(
-        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
-    void (*resetXComponentBackgroundColor)(ArkUINodeHandle node);
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, ArkUI_Bool isJsView);
+    void (*resetXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Bool isJsView);
     void (*setXComponentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*resetXComponentOpacity)(ArkUINodeHandle node);
     void (*setXComponentId)(ArkUINodeHandle node, ArkUI_CharPtr id);
@@ -3606,6 +3606,15 @@ struct CJUIXComponentModifier {
     void* (*getNativeXComponent)(ArkUINodeHandle node);
     void (*setXComponentLibraryname)(ArkUINodeHandle node, ArkUI_CharPtr libraryname);
     void (*setImageAIOptions)(ArkUINodeHandle node, void* options);
+    void (*createXComponent)(ArkUI_CharPtr id, ArkUI_Int32 type, ArkUI_CharPtr libraryName, void* controller);
+    void (*setControllerOnCreated)(ArkUINodeHandle node, ArkUI_Int64 controllerId,
+        void (*callback)(ArkUI_Int64 controllerId, ArkUI_CharPtr surfaceId, ArkUI_CharPtr xcomponentId));
+    void (*setControllerOnChanged)(ArkUINodeHandle node, ArkUI_Int64 controllerId,
+        void (*callback)(ArkUI_Int64 controllerId, ArkUI_CharPtr surfaceId, ArkUI_Float32 left, ArkUI_Float32 top,
+            ArkUI_Float32 width, ArkUI_Float32 height));
+    void (*setControllerOnDestroyed)(ArkUINodeHandle node, ArkUI_Int64 controllerId,
+        void (*callback)(ArkUI_Int64 controllerId, ArkUI_CharPtr surfaceId, ArkUI_CharPtr xcomponentId));
+    void (*setXComponentEnableSecure)(ArkUINodeHandle node, ArkUI_Bool isSecure);
 };
 
 struct CJUIStateModifier {
