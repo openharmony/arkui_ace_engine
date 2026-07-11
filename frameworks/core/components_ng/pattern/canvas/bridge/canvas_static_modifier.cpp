@@ -27,7 +27,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 // Provide AssignCast specialization for CanvasUnit locally (was in converter_enums.cpp)
-// so that canvas BUILD.gn no longer needs to compile converter_enums.cpp.
+#ifndef ARKUI_CAPI_UNITTEST
 namespace OHOS::Ace::NG {
 namespace Converter {
 template<>
@@ -41,6 +41,7 @@ void AssignCast(std::optional<Ace::CanvasUnit>& dst, const Ark_LengthMetricsUnit
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
+#endif
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasModifier {

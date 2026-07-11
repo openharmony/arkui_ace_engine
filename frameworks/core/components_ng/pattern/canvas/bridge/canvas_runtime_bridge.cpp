@@ -113,30 +113,26 @@ void StopCanvasImageAnalyzerImpl(const RefPtr<RenderingContext2DModel>& context)
 
 void DrawCanvasImageImpl(const RefPtr<RenderingContext2DModel>& context, const ImageInfo& imageInfo)
 {
-    auto model = GetCanvasRenderingContext2DModel(context);
-    CHECK_NULL_VOID(model);
-    model->DrawImage(imageInfo);
+    CHECK_NULL_VOID(context);
+    context->DrawImage(imageInfo);
 }
 
 void DrawCanvasSvgImageImpl(const RefPtr<RenderingContext2DModel>& context, const ImageInfo& imageInfo)
 {
-    auto model = GetCanvasRenderingContext2DModel(context);
-    CHECK_NULL_VOID(model);
-    model->DrawSvgImage(imageInfo);
+    CHECK_NULL_VOID(context);
+    context->DrawSvgImage(imageInfo);
 }
 
 void DrawCanvasPixelMapImpl(const RefPtr<RenderingContext2DModel>& context, const ImageInfo& imageInfo)
 {
-    auto model = GetCanvasRenderingContext2DModel(context);
-    CHECK_NULL_VOID(model);
-    model->DrawPixelMap(imageInfo);
+    CHECK_NULL_VOID(context);
+    context->DrawPixelMap(imageInfo);
 }
 
 void PutCanvasImageDataImpl(const RefPtr<RenderingContext2DModel>& context, const ImageData& imageData)
 {
-    auto model = GetCanvasRenderingContext2DModel(context);
-    CHECK_NULL_VOID(model);
-    model->PutImageData(imageData);
+    CHECK_NULL_VOID(context);
+    context->PutImageData(imageData);
 }
 
 RefPtr<AceType> CreateOffscreenPatternImpl(int32_t width, int32_t height)

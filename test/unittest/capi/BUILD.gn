@@ -298,6 +298,8 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
 
   sources += [
     "$ace_root/frameworks/core/components_ng/pattern/canvas/bridge/canvas_static_modifier.cpp",
+    "$ace_root/frameworks/core/interfaces/native/node/node_canvas_modifier.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_dynamic_module_helper.cpp",
   ]
   deps = [
     ":capi_qrcode_dep",
