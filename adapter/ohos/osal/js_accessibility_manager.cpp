@@ -693,17 +693,27 @@ void SetUiExtensionAbilityParentIdForFocus(const RefPtr<NG::UINode>& uiExtension
     }
 }
 
+bool GetAccessibilityFocusStateByFrameNode(const RefPtr<NG::FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto& renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto isAccessibilityFocus = renderContext->GetAccessibilityFocus().value_or(false);
+    CHECK_EQUAL_RETURN(isAccessibilityFocus, true, true);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return accessibilityProperty->GetAccessibilityFocusState();
+}
+
 RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node,
     int32_t focusType, Accessibility::AccessibilityElementInfo& info,
     const int64_t uiExtensionOffset, const RefPtr<PipelineBase>& context, int64_t currentFocusNodeId)
 {
     CHECK_NULL_RETURN(node, nullptr);
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
-    if (frameNode) {
-        if (frameNode->GetRenderContext()->GetAccessibilityFocus().value_or(false)) {
-            auto node = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(frameNode, currentFocusNodeId);
-            return node;
-        }
+    if (GetAccessibilityFocusStateByFrameNode(frameNode)) {
+        auto node = NG::AccessibilityFrameNodeUtils::GetFramenodeByAccessibilityId(frameNode, currentFocusNodeId);
+        return node;
     }
     if (node->GetChildren(true).empty()) {
         return nullptr;
@@ -2061,7 +2071,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
 
     nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
     nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
-    nodeInfo.SetAccessibilityFocus(node->GetRenderContext()->GetAccessibilityFocus().value_or(false));
+    nodeInfo.SetAccessibilityFocus(GetAccessibilityFocusStateByFrameNode(node));
     nodeInfo.SetClip(node->GetRenderContext()->GetClipEdge().value_or(false));
     nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
     nodeInfo.SetVisible(node->IsVisible());
