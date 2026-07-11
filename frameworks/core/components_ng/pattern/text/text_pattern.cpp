@@ -45,9 +45,11 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/common/properties/text_style_gradient.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/manager/select_content_overlay/selection_container.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
+#include "core/components_ng/pattern/text/base_text_select_geometry_utils.h"
 #include "core/components_ng/pattern/text/span/span_group_hash_calculator.h"
 #include "core/components_ng/pattern/text/text_selection_child.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -2426,22 +2428,43 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
 
 RectF TextPattern::CalcAIEntityRectWithHandles()
 {
-    auto selectOverlay = GetSelectOverlay();
-    CHECK_NULL_RETURN(selectOverlay, {});
-    auto paintOffset = selectOverlay->GetPaintOffsetWithoutTransform();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, {});
+    OffsetF paintOffset;
+    bool hasTransform = false;
+    if (selectionChild_) {
+        paintOffset = selectionChild_->GetChildHandleGlobalOffset();
+        hasTransform = selectionChild_->HasOrUpdateRenderTransform();
+    } else {
+        auto selectOverlay = GetSelectOverlay();
+        if (!selectOverlay) {
+            return {};
+        }
+        paintOffset = selectOverlay->GetPaintOffsetWithoutTransform();
+        hasTransform = selectOverlay->HasRenderTransform();
+    }
     auto firstHandleLocal = textSelector_.firstHandle;
     firstHandleLocal.SetOffset(firstHandleLocal.GetOffset() - paintOffset);
     auto secondHandleLocal = textSelector_.secondHandle;
     secondHandleLocal.SetOffset(secondHandleLocal.GetOffset() - paintOffset);
+    auto convertToGlobalRect = [host, paintOffset, hasTransform](const RectF& localRect) {
+        auto aiRect = localRect;
+        if (!hasTransform) {
+            aiRect.SetOffset(localRect.GetOffset() + paintOffset);
+            return aiRect;
+        }
+        BaseTextSelectGeometryUtils::GetGlobalRectWithTransform(host, hasTransform, aiRect);
+        return aiRect;
+    };
     if (firstHandleLocal.Top() == secondHandleLocal.Top()) {
-        return selectOverlay->ConvertToGlobalRectWithTransform(firstHandleLocal.CombineRectT(secondHandleLocal));
+        return convertToGlobalRect(firstHandleLocal.CombineRectT(secondHandleLocal));
     }
     auto top = std::min(firstHandleLocal.Top(), secondHandleLocal.Top());
     auto bottom = std::max(firstHandleLocal.Bottom(), secondHandleLocal.Bottom());
     auto left = contentRect_.GetX();
     RectF aiRectLocal = RectT(left, top, contentRect_.Width(), bottom - top);
     aiRectLocal = aiRectLocal.IntersectRectT(contentRect_);
-    return selectOverlay->ConvertToGlobalRectWithTransform(aiRectLocal);
+    return convertToGlobalRect(aiRectLocal);
 }
 
 std::pair<bool, bool> TextPattern::GetCopyAndSelectable()
@@ -3313,7 +3336,6 @@ bool TextPattern::HandleMouseLeftPressForContainer(const Offset& textOffset)
     } else {
         auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
         selectionChild_->HandleSelectionStart(textOffset, start, start);
-        selectionChild_->HandleSelectionUpdate(textOffset);
         return true;
     }
 }
@@ -3359,6 +3381,13 @@ void TextPattern::HandleMouseLeftReleaseForContainer(
     if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
         if (start == -1 && end == -1) {
             ResetSelection();
+            CloseSelectOverlay(true);
+            return;
+        }
+        if (oldMouseStatus != MouseStatus::MOVE && !shiftFlag_) {
+            ResetSelection();
+            CloseSelectOverlay(true);
+            selectionChild_->ProcessMouseLeftRelease(textOffset);
             return;
         }
         auto globalPoint = info.GetGlobalLocation();
@@ -7230,8 +7259,12 @@ void TextPattern::FireOnMarqueeStateChange(const TextMarqueeState& state)
     eventHub->FireOnMarqueeStateChange(static_cast<int32_t>(state));
 
     if (TextMarqueeState::START == state) {
-        CloseSelectOverlay();
-        ResetSelection();
+        // In SelectionContainer mode, marquee restart from an unselected sibling must not clear
+        // the container-wide selection owned by another child.
+        if (!selectionChild_ || IsSelected()) {
+            CloseSelectOverlay();
+            ResetSelection();
+        }
         isMarqueeRunning_ = true;
     } else if (TextMarqueeState::FINISH == state) {
         isMarqueeRunning_ = false;
@@ -9115,6 +9148,7 @@ RefPtr<DataDetectorAdapter> TextPattern::GetDataDetectorAdapter()
             ACE_UINODE_TRACE(host);
         }
         dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
+        GetOrCreateSelectOverlay();
     }
     return dataDetectorAdapter_;
 }

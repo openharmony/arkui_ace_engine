@@ -226,6 +226,7 @@ public:
     virtual bool FireOnWillCopy(const std::u16string& selectedContent) { return true; }
     virtual void FireOnCopy(const std::u16string& selectedContent) {}
     virtual bool IsAskCeliaSupported() const { return false; }
+    virtual std::u16string GetSelectAllText() = 0;
     virtual SelectionCopyPayload GetSelectionCopyPayload();
     virtual RefPtr<SpanString> GetSelectedSpanString() { return nullptr; }
     virtual void ResetOriginCaretPosition() {}

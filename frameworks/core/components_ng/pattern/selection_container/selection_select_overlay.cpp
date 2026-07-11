@@ -38,6 +38,12 @@ OffsetF GetHandleAnchorPoint(const RectF& rect)
     return point;
 }
 
+OffsetF ConvertWindowPointToContainer(const OffsetF& pointInWindow, const RefPtr<FrameNode>& containerNode)
+{
+    CHECK_NULL_RETURN(containerNode, OffsetF());
+    return containerNode->ConvertPositionToWindow(pointInWindow, true);
+}
+
 CopyOptions MergeCopyOption(CopyOptions current, CopyOptions next)
 {
     return static_cast<int32_t>(current) <= static_cast<int32_t>(next) ? current : next;
@@ -546,8 +552,6 @@ void SelectionSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool i
     CHECK_NULL_VOID(pattern);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    auto overlayRoot = manager->GetSelectOverlayRoot();
-    CHECK_NULL_VOID(overlayRoot);
 
     auto fixedChild = isFirst ? pattern->GetSelectionEndChild() : pattern->GetSelectionStartChild();
     CHECK_NULL_VOID(fixedChild);
@@ -555,7 +559,8 @@ void SelectionSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool i
     CHECK_NULL_VOID(fixedHandle);
     auto containerNode = pattern->GetHostNode();
     CHECK_NULL_VOID(containerNode);
-    auto fixedPointInContainer = overlayRoot->ConvertPoint(GetHandleAnchorPoint(fixedHandle.value()), containerNode);
+    auto fixedPointInContainer = ConvertWindowPointToContainer(
+        GetHandleAnchorPoint(fixedHandle.value()), containerNode);
     auto fixedIndex = isFirst ? GetVisualEndHandleIndex(fixedChild) : GetVisualStartHandleIndex(fixedChild);
     auto fixedHandleIsTopOnStart = !isFirst;
     pattern->HandleSelectionStart(fixedPointInContainer, fixedChild, fixedIndex, fixedIndex, fixedHandleIsTopOnStart);
@@ -572,13 +577,11 @@ void SelectionSelectOverlay::OnHandleMove(const RectF& rect, bool isFirst)
     CHECK_NULL_VOID(pattern);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    auto overlayRoot = manager->GetSelectOverlayRoot();
-    CHECK_NULL_VOID(overlayRoot);
     auto containerNode = pattern->GetHostNode();
     CHECK_NULL_VOID(containerNode);
     auto startChild = pattern->GetSelectionStartChild();
     auto endChild = pattern->GetSelectionEndChild();
-    auto movingPointInContainer = overlayRoot->ConvertPoint(GetHandleAnchorPoint(rect), containerNode);
+    auto movingPointInContainer = ConvertWindowPointToContainer(GetHandleAnchorPoint(rect), containerNode);
     pattern->HandleSelectionUpdate(movingPointInContainer);
     if (startChild != pattern->GetSelectionStartChild() || endChild != pattern->GetSelectionEndChild()) {
         needUpdateViewPortOnMoveDone_ = true;
@@ -593,11 +596,9 @@ void SelectionSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     CHECK_NULL_VOID(pattern);
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    auto overlayRoot = manager->GetSelectOverlayRoot();
-    CHECK_NULL_VOID(overlayRoot);
     auto containerNode = pattern->GetHostNode();
     CHECK_NULL_VOID(containerNode);
-    auto movingPointInContainer = overlayRoot->ConvertPoint(GetHandleAnchorPoint(rect), containerNode);
+    auto movingPointInContainer = ConvertWindowPointToContainer(GetHandleAnchorPoint(rect), containerNode);
     pattern->ProcessHandleMoveSelectionEnd(movingPointInContainer);
     if (!pattern->IsSelectedTypeChange()) {
         manager->ShowOptionMenu();

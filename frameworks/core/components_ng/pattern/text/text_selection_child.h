@@ -29,6 +29,7 @@ public:
     ~TextSelectionChild() override = default;
 
     std::u16string GetSelectionText() override;
+    std::u16string GetSelectAllText() override;
     RefPtr<FrameNode> GetHostNode() const override;
     std::optional<RectF> GetFirstHandleRect() override;
     std::optional<RectF> GetSecondHandleRect() override;

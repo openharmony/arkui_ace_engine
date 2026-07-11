@@ -15,6 +15,7 @@
 
 #include "interfaces/inner_api/ui_session/ui_report_stub.h"
 
+#include <algorithm>
 #include <cinttypes>
 
 #include "pixel_map.h"
@@ -28,6 +29,7 @@ namespace {
 constexpr char GET_INSPECTOR_TREE_CALLBACK_TIMEOUT[] = "GetInspectorTreeCallbackTimeout";
 constexpr char PAGE_TRANSLATE_CALLBACK_TIMEOUT[] = "PageTranslateCallbackTimeout";
 constexpr char PAGE_TRANSLATE_RESULT_WATCHDOG_PREFIX[] = "PageTranslateResultWatchdog";
+constexpr int32_t SPECIFIED_CONTENT_OFFSETS_LOOP_UPPERBOUND = 1024000;
 
 inline int32_t NormalizeTimeout(int32_t timeout, int32_t defaultTimeout)
 {
@@ -232,7 +234,12 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
                 LOGW("SendSpecifiedContentOffsets size read failed");
                 break;
             }
-            for (int32_t i = 0; i < size; i++) {
+            const int32_t loopSize = std::clamp(size, 0, SPECIFIED_CONTENT_OFFSETS_LOOP_UPPERBOUND);
+            if (size < 0 || size > loopSize) {
+                LOGW("SendSpecifiedContentOffsets size %{public}d exceeds boundary, clamp to %{public}d",
+                    size, loopSize);
+            }
+            for (int32_t i = 0; i < loopSize; i++) {
                 float offsetX = data.ReadFloat();
                 float offsetY = data.ReadFloat();
                 std::pair<float, float> value = { offsetX, offsetY };
