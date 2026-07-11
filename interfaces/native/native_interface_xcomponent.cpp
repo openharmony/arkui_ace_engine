@@ -559,21 +559,15 @@ void OH_ArkUI_SurfaceHolder_Dispose(OH_ArkUI_SurfaceHolder* surfaceHolder)
         if (impl == nullptr) {
             SET_ERROR_MESSAGE(
                 OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Native module not initialized");
-            return;
-        }
-        auto nodeModifiers = impl->getNodeModifiers();
-        if (nodeModifiers == nullptr) {
+        } else if (impl->getNodeModifiers() == nullptr) {
             SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID,
                 __FUNCTION__, "Node modifiers are not initialized");
-            return;
-        }
-        auto xComponentModifier = nodeModifiers->getXComponentModifier();
-        if (xComponentModifier == nullptr) {
+        } else if (impl->getNodeModifiers()->getXComponentModifier() == nullptr) {
             SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID,
                 __FUNCTION__, "XComponent modifier is not initialized");
-            return;
+        } else {
+            impl->getNodeModifiers()->getXComponentModifier()->dispose(node->uiNodeHandle);
         }
-        xComponentModifier->dispose(node->uiNodeHandle);
     }
     auto config = surfaceHolder->config_;
     if (config) {
