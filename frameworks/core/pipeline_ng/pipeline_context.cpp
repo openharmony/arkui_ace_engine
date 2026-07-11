@@ -2149,13 +2149,7 @@ void PipelineContext::RSTransactionBeginAndCommit(const std::shared_ptr<Rosen::R
         CHECK_NULL_VOID(surfaceNode);
         auto shadowSurface = surfaceNode->CreateShadowSurfaceNode();
         CHECK_NULL_VOID(shadowSurface);
-        auto rsUIContext = shadowSurface->GetRSUIContext();
-        CHECK_NULL_VOID(rsUIContext);
-        auto rsTransaction = rsUIContext->GetRSTransaction();
-        CHECK_NULL_VOID(rsTransaction);
-        rsTransaction->Begin();
         shadowSurface->SetAbilityBGAlpha(appBgColor_.GetAlpha());
-        rsTransaction->Commit();
     } else {
         rsUIDirector->SetAbilityBGAlpha(appBgColor_.GetAlpha());
     }
