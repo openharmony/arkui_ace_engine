@@ -78,6 +78,9 @@ private:
     int32_t ResetPageTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t SendPageTranslateResultInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetCurrentAbilityLanguageInfoInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t RegisterPageSceneRulesInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t UnregisterPageSceneRulesInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetPageSceneInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     bool IsSACalling() const;
 };

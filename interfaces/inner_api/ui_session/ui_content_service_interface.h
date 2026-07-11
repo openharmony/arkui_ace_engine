@@ -38,6 +38,7 @@ namespace OHOS::Ace {
 using GetWebInfoByRequestCallback =
     std::function<void(int32_t, int32_t, const std::string&, const std::string&, WebRequestErrorCode)>;
 using PageTranslateTextCallback = std::function<void(int32_t, const std::string&, int64_t)>;
+using PageSceneEventCallback = std::function<void(const std::string&)>;
 
 constexpr int32_t DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS = 1500;
 constexpr int32_t DEFAULT_PAGE_TRANSLATE_CALLBACK_TIMEOUT_MS = 5000;
@@ -98,6 +99,9 @@ public:
         RESET_PAGE_TRANSLATE,
         SEND_PAGE_TRANSLATE_RESULT,
         GET_CURRENT_ABILITY_LANGUAGE_INFO,
+        REGISTER_PAGE_SCENE_RULES,
+        UNREGISTER_PAGE_SCENE_RULES,
+        GET_PAGE_SCENE,
     };
 
     /**
@@ -419,6 +423,20 @@ public:
     {
         return FAILED;
     }
+    virtual int32_t RegisterPageSceneRules(
+        const std::string& ruleJson, const PageSceneEventCallback& eventCallback)
+    {
+        return FAILED;
+    }
+    virtual int32_t UnregisterPageSceneRules(const std::string& ruleSetId)
+    {
+        return FAILED;
+    }
+    virtual int32_t GetPageScene(
+        const std::string& ruleJsonOrRuleSetId, const PageSceneEventCallback& eventCallback)
+    {
+        return FAILED;
+    }
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
@@ -451,6 +469,7 @@ public:
         SEND_ARKWEB_IMAGES_BY_ID,
         SEND_WEB_INFO_BY_REQUEST,
         SEND_PAGE_TEXT,
+        REPORT_PAGE_SCENE_EVENT,
     };
 
     /**
@@ -572,6 +591,7 @@ public:
         const std::string& request,
         const std::string& result, WebRequestErrorCode errorCode) = 0;
     virtual void SendPageText(int32_t nodeId, const std::string& text, int64_t version) {}
+    virtual void ReportPageSceneEvent(const std::string& sceneJson) {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

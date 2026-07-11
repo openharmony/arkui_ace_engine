@@ -315,6 +315,15 @@ ohos_unittest("content_change_manager_translate_test_ng") {
   ]
 }
 
+ace_unittest("page_scene_rule_manager_test_ng") {
+  module_name = "TextSet-Text"
+  type = "new"
+  sources = [
+    "$ace_root/frameworks/core/components_ng/manager/page_scene/page_scene_rule_manager.cpp",
+    "page_scene_rule_manager_test_ng.cpp",
+  ]
+}
+
 group("core_manager_unittest") {
   testonly = true
   deps = [
@@ -340,6 +349,7 @@ group("core_manager_unittest") {
     ":full_screen_manager_test_ng",
     ":json_report_test_ng",
     ":navigation_manager_test_ng",
+    ":page_scene_rule_manager_test_ng",
     ":post_event_manager_test_ng",
     ":recoverable_manager_test_ng",
     ":safe_area_manager_test_ng",

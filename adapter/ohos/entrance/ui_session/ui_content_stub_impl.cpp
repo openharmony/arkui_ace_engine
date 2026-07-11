@@ -15,6 +15,8 @@
 
 #include "interfaces/inner_api/ui_session/ui_content_stub_impl.h"
 
+#include "ipc_skeleton.h"
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace {
@@ -332,5 +334,34 @@ int32_t UIContentServiceStubImpl::GetWebInfoByRequest(
 {
     UiSessionManager::GetInstance()->GetWebInfoByRequest(webId, request);
     return NO_ERROR;
+}
+
+int32_t UIContentServiceStubImpl::RegisterPageSceneRules(
+    const std::string& ruleJson, const PageSceneEventCallback& eventCallback)
+{
+    if (ruleJson.empty()) {
+        return PARAM_INVALID;
+    }
+    int32_t processId = IPCSkeleton::GetCallingRealPid();
+    return UiSessionManager::GetInstance()->RegisterPageSceneRules(processId, ruleJson);
+}
+
+int32_t UIContentServiceStubImpl::UnregisterPageSceneRules(const std::string& ruleSetId)
+{
+    if (ruleSetId.empty()) {
+        return PARAM_INVALID;
+    }
+    int32_t processId = IPCSkeleton::GetCallingRealPid();
+    return UiSessionManager::GetInstance()->UnregisterPageSceneRules(processId, ruleSetId);
+}
+
+int32_t UIContentServiceStubImpl::GetPageScene(
+    const std::string& ruleJsonOrRuleSetId, const PageSceneEventCallback& eventCallback)
+{
+    if (ruleJsonOrRuleSetId.empty()) {
+        return PARAM_INVALID;
+    }
+    int32_t processId = IPCSkeleton::GetCallingRealPid();
+    return UiSessionManager::GetInstance()->GetPageScene(processId, ruleJsonOrRuleSetId);
 }
 } // namespace OHOS::Ace

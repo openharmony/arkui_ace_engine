@@ -55,6 +55,7 @@ build_component_ng("manager_ng") {
     "gesture/active_recognizer_manager.cpp",
     "memory/memory_manager.cpp",
     "navigation/navigation_manager.cpp",
+    "page_scene/page_scene_rule_manager.cpp",
     "post_event/post_event_manager.cpp",
     "recoverable/recoverable_manager.cpp",
     "recoverable/recoverable_view.cpp",

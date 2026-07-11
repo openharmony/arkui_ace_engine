@@ -161,6 +161,97 @@ int32_t UIContentServiceProxy::Connect(const EventCallback& eventCallback,
     return NO_ERROR;
 }
 
+int32_t UIContentServiceProxy::RegisterPageSceneRules(
+    const std::string& ruleJson, const PageSceneEventCallback& eventCallback)
+{
+    if (ruleJson.empty() || eventCallback == nullptr) {
+        LOGW("RegisterPageSceneRules invalid params");
+        return PARAM_INVALID;
+    }
+    if (report_ == nullptr) {
+        LOGW("RegisterPageSceneRules reportStub is nullptr");
+        return FAILED;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor()) || !data.WriteString(ruleJson)) {
+        LOGW("RegisterPageSceneRules write parcel failed");
+        return FAILED;
+    }
+    report_->RegisterPageSceneEventCallback(eventCallback);
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REGISTER_PAGE_SCENE_RULES, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("RegisterPageSceneRules send request failed, errorCode is %{public}d", sendRequestErrorCode);
+        report_->UnregisterPageSceneEventCallback();
+        return REPLY_ERROR;
+    }
+    int32_t result = reply.ReadInt32();
+    if (result != NO_ERROR) {
+        report_->UnregisterPageSceneEventCallback();
+    }
+    return result;
+}
+
+int32_t UIContentServiceProxy::UnregisterPageSceneRules(const std::string& ruleSetId)
+{
+    if (ruleSetId.empty()) {
+        LOGW("UnregisterPageSceneRules ruleSetId is empty");
+        return PARAM_INVALID;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor()) || !data.WriteString(ruleSetId)) {
+        LOGW("UnregisterPageSceneRules write parcel failed");
+        return FAILED;
+    }
+    int32_t sendRequestErrorCode = Remote()->SendRequest(UNREGISTER_PAGE_SCENE_RULES, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("UnregisterPageSceneRules send request failed, errorCode is %{public}d", sendRequestErrorCode);
+        return REPLY_ERROR;
+    }
+    if (report_ != nullptr) {
+        report_->UnregisterPageSceneEventCallback();
+    }
+    return reply.ReadInt32();
+}
+
+int32_t UIContentServiceProxy::GetPageScene(
+    const std::string& ruleJsonOrRuleSetId, const PageSceneEventCallback& eventCallback)
+{
+    if (ruleJsonOrRuleSetId.empty() || eventCallback == nullptr) {
+        LOGW("GetPageScene invalid params");
+        return PARAM_INVALID;
+    }
+    if (report_ == nullptr) {
+        LOGW("GetPageScene reportStub is nullptr");
+        return FAILED;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (!data.WriteInterfaceToken(GetDescriptor()) || !data.WriteString(ruleJsonOrRuleSetId)) {
+        LOGW("GetPageScene write parcel failed");
+        return FAILED;
+    }
+    if (!report_->RegisterGetPageSceneCallback(eventCallback)) {
+        LOGW("GetPageScene register callback failed");
+        return LAST_UNFINISH;
+    }
+    int32_t sendRequestErrorCode = Remote()->SendRequest(GET_PAGE_SCENE, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("GetPageScene send request failed, errorCode is %{public}d", sendRequestErrorCode);
+        report_->UnregisterGetPageSceneCallback();
+        return REPLY_ERROR;
+    }
+    int32_t result = reply.ReadInt32();
+    if (result != NO_ERROR) {
+        report_->UnregisterGetPageSceneCallback();
+    }
+    return result;
+}
+
 int32_t UIContentServiceProxy::RegisterClickEventCallback(const EventCallback& eventCallback)
 {
     MessageParcel data;

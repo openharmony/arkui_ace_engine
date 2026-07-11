@@ -242,6 +242,18 @@ int32_t UiContentStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messa
             GetCurrentAbilityLanguageInfoInner(data, reply, option);
             break;
         }
+        case REGISTER_PAGE_SCENE_RULES: {
+            RegisterPageSceneRulesInner(data, reply, option);
+            break;
+        }
+        case UNREGISTER_PAGE_SCENE_RULES: {
+            UnregisterPageSceneRulesInner(data, reply, option);
+            break;
+        }
+        case GET_PAGE_SCENE: {
+            GetPageSceneInner(data, reply, option);
+            break;
+        }
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -275,6 +287,27 @@ int32_t UiContentStub::ConnectInner(MessageParcel& data, MessageParcel& reply, M
     UiSessionManagerOhos* uisession = reinterpret_cast<UiSessionManagerOhos*>(UiSessionManager::GetInstance());
     uisession->SaveReportStub(report, processId);
     uisession->SendBaseInfo(processId);
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::RegisterPageSceneRulesInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string ruleJson = data.ReadString();
+    reply.WriteInt32(RegisterPageSceneRules(ruleJson, nullptr));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::UnregisterPageSceneRulesInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string ruleSetId = data.ReadString();
+    reply.WriteInt32(UnregisterPageSceneRules(ruleSetId));
+    return NO_ERROR;
+}
+
+int32_t UiContentStub::GetPageSceneInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
+{
+    std::string ruleJsonOrRuleSetId = data.ReadString();
+    reply.WriteInt32(GetPageScene(ruleJsonOrRuleSetId, nullptr));
     return NO_ERROR;
 }
 

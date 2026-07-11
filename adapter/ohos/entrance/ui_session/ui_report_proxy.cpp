@@ -589,6 +589,25 @@ void UiReportProxy::ReportGetStateMgmtInfo(std::vector<std::string> results)
     }
 }
 
+void UiReportProxy::ReportPageSceneEvent(const std::string& sceneJson)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportPageSceneEvent write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(sceneJson)) {
+        LOGW("ReportPageSceneEvent write scene json failed");
+        return;
+    }
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_PAGE_SCENE_EVENT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportPageSceneEvent send request failed, errorCode is %{public}d", sendRequestErrorCode);
+    }
+}
+
 void UiReportProxy::SendWebInfoRequestResult(
     uint32_t windowId,
     int32_t webId,

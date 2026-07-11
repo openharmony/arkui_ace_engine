@@ -64,6 +64,7 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/page_scene/page_scene_rule_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_resolution_config.h"
@@ -6256,6 +6257,78 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     SaveGetStateMgmtInfoFunction(taskExecutor);
     SaveGetWebInfoByRequestFunction(taskExecutor);
     SaveArkUIPageTranslateFunctions(taskExecutor);
+    auto pageSceneMatcher = std::make_shared<NG::PageSceneRuleManager>();
+    auto pageSceneDetectCallback = [weakTaskExecutor = taskExecutor, pageSceneMatcher](
+        int32_t processId, const std::string& ruleJson, bool isGetResult) {
+        auto taskExecutor = weakTaskExecutor.Upgrade();
+        if (!taskExecutor) {
+            auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+            if (!pipeline) {
+                if (isGetResult) {
+                    UiSessionManager::GetInstance()->CompleteGetPageScene(processId);
+                }
+                return;
+            }
+            taskExecutor = pipeline->GetTaskExecutor();
+        }
+        if (!taskExecutor) {
+            if (isGetResult) {
+                UiSessionManager::GetInstance()->CompleteGetPageScene(processId);
+            }
+            return;
+        }
+        auto posted = taskExecutor->PostTask(
+            [processId, ruleJson, isGetResult, weakTaskExecutor, pageSceneMatcher]() {
+                if (ruleJson.empty()) {
+                    pageSceneMatcher->ClearProcess(processId);
+                    return;
+                }
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                if (!pipeline) {
+                    if (isGetResult) {
+                        UiSessionManager::GetInstance()->CompleteGetPageScene(processId);
+                    }
+                    return;
+                }
+                auto stageManager = pipeline->GetStageManager();
+                auto pageRoot = stageManager ? stageManager->GetLastPage() : pipeline->GetRootElement();
+                auto result = pageSceneMatcher->MatchPageScene(
+                    processId, ruleJson, pageRoot, pipeline->GetCurrentPageName(), isGetResult);
+                if (!result.has_value()) {
+                    if (isGetResult) {
+                        UiSessionManager::GetInstance()->CompleteGetPageScene(processId);
+                    }
+                    return;
+                }
+                if (!isGetResult && !pageSceneMatcher->ShouldReport(processId, result.value())) {
+                    return;
+                }
+                auto reportTaskExecutor = weakTaskExecutor.Upgrade();
+                if (!reportTaskExecutor) {
+                    reportTaskExecutor = pipeline->GetTaskExecutor();
+                }
+                if (!reportTaskExecutor) {
+                    if (isGetResult) {
+                        UiSessionManager::GetInstance()->CompleteGetPageScene(processId);
+                    }
+                    return;
+                }
+                auto sceneJson = result->sceneJson;
+                auto reportPosted = reportTaskExecutor->PostTask(
+                    [processId, sceneJson, isGetResult]() {
+                        UiSessionManager::GetInstance()->ReportPageSceneEvent(processId, sceneJson, isGetResult);
+                    },
+                    TaskExecutor::TaskType::BACKGROUND, "UiSessionPageSceneReport");
+                if (!reportPosted && isGetResult) {
+                    UiSessionManager::GetInstance()->CompleteGetPageScene(processId);
+                }
+            },
+            TaskExecutor::TaskType::UI, "UiSessionPageSceneDetect");
+        if (!posted && isGetResult) {
+            UiSessionManager::GetInstance()->CompleteGetPageScene(processId);
+        }
+    };
+    UiSessionManager::GetInstance()->SavePageSceneDetectFunction(pageSceneDetectCallback);
 }
 
 void UIContentImpl::SaveArkUIPageTranslateFunctions(const WeakPtr<TaskExecutor>& taskExecutor)

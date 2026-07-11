@@ -275,6 +275,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             OnSendPageTextInner(data);
             break;
         }
+        case REPORT_PAGE_SCENE_EVENT: {
+            std::string result = data.ReadString();
+            ReportPageSceneEvent(result);
+            break;
+        }
 
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
@@ -884,6 +889,53 @@ void UiReportStub::ReportGetStateMgmtInfo(std::vector<std::string> results)
 {
     if (getStateMgmtInfoCallback_) {
         getStateMgmtInfoCallback_(results);
+    }
+}
+
+void UiReportStub::RegisterPageSceneEventCallback(const PageSceneEventCallback& eventCallback)
+{
+    std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
+    pageSceneEventCallback_ = eventCallback;
+}
+
+void UiReportStub::UnregisterPageSceneEventCallback()
+{
+    std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
+    pageSceneEventCallback_ = nullptr;
+}
+
+bool UiReportStub::RegisterGetPageSceneCallback(const PageSceneEventCallback& eventCallback)
+{
+    std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
+    if (getPageSceneCallback_ != nullptr) {
+        return false;
+    }
+    getPageSceneCallback_ = eventCallback;
+    return true;
+}
+
+void UiReportStub::UnregisterGetPageSceneCallback()
+{
+    std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
+    getPageSceneCallback_ = nullptr;
+}
+
+void UiReportStub::ReportPageSceneEvent(const std::string& sceneJson)
+{
+    PageSceneEventCallback pageSceneEventCallback;
+    PageSceneEventCallback getPageSceneCallback;
+    {
+        std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
+        pageSceneEventCallback = pageSceneEventCallback_;
+        getPageSceneCallback = getPageSceneCallback_;
+        getPageSceneCallback_ = nullptr;
+    }
+    if (getPageSceneCallback) {
+        getPageSceneCallback(sceneJson);
+        return;
+    }
+    if (pageSceneEventCallback) {
+        pageSceneEventCallback(sceneJson);
     }
 }
 } // namespace OHOS::Ace
