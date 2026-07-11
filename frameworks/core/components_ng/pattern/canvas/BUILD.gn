@@ -18,7 +18,6 @@ import(
 
 build_component_ng("canvas_pattern_ng") {
   is_component_model = true
-  defines = [ "USE_ARK_ENGINE" ]
   sources = [
     "canvas_layout_algorithm.cpp",
     "canvas_model_ng.cpp",
@@ -36,8 +35,6 @@ build_component_ng("canvas_pattern_ng") {
   ]
   ark_sources = [
     "bridge/arkts_native_canvas_bridge.cpp",
-    "bridge/arkts_native_canvas_rendering_context_bridge.cpp",
-    "bridge/arkts_native_offscreen_canvas_rendering_context_bridge.cpp",
     "bridge/canvas_dynamic_module.cpp",
     "bridge/canvas_dynamic_modifier.cpp",
     "bridge/canvas_rendering_context_2d_dynamic_modifier.cpp",

@@ -32,6 +32,7 @@
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_drawing_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/core/common/card_scope.h"
 #include "frameworks/core/common/color_inverter.h"
@@ -4037,6 +4038,33 @@ Rosen::BrightnessBlender* ArkTSUtils::CreateRSBrightnessBlenderFromNapiValue(con
 {
     auto blenderPtr = static_cast<Rosen::BrightnessBlender*>(UnwrapNapiValue(vm, obj));
     return blenderPtr;
+}
+
+napi_value ArkTSUtils::CreateNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj)
+{
+    CHECK_NULL_RETURN(vm, nullptr);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    auto nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    JSValueWrapper valueWrapper = obj;
+
+    Framework::ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+    return nativeEngine->ValueToNapiValue(valueWrapper);
+}
+
+void ArkTSUtils::CreateDrawingRenderingContext(void** outJsHandle, void** outCppPtr)
+{
+    auto jsDrawingContext = Framework::JSClass<Framework::JSDrawingRenderingContext>::NewInstance();
+    auto drawingContext = Referenced::Claim(
+        jsDrawingContext->Unwrap<Framework::JSDrawingRenderingContext>());
+    drawingContext->SetBuiltIn(true);
+    if (outJsHandle) {
+        *outJsHandle = reinterpret_cast<void*>(*jsDrawingContext->GetLocalHandle());
+    }
+    if (outCppPtr) {
+        *outCppPtr = AceType::RawPtr(drawingContext);
+    }
 }
 
 void* ArkTSUtils::UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj)

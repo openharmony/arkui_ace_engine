@@ -184,24 +184,3 @@ const JSRef<JSObject>& JSDrawingRenderingContext::GetOrCreateContext2D(bool anti
     return context2d_;
 }
 } // namespace OHOS::Ace::Framework
-
-// Exported for libarkui_canvas.z.so (Canvas dynamic module).
-// Creates a JSDrawingRenderingContext with proper JS prototype and returns
-// the JS handle and the C++ pointer. The caller (canvas so) is responsible
-// for setting properties and invoking the callback.
-extern "C" ACE_FORCE_EXPORT void OHOS_ACE_CreateDrawingRenderingContext(
-    void** outJsHandle, void** outCppPtr)
-{
-    auto jsDrawingContext = OHOS::Ace::Framework::JSClass<
-        OHOS::Ace::Framework::JSDrawingRenderingContext>::NewInstance();
-    auto drawingContext = OHOS::Ace::Referenced::Claim(
-        jsDrawingContext->Unwrap<OHOS::Ace::Framework::JSDrawingRenderingContext>());
-    drawingContext->SetBuiltIn(true);
-    if (outJsHandle) {
-        *outJsHandle = reinterpret_cast<void*>(
-            *jsDrawingContext->GetLocalHandle());
-    }
-    if (outCppPtr) {
-        *outCppPtr = OHOS::Ace::AceType::RawPtr(drawingContext);
-    }
-}

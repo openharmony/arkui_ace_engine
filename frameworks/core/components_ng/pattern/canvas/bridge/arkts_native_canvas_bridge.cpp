@@ -15,16 +15,12 @@
 #include "frameworks/core/components_ng/pattern/canvas/bridge/arkts_native_canvas_bridge.h"
 
 #include "base/error/error_code.h"
-#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
-extern "C" void OHOS_ACE_CreateDrawingRenderingContext(
-    void** outJsHandle, void** outCppPtr);
 
 namespace OHOS::Ace::Framework {
 class JSRenderingContextBase : public virtual AceType {
@@ -108,37 +104,16 @@ void ThrowBusinessErrorInline(EcmaVM* vm, const std::string& msg, int32_t code)
     panda::JSNApi::ThrowException(vm, errorObj);
 }
 
-// RAII wrapper for napi handle scope — avoids including js_utils.h.
-class ScopeRAII {
-public:
-    explicit ScopeRAII(napi_env env) : env_(env)
-    {
-        napi_open_handle_scope(env_, &scope_);
-    }
-    ~ScopeRAII()
-    {
-        napi_close_handle_scope(env_, scope_);
-    }
-private:
-    napi_env env_;
-    napi_handle_scope scope_;
-};
-
 // Convert a Panda Local<JSValueRef> into a napi_value, then forward it to
-// CanvasPattern::SetImageAIOptions. Mirrors the napi conversion that the old
-// JSCanvas::ParseCanvasParams performed via EngineHelper + ValueToNapiValue.
+// CanvasPattern::SetImageAIOptions. Uses ArkTSUtils::CreateNapiValue to avoid
+// depending on NativeEngine/JSValueWrapper/napi_handle_scope directly.
 void ApplyImageAIOptions(EcmaVM* vm, const Local<JSValueRef>& optionsArg, FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CanvasPattern>();
     CHECK_NULL_VOID(pattern);
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_VOID(engine);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_VOID(nativeEngine);
-    JSValueWrapper valueWrapper = optionsArg;
-    ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
-    napi_value optionsValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    napi_value optionsValue = ArkTSUtils::CreateNapiValue(vm, optionsArg);
+    CHECK_NULL_VOID(optionsValue);
     pattern->SetImageAIOptions(optionsValue);
 }
 
@@ -189,7 +164,7 @@ void InvokeOnReadyCallback(const OnReadyContext& ctx,
     }
     void* jsHandleRaw = nullptr;
     void* cppPtrRaw = nullptr;
-    OHOS_ACE_CreateDrawingRenderingContext(&jsHandleRaw, &cppPtrRaw);
+    ArkTSUtils::CreateDrawingRenderingContext(&jsHandleRaw, &cppPtrRaw);
     if (!jsHandleRaw || !cppPtrRaw) {
         return;
     }
