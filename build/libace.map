@@ -938,6 +938,8 @@
       "OHOS::Ace::NG::ArkTSUtils::CreateItemDragInfo(panda::ecmascript::EcmaVM const*, OHOS::Ace::ItemDragInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::CreateJsResourceWrapper(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::ArkTSUtils::CreatePixelMapFromNapiValue(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef>)";
+      "OHOS::Ace::NG::ArkTSUtils::CreateNapiValue(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&)";
+      "OHOS::Ace::NG::ArkTSUtils::CreateDrawingRenderingContext(void**, void**)";
       "OHOS::Ace::NG::ArkTSUtils::GetArrayLength(panda::ecmascript::EcmaVM const*, panda::Local<panda::ArrayRef>)";
       "OHOS::Ace::NG::ArkTSUtils::GetBasicShape(panda::ecmascript::EcmaVM const*, panda::Local<panda::ObjectRef> const&)";
       "OHOS::Ace::NG::ArkTSUtils::GetBorderColor(OHOS::Ace::NG::CommonColor const&)";

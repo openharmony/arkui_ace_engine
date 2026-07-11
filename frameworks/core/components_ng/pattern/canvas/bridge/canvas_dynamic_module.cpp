@@ -20,8 +20,6 @@
 #endif
 
 #include "core/components_ng/pattern/canvas/bridge/arkts_native_canvas_bridge.h"
-#include "core/components_ng/pattern/canvas/bridge/arkts_native_canvas_rendering_context_bridge.h"
-#include "core/components_ng/pattern/canvas/bridge/arkts_native_offscreen_canvas_rendering_context_bridge.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/interfaces/native/canvas_runtime_bridge_api.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
@@ -48,8 +46,6 @@ const GENERATED_ArkUICanvasModifier* GetCanvasStaticModifier();
 void CanvasDynamicModule::RegisterAttributes(panda::Local<panda::ObjectRef> object, panda::ecmascript::EcmaVM* vm)
 {
     NG::CanvasBridge::RegisterCanvasAttributes(object, vm);
-    NG::CanvasRenderingContext2DBridge::RegisterCanvasRenderingContext2DAttributes(object, vm);
-    NG::OffscreenCanvasRenderingContext2DBridge::RegisterOffscreenCanvasRenderingContext2DAttributes(object, vm);
 }
 
 
