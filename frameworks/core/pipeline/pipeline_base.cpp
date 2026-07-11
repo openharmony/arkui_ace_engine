@@ -22,6 +22,7 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/log/log_wrapper.h"
 #include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -1193,6 +1194,16 @@ void PipelineBase::SetUiDvsyncSwitch(bool on)
         window_->SetUiDvsyncSwitch(on);
     }
     lastUiDvsyncStatus_ = on;
+}
+
+bool PipelineBase::CheckThreadSafe()
+{
+    CHECK_NULL_RETURN(taskExecutor_, true);
+    if (!isFormRender_ && !taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        LogBacktrace();
+        return false;
+    }
+    return true;
 }
 
 bool PipelineBase::CheckIfGetTheme()

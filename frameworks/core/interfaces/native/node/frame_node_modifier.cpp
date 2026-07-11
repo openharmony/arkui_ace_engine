@@ -1310,6 +1310,23 @@ ArkUINodeHandle GetPageRootNode(int32_t instanceId)
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
+ArkUI_Int32 SetUiDvsyncSwitch(ArkUIContext* context, bool enable)
+{
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(context, ERROR_CODE_PARAM_INVALID,
+        "context is null.");
+    auto container = Container::GetContainer(context->id);
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(container, ERROR_CODE_PARAM_INVALID, "container is invalid.");
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN_WITH_BACKEND_MESSAGE(pipelineContext, ERROR_CODE_PARAM_INVALID, "pipeline is invalid.");
+    if (!pipelineContext->CheckThreadSafe()) {
+        SET_ERROR_CODE_AND_MESSAGE_IN_BACKEND(ERROR_CODE_PARAM_INVALID,
+            "SetUiDvsyncSwitch is not running on UI thread.");
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    pipelineContext->SetUiDvsyncSwitch(enable);
+    return ERROR_CODE_NO_ERROR;
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -1357,6 +1374,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .getLast = GetLast,
         .getFirstUINode = GetFirstUINode,
         .getLayoutSize = GetLayoutSize,
+        .setUiDvsyncSwitch = SetUiDvsyncSwitch,
         .getLayoutPositionWithoutMargin = GetLayoutPositionWithoutMargin,
         .setSystemColorModeChangeEvent = SetSystemColorModeChangeEvent,
         .resetSystemColorModeChangeEvent = ResetSystemColorModeChangeEvent,

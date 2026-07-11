@@ -7756,16 +7756,6 @@ bool PipelineContext::CatchInteractiveAnimations(const std::function<void()>& an
     return false;
 }
 
-bool PipelineContext::CheckThreadSafe()
-{
-    CHECK_NULL_RETURN(taskExecutor_, true);
-    if (!isFormRender_ && !taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
-        LogBacktrace();
-        return false;
-    }
-    return true;
-}
-
 uint64_t PipelineContext::AdjustVsyncTimeStamp(uint64_t nanoTimestamp)
 {
     auto period = window_->GetVSyncPeriod();
