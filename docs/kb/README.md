@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-08
-> 组件数：8
+> 更新时间：2026-07-09
+> 组件数：9
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -34,6 +34,7 @@ docs/kb/
 |----|------|---------|------|
 | Text | 文本组件 | `docs/kb/components/basic/text.md` | 已迁移，旧 KB 已移除 |
 | Image | 图片组件 | `docs/kb/components/media/image.md` | 已迁移，旧 KB 已移除 |
+| Video | 视频组件 | `docs/kb/components/media/video.md` | 新建（无旧 KB） |
 | Toggle | 开关组件 | `docs/kb/components/selector/toggle.md` | 已迁移，旧 KB 已移除 |
 | Navigation | 导航容器组件 | `docs/kb/components/container/navigation.md` | 新建 |
 | Tabs | 标签页容器组件 | `docs/kb/components/container/tabs.md` | 新建 |

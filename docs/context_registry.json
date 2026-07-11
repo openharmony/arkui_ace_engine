@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-08",
+  "last_updated": "2026-07-09",
   "contexts": [
     {
       "id": "Text",
@@ -457,6 +457,83 @@
       ],
       "status": "active",
       "last_verified": "2026-07-08"
+    },
+    {
+      "id": "Video",
+      "name": "Video",
+      "name_cn": "视频组件",
+      "kind": "component",
+      "category": "media",
+      "keywords": [
+        "Video",
+        "视频",
+        "播放器",
+        "media",
+        "MediaPlayer",
+        "autoPlay",
+        "muted",
+        "loop",
+        "controls",
+        "objectFit",
+        "fullScreen",
+        "VideoController",
+        "VideoControllerAsync",
+        "Poster",
+        "PlaybackSpeed"
+      ],
+      "aliases": [
+        "Video组件",
+        "视频",
+        "视频组件",
+        "VideoPattern"
+      ],
+      "kb": "docs/kb/components/media/video.md",
+      "spec_domain": "specs/05-ui-components/13-platform-components/02-video",
+      "func_id": "05-13-02",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/video/video_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/video/video_pattern.h",
+        "pattern_ohos": "frameworks/core/components_ng/pattern/video/video_pattern_ohos.cpp",
+        "full_screen_pattern": "frameworks/core/components_ng/pattern/video/video_full_screen_pattern.cpp",
+        "full_screen_node": "frameworks/core/components_ng/pattern/video/video_full_screen_node.cpp",
+        "state_machine_pattern": "frameworks/core/components_ng/pattern/video/video_state_machine_pattern.cpp",
+        "state_manager": "frameworks/core/components_ng/pattern/video/video_state_manager.cpp",
+        "model": "frameworks/core/components_ng/pattern/video/video_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/video/video_model_static.cpp",
+        "layout_algorithm": "frameworks/core/components_ng/pattern/video/video_layout_algorithm.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/video/video_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/video/video_event_hub.h",
+        "controller_sync": "frameworks/core/components_ng/pattern/video/video_controller_v2.h",
+        "controller_async": "frameworks/core/components_ng/pattern/video/video_controller_async.cpp",
+        "node": "frameworks/core/components_ng/pattern/video/video_node.cpp",
+        "media_player_callback": "frameworks/core/components_ng/pattern/video/media_player_callback.h",
+        "theme": "frameworks/core/components_ng/pattern/video/video_theme.h",
+        "accessibility": "frameworks/core/components_ng/pattern/video/video_accessibility_property.cpp",
+        "media_player_abstract": "frameworks/core/components_ng/render/media_player.h",
+        "media_player_impl": "frameworks/core/components_ng/render/adapter/media_player_impl.cpp",
+        "media_player_creator": "frameworks/core/components_ng/render/media_player_creator.cpp",
+        "render_surface_impl": "frameworks/core/components_ng/render/adapter/render_surface_impl.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/video_modifier.cpp",
+        "ani_modifier": "frameworks/core/interfaces/native/ani/video_ani_modifier.cpp",
+        "peer_modifier": "frameworks/core/interfaces/native/implementation/video_modifier.cpp",
+        "controller_peer": "frameworks/core/interfaces/native/implementation/video_controller_peer_impl.cpp",
+        "controller_async_peer": "frameworks/core/interfaces/native/implementation/video_controller_async_peer_impl.cpp",
+        "jsview": "frameworks/core/components_ng/pattern/video/bridge/video_dynamic_modifier.cpp",
+        "arkts_bridge": "frameworks/core/components_ng/pattern/video/bridge/arkts_native_video_bridge.cpp",
+        "ark_modifier": "frameworks/bridge/declarative_frontend/ark_modifier/src/video_modifier.ts"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/video.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/video.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/VideoModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/VideoModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/video/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-09"
     }
   ]
 }
