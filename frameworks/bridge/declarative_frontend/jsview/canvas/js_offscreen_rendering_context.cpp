@@ -231,11 +231,13 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         height *= density;
         jsRenderContext->SetWidth(width);
         jsRenderContext->SetHeight(height);
-        auto renderingContext =
-            AceType::DynamicCast<OffscreenCanvasRenderingContext2DModel>(jsRenderContext->renderingContext2DModel_);
-        auto offscreenPattern = renderingContext->CreateOffscreenPattern(round(width), round(height));
+        auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+        CHECK_NULL_VOID(bridge);
+        CHECK_NULL_VOID(bridge->createOffscreenPattern);
+        auto offscreenPattern = bridge->createOffscreenPattern(round(width), round(height));
         CHECK_NULL_VOID(offscreenPattern);
-        size_t bitmapSize = renderingContext->GetBitmapSize(offscreenPattern);
+        CHECK_NULL_VOID(bridge->getOffscreenBitmapSize);
+        size_t bitmapSize = bridge->getOffscreenBitmapSize(offscreenPattern);
         args.SetSize(bitmapSize);
         jsRenderContext->SetOffscreenPattern(offscreenPattern);
         std::lock_guard<std::mutex> lock(mutex_);
