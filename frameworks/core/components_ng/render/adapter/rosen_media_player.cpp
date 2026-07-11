@@ -176,9 +176,18 @@ bool RosenMediaPlayer::SetSourceByFd(int32_t fd)
         LOGE("Video media player get stat failed.");
         return false;
     }
-    auto size = statBuf.st_size;
-    if (mediaPlayer_ && mediaPlayer_->SetSource(fd, 0, size) != 0) {
-        LOGE("Video media player etSource failed");
+    int64_t current = static_cast<int64_t>(lseek(fd, 0, SEEK_CUR));
+    if (current == -1) {
+        LOGE("Video media player lseek failed.");
+        return false;
+    }
+    int64_t size = static_cast<int64_t>(statBuf.st_size) - current;
+    if (size <= 0) {
+        LOGE("Video media player check size failed.");
+        return false;
+    }
+    if (mediaPlayer_ && mediaPlayer_->SetSource(fd, current, size) != 0) {
+        LOGE("Video media player SetSource failed");
         return false;
     }
     return true;
