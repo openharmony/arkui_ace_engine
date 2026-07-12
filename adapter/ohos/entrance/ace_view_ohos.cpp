@@ -347,7 +347,9 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         return;
     }
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     touchPoint.processTime = std::chrono::high_resolution_clock::now();
+#endif
     touchPoint.SetIsInjected(isInjected);
     if (SystemProperties::GetDebugEnabled()) {
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d eventId=%d", touchPoint.x,

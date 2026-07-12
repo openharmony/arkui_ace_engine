@@ -941,7 +941,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             // callback may be overwritten in its invoke so we copy it first
             auto callbackFunction = *panEndOnDisableState_;
             callbackFunction(info);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
             HandleReports(info, type);
+#endif
             localMatrix_.clear();
             return;
         }
@@ -959,8 +961,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     ReportToGestureDebugManager(type, GestureListenerType::PAN);
 #endif
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     HandleReports(info, type);
-
+#endif
     if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
         localMatrix_.clear();
     }
@@ -975,6 +978,7 @@ void PanRecognizer::HandleCallbackReports(
     HandlePanGestureAccept(info, panGestureState, type);
 }
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void PanRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
 {
     if (type == GestureCallbackType::ACTION || type == GestureCallbackType::UPDATE) {
@@ -990,6 +994,7 @@ void PanRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType 
     panReport.SetPoint(info.GetGlobalPoint());
     Reporter::GetInstance().HandleUISessionReporting(panReport);
 }
+#endif
 
 GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
 {

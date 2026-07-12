@@ -1541,7 +1541,9 @@ void DragDropFuncWrapper::GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     if (!context->CreateThumbnailPixelMapAsyncTask(true, std::move(callback))) {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SNAPSHOT_FAIL);
+#endif
         TAG_LOGW(AceLogTag::ACE_DRAG, "Create thumbnail pixelMap async task failed!");
     }
 }
@@ -1585,7 +1587,9 @@ void DragDropFuncWrapper::GetThumbnailPixelMapForCustomNode(
                 TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
         } else {
             TAG_LOGI(AceLogTag::ACE_DRAG, "PixelMap is null.");
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
             DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SNAPSHOT_FAIL);
+#endif
         }
     };
     SnapshotParam param;
@@ -1704,7 +1708,9 @@ void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>
     CHECK_NULL_VOID(dragEvent);
     auto unifiedData = dragEvent->GetData();
     if (unifiedData) {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
+#endif
     }
     auto dataLoadParams = dragEvent->GetDataLoadParams();
     auto isUseDataLoadParams = dragEvent->IsUseDataLoadParams();
@@ -1712,14 +1718,18 @@ void DragDropFuncWrapper::ProcessDragDropData(const RefPtr<OHOS::Ace::DragEvent>
         ACE_SCOPED_TRACE("drag: set delayInfo to udmf");
         if (UdmfClient::GetInstance()->SetDelayInfo(dataLoadParams, udKey) != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "udmf set delayInfo failed, return value is %{public}d", ret);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
             DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
+#endif
         }
     }
     if (unifiedData && !isUseDataLoadParams) {
         ACE_SCOPED_TRACE("drag: set drag data to udmf");
         if (UdmfClient::GetInstance()->SetData(unifiedData, udKey) != 0) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "UDMF set data failed, return value is %{public}d", ret);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
             DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SET_DATA_FAIL);
+#endif
         }
     }
     ret = UdmfClient::GetInstance()->GetSummary(udKey, dragSummaryInfo);

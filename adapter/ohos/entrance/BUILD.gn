@@ -53,7 +53,6 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/navigation_controller_helper.cpp",
       "$ace_root/adapter/ohos/entrance/pa_container.cpp",
       "$ace_root/adapter/ohos/entrance/plugin_utils_impl.cpp",
-      "$ace_root/adapter/ohos/entrance/reporter_impl.cpp",
       "$ace_root/adapter/ohos/entrance/rs_adapter.cpp",
       "$ace_root/adapter/ohos/entrance/setting_data_manager_impl.cpp",
       "$ace_root/adapter/ohos/entrance/setting_data_observer.cpp",
@@ -90,6 +89,10 @@ template("ace_ohos_standard_source_set") {
       # AudioHaptic
       "$ace_root/adapter/ohos/entrance/picker/picker_haptic_factory.cpp",
     ]
+
+    if (defined(config.enable_inspector_event_reporting) && config.enable_inspector_event_reporting) {
+      sources += [ "$ace_root/adapter/ohos/entrance/reporter_impl.cpp" ]
+    }
 
     if (ace_engine_feature_enable_event_extra_handling) {
       sources += [

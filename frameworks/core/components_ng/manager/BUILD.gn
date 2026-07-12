@@ -19,7 +19,6 @@ build_component_ng("manager_ng") {
     "avoid_info/avoid_info_manager.cpp",
     "display_sync/ui_display_sync.cpp",
     "display_sync/ui_display_sync_manager.cpp",
-    "drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.cpp",
     "drag_drop/drag_drop_controller_func_wrapper.cpp",
     "drag_drop/drag_drop_func_wrapper.cpp",
     "drag_drop/drag_drop_global_controller.cpp",
@@ -43,7 +42,6 @@ build_component_ng("manager_ng") {
     "drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_state_machine.cpp",
     "drag_drop/drag_drop_spring_loading/drag_drop_spring_loading_state_update.cpp",
     "drag_drop/utils/drag_animation_helper.cpp",
-    "event/json_child_report.cpp",
     "focus/focus_manager.cpp",
     "focus/focus_view.cpp",
     "force_split/force_split_manager.cpp",
@@ -72,6 +70,11 @@ build_component_ng("manager_ng") {
     "shared_overlay/shared_transition_effect.cpp",
     "toolbar/toolbar_manager.cpp",
     "content_change_manager/content_change_manager.cpp",
+  ]
+
+  inspector_event_reporting_sources = [
+    "event/json_child_report.cpp",
+    "drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.cpp",
   ]
 
   gesture_debug_sources = [ "gesture_debug/gesture_debug_boundary_manager.cpp" ]

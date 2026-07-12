@@ -1067,7 +1067,9 @@ bool GestureEventHub::CheckDragStartResult(DragStartContext& ctx)
     if (ctx.info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         SetMouseDragMonitorState(false);
     }
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::APP_REFUSE_DRAG);
+#endif
     return false;
 }
 
@@ -1250,7 +1252,9 @@ void GestureEventHub::ReportDragStartData(const DragStartContext& ctx, const Dra
 {
     auto summarys = DragDropFuncWrapper::GetSummaryString(ctx.dragSummaryInfo.summary);
     auto detailedSummarys = DragDropFuncWrapper::GetSummaryString(ctx.dragSummaryInfo.detailedSummary);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
+#endif
     TAG_LOGI(AceLogTag::ACE_DRAG,
         "Start drag, frameNode is %{public}s, pixelMap width %{public}d height %{public}d, "
         "scale is %{public}f, udkey %{public}s, recordsSize %{public}d, extraInfo length %{public}d, "
@@ -1293,7 +1297,9 @@ bool GestureEventHub::TryStartSystemDrag(DragStartContext& ctx, int32_t windowId
 
 void GestureEventHub::HandleStartDragFailure(const DragStartContext& ctx)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAGFWK_START_FAIL);
+#endif
     if (ctx.subWindow) {
         SubwindowManager::GetInstance()->HidePreviewNG();
         CHECK_NULL_VOID(ctx.overlayManager);
@@ -1309,7 +1315,9 @@ void GestureEventHub::BeginSuccessfulDragStart(DragStartContext& ctx)
     StartVibratorByDrag(ctx.frameNode);
     CHECK_NULL_VOID(dragEventActuator_);
     dragEventActuator_->NotifyDragStart();
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAG_START_SUCCESS);
+#endif
     ctx.dragDropManager->SetIsMouseDrag(ctx.info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
 }
 
@@ -1967,7 +1975,9 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
         if (pixelMap != nullptr) {
             dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
         } else {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
             DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SNAPSHOT_FAIL);
+#endif
         }
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);

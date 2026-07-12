@@ -606,7 +606,9 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
 
     // onKeyPreIme
     if (event.isPreIme) {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         Reporter::GetInstance().HandleInputEventInspectorReporting(event);
+#endif
         ResSchedReport::GetInstance().OnKeyEvent(event);
         if (TriggerKeyEventDispatch(event)) {
             return true;
