@@ -210,6 +210,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     childLayoutConstraint_ = childLayoutConstraint;
     if (totalItemCount_ > 0) {
         UpdateLayoutInfoBeforeMeasureSwiper(swiperLayoutProperty, childLayoutConstraint);
+        CheckIndexWithIgnoreHiddenItem(layoutWrapper);
         MeasureSwiper(layoutWrapper, childLayoutConstraint);
     } else {
         itemPosition_.clear();
@@ -912,7 +913,9 @@ float SwiperLayoutAlgorithm::GetChildMainAxisSize(
     auto childProperty = childWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(childProperty, mainAxisSize);
     auto visibilityValue = childProperty->GetVisibilityValue(VisibleType::VISIBLE);
-    if (visibilityValue == VisibleType::INVISIBLE || visibilityValue == VisibleType::GONE) {
+    if (ignoreHiddenItem_ && visibilityValue == VisibleType::GONE) {
+        mainAxisSize = 0.0f;
+    } else if (visibilityValue == VisibleType::INVISIBLE || visibilityValue == VisibleType::GONE) {
         mainAxisSize = (contentMainSize_ - nextMargin_ - prevMargin_ - (displayCount - 1) * spaceWidth_)
             / displayCount;
     }
@@ -994,7 +997,13 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
             endMainPos_ = endMainPos;
         }
         if ((currentIndex >= 0 && currentIndex < (totalItemCount_ - 1)) || isLoop_) {
-            currentEndPos += spaceWidth_;
+            // When ignoreHiddenItem is true, GONE items with size=0 should not produce spacing
+            auto itemIter = itemPosition_.find(currentIndex);
+            bool isGoneItem = ignoreHiddenItem_ && itemIter != itemPosition_.end() &&
+                              NearEqual(itemIter->second.startPos, itemIter->second.endPos);
+            if (!isGoneItem) {
+                currentEndPos += spaceWidth_;
+            }
         }
         // reach the valid target index
         if (targetIndex_ && currentIndex >= targetIndex_.value()) {
@@ -1118,7 +1127,13 @@ void SwiperLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, const L
             break;
         }
         if (currentIndex > 0 || isLoop_) {
-            currentStartPos = currentStartPos - spaceWidth_;
+            // When ignoreHiddenItem is true, GONE items with size=0 should not produce spacing
+            auto itemIter = itemPosition_.find(currentIndex);
+            bool isGoneItem = ignoreHiddenItem_ && itemIter != itemPosition_.end() &&
+                              NearEqual(itemIter->second.startPos, itemIter->second.endPos);
+            if (!isGoneItem) {
+                currentStartPos = currentStartPos - spaceWidth_;
+            }
         }
         // reach the valid target index
         if (targetIndex_ && LessOrEqual(currentIndex, targetIndex_.value())) {
@@ -1955,5 +1970,23 @@ void SwiperLayoutAlgorithm::MeasureBackwardItemFakeDrag(LayoutWrapper* layoutWra
     auto startPos = measureEndPos - mainAxisSize;
     itemPosition_[backwardMeasureIndex] = { startPos, measureEndPos, wrapper->GetHostNode() };
     measureEndPos = startPos - spaceWidth_;
+}
+
+void SwiperLayoutAlgorithm::CheckIndexWithIgnoreHiddenItem(LayoutWrapper* layoutWrapper)
+{
+    // When ignoreHiddenItem is true and currentIndex_ points to a GONE item,
+    // the layout starting position is invalid. Search for the visible item
+    // and set jumpIndex_ to force position recalculation via JumpTo.
+    if (!ignoreHiddenItem_ || jumpIndex_.has_value() || targetIndex_.has_value()) {
+        return;
+    }
+    auto childWrapper = layoutWrapper->GetChildByIndex(currentIndex_, false);
+    if (childWrapper) {
+        auto hostNode = childWrapper->GetHostNode();
+        auto props = hostNode ? hostNode->GetLayoutProperty<LayoutProperty>() : nullptr;
+        if (props && props->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::GONE) {
+            jumpIndex_ = 0;
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -846,7 +846,8 @@ void SwiperBridge::RegisterSwiperAttributes(Local<panda::ObjectRef> object, Ecma
         "resetSwiperOnContentDidScroll", "setSwiperPageFlipMode", "resetSwiperPageFlipMode",
         "setSwiperOnContentWillScroll", "resetSwiperOnContentWillScroll", "setSwiperMaintainVisibleContentPosition",
         "resetSwiperMaintainVisibleContentPosition", "setSwiperOnScrollStateChanged", "resetSwiperOnScrollStateChanged",
-        "setSwiperWidth", "setSwiperHeight", "setSwiperSize", "setSwiperOnClick", "setSwiperRemoteMessage" };
+        "setSwiperWidth", "setSwiperHeight", "setSwiperSize", "setSwiperOnClick", "setSwiperRemoteMessage",
+        "setSwiperIgnoreHiddenItem", "resetSwiperIgnoreHiddenItem" };
 
     Local<JSValueRef> funcValues[] = {
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::Create),
@@ -930,6 +931,8 @@ void SwiperBridge::RegisterSwiperAttributes(Local<panda::ObjectRef> object, Ecma
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperSize),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperOnClick),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperRemoteMessage),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperIgnoreHiddenItem),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperIgnoreHiddenItem),
     };
     auto swiper = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "swiper"), swiper);
@@ -3246,4 +3249,31 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperRemoteMessage(ArkUIRuntimeCallInfo
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SwiperBridge::SetSwiperIgnoreHiddenItem(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    if (valueArg->IsBoolean()) {
+        bool ignoreHiddenItem = valueArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperIgnoreHiddenItem(nativeNode, ignoreHiddenItem);
+    } else {
+        GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperIgnoreHiddenItem(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::ResetSwiperIgnoreHiddenItem(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperIgnoreHiddenItem(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

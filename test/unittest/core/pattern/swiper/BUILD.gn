@@ -44,6 +44,7 @@ ace_unittest("swiper_test_ng") {
     "swiper_fakedrag_test_ng.cpp",
     "swiper_flex_layout_test_ng.cpp",
     "swiper_helper_test_ng.cpp",
+    "swiper_ignore_hidden_item_test_ng.cpp",
     "swiper_indicator_common_test_ng.cpp",
     "swiper_indicator_extent_test_ng.cpp",
     "swiper_indicator_extent_test_two_ng.cpp",
