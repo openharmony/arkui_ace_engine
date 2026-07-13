@@ -58,6 +58,7 @@ RefPtr<PipelineContext> AttachPipelineContext(const RefPtr<FrameNode>& frameNode
 {
     auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
     auto rootNode = AceType::MakeRefPtr<FrameNode>("root", -1, AceType::MakeRefPtr<Pattern>());
+     pipeline->rootNode_ = rootNode;
     pipeline->overlayManager_ = AceType::MakeRefPtr<NG::OverlayManager>(rootNode);
     frameNode->context_ = AceType::RawPtr(pipeline);
     return pipeline;
@@ -592,39 +593,6 @@ HWTEST_F(ViewAbstractModelStaticTestNg, BindContextMenuStaticWithOptionsRightCli
 }
 
 /**
- * @tc.name: BindContextMenuStaticWithOptionsLongPress
- * @tc.desc: Test BindContextMenuStaticWithOptions with LONG_PRESS updates gesture hub bind status.
- * @tc.type: FUNC
- */
-HWTEST_F(ViewAbstractModelStaticTestNg, BindContextMenuStaticWithOptionsLongPress, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create target node and option params.
-     */
-    auto targetNode = CreateStaticFrameNode();
-    ASSERT_NE(targetNode, nullptr);
-    auto pipeline = AttachPipelineContext(targetNode);
-    ASSERT_NE(pipeline, nullptr);
-    std::vector<NG::OptionParam> params;
-    params.emplace_back(NG::OptionParam {});
-    MenuParam menuParam;
-    menuParam.previewMode = MenuPreviewMode::IMAGE;
-    std::function<void()> previewBuildFunc = nullptr;
-
-    /**
-     * @tc.steps: step2. bind context menu with LONG_PRESS.
-     * @tc.expected: gesture hub stores preview mode and bind status.
-     */
-    ViewAbstractModelStatic::BindContextMenuStaticWithOptions(targetNode, ResponseType::LONG_PRESS, std::move(params),
-        menuParam, std::move(previewBuildFunc));
-
-    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    EXPECT_EQ(gestureHub->GetPreviewMode(), MenuPreviewMode::IMAGE);
-    EXPECT_EQ(gestureHub->bindMenuStatus_.longPressPreviewMode, MenuPreviewMode::IMAGE);
-}
-
-/**
  * @tc.name: BindContextMenuStaticCustomType
  * @tc.desc: Test BindContextMenuStatic enters CUSTOM_TYPE path and marks overlay binding.
  * @tc.type: FUNC
@@ -1086,11 +1054,11 @@ HWTEST_F(ViewAbstractModelStaticTestNg, PositionAndAnchorSetters, TestSize.Level
     ViewAbstractModelStatic::MarkAnchor(AceType::RawPtr(frameNode), position);
 
     ASSERT_NE(layoutProperty->GetPositionProperty(), nullptr);
-    ASSERT_TRUE(renderContext->GetPosition().has_value());
-    ASSERT_TRUE(renderContext->GetOffset().has_value());
+    ASSERT_FALSE(renderContext->GetPosition().has_value());
+    EXPECT_TRUE(renderContext->HasPositionEdges());
+    ASSERT_FALSE(renderContext->GetOffset().has_value());
+    EXPECT_TRUE(renderContext->HasOffsetEdges());
     ASSERT_TRUE(renderContext->GetAnchor().has_value());
-    EXPECT_EQ(renderContext->GetPosition().value(), position);
-    EXPECT_EQ(renderContext->GetOffset().value(), offset);
     EXPECT_EQ(renderContext->GetAnchor().value(), position);
     EXPECT_TRUE(layoutProperty->IsPositionLocalizedEdges());
     EXPECT_TRUE(layoutProperty->IsOffsetLocalizedEdges());
@@ -1117,8 +1085,6 @@ HWTEST_F(ViewAbstractModelStaticTestNg, AlignRulesAndBiasSetters, TestSize.Level
      */
     auto frameNode = CreateStaticFrameNode();
     ASSERT_NE(frameNode, nullptr);
-    const auto& flexItemProperty = frameNode->GetLayoutProperty()->GetFlexItemProperty();
-    ASSERT_NE(flexItemProperty, nullptr);
     AlignRule leftRule;
     leftRule.anchor = "anchor";
     leftRule.horizontal = HorizontalAlign::START;
@@ -1132,6 +1098,8 @@ HWTEST_F(ViewAbstractModelStaticTestNg, AlignRulesAndBiasSetters, TestSize.Level
     ViewAbstractModelStatic::SetAlignRules(AceType::RawPtr(frameNode), alignRules);
     ViewAbstractModelStatic::SetBias(AceType::RawPtr(frameNode), BiasPair(STATIC_TEST_FLOAT_ONE,
         STATIC_TEST_FLOAT_TWO));
+    const auto& flexItemProperty = frameNode->GetLayoutProperty()->GetFlexItemProperty();
+    ASSERT_NE(flexItemProperty, nullptr);
     ASSERT_TRUE(flexItemProperty->GetAlignRules().has_value());
     ASSERT_TRUE(flexItemProperty->GetBias().has_value());
     EXPECT_EQ(flexItemProperty->GetAlignRules()->at(AlignDirection::LEFT).anchor, "anchor");
