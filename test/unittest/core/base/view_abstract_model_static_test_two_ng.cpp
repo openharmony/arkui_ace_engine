@@ -58,7 +58,7 @@ RefPtr<PipelineContext> AttachPipelineContext(const RefPtr<FrameNode>& frameNode
 {
     auto pipeline = AceType::MakeRefPtr<NG::PipelineContext>();
     auto rootNode = AceType::MakeRefPtr<FrameNode>("root", -1, AceType::MakeRefPtr<Pattern>());
-     pipeline->rootNode_ = rootNode;
+    pipeline->rootNode_ = rootNode;
     pipeline->overlayManager_ = AceType::MakeRefPtr<NG::OverlayManager>(rootNode);
     frameNode->context_ = AceType::RawPtr(pipeline);
     return pipeline;
@@ -1054,9 +1054,9 @@ HWTEST_F(ViewAbstractModelStaticTestNg, PositionAndAnchorSetters, TestSize.Level
     ViewAbstractModelStatic::MarkAnchor(AceType::RawPtr(frameNode), position);
 
     ASSERT_NE(layoutProperty->GetPositionProperty(), nullptr);
-    ASSERT_FALSE(renderContext->GetPosition().has_value());
+    EXPECT_FALSE(renderContext->GetPosition().has_value());
     EXPECT_TRUE(renderContext->HasPositionEdges());
-    ASSERT_FALSE(renderContext->GetOffset().has_value());
+    EXPECT_FALSE(renderContext->GetOffset().has_value());
     EXPECT_TRUE(renderContext->HasOffsetEdges());
     ASSERT_TRUE(renderContext->GetAnchor().has_value());
     EXPECT_EQ(renderContext->GetAnchor().value(), position);
