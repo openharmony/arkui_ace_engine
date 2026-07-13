@@ -1486,21 +1486,20 @@ void ListItemGroupLayoutAlgorithm::SetListItemIndex(const LayoutWrapper* groupLa
 {
     auto host = itemLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    // Write both indices into the child's own LazyContainerItemHelper (held on the base Pattern). This
+    // covers ListItem and any generic child uniformly; the child carries its own index and is destroyed
+    // together with it, so no stale entries accumulate on recycling.
+    const auto& helper = pattern->GetOrCreateLazyContainerItemHelper();
+    CHECK_NULL_VOID(helper);
+    helper->SetIndexInListItemGroup(indexInGroup);
+
     auto groupHost = groupLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(groupHost);
     auto listItemGroup = groupHost->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(listItemGroup);
-    int32_t listIndexOfGroup = listItemGroup->GetIndexInList();
-    // Write both indices into the child's own LazyContainerItemHelper (held on the base Pattern). This
-    // covers ListItem and any generic child uniformly; the child carries its own index and is destroyed
-    // together with it, so no stale entries accumulate on recycling.
-    auto pattern = host->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    const auto& helper = pattern->GetOrCreateLazyContainerItemHelper();
-    if (helper) {
-        helper->SetIndexInListItemGroup(indexInGroup);
-        helper->SetIndexInList(listIndexOfGroup);
-    }
+    helper->SetIndexInList(listItemGroup->GetIndexInList());
 }
 
 bool ListItemGroupLayoutAlgorithm::NeedReserveEditModeCheckBoxSpace() const

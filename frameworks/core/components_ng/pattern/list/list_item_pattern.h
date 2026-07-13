@@ -219,8 +219,7 @@ public:
 
     bool FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target)
     {
-        const auto& helper = GetLazyContainerItemHelper();
-        return helper ? helper->FindHeadOrTailChild(childFocus, step, target) : false;
+        return LazyContainerItemHelper::FindHeadOrTailChild(childFocus, step, target);
     }
 
     bool IsEnableChildrenMatchParent() override
