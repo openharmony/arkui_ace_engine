@@ -1206,6 +1206,10 @@ void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
 bool JSText::BindPreviewMenu(const JSRef<JSVal> argsMenuOptions, NG::TextResponseType responseType,
     NG::TextSpanType textSpanType, std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam)
 {
+    if (!argsMenuOptions->IsObject()) {
+        TextModel::GetInstance()->UnBindPreviewMenu();
+        return false;
+    }
     JSRef<JSObject> menuOptions = JSRef<JSObject>::Cast(argsMenuOptions);
     auto menuType = menuOptions->GetProperty("menuType");
     bool isPreviewMenu = !menuType->IsUndefined() && !menuType->IsNull() && menuType->IsNumber() &&

@@ -621,6 +621,7 @@ void SpanNode::UpdateSpanResource(const std::string& key, const RefPtr<ResourceO
 {
     UpdateProperty<T>(key, resObj);
     auto spanItem = GetSpanItem();
+    CHECK_NULL_VOID(spanItem);
     auto pattern = spanItem->GetTextPattern().Upgrade();
     CHECK_NULL_VOID(pattern);
     auto textPattern = DynamicCast<TextPattern>(pattern);
