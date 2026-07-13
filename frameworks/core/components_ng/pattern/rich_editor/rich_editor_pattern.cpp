@@ -2626,19 +2626,8 @@ void RichEditorPattern::SetTypingStyle(std::optional<struct UpdateSpanStyle> typ
     std::optional<TextStyle> textStyle)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetTypingStyle, %{public}d", typingStyle.has_value());
-    bool isReset = typingStyle_.has_value() && !typingStyle.has_value();
-    typingStyle_ = typingStyle;
-    typingTextStyle_ = textStyle;
+    bool isReset = styleManager_->HasTypingFontStyle() && !typingStyle.has_value();
     styleManager_->SetTypingStyle(typingStyle, textStyle);
-    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
-        IF_TRUE(typingStyle_->updateTextBackgroundStyle,
-            typingStyle_->updateTextBackgroundStyle->needCompareGroupId = false);
-        auto textBackgroundStyle = typingTextStyle_->GetTextBackgroundStyle();
-        if (textBackgroundStyle) {
-            textBackgroundStyle->needCompareGroupId = false;
-            typingTextStyle_->SetTextBackgroundStyle(textBackgroundStyle);
-        }
-    }
     UpdateCaretStyleByTypingStyle(isReset);
 }
 
@@ -2667,7 +2656,7 @@ UpdateSpanStyle RichEditorPattern::GetUpdateSpanStyle()
 
 std::optional<struct UpdateSpanStyle> RichEditorPattern::GetTypingStyle()
 {
-    return typingStyle_;
+    return styleManager_->GetTypingFontStyle();
 }
 
 void RichEditorPattern::UpdateFontFeatureTextStyle(
@@ -2808,10 +2797,10 @@ bool RichEditorPattern::HasSameTypingStyle(const RefPtr<SpanItem>& spanItem)
     auto spanType = spanItem->spanItemType;
     CHECK_NULL_RETURN(spanType == SpanItemType::NORMAL || spanType == SpanItemType::SYMBOL, false);
     auto spanTextstyle = spanItem->GetTextStyle();
-    if (spanTextstyle.has_value() && typingTextStyle_.has_value()) {
-        return spanTextstyle.value() == typingTextStyle_.value();
+    if (spanTextstyle.has_value() && styleManager_->GetTypingTextStyle().has_value()) {
+        return spanTextstyle.value() == styleManager_->GetTypingTextStyle().value();
     } else {
-        return !(spanTextstyle.has_value() || typingTextStyle_.has_value());
+        return !(spanTextstyle.has_value() || styleManager_->GetTypingTextStyle().has_value());
     }
 }
 
@@ -6167,8 +6156,7 @@ void RichEditorPattern::HandleColorConfigurationUpdate()
     UpdateStyledStringByColorMode();
 
     paragraphCache_.Clear();
-    IF_PRESENT(typingTextStyle_, ReloadResources());
-    IF_PRESENT(typingStyle_, ReloadResources());
+    styleManager_->ReloadTypingResources();
     IF_PRESENT(selectOverlay_, UpdateHandleColor());
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
     floatingCaretState_.UpdateOriginCaretColor();
@@ -6957,7 +6945,7 @@ void RichEditorPattern::InsertValueOperation(const std::u16string& insertValue, 
     bool isCreate = true;
     if (needCreateNewSpan) {
         CreateTextSpanNode(targetSpanNode, info, insertValue);
-    } else if (typingStyle_.has_value() && !HasSameTypingStyle(targetSpanNode)) {
+    } else if (styleManager_->HasTypingFontStyle() && !HasSameTypingStyle(targetSpanNode)) {
         InsertDiffStyleValueInSpan(targetSpanNode, info, insertValue);
     } else {
         InsertValueToSpanNode(targetSpanNode, insertValue, info);
@@ -6974,9 +6962,9 @@ TextStyle RichEditorPattern::CreateTextStyleByTypingStyle()
 {
     auto theme = GetTheme<RichEditorTheme>();
     auto ret = theme ? theme->GetTextStyle() : TextStyle();
-    CHECK_NULL_RETURN(typingStyle_.has_value() && typingTextStyle_.has_value(), ret);
-    const auto& updateSpanStyle = typingStyle_.value();
-    const auto& textStyle = typingTextStyle_.value();
+    CHECK_NULL_RETURN(styleManager_->GetTypingFontStyle().has_value() && styleManager_->GetTypingTextStyle().has_value(), ret);
+    const auto& updateSpanStyle = styleManager_->GetTypingFontStyle().value();
+    const auto& textStyle = styleManager_->GetTypingTextStyle().value();
     IF_TRUE(updateSpanStyle.updateFontFeature, ret.SetFontFeatures(textStyle.GetFontFeatures()));
     IF_TRUE(updateSpanStyle.updateTextColor, ret.SetTextColor(textStyle.GetTextColor()));
     IF_TRUE(updateSpanStyle.updateLineHeight, ret.SetLineHeight(textStyle.GetLineHeight()));
@@ -7010,9 +6998,9 @@ void RichEditorPattern::InsertDiffStyleValueInSpan(
     options.value = insertValue;
     options.offset = caretPosition_;
     options.style = CreateTextStyleByTypingStyle();
-    options.useThemeFontColor = typingStyle_->useThemeFontColor;
-    options.useThemeDecorationColor = typingStyle_->useThemeDecorationColor;
-    options.strokeColorFollowFontColor = typingStyle_->strokeColorFollowFontColor;
+    options.useThemeFontColor = styleManager_->GetTypingFontStyle()->useThemeFontColor;
+    options.useThemeDecorationColor = styleManager_->GetTypingFontStyle()->useThemeDecorationColor;
+    options.strokeColorFollowFontColor = styleManager_->GetTypingFontStyle()->strokeColorFollowFontColor;
     options.optionSource = OptionSource::IME_INSERT;
     bool useTypingParaStyle = styleManager_->UseTypingParaStyle(spans_, caretPosition_);
     IF_TRUE(useTypingParaStyle, options.paraStyle = styleManager_->GetTypingParagraphStyle());
@@ -7069,16 +7057,14 @@ void RichEditorPattern::CreateTextSpanNode(
     spanNode = SpanNode::GetOrCreateSpanNode(ElementRegister::GetInstance()->MakeUniqueId());
     spanNode->MountToParent(host, info.GetSpanIndex());
     auto spanItem = spanNode->GetSpanItem();
-    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
-        spanItem->useThemeFontColor = typingStyle_->useThemeFontColor;
-        spanItem->useThemeDecorationColor = typingStyle_->useThemeDecorationColor;
-        spanItem->strokeColorFollowFontColor = typingStyle_->strokeColorFollowFontColor;
-        if (typingStyle_->strokeColorFollowFontColor && typingStyle_->updateTextColor.has_value()) {
-            typingStyle_->updateStrokeColor = typingTextStyle_.value().GetTextColor();
-        }
-        UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
+    if (styleManager_->GetTypingFontStyle().has_value() && styleManager_->GetTypingTextStyle().has_value()) {
+        spanItem->useThemeFontColor = styleManager_->GetTypingFontStyle()->useThemeFontColor;
+        spanItem->useThemeDecorationColor = styleManager_->GetTypingFontStyle()->useThemeDecorationColor;
+        spanItem->strokeColorFollowFontColor = styleManager_->GetTypingFontStyle()->strokeColorFollowFontColor;
+        styleManager_->SyncStrokeColorFollowFontColor();
+        UpdateTextStyle(spanNode, styleManager_->GetTypingFontStyle().value(), styleManager_->GetTypingTextStyle().value());
         auto spanItem = spanNode->GetSpanItem();
-        spanItem->SetTextStyle(typingTextStyle_);
+        spanItem->SetTextStyle(styleManager_->GetTypingTextStyle());
         UpdateLpxUnitFlag();
     } else {
         spanNode->UpdateFontSize(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP));
@@ -12501,9 +12487,9 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
     changeValue.SetRangeAfter({ innerPosition, innerPosition + insertValue.length()});
     std::u16string textTemp = insertValue;
     if (!textStyle && !isCreate && targetSpanItem) {
-        if (typingStyle_ && !HasSameTypingStyle(targetSpanItem)) {
+        if (styleManager_->HasTypingFontStyle() && !HasSameTypingStyle(targetSpanItem)) {
             TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "useTypingStyle");
-            textStyle = typingTextStyle_; // create a new span When have a different typingStyle
+            textStyle = styleManager_->GetTypingTextStyle(); // create a new span When have a different typingStyle
             bool insertInSpan = textIndex && offsetInSpan;
             spanIndex = insertInSpan ? spanIndex + 1 : spanIndex;
             offsetInSpan = 0;
@@ -12528,7 +12514,7 @@ void RichEditorPattern::GetReplacedSpan(RichEditorChangeValue& changeValue, int3
             spanNode = AceType::MakeRefPtr<SpanNode>(ElementRegister::GetInstance()->MakeUniqueId());
             spanNode->SetSpanItem(targetSpanItem);
         }
-        std::optional<TextStyle> spanTextStyle = textStyle ? textStyle : typingTextStyle_;
+        std::optional<TextStyle> spanTextStyle = textStyle ? textStyle : styleManager_->GetTypingTextStyle();
         GetChangeSpanStyle(changeValue, spanTextStyle, paraStyle, urlAddress, spanNode, spanIndex, useTypingParaStyle);
         CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, offsetInSpan + insertValue.length(),
             textTemp, spanTextStyle, paraStyle, urlAddress);
@@ -13031,8 +13017,8 @@ void RichEditorPattern::BeforeDrag(
     int length = recordAddText.length();
     int32_t nowPosition = innerPosition;
     std::optional<TextStyle> style = std::nullopt;
-    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
-        style = typingTextStyle_.value();
+    if (styleManager_->HasTypingFontStyle() && styleManager_->HasTypingTextStyle()) {
+        style = styleManager_->GetTypingTextStyle().value();
     }
     if (!isDragSponsor_) { // drag from outside
         GetReplacedSpan(
