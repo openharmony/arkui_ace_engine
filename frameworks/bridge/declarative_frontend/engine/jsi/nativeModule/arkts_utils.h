@@ -32,6 +32,10 @@ class ResourceAdapter;
 struct SelectParam;
 }
 
+namespace OHOS::Ace::Framework {
+class JSRenderingContextBase;
+}
+
 namespace OHOS::Ace::NG {
 class MenuItemConfiguration;
 struct MenuParam;
@@ -446,7 +450,8 @@ public:
     static Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
     static void* UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj);
     static napi_value CreateNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj);
-    static void CreateDrawingRenderingContext(void** outJsHandle, void** outCppPtr);
+    static Local<panda::ObjectRef> CreateDrawingRenderingContext(
+        Framework::JSRenderingContextBase** outCppPtr);
 #if !defined(PREVIEW)
     static RefPtr<PixelMap> CreatePixelMapFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
 #endif

@@ -162,13 +162,11 @@ void InvokeOnReadyCallback(const OnReadyContext& ctx,
     if (!pattern) {
         return;
     }
-    void* jsHandleRaw = nullptr;
-    void* cppPtrRaw = nullptr;
-    ArkTSUtils::CreateDrawingRenderingContext(&jsHandleRaw, &cppPtrRaw);
-    if (!jsHandleRaw || !cppPtrRaw) {
+    Framework::JSRenderingContextBase* drawingContext = nullptr;
+    auto jsDrawingContext = ArkTSUtils::CreateDrawingRenderingContext(&drawingContext);
+    if (jsDrawingContext.IsEmpty() || !drawingContext) {
         return;
     }
-    auto* drawingContext = reinterpret_cast<Framework::JSRenderingContextBase*>(cppPtrRaw);
     drawingContext->SetInstanceId(Container::CurrentId());
     drawingContext->SetCanvasPattern(pattern);
     drawingContext->SetUnit(unit);
@@ -183,8 +181,6 @@ void InvokeOnReadyCallback(const OnReadyContext& ctx,
         canvasModifier->setRSCanvasForDrawingContext(
             reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(pattern)));
     }
-    Local<panda::ObjectRef> jsDrawingContext(
-        reinterpret_cast<uintptr_t>(jsHandleRaw));
     std::vector<Local<JSValueRef>> argv;
     argv.emplace_back(jsDrawingContext);
     ctx.func->Call(ctx.vm, ctx.func.ToLocal(), argv.data(), argv.size());
