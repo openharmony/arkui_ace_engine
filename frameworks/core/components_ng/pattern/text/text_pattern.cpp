@@ -3331,11 +3331,14 @@ bool TextPattern::HandleMouseLeftPressForContainer(const Offset& textOffset)
     CHECK_NULL_RETURN(selectionChild_, false);
     CHECK_NULL_RETURN(pManager_, false);
     SetTextResponseType(TextResponseType::SELECTED_BY_MOUSE);
+    auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+    Offset nodeLocalOffset = {
+        textOffset.GetX() + textPaintOffset.GetX(), textOffset.GetY() + textPaintOffset.GetY() };
     if (shiftFlag_) {
-        return selectionChild_->ExtendSelectionFromFixedAnchor(textOffset);
+        return selectionChild_->ExtendSelectionFromFixedAnchor(nodeLocalOffset);
     } else {
         auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
-        selectionChild_->HandleSelectionStart(textOffset, start, start);
+        selectionChild_->HandleSelectionStart(nodeLocalOffset, start, start);
         return true;
     }
 }
@@ -3376,18 +3379,12 @@ void TextPattern::HandleMouseLeftReleaseForLocal(
 }
 
 void TextPattern::HandleMouseLeftReleaseForContainer(
-    const MouseInfo& info, const Offset& textOffset, MouseStatus oldMouseStatus, int32_t start, int32_t end)
+    const MouseInfo& info, const Offset& textOffset, MouseStatus oldMouseStatus, bool mousePressReleaseNoChange)
 {
     if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
-        if (start == -1 && end == -1) {
+        if (!HasAnySelectionInContainer() || mousePressReleaseNoChange) {
             ResetSelection();
             CloseSelectOverlay(true);
-            return;
-        }
-        if (oldMouseStatus != MouseStatus::MOVE && !shiftFlag_) {
-            ResetSelection();
-            CloseSelectOverlay(true);
-            selectionChild_->ProcessMouseLeftRelease(textOffset);
             return;
         }
         auto globalPoint = info.GetGlobalLocation();
@@ -3460,7 +3457,8 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     }
 
     if (selectionChild_) {
-        HandleMouseLeftReleaseForContainer(info, textOffset, oldMouseStatus, start, end);
+        HandleMouseLeftReleaseForContainer(info, textOffset, oldMouseStatus,
+            (pressBetweenSelectedPosition && !mouseUpAndDownPointChange_));
     } else {
         HandleMouseLeftReleaseForLocal(info, oldMouseStatus, start, end);
     }

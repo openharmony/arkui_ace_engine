@@ -14,6 +14,7 @@
  */
 
 #include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -1326,7 +1327,8 @@ HWTEST_F(TextTestSevenNg, SetGradientShaderStyle009, TestSize.Level1)
  */
 HWTEST_F(TextTestSevenNg, SetGradientShaderStyle010, TestSize.Level1)
 {
-    SystemProperties::SetConfigChangePerform();
+    bool configChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
     ASSERT_TRUE(SystemProperties::ConfigChangePerform());
 
     TextModelNG textModel;
@@ -1353,6 +1355,45 @@ HWTEST_F(TextTestSevenNg, SetGradientShaderStyle010, TestSize.Level1)
     EXPECT_FALSE(layoutProperty->HasGradientShaderStyle());
     EXPECT_FALSE(layoutProperty->HasColorShaderStyle());
     EXPECT_EQ(pattern->resourceMgr_, nullptr);
+
+    g_isConfigChangePerform = configChangePerform;
+}
+
+/**
+ * @tc.name: SetGradientShaderStyle011
+ * @tc.desc: Test ResetGradientShaderStyle only removes gradient resource object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle011, TestSize.Level1)
+{
+    bool configChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+    ASSERT_TRUE(SystemProperties::ConfigChangePerform());
+
+    TextModelNG textModel;
+    textModel.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto otherResObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    pattern->AddResObj("TextGradient.other", otherResObj, [](const RefPtr<ResourceObject>&) {});
+
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    gradient.AddColor(GradientColor(Color::RED));
+    textModel.SetGradientShaderStyle(gradient);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+
+    textModel.ResetGradientShaderStyle();
+
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    const auto& keys = pattern->resourceMgr_->GetResKeyArray();
+    EXPECT_EQ(std::find(keys.begin(), keys.end(), "TextGradient.gradient"), keys.end());
+    EXPECT_NE(std::find(keys.begin(), keys.end(), "TextGradient.other"), keys.end());
+
+    g_isConfigChangePerform = configChangePerform;
 }
 
 /**

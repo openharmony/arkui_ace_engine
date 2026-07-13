@@ -723,7 +723,7 @@ private:
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftReleaseForLocal(const MouseInfo& info, MouseStatus oldMouseStatus, int32_t start, int32_t end);
     void HandleMouseLeftReleaseForContainer(
-        const MouseInfo& info, const Offset& textOffset, MouseStatus oldMouseStatus, int32_t start, int32_t end);
+        const MouseInfo& info, const Offset& textOffset, MouseStatus oldMouseStatus, bool mousePressReleaseNoChange);
     void ResetMouseReleaseState(const MouseInfo& info);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
     void UpdateSourceType(SourceType sourceType);
