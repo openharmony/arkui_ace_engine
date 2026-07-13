@@ -2566,6 +2566,10 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableWebAVSession));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableWebAVSession"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableWebAVSession));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableMediaNetworkProxy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableMediaNetworkProxy));
+    web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableMediaNetworkProxy"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::ResetEnableMediaNetworkProxy));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDrag"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WebBridge::SetEnableDrag));
     web->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDrag"),

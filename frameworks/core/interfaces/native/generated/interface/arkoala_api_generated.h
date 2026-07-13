@@ -28561,6 +28561,8 @@ typedef struct GENERATED_ArkUIWebModifier {
                                      const Opt_OnInputmethodAttachedCallback* value);
     void (*setEnableFullscreenVideoOverlay)(Ark_NativePointer node,
                                             const Opt_Boolean* value);
+    void (*setEnableMediaNetworkProxy)(Ark_NativePointer node,
+                                  const Opt_Boolean* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,
                                        const Opt_String* tag,
                                        const Opt_String* type);

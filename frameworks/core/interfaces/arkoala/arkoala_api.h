@@ -7023,6 +7023,8 @@ struct ArkUIWebModifier {
     void (*resetEnableWebAVSession)(ArkUINodeHandle node);
     void (*setEnableDrag)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableDrag)(ArkUINodeHandle node);
+    void (*setEnableMediaNetworkProxy)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableMediaNetworkProxy)(ArkUINodeHandle node);
     void (*setScrollbarLayoutPolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetScrollbarLayoutPolicy)(ArkUINodeHandle node);
     void (*setOnInputMethodAttached)(ArkUINodeHandle node, void* callback);

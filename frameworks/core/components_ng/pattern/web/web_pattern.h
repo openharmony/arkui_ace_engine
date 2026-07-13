@@ -670,6 +670,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaNetworkProxyEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableSelectedDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableDataDetector, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnableFollowSystemFontWeight, bool);
@@ -1017,6 +1018,7 @@ public:
     bool GetAccessibilityVisible(int64_t accessibilityId);
 
     void OnWebMediaAVSessionEnabledUpdate(bool enable);
+    void OnWebMediaNetworkProxyEnabledUpdate(bool enable);
 
     void UpdateImageOverlayTouchInfo(int touchPointX, int touchPointY, TouchType touchType);
     void PushOverlayInfo(float x, float y, int32_t id);
