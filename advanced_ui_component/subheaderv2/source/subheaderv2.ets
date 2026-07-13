@@ -61,6 +61,9 @@ const SINGLE_ICON_REGION_X: number = -12;
 const SINGLE_ICON_NUMBER: number = 1;
 const PADDING_LEFT: number = 2;
 
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: number = 125836945;
+const PUNCTUATION_OVERFLOW_DEFAULT_VALUE: boolean = true;
+
 export declare type SubHeaderV2IconType = ResourceStr | SymbolGlyphModifier;
 
 export interface SubHeaderV2TitleOptions {
@@ -240,6 +243,29 @@ class SubHeaderTheme {
   public rightIconColor: ResourceColor = $r('sys.color.icon_primary');
 }
 
+function getPunctuationOverflowEnabled(): boolean {
+  try {
+    let configValue: string = resourceManager.getSysResourceManager()
+      ?.getStringSync(SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED);
+    
+    if (configValue === 'true') {
+      return true;
+    } else if (configValue === 'false') {
+      return false;
+    } else {
+      hilog.warn(0x3900, 'AdvanceSubHeaderV2', 
+        `Punctuation overflow config invalid value: ${configValue}, use default: ${PUNCTUATION_OVERFLOW_DEFAULT_VALUE}`);
+      return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+    }
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'AdvanceSubHeaderV2', 
+      `Failed to get punctuation overflow config, code: ${code}, message: ${message}`);
+    return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+  }
+}
+
 @Extend(Text)
 function secondaryTitleStyles(fontStyle: FontStyle) {
   .fontSize(`${getResourceValue('sys.float.Subtitle_S')}fp`)
@@ -250,7 +276,7 @@ function secondaryTitleStyles(fontStyle: FontStyle) {
   .align(fontStyle?.alignment)
   .fallbackLineSpacing(true)
   .orphanCharOptimization(true)
-  .punctuationOverflow(true)
+  .punctuationOverflow(getPunctuationOverflowEnabled())
 }
 
 @Extend(Text)
@@ -263,7 +289,7 @@ function primaryTitleStyles(fontStyle: FontStyle) {
   .align(fontStyle?.alignment)
   .fallbackLineSpacing(true)
   .orphanCharOptimization(true)
-  .punctuationOverflow(true)
+  .punctuationOverflow(getPunctuationOverflowEnabled())
 }
 
 @Styles

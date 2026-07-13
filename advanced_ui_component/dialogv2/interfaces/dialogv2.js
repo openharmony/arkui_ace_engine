@@ -89,6 +89,8 @@ const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
 const CONTENT_FONT_SIZE = getNumberByResourceId(125835677, BODY_L);
 const SCROLL_BAR_OFFSET = 20;
 const SELECT_DIALOG_SCROLL_BAR_OFFSET = 4;
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED = 125836945;
+const PUNCTUATION_OVERFLOW_DEFAULT_VALUE = true;
 let AdvancedDialogV2Button = class AdvancedDialogV2Button {
   constructor(options) {
     this.content = '';
@@ -428,7 +430,7 @@ export class TipsDialogV2 extends ViewV2 {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fallbackLineSpacing(true);
             Text.orphanCharOptimization(true);
-            Text.punctuationOverflow(true);
+            Text.punctuationOverflow(getPunctuationOverflowEnabled());
           }, Text);
           Text.pop();
         });
@@ -494,7 +496,7 @@ export class TipsDialogV2 extends ViewV2 {
             Text.width('100%');
             Text.fallbackLineSpacing(true);
             Text.orphanCharOptimization(true);
-            Text.punctuationOverflow(true);
+            Text.punctuationOverflow(getPunctuationOverflowEnabled());
           }, Text);
           Text.pop();
           Row.pop();
@@ -532,7 +534,7 @@ export class TipsDialogV2 extends ViewV2 {
             });
             Text.fallbackLineSpacing(true);
             Text.orphanCharOptimization(true);
-            Text.punctuationOverflow(true);
+            Text.punctuationOverflow(getPunctuationOverflowEnabled());
           }, Text);
           Text.pop();
           Row.pop();
@@ -892,7 +894,7 @@ export class SelectDialogV2 extends ViewV2 {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fallbackLineSpacing(true);
             Text.orphanCharOptimization(true);
-            Text.punctuationOverflow(true);
+            Text.punctuationOverflow(getPunctuationOverflowEnabled());
           }, Text);
           Text.pop();
           Row.pop();
@@ -981,7 +983,7 @@ export class SelectDialogV2 extends ViewV2 {
               Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
               Text.fallbackLineSpacing(true);
               Text.orphanCharOptimization(true);
-              Text.punctuationOverflow(true);
+              Text.punctuationOverflow(getPunctuationOverflowEnabled());
             }, Text);
             Text.pop();
             this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1328,7 +1330,7 @@ export class ConfirmDialogV2 extends ViewV2 {
       Text.width('100%');
       Text.fallbackLineSpacing(true);
       Text.orphanCharOptimization(true);
-      Text.punctuationOverflow(true);
+      Text.punctuationOverflow(getPunctuationOverflowEnabled());
     }, Text);
     Text.pop();
     Column.pop();
@@ -1391,7 +1393,7 @@ export class ConfirmDialogV2 extends ViewV2 {
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.fallbackLineSpacing(true);
       Text.orphanCharOptimization(true);
-      Text.punctuationOverflow(true);
+      Text.punctuationOverflow(getPunctuationOverflowEnabled());
     }, Text);
     Text.pop();
     Row.pop();
@@ -1702,7 +1704,7 @@ export class AlertDialogV2 extends ViewV2 {
       });
       Text.fallbackLineSpacing(true);
       Text.orphanCharOptimization(true);
-      Text.punctuationOverflow(true);
+      Text.punctuationOverflow(getPunctuationOverflowEnabled());
     }, Text);
     Text.pop();
     Scroll.pop();
@@ -2352,7 +2354,7 @@ class CustomDialogContentComponent extends ViewV2 {
       Text.width('100%');
       Text.fallbackLineSpacing(true);
       Text.orphanCharOptimization(true);
-      Text.punctuationOverflow(true);
+      Text.punctuationOverflow(getPunctuationOverflowEnabled());
     }, Text);
     Text.pop();
     Row.pop();
@@ -2390,7 +2392,7 @@ class CustomDialogContentComponent extends ViewV2 {
       Text.width('100%');
       Text.fallbackLineSpacing(true);
       Text.orphanCharOptimization(true);
-      Text.punctuationOverflow(true);
+      Text.punctuationOverflow(getPunctuationOverflowEnabled());
     }, Text);
     Text.pop();
     Row.pop();
@@ -2930,6 +2932,28 @@ function getNumberByResourceId(resourceId, defaultValue, allowZero) {
     return defaultValue;
   }
 }
+function getPunctuationOverflowEnabled() {
+  try {
+      let configValue = resourceManager.getSysResourceManager()
+          ?.getStringSync(SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED);
+      if (configValue === 'true') {
+          return true;
+      }
+      else if (configValue === 'false') {
+          return false;
+      }
+      else {
+          hilog.warn(0x3900, 'AdvanceDialogV2', `Punctuation overflow config invalid value: ${configValue}, use default: ${PUNCTUATION_OVERFLOW_DEFAULT_VALUE}`);
+          return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+      }
+  }
+  catch (error) {
+      let code = error.code;
+      let message = error.message;
+      hilog.error(0x3900, 'AdvanceDialogV2', `Failed to get punctuation overflow config, code: ${code}, message: ${message}`);
+      return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+  }
+}
 /**
  * get enum number
  *
@@ -3128,7 +3152,7 @@ export class LoadingDialogV2 extends ViewV2 {
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.fallbackLineSpacing(true);
       Text.orphanCharOptimization(true);
-      Text.punctuationOverflow(true);
+      Text.punctuationOverflow(getPunctuationOverflowEnabled());
     }, Text);
     Text.pop();
     this.observeComponentCreation2((elmtId, isInitialRender) => {

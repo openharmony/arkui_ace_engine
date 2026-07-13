@@ -77,6 +77,8 @@ const ICON_REGION_Y = -6;
 const SINGLE_ICON_REGION_X = -12;
 const SINGLE_ICON_NUMBER = 1;
 const PADDING_LEFT = 2;
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED = 125836945;
+const PUNCTUATION_OVERFLOW_DEFAULT_VALUE = true;
 let SubHeaderV2Title = class SubHeaderV2Title {
     constructor(v141) {
         this.primaryTitle = v141.primaryTitle;
@@ -329,6 +331,29 @@ SubHeaderTheme = __decorate([
     ObservedV2
 ], SubHeaderTheme);
 
+function getPunctuationOverflowEnabled() {
+    try {
+        let configValue = resourceManager.getSysResourceManager()
+            ?.getStringSync(SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED);
+        if (configValue === 'true') {
+            return true;
+        }
+        else if (configValue === 'false') {
+            return false;
+        }
+        else {
+            hilog.warn(0x3900, 'AdvanceSubHeaderV2', `Punctuation overflow config invalid value: ${configValue}, use default: ${PUNCTUATION_OVERFLOW_DEFAULT_VALUE}`);
+            return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+        }
+    }
+    catch (error) {
+        let code = error.code;
+        let message = error.message;
+        hilog.error(0x3900, 'AdvanceSubHeaderV2', `Failed to get punctuation overflow config, code: ${code}, message: ${message}`);
+        return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+    }
+}
+
 function __Text__secondaryTitleStyles(r141) {
     Text.fontSize(`${getResourceValue('sys.float.Subtitle_S')}fp`);
     Text.fontColor(r141?.fontColor ?? {
@@ -344,7 +369,7 @@ function __Text__secondaryTitleStyles(r141) {
     Text.align(r141?.alignment);
     Text.fallbackLineSpacing(true);
     Text.orphanCharOptimization(true);
-    Text.punctuationOverflow(true);
+    Text.punctuationOverflow(getPunctuationOverflowEnabled());
 }
 
 function __Text__primaryTitleStyles(q141) {
@@ -362,7 +387,7 @@ function __Text__primaryTitleStyles(q141) {
     Text.align(q141?.alignment);
     Text.fallbackLineSpacing(true);
     Text.orphanCharOptimization(true);
-    Text.punctuationOverflow(true);
+    Text.punctuationOverflow(getPunctuationOverflowEnabled());
 }
 
 class SubHeaderModifier {
