@@ -33,6 +33,7 @@ public:
     virtual void SetCanvasPattern(const RefPtr<AceType>& canvas) = 0;
     virtual void SetInstanceId(int32_t id) = 0;
     virtual int32_t GetInstanceId() = 0;
+    virtual void SetUnit(CanvasUnit unit) = 0;
 
     bool IsBuiltIn() const
     {

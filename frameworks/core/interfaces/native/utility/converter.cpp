@@ -71,15 +71,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr int32_t NUM_0 = 0;
-    constexpr int32_t NUM_1 = 1;
-    constexpr int32_t NUM_2 = 2;
     constexpr int32_t STD_TM_START_YEAR = 1900;
     constexpr uint32_t DEFAULT_DURATION = 1000; // ms
     constexpr double NUM_DOUBLE_0 = 0.;
     constexpr double NUM_DOUBLE_1 = 1.;
     constexpr double NUM_DOUBLE_100 = 100.;
-    constexpr int32_t NUM_PERCENT_100 = 100;
     constexpr int32_t DEFAULT_MULTIPLE = 100;
     constexpr uint16_t UTF16_BOM = 0xFEFF;
     constexpr int32_t DEFAULT_NAVDESTINATION_TRANSITION_DURATION = 1000;
@@ -1459,7 +1455,6 @@ ACE_FORCE_EXPORT void AssignCast (std::optional<Gradient>& dst, const Ark_Linear
 {
     Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
-    auto peer = reinterpret_cast<LinearGradientPeer*>(src);
     auto gradientColors = src->colorStops;
 
     if (gradientColors.size() == 1) {
@@ -1914,7 +1909,6 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
     }
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
         styleOptions.blurStyle =
             Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle.value).value_or(BlurStyle::NO_MATERIAL);
     }
@@ -1947,7 +1941,6 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src)
     }
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
         styleOptions.blurStyle =
             Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle.value).value_or(BlurStyle::NO_MATERIAL);
     }
@@ -4137,7 +4130,6 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src)
     }
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
         styleOptions.blurStyle =
             Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle.value).value_or(BlurStyle::NO_MATERIAL);
     }

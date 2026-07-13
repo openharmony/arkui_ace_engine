@@ -30,8 +30,8 @@
 #endif
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_with_theme.h"
 #include "bridge/declarative_frontend/interfaces/profiler/js_profiler.h"
-#include "bridge/declarative_frontend/jsview/canvas/js_canvas.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_drawing_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/dialog/js_action_sheet.h"
@@ -422,7 +422,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LineHeightSpan", JSLineHeightSpan::JSBind},
     { "LineSpacingSpan", JSLineSpacingSpan::JSBind},
     { "TextLayout", JSTextLayout::JSBind },
-    { "Canvas", JSCanvas::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
     { "CanvasPattern", JSCanvasPattern::JSBind },
     { "List", JSList::JSBind },
@@ -488,7 +487,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LineHeightSpan", JSLineHeightSpan::JSBind},
     { "LineSpacingSpan", JSLineSpacingSpan::JSBind},
     { "TextLayout", JSTextLayout::JSBind },
-    { "Canvas", JSCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },

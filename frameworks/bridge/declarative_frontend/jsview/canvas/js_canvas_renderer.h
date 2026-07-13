@@ -165,7 +165,7 @@ public:
         return anti_;
     }
 
-    void SetUnit(CanvasUnit unit)
+    void SetUnit(CanvasUnit unit) override
     {
         unit_ = unit;
     }

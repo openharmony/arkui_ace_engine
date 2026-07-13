@@ -45,6 +45,7 @@ public:
     void JsSetSize(const JSCallbackInfo& info);
     void SetInvalidate(const JSCallbackInfo& info);
     void SetRSCanvasCallback(WeakPtr<AceType>& canvasPattern);
+    void JsSetCanvasComponent(const JSCallbackInfo& info);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSDrawingRenderingContext);
 
@@ -63,7 +64,7 @@ public:
         return instanceId_;
     }
 
-    void SetUnit(CanvasUnit unit);
+    void SetUnit(CanvasUnit unit) override;
 
     CanvasUnit GetUnit()
     {

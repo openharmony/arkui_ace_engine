@@ -54,6 +54,7 @@ public:
     void JsStopImageAnalyzer(const JSCallbackInfo& info);
     void JsGetCanvas(const JSCallbackInfo& info);
     void JsSetCanvas(const JSCallbackInfo& info);
+    void JsSetCanvasComponent(const JSCallbackInfo& info);
     void JsOn(const JSCallbackInfo& info);
     void JsOff(const JSCallbackInfo& info);
 

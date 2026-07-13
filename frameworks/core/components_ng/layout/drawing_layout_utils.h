@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_DRAWING_LAYOUT_UTILS_H
 
 #include "base/memory/ace_type.h"
+#include "base/utils/macros.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/property/layout_constraint.h"
 

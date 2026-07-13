@@ -28,6 +28,7 @@
 #include "bridge/cj_frontend/cppview/render_image.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 #include "core/pipeline/base/constants.h"
 
 using namespace OHOS;
@@ -42,6 +43,14 @@ constexpr uint32_t PIXEL_SIZE = 4;
 constexpr double DIFF = 1e-10;
 const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
 
+RefPtr<RenderingContext2DModel> CreateCanvasRenderingContextModel()
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->createCanvasRenderingContext2DModel, nullptr);
+    return bridge->createCanvasRenderingContext2DModel();
+}
+
 void CreateZeroImageData(NativeImageData& imageData)
 {
     imageData.width_ = 0;
@@ -52,14 +61,14 @@ void CreateZeroImageData(NativeImageData& imageData)
 
 NativeCanvasRenderer::NativeCanvasRenderer(bool antialias) : FFIData()
 {
-    renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+    renderingContext2DModel_ = CreateCanvasRenderingContextModel();
     antialias_ = antialias;
     density_ = PipelineBase::GetCurrentDensity();
 }
 
 NativeCanvasRenderer::NativeCanvasRenderer() : FFIData()
 {
-    renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+    renderingContext2DModel_ = CreateCanvasRenderingContextModel();
     density_ = PipelineBase::GetCurrentDensity();
 }
 

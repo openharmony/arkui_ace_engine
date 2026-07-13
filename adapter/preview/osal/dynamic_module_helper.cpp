@@ -124,6 +124,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"CalendarPicker", "calendarpicker"},
         {"CalendarPickerDialog", "calendarpicker"},
         {"RelativeContainer", "relativecontainer"},
+        {"Canvas", "canvas"},
         {"Indexer", "indexer"},
         { "Badge", "badge" },
         { "Hyperlink", "hyperlink" },

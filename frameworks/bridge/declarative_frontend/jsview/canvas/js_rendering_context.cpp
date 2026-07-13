@@ -35,7 +35,8 @@
 #include "core/common/container_scope.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/common/statistic_event_reporter.h"
-#include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 
 namespace OHOS::Ace {
 struct CanvasAsyncCxt {
@@ -62,15 +63,109 @@ const ArkUICanvasModifierCompatible* GetCanvasInnerModifier()
     return nullptr;
 }
 #endif
+
+RefPtr<RenderingContext2DModel> CreateCanvasRenderingContextModel()
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->createCanvasRenderingContext2DModel, nullptr);
+    return bridge->createCanvasRenderingContext2DModel();
+}
+
+RefPtr<AceType> GetCanvasPattern(NG::FrameNode* frameNode)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->getCanvasPattern, nullptr);
+    return bridge->getCanvasPattern(frameNode);
+}
+
+void SetCanvasRenderingContext2DCallbacks(
+    const RefPtr<RenderingContext2DModel>& context, std::function<void()> onAttach, std::function<void()> onDetach)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->setCanvasRenderingContext2DCallbacks);
+    bridge->setCanvasRenderingContext2DCallbacks(context, std::move(onAttach), std::move(onDetach));
+}
+
+void SetCanvasRenderingContext2DPatternInstanceId(const RefPtr<RenderingContext2DModel>& context, int32_t instanceId)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->setCanvasRenderingContext2DPatternInstanceId);
+    bridge->setCanvasRenderingContext2DPatternInstanceId(context, instanceId);
+}
+
+int32_t GetCanvasRenderingContext2DId(const RefPtr<RenderingContext2DModel>& context)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, -1);
+    CHECK_NULL_RETURN(bridge->getCanvasRenderingContext2DId, -1);
+    return bridge->getCanvasRenderingContext2DId(context);
+}
+
+void GetCanvasRenderingContext2DWidth(const RefPtr<RenderingContext2DModel>& context, double& width)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->getCanvasRenderingContext2DWidth);
+    bridge->getCanvasRenderingContext2DWidth(context, width);
+}
+
+void GetCanvasRenderingContext2DHeight(const RefPtr<RenderingContext2DModel>& context, double& height)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->getCanvasRenderingContext2DHeight);
+    bridge->getCanvasRenderingContext2DHeight(context, height);
+}
+
+#ifdef PIXEL_MAP_SUPPORTED
+void TransferCanvasRenderingContext2DFromImageBitmap(
+    const RefPtr<RenderingContext2DModel>& context, const RefPtr<AceType>& pixelMap)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->transferCanvasRenderingContext2DFromImageBitmap);
+    bridge->transferCanvasRenderingContext2DFromImageBitmap(context, pixelMap);
+}
+#else
+void TransferCanvasRenderingContext2DFromImageBitmap(
+    const RefPtr<RenderingContext2DModel>& context, const std::shared_ptr<ImageData>& imageData)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->transferCanvasRenderingContext2DFromImageBitmap);
+    bridge->transferCanvasRenderingContext2DFromImageBitmap(context, imageData);
+}
+#endif
+
+void StartCanvasImageAnalyzer(
+    const RefPtr<RenderingContext2DModel>& context, void* config, OnAnalyzedCallback& onAnalyzed)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->startCanvasImageAnalyzer);
+    bridge->startCanvasImageAnalyzer(context, config, onAnalyzed);
+}
+
+void StopCanvasImageAnalyzer(const RefPtr<RenderingContext2DModel>& context)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->stopCanvasImageAnalyzer);
+    bridge->stopCanvasImageAnalyzer(context);
+}
 }
 
 JSRenderingContext::JSRenderingContext()
 {
 #ifdef NG_BUILD
-    renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+    renderingContext2DModel_ = CreateCanvasRenderingContextModel();
 #else
     if (Container::IsCurrentUseNewPipeline()) {
-        renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+        renderingContext2DModel_ = CreateCanvasRenderingContextModel();
         auto onAttach = [weakCtx = WeakClaim(this)]() {
             auto ctx = weakCtx.Upgrade();
             CHECK_NULL_VOID(ctx);
@@ -81,11 +176,7 @@ JSRenderingContext::JSRenderingContext()
             CHECK_NULL_VOID(ctx);
             ctx->OnDetachFromCanvas();
         };
-        auto canvasRenderingContext2DModel =
-            AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-        CHECK_NULL_VOID(canvasRenderingContext2DModel);
-        canvasRenderingContext2DModel->SetOnAttach(onAttach);
-        canvasRenderingContext2DModel->SetOnDetach(onDetach);
+        SetCanvasRenderingContext2DCallbacks(renderingContext2DModel_, std::move(onAttach), std::move(onDetach));
     } else {
         const auto* modifier = GetCanvasInnerModifier();
         CHECK_NULL_VOID(modifier);
@@ -95,12 +186,14 @@ JSRenderingContext::JSRenderingContext()
         }
     }
 #endif
-    renderingContext2DModel_->SetPatternInstanceId(GetInstanceId());
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    SetCanvasRenderingContext2DPatternInstanceId(renderingContext2DModel_, GetInstanceId());
 }
 
 void JSRenderingContext::JSBind(BindingTarget globalObj)
 {
-    // Define the class "CanvasRenderingContext2D"
+    // Keep the legacy JSRenderingContext available for old DrawingRenderingContext/
+    // preview compat flows, but move it off the public CanvasRenderingContext2D name.
     JSClass<JSRenderingContext>::Declare("CanvasRenderingContext2D");
 
     // Define all properties of the "CanvasRenderingContext2D"
@@ -222,11 +315,13 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
     JSClass<JSRenderingContext>::CustomMethod("stopImageAnalyzer", &JSRenderingContext::JsStopImageAnalyzer);
     JSClass<JSRenderingContext>::CustomMethod("on", &JSRenderingContext::JsOn);
     JSClass<JSRenderingContext>::CustomMethod("off", &JSRenderingContext::JsOff);
+    JSClass<JSRenderingContext>::CustomMethod(
+        "__setCanvasComponent__", &JSRenderingContext::JsSetCanvasComponent);
 
     JSClass<JSRenderingContext>::StaticMethod(
         "getContext2DFromDrawingContext", &JSRenderingContext::JsGetContext2DFromDrawingContext);
 
-    // Register the "CanvasRenderingContext2D" to the global object of the vm
+    // Register the hidden compat constructor to the global object of the vm.
     JSClass<JSRenderingContext>::Bind(globalObj, JSRenderingContext::Constructor, JSRenderingContext::Destructor);
 }
 
@@ -279,9 +374,8 @@ void JSRenderingContext::OnDetachFromCanvas()
 
 void JSRenderingContext::JsGetCanvas(const JSCallbackInfo& info)
 {
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    auto nodeId = canvasRenderingContext2DModel->GetId();
+    auto nodeId = GetCanvasRenderingContext2DId(renderingContext2DModel_);
+    CHECK_NULL_VOID(nodeId >= 0);
 
     auto vm = info.GetVm();
     auto globalObj = JSNApi::GetGlobalObject(vm);
@@ -305,12 +399,19 @@ void JSRenderingContext::JsSetCanvas(const JSCallbackInfo& info)
     return;
 }
 
+void JSRenderingContext::JsSetCanvasComponent(const JSCallbackInfo& info)
+{
+    auto* frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = GetCanvasPattern(frameNode);
+    CHECK_NULL_VOID(pattern);
+    SetCanvasPattern(pattern);
+}
+
 void JSRenderingContext::JsGetWidth(const JSCallbackInfo& info)
 {
     double width = 0.0;
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->GetWidth(width);
+    GetCanvasRenderingContext2DWidth(renderingContext2DModel_, width);
     double density = GetDensity();
     width /= density;
     auto returnValue = JSVal(ToJSValue(width));
@@ -331,9 +432,7 @@ void JSRenderingContext::JsSetHeight(const JSCallbackInfo& info)
 void JSRenderingContext::JsGetHeight(const JSCallbackInfo& info)
 {
     double height = 0.0;
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->GetHeight(height);
+    GetCanvasRenderingContext2DHeight(renderingContext2DModel_, height);
     double density = GetDensity();
     height /= density;
     auto returnValue = JSVal(ToJSValue(height));
@@ -361,16 +460,14 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
     NAPI_CALL_RETURN_VOID(env, napi_unwrap(env, napiValue, &nativeObj));
     auto jsImage = (JSRenderImage*)nativeObj;
     CHECK_NULL_VOID(jsImage);
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_VOID(canvasRenderingContext2DModel);
 #ifdef PIXEL_MAP_SUPPORTED
     auto pixelMap = jsImage->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    canvasRenderingContext2DModel->TransferFromImageBitmap(pixelMap);
+    TransferCanvasRenderingContext2DFromImageBitmap(renderingContext2DModel_, pixelMap);
 #else
     auto imageData = jsImage->GetImageData();
     CHECK_NULL_VOID(imageData);
-    canvasRenderingContext2DModel->TransferFromImageBitmap(imageData);
+    TransferCanvasRenderingContext2DFromImageBitmap(renderingContext2DModel_, imageData);
 #endif
 }
 
@@ -466,18 +563,14 @@ void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
         ctx->isImageAnalyzing_ = false;
     };
     isImageAnalyzing_ = true;
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->StartImageAnalyzer(configNativeValue, onAnalyzed_);
+    StartCanvasImageAnalyzer(renderingContext2DModel_, configNativeValue, onAnalyzed_);
     ReturnPromise(info, promise);
 }
 
 void JSRenderingContext::JsStopImageAnalyzer(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_);
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->StopImageAnalyzer();
+    StopCanvasImageAnalyzer(renderingContext2DModel_);
 }
 
 CanvasCallbackFuncPairList::const_iterator JSRenderingContext::FindCbList(
