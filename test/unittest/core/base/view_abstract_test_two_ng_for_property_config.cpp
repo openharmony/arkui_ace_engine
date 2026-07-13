@@ -22,7 +22,7 @@
 
 
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/common/resource/resource_parse_utils.h"
 
 using namespace testing;

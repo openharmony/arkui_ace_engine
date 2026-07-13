@@ -265,12 +265,13 @@ napi_value ResourceToNapiString(napi_env env, napi_value resource)
     std::string resourceStr;
     if (ParseResourceParam(env, resource, resourceInfo)) {
         if (resourceInfo.type == static_cast<int>(ResourceType::MEDIA)) {
-            auto resourceWrapper = CreateResourceWrapper(resourceInfo);
+            auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+            CHECK_NULL_RETURN(resourceAdapter, nullptr);
             std::string pathStr;
             if (resourceInfo.resId == -1) {
-                pathStr = resourceWrapper->GetMediaPathByName(resourceInfo.params[0]);
+                pathStr = resourceAdapter->GetMediaPathByName(resourceInfo.params[0]);
             } else {
-                pathStr = resourceWrapper->GetMediaPath(resourceInfo.resId);
+                pathStr = resourceAdapter->GetMediaPath(resourceInfo.resId);
             }
             return CreateNapiString(env, pathStr);
         } else if (ParseString(resourceInfo, resourceStr)) {

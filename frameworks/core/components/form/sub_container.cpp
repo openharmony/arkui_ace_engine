@@ -533,9 +533,8 @@ void SubContainer::InitCardThemeManager(const std::string &path, int32_t instanc
         cardThemeManager->InitResource(cardResourceInfo);
         cardThemeManager->LoadSystemTheme(cardResourceInfo.GetThemeId());
         auto weakTheme = AceType::WeakClaim(AceType::RawPtr(cardThemeManager));
-        auto weakAsset = AceType::WeakClaim(AceType::RawPtr(assetManager));
         taskExecutor_->PostTask(
-            [weakTheme, weakAsset]() {
+            [weakTheme]() {
                 auto themeManager = weakTheme.Upgrade();
                 if (themeManager == nullptr) {
                     LOGE("themeManager or aceView is null!");
@@ -543,7 +542,6 @@ void SubContainer::InitCardThemeManager(const std::string &path, int32_t instanc
                 }
                 themeManager->ParseSystemTheme();
                 themeManager->SetColorScheme(ColorScheme::SCHEME_LIGHT);
-                themeManager->LoadCustomTheme(weakAsset.Upgrade());
             },
             TaskExecutor::TaskType::UI, "ArkUIFormLoadTheme");
     }

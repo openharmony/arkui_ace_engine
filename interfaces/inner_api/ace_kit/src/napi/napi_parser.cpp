@@ -176,7 +176,7 @@ napi_value CreateNapiString(napi_env env, const std::string& rawStr)
     return retVal;
 }
 
-RefPtr<ResourceAdapter> CreateResourceWrapper(const ResourceInfo& info)
+RefPtr<ResourceAdapter> CreateResourceAdapter(const ResourceInfo& info)
 {
     auto bundleName = info.bundleName;
     auto moduleName = info.moduleName;
@@ -194,15 +194,15 @@ RefPtr<ResourceAdapter> CreateResourceWrapper(const ResourceInfo& info)
 
 bool ParseIntegerToString(const ResourceInfo& info, std::string& result)
 {
-    auto resourceWrapper = CreateResourceWrapper(info);
-    if (resourceWrapper == nullptr) {
+    auto resourceAdapter = CreateResourceAdapter(info);
+    if (resourceAdapter == nullptr) {
         return false;
     }
     if (info.type == static_cast<int>(ResourceType::INTEGER)) {
         if (info.resId == UNKNOWN_RESOURCE_ID) {
-            result = std::to_string(resourceWrapper->GetIntByName(info.params[0]));
+            result = std::to_string(resourceAdapter->GetIntByName(info.params[0]));
         } else {
-            result = std::to_string(resourceWrapper->GetInt(info.resId));
+            result = std::to_string(resourceAdapter->GetInt(info.resId));
         }
         return true;
     }
@@ -228,53 +228,53 @@ std::string DimensionToString(Dimension dimension)
 
 bool ParseString(const ResourceInfo& info, std::string& result)
 {
-    auto resourceWrapper = CreateResourceWrapper(info);
-    if (resourceWrapper == nullptr) {
+    auto resourceAdapter = CreateResourceAdapter(info);
+    if (resourceAdapter == nullptr) {
         return false;
     }
     if (info.type == static_cast<int>(ResourceType::PLURAL)) {
         std::string pluralResults;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             auto count = StringUtils::StringToInt(info.params[1]);
-            pluralResults = resourceWrapper->GetPluralStringByName(info.params[0], count);
+            pluralResults = resourceAdapter->GetPluralStringByName(info.params[0], count);
             ReplaceHolder(pluralResults, info.params, 2); // plural holder in index 2
         } else {
-            pluralResults = resourceWrapper->GetPluralString(info.resId, StringUtils::StringToInt(info.params[0]));
+            pluralResults = resourceAdapter->GetPluralString(info.resId, StringUtils::StringToInt(info.params[0]));
             ReplaceHolder(pluralResults, info.params, 1);
         }
         result = pluralResults;
         return true;
     }
     if (info.type == static_cast<int>(ResourceType::RAWFILE)) {
-        result = resourceWrapper->GetRawfile(info.params[0]);
+        result = resourceAdapter->GetRawfile(info.params[0]);
         return true;
     }
     if (info.type == static_cast<int>(ResourceType::FLOAT)) {
         if (info.resId == UNKNOWN_RESOURCE_ID) {
-            result = DimensionToString(resourceWrapper->GetDimensionByName(info.params[0]));
+            result = DimensionToString(resourceAdapter->GetDimensionByName(info.params[0]));
         } else {
-            result = DimensionToString(resourceWrapper->GetDimension(info.resId));
+            result = DimensionToString(resourceAdapter->GetDimension(info.resId));
         }
         return true;
     }
     if (info.type == static_cast<int>(ResourceType::STRING)) {
         std::string originStr;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
-            originStr = resourceWrapper->GetStringByName(info.params[0]);
+            originStr = resourceAdapter->GetStringByName(info.params[0]);
             ReplaceHolder(originStr, info.params, 1);
         } else {
-            originStr = resourceWrapper->GetString(info.resId);
+            originStr = resourceAdapter->GetString(info.resId);
             ReplaceHolder(originStr, info.params, 0);
         }
         result = originStr;
         return true;
     }
     if (info.type == static_cast<int>(ResourceType::COLOR)) {
-        result = resourceWrapper->GetColor(info.resId).ColorToString();
+        result = resourceAdapter->GetColor(info.resId).ColorToString();
         return true;
     }
     if (info.type == static_cast<int>(ResourceType::INTEGER)) {
-        result = std::to_string(resourceWrapper->GetInt(info.resId));
+        result = std::to_string(resourceAdapter->GetInt(info.resId));
         return true;
     }
     return true;
@@ -641,20 +641,20 @@ bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorRe
     if (!ParseResourceParam(env, value, resourceInfo)) {
         return false;
     }
-    auto resourceWrapper = CreateResourceWrapper(resourceInfo);
-    if (resourceWrapper == nullptr) {
+    auto resourceAdapter = CreateResourceAdapter(resourceInfo);
+    if (resourceAdapter == nullptr) {
         return false;
     }
     if (resourceInfo.type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto colorString = resourceWrapper->GetString(resourceInfo.type);
+        auto colorString = resourceAdapter->GetString(resourceInfo.type);
         return Color::ParseColorString(colorString, colorResult);
     }
     if (resourceInfo.type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto colorInt = resourceWrapper->GetInt(resourceInfo.type);
+        auto colorInt = resourceAdapter->GetInt(resourceInfo.type);
         colorResult = Color(CompleteColorAlphaIfIncomplete(colorInt));
         return true;
     }
-    colorResult = resourceWrapper->GetColor(resourceInfo.resId);
+    colorResult = resourceAdapter->GetColor(resourceInfo.resId);
     return true;
 }
 

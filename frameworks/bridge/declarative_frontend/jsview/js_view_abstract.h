@@ -30,7 +30,7 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/popup_param.h"
 #include "core/components/theme/theme_manager.h"
@@ -130,8 +130,8 @@ struct CommonColor {
 
 RefPtr<ResourceObject> GetResourceObject(const JSRef<JSObject>& jsObj);
 RefPtr<ResourceObject> GetResourceObjectByBundleAndModule(const JSRef<JSObject>& jsObj);
-RefPtr<ResourceWrapper> CreateResourceWrapper(const JSRef<JSObject>& jsObj, RefPtr<ResourceObject>& resourceObject);
-RefPtr<ResourceWrapper> CreateResourceWrapper();
+RefPtr<ResourceAdapter> CreateResourceAdapter(RefPtr<ResourceObject>& resourceObject);
+RefPtr<ResourceAdapter> CreateResourceAdapter();
 using PopupOnWillDismiss = std::function<void(int32_t)>;
 std::function<std::string()> JsGetCustomMapFunc(panda::ecmascript::EcmaVM* vm, int32_t nodeId);
 class JSViewAbstract {
@@ -817,8 +817,8 @@ public:
 
         resObj = SystemProperties::ConfigChangePerform() ? GetResourceObjectWithId(jsObj, hasGetter)
                                                          : GetResourceObjectByBundleAndModule(jsObj);
-        auto resourceWrapper = CreateResourceWrapper(jsObj, resObj);
-        if (!resourceWrapper) {
+        auto resourceAdapter = CreateResourceAdapter(resObj);
+        if (!resourceAdapter) {
             return false;
         }
         if (resIdNum == -1) {
@@ -832,13 +832,13 @@ public:
             JSRef<JSArray> params = JSRef<JSArray>::Cast(args);
             auto param = params->GetValueAt(0);
             if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
-                result = static_cast<T>(resourceWrapper->GetIntByName(param->ToString()));
+                result = static_cast<T>(resourceAdapter->GetIntByName(param->ToString()));
                 return true;
             }
             return false;
         }
         if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
-            result = static_cast<T>(resourceWrapper->GetInt(static_cast<uint32_t>(resIdNum)));
+            result = static_cast<T>(resourceAdapter->GetInt(static_cast<uint32_t>(resIdNum)));
             return true;
         }
         return false;
@@ -880,8 +880,8 @@ public:
         const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName,
         RefPtr<ResourceObject>& resourceObject);
     static bool CheckResource(RefPtr<ResourceObject> resourceObject,
-        RefPtr<ResourceWrapper> resourceWrapper);
-    static bool CheckCustomSymbolId(RefPtr<ResourceWrapper> resourceWrapper, int32_t resIdNum,
+        RefPtr<ResourceAdapter> resourceAdapter);
+    static bool CheckCustomSymbolId(RefPtr<ResourceAdapter> resourceAdapter, int32_t resIdNum,
         std::uint32_t& symbolId);
     static bool ProcessSymbolObject(
         JSRef<JSObject>& jsObj, std::uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject);
@@ -975,15 +975,15 @@ private:
         std::vector<RefPtr<ResourceObject>>& resObjArray);
     static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result, RefPtr<ResourceObject>& resObj);
     static bool ParseJSMediaWithRawFile(const JSRef<JSObject>& jsObj, std::string& result,
-        RefPtr<ResourceWrapper>& resourceWrapper);
+        RefPtr<ResourceAdapter>& resourceAdapter);
     static bool ParseJSMediaInternal(const JSRef<JSObject>& jsValue, std::string& result,
         RefPtr<ResourceObject>& resObj, JSRef<JSVal>& resId);
     static bool ParseResourceToDoubleByName(
-        const JSRef<JSObject>& jsObj, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
+        const JSRef<JSObject>& jsObj, int32_t resType, const RefPtr<ResourceAdapter>& resourceAdapter, double& result);
     static bool ParseResourceToDoubleById(
-        int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
+        int32_t resId, int32_t resType, const RefPtr<ResourceAdapter>& resourceAdapter, double& result);
     static bool ParseJsDimensionByNameInternal(const JSRef<JSObject>& jsObj, CalcDimension& result,
-        DimensionUnit defaultUnit, RefPtr<ResourceWrapper>& resourceWrapper, int32_t resType);
+        DimensionUnit defaultUnit, RefPtr<ResourceAdapter>& resourceAdapter, int32_t resType);
     static void ParseMenuItemsSymbolId(const JSRef<JSVal>& jsStartIcon, NG::MenuOptionsParam& menuOptionsParam);
     static std::vector<NG::MenuOptionsParam> ParseMenuItems(const JSRef<JSArray>& menuItemsArray, bool showShortcut);
     static void ParseOnCreateMenu(

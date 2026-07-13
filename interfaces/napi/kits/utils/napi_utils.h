@@ -27,7 +27,7 @@
 #include "base/log/log.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/color.h"
 
@@ -120,7 +120,7 @@ bool GetSingleParam(napi_env env, napi_callback_info info, napi_value* argv, nap
 std::optional<Color> GetOptionalColor(napi_env env, napi_value argv, napi_valuetype& valueType);
 
 napi_valuetype GetValueType(napi_env env, napi_value value);
-RefPtr<ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info);
+RefPtr<ResourceAdapter> CreateResourceAdapter(const ResourceInfo& info);
 std::optional<std::string> GetStringFromValueUtf8(napi_env env, napi_value value);
 bool ParseIntegerToString(const ResourceInfo& info, std::string& result);
 bool ParseColorFromResourceObject(napi_env env, napi_value value, Color& colorResult);

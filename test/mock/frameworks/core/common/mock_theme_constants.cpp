@@ -20,19 +20,9 @@
 namespace OHOS::Ace {
 namespace {
 constexpr InternalResource::ResourceId ERROR_VALUE_RESOURCE_ID = InternalResource::ResourceId::NO_ID;
-constexpr double BLEND_ALPHA_MAX = 1.0;
 constexpr double DIMENSION_DEFAULT = 10.0;
 constexpr int32_t INT_DEFAULT = 5;
-const ResValueWrapper ERROR_VALUE = { .type = ThemeConstantsType::ERROR };
 } // namespace
-void ThemeConstants::InitDeviceType()
-{
-}
-
-const ResValueWrapper* ThemeConstants::GetPlatformConstants(uint32_t key)
-{
-    return nullptr;
-}
 
 Color ThemeConstants::GetColor(uint32_t key) const
 {
@@ -213,19 +203,9 @@ bool ThemeConstants::GetResourceIdByName(const std::string& resName, const std::
     return false;
 }
 
-InternalResource::ResourceId ThemeConstants::GetResourceId(uint32_t key) const
+InternalResource::ResourceId ThemeConstants::GetResourceId(uint32_t) const
 {
     return ERROR_VALUE_RESOURCE_ID;
-}
-
-ResValueWrapper ThemeConstants::GetValue(uint32_t key) const
-{
-    return ERROR_VALUE;
-}
-
-double ThemeConstants::GetBlendAlpha(const BlendAlpha& blendAlpha) const
-{
-    return BLEND_ALPHA_MAX;
 }
 
 void ThemeConstants::LoadTheme(int32_t themeId)
@@ -234,18 +214,6 @@ void ThemeConstants::LoadTheme(int32_t themeId)
 }
 
 void ThemeConstants::ParseTheme()
-{
-}
-
-void ThemeConstants::LoadCustomStyle(const RefPtr<AssetManager>& assetManager)
-{
-}
-
-void ThemeConstants::ParseCustomStyle(const std::string& content)
-{
-}
-
-void ThemeConstants::LoadFile(const RefPtr<Asset>& asset)
 {
 }
 
@@ -286,11 +254,6 @@ void ThemeConstants::UpdateConfig(const ResourceConfiguration& config) {}
 RefPtr<ThemeStyle> ThemeConstants::GetThemeStyle() const
 {
     return currentThemeStyle_;
-}
-
-bool ThemeConstants::HasCustomStyle(uint32_t key) const
-{
-    return customStyleMap_.find(key) != customStyleMap_.end();
 }
 
 void ThemeConstants::UpdateThemeConstants(const std::string& bundleName, const std::string& moduleName) {}

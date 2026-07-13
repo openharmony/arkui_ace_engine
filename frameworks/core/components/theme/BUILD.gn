@@ -14,21 +14,6 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
-action("build_theme_code") {
-  script = "tools/build_theme_code.py"
-  inputs = [ "theme.csv" ]
-  outputs = [
-    "$root_out_dir/arkui/framework/core/components/theme/",
-    "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
-    "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp",
-    "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
-  ]
-  args = [
-    rebase_path(inputs[0], root_build_dir),
-    rebase_path(outputs[0], root_build_dir),
-  ]
-}
-
 # build core theme sources
 template("ace_core_components_theme_set") {
   forward_variables_from(invoker, "*")
@@ -37,10 +22,8 @@ template("ace_core_components_theme_set") {
     part_name = ace_engine_part
     defines += invoker.defines
     configs = [ "$ace_root:ace_config" ]
-    deps = [ ":build_theme_code" ]
 
     sources = [
-      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
       "app_theme.cpp",
       "blur_style_theme.cpp",
       "icon_theme.cpp",
@@ -52,13 +35,6 @@ template("ace_core_components_theme_set") {
       "theme_utils.cpp",
       "ui_material_theme.cpp",
     ]
-
-    # add sources only needed by wearable like watch.
-    if (is_wearable_product) {
-      sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp" ]
-    } else {
-      sources += [ "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp" ]
-    }
     if (use_hilog) {
       external_deps = [ "hilog:libhilog" ]
     }

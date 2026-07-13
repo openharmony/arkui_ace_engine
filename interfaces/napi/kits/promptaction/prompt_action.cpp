@@ -264,19 +264,19 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 
 bool ParseResource(const ResourceInfo resource, CalcDimension& result)
 {
-    auto resourceWrapper = CreateResourceWrapper(resource);
-    CHECK_NULL_RETURN(resourceWrapper, false);
+    auto resourceAdapter = CreateResourceAdapter(resource);
+    CHECK_NULL_RETURN(resourceAdapter, false);
     if (resource.type == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resource.resId);
+        auto value = resourceAdapter->GetString(resource.resId);
         return StringUtils::StringToCalcDimensionNG(value, result, false);
     }
     if (resource.type == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(resource.resId));
+        auto value = std::to_string(resourceAdapter->GetInt(resource.resId));
         StringUtils::StringToDimensionWithUnitNG(value, result);
         return true;
     }
     if (resource.type == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDimension(resource.resId);
+        result = resourceAdapter->GetDimension(resource.resId);
         return true;
     }
     return false;
@@ -1378,9 +1378,9 @@ std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptA
         napi_get_named_property(env, asyncContext->shadowApi, "offsetY", &offsetYApi);
         ResourceInfo recv;
         if (ParseResourceParam(env, offsetXApi, recv)) {
-            auto resourceWrapper = CreateResourceWrapper(recv);
-            CHECK_NULL_RETURN(resourceWrapper, std::nullopt);
-            auto offsetX = resourceWrapper->GetDimension(recv.resId);
+            auto resourceAdapter = CreateResourceAdapter(recv);
+            CHECK_NULL_RETURN(resourceAdapter, std::nullopt);
+            auto offsetX = resourceAdapter->GetDimension(recv.resId);
             shadow.SetOffsetX(offsetX.Value());
         } else {
             CalcDimension offsetX;
@@ -1389,9 +1389,9 @@ std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptA
             }
         }
         if (ParseResourceParam(env, offsetYApi, recv)) {
-            auto resourceWrapper = CreateResourceWrapper(recv);
-            CHECK_NULL_RETURN(resourceWrapper, std::nullopt);
-            auto offsetY = resourceWrapper->GetDimension(recv.resId);
+            auto resourceAdapter = CreateResourceAdapter(recv);
+            CHECK_NULL_RETURN(resourceAdapter, std::nullopt);
+            auto offsetY = resourceAdapter->GetDimension(recv.resId);
             shadow.SetOffsetY(offsetY.Value());
         } else {
             CalcDimension offsetY;

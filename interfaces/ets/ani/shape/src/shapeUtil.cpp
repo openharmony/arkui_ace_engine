@@ -567,55 +567,24 @@ void ReplaceHolder(std::string& originStr, const std::vector<std::string>& param
     }
 }
 
-OHOS::Ace::RefPtr<OHOS::Ace::ThemeConstants> GetThemeConstants(
-    const std::optional<std::string>& bundleName, const std::optional<std::string>& moduleName)
-{
-    auto container = OHOS::Ace::Container::Current();
-    if (!container) {
-        return nullptr;
-    }
-    auto pipelineContext = container->GetPipelineContext();
-    if (!pipelineContext) {
-        return nullptr;
-    }
-    auto themeManager = pipelineContext->GetThemeManager();
-    if (!themeManager) {
-        LOGE("themeManager is null!");
-        return nullptr;
-    }
-    if (bundleName.has_value() && moduleName.has_value()) {
-        return themeManager->GetThemeConstants(bundleName.value_or(""), moduleName.value_or(""));
-    }
-    return themeManager->GetThemeConstants();
-}
-
-OHOS::Ace::RefPtr<OHOS::Ace::ResourceWrapper> CreateResourceWrapper(const ResourceInfo& info)
+OHOS::Ace::RefPtr<OHOS::Ace::ResourceAdapter> CreateResourceAdapter(const ResourceInfo& info)
 {
     auto bundleName = info.bundleName;
     auto moduleName = info.moduleName;
 
     OHOS::Ace::RefPtr<OHOS::Ace::ResourceAdapter> resourceAdapter = nullptr;
-    OHOS::Ace::RefPtr<OHOS::Ace::ThemeConstants> themeConstants = nullptr;
-    if (OHOS::Ace::SystemProperties::GetResourceDecoupling()) {
-        if (bundleName.has_value() && moduleName.has_value()) {
-            auto resourceObject = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::ResourceObject>(
-                            bundleName.value_or(""), moduleName.value_or(""), OHOS::Ace::Container::CurrentIdSafely());
-            resourceAdapter = OHOS::Ace::ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        } else {
-            resourceAdapter = OHOS::Ace::ResourceManager::GetInstance().GetResourceAdapter(
-                OHOS::Ace::Container::CurrentIdSafely());
-        }
-        if (!resourceAdapter) {
-            return nullptr;
-        }
+    if (bundleName.has_value() && moduleName.has_value()) {
+        auto resourceObject = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::ResourceObject>(
+                        bundleName.value_or(""), moduleName.value_or(""), OHOS::Ace::Container::CurrentIdSafely());
+        resourceAdapter = OHOS::Ace::ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
     } else {
-        themeConstants = GetThemeConstants(info.bundleName, info.moduleName);
-        if (!themeConstants) {
-            return nullptr;
-        }
+        resourceAdapter = OHOS::Ace::ResourceManager::GetInstance().GetResourceAdapter(
+            OHOS::Ace::Container::CurrentIdSafely());
     }
-    auto resourceWrapper = OHOS::Ace::AceType::MakeRefPtr<OHOS::Ace::ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
+    if (!resourceAdapter) {
+        return nullptr;
+    }
+    return resourceAdapter;
 }
 
 std::string DimensionToString(OHOS::Ace::Dimension dimension)
@@ -637,47 +606,48 @@ std::string DimensionToString(OHOS::Ace::Dimension dimension)
 
 bool ParseString(const ResourceInfo& info, std::string& result)
 {
-    auto resourceWrapper = CreateResourceWrapper(info);
+    auto resourceAdapter = CreateResourceAdapter(info);
+    CHECK_NULL_RETURN(resourceAdapter, false);
     if (info.type == static_cast<int>(ResourceType::PLURAL)) {
         std::string pluralResults;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
             auto count = OHOS::Ace::StringUtils::StringToInt(info.params[1]);
-            pluralResults = resourceWrapper->GetPluralStringByName(info.params[0], count);
+            pluralResults = resourceAdapter->GetPluralStringByName(info.params[0], count);
             ReplaceHolder(pluralResults, info.params, 2); // plural holder in index 2
         } else {
             auto count = OHOS::Ace::StringUtils::StringToInt(info.params[0]);
-            pluralResults = resourceWrapper->GetPluralString(info.resId, count);
+            pluralResults = resourceAdapter->GetPluralString(info.resId, count);
             ReplaceHolder(pluralResults, info.params, 1);
         }
         result = pluralResults;
         return true;
     } else if (info.type == static_cast<int>(ResourceType::RAWFILE)) {
         auto fileName = info.params[0];
-        result = resourceWrapper->GetRawfile(fileName);
+        result = resourceAdapter->GetRawfile(fileName);
         return true;
     } else if (info.type == static_cast<int>(ResourceType::FLOAT)) {
         if (info.resId == UNKNOWN_RESOURCE_ID) {
-            result = DimensionToString(resourceWrapper->GetDimensionByName(info.params[0]));
+            result = DimensionToString(resourceAdapter->GetDimensionByName(info.params[0]));
         } else {
-            result = DimensionToString(resourceWrapper->GetDimension(info.resId));
+            result = DimensionToString(resourceAdapter->GetDimension(info.resId));
         }
         return true;
     } else if (info.type == static_cast<int>(ResourceType::STRING)) {
         std::string originStr;
         if (info.resId == UNKNOWN_RESOURCE_ID) {
-            originStr = resourceWrapper->GetStringByName(info.params[0]);
+            originStr = resourceAdapter->GetStringByName(info.params[0]);
             ReplaceHolder(originStr, info.params, 1);
         } else {
-            originStr = resourceWrapper->GetString(info.resId);
+            originStr = resourceAdapter->GetString(info.resId);
             ReplaceHolder(originStr, info.params, 0);
         }
         result = originStr;
         return true;
     } else if (info.type == static_cast<int>(ResourceType::COLOR)) {
-        result = resourceWrapper->GetColor(info.resId).ColorToString();
+        result = resourceAdapter->GetColor(info.resId).ColorToString();
         return true;
     } else if (info.type == static_cast<int>(ResourceType::INTEGER)) {
-        result = std::to_string(resourceWrapper->GetInt(info.resId));
+        result = std::to_string(resourceAdapter->GetInt(info.resId));
         return true;
     }
     return false;

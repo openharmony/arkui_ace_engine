@@ -22,7 +22,6 @@
 #include "base/resource/data_provider_manager.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/pattern/video/media_player_callback.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -249,24 +248,15 @@ bool RosenMediaPlayer::RawFileWithModuleInfoPlay(const std::string& src, const s
 {
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, Container::CurrentIdSafely());
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        CHECK_NULL_RETURN(resourceAdapter, false);
-        resourceAdapter->UpdateResourceManager(bundleName, moduleName);
-    } else {
-        auto themeManager = PipelineBase::CurrentThemeManager();
-        CHECK_NULL_RETURN(themeManager, false);
-        themeConstants = themeManager->GetThemeConstants();
-        CHECK_NULL_RETURN(themeConstants, false);
-    }
+    resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+    CHECK_NULL_RETURN(resourceAdapter, false);
+    resourceAdapter->UpdateResourceManager(bundleName, moduleName);
 
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     std::string rawFile;
     RawfileDescription rawfileDescription;
     rawfileDescription.fd = -1;
     if (GetResourceId(src, rawFile)) {
-        if (!resourceWrapper->GetRawFD(rawFile, rawfileDescription)) {
+        if (!resourceAdapter->GetRawFD(rawFile, rawfileDescription)) {
             TAG_LOGW(AceLogTag::ACE_VIDEO, "get video data by name failed");
             return false;
         }

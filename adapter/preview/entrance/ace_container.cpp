@@ -115,7 +115,6 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, bool useNewPip
     if (useNewPipeline) {
         SetUseNewPipeline();
     }
-    ThemeConstants::InitDeviceType();
     auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
     taskExecutorImpl->InitPlatformThread(useCurrentEventRunner);
     if (type_ != FrontendType::DECLARATIVE_JS && type_ != FrontendType::ETS_CARD) {
@@ -598,9 +597,7 @@ void AceContainer::UpdateResourceConfiguration(const std::string& jsonStr)
         return;
     }
     themeManager->UpdateConfig(resConfig);
-    if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(GetBundleName(), GetModuleName(), instanceId_, resConfig);
-    }
+    ResourceManager::GetInstance().UpdateResourceConfig(GetBundleName(), GetModuleName(), instanceId_, resConfig);
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_, config = resConfig,
             weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
@@ -822,9 +819,7 @@ void AceContainer::UpdateDeviceConfig(const DeviceConfig& deviceConfig)
         return;
     }
     themeManager->UpdateConfig(resConfig);
-    if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(GetBundleName(), GetModuleName(), instanceId_, resConfig);
-    }
+    ResourceManager::GetInstance().UpdateResourceConfig(GetBundleName(), GetModuleName(), instanceId_, resConfig);
     taskExecutor_->PostTask(
         [weakThemeManager = WeakPtr<ThemeManager>(themeManager), colorScheme = colorScheme_,
             weakContext = WeakPtr<PipelineBase>(pipelineContext_)]() {
@@ -916,29 +911,21 @@ void AceContainer::AttachView(
     pipelineContext_ = pipelineContext;
     InitializeCallback();
 
-    ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
 
-    if (SystemProperties::GetResourceDecoupling()) {
-        auto resourceAdapter = ResourceAdapter::Create();
-        resourceAdapter->Init(resourceInfo);
-        SaveResourceAdapter(bundleName_, moduleName_, instanceId_, resourceAdapter);
-        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
-    }
+    auto resourceAdapter = ResourceAdapter::Create();
+    resourceAdapter->Init(resourceInfo);
+    SaveResourceAdapter(bundleName_, moduleName_, instanceId_, resourceAdapter);
+    themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
         // Init resource, load theme map.
-        if (!SystemProperties::GetResourceDecoupling()) {
-            themeManager->InitResource(resourceInfo_);
-        }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
-            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_,
-                pipelineContext = pipelineContext_]() {
+            [themeManager, colorScheme = colorScheme_, pipelineContext = pipelineContext_]() {
                 themeManager->ParseSystemTheme();
                 themeManager->SetColorScheme(colorScheme);
-                themeManager->LoadCustomTheme(assetManager);
                 // get background color from theme
                 pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
             },
@@ -1041,30 +1028,22 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceViewPreview* vi
         cardFrontend->SetLoadCardCallBack(WeakPtr<PipelineBase>(pipelineContext_));
     }
 
-    ThemeConstants::InitDeviceType();
     // Only init global resource here, construct theme in UI thread
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
 
-    if (SystemProperties::GetResourceDecoupling()) {
-        auto resourceAdapter = ResourceAdapter::Create();
-        resourceAdapter->Init(resourceInfo_);
-        SaveResourceAdapter(bundleName_, moduleName_, instanceId_, resourceAdapter);
-        themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
-    }
+    auto resourceAdapter = ResourceAdapter::Create();
+    resourceAdapter->Init(resourceInfo_);
+    SaveResourceAdapter(bundleName_, moduleName_, instanceId_, resourceAdapter);
+    themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
 
     if (themeManager) {
         pipelineContext_->SetThemeManager(themeManager);
         // Init resource, load theme map.
-        if (!SystemProperties::GetResourceDecoupling()) {
-            themeManager->InitResource(resourceInfo_);
-        }
         themeManager->LoadSystemTheme(resourceInfo_.GetThemeId());
         taskExecutor_->PostTask(
-            [themeManager, assetManager = assetManager_, colorScheme = colorScheme_,
-                pipelineContext = pipelineContext_]() {
+            [themeManager, colorScheme = colorScheme_, pipelineContext = pipelineContext_]() {
                 themeManager->ParseSystemTheme();
                 themeManager->SetColorScheme(colorScheme);
-                themeManager->LoadCustomTheme(assetManager);
                 // get background color from theme
                 pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
             },
