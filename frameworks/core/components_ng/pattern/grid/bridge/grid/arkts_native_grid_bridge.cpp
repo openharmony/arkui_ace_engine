@@ -2027,8 +2027,10 @@ ArkUINativeModuleValue GridBridge::SetOnGridItemDrop(ArkUIRuntimeCallInfo* runti
             auto result = func->Call(vm, func.ToLocal(), params.data(), static_cast<int32_t>(params.size()));
             if (isJSView) {
                 ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+#ifndef CROSS_PLATFORM
                 UiSessionManager::GetInstance()->ReportComponentChangeEvent(
                     "event", "Grid.onItemDrop", ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
             }
         };
     GetArkUINodeModifiers()->getGridModifier()->setOnGridItemDrop(nativeNode, reinterpret_cast<void*>(&callback));
@@ -2106,8 +2108,10 @@ ArkUINativeModuleValue GridBridge::SetOnReachStart(ArkUIRuntimeCallInfo* runtime
         panda::TryCatch trycatch(vm);
         auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
         ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(
             "event", "Grid.onReachStart", ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
     };
     GetArkUINodeModifiers()->getGridModifier()->setOnGridReachStart(nativeNode, reinterpret_cast<void*>(&onReachStart));
     return panda::JSValueRef::Undefined(vm);
@@ -2131,8 +2135,10 @@ ArkUINativeModuleValue GridBridge::SetOnReachEnd(ArkUIRuntimeCallInfo* runtimeCa
         panda::TryCatch trycatch(vm);
         auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
         ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(
             "event", "Grid.onReachEnd", ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
     };
     GetArkUINodeModifiers()->getGridModifier()->setOnGridReachEnd(nativeNode, reinterpret_cast<void*>(&onReachEnd));
     return panda::JSValueRef::Undefined(vm);
@@ -2180,8 +2186,10 @@ ArkUINativeModuleValue GridBridge::SetOnScrollStop(ArkUIRuntimeCallInfo* runtime
         panda::TryCatch trycatch(vm);
         auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
         ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(
             "event", "Grid.onScrollStop", ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
     };
     GetArkUINodeModifiers()->getGridModifier()->setOnGridScrollStop(nativeNode, reinterpret_cast<void*>(&onScrollStop));
     return panda::JSValueRef::Undefined(vm);

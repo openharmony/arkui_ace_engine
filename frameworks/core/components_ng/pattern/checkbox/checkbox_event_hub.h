@@ -18,8 +18,10 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/event/event_hub.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -49,6 +51,7 @@ public:
             auto changeEvent = changeEvent_;
             changeEvent(select);
         }
+#ifndef CROSS_PLATFORM
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;
             auto host = GetFrameNode();
@@ -65,6 +68,7 @@ public:
             builder.SetChecked(select).SetText(name_);
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
         }
+#endif
     }
 
     const std::string& GetName()

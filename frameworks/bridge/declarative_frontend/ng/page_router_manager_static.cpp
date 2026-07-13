@@ -712,7 +712,9 @@ void PageRouterManager::ReplaceNamedRouteExtender(
 void PageRouterManager::RunPageExtender(
     const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode)
 {
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+#endif
     ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info = target;
@@ -792,7 +794,9 @@ RefPtr<FrameNode> PageRouterManager::CreatePageExtender(int32_t pageId, const Ro
         pageId, target.url, target.path, target.params, target.recoverable, target.isNamedRouterMode);
     auto pagePattern = ViewAdvancedRegister::GetInstance()->CreatePagePattern(entryPageInfo);
     std::unordered_map<std::string, std::string> reportData { { "pageUrl", target.url } };
+#ifndef CROSS_PLATFORM
     ResSchedReportScope reportScope("push_page", reportData);
+#endif
     auto pageNode = PageNode::CreatePageNode(ElementRegister::GetInstance()->MakeUniqueId(), pagePattern);
     if (!target.componentInfo.empty()) {
         pagePattern->SetRestoreInfo(target.componentInfo);

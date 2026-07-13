@@ -1088,12 +1088,16 @@ public:
 
     void RegisterListenerForTranslate(const WeakPtr<NG::FrameNode> node)
     {
+#ifndef CROSS_PLATFORM
         uiTranslateManager_->AddTranslateListener(node);
+#endif
     }
 
     void UnRegisterListenerForTranslate(int32_t nodeId)
     {
+#ifndef CROSS_PLATFORM
         uiTranslateManager_->RemoveTranslateListener(nodeId);
+#endif
     }
 
     void SetEnableSwipeBack(bool isEnable) override;
@@ -1152,7 +1156,9 @@ public:
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector();
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
     {
+#ifndef CROSS_PLATFORM
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
+#endif
     }
 
     ACE_FORCE_EXPORT WeakPtr<AIWriteAdapter> GetOrCreateAIWriteAdapter();
@@ -1287,8 +1293,10 @@ protected:
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
+#ifndef CROSS_PLATFORM
     void OnDumpRecorderStart(const std::vector<std::string>& params) const;
     void TriggerFrameDumpFuncIfExist() const;
+#endif
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
@@ -1646,7 +1654,7 @@ private:
     int32_t frameCountForNotCallJSCleanUp_ = 0;
     RefPtr<Kit::UIContextImpl> uiContextImpl_;
     std::shared_ptr<UiTranslateManagerImpl> uiTranslateManager_;
-    RotationEndCallbackMap rotationEndCallbackMap_ {};
+    RotationEndCallbackMap rotationEndCallbackMap_ {};  
     friend class ScopedLayout;
     friend class FormGestureManager;
     RefPtr<AIWriteAdapter> aiWriteAdapter_;

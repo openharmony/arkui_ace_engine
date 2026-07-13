@@ -274,7 +274,9 @@ void DistributedUI::ApplyOneUpdate()
         if (pendingUpdates_.empty()) {
             return;
         }
+#ifndef CROSS_PLATFORM
         ResSchedReport::GetInstance().ResSchedDataReport("click");
+#endif
         auto update = std::move(pendingUpdates_.front());
         pendingUpdates_.pop_front();
         UpdateUITreeInner(update);

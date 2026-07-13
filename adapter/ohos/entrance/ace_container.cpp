@@ -1444,11 +1444,13 @@ void AceContainer::InitializeCallback()
 
     auto&& crownEventCallback = [context = pipelineContext_, id = instanceId_](
                                     const CrownEvent& event, const std::function<void()>& markProcess) {
+#ifndef CROSS_PLATFORM
         if (event.action == CrownAction::BEGIN || event.action == CrownAction::END) {
             std::unordered_map<std::string, std::string> mapPayload;
             ResSchedReport::GetInstance().ResSchedDataReport(
                 RES_TYPE_CROWN_ROTATION_STATUS, static_cast<int32_t>(event.action), mapPayload);
         }
+#endif
         ContainerScope scope(id);
         auto crownTask = [context, event, markProcess, id]() {
             ContainerScope scope(id);
@@ -2582,6 +2584,7 @@ bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
     return false;
 }
 
+#ifndef CROSS_PLATFORM
 void AceContainer::DumpSimplifyTreeWithParamConfig(
     std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
 {
@@ -2590,6 +2593,7 @@ void AceContainer::DumpSimplifyTreeWithParamConfig(
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetComponentOverlayInspector(root, pipelineContext->GetRootElement(), config, isInSubWindow);
 }
+#endif
 
 void AceContainer::TriggerGarbageCollection()
 {
@@ -2788,7 +2792,9 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager, instanceId_);
+#endif
         if (pipeline) {
             LOGI("set translateManager to pipeline, instanceId:%{public}d", pipeline->GetInstanceId());
             pipeline->SaveTranslateManager(uiTranslateManager);
@@ -2806,7 +2812,9 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager, instanceId_);
+#endif
     if (pipeline) {
         LOGI("set translateManager to pipeline, instanceId:%{public}d", pipeline->GetInstanceId());
         pipeline->SaveTranslateManager(uiTranslateManager);
@@ -4664,7 +4672,9 @@ void AceContainer::AddWatchSystemParameter()
 
 void AceContainer::RemoveUISessionCallbacks()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->RemoveSaveGetCurrentInstanceId(instanceId_);
+#endif
 }
 
 void AceContainer::RemoveWatchSystemParameter()

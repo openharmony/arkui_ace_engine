@@ -707,7 +707,9 @@ bool ArcSwiperPattern::IsScrollOverCritical()
 
 void ArcSwiperPattern::PlayAnimation(const OffsetF& offset, int32_t index, const RefPtr<FrameNode>& frameNode)
 {
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
+#endif
     if (GetDirection() == Axis::HORIZONTAL) {
         PlayHorizontalAnimation(offset, index, frameNode, !IsScrollOverCritical());
     } else {
@@ -723,7 +725,9 @@ void ArcSwiperPattern::ClearAnimationFinishList()
 void ArcSwiperPattern::AnimationFinish()
 {
     if (!hasTabsAncestor_) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
+#endif
     }
     OnPropertyTranslateAnimationFinish(offset_);
 }
@@ -741,7 +745,9 @@ void ArcSwiperPattern::PlayPropertyTranslateFlipAnimation(const OffsetF& offset)
     }
     int32_t index = 0;
     if (!hasTabsAncestor_) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
+#endif
     }
     for (auto &item : itemPosition_) {
         auto frameNode = item.second.node;
@@ -837,7 +843,9 @@ void ArcSwiperPattern::PlayPropertyTranslateDefaultAnimation(const OffsetF& offs
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
         if (!swiper->hasTabsAncestor_) {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_SWIPER_FLING, true);
+#endif
         }
         OffsetF finalOffset =
             swiper->itemPosition_.empty() ? OffsetF() : swiper->itemPosition_.begin()->second.node
@@ -855,7 +863,9 @@ void ArcSwiperPattern::PlayPropertyTranslateDefaultAnimation(const OffsetF& offs
         auto swiperPattern = swiper.Upgrade();
         CHECK_NULL_VOID(swiperPattern);
         if (!swiperPattern->hasTabsAncestor_) {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_SWIPER_FLING, PerfActionType::FIRST_MOVE, "");
+#endif
         }
         TAG_LOGI(AceLogTag::ACE_SWIPER,
             "ArcSwiper start property translate animation with offsetX: %{public}f, offsetY: %{public}f", offset.GetX(),

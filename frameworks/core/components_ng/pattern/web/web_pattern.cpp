@@ -60,9 +60,15 @@
 #include "core/common/container.h"
 #include "core/components/common/properties/placement.h"
 #include "core/common/ime/input_method_manager.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_definition.h"
+#endif
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/inspector_tree_collector.h"
+#endif
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
@@ -4868,6 +4874,7 @@ char* HandleWebMessage(const char** params, int32_t size)
 #if defined(PREVIEW) || defined(ACE_UNITTEST)
     return nullptr;
 #else
+#ifndef CROSS_PLATFORM
     if (!EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_WEB)) {
         return nullptr;
     }
@@ -4890,6 +4897,7 @@ char* HandleWebMessage(const char** params, int32_t size)
         .SetExtra(Recorder::KEY_WEB_CATEGORY, params[Recorder::WEB_PARAM_INDEX_CATEGORY])
         .SetText(params[Recorder::WEB_PARAM_INDEX_CONTENT]);
     EventRecorder::Get().OnEvent(std::move(builder));
+#endif
     return nullptr;
 #endif
 }
@@ -4982,7 +4990,9 @@ void WebPattern::RecordWebEvent(bool isInit)
             std::make_pair<std::string, NativeMethodCallback>(Recorder::WEB_METHOD_NAME, HandleWebMessage)
         };
         delegate_->RegisterNativeArkJSFunction(Recorder::WEB_OBJ_NAME, methodList, false);
+#ifndef CROSS_PLATFORM
         EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
+#endif
     }
 #endif
 }
@@ -8746,7 +8756,9 @@ void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentEndScriptRegexItems_ = std::make_optional<ScriptRegexItems>(scriptRegexItems);
     onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+#ifndef CROSS_PLATFORM
     EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
+#endif
     if (delegate_) {
         UpdateJavaScriptOnDocumentEndByOrder();
         delegate_->JavaScriptOnDocumentEndByOrder();
@@ -8769,7 +8781,9 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     onDocumentEndScriptItemsByOrder_ = std::nullopt;
+#ifndef CROSS_PLATFORM
     EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
+#endif
     if (delegate_) {
         UpdateJavaScriptOnDocumentEnd();
         delegate_->JavaScriptOnDocumentEnd();
@@ -10683,7 +10697,11 @@ RefPtr<WebAccessibilityEventReport> WebPattern::GetAccessibilityEventReport()
 
 void WebPattern::InitInputEventReportCallback()
 {
-    if (UiSessionManager::GetInstance()->GetWebFocusRegistered()) {
+    auto hasRegisteredFocus = false;
+#ifndef CROSS_PLATFORM
+    hasRegisteredFocus = UiSessionManager::GetInstance()->GetWebFocusRegistered();
+#endif
+    if (hasRegisteredFocus) {
         TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::InitInputEventReportCallback, register event report callback");
         auto report = GetAccessibilityEventReport();
         CHECK_NULL_VOID(report);
@@ -10720,12 +10738,14 @@ RefPtr<WebAgentEventReporter> WebPattern::GetAgentEventReporter()
 
 void WebPattern::ReportSelectedText(bool isRegister)
 {
+#ifndef CROSS_PLATFORM
     if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
         CHECK_NULL_VOID(delegate_);
         auto text = delegate_->GetLastSelectionText();
         TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::ReportSelectedText %{public}zu", text.size());
         UiSessionManager::GetInstance()->ReportSelectTextEvent(text);
     }
+#endif
 }
 
 void WebPattern::UpdateTextSelectionHolderId()

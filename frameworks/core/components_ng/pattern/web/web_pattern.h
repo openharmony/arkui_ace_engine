@@ -28,7 +28,9 @@
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ai/data_detector_adapter.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/web_event_recorder.h"
+#endif
 #include "core/common/udmf/unified_data.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_properties.h"

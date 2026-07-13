@@ -166,8 +166,10 @@ void JSPageTransition::JsHandlerOnEnter(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("PageTransition.onEnter");
         func->Execute(type, progress);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onEnter",
             ComponentEventType::COMPONENT_EVENT_PAGE_TRANSITION);
+#endif
     };
 
     PageTransitionModel::GetInstance()->SetOnEnter(std::move(onEnterHandler));
@@ -187,8 +189,10 @@ void JSPageTransition::JsHandlerOnExit(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("PageTransition.onExit");
         func->Execute(type, progress);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onExit",
             ComponentEventType::COMPONENT_EVENT_PAGE_TRANSITION);
+#endif
     };
 
     PageTransitionModel::GetInstance()->SetOnExit(std::move(onExitHandler));

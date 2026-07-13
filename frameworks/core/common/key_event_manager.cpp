@@ -609,7 +609,9 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
 #ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         Reporter::GetInstance().HandleInputEventInspectorReporting(event);
 #endif
+#ifndef CROSS_PLATFORM
         ResSchedReport::GetInstance().OnKeyEvent(event);
+#endif
         if (TriggerKeyEventDispatch(event)) {
             return true;
         }

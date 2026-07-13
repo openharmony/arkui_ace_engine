@@ -128,6 +128,7 @@ void Pattern::ReadFontScaleFromEnv()
 GestureEventFunc Pattern::GetLongPressEventRecorder()
 {
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+#ifndef CROSS_PLATFORM
         if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             return;
         }
@@ -151,6 +152,7 @@ GestureEventFunc Pattern::GetLongPressEventRecorder()
             builder.SetExtra(Recorder::KEY_NODE_RECT, std::move(rect));
         }
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+#endif
     };
     return longPressCallback;
 }

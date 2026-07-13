@@ -380,8 +380,10 @@ void XComponentPattern::OnAttachToMainTree()
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto bundleName = pipelineContext->GetBundleName();
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->ReportSurface(renderSurface_->GetUniqueIdNum(), renderSurface_->GetPSurfaceName(),
         customNode->GetJSViewName(), bundleName.c_str(), getpid());
+#endif
     if (pipelineContext->GetXComponentDisplayConstraintEnabled()) {
         host->RegisterNodeChangeListener();
     }
@@ -417,7 +419,9 @@ void XComponentPattern::OnDetachFromMainTree()
     std::string viewName = customNode ? customNode->GetJSViewName() : "";
     auto pipelineContext = host->GetContextRefPtr();
     auto bundleName = pipelineContext ? pipelineContext->GetBundleName() : "";
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->ReportComponentDetach(uniqueId, surfaceName, viewName, bundleName, getpid());
+#endif
     host->UnregisterNodeChangeListener();
 }
 

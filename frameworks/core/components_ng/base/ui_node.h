@@ -354,10 +354,12 @@ public:
     void DumpSimplifyTreeBase(std::shared_ptr<JsonValue>& current);
     void DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current);
     void DumpSimplifyTreeNode(std::shared_ptr<JsonValue>& current, ParamConfig config);
+#ifndef CROSS_PLATFORM
     void DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current,
         bool onlyNeedVisible, ParamConfig config = ParamConfig(),
         std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker = nullptr,
         double parentFinalOpacity = DEFAULT_NODE_OPACITY);
+#endif
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
@@ -1308,9 +1310,11 @@ protected:
 private:
     struct RectCullingState;
 
+#ifndef CROSS_PLATFORM
     void DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
         ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker,
         double parentFinalOpacity, const RectCullingState& rectCullingState);
+#endif
     RectCullingState CreateRectCullingState(bool onlyNeedVisible, ParamConfig config);
     RectCullingState CreateChildRectCullingState(const RectCullingState& rectCullingState);
     bool IsCulledByRect(const RectCullingState& rectCullingState, bool hasInspectableChildren);
