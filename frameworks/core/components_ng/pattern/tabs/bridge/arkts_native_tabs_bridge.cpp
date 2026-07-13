@@ -1437,8 +1437,8 @@ ArkUINativeModuleValue TabsBridge::SetIsVertical(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (ArkTSUtils::IsJsView(firstArg, vm)) {
         bool isVertical = false;
-        if (isVerticalArg->IsString(vm)) {
-            isVertical = Framework::StringToBool(isVerticalArg->ToString(vm)->ToString(vm));
+        if (!isVerticalArg.IsNull() && !isVerticalArg->IsUndefined() && isVerticalArg->IsBoolean()) {
+            isVertical = isVerticalArg->ToBoolean(vm)->Value();
         }
         GetArkUINodeModifiers()->getTabsModifier()->setIsVertical(nativeNode, isVertical);
         return panda::JSValueRef::Undefined(vm);
@@ -1623,10 +1623,9 @@ ArkUINativeModuleValue TabsBridge::SetScrollable(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     ArkUINativeModuleValue undefinedRes = panda::JSValueRef::Undefined(vm);
     if (ArkTSUtils::IsJsView(firstArg, vm)) {
-        bool scrollable = false;
-        if (!scrollableArg.IsNull() && !scrollableArg->IsUndefined() && scrollableArg->IsString(vm)) {
-            auto value = scrollableArg->ToString(vm)->ToString(vm);
-            scrollable = (value == "undefined") ? true : Framework::StringToBool(value);
+        bool scrollable = true;
+        if (!scrollableArg.IsNull() && !scrollableArg->IsUndefined() && scrollableArg->IsBoolean()) {
+            scrollable = scrollableArg->ToBoolean(vm)->Value();
         }
         GetArkUINodeModifiers()->getTabsModifier()->setScrollable(nativeNode, scrollable);
         return undefinedRes;
@@ -1872,15 +1871,15 @@ ArkUINativeModuleValue TabsBridge::SetAnimationDuration(ArkUIRuntimeCallInfo* ru
     if (ArkTSUtils::IsJsView(firstArg, vm)) {
         uint32_t argc = runtimeCallInfo->GetArgsNumber();
         if (argc <= TABS_ARG_INDEX_1) {
-            GetArkUINodeModifiers()->getTabsModifier()->setAnimationDuration(nativeNode, -1.0f);
+            GetArkUINodeModifiers()->getTabsModifier()->setAnimationDuration(nativeNode, -1);
             return panda::JSValueRef::Undefined(vm);
         }
         if ((!durationArg.IsNull() && !durationArg->IsUndefined() && !durationArg->IsNumber()) ||
             (durationArg.IsNull() && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
-            GetArkUINodeModifiers()->getTabsModifier()->setAnimationDuration(nativeNode, -1.0f);
+            GetArkUINodeModifiers()->getTabsModifier()->setAnimationDuration(nativeNode, -1);
             return panda::JSValueRef::Undefined(vm);
         }
-        float duration = durationArg->IsNumber() ? durationArg->ToNumber(vm)->Value() : 0.0f;
+        float duration = durationArg->IsNumber() ? static_cast<int32_t>(durationArg->ToNumber(vm)->Value()) : 0;
         GetArkUINodeModifiers()->getTabsModifier()->setAnimationDuration(nativeNode, duration);
         return panda::JSValueRef::Undefined(vm);
     }
