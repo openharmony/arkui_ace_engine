@@ -1150,7 +1150,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
                 ViewV2.createRecycle(componentRef, isActuallyRecycled, reuseId, () => {
                     recycledNode?.aboutToReuseInternal(getParams());
                 });
-				if (wasPreRendered) {
+				if (wasPreRendered && componentRef.updateStateVars) {
 				  componentRef.updateStateVars(getParams());
 				}
                 if (recycledNode && !isActuallyRecycled) {
