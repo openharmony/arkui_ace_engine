@@ -19,6 +19,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include "text_layout_adapter.h"
 
@@ -47,8 +48,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
-const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+constexpr std::string_view CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+constexpr std::string_view DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 
 template<typename T>
 inline bool HasLpxUnit(const std::optional<T>& value)
@@ -1070,7 +1071,7 @@ bool SpanItem::UpdateSymbolSpanFontFamily(TextStyle& symbolSpanStyle)
         }
         symbolSpanStyle.SetFontFamilies(fontFamilies);
     } else {
-        fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        fontFamilies.push_back(std::string(DEFAULT_SYMBOL_FONTFAMILY));
         symbolSpanStyle.SetFontFamilies(fontFamilies);
     }
     return true;

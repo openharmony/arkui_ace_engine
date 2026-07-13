@@ -142,13 +142,14 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextColorResToSpanNodeTest004, TestSize.
     RefPtr<SpanNode> spanNode = AceType::MakeRefPtr<SpanNode>(1);
     TextStyle textStyle;
     RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>();
-    textStyle.AddResource(StyleManager::TEXT_COLOR_KEY, colorResObj, StyleManager::TEXT_STYLE_TEXT_COLOR_UPDATER);
+    textStyle.AddResource(std::string(StyleManager::TEXT_COLOR_KEY), colorResObj,
+        StyleManager::TEXT_STYLE_TEXT_COLOR_UPDATER);
     g_isConfigChangePerform = true;
 
     StyleManager::UpdateTextColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
 
-    textStyle.AddResource(StyleManager::TEXT_DECORATION_COLOR_KEY, colorResObj,
+    textStyle.AddResource(std::string(StyleManager::TEXT_DECORATION_COLOR_KEY), colorResObj,
         StyleManager::TEXT_STYLE_TEXT_DECORATION_COLOR_UPDATER);
     StyleManager::UpdateTextColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
@@ -241,14 +242,15 @@ HWTEST_F(RichEditorStyleManagerTest, AddTextDecorationColorResToSpanNodeTest004,
     RefPtr<SpanNode> spanNode = AceType::MakeRefPtr<SpanNode>(1);
     TextStyle textStyle;
     RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>();
-    textStyle.AddResource(StyleManager::TEXT_DECORATION_COLOR_KEY, colorResObj,
+    textStyle.AddResource(std::string(StyleManager::TEXT_DECORATION_COLOR_KEY), colorResObj,
         StyleManager::TEXT_STYLE_TEXT_DECORATION_COLOR_UPDATER);
     g_isConfigChangePerform = true;
 
     StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
 
-    textStyle.AddResource(StyleManager::TEXT_COLOR_KEY, colorResObj, StyleManager::TEXT_STYLE_TEXT_COLOR_UPDATER);
+    textStyle.AddResource(std::string(StyleManager::TEXT_COLOR_KEY), colorResObj,
+        StyleManager::TEXT_STYLE_TEXT_COLOR_UPDATER);
     StyleManager::UpdateTextDecorationColorResource(spanNode, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
 }
@@ -349,9 +351,9 @@ HWTEST_F(RichEditorStyleManagerTest, TextStyleUpdateTest002, TestSize.Level0) {
     RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>();
     const auto& key = StyleManager::TEXT_COLOR_KEY;
     const auto& updater = StyleManager::TEXT_STYLE_TEXT_COLOR_UPDATER;
-    textStyle.AddResource(key, colorResObj, updater);
+    textStyle.AddResource(std::string(key), colorResObj, updater);
     EXPECT_EQ(textStyle.resMap_.Size(), 1);
-    EXPECT_NE(textStyle.GetResource(key), nullptr);
+    EXPECT_NE(textStyle.GetResource(std::string(key)), nullptr);
 
     /**
      * @tc.steps: step1. test CopyResource
@@ -359,7 +361,7 @@ HWTEST_F(RichEditorStyleManagerTest, TextStyleUpdateTest002, TestSize.Level0) {
     TextStyle textStyle1;
     textStyle1.CopyResource(textStyle);
     EXPECT_EQ(textStyle1.resMap_.Size(), 1);
-    EXPECT_NE(textStyle1.GetResource(key), nullptr);
+    EXPECT_NE(textStyle1.GetResource(std::string(key)), nullptr);
 
     /**
      * @tc.steps: step2. test AppendResource
@@ -367,7 +369,7 @@ HWTEST_F(RichEditorStyleManagerTest, TextStyleUpdateTest002, TestSize.Level0) {
     TextStyle textStyle2;
     textStyle2.AppendResource(textStyle);
     EXPECT_EQ(textStyle2.resMap_.Size(), 1);
-    EXPECT_NE(textStyle2.GetResource(key), nullptr);
+    EXPECT_NE(textStyle2.GetResource(std::string(key)), nullptr);
 }
 
 HWTEST_F(RichEditorStyleManagerTest, TextStyleUpdateTest003, TestSize.Level0) {
@@ -393,7 +395,7 @@ HWTEST_F(RichEditorStyleManagerTest, SpanNodeUpdateTest002, TestSize.Level0) {
     RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>();
     const auto& key = StyleManager::TEXT_COLOR_KEY;
     const auto& updater = StyleManager::TEXT_COLOR_UPDATER;
-    spanNode->AddResource(key, colorResObj, updater);
+    spanNode->AddResource(std::string(key), colorResObj, updater);
     EXPECT_EQ(spanNode->spanItem_->fontStyle->resMap_.size(), 1);
 
     RefPtr<SpanNode> spanNode1 = AceType::MakeRefPtr<SpanNode>(1);
@@ -408,7 +410,7 @@ HWTEST_F(RichEditorStyleManagerTest, SpanItemUpdateTest001, TestSize.Level0) {
     RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>();
     const auto& key = StyleManager::TEXT_COLOR_KEY;
     const auto& updater = StyleManager::TEXT_COLOR_UPDATER;
-    spanItem->AddResource(key, colorResObj, updater);
+    spanItem->AddResource(std::string(key), colorResObj, updater);
     EXPECT_EQ(spanItem->fontStyle->resMap_.size(), 1);
 
     RefPtr<SpanItem> spanItem1 = AceType::MakeRefPtr<SpanItem>();
@@ -432,7 +434,7 @@ HWTEST_F(RichEditorStyleManagerTest, FontStyleUpdateTest002, TestSize.Level0) {
     RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>();
     const auto& key = StyleManager::TEXT_COLOR_KEY;
     const auto& updater = StyleManager::TEXT_COLOR_UPDATER;
-    fontStyle->AddResource(key, colorResObj, updater);
+    fontStyle->AddResource(std::string(key), colorResObj, updater);
     EXPECT_EQ(fontStyle->resMap_.size(), 1);
 
     FontStyle fontStyle1;
@@ -449,7 +451,7 @@ HWTEST_F(RichEditorStyleManagerTest, DragBackgroundColorTest002, TestSize.Level0
     RefPtr<ResourceObject> colorResObj = AceType::MakeRefPtr<ResourceObject>();
     const auto& key = StyleManager::TEXT_COLOR_KEY;
     const auto& updater = StyleManager::TEXT_COLOR_UPDATER;
-    fontStyle->AddResource(key, colorResObj, updater);
+    fontStyle->AddResource(std::string(key), colorResObj, updater);
     EXPECT_EQ(fontStyle->resMap_.size(), 1);
 }
 
@@ -462,10 +464,10 @@ HWTEST_F(RichEditorStyleManagerTest, UpdatePropertyTest001, TestSize.Level0) {
     value->SetValueType(ValueType::COLOR);
     value->SetValue(color);
 
-    richEditorPattern->UpdatePropertyImpl(StyleManager::CARET_COLOR_KEY, value);
-    richEditorPattern->UpdatePropertyImpl(StyleManager::SCROLL_BAR_COLOR_KEY, value);
-    richEditorPattern->UpdatePropertyImpl(StyleManager::PLACEHOLDER_FONT_COLOR_KEY, value);
-    richEditorPattern->UpdatePropertyImpl(StyleManager::SELECTED_BACKGROUND_COLOR_KEY, value);
+    richEditorPattern->UpdatePropertyImpl(std::string(StyleManager::CARET_COLOR_KEY), value);
+    richEditorPattern->UpdatePropertyImpl(std::string(StyleManager::SCROLL_BAR_COLOR_KEY), value);
+    richEditorPattern->UpdatePropertyImpl(std::string(StyleManager::PLACEHOLDER_FONT_COLOR_KEY), value);
+    richEditorPattern->UpdatePropertyImpl(std::string(StyleManager::SELECTED_BACKGROUND_COLOR_KEY), value);
 
     richEditorPattern->OnColorModeChange(0);
     richEditorPattern->UpdatePlaceholderFontColor(color);

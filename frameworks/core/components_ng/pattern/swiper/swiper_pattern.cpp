@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include "base/error/error_code.h"
 #include "base/geometry/axis.h"
@@ -89,11 +90,11 @@ const char SWIPER_RIGHT_CAPTURE_ETS_TAG[] = "SwiperRightCapture";
 const char TABS_ETS_TAG[] = "Tabs";
 const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
 const char JS_FOR_EACH_ETS_TAG[] = "JSForEach";
-const std::string SWIPER_DRAG_SCENE = "swiper_drag_scene";
-const std::string FADE_PROPERTY_NAME = "fade";
-const std::string SPRING_PROPERTY_NAME = "spring";
-const std::string INDICATOR_PROPERTY_NAME = "indicator";
-const std::string TRANSLATE_PROPERTY_NAME = "translate";
+constexpr std::string_view SWIPER_DRAG_SCENE = "swiper_drag_scene";
+constexpr std::string_view FADE_PROPERTY_NAME = "fade";
+constexpr std::string_view SPRING_PROPERTY_NAME = "spring";
+constexpr std::string_view INDICATOR_PROPERTY_NAME = "indicator";
+constexpr std::string_view TRANSLATE_PROPERTY_NAME = "translate";
 constexpr uint16_t CAPTURE_PIXEL_ROUND_VALUE = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
                                               static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
                                               static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
@@ -2795,7 +2796,7 @@ void SwiperPattern::StopTranslateAnimation()
                 CHECK_NULL_VOID(swiper);
                 auto host = swiper->GetHost();
                 CHECK_NULL_VOID(host);
-                host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, swiper->currentOffset_);
+                host->UpdateAnimatablePropertyFloat(std::string(TRANSLATE_PROPERTY_NAME), swiper->currentOffset_);
             }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, host->GetContextRefPtr());
         }
 
@@ -2818,7 +2819,7 @@ void SwiperPattern::StopSpringAnimationImmediately()
         CHECK_NULL_VOID(swiper);
         auto host = swiper->GetHost();
         CHECK_NULL_VOID(host);
-        host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, swiper->currentIndexOffset_);
+        host->UpdateAnimatablePropertyFloat(std::string(SPRING_PROPERTY_NAME), swiper->currentIndexOffset_);
         swiper->FireScrollStateEvent(ScrollState::IDLE);
     }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, host->GetContextRefPtr());
     OnSpringAnimationFinish();
@@ -4588,7 +4589,7 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::option
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
-    host->CreateAnimatablePropertyFloat(INDICATOR_PROPERTY_NAME, 0, [weak](float value) {
+    host->CreateAnimatablePropertyFloat(std::string(INDICATOR_PROPERTY_NAME), 0, [weak](float value) {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
         const auto& turnPageRateCallback = swiper->swiperController_->GetTurnPageRateCallback();
@@ -4603,14 +4604,14 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::option
     option.SetDuration(GetDuration());
     option.SetCurve(Curves::LINEAR);
 
-    host->UpdateAnimatablePropertyFloat(INDICATOR_PROPERTY_NAME, 0);
+    host->UpdateAnimatablePropertyFloat(std::string(INDICATOR_PROPERTY_NAME), 0);
     indicatorAnimationIsRunning_ = true;
     indicatorAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weakHost = WeakClaim(RawPtr(host)), translate]() {
             auto host = weakHost.Upgrade();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(INDICATOR_PROPERTY_NAME, translate);
+            host->UpdateAnimatablePropertyFloat(std::string(INDICATOR_PROPERTY_NAME), translate);
         },
         [weak]() {
             auto swiperPattern = weak.Upgrade();
@@ -4638,7 +4639,7 @@ void SwiperPattern::PlayTranslateAnimation(
     CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
     host->CreateAnimatablePropertyFloat(
-        TRANSLATE_PROPERTY_NAME, 0,
+        std::string(TRANSLATE_PROPERTY_NAME), 0,
         [weak](float value) {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
@@ -4664,7 +4665,7 @@ void SwiperPattern::PlayTranslateAnimation(
     } else {
         option.SetFrameRateRange(SWIPER_DEFAULT_FRAME_RATE);
     }
-    host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, startPos);
+    host->UpdateAnimatablePropertyFloat(std::string(TRANSLATE_PROPERTY_NAME), startPos);
     translateAnimationIsRunning_ = true;
     propertyAnimationIndex_ = nextIndex;
     translateAnimationEndPos_ = endPos;
@@ -4675,7 +4676,7 @@ void SwiperPattern::PlayTranslateAnimation(
             CHECK_NULL_VOID(swiper);
             auto host = swiper->GetHost();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, endPos);
+            host->UpdateAnimatablePropertyFloat(std::string(TRANSLATE_PROPERTY_NAME), endPos);
             AceAsyncTraceBeginCommercial(
                 0, swiper->hasTabsAncestor_ ? APP_TABS_FRAME_ANIMATION : APP_SWIPER_FRAME_ANIMATION);
             AnimationCallbackInfo info;
@@ -4896,7 +4897,8 @@ void SwiperPattern::PlayFadeAnimation()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
-    host->CreateAnimatablePropertyFloat(FADE_PROPERTY_NAME, 0, Animation<double>::ValueCallback([weak](float value) {
+    host->CreateAnimatablePropertyFloat(std::string(FADE_PROPERTY_NAME), 0,
+        Animation<double>::ValueCallback([weak](float value) {
         auto swiper = weak.Upgrade();
         if (swiper && swiper->GetHost() && !swiper->isTouchDown_) {
             swiper->fadeOffset_ = value;
@@ -4908,7 +4910,7 @@ void SwiperPattern::PlayFadeAnimation()
     option.SetDuration(FADE_DURATION);
     option.SetCurve(Curves::LINEAR);
 
-    host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, fadeOffset_);
+    host->UpdateAnimatablePropertyFloat(std::string(FADE_PROPERTY_NAME), fadeOffset_);
     nextIndex_ = currentIndex_;
     fadeAnimation_ = AnimationUtils::StartAnimation(
         option,
@@ -4918,7 +4920,7 @@ void SwiperPattern::PlayFadeAnimation()
             swiperPattern->OnFadeAnimationStart();
             auto host = swiperPattern->GetHost();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, 0.f);
+            host->UpdateAnimatablePropertyFloat(std::string(FADE_PROPERTY_NAME), 0.f);
         },
         [weak]() {
             auto swiperPattern = weak.Upgrade();
@@ -4932,7 +4934,7 @@ void SwiperPattern::CreateSpringProperty()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->CreateAnimatablePropertyFloat(
-        SPRING_PROPERTY_NAME, 0,
+        std::string(SPRING_PROPERTY_NAME), 0,
         [weak = AceType::WeakClaim(this)](float position) {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
@@ -4962,7 +4964,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     auto trailing = currentIndexOffset_ - itemPosition_.begin()->second.startPos;
     ExtentPair extentPair = ExtentPair(leading, trailing);
     CreateSpringProperty();
-    host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, currentIndexOffset_);
+    host->UpdateAnimatablePropertyFloat(std::string(SPRING_PROPERTY_NAME), currentIndexOffset_);
     auto delta = currentIndexOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing();
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         delta = extentPair.Trailing();
@@ -4987,7 +4989,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
             swiperPattern->FireScrollStateEvent(ScrollState::FLING);
             auto host = swiperPattern->GetHost();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, delta);
+            host->UpdateAnimatablePropertyFloat(std::string(SPRING_PROPERTY_NAME), delta);
         },
         [weak = AceType::WeakClaim(this)]() {
             auto swiperPattern = weak.Upgrade();
@@ -6661,7 +6663,7 @@ void SwiperPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->AddFRCSceneInfo(SWIPER_DRAG_SCENE, speed, sceneStatus);
+    host->AddFRCSceneInfo(std::string(SWIPER_DRAG_SCENE), speed, sceneStatus);
 }
 
 int32_t SwiperPattern::GetLoopIndex(int32_t index, int32_t childrenSize) const

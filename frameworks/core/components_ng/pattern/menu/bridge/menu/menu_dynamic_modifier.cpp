@@ -28,8 +28,8 @@ static const char* ERR_CODE = "-1";
 constexpr int SUB_MENU_EXPANDING_MODE_SIDE = 0;
 constexpr int SUB_MENU_EXPANDING_MODE_EMBEDDED = 1;
 constexpr int SUB_MENU_EXPANDING_MODE_STACK = 2;
-const std::string DEFAULT_FONT_WEIGHT = "normal";
-const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
+constexpr std::string_view DEFAULT_FONT_WEIGHT = "normal";
+constexpr std::string_view DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
@@ -169,7 +169,8 @@ void SetMenuFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal)
     if (res[2] != ERR_CODE) { // 2: index of font family data
         MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[2]));
     } else {
-        MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+        MenuModelNG::SetFontFamily(frameNode,
+            Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY)));
     }
 }
 
@@ -200,7 +201,8 @@ void SetMenuFontWithResource(ArkUINodeHandle node, ArkUIMenuFontOptions* menuFon
                 MenuModelNG::CreateWithFontFamilyResourceObj(frameNode, familyResObj, MenuFamilyType::FONT_FAMILY);
             }
         } else {
-            MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+            MenuModelNG::SetFontFamily(frameNode,
+                Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY)));
         }
     }
 }
@@ -210,11 +212,12 @@ void ResetMenuFont(ArkUINodeHandle node)
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension fontSize;
-    FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT, FontWeight::NORMAL);
+    FontWeight fontWeight = StringUtils::StringToFontWeight(std::string(DEFAULT_FONT_WEIGHT), FontWeight::NORMAL);
     MenuModelNG::SetFontSize(frameNode, fontSize);
     MenuModelNG::SetFontWeight(frameNode, fontWeight);
     MenuModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
-    MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+    MenuModelNG::SetFontFamily(frameNode,
+        Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY)));
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> nullResObj = nullptr;
         MenuModelNG::CreateWithDimensionResourceObj(frameNode, nullResObj, MenuDimensionType::FONT_SIZE);

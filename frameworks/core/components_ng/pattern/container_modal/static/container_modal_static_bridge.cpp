@@ -15,6 +15,7 @@
 #include "core/components_ng/pattern/container_modal/static/container_modal_static_bridge.h"
 
 #include <cstdint>
+#include <string_view>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
@@ -25,28 +26,28 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string EVENT_NAME_CUSTOM_MAX_CLICK_STATIC = "arkui_custom_max_click";
-const std::string EVENT_NAME_MIN_CLICK_STATIC = "arkui_custom_min_click";
-const std::string EVENT_NAME_CLOSE_CLICK_STATIC = "arkui_custom_close_click";
-const std::string EVENT_NAME_PAN_EVENT_STATIC = "arkui_custom_pan_event";
-const std::string EVENT_NAME_LEFT_SPLIT_CLICK_STATIC = "arkui_custom_left_split_click";
-const std::string EVENT_NAME_RIGHT_SPLIT_CLICK_STATIC = "arkui_custom_right_split_click";
-const std::string EVENT_NAME_BUTTON_POINT_LIGHT_ANIM_STATIC = "arkui_custom_button_point_light_anim";
-const std::string EVENT_NAME_BUTTON_RECT_CHANGE_STATIC = "arkui_custom_button_rect_change";
-const std::string EVENT_NAME_MENU_WIDTH_CHANGE_STATIC = "arkui_custom_menu_width_change";
+constexpr std::string_view EVENT_NAME_CUSTOM_MAX_CLICK_STATIC = "arkui_custom_max_click";
+constexpr std::string_view EVENT_NAME_MIN_CLICK_STATIC = "arkui_custom_min_click";
+constexpr std::string_view EVENT_NAME_CLOSE_CLICK_STATIC = "arkui_custom_close_click";
+constexpr std::string_view EVENT_NAME_LEFT_SPLIT_CLICK_STATIC = "arkui_custom_left_split_click";
+constexpr std::string_view EVENT_NAME_RIGHT_SPLIT_CLICK_STATIC = "arkui_custom_right_split_click";
+constexpr std::string_view EVENT_NAME_BUTTON_POINT_LIGHT_ANIM_STATIC = "arkui_custom_button_point_light_anim";
+constexpr std::string_view EVENT_NAME_BUTTON_RECT_CHANGE_STATIC = "arkui_custom_button_rect_change";
+constexpr std::string_view EVENT_NAME_MENU_WIDTH_CHANGE_STATIC = "arkui_custom_menu_width_change";
 
 } // namespace
 
 const std::map<std::string, std::function<void(const std::string& eventName, const std::string& param)>>
     ContainerModalStaticBridge::nativeFuncMap_ = {
-        { EVENT_NAME_CUSTOM_MAX_CLICK_STATIC, ContainerModalStaticBridge::OnMaxBtnClick },
-        { EVENT_NAME_MIN_CLICK_STATIC, ContainerModalStaticBridge::OnMinBtnClick },
-        { EVENT_NAME_CLOSE_CLICK_STATIC, ContainerModalStaticBridge::OnCloseBtnClick },
-        { EVENT_NAME_LEFT_SPLIT_CLICK_STATIC, ContainerModalStaticBridge::OnLeftSplitClick },
-        { EVENT_NAME_RIGHT_SPLIT_CLICK_STATIC, ContainerModalStaticBridge::OnRightSplitClick },
-        { EVENT_NAME_BUTTON_POINT_LIGHT_ANIM_STATIC, ContainerModalStaticBridge::AddButtonPointLightAnim },
-        { EVENT_NAME_BUTTON_RECT_CHANGE_STATIC, ContainerModalStaticBridge::CallButtonsRectChange },
-        { EVENT_NAME_MENU_WIDTH_CHANGE_STATIC, ContainerModalStaticBridge::CallMenuWidthChange },
+        { std::string(EVENT_NAME_CUSTOM_MAX_CLICK_STATIC), ContainerModalStaticBridge::OnMaxBtnClick },
+        { std::string(EVENT_NAME_MIN_CLICK_STATIC), ContainerModalStaticBridge::OnMinBtnClick },
+        { std::string(EVENT_NAME_CLOSE_CLICK_STATIC), ContainerModalStaticBridge::OnCloseBtnClick },
+        { std::string(EVENT_NAME_LEFT_SPLIT_CLICK_STATIC), ContainerModalStaticBridge::OnLeftSplitClick },
+        { std::string(EVENT_NAME_RIGHT_SPLIT_CLICK_STATIC), ContainerModalStaticBridge::OnRightSplitClick },
+        { std::string(EVENT_NAME_BUTTON_POINT_LIGHT_ANIM_STATIC),
+            ContainerModalStaticBridge::AddButtonPointLightAnim },
+        { std::string(EVENT_NAME_BUTTON_RECT_CHANGE_STATIC), ContainerModalStaticBridge::CallButtonsRectChange },
+        { std::string(EVENT_NAME_MENU_WIDTH_CHANGE_STATIC), ContainerModalStaticBridge::CallMenuWidthChange },
     };
 
 void ContainerModalStaticBridge::OnMaxBtnClick(const std::string& eventName, const std::string& param)

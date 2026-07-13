@@ -23,6 +23,7 @@
 #include <sstream>
 #include <queue>
 #include <string>
+#include <string_view>
 
 #include "event_handler.h"
 
@@ -106,13 +107,13 @@ constexpr char NTC_PARAM_DESCRIPTION[] = "description";
 constexpr char WEB_ERROR_CODE_CREATEFAIL[] = "error-web-delegate-000001";
 constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
 
-const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
-const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
-const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
-const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
-const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
-const std::string RESOURCE_SENSOR = "TYPE_SENSOR";
-const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
+constexpr std::string_view RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
+constexpr std::string_view RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
+constexpr std::string_view RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
+constexpr std::string_view RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
+constexpr std::string_view RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
+constexpr std::string_view RESOURCE_SENSOR = "TYPE_SENSOR";
+constexpr std::string_view DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 const int32_t DEFAULT_BACK_TO_TOP_TIME = 1000;
 const float DEFAULT_BACK_TO_TOP_OFFSET = 0.0;
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
@@ -126,7 +127,7 @@ constexpr int32_t ACCESSIBILITY_PAGE_CHANGE_MAX_RETRY = 10;
 constexpr int64_t WEB_ACCESSIBILITY_INVALID_NODE_ID = -1;
 constexpr int32_t WEB_ACCESSIBILITY_FOCUS_FORWARD = 1 << 4;
 constexpr uint32_t AUTOFILL_DELAY_MILLISECONDS = 100;
-const std::string DEFAULT_NATIVE_EMBED_ID = "0";
+constexpr std::string_view DEFAULT_NATIVE_EMBED_ID = "0";
 constexpr uint32_t TIMEOUT_SECONDS = 5;
 
 constexpr double WEB_SNAPSHOT_SIZE_TOLERANCE = 0.85;
@@ -606,22 +607,22 @@ std::vector<std::string> WebPermissionRequestOhos::GetResources() const
     if (request_) {
         uint32_t resourcesId = static_cast<uint32_t>(request_->ResourceAcessId());
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::VIDEO_CAPTURE) {
-            resources.push_back(RESOURCE_VIDEO_CAPTURE);
+            resources.push_back(std::string(RESOURCE_VIDEO_CAPTURE));
         }
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::AUDIO_CAPTURE) {
-            resources.push_back(RESOURCE_AUDIO_CAPTURE);
+            resources.push_back(std::string(RESOURCE_AUDIO_CAPTURE));
         }
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::PROTECTED_MEDIA_ID) {
-            resources.push_back(RESOURCE_PROTECTED_MEDIA_ID);
+            resources.push_back(std::string(RESOURCE_PROTECTED_MEDIA_ID));
         }
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX) {
-            resources.push_back(RESOURCE_MIDI_SYSEX);
+            resources.push_back(std::string(RESOURCE_MIDI_SYSEX));
         }
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
-            resources.push_back(RESOURCE_CLIPBOARD_READ_WRITE);
+            resources.push_back(std::string(RESOURCE_CLIPBOARD_READ_WRITE));
         }
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::SENSORS) {
-            resources.push_back(RESOURCE_SENSOR);
+            resources.push_back(std::string(RESOURCE_SENSOR));
         }
     }
     return resources;
@@ -8358,7 +8359,7 @@ void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedT
     } else {
         TouchEvent event;
         event.SetId(0);
-        webPattern->SetTouchEventInfo(event, touchEventInfo, DEFAULT_NATIVE_EMBED_ID);
+        webPattern->SetTouchEventInfo(event, touchEventInfo, std::string(DEFAULT_NATIVE_EMBED_ID));
     }
 }
 
@@ -8407,7 +8408,7 @@ MouseInfo WebDelegate::TransToMouseInfo(const std::shared_ptr<OHOS::NWeb::NWebNa
         x = mouseEvent->GetX();
         y = mouseEvent->GetY();
     } else {
-        embedId = DEFAULT_NATIVE_EMBED_ID;
+        embedId = std::string(DEFAULT_NATIVE_EMBED_ID);
     }
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(webPattern, MouseInfo());
@@ -9137,7 +9138,7 @@ std::string WebDelegate::GetCanonicalEncodingName(const std::string& alias_name)
                 return canonicalName;
         }
     }
-    return DEFAULT_CANONICAL_ENCODING_NAME;
+    return std::string(DEFAULT_CANONICAL_ENCODING_NAME);
 }
 
 void WebDelegate::UpdateDefaultTextEncodingFormat(const std::string& textEncodingFormat)

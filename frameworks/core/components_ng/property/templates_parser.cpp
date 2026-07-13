@@ -16,6 +16,7 @@
 #include "core/components_ng/property/templates_parser.h"
 
 #include <regex>
+#include <string_view>
 
 #include "core/pipeline/pipeline_base.h"
 #include "core/components_ng/property/measure_utils.h"
@@ -26,27 +27,27 @@ constexpr double FULL_PERCENT = 100.0;
 constexpr uint32_t REPEAT_MIN_SIZE = 6;
 constexpr uint32_t CROSS_WIDTH = 2;
 constexpr uint32_t STRETCH_MATCH_SIZE = 4;
-const std::string UNIT_VP = "vp";
-const std::string UNIT_PIXEL = "px";
-const std::string UNIT_RATIO = "fr";
-const std::string UNIT_PERCENT = "%";
-const std::string REPEAT_PREFIX = "repeat";
-const std::string UNIT_AUTO_FILL = "auto-fill";
-const std::string UNIT_AUTO_FIT = "auto-fit";
-const std::string UNIT_AUTO_STRETCH = "auto-stretch";
-const std::string TRIM_TEMPLATE = "$1$2";
-const std::string INVALID_PATTERN = R"(((repeat)\(\s{0,}((auto-fill)|(auto-fit))\s{0,},))";
-const std::string SIZE_PATTERN = "\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}";
-const std::string PREFIX_PATTERN = R"(\S{1,}(repeat)|(px|%|vp)\d{1,}|\)\d{1,})";
+constexpr std::string_view UNIT_VP = "vp";
+constexpr std::string_view UNIT_PIXEL = "px";
+constexpr std::string_view UNIT_RATIO = "fr";
+constexpr std::string_view UNIT_PERCENT = "%";
+constexpr std::string_view REPEAT_PREFIX = "repeat";
+constexpr std::string_view UNIT_AUTO_FILL = "auto-fill";
+constexpr std::string_view UNIT_AUTO_FIT = "auto-fit";
+constexpr std::string_view UNIT_AUTO_STRETCH = "auto-stretch";
+constexpr std::string_view TRIM_TEMPLATE = "$1$2";
+constexpr std::string_view INVALID_PATTERN = R"(((repeat)\(\s{0,}((auto-fill)|(auto-fit))\s{0,},))";
+constexpr std::string_view SIZE_PATTERN = "\\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}";
+constexpr std::string_view PREFIX_PATTERN = R"(\S{1,}(repeat)|(px|%|vp)\d{1,}|\)\d{1,})";
 const std::regex UNIT_PIXEL_REGEX(R"(^([0-9]\d*|[0-9]\d*.\d*|0\.\d*[0-9]\d*)px$)", std::regex::icase);
 const std::regex UNIT_RATIO_REGEX(R"(^([0-9]\d*|[0-9]\d*.\d*|0\.\d*[0-9]\d*)fr$)", std::regex::icase);
 const std::regex UNIT_PERCENT_REGEX(R"(^([0-9]\d*|[0-9]\d*.\d*|0\.\d*[0-9]\d*)%$)", std::regex::icase);
 const std::regex AUTO_REGEX(R"(^repeat\((.+),(.+)\))", std::regex::icase);        // regex for "repeat(auto-fill, 10px)"
 const std::regex REPEAT_NUM_REGEX(R"(^repeat\((\d+),(.+)\))", std::regex::icase); // regex for "repeat(2, 100px)"
 const std::regex TRIM_REGEX(R"(^ +| +$|(\"[^\"\\\\]*(?:\\\\[\\s\\S][^\"\\\\]*)*\")|( ) +)", std::regex::icase);
-const std::string REPEAT_WITH_AUTOFILL_OR_AUTOFIT =
+constexpr std::string_view REPEAT_WITH_AUTOFILL_OR_AUTOFIT =
     R"(((repeat)\(\s{0,}((auto-fill)|(auto-fit))\s{0,},(\s{0,}[0-9]+([.]{1}[0-9]+){0,1}(px|%|vp){0,1}){1,}\s{0,}\)))";
-const std::string AUTO_STRETCH_REGEX = R"(^\s*repeat\(auto-stretch,\s*(\d+(\.\d+)?(vp|px)?)\)$)";
+constexpr std::string_view AUTO_STRETCH_REGEX = R"(^\s*repeat\(auto-stretch,\s*(\d+(\.\d+)?(vp|px)?)\)$)";
 
 enum class RepeatType {
     NONE = 0,
@@ -102,7 +103,7 @@ double ParseUnit(const Value& val, double size)
 
 std::string TrimTemplate(std::string& str)
 {
-    return std::regex_replace(str, TRIM_REGEX, TRIM_TEMPLATE);
+    return std::regex_replace(str, TRIM_REGEX, std::string(TRIM_TEMPLATE));
 }
 
 void RTrim(std::string& str)
@@ -115,7 +116,7 @@ bool SplitTemplate(const std::string& str, std::vector<Value>& vec, bool isRepea
     std::string merge;
     std::string regexResult;
     std::smatch result;
-    std::regex pattern(SIZE_PATTERN, std::regex::icase);
+    std::regex pattern(std::string(SIZE_PATTERN), std::regex::icase);
     std::string::const_iterator iterStart = str.begin();
     std::string::const_iterator iterEnd = str.end();
 
@@ -134,7 +135,7 @@ bool SplitTemplate(const std::string& str, std::vector<Value>& vec, bool isRepea
 std::string GetRepeat(const std::string& str)
 {
     std::smatch result;
-    std::regex pattern(REPEAT_WITH_AUTOFILL_OR_AUTOFIT, std::regex::icase);
+    std::regex pattern(std::string(REPEAT_WITH_AUTOFILL_OR_AUTOFIT), std::regex::icase);
     std::string::const_iterator iterStart = str.begin();
     std::string::const_iterator iterEnd = str.end();
     std::string regexResult;
@@ -156,7 +157,7 @@ bool CheckRepeatAndSplitString(std::vector<std::string>& vec, std::string& repea
         return false;
     }
     std::string regexResult;
-    std::regex pattern(INVALID_PATTERN, std::regex::icase);
+    std::regex pattern(std::string(INVALID_PATTERN), std::regex::icase);
 
     for (auto it = vec.begin(); it != vec.end(); it++) {
         RTrim(*it);
@@ -188,13 +189,13 @@ bool CheckAutoFillParameter(
         return false;
     }
     std::smatch result;
-    std::regex patternFilter(PREFIX_PATTERN, std::regex::icase);
+    std::regex patternFilter(std::string(PREFIX_PATTERN), std::regex::icase);
     if (std::regex_search(args, result, patternFilter)) {
         out.push_back(size);
         return false;
     }
 
-    std::regex pattern(REPEAT_WITH_AUTOFILL_OR_AUTOFIT, std::regex::icase);
+    std::regex pattern(std::string(REPEAT_WITH_AUTOFILL_OR_AUTOFIT), std::regex::icase);
     std::vector<std::string> vec(
         std::sregex_token_iterator(args.begin(), args.end(), pattern, -1), std::sregex_token_iterator());
 
@@ -452,7 +453,7 @@ std::pair<std::vector<double>, double> ParseArgsWithAutoFit(
 
 bool CheckAutoStretchParameter(const std::string& args, Value& track)
 {
-    std::regex pattern(AUTO_STRETCH_REGEX, std::regex::icase);
+    std::regex pattern(std::string(AUTO_STRETCH_REGEX), std::regex::icase);
     std::smatch match;
     if (std::regex_match(args, match, pattern)) {
         if (match.size() == STRETCH_MATCH_SIZE) {
