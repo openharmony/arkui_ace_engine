@@ -9327,12 +9327,16 @@ struct ArkUIQRCodeModifier {
     void (*resetQRColor)(ArkUINodeHandle node);
     void (*setQRBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setQRBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
-    void (*resetQRBackgroundColor)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetQRBackgroundColor)(ArkUINodeHandle node);
     void (*setContentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*setContentOpacityPtr)(ArkUINodeHandle node, ArkUI_Float32 opacity, void* opacityRawPtr);
     void (*resetContentOpacity)(ArkUINodeHandle node);
     void (*setQRValue)(ArkUINodeHandle node, ArkUI_CharPtr value);
     ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
+    void (*setQRBackgroundColorWithColorSpace)(
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* colorRawPtr);
+    void (*setBackgroundColorForHDR)(
+        ArkUINodeHandle node, ArkUI_Int32 colorSpace, const ArkUI_Float32 (*hdrValues)[5], void* colorRawPtr);
 };
 
 struct ArkUIFormComponentModifier {
