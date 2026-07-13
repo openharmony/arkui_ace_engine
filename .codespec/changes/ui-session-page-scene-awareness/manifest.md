@@ -3,9 +3,9 @@ id: ui-session-page-scene-awareness
 type: feature
 title: UISession page scene rule awareness
 spec_schema: ohos-sdd/v1
-profile: arkui/component
+profile: arkui
 subprofiles:
-  - arkui/component
+  - component
 target_release:
   id: TBD
   name: TBD

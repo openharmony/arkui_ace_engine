@@ -1,4 +1,6 @@
-# UISession 页面场景规则化感知能力
+# 特性规格
+
+## UISession 页面场景规则化感知能力
 
 > 特性规格，驱动代码实现 | 模板参考: sdd-spec-optimization/spec-suggested.md
 
