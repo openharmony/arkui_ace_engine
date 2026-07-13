@@ -291,6 +291,8 @@ public:
     static void SetIsShowVoiceButton(FrameNode* frameNode, bool isShowButton);
     static void SetCancelIconSize(FrameNode* frameNode, const CalcDimension& iconSize);
     static void SetCanacelIconSrc(FrameNode* frameNode, const std::string& iconSrc);
+    static void SetCanacelIconSrc(
+        FrameNode* frameNode, const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& iconColor);
     static void SetCancelButtonSymbol(FrameNode* frameNode, bool isShowSymbol);
     static void SetCancelSymbolIcon(FrameNode* frameNode,

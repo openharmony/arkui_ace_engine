@@ -1972,6 +1972,14 @@ void TextFieldModelNG::SetCanacelIconSrc(FrameNode* frameNode, const std::string
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc, frameNode);
 }
 
+void TextFieldModelNG::SetCanacelIconSrc(
+    FrameNode* frameNode, const std::string& iconSrc, const std::string& bundleName, const std::string& moduleName)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconSrc, iconSrc, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, BundleName, bundleName, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ModuleName, moduleName, frameNode);
+}
+
 void TextFieldModelNG::SetCancelIconColor(FrameNode* frameNode, const Color& iconColor)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IconColor, iconColor, frameNode);

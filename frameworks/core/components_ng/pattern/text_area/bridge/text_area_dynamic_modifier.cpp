@@ -947,6 +947,26 @@ void SetTextAreaBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32
     }
 }
 
+void SetTextAreaBackgroundColorForHDR(ArkUINodeHandle node, const ArkUI_Float32* hdrValues,
+    ArkUI_Int32 colorSpace, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode && hdrValues);
+    Color backgroundColor = Color::FromFloat(hdrValues[0], hdrValues[1], hdrValues[2], hdrValues[3], hdrValues[4]);
+    backgroundColor.SetColorSpace(static_cast<ColorSpace>(colorSpace));
+    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("backgroundColor", resObj, backgroundColor);
+        } else {
+            pattern->UnRegisterResource("backgroundColor");
+        }
+    }
+}
+
 void ResetTextAreaBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3657,6 +3677,12 @@ void SetTextAreaBackgroundColorWithColorSpaceImpl(ArkUINodeHandle node, ArkUI_Ui
     GetTextFieldModelImpl()->SetBackgroundColor(backgroundColor, false);
 }
 
+void SetTextAreaBackgroundColorForHDRImpl(ArkUINodeHandle node, const ArkUI_Float32* hdrValues,
+    ArkUI_Int32 colorSpace, void* resRawPtr)
+{
+    return;
+}
+
 void SetTextAreaHeightCommonImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3777,6 +3803,7 @@ const ArkUITextAreaModifier* GetTextAreaDynamicModifier()
             .getTextAreaEditing = nullptr,
             .setTextAreaBackgroundColor = nullptr,
             .setTextAreaBackgroundColorWithColorSpace = SetTextAreaBackgroundColorWithColorSpaceImpl,
+            .setTextAreaBackgroundColorForHDR = SetTextAreaBackgroundColorForHDRImpl,
             .resetTextAreaBackgroundColor = nullptr,
             .setTextAreaType = SetTextAreaTypeImpl,
             .resetTextAreaType = nullptr,
@@ -4040,6 +4067,7 @@ const ArkUITextAreaModifier* GetTextAreaDynamicModifier()
         .getTextAreaEditing = GetTextAreaEditing,
         .setTextAreaBackgroundColor = SetTextAreaBackgroundColor,
         .setTextAreaBackgroundColorWithColorSpace = SetTextAreaBackgroundColorWithColorSpace,
+        .setTextAreaBackgroundColorForHDR = SetTextAreaBackgroundColorForHDR,
         .resetTextAreaBackgroundColor = ResetTextAreaBackgroundColor,
         .setTextAreaType = SetTextAreaType,
         .resetTextAreaType = ResetTextAreaType,

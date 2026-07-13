@@ -1482,6 +1482,26 @@ void SetTextInputBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint3
     }
 }
 
+void SetTextInputBackgroundColorForHDR(ArkUINodeHandle node, const ArkUI_Float32* hdrValues,
+    ArkUI_Int32 colorSpace, void* resRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode && hdrValues);
+    Color backgroundColor = Color::FromFloat(hdrValues[0], hdrValues[1], hdrValues[2], hdrValues[3], hdrValues[4]);
+    backgroundColor.SetColorSpace(static_cast<ColorSpace>(colorSpace));
+    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("backgroundColor", resObj, backgroundColor);
+        } else {
+            pattern->UnRegisterResource("backgroundColor");
+        }
+    }
+}
+
 void ResetTextInputBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3336,6 +3356,148 @@ void SetUserAccessibilityText(ArkUINodeHandle node)
     TextFieldModelNG::SetUserAccessibilityText(frameNode);
 }
 
+void SetTextInputSetCancelButtonStyle(ArkUINodeHandle node, ArkUI_Int32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetCleanNodeStyle(frameNode, static_cast<CleanNodeStyle>(style));
+    TextFieldModelNG::SetIsShowCancelButton(frameNode, true);
+}
+
+void SetTextInputSetCancelDefaultIcon(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
+        TextFieldModelNG::SetCancelIconColor(frameNode, theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModelNG::SetCancelIconColor(frameNode, Color());
+    }
+    TextFieldModelNG::SetCancelIconSize(frameNode, theme->GetCancelIconSize());
+    TextFieldModelNG::SetCanacelIconSrc(frameNode, std::string());
+    TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("cancelButtonIconSrc");
+        pattern->UnRegisterResource("cancelButtonIconColor");
+        pattern->UnRegisterResource("cancelButtonIconSize");
+    }
+}
+
+void SetTextInputSetCancelSymbolIconJs(ArkUINodeHandle node, void* symbolFunction)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (symbolFunction) {
+        auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction);
+        TextFieldModelNG::SetCancelSymbolIcon(frameNode, std::move(*symbolCallback));
+    } else {
+        TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
+    }
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, true);
+}
+
+void SetTextInputCancelImageIconSize(ArkUINodeHandle node, const struct ArkUISizeType* size, void* resRawPtr)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension iconSize = CalcDimension(size->value, static_cast<DimensionUnit>(size->unit));
+    if (LessNotEqual(iconSize.Value(), 0.0)) {
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto themeManager = pipeline->GetThemeManager();
+        CHECK_NULL_VOID(themeManager);
+        auto theme = themeManager->GetTheme<TextFieldTheme>();
+        iconSize = theme->GetCancelIconSize();
+    }
+    TextFieldModelNG::SetCancelIconSize(frameNode, iconSize);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<CalcDimension>("cancelButtonIconSize", resObj, iconSize);
+        } else {
+            pattern->UnRegisterResource("cancelButtonIconSize");
+        }
+    }
+}
+
+void SetCancelButtonIconColorDefault(FrameNode* frameNode, const Color& iconColor)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        pattern->RegisterResource<Color>("cancelButtonIconColorDefault", resObj, iconColor);
+    }
+    if (Container::CurrentColorMode() == ColorMode::DARK) {
+        TextFieldModelNG::SetCancelIconColor(frameNode, theme->GetCancelButtonIconColor());
+    } else {
+        TextFieldModelNG::SetCancelIconColor(frameNode, iconColor);
+    }
+}
+
+void SetTextInputCancelImageIconSrcAndColor(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName,
+    ArkUI_CharPtr moduleName, void* srcRawPtr, ArkUI_Uint32 color, void* colorRawPtr, bool isColorInvalid)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    std::string iconSrc(src);
+    std::string iconBundleName(bundleName);
+    std::string iconModuleName(moduleName);
+    TextFieldModelNG::SetCanacelIconSrc(frameNode, iconSrc, iconBundleName, iconModuleName);
+    TextFieldModelNG::SetCancelButtonSymbol(frameNode, false);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("cancelButtonIconSrc");
+        pattern->UnRegisterResource("cancelButtonIconColor");
+        pattern->UnRegisterResource("cancelButtonIconColorDefault");
+        if (srcRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(srcRawPtr));
+            pattern->RegisterResource<std::string>("cancelButtonIconSrc", resObj, iconSrc);
+        }
+    }
+    Color iconColor(color);
+    if (isColorInvalid) {
+        TextFieldModelNG::SetCancelIconColor(frameNode, iconColor);
+        if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
+            auto pattern = frameNode->GetPattern();
+            CHECK_NULL_VOID(pattern);
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
+            pattern->RegisterResource<Color>("cancelButtonIconColor", resObj, iconColor);
+        }
+        return;
+    }
+    auto info = ImageSourceInfo(iconSrc, iconBundleName, iconModuleName);
+    if (info.IsSvg() && iconSrc != "") { // svg need not default color, otherwise multi color svg will render fault
+        return;
+    }
+    SetCancelButtonIconColorDefault(frameNode, iconColor);
+}
+
 #ifndef CROSS_PLATFORM
 ArkUINodeHandle CreateTextInputImpl(std::optional<std::u16string>& stringValue,
     std::optional<std::u16string>& placeholder, const ArkUITextEditCreateResourceParams* resParams)
@@ -3581,6 +3743,12 @@ void SetTextInputBackgroundColorWithColorSpaceImpl(ArkUINodeHandle node, ArkUI_U
     GetTextFieldModelImpl()->SetBackgroundColor(backgroundColor, false);
 }
 
+void SetTextInputBackgroundColorForHDRImpl(ArkUINodeHandle node, const ArkUI_Float32* hdrValues,
+    ArkUI_Int32 colorSpace, void* resRawPtr)
+{
+    return;
+}
+
 void SetTextInputFocusableAndFocusNodeImpl()
 {
     GetTextFieldModelImpl()->SetFocusableAndFocusNode();
@@ -3706,6 +3874,7 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
             .getTextInputCancelButtonStyle = nullptr,
             .setTextInputBackgroundColor = nullptr,
             .setTextInputBackgroundColorWithColorSpace = SetTextInputBackgroundColorWithColorSpaceImpl,
+            .setTextInputBackgroundColorForHDR = SetTextInputBackgroundColorForHDRImpl,
             .resetTextInputBackgroundColor = nullptr,
             .setTextInputTextSelection = nullptr,
             .getTextInputTextSelectionIndex = nullptr,
@@ -3894,6 +4063,11 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
             .setTextInputColorShaderColor = nullptr,
             .resetTextInputColorShaderColor = nullptr,
             .setUserAccessibilityText = nullptr,
+            .setTextInputSetCancelButtonStyle = nullptr,
+            .setTextInputSetCancelDefaultIcon = nullptr,
+            .setTextInputSetCancelSymbolIconJs = nullptr,
+            .setTextInputCancelImageIconSize = nullptr,
+            .setTextInputCancelImageIconSrcAndColor = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -3992,6 +4166,7 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         .getTextInputCancelButtonStyle = GetTextInputCancelButtonStyle,
         .setTextInputBackgroundColor = SetTextInputBackgroundColor,
         .setTextInputBackgroundColorWithColorSpace = SetTextInputBackgroundColorWithColorSpace,
+        .setTextInputBackgroundColorForHDR = SetTextInputBackgroundColorForHDR,
         .resetTextInputBackgroundColor = ResetTextInputBackgroundColor,
         .setTextInputTextSelection = SetTextInputTextSelection,
         .getTextInputTextSelectionIndex = GetTextInputTextSelectionIndex,
@@ -4180,6 +4355,11 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         .setTextInputColorShaderColor = SetTextInputColorShaderColor,
         .resetTextInputColorShaderColor = ResetTextInputColorShaderColor,
         .setUserAccessibilityText = SetUserAccessibilityText,
+        .setTextInputSetCancelButtonStyle = SetTextInputSetCancelButtonStyle,
+        .setTextInputSetCancelDefaultIcon = SetTextInputSetCancelDefaultIcon,
+        .setTextInputSetCancelSymbolIconJs = SetTextInputSetCancelSymbolIconJs,
+        .setTextInputCancelImageIconSize = SetTextInputCancelImageIconSize,
+        .setTextInputCancelImageIconSrcAndColor = SetTextInputCancelImageIconSrcAndColor,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
