@@ -6353,7 +6353,7 @@ void ArkTSUtils::SetButtonBorderRadiusByJs(
     auto buttonModifier = nodeModifiers->getButtonModifier();
     CHECK_NULL_VOID(buttonModifier);
     CalcDimension radius;
-    if (ParseJsDimensionVp(vm, value, radius, false)) {
+    if (ParseJsDimensionVpNG(vm, value, radius)) {
         CHECK_NULL_VOID(buttonModifier->setJsButtonBorderRadius);
         buttonModifier->setJsButtonBorderRadius(nativeNode, radius.Value(), static_cast<int32_t>(radius.Unit()));
         return;

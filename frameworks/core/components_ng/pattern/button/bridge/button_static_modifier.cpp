@@ -203,8 +203,10 @@ void SetFontSizeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    Converter::DefaultDimensionUnit du(DimensionUnit::FP);
-    auto fontSize = Converter::OptConvertPtr<Dimension>(value);
+    std::optional<Dimension> fontSize;
+    if (value != nullptr && value->tag != INTEROP_TAG_UNDEFINED) {
+        fontSize = Converter::OptConvertFromArkLength(value->value, DimensionUnit::FP);
+    }
     Validator::ValidatePositive(fontSize);
     Validator::ValidateNonPercent(fontSize);
     ButtonModelStatic::SetFontSize(frameNode, fontSize);
