@@ -90,6 +90,11 @@ class DatePickerConstant {
   public static readonly SYSTEM_MAX_DATE = new Date(2100, 11, 31);
 }
 
+interface PeriodTranslation {
+  am: string;
+  pm: string;
+}
+
 @Component
 export struct DatePickerComponent {
   @Prop @Watch('onOptionsChange') options: DatePickerComponentOptions;
@@ -146,6 +151,9 @@ export struct DatePickerComponent {
   private userLunar: boolean = false;  // Save user-set lunar value
   @State firstColumnWidth: number = 0;
   @State lastColumnWidth: number = 0;
+  private hourFormatter: intl.DateTimeFormat | null = null;
+  private minuteFormatter: intl.DateTimeFormat | null = null;
+  private secondFormatter: intl.DateTimeFormat | null = null;
   
   aboutToAppear(): void {
     this.currentLocale = i18n.System.getSystemLanguage();
@@ -226,6 +234,11 @@ export struct DatePickerComponent {
     this.locale = new intl.Locale(this.currentLocale);
     this.formatter = new intl.NumberFormat();
     this.yearFormatter = new intl.NumberFormat(this.locale.toString(), { useGrouping: false });
+    
+    // Reset cached formatters when locale changes
+    this.hourFormatter = null;
+    this.minuteFormatter = null;
+    this.secondFormatter = null;
     
     const isChinese = this.isChineseLocale();
     const prevLunar = this.lunar;
@@ -503,7 +516,7 @@ export struct DatePickerComponent {
     } else {
       this.hourArray = [];
       for (let i = this.startHour; i <= this.endHour; i++) {
-        this.hourArray.push(i.toString().padStart(2, '0'));
+        this.hourArray.push(this.formatHour(i));
       }
     }
     
@@ -565,28 +578,28 @@ export struct DatePickerComponent {
       // Check if 12 AM (hour24=0) is within range
       const hour24ForAm12 = 0;
       if (hour24ForAm12 >= this.startHour && hour24ForAm12 <= this.endHour) {
-        this.hourArray.push('12');
+        this.hourArray.push(this.formatHour12(12));
       }
       
       // Check if 1-11 AM (hour24=1-11) are within range
       for (let displayHour = 1; displayHour <= 11; displayHour++) {
         const hour24 = displayHour;
         if (hour24 >= this.startHour && hour24 <= this.endHour) {
-          this.hourArray.push(displayHour.toString().padStart(2, '0'));
+          this.hourArray.push(this.formatHour12(displayHour));
         }
       }
     } else {
       // Check if 12 PM (hour24=12) is within range
       const hour24ForPm12 = 12;
       if (hour24ForPm12 >= this.startHour && hour24ForPm12 <= this.endHour) {
-        this.hourArray.push('12');
+        this.hourArray.push(this.formatHour12(12));
       }
       
       // Check if 1-11 PM (hour24=13-23) are within range
       for (let displayHour = 1; displayHour <= 11; displayHour++) {
         const hour24 = displayHour + 12;
         if (hour24 >= this.startHour && hour24 <= this.endHour) {
-          this.hourArray.push(displayHour.toString().padStart(2, '0'));
+          this.hourArray.push(this.formatHour12(displayHour));
         }
       }
     }
@@ -594,7 +607,7 @@ export struct DatePickerComponent {
     // Fallback: if no hours available for current period, show all 12 hours
     if (this.hourArray.length === 0) {
       for (let i = 1; i <= 12; i++) {
-        this.hourArray.push(i.toString().padStart(2, '0'));
+        this.hourArray.push(this.formatHour12(i));
       }
     }
   }
@@ -724,47 +737,131 @@ export struct DatePickerComponent {
     }
   }
   
-  private formatMinute(minute: number): string {
-    return minute.toString().padStart(2, '0');
+private formatHour(hour24: number): string {
+    // 24-hour format: use locale-specific digits but NO suffixes like "时"
+    // Use NumberFormat instead of DateTimeFormat to avoid time unit suffixes
+    try {
+      return this.formatter.format(hour24);
+    } catch (error) {
+      return hour24.toString().padStart(2, '0');
+    }
   }
   
-private formatSecond(second: number): string {
-  return second.toString().padStart(2, '0');
+  private formatHour12(displayHour: number): string {
+    try {
+      const localeStr = this.locale.toString();
+      if (!localeStr || localeStr.length === 0) {
+        return displayHour.toString().padStart(2, '0');
+      }
+      
+      // Use cached formatter to avoid repeated object creation
+      if (this.hourFormatter === null) {
+        this.hourFormatter = new Intl.DateTimeFormat(localeStr, {
+          hour: '2-digit',
+          hour12: true
+        });
+      }
+      
+      const date = new Date(2026, 0, 1, displayHour, 0, 0);
+      const formatted = this.hourFormatter!.format(date);
+      
+      // Remove any non-digit characters (like AM/PM, spaces, etc.)
+      // This gives us just the hour number in locale format
+      const hourMatch = formatted.match(/[\d\u0660-\u0669\u06F0-\u06F9\u0966-\u096F\u0E50-\u0E59\u0ED0-\u0ED9]+/);
+      if (hourMatch && hourMatch.length > 0) {
+        return hourMatch[0];
+      }
+      
+      return displayHour.toString().padStart(2, '0');
+    } catch (error) {
+      return displayHour.toString().padStart(2, '0');
+    }
+  }
+  
+  private formatMinute(minute: number): string {
+    try {
+      const localeStr = this.locale.toString();
+      if (!localeStr || localeStr.length === 0) {
+        return minute.toString().padStart(2, '0');
+      }
+      
+      // Use cached formatter to avoid repeated object creation
+      if (this.minuteFormatter === null) {
+        this.minuteFormatter = new Intl.DateTimeFormat(localeStr, {
+          minute: '2-digit'
+        });
+      }
+      
+      const date = new Date(2026, 0, 1, 0, minute, 0);
+      const formatted = this.minuteFormatter.format(date);
+      
+      return formatted;
+    } catch (error) {
+      return minute.toString().padStart(2, '0');
+    }
+  }
+  
+  private formatSecond(second: number): string {
+    try {
+      const localeStr = this.locale.toString();
+      if (!localeStr || localeStr.length === 0) {
+        return second.toString().padStart(2, '0');
+      }
+      
+      // Use cached formatter to avoid repeated object creation
+      if (this.secondFormatter === null) {
+        this.secondFormatter = new Intl.DateTimeFormat(localeStr, {
+          second: '2-digit'
+        });
+      }
+      
+      const date = new Date(2026, 0, 1, 0, 0, second);
+      const formatted = this.secondFormatter.format(date);
+      
+      return formatted;
+    } catch (error) {
+      return second.toString().padStart(2, '0');
+    }
   }
   
   private formatPeriod(isAM: boolean): string {
-  try {
-    const localeStr = this.locale.toString();
-    if (!localeStr || localeStr.length === 0) {
+    // Direct translation map for period markers in different languages
+    // Only include languages with non-AM/PM period markers
+    const periodEntries: [string, PeriodTranslation][] = [
+      ['zh', { am: '上午', pm: '下午' } as PeriodTranslation],
+      ['ja', { am: '午前', pm: '午後' } as PeriodTranslation],
+      ['ko', { am: '오전', pm: '오후' } as PeriodTranslation],
+      ['ar', { am: 'ص', pm: 'م' } as PeriodTranslation],
+      ['my', { am: 'နံနက်', pm: 'ညနေ' } as PeriodTranslation],
+      ['th', { am: 'น.', pm: 'ทุ่ม' } as PeriodTranslation],
+      ['fa', { am: 'ق.ظ', pm: 'ب.ظ' } as PeriodTranslation],
+      ['ur', { am: 'صبح', pm: 'شام' } as PeriodTranslation],
+      ['hi', { am: 'पूर्वाह्न', pm: 'अपराह्न' } as PeriodTranslation],
+      ['bn', { am: 'পূর্বাহ্ণ', pm: 'অপরাহ্ণ' } as PeriodTranslation],
+      ['vi', { am: 'SA', pm: 'CH' } as PeriodTranslation],
+      ['ms', { am: 'PG', pm: 'PTG' } as PeriodTranslation],
+      ['tr', { am: 'ÖÖ', pm: 'AS' } as PeriodTranslation]
+    ];
+    const periodMap: Map<string, PeriodTranslation> = new Map<string, PeriodTranslation>(periodEntries);
+    
+    try {
+      const localeStr = this.locale.toString();
+      if (!localeStr || localeStr.length === 0) {
+        return isAM ? 'AM' : 'PM';
+      }
+      
+      // Check language code prefix (e.g., 'zh-CN' -> 'zh')
+      const langCode = localeStr.split('-')[0];
+      const langMatch = periodMap.get(langCode);
+      if (langMatch) {
+        return isAM ? langMatch.am : langMatch.pm;
+      }
+      
+      // Fallback to AM/PM for all other languages
+      return isAM ? 'AM' : 'PM';
+    } catch (error) {
       return isAM ? 'AM' : 'PM';
     }
-    
-    if (this.isChineseLocale()) {
-      return isAM ? '上午' : '下午';
-    }
-    
-    const hour = isAM ? 10 : 22;
-    const dateFormat = new Intl.DateTimeFormat(localeStr, {
-      hour: 'numeric',
-      hour12: true
-    });
-    const date = new Date(2026, 0, 1, hour, 0, 0);
-    const formatted = dateFormat.format(date);
-    
-    if (formatted.includes('上午')) {
-      return isAM ? '上午' : '下午';
-    } else if (formatted.includes('下午')) {
-      return isAM ? '上午' : '下午';
-    } else if (formatted.includes('AM') || formatted.includes('am')) {
-      return isAM ? 'AM' : 'PM';
-    } else if (formatted.includes('PM') || formatted.includes('pm')) {
-      return isAM ? 'AM' : 'PM';
-    }
-    
-    return isAM ? 'AM' : 'PM';
-  } catch (error) {
-    return isAM ? 'AM' : 'PM';
-  }
   }
   
   private getDaysInMonth(year: number, month: number): number {
@@ -1517,15 +1614,53 @@ private formatSecond(second: number): string {
     this.dateOnChange?.(this.getResult());
   }
   
-private onHourChange(selectedIndex: number): void {
+  private onHourChange(selectedIndex: number): void {
     if (this.useMilitaryTime) {
       this.selectedHour = this.startHour + selectedIndex;
     } else {
       const oldDisplayHour = this.selectedHour === 0 || this.selectedHour === 12 ? 12 : 
                             (this.selectedHour > 12 ? this.selectedHour - 12 : this.selectedHour);
       
-      // Get the actual display hour from hourArray
-      const newDisplayHour = parseInt(this.hourArray[selectedIndex]);
+      // Calculate the actual display hour from selectedIndex using the SAME logic as getHourSelectedIndex()
+      // This ensures bidirectional consistency
+      const isAM = this.selectedPeriod === 0;
+      let newDisplayHour = 12; // default fallback
+      
+      // Find displayHour by counting valid hours (same as getHourSelectedIndex logic)
+      let validIndex = 0;
+      if (isAM) {
+        // AM period: check 12 AM (hour24=0) and 1-11 AM (hour24=1-11)
+        if (0 >= this.startHour && 0 <= this.endHour) {
+          if (validIndex === selectedIndex) {
+            newDisplayHour = 12;
+          }
+          validIndex++;
+        }
+        for (let h = 1; h <= 11; h++) {
+          if (h >= this.startHour && h <= this.endHour) {
+            if (validIndex === selectedIndex) {
+              newDisplayHour = h;
+            }
+            validIndex++;
+          }
+        }
+      } else {
+        // PM period: check 12 PM (hour24=12) and 1-11 PM (hour24=13-23)
+        if (12 >= this.startHour && 12 <= this.endHour) {
+          if (validIndex === selectedIndex) {
+            newDisplayHour = 12;
+          }
+          validIndex++;
+        }
+        for (let h = 13; h <= 23; h++) {
+          if (h >= this.startHour && h <= this.endHour) {
+            if (validIndex === selectedIndex) {
+              newDisplayHour = h === 12 ? 12 : h - 12;
+            }
+            validIndex++;
+          }
+        }
+      }
       
       // Crossing 11↔12 always triggers period toggle
       const crossingBoundary = (oldDisplayHour === 11 && newDisplayHour === 12) || 
@@ -1620,6 +1755,9 @@ private onHourChange(selectedIndex: number): void {
   }
   
   private updateTimeArrays(): void {
+    // Optimize: only update arrays when range actually changes
+    const oldMinuteStart = this.minuteArray.length > 0 ? 0 : -1;
+    
     this.minuteArray = [];
     let startMinuteIndex = DatePickerConstant.MIN_MINUTE;
     let endMinuteIndex = DatePickerConstant.MAX_MINUTE;
@@ -1631,8 +1769,10 @@ private onHourChange(selectedIndex: number): void {
       endMinuteIndex = this.endMinute;
     }
     
-    for (let i = startMinuteIndex; i <= endMinuteIndex; i++) {
-      this.minuteArray.push(this.formatMinute(i));
+    // Use pre-allocated array with direct assignment for better performance
+    const minuteCount = endMinuteIndex - startMinuteIndex + 1;
+    for (let i = 0; i < minuteCount; i++) {
+      this.minuteArray.push(this.formatMinute(startMinuteIndex + i));
     }
     
     if (this.selectedMinute < startMinuteIndex) {
@@ -1657,8 +1797,10 @@ private onHourChange(selectedIndex: number): void {
       endSecondIndex = this.endSecond;
     }
     
-    for (let i = startSecondIndex; i <= endSecondIndex; i++) {
-      this.secondArray.push(this.formatSecond(i));
+    // Use pre-allocated array with direct assignment for better performance
+    const secondCount = endSecondIndex - startSecondIndex + 1;
+    for (let i = 0; i < secondCount; i++) {
+      this.secondArray.push(this.formatSecond(startSecondIndex + i));
     }
     
     if (this.selectedSecond < startSecondIndex) {
@@ -1757,16 +1899,72 @@ private onHourChange(selectedIndex: number): void {
     if (this.useMilitaryTime) {
       return this.selectedHour - this.startHour;
     } else {
-      // Convert selectedHour to display hour (1-12)
+      // For 12-hour format, calculate index directly based on hourArray generation logic
+      // hourArray structure:
+      // - AM period: [12, 1, 2, ..., 11] (if in range)
+      // - PM period: [12, 1, 2, ..., 11] (if in range)
+      
+      const isAM = this.selectedPeriod === 0;
       const displayHour = this.selectedHour === 0 || this.selectedHour === 12 ? 12 : 
                          (this.selectedHour > 12 ? this.selectedHour - 12 : this.selectedHour);
       
-      // Find the index of displayHour in hourArray
-      const displayHourStr = displayHour.toString().padStart(2, '0');
-      const index = this.hourArray.indexOf(displayHourStr);
+      // Calculate index by matching display hour to hourArray structure
+      // hourArray[0] = 12, hourArray[1] = 1, hourArray[2] = 2, ..., hourArray[11] = 11
+      let targetIndex = 0;
       
-      // Fallback to first element if not found (shouldn't happen with correct logic)
-      return index >= 0 ? index : 0;
+      if (displayHour === 12) {
+        targetIndex = 0;
+      } else {
+        targetIndex = displayHour;
+      }
+      
+      // Ensure the targetIndex is within valid hourArray bounds
+      // Need to verify this index exists in hourArray based on actual time range
+      const actualHour24 = isAM ? (displayHour === 12 ? 0 : displayHour) : 
+                                    (displayHour === 12 ? 12 : displayHour + 12);
+      
+      // Check if this hour is actually in hourArray
+      if (actualHour24 >= this.startHour && actualHour24 <= this.endHour) {
+        // Find the actual index in hourArray by counting valid hours
+        let validIndex = 0;
+        if (isAM) {
+          // AM period: check 12 AM (hour24=0) and 1-11 AM (hour24=1-11)
+          if (0 >= this.startHour && 0 <= this.endHour) {
+            if (displayHour === 12) {
+              return validIndex;
+            }
+            validIndex++;
+          }
+          for (let h = 1; h <= 11; h++) {
+            if (h >= this.startHour && h <= this.endHour) {
+              if (h === displayHour) {
+                return validIndex;
+              }
+              validIndex++;
+            }
+          }
+        } else {
+          // PM period: check 12 PM (hour24=12) and 1-11 PM (hour24=13-23)
+          if (12 >= this.startHour && 12 <= this.endHour) {
+            if (displayHour === 12) {
+              return validIndex;
+            }
+            validIndex++;
+          }
+          for (let h = 13; h <= 23; h++) {
+            if (h >= this.startHour && h <= this.endHour) {
+              const hDisplay = h === 12 ? 12 : h - 12;
+              if (hDisplay === displayHour) {
+                return validIndex;
+              }
+              validIndex++;
+            }
+          }
+        }
+      }
+      
+      // Fallback: return first element index
+      return 0;
     }
   }
   
@@ -1996,7 +2194,6 @@ private onHourChange(selectedIndex: number): void {
             this.onYearChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.onYearChange(selectedIndex);
             this.dateOnScrollStop?.(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -2023,7 +2220,6 @@ private onHourChange(selectedIndex: number): void {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.onMonthChange(selectedIndex);
             this.dateOnScrollStop?.(this.getResult());
           })
           
@@ -2044,7 +2240,6 @@ private onHourChange(selectedIndex: number): void {
             this.onDayChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.onDayChange(selectedIndex);
             this.dateOnScrollStop?.(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -2073,7 +2268,6 @@ private onHourChange(selectedIndex: number): void {
             this.onYearChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.onYearChange(selectedIndex);
             this.dateOnScrollStop?.(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -2100,7 +2294,6 @@ private onHourChange(selectedIndex: number): void {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.onMonthChange(selectedIndex);
             this.dateOnScrollStop?.(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -2130,7 +2323,6 @@ private onHourChange(selectedIndex: number): void {
             this.onMonthChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.onMonthChange(selectedIndex);
             this.dateOnScrollStop?.(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -2139,7 +2331,6 @@ private onHourChange(selectedIndex: number): void {
               this.firstColumnWidth = newWidth;
             }
           })
-          
           UIPickerComponent({ selectedIndex: this.getDaySelectedIndex() }) {
             ForEach(this.dayArray, (item: string) => {
               Text(item)
@@ -2157,7 +2348,6 @@ private onHourChange(selectedIndex: number): void {
             this.onDayChange(selectedIndex);
           })
           .onScrollStop((selectedIndex: number) => {
-            this.onDayChange(selectedIndex);
             this.dateOnScrollStop?.(this.getResult());
           })
           .onAreaChange((oldValue: Area, newValue: Area) => {
@@ -2168,6 +2358,7 @@ private onHourChange(selectedIndex: number): void {
               }
             }
           })
+          
         }
       }
       
