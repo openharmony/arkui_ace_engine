@@ -65,6 +65,7 @@ struct ArkUISwiperCustomModifier {
     void (*swipeTo)(ArkUINodeHandle node, ArkUI_Int32 index);
     ArkUI_Bool (*isAnimationStopped)(ArkUINodeHandle node);
     void (*setCurveLinear)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getCurrentShownIndex)(ArkUINodeHandle node);
 };
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SWIPER_BRIDGE_SWIPER_CUSTOM_MODIFIER_H
