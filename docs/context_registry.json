@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-09",
+  "last_updated": "2026-07-13",
   "contexts": [
     {
       "id": "Text",
@@ -457,6 +457,80 @@
       ],
       "status": "active",
       "last_verified": "2026-07-08"
+    },
+    {
+      "id": "Slider",
+      "name": "Slider",
+      "name_cn": "滑动选择器组件",
+      "kind": "component",
+      "category": "input-form",
+      "keywords": [
+        "Slider",
+        "滑动选择器",
+        "滑块",
+        "range",
+        "step",
+        "trackColor",
+        "selectedColor",
+        "blockStyle",
+        "showSteps",
+        "showTips",
+        "SliderChangeMode",
+        "SliderInteraction",
+        "enableHapticFeedback",
+        "prefix",
+        "suffix"
+      ],
+      "aliases": [
+        "Slider组件",
+        "滑动选择器",
+        "滑块组件",
+        "SliderPattern"
+      ],
+      "kb": "docs/kb/components/input-form/slider.md",
+      "spec_domain": "specs/05-ui-components/04-input-form-components/05-slider",
+      "func_id": "05-04-05",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/slider/slider_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/slider/slider_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/slider/slider_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/slider/slider_model_static.cpp",
+        "layout_algorithm": "frameworks/core/components_ng/pattern/slider/slider_layout_algorithm.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/slider/slider_layout_property.h",
+        "paint_property": "frameworks/core/components_ng/pattern/slider/slider_paint_property.h",
+        "paint_method": "frameworks/core/components_ng/pattern/slider/slider_paint_method.cpp",
+        "content_modifier": "frameworks/core/components_ng/pattern/slider/slider_content_modifier.cpp",
+        "tip_modifier": "frameworks/core/components_ng/pattern/slider/slider_tip_modifier.cpp",
+        "event_hub": "frameworks/core/components_ng/pattern/slider/slider_event_hub.h",
+        "accessibility": "frameworks/core/components_ng/pattern/slider/slider_accessibility_property.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/slider/bridge/arkts_native_slider_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/slider/bridge/slider_dynamic_module.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/slider/bridge/slider_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/slider/bridge/slider_static_modifier.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_slider_modifier.cpp",
+        "peer_modifier": "frameworks/core/interfaces/native/implementation/slider_modifier.cpp",
+        "extender_accessor": "frameworks/core/interfaces/native/implementation/slider_extender_accessor.cpp",
+        "ops_accessor": "frameworks/core/interfaces/native/implementation/slider_ops_accessor.cpp",
+        "ark_component": "frameworks/bridge/declarative_frontend/ark_component/components/arkslider.js",
+        "ark_modifier": "frameworks/bridge/declarative_frontend/ark_modifier/src/slider_modifier.ts",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/slider.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/slider.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/SliderModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/SliderModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/slider/",
+        "test/unittest/capi/modifiers/",
+        "test/unittest/capi/accessors/",
+        "test/component_test/test_cases/components/button_and_selection/entry/src/main/ets/pages/slider/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-13"
     },
     {
       "id": "Video",
