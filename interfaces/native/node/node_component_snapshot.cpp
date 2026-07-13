@@ -89,6 +89,7 @@ int32_t OH_ArkUI_GetNodeSnapshot(
     ArkUI_NodeHandle node, ArkUI_SnapshotOptions* snapshotOptions, OH_PixelmapNative** pixelmap)
 {
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(pixelmap, ARKUI_ERROR_CODE_PARAM_INVALID);
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_INTERNAL_ERROR);
     auto options = reinterpret_cast<ArkUISnapshotOptions*>(snapshotOptions);
@@ -98,11 +99,14 @@ int32_t OH_ArkUI_GetNodeSnapshot(
         case OHOS::Ace::ERROR_CODE_PARAM_INVALID:
             return ARKUI_ERROR_CODE_PARAM_INVALID;
         case OHOS::Ace::ERROR_CODE_NO_ERROR:
-            if (tmpPixel) {
-                *pixelmap = new (std::nothrow) OH_PixelmapNative(tmpPixel);
-                return ARKUI_ERROR_CODE_NO_ERROR;
+            if (!tmpPixel) {
+                return ARKUI_ERROR_CODE_INTERNAL_ERROR;
             }
-            return ARKUI_ERROR_CODE_INTERNAL_ERROR;
+            *pixelmap = new (std::nothrow) OH_PixelmapNative(tmpPixel);
+            if (*pixelmap == nullptr) {
+                return ARKUI_ERROR_CODE_INTERNAL_ERROR;
+            }
+            return ARKUI_ERROR_CODE_NO_ERROR;
         case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT:
             return ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT;
         case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:

@@ -403,12 +403,17 @@ int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction)
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     std::vector<std::shared_ptr<OHOS::Media::PixelMap>> pixelMapList;
-    auto pixelmapArray = reinterpret_cast<OH_PixelmapNative**>(dragActions->pixelmapNativeList);
-    for (int32_t index = 0; index < dragActions->size; index++) {
-        if (!pixelmapArray[index]) {
-            continue;
+    if (dragActions->size > 0) {
+        auto pixelmapArray = reinterpret_cast<OH_PixelmapNative**>(dragActions->pixelmapNativeList);
+        if (!pixelmapArray) {
+            return ARKUI_ERROR_CODE_PARAM_INVALID;
         }
-        pixelMapList.push_back(pixelmapArray[index]->GetInnerPixelmap());
+        for (int32_t index = 0; index < dragActions->size; index++) {
+            if (!pixelmapArray[index]) {
+                continue;
+            }
+            pixelMapList.push_back(pixelmapArray[index]->GetInnerPixelmap());
+        }
     }
     dragActions->pixelmapArray = reinterpret_cast<void**>(pixelMapList.data());
     impl->getDragAdapterAPI()->startDrag(dragActions);
@@ -546,7 +551,7 @@ int32_t OH_ArkUI_DragPreviewOption_SetDefaultAnimationBeforeLiftingEnabled(
 int32_t OH_ArkUI_SetNodeDragPreviewOption(ArkUI_NodeHandle node, ArkUI_DragPreviewOption* option)
 {
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-    if (!impl || !node) {
+    if (!impl || !node || !option) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* previewOption = reinterpret_cast<ArkUIDragPreViewAndInteractionOptions*>(option);
