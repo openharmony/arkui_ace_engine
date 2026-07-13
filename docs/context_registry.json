@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-06-26",
+  "last_updated": "2026-07-08",
   "contexts": [
     {
       "id": "Text",
@@ -168,6 +168,295 @@
       ],
       "status": "active",
       "last_verified": "2026-06-27"
+    },
+    {
+      "id": "Navigation",
+      "name": "Navigation",
+      "name_cn": "导航容器组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "Navigation",
+        "导航",
+        "NavDestination",
+        "NavRouter",
+        "NavigationStack",
+        "NavBar",
+        "TitleBar",
+        "Toolbar",
+        "路由栈",
+        "页面生命周期",
+        "转场动画",
+        "页面沉浸式",
+        "主动分栏",
+        "强制分栏",
+        "平行视界"
+      ],
+      "aliases": [
+        "Navigation组件",
+        "导航组件",
+        "导航容器",
+        "NavigationPattern"
+      ],
+      "kb": "docs/kb/components/container/navigation.md",
+      "spec_domain": "specs/05-ui-components/02-navigation-components/01-navigation",
+      "func_id": "05-02-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/navigation/navigation_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/navigation/navigation_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/navigation/navigation_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/navigation/navigation_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/navigation/navigation_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/navigation/navigation_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/navigation/navigation_event_hub.h",
+        "nav_stack": "frameworks/core/components_ng/pattern/navigation/navigation_stack.cpp",
+        "nav_route": "frameworks/core/components_ng/pattern/navigation/navigation_route.h",
+        "nav_bar": "frameworks/core/components_ng/pattern/navigation/nav_bar_pattern.cpp",
+        "title_bar": "frameworks/core/components_ng/pattern/navigation/title_bar_pattern.cpp",
+        "toolbar": "frameworks/core/components_ng/pattern/navigation/tool_bar_pattern.cpp",
+        "navdestination_pattern": "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.cpp",
+        "navrouter_pattern": "frameworks/core/components_ng/pattern/navrouter/navrouter_pattern.cpp",
+        "navigator_pattern": "frameworks/core/components_ng/pattern/navigator/navigator_pattern.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_navigation.cpp",
+        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.cpp",
+        "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/navigation_modifier.ts"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/navigation.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/navigation.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/NavigationModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/NavigationModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/navigation/",
+        "test/unittest/core/pattern/navrouter/",
+        "test/unittest/core/pattern/navigator/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-08"
+    },
+    {
+      "id": "Tabs",
+      "name": "Tabs",
+      "name_cn": "标签页容器组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "Tabs",
+        "标签页",
+        "TabBar",
+        "TabContent",
+        "标签切换",
+        "控制器",
+        "子标签",
+        "标签动画",
+        "自定义标签栏",
+        "TabController"
+      ],
+      "aliases": [
+        "Tabs组件",
+        "标签页组件",
+        "标签容器",
+        "TabsPattern"
+      ],
+      "kb": "docs/kb/components/container/tabs.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/09-tabs-tab-content",
+      "func_id": "05-03-09",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/tabs/tabs_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/tabs/tabs_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/tabs/tabs_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/tabs/tabs_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/tabs/tabs_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/tabs/tabs_layout_property.h",
+        "controller": "frameworks/core/components_ng/pattern/tabs/tabs_controller.h",
+        "tab_bar_pattern": "frameworks/core/components_ng/pattern/tabs/tab_bar_pattern.cpp",
+        "tab_content_pattern": "frameworks/core/components_ng/pattern/tabs/tab_content_pattern.cpp",
+        "tab_content_model": "frameworks/core/components_ng/pattern/tabs/tab_content_model_ng.cpp",
+        "tab_content_static_model": "frameworks/core/components_ng/pattern/tabs/tab_content_model_static.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_tabs_feature.cpp",
+        "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/tabs_modifier.ts"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/tabs.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/tabs.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TabsModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TabsModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/tabs/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-08"
+    },
+    {
+      "id": "Swiper",
+      "name": "Swiper",
+      "name_cn": "轮播容器组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "Swiper",
+        "轮播",
+        "自动播放",
+        "手势滑动",
+        "指示器",
+        "箭头导航",
+        "循环播放",
+        "转场动画",
+        "弧形轮播",
+        "ArcSwiper"
+      ],
+      "aliases": [
+        "Swiper组件",
+        "轮播组件",
+        "轮播容器",
+        "SwiperPattern"
+      ],
+      "kb": "docs/kb/components/container/swiper.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/08-swiper",
+      "func_id": "05-03-08",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/swiper/swiper_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/swiper/swiper_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/swiper/swiper_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/swiper/swiper_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/swiper/swiper_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/swiper/swiper_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/swiper/swiper_event_hub.cpp",
+        "arc_swiper": "frameworks/core/components_ng/pattern/swiper/arc_swiper_pattern.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_swiper_modifier.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_swiper.cpp",
+        "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/swiper_modifier.ts",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/swiper.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/swiper.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/SwiperModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/SwiperModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/swiper/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-08"
+    },
+    {
+      "id": "NavDestination",
+      "name": "NavDestination",
+      "name_cn": "导航目标页组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "NavDestination",
+        "导航目标页",
+        "NavRouter",
+        "页面生命周期",
+        "转场动画",
+        "沉浸式",
+        "NavDestinationContext",
+        "onShown",
+        "onHidden",
+        "systemBarStyle",
+        "返回值"
+      ],
+      "aliases": [
+        "NavDestination组件",
+        "导航目标页",
+        "目标页组件",
+        "NavDestinationPattern"
+      ],
+      "kb": "docs/kb/components/container/navdestination.md",
+      "spec_domain": "specs/05-ui-components/02-navigation-components/02-nav-router",
+      "func_id": "05-02-02",
+      "spec_status": "pending",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/navrouter/navdestination_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/navrouter/navdestination_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/navrouter/navdestination_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/navrouter/navdestination_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/navrouter/navdestination_event_hub.h",
+        "context": "frameworks/core/components_ng/pattern/navrouter/navdestination_context.cpp",
+        "group_node": "frameworks/core/components_ng/pattern/navrouter/navdestination_group_node.cpp",
+        "scrollable_processor": "frameworks/core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h",
+        "pattern_base": "frameworks/core/components_ng/pattern/navigation/navdestination_pattern_base.cpp",
+        "node_base": "frameworks/core/components_ng/pattern/navigation/navdestination_node_base.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_navdestination.cpp",
+        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_destination_bridge.cpp",
+        "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/nav_destination_modifier.ts"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/nav_destination.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/nav_destination.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/NavDestinationModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/NavDestinationModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/navrouter/",
+        "test/unittest/core/pattern/navigation/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-08"
+    },
+    {
+      "id": "SideBarContainer",
+      "name": "SideBarContainer",
+      "name_cn": "侧边栏容器组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "SideBarContainer",
+        "侧边栏",
+        "侧边栏类型",
+        "叠加",
+        "嵌入",
+        "控制按钮",
+        "动画过渡",
+        "自动折叠",
+        "SideBarType",
+        "SideBarPosition"
+      ],
+      "aliases": [
+        "SideBarContainer组件",
+        "侧边栏组件",
+        "侧边栏容器",
+        "SideBarContainerPattern"
+      ],
+      "kb": "docs/kb/components/container/side_bar_container.md",
+      "spec_domain": "specs/05-ui-components/02-navigation-components/06-sidebar-container",
+      "func_id": "05-02-06",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/side_bar/side_bar_container_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/side_bar/side_bar_container_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/side_bar/side_bar_container_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/side_bar/side_bar_container_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/side_bar/side_bar_container_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/side_bar/side_bar_container_event_hub.h",
+        "bridge": "frameworks/core/components_ng/pattern/side_bar/bridge/arkts_native_side_bar_container_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/side_bar/bridge/side_bar_container_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/side_bar/bridge/side_bar_container_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/side_bar/bridge/side_bar_container_dynamic_module.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/side_bar_container.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/side_bar_container.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/SideBarContainerModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/SideBarContainerModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/side_bar/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-08"
     }
   ]
 }

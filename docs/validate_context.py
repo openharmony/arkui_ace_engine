@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # Copyright (c) 2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -281,7 +282,7 @@ class Validator:
             self.error(entry_path, "spec_domain is set but specs/index.md does not exist")
             return
         index_text = index_path.read_text(encoding="utf-8")
-        domain_without_prefix = spec_domain.removeprefix("specs/").rstrip("/") + "/"
+        domain_without_prefix = spec_domain[len("specs/"):].rstrip("/") + "/"
         if domain_without_prefix not in index_text:
             self.error(entry_path, f"`spec_domain` is not registered in specs/index.md: {spec_domain}")
         if func_id and str(func_id) not in index_text:
