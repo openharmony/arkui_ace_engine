@@ -25,6 +25,7 @@ build_component_ng("form_pattern_ng") {
     "form_special_style.cpp",
     "form_scoped_rs_transaction.cpp",
     "form_snapshot_util.cpp",
+    "form_task_executor.cpp",
   ]
 
   if (is_ohos_standard_system) {

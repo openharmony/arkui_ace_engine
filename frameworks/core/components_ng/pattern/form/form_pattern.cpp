@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/form/form_scoped_rs_transaction.h"
 #include "core/components_ng/pattern/form/form_snapshot_check.h"
 #include "core/components_ng/pattern/form/form_snapshot_util.h"
+#include "core/components_ng/pattern/form/form_task_executor.h"
 
 #if OHOS_STANDARD_SYSTEM
 #include "form_info.h"
@@ -100,8 +101,6 @@ constexpr char NO_FORM_DUMP[] = "-noform";
 constexpr char PID_FLAG[] = "pidflag";
 constexpr float DEFAULT_VIEW_SCALE = 1.0f;
 constexpr char COLUMN_ROLE[] = "column";
-constexpr int32_t FORM_TASK_PRIORITY_VIP = 0;
-constexpr int32_t FORM_TASK_PRIORITY_IMMEDIATE = 1;
 
 // Relationship between form styles and resource text content
 const static std::unordered_map<FormStyleAttribution, std::pair<const char*, FormChildNodeType>> FORM_STYLE_RES_MAP = {
@@ -112,25 +111,6 @@ const static std::unordered_map<FormStyleAttribution, std::pair<const char*, For
     { FormStyleAttribution::DUE_DISABLE, { DUE_CONTROL_RESOURCE_NAME, FormChildNodeType::DUE_CONTROL_TEXT_NODE } },
     { FormStyleAttribution::DUE_REMOVE, { DUE_CONTROL_RESOURCE_NAME, FormChildNodeType::DUE_CONTROL_TEXT_NODE } }
 };
-
-PriorityType GetFormTaskPriorityType()
-{
-    const int32_t formTaskPriority = SystemProperties::GetFormTaskPriority();
-    switch (formTaskPriority) {
-        case FORM_TASK_PRIORITY_VIP:
-            return PriorityType::VIP;
-        case FORM_TASK_PRIORITY_IMMEDIATE:
-            return PriorityType::IMMEDIATE;
-        default:
-            return PriorityType::HIGH;
-    }
-}
-
-PriorityType GetFormTaskPriority()
-{
-    static PriorityType formTaskPriority = GetFormTaskPriorityType();
-    return formTaskPriority;
-}
 
 RefPtr<FrameNode> CreateRectFrameNode()
 {
@@ -165,40 +145,6 @@ private:
     WeakPtr<FormPattern> weakFormPattern_ = nullptr;
 };
 
-void PostDelayedTask(
-    const TaskExecutor::Task &task, TaskExecutor::TaskType type, int32_t delayTime, const std::string &name)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(task, type, delayTime, name, GetFormTaskPriority());
-}
-
-void PostDelayedUITask(const TaskExecutor::Task &task, int32_t delayTime, const std::string &name)
-{
-    PostDelayedTask(task, TaskExecutor::TaskType::UI, delayTime, name);
-}
-
-void PostUITask(const TaskExecutor::Task &task, const std::string &name)
-{
-    PostDelayedTask(task, TaskExecutor::TaskType::UI, 0, name);
-}
-
-void PostBgTask(const TaskExecutor::Task &task, const std::string &name)
-{
-    PostDelayedTask(task, TaskExecutor::TaskType::BACKGROUND, 0, name);
-}
-
-void RemoveUITask(const std::string &name)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, name);
-}
-
 int64_t GetCurrentTimestamp()
 {
     auto nowSys = std::chrono::steady_clock::now();
@@ -229,7 +175,7 @@ void FormPattern::OnAttachToFrameNode()
     InitFormManagerDelegate();
     auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnCache([weak = WeakClaim(this), scopeId = Container::CurrentId()]() {
+    eventHub->SetOnCache([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto subContainer = pattern->GetSubContainer();
@@ -237,8 +183,7 @@ void FormPattern::OnAttachToFrameNode()
         auto id = subContainer->GetRunningCardId();
         TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::FormCacheCallback, cardId: %{public}" PRId64, id);
         FormManager::GetInstance().AddSubContainer(id, subContainer);
-        ContainerScope containerScope(scopeId);
-        PostDelayedUITask(
+        pattern->formTaskExecutor_->PostDelayedUITask(
             [id, nodeId = subContainer->GetNodeId()] {
                 auto cachedSubContainer = FormManager::GetInstance().GetSubContainer(id);
                 if (cachedSubContainer != nullptr && cachedSubContainer->GetNodeId() == nodeId) {
@@ -353,11 +298,10 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
 {
     snapshotTimestamp_ = GetCurrentTimestamp();
 
-    ContainerScope containerScope(scopeId_);
     if (isDynamic_) {
         if (formChildrenNodeMap_.find(FormChildNodeType::FORM_STATIC_IMAGE_NODE) != formChildrenNodeMap_.end()) {
-            RemoveUITask("ArkUIFormDeleteImageNodeAfterRecover_" + nodeIdStr);
-            PostUITask([weak = WeakClaim(this)] {
+            formTaskExecutor_->RemoveUITask("ArkUIFormDeleteImageNodeAfterRecover_" + nodeIdStr);
+            formTaskExecutor_->PostUITask([weak = WeakClaim(this)] {
                 auto formPattern = weak.Upgrade();
                 CHECK_NULL_VOID(formPattern);
                 formPattern->RemoveFrsNode();
@@ -374,7 +318,7 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
         return;
     }
     isStaticFormSnaping_ = true;
-    PostDelayedUITask(
+    formTaskExecutor_->PostDelayedUITask(
         [weak = WeakClaim(this), delayTime]() mutable {
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
@@ -442,8 +386,7 @@ void FormPattern::ProcessCheckForm()
         return;
     }
 
-    ContainerScope scope(scopeId_);
-    PostUITask(
+    formTaskExecutor_->PostUITask(
         [weak = WeakClaim(this), checker] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -493,8 +436,7 @@ void FormPattern::TakeSurfaceCaptureForUI()
         return;
     }
 
-    ContainerScope containerScope(scopeId_);
-    PostDelayedUITask(
+    formTaskExecutor_->PostDelayedUITask(
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -539,13 +481,11 @@ void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
         std::to_string(pixelMap->GetWidth()) + "x" + std::to_string(pixelMap->GetHeight());
     pixelMap->SetMemoryName(captureName);
 
-    auto uiTaskExecutor =
-        SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask([weak = WeakClaim(this), pixelMap] {
+    formTaskExecutor_->PostUITask([weak = WeakClaim(this), pixelMap] {
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         formPattern->HandleOnSnapshot(pixelMap);
-        }, "ArkUIFormHandleOnSnapshot", GetFormTaskPriority());
+        }, "ArkUIFormHandleOnSnapshot");
 }
 
 void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
@@ -555,16 +495,10 @@ void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto executor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(executor);
 
     std::string nodeIdStr = std::to_string(host->GetId());
-    executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("DelayRemoveFormChildNode").append(nodeIdStr));
-
-    executor->RemoveTask(
-        TaskExecutor::TaskType::UI, std::string("ArkUIFormDeleteImageNodeAfterRecover_").append(nodeIdStr));
+    formTaskExecutor_->RemoveUITask(std::string("DelayRemoveFormChildNode").append(nodeIdStr));
+    formTaskExecutor_->RemoveUITask(std::string("ArkUIFormDeleteImageNodeAfterRecover_").append(nodeIdStr));
 
     pixelMap_ = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
     UpdateStaticCard();
@@ -991,7 +925,7 @@ void FormPattern::AddFormComponent(const RequestFormInfo& info)
     }
     isJsCard_ = true;
     RefPtr<PipelineContext> pipeline = host->GetContextRefPtr();
-    PostBgTask([weak = WeakClaim(this), info, pipeline] {
+    formTaskExecutor_->PostBgTask([weak = WeakClaim(this), info, pipeline] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->AddFormComponentTask(info, pipeline);
@@ -1041,7 +975,7 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
         newFormSpecialStyle.SetIsDisableByDue(isDueDisable);
         newFormSpecialStyle.SetIsRemoveByDue(isDueRemove);
         newFormSpecialStyle.SetInitDone();
-        PostUITask([weak = WeakClaim(this), info, newFormSpecialStyle] {
+        formTaskExecutor_->PostUITask([weak = WeakClaim(this), info, newFormSpecialStyle] {
             ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1054,7 +988,7 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
 
 void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info)
 {
-    PostUITask([weak = WeakClaim(this), isTransparencyEnabled, info, isJsCard = isJsCard_] {
+    formTaskExecutor_->PostUITask([weak = WeakClaim(this), isTransparencyEnabled, info, isJsCard = isJsCard_] {
         ACE_SCOPED_TRACE("ArkUIAddFormComponentUI");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1078,7 +1012,7 @@ void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFo
 
 void FormPattern::SetParamForWantTask(const RequestFormInfo& info)
 {
-    PostBgTask([weak = WeakClaim(this), info] {
+    formTaskExecutor_->PostBgTask([weak = WeakClaim(this), info] {
         ACE_SCOPED_TRACE("ArkUISetParamForWant");
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1729,29 +1663,28 @@ void FormPattern::InitFormManagerDelegate()
         formManagerBridge_->SetFormUtils(formUtils);
     }
     int32_t instanceID = context->GetInstanceId();
+    formTaskExecutor_ = AceType::MakeRefPtr<FormTaskExecutor>(WeakPtr<FrameNode>(host));
     accessibilitySessionAdapter_ = AceType::MakeRefPtr<AccessibilitySessionAdapterForm>(formManagerBridge_);
     formManagerBridge_->SetFormLayoutWrapper(WeakClaim(this));
-    formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t id,
+    formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID](int64_t id,
                                                    const std::string& path,
                                                    const std::string& module, const std::string& data,
                                                    const std::map<std::string, sptr<AppExecFwk::FormAshmem>>&
                                                        imageDataMap,
                                                    const AppExecFwk::FormJsInfo& formJsInfo,
                                                    const FrontendType& frontendType, const FrontendType& uiSyntax) {
-        ContainerScope scope(instanceID);
-        CHECK_NULL_VOID(pipeline);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([id, path, module, data, imageDataMap, formJsInfo, weak, instanceID, frontendType,
-                                    uiSyntax] {
-            ContainerScope scope(instanceID);
-            auto form = weak.Upgrade();
-            CHECK_NULL_VOID(form);
-            auto container = form->GetSubContainer();
-            CHECK_NULL_VOID(container);
-            container->SetWindowConfig({ formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth });
-            container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType, uiSyntax);
-            }, "ArkUIFormRunCard", GetFormTaskPriority());
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formTaskExecutor_->PostUITask(
+            [id, path, module, data, imageDataMap, formJsInfo, weak, instanceID, frontendType, uiSyntax] {
+                ContainerScope scope(instanceID);
+                auto form = weak.Upgrade();
+                CHECK_NULL_VOID(form);
+                auto container = form->GetSubContainer();
+                CHECK_NULL_VOID(container);
+                container->SetWindowConfig({formJsInfo.formWindow.designWidth, formJsInfo.formWindow.autoDesignWidth});
+                container->RunCard(id, path, module, data, imageDataMap, formJsInfo.formSrc, frontendType, uiSyntax);
+            }, "ArkUIFormRunCard");
     });
 
     InitAddFormUpdateAndErrorCallback(instanceID);
@@ -1815,8 +1748,7 @@ void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType, 
     CHECK_NULL_VOID(host);
     std::string nodeIdStr = std::to_string(host->GetId());
 
-    ContainerScope containerScope(scopeId_);
-    PostDelayedUITask(
+    formTaskExecutor_->PostDelayedUITask(
         [weak = WeakClaim(this), formChildNodeType] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -1921,8 +1853,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
             return;
         }
         std::string nodeIdStr = std::to_string(host->GetId());
-        ContainerScope containerScope(scopeId_);
-        PostDelayedUITask(
+        formTaskExecutor_->PostDelayedUITask(
             [weak = WeakClaim(this)] {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
@@ -1937,8 +1868,7 @@ void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::string nodeIdStr = std::to_string(host->GetId());
-    ContainerScope containerScope(scopeId_);
-    PostDelayedUITask(
+    formTaskExecutor_->PostDelayedUITask(
         [weak = WeakClaim(this), needHandleCachedClick] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -2105,14 +2035,11 @@ void FormPattern::OnLoadEvent()
     isSnapshot_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+    formTaskExecutor_->PostUITask([weak = WeakClaim(this)] {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->FireOnLoadEvent();
-        }, "ArkUIFormFireLoadEvent", GetFormTaskPriority());
+        }, "ArkUIFormFireLoadEvent");
 }
 
 void FormPattern::OnActionEvent(const std::string& action)
@@ -2161,20 +2088,16 @@ void FormPattern::OnActionEvent(const std::string& action)
         isManuallyClick_ = false;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        if (uiTaskExecutor.IsRunOnCurrentThread()) {
+        if (formTaskExecutor_->IsRunOnUIThread()) {
             FireOnRouterEvent(eventAction);
         } else {
-            uiTaskExecutor.PostTask([weak = WeakClaim(this), action] {
+            formTaskExecutor_->PostUITask([weak = WeakClaim(this), action] {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 auto eventAction = JsonUtil::ParseJsonString(action);
                 TAG_LOGI(AceLogTag::ACE_FORM, "UI task execute begin.");
                 pattern->FireOnRouterEvent(eventAction);
-                }, "ArkUIFormFireRouterEvent", GetFormTaskPriority());
+                }, "ArkUIFormFireRouterEvent");
         }
     }
 
@@ -2472,9 +2395,8 @@ void FormPattern::DelayResetManuallyClickFlag()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     std::string nodeIdStr = std::to_string(host->GetId());
-    ContainerScope containerScope(scopeId_);
-    RemoveUITask(std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
-    PostDelayedUITask(
+    formTaskExecutor_->RemoveUITask(std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
+    formTaskExecutor_->PostDelayedUITask(
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -2488,12 +2410,8 @@ void FormPattern::RemoveDelayResetManuallyClickFlagTask()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto executor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(executor);
     std::string nodeIdStr = std::to_string(host->GetId());
-    executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
+    formTaskExecutor_->RemoveUITask(std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
 }
 
 void FormPattern::SetTransparencyConfig(bool isTransparencyForm, const RequestFormInfo& info)
@@ -2634,15 +2552,13 @@ void FormPattern::InitAddFormUpdateAndErrorCallback(int32_t instanceID)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
 
     formManagerBridge_->AddFormUpdateCallback(
-        [weak = WeakClaim(this), instanceID, pipeline](int64_t id, const std::string& data,
+        [weak = WeakClaim(this), instanceID](int64_t id, const std::string& data,
             const std::map<std::string, sptr<AppExecFwk::FormAshmem>>& imageDataMap) {
-            ContainerScope scope(instanceID);
-            CHECK_NULL_VOID(pipeline);
-            auto uiTaskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->formTaskExecutor_->PostUITask(
                 [id, data, imageDataMap, weak, instanceID] {
                     ContainerScope scope(instanceID);
                     auto form = weak.Upgrade();
@@ -2651,22 +2567,21 @@ void FormPattern::InitAddFormUpdateAndErrorCallback(int32_t instanceID)
                         form->GetSubContainer()->UpdateCard(data, imageDataMap);
                     }
                 },
-                "ArkUIFormUpdateCard", GetFormTaskPriority());
+                "ArkUIFormUpdateCard");
         });
 
     formManagerBridge_->AddFormErrorCallback(
-        [weak = WeakClaim(this), instanceID, pipeline](const std::string& code, const std::string& msg) {
-            ContainerScope scope(instanceID);
-            CHECK_NULL_VOID(pipeline);
-            auto uiTaskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
+        [weak = WeakClaim(this), instanceID](const std::string& code, const std::string& msg) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->formTaskExecutor_->PostUITask(
                 [code, msg, weak, instanceID] {
                     ContainerScope scope(instanceID);
                     auto form = weak.Upgrade();
                     CHECK_NULL_VOID(form);
                     form->FireOnErrorEvent(code, msg);
                 },
-                "ArkUIFormFireErrorEvent", GetFormTaskPriority());
+                "ArkUIFormFireErrorEvent");
         });
 }
 
@@ -2675,38 +2590,32 @@ void FormPattern::InitAddUninstallAndSurfaceNodeCallback(int32_t instanceID)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID, pipeline](int64_t formId) {
-        ContainerScope scope(instanceID);
-        CHECK_NULL_VOID(pipeline);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask(
+    formManagerBridge_->AddFormUninstallCallback([weak = WeakClaim(this), instanceID](int64_t formId) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formTaskExecutor_->PostUITask(
             [formId, weak, instanceID] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
                 form->FireOnUninstallEvent(formId);
             },
-            "ArkUIFormFireUninstallEvent", GetFormTaskPriority());
+            "ArkUIFormFireUninstallEvent");
     });
 
     formManagerBridge_->AddFormSurfaceNodeCallback(
         [weak = WeakClaim(this), instanceID](
             const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want) {
-            ContainerScope scope(instanceID);
-            auto pipeline = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipeline);
-            auto executor = pipeline->GetTaskExecutor();
-            CHECK_NULL_VOID(executor);
-            auto uiTaskExecutor = SingleTaskExecutor::Make(executor, TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->formTaskExecutor_->PostUITask(
                 [weak, instanceID, node, want] {
                     ContainerScope scope(instanceID);
                     auto form = weak.Upgrade();
                     CHECK_NULL_VOID(form);
                     form->FireFormSurfaceNodeCallback(node, want);
                 },
-                "ArkUIFormFireSurfaceNodeCallback", GetFormTaskPriority());
+                "ArkUIFormFireSurfaceNodeCallback");
         });
 }
 
@@ -2714,32 +2623,28 @@ void FormPattern::InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceID)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
 
     formManagerBridge_->AddFormSurfaceChangeCallback(
-        [weak = WeakClaim(this), instanceID, pipeline](float width, float height, float borderWidth) {
-            ContainerScope scope(instanceID);
-            CHECK_NULL_VOID(pipeline);
-            auto uiTaskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask(
+        [weak = WeakClaim(this), instanceID](float width, float height, float borderWidth) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->formTaskExecutor_->PostUITask(
                 [weak, instanceID, width, height, borderWidth] {
                     ContainerScope scope(instanceID);
                     auto form = weak.Upgrade();
                     CHECK_NULL_VOID(form);
                     form->FireFormSurfaceChangeCallback(width, height, borderWidth);
                 },
-                "ArkUIFormFireSurfaceChange", GetFormTaskPriority());
+                "ArkUIFormFireSurfaceChange");
         });
 
     formManagerBridge_->AddFormSurfaceDetachCallback([weak = WeakClaim(this), instanceID]() {
-        ContainerScope scope(instanceID);
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         formPattern->FireFormSurfaceDetachCallback();
     });
 
     formManagerBridge_->AddActionEventHandle([weak = WeakClaim(this), instanceID](const std::string& action) {
-        ContainerScope scope(instanceID);
         TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}zu", action.length());
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
@@ -2751,23 +2656,20 @@ void FormPattern::InitAddUnTrustAndSnapshotCallback(int32_t instanceID)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID, pipeline]() {
-        ContainerScope scope(instanceID);
-        CHECK_NULL_VOID(pipeline);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask(
+    formManagerBridge_->AddUnTrustFormCallback([weak = WeakClaim(this), instanceID]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formTaskExecutor_->PostUITask(
             [weak, instanceID] {
                 ContainerScope scope(instanceID);
                 auto formPattern = weak.Upgrade();
                 CHECK_NULL_VOID(formPattern);
                 formPattern->HandleUnTrustForm();
             },
-            "ArkUIFormHandleUnTrust", GetFormTaskPriority());
+            "ArkUIFormHandleUnTrust");
     });
 
     formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID](const uint32_t& delayTime) {
-        ContainerScope scope(instanceID);
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
         auto host = formPattern->GetHost();
@@ -2778,7 +2680,6 @@ void FormPattern::InitAddUnTrustAndSnapshotCallback(int32_t instanceID)
 
     formManagerBridge_->AddFormLinkInfoUpdateCallback(
         [weak = WeakClaim(this), instanceID](const std::vector<std::string>& infos) {
-            ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->SetFormLinkInfos(infos);
@@ -2790,15 +2691,11 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
     formManagerBridge_->AddGetRectRelativeToWindowCallback(
         [weak = WeakClaim(this), instanceID](AccessibilityParentRectInfo& parentRectInfo) {
-            ContainerScope scope(instanceID);
-            auto context = PipelineContext::GetCurrentContextSafely();
-            CHECK_NULL_VOID(context);
-            auto uiTaskExecutor =
-                SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostSyncTask([weak, instanceID, &parentRectInfo] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->formTaskExecutor_->PostSyncUITask([weak, instanceID, &parentRectInfo] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
@@ -2806,38 +2703,35 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
                 }, "ArkUIFormGetRectRelativeToWindow");
         });
 
-    formManagerBridge_->AddEnableFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool enable) {
-        ContainerScope scope(instanceID);
-        CHECK_NULL_VOID(pipeline);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak, instanceID, enable] {
+    formManagerBridge_->AddEnableFormCallback([weak = WeakClaim(this), instanceID](const bool enable) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formTaskExecutor_->PostUITask([weak, instanceID, enable] {
             ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleEnableForm(enable);
-            }, "ArkUIFormHandleEnableForm", GetFormTaskPriority());
+            }, "ArkUIFormHandleEnableForm");
         });
 
-    formManagerBridge_->AddLockFormCallback([weak = WeakClaim(this), instanceID, pipeline](const bool lock) {
-        ContainerScope scope(instanceID);
-        CHECK_NULL_VOID(pipeline);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak, instanceID, lock] {
+    formManagerBridge_->AddLockFormCallback([weak = WeakClaim(this), instanceID](const bool lock) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formTaskExecutor_->PostUITask([weak, instanceID, lock] {
             ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleLockEvent(lock);
-            }, "ArkUIFormHandleLockForm", GetFormTaskPriority());
+            }, "ArkUIFormHandleLockForm");
         });
 }
 
 void FormPattern::InitUpdateFormDoneCallback(int32_t instanceID)
 {
     formManagerBridge_->AddFormUpdateDoneCallback([weak = WeakClaim(this), instanceID](const int64_t formId) {
-        ContainerScope scope(instanceID);
-        PostUITask([formId, weak, instanceID] {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formTaskExecutor_->PostUITask([formId, weak, instanceID] {
             ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
@@ -2862,15 +2756,15 @@ void FormPattern::enhancesSubContainer(bool hasContainer)
     subContainer_->Initialize();
     subContainer_->SetNodeId(host->GetId());
 
-    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this), pipeline](int64_t id) {
-        CHECK_NULL_VOID(pipeline);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([id, weak] {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->FireOnAcquiredEvent(id);
-            }, "ArkUIFormFireAcquiredEvent", GetFormTaskPriority());
+    subContainer_->AddFormAcquireCallback([weak = WeakClaim(this)](int64_t id) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formTaskExecutor_->PostUITask(
+            [weak, id] {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->FireOnAcquiredEvent(id);
+            }, "ArkUIFormFireAcquiredEvent");
     });
 
     subContainer_->SetFormLoadCallback([weak = WeakClaim(this)]() {
@@ -3058,12 +2952,8 @@ void FormPattern::ReAddStaticFormSnapshotTimer()
     TAG_LOGI(AceLogTag::ACE_FORM, "ReAddStaticFormSnapshotTimer.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto executor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(executor);
     std::string nodeIdStr = std::to_string(host->GetId());
-    executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormTakeSurfaceCapture_" + nodeIdStr);
+    formTaskExecutor_->RemoveUITask("ArkUIFormTakeSurfaceCapture_" + nodeIdStr);
     HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_10S, nodeIdStr);
 }
 
@@ -3189,13 +3079,12 @@ bool FormPattern::OnAccessibilityStateChange(bool state)
         UnregisterAccessibility();
     }
 
-    auto taskExecutor = SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
-    taskExecutor.PostTask([weak = WeakClaim(this)] {
+    formTaskExecutor_->PostBgTask([weak = WeakClaim(this)] {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         CHECK_NULL_VOID(pattern->formManagerBridge_);
         pattern->formManagerBridge_->ReAddForm();
-        }, "ReAddForm", GetFormTaskPriority());
+        }, "ReAddForm");
     return true;
 }
 
@@ -3203,19 +3092,16 @@ void FormPattern::InitDueControlFormCallback(int32_t instanceID)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
     formManagerBridge_->AddDueControlFormCallback(
-        [weak = WeakClaim(this), instanceID, pipeline](const bool isDisablePolicy, const bool isControl) {
-        ContainerScope scope(instanceID);
-        CHECK_NULL_VOID(pipeline);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(pipeline->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask([weak, instanceID, isDisablePolicy, isControl] {
+        [weak = WeakClaim(this), instanceID](const bool isDisablePolicy, const bool isControl) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->formTaskExecutor_->PostUITask([weak, instanceID, isDisablePolicy, isControl] {
             ContainerScope scope(instanceID);
             auto formPattern = weak.Upgrade();
             CHECK_NULL_VOID(formPattern);
             formPattern->HandleFormDueControl(isDisablePolicy, isControl);
-            }, "ArkUIFormHandleDueControlEvent", GetFormTaskPriority());
+            }, "ArkUIFormHandleDueControlEvent");
     });
 }
 

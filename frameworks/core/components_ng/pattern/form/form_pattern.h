@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/form/form_layout_wrapper.h"
 #include "core/components_ng/pattern/form/form_special_style.h"
+#include "core/components_ng/pattern/form/form_task_executor.h"
 #include "core/components/common/properties/color.h"
 #include "form_skeleton_params.h"
 
@@ -342,6 +343,7 @@ private:
 
     RefPtr<SubContainer> subContainer_;
     RefPtr<FormManagerDelegate> formManagerBridge_;
+    RefPtr<NG::FormTaskExecutor> formTaskExecutor_;
     RefPtr<AccessibilitySessionAdapterForm> accessibilitySessionAdapter_;
 
     FormSpecialStyle formSpecialStyle_;
