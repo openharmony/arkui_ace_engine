@@ -15,7 +15,6 @@
         "src/ArkSpan.ts",
         "src/ArkStack.ts",
         "src/ArkText.ts",
-        "src/ArkVideo.ts",
         "src/ArkClassDefine.ts",
         "src/ArkParticle.ts"
     ],

@@ -121,9 +121,8 @@
 #endif
 
 #ifdef VIDEO_SUPPORTED
-#include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_async.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_async_binding.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_binding.h"
 #endif
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_embedded_component.h"
@@ -169,6 +168,7 @@
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
+#include "core/common/plugin_manager.h"
 #ifdef EFFECT_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
@@ -351,9 +351,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSContainerModal::JSBind(globalObj);
     JSAppBar::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
-    JSVideo::JSBind(globalObj);
-    JSVideoController::JSBind(globalObj);
-    JSVideoControllerAsync::JSBind(globalObj);
+    JSVideoControllerAsyncBinding::JSBind(globalObj);
+    JSVideoControllerBinding::JSBind(globalObj);
 #endif
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponent::JSBind(globalObj);

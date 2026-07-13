@@ -17,7 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIDEO_CONTROLLER_ASYNC_H
 
 #include "base/memory/referenced.h"
-#include "bridge/declarative_frontend/engine/bindings.h"
+#include "frameworks/core/common/container_consts.h"
 #include "core/components_ng/pattern/video/video_controller_async.h"
 
 namespace OHOS::Ace::Framework {
@@ -26,19 +26,6 @@ class JSVideoControllerAsync : public Referenced {
 public:
     JSVideoControllerAsync() = default;
     ~JSVideoControllerAsync() override = default;
-
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSVideoControllerAsync* controller);
-
-    void StartAsync(const JSCallbackInfo& args);
-    void PauseAsync(const JSCallbackInfo& args);
-    void StopAsync(const JSCallbackInfo& args);
-    void ResetAsync(const JSCallbackInfo& args);
-
-    void SetCurrentTime(const JSCallbackInfo& args);
-    void RequestFullscreen(const JSCallbackInfo& args);
-    void ExitFullscreen(const JSCallbackInfo& args);
 
     RefPtr<VideoControllerAsync> GetController() const
     {
@@ -55,6 +42,11 @@ public:
         instanceId_ = id;
     }
 
+    int32_t GetInstanceId() const
+    {
+        return instanceId_;
+    }
+
 private:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     RefPtr<VideoControllerAsync> videoControllerAsync_;
@@ -62,4 +54,5 @@ private:
 };
 
 } // namespace OHOS::Ace::Framework
+
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_VIDEO_CONTROLLER_ASYNC_H

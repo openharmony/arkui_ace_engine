@@ -493,9 +493,8 @@ template("declarative_js_engine") {
       if (defined(config.video_components_support) &&
           config.video_components_support) {
         sources += [
-          "jsview/js_video.cpp",
-          "jsview/js_video_controller.cpp",
           "jsview/js_video_controller_async.cpp",
+          "jsview/js_video_controller.cpp",
         ]
       }
       if (defined(config.video_support_jsstack) &&
@@ -943,9 +942,8 @@ template("declarative_js_engine_ng") {
     if (defined(config.video_components_support) &&
         config.video_components_support) {
       sources += [
-        "jsview/js_video.cpp",
-        "jsview/js_video_controller.cpp",
         "jsview/js_video_controller_async.cpp",
+        "jsview/js_video_controller.cpp",
       ]
       if (defined(config.video_support_jsstack) &&
           config.video_support_jsstack) {
