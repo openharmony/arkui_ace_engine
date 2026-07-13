@@ -20,11 +20,13 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/unittest/core/event/frame_node_on_tree.h"
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/common/ace_engine.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -49,6 +51,26 @@ namespace {
     constexpr int32_t MATERIAL_TYPE_NONE = static_cast<int32_t>(MaterialType::NONE);
     constexpr int32_t MATERIAL_TYPE_SEMI_TRANSPARENT = static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT);
     constexpr int32_t MATERIAL_TYPE_IMMERSIVE = static_cast<int32_t>(MaterialType::IMMERSIVE);
+
+    // Restore the immersive-material inputs to their pristine defaults so that mutating them in a test never leaks
+    // into sibling tests in the same binary.
+    void ResetImmersiveMaterialState()
+    {
+        g_uiMaterialLevel = UiMaterialLevel::DEFAULT;
+        TransparencyUtils::transparencyLevelGet_ = false;
+        auto& levelMap = TransparencyUtils::GetLevelMap();
+        levelMap[UiMaterialLevel::EXQUISITE] = UiMaterialTransparency::NORMAL;
+        levelMap[UiMaterialLevel::GENTLE] = UiMaterialTransparency::GENTLE_NORMAL;
+        levelMap[UiMaterialLevel::SMOOTH] = UiMaterialTransparency::NONE;
+    }
+
+    // Drive TransparencyUtils::GetTransparencyLevel to return `transparency` for `level` by short-circuiting the
+    // settings read (transparencyLevelGet_ = true) and seeding the lookup map.
+    void SetTransparencyForLevel(UiMaterialLevel level, UiMaterialTransparency transparency)
+    {
+        TransparencyUtils::transparencyLevelGet_ = true;
+        TransparencyUtils::GetLevelMap()[level] = transparency;
+    }
 } // namespace
 
 class DialogManagerTestNg : public testing::Test {
@@ -587,6 +609,160 @@ HWTEST_F(DialogManagerTestNg, DialogManagerTest023, TestSize.Level1)
     DialogManager::SetSmoothImmersiveShadow(nodeWithoutContext, material);
     // Function should return early without crash
     DialogManagerTestNg::SetUpTestCase();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveDistortionEffectSmooth001
+ * @tc.desc: Test IsUseImmersiveDistortionEffect returns false for SMOOTH material level.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveDistortionEffectSmooth001, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+    EXPECT_FALSE(DialogManager::IsUseImmersiveDistortionEffect());
+    ResetImmersiveMaterialState();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveDistortionEffectExquisite001
+ * @tc.desc: Test IsUseImmersiveDistortionEffect for EXQUISITE level returns true when transparency is NORMAL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveDistortionEffectExquisite001, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    SetTransparencyForLevel(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::NORMAL);
+    EXPECT_TRUE(DialogManager::IsUseImmersiveDistortionEffect());
+    ResetImmersiveMaterialState();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveDistortionEffectExquisite002
+ * @tc.desc: Test IsUseImmersiveDistortionEffect for EXQUISITE level returns true when transparency is THIN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveDistortionEffectExquisite002, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    SetTransparencyForLevel(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THIN);
+    EXPECT_TRUE(DialogManager::IsUseImmersiveDistortionEffect());
+    ResetImmersiveMaterialState();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveDistortionEffectExquisite003
+ * @tc.desc: Test IsUseImmersiveDistortionEffect for EXQUISITE level returns false when transparency is THICK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveDistortionEffectExquisite003, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    SetTransparencyForLevel(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THICK);
+    EXPECT_FALSE(DialogManager::IsUseImmersiveDistortionEffect());
+    ResetImmersiveMaterialState();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveDistortionEffectGentle001
+ * @tc.desc: Test IsUseImmersiveDistortionEffect for GENTLE level returns false for GENTLE_THIN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveDistortionEffectGentle001, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::GENTLE;
+    SetTransparencyForLevel(UiMaterialLevel::GENTLE, UiMaterialTransparency::GENTLE_THIN);
+    EXPECT_FALSE(DialogManager::IsUseImmersiveDistortionEffect());
+    ResetImmersiveMaterialState();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveDistortionEffectGentle002
+ * @tc.desc: Test IsUseImmersiveDistortionEffect for GENTLE level returns false for GENTLE_NORMAL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveDistortionEffectGentle002, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::GENTLE;
+    SetTransparencyForLevel(UiMaterialLevel::GENTLE, UiMaterialTransparency::GENTLE_NORMAL);
+    EXPECT_FALSE(DialogManager::IsUseImmersiveDistortionEffect());
+    ResetImmersiveMaterialState();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveEdgeLightEffectSmooth001
+ * @tc.desc: Test IsUseImmersiveEdgeLightEffect returns false for SMOOTH material level.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveEdgeLightEffectSmooth001, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+    EXPECT_FALSE(DialogManager::IsUseImmersiveEdgeLightEffect());
+    ResetImmersiveMaterialState();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveEdgeLightEffectExquisite001
+ * @tc.desc: Test IsUseImmersiveEdgeLightEffect for EXQUISITE level returns true when transparency is NORMAL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveEdgeLightEffectExquisite001, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    SetTransparencyForLevel(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::NORMAL);
+    EXPECT_TRUE(DialogManager::IsUseImmersiveEdgeLightEffect());
+    ResetImmersiveMaterialState();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveEdgeLightEffectExquisite002
+ * @tc.desc: Test IsUseImmersiveEdgeLightEffect for EXQUISITE level returns true when transparency is THIN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveEdgeLightEffectExquisite002, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    SetTransparencyForLevel(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THIN);
+    EXPECT_TRUE(DialogManager::IsUseImmersiveEdgeLightEffect());
+    ResetImmersiveMaterialState();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveEdgeLightEffectExquisite003
+ * @tc.desc: Test IsUseImmersiveEdgeLightEffect for EXQUISITE level returns false when transparency is THICK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveEdgeLightEffectExquisite003, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    SetTransparencyForLevel(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THICK);
+    EXPECT_FALSE(DialogManager::IsUseImmersiveEdgeLightEffect());
+    ResetImmersiveMaterialState();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveEdgeLightEffectGentle001
+ * @tc.desc: Test IsUseImmersiveEdgeLightEffect for GENTLE level returns true when transparency is GENTLE_THIN.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveEdgeLightEffectGentle001, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::GENTLE;
+    SetTransparencyForLevel(UiMaterialLevel::GENTLE, UiMaterialTransparency::GENTLE_THIN);
+    EXPECT_TRUE(DialogManager::IsUseImmersiveEdgeLightEffect());
+    ResetImmersiveMaterialState();
+}
+
+/**
+ * @tc.name: DialogManagerIsUseImmersiveEdgeLightEffectGentle002
+ * @tc.desc: Test IsUseImmersiveEdgeLightEffect for GENTLE level returns false when transparency is GENTLE_NORMAL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogManagerTestNg, DialogManagerIsUseImmersiveEdgeLightEffectGentle002, TestSize.Level1)
+{
+    g_uiMaterialLevel = UiMaterialLevel::GENTLE;
+    SetTransparencyForLevel(UiMaterialLevel::GENTLE, UiMaterialTransparency::GENTLE_NORMAL);
+    EXPECT_FALSE(DialogManager::IsUseImmersiveEdgeLightEffect());
+    ResetImmersiveMaterialState();
 }
 
 } // namespace OHOS::Ace::NG

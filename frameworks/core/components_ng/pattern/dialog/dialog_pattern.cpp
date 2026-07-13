@@ -3355,8 +3355,11 @@ bool DialogPattern::NeedDistortion()
         return needDistortion_.value();
     }
     if (dialogProperties_.transitionEffect || dialogProperties_.dialogTransitionEffect ||
-        dialogProperties_.maskTransitionEffect ||
-        dialogProperties_.isMask || dialogProperties_.customStyle || !dialogProperties_.systemMaterial ||
+        dialogProperties_.maskTransitionEffect || dialogProperties_.isMask || dialogProperties_.customStyle ||
+        !dialogProperties_.systemMaterial ||
+        (dialogProperties_.systemMaterial &&
+            Ace::AceType::TypeId(AceType::RawPtr(dialogProperties_.systemMaterial)) != Ace::UiMaterial::TypeId() &&
+            !dialogProperties_.edgeLightMode.has_value()) ||
         !MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
         needDistortion_ = false;
     } else if (dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO) ==
@@ -3367,10 +3370,10 @@ bool DialogPattern::NeedDistortion()
         needDistortion_ = false;
     } else if (dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO) ==
                    DistortionMode::DISTORTION_AUTO &&
-               dialogProperties_.systemMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE) &&
-               (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::EXQUISITE ||
-                   SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::GENTLE)) {
-        needDistortion_ = true;
+               (dialogProperties_.systemMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE) ||
+                   Ace::AceType::TypeId(AceType::RawPtr(dialogProperties_.systemMaterial)) !=
+                   Ace::UiMaterial::TypeId()) &&
+               DialogManager::IsUseImmersiveDistortionEffect()) {
         if (dialogProperties_.openAnimation.has_value() && !MaterialUtils::IsMaterialEnabled()) {
             needDistortion_ = false;
         } else {
@@ -3388,6 +3391,9 @@ bool DialogPattern::NeedEdgeLight()
         return needFlowLight_.value();
     }
     if (dialogProperties_.isMask || dialogProperties_.customStyle || !dialogProperties_.systemMaterial ||
+        (dialogProperties_.systemMaterial &&
+            Ace::AceType::TypeId(AceType::RawPtr(dialogProperties_.systemMaterial)) != Ace::UiMaterial::TypeId() &&
+            !dialogProperties_.edgeLightMode.has_value()) ||
         !MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
         needFlowLight_ = false;
     } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO) ==
@@ -3398,8 +3404,10 @@ bool DialogPattern::NeedEdgeLight()
         needFlowLight_ = false;
     } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO) ==
                    EdgeLightMode::EDGELIGHT_AUTO &&
-               dialogProperties_.systemMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE) &&
-               SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::EXQUISITE) {
+               (dialogProperties_.systemMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE) ||
+                   Ace::AceType::TypeId(AceType::RawPtr(dialogProperties_.systemMaterial)) !=
+                   Ace::UiMaterial::TypeId()) &&
+               DialogManager::IsUseImmersiveEdgeLightEffect()) {
         needFlowLight_ = true;
     } else {
         needFlowLight_ = false;

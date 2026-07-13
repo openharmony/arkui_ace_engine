@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/security_component/security_component_paint_property.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
@@ -1783,16 +1784,17 @@ bool MenuPattern::IsUseDistortionAnimation() const
     if (!MaterialUtils::IsEnableMaterialParam(menuSystemMaterial)) {
         return false;
     }
+    if (Ace::AceType::TypeId(AceType::RawPtr(menuSystemMaterial)) != Ace::UiMaterial::TypeId() &&
+        !menuParam.distortionMode.has_value()) {
+        return false;
+    }
     auto menuSystemMaterialType =
         MaterialUtils::GetTypeFromMaterial(AceType::RawPtr(menuSystemMaterial)).value_or(MaterialType::NONE);
-    auto materialLevel = SystemProperties::GetUiMaterialLevel();
     auto menuDistortionMode = menuParam.distortionMode.value_or(DistortionMode::DISTORTION_AUTO);
-    if (menuSystemMaterialType == MaterialType::IMMERSIVE && menuDistortionMode == DistortionMode::DISTORTION_AUTO) {
-        if (materialLevel == UiMaterialLevel::SMOOTH) {
-            return false;
-        } else {
-            return true;
-        }
+    if ((menuSystemMaterialType == MaterialType::IMMERSIVE ||
+            Ace::AceType::TypeId(AceType::RawPtr(menuSystemMaterial)) != Ace::UiMaterial::TypeId()) &&
+        menuDistortionMode == DistortionMode::DISTORTION_AUTO) {
+        return DialogManager::IsUseImmersiveDistortionEffect();
     }
     if (menuDistortionMode == DistortionMode::DISTORTION_ENABLED) {
         return true;
@@ -1807,16 +1809,17 @@ bool MenuPattern::IsUseEdgeLightAnimation() const
     if (!MaterialUtils::IsEnableMaterialParam(menuSystemMaterial)) {
         return false;
     }
+    if (Ace::AceType::TypeId(AceType::RawPtr(menuSystemMaterial)) != Ace::UiMaterial::TypeId() &&
+        !menuParam.edgeLightMode.has_value()) {
+        return false;
+    }
     auto menuSystemMaterialType =
         MaterialUtils::GetTypeFromMaterial(AceType::RawPtr(menuSystemMaterial)).value_or(MaterialType::NONE);
-    auto materialLevel = SystemProperties::GetUiMaterialLevel();
     auto menuEdgeLightMode = menuParam.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_DISABLED);
-    if (menuSystemMaterialType == MaterialType::IMMERSIVE && menuEdgeLightMode == EdgeLightMode::EDGELIGHT_AUTO) {
-        if (materialLevel == UiMaterialLevel::EXQUISITE) {
-            return true;
-        } else {
-            return false;
-        }
+    if ((menuSystemMaterialType == MaterialType::IMMERSIVE ||
+            Ace::AceType::TypeId(AceType::RawPtr(menuSystemMaterial)) != Ace::UiMaterial::TypeId()) &&
+        menuEdgeLightMode == EdgeLightMode::EDGELIGHT_AUTO) {
+        return DialogManager::IsUseImmersiveEdgeLightEffect();
     }
     if (menuEdgeLightMode == EdgeLightMode::EDGELIGHT_ENABLED) {
         return true;
