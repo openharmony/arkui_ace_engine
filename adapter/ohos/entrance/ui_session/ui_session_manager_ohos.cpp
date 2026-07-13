@@ -26,6 +26,8 @@
 namespace OHOS::Ace {
 namespace {
 constexpr int32_t PAGE_SCENE_MAX_ID_LENGTH = 128;
+constexpr int32_t PAGE_SCENE_RULE_VERSION = 1;
+constexpr char PAGE_SCENE_VERSION[] = "version";
 constexpr char PAGE_SCENE_RULE_SET_ID[] = "ruleSetId";
 constexpr char PAGE_SCENE_SOURCE_CONFIG[] = "sourceConfig";
 constexpr char PAGE_SCENE_ARKUI_SOURCE[] = "arkui";
@@ -40,7 +42,6 @@ constexpr char PAGE_SCENE_OPERATOR[] = "operator";
 constexpr char PAGE_SCENE_THRESHOLD[] = "threshold";
 constexpr char PAGE_SCENE_POLICY[] = "policy";
 constexpr char PAGE_SCENE_REPORT_ON_REGISTER[] = "reportOnRegister";
-constexpr char PAGE_SCENE_REPORT_ON_TEXT_INPUT_ATTACHED[] = "reportOnTextInputAttached";
 constexpr char PAGE_SCENE_TEXT_EDITOR_SCENE[] = "TEXT_EDITOR";
 constexpr char PAGE_SCENE_COUNT_GTE_OPERATOR[] = "COUNT_GTE";
 constexpr char PAGE_SCENE_TEXT_INPUT_TAG[] = "TextInput";
@@ -476,12 +477,12 @@ int32_t UiSessionManagerOhos::RegisterPageSceneRules(int32_t processId, const st
         pageSceneRuleSets_[processId] = ruleSetInfo;
         auto previousCount = pageSceneRuleRegisterProcesses_.fetch_add(1);
         if (previousCount == 0 ||
-            (!hadTextEditorRule && HasPageSceneRule(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, false, false, ""))) {
+            (!hadTextEditorRule && HasPageSceneRule(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, false, ""))) {
             pageSceneInputNodeCount_.store(0);
         }
     }
     SaveProcessId("pageScene", processId);
-    auto registerRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, true, false, "");
+    auto registerRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, true, "");
     for (const auto& registerRuleJson : registerRuleJsons) {
         TriggerPageSceneDetect(processId, registerRuleJson, false);
     }
@@ -527,13 +528,13 @@ int32_t UiSessionManagerOhos::GetPageScene(int32_t processId, const std::string&
         }
         auto iter = pageSceneRuleSets_.find(processId);
         if (iter != pageSceneRuleSets_.end() && iter->second.ruleSetId == ruleJsonOrRuleSetId) {
-            auto ruleJsons = GetPageSceneRuleJsons(iter->second, PAGE_SCENE_TEXT_EDITOR_SCENE, false, false, "");
+            auto ruleJsons = GetPageSceneRuleJsons(iter->second, PAGE_SCENE_TEXT_EDITOR_SCENE, false, "");
             if (!ruleJsons.empty()) {
                 ruleJson = ruleJsons.front();
             }
         } else {
             auto ruleSetInfo = ExtractPageSceneRuleSetInfo(ruleJsonOrRuleSetId);
-            auto ruleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, false, false, "");
+            auto ruleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, false, "");
             if (!ruleJsons.empty()) {
                 ruleJson = ruleJsons.front();
             }
@@ -584,7 +585,7 @@ void UiSessionManagerOhos::NotifyPageSceneNodeChanged(const std::string& nodeTag
     if (!IsPageSceneInputControlNode(nodeTag)) {
         return;
     }
-    auto ruleJsons = GetPageSceneRuleJsonsForNodeChange(nodeTag, PAGE_SCENE_TEXT_EDITOR_SCENE, isAttach);
+    auto ruleJsons = GetPageSceneRuleJsonsForNodeChange(nodeTag, PAGE_SCENE_TEXT_EDITOR_SCENE);
     if (ruleJsons.empty()) {
         return;
     }
@@ -613,7 +614,7 @@ void UiSessionManagerOhos::NotifyPageSceneContentChanged()
 {
     std::lock_guard<std::mutex> lock(pageSceneMutex_);
     for (const auto& [pid, ruleSetInfo] : pageSceneRuleSets_) {
-        auto ruleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, false, false, "");
+        auto ruleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, false, "");
         for (const auto& ruleJson : ruleJsons) {
             pendingPageSceneDetectRules_.emplace(pid, ruleJson);
         }
@@ -682,6 +683,13 @@ UiSessionManagerOhos::PageSceneRuleSetInfo UiSessionManagerOhos::ExtractPageScen
         cJSON_Delete(root);
         return ruleSetInfo;
     }
+    auto version = GetJsonInt(root, PAGE_SCENE_VERSION, 0);
+    if (version != PAGE_SCENE_RULE_VERSION) {
+        LOGW("Parse page scene rule failed, unsupported version:%{public}d", version);
+        cJSON_Delete(root);
+        return ruleSetInfo;
+    }
+    ruleSetInfo.version = version;
     auto ruleSetId = GetJsonString(root, PAGE_SCENE_RULE_SET_ID);
     if (!IsValidPageSceneId(ruleSetId)) {
         LOGW("Parse page scene rule failed, invalid ruleSetId length:%{public}zu", ruleSetId.length());
@@ -715,8 +723,6 @@ UiSessionManagerOhos::PageSceneRuleSetInfo UiSessionManagerOhos::ExtractPageScen
         auto policy = cJSON_GetObjectItem(ruleJsonValue, PAGE_SCENE_POLICY);
         if (cJSON_IsObject(policy)) {
             ruleInfo.reportOnRegister = GetJsonBool(policy, PAGE_SCENE_REPORT_ON_REGISTER, true);
-            ruleInfo.reportOnTextInputAttached =
-                GetJsonBool(policy, PAGE_SCENE_REPORT_ON_TEXT_INPUT_ATTACHED, true);
         }
         ruleInfo.nodeTypes = ExtractTextInputNodeTypes(ruleJsonValue);
         if (IsSupportedArkuiPageSceneRule(ruleInfo.ruleId, ruleInfo.sceneType, ruleInfo.nodeTypes, ruleJsonValue)) {
@@ -735,7 +741,7 @@ std::string UiSessionManagerOhos::ExtractPageSceneRuleSetId(const std::string& r
 }
 
 bool UiSessionManagerOhos::IsPageSceneRuleMatched(const PageSceneRuleInfo& rule, const std::string& sceneType,
-    bool requireRegisterPolicy, bool isAttach, const std::string& nodeType) const
+    bool requireRegisterPolicy, const std::string& nodeType) const
 {
     if (!rule.enabled || !rule.supported || rule.sceneType != sceneType || rule.ruleJson.empty()) {
         return false;
@@ -746,21 +752,18 @@ bool UiSessionManagerOhos::IsPageSceneRuleMatched(const PageSceneRuleInfo& rule,
     if (requireRegisterPolicy && !rule.reportOnRegister) {
         return false;
     }
-    if (isAttach && !rule.reportOnTextInputAttached) {
-        return false;
-    }
     return true;
 }
 
 bool UiSessionManagerOhos::HasPageSceneRule(
     const PageSceneRuleSetInfo& ruleSetInfo, const std::string& sceneType, bool requireRegisterPolicy,
-    bool isAttach, const std::string& nodeType) const
+    const std::string& nodeType) const
 {
     if (!ruleSetInfo.arkuiEnabled) {
         return false;
     }
     for (const auto& rule : ruleSetInfo.rules) {
-        if (IsPageSceneRuleMatched(rule, sceneType, requireRegisterPolicy, isAttach, nodeType)) {
+        if (IsPageSceneRuleMatched(rule, sceneType, requireRegisterPolicy, nodeType)) {
             return true;
         }
     }
@@ -769,14 +772,14 @@ bool UiSessionManagerOhos::HasPageSceneRule(
 
 std::vector<std::string> UiSessionManagerOhos::GetPageSceneRuleJsons(
     const PageSceneRuleSetInfo& ruleSetInfo, const std::string& sceneType, bool requireRegisterPolicy,
-    bool isAttach, const std::string& nodeType) const
+    const std::string& nodeType) const
 {
     std::vector<std::string> ruleJsons;
     if (!ruleSetInfo.arkuiEnabled) {
         return ruleJsons;
     }
     for (const auto& rule : ruleSetInfo.rules) {
-        if (!IsPageSceneRuleMatched(rule, sceneType, requireRegisterPolicy, isAttach, nodeType)) {
+        if (!IsPageSceneRuleMatched(rule, sceneType, requireRegisterPolicy, nodeType)) {
             continue;
         }
         ruleJsons.emplace_back(rule.ruleJson);
@@ -787,7 +790,7 @@ std::vector<std::string> UiSessionManagerOhos::GetPageSceneRuleJsons(
 bool UiSessionManagerOhos::HasRegisteredPageSceneRuleLocked(const std::string& sceneType) const
 {
     for (const auto& [_, ruleSetInfo] : pageSceneRuleSets_) {
-        if (HasPageSceneRule(ruleSetInfo, sceneType, false, false, "")) {
+        if (HasPageSceneRule(ruleSetInfo, sceneType, false, "")) {
             return true;
         }
     }
@@ -795,13 +798,13 @@ bool UiSessionManagerOhos::HasRegisteredPageSceneRuleLocked(const std::string& s
 }
 
 std::vector<std::pair<int32_t, std::string>> UiSessionManagerOhos::GetPageSceneRuleJsonsForNodeChange(
-    const std::string& nodeTag, const std::string& sceneType, bool isAttach)
+    const std::string& nodeTag, const std::string& sceneType)
 {
     std::vector<std::pair<int32_t, std::string>> ruleJsons;
     auto nodeType = NormalizePageSceneNodeType(nodeTag);
     std::lock_guard<std::mutex> lock(pageSceneMutex_);
     for (const auto& [pid, ruleSetInfo] : pageSceneRuleSets_) {
-        auto scopedRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, sceneType, false, isAttach, nodeType);
+        auto scopedRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, sceneType, false, nodeType);
         for (const auto& ruleJson : scopedRuleJsons) {
             ruleJsons.emplace_back(pid, ruleJson);
         }
