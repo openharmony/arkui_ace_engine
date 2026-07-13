@@ -60,7 +60,6 @@ private:
     static void RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavRouterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNodeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterXComponentNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRenderNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFrameNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -71,7 +70,6 @@ private:
     static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFlexAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterResourceAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM *vm);

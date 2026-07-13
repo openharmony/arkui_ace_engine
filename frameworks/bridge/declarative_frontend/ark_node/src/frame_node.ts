@@ -1428,7 +1428,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['XComponent', (context: UIContext, options?: object): FrameNode => {
       return new TypedFrameNode(context, 'XComponent', (node: NodePtr, type: ModifierType): ArkXComponentComponent => {
-        return new ArkXComponentComponent(node, type);
+				getUINativeModule().loadNativeModule('XComponent');
+				let module = globalThis.requireNapi('arkui.components.arkxcomponent');
+        return new module.createComponent(node, type);
       }, options);
     }],
     ['ListItemGroup', (context: UIContext): FrameNode => {
@@ -1829,7 +1831,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkXComponentComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('XComponent');
+      let module = globalThis.requireNapi('arkui.components.arkxcomponent');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Progress', (node: FrameNode): ArkProgressComponent => {

@@ -51,6 +51,12 @@ public:
     static void Mock(const JSCallbackInfo& args);
 };
 
+class JSXComponentControllerBinding final : public JSXComponentController {
+public:
+    static void JSBind(BindingTarget globalObj);
+    static void Mock(const JSCallbackInfo& args);
+};
+
 class JSWeb : public JSContainerBase {
 public:
     static void Create(const JSCallbackInfo& info);

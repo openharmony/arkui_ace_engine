@@ -99,6 +99,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
+#include "core/interfaces/native/node/node_xcomponent_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
@@ -355,27 +356,28 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 void* createXComponentNode(ArkUI_Int32 nodeId)
 {
     ACE_UINODE_TRACE(nodeId);
-    auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::SURFACE, "");
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetXComponentCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    CHECK_NULL_RETURN(modifier->createFrameNode, nullptr);
+    return modifier->createFrameNode(nodeId, "", static_cast<ArkUI_Int32>(XComponentType::SURFACE), "", true);
 }
 
 void* createXComponentTextureNode(ArkUI_Int32 nodeId)
 {
     ACE_UINODE_TRACE(nodeId);
-    auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::TEXTURE, "");
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetXComponentCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    CHECK_NULL_RETURN(modifier->createFrameNode, nullptr);
+    return modifier->createFrameNode(nodeId, "", static_cast<ArkUI_Int32>(XComponentType::TEXTURE), "", true);
 }
 
 void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
     ACE_UINODE_TRACE(nodeId);
-    ArkUI_XComponent_Params* xcParams = (ArkUI_XComponent_Params*)(&params);
-    CHECK_NULL_RETURN(xcParams, nullptr);
-    auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, xcParams);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetXComponentCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    CHECK_NULL_RETURN(modifier->createTypeNode, nullptr);
+    return modifier->createTypeNode(nodeId, const_cast<ArkUI_Params*>(&params));
 }
 #endif
 

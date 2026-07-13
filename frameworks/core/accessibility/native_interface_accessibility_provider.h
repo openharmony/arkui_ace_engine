@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_NATIVE_INTERFACE_ACCESSIBILITY_HANDLE_H
 
 #include <functional>
+#include "base/utils/macros.h"
 #include <memory>
 
 #include "core/accessibility/accessibility_provider.h"
@@ -27,7 +28,7 @@ enum AccessibilityProviderOperatorErrorCode : int32_t {
     COPY_FAILED = -10002,
 };
 
-struct ArkUI_AccessibilityProvider {
+struct ACE_FORCE_EXPORT ArkUI_AccessibilityProvider {
 public:
     ArkUI_AccessibilityProvider() = default;
     virtual ~ArkUI_AccessibilityProvider() {}

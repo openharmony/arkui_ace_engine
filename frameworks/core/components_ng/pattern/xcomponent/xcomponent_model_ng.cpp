@@ -15,15 +15,16 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 
+#include "base/display_manager/display_manager.h"
+#include "base/error/error_code.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
-#include "base/display_manager/display_manager.h"
-#include "base/error/error_code.h"
 
 namespace OHOS::Ace::NG {
 const uint32_t DEFAULT_SURFACE_SIZE = 0;
 namespace {
+constexpr char XCOMPONENT_ETS_TAG[] = "XComponent";
 void SendStatisticEvent(FrameNode* frameNode, StatisticEventType type)
 {
     CHECK_NULL_VOID(frameNode);
@@ -39,8 +40,8 @@ void XComponentModelNG::Create(XComponentType type)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_UINODE_TRACE(nodeId);
-    ACE_LAYOUT_SCOPED_TRACE("Create[%sNative][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId,
+    ACE_LAYOUT_SCOPED_TRACE("Create[%sNative][self:%d]", XCOMPONENT_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(XCOMPONENT_ETS_TAG, nodeId,
         [type]() { return AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::DECLARATIVE_NODE); });
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type);
@@ -53,9 +54,9 @@ void XComponentModelNG::Create(const std::optional<std::string>& id, XComponentT
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_UINODE_TRACE(nodeId);
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, libraryname, xcomponentController]() {
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", XCOMPONENT_ETS_TAG, nodeId);
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(XCOMPONENT_ETS_TAG, nodeId, [id, type, libraryname, xcomponentController]() {
             return AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, xcomponentController);
         });
     stack->Push(frameNode);
@@ -67,11 +68,11 @@ RefPtr<AceType> XComponentModelNG::Create(int32_t nodeId, float width, float hei
     const std::shared_ptr<InnerXComponentController>& xcomponentController)
 {
     ACE_UINODE_TRACE(nodeId);
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", XCOMPONENT_ETS_TAG, nodeId);
     auto calcWidth = CalcLength(width, DimensionUnit::VP);
     auto calcHeight = CalcLength(height, DimensionUnit::VP);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, libraryname, xcomponentController, calcWidth, calcHeight]() {
+        XCOMPONENT_ETS_TAG, nodeId, [id, type, libraryname, xcomponentController, calcWidth, calcHeight]() {
             return AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, xcomponentController,
                 calcWidth.GetDimension().ConvertToPx(), calcHeight.GetDimension().ConvertToPx());
         });
@@ -333,7 +334,7 @@ void XComponentModelNG::SetScreenId(uint64_t screenId)
     SetScreenId(frameNode, screenId);
 }
 
-bool XComponentModelNG::IsTexture(FrameNode *frameNode)
+bool XComponentModelNG::IsTexture(FrameNode* frameNode)
 {
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
@@ -348,11 +349,11 @@ XComponentType XComponentModelNG::GetType(FrameNode* frameNode)
 }
 
 // For CAPI XComponent
-RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::string& id, XComponentType type,
-    const std::optional<std::string>& libraryname)
+RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(
+    int32_t nodeId, const std::string& id, XComponentType type, const std::optional<std::string>& libraryname)
 {
     auto pattern = AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::CNODE);
-    auto frameNode = FrameNode::CreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId, pattern);
+    auto frameNode = FrameNode::CreateFrameNode(XCOMPONENT_ETS_TAG, nodeId, pattern);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, frameNode);
     layoutProperty->UpdateXComponentType(type);
@@ -369,10 +370,10 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
 
     RefPtr<FrameNode> frameNode;
     if (id.empty() && controller == nullptr && (type == XComponentType::SURFACE || type == XComponentType::TEXTURE)) {
-        frameNode = FrameNode::CreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId,
-            AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::TYPE_NODE));
+        frameNode = FrameNode::CreateFrameNode(
+            XCOMPONENT_ETS_TAG, nodeId, AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::TYPE_NODE));
     } else {
-        frameNode = FrameNode::CreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId,
+        frameNode = FrameNode::CreateFrameNode(XCOMPONENT_ETS_TAG, nodeId,
             AceType::MakeRefPtr<XComponentPattern>(id, type, libraryName, controller, 0.0, 0.0, true));
     }
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
@@ -626,8 +627,8 @@ RenderFit XComponentModelNG::GetSurfaceRenderFit(FrameNode* frameNode)
     return xcPattern->GetSurfaceRenderFit();
 }
 
-void XComponentModelNG::SetXComponentSurfaceRect(FrameNode* frameNode, float offsetX, float offsetY,
-    float surfaceWidth, float surfaceHeight)
+void XComponentModelNG::SetXComponentSurfaceRect(
+    FrameNode* frameNode, float offsetX, float offsetY, float surfaceWidth, float surfaceHeight)
 {
     CHECK_NULL_VOID(frameNode);
     if (AceType::InstanceOf<XComponentPatternV2>(frameNode->GetPattern())) {
@@ -637,8 +638,8 @@ void XComponentModelNG::SetXComponentSurfaceRect(FrameNode* frameNode, float off
     InnerSetSurfaceRectV1(frameNode, offsetX, offsetY, surfaceWidth, surfaceHeight);
 }
 
-void XComponentModelNG::InnerSetSurfaceRectV1(FrameNode* frameNode, float offsetX, float offsetY,
-    float surfaceWidth, float surfaceHeight)
+void XComponentModelNG::InnerSetSurfaceRectV1(
+    FrameNode* frameNode, float offsetX, float offsetY, float surfaceWidth, float surfaceHeight)
 {
     CHECK_NULL_VOID(frameNode);
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
@@ -652,8 +653,8 @@ void XComponentModelNG::InnerSetSurfaceRectV1(FrameNode* frameNode, float offset
     xcPattern->HandleSurfaceChangeEvent(true, offsetChanged, sizeChanged, needFireNativeEvent);
 }
 
-void XComponentModelNG::InnerSetSurfaceRectV2(FrameNode* frameNode, float offsetX, float offsetY,
-    float surfaceWidth, float surfaceHeight)
+void XComponentModelNG::InnerSetSurfaceRectV2(
+    FrameNode* frameNode, float offsetX, float offsetY, float surfaceWidth, float surfaceHeight)
 {
     CHECK_NULL_VOID(frameNode);
     auto xcPattern = AceType::DynamicCast<XComponentPatternV2>(frameNode->GetPattern());
@@ -667,8 +668,8 @@ void XComponentModelNG::InnerSetSurfaceRectV2(FrameNode* frameNode, float offset
     xcPattern->HandleSurfaceChangeEvent(true, offsetChanged, sizeChanged, true);
 }
 
-void XComponentModelNG::GetXComponentSurfaceRect(FrameNode* frameNode, float& offsetX, float& offsetY,
-    float& surfaceWidth, float& surfaceHeight)
+void XComponentModelNG::GetXComponentSurfaceRect(
+    FrameNode* frameNode, float& offsetX, float& offsetY, float& surfaceWidth, float& surfaceHeight)
 {
     CHECK_NULL_VOID(frameNode);
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
@@ -701,8 +702,8 @@ int32_t XComponentModelNG::SetExpectedRateRange(FrameNode* frameNode, int32_t mi
     return ERROR_CODE_NO_ERROR;
 }
 
-int32_t XComponentModelNG::SetOnFrameCallback(FrameNode* frameNode,
-    void(*callback)(void*, uint64_t, uint64_t), void* arkuiNode)
+int32_t XComponentModelNG::SetOnFrameCallback(
+    FrameNode* frameNode, void (*callback)(void*, uint64_t, uint64_t), void* arkuiNode)
 {
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     auto xcPattern = frameNode->GetPattern<XComponentPatternV2>();
@@ -758,9 +759,8 @@ void XComponentModelNG::DisposeAccessibilityProvider(ArkUI_AccessibilityProvider
     if (!isProviderValied) {
         return;
     }
-    RefPtr<XComponentPatternV2> xcPattern = (frameNode == nullptr)
-                                            ? (nullptr)
-                                            : (frameNode->GetPattern<XComponentPatternV2>());
+    RefPtr<XComponentPatternV2> xcPattern =
+        (frameNode == nullptr) ? (nullptr) : (frameNode->GetPattern<XComponentPatternV2>());
     if (xcPattern) {
         xcPattern->DisposeAccessibilityProvider(provider);
         return;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
+
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/xcomponent/bridge/xcomponent_controller_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace XComponentControllerExtenderAccessor {
@@ -32,13 +33,13 @@ void StartImageAnalyzerImpl(Ark_VMContext vmContext,
     wrapper->nativeObj->TriggerStartImageAnalyzer(vmContext, asyncWorker, config, outputArgumentForReturningPromise);
 #endif //XCOMPONENT_SUPPORTED
 }
-} // XComponentControllerExtenderAccessor
-const GENERATED_ArkUIXComponentControllerExtenderAccessor* GetXComponentControllerExtenderAccessor()
+} // namespace XComponentControllerExtenderAccessor
+
+const GENERATED_ArkUIXComponentControllerExtenderAccessor* GetXComponentControllerExtenderStaticAccessor()
 {
     static const GENERATED_ArkUIXComponentControllerExtenderAccessor XComponentControllerExtenderAccessorImpl {
         XComponentControllerExtenderAccessor::StartImageAnalyzerImpl,
     };
     return &XComponentControllerExtenderAccessorImpl;
 }
-
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

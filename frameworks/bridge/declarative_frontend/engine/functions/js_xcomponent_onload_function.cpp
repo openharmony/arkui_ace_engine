@@ -16,7 +16,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_xcomponent_onload_function.h"
 
 #if defined(XCOMPONENT_SUPPORTED)
-#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller_binding.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
 
@@ -26,12 +26,22 @@ void JsXComponentOnloadFunction::ExecuteNew(const std::vector<std::string>& keys
 {
     JSRef<JSVal> jsVal;
     if (keys.size() > 1) {
-        auto result = XComponentClient::GetInstance().GetJSVal(keys[1], jsVal);
+#if defined(XCOMPONENT_SUPPORTED)
+        auto vm = const_cast<EcmaVM*>(jsFunction_->GetEcmaVM());
+        Local<JSValueRef> localVal;
+        auto result = XComponentClient::GetInstance().GetJSVal(vm, keys[1], localVal);
+        if (result) {
+            jsVal = JSRef<JSVal>::Make(JsiValue(localVal));
+        }
         RefPtr<JSXComponentController> controller =
             XComponentClient::GetInstance().GetControllerFromJSXComponentControllersMap(keys[1]);
         if (result && controller) {
-            controller->SetXComponentContext(jsVal);
+            auto* bindingController = static_cast<JSXComponentControllerBinding*>(Referenced::RawPtr(controller));
+            if (bindingController) {
+                bindingController->SetXComponentContext(jsVal);
+            }
         }
+#endif
     }
     ExecuteJS(1, &jsVal);
 }

@@ -583,6 +583,8 @@ public:
     static bool GetNativeNode(const EcmaVM* vm, const Local<JSValueRef>& value, ArkUINodeHandle& nativeNode);
     static RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<JSValueRef>& jsObj);
     static RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<panda::ObjectRef>& obj);
+    static RefPtr<OHOS::Ace::ThemeConstants> GetThemeConstants(
+        const EcmaVM* vm, const Local<JSValueRef>& jsObj = Local<JSValueRef>());
     static bool ParseAllBorderRadiuses(
         EcmaVM* vm, panda::Local<panda::ObjectRef> object, BorderRadiusOption& borderRadius);
     static NG::BorderRadiusProperty BorderRadiusProperty(

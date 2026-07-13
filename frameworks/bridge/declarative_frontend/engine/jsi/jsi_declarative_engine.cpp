@@ -90,8 +90,8 @@
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
-#include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "frameworks/core/interfaces/native/node/node_api.h"
+#include "frameworks/core/interfaces/native/node/node_xcomponent_modifier.h"
 
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
@@ -880,6 +880,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Blank", "arkui.components.arkblank" },
         { "GridRow", "arkui.components.arkgridrow" },
         { "GridCol", "arkui.components.arkgridcol" },
+        { "XComponent", "arkui.components.arkxcomponent" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");
@@ -2862,9 +2863,11 @@ void JsiDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
 
 void JsiDeclarativeEngine::InitXComponent(const std::string& componentId)
 {
+#ifdef XCOMPONENT_SUPPORTED
     ACE_DCHECK(engineInstance_);
     std::tie(nativeXComponentImpl_, nativeXComponent_) =
         XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(componentId);
+#endif
 }
 
 void JsiDeclarativeEngine::FireExternalEvent(
@@ -2872,29 +2875,28 @@ void JsiDeclarativeEngine::FireExternalEvent(
 {
     CHECK_RUN_ON(JS);
 
+#ifdef XCOMPONENT_SUPPORTED
     if (Container::IsCurrentUseNewPipeline()) {
         ACE_DCHECK(engineInstance_);
         auto xcFrameNode = NG::FrameNode::GetFrameNode(V2::XCOMPONENT_ETS_TAG, static_cast<int32_t>(nodeId));
         if (!xcFrameNode) {
             return;
         }
-        auto xcPattern = DynamicCast<NG::XComponentPattern>(xcFrameNode->GetPattern());
-        CHECK_NULL_VOID(xcPattern);
-        CHECK_EQUAL_VOID(xcPattern->GetLibraryName().has_value(), false);
-        std::weak_ptr<OH_NativeXComponent> weakNativeXComponent;
-        RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
-        std::tie(nativeXComponentImpl, weakNativeXComponent) = xcPattern->GetNativeXComponent();
-        auto nativeXComponent = weakNativeXComponent.lock();
+        auto* frameNode = AceType::RawPtr(xcFrameNode);
+        auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
+        CHECK_NULL_VOID(xcomponentModifier);
+        CHECK_NULL_VOID(xcomponentModifier->getLibraryName);
+        bool hasLibraryName = false;
+        auto libraryName = std::string(xcomponentModifier->getLibraryName(frameNode, &hasLibraryName));
+        CHECK_EQUAL_VOID(hasLibraryName, false);
+        CHECK_NULL_VOID(xcomponentModifier->getNativeXComponent);
+        auto nativeXComponent = reinterpret_cast<OH_NativeXComponent*>(
+            xcomponentModifier->getNativeXComponent(frameNode, componentId.c_str()));
         CHECK_NULL_VOID(nativeXComponent);
-        CHECK_NULL_VOID(nativeXComponentImpl);
 
-        nativeXComponentImpl->SetXComponentId(componentId);
-
-#ifdef XCOMPONENT_SUPPORTED
-        xcPattern->SetExpectedRateRangeInit();
-        xcPattern->OnFrameEventInit();
-        xcPattern->UnregisterOnFrameEventInit();
-#endif
+        if (xcomponentModifier->initExternalEventCallbacks) {
+            xcomponentModifier->initExternalEventCallbacks(frameNode);
+        }
         auto* arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
         if (arkNativeEngine == nullptr) {
             return;
@@ -2906,34 +2908,35 @@ void JsiDeclarativeEngine::FireExternalEvent(
             return;
         }
         std::string arguments;
-        auto soPath = xcPattern->GetSoPath().value_or("");
+        CHECK_NULL_VOID(xcomponentModifier->getSoPath);
+        auto soPath = std::string(xcomponentModifier->getSoPath(frameNode));
         auto runtime = engineInstance_->GetJsRuntime();
         shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
         LocalScope scope(pandaRuntime->GetEcmaVm());
-        auto objXComp = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName().value(), true, arguments,
-            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent.get()), soPath);
+        auto objXComp = arkNativeEngine->LoadModuleByName(libraryName, true, arguments,
+            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent), soPath);
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
             napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
             return;
         }
 
         auto objContext = JsiObject(objXComp);
-        JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
-        OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
+        OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(
+            const_cast<EcmaVM*>(pandaRuntime->GetEcmaVm()), componentId, objContext.GetLocalHandle());
         napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
-        auto type = xcPattern->GetType();
+        CHECK_NULL_VOID(xcomponentModifier->getXComponentType);
+        auto type = static_cast<XComponentType>(xcomponentModifier->getXComponentType(frameNode));
         if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
-            auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
-                auto pattern = weakPattern.Upgrade();
-                if (!pattern) {
-                    return;
-                }
+            auto task = [weak = WeakClaim(this), weakNode = AceType::WeakClaim(AceType::RawPtr(xcFrameNode))]() {
+                auto frameNode = weakNode.Upgrade();
+                CHECK_NULL_VOID(frameNode);
                 auto bridge = weak.Upgrade();
                 if (bridge) {
-#ifdef XCOMPONENT_SUPPORTED
-                    pattern->NativeXComponentInit();
-#endif
+                    auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
+                    if (xcomponentModifier && xcomponentModifier->nativeXComponentInit) {
+                        xcomponentModifier->nativeXComponentInit(AceType::RawPtr(frameNode));
+                    }
                 }
             };
 
@@ -3005,8 +3008,8 @@ void JsiDeclarativeEngine::FireExternalEvent(
     }
 
     auto objContext = JsiObject(objXComp);
-    JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
-    XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
+    XComponentClient::GetInstance().AddJsValToJsValMap(
+        const_cast<EcmaVM*>(pandaRuntime->GetEcmaVm()), componentId, objContext.GetLocalHandle());
     napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
     auto task = [weak = WeakClaim(this), xcomponent]() {
@@ -3016,10 +3019,11 @@ void JsiDeclarativeEngine::FireExternalEvent(
         }
         auto bridge = weak.Upgrade();
         if (bridge) {
-#ifdef XCOMPONENT_SUPPORTED
-            pool->NativeXComponentInit(
-                bridge->nativeXComponent_, AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
-#endif
+            auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
+            if (xcomponentModifier && xcomponentModifier->legacyNativeXComponentInit) {
+                xcomponentModifier->legacyNativeXComponentInit(AceType::RawPtr(pool), bridge->nativeXComponent_,
+                    AceType::RawPtr(bridge->nativeXComponentImpl_));
+            }
         }
     };
 
@@ -3028,6 +3032,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         return;
     }
     delegate->PostSyncTaskToPage(task, "ArkUINativeXComponentInit");
+#endif
 #endif
 }
 

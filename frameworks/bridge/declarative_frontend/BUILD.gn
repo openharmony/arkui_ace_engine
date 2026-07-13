@@ -516,8 +516,7 @@ template("declarative_js_engine") {
         config.xcomponent_components_support) {
       sources += [
         "jsview/js_xcomponent.cpp",
-        "jsview/js_xcomponent_controller.cpp",
-        "jsview/models/xcomponent_model_impl.cpp",
+        "jsview/js_xcomponent_controller_binding.cpp",
       ]
     }
 
@@ -1028,7 +1027,7 @@ template("declarative_js_engine_ng") {
         config.xcomponent_components_support) {
       sources += [
         "jsview/js_xcomponent.cpp",
-        "jsview/js_xcomponent_controller.cpp",
+        "jsview/js_xcomponent_controller_binding.cpp",
       ]
     }
 

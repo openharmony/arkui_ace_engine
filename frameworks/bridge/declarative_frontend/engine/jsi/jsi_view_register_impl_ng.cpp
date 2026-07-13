@@ -150,8 +150,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
 #endif
 #if defined(XCOMPONENT_SUPPORTED)
-#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller_binding.h"
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
 #include "frameworks/bridge/declarative_frontend/jsview/js_sceneview.h"
@@ -374,8 +373,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSRemoteWindow::JSBind(globalObj);
 #endif
 #if defined(XCOMPONENT_SUPPORTED)
-    JSXComponent::JSBind(globalObj);
-    JSXComponentController::JSBind(globalObj);
+    JSXComponentControllerBinding::JSBind(globalObj);
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
     JSSceneView::JSBind(globalObj);

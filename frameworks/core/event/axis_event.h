@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_AXIS_EVENT_H
 
 #include <list>
+#include "base/utils/macros.h"
 #include <utility>
 
 #include "base/geometry/offset.h"
@@ -116,7 +117,7 @@ struct ACE_FORCE_EXPORT AxisEvent final : public PointerEvent {
     bool HasKey(KeyCode expectCode) const;
 };
 
-class AxisInfo : public BaseEventInfo {
+class ACE_FORCE_EXPORT AxisInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(AxisInfo, BaseEventInfo);
 
 public:

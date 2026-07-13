@@ -17,7 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_CONTROLLER_H
 
 #include "base/memory/referenced.h"
-#include "bridge/declarative_frontend/engine/bindings.h"
+#include "core/common/container_consts.h"
 #include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
 
 namespace OHOS::Ace::Framework {
@@ -26,26 +26,7 @@ public:
     JSXComponentController() = default;
     ~JSXComponentController() override = default;
 
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JSXComponentController* xcomponentController);
-
-    void GetSurfaceId(const JSCallbackInfo& args);
-    void SetSurfaceConfig(const JSCallbackInfo& args);
-
-    void GetXComponentContext(const JSCallbackInfo& args)
-    {
-        args.SetReturnValue(renderContext_.Lock());
-    }
-
-    void SetXComponentContext(const JSRef<JSVal>& renderContext)
-    {
-        renderContext_ = renderContext;
-    }
-
-    void GetXComponentSurfaceRect(const JSCallbackInfo& args);
-
-    void SetXComponentSurfaceRect(const JSCallbackInfo& args);
 
     std::shared_ptr<InnerXComponentController> GetController() const
     {
@@ -62,22 +43,10 @@ public:
         instanceId_ = id;
     }
 
-    void StartImageAnalyzer(const JSCallbackInfo& args);
-    void StopImageAnalyzer(const JSCallbackInfo& args);
-
-    void SetXComponentSurfaceRotation(const JSCallbackInfo& args);
-    void GetXComponentSurfaceRotation(const JSCallbackInfo& args);
-
-    void LockCanvas(const JSCallbackInfo& args);
-    void UnlockCanvasAndPost(const JSCallbackInfo& args);
-
-    void SetXComponentSurfaceConfig(const JSCallbackInfo& args);
-
 private:
+    friend class JSXComponentControllerBinding;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
     std::shared_ptr<InnerXComponentController> xcomponentController_;
-    JSWeak<JSVal> renderContext_;
-    bool isImageAnalyzing_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(JSXComponentController);
 };
 } // namespace OHOS::Ace::Framework

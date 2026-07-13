@@ -319,6 +319,10 @@ interface CircleComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface XComponentComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 declare class TextForegroundColorModifier extends ModifierWithKey<object> {
     constructor(value: object);
 }

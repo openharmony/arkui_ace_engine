@@ -25,19 +25,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 
 namespace OHOS::Ace::Framework {
-
-struct XComponentParams {
-    int32_t elmtId = -1;
-    int32_t xcomponentType = 0;
-    int32_t renderType = 0;
-    int32_t width = 0;
-    int32_t height = 0;
-    std::string xcomponentId;
-    std::string surfaceId;
-    std::string libraryName;
-    JSXComponentController* controller = nullptr;
-};
-
 struct XComponentOptions {
     std::optional<std::string> id = std::nullopt;
     XComponentType xcomponentType = XComponentType::SURFACE;
@@ -48,17 +35,11 @@ struct XComponentOptions {
 
 class XComponentClient {
 public:
-    using GetJSValCallback = std::function<bool(JSRef<JSVal>& param)>;
-    using DeleteCallback = std::function<void()>;
     XComponentClient& operator=(const XComponentClient&) = delete;
     XComponentClient(const XComponentClient&) = delete;
     ~XComponentClient() = default;
 
-    static XComponentClient& GetInstance()
-    {
-        static XComponentClient instance;
-        return instance;
-    }
+    ACE_FORCE_EXPORT static XComponentClient& GetInstance();
 
     RefPtr<JSXComponentController> GetControllerFromJSXComponentControllersMap(const std::string& xcomponentId)
     {
@@ -111,12 +92,12 @@ public:
         nativeXcomponentsMap_.erase(it);
     }
 
-    void AddJsValToJsValMap(const std::string& xcomponentId, const JSRef<JSVal>& jsVal)
+    void AddJsValToJsValMap(EcmaVM* vm, const std::string& xcomponentId, const Local<JSValueRef>& jsVal)
     {
         auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
-        auto result = jsValMap_.try_emplace(idWithContainerId, jsVal);
+        auto result = jsValMap_.try_emplace(idWithContainerId, panda::Global<JSValueRef>(vm, jsVal));
         if (!result.second) {
-            result.first->second = jsVal;
+            result.first->second = panda::Global<JSValueRef>(vm, jsVal);
         }
     }
 
@@ -130,12 +111,13 @@ public:
         jsValMap_.erase(it);
     }
 
-    bool GetJSVal(const std::string& xcomponentId, JSRef<JSVal>& jsVal)
+    // Use Local<JSValueRef> directly — preferred for bridge/modifier paths
+    bool GetJSVal(EcmaVM* vm, const std::string& xcomponentId, Local<JSValueRef>& jsVal)
     {
         auto idWithContainerId = xcomponentId + std::to_string(Container::CurrentId());
         auto iter = jsValMap_.find(idWithContainerId);
         if (iter != jsValMap_.end()) {
-            jsVal = iter->second;
+            jsVal = iter->second.ToLocal(vm);
             jsValMap_.erase(iter);
             return true;
         }
@@ -147,76 +129,7 @@ private:
     std::unordered_map<std::string, RefPtr<JSXComponentController>> jsXComponentControllersMap_;
     std::unordered_map<std::string, std::pair<RefPtr<OHOS::Ace::NativeXComponentImpl>, OH_NativeXComponent*>>
         nativeXcomponentsMap_;
-    std::unordered_map<std::string, JSRef<JSVal>> jsValMap_;
-};
-
-class ACE_EXPORT JSXComponent : public JSContainerBase {
-public:
-    static void JSBind(BindingTarget globalObj);
-    static void Create(const JSCallbackInfo& info);
-    static void JsOnLoad(const JSCallbackInfo& args);
-    static void JsOnDestroy(const JSCallbackInfo& args);
-    static void JsOnAppear(const JSCallbackInfo& args);
-    static void JsOnDisAppear(const JSCallbackInfo& args);
-    static void JsOnAttach(const JSCallbackInfo& args);
-    static void JsOnDetach(const JSCallbackInfo& args);
-
-    static void JsOnTouch(const JSCallbackInfo& args);
-    static void JsOnClick(const JSCallbackInfo& args);
-    static void JsOnKeyEvent(const JSCallbackInfo& args);
-    static void JsOnMouse(const JSCallbackInfo& args);
-    static void JsOnHover(const JSCallbackInfo& args);
-    static void JsOnFocus(const JSCallbackInfo& args);
-    static void JsOnBlur(const JSCallbackInfo& args);
-
-    static void JsBackgroundColor(const JSCallbackInfo& args);
-    static void JsBackgroundImage(const JSCallbackInfo& args);
-    static void JsBackgroundImageSize(const JSCallbackInfo& args);
-    static void JsBackgroundImagePosition(const JSCallbackInfo& args);
-    static void JsOpacity(const JSCallbackInfo& args);
-    static void JsBlur(const JSCallbackInfo& args);
-    static void JsBackdropBlur(const JSCallbackInfo& args);
-    static void JsGrayscale(const JSCallbackInfo& args);
-    static void JsBrightness(const JSCallbackInfo& args);
-    static void JsSaturate(const JSCallbackInfo& args);
-    static void JsContrast(const JSCallbackInfo& args);
-    static void JsInvert(const JSCallbackInfo& args);
-    static void JsSepia(const JSCallbackInfo& args);
-    static void JsHueRotate(const JSCallbackInfo& args);
-    static void JsColorBlend(const JSCallbackInfo& args);
-    static void JsSphericalEffect(const JSCallbackInfo& args);
-    static void JsLightUpEffect(const JSCallbackInfo& args);
-    static void JsPixelStretchEffect(const JSCallbackInfo& args);
-    static void JsLinearGradientBlur(const JSCallbackInfo& args);
-    static void JsEnableAnalyzer(bool enable);
-    static void JsRenderFit(const JSCallbackInfo& args);
-    static void JsEnableSecure(const JSCallbackInfo& args);
-    static void JsHdrBrightness(const JSCallbackInfo& args);
-    static void JsBlendMode(const JSCallbackInfo& args);
-    static void JsEnableTransparentLayer(const JSCallbackInfo& args);
-
-    // For xcomponent node
-    static void* Create(const XComponentParams& params);
-
-    void RegisterOnCreate(const JsiExecutionContext& execCtx, const Local<JSValueRef>& func);
-    void RegisterOnDestroy(const JsiExecutionContext& execCtx, const Local<JSValueRef>& func);
-    void SetFrameNode(RefPtr<AceType> frameNode)
-    {
-        frameNode_ = frameNode;
-    }
-    RefPtr<AceType> GetFrameNode() const
-    {
-        return frameNode_;
-    }
-    bool ChangeRenderType(int32_t renderType);
-
-private:
-    static void ParseImageAIOptions(const JSRef<JSVal>& jsValue);
-    static void ExtractInfoToXComponentOptions(
-        XComponentOptions& options, JSRef<JSObject>& controllerObj,
-        const JSRef<JSObject>& paramObject, const JSCallbackInfo& info);
-
-    RefPtr<AceType> frameNode_;
+    std::unordered_map<std::string, panda::Global<JSValueRef>> jsValMap_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H

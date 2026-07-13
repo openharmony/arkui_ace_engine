@@ -20,13 +20,14 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "base/display_manager/display_manager.h"
 #include "base/error/error_code.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr char XCOMPONENT_ETS_TAG[] = "XComponent";
 // Declare xcomponent static pattern for language with static typing.
 class XComponentStaticPattern : public XComponentPatternV2 {
     DECLARE_ACE_TYPE(XComponentStaticPattern, XComponentPatternV2);
@@ -39,10 +40,11 @@ public:
     void MarkBindNative();
     bool BindXComponentController(const std::shared_ptr<InnerXComponentController>& controller);
     void SetNativeHandler(const std::function<void(void*)>& handler);
-    void UpdateId(const std::string &id);
+    void UpdateId(const std::string& id);
     bool UpdateType(XComponentType type);
     void RegisterSurfaceInitEvent();
     void HandleSurfaceInitEvent();
+
 private:
     // Hooked xcomponent pattern methods.
     void InitializeNativeXComponent();
@@ -64,9 +66,9 @@ private:
 #define XCOMPONENT_STATIC_PATTERN_METHOD(func, ...) \
     if (isBindNative_) {                            \
         XComponentPatternV2::func(__VA_ARGS__);     \
-    }  else {                                       \
+    } else {                                        \
         XComponentPattern::func(__VA_ARGS__);       \
-    }                                               \
+    }
 
 } // namespace
 
@@ -74,12 +76,12 @@ RefPtr<FrameNode> XComponentModelStatic::CreateFrameNode(int32_t nodeId, bool is
 {
     std::shared_ptr<InnerXComponentController> controller = nullptr;
     auto frameNode = FrameNode::CreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, AceType::MakeRefPtr<XComponentStaticPattern>(isTypedNode));
+        XCOMPONENT_ETS_TAG, nodeId, AceType::MakeRefPtr<XComponentStaticPattern>(isTypedNode));
     return frameNode;
 }
 
-bool XComponentModelStatic::SetXComponentController(FrameNode* frameNode,
-    const std::shared_ptr<InnerXComponentController>& controller)
+bool XComponentModelStatic::SetXComponentController(
+    FrameNode* frameNode, const std::shared_ptr<InnerXComponentController>& controller)
 {
     CHECK_NULL_RETURN(frameNode, false);
     auto xcPattern = AceType::DynamicCast<XComponentStaticPattern>(frameNode->GetPattern());
@@ -95,8 +97,7 @@ void XComponentModelStatic::InitParams(FrameNode* frameNode)
     xcPattern->InitParams();
 }
 
-void XComponentModelStatic::SetNativeXComponentHandler(
-    FrameNode* frameNode, const std::function<void(void*)>& handler)
+void XComponentModelStatic::SetNativeXComponentHandler(FrameNode* frameNode, const std::function<void(void*)>& handler)
 {
     CHECK_NULL_VOID(frameNode);
     auto xcPattern = AceType::DynamicCast<XComponentStaticPattern>(frameNode->GetPattern());
@@ -193,7 +194,7 @@ void XComponentStaticPattern::SetNativeHandler(const std::function<void(void*)>&
     nativeHandler_ = std::move(handler);
 }
 
-void XComponentStaticPattern::UpdateId(const std::string &id)
+void XComponentStaticPattern::UpdateId(const std::string& id)
 {
     CHECK_EQUAL_VOID(isBindNative_, true);
     CHECK_EQUAL_VOID((id_.has_value()), true);
@@ -227,8 +228,8 @@ void XComponentStaticPattern::InitializeNativeXComponent()
 
 void XComponentStaticPattern::RegisterSurfaceInitEvent()
 {
-    auto surfaceInitEvent = [weak = AceType::WeakClaim(this)]
-        (const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
+    auto surfaceInitEvent = [weak = AceType::WeakClaim(this)](
+                                const std::string& componentId, const uint32_t nodeId, const bool isDestroy) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleSurfaceInitEvent();

@@ -47,14 +47,11 @@
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/pattern/date_picker/picker_types.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
-#ifdef XCOMPONENT_SUPPORTED
-#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
-#endif //XCOMPONENT_SUPPORTED
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/xcomponent/bridge/xcomponent_controller_peer_impl.h"
 #include "core/components_v2/inspector/inspector.h"
 #include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
-#include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
@@ -63,6 +60,8 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h"
 #include "core/components/common/properties/placement.h"
+#include "core/interfaces/native/node/node_xcomponent_modifier.h"
+
 namespace OHOS::Ace::Framework {
 namespace {
 static constexpr uint32_t PARAM_SIZE_ONE   = 1;
@@ -1437,10 +1436,6 @@ panda::Local<panda::JSValueRef> WrapXComponentImageAIOptions(panda::JsiRuntimeCa
     }
     auto xComponentPointer = static_cast<int64_t>(xComponentValueRef->ToNumber(vm)->Value());
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(xComponentPointer);
-    auto xComponenPattern = frameNode->GetPattern<NG::XComponentPattern>();
-    if (!xComponenPattern) {
-        return panda::JSValueRef::Undefined(vm);
-    }
     panda::Local<panda::JSValueRef> imageAIOptionsValueRef = runtimeCallInfo->GetCallArgRef(1);
     if (imageAIOptionsValueRef.IsNull() || imageAIOptionsValueRef->IsUndefined()) {
         return panda::JSValueRef::Undefined(vm);
@@ -1453,7 +1448,10 @@ panda::Local<panda::JSValueRef> WrapXComponentImageAIOptions(panda::JsiRuntimeCa
     Framework::ScopeRAII scopeRAII(env);
     JSValueWrapper optionsWrapper = imageAIOptionsValueRef;
     napi_value optionsValue = nativeEngine->ValueToNapiValue(optionsWrapper);
-    xComponenPattern->SetImageAIOptions(optionsValue);
+    auto modifier = NG::NodeModifier::GetXComponentCustomModifier();
+    if (modifier && modifier->setImageAIOptions) {
+        modifier->setImageAIOptions(frameNode, optionsValue);
+    }
 #endif //XCOMPONENT_SUPPORTED
     return panda::JSValueRef::Undefined(vm);
 }

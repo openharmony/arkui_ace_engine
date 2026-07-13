@@ -3842,7 +3842,7 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundImageSize(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
-bool ParseJsBackgroundImageOptions(
+bool CommonBridge::ParseJsBackgroundImageOptions(
     const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& repeatIndex, bool& syncMode)
 {
     if (!value->IsObject(vm)) {
