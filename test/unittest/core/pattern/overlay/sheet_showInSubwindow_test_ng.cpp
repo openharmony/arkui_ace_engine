@@ -33,6 +33,7 @@
 #include "ui/base/geometry/dimension.h"
 
 #include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/sheet/side/sheet_side_object.h"
 #include "base/geometry/dimension.h"
 #include "frameworks/base/subwindow/subwindow_manager.h"
 #include "base/geometry/ng/offset_t.h"

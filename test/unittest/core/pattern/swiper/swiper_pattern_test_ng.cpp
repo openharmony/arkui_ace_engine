@@ -2030,7 +2030,6 @@ HWTEST_F(SwiperPatternTestNg, OnFontScaleConfigurationUpdate001, TestSize.Level1
     pattern_->OnFontScaleConfigurationUpdate();
     auto pipelineContext = pattern_->GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->OnFlushReloadFinish();
     EXPECT_EQ(pattern_->mainSizeIsMeasured_, false);
 }
 

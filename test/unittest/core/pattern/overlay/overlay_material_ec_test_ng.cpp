@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/sheet/sheet_theme.h"
 #include "core/components_ng/pattern/sheet/sheet_view.h"
 #include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -1337,19 +1338,19 @@ HWTEST_F(OverlayMaterialECTestNg, OverlayManagerDismissTarget002, TestSize.Level
 }
 
 /**
- * @tc.name: OverlayManagerSetDismissSheet001
- * @tc.desc: Test OverlayManager SetDismissSheet and GetDismissSheet
+ * @tc.name: SheetManagerSetDismissSheet001
+ * @tc.desc: Test SheetManager SetDismissSheet and GetDismissSheet
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayMaterialECTestNg, OverlayManagerSetDismissSheet001, TestSize.Level1)
+HWTEST_F(OverlayMaterialECTestNg, SheetManagerSetDismissSheet001, TestSize.Level1)
 {
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    EXPECT_EQ(SheetManager::GetInstance().GetDismissSheet(), 0);
 
-    EXPECT_EQ(overlayManager->GetDismissSheet(), 0);
+    SheetManager::GetInstance().SetDismissSheet(42);
+    EXPECT_EQ(SheetManager::GetInstance().GetDismissSheet(), 42);
 
-    overlayManager->SetDismissSheet(42);
-    EXPECT_EQ(overlayManager->GetDismissSheet(), 42);
+    // cleanup
+    SheetManager::GetInstance().SetDismissSheet(0);
 }
 
 /**

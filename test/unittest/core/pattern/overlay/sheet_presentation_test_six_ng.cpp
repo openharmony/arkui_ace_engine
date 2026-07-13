@@ -29,7 +29,6 @@
 #include "core/common/ace_engine.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/sheet/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_view.h"

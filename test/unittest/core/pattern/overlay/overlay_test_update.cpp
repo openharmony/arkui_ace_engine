@@ -59,6 +59,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
 #include "core/components_ng/pattern/sheet/sheet_drag_bar_paint_method.h"
 #include "core/components_ng/pattern/sheet/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_layout_algorithm.h"

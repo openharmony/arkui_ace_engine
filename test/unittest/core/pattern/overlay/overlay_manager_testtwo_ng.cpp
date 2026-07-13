@@ -50,9 +50,12 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
+#include "core/components_ng/render/render_context.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2302,10 +2305,10 @@ HWTEST_F(OverlayManagerTwoTestNg, PopMenuAnimation, TestSize.Level1)
     menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
     EXPECT_EQ(menuPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
     EXPECT_EQ(menuWrapperPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
-    menuNode->renderContext_ = AceType::MakeRefPtr<RosenRenderContext>();
+    menuNode->renderContext_ = AceType::MakeRefPtr<RenderContext>();
     auto deformRenderContext = menuNode->GetRenderContext();
     EXPECT_NE(deformRenderContext, nullptr);
-    auto renderContext = AceType::DynamicCast<RosenRenderContext>(deformRenderContext);
+    auto renderContext = AceType::DynamicCast<RenderContext>(deformRenderContext);
     EXPECT_NE(renderContext, nullptr);
     EXPECT_FALSE(renderContext->HasDisappearTransition());
     menuManager->PopMenuAnimation(menuNode, overlayManager, true, true);
