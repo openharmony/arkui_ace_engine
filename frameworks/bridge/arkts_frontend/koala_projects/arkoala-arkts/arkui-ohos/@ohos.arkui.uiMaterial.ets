@@ -43,6 +43,11 @@ namespace uiMaterial {
         THICK_EC_SUB = 13,
         ULTRA_THICK_EC_SUB = 14,
     }
+    export enum MaterialLevel {
+        EXQUISITE = 0,
+        GENTLE = 1,
+        SMOOTH = 2,
+    }
     export interface LightEffectOptions {
         color?: ResourceColor,
     }
@@ -136,6 +141,13 @@ namespace uiMaterial {
         result.setNativeObject(newPtr);
         result.registerCleaner(newPtr);
         return result;
+    }
+    export function getGlobalMaterialLevel(): MaterialLevel {
+        let level = ArkUIAniModule._UiMaterial_GetGlobalMaterialLevel();
+        return MaterialLevel.fromValue(level);
+    }
+    export function isImmersiveMaterialSupported(): boolean {
+        return ArkUIAniModule._UiMaterial_IsImmersiveMaterialSupported();
     }
 }
 
