@@ -685,10 +685,8 @@ void SetCustomCallbackWithCheck(ani_env* env, ani_object obj, ani_long ptr, ani_
     auto frameNodeClass = static_cast<ani_class>(frameNodeType);
     ani_method getterMethod = nullptr;
     ani_method onDrawMethod = nullptr;
-    if ((status = env->Class_FindMethod(frameNodeClass, "onDraw", "C{arkui.Graphics.DrawContext}:", &onDrawMethod)) !=
+    if ((status = env->Class_FindMethod(frameNodeClass, "onDraw", "C{arkui.Graphics.DrawContext}:", &onDrawMethod)) ==
         ANI_OK) {
-        HILOGI("Class_FindMethod onDraw failed, status : %{public}d", status);
-    } else {
         ani_method onDrawWrapperMethod = nullptr;
         env->Class_FindMethod(frameNodeClass, "onDrawWrapper", "C{arkui.Graphics.DrawContext}:", &onDrawWrapperMethod);
         auto funcOnDrawAni = std::make_shared<CommonModuleCallbackAni>(env, frameNode);
@@ -699,12 +697,10 @@ void SetCustomCallbackWithCheck(ani_env* env, ani_object obj, ani_long ptr, ani_
     }
     if ((status = env->Class_FindMethod(frameNodeClass, "onLayout", "C{arkui.Graphics.Vector2}:", &getterMethod)) !=
         ANI_OK) {
-        HILOGI("Class_FindMethod onLayout failed, status : %{public}d", status);
         return;
     }
     if ((status = env->Class_FindMethod(
         frameNodeClass, "onMeasure", "C{arkui.FrameNode.LayoutConstraint}:", &getterMethod)) != ANI_OK) {
-        HILOGI("Class_FindMethod onMeasure failed, status : %{public}d", status);
         return;
     }
     void* fnMeasureFun = nullptr;
