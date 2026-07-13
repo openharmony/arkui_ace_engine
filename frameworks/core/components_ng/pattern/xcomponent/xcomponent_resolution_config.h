@@ -21,8 +21,6 @@
 #include <string>
 #include <vector>
 
-#include "adapter/ohos/entrance/aps_monitor_impl.h"
-
 namespace OHOS::Ace::NG {
 enum class RatioValue : int32_t {
     RATIO_READ_FAIL = -1,
@@ -43,7 +41,7 @@ inline std::mutex SDR_RATIOS_MUTEX;
 class XComponentResolutionConfig {
 public:
     static XComponentResolutionConfig& GetInstance();
-    void GetApsSdrRatio(const std::string& pkgName, int32_t indexForUsingClient);
+    void GetApsSdrRatio(const std::string& pkgName, int32_t indexForUsingClient, float apsSdrRatio);
 
 private:
     XComponentResolutionConfig();

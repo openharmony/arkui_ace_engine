@@ -55,7 +55,7 @@ using DisableSelfRenderFunc = void (*)();
 using ReportSchedEventFunc =
     void (*)(FrameSchedEvent, const std::unordered_map<std::string, std::string>&);
 
-class ACE_EXPORT FrameReport final {
+class ACE_FORCE_EXPORT FrameReport final {
 public:
     static FrameReport& GetInstance();
     void Init();

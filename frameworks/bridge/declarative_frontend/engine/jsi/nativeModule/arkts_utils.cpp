@@ -780,6 +780,41 @@ RefPtr<ResourceObject> ArkTSUtils::GetResourceObject(const EcmaVM* vm, const Loc
     return resourceObject;
 }
 
+RefPtr<OHOS::Ace::ThemeConstants> ArkTSUtils::GetThemeConstants(const EcmaVM* vm, const Local<JSValueRef>& jsObj)
+{
+    std::string bundleName;
+    std::string moduleName;
+    if (!jsObj->IsUndefined()) {
+        auto obj = jsObj->ToObject(vm);
+        auto bundle = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bundleName"));
+        auto module = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "moduleName"));
+        if (bundle->IsString(vm) && module->IsString(vm)) {
+            bundleName = bundle->ToString(vm)->ToString(vm);
+            moduleName = module->ToString(vm)->ToString(vm);
+        }
+    }
+
+    auto cardId = CardScope::CurrentId();
+    if (cardId != OHOS::Ace::INVALID_CARD_ID) {
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, nullptr);
+        auto weak = container->GetCardPipeline(cardId);
+        auto cardPipelineContext = weak.Upgrade();
+        CHECK_NULL_RETURN(cardPipelineContext, nullptr);
+        auto cardThemeManager = cardPipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(cardThemeManager, nullptr);
+        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    return themeManager->GetThemeConstants(bundleName, moduleName);
+}
+
 bool IsGetResourceByName(const EcmaVM* vm, const Local<JSValueRef>& jsObj)
 {
     auto obj = jsObj->ToObject(vm);

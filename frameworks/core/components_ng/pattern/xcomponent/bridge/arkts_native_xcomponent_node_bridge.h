@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_XCOMPONENT_NODE_BRIDGE_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_XCOMPONENT_NODE_BRIDGE_H
+#ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_BRIDGE_ARKTS_NATIVE_XCOMPONENT_NODE_BRIDGE_H
+#define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_BRIDGE_ARKTS_NATIVE_XCOMPONENT_NODE_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
-#include "bridge/declarative_frontend/jsview/js_xcomponent.h"
+#include "core/components_ng/pattern/xcomponent/bridge/xcomponent_node.h"
 
 namespace OHOS::Ace::NG {
 class XComponentNodeBridge {
 public:
+    static void RegisterXComponentNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static ArkUINativeModuleValue Create(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RegisterOnCreateCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue RegisterOnDestroyCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -31,4 +32,4 @@ public:
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_XCOMPONENT_NODE_BRIDGE_H
+#endif // FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_BRIDGE_ARKTS_NATIVE_XCOMPONENT_NODE_BRIDGE_H

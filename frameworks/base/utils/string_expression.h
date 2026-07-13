@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+#include "base/utils/macros.h"
+
 #include "base/geometry/dimension.h"
 
 namespace OHOS::Ace::StringExpression {
@@ -31,7 +33,7 @@ bool CheckCalcIsValid(const std::string& formula);
 
 void ReplaceSignNumber(std::string& formula);
 
-void ConvertDal2Rpn(std::string formula, std::vector<std::string> &result);
+ACE_FORCE_EXPORT void ConvertDal2Rpn(std::string formula, std::vector<std::string> &result);
 
 double CalculateExp(const std::string& expression, const std::function<double(const Dimension&)>& calcFunc,
     const std::vector<std::string>& lengthString = std::vector<std::string>());

@@ -13,12 +13,28 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_node_bridge.h"
+#include "core/components_ng/pattern/xcomponent/bridge/arkts_native_xcomponent_node_bridge.h"
 
 #include "bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 
 namespace OHOS::Ace::NG {
+
+void XComponentNodeBridge::RegisterXComponentNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto xcomponentNode = panda::ObjectRef::New(vm);
+    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::Create));
+    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::GetFrameNode));
+    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerOnCreateCallback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::RegisterOnCreateCallback));
+    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerOnDestroyCallback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::RegisterOnDestroyCallback));
+    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "changeRenderType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::ChangeRenderType));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "xcomponentNode"), xcomponentNode);
+}
 
 Framework::XComponentParams XComponentNodeBridge::SetXComponentNodeParams(
     ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
@@ -69,8 +85,7 @@ Framework::XComponentParams XComponentNodeBridge::SetXComponentNodeParams(
     arg = runtimeCallInfo->GetCallArgRef(8);
     if (!arg->IsUndefined()) {
         params.controller =
-            static_cast<Framework::JSXComponentController*>(Local<panda::ObjectRef>(arg)->GetNativePointerField(
-                vm, 0));
+            static_cast<Framework::JSXComponentController*>(Local<panda::ObjectRef>(arg)->GetNativePointerField(vm, 0));
     }
 
     return params;
@@ -81,20 +96,20 @@ ArkUINativeModuleValue XComponentNodeBridge::Create(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Framework::XComponentParams params = SetXComponentNodeParams(runtimeCallInfo, vm);
-    void* jsXComponent = Framework::JSXComponent::Create(params);
-    ACE_UINODE_TRACE(jsXComponent ? AceType::DynamicCast<FrameNode>(
-                                        reinterpret_cast<Framework::JSXComponent*>(jsXComponent)->GetFrameNode())
-                                  : nullptr);
+    void* xcomponentNode = Framework::XComponentNode::Create(params);
+    ACE_UINODE_TRACE(xcomponentNode ? AceType::DynamicCast<FrameNode>(
+                                          reinterpret_cast<Framework::XComponentNode*>(xcomponentNode)->GetFrameNode())
+                                    : nullptr);
     auto nativeModule = panda::NativePointerRef::New(
-        vm, reinterpret_cast<void*>(jsXComponent),
-        [](void *env, void* data, [[maybe_unused]] void* hint) {
-            auto* jsXComponent = reinterpret_cast<Framework::JSXComponent*>(data);
-            if (jsXComponent) {
-                delete jsXComponent;
-                jsXComponent = nullptr;
+        vm, reinterpret_cast<void*>(xcomponentNode),
+        [](void* env, void* data, [[maybe_unused]] void* hint) {
+            auto* xcomponentNode = reinterpret_cast<Framework::XComponentNode*>(data);
+            if (xcomponentNode) {
+                delete xcomponentNode;
+                xcomponentNode = nullptr;
             }
         },
-        reinterpret_cast<void*>(jsXComponent), sizeof(void*));
+        reinterpret_cast<void*>(xcomponentNode), sizeof(void*));
     return nativeModule;
 }
 
@@ -106,10 +121,10 @@ ArkUINativeModuleValue XComponentNodeBridge::GetFrameNode(ArkUIRuntimeCallInfo* 
     if (!firstArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    Framework::JSXComponent* jsXComponent =
-        reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
-    if (jsXComponent) {
-        auto frameNode = jsXComponent->GetFrameNode();
+    Framework::XComponentNode* xcomponentNode =
+        reinterpret_cast<Framework::XComponentNode*>(firstArg->ToNativePointer(vm)->Value());
+    if (xcomponentNode) {
+        auto frameNode = xcomponentNode->GetFrameNode();
         ACE_UINODE_TRACE(AceType::DynamicCast<FrameNode>(frameNode));
         auto nativeModule = panda::NativePointerRef::New(vm, reinterpret_cast<void*>(AceType::RawPtr(frameNode)));
         return nativeModule;
@@ -125,13 +140,12 @@ ArkUINativeModuleValue XComponentNodeBridge::RegisterOnCreateCallback(ArkUIRunti
     if (!firstArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    Framework::JSXComponent* jsXComponent =
-        reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
+    Framework::XComponentNode* xcomponentNode =
+        reinterpret_cast<Framework::XComponentNode*>(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    if (jsXComponent && secondArg->IsFunction(vm)) {
-        ACE_UINODE_TRACE(AceType::DynamicCast<FrameNode>(jsXComponent->GetFrameNode()));
-        Framework::JsiExecutionContext execCtx = { vm };
-        jsXComponent->RegisterOnCreate(execCtx, secondArg);
+    if (xcomponentNode && secondArg->IsFunction(vm)) {
+        ACE_UINODE_TRACE(AceType::DynamicCast<FrameNode>(xcomponentNode->GetFrameNode()));
+        xcomponentNode->RegisterOnCreate(runtimeCallInfo, secondArg);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -144,13 +158,12 @@ ArkUINativeModuleValue XComponentNodeBridge::RegisterOnDestroyCallback(ArkUIRunt
     if (!firstArg->IsNativePointer(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    Framework::JSXComponent* jsXComponent =
-        reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
+    Framework::XComponentNode* xcomponentNode =
+        reinterpret_cast<Framework::XComponentNode*>(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    if (jsXComponent && secondArg->IsFunction(vm)) {
-        ACE_UINODE_TRACE(AceType::DynamicCast<FrameNode>(jsXComponent->GetFrameNode()));
-        Framework::JsiExecutionContext execCtx = { vm };
-        jsXComponent->RegisterOnDestroy(execCtx, secondArg);
+    if (xcomponentNode && secondArg->IsFunction(vm)) {
+        ACE_UINODE_TRACE(AceType::DynamicCast<FrameNode>(xcomponentNode->GetFrameNode()));
+        xcomponentNode->RegisterOnDestroy(runtimeCallInfo, secondArg);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -164,12 +177,12 @@ ArkUINativeModuleValue XComponentNodeBridge::ChangeRenderType(ArkUIRuntimeCallIn
     if (!firstArg->IsNativePointer(vm)) {
         return defaultNativeModule;
     }
-    Framework::JSXComponent* jsXComponent =
-        reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
+    Framework::XComponentNode* xcomponentNode =
+        reinterpret_cast<Framework::XComponentNode*>(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    if (jsXComponent && secondArg->IsNumber()) {
-        ACE_UINODE_TRACE(AceType::DynamicCast<FrameNode>(jsXComponent->GetFrameNode()));
-        auto ret = jsXComponent->ChangeRenderType(secondArg->Int32Value(vm));
+    if (xcomponentNode && secondArg->IsNumber()) {
+        ACE_UINODE_TRACE(AceType::DynamicCast<FrameNode>(xcomponentNode->GetFrameNode()));
+        auto ret = xcomponentNode->ChangeRenderType(secondArg->Int32Value(vm));
         auto nativeModule = panda::BooleanRef::New(vm, ret);
         return nativeModule;
     }

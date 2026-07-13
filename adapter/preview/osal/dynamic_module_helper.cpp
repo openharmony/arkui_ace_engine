@@ -163,6 +163,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Select", "select" },
         { "Bubble", "bubble" },
         { "Panel", "panel" },
+        { "XComponent", "xcomponent" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);
