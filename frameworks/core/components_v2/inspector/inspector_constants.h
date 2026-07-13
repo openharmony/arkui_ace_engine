@@ -60,15 +60,15 @@ ACE_FORCE_EXPORT extern const char STAGE_ETS_TAG[];
 // page view
 ACE_FORCE_EXPORT extern const char PAGE_ETS_TAG[];
 // overlay view
-ACE_EXPORT extern const char OVERLAY_ETS_TAG[];
-ACE_EXPORT extern const char ORDER_OVERLAY_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char OVERLAY_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char ORDER_OVERLAY_ETS_TAG[];
 // container modal view (title bar)
 ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
 
 ACE_EXPORT extern const char ATOMIC_SERVICE_ETS_TAG[];
 ACE_EXPORT extern const char APP_BAR_ETS_TAG[];
 // js custom view
-ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char JS_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char JS_VIEW_COMPONENT_TAG[];
 // js lazy foreach node
 ACE_EXPORT extern const char JS_LAZY_FOR_EACH_ETS_TAG[];
@@ -376,7 +376,7 @@ ACE_EXPORT extern const char PLUGIN_ETS_TAG[];
 
 // video
 ACE_EXPORT extern const char VIDEO_COMPONENT_TAG[];
-ACE_EXPORT extern const char VIDEO_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char VIDEO_ETS_TAG[];
 
 // AlphabetIndexer
 ACE_EXPORT extern const char INDEXER_COMPONENT_TAG[];
@@ -455,7 +455,7 @@ ACE_EXPORT extern const char GAUGE_INDICATOR_TAG[];
 
 // gridContainer
 ACE_EXPORT extern const char GRIDCONTAINER_COMPONENT_TAG[];
-ACE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[];
 
 // gridCol
 ACE_EXPORT extern const char GRID_COL_COMPONENT_TAG[];
@@ -709,7 +709,7 @@ ACE_EXPORT extern const char UNDEFINED_NODE_ETS_TAG[];
 ACE_EXPORT extern const char UNION_EFFECT_CONTAINER_ETS_TAG[];
 
 // Custom
-ACE_EXPORT extern const char CUSTOM_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char CUSTOM_ETS_TAG[];
 
 // LazyColumnLayout
 ACE_EXPORT extern const char LAZY_COLUMN_LAYOUT_ETS_TAG[];

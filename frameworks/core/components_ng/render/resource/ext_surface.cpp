@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/video/resource/ext_surface.h"
+#include "core/components_ng/render/resource/ext_surface.h"
 
 namespace OHOS::Ace {
 

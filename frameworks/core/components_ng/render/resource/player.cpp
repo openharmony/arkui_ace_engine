@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/video/resource/player.h"
+#include "core/components_ng/render/resource/player.h"
 
 namespace OHOS::Ace {
 
@@ -423,6 +423,7 @@ void Player::UnregisterEvent()
     resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_SEEKCOMPLETE));
     resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_STOP));
     resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_ONPLAYSTATUS));
+    resRegister->UnregisterEvent(MakeEventHash(PLAYER_EVENT_ONGETCURRENTTIME));
 }
 
 void Player::EnterFullScreen()

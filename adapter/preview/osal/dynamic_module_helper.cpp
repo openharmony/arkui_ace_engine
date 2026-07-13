@@ -88,6 +88,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Button", "button" },
         {"Counter", "counter"},
         { "DataPanel", "datapanel" },
+        { "Video", "video" },
         {"Checkbox", "checkbox"},
         {"CheckboxGroup", "checkbox"},
         {"Gauge", "gauge"},
