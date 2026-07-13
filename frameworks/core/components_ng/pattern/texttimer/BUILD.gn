@@ -35,8 +35,12 @@ build_component_ng("texttimer_pattern_ng") {
     "bridge/text_timer_dynamic_module.cpp",
   ]
 
-  if (include_generated_sources) {
-    ark_sources += [ "bridge/text_timer_static_modifier.cpp" ]
+  if (!is_arkui_x) {
+    if (!ace_engine_feature_wearable) {
+      if (include_generated_sources) {
+        ark_sources += [ "bridge/text_timer_static_modifier.cpp" ]
+      }
+    }
   }
   if (!is_arkui_x) {
     deps = [ "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility" ]
