@@ -220,7 +220,7 @@ RefPtr<LayoutAlgorithm> ListItemPattern::CreateLayoutAlgorithm()
     auto layoutAlgorithm = MakeRefPtr<ListItemLayoutAlgorithm>(startNodeIndex_, endNodeIndex_, itemChildNodeIndex);
     layoutAlgorithm->SetEditModeCheckBoxNodeIndex(editModeCheckBoxNodeIndex);
     layoutAlgorithm->SetNeedReserveEditModeCheckBoxSpace(needReserveEditModeCheckBoxSpace_);
-    layoutAlgorithm->SetAxis(axis_);
+    layoutAlgorithm->SetAxis(GetAxis());
     layoutAlgorithm->SetStartNodeSize(startNodeSize_);
     layoutAlgorithm->SetEndNodeSize(endNodeSize_);
     layoutAlgorithm->SetCurOffset(curOffset_);

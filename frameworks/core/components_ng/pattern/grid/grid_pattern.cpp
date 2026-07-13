@@ -2166,7 +2166,7 @@ void GridPattern::ApplyEditModeToCachedItems(bool enabled)
     for (int32_t idx = startIdx - 1; idx >= 0; --idx) {
         auto* child = host->GetFrameNodeChildByIndexWithoutBuild(idx);
         if (!child) {
-            break;
+            continue;
         }
         auto itemPattern = child->GetPattern<SelectableItemPattern>();
         if (itemPattern) {
@@ -2177,7 +2177,7 @@ void GridPattern::ApplyEditModeToCachedItems(bool enabled)
     for (int32_t idx = endIdx + 1; idx < total; ++idx) {
         auto* child = host->GetFrameNodeChildByIndexWithoutBuild(idx);
         if (!child) {
-            break;
+            continue;
         }
         auto itemPattern = child->GetPattern<SelectableItemPattern>();
         if (itemPattern) {

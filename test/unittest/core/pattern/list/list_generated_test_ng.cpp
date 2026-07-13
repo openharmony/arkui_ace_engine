@@ -2360,4 +2360,169 @@ HWTEST_F(ListGeneratedTestNg, ListEditModeChangedOnModifyDoneRepeatedCalls001, T
     pattern_->OnModifyDone();
     EXPECT_FALSE(pattern_->IsEditModeChanged());
 }
+
+/**
+ * @tc.name: ListHorizontalEditModeCheckBoxBelowItem001
+ * @tc.desc: Test that for a single-lane horizontal list with enableEditMode, the checkbox is laid out below the item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListHorizontalEditModeCheckBoxBelowItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a horizontal single-lane list with edit mode enabled.
+     * @tc.expected: The list axis is HORIZONTAL and edit mode is enabled.
+     */
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    model.SetListDirection(Axis::HORIZONTAL);
+    model.SetLanes(1);
+    CreateListItems(ITEM_COUNT);
+    CreateDone();
+
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->GetEnableEditMode());
+    EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step2. Check the first item reserves edit mode checkbox space.
+     * @tc.expected: needReserveEditModeCheckBoxSpace_ is true and editModeCheckBoxNode_ is created.
+     */
+    auto item = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(item, nullptr);
+    auto itemPattern = item->GetPattern<ListItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    EXPECT_TRUE(itemPattern->needReserveEditModeCheckBoxSpace_);
+    auto checkBox = itemPattern->editModeCheckBoxNode_;
+    ASSERT_NE(checkBox, nullptr);
+
+    /**
+     * @tc.steps: step3. Verify the checkbox is laid out below the item content.
+     * @tc.expected: The checkbox's bottom edge aligns with the item's bottom edge and X is centered.
+     */
+    auto cbGeometry = checkBox->GetGeometryNode();
+    ASSERT_NE(cbGeometry, nullptr);
+    auto cbOffset = cbGeometry->GetMarginFrameOffset();
+    auto cbSize = cbGeometry->GetMarginFrameSize();
+    auto itemSize = item->GetGeometryNode()->GetFrameSize();
+    // checkbox bottom edge should align with the item bottom edge (below the content)
+    EXPECT_TRUE(std::abs((cbOffset.GetY() + cbSize.Height()) - itemSize.Height()) < 1.0f);
+    // checkbox should be horizontally centered within the item
+    auto expectX = (itemSize.Width() - cbSize.Width()) / 2.0f;
+    EXPECT_TRUE(std::abs(cbOffset.GetX() - expectX) < 1.0f);
+}
+
+/**
+ * @tc.name: ListSwipeSelectHotZoneHorizontalSingleLane001
+ * @tc.desc: Test swipe multi-select hot zone detection for single-lane horizontal list (hot zone at bottom)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListSwipeSelectHotZoneHorizontalSingleLane001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a horizontal single-lane list with edit mode enabled.
+     * @tc.expected: The hot zone is at the bottom of each item.
+     */
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    model.SetListDirection(Axis::HORIZONTAL);
+    model.SetLanes(1);
+    CreateItemWithSize(
+        ITEM_COUNT, SizeT<Dimension>(Dimension(ITEM_MAIN_SIZE), Dimension(ITEM_MAIN_SIZE)));
+    CreateDone();
+
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->GetEnableEditMode());
+    EXPECT_EQ(pattern_->GetAxis(), Axis::HORIZONTAL);
+
+    /**
+     * @tc.steps: step2. A point near the bottom of item 0 should be in the hot zone.
+     * @tc.expected: IsInEditModeHotZone returns true for the bottom point.
+     */
+    RectF itemRect = GetChildRect(frameNode_, 0);
+    ASSERT_GT(itemRect.Height(), 0.0f);
+    PointF bottomPoint(itemRect.GetX() + itemRect.Width() / 2.0f, itemRect.GetY() + itemRect.Height() - 1.0f);
+    EXPECT_TRUE(pattern_->IsInEditModeHotZone(bottomPoint));
+
+    /**
+     * @tc.steps: step3. A point at the right edge (middle height) should NOT be in the hot zone.
+     * @tc.expected: IsInEditModeHotZone returns false for the right-edge point.
+     */
+    PointF rightPoint(itemRect.GetX() + itemRect.Width() - 1.0f, itemRect.GetY() + itemRect.Height() / 2.0f);
+    EXPECT_FALSE(pattern_->IsInEditModeHotZone(rightPoint));
+
+    /**
+     * @tc.steps: step4. A point below item 0 but still inside the List should NOT be in the hot zone.
+     * @tc.expected: IsInEditModeHotZone returns false for the point outside the item bounds.
+     */
+    PointF belowPoint(itemRect.GetX() + itemRect.Width() / 2.0f, itemRect.GetY() + itemRect.Height() + 1.0f);
+    ASSERT_LT(belowPoint.GetY(), HEIGHT);
+    EXPECT_FALSE(pattern_->IsInEditModeHotZone(belowPoint));
+}
+
+/**
+ * @tc.name: ListVerticalEditModeCheckBoxRightSide001
+ * @tc.desc: Test that for a single-lane vertical list with enableEditMode, the checkbox is laid out on the right side.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGeneratedTestNg, ListVerticalEditModeCheckBoxRightSide001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a vertical single-lane list with edit mode enabled.
+     * @tc.expected: The list axis is VERTICAL and edit mode is enabled.
+     */
+    ListModelNG model = CreateList();
+    model.SetMultiSelectable(true);
+    model.SetEnableEditMode(true);
+    model.SetLanes(1);
+    CreateItemWithSize(
+        ITEM_COUNT, SizeT<Dimension>(Dimension(ITEM_MAIN_SIZE), Dimension(ITEM_MAIN_SIZE)));
+    CreateDone();
+
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->GetEnableEditMode());
+    EXPECT_EQ(pattern_->GetAxis(), Axis::VERTICAL);
+
+    /**
+     * @tc.steps: step2. Check the checkbox is placed on the right side of the item content.
+     * @tc.expected: The checkbox's right edge aligns with the item's right edge and Y is centered.
+     */
+    auto item = GetChildFrameNode(frameNode_, 0);
+    ASSERT_NE(item, nullptr);
+    auto itemPattern = item->GetPattern<ListItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+    EXPECT_TRUE(itemPattern->needReserveEditModeCheckBoxSpace_);
+    auto checkBox = itemPattern->editModeCheckBoxNode_;
+    ASSERT_NE(checkBox, nullptr);
+
+    auto cbGeometry = checkBox->GetGeometryNode();
+    ASSERT_NE(cbGeometry, nullptr);
+    auto cbOffset = cbGeometry->GetMarginFrameOffset();
+    auto cbSize = cbGeometry->GetMarginFrameSize();
+    auto itemSize = item->GetGeometryNode()->GetFrameSize();
+    // checkbox right edge should align with the item right edge (beside the content)
+    EXPECT_TRUE(std::abs((cbOffset.GetX() + cbSize.Width()) - itemSize.Width()) < 1.0f);
+    // checkbox should be vertically centered within the item
+    auto expectY = (itemSize.Height() - cbSize.Height()) / 2.0f;
+    EXPECT_TRUE(std::abs(cbOffset.GetY() - expectY) < 1.0f);
+
+    /**
+     * @tc.steps: step3. A point at the right edge of item 0 should be in the hot zone.
+     * @tc.expected: IsInEditModeHotZone returns true for the right-edge point.
+     */
+    RectF itemRect = GetChildRect(frameNode_, 0);
+    ASSERT_GT(itemRect.Width(), 0.0f);
+    PointF rightPoint(itemRect.GetX() + itemRect.Width() - 1.0f, itemRect.GetY() + itemRect.Height() / 2.0f);
+    EXPECT_TRUE(pattern_->IsInEditModeHotZone(rightPoint));
+
+    /**
+     * @tc.steps: step4. A point to the right of item 0 but still inside the List should NOT be in the hot zone.
+     * @tc.expected: IsInEditModeHotZone returns false for the point outside the item bounds.
+     */
+    PointF outsideRightPoint(
+        itemRect.GetX() + itemRect.Width() + 1.0f, itemRect.GetY() + itemRect.Height() / 2.0f);
+    ASSERT_LT(outsideRightPoint.GetX(), WIDTH);
+    EXPECT_FALSE(pattern_->IsInEditModeHotZone(outsideRightPoint));
+}
 } // namespace OHOS::Ace::NG
