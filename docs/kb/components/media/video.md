@@ -1,14 +1,14 @@
 # Video Context
 
-> 文档版本：v1.1
-> 更新时间：2026-07-09
+> 文档版本：v1.2
+> 更新时间：2026-07-13
 > 来源：`docs/context_registry.json` 主题 `Video`
 
 ## 定位
 
 Video 是 ArkUI 的视频播放组件，面向应用侧提供视频源加载、播放/暂停/停止/Seek、静音、自动播放、循环、内置控制条、全屏切换、播放速率、Poster/预览图、AI 图像分析等能力。支持网络视频、本地文件、应用资源等多种数据源。
 
-Video 组件采用 Pattern + Model + Controller + 状态机 架构：`VideoPattern`（及全屏派生的 `VideoFullScreenPattern`、异步版本 `VideoStateMachinePattern`）承载核心行为；`VideoControllerV2`/`VideoController` 提供命令式控制入口；`VideoStateManager` 承载播放状态转换；底层通过 `MediaPlayer` + `RenderSurface` 抽象接入 OHOS `player_framework` 和 `graphic_2d`。
+Video 组件采用 Pattern + Model + Controller + 状态机 架构：`VideoPattern`（及全屏派生的 `VideoFullScreenPattern`、异步版本 `VideoStateMachinePattern`）承载核心行为；`VideoControllerV2`/`VideoController` 提供命令式控制入口；`VideoStateManager` 承载播放状态转换；底层通过 `MediaPlayer` + `RenderSurface` 抽象接入 OHOS `player_framework` 和 `graphic_2d`。Video 已纳入动态组件模块加载，`DynamicModuleHelper` 将组件名 `Video` 映射到 `video` 动态模块，桥接实现集中在 `frameworks/core/components_ng/pattern/video/bridge/`。
 
 本文档用于快速定位 Video 相关源码、SDK 声明、测试和规格文档。具体行为、默认值、边界条件和兼容性说明以对应 SDK 声明、源码实现、测试用例和 Spec 为准。
 
@@ -46,6 +46,11 @@ Video 组件采用 Pattern + Model + Controller + 状态机 架构：`VideoPatte
 | MediaPlayer 工厂 | `frameworks/core/components_ng/render/media_player_creator.cpp` | `MediaPlayer::Create()` 实例化入口 |
 | RenderSurface 抽象 | `frameworks/core/components_ng/render/render_surface.h` | Video 使用的 RenderSurface 抽象 |
 | RenderSurface 适配实现 | `frameworks/core/components_ng/render/adapter/render_surface_impl.*` | Surface 到 Rosen SurfaceNode 的绑定 |
+| 组件动态模块 | `frameworks/core/components_ng/pattern/video/bridge/video_dynamic_module.*` | `OHOS_ACE_DynamicModule_Create_Video` 和动态/静态 modifier/model 导出 |
+| 动态属性解析 | `frameworks/core/components_ng/pattern/video/bridge/video_dynamic_modifier.cpp` | JSView/动态属性侧属性写入入口 |
+| ArkTS Bridge | `frameworks/core/components_ng/pattern/video/bridge/arkts_native_video_bridge.cpp` | ArkTS runtime 参数解析和 `VideoBridge::RegisterVideoAttributes` |
+| 静态属性解析 | `frameworks/core/components_ng/pattern/video/bridge/video_static_modifier.cpp` | 静态 ArkTS / 生成态 modifier 属性解析 |
+| 异步控制器动态 modifier | `frameworks/core/components_ng/pattern/video/bridge/video_controller_async_dynamic_modifier.cpp` | `VideoControllerAsync` 自定义动态 modifier |
 
 ### API 入口
 
@@ -55,7 +60,9 @@ Video 组件采用 Pattern + Model + Controller + 状态机 架构：`VideoPatte
 | Static API | `<OH_ROOT>/interface/sdk-js/api/arkui/component/video.static.d.ets` | 静态 ArkTS Video 组件与 `VideoControllerAsync` 声明 |
 | Modifier API (Dynamic) | `<OH_ROOT>/interface/sdk-js/api/arkui/VideoModifier.d.ts` | 动态 Modifier 声明 |
 | Modifier API (Static) | `<OH_ROOT>/interface/sdk-js/api/arkui/VideoModifier.static.d.ets` | 静态 Modifier 声明 |
-| CAPI / NDK | — | Video 目前没有 `ARKUI_NODE_VIDEO` 定义，暂无 C API / NDK 表面（详见 design.md） |
+| 公开 NDK 节点枚举 | `interfaces/native/native_node.h` | 未定义 `ARKUI_NODE_VIDEO`，不要按公开 `ArkUI_NodeType` 路由 Video |
+| 生成态 arkoala/CAPI 接口 | `frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h` | `GENERATED_ARKUI_VIDEO`、`GENERATED_ArkUIVideoModifier`、`VideoController`/`VideoControllerAsync` accessor 声明 |
+| Native modifier / accessor 实现 | `frameworks/core/interfaces/native/node/video_modifier.cpp`、`frameworks/core/interfaces/native/implementation/video_modifier.cpp`、`video_controller_accessor.cpp`、`video_controller_async_accessor.cpp` | 动态模块委托、生成态 modifier 和 controller peer/accessor 实现 |
 
 API 检索建议：
 
@@ -64,24 +71,32 @@ API 检索建议：
 - 事件：在 SDK 文件中搜索 `onStart`、`onPause`、`onFinish`、`onFullscreenChange`、`onPrepared`、`onSeeking`、`onSeeked`、`onUpdate`、`onError`、`onStop`。
 - Controller：在 SDK 文件中搜索 `VideoController`、`VideoControllerAsync`。
 - Modifier：在 `VideoModifier*.d.ts` / `VideoModifier*.d.ets` 中确认声明。
+- 生成态接口：在 `arkoala_api_generated.h` 中搜索 `GENERATED_ARKUI_VIDEO`、`GENERATED_ArkUIVideoModifier`、`GENERATED_ArkUIVideoControllerAccessor`。
 
 ### API 解析实现路径
 
-Video 组件已完成**小型化整改**（声明式 JSView 与 ArkTS Bridge 迁入 `frameworks/core/components_ng/pattern/video/bridge/`），但尚未输出独立 so，编译产物仍在主 `libace_compatible.z.so` 中（Video 归属 `ace_compatible_components` 拆分候选，见 design.md）。
+Video 组件已完成组件动态模块化：`adapter/ohos/osal/dynamic_module_helper.cpp` 中存在 `Video` → `video` 映射，组件桥接目录包含 `video_dynamic_module.*`，运行时通过 `libarkui_video.z.so` 形态加载动态模块。公开 NDK `interfaces/native/native_node.h` 仍没有 `ARKUI_NODE_VIDEO`；需要区分“公开 Native 节点枚举”与“生成态 arkoala/CAPI modifier/accessor”。
 
 | 路径 | 入口文件 | 说明 |
 |------|----------|------|
-| **动态前端入口（小型化后）** | `frameworks/core/components_ng/pattern/video/bridge/video_dynamic_modifier.cpp` | 原 `js_video.cpp` 声明式 JSView 入口经小型化整改迁入此动态 Modifier |
+| **前端 JS/TS 定义** | `frameworks/bridge/declarative_frontend/ark_direct_component/src/arkvideo.ts`、`frameworks/bridge/declarative_frontend/ark_component/dist/ArkVideo.js` | 动态前端 Video 组件类和 ArkComponent/JSView 侧入口 |
+| **组件动态模块** | `frameworks/core/components_ng/pattern/video/bridge/video_dynamic_module.cpp` | 导出 `OHOS_ACE_DynamicModule_Create_Video`，提供 dynamic/static/CJ/custom modifier 和 `VideoModelNG` |
+| **动态前端入口** | `frameworks/core/components_ng/pattern/video/bridge/video_dynamic_modifier.cpp` | JSView/动态属性侧属性写入入口 |
 | **JSView Controller（同步）** | `frameworks/bridge/declarative_frontend/jsview/js_video_controller.cpp` | `VideoController` 命令式接口的 JS 桥 |
 | **JSView Controller（异步）** | `frameworks/bridge/declarative_frontend/jsview/js_video_controller_async.cpp` | `VideoControllerAsync` 命令式接口的 JS 桥 |
-| **ArkTS Bridge（动态属性 / Modifier / FrameNode 命令式）** | `frameworks/core/components_ng/pattern/video/bridge/arkts_native_video_bridge.cpp` | `VideoBridge::SetXxx()` → `node_video_modifier` → `VideoModelNG::SetXxx(frameNode, ...)` |
-| **node_modifier 层** | `frameworks/core/interfaces/native/node/video_modifier.cpp` | C++ 属性 Set/Reset/Get 函数，由 bridge 侧共用；无 C API 消费方 |
-| **ANI Modifier（静态 ArkTS）** | `frameworks/core/interfaces/native/ani/video_ani_modifier.cpp` | 静态 ArkTS 侧属性写入桥 |
-| **Peer / Accessor（Peer 层）** | `frameworks/core/interfaces/native/implementation/video_modifier.cpp`、`video_controller_peer_impl.cpp`、`video_controller_async_peer_impl.cpp`、`video_controller_accessor.cpp`、`video_controller_async_accessor.cpp` | 静态 ArkTS Peer 对象的实现 |
+| **ArkTS Bridge（动态属性 / Modifier / FrameNode 命令式）** | `frameworks/core/components_ng/pattern/video/bridge/arkts_native_video_bridge.cpp` | `VideoBridge::SetXxx()` / `Create()` 解析参数后经 `getVideoModifier()` 写入 `VideoModelNG` |
+| **Dynamic Modifier** | `frameworks/core/components_ng/pattern/video/bridge/video_dynamic_modifier.cpp` | `ArkUIVideoModifier` / `CJUIVideoModifier` 动态属性函数表 |
+| **Static Modifier** | `frameworks/core/components_ng/pattern/video/bridge/video_static_modifier.cpp` | `GENERATED_ArkUIVideoModifier` 静态属性函数表 |
+| **Async Controller Custom Modifier** | `frameworks/core/components_ng/pattern/video/bridge/video_controller_async_dynamic_modifier.cpp` | `VideoControllerAsync` 的 start/pause/stop/reset/seek/fullscreen 自定义函数表 |
+| **node_modifier 委托层** | `frameworks/core/interfaces/native/node/video_modifier.cpp` | 通过 `DynamicModuleHelper::GetDynamicModule("Video")` 转发到动态模块 |
+| **生成态 modifier 委托层** | `frameworks/core/interfaces/native/implementation/video_modifier.cpp` | 通过动态模块取得 static modifier，供生成态 arkoala/CAPI 测试和 peer 层使用 |
+| **ANI Modifier（静态 ArkTS）** | `frameworks/core/interfaces/native/ani/video_ani_modifier.cpp` | 静态 ArkTS 侧 onError 相关桥 |
+| **Peer / Accessor（Peer 层）** | `frameworks/core/interfaces/native/implementation/video_controller_peer_impl.cpp`、`video_controller_async_peer_impl.cpp`、`video_controller_accessor.cpp`、`video_controller_async_accessor.cpp` | 静态 ArkTS / 生成态 controller peer 与 accessor 实现 |
 | **前端 Modifier（ArkTS 侧）** | `frameworks/bridge/declarative_frontend/ark_modifier/src/video_modifier.ts` | ArkTS `VideoModifier` 类定义 |
-| **C API（NDK）** | — | Video 无 `ARKUI_NODE_VIDEO`，无 `video_native_impl.*`；无 NDK 表面 |
+| **公开 C API / NDK 节点** | `interfaces/native/native_node.h` | 无 `ARKUI_NODE_VIDEO`，无 `interfaces/native/node/video_native_impl.*` |
+| **生成态 arkoala/CAPI** | `frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h` | 存在 `GENERATED_ARKUI_VIDEO` 和 Video modifier/controller accessor，测试位于 `test/unittest/capi/` |
 
-组件化改造参考：`./组件化重构通用方案.md`。ArkTS Bridge 已（小型化整改）迁至 `pattern/video/bridge/arkts_native_video_bridge.cpp`；后续完整组件化将输出独立 so（如 `libarkui_video.z.so`）。
+组件化改造参考：`./组件化重构通用方案.md`。Video 当前已具备 `pattern/video/bridge/` 动态模块入口，后续确认产物或符号时优先检查 `libarkui_video.z.so`、`OHOS_ACE_DynamicModule_Create_Video` 与 `DynamicModuleHelper` 映射。
 
 ### 外部依赖入口
 
@@ -89,11 +104,11 @@ Video 组件已完成**小型化整改**（声明式 JSView 与 ArkTS Bridge 迁
 
 | 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件 / 目标路径 | 说明 |
 |----------|----------|------------|-------------------------------|------|
-| 媒体播放框架 | `frameworks/core/components_ng/render/media_player.h` 抽象 → `frameworks/core/components_ng/render/adapter/media_player_impl.cpp` | `foundation/multimedia/player_framework` | `interfaces/inner_api/native/player.h`、`media_errors.h` | Video 通过 `MediaPlayer` 抽象接入 `Media::Player`，负责解码、音视频同步、Seek、事件回调 |
-| 图形渲染 / 合成 | `frameworks/core/components_ng/render/render_surface.h` 抽象 → `frameworks/core/components_ng/render/adapter/render_surface_impl.cpp`；`renderContextForMediaPlayer_` 使用 `RosenRenderContext` | `foundation/graphic/graphic_2d` | `rosen/modules/render_service_client/core/*`、SurfaceNode | Video 画面通过 `RenderSurface` 绑定到 Rosen SurfaceNode 参与窗口合成 |
-| 音频触感 | `adapter/ohos/entrance/BUILD.gn`（`enable_player_framework` 分支） | `foundation/multimedia/player_framework` | `player_framework:audio_haptic` | 播放期音触反馈（按需依赖） |
-| UI Session | `frameworks/core/components_ng/pattern/video/video_pattern.cpp` | `foundation/arkui/ui_lite`（或对应 inner_api 仓） | `interfaces/inner_api/ui_session/ui_session_manager.h` | UI 会话事件上报 |
-| AI 图像分析 | `frameworks/core/components_ng/pattern/video/video_pattern.cpp` → `core/common/ai/image_analyzer_manager.h` | 本仓通用能力 → 底层 AI 能力仓 | — | AI overlay / 内容分析（Feat-03） |
+| 媒体播放框架 | `frameworks/core/components_ng/render/media_player.h` 抽象 → `frameworks/core/components_ng/render/adapter/media_player_impl.cpp`；`frameworks/core/components_ng/pattern/video/BUILD.gn` | `foundation/multimedia/player_framework` | `interfaces/inner_api/native/player.h`、`media_errors.h`、`player_framework:media_client` | Video 通过 `MediaPlayer` 抽象接入 `Media::Player`，负责解码、音视频同步、Seek、事件回调 |
+| 图形渲染 / 合成 | `frameworks/core/components_ng/render/render_surface.h` 抽象 → `frameworks/core/components_ng/render/adapter/render_surface_impl.cpp`；`video_pattern*.cpp` 中的 `renderContextForMediaPlayer_` | `foundation/graphic/graphic_2d` | `rosen/modules/render_service_base/include/`、`rosen/modules/render_service_client/` | Video 画面通过 `RenderSurface` / RenderContext 绑定到 Rosen Surface/Texture 参与合成 |
+| JS 栈事件上报 | `frameworks/core/components_ng/pattern/video/bridge/arkts_native_video_bridge.cpp`；`frameworks/core/components_ng/pattern/video/BUILD.gn` | `base/hiviewdfx/hiview` | `hiview:libxpower_event_js` | `SUPPORT_JSSTACK` 场景下桥接层引用 `xpower_event_jsvm.h` |
+| AI 图像分析 | `frameworks/core/components_ng/pattern/video/video_pattern.cpp`、`video_state_machine_pattern.cpp` → `core/common/ai/image_analyzer_manager.h` | 本仓 `interfaces/inner_api/ace/ai/`，底层由 ImageAnalyzer loader/adapter 接入 | `interfaces/inner_api/ace/ai/image_analyzer.h`、`image_analyzer_interface.h` | AI overlay / 内容分析（Feat-03） |
+| UI Session（本仓 inner_api） | `frameworks/core/components_ng/pattern/video/video_pattern.cpp`、`video_state_machine_pattern.cpp`；`frameworks/core/components_ng/pattern/video/BUILD.gn` | `foundation/arkui/ace_engine` | `interfaces/inner_api/ui_session/ui_session_manager.h` | Video 事件与会话状态上报，属于本仓 inner_api 依赖 |
 
 ### 测试入口
 
@@ -104,6 +119,9 @@ Video 组件已完成**小型化整改**（声明式 JSView 与 ArkTS Bridge 迁
 | 属性测试 | `test/unittest/core/pattern/video/video_property_test_ng.cpp` | 属性写入与 `VideoStyle` 组回归 |
 | 资源测试 | `test/unittest/core/pattern/video/video_resource_test_ng.cpp` | 内置控制条资源 / Poster 相关 |
 | 控制器（异步）测试 | `test/unittest/core/pattern/video/video_controller_async_test.cpp` | `VideoControllerAsync` 行为回归 |
+| 生成态 CAPI modifier 测试 | `test/unittest/capi/modifiers/video_modifier_test.cpp` | `GENERATED_ArkUIVideoModifier`、`GENERATED_ARKUI_VIDEO` 属性与事件回归 |
+| 生成态 CAPI controller accessor 测试 | `test/unittest/capi/accessors/video_controller_accessor_test.cpp`、`video_controller_async_accessor_test.cpp` | `VideoController` / `VideoControllerAsync` accessor 回归 |
+| 组件样例测试 | `test/component_test/test_cases/components/image_video_and_media/` | Image/Video/Media 组合场景 |
 | Spec 功能域 | `specs/05-ui-components/13-platform-components/02-video/` | Video 功能域设计和验收契约 |
 | Context registry | `docs/context_registry.json` | Video 的 KB、Spec、源码、API、测试统一路由 |
 
@@ -135,11 +153,13 @@ Video 功能域：`specs/05-ui-components/13-platform-components/02-video/`
 | 深色模式颜色未跟随 | `VideoPattern::OnColorConfigurationUpdate`、`video_theme.h` |
 | AI 图像分析异常 | `IsSupportImageAnalyzer` / `DestroyAnalyzerOverlay`、`core/common/ai/image_analyzer_manager.h` |
 | 无障碍读屏异常 | `video_accessibility_property.*`、`video_theme.h` 中控制条子节点文案 |
+| 生成态 CAPI / arkoala 路由异常 | `arkoala_api_generated.h`、`frameworks/core/interfaces/native/implementation/video_modifier.cpp`、`test/unittest/capi/modifiers/video_modifier_test.cpp` |
 
 ## 调试入口
 
 - 创建链路：从 `VideoModel::GetInstance()->Create()`（`video_model_ng.cpp`）确认 Video 节点、Pattern 与 Controller 是否建立。
 - MediaPlayer 链路：`VideoPattern::PrepareMediaPlayer` → `SetSourceForMediaPlayer` → `MediaPlayerImpl::CreateMediaPlayer` → `Media::Player`。
+- 动态模块链路：`DynamicModuleHelper::GetDynamicModule("Video")` → `libarkui_video.z.so` → `OHOS_ACE_DynamicModule_Create_Video` → `VideoDynamicModule`。
 - 事件链路：`RegisterMediaPlayerEvent`（`video_pattern.cpp`）→ `media_player_callback.h` → `VideoEventHub::FireXxx` → JS 侧回调。
 - 全屏链路：`VideoPattern::FullScreen` / `ExitFullScreen` → `VideoFullScreenNode::CreateFullScreenNode` → 挂载到 root overlay。
 - 状态机链路（异步）：`VideoControllerAsync` 命令 → `VideoStateMachinePattern` → `VideoStateManager` 状态转换。
