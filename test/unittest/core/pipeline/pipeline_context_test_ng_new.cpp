@@ -4673,7 +4673,7 @@ HWTEST_F(PipelineContextTestNg, GetNavDestinationJSViewName002, TestSize.Level1)
     auto pageInfo = AceType::MakeRefPtr<PageInfo>(pageId, "testUrl", "testPath");
 
     context_->pageToNavigationNodes_.clear();
-    context_->AddNavigationNode(pageId, nullptr);
+    context_->pageToNavigationNodes_[pageId].clear();
 
     auto result = context_->GetNavDestinationJSViewName(pageInfo);
     EXPECT_EQ(result, "");
@@ -4695,8 +4695,12 @@ HWTEST_F(PipelineContextTestNg, GetNavDestinationJSViewName003, TestSize.Level1)
      * @tc.steps2: call GetNavDestinationJSViewName.
      * @tc.expect: function executes return normal.
      */
+
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto node = NavigationGroupNode::GetOrCreateGroupNode(
-        TEST_TAG, 121, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+        TEST_TAG, nodeId, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    node->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
 
     auto pageId = ElementRegister::GetInstance()->MakeUniqueId();
     auto pageInfo = AceType::MakeRefPtr<PageInfo>(pageId, "testUrl", "testPath");

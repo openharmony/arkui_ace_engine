@@ -34,7 +34,7 @@ bool TaihangOptimizer::IsEnable()
     return false;
 }
 
-bool TaihangOptimizer::CheckSwiperPageValid(const std::string& pageFullPath)
+bool TaihangOptimizer::CheckSwiperPageValid(const std::string& pageFullPath, const std::string& pageName)
 {
     return true;
 }

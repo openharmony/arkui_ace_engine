@@ -85,7 +85,7 @@ void TaihangOptimizer::ParseReplyPages(const std::unordered_map<std::string, std
     }
 }
 
-bool TaihangOptimizer::CheckSwiperPageValid(const std::string& pageFullPath, int32_t test)
+bool TaihangOptimizer::CheckSwiperPageValid(const std::string& pageFullPath, const std::string& pageName)
 {
     CHECK_EQUAL_RETURN(isInited_, false, false);
     CHECK_EQUAL_RETURN(enable_, false, false);
@@ -94,7 +94,9 @@ bool TaihangOptimizer::CheckSwiperPageValid(const std::string& pageFullPath, int
     if (pageNameSet_.find(pageFullPath) != pageNameSet_.end()) {
         return true;
     }
-    test --;
+    if (pageNameSet_.find(pageName) != pageNameSet_.end()) {
+        return true;
+    }
     return false;
 }
 
