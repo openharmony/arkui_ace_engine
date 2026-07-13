@@ -650,7 +650,12 @@ const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
 };
 
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::SetCanvasOnReady,
+    [](ArkUINodeHandle node, void* extraParam) {
+        auto* modifier = NodeModifier::GetCanvasModifier();
+        if (modifier && modifier->setCanvasOnReady) {
+            modifier->setCanvasOnReady(node, extraParam);
+        }
+    },
 };
 
 const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {

@@ -15,7 +15,6 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_OFFSCREEN_CANVAS_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_OFFSCREEN_CANVAS_PEER_H
 
-#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 
 #include "arkoala_api_generated.h"
@@ -78,7 +77,7 @@ public:
     {
         return isGetContext;
     }
-    void SetOffScreenPattern(const OHOS::Ace::RefPtr<OHOS::Ace::NG::OffscreenCanvasPattern>& value)
+    void SetOffScreenPattern(const OHOS::Ace::RefPtr<OHOS::Ace::AceType>& value)
     {
         offscreenCanvasPattern = value;
     }
@@ -87,7 +86,7 @@ public:
     };
 
 private:
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::OffscreenCanvasPattern> offscreenCanvasPattern;
+    OHOS::Ace::RefPtr<OHOS::Ace::AceType> offscreenCanvasPattern;
     OHOS::Ace::NG::GeneratedModifier::OffscreenCanvasRenderingContext2DPeerImpl* offscreenCanvasContext;
     RenderingContextSettingsPeer* offscreenCanvasSettings;
     double width = 0.0f;

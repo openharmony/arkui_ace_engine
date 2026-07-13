@@ -32,7 +32,6 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
-#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
@@ -405,7 +404,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSPathShape::JSBind(globalObj);
     JSRect::JSBind(globalObj);
     JSAnimator::JSBind(globalObj);
-    JSCanvas::JSBind(globalObj);
     JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSListItemGroup::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
@@ -509,6 +507,7 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSCanvasPattern::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
     JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
+    JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);

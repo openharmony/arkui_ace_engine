@@ -28,6 +28,7 @@
 #include "canvas_pattern_peer.h"
 
 #include "base/error/error_code.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "core/pipeline/base/constants.h"
 
@@ -59,7 +60,6 @@ constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr double DIFF = 1e-10;
 constexpr uint32_t PIXEL_SIZE = 4;
-constexpr int32_t ALPHA_INDEX = 3;
 constexpr auto TEXT_FONT_STYLE_ITALIC = "italic";
 constexpr uint32_t RGB_SUB_SIZE = 3;
 constexpr uint32_t RGBA_SUB_SIZE = 4;
@@ -77,7 +77,6 @@ const std::map<std::string, LineJoinStyle> LINE_JOIN_MAP = {
     { "miter", LineJoinStyle::MITER },
     { "round", LineJoinStyle::ROUND },
 };
-const double ERROR_VALUE = 0;
 const std::string ERROR_STRING = "";
 const auto MULTI_BY_2 = 2;
 constexpr size_t EVEN_BY_2 = 2;
@@ -117,6 +116,7 @@ inline std::vector<std::string> ConvertStrToFontFamilies(const std::string& fami
     }
     return fontFamilies;
 }
+
 static bool MatchColorWithRGBA(const std::string& colorStr, Color& color)
 {
     if (colorStr.rfind("rgb(", 0) != 0 && colorStr.rfind("rgba(", 0) != 0) {
@@ -715,17 +715,18 @@ void CanvasRendererPeerImpl::SetPixelMap(const RefPtr<Ace::PixelMap>& pixelMap)
 void CanvasRendererPeerImpl::TransferFromImageBitmap(ImageBitmapPeer* bitmap)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_VOID(canvasRenderingContext2DModel);
     CHECK_NULL_VOID(bitmap);
+    auto* bridge = GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->transferCanvasRenderingContext2DFromImageBitmap);
 #ifdef PIXEL_MAP_SUPPORTED
     auto pixelMap = bitmap->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    canvasRenderingContext2DModel->TransferFromImageBitmap(pixelMap);
+    bridge->transferCanvasRenderingContext2DFromImageBitmap(renderingContext2DModel_, pixelMap);
 #else
     auto imageData = bitmap->GetImageData();
     CHECK_NULL_VOID(imageData);
-    canvasRenderingContext2DModel->TransferFromImageBitmap(imageData);
+    bridge->transferCanvasRenderingContext2DFromImageBitmap(renderingContext2DModel_, imageData);
 #endif
 }
 void CanvasRendererPeerImpl::SaveLayer()

@@ -973,6 +973,20 @@ if (globalThis.LoadingProgress === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Canvas === undefined) {
+  globalThis.Canvas = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Canvas');
+      let module = globalThis.requireNapi('arkui.components.arkcanvas');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().canvas.create(params);
+    },
+    name: 'JSCanvas'
+  }
+}
+
+// @ts-ignore
 if (globalThis.ImageAnimator === undefined) {
   globalThis.ImageAnimator = {
     create: function () {

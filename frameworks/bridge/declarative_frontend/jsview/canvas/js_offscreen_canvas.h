@@ -19,7 +19,6 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 #include "core/common/ace_engine.h"
 #include "core/components/common/properties/paint_state.h"
-#include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -176,7 +175,7 @@ public:
         return isGetContext_;
     }
 
-    void SetOffscreenPattern(const RefPtr<NG::OffscreenCanvasPattern>& offscreenPattern)
+    void SetOffscreenPattern(const RefPtr<AceType>& offscreenPattern)
     {
         offscreenCanvasPattern_ = offscreenPattern;
     }
@@ -196,7 +195,7 @@ private:
     napi_value OnSetWidth(napi_env env, napi_callback_info info);
     napi_value OnSetHeight(napi_env env, napi_callback_info info);
 
-    RefPtr<NG::OffscreenCanvasPattern> offscreenCanvasPattern_;
+    RefPtr<AceType> offscreenCanvasPattern_;
     RefPtr<JSOffscreenRenderingContext> offscreenCanvasContext_;
     RefPtr<JSRenderingContextSettings> offscreenCanvasSettings_;
     double width_ = 0.0f;

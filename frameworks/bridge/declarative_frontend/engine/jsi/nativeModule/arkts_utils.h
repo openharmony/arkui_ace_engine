@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "ecmascript/napi/include/jsnapi.h"
+#include "napi/native_api.h"
 #include "ui/resource/node_info.h"
 
 namespace OHOS::Rosen {
@@ -29,6 +30,10 @@ class BrightnessBlender;
 namespace OHOS::Ace {
 class ResourceAdapter;
 struct SelectParam;
+}
+
+namespace OHOS::Ace::Framework {
+class JSRenderingContextBase;
 }
 
 namespace OHOS::Ace::NG {
@@ -444,6 +449,9 @@ public:
     static RefPtr<PixelMap> GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj);
     static Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
     static void* UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj);
+    static napi_value CreateNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj);
+    static Local<panda::ObjectRef> CreateDrawingRenderingContext(
+        Framework::JSRenderingContextBase** outCppPtr);
 #if !defined(PREVIEW)
     static RefPtr<PixelMap> CreatePixelMapFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
 #endif

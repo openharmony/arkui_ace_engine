@@ -25,7 +25,9 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "core/components_ng/base/modifier.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/interfaces/native/node/node_canvas_modifier.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -120,7 +122,13 @@ void JSDrawingRenderingContext::SetRSCanvasCallback(WeakPtr<AceType>& canvasPatt
     std::function<void(std::shared_ptr<RSCanvas>, double, double)> callback = func;
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern.Upgrade());
     if (customPaintPattern) {
-        customPaintPattern->SetRSCanvasCallback(callback);
+        auto frameNode = customPaintPattern->GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto* modifier = NG::NodeModifier::GetCanvasModifier();
+        CHECK_NULL_VOID(modifier);
+        CHECK_NULL_VOID(modifier->setRSCanvasCallback);
+        modifier->setRSCanvasCallback(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)), &callback);
     }
 }
 
@@ -128,7 +136,12 @@ void JSDrawingRenderingContext::SetInvalidate(const JSCallbackInfo& info)
 {
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_.Upgrade());
     CHECK_NULL_VOID(customPaintPattern);
-    customPaintPattern->SetInvalidate();
+    auto frameNode = customPaintPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto* modifier = NG::NodeModifier::GetCanvasModifier();
+    CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(modifier->setInvalidate);
+    modifier->setInvalidate(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
 }
 
 void JSDrawingRenderingContext::SetUnit(CanvasUnit unit)
@@ -160,7 +173,13 @@ const JSRef<JSObject>& JSDrawingRenderingContext::GetOrCreateContext2D(bool anti
     // 解析info[1],把antialias给到pattern
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_.Upgrade());
     if (customPaintPattern) {
-        customPaintPattern->SetAntiAlias(antialias);
+        auto frameNode = customPaintPattern->GetHost();
+        CHECK_NULL_RETURN(frameNode, context2d_);
+        auto* modifier = NG::NodeModifier::GetCanvasModifier();
+        CHECK_NULL_RETURN(modifier, context2d_);
+        CHECK_NULL_RETURN(modifier->setAntiAlias, context2d_);
+        modifier->setAntiAlias(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)), antialias);
     }
     return context2d_;
 }

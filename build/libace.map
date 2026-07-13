@@ -298,11 +298,14 @@
       "OHOS::Ace::ComposedElement::Update()";
       "OHOS::Ace::ComposedElement::UpdateChild(OHOS::Ace::RefPtr<OHOS::Ace::Element> const&, OHOS::Ace::RefPtr<OHOS::Ace::Component> const&)";
       "OHOS::Ace::ConvertFontWeight(OHOS::Ace::FontWeight)";
+      "OHOS::Ace::ConvertTimestampToStr(long long)";
       "OHOS::Ace::Constants::ConvertSkColor(OHOS::Ace::Color)";
       "OHOS::Ace::Constants::ConvertSkRect(OHOS::Rosen::Drawing::RectF const&)";
       "OHOS::Ace::Constants::ConvertTxtFontStyle(OHOS::Ace::FontStyle)";
       "OHOS::Ace::Constants::ConvertTxtFontWeight(OHOS::Ace::FontWeight)";
       "OHOS::Ace::Constants::ConvertTxtStyle(OHOS::Ace::TextStyle const&, OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, OHOS::Rosen::TextStyle&)";
+      "OHOS::Ace::Constants::ConvertTxtStyle(OHOS::Ace::TextStyle const&, OHOS::Rosen::TextStyle&)";
+      "OHOS::Ace::Constants::SetFontWeightVariations(OHOS::Rosen::TextStyle&, float, OHOS::Ace::TextStyle const&)";
       "OHOS::Ace::Constants::ConvertTxtTextAlign(OHOS::Ace::TextAlign)";
       "OHOS::Ace::Constants::ConvertTxtTextBaseline(OHOS::Ace::TextBaseline)";
       "OHOS::Ace::Constants::ConvertTxtTextDirection(OHOS::Ace::TextDirection)";
@@ -569,6 +572,7 @@
       "OHOS::Ace::FocusNode::SetShow(bool)";
       "OHOS::Ace::Font OHOS::Ace::NG::Converter::Convert<OHOS::Ace::Font, Ark_Font>(Ark_Font const&)";
       "OHOS::Ace::FontManager::AddFontNodeNG(OHOS::Ace::WeakPtr<OHOS::Ace::NG::UINode> const&)";
+      "OHOS::Ace::FontManager::IsDefaultFontChanged()";
       "OHOS::Ace::FontManager::AddVariationNode(OHOS::Ace::WeakPtr<OHOS::Ace::RenderNode> const&)";
       "OHOS::Ace::FontManager::GetAppCustomFont() const";
       "OHOS::Ace::FontManager::GetFallbackLineSpacingStyleOptimizeFlag()";
@@ -693,6 +697,7 @@
       "OHOS::Ace::GestureRecognizer::HandleEvent(OHOS::Ace::AxisEvent const&)";
       "OHOS::Ace::GestureRecognizer::HandleEvent(OHOS::Ace::TouchEvent const&)";
       "OHOS::Ace::GetCurrentTimestampMicroSecond()";
+      "OHOS::Ace::GetCurrentTimestamp()";
       "OHOS::Ace::GetProgressColorSpace(OHOS::Ace::Color const&)";
       "OHOS::Ace::GetMicroTickCount()";
       "OHOS::Ace::GetSysTimestamp()";
@@ -736,6 +741,7 @@
       "OHOS::Ace::IconTheme::GetIconPath(OHOS::Ace::InternalResource::ResourceId const&) const";
       "OHOS::Ace::ImageCache::CacheImage(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::shared_ptr<OHOS::Ace::CachedImage> const&)";
       "OHOS::Ace::ImageCache::ClearCacheImgObj(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::ImageCache::ClearCacheImage(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::ImageCache::Create()";
       "OHOS::Ace::ImageCache::GetCacheImage(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::ImageComponent::ImageComponent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
@@ -774,6 +780,9 @@
       "OHOS::Ace::ImageSourceInfo::SetResourceId(OHOS::Ace::InternalResource::ResourceId, std::__h::optional<OHOS::Ace::Color>)";
       "OHOS::Ace::ImageSourceInfo::SetSrc(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::optional<OHOS::Ace::Color>)";
       "OHOS::Ace::ImageSourceInfo::ToString(bool) const";
+      "OHOS::Ace::ImageAnalyzerManager::SetImageAnalyzerCallback(std::__h::optional<std::__h::function<void (OHOS::Ace::ImageAnalyzerState)>>&)";
+      "OHOS::Ace::ImageAnalyzerManager::CreateAnalyzerOverlay(OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> const&, OHOS::Ace::NG::OffsetT<float> const&)";
+      "OHOS::Ace::ImageAnalyzerManager::UpdateAnalyzerOverlay(OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> const&, OHOS::Ace::NG::OffsetT<float> const&)";
       "OHOS::Ace::IndexerComponent::BuildIndexerAlphabet()";
       "OHOS::Ace::IndexerComponent::BuildIndexerItems()";
       "OHOS::Ace::IndexerComponent::InitIndexerItemStyle()";
@@ -929,6 +938,8 @@
       "OHOS::Ace::NG::ArkTSUtils::CreateItemDragInfo(panda::ecmascript::EcmaVM const*, OHOS::Ace::ItemDragInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::CreateJsResourceWrapper(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::ArkTSUtils::CreatePixelMapFromNapiValue(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef>)";
+      "OHOS::Ace::NG::ArkTSUtils::CreateNapiValue(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&)";
+      "OHOS::Ace::NG::ArkTSUtils::CreateDrawingRenderingContext(OHOS::Ace::Framework::JSRenderingContextBase**)";
       "OHOS::Ace::NG::ArkTSUtils::GetArrayLength(panda::ecmascript::EcmaVM const*, panda::Local<panda::ArrayRef>)";
       "OHOS::Ace::NG::ArkTSUtils::GetBasicShape(panda::ecmascript::EcmaVM const*, panda::Local<panda::ObjectRef> const&)";
       "OHOS::Ace::NG::ArkTSUtils::GetBorderColor(OHOS::Ace::NG::CommonColor const&)";
@@ -1221,6 +1232,7 @@
       "OHOS::Ace::NG::ContainerModalPattern::GetContainerModalTitleHeight()";
       "OHOS::Ace::NG::ContentRootPattern::BeforeCreateLayoutWrapper()";
       "OHOS::Ace::NG::Convert(OHOS::Ace::TextLineMetrics const&)";
+      "OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::CanvasUnit, Ark_LengthMetricsUnit>(std::__h::optional<OHOS::Ace::CanvasUnit>&, Ark_LengthMetricsUnit const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_Dimension&, OHOS::Ace::Dimension const&, OHOS::Ace::NG::Converter::ConvContext*)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_EnterKeyType&, OHOS::Ace::TextInputAction const&)";
       "OHOS::Ace::NG::Converter::AssignArkValue(Ark_FoldStatus&, OHOS::Ace::FoldStatus const&)";
@@ -1309,6 +1321,7 @@
       "OHOS::Ace::NG::DialogManager::ShouldHandleSmoothImmersiveMaterial(OHOS::Ace::RefPtr<OHOS::Ace::UiMaterial> const&)";
       "OHOS::Ace::NG::DialogManager::ShowInEmbeddedOverlay(std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>)>&&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)"; 
       "OHOS::Ace::NG::DividerPainter::DrawLine(OHOS::Rosen::Drawing::Canvas&, OHOS::Ace::NG::OffsetT<float> const&) const";
+      "OHOS::Ace::NG::DrawingDecorationPainter::ConvertRadiusToSigma(float)";
       "OHOS::Ace::NG::DragAnimationHelper::ShowGatherAnimationWithMenu(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
       "OHOS::Ace::NG::DragAnimationHelper::UpdateGatherNodeToTop()";
       "OHOS::Ace::NG::DragDropFuncWrapper::GetCurrentWindowOffset(OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase> const&)";
@@ -1581,6 +1594,14 @@
       "OHOS::Ace::NG::GeometryNode::SetContentSize(OHOS::Ace::NG::SizeT<float> const&)";
       "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffset(OHOS::Ace::NG::OffsetT<float> const&)";
       "OHOS::Ace::NG::GeometryNode::UpdatePaddingWithBorder(OHOS::Ace::NG::PaddingPropertyF const&)";
+      "OHOS::Ace::NG::GeneratedModifier::DrawingRenderingContextPeerImpl::DrawingRenderingContextPeerImpl()";
+      "OHOS::Ace::NG::GeneratedModifier::DrawingRenderingContextPeerImpl::SetCanvasPattern(OHOS::Ace::RefPtr<OHOS::Ace::AceType> const&)";
+      "OHOS::Ace::NG::GeneratedModifier::DrawingRenderingContextPeerImpl::SetUnit(OHOS::Ace::CanvasUnit)";
+      "OHOS::Ace::NG::GeneratedModifier::DrawingRenderingContextPeerImpl::ThrowError(int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::GeneratedModifier::DrawingRenderingContextPeerImpl::SetOptions(std::__h::optional<OHOS::Ace::CanvasUnit> const&)";
+      "OHOS::Ace::NG::GeneratedModifier::CanvasRendererPeerImpl::SetAntiAlias()";
+      "OHOS::Ace::NG::GeneratedModifier::CanvasRendererPeerImpl::SetDensity()";
+      "OHOS::Ace::NG::GeneratedModifier::CanvasRendererPeerImpl::MakePath2D()";
       "OHOS::Ace::NG::GestureEventHub::~GestureEventHub()";
       "OHOS::Ace::NG::GestureEventHub::ActClick(std::__h::shared_ptr<OHOS::Ace::JsonValue>)";
       "OHOS::Ace::NG::GestureEventHub::AddClickAfterEvent(OHOS::Ace::RefPtr<OHOS::Ace::NG::ClickEvent> const&)";
@@ -1669,6 +1690,7 @@
       "OHOS::Ace::NG::LayoutConstraintT<float>::UpdateMaxSizeWithCheck(OHOS::Ace::NG::SizeT<float> const&)";
       "OHOS::Ace::NG::LayoutConstraintT<float>::UpdateMinSizeWithCheck(OHOS::Ace::NG::SizeT<float> const&)";
       "OHOS::Ace::NG::LayoutConstraintT<float>::UpdateSelfMarginSizeWithCheck(OHOS::Ace::NG::OptionalSize<float> const&)";
+      "OHOS::Ace::NG::MeasureLayoutPolicySize(OHOS::Ace::NG::LayoutConstraintT<float> const&, OHOS::Ace::NG::LayoutWrapper*, OHOS::Ace::NG::SizeT<float>&)";
       "OHOS::Ace::NG::LayoutProperty::~LayoutProperty()";
       "OHOS::Ace::NG::LayoutProperty::CheckBackgroundLayoutSafeAreaEdges(OHOS::Ace::TextDirection const&)";
       "OHOS::Ace::NG::LayoutProperty::CheckIgnoreLayoutSafeArea(OHOS::Ace::TextDirection const&)";
@@ -2061,6 +2083,8 @@
       "OHOS::Ace::NG::RenderContext::GetHost() const";
       "OHOS::Ace::NG::RichEditorDragPattern::CreateDragNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>>>&, OHOS::Ace::NG::TextDragInfo const&)";
       "OHOS::Ace::NG::RosenEffectConverter::ConvertToFrostedGlassFilter(OHOS::Ace::FrostedGlassParam const&, float)";
+      "OHOS::Ace::NG::RosenRenderContext::GetBitmap(OHOS::Rosen::Drawing::Bitmap&, std::__h::shared_ptr<OHOS::Rosen::Drawing::DrawCmdList>)";
+      "OHOS::Ace::NG::RosenRenderContext::GetPixelMap(std::__h::shared_ptr<OHOS::Media::PixelMap> const&, std::__h::shared_ptr<OHOS::Rosen::Drawing::DrawCmdList>, OHOS::Rosen::Drawing::RectF*)";
       "OHOS::Ace::NG::RosenRenderContext::SetHDRColorHeadRoom(float)";
       "OHOS::Ace::NG::SafeAreaInsets::Inset::ToString() const";
       "OHOS::Ace::NG::SafeAreaInsets::ToString() const";
@@ -3655,6 +3679,7 @@
       "OHOS::Ace::UtfUtils::Str16ToStr8(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&)";
       "OHOS::Ace::UtfUtils::Str8DebugToStr16(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::UtfUtils::Str8ToStr16(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::V2::CANVAS_ETS_TAG";
       "OHOS::Ace::V2::CALENDAR_ETS_TAG";
       "OHOS::Ace::V2::CALENDAR_PICKER_ETS_TAG";
       "OHOS::Ace::V2::COLUMN_ETS_TAG";
@@ -4308,7 +4333,6 @@
       OHOS::Ace::NG::BoxLayoutAlgorithm::*;
       OHOS::Ace::NG::BuildMenuBarRow*;
       OHOS::Ace::NG::BuildTitleNodeForCj*;
-      OHOS::Ace::NG::CanvasPattern::*;
       OHOS::Ace::NG::ColorSampler::*;
       OHOS::Ace::NG::ComponentSnapshot::*;
       OHOS::Ace::NG::ContainerModalView::*;
@@ -4335,6 +4359,8 @@
       "OHOS::Ace::NG::Converter::FontWeightInt OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontWeightInt, Ark_Resource>(Ark_Resource const&)";
       "OHOS::Ace::NG::Converter::FontWeightInt OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontWeightInt, Ark_FontWeight>(Ark_FontWeight const&)";
       "OHOS::Ace::NG::Converter::FontWeightInt OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontWeightInt, InteropString>(InteropString const&)";
+      "OHOS::Rosen::TextShadow::TextShadow()";
+      "OHOS::Rosen::TypographyCreate::Create(OHOS::Rosen::TypographyStyle const&, std::__h::shared_ptr<OHOS::Rosen::FontCollection>)";
       OHOS::Ace::NG::GestureEventHub::*;
       OHOS::Ace::NG::GetCommonWidthBreakpoint*;
       OHOS::Ace::NG::GetCalcWidthBreakpoint*;
@@ -4369,7 +4395,6 @@
       OHOS::Ace::NG::NGGestureRecognizer::GetGestureInfo*;
       OHOS::Ace::NG::NodeRenderStatusMonitor::*;
       OHOS::Ace::NG::NodeModifier::GetDividerModifier*;
-      OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::NG::OverlayManager::*;
       OHOS::Ace::NG::PaddingPropertyF::*;
       OHOS::Ace::NG::PaddingPropertyT*;
@@ -4792,7 +4817,6 @@
       vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
       vtable?for?OHOS::Ace::NG::CalendarMonthPattern;
       vtable?for?OHOS::Ace::NG::CalendarPattern;
-      vtable?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       vtable?for?OHOS::Ace::NG::ClickRecognizer;
       vtable?for?OHOS::Ace::NG::ContainerModalView;
       vtable?for?OHOS::Ace::NG::CustomNode;
@@ -4826,8 +4850,6 @@
       vtable?for?OHOS::Ace::NG::NavDestinationModelNG;
       vtable?for?OHOS::Ace::NG::NavigationGroupNode;
       vtable?for?OHOS::Ace::NG::NavigationStack;
-      vtable?for?OHOS::Ace::NG::OffscreenCanvasPattern;
-      vtable?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
       vtable?for?OHOS::Ace::NG::OnTextChangedListenerImpl;
       vtable?for?OHOS::Ace::NG::PagePattern;
       vtable?for?OHOS::Ace::NG::ParticlePattern;
@@ -4956,7 +4978,6 @@
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::NG::CalendarMonthPattern;
       VTT?for?OHOS::Ace::NG::CalendarPattern;
-      VTT?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::ClickRecognizer;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
       VTT?for?OHOS::Ace::NG::EventHub;
@@ -4976,8 +4997,6 @@
       VTT?for?OHOS::Ace::NG::ExclusiveRecognizer;
       VTT?for?OHOS::Ace::NG::MenuWrapperPattern;
       VTT?for?OHOS::Ace::NG::NavigationStack;
-      VTT?for?OHOS::Ace::NG::OffscreenCanvasPattern;
-      VTT?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::OnTextChangedListenerImpl;
       VTT?for?OHOS::Ace::NG::PagePattern;
       VTT?for?OHOS::Ace::NG::ParticlePattern;

@@ -104,6 +104,15 @@ ohos_abc("arkdatapanel") {
   part_name = ace_engine_part
 }
 
+ohos_abc("arkcanvas") {
+  sources = [ "./src/arkcanvas.ts" ]
+  output_name = "arkcanvas"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
 ohos_abc("arktextclock") {
   sources = [ "./src/arktextclock.ts" ]
   output_name = "arktextclock"

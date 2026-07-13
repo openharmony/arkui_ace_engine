@@ -23,19 +23,37 @@
 #include "ffi_remote_data.h"
 
 #include "base/geometry/matrix4.h"
+#include "base/log/log_wrapper.h"
 #include "bridge/cj_frontend/cppview/canvas_image_data.h"
 #include "bridge/cj_frontend/cppview/canvas_pattern.h"
 #include "bridge/cj_frontend/cppview/offscreen_canvas.h"
 #include "bridge/cj_frontend/cppview/render_image.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/common/properties/paint_state.h"
-#include "core/components_ng/pattern/canvas/canvas_model.h"
+#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/pipeline/pipeline_context.h"
 
 using namespace OHOS;
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
+
+namespace OHOS::Ace {
+NG::CanvasModelNG* GetCanvasModel()
+{
+    static NG::CanvasModelNG* model = nullptr;
+    if (model != nullptr) {
+        return model;
+    }
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Canvas");
+    if (module == nullptr) {
+        LOGF_ABORT("Can't find canvas dynamic module");
+    }
+    model = reinterpret_cast<NG::CanvasModelNG*>(module->GetModel());
+    return model;
+}
+} // namespace OHOS::Ace
 
 namespace {
 constexpr int32_t PIXEL_SIZE = 4;
@@ -145,11 +163,12 @@ void FfiOHOSAceFrameworkCanvasCreate(int64_t contextId)
         return;
     }
 
-    auto pattern = CanvasModel::GetInstance()->Create();
+    auto* canvasModel = GetCanvasModel();
+    auto pattern = canvasModel->Create();
     if (pattern == nullptr) {
         return;
     }
-    CanvasModel::GetInstance()->SetImmediateRender(false);
+    canvasModel->SetImmediateRender(false);
     context->SetCanvasPattern(pattern);
     context->SetAntiAlias();
     context->SetDensity();
@@ -162,7 +181,7 @@ void FfiOHOSAceFrameworkCanvasOnReady(void (*callback)())
         PipelineContext::SetCallBackNode(node);
         lambda();
     };
-    CanvasModel::GetInstance()->SetOnReady(std::move(readyEvent));
+    GetCanvasModel()->SetOnReady(std::move(readyEvent));
 }
 
 int64_t FfiOHOSAceFrameworkRenderingContextCtor(bool antialias)
