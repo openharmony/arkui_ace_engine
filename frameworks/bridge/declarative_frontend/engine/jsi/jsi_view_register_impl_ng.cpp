@@ -33,6 +33,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_drawing_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_animator.h"
