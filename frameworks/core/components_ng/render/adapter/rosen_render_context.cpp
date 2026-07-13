@@ -7480,11 +7480,22 @@ void RosenRenderContext::OnTransitionOutFinish()
     if (isModalRootNode_ && modalNode && modalNode->GetChildren().empty()) {
         auto grandParent = modalNode->GetParent();
         CHECK_NULL_VOID(grandParent);
-        grandParent->RemoveChild(breakPointParent);
+        PopModalPageLevelOrder(modalNode);
+        grandParent->RemoveChild(modalNode);
         grandParent->RebuildRenderContextTree();
     }
     FireTransitionUserCallback(false);
     host->SetInActiveAfterTransitionOut();
+}
+
+void RosenRenderContext::PopModalPageLevelOrder(const RefPtr<UINode>& modalNode)
+{
+    CHECK_NULL_VOID(modalNode);
+    auto pipelineContext = modalNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->PopLevelOrder(modalNode->GetId());
 }
 
 RefPtr<UINode> RosenRenderContext::GetModalNode(const RefPtr<UINode>& breakPointParent)
