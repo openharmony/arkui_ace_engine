@@ -89,7 +89,7 @@ constexpr char SWIPER_SLIDE_OFF[] = "swiper_slide_off";
 constexpr char OVERLAY_ADD[] = "overlay_add";
 constexpr char OVERLAY_REMOVE[] = "overlay_remove";
 constexpr char TOUCH[] = "touch";
-constexpr char TOUCH_CLIKABLE_FRAMENODE[] = "touch clickable frameNode";
+constexpr char TOUCH_CLICKABLE_FRAMENODE[] = "touch clickable frameNode";
 constexpr char WEB_GESTURE[] = "web_gesture";
 constexpr char LOAD_PAGE[] = "load_page";
 constexpr char UP_SPEED_KEY[] = "up_speed";
@@ -212,7 +212,7 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                     reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, CLICK_EVENT, payload);
                 }
             },
-            { TOUCH_CLIKABLE_FRAMENODE,
+            { TOUCH_CLICKABLE_FRAMENODE,
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     reportDataFunc_(RES_TYPE_CLICK_RECOGNIZE, TOUCH_EVENT_DOWN_CLICKABLE_FRAMENODE, payload);
                 }

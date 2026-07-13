@@ -937,13 +937,20 @@ void ClickRecognizer::ReportTouchDownToResSched()
 {
     CHECK_EQUAL_VOID(shouldReportTouchDown_, false);
     auto frameNode = GetAttachedNode();
-    CHECK_EQUAL_VOID(frameNode.Invalid(), true);
-    ResSchedClickOptimizer::HandleTouchClickableFrameNodeReport(frameNode);
+    auto node = frameNode.Upgrade();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto clickOptimizer = pipeline->GetClickOptimizer();
+    CHECK_NULL_VOID(clickOptimizer);
+    clickOptimizer->HandleTouchClickableFrameNodeReport(frameNode);
 }
 
 void ClickRecognizer::ResetTouchDownNotifiedToClickFlag()
 {
-    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto node = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(node);
+    auto context = node->GetContext();
     CHECK_NULL_VOID(context);
     auto ngContext = DynamicCast<PipelineContext>(context);
     CHECK_NULL_VOID(ngContext);
