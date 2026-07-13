@@ -50,13 +50,16 @@ thread_local panda::Global<panda::FunctionRef> JsiClass<C>::classFunction_;
 template<typename C>
 void JsiClass<C>::Declare(const char* name)
 {
+#ifdef CROSS_PLATFORM
     JsiClassBase::RegisterUnDeclare(&JsiClass<C>::UnDeclare);
+#endif
     JsiClassBase::DeclareImpl(name, className_, staticFunctions_, customFunctions_, customGetFunctions_,
         customSetFunctions_, classFunction_);
 }
 template<typename C>
 void JsiClass<C>::UnDeclare()
 {
+#ifdef CROSS_PLATFORM
     for (auto& [name, val] : staticFunctions_) {
         val.FreeGlobalHandleAddr();
     }
@@ -78,6 +81,7 @@ void JsiClass<C>::UnDeclare()
     className_.clear();
     constructor_ = nullptr;
     jsConstructorBinding_ = JsiClassConstructorBinding();
+#endif
 }
 
 template<typename C>
