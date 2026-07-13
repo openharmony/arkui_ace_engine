@@ -34,7 +34,9 @@ docs/kb/
 |----|------|---------|------|
 | Text | 文本组件 | `docs/kb/components/basic/text.md` | 已迁移，旧 KB 已移除 |
 | Image | 图片组件 | `docs/kb/components/media/image.md` | 已迁移，旧 KB 已移除 |
+| ImageAnimator | 图片动画组件 | `docs/kb/components/media/image_animator.md` | 已迁移，旧 KB 已移除 |
 | Video | 视频组件 | `docs/kb/components/media/video.md` | 新建（无旧 KB） |
+| DrawableDescriptor | 图片资源描述能力 | `docs/kb/capabilities/drawable_descriptor.md` | 新增 |
 | Toggle | 开关组件 | `docs/kb/components/selector/toggle.md` | 已迁移，旧 KB 已移除 |
 | Navigation | 导航容器组件 | `docs/kb/components/container/navigation.md` | 新建 |
 | Tabs | 标签页容器组件 | `docs/kb/components/container/tabs.md` | 新建 |
@@ -42,6 +44,10 @@ docs/kb/
 | SideBarContainer | 侧边栏容器组件 | `docs/kb/components/container/side_bar_container.md` | 新建 |
 | NavDestination | 导航目标页组件 | `docs/kb/components/container/navdestination.md` | 新建 |
 | Slider | 滑动选择器组件 | `docs/kb/components/input-form/slider.md` | 新建（无旧 KB） |
+| TextPicker | 文本选择器组件 | `docs/kb/components/selector/text_picker.md` | 已迁移，旧 KB 已移除 |
+| DatePicker | 日期选择器组件 | `docs/kb/components/selector/date_picker.md` | 已迁移，旧 KB 已移除 |
+| TimePicker | 时间选择器组件 | `docs/kb/components/selector/time_picker.md` | 已迁移，旧 KB 已移除 |
+| UIPickerComponent | UI选择器容器组件 | `docs/kb/components/selector/ui_picker_component.md` | 已迁移，旧 KB 已移除 |
 
 ## 检索
 

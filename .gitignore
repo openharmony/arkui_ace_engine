@@ -22,3 +22,5 @@ frameworks/bridge/declarative_frontend/ark_breakpoint/files_to_watch.gni
 frameworks/bridge/declarative_frontend/ark_breakpoint/package-lock.json
 frameworks/bridge/declarative_frontend/engine/WindowSizeLayoutBreakpoint.js
 docs/superpowers/
+specs/
+ouha-ai-context/
