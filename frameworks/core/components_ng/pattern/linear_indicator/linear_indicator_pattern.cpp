@@ -15,8 +15,10 @@
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/linear_indicator/linear_indicator_accessibility_property.h"
-#include "core/components_ng/pattern/progress/progress_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/node/progress_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -127,34 +129,25 @@ void LinearIndicatorPattern::UpdateProgressNodeAtIndex(std::size_t index)
 {
     auto progressNode = GetProgressNode(index);
     CHECK_NULL_VOID(progressNode);
-    auto progressPaintProperty = progressNode->GetPaintProperty<NG::ProgressPaintProperty>();
-    CHECK_NULL_VOID(progressPaintProperty);
-    auto progressLayoutProperty = progressNode->GetLayoutProperty<ProgressLayoutProperty>();
-    CHECK_NULL_VOID(progressLayoutProperty);
-    progressPaintProperty->UpdateColor(trackColor_);
-    progressPaintProperty->UpdateBackgroundColor(trackBackgroundColor_);
-    progressLayoutProperty->UpdateStrokeWidth(strokeWidth_);
-    progressPaintProperty->UpdateStrokeRadius(strokeRadius_);
-    progressLayoutProperty->UpdateLayoutDirection(direction_);
-    progressNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto customModifier = NG::NodeModifier::GetProgressCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    customModifier->updateProgressProperties(progressNode,
+        { trackColor_, trackBackgroundColor_, strokeWidth_, strokeRadius_,
+          static_cast<int32_t>(direction_), false });
 }
 
 void LinearIndicatorPattern::AddProgressNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto customModifier = NG::NodeModifier::GetProgressCustomModifier();
+    CHECK_NULL_VOID(customModifier);
     auto progressNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto progressNode = FrameNode::GetOrCreateFrameNode(
-        V2::PROGRESS_ETS_TAG, progressNodeId, []() { return AceType::MakeRefPtr<ProgressPattern>(); });
-    auto progressPaintProperty = progressNode->GetPaintProperty<NG::ProgressPaintProperty>();
-    auto progressLayoutProperty = progressNode->GetLayoutProperty<ProgressLayoutProperty>();
-    progressPaintProperty->UpdateColor(trackColor_);
-    progressPaintProperty->UpdateBackgroundColor(trackBackgroundColor_);
-    progressPaintProperty->UpdateEnableSmoothEffect(false);
-    progressLayoutProperty->UpdateLayoutWeight(1);
-    progressLayoutProperty->UpdateStrokeWidth(strokeWidth_);
-    progressPaintProperty->UpdateStrokeRadius(strokeRadius_);
-    progressLayoutProperty->UpdateLayoutDirection(direction_);
+    auto progressNode = customModifier->createProgressNode(progressNodeId);
+    CHECK_NULL_VOID(progressNode);
+    customModifier->updateProgressProperties(progressNode,
+        { trackColor_, trackBackgroundColor_, strokeWidth_, strokeRadius_,
+          static_cast<int32_t>(direction_), true });
     host->AddChild(progressNode);
 }
 

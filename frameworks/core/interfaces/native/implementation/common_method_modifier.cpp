@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
+#include "core/interfaces/native/node/progress_modifier.h"
 #include "core/components_ng/pattern/progress/progress_model_static.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
@@ -2801,7 +2802,9 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
         }
         NavDestinationModelStatic::SetBackgroundColor(frameNode, backgroundColor, isValid);
     } else if (frameNode->GetTag() == V2::PROGRESS_ETS_TAG) {
-        ProgressModelStatic::SetBackgroundColor(frameNode, colorValue);
+        auto progressModifier = NG::NodeModifier::GetProgressCustomModifier();
+        CHECK_NULL_VOID(progressModifier);
+        progressModifier->setBackgroundColorToModelStatic(frameNode, colorValue);
     } else if (frameNode->GetTag() == V2::TOGGLE_ETS_TAG) {
         if (colorValue.has_value()) {
             auto buttonModifier = NodeModifier::GetButtonCustomModifier();

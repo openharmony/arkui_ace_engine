@@ -1831,6 +1831,7 @@
       "OHOS::Ace::NG::NodeModifier::GetLazyGridLayoutCustomModifier()";
       "OHOS::Ace::NG::NodeModifier::GetLoadingProgressModifier()";
       "OHOS::Ace::NG::NodeModifier::GetMenuInnerModifier()";
+      "OHOS::Ace::NG::NodeModifier::GetProgressCustomModifier()";
       "OHOS::Ace::NG::NodeModifier::GetMenuItemInnerModifier()";
       "OHOS::Ace::NG::NodeModifier::GetMenuItemModel()";
       "OHOS::Ace::NG::NodeModifier::GetMenuModel()";
@@ -4836,6 +4837,7 @@
       vtable?for?OHOS::Ace::NG::PasteButtonModelNG;
       vtable?for?OHOS::Ace::NG::Pattern;
       vtable?for?OHOS::Ace::NG::PinchGesture;
+      vtable?for?OHOS::Ace::NG::ProgressPattern;
       vtable?for?OHOS::Ace::NG::PlaceholderSpanItem;
       vtable?for?OHOS::Ace::NG::SaveButtonModelNG;
       vtable?for?OHOS::Ace::NG::ScrollableAccessibilityProperty;
@@ -4985,6 +4987,7 @@
       VTT?for?OHOS::Ace::NG::Pattern;
       VTT?for?OHOS::Ace::NG::PinchGesture;
       VTT?for?OHOS::Ace::NG::PlaceholderSpanItem;
+      VTT?for?OHOS::Ace::NG::ProgressPattern;
       VTT?for?OHOS::Ace::NG::ScrollableAccessibilityProperty;
       VTT?for?OHOS::Ace::NG::ScrollableController;
       VTT?for?OHOS::Ace::NG::ScrollableLayoutProperty;
@@ -5154,6 +5157,9 @@
       "OHOS::Ace::NG::ArkTSUtils::ParseJsInteger(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, unsigned int&)";
       "OHOS::Ace::NG::FrameNodeBridge::CreateEventTargetObject(panda::ecmascript::EcmaVM*, OHOS::Ace::BaseEventInfo const&)";
       "OHOS::Ace::NG::ArkTSUtils::JsGetModifierKeyState(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::NG::ProgressPattern::SetBuilderFuncMultiThread()";
+      "OHOS::Ace::NG::ProgressModelStatic::SetBackgroundColor(OHOS::Ace::NG::FrameNode*, std::__h::optional<OHOS::Ace::Color> const&)";
+      "OHOS::Ace::NG::ProgressModelNG::SetBuilderFunc(OHOS::Ace::NG::FrameNode*, std::__h::function<OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> (OHOS::Ace::NG::ProgressConfiguration const&)>&&)";
     };
   local:
     *;

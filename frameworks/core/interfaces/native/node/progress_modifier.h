@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,10 +18,12 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_PROGRESS_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/progress/bridge/progress_custom_modifier.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIProgressModifier* GetProgressModifier();
 const CJUIProgressModifier* GetCJUIProgressModifier();
+ACE_FORCE_EXPORT const ArkUIProgressCustomModifier* GetProgressCustomModifier();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_COMMON_MODIFIER_H

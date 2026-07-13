@@ -13,11 +13,15 @@
  * limitations under the License.
  */
 
+#include "core/interfaces/native/common/api_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/object_keeper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/components_ng/pattern/common_view/common_view_model_ng.h"
+#include "core/components_ng/pattern/texttimer/bridge/text_timer_content_modifier_helper.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_static.h"
 #include "core/interfaces/native/implementation/text_timer_controller_peer_impl.h"
@@ -229,6 +233,51 @@ void SetTextShadowImpl(Ark_NativePointer node,
     TextTimerModelStatic::SetTextShadow(frameNode, shadowList);
 }
 } // TextTimerAttributeModifier
+
+void ContentModifierTextTimerImpl(Ark_NativePointer node,
+                                  const Ark_Object* contentModifier,
+                                  const TextTimerModifierBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
+    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
+                           TextTimerConfiguration config) -> RefPtr<FrameNode> {
+        Ark_ContentModifier contentModifier = (*objectKeeper).get();
+        Ark_TextTimerConfiguration arkConfig;
+        arkConfig.contentModifier = contentModifier;
+        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
+        arkConfig.count = Converter::ArkValue<Ark_Int64>(config.count_);
+        arkConfig.isCountDown = Converter::ArkValue<Ark_Boolean>(config.isCountDown_);
+        arkConfig.started = Converter::ArkValue<Ark_Boolean>(config.started_);
+        arkConfig.elapsedTime = Converter::ArkValue<Ark_Int64>(static_cast<int32_t>(config.elapsedTime_));
+        arkConfig.startTime = Converter::ArkValue<Opt_Int32>(config.startTime_);
+        auto boxNode = GeneratedApiImpl::GetContentNode(node);
+        if (boxNode == nullptr) {
+            boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+            GeneratedApiImpl::SetContentNode(node, boxNode);
+        }
+        arkBuilder.BuildAsync(
+            [boxNode](const RefPtr<UINode>& uiNode) mutable {
+                auto old = boxNode->GetChildAtIndex(0);
+                if (old != nullptr) {
+                    boxNode->RemoveChildSilently(old);
+                }
+                boxNode->AddChild(uiNode);
+                boxNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
+            },
+            node, arkConfig);
+        return boxNode;
+    };
+    TextTimerModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+}
+void ResetContentModifierTextTimerImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextTimerModelNG::SetBuilderFunc(frameNode, nullptr);
+}
+
 const GENERATED_ArkUITextTimerModifier* GetTextTimerStaticModifier()
 {
     static const GENERATED_ArkUITextTimerModifier ArkUITextTimerModifierImpl {
@@ -244,5 +293,13 @@ const GENERATED_ArkUITextTimerModifier* GetTextTimerStaticModifier()
         TextTimerAttributeModifier::SetTextShadowImpl,
     };
     return &ArkUITextTimerModifierImpl;
+}
+
+const ArkUITextTimerContentModifier* GetTextTimerStaticContentModifier()
+{
+    static const ArkUITextTimerContentModifier TextTimerContentModifierImpl {
+        ContentModifierTextTimerImpl, ResetContentModifierTextTimerImpl
+    };
+    return &TextTimerContentModifierImpl;
 }
 }
