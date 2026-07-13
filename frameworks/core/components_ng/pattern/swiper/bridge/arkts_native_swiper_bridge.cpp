@@ -19,6 +19,7 @@
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
@@ -343,7 +344,7 @@ std::optional<Dimension> ParseIndicatorBottom(EcmaVM* vm, const Local<JSValueRef
         return bottom;
     } else {
         CalcDimension dimBottom;
-        bool parseOk = ArkTSUtils::ParseLengthMetricsToDimensionForTabs(vm, bottomValue, dimBottom, resObj);
+        bool parseOk = ParseLengthMetricsToDimensionForSwiper(vm, bottomValue, dimBottom, resObj);
         if (!parseOk) {
             bottom = ParseIndicatorDimension(vm, bottomValue, resObj);
             return bottom;
@@ -440,17 +441,17 @@ SwiperParameters GetDotIndicatorInfo(EcmaVM* vm, const Local<ObjectRef>& obj, Ar
     std::optional<Dimension> indicatorDimension;
     swiperParameters.dimStart =
         !startValue.IsNull() && !startValue->IsUndefined() &&
-            ArkTSUtils::ParseLengthMetricsToDimensionForTabs(vm, startValue, dimStart)
+            ParseLengthMetricsToDimensionForSwiper(vm, startValue, dimStart)
             ? dimStart
             : indicatorDimension;
     swiperParameters.dimEnd =
         !endValue.IsNull() && !endValue->IsUndefined() &&
-            ArkTSUtils::ParseLengthMetricsToDimensionForTabs(vm, endValue, dimEnd)
+            ParseLengthMetricsToDimensionForSwiper(vm, endValue, dimEnd)
             ? dimEnd
             : indicatorDimension;
 
     auto parseSpaceOk = !spaceValue.IsNull() && !spaceValue->IsUndefined() &&
-                        ArkTSUtils::ParseLengthMetricsToDimensionForTabs(vm, spaceValue, dimSpace) &&
+                        ParseLengthMetricsToDimensionForSwiper(vm, spaceValue, dimSpace) &&
                         (dimSpace.Unit() != DimensionUnit::PERCENT);
     auto defaultSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
     swiperParameters.dimSpace = (parseSpaceOk && !(dimSpace < 0.0_vp)) ? dimSpace : defaultSpace;
@@ -555,10 +556,10 @@ SwiperDigitalParameters GetDigitIndicatorInfo(EcmaVM* vm, const Local<ObjectRef>
     std::optional<Dimension> indicatorDimension;
     CalcDimension dimStart;
     CalcDimension dimEnd;
-    digitalParameters.dimStart = ArkTSUtils::ParseLengthMetricsToDimensionForTabs(vm, startValue, dimStart)
+    digitalParameters.dimStart = ParseLengthMetricsToDimensionForSwiper(vm, startValue, dimStart)
                                      ? dimStart
                                      : indicatorDimension;
-    digitalParameters.dimEnd = ArkTSUtils::ParseLengthMetricsToDimensionForTabs(vm, endValue, dimEnd)
+    digitalParameters.dimEnd = ParseLengthMetricsToDimensionForSwiper(vm, endValue, dimEnd)
                                    ? dimEnd
                                    : indicatorDimension;
 
@@ -720,6 +721,52 @@ bool ParseJsBoolForSwiper(
     return parseResult;
 }
 
+bool ParseLengthMetricsToDimensionForSwiper(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result)
+{
+    RefPtr<ResourceObject> resourceObj;
+    return ParseLengthMetricsToDimensionForSwiper(vm, jsValue, result, resourceObj);
+}
+
+bool ParseLengthMetricsToDimensionForSwiper(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+    CalcDimension& result, RefPtr<ResourceObject>& resourceObj)
+{
+    if (jsValue->IsNumber()) {
+        result = CalcDimension(jsValue->ToNumber(vm)->Value(), DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsString(vm)) {
+        auto value = jsValue->ToString(vm)->ToString(vm);
+        StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
+        return true;
+    }
+    if (jsValue->IsObject(vm)) {
+        auto jsObj = jsValue->ToObject(vm);
+        auto valObj = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
+        if (valObj->IsUndefined() || valObj->IsNull()) {
+            return false;
+        }
+        double value = valObj->ToNumber(vm)->Value();
+        auto unit = static_cast<DimensionUnit>(
+            jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "unit"))->ToNumber(vm)->Value());
+        result = CalcDimension(value, unit);
+        auto jsRes = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "res"));
+        if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
+            !jsRes->IsNull() && jsRes->IsObject(vm)) {
+            Local<ObjectRef> resObj = jsRes->ToObject(vm);
+            ArkTSUtils::CompleteResourceObject(vm, resObj);
+            resourceObj = ArkTSUtils::GetResourceObject(vm, resObj);
+        }
+        return true;
+    }
+    if (jsValue->IsNull()) {
+        result = CalcDimension(0.0f, DimensionUnit::VP);
+        return true;
+    }
+
+    return false;
+}
+
 bool ParseSymbolIndicatorIcon(EcmaVM* vm, const Local<JSValueRef>& iconValue, OHOS::Ace::IndicatorIconParam& iconParam)
 {
     if (!iconValue->IsObject(vm)) {
@@ -780,7 +827,7 @@ void ParseIndicatorIconList(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo,
 
 void SwiperBridge::RegisterSwiperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
-    const char* functionNames[] = { "setSwiperInitialize", "resetSwiperInitialize", "setSwiperNextMargin",
+    const char* functionNames[] = { "create", "setSwiperInitialize", "resetSwiperInitialize", "setSwiperNextMargin",
         "resetSwiperNextMargin", "setSwiperPrevMargin", "resetSwiperPrevMargin", "setSwiperDisplayCount",
         "resetSwiperDisplayCount", "setSwiperSwipeByGroup", "resetSwiperSwipeByGroup", "setSwiperDisplayArrow",
         "resetSwiperDisplayArrow", "setSwiperCurve", "resetSwiperCurve", "setSwiperOnChange", "resetSwiperOnChange",
@@ -802,6 +849,7 @@ void SwiperBridge::RegisterSwiperAttributes(Local<panda::ObjectRef> object, Ecma
         "setSwiperWidth", "setSwiperHeight", "setSwiperSize", "setSwiperOnClick", "setSwiperRemoteMessage" };
 
     Local<JSValueRef> funcValues[] = {
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::Create),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperInitialize),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::ResetSwiperInitialize),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SwiperBridge::SetSwiperNextMargin),
@@ -904,16 +952,9 @@ void ApplyThemeInConstructor(EcmaVM* vm, ArkUINodeHandle nativeNode)
     GetArkUINodeModifiers()->getSwiperModifier()->setJsShowIndicator(nativeNode, true);
 }
 
-ArkUINativeModuleValue SwiperBridge::SetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+void BindSwiperController(
+    EcmaVM* vm, const Local<JSValueRef>& controllerArg, const RefPtr<OHOS::Ace::SwiperController>& controller)
 {
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    auto controllerPtr = GetArkUINodeModifiers()->getSwiperModifier()->create(false);
-    auto controller = AceType::Claim(reinterpret_cast<OHOS::Ace::SwiperController*>(controllerPtr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
-    Local<JSValueRef> controllerArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
     if (!controllerArg.IsNull() && !controllerArg->IsUndefined() && controllerArg->IsObject(vm)) {
         auto* jsController =
             static_cast<Framework::JSSwiperController*>(controllerArg->ToObject(vm)->GetNativePointerField(vm, 0));
@@ -922,7 +963,35 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperInitialize(ArkUIRuntimeCallInfo* r
             jsController->SetControllerHandle(controller);
         }
     }
+}
+
+ArkUINativeModuleValue SwiperBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    auto controllerPtr = GetArkUINodeModifiers()->getSwiperModifier()->create(false);
+    auto controller = AceType::Claim(reinterpret_cast<OHOS::Ace::SwiperController*>(controllerPtr));
+    auto nativeNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> controllerArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    BindSwiperController(vm, controllerArg, controller);
     ApplyThemeInConstructor(vm, nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SwiperBridge::SetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto controllerPtr = GetArkUINodeModifiers()->getSwiperModifier()->getSwiperController(nativeNode);
+    auto controller = AceType::Claim(reinterpret_cast<OHOS::Ace::SwiperController*>(controllerPtr));
+
+    Local<JSValueRef> controllerArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    BindSwiperController(vm, controllerArg, controller);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -2150,6 +2219,7 @@ bool SwiperBridge::SetIndicatorController(
         return false;
     }
 
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperBindIndicator(nativeNode, true);
     jsIndicatorController->SetInstanceId(Container::CurrentId());
     auto targetNode = AceType::Claim(frameNode);
     auto resetFunc = jsIndicatorController->SetSwiperNodeBySwiper(targetNode);
@@ -2230,7 +2300,6 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndicator(ArkUIRuntimeCallInfo* ru
                 }
             } else if (typeArg->IsUndefined()) {
                 SetIndicatorController(runtimeCallInfo, nativeNode, CALL_ARG_VALUE_INDEX);
-                GetArkUINodeModifiers()->getSwiperModifier()->setSwiperShowIndicator(nativeNode, true);
                 return panda::JSValueRef::Undefined(vm);
             } else {
                 SwiperParameters swiperParameters = GetDotIndicatorInfo(vm, panda::ObjectRef::New(vm), nativeNode);

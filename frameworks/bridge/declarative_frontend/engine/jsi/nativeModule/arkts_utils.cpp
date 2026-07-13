@@ -2311,52 +2311,6 @@ bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>&
     return true;
 }
 
-bool ArkTSUtils::ParseLengthMetricsToDimensionForTabs(
-    const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result)
-{
-    RefPtr<ResourceObject> resourceObj;
-    return ArkTSUtils::ParseLengthMetricsToDimensionForTabs(vm, jsValue, result, resourceObj);
-}
-
-bool ArkTSUtils::ParseLengthMetricsToDimensionForTabs(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-    CalcDimension& result, RefPtr<ResourceObject>& resourceObj)
-{
-    if (jsValue->IsNumber()) {
-        result = CalcDimension(jsValue->ToNumber(vm)->Value(), DimensionUnit::VP);
-        return true;
-    }
-    if (jsValue->IsString(vm)) {
-        auto value = jsValue->ToString(vm)->ToString(vm);
-        StringUtils::StringToCalcDimensionNG(value, result, false, DimensionUnit::VP);
-        return true;
-    }
-    if (jsValue->IsObject(vm)) {
-        auto jsObj = jsValue->ToObject(vm);
-        auto valObj = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
-        if (valObj->IsUndefined() || valObj->IsNull()) {
-            return false;
-        }
-        double value = valObj->ToNumber(vm)->Value();
-        auto unit = static_cast<DimensionUnit>(
-            jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "unit"))->ToNumber(vm)->Value());
-        result = CalcDimension(value, unit);
-        auto jsRes = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "res"));
-        if (SystemProperties::ConfigChangePerform() && !jsRes->IsUndefined() &&
-            !jsRes->IsNull() && jsRes->IsObject(vm)) {
-            Local<ObjectRef> resObj = jsRes->ToObject(vm);
-            CompleteResourceObject(vm, resObj);
-            resourceObj = GetResourceObject(vm, resObj);
-        }
-        return true;
-    }
-    if (jsValue->IsNull()) {
-        result = CalcDimension(0.0f, DimensionUnit::VP);
-        return true;
-    }
-
-    return false;
-}
-
 bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result, bool isJsView)
 {
     RefPtr<ResourceObject> resourceObject;
