@@ -29,6 +29,7 @@ arkui_files = [
   "arkui-preprocessed/@ohos.arkui.componentSnapshot.ets",
   "arkui-preprocessed/@ohos.arkui.componentUtils.ets",
   "arkui-preprocessed/@ohos.arkui.components.ArkDynamicLayout.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ContainerReader.ets",
   "arkui-preprocessed/@ohos.arkui.components.ArkLazyDynamicLayout.ets",
   "arkui-preprocessed/@ohos.arkui.WithEnv.ets",
   "arkui-preprocessed/@ohos.arkui.dragController.ets",
@@ -639,6 +640,7 @@ arkui_path_keys = [
   "@aceTrace",
   "@decoratorEnv",
   "@ohos.arkui.components.ArkDynamicLayout",
+  "@ohos.arkui.components.ContainerReader",
   "@ohos.arkui.components.ArkLazyDynamicLayout",
   "@ohos.arkui.WithEnv",
 ]
@@ -707,6 +709,7 @@ arkui_path_values = [
   "arkui-preprocessed/arkui/base/AceTrace.ets",
   "arkui-preprocessed/arkui/stateManagement/decoratorImpl/decoratorEnv.ets",
   "arkui-preprocessed/@ohos.arkui.components.ArkDynamicLayout.ets",
+  "arkui-preprocessed/@ohos.arkui.components.ContainerReader.ets",
   "arkui-preprocessed/@ohos.arkui.components.ArkLazyDynamicLayout.ets",
   "arkui-preprocessed/@ohos.arkui.WithEnv.ets",
 ]

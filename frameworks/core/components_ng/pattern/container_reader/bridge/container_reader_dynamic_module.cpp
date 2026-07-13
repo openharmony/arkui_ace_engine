@@ -15,8 +15,14 @@
 
 #include "core/components_ng/pattern/container_reader/bridge/container_reader_dynamic_module.h"
 
+#include "arkoala_api_generated.h"
+
 #include "core/components_ng/pattern/container_reader/bridge/arkts_native_container_reader_bridge.h"
 #include "core/components_ng/pattern/container_reader/container_reader_model_ng.h"
+
+#ifdef INCLUDE_GENERATED_SOURCES
+#include "core/components_ng/pattern/container_reader/container_reader_model_static.h"
+#endif
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_DynamicModule_Create_ContainerReader()
 {
@@ -27,6 +33,12 @@ namespace OHOS::Ace {
 
 namespace NG {
 const ArkUIContainerReaderModifier* GetContainerReaderDynamicModifier();
+#ifdef INCLUDE_GENERATED_SOURCES
+namespace GeneratedModifier {
+constexpr const char* EXTENDER_ACCESSOR = "ExtenderAccessor";
+const GENERATED_ArkUIContainerReaderExtenderAccessor* GetContainerReaderExtenderAccessor();
+}
+#endif
 } // namespace NG
 
 void ContainerReaderDynamicModule::RegisterAttributes(
@@ -42,7 +54,11 @@ const void* ContainerReaderDynamicModule::GetDynamicModifier()
 
 const void* ContainerReaderDynamicModule::GetStaticModifier()
 {
+#ifdef INCLUDE_GENERATED_SOURCES
+    return nullptr; // ContainerReader doesn't have a static modifier, only extender accessor
+#else
     return nullptr;
+#endif
 }
 
 const void* ContainerReaderDynamicModule::GetCjModifier()
@@ -58,6 +74,11 @@ void* ContainerReaderDynamicModule::GetModel()
 
 const void* ContainerReaderDynamicModule::GetCustomModifier(const std::string& name)
 {
+#ifdef INCLUDE_GENERATED_SOURCES
+    if (name == NG::GeneratedModifier::EXTENDER_ACCESSOR) {
+        return NG::GeneratedModifier::GetContainerReaderExtenderAccessor();
+    }
+#endif
     return nullptr;
 }
 

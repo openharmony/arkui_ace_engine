@@ -22,14 +22,14 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from './alertDialog'
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, OnVisibleIndexesChangeCallback, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, LinearGradientOptions, RadialGradientOptions, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, LinearGradientOptions_serializer, RadialGradientOptions_serializer, EventTarget_serializer, TouchObject_serializer } from './common'
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, Bindable_WidthBreakpoint_serializer, Bindable_HeightBreakpoint_serializer, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, OnVisibleIndexesChangeCallback, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, LinearGradientOptions, RadialGradientOptions, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, LinearGradientOptions_serializer, RadialGradientOptions_serializer, EventTarget_serializer, TouchObject_serializer } from './common'
 import { extractors, TouchEvent, ContentModifier, XComponentController, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
 import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ItemFillPolicy_serializer, ItemFillPolicy, DrawingCanvas, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
 import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
 import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
-import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, CompetitionStrategy, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, RawInputEventType, HorizontalAlign, Curve, DialogDisplayMode, BorderStyle, TouchType, ColorSpace } from './enums'
+import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, CompetitionStrategy, Color as arkui_component_enums_Color, WidthBreakpoint, HeightBreakpoint, AnimationPropertyType, EventQueryType, RawInputEventType, HorizontalAlign, Curve, DialogDisplayMode, BorderStyle, TouchType, ColorSpace } from './enums'
 import { ScrollState, StickyStyle, UIListEvent, UIListEventInternal } from './list'
 import { SwipeActionOptions_serializer, SwipeActionOptions } from './listItem'
 import { ArcScrollBarOptions_serializer } from './../framework/ohos.arkui.ArcScrollBar'
@@ -1754,6 +1754,80 @@ export class CommonShape implements MaterializedBase {
         thisSerializer.release()
         const obj: CommonShape = CommonShapeInternal.fromPtr(retval)
         return obj
+    }
+}
+export class ContainerReaderExtender {
+    public static containerReaderConstructor(id: int32): KPointer {
+        const id_casted = id as (int32)
+        return ContainerReaderExtender.containerReaderConstructor_serialize(id_casted)
+    }
+    public static setContainerReaderOptions(node: KPointer, size: Size, onChange: Callback_SizeInfo_Void, widthBreakpoint: Bindable<WidthBreakpoint> | undefined, heightBreakpoint: Bindable<HeightBreakpoint> | undefined): void {
+        const node_casted = node as (KPointer)
+        const size_casted = size as (Size)
+        const onChange_casted = onChange as (Callback_SizeInfo_Void)
+        const widthBreakpoint_casted = widthBreakpoint as (Bindable<WidthBreakpoint> | undefined)
+        const heightBreakpoint_casted = heightBreakpoint as (Bindable<HeightBreakpoint> | undefined)
+        ContainerReaderExtender.setContainerReaderOptions_serialize(node_casted, size_casted, onChange_casted, widthBreakpoint_casted, heightBreakpoint_casted)
+        return
+    }
+    public static breakpointConfig(node: KPointer, width?: Array<double>, height?: Array<double>): void {
+        const node_casted = node as (KPointer)
+        const width_casted = width as (Array<double> | undefined)
+        const height_casted = height as (Array<double> | undefined)
+        ContainerReaderExtender.breakpointConfig_serialize(node_casted, width_casted, height_casted)
+        return
+    }
+    private static containerReaderConstructor_serialize(id: int32): KPointer {
+        const retval = ArkUIGeneratedNativeModule._ContainerReaderExtender_containerReaderConstructor(id)
+        return retval
+    }
+    private static setContainerReaderOptions_serialize(node: KPointer, size: Size, onChange: Callback_SizeInfo_Void, widthBreakpoint: Bindable<WidthBreakpoint> | undefined, heightBreakpoint: Bindable<HeightBreakpoint> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        Size_serializer.write(thisSerializer, size)
+        thisSerializer.holdAndWriteCallback(onChange)
+        if (widthBreakpoint !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const widthBreakpointTmpValue = widthBreakpoint!
+            Bindable_WidthBreakpoint_serializer.write(thisSerializer, widthBreakpointTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (heightBreakpoint !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const heightBreakpointTmpValue = heightBreakpoint!
+            Bindable_HeightBreakpoint_serializer.write(thisSerializer, heightBreakpointTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ContainerReaderExtender_setContainerReaderOptions(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static breakpointConfig_serialize(node: KPointer, width?: Array<double>, height?: Array<double>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (width !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const widthTmpValue = width!
+            thisSerializer.writeInt32((widthTmpValue.length).toInt())
+            for (let widthTmpValueCounterI = 0; widthTmpValueCounterI < widthTmpValue.length; widthTmpValueCounterI++) {
+                const widthTmpValueTmpElement: double = widthTmpValue[widthTmpValueCounterI]
+                thisSerializer.writeFloat64(widthTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (height !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const heightTmpValue = height!
+            thisSerializer.writeInt32((heightTmpValue.length).toInt())
+            for (let heightTmpValueCounterI = 0; heightTmpValueCounterI < heightTmpValue.length; heightTmpValueCounterI++) {
+                const heightTmpValueTmpElement: double = heightTmpValue[heightTmpValueCounterI]
+                thisSerializer.writeFloat64(heightTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ContainerReaderExtender_breakpointConfig(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class ContentModifierHelper {
@@ -7314,6 +7388,7 @@ export enum ArcDirectionInner {
 export type AnimationStartHandler = (index: int32, targetIndex: int32, extraInfo: SwiperAnimationEvent) => void;
 export type AnimationEndHandler = (index: int32, extraInfo: SwiperAnimationEvent) => void;
 export type GestureSwipeHandler = (index: int32, extraInfo: SwiperAnimationEvent) => void;
+export type Callback_SizeInfo_Void = (size: Size) => void;
 export interface ComponentInfo {
     size: Size;
     localOffset: Offset_componentutils;
