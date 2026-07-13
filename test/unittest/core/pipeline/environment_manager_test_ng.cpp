@@ -234,7 +234,18 @@ HWTEST_F(PipelineContextTestNg, EnvironmentManagerSystemEnvRemovedValue001, Test
     EXPECT_EQ(*callbackCount, 1);
     EXPECT_EQ(*receivedKey, ENV_KEY_DIRECTION);
     EXPECT_FALSE(receivedValue->has_value());
+    EXPECT_FALSE(envManager->FindSystemEnvValueByKey(customNode, ENV_KEY_DIRECTION, queryResult));
     EXPECT_FALSE(withEnvNode->HasSystemEnvProperty(ENV_KEY_DIRECTION));
+
+    EXPECT_TRUE(envManager->SetSystemEnvValue(
+        withEnvNode, ENV_KEY_DIRECTION, SystemEnvValue::FromDirection(TextDirection::AUTO)));
+
+    EXPECT_EQ(*callbackCount, 2);
+    EXPECT_EQ(*receivedKey, ENV_KEY_DIRECTION);
+    ASSERT_TRUE(receivedValue->has_value());
+    auto direction = (*receivedValue)->GetDirection();
+    ASSERT_TRUE(direction.has_value());
+    EXPECT_EQ(direction.value(), TextDirection::AUTO);
     ClearSystemEnvUpdateFunc(customNode);
 }
 
