@@ -457,9 +457,12 @@ OH_NativeXComponent* OH_NativeXComponent_GetNativeXComponent(ArkUI_NodeHandle no
         (node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
         return nullptr;
     }
-    auto nodeModifiers = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers();
+    auto xComponentModifier = GetArkUIXComponentModifierWithMessage(__FUNCTION__);
+    if (xComponentModifier == nullptr) {
+        return nullptr;
+    }
     return reinterpret_cast<OH_NativeXComponent*>(
-        nodeModifiers->getXComponentModifier()->getNativeXComponent(node->uiNodeHandle));
+        xComponentModifier->getNativeXComponent(node->uiNodeHandle));
 }
 
 int32_t OH_NativeXComponent_GetNativeAccessibilityProvider(
