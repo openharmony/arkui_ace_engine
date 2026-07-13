@@ -1351,6 +1351,7 @@ void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event)
 
 void PanRecognizer::DispatchPanStartedToPerf(const TouchEvent& event)
 {
+#ifndef CROSS_PLATFORM
     int64_t inputTime = event.time.time_since_epoch().count();
     if (inputTime <= 0 || event.sourceType != SourceType::TOUCH) {
         return;
@@ -1360,6 +1361,7 @@ void PanRecognizer::DispatchPanStartedToPerf(const TouchEvent& event)
         return;
     }
     pMonitor->RecordInputEvent(FIRST_MOVE, PERF_TOUCH_EVENT, inputTime);
+#endif
 }
 
 void PanRecognizer::DumpVelocityInfo(int32_t fingerId)

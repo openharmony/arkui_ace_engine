@@ -104,26 +104,32 @@ bool ParseInt64Param(const napi_env& env, const napi_value& value, int64_t& dest
 
 static void SceneStart(std::string sceneId, int type, std::string note)
 {
+#ifndef CROSS_PLATFORM
     PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
     if (pMonitor != nullptr) {
         pMonitor->Start(sceneId, static_cast<PerfActionType>(type), note);
     }
+#endif
 }
 
 static void SceneEnd(std::string sceneId, bool isJsApi)
 {
+#ifndef CROSS_PLATFORM
     PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
     if (pMonitor != nullptr) {
         pMonitor->End(sceneId, isJsApi);
     }
+#endif
 }
 
 static void InputEvent(int type, int sourceType, int64_t time)
 {
+#ifndef CROSS_PLATFORM
     PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
     if (pMonitor != nullptr) {
         pMonitor->RecordInputEvent(static_cast<PerfActionType>(type), static_cast<PerfSourceType>(sourceType), time);
     }
+#endif
 }
 
 static napi_value JSSceneStart(napi_env env, napi_callback_info info)

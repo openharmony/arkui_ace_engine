@@ -1267,7 +1267,9 @@ public:
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector();
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
     {
+#ifndef CROSS_PLATFORM
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
+#endif
     }
 
     ACE_FORCE_EXPORT WeakPtr<AIWriteAdapter> GetOrCreateAIWriteAdapter();
@@ -1411,8 +1413,10 @@ protected:
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
+#ifndef CROSS_PLATFORM
     void OnDumpRecorderStart(const std::vector<std::string>& params) const;
     void TriggerFrameDumpFuncIfExist() const;
+#endif
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,

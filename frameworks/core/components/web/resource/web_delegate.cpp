@@ -5532,6 +5532,7 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid)
 
 void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::string& param) const
 {
+#ifndef CROSS_PLATFORM
     if (!Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_WEB)) {
         return;
     }
@@ -5549,6 +5550,7 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
         .SetHost(host)
         .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+#endif
 }
 
 void WebDelegate::OnPageStarted(const std::string& param)
@@ -6423,11 +6425,13 @@ void WebDelegate::ReportDynamicFrameLossEvent(const std::string& sceneId, bool i
         return;
     }
     ACE_SCOPED_TRACE("ReportDynamicFrameLossEvent, sceneId: %s, isStart: %u", sceneId.c_str(), isStart);
+#ifndef CROSS_PLATFORM
     if (isStart) {
         PerfMonitor::GetPerfMonitor()->Start(sceneId, PerfActionType::FIRST_MOVE, "");
     } else {
         PerfMonitor::GetPerfMonitor()->End(sceneId, false);
     }
+#endif
 }
 
 void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,

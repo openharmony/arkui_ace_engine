@@ -1604,7 +1604,9 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
         OnCustomContentTransition(indicator, index);
     } else {
         if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
             animationTargetIndex_ = index;
@@ -1982,7 +1984,9 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         OnCustomContentTransition(indicator, index);
     } else {
         if (duration> 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
         } else {
@@ -3326,7 +3330,9 @@ void TabBarPattern::InitTurnPageRateEvent()
     if (!animationEndEvent_) {
         AnimationEndEvent animationEndEvent =
             [weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
+#ifndef CROSS_PLATFORM
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
+#endif
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 auto host = pattern->GetHost();

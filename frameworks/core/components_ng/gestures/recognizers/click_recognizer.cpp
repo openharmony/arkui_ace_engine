@@ -725,6 +725,7 @@ void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
 
 void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
 {
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto host = GetAttachedNode().Upgrade();
         CHECK_NULL_VOID(host);
@@ -747,6 +748,7 @@ void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
         }
         Recorder::EventRecorder::Get().OnClick(std::move(builder));
     }
+#endif
 }
 
 GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()

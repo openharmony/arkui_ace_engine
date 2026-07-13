@@ -107,7 +107,7 @@ void RenderXComponent::HandleTouchEvent(const TouchEventInfo& info, const TouchT
         touchInfoList = info.GetTouches();
     }
 #endif
-#ifdef OHOS_PLATFORM
+ #ifdef OHOS_PLATFORM
     // increase cpu frequency
     if (touchType == TouchType::MOVE) {
         auto currentTime = GetSysTimestamp();

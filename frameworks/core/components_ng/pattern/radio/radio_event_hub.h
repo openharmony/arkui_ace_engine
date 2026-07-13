@@ -17,8 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 
@@ -48,6 +50,7 @@ public:
         if (changeEvent) {
             changeEvent(check);
         }
+#ifndef CROSS_PLATFORM
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;
             auto host = GetFrameNode();
@@ -64,6 +67,7 @@ public:
             builder.SetChecked(check).SetText(value_);
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
         }
+#endif
     }
 
     const std::string& GetValue()

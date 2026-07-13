@@ -19,7 +19,9 @@
 #include <functional>
 
 #include "base/memory/ace_type.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
@@ -49,7 +51,9 @@ public:
             auto onStart = onStart_;
             onStart(param);
         }
+#ifndef CROSS_PLATFORM
         RecorderOnEvent(Recorder::EventType::VIDEO_START, param);
+#endif
     }
 
     void SetOnPause(VideoEventCallback&& onPause)
@@ -66,7 +70,9 @@ public:
             auto onPause = onPause_;
             onPause(param);
         }
+#ifndef CROSS_PLATFORM
         RecorderOnEvent(Recorder::EventType::VIDEO_PAUSE, param);
+#endif
     }
 
     void SetOnFinish(VideoEventCallback&& onFinish)
@@ -83,7 +89,9 @@ public:
             auto onFinish = onFinish_;
             onFinish(param);
         }
+#ifndef CROSS_PLATFORM
         RecorderOnEvent(Recorder::EventType::VIDEO_FINISH, param);
+#endif
     }
 
     void SetOnError(VideoEventCallback&& onError)
@@ -100,7 +108,9 @@ public:
             auto onError = onError_;
             onError(param);
         }
+#ifndef CROSS_PLATFORM
         RecorderOnEvent(Recorder::EventType::VIDEO_ERROR, param);
+#endif
     }
     void FireErrorEvent(int32_t code, const std::string& message)
     {
@@ -116,7 +126,9 @@ public:
             auto onError = onError_;
             onError(param);
         }
+#ifndef CROSS_PLATFORM
         RecorderOnEvent(Recorder::EventType::VIDEO_ERROR, param);
+#endif
     }
 
     void SetOnPrepared(VideoEventCallback&& onPrepared)
@@ -133,7 +145,9 @@ public:
             auto onPrepared = onPrepared_;
             onPrepared(param);
         }
+#ifndef CROSS_PLATFORM
         RecorderOnEvent(Recorder::EventType::VIDEO_PREPARED, param);
+#endif
     }
 
     void SetOnSeeking(VideoEventCallback&& onSeeking)
@@ -166,7 +180,9 @@ public:
             auto onSeeked = onSeeked_;
             onSeeked(param);
         }
+#ifndef CROSS_PLATFORM
         RecorderOnEvent(Recorder::EventType::VIDEO_SEEKED, param);
+#endif
     }
 
     void SetOnUpdate(VideoEventCallback&& onUpdate)
@@ -199,7 +215,9 @@ public:
             auto onStop = onStop_;
             onStop(param);
         }
+#ifndef CROSS_PLATFORM
         RecorderOnEvent(Recorder::EventType::VIDEO_STOP, param);
+#endif
     }
 
     void SetOnFullScreenChange(VideoEventCallback&& onFullScreenChange)
@@ -216,7 +234,9 @@ public:
             auto onFullScreenChange = onFullScreenChange_;
             onFullScreenChange(param);
         }
+#ifndef CROSS_PLATFORM
         RecorderOnEvent(Recorder::EventType::VIDEO_SCREEN_CHANGE, param);
+#endif
     }
 
     void SetInspectorId(const std::string& inspectorId)
@@ -225,6 +245,7 @@ public:
     }
 
 private:
+#ifndef CROSS_PLATFORM
     void RecorderOnEvent(Recorder::EventType eventType, const std::string& param) const
     {
         if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -239,6 +260,7 @@ private:
         builder.SetEventType(eventType).SetText(param);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
 
     VideoEventCallback onStart_;
     VideoEventCallback onPause_;

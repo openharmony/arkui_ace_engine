@@ -1298,8 +1298,10 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
         JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
         JSRef<JSVal> param[2] = {keyEvent, dataObject};
         func->Execute(param);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onSubmit",
             ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
     };
     TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
 }

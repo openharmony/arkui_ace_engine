@@ -141,8 +141,10 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos, const std::string&
     int64_t durationTmp = now - std::max(timeStampNanos, prevEndTimeStamp_);
     int64_t duration = (now <= timeStampNanos) ? 0 : durationTmp;
     double jank = double(duration) / refreshPeriod_;
+#ifndef CROSS_PLATFORM
     // perf monitor jank frame
     PerfMonitor::GetPerfMonitor()->SetFrameTime(timeStampNanos, duration, jank, windowName);
+#endif
     RecordJankStatus(jank);
     prevFrameUpdateCount_ = currentFrameUpdateCount_;
     RecordPreviousEnd();
@@ -183,7 +185,9 @@ void JankFrameReport::RecordJankStatus(double jank)
             static_cast<long long>(jank * refreshPeriod_ / NS_TO_MS));
         ACE_COUNT_TRACE(jankFrameCount_, "JANK FRAME %s", pageUrl_.c_str());
     }
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->ReportJankFrameApp(jank);
+#endif
 }
 
 void JankFrameReport::RecordPreviousEnd()
@@ -239,7 +243,11 @@ void JankFrameReport::ResetFrameJankClock()
 void JankFrameReport::StartRecord(const std::string& pageUrl)
 {
     ResetFrameJankClock();
+#ifndef CROSS_PLATFORM
     pageUrl_ = ParsePageUrl(pageUrl);
+#else
+    pageUrl_ = pageUrl;
+#endif
 }
 
 void JankFrameReport::FlushRecord()

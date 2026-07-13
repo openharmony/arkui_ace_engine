@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVROUTER_NAVDESTINATION_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"

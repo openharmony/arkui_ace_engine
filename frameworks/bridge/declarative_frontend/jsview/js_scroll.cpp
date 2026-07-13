@@ -98,8 +98,10 @@ bool CheckSnapPaginations(std::vector<Dimension> snapPaginations)
 
 void ReportScrollComponentChangeEvent(const char* eventName)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "event", eventName, ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 struct ScrollBeginJsCallback {

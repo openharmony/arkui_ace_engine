@@ -23,131 +23,183 @@ int32_t UIContentServiceStubImpl::GetInspectorTree(
     const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config,
     [[maybe_unused]] int32_t timeout)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetInspectorTree(config);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::RegisterClickEventCallback(const EventCallback& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetClickEventRegistered(true);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::RegisterRouterChangeEventCallback(const EventCallback& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetRouterChangeEventRegistered(true);
+#endif
     return NO_ERROR;
 }
 int32_t UIContentServiceStubImpl::RegisterSearchEventCallback(const EventCallback& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetSearchEventRegistered(true);
+#endif
     return NO_ERROR;
 }
 int32_t UIContentServiceStubImpl::RegisterTextChangeEventCallback(const EventCallback& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetTextChangeEventRegistered(true);
+#endif
     return NO_ERROR;
 }
 int32_t UIContentServiceStubImpl::RegisterComponentChangeEventCallback(const EventCallback& eventCallback,
     uint32_t mask)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetComponentChangeEventRegistered(true);
+#endif
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetComponentChangeEventMask(mask);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::RegisterWebUnfocusEventCallback(
     const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->NotifyAllWebPattern(true);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::RegisterScrollEventCallback(const EventCallback& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetScrollEventRegistered(true);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::RegisterLifeCycleEventCallback(const EventCallback& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetLifeCycleEventRegistered(true);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::RegisterSelectTextEventCallback(const EventCallback& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetSelectTextEventRegistered(true);
+#endif
     // first register
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportSelectText();
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::SendCommand(int32_t id, const std::string& command)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->NotifySendCommandPattern(id, command);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::SendCommandAsync(int32_t id, const std::string& command)
 {
+#ifndef CROSS_PLATFORM
     return UiSessionManager::GetInstance()->NotifySendCommandAsyncPattern(id, command);
+#else
+    return NO_ERROR;
+#endif
 }
 
 int32_t UIContentServiceStubImpl::SendCommand(const std::string command)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SendCommand(command);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::UnregisterClickEventCallback()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetClickEventRegistered(false);
+#endif
     return NO_ERROR;
 }
 int32_t UIContentServiceStubImpl::UnregisterSearchEventCallback()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetSearchEventRegistered(false);
+#endif
     return NO_ERROR;
 }
 int32_t UIContentServiceStubImpl::UnregisterTextChangeEventCallback()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetTextChangeEventRegistered(false);
+#endif
     return NO_ERROR;
 }
 int32_t UIContentServiceStubImpl::UnregisterRouterChangeEventCallback()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetRouterChangeEventRegistered(false);
+#endif
     return NO_ERROR;
 }
 int32_t UIContentServiceStubImpl::UnregisterComponentChangeEventCallback()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetComponentChangeEventRegistered(false);
+#endif
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetComponentChangeEventMask(ComponentEventType::COMPONENT_EVENT_NONE);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::UnregisterWebUnfocusEventCallback()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->NotifyAllWebPattern(false);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::UnregisterScrollEventCallback()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetScrollEventRegistered(false);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::UnregisterLifeCycleEventCallback()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetLifeCycleEventRegistered(false);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::UnregisterSelectTextEventCallback()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetSelectTextEventRegistered(false);
+#endif
     return NO_ERROR;
 }
 
@@ -158,52 +210,68 @@ bool UIContentServiceStubImpl::IsConnect()
 
 int32_t UIContentServiceStubImpl::ResetTranslateTextAll()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ResetTranslate(-1);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::ResetTranslateText(int32_t nodeId)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ResetTranslate(nodeId);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::GetWebViewTranslateText(
     const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetWebTranslateText(data, false);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::StartWebViewTranslate(
     const std::string& data, const std::function<void(int32_t, std::string)>& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetWebTranslateText(data, true);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::GetWebViewCurrentLanguage(const EventCallback& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetWebViewLanguage();
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::SendTranslateResult(
     int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SendTranslateResult(nodeId, results, ids);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::EndWebViewTranslate()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ResetTranslate(-1);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::SendTranslateResult(int32_t nodeId, std::string result)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SendTranslateResult(nodeId, result);
+#endif
     return NO_ERROR;
 }
 
@@ -245,7 +313,9 @@ int32_t UIContentServiceStubImpl::GetCurrentAbilityLanguageInfo(std::string& lan
 int32_t UIContentServiceStubImpl::GetCurrentImagesShowing(
     const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetPixelMap();
+#endif
     return NO_ERROR;
 }
 
@@ -257,13 +327,17 @@ int32_t UIContentServiceStubImpl::GetImagesById(
     const std::function<void(int32_t, const std::map<int32_t, std::map<int32_t,
         std::shared_ptr<Media::PixelMap>>>&, MultiImageQueryErrorCode)>& arkWebfinishCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetMultiImagesById(arkUIIds, arkWebs);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::GetCurrentPageName(const EventCallback& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetCurrentPageName();
+#endif
     return NO_ERROR;
 }
 
@@ -271,14 +345,18 @@ int32_t UIContentServiceStubImpl::GetVisibleInspectorTree(
     const std::function<void(std::string, int32_t, bool)>& eventCallback, ParamConfig config,
     [[maybe_unused]] int32_t timeout)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetVisibleInspectorTree(config);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::GetLatestHitTestNodeInfosForTouch(
     const std::function<void(std::string, int32_t, bool)>& eventCallback, InteractionParamConfig config)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetLatestHitTestNodeInfosForTouch(config);
+#endif
     return NO_ERROR;
 }
 
@@ -286,34 +364,44 @@ int32_t UIContentServiceStubImpl::ExeAppAIFunction(
     const std::string& funcName, const std::string& params, const sptr<IRemoteObject>& remoteObj, int32_t nodeId,
     const std::function<void(uint32_t, std::string)>& finishCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ExeAppAIFunction(funcName, params, remoteObj, nodeId);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::RegisterContentChangeCallback(const ContentChangeConfig& config,
     const std::function<void(ChangeType type, const std::string& simpleTree)> callback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->RegisterContentChangeCallback(config);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::GetSpecifiedContentOffsets(int32_t id, const std::string& content,
     const std::function<void(std::vector<std::pair<float, float>>)>& eventCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetSpecifiedContentOffsets(id, content);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::HighlightSpecifiedContent(int32_t id, const std::string& content,
     const std::vector<std::string>& nodeIds, const std::string& configs)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->HighlightSpecifiedContent(id, content, nodeIds, configs);
+#endif
     return NO_ERROR;
 }
 
 int32_t UIContentServiceStubImpl::UnregisterContentChangeCallback()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->UnregisterContentChangeCallback();
+#endif
     return NO_ERROR;
 }
 
@@ -321,7 +409,9 @@ int32_t UIContentServiceStubImpl::GetStateMgmtInfo(const std::string& componentN
     const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback,
     bool onlyVisible)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetStateMgmtInfo(componentName, propertyName, jsonPath, onlyVisible);
+#endif
     return NO_ERROR;
 }
 
@@ -330,7 +420,9 @@ int32_t UIContentServiceStubImpl::GetWebInfoByRequest(
     const std::string& request,
     const GetWebInfoByRequestCallback& finishCallback)
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->GetWebInfoByRequest(webId, request);
+#endif
     return NO_ERROR;
 }
 } // namespace OHOS::Ace

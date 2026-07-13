@@ -28,6 +28,9 @@ template("ace_core_interfaces_native_node") {
     if (ace_engine_feature_enable_point_light) {
       defines += [ "POINT_LIGHT_ENABLE" ]
     }
+    if (is_arkui_x) {
+      defines += [ "CROSS_PLATFORM" ]
+    }
 
     # add common source file needed by all product platform here
     sources = [

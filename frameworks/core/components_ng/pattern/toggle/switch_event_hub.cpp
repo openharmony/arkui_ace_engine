@@ -15,8 +15,12 @@
 
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
 
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -36,6 +40,7 @@ void SwitchEventHub::UpdateChangeEvent(bool isOn) const
     CHECK_NULL_VOID(context);
     context->PostAsyncEvent(task, "ArkUIToggleUpdateChangeEvent", TaskExecutor::TaskType::UI);
 
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         auto host = GetFrameNode();
@@ -52,6 +57,7 @@ void SwitchEventHub::UpdateChangeEvent(bool isOn) const
         builder.SetChecked(isOn);
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
+#endif
 }
 
 } // namespace OHOS::Ace::NG

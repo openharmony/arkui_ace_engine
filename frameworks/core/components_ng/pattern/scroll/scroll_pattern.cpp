@@ -2037,6 +2037,7 @@ bool ScrollPattern::FreeScrollBy(const OffsetF& delta, bool canOverScroll)
 
 void ScrollPattern::ReportOnItemScrollEvent(const std::string& event)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -2055,6 +2056,7 @@ void ScrollPattern::ReportOnItemScrollEvent(const std::string& event)
     result->Put("result", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 void ScrollPattern::FillReportOnItemStopParams(std::unique_ptr<JsonValue>& params)

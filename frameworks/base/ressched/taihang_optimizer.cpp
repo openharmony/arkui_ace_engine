@@ -31,6 +31,7 @@ void TaihangOptimizer::Init()
 {
     CHECK_EQUAL_VOID(isInited_, true);
     isInited_ = true;
+#ifndef CROSS_PLATFORM
     std::weak_ptr<TaihangOptimizer> weakThis = shared_from_this();
     auto task = [weakThis]() {
         auto optimizerRef = weakThis.lock();
@@ -47,6 +48,7 @@ void TaihangOptimizer::Init()
             static_cast<int32_t>(optimizerRef->enable_));
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
+#endif
 }
 
 bool TaihangOptimizer::IsInited()

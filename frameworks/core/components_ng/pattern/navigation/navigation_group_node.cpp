@@ -972,7 +972,9 @@ void NavigationGroupNode::CreateAnimationWithPop(const TransitionUnitInfo& preIn
     auto newPopAnimation = AnimationUtils::StartAnimation(option, [this, preNode, curNode, isNavBarOrHomeDestination,
         preUseCustomTransition, curUseCustomTransition, overlayPop, pattern, weakNavigation = WeakClaim(this)]() {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page pop transition start");
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start: animationId: %{public}d",
                 static_cast<int32_t>(animationId_));
 
@@ -1063,14 +1065,18 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page pop transition end");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION,
                 "navigation pop animation end, pre node animationId: %{public}d", preAnimationId);
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+#endif
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
             navigation->isOnAnimation_ = false;
             auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
             navigation->OnAccessibilityEvent(
                 AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
+#endif
             navigation->CleanPopAnimations();
             auto preNavDesNode = weakPreNode.Upgrade();
             CHECK_NULL_VOID(preNavDesNode);
@@ -1211,7 +1217,9 @@ void NavigationGroupNode::CreateAnimationWithPush(const TransitionUnitInfo& preI
         pattern,
         weakNavigation = WeakClaim(this)]() {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page push transition start");
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation start");
             if (!overlayPush && ((isNavBarOrHomeDestination && !pattern->IsForceSplitSuccess()) ||
                 (preNode && !preUseCustomTransition))) {
@@ -1285,7 +1293,9 @@ void NavigationGroupNode::StartSplitPushAnimation(
         weakPreNode = WeakPtr<FrameNode>(preNode), weakCurNode = WeakPtr<FrameNode>(curNode),
         weakNavigation = WeakClaim(this), pushAnimationId] {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation split push page transition end");
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+#endif
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
             auto pattern = navigation->GetPattern<NavigationPattern>();
@@ -1308,7 +1318,9 @@ void NavigationGroupNode::StartSplitPushAnimation(
             auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
             navigation->OnAccessibilityEvent(
                 AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
+#endif
             navigation->isOnAnimation_ = false;
             navigation->CleanSplitPushAnimations();
             pattern->CheckContentNeedMeasure(navigation);
@@ -1362,7 +1374,9 @@ void NavigationGroupNode::StartSplitPopAnimation(
         weakPreNode = WeakPtr<FrameNode>(preNode), weakCurNode = WeakPtr<FrameNode>(curNode),
         weakNavigation = WeakClaim(this), popAnimationId] {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation split pop page transition end");
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+#endif
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
             auto pattern = navigation->GetPattern<NavigationPattern>();
@@ -1385,7 +1399,9 @@ void NavigationGroupNode::StartSplitPopAnimation(
             auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
             navigation->OnAccessibilityEvent(
                 AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
+#endif
             navigation->isOnAnimation_ = false;
             navigation->CleanSplitPopAnimations();
             pattern->CheckContentNeedMeasure(navigation);
@@ -1443,7 +1459,9 @@ bool NavigationGroupNode::CreateSplitPushAnimation(
     auto newSplitPushAnimation = AnimationUtils::StartAnimation(option, [
         pushExitNode, preNode, curNode, weakNavigation = WeakClaim(this)]() {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page split push transition start");
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             auto navNode = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navNode);
             auto context = navNode->GetContext();
@@ -1528,7 +1546,9 @@ bool NavigationGroupNode::CreateSplitPopAnimation(
     auto newSplitPopAnimation = AnimationUtils::StartAnimation(option, [
         popEnterNode, preNode, curNode, weakNavigation = WeakClaim(this)]() {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page split pop transition start");
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             auto navNode = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navNode);
             auto context = navNode->GetContext();
@@ -1610,7 +1630,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
         weakCurNode = WeakPtr<FrameNode>(curNode), curUseCustomTransition, weakNavigation = WeakClaim(this),
         isNavBarOrHomeDestination, preAnimationId, curAnimationId, overlayPush] {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page push transition end");
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+#endif
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation end");
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
@@ -1673,7 +1695,9 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             auto id = navigation->GetTopDestination() ? navigation->GetTopDestination()->GetAccessibilityId() : -1;
             navigation->OnAccessibilityEvent(
                 AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
+#endif
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
             pattern->CheckContentNeedMeasure(navigation);
@@ -1787,7 +1811,9 @@ void NavigationGroupNode::TransitionWithReplace(
         weakCurNode = WeakPtr<FrameNode>(curNode), preUseCustomTransition]() {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation replace animation end");
         ACE_SCOPED_TRACE_COMMERCIAL("Navigation page replace transition end");
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+#ifndef CROSS_PLATFORM
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+#endif
         auto preNode = weakPreNode.Upgrade();
         CHECK_NULL_VOID(preNode);
         preNode->GetRenderContext()->SetLayerMark(false);
@@ -1797,7 +1823,9 @@ void NavigationGroupNode::TransitionWithReplace(
         auto id = navigationNode->GetTopDestination() ? navigationNode->GetTopDestination()->GetAccessibilityId() : -1;
         navigationNode->OnAccessibilityEvent(
             AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->OnRouterChange(navigationNode->GetNavigationPathInfo(), "onPageChange");
+#endif
         preNode->GetEventHub<EventHub>()->SetEnabledInternal(true);
         if (!navigationNode->CheckAnimationIdValid(preNode, preAnimationId)) {
             return;
@@ -1850,7 +1878,9 @@ void NavigationGroupNode::TransitionWithReplace(
         [curNode, curUseCustomTransition, weakNavigation = WeakClaim(this)]() {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation replace animation start");
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page replace transition start");
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
             if (curNavDestination && curNavDestination->IsNeedContentTransition() && !curUseCustomTransition) {
                 curNode->GetRenderContext()->UpdateOpacity(1.0f);
@@ -2338,7 +2368,9 @@ void NavigationGroupNode::CreateAnimationWithDialogPop(const AnimationFinishCall
     navigationPattern->OnStartOneTransitionAnimation();
     auto newPopAnimation = AnimationUtils::StartAnimation(option, [
        weakNavigation = WeakClaim(this), curNavList, preNavList]() {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation dialog pop animation start");
 
             // do preNode transition
@@ -2406,7 +2438,9 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
                 }
             }
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation dialog pop animation end TransitionWithDialogPop");
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+#endif
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
             navigation->isOnAnimation_ = false;
@@ -2418,7 +2452,9 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
             auto id = curNode ? curNode->GetAccessibilityId() : -1;
             navigation->OnAccessibilityEvent(
                 AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
+#endif
             navigation->CleanPopAnimations();
             for (auto iter = preNavList.rbegin(); iter != preNavList.rend(); ++iter) {
                 auto preNode = (*iter).Upgrade();
@@ -2479,7 +2515,9 @@ void NavigationGroupNode::CreateAnimationWithDialogPush(const AnimationFinishCal
     navigationPattern->OnStartOneTransitionAnimation();
     auto newPushAnimation = AnimationUtils::StartAnimation(option,
         [weakNavigation = WeakClaim(this), prevNavList, curNavList]() {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation dialog push animation start");
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
@@ -2579,7 +2617,9 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
                     curLayerNode->GetRenderContext()->SetLayerMark(false);
                 }
             }
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+#endif
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation dialog push animation end");
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
@@ -2604,7 +2644,9 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
             auto id = curNode ? curNode->GetAccessibilityId() : -1;
             navigation->OnAccessibilityEvent(
                 AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
+#endif
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
             navigation->ContentChangeReport(curNode);
@@ -3195,7 +3237,9 @@ void NavigationGroupNode::SoftTransitionAnimationPush(const RefPtr<FrameNode>& p
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
         preNode, curNode, isNavBar, preUseCustomTransition, curUseCustomTransition, overlayPush,
         weakNavigation = WeakClaim(this)]() {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             if (isNavBar && !overlayPush) {
                 auto navBarNode = AceType::DynamicCast<NavBarNode>(preNode);
                 CHECK_NULL_VOID(navBarNode);
@@ -3292,7 +3336,9 @@ void NavigationGroupNode::SoftTransitionAnimationPop(const RefPtr<FrameNode>& pr
     auto newPopAnimation = AnimationUtils::StartAnimation(option, [
         this, preNode, curNode, isNavBar, preUseCustomTransition, curUseCustomTransition, overlayPop,
         weakNavigation = WeakClaim(this)]() {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             if (curNode) {
                 if (isNavBar && !overlayPop) {
                     auto curNavBar = AceType::DynamicCast<NavBarNode>(curNode);
@@ -3414,11 +3460,13 @@ bool NavigationGroupNode::IsHomeNodeAndShouldShow(const RefPtr<NavDestinationGro
 
 void NavigationGroupNode::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
 {
+#ifndef CROSS_PLATFORM
     auto context = GetContextWithCheck();
     CHECK_NULL_VOID(context);
     auto mgr = context->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnPageTransitionEnd(keyNode);
+#endif
 }
 
 RefPtr<FrameNode> NavigationGroupNode::GetOrCreateMaskNode(bool isLeft)

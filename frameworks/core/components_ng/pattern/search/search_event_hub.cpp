@@ -16,7 +16,9 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utf_helper.h"
 #include "core/common/container.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/search/search_event_hub.h"
@@ -38,7 +40,9 @@ void SearchEventHub::UpdateChangeEvent(const std::u16string& value) const
     pattern->UpdateChangeEvent(value);
     auto id = host->GetInspectorIdValue("");
     if (!id.empty()) {
+#ifndef CROSS_PLATFORM
         Recorder::NodeDataCache::Get().PutString(host, id, UtfUtils::Str16DebugToStr8(value));
+#endif
     }
 }
 } // namespace OHOS::Ace::NG

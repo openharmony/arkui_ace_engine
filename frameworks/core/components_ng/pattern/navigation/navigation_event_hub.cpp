@@ -34,8 +34,10 @@ void NavigationEventHub::FireNavBarStateChangeEvent(bool isVisible)
     CHECK_NULL_VOID(navigation);
     if (isVisible_.has_value()) {
         if (isVisible_.value() != isVisible) {
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(),
                 "onNavBarStateChange");
+#endif
             if (onNavBarStateChangeEvent_) {
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "NavBar Visible State Change %{public}s",
                     isVisible ? "false -> true" : "true -> false");
@@ -44,8 +46,10 @@ void NavigationEventHub::FireNavBarStateChangeEvent(bool isVisible)
             }
         }
     } else {
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(),
             "onNavBarStateChange");
+#endif
         if (onNavBarStateChangeEvent_) {
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set NavBar Visible State as %{public}s",
                 isVisible ? "true" : "false");

@@ -868,7 +868,9 @@ void SubwindowOhos::ShowWindow(bool needFocus)
     if (ifNeedSetCurrentWindow_) {
         SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
     }
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(window_->GetWindowName(), "onPageChange");
+#endif
 }
 
 void SubwindowOhos::HideWindow()
@@ -970,7 +972,9 @@ void SubwindowOhos::HideWindow()
     event.windowId = context->GetWindowId();
     event.windowChangeTypes = WINDOW_UPDATE_REMOVED;
     context->SendEventToAccessibility(event);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(window_->GetWindowName(), "onPageChange");
+#endif
 }
 
 void SubwindowOhos::ContainerModalUnFocus()

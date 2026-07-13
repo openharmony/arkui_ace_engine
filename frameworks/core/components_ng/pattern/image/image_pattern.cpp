@@ -473,6 +473,7 @@ void ImagePattern::ReportCompleteLoadEvent(const RefPtr<FrameNode>& host)
     if (imageDfxConfig_.GetSrcType() != static_cast<int32_t>(SrcType::NETWORK) && !(image_->GetPixelMap())) {
         return;
     }
+#ifndef CROSS_PLATFORM
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
@@ -482,6 +483,7 @@ void ImagePattern::ReportCompleteLoadEvent(const RefPtr<FrameNode>& host)
     auto reportImageType =
         imageDfxConfig_.GetSrcType() == static_cast<int32_t>(SrcType::NETWORK) ? "network" : "pixelmap";
     mgr->OnImageChangeEnd(WeakPtr(host), reportImageType, rootNode->GetRectWithRender());
+#endif
 }
 
 void ImagePattern::OnImageLoadSuccess()
@@ -2898,6 +2900,7 @@ void ImagePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 
 void ImagePattern::AddPixelMapToUiManager()
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(image_);
     auto pixmap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixmap);
@@ -2906,6 +2909,7 @@ void ImagePattern::AddPixelMapToUiManager()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddPixelMap(host->GetId(), pixmap);
+#endif
 }
 
 FocusPattern ImagePattern::GetFocusPattern() const

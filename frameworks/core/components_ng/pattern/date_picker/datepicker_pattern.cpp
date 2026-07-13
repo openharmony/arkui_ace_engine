@@ -1289,6 +1289,7 @@ void DatePickerPattern::FlushMonthDaysColumn()
 bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string& compName,
     const std::string& eventName, const std::string& eventData)
 {
+#ifndef CROSS_PLATFORM
     auto dataJson = JsonUtil::ParseJsonString(eventData);
     CHECK_NULL_RETURN(dataJson, false);
     auto params = InspectorJsonUtil::CreateObject();
@@ -1303,6 +1304,7 @@ bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string&
     value->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 
@@ -1316,7 +1318,7 @@ bool DatePickerPattern::ReportDialogDateChangeEvent(int32_t nodeId, const std::s
         !dataJson->Contains("hour") || !dataJson->Contains("minute")) {
         return false;
     }
-
+#ifndef CROSS_PLATFORM
     auto params = InspectorJsonUtil::CreateObject();
     CHECK_NULL_RETURN(params, false);
     params->Put("year", static_cast<int32_t>(dataJson->GetUInt("year")));
@@ -1332,6 +1334,7 @@ bool DatePickerPattern::ReportDialogDateChangeEvent(int32_t nodeId, const std::s
     value->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 
@@ -3542,6 +3545,7 @@ bool DatePickerPattern::IsJsonObject(const std::unique_ptr<JsonValue>& json)
 bool DatePickerPattern::ReportCommandResult(int32_t nodeId, const std::string& event,
     const std::string& result, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     auto value = InspectorJsonUtil::Create();
     CHECK_NULL_RETURN(value, false);
     value->Put("event", event.c_str());
@@ -3552,6 +3556,7 @@ bool DatePickerPattern::ReportCommandResult(int32_t nodeId, const std::string& e
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "DatePickerResult", value,
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 

@@ -2793,8 +2793,10 @@ bool TimePickerRowPattern::ReportTimeChangeEvent(int32_t nodeId, const std::stri
     }
     value->Put("params", params);
 
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 
@@ -2809,8 +2811,10 @@ bool TimePickerRowPattern::ReportCommandResult(int32_t nodeId, const std::string
         value->Put("reason", reason.c_str());
     }
 
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "TimePickerResult", value,
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 } // namespace OHOS::Ace::NG

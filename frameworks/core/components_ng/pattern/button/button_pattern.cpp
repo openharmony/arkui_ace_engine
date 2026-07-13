@@ -841,7 +841,9 @@ void ButtonPattern::OnAfterModifyDone()
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
         auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
+#ifndef CROSS_PLATFORM
         Recorder::NodeDataCache::Get().PutString(host, inspectorId, text);
+#endif
     }
 }
 
@@ -888,6 +890,7 @@ int32_t ButtonPattern::OnInjectionEvent(const std::string& command)
 
 void ButtonPattern::ReportButtonClickResult()
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto buttonResult = JsonUtil::Create();
@@ -905,6 +908,7 @@ void ButtonPattern::ReportButtonClickResult()
     auto manager = UiSessionManager::GetInstance();
     CHECK_NULL_VOID(manager);
     manager->ReportComponentChangeEvent("buttonClick", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 void ButtonPattern::InitHoverEvent()

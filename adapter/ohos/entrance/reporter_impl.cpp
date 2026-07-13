@@ -38,6 +38,7 @@ Reporter& Reporter::GetInstance()
 
 void ReporterImpl::HandleUISessionReporting(const JsonReport& report) const
 {
+#ifndef CROSS_PLATFORM
     auto value = report.GetJsonData();
     CHECK_NULL_VOID(value);
     if (value->IsNull()) {
@@ -47,6 +48,7 @@ void ReporterImpl::HandleUISessionReporting(const JsonReport& report) const
         AceLogTag::ACE_GESTURE, "UISession JsonString " SEC_PLD("%{public}s"), SEC_PARAM(value->ToString().c_str()));
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(report.GetId(), "event", value,
         ComponentEventType::COMPONENT_EVENT_GESTURE);
+#endif
 }
 
 static const std::unordered_map<TouchType, std::string> TOUCH_TYPE_CONVERT_MAP {

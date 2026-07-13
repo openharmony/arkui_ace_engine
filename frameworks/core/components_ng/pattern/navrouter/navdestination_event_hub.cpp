@@ -86,7 +86,9 @@ void NavDestinationEventHub::FireOnShownEvent(
     state_= NavDestinationState::ON_SHOWN;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_SHOWN);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(navDestination->GetNavDestinationPathInfo(), "onPageShow");
+#endif
     if (onShownEvent_) {
         auto onShownEvent = onShownEvent_;
         onShownEvent(static_cast<int32_t>(reason));
@@ -94,6 +96,7 @@ void NavDestinationEventHub::FireOnShownEvent(
     if (!onHiddenChange_.empty()) {
         FireOnHiddenChange(true);
     }
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         auto host = GetFrameNode();
         CHECK_NULL_VOID(host);
@@ -106,6 +109,7 @@ void NavDestinationEventHub::FireOnShownEvent(
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnNavDstShow(std::move(builder));
     }
+#endif
     auto host = GetFrameNode();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -127,13 +131,16 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name, NavDestV
     state_ = NavDestinationState::ON_HIDDEN;
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
         NavDestinationState::ON_HIDDEN);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(navDestination->GetNavDestinationPathInfo(), "onPageHide");
+#endif
     if (onHiddenEvent_) {
         onHiddenEvent_(static_cast<int32_t>(reason));
     }
     if (!onHiddenChange_.empty()) {
         FireOnHiddenChange(false);
     }
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         auto host = GetFrameNode();
         CHECK_NULL_VOID(host);
@@ -142,6 +149,7 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name, NavDestV
         builder.SetId(id).SetNavDst(name).SetHost(host).SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder));
     }
+#endif
     FireOnSaveState();
 }
 
@@ -259,8 +267,10 @@ bool NavDestinationEventHub::FireOnBackPressedEvent()
 {
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
     CHECK_NULL_RETURN(navDestination, false);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(navDestination->GetNavDestinationPathInfo(),
         "onBackPressed");
+#endif
     if (onBackPressedEvent_) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination backButton press is happening.");
         return onBackPressedEvent_();

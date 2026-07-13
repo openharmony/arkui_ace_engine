@@ -699,6 +699,7 @@ void JSViewContext::JSAnimateToImmediately(const JSCallbackInfo& info)
 
 void RecordAnimationFinished(int32_t count)
 {
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_ANIMATION)) {
         Recorder::EventParamsBuilder builder;
         builder.SetEventCategory(Recorder::EventCategory::CATEGORY_ANIMATION)
@@ -706,6 +707,7 @@ void RecordAnimationFinished(int32_t count)
             .SetExtra(Recorder::KEY_COUNT, std::to_string(count));
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
 }
 
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
