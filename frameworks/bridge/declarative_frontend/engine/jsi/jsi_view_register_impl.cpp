@@ -149,9 +149,8 @@
 #include "bridge/declarative_frontend/jsview/js_piece.h"
 #if defined(PLAYER_FRAMEWORK_EXISTS)
 #ifdef VIDEO_SUPPORTED
-#include "bridge/declarative_frontend/jsview/js_video.h"
-#include "bridge/declarative_frontend/jsview/js_video_controller.h"
-#include "bridge/declarative_frontend/jsview/js_video_controller_async.h"
+#include "bridge/declarative_frontend/jsview/js_video_controller_async_binding.h"
+#include "bridge/declarative_frontend/jsview/js_video_controller_binding.h"
 #endif
 #endif
 #endif
@@ -199,7 +198,6 @@
 #endif
 
 namespace OHOS::Ace::Framework {
-
 
 void CleanPageNode(const RefPtr<NG::FrameNode>& pageNode)
 {
@@ -554,11 +552,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #ifndef WEARABLE_PRODUCT
     { "Piece", JSPiece::JSBind },
-#if defined(PLAYER_FRAMEWORK_EXISTS)
-#ifdef VIDEO_SUPPORTED
-    { "Video", JSVideo::JSBind },
-#endif
-#endif
 #endif
 #if defined(XCOMPONENT_SUPPORTED)
     { "XComponentController", JSXComponentControllerBinding::JSBind },
@@ -593,11 +586,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Matrix2D", JSMatrix2d::JSBind },
     { "CanvasPattern", JSCanvasPattern::JSBind },
     { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
-#if defined(PLAYER_FRAMEWORK_EXISTS)
-#ifdef VIDEO_SUPPORTED
-    { "VideoController", JSVideoController::JSBind },
-    { "VideoControllerAsync", JSVideoControllerAsync::JSBind },
-#endif
+#if !defined(WEARABLE_PRODUCT) && defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
+    { "VideoControllerAsync", JSVideoControllerAsyncBinding::JSBind },
+    { "VideoController", JSVideoControllerBinding::JSBind },
 #endif
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockControllerBinding::JSBind },
@@ -623,9 +614,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
-#if defined(PLAYER_FRAMEWORK_EXISTS)
-    { "Video", JSVideo::JSBind },
-    { "VideoController", JSVideoController::JSBind },
+#if !defined(WEARABLE_PRODUCT) && defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
+    { "VideoControllerAsync", JSVideoControllerAsyncBinding::JSBind },
+    { "VideoController", JSVideoControllerBinding::JSBind },
 #endif
     { "PluginComponent", JSPlugin::JSBind },
     { "SecurityUIExtensionComponent", JSSecurityUIExtension::JSBind },
@@ -726,11 +717,9 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponentController::JSBind(globalObj);
 #endif
-#if defined(PLAYER_FRAMEWORK_EXISTS)
-#ifdef VIDEO_SUPPORTED
-    JSVideoController::JSBind(globalObj);
-    JSVideoControllerAsync::JSBind(globalObj);
-#endif
+#if !defined(WEARABLE_PRODUCT) && defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
+    JSVideoControllerAsyncBinding::JSBind(globalObj);
+    JSVideoControllerBinding::JSBind(globalObj);
 #endif
     JSTextInputController::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);
@@ -808,6 +797,13 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
         JSTextTimerController::JSBind(globalObj);
         return;
     }
+#if !defined(WEARABLE_PRODUCT) && defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
+    if (module == "Video") {
+        JSVideoControllerAsyncBinding::JSBind(globalObj);
+        JSVideoControllerBinding::JSBind(globalObj);
+        return;
+    }
+#endif
     auto func = bindFuncs.find(module);
     if (func == bindFuncs.end()) {
         RegisterExtraViewByName(globalObj, module);
@@ -830,6 +826,13 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
 
 void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 {
+#if !defined(WEARABLE_PRODUCT) && defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
+    if (moduleName == "Video") {
+        JSVideoControllerAsyncBinding::JSBind(globalObj);
+        JSVideoControllerBinding::JSBind(globalObj);
+        return;
+    }
+#endif
     auto func = bindFuncs.find(moduleName);
     if (func == bindFuncs.end()) {
         RegisterExtraViewByName(globalObj, moduleName);
@@ -852,13 +855,6 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     } else if ((*func).first == "AbilityComponent") {
 #ifdef ABILITY_COMPONENT_SUPPORTED
         JSAbilityComponentController::JSBind(globalObj);
-#endif
-    } else if ((*func).first == "Video") {
-#if defined(PLAYER_FRAMEWORK_EXISTS)
-#ifdef VIDEO_SUPPORTED
-        JSVideoController::JSBind(globalObj);
-        JSVideoControllerAsync::JSBind(globalObj);
-#endif
 #endif
     } else if ((*func).first == "Grid") {
         JSColumn::JSBind(globalObj);

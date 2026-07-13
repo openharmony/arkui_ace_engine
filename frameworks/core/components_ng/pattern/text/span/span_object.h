@@ -386,7 +386,7 @@ private:
     ImageSpanOptions imageOptions_;
 };
 
-class CustomSpan : public SpanBase {
+class ACE_FORCE_EXPORT CustomSpan : public SpanBase {
     DECLARE_ACE_TYPE(CustomSpan, SpanBase);
 
 public:
@@ -547,7 +547,7 @@ private:
     bool halfLeading_;
 };
 
-class ExtSpan : public SpanBase {
+class ACE_FORCE_EXPORT ExtSpan : public SpanBase {
     DECLARE_ACE_TYPE(ExtSpan, SpanBase);
 
 public:

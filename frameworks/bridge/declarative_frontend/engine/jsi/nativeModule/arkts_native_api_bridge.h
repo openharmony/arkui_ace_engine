@@ -32,7 +32,7 @@ using panda::Local;
 using panda::ecmascript::EcmaVM;
 class ArkUINativeModule {
 public:
-    static ArkUINativeModuleValue PreviewMockComponent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    ACE_FORCE_EXPORT static ArkUINativeModuleValue PreviewMockComponent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetFrameNodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetPageInfoByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -77,7 +77,6 @@ private:
 #ifdef WINDOW_SCENE_SUPPORTED
     static void RegisterEmbeddedComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 #endif
-    static void RegisterVideoAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterContainerPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGlobalMethods(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNativeUtils(Local<panda::ObjectRef> object, EcmaVM* vm);

@@ -44,7 +44,6 @@ class VideoStateMachinePattern : public Pattern {
     DECLARE_ACE_TYPE(VideoStateMachinePattern, Pattern);
     friend class VideoStateManager;
     friend class VideoStateMachineFullScreenPattern;
-    friend class ::OHOS::Ace::VideoControllerAsync;
 
 public:
     using HiddenChangeEvent = std::function<void(bool)>;
@@ -163,6 +162,11 @@ public:
     bool GetInitialState() const
     {
         return isInitialState_;
+    }
+
+    bool OnBackPressedCallback() override
+    {
+        return OnBackPressed();
     }
 
     virtual bool OnBackPressed()
@@ -414,6 +418,8 @@ private:
     void ReportChangeEventOnUIThread(PlaybackStatus status, double playbackSpeed, uint32_t currentPos);
     void ReportCommandResultOnUIThread(
         const std::string& event, const std::string& result, const std::string& reason = "");
+    void BindControllerAsync();
+    void ClearControllerAsync();
 
     std::string GetDumpInfo();
     void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
@@ -500,6 +506,7 @@ private:
     std::mutex serialBgQueueMutex_;
     std::queue<SerialBgTask> serialBgTaskQueue_;
     bool isDrainingSerialBgQueue_ = false;
+    bool ownsControllerAsyncBinding_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoStateMachinePattern);
 };

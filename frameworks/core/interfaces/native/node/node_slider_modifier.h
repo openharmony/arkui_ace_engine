@@ -16,12 +16,13 @@
 #ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SLIDER_MODIFIER_H
 #define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SLIDER_MODIFIER_H
 
+#include "base/utils/macros.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "frameworks/core/components_ng/pattern/slider/bridge/slider_custom_modifier.h"
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISliderModifier* GetSliderModifier();
 const CJUISliderModifier* GetCJUISliderModifier();
-const ArkUISliderCustomModifier* GetSliderCustomModifier();
+ACE_FORCE_EXPORT const ArkUISliderCustomModifier* GetSliderCustomModifier();
 void SetSliderChange(ArkUINodeHandle node, void* extraParam);
 }
 #endif
