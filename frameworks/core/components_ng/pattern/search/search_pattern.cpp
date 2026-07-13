@@ -27,7 +27,9 @@
 #include "base/geometry/rect.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components/search/search_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -623,7 +625,9 @@ void SearchPattern::OnAfterModifyDone()
         auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
         CHECK_NULL_VOID(textFieldPattern);
         auto text = textFieldPattern->GetTextValue();
+#ifndef CROSS_PLATFORM
         Recorder::NodeDataCache::Get().PutString(host, inspectorId, text);
+#endif
     }
 }
 
@@ -843,8 +847,10 @@ void SearchPattern::OnClickButtonAndImage()
     if (!event.IsKeepEditable()) {
         textFieldPattern->StopEditing();
     }
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit",
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
     TAG_LOGI(AceLogTag::ACE_SEARCH, "nodeId:[%{public}d] Search reportComponentChangeEvent onSubmit", host->GetId());
 }
 

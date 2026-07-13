@@ -391,8 +391,10 @@ ArkUINativeModuleValue RefreshBridge::SetOnStateChange(ArkUIRuntimeCallInfo* run
         auto result = func->Call(vm, func.ToLocal(), params, NUM_1);
         if (isJsView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->ReportComponentChangeEvent(
                 "event", "Refresh.OnStateChange", ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
         }
     };
     GetArkUINodeModifiers()->getRefreshModifier()->setRefreshOnStateChangeCallback(

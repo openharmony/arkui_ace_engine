@@ -489,7 +489,9 @@ void ToggleButtonPattern::OnAfterModifyDone()
     CHECK_NULL_VOID(host);
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
+#ifndef CROSS_PLATFORM
         Recorder::NodeDataCache::Get().PutBool(host, inspectorId, isOn_.value_or(false));
+#endif
     }
 }
 
@@ -931,6 +933,7 @@ int32_t ToggleButtonPattern::OnInjectionEvent(const std::string& command)
 
 void ToggleButtonPattern::ReportChangeEvent(bool isOn)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
@@ -944,10 +947,12 @@ void ToggleButtonPattern::ReportChangeEvent(bool isOn)
     json->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 bool ToggleButtonPattern::ReportInjectionResult(bool isSuccess, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto nodeId = host->GetId();
@@ -960,6 +965,7 @@ bool ToggleButtonPattern::ReportInjectionResult(bool isSuccess, const std::strin
     result->Put("reason", reason.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "ToggleResult", result->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
     return true;
 }
 } // namespace OHOS::Ace::NG

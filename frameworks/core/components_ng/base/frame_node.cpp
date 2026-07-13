@@ -79,9 +79,11 @@
 #include "core/common/container.h"
 #include "core/common/event_manager.h"
 #include "core/common/premake_scope.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/gestures/gesture_info.h"
@@ -3462,7 +3464,7 @@ void FrameNode::MarkModifyDone()
         eventHub_->MarkModifyDone();
     }
     renderContext_->OnModifyDone();
-#if (defined(__aarch64__) || defined(__x86_64__))
+#if !defined(CROSS_PLATFORM) && (defined(__aarch64__) || defined(__x86_64__))
     if (Recorder::IsCacheAvaliable()) {
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
@@ -6893,6 +6895,7 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
     if (parent && parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
         if (exposureProcessor_) {
             return;
@@ -6910,10 +6913,12 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
             host->RecordExposureInner();
         });
     }
+#endif
 }
 
 void FrameNode::OnAutoEventParamUpdate(const std::string& value)
 {
+#ifndef CROSS_PLATFORM
     if (value.empty()) {
         return;
     }
@@ -6954,8 +6959,10 @@ void FrameNode::OnAutoEventParamUpdate(const std::string& value)
             host->RecordExposureInner();
         });
     }
+#endif
 }
 
+#ifndef CROSS_PLATFORM
 void FrameNode::SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor)
 {
     if (exposureProcessor_ && exposureProcessor_->isListening()) {
@@ -6994,6 +7001,7 @@ void FrameNode::RecordExposureInner()
     pipeline->AddVisibleAreaChangeNode(Claim(this), ratios, callback, false, true);
     exposureProcessor_->SetListenState(true);
 }
+#endif
 
 void FrameNode::AddFrameNodeSnapshot(
     bool isHit, int32_t parentId, const std::vector<RectF>& responseRegionList, EventTreeType type)
@@ -8943,6 +8951,7 @@ bool FrameNode::IsPreMakeAndScroll()
     if (IsActive() || !HasPreMake()) {
         return false;
     }
+#ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto contentChangeMgr = pipeline->GetContentChangeManager();
@@ -8950,6 +8959,7 @@ bool FrameNode::IsPreMakeAndScroll()
     if (contentChangeMgr->IsSwiperScrolling() || contentChangeMgr->IsScrolling()) {
         return true;
     }
+#endif
     return false;
 }
 

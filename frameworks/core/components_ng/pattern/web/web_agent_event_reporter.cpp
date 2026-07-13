@@ -323,8 +323,10 @@ void WebAgentEventReporter::ReportEventImediately(const std::shared_ptr<JsonValu
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", eventJson->ToString(),
         ComponentEventType::COMPONENT_EVENT_WEB);
+#endif
 }
 
 void WebAgentEventReporter::AIPostTask(

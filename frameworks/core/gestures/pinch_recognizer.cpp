@@ -28,7 +28,9 @@ constexpr int32_t AXIS_PINCH_FINGERS = 2;
 
 void PinchRecognizer::OnAccepted()
 {
+#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("click");
+#endif
     SendCallbackMsg(onActionStart_);
 
     if (pendingEnd_) {

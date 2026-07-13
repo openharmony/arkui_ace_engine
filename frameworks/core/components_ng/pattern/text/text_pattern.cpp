@@ -38,7 +38,9 @@
 #include "core/common/container_scope.h"
 #include "core/common/clipboard/clipboard_proxy.h"
 #include "core/common/font_manager.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
@@ -1663,11 +1665,13 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
 
 bool TextPattern::ReportCommandResult(int32_t nodeId, const std::string& event)
 {
+#ifndef CROSS_PLATFORM
     auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put("event", event.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
     return true;
 }
 
@@ -1726,6 +1730,7 @@ int32_t TextPattern::OnInjectionEvent(const std::string& command)
 void TextPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr,
     const std::string& value, int32_t start, int32_t end)
 {
+#ifndef CROSS_PLATFORM
     auto json = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(json);
     json->Put("event", dataStr.c_str());
@@ -1734,6 +1739,7 @@ void TextPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& 
     json->Put("end", end);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
 }
 
 RefPtr<RenderContext> TextPattern::GetRenderContext()
@@ -3402,6 +3408,7 @@ void TextPattern::HandleMouseLeftReleaseForContainer(
 
 void TextPattern::ContentChangeByDetaching(PipelineContext* context)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(context);
     auto contentChangeManager = context->GetContentChangeManager();
     CHECK_NULL_VOID(contentChangeManager);
@@ -3414,6 +3421,7 @@ void TextPattern::ContentChangeByDetaching(PipelineContext* context)
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
     contentChangeManager->OnTextChangeEnd(rect, rootNode->GetRectWithRender());
+#endif
 }
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
@@ -5098,7 +5106,9 @@ void TextPattern::OnAfterModifyDone()
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
         auto prop = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+#ifndef CROSS_PLATFORM
         Recorder::NodeDataCache::Get().PutString(host, inspectorId, prop->GetText());
+#endif
     }
 }
 
@@ -5390,7 +5400,9 @@ void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
             if (item->inspectId.empty()) {
                 continue;
             }
+#ifndef CROSS_PLATFORM
             Recorder::NodeDataCache::Get().PutString(host, item->inspectId, UtfUtils::Str16DebugToStr8(item->content));
+#endif
         }
         ResetAfterTextChange();
     }
@@ -8199,6 +8211,7 @@ void TextPattern::ReportSelectedText(bool isRegister)
     } else {
         textSelector_.lastReportSelectionText_ = "";
     }
+#ifndef CROSS_PLATFORM
     if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
@@ -8216,8 +8229,11 @@ void TextPattern::ReportSelectedText(bool isRegister)
             UiSessionManager::GetInstance()->ReportSelectTextEvent(res);
         }
     } else {
+#endif
         textSelector_.lastReportContent_ = "";
+#ifndef CROSS_PLATFORM
     }
+#endif
 }
 
 Offset TextPattern::ConvertLocalOffsetToParagraphOffset(const Offset& offset)

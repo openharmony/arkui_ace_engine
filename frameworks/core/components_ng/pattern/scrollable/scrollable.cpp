@@ -117,7 +117,9 @@ Scrollable::~Scrollable()
 {
     // If animation still runs, force stop it.
     if (!IsStopped()) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
+#endif
         AceAsyncTraceEndCommercial(0, (TRAILING_ANIMATION + std::to_string(nodeId_) + std::string(" ") +
             nodeTag_).c_str());
         if (!context_.Invalid()) {
@@ -1827,7 +1829,9 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
             scroll->frictionVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
             if (NearZero(scroll->frictionVelocity_, FRICTION_VELOCITY_THRESHOLD)) {
                 scroll->StopFrictionAnimation();
+#ifndef CROSS_PLATFORM
                 ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
             }
         }
         scroll->lastVsyncTime_ = currentVsync;

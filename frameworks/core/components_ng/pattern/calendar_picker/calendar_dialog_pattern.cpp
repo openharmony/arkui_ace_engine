@@ -1733,6 +1733,7 @@ int32_t CalendarDialogPattern::OnInjectionEvent(const std::string& command)
 bool CalendarDialogPattern::ReportCommandResultEvent(int32_t nodeId, const std::string& event,
     bool isSuccess, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
 
@@ -1746,6 +1747,7 @@ bool CalendarDialogPattern::ReportCommandResultEvent(int32_t nodeId, const std::
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "CalendarPickerDialogResult", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 

@@ -3682,9 +3682,11 @@ void DragDropManager::ReportOnItemDropEvent(
     DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY)
 {
     CHECK_NULL_VOID(dragFrameNode);
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
+#endif
     auto windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
     auto windowX = PipelineBase::Px2VpWithCurrentDensity(dragStartPoint_.GetX() * windowScale);
     auto windowY = PipelineBase::Px2VpWithCurrentDensity(dragStartPoint_.GetY() * windowScale);
@@ -3718,7 +3720,9 @@ void DragDropManager::ReportOnItemDropEvent(
     auto result = JsonUtil::Create();
     CHECK_NULL_VOID(result);
     result->Put("result", json);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 } // namespace OHOS::Ace::NG

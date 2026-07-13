@@ -3181,6 +3181,7 @@ int32_t VideoStateMachinePattern::OnInjectionEvent(const std::string& command)
 
 void VideoStateMachinePattern::ReportChangeEvent(PlaybackStatus status, double playbackSpeed, uint32_t currentPos)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()) {
         return;
     }
@@ -3218,10 +3219,12 @@ void VideoStateMachinePattern::ReportChangeEvent(PlaybackStatus status, double p
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString(),
         ComponentEventType::COMPONENT_EVENT_VIDEO);
+#endif
 }
 
 void VideoStateMachinePattern::ReportCommandResult(const std::string& event, const std::string& result, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()) {
         return;
     }
@@ -3246,6 +3249,7 @@ void VideoStateMachinePattern::ReportCommandResult(const std::string& event, con
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", videoResult->ToString(),
         ComponentEventType::COMPONENT_EVENT_VIDEO);
+#endif
 }
 
 void VideoStateMachinePattern::SetContentTransition(ContentTransitionType contentTransition)

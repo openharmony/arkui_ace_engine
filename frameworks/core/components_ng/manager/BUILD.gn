@@ -69,13 +69,18 @@ build_component_ng("manager_ng") {
     "shared_overlay/shared_overlay_manager.cpp",
     "shared_overlay/shared_transition_effect.cpp",
     "toolbar/toolbar_manager.cpp",
-    "content_change_manager/content_change_manager.cpp",
   ]
 
   inspector_event_reporting_sources = [
     "event/json_child_report.cpp",
     "drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.cpp",
   ]
+
+  if(!is_arkui_x){
+    sources += [
+        "content_change_manager/content_change_manager.cpp",
+    ]
+  }
 
   gesture_debug_sources = [ "gesture_debug/gesture_debug_boundary_manager.cpp" ]
 

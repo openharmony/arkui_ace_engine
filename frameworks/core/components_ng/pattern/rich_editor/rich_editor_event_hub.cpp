@@ -604,8 +604,10 @@ void RichEditorEventHub::FireOnDeleteComplete()
 {
     if (onDeleteComplete_) {
         onDeleteComplete_();
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "RichEditor.onDeleteComplete",
             ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
     }
 }
 

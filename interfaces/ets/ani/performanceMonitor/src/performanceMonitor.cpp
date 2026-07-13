@@ -67,11 +67,13 @@ static void Begin([[maybe_unused]] ani_env *env, ani_string scene, ani_enum_item
         return;
     }
 
+#ifndef CROSS_PLATFORM
     OHOS::Ace::PerfMonitor* pMonitor = nullptr;
     pMonitor = OHOS::Ace::PerfMonitor::GetPerfMonitor();
     if (pMonitor != nullptr) {
         pMonitor->Start(sceneId, static_cast<OHOS::Ace::PerfActionType>(intValue), noteStr);
     }
+#endif
 }
 
 static void End([[maybe_unused]] ani_env *env, ani_string scene)
@@ -91,11 +93,13 @@ static void End([[maybe_unused]] ani_env *env, ani_string scene)
         return;
     }
 
+#ifndef CROSS_PLATFORM
     OHOS::Ace::PerfMonitor* pMonitor = nullptr;
     pMonitor = OHOS::Ace::PerfMonitor::GetPerfMonitor();
     if (pMonitor != nullptr) {
         pMonitor->End(sceneId, true);
     }
+#endif
 }
 
 static void RecordInputEventTime([[maybe_unused]] ani_env* env,
@@ -118,12 +122,14 @@ static void RecordInputEventTime([[maybe_unused]] ani_env* env,
     }
     int64_t timeValue = static_cast<int64_t>(time);
 
+#ifndef CROSS_PLATFORM
     OHOS::Ace::PerfMonitor* pMonitor = nullptr;
     pMonitor = OHOS::Ace::PerfMonitor::GetPerfMonitor();
     if (pMonitor != nullptr) {
         pMonitor->RecordInputEvent(static_cast<OHOS::Ace::PerfActionType>(intTypeValue),
             static_cast<OHOS::Ace::PerfSourceType>(intSourceTypeValue), timeValue);
     }
+#endif
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm *vm, uint32_t *result)

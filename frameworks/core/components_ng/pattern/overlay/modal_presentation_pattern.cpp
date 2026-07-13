@@ -134,6 +134,7 @@ void ModalPresentationPattern::OnAppear()
     if (onAppear_) {
         onAppear_();
     }
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "ModalPresentation.onAppear",
         ComponentEventType::COMPONENT_EVENT_MODAL_PRESENTATION);
     auto pipeline = GetContext();
@@ -141,6 +142,7 @@ void ModalPresentationPattern::OnAppear()
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnDialogChangeEnd(GetHost(), true);
+#endif
 }
 
 void ModalPresentationPattern::OnDisappear()
@@ -150,6 +152,7 @@ void ModalPresentationPattern::OnDisappear()
         isExecuteOnDisappear_ = true;
         onDisappear_();
     }
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "ModalPresentation.onDisappear",
         ComponentEventType::COMPONENT_EVENT_MODAL_PRESENTATION);
     auto pipeline = GetContext();
@@ -157,6 +160,7 @@ void ModalPresentationPattern::OnDisappear()
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnDialogChangeEnd(GetHost(), false);
+#endif
 }
 
 int32_t ModalPresentationPattern::ParseCommand(const std::string& command, std::string& comValue)
@@ -216,6 +220,7 @@ void ModalPresentationPattern::HandleModalSheetEvent(const std::string cmd)
 
 void ModalPresentationPattern::ReportCloseContentCoverResult(std::string result, std::string reason, std::string event)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto id = host->GetId();
@@ -231,5 +236,6 @@ void ModalPresentationPattern::ReportCloseContentCoverResult(std::string result,
     json->Put(eventResult.c_str(), params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_MODAL_PRESENTATION);
+#endif
 }
 } // namespace OHOS::Ace::NG
