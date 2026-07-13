@@ -63,6 +63,7 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mo
              * 1 -> 2 or 1 -> 3, but mode did not change
              */
             OnForceSplitEnableChange();
+            NotifyMediaQueryUpdate();
             return;
         }
         // 1 -> 2 or 1 -> 3, and mode did change
