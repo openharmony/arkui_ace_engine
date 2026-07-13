@@ -4053,18 +4053,17 @@ napi_value ArkTSUtils::CreateNapiValue(const EcmaVM* vm, const Local<JSValueRef>
     return nativeEngine->ValueToNapiValue(valueWrapper);
 }
 
-void ArkTSUtils::CreateDrawingRenderingContext(void** outJsHandle, void** outCppPtr)
+Local<panda::ObjectRef> ArkTSUtils::CreateDrawingRenderingContext(
+    Framework::JSRenderingContextBase** outCppPtr)
 {
     auto jsDrawingContext = Framework::JSClass<Framework::JSDrawingRenderingContext>::NewInstance();
     auto drawingContext = Referenced::Claim(
         jsDrawingContext->Unwrap<Framework::JSDrawingRenderingContext>());
     drawingContext->SetBuiltIn(true);
-    if (outJsHandle) {
-        *outJsHandle = reinterpret_cast<void*>(*jsDrawingContext->GetLocalHandle());
-    }
     if (outCppPtr) {
         *outCppPtr = AceType::RawPtr(drawingContext);
     }
+    return jsDrawingContext->GetLocalHandle();
 }
 
 void* ArkTSUtils::UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj)
