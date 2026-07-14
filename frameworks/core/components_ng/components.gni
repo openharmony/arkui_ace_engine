@@ -271,6 +271,12 @@ template("build_component_ng") {
           defined(invoker.image_analyzer_sources)) {
         sources += invoker.image_analyzer_sources
       }
+
+      if (defined(config.enable_inspector_event_reporting) &&
+          config.enable_inspector_event_reporting &&
+          defined(invoker.inspector_event_reporting_sources)) {
+        sources += invoker.inspector_event_reporting_sources
+      }
     }
   }
 

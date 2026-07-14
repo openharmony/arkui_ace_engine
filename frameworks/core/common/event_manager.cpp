@@ -355,6 +355,7 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
         touchPoint.touchEventId, resultInfo.c_str());
     if (touchTestResultInfo.empty()) {
         TAG_LOGW(AceLogTag::ACE_INPUTKEYFLOW, "Touch test result is empty.");
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         int32_t dumpCount = 0;
@@ -369,6 +370,7 @@ void EventManager::LogTouchTestResultInfo(const TouchEvent& touchPoint, const Re
                 SEC_PARAM(item.second.c_str()));
         }
         RecordHitEmptyMessage(touchPoint, resultInfo, frameNode);
+#endif
     }
 }
 
@@ -388,7 +390,7 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
     }
     if (duration >= EVENT_CLEAR_DURATION && !currentReferee->IsReady()) {
         TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "GestureReferee is not ready, force clean gestureReferee.");
-#ifndef IS_RELEASE_VERSION
+#if !defined(IS_RELEASE_VERSION) && defined(ENABLE_INSPECTOR_EVENT_REPORTING)
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
@@ -396,7 +398,9 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
                 SEC_PARAM(item.second.c_str()));
         }
 #endif
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         eventTree_.eventTreeList.clear();
+#endif
         FalsifyCancelEventAndDispatch(touchPoint);
         currentReferee->ForceCleanGestureReferee();
         responseCtrl_->Reset();
@@ -435,6 +439,7 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
     }
 }
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void EventManager::RecordHitEmptyMessage(
     const TouchEvent& touchPoint, const std::string& resultInfo, const RefPtr<NG::FrameNode>& frameNode)
 {
@@ -467,6 +472,7 @@ void EventManager::RecordHitEmptyMessage(
     }
     XcollieInterface::GetInstance().TriggerTimerCount("HIT_EMPTY_WARNING", true, hitEmptyMessage->ToString());
 }
+#endif
 
 void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, int32_t touchEventId)
 {
@@ -506,11 +512,13 @@ void EventManager::LogTouchTestResultRecognizers(const TouchTestResult& result, 
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "%{public}s", hittedRecognizerTypeInfo.c_str());
     if (hittedRecognizerInfo.empty() && !SystemProperties::GetAceCommercialLogEnabled()) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Hitted recognizer info is empty.");
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0, DUMP_START_NUMBER);
         for (auto& item : dumpList) {
             TAG_LOGD(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
         }
+#endif
     }
 }
 
@@ -1124,6 +1132,7 @@ bool EventManager::DispatchMultiContainerEvent(const TouchEvent& point)
     return dispatchSuccess;
 }
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 bool EventManager::CheckTouchInfoDump()
 {
     NG::EventTouchInfoRecord& eventTouchInfoRecord = GetEventTouchInfoRecord();
@@ -1180,10 +1189,24 @@ void EventManager::AddDumpTouchInfo(const TouchEvent& event)
         );
     }
 }
+#endif
+
+void EventManager::ProcessTouchEventDownPhase(const TouchEvent& point, const TouchTestResult& targets,
+    const RefPtr<NG::GestureReferee>& currentReferee, int32_t touchId)
+{
+    currentReferee->CleanGestureRefereeState(touchId);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
+    for (const auto& target : targets) {
+        AddGestureSnapshot(point.id, 0, target, NG::EventTreeType::TOUCH);
+    }
+#endif
+}
 
 bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     AddDumpTouchInfo(event);
+#endif
     if (event.sourceType == SourceType::TOUCH) {
         NG::GestureExtraHandler::NotifiyTouchEvent(event);
     }
@@ -1199,7 +1222,6 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
     ACE_SCOPED_TRACE_COMMERCIAL("DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d",
         point.id, point.x, point.y, (int)point.type);
     lastTouchEvent_ = event;
-
     auto currentReferee = refereeNG_;
     int32_t eventHandleId = event.eventHandleId;
     if (eventHandleId / EVENT_HANDLE > 0) {
@@ -1207,14 +1229,11 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
         CHECK_NULL_RETURN(currentReferee, false);
     }
     if (point.type == TouchType::DOWN) {
-        currentReferee->CleanGestureRefereeState(event.id);
-        // add gesture snapshot to dump
-        for (const auto& target : iter->second) {
-            AddGestureSnapshot(point.id, 0, target, NG::EventTreeType::TOUCH);
-        }
+        ProcessTouchEventDownPhase(point, iter->second, currentReferee, event.id);
     }
-
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     NG::Reporter::GetInstance().HandleInputEventInspectorReporting(point);
+#endif
     bool dispatchSuccess = true;
     dispatchSuccess = DispatchMultiContainerEvent(point);
     // If one gesture recognizer has already been won, other gesture recognizers will still be affected by
@@ -1231,7 +1250,6 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
     }
     DispatchTouchEventInOldPipeline(point, dispatchSuccess);
     NotifyDragTouchEventListener(point);
-
     CheckUpEvent(event);
     auto item = touchTestResults_.find(event.id);
     passThroughResult_ = (item != touchTestResults_.end() && !item->second.empty());
@@ -1516,14 +1534,18 @@ void EventManager::DispatchTouchEventToTouchTestResult(const TouchEvent& touchEv
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
         if (recognizer) {
             entry->HandleMultiContainerEvent(touchEvent);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), touchEvent, "",
                 NG::TransRefereeState(recognizer->GetRefereeState()),
                 NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
+#endif
         }
         if (!recognizer && !isStopTouchEvent && sendOnTouch) {
             isStopTouchEvent = !entry->HandleMultiContainerEvent(touchEvent);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
+#endif
         }
         if (!recognizer && sendOnTouch && !isTriggeredInteractionEvent) {
             isTriggeredInteractionEvent |= entry->HandleInteractionEvent(touchEvent);
@@ -1547,14 +1569,25 @@ void EventManager::DispatchTouchCancelToRecognizer(
         touchEvent.type = TouchType::CANCEL;
         touchEvent.isFalsified = true;
         touchEventTarget->HandleMultiContainerEvent(touchEvent);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(touchEventTarget), "",
             std::string("Handle").append(GestureSnapshot::TransTouchType(touchEvent.type)), "", "");
-
+#endif
         touchTestResults_[item.first].erase(item.second);
         if (touchTestResults_[item.first].empty()) {
             touchTestResults_.erase(item.first);
         }
     }
+}
+
+void EventManager::ProcessPostEventDownPhase(const TouchEvent& point, const TouchTestResult& targets)
+{
+    postEventRefereeNG_->AddGestureToScope(point.id, targets);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
+    for (const auto& target : targets) {
+        AddGestureSnapshot(point.id, 0, target, NG::EventTreeType::POST_EVENT);
+    }
+#endif
 }
 
 bool EventManager::PostEventDispatchTouchEvent(const TouchEvent& event)
@@ -1567,16 +1600,10 @@ bool EventManager::PostEventDispatchTouchEvent(const TouchEvent& event)
     }
     ACE_SCOPED_TRACE(
         "PostEventDispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
-
     if (point.type == TouchType::DOWN) {
         // first collect gesture into gesture referee.
-        postEventRefereeNG_->AddGestureToScope(point.id, iter->second);
-        // add gesture snapshot to dump
-        for (const auto& target : iter->second) {
-            AddGestureSnapshot(point.id, 0, target, NG::EventTreeType::POST_EVENT);
-        }
+        ProcessPostEventDownPhase(point, iter->second);
     }
-
     bool dispatchSuccess = true;
     for (auto entry = iter->second.rbegin(); entry != iter->second.rend(); ++entry) {
         if (!(*entry)->DispatchMultiContainerEvent(point)) {
@@ -1592,18 +1619,21 @@ bool EventManager::PostEventDispatchTouchEvent(const TouchEvent& event)
             auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
             if (recognizer) {
                 entry->HandleMultiContainerEvent(point);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
                 postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point, "",
                     NG::TransRefereeState(recognizer->GetRefereeState()),
                     NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
+#endif
             }
             if (!recognizer && !isStopTouchEvent) {
                 isStopTouchEvent = !entry->HandleMultiContainerEvent(point);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
                 postEventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                     std::string("Handle").append(GestureSnapshot::TransTouchType(point.type)), "", "");
+#endif
             }
         }
     }
-
     if (point.type == TouchType::UP || point.type == TouchType::CANCEL) {
         postEventRefereeNG_->CleanGestureScope(point.id);
         postEventTouchTestResults_.erase(point.id);
@@ -1639,27 +1669,33 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch)
             }
         }
         // add gesture snapshot to dump
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         for (const auto& target : curResultIter->second) {
             AddGestureSnapshot(event.id, 0, target, NG::EventTreeType::TOUCH);
         }
+#endif
     }
 
     ACE_FUNCTION_TRACE_COMMERCIAL();
     for (const auto& entry : curResultIter->second) {
         auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(entry);
         if (!recognizer && !sendOnTouch) {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(entry)), "",
                 std::string("Handle").append(GestureSnapshot::TransAxisType(event.action)), "", "");
+#endif
             continue;
         }
         if (!entry->HandleEvent(event)) {
             break;
         }
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         if (recognizer) {
             eventTree_.AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), event, "",
                 NG::TransRefereeState(recognizer->GetRefereeState()),
                 NG::TransGestureDisposal(recognizer->GetGestureDisposal()));
         }
+#endif
     }
     ProcessRefereeWithAxisEnd(event, currentReferee);
     return true;
@@ -2021,7 +2057,9 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     }
     ACE_SCOPED_TRACE("DispatchMouseEventNG type:%d button:%d", static_cast<int32_t>(event.action),
         static_cast<int32_t>(event.button));
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     NG::Reporter::GetInstance().HandleInputEventInspectorReporting(event);
+#endif
     lastMouseEvent_ = event;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
         return DispatchMouseEventInGreatOrEqualAPI13(event);
@@ -2365,7 +2403,9 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 {
     isNewRefereeMap_[event.id] = event.isNewReferee;
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     NG::Reporter::GetInstance().HandleInputEventInspectorReporting(event);
+#endif
     // when api >= 15, do not block this event.
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
         if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
@@ -2519,6 +2559,7 @@ void EventManager::ClearRectCallbacks()
 
 void EventManager::DumpEvent(NG::EventTreeType type, bool hasJson)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     auto& eventTree = GetEventTreeRecord(type);
     if (hasJson) {
         std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
@@ -2533,6 +2574,7 @@ void EventManager::DumpEvent(NG::EventTreeType type, bool hasJson)
             DumpLog::GetInstance().Print(item.first, item.second);
         }
     }
+#endif
 }
 
 const RefPtr<NG::GestureDebugBoundaryManager>& EventManager::GetGestureDebugBoundaryManager()
@@ -2548,6 +2590,7 @@ const RefPtr<NG::GestureDebugBoundaryManager>& EventManager::GetGestureDebugBoun
 void EventManager::AddGestureSnapshot(
     int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     if (!target) {
         return;
     }
@@ -2575,11 +2618,14 @@ void EventManager::AddGestureSnapshot(
             AddGestureSnapshot(finger, depth + 1, child, type);
         }
     }
+#endif
 }
 
 void EventManager::RecordSmartGestureExecution(NG::SmartGestureExecutionSnapshot&& snapshot)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     eventTree_.AddSmartGestureExecution(std::move(snapshot));
+#endif
 }
 
 void EventManager::SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults)
@@ -3111,6 +3157,7 @@ void EventManager::CheckMousePendingRecognizersState(const TouchEvent& event)
 
 void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG::EventTreeType type, bool hasJson)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     if (params.size() == MIN_PARAM_SIZE) {
         DumpEvent(type, hasJson);
         return;
@@ -3142,9 +3189,11 @@ void EventManager::DumpEventWithCount(const std::vector<std::string>& params, NG
             }
         }
     }
+#endif
 }
 
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void EventManager::DoDumpTouchInfo(bool hasJson)
 {
     CHECK_RUN_ON(UI);
@@ -3184,6 +3233,7 @@ void EventManager::DumpTouchInfo(const std::vector<std::string>& params, bool ha
         }
     }
 }
+#endif
 
 TouchDelegateHdl EventManager::AddTouchDelegate(const int32_t touchId, const RefPtr<NG::TouchDelegate>& delegater)
 {
