@@ -106,14 +106,13 @@ constexpr float EDGELIGHT_THICKNESS = 250.0f;
 constexpr float EDGELIGHT_LENGTH_RATIO = 0.4f;
 constexpr float EDGELIGHT_INTENSITY = 0.5f;
 constexpr float BUTTON_MIN_FONTSIZE = 9.0f;
+constexpr float TRANSLATEY_RATIO = 0.5f;
+constexpr float INITIAL_ZOOM_FACTOR = 0.2f;
 constexpr uint32_t EDGELIGHT_MOVING_TIME = 568;
 constexpr uint32_t HIGHLIGHT_ANIMATION_TIME = 220;
 constexpr uint32_t HIGHLIGHT_ANIMATION_DELAY_TIME = 305;
 constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_TIME = 221;
 constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_DELAY_TIME = 443;
-constexpr uint32_t MIN_FRAME_RATE = 60;
-constexpr uint32_t MAX_FRAME_RATE = 120;
-constexpr uint32_t EXPECTED_FRAME_RATE = 120;
 constexpr char ACTION_SHEET_DIALOG_ETS_TAG[] = "ActionSheet";
 constexpr char ALERT_DIALOG_ETS_TAG[] = "AlertDialog";
 constexpr char BUTTON_ETS_TAG[] = "Button";
@@ -3584,10 +3583,10 @@ void DialogPattern::PlayDistortion()
      * Four corners shrink inward, creating a slight "collapse" effect
      */
     DistortionParam param {
-        .luCorner = { 0.4, 1 },  // Left-upper corner shrinks to 80% position
-        .ruCorner = { 0.6, 1 },    // Right-upper corner shrinks to 80% position
-        .lbCorner = { 0.4, 1.2 },    // Left-bottom corner shrinks to 80% position
-        .rbCorner = { 0.6, 1.2 },      // Right-bottom corner stays in place
+        .luCorner = { 0, 0 },  // Left-upper corner shrinks to 80% position
+        .ruCorner = { 1, 0 },    // Right-upper corner shrinks to 80% position
+        .lbCorner = { 0.1, 1 },    // Left-bottom corner shrinks to 80% position
+        .rbCorner = { 0.9, 1 },      // Right-bottom corner stays in place
         .barrelDistortion = { 0, 0, 0, 0 },  // No barrel distortion
     };
     renderContext->UpdateDistortionParam(param);
@@ -3595,29 +3594,15 @@ void DialogPattern::PlayDistortion()
         childContext->UpdateForegroundFilterDistortionParam(param);
     }
 
-    /**
-     * Stage 2: Right stretch effect
-     * Left-upper corner moves to origin, right-upper corner stretches right to 80% height position
-     * Use spring interpolation, elasticity coefficient 200, damping 20
-     */
-    DistortionParam param1 {
-        .luCorner = { 0, 0 },     // Left-upper corner moves to origin
-        .ruCorner = { 1, 0 },   // Right-upper corner stretches right
-        .lbCorner = { 0.4, 1.2 },   // Left-bottom corner moves slightly right
-        .rbCorner = { 0.6, 1.2 },   // Right-bottom corner stays in place
-        .barrelDistortion = { 0, 0, 0, 0 },  // No barrel distortion
-    };
     AnimationOption option;
-    RefPtr<FrameRateRange> frameRateRange =
-        AceType::MakeRefPtr<FrameRateRange>(MIN_FRAME_RATE, MAX_FRAME_RATE, EXPECTED_FRAME_RATE);
-    option.SetFrameRateRange(frameRateRange);
     option.SetDuration(1000);
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 322, 27));  // Spring curve
-    AnimationUtils::Animate(option, [renderContext, param1, childContexts]() {
-        renderContext->UpdateDistortionParam(param1);
-        for (const auto& childContext : childContexts) {
-            childContext->UpdateForegroundFilterDistortionParam(param1);
-        }
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 322, 27)); // Spring curve
+    renderContext->ScaleAnimation(option, INITIAL_ZOOM_FACTOR, 1);
+    renderContext->UpdateTranslateInXY(
+        OffsetF(0, renderContext->GetPaintRectWithoutTransform().Height() * TRANSLATEY_RATIO));
+    AnimationUtils::Animate(option, [renderContext]() {
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateTranslateInXY(OffsetF());
     });
 
     isDistortAnimationExecuting_ = true;
