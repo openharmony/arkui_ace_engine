@@ -29,7 +29,7 @@ struct ReusableFlowItem {
 
   build() {
     Column() {
-      Text("N" + this.item).fontSize(12).height('16')
+      Text('N' + this.item).fontSize(12).height('16')
       // 注意：需要确保对应的jpg文件存在才会正常显示
       Image('res/waterFlow(' + this.item % 5 + ').jpg')
         .objectFit(ImageFit.Fill)
@@ -194,7 +194,7 @@ struct WaterFlowDemo33 {
             FlowItem() {
               // 使用可复用组件，提升性能
               Column() {
-                Text("F" + item).fontSize(12).height('16')
+                Text('F' + item).fontSize(12).height('16')
               }
               .height(item * 11)
             }

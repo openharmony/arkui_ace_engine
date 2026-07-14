@@ -30,7 +30,7 @@ export struct ScrollableInfiniteScroll {
       .height('100%')
       .padding({ left: 12, right: 12 })
     }
-    .title("无限滚动")
+    .title('无限滚动')
     .onAppear(() => entry.CreateScrollableInfiniteScroll(this.rootSlot))
   }
 }

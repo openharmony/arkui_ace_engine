@@ -61,7 +61,7 @@ class BasicDataSource<T> implements IDataSource {
 }
 
 export class LazyDataSource<T> extends BasicDataSource<T> {
-  dataArray: T[] = [];
+  public dataArray: T[] = [];
 
   public totalCount(): number {
     return this.dataArray.length;

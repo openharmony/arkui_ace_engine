@@ -23,8 +23,8 @@ import window from '@ohos.window';
 import { LengthMetrics } from '@kit.ArkUI';
 
 class CustomModifier1 implements AttributeModifier<ListAttribute> {
-  speedIndex: number = 0;
-  speedList: ( /*ScrollSnapAnimationSpeed |*/  undefined | null | ScrollSnapAnimationSpeed)[] = [
+  public speedIndex: number = 0;
+  public speedList: ( /*ScrollSnapAnimationSpeed |*/  undefined | null | ScrollSnapAnimationSpeed)[] = [
     ScrollSnapAnimationSpeed.SLOW,
     ScrollSnapAnimationSpeed.NORMAL,
     null,

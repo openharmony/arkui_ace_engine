@@ -19,9 +19,9 @@
  */
 
 class ClassifyModel {
-  classifyId: number;
-  classifyName: string;
-  courseList: Array<string>;
+  public classifyId: number;
+  public classifyName: string;
+  public courseList: Array<string>;
 
   constructor(classifyId: number, classifyName: string, courseList: Array<string>) {
     this.classifyId = classifyId;
@@ -72,7 +72,7 @@ struct IndexPage {
   //二级联动逻辑
   classifyChangeAction(startIndex: number, endIndex: number, isClassify: boolean) {
     if (this.currentClassify !== startIndex) {
-      console.log("dlh", startIndex, isClassify);
+      console.log('dlh', startIndex, isClassify);
       this.currentClassify = startIndex;
       if (isClassify) {
         this.scroller.scrollToIndex(startIndex);  // 通过点击标题移动内容区域

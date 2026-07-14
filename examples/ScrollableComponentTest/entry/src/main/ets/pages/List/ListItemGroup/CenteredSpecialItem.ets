@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*
+/*
   * Description: 通过OnItemDragStart等事件实现了ListItem在两个List组件间的拖拽效果
   * Writer: dailihuan
   */
@@ -27,7 +27,7 @@ interface Item {
 }
 
 class FootBuilderParams {
-  item: Item;
+  public item: Item;
 
   constructor(item: Item) {
     this.item = item;
@@ -35,7 +35,7 @@ class FootBuilderParams {
 }
 
 @Builder
-function ItemFoot(params: FootBuilderParams) {
+function itemFoot(params: FootBuilderParams) {
   Flex({ justifyContent: FlexAlign.Center, alignItems: ItemAlign.Center }) {
     Text(params.item.text)
       .fontSize(18)
@@ -83,7 +83,7 @@ struct SpecialListLayout {
           .width('100%') // 关键：让普通项参与双列布局
         } else {
           // 特殊居中项（独立处理）
-          ListItemGroup({ footer: ItemFoot(new FootBuilderParams(item)) }) {
+          ListItemGroup({ footer: itemFoot(new FootBuilderParams(item)) }) {
             ListItem() {
             }
           }

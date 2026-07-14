@@ -22,8 +22,8 @@
 import { WaterFlowDataSource } from '../../WaterFlowDataSource';
 
 class waterFlowModifier implements AttributeModifier<WaterFlowAttribute> {
-  index: number = 0;
-  columnList: (string | ItemFillPolicy | undefined | null)[] = [
+  public index: number = 0;
+  public columnList: (string | ItemFillPolicy | undefined | null)[] = [
     '1fr 2fr 1fr',
     { fillType: PresetFillType.BREAKPOINT_DEFAULT },
     { fillType: PresetFillType.BREAKPOINT_SM2MD3LG5 },

@@ -44,7 +44,7 @@ import { ScrollModifier } from '@ohos.arkui.modifier';
 import router from '@ohos.router';
 
 class RouterParams {
-  data1: string;
+  public data1: string;
   constructor(data1: string) {
     this.data1 = data1;
   }

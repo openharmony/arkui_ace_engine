@@ -25,73 +25,73 @@ struct Index {
             .textAlign(TextAlign.Center)
             .width('100%')
             .backgroundColor(0x0000FF)
-          Button("List")
+          Button('List')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
               this.getUIContext().getRouter().pushUrl({url: 'pages/scrollable/ScrollSpeak/List/listIndex'});
             })
-          Button("List水平")
+          Button('List水平')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
               this.getUIContext().getRouter().pushUrl({url: 'pages/scrollable/ScrollSpeak/List/listHori'});
             })
-          Button("List不可滚动")
+          Button('List不可滚动')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
               this.getUIContext().getRouter().pushUrl({url: 'pages/scrollable/ScrollSpeak/List/listNo'});
             })
-          Button("Grid")
+          Button('Grid')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
               this.getUIContext().getRouter().pushUrl({url: 'pages/scrollable/ScrollSpeak/Grid/gridIndex'});
             })
-          Button("Grid水平")
+          Button('Grid水平')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
               this.getUIContext().getRouter().pushUrl({url: 'pages/scrollable/ScrollSpeak/Grid/girdHori'});
             })
-          Button("Grid不可滚动")
+          Button('Grid不可滚动')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
               this.getUIContext().getRouter().pushUrl({url: 'pages/scrollable/ScrollSpeak/Grid/gridNo'});
             })
-          Button("Scroll")
+          Button('Scroll')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
               this.getUIContext().getRouter().pushUrl({url: 'pages/scrollable/ScrollSpeak/Scroll/scrollIndex'});
             })
-          Button("Scroll水平")
+          Button('Scroll水平')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
               this.getUIContext().getRouter().pushUrl({url: 'pages/scrollable/ScrollSpeak/Scroll/scrollHori'});
             })
-          Button("Scroll不可滚动")
+          Button('Scroll不可滚动')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
               this.getUIContext().getRouter().pushUrl({url: 'pages/scrollable/ScrollSpeak/Scroll/scrollNo'});
             })
-          Button("WaterFlow")
+          Button('WaterFlow')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
               this.getUIContext().getRouter().pushUrl({url: 'pages/scrollable/ScrollSpeak/WaterFlow/waterFlowIndex'});
             })
-          Button("WaterFlow水平")
+          Button('WaterFlow水平')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
               this.getUIContext().getRouter().pushUrl({url: 'pages/scrollable/ScrollSpeak/WaterFlow/waterFlowHori'});
             })
-          Button("WaterFlow不可滚动")
+          Button('WaterFlow不可滚动')
             .margin(10)
             .width('80%')
             .onClick((e: ClickEvent) => {
