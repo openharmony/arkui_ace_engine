@@ -14,15 +14,14 @@
  */
 
 #include "core/components_ng/pattern/toggle/switch_accessibility_property.h"
+
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
 #include "accessibility_element_info.h"
 #endif
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const std::string SWITCH_TAG = "Switch";
-}
+
 bool SwitchAccessibilityProperty::IsCheckable() const
 {
     return true;

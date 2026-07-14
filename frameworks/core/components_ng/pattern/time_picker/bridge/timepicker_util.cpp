@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include <string>
+#include <string_view>
 
 #include "interfaces/inner_api/ace_kit/include/ui/base/geometry/dimension.h"
 #include "interfaces/inner_api/ace_kit/include/ui/gestures/gesture_event.h"
@@ -33,7 +34,7 @@
 namespace OHOS::Ace::NG::TimePickerUtil {
 namespace {
 #define MODIFIER_COUNTS 1
-const std::string COLON = ":";
+constexpr std::string_view COLON = ":";
 const Dimension& FONT_SIZE_LIMIT = 0.0_vp;
 const bool IS_USER_SET_FONT_SIZE = false;
 } // namespace
@@ -64,7 +65,7 @@ std::string GetShowTimePickerText(const RefPtr<FrameNode>& frameNode)
     }
     if (options.find(minuteColumn) != options.end()) {
         std::string minute = options[minuteColumn][minutePickerColumnPattern->GetCurrentIndex()];
-        result += COLON + minute;
+        result += std::string(COLON) + minute;
     }
     if (timePickerRowPattern->GetHasSecond()) {
         auto secondColumn = allChildNode["second"].Upgrade();
@@ -73,7 +74,7 @@ std::string GetShowTimePickerText(const RefPtr<FrameNode>& frameNode)
         CHECK_NULL_RETURN(secondPickerColumnPattern, "");
         if (options.find(secondColumn) != options.end()) {
             std::string second = options[secondColumn][secondPickerColumnPattern->GetCurrentIndex()];
-            result += COLON + second;
+            result += std::string(COLON) + second;
         }
     }
     if (!timePickerRowPattern->GetHour24()) {

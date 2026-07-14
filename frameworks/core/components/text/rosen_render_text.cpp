@@ -30,7 +30,7 @@
 namespace OHOS::Ace {
 namespace {
 
-const std::u16string ELLIPSIS = u"\u2026";
+static constexpr char16_t ELLIPSIS[] = u"\u2026";
 constexpr Dimension ADAPT_UNIT = 1.0_fp;
 constexpr int32_t COMPATIBLE_VERSION = 6;
 

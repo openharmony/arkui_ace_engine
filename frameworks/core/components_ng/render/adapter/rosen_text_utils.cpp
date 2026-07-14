@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/render/text_utils.h"
 
+#include <string_view>
+
 #include "rosen_text/typography.h"
 #include "rosen_text/typography_create.h"
 #include "rosen_text/typography_style.h"
@@ -25,8 +27,8 @@
 
 namespace OHOS::Ace::NG {
 
-const std::string FONTWEIGHT = "wght";
-const std::u16string ELLIPSIS = u"\u2026";
+constexpr std::string_view FONTWEIGHT = "wght";
+static constexpr char16_t ELLIPSIS[] = u"\u2026";
 
 bool IsApplyIndent(const MeasureContext& context, double& indent)
 {
@@ -89,7 +91,7 @@ double TextUtils::MeasureText(const MeasureContext& context)
     if (pipelineContext) {
         fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
     }
-    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    txtStyle.fontVariations.SetAxisValue(std::string(FONTWEIGHT), fontWeightValue);
     StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
     txtStyle.fontFamilies = fontFamilies;
     if (context.letterSpacing.has_value()) {
@@ -143,7 +145,7 @@ Size TextUtils::MeasureTextSize(const MeasureContext& context)
     if (pipelineContext) {
         fontWeightValue = fontWeightValue * pipelineContext->GetFontWeightScale();
     }
-    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    txtStyle.fontVariations.SetAxisValue(std::string(FONTWEIGHT), fontWeightValue);
     StringUtils::StringSplitter(context.fontFamily, ',', fontFamilies);
     txtStyle.fontFamilies = fontFamilies;
     if (context.letterSpacing.has_value()) {

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 
 #include <string>
+#include <string_view>
 
 #include "base/log/dump_log.h"
 #include "base/i18n/localization.h"
@@ -38,7 +39,7 @@ constexpr int32_t SECONDS_OF_TEN = 10;
 constexpr int32_t DEFAULT_SCALE = 1;
 constexpr double DEFAULT_COUNT = 60000.0;
 constexpr int32_t DEFAULT_START_TIME = 0;
-const std::string DEFAULT_FORMAT = "HH:mm:ss.SS";
+constexpr std::string_view DEFAULT_FORMAT = "HH:mm:ss.SS";
 } // namespace
 
 RefPtr<LayoutProperty> TextTimerPattern::CreateLayoutProperty()
@@ -293,7 +294,7 @@ void TextTimerPattern::UpdateTextTimer(double elapsedTime)
     std::string timerText =
         Localization::GetInstance()->FormatDuration(static_cast<uint32_t>(elapsedTime), GetFormat());
     if (timerText.empty()) {
-        timerText = Localization::GetInstance()->FormatDuration(elapsedTime, DEFAULT_FORMAT);
+        timerText = Localization::GetInstance()->FormatDuration(elapsedTime, std::string(DEFAULT_FORMAT));
     }
     if (isNegative) {
         timerText.insert(0, "-");
@@ -309,8 +310,8 @@ void TextTimerPattern::UpdateTextTimer(double elapsedTime)
 std::string TextTimerPattern::GetFormat() const
 {
     auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();
-    CHECK_NULL_RETURN(textTimerLayoutProperty, DEFAULT_FORMAT);
-    return textTimerLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
+    CHECK_NULL_RETURN(textTimerLayoutProperty, std::string(DEFAULT_FORMAT));
+    return textTimerLayoutProperty->GetFormat().value_or(std::string(DEFAULT_FORMAT));
 }
 
 bool TextTimerPattern::GetIsCountDown() const
@@ -382,7 +383,7 @@ uint64_t TextTimerPattern::GetMillisecondsDuration(uint64_t duration) const
     CHECK_NULL_RETURN(host, duration);
     auto layoutProperty = host->GetLayoutProperty<TextTimerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, duration);
-    auto format = layoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
+    auto format = layoutProperty->GetFormat().value_or(std::string(DEFAULT_FORMAT));
     if (format.find("SSS") != std::string::npos) {
         return duration;
     } else if (format.find("SS") != std::string::npos) {
@@ -463,7 +464,7 @@ void TextTimerPattern::DumpInfo()
     auto isCountDown = textTimerLayoutProperty->GetIsCountDown().value_or(false);
     isCountDown ? DumpLog::GetInstance().AddDesc("isCountDown: true") :
         DumpLog::GetInstance().AddDesc("isCountDown: false");
-    auto format = textTimerLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT);
+    auto format = textTimerLayoutProperty->GetFormat().value_or(std::string(DEFAULT_FORMAT));
     DumpLog::GetInstance().AddDesc("format: ", format);
     DumpLog::GetInstance().AddDesc("startTime: ", GetStartTime());
     auto elapsedTime = GetFormatDuration(elapsedTime_);
@@ -475,7 +476,7 @@ void TextTimerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     auto textTimerLayoutProperty = GetLayoutProperty<TextTimerLayoutProperty>();
     CHECK_NULL_VOID(textTimerLayoutProperty);
     json->Put("isCountDown", textTimerLayoutProperty->GetIsCountDown().value_or(false));
-    json->Put("format", textTimerLayoutProperty->GetFormat().value_or(DEFAULT_FORMAT).c_str());
+    json->Put("format", textTimerLayoutProperty->GetFormat().value_or(std::string(DEFAULT_FORMAT)).c_str());
     json->Put("startTime", std::to_string(GetStartTime()).c_str());
     json->Put("elapsedTime", std::to_string(GetFormatDuration(elapsedTime_)).c_str());
 }

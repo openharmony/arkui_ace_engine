@@ -16,6 +16,7 @@
 #include "core/common/container.h"
 
 #include <cstdio>
+#include <string_view>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "base/image/file_uri_helper.h"
@@ -43,7 +44,7 @@ constexpr uint32_t MEDIA_RESOURCE_MATCH_SIZE = 2;
 const int32_t RAWFILE_PREFIX_LENGTH = strlen("resource://RAWFILE/");
 const std::regex MEDIA_RES_ID_REGEX(R"(^resource://\w+/([0-9]+)\.\w+$)", std::regex::icase);
 const std::regex MEDIA_APP_RES_ID_REGEX(R"(^resource://.*/([0-9]+)\.\w+$)", std::regex::icase);
-const std::string FA_RESOURCE_PREFIX = "assets/entry/";
+constexpr std::string_view FA_RESOURCE_PREFIX = "assets/entry/";
 const std::regex MEDIA_APP_RES_PATH_REGEX(R"(^resource://RAWFILE/(.*)$)");
 
 OHOS::Media::PlayerSeekMode ConvertToMediaSeekMode(SeekMode seekMode)
@@ -216,7 +217,7 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     if (!container->IsUseStageModel()) {
-        videoFilePath = FA_RESOURCE_PREFIX + videoFilePath;
+        videoFilePath = std::string(FA_RESOURCE_PREFIX) + videoFilePath;
     }
     auto getFileInfoState = assetManager->GetFileInfo(videoFilePath, fileInfo);
     if (!getFileInfoState) {
@@ -286,7 +287,7 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     if (!container->IsUseStageModel()) {
-        path = FA_RESOURCE_PREFIX + path;
+        path = std::string(FA_RESOURCE_PREFIX) + path;
     }
     MediaFileInfo fileInfo;
     auto getFileInfoState = assetManager->GetFileInfo(path, fileInfo);

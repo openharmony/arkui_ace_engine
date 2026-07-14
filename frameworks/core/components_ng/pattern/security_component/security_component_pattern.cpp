@@ -20,6 +20,8 @@
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
+
+#include <string_view>
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_paint_property.h"
@@ -44,7 +46,7 @@ static std::unordered_map<uint64_t, RefPtr<FrameNode>> g_scNodeMap;
 static std::vector<uint64_t> g_omittedNodeIndex;
 static uint64_t g_scIndex = 0;
 static std::mutex g_scMutex;
-const std::string SYSTEM_INTERNAL_ERROR_MESSAGE = "system internal error";
+constexpr std::string_view SYSTEM_INTERNAL_ERROR_MESSAGE = "system internal error";
 constexpr int REPORT_CLICK_ERROR = -1;
 #endif
 constexpr float MIN_FONT_SCALE = 0.85f;
@@ -1238,7 +1240,7 @@ void SecurityComponentPattern::HandleReportSecCompClickEventResult(int32_t& code
     }
 
     if (code != SecurityComponentErrorCode::SUCCESS && message.empty()) {
-        message = SYSTEM_INTERNAL_ERROR_MESSAGE;
+        message = std::string(SYSTEM_INTERNAL_ERROR_MESSAGE);
         code = SecurityComponentErrorCode::SYSTEM_INTERNAL_ERROR;
     }
 }

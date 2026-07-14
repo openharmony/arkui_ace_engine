@@ -16,13 +16,15 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
+#include <string_view>
+
 #include "matrix2d_peer_impl.h"
 #include "path2d_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Path2DAccessor {
 namespace {
-const std::string EMPTY_STRING = "";
+constexpr std::string_view EMPTY_STRING = "";
 RefPtr<Path2DPeerImpl> CreatePeerImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<Path2DPeerImpl>();
@@ -75,7 +77,7 @@ Ark_Path2D Construct3Impl(Ark_Path2D path,
 Ark_Path2D Construct4Impl(const Ark_String* d)
 {
     auto peerImpl = CreatePeerImpl();
-    auto path = Converter::OptConvertPtr<std::string>(d).value_or(EMPTY_STRING);
+    auto path = Converter::OptConvertPtr<std::string>(d).value_or(std::string(EMPTY_STRING));
     if (!path.empty()) {
         auto canvasPath = Referenced::MakeRefPtr<CanvasPath2D>(path);
         peerImpl->SetCanvasPath2d(canvasPath);
@@ -88,7 +90,7 @@ Ark_Path2D Construct5Impl(const Ark_String* description,
     auto peerImpl = CreatePeerImpl();
     auto optUnit = Converter::OptConvert<Ace::CanvasUnit>(unit).value_or(Ace::CanvasUnit::DEFAULT);
     peerImpl->SetUnit(optUnit);
-    auto path = Converter::OptConvertPtr<std::string>(description).value_or(EMPTY_STRING);
+    auto path = Converter::OptConvertPtr<std::string>(description).value_or(std::string(EMPTY_STRING));
     if (!path.empty()) {
         auto canvasPath = Referenced::MakeRefPtr<CanvasPath2D>(path);
         peerImpl->SetCanvasPath2d(canvasPath);

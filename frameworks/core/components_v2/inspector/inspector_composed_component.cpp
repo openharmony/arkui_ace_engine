@@ -16,9 +16,11 @@
 #include "core/components_v2/inspector/inspector_composed_component.h"
 #include "core/accessibility/accessibility_manager.h"
 
+#include "base/utils/linear_map.h"
 #include "compatible/components/component_loader.h"
 
 #include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 #include "core/components_v2/inspector/actionsheetdialog_composed_element.h"
 #include "core/components_v2/inspector/alertdialog_composed_element.h"
 #include "core/components_v2/inspector/blank_composed_element.h"
@@ -72,169 +74,292 @@ namespace OHOS::Ace::V2 {
 
 namespace {
 
-using CreateElementFunc = std::function<RefPtr<InspectorComposedElement>(const std::string& id)>;
+using CreateElementFunc = RefPtr<InspectorComposedElement>(*)(const std::string& id);
 RefPtr<InspectorComposedElement> DynamicCreateInspectorElement(const std::string tag, const std::string& id)
 {
     auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName(tag.c_str());
     return loader ? loader->CreateInspectorElement(id) : nullptr;
 }
-const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
-    { COLUMN_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ColumnComposedElement>(id); } },
+
+template<typename T>
+RefPtr<InspectorComposedElement> MakeInspectorElement(const std::string& id)
+{
+    return AceType::MakeRefPtr<T>(id);
+}
+
+static constexpr LinearMapNode<CreateElementFunc> CREATE_ELEMENT_MAP[] = {
+    { ACTION_SHEET_DIALOG_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::ActionSheetDialogComposedElement>(id);
+        } },
+    { ALERT_DIALOG_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::AlertDialogComposedElement>(id);
+        } },
+    { BADGE_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_BADGE, id); } },
+    { BOX_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::BlankComposedElement>(id);
+        } },
+    { BUTTON_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::ButtonComposedElement>(id);
+        } },
+    { CALENDAR_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::CalendarComposedElement>(id);
+        } },
+    { CANVAS_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { CHECKBOXGROUP_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::CheckboxGroupComposedElement>(id);
+        } },
+    { CHECKBOX_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::CheckboxComposedElement>(id);
+        } },
+    { CHECK_BOX_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::CheckboxComposedElement>(id);
+        } },
+    { COLUMN_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::ColumnComposedElement>(id);
+        } },
     { COLUMN_SPLIT_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::ColumnSplitComposedElement>(id); } },
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::ColumnSplitComposedElement>(id);
+        } },
     { COUNTER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::CounterComposedElement>(id); } },
-    { NAVIGATION_VIEW_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationComposedElement>(id); } },
-    { ROW_SPLIT_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::RowSplitComposedElement>(id); } },
-    { STACK_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::StackComposedElement>(id); } },
-    { SWIPER_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(SWIPER_ETS_TAG, id); } },
-    { TAB_CONTENT_ITEM_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TAB_CONTENT, id); } },
-    { TABS_COMPONENT_TAG, [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TABS, id); } },
-    { TEXT_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::TextComposedElement>(id); } },
-    { FLEX_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::FlexComposedElement>(id); } },
-    { WRAP_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::WrapComposedElement>(id); } },
-    { GRID_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::GridComposedElement>(id); } },
-    { GRID_ITEM_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::GridItemComposedElement>(id); } },
-    { WATERFLOW_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::WaterFlowComposedElement>(id); } },
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::CounterComposedElement>(id);
+        } },
+    { CUSTOM_DIALOG_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::CustomDialogComposedElement>(id);
+        } },
+    { DATA_PANEL_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::DataPanelComposedElement>(id);
+        } },
+    { DATE_PICKER_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DATE_PICKER_COMPONENT_LOADER_TAG, id); } },
+    { DATE_PICKER_DIALOG_COMPONENT_TAG,
+        [](const std::string& id) {
+            return DynamicCreateInspectorElement(DATE_PICKER_DIALOG_COMPONENT_LOADER_TAG, id);
+        } },
+    { DIALOG_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { DIVIDER_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::DividerComposedElement>(id);
+        } },
+    { FLEX_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::FlexComposedElement>(id);
+        } },
     { FLOW_ITEM_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::WaterFlowItemComposedElement>(id); } },
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::WaterFlowItemComposedElement>(id);
+        } },
+    { FORM_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { GAUGE_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::GaugeComposedElement>(id);
+        } },
+    { GRIDCONTAINER_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_CONTAINER, id); } },
+    { GRID_COL_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_COLUMN, id); } },
+    { GRID_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::GridComposedElement>(id);
+        } },
+    { GRID_ITEM_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::GridItemComposedElement>(id);
+        } },
+    { GRID_ROW_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_ROW, id); } },
+    { HYPERLINK_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::HyperlinkComposedElement>(id);
+        } },
+    { IMAGE_ANIMATOR_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_IMAGE_ANIMATOR, id); } },
+    { IMAGE_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::ImageComposedElement>(id);
+        } },
+    { INDEXER_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::IndexerComposedElement>(id);
+        } },
+    { JS_VIEW_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
     { LIST_COMPONENT_TAG, [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST, id); } },
     { LIST_ITEM_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST_ITEM, id); } },
     { LIST_ITEM_GROUP_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_LIST_ITEM_GROUP, id); } },
+    { LOADING_PROGRESS_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::LoadingProgressComposedElement>(id);
+        } },
+    { MARQUEE_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_MARQUEE, id); } },
+    { MENU_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::MenuComposedElement>(id);
+        } },
+    { MOVING_PHOTO_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { NAVIGATION_MENUS_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_NAVIGATION_MENU, id); } },
+    { NAVIGATION_TITLE_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::NavigationTitleComposedElement>(id);
+        } },
+    { NAVIGATION_VIEW_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::NavigationComposedElement>(id);
+        } },
     { NAVIGATOR_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigatorComposedElement>(id); } },
-    { PANEL_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::PanelComposedElement>(id); } },
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::NavigatorComposedElement>(id);
+        } },
+    { PANEL_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::PanelComposedElement>(id);
+        } },
     { PATTERN_LOCK_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::PatternLockComposedElement>(id); } },
-    { ROW_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::RowComposedElement>(id); } },
-    { SHAPE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ShapeComposedElement>(id); } },
-    { SHAPE_CONTAINER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::ShapeContainerComposedElement>(id); } },
-    { IMAGE_ANIMATOR_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_IMAGE_ANIMATOR, id); } },
-    { IMAGE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ImageComposedElement>(id); } },
-    { QRCODE_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_QRCODE, id); } },
-    { SPAN_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SpanComposedElement>(id); } },
-    { BOX_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::BlankComposedElement>(id); } },
-    { BUTTON_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ButtonComposedElement>(id); } },
-    { DIVIDER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::DividerComposedElement>(id); } },
-    { CHECKBOX_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::CheckboxComposedElement>(id); } },
-    { CHECK_BOX_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::CheckboxComposedElement>(id); } },
-    { SWITCH_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_SWITCH, id); } },
-    { TOGGLE_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TOGGLE, id); } },
-    { SCROLL_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::ScrollComposedElement>(id); } },
-    { CALENDAR_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::CalendarComposedElement>(id); } },
-    { BADGE_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_BADGE, id); } },
-    { SEARCH_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_SEARCH, id); } },
-    { FORM_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::PatternLockComposedElement>(id);
+        } },
+    { PICKER_TEXT_DIALOG_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG, id); } },
     { PLUGIN_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
-    { VIDEO_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_VIDEO, id); } },
-    { INDEXER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::IndexerComposedElement>(id); } },
-    { SLIDER_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SliderComposedElement>(id); } },
+    { PROGRESS_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::ProgressComposedElement>(id);
+        } },
+    { QRCODE_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_QRCODE, id); } },
+    { RADIO_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::RadioComposedElement>(id);
+        } },
     { RATING_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_RATING, id); } },
-    { PROGRESS_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::ProgressComposedElement>(id); } },
-    { DATA_PANEL_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::DataPanelComposedElement>(id); } },
-    { SHEET_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SheetComposedElement>(id); } },
-    { HYPERLINK_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::HyperlinkComposedElement>(id); } },
+    { REFRESH_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_REFRESH, id); } },
+    { RELATIVE_CONTAINER_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::RelativeContainerComposedElement>(id);
+        } },
+    { RICH_TEXT_COMPONENT_TAG,
+        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
+    { ROW_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::RowComposedElement>(id);
+        } },
+    { ROW_SPLIT_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::RowSplitComposedElement>(id);
+        } },
+    { SCROLL_BAR_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::ScrollBarComposedElement>(id);
+        } },
+    { SCROLL_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::ScrollComposedElement>(id);
+        } },
+    { SEARCH_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_SEARCH, id); } },
+    { SELECT_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::SelectComposedElement>(id);
+        } },
+    { SHAPE_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::ShapeComposedElement>(id);
+        } },
+    { SHAPE_CONTAINER_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::ShapeContainerComposedElement>(id);
+        } },
+    { SHEET_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::SheetComposedElement>(id);
+        } },
+    { SIDE_BAR_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::SideBarComposedElement>(id);
+        } },
+    { SLIDER_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::SliderComposedElement>(id);
+        } },
+    { SPAN_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::SpanComposedElement>(id);
+        } },
+    { STACK_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::StackComposedElement>(id);
+        } },
     { STEPPER_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_STEPPER, id); } },
     { STEPPER_ITEM_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_STEPPER_ITEM, id); } },
-    { SCROLL_BAR_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::ScrollBarComposedElement>(id); } },
-    { REFRESH_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_REFRESH, id); } },
-    { DATE_PICKER_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DATE_PICKER_COMPONENT_LOADER_TAG, id); } },
-    { TIME_PICKER_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(TIME_PICKER_COMPONENT_LOADER_TAG, id); } },
-    { RADIO_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::RadioComposedElement>(id); } },
-    { GAUGE_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::GaugeComposedElement>(id); } },
-    { GRIDCONTAINER_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_CONTAINER, id); } },
-    { GRID_COL_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_COLUMN, id); } },
-    { GRID_ROW_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_GRID_ROW, id); } },
-    { MENU_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::MenuComposedElement>(id); } },
+    { SWIPER_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(SWIPER_ETS_TAG, id); } },
+    { SWITCH_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_SWITCH, id); } },
+    { TABS_COMPONENT_TAG, [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TABS, id); } },
+    { TAB_CONTENT_ITEM_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TAB_CONTENT, id); } },
     { TEXTAREA_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TEXTAREA, id); } },
+    { TEXTCLOCK_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::TextClockComposedElement>(id);
+        } },
     { TEXTINPUT_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_INPUT, id); } },
     { TEXTTIMER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TextTimerComposedElement>(id); } },
-    { SELECT_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::SelectComposedElement>(id); } },
-    { MARQUEE_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_MARQUEE, id); } },
-    { TEXTCLOCK_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::TextClockComposedElement>(id); } },
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::TextTimerComposedElement>(id);
+        } },
+    { TEXT_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::TextComposedElement>(id);
+        } },
     { TEXT_PICKER_COMPONENT_TAG,
         [](const std::string& id) { return DynamicCreateInspectorElement(TEXT_PICKER_COMPONENT_LOADER_TAG, id); } },
-    { PICKER_TEXT_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) {
-            return DynamicCreateInspectorElement(PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG, id);
-        } },
-    { CANVAS_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
-    { DIALOG_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
-    { ACTION_SHEET_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::ActionSheetDialogComposedElement>(id); } },
-    { ALERT_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::AlertDialogComposedElement>(id); } },
-    { CUSTOM_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::CustomDialogComposedElement>(id); } },
-    { DATE_PICKER_DIALOG_COMPONENT_TAG,
-        [](const std::string& id) {
-            return DynamicCreateInspectorElement(DATE_PICKER_DIALOG_COMPONENT_LOADER_TAG, id);
-        } },
-    { SIDE_BAR_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::SideBarComposedElement>(id); } },
-    { LOADING_PROGRESS_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::LoadingProgressComposedElement>(id); } },
-    { CHECKBOXGROUP_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::CheckboxGroupComposedElement>(id); } },
+    { TIME_PICKER_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(TIME_PICKER_COMPONENT_LOADER_TAG, id); } },
     { TIME_PICKER_DIALOG_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(TIME_PICKER_DIALOG_COMPONENT_LOADER_TAG, id); } },
+    { TOGGLE_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_TOGGLE, id); } },
+    { VIDEO_COMPONENT_TAG,
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_VIDEO, id); } },
+    { WATERFLOW_COMPONENT_TAG,
         [](const std::string& id) {
-            return DynamicCreateInspectorElement(TIME_PICKER_DIALOG_COMPONENT_LOADER_TAG, id);
+            return MakeInspectorElement<V2::WaterFlowComposedElement>(id);
         } },
-    { WEB_COMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
-    { RICH_TEXT_COMPONENT_TAG,
+    { WEB_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
-    { XCOMPONENT_TAG, [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
-    { NAVIGATION_TITLE_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::NavigationTitleComposedElement>(id); } },
-    { NAVIGATION_MENUS_COMPONENT_TAG,
-        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_NAVIGATION_MENU, id); } },
-    { JS_VIEW_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
-    { RELATIVE_CONTAINER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::RelativeContainerComposedElement>(id); } },
-    { MOVING_PHOTO_COMPONENT_TAG,
+    { WRAP_COMPONENT_TAG,
+        [](const std::string& id) {
+            return MakeInspectorElement<V2::WrapComposedElement>(id);
+        } },
+    { XCOMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::InspectorComposedElement>(id); } },
 };
 
@@ -349,15 +474,15 @@ thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;
 
 RefPtr<Element> InspectorComposedComponent::CreateElement()
 {
-    auto generateFunc = CREATE_ELEMENT_MAP.find(GetName());
-    if (generateFunc != CREATE_ELEMENT_MAP.end()) {
-        auto composedElement = generateFunc->second(id_);
-        composedElement->SetInspectorTag(GetName());
-        composedElement->SetDebugLine(GetDebugLine());
-        composedElement->SetViewId(viewId_);
-        auto inspectorElement = AceType::DynamicCast<InspectorComposedElement>(composedElement);
+    auto index =
+        BinarySearchFindIndex(CREATE_ELEMENT_MAP, ArraySize(CREATE_ELEMENT_MAP), GetName().c_str());
+    if (index >= 0) {
+        auto inspectorElement = CREATE_ELEMENT_MAP[index].value(id_);
+        inspectorElement->SetInspectorTag(GetName());
+        inspectorElement->SetDebugLine(GetDebugLine());
+        inspectorElement->SetViewId(viewId_);
         inspectorElement->SetKey(GetInspectorKey());
-        return composedElement;
+        return inspectorElement;
     }
     return nullptr;
 }
@@ -378,13 +503,10 @@ RefPtr<AccessibilityManager> InspectorComposedComponent::GetAccessibilityManager
     return accessibilityManager;
 }
 
-bool InspectorComposedComponent::HasInspectorFinished(std::string tag)
+bool InspectorComposedComponent::HasInspectorFinished(const std::string& tag)
 {
-    auto generateFunc = CREATE_ELEMENT_MAP.find(tag);
-    if (generateFunc != CREATE_ELEMENT_MAP.end()) {
-        return true;
-    }
-    return false;
+    auto index = BinarySearchFindIndex(CREATE_ELEMENT_MAP, ArraySize(CREATE_ELEMENT_MAP), tag.c_str());
+    return index >= 0;
 }
 
 RefPtr<AccessibilityNode> InspectorComposedComponent::CreateAccessibilityNode(

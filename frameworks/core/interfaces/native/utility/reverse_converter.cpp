@@ -15,6 +15,8 @@
 
 #include "reverse_converter.h"
 
+#include <string_view>
+
 // SORTED_SECTION
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/shadow.h"
@@ -65,12 +67,12 @@
 
 namespace OHOS::Ace {
 namespace {
-const std::string YEAR = "year";
-const std::string MONTH = "month";
-const std::string DAY = "day";
-const std::string HOUR = "hour";
-const std::string MINUTE = "minute";
-const std::string SECOND = "second";
+constexpr std::string_view YEAR = "year";
+constexpr std::string_view MONTH = "month";
+constexpr std::string_view DAY = "day";
+constexpr std::string_view HOUR = "hour";
+constexpr std::string_view MINUTE = "minute";
+constexpr std::string_view SECOND = "second";
 const int32_t STD_TM_START_YEAR = 1900;
 const int32_t SEC_TO_MILLISEC = 1000;
 const int32_t TYPE_STRING = 0;
@@ -246,9 +248,9 @@ void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecogn
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)
 {
     auto data = JsonUtil::ParseJsonString(src);
-    auto hour = data->GetValue(HOUR)->GetInt();
-    auto minute = data->GetValue(MINUTE)->GetInt();
-    auto second = data->GetValue(SECOND)->GetInt();
+    auto hour = data->GetValue(std::string(HOUR))->GetInt();
+    auto minute = data->GetValue(std::string(MINUTE))->GetInt();
+    auto second = data->GetValue(std::string(SECOND))->GetInt();
     dst = {
         .hour = ArkValue<Ark_Int32>(hour),
         .minute = ArkValue<Ark_Int32>(minute),
@@ -535,15 +537,15 @@ void AssignArkValue(Ark_Date& dst, const std::string& src)
 {
     auto json = JsonUtil::ParseJsonString(src);
     PickerDate date(
-        json->GetValue(YEAR)->GetInt(),
-        json->GetValue(MONTH)->GetInt(),
-        json->GetValue(DAY)->GetInt());
+        json->GetValue(std::string(YEAR))->GetInt(),
+        json->GetValue(std::string(MONTH))->GetInt(),
+        json->GetValue(std::string(DAY))->GetInt());
     Validator::ValidatePickerDate(date);
 
     PickerTime time(
-        json->GetValue(HOUR)->GetInt(),
-        json->GetValue(MINUTE)->GetInt(),
-        json->GetValue(SECOND)->GetInt());
+        json->GetValue(std::string(HOUR))->GetInt(),
+        json->GetValue(std::string(MINUTE))->GetInt(),
+        json->GetValue(std::string(SECOND))->GetInt());
 
     std::tm tm {};
     tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900

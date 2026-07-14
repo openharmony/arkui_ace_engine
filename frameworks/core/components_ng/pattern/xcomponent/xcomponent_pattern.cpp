@@ -17,6 +17,7 @@
 #include "core/accessibility/accessibility_manager.h"
 
 #include <cmath>
+#include <string_view>
 #include <cstdlib>
 
 #include "interfaces/inner_api/ace/ui_content.h"
@@ -86,7 +87,7 @@ std::mutex XComponentPattern::angleMtx_;
 std::string XComponentPattern::compensationAngleFromFeatureManager_ = "";
 namespace {
 
-const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+constexpr std::string_view BUFFER_USAGE_XCOMPONENT = "xcomponent";
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr char X_COMPONENT_COMPENSATION_ANGLE[] = "xcomponentCompensationAngle";
 const int32_t ROTATION_0 = 0;
@@ -183,14 +184,15 @@ std::string XComponentPattern::GetLeakType()
 {
     auto xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
     if (id_.has_value() && !id_.value().empty()) {
-        return BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + id_.value();
+        return std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + id_.value();
     }
-    std::string defaultLeakType = BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + "nodeId_" + nodeId_;
+    std::string defaultLeakType =
+        std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + "nodeId_" + nodeId_;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, defaultLeakType);
     auto inspectorKey = host->GetInspectorId().value_or("");
     if (!inspectorKey.empty()) {
-        return BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + inspectorKey;
+        return std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + inspectorKey;
     }
     return defaultLeakType;
 }
@@ -216,9 +218,9 @@ void XComponentPattern::InitSurface()
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
+    renderSurface_->SetBufferUsage(std::string(BUFFER_USAGE_XCOMPONENT));
     std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
-    renderSurface_->SetBufferTypeLeak(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
+    renderSurface_->SetBufferTypeLeak(std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {

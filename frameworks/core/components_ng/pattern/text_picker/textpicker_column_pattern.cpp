@@ -19,6 +19,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <string_view>
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/geometry/dimension.h"
@@ -51,7 +52,7 @@ const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const Dimension ICON_SIZE = 24.0_vp;
 const Dimension ICON_TEXT_SPACE = 8.0_vp;
 const std::vector<std::string> FONT_FAMILY_DEFAULT = { "sans-serif" };
-const std::string MEASURE_STRING = "TEST";
+constexpr std::string_view MEASURE_STRING = "TEST";
 const int32_t HALF_NUMBER = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 const double CURVE_MOVE_THRESHOLD = 0.5;
@@ -1199,7 +1200,7 @@ void TextPickerColumnPattern::AddAnimationTextProperties(
     TextProperties properties{};
     if (textLayoutProperty->HasFontSize()) {
         MeasureContext measureContext;
-        measureContext.textContent = MEASURE_STRING;
+        measureContext.textContent = std::string(MEASURE_STRING);
         measureContext.fontSize = textLayoutProperty->GetFontSize().value();
         if (textLayoutProperty->HasFontFamily()) {
             auto fontFamilyVector = textLayoutProperty->GetFontFamily().value();
@@ -2434,7 +2435,7 @@ void TextPickerColumnPattern::InitTextHeightAndFontHeight(uint32_t childIndex, u
     auto theme = pipeline->GetTheme<PickerTheme>();
 
     MeasureContext measureContext;
-    measureContext.textContent = MEASURE_STRING;
+    measureContext.textContent = std::string(MEASURE_STRING);
     measureContext.fontFamily = FONT_FAMILY_DEFAULT[0];
 
     if (childIndex == midIndex) {
