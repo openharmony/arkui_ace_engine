@@ -1472,4 +1472,160 @@ HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect003, TestSize.Lev
     EXPECT_FALSE(layoutAlgorithm->targetFullyInvisible_);
 }
 
+/**
+ * @tc.name: InitTargetSizeAndPositionVisibleRect004
+ * @tc.desc: Test non-tips popup in subwindow keeps full frame size when target is partially clipped.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node and bubble node (non-tips popup) for subwindow.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->targetTag_ = targetNode->GetTag();
+    layoutAlgorithm->targetNodeId_ = targetNode->GetId();
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->isTips_ = false;
+    layoutAlgorithm->followTransformOfTarget_ = false;
+
+    /**
+     * @tc.steps: step2. set up parent-child hierarchy with clipping.
+     */
+    // target geometry: 200x200 at (100,100)
+    targetNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 200.0f));
+    auto targetRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    ASSERT_NE(targetRenderContext, nullptr);
+    targetRenderContext->SetPaintRectWithTransform(RectF(100.0f, 100.0f, 200.0f, 200.0f));
+
+    // parent: 150x150 at (0,0) — clips the target to 50x50
+    auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 150.0f, 150.0f));
+    parent->AddChild(targetNode);
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition with showInSubWindow=true.
+     * @tc.expected: targetSize_ should keep the full frame size (200x200), not the visible
+     *               portion (50x50), because the non-tips popup subwindow path no longer
+     *               overwrites target with the visible rect. targetFullyInvisible_ stays false.
+     */
+    layoutAlgorithm->InitTargetSizeAndPosition(true, nullptr);
+    EXPECT_EQ(layoutAlgorithm->targetSize_, SizeF(200.0f, 200.0f));
+    EXPECT_FALSE(layoutAlgorithm->targetFullyInvisible_);
+}
+
+/**
+ * @tc.name: InitTargetSizeAndPositionVisibleRect005
+ * @tc.desc: Test non-tips popup in subwindow keeps targetFullyInvisible_ false when target is fully outside parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect005, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node and bubble node (non-tips popup) for subwindow.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->targetTag_ = targetNode->GetTag();
+    layoutAlgorithm->targetNodeId_ = targetNode->GetId();
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->isTips_ = false;
+    layoutAlgorithm->followTransformOfTarget_ = false;
+
+    /**
+     * @tc.steps: step2. set up target fully outside parent's visible area.
+     */
+    targetNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 200.0f));
+    auto targetRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    ASSERT_NE(targetRenderContext, nullptr);
+    targetRenderContext->SetPaintRectWithTransform(RectF(200.0f, 200.0f, 200.0f, 200.0f));
+
+    // parent: 100x100 at (0,0) — target at (200,200) is fully outside
+    auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+    parent->AddChild(targetNode);
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition with showInSubWindow=true.
+     * @tc.expected: targetFullyInvisible_ stays false because the non-tips popup subwindow path
+     *               no longer computes the visible rect, so the fully-invisible guard is not
+     *               triggered. targetSize_ keeps the full frame size (200x200).
+     */
+    layoutAlgorithm->InitTargetSizeAndPosition(true, nullptr);
+    EXPECT_FALSE(layoutAlgorithm->targetFullyInvisible_);
+    EXPECT_EQ(layoutAlgorithm->targetSize_, SizeF(200.0f, 200.0f));
+}
+
+/**
+ * @tc.name: InitTargetSizeAndPositionVisibleRect006
+ * @tc.desc: Test non-tips popup in subwindow keeps full frame size when target is fully visible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect006, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node and bubble node (non-tips popup) for subwindow.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->targetTag_ = targetNode->GetTag();
+    layoutAlgorithm->targetNodeId_ = targetNode->GetId();
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->isTips_ = false;
+    layoutAlgorithm->followTransformOfTarget_ = false;
+
+    /**
+     * @tc.steps: step2. set up target fully within parent's visible area.
+     */
+    targetNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 200.0f));
+    auto targetRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    ASSERT_NE(targetRenderContext, nullptr);
+    targetRenderContext->SetPaintRectWithTransform(RectF(100.0f, 100.0f, 200.0f, 200.0f));
+
+    // parent: 500x500 at (0,0) — target fully visible
+    auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 500.0f, 500.0f));
+    parent->AddChild(targetNode);
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition with showInSubWindow=true.
+     * @tc.expected: targetSize_ should be the full frame size (200x200) and
+     *               targetFullyInvisible_ should stay false.
+     */
+    layoutAlgorithm->InitTargetSizeAndPosition(true, nullptr);
+    EXPECT_EQ(layoutAlgorithm->targetSize_, SizeF(200.0f, 200.0f));
+    EXPECT_FALSE(layoutAlgorithm->targetFullyInvisible_);
+}
+
 } // namespace OHOS::Ace::NG
