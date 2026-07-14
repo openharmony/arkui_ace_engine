@@ -3277,6 +3277,7 @@ int32_t SliderPattern::OnInjectionEvent(const std::string& command)
 
 void SliderPattern::ReportChangeEvent(float value, int32_t mode)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
@@ -3291,10 +3292,12 @@ void SliderPattern::ReportChangeEvent(float value, int32_t mode)
     json->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 bool SliderPattern::ReportInjectionResult(bool isSuccess, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto nodeId = host->GetId();
@@ -3307,6 +3310,7 @@ bool SliderPattern::ReportInjectionResult(bool isSuccess, const std::string& rea
     result->Put("reason", reason.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "SliderResult", result->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
     return true;
 }
 

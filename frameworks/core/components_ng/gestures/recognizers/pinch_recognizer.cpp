@@ -59,7 +59,9 @@ void PinchRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "PINCH RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
+#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("click");
+#endif
     StateChangeReason reason = isLastPinchFinished_ ? StateChangeReason::PINCH_DISTANCE_REACHED
                                                      : StateChangeReason::PINCH_CONTINUOUS_ACCEPT;
     LogStateChange(refereeState_, RefereeState::SUCCEED, reason);

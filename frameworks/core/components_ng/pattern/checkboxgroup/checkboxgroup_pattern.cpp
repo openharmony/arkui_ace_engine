@@ -433,7 +433,9 @@ void CheckBoxGroupPattern::OnAfterModifyDone()
             vec.push_back(eventHub->GetName());
         }
     }
+#ifndef CROSS_PLATFORM
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, eventHub->GetGroupName(), vec);
+#endif
 }
 
 void CheckBoxGroupPattern::UpdateGroupCheckStatus(const RefPtr<FrameNode>& frameNode, bool select)
@@ -970,6 +972,7 @@ int32_t CheckBoxGroupPattern::OnInjectionEvent(const std::string& command)
 
 void CheckBoxGroupPattern::ReportChangeEvent(bool selectStatus)
 {
+#ifndef CROSS_PLATFORM
     auto params = JsonUtil::Create();
     CHECK_NULL_VOID(params);
     params->Put("selectStatus", selectStatus);
@@ -983,5 +986,6 @@ void CheckBoxGroupPattern::ReportChangeEvent(bool selectStatus)
     json->Put("nodeId", id);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString(),
         ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 } // namespace OHOS::Ace::NG

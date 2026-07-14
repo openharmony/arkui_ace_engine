@@ -43,6 +43,9 @@ template("ace_base_source_set") {
       external_deps += [ "hilog:libhilog" ]
     }
     configs = [ "$ace_root:ace_config" ]
+    if (is_arkui_x) {
+      defines += [ "CROSS_PLATFORM" ]
+    }
 
     # add base source file here
     sources = [
@@ -76,9 +79,8 @@ template("ace_base_source_set") {
       "log/log_wrapper.cpp",
       "memory/memory_monitor.cpp",
       "mousestyle/mouse_style.cpp",
-      "perfmonitor/perf_monitor.cpp",
       "ressched/ressched_click_optimizer.cpp",
-      "ressched/ressched_report.cpp",
+      "perfmonitor/perf_monitor.cpp",
       "ressched/ressched_touch_optimizer.cpp",
       "ressched/taihang_optimizer.cpp",
       "subwindow/subwindow_manager.cpp",
@@ -99,6 +101,11 @@ template("ace_base_source_set") {
       "utils/utf_helper.cpp",
       "utils/utils.cpp",
     ]
+    if (!is_arkui_x) {
+      sources += [
+        "ressched/ressched_report.cpp",
+      ]
+    }
 
     if (platform != "windows") {
       # add secure c API

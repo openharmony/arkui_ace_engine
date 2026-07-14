@@ -43,7 +43,9 @@
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/common/statistic_event_reporter.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/ui_material.h"
@@ -6013,7 +6015,9 @@ void OverlayManager::CreateOverlayNode()
 
 void OverlayManager::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
 {
+#ifndef CROSS_PLATFORM
     OHOS::Ace::ResSchedReport::GetInstance().ResSchedDataReport("overlay_add");
+#endif
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "add FrameNode to the overlay node enter");
     CHECK_NULL_VOID(node);
     int32_t level = -1;
@@ -6143,7 +6147,9 @@ void OverlayManager::OpenOrderOverlay(const RefPtr<FrameNode>& node, const Order
 
 void OverlayManager::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
 {
+#ifndef CROSS_PLATFORM
     OHOS::Ace::ResSchedReport::GetInstance().ResSchedDataReport("overlay_remove");
+#endif
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "delete the FrameNode on the overlay node enter");
     RemoveFrameNodeWithOrder(node);
     CHECK_NULL_VOID(node);
@@ -7321,9 +7327,11 @@ void OverlayManager::ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool 
         pipeline = PipelineContext::GetContextByContainerId(parentId);
         CHECK_NULL_VOID(pipeline);
     }
+#ifndef CROSS_PLATFORM
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnDialogChangeEnd(keyNode, isShow);
+#endif
 }
 
 void OverlayManager::UpdateImageGeneratorSheetKey(const RefPtr<UINode>& sheetNode, int32_t rootId)

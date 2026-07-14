@@ -169,7 +169,9 @@ DeclarativeFrontend::~DeclarativeFrontend() noexcept
 void DeclarativeFrontend::Destroy()
 {
     // The call doesn't change the page pop status
+#ifndef CROSS_PLATFORM
     Recorder::NodeDataCache::Get().OnBeforePagePop(true);
+#endif
     CHECK_RUN_ON(JS);
     LOGI("DeclarativeFrontend Destroy begin.");
     // To guarantee the jsEngine_ and delegate_ released in js thread

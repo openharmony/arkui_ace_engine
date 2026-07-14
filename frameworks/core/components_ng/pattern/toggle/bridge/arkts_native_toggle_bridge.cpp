@@ -581,8 +581,10 @@ ArkUINativeModuleValue ToggleBridge::SetOnChange(ArkUIRuntimeCallInfo* runtimeCa
         panda::Local<panda::JSValueRef> params[NUM_1] = { panda::BooleanRef::New(vm, isOnchange) };
         auto result = func->Call(vm, func.ToLocal(), params, 1);
         if (isJsView) {
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->ReportComponentChangeEvent(
                 "event", "Toggle.onChange", ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         }
     };
