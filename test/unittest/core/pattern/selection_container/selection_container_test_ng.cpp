@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/selection_container/selection_container_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_selection_child.h"
 #include "base/json/json_util.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -652,6 +653,26 @@ HWTEST_F(SelectionContainerPatternTest, ResetAllSelectionTest001, TestSize.Level
     EXPECT_EQ(indexes.endIndex, -1);
     EXPECT_TRUE(pattern_->selectionStartChild_.Upgrade() == nullptr);
     EXPECT_TRUE(pattern_->selectionEndChild_.Upgrade() == nullptr);
+}
+
+/**
+ * @tc.name: HasSelectionTest001
+ * @tc.desc: Test HasSelection checks selected children instead of current child only
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, HasSelectionTest001, TestSize.Level1)
+{
+    EXPECT_FALSE(pattern_->HasSelection());
+
+    pattern_->selectedChildren_.emplace_back(child1_);
+    EXPECT_FALSE(pattern_->HasSelection());
+
+    child2_->SetSelectionText(TEST_SELECTION_TEXT2);
+    pattern_->selectedChildren_.emplace_back(child2_);
+    EXPECT_TRUE(pattern_->HasSelection());
+
+    child2_->SetSelectionText(u"");
+    EXPECT_FALSE(pattern_->HasSelection());
 }
 
 /**
