@@ -649,7 +649,9 @@ void CustomDialogControllerPeerImpl::OpenDialog()
         }
     }
     dialogProperties_.isSysBlurStyle = true;
-    builder_();
+    if (builder_) {
+        builder_();
+    }
 }
 
 void CustomDialogControllerPeerImpl::CloseDialog()
