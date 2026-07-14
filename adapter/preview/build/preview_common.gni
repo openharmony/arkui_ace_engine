@@ -27,6 +27,7 @@ advance_components_support = false
 connect_server_support = false
 enable_rosen_backend = true
 enable_standard_input = false
+enable_inspector_event_reporting = true
 enable_auto_fill_controller = true
 video_components_support = false
 web_components_support = false
@@ -107,6 +108,10 @@ if (defined(preview_support) && preview_support) {
 
 if (defined(model_component_support) && model_component_support) {
   defines += [ "MODEL_COMPONENT_SUPPORTED" ]
+}
+
+if (defined(enable_inspector_event_reporting) && enable_inspector_event_reporting) {
+  defines += [ "ENABLE_INSPECTOR_EVENT_REPORTING" ]
 }
 
 if (defined(image_analyzer_support) && image_analyzer_support) {

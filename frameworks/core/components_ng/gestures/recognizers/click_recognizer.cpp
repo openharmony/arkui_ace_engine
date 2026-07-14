@@ -648,7 +648,9 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
                 static_cast<int32_t>(info.GetScreenLocation().GetY()));
         }
         onActionFunction(info);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         HandleReports(info, type);
+#endif
         RecordClickEventIfNeed(info);
     }
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
@@ -694,6 +696,7 @@ void ClickRecognizer::HandleReportClick(const GestureEvent& info)
     pipeline->GetClickOptimizer()->ReportClick(frameNode, info);
 }
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
 {
     auto frameNode = GetAttachedNode().Upgrade();
@@ -718,6 +721,7 @@ void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
         Reporter::GetInstance().HandleUISessionReporting(tapReport);
     }
 }
+#endif
 
 void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
 {

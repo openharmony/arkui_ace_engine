@@ -139,6 +139,10 @@ config("ace_unittest_config") {
     defines += [ "SUPPORT_IMAGE_ANALYZER" ]
   }
 
+  if (!is_arkui_x) {
+    defines += [ "ENABLE_INSPECTOR_EVENT_REPORTING" ]
+  }
+
   if (ace_engine_feature_enable_digital_crown) {
     defines += [ "SUPPORT_DIGITAL_CROWN" ]
   }
@@ -195,6 +199,10 @@ config("ace_unittest_config_ext") {
 
   if (!is_arkui_x) {
     defines += [ "SUPPORT_IMAGE_ANALYZER" ]
+  }
+
+  if (!is_arkui_x) {
+    defines += [ "ENABLE_INSPECTOR_EVENT_REPORTING" ]
   }
 
   if (ace_engine_feature_enable_digital_crown) {
