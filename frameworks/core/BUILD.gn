@@ -516,10 +516,6 @@ template("ace_core_source_set") {
 
     deps += [ "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform" ]
 
-    if (qrcodegen_support) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform" ]
-    }
-
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/model:ace_core_components_model_pattern_ng_$platform" ]
@@ -1108,10 +1104,6 @@ template("ace_core_ng_source_set") {
 
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
-    } else {
-      if (qrcodegen_support) {
-        deps += [ "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform" ]
-      }
     }
 
     if (defined(config.enable_ability_component) &&
