@@ -15,7 +15,6 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 
-#include <chrono>
 #include <cstdint>
 #include <sstream>
 #include <string>
@@ -2026,18 +2025,8 @@ void JSText::RegisterTailIndentsResources(NG::FrameNode* frameNode,
     std::vector<RefPtr<ResourceObject>> resObjArrayCopy = allResObjs;
     std::vector<size_t> indexCopy = resourceIndexes;
 
-    // Deduplication mechanism to avoid N redundant rebuilds
-    constexpr int64_t RESOURCE_UPDATE_DEDUP_INTERVAL_MS = 10;  // 10ms deduplication window
-    auto lastUpdateTime = std::make_shared<int64_t>(0);
-    auto updateFunc = [weakNode, arrayCopy, resObjArrayCopy, indexCopy, lastUpdateTime]
+    auto updateFunc = [weakNode, arrayCopy, resObjArrayCopy, indexCopy]
         (const RefPtr<ResourceObject>& resObj) {
-        auto now = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now().time_since_epoch()).count();
-        // Skip if already updated within dedup interval
-        if (now - *lastUpdateTime < RESOURCE_UPDATE_DEDUP_INTERVAL_MS) {
-            return;
-        }
-        *lastUpdateTime = now;
         auto node = weakNode.Upgrade();
         if (node) {
             UpdateTailIndentsFromResources(node, arrayCopy, resObjArrayCopy, indexCopy);
