@@ -16,6 +16,7 @@
 
 #include "base/error/error_code.h"
 #include "core/common/container.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -251,6 +252,38 @@ void DialogManager::SetSmoothImmersiveShadow(
     auto dipScale = pipelineContext->GetDipScale();
     auto shadow = Ace::MaterialUtils::GetImmersiveShadow(dipScale);
     renderContext->UpdateBackShadow(shadow);
+}
+
+bool DialogManager::IsUseImmersiveDistortionEffect()
+{
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel == UiMaterialLevel::SMOOTH) {
+        return false;
+    }
+    auto transparencyLevel = static_cast<UiMaterialTransparency>(
+        TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel)));
+    if (materialLevel == UiMaterialLevel::EXQUISITE) {
+        return transparencyLevel == UiMaterialTransparency::NORMAL ||
+               transparencyLevel == UiMaterialTransparency::THIN;
+    }
+    // GENTLE: distortion is false for all transparency levels
+    return false;
+}
+
+bool DialogManager::IsUseImmersiveEdgeLightEffect()
+{
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel == UiMaterialLevel::SMOOTH) {
+        return false;
+    }
+    auto transparencyLevel = static_cast<UiMaterialTransparency>(
+        TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel)));
+    if (materialLevel == UiMaterialLevel::EXQUISITE) {
+        return transparencyLevel == UiMaterialTransparency::NORMAL ||
+               transparencyLevel == UiMaterialTransparency::THIN;
+    }
+    // GENTLE: edge light is true only for GENTLE_THIN
+    return transparencyLevel == UiMaterialTransparency::GENTLE_THIN;
 }
 
 } // namespace OHOS::Ace::NG

@@ -49,6 +49,9 @@ public:
 
     RefPtr<UINode> GetDialogNodeByContentNode(const RefPtr<UINode>& currentNode);
 
+    static bool IsUseImmersiveDistortionEffect();
+    static bool IsUseImmersiveEdgeLightEffect();
+
     void SetDismissDialogInfo(int32_t id, const std::string& name)
     {
         dismissDialogId_ = id;

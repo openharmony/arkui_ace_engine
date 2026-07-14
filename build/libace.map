@@ -4412,6 +4412,8 @@
       OHOS::Ace::NG::CustomNodeStatic::*;
       OHOS::Ace::NG::CustomPaintPattern::*;
       OHOS::Ace::NG::DialogManagerStatic::*;
+      OHOS::Ace::NG::DialogManager::IsUseImmersiveDistortionEffect*;
+      OHOS::Ace::NG::DialogManager::IsUseImmersiveEdgeLightEffect*;
       OHOS::Ace::NG::DragControllerFuncWrapper::*;
       OHOS::Ace::NG::DragDropFuncWrapper::*;
       OHOS::Ace::NG::DragDropGlobalController::*;
