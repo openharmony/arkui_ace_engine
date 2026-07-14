@@ -195,7 +195,9 @@ bool DragDropInitiatingStateBase::CheckStatusForPanActionBegin(
     CHECK_NULL_RETURN(dragDropManager, false);
     if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
         DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, Container::CurrentId());
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::REPEAT_DRAG_FAIL);
+#endif
         TAG_LOGI(AceLogTag::ACE_DRAG, "It's already dragging now, dragging is %{public}d, MSDP dragging is %{public}d",
             dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
         return false;
@@ -397,7 +399,9 @@ void DragDropInitiatingStateBase::HandleTextDragStart(const RefPtr<FrameNode>& f
             gestureHub->SetIsTextDraggable(false);
             TAG_LOGW(AceLogTag::ACE_DRAG, "Text is not selected, stop dragging.");
             DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, Container::CurrentId());
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
             DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
+#endif
             return;
         }
         if (gestureHub->GetIsTextDraggable()) {
@@ -412,7 +416,9 @@ void DragDropInitiatingStateBase::HandleTextDragStart(const RefPtr<FrameNode>& f
                 gestureHub->SetIsTextDraggable(false);
                 TAG_LOGW(AceLogTag::ACE_DRAG, "Text isSelected: %{public}d, stop dragging.", pattern->IsSelected());
                 DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, Container::CurrentId());
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
                 DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
+#endif
                 return;
             }
             HandleTextDragCallback();

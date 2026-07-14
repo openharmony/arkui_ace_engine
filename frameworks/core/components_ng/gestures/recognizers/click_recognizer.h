@@ -145,7 +145,9 @@ private:
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
     void PlayClickSoundEffect(int32_t abscissa, int32_t ordinate);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
+#endif
     GestureJudgeResult TriggerGestureJudgeCallback();
     bool ExceedSlop();
     void InitGlobalValue(SourceType deviceId);

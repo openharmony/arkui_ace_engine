@@ -3812,7 +3812,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 #endif
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
-
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddTouchPoint(scalePoint);
@@ -3830,7 +3830,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
             scalePoint.isInjected);
 #endif
     }
-
+#endif
     if (scalePoint.type == TouchType::MOVE) {
         for (auto listenerItem : listenerVector_) {
             if (listenerItem) {
@@ -4415,19 +4415,23 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
                 pagePattern->FireDumpListener(jsParams);
             }
         }
-    } else if (params[0] == "-event") {
-        if (eventManager_) {
-            eventManager_->DumpEventWithCount(params, EventTreeType::TOUCH, hasJson);
+    } else if (params[0] == "-event" || params[0] == "-postevent" || params[0] == "-touchmonitor") {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
+        if (params[0] == "-event") {
+            if (eventManager_) {
+                eventManager_->DumpEventWithCount(params, EventTreeType::TOUCH, hasJson);
+            }
+            DumpUIExt();
+        } else if (params[0] == "-postevent") {
+            if (eventManager_) {
+                eventManager_->DumpEvent(EventTreeType::POST_EVENT, hasJson);
+            }
+        } else if (params[0] == "-touchmonitor") {
+            if (eventManager_) {
+                eventManager_->DumpTouchInfo(params, hasJson);
+            }
         }
-        DumpUIExt();
-    } else if (params[0] == "-postevent") {
-        if (eventManager_) {
-            eventManager_->DumpEvent(EventTreeType::POST_EVENT, hasJson);
-        }
-    } else if (params[0] == "-touchmonitor") {
-        if (eventManager_) {
-            eventManager_->DumpTouchInfo(params, hasJson);
-        }
+#endif
     } else if (params[0] == "-imagecache") {
         if (imageCache_) {
             imageCache_->DumpCacheInfo();
@@ -5416,9 +5420,11 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
             axisEventChecker_.GetPreAction());
     }
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::CANCEL || event.action == AxisAction::END) {
         eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddAxis(scaleEvent);
     }
+#endif
     if (eventManager_->HandleAxisEventWithDifferentDeviceId(scaleEvent, node)) {
         return;
     }
@@ -5687,7 +5693,9 @@ void PipelineContext::WindowFocus(bool isFocus)
         isWindowHasFocused_ = true;
         InputMethodManager::GetInstance()->SetWindowFocus(true);
     }
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     NG::Reporter::GetInstance().HandleWindowFocusInspectorReporting(isFocus);
+#endif
     GetOrCreateFocusManager()->WindowFocus(isFocus);
     FlushWindowFocusChangedCallback(isFocus);
 }

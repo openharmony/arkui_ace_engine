@@ -102,7 +102,9 @@ private:
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
     void GetGestureEventInfo(GestureEvent& info);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
+#endif
     GestureJudgeResult TriggerGestureJudgeCallback();
     void UpdateGestureEventInfo(std::shared_ptr<SwipeGestureEvent>& info);
 
