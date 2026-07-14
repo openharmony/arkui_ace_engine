@@ -836,6 +836,13 @@ void ArktsDynamicComponentRendererImpl::UpdateDynamicViewportConfig(
             removeTransaction();
             return;
         }
+        auto host = renderer->host_.Upgrade();
+        auto container = Platform::AceContainer::GetContainer(renderer->hostInstanceId_);
+        auto pipeline = container ? container->GetPipelineContext() : nullptr;
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        if (host && ngPipeline) {
+            ngPipeline->GetDynamicComponentSafeManager()->SetDynamicViewportConfig(host->GetId(), config);
+        }
         uiContent->UpdateViewportConfigWithAnimation(
             config, static_cast<Rosen::WindowSizeChangeReason>(reason), *option, hostRSTransaction,
             avoidAreaMap, occupiedAreaChangeInfo);
