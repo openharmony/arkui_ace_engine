@@ -32,6 +32,7 @@ template<typename Rect, typename Offset>
 JSRef<JSObject> CreateAreaObject(const EcmaVM* vm, const Rect& rect, const Offset& origin)
 {
     auto localOffset = rect.GetOffset();
+    auto d = PipelineBase::GetCurrentDensity();
 
     // offset: { x, y }
     Local<JSValueRef> offsetKeys[] = {
@@ -40,9 +41,9 @@ JSRef<JSObject> CreateAreaObject(const EcmaVM* vm, const Rect& rect, const Offse
     };
     panda::PropertyAttribute offsetAttrs[] = {
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX())), true, true, true),
+            localOffset.GetX() / d), true, true, true),
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY())), true, true, true),
+            localOffset.GetY() / d), true, true, true),
     };
     auto offsetObj = panda::ObjectRef::NewWithProperties(vm, 2, offsetKeys, offsetAttrs);
 
@@ -53,9 +54,9 @@ JSRef<JSObject> CreateAreaObject(const EcmaVM* vm, const Rect& rect, const Offse
     };
     panda::PropertyAttribute globalAttrs[] = {
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() + origin.GetX())), true, true, true),
+            (localOffset.GetX() + origin.GetX()) / d), true, true, true),
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY())), true, true, true),
+            (localOffset.GetY() + origin.GetY()) / d), true, true, true),
     };
     auto globalOffsetObj = panda::ObjectRef::NewWithProperties(vm, 2, globalKeys, globalAttrs);
 
@@ -74,9 +75,9 @@ JSRef<JSObject> CreateAreaObject(const EcmaVM* vm, const Rect& rect, const Offse
         panda::PropertyAttribute(globalOffsetObj, true, true, true),
         panda::PropertyAttribute(globalOffsetObj, true, true, true),
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            PipelineBase::Px2VpWithCurrentDensity(rect.Width())), true, true, true),
+            rect.Width() / d), true, true, true),
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            PipelineBase::Px2VpWithCurrentDensity(rect.Height())), true, true, true),
+            rect.Height() / d), true, true, true),
     };
     auto areaObj = panda::ObjectRef::NewWithProperties(vm, 6, areaKeys, areaAttrs);
 
@@ -90,8 +91,8 @@ void JsOnAreaChangeFunction::Execute(
 {
     auto vm = jsFunction_->GetEcmaVM();
     panda::JsiFastNativeScope fastNativeScope(vm);
-    auto oldArea = CreateAreaObject(vm, oldRect, oldOrigin);
-    auto area = CreateAreaObject(vm, rect, origin);
+    auto oldArea = CreateAreaObject<Rect, Offset>(vm, oldRect, oldOrigin);
+    auto area = CreateAreaObject<Rect, Offset>(vm, rect, origin);
     JSRef<JSVal> params[2];
     params[0] = oldArea;
     params[1] = area;
@@ -103,8 +104,8 @@ void JsOnAreaChangeFunction::Execute(
 {
     auto vm = jsFunction_->GetEcmaVM();
     panda::JsiFastNativeScope fastNativeScope(vm);
-    auto oldArea = CreateAreaObject(vm, oldRect, oldOrigin);
-    auto area = CreateAreaObject(vm, rect, origin);
+    auto oldArea = CreateAreaObject<NG::RectF, NG::OffsetF>(vm, oldRect, oldOrigin);
+    auto area = CreateAreaObject<NG::RectF, NG::OffsetF>(vm, rect, origin);
     JSRef<JSVal> params[2];
     params[0] = oldArea;
     params[1] = area;
