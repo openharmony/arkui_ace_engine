@@ -64,7 +64,7 @@ bool CheckPageName(std::unordered_map<std::string, std::string>& extInfo, std::s
     auto iter = extInfo.find(KEY_PAGE_NAME);
     CHECK_EQUAL_RETURN(iter, extInfo.end(), false);
     pageName = iter->second;
-    return !pageName.empty();
+    return true;
 }
 
 bool CheckComponentName(std::unordered_map<std::string, std::string>& extInfo, std::string& componentName)
@@ -204,10 +204,8 @@ int32_t ResschedEventListener::GetContainerId(int32_t windowId)
 bool ResschedEventListener::IsPageMatch(const std::string& pageName, const std::string& componentName,
     const std::string& pageFullPath, const std::string& currentPageName, const std::string& currentComponentName) const
 {
-    CHECK_EQUAL_RETURN(pageName, pageFullPath, true);
-    CHECK_EQUAL_RETURN(pageName, currentPageName, true);
-    CHECK_EQUAL_RETURN(componentName.empty(), true, false);
-    CHECK_EQUAL_RETURN(componentName, currentComponentName, true);
-    return false;
+    auto isPageNameMatch = !pageName.empty() && (pageName == pageFullPath || pageName == currentPageName);
+    auto isComponentNameMatch = !componentName.empty() && componentName == currentComponentName;
+    return isPageNameMatch || isComponentNameMatch;
 }
 } // namespace OHOS::Ace
