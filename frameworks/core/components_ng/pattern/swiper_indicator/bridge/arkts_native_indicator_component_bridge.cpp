@@ -272,7 +272,7 @@ void SetJsViewDotIndicatorInfo(
     auto defaultSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
     CalcDimension dimSpace;
     auto parseSpaceOk = !spaceValue.IsNull() && !spaceValue->IsUndefined() &&
-                        ArkTSUtils::ParseLengthMetricsToDimensionForTabs(vm, spaceValue, dimSpace) &&
+                        ParseLengthMetricsToDimensionForSwiper(vm, spaceValue, dimSpace) &&
                         (dimSpace.Unit() != DimensionUnit::PERCENT);
     swiperParameters.dimSpace = (parseSpaceOk && !(dimSpace < 0.0_vp)) ? dimSpace : defaultSpace;
     if (maxDisplayCountVal.IsNull() || maxDisplayCountVal->IsUndefined()) {
@@ -311,11 +311,11 @@ SwiperParameters GetJsViewDotIndicatorInfo(EcmaVM* vm, const Local<JSValueRef>& 
     CalcDimension dimEnd;
     std::optional<Dimension> indicatorDimension;
     swiperParameters.dimStart = !startValue.IsNull() && !startValue->IsUndefined() &&
-                                        ArkTSUtils::ParseLengthMetricsToDimensionForTabs(vm, startValue, dimStart)
+                                        ParseLengthMetricsToDimensionForSwiper(vm, startValue, dimStart)
                                     ? dimStart
                                     : indicatorDimension;
     swiperParameters.dimEnd = !endValue.IsNull() && !endValue->IsUndefined() &&
-                                      ArkTSUtils::ParseLengthMetricsToDimensionForTabs(vm, endValue, dimEnd)
+                                      ParseLengthMetricsToDimensionForSwiper(vm, endValue, dimEnd)
                                   ? dimEnd
                                   : indicatorDimension;
 
