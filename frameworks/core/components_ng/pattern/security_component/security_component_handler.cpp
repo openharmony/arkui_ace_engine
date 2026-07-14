@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
+
+#include <string_view>
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/utils/utils.h"
 #include "session/host/include/session.h"
@@ -38,8 +40,8 @@ using namespace OHOS::Security::SecurityComponent;
 namespace {
 constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
 constexpr float HALF = 2.0f;
-const std::string SEC_COMP_ID = "security component id = ";
-const std::string SEC_COMP_TYPE = ", security component type = ";
+constexpr std::string_view SEC_COMP_ID = "security component id = ";
+constexpr std::string_view SEC_COMP_TYPE = ", security component type = ";
 constexpr int32_t PARENT_EFFECT_CHECK_FUNC_NUM = 15;
 }
 
@@ -704,14 +706,14 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
         }
         if (CheckRenderEffect(node, parentNode, message, buttonInfo) ||
             CheckParentBorder(parentNode, frameRect, message)) {
-            message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType + message;
+            message = std::string(SEC_COMP_ID) + scId + std::string(SEC_COMP_TYPE) + scType + message;
             return true;
         }
         CheckOverlayNode(parentNode, node, message, buttonInfo);
         if (CheckLinearGradientBlur(parentNode, node, buttonInfo.hasNonCompatibleChange_, buttonInfo.blurRadius_)) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s LinearGradientBlur is set, " \
                 "security component is invalid", parentNode->GetTag().c_str());
-            message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType +
+            message = std::string(SEC_COMP_ID) + scId + std::string(SEC_COMP_TYPE) + scType +
                 ", attribute linearGradientBlur of parent component " +
                 parentNode->GetTag() + " is set";
             return true;
@@ -1375,7 +1377,8 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t
         return res;
     }
     if (!message.empty() && message != "PARENT_HAVE_INVALID_EFFECT") {
-        message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE + node->GetTag() + message;
+        message = std::string(SEC_COMP_ID) + std::to_string(node->GetId()) + std::string(SEC_COMP_TYPE) +
+            node->GetTag() + message;
     }
 
     if (res == SC_SERVICE_ERROR_COMPONENT_INFO_INVALID && !message.empty() &&
@@ -1391,14 +1394,14 @@ void SecurityComponentHandler::CheckSecurityComponentClickEvent(const RefPtr<Fra
     if (layoutProperty && layoutProperty->GetIsMaxLineLimitExceeded().has_value() &&
         layoutProperty->GetIsMaxLineLimitExceeded().value()) {
         SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is cliped by lines.");
-        message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE +
+        message = std::string(SEC_COMP_ID) + std::to_string(node->GetId()) + std::string(SEC_COMP_TYPE) +
             node->GetTag() + ", the text of the security component is cliped by lines";
         return;
     }
     if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
         layoutProperty->GetIsTextLimitExceeded().value()) {
         SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is out of range.");
-        message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE +
+        message = std::string(SEC_COMP_ID) + std::to_string(node->GetId()) + std::string(SEC_COMP_TYPE) +
             node->GetTag() + ", the text of the security component is out of range";
         return;
     }
@@ -1407,7 +1410,8 @@ void SecurityComponentHandler::CheckSecurityComponentClickEvent(const RefPtr<Fra
     }
     if (CheckComponentCoveredStatus(node->GetId(), message)) {
         SC_LOG_ERROR("SecurityComponentCheckFail: Security component is covered by another component.");
-        message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE + node->GetTag() + message;
+        message = std::string(SEC_COMP_ID) + std::to_string(node->GetId()) + std::string(SEC_COMP_TYPE) +
+            node->GetTag() + message;
         return;
     }
 }

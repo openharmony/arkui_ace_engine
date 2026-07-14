@@ -15,6 +15,8 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
 
+#include <string_view>
+
 #include "core/common/container.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/components_ng/svg/parse/svg_stop.h"
@@ -24,8 +26,8 @@ namespace {
 const char DOM_SVG_SRC_GRADIENT_TRANSFORM[] = "gradientTransform";
 const char DOM_SVG_SRC_SPREAD_METHOD[] = "spreadMethod"; 
 const std::string SPREAD_METHOD_PAD = "pad";
-const std::string SPREAD_METHOD_REPEAT = "repeat";
-const std::string SPREAD_METHOD_REFLECT = "reflect";
+constexpr std::string_view SPREAD_METHOD_REPEAT = "repeat";
+constexpr std::string_view SPREAD_METHOD_REFLECT = "reflect";
 }
 
 SvgGradient::SvgGradient(OHOS::Ace::GradientType gradientType)

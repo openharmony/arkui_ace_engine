@@ -42,8 +42,8 @@ Framework::GridModelImpl* GetGridModelImpl()
 #endif
 namespace NG {
 namespace {
-const std::string DEFAULT_ROWS_TEMPLATE = "1fr";
-const std::string DEFAULT_COLUMNS_TEMPLATE = "1fr";
+static constexpr std::string_view DEFAULT_ROWS_TEMPLATE = "1fr";
+static constexpr std::string_view DEFAULT_COLUMNS_TEMPLATE = "1fr";
 constexpr Dimension DEFAULT_COLUMNS_GAP = 0.0_fp;
 constexpr Dimension DEFAULT_ROWS_GAP = 0.0_fp;
 constexpr DisplayMode DEFAULT_SCROLL_BAR = DisplayMode::AUTO;
@@ -85,7 +85,7 @@ void ResetGridColumnsTemplate(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetColumnsTemplate(frameNode, DEFAULT_COLUMNS_TEMPLATE);
+    GridModelNG::SetColumnsTemplate(frameNode, std::string(DEFAULT_COLUMNS_TEMPLATE));
 }
 void SetGridRowsTemplate(ArkUINodeHandle node, const char* rowsTemplate)
 {
@@ -98,7 +98,7 @@ void ResetGridRowsTemplate(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetRowsTemplate(frameNode, DEFAULT_ROWS_TEMPLATE);
+    GridModelNG::SetRowsTemplate(frameNode, std::string(DEFAULT_ROWS_TEMPLATE));
 }
 void SetGridColumnsGap(ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap, void* columnsGapRawPtr)
 {

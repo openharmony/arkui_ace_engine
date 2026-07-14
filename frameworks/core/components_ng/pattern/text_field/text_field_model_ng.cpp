@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
 #include <cstddef>
+#include <string_view>
 
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
@@ -33,9 +34,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
-const std::string DROP_TYPE_PLAIN_TEXT = "general.plain-text";
-const std::string DROP_TYPE_HYPERLINK = "general.hyperlink";
+constexpr std::string_view DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
+constexpr std::string_view DROP_TYPE_PLAIN_TEXT = "general.plain-text";
+constexpr std::string_view DROP_TYPE_HYPERLINK = "general.hyperlink";
 }
 void TextFieldModelNG::CreateNode(
     const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value, bool isTextArea)
@@ -51,7 +52,8 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
-    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
+    std::set<std::string> allowDropSet({ std::string(DROP_TYPE_PLAIN_TEXT), std::string(DROP_TYPE_HYPERLINK),
+        std::string(DROP_TYPE_STYLED_STRING) });
     frameNode->SetAllowDrop(allowDropSet);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->InitTheme();
@@ -292,7 +294,8 @@ void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& 
     CHECK_NULL_VOID(textFieldTheme);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
-    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
+    std::set<std::string> allowDropSet({ std::string(DROP_TYPE_PLAIN_TEXT), std::string(DROP_TYPE_HYPERLINK),
+        std::string(DROP_TYPE_STYLED_STRING) });
     frameNode->SetAllowDrop(allowDropSet);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());

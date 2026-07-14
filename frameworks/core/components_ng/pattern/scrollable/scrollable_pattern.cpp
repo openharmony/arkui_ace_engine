@@ -20,6 +20,7 @@
 #include <cmath>
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include <string_view>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/point.h"
@@ -89,12 +90,11 @@ constexpr uint32_t DVSYNC_DELAY_TIME_BASE = 27000000;
 constexpr double ARC_INITWIDTH_VAL = 4.0;
 constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
 constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
-const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
-const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
-const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
-const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
-const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
-const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
+constexpr std::string_view SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
+constexpr std::string_view SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
+constexpr std::string_view SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
+constexpr std::string_view SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
+constexpr std::string_view CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
 // Threshold for back to top performance optimization (5 screen sizes)
 constexpr uint32_t BACK_TO_TOP_THRESHOLD_SCREEN = 5;
 
@@ -967,7 +967,7 @@ void ScrollablePattern::SetDragFRCSceneCallback(const RefPtr<Scrollable>& scroll
         } else if (sceneStatus == NG::SceneStatus::END) {
             pattern->SetUiDvsyncSwitch(true);
         }
-        return pattern->NotifyFRCSceneInfo(SCROLLABLE_DRAG_SCENE, velocity, sceneStatus);
+        return pattern->NotifyFRCSceneInfo(std::string(SCROLLABLE_DRAG_SCENE), velocity, sceneStatus);
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 }
@@ -1444,7 +1444,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        return pattern->NotifyFRCSceneInfo(SCROLL_BAR_DRAG_SCENE, velocity, sceneStatus);
+        return pattern->NotifyFRCSceneInfo(std::string(SCROLL_BAR_DRAG_SCENE), velocity, sceneStatus);
     };
     scrollBar_->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 
@@ -1917,7 +1917,7 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
     auto scrollbarFRcallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        return pattern->NotifyFRCSceneInfo(CUSTOM_SCROLL_BAR_SCENE, velocity, sceneStatus);
+        return pattern->NotifyFRCSceneInfo(std::string(CUSTOM_SCROLL_BAR_SCENE), velocity, sceneStatus);
     };
     auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
         auto pattern = weak.Upgrade();
@@ -2257,7 +2257,7 @@ void ScrollablePattern::OnAnimateFinish()
             (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
                 .c_str());
     }
-    NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::END);
+    NotifyFRCSceneInfo(std::string(SCROLLABLE_MULTI_TASK_SCENE), GetCurrentVelocity(), SceneStatus::END);
     isBackToTopRunning_ = false;
     backToTopSkipDistance_.reset();
 }
@@ -2302,7 +2302,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, const SpringCurveOpt
             }
             pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
         });
-    NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
+    NotifyFRCSceneInfo(std::string(SCROLLABLE_MULTI_TASK_SCENE), GetCurrentVelocity(), SceneStatus::START);
 }
 
 void ScrollablePattern::PlayCurveAnimation(
@@ -2333,7 +2333,7 @@ void ScrollablePattern::PlayCurveAnimation(
             CHECK_NULL_VOID(pattern);
             pattern->OnAnimateFinish();
         }, nullptr, host->GetContextRefPtr());
-    NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
+    NotifyFRCSceneInfo(std::string(SCROLLABLE_MULTI_TASK_SCENE), GetCurrentVelocity(), SceneStatus::START);
 }
 
 float ScrollablePattern::GetScrollDelta(float offset, bool& stopAnimation)
@@ -2346,7 +2346,7 @@ float ScrollablePattern::GetScrollDelta(float offset, bool& stopAnimation)
     uint64_t diff = currentVsync - lastVsyncTime_;
     if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
         currentVelocity_ = (offset - lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
-        NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, currentVelocity_, SceneStatus::RUNNING);
+        NotifyFRCSceneInfo(std::string(SCROLLABLE_MULTI_TASK_SCENE), currentVelocity_, SceneStatus::RUNNING);
     }
     stopAnimation = NearEqual(finalPosition_, offset, SPRING_ACCURACY);
     if (stopAnimation) {
@@ -4078,7 +4078,7 @@ void ScrollablePattern::AddHotZoneSenceInterface(SceneStatus scene)
 {
     CHECK_NULL_VOID(velocityMotion_);
     auto velocity = velocityMotion_->GetCurrentVelocity();
-    NotifyFRCSceneInfo(SCROLL_IN_HOTZONE_SCENE, velocity, scene);
+    NotifyFRCSceneInfo(std::string(SCROLL_IN_HOTZONE_SCENE), velocity, scene);
 }
 
 void ScrollablePattern::OnCollectClickTarget(const OffsetF& coordinateOffset,

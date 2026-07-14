@@ -28,10 +28,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::u16string DIGIT_WHITE_LIST = u"[0-9]";
-const std::u16string DIGIT_DECIMAL_WHITE_LIST = u"[0-9.]";
-const std::u16string PHONE_WHITE_LIST = uR"([0-9 \+\-\*\#\(\)])";
-const std::u16string EMAIL_WHITE_LIST = uR"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@"-])";
+static constexpr char16_t DIGIT_WHITE_LIST[] = u"[0-9]";
+static constexpr char16_t DIGIT_DECIMAL_WHITE_LIST[] = u"[0-9.]";
+static constexpr char16_t PHONE_WHITE_LIST[] = uR"([0-9 \+\-\*\#\(\)])";
+static constexpr char16_t EMAIL_WHITE_LIST[] = uR"([a-zA-Z0-9.!#$%&'*+/=?^_`{|}~@"-])";
 // when do ai analaysis, we should list the left and right of the string
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;

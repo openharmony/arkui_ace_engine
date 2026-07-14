@@ -15,6 +15,7 @@
 
 #include "constants_converter.h"
 #include <cstdint>
+#include <string_view>
 
 #include "rosen_text/hm_symbol_txt.h"
 #include "rosen_text/typography_create.h"
@@ -28,7 +29,7 @@
 
 namespace OHOS::Ace::Constants {
 namespace {
-const std::string FONTWEIGHT = "wght";
+constexpr std::string_view FONTWEIGHT = "wght";
 constexpr float DEFAULT_MULTIPLE = 100.0f;
 constexpr float MIN_FONT_WEIGHT = 100.0f;
 constexpr float DEFAULT_FONT_WEIGHT = 400.0f;
@@ -37,7 +38,7 @@ constexpr int32_t SCALE_EFFECT = 2;
 constexpr int32_t NONE_EFFECT = 0;
 constexpr float ORIGINAL_LINE_HEIGHT_SCALE = 1.0f;
 constexpr float DEFAULT_STROKE_WIDTH = 0.0f;
-const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+constexpr std::string_view DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 struct LineSpaceAndHeightInfo {
     double lineHeightScale = 0.0;
     double lineSpacingScale = 0.0;
@@ -623,7 +624,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
             }
         }
     }
-    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    txtStyle.fontVariations.SetAxisValue(std::string(FONTWEIGHT), fontWeightValue);
     for (const auto& variation : textStyle.GetFontVariations()) {
         if (!variation.axis.empty()) {
             txtStyle.fontVariations.SetAxisValue(
@@ -895,7 +896,7 @@ void ConvertSymbolTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyl
         txtStyle.symbol.SetAnimationStart(true);
     }
     if (txtStyle.symbol.GetSymbolType() != Rosen::SymbolType::CUSTOM) {
-        txtStyle.fontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        txtStyle.fontFamilies.push_back(std::string(DEFAULT_SYMBOL_FONTFAMILY));
     }
     txtStyle.symbol.SetSymbolBitmap(textStyle.GetReLayoutSymbolStyleBitmap());
     txtStyle.symbol.SetSymbolUid(textStyle.GetSymbolUid());
@@ -961,7 +962,7 @@ void SetFontWeightVariations(Rosen::TextStyle& txtStyle, float fontWeightScale, 
 {
     auto fontWeightValue = GetVariableFontWeight(textStyle.GetFontWeight());
     fontWeightValue = fontWeightValue * fontWeightScale;
-    txtStyle.fontVariations.SetAxisValue(FONTWEIGHT, fontWeightValue);
+    txtStyle.fontVariations.SetAxisValue(std::string(FONTWEIGHT), fontWeightValue);
 }
 
 std::optional<Rosen::SymbolShadow> ConvertToNativeSymbolShadow(const SymbolShadow& shadow)

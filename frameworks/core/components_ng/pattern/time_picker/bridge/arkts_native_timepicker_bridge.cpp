@@ -31,11 +31,12 @@
 #include "frameworks/base/i18n/time_format.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/compatible/components/picker/picker_base_component.h"
+#include <string_view>
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string DEFAULT_ERR_CODE = "-1";
-const std::string FORMAT_FONT = "%s|%s|%s";
+constexpr std::string_view DEFAULT_ERR_CODE = "-1";
+constexpr std::string_view FORMAT_FONT = "%s|%s|%s";
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -107,13 +108,13 @@ void ParseTextStyleFontSize(const EcmaVM* vm, const Local<JSValueRef>& fontSizeA
 
 std::string ParseFontWeight(const EcmaVM* vm, const Local<JSValueRef>& fontWeightArg)
 {
-    std::string weight = DEFAULT_ERR_CODE;
+    std::string weight = std::string(DEFAULT_ERR_CODE);
     if (!fontWeightArg->IsNull() && !fontWeightArg->IsUndefined()) {
         if (fontWeightArg->IsNumber()) {
             weight = std::to_string(fontWeightArg->Int32Value(vm));
         } else {
             if (!ArkTSUtils::ParseJsString(vm, fontWeightArg, weight) || weight.empty()) {
-                weight = DEFAULT_ERR_CODE;
+                weight = std::string(DEFAULT_ERR_CODE);
             }
         }
     }
@@ -702,7 +703,7 @@ ArkUINativeModuleValue TimePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     RefPtr<ResourceObject> fontFamilyResObj;
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily, fontFamilyResObj) ||
         fontFamily.empty()) {
-        fontFamily = DEFAULT_ERR_CODE;
+        fontFamily = std::string(DEFAULT_ERR_CODE);
     }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
@@ -710,7 +711,7 @@ ArkUINativeModuleValue TimePickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
     }
 
     std::string fontInfo =
-        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
+        StringUtils::FormatString(FORMAT_FONT.data(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
     textStyleStruct.textColor = color.GetValue();
     textStyleStruct.fontStyle = styleVal;
@@ -760,7 +761,7 @@ ArkUINativeModuleValue TimePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     RefPtr<ResourceObject> fontFamilyResObj;
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily, fontFamilyResObj) ||
         fontFamily.empty()) {
-        fontFamily = DEFAULT_ERR_CODE;
+        fontFamily = std::string(DEFAULT_ERR_CODE);
     }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
@@ -768,7 +769,7 @@ ArkUINativeModuleValue TimePickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
     }
 
     std::string fontInfo =
-        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
+        StringUtils::FormatString(FORMAT_FONT.data(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
     textStyleStruct.textColor = color.GetValue();
     textStyleStruct.fontStyle = styleVal;
@@ -819,7 +820,7 @@ ArkUINativeModuleValue TimePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     RefPtr<ResourceObject> fontFamilyResObj;
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamily, fontFamilyResObj) ||
         fontFamily.empty()) {
-        fontFamily = DEFAULT_ERR_CODE;
+        fontFamily = std::string(DEFAULT_ERR_CODE);
     }
     int32_t styleVal = 0;
     if (!fontStyleArg->IsNull() && !fontStyleArg->IsUndefined()) {
@@ -827,7 +828,7 @@ ArkUINativeModuleValue TimePickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
     }
 
     std::string fontInfo =
-        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
+        StringUtils::FormatString(FORMAT_FONT.data(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
 
     textStyleStruct.textColor = color.GetValue();
     textStyleStruct.fontStyle = styleVal;

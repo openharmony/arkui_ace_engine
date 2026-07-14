@@ -38,7 +38,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr bool DEFAULT_ALLOW_SCALE = true;
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
-const std::string DEFAULT_FONT_FAMILY = "cursive";
+constexpr std::string_view DEFAULT_FONT_FAMILY = "cursive";
 constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 constexpr double DEFAULT_STEP = 6.0;
 
@@ -166,7 +166,7 @@ void ResetMarqueeFontFamily(ArkUINodeHandle node, ArkUI_Bool isJsView)
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     if (!isJsView) {
-        std::string familiesStr = DEFAULT_FONT_FAMILY;
+        std::string familiesStr = std::string(DEFAULT_FONT_FAMILY);
         std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
         MarqueeModelNG::SetFontFamily(frameNode, fontFamilyResult);
     } else {
@@ -478,7 +478,7 @@ void SetMarqueeFontFamilyImpl(ArkUINodeHandle node, const char* fontFamily)
 void ResetMarqueeFontFamilyImpl(ArkUINodeHandle node, ArkUI_Bool isJsView)
 {
     if (!isJsView) {
-        std::string familiesStr = DEFAULT_FONT_FAMILY;
+        std::string familiesStr = std::string(DEFAULT_FONT_FAMILY);
         std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
         GetMarqueeModelImpl()->SetFontFamily(fontFamilyResult);
     } else {

@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h"
 #include "core/common/container.h"
 
+#include <string_view>
+
 #include "text_layout_adapter.h"
 
 #include "base/geometry/dimension.h"
@@ -43,8 +45,8 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 constexpr int32_t HEIGHT_HALF = 2;
-const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
-const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+constexpr std::string_view CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+constexpr std::string_view DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
 constexpr uint32_t DEFAULT_MIN_LINES = 1;
 constexpr uint32_t DEFAULT_LINE_HEIGHT = 28;
 float GetContentOffsetY(LayoutWrapper* layoutWrapper)
@@ -343,7 +345,7 @@ void MultipleParagraphLayoutAlgorithm::UpdateFontFamilyWithSymbol(TextStyle& tex
         }
         textStyle.SetFontFamilies(symbolFontFamilies);
     } else {
-        symbolFontFamilies.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+        symbolFontFamilies.push_back(std::string(DEFAULT_SYMBOL_FONTFAMILY));
         textStyle.SetFontFamilies(symbolFontFamilies);
     }
 }
