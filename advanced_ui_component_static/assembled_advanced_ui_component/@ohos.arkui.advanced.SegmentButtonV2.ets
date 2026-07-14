@@ -1217,7 +1217,7 @@ const multiplyCapsuleTheme: MultiplySegmentButtonV2Theme = {
 export struct MultiCapsuleSegmentButtonV2 {
   @Require @Param items: SegmentButtonV2Items;
   @Require @Param selectedIndexes: int[];
-  @Event $selectedIndexes: OnSelectedIndexesChange;
+  @Event $selectedIndexes?: OnSelectedIndexesChange;
   @Event onItemClicked?: Callback<int>;
   @Param itemMinFontScale?: double | Resource = undefined;
   @Param itemMaxFontScale?: double | Resource = undefined;
@@ -1310,7 +1310,7 @@ export struct MultiCapsuleSegmentButtonV2 {
                 .filter((index) => index >= 0 && index <= items.length - 1)
                 .concat([repeatItem.index]);
             }
-            this.$selectedIndexes(selection);
+            this.$selectedIndexes?.(selection);
           })
         })
         .key(generateUniqueKye(this.focusGroupId))
