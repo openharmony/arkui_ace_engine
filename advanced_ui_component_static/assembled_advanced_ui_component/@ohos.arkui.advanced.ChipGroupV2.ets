@@ -913,7 +913,13 @@ function parseDimension<T>(
         return value as T;
       }
     } else if (temp.type === 10003) {
-      if (resourceManager && isValidDimensionString(resourceManager.getStringSync(temp.id))) {
+      let stringValue: string = '';
+      try {
+        stringValue = resourceManager.getStringSync(temp.id);
+      } catch (err) {
+        stringValue = '';
+      }
+      if (resourceManager && isValidDimensionString(stringValue)) {
         return value as T;
       }
     }

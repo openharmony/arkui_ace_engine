@@ -1566,11 +1566,11 @@ class SimpleSegmentButtonV2 extends ViewV2 {
               Button.accessibilitySelected(this.isSelected(repeatItem));
               Button.accessibilityText(this.getItemAccessibilityText(repeatItem));
               Button.accessibilityDescription(this.getItemAccessibilityDescription(repeatItem));
-              Button.accessibilityLevel(repeatItem.item.accessibilityLevel);
+              Button.accessibilityLevel(repeatItem.item?.accessibilityLevel);
               Button.backgroundColor(Color.Transparent);
               Button.borderRadius(this.getItemBorderRadius());
               Button.direction(this.languageDirection);
-              Button.enabled(repeatItem.item.enabled);
+              Button.enabled(repeatItem.item?.enabled);
               Button.focusScopePriority(this.focusGroupId, this.getFocusPriority(repeatItem));
               Button.hoverEffect(HoverEffect.None);
               Button.layoutWeight(1);
@@ -1774,13 +1774,13 @@ class SimpleSegmentButtonV2 extends ViewV2 {
               Stack.create();
               Stack.backgroundColor(this.getEffectBackgroundColor(repeatItem));
               Stack.borderRadius(this.getItemBorderRadius());
-              Stack.height(repeatItem.item.size.height);
+              Stack.height(repeatItem.item?.size?.height);
               Stack.position({
-                x: repeatItem.item.position.x,
-                y: repeatItem.item.position.y,
+                x: repeatItem.item?.position?.x,
+                y: repeatItem.item?.position?.y,
               });
               Stack.scale(this.getItemScale(repeatItem.index));
-              Stack.width(repeatItem.item.size.width);
+              Stack.width(repeatItem.item?.size?.width);
             }, Stack);
             Stack.pop();
           })
@@ -2278,10 +2278,10 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     });
   }
   getItemAccessibilityDescription(repeatItem) {
-    return repeatItem.item.accessibilityDescription;
+    return repeatItem.item?.accessibilityDescription;
   }
   getItemAccessibilityText(repeatItem) {
-    return repeatItem.item.accessibilityText;
+    return repeatItem.item?.accessibilityText;
   }
   isSelected(repeatItem) {
     return repeatItem.index === this.normalizedSelectedIndex;
@@ -2761,13 +2761,13 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
             Button.accessibilityChecked(this.isSelected(repeatItem));
             Button.accessibilityText(this.getItemAccessibilityText(repeatItem));
             Button.accessibilityDescription(this.getItemAccessibilityDescription(repeatItem));
-            Button.accessibilityLevel(repeatItem.item.accessibilityLevel);
+            Button.accessibilityLevel(repeatItem.item?.accessibilityLevel);
             Button.backgroundColor(this.getItemBackgroundColor(repeatItem));
             Button.backgroundEffect(this.itemBackgroundEffect, { disableSystemAdaptation: true });
             Button.borderRadius(this.getItemButtonBorderRadius(repeatItem));
             Button.constraintSize({ minHeight: this.getItemMinHeight() });
             Button.direction(this.languageDirection);
-            Button.enabled(repeatItem.item.enabled);
+            Button.enabled(repeatItem.item?.enabled);
             Button.focusScopePriority(this.focusGroupId, this.getFocusPriority(repeatItem));
             Button.layoutWeight(1);
             Button.padding(0);
@@ -2920,10 +2920,10 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     return this.itemBackgroundBlurStyle;
   }
   getItemAccessibilityDescription(repeatItem) {
-    return repeatItem.item.accessibilityDescription;
+    return repeatItem.item?.accessibilityDescription;
   }
   getItemAccessibilityText(repeatItem) {
-    return repeatItem.item.accessibilityText;
+    return repeatItem.item?.accessibilityText;
   }
   getItemSpace() {
     if (
