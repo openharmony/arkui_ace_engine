@@ -43,7 +43,6 @@ public:
         themeManager_ = AceType::MakeRefPtr<NiceMock<MockThemeManager>>();
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
 
-        g_isResourceDecoupling = false;
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
             .WillRepeatedly(testing::Return(themeConstants_));

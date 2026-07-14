@@ -22,8 +22,10 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
-#include "frameworks/core/components/theme/theme_manager_impl.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/theme/app_theme.h"
+#include "core/components/theme/theme_attributes.h"
+#include "frameworks/core/components/theme/theme_manager_impl.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -90,5 +92,28 @@ HWTEST_F(ThemeManagerTestNg, GetThemesMultiThread002, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
     auto theme = themeManager->GetThemeMultiThread(ButtonTheme::TypeId(), 0);
     EXPECT_TRUE(AceType::InstanceOf<ButtonTheme>(theme));
+}
+
+/**
+ * @tc.name: GetBackgroundColor001
+ * @tc.desc: Get app background color from AppTheme, theme style, and fallback value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ThemeManagerTestNg, GetBackgroundColor001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
+
+    themeManager->themeConstants_->currentThemeStyle_ = nullptr;
+    EXPECT_EQ(themeManager->GetBackgroundColor(), Color::WHITE);
+
+    auto themeStyle = AceType::MakeRefPtr<ThemeStyle>();
+    themeStyle->SetAttr(THEME_ATTR_BG_COLOR, { .type = ThemeConstantsType::COLOR, .value = Color::RED });
+    themeManager->themeConstants_->currentThemeStyle_ = themeStyle;
+    EXPECT_EQ(themeManager->GetBackgroundColor(), Color::RED);
+
+    auto appTheme = AceType::MakeRefPtr<AppTheme>();
+    appTheme->SetBackgroundColor(Color::BLUE);
+    themeManager->themes_[AppTheme::TypeId()] = appTheme;
+    EXPECT_EQ(themeManager->GetBackgroundColor(), Color::BLUE);
 }
 }

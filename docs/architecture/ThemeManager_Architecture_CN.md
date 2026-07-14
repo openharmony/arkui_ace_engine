@@ -190,9 +190,6 @@ public:
     virtual int32_t GetSystemTheme() { return -1; }
     virtual void ParseSystemTheme() {}
 
-    // 加载自定义主题
-    virtual void LoadCustomTheme(const RefPtr<AssetManager>& assetManager) {}
-
     // 颜色模式设置
     virtual void SetColorScheme(ColorScheme colorScheme) {}
 
@@ -981,13 +978,10 @@ ResourceManager::UpdateConfiguration(config)
    Pattern::GetTheme(themeScopeId)  // 获取新主题
    ```
 
-3. **自定义主题加载**
+3. **旧自定义主题覆盖链路**
    ```
-   LoadCustomTheme(assetManager)
-       ↓
-   ThemeConstants::LoadCustomStyle(assetManager)
-       ↓
-   重新解析自定义主题样式
+   旧 resources/styles/*.json 自定义样式覆盖链路
+   已随 theme.csv 预置主题系统下线移除。
    ```
 
 #### 缓存失效策略
@@ -1850,20 +1844,14 @@ ThemeManagerImpl::GetThemeNormal(type)
           ↓
       themeConstants->GetPatternByName(THEME_PATTERN_BUTTON)
           ↓
-      ThemeStyle (包含按钮主题属性)
+      ThemeStyle (由 ResourceAdapter 装载，包含按钮主题属性)
           ├── buttonPattern->GetAttr<Color>("button_bg_color")
           ├── buttonPattern->GetAttr<Dimension>("button_radius")
           └── buttonPattern->GetAttr<double>("button_font_weight")
                 ↓
             ThemeStyle::GetAttr<T>()
                 ↓
-                ThemeConstants::GetValue(key)
-                    ↓
-                    ResourceAdapter::GetColor(resId)
-                        ├── OHOS 平台 → Global::ResourceManager::GetResourceById()
-                        └── Preview 平台 → PreviewResourceManager::GetResourceById()
-                              ↓
-                          返回资源值（Color, Dimension, int, double 等）
+                返回主题属性值（Color, Dimension, int, double 等）
 ```
 
 ### 6.3 组件获取主题的典型调用路径

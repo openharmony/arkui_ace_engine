@@ -176,7 +176,6 @@ template("ace_core_source_set") {
       "common/resource/pattern_resource_manager.cpp",
       "common/resource/resource_manager.cpp",
       "common/resource/resource_parse_utils.cpp",
-      "common/resource/resource_wrapper.cpp",
       "common/sharedata/share_data.cpp",
       "common/statistic_event_reporter.cpp",
       "common/storage/storage_proxy.cpp",
@@ -795,7 +794,6 @@ template("ace_core_ng_source_set") {
       "common/resource/pattern_resource_manager.cpp",
       "common/resource/resource_manager.cpp",
       "common/resource/resource_parse_utils.cpp",
-      "common/resource/resource_wrapper.cpp",
       "common/sharedata/share_data.cpp",
       "common/statistic_event_reporter.cpp",
       "common/storage/storage_proxy.cpp",
@@ -918,8 +916,6 @@ template("ace_core_ng_source_set") {
       "components/common/layout/screen_system_manager.cpp",
 
       # v1 deps
-      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
-      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
       "components/button/button_theme.cpp",
       "components/checkable/checkable_theme.cpp",
       "components/common/painter/rosen_svg_painter.cpp",
@@ -1040,7 +1036,6 @@ template("ace_core_ng_source_set") {
     configs = [ "$ace_root:ace_config" ]
 
     deps = [
-      "$ace_root/frameworks/core/components/theme:build_theme_code",
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
 

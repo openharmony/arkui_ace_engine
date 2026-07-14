@@ -1078,21 +1078,7 @@ auto callback = [weakView = AceType::WeakPtr<ViewAbstract>(view)]() {
 
 **解决**: 检查 `GetMinPlatformVersion()` 并提供 fallback
 
-#### 陷阱 4: 资源未释放
-
-**问题**: ResourceObject 未调用 DecRef
-
-**解决**:
-```cpp
-RefPtr<ResourceWrapper> CreateResourceWrapper(const NativeResourceObject& obj) {
-    RefPtr<ResourceObject> resourceObj = ResourceManager::GetResource(obj);
-    auto wrapper = AceType::MakeRefPtr<ResourceWrapper>(resourceObj);
-    wrapper->AddRef();  // wrapper 负责释放
-    return wrapper;
-}
-```
-
-#### 陷阱 5: 组件未附加到树
+#### 陷阱 4: 组件未附加到树
 
 **问题**: 创建 FrameNode 但未 AddChild
 
@@ -1104,7 +1090,7 @@ auto frameNode = FrameNode::CreateFrameNode(...);
 host->AddChild(frameNode);  // 附加到父节点
 ```
 
-#### 陷阱 6: 事件重复注册
+#### 陷阱 5: 事件重复注册
 
 **问题**: 多次调用 SetOnClick 导致事件触发多次
 

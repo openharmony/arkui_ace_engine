@@ -462,11 +462,6 @@ bool IsEnableScrollableItemPool()
     return system::GetBoolParameter("persist.ace.scrollablepool.enabled", false);
 }
 
-bool IsResourceDecoupling()
-{
-    return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
-}
-
 bool IsAcePerformanceMonitorEnabled()
 {
     return system::GetBoolParameter("persist.ace.performance.monitor.enabled", false);
@@ -798,7 +793,6 @@ ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 ACE_WEAK_SYM bool SystemProperties::windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
-bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::configChangePerform_ = IsConfigChangePerform();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 std::optional<bool> SystemProperties::arkUIHookEnabled_ = IsArkUIHookEnabled();
@@ -1014,7 +1008,6 @@ void SystemProperties::ReadSystemParametersCallOnce()
         traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
         stateManagerEnable_.store(IsStateManagerEnable());
         arkUIHookEnabled_ = IsArkUIHookEnabled();
-        resourceDecoupling_ = IsResourceDecoupling();
         gridCacheEnabled_ = IsGridCacheEnabled();
         gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
         sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
@@ -1163,11 +1156,6 @@ ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 bool SystemProperties::IsFormAnimationLimited()
 {
     return system::GetBoolParameter("persist.sys.arkui.formAnimationLimit", true);
-}
-
-bool SystemProperties::GetResourceDecoupling()
-{
-    return resourceDecoupling_;
 }
 
 bool SystemProperties::IsPCMode()
