@@ -134,6 +134,7 @@ struct CustomKeyboardOffsetInfo {
 struct OverlayManagerInfo {
     bool renderRootOverlay = true;
     bool enableBackPressedEvent = false;
+    std::function<bool()> onBackPress = nullptr;
 };
 
 enum class MenuLifeCycleEvent;
@@ -592,6 +593,7 @@ public:
     void OnUIExtensionWindowSizeChange();
     bool SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo);
     std::optional<OverlayManagerInfo> GetOverlayManagerOptions();
+    static bool IsDescendantOfOverlay(const RefPtr<FrameNode>& node);
 
     // The focus logic of overlay node (menu and dialog):
     // 1. before start show animation: lower level node set unfocusabel and lost focus;

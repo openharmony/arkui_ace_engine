@@ -3545,6 +3545,7 @@ bool PipelineContext::OnBackPressed()
         auto hasContainerModal = windowModal_ == WindowModal::CONTAINER_MODAL;
         if (lastRequestKeyboardNode &&
             (lastRequestKeyboardNode->GetPageId() == -1 ||
+                OverlayManager::IsDescendantOfOverlay(lastRequestKeyboardNode) ||
                 (hasContainerModal && lastRequestKeyboardNode->GetPageId() == 0)) &&
             textfieldMgr->OnBackPressed()) {
             LOGI("textfield consumed backpressed event");

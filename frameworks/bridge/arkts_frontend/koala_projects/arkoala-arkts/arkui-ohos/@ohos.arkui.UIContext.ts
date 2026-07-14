@@ -401,11 +401,13 @@ export class DragController {
 export interface OverlayManagerOptions {
     renderRootOverlay?: boolean;
     enableBackPressedEvent?: boolean;
+    onBackPress?: () => boolean;
 }
 
 class OverlayManagerOptionsInner implements OverlayManagerOptions {
     renderRootOverlay?: boolean = true;
     enableBackPressedEvent?: boolean = false;
+    onBackPress?: () => boolean = undefined;
 }
 
 export interface OrderOverlayOptions {
