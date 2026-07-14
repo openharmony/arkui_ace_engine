@@ -2,13 +2,13 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-06-27
+> 更新时间：2026-07-11
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
 
 - 上下文索引：`docs/context_registry.json`
-- 新版 KB 索引：`docs/knowledge_base_INDEX.json`
+- 旧 KB 兼容索引：`docs/knowledge_base_INDEX.json`
 - 推荐检索脚本：`docs/kb_search.py`
 - 新增文档模板：`docs/knowledge_base_TEMPLATE.md`
 
@@ -38,20 +38,20 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：79
-- 命名符合 `*_Knowledge_Base*.md` 的知识库文档：58
+- `docs/` 下 Markdown 文档总数：78
+- 命名符合 `*_Knowledge_Base*.md` 的知识库文档：52
 - `docs/syntax/` 下语法专题文档：7
   - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计
 
-- `context_registry.json` 试点条目数：2
-- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：59
-- 旧 KB 索引路径有效性：59/59（全部存在）
+- `context_registry.json` 试点条目数：9
+- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：53
+- 旧 KB 索引路径有效性：53/53（全部存在）
 
 - 类型分布：
-  - `component`: 35
+  - `component`: 29
   - `sdk`: 4
   - `feature`: 20
 - 分类分布：
@@ -59,14 +59,13 @@ rg -n "<关键字>" docs
   - `basic`: 4
   - `container`: 7
   - `data_display`: 8
-  - `media`: 1
   - `rich_text`: 3
   - `sdk`: 6
-  - `selector`: 8
+  - `selector`: 3
   - `shape`: 1
   - `system`: 16
-- 关键词总数（索引内）：530
-- 别名总数（索引内）：188
+- 关键词总数（索引内）：492
+- 别名总数（索引内）：173
 
 ### 2.3 覆盖现状
 
@@ -81,7 +80,7 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-├── kb/ (2 MD，新版 KB 专区)
+├── kb/ (10 MD，9 个新版 KB 主题 + README)
 ├── accessibility/ (1 KB)
 ├── api/ (2 KB)
 ├── architecture/ (2 KB + 2 非 `*_Knowledge_Base*` 命名架构文档)
@@ -90,7 +89,7 @@ docs/
 ├── entrance/ (1 MD)
 ├── focus/ (2 MD)
 ├── layout/ (3 KB)
-├── pattern/ (37 KB)
+├── pattern/ (31 KB + 6 非 `*_Knowledge_Base*` 命名文档)
 ├── sdk/ (3 KB)
 ├── svg/ (1 KB)
 └── syntax/ (7 MD, 其中 4 KB)
@@ -175,3 +174,6 @@ PY
 - 2026-06-27：Text 迁移完成后移除旧 KB 文件和 `legacy_kb` 入口。
 - 2026-06-27：Text 迁移完成后从旧 `knowledge_base_INDEX.json` 移除，未迁移旧 KB 仍保留。
 - 2026-06-27：Image 迁移到 `docs/kb/components/media/image.md`，旧 KB 已移除，旧索引已更新（59 条）。
+- 2026-07-10：ImageAnimator 迁移到 `docs/kb/components/media/image_animator.md`，旧 KB 已移除，旧索引已更新（57 条）。
+- 2026-07-10：新增 DrawableDescriptor 通用能力 KB：`docs/kb/capabilities/drawable_descriptor.md`。
+- 2026-07-11：TextPicker、DatePicker、TimePicker、UIPickerComponent 迁移到 `docs/kb/components/selector/`，旧 KB 已移除，旧索引已更新（53 条）。
