@@ -3182,7 +3182,7 @@ void DialogPattern::ReportDestroyActionMenu(int32_t buttonIdx)
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]PopDialog menu:%{public}s.", json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
         "ActionMenu.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
-#ifndef CROSS_PLATFORM
+#endif
 }
 
 void DialogPattern::ReportActionSheetOnInjectionEvent(bool result,
