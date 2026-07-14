@@ -179,7 +179,12 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
     auto previousOption = pipelineContext->GetSyncAnimationOption();
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
-    jsAnimateToFunc->Call(jsAnimateToFunc);
+    if (!jsAnimateToFunc->IsEmpty()) {
+        jsAnimateToFunc->Call(jsAnimateToFunc);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "jsAnimateToFunc is empty");
+        return;
+    }
     pipelineContext->FlushOnceVsyncTask();
     auto tokenOut = AnimationUtils::GetRSUIContextToken(pipelineContext);
     AceEngine::Get().NotifyContainersOrderly([triggerId, tokenOut,

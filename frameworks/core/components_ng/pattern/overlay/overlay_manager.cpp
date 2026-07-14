@@ -3454,7 +3454,9 @@ void OverlayManager::PlayDefaultModalIn(
             auto modal = modalWK.Upgrade();
             auto overlayManager = overlayWeak.Upgrade();
             CHECK_NULL_VOID(modal && overlayManager);
-            modal->GetPattern<ModalPresentationPattern>()->OnAppear();
+            auto modalPattern = modal->GetPattern<ModalPresentationPattern>();
+            CHECK_NULL_VOID(modalPattern);
+            modalPattern->OnAppear();
             // Fire hidden event of navdestination on the disappeared modal
             overlayManager->FireNavigationStateChange(false);
             ACE_SCOPED_TRACE("PlayDefaultModalIn Finished");
