@@ -22,7 +22,7 @@
 import { ListDataSource } from './ListDataSource';
 
 class SnapSpeedModifier implements AttributeModifier<ListAttribute> {
-  snapSpeed: ScrollSnapAnimationSpeed | null | undefined;
+  public snapSpeed: ScrollSnapAnimationSpeed | null | undefined;
 
   applyNormalAttribute(instance: ListAttribute): void {
     instance.scrollSnapAnimationSpeed(this.snapSpeed);

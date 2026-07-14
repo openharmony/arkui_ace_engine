@@ -38,10 +38,10 @@ import { CompletedRoutableCard } from '../../../common/Card';
 import resource from '../../../common/resource';
 
 class TestList {
-  title: string = ''
-  url: string = ''
-  key: string = ''
-  description?: ResourceStr;
+  public title: string = ''
+  public url: string = ''
+  public key: string = ''
+  public description?: ResourceStr;
 }
 
 export const Scroll_ROUTE_PREFIX: string = 'scroll';

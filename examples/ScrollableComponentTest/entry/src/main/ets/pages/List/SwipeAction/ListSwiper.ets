@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*
+/*
   * Description: 通过滑动手势PanGesture监听List的滑动方向和距离，每滑一次更新显示相应Item，模拟实现Swiper
   * Writer: dailihuan
   */

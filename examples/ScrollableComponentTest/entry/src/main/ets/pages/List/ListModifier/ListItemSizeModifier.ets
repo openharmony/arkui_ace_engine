@@ -24,7 +24,7 @@ class ListItemModify implements AttributeModifier<ListItemAttribute> {
   public hasShadow: boolean = false;
   public scale: number = 1;
   public offsetY: number = 0;
-  h: number = 30;
+  public h: number = 30;
 
   applyNormalAttribute(instance: ListItemAttribute): void {
     if (this.hasShadow) {
@@ -54,8 +54,8 @@ class DragSortCtrl<T> {
   private arr: Array<T>;
   private modify: Array<ListItemModify>;
   private dragRefOffset: number = 0;
-  offsetY: number = 0;
-  state: DragSortState = DragSortState.IDLE;
+  public offsetY: number = 0;
+  public state: DragSortState = DragSortState.IDLE;
   private ITEM_INTV: number = 120;
 
   constructor(arr: Array<T>, intv: number) {
