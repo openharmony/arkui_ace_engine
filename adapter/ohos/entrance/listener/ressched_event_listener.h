@@ -37,7 +37,7 @@ private:
 
     int32_t GetContainerId(int32_t windowId);
 
-    bool IsPageMatch(const std::string& pageName, const std::string& componentName, const std::string& pageFullPath,
+    bool IsPageOrComponentMatch(const std::string& pageName, const std::string& componentName, const std::string& pageFullPath,
         const std::string& currentPageName, const std::string& currentComponentName) const;
 
     std::mutex mutex_;

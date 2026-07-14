@@ -201,7 +201,7 @@ int32_t ResschedEventListener::GetContainerId(int32_t windowId)
     return iter->second;
 }
 
-bool ResschedEventListener::IsPageMatch(const std::string& pageName, const std::string& componentName,
+bool ResschedEventListener::IsPageOrComponentMatch(const std::string& pageName, const std::string& componentName,
     const std::string& pageFullPath, const std::string& currentPageName, const std::string& currentComponentName) const
 {
     auto isPageNameMatch = !pageName.empty() && (pageName == pageFullPath || pageName == currentPageName);

@@ -584,18 +584,14 @@ std::string PipelineContext::GetNavDestinationJSViewName(const RefPtr<PageInfo>&
     CHECK_NULL_RETURN(navigationNode, "");
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     CHECK_NULL_RETURN(navigationPattern, "");
-    
     auto navigationStack = navigationPattern->GetNavigationStack();
     CHECK_NULL_RETURN(navigationStack, "");
-
     RefPtr<NavDestinationGroupNode> navDestinationNode = nullptr;
     navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
         NavigationGroupNode::GetNavDestinationNode(navigationStack->Get()));
     CHECK_NULL_RETURN(navDestinationNode, "");
-
     auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     CHECK_NULL_RETURN(navDestinationPattern, "");
-
     return navDestinationPattern->GetJSViewName();
 }
 
