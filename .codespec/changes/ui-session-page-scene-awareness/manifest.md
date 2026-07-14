@@ -3,9 +3,9 @@ id: ui-session-page-scene-awareness
 type: feature
 title: UISession page scene rule awareness
 spec_schema: ohos-sdd/v1
-profile: arkui/component
+profile: arkui
 subprofiles:
-  - arkui/component
+  - component
 target_release:
   id: TBD
   name: TBD
@@ -16,14 +16,16 @@ target_release:
   decided_by: User
   decided_at: 2026-06-18
   change_policy: "Only update manifest.md and append release_change_log."
-release_change_log: []
+release_change_log:
+  - date: 2026-07-13
+    summary: "Align PageScene ruleJson version, stable-point text input detection, unregister story, report JSON examples, and test error-code coverage."
 complexity: "standard + security/performance"
 lineage: new-on-legacy
 status: designed
 owner: "ACE/UISession owner"
 source_issue: "TBD"
 created_at: 2026-06-18
-updated_at: 2026-07-10
+updated_at: 2026-07-13
 related: []
 related_tasks:
   - TASK-001: UISession IPC / ReportService 接口扩展

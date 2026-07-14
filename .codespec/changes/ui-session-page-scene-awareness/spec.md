@@ -1,4 +1,6 @@
-# UISession 页面场景规则化感知能力
+# 特性规格
+
+## UISession 页面场景规则化感知能力
 
 > 特性规格，驱动代码实现 | 模板参考: sdd-spec-optimization/spec-suggested.md
 
@@ -17,7 +19,7 @@
 | 状态 | Baselined |
 | 复杂度 | 标准 + 安全/DFX专项 |
 | 创建日期 | 2026-06-18 |
-| 最后更新 | 2026-07-10 |
+| 最后更新 | 2026-07-13 |
 
 ## 本次变更范围
 
@@ -71,7 +73,7 @@
 
 | AC编号 | 验收标准 | 类型 |
 |--------|----------|------|
-| AC-3.1 | GIVEN 已注册 `TEXT_EDITOR` 规则且 `policy.reportOnTextInputAttached=true`，WHEN 文本输入类控件上树且满足可见性/可获焦规则，THEN 宿主将该控件加入页面输入控件计数并挂起待检测规则；不得仅因数量达到阈值立即上报 | 正常 |
+| AC-3.1 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 文本输入类控件上树且满足可见性/可获焦规则，THEN 宿主将该控件加入页面输入控件计数并挂起待检测规则；不得仅因数量达到阈值立即上报 | 正常 |
 | AC-3.2 | GIVEN `policy.deduplicate=true` 且同一页面、同一规则、同一命中节点集合已上报，WHEN 再次触发匹配且命中集合未变化，THEN 不重复上报 | 边界 |
 | AC-3.3 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 命中节点集合变化或当前页面名变化且页面已稳定，THEN 可以重新上报新的命中结果 | 正常 |
 | AC-3.4 | GIVEN 已注册 `TEXT_EDITOR` 规则且页面内已计数某个文本输入类控件，WHEN 该控件下树，THEN 宿主从页面输入控件计数中移除该控件，并挂起待检测规则等待页面稳定点检查 | 边界 |
@@ -99,6 +101,16 @@
 | AC-5.3 | GIVEN 已向 Web 或 UIExtension 透传过规则，WHEN SA 调用 `UnregisterPageSceneRules(ruleSetId)` 或 SA 死亡，THEN 宿主向对应控件透传反注册请求 | 恢复 |
 | AC-5.4 | GIVEN SA 调用 `GetPageScene` 且规则允许 Web 或 UIExtension 来源参与，WHEN 宿主发起当前页面查询，THEN 宿主向对应控件透传查询请求 | 边界 |
 
+### US-5A: SA 反注册页面场景规则
+
+**作为** 系统 SA，**我想要** 反注册已注册的页面场景规则，**以便** 宿主停止后续检测和上报并释放该 SA 相关状态。
+
+| AC编号 | 验收标准 | 类型 |
+|--------|----------|------|
+| AC-5A.1 | GIVEN SA 已成功注册页面场景规则，WHEN SA 调用 `UnregisterPageSceneRules(ruleSetId)` 且 `ruleSetId` 匹配当前注册规则，THEN 宿主删除该规则、待检测状态和去重缓存，并返回成功 | 正常 |
+| AC-5A.2 | GIVEN SA 未注册页面场景规则或传入 `ruleSetId` 为空/不匹配，WHEN SA 调用 `UnregisterPageSceneRules(ruleSetId)`，THEN 接口返回参数错误或未注册错误，不影响其他 SA 已注册规则 | 异常 |
+| AC-5A.3 | GIVEN SA 已成功反注册页面场景规则，WHEN 后续页面文本输入类控件上树、下树或页面稳定点到达，THEN 宿主不得再因该规则上报 PageScene 事件 | 恢复 |
+
 ### US-6: 上报结果脱敏
 
 **作为** 终端用户，**我想要** 页面场景感知默认不泄露输入文本，**以便** 场景感知满足隐私和安全边界。
@@ -107,8 +119,8 @@
 |--------|----------|------|
 | AC-6.1 | GIVEN 规则中 `report.includeText=false`，WHEN 上报 `TEXT_EDITOR` 场景结果，THEN 上报结果不得包含输入文本正文 | 安全 |
 | AC-6.2 | GIVEN 规则中 `report.includeText=true`，WHEN 上报 `TEXT_EDITOR` 场景结果，THEN 每个命中文本输入类控件在 `nodes[]` 中携带 `text` 字段，字段值优先为用户已输入文本，输入为空时为框内占位提示文本 | 正常 |
-| AC-6.3 | GIVEN 规则中 `report.includeRect=true`，WHEN 上报命中节点，THEN 每个命中节点包含 `rect.x`、`rect.y`、`rect.width`、`rect.height` | 正常 |
-| AC-6.4 | GIVEN 规则中 `report.includeFocusable=true`，WHEN 上报命中节点，THEN 每个命中节点包含 `focusable` 字段 | 正常 |
+| AC-6.3 | GIVEN 规则中 `report.includeRect=true`，WHEN 上报节点摘要，THEN 每个上报节点包含 `rect.x`、`rect.y`、`rect.width`、`rect.height` | 正常 |
+| AC-6.4 | GIVEN 规则中 `report.includeFocusable=true`，WHEN 上报节点摘要，THEN 每个上报节点包含 `focusable` 字段 | 正常 |
 
 ### US-7: 页面稳定点触发 PageScene 检测
 
@@ -143,7 +155,7 @@
 | R-5 | 行为 | 页面内符合规则的可见输入类控件数量大于等于阈值 | 上报 `TEXT_EDITOR` | 首版阈值为 2，operator 为 `COUNT_GTE` | AC-2.2 |
 | R-6 | 边界 | `scope.onlyVisible=true` | 不可见或屏幕范围外控件不参与计数 | rect 为空或无交集视为不可见 | AC-2.3 |
 | R-7 | 边界 | `includeUnfocusableTextInput=false` | 不可获焦文本输入类控件不参与计数 | 默认 false | AC-2.4 |
-| R-8 | 行为 | 文本输入类控件上树且开启上树检测 | 按规则加入页面输入控件计数，并挂起对应规则的待检测任务 | 不因达到阈值立即上报，必须等待页面稳定点 | AC-3.1 |
+| R-8 | 行为 | 文本输入类控件上树 | 按规则加入页面输入控件计数，并挂起对应规则的待检测任务 | 不因达到阈值立即上报，必须等待页面稳定点 | AC-3.1 |
 | R-9 | 边界 | 命中集合与上次相同且开启去重 | 不重复上报 | 页面名、规则、来源、节点集合共同构成签名 | AC-3.2 |
 | R-10 | 行为 | 命中集合或页面名变化 | 页面稳定后允许重新上报 | 仍需满足最小上报间隔 | AC-3.3 |
 | R-10A | 边界 | 已计数文本输入类控件下树 | 从页面输入控件计数中移除，并挂起待检测规则等待页面稳定点检查 | 防止销毁节点继续贡献计数 | AC-3.4 |
@@ -161,6 +173,8 @@
 | R-20 | 边界 | 存在待检测规则但页面仍滚动、Swiper 滚动或转场 | 暂不 flush，待页面稳定后再检测 | 防频繁上下树导致中间态上报 | AC-7.2 |
 | R-21 | 架构 | Pipeline VSync 尾部 | 只调用 `ContentChangeManager::OnVsyncEnd(rootRect)` | Pipeline 不直接依赖 UiSessionManager PageScene flush 接口 | AC-7.4 |
 | R-22 | 边界 | 仅发生 Text/Image 具体控件 ContentChange 事件 | 不触发 PageScene-only 检测 | Text/Image 路径仍由 `IsContentChangeDetectEnable` 控制 | AC-7.3 |
+| R-23 | 恢复 | SA 调用合法 `UnregisterPageSceneRules(ruleSetId)` | 删除当前 SA 的已注册规则、待检测规则和去重状态，后续不再按该规则上报 | 子来源已下发规则时同步反注册；不影响其他 SA | AC-5A.1, AC-5A.3 |
+| R-24 | 异常 | `UnregisterPageSceneRules` 入参为空、未注册或与当前 SA 注册规则不匹配 | 返回参数错误或未注册错误，不清理其他 SA 状态 | 不触发子来源反注册 | AC-5A.2 |
 
 规则质量要求：每条规则必须可复现、可观测、边界明确、关联 AC 完整，且触发条件之间不得产生冲突。
 
@@ -168,6 +182,7 @@
 
 ```json
 {
+  "version": 1,
   "ruleSetId": "default_scene_rules",
   "globalConfig": {
     "includeUnfocusableTextInput": false
@@ -207,7 +222,6 @@
       },
       "policy": {
         "reportOnRegister": true,
-        "reportOnTextInputAttached": true,
         "minReportIntervalMs": 500,
         "deduplicate": true
       }
@@ -218,6 +232,7 @@
 
 | 字段 | 说明 |
 |------|------|
+| `version` | ruleJson 规格版本。首版为整数 `1`，用于后续规则格式演进时进行兼容性约定 |
 | `ruleSetId` | 规则集 ID，用于注册、反注册和查询 |
 | `globalConfig.includeUnfocusableTextInput` | 是否将不可获焦文本输入类控件纳入匹配计数 |
 | `sourceConfig.arkui` / `web` / `uiExtension` | 是否启用对应来源 |
@@ -258,14 +273,55 @@
         "width": 320.0,
         "height": 48.0
       }
+    },
+    {
+      "nodeId": 13,
+      "nodeType": "TextArea",
+      "focusable": true,
+      "rect": {
+        "x": 24.0,
+        "y": 192.0,
+        "width": 320.0,
+        "height": 96.0
+      }
     }
   ]
 }
 ```
 
-当 `report.includeText=true` 时，ArkUI 宿主来源上报的每个命中节点额外携带 `text` 字段；字段值优先为用户已输入文本，输入为空时为框内占位提示文本。默认 `includeText=false` 时不输出该字段。
+当 `report.includeText=true` 时，ArkUI 宿主来源上报的每个文本输入类控件额外携带 `text` 字段；字段值优先为用户已输入文本，输入为空时为框内占位提示文本。默认 `includeText=false` 时不输出该字段。示例：
 
-当已注册规则曾上报过 `TEXT_EDITOR` 命中事件，后续页面稳定点检查发现该规则不再命中时，ArkUI 宿主来源额外上报一次场景退出事件。退出事件沿用 `sceneType=TEXT_EDITOR`，`eventName=TEXT_EDITOR_EXIT`，`matched=false`，`matchedCount` 为当前参与统计的文本输入类控件数量，`nodes[]` 为当前仍参与统计但未达到阈值的节点摘要。退出事件只表示“该规则从已命中态转为未命中态”，主动 `GetPageScene` 返回未命中结果时仍使用 `eventName=TEXT_EDITOR`。
+```json
+{
+  "ruleSetId": "default_scene_rules",
+  "ruleId": "text_editor_rule_001",
+  "sceneType": "TEXT_EDITOR",
+  "eventName": "TEXT_EDITOR",
+  "currentPageName": "LoginPage",
+  "source": {
+    "type": "ARKUI",
+    "hostNodeId": -1
+  },
+  "matched": true,
+  "matchedCount": 2,
+  "nodes": [
+    {
+      "nodeId": 12,
+      "nodeType": "TextInput",
+      "focusable": true,
+      "text": "account"
+    },
+    {
+      "nodeId": 13,
+      "nodeType": "TextArea",
+      "focusable": true,
+      "text": "input password"
+    }
+  ]
+}
+```
+
+当已注册规则曾上报过 `TEXT_EDITOR` 命中事件，后续页面稳定点检查发现该规则不再命中时，ArkUI 宿主来源额外上报一次场景退出事件。退出事件沿用 `sceneType=TEXT_EDITOR`，`eventName=TEXT_EDITOR_EXIT`，`matched=false`，`matchedCount` 为当前参与统计的文本输入类控件数量，`nodes[]` 为当前参与统计的节点摘要。无论当前数量是否达到阈值，`nodes[]` 均表示当前参与统计的文本输入类控件摘要。退出事件只表示“该规则从已命中态转为未命中态”，主动 `GetPageScene` 返回未命中结果时仍使用 `eventName=TEXT_EDITOR`。
 
 本阶段端到端上报验证来源为 ArkUI 宿主；Web / UIExtension 对应能力为规则生命周期透传。
 
@@ -276,7 +332,7 @@
 | API 名称 | 开放范围 | 入参概要 | 返回值 | 错误码范围 | 功能描述 | 关联 AC |
 |----------|----------|----------|--------|------------|----------|---------|
 | `RegisterPageSceneRules` | System innerAPI | `ruleJson`、`PageSceneEventCallback` | `int32_t` | 成功、参数错误、重复注册、请求忙、IPC 错误 | 注册页面场景规则 | AC-1.1, AC-1.2, AC-1.3 |
-| `UnregisterPageSceneRules` | System innerAPI | `ruleSetId` | `int32_t` | 成功、参数错误、未注册、请求忙、IPC 错误 | 反注册页面场景规则 | AC-8.3, AC-8.4 |
+| `UnregisterPageSceneRules` | System innerAPI | `ruleSetId` | `int32_t` | 成功、参数错误、未注册、请求忙、IPC 错误 | 反注册页面场景规则 | AC-5A.1, AC-5A.2, AC-5A.3, AC-8.3, AC-8.4 |
 | `GetPageScene` | System innerAPI | `ruleJsonOrRuleSetId`、`PageSceneEventCallback` | `int32_t` | 成功、参数错误、请求忙、IPC 错误 | 主动查询一次页面场景 | AC-4.1, AC-4.3, AC-4.4 |
 | `ReportPageSceneEvent` | ReportService callback | `sceneJson` | void | 无返回错误码 | UI 侧向 SA 回传 ArkUI 宿主来源场景命中或退出结果 | AC-2.2, AC-3.5 |
 
@@ -297,9 +353,10 @@ API 签名、transaction、proxy/stub 和内部接口挂载点见 `design.md`。
 | AC-1.1 - AC-1.5 | R-1, R-2, R-3, R-13, R-15 | TASK-001, TASK-002, TASK-004, TASK-005 | 单测/集成/sample | Stage 3 填写 |
 | AC-2.1 - AC-2.4 | R-4, R-5, R-6, R-7 | TASK-002, TASK-003 | 单测/集成 | Stage 3 填写 |
 | AC-3.1 - AC-3.5 | R-8, R-9, R-10, R-10A, R-10B, R-19, R-20 | TASK-003, TASK-007 | 单测/集成 | Stage 3 填写 |
-| AC-4.1 - AC-4.4 | R-11, R-12, R-13 | TASK-001, TASK-002, TASK-003, TASK-004 | 单测/集成/sample | Stage 3 填写 |
-| AC-5.1 - AC-5.4 | R-13, R-14, R-15 | TASK-004, TASK-005 | 单测/mock | Stage 3 填写 |
-| AC-6.1 - AC-6.4 | R-16, R-16A, R-17 | TASK-002, TASK-003 | 单测/隐私检查 | Stage 3 填写 |
+	| AC-4.1 - AC-4.4 | R-11, R-12, R-13 | TASK-001, TASK-002, TASK-003, TASK-004 | 单测/集成/sample | Stage 3 填写 |
+	| AC-5.1 - AC-5.4 | R-13, R-14, R-15 | TASK-004, TASK-005 | 单测/mock | Stage 3 填写 |
+	| AC-5A.1 - AC-5A.3 | R-18, R-23, R-24 | TASK-001, TASK-002, TASK-004, TASK-005, TASK-007 | 单测/sample/mock | Stage 3 填写 |
+	| AC-6.1 - AC-6.4 | R-16, R-16A, R-17 | TASK-002, TASK-003 | 单测/隐私检查 | Stage 3 填写 |
 | AC-7.1 - AC-7.4 | R-19, R-20, R-21, R-22 | TASK-003, TASK-007 | 单测/代码检查 | Stage 3 填写 |
 | AC-8.1 - AC-8.4 | R-3, R-12, R-18 | TASK-001, TASK-002, TASK-007 | 单测/并发测试/死亡清理测试 | Stage 3 填写 |
 
@@ -313,7 +370,7 @@ API 签名、transaction、proxy/stub 和内部接口挂载点见 `design.md`。
 | VM-4 | R-11, R-12 | 单元测试/并发测试 | 主动查询成功、未返回再次查询返回 busy |
 | VM-5 | R-13 - R-15 | mock/单元测试 | Web/UIExtension 规则注册、反注册、查询请求透传 |
 | VM-6 | R-16, R-16A, R-17 | 单元测试/日志检查 | `includeText=false` 不输出正文、`includeText=true` 输出节点用户输入文本或占位提示文本、rect/focusable 输出 |
-| VM-7 | R-18 | 单元测试/死亡监听测试 | 反注册、SA 死亡、连接断开后的清理 |
+	| VM-7 | R-18, R-23, R-24 | 单元测试/死亡监听测试/sample | 反注册、SA 死亡、连接断开后的清理，反注册后不再上报 |
 | VM-8 | R-21, R-22 | 单元测试/代码检查 | Pipeline 不直接 flush PageScene；Text/Image 具体事件不触发 PageScene-only 检测 |
 
 ## 兼容性声明

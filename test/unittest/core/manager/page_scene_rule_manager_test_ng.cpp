@@ -81,6 +81,7 @@ std::string BuildRuleJson(bool includeUnfocusable = false, bool includeText = fa
     bool deduplicate = true, int32_t minReportIntervalMs = DEFAULT_MIN_REPORT_INTERVAL_MS)
 {
     return std::string(R"({
+        "version": 1,
         "ruleSetId": "default_scene_rules",
         "globalConfig": {
             "includeUnfocusableTextInput": )") + (includeUnfocusable ? "true" : "false") + R"(
@@ -117,7 +118,6 @@ std::string BuildRuleJson(bool includeUnfocusable = false, bool includeText = fa
                 },
                 "policy": {
                     "reportOnRegister": true,
-                    "reportOnTextInputAttached": true,
                     "deduplicate": )" + (deduplicate ? "true" : "false") + R"(,
                     "minReportIntervalMs": )" + std::to_string(minReportIntervalMs) + R"(
                 }
@@ -129,6 +129,7 @@ std::string BuildRuleJson(bool includeUnfocusable = false, bool includeText = fa
 std::string BuildInvalidRuleJson(const std::string& sceneType, const std::string& operatorName, int32_t threshold)
 {
     return std::string(R"({
+        "version": 1,
         "ruleSetId": "default_scene_rules",
         "rules": [
             {
@@ -140,6 +141,27 @@ std::string BuildInvalidRuleJson(const std::string& sceneType, const std::string
                 "condition": {
                     "operator": ")" + operatorName + R"(",
                     "threshold": )" + std::to_string(threshold) + R"(
+                }
+            }
+        ]
+    })";
+}
+
+std::string BuildUnsupportedVersionRuleJson()
+{
+    return R"({
+        "version": 2,
+        "ruleSetId": "default_scene_rules",
+        "rules": [
+            {
+                "ruleId": "text_editor_rule_001",
+                "sceneType": "TEXT_EDITOR",
+                "selector": {
+                    "nodeTypes": ["TextInput"]
+                },
+                "condition": {
+                    "operator": "COUNT_GTE",
+                    "threshold": 2
                 }
             }
         ]
@@ -243,6 +265,7 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_RegisterRuleSet001, Te
 
     EXPECT_EQ(manager.RegisterRuleSet(SECOND_PROCESS_ID, BuildRuleJson(false, true)), PAGE_SCENE_NO_ERROR);
     manager.ClearProcess(SECOND_PROCESS_ID);
+    EXPECT_EQ(manager.RegisterRuleSet(SECOND_PROCESS_ID, BuildUnsupportedVersionRuleJson()), PAGE_SCENE_PARAM_INVALID);
     EXPECT_EQ(manager.RegisterRuleSet(
         SECOND_PROCESS_ID, BuildInvalidRuleJson("TEXT_EDITOR", "COUNT_GT", MATCH_THRESHOLD)), PAGE_SCENE_PARAM_INVALID);
     EXPECT_EQ(manager.RegisterRuleSet(

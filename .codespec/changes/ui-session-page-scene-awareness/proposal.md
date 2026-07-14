@@ -1,4 +1,6 @@
-# Proposal
+# 需求文档
+
+## Proposal
 
 > This document records the Stage 1 Define deliverable for UISession page scene rule awareness.
 
@@ -90,8 +92,18 @@ UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通
 
 验收标准：
 
-- AC-8: WHEN 文本输入类控件上树且 `policy.reportOnTextInputAttached=true` THEN 维护输入控件计数并在页面稳定点触发 `TEXT_EDITOR` 匹配。
+- AC-8: WHEN 文本输入类控件上树 THEN 维护输入控件计数并在页面稳定点触发 `TEXT_EDITOR` 匹配。
 - AC-9: WHEN 同一页面、同一规则、同一命中节点集合已上报且 `policy.deduplicate=true` THEN 不重复上报。
+
+#### US-6: SA 反注册页面场景规则
+
+作为系统 SA，我想反注册已注册的页面场景规则，以便停止后续场景检测并释放宿主保存的规则状态。
+
+验收标准：
+
+- AC-15: WHEN SA 调用 `UnregisterPageSceneRules(ruleSetId)` 且 `ruleSetId` 对应当前已注册规则 THEN 宿主清理该规则、待检测状态和去重状态并返回成功。
+- AC-16: WHEN SA 调用 `UnregisterPageSceneRules(ruleSetId)` 且 `ruleSetId` 为空、不存在或不属于当前 SA THEN 宿主返回参数错误或未注册错误，不影响其他 SA 的规则。
+- AC-17: WHEN 反注册成功后页面文本输入类控件继续变化 THEN 宿主不得再因该规则上报 PageScene 事件。
 
 #### US-4: Web / UIExtension 规则透传
 

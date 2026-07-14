@@ -186,10 +186,10 @@ private:
         bool supported = false;
         bool enabled = true;
         bool reportOnRegister = true;
-        bool reportOnTextInputAttached = true;
     };
 
     struct PageSceneRuleSetInfo {
+        int32_t version = 1;
         std::string ruleSetId;
         std::string ruleJson;
         bool arkuiEnabled = true;
@@ -199,16 +199,16 @@ private:
     PageSceneRuleSetInfo ExtractPageSceneRuleSetInfo(const std::string& ruleJson) const;
     std::string ExtractPageSceneRuleSetId(const std::string& ruleJson) const;
     bool IsPageSceneRuleMatched(const PageSceneRuleInfo& rule, const std::string& sceneType,
-        bool requireRegisterPolicy, bool isAttach, const std::string& nodeType) const;
+        bool requireRegisterPolicy, const std::string& nodeType) const;
     bool HasPageSceneRule(
         const PageSceneRuleSetInfo& ruleSetInfo, const std::string& sceneType, bool requireRegisterPolicy,
-        bool isAttach, const std::string& nodeType) const;
+        const std::string& nodeType) const;
     std::vector<std::string> GetPageSceneRuleJsons(
         const PageSceneRuleSetInfo& ruleSetInfo, const std::string& sceneType, bool requireRegisterPolicy,
-        bool isAttach, const std::string& nodeType) const;
+        const std::string& nodeType) const;
     bool HasRegisteredPageSceneRuleLocked(const std::string& sceneType) const;
     std::vector<std::pair<int32_t, std::string>> GetPageSceneRuleJsonsForNodeChange(
-        const std::string& nodeTag, const std::string& sceneType, bool isAttach);
+        const std::string& nodeTag, const std::string& sceneType);
     void ErasePendingPageSceneRulesLocked(int32_t processId);
     void TriggerPageSceneDetect(int32_t processId, const std::string& ruleJson, bool isGetResult);
 

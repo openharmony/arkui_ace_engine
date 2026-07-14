@@ -174,17 +174,18 @@ virtual void ReportPageSceneEvent(const std::string& sceneJson) {}
 
 | 结构 | 字段 | 说明 |
 |------|------|------|
-| `PageSceneRuleSet` | `ruleSetId`、`globalConfig`、`sourceConfig`、`rules`、`webRulesRaw` | 一次 `ruleJson` 解析结果；`webRulesRaw` 保存原始 JSON 片段用于 Web 透传。 |
+| `PageSceneRuleSet` | `version`、`ruleSetId`、`globalConfig`、`sourceConfig`、`rules`、`webRulesRaw` | 一次 `ruleJson` 解析结果；`version` 标识规则格式版本，`webRulesRaw` 保存原始 JSON 片段用于 Web 透传。 |
 | `PageSceneRule` | `ruleId`、`sceneType`、`scope`、`selector`、`condition`、`report`、`policy` | 单条规则。 |
 | `PageSceneSubscription` | `pid`、`ruleSetId`、`PageSceneEventCallback` 语义标识、`PageSceneRuleSet` | SA 注册态。 |
 | `PageSceneReportState` | `lastReportTime`、`lastPageName`、`lastNodeSignature`、`lastMatched` | 命中去重、节流和命中到退出的状态转换。 |
-| `PageSceneNodeInfo` | `nodeId`、`nodeType`、`focusable`、`rect`、可选 `text` | 命中节点摘要；仅 `report.includeText=true` 时采集并上报 `text`，字段值优先为用户已输入文本，输入为空时为框内占位提示文本。 |
+| `PageSceneNodeInfo` | `nodeId`、`nodeType`、`focusable`、`rect`、可选 `text` | 当前参与统计节点摘要；无论是否达到阈值均可随结果上报。仅 `report.includeText=true` 时采集并上报 `text`，字段值优先为用户已输入文本，输入为空时为框内占位提示文本。 |
 | `PageSceneInputCountTracker` | `currentPageName`、`visibleInputNodes`、`visibleInputCount`、`threshold`、`rule snapshot` | ArkUI 宿主 `TEXT_EDITOR` 场景状态维护类。 |
 
 校验规则：
 
 | 字段 | 校验 |
 |------|------|
+| `version` | 必须为整数 `1`；缺失或不支持版本返回参数错误，不保存规则。 |
 | `ruleSetId` / `ruleId` | 非空，长度建议不超过 128，字符限制为字母、数字、`_`、`-`。 |
 | `sceneType` | 首版仅支持 `TEXT_EDITOR`；未知场景按规则级失败处理，不影响其他规则。 |
 | `condition.operator` | 首版仅支持 `COUNT_GTE`，即 `COUNT Greater Than or Equal`。 |
@@ -207,7 +208,7 @@ virtual void ReportPageSceneEvent(const std::string& sceneJson) {}
 | 时机 | 触发条件 | 行为 |
 |------|----------|------|
 | 首次注册后 | `policy.reportOnRegister=true` | 在 UI 线程扫描当前页面顶部控件树，初始化 `PageSceneInputCountTracker` 的可见输入控件集合和数量。 |
-| 文本输入类控件上树 | `policy.reportOnTextInputAttached=true` | 若节点满足规则过滤条件，则加入 tracker 并更新可见输入控件数量；挂起待检测规则，不立即上报。 |
+| 文本输入类控件上树 | 已注册 `TEXT_EDITOR` 规则 | 若节点满足规则过滤条件，则加入 tracker 并更新可见输入控件数量；挂起待检测规则，不立即上报。 |
 | 文本输入类控件下树 | 已注册 `TEXT_EDITOR` 规则 | 从 tracker 移除该节点并更新数量，挂起待检测规则；若稳定点检查发现已上报命中的规则不再命中，则补发一次 `TEXT_EDITOR_EXIT`。 |
 | 可见性/可获焦/rect 变化 | 已注册 `TEXT_EDITOR` 规则且节点仍在树上 | 按当前规则重新判断该节点是否计入 tracker，并更新节点摘要。 |
 | 页面稳定点 | 页面切换结束、滚动结束、Swiper/Tabs 切换结束、弹窗显示隐藏结束或 VSync 末尾确认稳定 | 对已挂起的待检测规则执行匹配和上报。滚动、Swiper 滚动、页面转场中必须延后。 |
@@ -344,7 +345,7 @@ void GetPageSceneForSubSource(const std::string& ruleJsonOrRuleSetId);
 | 场景 | 处理 |
 |------|------|
 | 非 SA 调用 | 沿用 `UiContentStub::OnRemoteRequest` 的 token 校验，返回失败。 |
-| `ruleJson` 非法 | 返回参数错误，不保存规则，不触发扫描和子来源下发。 |
+| `ruleJson` 非法、缺少 `version` 或 `version` 不支持 | 返回参数错误，不保存规则，不触发扫描和子来源下发。 |
 | `eventCallback` 语义为空或未连接 `ReportService` | 返回失败；sample 侧要求先 `Connect`。 |
 | 重复注册 | 同一 SA 已注册未注销时返回重复注册错误，不覆盖已有规则，不触发子来源下发。 |
 | 主动查询并发 | 同一 SA 已有 `GetPageScene` 未返回时返回请求忙错误，不启动新扫描。 |

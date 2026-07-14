@@ -34,6 +34,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_MIN_REPORT_INTERVAL_MS = 500;
 constexpr int32_t MAX_ID_LENGTH = 128;
+constexpr int32_t PAGE_SCENE_RULE_VERSION = 1;
 constexpr int32_t PAGE_SCENE_NO_ERROR = 0;
 constexpr int32_t PAGE_SCENE_PARAM_INVALID = 4;
 constexpr int32_t PAGE_SCENE_LAST_UNFINISH = 5;
@@ -413,6 +414,10 @@ std::optional<PageSceneRuleSet> PageSceneRuleManager::ParseRuleSet(const std::st
     }
     PageSceneRuleSet ruleSet;
     ruleSet.rawJson = ruleJson;
+    ruleSet.version = root->GetInt("version", 0);
+    if (ruleSet.version != PAGE_SCENE_RULE_VERSION) {
+        return std::nullopt;
+    }
     ruleSet.ruleSetId = root->GetString("ruleSetId");
     if (!IsValidId(ruleSet.ruleSetId)) {
         return std::nullopt;
@@ -509,7 +514,6 @@ std::optional<PageSceneRule> PageSceneRuleManager::ParseRule(const std::unique_p
     auto policy = GetObjectValue(ruleJson, "policy");
     if (policy) {
         rule.reportOnRegister = policy->GetBool("reportOnRegister", true);
-        rule.reportOnTextInputAttached = policy->GetBool("reportOnTextInputAttached", true);
         rule.deduplicate = policy->GetBool("deduplicate", true);
         rule.minReportIntervalMs = policy->GetInt("minReportIntervalMs", DEFAULT_MIN_REPORT_INTERVAL_MS);
         if (rule.minReportIntervalMs < 0) {
