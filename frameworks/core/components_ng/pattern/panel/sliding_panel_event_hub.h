@@ -19,7 +19,9 @@
 #include <memory>
 
 #include "base/memory/ace_type.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/components/panel/sliding_events.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -57,6 +59,7 @@ public:
             auto changEvent = std::make_shared<SlidingPanelSizeChangeEvent>(mode, width, height);
             changeEvent_(changEvent.get());
         }
+#ifndef CROSS_PLATFORM
         if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             return;
         }
@@ -84,6 +87,7 @@ public:
         }
         builder.SetText(modeDesc);
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
+#endif
     }
 
     void FireHeightChangeEvent(float currentOffset) const

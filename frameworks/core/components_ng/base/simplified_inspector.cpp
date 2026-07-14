@@ -22,8 +22,12 @@
 #endif
 
 #include "core/common/container.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/inspector_tree_collector.h"
+#endif
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -344,9 +348,11 @@ bool SimplifiedInspector::GetInspectorStep2(
 void SimplifiedInspector::GetFrameNodeChildren(const RefPtr<UINode>& uiNode, std::list<RefPtr<UINode>>& children)
 {
     CHECK_NULL_VOID(uiNode);
+#ifndef CROSS_PLATFORM
     if (isBackground_) {
         collector_->RetainNode(uiNode);
     }
+#endif
     if (AceType::InstanceOf<NG::FrameNode>(uiNode) || AceType::InstanceOf<SpanNode>(uiNode) ||
         AceType::InstanceOf<CustomNode>(uiNode)) {
         if (uiNode->GetTag() == "page") {
@@ -545,6 +551,7 @@ void SimplifiedInspector::GetInspectorAsync(const std::shared_ptr<Recorder::Insp
 void SimplifiedInspector::GetInspectorBackgroundAsync(
     const std::shared_ptr<Recorder::InspectorTreeCollector>& collector)
 {
+#ifndef CROSS_PLATFORM
     ContainerScope scope(Container::CurrentIdSafely());
     CHECK_NULL_VOID(collector);
     collector->CreateJson();
@@ -595,11 +602,13 @@ void SimplifiedInspector::GetInspectorBackgroundAsync(
             jsonRoot->Put(INSPECTOR_CHILDREN_COUNT, inspector->size_);
             inspector->collector_->DecreaseTaskNum();
         }, TaskExecutor::TaskType::BACKGROUND, "GetSimplifiedInspector");
+#endif
 }
 
 void SimplifiedInspector::GetInspectorTreeNode(
     const RefPtr<NG::UINode>& pageRootNode, std::shared_ptr<SimplifiedInspectorTree>& root)
 {
+#ifndef CROSS_PLATFORM
     collector_->RetainNode(pageRootNode);
     std::list<RefPtr<NG::UINode>> children;
     for (const auto& item : pageRootNode->GetChildrenForInspector(params_.enableCacheNode)) {
@@ -619,6 +628,7 @@ void SimplifiedInspector::GetInspectorTreeNode(
         }
     }
     root->children = std::move(childNodes);
+#endif
 }
 
 void SimplifiedInspector::GetInspectorTreeNodeChildren(
@@ -696,6 +706,7 @@ void SimplifiedInspector::GetInspectorChildrenBackground(
 
 void SimplifiedInspector::ExecuteUICommand(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(collector);
     collector_ = collector;
     ContainerScope scope(Container::CurrentIdSafely());
@@ -725,6 +736,7 @@ void SimplifiedInspector::ExecuteUICommand(const std::shared_ptr<Recorder::Inspe
             collector->DecreaseTaskNum();
         }
     }
+#endif
 }
 
 int32_t SimplifiedInspector::ExecuteWebScrollCommand(
@@ -806,9 +818,11 @@ void SimplifiedInspector::GetComponentSnapshot(
     if (componentParams_.mode == MODE_COMPONENT_SNAPSHOT) {
         target = frameNode;
     } else if (componentParams_.mode == MODE_IMAGE_SNAPSHOT) {
+#ifndef CROSS_PLATFORM
         auto imageNode = Recorder::GetFirstImageNodeChild(node);
         CHECK_NULL_VOID(imageNode);
         target = imageNode;
+#endif
     }
     CHECK_NULL_VOID(target);
     ComponentSnapshot::GetNormalCapture(

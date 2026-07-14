@@ -43,7 +43,9 @@
 #endif
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/event/statusbar/statusbar_event_proxy.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 
 namespace OHOS::Ace {
 class BezierVariableVelocityMotion;
@@ -1138,7 +1140,9 @@ protected:
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
 #endif
 
+#ifndef CROSS_PLATFORM
     void RecordScrollEvent(Recorder::EventType eventType);
+#endif
 
     RefPtr<Animator> GetOrCreateAnimator();
     void StopActiveScrollAnimation();

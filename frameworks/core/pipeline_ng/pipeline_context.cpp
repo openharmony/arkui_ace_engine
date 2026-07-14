@@ -48,7 +48,9 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
+#ifndef CROSS_PLATFORM
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -56,14 +58,20 @@
 #include "base/log/ace_trace.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
+#ifndef CROSS_PLATFORM
 #include "base/log/dump_recorder.h"
+#endif
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
+#ifndef CROSS_PLATFORM
 #include "base/perfmonitor/perf_monitor.h"
+#endif
 #include "base/resource/shared_image_manager.h"
 #include "base/ressched/ressched_click_optimizer.h"
+#ifndef CROSS_PLATFORM
 #include "base/ressched/ressched_report.h"
+#endif
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/ressched/taihang_optimizer.h"
 #include "base/thread/background_task_executor.h"
@@ -426,7 +434,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
+#ifndef CROSS_PLATFORM
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+#endif
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
@@ -466,7 +476,9 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
+#ifndef CROSS_PLATFORM
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+#endif
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
@@ -500,7 +512,9 @@ PipelineContext::PipelineContext()
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
     recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
+#ifndef CROSS_PLATFORM
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
+#endif
     dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
@@ -927,7 +941,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
     }
-#ifndef IS_RELEASE_VERSION
+#if !defined(IS_RELEASE_VERSION) && !defined(CROSS_PLATFORM)
     int64_t duration = GetCurrentTimestampMicroSecond() - startTime;
     if (duration > SINGLE_FRAME_TIME_MICROSEC) {
         PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SUBHEALTH", "FlushDirtyNodeUpdate", duration);
@@ -1163,9 +1177,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     }
     SetVsyncTime(nanoTimestamp);
     // First vsync may come before rootNode_ is created.
+#ifndef CROSS_PLATFORM
     if (contentChangeMgr_ && rootNode_) {
         contentChangeMgr_->OnVsyncStart();
     }
+#endif
     ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]", nanoTimestamp,
         frameCount, instanceId_);
     window_->Lock();
@@ -1341,8 +1357,10 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         asyncEventsHookListener_(); // fire all arkoala callbacks
     }
     // Keep the call sent at the end of the function
+#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
     TriggerFrameDumpFuncIfExist();
+#endif
     window_->Unlock();
 #ifdef COMPONENT_TEST_ENABLED
     ComponentTest::UpdatePipelineStatus();
@@ -1354,9 +1372,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     }
     FireFrameMetricsCallBack(frameMetrics);
     // First vsync may come before rootNode_ is created.
+#ifndef CROSS_PLATFORM
     if (contentChangeMgr_ && rootNode_) {
         contentChangeMgr_->OnVsyncEnd(rootNode_->GetRectWithRender());
     }
+#endif
 }
 
 void PipelineContext::UpdateDrawLayoutChildObserver(
@@ -1638,7 +1658,9 @@ void PipelineContext::FlushMessages(std::function<void()> callback)
     }
     if (!window_->GetIsRequestFrame()) {
         ACE_SCOPED_TRACE("smart gc end with no request frame(app_start or push_page)!");
+#ifndef CROSS_PLATFORM
         ResSchedReport::GetInstance().ResSchedDataReport("page_end_flush", {});
+#endif
     }
     HandleSpecialContainerNode();
     UpdateOcclusionCullingStatus();
@@ -3557,7 +3579,9 @@ bool PipelineContext::OnBackPressed()
         }
     }
     auto hasOverlay = false;
+#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("backpressed");
+#endif
     taskExecutor_->PostSyncTask(
         [weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager_)),
             weakSelectOverlay = AceType::WeakClaim(AceType::RawPtr(selectOverlayManager_)), &hasOverlay]() {
@@ -3806,6 +3830,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     eventManager_->CheckDownEvent(scalePoint);
+#ifndef CROSS_PLATFORM
     ReportConfig config;
 #if !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM) && defined(OHOS_PLATFORM)
     auto container = Container::GetContainer(instanceId_);
@@ -3817,8 +3842,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 #endif
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
+#endif
 #ifdef ENABLE_INSPECTOR_EVENT_REPORTING
-    if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE &&
         scalePoint.type != TouchType::HOVER_MOVE) {
         eventManager_->GetEventTreeRecord(EventTreeType::TOUCH).AddTouchPoint(scalePoint);
 #ifdef IS_RELEASE_VERSION
@@ -4490,6 +4515,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         auto root = JsonUtil::CreateSharedPtrJson(true);
         rootNode_->DumpSimplifyTree(0, root);
         DumpLog::GetInstance().Print(root->ToString());
+#ifndef CROSS_PLATFORM
     } else if (params[0] == "-allInfoWithParamConfig") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
@@ -4500,6 +4526,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, { true, true, true, false });
         DumpLog::GetInstance().Print(root->ToString());
+#endif
     } else if (params[0] == "-visibleInfoHasTopNavNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
@@ -4514,11 +4541,14 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             auto childrenJson = root->GetValue("$children");
             for (auto& navDesNode : navDesNodes) {
                 auto navDestinationJson = JsonUtil::CreateSharedPtrJson();
+#ifndef CROSS_PLATFORM
                 navDesNode->DumpSimplifyTreeWithParamConfig(0, navDestinationJson, true, { true, true, true });
+#endif
                 childrenJson->Put(navDestinationJson);
             }
         }
         DumpLog::GetInstance().Print(root->ToString());
+#ifndef CROSS_PLATFORM
     } else if (params[0] == "-visibleInfoHasNoTopNavNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
@@ -4529,6 +4559,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, { true, true, true, false });
         DumpLog::GetInstance().Print(root->ToString());
+#endif
     } else if (params[0] == "-visibleInfoFromTopPageNodeWithWeb") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
@@ -4543,11 +4574,13 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         auto config = ParseDumpParamConfig(params, DUMP_PARAM_VISIBLE_INFO_START_INDEX);
         DumpVisibleInspectorTree(root, config);
         DumpLog::GetInstance().Print(root->ToString());
+#ifndef CROSS_PLATFORM
     } else if (params[0] == "-infoOfRootNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, { true, true, true });
         DumpLog::GetInstance().Print(root->ToString());
+#endif
     } else if (params[0] == "-featuremanager") {
         if (params.size() < PARAM_NUM) {
             DumpLog::GetInstance().Print("Error: -featuremanager needs key");
@@ -4563,15 +4596,19 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
     } else if (params[0] == "-resource") {
         DumpResLoadError();
+#ifndef CROSS_PLATFORM
     } else if (params[0] == "-start") {
         OnDumpRecorderStart(params);
     } else if (params[0] == "-end") {
         DumpRecorder::GetInstance().Stop();
+#endif
     } else if (params[0] == "-injection" && params.size() > PARAM_NUM) {
 #ifndef IS_RELEASE_VERSION
         OnDumpInjection(params);
     } else if (params[0] == "-injectionkeycode" && params.size() > PARAM_NUM) {
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->SendCommand(params[1]);
+#endif
 #endif
     } else if (params[0] == "-forcedark") {
         DumpForceColor(params);
@@ -4580,20 +4617,26 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-compname" && params.size() >= PARAM_NUM) {
         rootNode_->DumpTreeByComponentName(params[1]);
         DumpLog::GetInstance().OutPutDefault();
+#ifndef CROSS_PLATFORM
     } else if (params[0] == "-allInfoWithParamConfigTotal" && params.size() >= SIMPLIFYTREE_WITH_PARAMCONFIG) {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
         auto config = ParseDumpParamConfig(params);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, params[1] == "1", config);
         DumpLog::GetInstance().Print(root->ToString());
+#endif
 #ifndef IS_RELEASE_VERSION
+#ifndef CROSS_PLATFORM
     } else if (params[0] == "-contentChange") {
         std::string info = contentChangeMgr_ ? contentChangeMgr_->DumpInfo() : "No available ContentChangeManager";
         DumpLog::GetInstance().Print(info);
 #endif
+#endif
 #ifdef RELAXED_INTERACTION_SUPPORT
     } else if (params[0] == "-relaxedinteractioncmd" && params.size() >= PARAM_NUM) {
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->SendCommand(params[1]);
+#endif
     } else if (params[0] == "-relaxedinteractionlog") {
         DumpLog::GetInstance().Print(WorkflowDumper::GetInstance().Dump());
 #endif
@@ -4601,6 +4644,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     return true;
 }
 
+#ifndef CROSS_PLATFORM
 void PipelineContext::OnDumpRecorderStart(const std::vector<std::string>& params) const
 {
     int32_t recordTime = DEFAULT_RECORD_SECOND;
@@ -4637,6 +4681,7 @@ void PipelineContext::TriggerFrameDumpFuncIfExist() const
         DumpRecorder::GetInstance().Stop();
     }
 }
+#endif
 
 void PipelineContext::DumpUIExt() const
 {
@@ -5652,7 +5697,9 @@ void PipelineContext::OnShow()
     onShow_ = true;
     isNeedCallbackAreaChange_ = true;
     window_->OnShow();
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetAppForeground(true);
+#endif
     RequestFrame();
     FlushWindowStateChangedCallback(true);
     OnShowHideForAccessibility(true);
@@ -5670,7 +5717,9 @@ void PipelineContext::OnHide()
     onShow_ = false;
     isNeedCallbackAreaChange_ = true;
     window_->OnHide();
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetAppForeground(false);
+#endif
     RequestFrame();
     OnVirtualKeyboardAreaChange(Rect());
     FlushWindowStateChangedCallback(false);
@@ -7239,7 +7288,9 @@ bool PipelineContext::ProcessOverlayChildrenDumpInfo(const RefPtr<FrameNode>& ro
                 continue;
             }
             auto eachOverlayContent = JsonUtil::CreateSharedPtrJson();
+#ifndef CROSS_PLATFORM
             child->DumpSimplifyTreeWithParamConfig(0, eachOverlayContent, true, config, nullptr, rootNodeFinalOpacity);
+#endif
             if (!eachOverlayContent->Contains("$type")) {
                 continue;
             }
@@ -7311,7 +7362,9 @@ void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, RefP
     for (auto& containerId : subContainerIds) {
         auto container = Container::GetContainer(containerId);
         CHECK_NULL_VOID(container);
+#ifndef CROSS_PLATFORM
         container->DumpSimplifyTreeWithParamConfig(root, config, true);
+#endif
     }
 }
 
@@ -7335,7 +7388,9 @@ void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(RefPtr<NG::FrameNode> s
             }
         }
         auto navNodeJson = JsonUtil::CreateSharedPtrJson();
+#ifndef CROSS_PLATFORM
         navNode->DumpSimplifyTreeWithParamConfig(0, navNodeJson, true, config, nullptr, navNodeParentFinalOpacity);
+#endif
         if (!navNodeJson->Contains("$type")) {
             continue;
         }
@@ -7465,10 +7520,12 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
         auto json = root->ToString();
         auto res = JsonUtil::Create(true);
         res->Put("0", json.c_str());
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
         if (!onlyNeedVisible) {
             UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
         }
+#endif
     };
     ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d]"
                      "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]"
@@ -7479,7 +7536,9 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
         DumpVisibleInspectorTree(root, config);
         taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
     } else {
+#ifndef CROSS_PLATFORM
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, config);
+#endif
         taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
     }
 }
@@ -7489,7 +7548,9 @@ void PipelineContext::GetHitTestInfos(InteractionParamConfig config)
     CHECK_NULL_VOID(eventManager_);
     auto json = eventManager_->GetLastHitTestNodeInfosForTouch(config.isTopMost);
     if (json.size() != 0) {
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportHitTestNodeInfos(json);
+#endif
     }
 }
 
@@ -7885,11 +7946,13 @@ RefPtr<Kit::UIContext> PipelineContext::GetUIContext()
 
 void PipelineContext::GetAllPixelMap()
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(stageManager_);
     auto pageNode = stageManager_->GetLastPage();
     CHECK_NULL_VOID(pageNode);
     CHECK_NULL_VOID(uiTranslateManager_);
     uiTranslateManager_->GetAllPixelMap(pageNode);
+#endif
 }
 
 std::shared_ptr<UiTranslateManagerImpl> PipelineContext::GetUiTranslateManagerImpl()
@@ -8151,6 +8214,7 @@ RefPtr<MagnifierController> PipelineContext::GetMagnifierController() const
 
 void PipelineContext::ResSchedReportAxisEvent(const AxisEvent& event) const
 {
+#ifndef CROSS_PLATFORM
     if (event.action == AxisAction::BEGIN) {
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Begin");
         ResSchedReport::GetInstance().OnAxisEvent(event);
@@ -8161,6 +8225,7 @@ void PipelineContext::ResSchedReportAxisEvent(const AxisEvent& event) const
         TAG_LOGD(AceLogTag::ACE_MOUSE, "Slide Axis Update");
         ResSchedReport::GetInstance().OnAxisEvent(event);
     }
+#endif
 }
 
 const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimizer() const
@@ -8242,7 +8307,9 @@ void PipelineContext::GetStateMgmtInfo(const std::string& componentName, const s
         }
     }
 
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportGetStateMgmtInfo(resultsStateMgmtInfo);
+#endif
 }
 
 void PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const

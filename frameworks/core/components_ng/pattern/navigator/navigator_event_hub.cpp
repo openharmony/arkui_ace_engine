@@ -15,13 +15,16 @@
 
 #include "navigator_event_hub.h"
 
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 
 void NavigatorEventHub::NavigatePage()
 {
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         auto host = GetFrameNode();
@@ -36,6 +39,7 @@ void NavigatorEventHub::NavigatePage()
             .SetExtra(Recorder::KEY_NAV_PAGE_TYPE, GetNavigatorType());
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
 
     auto delegate = EngineHelper::GetCurrentDelegate();
     CHECK_NULL_VOID(delegate);

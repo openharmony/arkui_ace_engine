@@ -708,6 +708,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         refreshEventHub->FireChangeEvent("false");
     }
     refreshEventHub->FireOnStateChange(static_cast<int>(refreshStatus_));
+#ifndef CROSS_PLATFORM
     if (refreshStatus_ == RefreshStatus::REFRESH && Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto inspectorId = host->GetInspectorId().value_or("");
         Recorder::EventParamsBuilder builder;
@@ -718,6 +719,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
     TAG_LOGI(AceLogTag::ACE_REFRESH, "Refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
 }
 

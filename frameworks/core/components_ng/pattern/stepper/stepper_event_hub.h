@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STEPPER_STEPPER_EVENT_HUB_H
 
 #include "core/components_ng/event/event_hub.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -59,14 +61,18 @@ public:
         if (finishEvent_) {
             finishEvent_();
         }
+#ifndef CROSS_PLATFORM
         RecordEvent(Recorder::EventType::STEPPER_FINISH, index);
+#endif
     }
     void FireSkipEvent(int32_t index) const
     {
         if (skipEvent_) {
             skipEvent_();
         }
+#ifndef CROSS_PLATFORM
         RecordEvent(Recorder::EventType::STEPPER_SKIP, index);
+#endif
     }
     void FireChangeEvent(int32_t prevIndex, int32_t index) const
     {
@@ -82,14 +88,18 @@ public:
         if (nextEvent_) {
             nextEvent_(index, pendingIndex);
         }
+#ifndef CROSS_PLATFORM
         RecordEvent(Recorder::EventType::STEPPER_NEXT, index);
+#endif
     }
     void FirePreviousEvent(int32_t index, int32_t pendingIndex) const
     {
         if (previousEvent_) {
             previousEvent_(index, pendingIndex);
         }
+#ifndef CROSS_PLATFORM
         RecordEvent(Recorder::EventType::STEPPER_PREVIOUS, index);
+#endif
     }
     void SetOnChangeEvent(IndexChangeEvent&& onChangeEvent)
     {
@@ -97,6 +107,7 @@ public:
     }
 
 private:
+#ifndef CROSS_PLATFORM
     void RecordEvent(Recorder::EventType eventType, int32_t index) const
     {
         if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
@@ -113,6 +124,7 @@ private:
         builder.SetEventType(eventType).SetIndex(index);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
 
     RoutineCallbackEvent finishEvent_;
     RoutineCallbackEvent skipEvent_;

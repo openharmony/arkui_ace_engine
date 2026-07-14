@@ -34,7 +34,9 @@
 #include "core/common/ace_engine.h"
 #include "core/common/color_inverter.h"
 #include "core/common/container.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/ui_material.h"
@@ -388,6 +390,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 
 void DialogPattern::RecordEvent(int32_t btnIndex) const
 {
+#ifndef CROSS_PLATFORM
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;
     }
@@ -407,6 +410,7 @@ void DialogPattern::RecordEvent(int32_t btnIndex) const
         .SetExtra(Recorder::KEY_TITLE, title_)
         .SetExtra(Recorder::KEY_SUB_TITLE, subtitle_);
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+#endif
 }
 
 bool CheckIsEnableMaterial(const DialogProperties& dialogProperties)
@@ -1431,6 +1435,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->storedSheetTitle_ = title;
+#ifndef CROSS_PLATFORM
             if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
                 return;
             }
@@ -1440,6 +1445,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
                 .SetExtra(Recorder::KEY_TITLE, pattern->title_)
                 .SetExtra(Recorder::KEY_SUB_TITLE, pattern->subtitle_);
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+#endif
         };
         auto recordEventPtr = MakeRefPtr<ClickEvent>(std::move(recordEvent));
         hub->AddClickEvent(recordEventPtr);
@@ -3024,6 +3030,7 @@ bool DialogPattern::HandleAlertDialogButtonClickCmd(const std::unique_ptr<JsonVa
 void DialogPattern::ReportAlertDialogOnInjectionEvent(bool result, std::string reason,
     int32_t btnIndex, RefPtr<FrameNode> btnNode)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
@@ -3049,10 +3056,12 @@ void DialogPattern::ReportAlertDialogOnInjectionEvent(bool result, std::string r
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]Report info:%{public}s.", json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
         ComponentEventType::COMPONENT_EVENT_DIALOG);
+#endif
 }
 
 void DialogPattern::ReportShow()
 {
+#ifndef CROSS_PLATFORM
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]Report show event.");
     if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show",
@@ -3064,6 +3073,7 @@ void DialogPattern::ReportShow()
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "ActionMenu.show",
             ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
+#endif
 }
 
 void DialogPattern::ReportDestroy(int32_t buttonIdx)
@@ -3075,6 +3085,7 @@ void DialogPattern::ReportDestroy(int32_t buttonIdx)
     } else {
         return;
     }
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
@@ -3105,6 +3116,7 @@ void DialogPattern::ReportDestroy(int32_t buttonIdx)
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
             "ActionSheet.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
+#endif
     if (dialogProperties_.isMenu) {
         ReportDestroyActionMenu(buttonIdx);
     }
@@ -3118,6 +3130,7 @@ void DialogPattern::ReportDestroyAutoCancel()
     } else {
         return;
     }
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
@@ -3136,6 +3149,7 @@ void DialogPattern::ReportDestroyAutoCancel()
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
             "ActionSheet.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
+#endif
 }
 
 void DialogPattern::ReportDestroyActionMenu(int32_t buttonIdx)
@@ -3153,6 +3167,7 @@ void DialogPattern::ReportDestroyActionMenu(int32_t buttonIdx)
         // click cancel button
         findIndex = static_cast<int32_t>(menuCount) - 1;
     }
+#ifndef CROSS_PLATFORM
     auto btnRow = DynamicCast<FrameNode>(upgradedMenuNode->GetChildAtIndex(findIndex));
     CHECK_NULL_VOID(btnRow);
     auto buttonNode = DynamicCast<FrameNode>(btnRow->GetFirstChild());
@@ -3167,11 +3182,13 @@ void DialogPattern::ReportDestroyActionMenu(int32_t buttonIdx)
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]PopDialog menu:%{public}s.", json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
         "ActionMenu.destroy", json, ComponentEventType::COMPONENT_EVENT_DIALOG);
+#ifndef CROSS_PLATFORM
 }
 
 void DialogPattern::ReportActionSheetOnInjectionEvent(bool result,
     std::string reason, int32_t sheetIndex, int32_t buttonIndex)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
@@ -3205,6 +3222,7 @@ void DialogPattern::ReportActionSheetOnInjectionEvent(bool result,
     TAG_LOGD(AceLogTag::ACE_DIALOG, "ReportActionSheetOnInjectionEvent report: %{public}s!", json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
         ComponentEventType::COMPONENT_EVENT_DIALOG);
+#endif
 }
 
 int32_t DialogPattern::HandleActionSheetClick(int32_t index)
@@ -3329,6 +3347,7 @@ int32_t DialogPattern::HandleActionMenuButtonClickCmd(const std::unique_ptr<Json
 
 void DialogPattern::ReportActionMenuOnInjectionEvent(bool result, const std::string& reason, const std::string& text)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
@@ -3349,6 +3368,7 @@ void DialogPattern::ReportActionMenuOnInjectionEvent(bool result, const std::str
         json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
         ComponentEventType::COMPONENT_EVENT_DIALOG);
+#endif
 }
 
 bool DialogPattern::NeedDistortion()

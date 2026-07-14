@@ -159,8 +159,10 @@ public:
 
     virtual void* GetView() const = 0;
 
+#ifndef CROSS_PLATFORM
     virtual void DumpSimplifyTreeWithParamConfig(
         std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) {};
+#endif
 
     // Trigger garbage collection
     virtual void TriggerGarbageCollection() {}

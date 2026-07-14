@@ -5438,6 +5438,7 @@ void ListPattern::ResetForExtScroll()
 
 void ListPattern::ReportOnItemListEvent(const std::string& event)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -5456,10 +5457,12 @@ void ListPattern::ReportOnItemListEvent(const std::string& event)
     result->Put("result", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -5488,6 +5491,7 @@ void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t 
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 int32_t ListPattern::OnInjectionEvent(const std::string& command)

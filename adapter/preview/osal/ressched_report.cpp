@@ -15,6 +15,7 @@
 
 #include "base/ressched/ressched_report.h"
 
+#ifndef CROSS_PLATFORM
 namespace OHOS::Ace {
 ReportDataFunc LoadReportDataFunc()
 {
@@ -41,3 +42,4 @@ pthread_t ResSchedReport::GetPthreadSelf()
     return 0;
 }
 } // namespace OHOS::Ace
+#endif

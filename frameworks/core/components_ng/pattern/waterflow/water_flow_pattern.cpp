@@ -1202,6 +1202,7 @@ bool WaterFlowPattern::IsAtSectionBoundary() const
 
 void WaterFlowPattern::ReportOnItemWaterFlowEvent(const std::string& event)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -1220,10 +1221,12 @@ void WaterFlowPattern::ReportOnItemWaterFlowEvent(const std::string& event)
     result->Put("result", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 void WaterFlowPattern::ReportOnItemWaterFlowScrollEvent(const std::string& event, int32_t startindex, int32_t endindex)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -1252,6 +1255,7 @@ void WaterFlowPattern::ReportOnItemWaterFlowScrollEvent(const std::string& event
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 int32_t WaterFlowPattern::OnInjectionEvent(const std::string& command)

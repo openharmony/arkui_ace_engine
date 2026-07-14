@@ -132,6 +132,7 @@ int32_t SwiperUISessionAdapter::OnInjectionEvent(int32_t nodeId, const std::stri
 
 void SwiperUISessionAdapter::ReportComponentChangeEvent(bool result, SwiperCommand type)
 {
+#ifndef CROSS_PLATFORM
     auto json = JsonUtil::Create();
     switch (type) {
         case SwiperCommand::FORWARD: {
@@ -172,10 +173,12 @@ void SwiperUISessionAdapter::ReportComponentChangeEvent(bool result, SwiperComma
     }
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("swiperResult", json->ToString().c_str(),
         ComponentEventType::COMPONENT_EVENT_SWIPER);
+#endif
 }
 
 void SwiperUISessionAdapter::ReportSelectChangeData(int32_t nodeId, int index)
 {
+#ifndef CROSS_PLATFORM
     auto json = InspectorJsonUtil::Create();
     CHECK_NULL_VOID(json);
 
@@ -184,6 +187,7 @@ void SwiperUISessionAdapter::ReportSelectChangeData(int32_t nodeId, int index)
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(json),
         ComponentEventType::COMPONENT_EVENT_SWIPER);
+#endif
 }
 
 const char* SwiperUISessionAdapter::GetScrollAbility()

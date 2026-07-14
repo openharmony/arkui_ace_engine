@@ -1598,10 +1598,12 @@ bool NavDestinationGroupNode::GetCanReused() const
 
 void NavDestinationGroupNode::ContentChangeReport()
 {
+#ifndef CROSS_PLATFORM
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto mgr = context->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnPageTransitionEnd(WeakClaim(this).Upgrade());
+#endif
 }
 } // namespace OHOS::Ace::NG

@@ -78,7 +78,6 @@ template("ace_base_source_set") {
       "mousestyle/mouse_style.cpp",
       "perfmonitor/perf_monitor.cpp",
       "ressched/ressched_click_optimizer.cpp",
-      "ressched/ressched_report.cpp",
       "ressched/ressched_touch_optimizer.cpp",
       "ressched/taihang_optimizer.cpp",
       "subwindow/subwindow_manager.cpp",
@@ -99,6 +98,12 @@ template("ace_base_source_set") {
       "utils/utf_helper.cpp",
       "utils/utils.cpp",
     ]
+
+     if (!is_arkui_x) {
+       sources += [
+         "ressched/ressched_report.cpp",
+       ]
+     }
 
     if (platform != "windows") {
       # add secure c API
@@ -177,6 +182,10 @@ foreach(item, ace_platforms) {
     }
 
     configs = [ "$ace_root:ace_config" ]
+
+   if (is_arkui_x) {
+      defines += [ "CROSS_PLATFORM" ]
+    }
 
     sources = [
       "$ace_root/frameworks/base/log/dump_log.cpp",

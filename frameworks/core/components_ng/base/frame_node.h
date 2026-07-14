@@ -1279,7 +1279,9 @@ public:
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
 
+#ifndef CROSS_PLATFORM
     void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
+#endif
 
     bool GetIsGeometryTransitionIn() const
     {
@@ -1760,7 +1762,9 @@ private:
 
     int32_t GetNodeExpectedRate();
 
+#ifndef CROSS_PLATFORM
     void RecordExposureInner();
+#endif
 
     const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const;
 
@@ -1957,7 +1961,9 @@ private:
 
     std::map<std::string, std::function<void()>> destroyCallbacks_;
 
+#ifndef CROSS_PLATFORM
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
+#endif
     RefPtr<SamplerManager> samplerManager_;
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
