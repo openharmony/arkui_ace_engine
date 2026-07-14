@@ -9821,6 +9821,25 @@ void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateWebMediaAVSessionEnabled");
 }
 
+void WebDelegate::UpdateWebMediaNetworkProxyEnabled(bool isEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutWebMediaNetworkProxyEnabled(isEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateWebMediaNetworkProxyEnabled");
+}
+
 std::string WebDelegate::GetCurrentLanguage()
 {
     if (nweb_) {

@@ -4733,6 +4733,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
         delegate_->UpdateOptimizeParserBudgetEnabled(GetOptimizeParserBudgetEnabledValue(false));
         delegate_->UpdateWebMediaAVSessionEnabled(GetWebMediaAVSessionEnabledValue(true));
+        delegate_->UpdateWebMediaNetworkProxyEnabled(GetWebMediaNetworkProxyEnabledValue(false));
         delegate_->UpdateGestureFocusMode(GetGestureFocusModeValue(GestureFocusMode::DEFAULT));
         delegate_->UpdateKeyboardAppearanceMode(GetKeyboardAppearanceModeValue(WebKeyboardAppearanceMode::NONE_IMMERSIVE));
 
@@ -10376,6 +10377,14 @@ void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool enable)
 {
     if (delegate_) {
         delegate_->UpdateWebMediaAVSessionEnabled(enable);
+    }
+}
+
+void WebPattern::OnWebMediaNetworkProxyEnabledUpdate(bool enable)
+{
+    RETURN_IF_CALLING_FROM_M132();
+    if (delegate_) {
+        delegate_->UpdateWebMediaNetworkProxyEnabled(enable);
     }
 }
 

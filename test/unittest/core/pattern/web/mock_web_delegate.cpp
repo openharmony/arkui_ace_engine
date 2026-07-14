@@ -1520,6 +1520,7 @@ void WebDelegate::SetIsSystemRtlEnable(bool enable) {}
 void WebDelegate::SetForceEnableZoom(bool isEnabled) {}
 void WebDelegate::SetEnableAutoFill(bool isEnabled) {}
 void WebDelegate::SetEnableDrag(bool isEnabled) {}
+void WebDelegate::UpdateWebMediaNetworkProxyEnabled(bool isEnabled) {}
 void WebDelegate::OnStatusBarClick() {}
 bool WebDelegate::IsQuickMenuShow() { return false; }
 void WebDelegate::WebScrollStopFling() {}
