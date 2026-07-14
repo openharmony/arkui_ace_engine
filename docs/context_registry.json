@@ -1062,6 +1062,53 @@
       ],
       "status": "active",
       "last_verified": "2026-07-13"
+    },
+    {
+      "id": "Router",
+      "name": "Router",
+      "name_cn": "路由管理",
+      "kind": "sdk",
+      "category": "api",
+      "keywords": [
+        "Router",
+        "路由",
+        "pushUrl",
+        "replaceUrl",
+        "back",
+        "clear",
+        "getLength",
+        "namedRouter",
+        "UIContext.Router",
+        "页面跳转",
+        "路由栈",
+        "命名路由"
+      ],
+      "aliases": [
+        "Router路由",
+        "页面路由",
+        "@ohos.router",
+        "路由管理"
+      ],
+      "kb": "docs/kb/api/router.md",
+      "spec_domain": "specs/04-common-capability/15-router-mechanism/01-router-management",
+      "func_id": "04-15-01",
+      "spec_status": "active",
+      "source_paths": {
+        "napi": "interfaces/napi/kits/router/js_router.cpp",
+        "page_router_manager": "frameworks/bridge/declarative_frontend/ng/page_router_manager_factory.cpp",
+        "manifest_router": "frameworks/bridge/common/manifest/manifest_router.cpp",
+        "router_recover": "frameworks/core/common/router_recover_record.h",
+        "router_extender": "frameworks/core/interfaces/native/implementation/router_extender_accessor.cpp",
+        "arkts_router_impl": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/router/router_impl.ets",
+        "uicontext_accessor": "frameworks/core/interfaces/native/implementation/iui_context_accessor.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.router.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.router.static.d.ets",
+        "legacy_system_router": "<OH_ROOT>/interface/sdk-js/api/@system.router.d.ts"
+      },
+      "status": "deprecated",
+      "last_verified": "2026-07-14"
     }
   ]
 }

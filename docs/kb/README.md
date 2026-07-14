@@ -1,7 +1,7 @@
 # ArkUI KB
 
 > 更新时间：2026-07-14
-> 主题数：16
+> 主题数：17
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -49,6 +49,7 @@ docs/kb/
 | TimePicker | 时间选择器组件 | `docs/kb/components/selector/time_picker.md` | 已迁移，旧 KB 已移除 |
 | UIPickerComponent | UI选择器容器组件 | `docs/kb/components/selector/ui_picker_component.md` | 已迁移，旧 KB 已移除 |
 | AlphabetIndexer | 字母索引组件 | `docs/kb/components/data_display/alphabet_indexer.md` | 新建 |
+| Router | 路由管理 | `docs/kb/api/router.md` | 新建（不推荐，推荐 Navigation） |
 
 ## 检索
 
