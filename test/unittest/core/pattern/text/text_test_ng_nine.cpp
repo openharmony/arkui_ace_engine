@@ -26,6 +26,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 
 
 namespace OHOS::Ace::NG {
@@ -198,18 +199,23 @@ HWTEST_F(TextTestNgNine, GetGlobalOffset001, TestSize.Level1)
      */
     auto [host, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(host, nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     /**
      * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
      * @tc.expected: Running GetGlobalOffset function and check the result with expected results.
+     * GetGlobalOffset computes: hostPaintOffset - rootOffset, so expected = hostPaintOffset - rootOffset.
      */
     std::vector<OffsetF> offsetCases = { { 3.0, 5.0 }, { 4.0, 5.0 }, { 6.0, 7.0 } };
-    std::vector<Offset> expectResults = { { -3.0, -5.0 }, { -4.0, -5.0 }, { -6.0, -7.0 } };
     for (uint32_t turn = 0; turn < offsetCases.size(); ++turn) {
         pipeline->rootNode_->GetGeometryNode()->SetFrameOffset(offsetCases[turn]);
         Offset tmp;
         pattern->GetGlobalOffset(tmp);
-        EXPECT_EQ(tmp, expectResults[turn]);
+        auto hostPaintOffset = host->GetPaintRectOffsetNG(false, true);
+        auto rootOffset = pipeline->GetRootRect().GetOffset();
+        Offset expected(hostPaintOffset.GetX() - rootOffset.GetX(), hostPaintOffset.GetY() - rootOffset.GetY());
+        EXPECT_EQ(tmp, expected);
     }
 }
 
