@@ -687,7 +687,13 @@ void DialogInnerManager::OpenCustomDialogInner(const RefPtr<OverlayManager>& ove
 
     int32_t dialogId = dialog->GetId();
     auto mountCallback = std::function<void(int32_t)>(
-        [cb = std::move(callback), dialogId](int32_t errorCode) { cb(errorCode, dialogId); });
+        [cb = std::move(callback), dialogId, dialog, overlayWeak = WeakClaim(this)](int32_t errorCode) {
+            auto overlayManager = overlayWeak.Upgrade();
+            if (errorCode != ERROR_CODE_NO_ERROR && overlayManager) {
+                overlayManager->RemoveDialogFromMap(dialog);
+            }
+            cb(errorCode, dialogId);
+        });
     if (dialogProps.transitionEffect != nullptr || dialogProps.dialogTransitionEffect != nullptr ||
         dialogProps.maskTransitionEffect != nullptr) {
         SetDialogTransitionEffect(overlayManager, dialog, dialogProps, std::move(mountCallback));
