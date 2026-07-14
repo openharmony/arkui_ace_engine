@@ -33,6 +33,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/arkts_frontend/ani_local_scope.h"
 #include "core/animation/animation.h"
 #include "core/animation/curve.h"
 #include "core/animation/curve_animation.h"
@@ -164,7 +165,10 @@ public:
     {
         ApplyOption();
     }
-    ~AnimatorResult() override = default;
+    ~AnimatorResult() override
+    {
+        Destroy();
+    }
 
     ani_ref GetOnframeRef() const
     {
@@ -206,6 +210,50 @@ public:
         onrepeat_ = onrepeat;
     }
 
+    void SetAniVm(ani_vm* vm)
+    {
+        vm_ = vm;
+    }
+
+    void Destroy()
+    {
+        if (animator_) {
+            if (animator_->IsRunning()) {
+                animator_->Stop();
+                TAG_LOGI(AceLogTag::ACE_ANIMATION, "[ANI] AnimatorResult force stopping when destroying, id:%{public}d",
+                    animator_->GetId());
+            }
+            animator_ = nullptr;
+        }
+        motion_ = nullptr;
+        option_ = nullptr;
+
+        if (vm_ == nullptr) {
+            return;
+        }
+        ani_env* env = GetAniEnv(vm_);
+        if (env == nullptr) {
+            return;
+        }
+
+        if (onframe_ != nullptr) {
+            env->GlobalReference_Delete(onframe_);
+            onframe_ = nullptr;
+        }
+        if (onfinish_ != nullptr) {
+            env->GlobalReference_Delete(onfinish_);
+            onfinish_ = nullptr;
+        }
+        if (oncancel_ != nullptr) {
+            env->GlobalReference_Delete(oncancel_);
+            oncancel_ = nullptr;
+        }
+        if (onrepeat_ != nullptr) {
+            env->GlobalReference_Delete(onrepeat_);
+            onrepeat_ = nullptr;
+        }
+    }
+
     void ApplyOption()
     {
         CHECK_NULL_VOID(animator_);
@@ -229,6 +277,7 @@ private:
     ani_ref onfinish_ = nullptr;
     ani_ref oncancel_ = nullptr;
     ani_ref onrepeat_ = nullptr;
+    ani_vm* vm_ = nullptr;
 };
 
 class JsSimpleAnimatorOption {
@@ -519,6 +568,13 @@ static void SetOnfinish([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
     }
     ani_vm* vm = GetAniVm(env);
     CHECK_NULL_VOID(vm);
+    animatorResult->SetAniVm(vm);
+
+    ani_ref oldFinishRef = animatorResult->GetOnfinishRef();
+    if (oldFinishRef != nullptr) {
+        env->GlobalReference_Delete(oldFinishRef);
+    }
+
     ani_ref onfinishRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onfinishGlobalRef;
     env->GlobalReference_Create(onfinishRef, &onfinishGlobalRef);
@@ -612,6 +668,13 @@ static void SetOnframe([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_objec
     }
     ani_vm* vm = GetAniVm(env);
     CHECK_NULL_VOID(vm);
+    animatorResult->SetAniVm(vm);
+
+    ani_ref oldFrameRef = animatorResult->GetOnframeRef();
+    if (oldFrameRef != nullptr) {
+        env->GlobalReference_Delete(oldFrameRef);
+    }
+
     animator->ClearInterpolators();
     ani_ref onframeRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onframeGlobalRef;
@@ -621,6 +684,7 @@ static void SetOnframe([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_objec
         weakOption = std::weak_ptr<Napi::AnimatorOption>(animatorResult->GetAnimatorOption())](double value) {
         ani_env* env = GetAniEnv(vm);
         CHECK_NULL_VOID(env);
+        ScopedAniLocalScope localScope(env);
         auto fnObj = reinterpret_cast<ani_fn_object>(onframeGlobalRef);
         auto option = weakOption.lock();
         auto args = createDouble(env, value);
@@ -665,6 +729,13 @@ static void SetOncancel([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
     }
     ani_vm* vm = GetAniVm(env);
     CHECK_NULL_VOID(vm);
+    animatorResult->SetAniVm(vm);
+
+    ani_ref oldCancelRef = animatorResult->GetOncancelRef();
+    if (oldCancelRef != nullptr) {
+        env->GlobalReference_Delete(oldCancelRef);
+    }
+
     ani_ref oncancelRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref oncancelGlobalRef;
     env->GlobalReference_Create(oncancelRef, &oncancelGlobalRef);
@@ -697,6 +768,12 @@ static void SetOnrepeat([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_obje
     }
     ani_vm* vm = GetAniVm(env);
     CHECK_NULL_VOID(vm);
+    animatorResult->SetAniVm(vm);
+
+    ani_ref oldRepeatRef = animatorResult->GetOnrepeatRef();
+    if (oldRepeatRef != nullptr) {
+        env->GlobalReference_Delete(oldRepeatRef);
+    }
 
     ani_ref onrepeatRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onrepeatGlobalRef;
@@ -879,6 +956,7 @@ static void ANIReset(ani_env *env, [[maybe_unused]] ani_object object, [[maybe_u
         auto onFrameCallback = [vm, onframeRef, id = animator->GetId()](double value) {
             ani_env* env = GetAniEnv(vm);
             CHECK_NULL_VOID(env);
+            ScopedAniLocalScope localScope(env);
             auto fnObj = reinterpret_cast<ani_fn_object>(onframeRef);
             auto args = createDouble(env, value);
             if (args == nullptr) {
