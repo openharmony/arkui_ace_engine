@@ -334,7 +334,9 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
             CHECK_NULL_VOID(video);
             ContainerScope scope(instanceId);
             video->OnCurrentTimeChange(currentPos);
+#ifdef SUPPORT_IMAGE_ANALYZER
             video->StartUpdateImageAnalyzer();
+#endif
             }, "ArkUIVideoCurrentTimeChange");
     };
 
@@ -1296,11 +1298,13 @@ void VideoPattern::OnModifyDone()
     if (!AceType::InstanceOf<VideoFullScreenPattern>(this)) {
         eventHub->SetInspectorId(host->GetInspectorIdValue(""));
     }
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     } else if (isPaused_ && !isPlaying_ && !GetAnalyzerState()) {
         StartImageAnalyzer();
     }
+#endif
     InitKeyEvent();
 }
 
@@ -1996,7 +2000,9 @@ void VideoPattern::Start()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
 
+#ifdef SUPPORT_IMAGE_ANALYZER
     DestroyAnalyzerOverlay();
+#endif
     isPaused_ = false;
 
     auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
@@ -2048,7 +2054,9 @@ void VideoPattern::Pause()
 
     if (ret != -1 && !isPaused_) {
         isPaused_ = true;
+#ifdef SUPPORT_IMAGE_ANALYZER
         StartImageAnalyzer();
+#endif
     }
 }
 
@@ -2218,6 +2226,7 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (isEnableAnalyzer_) {
         if (!imageAnalyzerManager_) {
             EnableAnalyzer(isEnableAnalyzer_);
@@ -2226,6 +2235,7 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
             StartImageAnalyzer();
         }
     }
+#endif
 
     if (!SystemProperties::GetExtSurfaceEnabled()) {
         return;
@@ -2269,9 +2279,11 @@ VideoPattern::~VideoPattern()
         renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
     }
 #endif
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     }
+#endif
     if (!fullScreenNodeId_.has_value()) {
         return;
     }
@@ -2372,11 +2384,13 @@ void VideoPattern::EnableAnalyzer(bool enable)
         return;
     }
 
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(!imageAnalyzerManager_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_UINODE_TRACE(host);
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::VIDEO_CUSTOM);
+#endif
 }
 
 void VideoPattern::SetShortcutKeyEnabled(bool isEnableShortcutKey)
@@ -2401,14 +2415,17 @@ float VideoPattern::GetCurrentVolume() const
 
 void VideoPattern::SetImageAnalyzerConfig(void* config)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (isEnableAnalyzer_) {
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->SetImageAnalyzerConfig(config);
     }
+#endif
 }
 
 void VideoPattern::SetImageAIOptions(void* options)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!imageAnalyzerManager_) {
         auto host = GetHost();
         ACE_UINODE_TRACE(host);
@@ -2416,10 +2433,12 @@ void VideoPattern::SetImageAIOptions(void* options)
     }
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->SetImageAIOptions(options);
+#endif
 }
 
 bool VideoPattern::IsSupportImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
@@ -2427,6 +2446,9 @@ bool VideoPattern::IsSupportImageAnalyzer()
     bool needControlBar = layoutProperty->GetControlsValue(true);
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
     return isEnableAnalyzer_ && !needControlBar && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
+#else
+    return false;
+#endif
 }
 
 bool VideoPattern::ShouldUpdateImageAnalyzer()
@@ -2450,6 +2472,7 @@ bool VideoPattern::ShouldUpdateImageAnalyzer()
 
 void VideoPattern::StartImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!IsSupportImageAnalyzer() || !imageAnalyzerManager_) {
         return;
     }
@@ -2469,10 +2492,12 @@ void VideoPattern::StartImageAnalyzer()
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
         }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
+#endif
 }
 
 void VideoPattern::CreateAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetOverlayNode(nullptr);
@@ -2489,10 +2514,12 @@ void VideoPattern::CreateAnalyzerOverlay()
                               contentRect_.Top() - padding.top.value_or(0) };
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap, contentOffset);
+#endif
 }
 
 void VideoPattern::StartUpdateImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     if (!imageAnalyzerManager_->IsOverlayCreated()) {
         return;
@@ -2515,10 +2542,12 @@ void VideoPattern::StartUpdateImageAnalyzer()
         pattern->isContentSizeChanged_ = false;
         }, ANALYZER_CAPTURE_DELAY_TIME, "ArkUIVideoUpdateAnalyzerOverlay");
     isContentSizeChanged_ = true;
+#endif
 }
 
 void VideoPattern::UpdateAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -2536,10 +2565,12 @@ void VideoPattern::UpdateAnalyzerOverlay()
                               contentRect_.Top() - padding.top.value_or(0) };
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap, contentOffset);
+#endif
 }
 
 void VideoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzer()) {
         auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -2551,18 +2582,25 @@ void VideoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geomet
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode, info);
     }
+#endif
 }
 
 void VideoPattern::DestroyAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
+#endif
 }
 
 bool VideoPattern::GetAnalyzerState()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
     return imageAnalyzerManager_->IsOverlayCreated();
+#else
+    return false;
+#endif
 }
 
 void VideoPattern::UpdateOverlayVisibility(VisibleType type)
