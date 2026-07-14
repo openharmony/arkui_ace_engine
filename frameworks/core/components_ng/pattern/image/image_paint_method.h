@@ -64,7 +64,7 @@ public:
 
 private:
     void UpdatePaintConfig(PaintWrapper* paintWrapper);
-    void UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxConfig& imageDfxConfig);
+    void UpdateBorderRadius(PaintWrapper* paintWrapper);
     void UpdateCanvasImage(const RefPtr<CanvasImage>& canvasImage);
 
     bool selected_ = false;
