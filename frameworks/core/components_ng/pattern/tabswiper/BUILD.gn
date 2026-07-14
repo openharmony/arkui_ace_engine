@@ -19,7 +19,7 @@ build_component_ng("tabswiper_pattern_ng") {
 
   sources = []
 
-  ark_source = []
+  ark_sources = []
 
   component_ng_deps = [
     "tabs",
