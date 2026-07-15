@@ -44,13 +44,13 @@ export class ArkGridColPeer extends ArkCommonMethodPeer {
         component?.setPeer(_peer)
         return _peer
     }
-    setGridColOptionsAttribute(option?: GridColOptions): void {
+    setGridColOptionsAttribute(options?: GridColOptions): void {
         ArkThemeScopeManager.getInstance().applyThemeScopeIdToNode(this.peer.ptr);
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (option !== undefined) {
+        if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionTmpValue = option!
-            GridColOptions_serializer.write(thisSerializer, optionTmpValue)
+            const optionsTmpValue = options!
+            GridColOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -132,7 +132,7 @@ export interface GridColOptions {
     order?: int32 | GridColColumnOption;
 }
 export interface GridColAttribute extends CommonMethod {
-    setGridColOptions(option?: GridColOptions): this {
+    setGridColOptions(options?: GridColOptions): this {
         throw new Error('Unimplemented method setGridColOptions')
     }
     span(value: int32 | GridColColumnOption | undefined): this {
@@ -153,9 +153,9 @@ export class ArkGridColComponent extends ArkCommonMethodComponent implements Gri
     getPeer(): ArkGridColPeer {
         return (this.peer as ArkGridColPeer)
     }
-    public setGridColOptions(option?: GridColOptions): this {
-        const option_casted = option as (GridColOptions | undefined)
-        this.getPeer()?.setGridColOptionsAttribute(option_casted)
+    public setGridColOptions(options?: GridColOptions): this {
+        const options_casted = options as (GridColOptions | undefined)
+        this.getPeer()?.setGridColOptionsAttribute(options_casted)
         this.applyOptionsFinish('GridColAttribute');
         return this
     }

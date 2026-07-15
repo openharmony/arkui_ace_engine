@@ -173,7 +173,7 @@ export interface SurfaceConfig {
 }
 export enum HdrType {
     DEFAULT = 0,
-    AIHDR = 1,
+    AIHDR = 1
 }
 export interface XComponentOptions {
     type: XComponentType;
@@ -300,15 +300,12 @@ export function XComponentImpl(
 export function XComponent(
     @memo @memo_skip
     style: ((attributes: XComponentAttribute) => void) | undefined,
-    @memo @memo_skip
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkXComponentComponent>((): ArkXComponentComponent => {
         return new ArkXComponentComponent()
     })
     NodeAttach<ArkXComponentPeer>((): ArkXComponentPeer => ArkXComponentPeer.create(receiver), (_: ArkXComponentPeer): void => {
         style?.(receiver)
-        content_?.()
     })
 }
 export class SurfaceConfig_serializer {

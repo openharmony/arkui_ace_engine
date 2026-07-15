@@ -323,19 +323,6 @@ export function Row(
         content_?.()
     })
 }
-export class RowOptionsV2_serializer {
-    public static write(buffer: SerializerBase, value: RowOptionsV2): void {
-        let valueSerializer: SerializerBase = buffer
-        const valueHolderFor_stub = value._stub
-        valueSerializer.writeInt32(valueHolderFor_stub)
-    }
-    public static read(buffer: DeserializerBase): RowOptionsV2 {
-        let valueDeserializer: DeserializerBase = buffer
-        const _stubTmpResult: int32 = valueDeserializer.readInt32()
-        let value: RowOptionsV2 = ({_stub: _stubTmpResult} as RowOptionsV2)
-        return value
-    }
-}
 export class RowOptions_serializer {
     public static write(buffer: SerializerBase, value: RowOptions): void {
         let valueSerializer: SerializerBase = buffer
