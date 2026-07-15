@@ -135,20 +135,20 @@ HWTEST_F(RichEditorCaretTestNg, MoveCaretToContentRect001, TestSize.Level0)
     richEditorPattern->contentRect_ = RectF(0, 5, 100, 60);
     auto offsetF = OffsetF(0.0f, 0.5f);
     richEditorPattern->isShowPlaceholder_ = false;
-    richEditorPattern->MoveCaretToContentRect(offsetF, 80.0f);
+    richEditorPattern->scrollController_->MoveCaretToContentRect(offsetF, 80.0f);
     EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
 
     /**
      * @tc.steps: step2. set MoveCaretToContentRect second parameter
      */
-    richEditorPattern->MoveCaretToContentRect(offsetF, 40.0f);
+    richEditorPattern->scrollController_->MoveCaretToContentRect(offsetF, 40.0f);
     EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
 
     /**
      * @tc.steps: step3. set MoveCaretToContentRect first parameter
      */
     auto offsetFtemp = OffsetF(0.0f, 10.0f);
-    richEditorPattern->MoveCaretToContentRect(offsetFtemp, 40.0f);
+    richEditorPattern->scrollController_->MoveCaretToContentRect(offsetFtemp, 40.0f);
     EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
 }
 
