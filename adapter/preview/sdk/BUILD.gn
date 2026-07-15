@@ -175,6 +175,7 @@ if (is_ohos_standard_system) {
   ohos_copy("copy_component_model_abc_library") {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:containerreader",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:selectioncontainer",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:dynamiclayout",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:lazydynamiclayout",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:flowitem",
@@ -262,6 +263,7 @@ if (is_ohos_standard_system) {
             "root_out_dir")
     sources = [
       "${out_path}/arkui/ace_engine/containerreader.abc",
+      "${out_path}/arkui/ace_engine/selectioncontainer.abc",
       "${out_path}/arkui/ace_engine/arkdynamiclayout.abc",
       "${out_path}/arkui/ace_engine/arklazydynamiclayout.abc",
       "${out_path}/arkui/ace_engine/arkgridcontainer.abc",
