@@ -18,7 +18,7 @@
 
 import { AccessibilityActionInterceptCallback, AccessibilityCallback, AccessibilityHoverEvent_serializer, AccessibilityFocusCallback, AccessibilityTransparentCallback, AreaChangeCallback, Callback as arkui_component_common_Callback, TouchTestInfo_serializer, TouchResult_serializer, AxisEvent_serializer, HoverEvent_serializer, ClickEvent_serializer, CrownEvent_serializer, DismissContentCoverAction_serializer, DismissPopupAction_serializer, DismissSheetAction_serializer, DragEvent_serializer, FocusAxisEvent_serializer, InputEventInterceptResult_serializer, ItemDragInfo_serializer, KeyEvent_serializer, MouseEvent_serializer, GeometryInfo_serializer, Measurable_serializer, SizeResult_serializer, Layoutable_serializer, ScrollResult_serializer, SheetDismiss_serializer, SpringBackAction_serializer, TerminationInfo_serializer, DragItemInfo_serializer, GestureCollectInterceptCallback, GestureRecognizerJudgeBeginCallback, HoverCallback, InputEventListener, RawInputEventWrapper_serializer, ModifierKeyStateGetter, OnDidStopDraggingCallback, OnDragEventCallback, OnGetPreviewBadgeCallback, OnItemDragStartCallback, OnMoveHandler, OnNeedSoftkeyboardCallback, OnScrollCallback, OnVisibleIndexesChangeCallback, OnWillScrollCallback, OnWillStopDraggingCallback, PopupStateChangeCallback, PopupStateChangeParam_serializer, ReuseIdCallback, ShouldBuiltInRecognizerParallelWithCallback, ShouldRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, TransitionFinishCallback, VisibleAreaChangeCallback, AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityHoverEvent, TouchTestInfo, TouchResult, AxisEvent, HoverEvent, ClickEvent, CrownEvent, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, SpringLoadingContext, DragEvent, DrawContext as arkui_component_common_DrawContext, FocusAxisEvent, InputEventInterceptResult, ItemDragInfo, KeyEvent, MouseEvent, GeometryInfo, Measurable, SizeResult, Layoutable, ScrollResult, PreDragStatus, SheetDismiss, SheetType, SpringBackAction, TerminationInfo, DragItemInfo, RawInputEventWrapper, PopupStateChangeParam } from './../../component/common'
 import { resourceFinalizerRegister, registerApiEventHandler, ResourceHolder, KInt, KStringPtr, wrapSystemCallback, DeserializerBase, SerializerBase, CallbackResource, InteropNativeModule, KPointer, RuntimeType, KSerializerBuffer, NativeBuffer } from '@koalaui/interop'
-import { TouchEventProxy, TouchEventProxy_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, CustomSpanMeasureInfoProxy, CustomSpanMeasureInfoProxy_serializer, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_SizeInfo_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomNodeBuilderT, BusinessErrorInterface, BusinessErrorInterface_Void_serializer, GestureEventHandler, GestureSwipeHandler, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, NavExtender_PushDestinationInner, OnSurfaceChangedCb, OnSurfaceCreatedCb, OnSurfaceDestroyedCb, RestrictedWorker_onerror_Callback, ErrorEvent_serializer, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents_serializer, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo_serializer, WorkerEventListener, Event_serializer, ErrorEvent, MessageEvents, InnerGestureTriggerInfo, Event } from './../../component/idlize'
+import { TouchEventProxy, TouchEventProxy_serializer, AnimationEndHandler, AnimationStartHandler, Callback_ClearCache, Callback_CreateItem, CustomSpanMeasureInfoProxy, CustomSpanMeasureInfoProxy_serializer, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_ReleaseItemByIndex, Callback_Size_Void, Callback_SizeInfo_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomNodeBuilderT, BusinessErrorInterface, BusinessErrorInterface_Void_serializer, GestureEventHandler, GestureSwipeHandler, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, NavExtender_PushDestinationInner, OnSurfaceChangedCb, OnSurfaceCreatedCb, OnSurfaceDestroyedCb, RestrictedWorker_onerror_Callback, ErrorEvent_serializer, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents_serializer, Router_BusinessError_Void, RouterFinishCallback, InnerGestureTriggerInfo_serializer, WorkerEventListener, Event_serializer, ErrorEvent, MessageEvents, InnerGestureTriggerInfo, Event } from './../../component/idlize'
 import { extractors, TouchEvent } from '#handwritten'
 import { SwiperAnimationEvent_serializer, SwiperContentTransitionProxy_serializer, ContentDidScrollCallback, ContentWillScrollCallback, SwiperContentWillScrollResult_serializer, OnSwiperAnimationEndCallback, OnSwiperAnimationStartCallback, OnSwiperGestureSwipeCallback, SwiperAnimationEvent, SwiperContentTransitionProxy, SwiperContentWillScrollResult } from './../../component/swiper'
 import { ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
@@ -49,6 +49,7 @@ import { UIExtensionProxy_serializer, UIExtensionProxy } from './../../component
 import { CheckBoxGroupConfiguration_serializer, OnCheckboxGroupChangeCallback, CheckboxGroupResult_serializer, CheckBoxGroupConfiguration, CheckboxGroupResult } from './../../component/checkboxgroup'
 import { CheckBoxConfiguration_serializer, OnCheckboxChangeCallback, CheckBoxConfiguration } from './../../component/checkbox'
 import { DataPanelConfiguration_serializer, DataPanelConfiguration } from './../../component/dataPanel'
+import { DepthComponentCompleteCallback, DepthComponentCompleteEvent_serializer, DepthComponentErrorCallback, DepthComponentErrorEvent_serializer, DepthMapCallback, DepthComponentCompleteEvent, DepthComponentErrorEvent } from './../../component/depthComponent'
 import { GaugeConfiguration_serializer, GaugeConfiguration } from './../../component/gauge'
 import { ImageCompleteCallback, ImageLoadResult_serializer, ImageLoadResult } from './../../component/imageSpan'
 import { ImageErrorCallback, ImageError_serializer, ImageOnCompleteCallback, ImageCompleteEvent_serializer, ImageError, ImageCompleteEvent } from './../../component/image'
@@ -343,6 +344,11 @@ export function deserializeAndCallCallback_Buffer_Void(thisDeserializer: Deseria
     const call = (ResourceHolder.instance().get(resourceId) as ((value: ArrayBuffer) => void))
     let value: ArrayBuffer = (thisDeserializer.readBuffer() as ArrayBuffer)
     call(value)
+}
+export function deserializeAndCallCallback_ClearCache(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as Callback_ClearCache)
+    call()
 }
 export function deserializeAndCallCallback_ClickEvent_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -1700,6 +1706,12 @@ export function deserializeAndCallCallback_RefreshStatus_Void(thisDeserializer: 
     let state: RefreshStatus = RefreshStatus.fromValue(thisDeserializer.readInt32())
     call(state)
 }
+export function deserializeAndCallCallback_ReleaseItemByIndex(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as Callback_ReleaseItemByIndex)
+    let index: int32 = thisDeserializer.readInt32()
+    call(index)
+}
 export function deserializeAndCallCallback_Resource_Void(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
     const call = (ResourceHolder.instance().get(resourceId) as arkui_component_common_Callback<global_resource_Resource, void>)
@@ -2248,6 +2260,25 @@ export function deserializeAndCallDataPanelModifierBuilder(thisDeserializer: Des
     let continuationResult: ((value: KPointer) => void) = continuationBufferClosure
     const callResult = call(parentNode, config)
     continuationResult(callResult)
+}
+export function deserializeAndCallDepthComponentCompleteCallback(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as DepthComponentCompleteCallback)
+    let event: DepthComponentCompleteEvent = DepthComponentCompleteEvent_serializer.read(thisDeserializer)
+    call(event)
+}
+export function deserializeAndCallDepthComponentErrorCallback(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as DepthComponentErrorCallback)
+    let error: DepthComponentErrorEvent = DepthComponentErrorEvent_serializer.read(thisDeserializer)
+    call(error)
+}
+export function deserializeAndCallDepthMapCallback(thisDeserializer: DeserializerBase): void {
+    const resourceId: int32 = thisDeserializer.readInt32()
+    const call = (ResourceHolder.instance().get(resourceId) as DepthMapCallback)
+    const errorTmpBufDeserialized: BusinessErrorInterface<void> = BusinessErrorInterface_Void_serializer.read(thisDeserializer)
+    let error: BusinessError<void> = extractors.transform_Ark_BusinessErrorInterface_Void_to_Ark_BusinessError_Void(errorTmpBufDeserialized)
+    call(error)
 }
 export function deserializeAndCallEditableTextOnChangeCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -4438,6 +4469,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_BOOLEAN_HOVEREVENT_VOID: return deserializeAndCallCallback_Boolean_HoverEvent_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_BOOLEAN_VOID: return deserializeAndCallCallback_Boolean_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_BUFFER_VOID: return deserializeAndCallCallback_Buffer_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_CLEARCACHE: return deserializeAndCallCallback_ClearCache(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_CLICKEVENT_VOID: return deserializeAndCallCallback_ClickEvent_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_COMPUTEDBARATTRIBUTE_VOID: return deserializeAndCallCallback_ComputedBarAttribute_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_COPYEVENT_VOID: return deserializeAndCallCallback_CopyEvent_Void(thisDeserializer);
@@ -4573,6 +4605,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CALLBACK_PREPAREDINFO_VOID: return deserializeAndCallCallback_PreparedInfo_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_RANGEUPDATE: return deserializeAndCallCallback_RangeUpdate(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_REFRESHSTATUS_VOID: return deserializeAndCallCallback_RefreshStatus_Void(thisDeserializer);
+        case CallbackKind.KIND_CALLBACK_RELEASEITEMBYINDEX: return deserializeAndCallCallback_ReleaseItemByIndex(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_RESOURCE_VOID: return deserializeAndCallCallback_Resource_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_RESOURCESTR_VOID: return deserializeAndCallCallback_ResourceStr_Void(thisDeserializer);
         case CallbackKind.KIND_CALLBACK_RICHEDITORCHANGEVALUE_BOOLEAN: return deserializeAndCallCallback_RichEditorChangeValue_Boolean(thisDeserializer);
@@ -4623,6 +4656,9 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.KIND_CUSTOMNODEBUILDER: return deserializeAndCallCustomNodeBuilder(thisDeserializer);
         case CallbackKind.KIND_CUSTOMNODEBUILDERT_RESPONSETYPE: return deserializeAndCallCustomNodeBuilderT_ResponseType(thisDeserializer);
         case CallbackKind.KIND_DATAPANELMODIFIERBUILDER: return deserializeAndCallDataPanelModifierBuilder(thisDeserializer);
+        case CallbackKind.KIND_DEPTHCOMPONENTCOMPLETECALLBACK: return deserializeAndCallDepthComponentCompleteCallback(thisDeserializer);
+        case CallbackKind.KIND_DEPTHCOMPONENTERRORCALLBACK: return deserializeAndCallDepthComponentErrorCallback(thisDeserializer);
+        case CallbackKind.KIND_DEPTHMAPCALLBACK: return deserializeAndCallDepthMapCallback(thisDeserializer);
         case CallbackKind.KIND_EDITABLETEXTONCHANGECALLBACK: return deserializeAndCallEditableTextOnChangeCallback(thisDeserializer);
         case CallbackKind.KIND_ERRORCALLBACK_BUSINESSERRORINTERFACE_VOID: return deserializeAndCallErrorCallback_BusinessErrorInterface_Void(thisDeserializer);
         case CallbackKind.KIND_GAUGEMODIFIERBUILDER: return deserializeAndCallGaugeModifierBuilder(thisDeserializer);

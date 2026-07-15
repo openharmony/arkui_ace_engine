@@ -25,9 +25,9 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { ShaderStyleProxy, ShaderStyleProxy_serializer } from './idlize'
 import { extractors, ShaderStyle, AttributeModifier, initializers, hookTextAttributeModifier, AttributeUpdater } from '#handwritten'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { text_FontVariation_serializer } from './../framework/ohos.graphics.text'
 import { arkui_component_units_Font_serializer, ResourceColor, Resource as arkui_component_units_Resource, Length, LengthMetrics as arkui_component_units_LengthMetrics, Font as arkui_component_units_Font, ResourceStr, VoidCallback } from './units'
 import { SelectionMenuOptions_serializer, SelectionMenuOptions, MenuOnAppearCallback, MenuCallback, PreviewMenuOptions } from './richEditor'
@@ -559,6 +559,38 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setTextIndent(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setTailIndentsAttribute(value: arkui_component_units_LengthMetrics | Array<arkui_component_units_LengthMetrics> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            if (valueTmpValue instanceof arkui_component_units_LengthMetrics) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0 = valueTmpValue as arkui_component_units_LengthMetrics
+                arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Array) {
+                if (valueTmpValue.length == 0) {
+                    thisSerializer.writeInt8((1).toByte())
+                    thisSerializer.writeInt32(0)
+                } else {
+                    const valueTmpValueElem = valueTmpValue[0]
+                    if (valueTmpValueElem instanceof arkui_component_units_LengthMetrics) {
+                        thisSerializer.writeInt8((1).toByte())
+                        const valueTmpValueForIdx1 = valueTmpValue as Array<arkui_component_units_LengthMetrics>
+                        thisSerializer.writeInt32((valueTmpValueForIdx1.length).toInt())
+                        for (let valueTmpValueForIdx1CounterI = 0; valueTmpValueForIdx1CounterI < valueTmpValueForIdx1.length; valueTmpValueForIdx1CounterI++) {
+                            const valueTmpValueForIdx1TmpElement: arkui_component_units_LengthMetrics = valueTmpValueForIdx1[valueTmpValueForIdx1CounterI]
+                            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValueForIdx1TmpElement)
+                        }
+                    }
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setTailIndents(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setWordBreakAttribute(value: WordBreak | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -1040,6 +1072,18 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setIncrementalUpdatePolicy(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setPunctuationOverflowAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setPunctuationOverflow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFontAttribute(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (fontValue !== undefined) {
@@ -1426,6 +1470,18 @@ export interface TextAttribute extends CommonMethod {
             }
         }
         throw new Error('Unimplemented method textIndent')
+    }
+    tailIndents(value: arkui_component_units_LengthMetrics | Array<arkui_component_units_LengthMetrics> | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).tailIndents(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute tailIndents can only be set when creating an extendable component.')
+            }
+        }
+        throw new Error('Unimplemented method tailIndents')
     }
     wordBreak(value: WordBreak | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
@@ -1871,6 +1927,18 @@ export interface TextAttribute extends CommonMethod {
         }
         throw new Error('Unimplemented method incrementalUpdatePolicy')
     }
+    punctuationOverflow(value: boolean | undefined): this {
+        const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
+        if (commonStyle) {
+            (commonStyle as Array<(instance: CommonMethod) => void>).push((instance: CommonMethod): void => (instance as TextAttribute).punctuationOverflow(value));
+            return this;
+        } else {
+            if (this.__is_CustomComponent__Internal()) {
+                throw new Error('Text attribute punctuationOverflow can only be set when creating an extendable component.')
+            }
+        }
+        throw new Error('Unimplemented method punctuationOverflow')
+    }
     font(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -2148,6 +2216,11 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         this.getPeer()?.setTextIndentAttribute(value_casted)
         return this
     }
+    public tailIndents(value: arkui_component_units_LengthMetrics | Array<arkui_component_units_LengthMetrics> | undefined): this {
+        const value_casted = value as (arkui_component_units_LengthMetrics | Array<arkui_component_units_LengthMetrics> | undefined)
+        this.getPeer()?.setTailIndentsAttribute(value_casted)
+        return this
+    }
     public wordBreak(value: WordBreak | undefined): this {
         const value_casted = value as (WordBreak | undefined)
         this.getPeer()?.setWordBreakAttribute(value_casted)
@@ -2331,6 +2404,11 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
     public incrementalUpdatePolicy(value: IncrementalUpdatePolicy | undefined): this {
         const value_casted = value as (IncrementalUpdatePolicy | undefined)
         this.getPeer()?.setIncrementalUpdatePolicyAttribute(value_casted)
+        return this
+    }
+    public punctuationOverflow(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setPunctuationOverflowAttribute(value_casted)
         return this
     }
     public font(fontValue: arkui_component_units_Font | undefined, options?: FontSettingOptions): this {

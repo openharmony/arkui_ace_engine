@@ -82,8 +82,17 @@ export class ArkStackPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._StackAttribute_setPointLight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setSyncLoadAttribute(value: boolean): void {
-        ArkUIGeneratedNativeModule._StackAttribute_setSyncLoad(this.peer.ptr, value ? true : false)
+    setSyncLoadAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._StackAttribute_setSyncLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export interface StackOptions {

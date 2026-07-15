@@ -26,7 +26,7 @@ import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { ArkCommonShapeMethodPeer, CommonShapeMethod as arkui_component_common_CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonMethodComponent } from './common'
-import { ResourceColor, Resource as arkui_component_units_Resource, Length } from './units'
+import { ResourceColor, Resource as arkui_component_units_Resource, ColorMetrics as arkui_component_units_ColorMetrics, Length } from './units'
 import { Color as arkui_component_enums_Color } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
@@ -62,7 +62,7 @@ export class ArkCirclePeer extends ArkCommonShapeMethodPeer {
         ArkUIGeneratedNativeModule._CircleInterface_setCircleOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setStrokeAttribute(value: ResourceColor | arkui_Graphics_ColorMetrics | undefined): void {
+    setStrokeAttribute(value: ResourceColor | arkui_component_units_ColorMetrics | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -87,9 +87,9 @@ export class ArkCirclePeer extends ArkCommonShapeMethodPeer {
                     const valueTmpValueForIdx0ForIdx3 = valueTmpValueForIdx0 as arkui_component_units_Resource
                     global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
-            } else if (valueTmpValue instanceof arkui_Graphics_ColorMetrics) {
+            } else if (valueTmpValue instanceof arkui_component_units_ColorMetrics) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1 = valueTmpValue as arkui_Graphics_ColorMetrics
+                const valueTmpValueForIdx1 = valueTmpValue as arkui_component_units_ColorMetrics
                 const valueTmpValueForIdx1Transformed: ColorMetricsExt = extractors.transform_Ark_ColorMetrics_to_Ark_ColorMetricsExt(valueTmpValueForIdx1)
                 ColorMetricsExt_serializer.write(thisSerializer, valueTmpValueForIdx1Transformed)
             }
@@ -99,7 +99,7 @@ export class ArkCirclePeer extends ArkCommonShapeMethodPeer {
         ArkUIGeneratedNativeModule._CircleAttribute_setStroke(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFillAttribute(value: ResourceColor | arkui_Graphics_ColorMetrics | undefined): void {
+    setFillAttribute(value: ResourceColor | arkui_component_units_ColorMetrics | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -124,9 +124,9 @@ export class ArkCirclePeer extends ArkCommonShapeMethodPeer {
                     const valueTmpValueForIdx0ForIdx3 = valueTmpValueForIdx0 as arkui_component_units_Resource
                     global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx3)
                 }
-            } else if (valueTmpValue instanceof arkui_Graphics_ColorMetrics) {
+            } else if (valueTmpValue instanceof arkui_component_units_ColorMetrics) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1 = valueTmpValue as arkui_Graphics_ColorMetrics
+                const valueTmpValueForIdx1 = valueTmpValue as arkui_component_units_ColorMetrics
                 const valueTmpValueForIdx1Transformed: ColorMetricsExt = extractors.transform_Ark_ColorMetrics_to_Ark_ColorMetricsExt(valueTmpValueForIdx1)
                 ColorMetricsExt_serializer.write(thisSerializer, valueTmpValueForIdx1Transformed)
             }
@@ -145,8 +145,8 @@ export interface CircleAttribute extends arkui_component_common_CommonShapeMetho
     setCircleOptions(options?: CircleOptions): this {
         throw new Error('Unimplemented method setCircleOptions')
     }
-    stroke(value: ResourceColor | arkui_Graphics_ColorMetrics | undefined): this
-    fill(value: ResourceColor | arkui_Graphics_ColorMetrics | undefined): this
+    stroke(value: ResourceColor | arkui_component_units_ColorMetrics | undefined): this
+    fill(value: ResourceColor | arkui_component_units_ColorMetrics | undefined): this
     attributeModifier(value: AttributeModifier<CircleAttribute> | AttributeModifier<arkui_component_common_CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
     }
@@ -162,13 +162,13 @@ export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements
         this.applyOptionsFinish('CircleAttribute');
         return this
     }
-    public stroke(value: ResourceColor | arkui_Graphics_ColorMetrics | undefined): this {
-        const value_casted = value as (ResourceColor | arkui_Graphics_ColorMetrics | undefined)
+    public stroke(value: ResourceColor | arkui_component_units_ColorMetrics | undefined): this {
+        const value_casted = value as (ResourceColor | arkui_component_units_ColorMetrics | undefined)
         this.getPeer()?.setStrokeAttribute(value_casted)
         return this
     }
-    public fill(value: ResourceColor | arkui_Graphics_ColorMetrics | undefined): this {
-        const value_casted = value as (ResourceColor | arkui_Graphics_ColorMetrics | undefined)
+    public fill(value: ResourceColor | arkui_component_units_ColorMetrics | undefined): this {
+        const value_casted = value as (ResourceColor | arkui_component_units_ColorMetrics | undefined)
         this.getPeer()?.setFillAttribute(value_casted)
         return this
     }

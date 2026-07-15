@@ -65,38 +65,3 @@ export class uiEffect_VisualEffect_serializer {
         return extractors.fromUiEffectVisualEffectPtr(ptr)
     }
 }
-export class uiEffect_HdrDarkenBlender_serializer {
-    public static write(buffer: SerializerBase, value: uiEffect.HdrDarkenBlender): void {
-        let valueSerializer: SerializerBase = buffer
-        const valueHolderForHdrBrightnessRatio = value.hdrBrightnessRatio
-        valueSerializer.writeFloat64(valueHolderForHdrBrightnessRatio)
-        const valueHolderForGrayscaleFactor = value.grayscaleFactor
-        if (valueHolderForGrayscaleFactor !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForGrayscaleFactorTmpValue = valueHolderForGrayscaleFactor!
-            const valueHolderForGrayscaleFactorTmpValue_0 = valueHolderForGrayscaleFactorTmpValue[0]
-            valueSerializer.writeFloat64(valueHolderForGrayscaleFactorTmpValue_0)
-            const valueHolderForGrayscaleFactorTmpValue_1 = valueHolderForGrayscaleFactorTmpValue[1]
-            valueSerializer.writeFloat64(valueHolderForGrayscaleFactorTmpValue_1)
-            const valueHolderForGrayscaleFactorTmpValue_2 = valueHolderForGrayscaleFactorTmpValue[2]
-            valueSerializer.writeFloat64(valueHolderForGrayscaleFactorTmpValue_2)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): uiEffect.HdrDarkenBlender {
-        let valueDeserializer: DeserializerBase = buffer
-        const hdrBrightnessRatioTmpResult: double = valueDeserializer.readFloat64()
-        const grayscaleFactorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let grayscaleFactorTmpBuf: [ double, double, double ] | undefined = undefined
-        if ((grayscaleFactorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const grayscaleFactorTmpBufOptValue0: double = valueDeserializer.readFloat64()
-            const grayscaleFactorTmpBufOptValue1: double = valueDeserializer.readFloat64()
-            const grayscaleFactorTmpBufOptValue2: double = valueDeserializer.readFloat64()
-            grayscaleFactorTmpBuf = ([grayscaleFactorTmpBufOptValue0, grayscaleFactorTmpBufOptValue1, grayscaleFactorTmpBufOptValue2] as [ double, double, double ])
-        }
-        const grayscaleFactorTmpResult: [ double, double, double ] | undefined = grayscaleFactorTmpBuf
-        let value: uiEffect.HdrDarkenBlender = ({hdrBrightnessRatio: hdrBrightnessRatioTmpResult, grayscaleFactor: grayscaleFactorTmpResult} as uiEffect.HdrDarkenBlender)
-        return value
-    }
-}
