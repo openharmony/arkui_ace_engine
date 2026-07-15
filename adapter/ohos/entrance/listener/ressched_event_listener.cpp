@@ -135,7 +135,7 @@ void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, s
     if (pageName != fullPath && pageName != currentPageName && pageName != currentJsViewName) {
         LOGE("OnComponentPreMake pageName does not match, pageName:%{public}s, "
             "fullPath:%{public}s, currentPageName:%{public}s, currentJsViewName:%{public}s",
-            pageName.c_str(), fullPath.c_str(), currentPageName.c_str() , currentJsViewName.c_str());
+            pageName.c_str(), fullPath.c_str(), currentPageName.c_str(), currentJsViewName.c_str());
         return;
     }
 
