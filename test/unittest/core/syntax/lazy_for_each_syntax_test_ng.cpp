@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#include <algorithm>
 #include <optional>
+#include <type_traits>
 #include <utility>
 
 #include "gtest/gtest.h"
@@ -1521,6 +1523,32 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeGetChildrenTest001, TestSize.Le
     // Get children again
     const auto& children2 = lazyForEachNode->GetChildren();
     EXPECT_EQ(children2.size(), 1);
+}
+
+/**
+ * @tc.name: LazyForEachNodeGetChildrenForInspectorTest001
+ * @tc.desc: Cached children returned for Inspector are held only by the returned temporary list.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeGetChildrenForInspectorTest001, TestSize.Level1)
+{
+    static_assert(std::is_same_v<decltype(std::declval<const LazyForEachNode&>().GetChildrenForInspector(true)),
+        std::list<RefPtr<UINode>>>);
+
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    ASSERT_NE(lazyForEachNode->builder_, nullptr);
+    auto child = lazyForEachNode->builder_->GetChildByIndex(INDEX_0, true).second;
+    ASSERT_NE(child, nullptr);
+    auto refCount = child->RefCount();
+
+    {
+        auto inspectorChildren = lazyForEachNode->GetChildrenForInspector(true);
+        auto count = std::count(inspectorChildren.begin(), inspectorChildren.end(), child);
+        EXPECT_GT(count, 0);
+        EXPECT_EQ(child->RefCount(), refCount + count);
+    }
+    EXPECT_EQ(child->RefCount(), refCount);
 }
 
 

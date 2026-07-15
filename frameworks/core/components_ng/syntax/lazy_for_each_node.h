@@ -128,7 +128,7 @@ public:
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
     void LoadChildren(bool notDetach) const;
 
-    const std::list<RefPtr<UINode>>& GetChildrenForInspector(bool needCacheNode = false) const override;
+    std::list<RefPtr<UINode>> GetChildrenForInspector(bool needCacheNode = false) const override;
 
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
     {
@@ -318,7 +318,6 @@ private:
     mutable std::list<RefPtr<UINode>> tempChildren_;
     mutable std::list<RefPtr<UINode>> children_;
     mutable bool needPredict_ = false;
-    mutable std::list<RefPtr<UINode>> childrenWithCache_;
     mutable int32_t childrenDepth_ = 0;
     bool hasSetActiveChildRangeInGetChildren_ = false;
     bool needMarkParent_ = true;
