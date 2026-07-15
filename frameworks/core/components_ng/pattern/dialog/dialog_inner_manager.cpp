@@ -629,6 +629,7 @@ RefPtr<UINode> DialogInnerManager::RebuildCustomBuilder(RefPtr<UINode>& contentN
 
 void DialogInnerManager::CustomDialogRecordEvent(const DialogProperties& dialogProps)
 {
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("Dialog")
@@ -637,6 +638,7 @@ void DialogInnerManager::CustomDialogRecordEvent(const DialogProperties& dialogP
             .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
 }
 
 void DialogInnerManager::OpenCustomDialogInner(const RefPtr<OverlayManager>& overlayManager,
@@ -1118,6 +1120,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialog(const RefPtr<OverlayManager>& o
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("Dialog")
@@ -1126,6 +1129,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialog(const RefPtr<OverlayManager>& o
             .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
     return dialog;
 }
 
@@ -1166,6 +1170,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithErrorCallback(const RefPtr<O
 
     dialogCount_++;
     SetContainerButtonEnable(false);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("Dialog")
@@ -1173,7 +1178,9 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithErrorCallback(const RefPtr<O
             .SetExtra(Recorder::KEY_TITLE, dialogProps.title)
             .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+
     }
+#endif
     return dialog;
 }
 
@@ -1194,6 +1201,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithNode(const RefPtr<OverlayMan
     dialogCount_++;
     // set close button disable
     SetContainerButtonEnable(false);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("Dialog")
@@ -1202,6 +1210,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithNode(const RefPtr<OverlayMan
             .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
     return dialog;
 }
 
@@ -1228,6 +1237,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithNodeAndErrorCallback(const R
 
     dialogCount_++;
     SetContainerButtonEnable(false);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("Dialog")
@@ -1236,6 +1246,7 @@ RefPtr<FrameNode> DialogInnerManager::ShowDialogWithNodeAndErrorCallback(const R
             .SetExtra(Recorder::KEY_SUB_TITLE, dialogProps.subtitle);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
     return dialog;
 }
 
@@ -1521,11 +1532,13 @@ void DialogInnerManager::ShowTextDialog(const RefPtr<OverlayManager>& overlayMan
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(overlayManager, dialogNode, dialogProps);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::DIALOG_SHOW);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
 #endif
 }
 
