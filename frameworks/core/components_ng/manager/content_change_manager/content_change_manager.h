@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -115,6 +115,7 @@ private:
         const std::unordered_map<int32_t, std::pair<size_t, int64_t>>& versions, int32_t nodeId,
         const std::string& result, int64_t version);
     void ResetTranslateNode(const RefPtr<PageTranslateNode>& node);
+    void ResetTranslateNodes(std::set<WeakPtr<PageTranslateNode>>& nodes, int32_t nodeId);
 
     std::set<WeakPtr<FrameNode>> onContentChangeNodes_;
     std::set<WeakPtr<PageTranslateNode>> translateTextNodes_;
