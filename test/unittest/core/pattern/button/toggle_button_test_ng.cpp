@@ -91,8 +91,14 @@ void ToggleButtonTestNg::TearDownTestCase()
 
 RefPtr<FrameNode> ToggleButtonTestNg::CreateToggleButtonFrameNode(const TestProperty& testProperty)
 {
+    /**
+     * @tc.steps: step1. create toggleButtonModel.
+     */
     ToggleButtonModelNG toggleButtonModelNG;
     toggleButtonModelNG.Create(TOGGLE_ETS_TAG);
+    /**
+     * @tc.steps: step2. set toggleButtonModel attribute.
+     */
     if (testProperty.isOn.has_value()) {
         toggleButtonModelNG.SetIsOn(testProperty.isOn.value());
     }

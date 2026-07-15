@@ -349,7 +349,7 @@ void ParseJsDefaultPickerItemHeight(
 {
     CalcDimension height;
     if (secondArg->IsNumber() || secondArg->IsString(vm)) {
-        if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, height)) {
+        if (!ArkTSUtils::ParseJsDimensionFp(vm, secondArg, height, true, false)) {
             return;
         }
     }
