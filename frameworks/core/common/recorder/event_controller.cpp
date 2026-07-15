@@ -217,7 +217,9 @@ void EventController::ApplyExposureCfgInner(const std::shared_ptr<Config>& confi
         item.processor->SetContainerId(containerId);
         auto node = item.node.Upgrade();
         CHECK_NULL_VOID(node);
+#ifndef CROSS_PLATFORM
         node->SetExposureProcessor(item.processor);
+#endif
     }
 }
 
