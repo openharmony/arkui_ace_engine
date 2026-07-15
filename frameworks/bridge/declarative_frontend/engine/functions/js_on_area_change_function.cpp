@@ -32,7 +32,6 @@ template<typename Rect, typename Offset>
 JSRef<JSObject> CreateAreaObject(const EcmaVM* vm, const Rect& rect, const Offset& origin)
 {
     auto localOffset = rect.GetOffset();
-    auto d = PipelineBase::GetCurrentDensity();
 
     // offset: { x, y }
     Local<JSValueRef> offsetKeys[] = {
@@ -41,9 +40,9 @@ JSRef<JSObject> CreateAreaObject(const EcmaVM* vm, const Rect& rect, const Offse
     };
     panda::PropertyAttribute offsetAttrs[] = {
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            localOffset.GetX() / d), true, true, true),
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX())), true, true, true),
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            localOffset.GetY() / d), true, true, true),
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY())), true, true, true),
     };
     auto offsetObj = panda::ObjectRef::NewWithProperties(vm, 2, offsetKeys, offsetAttrs);
 
@@ -54,9 +53,9 @@ JSRef<JSObject> CreateAreaObject(const EcmaVM* vm, const Rect& rect, const Offse
     };
     panda::PropertyAttribute globalAttrs[] = {
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            (localOffset.GetX() + origin.GetX()) / d), true, true, true),
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() + origin.GetX())), true, true, true),
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            (localOffset.GetY() + origin.GetY()) / d), true, true, true),
+            PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY())), true, true, true),
     };
     auto globalOffsetObj = panda::ObjectRef::NewWithProperties(vm, 2, globalKeys, globalAttrs);
 
@@ -75,9 +74,9 @@ JSRef<JSObject> CreateAreaObject(const EcmaVM* vm, const Rect& rect, const Offse
         panda::PropertyAttribute(globalOffsetObj, true, true, true),
         panda::PropertyAttribute(globalOffsetObj, true, true, true),
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            rect.Width() / d), true, true, true),
+            PipelineBase::Px2VpWithCurrentDensity(rect.Width())), true, true, true),
         panda::PropertyAttribute(panda::NumberRef::New(vm,
-            rect.Height() / d), true, true, true),
+            PipelineBase::Px2VpWithCurrentDensity(rect.Height())), true, true, true),
     };
     auto areaObj = panda::ObjectRef::NewWithProperties(vm, 6, areaKeys, areaAttrs);
 
