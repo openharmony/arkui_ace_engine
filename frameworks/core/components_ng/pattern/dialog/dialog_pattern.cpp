@@ -1212,6 +1212,7 @@ void DialogPattern::RegisterButtonOnKeyEvent(const ButtonInfo& params, RefPtr<Fr
             ACE_UINODE_TRACE(dialog);
             if (params.action) {
                 auto actionFunc = params.action->GetGestureEventFunc();
+                CHECK_NULL_RETURN(actionFunc, false);
                 GestureEvent info;
                 actionFunc(info);
             }
