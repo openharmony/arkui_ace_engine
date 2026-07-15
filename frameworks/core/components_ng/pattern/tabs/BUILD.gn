@@ -48,13 +48,15 @@ build_component_ng("tabs_pattern_ng") {
     "bridge/tabs_dynamic_module.cpp",
   ]
 
-  if (!ace_engine_feature_wearable) {
-    ark_sources += [
-      "bridge/tab_content_static_modifier.cpp",
-      "bridge/tab_content_transition_proxy_accessor.cpp",
-      "bridge/tabs_static_modifier.cpp",
-      "bridge/tabs_controller_accessor.cpp",
-      "bridge/tabs_extender_accessor.cpp",
-    ]
+  if (!is_arkui_x) {
+    if (!ace_engine_feature_wearable) {
+      ark_sources += [
+        "bridge/tab_content_static_modifier.cpp",
+        "bridge/tab_content_transition_proxy_accessor.cpp",
+        "bridge/tabs_static_modifier.cpp",
+        "bridge/tabs_controller_accessor.cpp",
+        "bridge/tabs_extender_accessor.cpp",
+      ]
+    }
   }
 }
