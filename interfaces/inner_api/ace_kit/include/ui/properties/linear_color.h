@@ -48,7 +48,7 @@ public:
     static const LinearColor BLACK;
     static const LinearColor RED;
     static const LinearColor GREEN;
-    static const LinearColor BLUE;
+    ACE_FORCE_EXPORT static const LinearColor BLUE;
     static const LinearColor GRAY;
 
     LinearColor operator+(const LinearColor& color) const
