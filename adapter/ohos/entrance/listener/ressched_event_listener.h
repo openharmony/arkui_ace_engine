@@ -37,9 +37,6 @@ private:
 
     int32_t GetContainerId(int32_t windowId);
 
-    bool IsPageOrComponentMatch(const std::string& pageName, const std::string& componentName, const std::string& pageFullPath,
-        const std::string& currentPageName, const std::string& currentComponentName) const;
-
     std::mutex mutex_;
     std::unordered_map<int32_t, int32_t> containerMap_;
 };
