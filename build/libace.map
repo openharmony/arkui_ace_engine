@@ -303,6 +303,7 @@
       "OHOS::Ace::ComposedElement::UpdateChild(OHOS::Ace::RefPtr<OHOS::Ace::Element> const&, OHOS::Ace::RefPtr<OHOS::Ace::Component> const&)";
       "OHOS::Ace::ConvertFontWeight(OHOS::Ace::FontWeight)";
       "OHOS::Ace::ConvertTimestampToStr(long long)";
+      "OHOS::Ace::ConvertTimestampToStr(long)";
       "OHOS::Ace::Constants::ConvertSkColor(OHOS::Ace::Color)";
       "OHOS::Ace::Constants::ConvertSkRect(OHOS::Rosen::Drawing::RectF const&)";
       "OHOS::Ace::Constants::ConvertTxtFontStyle(OHOS::Ace::FontStyle)";
@@ -4263,12 +4264,18 @@
       "OHOS::Ace::XComponentComponent::XComponentComponent(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::XComponentTaskPool::NativeXComponentInit(OH_NativeXComponent*, OHOS::Ace::WeakPtr<OHOS::Ace::NativeXComponentImpl>)";
       "ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosById(long long, int, int, std::__h::vector<ArkUI_AccessibilityElementInfo, std::__h::allocator<ArkUI_AccessibilityElementInfo>>&)";
+      "ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosById(long, int, int, std::__h::vector<ArkUI_AccessibilityElementInfo, std::__h::allocator<ArkUI_AccessibilityElementInfo>>&)";
       "ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosByText(long long, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, int, std::__h::vector<ArkUI_AccessibilityElementInfo, std::__h::allocator<ArkUI_AccessibilityElementInfo>>&)";
+      "ArkUI_AccessibilityProvider::FindAccessibilityNodeInfosByText(long, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, int, std::__h::vector<ArkUI_AccessibilityElementInfo, std::__h::allocator<ArkUI_AccessibilityElementInfo>>&)";
       "ArkUI_AccessibilityProvider::FindFocusedAccessibilityNode(long long, int, int, ArkUI_AccessibilityElementInfo&)";
+      "ArkUI_AccessibilityProvider::FindFocusedAccessibilityNode(long, int, int, ArkUI_AccessibilityElementInfo&)";
       "ArkUI_AccessibilityProvider::FindNextFocusAccessibilityNode(long long, int, int, ArkUI_AccessibilityElementInfo&)";
+      "ArkUI_AccessibilityProvider::FindNextFocusAccessibilityNode(long, int, int, ArkUI_AccessibilityElementInfo&)";
       "ArkUI_AccessibilityProvider::ExecuteAccessibilityAction(long long, int, int, std::__h::map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>> const&)";
+      "ArkUI_AccessibilityProvider::ExecuteAccessibilityAction(long, int, int, std::__h::map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>>> const&)";
       "ArkUI_AccessibilityProvider::ClearFocusedAccessibilityNode()";
       "ArkUI_AccessibilityProvider::GetAccessibilityNodeCursorPosition(long long, int, int&)";
+      "ArkUI_AccessibilityProvider::GetAccessibilityNodeCursorPosition(long, int, int&)";
       "ArkUI_AccessibilityProvider::SetRegisterCallback(std::__h::function<void (bool)>)";
       "ArkUI_AccessibilityProvider::SetInnerAccessibilityProvider(OHOS::Ace::WeakPtr<OHOS::Ace::AccessibilityProvider> const&)";
       "ArkUI_AccessibilityProvider::IsRegister()";
