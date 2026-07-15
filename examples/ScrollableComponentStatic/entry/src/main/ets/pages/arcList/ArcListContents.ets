@@ -39,9 +39,9 @@ import { util } from '@kit.ArkTS';
 import { common } from '@kit.AbilityKit';
 
 export class Contact {
-  key: string = util.generateRandomUUID(true);
-  name: ResourceStr;
-  icon: Resource;
+  public key: string = util.generateRandomUUID(true);
+  public name: ResourceStr;
+  public icon: Resource;
 
   constructor(name: ResourceStr, icon: Resource) {
     this.name = name;

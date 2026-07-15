@@ -2373,7 +2373,7 @@ void BubbleLayoutAlgorithm::InitCaretTargetSizeAndPosition()
 
 void BubbleLayoutAlgorithm::UpdateTargetVisibleRect(const RefPtr<FrameNode>& targetNode, bool showInSubWindow)
 {
-    bool useVisibleRect = (isTips_ && !followCursor_) || (!isTips_ && showInSubWindow);
+    bool useVisibleRect = isTips_ && !followCursor_;
     if (!useVisibleRect || !targetNode->GetAncestorNodeOfFrame(true)) {
         return;
     }

@@ -120,7 +120,7 @@ export class MyDataSource extends BasicDataSource {
 @ObservedV2
 export class StringData {
   @Trace
-  message: string;
+  public message: string;
 
   constructor(message: string) {
     this.message = message;

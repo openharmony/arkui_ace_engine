@@ -64,7 +64,6 @@ struct PageSceneRule {
     bool includeFocusable = true;
     bool includeText = false;
     bool reportOnRegister = true;
-    bool reportOnTextInputAttached = true;
     bool deduplicate = true;
     int32_t minReportIntervalMs = 500;
     int32_t threshold = 2;
@@ -72,6 +71,7 @@ struct PageSceneRule {
 };
 
 struct PageSceneRuleSet {
+    int32_t version = 1;
     std::string ruleSetId;
     std::string rawJson;
     std::string webRulesRaw;

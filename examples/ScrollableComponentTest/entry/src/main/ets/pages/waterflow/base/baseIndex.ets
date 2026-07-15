@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
- /*
+/*
   * Description: WaterFlow组件支持基于断点自适应列数
   * Writer: renxiaowen
   */
@@ -26,21 +26,21 @@ interface routerInfo {
 }
 
 let routerData: routerInfo[] = [
-  {url: "pages/waterflow/base/AlwaysTopDown/LazyVertical", info: "AlwaysTopDown_LazyVertical"},
-  {url: "pages/waterflow/base/AlwaysTopDown/LazyVerticalSections", info: "AlwaysTopDown_LazyVerticalSections"},
-  {url: "pages/waterflow/base/AlwaysTopDown/OriVertical", info: "AlwaysTopDown_OriVertical"},
-  {url: "pages/waterflow/base/AlwaysTopDown/OriVerticalSections", info: "AlwaysTopDown_OriVerticalSections"},
-  {url: "pages/waterflow/base/AlwaysTopDown/RepeatVertical", info: "AlwaysTopDown_RepeatVertical"},
-  {url: "pages/waterflow/base/AlwaysTopDown/RepeatVerticalSections", info: "AlwaysTopDown_RepeatVerticalSections"},
-  {url: "pages/waterflow/base/SlidingWindow/LazyVertical", info: "SlidingWindow_LazyVertical"},
-  {url: "pages/waterflow/base/SlidingWindow/LazyVerticalSections", info: "SlidingWindow_LazyVerticalSections"},
-  {url: "pages/waterflow/base/SlidingWindow/OriVertical", info: "SlidingWindow_OriVertical"},
-  {url: "pages/waterflow/base/SlidingWindow/OriVerticalSections", info: "SlidingWindow_OriVerticalSections"},
-  {url: "pages/waterflow/base/SlidingWindow/RepeatVertical", info: "SlidingWindow_RepeatVertical"},
-  {url: "pages/waterflow/base/SlidingWindow/RepeatVerticalSections", info: "SlidingWindow_RepeatVerticalSections"},
-  {url: "pages/waterflow/base/normal/LazyVertical", info: "normal_LazyVertical"},
-  {url: "pages/waterflow/base/normal/OriVertical", info: "normal_OriVertical"},
-  {url: "pages/waterflow/base/normal/RepeatVertical", info: "normal_RepeatVertical"},
+  {url: 'pages/waterflow/base/AlwaysTopDown/LazyVertical', info: 'AlwaysTopDown_LazyVertical'},
+  {url: 'pages/waterflow/base/AlwaysTopDown/LazyVerticalSections', info: 'AlwaysTopDown_LazyVerticalSections'},
+  {url: 'pages/waterflow/base/AlwaysTopDown/OriVertical', info: 'AlwaysTopDown_OriVertical'},
+  {url: 'pages/waterflow/base/AlwaysTopDown/OriVerticalSections', info: 'AlwaysTopDown_OriVerticalSections'},
+  {url: 'pages/waterflow/base/AlwaysTopDown/RepeatVertical', info: 'AlwaysTopDown_RepeatVertical'},
+  {url: 'pages/waterflow/base/AlwaysTopDown/RepeatVerticalSections', info: 'AlwaysTopDown_RepeatVerticalSections'},
+  {url: 'pages/waterflow/base/SlidingWindow/LazyVertical', info: 'SlidingWindow_LazyVertical'},
+  {url: 'pages/waterflow/base/SlidingWindow/LazyVerticalSections', info: 'SlidingWindow_LazyVerticalSections'},
+  {url: 'pages/waterflow/base/SlidingWindow/OriVertical', info: 'SlidingWindow_OriVertical'},
+  {url: 'pages/waterflow/base/SlidingWindow/OriVerticalSections', info: 'SlidingWindow_OriVerticalSections'},
+  {url: 'pages/waterflow/base/SlidingWindow/RepeatVertical', info: 'SlidingWindow_RepeatVertical'},
+  {url: 'pages/waterflow/base/SlidingWindow/RepeatVerticalSections', info: 'SlidingWindow_RepeatVerticalSections'},
+  {url: 'pages/waterflow/base/normal/LazyVertical', info: 'normal_LazyVertical'},
+  {url: 'pages/waterflow/base/normal/OriVertical', info: 'normal_OriVertical'},
+  {url: 'pages/waterflow/base/normal/RepeatVertical', info: 'normal_RepeatVertical'},
 ]
 @Entry
 @Preview
@@ -53,9 +53,9 @@ struct baseIndex {
         ForEach(routerData, (item: routerInfo) => {
           ListItem() {
             Text(item.info)
-              .width("100%")
-              .height("50vp")
-              .fontSize("20vp")
+              .width('100%')
+              .height('50vp')
+              .fontSize('20vp')
               .backgroundColor(0x6666FF)
               .borderRadius(10)
               .textAlign(TextAlign.Center)
@@ -66,7 +66,7 @@ struct baseIndex {
               })
           }
         })
-      }.width("90%")
+      }.width('90%')
 
       .scrollBar(BarState.Off)
       .friction(0.6)

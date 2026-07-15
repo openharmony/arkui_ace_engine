@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <string_view>
+
 #include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
@@ -52,7 +54,7 @@ constexpr float MAX_FONT_SCALE = 2.0f;
 const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
     "Button__", "Divider__" };
-const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
+constexpr std::string_view DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
 constexpr Dimension ICON_HEIGHT = 16.0_vp;
 const char SEARCH_Field_ETS_TAG[] = "SearchField";
 const char SEARCH_ETS_TAG[] = "Search";
@@ -1076,10 +1078,12 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     CHECK_NULL_VOID(pipeline);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
+    std::set<std::string> allowDropSet({
+        DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, std::string(DROP_TYPE_STYLED_STRING) });
     frameNode->SetAllowDrop(allowDropSet);
     auto parentInspector = parentNode->GetInspectorIdValue("");
-    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[TEXTFIELD_INDEX] + parentInspector);
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX +
+        SPECICALIZED_INSPECTOR_INDEXS[TEXTFIELD_INDEX] + parentInspector);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->InitTheme();
     auto textValue = pattern->GetTextUtf16Value();
@@ -1222,7 +1226,8 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     searchButtonEvent->SetEnabled(false);
     auto pattern = parentNode->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
-    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[BUTTON_INDEX] + parentInspector);
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX +
+        SPECICALIZED_INSPECTOR_INDEXS[BUTTON_INDEX] + parentInspector);
     pattern->SetButtonNode(frameNode);
     frameNode->MountToParent(parentNode);
     frameNode->MarkModifyDone();
@@ -1251,7 +1256,8 @@ void SearchModelNG::CreateDivider(const RefPtr<SearchNode>& parentNode, bool has
     dividerLayoutProperty->UpdateVertical(true);
     dividerLayoutProperty->UpdateStrokeWidth(searchDividerWidth);
 
-    dividerNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);
+    dividerNode->UpdateInspectorId(INSPECTOR_PREFIX +
+        SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);
     dividerNode->MountToParent(parentNode);
     dividerNode->MarkModifyDone();
 }

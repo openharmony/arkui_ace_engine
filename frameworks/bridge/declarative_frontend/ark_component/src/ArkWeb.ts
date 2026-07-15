@@ -1750,6 +1750,20 @@ class WebEnableDragModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WebEnableMediaNetworkProxyModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('webEnableMediaNetworkProxyModifier');
+  applyPeer(node: KNode, reset: boolean): void {
+      if (reset) {
+          getUINativeModule().web.resetEnableMediaNetworkProxy(node);
+      } else {
+          getUINativeModule().web.setEnableMediaNetworkProxy(node, this.value);
+      }
+    }
+}
+
 class WebScrollbarLayoutPolicyModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -2396,6 +2410,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   }
   enableWebAVSession(enabled: boolean): this {
       modifierWithKey(this._modifiersWithKeys, WebEnableWebAVSessionModifier.identity, WebEnableWebAVSessionModifier, enabled);
+      return this;
+  }
+  enableMediaNetworkProxy(enabled: boolean): this {
+      modifierWithKey(this._modifiersWithKeys, WebEnableMediaNetworkProxyModifier.identity, WebEnableMediaNetworkProxyModifier, enabled);
       return this;
   }
   scrollbarLayoutPolicy(value: number): this {

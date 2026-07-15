@@ -553,7 +553,7 @@ HWTEST_F(ImagePatternPropertyLoadTest, StartDecoding002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     SizeF dstSize(100.0f, 200.0f);
     pattern->StartDecoding(dstSize);
-    EXPECT_EQ(pattern->loadingCtx_, nullptr);
+    EXPECT_NE(pattern->loadingCtx_, nullptr);
 }
 
 /**
@@ -1372,7 +1372,8 @@ HWTEST_F(ImagePatternPropertyLoadTest, ImageRenderPropertyTestNg012, TestSize.Le
 {
     auto prop = AceType::MakeRefPtr<ImageRenderProperty>();
     prop->UpdateMatchTextDirection(false);
-    EXPECT_FALSE(prop->GetMatchTextDirection());
+    ASSERT_TRUE(prop->GetMatchTextDirection().has_value());
+    EXPECT_FALSE(prop->GetMatchTextDirection().value());
     prop->UpdateSvgFillColor(SVG_FILL_COLOR_DEFAULT);
     EXPECT_EQ(prop->GetSvgFillColor(), SVG_FILL_COLOR_DEFAULT);
     prop->UpdateSmoothEdge(5.0f);
@@ -1392,7 +1393,8 @@ HWTEST_F(ImagePatternPropertyLoadTest, ImageRenderPropertyTestNg013, TestSize.Le
     prop->UpdateHdrBrightness(0.8f);
     EXPECT_FLOAT_EQ(prop->GetHdrBrightness().value_or(0.0f), 0.8f);
     prop->UpdateAntiAlias(false);
-    EXPECT_FALSE(prop->GetAntiAlias());
+    ASSERT_TRUE(prop->GetAntiAlias().has_value());
+    EXPECT_FALSE(prop->GetAntiAlias().value());
 }
 
 /**
@@ -1813,12 +1815,20 @@ HWTEST_F(ImagePatternPropertyLoadTest, GetContentTransitionParam001, TestSize.Le
  */
 HWTEST_F(ImagePatternPropertyLoadTest, InitOnKeyEvent001, TestSize.Level1)
 {
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backupApiVersion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
     auto frameNode = CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL, nullptr);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     ASSERT_NE(pattern, nullptr);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
     pattern->InitOnKeyEvent();
-    EXPECT_TRUE(pattern->keyEventCallback_ != nullptr);
+    EXPECT_EQ(pattern->keyEventCallback_, nullptr);
+    EXPECT_TRUE(focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::DEFAULT));
+    container->SetApiTargetVersion(backupApiVersion);
 }
 
 /**

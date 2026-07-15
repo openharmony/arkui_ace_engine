@@ -217,11 +217,13 @@ void UiReportProxy::ReportHitTestNodeInfos(const std::string& data, int32_t part
 
 void UiReportProxy::OnComponentChange(const std::string& key, const std::string& value)
 {
+#ifndef CROSS_PLATFORM
     if (UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         auto result = InspectorJsonUtil::Create(true);
         result->Put(key.c_str(), value.c_str());
         ReportComponentChangeEvent(result->ToString());
     }
+#endif
 }
 
 void UiReportProxy::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)

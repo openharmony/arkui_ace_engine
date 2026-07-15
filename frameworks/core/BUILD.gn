@@ -158,7 +158,6 @@ template("ace_core_source_set") {
       "common/container.cpp",
       "common/container_scope.cpp",
       "common/environment/environment_proxy.cpp",
-      "common/event_dump.cpp",
       "common/event_manager.cpp",
       "common/event_manager_pen.cpp",
       "common/focus_animation_manager.cpp",
@@ -276,14 +275,6 @@ template("ace_core_source_set") {
       "common/ime/text_input_proxy.cpp",
       "common/ime/text_input_type.cpp",
 
-      # recorder
-      "common/recorder/event_config.cpp",
-      "common/recorder/event_controller.cpp",
-      "common/recorder/event_recorder.cpp",
-      "common/recorder/exposure_processor.cpp",
-      "common/recorder/inspector_tree_collector.cpp",
-      "common/recorder/node_data_cache.cpp",
-
       # text
       "text/text_emoji_processor.cpp",
 
@@ -305,6 +296,22 @@ template("ace_core_source_set") {
       # refresh
       "components/refresh/render_refresh_target.cpp",
     ]
+
+    if (defined(config.enable_inspector_event_reporting) &&
+        config.enable_inspector_event_reporting) {
+      sources += [ "common/event_dump.cpp", ]
+    }
+
+    if (!is_arkui_x) {
+      sources += [
+        "common/recorder/event_config.cpp",
+        "common/recorder/event_controller.cpp",
+        "common/recorder/event_recorder.cpp",
+        "common/recorder/exposure_processor.cpp",
+        "common/recorder/inspector_tree_collector.cpp",
+        "common/recorder/node_data_cache.cpp",
+      ]
+    }
 
     if (defined(config.relaxed_interaction_support) &&
         config.relaxed_interaction_support) {
@@ -504,6 +511,9 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
       "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
+    if (enable_player_framework) {
+      deps += [ "$ace_root/frameworks/core/components_ng/render:ace_core_components_video_resource_ng_$platform" ]
+    }
 
     deps += [
       "$ace_root/frameworks/core/components_ng/pattern/rich_editor:ace_core_components_rich_editor_pattern_ng_$platform",
@@ -512,10 +522,6 @@ template("ace_core_source_set") {
     ]
 
     deps += [ "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform" ]
-
-    if (qrcodegen_support) {
-      deps += [ "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform" ]
-    }
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
@@ -696,6 +702,10 @@ template("ace_core_source_set") {
       defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
     }
 
+    if (ace_engine_feature_enable_material_customized) {
+      defines += [ "ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED" ]
+    }
+
     # arkoala C interface
     deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
     deps += [ "$ace_root/frameworks/core/interfaces/native/common:ace_core_interfaces_native_$platform" ]
@@ -774,7 +784,6 @@ template("ace_core_ng_source_set") {
       "common/container.cpp",
       "common/container_scope.cpp",
       "common/environment/environment_proxy.cpp",
-      "common/event_dump.cpp",
       "common/event_manager.cpp",
       "common/event_manager_pen.cpp",
       "common/focus_animation_manager.cpp",
@@ -952,14 +961,6 @@ template("ace_core_ng_source_set") {
       #declaration
       "components/declaration/common/declaration.cpp",
 
-      # recorder
-      "common/recorder/event_config.cpp",
-      "common/recorder/event_controller.cpp",
-      "common/recorder/event_recorder.cpp",
-      "common/recorder/exposure_processor.cpp",
-      "common/recorder/inspector_tree_collector.cpp",
-      "common/recorder/node_data_cache.cpp",
-
       # text
       "text/text_emoji_processor.cpp",
 
@@ -975,6 +976,22 @@ template("ace_core_ng_source_set") {
       "drawable/picture_drawable_descriptor.cpp",
       "drawable/pixel_map_drawable_descriptor.cpp",
     ]
+
+    if (defined(config.enable_inspector_event_reporting) &&
+        config.enable_inspector_event_reporting) {
+      sources += [ "common/event_dump.cpp", ]
+    }
+
+    if (!is_arkui_x) {
+      sources += [
+        "common/recorder/event_config.cpp",
+        "common/recorder/event_controller.cpp",
+        "common/recorder/event_recorder.cpp",
+        "common/recorder/exposure_processor.cpp",
+        "common/recorder/inspector_tree_collector.cpp",
+        "common/recorder/node_data_cache.cpp",
+      ]
+    }
 
     if (defined(config.relaxed_interaction_support) &&
         config.relaxed_interaction_support) {
@@ -1093,15 +1110,14 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
       "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
+    if (enable_player_framework) {
+      deps += [ "$ace_root/frameworks/core/components_ng/render:ace_core_components_video_resource_ng_$platform" ]
+    }
 
     deps += [ "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform" ]
 
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
-    } else {
-      if (qrcodegen_support) {
-        deps += [ "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform" ]
-      }
     }
 
     if (defined(config.enable_ability_component) &&
@@ -1230,6 +1246,10 @@ template("ace_core_ng_source_set") {
     if (defined(global_parts_info) && defined(global_parts_info.hiviewdfx_api_metrics)) {
       external_deps += [ "api_metrics:histogrammanager" ]
       defines += [ "ACE_ENGINE_API_METRICS_EXT_ENABLE" ]
+    }
+
+    if (ace_engine_feature_enable_material_customized) {
+      defines += [ "ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED" ]
     }
 
     cflags_cc = []

@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "base/log/log_wrapper.h"
 
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
@@ -45,6 +47,38 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(parentItemPattern);
     auto expandingMode = parentItemPattern->GetExpandingMode();
     OffsetF position = GetSubMenuLayoutOffset(layoutWrapper, parentMenuItem, size, expandingMode);
+    // The STACK appear animation (ShowStackSubMenuAnimation) sets a render-context
+    // position (UpdatePosition to endOffset) that OVERRIDES the geometry frame offset
+    // and is computed from parent-menu item geometry WITHOUT keyboard awareness. So even
+    // though the geometry offset above is keyboard-aware, the rendered position stays at
+    // endOffset and overlaps the keyboard. Re-sync the render-context position to the
+    // keyboard-aware geometry offset. (Layout does not run during the appear animation,
+    // which is render-only, so this does not fight the animation.)
+    auto subRenderContext = menuNode->GetRenderContext();
+    bool hasRenderPos = subRenderContext && subRenderContext->HasPosition();
+    // Only re-sync while the submenu is stably shown. Skip when:
+    //  - the whole menu is hiding (IsHide()): the disappear animation drives UpdatePosition;
+    //  - the submenu is collapsing: HideStackMenu sets the parent item's IsSubMenuShowed()
+    //    to false BEFORE the disappear animation, so a layout fired during collapse would
+    //    otherwise sync the render position and make the submenu jump up.
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    bool wrapperHiding = false;
+    if (menuWrapper) {
+        auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+        wrapperHiding = wrapperPattern && wrapperPattern->IsHide();
+    }
+    bool subMenuShowed = parentItemPattern->IsSubMenuShowed();
+    if (hasRenderPos && !wrapperHiding && subMenuShowed) {
+        subRenderContext->UpdatePosition(
+            OffsetT<Dimension>(Dimension(position.GetX()), Dimension(position.GetY())));
+    }
+    TAG_LOGD(AceLogTag::ACE_MENU,
+        "SubMenu Layout apply: expandingMode=%{public}d geoPos=%{public}s sizeH=%{public}f "
+        "geoBottom=%{public}f wrapperRect=%{public}s hasRenderPos=%{public}d wrapperHiding=%{public}d "
+        "subMenuShowed=%{public}d",
+        static_cast<int32_t>(expandingMode), position.ToString().c_str(), size.Height(),
+        position.GetY() + size.Height(), wrapperRect_.ToString().c_str(), hasRenderPos ? 1 : 0,
+        wrapperHiding ? 1 : 0, subMenuShowed ? 1 : 0);
     geometryNode->SetMarginFrameOffset(position);
     if (parentMenuItem) {
         UpdateHoverRegion(parentMenuItem, position, size);
@@ -256,6 +290,10 @@ float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreen(
 {
     auto parentMenuPattern = parentMenu->GetPattern<MenuPattern>();
     auto parentPlacement = parentMenuPattern->GetLastPlacement().value_or(Placement::NONE);
+    TAG_LOGD(AceLogTag::ACE_MENU,
+        "StackSub calc enter: wrapperRect=%{public}s position_=%{public}s sizeH=%{public}f parentPlacement=%{public}d",
+        wrapperRect_.ToString().c_str(), position_.ToString().c_str(), size.Height(),
+        static_cast<int32_t>(parentPlacement));
     auto firstItemBottomPositionY = GetFirstItemBottomPositionY(parentMenu);
     float parentMenuBottomY = GetMenuBottomPositionY(parentMenu);
     float lastMenuItemPositionY = GetLastItemTopPositionY(parentMenu);
@@ -294,12 +332,30 @@ float SubMenuLayoutAlgorithm::CalcStackSubMenuPositionYHalfScreen(
             return wrapperRect_.Bottom() - param_.bottomSecurity - size.Height();
         }
         if (bottomSpace < parentMenuItem->GetGeometryNode()->GetFrameSize().Height()) {
-            return parentMenuPositionY;
+            // fallback must still keep the stack submenu above the keyboard
+            float stackY = std::max(parentMenuPositionY,
+                static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - size.Height());
+            TAG_LOGD(AceLogTag::ACE_MENU,
+                "StackSub fallback(parentPos): wrapperRect=%{public}s sizeH=%{public}f y=%{public}f",
+                wrapperRect_.ToString().c_str(), size.Height(), stackY);
+            return stackY;
         }
-        return firstItemBottomPositionY;
+        float stackY = std::max(firstItemBottomPositionY,
+            static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - size.Height());
+        TAG_LOGD(AceLogTag::ACE_MENU,
+            "StackSub fallback(firstItem): wrapperRect=%{public}s sizeH=%{public}f y=%{public}f",
+            wrapperRect_.ToString().c_str(), size.Height(), stackY);
+        return stackY;
     }
-    // can't fit in screen, line up with top of the screen
-    return 0.0f;
+    // can't fit in the keyboard-shrunk area: align the submenu bottom to the keyboard
+    // top (i.e. wrapperRect_.Bottom()) instead of lining up with screen top, so the
+    // visible region stays above the keyboard.
+    float stackY = std::max(0.0f,
+        static_cast<float>(wrapperRect_.Bottom()) - param_.bottomSecurity - size.Height());
+    TAG_LOGD(AceLogTag::ACE_MENU,
+        "StackSub cannotFit: wrapperRect=%{public}s sizeH=%{public}f y=%{public}f",
+        wrapperRect_.ToString().c_str(), size.Height(), stackY);
+    return stackY;
 }
 
 float SubMenuLayoutAlgorithm::VerticalLayoutSubMenuHalfScreen(

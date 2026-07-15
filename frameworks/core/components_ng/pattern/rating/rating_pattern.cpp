@@ -23,8 +23,12 @@
 #include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components/common/properties/color.h"
 #include "core/components/rating/rating_theme.h"
 #include "core/components/theme/icon_theme.h"
@@ -414,6 +418,7 @@ void RatingPattern::FireChangeEvent()
     ReportChangeEvent(ss.str());
     lastRatingScore_ = ratingRenderProperty->GetRatingScoreValue(0.0);
 
+#ifndef CROSS_PLATFORM
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;
     }
@@ -432,6 +437,7 @@ void RatingPattern::FireChangeEvent()
         return;
     }
     Recorder::NodeDataCache::Get().PutString(host, inspectorId, score);
+#endif
 }
 
 void RatingPattern::HandleDragEnd()
@@ -1218,6 +1224,7 @@ void RatingPattern::OnColorModeChange(uint32_t colorMode)
 
 void RatingPattern::ReportChangeEvent(const std::string& index)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
@@ -1231,6 +1238,7 @@ void RatingPattern::ReportChangeEvent(const std::string& index)
     json->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 int32_t RatingPattern::OnInjectionEvent(const std::string& command)
@@ -1258,6 +1266,7 @@ int32_t RatingPattern::OnInjectionEvent(const std::string& command)
 
 bool RatingPattern::ReportInjectionResult(bool isSuccess, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto nodeId = host->GetId();
@@ -1270,6 +1279,7 @@ bool RatingPattern::ReportInjectionResult(bool isSuccess, const std::string& rea
     result->Put("reason", reason.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "RatingResult", result->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
     return true;
 }
 

@@ -15,6 +15,7 @@
 
 #include "test/unittest/core/event/event_manager_test_ng.h"
 #include "core/common/event_manager.h"
+#include "core/components_ng/gestures/recognizers/sequenced_recognizer.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1976,11 +1977,11 @@ HWTEST_F(EventManagerTestNg, DumpTouchInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetCurrentReferee001
+ * @tc.name: GetCurrentReferee007
  * @tc.desc: Test GetCurrentReferee function with isNewReferee=false and key=1 (POST_ONCE).
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, GetCurrentReferee001, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, GetCurrentReferee007, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
@@ -2139,11 +2140,11 @@ HWTEST_F(EventManagerTestNg, SetResponseLinkRecognizers002, TestSize.Level1)
 }
  
 /**
- * @tc.name: CleanRefereeBeforeTouchTest001
+ * @tc.name: CleanRefereeBeforeTouchTest003
  * @tc.desc: Test CleanRefereeBeforeTouchTest with eventHandleId=0.
  * @tc.type: FUNC
  */
-HWTEST_F(EventManagerTestNg, CleanRefereeBeforeTouchTest001, TestSize.Level1)
+HWTEST_F(EventManagerTestNg, CleanRefereeBeforeTouchTest003, TestSize.Level1)
 {
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);

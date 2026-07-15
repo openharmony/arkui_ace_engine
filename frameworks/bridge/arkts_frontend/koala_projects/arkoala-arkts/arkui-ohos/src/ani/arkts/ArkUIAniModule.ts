@@ -347,6 +347,8 @@ export class ArkUIAniModule {
     native static _UiMaterial_DestroyMaterial(value: long): void
     native static _UiMaterial_ConvertToECMaterial(value: long): long
     native static _UiMaterial_ConvertToECSubMaterial(value: long): long
+    native static _UiMaterial_GetGlobalMaterialLevel(): int
+    native static _UiMaterial_IsImmersiveMaterialSupported(): boolean
 
     native static _CreateViewStackProcessor(): KPointer
 

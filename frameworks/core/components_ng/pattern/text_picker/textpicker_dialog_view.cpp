@@ -19,7 +19,9 @@
 
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/components/button/button_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -621,11 +623,13 @@ RefPtr<FrameNode> TextPickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
         auto textPickerEventHub = pickerPattern->GetEventHub<TextPickerEventHub>();
         CHECK_NULL_VOID(textPickerEventHub);
         textPickerEventHub->FireDialogAcceptEvent(str);
+#ifndef CROSS_PLATFORM
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;
             builder.SetType(dateNode->GetTag()).SetEventType(Recorder::EventType::DIALOG_ACCEPT).SetText(str);
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         }
+#endif
     };
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(clickCallback));
     buttonConfirmNode->MarkModifyDone();
@@ -937,11 +941,13 @@ RefPtr<FrameNode> TextPickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
     auto recordEvent = [](GestureEvent& info) {
+#ifndef CROSS_PLATFORM
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;
             builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::DIALOG_CANCEL);
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         }
+#endif
     };
     auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
     eventCancelHub->AddClickEvent(recordEventPtr);
@@ -1385,11 +1391,13 @@ RefPtr<FrameNode> TextPickerDialogView::CreateForwardNode(NG::DialogGestureEvent
     CHECK_NULL_RETURN(eventForwardHub, nullptr);
     eventForwardHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(moveForwardEvent)));
     auto recordEvent = [](GestureEvent& info) {
+#ifndef CROSS_PLATFORM
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;
             builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::STEPPER_NEXT);
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         }
+#endif
     };
     auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
     eventForwardHub->AddClickEvent(recordEventPtr);
@@ -1443,11 +1451,13 @@ RefPtr<FrameNode> TextPickerDialogView::CreateBackwardNode(NG::DialogGestureEven
     CHECK_NULL_RETURN(eventBackwardHub, nullptr);
     eventBackwardHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(moveBackwardEvent)));
     auto recordEvent = [](GestureEvent& info) {
+#ifndef CROSS_PLATFORM
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;
             builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::STEPPER_NEXT);
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         }
+#endif
     };
     auto recordEventPtr = AceType::MakeRefPtr<ClickEvent>(std::move(recordEvent));
     eventBackwardHub->AddClickEvent(recordEventPtr);

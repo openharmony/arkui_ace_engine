@@ -843,7 +843,9 @@ void ButtonPattern::OnAfterModifyDone()
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
         auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
+#ifndef CROSS_PLATFORM
         Recorder::NodeDataCache::Get().PutString(host, inspectorId, text);
+#endif
     }
 }
 
@@ -890,6 +892,7 @@ int32_t ButtonPattern::OnInjectionEvent(const std::string& command)
 
 void ButtonPattern::ReportButtonClickResult()
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto buttonResult = JsonUtil::Create();
@@ -907,6 +910,7 @@ void ButtonPattern::ReportButtonClickResult()
     auto manager = UiSessionManager::GetInstance();
     CHECK_NULL_VOID(manager);
     manager->ReportComponentChangeEvent("buttonClick", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 void ButtonPattern::InitHoverEvent()
@@ -1311,8 +1315,36 @@ void ButtonPattern::HandleEnabled()
     auto theme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(theme);
     auto alpha = theme->GetBgDisabledAlpha();
+    // Logic for Button with systemmaterials.
+    if (renderContext->GetSystemMaterial()) {
+        renderContext->OnOpacityUpdate(renderContext->GetOpacityValue(1.0));
+        std::vector<RefPtr<UINode>> pending(host->GetChildren().begin(), host->GetChildren().end());
+        while (!pending.empty()) {
+            auto current = pending.back();
+            pending.pop_back();
+            auto childFrame = DynamicCast<FrameNode>(current);
+            // The child nodes of non-FrameNode nodes are added to the pending queue.
+            if (!childFrame) {
+                const auto& grandChildren = current->GetChildren();
+                pending.insert(pending.end(), grandChildren.begin(), grandChildren.end());
+                continue;
+            }
+            auto childRenderContext = childFrame->GetRenderContext();
+            if (!childRenderContext) {
+                continue;
+            }
+            auto childOriginalOpacity = childRenderContext->GetOpacityValue(1.0);
+            childRenderContext->OnOpacityUpdate(enabled ? childOriginalOpacity : alpha * childOriginalOpacity);
+        }
+        return;
+    }
     auto originalOpacity = renderContext->GetOpacityValue(1.0);
     renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
+}
+
+void ButtonPattern::OnRebuildFrame()
+{
+    HandleEnabled();
 }
 
 void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo,

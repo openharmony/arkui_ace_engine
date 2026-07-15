@@ -53,9 +53,9 @@ import { common } from '@kit.AbilityKit';
 import { State } from '@ohos.arkui.stateManagement';
 
 export class Contact {
-  key: string = util.generateRandomUUID(true);
-  name: ResourceStr;
-  firstChar: string;
+  public key: string = util.generateRandomUUID(true);
+  public name: ResourceStr;
+  public firstChar: string;
 
   constructor(name: ResourceStr, firstChar: string) {
     this.name = name;

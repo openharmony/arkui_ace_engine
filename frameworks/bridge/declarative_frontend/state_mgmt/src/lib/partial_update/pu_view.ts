@@ -1374,8 +1374,20 @@ abstract class ViewPU extends PUV2ViewBase
       recycleUpdateFunc(recycleElmtId, /* is first render */ true, node, node.__isPreRendered__Internal);
     } finally {
       if (node.__isPreRendered__Internal) {
+        this.__updateStateVarsForPreRenderedNodes__Internal(node);
         this.rerender();
         node.__isPreRendered__Internal = false;
+      }
+    }
+  }
+
+  private __updateStateVarsForPreRenderedNodes__Internal(node: ViewPU): void {
+    if (node.paramsGenerator_ && typeof node.paramsGenerator_ === 'function' &&
+      node.updateStateVars && typeof node.updateStateVars === 'function') {
+      try {
+        node.updateStateVars(node.paramsGenerator_());
+      } catch (error) {
+        stateMgmtConsole.warn('Prerender components on reuse, updateStateVars errors.', error);
       }
     }
   }

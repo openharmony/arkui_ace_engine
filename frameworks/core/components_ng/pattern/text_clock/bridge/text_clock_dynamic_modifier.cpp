@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <string_view>
+
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/common/container.h"
@@ -41,7 +43,7 @@ constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 constexpr Dimension DEFAULT_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
-const std::string DEFAULT_FONT_FAMILY_CLOCK = "HarmonyOS Sans";
+constexpr std::string_view DEFAULT_FONT_FAMILY_CLOCK = "HarmonyOS Sans";
 
 FrameNode* GetFrameNode(ArkUINodeHandle node)
 {
@@ -215,7 +217,7 @@ void ResetFontFamily(ArkUINodeHandle node)
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    std::string familiesStr = DEFAULT_FONT_FAMILY_CLOCK;
+    std::string familiesStr = std::string(DEFAULT_FONT_FAMILY_CLOCK);
     std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
     TextClockModelNG::SetFontFamily(frameNode, fontFamilyResult);
     if (SystemProperties::ConfigChangePerform()) {
@@ -560,7 +562,7 @@ void SetFontFamilyResImpl(ArkUINodeHandle node, ArkUI_CharPtr fontFamily, void* 
 
 void ResetFontFamilyImpl(ArkUINodeHandle node)
 {
-    std::string familiesStr = DEFAULT_FONT_FAMILY_CLOCK;
+    std::string familiesStr = std::string(DEFAULT_FONT_FAMILY_CLOCK);
     std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
     GetTextClockImpl()->SetFontFamily(fontFamilyResult);
 }

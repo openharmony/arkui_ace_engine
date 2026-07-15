@@ -1596,4 +1596,146 @@ HWTEST_F(QRCodeTestNg, QRCodeOnThemeScopeUpdateTest006, TestSize.Level1)
 
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
+
+/**
+ * @tc.name: QRCodeSetBackgroundColorHDR001
+ * @tc.desc: Test SetQRBackgroundColor with HDR color
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeSetBackgroundColorHDR001, TestSize.Level1)
+{
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    Color hdrColor = Color::FromFloat(1.0f, 0.5f, 0.3f, 1.0f, 2.0f);
+    qrCodeModelNG.SetQRBackgroundColor(AceType::RawPtr(frameNode), hdrColor);
+
+    auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(), hdrColor);
+
+    auto headRoomColor = hdrColor.GetHeadRoomColor();
+    ASSERT_TRUE(headRoomColor.has_value());
+    EXPECT_EQ(headRoomColor.value().headRoom, 2.0f);
+}
+
+/**
+ * @tc.name: QRCodeSetBackgroundColorNoHDR001
+ * @tc.desc: Test SetQRBackgroundColor with non-HDR color (headRoom should be 1.0)
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeSetBackgroundColorNoHDR001, TestSize.Level1)
+{
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    Color normalColor(0xFFFF0000);
+    qrCodeModelNG.SetQRBackgroundColor(AceType::RawPtr(frameNode), normalColor);
+
+    auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(), normalColor);
+
+    auto headRoomColor = normalColor.GetHeadRoomColor();
+    if (headRoomColor.has_value()) {
+        EXPECT_EQ(headRoomColor.value().headRoom, 1.0f);
+    }
+}
+
+/**
+ * @tc.name: QRCodeSetBackgroundColorColorSpace001
+ * @tc.desc: Test SetQRBackgroundColor with DISPLAY_P3 color space
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeSetBackgroundColorColorSpace001, TestSize.Level1)
+{
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    Color p3Color(0xFF123456);
+    p3Color.SetColorSpace(ColorSpace::DISPLAY_P3);
+    qrCodeModelNG.SetQRBackgroundColor(AceType::RawPtr(frameNode), p3Color);
+
+    auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue().GetColorSpace(), ColorSpace::DISPLAY_P3);
+}
+
+/**
+ * @tc.name: QRCodeSetBackgroundColorColorSpace002
+ * @tc.desc: Test SetQRBackgroundColor with BT2020 color space
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeSetBackgroundColorColorSpace002, TestSize.Level1)
+{
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    Color bt2020Color(0xFFABCDEF);
+    bt2020Color.SetColorSpace(ColorSpace::BT2020);
+    qrCodeModelNG.SetQRBackgroundColor(AceType::RawPtr(frameNode), bt2020Color);
+
+    auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue().GetColorSpace(), ColorSpace::BT2020);
+}
+
+/**
+ * @tc.name: QRCodeSetBackgroundColorColorSpace003
+ * @tc.desc: Test SetQRBackgroundColor with SRGB color space (default)
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeSetBackgroundColorColorSpace003, TestSize.Level1)
+{
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+
+    Color srgbColor(0xFF0000FF);
+    qrCodeModelNG.SetQRBackgroundColor(AceType::RawPtr(frameNode), srgbColor);
+
+    auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue().GetColorSpace(), ColorSpace::SRGB);
+}
+
+/**
+ * @tc.name: QRCodeSetBackgroundColorHDRAndColorSpace001
+ * @tc.desc: Test SetQRBackgroundColor with HDR color and DISPLAY_P3 color space
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeSetBackgroundColorHDRAndColorSpace001, TestSize.Level1)
+{
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    Color hdrP3Color = Color::FromFloat(1.0f, 0.8f, 0.6f, 1.0f, 2.5f);
+    hdrP3Color.SetColorSpace(ColorSpace::DISPLAY_P3);
+    qrCodeModelNG.SetQRBackgroundColor(AceType::RawPtr(frameNode), hdrP3Color);
+
+    auto paintProperty = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue().GetColorSpace(), ColorSpace::DISPLAY_P3);
+
+    auto headRoomColor = hdrP3Color.GetHeadRoomColor();
+    ASSERT_TRUE(headRoomColor.has_value());
+    EXPECT_EQ(headRoomColor.value().headRoom, 2.5f);
+}
 } // namespace OHOS::Ace::NG

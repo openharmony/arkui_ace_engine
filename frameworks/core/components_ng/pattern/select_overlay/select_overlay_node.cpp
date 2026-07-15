@@ -26,6 +26,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/utils/linear_map.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
@@ -144,13 +145,18 @@ std::unordered_map<TextDataDetectType, std::pair<std::string, std::function<bool
     { TextDataDetectType::DATE_TIME, std::make_pair(OH_DEFAULT_AI_MENU_DATETIME, &TextSystemMenu::IsShowAIDatetime) },
 };
 
-std::unordered_map<std::string, TextDataDetectType> AI_ID_TYPE_MAP = {
-    { OH_DEFAULT_AI_MENU_PHONE, TextDataDetectType::PHONE_NUMBER },
-    { OH_DEFAULT_AI_MENU_URL, TextDataDetectType::URL },
-    { OH_DEFAULT_AI_MENU_EMAIL, TextDataDetectType::EMAIL },
+// Sorted alphabetically by key
+static constexpr LinearMapNode<TextDataDetectType> AI_ID_TYPE_MAP[] = {
     { OH_DEFAULT_AI_MENU_ADDRESS, TextDataDetectType::ADDRESS },
     { OH_DEFAULT_AI_MENU_DATETIME, TextDataDetectType::DATE_TIME },
+    { OH_DEFAULT_AI_MENU_EMAIL, TextDataDetectType::EMAIL },
+    { OH_DEFAULT_AI_MENU_PHONE, TextDataDetectType::PHONE_NUMBER },
+    { OH_DEFAULT_AI_MENU_URL, TextDataDetectType::URL },
 };
+static_assert(IsSorted(AI_ID_TYPE_MAP), "AI_ID_TYPE_MAP array must be sorted to work properly");
+static_assert(IsSortedWithDetailedLog<AI_ID_TYPE_MAP>(),
+    "AI_ID_TYPE_MAP array must be sorted alphabetically. "
+    "See LinearMapSortKeyChars<...> in the compile error for the first out-of-order key.");
 
 bool IsAIMenuOption(const std::string& id)
 {
@@ -939,72 +945,101 @@ void PlayExtensionMenuDistortionAnimations(const RefPtr<FrameNode>& extensionMen
     }, nullptr, nullptr, extensionMenu->GetContextRefPtr());
 }
 
-const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>> isMenuItemEnabledFuncMap = {
-    { OH_DEFAULT_CUT, [](const SelectMenuInfo& info){ return info.showCut; } },
-    { OH_DEFAULT_COPY, [](const SelectMenuInfo& info){ return info.showCopy; } },
-    { OH_DEFAULT_SELECT_ALL, [](const SelectMenuInfo& info){ return info.showCopyAll; } },
-    { OH_DEFAULT_AUTO_FILL, [](const SelectMenuInfo& info){ return info.showAutoFill; } },
-    { OH_DEFAULT_PASSWORD_VAULT, [](const SelectMenuInfo& info){ return info.showAutoFill; } },
-    { OH_DEFAULT_PASTE, [](const SelectMenuInfo& info){ return info.showPaste; } },
-    { OH_DEFAULT_TRANSLATE, [](const SelectMenuInfo& info){ return info.showTranslate; } },
-    { OH_DEFAULT_SEARCH, [](const SelectMenuInfo& info){ return info.showSearch; } },
-    { OH_DEFAULT_SHARE, [](const SelectMenuInfo& info){ return info.showShare; } },
-    { OH_DEFAULT_AI_WRITE, [](const SelectMenuInfo& info){ return info.showAIWrite; } }
+// Sorted alphabetically by key
+using MenuItemEnabledMapFunc = bool(*)(const SelectMenuInfo&);
+static constexpr LinearMapNode<MenuItemEnabledMapFunc> IS_MENUITEM_ENABLED_MAP[] = {
+    { OH_DEFAULT_AI_WRITE, +[](const SelectMenuInfo& info){ return info.showAIWrite; } },
+    { OH_DEFAULT_AUTO_FILL, +[](const SelectMenuInfo& info){ return info.showAutoFill; } },
+    { OH_DEFAULT_COPY, +[](const SelectMenuInfo& info){ return info.showCopy; } },
+    { OH_DEFAULT_CUT, +[](const SelectMenuInfo& info){ return info.showCut; } },
+    { OH_DEFAULT_PASSWORD_VAULT, +[](const SelectMenuInfo& info){ return info.showAutoFill; } },
+    { OH_DEFAULT_PASTE, +[](const SelectMenuInfo& info){ return info.showPaste; } },
+    { OH_DEFAULT_SEARCH, +[](const SelectMenuInfo& info){ return info.showSearch; } },
+    { OH_DEFAULT_SELECT_ALL, +[](const SelectMenuInfo& info){ return info.showCopyAll; } },
+    { OH_DEFAULT_SHARE, +[](const SelectMenuInfo& info){ return info.showShare; } },
+    { OH_DEFAULT_TRANSLATE, +[](const SelectMenuInfo& info){ return info.showTranslate; } },
 };
+static_assert(IsSorted(IS_MENUITEM_ENABLED_MAP), "IS_MENUITEM_ENABLED_MAP array must be sorted to work properly");
+static_assert(IsSortedWithDetailedLog<IS_MENUITEM_ENABLED_MAP>(),
+    "IS_MENUITEM_ENABLED_MAP array must be sorted alphabetically. "
+    "See LinearMapSortKeyChars<...> in the compile error for the first out-of-order key.");
 
-const std::unordered_map<std::string, std::function<uint32_t(RefPtr<OHOS::Ace::TextOverlayTheme>)>> getSymbolIdMap = {
-    { OH_DEFAULT_CUT,
-        [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) { return textOverlayTheme->GetCutSymbolId();}
-    },
+// Sorted alphabetically by key
+using SymbolIdMapFunc = uint32_t(*)(const RefPtr<OHOS::Ace::TextOverlayTheme>&);
+static constexpr LinearMapNode<SymbolIdMapFunc> GET_SYMBOL_ID_MAP[] = {
+    { OH_DEFAULT_AI_MENU_ADDRESS,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetAIMenuSymbolId(); } },
+    { OH_DEFAULT_AI_MENU_DATETIME,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetAIMenuSymbolId(); } },
+    { OH_DEFAULT_AI_MENU_EMAIL,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetAIMenuSymbolId(); } },
+    { OH_DEFAULT_AI_MENU_PHONE,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetAIMenuSymbolId(); } },
+    { OH_DEFAULT_AI_MENU_URL,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetAIMenuSymbolId(); } },
+    { OH_DEFAULT_AI_WRITE,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetAIWriteSymbolId(); } },
+    { OH_DEFAULT_ASK_CELIA,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetAskCeliaSymbolId(); } },
+    { OH_DEFAULT_AUTO_FILL,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetAutoFillSymbolId(); } },
+    { OH_DEFAULT_CAMERA_INPUT,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetCameraInputSymbolId(); } },
     { OH_DEFAULT_COPY,
-        [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) { return textOverlayTheme->GetCopySymbolId();}
-    },
-    { OH_DEFAULT_SELECT_ALL, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetCopyAllSymbolId();}
-    },
-    { OH_DEFAULT_AUTO_FILL, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetAutoFillSymbolId();}
-    },
-    { OH_DEFAULT_PASSWORD_VAULT, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetPasswordVaultSymbolId();}
-    },
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetCopySymbolId(); } },
+    { OH_DEFAULT_CUT,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetCutSymbolId(); } },
+    { OH_DEFAULT_PASSWORD_VAULT,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetPasswordVaultSymbolId(); } },
     { OH_DEFAULT_PASTE,
-        [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) { return textOverlayTheme->GetPasteSymbolId();}
-    },
-    { OH_DEFAULT_CAMERA_INPUT, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetCameraInputSymbolId();}
-    },
-    { OH_DEFAULT_AI_WRITE, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetAIWriteSymbolId();}
-    },
-    { OH_DEFAULT_SEARCH, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetSearchSymbolId();}
-    },
-    { OH_DEFAULT_TRANSLATE, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetTranslateSymbolId();}
-    },
-    { OH_DEFAULT_SHARE, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetShareSymbolId();}
-    },
-    { OH_DEFAULT_AI_MENU_PHONE, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetAIMenuSymbolId();}
-    },
-    { OH_DEFAULT_AI_MENU_URL, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetAIMenuSymbolId();}
-    },
-    { OH_DEFAULT_AI_MENU_EMAIL, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetAIMenuSymbolId();}
-    },
-    { OH_DEFAULT_AI_MENU_ADDRESS, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetAIMenuSymbolId();}
-    },
-    { OH_DEFAULT_AI_MENU_DATETIME, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetAIMenuSymbolId();}
-    },
-    { OH_DEFAULT_ASK_CELIA, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
-        { return textOverlayTheme->GetAskCeliaSymbolId();}
-    }
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetPasteSymbolId(); } },
+    { OH_DEFAULT_SEARCH,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetSearchSymbolId(); } },
+    { OH_DEFAULT_SELECT_ALL,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetCopyAllSymbolId(); } },
+    { OH_DEFAULT_SHARE,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetShareSymbolId(); } },
+    { OH_DEFAULT_TRANSLATE,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) { return theme->GetTranslateSymbolId(); } },
 };
+static_assert(IsSorted(GET_SYMBOL_ID_MAP), "GET_SYMBOL_ID_MAP array must be sorted to work properly");
+static_assert(IsSortedWithDetailedLog<GET_SYMBOL_ID_MAP>(),
+    "GET_SYMBOL_ID_MAP array must be sorted alphabetically. "
+    "See LinearMapSortKeyChars<...> in the compile error for the first out-of-order key.");
+
+// Sorted alphabetically by key (lambdas use -> std::string so they convert to plain function pointers)
+using GetItemContentLabelFunc = std::string (*)(const RefPtr<OHOS::Ace::TextOverlayTheme>&);
+static constexpr LinearMapNode<GetItemContentLabelFunc> GET_ITEM_CONTENT_LABEL_MAP[] = {
+    { OH_DEFAULT_AI_WRITE,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetAIWrite(); } },
+    { OH_DEFAULT_ASK_CELIA,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetAskCelia(); } },
+    { OH_DEFAULT_AUTO_FILL,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetAutoFillLabel(); } },
+    { OH_DEFAULT_CAMERA_INPUT,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetCameraInput(); } },
+    { OH_DEFAULT_COPY,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetCopyLabel(); } },
+    { OH_DEFAULT_CUT,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetCutLabel(); } },
+    { OH_DEFAULT_PASSWORD_VAULT,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetPasswordVaultLabel(); } },
+    { OH_DEFAULT_PASTE,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetPasteLabel(); } },
+    { OH_DEFAULT_SEARCH,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetSearchLabel(); } },
+    { OH_DEFAULT_SELECT_ALL,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetSelectAllLabel(); } },
+    { OH_DEFAULT_SHARE,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetShareLabel(); } },
+    { OH_DEFAULT_TRANSLATE,
+        +[](const RefPtr<OHOS::Ace::TextOverlayTheme>& theme) -> std::string { return theme->GetTranslateLabel(); } },
+};
+static_assert(IsSorted(GET_ITEM_CONTENT_LABEL_MAP), "GET_ITEM_CONTENT_LABEL_MAP array must be sorted to work properly");
+static_assert(IsSortedWithDetailedLog<GET_ITEM_CONTENT_LABEL_MAP>(),
+    "GET_ITEM_CONTENT_LABEL_MAP array must be sorted alphabetically. "
+    "See LinearMapSortKeyChars<...> in the compile error for the first out-of-order key.");
+ 
 
 enum class SelectOverlayMenuButtonType {
     NORMAL,
@@ -1802,8 +1837,9 @@ std::unordered_map<std::string, std::function<void()>> GetSystemCallback(
 bool IsSystemMenuItemEnabled(const std::shared_ptr<SelectOverlayInfo>& info, const std::string& id)
 {
     CHECK_NULL_RETURN(info, true);
-    auto isEnabledFunc = isMenuItemEnabledFuncMap.find(id);
-    return isEnabledFunc == isMenuItemEnabledFuncMap.end() ? true : (isEnabledFunc->second)(info->menuInfo);
+    int64_t index = BinarySearchFindIndex(
+        IS_MENUITEM_ENABLED_MAP, ArraySize(IS_MENUITEM_ENABLED_MAP), id.c_str());
+    return index < 0 ? true : IS_MENUITEM_ENABLED_MAP[index].value(info->menuInfo);
 }
 
 std::string GetSystemIconPath(const std::string& id, const std::string& iconPath)
@@ -1849,48 +1885,18 @@ std::string GetItemContent(const std::string& id, const std::string& content,
     CHECK_NULL_RETURN(pipeline, content);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, content);
-    if (id == OH_DEFAULT_CUT) {
-        return textOverlayTheme->GetCutLabel();
-    }
-    if (id == OH_DEFAULT_COPY) {
-        return textOverlayTheme->GetCopyLabel();
-    }
-    if (id == OH_DEFAULT_SELECT_ALL) {
-        return textOverlayTheme->GetSelectAllLabel();
-    }
-    if (id == OH_DEFAULT_AUTO_FILL) {
-        return textOverlayTheme->GetAutoFillLabel();
-    }
-    if (id == OH_DEFAULT_PASSWORD_VAULT) {
-        return textOverlayTheme->GetPasswordVaultLabel();
-    }
-    if (id == OH_DEFAULT_PASTE) {
-        return textOverlayTheme->GetPasteLabel();
-    }
-    if (id == OH_DEFAULT_TRANSLATE) {
-        return textOverlayTheme->GetTranslateLabel();
-    }
-    if (id == OH_DEFAULT_SEARCH) {
-        return textOverlayTheme->GetSearchLabel();
-    }
-    if (id == OH_DEFAULT_SHARE) {
-        return textOverlayTheme->GetShareLabel();
-    }
-    if (id == OH_DEFAULT_AI_WRITE) {
-        return textOverlayTheme->GetAIWrite();
-    }
-    if (id == OH_DEFAULT_CAMERA_INPUT) {
-        return textOverlayTheme->GetCameraInput();
+    int64_t labelIndex =
+        BinarySearchFindIndex(GET_ITEM_CONTENT_LABEL_MAP, ArraySize(GET_ITEM_CONTENT_LABEL_MAP), id.c_str());
+    if (labelIndex >= 0) {
+        return GET_ITEM_CONTENT_LABEL_MAP[labelIndex].value(textOverlayTheme);
     }
     if (IsAIMenuOption(id)) {
         if (info) {
             return textOverlayTheme->GetAiMenuOptionName(info->menuInfo.aiMenuOptionType);
-        } else {
-            return textOverlayTheme->GetAiMenuOptionName(AI_ID_TYPE_MAP[id]);
         }
-    }
-    if (id == OH_DEFAULT_ASK_CELIA) {
-        return textOverlayTheme->GetAskCelia();
+        int64_t index = BinarySearchFindIndex(AI_ID_TYPE_MAP, ArraySize(AI_ID_TYPE_MAP), id.c_str());
+        return textOverlayTheme->GetAiMenuOptionName(
+            index >= 0 ? AI_ID_TYPE_MAP[index].value : TextDataDetectType::INVALID);
     }
     return content;
 }
@@ -1901,9 +1907,10 @@ void SetSystemOptionsParam(const MenuOptionsParam& item, OptionParam& para)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);
-    auto symbolIdFunc = getSymbolIdMap.find(item.id);
-    if (symbolIdFunc != getSymbolIdMap.end()) {
-        para.symbolId = (symbolIdFunc->second)(theme);
+    int64_t symbolIdIndex = BinarySearchFindIndex(
+        GET_SYMBOL_ID_MAP, ArraySize(GET_SYMBOL_ID_MAP), item.id.c_str());
+    if (symbolIdIndex >= 0) {
+        para.symbolId = GET_SYMBOL_ID_MAP[symbolIdIndex].value(theme);
     }
     switch (SelectOverlayNode::ConvertToIntMenuId(item.id)) {
         case static_cast<int32_t>(NativeMenuId::ID_COPY):
@@ -3716,9 +3723,10 @@ std::function<void(WeakPtr<NG::FrameNode>)> SelectOverlayNode::GetSymbolFunc(con
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_RETURN(textOverlayTheme, symbol);
     auto useAIGradient = IsAIGradientOption(symbolId);
-    auto symbolIdFunc = getSymbolIdMap.find(symbolId);
-    if (symbolIdFunc != getSymbolIdMap.end()) {
-        auto menuSymbolId = (symbolIdFunc->second)(textOverlayTheme);
+    int64_t symbolIdIndex = BinarySearchFindIndex(
+ 	    GET_SYMBOL_ID_MAP, ArraySize(GET_SYMBOL_ID_MAP), symbolId.c_str());
+    if (symbolIdIndex >= 0) {
+        auto menuSymbolId = GET_SYMBOL_ID_MAP[symbolIdIndex].value(textOverlayTheme);
         auto symbolSize = textOverlayTheme->GetSymbolSize();
         symbol = CreateSymbolApply(menuSymbolId, symbolSize, textOverlayTheme, useAIGradient);
     }
@@ -4077,10 +4085,11 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
             CreateExtensionMenuOptionCallback(id, info->onCreateCallback, systemEvent, item);
         auto content = GetItemContent(item.id, item.content.value_or(""), info);
         std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
-        auto symbolIdFunc = getSymbolIdMap.find(item.id);
+        int64_t symbolIdIndex = BinarySearchFindIndex(
+ 	        GET_SYMBOL_ID_MAP, ArraySize(GET_SYMBOL_ID_MAP), item.id.c_str());
         auto useAIGradient = IsAIGradientOption(item.id);
-        if (symbolIdFunc != getSymbolIdMap.end()) {
-            auto symbolId = (symbolIdFunc->second)(textOverlayTheme);
+        if (symbolIdIndex >= 0) {
+            auto symbolId = GET_SYMBOL_ID_MAP[symbolIdIndex].value(textOverlayTheme);
             auto symbolSize = textOverlayTheme->GetSymbolSize();
             symbol = CreateSymbolApply(symbolId, symbolSize, textOverlayTheme, useAIGradient);
         } else {

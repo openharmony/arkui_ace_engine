@@ -153,6 +153,19 @@ if (globalThis.Button === undefined) {
   };
 }
 
+// @ts-ignore
+if (globalThis.Video === undefined) {
+  globalThis.Video = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Video');
+      let module = globalThis.requireNapi('arkui.components.arkvideo');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().video.create(params);
+    },
+    name: 'JSVideo'
+  };
+}
 
 // @ts-ignore
 if (globalThis.Rating === undefined) {
@@ -897,7 +910,7 @@ if (globalThis.Swiper === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkswiper');
       module.exportView();
       module.loadComponent();
-      getUINativeModule().swiper.setSwiperInitialize(true, controller);
+      getUINativeModule().swiper.create(controller);
     },
     name: 'JSSwiper'
   };

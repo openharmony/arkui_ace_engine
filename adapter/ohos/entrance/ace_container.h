@@ -374,8 +374,10 @@ public:
 
     bool OnDumpInfo(const std::vector<std::string>& params);
 
+#ifndef CROSS_PLATFORM
     void DumpSimplifyTreeWithParamConfig(
         std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) override;
+#endif
 
     void TriggerGarbageCollection() override;
 

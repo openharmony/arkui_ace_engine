@@ -34,18 +34,18 @@ struct barBackgroundColorTest {
               ListItem() {
                 Row() {
                   Image($r('app.media.startIcon')).size({width:64, height:64})
-                  Text("item" + item.toString())
+                  Text('item' + item.toString())
                   Blank()
-                  Button("下载")
-                }.width("100%").padding(12)
+                  Button('下载')
+                }.width('100%').padding(12)
               }
             })
           }
           .contentEndOffset(56)
         }
-        .tabBar(new BottomTabBarStyle($r('sys.media.ohos_app_icon'), "1"))
+        .tabBar(new BottomTabBarStyle($r('sys.media.ohos_app_icon'), '1'))
         TabContent()
-        .tabBar(new BottomTabBarStyle($r('sys.media.ohos_app_icon'), "2"))
+        .tabBar(new BottomTabBarStyle($r('sys.media.ohos_app_icon'), '2'))
       }
       .barOverlap(true)
       .barBackgroundColor('#88888888')

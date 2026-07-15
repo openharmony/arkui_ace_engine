@@ -20,6 +20,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/container_reader/container_reader_event_hub.h"
 #include "core/components_ng/pattern/container_reader/container_reader_layout_property.h"
+#include "core/components_ng/pattern/container_reader/container_reader_model_static.h"
 #include "core/components_ng/pattern/container_reader/container_reader_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 
@@ -1703,4 +1704,53 @@ HWTEST_F(ContainerReaderTestNg, CrossAxisMatchParent004, TestSize.Level1)
 
     MockContainer::Current()->SetApiTargetVersion(savedVersion);
 }
+
+// ==================== ContainerReaderModelStatic - CreateFrameNode ====================
+
+/**
+ * @tc.name: ModelStatic_CreateFrameNode001
+ * @tc.desc: Test ContainerReaderModelStatic::CreateFrameNode creates valid FrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_CreateFrameNode001, TestSize.Level1)
+{
+    int32_t nodeId = 100;
+    auto frameNode = ContainerReaderModelStatic::CreateFrameNode(nodeId);
+    ASSERT_NE(frameNode, nullptr);
+    
+    auto pattern = frameNode->GetPattern<ContainerReaderPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    EXPECT_EQ(frameNode->GetTag(), "ContainerReader");
+}
+
+// ==================== ContainerReaderModelStatic - SetBreakPointConfig ====================
+
+/**
+ * @tc.name: ModelStatic_SetBreakPointConfig001
+ * @tc.desc: Test ContainerReaderModelStatic::SetBreakPointConfig sets custom breakpoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerReaderTestNg, ModelStatic_SetBreakPointConfig001, TestSize.Level1)
+{
+    auto frameNode = ContainerReaderModelStatic::CreateFrameNode(101);
+    ASSERT_NE(frameNode, nullptr);
+    
+    std::vector<double> widthBreakpoints = { TEST_CUSTOM_BREAKPOINT_320, TEST_CUSTOM_BREAKPOINT_600 };
+    std::vector<double> heightBreakpoints = { TEST_CUSTOM_BREAKPOINT_840 };
+    
+    ContainerReaderModelStatic::SetBreakPointConfig(
+        frameNode.GetRawPtr(), widthBreakpoints, heightBreakpoints);
+    
+    auto layoutProperty = frameNode->GetLayoutProperty<ContainerReaderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    
+    auto config = layoutProperty->GetBreakPointConfig();
+    ASSERT_TRUE(config.has_value());
+    ASSERT_TRUE(config->widthBreakpoints.has_value());
+    EXPECT_EQ(config->widthBreakpoints->size(), 2UL);
+    ASSERT_TRUE(config->heightBreakpoints.has_value());
+    EXPECT_EQ(config->heightBreakpoints->size(), 1UL);
+}
+
 } // namespace OHOS::Ace::NG

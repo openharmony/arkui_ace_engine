@@ -121,16 +121,16 @@ struct SubPage {
               }
               return '';
             })
-            .template('SpaceTop', (Ri: RepeatItem<ItemType>) => {
+            .template('SpaceTop', (ri: RepeatItem<ItemType>) => {
               ListItem() {
                 Column()
                   .height(100)
               }
             })
-            .template('number', (Ri: RepeatItem<ItemType>) => {
+            .template('number', (ri: RepeatItem<ItemType>) => {
               ListItem() {
-                if (typeof Ri.item === 'number') {
-                  this.LabelItemBuilder(Ri as RepeatItem<ItemType>);
+                if (typeof ri.item === 'number') {
+                  this.LabelItemBuilder(ri as RepeatItem<ItemType>);
                 }
               }
               .margin({
@@ -141,7 +141,7 @@ struct SubPage {
               .borderRadius(16)
               .swipeAction({
                 end: {
-                  builder: () => this.SwipeBuilder(Ri),
+                  builder: () => this.SwipeBuilder(ri),
                   actionAreaDistance: -1
                 }
               })
@@ -169,7 +169,7 @@ struct SubPage {
       .height('100%')
       .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
     }
-    .title("标签管理")
+    .title('标签管理')
     .hideTitleBar(true)
     .backgroundColor($r('sys.color.background_secondary'))
   }

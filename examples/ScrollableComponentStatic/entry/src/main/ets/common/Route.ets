@@ -17,10 +17,10 @@
 import { ResourceStr } from '@ohos.arkui.component';
 
 export class Route {
-  name: string;
-  title: string;
-  description: ResourceStr = '';
-  items?: Route[];
+  public name: string;
+  public title: string;
+  public description: ResourceStr = '';
+  public items?: Route[];
 
   constructor(name: string, title: string, description?: ResourceStr, items?: Route[]) {
     this.name = name;

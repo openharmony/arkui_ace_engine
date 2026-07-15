@@ -18,6 +18,7 @@
 #include "base/thread/task_executor.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/video/video_utils.h"
+#include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/utility/promise_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -53,7 +54,8 @@ void VideoControllerAsyncPeerImpl::TriggerStartAsync(Ark_VMContext vmContext,
 
     promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), callback]() {
         if (peer->controller_) {
-            peer->controller_->Start(std::move(callback));
+            VideoControllerAsync::AsyncCommandCallback cb = callback;
+            NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->start(AceType::RawPtr(peer->controller_), &cb);
         } else {
             callback(false, "controller is null");
         }
@@ -82,7 +84,8 @@ void VideoControllerAsyncPeerImpl::TriggerPauseAsync(Ark_VMContext vmContext,
 
     promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), callback]() {
         if (peer->controller_) {
-            peer->controller_->Pause(std::move(callback));
+            VideoControllerAsync::AsyncCommandCallback cb = callback;
+            NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->pause(AceType::RawPtr(peer->controller_), &cb);
         } else {
             callback(false, "controller is null");
         }
@@ -111,7 +114,8 @@ void VideoControllerAsyncPeerImpl::TriggerStopAsync(Ark_VMContext vmContext,
 
     promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), callback]() {
         if (peer->controller_) {
-            peer->controller_->Stop(std::move(callback));
+            VideoControllerAsync::AsyncCommandCallback cb = callback;
+            NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->stop(AceType::RawPtr(peer->controller_), &cb);
         } else {
             callback(false, "controller is null");
         }
@@ -140,7 +144,8 @@ void VideoControllerAsyncPeerImpl::TriggerResetAsync(Ark_VMContext vmContext,
 
     promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), callback]() {
         if (peer->controller_) {
-            peer->controller_->Reset(std::move(callback));
+            VideoControllerAsync::AsyncCommandCallback cb = callback;
+            NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->reset(AceType::RawPtr(peer->controller_), &cb);
         } else {
             callback(false, "controller is null");
         }
@@ -151,7 +156,8 @@ void VideoControllerAsyncPeerImpl::TriggerSetCurrentTime(float pos, SeekMode see
 {
     ContainerScope scope(instanceId_);
     if (controller_) {
-        controller_->SeekTo(pos, seekMode);
+        NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->seekTo(
+            AceType::RawPtr(controller_), pos, static_cast<int32_t>(seekMode));
     }
 }
 
@@ -159,7 +165,8 @@ void VideoControllerAsyncPeerImpl::TriggerRequestFullscreen(bool landscape)
 {
     ContainerScope scope(instanceId_);
     if (controller_) {
-        controller_->RequestFullscreen(landscape);
+        NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->requestFullscreen(
+            AceType::RawPtr(controller_), landscape);
     }
 }
 
@@ -167,7 +174,7 @@ void VideoControllerAsyncPeerImpl::TriggerExitFullscreen()
 {
     ContainerScope scope(instanceId_);
     if (controller_) {
-        controller_->ExitFullscreen();
+        NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->exitFullscreen(AceType::RawPtr(controller_));
     }
 }
 

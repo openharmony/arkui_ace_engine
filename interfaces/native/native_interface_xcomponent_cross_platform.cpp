@@ -410,12 +410,11 @@ void OH_ArkUI_SurfaceHolder_Dispose(OH_ArkUI_SurfaceHolder* surfaceHolder)
         auto node = surfaceHolder->node_;
         if (OHOS::Ace::NodeModel::IsValidArkUINode(node)) {
             const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
-            CHECK_NULL_VOID(impl);
-            auto nodeModifiers = impl->getNodeModifiers();
-            CHECK_NULL_VOID(nodeModifiers);
-            auto xComponentModifier = nodeModifiers->getXComponentModifier();
-            CHECK_NULL_VOID(xComponentModifier);
-            xComponentModifier->dispose(node->uiNodeHandle);
+            auto nodeModifiers = impl ? impl->getNodeModifiers() : nullptr;
+            auto xComponentModifier = nodeModifiers ? nodeModifiers->getXComponentModifier() : nullptr;
+            if (xComponentModifier) {
+                xComponentModifier->dispose(node->uiNodeHandle);
+            }
         }
         auto config = surfaceHolder->config_;
         if (config) {

@@ -1,4 +1,6 @@
-# Execution Plan
+# 执行计划
+
+## Execution Plan
 
 ## 状态
 
@@ -6,6 +8,7 @@ Stage 2 设计已通过，Stage 3 已进入实现与验证阶段。已补充 `Pa
 host toolchain 单元测试，覆盖 ruleJson、TEXT_EDITOR matcher 和注册/Get/注销基础 DFX 行为。
 2026-07-06 追加 PageScene 稳定点调度实现和 ContentChangeManager UT：输入类控件上下树只维护计数和待检测规则，页面稳定后再检查并上报。
 2026-07-09 追加命中态退出规格：同一规则已上报过 `TEXT_EDITOR` 命中后，后续稳定点检查不再命中时上报一次 `TEXT_EDITOR_EXIT`，连续未命中不重复上报。
+2026-07-13 对齐最终交付规格：`ruleJson` 顶层新增 `version=1`，文本输入类控件变化不再由 `reportOnTextInputAttached` 控制，补充独立反注册用户故事和接口级错误码测试规格。
 
 ## 初始任务草案
 
@@ -19,6 +22,34 @@ host toolchain 单元测试，覆盖 ruleJson、TEXT_EDITOR matcher 和注册/Ge
 | TASK-006 | sample/hidumper 验证命令：补注册、查询、反注册命令和摘要日志 | Ready |
 | TASK-007 | 单测和回归验证：覆盖 ruleJson、matcher、IPC、重复注册、Get pending busy、反注册/死亡清理、Web/UIExtension 透传入口、隐私日志 | In Progress |
 
+## AC 到 Task 追溯
+
+| AC 范围 | 任务 | 验证入口 |
+|---------|------|----------|
+| AC-1.1 - AC-1.5 | TASK-001, TASK-002, TASK-004, TASK-005 | UISession IPC/规则解析单测、Web/UIExtension 透传验证 |
+| AC-2.1 - AC-2.4 | TASK-002, TASK-003, TASK-007 | `page_scene_rule_manager_test_ng`、TEXT_EDITOR matcher 单测 |
+| AC-3.1 - AC-3.5 | TASK-003, TASK-007 | 稳定点检测、上下树计数、退出事件单测 |
+| AC-4.1 - AC-4.4 | TASK-001, TASK-002, TASK-003, TASK-004 | GetPageScene 参数、busy 和回调路径验证 |
+| AC-5.1 - AC-5.4 | TASK-004, TASK-005 | Web/UIExtension 注册、查询和反注册透传验证 |
+| AC-5A.1 - AC-5A.3 | TASK-001, TASK-002, TASK-004, TASK-005, TASK-007 | UnregisterPageSceneRules 单测、sample/mock 验证 |
+| AC-6.1 - AC-6.4 | TASK-002, TASK-003, TASK-007 | includeText/includeRect/includeFocusable 输出验证 |
+| AC-7.1 - AC-7.4 | TASK-003, TASK-007 | ContentChangeManager 稳定点调度单测和代码检查 |
+| AC-8.1 - AC-8.4 | TASK-001, TASK-002, TASK-007 | 重复注册、Get busy、并发反注册和死亡清理验证 |
+
+## 受影响文件全量清单
+
+- `.codespec/changes/ui-session-page-scene-awareness/manifest.md`
+- `.codespec/changes/ui-session-page-scene-awareness/proposal.md`
+- `.codespec/changes/ui-session-page-scene-awareness/spec.md`
+- `.codespec/changes/ui-session-page-scene-awareness/design.md`
+- `.codespec/changes/ui-session-page-scene-awareness/spec-for-test.md`
+- `.codespec/changes/ui-session-page-scene-awareness/execution-plan.md`
+- `adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h`
+- `adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp`
+- `frameworks/core/components_ng/manager/page_scene/page_scene_rule_manager.h`
+- `frameworks/core/components_ng/manager/page_scene/page_scene_rule_manager.cpp`
+- `test/unittest/core/manager/page_scene_rule_manager_test_ng.cpp`
+
 ## Stage 3 当前验证记录
 
 | 日期 | 范围 | 结果 |
@@ -30,6 +61,7 @@ host toolchain 单元测试，覆盖 ruleJson、TEXT_EDITOR matcher 和注册/Ge
 | 2026-07-06 | 重新构建目标板 32 位 `libace_compatible.z.so`、`libui_session.z.so`、`libui_sa.z.so`，确认产物为 ARM 32-bit ELF；设备端镜像与代码产物完成匹配后执行推库 E2E | Pending |
 | 2026-07-09 | 补充 `page_scene_rule_manager_test_ng` 用例，覆盖未曾命中不发退出、命中后跌出阈值上报一次 `TEXT_EDITOR_EXIT`、主动 Get 未命中仍返回 `TEXT_EDITOR`、退出后再次命中可重新上报 | Pass |
 | 2026-07-09 | rk3568 增量编译 `arkui/ace_engine/libace_compatible.z.so`，确认 PageScene manager 改动在目标板 toolchain 下通过 | Pass |
+| 2026-07-13 | 补充 `ruleJson.version` 解析校验，移除 `reportOnTextInputAttached` 规则字段依赖；补充 SDD unregister 故事、输出示例和接口错误码测试规格；`page_scene_rule_manager_test_ng --gtest_filter=PageSceneRuleManagerTestNg.*` 8 条用例通过；`ohos-sdd validate --level all` 33 项通过 | Pass |
 
 验证命令：
 
@@ -56,6 +88,7 @@ IPC、SA 死亡清理、Web/UIExtension 规则透传入口以及 `PageSceneInput
 - `git diff --check`
 - 新增/修改的 UISession 单元测试通过
 - ruleJson 解析和 `TEXT_EDITOR` matcher 单元测试通过
+- `ruleJson.version` 缺失或不支持版本返回参数错误，`version=1` 合法规则注册和查询通过
 - `PageSceneInputCountTracker` 初始化扫描、上树计数增加、下树计数减少、阈值跨越后挂起检测、页面稳定后上报测试通过
 - `TEXT_EDITOR` 已命中后跌出阈值时只上报一次 `TEXT_EDITOR_EXIT`，未曾命中和连续未命中均不补发退出事件，主动 `GetPageScene` 未命中仍使用 `TEXT_EDITOR`
 - `ContentChangeManager` 稳定点调度测试通过：PageScene-only 注册、Page/Scroll/Dialog 稳定点、Swiper 延迟、滚动/转场/Swiper 滚动中不 flush

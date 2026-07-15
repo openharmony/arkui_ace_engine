@@ -17,8 +17,12 @@
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/base/observer_handler.h"
 
@@ -89,6 +93,7 @@ void SwiperEventHub::FireChangeEvent(int32_t preIndex, int32_t currentIndex, boo
             });
     }
 
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         auto host = GetFrameNode();
@@ -105,6 +110,7 @@ void SwiperEventHub::FireChangeEvent(int32_t preIndex, int32_t currentIndex, boo
         builder.SetIndex(currentIndex);
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
+#endif
 }
 
 void SwiperEventHub::FireAnimationStartEvent(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)
@@ -246,6 +252,7 @@ void SwiperEventHub::FireJSChangeEvent(int32_t preIndex, int32_t index)
 void SwiperEventHub::ReportComponentChangeEvent(
     const std::string& type, int32_t currentIndex, float offset) const
 {
+#ifndef CROSS_PLATFORM
     auto result = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(result);
     
@@ -260,6 +267,7 @@ void SwiperEventHub::ReportComponentChangeEvent(
     auto nodeId = tabsId_.has_value() ? tabsId_.value() : swiperId_;
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SWIPER);
+#endif
 }
 
 void SwiperEventHub::NotifySwiperObserver(const RefPtr<FrameNode>& hostNode, int32_t index)

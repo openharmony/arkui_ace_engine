@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/base/modifier.h"
 
+#include <string_view>
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/log/dump_log.h"
@@ -59,7 +61,7 @@ constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
 constexpr Dimension MAX_SCROLL_DISTANCE = 128.0_vp;
 constexpr float DEFAULT_FRICTION = 62.0f;
 const RefPtr<Curve> DEFAULT_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
-const std::string REFRESH_DRAG_SCENE = "refresh_drag_scene";
+constexpr std::string_view REFRESH_DRAG_SCENE = "refresh_drag_scene";
 constexpr Dimension LOADING_TEXT_TOP_MARGIN = 16.0_vp;
 constexpr Dimension LOADING_TEXT_DISPLAY_DISTANCE = 80.0_vp;
 double NormalizeToPx(const Dimension& dimension, PipelineContext* context)
@@ -180,7 +182,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<FrameNode>& host)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
-        pattern->UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, speed, SceneStatus::START);
+        pattern->UpdateDragFRCSceneInfo(std::string(REFRESH_DRAG_SCENE), speed, SceneStatus::START);
         pattern->HandleDragStart(true, speed);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -193,7 +195,7 @@ void RefreshPattern::InitPanEvent(const RefPtr<FrameNode>& host)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto speed = static_cast<float>(info.GetMainVelocity());
-        pattern->UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, speed, SceneStatus::END);
+        pattern->UpdateDragFRCSceneInfo(std::string(REFRESH_DRAG_SCENE), speed, SceneStatus::END);
         pattern->HandleDragEnd(speed);
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
@@ -487,7 +489,7 @@ void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 
 ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 {
-    UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::RUNNING);
+    UpdateDragFRCSceneInfo(std::string(REFRESH_DRAG_SCENE), mainSpeed, SceneStatus::RUNNING);
     if (isHigherVersion_) {
         // If dragging does not expand the refresh, there is no need to continue executing the code
         if (NearZero(scrollOffset_) && NonPositive(delta)) {
@@ -706,6 +708,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
         refreshEventHub->FireChangeEvent("false");
     }
     refreshEventHub->FireOnStateChange(static_cast<int>(refreshStatus_));
+#ifndef CROSS_PLATFORM
     if (refreshStatus_ == RefreshStatus::REFRESH && Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto inspectorId = host->GetInspectorId().value_or("");
         Recorder::EventParamsBuilder builder;
@@ -716,6 +719,7 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
     TAG_LOGI(AceLogTag::ACE_REFRESH, "Refresh status changed %{public}d", static_cast<int32_t>(refreshStatus_));
 }
 

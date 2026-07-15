@@ -1983,8 +1983,10 @@ ArkUINativeModuleValue SelectBridge::SetOnSelect(ArkUIRuntimeCallInfo* runtimeCa
         if (isJsView) {
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         } else {
+#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->ReportComponentChangeEvent(
                 "event", "Select.onSelect", ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
         }
     };
     SelectModelNG::SetOnSelect(frameNode, std::move(onSelect));

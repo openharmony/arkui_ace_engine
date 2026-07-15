@@ -3554,6 +3554,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_setEnableFullscreenVideoOverlay(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+	native static _WebAttribute_setEnableMediaNetworkProxy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _WebAttribute_setRegisterNativeEmbedRule(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _WebAttribute_setBindSelectionMenu(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
@@ -4372,6 +4374,12 @@ export class ArkUIGeneratedNativeModule {
     native static _ConsoleMessage_getMessageLevel(ptr: KPointer): KInt
     @ani.unsafe.Direct
     native static _ConsoleMessage_getSource(ptr: KPointer): KInt
+    @ani.unsafe.Direct
+    native static _ContainerReaderExtender_containerReaderConstructor(id: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ContainerReaderExtender_setContainerReaderOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _ContainerReaderExtender_breakpointConfig(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _ContentModifierHelper_contentModifierButton(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct

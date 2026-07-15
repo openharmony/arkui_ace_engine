@@ -748,11 +748,12 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     draggedFrameNode_ = preTargetFrameNode_;
     preMovePoint_ = point;
     parentHitNodes_.emplace(frameNode->GetId());
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateFrameNodeStartId(frameNode->GetId());
     DragDropBehaviorReporter::GetInstance().UpdateStartPoint(point);
     DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationEnd(GetSysTimestamp());
     DragDropBehaviorReporter::GetInstance().UpdateDropResult(DropResult::DROP_FAIL);
-
+#endif
     // Reset hover status when drag start.
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
@@ -943,8 +944,10 @@ void DragDropManager::OnDragPullCancel(const DragPointerEvent& pointerEvent)
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto containerId = container->GetInstanceId();
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
     DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
+#endif
     if (container && container->IsSceneBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
             SetIsWindowConsumed(false);
@@ -1235,7 +1238,9 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
             "DragDropManager onDragEnd, target data is not allowed to fall into. WindowId is %{public}d, "
             "pointerEventId is %{public}d.",
             container->GetWindowId(), pointerEvent.pointerEventId);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_REFUSE_DATA);
+#endif
         ACE_SCOPED_TRACE("drag: stop drag, not allowed to drop");
         ResetDragDrop(container->GetWindowId(), point);
         return;
@@ -1266,20 +1271,41 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     }
 }
 
+
+void DragDropManager::HandleDragCancel(const Point& point, const DragPointerEvent& pointerEvent,
+    const RefPtr<FrameNode>& preTargetFrameNode, const std::string& extraInfo, int32_t windowId)
+{
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
+    DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
+#endif
+    TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager is dragCancel, finish drag. WindowId is %{public}d, "
+        "pointerEventId is %{public}d.",
+        windowId, pointerEvent.pointerEventId);
+    ACE_SCOPED_TRACE("drag: drag cancelled");
+    DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, windowId, DragBehavior::UNKNOWN };
+    ResetDragDropStatus(point, dragDropRet, windowId);
+    FireOnDragEvent(preTargetFrameNode, pointerEvent, DragEventType::LEAVE, extraInfo);
+    ClearVelocityInfo();
+}
+
 void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std::string& extraInfo,
     const RefPtr<FrameNode>& node, const bool keyEscape)
 {
     NotifyDragSpringLoadingIntercept(extraInfo);
     RemoveDeadlineTimer();
     Point point = pointerEvent.GetPoint();
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateEndPoint(point);
+#endif
     auto preTargetFrameNode = preTargetFrameNode_;
     DoDragReset();
     dragDropPointerEvent_ = pointerEvent;
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto containerId = container->GetInstanceId();
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateContainerId(containerId);
+#endif
     if (container && container->IsSceneBoardWindow() && (IsDragged() && IsWindowConsumed())) {
         TAG_LOGD(AceLogTag::ACE_DRAG, "DragDropManager is dragged or window consumed. WindowId is %{public}d",
             container->GetWindowId());
@@ -1292,22 +1318,16 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
         return;
     }
     if (isDragCancel_) {
-        DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
-        TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager is dragCancel, finish drag. WindowId is %{public}d, "
-            "pointerEventId is %{public}d.",
-            container->GetWindowId(), pointerEvent.pointerEventId);
-        ACE_SCOPED_TRACE("drag: drag cancelled");
-        DragDropRet dragDropRet { DragRet::DRAG_CANCEL, false, container->GetWindowId(), DragBehavior::UNKNOWN };
-        ResetDragDropStatus(point, dragDropRet, container->GetWindowId());
-        FireOnDragEvent(preTargetFrameNode, pointerEvent, DragEventType::LEAVE, extraInfo);
-        ClearVelocityInfo();
+        HandleDragCancel(point, pointerEvent, preTargetFrameNode, extraInfo, container->GetWindowId());
         return;
     }
     if (preTargetFrameNode != dragFrameNode) {
         FireOnDragEvent(preTargetFrameNode, pointerEvent, DragEventType::LEAVE, extraInfo);
     }
     if (!dragFrameNode) {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_DATA_UNSUPPORT);
+#endif
         TAG_LOGI(AceLogTag::ACE_DRAG,
             "DragDropManager onDragEnd, not find drop target, stop drag. WindowId is %{public}d, "
             "pointerEventId is %{public}d.",
@@ -1354,7 +1374,9 @@ bool DragDropManager::IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode)
     if (dragFrameNodeAllowDrop.empty() || summaryMap_.empty()) {
         return true;
     }
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateAllowDropType(dragFrameNodeAllowDrop);
+#endif
     dragSummaryInfo_.summary = summaryMap_;
     return UdmfClient::GetInstance()->IsAppropriateType(dragSummaryInfo_, dragFrameNodeAllowDrop);
 }
@@ -1388,7 +1410,9 @@ void DragDropManager::DoDropAction(const RefPtr<FrameNode>& dragFrameNode, const
     if (unifiedData == nullptr) {
         event->SetIsGetDataSuccess(false);
     } else {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         DragDropBehaviorReporter::GetInstance().UpdateRecordSize(unifiedData->GetSize());
+#endif
         event->SetData(unifiedData);
         event->SetIsGetDataSuccess(true);
     }
@@ -1453,7 +1477,9 @@ bool DragDropManager::CheckRemoteData(
     const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent, const std::string& udKey)
 {
     if (udKey.empty()) {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::GET_UDKEY_FAIL);
+#endif
         return false;
     }
     std::string remoteUdKey = udKey;
@@ -1461,11 +1487,15 @@ bool DragDropManager::CheckRemoteData(
     if (isRemoteData) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag with motion drag action.");
         TryGetDataBackGround(dragFrameNode, pointerEvent, udKey);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::GET_UDKEY_FAIL);
         DragDropBehaviorReporter::GetInstance().UpdateIsCrossing(CrossingEnd::IS_CROSSING);
+#endif
         return isRemoteData;
     }
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateIsCrossing(CrossingEnd::NOT_CROSSING);
+#endif
     return isRemoteData;
 }
 
@@ -1479,8 +1509,10 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     UpdateDragEvent(event, pointerEvent);
     auto extraParams = eventHub->GetDragExtraParams(extraInfo_, point, DragEventType::DROP);
     DragDropGlobalController::GetInstance().SetIsOnOnDropPhase(true);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateFrameNodeDropId(dragFrameNode->GetId());
     DragDropBehaviorReporter::GetInstance().UpdateDropResult(DropResult::DROP_SUCCESS);
+#endif
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_DROP, event, extraParams);
     if (event->IsDragEndPending() && event->GetRequestIdentify() != -1) {
         if (PostStopDrag(dragFrameNode, pointerEvent, event, extraParams)) {
@@ -1504,11 +1536,13 @@ void DragDropManager::HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, con
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragResult = event->GetResult();
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     if (dragResult == DragRet::DRAG_FAIL) {
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_RECEIVE_FAIL);
     } else if (dragResult == DragRet::DRAG_CANCEL) {
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::USER_STOP_DRAG);
     }
+#endif
     auto useCustomAnimation = event->IsUseCustomAnimation();
     if (event->GetNeedDoInternalDropAnimation() && useCustomAnimation) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Need do internal drop animation, set useCustomAnimation to false.");
@@ -1793,7 +1827,9 @@ void DragDropManager::RequireSummary()
         std::string detailedSummarys = DragDropFuncWrapper::GetSummaryString(dragSummaryInfo.detailedSummary);
         TAG_LOGI(AceLogTag::ACE_DRAG, "require summary: %{public}s, detailedSummary:%{public}s, tag:%{public}s",
             summarys.c_str(), detailedSummarys.c_str(), dragSummaryInfo.tag.c_str());
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         DragDropBehaviorReporter::GetInstance().UpdateSummaryType(summarys);
+#endif
     }
     std::string extraInfo;
     ret = InteractionInterface::GetInstance()->GetDragExtraInfo(extraInfo);
@@ -3646,9 +3682,11 @@ void DragDropManager::ReportOnItemDropEvent(
     DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY)
 {
     CHECK_NULL_VOID(dragFrameNode);
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
+#endif
     auto windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
     auto windowX = PipelineBase::Px2VpWithCurrentDensity(dragStartPoint_.GetX() * windowScale);
     auto windowY = PipelineBase::Px2VpWithCurrentDensity(dragStartPoint_.GetY() * windowScale);
@@ -3682,7 +3720,9 @@ void DragDropManager::ReportOnItemDropEvent(
     auto result = JsonUtil::Create();
     CHECK_NULL_VOID(result);
     result->Put("result", json);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 } // namespace OHOS::Ace::NG

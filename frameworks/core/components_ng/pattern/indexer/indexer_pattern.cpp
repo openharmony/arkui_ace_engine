@@ -1800,8 +1800,10 @@ void IndexerPattern::OnListItemClick(int32_t index)
     ReportPoupSelectEvent();
     if (onPopupSelected) {
         onPopupSelected(index);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPopupSelected",
             ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
     }
     ChangeListItemsSelectedStyle(index);
 }
@@ -2403,8 +2405,10 @@ void IndexerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 void IndexerPattern::ReportSelectEvent()
 {
     if (initialized_ && selectChanged_) {
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected",
             ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
         TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected",
             GetHost()->GetId());
     }
@@ -2412,14 +2416,17 @@ void IndexerPattern::ReportSelectEvent()
 
 void IndexerPattern::ReportPoupSelectEvent()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onPopupSelect",
         ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
     TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onPopupSelect",
         GetHost()->GetId());
 }
 
 void IndexerPattern::ReportInjectionEvent(bool result, std::string reason)
 {
+#ifndef CROSS_PLATFORM
     auto alphabetIndexerResult = JsonUtil::Create();
     CHECK_NULL_VOID(alphabetIndexerResult);
     alphabetIndexerResult->Put("event", "setAlphabetIndexer");
@@ -2436,6 +2443,7 @@ void IndexerPattern::ReportInjectionEvent(bool result, std::string reason)
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
         ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 bool IndexerPattern::ParseCommand(const std::string& command, int32_t& selected)
@@ -2498,6 +2506,7 @@ int32_t IndexerPattern::OnInjectionEvent(const std::string& command)
 
 void IndexerPattern::ReportSelectChangeData(int32_t nodeId, int32_t currentIndex)
 {
+#ifndef CROSS_PLATFORM
     auto result = JsonUtil::Create();
     auto resultParams = JsonUtil::Create();
     CHECK_NULL_VOID(result);
@@ -2510,5 +2519,6 @@ void IndexerPattern::ReportSelectChangeData(int32_t nodeId, int32_t currentIndex
     result->Put("params", resultParams);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 } // namespace OHOS::Ace::NG

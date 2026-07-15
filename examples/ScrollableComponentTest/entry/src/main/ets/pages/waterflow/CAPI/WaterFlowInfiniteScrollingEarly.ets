@@ -30,7 +30,7 @@ export struct WaterFlowInfiniteScrollingEarly {
       .height('100%')
       .padding({ left: 12, right: 12 })
     }
-    .title("无限滚动（提前新增数据）")
+    .title('无限滚动（提前新增数据）')
     .onAppear(() => entry.CreateWaterFlowInfiniteScrollingEarly(this.rootSlot))
   }
 }

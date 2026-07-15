@@ -453,12 +453,16 @@ void GridPattern::MarkSwipeItemSelected(int32_t index, bool isSelected)
 
 void GridPattern::FireOnScrollStart(bool withPerfMonitor)
 {
+#ifndef CROSS_PLATFORM
     ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
+#endif
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     SuggestOpIncGroup(true);
     if (withPerfMonitor) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+#endif
     }
     if (GetScrollAbort()) {
         return;
@@ -2090,6 +2094,7 @@ float GridPattern::GetOffsetWithLimit(float offset) const
 
 void GridPattern::ReportOnItemGridEvent(const std::string& event)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -2108,6 +2113,7 @@ void GridPattern::ReportOnItemGridEvent(const std::string& event)
     result->Put("result", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 std::string GridPattern::GetLayoutMode() const

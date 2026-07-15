@@ -1555,6 +1555,11 @@ class DialogPresenter {
                 reject({ message: paramErrMsg, code: 401 });
             });
         }
+        if (typeof content.getFrameNode !== 'function') {
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
         return withInstanceId(this.instanceId_, () => {
             return this.ohos_dialog.updateCustomDialog(content.getFrameNode(), options);
         });
@@ -1573,6 +1578,11 @@ class DialogPresenter {
             if (typeof target === 'number') {
                 return this.ohos_dialog.dismissDialog(target);
             } else {
+                if (typeof target.getFrameNode !== 'function') {
+                    return new Promise((resolve, reject) => {
+                        reject({ message: paramErrMsg, code: 401 });
+                    });
+                }
                 return this.ohos_dialog.dismissDialog(target.getFrameNode());
             }
         });

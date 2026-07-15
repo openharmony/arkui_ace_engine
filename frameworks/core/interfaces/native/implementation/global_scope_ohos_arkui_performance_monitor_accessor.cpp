@@ -58,17 +58,21 @@ void BeginImpl(const Ark_String* scene,
     auto sceneId = Converter::Convert<std::string>(*scene);
     auto action = Converter::OptConvert<PerfActionType>(startInputType).value_or(PerfActionType::UNKNOWN_ACTION);
     auto notes = Converter::OptConvertPtr<std::string>(note).value_or(EMPTY_STRING);
+#ifndef CROSS_PLATFORM
     auto pMonitor = PerfMonitor::GetPerfMonitor();
     CHECK_NULL_VOID(pMonitor);
     pMonitor->Start(sceneId, action, notes);
+#endif
 }
 void EndImpl(const Ark_String* scene)
 {
     CHECK_NULL_VOID(scene);
     auto sceneId = Converter::Convert<std::string>(*scene);
+#ifndef CROSS_PLATFORM
     auto pMonitor = PerfMonitor::GetPerfMonitor();
     CHECK_NULL_VOID(pMonitor);
     pMonitor->End(sceneId, false);
+#endif
 }
 void RecordInputEventTimeImpl(Ark_PerfMonitorActionType actionType,
                               Ark_PerfMonitorSourceType sourceType,
@@ -77,9 +81,11 @@ void RecordInputEventTimeImpl(Ark_PerfMonitorActionType actionType,
     auto action = Converter::OptConvert<PerfActionType>(actionType).value_or(PerfActionType::UNKNOWN_ACTION);
     auto source = Converter::OptConvert<PerfSourceType>(sourceType).value_or(PerfSourceType::UNKNOWN_SOURCE);
     auto timestamp = Converter::Convert<int64_t>(time);
+#ifndef CROSS_PLATFORM
     auto pMonitor = PerfMonitor::GetPerfMonitor();
     CHECK_NULL_VOID(pMonitor);
     pMonitor->RecordInputEvent(action, source, timestamp);
+#endif
 }
 } // GlobalScope_ohos_arkui_performanceMonitorAccessor
 const GENERATED_ArkUIGlobalScope_ohos_arkui_performanceMonitorAccessor* GetGlobalScope_ohos_arkui_performanceMonitorAccessor()

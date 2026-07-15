@@ -176,6 +176,7 @@ export struct ComposeTitleBarV2 {
           item: new ComposeTitleBarV2MenuItem({
             value: this.PUBLIC_BACK,
             isEnabled: true,
+            label: $r('sys.string.icon_back'),
             action: () => {
               this.getUIContext()?.getRouter()?.back()
             }
@@ -382,6 +383,11 @@ struct CollapsibleMenuSectionV2 {
       builder: this.composeTitleBarDialogBuilder,
       maskColor: Color.Transparent,
       isModal: true,
+      backgroundBlurStyle: BlurStyle.COMPONENT_ULTRA_THICK,
+      backgroundColor: Color.Transparent,
+      shadow: ShadowStyle.OUTER_DEFAULT_LG,
+      cornerRadius: $r('sys.float.corner_radius_level10'),
+      width: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE,
     } as promptAction.CustomDialogOptions).then((id: int) => {
       this.dialogId = id;
     }).catch((error: Error) => {
@@ -447,11 +453,7 @@ struct CollapsibleMenuSectionV2 {
           bottom: $r('sys.float.padding_level12'),
         } as Padding)
       }
-      .width(this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE)
       .constraintSize({ minHeight: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
-      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
-      .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
         if (this.item.symbolStyle) {
@@ -474,11 +476,7 @@ struct CollapsibleMenuSectionV2 {
           }
         }
       }
-      .width(this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE)
       .constraintSize({ minHeight: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
-      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
-      .borderRadius($r('sys.float.corner_radius_level10'))
       .justifyContent(FlexAlign.Center)
     }
   }
@@ -773,6 +771,11 @@ struct ImageMenuItemV2 {
       builder: this.composeTitleBarDialogBuilder,
       maskColor: Color.Transparent,
       isModal: true,
+      backgroundBlurStyle: BlurStyle.COMPONENT_ULTRA_THICK,
+      backgroundColor: Color.Transparent,
+      shadow: ShadowStyle.OUTER_DEFAULT_LG,
+      cornerRadius: $r('sys.float.corner_radius_level10'),
+      width: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE,
     } as promptAction.CustomDialogOptions).then((id: int) => {
       this.dialogId = id;
     }).catch((error: Error) => {
@@ -838,11 +841,7 @@ struct ImageMenuItemV2 {
           bottom: $r('sys.float.padding_level12'),
         } as Padding)
       }
-      .width(this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE)
       .constraintSize({ minHeight: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
-      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
-      .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
         if (this.item.symbolStyle) {
@@ -865,11 +864,7 @@ struct ImageMenuItemV2 {
           }
         }
       }
-      .width(this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE)
       .constraintSize({ minHeight: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
-      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
-      .borderRadius($r('sys.float.corner_radius_level10'))
       .justifyContent(FlexAlign.Center)
     }
   }

@@ -846,6 +846,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "TextInput", "arkui.components.arktextinput" },
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
+        { "Video", "arkui.components.arkvideo" },
         { "Toggle", "arkui.components.arktoggle" },
         { "ToolBarItem", "arkui.components.arktoolbaritem" },
         { "WaterFlow", "arkui.components.arkwaterflow" },
@@ -1692,6 +1693,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 
     if (nativeEngine_ == nullptr) {
         nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
+        RegisterContainerScopeFunc();
     }
     EngineTask(sharedRuntime);
     std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(instanceId_) };
@@ -1784,6 +1786,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
 
 void JsiDeclarativeEngine::RegisterContainerScopeFunc()
 {
+    CHECK_NULL_VOID(nativeEngine_);
     nativeEngine_->SetGetContainerScopeIdFunc(ContainerScope::CurrentId);
     nativeEngine_->SetInitContainerScopeFunc(ContainerScope::UpdateCurrent);
     nativeEngine_->SetFinishContainerScopeFunc(ContainerScope::RestoreCurrent);

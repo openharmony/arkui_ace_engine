@@ -20,7 +20,7 @@
 #include <map>
 #include <mutex>
 #include <string>
-
+#include <string_view>
 
 #include "base/memory/referenced.h"
 #include "base/geometry/dimension.h"
@@ -41,7 +41,7 @@ enum class ScreenSizeType {
 };
 
 constexpr size_t SCREEN_SIZE_COUNT = static_cast<size_t>(ScreenSizeType::XL) + 1;
-const inline std::map<ScreenSizeType, std::string> SCREEN_SIZE_VALUES = {
+const inline std::map<ScreenSizeType, std::string_view> SCREEN_SIZE_VALUES = {
     {ScreenSizeType::XS, "xs"},
     {ScreenSizeType::SM, "sm"},
     {ScreenSizeType::MD, "md"},

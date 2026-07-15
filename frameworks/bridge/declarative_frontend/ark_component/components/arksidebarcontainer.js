@@ -297,7 +297,7 @@ class SideBarContainerShowSideBarWithGestureModifier extends ModifierWithKey {
 }
 SideBarContainerShowSideBarWithGestureModifier.identity = Symbol('sideBarContainerShowSideBarWithGesture');
 
-class JSSideBarContainer extends JSViewAbstract {
+class JSSideBarContainer extends JSContainerBase {
     static create(params) {
         if (params !== undefined) {
             getUINativeModule().sideBarContainer.create(params);

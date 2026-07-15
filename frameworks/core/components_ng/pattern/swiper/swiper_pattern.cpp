@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include "base/error/error_code.h"
 #include "base/geometry/axis.h"
@@ -40,7 +41,9 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/container_scope.h"
 #include "core/common/premake_scope.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
@@ -89,11 +92,11 @@ const char SWIPER_RIGHT_CAPTURE_ETS_TAG[] = "SwiperRightCapture";
 const char TABS_ETS_TAG[] = "Tabs";
 const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
 const char JS_FOR_EACH_ETS_TAG[] = "JSForEach";
-const std::string SWIPER_DRAG_SCENE = "swiper_drag_scene";
-const std::string FADE_PROPERTY_NAME = "fade";
-const std::string SPRING_PROPERTY_NAME = "spring";
-const std::string INDICATOR_PROPERTY_NAME = "indicator";
-const std::string TRANSLATE_PROPERTY_NAME = "translate";
+constexpr std::string_view SWIPER_DRAG_SCENE = "swiper_drag_scene";
+constexpr std::string_view FADE_PROPERTY_NAME = "fade";
+constexpr std::string_view SPRING_PROPERTY_NAME = "spring";
+constexpr std::string_view INDICATOR_PROPERTY_NAME = "indicator";
+constexpr std::string_view TRANSLATE_PROPERTY_NAME = "translate";
 constexpr uint16_t CAPTURE_PIXEL_ROUND_VALUE = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
                                               static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
                                               static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
@@ -651,7 +654,9 @@ void SwiperPattern::OnAfterModifyDone()
     CHECK_NULL_VOID(host);
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
+#ifndef CROSS_PLATFORM
         Recorder::NodeDataCache::Get().PutInt(host, inspectorId, CurrentIndex());
+#endif
     }
 }
 
@@ -1398,7 +1403,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             pipeline->AddAfterRenderTask([weak = WeakClaim(this), needSwiperChangeEnd]() {
                 auto swiper = weak.Upgrade();
                 CHECK_NULL_VOID(swiper);
+#ifndef CROSS_PLATFORM
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
+#endif
                 AceAsyncTraceEndCommercial(
                     0, swiper->hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
                 swiper->ContentChangeReport(swiper->GetHost(), needSwiperChangeEnd);
@@ -1790,7 +1797,9 @@ void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
         payload["path"] = path;
         payload["currentIndex"] = std::to_string(currentIndex);
         payload["componentType"] = std::to_string(COMPONENT_SWIPER);
+#ifndef CROSS_PLATFORM
         ResSchedReport::GetInstance().HandleSwiperChange(payload);
+#endif
     }
 }
 
@@ -1865,6 +1874,7 @@ void SwiperPattern::FireUnselectedEvent(int32_t currentIndex, int32_t targetInde
 
 void SwiperPattern::NotifyScrollStateEvent(ScrollState scrollState)
 {
+#ifndef CROSS_PLATFORM
     if (scrollState_ == scrollState) {
         return;
     }
@@ -1882,6 +1892,7 @@ void SwiperPattern::NotifyScrollStateEvent(ScrollState scrollState)
     if (scrollState == ScrollState::IDLE) {
         mgr->OnSwiperScrollEnd(host);
     }
+#endif
 }
 
 void SwiperPattern::FireScrollStateEvent(ScrollState scrollState)
@@ -2795,7 +2806,7 @@ void SwiperPattern::StopTranslateAnimation()
                 CHECK_NULL_VOID(swiper);
                 auto host = swiper->GetHost();
                 CHECK_NULL_VOID(host);
-                host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, swiper->currentOffset_);
+                host->UpdateAnimatablePropertyFloat(std::string(TRANSLATE_PROPERTY_NAME), swiper->currentOffset_);
             }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, host->GetContextRefPtr());
         }
 
@@ -2818,7 +2829,7 @@ void SwiperPattern::StopSpringAnimationImmediately()
         CHECK_NULL_VOID(swiper);
         auto host = swiper->GetHost();
         CHECK_NULL_VOID(host);
-        host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, swiper->currentIndexOffset_);
+        host->UpdateAnimatablePropertyFloat(std::string(SPRING_PROPERTY_NAME), swiper->currentIndexOffset_);
         swiper->FireScrollStateEvent(ScrollState::IDLE);
     }, nullptr /* finishCallback*/, nullptr /* repeatCallback */, host->GetContextRefPtr());
     OnSpringAnimationFinish();
@@ -3733,8 +3744,10 @@ void SwiperPattern::HandleTouchUp()
 void SwiperPattern::HandleDragStart(const GestureEvent& info)
 {
     if (!hasTabsAncestor_) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_SWIPER_SCROLL,
             PerfActionType::FIRST_MOVE, "");
+#endif
     } else {
         AceAsyncTraceBeginCommercial(0, APP_TABS_SCROLL);
     }
@@ -3824,7 +3837,9 @@ void SwiperPattern::TriggerAddTabBarEvent() const
 void SwiperPattern::ReportTraceOnDragEnd() const
 {
     if (!hasTabsAncestor_) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_SCROLL, false);
+#endif
     } else {
         AceAsyncTraceEndCommercial(0, APP_TABS_SCROLL);
     }
@@ -4170,7 +4185,7 @@ void SwiperPattern::UpdateTranslateForSwiperItem(SwiperLayoutAlgorithm::Position
 void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
 {
     if (isBeginPerf) {
-#ifdef OHOS_PLATFORM
+#if defined(OHOS_PLATFORM)
         if (isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_on");
         }
@@ -4179,14 +4194,18 @@ void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
             AceAsyncTraceBeginCommercial(0, APP_TABS_FLING);
         } else if (isInAutoPlay_) {
             isAutoPlayAnimationRunning_ = true;
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->StartCommercial(
                 PerfConstants::AUTO_APP_SWIPER_FLING, PerfActionType::LAST_UP, "");
+#endif
         } else {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->StartCommercial(
                 PerfConstants::APP_SWIPER_FLING, PerfActionType::LAST_UP, "");
+#endif
         }
     } else {
-#ifdef OHOS_PLATFORM
+#if defined(OHOS_PLATFORM)
         if (isInAutoPlay_) {
             ResSchedReport::GetInstance().ResSchedDataReport("auto_play_off");
         } else {
@@ -4199,10 +4218,14 @@ void SwiperPattern::PropertyPrefMonitor(bool isBeginPerf)
             ContentChangeReport(GetHost(), true);
         } else if (isAutoPlayAnimationRunning_) {
             isAutoPlayAnimationRunning_ = false;
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::AUTO_APP_SWIPER_FLING, true);
+#endif
             ContentChangeReport(GetHost(), true);
-    } else {
+        } else {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_SWIPER_FLING, true);
+#endif
             ContentChangeReport(GetHost(), true);
         }
     }
@@ -4588,7 +4611,7 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::option
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
-    host->CreateAnimatablePropertyFloat(INDICATOR_PROPERTY_NAME, 0, [weak](float value) {
+    host->CreateAnimatablePropertyFloat(std::string(INDICATOR_PROPERTY_NAME), 0, [weak](float value) {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
         const auto& turnPageRateCallback = swiper->swiperController_->GetTurnPageRateCallback();
@@ -4603,14 +4626,14 @@ void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::option
     option.SetDuration(GetDuration());
     option.SetCurve(Curves::LINEAR);
 
-    host->UpdateAnimatablePropertyFloat(INDICATOR_PROPERTY_NAME, 0);
+    host->UpdateAnimatablePropertyFloat(std::string(INDICATOR_PROPERTY_NAME), 0);
     indicatorAnimationIsRunning_ = true;
     indicatorAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weakHost = WeakClaim(RawPtr(host)), translate]() {
             auto host = weakHost.Upgrade();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(INDICATOR_PROPERTY_NAME, translate);
+            host->UpdateAnimatablePropertyFloat(std::string(INDICATOR_PROPERTY_NAME), translate);
         },
         [weak]() {
             auto swiperPattern = weak.Upgrade();
@@ -4638,7 +4661,7 @@ void SwiperPattern::PlayTranslateAnimation(
     CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
     host->CreateAnimatablePropertyFloat(
-        TRANSLATE_PROPERTY_NAME, 0,
+        std::string(TRANSLATE_PROPERTY_NAME), 0,
         [weak](float value) {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
@@ -4664,7 +4687,7 @@ void SwiperPattern::PlayTranslateAnimation(
     } else {
         option.SetFrameRateRange(SWIPER_DEFAULT_FRAME_RATE);
     }
-    host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, startPos);
+    host->UpdateAnimatablePropertyFloat(std::string(TRANSLATE_PROPERTY_NAME), startPos);
     translateAnimationIsRunning_ = true;
     propertyAnimationIndex_ = nextIndex;
     translateAnimationEndPos_ = endPos;
@@ -4675,7 +4698,7 @@ void SwiperPattern::PlayTranslateAnimation(
             CHECK_NULL_VOID(swiper);
             auto host = swiper->GetHost();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(TRANSLATE_PROPERTY_NAME, endPos);
+            host->UpdateAnimatablePropertyFloat(std::string(TRANSLATE_PROPERTY_NAME), endPos);
             AceAsyncTraceBeginCommercial(
                 0, swiper->hasTabsAncestor_ ? APP_TABS_FRAME_ANIMATION : APP_SWIPER_FRAME_ANIMATION);
             AnimationCallbackInfo info;
@@ -4782,7 +4805,9 @@ void SwiperPattern::OnSpringAnimationFinish()
     if (!springAnimationIsRunning_) {
         return;
     }
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
+#endif
     AceAsyncTraceEndCommercial(0, TRAILING_ANIMATION);
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper finish spring animation offset %{public}f, id: %{public}d",
         currentIndexOffset_, swiperId_);
@@ -4896,7 +4921,8 @@ void SwiperPattern::PlayFadeAnimation()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto weak = AceType::WeakClaim(this);
-    host->CreateAnimatablePropertyFloat(FADE_PROPERTY_NAME, 0, Animation<double>::ValueCallback([weak](float value) {
+    host->CreateAnimatablePropertyFloat(std::string(FADE_PROPERTY_NAME), 0,
+        Animation<double>::ValueCallback([weak](float value) {
         auto swiper = weak.Upgrade();
         if (swiper && swiper->GetHost() && !swiper->isTouchDown_) {
             swiper->fadeOffset_ = value;
@@ -4908,7 +4934,7 @@ void SwiperPattern::PlayFadeAnimation()
     option.SetDuration(FADE_DURATION);
     option.SetCurve(Curves::LINEAR);
 
-    host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, fadeOffset_);
+    host->UpdateAnimatablePropertyFloat(std::string(FADE_PROPERTY_NAME), fadeOffset_);
     nextIndex_ = currentIndex_;
     fadeAnimation_ = AnimationUtils::StartAnimation(
         option,
@@ -4918,7 +4944,7 @@ void SwiperPattern::PlayFadeAnimation()
             swiperPattern->OnFadeAnimationStart();
             auto host = swiperPattern->GetHost();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(FADE_PROPERTY_NAME, 0.f);
+            host->UpdateAnimatablePropertyFloat(std::string(FADE_PROPERTY_NAME), 0.f);
         },
         [weak]() {
             auto swiperPattern = weak.Upgrade();
@@ -4932,7 +4958,7 @@ void SwiperPattern::CreateSpringProperty()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->CreateAnimatablePropertyFloat(
-        SPRING_PROPERTY_NAME, 0,
+        std::string(SPRING_PROPERTY_NAME), 0,
         [weak = AceType::WeakClaim(this)](float position) {
             auto swiper = weak.Upgrade();
             CHECK_NULL_VOID(swiper);
@@ -4962,7 +4988,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     auto trailing = currentIndexOffset_ - itemPosition_.begin()->second.startPos;
     ExtentPair extentPair = ExtentPair(leading, trailing);
     CreateSpringProperty();
-    host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, currentIndexOffset_);
+    host->UpdateAnimatablePropertyFloat(std::string(SPRING_PROPERTY_NAME), currentIndexOffset_);
     auto delta = currentIndexOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing();
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         delta = extentPair.Trailing();
@@ -4976,8 +5002,10 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
         [weak = AceType::WeakClaim(this), delta]() {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING,
                 PerfActionType::FIRST_MOVE, "");
+#endif
             auto swiperPattern = weak.Upgrade();
             CHECK_NULL_VOID(swiperPattern);
             TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper start spring animation with offset:%{public}f, id:%{public}d",
@@ -4987,7 +5015,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
             swiperPattern->FireScrollStateEvent(ScrollState::FLING);
             auto host = swiperPattern->GetHost();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, delta);
+            host->UpdateAnimatablePropertyFloat(std::string(SPRING_PROPERTY_NAME), delta);
         },
         [weak = AceType::WeakClaim(this)]() {
             auto swiperPattern = weak.Upgrade();
@@ -6661,7 +6689,7 @@ void SwiperPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->AddFRCSceneInfo(SWIPER_DRAG_SCENE, speed, sceneStatus);
+    host->AddFRCSceneInfo(std::string(SWIPER_DRAG_SCENE), speed, sceneStatus);
 }
 
 int32_t SwiperPattern::GetLoopIndex(int32_t index, int32_t childrenSize) const
@@ -8259,37 +8287,45 @@ void SwiperPattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode, bool n
     if (targetIndex_.has_value() && targetIndex_.value() == currentIndex_) {
         return;
     }
+#ifndef CROSS_PLATFORM
     mgr->OnSwiperChangeEnd(keyNode, hasTabsAncestor_);
+#endif
 }
 
 void SwiperPattern::ContentChangeOnTransitionStart(const RefPtr<FrameNode>& keyNode) const
 {
+#ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     CHECK_NULL_VOID(keyNode);
     mgr->OnTransitionAdded(keyNode->GetId());
+#endif
 }
 
 void SwiperPattern::ContentChangeOnTransitionEnd(const RefPtr<FrameNode>& keyNode) const
 {
+#ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     CHECK_NULL_VOID(keyNode);
     mgr->OnTransitionRemoved(keyNode->GetId());
+#endif
 }
 
 void SwiperPattern::ContentChangeByDetaching(PipelineContext* pipeline)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     mgr->OnTransitionRemoved(host->GetId());
+#endif
 }
 
 bool SwiperPattern::StartFakeDrag()

@@ -17,6 +17,7 @@
 #include "core/components_ng/base/modifier.h"
 
 #include <optional>
+#include <string_view>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -75,9 +76,9 @@ const auto TRANSLATE_THRESHOLD = 26.0f;
 const auto TRANSLATE_FRAME_RATE = 120;
 const auto TRANSLATE_FRAME_RATE_RANGE =
     AceType::MakeRefPtr<FrameRateRange>(0, TRANSLATE_FRAME_RATE, TRANSLATE_FRAME_RATE);
-const std::string TAB_BAR_PROPERTY_NAME = "tabBar";
-const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
-const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
+constexpr std::string_view TAB_BAR_PROPERTY_NAME = "tabBar";
+constexpr std::string_view INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
+constexpr std::string_view INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
 
 ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& src, RefPtr<PixelMap>& pixelMap,
     const std::string& bundleName, const std::string& moduleName)
@@ -1603,7 +1604,9 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
         OnCustomContentTransition(indicator, index);
     } else {
         if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
             animationTargetIndex_ = index;
@@ -1981,7 +1984,9 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         OnCustomContentTransition(indicator, index);
     } else {
         if (duration> 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
         } else {
@@ -2535,7 +2540,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
 
     currentOffset_ = 0.0f;
     CHECK_NULL_VOID(host);
-    host->CreateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, 0, [weak](float value) {
+    host->CreateAnimatablePropertyFloat(std::string(TAB_BAR_PROPERTY_NAME), 0, [weak](float value) {
         auto tabBarPattern = weak.Upgrade();
         CHECK_NULL_VOID(tabBarPattern);
         tabBarPattern->currentDelta_ = value - tabBarPattern->currentOffset_;
@@ -2544,7 +2549,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     });
-    host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, currentOffset_);
+    host->UpdateAnimatablePropertyFloat(std::string(TAB_BAR_PROPERTY_NAME), currentOffset_);
     translateAnimationIsRunning_ = true;
     auto pipeline = host->GetContextRefPtr();
     translateAnimation_ = AnimationUtils::StartAnimation(
@@ -2552,7 +2557,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
         [weakHost = WeakClaim(RawPtr(host)), targetCurrentOffset]() {
             auto host = weakHost.Upgrade();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, targetCurrentOffset);
+            host->UpdateAnimatablePropertyFloat(std::string(TAB_BAR_PROPERTY_NAME), targetCurrentOffset);
         },
         [weak]() {
             auto tabBarPattern = weak.Upgrade();
@@ -2572,11 +2577,11 @@ void TabBarPattern::PlayIndicatorTranslateAnimation(AnimationOption option, Rect
     turnPageRate_ = 0.0f;
     indicatorStartPos_ = originalPaintRect.GetX() + originalPaintRect.Width() / HALF_OF_WIDTH;
     indicatorEndPos_ = targetPaintRect.GetX() + targetPaintRect.Width() / HALF_OF_WIDTH + targetOffset;
-    auto propertyName = INDICATOR_OFFSET_PROPERTY_NAME;
+    auto propertyName = std::string(INDICATOR_OFFSET_PROPERTY_NAME);
     if (NearZero(indicatorEndPos_ - indicatorStartPos_)) {
         indicatorStartPos_ = originalPaintRect.Width();
         indicatorEndPos_ = targetPaintRect.Width();
-        propertyName = INDICATOR_WIDTH_PROPERTY_NAME;
+        propertyName = std::string(INDICATOR_WIDTH_PROPERTY_NAME);
     }
     CreateIndicatorTranslateProperty(host, propertyName);
 
@@ -2644,7 +2649,7 @@ void TabBarPattern::StopTranslateAnimation(bool isImmediately)
                 CHECK_NULL_VOID(pattern);
                 auto host = pattern->GetHost();
                 CHECK_NULL_VOID(host);
-                host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, pattern->currentOffset_);
+                host->UpdateAnimatablePropertyFloat(std::string(TAB_BAR_PROPERTY_NAME), pattern->currentOffset_);
             },
             nullptr, nullptr, pipeline);
     } else {
@@ -3325,7 +3330,9 @@ void TabBarPattern::InitTurnPageRateEvent()
     if (!animationEndEvent_) {
         AnimationEndEvent animationEndEvent =
             [weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
+#ifndef CROSS_PLATFORM
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
+#endif
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 auto host = pattern->GetHost();

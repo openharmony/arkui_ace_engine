@@ -59,7 +59,9 @@ void PinchRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "PINCH RACC, T: %{public}s",
         node ? node->GetTag().c_str() : "null");
+#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("click");
+#endif
     StateChangeReason reason = isLastPinchFinished_ ? StateChangeReason::PINCH_DISTANCE_REACHED
                                                      : StateChangeReason::PINCH_CONTINUOUS_ACCEPT;
     LogStateChange(refereeState_, RefereeState::SUCCEED, reason);
@@ -458,7 +460,9 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         HandleGestureAccept(info, type, GestureListenerType::PINCH);
         ACE_BENCH_MARK_TRACE("PinchGesture_end");
         callbackFunction(info);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         HandleReports(info, type);
+#endif
     }
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     ReportToGestureDebugManager(type, GestureListenerType::PINCH);
@@ -516,6 +520,7 @@ void PinchRecognizer::GetGestureEventInfo(GestureEvent& info)
     info.SetInputEventType(inputEventType_);
 }
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void PinchRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
 {
     if (type == GestureCallbackType::ACTION || type == GestureCallbackType::UPDATE) {
@@ -531,6 +536,7 @@ void PinchRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
     pinchReport.SetScale(info.GetScale());
     Reporter::GetInstance().HandleUISessionReporting(pinchReport);
 }
+#endif
 
 GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
 {

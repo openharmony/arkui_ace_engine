@@ -1395,7 +1395,13 @@ export struct ChipComponent {
       if ((resource?.type?.toInt()) === RESOURCE_TYPE_FLOAT || (resource?.type?.toInt()) === RESOURCE_TYPE_INTEGER) {
         return resourceManager.getDouble(resource.id) >= 0;
       } else if ((resource?.type?.toInt()) === RESOURCE_TYPE_STRING) {
-        return this.isValidLengthString(resourceManager.getStringSync(resource.id));
+        let stringValue: string = '';
+        try {
+          stringValue = resourceManager.getStringSync(resource.id);
+        } catch (err) {
+          stringValue = '';
+        }
+        return this.isValidLengthString(stringValue);
       } else {
         return false;
       }

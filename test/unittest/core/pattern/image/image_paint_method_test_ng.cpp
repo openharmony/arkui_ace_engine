@@ -70,17 +70,16 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdateBorderRadius, Test
      */
     RefPtr<PaintWrapper> paintWrapperNull = AceType::MakeRefPtr<PaintWrapper>(nullptr, nullptr, nullptr);
     PaintWrapper* imagePaintWrapperNullRaw_ = AceType::RawPtr(paintWrapperNull);
-    ImageDfxConfig imageDfxConfig;
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperNullRaw_, imageDfxConfig);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperNullRaw_);
     PaintWrapper* imagePaintWrapperRaw_ = AceType::RawPtr(imagePaintWrapper_);
     EXPECT_NE(imagePaintWrapperRaw_, nullptr);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_);
     BorderWidthProperty borderWidth_;
     frameNode->GetRenderContext()->UpdateBorderWidth(borderWidth_);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_);
     borderWidth_.SetBorderWidth(IMAGE_SOURCEINFO_WIDTH);
     frameNode->GetRenderContext()->UpdateBorderWidth(borderWidth_);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_);
     EXPECT_EQ(imagePaintMethod_->selected_, true);
 }
 
@@ -366,10 +365,9 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_NormalizeRadius, TestSiz
     /**
      * @tc.steps: step3. call function.
      */
-    ImageDfxConfig imageDfxConfig;
     PaintWrapper* imagePaintWrapperRaw_ = AceType::RawPtr(imagePaintWrapper_);
     EXPECT_NE(imagePaintWrapperRaw_, nullptr);
-    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_, imageDfxConfig);
+    imagePaintMethod_->UpdateBorderRadius(imagePaintWrapperRaw_);
 }
 
 /**

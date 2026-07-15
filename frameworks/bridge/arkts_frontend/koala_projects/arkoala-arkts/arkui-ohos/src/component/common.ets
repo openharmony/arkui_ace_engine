@@ -6,6 +6,7 @@ import { GestureGroupHandler, GestureHandler, GesturePriority } from "./gesture"
 import { GestureOps } from "./idlize"
 import { ArkUIAniModule } from "arkui.ani"
 import { Bindable, Callback } from "#generated"
+import { HeightBreakpoint, WidthBreakpoint } from '/arkui/component/enums';
 import { hookTouchEventGetModifierKeyState } from "../"
 
 export interface AttributeModifier<T> {
@@ -1219,6 +1220,68 @@ export class ArkCommonPeer extends ArkCommonMethodPeer {
     }
     setCommonOptionsAttribute(): void {
         ArkUIAniModule._CommonInterface_setCommonOptions(this.peer.ptr)
+    }
+}
+
+export class Bindable_WidthBreakpoint_serializer {
+    public static write(buffer: SerializerBase, value: Bindable<WidthBreakpoint>): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForValue = value.value
+        valueSerializer.writeInt32(valueHolderForValue.valueOf())
+        const valueHolderForOnChange = value.onChange
+        valueSerializer.holdAndWriteCallback(valueHolderForOnChange)
+    }
+    public static read(buffer: DeserializerBase): Bindable<WidthBreakpoint> {
+        let valueDeserializer: DeserializerBase = buffer
+        const valueTmpResult: WidthBreakpoint = WidthBreakpoint.fromValue(valueDeserializer.readInt32())
+        const onChangeTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+        const onChangeTmpBufBufCall: KPointer = valueDeserializer.readPointer()
+        const onChangeTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
+        const onChangeTmpBufClosure = (data: WidthBreakpoint): void => {
+            const onChangeTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+            onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
+            onChangeTmpBufBufArgsSerializer.writeInt32(data.valueOf());
+            InteropNativeModule._CallCallbackSync(10, 0, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            onChangeTmpBufBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult: Callback<WidthBreakpoint, void> = onChangeTmpBufClosure
+        let value: Bindable<WidthBreakpoint> = ({ value: valueTmpResult, onChange: onChangeTmpResult } as Bindable<WidthBreakpoint>)
+        return value
+    }
+}
+
+export class Bindable_HeightBreakpoint_serializer {
+    public static write(buffer: SerializerBase, value: Bindable<HeightBreakpoint>): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForValue = value.value
+        valueSerializer.writeInt32(valueHolderForValue.valueOf())
+        const valueHolderForOnChange = value.onChange
+        valueSerializer.holdAndWriteCallback(valueHolderForOnChange)
+    }
+    public static read(buffer: DeserializerBase): Bindable<HeightBreakpoint> {
+        let valueDeserializer: DeserializerBase = buffer
+        const valueTmpResult: HeightBreakpoint = HeightBreakpoint.fromValue(valueDeserializer.readInt32())
+        const onChangeTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+        const onChangeTmpBufBufCall: KPointer = valueDeserializer.readPointer()
+        const onChangeTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
+        const onChangeTmpBufClosure = (data: HeightBreakpoint): void => {
+            const onChangeTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+            onChangeTmpBufBufArgsSerializer.writeInt32(onChangeTmpBufBufResource.resourceId);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCall);
+            onChangeTmpBufBufArgsSerializer.writePointer(onChangeTmpBufBufCallSync);
+            onChangeTmpBufBufArgsSerializer.writeInt32(data.valueOf());
+            InteropNativeModule._CallCallbackSync(10, 0, onChangeTmpBufBufArgsSerializer.asBuffer(), onChangeTmpBufBufArgsSerializer.length());
+            onChangeTmpBufBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(onChangeTmpBufClosure, onChangeTmpBufBufResource)
+        const onChangeTmpResult: Callback<HeightBreakpoint, void> = onChangeTmpBufClosure
+        let value: Bindable<HeightBreakpoint> = ({ value: valueTmpResult, onChange: onChangeTmpResult } as Bindable<HeightBreakpoint>)
+        return value
     }
 }
 

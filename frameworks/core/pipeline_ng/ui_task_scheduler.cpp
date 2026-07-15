@@ -185,7 +185,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 #endif
 
     isLayouting_ = false;
-#ifndef IS_RELEASE_VERSION
+#if !defined(IS_RELEASE_VERSION) && !defined(CROSS_PLATFORM)
     if (duration > SINGLE_FRAME_TIME_NANOSEC) {
         PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SUBHEALTH", "FlushLayoutTask", duration / NANO_TO_MICRO);
     }

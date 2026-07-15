@@ -254,6 +254,7 @@ public:
     void SetOptimizeParserBudgetEnabled(bool enable) override;
     void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
     void SetWebMediaAVSessionEnabled(bool isEnabled) override;
+    void SetWebMediaNetworkProxyEnabled(bool isEnabled) override;
     void SetEnableDataDetector(bool isEnabled) override;
     void SetDataDetectorConfig(const TextDetectConfig& config) override;
     void SetEnableSelectedDataDetector(bool isEnabled) override;
@@ -447,6 +448,7 @@ public:
     static void SetEnableScrollDirectionalLock(FrameNode* frameNode, bool enabled, int32_t type);
     static void SetNativeVideoPlayerConfig(FrameNode* frameNode, bool enable, bool shouldOverlay);
     static void SetWebMediaAVSessionEnabled(FrameNode* frameNode, bool isEnabled);
+    static void SetWebMediaNetworkProxyEnabled(FrameNode* frameNode, bool isEnabled);
     static void SetEnableDrag(FrameNode* frameNode, bool isEnabled);
     static void SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutPolicy layoutPolicy);
     static void SetInputMethodAttachedId(

@@ -22,8 +22,12 @@
 #include "base/log/ace_checker.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/base/observer_handler.h"
@@ -332,6 +336,7 @@ void TabsPattern::RecordChangeEvent(int32_t index)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(tabsNode);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto inspectorId = tabsNode->GetInspectorId().value_or("");
         auto tabBarText = GetTabBarTextByIndex(index);
@@ -347,6 +352,7 @@ void TabsPattern::RecordChangeEvent(int32_t index)
             Recorder::NodeDataCache::Get().PutMultiple(tabsNode, inspectorId, tabBarText, index);
         }
     }
+#endif
 }
 
 std::string TabsPattern::GetTabBarTextByIndex(int32_t index) const
@@ -525,7 +531,9 @@ void TabsPattern::OnAfterModifyDone()
     CHECK_NULL_VOID(property);
     auto index = property->GetIndexValue(0);
     auto tabBarText = GetTabBarTextByIndex(index);
+#ifndef CROSS_PLATFORM
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, tabBarText, index);
+#endif
 }
 
 void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event)

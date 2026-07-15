@@ -1716,28 +1716,28 @@ RefPtr<UiMaterial> GetSystemMaterialParam(napi_env env, const std::shared_ptr<Pr
     return material ? material->Copy() : nullptr;
 }
 
-DistortionMode GetDistortionModeParam(
+std::optional<DistortionMode> GetDistortionModeParam(
     napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
-    int32_t distortionMode = 0;
+    int32_t distortionMode;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, asyncContext->distortionModeApi, &valueType);
     if (valueType != napi_number) {
-        return static_cast<DistortionMode>(distortionMode);
+        return std::nullopt;
     }
 
     napi_get_value_int32(env, asyncContext->distortionModeApi, &distortionMode);
     return static_cast<DistortionMode>(distortionMode);
 }
 
-EdgeLightMode GetEdgeLightModeParam(
+std::optional<EdgeLightMode> GetEdgeLightModeParam(
     napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
-    int32_t edgeLightMode = 0;
+    int32_t edgeLightMode;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, asyncContext->edgeLightModeApi, &valueType);
     if (valueType != napi_number) {
-        return static_cast<EdgeLightMode>(edgeLightMode);
+        return std::nullopt;
     }
 
     napi_get_value_int32(env, asyncContext->edgeLightModeApi, &edgeLightMode);

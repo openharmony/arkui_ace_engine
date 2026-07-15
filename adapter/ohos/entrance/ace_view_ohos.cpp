@@ -217,6 +217,7 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& 
 void AceViewOhos::RecordInputEventWithPos(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     const PerfActionType inputType, const PerfSourceType sourceType, uint64_t inputTime)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(pointerEvent);
     PerfMonitor* pMonitor = PerfMonitor::GetPerfMonitor();
     if (pMonitor == nullptr) {
@@ -233,10 +234,12 @@ void AceViewOhos::RecordInputEventWithPos(const std::shared_ptr<MMI::PointerEven
         }
     }
     pMonitor->RecordInputEvent(inputType, sourceType, inputTime);
+#endif
 }
 
 void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyEvent)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(keyEvent);
     int32_t keyCode = keyEvent->GetKeyCode();
     if (keyCode != MMI::KeyEvent::KEYCODE_VOLUME_DOWN
@@ -265,6 +268,7 @@ void AceViewOhos::DispatchEventToPerf(const std::shared_ptr<MMI::KeyEvent>& keyE
     } else {
         TAG_LOGE(AceLogTag::ACE_INPUTTRACKING, "DispatchEventToPerf keyItem is invalid.");
     }
+#endif
 }
 
 bool AceViewOhos::DispatchKeyEvent(const RefPtr<AceViewOhos>& view,
@@ -347,7 +351,9 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         return;
     }
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     touchPoint.processTime = std::chrono::high_resolution_clock::now();
+#endif
     touchPoint.SetIsInjected(isInjected);
     if (SystemProperties::GetDebugEnabled()) {
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d eventId=%d", touchPoint.x,

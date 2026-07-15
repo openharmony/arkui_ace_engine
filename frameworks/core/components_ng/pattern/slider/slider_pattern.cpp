@@ -17,6 +17,7 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include <string_view>
 
 #include "core/components_ng/base/view_abstract.h"
 #include "ui/properties/ui_material_structs.h"
@@ -62,9 +63,9 @@ constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 100;
 constexpr int32_t NONE_POINT_OFFSET = 2;
 constexpr int32_t STEP_POINT_OFFSET = 1;
 constexpr int32_t DEFAULT_STEP = 1;
-const std::string STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
-const std::string SLIDER_EFFECT_ID_NAME = "haptic.slide";
-const std::string STR_SLIDER_LONG_PRESS = "ArkUISliderLongPressEvent";
+constexpr std::string_view STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
+constexpr std::string_view SLIDER_EFFECT_ID_NAME = "haptic.slide";
+constexpr std::string_view STR_SLIDER_LONG_PRESS = "ArkUISliderLongPressEvent";
 
 constexpr float DRAG_FRAME_PRESS_START_SCALE = 1.1f;
 constexpr float DRAG_FRAME_PRESS_END_SCALE = 1.0f;
@@ -108,8 +109,8 @@ constexpr float CROWN_SENSITIVITY_HIGH = 2.0f;
 constexpr int64_t CROWN_TIME_THRESH = 30;
 constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength2";
 #endif
-const std::string INJECTION_CMD_FORMAT_ERROR = "Invalid injection command format.";
-const std::string COMPONENT_IN_READONLY = "The component is in read-only state.";
+constexpr std::string_view INJECTION_CMD_FORMAT_ERROR = "Invalid injection command format.";
+constexpr std::string_view COMPONENT_IN_READONLY = "The component is in read-only state.";
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
 {
@@ -509,7 +510,7 @@ void SliderPattern::PlayHapticFeedback(bool isShowSteps)
         return;
     }
     if (isShowSteps) {
-        VibratorUtils::StartViratorDirectly(SLIDER_EFFECT_ID_NAME);
+        VibratorUtils::StartViratorDirectly(std::string(SLIDER_EFFECT_ID_NAME));
     }
 }
 
@@ -2173,7 +2174,7 @@ void SliderPattern::SendAccessibilityValueEvent(int32_t mode)
             CHECK_NULL_VOID(host);
             host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
         },
-        TaskExecutor::TaskType::UI, SCREEN_READ_SENDEVENT_TIMESTAMP, STR_SCREEN_READ_SENDEVENT);
+        TaskExecutor::TaskType::UI, SCREEN_READ_SENDEVENT_TIMESTAMP, std::string(STR_SCREEN_READ_SENDEVENT));
 }
 
 void SliderPattern::UpdateMarkDirtyNode(const PropertyChangeFlag& Flag)
@@ -3223,27 +3224,27 @@ bool SliderPattern::ParseCommand(const std::string& command, float& value)
 {
     auto jsonObj = JsonUtil::ParseJsonString(command);
     if (!jsonObj->IsValid() || !jsonObj->IsObject()) {
-        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        ReportInjectionResult(false, std::string(INJECTION_CMD_FORMAT_ERROR));
         return false;
     }
     auto cmdObj = jsonObj->GetValue("cmd");
     if (!cmdObj->IsValid() || !cmdObj->IsString()) {
-        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        ReportInjectionResult(false, std::string(INJECTION_CMD_FORMAT_ERROR));
         return false;
     }
     auto cmdType = cmdObj->GetString();
     if (cmdType != "onSliderChange") {
-        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        ReportInjectionResult(false, std::string(INJECTION_CMD_FORMAT_ERROR));
         return false;
     }
     auto paramJson = jsonObj->GetValue("params");
     if (!paramJson->IsValid() || !paramJson->IsObject()) {
-        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        ReportInjectionResult(false, std::string(INJECTION_CMD_FORMAT_ERROR));
         return false;
     }
     auto valueJson = paramJson->GetValue("value");
     if (!valueJson->IsValid() || !valueJson->IsNumber()) {
-        ReportInjectionResult(false, INJECTION_CMD_FORMAT_ERROR);
+        ReportInjectionResult(false, std::string(INJECTION_CMD_FORMAT_ERROR));
         return false;
     }
     value = static_cast<float>(valueJson->GetDouble());
@@ -3261,7 +3262,7 @@ int32_t SliderPattern::OnInjectionEvent(const std::string& command)
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_RETURN(eventHub, RET_FAILED);
     if (!eventHub->IsEnabled()) {
-        ReportInjectionResult(false, COMPONENT_IN_READONLY);
+        ReportInjectionResult(false, std::string(COMPONENT_IN_READONLY));
         return RET_FAILED;
     }
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
@@ -3276,6 +3277,7 @@ int32_t SliderPattern::OnInjectionEvent(const std::string& command)
 
 void SliderPattern::ReportChangeEvent(float value, int32_t mode)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
@@ -3290,10 +3292,12 @@ void SliderPattern::ReportChangeEvent(float value, int32_t mode)
     json->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 bool SliderPattern::ReportInjectionResult(bool isSuccess, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto nodeId = host->GetId();
@@ -3306,6 +3310,7 @@ bool SliderPattern::ReportInjectionResult(bool isSuccess, const std::string& rea
     result->Put("reason", reason.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "SliderResult", result->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
     return true;
 }
 
@@ -4260,7 +4265,7 @@ void SliderPattern::StartLongPressTimer()
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostDelayedTask(
-        longPressTask_, TaskExecutor::TaskType::UI, LONG_PRESS_DELAY_MS, STR_SLIDER_LONG_PRESS);
+        longPressTask_, TaskExecutor::TaskType::UI, LONG_PRESS_DELAY_MS, std::string(STR_SLIDER_LONG_PRESS));
 }
 
 void SliderPattern::HandleLongPress()

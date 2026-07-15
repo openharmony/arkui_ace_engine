@@ -193,10 +193,6 @@ public:
         const EcmaVM *vm, const Local<JSValueRef> &obj, CalcDimension &result);
     static bool ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
         RefPtr<ResourceObject>& resourceObj);
-    static bool ParseLengthMetricsToDimensionForTabs(
-        const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue, CalcDimension& result);
-    static bool ParseLengthMetricsToDimensionForTabs(const EcmaVM* vm,
-        const Local<panda::JSValueRef>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resourceObj);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, bool isSupportPercent = true, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimension(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,

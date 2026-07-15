@@ -16,6 +16,7 @@
 #include "core/common/font_manager.h"
 
 #include <regex>
+#include <string_view>
 
 #include "base/i18n/localization.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -38,8 +39,8 @@ namespace OHOS::Ace {
 std::string FontManager::appCustomFont_ = "";
 float FontManager::fontWeightScale_ = 1.0f;
 bool FontManager::isDefaultFontChanged_ = false;
-const std::string URL_HTTP = "http://";
-const std::string URL_HTTPS = "https://";
+constexpr std::string_view URL_HTTP = "http://";
+constexpr std::string_view URL_HTTPS = "https://";
 namespace {
 bool CheckWebUrlType(const std::string& type)
 {

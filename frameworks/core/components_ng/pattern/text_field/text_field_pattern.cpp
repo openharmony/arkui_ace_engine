@@ -37,8 +37,12 @@
 #include "core/common/container_scope.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/ime/text_input_formatter.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/common/screen_lock/screen_lock_manager.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/vibrator/vibrator_utils.h"
@@ -101,10 +105,9 @@ constexpr uint32_t OBSCURE_SHOW_TICKS = 1;
 constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
-const std::string NEWLINE = "\n";
-const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
-const std::string INSPECTOR_PREFIX = "__SearchField__";
-const std::string ERRORNODE_PREFIX = "ErrorNodeField__";
+constexpr std::string_view NEWLINE = "\n";
+const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(std::string(NEWLINE));
+constexpr std::string_view INSPECTOR_PREFIX = "__SearchField__";
 const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 constexpr Dimension FLOATING_CARET_SHOW_ORIGIN_CARET_DISTANCE = 10.0_vp;
 #if defined(ENABLE_STANDARD_INPUT)
@@ -114,21 +117,15 @@ constexpr size_t MAX_ABILITY_NAME_SIZE = 127;
 #endif
 
 // need to be moved to formatter
-const std::string DIGIT_WHITE_LIST = "[0-9]";
-const std::string PHONE_WHITE_LIST = "[\\d\\-\\+\\*\\#]+";
-const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
-const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
-const std::string SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
-const std::string HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
-const std::string AUTO_FILL_PARAMS_USERNAME = "com.autofill.params.userName";
-const std::string AUTO_FILL_PARAMS_NEWPASSWORD = "com.autofill.params.newPassword";
-const std::string FIELD_TEXT_CHANGE_EVENT = "textChange";
-const std::string FIELD_BLUR_EVENT = "blur";
-const std::string FIELD_FOCUS_EVENT = "focus";
+constexpr std::string_view SHOW_PASSWORD_SVG = "SYS_SHOW_PASSWORD_SVG";
+constexpr std::string_view HIDE_PASSWORD_SVG = "SYS_HIDE_PASSWORD_SVG";
+constexpr std::string_view FIELD_TEXT_CHANGE_EVENT = "textChange";
+constexpr std::string_view FIELD_BLUR_EVENT = "blur";
+constexpr std::string_view FIELD_FOCUS_EVENT = "focus";
 constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t PREVIEW_TEXT_RANGE_DEFAULT = -1;
-const std::string PREVIEW_STYLE_NORMAL = "normal";
-const std::string PREVIEW_STYLE_UNDERLINE = "underline";
+constexpr std::string_view PREVIEW_STYLE_NORMAL = "normal";
+constexpr std::string_view PREVIEW_STYLE_UNDERLINE = "underline";
 
 constexpr int32_t PREVIEW_NO_ERROR = 0;
 constexpr int32_t PREVIEW_NULL_POINTER = 1;
@@ -521,17 +518,20 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 
 bool TextFieldPattern::ReportCommandResult(int32_t nodeId, const std::string& event)
 {
+#ifndef CROSS_PLATFORM
     auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put("event", event.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
     return true;
 }
 
 void TextFieldPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::string& dataStr, int32_t start,
     int32_t end)
 {
+#ifndef CROSS_PLATFORM
     auto json = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(json);
     auto valueStr = contentController_->GetSelectedValue(start, end);
@@ -545,20 +545,24 @@ void TextFieldPattern::ReportSelectionChangeEvent(int32_t nodeId, const std::str
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", json->ToString(),
             ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     }
+#endif
 }
 
 void TextFieldPattern::ReportCaretPositionChangeEvent(int32_t nodeId, int32_t position)
 {
+#ifndef CROSS_PLATFORM
     auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(value);
     value->Put("event", "caretPositionChange");
     value->Put("position", position);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
 }
 
 void TextFieldPattern::ReportRequestKeyboardEvent(const RefPtr<FrameNode>& frameNode)
 {
+#ifndef CROSS_PLATFORM
     auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(value);
     if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
@@ -574,6 +578,7 @@ void TextFieldPattern::ReportRequestKeyboardEvent(const RefPtr<FrameNode>& frame
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(),
             "event", value->ToString(), ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     }
+#endif
 }
 
 int32_t TextFieldPattern::OnInjectionEvent(const std::string& command)
@@ -1505,7 +1510,7 @@ void TextFieldPattern::HandleFocusEvent()
     RequestKeyboardByFocusSwitch();
     ResetFirstClickAfterGetFocus();
     SetFocusStyle();
-    ReportTextChangeEvent(FIELD_FOCUS_EVENT);
+    ReportTextChangeEvent(std::string(FIELD_FOCUS_EVENT));
 
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -2034,7 +2039,7 @@ void TextFieldPattern::HandleBlurEvent()
         RestoreDefaultMouseState();
     }
     ReportEvents();
-    ReportTextChangeEvent(FIELD_BLUR_EVENT);
+    ReportTextChangeEvent(std::string(FIELD_BLUR_EVENT));
     ScheduleDisappearDelayTask();
     requestFocusReason_ = RequestFocusReason::UNKNOWN;
     ClearFocusStyle();
@@ -4638,7 +4643,9 @@ void TextFieldPattern::OnAfterModifyDone()
                         inputType == TextInputType::SCREEN_LOCK_PASSWORD || inputType == TextInputType::NEW_PASSWORD;
         }
         if (!isPwdType) {
+#ifndef CROSS_PLATFORM
             Recorder::NodeDataCache::Get().PutString(host, inspectorId, contentController_->GetTextValue());
+#endif
         }
     }
 }
@@ -4713,7 +4720,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     AddTextFireOnChange();
-    ReportTextChangeEvent(FIELD_TEXT_CHANGE_EVENT);
+    ReportTextChangeEvent(std::string(FIELD_TEXT_CHANGE_EVENT));
     auto context = host->GetContextRefPtr();
     CHECK_NULL_RETURN(context, false);
     auto taskExecutor = context->GetTaskExecutor();
@@ -4788,6 +4795,7 @@ void TextFieldPattern::AddTextFireOnChange()
 
 void TextFieldPattern::RecordTextInputEvent()
 {
+#ifndef CROSS_PLATFORM
     if (!Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_TEXT_INPUT)) {
         return;
     }
@@ -4810,6 +4818,7 @@ void TextFieldPattern::RecordTextInputEvent()
         .SetDescription(host->GetAutoEventParamValue(""))
         .SetHost(host);
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+#endif
 }
 
 void TextFieldPattern::FilterInitializeText()
@@ -7356,8 +7365,10 @@ void TextFieldPattern::FireSubmitAction(TextInputAction action, bool forceCloseK
     if (textInputBlurOnSubmit_) {
         HandleCloseKeyboard(forceCloseKeyboard);
     }
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Textfield.onSubmit",
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
 }
 
 void TextFieldPattern::TextFieldLostFocusToViewRoot()
@@ -7368,6 +7379,7 @@ void TextFieldPattern::TextFieldLostFocusToViewRoot()
 
 void TextFieldPattern::RecordSubmitEvent() const
 {
+#ifndef CROSS_PLATFORM
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;
     }
@@ -7388,6 +7400,7 @@ void TextFieldPattern::RecordSubmitEvent() const
         builder.SetText(contentController_->GetTextValue());
     }
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+#endif
 }
 
 void TextFieldPattern::UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent)
@@ -9144,7 +9157,7 @@ std::string TextFieldPattern::GetShowResultImageSrc() const
     if (showImageSource && !showImageSource->GetSrc().empty()) {
         return showImageSource->GetSrc();
     }
-    return SHOW_PASSWORD_SVG;
+    return std::string(SHOW_PASSWORD_SVG);
 }
 
 std::string TextFieldPattern::GetNormalUnderlineColorStr() const
@@ -9189,7 +9202,7 @@ std::string TextFieldPattern::GetHideResultImageSrc() const
     if (hideSourceInfo && !hideSourceInfo->GetSrc().empty()) {
         return hideSourceInfo->GetSrc();
     }
-    return HIDE_PASSWORD_SVG;
+    return std::string(HIDE_PASSWORD_SVG);
 }
 
 void TextFieldPattern::RestorePreInlineStates()
@@ -11800,7 +11813,9 @@ void TextFieldPattern::ReportTextChangeEvent(const std::string& eventType)
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(UiSessionManager::GetInstance()->GetTextChangeEventRegistered());
+#endif
     auto data = JsonUtil::Create();
     data->Put("event", eventType.data());
     data->Put("id", host->GetId());
@@ -13310,6 +13325,7 @@ bool TextFieldPattern::IsStopEditWhenCloseKeyboard()
 
 void TextFieldPattern::OnReportPasteEvent(const RefPtr<FrameNode>& frameNode)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "TextInput.onPasteComplete",
@@ -13322,10 +13338,12 @@ void TextFieldPattern::OnReportPasteEvent(const RefPtr<FrameNode>& frameNode)
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] Search reportComponentChangeEvent onPasteComplete",
             frameNode->GetId());
     }
+#endif
 }
 
 void TextFieldPattern::OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "TextInput.onSubmitComplete",
@@ -13333,6 +13351,7 @@ void TextFieldPattern::OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode)
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextInput reportComponentChangeEvent onSubmitComplete",
             frameNode->GetId());
     }
+#endif
 }
 
 #ifdef ENABLE_AUTO_FILL_CONTROLLER

@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 #if defined(PREVIEW)
-RefPtr<FrameNode> CreatePreviewPlaceholder(const std::string& tag, int32_t nodeId);
+ACE_FORCE_EXPORT RefPtr<FrameNode> CreatePreviewPlaceholder(const std::string& tag, int32_t nodeId);
 #endif
 } // namespace OHOS::Ace::NG
 

@@ -11284,7 +11284,7 @@ const ArkUI_AttributeItem* GetBaseLineOffset(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetTextShadow(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    ArkUITextShadowStruct shadowArray[NUM_1];
+    ArkUITextShadowStruct shadowArray[NUM_1] = {};
     if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->getTextShadows(node->uiNodeHandle, &shadowArray[0], NUM_1);
     } else if (node->type == ARKUI_NODE_SPAN) {
@@ -17014,11 +17014,11 @@ int32_t SetTextLinearGradient(ArkUI_NodeHandle node, const ArkUI_AttributeItem* 
 const ArkUI_AttributeItem* GetTextLinearGradient(ArkUI_NodeHandle node)
 {
     //default size 3
-    ArkUI_Float32 values[NUM_3];
+    ArkUI_Float32 values[NUM_3] = {};
     //default size 10
-    ArkUI_Uint32 colors[NUM_10];
+    ArkUI_Uint32 colors[NUM_10] = {};
     //default size 10
-    ArkUI_Float32 stops[NUM_10];
+    ArkUI_Float32 stops[NUM_10] = {};
     ArkUI_Int32 resultValue = 0;
     switch (node->type) {
         case ARKUI_NODE_TEXT_INPUT:
@@ -17157,11 +17157,11 @@ void ResetTextRadialGradient(ArkUI_NodeHandle node)
 const ArkUI_AttributeItem* GetTextRadialGradient(ArkUI_NodeHandle node)
 {
     //default size 4
-    ArkUI_Float32 values[NUM_4];
+    ArkUI_Float32 values[NUM_4] = {};
     //default size 10
-    ArkUI_Uint32 colors[NUM_10];
+    ArkUI_Uint32 colors[NUM_10] = {};
     //default size 10
-    ArkUI_Float32 stops[NUM_10];
+    ArkUI_Float32 stops[NUM_10] = {};
 
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
     ArkUI_Int32 resultValue = 0;

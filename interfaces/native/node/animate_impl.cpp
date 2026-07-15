@@ -83,6 +83,8 @@ int32_t KeyframeAnimateTo(ArkUI_ContextHandle context, ArkUI_KeyframeAnimateOpti
         keyframes[i].duration = option->keyframes[i].duration;
         keyframes[i].event = option->keyframes[i].event;
         keyframes[i].userData = option->keyframes[i].userData;
+        keyframes[i].curve = nullptr;
+        keyframes[i].curveType = 0;
 
         auto curve = option->keyframes[i].curve;
         if (!curve) {

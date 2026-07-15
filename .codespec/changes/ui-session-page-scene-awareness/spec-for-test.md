@@ -19,7 +19,7 @@
 | 状态 | Draft |
 | 复杂度 | 标准 + 安全/DFX专项 |
 | 创建日期 | 2026-06-18 |
-| 最后更新 | 2026-07-10 |
+| 最后更新 | 2026-07-13 |
 
 ## 一、需求目标与规格 `[源: spec.md]`
 
@@ -55,7 +55,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 
 | AC编号 | 验收标准 | 类型 |
 |--------|----------|------|
-| AC-3.1 | GIVEN 已注册 `TEXT_EDITOR` 规则且 `policy.reportOnTextInputAttached=true`，WHEN 文本输入类控件上树且满足可见性/可获焦规则，THEN 宿主将该控件加入页面输入控件计数并挂起待检测规则；不得仅因数量达到阈值立即上报 | 正常 |
+| AC-3.1 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 文本输入类控件上树且满足可见性/可获焦规则，THEN 宿主将该控件加入页面输入控件计数并挂起待检测规则；不得仅因数量达到阈值立即上报 | 正常 |
 | AC-3.2 | GIVEN `policy.deduplicate=true` 且同一页面、同一规则、同一命中节点集合已上报，WHEN 再次触发匹配且命中集合未变化，THEN 不重复上报 | 边界 |
 | AC-3.3 | GIVEN 已注册 `TEXT_EDITOR` 规则，WHEN 命中节点集合变化或当前页面名变化且页面已稳定，THEN 可以重新上报新的命中结果 | 正常 |
 | AC-3.4 | GIVEN 已注册 `TEXT_EDITOR` 规则且页面内已计数某个文本输入类控件，WHEN 该控件下树，THEN 宿主从页面输入控件计数中移除该控件，并挂起待检测规则等待页面稳定点检查 | 边界 |
@@ -79,14 +79,22 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | AC-5.3 | GIVEN 已向 Web 或 UIExtension 透传过规则，WHEN SA 调用 `UnregisterPageSceneRules(ruleSetId)` 或 SA 死亡，THEN 宿主向对应控件透传反注册请求 | 恢复 |
 | AC-5.4 | GIVEN SA 调用 `GetPageScene` 且规则允许 Web 或 UIExtension 来源参与，WHEN 宿主发起当前页面查询，THEN 宿主向对应控件透传查询请求 | 边界 |
 
+### 1.5A US-5A：SA 反注册页面场景规则
+
+| AC编号 | 验收标准 | 类型 |
+|--------|----------|------|
+| AC-5A.1 | GIVEN SA 已成功注册页面场景规则，WHEN SA 调用 `UnregisterPageSceneRules(ruleSetId)` 且 `ruleSetId` 匹配当前注册规则，THEN 宿主删除该规则、待检测状态和去重缓存，并返回成功 | 正常 |
+| AC-5A.2 | GIVEN SA 未注册页面场景规则或传入 `ruleSetId` 为空/不匹配，WHEN SA 调用 `UnregisterPageSceneRules(ruleSetId)`，THEN 接口返回参数错误或未注册错误，不影响其他 SA 已注册规则 | 异常 |
+| AC-5A.3 | GIVEN SA 已成功反注册页面场景规则，WHEN 后续页面文本输入类控件上树、下树或页面稳定点到达，THEN 宿主不得再因该规则上报 PageScene 事件 | 恢复 |
+
 ### 1.6 US-6：上报结果脱敏
 
 | AC编号 | 验收标准 | 类型 |
 |--------|----------|------|
 | AC-6.1 | GIVEN 规则中 `report.includeText=false`，WHEN 上报 `TEXT_EDITOR` 场景结果，THEN 上报结果不得包含输入文本正文 | 安全 |
 | AC-6.2 | GIVEN 规则中 `report.includeText=true`，WHEN 上报 `TEXT_EDITOR` 场景结果，THEN 每个命中文本输入类控件在 `nodes[]` 中携带 `text` 字段，字段值优先为用户已输入文本，输入为空时为框内占位提示文本 | 正常 |
-| AC-6.3 | GIVEN 规则中 `report.includeRect=true`，WHEN 上报命中节点，THEN 每个命中节点包含 `rect.x`、`rect.y`、`rect.width`、`rect.height` | 正常 |
-| AC-6.4 | GIVEN 规则中 `report.includeFocusable=true`，WHEN 上报命中节点，THEN 每个命中节点包含 `focusable` 字段 | 正常 |
+| AC-6.3 | GIVEN 规则中 `report.includeRect=true`，WHEN 上报节点摘要，THEN 每个上报节点包含 `rect.x`、`rect.y`、`rect.width`、`rect.height` | 正常 |
+| AC-6.4 | GIVEN 规则中 `report.includeFocusable=true`，WHEN 上报节点摘要，THEN 每个上报节点包含 `focusable` 字段 | 正常 |
 
 ### 1.7 US-7：页面稳定点触发 PageScene 检测
 
@@ -111,7 +119,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | 规则ID | 类型 | 触发条件 | 预期行为 | 边界/约束 | 关联AC | 验证方式 | 测试数据 | 优先级 |
 |--------|------|----------|----------|-----------|--------|----------|----------|--------|
 | R-1 | 行为 | 首次合法注册 | 保存规则并建立回调路由 | 单 SA 单注册态 | AC-1.1 | 单测/sample | 合法 `TEXT_EDITOR` ruleJson | P0 |
-| R-2 | 异常 | `ruleJson` 非法、回调为空或未连接 `ReportService` | 返回错误，不保存规则 | 不触发扫描和下发 | AC-1.2 | 单测 | 空串、非 JSON、缺少 `ruleSetId`、空 callback、未 Connect | P0 |
+| R-2 | 异常 | `ruleJson` 非法、缺少/不支持 `version`、回调为空或未连接 `ReportService` | 返回错误，不保存规则 | 不触发扫描和下发 | AC-1.2 | 单测 | 空串、非 JSON、缺少 `version`、`version=2`、缺少 `ruleSetId`、空 callback、未 Connect | P0 |
 | R-3 | 异常 | 已注册未注销时再次注册 | 返回重复注册错误，不覆盖旧规则 | 防重复注册 | AC-1.3, AC-8.1 | 单测/并发测试 | ruleA 注册成功后注册 ruleB | P0 |
 | R-4 | 行为 | `reportOnRegister=true` 且注册成功 | 扫描当前页面顶部控件树，初始化页面可见输入控件计数 | 只采集规则所需字段 | AC-2.1 | 集成测试 | 注册后立即检查 tracker 计数和回调 | P0 |
 | R-5 | 行为 | 页面内符合规则的可见输入节点数量 >= 2 | 上报 `TEXT_EDITOR` | `COUNT_GTE` 阈值为 2 | AC-2.2 | 单测/集成 | 0/1/2/3 个文本输入控件 | P0 |
@@ -135,6 +143,8 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | R-20 | 边界 | 存在待检测规则但页面仍滚动、Swiper 滚动或转场 | 暂不 flush，稳定后再检测 | 防中间态上报 | AC-7.2 | 单测 | OnVsyncEnd 时 scrolling/swiperScrolling/transitioning 为 true | P0 |
 | R-21 | 架构 | Pipeline VSync 尾部 | 只调用 `ContentChangeManager::OnVsyncEnd(rootRect)` | Pipeline 不直接调用 UiSessionManager PageScene flush | AC-7.4 | 代码检查 | `pipeline_context.cpp` 无 `FlushPageSceneNodeChanged` 调用 | P0 |
 | R-22 | 边界 | 仅发生 Text/Image 具体控件 ContentChange 事件 | 不触发 PageScene-only 检测 | Text/Image 仍由 ContentChange 注册控制 | AC-7.3 | 单测/代码检查 | PageScene-only 时 Text/Image 路径不调用 PageScene flush | P1 |
+| R-23 | 恢复 | SA 调用合法 `UnregisterPageSceneRules(ruleSetId)` | 删除当前 SA 的已注册规则、待检测规则和去重状态，后续不再按该规则上报 | 子来源已下发规则时同步反注册；不影响其他 SA | AC-5A.1, AC-5A.3 | 单测/sample/mock | 注册后反注册、反注册后触发文本输入上下树和稳定点 | P0 |
+| R-24 | 异常 | `UnregisterPageSceneRules` 入参为空、未注册或与当前 SA 注册规则不匹配 | 返回参数错误或未注册错误，不清理其他 SA 状态 | 不触发子来源反注册 | AC-5A.2 | 单测/sample | 空 ruleSetId、未知 ruleSetId、多 SA 隔离 | P0 |
 
 ## 三、API 变更分析 `[源: spec.md]`
 
@@ -143,9 +153,28 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | API 名称 | 开放范围 | 入参概要 | 返回值 | 错误码范围 | 功能描述 | 关联 AC |
 |----------|----------|----------|--------|------------|----------|---------|
 | `RegisterPageSceneRules` | System innerAPI | `ruleJson`、`PageSceneEventCallback` | `int32_t` | 成功、参数错误、重复注册、请求忙、IPC 错误 | 注册页面场景规则 | AC-1.1, AC-1.2, AC-1.3 |
-| `UnregisterPageSceneRules` | System innerAPI | `ruleSetId` | `int32_t` | 成功、参数错误、未注册、请求忙、IPC 错误 | 反注册页面场景规则 | AC-8.3, AC-8.4 |
+| `UnregisterPageSceneRules` | System innerAPI | `ruleSetId` | `int32_t` | 成功、参数错误、未注册、请求忙、IPC 错误 | 反注册页面场景规则 | AC-5A.1, AC-5A.2, AC-5A.3, AC-8.3, AC-8.4 |
 | `GetPageScene` | System innerAPI | `ruleJsonOrRuleSetId`、`PageSceneEventCallback` | `int32_t` | 成功、参数错误、请求忙、IPC 错误 | 主动查询一次页面场景 | AC-4.1, AC-4.3, AC-4.4 |
 | `ReportPageSceneEvent` | ReportService callback | `sceneJson` | void | 无返回错误码 | UI 侧向 SA 回传 ArkUI 宿主来源场景命中或退出结果 | AC-2.2, AC-3.5 |
+
+### 3.1A 接口级错误码场景
+
+| 接口 | 错误码 | 触发条件 | 验收方式 |
+|------|--------|----------|----------|
+| `RegisterPageSceneRules` | `NO_ERROR(0)` | SA 已 Connect，`ruleJson.version=1`、规则合法、当前 SA 无未注销 PageScene 规则 | 返回 0，保存规则；`reportOnRegister=true` 时触发首次检测 |
+| `RegisterPageSceneRules` | `PARAM_INVALID(4)` | `ruleJson` 为空、非 JSON、缺少/不支持 `version`、缺少合法 `ruleSetId`、无合法 `rules`、未知 `sceneType`、未知 operator、阈值非法，或 callback 为空 | 返回 4；不保存规则，不触发匹配和子来源下发 |
+| `RegisterPageSceneRules` | `FAILED(2)` / `NOT_CONNECTED(1)` | proxy 未建立 `ReportService`，或 host 侧找不到当前 SA 的 report object | 返回对应错误；不保存规则 |
+| `RegisterPageSceneRules` | `LAST_UNFINISH(5)` | 同一 SA 已有未注销 PageScene 规则 | 返回 5；旧规则保持有效，新规则不覆盖 |
+| `RegisterPageSceneRules` | `REPLY_ERROR(3)` | IPC `SendRequest` 返回非 `ERR_NONE` | 返回 3；proxy 清理已登记的 PageScene 回调 |
+| `UnregisterPageSceneRules` | `NO_ERROR(0)` | SA 已注册规则且 `ruleSetId` 匹配 | 返回 0；清理该 SA 规则、待检测规则、pending Get 和去重状态 |
+| `UnregisterPageSceneRules` | `PARAM_INVALID(4)` | `ruleSetId` 为空、当前 SA 未注册、或 `ruleSetId` 与当前 SA 注册规则不匹配 | 返回 4；不影响其他 SA 规则，不触发错误规则的子来源反注册 |
+| `UnregisterPageSceneRules` | `REPLY_ERROR(3)` | IPC `SendRequest` 返回非 `ERR_NONE` | 返回 3；proxy 保持可再次调用 |
+| `GetPageScene` | `NO_ERROR(0)` | SA 已 Connect，入参为已注册 `ruleSetId` 或合法完整 `ruleJson`，且当前 SA 无 pending Get | 返回 0；通过 `ReportPageSceneEvent` 返回本次查询结果 |
+| `GetPageScene` | `PARAM_INVALID(4)` | 入参为空、非已注册 `ruleSetId` 且不是合法 `ruleJson`、缺少/不支持 `version`、或 callback 为空 | 返回 4；不启动扫描，不下发子来源查询 |
+| `GetPageScene` | `FAILED(2)` / `NOT_CONNECTED(1)` | proxy 未建立 `ReportService`，或 host 侧无法找到 report object | 返回对应错误；不启动扫描 |
+| `GetPageScene` | `LAST_UNFINISH(5)` | 同一 SA 已有 pending Get，或 proxy 已登记未完成 Get 回调 | 返回 5；不启动新的扫描或子来源查询 |
+| `GetPageScene` | `REPLY_ERROR(3)` | IPC `SendRequest` 返回非 `ERR_NONE` | 返回 3；proxy 清理本次 Get 回调 |
+| `ReportPageSceneEvent` | 无返回错误码 | host 向 SA 回调 JSON；report object 失效时只记录摘要日志 | 正常场景检查 callback 收到 JSON；失效场景检查不崩溃、不打印文本正文 |
 
 ### 3.2 测试补充信息
 
@@ -305,7 +334,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 
 | 用例组 | 重点用例 |
 |--------|----------|
-| 注册接口 | 首次合法注册、非法 JSON、空 callback、未 Connect、重复注册、注册期间并发注册 |
+| 注册接口 | 首次合法注册、缺少/不支持 `version`、非法 JSON、空 callback、未 Connect、重复注册、注册期间并发注册 |
 | 首次扫描 | 0/1/2/3 个文本输入控件、`reportOnRegister=false`、页面名变化 |
 | 节点过滤 | visible/hidden/offscreen、focusable true/false、rect 开关、focusable 开关 |
 | 上下树触发 | 动态添加 TextInput/TextArea/Search/RichEditor、控件下树移除计数、未稳定前不立即上报、稳定后触发检测、重复触发去重、最小间隔、命中后跌出阈值上报一次 `TEXT_EDITOR_EXIT` |
@@ -314,7 +343,7 @@ UISession 新增独立的页面场景规则化感知能力。系统 SA 通过 UI
 | Web 透传 | `webRules` 注册透传、反注册透传、查询请求透传、透传失败隔离 |
 | UIExtension 透传 | 规则注册透传、反注册透传、查询请求透传、透传失败隔离 |
 | 隐私安全 | 输入敏感文本时 JSON/日志不含正文；非 SA 调用失败 |
-| 生命周期 | 反注册后不上报、SA death 清理、断连清理、多 SA 隔离 |
+| 生命周期 | 合法反注册、空/未知 `ruleSetId` 反注册失败、反注册后不上报、SA death 清理、断连清理、多 SA 隔离 |
 
 ## 九、参考资料
 

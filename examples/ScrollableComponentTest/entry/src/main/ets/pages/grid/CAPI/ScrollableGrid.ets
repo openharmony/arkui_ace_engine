@@ -27,7 +27,7 @@ export struct ScrollableGrid {
         ContentSlot(this.root)
       }.width('100%')
     }
-    .title("可滚动的网格布局")
+    .title('可滚动的网格布局')
     .onAppear(() => {
       entry.CreateScrollableGrid(this.root);
     })

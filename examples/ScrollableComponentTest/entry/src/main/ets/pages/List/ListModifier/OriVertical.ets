@@ -22,15 +22,15 @@
 import { ListDataSource } from './ListDataSource';
 
 class CustomModifier1 implements AttributeModifier<ListAttribute> {
-  changeLanesValueIndex: number = 0;
-  changeLanesValueList: (LengthConstrain | number | undefined | null | ItemFillPolicy)[] = [
+  public changeLanesValueIndex: number = 0;
+  public changeLanesValueList: (LengthConstrain | number | undefined | null | ItemFillPolicy)[] = [
     { fillType: PresetFillType.BREAKPOINT_SM1MD2LG3 }, { fillType: PresetFillType.BREAKPOINT_SM2MD3LG5 },
     { fillType: PresetFillType.BREAKPOINT_DEFAULT }, { fillType: PresetFillType.BREAKPOINT_SM2MD3LG5 },
     { minLength: 150, maxLength: 150 }, undefined, { minLength: -40, maxLength: -40 }, 0, 1, 2, -1, 1000,
     { fillType: 1 }, { fillType: 2 }, { fillType: 0 }, { fillType: 2 }
   ]
-  changeLanesGutterIndex: number = 0;
-  changeLanesGutterList: (Dimension | undefined | null)[] = [
+  public changeLanesGutterIndex: number = 0;
+  public changeLanesGutterList: (Dimension | undefined | null)[] = [
     '10px', 20, '10vp', undefined, null, '20lpx', '10fp',
   ]
 

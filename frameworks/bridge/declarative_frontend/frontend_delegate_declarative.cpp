@@ -2112,7 +2112,7 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId, std:
     };
     auto dialogNode = NG::FrameNode::GetFrameNodeOnly(V2::DIALOG_ETS_TAG, dialogId);
     auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
-    if (dialogNode) {
+    if (currentOverlay == nullptr && dialogNode) {
         auto pipeline = dialogNode->GetContext();
         if (pipeline) {
             currentOverlay = pipeline->GetOverlayManager();

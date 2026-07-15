@@ -28,7 +28,9 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
@@ -167,6 +169,7 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, P
         CHECK_NULL_VOID(pattern);
         if (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP) {
             ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition End");
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
             auto pipeline = pattern->GetContext();
             if (pipeline) {
@@ -174,6 +177,7 @@ void PagePattern::TriggerPageTransition(const std::function<void()>& onFinish, P
                 CHECK_NULL_VOID(mgr);
                 mgr->OnPageTransitionEnd(pattern->GetHost());
             }
+#endif
         }
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
@@ -391,6 +395,7 @@ void PagePattern::OnShow(bool isFromWindow)
 
 void PagePattern::RecordPageEvent(bool isShow)
 {
+#ifndef CROSS_PLATFORM
     if (!Recorder::EventRecorder::Get().IsPageRecordEnable()) {
         return;
     }
@@ -413,6 +418,7 @@ void PagePattern::RecordPageEvent(bool isShow)
             pageInfo_->GetPageUrl(), duration, pageInfo_->GetRouteName().value_or(""));
         UiSessionManager::GetInstance()->OnRouterChange(pageInfo_->GetFullPath(), "onPageHide");
     }
+#endif
 }
 
 void PagePattern::OnHide(bool isFromWindow)
@@ -564,9 +570,11 @@ void PagePattern::FirePageTransitionStart()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetTHPNotifyState(ThpNotifyState::ROUTER_TRANSITION);
+#ifndef CROSS_PLATFORM
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnTransitionAdded(host->GetId());
+#endif
 }
 
 void PagePattern::FirePageTransitionFinish()
@@ -584,9 +592,11 @@ void PagePattern::FirePageTransitionFinish()
     CHECK_NULL_VOID(pipeline);
     pipeline->SetTHPNotifyState(ThpNotifyState::DEFAULT);
     pipeline->PostTaskResponseRegion(DEFAULT_DELAY_THP);
+#ifndef CROSS_PLATFORM
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnTransitionRemoved(host->GetId());
+#endif
 }
 
 void PagePattern::StopPageTransition()
@@ -655,12 +665,14 @@ bool PagePattern::IsNeedCallbackBackPressed()
 
 void PagePattern::NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName)
 {
+#ifndef CROSS_PLATFORM
     if (PerfMonitor::GetPerfMonitor() != nullptr) {
         PerfMonitor::GetPerfMonitor()->SetPageUrl(pageUrl);
         // The page contains only page url but not the page name
         PerfMonitor::GetPerfMonitor()->SetPageName("");
         PerfMonitor::GetPerfMonitor()->ReportPageShowMsg(pageUrl, bundleName, "");
     }
+#endif
 }
 
 void PagePattern::MarkDirtyOverlay()
@@ -1219,12 +1231,14 @@ ScopeFocusAlgorithm PagePattern::GetScopeFocusAlgorithm()
 
 void PagePattern::ContentChangeByDetaching(PipelineContext* pipeline)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     mgr->OnTransitionRemoved(host->GetId());
+#endif
 }
 
 bool PagePattern::GetComponentInfo(const std::string& id, std::string& info)

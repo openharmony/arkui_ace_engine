@@ -15,10 +15,12 @@
 
 #include "core/components_ng/pattern/grid/grid_utils.h"
 
+#include <string_view>
+
 namespace OHOS::Ace::NG {
 namespace {
 
-const std::string UNIT_AUTO = "auto";
+constexpr std::string_view UNIT_AUTO = "auto";
 
 } // namespace
 

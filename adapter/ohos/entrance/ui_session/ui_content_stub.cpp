@@ -18,7 +18,9 @@
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 
+#ifndef CROSS_PLATFORM
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
+#endif
 #include "ui_content_errors.h"
 
 #include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
@@ -269,8 +271,10 @@ int32_t UiContentStub::GetInspectorTreeInner(MessageParcel& data, MessageParcel&
         LOGW("GetInspectorTreeInner read GetInspectorTreeConfigImpl failed");
         return FAILED;
     }
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManager::GetInstance()->SaveProcessId("getInspectorTree", processId);
+#endif
     GetInspectorTree(nullptr, configImplPtr->GetConfig());
     delete configImplPtr;
     return NO_ERROR;
@@ -283,10 +287,12 @@ int32_t UiContentStub::ConnectInner(MessageParcel& data, MessageParcel& reply, M
         LOGW("read reportStub object is nullptr,connect failed");
         return FAILED;
     }
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManagerOhos* uisession = reinterpret_cast<UiSessionManagerOhos*>(UiSessionManager::GetInstance());
     uisession->SaveReportStub(report, processId);
     uisession->SendBaseInfo(processId);
+#endif
     return NO_ERROR;
 }
 
@@ -475,8 +481,10 @@ int32_t UiContentStub::ResetTranslateTextInner(MessageParcel& data, MessageParce
 
 int32_t UiContentStub::GetWebViewCurrentLanguageInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManager::GetInstance()->SaveProcessId("translate", processId);
+#endif
     reply.WriteInt32(GetWebViewCurrentLanguage(nullptr));
     return NO_ERROR;
 }
@@ -491,8 +499,10 @@ int32_t UiContentStub::GetWebViewTranslateTextInner(MessageParcel& data, Message
 int32_t UiContentStub::StartWebViewTranslateInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     std::string extraData = data.ReadString();
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManager::GetInstance()->SaveProcessId("translate", processId);
+#endif
     reply.WriteInt32(StartWebViewTranslate(extraData, nullptr));
     return NO_ERROR;
 }
@@ -529,17 +539,21 @@ int32_t UiContentStub::GetCurrentPageNameInner(MessageParcel& data, MessageParce
 
 int32_t UiContentStub::GetCurrentImagesShowingInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManager::GetInstance()->SaveProcessId("pixel", processId);
+#endif
     reply.WriteInt32(GetCurrentImagesShowing(nullptr));
     return NO_ERROR;
 }
 
 int32_t UiContentStub::GetMultiImagesByIdInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManager::GetInstance()->SaveProcessId("getArkUIImages", processId);
     UiSessionManager::GetInstance()->SaveProcessId("getArkWebImages", processId);
+#endif
     std::vector<int32_t> arkUIIds;
     data.ReadInt32Vector(&arkUIIds);
     std::map<int32_t, std::vector<int32_t>> arkWebs;
@@ -565,8 +579,10 @@ int32_t UiContentStub::GetVisibleInspectorTreeInner(MessageParcel& data, Message
         LOGW("GetVisibleInspectorTreeInner read GetInspectorTreeConfigImpl failed");
         return FAILED;
     }
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManager::GetInstance()->SaveProcessId("getInspectorTree", processId);
+#endif
     GetVisibleInspectorTree(nullptr, configImplPtr->GetConfig());
     delete configImplPtr;
     return NO_ERROR;
@@ -595,8 +611,10 @@ int32_t UiContentStub::ExeAppAIFunctionInner(MessageParcel& data, MessageParcel&
         }
     }
     int32_t nodeId = data.ReadInt32();
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManager::GetInstance()->SaveProcessId("ExeAppAIFunction", processId);
+#endif
     reply.WriteInt32(ExeAppAIFunction(funcName, params, remoteObj, nodeId, nullptr));
     return NO_ERROR;
 }
@@ -604,8 +622,10 @@ int32_t UiContentStub::ExeAppAIFunctionInner(MessageParcel& data, MessageParcel&
 int32_t UiContentStub::RegisterContentChangeCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManager::GetInstance()->SaveProcessId("contentChange", processId);
+#endif
     ContentChangeConfigImpl* configImplPtr = data.ReadParcelable<ContentChangeConfigImpl>();
     if (!configImplPtr) {
         LOGW("RegisterContentChangeCallbackInner read ContentChangeConfig failed");
@@ -624,8 +644,10 @@ int32_t UiContentStub::RegisterContentChangeCallbackInner(
 int32_t UiContentStub::UnregisterContentChangeCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManager::GetInstance()->EraseProcessId("contentChange", processId);
+#endif
     reply.WriteInt32(UnregisterContentChangeCallback());
     return NO_ERROR;
 }
@@ -654,8 +676,10 @@ int32_t UiContentStub::HighlightSpecifiedContentInner(MessageParcel& data, Messa
 
 int32_t UiContentStub::GetStateMgmtInfoInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManager::GetInstance()->SaveProcessId("GetStateMgmtInfo", processId);
+#endif
     std::string componentName = data.ReadString();
     std::string propertyName = data.ReadString();
     std::string jsonPath = data.ReadString();
@@ -666,8 +690,10 @@ int32_t UiContentStub::GetStateMgmtInfoInner(MessageParcel& data, MessageParcel&
 
 int32_t UiContentStub::GetWebInfoByRequestInner(MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+#ifndef CROSS_PLATFORM
     int32_t processId = IPCSkeleton::GetCallingRealPid();
     UiSessionManager::GetInstance()->SaveProcessId("GetWebInfoByRequest", processId);
+#endif
     int32_t webId = data.ReadInt32();
     std::string request = data.ReadString();
     reply.WriteInt32(GetWebInfoByRequest(webId, request, nullptr));

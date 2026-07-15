@@ -730,6 +730,7 @@ void SmartGestureManager::RecordExecutionSnapshot(SmartGestureTrigger trigger, b
     const SmartGestureProposal& defaultProposal, const std::optional<SmartGestureProposal>& resolvedProposal,
     bool executeResult) const
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     auto context = GetPipelineContext();
     CHECK_NULL_VOID(context);
     auto eventManager = context->GetEventManager();
@@ -751,6 +752,7 @@ void SmartGestureManager::RecordExecutionSnapshot(SmartGestureTrigger trigger, b
     }
     snapshot.executeResult = executeResult;
     eventManager->RecordSmartGestureExecution(std::move(snapshot));
+#endif
 }
 
 bool SmartGestureManager::ValidateProposal(const SmartGestureProposal& proposal) const

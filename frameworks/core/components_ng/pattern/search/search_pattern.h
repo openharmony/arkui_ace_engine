@@ -33,6 +33,7 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+class PipelineContext;
 
 class SearchPattern : public Pattern {
     DECLARE_ACE_TYPE(SearchPattern, Pattern);
@@ -305,6 +306,9 @@ private:
     void UpdateTextFieldColor();
 
     void CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool isFromModifier);
+    void ConfigureSymbolIconFrameNode(RefPtr<FrameNode>& iconFrameNode, int32_t index, PipelineContext* pipeline,
+        const RefPtr<SearchTheme>& searchTheme, bool isFromModifier);
+    void MountOrReplaceSymbolIconChild(RefPtr<FrameNode>& iconFrameNode, int32_t index, bool isCreateNode);
     void CreateOrUpdateImage(int32_t index, bool isCreateNode);
     void UpdateImageIconProperties(RefPtr<FrameNode>& frameNode, int32_t index);
     void UpdateImageIconNode(int32_t index);

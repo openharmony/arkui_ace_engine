@@ -19,9 +19,6 @@
 #include <cstring>
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#if defined(ENABLE_ROSEN_BACKEND)
-#include "render_service_client/core/ui_effect/property/include/rs_ui_shape_base.h"
-#endif
 
 #include "base/log/dump_log.h"
 #include "base/log/log.h"
@@ -34,7 +31,9 @@
 #include "core/common/ace_engine.h"
 #include "core/common/color_inverter.h"
 #include "core/common/container.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/ui_material.h"
@@ -107,14 +106,13 @@ constexpr float EDGELIGHT_THICKNESS = 250.0f;
 constexpr float EDGELIGHT_LENGTH_RATIO = 0.4f;
 constexpr float EDGELIGHT_INTENSITY = 0.5f;
 constexpr float BUTTON_MIN_FONTSIZE = 9.0f;
+constexpr float TRANSLATEY_RATIO = 0.5f;
+constexpr float INITIAL_ZOOM_FACTOR = 0.2f;
 constexpr uint32_t EDGELIGHT_MOVING_TIME = 568;
 constexpr uint32_t HIGHLIGHT_ANIMATION_TIME = 220;
 constexpr uint32_t HIGHLIGHT_ANIMATION_DELAY_TIME = 305;
 constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_TIME = 221;
 constexpr uint32_t LIGHT_DISAPPEARING_ANIMATION_DELAY_TIME = 443;
-constexpr uint32_t MIN_FRAME_RATE = 60;
-constexpr uint32_t MAX_FRAME_RATE = 120;
-constexpr uint32_t EXPECTED_FRAME_RATE = 120;
 constexpr char ACTION_SHEET_DIALOG_ETS_TAG[] = "ActionSheet";
 constexpr char ALERT_DIALOG_ETS_TAG[] = "AlertDialog";
 constexpr char BUTTON_ETS_TAG[] = "Button";
@@ -387,6 +385,7 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
 
 void DialogPattern::RecordEvent(int32_t btnIndex) const
 {
+#ifndef CROSS_PLATFORM
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;
     }
@@ -406,6 +405,7 @@ void DialogPattern::RecordEvent(int32_t btnIndex) const
         .SetExtra(Recorder::KEY_TITLE, title_)
         .SetExtra(Recorder::KEY_SUB_TITLE, subtitle_);
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+#endif
 }
 
 bool CheckIsEnableMaterial(const DialogProperties& dialogProperties)
@@ -1429,6 +1429,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->storedSheetTitle_ = title;
+#ifndef CROSS_PLATFORM
             if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
                 return;
             }
@@ -1438,6 +1439,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheetItem(const ActionSheetInfo& item)
                 .SetExtra(Recorder::KEY_TITLE, pattern->title_)
                 .SetExtra(Recorder::KEY_SUB_TITLE, pattern->subtitle_);
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+#endif
         };
         auto recordEventPtr = MakeRefPtr<ClickEvent>(std::move(recordEvent));
         hub->AddClickEvent(recordEventPtr);
@@ -2426,10 +2428,10 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     CHECK_NULL_RETURN(contentNode, false);
     auto renderContext = contentNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (NeedDistortion() && !isDialogShow_) {
+    if (NeedDistortion() && isDistortAnimationExecuting_.value_or(false)) {
         renderContext->UpdateDistortionParam(TERMINAL_DISTORTION_PARAM);
     }
-    CHECK_EQUAL_RETURN(isDialogShow_, false, false);
+    CHECK_NULL_RETURN(!isDistortAnimationExecuting_.has_value(), false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
@@ -2442,7 +2444,6 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             dialogPattern->PlayFlowLight();
         }
     });
-    isDialogShow_ = false;
     return true;
 }
 
@@ -3022,6 +3023,7 @@ bool DialogPattern::HandleAlertDialogButtonClickCmd(const std::unique_ptr<JsonVa
 void DialogPattern::ReportAlertDialogOnInjectionEvent(bool result, std::string reason,
     int32_t btnIndex, RefPtr<FrameNode> btnNode)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
@@ -3047,10 +3049,12 @@ void DialogPattern::ReportAlertDialogOnInjectionEvent(bool result, std::string r
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]Report info:%{public}s.", json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
         ComponentEventType::COMPONENT_EVENT_DIALOG);
+#endif
 }
 
 void DialogPattern::ReportShow()
 {
+#ifndef CROSS_PLATFORM
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]Report show event.");
     if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show",
@@ -3062,6 +3066,7 @@ void DialogPattern::ReportShow()
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "ActionMenu.show",
             ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
+#endif
 }
 
 void DialogPattern::ReportDestroy(int32_t buttonIdx)
@@ -3073,6 +3078,7 @@ void DialogPattern::ReportDestroy(int32_t buttonIdx)
     } else {
         return;
     }
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
@@ -3103,6 +3109,7 @@ void DialogPattern::ReportDestroy(int32_t buttonIdx)
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
             "ActionSheet.destroy", json->ToString(), ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
+#endif
     if (dialogProperties_.isMenu) {
         ReportDestroyActionMenu(buttonIdx);
     }
@@ -3116,6 +3123,7 @@ void DialogPattern::ReportDestroyAutoCancel()
     } else {
         return;
     }
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (dialogProperties_.type == DialogType::ALERT_DIALOG) {
@@ -3134,6 +3142,7 @@ void DialogPattern::ReportDestroyAutoCancel()
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
             "ActionSheet.destroy", json->ToString(), ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
+#endif
 }
 
 void DialogPattern::ReportDestroyActionMenu(int32_t buttonIdx)
@@ -3151,6 +3160,7 @@ void DialogPattern::ReportDestroyActionMenu(int32_t buttonIdx)
         // click cancel button
         findIndex = static_cast<int32_t>(menuCount) - 1;
     }
+#ifndef CROSS_PLATFORM
     auto btnRow = DynamicCast<FrameNode>(upgradedMenuNode->GetChildAtIndex(findIndex));
     CHECK_NULL_VOID(btnRow);
     auto buttonNode = DynamicCast<FrameNode>(btnRow->GetFirstChild());
@@ -3165,11 +3175,13 @@ void DialogPattern::ReportDestroyActionMenu(int32_t buttonIdx)
     TAG_LOGD(AceLogTag::ACE_DIALOG, "[DIALOG]PopDialog menu:%{public}s.", json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(),
         "ActionMenu.destroy", json->ToString(), ComponentEventType::COMPONENT_EVENT_DIALOG);
+#endif
 }
 
 void DialogPattern::ReportActionSheetOnInjectionEvent(bool result,
     std::string reason, int32_t sheetIndex, int32_t buttonIndex)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
@@ -3203,6 +3215,7 @@ void DialogPattern::ReportActionSheetOnInjectionEvent(bool result,
     TAG_LOGD(AceLogTag::ACE_DIALOG, "ReportActionSheetOnInjectionEvent report: %{public}s!", json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
         ComponentEventType::COMPONENT_EVENT_DIALOG);
+#endif
 }
 
 int32_t DialogPattern::HandleActionSheetClick(int32_t index)
@@ -3327,6 +3340,7 @@ int32_t DialogPattern::HandleActionMenuButtonClickCmd(const std::unique_ptr<Json
 
 void DialogPattern::ReportActionMenuOnInjectionEvent(bool result, const std::string& reason, const std::string& text)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
@@ -3347,6 +3361,7 @@ void DialogPattern::ReportActionMenuOnInjectionEvent(bool result, const std::str
         json->ToString().c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", json->ToString().c_str(),
         ComponentEventType::COMPONENT_EVENT_DIALOG);
+#endif
 }
 
 bool DialogPattern::NeedDistortion()
@@ -3355,8 +3370,11 @@ bool DialogPattern::NeedDistortion()
         return needDistortion_.value();
     }
     if (dialogProperties_.transitionEffect || dialogProperties_.dialogTransitionEffect ||
-        dialogProperties_.maskTransitionEffect ||
-        dialogProperties_.isMask || dialogProperties_.customStyle || !dialogProperties_.systemMaterial ||
+        dialogProperties_.maskTransitionEffect || dialogProperties_.isMask || dialogProperties_.customStyle ||
+        !dialogProperties_.systemMaterial ||
+        (dialogProperties_.systemMaterial &&
+            Ace::AceType::TypeId(AceType::RawPtr(dialogProperties_.systemMaterial)) != Ace::UiMaterial::TypeId() &&
+            !dialogProperties_.edgeLightMode.has_value()) ||
         !MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
         needDistortion_ = false;
     } else if (dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO) ==
@@ -3367,10 +3385,10 @@ bool DialogPattern::NeedDistortion()
         needDistortion_ = false;
     } else if (dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO) ==
                    DistortionMode::DISTORTION_AUTO &&
-               dialogProperties_.systemMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE) &&
-               (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::EXQUISITE ||
-                   SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::GENTLE)) {
-        needDistortion_ = true;
+               (dialogProperties_.systemMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE) ||
+                   Ace::AceType::TypeId(AceType::RawPtr(dialogProperties_.systemMaterial)) !=
+                   Ace::UiMaterial::TypeId()) &&
+               DialogManager::IsUseImmersiveDistortionEffect()) {
         if (dialogProperties_.openAnimation.has_value() && !MaterialUtils::IsMaterialEnabled()) {
             needDistortion_ = false;
         } else {
@@ -3388,6 +3406,9 @@ bool DialogPattern::NeedEdgeLight()
         return needFlowLight_.value();
     }
     if (dialogProperties_.isMask || dialogProperties_.customStyle || !dialogProperties_.systemMaterial ||
+        (dialogProperties_.systemMaterial &&
+            Ace::AceType::TypeId(AceType::RawPtr(dialogProperties_.systemMaterial)) != Ace::UiMaterial::TypeId() &&
+            !dialogProperties_.edgeLightMode.has_value()) ||
         !MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
         needFlowLight_ = false;
     } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO) ==
@@ -3398,8 +3419,10 @@ bool DialogPattern::NeedEdgeLight()
         needFlowLight_ = false;
     } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO) ==
                    EdgeLightMode::EDGELIGHT_AUTO &&
-               dialogProperties_.systemMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE) &&
-               SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::EXQUISITE) {
+               (dialogProperties_.systemMaterial->GetType() == static_cast<int32_t>(MaterialType::IMMERSIVE) ||
+                   Ace::AceType::TypeId(AceType::RawPtr(dialogProperties_.systemMaterial)) !=
+                   Ace::UiMaterial::TypeId()) &&
+               DialogManager::IsUseImmersiveEdgeLightEffect()) {
         needFlowLight_ = true;
     } else {
         needFlowLight_ = false;
@@ -3492,6 +3515,7 @@ void DialogPattern::PlayFlowLight()
         auto renderContext = weakRender.Upgrade();
         CHECK_NULL_VOID(renderContext);
         renderContext->ResetEdgeLightParam();
+        renderContext->ResetEdgeLightFilter();
     });
     AnimationUtils::Animate(option3, [columnNode, param3]() {
         // Move light effect to target position
@@ -3559,10 +3583,10 @@ void DialogPattern::PlayDistortion()
      * Four corners shrink inward, creating a slight "collapse" effect
      */
     DistortionParam param {
-        .luCorner = { 0.4, 1 },  // Left-upper corner shrinks to 80% position
-        .ruCorner = { 0.6, 1 },    // Right-upper corner shrinks to 80% position
-        .lbCorner = { 0.4, 1.2 },    // Left-bottom corner shrinks to 80% position
-        .rbCorner = { 0.6, 1.2 },      // Right-bottom corner stays in place
+        .luCorner = { 0, 0 },  // Left-upper corner shrinks to 80% position
+        .ruCorner = { 1, 0 },    // Right-upper corner shrinks to 80% position
+        .lbCorner = { 0.1, 1 },    // Left-bottom corner shrinks to 80% position
+        .rbCorner = { 0.9, 1 },      // Right-bottom corner stays in place
         .barrelDistortion = { 0, 0, 0, 0 },  // No barrel distortion
     };
     renderContext->UpdateDistortionParam(param);
@@ -3570,31 +3594,18 @@ void DialogPattern::PlayDistortion()
         childContext->UpdateForegroundFilterDistortionParam(param);
     }
 
-    /**
-     * Stage 2: Right stretch effect
-     * Left-upper corner moves to origin, right-upper corner stretches right to 80% height position
-     * Use spring interpolation, elasticity coefficient 200, damping 20
-     */
-    DistortionParam param1 {
-        .luCorner = { 0, 0 },     // Left-upper corner moves to origin
-        .ruCorner = { 1, 0 },   // Right-upper corner stretches right
-        .lbCorner = { 0.4, 1.2 },   // Left-bottom corner moves slightly right
-        .rbCorner = { 0.6, 1.2 },   // Right-bottom corner stays in place
-        .barrelDistortion = { 0, 0, 0, 0 },  // No barrel distortion
-    };
     AnimationOption option;
-    RefPtr<FrameRateRange> frameRateRange =
-        AceType::MakeRefPtr<FrameRateRange>(MIN_FRAME_RATE, MAX_FRAME_RATE, EXPECTED_FRAME_RATE);
-    option.SetFrameRateRange(frameRateRange);
     option.SetDuration(1000);
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 322, 27));  // Spring curve
-    AnimationUtils::Animate(option, [renderContext, param1, childContexts]() {
-        renderContext->UpdateDistortionParam(param1);
-        for (const auto& childContext : childContexts) {
-            childContext->UpdateForegroundFilterDistortionParam(param1);
-        }
+    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 322, 27)); // Spring curve
+    renderContext->ScaleAnimation(option, INITIAL_ZOOM_FACTOR, 1);
+    renderContext->UpdateTranslateInXY(
+        OffsetF(0, renderContext->GetPaintRectWithoutTransform().Height() * TRANSLATEY_RATIO));
+    AnimationUtils::Animate(option, [renderContext]() {
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateTranslateInXY(OffsetF());
     });
 
+    isDistortAnimationExecuting_ = true;
     /**
      * Stage 5: Add barrel distortion
      * Add slight barrel distortion effect, parameter {0.5, 0.5}
@@ -3633,6 +3644,15 @@ void DialogPattern::PlayDistortion()
         for (const auto& childContext : childContexts) {
             childContext->UpdateForegroundFilterDistortionParam(param3);
         }
+    }, [weakRender = WeakPtr<RenderContext>(renderContext), weak = WeakClaim(this)]() {
+        // Clear SDF shape after animation completes
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "dialog completes distortion animation.");
+        auto render = weakRender.Upgrade();
+        CHECK_NULL_VOID(render);
+        render->SetSDFShape(nullptr);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->isDistortAnimationExecuting_ = false;
     });
 
     /**
