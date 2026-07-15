@@ -5284,6 +5284,7 @@ struct ArkUIGridModifier {
     void (*setEditModeOptions)(ArkUINodeHandle node, void* options);
     void (*resetEditModeOptions)(ArkUINodeHandle node);
     void (*getEditModeOptions)(ArkUINodeHandle node, ArkUI_Int32 (*values)[3]);
+    void (*setGridEditModeOptions)(ArkUINodeHandle node, ArkUIEditModeOptions options);
     void (*setGridFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetGridFadingEdge)(ArkUINodeHandle node);

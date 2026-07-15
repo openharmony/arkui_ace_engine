@@ -19827,9 +19827,10 @@ int32_t SetGridEditModeOptions(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
         enableFingerMultiSelect = item->value[NUM_1].i32;
     }
     ArkUI_EditModeOptions options;
+    options.enableGatherSelectedItemsAnimation = false;
     options.useDefaultMultiSelectStyle = useDefaultMultiSelectStyle;
     options.enableFingerMultiSelect = enableFingerMultiSelect;
-    GetFullImpl()->getNodeModifiers()->getGridModifier()->setEditModeOptions(node->uiNodeHandle, &options);
+    GetFullImpl()->getNodeModifiers()->getGridModifier()->setGridEditModeOptions(node->uiNodeHandle, &options);
     return ERROR_CODE_NO_ERROR;
 }
 
