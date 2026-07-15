@@ -2189,8 +2189,8 @@ void ViewAbstract::SetDashGap(FrameNode *frameNode, const BorderWidthProperty& v
 void ViewAbstract::CheckBorderDashGapLPX(const BorderWidthProperty& value)
 {
     auto lpxUpdateFunc = GetBorderDashGapFuncForLPX(value);
-    if (value.topDimen.has_value() || value.bottomDimen.has_value() || value.leftDimen.has_value() ||
-        value.rightDimen.has_value()) {
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
         ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_GAP, lpxUpdateFunc);
     }
 }
@@ -2199,8 +2199,8 @@ void ViewAbstract::CheckNodeBorderDashGapLPX(
     RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value)
 {
     auto lpxUpdateFunc = GetBorderDashGapFuncForLPX(value);
-    if (value.topDimen.has_value() || value.bottomDimen.has_value() || value.leftDimen.has_value() ||
-        value.rightDimen.has_value()) {
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
         ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_GAP, lpxUpdateFunc, frameNode);
     }
 }
@@ -2208,8 +2208,8 @@ void ViewAbstract::CheckNodeBorderDashGapLPX(
 void ViewAbstract::CheckNodeBorderDashGapLPX(FrameNode* frameNode, const BorderWidthProperty& value)
 {
     auto lpxUpdateFunc = GetBorderDashGapFuncForLPX(value);
-    if (value.topDimen.has_value() || value.bottomDimen.has_value() || value.leftDimen.has_value() ||
-        value.rightDimen.has_value()) {
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
         ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_GAP, lpxUpdateFunc, frameNode);
     }
 }
@@ -2298,8 +2298,8 @@ void ViewAbstract::SetDashWidth(FrameNode *frameNode, const BorderWidthProperty&
 void ViewAbstract::CheckBorderDashWidthLPX(const BorderWidthProperty& value)
 {
     auto lpxUpdateFunc = GetDashWidthFuncForLPX(value);
-    if (value.topDimen.has_value() || value.bottomDimen.has_value() || value.leftDimen.has_value() ||
-        value.rightDimen.has_value()) {
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
         ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_WIDTH, lpxUpdateFunc);
     }
 }
@@ -2399,8 +2399,8 @@ void ViewAbstract::CheckNodeBorderDashWidthLPX(
     RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderWidthProperty& value)
 {
     auto lpxUpdateFunc = GetDashWidthFuncForLPX(value);
-    if (value.topDimen.has_value() || value.bottomDimen.has_value() || value.leftDimen.has_value() ||
-        value.rightDimen.has_value()) {
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
         ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_WIDTH, lpxUpdateFunc, frameNode);
     }
 }
@@ -2408,8 +2408,8 @@ void ViewAbstract::CheckNodeBorderDashWidthLPX(
 void ViewAbstract::CheckNodeBorderDashWidthLPX(FrameNode* frameNode, const BorderWidthProperty& value)
 {
     auto lpxUpdateFunc = GetDashWidthFuncForLPX(value);
-    if (value.topDimen.has_value() || value.bottomDimen.has_value() || value.leftDimen.has_value() ||
-        value.rightDimen.has_value()) {
+    if (CheckDimensionUseLPX(value.topDimen) || CheckDimensionUseLPX(value.bottomDimen) ||
+        CheckDimensionUseLPX(value.leftDimen) || CheckDimensionUseLPX(value.rightDimen)) {
         ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_DASH_WIDTH, lpxUpdateFunc, frameNode);
     }
 }
@@ -7575,8 +7575,10 @@ void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const Dimension& value)
     borderRadius.SetRadius(value);
     borderRadius.multiValued = false;
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
-    auto lpxUpdateFunc = GetBorderRadiusFuncForLPX(value);
-    ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_RADIUS, lpxUpdateFunc, frameNode);
+    if (CheckDimensionUseLPX(value)) {
+        auto lpxUpdateFunc = GetBorderRadiusFuncForLPX(value);
+        ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_RADIUS, lpxUpdateFunc, frameNode);
+    }
 }
 
 void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
@@ -7624,8 +7626,8 @@ void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const RefPtr<ResourceOb
 void ViewAbstract::CheckBorderRadiusLPX(const BorderRadiusProperty& value)
 {
     auto lpxUpdateFunc = GetBorderRadiusFuncForLPX(value);
-    if (value.radiusTopLeft.has_value() || value.radiusTopRight.has_value() || value.radiusBottomRight.has_value() ||
-        value.radiusBottomLeft.has_value()) {
+    if (CheckDimensionUseLPX(value.radiusTopLeft) || CheckDimensionUseLPX(value.radiusTopRight) ||
+        CheckDimensionUseLPX(value.radiusBottomRight) || CheckDimensionUseLPX(value.radiusBottomLeft)) {
         ACE_SET_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_RADIUS_TOP_LEFT, lpxUpdateFunc);
     }
 }
@@ -7634,8 +7636,8 @@ void ViewAbstract::CheckNodeBorderRadiusLPX(
     RefPtr<OHOS::Ace::NG::FrameNode> frameNode, const BorderRadiusProperty& value)
 {
     auto lpxUpdateFunc = GetBorderRadiusFuncForLPX(value);
-    if (value.radiusTopLeft.has_value() || value.radiusTopRight.has_value() || value.radiusBottomRight.has_value() ||
-        value.radiusBottomLeft.has_value()) {
+    if (CheckDimensionUseLPX(value.radiusTopLeft) || CheckDimensionUseLPX(value.radiusTopRight) ||
+        CheckDimensionUseLPX(value.radiusBottomRight) || CheckDimensionUseLPX(value.radiusBottomLeft)) {
         ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_RADIUS, lpxUpdateFunc, frameNode);
     }
 }
@@ -7643,8 +7645,8 @@ void ViewAbstract::CheckNodeBorderRadiusLPX(
 void ViewAbstract::CheckNodeBorderRadiusLPX(FrameNode* frameNode, const BorderRadiusProperty& value)
 {
     auto lpxUpdateFunc = GetBorderRadiusFuncForLPX(value);
-    if (value.radiusTopLeft.has_value() || value.radiusTopRight.has_value() || value.radiusBottomRight.has_value() ||
-        value.radiusBottomLeft.has_value()) {
+    if (CheckDimensionUseLPX(value.radiusTopLeft) || CheckDimensionUseLPX(value.radiusTopRight) ||
+        CheckDimensionUseLPX(value.radiusBottomRight) || CheckDimensionUseLPX(value.radiusBottomLeft)) {
         ACE_SET_NODE_LPX_UPDATE_CALLBACK(true, LpxAttribute::LPX_BORDER_RADIUS, lpxUpdateFunc, frameNode);
     }
 }
