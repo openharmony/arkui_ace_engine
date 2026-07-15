@@ -85,7 +85,6 @@ bool CheckParameterValid(std::unordered_map<std::string, std::string>& extInfo,
         LOGE("CheckParameterValid parameter pageName is invalid");
         return false;
     }
-
     if (!CheckWindowId(extInfo, windowId)) {
         LOGE("CheckParameterValid parameter windowId is invalid");
         return false;

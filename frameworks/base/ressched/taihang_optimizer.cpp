@@ -93,7 +93,7 @@ bool TaihangOptimizer::CheckSwiperPageValid(const std::string& fullPath,
     std::shared_lock<std::shared_mutex> lock(processWhiteListMutex_);
     CHECK_EQUAL_RETURN(pageNameSet_.empty(), true, false);
     for(auto name : pageNameSet_) {
-        if (name == pageFullPath || name == pageName || name == jsViewName) {
+        if (name == fullPath || name == pageName || name == jsViewName) {
             return true;
         }
     }

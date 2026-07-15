@@ -86,7 +86,7 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest001, TestSize.Level1)
     optimizer_->isInited_ = true;
     optimizer_->enable_ = false;
     optimizer_->pageNameSet_.clear();
-    bool result = optimizer_->CheckSwiperPageValid("path1", "page2");
+    bool result = optimizer_->CheckSwiperPageValid("path1", "page2", "jsViewName1");
     EXPECT_FALSE(result);
 }
 
@@ -95,7 +95,7 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest002, TestSize.Level1)
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
     optimizer_->pageNameSet_.clear();
-    bool result = optimizer_->CheckSwiperPageValid("path1", "page2");
+    bool result = optimizer_->CheckSwiperPageValid("path1", "page2", "jsViewName1");
     EXPECT_FALSE(result);
 }
 
@@ -104,7 +104,7 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest003, TestSize.Level1)
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
     optimizer_->pageNameSet_ = {};
-    bool result = optimizer_->CheckSwiperPageValid("path1", "page1");
+    bool result = optimizer_->CheckSwiperPageValid("path1", "page1", "jsViewName1");
     EXPECT_FALSE(result);
 }
 
@@ -113,8 +113,8 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest004, TestSize.Level1)
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
     optimizer_->pageNameSet_ = {"path1"};
-    bool result = optimizer_->CheckSwiperPageValid("path2", "page2");
-    EXPECT_FALSE(result);
+    bool result = optimizer_->CheckSwiperPageValid("path1", "page2", "jsViewName1");
+    EXPECT_TRUE(result);
 }
 
 HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest005, TestSize.Level1)
@@ -122,8 +122,8 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest005, TestSize.Level1)
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
     optimizer_->pageNameSet_ = {"path1"};
-    bool result = optimizer_->CheckSwiperPageValid("path1", "page2");
-    EXPECT_TRUE(result);
+    bool result = optimizer_->CheckSwiperPageValid("path2", "page2", "jsViewName1");
+    EXPECT_FALSE(result);
 }
 
 HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest006, TestSize.Level1)
@@ -131,7 +131,7 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest006, TestSize.Level1)
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
     optimizer_->pageNameSet_ = {"page1"};
-    bool result = optimizer_->CheckSwiperPageValid("path2", "page1");
+    bool result = optimizer_->CheckSwiperPageValid("path1", "page1", "jsViewName1");
     EXPECT_TRUE(result);
 }
 
@@ -139,9 +139,9 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest007, TestSize.Level1)
 {
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
-    optimizer_->pageNameSet_ = {"page1"};
-    bool result = optimizer_->CheckSwiperPageValid("path2", "page2");
-    EXPECT_FALSE(result);
+    optimizer_->pageNameSet_ = {"jsViewName1"};
+    bool result = optimizer_->CheckSwiperPageValid("path1", "page1", "jsViewName1");
+    EXPECT_TRUE(result);
 }
 
 HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest008, TestSize.Level1)
@@ -155,8 +155,8 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest009, TestSize.Level1)
 {
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
-    optimizer_->pageNameSet_ = {"path1", "page1"};
-    bool result = optimizer_->CheckSwiperPageValid("path1", "page1");
+    optimizer_->pageNameSet_ = {"path1", "page1", "jsViewName1"};
+    bool result = optimizer_->CheckSwiperPageValid("path1", "page1", "jsViewName1");
     EXPECT_TRUE(result);
 }
 
@@ -164,8 +164,8 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest010, TestSize.Level1)
 {
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
-    optimizer_->pageNameSet_ = {"path2", "page1"};
-    bool result = optimizer_->CheckSwiperPageValid("path1", "page1");
+    optimizer_->pageNameSet_ = {"path2", "page1", "jsViewName1"};
+    bool result = optimizer_->CheckSwiperPageValid("path1", "page1", "jsViewName1");
     EXPECT_TRUE(result);
 }
 
@@ -173,8 +173,17 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest011, TestSize.Level1)
 {
     optimizer_->isInited_ = true;
     optimizer_->enable_ = true;
-    optimizer_->pageNameSet_ = {"path2", "page2"};
-    bool result = optimizer_->CheckSwiperPageValid("path1", "page1");
+    optimizer_->pageNameSet_ = {"path2", "page2", "jsViewName1"};
+    bool result = optimizer_->CheckSwiperPageValid("path1", "page1", "jsViewName1");
+    EXPECT_TRUE(result);
+}
+
+HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest012, TestSize.Level1)
+{
+    optimizer_->isInited_ = true;
+    optimizer_->enable_ = true;
+    optimizer_->pageNameSet_ = {"path2", "page2", "jsViewName2"};
+    bool result = optimizer_->CheckSwiperPageValid("path1", "page1", "jsViewName1");
     EXPECT_FALSE(result);
 }
 
