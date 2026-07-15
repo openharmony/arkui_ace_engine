@@ -63,4 +63,14 @@ bool FeatureParam::IsSmartLayoutEnabled()
 {
     return FeatureParamManager::GetInstance().IsSmartLayoutEnabled();
 }
+
+bool FeatureParam::IsSmartLayoutPageOverflowFixEnabled(const std::string& pathHash)
+{
+    return FeatureParamManager::GetInstance().IsSmartLayoutPageOverflowFixEnabled(pathHash);
+}
+
+bool FeatureParam::IsSmartLayoutWidgetSplitEnabled(const std::string& pageUrl)
+{
+    return FeatureParamManager::GetInstance().IsSmartLayoutWidgetSplitEnabled(pageUrl);
+}
 } // OHOS::Ace

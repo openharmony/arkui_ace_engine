@@ -18,6 +18,7 @@
 
 #include <mutex>
 #include <string>
+#include <unordered_set>
 
 #include "base/utils/singleton.h"
 #include "base/utils/noncopyable.h"
@@ -33,6 +34,10 @@ class FeatureParamManager final : public Singleton<FeatureParamManager> {
     ACE_DISALLOW_MOVE(FeatureParamManager);
 
 public:
+    struct SmartLayoutFeatureConfig {
+        bool enabled = false;
+        std::unordered_set<std::string> values;
+    };
     void Init(const std::string& bundleName, std::vector<OHOS::AppExecFwk::Metadata>& metaData);
 
     // SyncLoadParser
@@ -54,10 +59,13 @@ public:
     void ParseArkUICorrectionConfigFromUIContent();
     void ParseArkWebAutoLayoutConfigFromUIContent();
     void SetSmartLayoutEnabled(bool enabled);
+    bool IsSmartLayoutPageOverflowFixEnabled(const std::string& pathHash = "") const;
+    bool IsSmartLayoutWidgetSplitEnabled(const std::string& pageUrl = "") const;
 private:
     void MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metadata>& metaData);
     void FeatureParamParseEntry(const std::string& bundleName);
     void UICorrectionParamParseEntry(const std::string& bundleName);
+    void ParseUICorrectionStrategyConfig();
     static const std::unordered_map<std::string, std::shared_ptr<ConfigParserBase>> featureParamMap_;
     static const std::unordered_map<std::string, std::string> metaDataMappingMap_;
     static constexpr uint32_t MAX_TIMER_SIZE = 3; // 3 is max size for responseDeadline
@@ -78,6 +86,13 @@ private:
     bool dialogCorrectionEnabled_ = false;
     bool rnOverflowEnabled_ = false;
     bool smartlayoutEnabled_ = false;
+
+    SmartLayoutFeatureConfig smartlayoutPageOverflowFix_;
+    SmartLayoutFeatureConfig smartlayoutWidgetSplit_;
+    // UICorrectionStrategy from FeatureManager
+    bool strategyPageOverflowEnabled_ = false;
+    bool strategyDialogOverflowEnabled_ = false;
+    bool strategyRnOverflowEnabled_ = false;
 
     std::optional<bool> pageOverflowEnabledFromCloud_;
     std::optional<bool> dialogCorrectionEnabledFromCloud_;
