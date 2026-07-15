@@ -249,7 +249,18 @@ HWTEST_F(RepeatVirtual2AdvancedTestNg, RepeatVirtual2GetChildrenForInspectorTest
 
     ASSERT_NE(node, nullptr);
     (void)node->GetChildrenForInspector(false);
-    (void)node->GetChildrenForInspector(true);
+    RefPtr<UINode> child = CreateNode(V2::TEXT_ETS_TAG, CHILD_ID_10);
+    auto cacheItem = RepeatVirtualScroll2CacheItem::MakeCacheItem(child, false);
+    node->caches_.cacheItem4Rid_[INDEX_1] = cacheItem;
+    auto refCount = child->RefCount();
+
+    {
+        auto inspectorChildren = node->GetChildrenForInspector(true);
+        ASSERT_EQ(inspectorChildren.size(), 1);
+        EXPECT_EQ(inspectorChildren.front(), child);
+        EXPECT_EQ(child->RefCount(), refCount + 1);
+    }
+    EXPECT_EQ(child->RefCount(), refCount);
 }
 
 /**

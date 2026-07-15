@@ -625,16 +625,16 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScroll2Node::GetChildren(bool /*no
     return children_;
 }
 
-const std::list<RefPtr<UINode>>& RepeatVirtualScroll2Node::GetChildrenForInspector(bool needCacheNode) const
+std::list<RefPtr<UINode>> RepeatVirtualScroll2Node::GetChildrenForInspector(bool needCacheNode) const
 {
     if (needCacheNode) {
-        childrenWithCache_.clear();
-        caches_.ForEachCacheItem([this](RIDType rid, const CacheItem& cacheItem) {
+        std::list<RefPtr<UINode>> childrenWithCache;
+        caches_.ForEachCacheItem([&childrenWithCache](RIDType rid, const CacheItem& cacheItem) {
             if (cacheItem->node_ != nullptr) {
-                childrenWithCache_.emplace_back(cacheItem->node_);
+                childrenWithCache.emplace_back(cacheItem->node_);
             }
         });
-        return childrenWithCache_;
+        return childrenWithCache;
     } else {
         return children_;
     }

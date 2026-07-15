@@ -633,16 +633,16 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
     builder_->ProcessSyncLoadTempChildren(children_);
 }
 
-const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
+std::list<RefPtr<UINode>> LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
 {
     if (needCacheNode) {
         std::vector<UINode*> childList;
         builder_->GetAllItems(childList);
-        childrenWithCache_.clear();
+        std::list<RefPtr<UINode>> childrenWithCache;
         for (const auto& uiNode : childList) {
-            childrenWithCache_.emplace_back(Claim(uiNode));
+            childrenWithCache.emplace_back(Claim(uiNode));
         }
-        return childrenWithCache_;
+        return childrenWithCache;
     } else {
         return children_;
     }
