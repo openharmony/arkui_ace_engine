@@ -1,0 +1,7 @@
+{
+    "src_path":[
+        "out/generic_generic_arm_64only/general_all_phone_standard/ohos_ets/build-tools/ets2panda/lib/etsstdlib.abc",
+        "out/generic_generic_arm_64only/general_all_phone_standard/obj/foundation/arkui/ace_engine/frameworks/bridge/arkts_frontend/arkoala.abc",
+        "out/generic_generic_arm_64only/general_all_phone_standard/obj/base/global/resource_management/interfaces/ets/ani/resourceManager/resource.abc"
+    ]
+}

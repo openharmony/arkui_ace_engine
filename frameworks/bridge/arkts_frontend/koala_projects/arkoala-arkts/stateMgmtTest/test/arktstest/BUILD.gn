@@ -1,0 +1,61 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/test.gni")
+import("//build/config/components/ets_frontend/ets2abc_config.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("../../../components.gni")
+
+config("base_private_config") {
+  visibility = [ ":*" ]
+}
+
+if (!is_host_product && !ohos_indep_compiler_enable) {
+  base_output_path = "ace_engine/statemgmt/base_test"
+  ohos_arkts_unittest("decoratorTestSuite") {
+    module_out_path = base_output_path
+    sources = ["decoratorTest/src.json"]  # 测试用例依赖源码管理文件
+    test_files = [
+      "decoratorTest/uipluginState.test.ets",
+      "decoratorTest/stateDecoratedVariable.test.ets",
+      "decoratorTest/list.test.ets",
+      "decoratorTest/OpenHarmonyTestRunner.ets"
+    ] # 测试用例文件列表
+
+    base_url = "./arkui-preprocessed"
+    files = arkui_files
+    paths_keys = arkui_path_keys
+    paths_keys += [ "@ohos.windowenv" ]
+    paths_values = arkui_path_values
+    paths_values += [ rebase_path("$ohos_ets_inner_path/window/@ohos.windowenv.ets") ]
+    ui_enable = "True"
+
+    deps = [] #定义部件内依赖
+
+    external_deps = [] #定义部件间依赖
+    subsystem_name = ace_engine_subsystem
+    part_name = "ace_engine"
+  }
+}
+
+group("arktstest") {
+  testonly = true
+  if (is_host_product || ohos_indep_compiler_enable) {
+    # SDK 构建和独立编译模式缺少 ETS SDK 依赖，跳过
+    deps = []
+  } else {
+    deps = [
+      ":decoratorTestSuite"
+    ] # 编译目标列表
+  }
+}
