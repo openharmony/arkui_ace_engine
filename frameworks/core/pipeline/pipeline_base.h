@@ -143,11 +143,7 @@ public:
     /*
      * Change px to vp with density of current pipeline
      */
-    static inline double Px2VpWithCurrentDensity(double px)
-    {
-        double density = GetCurrentDensity();
-        return px / density;
-    }
+    static double Px2VpWithCurrentDensity(double px);
 
     /*
      * Change vp to px with density of current pipeline

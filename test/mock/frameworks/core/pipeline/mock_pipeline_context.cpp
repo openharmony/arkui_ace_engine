@@ -1561,6 +1561,12 @@ ColorMode PipelineBase::GetCurrentColorMode()
     return currentContainer->GetColorMode();
 }
 
+double PipelineBase::Px2VpWithCurrentDensity(double px)
+{
+    double density = GetCurrentDensity();
+    return px / density;
+}
+
 double PipelineBase::Vp2PxWithCurrentDensity(double vp)
 {
     double density = GetCurrentDensity();
