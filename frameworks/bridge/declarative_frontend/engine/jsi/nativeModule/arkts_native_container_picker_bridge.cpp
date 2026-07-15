@@ -261,7 +261,8 @@ ArkUINativeModuleValue ContainerPickerBridge::SetContainerPickerSelectionIndicat
     CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
-    ArkUIPickerIndicatorStyle pickerIndicatorStyle;
+    ArkUIPickerIndicatorStyle pickerIndicatorStyle = {};
+    pickerIndicatorStyle.type = static_cast<ArkUI_Int32>(PickerIndicatorType::BACKGROUND);
     if (typeArg->IsNumber()) {
         pickerIndicatorStyle.type = typeArg->ToNumber(vm)->Value();
     }
@@ -324,6 +325,14 @@ ArkUINativeModuleValue ContainerPickerBridge::ResetContainerPickerSelectionIndic
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto containerPickerModifier = nodeModifiers->getContainerPickerModifier();
+    CHECK_NULL_RETURN(containerPickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    containerPickerModifier->resetContainerPickerSelectionIndicator(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

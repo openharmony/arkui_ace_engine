@@ -27,6 +27,7 @@
 #include "core/components/web/web_property.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
+#include "core/components_ng/pattern/date_picker/picker_types.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"

@@ -21,7 +21,7 @@
 #include "base/utils/macros.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
+#include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"
@@ -89,12 +89,12 @@ public:
 
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto pickerTheme = host->GetTheme<PickerTheme>(true);
+        auto pickerTheme = host->GetTheme<ContainerPickerTheme>(true);
         CHECK_NULL_VOID(pickerTheme);
-        Dimension defaultDividerWidth = pickerTheme->GetDividerThickness();
-        Color defaultDividerColor = pickerTheme->GetDividerColor();
-        Color defaultIndicatorBackgroundColor = pickerTheme->GetSelectedBackgroundColor();
-        Dimension defaultIndicatorBorderRadius = 12.0_vp;
+        Dimension defaultDividerWidth = pickerTheme->GetStrokeWidth();
+        Color defaultDividerColor = pickerTheme->GetIndicatorDividerColor();
+        Color defaultIndicatorBackgroundColor = pickerTheme->GetIndicatorBackgroundColor();
+        Dimension defaultIndicatorBorderRadius = pickerTheme->GetIndicatorBackgroundRadius();
 
         auto pickerIndicatorStyle = JsonUtil::Create(true);
         int32_t typeIndex = GetIndicatorType().value_or(0);
