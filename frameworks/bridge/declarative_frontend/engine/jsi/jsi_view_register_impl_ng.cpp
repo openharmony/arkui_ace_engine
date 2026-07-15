@@ -96,6 +96,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper_controller_binding.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_indicator_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_clock_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
@@ -416,6 +417,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSGesture::JSBind(globalObj);
     JSPanGestureOption::JSBind(globalObj);
     JSSwiperControllerBinding::JSBind(globalObj);
+    JSIndicatorControllerBinding::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
