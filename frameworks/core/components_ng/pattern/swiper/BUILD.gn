@@ -42,11 +42,13 @@ build_component_ng("swiper_pattern_ng") {
     "bridge/arc_swiper_custom_modifier.cpp",
   ]
 
-  if (!ace_engine_feature_wearable) {
-    ark_sources += [
-      "bridge/swiper_static_modifier.cpp",
-      "bridge/swiper_content_transition_proxy_accessor.cpp",
-      "bridge/swiper_controller_accessor.cpp",
-    ]
+  if (!is_arkui_x) {
+    if (!ace_engine_feature_wearable) {
+      ark_sources += [
+        "bridge/swiper_static_modifier.cpp",
+        "bridge/swiper_content_transition_proxy_accessor.cpp",
+        "bridge/swiper_controller_accessor.cpp",
+      ]
+    }
   }
 }
