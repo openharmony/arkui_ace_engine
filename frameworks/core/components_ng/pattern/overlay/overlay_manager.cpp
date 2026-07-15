@@ -1892,6 +1892,7 @@ void OverlayManager::UpdatePopupCustomNode()
 void OverlayManager::ReloadBuilderNodeConfig()
 {
     UpdatePopupCustomNode();
+    CHECK_EQUAL_VOID(DynamicModuleHelper::GetInstance().IsDynamicModuleLoaded("Dialog"), false);
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
     const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
