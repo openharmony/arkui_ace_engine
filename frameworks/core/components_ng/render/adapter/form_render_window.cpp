@@ -92,7 +92,7 @@ FormRenderWindow::FormRenderWindow(RefPtr<TaskExecutor> taskExecutor, int32_t id
 void FormRenderWindow::RequestFrame()
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (receiver_ != nullptr && onShow_) {
+    if (receiver_ != nullptr) {
         if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
             CHECK_NULL_VOID(!isRequestVsync_);
             isRequestVsync_ = true;
