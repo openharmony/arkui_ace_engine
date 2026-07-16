@@ -33,49 +33,37 @@ void InitMapping(std::map<std::string, int>& mapping)
 
 bool CheckCalcIsValid(const std::string& formula)
 {
-    std::string formulaNoSpace;
-    formulaNoSpace.reserve(formula.size());
-    for (char c : formula) {
-        if (c != ' ') {
-            formulaNoSpace += c;
-        }
-    }
+    std::regex space(" ");
+    std::string formulaNoSpace = regex_replace(formula, space, "");
 
-    auto isOperator = [](char c) { return c == '+' || c == '-' || c == '*' || c == '/'; };
-    size_t pos = 0;
-    while (pos < formulaNoSpace.size()) {
-        size_t matchStart = std::string::npos;
-        size_t matchEnd = 0;
-        for (size_t i = pos; i < formulaNoSpace.size(); ++i) {
-            if (!isOperator(formulaNoSpace[i])) {
-                continue;
-            }
-            size_t j = i + 1;
-            while (j < formulaNoSpace.size() && formulaNoSpace[j] == '(') {
-                ++j;
-            }
-            if (j + 4 <= formulaNoSpace.size() && formulaNoSpace.compare(j, 4, "calc") == 0) {
-                matchStart = i;
-                matchEnd = j + 4;
-                break;
-            }
-        }
-        if (matchStart == std::string::npos) {
-            return true;
-        }
+    std::smatch result;
+    std::string substr;
+    std::regex pattern("(\\-|\\+|\\/|\\*)(\\({0,})(calc)");
+    while (std::regex_search(formulaNoSpace, result, pattern)) {
         size_t leftBracketCount = 0;
-        size_t rightBracketCount = 0;
-        for (size_t k = matchEnd; k < formulaNoSpace.size(); ++k) {
-            if (formulaNoSpace[k] == '(') {
-                ++leftBracketCount;
-            } else if (formulaNoSpace[k] == ')') {
-                ++rightBracketCount;
-            }
+        std::smatch leftBracket;
+        std::regex leftBracketPattern("\\(");
+        substr = result.suffix().str();
+
+        while (std::regex_search(substr, leftBracket, leftBracketPattern)) {
+            ++leftBracketCount;
+            substr = leftBracket.suffix().str();
         }
+
+        size_t rightBracketCount = 0;
+        std::smatch rightBracket;
+        std::regex rightBracketPattern("\\)");
+        substr = result.suffix().str();
+
+        while (std::regex_search(substr, rightBracket, rightBracketPattern)) {
+            ++rightBracketCount;
+            substr = rightBracket.suffix().str();
+        }
+
         if (leftBracketCount == rightBracketCount) {
             return false;
         }
-        pos = matchEnd;
+        formulaNoSpace = result.suffix().str();
     }
     return true;
 }
@@ -136,29 +124,15 @@ void ReplaceSignNumberWithUnit(std::string& formula)
     }
 }
 
-static int8_t GetOpPriority(char op)
-{
-    switch (op) {
-        case '+':
-        case '-':
-            return 0;
-        case '*':
-        case '/':
-            return 1;
-        case '(':
-        case ')':
-            return 2;
-        default:
-            return -1;
-    }
-}
-
 bool PushOpStack(const std::string& formula, std::string& curNum, std::vector<std::string>& result,
     std::vector<std::string>& opStack)
 {
+    std::string ops = "+-*/()";
+    std::map<std::string, int> opMapping;
+    InitMapping(opMapping);
     std::string curOp;
     for (char i : formula) {
-        if (GetOpPriority(i) < 0) {
+        if (ops.find(i) == ops.npos) {
             curNum += i;
         } else {
             if (!curNum.empty()) {
@@ -183,10 +157,10 @@ bool PushOpStack(const std::string& formula, std::string& curNum, std::vector<st
                 opStack.pop_back();
             } else if (opStack.back() == "(") {
                 opStack.emplace_back(curOp);
-            } else if (GetOpPriority(curOp[0]) > GetOpPriority(opStack.back()[0]) && (!opStack.empty())) {
+            } else if (opMapping[curOp] > opMapping[opStack.back()] && (!opStack.empty())) {
                 opStack.emplace_back(curOp);
             } else {
-                while ((opStack.back() != "(") && (GetOpPriority(opStack.back()[0]) >= GetOpPriority(curOp[0]))) {
+                while ((opStack.back() != "(") && (opMapping[opStack.back()] >= opMapping[curOp])) {
                     result.emplace_back(opStack.back());
                     opStack.pop_back();
                     if (opStack.empty())
