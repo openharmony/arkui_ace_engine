@@ -42,10 +42,13 @@ public:
     bool PerformSmartLayout(LayoutWrapper* layoutWrapper);
 
 private:
+    bool HandleTextContentOverflow(LayoutWrapper* layoutWrapper);
+    bool RemeasureText(LayoutWrapper* layoutWrapper);
+
     /**
      * @brief Get layout type from layout wrapper's host tag
      * @param layoutWrapper Layout wrapper
-     * @return SmartLayoutType::COLUMN for Column, SmartLayoutType::ROW for Row (default)
+     * @return Smart layout type corresponding to the host component
      */
     SmartLayoutType GetLayoutTypeFromWrapper(LayoutWrapper* layoutWrapper);
 

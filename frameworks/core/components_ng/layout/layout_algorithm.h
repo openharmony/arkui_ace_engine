@@ -126,6 +126,7 @@ public:
 
 private:
     bool IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapper);
+    bool IsTextContentOverflowForSmartLayout(LayoutWrapper* layoutWrapper);
     void TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper);
     uint64_t NodePath2Hash(const std::string& path);
     std::string ComputeCurrentPathHash(FrameNode* hostNode);
