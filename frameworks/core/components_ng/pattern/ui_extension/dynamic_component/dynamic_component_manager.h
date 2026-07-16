@@ -84,9 +84,12 @@ public:
     std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea> GetAvoidAreaIntersection(
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas,
         OHOS::Ace::ViewportConfig viewportConfig);
+    void SetDynamicViewportConfig(int32_t hostId, const OHOS::Ace::ViewportConfig& config);
+    OHOS::Ace::ViewportConfig GetDynamicViewportConfig(int32_t hostId) const;
 
     mutable std::shared_mutex avoidAreasMutex_;
     std::map<int32_t, OHOS::Ace::WeakPtr<PlatformPattern>> aliveDynamics_;
+    std::map<int32_t, OHOS::Ace::ViewportConfig> dcViewportConfigs_;
     OHOS::Ace::ViewportConfig viewportConfig_;
     OHOS::Ace::WindowSizeChangeReason reason_;
     std::shared_ptr<OHOS::Rosen::RSTransaction> rsTransaction_;
