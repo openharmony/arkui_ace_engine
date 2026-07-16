@@ -62,8 +62,8 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
     SetAllowUpdate(allowUpdate_);
     float uiWidth = width_ - borderWidth_ * DOUBLE;
     float uiHeight = height_ - borderWidth_ * DOUBLE;
-    uiContent_->SetFormWidth(uiWidth);
-    uiContent_->SetFormHeight(uiHeight);
+    uiContent_->SetFormWidth(uiWidth? uiWidth : 0.0f);
+    uiContent_->SetFormHeight(uiHeight? uiHeight : 0.0f);
     lastBorderWidth_ = borderWidth_;
     uiContent_->SetFontScaleFollowSystem(fontScaleFollowSystem_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
@@ -163,18 +163,44 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
     disableUIFirst_ = want.GetBoolParam(FORM_DISABLE_UIFIRST_KEY, false);
     allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
+    if (width_ < 0.0f) {
+        HILOG_ERROR("invalid param, width: %f", width_);
+        width_ = 0.0f;
+    }
     height_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f);
+    if (height_ < 0.0f) {
+        HILOG_ERROR("invalid param, height_: %f", height_);
+        height_ = 0.0f;
+    }
     formViewScale_ = want.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_VIEW_SCALE, 1.0f);
+    if (formViewScale_ <= 0.0f) {
+        HILOG_ERROR("invalid param, formViewScale_: %f", formViewScale_);
+        formViewScale_ = 1.0f;
+    }
     proxy_ = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
     renderingMode_ = (AppExecFwk::Constants::RenderingMode)want.GetIntParam(
         OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, 0);
+    minRenderingMode = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
+    maxRenderingMode = AppExecFwk::Constants::RenderingMode::SINGLE_COLOR;
+    if (renderingMode_ > maxRenderingMode || renderingMode_ < minRenderingMode) {
+        renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
+    }
     enableBlurBackground_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY,
         false);
     borderWidth_ = want.GetFloatParam(OHOS::AppExecFwk::Constants::PARAM_FORM_BORDER_WIDTH_KEY, 0.0f);
+    if (borderWidth_ < 0.0f) {
+        HILOG_ERROR("invalid param, borderWidth_: %f", borderWidth_);
+        borderWidth_ = 0.0f;
+    }
     fontScaleFollowSystem_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FONT_FOLLOW_SYSTEM_KEY, true);
     obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
     formLocation_ = static_cast<AppExecFwk::Constants::FormLocation>(
         want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));  // -1: FormLocation::OTHER
+    minFormLocation = AppExecFwk::Constants::FormLocation::OTHER;
+    maxFormLocation = AppExecFwk::Constants::FormLocation::FORM_LOCATION_END;
+    if (formLocation_ > maxFormLocation || formLocation_ < minFormLocation) {
+        formLocation_ = AppExecFwk::Constants::FormLocation::OTHER;
+    }
     deleteBackgroundImage_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_DELETE_BACKGROUND_IMAGE, false);
 }
 
@@ -319,6 +345,14 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth, 
     }
     float resizedWidth = width - borderWidth * DOUBLE;
     float resizedHeight = height - borderWidth * DOUBLE;
+    if (width <= 0 || height <= 0 || borderWidth < 0 || formViewScale < 0 || resizedWidth <= 0 || resizedHeight <= 0) {
+        HILOG_ERROR("Invalid parameters detected in surface change event. "
+                "width: %.2f, height: %.2f, borderWidth: %.2f, formViewScale: %.2f, "
+                "resizedWidth: %.2f, resizedHeight: %.2f. "
+                "All values must be positive except borderWidth which must be non-negative.",
+                width, height, borderWidth, formViewScale, resizedWidth, resizedHeight);
+        return;
+    }
     if (!NearEqual(width, width_) || !NearEqual(height, height_) || !NearEqual(borderWidth, lastBorderWidth_) ||
         !NearEqual(formViewScale, formViewScale_)) {
         width_ = width;

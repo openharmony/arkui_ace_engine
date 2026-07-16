@@ -23,6 +23,8 @@ namespace OHOS {
 namespace Ace {
 static std::mutex g_surfaceNodeMutex_;
 static std::map<uint64_t, std::shared_ptr<Rosen::RSSurfaceNode>> g_surfaceNodeMap_;
+// The maximum number of local forms and online forms is 1024
+constexpr size_t MAX_SURFACE_NODE_MAP_SIZE = 1024;
 
 FormRendererDelegateStub::FormRendererDelegateStub()
 {
@@ -79,14 +81,17 @@ int FormRendererDelegateStub::OnRemoteRequest(
 
 int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel& data, MessageParcel& reply)
 {
+    {
+        std::lock_guard<std::mutex> lock(g_surfaceNodeMutex_);
+        if (g_surfaceNodeMap_.size() >= MAX_SURFACE_NODE_MAP_SIZE) {
+            HILOG_ERROR("surfaceNode map reached maximum capacity: %{public}zu", MAX_SURFACE_NODE_MAP_SIZE);
+            return ERR_APPEXECFWK_PARCEL_ERROR;
+        }
+    }
     auto surfaceNode = Rosen::RSSurfaceNode::Unmarshalling(data);
     if (surfaceNode == nullptr) {
         HILOG_ERROR("surfaceNode is nullptr");
         return ERR_APPEXECFWK_PARCEL_ERROR;
-    }
-    {
-        std::lock_guard<std::mutex> lock(g_surfaceNodeMutex_);
-        g_surfaceNodeMap_[surfaceNode->GetId()] = surfaceNode;
     }
     HILOG_INFO("Stub create surfaceNode:%{public}s", std::to_string(surfaceNode->GetId()).c_str());
     std::unique_ptr<AppExecFwk::FormJsInfo> formJsInfo(data.ReadParcelable<AppExecFwk::FormJsInfo>());
@@ -99,6 +104,11 @@ int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel& data, Message
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
         return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(g_surfaceNodeMutex_);
+        g_surfaceNodeMap_[surfaceNode->GetId()] = surfaceNode;
     }
 
     int32_t errCode = OnSurfaceCreate(surfaceNode, *formJsInfo, *want);

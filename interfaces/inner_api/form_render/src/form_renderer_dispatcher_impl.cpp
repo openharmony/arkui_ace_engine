@@ -261,6 +261,11 @@ void FormRendererDispatcherImpl::OnAccessibilityChildTreeRegister(
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
+        if (windowId <= 0 || treeId <= 0 || accessibilityId < 0) {
+            HILOG_ERROR("invalid param: windowId: %{public}u treeId: %{public}d accessibilityId: %{public}"
+                PRId64, windowId, treeId, accessibilityId);
+            return;
+        }
         HILOG_INFO("OnAccessibilityChildTreeRegister: %{public}d %{public}" PRId64, treeId, accessibilityId);
         uiContent->RegisterAccessibilityChildTree(windowId, treeId, accessibilityId);
         uiContent->SetAccessibilityGetParentRectHandler([formRenderer](AccessibilityParentRectInfo &parentRectInfo) {
@@ -338,6 +343,7 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
         HILOG_ERROR("eventHandler is nullptr");
         return;
     }
+    std::vector<std::string> infoCopy = info;
     struct DumpInfoCondition {
         std::mutex mtx;
         std::condition_variable cv;
@@ -345,7 +351,7 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
     std::shared_ptr<DumpInfoCondition> dumpCondition = std::make_shared<DumpInfoCondition>();
     std::unique_lock<std::mutex> lock(dumpCondition->mtx);
     handler->PostTask(
-        [content = uiContent_, params, &info, dumpCondition]() {
+        [content = uiContent_, params, infoCopy, dumpCondition]() {
             std::unique_lock<std::mutex> lock(dumpCondition->mtx);
             auto uiContent = content.lock();
             if (!uiContent) {
@@ -354,7 +360,7 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
                 return;
             }
             HILOG_INFO("OnNotifyDumpInfo");
-            uiContent->DumpInfo(params, info);
+            uiContent->DumpInfo(params, infoCopy);
             dumpCondition->cv.notify_all();
         },
         "OnNotifyDumpInfoTask");
@@ -363,6 +369,7 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
         info.push_back("dump timeout " + std::to_string(DUMP_WAIT_TIME) + "ms");
         handler->RemoveTask("OnNotifyDumpInfoTask");
     }
+    info = infoCopy;
 }
 
 void FormRendererDispatcherImpl::SetMultiInstanceEnabled(bool isMultiInstanceEnabled)
