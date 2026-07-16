@@ -18,6 +18,7 @@
 
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
 namespace OHOS::Ace::NG {
@@ -1095,6 +1096,96 @@ HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset001, TestSize.Level1)
     scrollPattern->viewSize_ = SizeF(100.0f, 200.0f);
     auto result = scrollPattern->UpdateCurrentOffset(2.0f, SCROLL_FROM_NONE);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset002
+ * @tc.desc: Test ScrollPattern UpdateCurrentOffset with near-zero currentOffset should be zeroed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset002, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->scrollableDistance_ = 800.0f;
+    scrollPattern->currentOffset_ = 0.0;
+    scrollPattern->scrollEffect_ = nullptr;
+    scrollPattern->viewSize_ = SizeF(100.0f, 200.0f);
+    scrollPattern->UpdateCurrentOffset(0.0005f, SCROLL_FROM_JUMP);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset003
+ * @tc.desc: Test ScrollPattern UpdateCurrentOffset with currentOffset beyond epsilon should not be zeroed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset003, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->scrollableDistance_ = 800.0f;
+    scrollPattern->currentOffset_ = 0.0;
+    scrollPattern->scrollEffect_ = nullptr;
+    scrollPattern->viewSize_ = SizeF(100.0f, 200.0f);
+    scrollPattern->UpdateCurrentOffset(0.002f, SCROLL_FROM_JUMP);
+    EXPECT_NE(scrollPattern->currentOffset_, 0.0);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset004
+ * @tc.desc: Test ScrollPattern UpdateCurrentOffset with currentOffset slightly below epsilon should be zeroed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset004, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->scrollableDistance_ = 800.0f;
+    scrollPattern->currentOffset_ = 0.0;
+    scrollPattern->scrollEffect_ = nullptr;
+    scrollPattern->viewSize_ = SizeF(100.0f, 200.0f);
+    scrollPattern->UpdateCurrentOffset(0.0009f, SCROLL_FROM_JUMP);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset005
+ * @tc.desc: Test ScrollPattern UpdateCurrentOffset with negative near-zero currentOffset should be zeroed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset005, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->scrollableDistance_ = 800.0f;
+    scrollPattern->currentOffset_ = 0.0;
+    scrollPattern->scrollEffect_ = nullptr;
+    scrollPattern->viewSize_ = SizeF(100.0f, 200.0f);
+    scrollPattern->UpdateCurrentOffset(-0.0005f, SCROLL_FROM_JUMP);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset006
+ * @tc.desc: Test ScrollPattern UpdateCurrentOffset with zero currentOffset stays zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset006, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->scrollableDistance_ = 800.0f;
+    scrollPattern->currentOffset_ = 0.0;
+    scrollPattern->scrollEffect_ = nullptr;
+    scrollPattern->viewSize_ = SizeF(100.0f, 200.0f);
+    scrollPattern->UpdateCurrentOffset(0.0f, SCROLL_FROM_JUMP);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0);
 }
 
 /**
