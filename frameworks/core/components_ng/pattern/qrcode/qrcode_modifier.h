@@ -57,7 +57,8 @@ public:
     void SetQRCodeBackgroundColor(const Color& bgColor);
 
 private:
-    RSBitmap CreateBitMap(int32_t width, const QrcodeImage& qrCode, const Color& color) const;
+    RSBitmap CreateBitMap(
+        int32_t width, const QrcodeImage& qrCode, const Color& color, const Color& backgroundColor) const;
     uint32_t ConvertColorFromHighToLow(const Color& color) const;
 
     RefPtr<AnimatablePropertyFloat> opacity_;
