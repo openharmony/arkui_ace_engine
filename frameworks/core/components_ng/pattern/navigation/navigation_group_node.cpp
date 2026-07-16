@@ -3511,7 +3511,7 @@ void NavigationGroupNode::UpdateMaskNodeVisibility(bool isLeft, VisibleType type
 
 void NavigationGroupNode::InitNavigationId()
 {
-    if (recoverable_ || !curId_.empty()) {
+    if (!recoverable_ || !curId_.empty()) {
         return;
     }
     // support navigation in navigation
@@ -3521,7 +3521,7 @@ void NavigationGroupNode::InitNavigationId()
         if (parentNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             auto navdestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(parentNode);
             CHECK_NULL_CONTINUE(navdestinationNode);
-            curId_ = navdestinationNode->GetTag() + "-" + std::to_string(navdestinationNode->GetIndex());
+            curId_ += "-" + navdestinationNode->GetTag() + "-" + std::to_string(navdestinationNode->GetIndex());
         } else if (parentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
             auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parentNode);
             CHECK_NULL_CONTINUE(navigationNode);
