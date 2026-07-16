@@ -743,9 +743,7 @@ public:
     const RectF& GetTextRect() const override;
     float GetScrollOffset() const;
     RefPtr<ScrollBar> GetScrollControllerBar();
-    void StopScrolling();
     void ClearAISpanRects();
-    void HandleScrollStart();
     std::vector<RectF> CalculateSelectedRect(int32_t start, int32_t end);
     void ScrollToVisible(std::optional<int32_t> start, std::optional<int32_t> end);
     bool OnScrollCallback(float offset, int32_t source) override;
@@ -900,12 +898,10 @@ public:
     }
     bool IsFreeScrollEnabled() const;
     RefPtr<RichEditorScrollController> GetScrollController() const;
-    bool HandleHorizontalScroll(bool needUpdateOffset);
+    void HandleFreeScroll(bool needUpdateOffset);
+    void HandleFixedScroll();
     void RemoveOverlayModifier();
-    void ScheduleDisappearDelayTask();
-    bool IsMouseOverScrollBar(const MouseInfo& info);
     bool IsShortCutBlocked() override;
-    void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
     Color GetScrollBarColor() const;
     void UpdatePlaceholderFontColor(const Color& color);
     void MarkContentNodeForRender() override;
@@ -1198,16 +1194,12 @@ private:
     void CheckScrollable();
     void UpdateMagnifierStateAfterLayout(bool frameSizeChange);
     void UpdateScrollStateAfterLayout(bool shouldDisappear);
-    void OnAutoScroll(AutoScrollParam param);
+    void HandleMouseAutoScroll(AutoScrollParam param);
     void StopAutoScroll();
     void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
-    float MoveTextRect(float offset);
     void SetNeedMoveCaretToContentRect();
     void MoveCaretToContentRect();
-    void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
-    void MoveCaretToContentRectHorizontal(const OffsetF& caretOffset);
-    void MoveCaretToContentRectVertical(const OffsetF& caretOffset, float caretHeight);
-    void MoveCaretToContentRect(float offset, int32_t source);
+    float GetOverlayCaretWidth() const;
     bool IsCaretInContentArea();
     bool IsTextArea() const override;
     void UpdateRichTextRectOffsetWithPadding();

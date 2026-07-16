@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 namespace OHOS::Ace::NG {
@@ -1147,7 +1148,7 @@ void RichEditorModelNG::SetScrollBarColor(std::optional<Color> value)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->UpdateScrollBarColor(value, true);
+    richEditorPattern->GetScrollController()->UpdateScrollBarColor(value, true);
 }
 
 void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
@@ -1211,7 +1212,7 @@ void RichEditorModelNG::SetScrollBarColor(FrameNode* frameNode, std::optional<Co
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->UpdateScrollBarColor(value, true);
+    richEditorPattern->GetScrollController()->UpdateScrollBarColor(value, true);
 }
 
 void RichEditorModelNG::SetSelectedDragPreviewStyle(const Color& value)

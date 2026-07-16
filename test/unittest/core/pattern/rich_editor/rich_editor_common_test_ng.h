@@ -23,6 +23,7 @@
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 namespace OHOS::Ace::NG {

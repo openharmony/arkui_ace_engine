@@ -743,11 +743,11 @@ HWTEST_F(RichEditorScrollControllerTest, MoveHandleOnScroll003, TestSize.Level0)
 }
 
 /**
- * @tc.name: MoveHandleOnScroll004
- * @tc.desc: test MoveHandleOnScroll
+ * @tc.name: MoveTextRect001
+ * @tc.desc: test MoveTextRect
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollControllerTest, MoveHandleOnScroll004, TestSize.Level0)
+HWTEST_F(RichEditorScrollControllerTest, MoveTextRect001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -767,7 +767,7 @@ HWTEST_F(RichEditorScrollControllerTest, MoveHandleOnScroll004, TestSize.Level0)
 
 /**
  * @tc.name: CalCaretToContentRectDistanceVertical001
- * @tc.desc: test CalCaretToContentRectDistanceVertical
+ * @tc.desc: test CalCaretToContentRectDistanceVertical contentHeight < caretHeight
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorScrollControllerTest, CalCaretToContentRectDistanceVertical001, TestSize.Level0)
@@ -775,22 +775,21 @@ HWTEST_F(RichEditorScrollControllerTest, CalCaretToContentRectDistanceVertical00
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-
     auto& scrollController = richEditorPattern->scrollController_;
     scrollController->textRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     scrollController->contentRect_ = RectF(0.0f, 0.0f, 10.0f, 10.0f);
-
-    OffsetF caretOffset(-10.0f, -20.0f);
     float caretHeight = 20.0f;
-    float keyboardOffset = 0.0f;
-
-    float result = scrollController->CalCaretToContentRectDistanceVertical(caretOffset, caretHeight, keyboardOffset);
-    EXPECT_EQ(result, 10.0f);  // contentRect_.GetY() - caretOffset.GetY() + caretHeight
+    // contentHeight < caretHeight and caret not at bottom
+    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+        OffsetF(10.0f, 120.0f), caretHeight, 30.0f), -160.0f);
+    // contentHeight < caretHeight and caret at bottom
+    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+        OffsetF(10.0f, -10.0f), caretHeight, 0.0f), 0.0f);
 }
 
 /**
  * @tc.name: CalCaretToContentRectDistanceVertical002
- * @tc.desc: test CalCaretToContentRectDistanceVertical
+ * @tc.desc: test CalCaretToContentRectDistanceVertical contentHeight >= caretHeight
  * @tc.type: FUNC
  */
 HWTEST_F(RichEditorScrollControllerTest, CalCaretToContentRectDistanceVertical002, TestSize.Level0)
@@ -798,86 +797,46 @@ HWTEST_F(RichEditorScrollControllerTest, CalCaretToContentRectDistanceVertical00
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-
     auto& scrollController = richEditorPattern->scrollController_;
     scrollController->textRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
-    scrollController->contentRect_ = RectF(0.0f, 0.0f, 10.0f, 10.0f);
-
-    OffsetF caretOffset(10.0f, 120.0f); // 光标在内容矩形下方
+    scrollController->contentRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
     float caretHeight = 20.0f;
-    float keyboardOffset = 0.0f;
-
-    float result = scrollController->CalCaretToContentRectDistanceVertical(caretOffset, caretHeight, keyboardOffset);
-    EXPECT_EQ(result, -130.0f); // contentRect_.Bottom() - keyboardOffset - caretOffset.GetY() - caretHeight
+    // caret above top and caretX <= textRectX
+    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+        OffsetF(0.0f, -10.0f), caretHeight, 0.0f), 30.0f);
+    // caret above top and caretX > textRectX
+    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+        OffsetF(10.0f, -10.0f), caretHeight, 0.0f), 10.0f);
+    // caret beyond bottom
+    Dimension caretBottomDistance = 16.0_vp;
+    float bottomDistance = caretBottomDistance.ConvertToPx();
+    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+        OffsetF(0.0f, 90.0f), caretHeight, 0.0f), -10.0f - bottomDistance);
+    // caret within content, default return
+    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceVertical(
+        OffsetF(0.0f, 10.0f), caretHeight, 0.0f), 0.0f);
 }
 
 /**
- * @tc.name: CalCaretToContentRectDistanceVertical003
- * @tc.desc: test CalCaretToContentRectDistanceVertical
+ * @tc.name: CalCaretToContentRectDistanceHorizontal001
+ * @tc.desc: test CalCaretToContentRectDistanceHorizontal
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorScrollControllerTest, CalCaretToContentRectDistanceVertical003, TestSize.Level0)
+HWTEST_F(RichEditorScrollControllerTest, CalCaretToContentRectDistanceHorizontal001, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-
     auto& scrollController = richEditorPattern->scrollController_;
-    scrollController->textRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
-    scrollController->contentRect_ = RectF(0.0f, 0.0f, 10.0f, 10.0f);
-
-    OffsetF caretOffset(10.0f, 50.0f);
-    float caretHeight = 20.0f;
-    float keyboardOffset = 0.0f;
-
-    float result = scrollController->CalCaretToContentRectDistanceVertical(caretOffset, caretHeight, keyboardOffset);
-    EXPECT_EQ(result, -60.0f);
-}
-
-/**
- * @tc.name: CalCaretToContentRectDistanceVertical004
- * @tc.desc: test CalCaretToContentRectDistanceVertical
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorScrollControllerTest, CalCaretToContentRectDistanceVertical004, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto& scrollController = richEditorPattern->scrollController_;
-    scrollController->textRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
-    scrollController->contentRect_ = RectF(0.0f, 0.0f, 10.0f, 10.0f);
-
-    OffsetF caretOffset(10.0f, 0.0f);
-    float caretHeight = 150.0f;
-    float keyboardOffset = 0.0f;
-
-    float result = scrollController->CalCaretToContentRectDistanceVertical(caretOffset, caretHeight, keyboardOffset);
-    EXPECT_EQ(result, -140.0f);
-}
-
-/**
- * @tc.name: CalCaretToContentRectDistanceVertical005
- * @tc.desc: test CalCaretToContentRectDistanceVertical
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorScrollControllerTest, CalCaretToContentRectDistanceVertical005, TestSize.Level0)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto& scrollController = richEditorPattern->scrollController_;
-    scrollController->textRect_ = RectF(0.0f, 0.0f, 100.0f, 100.0f);
-    scrollController->contentRect_ = RectF(0.0f, 0.0f, 10.0f, 10.0f);
-
-    OffsetF caretOffset(10.0f, 120.0f);
-    float caretHeight = 20.0f;
-    float keyboardOffset = 30.0f;
-
-    float result = scrollController->CalCaretToContentRectDistanceVertical(caretOffset, caretHeight, keyboardOffset);
-    EXPECT_EQ(result, -160.0f);  // contentRect_.Bottom() - keyboardOffset - caretOffset.GetY() - caretHeight
+    scrollController->contentRect_ = RectF(10.0f, 0.0f, 80.0f, 100.0f); // Left=10, Right=90
+    // caret within content
+    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceHorizontal(OffsetF(20.0f, 0.0f), 10.0f), 0.0f);
+    // caret left of content
+    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceHorizontal(OffsetF(0.0f, 0.0f), 5.0f), 10.0f);
+    // caret right of content
+    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceHorizontal(OffsetF(95.0f, 0.0f), 10.0f), -15.0f);
+    // caret spans entire content
+    EXPECT_EQ(scrollController->CalCaretToContentRectDistanceHorizontal(OffsetF(0.0f, 0.0f), 100.0f), 0.0f);
 }
 
 /**
@@ -1273,5 +1232,40 @@ HWTEST_F(RichEditorScrollControllerTest, RemoveOverlayModifierScrollBarOverlay00
 
     auto scrollBarOverlayModifierAfter = richEditorPattern->GetScrollBarOverlayModifier();
     EXPECT_NE(scrollBarOverlayModifierAfter, nullptr);
+}
+
+/**
+ * @tc.name: UpdateScrollBar001
+ * @tc.desc: test UpdateScrollBar and UpdateScrollBarAxis
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorScrollControllerTest, UpdateScrollBar001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto& scrollController = richEditorPattern->scrollController_;
+
+    scrollController->SetScrollBar(DisplayMode::ON);
+    ASSERT_NE(scrollController->scrollBar_, nullptr);
+    auto verticalBar = scrollController->scrollBar_->GetVerticalBar();
+    auto horizontalBar = scrollController->scrollBar_->GetHorizontalBar();
+    ASSERT_NE(verticalBar, nullptr);
+    ASSERT_NE(horizontalBar, nullptr);
+
+    // vertical bar needs paint, enter if branch, animation types reset to NONE
+    verticalBar->SetScrollable(true);
+    verticalBar->SetHoverAnimationType(HoverAnimationType::GROW);
+    verticalBar->SetOpacityAnimationType(OpacityAnimationType::APPEAR);
+
+    // horizontal bar does not need paint, skip if branch, animation types unchanged
+    horizontalBar->SetHoverAnimationType(HoverAnimationType::GROW);
+    horizontalBar->SetOpacityAnimationType(OpacityAnimationType::APPEAR);
+
+    scrollController->UpdateScrollBar();
+    EXPECT_EQ(verticalBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    EXPECT_EQ(verticalBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
+    EXPECT_EQ(horizontalBar->GetHoverAnimationType(), HoverAnimationType::GROW);
+    EXPECT_EQ(horizontalBar->GetOpacityAnimationType(), OpacityAnimationType::APPEAR);
 }
 }

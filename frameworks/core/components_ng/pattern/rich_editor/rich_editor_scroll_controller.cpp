@@ -14,6 +14,8 @@
  */
 
 #include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
+#include "core/components_ng/base/observer_handler.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -90,17 +92,6 @@ bool RichEditorScrollController::IsReachBoundary()
     return IsReachLowerBoundary() || IsReachUpperBoundary();
 }
 
-bool RichEditorScrollController::IsReachLowerBoundary(const Offset& textOffset)
-{
-    return isSingleLineMode_ ? LessOrEqual(textOffset.GetX(), 0) : LessOrEqual(textOffset.GetY(), 0);
-}
-
-bool RichEditorScrollController::IsReachUpperBoundary(const Offset& textOffset, const SizeF& contentSize)
-{
-    return isSingleLineMode_ ? GreatOrEqual(textOffset.GetX(), contentSize.Width())
-                             : GreatOrEqual(textOffset.GetY(), contentSize.Height());
-}
-
 bool RichEditorScrollController::IsReachAvoidBoundary(float offset)
 {
     auto axis = isSingleLineMode_ ? Axis::HORIZONTAL : Axis::VERTICAL;
@@ -140,7 +131,7 @@ void RichEditorScrollController::ScheduleAutoScroll(AutoScrollParam param)
         if (controller->IsFreeScrollEnabled()) {
             controller->ProcessAutoScroll();
         } else {
-            pattern->OnAutoScroll(controller->currentScrollParam_);
+            controller->OnAutoScroll(controller->currentScrollParam_);
         }
         if (controller->IsReachBoundary(isVertical)) {
             controller->StopAutoScroll();
@@ -156,8 +147,7 @@ void RichEditorScrollController::StopAutoScroll()
     isAutoScrollRunning_ = false;
     autoScrollTask_.Cancel();
     prevAutoScrollOffset_ = OffsetF(0.0f, 0.0f);
-    auto pattern = weakPattern_.Upgrade();
-    IF_PRESENT(pattern, ScheduleDisappearDelayTask());
+    ScheduleDisappearDelayTask();
 }
 
 float RichEditorScrollController::GetAutoScrollOffsetDiff(const OffsetF& offset)
@@ -175,27 +165,34 @@ bool RichEditorScrollController::GetHotAreaOverflow(bool isDragging, float edgeT
     return isSingleLineMode_ ? GreatNotEqual(doubleThreshold, maxWidth) : GreatNotEqual(doubleThreshold, maxHeight);
 }
 
-void RichEditorScrollController::AutoScrollByEdgeDetection(
+RectF RichEditorScrollController::GetSafeAreaRect(bool isDragging)
+{
+    float edgeThreshold = isDragging ? AUTO_SCROLL_DRAG_EDGE_DIS.ConvertToPx() : AUTO_SCROLL_EDGE_DIS.ConvertToPx();
+    return RectF(
+        isDragging ? edgeThreshold : contentRect_.GetX() + edgeThreshold,
+        isDragging ? edgeThreshold : contentRect_.GetY() + edgeThreshold,
+        (isDragging ? frameRect_.Width() : contentRect_.Width()) - 2.0f * edgeThreshold,
+        (isDragging ? frameRect_.Height() : contentRect_.Height()) - 2.0f * edgeThreshold
+    );
+}
+
+void RichEditorScrollController::HandleAutoScrollNearBoundary(
     AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy)
 {
     auto scrollOffsetDiff = GetAutoScrollOffsetDiff(offset);
     CHECK_NULL_VOID(!NearZero(scrollOffsetDiff));
     prevAutoScrollOffset_ = offset;
-    auto contentRect = contentRect_;
     auto isDragging = param.autoScrollEvent == AutoScrollEvent::DRAG;
     float edgeThreshold = isDragging ? AUTO_SCROLL_DRAG_EDGE_DIS.ConvertToPx() : AUTO_SCROLL_EDGE_DIS.ConvertToPx();
     bool hotAreaOverflow = GetHotAreaOverflow(isDragging, edgeThreshold);
     if (hotAreaOverflow) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AutoScrollByEdgeDetection: hot area height is great than max height.");
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleAutoScrollNearBoundary: hot area height is great than max height.");
         return;
     }
-    float topEdgeThreshold = isDragging ? edgeThreshold : edgeThreshold + contentRect.GetY();
-    float leftEdgeThreshold = isDragging ? edgeThreshold : edgeThreshold + contentRect.GetX();
-    float bottomThreshold = isDragging ? frameRect_.Height() - edgeThreshold : contentRect.Bottom() - edgeThreshold;
-    float rightThreshold = isDragging ? frameRect_.Width() - edgeThreshold : contentRect.Right() - edgeThreshold;
+    auto safeAreaRect = GetSafeAreaRect(isDragging);
     RectF handleRect{ offset, param.handleRect.GetSize() };
-    auto lowerThreshold = isSingleLineMode_ ? leftEdgeThreshold : topEdgeThreshold;
-    auto upperThreshold = isSingleLineMode_ ? rightThreshold : bottomThreshold;
+    auto lowerThreshold = isSingleLineMode_ ? safeAreaRect.Left() : safeAreaRect.Top();
+    auto upperThreshold = isSingleLineMode_ ? safeAreaRect.Right() : safeAreaRect.Bottom();
     auto handleLower = isSingleLineMode_ ? handleRect.Left() : handleRect.Top();
     auto handleUpper = isSingleLineMode_ ? handleRect.Right() : handleRect.Bottom();
     if (param.autoScrollEvent == AutoScrollEvent::HANDLE) {
@@ -264,7 +261,15 @@ void RichEditorScrollController::MoveSecondHandleOnScroll(const OffsetF& offset)
 
 float RichEditorScrollController::MoveTextRect(float offset)
 {
-    return isSingleLineMode_ ? MoveTextRectHorizontal(offset) : MoveTextRectVertical(offset);
+    offset = isSingleLineMode_ ? MoveTextRectHorizontal(offset) : MoveTextRectVertical(offset);
+    UpdateScrollBarOffset();
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_RETURN(pattern, offset);
+    pattern->UpdateChildrenOffset();
+    if (auto host = pattern->GetContentHost(); host) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    return offset;
 }
 
 float RichEditorScrollController::MoveTextRectHorizontal(float offset)
@@ -290,7 +295,7 @@ float RichEditorScrollController::MoveTextRectVertical(float offset)
     auto pattern = weakPattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, 0.0f);
     auto keyboardOffset = pattern->GetCrossOverHeight();
-    if (GreatNotEqual(textRect_.Height(), contentRect_.Height() - keyboardOffset)) {
+    if (NeedScroll(true, keyboardOffset)) {
         if (GreatNotEqual(textRect_.GetY() + offset, contentRect_.GetY())) {
             offset = contentRect_.GetY() - textRect_.GetY();
         } else if (LessNotEqual(textRect_.Bottom() + offset, contentRect_.Bottom() - keyboardOffset)) {
@@ -346,15 +351,133 @@ bool RichEditorScrollController::NeedScroll()
     return NeedScroll(!isSingleLineMode_);
 }
 
-bool RichEditorScrollController::NeedScroll(bool isVertical)
+bool RichEditorScrollController::NeedScroll(bool isVertical, float keyboardOffset)
 {
-    return isVertical ? GreatNotEqual(textRect_.Height(), contentRect_.Height())
-                      : GreatNotEqual(textRect_.Width(), contentRect_.Width());
+    if (isVertical) {
+        return !isSingleLineMode_ && GreatNotEqual(textRect_.Height(), contentRect_.Height() - keyboardOffset);
+    }
+    return GreatNotEqual(textRect_.Width(), contentRect_.Width());
 }
 
 float RichEditorScrollController::GetScrollOffset()
 {
     return scrollOffset_;
+}
+
+void RichEditorScrollController::HandleScrollStart()
+{
+    if (selectOverlay_->SelectOverlayIsOn()) {
+        selectOverlay_->HideMenu(true);
+    }
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    pattern->CloseAIMenu();
+#ifndef CROSS_PLATFORM
+    pattern->RecordScrollEvent(Recorder::EventType::SCROLL_START);
+#endif
+    UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
+        weakPattern_, ScrollEventType::SCROLL_START);
+}
+
+bool RichEditorScrollController::HandleScrollCallback(float offset, int32_t source)
+{
+    CHECK_NULL_RETURN(offset != 0, false);
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_RETURN(pattern, false);
+    auto scrollBar = pattern->GetScrollBar();
+    if (source == SCROLL_FROM_START) {
+        IF_PRESENT(scrollBar, PlayScrollBarAppearAnimation());
+        HandleScrollStart();
+        return true;
+    }
+    if (IsReachAvoidBoundary(offset)) {
+        return false;
+    }
+    if (scrollBar && source == SCROLL_FROM_JUMP) {
+        scrollBar->PlayScrollBarAppearAnimation();
+        scrollBar->ScheduleDisappearDelayTask();
+    }
+    auto newOffset = MoveTextRect(offset);
+    MoveHandleOnScroll(newOffset);
+    pattern->ClearAISpanRects();
+    return true;
+}
+
+void RichEditorScrollController::MoveCaretToContentRectHorizontal(const OffsetF& caretOffset)
+{
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "MoveCaretToContentRect Horizontal");
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    if (LessOrEqual(textRect_.Width(), contentRect_.Width()) || pattern->isShowPlaceholder_) {
+        return;
+    }
+    auto caretWidth = pattern->GetOverlayCaretWidth();
+    float distance = CalCaretToContentRectDistanceHorizontal(caretOffset, caretWidth);
+    HandleScrollCallback(distance, SCROLL_FROM_NONE);
+}
+
+void RichEditorScrollController::MoveCaretToContentRectVertical(const OffsetF& caretOffset, float caretHeight)
+{
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "MoveCaretToContentRect Vertical");
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto keyboardOffset = pattern->GetCrossOverHeight();
+    auto scrollBar = pattern->GetScrollBar();
+    if (scrollBar) {
+        scrollBar->PlayScrollBarAppearAnimation();
+        scrollBar->ScheduleDisappearDelayTask();
+    }
+    if (LessOrEqual(textRect_.Height(), contentRect_.Height() - keyboardOffset) || pattern->isShowPlaceholder_) {
+        return;
+    }
+    float distance = CalCaretToContentRectDistanceVertical(caretOffset, caretHeight, keyboardOffset);
+    HandleScrollCallback(distance, SCROLL_FROM_NONE);
+}
+
+void RichEditorScrollController::MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight)
+{
+    if (IsFreeScrollEnabled()) {
+        auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+        CHECK_NULL_VOID(pattern);
+        auto caretWidth = pattern->GetOverlayCaretWidth();
+        auto caretRect = RectF(caretOffset, SizeF(caretWidth, caretHeight));
+        MoveCaretToContentRect(caretRect);
+        return;
+    }
+    isSingleLineMode_ ? MoveCaretToContentRectHorizontal(caretOffset)
+                      : MoveCaretToContentRectVertical(caretOffset, caretHeight);
+}
+
+void RichEditorScrollController::OnAutoScroll(AutoScrollParam param)
+{
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    if (param.showScrollbar) {
+        auto scrollBar = pattern->GetScrollBar();
+        IF_PRESENT(scrollBar, PlayScrollBarAppearAnimation());
+        param.showScrollbar = false;
+    }
+    CHECK_NULL_VOID(param.autoScrollEvent != AutoScrollEvent::NONE);
+    auto newOffset = MoveTextRect(param.offset);
+    switch (param.autoScrollEvent) {
+        case AutoScrollEvent::CARET:
+            break;
+        case AutoScrollEvent::HANDLE: {
+            MoveHandleOnScroll(newOffset, !param.isFirstHandle);
+            selectOverlay_->OnHandleMove(param.handleRect, param.isFirstHandle);
+            break;
+        }
+        case AutoScrollEvent::DRAG:
+            break;
+        case AutoScrollEvent::MOUSE:
+            pattern->HandleMouseAutoScroll(param);
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "Unsupported auto scroll event type");
+            return;
+    }
+    CHECK_NULL_VOID(!NearEqual(newOffset, 0.0f));
+    ScheduleAutoScroll(param);
 }
 
 bool RichEditorScrollController::IsFreeScrollEnabled() const
@@ -396,12 +519,19 @@ void RichEditorScrollController::PlayScrollBarAppearAnimation(Axis axis)
 
 void RichEditorScrollController::ScheduleDisappearDelayTask()
 {
-    if (scrollingAxis_ != Axis::NONE) {
-        ScheduleDisappearDelayTask(scrollingAxis_);
+    if (IsFreeScrollEnabled()) {
+        if (scrollingAxis_ != Axis::NONE) {
+            ScheduleDisappearDelayTask(scrollingAxis_);
+            return;
+        }
+        ScheduleDisappearDelayTask(Axis::VERTICAL);
+        ScheduleDisappearDelayTask(Axis::HORIZONTAL);
         return;
     }
-    ScheduleDisappearDelayTask(Axis::VERTICAL);
-    ScheduleDisappearDelayTask(Axis::HORIZONTAL);
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto scrollBar = pattern->GetScrollBar();
+    IF_PRESENT(scrollBar, ScheduleDisappearDelayTask());
 }
 
 void RichEditorScrollController::ScheduleDisappearDelayTask(Axis axis)
@@ -413,8 +543,13 @@ void RichEditorScrollController::ScheduleDisappearDelayTask(Axis axis)
 
 void RichEditorScrollController::StopScrolling()
 {
-    CHECK_NULL_VOID(freeScrollController_);
-    freeScrollController_->StopAllScrollAnimation();
+    if (IsFreeScrollEnabled()) {
+        freeScrollController_->StopAllScrollAnimation();
+        return;
+    }
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    pattern->StopScrollable();
 }
 
 void RichEditorScrollController::OnDrawScrollBar(DrawingContext& context)
@@ -424,38 +559,63 @@ void RichEditorScrollController::OnDrawScrollBar(DrawingContext& context)
     }
 }
 
-void RichEditorScrollController::UpdateScrollBarColor(std::optional<Color> color)
+void RichEditorScrollController::UpdateScrollBarColor(const Color& foregroundColor, const Color& backgroundColor)
 {
-    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
-    CHECK_NULL_VOID(pattern);
-    auto scrollbarTheme = pattern->GetTheme<ScrollBarTheme>();
-    CHECK_NULL_VOID(scrollBar_ && scrollbarTheme);
-    auto scrollBarColor = color.value_or(scrollbarTheme->GetForegroundColor());
-    auto backgroundColor = scrollbarTheme->GetBackgroundColor();
+    if (!IsFreeScrollEnabled()) {
+        auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        scrollBar->SetForegroundColor(foregroundColor);
+        scrollBar->SetBackgroundColor(backgroundColor);
+        return;
+    }
+    CHECK_NULL_VOID(scrollBar_);
     if (auto verticalBar = scrollBar_->GetVerticalBar(); verticalBar) {
-        verticalBar->SetForegroundColor(scrollBarColor);
+        verticalBar->SetForegroundColor(foregroundColor);
         verticalBar->SetBackgroundColor(backgroundColor);
     }
     if (auto horizontalBar = scrollBar_->GetHorizontalBar(); horizontalBar) {
-        horizontalBar->SetForegroundColor(scrollBarColor);
+        horizontalBar->SetForegroundColor(foregroundColor);
         horizontalBar->SetBackgroundColor(backgroundColor);
     }
 }
 
+void RichEditorScrollController::UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty)
+{
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto property = pattern->GetLayoutProperty<RichEditorLayoutProperty>();
+    IF_TRUE(isUpdateProperty && property, property->UpdateScrollBarColor(color));
+    auto scrollbarTheme = pattern->GetTheme<ScrollBarTheme>();
+    CHECK_NULL_VOID(scrollbarTheme);
+    auto foregroundColor = color.value_or(scrollbarTheme->GetForegroundColor());
+    auto backgroundColor = scrollbarTheme->GetBackgroundColor();
+    UpdateScrollBarColor(foregroundColor, backgroundColor);
+}
+
 bool RichEditorScrollController::IsMouseOverScrollBar(const MouseInfo& info)
 {
-    CHECK_NULL_RETURN(scrollBar_, false);
-    auto point = Point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
-    auto verticalBar = scrollBar_->GetVerticalBar();
-    if (verticalBar && (verticalBar->IsPressed() || verticalBar->IsHover() || IsPointInScrollBarRect(point, true))) {
-        return true;
+    if (IsFreeScrollEnabled()) {
+        CHECK_NULL_RETURN(scrollBar_, false);
+        auto point = Point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+        auto verticalBar = scrollBar_->GetVerticalBar();
+        if (verticalBar &&
+            (verticalBar->IsPressed() || verticalBar->IsHover() || IsPointInScrollBarRect(point, true))) {
+            return true;
+        }
+        auto horizontalBar = scrollBar_->GetHorizontalBar();
+        if (horizontalBar &&
+            (horizontalBar->IsPressed() || horizontalBar->IsHover() || IsPointInScrollBarRect(point, false))) {
+            return true;
+        }
+        return false;
     }
-    auto horizontalBar = scrollBar_->GetHorizontalBar();
-    if (horizontalBar &&
-        (horizontalBar->IsPressed() || horizontalBar->IsHover() || IsPointInScrollBarRect(point, false))) {
-        return true;
-    }
-    return false;
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_RETURN(pattern, false);
+    auto scrollBar = pattern->GetScrollBar();
+    CHECK_NULL_RETURN(scrollBar, false);
+    return (scrollBar->IsHover() || scrollBar->IsPressed());
 }
 
 bool RichEditorScrollController::IsPointInScrollBarRect(const Point& point, bool isVertical)
@@ -494,7 +654,7 @@ void RichEditorScrollController::CheckScrollEnabled()
 {
     auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
-    bool needVerticalScroll = !isSingleLineMode_ && NeedScroll(true);
+    bool needVerticalScroll = NeedScroll(true);
     bool needHorizontalScroll = NeedScroll(false);
     auto enabled = pattern->GetTextContentLength() > 0 && (needVerticalScroll || needHorizontalScroll);
     if (freeScrollController_) {
@@ -600,42 +760,48 @@ void RichEditorScrollController::UpdateBorderRadius()
     }
 }
 
-void RichEditorScrollController::UpdateScrollBar()
+void RichEditorScrollController::UpdateScrollBarAxis(bool isVertical)
 {
     CHECK_NULL_VOID(scrollBar_);
     auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
-    auto layoutProperty = pattern->GetLayoutProperty<RichEditorLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    auto verticalModifier = scrollBar_->GetVerticalModifier();
-    auto verticalBar = scrollBar_->GetVerticalBar();
-    if (verticalModifier && verticalBar && verticalBar->NeedPaint()) {
-        verticalModifier->StartBarAnimation(verticalBar->GetHoverAnimationType(),
-            verticalBar->GetOpacityAnimationType(), verticalBar->GetNeedAdaptAnimation(), verticalBar->GetActiveRect());
-        verticalBar->SetHoverAnimationType(HoverAnimationType::NONE);
+    auto modifier = isVertical ? scrollBar_->GetVerticalModifier() : scrollBar_->GetHorizontalModifier();
+    auto bar = isVertical ? scrollBar_->GetVerticalBar() : scrollBar_->GetHorizontalBar();
+    if (modifier && bar && bar->NeedPaint()) {
+        modifier->StartBarAnimation(bar->GetHoverAnimationType(), bar->GetOpacityAnimationType(),
+            bar->GetNeedAdaptAnimation(), bar->GetActiveRect());
+        bar->SetHoverAnimationType(HoverAnimationType::NONE);
         auto barColorValue = pattern->GetScrollBarColor();
-        verticalModifier->SetBarColor(barColorValue);
-        verticalBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+        modifier->SetBarColor(barColorValue);
+        bar->SetOpacityAnimationType(OpacityAnimationType::NONE);
     }
+}
 
-    auto horizontalModifier = scrollBar_->GetHorizontalModifier();
-    auto horizontalBar = scrollBar_->GetHorizontalBar();
-    if (horizontalModifier && horizontalBar && horizontalBar->NeedPaint()) {
-        horizontalModifier->StartBarAnimation(horizontalBar->GetHoverAnimationType(),
-            horizontalBar->GetOpacityAnimationType(), horizontalBar->GetNeedAdaptAnimation(),
-            horizontalBar->GetActiveRect());
-        horizontalBar->SetHoverAnimationType(HoverAnimationType::NONE);
-        auto barColorValue = pattern->GetScrollBarColor();
-        horizontalModifier->SetBarColor(barColorValue);
-        horizontalBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
-    }
+void RichEditorScrollController::UpdateScrollBar()
+{
+    UpdateScrollBarAxis(true);
+    UpdateScrollBarAxis(false);
 }
 
 void RichEditorScrollController::UpdateScrollBarOffset()
 {
-    UpdateScrollBarOffsetWithAxis(Axis::VERTICAL, (scrollingAxis_ != Axis::HORIZONTAL));
-    UpdateScrollBarOffsetWithAxis(Axis::HORIZONTAL, (scrollingAxis_ != Axis::VERTICAL));
+    if (IsFreeScrollEnabled()) {
+        UpdateScrollBarOffsetWithAxis(Axis::VERTICAL, (scrollingAxis_ != Axis::HORIZONTAL));
+        UpdateScrollBarOffsetWithAxis(Axis::HORIZONTAL, (scrollingAxis_ != Axis::VERTICAL));
+        return;
+    }
+    auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetScrollBar() && !pattern->GetScrollBarProxy()) {
+        return;
+    }
+    Size size(frameRect_.Width(), frameRect_.Height());
+    auto verticalGap = frameRect_.Height() - contentRect_.Height();
+    pattern->UpdateScrollBarRegion(
+        contentRect_.GetY() - textRect_.GetY(), textRect_.Height() + verticalGap, size, Offset(0.0, 0.0));
+    auto tmpHost = pattern->GetHost();
+    CHECK_NULL_VOID(tmpHost);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void RichEditorScrollController::PlayScrollBarUpdateAnimation(Axis axis)
@@ -653,6 +819,7 @@ void RichEditorScrollController::UpdateScrollBarOffsetWithAxis(Axis axis, bool n
     CHECK_NULL_VOID(pattern);
     bool hasText = (pattern->GetTextContentLength() > 0);
     IF_TRUE(needAnimation, PlayScrollBarUpdateAnimation(axis));
+    CHECK_NULL_VOID(axis == Axis::VERTICAL || axis == Axis::HORIZONTAL);
     if (axis == Axis::VERTICAL) {
         auto verticalGap = frameRect_.Height() - contentRect_.Height();
         Size size(frameRect_.Width(), frameRect_.Height());
@@ -665,8 +832,6 @@ void RichEditorScrollController::UpdateScrollBarOffsetWithAxis(Axis axis, bool n
         scrollBar_->UpdateHorizontalBar(
             contentRect_.GetX() - textRect_.GetX(), textRect_.Width() + horizontalGap, size, Offset(0.0, 0.0));
         scrollBar_->SetHorizontalScrollable(scrollBar_->IsHorizontalScrollable() && hasText);
-    } else {
-        return;
     }
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -676,12 +841,10 @@ void RichEditorScrollController::UpdateScrollBarOffsetWithAxis(Axis axis, bool n
 void RichEditorScrollController::SetMinHeight(const Dimension& height)
 {
     CHECK_NULL_VOID(scrollBar_);
-    auto verticalBar = scrollBar_->GetVerticalBar();
-    if (verticalBar) {
+    if (auto verticalBar = scrollBar_->GetVerticalBar()) {
         verticalBar->SetMinHeight(height);
     }
-    auto horizontalBar = scrollBar_->GetHorizontalBar();
-    if (horizontalBar) {
+    if (auto horizontalBar = scrollBar_->GetHorizontalBar()) {
         horizontalBar->SetMinHeight(height);
     }
 }
@@ -693,20 +856,15 @@ bool RichEditorScrollController::IsAttachedModifier() const
 
 void RichEditorScrollController::AttachModifier(const RefPtr<OverlayModifier>& modifier)
 {
-    if (isScrollBarModifierPropertyAttached_) {
-        return;
-    }
-    CHECK_NULL_VOID(modifier);
-    CHECK_NULL_VOID(scrollBar_);
+    CHECK_NULL_VOID(!isScrollBarModifierPropertyAttached_);
+    CHECK_NULL_VOID(modifier && scrollBar_);
     auto verticalModifier = scrollBar_->GetVerticalModifier();
-    CHECK_NULL_VOID(verticalModifier);
-    for (const auto& prop : verticalModifier->GetAttachedProperties()) {
-        modifier->AttachProperty(prop);
-    }
     auto horizontalModifier = scrollBar_->GetHorizontalModifier();
-    CHECK_NULL_VOID(horizontalModifier);
-    for (const auto& prop : horizontalModifier->GetAttachedProperties()) {
-        modifier->AttachProperty(prop);
+    CHECK_NULL_VOID(verticalModifier && horizontalModifier);
+    for (const auto& scrollModifier : {verticalModifier, horizontalModifier}) {
+        for (const auto& prop : scrollModifier->GetAttachedProperties()) {
+            modifier->AttachProperty(prop);
+        }
     }
     isScrollBarModifierPropertyAttached_ = true;
 }
@@ -731,7 +889,7 @@ bool RichEditorScrollController::OnScrollWithAxisCallback(float offset, int32_t 
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Scroll start with axis:%{public}d", axis);
         scrollingAxis_ = axis;
         PlayScrollBarAppearAnimation(axis);
-        pattern->HandleScrollStart();
+        HandleScrollStart();
         return true;
     }
     CHECK_NULL_RETURN(offset != 0 && !IsReachAvoidBoundary(offset, axis), false);
@@ -816,47 +974,30 @@ void RichEditorScrollController::MoveCaretToContentRect(const RectF& caretRect)
     auto pattern = DynamicCast<RichEditorPattern>(weakPattern_.Upgrade());
     CHECK_NULL_VOID(pattern && !pattern->isShowPlaceholder_);
     auto caretOffset = caretRect.GetOffset();
-    auto caretWidth = caretRect.Width();
-    auto caretHeight = caretRect.Height();
     auto keyboardOffset = pattern->GetCrossOverHeight();
-    bool needVerticalScroll =
-        !isSingleLineMode_ && GreatNotEqual(textRect_.Height(), contentRect_.Height() - keyboardOffset);
-    bool needHorizontalScroll = NeedScroll(false);
-    if (needVerticalScroll) {
-        float distance = CalCaretToContentRectDistanceVertical(caretOffset, caretHeight, keyboardOffset);
-        PlayScrollBarAppearAnimation(Axis::VERTICAL);
-        ScheduleDisappearDelayTask(Axis::VERTICAL);
-        OnScrollWithAxisCallback(distance, SCROLL_FROM_NONE, Axis::VERTICAL);
-    }
-    if (needHorizontalScroll) {
-        float distance = CalCaretToContentRectDistanceHorizontal(caretOffset, caretWidth);
-        PlayScrollBarAppearAnimation(Axis::HORIZONTAL);
-        ScheduleDisappearDelayTask(Axis::HORIZONTAL);
-        OnScrollWithAxisCallback(distance, SCROLL_FROM_NONE, Axis::HORIZONTAL);
-    }
+    MoveCaretToContentRectWithAxis(true, caretOffset, caretRect.Height(), keyboardOffset);
+    MoveCaretToContentRectWithAxis(false, caretOffset, caretRect.Width());
 }
 
-bool RichEditorScrollController::IsHotAreaOverflow(bool isDragging, float edgeThreshold, bool isVertical)
+void RichEditorScrollController::MoveCaretToContentRectWithAxis(
+    bool isVertical, const OffsetF& caretOffset, float caretSize, float keyboardOffset)
 {
-    auto maxHeight = isDragging ? frameRect_.Height() : contentRect_.Height();
-    auto maxWidth = isDragging ? frameRect_.Width() : contentRect_.Width();
-    auto doubleThreshold = edgeThreshold * 2;
-    return isVertical ? GreatNotEqual(doubleThreshold, maxHeight) : GreatNotEqual(doubleThreshold, maxWidth);
+    CHECK_NULL_VOID(NeedScroll(isVertical, keyboardOffset));
+    Axis axis = isVertical ? Axis::VERTICAL : Axis::HORIZONTAL;
+    float distance = isVertical
+        ? CalCaretToContentRectDistanceVertical(caretOffset, caretSize, keyboardOffset)
+        : CalCaretToContentRectDistanceHorizontal(caretOffset, caretSize);
+    PlayScrollBarAppearAnimation(axis);
+    ScheduleDisappearDelayTask(axis);
+    OnScrollWithAxisCallback(distance, SCROLL_FROM_NONE, axis);
 }
 
 void RichEditorScrollController::HandleAutoScrollNearBoundary(AutoScrollParam param, OffsetF offset)
 {
     CHECK_NULL_VOID(prevAutoScrollOffset_ != offset);
     prevAutoScrollOffset_ = offset;
-    auto contentRect = contentRect_;
     auto isDragging = param.autoScrollEvent == AutoScrollEvent::DRAG;
-    float edgeThreshold = isDragging ? AUTO_SCROLL_DRAG_EDGE_DIS.ConvertToPx() : AUTO_SCROLL_EDGE_DIS.ConvertToPx();
-    auto safeAreaRect = RectF(
-        isDragging ? edgeThreshold : contentRect.GetX() + edgeThreshold,
-        isDragging ? edgeThreshold : contentRect.GetY() + edgeThreshold,
-        (isDragging ? frameRect_.Width()  : contentRect.Width())  - 2.0f * edgeThreshold,
-        (isDragging ? frameRect_.Height() : contentRect.Height()) - 2.0f * edgeThreshold
-    );
+    auto safeAreaRect = GetSafeAreaRect(isDragging);
     auto point = PointF(offset.GetX(), offset.GetY());
     if (param.autoScrollEvent == AutoScrollEvent::HANDLE) {
         point.SetY(offset.GetY() + param.handleRect.Height() / 2.0f);
@@ -955,13 +1096,9 @@ void RichEditorScrollController::ProcessAutoScroll()
         }
         case AutoScrollEvent::DRAG:
             break;
-        case AutoScrollEvent::MOUSE: {
-            auto textOffset = pattern->ConvertTouchOffsetToTextOffset(param.eventOffset);
-            int32_t extend = (pattern->GetTextContentLength() == 0) ? 0 : pattern->paragraphs_.GetIndex(textOffset);
-            pattern->UpdateSelector(pattern->textSelector_.baseOffset, extend);
-            pattern->SetCaretPosition(std::max(pattern->textSelector_.baseOffset, extend));
+        case AutoScrollEvent::MOUSE:
+            pattern->HandleMouseAutoScroll(param);
             break;
-        }
         default:
             TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "Unsupported auto scroll event type");
             return;
@@ -992,7 +1129,7 @@ bool RichEditorScrollController::UpdateScrollState()
 bool RichEditorScrollController::UpdateVerticalScrollState()
 {
     auto hasTextOffsetChanged = false;
-    bool needVerticalScroll = NeedScroll(true);
+    bool needVerticalScroll = GreatNotEqual(textRect_.Height(), contentRect_.Height());
     if (GreatNotEqual(textRect_.GetY(), contentRect_.GetY())) {
         textRect_.SetTop(contentRect_.GetY());
         hasTextOffsetChanged = true;
@@ -1050,7 +1187,7 @@ void RichEditorScrollController::ScrollToVisible(int32_t start, int32_t end)
     CHECK_NULL_VOID(pattern);
     auto layoutProperty = pattern->GetLayoutProperty<RichEditorLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    pattern->StopScrolling();
+    StopScrolling();
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto destOffset = CalculateDestination(start, end, isRTL);
     auto contentEdgeX = isRTL ? contentRect_.Right() : contentRect_.Left();
