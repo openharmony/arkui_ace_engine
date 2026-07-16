@@ -20,7 +20,7 @@ import {
   BorderStyle, KeyType, TouchType, Placement, CustomPopupOptions, GeometryInfo, Layoutable, ConstraintSizeOptions,
   Builder, focusControl, LocalizedPadding, Padding, PopupStateChangeParam, SymbolEffectStrategy, SymbolEffect,
   TextAlign, BlurStyle, ButtonOptions, HoverEvent, KeyEvent, TouchEvent, ClickEvent, ShadowStyle,
-  Margin
+  Margin, AccessibilityRoleType
 } from '@ohos.arkui.component';
 import resourceManager from '@ohos.resourceManager';
 import { State, Observed, PropRef, StoragePropRef, Watch, StorageLink, Provide, Consume, Link } from '@ohos.arkui.stateManagement'
@@ -178,7 +178,7 @@ export struct ComposeTitleBar {
           .constraintSize({ maxWidth: this.titleMaxWidth })
         }
         .accessibilityGroup(true)
-        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
+        .accessibilityRole(AccessibilityRoleType.TITLE_BAR)
       }
       .margin({ left: $r('sys.float.ohos_id_default_padding_start') } as Margin)
       if ((this.menuItems?.length ?? 0) > 0) {

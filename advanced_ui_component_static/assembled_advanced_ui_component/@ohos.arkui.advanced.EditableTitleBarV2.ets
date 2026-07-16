@@ -20,7 +20,8 @@ import {
   Button, ButtonType, SymbolGlyph, SymbolEffectStrategy, SymbolEffect, ImageFit, BlurStyle, SafeAreaType,
   SafeAreaEdge, Direction, ShadowStyle, $r, Margin, Padding, ButtonOptions, HoverEvent, ClickEvent,
   UIContext, Resource, Stack, Alignment, ResourceStr, CommonMethod,
-  ResourceColor, LocalizedMargin, GestureModifier, UIGestureEvent, LongPressGestureHandler
+  ResourceColor, LocalizedMargin, GestureModifier, UIGestureEvent, LongPressGestureHandler,
+  AccessibilityRoleType
 } from '@ohos.arkui.component';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
 import { LengthMetrics } from '@ohos.arkui.node';
@@ -487,7 +488,7 @@ export struct EditableTitleBarV2 {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(true)
-        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
+        .accessibilityRole(AccessibilityRoleType.TITLE_BAR)
 
         Row() {
           this.rightMenuItemsLayoutV2();

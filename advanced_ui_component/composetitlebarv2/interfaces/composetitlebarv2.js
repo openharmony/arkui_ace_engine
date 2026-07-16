@@ -268,13 +268,7 @@ export class ComposeTitleBarV2 extends ViewV2 {
         this.observeComponentCreation2((f9, g9) => {
             Row.create();
             Row.accessibilityGroup(true);
-            Row.accessibilityDescription({
-                'id': -1,
-                'type': 10003,
-                params: ['sys.string.subheader_accessibility_title'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            });
+            Row.accessibilityRole(AccessibilityRoleType.TITLE_BAR);
         }, Row);
         this.observeComponentCreation2((b9, c9) => {
             If.create();

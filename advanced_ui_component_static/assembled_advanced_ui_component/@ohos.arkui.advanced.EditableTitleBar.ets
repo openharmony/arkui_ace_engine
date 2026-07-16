@@ -21,7 +21,8 @@ import {
   BorderStyle, TouchEvent, TouchType, KeyEvent, KeyType, Button, ButtonType, SymbolGlyph, SymbolEffectStrategy,
   SymbolEffect, Resource, Image, Stack, Alignment, ImageFit, Circle, Direction, ShadowStyle, $r, Margin,
   Padding, ButtonOptions, HoverEvent, ClickEvent, TapGestureHandler, PanGestureHandler,
-  GestureEvent, applyStyles, CustomDialog, CustomDialogControllerOptions, CustomLayout, Callback
+  GestureEvent, applyStyles, CustomDialog, CustomDialogControllerOptions, CustomLayout, Callback,
+  AccessibilityRoleType
 } from '@ohos.arkui.component';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
 
@@ -278,7 +279,7 @@ export struct EditableTitleBar {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(true)
-        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
+        .accessibilityRole(AccessibilityRoleType.TITLE_BAR)
 
         Row() {
           this.rightMenuItemsLayout();

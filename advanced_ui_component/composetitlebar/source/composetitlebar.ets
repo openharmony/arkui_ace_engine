@@ -163,7 +163,7 @@ struct ComposeTitleBar {
           .constraintSize({ maxWidth: this.titleMaxWidth })
         }
         .accessibilityGroup(true)
-        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
+        .accessibilityRole(AccessibilityRoleType.TITLE_BAR)
       }
       .margin({ left: $r('sys.float.ohos_id_default_padding_start') })
 
