@@ -17,6 +17,8 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_algorithm.h"
 
+#include <string_view>
+
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -29,7 +31,7 @@ constexpr float DEFAULT_BIAS = 0.5f;
 constexpr float HALF_MULTIPLY = 0.5f;
 constexpr float DEFAULT_WEIGHT = 0.0f;
 constexpr ChainWeightPair DEFAULT_WEIGHT_PAIR = ChainWeightPair(DEFAULT_WEIGHT, DEFAULT_WEIGHT);
-const std::string CONCAT_ID_PREFIX = "@concat";
+constexpr std::string_view CONCAT_ID_PREFIX = "@concat";
 inline bool IsAnchorContainer(const std::string& anchor)
 {
     return anchor == "__container__";
@@ -39,7 +41,7 @@ std::string GetOrCreateNodeInspectorId(const RefPtr<FrameNode>& node)
 {
     auto inspectorId = node->GetInspectorIdValue("");
     if (!node->HasInspectorId()) {
-        inspectorId = CONCAT_ID_PREFIX + node->GetTag() + std::to_string(node->GetId());
+        inspectorId = std::string(CONCAT_ID_PREFIX) + node->GetTag() + std::to_string(node->GetId());
     }
     return inspectorId;
 }

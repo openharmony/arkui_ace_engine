@@ -15,6 +15,8 @@
 #include "core/components_ng/pattern/container_picker/container_picker_pattern.h"
 #include "core/components_ng/base/modifier.h"
 
+#include <string_view>
+
 #include <sys/time.h>
 
 #include "core/components_ng/render/drawing.h"
@@ -34,7 +36,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string CONTAINER_PICKER_DRAG_SCENE = "container_picker_drag_scene";
+constexpr std::string_view CONTAINER_PICKER_DRAG_SCENE = "container_picker_drag_scene";
 constexpr double MOVE_THRESHOLD = 2.0;
 constexpr float SPRING_DURATION = 600.0f;
 constexpr float SPRING_CURVE_VELOCITY = 0.0f;
@@ -1168,7 +1170,7 @@ void ContainerPickerPattern::UpdateDragFRCSceneInfo(float speed, SceneStatus sce
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->AddFRCSceneInfo(CONTAINER_PICKER_DRAG_SCENE, speed, sceneStatus);
+    host->AddFRCSceneInfo(std::string(CONTAINER_PICKER_DRAG_SCENE), speed, sceneStatus);
 }
 
 ScrollResult ContainerPickerPattern::HandleScroll(float offset, int32_t source, NestedState state, float velocity)

@@ -22,9 +22,6 @@
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const std::string UNIT_AUTO = "auto";
-} // namespace
 
 float WaterFlowLayoutAlgorithm::ComputeCrossPosition(int32_t crossIndex) const
 {

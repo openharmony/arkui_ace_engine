@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/video/video_pattern.h"
 
+#include <string_view>
+
 #include "video_node.h"
 
 #include "base/background_task_helper/background_task_helper.h"
@@ -60,8 +62,8 @@ namespace {
 using HiddenChangeEvent = std::function<void(bool)>;
 constexpr uint32_t SECONDS_PER_HOUR = 3600;
 constexpr uint32_t SECONDS_PER_MINUTE = 60;
-const std::string FORMAT_HH_MM_SS = "%02d:%02d:%02d";
-const std::string FORMAT_MM_SS = "%02d:%02d";
+constexpr std::string_view FORMAT_HH_MM_SS = "%02d:%02d:%02d";
+constexpr std::string_view FORMAT_MM_SS = "%02d:%02d";
 constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
 constexpr uint32_t CURRENT_POS = 1;
 constexpr uint32_t SLIDER_POS = 2;
@@ -71,7 +73,6 @@ constexpr int32_t AVERAGE_VALUE = 2;
 constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 const Dimension LIFT_HEIGHT = 28.0_vp;
-const std::string PNG_FILE_EXTENSION = "png";
 constexpr int32_t MEDIA_TYPE_AUD = 0;
 constexpr float VOLUME_STEP = 0.05f;
 constexpr float SPEED_0_125_X = 0.125;
@@ -113,9 +114,9 @@ std::string IntTimeToText(uint32_t time)
     auto seconds = time % SECONDS_PER_MINUTE;
     if (time >= SECONDS_PER_HOUR) {
         auto hours = time / SECONDS_PER_HOUR;
-        return StringUtils::FormatString(FORMAT_HH_MM_SS.c_str(), hours, minutes, seconds);
+        return StringUtils::FormatString(FORMAT_HH_MM_SS.data(), hours, minutes, seconds);
     }
-    return StringUtils::FormatString(FORMAT_MM_SS.c_str(), minutes, seconds);
+    return StringUtils::FormatString(FORMAT_MM_SS.data(), minutes, seconds);
 }
 
 SizeF CalculateFitContain(const SizeF& videoSize, const SizeF& layoutSize)

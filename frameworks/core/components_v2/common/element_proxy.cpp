@@ -15,6 +15,8 @@
 
 #include "core/components_v2/common/element_proxy.h"
 
+#include <string_view>
+
 #include "base/log/dump_log.h"
 #include "core/components/grid_layout/grid_layout_item_component.h"
 #include "core/components/ifelse/if_else_component.h"
@@ -40,7 +42,7 @@ const ArkUITabContentModifier* GetTabContentInnerModifier()
     return cachedModifier;
 }
 
-const std::string PREFIX_STEP = "  ";
+constexpr std::string_view PREFIX_STEP = "  ";
 class RenderElementProxy : public ElementProxy {
 public:
     explicit RenderElementProxy(const WeakPtr<ElementProxyHost>& host, bool forceRender = false)
@@ -1073,7 +1075,7 @@ public:
         DumpLog::GetInstance().AddDesc(
             prefix + std::string("[LinearElementProxy] childSize: ").append(std::to_string(children_.size())));
         for (const auto& child : children_) {
-            child->Dump(prefix + PREFIX_STEP);
+            child->Dump(prefix + std::string(PREFIX_STEP));
         }
     }
 
@@ -1608,7 +1610,7 @@ void ElementProxyHost::ReleaseElementById(const std::string& id)
 void ElementProxyHost::DumpProxy()
 {
     if (proxy_) {
-        proxy_->Dump(PREFIX_STEP);
+        proxy_->Dump(std::string(PREFIX_STEP));
     } else {
         if (DumpLog::GetInstance().GetDumpFile()) {
             DumpLog::GetInstance().AddDesc(std::string("No Proxy"));
