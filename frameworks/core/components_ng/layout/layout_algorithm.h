@@ -123,8 +123,13 @@ public:
     bool HandleContentOverflowWithSmartLayout(LayoutWrapper* layoutWrapper);
     void HandleStackContentOverflow(LayoutWrapper* layoutWrapper);
     bool IsContentOverflow(LayoutWrapper* layoutWrapper, OverflowCollector& collector);
+
+private:
     bool IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapper);
     void TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper);
+    uint64_t NodePath2Hash(const std::string& path);
+    std::string ComputeCurrentPathHash(FrameNode* hostNode);
+    bool IsSmartLayoutEffective(const RefPtr<FrameNode>& hostNode);
 
 protected:
     virtual void OnReset() {}

@@ -37,6 +37,8 @@ public:
     ACE_FORCE_EXPORT static bool IsDialogCorrectionEnabled();
     static std::string GetArkWebAutoLayoutConfig();
     static bool IsSmartLayoutEnabled();
+    static bool IsSmartLayoutPageOverflowFixEnabled(const std::string& pathHash = "");
+    static bool IsSmartLayoutWidgetSplitEnabled(const std::string& pageUrl = "");
 };
 } // namespace OHOS::Ace
 

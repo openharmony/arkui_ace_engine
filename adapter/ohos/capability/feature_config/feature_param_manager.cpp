@@ -15,7 +15,7 @@
 
 #include "interfaces/inner_api/ace/ui_content.h"
 #include "base/json/json_util.h"
-
+#include "base/utils/feature_manager.h"
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 
 #include "adapter/ohos/capability/feature_config/config_parser_base.h"
@@ -35,13 +35,47 @@ bool ParseConfigBool(const std::unique_ptr<JsonValue>& jsonObject, const std::st
         return false;
     }
     auto value = jsonObject->GetValue(key);
-    if (value && value->IsString()) {
-        auto strValue = value->GetString();
-        return strValue == "true";
+    if (!value) {
+        return false;
+    }
+    if (value->IsBool()) {
+        return value->GetBool();
+    }
+    if (value->IsString()) {
+        return value->GetString() == "true";
     }
     return false;
 }
-} // namesapce
+
+FeatureParamManager::SmartLayoutFeatureConfig ParseSmartLayoutFeature(
+    const std::unique_ptr<JsonValue>& jsonObject, const std::string& key)
+{
+    FeatureParamManager::SmartLayoutFeatureConfig config;
+    if (!jsonObject || !jsonObject->Contains(key)) {
+        return config;
+    }
+    auto featureObj = jsonObject->GetObject(key);
+    if (!featureObj || !featureObj->IsObject()) {
+        return config;
+    }
+    config.enabled = ParseConfigBool(featureObj, "enabled");
+    if (!featureObj->Contains("values")) {
+        return config;
+    }
+    auto valueArray = featureObj->GetValue("values");
+    if (!valueArray || !valueArray->IsArray()) {
+        return config;
+    }
+    int32_t size = valueArray->GetArraySize();
+    for (int32_t i = 0; i < size; ++i) {
+        auto item = valueArray->GetArrayItem(i);
+        if (item && item->IsString()) {
+            config.values.insert(item->GetString());
+        }
+    }
+    return config;
+}
+} // namespace
 
 #define ADD_PARSER_MODEL(cls)         \
     {                                 \
@@ -72,6 +106,34 @@ void FeatureParamManager::Init(const std::string& bundleName, std::vector<OHOS::
     ExtraModulesManager::GetInstance().Init();
     FeatureParamParseEntry(bundleName);
     UICorrectionParamParseEntry(bundleName);
+    ParseUICorrectionStrategyConfig();
+}
+
+void FeatureParamManager::ParseUICorrectionStrategyConfig()
+{
+    std::string strategyConfig;
+    if (FeatureManager::GetInstance().GetFeatureParam("UICorrectionStrategy", strategyConfig) !=
+        FeatureManager::SUCCESS) {
+        LOGW("FeatureParamManager get UICorrectionStrategy from FeatureManager failed");
+        return;
+    }
+    auto jsonValue = JsonUtil::ParseJsonString(strategyConfig);
+    if (!jsonValue || !jsonValue->IsValid() || !jsonValue->IsObject()) {
+        LOGW("FeatureParamManager failed to parse UICorrectionStrategy json string");
+        return;
+    }
+    strategyPageOverflowEnabled_ = ParseConfigBool(jsonValue, "pageOverflowEnabled");
+    strategyDialogOverflowEnabled_ = ParseConfigBool(jsonValue, "dialogOverflowEnabled");
+    strategyRnOverflowEnabled_ = ParseConfigBool(jsonValue, "RNPageOverflowEnabled");
+    if (!jsonValue->Contains("smartlayout")) {
+        return;
+    }
+    auto smartlayoutObj = jsonValue->GetObject("smartlayout");
+    if (!smartlayoutObj || !smartlayoutObj->IsObject()) {
+        return;
+    }
+    smartlayoutPageOverflowFix_ = ParseSmartLayoutFeature(smartlayoutObj, "PageOverflowFix");
+    smartlayoutWidgetSplit_ = ParseSmartLayoutFeature(smartlayoutObj, "WidgetSplit");
 }
 
 void FeatureParamManager::MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metadata>& metaData)
@@ -143,21 +205,21 @@ bool FeatureParamManager::IsPageOverflowEnabled()
 {
     ParseArkUICorrectionConfigFromUIContent();
     std::lock_guard<std::mutex> lock(arkui_cloud_config_mutex_);
-    return pageOverflowEnabledFromCloud_.value_or(pageOverflowEnabled_);
+    return pageOverflowEnabledFromCloud_.value_or(pageOverflowEnabled_) || strategyPageOverflowEnabled_;
 }
 
 bool FeatureParamManager::IsDialogCorrectionEnabled()
 {
     ParseArkUICorrectionConfigFromUIContent();
     std::lock_guard<std::mutex> lock(arkui_cloud_config_mutex_);
-    return dialogCorrectionEnabledFromCloud_.value_or(dialogCorrectionEnabled_);
+    return dialogCorrectionEnabledFromCloud_.value_or(dialogCorrectionEnabled_) || strategyDialogOverflowEnabled_;
 }
 
 bool FeatureParamManager::IsRnOverflowEnable()
 {
     ParseArkUICorrectionConfigFromUIContent();
     std::lock_guard<std::mutex> lock(arkui_cloud_config_mutex_);
-    return rnOverflowEnabledFromCloud_.value_or(rnOverflowEnabled_);
+    return rnOverflowEnabledFromCloud_.value_or(rnOverflowEnabled_) || strategyRnOverflowEnabled_;
 }
 
 void FeatureParamManager::SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled)
@@ -179,6 +241,28 @@ bool FeatureParamManager::IsSmartLayoutEnabled() const
 void FeatureParamManager::SetSmartLayoutEnabled(bool enabled)
 {
     smartlayoutEnabled_ = enabled;
+}
+
+bool FeatureParamManager::IsSmartLayoutPageOverflowFixEnabled(const std::string& pathHash) const
+{
+    if (!smartlayoutPageOverflowFix_.enabled) {
+        return false;
+    }
+    if (pathHash.empty()) {
+        return true;
+    }
+    return smartlayoutPageOverflowFix_.values.count(pathHash) > 0;
+}
+
+bool FeatureParamManager::IsSmartLayoutWidgetSplitEnabled(const std::string& pageUrl) const
+{
+    if (!smartlayoutWidgetSplit_.enabled) {
+        return false;
+    }
+    if (pageUrl.empty()) {
+        return true;
+    }
+    return smartlayoutWidgetSplit_.values.count(pageUrl) > 0;
 }
 
 uint32_t FeatureParamManager::GetSyncloadResponseDeadline() const

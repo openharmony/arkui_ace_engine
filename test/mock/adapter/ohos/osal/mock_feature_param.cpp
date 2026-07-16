@@ -13,10 +13,23 @@
  * limitations under the License.
  */
 
+#include <unordered_set>
+#include <utility>
 #include "base/utils/feature_param.h"
 
 namespace {
 constexpr int32_t DEFAULT_RESPONSE_DELAY = 50000000; // default max response delay is 50ms.
+
+struct MockFeatureParamState {
+    bool pageOverflowFixEnabled = false;
+    std::unordered_set<std::string> pageOverflowFixWhitelist;
+};
+
+MockFeatureParamState& GetMockFeatureParamState()
+{
+    static MockFeatureParamState state;
+    return state;
+}
 } // namespace
 
 namespace OHOS::Ace {
@@ -64,5 +77,39 @@ std::string FeatureParam::GetArkWebAutoLayoutConfig()
 bool FeatureParam::IsSmartLayoutEnabled()
 {
     return false;
+}
+
+bool FeatureParam::IsSmartLayoutPageOverflowFixEnabled(const std::string& pathHash)
+{
+    // Opt-in test hook: default flag stays false so existing tests see no behavior change.
+    const auto& state = GetMockFeatureParamState();
+    if (!state.pageOverflowFixEnabled) {
+        return false;
+    }
+    if (pathHash.empty()) {
+        return true;
+    }
+    return state.pageOverflowFixWhitelist.count(pathHash) > 0;
+}
+
+bool FeatureParam::IsSmartLayoutWidgetSplitEnabled(const std::string& pageUrl)
+{
+    return false;
+}
+
+// Test-only seam. ace_components_mock is a testonly library, so unconditional linkage is safe.
+void SetMockFeatureParamPageOverflowFixEnabled(bool enabled)
+{
+    GetMockFeatureParamState().pageOverflowFixEnabled = enabled;
+}
+
+void SetMockFeatureParamPageOverflowFixWhitelist(std::unordered_set<std::string> whitelist)
+{
+    GetMockFeatureParamState().pageOverflowFixWhitelist = std::move(whitelist);
+}
+
+void ResetMockFeatureParam()
+{
+    GetMockFeatureParamState() = MockFeatureParamState {};
 }
 } // OHOS::Ace
