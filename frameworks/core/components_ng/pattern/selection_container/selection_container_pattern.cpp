@@ -919,6 +919,7 @@ bool SelectionContainerPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     TAG_LOGI(AceLogTag::ACE_TEXT, "SelectionContainerPattern::HandleKeyEvent [action:%{public}d]", keyEvent.action);
+    UpdateShiftFlag(keyEvent);
     if (keyEvent.action != KeyAction::DOWN) {
         return false;
     }
@@ -933,6 +934,16 @@ bool SelectionContainerPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         return true;
     }
     return false;
+}
+
+void SelectionContainerPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
+{
+    bool flag = false;
+    if (keyEvent.action == KeyAction::DOWN &&
+        (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT))) {
+        flag = true;
+    }
+    SetShiftFlag(flag);
 }
 
 void SelectionContainerPattern::MarkContainerPropertyUpdate(uint32_t flags)
@@ -1220,7 +1231,8 @@ OffsetF SelectionContainerPattern::GetContainerPaintOffsetWithTransform() const
 void SelectionContainerPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
 {
     if (selectionSelectOverlay_ && selectionSelectOverlay_->SelectOverlayIsOn()) {
-        selectionSelectOverlay_->OnAncestorNodeChanged(flag);
+        selectionSelectOverlay_->OnAncestorNodeChanged(flag, false /*scrollTriggersEmbed*/,
+            false /*transformTriggersEmbed*/);
     }
     RefreshMouseLeftSelectionOnFrameNodeChanged();
 }

@@ -305,7 +305,7 @@ void TextPattern::CloseSelectOverlay(bool animation)
 
 void TextPattern::ResetSelection()
 {
-    if (shiftFlag_) {
+    if (IsShiftFlag()) {
         return;
     }
     if (selectionChild_) {
@@ -3149,7 +3149,7 @@ void TextPattern::InitCopyOption(const RefPtr<GestureEventHub>& gestureEventHub,
             clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
         }
         InitLongPressEvent(gestureEventHub);
-        if (host->IsDraggable() && !shiftFlag_) {
+        if (host->IsDraggable() && !IsShiftFlag()) {
             InitDragEvent();
         }
         InitKeyEvent();
@@ -3334,7 +3334,7 @@ bool TextPattern::HandleMouseLeftPressForContainer(const Offset& textOffset)
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     Offset nodeLocalOffset = {
         textOffset.GetX() + textPaintOffset.GetX(), textOffset.GetY() + textPaintOffset.GetY() };
-    if (shiftFlag_) {
+    if (IsShiftFlag()) {
         return selectionChild_->ExtendSelectionFromFixedAnchor(nodeLocalOffset);
     } else {
         auto start = pManager_->GetGlyphIndexByCoordinate(textOffset);
@@ -3346,7 +3346,7 @@ bool TextPattern::HandleMouseLeftPressForContainer(const Offset& textOffset)
 void TextPattern::HandleMouseLeftPressForLocal(const Offset& textOffset)
 {
     CHECK_NULL_VOID(pManager_);
-    if (shiftFlag_) {
+    if (IsShiftFlag()) {
         auto end = pManager_->GetGlyphIndexByCoordinate(textOffset);
         HandleSelectionChange(textSelector_.lastValidStart, end);
     } else {
@@ -3365,7 +3365,7 @@ void TextPattern::HandleMouseLeftPressForLocal(const Offset& textOffset)
 void TextPattern::HandleMouseLeftReleaseForLocal(
     const MouseInfo& info, MouseStatus oldMouseStatus, int32_t start, int32_t end)
 {
-    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
+    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || IsShiftFlag()) {
         HandleSelectionChange(start, end);
         ReportSelectedText();
     }
@@ -3381,7 +3381,7 @@ void TextPattern::HandleMouseLeftReleaseForLocal(
 void TextPattern::HandleMouseLeftReleaseForContainer(
     const MouseInfo& info, const Offset& textOffset, MouseStatus oldMouseStatus, bool mousePressReleaseNoChange)
 {
-    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || shiftFlag_) {
+    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE || IsShiftFlag()) {
         if (!HasAnySelectionInContainer() || mousePressReleaseNoChange) {
             ResetSelection();
             CloseSelectOverlay(true);
@@ -3496,7 +3496,7 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         leftMousePressed_ = false;
         return;
     }
-    if (blockPress_ && !shiftFlag_) {
+    if (blockPress_ && !IsShiftFlag()) {
         return;
     }
     if (isMousePressed_) {
@@ -3696,6 +3696,9 @@ void TextPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
     }
     if (flag != shiftFlag_) {
         shiftFlag_ = flag;
+        if (selectionChild_) {
+            selectionChild_->SyncShiftFlagToContainer(flag);
+        }
         if (!shiftFlag_) {
             // open drag
             InitDragEvent();
@@ -3704,6 +3707,14 @@ void TextPattern::UpdateShiftFlag(const KeyEvent& keyEvent)
             ClearDragEvent();
         }
     }
+}
+
+bool TextPattern::IsShiftFlag() const
+{
+    if (selectionChild_) {
+        return selectionChild_->IsContainerShiftFlagSet();
+    }
+    return shiftFlag_;
 }
 
 bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
@@ -3778,7 +3789,7 @@ bool TextPattern::HandleOnSelect(KeyCode code)
     }
     // Only when shiftFlag is true AND (UP/DOWN key), do NOT reset origin caret position.
     // This preserves the original coordinate during Shift+UP/DOWN multi-line selection.
-    if (!(shiftFlag_ && (code == KeyCode::KEY_DPAD_UP ||
+    if (!(IsShiftFlag() && (code == KeyCode::KEY_DPAD_UP ||
                          code == KeyCode::KEY_DPAD_DOWN))) {
         ResetOriginCaretPosition();
     }
