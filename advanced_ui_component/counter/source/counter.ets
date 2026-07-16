@@ -1282,11 +1282,19 @@ export struct CounterComponent {
   }
 
   private getIncreaseStr(): string {
-    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    try {
+      return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    } catch (error) {
+      return '';
+    }
   }
 
   private getReduceStr(): string {
-    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    try {
+      return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    } catch (error) {
+      return '';
+    } 
   }
 
   build() {

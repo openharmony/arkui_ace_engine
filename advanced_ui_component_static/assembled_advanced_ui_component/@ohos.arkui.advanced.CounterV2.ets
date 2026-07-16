@@ -1357,14 +1357,24 @@ export struct CounterV2Component {
 
   private getIncreaseStr(): string {
     if (this.increaseStrCache === undefined) {
-      this.increaseStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+      try {
+        this.increaseStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+      } catch (error) {
+        this.increaseStrCache = '';
+      }
+      
     }
     return this.increaseStrCache ?? '';
   }
 
   private getReduceStr(): string {
     if (this.reduceStrCache === undefined) {
-      this.reduceStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+      try {
+        this.reduceStrCache = this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+      } catch (error) {
+        this.reduceStrCache = '';
+      }
+      
     }
     return this.reduceStrCache ?? '';
   }
