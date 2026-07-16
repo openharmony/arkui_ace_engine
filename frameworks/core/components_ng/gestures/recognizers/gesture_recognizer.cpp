@@ -172,7 +172,9 @@ bool NGGestureRecognizer::ProcessTouchEvent(const TouchEvent& point)
 
 void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationStart(GetSysTimestamp());
+#endif
     deviceId_ = point.deviceId;
     deviceType_ = point.sourceType;
     deviceTool_ = point.sourceTool;
@@ -187,7 +189,9 @@ void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
 
 void NGGestureRecognizer::HandleTouchUp(const TouchEvent& point)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationStart(0);
+#endif
     auto result = AboutToMinusCurrentFingers(point.id);
     if (result) {
         HandleTouchUpEvent(point);
@@ -198,7 +202,9 @@ void NGGestureRecognizer::HandleTouchUp(const TouchEvent& point)
 
 void NGGestureRecognizer::HandleTouchCancel(const TouchEvent& point)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     DragDropBehaviorReporter::GetInstance().UpdateLongPressDurationStart(0);
+#endif
     auto result = AboutToMinusCurrentFingers(point.id);
     if (result) {
         HandleTouchCancelEvent(point);
@@ -532,6 +538,7 @@ RefPtr<GestureSnapshot> NGGestureRecognizer::Dump() const
 
 void NGGestureRecognizer::AddGestureProcedure(const std::string& procedure) const
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
@@ -540,11 +547,13 @@ void NGGestureRecognizer::AddGestureProcedure(const std::string& procedure) cons
         .AddGestureProcedure(reinterpret_cast<uintptr_t>(this), procedure,
         extraInfo_, TransRefereeState(this->GetRefereeState()),
         TransGestureDisposal(this->GetGestureDisposal()));
+#endif
 }
 
 void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
     const RefPtr<NGGestureRecognizer>& recognizer) const
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     if (!recognizer) {
         return;
     }
@@ -556,11 +565,13 @@ void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
         .AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
         point, recognizer->GetExtraInfo(), TransRefereeState(recognizer->GetRefereeState()),
         TransGestureDisposal(recognizer->GetGestureDisposal()));
+#endif
 }
 
 void NGGestureRecognizer::AddGestureProcedure(const AxisEvent& event,
     const RefPtr<NGGestureRecognizer>& recognizer) const
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     if (!recognizer) {
         return;
     }
@@ -572,6 +583,7 @@ void NGGestureRecognizer::AddGestureProcedure(const AxisEvent& event,
         .AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
         event, recognizer->GetExtraInfo(), TransRefereeState(recognizer->GetRefereeState()),
         TransGestureDisposal(recognizer->GetGestureDisposal()));
+#endif
 }
 
 bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)

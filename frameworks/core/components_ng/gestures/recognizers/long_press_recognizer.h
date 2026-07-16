@@ -152,7 +152,9 @@ private:
     void DoRepeat();
     void StartRepeatTimer();
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
+#endif
     GestureJudgeResult TriggerGestureJudgeCallback();
     void UpdateGestureEventInfo(std::shared_ptr<LongPressGestureEvent>& info);
     void OnResetStatus() override;
@@ -161,6 +163,7 @@ private:
     RefPtr<DragEventActuator> GetDragEventActuator();
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
     void TriggerCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type);
+    GestureEvent BuildGestureEventInfo(bool isRepeat, GestureCallbackType type);
 
     int32_t duration_ = 500;
     bool repeat_ = false;

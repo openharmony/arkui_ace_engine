@@ -85,6 +85,11 @@ if (defined(global_parts_info.inputmethod_imf)) {
   enable_standard_input = false
 }
 if (is_arkui_x) {
+  enable_inspector_event_reporting = false
+} else {
+  enable_inspector_event_reporting = true
+}
+if (is_arkui_x) {
   enable_auto_fill_controller = false
 } else {
   enable_auto_fill_controller = true
@@ -193,6 +198,10 @@ if (enable_rosen_backend) {
 
 if (enable_standard_input) {
   defines += [ "ENABLE_STANDARD_INPUT" ]
+}
+
+if (enable_inspector_event_reporting) {
+  defines += [ "ENABLE_INSPECTOR_EVENT_REPORTING" ]
 }
 
 if (enable_auto_fill_controller) {
