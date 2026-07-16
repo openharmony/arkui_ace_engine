@@ -429,59 +429,68 @@ void LongPressRecognizer::SendCallbackMsg(
     }
 }
 
+GestureEvent LongPressRecognizer::BuildGestureEventInfo(bool isRepeat, GestureCallbackType type)
+{
+    GestureEvent info;
+    info.SetLastAction(lastAction_);
+    info.SetGestureTypeName(GestureTypeName::LONG_PRESS_GESTURE);
+    info.SetTimeStamp(time_);
+    info.SetRepeat(isRepeat);
+    info.SetFingerList(fingerList_);
+    info.SetSourceDevice(deviceType_);
+    info.SetDeviceId(deviceId_);
+    info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
+    info.SetGlobalPoint(globalPoint_);
+    info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
+    info.SetGlobalLocation(lastTouchEvent_.GetOffset())
+        .SetLocalLocation(lastTouchEvent_.GetOffset() - coordinateOffset_);
+    TouchEvent touchPoint = {};
+    if (!touchPoints_.empty()) {
+        touchPoint = touchPoints_.begin()->second;
+    }
+    SetGestureEventCurrentLocalLocation(info, touchPoint);
+    info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
+    info.SetTarget(GetEventTarget().value_or(EventTarget()));
+    info.SetForce(lastTouchEvent_.force);
+    if (lastTouchEvent_.tiltX.has_value()) {
+        info.SetTiltX(lastTouchEvent_.tiltX.value());
+    }
+    if (lastTouchEvent_.tiltY.has_value()) {
+        info.SetTiltY(lastTouchEvent_.tiltY.value());
+    }
+    if (lastTouchEvent_.rollAngle.has_value()) {
+        info.SetRollAngle(lastTouchEvent_.rollAngle.value());
+    }
+    info.SetSourceTool(lastTouchEvent_.sourceTool);
+    info.SetPointerEvent(lastPointEvent_);
+    Platform::UpdatePressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+    info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+    info.SetInputEventType(inputEventType_);
+    info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
+    info.SetPassThrough(lastTouchEvent_.passThrough);
+    return info;
+}
+
 void LongPressRecognizer::TriggerCallbackMsg(
     const std::unique_ptr<GestureEventFunc>& callback, bool isRepeat, GestureCallbackType type)
 {
     if (callback && *callback) {
-        GestureEvent info;
-        info.SetLastAction(lastAction_);
-        info.SetGestureTypeName(GestureTypeName::LONG_PRESS_GESTURE);
-        info.SetTimeStamp(time_);
-        info.SetRepeat(isRepeat);
-        info.SetFingerList(fingerList_);
-        info.SetSourceDevice(deviceType_);
-        info.SetDeviceId(deviceId_);
-        info.SetTargetDisplayId(lastTouchEvent_.targetDisplayId);
-        info.SetGlobalPoint(globalPoint_);
-        info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
-        info.SetGlobalLocation(lastTouchEvent_.GetOffset())
-            .SetLocalLocation(lastTouchEvent_.GetOffset() - coordinateOffset_);
-        TouchEvent touchPoint = {};
-        if (!touchPoints_.empty()) {
-            touchPoint = touchPoints_.begin()->second;
-        }
-        SetGestureEventCurrentLocalLocation(info, touchPoint);
-        info.SetGlobalDisplayLocation(lastTouchEvent_.GetGlobalDisplayOffset());
-        info.SetTarget(GetEventTarget().value_or(EventTarget()));
-        info.SetForce(lastTouchEvent_.force);
-        if (lastTouchEvent_.tiltX.has_value()) {
-            info.SetTiltX(lastTouchEvent_.tiltX.value());
-        }
-        if (lastTouchEvent_.tiltY.has_value()) {
-            info.SetTiltY(lastTouchEvent_.tiltY.value());
-        }
-        if (lastTouchEvent_.rollAngle.has_value()) {
-            info.SetRollAngle(lastTouchEvent_.rollAngle.value());
-        }
-        info.SetSourceTool(lastTouchEvent_.sourceTool);
-        info.SetPointerEvent(lastPointEvent_);
-        Platform::UpdatePressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
-        info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
-        info.SetInputEventType(inputEventType_);
-        info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
-        info.SetPassThrough(lastTouchEvent_.passThrough);
+        GestureEvent info = BuildGestureEventInfo(isRepeat, type);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         HandleGestureAccept(info, type, GestureListenerType::LONG_PRESS);
         ACE_BENCH_MARK_TRACE("LongPressGesture_end");
         callbackFunction(info);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         HandleReports(info, type);
+#endif
         if (type == GestureCallbackType::START && longPressRecorder_ && *longPressRecorder_) {
             (*longPressRecorder_)(info);
         }
     }
 }
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void LongPressRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
 {
     if (type != GestureCallbackType::END) {
@@ -497,6 +506,7 @@ void LongPressRecognizer::HandleReports(const GestureEvent& info, GestureCallbac
     longPressReport.SetPoint(info.GetGlobalPoint());
     Reporter::GetInstance().HandleUISessionReporting(longPressReport);
 }
+#endif
 
 void LongPressRecognizer::OnResetStatus()
 {

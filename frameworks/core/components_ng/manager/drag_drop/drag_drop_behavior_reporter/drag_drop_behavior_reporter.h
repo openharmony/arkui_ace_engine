@@ -80,7 +80,9 @@ public:
     void UpdateDropResult(DropResult dropResult);
     void HandleDragReport(DragReporterPharse pharse, std::string hostName);
     void UpdateContainerId(int32_t containerId);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     void Submit(DragReporterPharse pharse, int32_t contanerID);
+#endif
     void HandleBehaviorEventReport(DragReporterPharse pharse, int32_t contanerID);
     void HandleUISessionReport(DragReporterPharse pharse, int32_t contanerID);
 
@@ -111,7 +113,9 @@ public:
         : pharse_(pharse), containerId_(containerId) {}
     ~DragDropBehaviorReporterTrigger()
     {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         DragDropBehaviorReporter::GetInstance().Submit(pharse_, containerId_);
+#endif
     }
 
 private:

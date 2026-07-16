@@ -801,6 +801,8 @@ private:
     void ReportOnItemDropEvent(
         DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY);
     void RequireDragAnimationType();
+    void HandleDragCancel(const Point& point, const DragPointerEvent& pointerEvent,
+        const RefPtr<FrameNode>& preTargetFrameNode, const std::string& extraInfo, int32_t windowId);
 
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;

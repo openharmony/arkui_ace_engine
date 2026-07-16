@@ -534,7 +534,9 @@ protected:
     virtual void HandleTouchUpEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchMoveEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchCancelEvent(const TouchEvent& event) = 0;
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     virtual void HandleReports(const GestureEvent& info, GestureCallbackType type) {};
+#endif
     virtual void HandleTouchDownEvent(const AxisEvent& event) {}
     virtual void HandleTouchUpEvent(const AxisEvent& event) {}
     virtual void HandleTouchMoveEvent(const AxisEvent& event) {}
