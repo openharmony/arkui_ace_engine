@@ -582,12 +582,12 @@ template("ace_compatible_source") {
       include_dirs = indep_compile_includes
     }
     if (qrcodegen_support) {
-      if (is_arkui_x) {
-        deps += [ "//third_party/qrcodegen:ace_engine_qrcode" ]
-      } else {
-        external_deps += [ "qrcodegen:ace_engine_qrcode" ]
+       if (is_arkui_x) {
+         deps += [ "//commonlibrary/qrcode_generator:qrcode_generator_static" ]
+       } else {
+         external_deps += [ "qrcode_generator:qrcode_generator_static" ]
+       }
     }
-  }
  }
 }
 

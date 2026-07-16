@@ -128,7 +128,8 @@
                 "sdk",
                 "screenlock_mgr",
                 "video_processing_engine",
-                "egl"
+                "egl",
+                "qrcode_generator"
             ],
             "third_party": []
         },
