@@ -1996,6 +1996,7 @@ void SubwindowOhos::ResizeWindowForToast(const NG::ToastInfo& toastInfo)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
+    ResetWindowOffset();
     // for float window in landscape mode.
     auto needFollowParentWindowLayout = toastInfo.showMode == NG::ToastShowMode::TOP_MOST &&
                                         !parentContainer->IsSceneBoardWindow() &&
@@ -2011,6 +2012,19 @@ void SubwindowOhos::ResizeWindowForToast(const NG::ToastInfo& toastInfo)
         ResizeWindow(rect.Width(), rect.Height());
     } else {
         ResizeWindow();
+    }
+}
+
+void SubwindowOhos::ResetWindowOffset()
+{
+    CHECK_NULL_VOID(window_);
+    if (isShowed_) {
+        return;
+    }
+    OHOS::Rosen::WMError ret = window_->MoveTo(0, 0);
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "Failed to reset window offset, code: %{public}d",
+            static_cast<int32_t>(ret));
     }
 }
 

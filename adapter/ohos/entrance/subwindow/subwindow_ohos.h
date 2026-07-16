@@ -322,6 +322,7 @@ private:
     void InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
     void ResizeWindow(double width, double height);
     void ResizeWindowForToast(const NG::ToastInfo& toastInfo);
+    void ResetWindowOffset();
 
     static int32_t id_;
     int32_t windowId_ = 0;
