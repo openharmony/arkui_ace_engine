@@ -535,10 +535,13 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     if (info_.reachStart_) {
         // At the top, item 0 rests at the content top (contentStartOffset_), padding region empty.
         // Clamp over-scroll down (Positive) always. Clamp negative offset (from FillBlankAtStart
-        // extension fill) only when startFixOffset_ > 0 (contentClip active). When startFixOffset_
-        // == 0 (CONTENT_ONLY), only Positive is clamped — identical to original behavior.
+        // extension fill) only when it exceeds the clip-extended viewport start bound
+        // (-startFixOffset_). When startFixOffset_ == 0 (CONTENT_ONLY), only Positive is
+        // clamped — identical to original behavior.
         auto offset = info_.currentOffset_ - info_.contentStartOffset_;
-        bool needClamp = Positive(offset) || (GreatNotEqual(info_.startFixOffset_, 0.0f) && Negative(offset));
+        bool needClamp = Positive(offset) ||
+                         (GreatNotEqual(info_.startFixOffset_, 0.0f) &&
+                             LessNotEqual(info_.currentOffset_, info_.contentStartOffset_ - info_.startFixOffset_));
         if (needClamp && !canOverScrollStart_) {
             info_.currentOffset_ = info_.contentStartOffset_;
             info_.prevOffset_ = info_.contentStartOffset_;
@@ -1354,8 +1357,12 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, runOutOfRecord);
     auto isScrollableSpringMotionRunning = pattern->IsScrollableSpringMotionRunning();
-    while (LessNotEqual(mainLength, mainSize) ||
-                (NearEqual(mainLength, mainSize) && IsNextExistLineHeightZero(currentMainLineIndex_))) {
+    // Extend the measure bound to include the content-clip extension area (endFixOffset_) .
+    // When contentClipMode_ != CONTENT_ONLY, items beyond mainSize but within mainSize + endFixOffset_
+    // are visible in the clip region and must be re-measured (e.g. crossSize change after rotation).
+    const float viewEndBound = info_.GetViewEndBound(mainSize);
+    while (LessNotEqual(mainLength, viewEndBound) ||
+           (NearEqual(mainLength, viewEndBound) && IsNextExistLineHeightZero(currentMainLineIndex_))) {
         if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, isScrollableSpringMotionRunning)) {
             runOutOfRecord = true;
             break;
@@ -1363,7 +1370,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     }
     // Case 1. if this while-loop breaks due to running out of records, the [currentMainLineIndex_] is larger by 1 than
     // real main line index, so reduce 1.
-    // Case 2. if this while-loop stops due to false result of [LessNotEqual(mainLength, mainSize)], the
+    // Case 2. if this while-loop stops due to false result of [LessNotEqual(mainLength, viewEndBound)], the
     // [currentMainLineIndex_] is exactly the real main line index. Update [endMainLineIndex_] when the recorded items
     // are done measured.
     info_.endMainLineIndex_ = runOutOfRecord ? --currentMainLineIndex_ : currentMainLineIndex_;

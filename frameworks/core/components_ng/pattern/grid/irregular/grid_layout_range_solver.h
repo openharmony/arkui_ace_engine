@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_LAYOUT_RANGE_SOLVER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_LAYOUT_RANGE_SOLVER_H
 
+#include <optional>
+
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
@@ -83,6 +85,18 @@ private:
      * @param idx The index of the current starting row
      */
     StartingRowInfo SolveForward(float mainGap, float targetLen, int32_t idx);
+
+    /**
+     * @brief Find the starting row using SkipLinesAboveView (accounts for startFixOffset_).
+     *
+     * Used when currentOffset_ < 0 and startFixOffset_ > 0: lines whose bottom is above
+     * the clip start (-startFixOffset_) are skipped, the rest are kept. Returns nullopt
+     * if no valid line is found (caller should fall back to SolveForward).
+     *
+     * @param mainGap The gap length between rows.
+     * @return The StartingRowInfo, or nullopt if lineHeightMap_ is exhausted.
+     */
+    std::optional<StartingRowInfo> SolveForwardWithExtension(float mainGap);
 
     /**
      * @brief Find the new starting row after offsetting by [targetLen] going backward (scrolling up).

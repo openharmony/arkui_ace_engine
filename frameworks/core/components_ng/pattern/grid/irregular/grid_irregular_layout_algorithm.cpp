@@ -375,10 +375,12 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 {
     Jump(mainSize, true);
 
+    bool reevaluated = false;
     if (info_.extraOffset_ && !NearZero(*info_.extraOffset_)) {
         info_.prevOffset_ = info_.currentOffset_;
         info_.currentOffset_ += *info_.extraOffset_;
         MeasureOnOffset(mainSize);
+        reevaluated = true;
     }
     if (!NearZero(postJumpOffset_)) {
         if (Positive(info_.currentOffset_)) {
@@ -395,10 +397,21 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
         info_.prevOffset_ = info_.currentOffset_;
         info_.currentOffset_ += info_.contentStartOffset_;
         MeasureOnOffset(mainSize);
+        reevaluated = true;
     }
     if (info_.scrollAlign_ == ScrollAlign::END && !NearZero(info_.contentEndOffset_)) {
         info_.prevOffset_ = info_.currentOffset_;
         info_.currentOffset_ -= info_.contentEndOffset_;
+        MeasureOnOffset(mainSize);
+        reevaluated = true;
+    }
+    // If contentClip extension is active and MeasureOnOffset was not triggered above,
+    // re-evaluate the range to fill the extension areas that FindRangeOnJump doesn't fill
+    // (end extension via GetViewEndBound in MeasureForward, start extension via
+    // FindStartingRow which accounts for startFixOffset_).
+    if (!reevaluated &&
+        (GreatNotEqual(info_.startFixOffset_, 0.0f) || GreatNotEqual(info_.endFixOffset_, 0.0f))) {
+        info_.prevOffset_ = info_.currentOffset_;
         MeasureOnOffset(mainSize);
     }
 }
