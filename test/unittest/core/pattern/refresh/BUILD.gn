@@ -13,23 +13,32 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("refresh_test_ng") {
-  module_name = "ScrollingSet-Refresh"
-  type = "new"
+test_sources = [
+  "refresh_accessibility_test_ng.cpp",
+  "refresh_event_test_ng.cpp",
+  "refresh_layout_test_ng.cpp",
+  "refresh_generated_layout_test_ng.cpp",
+  "refresh_nested_test_ng.cpp",
+  "refresh_test_core.cpp",
+  "refresh_test_ng.cpp",
+]
 
-  sources = [
-    "refresh_accessibility_test_ng.cpp",
-    "refresh_event_test_ng.cpp",
-    "refresh_layout_test_ng.cpp",
-    "refresh_generated_layout_test_ng.cpp",
-    "refresh_nested_test_ng.cpp",
-    "refresh_test_ng.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("refresh_test_ng") {
+    type = "host_components"
+    module_name = "ScrollingSet-Refresh"
+    sources = test_sources
+      cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("refresh_test_ng") {
+    module_name = "ScrollingSet-Refresh"
+    type = "new"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "refresh_test_core.cpp" ]
-  } else {
-    sources += [ "refresh_test_core.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources -= [ "refresh_test_core.cpp" ]
+    }
   }
 }

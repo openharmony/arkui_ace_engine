@@ -16,6 +16,9 @@
 #include "test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.h"
 #include "water_flow_test_ng.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
+
+#undef private
+#undef protected
 #define protected public
 #define private public
 

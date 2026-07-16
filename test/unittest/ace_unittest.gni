@@ -161,13 +161,18 @@ template("ace_unittest") {
       sources += invoker.sources
       include_dirs = []
       include_dirs += include_dir
-      deps = [ "$ace_root/test/unittest:ace_components_deps" ]
+      deps = []
+      deps += [ "$ace_root/test/unittest:ace_components_deps" ]
       deps += ace_unittest_deps
 
       configs = []
       configs = ace_unittest_config
       if (defined(cflags)) {
         cflags += cflags
+      }
+
+      if (defined(invoker.defines)) {
+        defines += invoker.defines
       }
 
       external_deps = []

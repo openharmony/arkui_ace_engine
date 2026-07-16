@@ -13,35 +13,44 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("scroll_test_ng") {
-  module_name = "ScrollingSet-Scroll"
-  type = "new"
+test_sources = [
+  "free_scroll_test.cpp",
+  "scroll_accessibility_test_ng.cpp",
+  "scroll_bar_overlay_test_ng.cpp",
+  "scroll_controller_test_ng.cpp",
+  "scroll_dump_test_ng.cpp",
+  "scroll_effect_test_ng.cpp",
+  "scroll_event_test_ng.cpp",
+  "scroll_inner_bar_test_ng.cpp",
+  "scroll_inner_event_test_ng.cpp",
+  "scroll_inner_layout_test_ng.cpp",
+  "scroll_layout_test_ng.cpp",
+  "scroll_model_test_ng.cpp",
+  "scroll_nested_test_ng.cpp",
+  "scroll_pattern_test_ng.cpp",
+  "scroll_pattern_test_ng_three.cpp",
+  "scroll_pattern_test_ng_two.cpp",
+  "scroll_test_core.cpp",
+  "scroll_test_ng.cpp",
+  "scroll_zoom_test.cpp",
+]
 
-  sources = [
-    "free_scroll_test.cpp",
-    "scroll_accessibility_test_ng.cpp",
-    "scroll_bar_overlay_test_ng.cpp",
-    "scroll_controller_test_ng.cpp",
-    "scroll_dump_test_ng.cpp",
-    "scroll_effect_test_ng.cpp",
-    "scroll_event_test_ng.cpp",
-    "scroll_inner_bar_test_ng.cpp",
-    "scroll_inner_event_test_ng.cpp",
-    "scroll_inner_layout_test_ng.cpp",
-    "scroll_layout_test_ng.cpp",
-    "scroll_model_test_ng.cpp",
-    "scroll_nested_test_ng.cpp",
-    "scroll_pattern_test_ng.cpp",
-    "scroll_pattern_test_ng_three.cpp",
-    "scroll_pattern_test_ng_two.cpp",
-    "scroll_test_ng.cpp",
-    "scroll_zoom_test.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("scroll_test_ng") {
+    type = "host_components"
+    module_name = "ScrollingSet-Scroll"
+    sources = test_sources
+      cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("scroll_test_ng") {
+    module_name = "ScrollingSet-Scroll"
+    type = "new"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "scroll_test_core.cpp" ]
-  } else {
-    sources += [ "scroll_test_core.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources -= [ "scroll_test_core.cpp" ]
+    }
   }
 }

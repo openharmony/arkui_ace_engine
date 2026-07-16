@@ -22,6 +22,10 @@
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 
+#undef private
+#undef protected
+
+
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;

@@ -28,6 +28,10 @@
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 
+#undef private
+#undef protected
+
+
 namespace OHOS::Ace::NG {
 class WaterFlowSegmentTest : public WaterFlowTestNg {
 public:

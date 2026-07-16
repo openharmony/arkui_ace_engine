@@ -16,13 +16,19 @@
 #ifndef FOUNDATION_ACE_ENGINE_TEST_UNITTEST_CORE_PATTERN_LAZYDYNAMICLAYOUT_LAZY_CUSTOM_COLUMN_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_ENGINE_TEST_UNITTEST_CORE_PATTERN_LAZYDYNAMICLAYOUT_LAZY_CUSTOM_COLUMN_LAYOUT_ALGORITHM_H
 
+#ifndef ACE_HOST_PRODUCT
 #ifndef private
     #define private public
 #endif
 #ifndef protected
     #define protected public
 #endif
+#endif
 #include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_algorithm.h"
+#ifndef ACE_HOST_PRODUCT
+#undef private
+#undef protected
+#endif
 
 namespace OHOS::Ace::NG {
 
