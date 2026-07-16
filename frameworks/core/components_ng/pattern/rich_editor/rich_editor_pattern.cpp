@@ -10650,6 +10650,15 @@ RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
     return MakeRefPtr<RichEditorPaintMethod>(WeakClaim(this), &paragraphs_, baselineOffset_, contentMod_, hostOverlayMod_);
 }
 
+void RichEditorPattern::BindScrollBarOverlayModifier()
+{
+    auto baseModifier = GetScrollBarOverlayModifier();
+    auto hostOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(hostOverlayMod_);
+    CHECK_NULL_VOID(baseModifier && hostOverlay && !hostOverlay->HasScrollBarOverlayModifier());
+    hostOverlay->SetScrollBarOverlayModifier(baseModifier);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Rebind scrollbar overlay modifier");
+}
+
 void RichEditorPattern::CreateRichEditorOverlayModifier()
 {
     ACE_UINODE_TRACE(GetHost());
@@ -10670,6 +10679,8 @@ void RichEditorPattern::CreateRichEditorOverlayModifier()
     if (!hostOverlayMod_) {
         hostOverlayMod_ = AceType::MakeRefPtr<RichEditorOverlayModifier>(
             WeakClaim(this), GetScrollBarOverlayModifier(), GetScrollEdgeEffect());
+    } else {
+        BindScrollBarOverlayModifier();
     }
     if (IsFreeScrollEnabled()) {
         scrollController_->AttachModifier(hostOverlayMod_);
