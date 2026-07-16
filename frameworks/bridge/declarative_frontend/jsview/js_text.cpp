@@ -1933,52 +1933,148 @@ void JSText::SetIncrementalUpdatePolicy(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetIncrementalUpdatePolicy(policy);
 }
 
-void JSText::SetTailIndents(const JSCallbackInfo& info)
+void JSText::ParseTailIndentDimension(const JSRef<JSVal>& value,
+    NG::TailIndentsArray& indentsArray,
+    std::vector<RefPtr<ResourceObject>>& allResObjs,
+    std::vector<size_t>& resourceIndexes)
 {
-    JSRef<JSVal> args = info[0];
-    UnRegisterResource("TailIndents");
-
-    NG::TailIndents tailIndents;
-    RefPtr<ResourceObject> firstResObj;
-    NG::TailIndentsArray indentsArray;
-
-    auto parseDimension = [&firstResObj, &indentsArray, isFirst = true](const JSRef<JSVal>& value) mutable {
-        CalcDimension dimension;
-        RefPtr<ResourceObject> resObj;
-        bool parsed = value->IsObject() &&
-            JSViewAbstract::ParseJsLengthMetricsVpWithResObj(JSRef<JSObject>::Cast(value), dimension, resObj);
-        if (!parsed) {
-            parsed = ParseJsDimensionFpNG(value, dimension, resObj);
+    CalcDimension dimension;
+    RefPtr<ResourceObject> resObj;
+    bool parsed = value->IsObject() &&
+        JSViewAbstract::ParseJsLengthMetricsVpWithResObj(JSRef<JSObject>::Cast(value), dimension, resObj);
+    if (!parsed) {
+        parsed = ParseJsDimensionFpNG(value, dimension, resObj);
+    }
+    if (parsed) {
+        if (dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
+            TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: invalid dimension (negative or PERCENT), reset");
+            dimension.Reset();
         }
+        size_t currentIndex = indentsArray.size();
+        indentsArray.emplace_back(static_cast<Dimension>(dimension));
+        if (resObj) {
+            allResObjs.push_back(resObj);
+            resourceIndexes.push_back(currentIndex);  // Record resource position
+        }
+    } else {
+        dimension.Reset();
+        indentsArray.emplace_back(dimension);
+        TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: parse failed, using default (0.0)");
+    }
+}
+
+void JSText::UpdateTailIndentsFromResources(const RefPtr<NG::FrameNode>& node,
+    const NG::TailIndentsArray& originalArray,
+    const std::vector<RefPtr<ResourceObject>>& resObjArray,
+    const std::vector<size_t>& resourceIndexes)
+{
+    CHECK_NULL_VOID(node);
+    auto layoutProperty = node->GetLayoutProperty<NG::TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    // Rebuild complete array: copy original values, then update resource positions
+    NG::TailIndentsArray newIndentsArray = originalArray;
+    for (size_t i = 0; i < resObjArray.size() && i < resourceIndexes.size(); i++) {
+        size_t targetIndex = resourceIndexes[i];
+        if (targetIndex >= newIndentsArray.size()) {
+            TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: index out of range [%{public}zu]", targetIndex);
+            continue;
+        }
+        CalcDimension dimension;
+        bool parsed = ResourceParseUtils::ParseResDimensionFpNG(resObjArray[i], dimension);
         if (parsed) {
             if (dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
+                TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: [%{public}zu] invalid dimension, reset", targetIndex);
                 dimension.Reset();
             }
-            indentsArray.emplace_back(static_cast<Dimension>(dimension));
-            if (isFirst && resObj) {
-                firstResObj = resObj;
-                isFirst = false;
-            }
+            newIndentsArray[targetIndex] = static_cast<Dimension>(dimension);
         } else {
-            dimension.Reset();
-            indentsArray.emplace_back(dimension);
+            newIndentsArray[targetIndex] = Dimension(0.0);
+            TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents: [%{public}zu] parse failed, using default", targetIndex);
+        }
+    }
+
+    NG::TailIndents newTailIndent;
+    newTailIndent.indentsArray = newIndentsArray;
+    layoutProperty->UpdateTailIndents(newTailIndent);
+    node->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void JSText::RegisterTailIndentsResources(NG::FrameNode* frameNode,
+    const NG::TailIndentsArray& originalArray,
+    const std::vector<RefPtr<ResourceObject>>& allResObjs,
+    const std::vector<size_t>& resourceIndexes)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+
+    std::string countStr = pattern->GetResCacheMapByKey("TailIndents_Count");
+    int32_t oldCount = 0;
+    if (!countStr.empty()) {
+        oldCount = std::stoi(countStr);
+    }
+
+    for (int32_t i = 0; i < oldCount; i++) {
+        pattern->RemoveResObj("TailIndents_" + std::to_string(i));
+    }
+
+    if (allResObjs.empty()) {
+        pattern->AddResCache("TailIndents_Count", "0");
+        return;
+    }
+
+    WeakPtr<NG::FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    NG::TailIndentsArray arrayCopy = originalArray;
+    std::vector<RefPtr<ResourceObject>> resObjArrayCopy = allResObjs;
+    std::vector<size_t> indexCopy = resourceIndexes;
+
+    auto updateFunc = [weakNode, arrayCopy, resObjArrayCopy, indexCopy]
+        (const RefPtr<ResourceObject>& resObj) {
+        auto node = weakNode.Upgrade();
+        if (node) {
+            UpdateTailIndentsFromResources(node, arrayCopy, resObjArrayCopy, indexCopy);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_TEXT, "TailIndents updateFunc: weakNode.Upgrade() failed");
         }
     };
 
+    int32_t newCount = static_cast<int32_t>(allResObjs.size());
+    for (int32_t i = 0; i < newCount; i++) {
+        std::string key = "TailIndents_" + std::to_string(i);
+        pattern->AddResObj(key, allResObjs[i], updateFunc);
+    }
+    pattern->AddResCache("TailIndents_Count", std::to_string(newCount));
+}
+
+void JSText::SetTailIndents(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    std::vector<RefPtr<ResourceObject>> allResObjs;
+    std::vector<size_t> resourceIndexes;
+    
     if (args->IsArray()) {
         JSRef<JSArray> array = JSRef<JSArray>::Cast(args);
         for (size_t i = 0; i < array->Length(); i++) {
-            parseDimension(array->GetValueAt(i));
+            ParseTailIndentDimension(array->GetValueAt(i), indentsArray, allResObjs, resourceIndexes);
         }
     } else {
-        parseDimension(args);
+        ParseTailIndentDimension(args, indentsArray, allResObjs, resourceIndexes);
     }
-
+    
     tailIndents.indentsArray = indentsArray;
-
-    if (SystemProperties::ConfigChangePerform() && firstResObj) {
-        RegisterResource<NG::TailIndents>("TailIndents", firstResObj, tailIndents);
+    
+    // Always register resources (handles both new registration and cleanup of old ones)
+    if (SystemProperties::ConfigChangePerform()) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        if (frameNode) {
+            RegisterTailIndentsResources(frameNode, indentsArray, allResObjs, resourceIndexes);
+        }
     }
+    
     TextModel::GetInstance()->SetTailIndents(tailIndents);
 }
 } // namespace OHOS::Ace::Framework
