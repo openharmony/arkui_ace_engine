@@ -147,7 +147,7 @@ HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest007, TestSize.Level1)
 HWTEST_F(TaihangOptimizerTest, CheckSwiperPageValidTest008, TestSize.Level1)
 {
     optimizer_->isInited_ = false;
-    bool result = optimizer_->CheckSwiperPageValid("page1", "page3");
+    bool result = optimizer_->CheckSwiperPageValid("page1", "page3", "jsViewName1");
     EXPECT_FALSE(result);
 }
 
