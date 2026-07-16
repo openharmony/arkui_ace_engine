@@ -100,6 +100,10 @@ HWTEST_F(StatisticEventReporterTest, ConvertToEventName002, TestSize.Level1)
     event = reporter->ConvertToEvent(StatisticEventType::XCOMPONENT_SET_ATTRIBUTE_NODE_SURFACE_SIZE);
     EXPECT_EQ(event.eventName, "XCOMPONENT");
     EXPECT_EQ(event.subEventName, "SET_ATTRIBUTE_NODE_SURFACE_SIZE");
+
+    event = reporter->ConvertToEvent(StatisticEventType::XCOMPONENT_TYPE_CHANGED);
+    EXPECT_EQ(event.eventName, "XCOMPONENT");
+    EXPECT_EQ(event.subEventName, "TYPE_CHANGED");
 }
 
 /**
