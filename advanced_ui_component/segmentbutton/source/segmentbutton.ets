@@ -34,6 +34,7 @@ const RESOURCE_TYPE_INTEGER = 10007;
 const ACCESSIBILITY_SELECTED_DESCRIPTION = ' ';
 const ACCESSIBILITY_DEFAULT_DESCRIPTION = '';
 const CAPSULE_FOCUS_SELECTED_OFFSET: number = 4;
+const SDK_API_VERSION_TWENTY_SIX: number = 26;
 
 interface SegmentButtonThemeInterface {
   SEGMENT_TEXT_VERTICAL_PADDING: Resource;
@@ -1357,6 +1358,7 @@ export struct SegmentButton {
   @Provide openSelectedItemSystemMaterial?: boolean = false;
   @Provide selectedItemScale?: ScaleOptions = undefined;
   @Provide useAdaptiveLineHeight: boolean = false;
+  private isFirstOptionsChange: boolean = true;
   private environmentCallbackID?: number = undefined;
   private environmentCallback: EnvironmentCallback = {
     onConfigurationUpdated: (configuration) => {
@@ -1436,7 +1438,9 @@ export struct SegmentButton {
     this.layoutAlgorithm.multiply = this.options.type === 'capsule' && (this.options.multiply ?? false)
     this.layoutAlgorithm.shouldMirror = this.shouldMirror
     this.updateAnimatedProperty(null)
-    if (this.environmentCallbackID === undefined && deviceInfo.sdkApiVersion >= 26) {
+    if (this.isFirstOptionsChange) {
+      this.isFirstOptionsChange = false;
+    } else if (this.environmentCallbackID === undefined && deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX) {
       let abilityContext = this.getUIContext().getHostContext()
       if (abilityContext) {
         this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback)
@@ -1482,9 +1486,9 @@ export struct SegmentButton {
     this.updateSelectedIndexes()
     this.setItemsSelected()
     this.updateAnimatedProperty(null)
-    if (deviceInfo.sdkApiVersion >= 26) {
+    if (deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX) {
       this.updateLanguageLineHeight();
-      let abilityContext = this.getUIContext().getHostContext();
+      let abilityContext = this.getUIContext()?.getHostContext();
       if (abilityContext) {
         this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
       }
@@ -1492,8 +1496,8 @@ export struct SegmentButton {
   }
 
   aboutToDisappear(): void {
-    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
-      let abilityContext = this.getUIContext().getHostContext();
+    if (deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX && this.environmentCallbackID !== undefined) {
+      let abilityContext = this.getUIContext()?.getHostContext();
       if (abilityContext) {
         abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
       }
