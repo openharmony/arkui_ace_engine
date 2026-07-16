@@ -1400,10 +1400,18 @@ export class CounterV2Component extends ViewV2 {
         }
     }
     getIncreaseStr() {
-        return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+        try {
+            return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+        } catch (error) {
+            return '';
+        }
     }
     getReduceStr() {
-        return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+        try {
+            return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+        } catch (error) {
+            return '';
+        }
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
