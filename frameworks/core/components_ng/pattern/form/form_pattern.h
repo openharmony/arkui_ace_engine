@@ -250,7 +250,7 @@ private:
     void UpdateForbiddenIcon(FormChildNodeType nodeType);
     void UpdateForbiddenText(FormChildNodeType nodeType);
 
-    void HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr);
+    void HandleSnapshot(uint32_t delayTime);
     void TakeSurfaceCaptureForUI();
     void UpdateStaticCard();
     RefPtr<FrameNode> CreateImageNode();

@@ -294,8 +294,12 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
     }
 }
 
-void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr)
+void FormPattern::HandleSnapshot(uint32_t delayTime)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeIdStr = std::to_string(host->GetId());
+
     snapshotTimestamp_ = GetCurrentTimestamp();
 
     if (isDynamic_) {
@@ -461,11 +465,6 @@ void FormPattern::SnapshotSurfaceNode(std::shared_ptr<Rosen::SurfaceCaptureCallb
 
 void FormPattern::OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
 {
-    ContainerScope scope(scopeId_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
     if (!pixelMap) {
         TAG_LOGW(AceLogTag::ACE_FORM, "FormPattern::OnSnapshot pixelmap is null");
         return;
@@ -1017,7 +1016,6 @@ void FormPattern::SetParamForWantTask(const RequestFormInfo& info)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->formManagerBridge_->SetParamForWant(info);
-        pattern->ReAddStaticFormSnapshotTimer();
         }, "ArkUISetParamForWant");
 }
 
@@ -1026,6 +1024,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
     if (formManagerBridge_) {
 #if OHOS_STANDARD_SYSTEM
         SetParamForWantTask(info);
+        ReAddStaticFormSnapshotTimer();
 #endif
     }
     auto host = GetHost();
@@ -1063,7 +1062,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
                 "Static-form, current opacity: %{public}f, visible: %{public}d, nodeId: %{public}s.",
                 opacity, static_cast<int>(visible), nodeIdStr.c_str());
             if (visible == VisibleType::VISIBLE && opacity == NON_TRANSPARENT_VAL) {
-                HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_3S, nodeIdStr);
+                HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_3S);
             }
         }
     }
@@ -2672,10 +2671,12 @@ void FormPattern::InitAddUnTrustAndSnapshotCallback(int32_t instanceID)
     formManagerBridge_->AddSnapshotCallback([weak = WeakClaim(this), instanceID](const uint32_t& delayTime) {
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
-        auto host = formPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        std::string nodeIdStr = std::to_string(host->GetId());
-        formPattern->HandleSnapshot(delayTime, nodeIdStr);
+        formPattern->formTaskExecutor_->PostUITask(
+            [weak, delayTime] {
+                auto form = weak.Upgrade();
+                CHECK_NULL_VOID(form);
+                form->HandleSnapshot(delayTime);
+            }, "HandleSnapshot");
     });
 
     formManagerBridge_->AddFormLinkInfoUpdateCallback(
@@ -2954,7 +2955,7 @@ void FormPattern::ReAddStaticFormSnapshotTimer()
     CHECK_NULL_VOID(host);
     std::string nodeIdStr = std::to_string(host->GetId());
     formTaskExecutor_->RemoveUITask("ArkUIFormTakeSurfaceCapture_" + nodeIdStr);
-    HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_10S, nodeIdStr);
+    HandleSnapshot(DELAY_TIME_FOR_FORM_SNAPSHOT_10S);
 }
 
 void FormPattern::FireOnUpdateFormDone(int64_t id) const
