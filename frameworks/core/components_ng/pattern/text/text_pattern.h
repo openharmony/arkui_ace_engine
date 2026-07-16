@@ -31,6 +31,7 @@
 #include "base/utils/utils.h"
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/components_ng/event/long_press_event.h"
+#include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
@@ -111,6 +112,13 @@ public:
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
     RefPtr<EventHub> CreateEventHub() override;
+    RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host) override
+    {
+        if (!vOverflowHandler_) {
+            vOverflowHandler_ = MakeRefPtr<VerticalOverflowHandler>(host);
+        }
+        return vOverflowHandler_;
+    }
     virtual bool IsDragging() const;
     bool IsAtomicNode() const override;
     bool IsTextNode() const;
@@ -891,6 +899,7 @@ private:
 
     // used to keep same life cycle with TextPattern
     std::function<void()> jsTextControllerBinder_;
+    RefPtr<VerticalOverflowHandler> vOverflowHandler_;
 };
 } // namespace OHOS::Ace::NG
 

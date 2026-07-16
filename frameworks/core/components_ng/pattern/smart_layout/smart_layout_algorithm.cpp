@@ -17,6 +17,7 @@
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/smart_layout/smart_layout_engine_loader.h"
@@ -24,6 +25,8 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+constexpr double SMART_LAYOUT_TEXT_ADAPT_MIN_FONT_SIZE_LIMIT_RATIO = 0.6;
+
 /**
  * @brief Convert FlexAlign to SmartLayoutAlign for decoupling
  */
@@ -43,7 +46,6 @@ SmartLayoutAlign ConvertFlexAlignToSmartLayoutAlign(FlexAlign flexAlign)
 
 } // namespace
 
-
 SmartLayoutType SmartLayoutAlgorithm::GetLayoutTypeFromWrapper(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, SmartLayoutType::UNKNOWN);
@@ -53,6 +55,9 @@ SmartLayoutType SmartLayoutAlgorithm::GetLayoutTypeFromWrapper(LayoutWrapper* la
     }
     if (hostTag == V2::ROW_ETS_TAG) {
         return SmartLayoutType::ROW;
+    }
+    if (hostTag == V2::TEXT_ETS_TAG) {
+        return SmartLayoutType::TEXT;
     }
     if (hostTag == V2::FLEX_ETS_TAG) {
         auto hostNode = layoutWrapper->GetHostNode();
@@ -79,6 +84,9 @@ bool SmartLayoutAlgorithm::PerformSmartLayout(LayoutWrapper* layoutWrapper)
     ACE_SCOPED_TRACE("PerformSmartLayout");
     auto layoutType = GetLayoutTypeFromWrapper(layoutWrapper);
     CHECK_EQUAL_RETURN(layoutType, SmartLayoutType::UNKNOWN, false);
+    if (layoutType == SmartLayoutType::TEXT) {
+        return HandleTextContentOverflow(layoutWrapper);
+    }
     LOGD("SmartLayout: Detected layout %{public}s content overflow!!",
         layoutWrapper->GetHostTag().c_str());
     return ExecuteLayout(layoutWrapper, layoutType);
@@ -314,6 +322,84 @@ bool SmartLayoutAlgorithm::InitializeLayoutContext(LayoutWrapper* layoutWrapper)
             rootNode_->SetAvoidSafeArea(true);
         }
     }
+    return true;
+}
+
+bool SmartLayoutAlgorithm::HandleTextContentOverflow(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto textPattern = hostNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    auto layoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto spanItems = textPattern->GetSpanItemChildren();
+    bool propertyChanged = false;
+    std::optional<Dimension> explicitSpanFontSize;
+    if (spanItems.size() == 1 && spanItems.front() && spanItems.front()->fontStyle &&
+        spanItems.front()->fontStyle->HasFontSize()) {
+        explicitSpanFontSize = spanItems.front()->fontStyle->GetFontSize();
+        spanItems.front()->fontStyle->ResetFontSize();
+        layoutProperty->UpdateFontSize(explicitSpanFontSize.value());
+        propertyChanged = true;
+    }
+    auto currentFontSize = layoutProperty->GetFontSize().value_or(textPattern->GetTextStyle().GetFontSize());
+    auto targetMinFontSize = currentFontSize * SMART_LAYOUT_TEXT_ADAPT_MIN_FONT_SIZE_LIMIT_RATIO;
+    auto adaptMinFontSize = layoutProperty->GetAdaptMinFontSize();
+    if (!adaptMinFontSize.has_value() || NearZero(adaptMinFontSize->ConvertToPx()) ||
+        GreatNotEqual(adaptMinFontSize->ConvertToPx(), targetMinFontSize.ConvertToPx())) {
+        layoutProperty->UpdateAdaptMinFontSize(targetMinFontSize);
+        propertyChanged = true;
+    }
+    auto adaptMaxFontSize = layoutProperty->GetAdaptMaxFontSize();
+    if (explicitSpanFontSize.has_value() || !adaptMaxFontSize.has_value() ||
+        NearZero(adaptMaxFontSize->ConvertToPx())) {
+        layoutProperty->UpdateAdaptMaxFontSize(explicitSpanFontSize.value_or(currentFontSize));
+        propertyChanged = true;
+    }
+    if (!layoutProperty->HasHeightAdaptivePolicy() ||
+        layoutProperty->GetHeightAdaptivePolicy() != TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST) {
+        layoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST
+        propertyChanged = true;
+    }
+    if (!propertyChanged) {
+        return true;
+    }
+    layoutProperty->OnPropertyChangeMeasure();
+    return RemeasureText(layoutWrapper);
+}
+
+bool SmartLayoutAlgorithm::RemeasureText(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
+    auto layoutAlgorithm = layoutAlgorithmWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_RETURN(layoutAlgorithm, false);
+
+    auto parentNode = hostNode->GetParentFrameNode();
+    bool isButtonLabel = hostNode->IsInternal() && parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG;
+    auto previousCenter = geometryNode->GetMarginFrameRect().Center();
+
+    // Rebuild and lay out the adapted paragraph before the current FrameNode layout is committed.
+    auto contentSize = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), layoutWrapper);
+    if (contentSize.has_value()) {
+        geometryNode->SetContentSize(contentSize.value());
+    }
+    layoutAlgorithm->Measure(layoutWrapper);
+    if (isButtonLabel) {
+        auto marginFrameSize = geometryNode->GetMarginFrameSize();
+        geometryNode->SetMarginFrameOffset(OffsetF(previousCenter.GetX() - marginFrameSize.Width() / 2.0f,
+            previousCenter.GetY() - marginFrameSize.Height() / 2.0f));
+    }
+    layoutAlgorithm->Layout(layoutWrapper);
     return true;
 }
 
