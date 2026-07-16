@@ -27,10 +27,15 @@ void ParseIndicatorIconList(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo,
 bool ParseJsBoolForSwiper(const EcmaVM* vm, const Local<JSValueRef>& value, bool& result);
 bool ParseJsBoolForSwiper(
     const EcmaVM* vm, const Local<JSValueRef>& value, bool& result, RefPtr<ResourceObject>& resourceObject);
+bool ParseLengthMetricsToDimensionForSwiper(
+    const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue, CalcDimension& result);
+bool ParseLengthMetricsToDimensionForSwiper(const EcmaVM* vm,
+    const Local<panda::JSValueRef>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resourceObj);
 
 class SwiperBridge {
 public:
     static void RegisterSwiperAttributes(panda::Local<panda::ObjectRef> object, panda::EcmaVM* vm);
+    static ArkUINativeModuleValue Create(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSwiperNextMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);

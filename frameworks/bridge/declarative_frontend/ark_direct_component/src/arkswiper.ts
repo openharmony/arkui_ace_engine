@@ -1008,7 +1008,7 @@ globalThis.Swiper.attributeModifier = function (modifier: ArkComponent): void {
 
 class JSSwiper extends JSContainerBase {
   static create(controller: any): void {
-    getUINativeModule().swiper.setSwiperInitialize(true, controller);
+    getUINativeModule().swiper.create(controller);
   }
 
   static indicatorInteractive(value: any): void {
