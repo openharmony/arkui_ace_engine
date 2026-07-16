@@ -1779,6 +1779,15 @@ bool MenuPattern::ShouldUpdateShadow() const
 
 bool MenuPattern::IsUseDistortionAnimation() const
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    if (theme->GetExpandDisplay()) {
+        return false;
+    }
     auto menuParam = GetMenuParam();
     auto menuSystemMaterial = menuParam.systemMaterial;
     if (!MaterialUtils::IsEnableMaterialParam(menuSystemMaterial)) {
@@ -1804,6 +1813,15 @@ bool MenuPattern::IsUseDistortionAnimation() const
 
 bool MenuPattern::IsUseEdgeLightAnimation() const
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, false);
+    if (theme->GetExpandDisplay()) {
+        return false;
+    }
     auto menuParam = GetMenuParam();
     auto menuSystemMaterial = menuParam.systemMaterial;
     if (!MaterialUtils::IsEnableMaterialParam(menuSystemMaterial)) {
