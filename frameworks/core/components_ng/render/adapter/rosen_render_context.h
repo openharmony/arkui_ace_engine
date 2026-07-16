@@ -774,6 +774,7 @@ protected:
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     RefPtr<UINode> GetModalNode(const RefPtr<UINode>& breakPointParent);
+    void PopModalPageLevelOrder(const RefPtr<UINode>& modalNode);
     void RemoveDefaultTransition();
     void FireTransitionUserCallback(bool isTransitionIn);
     void PostTransitionUserOutCallback();
