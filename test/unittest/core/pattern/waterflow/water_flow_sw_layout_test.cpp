@@ -28,7 +28,10 @@
 #undef private
 
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 class WaterFlowSWTest : public WaterFlowTestNg {
@@ -2721,5 +2724,37 @@ HWTEST_F(WaterFlowSWTest, LayoutWithoutMeasure001, TestSize.Level1)
 
     EXPECT_EQ(algo->props_, nullptr);
     EXPECT_EQ(info_->startIndex_, 0);
+}
+
+/**
+ * @tc.name: DirtyItemWithFooter001
+ * @tc.desc: With a footer, the dirty-item scan resolves node indices correctly and measures the dirty item.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, DirtyItemWithFooter001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateWaterFlowItems(20);
+    CreateDone();
+    ASSERT_EQ(info_->footerIndex_, 0);
+
+    // with footer at node index 0, data item 2 is node index 3
+    auto item = GetItem(3);
+    ASSERT_TRUE(item);
+    auto stack = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    int32_t measureCount = 0;
+    stack->measureCallback_ = [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; };
+    item->AddChild(stack);
+    stack->SetActive(false);
+    item->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    EXPECT_FALSE(CheckUpdateByChildRequest(layoutProperty_->GetPropertyChangeFlag()));
+
+    UpdateCurrentOffset(-1.0f);
+
+    EXPECT_GT(measureCount, 0);
+    EXPECT_TRUE(stack->IsActive());
 }
 } // namespace OHOS::Ace::NG
