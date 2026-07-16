@@ -78,8 +78,9 @@ bool JsonValue::GetBool() const
 
 bool JsonValue::GetBool(const std::string& key, bool defaultValue) const
 {
-    if (Contains(key) && GetValue(key)->IsBool()) {
-        return GetValue(key)->GetBool();
+    auto value = GetValue(key);
+    if (value && value->IsBool()) {
+        return value->GetBool();
     }
     return defaultValue;
 }
@@ -145,8 +146,9 @@ std::unique_ptr<JsonValue> JsonValue::GetValue(const std::string& key) const
 
 std::unique_ptr<JsonValue> JsonValue::GetObject(const std::string& key) const
 {
-    if (Contains(key) && GetValue(key)->IsObject()) {
-        return GetValue(key);
+    auto value = GetValue(key);
+    if (value && value->IsObject()) {
+        return value;
     }
     return std::make_unique<JsonValue>();
 }

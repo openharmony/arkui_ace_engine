@@ -648,19 +648,18 @@ void LayoutProperty::CheckCalcLayoutConstraint(RefPtr<FrameNode>& host, const La
     if (calcLayoutConstraint_) {
         auto versionCheck = host && (host->GetTag() == V2::COLUMN_ETS_TAG || host->GetTag() == V2::ROW_ETS_TAG) &&
                             host->LessThanAPITargetVersion(PlatformVersion::VERSION_TWENTY);
+        auto layoutPolicy = GetLayoutPolicyProperty();
         if (calcLayoutConstraint_->maxSize.has_value()) {
             if (!calcLayoutConstraint_->preMaxSize.has_value() ||
                 calcLayoutConstraint_->preMaxSize.value() != calcLayoutConstraint_->maxSize.value()) {
                 CalcToString(calcLayoutConstraint_->maxSize.value(), calcMaxSizeRpn_);
                 calcLayoutConstraint_->preMaxSize = calcLayoutConstraint_->maxSize;
             }
-            layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference, calcMaxSizeRpn_));
-            if (!versionCheck && GetLayoutPolicyProperty().has_value() && GetLayoutPolicyProperty().value().IsMatch()) {
-                layoutConstraint_->UpdateParentIdealSizeByLayoutPolicy(
-                    ConvertToSize(calcLayoutConstraint_->maxSize.value(), parentConstraint.scaleProperty,
-                        parentConstraint.percentReference, calcMaxSizeRpn_),
-                    true, GetLayoutPolicyProperty().value());
+            auto maxSizePx = ConvertToSize(calcLayoutConstraint_->maxSize.value(),
+                parentConstraint.scaleProperty, parentConstraint.percentReference, calcMaxSizeRpn_);
+            layoutConstraint_->UpdateMaxSizeWithCheck(maxSizePx);
+            if (!versionCheck && layoutPolicy.has_value() && layoutPolicy.value().IsMatch()) {
+                layoutConstraint_->UpdateParentIdealSizeByLayoutPolicy(maxSizePx, true, layoutPolicy.value());
             }
         }
         if (calcLayoutConstraint_->minSize.has_value()) {
@@ -669,13 +668,11 @@ void LayoutProperty::CheckCalcLayoutConstraint(RefPtr<FrameNode>& host, const La
                 CalcToString(calcLayoutConstraint_->minSize.value(), calcMinSizeRpn_);
                 calcLayoutConstraint_->preMinSize = calcLayoutConstraint_->minSize;
             }
-            layoutConstraint_->UpdateMinSizeWithCheck(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-                parentConstraint.scaleProperty, parentConstraint.percentReference, calcMinSizeRpn_));
-            if (!versionCheck && GetLayoutPolicyProperty().has_value() && GetLayoutPolicyProperty().value().IsMatch()) {
-                layoutConstraint_->UpdateParentIdealSizeByLayoutPolicy(
-                    ConvertToSize(calcLayoutConstraint_->minSize.value(), parentConstraint.scaleProperty,
-                        parentConstraint.percentReference, calcMinSizeRpn_),
-                    false, GetLayoutPolicyProperty().value());
+            auto minSizePx = ConvertToSize(calcLayoutConstraint_->minSize.value(),
+                parentConstraint.scaleProperty, parentConstraint.percentReference, calcMinSizeRpn_);
+            layoutConstraint_->UpdateMinSizeWithCheck(minSizePx);
+            if (!versionCheck && layoutPolicy.has_value() && layoutPolicy.value().IsMatch()) {
+                layoutConstraint_->UpdateParentIdealSizeByLayoutPolicy(minSizePx, false, layoutPolicy.value());
             }
         }
         if (calcLayoutConstraint_->selfIdealSize.has_value()) {
@@ -1006,9 +1003,8 @@ PaddingPropertyF LayoutProperty::CreateSafeAreaPadding(bool adjustingRound)
 
 PaddingPropertyF LayoutProperty::CreateSafeAreaPaddingInner(RefPtr<FrameNode>& host, bool adjustingRound)
 {
-    auto pipeline = host ? host->GetContext() : nullptr;
-    ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
     if (layoutConstraint_.has_value()) {
+        const auto& scaleProperty = layoutConstraint_->scaleProperty;
         std::optional<LayoutConstraintF> contentWithSafeArea = layoutConstraint_.value();
         PaddingPropertyF roundOffFraction;
         AdjustingConstrainAndRoundOff(contentWithSafeArea, roundOffFraction, layoutConstraint_, borderWidth_, padding_);
@@ -1028,7 +1024,9 @@ PaddingPropertyF LayoutProperty::CreateSafeAreaPaddingInner(RefPtr<FrameNode>& h
             isRtl ? truncatedSafeAreaPadding.left : truncatedSafeAreaPadding.right);
         return truncatedSafeAreaPadding;
     }
+    auto pipeline = host ? host->GetContext() : nullptr;
     auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
+    auto scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
     return ConvertToPaddingPropertyF(
         safeAreaPadding_, scaleProperty, rootWidth, true, true);
 }
@@ -1047,9 +1045,8 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderInner(RefPtr<FrameNode>& 
         safeAreaPadding = GetOrCreateSafeAreaPaddingInner(host, forceReCreate);
         SetDefaultValue(safeAreaPadding, 0.0f);
     }
-    auto pipeline = host ? host->GetContext() : nullptr;
-    ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
     if (layoutConstraint_.has_value()) {
+        const auto& scaleProperty = layoutConstraint_->scaleProperty;
         auto padding = ConvertToPaddingPropertyFDefault(
             padding_, scaleProperty, layoutConstraint_->percentReference.Width());
         auto borderWidth = ConvertToBorderWidthPropertyFDefault(
@@ -1062,7 +1059,9 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderInner(RefPtr<FrameNode>& 
         }
         return CombinePaddingsAndBorderWithoutCheck(safeAreaPadding, padding, borderWidth);
     }
+    auto pipeline = host ? host->GetContext() : nullptr;
     auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
+    auto scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
     auto padding = ConvertToPaddingPropertyFDefault(padding_, scaleProperty, rootWidth);
     auto borderWidth =
         ConvertToBorderWidthPropertyFDefault(borderWidth_, scaleProperty, rootWidth);
@@ -1078,16 +1077,17 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorderWithDefault(float padding
         .horizontalBorder = borderHorizontalDefault,
         .verticalBorder = borderVerticalDefault };
     auto host = GetHost();
-    auto pipeline = host ? host->GetContext() : nullptr;
-    ScaleProperty scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
     if (layoutConstraint_.has_value()) {
+        const auto& scaleProperty = layoutConstraint_->scaleProperty;
         auto padding = ConvertToPaddingPropertyF(
             padding_, scaleProperty, layoutConstraint_->percentReference.Width());
         auto borderWidth = ConvertToBorderWidthPropertyF(
             borderWidth_, scaleProperty, layoutConstraint_->percentReference.Width());
         return CombinePaddingsAndBorder(safeAreaPadding, padding, borderWidth, defaultParam);
     }
+    auto pipeline = host ? host->GetContext() : nullptr;
     auto rootWidth = pipeline ? pipeline->GetRootWidth() : PipelineContext::GetCurrentRootWidth();
+    auto scaleProperty = ScaleProperty::CreateScaleProperty(pipeline);
     auto padding = ConvertToPaddingPropertyF(
         padding_, scaleProperty, rootWidth);
     auto borderWidth = ConvertToBorderWidthPropertyF(

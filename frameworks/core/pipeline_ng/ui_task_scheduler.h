@@ -155,7 +155,7 @@ public:
 
     void AddSyncGeometryNodeTask(std::function<void()>&& task)
     {
-        syncGeometryNodeTasks_.emplace_back(task);
+        syncGeometryNodeTasks_.emplace_back(std::move(task));
     }
 
     void AddSafeAreaPaddingProcessTask(FrameNode* node);

@@ -2309,6 +2309,9 @@ void FrameNode::AdjustGridOffset()
     if (!isActive_) {
         return;
     }
+    if (!layoutProperty_->HasGridProperty()) {
+        return;
+    }
     if (layoutProperty_->UpdateGridOffset(Claim(this))) {
         renderContext_->SyncGeometryProperties(RawPtr(GetGeometryNode()));
     }
@@ -2993,11 +2996,13 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
         Measure(std::nullopt);
         Layout();
     } else {
+        auto frameParent = GetAncestorNodeOfFrame(false);
+        int32_t frameParentId = frameParent ? frameParent->GetId() : 0;
         if (layoutTaskType != LayoutType::LAYOUT_FOR_IGNORE) {
             auto layoutConstraint = GetLayoutConstraint();
             ACE_SCOPED_TRACE_COMMERCIAL("CreateTaskMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]"
                                         "[layoutPriority:%d][pageId:%d][depth:%d]",
-                tag_.c_str(), nodeId_, GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
+                tag_.c_str(), nodeId_, frameParentId,
                 layoutConstraint.ToString().c_str(), layoutPriority_, hostPageId_, depth_);
             SetIgnoreLayoutProcess(
                 layoutTaskType == LayoutType::MEASURE_FOR_IGNORE || layoutTaskType == LayoutType::TRAVERSE_FOR_IGNORE);
@@ -3010,8 +3015,7 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread, LayoutType layoutTaskT
         {
             ACE_SCOPED_TRACE_COMMERCIAL("CreateTaskLayout[%s][self:%d][parent:%d][layoutPriority:%d]"
                                         "[pageId:%d][depth:%d]",
-                tag_.c_str(), nodeId_, GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
-                layoutPriority_, hostPageId_, depth_);
+                tag_.c_str(), nodeId_, frameParentId, layoutPriority_, hostPageId_, depth_);
             SetIgnoreLayoutProcess(
                 layoutTaskType == LayoutType::LAYOUT_FOR_IGNORE || layoutTaskType == LayoutType::TRAVERSE_FOR_IGNORE);
             Layout();
@@ -5813,14 +5817,13 @@ void FrameNode::UpdatePercentSensitive()
     bool percentHeight = layoutAlgorithm_ ? layoutAlgorithm_->GetPercentHeight() : true;
     bool percentWidth = layoutAlgorithm_ ? layoutAlgorithm_->GetPercentWidth() : true;
     auto res = layoutProperty_->UpdatePercentSensitive(percentWidth, percentHeight);
+    auto parent = GetAncestorNodeOfFrame(true);
     if (res.first) {
-        auto parent = GetAncestorNodeOfFrame(true);
         if (parent && parent->layoutAlgorithm_) {
             parent->layoutAlgorithm_->SetPercentWidth(true);
         }
     }
     if (res.second) {
-        auto parent = GetAncestorNodeOfFrame(true);
         if (parent && parent->layoutAlgorithm_) {
             parent->layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -6452,9 +6455,10 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
             eventHub_->FireLayoutNDKCallback(context);
         }
     }
-    auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config);
+    RefPtr<LayoutWrapper> self = Claim(this);
+    auto needRerender = pattern_->OnDirtyLayoutWrapperSwap(self, config);
     needRerender =
-        needRerender || pattern_->OnDirtyLayoutWrapperSwap(Claim(this), config.skipMeasure, config.skipLayout);
+        needRerender || pattern_->OnDirtyLayoutWrapperSwap(self, config.skipMeasure, config.skipLayout);
     if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY)) {
         auto skippedMeasure = config.skipMeasure || SkipMeasureContent();
         needRerender =

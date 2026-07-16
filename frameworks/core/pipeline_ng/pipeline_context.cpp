@@ -4685,11 +4685,11 @@ void PipelineContext::CollectTouchEventsBeforeVsync(std::list<TouchEvent>& touch
     for (auto iter = touchEvents_.begin(); iter != touchEvents_.end();) {
         auto timeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(iter->time.time_since_epoch()).count();
         if (targetTimeStamp < static_cast<uint64_t>(timeStamp)) {
-            iter++;
+            ++iter;
             continue;
         }
-        touchEvents.emplace_back(*iter);
-        iter = touchEvents_.erase(iter);
+        auto current = iter++;
+        touchEvents.splice(touchEvents.end(), touchEvents_, current);
     }
 }
 
@@ -4799,8 +4799,8 @@ void PipelineContext::ConsumeTouchEvents(
     int32_t inputIndex = static_cast<int32_t>(touchEvents.size()) - 1;
     for (auto iter = touchEvents.rbegin(); iter != touchEvents.rend(); ++iter, --inputIndex) {
         auto scalePoint = (*iter).CreateScalePoint(GetViewScale());
-        idToTouchPoints.emplace(scalePoint.id, scalePoint);
-        idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
+        auto touchIt = idToTouchPoints.try_emplace(scalePoint.id, scalePoint).first;
+        touchIt->second.history.insert(touchIt->second.history.begin(), scalePoint);
         needInterpolation = iter->type != TouchType::MOVE ? false : true;
         timestampToIds.emplace(inputIndex, scalePoint.id);
         ids.insert(scalePoint.id);

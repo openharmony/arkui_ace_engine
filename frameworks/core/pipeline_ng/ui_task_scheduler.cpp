@@ -17,6 +17,7 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <unistd.h>
+#include <algorithm>
 
 #ifdef FFRT_EXISTS
 #include "base/longframe/long_frame_report.h"
@@ -80,9 +81,16 @@ void UITaskScheduler::SetLayoutNodeRect()
         return;
     }
     auto layoutNodes = std::move(layoutNodes_);
-    LayoutNodesSet layoutNodesSet(layoutNodes.begin(), layoutNodes.end());
+    std::vector<RefPtr<FrameNode>> layoutNodesVec(layoutNodes.begin(), layoutNodes.end());
+    std::sort(layoutNodesVec.begin(), layoutNodesVec.end(), NodeCompare<RefPtr<FrameNode>>{});
+    layoutNodesVec.erase(std::unique(layoutNodesVec.begin(), layoutNodesVec.end(),
+                             [](const RefPtr<FrameNode>& a, const RefPtr<FrameNode>& b) {
+                                 NodeCompare<RefPtr<FrameNode>> comp;
+                                 return !comp(a, b) && !comp(b, a);
+                             }),
+        layoutNodesVec.end());
 
-    for (auto& layoutNode : layoutNodesSet) {
+    for (auto& layoutNode : layoutNodesVec) {
         if (layoutNode->GetIsFind()) {
             layoutNode->SetIsFind(false);
             continue;
@@ -150,14 +158,21 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 
     isLayouting_ = true;
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
-    PageDirtySet dirtyLayoutNodesSet(dirtyLayoutNodes.begin(), dirtyLayoutNodes.end());
+    std::vector<RefPtr<FrameNode>> dirtyLayoutNodesVec(dirtyLayoutNodes.begin(), dirtyLayoutNodes.end());
+    std::sort(dirtyLayoutNodesVec.begin(), dirtyLayoutNodesVec.end(), NodeCompare<RefPtr<FrameNode>>{});
+    dirtyLayoutNodesVec.erase(std::unique(dirtyLayoutNodesVec.begin(), dirtyLayoutNodesVec.end(),
+                                 [](const RefPtr<FrameNode>& a, const RefPtr<FrameNode>& b) {
+                                     NodeCompare<RefPtr<FrameNode>> comp;
+                                     return !comp(a, b) && !comp(b, a);
+                                 }),
+        dirtyLayoutNodesVec.end());
 
     // Priority task creation
     int64_t time = 0;
 #ifndef IS_RELEASE_VERSION
     int64_t duration = 0;
 #endif
-    for (auto&& node : dirtyLayoutNodesSet) {
+    for (auto&& node : dirtyLayoutNodesVec) {
         // need to check the node is destroying or not before CreateLayoutTask
         if (!node || node->IsInDestroying()) {
             continue;

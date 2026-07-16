@@ -127,6 +127,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
             auto childFrame = SizeF();
             float maxWidth = 0.0f;
             float maxHeight = 0.0f;
+            auto childConstraint = hostLayoutProperty->CreateChildConstraint();
             for (const auto& child : childList) {
                 if (!child) {
                     continue;
@@ -139,7 +140,7 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
                 const auto& layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
                 auto singleSideFrame = CalcLayoutPolicySingleSide(layoutPolicy,
                     layoutProperty->GetCalcLayoutConstraint(),
-                    hostLayoutProperty->CreateChildConstraint(),
+                    childConstraint,
                     layoutProperty->GetMagicItemProperty());
                 if (singleSideFrame.AtLeastOneValid()) {
                     auto margin = layoutProperty->CreateMargin();
@@ -263,9 +264,9 @@ void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         }
     }
     // Update child position.
+    auto host = layoutWrapper->GetHostNode();
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
-        auto host = layoutWrapper->GetHostNode();
         auto childNode = child->GetHostNode();
         if (host && childNode && childNode->GetLayoutProperty() &&
             childNode->GetLayoutProperty()->IsIgnoreOptsValid()) {

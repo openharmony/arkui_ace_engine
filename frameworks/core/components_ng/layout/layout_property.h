@@ -212,6 +212,11 @@ public:
     void UpdateGridProperty(
         std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED);
 
+    bool HasGridProperty() const
+    {
+        return gridProperty_ != nullptr;
+    }
+
     bool UpdateGridOffset(const RefPtr<FrameNode>& host);
 
     void SetLayoutRect(const NG::RectF& rect);
