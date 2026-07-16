@@ -49,7 +49,7 @@
 | AC编号 | 验收标准 | 类型 |
 |--------|----------|------|
 | AC-4 | WHEN 调用 `registerNodeEvent(node, NODE_TEXT_EDITOR_ON_INPUT_FILTER_ERROR, targetId, userData)` THEN 过滤失败回调注册成功，后续过滤事件可通过全局 eventReceiver 接收 | 正常 |
-| AC-5 | WHEN 输入字符被 inputFilter 过滤掉 THEN 通过 `OH_ArkUI_NodeEvent_GetStringAsyncEvent(event)` 可获取被拒字符的 `ArkUI_StringAsyncEvent.pStr` | 正常 |
+| AC-5 | WHEN 输入字符被 inputFilter 过滤掉 THEN 通过 `OH_ArkUI_NodeEvent_GetStringAsyncEvent(event)` 可获取被拒字符的 `ArkUI_StringAsyncEvent.pStr`（事件内部构造使用 kind=TEXT_INPUT + textInputEvent，详见 design.md D-3） | 正常 |
 | AC-6 | WHEN 调用 `unregisterNodeEvent(node, NODE_TEXT_EDITOR_ON_INPUT_FILTER_ERROR)` THEN 回调注销成功，后续过滤失败不再触发该回调 | 正常 |
 
 ### US-3: 单行+属性字符串模式下使用 inputFilter
