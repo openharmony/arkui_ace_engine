@@ -165,6 +165,28 @@ void ContainerPickerModel::SetIndicatorStyle(const PickerIndicatorStyle& style)
     pickerPattern->SetIndicatorStyleVal(style);
 }
 
+void ContainerPickerModel::ResetIndicatorStyle()
+{
+    ACE_RESET_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType);
+    ACE_RESET_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorDividerWidth);
+    ACE_RESET_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorDividerColor);
+    ACE_RESET_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorStartMargin);
+    ACE_RESET_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorEndMargin);
+    ACE_RESET_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorBackgroundColor);
+    ACE_RESET_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorBorderRadius);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetIndicatorStyleVal(PickerIndicatorStyle());
+    pickerPattern->UnRegisterResource("containerPicker.strokeWidth");
+    pickerPattern->UnRegisterResource("containerPicker.dividerColor");
+    pickerPattern->UnRegisterResource("containerPicker.startMargin");
+    pickerPattern->UnRegisterResource("containerPicker.endMargin");
+    pickerPattern->UnRegisterResource("containerPicker.backgroundColor");
+    pickerPattern->UnRegisterResource("containerPicker.borderRadius");
+}
+
 void ContainerPickerModel::SetDisplayedItemCount(std::optional<int32_t> count)
 {
     if (!count.has_value()) {
@@ -314,6 +336,27 @@ void ContainerPickerModel::SetIndicatorStyle(FrameNode* frameNode, const PickerI
     auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
     pickerPattern->SetIndicatorStyleVal(style);
+}
+
+void ContainerPickerModel::ResetIndicatorStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorType, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorDividerWidth, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorDividerColor, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorStartMargin, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorEndMargin, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorBackgroundColor, frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ContainerPickerLayoutProperty, IndicatorBorderRadius, frameNode);
+    auto pickerPattern = frameNode->GetPattern<ContainerPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetIndicatorStyleVal(PickerIndicatorStyle());
+    pickerPattern->UnRegisterResource("containerPicker.strokeWidth");
+    pickerPattern->UnRegisterResource("containerPicker.dividerColor");
+    pickerPattern->UnRegisterResource("containerPicker.startMargin");
+    pickerPattern->UnRegisterResource("containerPicker.endMargin");
+    pickerPattern->UnRegisterResource("containerPicker.backgroundColor");
+    pickerPattern->UnRegisterResource("containerPicker.borderRadius");
 }
 
 int32_t ContainerPickerModel::GetSelectedIndex(FrameNode* frameNode)
