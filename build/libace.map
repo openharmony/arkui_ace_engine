@@ -5251,8 +5251,6 @@
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::TextHeightAdaptivePolicy, Ark_TextHeightAdaptivePolicy>(std::__h::optional<OHOS::Ace::TextHeightAdaptivePolicy>&, Ark_TextHeightAdaptivePolicy const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::TabAnimateMode, Ark_AnimationMode>(std::__h::optional<OHOS::Ace::TabAnimateMode>&, Ark_AnimationMode const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<int, Ark_PageFlipMode>(std::__h::optional<int>&, Ark_PageFlipMode const&)"; 
-      "OHOS::Ace::NG::ArkTSUtils::ParseLengthMetricsToDimensionForTabs(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&)";
-      "OHOS::Ace::NG::ArkTSUtils::ParseLengthMetricsToDimensionForTabs(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, OHOS::Ace::CalcDimension&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject>&)";
       "OHOS::Ace::NG::CommonBridge::SetOnClick(panda::JsiRuntimeCallInfo*)";
       "OHOS::Ace::NG::ArkTSUtils::ParseJsInteger(panda::ecmascript::EcmaVM const*, panda::Local<panda::JSValueRef> const&, unsigned int&)";
       "OHOS::Ace::NG::FrameNodeBridge::CreateEventTargetObject(panda::ecmascript::EcmaVM*, OHOS::Ace::BaseEventInfo const&)";
