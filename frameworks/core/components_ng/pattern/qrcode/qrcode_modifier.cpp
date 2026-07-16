@@ -79,7 +79,8 @@ void QRCodeModifier::onDraw(DrawingContext& context)
     canvas.Restore();
 }
 
-RSBitmap QRCodeModifier::CreateBitMap(int32_t width, const QrcodeImage& qrCode, const Color& color) const
+RSBitmap QRCodeModifier::CreateBitMap(
+    int32_t width, const QrcodeImage& qrCode, const Color& color, const Color& backgroundColor) const
 {
     uint32_t qrWidth = qrCode.width;
     RSBitmap bitMap;
