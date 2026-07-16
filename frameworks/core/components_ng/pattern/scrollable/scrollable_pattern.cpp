@@ -2309,7 +2309,9 @@ void ScrollablePattern::PlaySpringAnimation(float position, const SpringCurveOpt
             if (isFormUser) {
                 pattern->HandleAnimateFromUserStop();
             }
-            pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
+            if (pattern->GetScrollEdgeType() != ScrollEdgeType::SCROLL_NONE && pattern->IsScrollReachEdge()) {
+                pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
+            }
         });
     NotifyFRCSceneInfo(std::string(SCROLLABLE_MULTI_TASK_SCENE), GetCurrentVelocity(), SceneStatus::START);
 }

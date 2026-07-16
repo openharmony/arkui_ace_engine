@@ -676,6 +676,11 @@ public:
 
     virtual void SetScrollEdgeType(ScrollEdgeType scrollEdgeType) {}
 
+    virtual bool IsScrollReachEdge() const
+    {
+        return true;
+    }
+
     virtual void Fling(double flingVelocity);
 
     void SetPositionController(RefPtr<ScrollableController> control)
