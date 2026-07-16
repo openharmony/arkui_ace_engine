@@ -41,6 +41,7 @@ void QRCodeModifier::onDraw(DrawingContext& context)
     auto paintOffset = paintOffset_->Get();
     auto color = color_->Get();
     color = color.BlendOpacity(opacity);
+    auto backgroundColor = backgroundColor_->Get();
     QrcodeImage* qrCode = QrcodeImageEncodeString(value.c_str(), QRCODE_ECC::QRCODE_ECC_MEDIUM);
     if (qrCode == nullptr) {
         TAG_LOGE(AceLogTag::ACE_QRCODE, "QRCodeModifier::onDraw qrCode is null");
@@ -52,7 +53,7 @@ void QRCodeModifier::onDraw(DrawingContext& context)
         TAG_LOGE(AceLogTag::ACE_QRCODE, "QRCodeSize is too small. QRCodeSize: %{public}f", qrCodeSize);
         return;
     }
-    auto bitMap = CreateBitMap(static_cast<int32_t>(qrCodeSize), *qrCode, color);
+    auto bitMap = CreateBitMap(static_cast<int32_t>(qrCodeSize), *qrCode, color, backgroundColor);
     QrcodeImageFree(qrCode);
 
     RSImage image;
