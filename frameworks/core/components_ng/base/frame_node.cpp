@@ -6965,6 +6965,7 @@ void FrameNode::RecordExposureInner()
 void FrameNode::AddFrameNodeSnapshot(
     bool isHit, int32_t parentId, const std::vector<RectF>& responseRegionList, EventTreeType type)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
@@ -6982,15 +6983,18 @@ void FrameNode::AddFrameNodeSnapshot(
         .strategy = TouchTestStrategy::DEFAULT,
         .id = "" };
     eventMgr->GetEventTreeRecord(type).AddFrameNodeSnapshot(std::move(info));
+#endif
 }
 
 void FrameNode::UpdateFrameNodeSnapshot(const TouchResult& touchResult, EventTreeType type)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
     eventMgr->GetEventTreeRecord(type).UpdateFrameNodeSnapshot(nodeId_, touchResult.strategy, touchResult.id);
+#endif
 }
 
 int32_t FrameNode::GetUiExtensionId()

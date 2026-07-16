@@ -458,7 +458,9 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         HandleGestureAccept(info, type, GestureListenerType::PINCH);
         ACE_BENCH_MARK_TRACE("PinchGesture_end");
         callbackFunction(info);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         HandleReports(info, type);
+#endif
     }
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     ReportToGestureDebugManager(type, GestureListenerType::PINCH);
@@ -516,6 +518,7 @@ void PinchRecognizer::GetGestureEventInfo(GestureEvent& info)
     info.SetInputEventType(inputEventType_);
 }
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void PinchRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
 {
     if (type == GestureCallbackType::ACTION || type == GestureCallbackType::UPDATE) {
@@ -531,6 +534,7 @@ void PinchRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
     pinchReport.SetScale(info.GetScale());
     Reporter::GetInstance().HandleUISessionReporting(pinchReport);
 }
+#endif
 
 GestureJudgeResult PinchRecognizer::TriggerGestureJudgeCallback()
 {
