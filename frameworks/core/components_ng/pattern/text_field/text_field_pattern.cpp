@@ -12195,7 +12195,7 @@ bool TextFieldPattern::IsTextEditableForStylus() const
     if (NearZero(opacity.value_or(1.0f))) {
         return false;
     }
-    return !IsInPasswordMode();
+    return !(IsInPasswordMode() || IsOneTimeCodeType());
 }
 
 void TextFieldPattern::UpdateContentScroller(

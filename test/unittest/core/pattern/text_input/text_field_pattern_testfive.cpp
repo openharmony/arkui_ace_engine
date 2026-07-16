@@ -372,6 +372,43 @@ HWTEST_F(TextFieldPatternTestFive, IsTextEditableForStylus001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: IsTextEditableForStylus002
+ * @tc.desc: test IsTextEditableForStylus with password and one-time-code input types
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, IsTextEditableForStylus002, TestSize.Level0)
+{
+    CreateTextField();
+    auto focusHub = frameNode_->GetFocusHub();
+    auto renderContext = frameNode_->GetRenderContext();
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    focusHub->focusType_ = FocusType::NODE;
+    layoutProperty->propVisibility_ = VisibleType::VISIBLE;
+    renderContext->UpdateOpacity(10);
+
+    layoutProperty->UpdateTextInputType(TextInputType::TEXT);
+    EXPECT_EQ(pattern_->IsTextEditableForStylus(), true);
+
+    layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    EXPECT_EQ(pattern_->IsTextEditableForStylus(), false);
+
+    layoutProperty->UpdateTextInputType(TextInputType::NUMBER_PASSWORD);
+    EXPECT_EQ(pattern_->IsTextEditableForStylus(), false);
+
+    layoutProperty->UpdateTextInputType(TextInputType::NEW_PASSWORD);
+    EXPECT_EQ(pattern_->IsTextEditableForStylus(), false);
+
+    layoutProperty->UpdateTextInputType(TextInputType::SCREEN_LOCK_PASSWORD);
+    EXPECT_EQ(pattern_->IsTextEditableForStylus(), false);
+
+    layoutProperty->UpdateTextInputType(TextInputType::ONE_TIME_CODE);
+    EXPECT_EQ(pattern_->IsTextEditableForStylus(), false);
+
+    layoutProperty->UpdateTextInputType(TextInputType::ONE_TIME_CODE_NUMBER);
+    EXPECT_EQ(pattern_->IsTextEditableForStylus(), false);
+}
+
+/**
  * @tc.name: UpdateContentScroller001
  * @tc.desc: test testInput text UpdateContentScroller
  * @tc.type: FUNC
