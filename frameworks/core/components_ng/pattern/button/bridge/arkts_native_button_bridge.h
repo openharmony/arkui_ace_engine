@@ -77,6 +77,7 @@ public:
     static ArkUINativeModuleValue JsBorder(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue JsButtonStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue JsRole(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue JsFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
 private:
     static void PushValuesVector(const std::optional<int32_t>& value, std::vector<int32_t>& valuesVector);

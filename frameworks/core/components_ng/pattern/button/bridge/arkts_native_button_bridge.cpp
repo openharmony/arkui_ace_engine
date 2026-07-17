@@ -655,34 +655,23 @@ ArkUINativeModuleValue ButtonBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    if (ArkTSUtils::IsJsView(firstArg, vm)) {
+        return JsFontColor(runtimeCallInfo);
+    }
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(vm, firstArg, nativeNode), true, panda::JSValueRef::Undefined(vm));
-    auto* buttonModifier = GetSafeButtonModifier();
-    CHECK_NULL_RETURN(buttonModifier, panda::JSValueRef::Undefined(vm));
-
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
     RefPtr<ResourceObject> colorResObj;
-    auto frameNode = ArkTSUtils::IsJsView(firstArg, vm)
-                         ? reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode())
-                         : nativeNode;
-    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(frameNode);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    auto* buttonModifier = GetSafeButtonModifier();
+    CHECK_NULL_RETURN(buttonModifier, panda::JSValueRef::Undefined(vm));
     if (!ArkTSUtils::ParseJsColorAlphaForMaterial(vm, secondArg, color, colorResObj, nodeInfo)) {
-        if (ArkTSUtils::IsJsView(firstArg, vm)) {
-            auto node = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-            CHECK_NULL_RETURN(node, panda::JSValueRef::Undefined(vm));
-            auto buttonTheme = node->GetTheme<ButtonTheme>(true);
-            if (buttonTheme) {
-                color = buttonTheme->GetTextStyle().GetTextColor();
-            }
-        } else {
-            buttonModifier->resetButtonFontColor(nativeNode);
-            return panda::JSValueRef::Undefined(vm);
-        }
+        buttonModifier->resetButtonFontColor(nativeNode);
+    } else {
+        auto colorRawPtr = AceType::RawPtr(colorResObj);
+        buttonModifier->setButtonFontColorUseColorPtr(
+            nativeNode, reinterpret_cast<ArkUI_InnerColor*>(&color), colorRawPtr);
     }
-
-    auto colorRawPtr = AceType::RawPtr(colorResObj);
-    buttonModifier->setButtonFontColorUseColorPtr(nativeNode, reinterpret_cast<ArkUI_InnerColor*>(&color), colorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1767,6 +1756,32 @@ ArkUINativeModuleValue ButtonBridge::JsRole(ArkUIRuntimeCallInfo* runtimeCallInf
     }
     CHECK_NULL_RETURN(buttonModifier->setButtonRole, panda::JSValueRef::Undefined(vm));
     buttonModifier->setButtonRole(nullptr, static_cast<uint32_t>(buttonRole));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::JsFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto* buttonModifier = GetSafeButtonModifier();
+    CHECK_NULL_RETURN(buttonModifier, panda::JSValueRef::Undefined(vm));
+    Color color;
+    RefPtr<ResourceObject> colorResObj;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto nativeNode = reinterpret_cast<ArkUINodeHandle>(frameNode);
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlphaForMaterial(vm, secondArg, color, colorResObj, nodeInfo)) {
+        auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
+        if (buttonTheme) {
+            color = buttonTheme->GetTextStyle().GetTextColor();
+        }
+    }
+
+    auto colorRawPtr = AceType::RawPtr(colorResObj);
+    buttonModifier->setJsButtonFontColorUseColorPtr(
+        nativeNode, reinterpret_cast<ArkUI_InnerColor*>(&color), colorRawPtr);
     return panda::JSValueRef::Undefined(vm);
 }
 
