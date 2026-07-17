@@ -64,8 +64,6 @@ SideBarContainerPattern::~SideBarContainerPattern() = default;
 namespace {
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
 constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VALUE = 2;
-constexpr float RATIO_NEGATIVE = -1.0f;
-constexpr float RATIO_ZERO = 0.0f;
 constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 constexpr int32_t SIDEBAR_DURATION = 500;
 const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
@@ -892,39 +890,6 @@ void SideBarContainerPattern::InitShowAndCloseSidebarPanEvent(bool showSideBarWi
     PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
         { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
     hostGestureHub->AddPanEvent(dragEventForCloseSideBar_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
-}
-
-void SideBarContainerPattern::CreateAnimation()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    ACE_UINODE_TRACE(host);
-    if (!controller_) {
-        controller_ = CREATE_ANIMATOR(host->GetContextRefPtr());
-    }
-
-    auto weak = AceType::WeakClaim(this);
-    if (!rightToLeftAnimation_) {
-        rightToLeftAnimation_ =
-            AceType::MakeRefPtr<CurveAnimation<float>>(RATIO_ZERO, RATIO_NEGATIVE, Curves::FRICTION);
-        rightToLeftAnimation_->AddListener(Animation<float>::ValueCallback([weak](float value) {
-            auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->UpdateSideBarPosition(value);
-            }
-        }));
-    }
-
-    if (!leftToRightAnimation_) {
-        leftToRightAnimation_ =
-            AceType::MakeRefPtr<CurveAnimation<float>>(RATIO_NEGATIVE, RATIO_ZERO, Curves::FRICTION);
-        leftToRightAnimation_->AddListener(Animation<float>::ValueCallback([weak](float value) {
-            auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->UpdateSideBarPosition(value);
-            }
-        }));
-    }
 }
 
 void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
