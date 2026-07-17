@@ -1471,6 +1471,10 @@ namespace OHOS::Ace::NG {
         const std::unordered_map<std::string, LazyForEachCacheChild>& cache)
     {
         auto enableDebugTrace = SystemProperties::GetSyntaxTraceEnabled();
+        auto lazyForEachNode = GetLazyForEachNode();
+        if (lazyForEachNode) {
+            lazyForEachNode->MarkNeedSyncRenderTree(true);
+        }
         for (const auto& [key, node] : cache) {
             if (expiringItem_.find(key) != expiringItem_.end()) {
                 continue;

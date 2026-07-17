@@ -17,8 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_LAZY_FOR_EACH_UTILS_H
 
 #include "base/utils/macros.h"
+#include <string>
 
 namespace OHOS::Ace::NG {
+
+enum class LazyForEachMemOptStrategy;
+enum class RepeatMemOptStrategy;
+enum class ReusableMemOptStrategy;
 
 class ACE_EXPORT LazyForEachUtils {
 public:
@@ -31,10 +36,30 @@ public:
 
     static bool IsIdInRepeatAnimationAllowReuseSet(const std::string& id);
 
+    static void SetLazyForEachMemOptStrategy(std::string strategy);
+
+    static LazyForEachMemOptStrategy GetLazyForEachMemOptStrategy();
+
+    static void SetRepeatMemOptStrategy(std::string strategy);
+
+    static RepeatMemOptStrategy GetRepeatMemOptStrategy();
+
+    static void SetReusableMemOptStrategy(std::string strategy);
+
+    static ReusableMemOptStrategy GetReusableMemOptStrategy();
+
+    static void ParseMetaData(const std::string& name, const std::string & value);
+
 private:
     static bool enableCustomComponentFreeze_;
 
     static std::vector<std::string> idsForRepeatAnimationAllowReuse_;
+
+    static LazyForEachMemOptStrategy lazyForEachMemOptStrategy_;
+
+    static RepeatMemOptStrategy repeatMemOptStrategy_;
+
+    static ReusableMemOptStrategy reusableMemOptStrategy_;
 };
 
 } // namespace OHOS::Ace::NG

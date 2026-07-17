@@ -322,6 +322,16 @@ float ReadScrollCoefficients()
     return DEFAULT_SCROLL_COEFFICEIENT;
 }
 
+int32_t ReadSyntaxMemOptStrategy()
+{
+    return system::GetIntParameter<int32_t>("persist.ace.trace.syntax.memoptstrategy", -1);
+}
+
+int32_t ReadBootVendorDdrSize()
+{
+    return system::GetIntParameter<int32_t>("ohos.boot.vendor.ddrsize", 12); // Set default memory size as 12
+}
+
 int64_t GetDebugFlags()
 {
     return system::GetIntParameter<int64_t>("persist.ace.debug.flags", 0);
@@ -835,6 +845,8 @@ bool SystemProperties::isOpenYuvDecode_ = false;
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
 bool SystemProperties::autoResizeEnabled_ = false;
+int32_t SystemProperties::syntaxMemOptStrategy_ = ReadSyntaxMemOptStrategy();
+int32_t SystemProperties::bootVendorDdrSize_ = ReadBootVendorDdrSize();
 int32_t SystemProperties::sensorCorrectionEnable_ = 0;
 
 std::once_flag SystemProperties::getSysPropertiesFlag_;

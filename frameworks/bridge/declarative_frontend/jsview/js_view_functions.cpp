@@ -162,14 +162,18 @@ bool ViewFunctions::ExecuteHasNodeUpdateFunc(int32_t elmtId)
 }
 
 // recycleSelf
-void ViewFunctions::ExecuteRecycle(const std::string& viewName)
+void ViewFunctions::ExecuteRecycle(const std::string& viewName, int32_t memOptStrategy, int32_t cachedCount)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteRecycle");
     auto func = jsRecycleFunc_.Lock();
     if (!func->IsEmpty()) {
-        auto recycleNodeName = JSRef<JSVal>::Make(ToJSValue(viewName));
-        func->Call(jsObject_.Lock(), 1, &recycleNodeName);
+        // const std::string& viewName, int32_t memOptStrategy, int32_t cachedCount
+        JSRef<JSVal> params[3];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(viewName)); // const std::string& viewName
+        params[1] = JSRef<JSVal>::Make(ToJSValue(memOptStrategy)); // int32_t memOptStrategy
+        params[2] = JSRef<JSVal>::Make(ToJSValue(cachedCount)); // int32_t cachedCount
+        func->Call(jsObject_.Lock(), 3, params); // 3 params
     } else {
         LOGE("the recycle func is null");
     }
