@@ -87,9 +87,10 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
                 info_->targetIndex_.has_value() || !NearEqual(info_->currentOffset_, prevOffset);
     GetExpandArea(props_, info_);
+    // set mainSize_ before Init(), whose dirty scan may measure items
+    mainSize_ = GetMainAxisSize(idealSize, axis_);
     Init(idealSize, originalWidth);
 
-    mainSize_ = GetMainAxisSize(idealSize, axis_);
     CalcContentOffset(wrapper, info_, mainSize_);
     CalculateContentClipFixOffset(wrapper, info_);
     if (!pattern->IsInitialized()) {
@@ -203,17 +204,28 @@ void PrepareJump(const RefPtr<WaterFlowLayoutInfo>& info, std::optional<float>& 
 }
 } // namespace
 
-int32_t WaterFlowSegmentedLayout::CheckDirtyItem() const
+int32_t WaterFlowSegmentedLayout::CheckDirtyItem(bool forceMeasure) const
 {
     for (int32_t i = info_->startIndex_; i <= info_->endIndex_; ++i) {
         if (static_cast<int32_t>(info_->itemInfos_.size()) <= i) {
             break;
         }
+        auto child = wrapper_->GetChildByIndex(i);
+        const bool itemDirty = IsChildMeasureDirty(child);
+        if (!forceMeasure) {
+            if (!itemDirty) {
+                continue;
+            }
+            // dirty lazy-layout items are re-measured by MeasureRemainingLazyChild or a refill
+            if (child->GetLayoutProperty()->GetNeedLazyLayout()) {
+                continue;
+            }
+        }
         float userDefHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i);
-        if (NonNegative(userDefHeight)) {
+        if (NonNegative(userDefHeight) && !itemDirty) {
             continue;
         }
-        auto child = MeasureItem(i,
+        child = MeasureItem(i,
             { info_->itemInfos_[i].crossIdx, info_->itemInfos_[i].mainOffset }, userDefHeight, std::nullopt);
         if (!child) {
             break;
@@ -256,13 +268,11 @@ void WaterFlowSegmentedLayout::Init(const SizeF& frameSize, double originalWidth
     }
 
     const bool childDirty = props_->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
-    if (childDirty) {
-        const int32_t res = CheckDirtyItem();
-        if (res != -1) {
-            PrepareJump(info_, postJumpOffset_);
-            info_->ClearCacheAfterIndex(res - 1);
-            return;
-        }
+    const int32_t dirtyItem = CheckDirtyItem(childDirty);
+    if (dirtyItem != -1) {
+        PrepareJump(info_, postJumpOffset_);
+        info_->ClearCacheAfterIndex(dirtyItem - 1);
+        return;
     }
 
     if (wrapper_->ConstraintChanged()) {

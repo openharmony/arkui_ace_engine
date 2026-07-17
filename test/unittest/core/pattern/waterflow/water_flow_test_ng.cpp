@@ -49,6 +49,9 @@
 #include "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "core/components/button/button_theme.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 
@@ -3042,5 +3045,77 @@ HWTEST_F(WaterFlowTestNg, OnInjectionEventTest005, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 10);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 29);
     EXPECT_EQ(pattern_->GetFirstIndex(), 10);
+}
+
+/**
+ * @tc.name: DirtyVisibleItemMeasuredDuringScroll001
+ * @tc.desc: A visible fixed-size FlowItem with a newly attached subtree is measured during scrolling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, DirtyVisibleItemMeasuredDuringScroll001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    auto item = GetItem(2);
+    ASSERT_TRUE(item);
+    auto stack = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    ASSERT_TRUE(stack);
+
+    int32_t measureCount = 0;
+    stack->measureCallback_ = [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; };
+    item->AddChild(stack);
+    stack->SetActive(false);
+    item->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+
+    // the fixed-size FlowItem keeps the dirty flag from bubbling up to WaterFlow
+    EXPECT_TRUE(CheckUpdateByChildRequest(item->GetLayoutProperty()->GetPropertyChangeFlag()));
+    EXPECT_FALSE(CheckUpdateByChildRequest(layoutProperty_->GetPropertyChangeFlag()));
+
+    UpdateCurrentOffset(-1.0f);
+
+    EXPECT_GT(measureCount, 0);
+    EXPECT_TRUE(stack->IsActive());
+}
+
+/**
+ * @tc.name: DirtyVisibleItemMeasuredDuringScroll002
+ * @tc.desc: When the first dirty item changes height, dirty items behind it are still measured.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, DirtyVisibleItemMeasuredDuringScroll002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr");
+    CreateWaterFlowItems(20);
+    CreateDone();
+
+    // item 1 changes its own height, which requests a parent measure
+    auto item1 = GetItem(1);
+    ASSERT_TRUE(item1);
+    item1->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(ITEM_MAIN_SIZE * 3)));
+    item1->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    // item 3 keeps its fixed size but gets a new subtree, so its dirty flag doesn't bubble up
+    auto item3 = GetItem(3);
+    ASSERT_TRUE(item3);
+    auto stack = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    int32_t measureCount = 0;
+    stack->measureCallback_ = [&measureCount](RefPtr<Kit::FrameNode>&) { ++measureCount; };
+    item3->AddChild(stack);
+    stack->SetActive(false);
+    item3->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+
+    UpdateCurrentOffset(-1.0f);
+
+    // the height change of the first dirty item is applied
+    EXPECT_EQ(GetChildRect(frameNode_, 1).Height(), ITEM_MAIN_SIZE * 3);
+    // and the dirty item behind it is still measured after the layout cache is cleared
+    EXPECT_GT(measureCount, 0);
+    EXPECT_TRUE(stack->IsActive());
 }
 } // namespace OHOS::Ace::NG

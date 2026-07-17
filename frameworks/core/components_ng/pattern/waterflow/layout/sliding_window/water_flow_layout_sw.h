@@ -170,9 +170,17 @@ private:
     bool RecoverCachedHelper(int32_t itemIdx, bool front);
 
     /**
-     * @brief Measure all items in view to check if any item's height changed.
+     * @brief Measure items whose property flags require measurement, or all items requested by the
+     * parent, and check for height changes. Dirty lazy-layout items are skipped: every path that
+     * reaches Layout re-measures them, and the targetIndex_ path skips Layout entirely.
+     * @param forceMeasure whether to measure all items in view.
      */
-    bool ItemHeightChanged() const;
+    bool CheckItemSizeChanged(bool forceMeasure) const;
+
+    /**
+     * @brief CheckItemSizeChanged() implementation for a single lane.
+     */
+    bool LaneItemSizeChanged(const WaterFlowLayoutInfoSW::Lane& lane, size_t laneIdx, bool forceMeasure) const;
 
     /**
      * @brief Data validity check

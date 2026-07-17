@@ -237,15 +237,36 @@ void WaterFlowLayoutSW::SingleInit(const SizeF& frameSize, double originalWidth)
     info_->lanes_[0].resize(itemsCrossSize_[0].size(), WaterFlowLayoutInfoSW::Lane { newStartPos, newStartPos });
 }
 
-bool WaterFlowLayoutSW::ItemHeightChanged() const
+bool WaterFlowLayoutSW::CheckItemSizeChanged(bool forceMeasure) const
 {
     for (const auto& section : info_->lanes_) {
         for (size_t i = 0; i < section.size(); ++i) {
-            for (const auto& item : section[i].items_) {
-                if (!NearEqual(MeasureChild(item.idx, i), item.mainSize)) {
-                    return true;
-                }
+            if (LaneItemSizeChanged(section[i], i, forceMeasure)) {
+                return true;
             }
+        }
+    }
+    return false;
+}
+
+bool WaterFlowLayoutSW::LaneItemSizeChanged(
+    const WaterFlowLayoutInfoSW::Lane& lane, size_t laneIdx, bool forceMeasure) const
+{
+    for (const auto& item : lane.items_) {
+        // stable-state lanes_ only hold in-viewport items; pass isCache defensively
+        auto child = wrapper_->GetChildByIndex(nodeIdx(item.idx), IsCache(info_, item.idx));
+        if (!forceMeasure) {
+            if (!IsChildMeasureDirty(child)) {
+                continue;
+            }
+            // dirty lazy-layout items are re-measured by MeasureRemainingLazyChild or a refill,
+            // except on the targetIndex_ pass, which skips Layout and keeps their dirty flags
+            if (child->GetLayoutProperty()->GetNeedLazyLayout()) {
+                continue;
+            }
+        }
+        if (!NearEqual(MeasureChild(item.idx, laneIdx), item.mainSize)) {
+            return true;
         }
     }
     return false;
@@ -278,7 +299,7 @@ int32_t WaterFlowLayoutSW::CheckReset()
     }
 
     const bool childDirty = props_->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
-    if (childDirty && ItemHeightChanged()) {
+    if (CheckItemSizeChanged(childDirty)) {
         info_->ResetWithLaneOffset(std::nullopt);
         info_->needFixOffsetCache_ = hasValidItemRange;
         return info_->startIndex_;

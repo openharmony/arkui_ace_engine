@@ -112,6 +112,11 @@ protected:
                layoutWrapper->IsIgnoreOptsValid();
     }
 
+    static bool IsChildMeasureDirty(const RefPtr<LayoutWrapper>& child)
+    {
+        return child && CheckNeedMeasure(child->GetLayoutProperty()->GetPropertyChangeFlag());
+    }
+
     /**
     * Init unlayouted items collection from layout info when not layouted.
     */
