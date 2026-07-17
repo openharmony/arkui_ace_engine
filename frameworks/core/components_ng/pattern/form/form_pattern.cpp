@@ -1662,7 +1662,7 @@ void FormPattern::InitFormManagerDelegate()
         formManagerBridge_->SetFormUtils(formUtils);
     }
     int32_t instanceID = context->GetInstanceId();
-    formTaskExecutor_ = AceType::MakeRefPtr<FormTaskExecutor>(WeakPtr<FrameNode>(host));
+    formTaskExecutor_ = AceType::MakeRefPtr<FormTaskExecutor>(instanceID);
     accessibilitySessionAdapter_ = AceType::MakeRefPtr<AccessibilitySessionAdapterForm>(formManagerBridge_);
     formManagerBridge_->SetFormLayoutWrapper(WeakClaim(this));
     formManagerBridge_->AddFormAcquireCallback([weak = WeakClaim(this), instanceID](int64_t id,

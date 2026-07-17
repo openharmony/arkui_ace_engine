@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_TASK_EXECUTOR_H
 
 #include "base/thread/task_executor.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -25,7 +24,7 @@ namespace OHOS::Ace::NG {
 // Main responsibility: Post UI/BACKGROUND tasks with consistent priority and ContainerScope handling.
 class FormTaskExecutor : public virtual Referenced {
 public:
-    explicit FormTaskExecutor(const WeakPtr<FrameNode>& host);
+    explicit FormTaskExecutor(int32_t instanceId);
     ~FormTaskExecutor() = default;
 
     // Post task to UI thread with form task priority
@@ -54,7 +53,7 @@ private:
     static PriorityType GetFormTaskPriority();
     RefPtr<TaskExecutor> GetTaskExecutor() const;
 
-    WeakPtr<FrameNode> host_;
+    int32_t instanceId_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

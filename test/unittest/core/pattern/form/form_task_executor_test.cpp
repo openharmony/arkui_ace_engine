@@ -17,7 +17,7 @@
 
 #include "core/components_ng/pattern/form/form_task_executor.h"
 #include "base/thread/task_executor.h"
-#include "core/components_ng/base/frame_node.h"
+#include "core/common/container.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
@@ -34,7 +34,7 @@ public:
     void TearDown() override;
 
 protected:
-    RefPtr<FrameNode> frameNode_;
+    int32_t instanceId_ = -1;
 };
 
 void FormTaskExecutorTest::SetUpTestSuite()
@@ -55,12 +55,11 @@ void FormTaskExecutorTest::TearDownTestSuite()
 
 void FormTaskExecutorTest::SetUp()
 {
-    frameNode_ = FrameNode::CreateFrameNode("Form", 1, nullptr);
+    instanceId_ = Container::CurrentId();
 }
 
 void FormTaskExecutorTest::TearDown()
 {
-    frameNode_ = nullptr;
 }
 
 /**
@@ -70,12 +69,8 @@ void FormTaskExecutorTest::TearDown()
  */
 HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_PostUITask_001, TestSize.Level1)
 {
-    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(WeakPtr<FrameNode>(frameNode_));
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(instanceId_);
     ASSERT_NE(executor, nullptr);
-
-    // Verify FrameNode can access mock pipeline context through GetContext() fallback
-    auto* context = frameNode_->GetContext();
-    ASSERT_NE(context, nullptr);
 
     bool taskExecuted = false;
     executor->PostUITask([&taskExecuted]() { taskExecuted = true; }, "TestUITask");
@@ -89,7 +84,7 @@ HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_PostUITask_001, TestSize.Level1)
  */
 HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_PostBgTask_001, TestSize.Level1)
 {
-    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(WeakPtr<FrameNode>(frameNode_));
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(instanceId_);
     ASSERT_NE(executor, nullptr);
 
     bool taskExecuted = false;
@@ -104,7 +99,7 @@ HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_PostBgTask_001, TestSize.Level1)
  */
 HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_PostDelayedUITask_001, TestSize.Level1)
 {
-    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(WeakPtr<FrameNode>(frameNode_));
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(instanceId_);
     ASSERT_NE(executor, nullptr);
 
     bool taskExecuted = false;
@@ -119,7 +114,7 @@ HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_PostDelayedUITask_001, TestSize.
  */
 HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_PostDelayedTask_001, TestSize.Level1)
 {
-    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(WeakPtr<FrameNode>(frameNode_));
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(instanceId_);
     ASSERT_NE(executor, nullptr);
 
     bool taskExecuted = false;
@@ -135,7 +130,7 @@ HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_PostDelayedTask_001, TestSize.Le
  */
 HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_RemoveUITask_001, TestSize.Level1)
 {
-    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(WeakPtr<FrameNode>(frameNode_));
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(instanceId_);
     ASSERT_NE(executor, nullptr);
     executor->RemoveUITask("TaskToRemove");
 }
@@ -147,38 +142,38 @@ HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_RemoveUITask_001, TestSize.Level
  */
 HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_IsRunOnUIThread_001, TestSize.Level1)
 {
-    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(WeakPtr<FrameNode>(frameNode_));
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(instanceId_);
     ASSERT_NE(executor, nullptr);
     // MockTaskExecutor's WillRunOnCurrentThread returns true for all task types
     EXPECT_TRUE(executor->IsRunOnUIThread());
 }
 
 /**
- * @tc.name: FormTaskExecutor_NullHost_001
- * @tc.desc: Verify all methods handle null host (FrameNode destroyed) gracefully
+ * @tc.name: FormTaskExecutor_InvalidInstanceId_001
+ * @tc.desc: Verify all methods handle invalid instanceId gracefully
  * @tc.type: FUNC
  */
-HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_NullHost_001, TestSize.Level1)
+HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_InvalidInstanceId_001, TestSize.Level1)
 {
-    // Create executor with null host
-    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(WeakPtr<FrameNode>(nullptr));
+    // Create executor with invalid instanceId — GetContextByContainerId returns nullptr
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(-1);
     ASSERT_NE(executor, nullptr);
 
     bool taskExecuted = false;
-    executor->PostUITask([&taskExecuted]() { taskExecuted = true; }, "NullHostTest");
+    executor->PostUITask([&taskExecuted]() { taskExecuted = true; }, "InvalidIdTest");
     EXPECT_FALSE(taskExecuted);
 
     taskExecuted = false;
-    executor->PostBgTask([&taskExecuted]() { taskExecuted = true; }, "NullHostTest");
+    executor->PostBgTask([&taskExecuted]() { taskExecuted = true; }, "InvalidIdTest");
     EXPECT_FALSE(taskExecuted);
 
     taskExecuted = false;
-    executor->PostDelayedUITask([&taskExecuted]() { taskExecuted = true; }, 0, "NullHostTest");
+    executor->PostDelayedUITask([&taskExecuted]() { taskExecuted = true; }, 0, "InvalidIdTest");
     EXPECT_FALSE(taskExecuted);
 
-    executor->RemoveUITask("NullHostTest");
+    executor->RemoveUITask("InvalidIdTest");
     EXPECT_FALSE(executor->IsRunOnUIThread());
-    EXPECT_FALSE(executor->PostSyncUITask([]() {}, "NullHostTest"));
+    EXPECT_FALSE(executor->PostSyncUITask([]() {}, "InvalidIdTest"));
 }
 
 /**
@@ -193,7 +188,7 @@ HWTEST_F(FormTaskExecutorTest, FormTaskExecutor_NullTaskExecutor_001, TestSize.L
     auto savedExecutor = pipeline->GetTaskExecutor();
     pipeline->SetTaskExecutor(RefPtr<TaskExecutor>());
 
-    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(WeakPtr<FrameNode>(frameNode_));
+    auto executor = AceType::MakeRefPtr<FormTaskExecutor>(instanceId_);
     ASSERT_NE(executor, nullptr);
 
     bool taskExecuted = false;

@@ -39,7 +39,7 @@ PriorityType GetFormTaskPriorityType()
 }
 } // namespace
 
-FormTaskExecutor::FormTaskExecutor(const WeakPtr<FrameNode>& host) : host_(host) {}
+FormTaskExecutor::FormTaskExecutor(int32_t instanceId) : instanceId_(instanceId) {}
 
 PriorityType FormTaskExecutor::GetFormTaskPriority()
 {
@@ -49,9 +49,7 @@ PriorityType FormTaskExecutor::GetFormTaskPriority()
 
 RefPtr<TaskExecutor> FormTaskExecutor::GetTaskExecutor() const
 {
-    auto host = host_.Upgrade();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto* pipeline = host->GetContext();
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId_);
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetTaskExecutor();
 }
