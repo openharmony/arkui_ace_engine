@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -528,58 +528,38 @@ void ContentChangeManager::ResetTranslateNode(const RefPtr<PageTranslateNode>& n
     node->ResetPageTranslate();
 }
 
+void ContentChangeManager::ResetTranslateNodes(std::set<WeakPtr<PageTranslateNode>>& nodes, int32_t nodeId)
+{
+    for (auto iter = nodes.begin(); iter != nodes.end();) {
+        auto translateNode = iter->Upgrade();
+        if (!translateNode) {
+            iter = nodes.erase(iter);
+            continue;
+        }
+        if (nodeId < 0) {
+            ResetTranslateNode(translateNode);
+            ++iter;
+            continue;
+        }
+        if (translateNode->GetPageTranslateNodeId() == nodeId) {
+            ResetTranslateNode(translateNode);
+            nodes.erase(iter);
+            break;
+        }
+        ++iter;
+    }
+}
+
 void ContentChangeManager::ResetTranslateTextNode(int32_t nodeId)
 {
+    ResetTranslateNodes(translateTextNodes_, nodeId);
+    ResetTranslateNodes(translateTextSnapshotNodes_, nodeId);
     if (nodeId < 0) {
-        for (auto iter = translateTextNodes_.begin(); iter != translateTextNodes_.end();) {
-            auto translateNode = iter->Upgrade();
-            if (!translateNode) {
-                iter = translateTextNodes_.erase(iter);
-                continue;
-            }
-            ResetTranslateNode(translateNode);
-            ++iter;
-        }
-        for (auto iter = translateTextSnapshotNodes_.begin(); iter != translateTextSnapshotNodes_.end();) {
-            auto translateNode = iter->Upgrade();
-            if (!translateNode) {
-                iter = translateTextSnapshotNodes_.erase(iter);
-                continue;
-            }
-            ResetTranslateNode(translateNode);
-            ++iter;
-        }
         translateTextVersions_.clear();
         translateTextSnapshotVersions_.clear();
         return;
     }
-    for (auto iter = translateTextNodes_.begin(); iter != translateTextNodes_.end();) {
-        auto translateNode = iter->Upgrade();
-        if (!translateNode) {
-            iter = translateTextNodes_.erase(iter);
-            continue;
-        }
-        if (translateNode->GetPageTranslateNodeId() == nodeId) {
-            ResetTranslateNode(translateNode);
-            translateTextNodes_.erase(iter);
-            break;
-        }
-        ++iter;
-    }
     translateTextVersions_.erase(nodeId);
-    for (auto iter = translateTextSnapshotNodes_.begin(); iter != translateTextSnapshotNodes_.end();) {
-        auto translateNode = iter->Upgrade();
-        if (!translateNode) {
-            iter = translateTextSnapshotNodes_.erase(iter);
-            continue;
-        }
-        if (translateNode->GetPageTranslateNodeId() == nodeId) {
-            ResetTranslateNode(translateNode);
-            translateTextSnapshotNodes_.erase(iter);
-            break;
-        }
-        ++iter;
-    }
     translateTextSnapshotVersions_.erase(nodeId);
 }
 
