@@ -1109,6 +1109,215 @@
       },
       "status": "deprecated",
       "last_verified": "2026-07-14"
+    },
+    {
+      "id": "StateMgmtV1Core",
+      "name": "State Management V1 Core",
+      "name_cn": "V1 状态管理核心逻辑",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "V1 核心逻辑",
+        "ViewPU",
+        "ObservedPropertyAbstractPU",
+        "PropertyDependencies",
+        "依赖收集",
+        "变更通知",
+        "组件冻结",
+        "delayedNotification",
+        "ObservedObject",
+        "SubscribableHandler",
+        "PU 路径",
+        "FU 路径"
+      ],
+      "aliases": [
+        "V1 核心",
+        "V1 Core",
+        "ObservedPropertyPU",
+        "PU 核心"
+      ],
+      "kb": "docs/kb/architecture/state_management/v1_core.md",
+      "spec_status": "pending",
+      "source_paths": {
+        "pu_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_view.ts",
+        "pu_observed_property_abstract": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_observed_property_abstract.ts",
+        "pu_observed_property": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_observed_property.ts",
+        "pu_synced_two_way": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_synced_property_two_way.ts",
+        "pu_synced_one_way": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_synced_property_one_way.ts",
+        "pu_synced_object_nested": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_synced_property_object_nested.ts",
+        "pu_tracked_object": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_tracked_object.ts",
+        "observed_object": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/observed_object.ts",
+        "observed_property_abstract": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/observed_property_abstract.ts",
+        "subscribed_abstract_property": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/subscribed_abstract_property.ts",
+        "subscriber_lookup": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/subscriber_lookup.ts",
+        "fu_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/full_update/fu_view.ts"
+      },
+      "api_paths": {
+        "v1_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common/stateMgmt.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/stateMgmt.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v1_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/common_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-13"
+    },
+    {
+      "id": "StateMgmtV2Core",
+      "name": "State Management V2 Core",
+      "name_cn": "V2 状态管理核心逻辑",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "V2 核心逻辑",
+        "ObserveV2",
+        "trackInternal",
+        "autoProxyObject",
+        "ID 分段",
+        "updateDirty2Optimized",
+        "ViewV2",
+        "PUV2ViewBase",
+        "ObjectProxyHandler",
+        "ArrayProxyHandler",
+        "WeakRefPool",
+        "fireChange"
+      ],
+      "aliases": [
+        "V2 核心",
+        "V2 Core",
+        "ObserveV2 单例",
+        "V2 依赖图"
+      ],
+      "kb": "docs/kb/architecture/state_management/v2_core.md",
+      "spec_status": "pending",
+      "source_paths": {
+        "v2_change_observation": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_change_observation.ts",
+        "v2_observed_proxy": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_observed_proxy.ts",
+        "v2_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_view.ts",
+        "v2_decorators": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_decorators.ts",
+        "v2_computed": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_computed.ts",
+        "v2_monitor": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_monitor.ts",
+        "v2_env": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_env.ts",
+        "v2_decorated_variables": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_decorated_variables.ts",
+        "v2_recycle_pool": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_recycle_pool.ts",
+        "puv2_view_base": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_view_base.ts",
+        "weakref_pool": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/weakref_pool.ts",
+        "v2_data_coder": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_data_coder/"
+      },
+      "api_paths": {
+        "v2_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common/stateMgmtV2.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/stateMgmt.static.d.ets",
+        "statemanagement_module": "<OH_ROOT>/interface/sdk-js/api/arkui/@ohos.arkui.StateManagement.d.ts"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v2_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/env_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-13"
+    },
+    {
+      "id": "StateMgmtV1Decorators",
+      "name": "State Management V1 Decorators",
+      "name_cn": "V1 状态管理装饰器",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "V1 装饰器",
+        "@State",
+        "@Prop",
+        "@Link",
+        "@Watch",
+        "@Observed",
+        "@ObjectLink",
+        "@Provide",
+        "@Consume",
+        "@Track",
+        "ObservedPropertyPU",
+        "SynchedPropertyTwoWayPU"
+      ],
+      "aliases": [
+        "V1 装饰器",
+        "V1 Decorators",
+        "@State @Prop @Link",
+        "@Provide @Consume"
+      ],
+      "kb": "docs/kb/architecture/state_management/v1_decorators.md",
+      "spec_status": "pending",
+      "source_paths": {
+        "pu_observed_property": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_observed_property.ts",
+        "pu_synced_one_way": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_synced_property_one_way.ts",
+        "pu_synced_two_way": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_synced_property_two_way.ts",
+        "pu_synced_object_nested": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_synced_property_object_nested.ts",
+        "pu_tracked_object": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_tracked_object.ts",
+        "observed_object": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/observed_object.ts",
+        "pu_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_view.ts",
+        "pu_builder_proxy": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_builder_proxy.ts"
+      },
+      "api_paths": {
+        "v1_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common/stateMgmt.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/stateMgmt.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v1_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/repeat_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-13"
+    },
+    {
+      "id": "StateMgmtV2Decorators",
+      "name": "State Management V2 Decorators",
+      "name_cn": "V2 状态管理装饰器",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "V2 装饰器",
+        "@ObservedV2",
+        "@Trace",
+        "@Computed",
+        "@Monitor",
+        "@SyncMonitor",
+        "@Local",
+        "@Param",
+        "@Once",
+        "@Event",
+        "@Provider",
+        "@Consumer",
+        "@Type",
+        "@Env",
+        "@CustomEnv"
+      ],
+      "aliases": [
+        "V2 装饰器",
+        "V2 Decorators",
+        "@ObservedV2 @Trace",
+        "@Param @Once @Event"
+      ],
+      "kb": "docs/kb/architecture/state_management/v2_decorators.md",
+      "spec_status": "pending",
+      "source_paths": {
+        "v2_decorators": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_decorators.ts",
+        "v2_change_observation": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_change_observation.ts",
+        "v2_decorated_variables": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_decorated_variables.ts",
+        "v2_computed": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_computed.ts",
+        "v2_monitor": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_monitor.ts",
+        "v2_env": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_env.ts",
+        "v2_data_coder_json_coder": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_data_coder/json_coder.ts",
+        "ui_utils": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/ui_utils.ts"
+      },
+      "api_paths": {
+        "v2_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common/stateMgmtV2.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/stateMgmt.static.d.ets",
+        "statemanagement_module": "<OH_ROOT>/interface/sdk-js/api/arkui/@ohos.arkui.StateManagement.d.ts"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v2_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/env_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-13"
     }
   ]
 }
