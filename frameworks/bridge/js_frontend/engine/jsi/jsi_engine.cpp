@@ -3259,6 +3259,7 @@ void JsiEngine::RegisterInitWorkerFunc()
 
 void JsiEngine::RegisterContainerScopeFunc()
 {
+    CHECK_NULL_VOID(nativeEngine_);
     nativeEngine_->SetGetContainerScopeIdFunc(ContainerScope::CurrentId);
     nativeEngine_->SetInitContainerScopeFunc(ContainerScope::UpdateCurrent);
     nativeEngine_->SetFinishContainerScopeFunc(ContainerScope::RestoreCurrent);

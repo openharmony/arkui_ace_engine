@@ -1675,6 +1675,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 
     if (nativeEngine_ == nullptr) {
         nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
+        RegisterContainerScopeFunc();
     }
     EngineTask(sharedRuntime);
     std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(instanceId_) };
@@ -1767,6 +1768,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
 
 void JsiDeclarativeEngine::RegisterContainerScopeFunc()
 {
+    CHECK_NULL_VOID(nativeEngine_);
     nativeEngine_->SetGetContainerScopeIdFunc(ContainerScope::CurrentId);
     nativeEngine_->SetInitContainerScopeFunc(ContainerScope::UpdateCurrent);
     nativeEngine_->SetFinishContainerScopeFunc(ContainerScope::RestoreCurrent);
