@@ -786,10 +786,23 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         if (name.empty()) {
             return;
         }
+        CHECK_NULL_VOID(recycleNode);
         auto recycleUINode = AceType::DynamicCast<NG::UINode>(recycleNode);
+        CHECK_NULL_VOID(recycleUINode);
         recycleUINode->SetActive(false);
         jsView->SetRecycleCustomNode(recycleNode);
-        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
+        auto memOptStrategy = static_cast<int32_t>(recycleNode->GetReusableMemOptStrategy());
+
+        // Calculate cachedCount based on device memory size
+        int32_t cachedCount = 2; // if deviceMemory <= 6G, cachedCount = 2
+        int32_t deviceMemory = SystemProperties::GetBootVendorDdrSize();
+        if (deviceMemory > 8) {
+            cachedCount = 8; // if deviceMemory > 8G, cachedCount = 8
+        } else if (deviceMemory > 6) {
+            cachedCount = 4; // if 6G < deviceMemory <= 8G, cachedCount = 4
+        }
+
+        jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName(), memOptStrategy, cachedCount);
         if (!recycleNode->HasRecycleRenderFunc() && jsView->recycleCustomNode_) {
             recycleUINode->SetJSViewActive(false, false, true);
             jsView->jsViewFunction_->ExecuteAboutToRecycle();

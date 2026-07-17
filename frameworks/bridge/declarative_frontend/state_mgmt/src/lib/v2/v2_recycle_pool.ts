@@ -37,7 +37,7 @@ class RecyclePoolV2 {
     private pendingProgressiveReleaseNodes_: Array<ViewV2> = undefined;
     // Callback to request progressive release (set by parent ViewV2)
     private requestProgressiveReleaseCallback_: () => void = undefined;
-    private defaultCacheCount: number;
+    private cachedCount: number;
     private reuseIdForOptimize: Set<string> = new Set<string>();
 
     constructor() {
@@ -46,7 +46,7 @@ class RecyclePoolV2 {
       this.pendingCacheCleanTimers_ = new Map<string, any>();
       this.maxCacheSizes_ = new Map<string, number>();
       this.pendingProgressiveReleaseNodes_ = new Array<ViewV2>();
-      this.defaultCacheCount = 8;
+      this.cachedCount = 8;
     }
   
     /**
@@ -57,16 +57,20 @@ class RecyclePoolV2 {
      *
      * @param {string} reuseId - The id of the component being recycled.
      * @param {ViewV2} reuseComp - The recycled component to be added to the pool.
+     * @param {number} memOptStrategy - The memory optimization strategy (-1 = UNDEFINED, 0 = DEFAULT, 1 = ENABLE_AUTO_CACHE_OPTIMIZATION).
+     * @param {number} cachedCount - The size of reuse pool.
      */
-    public pushRecycleV2Component(reuseId: string, reuseComp: ViewV2): void {
+    public pushRecycleV2Component(
+      reuseId: string, reuseComp: ViewV2, memOptStrategy: number = 0, cachedCount: number = 8): void {
       if (!this.cachedRecycleComponents_.get(reuseId)) {
         this.cachedRecycleComponents_.set(reuseId, new Array<ViewV2>());
       }
       this.cachedRecycleComponents_.get(reuseId)?.push(reuseComp);
-      if (reuseComp.__getReusableMemOptStrategy__Internal() === 1) {
+      if (memOptStrategy === 1) {
+        this.cachedCount = cachedCount;
         this.reuseIdForOptimize.add(reuseId);
         const cachedComponents = this.cachedRecycleComponents_.get(reuseId);
-        if (cachedComponents && cachedComponents.length > this.defaultCacheCount) {
+        if (cachedComponents && cachedComponents.length > this.cachedCount) {
           const currentSize = cachedComponents.length;
           const maxSize = this.maxCacheSizes_.get(reuseId) || 0;
           // Only restart timer if cache size reaches a new maximum
@@ -170,7 +174,7 @@ class RecyclePoolV2 {
 
       const timerId = setTimeout(() => {
         // Prepare nodes for progressive release
-        const pendingCount = this.prepareCleanCacheToTargetProgressive(reuseId, this.defaultCacheCount);
+        const pendingCount = this.prepareCleanCacheToTargetProgressive(reuseId, this.cachedCount);
 
         // If there are nodes to release and callback is available, request progressive release
         if (pendingCount > 0 && this.requestProgressiveReleaseCallback_) {

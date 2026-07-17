@@ -2263,15 +2263,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         EventReport::ReportReusedNodeSkipMeasureApp();
     }
     AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
-    // Read the enableCustomComponentFreeze configuration from metadata and set it in LazyForEachUtils.
-    bool enableCustomComponentFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "enableCustomComponentFreeze" && metaDataItem.value == "true";
-    });
-    NG::LazyForEachUtils::SetEnableCustomComponentFreeze(enableCustomComponentFreeze);
-    bool enableRepeatAnimation = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "enableRepeatAnimation" && metaDataItem.value == "true";
-    });
-    NG::LazyForEachUtils::SetEnableRepeatAnimation(enableRepeatAnimation);
+    // Read metadata configurations and set them in LazyForEachUtils
+    for (const auto& metaDataItem : metaData) {
+        NG::LazyForEachUtils::ParseMetaData(metaDataItem.name, metaDataItem.value);
+    }
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
         bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);

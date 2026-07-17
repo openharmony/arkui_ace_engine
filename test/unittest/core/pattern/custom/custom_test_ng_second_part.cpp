@@ -1634,4 +1634,88 @@ HWTEST_F(CustomTestNg, CustomTest126, TestSize.Level1)
     EXPECT_FALSE(customNode->NeedRebuild());
 }
 
+/**
+ * @tc.name: LazyForEachUtilsSetReusableMemOptStrategy001
+ * @tc.desc: Test LazyForEachUtils::SetReusableMemOptStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, LazyForEachUtilsSetReusableMemOptStrategy001, TestSize.Level1)
+{
+    LazyForEachUtils::SetReusableMemOptStrategy("ENABLE_AUTO_CACHE_OPTIMIZATION");
+    EXPECT_EQ(LazyForEachUtils::GetReusableMemOptStrategy(),
+              ReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+    LazyForEachUtils::SetReusableMemOptStrategy("DEFAULT");
+    EXPECT_EQ(LazyForEachUtils::GetReusableMemOptStrategy(), ReusableMemOptStrategy::DEFAULT);
+    LazyForEachUtils::SetReusableMemOptStrategy("INVALID_STRATEGY");
+    EXPECT_EQ(LazyForEachUtils::GetReusableMemOptStrategy(), ReusableMemOptStrategy::DEFAULT);
+    LazyForEachUtils::SetReusableMemOptStrategy("");
+    EXPECT_EQ(LazyForEachUtils::GetReusableMemOptStrategy(), ReusableMemOptStrategy::DEFAULT);
+}
+
+/**
+ * @tc.name: CustomNodeBaseGetReusableMemOptStrategy001
+ * @tc.desc: Test CustomNodeBase::GetReusableMemOptStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomNodeBaseGetReusableMemOptStrategy001, TestSize.Level1)
+{
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    ASSERT_NE(customNode, nullptr);
+
+    customNode->reusableMemOptStrategy_ = ReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+    auto strategy = customNode->GetReusableMemOptStrategy();
+    EXPECT_EQ(strategy, ReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    customNode->reusableMemOptStrategy_ = ReusableMemOptStrategy::UNDEFINED;
+    LazyForEachUtils::reusableMemOptStrategy_ = ReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+    strategy = customNode->GetReusableMemOptStrategy();
+    EXPECT_EQ(strategy, ReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    customNode->reusableMemOptStrategy_ = ReusableMemOptStrategy::UNDEFINED;
+    LazyForEachUtils::reusableMemOptStrategy_ = ReusableMemOptStrategy::UNDEFINED;
+    SystemProperties::syntaxMemOptStrategy_ = 1;
+    strategy = customNode->GetReusableMemOptStrategy();
+    EXPECT_EQ(strategy, ReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    customNode->reusableMemOptStrategy_ = ReusableMemOptStrategy::UNDEFINED;
+    SystemProperties::syntaxMemOptStrategy_ = -1;
+    strategy = customNode->GetReusableMemOptStrategy();
+    EXPECT_EQ(strategy, ReusableMemOptStrategy::DEFAULT);
+}
+
+/**
+ * @tc.name: CustomNodeBaseTryEnableParentCustomNodeMemOpt001
+ * @tc.desc: Test CustomNodeBase::TryEnableParentCustomNodeMemOpt
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomNodeBaseTryEnableParentCustomNodeMemOpt001, TestSize.Level1)
+{
+    auto rootFrameNode = CreateNode(V2::TEXT_ETS_TAG);
+    ASSERT_NE(rootFrameNode, nullptr);
+
+    auto parentCustomNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "ParentCustom");
+    ASSERT_NE(parentCustomNode, nullptr);
+    parentCustomNode->SetJSViewName("ParentCustomNode");
+    parentCustomNode->MountToParent(rootFrameNode);
+
+    auto intermediateFrameNode = CreateNode(V2::COLUMN_ETS_TAG);
+    ASSERT_NE(intermediateFrameNode, nullptr);
+    intermediateFrameNode->MountToParent(parentCustomNode);
+
+    auto childCustomNode = CustomNode::CreateCustomNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), "ChildCustom");
+    ASSERT_NE(childCustomNode, nullptr);
+    childCustomNode->SetJSViewName("ChildCustomNode");
+    childCustomNode->MountToParent(intermediateFrameNode);
+
+    childCustomNode->reusableMemOptStrategy_ = ReusableMemOptStrategy::DEFAULT;
+    childCustomNode->TryEnableParentCustomNodeMemOpt();
+    EXPECT_EQ(parentCustomNode->runningMemOpt_, false);
+
+    childCustomNode->reusableMemOptStrategy_ = ReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+    childCustomNode->TryEnableParentCustomNodeMemOpt();
+    EXPECT_EQ(parentCustomNode->runningMemOpt_, true);
+}
+
 } // namespace OHOS::Ace::NG
