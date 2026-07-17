@@ -34,8 +34,8 @@ ace_unittest("qrcode_test_ng") {
   }
 
   if (is_arkui_x) {
-    deps = [ "//commonlibrary/qrcode_generator:qrcode_generator_static" ]
+    deps = [ "//commonlibrary/qrcode_generator:qrcodegen" ]
   } else {
-    external_deps = [ "qrcode_generator:qrcode_generator_static" ]
+    external_deps = [ "qrcode_generator:qrcodegen" ]
   }
 }

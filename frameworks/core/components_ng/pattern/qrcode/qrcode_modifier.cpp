@@ -40,8 +40,8 @@ void QRCodeModifier::onDraw(DrawingContext& context)
     auto value = value_->Get();
     auto paintOffset = paintOffset_->Get();
     auto color = color_->Get();
-    color = color.BlendOpacity(opacity);
     auto backgroundColor = backgroundColor_->Get();
+    color = color.BlendOpacity(opacity);
     QrcodeImage* qrCode = QrcodeImageEncodeString(value.c_str(), QRCODE_ECC::QRCODE_ECC_MEDIUM);
     if (qrCode == nullptr) {
         TAG_LOGE(AceLogTag::ACE_QRCODE, "QRCodeModifier::onDraw qrCode is null");
@@ -63,8 +63,7 @@ void QRCodeModifier::onDraw(DrawingContext& context)
     // 2.Calculate the max block of the QRcode. Ratio = qrCodeSize_ / qrCode.getSize().
     // 3.Scale the qrcode ,the scale ratio is qrCodeSize_ / (blockNumber * qrCode.getSize())
 
-    int32_t blockCounts = static_cast<int32_t>(qrCodeSize) / qrWidth;
-    int32_t sizeInPixel = blockCounts * qrWidth;
+    int32_t sizeInPixel = qrWidth;
     if (sizeInPixel == 0) {
         return;
     }
