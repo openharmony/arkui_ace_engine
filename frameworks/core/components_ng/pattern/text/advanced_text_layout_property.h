@@ -105,6 +105,14 @@ public:
     {
         return gradientShaderStyle_.reset();
     }
+
+    RefPtr<AdvancedTextLayoutProperty> Clone() const
+    {
+        auto value = MakeRefPtr<AdvancedTextLayoutProperty>();
+        value->gradientShaderStyle_ = gradientShaderStyle_;
+        return value;
+    }
+
 private:
     std::optional<NG::Gradient> gradientShaderStyle_;
 };

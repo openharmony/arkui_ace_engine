@@ -111,6 +111,26 @@ public:
         ResetTextColorFlagByUser();
         ResetClipEdge();
         ResetIncrementalUpdatePolicy();
+        ResetFontForegroudGradiantColor();
+        ResetSelectedDragPreviewStyle();
+        ResetEnableAutoSpacing();
+        ResetColorShaderStyle();
+        ResetTextEffectStrategy();
+        ResetMinLines();
+        ResetTextFlipDirection();
+        ResetTextFlipEnableBlur();
+        ResetLineHeightMultiply();
+        ResetMinimumLineHeight();
+        ResetMaximumLineHeight();
+        ResetIncludeFontPadding();
+        ResetFallbackLineSpacing();
+        ResetCopyOption();
+        ResetTextSelectableMode();
+        ResetIsAnimationNeeded();
+        ResetIsTextMaxlinesFirst();
+        ResetEnableSmallLanguageTruncation();
+        ResetEnablePunctuationOverflowOptimize();
+        ResetGradientShaderStyle();
         propNeedReCreateParagraph_ = true;
     }
 
@@ -337,7 +357,33 @@ protected:
         value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
         value->propCursorColor_ = CloneCursorColor();
         value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
+        value->propSelectedBackgroundColorFlagByUser_ = CloneSelectedBackgroundColorFlagByUser();
+        value->propCopyOptionFlagByUser_ = CloneCopyOptionFlagByUser();
+        value->propTextColorFlagByUser_ = CloneTextColorFlagByUser();
         value->propClipEdge_ = CloneClipEdge();
+        value->propFontForegroudGradiantColor_ = CloneFontForegroudGradiantColor();
+        value->propSelectedDragPreviewStyle_ = CloneSelectedDragPreviewStyle();
+        value->propEnableAutoSpacing_ = CloneEnableAutoSpacing();
+        value->propColorShaderStyle_ = CloneColorShaderStyle();
+        value->propTextEffectStrategy_ = CloneTextEffectStrategy();
+        value->propIncrementalUpdatePolicy_ = CloneIncrementalUpdatePolicy();
+        value->propMinLines_ = CloneMinLines();
+        value->propTextFlipDirection_ = CloneTextFlipDirection();
+        value->propTextFlipEnableBlur_ = CloneTextFlipEnableBlur();
+        value->propLineHeightMultiply_ = CloneLineHeightMultiply();
+        value->propMinimumLineHeight_ = CloneMinimumLineHeight();
+        value->propMaximumLineHeight_ = CloneMaximumLineHeight();
+        value->propIncludeFontPadding_ = CloneIncludeFontPadding();
+        value->propFallbackLineSpacing_ = CloneFallbackLineSpacing();
+        value->propCopyOption_ = CloneCopyOption();
+        value->propTextSelectableMode_ = CloneTextSelectableMode();
+        value->propIsAnimationNeeded_ = CloneIsAnimationNeeded();
+        value->propIsTextMaxlinesFirst_ = CloneIsTextMaxlinesFirst();
+        value->propEnableSmallLanguageTruncation_ = CloneEnableSmallLanguageTruncation();
+        value->propEnablePunctuationOverflowOptimize_ = CloneEnablePunctuationOverflowOptimize();
+        if (advancedTextLayoutProperty_) {
+            value->advancedTextLayoutProperty_ = advancedTextLayoutProperty_->Clone();
+        }
         value->propNeedReCreateParagraph_ = true;
     }
 
