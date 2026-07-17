@@ -3375,8 +3375,9 @@ bool DialogPattern::NeedDistortion()
         !dialogProperties_.systemMaterial ||
         (dialogProperties_.systemMaterial &&
             Ace::AceType::TypeId(AceType::RawPtr(dialogProperties_.systemMaterial)) != Ace::UiMaterial::TypeId() &&
-            !dialogProperties_.edgeLightMode.has_value()) ||
-        !MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
+            !dialogProperties_.distortionMode.has_value()) ||
+        !MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType()) ||
+        (dialogTheme_ && dialogTheme_->GetExpandDisplay())) {
         needDistortion_ = false;
     } else if (dialogProperties_.distortionMode.value_or(DistortionMode::DISTORTION_AUTO) ==
                DistortionMode::DISTORTION_ENABLED) {
@@ -3410,7 +3411,8 @@ bool DialogPattern::NeedEdgeLight()
         (dialogProperties_.systemMaterial &&
             Ace::AceType::TypeId(AceType::RawPtr(dialogProperties_.systemMaterial)) != Ace::UiMaterial::TypeId() &&
             !dialogProperties_.edgeLightMode.has_value()) ||
-        !MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType())) {
+        !MaterialUtils::CheckMaterialValid(dialogProperties_.systemMaterial->GetType()) ||
+        (dialogTheme_ && dialogTheme_->GetExpandDisplay())) {
         needFlowLight_ = false;
     } else if (dialogProperties_.edgeLightMode.value_or(EdgeLightMode::EDGELIGHT_AUTO) ==
                EdgeLightMode::EDGELIGHT_ENABLED) {
