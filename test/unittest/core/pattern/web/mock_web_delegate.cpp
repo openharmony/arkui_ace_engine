@@ -33,9 +33,10 @@ std::shared_ptr<NWeb::NWebAgentManager> g_nwebAgentManager = nullptr;
 std::map<std::string, std::string> htmlElementToSurfaceMap = { { "existhtmlElementId", "existSurfaceId" },
     { "existhtmlElementIdOther", "existSurfaceIdOther" } };
 std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId", "existhtmlElementId" },
-    { "existSurfaceIdOther", "existhtmlElementIdOther" } };
+    { "existSurfaceIdOther", "existhtmlElementIdOther" }, { "emptyHtmlElementSurfaceId", "" },
+    { "hoverSurfaceId", "hoverHtmlElementId" } };
 std::map<std::string, int64_t> surfaceToWebAccessibilityMap = { { "existSurfaceId", 123 },
-    { "existSurfaceIdOther", 456 } };
+    { "existSurfaceIdOther", 456 }, { "emptyHtmlElementSurfaceId", 789 } };
 constexpr double WEB_SNAPSHOT_SIZE_TOLERANCE = 0.85;
 class MockNWebAccessibilityNodeInfoOnlyForReturn : public NWeb::NWebAccessibilityNodeInfo {
 public:
@@ -1077,6 +1078,9 @@ void WebDelegate::HandleAccessibilityHoverEvent(
 
 std::string WebDelegate::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
 {
+    if (htmlElementId.empty()) {
+        return "";
+    }
     auto it = htmlElementToSurfaceMap.find(htmlElementId);
     if (it != htmlElementToSurfaceMap.end()) {
         return it->second;
@@ -1095,6 +1099,10 @@ std::string WebDelegate::GetHtmlElementIdBySurfaceId(const std::string& surfaceI
 int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surfaceId)
 {
     if (IS_CALLING_FROM_M114()) {
+        return -1;
+    }
+    auto htmlElementId = GetHtmlElementIdBySurfaceId(surfaceId);
+    if (htmlElementId.empty()) {
         return -1;
     }
     auto it = surfaceToWebAccessibilityMap.find(surfaceId);

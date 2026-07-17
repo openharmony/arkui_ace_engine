@@ -337,7 +337,7 @@ public:
         const RefPtr<NG::WebPattern>& webPattern);
     void WebFocusMoveSearchByComponent(AccessibilityElementInfo& nodeInfo, const RefPtr<NG::WebPattern>& webPattern,
         const int32_t direction, RefPtr<PipelineBase> context, FocusMoveResult& result,
-        int32_t focusRuleType = static_cast<int32_t>(FocusRuleType::DEFAULT));
+        int32_t focusRuleType = static_cast<int32_t>(FocusRuleType::DEFAULT), uint32_t searchDepth = 0);
     void WebFocusMoveSearchNG(int64_t elementId, int32_t direction,
         Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
         const RefPtr<NG::WebPattern>& webPattern);
