@@ -183,7 +183,6 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
         jsAnimateToFunc->Call(jsAnimateToFunc);
     } else {
         TAG_LOGE(AceLogTag::ACE_ANIMATION, "jsAnimateToFunc is empty");
-        return;
     }
     pipelineContext->FlushOnceVsyncTask();
     auto tokenOut = AnimationUtils::GetRSUIContextToken(pipelineContext);
