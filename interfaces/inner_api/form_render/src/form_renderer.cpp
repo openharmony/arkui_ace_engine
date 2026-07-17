@@ -180,8 +180,8 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
     proxy_ = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
     renderingMode_ = (AppExecFwk::Constants::RenderingMode)want.GetIntParam(
         OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, 0);
-    minRenderingMode = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
-    maxRenderingMode = AppExecFwk::Constants::RenderingMode::SINGLE_COLOR;
+    auto minRenderingMode = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
+    auto maxRenderingMode = AppExecFwk::Constants::RenderingMode::SINGLE_COLOR;
     if (renderingMode_ > maxRenderingMode || renderingMode_ < minRenderingMode) {
         renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     }
@@ -196,8 +196,8 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
     obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
     formLocation_ = static_cast<AppExecFwk::Constants::FormLocation>(
         want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));  // -1: FormLocation::OTHER
-    minFormLocation = AppExecFwk::Constants::FormLocation::OTHER;
-    maxFormLocation = AppExecFwk::Constants::FormLocation::FORM_LOCATION_END;
+    auto minFormLocation = AppExecFwk::Constants::FormLocation::OTHER;
+    auto maxFormLocation = AppExecFwk::Constants::FormLocation::FORM_LOCATION_END;
     if (formLocation_ > maxFormLocation || formLocation_ < minFormLocation) {
         formLocation_ = AppExecFwk::Constants::FormLocation::OTHER;
     }

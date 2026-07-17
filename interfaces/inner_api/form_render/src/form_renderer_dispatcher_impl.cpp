@@ -348,9 +348,10 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
         std::condition_variable cv;
     };
     std::shared_ptr<DumpInfoCondition> dumpCondition = std::make_shared<DumpInfoCondition>();
+    auto infoPtr = std::make_shared<std::vector<std::string>>(info);
     std::unique_lock<std::mutex> lock(dumpCondition->mtx);
     handler->PostTask(
-        [content = uiContent_, params, info, dumpCondition]() {
+        [content = uiContent_, params, infoPtr, dumpCondition]() {
             std::unique_lock<std::mutex> lock(dumpCondition->mtx);
             auto uiContent = content.lock();
             if (!uiContent) {
@@ -359,7 +360,7 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
                 return;
             }
             HILOG_INFO("OnNotifyDumpInfo");
-            uiContent->DumpInfo(params, info);
+            uiContent->DumpInfo(params, *infoPtr);
             dumpCondition->cv.notify_all();
         },
         "OnNotifyDumpInfoTask");
@@ -367,6 +368,8 @@ void FormRendererDispatcherImpl::OnNotifyDumpInfo(
         HILOG_ERROR("OnNotifyDumpInfo timeout");
         info.push_back("dump timeout " + std::to_string(DUMP_WAIT_TIME) + "ms");
         handler->RemoveTask("OnNotifyDumpInfoTask");
+    } else {
+        info = std::move(*infoPtr);
     }
 }
 
