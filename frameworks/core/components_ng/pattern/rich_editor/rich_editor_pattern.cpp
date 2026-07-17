@@ -1437,6 +1437,7 @@ void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& cust
 int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason reason, bool isPaste, int32_t index)
 {
     ACE_UINODE_TRACE(GetHost());
+    auto envFontScale = GetEnvFontScaleFromLayout();
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddTextSpan: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
@@ -1446,7 +1447,7 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason
         return -1;
     }
     options.value = options.value.substr(0, length);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddTextSpan, opts=%{public}s", ToBriefString(options).c_str());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddTextSpan, opts=%{public}s", ToBriefString(options, envFontScale).c_str());
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddTextSpan, opts=%{public}s", options.ToString().c_str());
     AdjustAddPosition(options);
     NotifyExitTextPreview();
@@ -1814,12 +1815,13 @@ void RichEditorPattern::UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::op
 int32_t RichEditorPattern::AddSymbolSpan(SymbolSpanOptions options, TextChangeReason reason, bool isPaste, int32_t index)
 {
     ACE_UINODE_TRACE(GetHost());
+    auto envFontScale = GetEnvFontScaleFromLayout();
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX) - 1) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddSymbolSpan: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddSymbolSpan, opts=%{public}s isPaste=%{public}d, index=%{public}d",
-        ToBriefString(options).c_str(), isPaste, index);
+        ToBriefString(options, envFontScale).c_str(), isPaste, index);
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddSymbolSpan, opts=%{public}s", options.ToString().c_str());
 
     NotifyExitTextPreview(false);
@@ -2887,8 +2889,9 @@ bool RichEditorPattern::SymbolSpanUpdateStyle(
 void RichEditorPattern::UpdateSpanStyle(
     int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle, bool isExternal)
 {
+    auto envFontScale = GetEnvFontScaleFromLayout();
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "updateSpanStyle, [%{public}d,%{public}d], %{public}s",
-        start, end, ToBriefString(textStyle, imageStyle, updateSpanStyle_).c_str());
+        start, end, ToBriefString(textStyle, imageStyle, updateSpanStyle_, envFontScale).c_str());
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "textStyle=%{public}s, imageStyle=%{public}s",
         textStyle.ToString().c_str(), imageStyle.ToString().c_str());
     auto host = GetContentHost();
@@ -3411,6 +3414,7 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
 
     auto&& firstSpan = spanNodes.front()->GetSpanItem();
     auto paraStart = firstSpan->position - static_cast<int32_t>(firstSpan->content.length());
+    auto envFontScale = GetEnvFontScaleFromLayout();
 
     for (auto it = spanNodes.begin(); it != spanNodes.end(); ++it) {
         if (it == std::prev(spanNodes.end()) || (!(*it)->GetSpanItem()->content.empty()
@@ -3419,7 +3423,7 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
             auto lm = (*it)->GetLeadingMarginValue({});
             std::optional<double> spacingOpt;
             if (auto spacing = (*it)->GetParagraphSpacing(); spacing.has_value()) {
-                spacingOpt = spacing.value().ConvertToFp();
+                spacingOpt = spacing.value().ConvertToFpWithEnv(envFontScale);
             }
             std::optional<int32_t> textVerticalAlignOpt;
             if (auto textVerticalAlign = (*it)->GetTextVerticalAlign(); textVerticalAlign.has_value()) {
@@ -5144,10 +5148,12 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
     CHECK_NULL_RETURN(spanItem, textStyle);
     auto theme = GetTheme<RichEditorTheme>();
     TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
+    auto envFontScale = GetEnvFontScaleFromLayout();
+    textStyle.envFontScale = envFontScale;
     if (spanItem->fontStyle) {
         textStyle.fontColor = spanItem->fontStyle->GetTextColor().value_or(style.GetTextColor()).ColorToString();
         textStyle.fontSize =
-            spanItem->fontStyle->GetFontSize().value_or(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP)).ConvertToFp();
+            spanItem->fontStyle->GetFontSize().value_or(Dimension(DEFAULT_TEXT_SIZE, DimensionUnit::FP)).ConvertToFpWithEnv(envFontScale);
         textStyle.fontStyle =
             static_cast<int32_t>(spanItem->fontStyle->GetItalicFontStyle().value_or(OHOS::Ace::FontStyle::NORMAL));
         textStyle.fontWeight = static_cast<int32_t>(spanItem->fontStyle->GetFontWeight().value_or(FontWeight::NORMAL));
@@ -5168,7 +5174,7 @@ TextStyleResult RichEditorPattern::GetTextStyleBySpanItem(const RefPtr<SpanItem>
             static_cast<int32_t>(spanItem->fontStyle->GetTextDecorationStyle().value_or(TextDecorationStyle::SOLID));
         textStyle.lineThicknessScale = static_cast<float>(spanItem->fontStyle->GetLineThicknessScale().value_or(1.0f));
         textStyle.fontFeature = spanItem->fontStyle->GetFontFeature().value_or(ParseFontFeatureSettings("\"pnum\" 1"));
-        textStyle.letterSpacing = spanItem->fontStyle->GetLetterSpacing().value_or(Dimension()).ConvertToFp();
+        textStyle.letterSpacing = spanItem->fontStyle->GetLetterSpacing().value_or(Dimension()).ConvertToFpWithEnv(envFontScale);
         textStyle.strokeWidth = spanItem->fontStyle->GetStrokeWidth().value_or(Dimension()).ConvertToVp();
         textStyle.strokeColor = spanItem->fontStyle->GetStrokeColor().value_or(style.GetTextColor()).ColorToString();
         textStyle.strokeJoinStyle = spanItem->fontStyle->GetStrokeJoinStyle();
@@ -5182,9 +5188,10 @@ void RichEditorPattern::CopyTextLineStyleToTextStyleResult(const RefPtr<SpanItem
     TextStyleResult& textStyle)
 {
     CHECK_NULL_VOID(spanItem->textLineStyle);
-    textStyle.lineHeight = spanItem->textLineStyle->GetLineHeight().value_or(Dimension()).ConvertToFp();
+    auto envFontScale = GetEnvFontScaleFromLayout();
+    textStyle.lineHeight = spanItem->textLineStyle->GetLineHeight().value_or(Dimension()).ConvertToFpWithEnv(envFontScale);
     textStyle.halfLeading = spanItem->textLineStyle->GetHalfLeading().value_or(false);
-    textStyle.lineSpacing = spanItem->textLineStyle->GetLineSpacing().value_or(Dimension()).ConvertToFp();
+    textStyle.lineSpacing = spanItem->textLineStyle->GetLineSpacing().value_or(Dimension()).ConvertToFpWithEnv(envFontScale);
     textStyle.textAlign = static_cast<int32_t>(spanItem->textLineStyle->GetTextAlign().value_or(TextAlign::START));
     auto lm = spanItem->textLineStyle->GetLeadingMargin();
     if (lm.has_value()) {
@@ -12607,6 +12614,7 @@ void RichEditorPattern::SetTextStyleToRet(RichEditorAbstractSpanResult& retInfo,
     retInfo.SetFontSize(textStyle.GetFontSize().ConvertToVp());
     retInfo.SetFontStyle(textStyle.GetFontStyle());
     TextStyleResult textStyleResult;
+    textStyleResult.envFontScale = GetEnvFontScaleFromLayout();
     textStyleResult.lineHeight = textStyle.GetLineHeight().ConvertToVp();
     textStyleResult.halfLeading = textStyle.GetHalfLeading();
     textStyleResult.letterSpacing = textStyle.GetLetterSpacing().ConvertToVp();
@@ -12651,7 +12659,9 @@ void RichEditorPattern::SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo,
     std::optional<struct UpdateParagraphStyle> paraStyle)
 {
     CHECK_NULL_VOID(paraStyle);
+    auto envFontScale = GetEnvFontScaleFromLayout();
     TextStyleResult textStyleResult = retInfo.GetTextStyle();
+    textStyleResult.envFontScale = envFontScale;
     textStyleResult.textAlign = static_cast<int32_t>(paraStyle->textAlign.value_or(TextAlign::START));
     if (paraStyle->leadingMargin) {
         textStyleResult.leadingMarginSize[0] = paraStyle->leadingMargin->size.Width().ToString();
@@ -12662,7 +12672,7 @@ void RichEditorPattern::SetParaStyleToRet(RichEditorAbstractSpanResult& retInfo,
     IF_TRUE(paraStyle->lineBreakStrategy.has_value(),
         textStyleResult.lineBreakStrategy = static_cast<int32_t>(paraStyle->lineBreakStrategy.value()));
     IF_TRUE(paraStyle->paragraphSpacing.has_value(), textStyleResult.paragraphSpacing =
-        Dimension(paraStyle->paragraphSpacing.value().ConvertToFp(), DimensionUnit::FP));
+        Dimension(paraStyle->paragraphSpacing.value().ConvertToFpWithEnv(envFontScale), DimensionUnit::FP));
     IF_TRUE(paraStyle->textVerticalAlign.has_value(), textStyleResult.textVerticalAlign =
         static_cast<int32_t>(paraStyle->textVerticalAlign.value()));
     IF_TRUE(paraStyle->textDirection.has_value(), textStyleResult.textDirection =

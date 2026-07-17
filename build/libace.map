@@ -2580,6 +2580,7 @@
       "OHOS::Ace::NG::TextPattern::GetDragParagraph() const";
       "OHOS::Ace::NG::TextPattern::GetDragRecordSize()";
       "OHOS::Ace::NG::TextPattern::GetDragUpperLeftCoordinates()";
+      "OHOS::Ace::NG::TextPattern::GetEnvFontScaleFromLayout()";
       "OHOS::Ace::NG::TextPattern::GetFontSizeWithThemeInJson(std::__h::optional<OHOS::Ace::Dimension> const&) const";
       "OHOS::Ace::NG::TextPattern::GetFocusPattern() const";
       "OHOS::Ace::NG::TextPattern::GetGlyphPositionAtCoordinate(int, int)";

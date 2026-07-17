@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_base_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/style_manager.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
@@ -253,7 +254,8 @@ JSRef<JSObject> JSRichEditor::CreateJsTextBackgroundStyle(const TextBackgroundSt
     return textBackgroundStyleObj;
 }
 
-JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& textStyleResult)
+JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& textStyleResult,
+    std::optional<float> envFontScale)
 {
     JSRef<JSObject> paragraphStyleObj = JSRef<JSObject>::New();
     paragraphStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
@@ -267,7 +269,7 @@ JSRef<JSObject> JSRichEditor::CreateJSParagraphStyle(const TextStyleResult& text
     }
     if (textStyleResult.paragraphSpacing.has_value()) {
         paragraphStyleObj->SetProperty<double>("paragraphSpacing",
-            textStyleResult.paragraphSpacing.value().ConvertToFp());
+            textStyleResult.paragraphSpacing.value().ConvertToFpWithEnv(envFontScale));
     }
     if (textStyleResult.textVerticalAlign.has_value()) {
         paragraphStyleObj->SetProperty<int32_t>("textVerticalAlign",
@@ -386,7 +388,8 @@ JSRef<JSObject> JSRichEditor::CreateParagraphStyleResult(const ParagraphInfo& in
     return obj;
 }
 
-JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resultObject)
+JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resultObject,
+    std::optional<float> envFontScale)
 {
     JSRef<JSArray> offsetArray = JSRef<JSArray>::New();
     JSRef<JSArray> spanRangeArray = JSRef<JSArray>::New();
@@ -400,17 +403,18 @@ JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resul
     spanPositionObj->SetPropertyObject("spanRange", spanRangeArray);
     resultObj->SetPropertyObject("offsetInSpan", offsetArray);
     resultObj->SetPropertyObject("spanPosition", spanPositionObj);
-    SetJSSpanResultObject(resultObj, resultObject);
+    SetJSSpanResultObject(resultObj, resultObject, envFontScale);
     return resultObj;
 }
 
-void JSRichEditor::SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject)
+void JSRichEditor::SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject,
+    std::optional<float> envFontScale)
 {
     if (resultObject.type == SelectSpanType::TYPESPAN) {
         resultObj->SetProperty<std::u16string>("value", resultObject.valueString);
         resultObj->SetProperty<std::u16string>("previewText", resultObject.previewText);
         resultObj->SetPropertyObject("textStyle", CreateJSTextStyleResult(resultObject.textStyle));
-        resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(resultObject.textStyle));
+        resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(resultObject.textStyle, envFontScale));
         SetJSUrlStyle(resultObject.urlAddress, resultObj);
     } else if (resultObject.type == SelectSpanType::TYPESYMBOLSPAN) {
         resultObj->SetProperty<std::u16string>("value", resultObject.valueString);
@@ -431,7 +435,8 @@ void JSRichEditor::SetJSSpanResultObject(JSRef<JSObject>& resultObj, const Resul
     }
 }
 
-JSRef<JSVal> JSRichEditor::CreateJSSelection(const SelectionInfo& selectInfo)
+JSRef<JSVal> JSRichEditor::CreateJSSelection(const SelectionInfo& selectInfo,
+    std::optional<float> envFontScale)
 {
     uint32_t idx = 0;
 
@@ -441,7 +446,7 @@ JSRef<JSVal> JSRichEditor::CreateJSSelection(const SelectionInfo& selectInfo)
 
     const std::list<ResultObject>& spanObjectList = selectInfo.GetSelection().resultObjects;
     for (const ResultObject& spanObject : spanObjectList) {
-        spanObjectArray->SetValueAt(idx++, CreateJSSpanResultObject(spanObject));
+        spanObjectArray->SetValueAt(idx++, CreateJSSpanResultObject(spanObject, envFontScale));
     }
 
     selectionArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[0])));
@@ -1003,6 +1008,10 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
 
 JSRef<JSVal> JSRichEditorController::CreateJSSpansInfo(const SelectionInfo& info)
 {
+    auto controller = controllerWeak_.Upgrade();
+    auto baseController = AceType::DynamicCast<NG::RichEditorBaseController>(controller);
+    auto envFontScale = baseController ? baseController->GetEnvFontScale() : std::nullopt;
+
     uint32_t idx = 0;
 
     JSRef<JSArray> spanObjectArray = JSRef<JSArray>::New();
@@ -1010,7 +1019,7 @@ JSRef<JSVal> JSRichEditorController::CreateJSSpansInfo(const SelectionInfo& info
 
     const std::list<ResultObject>& spanObjectList = info.GetSelection().resultObjects;
     for (const ResultObject& spanObject : spanObjectList) {
-        spanObjectArray->SetValueAt(idx++, JSRichEditor::CreateJSSpanResultObject(spanObject));
+        spanObjectArray->SetValueAt(idx++, JSRichEditor::CreateJSSpanResultObject(spanObject, envFontScale));
     }
 
     return JSRef<JSVal>::Cast(spanObjectArray);
@@ -1205,8 +1214,10 @@ void JSRichEditorController::GetSelection(const JSCallbackInfo& args)
     auto controller = controllerWeak_.Upgrade();
     auto richEditorController = AceType::DynamicCast<RichEditorControllerBase>(controller);
     CHECK_NULL_VOID(richEditorController);
+    auto baseController = AceType::DynamicCast<NG::RichEditorBaseController>(controller);
+    auto envFontScale = baseController ? baseController->GetEnvFontScale() : std::nullopt;
     SelectionInfo value = richEditorController->GetSelectionSpansInfo();
-    args.SetReturnValue(JSRichEditor::CreateJSSelection(value));
+    args.SetReturnValue(JSRichEditor::CreateJSSelection(value, envFontScale));
 }
 
 void JSRichEditorController::JSBind(BindingTarget globalObj)

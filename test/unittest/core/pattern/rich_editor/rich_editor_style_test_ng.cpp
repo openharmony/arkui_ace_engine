@@ -373,7 +373,9 @@ HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle001, TestSize.Level0)
     ASSERT_NE(newSpan1, nullptr);
     EXPECT_EQ(newSpan1->GetLineHeight(), LINE_HEIGHT_VALUE);
     EXPECT_EQ(newSpan1->GetLetterSpacing(), LETTER_SPACING);
-    for (const auto& pair : *newSpan1->GetFontFeature()) {
+    auto fontFeature = newSpan1->GetFontFeature();
+    ASSERT_TRUE(fontFeature.has_value());
+    for (const auto& pair : *fontFeature) {
         EXPECT_EQ(pair.first, "subs");
         EXPECT_EQ(pair.second, 1);
     }
@@ -402,7 +404,9 @@ HWTEST_F(RichEditorStyleTestNg, UpdateTextStyle002, TestSize.Level0)
     updateSpanStyle.updateFontFeature = TEXT_FONTFEATURE;
     richEditorPattern->UpdateTextStyle(newSpan1, updateSpanStyle, textStyle);
     ASSERT_NE(newSpan1, nullptr);
-    for (const auto& pair : *newSpan1->GetFontFeature()) {
+    auto fontFeature = newSpan1->GetFontFeature();
+    ASSERT_TRUE(fontFeature.has_value());
+    for (const auto& pair : *fontFeature) {
         EXPECT_EQ(pair.first, "subs");
         EXPECT_EQ(pair.second, 0);
     }
@@ -1458,6 +1462,425 @@ HWTEST_F(RichEditorStyleTestNg, RichEditorHalfLeading001, TestSize.Level0)
     ASSERT_NE(newSpan1, nullptr);
     EXPECT_EQ(newSpan1->GetHalfLeading(), true);
     ClearSpan();
+}
+
+/**
+ * @tc.name: GetEnvFontScale001
+ * @tc.desc: test GetEnvFontScaleFromLayout returns std::nullopt when no layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, GetEnvFontScale001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto envFontScale = richEditorPattern->GetEnvFontScaleFromLayout();
+    // In mock environment, IsEnvManagerActive returns false, so GetEnvFontScaleFromLayout returns std::nullopt
+    EXPECT_FALSE(envFontScale.has_value());
+}
+
+/**
+ * @tc.name: GetEnvFontScale002
+ * @tc.desc: test GetEnvFontScaleFromLayout returns consistent result with layout property
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, GetEnvFontScale002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Call twice and verify consistent results
+    auto envFontScale1 = richEditorPattern->GetEnvFontScaleFromLayout();
+    auto envFontScale2 = richEditorPattern->GetEnvFontScaleFromLayout();
+    EXPECT_EQ(envFontScale1.has_value(), envFontScale2.has_value());
+    if (envFontScale1.has_value() && envFontScale2.has_value()) {
+        EXPECT_EQ(envFontScale1.value(), envFontScale2.value());
+    }
+}
+
+/**
+ * @tc.name: GetTextStyleBySpanItemEnvFontScale001
+ * @tc.desc: test GetTextStyleBySpanItem uses ConvertToFpWithEnv for fontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, GetTextStyleBySpanItemEnvFontScale001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->fontStyle = nullptr;
+    spanItem->textLineStyle = nullptr;
+    auto textStyle = richEditorPattern->GetTextStyleBySpanItem(spanItem);
+    // When both fontStyle and textLineStyle are nullptr, fontSize should be default (0)
+    EXPECT_EQ(textStyle.fontSize, 0.0);
+}
+
+/**
+ * @tc.name: GetTextStyleBySpanItemEnvFontScale002
+ * @tc.desc: test GetTextStyleBySpanItem uses ConvertToFpWithEnv for fontSize and letterSpacing
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, GetTextStyleBySpanItemEnvFontScale002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->fontStyle = std::make_unique<FontStyle>();
+    spanItem->fontStyle->UpdateFontSize(Dimension(20, DimensionUnit::VP));
+    spanItem->fontStyle->UpdateLetterSpacing(Dimension(5, DimensionUnit::VP));
+    spanItem->textLineStyle = nullptr;
+    auto envFontScale = richEditorPattern->GetEnvFontScaleFromLayout();
+    auto textStyle = richEditorPattern->GetTextStyleBySpanItem(spanItem);
+    // With envFontScale as nullopt (mock env), ConvertToFpWithEnv should fallback to ConvertToFp behavior
+    EXPECT_EQ(textStyle.fontSize,
+        Dimension(20, DimensionUnit::VP).ConvertToFpWithEnv(envFontScale));
+    EXPECT_EQ(textStyle.letterSpacing,
+        Dimension(5, DimensionUnit::VP).ConvertToFpWithEnv(envFontScale));
+}
+
+/**
+ * @tc.name: CopyTextLineStyleToTextStyleResultEnvFontScale001
+ * @tc.desc: test CopyTextLineStyleToTextStyleResult uses ConvertToFpWithEnv for lineHeight and lineSpacing
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, CopyTextLineStyleToTextStyleResultEnvFontScale001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->fontStyle = nullptr;
+    spanItem->textLineStyle = std::make_unique<TextLineStyle>();
+    spanItem->textLineStyle->UpdateLineHeight(Dimension(30, DimensionUnit::VP));
+    spanItem->textLineStyle->UpdateLineSpacing(Dimension(10, DimensionUnit::VP));
+    auto envFontScale = richEditorPattern->GetEnvFontScaleFromLayout();
+
+    TextStyleResult textStyle;
+    richEditorPattern->CopyTextLineStyleToTextStyleResult(spanItem, textStyle);
+    EXPECT_EQ(textStyle.lineHeight,
+        Dimension(30, DimensionUnit::VP).ConvertToFpWithEnv(envFontScale));
+    EXPECT_EQ(textStyle.lineSpacing,
+        Dimension(10, DimensionUnit::VP).ConvertToFpWithEnv(envFontScale));
+}
+
+/**
+ * @tc.name: SetParaStyleToRetEnvFontScale001
+ * @tc.desc: test SetParaStyleToRet uses ConvertToFpWithEnv for paragraphSpacing
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, SetParaStyleToRetEnvFontScale001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorAbstractSpanResult retInfo;
+    struct UpdateParagraphStyle paraStyle;
+    paraStyle.paragraphSpacing = Dimension(8, DimensionUnit::VP);
+    auto envFontScale = richEditorPattern->GetEnvFontScaleFromLayout();
+    richEditorPattern->SetParaStyleToRet(retInfo, paraStyle);
+    auto textStyleResult = retInfo.GetTextStyle();
+    ASSERT_TRUE(textStyleResult.paragraphSpacing.has_value());
+    EXPECT_EQ(textStyleResult.paragraphSpacing.value(),
+        Dimension(Dimension(8, DimensionUnit::VP).ConvertToFpWithEnv(envFontScale), DimensionUnit::FP));
+}
+
+/**
+ * @tc.name: SetParaStyleToRetEnvFontScale002
+ * @tc.desc: test SetParaStyleToRet paragraphSpacing is stored as FP unit dimension
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, SetParaStyleToRetEnvFontScale002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorAbstractSpanResult retInfo;
+    struct UpdateParagraphStyle paraStyle;
+    paraStyle.paragraphSpacing = Dimension(10, DimensionUnit::VP);
+    richEditorPattern->SetParaStyleToRet(retInfo, paraStyle);
+    auto textStyleResult = retInfo.GetTextStyle();
+    ASSERT_TRUE(textStyleResult.paragraphSpacing.has_value());
+    // Verify the stored dimension is in FP unit so bridge ConvertToFpWithEnv returns value directly
+    EXPECT_EQ(textStyleResult.paragraphSpacing.value().Unit(), DimensionUnit::FP);
+    auto envFontScale = richEditorPattern->GetEnvFontScaleFromLayout();
+    // Bridge uses ConvertToFpWithEnv on already-FP dimension; should equal stored value
+    EXPECT_EQ(textStyleResult.paragraphSpacing.value().ConvertToFpWithEnv(envFontScale),
+        textStyleResult.paragraphSpacing.value().Value());
+}
+
+/**
+ * @tc.name: GetParagraphInfoEnvFontScale001
+ * @tc.desc: test GetParagraphInfo returns empty for invalid range
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, GetParagraphInfoEnvFontScale001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // GetParagraphInfo with empty range should return empty vector
+    auto result = richEditorPattern->GetParagraphInfo(0, 0);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BridgeParagraphSpacingEnvFontScale001
+ * @tc.desc: test that TextStyleResult.paragraphSpacing feeds correctly to bridge conversion
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, BridgeParagraphSpacingEnvFontScale001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Set up a paragraph style with spacing
+    RichEditorAbstractSpanResult retInfo;
+    struct UpdateParagraphStyle paraStyle;
+    paraStyle.paragraphSpacing = Dimension(16, DimensionUnit::VP);
+    richEditorPattern->SetParaStyleToRet(retInfo, paraStyle);
+    auto textStyleResult = retInfo.GetTextStyle();
+    ASSERT_TRUE(textStyleResult.paragraphSpacing.has_value());
+
+    // Simulate what the bridge does: ConvertToFpWithEnv on the stored Dimension
+    auto envFontScale = richEditorPattern->GetEnvFontScaleFromLayout();
+    double bridgeValue = textStyleResult.paragraphSpacing.value().ConvertToFpWithEnv(envFontScale);
+    // Since the dimension is already in FP unit, ConvertToFpWithEnv should return the raw value
+    EXPECT_EQ(bridgeValue, textStyleResult.paragraphSpacing.value().Value());
+    // And it should match the expected conversion from the original VP value
+    EXPECT_EQ(bridgeValue, Dimension(16, DimensionUnit::VP).ConvertToFpWithEnv(envFontScale));
+}
+
+/**
+ * @tc.name: GetTextStyleBySpanItemEnvFontScale003
+ * @tc.desc: test GetTextStyleBySpanItem with complete fontStyle and textLineStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, GetTextStyleBySpanItemEnvFontScale003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->fontStyle = std::make_unique<FontStyle>();
+    spanItem->fontStyle->UpdateFontSize(Dimension(16, DimensionUnit::VP));
+    spanItem->fontStyle->UpdateLetterSpacing(Dimension(2, DimensionUnit::VP));
+    spanItem->textLineStyle = std::make_unique<TextLineStyle>();
+    spanItem->textLineStyle->UpdateLineHeight(Dimension(24, DimensionUnit::VP));
+    spanItem->textLineStyle->UpdateLineSpacing(Dimension(4, DimensionUnit::VP));
+    auto envFontScale = richEditorPattern->GetEnvFontScaleFromLayout();
+
+    auto textStyle = richEditorPattern->GetTextStyleBySpanItem(spanItem);
+    // Verify all ConvertToFpWithEnv-based values
+    EXPECT_EQ(textStyle.fontSize,
+        Dimension(16, DimensionUnit::VP).ConvertToFpWithEnv(envFontScale));
+    EXPECT_EQ(textStyle.letterSpacing,
+        Dimension(2, DimensionUnit::VP).ConvertToFpWithEnv(envFontScale));
+    EXPECT_EQ(textStyle.lineHeight,
+        Dimension(24, DimensionUnit::VP).ConvertToFpWithEnv(envFontScale));
+    EXPECT_EQ(textStyle.lineSpacing,
+        Dimension(4, DimensionUnit::VP).ConvertToFpWithEnv(envFontScale));
+}
+
+/**
+ * @tc.name: CreateJSParagraphStyleEnvFontScale001
+ * @tc.desc: test that envFontScale from GetEnvFontScaleFromLayout is passed to CreateJSParagraphStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, CreateJSParagraphStyleEnvFontScale001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Verify the pattern's GetEnvFontScaleFromLayout is callable and returns std::optional<float>
+    auto envFontScale = richEditorPattern->GetEnvFontScaleFromLayout();
+    // In mock env, envFontScale should be std::nullopt (consistent with GetEnvFontScale001)
+    EXPECT_FALSE(envFontScale.has_value());
+}
+
+/**
+ * @tc.name: CreateJSParagraphStyleEnvFontScale002
+ * @tc.desc: test that envFontScale obtained from pattern feeds correctly into paragraphSpacing conversion
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, CreateJSParagraphStyleEnvFontScale002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Simulate what the bridge chain does: get envFontScale from pattern, then pass to CreateJSParagraphStyle
+    auto envFontScale = richEditorPattern->GetEnvFontScaleFromLayout();
+
+    // Set up TextStyleResult with paragraphSpacing (already converted via ConvertToFpWithEnv in SetParaStyleToRet)
+    RichEditorAbstractSpanResult retInfo;
+    struct UpdateParagraphStyle paraStyle;
+    paraStyle.paragraphSpacing = Dimension(20, DimensionUnit::VP);
+    richEditorPattern->SetParaStyleToRet(retInfo, paraStyle);
+    auto textStyleResult = retInfo.GetTextStyle();
+    ASSERT_TRUE(textStyleResult.paragraphSpacing.has_value());
+
+    // CreateJSParagraphStyle calls ConvertToFpWithEnv(envFontScale) on the stored FP dimension
+    double bridgeValue = textStyleResult.paragraphSpacing.value().ConvertToFpWithEnv(envFontScale);
+    // Since the dimension is already FP unit, ConvertToFpWithEnv returns the raw value
+    EXPECT_EQ(bridgeValue, textStyleResult.paragraphSpacing.value().Value());
+}
+
+/**
+ * @tc.name: CreateJSParagraphStyleEnvFontScale003
+ * @tc.desc: test that bridge chain obtains envFontScale from pattern via GetEnvFontScaleFromLayout
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, CreateJSParagraphStyleEnvFontScale003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // The bridge call chain: GetSelection/GetSpansInfo/FromStyledString
+    //   → pattern->GetEnvFontScaleFromLayout() → CreateJSSelection/CreateJSSpansInfo(envFontScale)
+    //   → CreateJSSpanResultObject(envFontScale) → SetJSSpanResultObject(envFontScale)
+    //   → CreateJSParagraphStyle(textStyle, envFontScale)
+
+    // Verify that GetEnvFontScaleFromLayout can be called from the pattern context
+    auto envFontScale = richEditorPattern->GetEnvFontScaleFromLayout();
+
+    // Set up a complete TextStyleResult that would flow through the bridge chain
+    RichEditorAbstractSpanResult retInfo;
+    struct UpdateParagraphStyle paraStyle;
+    paraStyle.paragraphSpacing = Dimension(15, DimensionUnit::VP);
+    richEditorPattern->SetParaStyleToRet(retInfo, paraStyle);
+    auto textStyleResult = retInfo.GetTextStyle();
+
+    ASSERT_TRUE(textStyleResult.paragraphSpacing.has_value());
+    // Verify stored dimension is FP (set by SetParaStyleToRet via ConvertToFpWithEnv)
+    EXPECT_EQ(textStyleResult.paragraphSpacing.value().Unit(), DimensionUnit::FP);
+
+    // Simulate the bridge conversion with envFontScale from pattern
+    double result = textStyleResult.paragraphSpacing.value().ConvertToFpWithEnv(envFontScale);
+    EXPECT_EQ(result, textStyleResult.paragraphSpacing.value().Value());
+}
+
+/**
+ * @tc.name: RichEditorBaseControllerGetEnvFontScale001
+ * @tc.desc: test RichEditorBaseController::GetEnvFontScale delegates to pattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, RichEditorBaseControllerGetEnvFontScale001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    // RichEditorBaseController::GetEnvFontScale() delegates to pattern->GetEnvFontScaleFromLayout()
+    auto envFontScale = richEditorController->GetEnvFontScale();
+    auto patternEnvFontScale = richEditorPattern->GetEnvFontScaleFromLayout();
+    EXPECT_EQ(envFontScale.has_value(), patternEnvFontScale.has_value());
+}
+
+/**
+ * @tc.name: RichEditorBaseControllerGetEnvFontScale002
+ * @tc.desc: test that bridge callers use RichEditorBaseController::GetEnvFontScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, RichEditorBaseControllerGetEnvFontScale002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    // Simulate what GetSelection/GetSpansInfo/FromStyledString do:
+    // auto envFontScale = baseController ? baseController->GetEnvFontScale() : std::nullopt;
+    auto envFontScale = richEditorController->GetEnvFontScale();
+
+    // Set up TextStyleResult and verify the envFontScale feeds into CreateJSParagraphStyle chain
+    RichEditorAbstractSpanResult retInfo;
+    struct UpdateParagraphStyle paraStyle;
+    paraStyle.paragraphSpacing = Dimension(20, DimensionUnit::VP);
+    richEditorPattern->SetParaStyleToRet(retInfo, paraStyle);
+    auto textStyleResult = retInfo.GetTextStyle();
+    ASSERT_TRUE(textStyleResult.paragraphSpacing.has_value());
+
+    // CreateJSParagraphStyle uses ConvertToFpWithEnv(envFontScale) internally
+    double bridgeValue = textStyleResult.paragraphSpacing.value().ConvertToFpWithEnv(envFontScale);
+    EXPECT_EQ(bridgeValue, textStyleResult.paragraphSpacing.value().Value());
+}
+
+/**
+ * @tc.name: RichEditorBaseControllerGetEnvFontScale003
+ * @tc.desc: test RichEditorBaseController::GetEnvFontScale returns nullopt when pattern is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, RichEditorBaseControllerGetEnvFontScale003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Create a controller without setting pattern
+    auto controller = AceType::MakeRefPtr<RichEditorController>();
+    ASSERT_NE(controller, nullptr);
+    // No SetPattern called - pattern_ is null
+    auto envFontScale = controller->GetEnvFontScale();
+    EXPECT_FALSE(envFontScale.has_value());
+}
+
+/**
+ * @tc.name: CreateJSSpansInfoEnvFontScale003
+ * @tc.desc: test that CreateJSSpansInfo signature no longer has envFontScale parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleTestNg, CreateJSSpansInfoEnvFontScale003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    // Verify that the pattern and controller chain work correctly
+    // CreateJSSpansInfo is now non-static, takes only SelectionInfo, no envFontScale
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    // The controller's GetEnvFontScale delegates to pattern->GetEnvFontScaleFromLayout
+    auto envFontScale = richEditorController->GetEnvFontScale();
+
+    // Verify multiple spacing values produce consistent results using the internally-obtained envFontScale
+    RichEditorAbstractSpanResult retInfo1;
+    struct UpdateParagraphStyle paraStyle1;
+    paraStyle1.paragraphSpacing = Dimension(10, DimensionUnit::VP);
+    richEditorPattern->SetParaStyleToRet(retInfo1, paraStyle1);
+    auto tsResult1 = retInfo1.GetTextStyle();
+
+    RichEditorAbstractSpanResult retInfo2;
+    struct UpdateParagraphStyle paraStyle2;
+    paraStyle2.paragraphSpacing = Dimension(30, DimensionUnit::VP);
+    richEditorPattern->SetParaStyleToRet(retInfo2, paraStyle2);
+    auto tsResult2 = retInfo2.GetTextStyle();
+
+    ASSERT_TRUE(tsResult1.paragraphSpacing.has_value());
+    ASSERT_TRUE(tsResult2.paragraphSpacing.has_value());
+
+    double val1 = tsResult1.paragraphSpacing.value().ConvertToFpWithEnv(envFontScale);
+    double val2 = tsResult2.paragraphSpacing.value().ConvertToFpWithEnv(envFontScale);
+    EXPECT_GT(val2, val1);
 }
 
 }

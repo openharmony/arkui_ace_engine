@@ -21,23 +21,23 @@
 namespace OHOS::Ace::NG {
 
 static std::string ToBriefString(const TextStyle& style, const ImageSpanAttribute& imageStyle,
-    struct UpdateSpanStyle opt)
+    struct UpdateSpanStyle opt, std::optional<float> envFontScale = std::nullopt)
 {
     std::stringstream ss;
     /* text style */
     ss << "te={";
     IF_TRUE(opt.updateTextColor, ss << style.GetTextColor().ToString() << ",");
-    IF_TRUE(opt.updateFontSize, ss << "FS" << style.GetFontSize().ConvertToFp() << ",");
+    IF_TRUE(opt.updateFontSize, ss << "FS" << style.GetFontSize().ConvertToFpWithEnv(envFontScale) << ",");
     IF_TRUE(opt.updateItalicFontStyle, ss << StringUtils::ToString(style.GetFontStyle()) << ",");
     IF_TRUE(opt.updateFontWeight, ss << StringUtils::ToString(style.GetFontWeight()) << ",");
     IF_TRUE(opt.updateTextDecoration, ss << StringUtils::ToString(style.GetTextDecorationFirst()) << ",");
-    IF_TRUE(opt.updateLineHeight, ss << "LH" << style.GetLineHeight().ConvertToFp() << ",");
-    IF_TRUE(opt.updateLetterSpacing, ss << "LS" << style.GetLetterSpacing().ConvertToFp() << ",");
+    IF_TRUE(opt.updateLineHeight, ss << "LH" << style.GetLineHeight().ConvertToFpWithEnv(envFontScale) << ",");
+    IF_TRUE(opt.updateLetterSpacing, ss << "LS" << style.GetLetterSpacing().ConvertToFpWithEnv(envFontScale) << ",");
     ss << "},";
 
     /* symbol style */
     ss << "sb={";
-    IF_TRUE(opt.updateSymbolFontSize, ss << opt.updateSymbolFontSize->ConvertToFp() << ",");
+    IF_TRUE(opt.updateSymbolFontSize, ss << opt.updateSymbolFontSize->ConvertToFpWithEnv(envFontScale) << ",");
     IF_TRUE(opt.updateSymbolFontWeight, ss  << StringUtils::ToString(*opt.updateSymbolFontWeight) << ",");
     IF_TRUE(opt.updateSymbolRenderingStrategy, ss << "RS" << *opt.updateSymbolRenderingStrategy  << ",");
     IF_TRUE(opt.updateSymbolEffectStrategy, ss << "ES" << *opt.updateSymbolEffectStrategy  << ",");
@@ -54,29 +54,29 @@ static std::string ToBriefString(const TextStyle& style, const ImageSpanAttribut
     return ss.str();
 }
 
-static std::string ToBriefString(const TextStyle& style)
+static std::string ToBriefString(const TextStyle& style, std::optional<float> envFontScale = std::nullopt)
 {
     std::stringstream ss;
     ss << "{";
     ss << style.GetTextColor().ToString() << ",";
-    ss << "FS" << style.GetFontSize().ConvertToFp() << ",";
+    ss << "FS" << style.GetFontSize().ConvertToFpWithEnv(envFontScale) << ",";
     ss << StringUtils::ToString(style.GetFontStyle()) << ",";
     ss << StringUtils::ToString(style.GetFontWeight()) << ",";
     ss << StringUtils::ToString(style.GetTextDecorationFirst()) << ",";
-    ss << "LH" << style.GetLineHeight().ConvertToFp() << ",";
-    ss << "LS" << style.GetLetterSpacing().ConvertToFp();
+    ss << "LH" << style.GetLineHeight().ConvertToFpWithEnv(envFontScale) << ",";
+    ss << "LS" << style.GetLetterSpacing().ConvertToFpWithEnv(envFontScale);
     ss << "}";
     return ss.str();
 }
 
-static std::string ToBriefString(const TextSpanOptions& opts)
+static std::string ToBriefString(const TextSpanOptions& opts, std::optional<float> envFontScale = std::nullopt)
 {
     std::stringstream ss;
     ss << "{";
     ss << "index=" << opts.offset.value_or(-1) << ", ";
     ss << "len=" << opts.value.size() << ", ";
     if (opts.style) {
-        ss << "ts=" << ToBriefString(opts.style.value()) << ", ";
+        ss << "ts=" << ToBriefString(opts.style.value(), envFontScale) << ", ";
     }
     if (opts.paraStyle) {
         ss << "ps={" << opts.paraStyle->ToString() << "}, ";
@@ -86,13 +86,13 @@ static std::string ToBriefString(const TextSpanOptions& opts)
     return ss.str();
 }
 
-static std::string ToBriefString(const SymbolSpanOptions& opts)
+static std::string ToBriefString(const SymbolSpanOptions& opts, std::optional<float> envFontScale = std::nullopt)
 {
     std::stringstream ss;
     ss << "{";
     ss << "index=" << opts.offset.value_or(-1) << ", ";
     if (opts.style) {
-        ss << "ts=" << ToBriefString(opts.style.value()) << ", ";
+        ss << "ts=" << ToBriefString(opts.style.value(), envFontScale) << ", ";
     }
     if (opts.paraStyle) {
         ss << "ps={" << opts.paraStyle->ToString() << "}, ";

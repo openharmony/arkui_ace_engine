@@ -118,6 +118,7 @@ struct TextStyleResult {
     double strokeWidth = 0.0;
     std::string strokeColor;
     std::optional<StrokeJoinStyle> strokeJoinStyle;
+    std::optional<float> envFontScale;
 };
 
 struct ImageStyleResult {

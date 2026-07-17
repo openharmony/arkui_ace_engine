@@ -22,6 +22,12 @@ void RichEditorBaseController::SetPattern(const WeakPtr<RichEditorPattern>& patt
     pattern_ = pattern;
 }
 
+std::optional<float> RichEditorBaseController::GetEnvFontScale() const
+{
+    auto pattern = pattern_.Upgrade();
+    return pattern ? pattern->GetEnvFontScaleFromLayout() : std::nullopt;
+}
+
 void RichEditorBaseController::SetHost(const WeakPtr<FrameNode>& host)
 {
     host_ = host;
