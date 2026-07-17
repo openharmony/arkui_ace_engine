@@ -2208,7 +2208,21 @@ void MenuLayoutAlgorithm::SetMenuPlacementForAnimation(LayoutWrapper* layoutWrap
     CHECK_NULL_VOID(menuWrapper);
     auto wrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
+    auto oldPlacement = wrapperPattern->GetMenuPlacement();
     wrapperPattern->SetMenuPlacementAfterLayout(placement_);
+    if (oldPlacement != placement_) {
+        auto menuRenderContext = menu->GetRenderContext();
+        if (menuRenderContext) {
+            menuRenderContext->UpdateTransformCenter(DimensionOffset(menuPattern->GetTransformCenter()));
+        }
+        auto wrapperRenderContext = menuWrapper->GetRenderContext();
+        auto menuGeometryNode = menu->GetGeometryNode();
+        if (wrapperRenderContext && menuGeometryNode) {
+            auto menuOffset = menuGeometryNode->GetFrameOffset();
+            wrapperRenderContext->UpdateTransformCenter(
+                DimensionOffset(Dimension(menuOffset.GetX()), Dimension(menuOffset.GetY())));
+        }
+    }
 }
 
 void MenuLayoutAlgorithm::LayoutArrow(const LayoutWrapper* layoutWrapper)
