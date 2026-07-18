@@ -372,10 +372,10 @@ const Color Color::LineColorTransition(const Color& startColor, const Color& end
     uint8_t blue = 0;
     uint8_t alpha = 0;
 
-    red = static_cast<uint8_t>((endColor.GetRed()- startColor.GetRed()) * percent) + startColor.GetRed();
-    green = static_cast<uint8_t>((endColor.GetGreen() - startColor.GetGreen()) * percent) + startColor.GetGreen();
-    blue = static_cast<uint8_t>((endColor.GetBlue() - startColor.GetBlue()) * percent) + startColor.GetBlue();
-    alpha = static_cast<uint8_t>((endColor.GetAlpha() - startColor.GetAlpha()) * percent) + startColor.GetAlpha();
+    red = static_cast<uint8_t>(startColor.GetRed() + (endColor.GetRed()- startColor.GetRed()) * percent);
+    green = static_cast<uint8_t>(startColor.GetGreen() + (endColor.GetGreen() - startColor.GetGreen()) * percent);
+    blue = static_cast<uint8_t>(startColor.GetBlue() + (endColor.GetBlue() - startColor.GetBlue()) * percent);
+    alpha = static_cast<uint8_t>(startColor.GetAlpha() + (endColor.GetAlpha() - startColor.GetAlpha()) * percent);
 
     return Color::FromARGB(alpha, red, green, blue);
 }
