@@ -645,6 +645,7 @@ public:
 
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
+    bool IsIgnoreHiddenItem() const;
     int32_t DisplayIndicatorTotalCount() const;
     bool IsAutoLinear() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;

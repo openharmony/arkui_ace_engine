@@ -4919,6 +4919,8 @@ struct ArkUISwiperModifier {
     void (*setSwiperIndexForJs)(ArkUINodeHandle node, ArkUI_Int32 index);
     void (*setJsSwiperRemoteMessage)(ArkUINodeHandle node, ArkUI_VoidPtr remoteMessageFunc);
     void (*setJsSwiperOnClick)(ArkUINodeHandle node, ArkUI_VoidPtr clickFunc);
+    void (*setSwiperIgnoreHiddenItem)(ArkUINodeHandle node, ArkUI_Bool ignoreHiddenItem);
+    void (*resetSwiperIgnoreHiddenItem)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {

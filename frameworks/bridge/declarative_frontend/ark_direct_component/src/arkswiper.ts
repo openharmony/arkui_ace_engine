@@ -192,6 +192,10 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, SwiperOnScrollStateChangedModifier.identity, SwiperOnScrollStateChangedModifier, event);
         return this;
       }
+      ignoreHiddenItem(value: boolean): this {
+        modifierWithKey(this._modifiersWithKeys, SwiperIgnoreHiddenItemModifier.identity, SwiperIgnoreHiddenItemModifier, value);
+        return this;
+      }
     }
     class SwiperInitializeModifier extends ModifierWithKey<SwiperController> {
       static identity: Symbol = Symbol('swiperInitialize');
@@ -992,6 +996,22 @@ function loadComponent(): ComponentObj | undefined {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
+    class SwiperIgnoreHiddenItemModifier extends ModifierWithKey<boolean> {
+      constructor(value: boolean) {
+        super(value);
+      }
+      static identity: Symbol = Symbol('swiperIgnoreHiddenItem');
+      applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().swiper.resetSwiperIgnoreHiddenItem(node);
+        } else {
+          getUINativeModule().swiper.setSwiperIgnoreHiddenItem(node, this.value);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
+    }
     
         loadComponent.componentObj = { 'component': ArkSwiperComponent };
   }
@@ -1163,6 +1183,10 @@ class JSSwiper extends JSContainerBase {
 
   static onScrollStateChanged(value: any): void {
     getUINativeModule().swiper.setSwiperOnScrollStateChanged(true, value);
+  }
+
+  static ignoreHiddenItem(value: any): void {
+    getUINativeModule().swiper.setSwiperIgnoreHiddenItem(true, value);
   }
 
   static onAttach(value: any): void {

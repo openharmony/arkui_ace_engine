@@ -305,6 +305,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetCachedCount(GetCachedCount());
     algo->SetIgnoreBlankOffset(ignoreBlankOffset_);
     algo->SetCrossMatchChild(crossMatchChild_);
+    algo->SetIgnoreHiddenItem(IsIgnoreHiddenItem());
     return algo;
 }
 
@@ -662,7 +663,7 @@ void SwiperPattern::OnAfterModifyDone()
 
 int32_t SwiperPattern::CheckUserSetIndex(int32_t index)
 {
-    if (!IsAutoLinear()) {
+    if (!IsAutoLinear() && !IsIgnoreHiddenItem()) {
         return index;
     }
 
@@ -1456,6 +1457,9 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         // jumpIndex_ is set inside layout algorithm to reset layout, need reset currentIndexOffset_
         currentIndexOffset_ = 0.0f;
         springOffset_ = 0.0f;
+        if (IsIgnoreHiddenItem()) {
+            UpdateCurrentIndex(algo->GetCurrentIndex());
+        }
     }
     mainSizeIsMeasured_ = algo->GetMainSizeIsMeasured();
     contentCrossSize_ = algo->GetContentCrossSize();
@@ -2260,7 +2264,7 @@ void SwiperPattern::UpdateTabBarAnimationDuration(int32_t index)
 
 int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex, bool isForceBackward)
 {
-    if (!IsAutoLinear()) {
+    if (!IsAutoLinear() && !IsIgnoreHiddenItem()) {
         return targetIndex;
     }
     while (GetLoopIndex(targetIndex) != GetLoopIndex(currentIndex_)) {
@@ -5452,6 +5456,16 @@ int32_t SwiperPattern::RealTotalCount() const
         num += CAPTURE_COUNT;
     }
     return host->TotalChildCount() - num;
+}
+
+bool SwiperPattern::IsIgnoreHiddenItem() const
+{
+    const auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, false);
+    if (!SwiperUtils::IsStretch(props) || props->GetLoop().value_or(true) || IsSwipeByGroup()) {
+        return false;
+    }
+    return props->GetIgnoreHiddenItem().value_or(false);
 }
 
 int32_t SwiperPattern::DisplayIndicatorTotalCount() const
