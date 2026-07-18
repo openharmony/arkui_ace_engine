@@ -1802,7 +1802,7 @@ std::optional<float> NG::PipelineContext::ResolveFontScaleFromEnv(const RefPtr<F
 
 float NG::PipelineContext::GetFontScaleFromEnv(const RefPtr<FrameNode>& host)
 {
-    return 1.0f;
+    return fontScale_;
 }
 
 std::optional<TextDirection> NG::PipelineContext::ResolveDirectionFromEnv(const RefPtr<FrameNode>& host)
