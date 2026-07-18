@@ -28,6 +28,8 @@ const char *GetManufacture(void);
 const char *GetMarketName(void);
 
 int GetSdkApiVersion(void);
+int GetSdkPatchApiVersion(void);
+int GetSdkMinorApiVersion(void);
 const char *GetOsReleaseType(void);
 
 int GetParameter(const char *key, const char *def, char *value, uint32_t len);
