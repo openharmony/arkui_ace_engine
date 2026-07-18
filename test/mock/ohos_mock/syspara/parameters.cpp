@@ -88,6 +88,16 @@ int GetSdkApiVersion(void)
     return 0;
 }
 
+int GetSdkPatchApiVersion(void)
+{
+    return 0;
+}
+
+int GetSdkMinorApiVersion(void)
+{
+    return 0;
+}
+
 const char *GetOsReleaseType(void)
 {
     return "test";
