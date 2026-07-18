@@ -707,12 +707,12 @@ std::string InitSysSdkApiVersion()
 
 std::string InitSysSdkPatchApiVersion()
 {
-     return std::to_string(::GetSdkPatchApiVersion());
+    return std::to_string(::GetSdkPatchApiVersion());
 }
 
 std::string InitSysSdkMinorApiVersion()
 {
-     return std::to_string(::GetSdkMinorApiVersion());
+    return std::to_string(::GetSdkMinorApiVersion());
 }
 
 std::string InitSysOsReleaseType()
