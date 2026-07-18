@@ -2195,7 +2195,7 @@ function resourceToNumber(context: Context | undefined, resource: Resource, defa
     case RESOURCE_TYPE_INTEGER:
       try {
         if (resource.id !== -1) {
-          return resourceManager.getNumber(resource);
+          return resourceManager.getNumber(resource.id);
         }
         return resourceManager.getNumberByName((resource.params as string[])[0].split('.')[2]);
       } catch (error) {
