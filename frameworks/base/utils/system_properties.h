@@ -240,6 +240,16 @@ public:
         return apiVersion_;
     }
 
+    static const std::string& GetSdkPatchApiVersion()
+    {
+        return sdkPatchApiVersion_;
+    }
+
+    static const std::string& GetSdkMinorApiVersion()
+    {
+        return sdkMinorApiVersion_;
+    }
+
     static const std::string& GetReleaseType()
     {
         return releaseType_;
@@ -831,6 +841,8 @@ private:
     static std::string model_;
     static std::string product_;
     static std::string apiVersion_;
+    static std::string sdkPatchApiVersion_;
+    static std::string sdkMinorApiVersion_;
     static std::string releaseType_;
     static std::string paramDeviceType_;
     static int32_t mcc_;

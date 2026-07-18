@@ -764,6 +764,8 @@ std::string GetDeviceInfo()
     infoList->Put("manufacturer", SystemProperties::GetManufacturer().c_str());
     infoList->Put("model", SystemProperties::GetModel().c_str());
     infoList->Put("product", SystemProperties::GetProduct().c_str());
+    infoList->Put("sdkPatchApiVersion", SystemProperties::GetSdkPatchApiVersion().c_str());
+    infoList->Put("sdkMinorApiVersion", SystemProperties::GetSdkMinorApiVersion().c_str());
     std::string tmp = SystemProperties::GetApiVersion();
     if (tmp != SystemProperties::INVALID_PARAM) {
         char* tmpEnd = nullptr;
