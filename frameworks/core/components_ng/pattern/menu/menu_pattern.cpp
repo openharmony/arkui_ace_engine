@@ -2988,7 +2988,6 @@ void MenuPattern::ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& m
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     auto preview = isShowHoverImage_ ? menuWrapperPattern->GetHoverImageFlexNode() : menuWrapperPattern->GetPreview();
-    CHECK_NULL_VOID(preview);
     AnimationUtils::Animate(option, [menuNode, menuPosition, preview]() {
         CHECK_NULL_VOID(menuNode);
         auto menuContext = menuNode->GetRenderContext();
@@ -3002,7 +3001,7 @@ void MenuPattern::ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& m
                 menuNode->GetGeometryNode()->SetMarginFrameOffset(OffsetF(menuPosition.GetX(),
                     menuPattern->GetOriginMenuYForStack()));
             }
-            if (GreatNotEqual(menuPattern->GetOriginPreviewYForStack(), 0.0f)) {
+            if (GreatNotEqual(menuPattern->GetOriginPreviewYForStack(), 0.0f) && preview) {
                 CHECK_NULL_VOID(preview);
                 auto previewRenderContext = preview->GetRenderContext();
                 CHECK_NULL_VOID(previewRenderContext);
@@ -3014,7 +3013,7 @@ void MenuPattern::ShowStackMainMenuDisappearAnimation(const RefPtr<FrameNode>& m
                     menuPattern->GetOriginPreviewYForStack()));
             }
         }
-    }, nullptr, nullptr, preview->GetContextRefPtr());
+    }, nullptr, nullptr, preview ? preview->GetContextRefPtr() : nullptr);
 
     ShowStackMainMenuDisappearOpacityAnimation(menuNode, option);
 }
