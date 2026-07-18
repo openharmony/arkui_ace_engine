@@ -28,7 +28,6 @@ group("capi_unittest") {
 
 ace_unittest("capi_fake_test") {
   type = "new"
-  module_output = "capi"
   sources = []
   extra_deps = []
   extra_deps += [ "..:run_linux_unittest_capi" ]

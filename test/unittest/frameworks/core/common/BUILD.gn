@@ -75,8 +75,6 @@ ace_unittest("color_inverter_test") {
       "frameworks_core_common_test_core.cpp",
     ]
   }
-
-  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 }
 
 ohos_unittest("premake_scope_test") {

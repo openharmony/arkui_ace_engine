@@ -49,10 +49,6 @@ template("ace_unittest") {
     type = invoker.type
   }
 
-  if (defined(invoker.module_output)) {
-    module_output = invoker.module_output
-  }
-
   if (defined(invoker.module_name)) {
     module_name = invoker.module_name
   }
