@@ -1083,6 +1083,6 @@ FlushLayoutTask 内部的 while 循环
 
 ## 相关文档
 
-- [Layout Framework Knowledge Base](../layout/Layout_Framework_Knowledge_Base.md) - 布局框架机制
+- [Layout Framework Context](../kb/architecture/layout-framework.md) - 布局框架机制
 - [Safe Area Mechanism Knowledge Base](../layout/Safe_Area_Mechanism_Knowledge_Base.md) - 安全区域机制
 - [IGNORE_LAYOUT_SAFE_AREA_GUIDE.md](../../frameworks/core/components_ng/IGNORE_LAYOUT_SAFE_AREA_GUIDE.md) - 开发者指南

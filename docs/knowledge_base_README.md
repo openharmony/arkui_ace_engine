@@ -2,7 +2,7 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-07-11
+> 更新时间：2026-07-18
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
@@ -38,22 +38,22 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：78
-- 命名符合 `*_Knowledge_Base*.md` 的知识库文档：52
+- `docs/` 下 Markdown 文档总数：93
+- 命名符合 `*_Knowledge_Base*.md` 的知识库文档：51
 - `docs/syntax/` 下语法专题文档：7
   - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计
 
-- `context_registry.json` 试点条目数：9
-- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：53
-- 旧 KB 索引路径有效性：53/53（全部存在）
+- `context_registry.json` 新版条目数：23
+- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：52
+- 旧 KB 索引路径有效性：52/52（全部存在）
 
 - 类型分布：
   - `component`: 29
   - `sdk`: 4
-  - `feature`: 20
+  - `feature`: 19
 - 分类分布：
   - `advanced`: 5
   - `basic`: 4
@@ -63,9 +63,9 @@ rg -n "<关键字>" docs
   - `sdk`: 6
   - `selector`: 3
   - `shape`: 1
-  - `system`: 16
-- 关键词总数（索引内）：492
-- 别名总数（索引内）：173
+  - `system`: 15
+- 关键词总数（索引内）：491
+- 别名总数（索引内）：170
 
 ### 2.3 覆盖现状
 
@@ -80,7 +80,7 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-├── kb/ (10 MD，9 个新版 KB 主题 + README)
+├── kb/ (24 MD，23 个新版 KB 主题 + README)
 ├── accessibility/ (1 KB)
 ├── api/ (2 KB)
 ├── architecture/ (2 KB + 2 非 `*_Knowledge_Base*` 命名架构文档)
@@ -88,7 +88,7 @@ docs/
 ├── common/ (4 KB)
 ├── entrance/ (1 MD)
 ├── focus/ (2 MD)
-├── layout/ (3 KB)
+├── layout/ (2 KB)
 ├── pattern/ (31 KB + 6 非 `*_Knowledge_Base*` 命名文档)
 ├── sdk/ (3 KB)
 ├── svg/ (1 KB)
@@ -177,3 +177,4 @@ PY
 - 2026-07-10：ImageAnimator 迁移到 `docs/kb/components/media/image_animator.md`，旧 KB 已移除，旧索引已更新（57 条）。
 - 2026-07-10：新增 DrawableDescriptor 通用能力 KB：`docs/kb/capabilities/drawable_descriptor.md`。
 - 2026-07-11：TextPicker、DatePicker、TimePicker、UIPickerComponent 迁移到 `docs/kb/components/selector/`，旧 KB 已移除，旧索引已更新（53 条）。
+- 2026-07-18：基于当前源码、SDK、测试和基础渲染管线 Spec 重建 Layout Framework 新版 KB，旧 KB 与旧索引入口已移除（旧索引 52 条）。

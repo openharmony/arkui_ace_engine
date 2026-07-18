@@ -1,7 +1,66 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-13",
+  "last_updated": "2026-07-18",
   "contexts": [
+    {
+      "id": "LayoutFramework",
+      "name": "Layout Framework",
+      "name_cn": "布局框架",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "Layout Framework",
+        "布局框架",
+        "布局流程",
+        "Measure",
+        "Layout",
+        "UITaskScheduler",
+        "FrameNode",
+        "LayoutWrapper",
+        "LayoutAlgorithm",
+        "LayoutProperty",
+        "GeometryNode",
+        "dirty layout",
+        "geometry sync"
+      ],
+      "aliases": [
+        "布局系统",
+        "Layout Flow",
+        "布局机制",
+        "NG布局框架"
+      ],
+      "kb": "docs/kb/architecture/layout-framework.md",
+      "spec_domain": "specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline",
+      "func_id": "03-01-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pipeline": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "scheduler": "frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "layout_wrapper": "frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "layout_wrapper_node": "frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+        "layout_algorithm": "frameworks/core/components_ng/layout/layout_algorithm.cpp",
+        "box_layout_algorithm": "frameworks/core/components_ng/layout/box_layout_algorithm.cpp",
+        "layout_property": "frameworks/core/components_ng/layout/layout_property.cpp",
+        "geometry_node": "frameworks/core/components_ng/base/geometry_node.cpp",
+        "render_context": "frameworks/core/components_ng/render/render_context.h",
+        "rosen_render_context": "frameworks/core/components_ng/render/adapter/rosen_render_context.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/layout/",
+        "test/unittest/core/base/frame_node_test_ng.cpp",
+        "test/unittest/core/base/geometry_node_test_ng.cpp",
+        "test/unittest/core/property/layout_constraint_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
     {
       "id": "Text",
       "name": "Text",
