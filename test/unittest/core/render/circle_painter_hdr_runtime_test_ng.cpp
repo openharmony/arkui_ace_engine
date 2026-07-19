@@ -23,7 +23,7 @@
 #undef protected
 
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
-#include "core/components_ng/render/circle_painter.h"
+#include "core/components_ng/pattern/shape/circle_painter.h"
 
 using namespace testing;
 using namespace testing::ext;

@@ -107,12 +107,14 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float mainSize = GetMainAxisSize(frameSize_, axis);
     float crossSize = GetCrossAxisSize(frameSize_, axis);
     CalcContentOffset(layoutWrapper, mainSize);
+    CalculateContentClipFixOffset(layoutWrapper, mainSize, mainGap_);
     if (!NearEqual(mainSize, info_.lastMainSize_)) {
         UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
         UpdateOffsetOnHeightChangeDuringAnimation(layoutWrapper, mainSize);
         info_.ResetPositionFlags();
     }
     FillGridViewportAndMeasureChildren(mainSize, crossSize, layoutWrapper);
+    info_.SyncReportRange(mainSize, mainGap_);
 
     if (gridLayoutProperty->GetAlignItems().value_or(GridItemAlignment::DEFAULT) == GridItemAlignment::STRETCH) {
         GridLayoutBaseAlgorithm::AdjustChildrenHeight(layoutWrapper);
@@ -531,10 +533,23 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     // Step3: Check if need to fill blank at start (in situation of grid items moving down)
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (info_.reachStart_) {
+        // At the top, item 0 rests at the content top (contentStartOffset_), padding region empty.
+        // Clamp over-scroll down (Positive) always. Clamp negative offset (from FillBlankAtStart
+        // extension fill) only when it exceeds the clip-extended viewport start bound
+        // (-startFixOffset_). When startFixOffset_ == 0 (CONTENT_ONLY), only Positive is
+        // clamped — identical to original behavior.
         auto offset = info_.currentOffset_ - info_.contentStartOffset_;
-        if (Positive(offset) && !canOverScrollStart_) {
+        bool needClamp = Positive(offset) ||
+                         (GreatNotEqual(info_.startFixOffset_, 0.0f) &&
+                             LessNotEqual(info_.currentOffset_, info_.contentStartOffset_ - info_.startFixOffset_));
+        if (needClamp && !canOverScrollStart_) {
             info_.currentOffset_ = info_.contentStartOffset_;
             info_.prevOffset_ = info_.contentStartOffset_;
+            // Only reset offset for negative (extension fill) clamp; positive over-scroll keeps
+            // the original offset for the downstream mainLength adjustment (original behavior).
+            if (Negative(offset)) {
+                offset = 0.0f;
+            }
         }
         if (!haveNewLineAtStart) {
             if (canOverScrollStart_) {
@@ -635,13 +650,16 @@ void GridScrollLayoutAlgorithm::ReloadFromUpdateIdxToStartIndex(
 
 bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
+    // Fill blank at start down to the clip start bound (-startFixOffset_), so items scrolled into the
+    // start extension region are created. startFixOffset_ == 0 (CONTENT_ONLY) -> original behavior.
     bool fillNewLine = false;
-    // If [currentOffset_] is non-positive, it means no blank at start
-    if (LessOrEqual(info_.currentOffset_, 0.0)) {
+    // If [currentOffset_] is at/above the clip start, it means no blank at start
+    if (LessOrEqual(info_.currentOffset_, -info_.startFixOffset_)) {
         return fillNewLine;
     }
     auto blankAtStart = info_.currentOffset_;
-    while (GreatNotEqual(blankAtStart, 0.0) || info_.startIndex_ > info_.GetChildrenCount() - 1) {
+    while (GreatNotEqual(blankAtStart + info_.startFixOffset_, 0.0) ||
+           info_.startIndex_ > info_.GetChildrenCount() - 1) {
         float lineHeight = FillNewLineForward(crossSize, mainSize, layoutWrapper);
         if (GreatOrEqual(lineHeight, 0.0)) {
             info_.lineHeightMap_[info_.startMainLineIndex_] = lineHeight;
@@ -769,7 +787,10 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
         return;
     }
 
-    if (GreatNotEqual(mainLength, mainSize)) {
+    // Extend the fill bound to the clip boundary so lines are laid out into the content-clip extension area.
+    // No-op when contentClipMode_ == CONTENT_ONLY (endFixOffset_ == 0, fillBound degenerates to mainSize).
+    const float fillBound = info_.GetViewEndBound(mainSize);
+    if (GreatNotEqual(mainLength, fillBound)) {
         if (IsScrollToEndLine()) {
             TAG_LOGI(AceLogTag::ACE_GRID, "scroll to end line with index:%{public}d", moveToEndLineIndex_);
             // scrollToIndex(AUTO) on first layout
@@ -777,9 +798,9 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
         }
         return;
     }
-    // When [mainLength] is still less than [mainSize], do [FillNewLineBackward] repeatedly until filling up the lower
+    // When [mainLength] is still less than [fillBound], do [FillNewLineBackward] repeatedly until filling up the lower
     // part of the viewport
-    while (LessNotEqual(mainLength, mainSize)) {
+    while (LessNotEqual(mainLength, fillBound)) {
         float lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
         if (GreatOrEqual(lineHeight, 0.0)) {
             mainLength += (lineHeight + mainGap_);
@@ -1222,9 +1243,12 @@ float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cros
 }
 
 namespace {
-inline bool OneLineMovesOffViewportFromAbove(float mainLength, float lineHeight)
+inline bool OneLineMovesOffViewportFromAbove(float mainLength, float lineHeight, float startFixOffset)
 {
-    return LessNotEqual(mainLength, 0.0) || (NearZero(mainLength) && GreatNotEqual(lineHeight, 0.0f));
+    // A line is off the top of the (possibly clip-extended) viewport when its bottom is at/above
+    // the clip start bound (-startFixOffset). startFixOffset == 0 (CONTENT_ONLY) -> original behavior.
+    return LessNotEqual(mainLength + startFixOffset, 0.0f) ||
+           (NearZero(mainLength + startFixOffset) && GreatNotEqual(lineHeight, 0.0f));
 }
 } // namespace
 
@@ -1313,7 +1337,7 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(
         mainLength += cellAveLength_ + mainGap_;
     }
     // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_]
-    if (OneLineMovesOffViewportFromAbove(mainLength, cellAveLength_)) {
+    if (OneLineMovesOffViewportFromAbove(mainLength, cellAveLength_, info_.startFixOffset_)) {
         info_.currentOffset_ = mainLength;
         info_.prevOffset_ = info_.currentOffset_;
         info_.startMainLineIndex_ = line + 1;
@@ -1333,11 +1357,12 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     auto pattern = host->GetPattern<GridPattern>();
     CHECK_NULL_RETURN(pattern, runOutOfRecord);
     auto isScrollableSpringMotionRunning = pattern->IsScrollableSpringMotionRunning();
-    while (LessNotEqual(mainLength, mainSize) ||
-                (NearEqual(mainLength, mainSize) && IsNextExistLineHeightZero(currentMainLineIndex_))) {
-        if (NearEqual(mainLength, mainSize)) {
-            TAG_LOGI(AceLogTag::ACE_GRID, "Measure next grid item with height zero.");
-        }
+    // Extend the measure bound to include the content-clip extension area (endFixOffset_) .
+    // When contentClipMode_ != CONTENT_ONLY, items beyond mainSize but within mainSize + endFixOffset_
+    // are visible in the clip region and must be re-measured (e.g. crossSize change after rotation).
+    const float viewEndBound = info_.GetViewEndBound(mainSize);
+    while (LessNotEqual(mainLength, viewEndBound) ||
+           (NearEqual(mainLength, viewEndBound) && IsNextExistLineHeightZero(currentMainLineIndex_))) {
         if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, isScrollableSpringMotionRunning)) {
             runOutOfRecord = true;
             break;
@@ -1345,7 +1370,7 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     }
     // Case 1. if this while-loop breaks due to running out of records, the [currentMainLineIndex_] is larger by 1 than
     // real main line index, so reduce 1.
-    // Case 2. if this while-loop stops due to false result of [LessNotEqual(mainLength, mainSize)], the
+    // Case 2. if this while-loop stops due to false result of [LessNotEqual(mainLength, viewEndBound)], the
     // [currentMainLineIndex_] is exactly the real main line index. Update [endMainLineIndex_] when the recorded items
     // are done measured.
     info_.endMainLineIndex_ = runOutOfRecord ? --currentMainLineIndex_ : currentMainLineIndex_;

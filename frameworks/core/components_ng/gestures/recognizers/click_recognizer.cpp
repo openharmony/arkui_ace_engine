@@ -18,6 +18,7 @@
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/components_ng/manager/event/json_report.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/common/container.h"
 #include "core/common/event_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
@@ -26,7 +27,6 @@
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "frameworks/core/common/extra_modules/extra_modules_manager.h"
@@ -311,7 +311,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
     InitGlobalValue(event.sourceType);
     UpdateInfoWithDownEvent(event);
-    ReportTouchDownToResSched(event, pipeline);
+    ReportTouchDownToResSched();
 }
 
 void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
@@ -648,7 +648,9 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
                 static_cast<int32_t>(info.GetScreenLocation().GetY()));
         }
         onActionFunction(info);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         HandleReports(info, type);
+#endif
         RecordClickEventIfNeed(info);
     }
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
@@ -694,6 +696,7 @@ void ClickRecognizer::HandleReportClick(const GestureEvent& info)
     pipeline->GetClickOptimizer()->ReportClick(frameNode, info);
 }
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
 {
     auto frameNode = GetAttachedNode().Upgrade();
@@ -718,9 +721,11 @@ void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
         Reporter::GetInstance().HandleUISessionReporting(tapReport);
     }
 }
+#endif
 
 void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
 {
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto host = GetAttachedNode().Upgrade();
         CHECK_NULL_VOID(host);
@@ -743,10 +748,14 @@ void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
         }
         Recorder::EventRecorder::Get().OnClick(std::move(builder));
     }
+#endif
 }
 
 GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return GestureJudgeResult::REJECT;
+    }
     auto frameNode = GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(frameNode, GestureJudgeResult::CONTINUE);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
@@ -930,30 +939,24 @@ std::string ClickRecognizer::GetGestureInfoString() const
     return gestureInfoStr;
 }
 
-void ClickRecognizer::ReportTouchDownToResSched(const TouchEvent& event, const RefPtr<PipelineBase>& pipeline)
+void ClickRecognizer::ReportTouchDownToResSched()
 {
+    CHECK_EQUAL_VOID(shouldReportTouchDown_, false);
     auto frameNode = GetAttachedNode();
-    if (frameNode.Invalid()) {
-        return;
-    }
-    auto ngPipeline = DynamicCast<NG::PipelineContext>(pipeline);
-    CHECK_NULL_VOID(ngPipeline);
-    auto clickOptimizer = ngPipeline->GetClickOptimizer();
-    bool isClickExtEnabled = clickOptimizer ? clickOptimizer->GetClickExtEnabled() : false;
-    ReportConfig config;
-#if !defined(MAC_PLATFORM) && !defined(IOS_PLATFORM) && defined(OHOS_PLATFORM)
-    auto container = Container::GetContainer(ngPipeline->GetInstanceId());
-    config.isReportTid = container && container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
-    config.tid = config.isReportTid ? static_cast<uint64_t>(pthread_self()) : config.tid;
-#endif
-    if (shouldReportTouchDown_) {
-        ResSchedReport::GetInstance().OnTouchEvent(event, config, frameNode, isClickExtEnabled);
-    }
+    auto node = frameNode.Upgrade();
+    CHECK_NULL_VOID(node);
+    auto pipeline = node->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto clickOptimizer = pipeline->GetClickOptimizer();
+    CHECK_NULL_VOID(clickOptimizer);
+    clickOptimizer->HandleTouchClickableFrameNodeReport(frameNode);
 }
 
 void ClickRecognizer::ResetTouchDownNotifiedToClickFlag()
 {
-    auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
+    auto node = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(node);
+    auto context = node->GetContext();
     CHECK_NULL_VOID(context);
     auto ngContext = DynamicCast<PipelineContext>(context);
     CHECK_NULL_VOID(ngContext);

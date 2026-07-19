@@ -16,7 +16,10 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SHAPE_ABSTRACT_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SHAPE_ABSTRACT_H
 
-#include "base/geometry/shape.h"
+namespace OHOS::Ace {
+class BasicShape;
+}
+
 #include "core/components_ng/base/view_abstract_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -26,33 +29,13 @@ namespace OHOS::Ace::Framework {
 class JSShapeAbstract : public AceType, public JSInteractableView, public JSViewAbstract {
     DECLARE_ACE_TYPE(JSShapeAbstract, AceType);
 public:
-    static void SetStroke(const JSCallbackInfo& info);
-    static void SetFill(const JSCallbackInfo& info);
-    static void SetStrokeDashOffset(const JSCallbackInfo& info);
-    static void SetStrokeDashArray(const JSCallbackInfo& info);
-    static void SetStrokeLineCap(int lineCap);
-    static void SetStrokeLineJoin(int lineJoin);
-    static void SetStrokeMiterLimit(const JSCallbackInfo& info);
-    static void SetStrokeOpacity(const JSCallbackInfo& info);
-    static void SetFillOpacity(const JSCallbackInfo& info);
-    static void SetStrokeWidth(const JSCallbackInfo& info);
-    static void SetAntiAlias(bool antiAlias);
-    static void JsWidth(const JSCallbackInfo& info);
-    static void JsHeight(const JSCallbackInfo& info);
-    static void JsSize(const JSCallbackInfo& info);
-    static void SetForegroundColor(const JSCallbackInfo& info);
-
     static void JSBind(BindingTarget globalObj);
-
     const RefPtr<BasicShape>& GetBasicShape() const
     {
         return basicShape_;
     }
 
-    void SetBasicShape(const RefPtr<BasicShape>& basicShape)
-    {
-        basicShape_ = basicShape;
-    }
+    void SetBasicShape(const RefPtr<BasicShape>& basicShape);
     void ObjectOffsetUpdate(const RefPtr<ResourceObject>& xResObj, RefPtr<ResourceObject> yResObj);
     void ObjectFillUpdate(const RefPtr<ResourceObject>& fillResObj);
     void ObjectHeightUpdate(const RefPtr<ResourceObject>& heightResObj);
@@ -65,9 +48,6 @@ public:
         RefPtr<ResourceObject>& yResObj);
     void ObjectPosition(const JSCallbackInfo& info);
 protected:
-    static void SetSize(const JSCallbackInfo& info);
-    static void SetWidth(const JSRef<JSVal>& jsValue);
-    static void SetHeight(const JSRef<JSVal>& jsValue);
     void ObjectWidth(const JSRef<JSVal>& jsValue);
     void ObjectHeight(const JSRef<JSVal>& jsValue);
     RefPtr<BasicShape> basicShape_;

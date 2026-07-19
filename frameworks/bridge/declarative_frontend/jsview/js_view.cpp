@@ -111,34 +111,14 @@ RefPtr<NG::EnvironmentManager> GetEnvironmentManager(const RefPtr<NG::UINode>& n
     return pipeline->GetEnvironmentManager();
 }
 
-void SetSystemEnvQueryReturnValue(const JSCallbackInfo& info, const NG::SystemEnvValue& result)
+std::optional<JSRef<JSVal>> MakeSystemEnvValue(const std::string& key, const std::optional<NG::SystemEnvValue>& value)
 {
-    if (auto direction = result.GetDirection()) {
-        switch (*direction) {
-            case TextDirection::LTR:
-                info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(std::string("Ltr"))));
-                return;
-            case TextDirection::RTL:
-                info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(std::string("Rtl"))));
-                return;
-            case TextDirection::AUTO:
-                info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(std::string("Auto"))));
-                return;
-            default:
-                info.SetReturnValue(JSVal::Undefined());
-                return;
+    if (key == NG::ENV_KEY_DIRECTION) {
+        if (!value) {
+            return JSRef<JSVal>::Make(ToJSValue(std::string("Auto")));
         }
-    }
-    if (auto doubleValue = result.GetDouble()) {
-        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(*doubleValue)));
-        return;
-    }
-    info.SetReturnValue(JSVal::Undefined());
-}
-
-JSRef<JSVal> MakeSystemEnvUpdateValue(const NG::SystemEnvValue& result)
-{
-    if (auto direction = result.GetDirection()) {
+        auto direction = value->GetDirection();
+        CHECK_NULL_RETURN(direction, JSVal::Undefined());
         switch (*direction) {
             case TextDirection::LTR:
                 return JSRef<JSVal>::Make(ToJSValue(std::string("Ltr")));
@@ -150,10 +130,13 @@ JSRef<JSVal> MakeSystemEnvUpdateValue(const NG::SystemEnvValue& result)
                 return JSVal::Undefined();
         }
     }
-    if (auto doubleValue = result.GetDouble()) {
+    if (key == NG::ENV_KEY_FONT_SCALE) {
+        CHECK_NULL_RETURN(value, std::nullopt);
+        auto doubleValue = value->GetDouble();
+        CHECK_NULL_RETURN(doubleValue, JSVal::Undefined());
         return JSRef<JSVal>::Make(ToJSValue(*doubleValue));
     }
-    return JSVal::Undefined();
+    return std::nullopt;
 }
 } // namespace
 
@@ -823,6 +806,15 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         return jsView->jsViewFunction_->ExecuteReleaseRecyclePool(remainingTimeMs, isProgressive, shouldCollect);
     };
 
+    auto enableReleaseExpiringNodesFunc =
+        [weak = AceType::WeakClaim(this)](bool enable, const std::vector<std::string>& reuseIds) -> void {
+        auto jsView = weak.Upgrade();
+        CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
+        ContainerScope scope(jsView->GetInstanceId());
+        jsView->jsViewFunction_->ExecuteEnableReleaseExpiringNodes(enable, reuseIds);
+    };
+
     auto triggerLifecycleFunc = [weak = AceType::WeakClaim(this)](int32_t eventId) -> bool {
         auto jsView = weak.Upgrade();
         CHECK_NULL_RETURN(jsView, false);
@@ -831,12 +823,13 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         return jsView->jsViewFunction_->ExecuteTriggerLifecycle(eventId);
     };
 
-    auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active, bool isReuse = false) -> void {
+    auto setActiveFunc = [weak = AceType::WeakClaim(this)](bool active, bool isReuse = false,
+        bool suppressActiveLifecycle = false) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
         CHECK_NULL_VOID(jsView->jsViewFunction_);
-        jsView->jsViewFunction_->ExecuteSetActive(active, isReuse);
+        jsView->jsViewFunction_->ExecuteSetActive(active, isReuse, suppressActiveLifecycle);
     };
 
     auto onDumpInfoFunc = [weak = AceType::WeakClaim(this)](const std::vector<std::string>& params) -> void {
@@ -898,6 +891,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         .hasNodeUpdateFunc = std::move(hasNodeUpdateFunc),
         .recycleCustomNodeFunc = recycleCustomNode,
         .releaseRecyclePoolFunc = std::move(releaseRecyclePoolFunc),
+        .enableReleaseExpiringNodes = std::move(enableReleaseExpiringNodesFunc),
         .setActiveFunc = std::move(setActiveFunc),
         .onDumpInfoFunc = std::move(onDumpInfoFunc),
         .onDumpInspectorFunc = std::move(onDumpInspectorFunc),
@@ -1167,6 +1161,17 @@ void JSViewPartialUpdate::Destroy(JSView* parentCustomView)
 void JSViewPartialUpdate::MarkNeedUpdate()
 {
     needsUpdate_ = ViewPartialUpdateModel::GetInstance()->MarkNeedUpdate(viewNode_);
+}
+
+void JSViewPartialUpdate::TryReleaseExpiringNode(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0 || !info[0]->IsString()) {
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    auto reuseId = info[0]->ToString();
+    bool result = ViewPartialUpdateModel::GetInstance()->TryReleaseExpiringNode(viewNode_, reuseId);
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
 /**
@@ -1571,12 +1576,16 @@ void JSViewPartialUpdate::JSFindSystemEnvValueByKey(const JSCallbackInfo& info)
     }
 
     NG::SystemEnvValue queryResult;
-    bool found = environmentManager->FindSystemEnvValueByKey(node, key, queryResult);
-    if (!found) {
-        info.SetReturnValue(JSVal::Undefined());
+    std::optional<NG::SystemEnvValue> queryValue;
+    if (environmentManager->FindSystemEnvValueByKey(node, key, queryResult)) {
+        queryValue.emplace(queryResult);
+    }
+    auto jsValue = MakeSystemEnvValue(key, queryValue);
+    if (jsValue) {
+        info.SetReturnValue(*jsValue);
         return;
     }
-    SetSystemEnvQueryReturnValue(info, queryResult);
+    info.SetReturnValue(JSVal::Undefined());
 }
 
 void JSViewPartialUpdate::RegisterOnCustomEnvUpdateCallback(const JSRef<JSFunc>& onCustomEnvUpdateFunc)
@@ -1650,10 +1659,7 @@ void JSViewPartialUpdate::RegisterOnSystemEnvUpdateCallback(const JSRef<JSFunc>&
         [weak = WeakClaim(this)](const std::string& key, const std::optional<NG::SystemEnvValue>& value) {
             auto self = weak.Upgrade();
             CHECK_NULL_VOID(self);
-            std::optional<JSRef<JSVal>> jsValue;
-            if (value) {
-                jsValue = MakeSystemEnvUpdateValue(*value);
-            }
+            auto jsValue = MakeSystemEnvValue(key, value);
             if (self->updateEnvCallback_) {
                 self->updateEnvCallback_(key, jsValue);
             }
@@ -1676,9 +1682,8 @@ void JSViewPartialUpdate::RegisterUpdateForEnvCallback(const JSRef<JSFunc>& upda
 
         JSRef<JSVal> newInstanceId = JSRef<JSVal>::Make(ToJSValue(instanceId));
         JSRef<JSVal> param[1] = { newInstanceId };
-        auto jsFunc = JSRef<JSFunc>::Cast(func);
         if (!self->jsViewObject_.IsEmpty() && !self->jsViewObject_->IsUndefined()) {
-            jsFunc->Call(self->jsViewObject_, 1, param);
+            func->Call(self->jsViewObject_, 1, param);
         }
     };
 
@@ -1729,6 +1734,7 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);
     JSClass<JSViewPartialUpdate>::Method(
         "allowReusableV2Descendant", &JSViewPartialUpdate::JSAllowReusableV2Descendant);
+    JSClass<JSViewPartialUpdate>::CustomMethod("tryReleaseExpiringNode", &JSViewPartialUpdate::TryReleaseExpiringNode);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
 }
 

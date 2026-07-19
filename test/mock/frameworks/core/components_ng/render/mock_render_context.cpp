@@ -17,8 +17,10 @@
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/animation/mock_animation_proxy.h"
 #include "core/components_ng/property/particle_property.h"
+#include "core/components_ng/property/transition_property.h"
 
 #include "base/utils/utils.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/modifier.h"
 
@@ -29,6 +31,11 @@ RefPtr<RenderContext> RenderContext::Create()
 }
 
 void RenderContext::SetNeedCallbackNodeChange(bool needCallback) {}
+
+void RenderContext::SetIsModalRootNode(bool isModalRootNode)
+{
+    isModalRootNode_ = isModalRootNode;
+}
 
 void RenderContext::SetRequestFrame(const std::function<void(bool)>& requestFrame)
 {
@@ -202,6 +209,65 @@ void RenderContext::ResetBorderImage()
     }
 }
 
+void RenderContext::SetIsNeedRebuildRSTree(bool isNeedRebuildRSTree) {}
+
+void RenderContext::SetNeedAnimateFlag(bool isNeedAnimate) {}
+
+std::optional<BlurOption> RenderContext::GetBackdropBlurOption() const
+{
+    return std::nullopt;
+}
+
+std::optional<BlurStyleOption> RenderContext::GetFrontBlurStyle() const
+{
+    return std::nullopt;
+}
+
+std::optional<Dimension> RenderContext::GetFrontBlurRadius() const
+{
+    return std::nullopt;
+}
+
+void RenderContext::UpdateParticleOptionArray(const std::list<ParticleOption>& value) {}
+
+const std::optional<std::list<ParticleOption>>& RenderContext::GetParticleOptionArray() const
+{
+    static const std::optional<std::list<ParticleOption>> empty;
+    return empty;
+}
+
+bool RenderContext::HasParticleOptionArray() const
+{
+    return false;
+}
+
+const std::list<ParticleOption>& RenderContext::GetParticleOptionArrayValue() const
+{
+    static const std::list<ParticleOption> empty;
+    return empty;
+}
+
+const std::list<ParticleOption>& RenderContext::GetParticleOptionArrayValue(
+    const std::list<ParticleOption>& defaultValue) const
+{
+    return defaultValue;
+}
+
+std::optional<std::list<ParticleOption>> RenderContext::CloneParticleOptionArray() const
+{
+    return std::nullopt;
+}
+
+void RenderContext::ResetParticleOptionArray() {}
+
+const RefPtr<OneCenterTransitionOptionType>& RenderContext::GetOneCenterTransitionOption()
+{
+    static const RefPtr<OneCenterTransitionOptionType> empty;
+    return empty;
+}
+
+void RenderContext::UpdateOneCenterTransitionOption(const RefPtr<OneCenterTransitionOptionType>& value) {}
+
 #ifdef ENHANCED_ANIMATION
 namespace {
 void InitProp(const RefPtr<PropertyBase>& propBase)
@@ -244,4 +310,25 @@ OffsetF MockRenderContext::GetTranslateXYProperty()
 }
 void MockRenderContext::UpdateTranslateInXY(const OffsetF& offset) {}
 #endif
+
+bool RenderContext::HasTransitionOutAnimation() const { return false; }
+bool RenderContext::HasDisappearTransition() const { return false; }
+bool RenderContext::IsSynced() const { return false; }
+RectF RenderContext::GetPaintRectWithTransform() { return {}; }
+std::pair<RectF, bool> RenderContext::GetPaintRectWithTranslate() { return {}; }
+Matrix4 RenderContext::GetLocalTransformMatrix() { return Matrix4::CreateIdentity(); }
+Matrix4 RenderContext::GetMatrixWithTransformRotate() { return Matrix4::CreateIdentity(); }
+RectF RenderContext::GetPaintRectWithoutTransform() { return {}; }
+RectF RenderContext::GetPaintRectWithTransformWithoutDegree() { return {}; }
+RectF RenderContext::GetPropertyOfPosition() { return {}; }
+OffsetF RenderContext::GetShowingTranslateProperty() { return {}; }
+OffsetF RenderContext::GetTranslateXYProperty() { return {}; }
+int32_t RenderContext::CalcExpectedFrameRate(const std::string&, float) { return 0; }
+bool RenderContext::IsUniRenderEnabled() { return false; }
+bool RenderContext::DoTextureExport(uint64_t) { return false; }
+std::optional<Dimension> RenderContext::GetBackBlurRadius() const { return std::nullopt; }
+std::optional<BlurStyleOption> RenderContext::GetBackBlurStyle() const { return std::nullopt; }
+std::optional<EffectOption> RenderContext::GetBackgroundEffect() const { return std::nullopt; }
+void RenderContext::SetIsFree(bool) {}
+
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,7 @@
 
 #include "foundation/arkui/ace_engine/interfaces/native/native_gesture.h"
 #include "core/interfaces/native/node/node_gesture_modifier.h"
+#include "core/interfaces/native/node/node_swiper_modifier.h"
 #include <securec.h>
 
 #include "base/error/error_code.h"
@@ -222,6 +223,7 @@ void dispose(ArkUIGesture* recognizer)
 {
     Gesture* gestureRef = reinterpret_cast<Gesture*>(recognizer);
     gestureRef->SetDisposeTag(true);
+    gestureRef->SetUserData(nullptr);
     gestureRef->DecRefCount();
 }
 
@@ -724,6 +726,7 @@ void addGestureToNode(ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 p
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
     auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
 
     GesturePriority priority = GesturePriority::Low;
@@ -1152,9 +1155,10 @@ ArkUI_Int32 gestureEventTargetInfoIsScrollBegin(ArkUIGestureEventTargetInfo* inf
         *ret = scrollablePattern->IsAtTop();
         return ERROR_CODE_NO_ERROR;
     }
-    auto swiperPattern = frameNode->GetPattern<NG::SwiperPattern>();
-    if (swiperPattern) {
-        *ret = swiperPattern->IsAtStart();
+    if (frameNode->GetTag() == V2::SWIPER_ETS_TAG) {
+        auto swiperModifier = NG::NodeModifier::GetSwiperCustomModifier();
+        CHECK_NULL_RETURN(swiperModifier, ERROR_CODE_PARAM_INVALID);
+        *ret = swiperModifier->isAtStart(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
         return ERROR_CODE_NO_ERROR;
     }
     return ERROR_CODE_NON_SCROLLABLE_CONTAINER;
@@ -1169,9 +1173,10 @@ ArkUI_Int32 gestureEventTargetInfoIsScrollEnd(ArkUIGestureEventTargetInfo* info,
         *ret = scrollablePattern->IsAtBottom();
         return ERROR_CODE_NO_ERROR;
     }
-    auto swiperPattern = frameNode->GetPattern<NG::SwiperPattern>();
-    if (swiperPattern) {
-        *ret = swiperPattern->IsAtEnd();
+    if (frameNode->GetTag() == V2::SWIPER_ETS_TAG) {
+        auto swiperModifier = NG::NodeModifier::GetSwiperCustomModifier();
+        CHECK_NULL_RETURN(swiperModifier, ERROR_CODE_PARAM_INVALID);
+        *ret = swiperModifier->isAtEnd(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
         return ERROR_CODE_NO_ERROR;
     }
     return ERROR_CODE_NON_SCROLLABLE_CONTAINER;

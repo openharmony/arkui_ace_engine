@@ -153,6 +153,10 @@ public:
     // to release the fingers we currently track.
     void FilterCoexistingGestureFingers();
 
+    void SetScrollEscapeForPan();
+
+    bool IsFingerEscaped(int32_t fingerId) const override;
+
 protected:
     std::string GetGestureInfoString() const override;
 private:
@@ -204,7 +208,9 @@ private:
 
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
     void HandleCallbackReports(const GestureEvent& info, GestureCallbackType type, PanGestureState panGestureState);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
+#endif
     GestureJudgeResult TriggerGestureJudgeCallback();
     void UpdateGestureEventInfo(std::shared_ptr<PanGestureEvent>& info);
     void ChangeFingers(int32_t fingers);
@@ -273,6 +279,7 @@ private:
     // Set to true once we issued the escape request, so we do it exactly
     // once per gesture cycle. Re-armed in OnResetStatus().
     bool escapeRequested_ = false;
+    bool isLocked_ = false;
 };
 
 } // namespace OHOS::Ace::NG

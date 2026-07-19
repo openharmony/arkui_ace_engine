@@ -18,6 +18,11 @@
 
 #include <memory>
 namespace OHOS {
+class RefBase {
+public:
+    virtual ~RefBase() = default;
+};
+
 template <typename T>
 class sptr {
 private:
@@ -52,6 +57,11 @@ public:
     T* operator->()
     {
         return ptr_.operator->();
+    }
+
+    T* GetRefPtr() const
+    {
+        return ptr_.get();
     }
 
     bool operator==(std::nullptr_t) const

@@ -16,6 +16,7 @@
 
 #include <dirent.h>
 #include <fstream>
+#include <string_view>
 #include <sys/stat.h>
 
 #include "base/image/image_packer.h"
@@ -35,14 +36,16 @@ ImageFileCache::ImageFileCache() = default;
 ImageFileCache::~ImageFileCache() = default;
 
 namespace {
-const std::string ASTC_SUFFIX = ".astc";
-const std::string CONVERT_ASTC_FORMAT = "image/astc/4*4";
-const std::string SLASH = "/";
-const std::string BACKSLASH = "\\";
+constexpr std::string_view ASTC_SUFFIX = ".astc";
+constexpr std::string_view CONVERT_ASTC_FORMAT = "image/astc/4*4";
+constexpr std::string_view SLASH = "/";
+#ifdef WINDOWS_PLATFORM
+constexpr std::string_view BACKSLASH = "\\";
+#endif
 const mode_t CHOWN_RW_UG = 0660;
 const mode_t DIRECTORY_PERMISSION = 0700;
-const std::string SVG_FORMAT = "image/svg+xml";
-const std::string IMAGE_FILE_CACHE_DIR = "image_file_cache";
+constexpr std::string_view SVG_FORMAT = "image/svg+xml";
+constexpr std::string_view IMAGE_FILE_CACHE_DIR = "image_file_cache";
 
 bool EndsWith(const std::string& str, const std::string& substr)
 {
@@ -52,7 +55,7 @@ bool EndsWith(const std::string& str, const std::string& substr)
 bool IsAstcFile(const char fileName[])
 {
     auto fileNameStr = std::string(fileName);
-    return (fileNameStr.length() >= ASTC_SUFFIX.length()) && EndsWith(fileNameStr, ASTC_SUFFIX);
+    return (fileNameStr.length() >= ASTC_SUFFIX.length()) && EndsWith(fileNameStr, std::string(ASTC_SUFFIX));
 }
 
 bool IsFileExists(const char* path)
@@ -71,18 +74,16 @@ void ImageFileCache::SetImageCacheFilePath(const std::string& cacheFilePath)
 {
     std::unique_lock<std::shared_mutex> lock(cacheFilePathMutex_);
     if (cacheFilePath_.empty()) {
-        cacheFilePath_ = cacheFilePath + SLASH + IMAGE_FILE_CACHE_DIR;
+        cacheFilePath_ = cacheFilePath + std::string(SLASH) + std::string(IMAGE_FILE_CACHE_DIR);
 #ifndef WINDOWS_PLATFORM
         if (mkdir(cacheFilePath_.c_str(), DIRECTORY_PERMISSION)) {
 #else
         if (mkdir(cacheFilePath_.c_str())) {
 #endif
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "mkdir cache file path failed.");
             return;
         }
 #ifndef WINDOWS_PLATFORM
         if (chmod(cacheFilePath_.c_str(), DIRECTORY_PERMISSION) != 0) {
-            TAG_LOGW(AceLogTag::ACE_IMAGE, "mkdir cache file path chmod failed.");
             return;
         }
 #endif
@@ -104,16 +105,16 @@ std::string ImageFileCache::ConstructCacheFilePath(const std::string& fileName)
 {
     std::shared_lock<std::shared_mutex> lock(cacheFilePathMutex_);
 #if !defined(PREVIEW)
-    return cacheFilePath_ + SLASH + fileName;
+    return cacheFilePath_ + std::string(SLASH) + fileName;
 #elif defined(MAC_PLATFORM) || defined(LINUX_PLATFORM)
 
     return "/tmp/" + fileName;
 #elif defined(WINDOWS_PLATFORM)
     char* pathvar = getenv("TEMP");
     if (!pathvar) {
-        return std::string("C:\\Windows\\Temp") + BACKSLASH + fileName;
+        return std::string("C:\\Windows\\Temp") + std::string(BACKSLASH) + fileName;
     }
-    return std::string(pathvar) + BACKSLASH + fileName;
+    return std::string(pathvar) + std::string(BACKSLASH) + fileName;
 #endif
 }
 
@@ -304,7 +305,7 @@ void ImageFileCache::ConvertToAstcAndWriteToFile(const std::string& fileCacheKey
         return;
     }
 
-    auto astcFileName = fileCacheKey + ASTC_SUFFIX;
+    auto astcFileName = fileCacheKey + std::string(ASTC_SUFFIX);
     auto astcFilePath = ConstructCacheFilePath(astcFileName);
     imagePacker->StartPacking(astcFilePath, option);
     imagePacker->AddImage(*pixelMap);
@@ -395,7 +396,7 @@ void ImageFileCache::SetCacheFileInfo()
     while (filePtr != nullptr) {
         // skip . or ..
         if (filePtr->d_name[0] != '.') {
-            std::string filePath = cacheFilePath + SLASH + std::string(filePtr->d_name);
+            std::string filePath = cacheFilePath + std::string(SLASH) + std::string(filePtr->d_name);
             struct stat fileStatus;
             if (stat(filePath.c_str(), &fileStatus) == -1) {
                 filePtr = readdir(dir.get());

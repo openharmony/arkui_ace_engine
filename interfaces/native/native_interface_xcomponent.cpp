@@ -457,9 +457,12 @@ OH_NativeXComponent* OH_NativeXComponent_GetNativeXComponent(ArkUI_NodeHandle no
         (node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
         return nullptr;
     }
-    auto nodeModifiers = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers();
+    auto xComponentModifier = GetArkUIXComponentModifierWithMessage(__FUNCTION__);
+    if (xComponentModifier == nullptr) {
+        return nullptr;
+    }
     return reinterpret_cast<OH_NativeXComponent*>(
-        nodeModifiers->getXComponentModifier()->getNativeXComponent(node->uiNodeHandle));
+        xComponentModifier->getNativeXComponent(node->uiNodeHandle));
 }
 
 int32_t OH_NativeXComponent_GetNativeAccessibilityProvider(
@@ -559,21 +562,15 @@ void OH_ArkUI_SurfaceHolder_Dispose(OH_ArkUI_SurfaceHolder* surfaceHolder)
         if (impl == nullptr) {
             SET_ERROR_MESSAGE(
                 OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Native module not initialized");
-            return;
-        }
-        auto nodeModifiers = impl->getNodeModifiers();
-        if (nodeModifiers == nullptr) {
+        } else if (impl->getNodeModifiers() == nullptr) {
             SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID,
                 __FUNCTION__, "Node modifiers are not initialized");
-            return;
-        }
-        auto xComponentModifier = nodeModifiers->getXComponentModifier();
-        if (xComponentModifier == nullptr) {
+        } else if (impl->getNodeModifiers()->getXComponentModifier() == nullptr) {
             SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID,
                 __FUNCTION__, "XComponent modifier is not initialized");
-            return;
+        } else {
+            impl->getNodeModifiers()->getXComponentModifier()->dispose(node->uiNodeHandle);
         }
-        xComponentModifier->dispose(node->uiNodeHandle);
     }
     auto config = surfaceHolder->config_;
     if (config) {

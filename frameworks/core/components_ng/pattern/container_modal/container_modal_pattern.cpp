@@ -17,8 +17,7 @@
 #include "core/pipeline/container_window_manager.h"
 
 #include "base/subwindow/subwindow_manager.h"
-#include "core/components_ng/pattern/button/button_event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_toolbar.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -529,7 +528,7 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
     // set closeButton enable or disable
     auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsRow, CLOSE_BUTTON_INDEX));
     CHECK_NULL_VOID(closeButton);
-    auto buttonEvent = closeButton->GetEventHub<ButtonEventHub>();
+    auto buttonEvent = closeButton->GetEventHub<EventHub>();
     CHECK_NULL_VOID(buttonEvent);
     buttonEvent->SetEnabled(isEnabled);
     TAG_LOGI(AceLogTag::ACE_APPBAR, "Set close button status %{public}s", isEnabled ? "enable" : "disable");
@@ -1010,7 +1009,7 @@ void ContainerModalPattern::InitButtonsLayoutProperty()
         }
         auto button = AceType::DynamicCast<FrameNode>(buttonsRow->GetChildAtIndex(index));
         CHECK_NULL_VOID(button);
-        auto layoutProp = button->GetLayoutProperty<ButtonLayoutProperty>();
+        auto layoutProp = button->GetLayoutProperty();
         layoutProp->UpdateMargin(margin);
         button->MarkModifyDone();
         button->MarkDirtyNode();

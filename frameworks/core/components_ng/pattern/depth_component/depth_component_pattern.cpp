@@ -42,10 +42,12 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr uint32_t PERCENT_100 = 100;
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
 constexpr uint32_t NUM_9 = 9;
+#endif
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
 constexpr uint32_t DEPTH_COMPONENT_NATIVE_WINDOW_COUNT = 2;
-constexpr uint32_t SURFACE_QUEUE_SIZE = 5;
+constexpr uint32_t SURFACE_QUEUE_SIZE = 2;
 constexpr uint32_t DEFAULT_DEPTH_BACKGROUND_COLOR = 0x00000000;
 constexpr uint32_t SURFACE_STRIDE_ALIGNMENT = 8;
 constexpr float DEFAULT_SCALE = 1.0f;
@@ -104,9 +106,6 @@ void DepthComponentPattern::OnAttachToFrameNode()
 
 void DepthComponentPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    onComplete_ = nullptr;
-    onError_ = nullptr;
-    onDepthMapError_ = nullptr;
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
     if (node) {
         auto pipeline = node->GetContextRefPtr();
@@ -131,8 +130,13 @@ void DepthComponentPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
 
     if (IsGltfBackground()) {
-        RemoveBackgroundImageNode();
 #if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
+        pendingCleanupImage_ = false;
+        if (HasBackgroundImageNode()) {
+            pendingCleanupImage_ = true;
+        } else {
+            RemoveBackgroundImageNode();
+        }
         InitGltfAdapter();
         if (!gltfWindowsInitialized_) {
             CreateCustomNativeWindows(width3d_, height3d_);
@@ -141,12 +145,21 @@ void DepthComponentPattern::OnModifyDone()
         UpdateWindowChangeSize(true);
         UpdateWindowInfo();
         MarkRender3D();
+#else
+        RemoveBackgroundImageNode();
 #endif
     } else {
-#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
-        CleanupGltfResources(true);
-#endif
         SetupBackgroundImageNode();
+#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
+        pendingCleanupGltf_ = false;
+        auto backgroundImage = GetBackgroundImageSource();
+        bool deferForImageLoad = backgroundImage.IsValid() && !backgroundImage.IsSvg();
+        if (surfaceRenderContext_.empty() || !deferForImageLoad) {
+            CleanupGltfResources(true);
+        } else {
+            pendingCleanupGltf_ = true;
+        }
+#endif
     }
 
 #if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
@@ -173,7 +186,7 @@ bool DepthComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>
         return false;
     }
     CHECK_NULL_RETURN(dirty, false);
-#ifdef ENABLE_ROSEN_BACKEND
+#if defined(ENABLE_ROSEN_BACKEND) && !defined(ACE_UNITTEST)
     auto rsDepthNode = GetRSDepthNode();
     CHECK_NULL_RETURN(rsDepthNode, false);
     TransferCameraParams(rsDepthNode);
@@ -185,6 +198,7 @@ bool DepthComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>
     width3d_ = frameRect.Width();
     height3d_ = frameRect.Height();
     if (IsGltfBackground()) {
+        FireGltfLoadCallback();
         UpdateGltfWindowChange(dirty, config);
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
@@ -224,12 +238,7 @@ void DepthComponentPattern::SetupBackgroundImageNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto backgroundImage = GetBackgroundImageSource();
-    if (!backgroundImage.IsValid()) {
-        RemoveBackgroundImageNode();
-        return;
-    }
-
-    if (backgroundImage.IsSvg()) {
+    if (!backgroundImage.IsValid() || backgroundImage.IsSvg()) {
         RemoveBackgroundImageNode();
         return;
     }
@@ -266,16 +275,35 @@ void DepthComponentPattern::ApplyOnCompleteCallback(const RefPtr<FrameNode>& bac
     CHECK_NULL_VOID(backgroundImageNode);
     auto imageEventHub = backgroundImageNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
-    CHECK_NULL_VOID(onComplete_);
-    auto callback = onComplete_;
-    imageEventHub->SetOnComplete([callback = std::move(callback)](const LoadImageSuccessEvent& event) {
-        constexpr int32_t LOADING_STATUS_LOAD_SUCCESS = 1;
-        CHECK_NE_VOID(event.GetLoadingStatus(), LOADING_STATUS_LOAD_SUCCESS);
-        DepthComponentCompleteEvent completeEvent;
-        completeEvent.componentWidth = event.GetComponentWidth();
-        completeEvent.componentHeight = event.GetComponentHeight();
-        callback(completeEvent);
-    });
+    auto eventHub = GetEventHub<DepthComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    imageEventHub->SetOnComplete(
+        [weakPattern = WeakClaim(this), weakEventHub = AceType::WeakClaim(AceType::RawPtr(eventHub))](
+            const LoadImageSuccessEvent& event) {
+            constexpr int32_t LOADING_STATUS_LOAD_SUCCESS = 1;
+            CHECK_NE_VOID(event.GetLoadingStatus(), LOADING_STATUS_LOAD_SUCCESS);
+            auto pattern = weakPattern.Upgrade();
+            if (pattern) {
+                pattern->FinishBackgroundSwitch();
+            }
+            auto eventHub = weakEventHub.Upgrade();
+            if (eventHub && eventHub->GetOnComplete()) {
+                DepthComponentCompleteEvent completeEvent;
+                completeEvent.componentWidth = event.GetComponentWidth();
+                completeEvent.componentHeight = event.GetComponentHeight();
+                eventHub->FireCompleteEvent(completeEvent);
+            }
+        });
+}
+
+void DepthComponentPattern::FinishBackgroundSwitch()
+{
+#if defined(KIT_3D_ENABLE) && !defined(PREVIEW)
+    if (pendingCleanupGltf_) {
+        pendingCleanupGltf_ = false;
+        CleanupGltfResources(true);
+    }
+#endif
 }
 
 void DepthComponentPattern::ApplyOnErrorCallback(const RefPtr<FrameNode>& backgroundImageNode)
@@ -283,27 +311,32 @@ void DepthComponentPattern::ApplyOnErrorCallback(const RefPtr<FrameNode>& backgr
     CHECK_NULL_VOID(backgroundImageNode);
     auto imageEventHub = backgroundImageNode->GetEventHub<ImageEventHub>();
     CHECK_NULL_VOID(imageEventHub);
-    CHECK_NULL_VOID(onError_);
-    auto callback = onError_;
-    imageEventHub->SetOnError([callback = std::move(callback)](const LoadImageFailEvent& event) {
-        DepthComponentErrorEvent errorEvent;
-        errorEvent.componentWidth = event.GetComponentWidth();
-        errorEvent.componentHeight = event.GetComponentHeight();
-        errorEvent.errorCode = static_cast<int32_t>(event.GetErrorInfo().errorCode);
-        errorEvent.errorMessage = event.GetErrorMessage();
-        callback(errorEvent);
-    });
+    auto eventHub = GetEventHub<DepthComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    imageEventHub->SetOnError(
+        [weakPattern = WeakClaim(this), weakEventHub = AceType::WeakClaim(AceType::RawPtr(eventHub))](
+            const LoadImageFailEvent& event) {
+            auto pattern = weakPattern.Upgrade();
+            if (pattern) {
+                pattern->pendingCleanupGltf_ = false;
+            }
+            auto eventHub = weakEventHub.Upgrade();
+            if (eventHub && eventHub->GetOnError()) {
+                DepthComponentErrorEvent errorEvent;
+                errorEvent.componentWidth = event.GetComponentWidth();
+                errorEvent.componentHeight = event.GetComponentHeight();
+                errorEvent.errorCode = static_cast<int32_t>(event.GetErrorInfo().errorCode);
+                errorEvent.errorMessage = event.GetErrorInfo().errorMessage;
+                eventHub->FireErrorEvent(errorEvent);
+            }
+        });
 }
 
 void DepthComponentPattern::ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& backgroundImageNode)
 {
     CHECK_NULL_VOID(backgroundImageNode);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
-    CHECK_NULL_VOID(depthLayoutProperty);
-    auto cameraParams = depthLayoutProperty->GetCameraParams();
-    if (!cameraParams.has_value() || !cameraParams->cameraBufferCrop.has_value()) {
+    auto cropOpt = GetEffectiveCameraBufferCrop();
+    if (!cropOpt.has_value()) {
         // No cameraBufferCrop: reset to COVER fit, no matrix
         auto imageLayoutProp = backgroundImageNode->GetLayoutProperty<ImageLayoutProperty>();
         if (imageLayoutProp) {
@@ -317,7 +350,7 @@ void DepthComponentPattern::ApplyBackgroundImageMatrix(const RefPtr<FrameNode>& 
         return;
     }
 
-    const auto& crop = cameraParams->cameraBufferCrop.value();
+    const auto& crop = cropOpt.value();
     if (crop.cropScale <= 0.0f) {
         return;
     }
@@ -361,6 +394,7 @@ void DepthComponentPattern::RemoveBackgroundImageNode()
     }
 
     backgroundImageId_.reset();
+    pendingCleanupImage_ = false;
 }
 
 bool DepthComponentPattern::IsCameraChange()
@@ -401,12 +435,37 @@ void DepthComponentPattern::OnPaint3D()
 void DepthComponentPattern::LoadDepthMap()
 {
     ACE_SCOPED_TRACE("DepthComponent::LoadDepthMap key=%s", depthMap_.GetKey().c_str());
-    if (!depthMap_.IsValid() || depthMap_.GetKey() == lastLoadedDepthMapKey_) {
+    if (!depthMap_.IsValid()) {
+        ClearDepthMap();
+        return;
+    }
+    if (depthMap_.GetKey() == lastLoadedDepthMapKey_) {
         return;
     }
     lastLoadedDepthMapKey_ = depthMap_.GetKey();
 
-    LoadNotifier loadNotifier(
+    auto loadNotifier = CreateDepthMapLoadNotifier();
+    depthMapLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(depthMap_, std::move(loadNotifier), false);
+    depthMapLoadingCtx_->FinishMeasure();
+    depthMapLoadingCtx_->LoadImageData();
+}
+
+void DepthComponentPattern::ClearDepthMap()
+{
+    if (lastLoadedDepthMapKey_.empty()) {
+        return;
+    }
+    lastLoadedDepthMapKey_.clear();
+    depthMapLoadingCtx_.Reset();
+    auto rsDepthNode = GetRSDepthNode();
+    if (rsDepthNode) {
+        rsDepthNode->SetDepthImage(nullptr);
+    }
+}
+
+LoadNotifier DepthComponentPattern::CreateDepthMapLoadNotifier()
+{
+    return LoadNotifier(
         [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -421,14 +480,15 @@ void DepthComponentPattern::LoadDepthMap()
             pattern->OnDepthMapLoadSuccess(canvasImage);
             auto context = pattern->GetHost() ? pattern->GetHost()->GetContext() : nullptr;
             CHECK_NULL_VOID(context);
-            auto onErrorCallback = pattern->onDepthMapError_;
+            auto eventHub = pattern->GetEventHub<DepthComponentEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            CHECK_NULL_VOID(eventHub->GetOnDepthMapError());
             context->GetTaskExecutor()->PostTask(
-                [onErrorCallback]() {
-                    if (onErrorCallback) {
-                        onErrorCallback(0, "");
-                    }
-                },
-                TaskExecutor::TaskType::JS, "ArkUIDepthMapLoadSuccess");
+                [weakEventHub = AceType::WeakClaim(AceType::RawPtr(eventHub))]() {
+                    auto eventHub = weakEventHub.Upgrade();
+                    CHECK_NULL_VOID(eventHub);
+                    eventHub->FireDepthMapErrorEvent(0, "");
+                }, TaskExecutor::TaskType::JS, "ArkUIDepthMapLoadSuccess");
         },
         [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg,
             const ImageErrorInfo& errorInfo) {
@@ -436,18 +496,19 @@ void DepthComponentPattern::LoadDepthMap()
             CHECK_NULL_VOID(pattern);
             auto context = pattern->GetHost() ? pattern->GetHost()->GetContext() : nullptr;
             CHECK_NULL_VOID(context);
-            auto onErrorCallback = pattern->onDepthMapError_;
+            auto eventHub = pattern->GetEventHub<DepthComponentEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            CHECK_NULL_VOID(eventHub->GetOnDepthMapError());
             auto errorCode = static_cast<int32_t>(errorInfo.errorCode);
+            auto errorMessage = errorInfo.errorMessage;
             context->GetTaskExecutor()->PostTask(
-                [onErrorCallback, errorCode, errorMsg]() {
-                    if (onErrorCallback) {
-                        onErrorCallback(errorCode, errorMsg);
-                    }
+                [weakEventHub = AceType::WeakClaim(AceType::RawPtr(eventHub)), errorCode, errorMessage]() {
+                    auto eventHub = weakEventHub.Upgrade();
+                    CHECK_NULL_VOID(eventHub);
+                    eventHub->FireDepthMapErrorEvent(errorCode, errorMessage);
                 },
                 TaskExecutor::TaskType::JS, "ArkUIDepthMapLoadError");
         });
-    depthMapLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(depthMap_, std::move(loadNotifier), false);
-    depthMapLoadingCtx_->LoadImageData();
 }
 
 void DepthComponentPattern::OnDepthMapDataReady()
@@ -584,24 +645,19 @@ void DepthComponentPattern::TransferImageMatrix(const std::shared_ptr<OHOS::Rose
 
 void DepthComponentPattern::Get2DImageMatrix(OHOS::Rosen::Matrix3f& matrix)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
-    CHECK_NULL_VOID(depthLayoutProperty);
-    auto cameraParams = depthLayoutProperty->GetCameraParams();
-    if (cameraParams.has_value() && cameraParams->cameraBufferCrop.has_value()) {
-        const auto& crop = cameraParams->cameraBufferCrop.value();
-        if (NearZero(crop.cropScale)) {
-            return;
-        }
-        float scale = (1.0 / crop.cropScale);
-        float offsetX = crop.cropOffset.x;
-        float offsetY = crop.cropOffset.y;
-        float vals[] = { scale, 0.0f, -scale * offsetX, 0.0f, scale, -scale * offsetY, 0.0f, 0.0f, 1.0f };
-        auto* data = matrix.GetData();
-        for (size_t i = 0; i < NUM_9; i++) {
-            data[i] = vals[i];
-        }
+    auto cropOpt = GetEffectiveCameraBufferCrop();
+    CHECK_NULL_VOID(cropOpt.has_value());
+    const auto& crop = cropOpt.value();
+    if (NearZero(crop.cropScale)) {
+        return;
+    }
+    float scale = (1.0 / crop.cropScale);
+    float offsetX = crop.cropOffset.x;
+    float offsetY = crop.cropOffset.y;
+    float vals[] = { scale, 0.0f, -scale * offsetX, 0.0f, scale, -scale * offsetY, 0.0f, 0.0f, 1.0f };
+    auto* data = matrix.GetData();
+    for (size_t i = 0; i < NUM_9; i++) {
+        data[i] = vals[i];
     }
 }
 
@@ -622,9 +678,7 @@ void DepthComponentPattern::PropagateCropToChildren()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
-    CHECK_NULL_VOID(depthLayoutProperty);
-    auto cameraParams = depthLayoutProperty->GetCameraParams();
+    auto cropOpt = GetEffectiveCameraBufferCrop();
 
     for (const auto& childWeak : host->GetFrameChildren()) {
         auto child = childWeak.Upgrade();
@@ -640,9 +694,9 @@ void DepthComponentPattern::PropagateCropToChildren()
             continue;
         }
         SpatialEffectParams params = spatialEffect.value();
-        if (cameraParams.has_value() && cameraParams->cameraBufferCrop.has_value()) {
-            params.cropOffset = cameraParams->cameraBufferCrop->cropOffset;
-            params.cropScale = cameraParams->cameraBufferCrop->cropScale;
+        if (cropOpt.has_value()) {
+            params.cropOffset = cropOpt->cropOffset;
+            params.cropScale = cropOpt->cropScale;
         } else {
             params.cropOffset.reset();
             params.cropScale = 1.0f;
@@ -667,6 +721,7 @@ void DepthComponentPattern::InitGltfAdapter()
         mrtDepthAdapter_ = Render3D::GetMrtDepthAdapterInstance();
         gltfSceneLoaded_ = false;
         isGltfLoaded_ = false;
+        pendingGltfLoadSuccess_.reset();
         nativeWindowSetUp_ = false;
         return;
     }
@@ -700,44 +755,55 @@ void DepthComponentPattern::UpdateGltfScene()
 
 std::function<void(bool)> DepthComponentPattern::CreateGltfLoadCallback()
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, std::function<void(bool)>());
-    double componentWidth = 0.0;
-    double componentHeight = 0.0;
-    if (host->GetGeometryNode()) {
-        auto frameSize = host->GetGeometryNode()->GetFrameSize();
-        componentWidth = static_cast<double>(frameSize.Width());
-        componentHeight = static_cast<double>(frameSize.Height());
-    }
-    auto onComplete = onComplete_;
-    auto onError = onError_;
-    auto fireCallback = [onComplete, onError, componentWidth, componentHeight](bool success) {
-        if (success && onComplete) {
-            DepthComponentCompleteEvent completeEvent;
-            completeEvent.componentWidth = componentWidth;
-            completeEvent.componentHeight = componentHeight;
-            onComplete(completeEvent);
-        } else if (!success && onError) {
-            DepthComponentErrorEvent errorEvent;
-            errorEvent.componentWidth = componentWidth;
-            errorEvent.componentHeight = componentHeight;
-            onError(errorEvent);
-        }
-    };
-    return [weakPattern = WeakClaim(this), weakNode = WeakClaim(AceType::RawPtr(host)),
-            fireCallback](bool success) {
+    return [weakPattern = WeakClaim(this)](bool success) {
         auto pattern = weakPattern.Upgrade();
-        if (pattern && success) {
-            pattern->isGltfLoaded_ = true;
-        }
-        auto node = weakNode.Upgrade();
-        CHECK_NULL_VOID(node);
-        auto context = node->GetContext();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         context->GetTaskExecutor()->PostTask(
-            [fireCallback, success]() { fireCallback(success); },
-            TaskExecutor::TaskType::JS, "ArkUIDepthComponentGltfLoad");
+            [weakPattern, success]() {
+                auto pattern = weakPattern.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (success) {
+                    pattern->isGltfLoaded_ = true;
+                }
+                pattern->pendingGltfLoadSuccess_ = success;
+                auto host = pattern->GetHost();
+                if (host && host->IsOnMainTree()) {
+                    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                }
+            },
+            TaskExecutor::TaskType::JS, "ArkUIDepthGltfLoadCallback");
     };
+}
+
+void DepthComponentPattern::FireGltfLoadCallback()
+{
+    if (!pendingGltfLoadSuccess_.has_value()) {
+        return;
+    }
+    bool success = pendingGltfLoadSuccess_.value();
+    pendingGltfLoadSuccess_.reset();
+    auto eventHub = GetEventHub<DepthComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (success) {
+        if (pendingCleanupImage_) {
+            pendingCleanupImage_ = false;
+            RemoveBackgroundImageNode();
+        }
+        DepthComponentCompleteEvent completeEvent;
+        completeEvent.componentWidth = width3d_;
+        completeEvent.componentHeight = height3d_;
+        eventHub->FireCompleteEvent(completeEvent);
+    } else {
+        pendingCleanupImage_ = false;
+        DepthComponentErrorEvent errorEvent;
+        errorEvent.componentWidth = width3d_;
+        errorEvent.componentHeight = height3d_;
+        eventHub->FireErrorEvent(errorEvent);
+    }
 }
 
 void DepthComponentPattern::UpdateGltfCamera()
@@ -802,8 +868,10 @@ void DepthComponentPattern::CleanupGltfResources(bool clearAdapter)
     gltfWindowsInitialized_ = false;
     gltfSceneLoaded_ = false;
     isGltfLoaded_ = false;
+    pendingGltfLoadSuccess_.reset();
     nativeWindowSetUp_ = false;
     lastLoadedGltfPath_.clear();
+    pendingCleanupGltf_ = false;
     if (clearAdapter) {
         mrtDepthAdapter_.reset();
     }
@@ -934,14 +1002,35 @@ void DepthComponentPattern::MarkRender3D()
 
 #endif
 
+std::optional<OHOS::Ace::CameraBufferCrop> DepthComponentPattern::GetEffectiveCameraBufferCrop()
+    const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto depthLayoutProperty = host->GetLayoutProperty<DepthComponentLayoutProperty>();
+    CHECK_NULL_RETURN(depthLayoutProperty, std::nullopt);
+    auto cameraParams = depthLayoutProperty->GetCameraParams();
+    CHECK_NULL_RETURN(cameraParams.has_value(), std::nullopt);
+    if (cameraParams->cameraBufferCrop.has_value()) {
+        return cameraParams->cameraBufferCrop.value();
+    }
+
+    OHOS::Ace::CameraBufferCrop crop;
+    auto geoNode = host->GetGeometryNode();
+    if (geoNode) {
+        crop.bufferWidth = static_cast<int32_t>(geoNode->GetFrameSize().Width());
+        crop.bufferHeight = static_cast<int32_t>(geoNode->GetFrameSize().Height());
+    }
+    return crop;
+}
+
 DepthComponentPattern::TiltShiftResult DepthComponentPattern::ComputeTiltShift(
     const OHOS::Ace::DepthCameraParams& camera, float dcW, float dcH)
 {
     TiltShiftResult result = { camera.yFov, 0.0f, 0.0f };
-    if (!camera.cameraBufferCrop.has_value()) {
-        return result;
-    }
-    const auto& crop = camera.cameraBufferCrop.value();
+    auto cropOpt = GetEffectiveCameraBufferCrop();
+    CHECK_NULL_RETURN(cropOpt.has_value(), result);
+    auto crop = cropOpt.value();
     if (crop.bufferWidth <= 0 || crop.bufferHeight <= 0 || crop.cropScale <= 0.0f) {
         return result;
     }

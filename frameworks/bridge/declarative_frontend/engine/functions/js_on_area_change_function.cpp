@@ -15,7 +15,10 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_on_area_change_function.h"
 
+#include "jsnapi_expo.h"
+
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
@@ -26,26 +29,59 @@ namespace OHOS::Ace::Framework {
 namespace {
 
 template<typename Rect, typename Offset>
-JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
+JSRef<JSObject> CreateAreaObject(const EcmaVM* vm, const Rect& rect, const Offset& origin)
 {
-    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
-    JSRef<JSObject> area = objectTemplate->NewInstance();
-    JSRef<JSObject> offset = objectTemplate->NewInstance();
-    JSRef<JSObject> globalOffset = objectTemplate->NewInstance();
     auto localOffset = rect.GetOffset();
-    offset->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    offset->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-    globalOffset->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX() + origin.GetX()));
-    globalOffset->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY() + origin.GetY()));
-    // keep compatible, need remove after
-    area->SetPropertyObject("pos", offset);
-    area->SetPropertyObject("position", offset);
-    // keep compatible, need remove after
-    area->SetPropertyObject("globalPos", globalOffset);
-    area->SetPropertyObject("globalPosition", globalOffset);
-    area->SetProperty<double>("width", PipelineBase::Px2VpWithCurrentDensity(rect.Width()));
-    area->SetProperty<double>("height", PipelineBase::Px2VpWithCurrentDensity(rect.Height()));
-    return area;
+    auto d = PipelineBase::GetCurrentDensity();
+
+    // offset: { x, y }
+    Local<JSValueRef> offsetKeys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::X)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::Y)),
+    };
+    panda::PropertyAttribute offsetAttrs[] = {
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            localOffset.GetX() / d), true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            localOffset.GetY() / d), true, true, true),
+    };
+    auto offsetObj = panda::ObjectRef::NewWithProperties(vm, ArraySize(offsetKeys), offsetKeys, offsetAttrs);
+
+    // globalOffset: { x, y }
+    Local<JSValueRef> globalKeys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::X)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::Y)),
+    };
+    panda::PropertyAttribute globalAttrs[] = {
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            (localOffset.GetX() + origin.GetX()) / d), true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            (localOffset.GetY() + origin.GetY()) / d), true, true, true),
+    };
+    auto globalOffsetObj = panda::ObjectRef::NewWithProperties(vm, ArraySize(globalKeys), globalKeys, globalAttrs);
+
+    // area: { pos, position, globalPos, globalPosition, width, height }
+    Local<JSValueRef> areaKeys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::POS)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::POSITION)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::GLOBAL_POS)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::GLOBAL_POSITION)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::WIDTH)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::HEIGHT)),
+    };
+    panda::PropertyAttribute areaAttrs[] = {
+        panda::PropertyAttribute(offsetObj, true, true, true),
+        panda::PropertyAttribute(offsetObj, true, true, true),
+        panda::PropertyAttribute(globalOffsetObj, true, true, true),
+        panda::PropertyAttribute(globalOffsetObj, true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            rect.Width() / d), true, true, true),
+        panda::PropertyAttribute(panda::NumberRef::New(vm,
+            rect.Height() / d), true, true, true),
+    };
+    auto areaObj = panda::ObjectRef::NewWithProperties(vm, ArraySize(areaKeys), areaKeys, areaAttrs);
+
+    return JSRef<JSObject>::FastMake(vm, areaObj);
 }
 
 } // namespace
@@ -53,9 +89,10 @@ JSRef<JSObject> CreateAreaObject(const Rect& rect, const Offset& origin)
 void JsOnAreaChangeFunction::Execute(
     const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin)
 {
-    panda::JsiFastNativeScope fastNativeScope(jsFunction_->GetEcmaVM());
-    auto oldArea = CreateAreaObject<Rect, Offset>(oldRect, oldOrigin);
-    auto area = CreateAreaObject<Rect, Offset>(rect, origin);
+    auto vm = jsFunction_->GetEcmaVM();
+    panda::JsiFastNativeScope fastNativeScope(vm);
+    auto oldArea = CreateAreaObject<Rect, Offset>(vm, oldRect, oldOrigin);
+    auto area = CreateAreaObject<Rect, Offset>(vm, rect, origin);
     JSRef<JSVal> params[2];
     params[0] = oldArea;
     params[1] = area;
@@ -65,9 +102,10 @@ void JsOnAreaChangeFunction::Execute(
 void JsOnAreaChangeFunction::Execute(
     const NG::RectF& oldRect, const NG::OffsetF& oldOrigin, const NG::RectF& rect, const NG::OffsetF& origin)
 {
-    panda::JsiFastNativeScope fastNativeScope(jsFunction_->GetEcmaVM());
-    auto oldArea = CreateAreaObject<NG::RectF, NG::OffsetF>(oldRect, oldOrigin);
-    auto area = CreateAreaObject<NG::RectF, NG::OffsetF>(rect, origin);
+    auto vm = jsFunction_->GetEcmaVM();
+    panda::JsiFastNativeScope fastNativeScope(vm);
+    auto oldArea = CreateAreaObject<NG::RectF, NG::OffsetF>(vm, oldRect, oldOrigin);
+    auto area = CreateAreaObject<NG::RectF, NG::OffsetF>(vm, rect, origin);
     JSRef<JSVal> params[2];
     params[0] = oldArea;
     params[1] = area;

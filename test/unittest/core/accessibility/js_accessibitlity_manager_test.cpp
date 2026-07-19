@@ -14,12 +14,12 @@
  */
 
 #include "gmock/gmock.h"
-#include "core/accessibility/accessibility_manager.h"
 #include "gtest/gtest.h"
 
 #define private public
 #define protected public
 #include "accessibility_system_ability_client.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -4687,9 +4687,9 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest001, TestSize.Level1)
 
     AccessibilityElementInfo nodeInfo;
     Framework::CommonProperty commonProperty;
-    // not virtual
+    // not virtual: property focus state should be reported even without render context focus
     jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
-    ASSERT_FALSE(nodeInfo.HasAccessibilityFocus());
+    ASSERT_TRUE(nodeInfo.HasAccessibilityFocus());
     // is virtual，but no parent
     AccessibilityElementInfo nodeInfo1;
     frameNode->SetAccessibilityNodeVirtual();
@@ -4699,6 +4699,87 @@ HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest001, TestSize.Level1)
     frameNode->SetAccessibilityVirtualNodeParent(frameNode1);
     jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo1, ngPipeline);
     ASSERT_TRUE(nodeInfo1.HasAccessibilityFocus());
+}
+
+/**
+ * @tc.name: UpdateElementInfoTest002
+ * @tc.desc: Render context focus true short-circuits to focus true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest002, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    frameNode->renderContext_ = mockRenderContext;
+    // render context reports focus true while property focus state is false: expect true (short-circuit)
+    mockRenderContext->UpdateAccessibilityFocus(true);
+    accessibilityProperty->SetAccessibilityFocusState(false);
+
+    AccessibilityElementInfo nodeInfo;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
+    ASSERT_TRUE(nodeInfo.HasAccessibilityFocus());
+}
+
+/**
+ * @tc.name: UpdateElementInfoTest003
+ * @tc.desc: Focus is false when both render context and property focus are false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest003, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    frameNode->renderContext_ = mockRenderContext;
+    // neither source reports focus: expect false
+    accessibilityProperty->SetAccessibilityFocusState(false);
+
+    AccessibilityElementInfo nodeInfo;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
+    ASSERT_FALSE(nodeInfo.HasAccessibilityFocus());
+}
+
+/**
+ * @tc.name: UpdateElementInfoTest004
+ * @tc.desc: Focus is true when focus draw level is TOP and property focus state is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, UpdateElementInfoTest004, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto mockRenderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(mockRenderContext, nullptr);
+    frameNode->renderContext_ = mockRenderContext;
+    // when focus draw level is TOP the render context focus is not set on this node,
+    // focus must still be reported from the property focus state
+    accessibilityProperty->SetFocusDrawLevel(static_cast<int32_t>(FocusDrawLevel::TOP));
+    accessibilityProperty->SetAccessibilityFocusState(true);
+
+    AccessibilityElementInfo nodeInfo;
+    Framework::CommonProperty commonProperty;
+    jsAccessibilityManager->UpdateElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
+    ASSERT_TRUE(nodeInfo.HasAccessibilityFocus());
 }
 
 /**
@@ -5572,6 +5653,106 @@ HWTEST_F(JsAccessibilityManagerTest, OnDumpInfoNGExecuteActionTest005, TestSize.
         std::to_string(nodeId), "16"};
 
     jsAccessibilityManager->OnDumpInfoNG(params, 0, false);
+}
+
+/**
+ * @tc.name: DumpComponentTypeTest001
+ * @tc.desc: Test DumpInfoParams parses set and clear component type modes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpComponentTypeTest001, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    DumpInfoArgument argument;
+    std::vector<std::string> setParams = {"-accessibility", "--set-component-type", "1", "SubHeader"};
+    auto ret = jsAccessibilityManager->GetDumpInfoArgument(setParams, argument);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(argument.mode, DumpMode::SET_COMPONENT_TYPE_TEST);
+
+    argument = DumpInfoArgument();
+    std::vector<std::string> clearParams = {"-accessibility", "--clear-component-type", "1"};
+    ret = jsAccessibilityManager->GetDumpInfoArgument(clearParams, argument);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(argument.mode, DumpMode::CLEAR_COMPONENT_TYPE_TEST);
+}
+
+/**
+ * @tc.name: DumpComponentTypeTest002
+ * @tc.desc: Test DumpSetComponentTypeTest and DumpClearComponentTypeTest with invalid params.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpComponentTypeTest002, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    std::vector<std::string> invalidSetParams = {"-accessibility", "--set-component-type", "1"};
+    jsAccessibilityManager->DumpSetComponentTypeTest(invalidSetParams);
+
+    std::vector<std::string> emptyTypeParams = {"-accessibility", "--set-component-type", "1", ""};
+    jsAccessibilityManager->DumpSetComponentTypeTest(emptyTypeParams);
+
+    std::vector<std::string> invalidClearParams = {"-accessibility", "--clear-component-type"};
+    jsAccessibilityManager->DumpClearComponentTypeTest(invalidClearParams);
+}
+
+/**
+ * @tc.name: DumpComponentTypeTest003
+ * @tc.desc: Test component type can be set and cleared through hidumper helpers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpComponentTypeTest003, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+
+    auto rootNode = context->GetRootElement();
+    ASSERT_NE(rootNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->context_ = AceType::RawPtr(context);
+    rootNode->AddChild(frameNode);
+    frameNode->MountToParent(rootNode);
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityRole());
+
+    std::vector<std::string> setParams = {
+        "-accessibility", "--set-component-type", std::to_string(frameNode->GetAccessibilityId()), "SubHeader"};
+    jsAccessibilityManager->DumpSetComponentTypeTest(setParams);
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityRole());
+    EXPECT_EQ(accessibilityProperty->GetAccessibilityRole(), "SubHeader");
+
+    std::vector<std::string> clearParams = {
+        "-accessibility", "--clear-component-type", std::to_string(frameNode->GetAccessibilityId())};
+    jsAccessibilityManager->DumpClearComponentTypeTest(clearParams);
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityRole());
+
+    rootNode->RemoveChild(frameNode);
+}
+
+/**
+ * @tc.name: DumpComponentTypeTest004
+ * @tc.desc: Test OnDumpInfoNG routes set and clear component type modes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, DumpComponentTypeTest004, TestSize.Level1)
+{
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    std::vector<std::string> setParams = {"-accessibility", "--set-component-type", "0", "SubHeader"};
+    jsAccessibilityManager->OnDumpInfoNG(setParams, 0, false);
+
+    std::vector<std::string> clearParams = {"-accessibility", "--clear-component-type", "0"};
+    jsAccessibilityManager->OnDumpInfoNG(clearParams, 0, false);
 }
 /**
  * @tc.name: NextFocusRelationController_DescendantMode_True

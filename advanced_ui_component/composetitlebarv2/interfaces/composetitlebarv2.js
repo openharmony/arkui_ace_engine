@@ -36,12 +36,12 @@ const promptAction = requireNapi('promptAction');
 
 let ComposeTitleBarV2MenuItem = class ComposeTitleBarV2MenuItem {
     constructor(j10) {
-        this.isEnabled = true;
+        this.isEnabled = false;
         this.accessibilityLevel = 'auto';
         if (j10) {
             this.value = j10.value;
             this.symbolStyle = j10.symbolStyle;
-            this.isEnabled = j10.isEnabled ?? true;
+            this.isEnabled = j10.isEnabled ?? false;
             this.action = j10.action;
             this.label = j10.label;
             this.accessibilityText = j10.accessibilityText;
@@ -49,7 +49,7 @@ let ComposeTitleBarV2MenuItem = class ComposeTitleBarV2MenuItem {
             this.accessibilityDescription = j10.accessibilityDescription;
         } else {
             this.value = '';
-            this.isEnabled = true;
+            this.isEnabled = false;
             this.accessibilityLevel = 'auto';
         }
     }
@@ -268,13 +268,7 @@ export class ComposeTitleBarV2 extends ViewV2 {
         this.observeComponentCreation2((f9, g9) => {
             Row.create();
             Row.accessibilityGroup(true);
-            Row.accessibilityDescription({
-                'id': -1,
-                'type': 10003,
-                params: ['sys.string.subheader_accessibility_title'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            });
+            Row.accessibilityRole(AccessibilityRoleType.TITLE_BAR);
         }, Row);
         this.observeComponentCreation2((b9, c9) => {
             If.create();
@@ -1029,6 +1023,18 @@ class CollapsibleMenuSectionV2 extends ViewV2 {
                                     });
                                     Button.onClick(() => this.isPopupShown = true);
                                     Button.gestureModifier(this.getItemGestureModifier());
+                                    Button.bindPopup(this.isPopupShown, {
+                                        builder: { builder: this.popupBuilder.bind(this) },
+                                        placement: Placement.Bottom,
+                                        popupColor: Color.White,
+                                        enableArrow: false,
+                                        onStateChange: (e) => {
+                                            this.isPopupShown = e.isVisible;
+                                            if (!e.isVisible) {
+                                                this.isMoreIconOnClick = false;
+                                            }
+                                        }
+                                    });
                                 }, Button);
                                 this.observeComponentCreation2((e5, f5) => {
                                     SymbolGlyph.create(PUBLIC_MORE);

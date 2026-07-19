@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG {
 class ParagraphUtil {
 public:
     static TextDirection GetTextDirection(const std::u16string& content, LayoutWrapper* layoutWrapper);
-    static TextDirection GetTextOwnDirection(
+    ACE_FORCE_EXPORT static TextDirection GetTextOwnDirection(
         const std::u16string& content, TextDirection direction, TextDirection textDirection);
     static TextDirection GetTextDirectionByContent(const std::u16string& content);
     static void GetSpanParagraphStyle(LayoutWrapper* layoutWrapper,
@@ -55,6 +55,8 @@ private:
     static TextDirection GetSpanParagraphDirection(LayoutWrapper* layoutWrapper, const std::u16string& spanContent,
         TextDirection spanDirection, const std::list<RefPtr<SpanItem>>& spanGroup);
     static TextDirection GetSpanTextDirectionForCompare(const std::u16string& content, TextDirection textDirection);
+    static bool NeedSplitParagraph(const ParagraphStyle& pStyle, const ParagraphStyle& nextStyle,
+        TextDirection textDirection, TextDirection nextTextDirection);
 };
 
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,11 @@
 
 #include "gtest/gtest.h"
 
+#include <chrono>
+#include <future>
+#include <set>
+#include <vector>
+
 #define private public
 #define protected public
 
@@ -29,6 +34,7 @@ using namespace testing::ext;
 
 namespace {
 const char* const TEST_TAG_CUSTOM = "customNode";
+constexpr int THREAD_COUNT = 8;
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -120,6 +126,88 @@ HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerAllocate
     auto id = VirtualNodeContainerIdManager::GetInstance().AllocateContainerId(node);
     EXPECT_GE(id, 1);
     EXPECT_LE(id, 255);
+}
+
+/**
+ * @tc.name: VirtualNodeContainerIdManagerAllocateContainerId003
+ * @tc.desc: Test AllocateContainerId on the same FrameNode twice returns the same ID
+ *           (regression: AllocateContainerId used to deadlock when calling the locked
+ *           FindNextAvailableId helper while already holding mutex_)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerAllocateContainerId003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. allocate twice for the same node
+     * @tc.expected: the second call returns the cached ID without freezing
+     */
+    auto& mgr = VirtualNodeContainerIdManager::GetInstance();
+    auto node = FrameNode::CreateFrameNode(TEST_TAG_CUSTOM,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    auto id1 = mgr.AllocateContainerId(node);
+    EXPECT_GE(id1, 1);
+    EXPECT_LE(id1, 255);
+    auto id2 = mgr.AllocateContainerId(node);
+    EXPECT_EQ(id1, id2);
+}
+
+/**
+ * @tc.name: VirtualNodeContainerIdManagerAllocateContainerId004
+ * @tc.desc: Test AllocateContainerId does not freeze (regression for self-deadlock on
+ *           non-recursive mutex_ when FindNextAvailableId re-locked it)
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerAllocateContainerId004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. run AllocateContainerId in an async task and wait with timeout
+     * @tc.expected: the future becomes ready within the deadline and returns a valid ID
+     */
+    auto& mgr = VirtualNodeContainerIdManager::GetInstance();
+    auto node = FrameNode::CreateFrameNode(TEST_TAG_CUSTOM,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(node, nullptr);
+    auto fut = std::async(std::launch::async, [&mgr, node]() { return mgr.AllocateContainerId(node); });
+    ASSERT_EQ(fut.wait_for(std::chrono::seconds(2)), std::future_status::ready);
+    auto id = fut.get();
+    EXPECT_GE(id, 1);
+    EXPECT_LE(id, 255);
+}
+
+/**
+ * @tc.name: VirtualNodeContainerIdManagerAllocateContainerId005
+ * @tc.desc: Test concurrent AllocateContainerId calls do not freeze and produce unique IDs
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityManagerUtilsTestTwo, VirtualNodeContainerIdManagerAllocateContainerId005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. allocate concurrently from multiple threads
+     * @tc.expected: every call returns a unique valid ID within the deadline
+     */
+    auto& mgr = VirtualNodeContainerIdManager::GetInstance();
+    std::vector<RefPtr<FrameNode>> nodes;
+    for (int i = 0; i < THREAD_COUNT; ++i) {
+        nodes.emplace_back(FrameNode::CreateFrameNode(TEST_TAG_CUSTOM,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true));
+        ASSERT_NE(nodes.back(), nullptr);
+    }
+    std::vector<std::future<uint8_t>> futures;
+    for (int i = 0; i < THREAD_COUNT; ++i) {
+        futures.emplace_back(std::async(std::launch::async, [&mgr, &nodes, i]() {
+            return mgr.AllocateContainerId(nodes[i]);
+        }));
+    }
+    std::set<uint8_t> ids;
+    for (auto& f : futures) {
+        ASSERT_EQ(f.wait_for(std::chrono::seconds(3)), std::future_status::ready);
+        auto id = f.get();
+        EXPECT_GE(id, 1);
+        EXPECT_LE(id, 255);
+        ids.insert(id);
+    }
+    EXPECT_EQ(ids.size(), static_cast<size_t>(THREAD_COUNT));
 }
 
 // ==================== VirtualNodeContainerIdManager ReleaseContainerId ====================

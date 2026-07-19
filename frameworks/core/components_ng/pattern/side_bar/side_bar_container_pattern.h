@@ -103,6 +103,7 @@ public:
         layoutAlgorithm->SetControlImageWidth(controlImageWidth_);
         layoutAlgorithm->SetControlImageHeight(controlImageHeight_);
         auto host = GetHost();
+        CHECK_NULL_RETURN(host, layoutAlgorithm);
         auto sideBarContainerPattern = host->GetPattern<SideBarContainerPattern>();
         layoutAlgorithm->SetPattern(AceType::WeakClaim(AceType::RawPtr(sideBarContainerPattern)));
         return layoutAlgorithm;
@@ -232,7 +233,6 @@ private:
     void OnHostChildUpdateDone() override;
     void UpdateAnimDir();
     void DoAnimation();
-    void CreateAnimation();
     void FireChangeEvent(bool isShow);
     void UpdateControlButtonIcon();
     void CreateAndMountNodes();
@@ -291,11 +291,6 @@ private:
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<InputEvent> dividerMouseEvent_;
     RefPtr<ClickEvent> controlButtonClickEvent_;
-    RefPtr<InputEvent> controlButtonHoverEvent_;
-    RefPtr<PanEvent> panEvent_;
-    RefPtr<Animator> controller_;
-    RefPtr<CurveAnimation<float>> rightToLeftAnimation_;
-    RefPtr<CurveAnimation<float>> leftToRightAnimation_;
     RefPtr<PanEvent> dragEvent_;
     RefPtr<ToolbarManager> toolbarManager_;
 

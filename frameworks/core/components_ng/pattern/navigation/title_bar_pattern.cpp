@@ -28,9 +28,9 @@
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/components_v2/inspector/utils.h"
 
@@ -63,6 +64,10 @@ constexpr int32_t LUMINANCE_SAMPLER_INTERVAL = 200;
 constexpr uint32_t LUMINANCE_THRESHOLD_LOW = 150;
 constexpr uint32_t LUMINANCE_THRESHOLD_HIGH = 220;
 const Color DEFAULT_LIGHT_EFFECT_COLOR = Color::FromString("#33FFFFFF");
+const Color SMOOTH_COMMON_BLUR_LIGHT_BG_COLOR = Color::FromString("#00F1F3F5");
+const Color SMOOTH_COMMON_BLUR_DARK_BG_COLOR = Color::FromString("#00000000");
+const Color SMOOTH_GRADUAL_BLUR_LIGHT_BG_COLOR = Color::FromString("#F2F1F3F5");
+const Color SMOOTH_GRADUAL_BLUR_DARK_BG_COLOR = Color::FromString("#99000000");
 constexpr int32_t INVERT_COLOR_ANIMATION_DURATION = 133;
 constexpr int32_t SCROLL_EFFECT_TITLEBAR_MASK_BLUR_ZINDEX = -2;
 constexpr int32_t SCROLL_EFFECT_TITLEBAR_MASK_ZINDEX = -1;
@@ -990,14 +995,16 @@ void TitleBarPattern::UpdateBackButtonIconEffect(bool forceUpdate)
     CHECK_NULL_VOID(host);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(host->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(buttonPattern);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(backButtonNode));
+    CHECK_NE_VOID(buttonModifier->isButtonPattern(nodeHandle), true);
     auto param = GetCurrentIconColorParam();
     if (!param.has_value()) {
         return;
     }
-    buttonPattern->SetBlendColor(param->pressedColor, param->hoverColor);
-    buttonPattern->SetFocusBorderColor(param->focusColor);
+    buttonModifier->setBlendColor(nodeHandle, param->pressedColor, param->hoverColor);
+    buttonModifier->setFocusBorderColor(nodeHandle, param->focusColor);
     if (backButtonNode->GetChildren().empty()) {
         return;
     }
@@ -1071,13 +1078,7 @@ void TitleBarPattern::UpdateBackButtonMaterialInner(const RefPtr<UiMaterial>& ma
     CHECK_NULL_VOID(host);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(host->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    auto titleRenderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(titleRenderContext);
-    if (IsApplyShadowEnabled(material)) {
-        titleRenderContext->UpdateClipEdge(false);
-    } else {
-        titleRenderContext->UpdateClipEdge(true);
-    }
+    UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(material));
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(backButtonNode), AceType::RawPtr(material));
 }
 
@@ -1101,8 +1102,7 @@ void TitleBarPattern::UpdateBackButtonBrightnessEffect(bool forceUpdate)
         return;
     }
     const Rosen::BrightnessBlender* blender = nullptr;
-    auto materialLevel = SystemProperties::GetUiMaterialLevel();
-    if (options_.bgOptions.scrollEffectOptions.has_value() && materialLevel != UiMaterialLevel::SMOOTH) {
+    if (options_.bgOptions.scrollEffectOptions.has_value() && IsBrightnessBlendEnabled()) {
         bool isColorInvertEnabled = IsColorInvertEnabled();
         auto colorMode = GetCurrentColorMode(isColorInvertEnabled);
         blender = colorMode == ColorMode::LIGHT ?
@@ -1142,11 +1142,13 @@ void TitleBarPattern::UpdateMenuIconEffect(const RefPtr<UINode>& menuNode, bool 
         if (menuItemNode->GetTag() != V2::MENU_ITEM_ETS_TAG) {
             continue;
         }
-        auto buttonPattern = menuItemNode->GetPattern<ButtonPattern>();
-        CHECK_NULL_CONTINUE(buttonPattern);
-        buttonPattern->SetBlendColor(param->pressedColor, param->hoverColor);
-        buttonPattern->SetFocusBorderColor(param->focusColor);
-        auto buttonEvent = menuItemNode->GetEventHub<ButtonEventHub>();
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_CONTINUE(buttonModifier);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(menuItemNode));
+        CHECK_NULL_CONTINUE(buttonModifier->isButtonPattern(nodeHandle));
+        buttonModifier->setBlendColor(nodeHandle, param->pressedColor, param->hoverColor);
+        buttonModifier->setFocusBorderColor(nodeHandle, param->focusColor);
+        auto buttonEvent = menuItemNode->GetEventHub<EventHub>();
         CHECK_NULL_VOID(buttonEvent);
         bool isButtonEnabled = buttonEvent->IsEnabled();
         if (menuItemNode->GetChildren().empty()) {
@@ -1191,13 +1193,7 @@ void TitleBarPattern::UpdateMenuMaterialInner(const RefPtr<UINode>& menuNode, co
     CHECK_NULL_VOID(menuNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto titleRenderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(titleRenderContext);
-    if (IsApplyShadowEnabled(material)) {
-        titleRenderContext->UpdateClipEdge(false);
-    } else {
-        titleRenderContext->UpdateClipEdge(true);
-    }
+    UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(material));
     InitColorPickerIfNeeded();
     InitTransparencyListenerIfNeeded();
     auto children = menuNode->GetChildren();
@@ -1220,8 +1216,7 @@ void TitleBarPattern::UpdateMenuBrightnessEffect(const RefPtr<UINode>& menuNode,
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_VOID(menuNode);
     const Rosen::BrightnessBlender* blender = nullptr;
-    auto materialLevel = SystemProperties::GetUiMaterialLevel();
-    if (options_.bgOptions.scrollEffectOptions.has_value() && materialLevel != UiMaterialLevel::SMOOTH) {
+    if (options_.bgOptions.scrollEffectOptions.has_value() && IsBrightnessBlendEnabled()) {
         bool isColorInvertEnabled = IsColorInvertEnabled();
         auto colorMode = GetCurrentColorMode(isColorInvertEnabled);
         blender = colorMode == ColorMode::LIGHT ?
@@ -1930,15 +1925,16 @@ void TitleBarPattern::UpdateBackButtonColor()
         iconColor = theme->GetIconColor();
         auto backButtonColor = theme->GetCompBackgroundColor();
         auto renderContext = backButton->GetRenderContext();
-        auto backButtonPattern = backButton->GetPattern<ButtonPattern>();
-        backButtonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-        backButtonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
-        backButtonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
-        backButtonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(backButton));
+        buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
+        buttonModifier->setBlendColor(
+            nodeHandle, theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetBackgroundFocusOutlineColor());
+        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetBackgroundFocusOutlineWeight());
         renderContext->UpdateBackgroundColor(backButtonColor);
-        auto backButtonLayoutProperty = backButtonPattern->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(backButtonLayoutProperty);
-        backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
         backButton->MarkModifyDone();
     }
     auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
@@ -2148,6 +2144,17 @@ bool TitleBarPattern::IsColorInvertEnabled()
     return transparencyLevel == UiMaterialTransparency::GENTLE_THIN;
 }
 
+bool TitleBarPattern::IsBrightnessBlendEnabled()
+{
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel != UiMaterialLevel::EXQUISITE) {
+        return false;
+    }
+    auto transparencyLevel = static_cast<UiMaterialTransparency>(
+        TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel)));
+    return transparencyLevel == UiMaterialTransparency::THIN;
+}
+
 bool TitleBarPattern::IsApplyShadowEnabled(const RefPtr<UiMaterial>& material)
 {
     if (!material) {
@@ -2158,6 +2165,15 @@ bool TitleBarPattern::IsApplyShadowEnabled(const RefPtr<UiMaterial>& material)
         return false;
     }
     return options->applyShadow;
+}
+
+bool TitleBarPattern::ShouldEnableTitleBarClip(const RefPtr<UiMaterial>& material) const
+{
+    if (IsApplyShadowEnabled(material)) {
+        return false;
+    }
+    const auto& scrollEffectOptions = options_.bgOptions.scrollEffectOptions;
+    return !scrollEffectOptions.has_value() || scrollEffectOptions->scrollEffectType != ScrollEffectType::GRADUAL_BLUR;
 }
 
 ColorMode TitleBarPattern::GetCurrentColorMode(bool enableColorInvert)
@@ -2348,7 +2364,7 @@ void TitleBarPattern::ResetTitleBarMaskBlendEffect()
 void TitleBarPattern::UpdateTitleBarMaskBlendEffect(ScrollEffectType scrollEffectType)
 {
     CHECK_NULL_VOID(titleBarMaskNode_);
-    if (scrollEffectType != ScrollEffectType::COMMON_BLUR) {
+    if (scrollEffectType != ScrollEffectType::COMMON_BLUR || !IsBrightnessBlendEnabled()) {
         ResetTitleBarMaskBlendEffect();
         return;
     }
@@ -2407,9 +2423,19 @@ void TitleBarPattern::PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrol
     auto shadowSpreadRadius = static_cast<double>(Dimension(0.0, DimensionUnit::VP).ConvertToPx());
     auto shadowOffsetY = static_cast<float>(Dimension(4.0, DimensionUnit::VP).ConvertToPx());
     bool isDarkMode = GetCurrentColorMode(false) == ColorMode::DARK;
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    auto isGradualBlur = scrollEffectType == ScrollEffectType::GRADUAL_BLUR;
+    auto isSmoothGradualBlur = materialLevel == UiMaterialLevel::SMOOTH && isGradualBlur;
+    auto isSmoothCommonBlur = materialLevel == UiMaterialLevel::SMOOTH && !isGradualBlur;
+    auto titleBarBgColor = tokenColors->CompBackgroundGray();
+    if (isSmoothGradualBlur) {
+        titleBarBgColor = isDarkMode ? SMOOTH_GRADUAL_BLUR_DARK_BG_COLOR : SMOOTH_GRADUAL_BLUR_LIGHT_BG_COLOR;
+    } else if (isSmoothCommonBlur) {
+        titleBarBgColor = isDarkMode ? SMOOTH_COMMON_BLUR_DARK_BG_COLOR : SMOOTH_COMMON_BLUR_LIGHT_BG_COLOR;
+    }
 
     std::vector<std::pair<float, float>> linearGradientBlurFractionStops;
-    if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+    if (materialLevel == UiMaterialLevel::SMOOTH) {
         linearGradientBlurFractionStops = {
             {1.0f, 0.0f}, {0.99764f, 0.450f}, {0.99010f, 0.478f}, {0.97627f, 0.508f},
             {0.95574f, 0.536f}, {0.92808f, 0.566f}, {0.89108f, 0.594f}, {0.84375f, 0.624f},
@@ -2432,12 +2458,12 @@ void TitleBarPattern::PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrol
     auto originalGradientBlurPara = LinearGradientBlurPara(
         Dimension(0.0, DimensionUnit::VP), linearGradientBlurFractionStops, GradientDirection::BOTTOM);
     auto scrollEffectGradientBlurPara = LinearGradientBlurPara(
-        Dimension(12.0, DimensionUnit::VP), linearGradientBlurFractionStops, GradientDirection::BOTTOM);
+        Dimension(isSmoothGradualBlur ? 0.0 : 12.0, DimensionUnit::VP), linearGradientBlurFractionStops,
+        GradientDirection::BOTTOM);
 
-    auto isGradualBlur = scrollEffectType == ScrollEffectType::GRADUAL_BLUR;
     auto originalShadowOpacity = isGradualBlur ? (isDarkMode ? 0.2f : 0.8f) : 0.0f;
-    auto scrollEffectBlurRadius = isGradualBlur ? Dimension(12.0, DimensionUnit::VP)
-                                                 : Dimension(30.0, DimensionUnit::VP);
+    auto scrollEffectBlurRadius = isGradualBlur ? Dimension(isSmoothGradualBlur ? 0.0 : 12.0, DimensionUnit::VP)
+                                                 : Dimension(isSmoothCommonBlur ? 0.0 : 30.0, DimensionUnit::VP);
     NavigationTitleBarStyle originalBgStyle {
         .titleColor = tokenColors->FontPrimary(),
         .buttonTextColor = tokenColors->FontPrimary(),
@@ -2448,7 +2474,7 @@ void TitleBarPattern::PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrol
             .opacity = 1.0,
         },
         .backgroundStyle {
-            .backgroundColor = tokenColors->CompBackgroundGray(),
+            .backgroundColor = titleBarBgColor,
             .brightness = 0,
             .blurRadius = Dimension(0.0),
             .opacity = isGradualBlur ? 0.0 : 1.0,
@@ -2473,7 +2499,7 @@ void TitleBarPattern::PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrol
             .opacity = 1.0,
         },
         .backgroundStyle {
-            .backgroundColor = tokenColors->CompBackgroundGray(),
+            .backgroundColor = titleBarBgColor,
             .brightness = 0,
             .blurRadius = scrollEffectBlurRadius,
             .opacity = isGradualBlur ? (isDarkMode ? 0.4 : 0.8) : 1.0,
@@ -2526,6 +2552,11 @@ void TitleBarPattern::UpdateBackgroundBlurStyle()
             startBlurRadius.Value() + scrollScale_ * (endBlurRadius.Value() - startBlurRadius.Value());
         gradientBlurPara.blurRadius_ = Dimension(blurRadius, DimensionUnit::VP);
         gradientBlurPara.fractionStops_ = MASK_BLUR_STOPS;
+        if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
+            maskBlurRenderContext->UpdateBackBlurRadius(Dimension(0.0, DimensionUnit::VP));
+            maskBlurRenderContext->ResetRadiusGradientBlur();
+            return;
+        }
         maskBlurRenderContext->UpdateBackBlurRadius(Dimension());
         maskBlurRenderContext->UpdateRadiusGradientBlur(gradientBlurPara);
         return;
@@ -2559,7 +2590,7 @@ void TitleBarPattern::InitScrollEffectOptions()
     if (!scrollEffectOptionsOpt.has_value()) {
         if (titleBarMaskNode_ || titleBarMaskBlurNode_) {
             ResetTitleBarMaskNodes();
-            UpdateTitleBarClipForMask(true);
+            UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(GetCurrentMaterial()));
             titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -2571,7 +2602,7 @@ void TitleBarPattern::InitScrollEffectOptions()
     isScrollEffectEnabled_ = true;
     SetIsTitleBarStyleStartUpdate(false);
     SetIsTitleBarStyleEndUpdate(false);
-    UpdateTitleBarClipForMask(scrollEffectType != ScrollEffectType::GRADUAL_BLUR);
+    UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(GetCurrentMaterial()));
 
     if (!titleBarMaskBlurNode_) {
         titleBarMaskBlurNode_ = CreateTitleBarEffectNode("TitleBarMaskBlur");
@@ -2847,9 +2878,10 @@ void TitleBarPattern::InitMenuDragEvent(const RefPtr<GestureEventHub>& gestureHu
             CHECK_NULL_VOID(pipeline);
             auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
             CHECK_NULL_VOID(buttonTheme);
-            auto buttonPattern = menuItemNode->GetPattern<ButtonPattern>();
-            CHECK_NULL_VOID(buttonPattern);
-            buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(buttonModifier);
+            buttonModifier->setClickedColor(
+                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(menuItemNode)), buttonTheme->GetClickedColor());
             if (!pattern->GetMoveIndex().has_value()) {
                 pattern->SetMoveIndex(index);
             }

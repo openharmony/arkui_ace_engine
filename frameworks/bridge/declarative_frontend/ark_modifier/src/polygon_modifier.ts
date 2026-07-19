@@ -13,11 +13,32 @@
  * limitations under the License.
  */
 
-class PolygonModifier extends ArkPolygonComponent implements AttributeModifier<PolygonAttribute> {
+class LazyArkPolygonComponent extends LazyArkCommonShapeComponent {
+  static module: PolygonComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkPolygonComponent.module === undefined) {
+      LazyArkPolygonComponent.module = globalThis.requireNapi('arkui.components.arkpolygon');
+    }
+    this.lazyComponent = LazyArkPolygonComponent.module.createComponent(nativePtr, classType);
+  }
+
+  points(value: Array<any>): this {
+    this.lazyComponent.points(value);
+    return this;
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+}
+
+class PolygonModifier extends LazyArkPolygonComponent implements AttributeModifier<PolygonAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: PolygonAttribute): void {

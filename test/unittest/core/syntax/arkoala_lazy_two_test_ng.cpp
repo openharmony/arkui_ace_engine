@@ -22,6 +22,14 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+void SetCallbacksForTest(const RefPtr<ArkoalaLazyNode>& node, ArkoalaLazyNode::CreateItemCb create,
+    ArkoalaLazyNode::UpdateRangeCb update)
+{
+    node->SetCallbacks(create, update, []() {}, [](int32_t) {});
+}
+} // namespace
+
 class TestUINode : public UINode {
     DECLARE_ACE_TYPE(TestUINode, UINode);
 
@@ -42,7 +50,7 @@ public:
         auto* stack = ViewStackProcessor::GetInstance();
         auto lazyForEachNode = AceType::MakeRefPtr<ArkoalaLazyNode>(nodeId);
         stack->Push(lazyForEachNode);
-        lazyForEachNode->SetCallbacks(createItemCb_, updateRangeCb_);
+        SetCallbacksForTest(lazyForEachNode, createItemCb_, updateRangeCb_);
         return lazyForEachNode;
     }
 
@@ -51,7 +59,7 @@ public:
         auto* stack = ViewStackProcessor::GetInstance();
         auto repeatNode = AceType::MakeRefPtr<ArkoalaLazyNode>(nodeId, true);
         stack->Push(repeatNode);
-        repeatNode->SetCallbacks(createItemCb_, updateRangeCb_);
+        SetCallbacksForTest(repeatNode, createItemCb_, updateRangeCb_);
         return repeatNode;
     }
 

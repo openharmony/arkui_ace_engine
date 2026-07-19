@@ -15,12 +15,14 @@
 
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 
+#include "base/geometry/shape.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -31,6 +33,70 @@ RefPtr<LayoutWrapper> CreateDummyGridItemChild()
     auto wrapper = GridItemModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     wrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0), CalcLength(0)));
     return wrapper;
+}
+
+std::pair<float, float> GetMainStartEnd(const RectF& rect, Axis axis, bool isReverse, float frameMainSize)
+{
+    const float start = axis == Axis::VERTICAL ? rect.Top() : rect.Left();
+    const float size = rect.GetSize().MainSize(axis);
+    if (isReverse) {
+        const float end = frameMainSize - start;
+        return { end - size, end };
+    }
+    return { start, start + size };
+}
+
+RectF GetPaddingRectInFrame(const RefPtr<GeometryNode>& geo)
+{
+    CHECK_NULL_RETURN(geo, RectF());
+    auto size = geo->GetFrameSize();
+    OffsetF offset;
+    const auto& padding = geo->GetPadding();
+    if (padding) {
+        MinusPaddingToSize(*padding, size);
+        offset = OffsetF(padding->left.value_or(0.0f), padding->top.value_or(0.0f));
+    }
+    return RectF { offset, size };
+}
+
+std::optional<RectF> ResolveCustomClipRect(
+    const RefPtr<ShapeRect>& shape, const ScaleProperty& scale, const SizeF& frameSize, Axis axis)
+{
+    CHECK_NULL_RETURN(shape, std::nullopt);
+    const float mainSize = frameSize.MainSize(axis);
+    if (GreaterOrEqualToInfinity(mainSize)) {
+        return std::nullopt;
+    }
+    float x = ConvertToPx(shape->GetOffset().GetX(), scale, frameSize.Width()).value_or(0.0f);
+    float y = ConvertToPx(shape->GetOffset().GetY(), scale, frameSize.Height()).value_or(0.0f);
+    float width = ConvertToPx(shape->GetWidth(), scale, frameSize.Width()).value_or(0.0f);
+    float height = ConvertToPx(shape->GetHeight(), scale, frameSize.Height()).value_or(0.0f);
+    return RectF { x, y, width, height };
+}
+
+std::optional<RectF> ResolveContentClipRect(
+    ContentClipMode mode, const RefPtr<GeometryNode>& geo, const std::optional<ExpandEdges>& safeAreaPad)
+{
+    CHECK_NULL_RETURN(geo, std::nullopt);
+    switch (mode) {
+        case ContentClipMode::CONTENT_ONLY:
+            return GetPaddingRectInFrame(geo);
+        case ContentClipMode::SAFE_AREA: {
+            if (!safeAreaPad.has_value()) {
+                return std::nullopt;
+            }
+            auto rect = GetPaddingRectInFrame(geo);
+            auto size = rect.GetSize();
+            AddPaddingToSize(safeAreaPad.value(), size);
+            auto offset = rect.GetOffset();
+            offset -= OffsetF(safeAreaPad->left.value_or(0.0f), safeAreaPad->top.value_or(0.0f));
+            return RectF { offset, size };
+        }
+        case ContentClipMode::BOUNDARY:
+            return RectF { OffsetF(), geo->GetFrameSize() };
+        default:
+            return std::nullopt;
+    }
 }
 } // namespace
 
@@ -191,6 +257,65 @@ void GridLayoutBaseAlgorithm::CalcContentOffset(LayoutWrapper* layoutWrapper, fl
     if (GreatOrEqual(info_.contentStartOffset_ + info_.contentEndOffset_, mainSize)) {
         info_.contentStartOffset_ = 0.0f;
         info_.contentEndOffset_ = 0.0f;
+    }
+}
+
+void GridLayoutBaseAlgorithm::PostClipContentSafeAreaBundle(LayoutWrapper* layoutWrapper) const
+{
+    if (contentClipMode_ != ContentClipMode::SAFE_AREA) {
+        return;
+    }
+    CHECK_NULL_VOID(layoutWrapper);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    host->PostBundle({}, false, LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA);
+}
+
+void GridLayoutBaseAlgorithm::CalculateContentClipFixOffset(
+    LayoutWrapper* layoutWrapper, float mainSize, float mainGap)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    info_.startFixOffset_ = 0.0f;
+    info_.endFixOffset_ = 0.0f;
+    if (contentClipMode_ == ContentClipMode::CONTENT_ONLY) {
+        return;
+    }
+
+    PostClipContentSafeAreaBundle(layoutWrapper);
+    if (contentClipMode_ == ContentClipMode::SAFE_AREA && !safeAreaPad_.has_value()) {
+        return;
+    }
+
+    auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    Axis axis = layoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
+    std::optional<RectF> clipRect;
+    if (contentClipMode_ == ContentClipMode::CUSTOM) {
+        const auto& constraint = layoutProperty->GetLayoutConstraint();
+        CHECK_NULL_VOID(constraint);
+        clipRect = ResolveCustomClipRect(
+            clipShapeRect_, constraint->scaleProperty, geometryNode->GetFrameSize(), axis);
+    } else {
+        clipRect = ResolveContentClipRect(contentClipMode_, geometryNode, safeAreaPad_);
+    }
+    if (!clipRect.has_value()) {
+        return;
+    }
+
+    const bool isReverse = layoutProperty->IsReverse();
+    const float frameMainSize = geometryNode->GetFrameSize().MainSize(axis);
+    auto contentRect = GetPaddingRectInFrame(geometryNode);
+    auto [contentStart, contentEnd] = GetMainStartEnd(contentRect, axis, isReverse, frameMainSize);
+    auto [clipStart, clipEnd] = GetMainStartEnd(clipRect.value(), axis, isReverse, frameMainSize);
+
+    if (GreatNotEqual(contentStart, clipStart)) {
+        info_.startFixOffset_ = contentStart - clipStart;
+    }
+    if (GreatNotEqual(clipEnd, contentEnd)) {
+        info_.endFixOffset_ = clipEnd - contentEnd;
     }
 }
 

@@ -329,6 +329,11 @@ public:
         isFakeDragging_ = isFakeDragging;
     }
 
+    void SetIgnoreHiddenItem(bool ignoreHiddenItem)
+    {
+        ignoreHiddenItem_ = ignoreHiddenItem;
+    }
+
 private:
     void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
         float startPos, bool cachedLayout = false);
@@ -397,6 +402,8 @@ private:
         int32_t forwardMeasureIndex, float& measureStartPos);
     void MeasureForwardItemFakeDrag(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t backwardMeasureIndex, float& measureEndPos);
+
+    void CheckIndexWithIgnoreHiddenItem(LayoutWrapper* layoutWrapper);
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -468,6 +475,7 @@ private:
     LayoutConstraintF childLayoutConstraint_;
     Axis axis_ = Axis::HORIZONTAL;
     bool isFakeDragging_ = false;
+    bool ignoreHiddenItem_ = false;
 
     std::mutex swiperMutex_;
 };

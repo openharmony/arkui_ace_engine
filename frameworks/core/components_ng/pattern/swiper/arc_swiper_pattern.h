@@ -38,6 +38,8 @@ public:
     std::shared_ptr<SwiperArcDotParameters> GetSwiperArcDotParameters() const override;
     bool IsLoop() const override;
     void SetDisableTransitionAnimation(bool isDisable) override;
+    bool IsDisableTransitionAnimation() const;
+    CrownSensitivity GetDigitalCrownSensitivity() const;
     bool GetAndResetDisableFlushFocus() override;
 
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -135,7 +137,6 @@ private:
     std::shared_ptr<Color> GetBackgroundColorValue(const RefPtr<FrameNode>& frameNode);
     std::shared_ptr<AnimationUtils::Animation> Animation(bool exit, AnimationParam& param, bool vertical = false,
         bool rollback = false);
-    bool IsDisableTransitionAnimation() const;
     void SetBackgroundColor(const RefPtr<RenderContext>& renderContext, const std::shared_ptr<Color>& color);
     std::shared_ptr<Color> CalcBackgroundByPercent(const std::shared_ptr<Color>& colorA,
         const std::shared_ptr<Color>& colorB, float percent);

@@ -60,15 +60,15 @@ ACE_FORCE_EXPORT extern const char STAGE_ETS_TAG[];
 // page view
 ACE_FORCE_EXPORT extern const char PAGE_ETS_TAG[];
 // overlay view
-ACE_EXPORT extern const char OVERLAY_ETS_TAG[];
-ACE_EXPORT extern const char ORDER_OVERLAY_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char OVERLAY_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char ORDER_OVERLAY_ETS_TAG[];
 // container modal view (title bar)
 ACE_EXPORT extern const char CONTAINER_MODAL_ETS_TAG[];
 
 ACE_EXPORT extern const char ATOMIC_SERVICE_ETS_TAG[];
 ACE_EXPORT extern const char APP_BAR_ETS_TAG[];
 // js custom view
-ACE_EXPORT extern const char JS_VIEW_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char JS_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char JS_VIEW_COMPONENT_TAG[];
 // js lazy foreach node
 ACE_EXPORT extern const char JS_LAZY_FOR_EACH_ETS_TAG[];
@@ -122,6 +122,7 @@ ACE_FORCE_EXPORT extern const char CONTROL_PARTS_STACK_ETS_TAG[];
 // swiper
 ACE_EXPORT extern const char SWIPER_COMPONENT_TAG[];
 ACE_FORCE_EXPORT extern const char SWIPER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char ARC_SWIPER_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_INDICATOR_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_LEFT_ARROW_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_RIGHT_ARROW_ETS_TAG[];
@@ -147,7 +148,7 @@ ACE_EXPORT extern const char TAB_BAR_ETS_TAG[];
 
 // navigation view
 ACE_EXPORT extern const char NAVIGATION_VIEW_COMPONENT_TAG[];
-ACE_EXPORT extern const char NAVIGATION_VIEW_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char NAVIGATION_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char BAR_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char TITLE_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVIGATION_CONTENT_ETS_TAG[];
@@ -157,7 +158,7 @@ ACE_EXPORT extern const char NAVIGATION_MENU_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_ETS_TAG[];
 ACE_EXPORT extern const char BACK_BUTTON_IMAGE_ETS_TAG[];
 ACE_EXPORT extern const char NAVBAR_CONTENT_ETS_TAG[];
-ACE_EXPORT extern const char NAVBAR_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char NAVBAR_ETS_TAG[];
 ACE_EXPORT extern const char SPLIT_PLACEHOLDER_CONTENT_ETS_TAG[];
 ACE_EXPORT extern const char PRIMARY_CONTENT_NODE_ETS_TAG[];
 
@@ -165,7 +166,7 @@ ACE_EXPORT extern const char PRIMARY_CONTENT_NODE_ETS_TAG[];
 ACE_EXPORT extern const char NAVROUTER_VIEW_ETS_TAG[];
 
 // navDestination view
-ACE_EXPORT extern const char NAVDESTINATION_VIEW_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char NAVDESTINATION_VIEW_ETS_TAG[];
 ACE_EXPORT extern const char NAVDESTINATION_TITLE_BAR_ETS_TAG[];
 ACE_EXPORT extern const char NAVDESTINATION_CONTENT_ETS_TAG[];
 
@@ -227,7 +228,7 @@ ACE_EXPORT extern const char NAVIGATOR_ETS_TAG[];
 
 // panel
 ACE_EXPORT extern const char PANEL_COMPONENT_TAG[];
-ACE_EXPORT extern const char PANEL_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char PANEL_ETS_TAG[];
 ACE_EXPORT extern const char PANEL_CLOSE_ICON_ETS_TAG[];
 
 // pattern-lock
@@ -352,8 +353,8 @@ ACE_EXPORT extern const char BADGE_ETS_TAG[];
 
 // search
 ACE_EXPORT extern const char SEARCH_COMPONENT_TAG[];
-ACE_EXPORT extern const char SEARCH_ETS_TAG[];
-extern const char SEARCH_Field_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char SEARCH_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char SEARCH_Field_ETS_TAG[];
 
 // formComponent
 ACE_EXPORT extern const char FORM_COMPONENT_TAG[];
@@ -375,7 +376,7 @@ ACE_EXPORT extern const char PLUGIN_ETS_TAG[];
 
 // video
 ACE_EXPORT extern const char VIDEO_COMPONENT_TAG[];
-ACE_EXPORT extern const char VIDEO_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char VIDEO_ETS_TAG[];
 
 // AlphabetIndexer
 ACE_EXPORT extern const char INDEXER_COMPONENT_TAG[];
@@ -401,8 +402,8 @@ ACE_EXPORT extern const char DATA_PANEL_ETS_TAG[];
 ACE_EXPORT extern const char SHEET_COMPONENT_TAG[];
 ACE_EXPORT extern const char SHEET_ETS_TAG[];
 ACE_EXPORT extern const char SHEET_MASK_TAG[];
-ACE_EXPORT extern const char SHEET_PAGE_TAG[];
-ACE_EXPORT extern const char SHEET_WRAPPER_TAG[];
+ACE_FORCE_EXPORT extern const char SHEET_PAGE_TAG[];
+ACE_FORCE_EXPORT extern const char SHEET_WRAPPER_TAG[];
 
 // full screen modal
 ACE_EXPORT extern const char MODAL_PAGE_TAG[];
@@ -454,7 +455,7 @@ ACE_EXPORT extern const char GAUGE_INDICATOR_TAG[];
 
 // gridContainer
 ACE_EXPORT extern const char GRIDCONTAINER_COMPONENT_TAG[];
-ACE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char GRIDCONTAINER_ETS_TAG[];
 
 // gridCol
 ACE_EXPORT extern const char GRID_COL_COMPONENT_TAG[];
@@ -484,14 +485,14 @@ ACE_EXPORT extern const char MENU_DIVIDER_TAG[];
 
 // textarea
 ACE_EXPORT extern const char TEXTAREA_COMPONENT_TAG[];
-ACE_EXPORT extern const char TEXTAREA_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char TEXTAREA_ETS_TAG[];
 
 // textdrag
 ACE_EXPORT extern const char TEXTDRAG_ETS_TAG[];
 
 // textinput
 ACE_EXPORT extern const char TEXTINPUT_COMPONENT_TAG[];
-ACE_EXPORT extern const char TEXTINPUT_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char TEXTINPUT_ETS_TAG[];
 
 // texttimer
 ACE_EXPORT extern const char TEXTTIMER_COMPONENT_TAG[];
@@ -499,7 +500,7 @@ ACE_EXPORT extern const char TEXTTIMER_ETS_TAG[];
 
 // select
 ACE_EXPORT extern const char SELECT_COMPONENT_TAG[];
-ACE_EXPORT extern const char SELECT_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char SELECT_ETS_TAG[];
 
 // select_popup
 ACE_EXPORT extern const char SELECT_POPUP_COMPONENT_TAG[];
@@ -525,7 +526,7 @@ ACE_EXPORT extern const char PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG[];
 
 // canvas
 ACE_EXPORT extern const char CANVAS_COMPONENT_TAG[];
-ACE_EXPORT extern const char CANVAS_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char CANVAS_ETS_TAG[];
 
 // ActionSheet
 ACE_EXPORT extern const char ACTION_SHEET_DIALOG_COMPONENT_TAG[];
@@ -581,7 +582,7 @@ ACE_EXPORT extern const char XCOMPONENT_ETS_TAG[];
 // ability_component
 ACE_EXPORT extern const char ABILITY_COMPONENT_ETS_TAG[];
 // Popup
-ACE_EXPORT extern const char POPUP_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char POPUP_ETS_TAG[];
 
 // remote window
 ACE_EXPORT extern const char REMOTE_WINDOW_ETS_TAG[];
@@ -684,7 +685,7 @@ ACE_EXPORT extern const char ARC_SCROLL_BAR_ETS_TAG[];
 
 // ArcAlphabetIndexer
 ACE_EXPORT extern const char ARC_INDEXER_COMPONENT_TAG[];
-ACE_EXPORT extern const char ARC_INDEXER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char ARC_INDEXER_ETS_TAG[];
 
 // Magnifier
 ACE_EXPORT extern const char MAGNIFIER_TAG[];
@@ -708,7 +709,7 @@ ACE_EXPORT extern const char UNDEFINED_NODE_ETS_TAG[];
 ACE_EXPORT extern const char UNION_EFFECT_CONTAINER_ETS_TAG[];
 
 // Custom
-ACE_EXPORT extern const char CUSTOM_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char CUSTOM_ETS_TAG[];
 
 // LazyColumnLayout
 ACE_EXPORT extern const char LAZY_COLUMN_LAYOUT_ETS_TAG[];

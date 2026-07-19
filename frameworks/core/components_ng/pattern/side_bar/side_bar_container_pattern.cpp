@@ -34,16 +34,17 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/container.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
@@ -55,6 +56,8 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 #include "core/components_ng/property/measure_utils.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
+
 namespace OHOS::Ace::NG {
 
 SideBarContainerPattern::SideBarContainerPattern() = default;
@@ -64,8 +67,6 @@ SideBarContainerPattern::~SideBarContainerPattern() = default;
 namespace {
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE = 3;
 constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_VALUE = 2;
-constexpr float RATIO_NEGATIVE = -1.0f;
-constexpr float RATIO_ZERO = 0.0f;
 constexpr Dimension DEFAULT_DRAG_REGION = 20.0_vp;
 constexpr int32_t SIDEBAR_DURATION = 500;
 const RefPtr<CubicCurve> SIDEBAR_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
@@ -93,6 +94,7 @@ constexpr static int32_t DEFAULT_DOUBLE_DRAG_REGION = 2;
 constexpr Dimension CLOSE_SIDEBAR_PAN_DISTANCE = 100.0_vp;
 const RefPtr<InterpolatingSpring> INTERPOLATING_SPRING_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 24.0f);
+
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()
@@ -201,7 +203,7 @@ void SideBarContainerPattern::OnUpdateShowControlButton(
     imageLayoutProperty->UpdateUserDefinedIdealSize(imageCalcSize);
 
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(controlButtonNode);
-    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty();
     CHECK_NULL_VOID(buttonLayoutProperty);
 
     buttonLayoutProperty->UpdateVisibility(showControlButton ? VisibleType::VISIBLE : VisibleType::GONE);
@@ -611,8 +613,7 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
     auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
 
     int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(dividerNodeId);
 
     auto dividerHub = dividerNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(dividerHub);
@@ -677,19 +678,25 @@ RefPtr<FrameNode> SideBarContainerPattern::CreateControlButton(const RefPtr<Side
 {
     CHECK_NULL_RETURN(sideBarTheme, nullptr);
     int32_t buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, buttonId, []() -> RefPtr<Pattern> {
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonModifier, nullptr);
+        auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+        CHECK_NULL_RETURN(rawPattern, nullptr);
+        return AceType::Claim(rawPattern);
+    });
     CHECK_NULL_RETURN(buttonNode, nullptr);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
-    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
     auto buttonRadius = sideBarTheme->GetControlButtonRadius();
-    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
-    buttonLayoutProperty->UpdateCreateWithLabel(false);
+    auto* sideBarBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(sideBarBtnModifier, nullptr);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    sideBarBtnModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
+    sideBarBtnModifier->updateBorderRadiusToLayoutProp(buttonHandle, BorderRadiusProperty(buttonRadius));
+    sideBarBtnModifier->updateCreateWithLabelToLayoutProp(buttonHandle, false);
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    sideBarBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
     buttonRenderContext->UpdateZIndex(DEFAULT_CONTROL_BUTTON_ZINDEX);
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);
@@ -781,6 +788,7 @@ void SideBarContainerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestur
 bool SideBarContainerPattern::IsInContentRegion(const Offset& globalLocation)
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     auto contentNode = GetContentNode(host);
     CHECK_NULL_RETURN(contentNode, false);
     return contentNode->GetTransformRectRelativeToWindow().IsInRegion(
@@ -892,39 +900,6 @@ void SideBarContainerPattern::InitShowAndCloseSidebarPanEvent(bool showSideBarWi
     PanDistanceMap distanceMap = { { SourceTool::UNKNOWN, DEFAULT_PAN_DISTANCE.ConvertToPx() },
         { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
     hostGestureHub->AddPanEvent(dragEventForCloseSideBar_, panDirection, DEFAULT_PAN_FINGER, distanceMap);
-}
-
-void SideBarContainerPattern::CreateAnimation()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    ACE_UINODE_TRACE(host);
-    if (!controller_) {
-        controller_ = CREATE_ANIMATOR(host->GetContextRefPtr());
-    }
-
-    auto weak = AceType::WeakClaim(this);
-    if (!rightToLeftAnimation_) {
-        rightToLeftAnimation_ =
-            AceType::MakeRefPtr<CurveAnimation<float>>(RATIO_ZERO, RATIO_NEGATIVE, Curves::FRICTION);
-        rightToLeftAnimation_->AddListener(Animation<float>::ValueCallback([weak](float value) {
-            auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->UpdateSideBarPosition(value);
-            }
-        }));
-    }
-
-    if (!leftToRightAnimation_) {
-        leftToRightAnimation_ =
-            AceType::MakeRefPtr<CurveAnimation<float>>(RATIO_NEGATIVE, RATIO_ZERO, Curves::FRICTION);
-        leftToRightAnimation_->AddListener(Animation<float>::ValueCallback([weak](float value) {
-            auto pattern = weak.Upgrade();
-            if (pattern) {
-                pattern->UpdateSideBarPosition(value);
-            }
-        }));
-    }
 }
 
 void SideBarContainerPattern::InitControlButtonTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1142,6 +1117,7 @@ void SideBarContainerPattern::FireChangeEvent(bool isShow)
 
     sideBarContainerEventHub->FireChangeEvent(isShow);
 
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         Recorder::EventParamsBuilder builder;
         auto host = GetHost();
@@ -1154,6 +1130,7 @@ void SideBarContainerPattern::FireChangeEvent(bool isShow)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
+#endif
 }
 
 void SideBarContainerPattern::UpdateControlButtonIcon()
@@ -1285,6 +1262,7 @@ void SideBarContainerPattern::SetContentClickEvent(bool showSideBar)
 void SideBarContainerPattern::UpdateSideBarStatus()
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();

@@ -483,7 +483,7 @@ void DragControllerFuncWrapper::UpdateDragPreviewScale()
 
 void DragControllerFuncWrapper::TransDragWindowToDragFwk(int32_t containerId)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);
     CHECK_NULL_VOID(pipelineContext);
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);

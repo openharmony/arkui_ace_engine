@@ -14,6 +14,7 @@
  */
 #include "scroll_test_ng.h"
 #include "base/memory/ace_type.h"
+#include "core/components_ng/base/modifier.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
@@ -1074,5 +1075,87 @@ HWTEST_F(ScrollBarOverlayTestNg, OnDrawWithDifferentModes001, TestSize.Level1)
     modifier.onDraw(drawingContext);
 }
 
-} // namespace OHOS::Ace::NG
+/**
+ * @tc.name: SetNeedPaintTrack001
+ * @tc.desc: Test SetNeedPaintTrack triggers overlay change count update only when value changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarOverlayTestNg, SetNeedPaintTrack001, TestSize.Level1)
+{
+    ScrollBarOverlayModifier modifier;
+    const auto& attachedProperties = modifier.GetAttachedProperties();
+    ASSERT_FALSE(attachedProperties.empty());
+    auto changeCount = AceType::DynamicCast<PropertyInt>(attachedProperties.front());
+    ASSERT_NE(changeCount, nullptr);
+    auto before = changeCount->Get();
 
+    modifier.SetNeedPaintTrack(true);
+
+    EXPECT_EQ(changeCount->Get(), before + 1);
+
+    modifier.SetNeedPaintTrack(true);
+    EXPECT_EQ(changeCount->Get(), before + 1);
+
+    modifier.SetNeedPaintTrack(false);
+    EXPECT_EQ(changeCount->Get(), before + 2);
+}
+
+/**
+ * @tc.name: SetTrackRect001
+ * @tc.desc: Test SetTrackRect triggers overlay change count update only when value changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarOverlayTestNg, SetTrackRect001, TestSize.Level1)
+{
+    ScrollBarOverlayModifier modifier;
+    const auto& attachedProperties = modifier.GetAttachedProperties();
+    ASSERT_FALSE(attachedProperties.empty());
+    auto changeCount = AceType::DynamicCast<PropertyInt>(attachedProperties.front());
+    ASSERT_NE(changeCount, nullptr);
+    auto before = changeCount->Get();
+
+    Rect trackRect(0.0, 0.0, 10.0, 20.0);
+    modifier.SetTrackRect(trackRect);
+
+    EXPECT_EQ(changeCount->Get(), before);
+
+    modifier.SetNeedPaintTrack(true);
+    EXPECT_EQ(changeCount->Get(), before + 1);
+
+    modifier.SetTrackRect(trackRect);
+    EXPECT_EQ(changeCount->Get(), before + 1);
+
+    Rect newTrackRect(0.0, 0.0, 10.0, 30.0);
+    modifier.SetTrackRect(newTrackRect);
+    EXPECT_EQ(changeCount->Get(), before + 2);
+}
+
+/**
+ * @tc.name: SetTrackColor001
+ * @tc.desc: Test SetTrackColor triggers overlay change count update only when value changes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarOverlayTestNg, SetTrackColor001, TestSize.Level1)
+{
+    ScrollBarOverlayModifier modifier;
+    const auto& attachedProperties = modifier.GetAttachedProperties();
+    ASSERT_FALSE(attachedProperties.empty());
+    auto changeCount = AceType::DynamicCast<PropertyInt>(attachedProperties.front());
+    ASSERT_NE(changeCount, nullptr);
+    auto before = changeCount->Get();
+
+    modifier.SetTrackColor(Color::BLUE);
+
+    EXPECT_EQ(changeCount->Get(), before);
+
+    modifier.SetNeedPaintTrack(true);
+    EXPECT_EQ(changeCount->Get(), before + 1);
+
+    modifier.SetTrackColor(Color::BLUE);
+    EXPECT_EQ(changeCount->Get(), before + 1);
+
+    modifier.SetTrackColor(Color::RED);
+    EXPECT_EQ(changeCount->Get(), before + 2);
+}
+
+} // namespace OHOS::Ace::NG

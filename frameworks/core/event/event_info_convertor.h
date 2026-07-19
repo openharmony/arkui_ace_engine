@@ -18,9 +18,10 @@
 
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
-class EventInfoConvertor final {
+class ACE_FORCE_EXPORT EventInfoConvertor final {
 public:
     enum class Mouse2TouchEventModeResult {
         MATCHED = 0,

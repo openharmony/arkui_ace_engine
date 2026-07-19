@@ -25,9 +25,8 @@ namespace {
 #define MODIFIER_COUNTS 1
 
 #ifndef ARKUI_WEARABLE
-void SetDatePickerDialogViewShow(DatePickerDialogInfo& info,
-    std::map<std::string, std::function<void(const std::string&)>> dialogEvent,
-    std::map<std::string, std::function<void(const GestureEvent& info)>> dialogCancelEvent)
+void SetDatePickerDialogViewShow(DatePickerDialogInfo& info, std::map<std::string, NG::DialogEvent> dialogEvent,
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     info.datePickerNode = DatePickerDialogView::Show(info.dialogProperties, info.settingData, info.buttonInfos,
         std::move(dialogEvent), std::move(dialogCancelEvent));

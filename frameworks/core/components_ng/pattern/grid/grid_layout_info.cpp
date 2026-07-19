@@ -14,6 +14,8 @@
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 
+#include <algorithm>
+
 #include "base/log/log_wrapper.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
@@ -175,9 +177,10 @@ void GridLayoutInfo::UpdateEndLine(float mainSize, float mainGap)
     if (mainSize >= lastMainSize_) {
         return;
     }
+    float endBound = GetViewEndBound(mainSize);
     for (auto i = startMainLineIndex_; i < endMainLineIndex_; ++i) {
-        mainSize -= (lineHeightMap_[i] + mainGap);
-        if (LessOrEqual(mainSize + mainGap, 0)) {
+        endBound -= (lineHeightMap_[i] + mainGap);
+        if (LessOrEqual(endBound + mainGap, 0)) {
             endMainLineIndex_ = i;
             break;
         }
@@ -187,7 +190,7 @@ void GridLayoutInfo::UpdateEndLine(float mainSize, float mainGap)
 void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, float mainGap)
 {
     auto oldEndLine = endMainLineIndex_;
-    auto remainSize = mainSize - overScrollOffset;
+    auto remainSize = GetViewEndBound(mainSize) - overScrollOffset;
     for (auto i = startMainLineIndex_; i < endMainLineIndex_; ++i) {
         remainSize -= (lineHeightMap_[i] + mainGap);
         if (LessOrEqual(remainSize + mainGap, 0)) {
@@ -329,6 +332,9 @@ float GridLayoutInfo::GetContentHeightOfRegularGrid(float mainGap) const
         return res;
     }
     auto childrenCount = childrenCount_ + repeatDifference_;
+    if (childrenCount <= 0) {
+        return res;
+    }
     float lineHeight = GetTotalLineHeight(0.0f) / static_cast<float>(lineHeightMap_.size());
     auto lines = (childrenCount) / crossCount_;
     for (int i = 0; i < lines; ++i) {
@@ -823,7 +829,22 @@ MatIter GridLayoutInfo::FindInMatrix(int32_t index) const
         return gridMatrix_.end();
     }
     if (index == 0) {
-        return gridMatrix_.begin();
+        // Optimization: item 0 is typically at the first row.
+        // When matrix is empty, begin() == end() returns end() correctly.
+        // Verify the first row actually contains item 0 to avoid returning
+        // a wrong result in edge cases where the invariant is broken.
+        auto first = gridMatrix_.begin();
+        if (first == gridMatrix_.end()) {
+            return gridMatrix_.end();
+        }
+        int32_t maxV = -1;
+        if (CheckRow(maxV, first->second, index)) {
+            return first;
+        }
+        // Grid layout invariant: items are placed sequentially starting from index 0,
+        // so item 0 is always at the first row if it exists. Not found here means it
+        // doesn't exist in the matrix — no need to fall through to binary search.
+        return gridMatrix_.end();
     }
     size_t count = gridMatrix_.size();
     size_t step = 0;
@@ -953,7 +974,9 @@ std::pair<GridLayoutInfo::HeightMapIt, float> GridLayoutInfo::SkipLinesAboveView
 {
     auto it = lineHeightMap_.find(startMainLineIndex_);
     float offset = currentOffset_;
-    while (it != lineHeightMap_.end() && Negative(it->second + offset + mainGap)) {
+    // Skip lines whose bottom is above the clip start bound (-startFixOffset_), keeping items in the
+    // start extension region laid out. startFixOffset_ == 0 (CONTENT_ONLY) -> original behavior.
+    while (it != lineHeightMap_.end() && Negative(it->second + offset + mainGap + startFixOffset_)) {
         offset += it->second + mainGap;
         ++it;
     }
@@ -962,11 +985,11 @@ std::pair<GridLayoutInfo::HeightMapIt, float> GridLayoutInfo::SkipLinesAboveView
 
 void GridLayoutInfo::UpdateStartIndexForExtralOffset(float mainGap, float mainSize)
 {
-    if (Negative(currentOffset_)) {
+    if (Negative(currentOffset_ + startFixOffset_)) {
         auto startLineHeight = lineHeightMap_.find(startMainLineIndex_);
         CHECK_NULL_VOID(startLineHeight != lineHeightMap_.end());
         auto currentEndOffset = currentOffset_ + startLineHeight->second + mainGap;
-        while (!Positive(currentEndOffset)) {
+        while (!Positive(currentEndOffset + startFixOffset_)) {
             startMainLineIndex_++;
             startLineHeight = lineHeightMap_.find(startMainLineIndex_);
             if (startLineHeight == lineHeightMap_.end()) {
@@ -998,7 +1021,7 @@ void GridLayoutInfo::UpdateStartIndexForExtralOffset(float mainGap, float mainSi
     CHECK_NULL_VOID(endLineHeight != lineHeightMap_.end());
     endMainLineIndex_ = startMainLineIndex_;
     auto currentEndOffset = currentOffset_ + endLineHeight->second + mainGap;
-    while (LessNotEqual(currentEndOffset, mainSize)) {
+    while (LessNotEqual(currentEndOffset, GetViewEndBound(mainSize))) {
         endMainLineIndex_++;
         endLineHeight = lineHeightMap_.find(endMainLineIndex_);
         if (endLineHeight == lineHeightMap_.end()) {
@@ -1247,5 +1270,61 @@ std::string GridLayoutInfo::ToString() const
            ", endIndex = " + std::to_string(endIndex_) + ", jumpIndex = " + std::to_string(jumpIndex_) +
            ", gridMatrix size = " + std::to_string(gridMatrix_.size()) +
            ", lineHeightMap size = " + std::to_string(lineHeightMap_.size());
+}
+
+void GridLayoutInfo::SyncReportRange(float mainSize, float mainGap)
+{
+    // --- report start: first item at/after content start (position 0) ---
+    float pos = static_cast<float>(currentOffset_);
+    int32_t reportStartLine = startMainLineIndex_;
+    for (int32_t i = startMainLineIndex_; i <= endMainLineIndex_; ++i) {
+        auto it = lineHeightMap_.find(i);
+        if (it == lineHeightMap_.end()) {
+            break;
+        }
+        if (GreatNotEqual(pos + it->second, 0.0f)) {
+            reportStartLine = i;
+            break;
+        }
+        pos += it->second + mainGap;
+        reportStartLine = i + 1;
+    }
+    auto startLineIt = gridMatrix_.find(reportStartLine);
+    if (startLineIt != gridMatrix_.end() && !startLineIt->second.empty()) {
+        reportStartIndex_ = startLineIt->second.begin()->second;
+    } else {
+        reportStartIndex_ = startIndex_;
+    }
+
+    // --- report end: last line within content-area bound (mainSize, no fix offset) ---
+    // Account for currentOffset_ (the start line's position): the content visible in [0, mainSize]
+    // spans mainSize - currentOffset_ of height from startMainLineIndex_. Without this, a negative
+    // currentOffset_ (start line in the top extension) makes the walk stop short of mainSize,
+    // producing an endIndex inconsistent with the no-contentClip case. Mirrors report-start (which
+    // uses currentOffset_) and UpdateEndIndex (which uses GetViewEndBound(mainSize) - overScrollOffset).
+    float remain = mainSize - static_cast<float>(currentOffset_);
+    int32_t reportEndLine = startMainLineIndex_;
+    for (int32_t i = startMainLineIndex_; i <= endMainLineIndex_; ++i) {
+        auto it = lineHeightMap_.find(i);
+        if (it == lineHeightMap_.end()) {
+            break;
+        }
+        if (LessOrEqual(remain + mainGap, 0.0f)) {
+            break;
+        }
+        remain -= (it->second + mainGap);
+        reportEndLine = i;
+    }
+    auto endLineIt = gridMatrix_.find(reportEndLine);
+    if (endLineIt != gridMatrix_.end() && !endLineIt->second.empty()) {
+        reportEndIndex_ = endLineIt->second.rbegin()->second;
+    } else {
+        reportEndIndex_ = endIndex_;
+    }
+
+    // keep trailing zero-height items in report range when there is no end extension
+    if (NearZero(endFixOffset_)) {
+        reportEndIndex_ = std::max(reportEndIndex_, endIndex_);
+    }
 }
 } // namespace OHOS::Ace::NG

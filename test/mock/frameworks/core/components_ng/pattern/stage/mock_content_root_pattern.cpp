@@ -16,5 +16,5 @@
 #include "core/components_ng/pattern/stage/content_root_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ContentRootPattern::BeforeCreateLayoutWrapper() {}
+ACE_FORCE_EXPORT void ContentRootPattern::BeforeCreateLayoutWrapper() {}
 } // namespace OHOS::Ace::NG

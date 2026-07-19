@@ -52,7 +52,7 @@ private:
     /**
      * @brief Execute layout with specified type
      * @param layoutWrapper Layout wrapper
-     * @param layoutType Column or Row layout type
+     * @param layoutType Column, Row or GENERAL (bounding-box based, e.g. Flex-wrap) layout type
      * @return true if layout solved and results applied successfully
      */
     bool ExecuteLayout(LayoutWrapper* layoutWrapper, SmartLayoutType layoutType);

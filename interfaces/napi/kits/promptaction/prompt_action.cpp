@@ -264,19 +264,19 @@ bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 
 bool ParseResource(const ResourceInfo resource, CalcDimension& result)
 {
-    auto resourceWrapper = CreateResourceWrapper(resource);
-    CHECK_NULL_RETURN(resourceWrapper, false);
+    auto resourceAdapter = CreateResourceAdapter(resource);
+    CHECK_NULL_RETURN(resourceAdapter, false);
     if (resource.type == static_cast<uint32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resource.resId);
+        auto value = resourceAdapter->GetString(resource.resId);
         return StringUtils::StringToCalcDimensionNG(value, result, false);
     }
     if (resource.type == static_cast<uint32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(resource.resId));
+        auto value = std::to_string(resourceAdapter->GetInt(resource.resId));
         StringUtils::StringToDimensionWithUnitNG(value, result);
         return true;
     }
     if (resource.type == static_cast<uint32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDimension(resource.resId);
+        result = resourceAdapter->GetDimension(resource.resId);
         return true;
     }
     return false;
@@ -1378,9 +1378,9 @@ std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptA
         napi_get_named_property(env, asyncContext->shadowApi, "offsetY", &offsetYApi);
         ResourceInfo recv;
         if (ParseResourceParam(env, offsetXApi, recv)) {
-            auto resourceWrapper = CreateResourceWrapper(recv);
-            CHECK_NULL_RETURN(resourceWrapper, std::nullopt);
-            auto offsetX = resourceWrapper->GetDimension(recv.resId);
+            auto resourceAdapter = CreateResourceAdapter(recv);
+            CHECK_NULL_RETURN(resourceAdapter, std::nullopt);
+            auto offsetX = resourceAdapter->GetDimension(recv.resId);
             shadow.SetOffsetX(offsetX.Value());
         } else {
             CalcDimension offsetX;
@@ -1389,9 +1389,9 @@ std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptA
             }
         }
         if (ParseResourceParam(env, offsetYApi, recv)) {
-            auto resourceWrapper = CreateResourceWrapper(recv);
-            CHECK_NULL_RETURN(resourceWrapper, std::nullopt);
-            auto offsetY = resourceWrapper->GetDimension(recv.resId);
+            auto resourceAdapter = CreateResourceAdapter(recv);
+            CHECK_NULL_RETURN(resourceAdapter, std::nullopt);
+            auto offsetY = resourceAdapter->GetDimension(recv.resId);
             shadow.SetOffsetY(offsetY.Value());
         } else {
             CalcDimension offsetY;
@@ -1716,28 +1716,28 @@ RefPtr<UiMaterial> GetSystemMaterialParam(napi_env env, const std::shared_ptr<Pr
     return material ? material->Copy() : nullptr;
 }
 
-DistortionMode GetDistortionModeParam(
+std::optional<DistortionMode> GetDistortionModeParam(
     napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
-    int32_t distortionMode = 0;
+    int32_t distortionMode;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, asyncContext->distortionModeApi, &valueType);
     if (valueType != napi_number) {
-        return static_cast<DistortionMode>(distortionMode);
+        return std::nullopt;
     }
 
     napi_get_value_int32(env, asyncContext->distortionModeApi, &distortionMode);
     return static_cast<DistortionMode>(distortionMode);
 }
 
-EdgeLightMode GetEdgeLightModeParam(
+std::optional<EdgeLightMode> GetEdgeLightModeParam(
     napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
-    int32_t edgeLightMode = 0;
+    int32_t edgeLightMode;
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, asyncContext->edgeLightModeApi, &valueType);
     if (valueType != napi_number) {
-        return static_cast<EdgeLightMode>(edgeLightMode);
+        return std::nullopt;
     }
 
     napi_get_value_int32(env, asyncContext->edgeLightModeApi, &edgeLightMode);

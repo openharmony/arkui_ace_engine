@@ -17,7 +17,10 @@ group("core_unittest") {
   testonly = true
   deps = []
   if (is_host_product) {
-    deps += [ "pattern:core_pattern_unittest" ]
+    deps += [
+      "manager:page_scene_rule_manager_test_ng",
+      "pattern:core_pattern_unittest",
+    ]
   } else {
     deps = [
       "accessibility:core_accessibility_unittest",

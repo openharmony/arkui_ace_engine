@@ -162,6 +162,7 @@ public:
 
     void UpdateStyleOptimizeFlagInCurrentLanguage();
     bool GetFallbackLineSpacingStyleOptimizeFlag();
+    bool GetPunctuationOverflowStyleOptimizeFlag();
 protected:
     static float fontWeightScale_;
     static bool isDefaultFontChanged_;
@@ -199,6 +200,7 @@ private:
     std::shared_mutex mutable externalCallbackLock_;
 
     bool fallbackLineSpacingStyleOptimizeFlag_ = false;
+    bool punctuationOverflowStyleOptimizeFlag_ = false;
 };
 
 } // namespace OHOS::Ace

@@ -1373,6 +1373,17 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg040, TestSize.L
 
     auto uiExtensionParams = wantPtr->GetParams().GetWantParams("ohos.system.window.uiextension.params");
     auto windowMode = uiExtensionParams.GetIntParam("ohos.system.window.mode", 1000);
+    EXPECT_EQ(windowMode, 1000);
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    sessionWrapper->hostPattern_ = AceType::WeakClaim(AceType::RawPtr(pattern));
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetIsWindowModeFollowHost(true);
+    sessionWrapper->UpdateWantPtr(wantPtr);
+    uiExtensionParams = wantPtr->GetParams().GetWantParams("ohos.system.window.uiextension.params");
+    windowMode = uiExtensionParams.GetIntParam("ohos.system.window.mode", 1000);
     EXPECT_EQ(windowMode, 0);
     windowMode = uiExtensionParams.GetIntParam("invalid.key", 1000);
     EXPECT_EQ(windowMode, 1000);
@@ -1451,7 +1462,60 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg043, TestSize.L
     EXPECT_EQ(sessionWrapper->reason_, static_cast<uint32_t>(Rosen::SizeChangeReason::ROTATION));
 
     SUCCEED();
-    
+
     GTEST_LOG_(INFO) << "SessionWrapperImplNewTestNg-end SessionWrapperImplNewTestNg043";
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg044
+ * @tc.desc: Test the method IsWindowModeFollowHost.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg044, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    ASSERT_NE(sessionWrapper, nullptr);
+    EXPECT_FALSE(sessionWrapper->IsWindowModeFollowHost());
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    sessionWrapper->hostPattern_ = AceType::WeakClaim(AceType::RawPtr(pattern));
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetIsWindowModeFollowHost(true);
+    EXPECT_TRUE(sessionWrapper->IsWindowModeFollowHost());
+
+    sessionWrapper->hostPattern_ = nullptr;
+    EXPECT_FALSE(sessionWrapper->IsWindowModeFollowHost());
+}
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg045
+ * @tc.desc: Test UpdateWantPtr window mode strategy follows host flag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg045, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    ASSERT_NE(sessionWrapper, nullptr);
+
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    sessionWrapper->hostPattern_ = AceType::WeakClaim(AceType::RawPtr(pattern));
+    ASSERT_NE(pattern, nullptr);
+
+    std::shared_ptr<AAFwk::Want> wantPtr = std::make_shared<AAFwk::Want>();
+    pattern->SetIsWindowModeFollowHost(false);
+    sessionWrapper->UpdateWantPtr(wantPtr);
+    auto uiExtensionParams = wantPtr->GetParams().GetWantParams("ohos.system.window.uiextension.params");
+    EXPECT_EQ(uiExtensionParams.GetIntParam("ohos.system.window.mode", 1000), 1000);
+
+    pattern->SetIsWindowModeFollowHost(true);
+    sessionWrapper->UpdateWantPtr(wantPtr);
+    uiExtensionParams = wantPtr->GetParams().GetWantParams("ohos.system.window.uiextension.params");
+    EXPECT_EQ(uiExtensionParams.GetIntParam("ohos.system.window.mode", 1000), 0);
 }
 } // namespace OHOS::Ace::NG

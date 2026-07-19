@@ -20,10 +20,12 @@
 #include <cmath>
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include <string_view>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/point.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/multi_thread.h"
@@ -42,12 +44,11 @@
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
-#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
-#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/interfaces/native/node/node_arc_scroll_bar_modifier.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/effect/scroll_fade_effect.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
@@ -70,6 +71,7 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/event/mouse_event.h"
 #include "core/gestures/drag_event.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/common/properties/os_content.h"
 
@@ -88,12 +90,11 @@ constexpr uint32_t DVSYNC_DELAY_TIME_BASE = 27000000;
 constexpr double ARC_INITWIDTH_VAL = 4.0;
 constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
 constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
-const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
-const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
-const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
-const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
-const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
-const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
+constexpr std::string_view SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
+constexpr std::string_view SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
+constexpr std::string_view SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
+constexpr std::string_view SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
+constexpr std::string_view CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
 // Threshold for back to top performance optimization (5 screen sizes)
 constexpr uint32_t BACK_TO_TOP_THRESHOLD_SCREEN = 5;
 
@@ -182,7 +183,9 @@ void ScrollablePattern::SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModif
 ScrollablePattern::~ScrollablePattern()
 {
     if (AnimateRunning()) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
+#endif
         auto scrollable = GetScrollable();
         if (scrollable) {
             auto nodeId = scrollable->GetNodeId();
@@ -532,12 +535,15 @@ ModalSheetCoordinationMode ScrollablePattern::CoordinateWithSheet(double& offset
     auto overOffsets = GetOverScrollOffset(offset);
     if (IsAtTop() && (source == SCROLL_FROM_UPDATE) && !isSheetInReactive_ && (axis_ == Axis::VERTICAL)) {
         isSheetInReactive_ = true;
-        if (sheetPattern_) {
-            sheetPattern_->OnCoordScrollStart();
+        auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+        if (sheetPattern_ && sheetModifier) {
+            sheetModifier->sheetOnCoordScrollStart(sheetPattern_);
         }
     }
     if (sheetPattern_ && isSheetInReactive_) {
-        if (!sheetPattern_->OnCoordScrollUpdate(GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
+        auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+        if (sheetModifier && !sheetModifier->sheetOnCoordScrollUpdate(
+            sheetPattern_, GreatNotEqual(overOffsets.start, 0.0) ? overOffsets.start : offset)) {
             isSheetInReactive_ = false;
             coordinationMode = ModalSheetCoordinationMode::SCROLLABLE_SCROLL;
         } else {
@@ -644,8 +650,9 @@ void ScrollablePattern::OnScrollEnd()
     }
     if (isSheetInReactive_) {
         isSheetInReactive_ = false;
-        if (sheetPattern_) {
-            sheetPattern_->OnCoordScrollEnd(GetVelocity());
+        auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+        if (sheetPattern_ && sheetModifier) {
+            sheetModifier->sheetOnCoordScrollEnd(sheetPattern_, GetVelocity());
         }
     }
     if (isReactInParentMovement_) {
@@ -722,8 +729,15 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
     }
     TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scrollable TouchTestDone: isHitTestBlock %{public}d, clickJudge %{public}d",
         isHitTestBlock, clickJudge);
+    OnTouchTestDoneHandlePreventRecognizer(activeRecognizers, isHitTestBlock);
+}
+
+void ScrollablePattern::OnTouchTestDoneHandlePreventRecognizer(
+    const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers, bool isHitTestBlock)
+{
     auto scrollableNode = GetHost();
     CHECK_NULL_VOID(scrollableNode);
+    auto scrollableNodeDepth = scrollableNode->GetDepth();
     bool isChild = true;
     for (auto iter = activeRecognizers.begin(); iter != activeRecognizers.end(); ++iter) {
         auto recognizer = *iter;
@@ -737,6 +751,24 @@ void ScrollablePattern::OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>&
             isChild = false;
             if (!isHitTestBlock) {
                 return;
+            }
+        }
+        if (isChild) {
+            auto parent = frameNode->GetParent();
+            bool isScrollableAncestor = false;
+            while (parent) {
+                auto parentNodeDepth = parent->GetDepth();
+                if (parentNodeDepth < scrollableNodeDepth) {
+                    break;
+                }
+                if (AceType::DynamicCast<FrameNode>(parent) == scrollableNode) {
+                    isScrollableAncestor = true;
+                    break;
+                }
+                parent = parent->GetParent();
+            }
+            if (!isScrollableAncestor) {
+                continue;
             }
         }
         if (IsNeedPreventRecognizer(upgradeRecognizer, isChild, isHitTestBlock)) {
@@ -937,7 +969,7 @@ void ScrollablePattern::SetDragFRCSceneCallback(const RefPtr<Scrollable>& scroll
         } else if (sceneStatus == NG::SceneStatus::END) {
             pattern->SetUiDvsyncSwitch(true);
         }
-        return pattern->NotifyFRCSceneInfo(SCROLLABLE_DRAG_SCENE, velocity, sceneStatus);
+        return pattern->NotifyFRCSceneInfo(std::string(SCROLLABLE_DRAG_SCENE), velocity, sceneStatus);
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 }
@@ -1116,6 +1148,7 @@ void ScrollablePattern::StopScrollAnimation()
 
 void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
 {
+    SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // touch down may interrupt animation
     if (GetNestedScrolling() && !NearZero(GetNestedScrollVelocity())) {
         auto child = GetScrollOriginChild();
         CHECK_NULL_VOID(child);
@@ -1186,7 +1219,8 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
         CHECK_NULL_VOID(pattern->scrollableEvent_);
         auto scrollable = pattern->scrollableEvent_->GetScrollable();
         CHECK_NULL_VOID(scrollable);
-        switch (info.GetTouches().front().GetTouchType()) {
+        CHECK_NULL_VOID(!info.GetChangedTouches().empty());
+        switch (info.GetChangedTouches().front().GetTouchType()) {
             case TouchType::DOWN:
                 scrollable->HandleTouchDown();
                 pattern->OnTouchDown(info);
@@ -1406,13 +1440,14 @@ void ScrollablePattern::RegisterScrollBarEventTask()
     auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // long-press inner scrollbar
         pattern->ScrollPage(reverse, smooth);
     };
     scrollBar_->SetScrollPageCallback(std::move(scrollPageCallback));
     auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        return pattern->NotifyFRCSceneInfo(SCROLL_BAR_DRAG_SCENE, velocity, sceneStatus);
+        return pattern->NotifyFRCSceneInfo(std::string(SCROLL_BAR_DRAG_SCENE), velocity, sceneStatus);
     };
     scrollBar_->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 
@@ -1648,7 +1683,10 @@ void ScrollablePattern::SetInBarRectRegionCallback()
 RefPtr<ScrollBar> ScrollablePattern::CreateScrollBar()
 {
     if (isRoundScroll_) {
-        return AceType::MakeRefPtr<ArcScrollBar>();
+        auto* mod = NodeModifier::GetArcScrollBarCustomModifier();
+        CHECK_NULL_RETURN(mod, AceType::MakeRefPtr<ScrollBar>());
+        CHECK_NULL_RETURN(mod->createArcScrollBar, AceType::MakeRefPtr<ScrollBar>());
+        return mod->createArcScrollBar();
     }
     return AceType::MakeRefPtr<ScrollBar>();
 }
@@ -1882,11 +1920,13 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
     auto scrollbarFRcallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        return pattern->NotifyFRCSceneInfo(CUSTOM_SCROLL_BAR_SCENE, velocity, sceneStatus);
+        return pattern->NotifyFRCSceneInfo(std::string(CUSTOM_SCROLL_BAR_SCENE), velocity, sceneStatus);
     };
     auto scrollPageCallback = [weak = WeakClaim(this)](bool reverse, bool smooth) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        // click or long-press external scrollbar
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
         return pattern->ScrollPage(reverse, smooth);
     };
     auto scrollBarOnDidStopDraggingCallback = [weak = WeakClaim(this)](bool isWillFling) {
@@ -1935,14 +1975,10 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
 RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
 {
     if (isRoundScroll_ && scrollBar_) {
-        auto arcScrollBarOverlayModifier = AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
-        auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar_);
-        if (arcScrollBar) {
-            arcScrollBarOverlayModifier->SetPositionMode(arcScrollBar->GetPositionMode());
-            arcScrollBarOverlayModifier->SetArcRect(arcScrollBar->GetArcActiveRect());
-            arcScrollBarOverlayModifier->SetBackgroundArcRect(arcScrollBar->GetArcBarRect());
-        }
-        return arcScrollBarOverlayModifier;
+        auto* mod = NodeModifier::GetArcScrollBarCustomModifier();
+        CHECK_NULL_RETURN(mod, AceType::MakeRefPtr<ScrollBarOverlayModifier>());
+        CHECK_NULL_RETURN(mod->createArcScrollBarOverlayModifier, AceType::MakeRefPtr<ScrollBarOverlayModifier>());
+        return mod->createArcScrollBarOverlayModifier(AceType::RawPtr(scrollBar_));
     }
     return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
 }
@@ -2029,10 +2065,9 @@ void ScrollablePattern::SetMaxFlingVelocity(double max)
 
 double ScrollablePattern::GetMaxFlingVelocity() const
 {
-    double density = PipelineBase::GetCurrentDensity();
-    CHECK_NULL_RETURN(scrollableEvent_, maxFlingVelocity_ * density);
+    CHECK_NULL_RETURN(scrollableEvent_, 0.0);
     auto scrollable = scrollableEvent_->GetScrollable();
-    CHECK_NULL_RETURN(scrollable, maxFlingVelocity_ * density);
+    CHECK_NULL_RETURN(scrollable, 0.0);
     return scrollable->GetMaxFlingVelocity();
 }
 
@@ -2078,16 +2113,18 @@ void ScrollablePattern::GetParentModalSheet()
     if (host->GetTag() != V2::SCROLL_ETS_TAG) {
         return;
     }
-
+    auto* sheetModifier = NodeModifier::GetSheetPatternInnerModifier();
+    CHECK_NULL_VOID(sheetModifier);
     for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
         RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
         if (!frameNode) {
             continue;
         }
-        sheetPattern_ = frameNode->GetPattern<SheetPresentationPattern>();
-        if (!sheetPattern_) {
+        auto pattern = frameNode->GetPattern();
+        if (!pattern || !sheetModifier->sheetIsPresentationPattern(pattern)) {
             continue;
         }
+        sheetPattern_ = pattern;
         return;
     }
     return;
@@ -2161,12 +2198,15 @@ void ScrollablePattern::SmartGesturePerformScroll(float position)
         scrollToDirection_ = ScrollToDirection::BACKWARD;
     }
 
+    SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // triggered by smart gesture
     PlaySpringAnimation(position, SpringCurveOption(), false, true);
     if (!GetIsDragging()) {
         FireOnScrollStart(false);
     }
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
+#endif
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
@@ -2201,8 +2241,10 @@ void ScrollablePattern::AnimateTo(
     if (!GetIsDragging()) {
         FireOnScrollStart(false);
     }
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
+#endif
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
@@ -2214,7 +2256,9 @@ void ScrollablePattern::OnAnimateFinish()
     CHECK_NULL_VOID(host);
     if (isAnimationStop_) {
         SetUiDvsyncSwitch(false);
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
+#endif
     }
     if (animateToTraceFlag_) {
         animateToTraceFlag_ = false;
@@ -2222,7 +2266,7 @@ void ScrollablePattern::OnAnimateFinish()
             (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag())
                 .c_str());
     }
-    NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::END);
+    NotifyFRCSceneInfo(std::string(SCROLLABLE_MULTI_TASK_SCENE), GetCurrentVelocity(), SceneStatus::END);
     isBackToTopRunning_ = false;
     backToTopSkipDistance_.reset();
 }
@@ -2265,9 +2309,11 @@ void ScrollablePattern::PlaySpringAnimation(float position, const SpringCurveOpt
             if (isFormUser) {
                 pattern->HandleAnimateFromUserStop();
             }
-            pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
+            if (pattern->GetScrollEdgeType() != ScrollEdgeType::SCROLL_NONE && pattern->IsScrollReachEdge()) {
+                pattern->SetScrollEdgeType(ScrollEdgeType::SCROLL_NONE);
+            }
         });
-    NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
+    NotifyFRCSceneInfo(std::string(SCROLLABLE_MULTI_TASK_SCENE), GetCurrentVelocity(), SceneStatus::START);
 }
 
 void ScrollablePattern::PlayCurveAnimation(
@@ -2298,7 +2344,7 @@ void ScrollablePattern::PlayCurveAnimation(
             CHECK_NULL_VOID(pattern);
             pattern->OnAnimateFinish();
         }, nullptr, host->GetContextRefPtr());
-    NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
+    NotifyFRCSceneInfo(std::string(SCROLLABLE_MULTI_TASK_SCENE), GetCurrentVelocity(), SceneStatus::START);
 }
 
 float ScrollablePattern::GetScrollDelta(float offset, bool& stopAnimation)
@@ -2311,7 +2357,7 @@ float ScrollablePattern::GetScrollDelta(float offset, bool& stopAnimation)
     uint64_t diff = currentVsync - lastVsyncTime_;
     if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
         currentVelocity_ = (offset - lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
-        NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, currentVelocity_, SceneStatus::RUNNING);
+        NotifyFRCSceneInfo(std::string(SCROLLABLE_MULTI_TASK_SCENE), currentVelocity_, SceneStatus::RUNNING);
     }
     stopAnimation = NearEqual(finalPosition_, offset, SPRING_ACCURACY);
     if (stopAnimation) {
@@ -3302,6 +3348,7 @@ void ScrollablePattern::OnStatusBarClick()
     }
 
     isBackToTopRunning_ = true; // set stop animation flag when click status bar.
+    SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // click status bar to scroll back to top
     StartBackToTopAnimation();
     ReportBackToTop();
 }
@@ -3354,12 +3401,16 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
     if (scrollStop_ && !GetScrollAbort()) {
         OnScrollStop(hub->GetOnScrollStop(), hub->GetJSFrameNodeOnScrollStop());
     }
+#ifndef CROSS_PLATFORM
     RecordScrollEvent(Recorder::EventType::SCROLL_START);
     UiSessionManager::GetInstance()->ReportScrollEvent("onScrollStart");
+#endif
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     if (withPerfMonitor) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+#endif
     }
     auto pipeline = host->GetContext();
     if (pipeline) {
@@ -3547,6 +3598,59 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
     host->SetSuggestOpIncActivatedOnce();
 }
 
+std::string ScrollablePattern::GetAccessibilityScrollSource()
+{
+    switch (accessibilityScrollSource_) {
+        case AccessibilityScrollSource::USER:
+        case AccessibilityScrollSource::FOCUS:
+            return "user";
+        case AccessibilityScrollSource::API:
+            return "api";
+        case AccessibilityScrollSource::ACCESSIBILITY:
+            return "accessibility";
+        case AccessibilityScrollSource::NONE:
+        default:
+            return "";
+    }
+}
+
+void ScrollablePattern::MarkUserScrollSource(int32_t source)
+{
+    // When scrollSource_ is one of the user-typed values below
+    // (UPDATE/AXIS/CROWN/STATUSBAR/BAR/BAR_FLING/BAR_OVER_DRAG), it clearly indicates a user gesture, so
+    // accessibilityScrollSource_ is forced to USER. Otherwise, for the source-neutral values
+    // (JUMP/FOCUS_JUMP/ANIMATION/ANIMATION_SPRING/ANIMATION_CONTROLLER), accessibilityScrollSource_ is left unchanged
+    // (falls through to default).
+
+    switch (source) {
+        case SCROLL_FROM_UPDATE: // drag
+        case SCROLL_FROM_AXIS: // mouse event
+        case SCROLL_FROM_CROWN: // rotary crown
+        case SCROLL_FROM_STATUSBAR: // click status bar to scroll to top
+        case SCROLL_FROM_BAR: // drag scrollbar
+        case SCROLL_FROM_BAR_FLING: // fling after dragging scrollbar
+        case SCROLL_FROM_BAR_OVER_DRAG: // drag scrollbar over boundary
+            accessibilityScrollSource_ = AccessibilityScrollSource::USER;
+            break;
+        default:
+            break;
+    }
+}
+
+void ScrollablePattern::FireAccessibilityScrollEndEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::string accessibilityScrollSource = GetAccessibilityScrollSource();
+    std::map<std::string, std::string> extraEventInfo;
+    extraEventInfo.insert({ "scrollSource", accessibilityScrollSource });
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE,
+        "%{public}s/%{public}d SCROLL_END, scrollSource_:%{public}d, accessibilityScrollSource:%{public}s",
+        host->GetTag().c_str(), host->GetId(), GetScrollSource(), accessibilityScrollSource.c_str());
+    accessibilityScrollSource.empty() ? host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END)
+                                      : host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END, extraEventInfo);
+}
+
 void ScrollablePattern::OnScrollStop(
     const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop)
 {
@@ -3556,13 +3660,13 @@ void ScrollablePattern::OnScrollStop(
         return;
     }
     auto pipeline = host->GetContext();
+#ifndef CROSS_PLATFORM
     RecordScrollEvent(Recorder::EventType::SCROLL_STOP);
+#endif
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_STOP);
     if (!GetScrollAbort()) {
-        if (host != nullptr) {
-            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-        }
+        FireAccessibilityScrollEndEvent();
         isScrolling_ = false;
         if (scrollBarProxy_) {
             scrollBarProxy_->SetIsScrollableNodeScrolling(false);
@@ -3583,7 +3687,9 @@ void ScrollablePattern::OnScrollStop(
     if (pipeline) {
         pipeline->GetFocusManager()->SetNeedTriggerScroll(false);
     }
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->EndCommercial(PerfConstants::APP_LIST_FLING, false);
+#endif
     AceAsyncTraceEndCommercial(host->GetAccessibilityId(),
         (TRAILING_ANIMATION + std::to_string(host->GetAccessibilityId()) + std::string(" ") + host->GetTag()).c_str());
     scrollStop_ = false;
@@ -3607,15 +3713,19 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     }
     AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
     SetScrollSource(SCROLL_FROM_NONE);
+    SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
     ResetLastSnapTargetIndex();
     ResetScrollableSnapDirection();
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetTHPNotifyState(ThpNotifyState::DEFAULT);
     pipeline->PostTaskResponseRegion(DEFAULT_DELAY_THP);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportScrollEvent("onScrollStop");
+#endif
 }
 
+#ifndef CROSS_PLATFORM
 void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)
 {
     if (!Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_SCROLL)) {
@@ -3640,6 +3750,7 @@ void ScrollablePattern::RecordScrollEvent(Recorder::EventType eventType)
     }
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
+#endif
 
 float ScrollablePattern::FireOnWillScroll(float offset) const
 {
@@ -3990,7 +4101,7 @@ void ScrollablePattern::AddHotZoneSenceInterface(SceneStatus scene)
 {
     CHECK_NULL_VOID(velocityMotion_);
     auto velocity = velocityMotion_->GetCurrentVelocity();
-    NotifyFRCSceneInfo(SCROLL_IN_HOTZONE_SCENE, velocity, scene);
+    NotifyFRCSceneInfo(std::string(SCROLL_IN_HOTZONE_SCENE), velocity, scene);
 }
 
 void ScrollablePattern::OnCollectClickTarget(const OffsetF& coordinateOffset,
@@ -4043,6 +4154,7 @@ void ScrollablePattern::HandleClickEvent()
     Point point(locationInfo_.GetX(), locationInfo_.GetY());
     bool reverse = false;
     if (scrollBar_->AnalysisUpOrDown(point, reverse) && isMousePressed_) {
+        SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // click inner scrollbar
         ScrollPage(reverse, true);
     }
 }
@@ -4383,6 +4495,7 @@ void ScrollablePattern::SetAccessibilityAction()
             pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
             host->GetTag().c_str());
         CHECK_NULL_VOID(pattern->IsScrollable());
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
         pattern->ScrollPage(false, true, scrollType);
     });
 
@@ -4395,6 +4508,7 @@ void ScrollablePattern::SetAccessibilityAction()
             pattern->IsScrollable(), scrollType, static_cast<int32_t>(host->GetAccessibilityId()),
             host->GetTag().c_str());
         CHECK_NULL_VOID(pattern->IsScrollable());
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
         pattern->ScrollPage(true, true, scrollType);
     });
 }
@@ -4413,7 +4527,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnAnimateStop();
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
+#endif
         });
     }
 
@@ -4442,7 +4558,9 @@ void ScrollablePattern::ScrollAtFixedVelocity(float velocity)
         fixedVelocityMotion_->Init();
         fixedVelocityMotion_->SetVelocity(velocity);
     }
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::SCROLLER_ANIMATION, PerfActionType::FIRST_MOVE, "");
+#endif
     animator_->PlayMotion(fixedVelocityMotion_);
     FireOnScrollStart(false);
 }
@@ -5058,32 +5176,38 @@ void ScrollablePattern::OnSyncGeometryNode(const DirtySwapConfig& config)
 
 void ScrollablePattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode, uint32_t type)
 {
+#ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     CHECK_EQUAL_VOID(mgr->IsIgnoringEventType(type), true);
     mgr->OnScrollChangeEnd(keyNode);
+#endif
 }
 
 void ScrollablePattern::ContentChangeByDetaching(PipelineContext* pipeline)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     mgr->OnScrollRemoved(host->GetId());
+#endif
 }
 
 void ScrollablePattern::ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode)
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(keyNode);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnScrollChangeStart(keyNode);
+#endif
 }
 
 std::string ScrollablePattern::ParseCommand(const std::string& command, ScrollOnInjectionEventInfo& info)
@@ -5110,6 +5234,7 @@ std::string ScrollablePattern::ParseCommand(const std::string& command, ScrollOn
 
 void ScrollablePattern::ReportScroll(bool isJump, ScrollError error, int32_t reportEventId)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -5133,10 +5258,12 @@ void ScrollablePattern::ReportScroll(bool isJump, ScrollError error, int32_t rep
     result->Put("result", json);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 void ScrollablePattern::ReportOnItemStopEvent()
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -5154,10 +5281,12 @@ void ScrollablePattern::ReportOnItemStopEvent()
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 void ScrollablePattern::ReportOnItemScrollStop(const std::string& event)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -5184,6 +5313,7 @@ void ScrollablePattern::ReportOnItemScrollStop(const std::string& event)
     result->Put("result", json);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
     lastScrollFromInjection_ = false;
 }
 
@@ -5204,6 +5334,7 @@ int32_t ScrollablePattern::OnInjectionEventByRatio(const std::string& command)
         ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, info.reportEventId);
         return RET_FAILED;
     }
+    SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY); // UiSession injection
     if (ret == "scrollForward") {
         HandleScrollByRatio(info.isScrollByRatio, true, info.ratio, info.reportEventId);
     } else if (ret == "scrollBackward") {

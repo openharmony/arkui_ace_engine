@@ -31,12 +31,13 @@ typedef struct Operation {
     std::string key;
     std::pair<std::string, std::string> coupleKey;
     std::list<std::string> keyList;
+    bool reuseImmediately = false;
 } Operation;
 
 class DataChangeListener : virtual public AceType {
     DECLARE_ACE_TYPE(DataChangeListener, AceType);
 public:
-    virtual void OnDataReloaded() = 0;
+    virtual void OnDataReloaded(bool reuseImmediately = false) = 0;
     virtual void OnDataAdded(size_t index) = 0;
     virtual void OnDataBulkAdded(size_t index, size_t count) = 0;
     virtual void OnDataDeleted(size_t index) = 0;

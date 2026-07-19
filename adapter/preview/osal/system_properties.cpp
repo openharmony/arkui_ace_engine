@@ -56,6 +56,7 @@ bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::dynamicDetectionTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
 bool SystemProperties::measureDebugTraceEnable_ = false;
+bool SystemProperties::skipSecondaryMeasuredEnable_ = false;
 bool SystemProperties::safeAreaDebugTraceEnable_ = false;
 bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
@@ -104,7 +105,6 @@ bool SystemProperties::imageFileCacheConvertAstc_ = false;
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 2;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
-bool SystemProperties::resourceDecoupling_ = true;
 #ifndef ENABLE_ROSEN_BACKEND
 bool SystemProperties::rosenBackendEnabled_ = false;
 #else
@@ -303,11 +303,6 @@ bool SystemProperties::IsFormAnimationLimited()
 bool SystemProperties::GetDebugPixelMapSaveEnabled()
 {
     return false;
-}
-
-bool SystemProperties::GetResourceDecoupling()
-{
-    return true;
 }
 
 bool SystemProperties::IsPCMode()

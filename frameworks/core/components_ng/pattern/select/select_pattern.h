@@ -31,7 +31,7 @@
 #include "core/components_ng/pattern/select/select_layout_property.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/select/select_paint_property.h"
-#include "interfaces/inner_api/ui_session/ui_session_json_util.h"
+#include "base/json/json_util.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
@@ -276,7 +276,7 @@ public:
     void SetOptionWidth(const Dimension& value);
     void SetOptionHeight(const Dimension& value);
     void SetOptionWidthFitTrigger(bool isFitTrigger);
-    void ShowSelectMenu();
+    ACE_FORCE_EXPORT void ShowSelectMenu();
     void ShowSelectMenuInSubWindow();
     void SetHasOptionWidth(bool hasOptionWidth);
     void SetControlSize(const ControlSize& controlSize);
@@ -506,26 +506,26 @@ public:
 
     SelectJsonUtil() : index(std::nullopt), value(std::nullopt) {}
 
-    static std::shared_ptr<InspectorJsonValue> ToJson(const SelectJsonUtil& util)
+    static std::shared_ptr<JsonValue> ToJson(const SelectJsonUtil& util)
     {
-        auto params = InspectorJsonUtil::CreateObject();
+        auto params = JsonUtil::Create();
         CHECK_NULL_RETURN(params, nullptr);
         params->Put("index", util.index.has_value() ? util.index.value() : -1);
         params->Put("value", util.value.has_value() ? util.value.value().c_str() : "");
-        auto result = InspectorJsonUtil::Create();
+        auto result = JsonUtil::CreateSharedPtrJson();
         CHECK_NULL_RETURN(result, nullptr);
         result->Put("cmd", "onSelect");
         result->Put("params", params);
         return result;
     };
     
-    static std::shared_ptr<InspectorJsonValue> BuildInjectResult(
+    static std::shared_ptr<JsonValue> BuildInjectResult(
         int32_t nodeId, const std::string& event, bool success, const std::string& reason = "")
     {
-        auto root = InspectorJsonUtil::CreateObject();
+        auto root = JsonUtil::Create();
         CHECK_NULL_RETURN(root, nullptr);
         
-        auto selectResult = InspectorJsonUtil::CreateObject();
+        auto selectResult = JsonUtil::Create();
         CHECK_NULL_RETURN(selectResult, nullptr);
         
         selectResult->Put("nodeId", nodeId);

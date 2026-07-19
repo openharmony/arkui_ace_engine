@@ -149,6 +149,12 @@ class ObserveV2 {
 
   public __interopInStaticRendering_internal_ : boolean = false;
 
+  // Transient flag set only while trackInternal performs the
+  // `target[storeProp] = target[propertyKey]` assignment. addRef reads it to
+  // detect the lazy-import compatibility case where that read fires an
+  // already-installed getter (see trackInternal at the bottom of this file).
+  public inTrackInternalAssignment_internal_ : boolean = false;
+
   // define a lambda for fireChange to call instead of calling this.updateDirty.bind(this) every time
   private updateDirtyBoundFunction_: () => void = () => { this.updateDirty(); };
 
@@ -246,28 +252,43 @@ class ObserveV2 {
 
   // Queue pre-render component creation of global reuse as an idle task
   public queuePreRenderCreation(parent: PUV2ViewBase, componentClass: new (...args: unknown[]) => PUV2ViewBase,
-      componentParams: Object, elmtId: number, pool: __ReusePool_Internal__, reuseId: string,
+      componentParams: Object, elmtId: number, pool: __ReusePool__Internal, reuseId: string,
       extraInfo: ExtraInfo = undefined): void {
     const createPreRenderTask = (): void => {
       const instance = new componentClass(parent, componentParams, undefined, elmtId, () => {}, extraInfo);
-      instance.isPreRendered = true;
+      instance.__isPreRendered__Internal = true;
+      try {
+        // Set context before rendering children
+        PUV2ViewBase.__beginPreRender__Internal(pool);
 
-      // Set context before rendering children
-      PUV2ViewBase.beginPreRender(pool);
+        // Build the full component subtree in sandboxed mode
+        // (fake element IDs, no observation bindings)
+        if ('__initialRenderForPreRender__Internal' in instance && typeof instance.__initialRenderForPreRender__Internal === 'function') {
+          instance.__initialRenderForPreRender__Internal();
+        }
 
-      // Build the full component subtree in sandboxed mode
-      // (fake element IDs, no observation bindings)
-      if ('initialRenderForPreRender' in instance && typeof instance.initialRenderForPreRender === 'function') {
-        instance.initialRenderForPreRender();
+        // Push to pool before endPreRender
+        if (pool && typeof pool.push === 'function') {
+            pool.push(reuseId, instance, componentClass);
+        }
+      } finally {
+        PUV2ViewBase.__endPreRender__Internal();
       }
-
-      // Push to pool before endPreRender
-      if (pool && typeof pool.push === 'function') {
-          pool.push(reuseId, instance, componentClass);
-      }
-      PUV2ViewBase.endPreRender();
     };
-    setTimeout(() => createPreRenderTask(), 5);
+    // Defer the build to a macrotask (runs after the current render flush). Record
+    // a promise so preRender() waits for the pool push before resolving, otherwise
+    // the consumer renders against an empty pool and creates a fresh node.
+    pool.preRenderTasks_.push(new Promise<void>((resolve, reject) => {
+      setTimeout(() => {
+        try {
+          createPreRenderTask();
+        } catch(e) {
+          reject(e);
+          return;
+        }
+        resolve();
+      }, 5);
+    }));
   }
 
   /**
@@ -432,6 +453,18 @@ class ObserveV2 {
     }
     if (!bound) {
       return;
+    }
+
+    // Lazy-import compatibility telemetry: this addRef was triggered
+    // synchronously by trackInternal's `target[storeProp] = target[propertyKey]`
+    // read (which fired an already-installed getter) while a rendering context
+    // (bound) was active. Log a warning and record the hit on the backend.
+    if (this.inTrackInternalAssignment_internal_) {
+      stateMgmtConsole.frequentWarn(`${target.constructor.name} '${attrName}' was triggered during trackInternal ` +
+        `assignment for id ${bound[0]} (lazy-import compatibility hit).`);
+      if (typeof StateMgmtHistogram === 'function') {
+        StateMgmtHistogram.recordBoolean('StateMgmt.TrackInternal.AddRefDuringAssignment', 1);
+      }
     }
 
     stateMgmtConsole.propertyAccess(`ObserveV2.addRef '${attrName}' for id ${bound[0]}...`);
@@ -1714,7 +1747,16 @@ const trackInternal = (
     target = target.prototype;
   }
   const storeProp = ObserveV2.OB_PREFIX + propertyKey;
-  target[storeProp] = target[propertyKey];
+  ObserveV2.getObserve().inTrackInternalAssignment_internal_ = true;
+  try {
+    // This read may fire an already-installed getter (parent class or a
+    // re-tracked property) and thus enter ObserveV2.addRef - the lazy-import
+    // compatibility case detected in addRef. try/finally guarantees the flag is
+    // always cleared even if the getter throws.
+    target[storeProp] = target[propertyKey];
+  } finally {
+    ObserveV2.getObserve().inTrackInternalAssignment_internal_ = false;
+  }
   Reflect.defineProperty(target, propertyKey, {
     get() {
       ObserveV2.getObserve().addRef(this, propertyKey);

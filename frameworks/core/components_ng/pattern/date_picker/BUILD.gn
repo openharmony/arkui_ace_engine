@@ -17,7 +17,7 @@ import(
 build_component_ng("date_picker_pattern_ng") {
   is_component_model = true
   sources = [
-    "../picker_utils/toss_animation_controller.cpp",
+    "../picker_utils/picker_layout_utils.cpp",
     "date_time_animation_controller.cpp",
     "datepicker_accessibility_property.cpp",
     "datepicker_column_accessibility_property.cpp",
@@ -42,13 +42,6 @@ build_component_ng("date_picker_pattern_ng") {
     "bridge/datepicker_util.cpp",
     "bridge/datepickerdialog_dynamic_module.cpp",
   ]
-
-  platform_deps = []
-  if (!ace_engine_feature_wearable) {
-    platform_deps += [
-      "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_checkbox_modifier",
-    ]
-  }
 
   if (!is_arkui_x) {
     if (!ace_engine_feature_wearable) {

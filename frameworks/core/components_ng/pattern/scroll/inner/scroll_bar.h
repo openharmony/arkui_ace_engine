@@ -242,14 +242,6 @@ public:
     {
         outBoundary_ = outBoundary;
     }
-    void SetPosition(const Dimension& position)
-    {
-        position_ = position;
-    }
-    const Dimension& GetPosition() const
-    {
-        return position_;
-    }
     void SetPressed(bool press)
     {
         isPressed_ = press;

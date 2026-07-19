@@ -413,11 +413,13 @@ void ResetTrackShadow(ArkUINodeHandle node)
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
+    RefPtr<DataPanelTheme> theme = frameNode->GetTheme<DataPanelTheme>();
+    CHECK_NULL_VOID(theme);
     DataPanelShadow shadow;
     shadow.isShadowVisible = true;
-    shadow.radius = DEFAULT_RADIUS;
-    shadow.offsetX = DEFAULT_OFFSET_X;
-    shadow.offsetY = DEFAULT_OFFSET_Y;
+    shadow.radius = theme->GetTrackShadowRadius().ConvertToVp();
+    shadow.offsetX = theme->GetTrackShadowOffsetX().ConvertToVp();
+    shadow.offsetY = theme->GetTrackShadowOffsetY().ConvertToVp();
     std::vector<OHOS::Ace::NG::Gradient> colors;
     ConvertThemeColor(colors);
     shadow.colors = colors;

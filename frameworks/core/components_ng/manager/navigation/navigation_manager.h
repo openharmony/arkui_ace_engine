@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/manager/recoverable/recoverable_declaration.h"
 
 namespace OHOS::Ace {
     struct NavigateChangeInfo;
@@ -70,13 +71,18 @@ struct NavigationIntentInfo {
 struct NavdestinationRecoveryInfo {
     std::string name;
     std::string param;
+    std::string fileName;
+    std::string moduleName;
     // mode of navdestination, 0 for standard page and 1 for dialog page
     int32_t mode;
+    std::string componentInfo;
     int32_t launchMode = 0;
+    std::string state;
 
     NavdestinationRecoveryInfo(const std::string& name, const std::string& param, int32_t mode,
-        int32_t launchMode = 0)
-        : name(std::move(name)), param(std::move(param)), mode(mode), launchMode(launchMode) {}
+        int32_t launchMode = 0, const std::string& state = "")
+        : name(std::move(name)), param(std::move(param)), mode(mode), launchMode(launchMode), state(std::move(state))
+    {}
 };
 
 struct SequentialNavdestinationRecoveryInfo {
@@ -202,11 +208,11 @@ public:
 
     void FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
-    void FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
+    ACE_FORCE_EXPORT void FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
-    void FireLowerLayerLifecycle(const RefPtr<UINode>& node, int lifecycle, int32_t reason);
+    ACE_FORCE_EXPORT void FireLowerLayerLifecycle(const RefPtr<UINode>& node, int lifecycle, int32_t reason);
 
-    void FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
+    ACE_FORCE_EXPORT void FireSubWindowLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
 
     // for non-animation
     void AddBeforeOrientationChangeTask(const std::function<void()>&& task);

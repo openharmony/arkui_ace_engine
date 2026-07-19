@@ -14,6 +14,8 @@
  */
 #include "core/interfaces/native/node/node_text_modifier.h"
 
+#include <string_view>
+
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -59,8 +61,7 @@ constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr int32_t DEFAULT_VARIABLE_FONT_WEIGHT = 400;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
-const std::string DEFAULT_FAMILY = "HarmonyOS Sans";
-const std::string EMPTY_STRING = "";
+constexpr std::string_view DEFAULT_FAMILY = "HarmonyOS Sans";
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 constexpr bool DEFAULT_ENABLE_TEXT_DETECTOR = false;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
@@ -1339,7 +1340,7 @@ void ResetTextFontFamily(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::vector<std::string> families;
-    families.emplace_back(DEFAULT_FAMILY);
+    families.emplace_back(std::string(DEFAULT_FAMILY));
     TextModelNG::SetFontFamily(frameNode, families);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
@@ -1589,7 +1590,7 @@ void ResetTextFont(ArkUINodeHandle node)
     font.fontWeight = DEFAULT_FONT_WEIGHT;
     font.fontStyle = DEFAULT_FONT_STYLE;
     std::vector<std::string> families;
-    families.emplace_back(DEFAULT_FAMILY);
+    families.emplace_back(std::string(DEFAULT_FAMILY));
     font.fontFamilies = families;
     TextModelNG::SetFont(frameNode, font);
     TextModelNG::SetVariableFontWeight(frameNode, DEFAULT_VARIABLE_FONT_WEIGHT);
@@ -2952,8 +2953,13 @@ void SetTailIndents(ArkUINodeHandle node, const ArkUI_Float32* values,
     NG::TailIndents tailIndents;
     if (values != nullptr && units != nullptr && length > 0) {
         NG::TailIndentsArray indentArray;
+        indentArray.reserve(length);
         for (ArkUI_Int32 i = 0; i < length; i++) {
-            indentArray.emplace_back(Dimension(values[i], static_cast<DimensionUnit>(units[i])));
+            Dimension dim(values[i], static_cast<DimensionUnit>(units[i]));
+            if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
+                dim.Reset();
+            }
+            indentArray.emplace_back(dim);
         }
         tailIndents.indentsArray = indentArray;
     }
@@ -3209,8 +3215,6 @@ const ArkUITextModifier* GetTextModifier()
         .setTextSelectedDragPreviewStyle = SetTextSelectedDragPreviewStyle,
         .resetTextSelectedDragPreviewStyle = ResetTextSelectedDragPreviewStyle,
         .getTextSelectedDragPreviewStyle = GetTextSelectedDragPreviewStyle,
-        .setIncrementalUpdatePolicy = SetIncrementalUpdatePolicy,
-        .resetIncrementalUpdatePolicy = ResetIncrementalUpdatePolicy,
         .setFontColorWithPlaceholder = SetFontColorWithPlaceholder,
         .setFontColorPtr = SetFontColorPtr,
         .getCharacterPositionAtCoordinate = GetCharacterPositionAtCoordinate,
@@ -3219,6 +3223,8 @@ const ArkUITextModifier* GetTextModifier()
         .setStyledString = SetStyledString,
         .setFontVariations = SetFontVariations,
         .resetFontVariations = ResetFontVariations,
+        .setIncrementalUpdatePolicy = SetIncrementalUpdatePolicy,
+        .resetIncrementalUpdatePolicy = ResetIncrementalUpdatePolicy,
         .setTailIndents = SetTailIndents,
         .resetTailIndents = ResetTailIndents,
         .getTailIndentsCount = GetTailIndentsCount,

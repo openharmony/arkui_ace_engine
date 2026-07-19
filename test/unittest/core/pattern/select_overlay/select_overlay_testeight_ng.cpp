@@ -1051,8 +1051,23 @@ HWTEST_F(SelectOverlayEightTestNg, UpdateMoreOrBackSymbolOptionsWithDelay002, Te
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
+        [selectTheme, textOverlayTheme, iconTheme](ThemeType type) -> RefPtr<Theme> {
+            if (type == SelectTheme::TypeId()) {
+                return selectTheme;
+            }
+            if (type == TextOverlayTheme::TypeId()) {
+                return textOverlayTheme;
+            }
+            if (type == IconTheme::TypeId()) {
+                return iconTheme;
+            }
+            return textOverlayTheme;
+        });
     selectOverlayNode->UpdateMoreOrBackSymbolOptionsWithDelay();
     EXPECT_NE(selectOverlayNode, nullptr);
 }
@@ -1075,12 +1090,28 @@ HWTEST_F(SelectOverlayEightTestNg, AddCreateMenuExtensionMenuParams005, TestSize
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
+        [selectTheme, textOverlayTheme, iconTheme](ThemeType type) -> RefPtr<Theme> {
+            if (type == SelectTheme::TypeId()) {
+                return selectTheme;
+            }
+            if (type == TextOverlayTheme::TypeId()) {
+                return textOverlayTheme;
+            }
+            if (type == IconTheme::TypeId()) {
+                return iconTheme;
+            }
+            return textOverlayTheme;
+        });
     EXPECT_NE(selectOverlayNode, nullptr);
     std::vector<OptionParam> params;
-    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 1, params);
-    EXPECT_EQ(params.size(), 0);
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 1, params, paramIds);
+    EXPECT_EQ(params.size(), 1);
 }
 
 /**
@@ -1102,12 +1133,28 @@ HWTEST_F(SelectOverlayEightTestNg, AddCreateMenuExtensionMenuParams006, TestSize
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    auto iconTheme = AceType::MakeRefPtr<IconTheme>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(
+        [selectTheme, textOverlayTheme, iconTheme](ThemeType type) -> RefPtr<Theme> {
+            if (type == SelectTheme::TypeId()) {
+                return selectTheme;
+            }
+            if (type == TextOverlayTheme::TypeId()) {
+                return textOverlayTheme;
+            }
+            if (type == IconTheme::TypeId()) {
+                return iconTheme;
+            }
+            return textOverlayTheme;
+        });
     EXPECT_NE(selectOverlayNode, nullptr);
     std::vector<OptionParam> params;
-    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 1, params);
-    EXPECT_EQ(params.size(), 0);
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 1, params, paramIds);
+    EXPECT_EQ(params.size(), 1);
 }
 
 /**
@@ -1612,6 +1659,38 @@ HWTEST_F(SelectOverlayEightTestNg, SelectOverlayNodeUpdateSelectMenuBg004, TestS
 
     EXPECT_TRUE(renderContext->GetBackShadow().has_value());
     EXPECT_EQ(renderContext->GetSystemMaterial(), nullptr);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeUpdateSelectMenuBg005
+ * @tc.desc: TDD cover default CCM state with unsupported system material falls back to legacy menu material
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayEightTestNg, SelectOverlayNodeUpdateSelectMenuBg005, TestSize.Level1)
+{
+    auto node = AceType::DynamicCast<SelectOverlayNode>(
+        SelectOverlayNode::CreateSelectOverlayNode(std::make_shared<SelectOverlayInfo>(SelectOverlayInfo())));
+    ASSERT_NE(node, nullptr);
+    ASSERT_NE(node->selectMenu_, nullptr);
+    node->selectMenu_->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto renderContext = node->selectMenu_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    auto backupLevel = g_uiMaterialLevel;
+    auto backupState = AceApplicationInfo::GetInstance().GetUIMaterialState();
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+    AceApplicationInfo::GetInstance().SetUIMaterialState("default");
+
+    node->UpdateSelectMenuBg(nullptr);
+
+    g_uiMaterialLevel = backupLevel;
+    AceApplicationInfo::GetInstance().SetUIMaterialState(backupState);
+
+    EXPECT_TRUE(renderContext->GetBackShadow().has_value());
+    const auto& groupProperty = renderContext->GetBackground();
+    ASSERT_NE(groupProperty, nullptr);
+    BlurStyleOption actualStyleOption = groupProperty->propBlurStyleOption.value_or(BlurStyleOption());
 }
 
 /**

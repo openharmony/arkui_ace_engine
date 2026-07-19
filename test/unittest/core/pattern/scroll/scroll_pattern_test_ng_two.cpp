@@ -18,6 +18,7 @@
 
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
 namespace OHOS::Ace::NG {
@@ -653,10 +654,9 @@ HWTEST_F(ScrollPatternTwoTestNg, ValidateOffset002, TestSize.Level1)
     scrollPattern->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>();
     scrollPattern->scrollEffect_->edgeEffect_ = EdgeEffect::SPRING;
     scrollPattern->axis_ = Axis::HORIZONTAL;
-    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
     scrollPattern->scrollableDistance_ = 8.0f;
     auto result = scrollPattern->ValidateOffset(SCROLL_FROM_AXIS, 4.0f);
-    EXPECT_EQ(result, 4.0f);
+    EXPECT_EQ(result, 0.0f);
 }
 
 /**
@@ -671,10 +671,9 @@ HWTEST_F(ScrollPatternTwoTestNg, ValidateOffset003, TestSize.Level1)
     scrollPattern->scrollEffect_->edgeEffect_ = EdgeEffect::SPRING;
     scrollPattern->axis_ = Axis::HORIZONTAL;
     scrollPattern->currentOffset_ = 20.0f;
-    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
     scrollPattern->scrollableDistance_ = 8.0f;
     scrollPattern->ValidateOffset(SCROLL_FROM_AXIS);
-    EXPECT_EQ(scrollPattern->currentOffset_, 8.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0f);
 }
 
 /**
@@ -1100,6 +1099,96 @@ HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateCurrentOffset002
+ * @tc.desc: Test ScrollPattern UpdateCurrentOffset with near-zero currentOffset should be zeroed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset002, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->scrollableDistance_ = 800.0f;
+    scrollPattern->currentOffset_ = 0.0;
+    scrollPattern->scrollEffect_ = nullptr;
+    scrollPattern->viewSize_ = SizeF(100.0f, 200.0f);
+    scrollPattern->UpdateCurrentOffset(0.0005f, SCROLL_FROM_JUMP);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset003
+ * @tc.desc: Test ScrollPattern UpdateCurrentOffset with currentOffset beyond epsilon should not be zeroed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset003, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->scrollableDistance_ = 800.0f;
+    scrollPattern->currentOffset_ = 0.0;
+    scrollPattern->scrollEffect_ = nullptr;
+    scrollPattern->viewSize_ = SizeF(100.0f, 200.0f);
+    scrollPattern->UpdateCurrentOffset(0.002f, SCROLL_FROM_JUMP);
+    EXPECT_NE(scrollPattern->currentOffset_, 0.0);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset004
+ * @tc.desc: Test ScrollPattern UpdateCurrentOffset with currentOffset slightly below epsilon should be zeroed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset004, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->scrollableDistance_ = 800.0f;
+    scrollPattern->currentOffset_ = 0.0;
+    scrollPattern->scrollEffect_ = nullptr;
+    scrollPattern->viewSize_ = SizeF(100.0f, 200.0f);
+    scrollPattern->UpdateCurrentOffset(0.0009f, SCROLL_FROM_JUMP);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset005
+ * @tc.desc: Test ScrollPattern UpdateCurrentOffset with negative near-zero currentOffset should be zeroed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset005, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->scrollableDistance_ = 800.0f;
+    scrollPattern->currentOffset_ = 0.0;
+    scrollPattern->scrollEffect_ = nullptr;
+    scrollPattern->viewSize_ = SizeF(100.0f, 200.0f);
+    scrollPattern->UpdateCurrentOffset(-0.0005f, SCROLL_FROM_JUMP);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0);
+}
+
+/**
+ * @tc.name: UpdateCurrentOffset006
+ * @tc.desc: Test ScrollPattern UpdateCurrentOffset with zero currentOffset stays zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternTwoTestNg, UpdateCurrentOffset006, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    scrollPattern->scrollableDistance_ = 800.0f;
+    scrollPattern->currentOffset_ = 0.0;
+    scrollPattern->scrollEffect_ = nullptr;
+    scrollPattern->viewSize_ = SizeF(100.0f, 200.0f);
+    scrollPattern->UpdateCurrentOffset(0.0f, SCROLL_FROM_JUMP);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0);
+}
+
+/**
  * @tc.name: ProcessAxisEndEvent001
  * @tc.desc: Test ProcessAxisEndEvent.
  * @tc.type: FUNC
@@ -1269,18 +1358,17 @@ HWTEST_F(ScrollPatternTwoTestNg, ValidateOffset_Two_Parameters, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Set scrollableDistance_ of scrollPattern to be greater than 0
-     * set axis_ of scrollPattern to HORIZONTAL and direction_ to ROW_REVERSE
+     * and set axis_ of scrollPattern to HORIZONTAL
      */
     scrollPattern->scrollableDistance_ = 2.0f;
     scrollPattern->axis_ = Axis::HORIZONTAL;
-    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
 
     /**
      * @tc.steps: step3. Set source to SCROLL_FROM_AXIS and willScrollOffset to 4.0f
-     * @tc.expected: The result of function return 2.0f
+     * @tc.expected: The result of function return 0.0f
      */
     auto result = scrollPattern->ValidateOffset(SCROLL_FROM_AXIS, 4.0f);
-    EXPECT_EQ(result, 2.0f);
+    EXPECT_EQ(result, 0.0f);
 }
 
 /**
@@ -1297,21 +1385,19 @@ HWTEST_F(ScrollPatternTwoTestNg, ValidateOffset_One_Parameter, TestSize.Level1)
     ASSERT_NE(scrollPattern, nullptr);
 
     /**
-     * @tc.steps: step2. Set scrollableDistance_ of scrollPattern to be greater than 0
-     * set axis_ of scrollPattern to HORIZONTAL and direction_ to ROW_REVERSE
-     * and set currentOffset_ of scrollPattern to 4.0f
+     * @tc.steps: step2. Set scrollableDistance_ of scrollPattern to be greater than 0,
+     * set axis_ of scrollPattern to HORIZONTAL and set currentOffset_ of scrollPattern to 4.0f
      */
     scrollPattern->scrollableDistance_ = 3.0f;
     scrollPattern->axis_ = Axis::HORIZONTAL;
-    scrollPattern->direction_ = FlexDirection::ROW_REVERSE;
     scrollPattern->currentOffset_ = 4.0f;
 
     /**
      * @tc.steps: step3. Set source to SCROLL_FROM_AXIS
-     * @tc.expected: The currentOffset_ of scrollPattern to be 3.0f
+     * @tc.expected: The currentOffset_ of scrollPattern to be 0.0f
      */
     scrollPattern->ValidateOffset(SCROLL_FROM_AXIS);
-    EXPECT_EQ(scrollPattern->currentOffset_, 3.0f);
+    EXPECT_EQ(scrollPattern->currentOffset_, 0.0f);
 }
 
 /**

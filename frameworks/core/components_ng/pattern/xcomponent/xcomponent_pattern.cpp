@@ -17,6 +17,7 @@
 #include "core/accessibility/accessibility_manager.h"
 
 #include <cmath>
+#include <string_view>
 #include <cstdlib>
 
 #include "interfaces/inner_api/ace/ui_content.h"
@@ -67,6 +68,7 @@
 #endif
 
 #include "core/components_ng/event/input_event.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
@@ -85,7 +87,7 @@ std::mutex XComponentPattern::angleMtx_;
 std::string XComponentPattern::compensationAngleFromFeatureManager_ = "";
 namespace {
 
-const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+constexpr std::string_view BUFFER_USAGE_XCOMPONENT = "xcomponent";
 #ifdef ENABLE_ROSEN_BACKEND
 constexpr char X_COMPONENT_COMPENSATION_ANGLE[] = "xcomponentCompensationAngle";
 const int32_t ROTATION_0 = 0;
@@ -182,14 +184,15 @@ std::string XComponentPattern::GetLeakType()
 {
     auto xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
     if (id_.has_value() && !id_.value().empty()) {
-        return BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + id_.value();
+        return std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + id_.value();
     }
-    std::string defaultLeakType = BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + "nodeId_" + nodeId_;
+    std::string defaultLeakType =
+        std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + "nodeId_" + nodeId_;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, defaultLeakType);
     auto inspectorKey = host->GetInspectorId().value_or("");
     if (!inspectorKey.empty()) {
-        return BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + inspectorKey;
+        return std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + inspectorKey;
     }
     return defaultLeakType;
 }
@@ -215,9 +218,9 @@ void XComponentPattern::InitSurface()
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
-    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
+    renderSurface_->SetBufferUsage(std::string(BUFFER_USAGE_XCOMPONENT));
     std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
-    renderSurface_->SetBufferTypeLeak(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
+    renderSurface_->SetBufferTypeLeak(std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -377,8 +380,10 @@ void XComponentPattern::OnAttachToMainTree()
     auto pipelineContext = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipelineContext);
     auto bundleName = pipelineContext->GetBundleName();
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->ReportSurface(renderSurface_->GetUniqueIdNum(), renderSurface_->GetPSurfaceName(),
         customNode->GetJSViewName(), bundleName.c_str(), getpid());
+#endif
     if (pipelineContext->GetXComponentDisplayConstraintEnabled()) {
         host->RegisterNodeChangeListener();
     }
@@ -414,7 +419,9 @@ void XComponentPattern::OnDetachFromMainTree()
     std::string viewName = customNode ? customNode->GetJSViewName() : "";
     auto pipelineContext = host->GetContextRefPtr();
     auto bundleName = pipelineContext ? pipelineContext->GetBundleName() : "";
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->ReportComponentDetach(uniqueId, surfaceName, viewName, bundleName, getpid());
+#endif
     host->UnregisterNodeChangeListener();
 }
 
@@ -2404,23 +2411,28 @@ void XComponentPattern::EnableAnalyzer(bool enable)
         return;
     }
 
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(!imageAnalyzerManager_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::XCOMPONENT);
+#endif
 }
 
 void XComponentPattern::SetImageAIOptions(void* options)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::XCOMPONENT);
     }
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->SetImageAIOptions(options);
+#endif
 }
 
 void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!IsSupportImageAnalyzerFeature()) {
         CHECK_NULL_VOID(onAnalyzed);
         (onAnalyzed.value())(ImageAnalyzerState::UNSUPPORTED);
@@ -2443,20 +2455,28 @@ void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onA
             pattern->CreateAnalyzerOverlay();
         },
         "ArkUIXComponentCreateAnalyzerOverlay");
+#endif
 }
 
 void XComponentPattern::StopImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     DestroyAnalyzerOverlay();
+#endif
 }
 
 bool XComponentPattern::IsSupportImageAnalyzerFeature()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     return isEnableAnalyzer_ && imageAnalyzerManager_ && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
+#else
+    return false;
+#endif
 }
 
 void XComponentPattern::CreateAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetOverlayNode(nullptr);
@@ -2474,10 +2494,12 @@ void XComponentPattern::CreateAnalyzerOverlay()
 
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
+#endif
 }
 
 void XComponentPattern::UpdateAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -2486,25 +2508,32 @@ void XComponentPattern::UpdateAnalyzerOverlay()
     CHECK_NULL_VOID(pixelMap);
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
+#endif
 }
 
 void XComponentPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzerFeature()) {
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
     }
+#endif
 }
 
 void XComponentPattern::DestroyAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
+#endif
 }
 
 void XComponentPattern::ReleaseImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->ReleaseImageAnalyzer();
+#endif
 }
 
 void XComponentPattern::SetSurfaceRotation(bool isLock)
@@ -2611,6 +2640,7 @@ bool XComponentPattern::GetEnableAnalyzer()
 
 void XComponentPattern::NativeStartImageAnalyzer(std::function<void(int32_t)>& callback)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(callback);
     if (!isOnTree_ || !isEnableAnalyzer_) {
         return callback(ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED);
@@ -2648,6 +2678,7 @@ void XComponentPattern::NativeStartImageAnalyzer(std::function<void(int32_t)>& c
             pattern->CreateAnalyzerOverlay();
         },
         "ArkUIXComponentCreateAnalyzerOverlay");
+#endif
 }
 
 RSCanvas* XComponentPattern::LockCanvas()

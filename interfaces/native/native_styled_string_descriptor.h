@@ -1970,7 +1970,7 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_GetRadialGradient(
  *
  * @note All input pointer parameters must be allocated, managed, and released by the caller.
  * @param paragraphStyle Pointer to the <b>OH_ArkUI_ParagraphStyle</b> object.
- * @param tailIndents The tail indent values, in vp. When size is 1, all lines share the same tail indent.
+ * @param tailIndents The tail indent values, in fp. When size is 1, all lines share the same tail indent.
  * When size > 1, the i-th value specifies the tail indent for the i-th line. If the number of text
  * lines exceeds size, the last value is used for the remaining lines.
  * @param size The number of tail indent values.
@@ -1987,7 +1987,7 @@ ArkUI_ErrorCode OH_ArkUI_ParagraphStyle_SetTailIndents(
  *
  * @note All input pointer parameters must be allocated, managed, and released by the caller.
  * @param paragraphStyle Pointer to the <b>OH_ArkUI_ParagraphStyle</b> object.
- * @param tailIndents The tail indent values, in vp.
+ * @param tailIndents The tail indent values, in fp.
  * @param tailIndentsSize The size of the tailIndents buffer provided by the caller.
  * @param writeLength The actual number of tail indent values written to the buffer.
  * @return Returns the result code.

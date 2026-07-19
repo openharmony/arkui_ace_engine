@@ -67,6 +67,8 @@ export interface ArkCustomComponent {
     // dump info
     onDumpInspector(): string;
     onDumpInfo(commands: string[]): void;
+    ClearParentReusePool(): void;
+    __getMemOpt__Internal(): int32;
 
     // dfx
     getName(): string;

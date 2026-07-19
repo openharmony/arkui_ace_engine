@@ -23,6 +23,7 @@
 #include <sstream>
 #include <queue>
 #include <string>
+#include <string_view>
 
 #include "event_handler.h"
 
@@ -106,13 +107,13 @@ constexpr char NTC_PARAM_DESCRIPTION[] = "description";
 constexpr char WEB_ERROR_CODE_CREATEFAIL[] = "error-web-delegate-000001";
 constexpr char WEB_ERROR_MSG_CREATEFAIL[] = "create web_delegate failed.";
 
-const std::string RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
-const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
-const std::string RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
-const std::string RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
-const std::string RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
-const std::string RESOURCE_SENSOR = "TYPE_SENSOR";
-const std::string DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
+constexpr std::string_view RESOURCE_VIDEO_CAPTURE = "TYPE_VIDEO_CAPTURE";
+constexpr std::string_view RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
+constexpr std::string_view RESOURCE_PROTECTED_MEDIA_ID = "TYPE_PROTECTED_MEDIA_ID";
+constexpr std::string_view RESOURCE_MIDI_SYSEX = "TYPE_MIDI_SYSEX";
+constexpr std::string_view RESOURCE_CLIPBOARD_READ_WRITE = "TYPE_CLIPBOARD_READ_WRITE";
+constexpr std::string_view RESOURCE_SENSOR = "TYPE_SENSOR";
+constexpr std::string_view DEFAULT_CANONICAL_ENCODING_NAME = "UTF-8";
 const int32_t DEFAULT_BACK_TO_TOP_TIME = 1000;
 const float DEFAULT_BACK_TO_TOP_OFFSET = 0.0;
 constexpr uint32_t DESTRUCT_DELAY_MILLISECONDS = 1000;
@@ -126,7 +127,7 @@ constexpr int32_t ACCESSIBILITY_PAGE_CHANGE_MAX_RETRY = 10;
 constexpr int64_t WEB_ACCESSIBILITY_INVALID_NODE_ID = -1;
 constexpr int32_t WEB_ACCESSIBILITY_FOCUS_FORWARD = 1 << 4;
 constexpr uint32_t AUTOFILL_DELAY_MILLISECONDS = 100;
-const std::string DEFAULT_NATIVE_EMBED_ID = "0";
+constexpr std::string_view DEFAULT_NATIVE_EMBED_ID = "0";
 constexpr uint32_t TIMEOUT_SECONDS = 5;
 
 constexpr double WEB_SNAPSHOT_SIZE_TOLERANCE = 0.85;
@@ -606,22 +607,22 @@ std::vector<std::string> WebPermissionRequestOhos::GetResources() const
     if (request_) {
         uint32_t resourcesId = static_cast<uint32_t>(request_->ResourceAcessId());
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::VIDEO_CAPTURE) {
-            resources.push_back(RESOURCE_VIDEO_CAPTURE);
+            resources.push_back(std::string(RESOURCE_VIDEO_CAPTURE));
         }
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::AUDIO_CAPTURE) {
-            resources.push_back(RESOURCE_AUDIO_CAPTURE);
+            resources.push_back(std::string(RESOURCE_AUDIO_CAPTURE));
         }
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::PROTECTED_MEDIA_ID) {
-            resources.push_back(RESOURCE_PROTECTED_MEDIA_ID);
+            resources.push_back(std::string(RESOURCE_PROTECTED_MEDIA_ID));
         }
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::MIDI_SYSEX) {
-            resources.push_back(RESOURCE_MIDI_SYSEX);
+            resources.push_back(std::string(RESOURCE_MIDI_SYSEX));
         }
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::CLIPBOARD_READ_WRITE) {
-            resources.push_back(RESOURCE_CLIPBOARD_READ_WRITE);
+            resources.push_back(std::string(RESOURCE_CLIPBOARD_READ_WRITE));
         }
         if (resourcesId & OHOS::NWeb::NWebAccessRequest::Resources::SENSORS) {
-            resources.push_back(RESOURCE_SENSOR);
+            resources.push_back(std::string(RESOURCE_SENSOR));
         }
     }
     return resources;
@@ -3134,7 +3135,6 @@ void WebDelegate::InitWebViewWithWindow()
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
             std::string app_path = GetDataPath();
             if (!app_path.empty()) {
-                initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(app_path));
                 initArgs->AddArg(std::string("--user-data-dir=").append(app_path));
             }
 
@@ -3668,7 +3668,6 @@ void WebDelegate::InitWebViewWithSurface()
             CHECK_NULL_VOID(delegate);
             std::shared_ptr<OHOS::NWeb::NWebEngineInitArgsImpl> initArgs =
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
-            initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(delegate->bundleDataPath_));
             initArgs->AddArg(std::string("--user-data-dir=").append(delegate->bundleDataPath_));
             initArgs->AddArg(std::string("--bundle-installation-dir=").append(delegate->bundlePath_));
             initArgs->AddArg(std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
@@ -5534,6 +5533,7 @@ void WebDelegate::CallIsPagePathInvalid(const bool& isPageInvalid)
 
 void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::string& param) const
 {
+#ifndef CROSS_PLATFORM
     if (!Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_WEB)) {
         return;
     }
@@ -5551,6 +5551,7 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
         .SetHost(host)
         .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+#endif
 }
 
 void WebDelegate::OnPageStarted(const std::string& param)
@@ -6425,11 +6426,13 @@ void WebDelegate::ReportDynamicFrameLossEvent(const std::string& sceneId, bool i
         return;
     }
     ACE_SCOPED_TRACE("ReportDynamicFrameLossEvent, sceneId: %s, isStart: %u", sceneId.c_str(), isStart);
+#ifndef CROSS_PLATFORM
     if (isStart) {
         PerfMonitor::GetPerfMonitor()->Start(sceneId, PerfActionType::FIRST_MOVE, "");
     } else {
         PerfMonitor::GetPerfMonitor()->End(sceneId, false);
     }
+#endif
 }
 
 void WebDelegate::OnHttpErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
@@ -8360,7 +8363,7 @@ void WebDelegate::SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedT
     } else {
         TouchEvent event;
         event.SetId(0);
-        webPattern->SetTouchEventInfo(event, touchEventInfo, DEFAULT_NATIVE_EMBED_ID);
+        webPattern->SetTouchEventInfo(event, touchEventInfo, std::string(DEFAULT_NATIVE_EMBED_ID));
     }
 }
 
@@ -8409,7 +8412,7 @@ MouseInfo WebDelegate::TransToMouseInfo(const std::shared_ptr<OHOS::NWeb::NWebNa
         x = mouseEvent->GetX();
         y = mouseEvent->GetY();
     } else {
-        embedId = DEFAULT_NATIVE_EMBED_ID;
+        embedId = std::string(DEFAULT_NATIVE_EMBED_ID);
     }
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_RETURN(webPattern, MouseInfo());
@@ -8480,6 +8483,10 @@ void WebDelegate::OnNativeEmbedAllDestory()
 
 std::string WebDelegate::GetSurfaceIdByHtmlElementId(const std::string& htmlElementId)
 {
+    if (htmlElementId.empty()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "GetSurfaceIdByHtmlElementId html element id is empty");
+        return "";
+    }
     std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
     for (auto iter = embedDataInfo_.begin(); iter != embedDataInfo_.end(); iter++) {
         std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo = iter->second;
@@ -8518,6 +8525,10 @@ int64_t WebDelegate::GetWebAccessibilityIdBySurfaceId(const std::string& surface
         return -1;
     }
     std::string htmlElementId = GetHtmlElementIdBySurfaceId(surfaceId);
+    if (htmlElementId.empty()) {
+        TAG_LOGD(AceLogTag::ACE_WEB, "GetWebAccessibilityIdBySurfaceId html element id is empty");
+        return -1;
+    }
     int64_t webAccessibilityId = nweb_->GetWebAccessibilityIdByHtmlElementId(htmlElementId);
     return webAccessibilityId;
 }
@@ -9051,6 +9062,24 @@ std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibi
     return nweb_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
 }
 
+std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetAccessibilityNodeInfoByParams(
+    int64_t accessibilityId, int32_t direction, int32_t focusRuleType,
+    const std::map<std::string, std::string>& params)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebDelegate::GetAccessibilityNodeInfoByParams, accessibilityId = %{public}" PRId64
+        ", direction = %{public}d, focusRuleType = %{public}d",
+        accessibilityId, direction, focusRuleType);
+    CHECK_NULL_RETURN(nweb_, nullptr);
+    if (!accessibilityState_) {
+        return nullptr;
+    }
+    if (IS_CALLING_FROM_M114() || IS_CALLING_FROM_M132()) {
+        return nweb_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+    }
+    return nweb_->GetAccessibilityNodeInfoByParams(accessibilityId, direction, focusRuleType, params);
+}
+
 OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() const
 {
     CHECK_NULL_RETURN(nweb_, OHOS::NWeb::NWebPreference::CopyOptionMode::CROSS_DEVICE);
@@ -9121,7 +9150,7 @@ std::string WebDelegate::GetCanonicalEncodingName(const std::string& alias_name)
                 return canonicalName;
         }
     }
-    return DEFAULT_CANONICAL_ENCODING_NAME;
+    return std::string(DEFAULT_CANONICAL_ENCODING_NAME);
 }
 
 void WebDelegate::UpdateDefaultTextEncodingFormat(const std::string& textEncodingFormat)
@@ -9804,6 +9833,25 @@ void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled)
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateWebMediaAVSessionEnabled");
 }
 
+void WebDelegate::UpdateWebMediaNetworkProxyEnabled(bool isEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutWebMediaNetworkProxyEnabled(isEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateWebMediaNetworkProxyEnabled");
+}
+
 std::string WebDelegate::GetCurrentLanguage()
 {
     if (nweb_) {
@@ -10067,14 +10115,39 @@ void WebDelegate::SetBorderRadiusFromWeb(double borderRadiusTopLeft, double bord
 
 void WebDelegate::SetScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy)
 {
-    CHECK_NULL_VOID(nweb_);
-    nweb_->SetScrollbarLayoutPolicy(static_cast<int32_t>(policy));
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    auto value = static_cast<int32_t>(policy);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), value]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetScrollbarLayoutPolicy(value);
+            }
+        }, TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetScrollbarLayoutPolicy");
 }
 
 void WebDelegate::SetIsSystemRtlEnable(bool enable)
 {
-    CHECK_NULL_VOID(nweb_);
-    nweb_->SetIsSystemRtlEnable(enable);
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enable]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetIsSystemRtlEnable(enable);
+            }
+        }, TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetIsSystemRtlEnable");
 }
 
 void WebDelegate::SetViewportScaleState()

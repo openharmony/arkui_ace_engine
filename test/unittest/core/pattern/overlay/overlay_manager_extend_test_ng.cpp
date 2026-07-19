@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #define private public
 #define protected public
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
@@ -27,29 +26,34 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "base/error/error_code.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/common/ace_engine.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "base/window/foldable_window.h"
+#include "core/common/ace_engine.h"
+#include "core/common/app_bar_helper.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/app_bar/app_bar_theme.h"
+#include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
+#include "core/components_ng/pattern/dialog/dialog_inner_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_manager.h"
@@ -60,21 +64,17 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/pattern/app_bar/app_bar_theme.h"
-#include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
-#include "core/common/app_bar_helper.h"
-#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -449,9 +449,12 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest009, TestSize.Level
         V2::DIALOG_ETS_TAG, 2, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
     auto dialogNodeThd = FrameNode::CreateFrameNode(
         V2::DIALOG_ETS_TAG, 3, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
-    overlayManager->dialogMap_.emplace(1, AceType::RawPtr(dialogNodeFst));
-    overlayManager->dialogMap_.emplace(2, AceType::RawPtr(dialogNodeScd));
-    overlayManager->dialogMap_.emplace(3, AceType::RawPtr(dialogNodeThd));
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->dialogMap_.emplace(1, AceType::RawPtr(dialogNodeFst));
+    dialogInnerManager->dialogMap_.emplace(2, AceType::RawPtr(dialogNodeScd));
+    dialogInnerManager->dialogMap_.emplace(3, AceType::RawPtr(dialogNodeThd));
     overlayManager->ReloadBuilderNodeConfig();
     EXPECT_EQ(overlayManager->GetDialogMap().size(), 3);
 }
@@ -641,26 +644,28 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest014, TestSize.Level
      * @tc.expected: toastMap_ is empty
      */
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->OnDialogCloseEvent(dialogNode);
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->OnDialogCloseEvent(overlayManager, dialogNode);
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
 
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     EXPECT_FALSE(dialogPattern == nullptr);
-    overlayManager->OnDialogCloseEvent(dialogNode);
+    dialogInnerManager->OnDialogCloseEvent(overlayManager, dialogNode);
 
     overlayManager->CloseDialog(dialogNode);
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
-    EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
-    overlayManager->OnDialogCloseEvent(dialogNode);
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
+    dialogInnerManager->OnDialogCloseEvent(overlayManager, dialogNode);
     overlayManager->CloseDialog(dialogNode);
-    EXPECT_TRUE(overlayManager->dialogMap_.empty());
+    EXPECT_TRUE(overlayManager->GetDialogMap().empty());
     auto dialogLayoutProp = dialogPattern->GetLayoutProperty<DialogLayoutProperty>();
     dialogLayoutProp->UpdateShowInSubWindow(true);
     auto parentNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     dialogNode->MountToParent(parentNode);
     overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    overlayManager->OnDialogCloseEvent(dialogNode);
+    dialogInnerManager->OnDialogCloseEvent(overlayManager, dialogNode);
     EXPECT_FALSE(MockContainer::Current()->IsDialogContainer());
 }
 
@@ -691,13 +696,17 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest015, TestSize.Level
     auto onFinishEvent = []() {};
     dialogOption.SetOnFinishEvent(onFinishEvent);
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
     /**
      * @tc.steps: step2. create overlayManager and call ShowToast when rootElement is nullptr.
      * @tc.expected: toastMap_ is empty
      */
     auto dialogLayoutProp = dialogPattern->GetLayoutProperty<DialogLayoutProperty>();
     dialogLayoutProp->UpdateShowInSubWindow(true);
-    overlayManager->OnDialogCloseEvent(dialogNode);
+    dialogInnerManager->OnDialogCloseEvent(overlayManager, dialogNode);
     EXPECT_FALSE(MockContainer::Current()->IsDialogContainer());
 }
 
@@ -777,16 +786,19 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest018, TestSize.Level
         V2::DIALOG_ETS_TAG, 2, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
     auto dialogNodeThd = FrameNode::CreateFrameNode(
         V2::DIALOG_ETS_TAG, 3, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
-    overlayManager->dialogMap_.emplace(1, AceType::RawPtr(dialogNodeFst));
-    overlayManager->dialogMap_.emplace(2, AceType::RawPtr(dialogNodeScd));
-    overlayManager->dialogMap_.emplace(3, AceType::RawPtr(dialogNodeThd));
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->dialogMap_.emplace(1, AceType::RawPtr(dialogNodeFst));
+    dialogInnerManager->dialogMap_.emplace(2, AceType::RawPtr(dialogNodeScd));
+    dialogInnerManager->dialogMap_.emplace(3, AceType::RawPtr(dialogNodeThd));
     overlayManager->CloseCustomDialog(0);
-    EXPECT_EQ(overlayManager->dialogMap_.end(), overlayManager->dialogMap_.find(0));
+    EXPECT_EQ(dialogInnerManager->dialogMap_.end(), dialogInnerManager->dialogMap_.find(0));
     /**
      * @tc.steps: step2+. create dialogMap_  and call ReloadBuilderNodeConfig.
      */
     overlayManager->CloseCustomDialog(-1);
-    EXPECT_EQ(overlayManager->dialogMap_.end(), overlayManager->dialogMap_.find(-1));
+    EXPECT_EQ(dialogInnerManager->dialogMap_.end(), dialogInnerManager->dialogMap_.find(-1));
 }
 
 /**
@@ -799,8 +811,12 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest019, TestSize.Level
     /**
      * @tc.steps: step1. create overlay node and create popup node.
      */
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
-    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    // Use the OverlayManager owned by the current pipeline as the caller. Since the popup node resolves its
+    // context to the same pipeline, the caller equals the OverlayManager that owns the overlay, so RemoveBubble
+    // does not forward and the local branches (interactiveDismiss / onWillDismiss / popupMap_) are exercised.
+    auto overlayManager = MockPipelineContext::GetCurrent()->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->popupMap_.clear(); // the pipeline OverlayManager is shared across cases; start clean
 
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -836,6 +852,7 @@ HWTEST_F(OverlayManagerExtendTestNg, OverlayManagerExtendTest019, TestSize.Level
     overlayManager->popupMap_.emplace(1, PopupInfo2);
     testResult = overlayManager->RemoveBubble(popupNodeEx);
     EXPECT_TRUE(testResult);
+    overlayManager->popupMap_.clear(); // clean up residue on the shared pipeline OverlayManager
 }
 
 /**
@@ -1454,5 +1471,54 @@ HWTEST_F(OverlayManagerExtendTestNg, OpenOrderOverlay008, TestSize.Level1)
     EXPECT_EQ(error2, ERROR_CODE_NO_ERROR);
     EXPECT_EQ(error3, ERROR_CODE_NO_ERROR);
     EXPECT_EQ(overlayManager->orderOverlayMap_.size(), 3u);
+}
+
+/**
+ * @tc.name: RemoveBubblePageLevelForward001
+ * @tc.desc: Test OverlayManager::RemoveBubble. When the caller is not the OverlayManager owned by the overlay's
+ *           own pipeline, the call is forwarded to that pipeline's OverlayManager (page-level swipe fix).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, RemoveBubblePageLevelForward001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. obtain the OverlayManager owned by the current pipeline and create a different
+     *           standalone OverlayManager as the caller.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto pipelineOverlayManager = pipeline->GetOverlayManager();
+    ASSERT_NE(pipelineOverlayManager, nullptr);
+
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    // The caller must differ from the pipeline OverlayManager, otherwise RemoveBubble never forwards.
+    EXPECT_NE(AceType::RawPtr(pipelineOverlayManager), AceType::RawPtr(overlayManager));
+
+    /**
+     * @tc.steps: step2. create a popup node whose context resolves to the current pipeline, and register it
+     *           only in the pipeline OverlayManager's popupMap_.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto targetId = targetNode->GetId();
+    auto popupNode = FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<BubblePattern>(targetId, targetNode->GetTag()));
+    ASSERT_NE(popupNode->GetContextRefPtr(), nullptr);
+    EXPECT_EQ(AceType::RawPtr(popupNode->GetContextRefPtr()->GetOverlayManager()), AceType::RawPtr(pipelineOverlayManager));
+
+    NG::PopupInfo popupInfo;
+    popupInfo.popupNode = popupNode;
+    pipelineOverlayManager->popupMap_.emplace(targetId, popupInfo);
+
+    /**
+     * @tc.steps: step3. call RemoveBubble on the standalone OverlayManager.
+     * @tc.expected: The call is forwarded to the pipeline OverlayManager whose popupMap_ holds the bubble, so the
+     *               bubble is removed and true is returned. Without forwarding, the caller's empty popupMap_
+     *               (and default interactiveDismiss) would yield false.
+     */
+    auto testResult = overlayManager->RemoveBubble(popupNode);
+    EXPECT_TRUE(testResult);
+    pipelineOverlayManager->popupMap_.clear(); // clean up residue on the shared pipeline OverlayManager
 }
 }

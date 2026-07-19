@@ -27,4 +27,5 @@ interface TouchEventExtender {
     static void stopPropagation(pointer ptr);
     static (sequence<HistoricalPoint> or undefined) getHistoricalPoints(pointer ptr);
     static void preventDefault(pointer ptr);
+    static boolean isPreventDefaultAllowed(pointer ptr);
 };

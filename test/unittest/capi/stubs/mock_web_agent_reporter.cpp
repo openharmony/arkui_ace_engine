@@ -25,7 +25,7 @@ void WebAgentEventReporter::SetAISessionOptions(uint32_t type, const AISessionCa
 {
 }
 
-void WebAgentEventReporter::ReportEventImediately(const std::shared_ptr<InspectorJsonValue>& eventJson)
+void WebAgentEventReporter::ReportEventImediately(const std::shared_ptr<JsonValue>& eventJson)
 {
 }
 

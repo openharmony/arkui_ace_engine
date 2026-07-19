@@ -59,7 +59,9 @@
 #include "core/components_ng/pattern/text_field/text_component_decorator.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
 #include "core/components_ng/pattern/text_field/auto_fill_controller.h"
+#endif
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
@@ -369,11 +371,6 @@ public:
         return needToRequestKeyboardOnFocus_;
     }
 
-    bool NeedReadFontScaleFromEnv() override
-    {
-        return true;
-    }
-
     bool CheckBlurReason();
 
     bool NeedSetScrollRect();
@@ -515,6 +512,7 @@ public:
         return contentController_->GetTextUtf16Value();
     }
 
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     const RefPtr<AutoFillController>& GetOrCreateAutoFillController()
     {
         if (!autoFillController_) {
@@ -526,6 +524,7 @@ public:
         }
         return autoFillController_;
     }
+#endif
 
 #if defined(IOS_PLATFORM)
     const TextEditingValue& GetInputEditingValue() const override
@@ -2037,7 +2036,9 @@ protected:
 
     // 是否独立控制键盘
     bool independentControlKeyboard_ = false;
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     RefPtr<AutoFillController> autoFillController_;
+#endif
     virtual IMEClient GetIMEClientInfo();
     RefPtr<TextFieldSelectOverlay> selectOverlay_;
     /* --------- select AI detect ---------- */
@@ -2135,7 +2136,7 @@ private:
     bool CanChangeSelectState();
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void CursorMoveOnClick(const Offset& offset);
-    void RequestCustomKeyboardBuilder();
+    bool RequestCustomKeyboardBuilder();
 
     void DelayProcessOverlay(const OverlayRequest& request = OverlayRequest());
     void CancelDelayProcessOverlay();

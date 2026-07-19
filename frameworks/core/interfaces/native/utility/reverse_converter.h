@@ -64,6 +64,7 @@ class PickerDate;
 class Rect;
 class RichEditorAbstractSpanResult;
 class SelectionInfo;
+class Shadow;
 class SpanBase;
 class TouchLocationInfo;
 struct MouseHistoricalPoint;
@@ -151,6 +152,7 @@ struct PreviewText;
 struct SwipeDirection;
 struct SymbolSpanStyle;
 struct TextBackgroundStyle;
+struct TextDecorationOptions;
 struct TextRange;
 struct TextStyleResult;
 
@@ -330,6 +332,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_arkui_component_enums_Color& dst, const Color& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Date& dst, const std::string& src);
+    void AssignArkValue(Ark_DecorationOptions& dst, const OHOS::Ace::TextDecorationOptions& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Dimension& dst, const Dimension& src, ConvContext *ctx);
     void AssignArkValue(Ark_Dimension& dst, const char* src);
     void AssignArkValue(Ark_Dimension& dst, const float& src);
@@ -370,10 +373,10 @@ namespace OHOS::Ace::NG::Converter {
     ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_ImageSpanAlignment& dst, const VerticalAlign& src);
     void AssignArkValue(Ark_Int32& dst, const Dimension& src);
-    void AssignArkValue(Ark_Int32& dst, const uint32_t& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_Int32& dst, const uint32_t& src);
     void AssignArkValue(Ark_IntentionCode& dst, const KeyIntention& src);
     void AssignArkValue(Ark_InteractionHand& dst, const ArkUI_InteractionHand& src);
-    void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src);
     void AssignArkValue(Ark_KeySource& dst, const SourceType& src);
     void AssignArkValue(Ark_KeyType& dst, const KeyAction& src);
     void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvContext *ctx);
@@ -412,7 +415,8 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src);
     void AssignArkValue(Ark_NavigationOperation& dst, const NG::NavigationOperation& src);
     void AssignArkValue(Ark_NavigationTitleMode& dst, const NavigationTitleMode& src);
-    void AssignArkValue(Ark_NavigationTransitionProxy& dst, const RefPtr<NavigationTransitionProxy>& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_NavigationTransitionProxy& dst,
+        const RefPtr<NavigationTransitionProxy>& src);
     void AssignArkValue(Ark_NestedScrollMode& dst, const NestedScrollMode& src);
     void AssignArkValue(Ark_Number& dst, const Dimension& src);
     void AssignArkValue(Ark_Number& dst, const double& src);
@@ -448,7 +452,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx);
     void AssignArkValue(Ark_ResourceStr &dst, const char *src, ConvContext *ctx);
-    void AssignArkValue(Ark_ResourceStr &dst, const std::string& src, ConvContext *ctx);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_ResourceStr &dst, const std::string& src, ConvContext *ctx);
     void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
     void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);
@@ -512,7 +516,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);
     void AssignArkValue(Ark_WordBreak& dst, const OHOS::Ace::WordBreak& src);
     void AssignArkValue(Ark_drawing_FontMetrics& dst, const FontMetrics& src, ConvContext *ctx);
-    void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_StrokeJoinStyle& dst, const OHOS::Ace::StrokeJoinStyle& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_GradientDirection& dst, const NG::GradientDirection& src);
 

@@ -72,7 +72,9 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
         return;
     }
     ACE_SCOPED_TRACE_COMMERCIAL("Router Page Transition Start");
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
+#endif
     pagePattern->TriggerPageTransition(
         [weak = WeakPtr<PagePattern>(pagePattern), animationId = stageManager->GetAnimationId(), transitionType]() {
             auto pagePattern = weak.Upgrade();
@@ -116,7 +118,9 @@ void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPt
         } else if (type == RouteType::POP) {
             routeType = "routerPopPage";
         }
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->OnRouterChange(pagePath, routeType);
+#endif
     }
     animationId_++;
     if (type == RouteType::PUSH) {
@@ -141,13 +145,12 @@ void StageManager::PageChangeCloseKeyboard()
     // close keyboard
 #if defined (ENABLE_STANDARD_INPUT)
     if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "StageManager FrameNode notNeedSoftKeyboard.");
         auto container = Container::Current();
         if (!container) {
             return;
         }
         if (!container->IsSceneBoardWindow()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not SceneBoardWindow.");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChangeCloseKB");
             InputMethodManager::GetInstance()->CloseKeyboard(false);
         }
     }
@@ -190,7 +193,9 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
         CHECK_NULL_RETURN(pageInfo, false);
         auto pagePath = pageInfo->GetFullPath();
         ACE_SCOPED_TRACE_COMMERCIAL("Router Main Page: %s", pagePath.c_str());
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->OnRouterChange(pagePath, "routerPushPage");
+#endif
     }
     if (needTransition) {
         pipeline->FlushPipelineImmediately();
@@ -816,6 +821,8 @@ void StageManager::PageTransitionReport(const std::string& srcFullPath, const st
     if (context) {
         windowId = context->GetWindowId();
     }
+#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().HandlePageTransition(pageTransitionInfo, windowId);
+#endif
 }
 } // namespace OHOS::Ace::NG

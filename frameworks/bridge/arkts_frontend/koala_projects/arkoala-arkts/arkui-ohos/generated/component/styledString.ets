@@ -132,22 +132,50 @@ export class DecorationStyle implements MaterializedBase {
     public readonly type: TextDecorationType
     public readonly color?: ResourceColor | undefined
     public readonly style?: TextDecorationStyle | undefined
+    public readonly thicknessScale?: double | undefined
+    public readonly options?: DecorationOptions | undefined
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, DecorationStyle.getFinalizer())
         this.type = this.getType()
         this.color = this.getColor()
         this.style = this.getStyle()
+        this.thicknessScale = this.getThicknessScale()
+        this.options = this.getOptions()
     }
     constructor(value: DecorationStyleInterface) {
-        this(MaterializedBaseTag.NOP, DecorationStyle.construct(value))
+        this(MaterializedBaseTag.NOP, DecorationStyle.construct0(value))
         this.type = this.getType()
         this.color = this.getColor()
         this.style = this.getStyle()
+        this.thicknessScale = this.getThicknessScale()
+        this.options = this.getOptions()
     }
-    static construct(value: DecorationStyleInterface): KPointer {
+    constructor(value: DecorationStyleInterface, options?: DecorationOptions) {
+        this(MaterializedBaseTag.NOP, DecorationStyle.construct1(value, options))
+        this.type = this.getType()
+        this.color = this.getColor()
+        this.style = this.getStyle()
+        this.thicknessScale = this.getThicknessScale()
+        this.options = this.getOptions()
+    }
+    static construct0(value: DecorationStyleInterface): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         DecorationStyleInterface_serializer.write(thisSerializer, value)
-        const retval = ArkUIGeneratedNativeModule._DecorationStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        const retval = ArkUIGeneratedNativeModule._DecorationStyle_construct0(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static construct1(value: DecorationStyleInterface, options?: DecorationOptions): KPointer {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        DecorationStyleInterface_serializer.write(thisSerializer, value)
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            DecorationOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval = ArkUIGeneratedNativeModule._DecorationStyle_construct1(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
@@ -162,6 +190,12 @@ export class DecorationStyle implements MaterializedBase {
     }
     private getStyle(): TextDecorationStyle | undefined {
         return this.getStyle_serialize()
+    }
+    private getThicknessScale(): double | undefined {
+        return this.getThicknessScale_serialize()
+    }
+    private getOptions(): DecorationOptions | undefined {
+        return this.getOptions_serialize()
     }
     private getType_serialize(): TextDecorationType {
         const retval = ArkUIGeneratedNativeModule._DecorationStyle_getType(this.peer!.ptr)
@@ -203,6 +237,30 @@ export class DecorationStyle implements MaterializedBase {
         const returnResult: TextDecorationStyle | undefined = buffer
         retvalDeserializer.dispose()
         return (returnResult as TextDecorationStyle | undefined)
+    }
+    private getThicknessScale_serialize(): double | undefined {
+        const retval = ArkUIGeneratedNativeModule._DecorationStyle_getThicknessScale(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: double | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readFloat64()
+        }
+        const returnResult: double | undefined = buffer
+        retvalDeserializer.dispose()
+        return (returnResult as double | undefined)
+    }
+    private getOptions_serialize(): DecorationOptions | undefined {
+        const retval = ArkUIGeneratedNativeModule._DecorationStyle_getOptions(this.peer!.ptr)
+        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType = retvalDeserializer.readInt8()!.toInt()
+        let buffer: DecorationOptions | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = DecorationOptions_serializer.read(retvalDeserializer)
+        }
+        const returnResult: DecorationOptions | undefined = buffer
+        retvalDeserializer.dispose()
+        return (returnResult as DecorationOptions | undefined)
     }
 }
 export class GestureStyleInternal {
@@ -1578,6 +1636,9 @@ export class UrlStyle implements MaterializedBase {
 export type StyledStringMarshallingValue = UserDataSpan;
 export type StyledStringMarshallCallback = (marshallableVal: StyledStringMarshallingValue) => ArrayBuffer;
 export type StyledStringUnmarshallCallback = (buf: ArrayBuffer) => StyledStringMarshallingValue;
+export interface DecorationOptions {
+    enableMultiType?: boolean;
+}
 export interface StyleOptions {
     start?: int32;
     length?: int32;
@@ -1607,6 +1668,7 @@ export interface DecorationStyleInterface {
     type?: TextDecorationType | undefined;
     color?: ResourceColor;
     style?: TextDecorationStyle;
+    thicknessScale?: double;
 }
 export interface GestureStyleInterface {
     onClick?: ((event: ClickEvent) => void);
@@ -1907,6 +1969,30 @@ export class CustomSpanMetrics_serializer {
         }
         const heightTmpResult: double | undefined = heightTmpBuf
         let value: CustomSpanMetrics = ({width: widthTmpResult, height: heightTmpResult} as CustomSpanMetrics)
+        return value
+    }
+}
+export class DecorationOptions_serializer {
+    public static write(buffer: SerializerBase, value: DecorationOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForEnableMultiType = value.enableMultiType
+        if (valueHolderForEnableMultiType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableMultiTypeTmpValue = valueHolderForEnableMultiType!
+            valueSerializer.writeBoolean(valueHolderForEnableMultiTypeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): DecorationOptions {
+        let valueDeserializer: DeserializerBase = buffer
+        const enableMultiTypeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let enableMultiTypeTmpBuf: boolean | undefined = undefined
+        if ((enableMultiTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableMultiTypeTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableMultiTypeTmpResult: boolean | undefined = enableMultiTypeTmpBuf
+        let value: DecorationOptions = ({enableMultiType: enableMultiTypeTmpResult} as DecorationOptions)
         return value
     }
 }
@@ -2217,6 +2303,14 @@ export class DecorationStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForThicknessScale = value.thicknessScale
+        if (valueHolderForThicknessScale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForThicknessScaleTmpValue = valueHolderForThicknessScale!
+            valueSerializer.writeFloat64(valueHolderForThicknessScaleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): DecorationStyleInterface {
         let valueDeserializer: DeserializerBase = buffer
@@ -2251,7 +2345,13 @@ export class DecorationStyleInterface_serializer {
             styleTmpBuf = TextDecorationStyle.fromValue(valueDeserializer.readInt32())
         }
         const styleTmpResult: TextDecorationStyle | undefined = styleTmpBuf
-        let value: DecorationStyleInterface = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult} as DecorationStyleInterface)
+        const thicknessScaleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let thicknessScaleTmpBuf: double | undefined = undefined
+        if ((thicknessScaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            thicknessScaleTmpBuf = valueDeserializer.readFloat64()
+        }
+        const thicknessScaleTmpResult: double | undefined = thicknessScaleTmpBuf
+        let value: DecorationStyleInterface = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult, thicknessScale: thicknessScaleTmpResult} as DecorationStyleInterface)
         return value
     }
 }

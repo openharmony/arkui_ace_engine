@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/web/web_data_detector_adapter.h"
 
 #include <algorithm>
+#include <string_view>
 #include <string>
 #include <vector>
 
@@ -33,17 +34,17 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string SEPARATE_STRING = "\n";
+constexpr std::string_view SEPARATE_STRING = "\n";
 const size_t SEP_LENGTH = 1;
 const size_t MAX_DETECT_LENGTH = (1 << 30);
 
-const std::string JS_DATA_DETECTOR = "arkWebEntityReplacer";
-const std::string JS_DATA_DETECTOR_METHOD = "handleNativeResult";
-const std::string DATA_DETECTOR_PROXY = "arkWebAceEntityReplacerProxy";
-const std::string PROXY_METHOD_PROCESS_REQUEST = "processRequest";
-const std::string PROXY_METHOD_CLICK_ENTITY = "clickEntity";
+constexpr std::string_view JS_DATA_DETECTOR = "arkWebEntityReplacer";
+constexpr std::string_view JS_DATA_DETECTOR_METHOD = "handleNativeResult";
+constexpr std::string_view DATA_DETECTOR_PROXY = "arkWebAceEntityReplacerProxy";
+constexpr std::string_view PROXY_METHOD_PROCESS_REQUEST = "processRequest";
+constexpr std::string_view PROXY_METHOD_CLICK_ENTITY = "clickEntity";
 
-const std::string ALL_TEXT_DETECT_TYPES = "phoneNum,url,email,location,datetime";
+constexpr std::string_view ALL_TEXT_DETECT_TYPES = "phoneNum,url,email,location,datetime";
 
 const std::vector<std::string> TEXT_DETECT_LIST = {
     "phoneNum" ,"url" ,"email", "location", "datetime"
@@ -88,7 +89,7 @@ WebDataDetectorAdapter::WebDataDetectorAdapter(const WeakPtr<Pattern>& pattern, 
         resultCache_ = AceType::MakeRefPtr<WebDataDetectorCache<std::string, DataDetectorResult>>(cacheSize);
     }
     TextDetectConfig defaultConfig;
-    defaultConfig.types = ALL_TEXT_DETECT_TYPES;
+    defaultConfig.types = std::string(ALL_TEXT_DETECT_TYPES);
     SetDataDetectorConfig(defaultConfig);
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
         TAG_LOGW(AceLogTag::ACE_WEB, "Using API Version less than 22");
@@ -150,7 +151,7 @@ std::string WebDataDetectorAdapter::GetSelectDataDetectorTypes()
     }
     if (config_.enable) {
         if (selectConfig_.useDDtypes) {
-            return config_.types.empty() ? ALL_TEXT_DETECT_TYPES : config_.types;
+            return config_.types.empty() ? std::string(ALL_TEXT_DETECT_TYPES) : config_.types;
         } else {
             return selectConfig_.types;
         }
@@ -208,7 +209,8 @@ void WebDataDetectorAdapter::InitJSProxy()
         return;
     }
     auto instanceId = Container::CurrentIdSafely();
-    std::vector<std::string> methods = { PROXY_METHOD_PROCESS_REQUEST, PROXY_METHOD_CLICK_ENTITY };
+    std::vector<std::string> methods = {
+        std::string(PROXY_METHOD_PROCESS_REQUEST), std::string(PROXY_METHOD_CLICK_ENTITY) };
     std::vector<std::function<void(const std::vector<std::string>&)>> funcs = {
         [weak = AceType::WeakClaim(this), instanceId](const std::vector<std::string>& param) {
             ContainerScope scope(instanceId);
@@ -227,7 +229,7 @@ void WebDataDetectorAdapter::InitJSProxy()
     };
     auto delegate = pattern->delegate_;
     CHECK_NULL_VOID(delegate);
-    delegate->RegisterNativeJavaScriptProxy(DATA_DETECTOR_PROXY, methods, funcs, false, "", hasInit_);
+    delegate->RegisterNativeJavaScriptProxy(std::string(DATA_DETECTOR_PROXY), methods, funcs, false, "", hasInit_);
     initDataDetectorProxy_ = true;
 }
 
@@ -245,7 +247,7 @@ void WebDataDetectorAdapter::ReleaseJSProxy()
     }
     auto delegate = pattern->delegate_;
     CHECK_NULL_VOID(delegate);
-    delegate->UnRegisterNativeArkJSFunction(DATA_DETECTOR_PROXY); // with stability problems
+    delegate->UnRegisterNativeArkJSFunction(std::string(DATA_DETECTOR_PROXY)); // with stability problems
     initDataDetectorProxy_ = false;
 }
 
@@ -328,7 +330,7 @@ std::string WebDataDetectorAdapter::PrepareDetectText(const std::string& request
             matches[index] = result; // overwrite
         } else {
             detectIds.emplace_back(index);
-            detectText += node.text + SEPARATE_STRING;
+            detectText += node.text + std::string(SEPARATE_STRING);
             auto wText = UtfUtils::Str8DebugToStr16(node.text);
             detectOffsets.emplace_back(maxDetectLength, maxDetectLength + wText.size());
             maxDetectLength += wText.size() + SEP_LENGTH;
@@ -455,7 +457,7 @@ void WebDataDetectorAdapter::HandleResultFromAI(const std::string& requestId, co
 
 void WebDataDetectorAdapter::SendResultToJS(const std::string& resultStr)
 {
-    auto jsCode = JS_DATA_DETECTOR + "." + JS_DATA_DETECTOR_METHOD + "('" + resultStr + "')";
+    auto jsCode = std::string(JS_DATA_DETECTOR) + "." + std::string(JS_DATA_DETECTOR_METHOD) + "('" + resultStr + "')";
     auto pattern = DynamicCast<WebPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
     pattern->RunJavascriptAsync(jsCode,  [](std::string result) {});

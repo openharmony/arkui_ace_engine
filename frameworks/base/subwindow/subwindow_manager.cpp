@@ -19,6 +19,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -30,7 +31,7 @@ std::mutex SubwindowManager::instanceMutex_;
 std::shared_ptr<SubwindowManager> SubwindowManager::instance_;
 thread_local RefPtr<Subwindow> SubwindowManager::currentSubwindow_;
 const std::unordered_set<SubwindowType> NORMAL_SUBWINDOW_TYPE = { SubwindowType::TYPE_MENU,
-    SubwindowType::TYPE_DIALOG, SubwindowType::TYPE_POPUP };
+    SubwindowType::TYPE_DIALOG, SubwindowType::TYPE_POPUP, SubwindowType::TYPE_SHEET };
 const std::unordered_set<std::string> DIALOG_AND_POPUP_TAG = { V2::POPUP_ETS_TAG, V2::DIALOG_ETS_TAG };
 
 std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
@@ -53,12 +54,17 @@ void SubwindowManager::AddContainerId(uint32_t windowId, int32_t containerId)
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Already have container of this windowId, windowId: %{public}u", windowId);
     }
     containerMap_.emplace(windowId, containerId);
+    reverseContainerMap_.emplace(containerId, windowId);
 }
 
 void SubwindowManager::RemoveContainerId(uint32_t windowId)
 {
     std::lock_guard<std::mutex> lock(mutex_);
-    containerMap_.erase(windowId);
+    auto it = containerMap_.find(windowId);
+    if (it != containerMap_.end()) {
+        reverseContainerMap_.erase(it->second);
+        containerMap_.erase(it);
+    }
 }
 
 int32_t SubwindowManager::GetContainerId(uint32_t windowId)
@@ -67,6 +73,17 @@ int32_t SubwindowManager::GetContainerId(uint32_t windowId)
     auto result = containerMap_.find(windowId);
     if (result != containerMap_.end()) {
         return result->second;
+    } else {
+        return -1;
+    }
+}
+
+int32_t SubwindowManager::GetWindowIdByContainerId(int32_t containerId)
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    auto result = reverseContainerMap_.find(containerId);
+    if (result != reverseContainerMap_.end()) {
+        return static_cast<int32_t>(result->second);
     } else {
         return -1;
     }
@@ -940,6 +957,13 @@ void SubwindowManager::CloseCustomDialogNG(int32_t dialogId)
     }
 }
 
+void SubwindowManager::CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback)
+{
+    auto subwindow = GetSubwindow(Container::CurrentId());
+    CHECK_NULL_VOID(subwindow);
+    subwindow->CloseCustomDialogNG(dialogId, std::move(callback));
+}
+
 void SubwindowManager::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "close customDialog ng enter");
@@ -1446,14 +1470,14 @@ void SubwindowManager::HideSubWindowNG()
     }
 }
 
-void SubwindowManager::HideToastSubWindowNG(int32_t instanceId)
+void SubwindowManager::HideSubWindowNG(int32_t instanceId)
 {
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide toast subwindow enter");
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "hide subwindow enter");
     RefPtr<Subwindow> subwindow = SubwindowManager::GetInstance()->GetSubwindowById(instanceId);
     if (subwindow) {
         subwindow->HideSubWindowNG();
     } else {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "fail to hide toast subwindow, subwindow is null.");
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "fail to hide subwindow, subwindow is null.");
     }
 }
 

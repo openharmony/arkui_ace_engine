@@ -142,22 +142,36 @@ ImageCodec DrawingImageData::Parse() const
         return { imageSize, ASTC_FRAME_COUNT, ImageRotateOrientation::UP };
     }
 
+    uint32_t errorCode = 0;
+    auto imageSource =
+        ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize(), errorCode);
+    if (imageSource) {
+        auto mimeType = imageSource->GetEncodedFormat();
+        if (mimeType == ImageSource::IMAGE_SVG_MIME) {
+            return { SizeF(-1, -1), 1, ImageRotateOrientation::UP, true };
+        }
+        if (!mimeType.empty()) {
+            auto originImageSize = imageSource->GetImageSize();
+            auto orientation = imageSource->GetImageOrientation();
+            auto frameCount = imageSource->GetFrameCount();
+            imageSize.SetSizeT(SizeF(originImageSize.first, originImageSize.second));
+            return { imageSize, frameCount, orientation };
+        }
+    }
+
     if (IsSvgData(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize())) {
         return { SizeF(-1, -1), 1, ImageRotateOrientation::UP, true };
     }
 
-    uint32_t errorCode = 0;
-    auto imageSource = 
-        ImageSource::Create(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize(), errorCode);
-    if (!imageSource) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, "image source create failed in drawing data parsing.");
-        return {};
+    if (imageSource) {
+        auto originImageSize = imageSource->GetImageSize();
+        auto orientation = imageSource->GetImageOrientation();
+        auto frameCount = imageSource->GetFrameCount();
+        imageSize.SetSizeT(SizeF(originImageSize.first, originImageSize.second));
+        return { imageSize, frameCount, orientation };
     }
-    auto originImageSize = imageSource->GetImageSize();
-    auto orientation = imageSource->GetImageOrientation();
-    auto frameCount = imageSource->GetFrameCount();
-    imageSize.SetSizeT(SizeF(originImageSize.first, originImageSize.second));
-    return { imageSize, frameCount, orientation };
+    TAG_LOGE(AceLogTag::ACE_IMAGE, "image source create failed in drawing data parsing.");
+    return {};
 }
 
 std::string DrawingImageData::ToString() const

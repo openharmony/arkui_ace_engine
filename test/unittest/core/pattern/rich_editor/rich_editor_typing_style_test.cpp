@@ -276,11 +276,11 @@ HWTEST_F(RichEditorTypingStyleTest, SetTypingStyle001, TestSize.Level0)
     richEditorPattern->previewTextRecord_.previewContent.clear();
 
     richEditorPattern->SetTypingStyle(TEST_TYPING_STYLE, std::nullopt);
-    EXPECT_TRUE(richEditorPattern->typingStyle_.has_value());
+    EXPECT_TRUE(richEditorPattern->styleManager_->HasTypingFontStyle());
     EXPECT_TRUE(richEditorPattern->styleManager_->typingFontStyle_.has_value());
 
     richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
-    EXPECT_FALSE(richEditorPattern->typingStyle_.has_value());
+    EXPECT_FALSE(richEditorPattern->styleManager_->HasTypingFontStyle());
 }
 
 /**
@@ -347,10 +347,10 @@ HWTEST_F(RichEditorTypingStyleTest, SetTypingStyle004, TestSize.Level0)
     richEditorPattern->previewTextRecord_.previewContent.clear();
 
     richEditorPattern->SetTypingStyle(TEST_TYPING_STYLE, std::nullopt);
-    EXPECT_TRUE(richEditorPattern->typingStyle_.has_value());
+    EXPECT_TRUE(richEditorPattern->styleManager_->HasTypingFontStyle());
 
     richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
-    EXPECT_FALSE(richEditorPattern->typingStyle_.has_value());
+    EXPECT_FALSE(richEditorPattern->styleManager_->HasTypingFontStyle());
     richEditorPattern->spans_.clear();
 }
 

@@ -1,5 +1,6 @@
+'use static'
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use static'
-
 import {
   Entry,
   Component,
@@ -44,17 +43,18 @@ class PageInfo {
 @Entry
 @Component
 struct Index {
-  @State routers: Array<PageInfo> = []
+  @State routers: PageInfo[] = [] as PageInfo[]
   private listScroller: ListScroller = new ListScroller()
 
   aboutToAppear(): void {
-    this.routers = []
+    this.routers = [] as PageInfo[]
     this.routers.push(new PageInfo('WaterFlow', 'pages/waterflow/WaterFlowMainPage'))
     this.routers.push(new PageInfo('Grid', 'pages/grid/GridMainPage'))
     this.routers.push(new PageInfo('Scroll', 'pages/scroll/ScrollMainPage'))
     this.routers.push(new PageInfo('List', 'pages/list/ListMainPage'))
     this.routers.push(new PageInfo('Refresh', 'pages/refresh/RefreshMainPage'))
     this.routers.push(new PageInfo('LazyVGrid', 'pages/lazyvgrid/LazyVGridMainPage'))
+    this.routers.push(new PageInfo('LazyHeaderFooter', 'pages/lazyheaderfooter/Index'))
   }
 
   build() {

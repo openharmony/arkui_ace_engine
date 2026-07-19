@@ -436,7 +436,7 @@ class ButtonModifier extends ButtonAttribute
 
 | 组件 | ace_engine Pattern | 知识库 | 功能 |
 |------|--------------------|--------|------|
-| Text | `pattern/text/text_pattern.cpp` | [Text](../pattern/text/Text_Knowledge_Base_CN.md) | 文本显示 |
+| Text | `pattern/text/text_pattern.cpp` | [Text](../kb/components/basic/text.md) | 文本显示 |
 | Image | `pattern/image/image_pattern.cpp` | [Image](../pattern/image/Image_Knowledge_Base.md) | 图片显示 |
 | TextInput | `pattern/text_input/text_input_pattern.cpp` | - | 单行文本输入 |
 | TextArea | `pattern/text_area/text_area_pattern.cpp` | - | 多行文本输入 |
@@ -584,13 +584,13 @@ class ButtonModifier extends ButtonAttribute
 | 组件 | Pattern | 知识库 | 功能 |
 |------|---------|--------|------|
 | Select | `pattern/select/select_pattern.cpp` | - | 下拉选择 |
-| DatePicker | `pattern/picker/date_picker_pattern.cpp` | [DatePicker](../pattern/picker/Date_Picker_Knowledge_Base.md) | 日期选择器 |
-| TimePicker | `pattern/time_picker/time_picker_pattern.cpp` | [TimePicker](../pattern/time_picker/Time_Picker_Knowledge_Base.md) | 时间选择器 |
-| TextPicker | `pattern/text_picker/text_picker_pattern.cpp` | [TextPicker](../pattern/text_picker/Text_Picker_Knowledge_Base.md) | 文本选择器 |
+| DatePicker | `pattern/date_picker/datepicker_pattern.cpp` | [DatePicker](../kb/components/selector/date_picker.md) | 日期选择器 |
+| TimePicker | `pattern/time_picker/timepicker_row_pattern.cpp` | [TimePicker](../kb/components/selector/time_picker.md) | 时间选择器 |
+| TextPicker | `pattern/text_picker/textpicker_pattern.cpp` | [TextPicker](../kb/components/selector/text_picker.md) | 文本选择器 |
 | CalendarPicker | `pattern/picker/calendar_picker_pattern.cpp` | [CalendarPicker](../pattern/calendar_picker/Calendar_Picker_Knowledge_Base.md) | 日历选择器 |
 | CheckboxGroup | `pattern/checkboxgroup/checkboxgroup_pattern.cpp` | - | 复选框组 |
 | Rating | `pattern/rating/rating_pattern.cpp` | - | 评分 |
-| UIPickerComponent | `pattern/picker/picker_pattern.cpp` | - | UI 选择器 |
+| UIPickerComponent | `pattern/container_picker/container_picker_pattern.cpp` | [UIPickerComponent](../kb/components/selector/ui_picker_component.md) | UI 选择器 |
 
 ### 3.4 形状组件 (7 个)
 
@@ -658,7 +658,7 @@ class ButtonModifier extends ButtonAttribute
 | 组件 | Pattern | 知识库 | 功能 |
 |------|---------|--------|------|
 | Video | `pattern/video/video_pattern.cpp` | - | 视频 |
-| ImageAnimator | `pattern/image_animator/image_animator_pattern.cpp` | [ImageAnimator](../pattern/image_animator/Image_Animator_Knowledge_Base.md) | 帧动画 |
+| ImageAnimator | `pattern/image_animator/image_animator_pattern.cpp` | [ImageAnimator](../kb/components/media/image_animator.md) | 帧动画 |
 | Canvas | `pattern/canvas/canvas_pattern.cpp` | - | 画布 |
 | XComponent | `pattern/xcomponent/xcomponent_pattern.cpp` | - | 原生组件容器 |
 

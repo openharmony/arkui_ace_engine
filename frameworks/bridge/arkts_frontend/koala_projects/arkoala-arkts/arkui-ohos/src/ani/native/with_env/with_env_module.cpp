@@ -34,6 +34,7 @@ constexpr ani_size KEY_VALUE_ARGC = 2;
 constexpr ArkUI_Int32 FRONTEND_DIRECTION_LTR = 0;
 constexpr ArkUI_Int32 FRONTEND_DIRECTION_RTL = 1;
 constexpr ArkUI_Int32 FRONTEND_DIRECTION_AUTO = 2;
+constexpr char DIRECTION_ENUM_NAME[] = "arkui.component.enums.Direction";
 
 ani_ref GetUndefinedRef(ani_env* env)
 {
@@ -236,6 +237,71 @@ ani_ref ConvertQueryResultToAniRef(ani_env* env, const ArkUIAniEnvironmentQueryR
     }
 }
 
+ani_object CreateCustomEnvValueResultObject(ani_env* env, bool isFind, ani_ref outResult)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+
+    ani_class resultClass = nullptr;
+    auto classString = "arkui.stateManagement.decorator.CustomEnvValueResult";
+    if (env->FindClass(classString, &resultClass) != ANI_OK || !resultClass) {
+        return nullptr;
+    }
+
+    ani_method ctor = nullptr;
+    if (env->Class_FindMethod(resultClass, "<ctor>", ":", &ctor) != ANI_OK || !ctor) {
+        return nullptr;
+    }
+
+    ani_object res = nullptr;
+    if (env->Object_New(resultClass, ctor, &res) != ANI_OK || !res) {
+        return nullptr;
+    }
+    if (env->Object_SetPropertyByName_Boolean(res, "isFind", isFind ? ANI_TRUE : ANI_FALSE) != ANI_OK) {
+        return nullptr;
+    }
+    if (isFind && outResult != nullptr &&
+        env->Object_SetPropertyByName_Ref(res, "outResult", outResult) != ANI_OK) {
+        env->Object_SetPropertyByName_Boolean(res, "isFind", ANI_FALSE);
+    }
+
+    return res;
+}
+
+std::optional<ani_ref> ConvertCustomUpdateValueToAniRef(ani_env* env,
+    const std::optional<ArkUIAniEnvironmentQueryResult>& value)
+{
+    if (!value) {
+        return std::nullopt;
+    }
+    return ConvertQueryResultToAniRef(env, *value);
+}
+
+std::optional<ani_ref> ConvertSystemValueToAniRef(ani_env* env,
+    const std::string& key, const std::optional<ArkUIAniEnvironmentQueryResult>& value)
+{
+    if (key == NG::ENV_KEY_DIRECTION) {
+        if (value) {
+            if (value->type != ARKUI_ANI_ENV_VALUE_TYPE_ENUM) {
+                return GetUndefinedRef(env);
+            }
+            return ConvertQueryResultToAniRef(env, *value);
+        }
+        ArkUIAniEnvironmentQueryResult result;
+        result.type = ARKUI_ANI_ENV_VALUE_TYPE_ENUM;
+        result.intValue = FRONTEND_DIRECTION_AUTO;
+        result.enumName = DIRECTION_ENUM_NAME;
+        return ConvertQueryResultToAniRef(env, result);
+    }
+    if (key == NG::ENV_KEY_FONT_SCALE) {
+        CHECK_NULL_RETURN(value, std::nullopt);
+        if (value->type != ARKUI_ANI_ENV_VALUE_TYPE_DOUBLE) {
+            return GetUndefinedRef(env);
+        }
+        return ConvertQueryResultToAniRef(env, *value);
+    }
+    return std::nullopt;
+}
+
 void CallEnvUpdateCallback(const std::shared_ptr<AniGlobalRefHolder>& callback, ani_vm* vm, const std::string& key,
     const std::optional<ArkUIAniEnvironmentQueryResult>& value, bool isCustom, const char* warning)
 {
@@ -259,8 +325,10 @@ void CallEnvUpdateCallback(const std::shared_ptr<AniGlobalRefHolder>& callback, 
         params[0] = reinterpret_cast<ani_ref>(keyString.value());
     }
     ani_size argc = 1;
-    if (value) {
-        params[1] = ConvertQueryResultToAniRef(env, *value);
+    auto valueArg = isCustom ? ConvertCustomUpdateValueToAniRef(env, value)
+                             : ConvertSystemValueToAniRef(env, key, value);
+    if (valueArg) {
+        params[1] = *valueArg;
         CHECK_NULL_VOID(params[1]);
         argc = KEY_VALUE_ARGC;
     }
@@ -335,17 +403,20 @@ void WithEnvRemoveCustomEnvProperty(
     withEnvModifier->removeCustomEnvProperty(ToNodeHandle(ptr), std::to_string(key));
 }
 
-ani_ref CustomNodeFindCustomEnvValueByKey(
+ani_object CustomNodeFindCustomEnvValueByKey(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_int key)
 {
+    CHECK_NULL_RETURN(env, nullptr);
+
     const auto* withEnvModifier = GetWithEnvModifier();
-    CHECK_NULL_RETURN(withEnvModifier, GetUndefinedRef(env));
-    CHECK_NULL_RETURN(withEnvModifier->findCustomEnvValueByKey, GetUndefinedRef(env));
+    CHECK_NULL_RETURN(withEnvModifier, nullptr);
+    CHECK_NULL_RETURN(withEnvModifier->findCustomEnvValueByKey, nullptr);
+
     ArkUIAniEnvironmentQueryResult result;
-    if (!withEnvModifier->findCustomEnvValueByKey(ToNodeHandle(ptr), std::to_string(key), result)) {
-        return GetUndefinedRef(env);
-    }
-    return ConvertQueryResultToAniRef(env, result);
+    bool isFind = withEnvModifier->findCustomEnvValueByKey(ToNodeHandle(ptr), std::to_string(key), result);
+    ani_ref outResult = isFind ? ConvertQueryResultToAniRef(env, result) : GetUndefinedRef(env);
+
+    return CreateCustomEnvValueResultObject(env, isFind && outResult != nullptr, outResult);
 }
 
 ani_ref CustomNodeFindSystemEnvValueByKey(
@@ -354,11 +425,14 @@ ani_ref CustomNodeFindSystemEnvValueByKey(
     const auto* withEnvModifier = GetWithEnvModifier();
     CHECK_NULL_RETURN(withEnvModifier, GetUndefinedRef(env));
     CHECK_NULL_RETURN(withEnvModifier->findSystemEnvValueByKey, GetUndefinedRef(env));
+    auto keyValue = KeyToString(env, key);
     ArkUIAniEnvironmentQueryResult result;
-    if (!withEnvModifier->findSystemEnvValueByKey(ToNodeHandle(ptr), KeyToString(env, key), result)) {
-        return GetUndefinedRef(env);
+    std::optional<ArkUIAniEnvironmentQueryResult> queryResult;
+    if (withEnvModifier->findSystemEnvValueByKey(ToNodeHandle(ptr), keyValue, result)) {
+        queryResult.emplace(std::move(result));
     }
-    return ConvertQueryResultToAniRef(env, result);
+    auto aniValue = ConvertSystemValueToAniRef(env, keyValue, queryResult);
+    return aniValue ? *aniValue : GetUndefinedRef(env);
 }
 
 void CustomNodeRegisterOnCustomEnvUpdate(

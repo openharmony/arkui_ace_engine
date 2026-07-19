@@ -34,7 +34,6 @@ public:
         themeManager_ = AceType::MakeRefPtr<::testing::NiceMock<MockThemeManager>>();
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
 
-        g_isResourceDecoupling = false;
         // assume using of test/mock/frameworks/core/common/mock_theme_constants.cpp in build
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))

@@ -32,9 +32,11 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 #include "core/common/event_manager.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/smart_gesture_property.h"
 #include "core/pipeline/base/element_register.h"
+#include "test/mock/frameworks/core/common/mock_theme_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -61,6 +63,12 @@ public:
         ++performScrollCount_;
     }
 
+    bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override
+    {
+        ++scrollToNodeCount_;
+        return scrollToNodeResult_;
+    }
+
     int32_t GetPerformScrollCount() const
     {
         return performScrollCount_;
@@ -71,9 +79,21 @@ public:
         return lastConfig_;
     }
 
+    int32_t GetScrollToNodeCount() const
+    {
+        return scrollToNodeCount_;
+    }
+
+    void SetScrollToNodeResult(bool result)
+    {
+        scrollToNodeResult_ = result;
+    }
+
 private:
     int32_t performScrollCount_ = 0;
     std::optional<ScrollingConfig> lastConfig_;
+    int32_t scrollToNodeCount_ = 0;
+    bool scrollToNodeResult_ = false;
 };
 
 RefPtr<FrameNode> CreateNode(const RefPtr<Pattern>& pattern)
@@ -438,6 +458,7 @@ HWTEST_F(SmartGestureManagerTestNg, BuildVisiblePrimaryActionNodes_InactiveNodeE
 }
 
 /**
+ * @tc.name: BuildVisiblePrimaryActionNodes_InactiveNodeNotOnMainTree
  * @tc.desc: BuildVisiblePrimaryActionNodes skips nodes that are not on the main tree.
  * @tc.type: FUNC
  */
@@ -912,5 +933,745 @@ HWTEST_F(SmartGestureManagerTestNg, ClearSelected, TestSize.Level1)
     manager_->selectedNode_ = node;
     manager_->ClearSelected();
     EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: BuildCenterHitPath_NullContext
+ * @tc.desc: BuildCenterHitPath returns empty vector when pipeline context is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildCenterHitPath_NullContext, TestSize.Level1)
+{
+    manager_->context_ = nullptr;
+    auto result = manager_->BuildCenterHitPath();
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BuildCenterHitPath_EmptyRootRect
+ * @tc.desc: BuildCenterHitPath returns empty vector when root node has no geometry rect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildCenterHitPath_EmptyRootRect, TestSize.Level1)
+{
+    auto result = manager_->BuildCenterHitPath();
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BuildSelectedAncestorPath_NullNode
+ * @tc.desc: BuildSelectedAncestorPath returns empty vector when input node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildSelectedAncestorPath_NullNode, TestSize.Level1)
+{
+    auto result = manager_->BuildSelectedAncestorPath(nullptr);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: BuildSelectedAncestorPath_NoAncestor
+ * @tc.desc: BuildSelectedAncestorPath returns empty vector when node has no scrollable ancestor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, BuildSelectedAncestorPath_NoAncestor, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    auto result = manager_->BuildSelectedAncestorPath(node);
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: RevealSelectedNodeIfNeeded_NonScrollableParent
+ * @tc.desc: RevealSelectedNodeIfNeeded does nothing when node parent is not scrollable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, RevealSelectedNodeIfNeeded_NonScrollableParent, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    manager_->RevealSelectedNodeIfNeeded(node);
+    EXPECT_FALSE(node->IsActive());
+}
+
+/**
+ * @tc.name: RevealSelectedNodeIfNeeded_ScrollableParentSuccess
+ * @tc.desc: RevealSelectedNodeIfNeeded calls ScrollToNode when parent has a scrollable pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, RevealSelectedNodeIfNeeded_ScrollableParentSuccess, TestSize.Level1)
+{
+    auto scrollablePattern = AceType::MakeRefPtr<TestScrollablePattern>();
+    scrollablePattern->SetScrollToNodeResult(true);
+    auto parent = CreateNode(scrollablePattern);
+    auto node = CreatePrimaryActionNode();
+    parent->AddChild(node);
+    MakeNodeActiveAndVisible(parent);
+    MakeNodeActiveAndVisible(node);
+    manager_->RevealSelectedNodeIfNeeded(node);
+    EXPECT_GT(scrollablePattern->GetScrollToNodeCount(), 0);
+}
+
+/**
+ * @tc.name: RevealSelectedNodeIfNeeded_ListItemTagNode
+ * @tc.desc: RevealSelectedNodeIfNeeded calls ScrollToNode on the scrollable parent when node is a ListItem.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, RevealSelectedNodeIfNeeded_ListItemTagNode, TestSize.Level1)
+{
+    auto listItemNode = FrameNode::CreateFrameNode(
+        V2::LIST_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto scrollablePattern = AceType::MakeRefPtr<TestScrollablePattern>();
+    auto parent = CreateNode(scrollablePattern);
+    parent->AddChild(listItemNode);
+    MakeNodeActiveAndVisible(parent);
+    MakeNodeActiveAndVisible(listItemNode);
+    manager_->RevealSelectedNodeIfNeeded(listItemNode);
+    EXPECT_EQ(scrollablePattern->GetScrollToNodeCount(), 1);
+}
+
+/**
+ * @tc.name: PaintSelectedNode_NullNode
+ * @tc.desc: PaintSelectedNode does not update selectedPaintedNode when node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, PaintSelectedNode_NullNode, TestSize.Level1)
+{
+    manager_->PaintSelectedNode(nullptr);
+    EXPECT_EQ(manager_->selectedPaintedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: PaintSelectedNode_NullRenderContext
+ * @tc.desc: PaintSelectedNode does not update selectedPaintedNode when node's renderContext is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, PaintSelectedNode_NullRenderContext, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    node->renderContext_ = nullptr;
+    manager_->PaintSelectedNode(node);
+    EXPECT_EQ(manager_->selectedPaintedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: PaintSelectedNode_NullAppTheme
+ * @tc.desc: PaintSelectedNode does not update selectedPaintedNode when theme manager returns null AppTheme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, PaintSelectedNode_NullAppTheme, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    manager_->PaintSelectedNode(node);
+    EXPECT_EQ(manager_->selectedPaintedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: PaintSelectedNode_FocusHubPath
+ * @tc.desc: PaintSelectedNode sets focus emphasis on focusHub path when node has a valid focusHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, PaintSelectedNode_FocusHubPath, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    auto context = MockPipelineContext::GetCurrent();
+    auto mockThemeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto appTheme = AceType::MakeRefPtr<AppTheme>();
+    EXPECT_CALL(*mockThemeManager, GetTheme(AppTheme::TypeId())).WillRepeatedly(Return(appTheme));
+    context->themeManager_ = mockThemeManager;
+    manager_->PaintSelectedNode(node);
+    EXPECT_NE(manager_->selectedPaintedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: PaintSelectedNode_RenderContextDirectPath
+ * @tc.desc: PaintSelectedNode sets emphasis directly on renderContext when node has no focusHub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, PaintSelectedNode_RenderContextDirectPath, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    node->focusHub_ = nullptr;
+    auto context = MockPipelineContext::GetCurrent();
+    auto mockThemeManager = AceType::MakeRefPtr<MockThemeManager>();
+    auto appTheme = AceType::MakeRefPtr<AppTheme>();
+    EXPECT_CALL(*mockThemeManager, GetTheme(AppTheme::TypeId())).WillRepeatedly(Return(appTheme));
+    context->themeManager_ = mockThemeManager;
+    manager_->PaintSelectedNode(node);
+    EXPECT_NE(manager_->selectedPaintedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: DispatchSmartGestureClick_SelectThenClick
+ * @tc.desc: ExecuteClickProposal selects node and triggers click callback when node matches selectedNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, DispatchSmartGestureClick_SelectThenClick, TestSize.Level1)
+{
+    bool clickCalled = false;
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    node->GetOrCreateGestureEventHub()->SetCommonClickEvent([&clickCalled](GestureEvent&) { clickCalled = true; });
+    manager_->AddPrimaryActionNode(node);
+    manager_->selectedNode_ = node;
+    KeyEvent event(KeyCode::KEY_ENTER, KeyAction::DOWN);
+
+    auto result = manager_->ExecuteClickProposal(node, event);
+
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(clickCalled);
+}
+
+/**
+ * @tc.name: DispatchSmartGestureClick_NullGeometryNode
+ * @tc.desc: ExecuteClickProposal returns false when node's geometryNode is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, DispatchSmartGestureClick_NullGeometryNode, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    node->GetOrCreateGestureEventHub()->SetCommonClickEvent([](GestureEvent&) {});
+    manager_->AddPrimaryActionNode(node);
+    manager_->selectedNode_ = node;
+    node->geometryNode_ = nullptr;
+    KeyEvent event(KeyCode::KEY_ENTER, KeyAction::DOWN);
+
+    auto result = manager_->ExecuteClickProposal(node, event);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: RequestSelected_NullContext
+ * @tc.desc: RequestSelected does not select any node when pipeline context is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, RequestSelected_NullContext, TestSize.Level1)
+{
+    manager_->context_ = nullptr;
+    manager_->RequestSelected("test_id");
+    EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: RequestSelected_NodeNotFound
+ * @tc.desc: RequestSelected does not select any node when inspectorId is not found in registry.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, RequestSelected_NodeNotFound, TestSize.Level1)
+{
+    manager_->RequestSelected("nonexistent_id");
+    EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: RequestSelected_NodeNotActive
+ * @tc.desc: RequestSelected does not select node when primary action is not enabled on it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, RequestSelected_NodeNotActive, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode(false);
+    MakeNodeActiveAndVisible(node);
+    MakeNodeClickable(node);
+    node->UpdateInspectorId("test_not_active");
+    manager_->RequestSelected("test_not_active");
+    EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: RequestSelected_NodeNotClickable
+ * @tc.desc: RequestSelected does not select node when it has no clickable event hub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, RequestSelected_NodeNotClickable, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    node->UpdateInspectorId("test_not_clickable");
+    manager_->AddPrimaryActionNode(node);
+    manager_->RequestSelected("test_not_clickable");
+    EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: RequestSelected_Valid
+ * @tc.desc: RequestSelected selects node when it is active, clickable, and found by inspectorId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, RequestSelected_Valid, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    MakeNodeClickable(node);
+    node->UpdateInspectorId("test_valid_id");
+    manager_->AddPrimaryActionNode(node);
+
+    manager_->RequestSelected("test_valid_id");
+
+    EXPECT_NE(manager_->selectedNode_.Upgrade(), nullptr);
+    EXPECT_EQ(manager_->selectedNode_.Upgrade()->GetId(), node->GetId());
+}
+
+/**
+ * @tc.name: UpdateSelectedNodePaintIfNeeded_NullNode
+ * @tc.desc: UpdateSelectedNodePaintIfNeeded does not clear selectedNode when input node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, UpdateSelectedNodePaintIfNeeded_NullNode, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    manager_->selectedNode_ = node;
+    manager_->UpdateSelectedNodePaintIfNeeded(nullptr);
+    EXPECT_NE(manager_->selectedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateSelectedNodePaintIfNeeded_NullSelectedNode
+ * @tc.desc: UpdateSelectedNodePaintIfNeeded does nothing when selectedNode weak ptr is already null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, UpdateSelectedNodePaintIfNeeded_NullSelectedNode, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    manager_->UpdateSelectedNodePaintIfNeeded(node);
+    EXPECT_EQ(manager_->selectedNode_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateSelectedNodePaintIfNeeded_DifferentNode
+ * @tc.desc: UpdateSelectedNodePaintIfNeeded clears painted node when input differs from selectedNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, UpdateSelectedNodePaintIfNeeded_DifferentNode, TestSize.Level1)
+{
+    auto selectedNode = CreatePrimaryActionNode();
+    auto otherNode = CreatePrimaryActionNode();
+    manager_->selectedNode_ = selectedNode;
+    manager_->UpdateSelectedNodePaintIfNeeded(otherNode);
+    EXPECT_EQ(manager_->selectedNode_.Upgrade()->GetId(), selectedNode->GetId());
+}
+
+/**
+ * @tc.name: UpdateSelectedNodePaintIfNeeded_SameNode
+ * @tc.desc: UpdateSelectedNodePaintIfNeeded paints node when input matches selectedNode and node is valid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, UpdateSelectedNodePaintIfNeeded_SameNode, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    MakeNodeClickable(node);
+    manager_->AddPrimaryActionNode(node);
+    manager_->selectedNode_ = node;
+    SmartGestureShortcutConfig selectableConfig { SmartGestureShortcutAction::PRIMARY, true, true };
+    node->GetOrCreateSmartGestureProperty()->SetSmartGestureShortcut(selectableConfig);
+    manager_->UpdateSelectedNodePaintIfNeeded(node);
+    EXPECT_EQ(manager_->selectedNode_.Upgrade()->GetId(), node->GetId());
+}
+
+/**
+ * @tc.name: ValidateProposal_NoneAction
+ * @tc.desc: ValidateProposal returns true for NONE_ACTION proposal type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_NoneAction, TestSize.Level1)
+{
+    SmartGestureProposal proposal(SmartGestureProposalType::NONE_ACTION, SmartGestureOperateIntention::TAP);
+    auto result = manager_->ValidateProposal(proposal);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ValidateProposal_BackPress
+ * @tc.desc: ValidateProposal returns true for BACK_PRESS proposal type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_BackPress, TestSize.Level1)
+{
+    SmartGestureProposal proposal(SmartGestureProposalType::BACK_PRESS, SmartGestureOperateIntention::BACK_PRESS);
+    auto result = manager_->ValidateProposal(proposal);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ValidateProposal_SelectWithNullNode
+ * @tc.desc: ValidateProposal returns false for SELECT type when target node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_SelectWithNullNode, TestSize.Level1)
+{
+    SmartGestureProposal proposal(SmartGestureProposalType::SELECT, SmartGestureOperateIntention::SLIDE_FORWARD);
+    auto result = manager_->ValidateProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateProposal_ClickWithValidNode
+ * @tc.desc: ValidateProposal returns true for CLICK type with a valid, active, clickable node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_ClickWithValidNode, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    MakeNodeClickable(node);
+    manager_->AddPrimaryActionNode(node);
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::CLICK, SmartGestureOperateIntention::TAP, node);
+    auto result = manager_->ValidateProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateProposal_SelectWithValidNode
+ * @tc.desc: ValidateProposal returns true for SELECT type with a valid, active, clickable node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_SelectWithValidNode, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    MakeNodeClickable(node);
+    manager_->AddPrimaryActionNode(node);
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SELECT, SmartGestureOperateIntention::SLIDE_FORWARD, node);
+    auto result = manager_->ValidateProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateProposal_ScrollWithValidConfig
+ * @tc.desc: ValidateProposal returns true for SCROLL type with valid scrolling config and scrollable pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateProposal_ScrollWithValidConfig, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<TestScrollablePattern>());
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    config.distance = TEST_SCROLL_DISTANCE;
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
+    auto result = manager_->ValidateProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateTargetNode_NullNode
+ * @tc.desc: ValidateTargetNode returns false when input node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateTargetNode_NullNode, TestSize.Level1)
+{
+    auto result = manager_->ValidateTargetNode(nullptr);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateTargetNode_NullContext
+ * @tc.desc: ValidateTargetNode returns false when pipeline context does not match node's context.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateTargetNode_NullContext, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    manager_->context_ = nullptr;
+    auto result = manager_->ValidateTargetNode(node);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateTargetNode_NotOnMainTree
+ * @tc.desc: ValidateTargetNode returns false when node is not on the main tree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateTargetNode_NotOnMainTree, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    auto result = manager_->ValidateTargetNode(node);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateTargetNode_NotVisible
+ * @tc.desc: ValidateTargetNode returns false when node has no visible rect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateTargetNode_NotVisible, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    node->onMainTree_ = true;
+    auto result = manager_->ValidateTargetNode(node);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateTargetNode_ValidNode
+ * @tc.desc: ValidateTargetNode returns true when node is active, on main tree, and visible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateTargetNode_ValidNode, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    manager_->AddPrimaryActionNode(node);
+    auto result = manager_->ValidateTargetNode(node);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateClickProposal_NullNode
+ * @tc.desc: ValidateClickProposal returns false when proposal target node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateClickProposal_NullNode, TestSize.Level1)
+{
+    SmartGestureProposal proposal(SmartGestureProposalType::CLICK, SmartGestureOperateIntention::TAP);
+    auto result = manager_->ValidateClickProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateClickProposal_NotActive
+ * @tc.desc: ValidateClickProposal returns false when node's primary action is not enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateClickProposal_NotActive, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode(false);
+    MakeNodeActiveAndVisible(node);
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::CLICK, SmartGestureOperateIntention::TAP, node);
+    auto result = manager_->ValidateClickProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateClickProposal_NotClickable
+ * @tc.desc: ValidateClickProposal returns false when node has no clickable event hub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateClickProposal_NotClickable, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::CLICK, SmartGestureOperateIntention::TAP, node);
+    auto result = manager_->ValidateClickProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateClickProposal_Valid
+ * @tc.desc: ValidateClickProposal returns true when node is active, clickable, and on main tree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateClickProposal_Valid, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    MakeNodeClickable(node);
+    manager_->AddPrimaryActionNode(node);
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::CLICK, SmartGestureOperateIntention::TAP, node);
+    auto result = manager_->ValidateClickProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateSelectProposal_NullNode
+ * @tc.desc: ValidateSelectProposal returns false when proposal target node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateSelectProposal_NullNode, TestSize.Level1)
+{
+    SmartGestureProposal proposal(SmartGestureProposalType::SELECT, SmartGestureOperateIntention::SLIDE_FORWARD);
+    auto result = manager_->ValidateSelectProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateSelectProposal_NotActive
+ * @tc.desc: ValidateSelectProposal returns false when node's primary action is not enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateSelectProposal_NotActive, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode(false);
+    MakeNodeActiveAndVisible(node);
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SELECT, SmartGestureOperateIntention::SLIDE_FORWARD, node);
+    auto result = manager_->ValidateSelectProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateSelectProposal_NotClickable
+ * @tc.desc: ValidateSelectProposal returns false when node has no clickable event hub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateSelectProposal_NotClickable, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SELECT, SmartGestureOperateIntention::SLIDE_FORWARD, node);
+    auto result = manager_->ValidateSelectProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateSelectProposal_Valid
+ * @tc.desc: ValidateSelectProposal returns true when node is active, clickable, and on main tree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateSelectProposal_Valid, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    MakeNodeClickable(node);
+    manager_->AddPrimaryActionNode(node);
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SELECT, SmartGestureOperateIntention::SLIDE_FORWARD, node);
+    auto result = manager_->ValidateSelectProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateScrollProposal_NullNode
+ * @tc.desc: ValidateScrollProposal returns false when proposal target node is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateScrollProposal_NullNode, TestSize.Level1)
+{
+    ScrollingConfig config;
+    config.distance = TEST_SCROLL_DISTANCE;
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, nullptr, config);
+    auto result = manager_->ValidateScrollProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateScrollProposal_NoScrollingConfig
+ * @tc.desc: ValidateScrollProposal returns false when proposal has no scrollingConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateScrollProposal_NoScrollingConfig, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<TestScrollablePattern>());
+    MakeNodeActiveAndVisible(node);
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node);
+    auto result = manager_->ValidateScrollProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateScrollProposal_EmptyScrollingConfig
+ * @tc.desc: ValidateScrollProposal returns false when scrollingConfig has zero count and distance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateScrollProposal_EmptyScrollingConfig, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<TestScrollablePattern>());
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
+    auto result = manager_->ValidateScrollProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateScrollProposal_NoPattern
+ * @tc.desc: ValidateScrollProposal returns false when node has no scrollable pattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateScrollProposal_NoPattern, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNode();
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    config.distance = TEST_SCROLL_DISTANCE;
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
+    auto result = manager_->ValidateScrollProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateScrollProposal_NotScrollablePattern
+ * @tc.desc: ValidateScrollProposal returns false when node's pattern is not a ScrollablePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateScrollProposal_NotScrollablePattern, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<Pattern>());
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    config.distance = TEST_SCROLL_DISTANCE;
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
+    auto result = manager_->ValidateScrollProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateScrollProposal_ValidWithCount
+ * @tc.desc: ValidateScrollProposal returns true when scrollingConfig has valid count.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateScrollProposal_ValidWithCount, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<TestScrollablePattern>());
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    config.count = 3;
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
+    auto result = manager_->ValidateScrollProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateScrollProposal_ValidWithDistance
+ * @tc.desc: ValidateScrollProposal returns true when scrollingConfig has valid distance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateScrollProposal_ValidWithDistance, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<TestScrollablePattern>());
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    config.distance = TEST_SCROLL_DISTANCE;
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
+    auto result = manager_->ValidateScrollProposal(proposal);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ValidateScrollProposal_ValidWithBoth
+ * @tc.desc: ValidateScrollProposal returns true when scrollingConfig has both valid count and distance.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartGestureManagerTestNg, ValidateScrollProposal_ValidWithBoth, TestSize.Level1)
+{
+    auto node = CreatePrimaryActionNodeWithPattern(AceType::MakeRefPtr<TestScrollablePattern>());
+    MakeNodeActiveAndVisible(node);
+    ScrollingConfig config;
+    config.count = 3;
+    config.distance = TEST_SCROLL_DISTANCE;
+    SmartGestureProposal proposal(
+        SmartGestureProposalType::SCROLL, SmartGestureOperateIntention::SLIDE_FORWARD, node, config);
+    auto result = manager_->ValidateScrollProposal(proposal);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG

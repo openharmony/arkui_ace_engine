@@ -17,6 +17,7 @@
 #include "core/common/container.h"
 #include <cmath>
 #include <regex>
+#include <string_view>
 
 #include "canvas_renderer_peer_impl.h"
 
@@ -28,6 +29,7 @@
 #include "canvas_pattern_peer.h"
 
 #include "base/error/error_code.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "core/pipeline/base/constants.h"
 
@@ -59,7 +61,6 @@ constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr double DIFF = 1e-10;
 constexpr uint32_t PIXEL_SIZE = 4;
-constexpr int32_t ALPHA_INDEX = 3;
 constexpr auto TEXT_FONT_STYLE_ITALIC = "italic";
 constexpr uint32_t RGB_SUB_SIZE = 3;
 constexpr uint32_t RGBA_SUB_SIZE = 4;
@@ -78,7 +79,7 @@ const std::map<std::string, LineJoinStyle> LINE_JOIN_MAP = {
     { "round", LineJoinStyle::ROUND },
 };
 const double ERROR_VALUE = 0;
-const std::string ERROR_STRING = "";
+constexpr std::string_view ERROR_STRING = "";
 const auto MULTI_BY_2 = 2;
 constexpr size_t EVEN_BY_2 = 2;
 const double DEFAULT_MITER_LIMIT = 10.0;
@@ -117,6 +118,7 @@ inline std::vector<std::string> ConvertStrToFontFamilies(const std::string& fami
     }
     return fontFamilies;
 }
+
 static bool MatchColorWithRGBA(const std::string& colorStr, Color& color)
 {
     if (colorStr.rfind("rgb(", 0) != 0 && colorStr.rfind("rgba(", 0) != 0) {
@@ -170,8 +172,6 @@ static bool ProcessColorFromString(std::string colorStr, Color& color)
 } // namespace
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
-std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> CanvasRendererPeerImpl::pattern_;
-unsigned int CanvasRendererPeerImpl::patternCount_ = 0;
 CanvasRendererPeerImpl::CanvasRendererPeerImpl()
 {
     instanceId_ = Container::CurrentIdSafely();
@@ -359,11 +359,8 @@ void CanvasRendererPeerImpl::CreatePattern(
     auto pixelMap = bitmap->GetPixelMap();
     pattern->SetPixelMap(pixelMap);
 #endif
-    pattern_[patternCount_] = pattern;
-    canvasPattern->SetCanvasRenderer(AceType::WeakClaim(this));
-    canvasPattern->SetId(patternCount_);
     canvasPattern->SetUnit(GetUnit());
-    patternCount_++;
+    canvasPattern->SetPattern(pattern);
 }
 std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateRadialGradient(const RadialGradientParam& params)
 {
@@ -678,13 +675,6 @@ void CanvasRendererPeerImpl::SetTransform(const std::optional<Matrix2DPeer*>& op
     auto param = matrix->GetTransform();
     renderingContext2DModel_->SetTransform(param, false);
 }
-void CanvasRendererPeerImpl::SetTransform(unsigned int id, const TransformParam& transform)
-{
-    CHECK_NULL_VOID(renderingContext2DModel_);
-    if (id >= 0 && id <= patternCount_) {
-        renderingContext2DModel_->SetTransform(pattern_[id], transform);
-    }
-}
 void CanvasRendererPeerImpl::Transform(TransformParam& param)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
@@ -715,17 +705,18 @@ void CanvasRendererPeerImpl::SetPixelMap(const RefPtr<Ace::PixelMap>& pixelMap)
 void CanvasRendererPeerImpl::TransferFromImageBitmap(ImageBitmapPeer* bitmap)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_VOID(canvasRenderingContext2DModel);
     CHECK_NULL_VOID(bitmap);
+    auto* bridge = GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->transferCanvasRenderingContext2DFromImageBitmap);
 #ifdef PIXEL_MAP_SUPPORTED
     auto pixelMap = bitmap->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    canvasRenderingContext2DModel->TransferFromImageBitmap(pixelMap);
+    bridge->transferCanvasRenderingContext2DFromImageBitmap(renderingContext2DModel_, pixelMap);
 #else
     auto imageData = bitmap->GetImageData();
     CHECK_NULL_VOID(imageData);
-    canvasRenderingContext2DModel->TransferFromImageBitmap(imageData);
+    bridge->transferCanvasRenderingContext2DFromImageBitmap(renderingContext2DModel_, imageData);
 #endif
 }
 void CanvasRendererPeerImpl::SaveLayer()
@@ -823,8 +814,9 @@ void CanvasRendererPeerImpl::SetFillStyle(CanvasPatternPeer* canvasPatternPeer)
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasPatternPeer);
-    auto id = canvasPatternPeer->GetId();
-    renderingContext2DModel_->SetFillPattern(GetPatternPtr(id));
+    auto pattern = canvasPatternPeer->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    renderingContext2DModel_->SetFillPattern(pattern);
     fillStyleType_ = ParamType::CANVAS_PATTERN;
     fillStylePattern_ = canvasPatternPeer;
 }
@@ -870,8 +862,9 @@ void CanvasRendererPeerImpl::SetStrokeStyle(CanvasPatternPeer* canvasPatternPeer
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     CHECK_NULL_VOID(canvasPatternPeer);
-    auto id = canvasPatternPeer->GetId();
-    renderingContext2DModel_->SetStrokePattern(GetPatternPtr(id));
+    auto pattern = canvasPatternPeer->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    renderingContext2DModel_->SetStrokePattern(pattern);
     strokeStyleType_ = ParamType::CANVAS_PATTERN;
     strokeStylePattern_ = canvasPatternPeer;
 }
@@ -1136,7 +1129,7 @@ void CanvasRendererPeerImpl::SetDensity()
 std::string CanvasRendererPeerImpl::ToDataURL(
     const std::optional<std::string>& optType, const std::optional<float>& optQuality)
 {
-    CHECK_NULL_RETURN(renderingContext2DModel_, ERROR_STRING);
+    CHECK_NULL_RETURN(renderingContext2DModel_, std::string(ERROR_STRING));
     std::string type;
     double quality = DEFAULT_QUALITY;
     if (optType) {
@@ -1211,20 +1204,6 @@ Dimension CanvasRendererPeerImpl::GetDimensionValue(const Dimension& dimension)
         return Dimension(dimension.Value() * GetDensity(true));
     }
     return Dimension(0.0);
-}
-Ace::Pattern CanvasRendererPeerImpl::GetPattern(unsigned int id)
-{
-    if (id < 0 || id >= pattern_.size()) {
-        return Ace::Pattern();
-    }
-    return *(pattern_[id].get());
-}
-std::shared_ptr<Ace::Pattern> CanvasRendererPeerImpl::GetPatternPtr(int32_t id)
-{
-    if (id < 0 || id >= static_cast<int32_t>(pattern_.size())) {
-        return std::shared_ptr<Ace::Pattern>();
-    }
-    return pattern_[id];
 }
 void CanvasRendererPeerImpl::ParseImageData(Ace::ImageData& imageData, const PutImageDataParam& params)
 {

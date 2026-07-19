@@ -58,7 +58,7 @@ ACE_FORCE_EXPORT OptionalSizeF ConvertToOptionalSize(const CalcSize& size, const
     const std::pair<std::vector<std::string>, std::vector<std::string>>& calcRpnexp =
         std::pair<std::vector<std::string>, std::vector<std::string>>());
 
-SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSize);
+ACE_FORCE_EXPORT SizeF ConstrainSize(const SizeF& size, const SizeF& minSize, const SizeF& maxSize);
 
 PaddingPropertyF ConvertToPaddingPropertyF(const std::unique_ptr<PaddingProperty>& padding,
     const ScaleProperty& scaleProperty, float percentReference = -1.0f, bool roundPixel = true,
@@ -113,7 +113,8 @@ ACE_FORCE_EXPORT void AddPaddingToSize(const PaddingPropertyF& padding, Optional
 
 ACE_FORCE_EXPORT void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
-PaddingPropertyF AdjacentExpandToRect(RectF& adjustingRect, PaddingPropertyF& frameExpand, RectF& frameRect);
+ACE_FORCE_EXPORT PaddingPropertyF AdjacentExpandToRect(
+    RectF& adjustingRect, PaddingPropertyF& frameExpand, RectF& frameRect);
 
 ACE_FORCE_EXPORT float GetCrossAxisSize(const SizeF& size, Axis axis);
 
@@ -127,7 +128,7 @@ ACE_FORCE_EXPORT std::optional<float> GetCrossAxisSize(const OptionalSizeF& size
 
 ACE_FORCE_EXPORT std::optional<float> GetMainAxisSize(const OptionalSizeF& size, Axis axis);
 
-void SetCrossAxisSize(float value, Axis axis, OptionalSizeF& size);
+ACE_FORCE_EXPORT void SetCrossAxisSize(float value, Axis axis, OptionalSizeF& size);
 
 void SetMainAxisSize(float value, Axis axis, OptionalSizeF& size);
 

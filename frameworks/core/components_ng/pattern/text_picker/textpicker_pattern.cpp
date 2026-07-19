@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,15 +19,16 @@
 #include <functional>
 #include <securec.h>
 
-#include "base/i18n/localization.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/i18n/localization.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -35,10 +36,10 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
-#include "core/components_ng/render/drawing.h"
-#include "core/common/resource/resource_object.h"
-#include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/render/drawing.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -171,9 +172,10 @@ void TextPickerPattern::UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonN
     CHECK_NULL_VOID(pickerTheme);
     std::string lettersStr = isNext ? pickerTheme->GetNextText() : pickerTheme->GetPrevText();
     updateNodeLayout->UpdateContent(lettersStr);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateLabel(lettersStr);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    buttonModifier->updateLabelToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), lettersStr);
 
     UpdateButtonMargin(buttonNode, dialogTheme, isNext);
     updateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -192,9 +194,10 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
     confirmNodeLayout->UpdateContent(dialogTheme->GetConfirmText());
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonConfirmLayoutProperty);
-    buttonConfirmLayoutProperty->UpdateLabel(dialogTheme->GetConfirmText());
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    buttonModifier->updateLabelToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonConfirmNode)), dialogTheme->GetConfirmText());
     UpdateButtonMargin(buttonConfirmNode, dialogTheme, true);
     confirmNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -206,9 +209,8 @@ void TextPickerPattern::OnLanguageConfigurationUpdate()
     CHECK_NULL_VOID(cancelNodeLayout);
     cancelNodeLayout->UpdateContent(dialogTheme->GetCancelText());
     UpdateButtonMargin(buttonCancelNode, dialogTheme, false);
-    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonCancelLayoutProperty);
-    buttonCancelLayoutProperty->UpdateLabel(dialogTheme->GetCancelText());
+    buttonModifier->updateLabelToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonCancelNode)), dialogTheme->GetCancelText());
     cancelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     auto buttonForwardNode = weakButtonForward_.Upgrade();
@@ -257,9 +259,10 @@ void TextPickerPattern::SetButtonIdeaSize()
         if (!useButtonFocusArea_) {
             if (!columnPattern->isHover()) {
                 buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-                auto buttonNodeLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-                if (buttonNodeLayoutProperty) {
-                    buttonNodeLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+                auto* textPickerBtnModifier = NodeModifier::GetButtonCustomModifier();
+                if (textPickerBtnModifier) {
+                    textPickerBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(
+                        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), true);
                 }
             }
         } else {
@@ -282,14 +285,18 @@ void TextPickerPattern::CalculateButtonMetrics(RefPtr<UINode> child, RefPtr<Pick
     auto width = stackNode->GetGeometryNode()->GetFrameSize().Width();
     auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty();
     CHECK_NULL_VOID(buttonLayoutProperty);
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
     if (layoutProperty->HasSelectedBorderRadius()) {
-        buttonLayoutProperty->UpdateBorderRadius(layoutProperty->GetSelectedBorderRadiusValue());
+        buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, layoutProperty->GetSelectedBorderRadiusValue());
     } else {
-        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(selectorItemRadius_));
+        buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, BorderRadiusProperty(selectorItemRadius_));
     }
     auto buttonHeight = CalculateHeight() - PRESS_INTERVAL.ConvertToPx() * (useButtonFocusArea_ ? 1 : RATE);
     if (resizeFlag_) {
@@ -1771,8 +1778,10 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     if (contentRowNode) {
         auto layoutRenderContext = contentRowNode->GetRenderContext();
         CHECK_NULL_VOID(layoutRenderContext);
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-            !DialogView::IsSupportBlurStyle(contentRowNode, isShowInSubWindow_)) {
+        const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+        bool isSupportBlurStyle =
+            dialogInnerModifier ? dialogInnerModifier->isSupportBlurStyle(contentRowNode, isShowInSubWindow_) : false;
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) || !isSupportBlurStyle) {
             layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
         }
     }

@@ -16,9 +16,12 @@
 #ifndef FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H
 #define FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H
 
+#include <atomic>
+
 #include "iremote_proxy.h"
 #include "ui_content_errors.h"
 #include "ui_content_service_interface.h"
+#include "ui_session_request_guard.h"
 #include "ui_report_stub.h"
 
 namespace OHOS::Ace {
@@ -100,11 +103,28 @@ public:
         int32_t webId,
         const std::string& request,
         const GetWebInfoByRequestCallback& finishCallback) override;
+    virtual int32_t GetPageTranslateText(
+        const std::string& request, const PageTranslateTextCallback& eventCallback) override;
+    virtual int32_t StartPageTranslate(
+        const std::string& request, const PageTranslateTextCallback& eventCallback) override;
+    virtual int32_t EndPageTranslate() override;
+    virtual int32_t ResetPageTranslate(int32_t nodeId = -1) override;
+    virtual int32_t SendPageTranslateResult(const std::string& result) override;
+    virtual int32_t GetCurrentAbilityLanguageInfo(std::string& language, std::string& region) override;
+    virtual int32_t RegisterPageSceneRules(
+        const std::string& ruleJson, const PageSceneEventCallback& eventCallback) override;
+    virtual int32_t UnregisterPageSceneRules(const std::string& ruleSetId) override;
+    virtual int32_t GetPageScene(
+        const std::string& ruleJsonOrRuleSetId, const PageSceneEventCallback& eventCallback) override;
 
 private:
+    int32_t SendPageTranslateRequest(uint32_t code, const char* caller, const std::string& request,
+        const PageTranslateTextCallback* eventCallback, bool isContinuous);
+    int32_t SendPageTranslateControlRequest(uint32_t code, const char* caller, int32_t nodeId = -1);
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
     sptr<UiReportStub> report_ = nullptr;
     bool isConnected_ = false;
+    std::atomic_bool currentAbilityLanguageInfoPending_ = false;
 };
 
 class ACE_FORCE_EXPORT UiContentProxyRecipient : public IRemoteObject::DeathRecipient {

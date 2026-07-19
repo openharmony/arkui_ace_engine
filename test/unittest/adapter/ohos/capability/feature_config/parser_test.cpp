@@ -16,23 +16,81 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+#include "adapter/ohos/capability/feature_config/extra_modules/extra_modules_manager_impl.h"
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
 #include "adapter/ohos/capability/feature_config/features/sync_load_parser.h"
 #include "adapter/ohos/capability/feature_config/features/ui_node_gc_params_parser.h"
 #undef private
 #undef protected
+
+#include <dlfcn.h>
+#include <string>
+#include <utility>
+
+#include "core/common/ace_application_info.h"
+
 using namespace testing;
 using namespace testing::ext;
 
 #include "bundlemgr/bundle_mgr_proxy.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr char UI_NODE_GC_FEATURE_NAME[] = "ui_node_gc";
+constexpr char UI_NODE_GC_CAPABILITY_NAME[] = "IsUINodeGcEnabledForApp";
+constexpr char TEST_BUNDLE_NAME[] = "test1.hap";
+constexpr char OTHER_BUNDLE_NAME[] = "test2.hap";
+
+bool IsUINodeGcEnabledForApp(const char*)
+{
+    return true;
+}
+
+bool IsUINodeGcEnabledForTestBundle(const char* bundleName)
+{
+    return bundleName != nullptr && std::string(bundleName) == TEST_BUNDLE_NAME;
+}
+
+void ResetExtraModulesManager()
+{
+    auto& manager = static_cast<ExtraModulesManagerImpl&>(ExtraModulesManager::GetInstance());
+    manager.moduleCache_.clear();
+    manager.initialized_ = false;
+}
+
+void SetUINodeGcCapability(void* handle, void* capabilityFunc)
+{
+    auto& manager = static_cast<ExtraModulesManagerImpl&>(ExtraModulesManager::GetInstance());
+    manager.initialized_ = true;
+    ModuleHolder holder;
+    holder.moduleName = "libnotused.z.so";
+    holder.moduleHandle = handle;
+    holder.capabilities[UI_NODE_GC_CAPABILITY_NAME] = capabilityFunc;
+    manager.moduleCache_[UI_NODE_GC_FEATURE_NAME] = std::move(holder);
+}
+
+void SetUINodeGcCapability(void* handle)
+{
+    SetUINodeGcCapability(handle, reinterpret_cast<void*>(IsUINodeGcEnabledForApp));
+}
+} // namespace
+
 class ParserTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
     static void TearDownTestCase() {};
-    void SetUp() {};
-    void TearDown() {};
+    void SetUp()
+    {
+        ResetExtraModulesManager();
+        auto handle = dlopen(nullptr, RTLD_LAZY);
+        ASSERT_NE(handle, nullptr);
+        SetUINodeGcCapability(handle);
+        FeatureParamManager::GetInstance().SetUINodeGcEnabled(false);
+    };
+    void TearDown()
+    {
+        ResetExtraModulesManager();
+    };
 
     SyncLoadParser syncLoadParser;
     UINodeGcParamParser uiNodeGcParamParser;
@@ -231,6 +289,57 @@ HWTEST_F(ParserTest, ParseFeatureParamParseMetaData, TestSize.Level1)
 
     uiNodeGcParamParser.ParseMetaData(dataFalse);
     uiNodeGcParamParser.ParseFeatureParam(nodeTrue);
+    EXPECT_FALSE(FeatureParamManager::GetInstance().IsUINodeGcEnabled());
+}
+
+/**
+ * @tc.name: ParseFeatureParamCapabilityLoadFailed
+ * @tc.desc: UINode GC is disabled when the extra module capability cannot be loaded.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParserTest, ParseFeatureParamCapabilityLoadFailed, TestSize.Level1)
+{
+    xmlNode node;
+    node.type = xmlElementType::XML_ELEMENT_NODE;
+    const std::string enableKey = "enable";
+    const std::string enableValue = "true";
+    xmlSetProp(&node, (const xmlChar*)(enableKey.c_str()), (const xmlChar*)(enableValue.c_str()));
+
+    FeatureParamManager::GetInstance().SetUINodeGcEnabled(true);
+    ResetExtraModulesManager();
+    auto ret = uiNodeGcParamParser.ParseFeatureParam(node);
+
+    EXPECT_EQ(ret, PARSE_EXEC_SUCCESS);
+    EXPECT_FALSE(FeatureParamManager::GetInstance().IsUINodeGcEnabled());
+}
+
+/**
+ * @tc.name: ParseFeatureParamCapabilityUsesBundleName
+ * @tc.desc: UINode GC follows the bundleName decision returned by the capability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParserTest, ParseFeatureParamCapabilityUsesBundleName, TestSize.Level1)
+{
+    xmlNode node;
+    node.type = xmlElementType::XML_ELEMENT_NODE;
+    const std::string enableKey = "enable";
+    const std::string enableValue = "true";
+    xmlSetProp(&node, (const xmlChar*)(enableKey.c_str()), (const xmlChar*)(enableValue.c_str()));
+
+    ResetExtraModulesManager();
+    auto handle = dlopen(nullptr, RTLD_LAZY);
+    ASSERT_NE(handle, nullptr);
+    SetUINodeGcCapability(handle, reinterpret_cast<void*>(IsUINodeGcEnabledForTestBundle));
+
+    AceApplicationInfo::GetInstance().SetPackageName(TEST_BUNDLE_NAME);
+    auto ret = uiNodeGcParamParser.ParseFeatureParam(node);
+    EXPECT_EQ(ret, PARSE_EXEC_SUCCESS);
+    EXPECT_TRUE(FeatureParamManager::GetInstance().IsUINodeGcEnabled());
+
+    FeatureParamManager::GetInstance().SetUINodeGcEnabled(true);
+    AceApplicationInfo::GetInstance().SetPackageName(OTHER_BUNDLE_NAME);
+    ret = uiNodeGcParamParser.ParseFeatureParam(node);
+    EXPECT_EQ(ret, PARSE_EXEC_SUCCESS);
     EXPECT_FALSE(FeatureParamManager::GetInstance().IsUINodeGcEnabled());
 }
 } // namespace OHOS::Ace

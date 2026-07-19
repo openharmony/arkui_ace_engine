@@ -156,7 +156,7 @@ public:
      */
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
-    const std::list<RefPtr<UINode>>& GetChildrenForInspector(bool needCacheNode = false) const override;
+    std::list<RefPtr<UINode>> GetChildrenForInspector(bool needCacheNode = false) const override;
     /**
      * scenario: called by layout informs:
      *   - start: the first visible index
@@ -229,7 +229,8 @@ public:
 
     void NotifyColorModeChange(uint32_t colorMode) override;
 
-    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override;
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false,
+        bool isReuse = false, bool suppressActiveLifecycle = false) override;
     void PaintDebugBoundaryTreeAll(bool flag) override;
 
     bool IsAllowAnimation();
@@ -338,7 +339,6 @@ private:
 
     // re-assembled by GetChildren called from idle task
     mutable std::list<RefPtr<UINode>> children_;
-    mutable std::list<RefPtr<UINode>> childrenWithCache_;
     int32_t startIndex_ = 0;
 
     // memorize parameters of previous DoSetActiveRange class

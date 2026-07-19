@@ -26,9 +26,16 @@ struct AnimatedDrawableDescriptorLayout {
       let buffer = resManager.getMediaContentSync($r('app.media.img2')).buffer
       let imageSource = image.createImageSource(buffer)
       if (imageSource) {
-        imageSource.createPixelMapList().then((pixelMaps: Array<PixelMap>) => {
-          this.drawable = new AnimatedDrawableDescriptor(pixelMaps, { iterations: -1, duration: 3000 })
-        })
+        imageSource.createPixelMapList()
+          .then((pixelMaps: Array<PixelMap>) => {
+            this.drawable = new AnimatedDrawableDescriptor(pixelMaps, { iterations: -1, duration: 3000 })
+          })
+          .catch((error: BusinessError<void>) => {
+            console.error(`Failed to create pixelMapList: ${JSON.stringify(error)}`)
+          })
+          .finally(() => {
+            imageSource.release()
+          })
       }
     }
   }

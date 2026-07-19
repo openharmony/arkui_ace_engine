@@ -229,7 +229,7 @@ void LsSolver::SelectBestOperationFromBoolVec(int operationIdxBool, int& bestSco
     }
     for (int i = 0; i < cnt; i++) {
         if (bms) {
-            int idx = static_cast<int>(mt()) % (operationIdxBool - i);
+            uint32_t idx = mt() % static_cast<uint32_t>(operationIdxBool - i);
             int tmp = operationVarIdxBoolVec[operationIdxBool - i - 1];
             varIdx = operationVarIdxBoolVec[idx];
             operationVarIdxBoolVec[idx] = tmp;
@@ -265,7 +265,7 @@ void LsSolver::SelectBestOperationFromVec(int operationIdx, int& bestScore, int&
     }
     for (int i = 0; i < cnt; i++) {
         if (bms) {
-            int idx = static_cast<int>(mt()) % (operationIdx - i);
+            uint32_t idx = mt() % static_cast<uint32_t>(operationIdx - i);
             operationChangeValue = operationChangeValueVec[idx];
             operationVarIdx = operationVarIdxVec[idx];
             operationChangeValueVec[idx] = operationChangeValueVec[operationIdx - i - 1];
@@ -415,7 +415,7 @@ void LsSolver::InsertOperation(uint64_t varIdx, RationNum changeValue, int& oper
 void LsSolver::ProcessClauseNiaLiterals(const Clause* cl, int& operationIdx)
 {
     for (int lIdx : cl->niaLiterals) {
-        if ((lits[std::abs(lIdx)].isTrue ^ lIdx) < 0) {
+        if ((lits[std::abs(lIdx)].isTrue >= 0) != (lIdx >= 0)) {
             AddOperationFromFalseLit(true, lIdx, operationIdx);
         } // determine a false lit, and add operation from it
     }
@@ -558,7 +558,7 @@ void LsSolver::UpdateClauseSatCountInVar(uint64_t varIdx)
         int watchLitIdxOld = c->watchLitIdx;
         c->satCount = 0;
         for (int lIdx : c->literals) {
-            if ((lIdx ^ lits[std::abs(lIdx)].isTrue) >= 0) {
+            if ((lIdx >= 0) == (lits[std::abs(lIdx)].isTrue >= 0)) {
                 c->satCount++;
                 c->watchLitIdx = lIdx;
             }
@@ -631,7 +631,7 @@ void LsSolver::UpdateWatchLitBool(int clauseIdx, int vLitIdx, int clSignIdx, int
     int originWatchLit = cp->watchLitIdx;
     if (std::abs(originWatchLit) == vLitIdx && cp->satCount > 0) {
         for (int lIdx : cp->literals) {
-            if ((lIdx ^ lits[std::abs(lIdx)].isTrue) >= 0) {
+            if ((lIdx >= 0) == (lits[std::abs(lIdx)].isTrue >= 0)) {
                 cp->watchLitIdx = lIdx;
                 break;
             }

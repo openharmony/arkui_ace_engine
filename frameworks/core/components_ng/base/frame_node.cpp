@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,6 +34,7 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #endif
@@ -78,9 +79,11 @@
 #include "core/common/container.h"
 #include "core/common/event_manager.h"
 #include "core/common/premake_scope.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/gestures/gesture_info.h"
@@ -156,11 +159,13 @@
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/base/mount_policy.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -194,6 +199,7 @@ constexpr float HIGHT_RATIO_LIMIT = 0.8f;
 constexpr float WIDTH_RATIO_LIMIT = 1.0f;
 // Min area for OPINC
 constexpr int32_t MIN_OPINC_AREA = 10000;
+
 } // namespace
 namespace OHOS::Ace::NG {
 namespace {
@@ -1415,17 +1421,22 @@ void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
 void FrameNode::DumpSimplifyCommonInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
 {
     auto eventHub = eventHub_ ? eventHub_->GetOrCreateGestureEventHub() : nullptr;
-    if (eventHub && config.interactionInfo) {
-        json->Put(TreeKey::CLICKABLE, eventHub->IsAccessibilityClickable());
-        json->Put(TreeKey::LONG_CLICKABLE, eventHub->IsAccessibilityLongClickable());
+    if (config.interactionInfo) {
+        if (eventHub) {
+            json->Put("clickable", eventHub->IsAccessibilityClickable());
+            json->Put("longClickable", eventHub->IsAccessibilityLongClickable());
+        }
+        if (focusHub_) {
+            json->Put("focusable", focusHub_->IsFocusable());
+        }
     }
     if (accessibilityProperty_) {
         if (!accessibilityProperty_->GetAccessibilityText().empty() && config.accessibilityInfo) {
             json->Put("accessibilityContent", accessibilityProperty_->GetAccessibilityText().c_str());
         }
         if (config.interactionInfo) {
-            json->Put(TreeKey::SCROLLABLE, accessibilityProperty_->IsScrollable());
-            json->Put(TreeKey::IS_EDITABLE, accessibilityProperty_->IsEditable());
+            json->Put("scrollable", accessibilityProperty_->IsScrollable());
+            json->Put("editable", accessibilityProperty_->IsEditable());
         }
     }
 }
@@ -1863,6 +1874,10 @@ void FrameNode::TriggerRsProfilerNodeMountCallbackIfExist()
 void FrameNode::OnAttachToMainTree(bool recursive)
 {
     TriggerRsProfilerNodeMountCallbackIfExist();
+    if (layoutProperty_) {
+        layoutProperty_->MarkEnvDirty(ENV_KEY_DIRECTION);
+        layoutProperty_->MarkEnvDirty(ENV_KEY_FONT_SCALE);
+    }
     if (eventHub_) {
         eventHub_->FireOnAttach();
         eventHub_->FireOnAppear();
@@ -1901,10 +1916,16 @@ void FrameNode::OnAttachToMainTree(bool recursive)
         context->AddDirtyPropertyNode(Claim(this));
     }
     if (!hasPendingRequest_) {
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, true);
+#endif
         return;
     }
     context->RequestFrame();
     hasPendingRequest_ = false;
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, true);
+#endif
 }
 
 void FrameNode::OnAttachToBuilderNode(NodeStatus nodeStatus)
@@ -2183,6 +2204,9 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->OnAccessibilityDetachFromMainTree();
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, false);
+#endif
 }
 
 void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& dirty)
@@ -2790,7 +2814,7 @@ void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleArea
 
     auto callback = visibleAreaUserCallback.callback;
     if (isHandled && callback) {
-        if (tag_ == V2::WEB_ETS_TAG) {
+        if (tag_ == V2::WEB_ETS_TAG || tag_ == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
             TAG_LOGI(AceLogTag::ACE_UIEVENT, "exp=%{public}d ratio=%{public}s %{public}d-%{public}s reason=%{public}d",
                 isVisible, std::to_string(currentVisibleRatio).c_str(), nodeId_,
                 std::to_string(accessibilityId_).c_str(), static_cast<int32_t>(visibleAreaChangeTriggerReason_));
@@ -2890,8 +2914,7 @@ void FrameNode::NotifyLazyChildrenOnInActive(const RefPtr<UINode>& node)
             pattern->OnInActive();
             continue;
         }
-        auto layoutProperty = GetLayoutProperty();
-        if (layoutProperty && layoutProperty->GetNeedLazyLayout()) {
+        if (IsNeedLazyLayout()) {
             NotifyLazyChildrenOnInActive(child);
         }
     }
@@ -2899,10 +2922,15 @@ void FrameNode::NotifyLazyChildrenOnInActive(const RefPtr<UINode>& node)
 
 void FrameNode::NotifyLazyChildren()
 {
-    auto layoutProperty = GetLayoutProperty();
-    if (layoutProperty && layoutProperty->GetNeedLazyLayout()) {
+    if (IsNeedLazyLayout()) {
         NotifyLazyChildrenOnInActive(Claim(this));
     }
+}
+
+bool FrameNode::IsNeedLazyLayout() const
+{
+    auto layoutProperty = GetLayoutProperty();
+    return (layoutProperty && layoutProperty->GetNeedLazyLayout());
 }
 
 void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
@@ -3436,7 +3464,7 @@ void FrameNode::MarkModifyDone()
         eventHub_->MarkModifyDone();
     }
     renderContext_->OnModifyDone();
-#if (defined(__aarch64__) || defined(__x86_64__))
+#if !defined(CROSS_PLATFORM) && (defined(__aarch64__) || defined(__x86_64__))
     if (Recorder::IsCacheAvaliable()) {
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
@@ -5387,6 +5415,20 @@ void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType, const std
     }
 }
 
+void FrameNode::OnAccessibilityEvent(
+    AccessibilityEventType eventType, const std::map<std::string, std::string>& extraEventInfo)
+{
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        AccessibilityEvent event;
+        event.type = eventType;
+        event.nodeId = accessibilityId_;
+        event.extraEventInfo = extraEventInfo;
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SendEventToAccessibility(event);
+    }
+}
+
 void FrameNode::OnRecycle()
 {
     for (const auto& destroyCallback : destroyCallbacksMap_) {
@@ -5680,6 +5722,24 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     for (auto nodeId : ids) {
         auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
         if (!uiNode) {
+            continue;
+        }
+        auto frameNode = DynamicCast<FrameNode>(uiNode);
+        if (frameNode) {
+            nodes.emplace_back(frameNode);
+        }
+    }
+    return nodes;
+}
+
+std::vector<RefPtr<FrameNode>> FrameNode::GetNodesByIdWithCleanup(std::unordered_set<int32_t>& set)
+{
+    std::vector<int32_t> ids(set.begin(), set.end());
+    std::vector<RefPtr<FrameNode>> nodes;
+    for (auto nodeId : ids) {
+        auto uiNode = ElementRegister::GetInstance()->GetUINodeById(nodeId);
+        if (!uiNode) {
+            set.erase(nodeId);
             continue;
         }
         auto frameNode = DynamicCast<FrameNode>(uiNode);
@@ -6008,8 +6068,12 @@ bool FrameNode::IsVerticalScrollable() const
     if (scrollablePattern && scrollablePattern->GetAxis() == Axis::VERTICAL) {
         return true;
     }
-    auto swiperPattern = AceType::DynamicCast<SwiperPattern>(pattern_);
-    return (swiperPattern && swiperPattern->GetDirection() == Axis::VERTICAL);
+    if (GetTag() == V2::SWIPER_ETS_TAG) {
+        auto swiperModifier = NodeModifier::GetSwiperCustomModifier();
+        return swiperModifier && static_cast<Axis>(swiperModifier->getDirection(
+            reinterpret_cast<ArkUINodeHandle>(const_cast<FrameNode*>(this)))) == Axis::VERTICAL;
+    }
+    return false;
 }
 
 // This will call child and self measure process.
@@ -6109,7 +6173,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
             ACE_LAYOUT_TRACE_END()
             return;
         }
-        if (CheckIfHasMeasured()) {
+        if (SystemProperties::GetSkipSecondaryMeasuredEnabled() && CheckIfHasMeasured()) {
             ACE_SCOPED_TRACE(
                 "SkipMeasure [%s][self:%d] reason:AlreadyMeasuredInCurrentFrame", tag_.c_str(), nodeId_);
             ACE_LAYOUT_TRACE_END()
@@ -6831,6 +6895,7 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
     if (parent && parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsExposureRecordEnable()) {
         if (exposureProcessor_) {
             return;
@@ -6848,10 +6913,12 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
             host->RecordExposureInner();
         });
     }
+#endif
 }
 
 void FrameNode::OnAutoEventParamUpdate(const std::string& value)
 {
+#ifndef CROSS_PLATFORM
     if (value.empty()) {
         return;
     }
@@ -6892,8 +6959,10 @@ void FrameNode::OnAutoEventParamUpdate(const std::string& value)
             host->RecordExposureInner();
         });
     }
+#endif
 }
 
+#ifndef CROSS_PLATFORM
 void FrameNode::SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor)
 {
     if (exposureProcessor_ && exposureProcessor_->isListening()) {
@@ -6932,10 +7001,12 @@ void FrameNode::RecordExposureInner()
     pipeline->AddVisibleAreaChangeNode(Claim(this), ratios, callback, false, true);
     exposureProcessor_->SetListenState(true);
 }
+#endif
 
 void FrameNode::AddFrameNodeSnapshot(
     bool isHit, int32_t parentId, const std::vector<RectF>& responseRegionList, EventTreeType type)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
@@ -6953,15 +7024,18 @@ void FrameNode::AddFrameNodeSnapshot(
         .strategy = TouchTestStrategy::DEFAULT,
         .id = "" };
     eventMgr->GetEventTreeRecord(type).AddFrameNodeSnapshot(std::move(info));
+#endif
 }
 
 void FrameNode::UpdateFrameNodeSnapshot(const TouchResult& touchResult, EventTreeType type)
 {
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
     eventMgr->GetEventTreeRecord(type).UpdateFrameNodeSnapshot(nodeId_, touchResult.strategy, touchResult.id);
+#endif
 }
 
 int32_t FrameNode::GetUiExtensionId()
@@ -8564,7 +8638,12 @@ void FrameNode::CleanupPipelineResources()
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(nodeId_);
         pipeline->RemoveVisibleAreaChangeNode(nodeId_);
-        pipeline->ChangeMouseStyle(nodeId_, MouseFormat::DEFAULT);
+        auto eventManager = pipeline->GetEventManager();
+        int32_t windowId = 0;
+        if (eventManager && eventManager->GetMouseStyleManager()) {
+            windowId = eventManager->GetMouseStyleManager()->GetWindowIdWithNodeId(nodeId_);
+        }
+        pipeline->ChangeMouseStyle(nodeId_, MouseFormat::DEFAULT, windowId);
         pipeline->FreeMouseStyleHoldNode(nodeId_);
         pipeline->RemoveStoredNode(GetRestoreId());
         auto dragManager = pipeline->GetDragDropManager();
@@ -8579,7 +8658,6 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveChangedFrameNode(nodeId_);
         pipeline->RemoveFrameNodeChangeListener(nodeId_);
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
-        auto eventManager = pipeline->GetEventManager();
         if (eventManager) {
             eventManager->UnregisterTouchpadInteractionListenerInner(GetId());
         }
@@ -8873,6 +8951,7 @@ bool FrameNode::IsPreMakeAndScroll()
     if (IsActive() || !HasPreMake()) {
         return false;
     }
+#ifndef CROSS_PLATFORM
     auto pipeline = GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto contentChangeMgr = pipeline->GetContentChangeManager();
@@ -8880,6 +8959,7 @@ bool FrameNode::IsPreMakeAndScroll()
     if (contentChangeMgr->IsSwiperScrolling() || contentChangeMgr->IsScrolling()) {
         return true;
     }
+#endif
     return false;
 }
 
@@ -8916,7 +8996,8 @@ ACE_FORCE_EXPORT RefPtr<T> FrameNode::GetAccessibilityProperty() const
 // Explicit template instantiation for common use cases
 template RefPtr<AccessibilityProperty> FrameNode::GetAccessibilityProperty<AccessibilityProperty>() const;
 template RefPtr<BadgeAccessibilityProperty> FrameNode::GetAccessibilityProperty<BadgeAccessibilityProperty>() const;
-template RefPtr<BubbleAccessibilityProperty> FrameNode::GetAccessibilityProperty<BubbleAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<BubbleAccessibilityProperty>
+    FrameNode::GetAccessibilityProperty<BubbleAccessibilityProperty>() const;
 template RefPtr<CheckBoxAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<CheckBoxAccessibilityProperty>() const;
 template RefPtr<CheckBoxGroupAccessibilityProperty>
@@ -8927,9 +9008,11 @@ template RefPtr<DatePickerAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<DatePickerAccessibilityProperty>() const;
 template RefPtr<DatePickerColumnAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>() const;
-template RefPtr<DialogAccessibilityProperty> FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<DialogAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
 template RefPtr<GaugeAccessibilityProperty> FrameNode::GetAccessibilityProperty<GaugeAccessibilityProperty>() const;
-template RefPtr<GridAccessibilityProperty> FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<GridAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
 template RefPtr<GridItemAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GridItemAccessibilityProperty>() const;
 template RefPtr<IndexerAccessibilityProperty> FrameNode::GetAccessibilityProperty<IndexerAccessibilityProperty>() const;
@@ -8948,7 +9031,8 @@ template RefPtr<ProgressAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<ProgressAccessibilityProperty>() const;
 template RefPtr<RadioAccessibilityProperty> FrameNode::GetAccessibilityProperty<RadioAccessibilityProperty>() const;
 template RefPtr<RatingAccessibilityProperty> FrameNode::GetAccessibilityProperty<RatingAccessibilityProperty>() const;
-template RefPtr<RefreshAccessibilityProperty> FrameNode::GetAccessibilityProperty<RefreshAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<RefreshAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<RefreshAccessibilityProperty>() const;
 template RefPtr<RichEditorAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<RichEditorAccessibilityProperty>() const;
 template RefPtr<ScrollAccessibilityProperty> FrameNode::GetAccessibilityProperty<ScrollAccessibilityProperty>() const;
@@ -8959,7 +9043,8 @@ FrameNode::GetAccessibilityProperty<SecurityComponentAccessibilityProperty>() co
 template RefPtr<SelectAccessibilityProperty> FrameNode::GetAccessibilityProperty<SelectAccessibilityProperty>() const;
 template RefPtr<SliderAccessibilityProperty> FrameNode::GetAccessibilityProperty<SliderAccessibilityProperty>() const;
 template RefPtr<StepperAccessibilityProperty> FrameNode::GetAccessibilityProperty<StepperAccessibilityProperty>() const;
-template RefPtr<SwiperAccessibilityProperty> FrameNode::GetAccessibilityProperty<SwiperAccessibilityProperty>() const;
+template ACE_FORCE_EXPORT RefPtr<SwiperAccessibilityProperty>
+FrameNode::GetAccessibilityProperty<SwiperAccessibilityProperty>() const;
 template RefPtr<SwiperIndicatorAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>() const;
 template RefPtr<SwitchAccessibilityProperty> FrameNode::GetAccessibilityProperty<SwitchAccessibilityProperty>() const;
@@ -8969,11 +9054,11 @@ FrameNode::GetAccessibilityProperty<TabBarItemAccessibilityProperty>() const;
 template RefPtr<TextAccessibilityProperty> FrameNode::GetAccessibilityProperty<TextAccessibilityProperty>() const;
 template RefPtr<TextClockAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<TextClockAccessibilityProperty>() const;
-template RefPtr<TextFieldAccessibilityProperty>
+template ACE_FORCE_EXPORT RefPtr<TextFieldAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<TextFieldAccessibilityProperty>() const;
 template RefPtr<TextPickerAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<TextPickerAccessibilityProperty>() const;
-template RefPtr<TextPickerRowAccessibilityProperty>
+template ACE_FORCE_EXPORT RefPtr<TextPickerRowAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<TextPickerRowAccessibilityProperty>() const;
 template RefPtr<TextTimerAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<TextTimerAccessibilityProperty>() const;

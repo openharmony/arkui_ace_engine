@@ -24,10 +24,63 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_matrix2d.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_render_image.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 
 namespace OHOS::Ace::Framework {
 constexpr int32_t ARGS_COUNT_ONE = 1;
 constexpr int32_t ARGS_COUNT_TWO = 2;
+
+namespace {
+
+const ArkUICanvasRuntimeBridge* GetCanvasBridge()
+{
+    return NG::GetCanvasRuntimeBridgeFromModule();
+}
+
+RefPtr<AceType> CreateOffscreenPattern(int32_t width, int32_t height)
+{
+    auto* bridge = GetCanvasBridge();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->createOffscreenPattern, nullptr);
+    return bridge->createOffscreenPattern(width, height);
+}
+
+size_t GetOffscreenBitmapSize(const RefPtr<AceType>& offscreenPattern)
+{
+    auto* bridge = GetCanvasBridge();
+    CHECK_NULL_RETURN(bridge, 0);
+    CHECK_NULL_RETURN(bridge->getOffscreenBitmapSize, 0);
+    return bridge->getOffscreenBitmapSize(offscreenPattern);
+}
+
+void UpdateOffscreenSize(const RefPtr<AceType>& offscreenPattern, int32_t width, int32_t height)
+{
+    auto* bridge = GetCanvasBridge();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->updateOffscreenSize);
+    bridge->updateOffscreenSize(offscreenPattern, width, height);
+}
+
+RefPtr<PixelMap> TransferToImageBitmap(const RefPtr<AceType>& offscreenPattern)
+{
+    auto* bridge = GetCanvasBridge();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->transferOffscreenToImageBitmap, nullptr);
+    return bridge->transferOffscreenToImageBitmap(offscreenPattern);
+}
+
+#ifndef PIXEL_MAP_SUPPORTED
+std::unique_ptr<ImageData> GetImageData(
+    const RefPtr<AceType>& offscreenPattern, double left, double top, double width, double height)
+{
+    auto* bridge = GetCanvasBridge();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->getOffscreenImageData, nullptr);
+    return bridge->getOffscreenImageData(offscreenPattern, left, top, width, height);
+}
+#endif
+
+} // namespace
 
 void* DetachOffscreenCanvas(napi_env env, void* value, void* hint)
 {
@@ -66,10 +119,12 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         LOGW("Invalid context.");
         return nullptr;
     }
-    auto offscreenCanvasPattern = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
-        workCanvas->GetWidth(), workCanvas->GetHeight());
+    auto offscreenCanvasPattern =
+        CreateOffscreenPattern(static_cast<int32_t>(workCanvas->GetWidth()),
+            static_cast<int32_t>(workCanvas->GetHeight()));
+    CHECK_NULL_RETURN(offscreenCanvasPattern, nullptr);
     workCanvas->SetOffscreenPattern(offscreenCanvasPattern);
-    auto bitmapSize = offscreenCanvasPattern->GetBitmapSize();
+    auto bitmapSize = GetOffscreenBitmapSize(offscreenCanvasPattern);
 
     napi_value offscreenCanvas = nullptr;
     napi_create_object(env, &offscreenCanvas);
@@ -160,9 +215,10 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
         fHeight *= density;
         workCanvas->SetHeight(fHeight);
     }
-    workCanvas->offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
-        static_cast<int32_t>(fWidth), static_cast<int32_t>(fHeight));
-    auto bitmapSize = workCanvas->offscreenCanvasPattern_->GetBitmapSize();
+    workCanvas->offscreenCanvasPattern_ =
+        CreateOffscreenPattern(static_cast<int32_t>(fWidth), static_cast<int32_t>(fHeight));
+    CHECK_NULL_RETURN(workCanvas->offscreenCanvasPattern_, nullptr);
+    auto bitmapSize = GetOffscreenBitmapSize(workCanvas->offscreenCanvasPattern_);
     napi_coerce_to_native_binding_object(
         env, thisVar, DetachOffscreenCanvas, AttachOffscreenCanvas, workCanvas, nullptr);
     napi_wrap_with_size(
@@ -284,7 +340,7 @@ napi_value JSOffscreenCanvas::OnSetWidth(napi_env env, napi_callback_info info)
 
     if (width_ != width) {
         width_ = width;
-        offscreenCanvasPattern_->UpdateSize(width_, height_);
+        UpdateOffscreenSize(offscreenCanvasPattern_, static_cast<int32_t>(width_), static_cast<int32_t>(height_));
         if (offscreenCanvasContext_ != nullptr) {
             offscreenCanvasContext_->SetWidth(width_);
         }
@@ -309,7 +365,7 @@ napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
 
     if (height_ != height) {
         height_ = height;
-        offscreenCanvasPattern_->UpdateSize(width_, height_);
+        UpdateOffscreenSize(offscreenCanvasPattern_, static_cast<int32_t>(width_), static_cast<int32_t>(height_));
         if (offscreenCanvasContext_ != nullptr) {
             offscreenCanvasContext_->SetHeight(height_);
         }
@@ -323,7 +379,7 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
         return nullptr;
     }
     napi_value renderImage = nullptr;
-    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
+    auto pixelMap = TransferToImageBitmap(offscreenCanvasPattern_);
     if (!JSRenderImage::CreateJSRenderImage(env, pixelMap, renderImage)) {
         return nullptr;
     }
@@ -332,7 +388,7 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
     auto jsImage = (JSRenderImage*)nativeObj;
     CHECK_NULL_RETURN(jsImage, nullptr);
 #ifndef PIXEL_MAP_SUPPORTED
-    auto imageData = offscreenCanvasPattern_->GetImageData(0, 0, width_, height_);
+    auto imageData = GetImageData(offscreenCanvasPattern_, 0, 0, width_, height_);
     if (imageData == nullptr) {
         return nullptr;
     }

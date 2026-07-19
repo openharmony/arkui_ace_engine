@@ -17,6 +17,7 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import deviceInfo from '@ohos.deviceInfo';
 import { display, mediaquery } from '@kit.ArkUI';
 import base from '@ohos.base';
+import window from '@ohos.window';
 
 const TAG = 'DeviceHelper';
 
@@ -236,10 +237,22 @@ export struct SubNavigation {
   @ObjectLink navWidthRangeModifier: NavWidthRangeAttrModifier;
   @ObjectLink needRenderDisplayMode: NeedRenderDisplayMode;
   onNavigationModeChange?: OnNavigationModeChangeCallback = (mode: NavigationMode) => {};
+  @State windowWidthVp: number = 0;
+  @State windowHeightVp: number = 0;
+  private windowInstance: window.Window | undefined = undefined;
+  private windowSizeChangeCallback: Callback<window.Size> = (size: window.Size) => {
+    this.windowWidthVp = px2vp(size.width);
+    this.windowHeightVp = px2vp(size.height);
+  };
 
   @Builder
   SubNavDestination(name: string, param?: object) {
     this.navDestination(name, param);
+  }
+
+  isWindowMeetColumn(): boolean {
+    return Math.min(this.windowWidthVp, this.windowHeightVp) >= 600 &&
+      this.windowHeightVp <= this.windowWidthVp * 1.2;
   }
 
   getMode(): NavigationMode {
@@ -260,7 +273,8 @@ export struct SubNavigation {
     }
     if (this.needRenderIsFullScreen.isFullScreen == undefined) {
       if (DeviceHelper.isPhone()) {
-        return this.secondaryStack.size() > 0 && DeviceHelper.isColumn() ? NavigationMode.Auto : NavigationMode.Stack;
+        return this.secondaryStack.size() > 0 && (DeviceHelper.isColumn() ||
+          this.isWindowMeetColumn()) ? NavigationMode.Auto : NavigationMode.Stack;
       }
       return this.secondaryStack.size() > 0 ? NavigationMode.Auto : NavigationMode.Stack;
     }
@@ -269,6 +283,24 @@ export struct SubNavigation {
 
   aboutToAppear(): void {
     hilog.debug(0x0000, 'MultiNavigation', 'SubNavigation aboutToAppear param = ' + JSON.stringify(this.primaryStack));
+    try {
+      this.windowInstance = window.findWindow(this.getUIContext().getWindowName());
+      let properties = this.windowInstance.getWindowProperties();
+      let rect = properties.windowRect;
+      this.windowWidthVp = px2vp(rect.width);
+      this.windowHeightVp = px2vp(rect.height);
+      this.windowInstance.on('windowSizeChange', this.windowSizeChangeCallback);
+    } catch (err) {
+      hilog.warn(0x0000, 'MultiNavigation', 'SubNavigation aboutToAppear get window error:' + JSON.stringify(err));
+    }
+  }
+
+  aboutToDisappear(): void {
+    try {
+      this.windowInstance?.off('windowSizeChange', this.windowSizeChangeCallback);
+    } catch (err) {
+      hilog.warn(0x0000, 'MultiNavigation', 'SubNavigation aboutToDisappear error:' + JSON.stringify(err));
+    }
   }
 
   build() {

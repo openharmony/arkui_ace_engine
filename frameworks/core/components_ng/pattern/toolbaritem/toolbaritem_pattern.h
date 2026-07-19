@@ -20,6 +20,8 @@
 
 namespace OHOS::Ace::NG {
 
+constexpr const char* TOOLBARITEM_ETS_TAG = "ToolBarItem";
+
 class ACE_EXPORT ToolBarItemPattern : public Pattern {
     DECLARE_ACE_TYPE(ToolBarItemPattern, Pattern);
 

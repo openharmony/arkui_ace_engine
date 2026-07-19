@@ -264,21 +264,66 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
 
     static ani_method setActiveMethod = nullptr;
     if (!setActiveMethod) {
-        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "setActiveInternal", "zz:", &
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "setActiveInternal", "zzz:", &
             setActiveMethod);
     }
-    auto setActive = [vm, weakRef](bool a, bool b) {
+    auto setActive = [vm, weakRef](bool a, bool b, bool c) {
         ani_env *env = nullptr;
         vm->GetEnv(ANI_VERSION_1, &env);
         ani_boolean released;
         ani_ref localRef;
         ani_boolean param1 = ani_boolean(a);
         ani_boolean param2 = ani_boolean(b);
+        ani_boolean param3 = ani_boolean(c);
         env->WeakReference_GetReference(*weakRef, &released, &localRef);
         if (!released) {
-            env->Object_CallMethod_Void(static_cast<ani_object>(localRef), setActiveMethod, param1, param2);
+            env->Object_CallMethod_Void(static_cast<ani_object>(localRef), setActiveMethod, param1, param2, param3);
             env->Reference_Delete(localRef);
         }
+    };
+
+    static ani_method clearParentReusePoolMethod = nullptr;
+    if (!clearParentReusePoolMethod) {
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "ClearParentReusePool", ":", &
+            clearParentReusePoolMethod);
+    }
+    auto clearParentReusePool = [vm, weakRef]() {
+        ani_env *env = nullptr;
+        if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+            return;
+        }
+        ani_boolean released;
+        ani_ref localRef;
+        if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef)) {
+            return;
+        }
+        if (!released) {
+            env->Object_CallMethod_Void(static_cast<ani_object>(localRef), clearParentReusePoolMethod);
+            env->Reference_Delete(localRef);
+        }
+    };
+
+    static ani_method getMemOptMethod = nullptr;
+    if (!getMemOptMethod) {
+        env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "__getMemOpt__Internal", ":i",
+            &getMemOptMethod);
+    }
+    auto getMemOpt = [vm, weakRef]() -> int32_t {
+        ani_env *env = nullptr;
+        if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+            return 0;
+        }
+        ani_boolean released;
+        ani_ref localRef;
+        ani_int result = 0;
+        if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef)) {
+            return 0;
+        }
+        if (!released) {
+            env->Object_CallMethod_Int(static_cast<ani_object>(localRef), getMemOptMethod, &result);
+            env->Reference_Delete(localRef);
+        }
+        return static_cast<int32_t>(result);
     };
 
     static ani_method getJsViewNameMethod = nullptr;
@@ -351,6 +396,8 @@ ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass,
         .onDumpInspectorFunc = std::move(onDumpInspector),
         .onDumpInfoFunc = std::move(onDumpInfo),
         .setActiveFunc = std::move(setActive),
+        .clearParentReusePoolFunc = std::move(clearParentReusePool),
+        .getMemOptFunc = std::move(getMemOpt),
         .onGetJsViewNameFunc = std::move(getJsViewName),
     };
     

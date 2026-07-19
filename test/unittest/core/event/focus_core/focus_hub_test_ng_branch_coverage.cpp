@@ -15,7 +15,9 @@
 #include "test/unittest/core/event/focus_hub_test_ng.h"
 #include "core/common/event_manager.h"
 #include "core/common/key_event_manager.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 
 using namespace testing;
@@ -616,7 +618,7 @@ HWTEST_F(FocusHubTestNg, ScrollByOffsetToParent001, TestSize.Level1)
     auto listPattern = listNode->GetPattern<ListPattern>();
     ASSERT_NE(listPattern, nullptr);
     EXPECT_NE(listPattern->targetIndexInGroup_, 0);
-    listItemPattern->indexInListItemGroup_ = 0;
+    listItemPattern->SetIndexInListItemGroup(0);
 
     /**
      * @tc.steps: step2. Set the corresponding variables to ensure entry into the target branch.

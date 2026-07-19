@@ -122,7 +122,7 @@ public:
         makeFunc_ = std::move(makeFunc);
     }
 
-    void SetBuilderFuncMultiThread();
+    ACE_FORCE_EXPORT void SetBuilderFuncMultiThread();
 
     bool UseContentModifier() const
     {

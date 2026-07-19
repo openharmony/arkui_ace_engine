@@ -16,6 +16,7 @@
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/accessibility/accessibility_manager.h"
 
+#include <string_view>
 #include "base/error/error_code.h"
 #include "base/utils/multi_thread.h"
 #include "core/common/ace_engine.h"
@@ -33,13 +34,12 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components/common/properties/placement.h"
@@ -48,9 +48,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
-const std::string BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
-const std::string ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME = "sys.float.ohos_id_point_light_illuminated_border_width";
+constexpr std::string_view BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
+constexpr std::string_view BLOOM_COLOR_SYS_RES_NAME = "sys.color.ohos_id_point_light_bloom_color";
+constexpr std::string_view ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME =
+    "sys.float.ohos_id_point_light_illuminated_border_width";
 constexpr char KEY_CONTEXT_MENU[] = "ContextMenu";
 constexpr char KEY_MENU[] = "Menu";
 constexpr float DEFAULT_BIAS = 0.5f;
@@ -866,13 +867,15 @@ void ViewAbstractModelStatic::BindSheet(FrameNode* frameNode, bool isShow,
     auto context = GetSheetContext(sheetStyle);
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    auto* sheetModifier = NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_VOID(sheetModifier);
     if (sheetStyle.showInPage.value_or(false)) {
-        overlayManager = SheetManager::FindPageNodeOverlay(targetNode, isShow);
+        overlayManager = sheetModifier->findPageNodeOverlay(targetNode, isShow, false);
     }
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
-    SheetManager::GetInstance().RegisterDestroyCallback(targetNode, sheetStyle, instanceId);
+    sheetModifier->registerDestroyCallback(targetNode, sheetStyle, instanceId);
 
     if (sheetStyle.showInSubWindow.value_or(false)) {
         if (isShow) {
@@ -883,7 +886,7 @@ void ViewAbstractModelStatic::BindSheet(FrameNode* frameNode, bool isShow,
                 std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
                 std::move(sheetSpringBack), targetNode);
         } else {
-            SheetManager::GetInstance().CloseSheetInSubWindow(SheetKey(targetNode->GetId()));
+            sheetModifier->closeSheetInSubWindow(targetNode->GetId());
         }
         return;
     }
@@ -940,12 +943,14 @@ std::vector<float> ViewAbstractModelStatic::GetRenderNodePropertyValue(
 
 void ViewAbstractModelStatic::DismissSheetStatic()
 {
-    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
+    auto* sheetManagerModifier = NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_VOID(sheetManagerModifier);
+    int32_t sheetId = sheetManagerModifier->getDismissSheetId();
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
     CHECK_NULL_VOID(sheet);
-    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->OverlayDismissSheet();
+    auto* sheetPatternModifier = NodeModifier::GetSheetPatternInnerModifier();
+    CHECK_NULL_VOID(sheetPatternModifier);
+    sheetPatternModifier->sheetOverlayDismissSheet(sheet);
 }
 
 void ViewAbstractModelStatic::DismissContentCoverStatic()
@@ -959,12 +964,14 @@ void ViewAbstractModelStatic::DismissContentCoverStatic()
 
 void ViewAbstractModelStatic::SheetSpringBackStatic()
 {
-    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
+    auto* sheetManagerModifier = NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_VOID(sheetManagerModifier);
+    int32_t sheetId = sheetManagerModifier->getDismissSheetId();
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
     CHECK_NULL_VOID(sheet);
-    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->OverlaySheetSpringBack();
+    auto* sheetPatternModifier = NodeModifier::GetSheetPatternInnerModifier();
+    CHECK_NULL_VOID(sheetPatternModifier);
+    sheetPatternModifier->sheetOverlaySheetSpringBack(sheet);
 }
 
 void ViewAbstractModelStatic::SetAccessibilityTextHint(FrameNode* frameNode, const std::string& text)
@@ -1128,8 +1135,8 @@ void ViewAbstractModelStatic::SetBloom(FrameNode *frameNode, const std::optional
     } else {
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, Bloom, frameNode);
     }
-    double bloomRadius = themeConstants->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
-    Color bloomColor = themeConstants->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
+    double bloomRadius = themeConstants->GetDoubleByName(std::string(BLOOM_RADIUS_SYS_RES_NAME));
+    Color bloomColor = themeConstants->GetColorByName(std::string(BLOOM_COLOR_SYS_RES_NAME));
     Shadow shadow;
     shadow.SetBlurRadius(value.value_or(-1.0f) * bloomRadius);
     shadow.SetColor(bloomColor);
@@ -1153,7 +1160,8 @@ void ViewAbstractModelStatic::SetLightIlluminated(FrameNode *frameNode, const st
     } else {
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, LightIlluminated, frameNode);
     }
-    auto illuminatedBorderWidth = themeConstants->GetDimensionByName(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME);
+    auto illuminatedBorderWidth = themeConstants->GetDimensionByName(
+        std::string(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME));
     ViewAbstractModelStatic::SetIlluminatedBorderWidth(frameNode, illuminatedBorderWidth);
 }
 
@@ -1961,6 +1969,9 @@ void ViewAbstractModelStatic::SetSpatialEffect(FrameNode* frameNode, const std::
     } else {
         auto target = frameNode->GetRenderContext();
         ACE_RESET_NODE_RENDER_CONTEXT(target, SpatialEffect, frameNode);
+        if (target) {
+            target->OnSpatialEffectReset();
+        }
     }
 }
 

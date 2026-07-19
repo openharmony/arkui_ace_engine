@@ -58,7 +58,6 @@
 #include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/sidebar_content_mask_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
-#include "core/components_ng/render/adapter/rosen_mixed_render_child_list.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/distortion_component/distortion_component_options.h"
@@ -80,12 +79,13 @@ class PageTransitionEffect;
 class OverlayTextModifier;
 class GradientStyleModifier;
 class PipelineContext;
+class RosenMixedRenderChildList;
 class UINode;
 
 class RosenRenderContext : public RenderContext {
     DECLARE_ACE_TYPE(RosenRenderContext, NG::RenderContext);
 public:
-    RosenRenderContext() = default;
+    RosenRenderContext();
     ~RosenRenderContext() override;
 
     void SetEffectLayer(const ContextParam& param);
@@ -265,6 +265,7 @@ public:
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
     void OnSpatialEffectUpdate(const SpatialEffectParams& params) override;
+    void OnSpatialEffectReset() override;
     void OnLightUpEffectUpdate(double radio) override;
     void OnParticleOptionArrayUpdate(const std::list<ParticleOption>& optionList) override;
     void OnClickEffectLevelUpdate(const ClickEffectInfo& info) override;
@@ -361,6 +362,7 @@ public:
     void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void SetSecurityLayer(bool isSecure) override;
+    void FlushImplicitTransaction();
     void SetIsBackground(bool isBackground) override;
     void SetHDRBrightness(float hdrBrightness) override;
     void SetHDRBrightness(float hdrBrightness, uint32_t type) override;
@@ -486,8 +488,8 @@ public:
     void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
     bool CreateThumbnailPixelMapAsyncTask(
         bool needScale, std::function<void(const RefPtr<PixelMap>)> &&callback) override;
-    bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
-    bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
+    ACE_FORCE_EXPORT bool GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr);
+    ACE_FORCE_EXPORT bool GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
         std::shared_ptr<RSDrawCmdList> drawCmdList = nullptr, Rosen::Drawing::Rect* rect = nullptr);
     void SetActualForegroundColor(const Color& value) override;
     void AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property) override;
@@ -498,7 +500,7 @@ public:
 
     void SetUsingContentRectForRenderFrame(bool value, bool adjustRSFrameByContentRect = false) override;
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
-    void SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch uiFirstSwitch);
+    ACE_FORCE_EXPORT void SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch uiFirstSwitch);
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
 
@@ -772,6 +774,7 @@ protected:
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
     RefPtr<UINode> GetModalNode(const RefPtr<UINode>& breakPointParent);
+    void PopModalPageLevelOrder(const RefPtr<UINode>& modalNode);
     void RemoveDefaultTransition();
     void FireTransitionUserCallback(bool isTransitionIn);
     void PostTransitionUserOutCallback();
@@ -866,8 +869,6 @@ protected:
     DataReadyNotifyTask CreateBorderImageDataReadyCallback();
     LoadSuccessNotifyTask CreateBorderImageLoadSuccessCallback();
     void BdImagePaintTask(RSCanvas& canvas);
-
-    void FlushImplicitTransaction();
 
     void RegisterDensityChangedCallback();
 
@@ -1010,7 +1011,7 @@ protected:
     Rosen::Vector4f borderWidth_ = Rosen::Vector4f(0.0f, 0.0f, 0.0f, 0.0f);
     bool isTouchUpFinished_ = true;
 
-    bool useContentRectForRSFrame_;
+    bool useContentRectForRSFrame_ = false;
     bool adjustRSFrameByContentRect_ = false;
     bool isFocusBoxGlow_ = false;
     std::shared_ptr<Rosen::RSUIDirector> rsUIDirector_;
@@ -1027,7 +1028,6 @@ protected:
     std::function<void()> callbackCachedAnimateAction_ = nullptr;
     bool isDraggingFlag_ = false;
     bool hasKeyFrameCache_ = false;
-    PipelineContext* pipeline_;
 
     template <typename Modifier, RSPropertyType PropertyType, typename ValueType>
     friend class PropertyTransitionEffectTemplate;
@@ -1042,12 +1042,13 @@ private:
     void InsertFrameChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& nextSibling);
     void RemoveMixedFrameChild(const RefPtr<UINode>& child);
     void NotifyMixedListChanged();
+    std::shared_ptr<Rosen::RSNode> ResolveMixedFrameChildRSNode(const RefPtr<UINode>& child) const;
     std::vector<std::shared_ptr<Rosen::RSNode>> BuildMixedTargetRSNodes(FrameNode* frameNode);
     void ReCreateRsNodeTreeByTargetList(const std::vector<std::shared_ptr<Rosen::RSNode>>& targetRSNodes,
         std::unordered_map<Rosen::RSNode::SharedPtr, bool>& childNodeMap);
 
     uint32_t backgroundTaskId_ = 0;
-    RosenMixedRenderChildList mixedRenderChildList_;
+    std::unique_ptr<RosenMixedRenderChildList> mixedRenderChildList_;
     static std::timed_mutex taskMtx_;
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;

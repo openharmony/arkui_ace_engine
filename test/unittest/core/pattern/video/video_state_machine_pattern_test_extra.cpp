@@ -100,39 +100,6 @@ HWTEST_F(VideoStateMachinePatternTestNg, UpdateMutedPrivate001, TestSize.Level1)
 }
 
 /**
- * @tc.name: PrepareSurface001
- * @tc.desc: Test PrepareSurface surface setup branches.
- * @tc.type: FUNC
- */
-HWTEST_F(VideoStateMachinePatternTestNg, PrepareSurface001, TestSize.Level1)
-{
-    auto frameNode = CreateVideoNode(g_testProperty);
-    ASSERT_TRUE(frameNode);
-    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
-    ASSERT_TRUE(pattern);
-
-    // Case 1: mediaPlayer null => returns early
-    pattern->mediaPlayer_.Reset();
-    pattern->PrepareSurface();
-    EXPECT_FALSE(pattern->mediaPlayer_);
-
-    // Case 2: valid mediaPlayer, surface invalid => init surface
-    auto mockMediaPlayer = AceType::MakeRefPtr<TestableMockMediaPlayer>();
-    EXPECT_CALL(*mockMediaPlayer, IsMediaPlayerValid()).WillRepeatedly(Return(true));
-    EXPECT_CALL(*mockMediaPlayer, SetRenderSurface(_)).Times(AnyNumber());
-    EXPECT_CALL(*mockMediaPlayer, SetSurface()).WillRepeatedly(Return(0));
-    pattern->mediaPlayer_ = mockMediaPlayer;
-
-    auto mockRenderSurface = AceType::MakeRefPtr<MockRenderSurface>();
-    EXPECT_CALL(*mockRenderSurface, IsSurfaceValid()).WillOnce(Return(false)).WillRepeatedly(Return(true));
-    EXPECT_CALL(*mockRenderSurface, InitSurface()).Times(1);
-    EXPECT_CALL(*mockRenderSurface, SetRenderContext(_)).Times(AnyNumber());
-    pattern->renderSurface_ = mockRenderSurface;
-    pattern->PrepareSurface();
-    EXPECT_TRUE(pattern->renderSurface_);
-}
-
-/**
  * @tc.name: OnSliderChange001
  * @tc.desc: Test OnSliderChange BEGIN/MOVING/END modes.
  * @tc.type: FUNC

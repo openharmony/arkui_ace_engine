@@ -19,6 +19,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/animation/animator.h"
 #include "core/animation/spring_motion.h"
 #include "core/components/list/list_item_theme.h"
 #include "core/components/scroll/scroll_controller_base.h"
@@ -39,6 +40,16 @@
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
+
+ListItemPattern::ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder)
+{}
+
+ListItemPattern::ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
+    : listItemStyle_(listItemStyle), shallowBuilder_(shallowBuilder)
+{}
+
+ListItemPattern::~ListItemPattern() = default;
+
 namespace {
 constexpr float SWIPER_TH = 0.25f;
 constexpr float NEW_SWIPER_TH = 0.5f;
@@ -51,8 +62,6 @@ constexpr float SWIPE_SPRING_DAMPING = 30.f;
 constexpr int32_t DELETE_ANIMATION_DURATION = 400;
 constexpr Color ITEM_FILL_COLOR = Color(0x1A0A59f7);
 } // namespace
-
-ListItemPattern::~ListItemPattern() = default;
 
 void ListItemPattern::BeforeCreateLayoutWrapper()
 {
@@ -1475,8 +1484,8 @@ bool ListItemPattern::GetLayouted() const
 
 void ListItemPattern::DumpAdvanceInfo()
 {
-    DumpLog::GetInstance().AddDesc("indexInList:" + std::to_string(indexInList_));
-    DumpLog::GetInstance().AddDesc("indexInListItemGroup:" + std::to_string(indexInListItemGroup_));
+    DumpLog::GetInstance().AddDesc("indexInList:" + std::to_string(GetIndexInList()));
+    DumpLog::GetInstance().AddDesc("indexInListItemGroup:" + std::to_string(GetIndexInListItemGroup()));
     DumpLog::GetInstance().AddDesc("swiperAction.startNodeIndex:" + std::to_string(startNodeIndex_));
     DumpLog::GetInstance().AddDesc("swiperAction.endNodeIndex:" + std::to_string(endNodeIndex_));
     DumpLog::GetInstance().AddDesc("swiperAction.childNodeIndex:" + std::to_string(childNodeIndex_));
@@ -1569,7 +1578,7 @@ bool ListItemPattern::ClickJudge(const PointF& localPoint)
     CHECK_NULL_RETURN(renderContext, false);
     RectF paintRect = renderContext->GetPaintRectWithoutTransform();
     auto offset = paintRect.GetOffset();
-    if (indexInListItemGroup_ != -1) {
+    if (GetIndexInListItemGroup() != -1) {
         auto parentFrameNode = GetParentFrameNode();
         CHECK_NULL_RETURN(parentFrameNode, false);
         auto parentRenderContext = parentFrameNode->GetRenderContext();
@@ -1633,8 +1642,8 @@ FocusPattern ListItemPattern::GetFocusPattern() const
 
 void ListItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
-    json->Put("indexInList", indexInList_);
-    json->Put("indexInListItemGroup", indexInListItemGroup_);
+    json->Put("indexInList", GetIndexInList());
+    json->Put("indexInListItemGroup", GetIndexInListItemGroup());
     json->Put("swiperAction.startNodeIndex", startNodeIndex_);
     json->Put("swiperAction.endNodeIndex", endNodeIndex_);
     json->Put("swiperAction.childNodeIndex", childNodeIndex_);
@@ -1699,35 +1708,4 @@ void ListItemPattern::HandleFocusEvent()
     }
 }
 
-bool ListItemPattern::FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target)
-{
-    CHECK_NULL_RETURN(childFocus, false);
-    // Support moving focus to the first item of the List when pressing HOME
-    // and to the last item of the List when pressing END.
-    auto isHome = step == FocusStep::LEFT_END || step == FocusStep::UP_END;
-    auto isEnd = step == FocusStep::RIGHT_END || step == FocusStep::DOWN_END;
-    bool isFindTailOrHead = false;
-    if (isHome) {
-        isFindTailOrHead = childFocus->AnyChildFocusHub([&target](const RefPtr<FocusHub>& node) {
-            auto headNode = node->GetHeadOrTailChild(true);
-            if (headNode) {
-                target = headNode;
-                return true;
-            }
-            return false;
-        });
-    } else if (isEnd) {
-        isFindTailOrHead = childFocus->AnyChildFocusHub(
-            [&target](const RefPtr<FocusHub>& node) {
-                auto tailNode = node->GetHeadOrTailChild(false);
-                if (tailNode) {
-                    target = tailNode;
-                    return true;
-                }
-                return false;
-            },
-            true);
-    }
-    return isFindTailOrHead;
-}
 } // namespace OHOS::Ace::NG

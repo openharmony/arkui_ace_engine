@@ -349,6 +349,51 @@ HWTEST_F(GridItemDragManagerTestNg, FindAvailableColumnSpanExceedsCrossCount001,
     EXPECT_EQ(col, -1);
 }
 
+/**
+ * @tc.name: FindAvailableColumnZeroSpan001
+ * @tc.desc: Test FindAvailableColumn returns -1 when colSpan is zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindAvailableColumnZeroSpan001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    GridItemDragManager::SimMatrix matrix;
+    matrix[0] = {};
+    int32_t col = manager->FindAvailableColumn(matrix, 0, 0, 4);
+    EXPECT_EQ(col, -1);
+}
+
+/**
+ * @tc.name: FindAvailableColumnNegativeSpan001
+ * @tc.desc: Test FindAvailableColumn returns -1 when colSpan is negative
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindAvailableColumnNegativeSpan001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    GridItemDragManager::SimMatrix matrix;
+    matrix[0] = {};
+    int32_t col = manager->FindAvailableColumn(matrix, 0, -1, 4);
+    EXPECT_EQ(col, -1);
+}
+
+/**
+ * @tc.name: FindAvailableColumnSpanEqualsCrossCount001
+ * @tc.desc: Test FindAvailableColumn succeeds when colSpan equals crossCount on empty row
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridItemDragManagerTestNg, FindAvailableColumnSpanEqualsCrossCount001, TestSize.Level1)
+{
+    auto manager = CreateDragManager();
+    ASSERT_NE(manager, nullptr);
+    GridItemDragManager::SimMatrix matrix;
+    matrix[0] = {};
+    int32_t col = manager->FindAvailableColumn(matrix, 0, 4, 4);
+    EXPECT_EQ(col, 0);
+}
+
 // ============================================================
 // PlaceItemInMatrix
 // ============================================================

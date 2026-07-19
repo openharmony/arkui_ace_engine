@@ -50,11 +50,11 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetFirstHandleInfo()
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = pattern->textSelector_.firstHandle;
     handleInfo.isShow = dragHandleIndex_ == DragHandleIndex::FIRST || CheckHandleVisible(handleInfo.paintRect);
-    handleInfo.isTouchable = handleInfo.isShow;
     auto localPaintRect = handleInfo.paintRect;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
+    handleInfo.isTouchable = handleInfo.isShow;
     return handleInfo;
 }
 
@@ -66,11 +66,11 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetSecondHandleInfo()
     handleInfo.paintRect = pattern->textSelector_.secondHandle;
     handleInfo.isShow = (dragHandleIndex_ == DragHandleIndex::SECOND && !IsSingleHandle()) ||
         CheckHandleVisible(handleInfo.paintRect);
-    handleInfo.isTouchable = handleInfo.isShow;
     auto localPaintRect = handleInfo.paintRect;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
+    handleInfo.isTouchable = handleInfo.isShow;
     return handleInfo;
 }
 
@@ -698,7 +698,7 @@ void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool 
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     initSelector_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
-    IF_TRUE(!IsSingleHandle(), ChangeHandleHeight(event, isFirst));
+    IF_TRUE(!IsSingleHandle() && !HasUnsupportedTransform(), ChangeHandleHeight(event, isFirst));
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);

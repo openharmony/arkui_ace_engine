@@ -366,13 +366,15 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     SetDragStartPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     const auto dragPositionInMainAxis =
         axis_ == Axis::VERTICAL ? info.GetGlobalLocation().GetY() : info.GetGlobalLocation().GetX();
-#ifdef OHOS_PLATFORM
+#if defined(OHOS_PLATFORM)
     // Increase the cpu frequency when sliding start.
     auto currentTime = GetSysTimestamp();
     auto increaseCpuTime = currentTime - startIncreaseTime_;
     if (!moved_ || increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
         startIncreaseTime_ = currentTime;
+#ifndef CROSS_PLATFORM
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().BeginListFling();
         }
@@ -576,13 +578,15 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
         snapController_->Stop();
         currentPos_ = 0.0;
     }
-#ifdef OHOS_PLATFORM
+#if defined(OHOS_PLATFORM)
     // Handle the case where you keep sliding past limit time(4s).
     auto currentTime = GetSysTimestamp();
     auto increaseCpuTime = currentTime - startIncreaseTime_;
     if (increaseCpuTime >= INCREASE_CPU_TIME_ONCE) {
         startIncreaseTime_ = currentTime;
+#ifndef CROSS_PLATFORM
         ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
+#endif
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().BeginListFling();
         }
@@ -634,8 +638,10 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         }
         HandleScrollEnd();
         currentVelocity_ = 0.0;
-#ifdef OHOS_PLATFORM
+#if defined(OHOS_PLATFORM)
+#ifndef CROSS_PLATFORM
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndListFling();
         }
@@ -948,8 +954,10 @@ void Scrollable::OnAnimateStop()
         return;
     }
     moved_ = false;
-#ifdef OHOS_PLATFORM
+#if defined(OHOS_PLATFORM)
+#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndListFling();
     }
@@ -1022,8 +1030,10 @@ void Scrollable::ProcessScrollMotionStop()
         }
         moved_ = false;
         HandleScrollEnd();
-#ifdef OHOS_PLATFORM
+#if defined(OHOS_PLATFORM)
+#ifndef CROSS_PLATFORM
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+#endif
         if (FrameReport::GetInstance().GetEnable()) {
             FrameReport::GetInstance().EndListFling();
         }

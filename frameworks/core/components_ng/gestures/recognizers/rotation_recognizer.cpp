@@ -392,7 +392,9 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
         HandleGestureAccept(info, type, GestureListenerType::ROTATION);
         ACE_BENCH_MARK_TRACE("RotationGesture_end");
         callbackFunction(info);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         HandleReports(info, type);
+#endif
     }
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     ReportToGestureDebugManager(type, GestureListenerType::ROTATION);
@@ -447,6 +449,7 @@ void RotationRecognizer::GetGestureEventInfo(GestureEvent& info)
     info.SetInputEventType(inputEventType_);
 }
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void RotationRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
 {
     if (type == GestureCallbackType::ACTION || type == GestureCallbackType::UPDATE) {
@@ -462,9 +465,13 @@ void RotationRecognizer::HandleReports(const GestureEvent& info, GestureCallback
     rotationReport.SetAngle(info.GetAngle());
     Reporter::GetInstance().HandleUISessionReporting(rotationReport);
 }
+#endif
 
 GestureJudgeResult RotationRecognizer::TriggerGestureJudgeCallback()
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return GestureJudgeResult::REJECT;
+    }
     auto frameNode = GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(frameNode, GestureJudgeResult::CONTINUE);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();

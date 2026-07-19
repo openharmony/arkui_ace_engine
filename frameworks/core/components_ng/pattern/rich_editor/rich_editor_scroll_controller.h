@@ -41,15 +41,14 @@ public:
     bool IsReachLowerBoundary();
     bool IsReachUpperBoundary();
     bool IsReachBoundary();
-    bool IsReachLowerBoundary(const Offset& textOffset);
-    bool IsReachUpperBoundary(const Offset& textOffset, const SizeF& contentSize);
     bool IsReachAvoidBoundary(float offset);
     static float CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point);
     void ScheduleAutoScroll(AutoScrollParam param);
     void StopAutoScroll();
     float GetAutoScrollOffsetDiff(const OffsetF& offset);
     bool GetHotAreaOverflow(bool isDragging, float edgeThreshold);
-    void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
+    RectF GetSafeAreaRect(bool isDragging);
+    void HandleAutoScrollNearBoundary(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
     OffsetF GetOffset2d(float offset);
     void MoveHandleOnScroll(float offset);
     void MoveHandleOnScroll(float offset, bool isFirst);
@@ -62,10 +61,18 @@ public:
     float CalCaretToContentRectDistanceHorizontal(const OffsetF& caretOffset, float caretWidth);
     bool NeedScroll();
     float GetScrollOffset();
+    bool NeedScroll(bool isVertical, float keyboardOffset = 0.0f);
+    bool HandleScrollCallback(float offset, int32_t source);
+    void HandleScrollStart();
+    void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
+    void MoveCaretToContentRectHorizontal(const OffsetF& caretOffset);
+    void MoveCaretToContentRectVertical(const OffsetF& caretOffset, float caretHeight);
+    void OnAutoScroll(AutoScrollParam param);
+
     // add for horizontal scroll
     bool IsFreeScrollEnabled() const;
     RefPtr<NGGestureRecognizer> GetScrollGestureRecognizer() const;
-    void InitFreeScrollController();
+    void InitFreeScrollController(bool forceRecreate = false);
     void HandleScrollCallback(float offset, int32_t source, bool isVertical);
     bool OnScrollWithAxisCallback(float offset, int32_t source, Axis axis);
     void HandleEndScrollCallback(bool isVertical);
@@ -76,7 +83,8 @@ public:
     void MoveHandleOnScrollWithAxis(float offset, Axis axis);
     void MoveHandleOnScrollWithAxis(float offset, bool isFirst, Axis axis);
     void MoveCaretToContentRect(const RectF& caretRect);
-    bool IsHotAreaOverflow(bool isDragging, float edgeThreshold, bool isVertical);
+    void MoveCaretToContentRectWithAxis(bool isVertical, const OffsetF& caretOffset, float caretSize,
+        float keyboardOffset = 0.0f);
     void HandleAutoScrollNearBoundary(AutoScrollParam param, OffsetF offset);
     void HandleInHorizontalHotArea(AutoScrollParam& param, const RectF& safeAreaRect, const PointF& point);
     void HandleInVerticalHotArea(AutoScrollParam& param, const RectF& safeAreaRect, const PointF& point);
@@ -92,13 +100,16 @@ public:
     void ScheduleDisappearDelayTask(Axis axis);
     void StopScrolling();
     void OnDrawScrollBar(DrawingContext& context);
-    void UpdateScrollBarColor(std::optional<Color> color);
+    void UpdateScrollBarColor(const Color& foregroundColor, const Color& backgroundColor);
+    void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
     bool IsMouseOverScrollBar(const MouseInfo& info);
     bool IsPointInScrollBarRect(const Point& point, bool isVertical);
+    bool IsScrollDirectionValid(bool isVertical);
     void CheckScrollEnabled();
     void SetScrollBar(DisplayMode displayMode);
     void UpdateBorderRadius();
     void UpdateScrollBar();
+    void UpdateScrollBarAxis(bool isVertical);
     void UpdateScrollBarOffset();
     void PlayScrollBarUpdateAnimation(Axis axis);
     void UpdateScrollBarOffsetWithAxis(Axis axis, bool needAnimation = true);

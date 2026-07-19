@@ -16,13 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CUSTOM_PAINT_CUSTOM_PAINT_PAINT_METHOD_H
 
-#include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
-#include "base/utils/macros.h"
-#include "core/common/font_manager.h"
 #include "core/components/common/properties/paint_state.h"
-#include "core/components_ng/image_provider/svg_dom_base.h"
-#include "core/components_ng/pattern/canvas/canvas_modifier.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/node_paint_method.h"
 #ifndef ACE_UNITTEST
@@ -31,13 +27,15 @@
 #include "core/image/image_source_info.h"
 #endif
 #include "core/image/image_cache.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 enum class StatisticEventType;
+struct CanvasImage;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+class SvgDomBase;
 
 const int32_t DEFAULT_SAVE_COUNT = 1;
 

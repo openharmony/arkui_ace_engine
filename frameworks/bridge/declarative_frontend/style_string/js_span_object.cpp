@@ -2004,9 +2004,9 @@ void JSParagraphStyleSpan::JSBind(BindingTarget globalObj)
         "textDirection", &JSParagraphStyleSpan::GetTextDirection, &JSParagraphStyleSpan::SetTextDirection);
     JSClass<JSParagraphStyleSpan>::CustomProperty(
         "shaderStyle", &JSParagraphStyleSpan::GetShaderStyle, &JSParagraphStyleSpan::SetShaderStyle);
-    JSClass<JSParagraphStyleSpan>::Bind(globalObj, JSParagraphStyleSpan::Constructor, JSParagraphStyleSpan::Destructor);
     JSClass<JSParagraphStyleSpan>::CustomProperty(
         "tailIndents", &JSParagraphStyleSpan::GetTailIndents, &JSParagraphStyleSpan::SetTailIndents);
+    JSClass<JSParagraphStyleSpan>::Bind(globalObj, JSParagraphStyleSpan::Constructor, JSParagraphStyleSpan::Destructor);
 }
 
 void JSParagraphStyleSpan::Constructor(const JSCallbackInfo& args)
@@ -2441,6 +2441,7 @@ void JSParagraphStyleSpan::ParseJsTailIndents(const JSRef<JSObject>& obj, SpanPa
     if (tailIndentsObj->IsArray()) {
         JSRef<JSArray> array = JSRef<JSArray>::Cast(tailIndentsObj);
         NG::TailIndentsArray indentsArray;
+        indentsArray.reserve(array->Length());
         for (size_t i = 0; i < array->Length(); i++) {
             JSRef<JSVal> value = array->GetValueAt(i);
             CalcDimension dimension;
@@ -2453,20 +2454,26 @@ void JSParagraphStyleSpan::ParseJsTailIndents(const JSRef<JSObject>& obj, SpanPa
             if (!parsed) {
                 parsed = JSContainerBase::ParseJsDimensionFpNG(value, dimension, resObj);
             }
-            if (parsed) {
-                indentsArray.emplace_back(static_cast<Dimension>(dimension));
+            if (!parsed || dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
+                dimension.Reset();
             }
+            indentsArray.emplace_back(static_cast<Dimension>(dimension));
         }
-        tailIndents.indentsArray = indentsArray;
+        tailIndents.indentsArray = std::move(indentsArray);
     } else if (tailIndentsObj->IsObject()) {
-        JSRef<JSObject> valObj = JSRef<JSObject>::Cast(tailIndentsObj);
         CalcDimension dimension;
         RefPtr<ResourceObject> resObj;
-        if (JSViewAbstract::ParseJsLengthMetricsVpWithResObj(valObj, dimension, resObj)) {
-            NG::TailIndentsArray indentsArray;
-            indentsArray.emplace_back(static_cast<Dimension>(dimension));
-            tailIndents.indentsArray = indentsArray;
+        JSRef<JSObject> valObj = JSRef<JSObject>::Cast(tailIndentsObj);
+        bool parsed = JSViewAbstract::ParseJsLengthMetricsVpWithResObj(valObj, dimension, resObj);
+        if (!parsed) {
+            parsed = JSContainerBase::ParseJsDimensionFpNG(tailIndentsObj, dimension, resObj);
         }
+        if (!parsed || dimension.IsNegative() || dimension.Unit() == DimensionUnit::PERCENT) {
+            dimension.Reset();
+        }
+        NG::TailIndentsArray indentsArray;
+        indentsArray.emplace_back(static_cast<Dimension>(dimension));
+        tailIndents.indentsArray = std::move(indentsArray);
     }
     if (tailIndents.HasValue()) {
         paragraphStyle.tailIndents = tailIndents;

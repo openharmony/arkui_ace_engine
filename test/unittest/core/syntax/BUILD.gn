@@ -105,6 +105,7 @@ ace_unittest("repeat_virtual_2_test_ng") {
     "repeat_virtual_2_model_test_ng.cpp",
     "repeat_virtual_2_test_ng.cpp",
     "repeat_virtual_2_syntax_test_ng_advanced.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_grid_modifier.cpp",
   ]
 }
 

@@ -17,29 +17,45 @@
 
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 
 
 using namespace OHOS::Ace;
 
+namespace {
+OHOS::Ace::NG::PathModelNG* GetPathModel()
+{
+    static OHOS::Ace::NG::PathModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = OHOS::Ace::DynamicModuleHelper::GetInstance().GetDynamicModule("Path");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find path dynamic module");
+        }
+        cachedModel = reinterpret_cast<OHOS::Ace::NG::PathModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+} // namespace
+
 extern "C" {
 void FfiOHOSAceFrameworkPathCreate(const char* commands)
 {
-    PathModel::GetInstance()->Create();
-    PathModel::GetInstance()->SetCommands(commands);
+    GetPathModel()->Create();
+    GetPathModel()->SetCommands(commands);
 }
 
 void FfiOHOSAceFrameworkPathCreateWithSize(
     double width, int32_t widthUnit, double height, int32_t heightUnit, const char* commands)
 {
-    PathModel::GetInstance()->Create();
+    GetPathModel()->Create();
     if (width > 0.0) {
         FfiOHOSAceFrameworkShapeSetWidth(width, widthUnit);
     }
     if (height > 0.0) {
         FfiOHOSAceFrameworkShapeSetHeight(height, heightUnit);
     }
-    PathModel::GetInstance()->SetCommands(commands);
+    GetPathModel()->SetCommands(commands);
 }
 
 int64_t FfiOHOSAceFrameworkPathInsCreate(const char* commands)
@@ -67,6 +83,6 @@ int64_t FfiOHOSAceFrameworkPathInsCreateWithSize(
 
 void FfiOHOSAceFrameworkPathSetCommands(const char* commands)
 {
-    PathModel::GetInstance()->SetCommands(commands);
+    GetPathModel()->SetCommands(commands);
 }
 }

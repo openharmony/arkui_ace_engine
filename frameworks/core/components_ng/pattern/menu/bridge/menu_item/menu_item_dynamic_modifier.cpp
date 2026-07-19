@@ -24,8 +24,8 @@ namespace {
 const char DELIMITER = '|';
 constexpr int32_t SIZE_OF_FONT_INFO = 3;
 static const char* ERR_CODE = "-1";
-const std::string DEFAULT_FONT_WEIGHT = "normal";
-const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
+constexpr std::string_view DEFAULT_FONT_WEIGHT = "normal";
+constexpr std::string_view DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
@@ -193,7 +193,8 @@ void SetLabelFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal)
     if (res[2] != ERR_CODE) { // 2: position of font family data
         MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[2]));
     } else {
-        MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+        MenuItemModelNG::SetLabelFontFamily(frameNode,
+            Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY)));
     }
 }
 
@@ -216,7 +217,8 @@ void SetLabelFontFamily(ArkUINodeHandle node, ArkUI_CharPtr fontFamily)
     if (fontFamily) {
         MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(fontFamily));
     } else {
-        MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+        MenuItemModelNG::SetLabelFontFamily(frameNode,
+            Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY)));
     }
 }
 
@@ -267,7 +269,8 @@ void SetLabelFontWithResource(ArkUINodeHandle node, ArkUIMenuFontOptions* menuFo
                     frameNode, familyResObj, MenuItemFontFamilyType::LABEL_FONT_FAMILY);
             }
         } else {
-            MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+            MenuItemModelNG::SetLabelFontFamily(frameNode,
+                Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY)));
         }
     }
 }
@@ -277,10 +280,11 @@ void ResetLabelFont(ArkUINodeHandle node)
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension fontSize;
-    FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
+    FontWeight fontWeight = StringUtils::StringToFontWeight(std::string(DEFAULT_FONT_WEIGHT));
     MenuItemModelNG::SetLabelFontSize(frameNode, fontSize);
     MenuItemModelNG::SetLabelFontWeight(frameNode, fontWeight);
-    MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+    MenuItemModelNG::SetLabelFontFamily(frameNode,
+        Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY)));
     MenuItemModelNG::SetLabelFontStyle(frameNode, DEFAULT_FONT_STYLE);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> nullResObj = nullptr;
@@ -322,7 +326,8 @@ void SetContentFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal
     if (res[2] != ERR_CODE) { // 2: position of font family data
         MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[2]));
     } else {
-        MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+        MenuItemModelNG::SetFontFamily(frameNode,
+            Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY)));
     }
 }
 
@@ -354,7 +359,8 @@ void SetContentFontWithResource(ArkUINodeHandle node, ArkUIMenuFontOptions* menu
                     frameNode, familyResObj, MenuItemFontFamilyType::FONT_FAMILY);
             }
         } else {
-            MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+            MenuItemModelNG::SetFontFamily(frameNode,
+                Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY)));
         }
     }
 }
@@ -364,10 +370,11 @@ void ResetContentFont(ArkUINodeHandle node)
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension fontSize;
-    FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
+    FontWeight fontWeight = StringUtils::StringToFontWeight(std::string(DEFAULT_FONT_WEIGHT));
     MenuItemModelNG::SetFontSize(frameNode, fontSize);
     MenuItemModelNG::SetFontWeight(frameNode, fontWeight);
-    MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
+    MenuItemModelNG::SetFontFamily(frameNode,
+        Framework::ConvertStrToFontFamilies(std::string(DEFAULT_FONT_FAMILY)));
     MenuItemModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> nullResObj = nullptr;
@@ -557,10 +564,10 @@ const ArkUIMenuItemModifier* GetMenuItemDynamicModifier()
             .resetSelectIconSymbol = ResetSelectIconSymbol,
             .setOnChange = SetMenuItemOnChange,
             .resetOnChange = ResetMenuItemOnChange,
-            .setSubMenuBuilder = SetSubMenuBuilder,
-            .resetSubMenuBuilder = ResetSubMenuBuilder,
             .createMenuItemFrameNode = CreateMenuItemFrameNode,
             .setLabelFontColorInt = SetLabelFontColor,
+            .setSubMenuBuilder = SetSubMenuBuilder,
+            .resetSubMenuBuilder = ResetSubMenuBuilder,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;

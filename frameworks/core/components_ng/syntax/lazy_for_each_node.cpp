@@ -16,12 +16,13 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
 #include "core/common/container.h"
-#include "core/components_ng/pattern/grid/grid_item_pattern.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/syntax/lazy_for_each_utils.h"
+#include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -42,12 +43,14 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
             TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH, "replace old lazy for each builder");
             node->builder_ = forEachBuilder;
         }
+        forEachBuilder->SetLazyForEachNode(node);
         return node;
     }
     ACE_UINODE_TRACE(nodeId);
     node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
     node->RegisterBuilderListener();
+    forEachBuilder->SetLazyForEachNode(node);
     if (node->GetMemOptStrategy() == LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
         node->RegisterWindowStateChangedCallback();
         node->RegisterMemoryLevelChangedCallback();
@@ -155,6 +158,7 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
             } else {
                 node->requestLongPredict_ = true;
                 node->itemConstraint_.reset();
+                node->DisableParentCustomNodeReleaseExpiringNode();
             }
 
             node->builder_->RemovingExpiringItem(deadline);
@@ -166,7 +170,7 @@ void LazyForEachNode::PostIdleTask(uint32_t taskSource)
     });
 }
 
-void LazyForEachNode::OnDataReloaded()
+void LazyForEachNode::OnDataReloaded(bool reuseImmediately)
 {
     ACE_SCOPED_TRACE("LazyForEach OnDataReloaded parendId[%d]", GetParentId());
     if (!children_.empty()) {
@@ -175,7 +179,7 @@ void LazyForEachNode::OnDataReloaded()
     }
     if (builder_) {
         builder_->SetUseNewInterface(false);
-        builder_->OnDataReloaded();
+        builder_->OnDataReloaded(reuseImmediately);
         if (FrameCount() == 0) {
             PostIdleTask(LazyForEachIdleTaskSource::ON_DATA_RELOADED);
         }
@@ -414,23 +418,26 @@ void LazyForEachNode::MarkNeedSyncRenderTree(bool needRebuild)
     }
 }
 
-RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree)
+RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBuild,
+    bool isCache, bool addToRenderTree)
 {
-    ACE_SYNTAX_SCOPED_TRACE(
-        "LazyForEach.GetFrameChildByIndex parentId[%d] index[%d] needBuild[%d] isCache[%d] addToRenderTree[%d]",
-        GetParentId(), static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
+    ACE_SYNTAX_SCOPED_TRACE("LazyForEach.GetFrameChildByIndex parentId[%d] index[%d] needBuild[%d] isCache[%d] "
+        "addToRenderTree[%d]", GetParentId(), static_cast<int32_t>(index), static_cast<int32_t>(needBuild),
         static_cast<int32_t>(isCache), static_cast<int32_t>(addToRenderTree));
-    if (index >= static_cast<uint32_t>(FrameCount())) {
-        return nullptr;
+    CHECK_EQUAL_RETURN(index >= static_cast<uint32_t>(FrameCount()), true, nullptr);
+    if (isParentCustomNodeReleaseExpiringNodeEnabled_) {
+        tempChildren_.clear();
     }
     auto child = builder_->GetChildByIndex(index, needBuild, isCache);
-    if (!child.second) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(child.second, nullptr);
     child.second->UpdateThemeScopeId(GetThemeScopeId());
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
-        child.second->SetJSViewActive(false, true);
+        if (!addToRenderTree) {
+            child.second->SetJSViewActive(false, true);
+        } else {
+            child.second->SetJSViewActive(false, true, false, true);
+        }
         bool enableCustomComponentFreeze = LazyForEachUtils::GetEnableCustomComponentFreeze();
         auto optionsFreeze = GetEnableCustomComponentFreeze();
         if (optionsFreeze == LazyForEachCustomComponentFreezeMode::DISABLED) {
@@ -520,6 +527,10 @@ void LazyForEachNode::DoSetActiveChildRange(
         end += cacheEnd;
         builder_->SetShowCached(cacheStart, cacheEnd);
     }
+    // if measured in any GetChildren call, need an additional measure
+    if (childrenDepth_ > 0) {
+        hasSetActiveChildRangeInGetChildren_ = true;
+    }
     ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d], cacheStart[%d], cacheEnd[%d], showCache[%d]",
         start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
     bool needRender = builder_->SetActiveChildRange(start, end);
@@ -546,17 +557,39 @@ bool LazyForEachNode::IsCachedCountReduced(int32_t cacheStart, int32_t cacheEnd)
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) const
 {
+    ++childrenDepth_;
     if (children_.empty()) {
         LoadChildren(notDetach);
 
         // if measure not done, return previous children
         if (notDetach && children_.empty()) {
+            // if measured in any GetChildren call, triggle measure again
+            const_cast<LazyForEachNode*>(this)->TryTriggleAdditionalLayout();
+            --childrenDepth_;
             return tempChildren_;
         }
 
         tempChildren_.clear();
     }
+    // if measured in any GetChildren call, triggle measure again
+    const_cast<LazyForEachNode*>(this)->TryTriggleAdditionalLayout();
+    --childrenDepth_;
     return children_;
+}
+
+void LazyForEachNode::TryTriggleAdditionalLayout()
+{
+    CHECK_EQUAL_VOID(hasSetActiveChildRangeInGetChildren_ && childrenDepth_ == 1, false);
+    TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH, "LazyForEach.TryTriggleAdditionalLayout id[%{public}d]", GetId());
+    ACE_SCOPED_TRACE("LazyForEach.TryTriggleAdditionalLayout id[%d]", GetId());
+    hasSetActiveChildRangeInGetChildren_ = false;
+    NotifyChangeWithCount(0, 0, NotificationType::START_CHANGE_POSITION);
+    if (builder_) {
+        int32_t endChangePos = std::max(builder_->GetHistoryTotalCount(), FrameCount());
+        NotifyChangeWithCount(endChangePos, 0, NotificationType::END_CHANGE_POSITION);
+    }
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void LazyForEachNode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)
@@ -600,16 +633,16 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
     builder_->ProcessSyncLoadTempChildren(children_);
 }
 
-const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
+std::list<RefPtr<UINode>> LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
 {
     if (needCacheNode) {
         std::vector<UINode*> childList;
         builder_->GetAllItems(childList);
-        childrenWithCache_.clear();
+        std::list<RefPtr<UINode>> childrenWithCache;
         for (const auto& uiNode : childList) {
-            childrenWithCache_.emplace_back(Claim(uiNode));
+            childrenWithCache.emplace_back(Claim(uiNode));
         }
-        return childrenWithCache_;
+        return childrenWithCache;
     } else {
         return children_;
     }
@@ -707,9 +740,9 @@ void LazyForEachNode::InitDragManager(const RefPtr<FrameNode>& childNode)
         CHECK_NULL_VOID(pattern);
         pattern->InitDragManager(AceType::Claim(this));
     } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-        auto pattern = childNode->GetPattern<GridItemPattern>();
+        auto pattern = NodeModifier::GetGridItemCustomModifier();
         CHECK_NULL_VOID(pattern);
-        pattern->InitDragManager(AceType::Claim(this));
+        pattern->initDragManager(childNode, AceType::Claim(this));
     }
 }
 
@@ -741,14 +774,14 @@ void LazyForEachNode::InitAllChilrenDragManager(bool init)
                 pattern->DeInitDragManager();
             }
         } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-            auto pattern = item->GetPattern<GridItemPattern>();
+            auto pattern = NodeModifier::GetGridItemCustomModifier();
             if (!pattern) {
                 continue;
             }
             if (init) {
-                pattern->InitDragManager(AceType::Claim(this));
+                pattern->initDragManager(item, AceType::Claim(this));
             } else {
-                pattern->DeInitDragManager();
+                pattern->deInitDragManager(item);
             }
         }
     }
@@ -1014,4 +1047,29 @@ void LazyForEachNode::SetIsSyncLoad(bool value)
     CHECK_NULL_VOID(builder_);
     builder_->SetIsSyncLoad(value);
 }
+
+void LazyForEachNode::EnableParentCustomNodeReleaseExpiringNode(const std::set<std::string>& reuseIds)
+{
+    CHECK_EQUAL_VOID(isParentCustomNodeReleaseExpiringNodeEnabled_, true);
+    auto parentCustomNode = GetParentCustomNode();
+    CHECK_NULL_VOID(parentCustomNode);
+    parentCustomNode->EnableReleaseExpiringNode(AceType::WeakClaim(this), reuseIds);
+    isParentCustomNodeReleaseExpiringNodeEnabled_ = true;
+    return;
+}
+
+void LazyForEachNode::DisableParentCustomNodeReleaseExpiringNode()
+{
+    CHECK_EQUAL_VOID(isParentCustomNodeReleaseExpiringNodeEnabled_, false);
+    auto parentCustomNode = GetParentCustomNode();
+    CHECK_NULL_VOID(parentCustomNode);
+    parentCustomNode->DisableReleaseExpiringNode(AceType::WeakClaim(this));
+    isParentCustomNodeReleaseExpiringNodeEnabled_ = false;
+}
+
+bool LazyForEachNode::ReleaseExpiringNode(std::string reuseId)
+{
+    return builder_->ReleaseExpiringNode(reuseId);
+}
+
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,7 @@
 
 #include "base/utils/utils.h"
 #include "core/interfaces/native/implementation/video_controller_async_peer_impl.h"
+#include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
@@ -40,7 +41,7 @@ void DestroyPeerImpl(Ark_VideoControllerAsync peer)
     if (peerImpl) {
         auto controller = peerImpl->GetController();
         if (controller) {
-            controller->ClearPattern();
+            controller->Clear();
         }
         peerImpl->DecRefCount();
     }
@@ -49,9 +50,9 @@ Ark_VideoControllerAsync ConstructImpl()
 {
     auto peerImpl = Referenced::MakeRefPtr<VideoControllerAsyncPeer>();
     peerImpl->IncRefCount();
-    WeakPtr<NG::VideoStateMachinePattern> emptyPattern;
-    RefPtr<VideoControllerAsync> controller =
-        AceType::MakeRefPtr<VideoControllerAsync>(emptyPattern);
+    RefPtr<VideoControllerAsync> controller = AceType::Claim(reinterpret_cast<VideoControllerAsync*>(
+        NG::NodeModifier::GetVideoControllerAsyncCustomModifier()->create()));
+    controller->DecRefCount();
     peerImpl->SetController(controller);
     return static_cast<VideoControllerAsyncPeer *>(Referenced::RawPtr(peerImpl));
 }

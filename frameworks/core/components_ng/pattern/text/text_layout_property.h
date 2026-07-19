@@ -82,6 +82,11 @@ public:
 
     ~TextLayoutProperty() override = default;
 
+    bool NeedReadFontScaleFromEnv() const override
+    {
+        return true;
+    }
+
     RefPtr<LayoutProperty> Clone() const override
     {
         auto value = MakeRefPtr<TextLayoutProperty>();
@@ -106,6 +111,26 @@ public:
         ResetTextColorFlagByUser();
         ResetClipEdge();
         ResetIncrementalUpdatePolicy();
+        ResetFontForegroudGradiantColor();
+        ResetSelectedDragPreviewStyle();
+        ResetEnableAutoSpacing();
+        ResetColorShaderStyle();
+        ResetTextEffectStrategy();
+        ResetMinLines();
+        ResetTextFlipDirection();
+        ResetTextFlipEnableBlur();
+        ResetLineHeightMultiply();
+        ResetMinimumLineHeight();
+        ResetMaximumLineHeight();
+        ResetIncludeFontPadding();
+        ResetFallbackLineSpacing();
+        ResetCopyOption();
+        ResetTextSelectableMode();
+        ResetIsAnimationNeeded();
+        ResetIsTextMaxlinesFirst();
+        ResetEnableSmallLanguageTruncation();
+        ResetEnablePunctuationOverflowOptimize();
+        ResetGradientShaderStyle();
         propNeedReCreateParagraph_ = true;
     }
 
@@ -115,6 +140,7 @@ public:
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
     void UpdateEnableSmallLanguageTruncation(const bool& value);
+    void UpdateEnablePunctuationOverflowOptimize(const bool& value);
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, FontSize, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -182,6 +208,7 @@ public:
 
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(EnableAutoSpacing, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(EnableSmallLanguageTruncation, bool);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(EnablePunctuationOverflowOptimize, bool);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::u16string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(ColorShaderStyle, Color, PROPERTY_UPDATE_MEASURE);
 
@@ -305,6 +332,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColorFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
 
     std::string GetTextMarqueeOptionsString() const;
+    std::string GetTailIndentInJson() const;
     void UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json);
     void SetIsNewMaterial(bool isNewMaterial)
     {
@@ -329,12 +357,39 @@ protected:
         value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
         value->propCursorColor_ = CloneCursorColor();
         value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
+        value->propSelectedBackgroundColorFlagByUser_ = CloneSelectedBackgroundColorFlagByUser();
+        value->propCopyOptionFlagByUser_ = CloneCopyOptionFlagByUser();
+        value->propTextColorFlagByUser_ = CloneTextColorFlagByUser();
         value->propClipEdge_ = CloneClipEdge();
+        value->propFontForegroudGradiantColor_ = CloneFontForegroudGradiantColor();
+        value->propSelectedDragPreviewStyle_ = CloneSelectedDragPreviewStyle();
+        value->propEnableAutoSpacing_ = CloneEnableAutoSpacing();
+        value->propColorShaderStyle_ = CloneColorShaderStyle();
+        value->propTextEffectStrategy_ = CloneTextEffectStrategy();
+        value->propIncrementalUpdatePolicy_ = CloneIncrementalUpdatePolicy();
+        value->propMinLines_ = CloneMinLines();
+        value->propTextFlipDirection_ = CloneTextFlipDirection();
+        value->propTextFlipEnableBlur_ = CloneTextFlipEnableBlur();
+        value->propLineHeightMultiply_ = CloneLineHeightMultiply();
+        value->propMinimumLineHeight_ = CloneMinimumLineHeight();
+        value->propMaximumLineHeight_ = CloneMaximumLineHeight();
+        value->propIncludeFontPadding_ = CloneIncludeFontPadding();
+        value->propFallbackLineSpacing_ = CloneFallbackLineSpacing();
+        value->propCopyOption_ = CloneCopyOption();
+        value->propTextSelectableMode_ = CloneTextSelectableMode();
+        value->propIsAnimationNeeded_ = CloneIsAnimationNeeded();
+        value->propIsTextMaxlinesFirst_ = CloneIsTextMaxlinesFirst();
+        value->propEnableSmallLanguageTruncation_ = CloneEnableSmallLanguageTruncation();
+        value->propEnablePunctuationOverflowOptimize_ = CloneEnablePunctuationOverflowOptimize();
+        if (advancedTextLayoutProperty_) {
+            value->advancedTextLayoutProperty_ = advancedTextLayoutProperty_->Clone();
+        }
         value->propNeedReCreateParagraph_ = true;
     }
 
 private:
     void OnEnableSmallLanguageTruncationUpdate(bool value);
+    void OnEnablePunctuationOverflowOptimizeUpdate(bool value);
 
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutProperty);
 

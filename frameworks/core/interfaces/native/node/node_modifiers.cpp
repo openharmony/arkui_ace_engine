@@ -17,13 +17,15 @@
 #include "core/interfaces/native/node/atomic_service_modifier.h"
 #include "core/interfaces/native/node/badge_modifier.h"
 #include "core/interfaces/native/node/blank_modifier.h"
-#include "core/interfaces/native/node/button_modifier.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_dialog_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "core/interfaces/native/node/column_modifier.h"
 #include "core/interfaces/native/node/column_split_modifier.h"
 #include "core/interfaces/native/node/common_shape_modifier.h"
+#include "core/interfaces/native/node/circle_modifier.h"
+#include "core/interfaces/native/node/ellipse_modifier.h"
 #include "core/interfaces/native/node/node_container_reader_modifier.h"
 #include "core/interfaces/native/node/counter_modifier.h"
 #include "core/interfaces/native/node/data_panel_modifier.h"
@@ -34,6 +36,7 @@
 #include "core/interfaces/native/node/frame_node_modifier.h"
 #include "core/interfaces/native/node/gauge_modifier.h"
 #include "core/interfaces/native/node/grid_col_modifier.h"
+#include "core/interfaces/native/node/grid_container_modifier.h"
 #include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/grid_row_modifier.h"
@@ -65,6 +68,9 @@
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_image_span_modifier.h"
+#include "core/interfaces/native/node/node_arc_list_item_modifier.h"
+#include "core/interfaces/native/node/node_arc_list_modifier.h"
+#include "core/interfaces/native/node/node_arc_scroll_bar_modifier.h"
 #include "core/interfaces/native/node/node_indicator_modifier.h"
 #include "core/interfaces/native/node/node_list_item_group_modifier.h"
 #include "core/interfaces/native/node/node_list_item_modifier.h"
@@ -80,6 +86,7 @@
 #include "core/interfaces/native/node/node_span_modifier.h"
 #include "core/interfaces/native/node/node_stack_modifier.h"
 #include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/native/node/node_arc_swiper_modifier.h"
 #include "core/interfaces/native/node/node_symbol_glyph_modifier.h"
 #include "core/interfaces/native/node/node_symbol_span_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
@@ -119,6 +126,7 @@
 #include "core/interfaces/native/node/tabs_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/text_timer_modifier.h"
+#include "core/interfaces/native/node/toolbaritem_modifier.h"
 #include "core/interfaces/native/node/theme_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
@@ -177,6 +185,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCheckboxModifier = NodeModifier::GetCheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetTimepickerModifier,
         .getTextPickerModifier = NodeModifier::GetTextPickerModifier,
+        .getToolBarItemModifier = NodeModifier::GetToolbaritemModifier,
         .getRatingModifier = NodeModifier::GetRatingModifier,
         .getSliderModifier = NodeModifier::GetSliderModifier,
         .getDividerModifier = NodeModifier::GetDividerModifier,
@@ -238,9 +247,12 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getGridItemModifier = NodeModifier::GetGridItemModifier,
         .getProgressModifier = NodeModifier::GetProgressModifier,
         .getCommonShapeModifier = NodeModifier::GetCommonShapeModifier,
+        .getCircleModifier = NodeModifier::GetCircleModifier,
+        .getEllipseModifier = NodeModifier::GetEllipseModifier,
         .getShapeModifier = NodeModifier::GetShapeModifier,
         .getRectModifier = NodeModifier::GetRectModifier,
         .getSwiperModifier = NodeModifier::GetSwiperModifier,
+        .getArcSwiperModifier = NodeModifier::GetArcSwiperModifier,
         .getListItemModifier = NodeModifier::GetListItemModifier,
         .getListModifier = NodeModifier::GetListModifier,
         .getListItemGroupModifier = NodeModifier::GetListItemGroupModifier,
@@ -303,7 +315,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getComponent3DModifier = nullptr,
     #endif
         .getContainerSpanModifier = NodeModifier::GetContainerSpanModifier,
-        .getCustomNodeExtModifier = nullptr,
+        .getCustomNodeExtModifier = NodeModifier::GetCustomNodeExtModifier,
         .getThemeModifier = NodeModifier::GetThemeModifier,
         .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
         .getIndicatorComponentModifier = NodeModifier::GetIndicatorComponentModifier,
@@ -324,6 +336,10 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getLazyWaterFlowLayoutModifier = NodeModifier::GetLazyWaterFlowLayoutModifier,
         .getMaterialModifier = NodeModifier::GetMaterialModifier,
         .getSelectionContainerModifier = NodeModifier::GetSelectionContainerModifier,
+        .getArcListModifier = NodeModifier::GetArcListModifier,
+        .getArcListItemModifier = NodeModifier::GetArcListItemModifier,
+        .getArcScrollBarModifier = NodeModifier::GetArcScrollBarModifier,
+        .getGridContainerModifier = NodeModifier::GetGridContainerModifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

@@ -14,6 +14,7 @@
  */
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
+#include "core/common/event_manager.h"
 #include "core/components_ng/event/event_constants.h"
 #include "securec.h"
 
@@ -3692,5 +3693,90 @@ HWTEST_F(PanRecognizerTestNg, PanGestureTest013, TestSize.Level1)
     };
     panGesture->SetDistanceMap(newMap);
     EXPECT_EQ(panGesture->GetDistanceMap().size(), 2);
+}
+
+/**
+ * @tc.name: PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest001
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest001, TestSize.Level1)
+{
+    PanDirection panDirection;
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(FINGER_NUMBER, panDirection, 0.0);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    panRecognizer->AttachFrameNode(frameNode);
+
+    panRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    panRecognizer->gestureInfo_->SetDisposeTag(true);
+    auto result = panRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest002
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest002, TestSize.Level1)
+{
+    PanDirection panDirection;
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(FINGER_NUMBER, panDirection, 0.0);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    panRecognizer->AttachFrameNode(frameNode);
+
+    panRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    panRecognizer->gestureInfo_->SetDisposeTag(false);
+    auto result = panRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest003
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerTriggerGestureJudgeCallbackDisposeTagTest003, TestSize.Level1)
+{
+    PanDirection panDirection;
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(FINGER_NUMBER, panDirection, 0.0);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    panRecognizer->AttachFrameNode(frameNode);
+
+    panRecognizer->gestureInfo_ = nullptr;
+    auto result = panRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: FilterCoexistingGestureFingersTest001
+ * @tc.desc: Test FilterCoexistingGestureFingers - early return when canCoexistWithScroll_&&escapeRequested_
+ *           + empty fingers early return + canCoexistWithScroll_ false skip escapeRequested_
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, FilterCoexistingGestureFingersTest001, TestSize.Level1)
+{
+    PanDirection panDirection;
+    panDirection.type = PanDirection::ALL;
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 5.0);
+
+    // B1: canCoexistWithScroll_ && escapeRequested_ both true → early return
+    panRecognizer->SetCanCoexistWithScroll(true);
+    panRecognizer->escapeRequested_ = true;
+    auto referee = AceType::MakeRefPtr<GestureReferee>();
+    panRecognizer->referee_ = referee;
+    TouchEvent touchEvent;
+    touchEvent.id = 0;
+    panRecognizer->touchPoints_[0] = touchEvent;
+    panRecognizer->FilterCoexistingGestureFingers();
+    EXPECT_TRUE(panRecognizer->escapeRequested_);
+    EXPECT_TRUE(panRecognizer->triggeredFingerIds_.empty());
+
+    // B9: empty fingers → early return
+    panRecognizer->SetCanCoexistWithScroll(false);
+    panRecognizer->escapeRequested_ = false;
+    panRecognizer->touchPoints_.clear();
+    panRecognizer->FilterCoexistingGestureFingers();
+    EXPECT_TRUE(panRecognizer->triggeredFingerIds_.empty());
 }
 } // namespace OHOS::Ace::NG

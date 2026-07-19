@@ -478,7 +478,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         actuator->isDragPrepareFinish_ = false;
         if (dragDropManager->IsDragging() || dragDropManager->IsMSDPDragging()) {
             DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, containerId);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
             DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::REPEAT_DRAG_FAIL);
+#endif
             TAG_LOGI(AceLogTag::ACE_DRAG,
                 "It's already dragging now, dragging is %{public}d, MSDP dragging is %{public}d",
                 dragDropManager->IsDragging(), dragDropManager->IsMSDPDragging());
@@ -510,7 +512,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     gestureHub->SetIsTextDraggable(false);
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Text is not selected, stop dragging.");
                     DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, containerId);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
                     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
+#endif
                     return;
                 }
                 if (gestureHub->GetIsTextDraggable()) {
@@ -536,7 +540,9 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     gestureHub->SetIsTextDraggable(false);
                     TAG_LOGW(AceLogTag::ACE_DRAG, "Text isSelected: %{public}d, stop dragging.", pattern->IsSelected());
                     DragDropBehaviorReporterTrigger trigger(DragReporterPharse::DRAG_START, containerId);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
                     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
+#endif
                     return;
                 }
                 actuator->HandleTextDragCallback(Offset(touchRestrict.touchEvent.x, touchRestrict.touchEvent.y));
@@ -1193,8 +1199,9 @@ void DragEventActuator::UpdateGatherAnimatePosition(
     CHECK_NULL_VOID(gatherNode);
     auto imageContext = gatherNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
+    auto offset = imageContext->GetPaintRectWithoutTransform();
     imageContext->UpdatePosition(OffsetT<Dimension>(
-        Dimension(GatherNodeOffset.GetX()), Dimension(GatherNodeOffset.GetY())));
+        Dimension(GatherNodeOffset.GetX() + offset.GetX()), Dimension(GatherNodeOffset.GetY() + offset.GetY())));
 }
 
 void DragEventActuator::UpdatePreviewPositionAndScale(

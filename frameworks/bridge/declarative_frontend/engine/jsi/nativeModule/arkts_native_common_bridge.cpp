@@ -20,10 +20,12 @@
 
 #include "ui/focus/focus_constants.h"
 
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/layout_break_point.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/event_manager.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
@@ -60,6 +62,9 @@
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "interfaces/native/native_type.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 using namespace OHOS::Ace::Framework;
 
@@ -2159,7 +2164,8 @@ ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm);
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
     CalcDimension width;
     RefPtr<ResourceObject> widthResObj;
@@ -2207,7 +2213,8 @@ ArkUINativeModuleValue CommonBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ArkUINodeHandle nativeNode = nullptr;
+    ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm);
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(NUM_1);
     CalcDimension height;
     RefPtr<ResourceObject> heightResObj;
@@ -3835,7 +3842,7 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundImageSize(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
-bool ParseJsBackgroundImageOptions(
+bool CommonBridge::ParseJsBackgroundImageOptions(
     const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& repeatIndex, bool& syncMode)
 {
     if (!value->IsObject(vm)) {
@@ -5127,7 +5134,10 @@ ArkUINativeModuleValue CommonBridge::SetSmartGestureShortcut(ArkUIRuntimeCallInf
     auto selectableVal = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "selectable"));
     config.action = SmartGestureShortcutAction::PRIMARY;
     if (actionVal->IsNumber()) {
-        config.action = static_cast<SmartGestureShortcutAction>(actionVal->Int32Value(vm));
+        auto rawAction = static_cast<SmartGestureShortcutAction>(actionVal->Int32Value(vm));
+        if (rawAction == SmartGestureShortcutAction::PRIMARY) {
+            config.action = rawAction;
+        }
     }
     config.enabled = false;
     if (enabledVal->IsBoolean()) {
@@ -6198,13 +6208,18 @@ ArkUINativeModuleValue CommonBridge::SetExpandSafeArea(ArkUIRuntimeCallInfo *run
     if (secondArg->IsString(vm)) {
         typeCppStr = secondArg->ToString(vm)->ToString(vm);
         safeAreaType = ParseStrToUint(typeCppStr);
-    } else {
+    } else if (secondArg->IsNumber()) {
+        safeAreaType = secondArg->ToNumber(vm)->Value();
+    }
+     else {
         safeAreaType = NG::SAFE_AREA_TYPE_ALL;
     }
 
     if (thirdArg->IsString(vm)) {
         edgesCppStr = thirdArg->ToString(vm)->ToString(vm);
         safeAreaEdge = ParseStrToUint(edgesCppStr);
+    } else if (thirdArg->IsNumber()) {
+        safeAreaEdge = thirdArg->ToNumber(vm)->Value();
     } else {
         safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
     }
@@ -7768,23 +7783,14 @@ ArkUINativeModuleValue CommonBridge::ResetKeyBoardShortCutAll(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
-RefPtr<ResourceWrapper> CreateResourceWrapper()
+RefPtr<ResourceAdapter> CreateResourceAdapter()
 {
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
-        if (!resourceAdapter) {
-            return nullptr;
-        }
-    } else {
-        themeConstants = JSViewAbstract::GetThemeConstants();
-        if (!themeConstants) {
-            return nullptr;
-        }
+    resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
+    if (!resourceAdapter) {
+        return nullptr;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
+    return resourceAdapter;
 }
 
 bool ParseLightPosition(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM* vm, ArkUISizeType& dimPosX,
@@ -7874,11 +7880,11 @@ ArkUINativeModuleValue CommonBridge::SetPointLightStyle(ArkUIRuntimeCallInfo *ru
 
     ParseLightSource(runtimeCallInfo, vm, nativeNode);
 
-    auto resourceWrapper = CreateResourceWrapper();
+    auto resourceAdapter = CreateResourceAdapter();
     Local<JSValueRef> illuminatedArg = runtimeCallInfo->GetCallArgRef(NUM_6);
-    if (illuminatedArg->IsNumber() || !resourceWrapper) {
+    if (illuminatedArg->IsNumber() || !resourceAdapter) {
         auto illuminatedValue = static_cast<ArkUI_Uint32>(illuminatedArg->ToNumber(vm)->Value());
-        Dimension illuminatedBorderWidth = resourceWrapper->GetDimensionByName(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME);
+        Dimension illuminatedBorderWidth = resourceAdapter->GetDimensionByName(ILLUMINATED_BORDER_WIDTH_SYS_RES_NAME);
         struct ArkUISizeType illuminatedBorderWidthValue = { 0.0, 0 };
         illuminatedBorderWidthValue.value = illuminatedBorderWidth.Value();
         illuminatedBorderWidthValue.unit = static_cast<int8_t>(illuminatedBorderWidth.Unit());
@@ -7889,10 +7895,10 @@ ArkUINativeModuleValue CommonBridge::SetPointLightStyle(ArkUIRuntimeCallInfo *ru
     }
 
     Local<JSValueRef> bloomArg = runtimeCallInfo->GetCallArgRef(NUM_7);
-    if (bloomArg->IsNumber() || !resourceWrapper) {
+    if (bloomArg->IsNumber() || !resourceAdapter) {
         auto bloomValue = static_cast<ArkUI_Float32>(bloomArg->ToNumber(vm)->Value());
-        double bloomRadius = resourceWrapper->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
-        Color bloomColor = resourceWrapper->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
+        double bloomRadius = resourceAdapter->GetDoubleByName(BLOOM_RADIUS_SYS_RES_NAME);
+        Color bloomColor = resourceAdapter->GetColorByName(BLOOM_COLOR_SYS_RES_NAME);
         GetArkUINodeModifiers()->getCommonModifier()->setPointLightBloom(nativeNode, bloomValue,
             static_cast<ArkUI_Float32>(bloomRadius), static_cast<ArkUI_Uint32>(bloomColor.GetValue()));
     } else {
@@ -8852,9 +8858,8 @@ Local<panda::ObjectRef> CommonBridge::CreateCommonGestureEventInfo(EcmaVM* vm, G
     obj->Set(
         vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_GESTURE_EVENT, nativeSize);
+        (void*)NATIVE_PTR_TAG_GESTURE_EVENT);
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
         panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetTargetDisplayId())));
     if (infoPtr->GetGestureTypeName() == GestureTypeName::TAP_GESTURE && !infoPtr->GetFingerList().empty()) {
@@ -8927,7 +8932,10 @@ ArkUINativeModuleValue CommonBridge::SetOnClick(ArkUIRuntimeCallInfo* runtimeCal
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
-    auto* frameNode = GetFrameNode(runtimeCallInfo);
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    ArkUINodeHandle nativeNode = nullptr;
+    ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm);
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
     CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
@@ -8972,6 +8980,28 @@ ArkUINativeModuleValue CommonBridge::ResetOnClick(ArkUIRuntimeCallInfo* runtimeC
     ViewAbstract::DisableOnClick(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+void CommonBridge::ReportClickEvent(const WeakPtr<NG::FrameNode>& weakNode, const std::u16string text)
+{
+    if (UiSessionManager::GetInstance()->GetClickEventRegistered()) {
+        auto data = JsonUtil::Create();
+        data->Put("event", "onClick");
+        std::u16string content = text;
+        auto node = weakNode.Upgrade();
+        if (node) {
+            data->Put("id", node->GetId());
+            auto children = node->GetChildren();
+            if (!children.empty()) {
+                node->GetContainerComponentText(content);
+            }
+            data->Put("text", UtfUtils::Str16DebugToStr8(content).data());
+            data->Put("position", node->GetGeometryNode()->GetFrameRect().ToString().data());
+        }
+        UiSessionManager::GetInstance()->ReportClickEvent(data->ToString());
+    }
+}
+#endif
 
 ArkUINativeModuleValue CommonBridge::SetOnDragStart(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -9729,9 +9759,8 @@ Local<panda::ObjectRef> CommonBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* inf
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "axisPinch"), panda::NumberRef::New(vm, 0.0f));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressure"), panda::NumberRef::New(vm, 0.0f));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_HOVER_INFO, nativeSize);
+        (void*)NATIVE_PTR_TAG_HOVER_INFO);
     return obj;
 }
 
@@ -11364,9 +11393,8 @@ Local<panda::ObjectRef> CommonBridge::CreateFocusAxisEventInfo(EcmaVM* vm, NG::F
         panda::NumberRef::New(vm, (infoPtr->GetTargetDisplayId()))};
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_FOCUS_AXIS_EVENT_INFO, nativeSize);
+        (void*)NATIVE_PTR_TAG_FOCUS_AXIS_EVENT_INFO);
     return obj;
 }
 
@@ -11490,9 +11518,8 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, AxisInfo* 
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_AXIS_INFO, nativeSize);
+        (void*)NATIVE_PTR_TAG_AXIS_INFO);
     return obj;
 }
 

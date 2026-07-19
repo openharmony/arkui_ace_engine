@@ -17,6 +17,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
+#include "core/interfaces/native/node/node_refresh_modifier.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> RefreshCoordination::FindRefreshNode() const
@@ -69,10 +70,11 @@ RefPtr<ScrollableCoordinationEvent> RefreshCoordination::CreateCoordinationEvent
     }
     auto refreshNode = refreshNode_.Upgrade();
     CHECK_NULL_RETURN(refreshNode, nullptr);
-    auto refreshPattern = DynamicCast<RefreshPattern>(refreshNode->GetPattern());
-    CHECK_NULL_RETURN(refreshPattern, nullptr);
     auto coordinationEvent = AceType::MakeRefPtr<ScrollableCoordinationEvent>();
-    refreshPattern->InitCoordinationEvent(coordinationEvent);
+    auto refreshModifier = NodeModifier::GetRefreshModifier();
+    CHECK_NULL_RETURN(refreshModifier, nullptr);
+    refreshModifier->initCoordinationEvent(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(refreshNode)), &coordinationEvent);
     return coordinationEvent;
 }
 

@@ -253,10 +253,9 @@ void ArcListLayoutAlgorithm::FixPredictSnapPos()
     float predictEndPos = predictSnapEndPos_.value();
     int32_t predictIndex = -1;
     int32_t curIndex = -1; // here invalid.
-    FindPredictSnapIndexInItemPositionsCenter(predictEndPos + currentOffset_, predictIndex, curIndex);
+    FindPredictSnapIndexInItemPositionsCenter(predictEndPos, predictIndex, curIndex);
     if (GetStartIndex() <= predictIndex && predictIndex <= GetEndIndex()) {
-        predictEndPos = CalculatePredictSnapEndPositionByIndex(predictIndex, predictEndPos + currentOffset_);
-        predictEndPos -= currentOffset_;
+        predictEndPos = CalculatePredictSnapEndPositionByIndex(predictIndex, predictEndPos);
     }
     if (!NearEqual(predictEndPos, predictSnapEndPos_.value())) {
         predictSnapEndPos_ = predictEndPos;
@@ -272,8 +271,8 @@ void ArcListLayoutAlgorithm::FixPredictSnapOffset(const RefPtr<ListLayoutPropert
     int32_t endIndex = FindPredictSnapEndIndexInItemPositions(predictEndPos, ScrollSnapAlign::CENTER);
     if (endIndex != -1) {
         predictEndPos = CalculatePredictSnapEndPositionByIndex(endIndex, predictEndPos);
-        predictSnapOffset_ = totalOffset_ - predictEndPos + currentOffset_;
-        predictSnapEndPos_.reset();
+        predictSnapOffset_ = totalOffset_ - predictEndPos;
+        predictSnapEndPos_ = predictEndPos;
     } else {
         if (IsUniformHeightProbably()) {
             FixPredictSnapOffsetAlignCenter();
@@ -409,16 +408,14 @@ float ArcListLayoutAlgorithm::CalculatePredictSnapEndPositionByIndex(int32_t ind
     if (iter == itemPosition_.end()) {
         return prevPredictEndPos;
     }
-    float predictSnapEndPos = prevPredictEndPos;
-    float predictPos = prevPredictEndPos + contentMainSize_ / FLOAT_TWO - totalOffset_;
     float itemHeight = iter->second.endPos - iter->second.startPos;
     float snapSize = LessOrEqual(itemHeight, GetItemSnapSize()) ? itemHeight : GetItemSnapSize();
     float snapLow = iter->second.startPos + snapSize / FLOAT_TWO;
     float snapHigh = iter->second.endPos - snapSize / FLOAT_TWO;
+    float predictPos = iter->second.startPos + itemHeight / FLOAT_TWO;
     predictPos = LessNotEqual(predictPos, snapLow) ? snapLow : predictPos;
     predictPos = LessNotEqual(snapHigh, predictPos) ? snapHigh : predictPos;
-    predictSnapEndPos = totalOffset_ + predictPos - contentMainSize_ / FLOAT_TWO;
-    return predictSnapEndPos;
+    return totalOffset_ + predictPos - contentMainSize_ / FLOAT_TWO;
 }
 
 float ArcListLayoutAlgorithm::GetItemSnapSize()

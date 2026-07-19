@@ -18,10 +18,12 @@
 
 #include "test/unittest/core/pattern/test_ng.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr float WIDTH = 240.0f;
@@ -33,6 +35,9 @@ constexpr float HORIZONTAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - WIDTH;
 constexpr int32_t TICK = 2;
 constexpr float CONTENT_START_OFFSET = 20.f;
 constexpr float CONTENT_END_OFFSET = 30.f;
+constexpr float SCROLL_FIXED_VELOCITY = 200.f;
+constexpr float OFFSET_TIME = 100.f;
+constexpr int32_t TIME_CHANGED_COUNTS = 20 * 20;
 
 class ScrollableUtilsTestNG : public TestNG {
 protected:
@@ -72,6 +77,7 @@ protected:
     AssertionResult TickPosition(float expectOffset);
     AssertionResult TickPosition(float velocity, float expectOffset);
     void TickToFinish();
+    std::shared_ptr<AccessibilityEvent> CaptureSendAccessibilityEventInfo(const RefPtr<MockPipelineContext>& pipeline);
 
 private:
     RefPtr<FrameNode> frameNode_;

@@ -31,6 +31,7 @@ const hilog = requireNapi('hilog');
 const deviceInfo = requireNapi('deviceInfo');
 const display = requireNapi('display');
 const mediaquery = requireNapi('mediaquery');
+const window = globalThis.requireNapi('window');
 
 const TAG = 'DeviceHelper';
 export class DeviceHelper {
@@ -209,6 +210,13 @@ export class SubNavigation extends ViewPU {
         this.__navWidthRangeModifier = new SynchedPropertyNesedObjectPU(t9.navWidthRangeModifier, this, "navWidthRangeModifier");
         this.__needRenderDisplayMode = new SynchedPropertyNesedObjectPU(t9.needRenderDisplayMode, this, "needRenderDisplayMode");
         this.onNavigationModeChange = (y9) => { };
+        this.__windowWidthVp = new ObservedPropertySimplePU(0, this, "windowWidthVp");
+        this.__windowHeightVp = new ObservedPropertySimplePU(0, this, "windowHeightVp");
+        this.windowInstance = undefined;
+        this.windowSizeChangeCallback = (z9) => {
+            this.windowWidthVp = px2vp(z9.width);
+            this.windowHeightVp = px2vp(z9.height);
+        };
         this.setInitiallyProvidedValue(t9);
         this.finalizeConstruction();
     }
@@ -236,6 +244,15 @@ export class SubNavigation extends ViewPU {
         if (r9.onNavigationModeChange !== undefined) {
             this.onNavigationModeChange = r9.onNavigationModeChange;
         }
+        if (r9.windowWidthVp !== undefined) {
+            this.windowWidthVp = r9.windowWidthVp;
+        }
+        if (r9.windowHeightVp !== undefined) {
+            this.windowHeightVp = r9.windowHeightVp;
+        }
+        if (r9.windowInstance !== undefined) {
+            this.windowInstance = r9.windowInstance;
+        }
     }
     updateStateVars(q9) {
         this.__multiStack.set(q9.multiStack);
@@ -254,6 +271,8 @@ export class SubNavigation extends ViewPU {
         this.__needRenderLeftClickCount.purgeDependencyOnElmtId(p9);
         this.__navWidthRangeModifier.purgeDependencyOnElmtId(p9);
         this.__needRenderDisplayMode.purgeDependencyOnElmtId(p9);
+        this.__windowWidthVp.purgeDependencyOnElmtId(p9);
+        this.__windowHeightVp.purgeDependencyOnElmtId(p9);
     }
     aboutToBeDeleted() {
         this.__isPortrait.aboutToBeDeleted();
@@ -265,6 +284,8 @@ export class SubNavigation extends ViewPU {
         this.__needRenderLeftClickCount.aboutToBeDeleted();
         this.__navWidthRangeModifier.aboutToBeDeleted();
         this.__needRenderDisplayMode.aboutToBeDeleted();
+        this.__windowWidthVp.aboutToBeDeleted();
+        this.__windowHeightVp.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -307,8 +328,24 @@ export class SubNavigation extends ViewPU {
     get needRenderDisplayMode() {
         return this.__needRenderDisplayMode.get();
     }
+    get windowWidthVp() {
+        return this.__windowWidthVp.get();
+    }
+    set windowWidthVp(b10) {
+        this.__windowWidthVp.set(b10);
+    }
+    get windowHeightVp() {
+        return this.__windowHeightVp.get();
+    }
+    set windowHeightVp(c10) {
+        this.__windowHeightVp.set(c10);
+    }
     SubNavDestination(i9, j9, k9 = null) {
         this.navDestination.bind(this)(i9, j9);
+    }
+    isWindowMeetColumn() {
+        return Math.min(this.windowWidthVp, this.windowHeightVp) >= 600 &&
+            this.windowHeightVp <= this.windowWidthVp * 1.2;
     }
     getMode() {
         this.displayMode = this.needRenderDisplayMode.displayMode;
@@ -328,7 +365,8 @@ export class SubNavigation extends ViewPU {
         }
         if (this.needRenderIsFullScreen.isFullScreen == undefined) {
             if (DeviceHelper.isPhone()) {
-                return this.secondaryStack.size() > 0 && DeviceHelper.isColumn() ? NavigationMode.Auto : NavigationMode.Stack;
+                return this.secondaryStack.size() > 0 && (DeviceHelper.isColumn() ||
+                    this.isWindowMeetColumn()) ? NavigationMode.Auto : NavigationMode.Stack;
             }
             return this.secondaryStack.size() > 0 ? NavigationMode.Auto : NavigationMode.Stack;
         }
@@ -336,6 +374,25 @@ export class SubNavigation extends ViewPU {
     }
     aboutToAppear() {
         hilog.debug(0x0000, 'MultiNavigation', 'SubNavigation aboutToAppear param = ' + JSON.stringify(this.primaryStack));
+        try {
+            this.windowInstance = window.findWindow(this.getUIContext().getWindowName());
+            let properties = this.windowInstance.getWindowProperties();
+            let rect = properties.windowRect;
+            this.windowWidthVp = px2vp(rect.width);
+            this.windowHeightVp = px2vp(rect.height);
+            this.windowInstance.on('windowSizeChange', this.windowSizeChangeCallback);
+        }
+        catch (err) {
+            hilog.warn(0x0000, 'MultiNavigation', 'SubNavigation aboutToAppear get window error:' + JSON.stringify(err));
+        }
+    }
+    aboutToDisappear() {
+        try {
+            this.windowInstance?.off('windowSizeChange', this.windowSizeChangeCallback);
+        }
+        catch (err) {
+            hilog.warn(0x0000, 'MultiNavigation', 'SubNavigation aboutToDisappear error:' + JSON.stringify(err));
+        }
     }
     initialRender() {
         this.observeComponentCreation2((a9, b9) => {

@@ -65,7 +65,16 @@ void PatternResourceManager::RemoveResource(const std::string& key)
     if (it != resKeyArray_.end()) {
         resKeyArray_.erase(it);
     }
-    resCacheMap_.clear();
+    
+    // Precise removal for TailIndents to avoid clearing other properties' cache
+    if (key.find("TailIndents_") == 0) {
+        auto cacheIt = resCacheMap_.find(key);
+        if (cacheIt != resCacheMap_.end()) {
+            resCacheMap_.erase(cacheIt);
+        }
+    } else {
+        resCacheMap_.clear();
+    }
 }
 
 void PatternResourceManager::ReloadResources()

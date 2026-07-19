@@ -17,8 +17,8 @@
 
 #include "ui/base/utils/utils.h"
 
-using namespace OHOS::Ace;
-
+namespace OHOS::Ace::NG {
+namespace NodeModifier {
 RefPtr<UiMaterial> CreateUiMaterialFromHandle(ArkUI_ImmersiveMaterialHandle handle)
 {
     CHECK_NULL_RETURN(handle, nullptr);
@@ -63,3 +63,5 @@ bool CreateHandleFromUiMaterial(const RefPtr<UiMaterial>& material, ArkUI_Immers
     }
     return true;
 }
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG

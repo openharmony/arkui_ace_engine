@@ -19,9 +19,9 @@
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUICalendarPickerModifier* GetCalendarPickerModifier();
+ACE_FORCE_EXPORT const ArkUICalendarPickerModifier* GetCalendarPickerModifier();
 const CJUICalendarPickerModifier* GetCJUICalendarPickerModifier();
 void SetCalendarPickerOnChange(ArkUINodeHandle node, void* extraParam);
-}
+} // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_CALENDAR_PICKER_MODIFIER_H

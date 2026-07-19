@@ -15,25 +15,38 @@
 
 #include "interfaces/inner_api/ui_session/ui_report_stub.h"
 
+#include <algorithm>
+#include <cinttypes>
+
 #include "pixel_map.h"
 
 #include "adapter/ohos/entrance/ui_session/include/large_string_ashmem.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 #include "interfaces/inner_api/ui_session/ui_content_errors.h"
+#include "interfaces/inner_api/ui_session/ui_session_ipc_util.h"
 
 namespace {
 constexpr char GET_INSPECTOR_TREE_CALLBACK_TIMEOUT[] = "GetInspectorTreeCallbackTimeout";
+constexpr char PAGE_TRANSLATE_CALLBACK_TIMEOUT[] = "PageTranslateCallbackTimeout";
+constexpr char PAGE_TRANSLATE_RESULT_WATCHDOG_PREFIX[] = "PageTranslateResultWatchdog";
+constexpr int32_t SPECIFIED_CONTENT_OFFSETS_LOOP_UPPERBOUND = 1024000;
 
-inline int32_t NormalizeCallbackTimeout(int32_t timeout)
+inline int32_t NormalizeTimeout(int32_t timeout, int32_t defaultTimeout)
 {
-    return timeout > 0 ? timeout : OHOS::Ace::DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS;
+    return timeout > 0 ? timeout : defaultTimeout;
+}
+
+std::string MakePageTranslateResultWatchdogTaskName(int32_t nodeId, int64_t version)
+{
+    return std::string(PAGE_TRANSLATE_RESULT_WATCHDOG_PREFIX) + "_" + std::to_string(nodeId) + "_" +
+           std::to_string(version);
 }
 
 void AddArkUIImagesByIds(OHOS::MessageParcel& data,
     std::unordered_map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>& componentImages)
 {
     uint64_t componentImagesSize = data.ReadUint64();
-    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 1000;
+    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 20;
     if (componentImagesSize > GET_IMAGES_BY_ID_LOOP_UPPERBOUND) {
         return;
     }
@@ -52,7 +65,7 @@ void AddArkWebImagesByIds(OHOS::MessageParcel& data,
     std::map<int32_t, std::map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>>& webImages)
 {
     uint64_t webImagesAllMapSize = data.ReadUint64();
-    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 1000;
+    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 20;
     if (webImagesAllMapSize > GET_IMAGES_BY_ID_LOOP_UPPERBOUND) {
         return;
     }
@@ -173,6 +186,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
                 LOGW("SendShowingImage size read failed");
                 break;
             }
+            constexpr int32_t SEND_IMAGES_SIZE_UPPERBOUND = 1000;
+            if (size < 0 || size > SEND_IMAGES_SIZE_UPPERBOUND) {
+                LOGW("SendShowingImage size is negative or greater than upper bound: %{public}d", size);
+                break;
+            }
             for (int32_t i = 0; i < size; i++) {
                 int32_t nodeId = data.ReadInt32();
                 auto pixelMap = std::shared_ptr<Media::PixelMap>(OHOS::Media::PixelMap::Unmarshalling(data));
@@ -216,7 +234,12 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
                 LOGW("SendSpecifiedContentOffsets size read failed");
                 break;
             }
-            for (int32_t i = 0; i < size; i++) {
+            const int32_t loopSize = std::clamp(size, 0, SPECIFIED_CONTENT_OFFSETS_LOOP_UPPERBOUND);
+            if (size < 0 || size > loopSize) {
+                LOGW("SendSpecifiedContentOffsets size %{public}d exceeds boundary, clamp to %{public}d",
+                    size, loopSize);
+            }
+            for (int32_t i = 0; i < loopSize; i++) {
                 float offsetX = data.ReadFloat();
                 float offsetY = data.ReadFloat();
                 std::pair<float, float> value = { offsetX, offsetY };
@@ -246,6 +269,15 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         }
         case SEND_WEB_INFO_BY_REQUEST: {
             OnGetWebInfoByRequestInner(data);
+            break;
+        }
+        case SEND_PAGE_TEXT: {
+            OnSendPageTextInner(data);
+            break;
+        }
+        case REPORT_PAGE_SCENE_EVENT: {
+            std::string result = data.ReadString();
+            ReportPageSceneEvent(result);
             break;
         }
 
@@ -279,6 +311,17 @@ void UiReportStub::OnGetWebInfoByRequestInner(MessageParcel& data)
     }
     WebRequestErrorCode errorCode = static_cast<WebRequestErrorCode>(data.ReadInt32());
     SendWebInfoRequestResult(windowId, webId, request, result, errorCode);
+}
+
+void UiReportStub::OnSendPageTextInner(MessageParcel& data)
+{
+    int32_t nodeId = data.ReadInt32();
+    int64_t version = data.ReadInt64();
+    std::string text;
+    if (!UiSessionIpcUtil::ReadStringWithAshmemFlag(data, text, "OnSendPageTextInner")) {
+        return;
+    }
+    SendPageText(nodeId, text, version);
 }
 
 void UiReportStub::SendWebInfoRequestResult(
@@ -432,11 +475,71 @@ void UiReportStub::PostGetInspectorTreeCallbackRemoveTask(int32_t timeout)
             return;
         }
         uiReportStub->HandleInspectorTreeCallbackTimeout();
-    }, GET_INSPECTOR_TREE_CALLBACK_TIMEOUT, NormalizeCallbackTimeout(timeout));
+    }, GET_INSPECTOR_TREE_CALLBACK_TIMEOUT, NormalizeTimeout(timeout, DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS));
     if (!postTaskSuccess) {
         LOGW("Post GetInspectorTree timeout task failed");
         inspectorTreeCallback_ = nullptr;
     }
+}
+
+void UiReportStub::PostPageTranslateCallbackRemoveTask(int32_t timeout)
+{
+    auto eventHandler = eventHandler_.lock();
+    if (eventHandler == nullptr) {
+        LOGE("PostPageTranslateCallbackRemoveTask eventHandler is null");
+        return;
+    }
+    wptr<UiReportStub> weakThis = this;
+    int64_t requestId = 0;
+    {
+        std::lock_guard<std::mutex> lock(pageTranslateCallbackMutex_);
+        requestId = pageTranslateRequestId_;
+    }
+    bool postTaskSuccess = eventHandler->PostTask([weakThis, requestId]() {
+        auto uiReportStub = weakThis.promote();
+        if (uiReportStub == nullptr) {
+            LOGE("PostPageTranslateCallbackRemoveTask uiReportStub is null");
+            return;
+        }
+        uiReportStub->HandlePageTranslateCallbackTimeout(requestId);
+    }, PAGE_TRANSLATE_CALLBACK_TIMEOUT, NormalizeTimeout(timeout, DEFAULT_PAGE_TRANSLATE_CALLBACK_TIMEOUT_MS));
+    if (!postTaskSuccess) {
+        LOGW("Post PageTranslate timeout task failed");
+        std::lock_guard<std::mutex> lock(pageTranslateCallbackMutex_);
+        ClearPageTranslateCallbackLocked();
+    }
+}
+
+void UiReportStub::PostPageTranslateResultWatchdogTask(int32_t nodeId, int64_t version, int32_t timeout)
+{
+    auto eventHandler = eventHandler_.lock();
+    if (eventHandler == nullptr) {
+        LOGE("PostPageTranslateResultWatchdogTask eventHandler is null");
+        return;
+    }
+    wptr<UiReportStub> weakThis = this;
+    auto taskName = MakePageTranslateResultWatchdogTaskName(nodeId, version);
+    bool postTaskSuccess = eventHandler->PostTask([weakThis, nodeId, version]() {
+        auto uiReportStub = weakThis.promote();
+        if (uiReportStub == nullptr) {
+            LOGE("PostPageTranslateResultWatchdogTask uiReportStub is null");
+            return;
+        }
+        uiReportStub->HandlePageTranslateResultWatchdogTimeout(nodeId, version);
+    }, taskName, NormalizeTimeout(timeout, DEFAULT_PAGE_TRANSLATE_CALLBACK_TIMEOUT_MS));
+    if (!postTaskSuccess) {
+        LOGW("Post PageTranslate result watchdog failed, nodeId=%{public}d, version=%{public}" PRId64, nodeId, version);
+    }
+}
+
+void UiReportStub::CancelPageTranslateResultWatchdogTask(int32_t nodeId, int64_t version)
+{
+    auto eventHandler = eventHandler_.lock();
+    if (eventHandler == nullptr) {
+        LOGE("CancelPageTranslateResultWatchdogTask eventHandler is null");
+        return;
+    }
+    eventHandler->RemoveTask(MakePageTranslateResultWatchdogTaskName(nodeId, version));
 }
 
 bool UiReportStub::RegisterGetInspectorTreeCallback(
@@ -450,11 +553,81 @@ bool UiReportStub::RegisterGetInspectorTreeCallback(
     return true;
 }
 
+bool UiReportStub::RegisterPageTranslateTextCallback(const PageTranslateTextCallback& eventCallback, bool isContinuous)
+{
+    std::lock_guard<std::mutex> lock(pageTranslateCallbackMutex_);
+    if (pageTranslateTextCallback_ != nullptr) {
+        return false;
+    }
+    ClearPageTranslateCallbackLocked();
+    pageTranslateTextCallback_ = eventCallback;
+    pageTranslateContinuous_ = isContinuous;
+    ++pageTranslateRequestId_;
+    return true;
+}
+
+void UiReportStub::RegisterPageTranslateTimeoutCallback(std::function<void()>&& timeoutCallback)
+{
+    std::lock_guard<std::mutex> lock(pageTranslateCallbackMutex_);
+    pageTranslateTimeoutCallback_ = std::move(timeoutCallback);
+}
+
+void UiReportStub::UnregisterPageTranslateTextCallback()
+{
+    std::lock_guard<std::mutex> lock(pageTranslateCallbackMutex_);
+    CancelPageTranslateCallbackTimeoutTaskLocked();
+    ClearPageTranslateCallbackLocked();
+}
+
+void UiReportStub::FinishPageTranslateTextRequest()
+{
+    std::lock_guard<std::mutex> lock(pageTranslateCallbackMutex_);
+    if (pageTranslateContinuous_) {
+        return;
+    }
+    CancelPageTranslateCallbackTimeoutTaskLocked();
+    ClearPageTranslateCallbackLocked();
+}
+
 void UiReportStub::HandleInspectorTreeCallbackTimeout()
 {
     std::lock_guard<std::mutex> lock(inspectorTreeCallbackMutex_);
     LOGW("GetInspectorTree callback timeout, clear pending callback");
     inspectorTreeCallback_ = nullptr;
+}
+
+void UiReportStub::HandlePageTranslateCallbackTimeout(int64_t requestId)
+{
+    std::function<void()> timeoutCallback;
+    {
+        std::lock_guard<std::mutex> lock(pageTranslateCallbackMutex_);
+        if (requestId != pageTranslateRequestId_) {
+            LOGW("PageTranslate callback timeout ignored, requestId expired");
+            return;
+        }
+        LOGW("PageTranslate callback timeout, clear pending callback");
+        timeoutCallback = pageTranslateTimeoutCallback_;
+        ClearPageTranslateCallbackLocked();
+    }
+    if (timeoutCallback) {
+        timeoutCallback();
+    }
+}
+
+void UiReportStub::HandlePageTranslateResultWatchdogTimeout(int32_t nodeId, int64_t version)
+{
+    LOGW("PageTranslate result timeout, nodeId=%{public}d, version=%{public}" PRId64, nodeId, version);
+    std::function<void()> timeoutCallback;
+    {
+        std::lock_guard<std::mutex> lock(pageTranslateCallbackMutex_);
+        timeoutCallback = pageTranslateTimeoutCallback_;
+        if (timeoutCallback) {
+            ClearPageTranslateCallbackLocked();
+        }
+    }
+    if (timeoutCallback) {
+        timeoutCallback();
+    }
 }
 
 void UiReportStub::SetEventHandler(std::shared_ptr<AppExecFwk::EventHandler> eventHandler)
@@ -470,6 +643,23 @@ void UiReportStub::CancelGetInspectorTreeCallbackTimeoutTaskLocked()
         return;
     }
     eventHandler->RemoveTask(GET_INSPECTOR_TREE_CALLBACK_TIMEOUT);
+}
+
+void UiReportStub::ClearPageTranslateCallbackLocked()
+{
+    pageTranslateTextCallback_ = nullptr;
+    pageTranslateTimeoutCallback_ = nullptr;
+    pageTranslateContinuous_ = false;
+}
+
+void UiReportStub::CancelPageTranslateCallbackTimeoutTaskLocked()
+{
+    auto eventHandler = eventHandler_.lock();
+    if (eventHandler == nullptr) {
+        LOGE("CancelPageTranslateCallbackTimeoutTaskLocked eventHandler is null");
+        return;
+    }
+    eventHandler->RemoveTask(PAGE_TRANSLATE_CALLBACK_TIMEOUT);
 }
 
 void UiReportStub::RegisterRouterChangeEventCallback(const EventCallback& eventCallback)
@@ -600,6 +790,25 @@ void UiReportStub::SendWebText(int32_t nodeId, std::string res)
     }
 }
 
+void UiReportStub::SendPageText(int32_t nodeId, const std::string& text, int64_t version)
+{
+    PageTranslateTextCallback pageTranslateTextCallback;
+    {
+        std::lock_guard<std::mutex> lock(pageTranslateCallbackMutex_);
+        if (pageTranslateTextCallback_ == nullptr) {
+            return;
+        }
+        pageTranslateTextCallback = pageTranslateTextCallback_;
+        if (nodeId >= 0) {
+            CancelPageTranslateCallbackTimeoutTaskLocked();
+        }
+    }
+    pageTranslateTextCallback(nodeId, text, version);
+    if (nodeId >= 0) {
+        PostPageTranslateResultWatchdogTask(nodeId, version);
+    }
+}
+
 void UiReportStub::RegisterGetShowingImageCallback(
     const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& eventCallback)
 {
@@ -680,6 +889,53 @@ void UiReportStub::ReportGetStateMgmtInfo(std::vector<std::string> results)
 {
     if (getStateMgmtInfoCallback_) {
         getStateMgmtInfoCallback_(results);
+    }
+}
+
+void UiReportStub::RegisterPageSceneEventCallback(const PageSceneEventCallback& eventCallback)
+{
+    std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
+    pageSceneEventCallback_ = eventCallback;
+}
+
+void UiReportStub::UnregisterPageSceneEventCallback()
+{
+    std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
+    pageSceneEventCallback_ = nullptr;
+}
+
+bool UiReportStub::RegisterGetPageSceneCallback(const PageSceneEventCallback& eventCallback)
+{
+    std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
+    if (getPageSceneCallback_ != nullptr) {
+        return false;
+    }
+    getPageSceneCallback_ = eventCallback;
+    return true;
+}
+
+void UiReportStub::UnregisterGetPageSceneCallback()
+{
+    std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
+    getPageSceneCallback_ = nullptr;
+}
+
+void UiReportStub::ReportPageSceneEvent(const std::string& sceneJson)
+{
+    PageSceneEventCallback pageSceneEventCallback;
+    PageSceneEventCallback getPageSceneCallback;
+    {
+        std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
+        pageSceneEventCallback = pageSceneEventCallback_;
+        getPageSceneCallback = getPageSceneCallback_;
+        getPageSceneCallback_ = nullptr;
+    }
+    if (getPageSceneCallback) {
+        getPageSceneCallback(sceneJson);
+        return;
+    }
+    if (pageSceneEventCallback) {
+        pageSceneEventCallback(sceneJson);
     }
 }
 } // namespace OHOS::Ace

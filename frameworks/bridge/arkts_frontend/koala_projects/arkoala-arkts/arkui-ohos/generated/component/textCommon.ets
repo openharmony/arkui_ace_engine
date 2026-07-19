@@ -27,12 +27,12 @@ import { default as text } from '@ohos.graphics.text'
 import { MutableStyledString_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from './styledString'
 import { SelectionOptions_serializer, SelectionOptions, Callback as arkui_component_common_Callback, LinearGradientOptions_serializer, LinearGradientOptions, RadialGradientOptions_serializer, RadialGradientOptions } from './common'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { ResourceStr, Resource as arkui_component_units_Resource, ResourceColor, Length, LengthMetrics as arkui_component_units_LengthMetrics } from './units'
+import { ResourceStr, Resource as arkui_component_units_Resource, LengthMetrics as arkui_component_units_LengthMetrics, ResourceColor, Length } from './units'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { memo, memo_stable } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { Color as arkui_component_enums_Color, TextDecorationType, TextDecorationStyle } from './enums'
 import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
+import { Color as arkui_component_enums_Color, TextDecorationType, TextDecorationStyle } from './enums'
 import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 export class ContentTransitionInternal {
     public static fromPtr(ptr: KPointer): ContentTransition {
@@ -417,6 +417,12 @@ export class TextMenuItemId implements MaterializedBase {
     public static readonly TRANSLATE: TextMenuItemId = TextMenuItemId.getTRANSLATE()
     public static readonly SEARCH: TextMenuItemId = TextMenuItemId.getSEARCH()
     public static readonly SHARE: TextMenuItemId = TextMenuItemId.getSHARE()
+    public static readonly url: TextMenuItemId = TextMenuItemId.getUrl()
+    public static readonly email: TextMenuItemId = TextMenuItemId.getEmail()
+    public static readonly phoneNumber: TextMenuItemId = TextMenuItemId.getPhoneNumber()
+    public static readonly address: TextMenuItemId = TextMenuItemId.getAddress()
+    public static readonly dateTime: TextMenuItemId = TextMenuItemId.getDateTime()
+    public static readonly askAI: TextMenuItemId = TextMenuItemId.getAskAI()
     public static readonly autoFill: TextMenuItemId = TextMenuItemId.getAutoFill()
     public static readonly passwordVault: TextMenuItemId = TextMenuItemId.getPasswordVault()
     constructor(tag: MaterializedBaseTag, peerPtr: KPointer) {
@@ -465,6 +471,24 @@ export class TextMenuItemId implements MaterializedBase {
     }
     private static getSHARE(): TextMenuItemId {
         return TextMenuItemId.getSHARE_serialize()
+    }
+    private static getUrl(): TextMenuItemId {
+        return TextMenuItemId.getUrl_serialize()
+    }
+    private static getEmail(): TextMenuItemId {
+        return TextMenuItemId.getEmail_serialize()
+    }
+    private static getPhoneNumber(): TextMenuItemId {
+        return TextMenuItemId.getPhoneNumber_serialize()
+    }
+    private static getAddress(): TextMenuItemId {
+        return TextMenuItemId.getAddress_serialize()
+    }
+    private static getDateTime(): TextMenuItemId {
+        return TextMenuItemId.getDateTime_serialize()
+    }
+    private static getAskAI(): TextMenuItemId {
+        return TextMenuItemId.getAskAI_serialize()
     }
     private static getAutoFill(): TextMenuItemId {
         return TextMenuItemId.getAutoFill_serialize()
@@ -538,6 +562,36 @@ export class TextMenuItemId implements MaterializedBase {
         const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
         return obj
     }
+    private static getUrl_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getUrl()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getEmail_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getEmail()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getPhoneNumber_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getPhoneNumber()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getAddress_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getAddress()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getDateTime_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getDateTime()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
+    private static getAskAI_serialize(): TextMenuItemId {
+        const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getAskAI()
+        const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
+        return obj
+    }
     private static getAutoFill_serialize(): TextMenuItemId {
         const retval = ArkUIGeneratedNativeModule._TextMenuItemId_getAutoFill()
         const obj: TextMenuItemId = TextMenuItemIdInternal.fromPtr(retval)
@@ -564,6 +618,20 @@ export enum TextDataDetectorType {
     ADDRESS = 3,
     DATE_TIME = 4
 }
+export enum TextVerticalAlign {
+    BASELINE = 0,
+    BOTTOM = 1,
+    CENTER = 2,
+    TOP = 3
+}
+export enum TextContentAlign {
+    TOP = 0,
+    CENTER = 1,
+    BOTTOM = 2
+}
+export interface TextLayoutOptions {
+    constraintWidth?: arkui_component_units_LengthMetrics;
+}
 export interface TextDataDetectorConfig {
     types?: Array<TextDataDetectorType> | null | undefined;
     onDetectResultUpdate?: arkui_component_common_Callback<string, void>;
@@ -583,15 +651,56 @@ export enum TextDeleteDirection {
     BACKWARD = 0,
     FORWARD = 1
 }
+export enum SuperscriptStyle {
+    NORMAL = 0,
+    SUPERSCRIPT = 1,
+    SUBSCRIPT = 2
+}
 export enum MenuType {
     SELECTION_MENU = 0,
     PREVIEW_MENU = 1
 }
+export type Paragraph = text.Paragraph;
+export type FontVariation = text.FontVariation;
 export enum AutoCapitalizationMode {
     NONE = 0,
     WORDS = 1,
     SENTENCES = 2,
     ALL_CHARACTERS = 3
+}
+export interface MaxLinesOptions {
+    overflowMode?: MaxLinesMode;
+}
+export enum MaxLinesMode {
+    CLIP = 0,
+    SCROLL = 1
+}
+export enum TextChangeReason {
+    UNKNOWN = 0,
+    INPUT = 1,
+    PASTE = 2,
+    CUT = 3,
+    DRAG = 4,
+    AUTO_FILL = 5,
+    AI_WRITE = 6,
+    REDO = 7,
+    UNDO = 8,
+    CONTROLLER = 9,
+    ACCESSIBILITY = 10,
+    COLLABORATION = 11,
+    STYLUS = 12
+}
+export enum KeyboardGradientMode {
+    NONE = 0,
+    LINEAR_GRADIENT = 1
+}
+export enum KeyboardFluidLightMode {
+    NONE = 0,
+    BACKGROUND_FLUID_LIGHT = 1
+}
+export interface KeyboardAppearanceConfig {
+    gradientMode?: KeyboardGradientMode;
+    fluidLightMode?: KeyboardFluidLightMode;
 }
 export interface DeleteValue {
     deleteOffset: int32;
@@ -622,8 +731,6 @@ export type LineMetrics = text.LineMetrics;
 export type RectWidthStyle = text.RectWidthStyle;
 export type RectHeightStyle = text.RectHeightStyle;
 export type TextBox = text.TextBox;
-export type Paragraph = text.Paragraph;
-export type FontVariation = text.FontVariation;
 export interface CaretStyle {
     width?: Length;
     color?: ResourceColor;
@@ -675,88 +782,8 @@ export enum KeyboardAppearance {
     LIGHT_IMMERSIVE = 2,
     DARK_IMMERSIVE = 3
 }
-export interface AccessibilitySpanOptions {
-    accessibilityText?: ResourceStr;
-    accessibilityDescription?: ResourceStr;
-    accessibilityLevel?: string;
-}
-export interface SelectedDragPreviewStyle {
-    color?: ResourceColor;
-}
-export enum TextDirection {
-    LTR = 0,
-    RTL = 1,
-    DEFAULT = 2,
-    AUTO = 3
-}
-export enum TextContentAlign {
-    TOP = 0,
-    CENTER = 1,
-    BOTTOM = 2
-}
-export enum StrokeJoinStyle {
-    MITER_JOIN = 0,
-    ROUND_JOIN = 1,
-    BEVEL_JOIN = 2
-}
-export enum KeyboardGradientMode {
-    NONE = 0,
-    LINEAR_GRADIENT = 1
-}
-export enum FlipDirection {
-    DOWN = 0,
-    UP = 1
-}
-export enum SuperscriptStyle {
-    NORMAL = 0,
-    SUPERSCRIPT = 1,
-    SUBSCRIPT = 2
-}
-export enum KeyboardFluidLightMode {
-    NONE = 0,
-    BACKGROUND_FLUID_LIGHT = 1
-}
-export enum TextChangeReason {
-    UNKNOWN = 0,
-    INPUT = 1,
-    PASTE = 2,
-    CUT = 3,
-    DRAG = 4,
-    AUTO_FILL = 5,
-    AI_WRITE = 6,
-    REDO = 7,
-    UNDO = 8,
-    CONTROLLER = 9,
-    ACCESSIBILITY = 10,
-    COLLABORATION = 11,
-    STYLUS = 12
-}
-export enum TextVerticalAlign {
-    BASELINE = 0,
-    BOTTOM = 1,
-    CENTER = 2,
-    TOP = 3
-}
-export interface NumericTextTransitionOptions {
-    flipDirection?: FlipDirection;
-    enableBlur?: boolean;
-}
-export interface TextLayoutOptions {
-    constraintWidth?: arkui_component_units_LengthMetrics;
-}
-export interface KeyboardAppearanceConfig {
-    gradientMode?: KeyboardGradientMode;
-    fluidLightMode?: KeyboardFluidLightMode;
-}
-export enum MaxLinesMode {
-    CLIP = 0,
-    SCROLL = 1
-}
 export interface LineSpacingOptions {
     onlyBetweenLines?: boolean;
-}
-export interface MaxLinesOptions {
-    overflowMode?: MaxLinesMode;
 }
 export interface VoiceButtonOptions {
     enabled?: boolean;
@@ -767,6 +794,33 @@ export interface FontConfigs {
 export interface FontWeightConfigs {
     enableVariableFontWeight?: boolean;
     enableDeviceFontWeightCategory?: boolean;
+}
+export interface NumericTextTransitionOptions {
+    flipDirection?: FlipDirection;
+    enableBlur?: boolean;
+}
+export enum FlipDirection {
+    DOWN = 0,
+    UP = 1
+}
+export enum TextDirection {
+    LTR = 0,
+    RTL = 1,
+    DEFAULT = 2,
+    AUTO = 3
+}
+export interface SelectedDragPreviewStyle {
+    color?: ResourceColor;
+}
+export interface AccessibilitySpanOptions {
+    accessibilityText?: ResourceStr;
+    accessibilityDescription?: ResourceStr;
+    accessibilityLevel?: string;
+}
+export enum StrokeJoinStyle {
+    MITER_JOIN = 0,
+    ROUND_JOIN = 1,
+    BEVEL_JOIN = 2
 }
 export enum IncrementalUpdatePolicy {
     NONE = 0,

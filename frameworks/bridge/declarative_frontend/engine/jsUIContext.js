@@ -182,10 +182,9 @@ class ComponentSnapshot {
 
     getSizeLimitation()
     {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let limitation = this.ohos_componentSnapshot.getSizeLimitation();
-        __JSScopeUtil__.restoreInstanceId();
-        return limitation;
+        return withInstanceId(this.instanceId_, () => {
+            return this.ohos_componentSnapshot.getSizeLimitation();
+        });
     }
 }
 
@@ -365,54 +364,54 @@ class SmartGestureController {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.enableSmartTapAndSlideGestures(enabled);
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId(this.instanceId_, () => {
+            this.ohos_smartGestureController.enableSmartTapAndSlideGestures(enabled);
+        });
     }
 
     registerMonitor(monitorCallback) {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.registerMonitor(monitorCallback, this.instanceId_);
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId(this.instanceId_, () => {
+            this.ohos_smartGestureController.registerMonitor(monitorCallback, this.instanceId_);
+        });
     }
 
     unregisterMonitor(monitorCallback) {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.unregisterMonitor(monitorCallback, this.instanceId_);
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId(this.instanceId_, () => {
+            this.ohos_smartGestureController.unregisterMonitor(monitorCallback, this.instanceId_);
+        });
     }
 
     clearMonitors() {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.clearMonitors(this.instanceId_);
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId(this.instanceId_, () => {
+            this.ohos_smartGestureController.clearMonitors(this.instanceId_);
+        });
     }
 
     requestSelected(id) {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.requestSelected(id);
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId(this.instanceId_, () => {
+            this.ohos_smartGestureController.requestSelected(id);
+        });
     }
 
     clearSelected() {
         if (this.ohos_smartGestureController === null || this.ohos_smartGestureController === undefined) {
             return;
         }
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_smartGestureController.clearSelected();
-        __JSScopeUtil__.restoreInstanceId();
+        withInstanceId(this.instanceId_, () => {
+            this.ohos_smartGestureController.clearSelected();
+        });
     }
 }
 
@@ -515,9 +514,9 @@ class UIContext {
         return this.promptAction_;
     }
 
-    getDialog() {
+    getDialogPresenter() {
         if (this.dialog_ == null) {
-            this.dialog_ = new Dialog(this.instanceId_);
+            this.dialog_ = new DialogPresenter(this.instanceId_);
         }
         return this.dialog_;
     }
@@ -1516,7 +1515,7 @@ class Router {
     }
 }
 
-class Dialog {
+class DialogPresenter {
     constructor(instanceId) {
         this.instanceId_ = instanceId;
         this.ohos_dialog = globalThis.requireNapi('arkui.dialog');
@@ -1556,6 +1555,11 @@ class Dialog {
                 reject({ message: paramErrMsg, code: 401 });
             });
         }
+        if (typeof content.getFrameNode !== 'function') {
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
         return withInstanceId(this.instanceId_, () => {
             return this.ohos_dialog.updateCustomDialog(content.getFrameNode(), options);
         });
@@ -1574,6 +1578,11 @@ class Dialog {
             if (typeof target === 'number') {
                 return this.ohos_dialog.dismissDialog(target);
             } else {
+                if (typeof target.getFrameNode !== 'function') {
+                    return new Promise((resolve, reject) => {
+                        reject({ message: paramErrMsg, code: 401 });
+                    });
+                }
                 return this.ohos_dialog.dismissDialog(target.getFrameNode());
             }
         });

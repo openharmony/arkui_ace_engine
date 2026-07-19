@@ -21,7 +21,7 @@
 #include "core/components_ng/pattern/shape/shape_paint_method.h"
 #include "core/components_ng/pattern/shape/shape_overlay_modifier.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
-#include "core/components_ng/render/circle_painter.h"
+#include "core/components_ng/pattern/shape/circle_painter.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -40,115 +40,12 @@ public:
     {}
     ~CirclePaintMethod() override = default;
 
-    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(paintWrapper, nullptr);
-        auto paintProperty = paintWrapper->GetPaintProperty();
-        CHECK_NULL_RETURN(paintProperty, nullptr);
-        auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintProperty->Clone());
-        CHECK_NULL_RETURN(shapePaintProperty, nullptr);
-
-        if (propertiesFromAncestor_) {
-            if (!shapePaintProperty->HasFill() && propertiesFromAncestor_->HasFill()) {
-                auto renderContext = paintWrapper->GetRenderContext();
-                CHECK_NULL_RETURN(renderContext, nullptr);
-                renderContext->UpdateForegroundColor(propertiesFromAncestor_->GetFillValue());
-                renderContext->ResetForegroundColorStrategy();
-            }
-            shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
-        }
-        if (paintWrapper->HasForegroundColor()) {
-            shapePaintProperty->UpdateFill(paintWrapper->GetForegroundColor());
-        } else if (paintWrapper->HasForegroundColorStrategy()) {
-            shapePaintProperty->UpdateFill(Color::FOREGROUND);
-            shapePaintProperty->ResetFillOpacity();
-        }
-        UpdateFillHDRColorHeadRoom(paintWrapper, *shapePaintProperty);
-        float height = paintWrapper->GetContentSize().Height();
-        float width = paintWrapper->GetContentSize().Width();
-        float radius = (width > height ? height : width) * 0.5;
-        UpdateStrokeHDRColorHeadRoom(paintWrapper, *shapePaintProperty);
-        return
-            [radiusValue = radius, offsetValue = paintWrapper->GetContentOffset(), shapePaintProperty, paintWrapper](
-                RSCanvas& canvas) {
-                    CirclePainter::DrawCircle(canvas, radiusValue, offsetValue, *shapePaintProperty);
-                    paintWrapper->FlushOverlayModifier();
-                };
-    }
-
-    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
-    {
-        CHECK_NULL_RETURN(paintWrapper, nullptr);
-        CHECK_NULL_RETURN(shapeOverlayModifier_, nullptr);
-        auto paintProperty = paintWrapper->GetPaintProperty();
-        CHECK_NULL_RETURN(paintProperty, nullptr);
-        auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintProperty->Clone());
-        CHECK_NULL_RETURN(shapePaintProperty, nullptr);
-
-        if (propertiesFromAncestor_) {
-            shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
-        }
-        float height = paintWrapper->GetContentSize().Height();
-        float width = paintWrapper->GetContentSize().Width();
-        auto offset = paintWrapper->GetContentOffset();
-        float strokeWidth =
-            shapePaintProperty->GetStrokeWidthValue(ShapePaintProperty::STROKE_WIDTH_DEFAULT).ConvertToPx();
-        RectF boundsRect = { (offset.GetX() - strokeWidth), (offset.GetY() - strokeWidth), (width + strokeWidth * 2),
-            (height + strokeWidth * 2) };
-        shapeOverlayModifier_->SetBoundsRect(boundsRect);
-        return shapeOverlayModifier_;
-    }
+    CanvasDrawFunction GetContentDrawFunction(PaintWrapper* paintWrapper) override;
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    void UpdateFillHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty)
-    {
-        CHECK_NULL_VOID(paintWrapper);
-        constexpr float DEFAULT_SDR_HEADROOM = 1.0f;
-        auto renderContext = paintWrapper->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto fillColor = shapePaintProperty.HasFill() ? shapePaintProperty.GetFillValue() : Color::BLACK;
-        auto headRoomColor = fillColor.GetHeadRoomColor();
-        if (!headRoomColor.has_value()) {
-            if (lastFillHdrHeadRoom_ && lastFillHdrHeadRoom_->has_value() &&
-                !NearEqual(lastFillHdrHeadRoom_->value(), DEFAULT_SDR_HEADROOM)) {
-                *lastFillHdrHeadRoom_ = DEFAULT_SDR_HEADROOM;
-                renderContext->SetHDRColorHeadRoom(DEFAULT_SDR_HEADROOM);
-            }
-            return;
-        }
-        float headRoom = headRoomColor.value().headRoom;
-        if (lastFillHdrHeadRoom_ && lastFillHdrHeadRoom_->has_value() &&
-            NearEqual(lastFillHdrHeadRoom_->value(), headRoom)) {
-            return;
-        }
-        if (lastFillHdrHeadRoom_) {
-            *lastFillHdrHeadRoom_ = headRoom;
-        }
-        renderContext->SetHDRColorHeadRoom(headRoom);
-    }
-
-    void UpdateStrokeHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty)
-    {
-        CHECK_NULL_VOID(paintWrapper);
-        if (!shapePaintProperty.HasStroke()) {
-            return;
-        }
-        auto headRoomColor = shapePaintProperty.GetStrokeValue().GetHeadRoomColor();
-        if (!headRoomColor.has_value()) {
-            return;
-        }
-        auto renderContext = paintWrapper->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        float headRoom = headRoomColor.value().headRoom;
-        if (lastStrokeHdrHeadRoom_ && lastStrokeHdrHeadRoom_->has_value() &&
-            NearEqual(lastStrokeHdrHeadRoom_->value(), headRoom)) {
-            return;
-        }
-        if (lastStrokeHdrHeadRoom_) {
-            *lastStrokeHdrHeadRoom_ = headRoom;
-        }
-        renderContext->SetHDRColorHeadRoom(headRoom);
-    }
+    void UpdateFillHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty);
+    void UpdateStrokeHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty);
 
     std::optional<float>* lastFillHdrHeadRoom_ = nullptr;
     std::optional<float>* lastStrokeHdrHeadRoom_ = nullptr;

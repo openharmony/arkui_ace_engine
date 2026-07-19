@@ -19,6 +19,7 @@
 #include "arkoala_api_generated.h"
 #include "ui/base/utils/utils.h"
 
+#include "base/geometry/shape.h"
 #include "bridge/arkts_frontend/arkts_frontend.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"

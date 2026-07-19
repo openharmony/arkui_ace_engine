@@ -82,8 +82,8 @@ ViewContextModel* ViewContextModel::GetInstance()
 namespace OHOS::Ace::Framework {
 namespace {
 
-constexpr uint32_t DEFAULT_DURATION = 1000; // ms
-constexpr uint32_t FORM_MAX_DURATION = 2000; // ms
+constexpr int32_t DEFAULT_DURATION = 1000; // ms
+constexpr int32_t FORM_MAX_DURATION = 2000; // ms
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t INVALID_ID = -1;
 constexpr int32_t INDEX_ONE = 1;
@@ -179,7 +179,11 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, const An
     auto previousOption = pipelineContext->GetSyncAnimationOption();
     pipelineContext->SetSyncAnimationOption(option);
     // Execute the function.
-    jsAnimateToFunc->Call(jsAnimateToFunc);
+    if (!jsAnimateToFunc->IsEmpty()) {
+        jsAnimateToFunc->Call(jsAnimateToFunc);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_ANIMATION, "jsAnimateToFunc is empty");
+    }
     pipelineContext->FlushOnceVsyncTask();
     auto tokenOut = AnimationUtils::GetRSUIContextToken(pipelineContext);
     AceEngine::Get().NotifyContainersOrderly([triggerId, tokenOut,
@@ -699,6 +703,7 @@ void JSViewContext::JSAnimateToImmediately(const JSCallbackInfo& info)
 
 void RecordAnimationFinished(int32_t count)
 {
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_ANIMATION)) {
         Recorder::EventParamsBuilder builder;
         builder.SetEventCategory(Recorder::EventCategory::CATEGORY_ANIMATION)
@@ -706,6 +711,7 @@ void RecordAnimationFinished(int32_t count)
             .SetExtra(Recorder::KEY_COUNT, std::to_string(count));
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
 }
 
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)

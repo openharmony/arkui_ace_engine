@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.h"
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
@@ -22,6 +24,31 @@ constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 constexpr Dimension INDICATOR_TOUCH_BOTTOM_MAX_DISTANCE = 80.0_vp;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 constexpr float DEFAULT_COUNT = 2.0f;
+constexpr int32_t MAX_DISPLAY_COUNT_MIN = 6;
+constexpr int32_t MAX_DISPLAY_COUNT_MAX = 9;
+constexpr int32_t LONG_PRESS_DELAY = 300;
+constexpr Color IMMERSIVE_INDICATOR_UNSELECTED_COLOR(0x19FFFFFF);
+constexpr Color IMMERSIVE_INDICATOR_SELECTED_COLOR(0xFFFFFFFF);
+
+Color GetDefaultIndicatorColor(const RefPtr<FrameNode>& host, const RefPtr<SwiperIndicatorTheme>& theme)
+{
+    CHECK_NULL_RETURN(theme, Color::TRANSPARENT);
+    CHECK_NULL_RETURN(host, theme->GetColor());
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, theme->GetColor());
+    return renderContext->GetImmersiveMaterialConfig().has_value() ? IMMERSIVE_INDICATOR_UNSELECTED_COLOR
+                                                                  : theme->GetColor();
+}
+
+Color GetDefaultSelectedIndicatorColor(const RefPtr<FrameNode>& host, const RefPtr<SwiperIndicatorTheme>& theme)
+{
+    CHECK_NULL_RETURN(theme, Color::TRANSPARENT);
+    CHECK_NULL_RETURN(host, theme->GetSelectedColor());
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, theme->GetSelectedColor());
+    return renderContext->GetImmersiveMaterialConfig().has_value() ? IMMERSIVE_INDICATOR_SELECTED_COLOR
+                                                                  : theme->GetSelectedColor();
+}
 } // namespace
 
 IndicatorPattern::IndicatorPattern()
@@ -62,6 +89,25 @@ int32_t IndicatorPattern::GetCountFromProperty() const
     return swiperIndicatorLayoutProperty->GetCount().value_or(DEFAULT_COUNT);
 }
 
+int32_t IndicatorPattern::GetMaxDisplayCount() const
+{
+    if (!swiperParameters_ || !swiperParameters_->maxDisplayCountVal.has_value()) {
+        return 0;
+    }
+
+    auto maxDisplayCount = swiperParameters_->maxDisplayCountVal.value();
+    if (maxDisplayCount < MAX_DISPLAY_COUNT_MIN || maxDisplayCount > MAX_DISPLAY_COUNT_MAX) {
+        return 0;
+    }
+
+    auto totalItemCount = RealTotalCount();
+    if (totalItemCount <= maxDisplayCount) {
+        return 0;
+    }
+
+    return maxDisplayCount;
+}
+
 bool IndicatorPattern::IsLoopFromProperty() const
 {
     auto swiperIndicatorLayoutProperty = GetLayoutProperty<SwiperIndicatorLayoutProperty>();
@@ -96,11 +142,21 @@ std::shared_ptr<SwiperParameters> IndicatorPattern::GetSwiperParameters()
         swiperParameters_->selectedItemWidth = swiperIndicatorTheme->GetSize();
         swiperParameters_->selectedItemHeight = swiperIndicatorTheme->GetSize();
         swiperParameters_->maskValue = false;
-        swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
-        swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+        swiperParameters_->colorVal = GetDefaultIndicatorColor(host, swiperIndicatorTheme);
+        swiperParameters_->selectedColorVal = GetDefaultSelectedIndicatorColor(host, swiperIndicatorTheme);
         swiperParameters_->dimSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
     }
     return swiperParameters_;
+}
+
+std::shared_ptr<SwiperParameters> IndicatorPattern::ObtainSwiperParameters() const
+{
+    if (swiperParameters_) {
+        return swiperParameters_;
+    }
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_RETURN(swiperPattern, nullptr);
+    return swiperPattern->GetSwiperParameters();
 }
 
 std::shared_ptr<SwiperDigitalParameters> IndicatorPattern::GetSwiperDigitalParameters()
@@ -158,6 +214,7 @@ void IndicatorPattern::SaveDigitIndicatorProperty()
     layoutProperty->UpdateSelectedFontWeight(swiperDigitalParameters->selectedFontWeight.value_or(
         swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetFontWeight()));
     ResetDotModifier();
+    ResetOverlongModifier();
 }
 
 void IndicatorPattern::SaveDotIndicatorProperty()
@@ -214,9 +271,17 @@ void IndicatorPattern::UpdatePaintProperty()
     paintProperty->UpdateSelectedItemHeight(
         swiperParameters->selectedItemHeight.value_or(swiperIndicatorTheme->GetSize()));
     paintProperty->UpdateIndicatorMask(swiperParameters->maskValue.value_or(false));
-    paintProperty->UpdateColor(swiperParameters->colorVal.value_or(swiperIndicatorTheme->GetColor()));
-    paintProperty->UpdateSelectedColor(
-        swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
+    if (!swiperParameters_->parametersByUser.count("colorVal")) {
+        paintProperty->UpdateColor(GetDefaultIndicatorColor(indicatorNode, swiperIndicatorTheme));
+    } else {
+        paintProperty->UpdateColor(swiperParameters->colorVal.value_or(swiperIndicatorTheme->GetColor()));
+    }
+    if (!swiperParameters_->parametersByUser.count("selectedColorVal")) {
+        paintProperty->UpdateSelectedColor(GetDefaultSelectedIndicatorColor(indicatorNode, swiperIndicatorTheme));
+    } else {
+        paintProperty->UpdateSelectedColor(
+            swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
+    }
     paintProperty->UpdateIsCustomSize(isCustomSize_);
     paintProperty->UpdateSpace(swiperParameters->dimSpace.value_or(swiperIndicatorTheme->GetIndicatorDotItemSpace()));
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -258,6 +323,15 @@ void IndicatorPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+
+    if (GetOverlengthDotIndicatorModifier()) {
+        GetOverlengthDotIndicatorModifier()->StopAnimation(true);
+    }
+
+    if (GetMaxDisplayCount() > 0 && GetOverlengthDotIndicatorModifier()) {
+        GetOverlengthDotIndicatorModifier()->InitOverlongStatus(GetLoopIndex(currentIndexInSingleMode_));
+    }
+
     SwiperIndicatorPattern::OnModifyDone();
 }
 
@@ -344,6 +418,10 @@ void IndicatorPattern::ShowPrevious()
     if (dotIndicatorModifier && !dotIndicatorModifier->GetIsBottomAnimationFinished()) {
         dotIndicatorModifier->FinishAnimationToTargetImmediately(dotIndicatorModifier->GetTargetCenter());
     }
+    auto overlongModifier = GetOverlengthDotIndicatorModifier();
+    if (overlongModifier) {
+        overlongModifier->StopAnimation(true);
+    }
     lastIndex_ = GetCurrentIndex();
     OnIndexChangeInSingleMode(GetCurrentIndex() - 1);
 }
@@ -368,6 +446,10 @@ void IndicatorPattern::ShowNext()
     auto dotIndicatorModifier = GetDotIndicatorModifier();
     if (dotIndicatorModifier && !dotIndicatorModifier->GetIsBottomAnimationFinished()) {
         dotIndicatorModifier->FinishAnimationToTargetImmediately(dotIndicatorModifier->GetTargetCenter());
+    }
+    auto overlongModifier = GetOverlengthDotIndicatorModifier();
+    if (overlongModifier) {
+        overlongModifier->StopAnimation(true);
     }
     lastIndex_ = GetCurrentIndex();
     OnIndexChangeInSingleMode(GetCurrentIndex() + 1);
@@ -395,6 +477,11 @@ void IndicatorPattern::ChangeIndex(int32_t index, bool useAnimation)
     if (dotIndicatorModifier) {
         dotIndicatorModifier->StopAnimation();
     }
+    auto overlongModifier = GetOverlengthDotIndicatorModifier();
+    if (overlongModifier) {
+        overlongModifier->StopAnimation(true);
+    }
+    lastIndex_ = GetCurrentIndex();
     OnIndexChangeInSingleMode(index);
 }
 
@@ -537,6 +624,12 @@ void IndicatorPattern::HandleDragEnd(double dragVelocity)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (GetMaxDisplayCount() > 0) {
+        auto overlongModifier = GetOverlengthDotIndicatorModifier();
+        if (overlongModifier) {
+            overlongModifier->SetIsDraggingIndicator(false);
+        }
+    }
     SetTouchBottomType(TouchBottomType::NONE);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -571,6 +664,30 @@ void IndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     swiperPattern->SetStopIndicatorAnimationCb(stopAnimationCb);
 }
 
+void IndicatorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (GetBindSwiperNode()) {
+        return SwiperIndicatorPattern::InitLongPressEvent(gestureHub);
+    }
+    if (GetMaxDisplayCount() > 0 && !longPressEvent_) {
+        auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleTouchDown();
+            pattern->HandleDragStart(info);
+            auto overlongModifier = pattern->GetOverlengthDotIndicatorModifier();
+            if (overlongModifier) {
+                overlongModifier->SetIsDraggingIndicator(true);
+            }
+            pattern->isLongPressed_ = true;
+        };
+        longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
+        gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
+        return;
+    }
+    SwiperIndicatorPattern::InitLongPressEvent(gestureHub);
+}
+
 void IndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
 {
     if (GetBindSwiperNode()) {
@@ -592,6 +709,22 @@ void IndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
     turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
     if (IsHorizontalAndRightToLeft()) {
         turnPageRateOffset = -turnPageRateOffset;
+    }
+    if (GetMaxDisplayCount() > 0) {
+        GestureState gestureState =
+            turnPageRate < 0 ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
+        if (NearZero(turnPageRate)) {
+            gestureState = GestureState::GESTURE_STATE_NONE;
+        }
+        singleGestureState_ = gestureState;
+        auto overlongModifier = GetOverlengthDotIndicatorModifier();
+        if (overlongModifier) {
+            overlongModifier->SetTurnPageRate(turnPageRate);
+        }
+        auto host = GetHost();
+        if (host) {
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
     }
     if (std::abs(turnPageRate) >= 1) {
         if (Positive(turnPageRateOffset)) {
@@ -650,10 +783,10 @@ void IndicatorPattern::UpdateDefaultColor()
             swiperIndicatorTheme->GetDigitalIndicatorTextStyle().GetTextColor();
     }
     if (swiperParameters_ && !swiperParameters_->parametersByUser.count("colorVal")) {
-        swiperParameters_->colorVal = swiperIndicatorTheme->GetColor();
+        swiperParameters_->colorVal = GetDefaultIndicatorColor(host, swiperIndicatorTheme);
     }
     if (swiperParameters_ && !swiperParameters_->parametersByUser.count("selectedColorVal")) {
-        swiperParameters_->selectedColorVal = swiperIndicatorTheme->GetSelectedColor();
+        swiperParameters_->selectedColorVal = GetDefaultSelectedIndicatorColor(host, swiperIndicatorTheme);
     }
 }
 
@@ -691,5 +824,133 @@ bool IndicatorPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(focusHub, false);
     focusHub->SetPaintColor(swiperTheme->GetFocusedColor());
     return false;
+}
+
+RefPtr<OverlengthDotIndicatorPaintMethod> IndicatorPattern::CreateOverlongDotIndicatorPaintMethodInSingleMode()
+{
+    ResetDotModifier();
+
+    if (!GetOverlengthDotIndicatorModifier()) {
+        auto host = GetHost();
+        int32_t id = TokenThemeStorage::INVALID_THEME_SCOPE_ID;
+        if (host && host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            id = host->GetThemeScopeId();
+        }
+        SetOverlengthDotIndicatorModifier(AceType::MakeRefPtr<OverlengthDotIndicatorModifier>(id));
+        InitOverlongStatusInSingleMode();
+    }
+
+    GetOverlengthDotIndicatorModifier()->SetAnimationDuration(INDICATOR_DEFAULT_DURATION);
+    float motionVelocity = 0.0f;
+    GetOverlengthDotIndicatorModifier()->SetLongPointHeadCurve(DEFAULT_CURVE, motionVelocity);
+    GetOverlengthDotIndicatorModifier()->SetIsBindIndicator(false);
+    GetOverlengthDotIndicatorModifier()->SetIsLoop(IsLoop());
+
+    auto overlongPaintMethod = MakeRefPtr<OverlengthDotIndicatorPaintMethod>(GetOverlengthDotIndicatorModifier());
+    auto paintMethodTemp = DynamicCast<DotIndicatorPaintMethod>(overlongPaintMethod);
+    SetOverlongDotIndicatorPaintMethodInfoInSingleMode(paintMethodTemp);
+    UpdateOverlongPaintMethodInSingleMode(overlongPaintMethod);
+
+    GetOverlengthDotIndicatorModifier()->SetBoundsRect(CalcBoundsRect());
+    return overlongPaintMethod;
+}
+
+void IndicatorPattern::SetOverlongDotIndicatorPaintMethodInfoInSingleMode(
+    const RefPtr<DotIndicatorPaintMethod>& paintMethod)
+{
+    CHECK_NULL_VOID(paintMethod);
+    paintMethod->SetAxis(GetDirection());
+    paintMethod->SetCurrentIndex(GetLoopIndex(currentIndexInSingleMode_));
+    paintMethod->SetCurrentIndexActual(GetLoopIndex(currentIndexInSingleMode_));
+    paintMethod->SetHorizontalAndRightToLeft(GetNonAutoLayoutDirection());
+    paintMethod->SetItemCount(RealTotalCount());
+    paintMethod->SetGestureState(singleGestureState_);
+    singleGestureState_ = GestureState::GESTURE_STATE_INIT;
+    paintMethod->SetIsLoop(IsLoop());
+    paintMethod->SetIsHover(IsHover());
+    paintMethod->SetIsPressed(IsPressed());
+    paintMethod->SetHoverPoint(GetHoverPoint());
+    if (GetOptinalMouseClickIndex()) {
+        SetMouseClickIndex(GetLoopIndex(GetOptinalMouseClickIndex().value_or(0)));
+    }
+    paintMethod->SetMouseClickIndex(GetOptinalMouseClickIndex());
+    paintMethod->SetIsTouchBottom(GetTouchBottomType());
+    paintMethod->SetTouchBottomRate(touchBottomRate_);
+    paintMethod->SetTouchBottomTypeLoop(singleIndicatorTouchBottomTypeLoop_);
+    singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    paintMethod->SetFirstIndex(lastIndex_);
+    ResetOptinalMouseClickIndex();
+}
+
+void IndicatorPattern::UpdateOverlongPaintMethodInSingleMode(
+    const RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod)
+{
+    auto animationStartIndex = lastIndex_;
+    auto animationEndIndex = GetLoopIndex(currentIndexInSingleMode_);
+    bool keepStatus = false;
+
+    overlongPaintMethod->SetMaxDisplayCount(GetMaxDisplayCount());
+    overlongPaintMethod->SetKeepStatus(keepStatus);
+    overlongPaintMethod->SetAnimationStartIndex(animationStartIndex);
+    overlongPaintMethod->SetAnimationEndIndex(animationEndIndex);
+    overlongPaintMethod->SetIsBindIndicator(false);
+    GetOverlengthDotIndicatorModifier()->SetIsSwiperTouchDown(true);
+    GetOverlengthDotIndicatorModifier()->SetIsAutoPlay(false);
+    GetOverlengthDotIndicatorModifier()->SetBoundsRect(CalcBoundsRect());
+}
+
+void IndicatorPattern::InitOverlongStatusInSingleMode()
+{
+    auto overlongModifier = GetOverlengthDotIndicatorModifier();
+    CHECK_NULL_VOID(overlongModifier);
+    overlongModifier->InitOverlongStatus(currentIndexInSingleMode_);
+}
+
+void IndicatorPattern::HandleTouchClick(const GestureEvent& info)
+{
+    if (GetBindSwiperNode()) {
+        return SwiperIndicatorPattern::HandleTouchClick(info);
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<DotIndicatorPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto theme = host->GetTheme<SwiperIndicatorTheme>(true);
+    CHECK_NULL_VOID(theme);
+    auto itemWidth = paintProperty->GetItemWidthValue(theme->GetSize()).ConvertToPx();
+    auto selectedItemWidth = paintProperty->GetSelectedItemWidthValue(theme->GetSize()).ConvertToPx();
+    if (Negative(itemWidth) || Negative(selectedItemWidth)) {
+        itemWidth = theme->GetSize().ConvertToPx();
+        selectedItemWidth = theme->GetSize().ConvertToPx();
+    }
+
+    auto isRtl = IsHorizontalAndRightToLeft();
+    auto axis = GetDirection();
+    auto mainClickOffset = axis == Axis::HORIZONTAL ? info.GetLocalLocation().GetX() : info.GetLocalLocation().GetY();
+
+    auto maxDisplayCount = GetMaxDisplayCount();
+    auto overlongModifier = GetOverlengthDotIndicatorModifier();
+    if (maxDisplayCount > 0 && overlongModifier) {
+        auto bounds = overlongModifier->GetVisualBounds();
+        if (mainClickOffset < bounds.first) {
+            isRtl ? ShowNext() : ShowPrevious();
+        } else if (mainClickOffset > bounds.second) {
+            isRtl ? ShowPrevious() : ShowNext();
+        }
+        return;
+    }
+
+    auto currentIndex = GetTouchCurrentIndex();
+    auto margin = HandleTouchClickMargin();
+    Dimension indicatorDotItemSpace =
+        paintProperty->GetSpaceValue(theme->GetIndicatorDotItemSpace());
+    auto lengthBeforeCurrentIndex = margin + theme->GetIndicatorPaddingDot().ConvertToPx() +
+                                    (indicatorDotItemSpace.ConvertToPx() + itemWidth) * currentIndex;
+    auto lengthWithCurrentIndex = lengthBeforeCurrentIndex + selectedItemWidth;
+    if (mainClickOffset < lengthBeforeCurrentIndex) {
+        isRtl ? ShowNext() : ShowPrevious();
+    } else if (mainClickOffset > lengthWithCurrentIndex) {
+        isRtl ? ShowPrevious() : ShowNext();
+    }
 }
 } // namespace OHOS::Ace::NG

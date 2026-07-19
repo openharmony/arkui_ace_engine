@@ -242,6 +242,77 @@ function __Interop_transferCompatibleDynamicBuilder_Internal(builder: (...args: 
     return InteropExtractorModule.transferCompatibleDynamicBuilder(builder);
 }
 
+function __Interop_transferCompatibleDynamicBuilder1_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder1 === undefined) {
+        // only happened in toolchain error, internal error
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleDynamicBuilder1 method For Transfer Compatible Dynamic Builder');
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder1(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder2_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder2 === undefined) {
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleDynamicBuilder2 method For Transfer Compatible Dynamic Builder');
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder2(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder3_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder3 === undefined) {
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleDynamicBuilder3 method For Transfer Compatible Dynamic Builder');
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder3(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder4_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder4 === undefined) {
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleDynamicBuilder4 method For Transfer Compatible Dynamic Builder');
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder4(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder5_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder5 === undefined) {
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleDynamicBuilder5 method For Transfer Compatible Dynamic Builder');
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder5(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder6_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder6 === undefined) {
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleDynamicBuilder6 method For Transfer Compatible Dynamic Builder');
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder6(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder7_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder7 === undefined) {
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleDynamicBuilder7 method For Transfer Compatible Dynamic Builder');
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder7(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder8_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder8 === undefined) {
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleDynamicBuilder8 method For Transfer Compatible Dynamic Builder');
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder8(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder9_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder9 === undefined) {
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleDynamicBuilder9 method For Transfer Compatible Dynamic Builder');
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder9(builder);
+}
+
+function __Interop_transferCompatibleDynamicBuilder10_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
+    if(InteropExtractorModule.transferCompatibleDynamicBuilder10 === undefined) {
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleDynamicBuilder10 method For Transfer Compatible Dynamic Builder');
+    }
+    return InteropExtractorModule.transferCompatibleDynamicBuilder10(builder);
+}
+
 function __Interop_createCompatibleStaticState_Internal(value: Object): Object {
     if(InteropExtractorModule.createCompatibleStaticState === undefined) {
         // only happened in toolchain error, internal error

@@ -235,6 +235,7 @@ void SystemWindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
         checkContextTransparentTask_.Cancel();
     }
     session_->SetNotifySystemSessionKeyEventFunc(nullptr);
+    session_->NotifyWindowSceneDetach();
 }
 
 void SystemWindowScene::OnAttachToMainTree()

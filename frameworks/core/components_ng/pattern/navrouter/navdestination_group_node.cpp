@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 constexpr double HALF = 0.5;
@@ -1597,10 +1598,12 @@ bool NavDestinationGroupNode::GetCanReused() const
 
 void NavDestinationGroupNode::ContentChangeReport()
 {
+#ifndef CROSS_PLATFORM
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     auto mgr = context->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnPageTransitionEnd(WeakClaim(this).Upgrade());
+#endif
 }
 } // namespace OHOS::Ace::NG

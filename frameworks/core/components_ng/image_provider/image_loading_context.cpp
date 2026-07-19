@@ -34,10 +34,10 @@ namespace OHOS::Ace::NG {
 ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad,
     bool isSceneBoardWindow, const ImageDfxConfig& imageDfxConfig)
     : src_(src), notifiers_(std::move(loadNotifier)), containerId_(Container::CurrentId()), syncLoad_(syncLoad),
-      isSceneBoardWindow_(isSceneBoardWindow), imageDfxConfig_(imageDfxConfig)
+      isSceneBoardWindow_(isSceneBoardWindow)
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
-    src_.SetImageDfxConfig(imageDfxConfig_);
+    src_.SetImageDfxConfig(imageDfxConfig);
 
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
         src_.GetSrcType() == SrcType::PIXMAP) {
@@ -158,7 +158,6 @@ void ImageLoadingContext::OnDataLoading()
         return;
     }
     src_.SetContainerId(containerId_);
-    src_.SetImageDfxConfig(GetImageDfxConfig());
     ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_, isSceneBoardWindow_);
 }
 
@@ -210,7 +209,6 @@ void ImageLoadingContext::OnMakeCanvasImage()
     src_.SetImageHdr(GetIsHdrDecoderNeed());
     canvasKey_ = ImageUtils::GenerateImageKey(src_, targetSize);
     imageObj_->SetImageSourceInfoHdr(GetIsHdrDecoderNeed());
-    imageObj_->SetImageDfxConfig(imageDfxConfig_);
     imageObj_->MakeCanvasImage(WeakClaim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
 }
 
@@ -276,8 +274,6 @@ void ImageLoadingContext::FailCallback(const std::string& errorMsg, const ImageE
     errorMsg_ = errorMsg;
     needErrorCallBack_ = true;
     RemoveDownloadedImageCache(src_);
-    TAG_LOGD(AceLogTag::ACE_IMAGE, "fail-%{private}s-%{public}s-%{public}s", src_.ToString().c_str(),
-        errorMsg.c_str(), imageDfxConfig_.ToStringWithoutSrc().c_str());
     CHECK_NULL_VOID(measureFinish_);
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_FAIL);
     needErrorCallBack_ = false;
@@ -343,11 +339,6 @@ bool ImageLoadingContext::MakeCanvasImageIfNeed(const SizeF& dstSize, bool autoR
         res |= RoundUp(dstSize.Width()) != sizeLevel_;
     } else if (dstSize_ == SizeF()) {
         res |= dstSize.IsPositive();
-    }
-    if (!res && hasValidSlice) {
-        dstSize_ = dstSize;
-        // to keep srcRect/dstRect in sync with the current component size.
-        ResizableCalcDstSize();
     }
     CHECK_NULL_RETURN(res, res);
     if (stateManager_->GetCurrentState() == ImageLoadingState::MAKE_CANVAS_IMAGE) {

@@ -25,6 +25,7 @@ namespace OHOS::Ace::NG {
  */
 enum class SmartLayoutType {
     UNKNOWN,
+    GENERAL,
     COLUMN,
     ROW,
     FLEX

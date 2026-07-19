@@ -59,7 +59,7 @@ public:
         }
     }
 
-    void BindContextMenu();
+    ACE_FORCE_EXPORT void BindContextMenu();
 
     void RestoreGatherNode();
 

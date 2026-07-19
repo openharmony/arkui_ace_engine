@@ -23,11 +23,11 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -35,12 +35,14 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/syntax/node_content.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/extension_custom_node.h"
+#include "core/interfaces/native/node/node_xcomponent_modifier.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "frameworks/core/components_ng/pattern/xcomponent/bridge/arkts_native_xcomponent_bridge.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -275,11 +277,16 @@ ArkUINativeModuleValue FrameNodeBridge::IsModifiable(ArkUIRuntimeCallInfo* runti
 
 ArkUINativeModuleValue FrameNodeBridge::MakeFrameNodeInfo(EcmaVM* vm, ArkUINodeHandle frameNode)
 {
-    const char* keys[] = { "nodeId", "nodePtr" };
     auto nodeId = GetArkUINodeModifiers()->getFrameNodeModifier()->getIdByNodePtr(frameNode);
-    Local<JSValueRef> values[] = { panda::NumberRef::New(vm, nodeId), panda::NativePointerRef::New(vm, frameNode) };
-    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-    return obj;
+    Local<JSValueRef> keys[] = {
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::NODE_ID)),
+        panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(Framework::ArkUIIndex::NODE_PTR)),
+    };
+    panda::PropertyAttribute attrs[] = {
+        panda::PropertyAttribute(panda::NumberRef::New(vm, nodeId), true, true, true),
+        panda::PropertyAttribute(panda::NativePointerRef::New(vm, frameNode), true, true, true),
+    };
+    return panda::ObjectRef::NewWithProperties(vm, ArraySize(keys), keys, attrs);
 }
 
 ArkUINativeModuleValue FrameNodeBridge::CreateFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -465,11 +472,16 @@ static void HandleNodeParams(
     ArkUINodeHandle nodePtr = nullptr;
     if (nodeType == ARKUI_XCOMPONENT) {
 #ifdef XCOMPONENT_SUPPORTED
-        ArkUI_XComponent_Params params;
-        XComponentBridge::ParseParams(runtimeCallInfo, params);
-        params.nodeType = ARKUI_XCOMPONENT;
-        nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
-        XComponentBridge::SetControllerCallback(runtimeCallInfo, reinterpret_cast<FrameNode*>(nodePtr));
+        auto xcomponentModifier = NG::NodeModifier::GetXComponentModifier();
+        if (xcomponentModifier && xcomponentModifier->parseParams && xcomponentModifier->setControllerCallback) {
+            ArkUI_XComponent_Params params;
+            xcomponentModifier->parseParams(runtimeCallInfo, params);
+            params.nodeType = ARKUI_XCOMPONENT;
+            nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNodeWithParams(nodeType, nodeId, 0, params);
+            xcomponentModifier->setControllerCallback(runtimeCallInfo, &nodePtr);
+        } else {
+            nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
+        }
 #else
         nodePtr = GetArkUIFullNodeAPI()->getBasicAPI()->createNode(nodeType, nodeId, 0);
 #endif
@@ -1184,9 +1196,52 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "preventDefault"),
         panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_GESTURE_EVENT, nativeSize);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_GESTURE_EVENT);
+    return obj;
+}
+
+Local<panda::ObjectRef> FrameNodeBridge::CreateClickEventInfo(EcmaVM* vm, const ClickInfo* infoPtr)
+{
+    CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
+    const Offset& globalOffset = infoPtr->GetGlobalLocation();
+    const Offset& localOffset = infoPtr->GetLocalLocation();
+    const Offset& screenOffset = infoPtr->GetScreenLocation();
+    const Offset& globalDisplayOffset = infoPtr->GetGlobalDisplayLocation();
+    const char* keys[] = { "globalDisplayX", "globalDisplayY", "displayX", "displayY", "windowX", "windowY",
+        "screenX", "screenY", "x", "y", "timestamp", "source", "deviceId", "pressure", "tiltX",
+        "tiltY", "rollAngle", "sourceTool", "axisVertical", "axisHorizontal", "axisPinch",
+        "targetDisplayId", "getModifierKeyState", "target", "getCurrentLocalPosition" };
+    Local<JSValueRef> values[] = {
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalDisplayOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX())),
+        panda::NumberRef::New(vm, PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY())),
+        panda::NumberRef::New(vm, static_cast<double>(infoPtr->GetTimeStamp().time_since_epoch().count())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetSourceDevice())),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetDeviceId())),
+        panda::NumberRef::New(vm, infoPtr->GetForce()),
+        panda::NumberRef::New(vm, infoPtr->GetTiltX().value_or(0.0f)),
+        panda::NumberRef::New(vm, infoPtr->GetTiltY().value_or(0.0f)),
+        panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)),
+        panda::NumberRef::New(vm, static_cast<int32_t>(infoPtr->GetSourceTool())),
+        panda::NumberRef::New(vm, 0.0f),
+        panda::NumberRef::New(vm, 0.0f),
+        panda::NumberRef::New(vm, 0.0f),
+        panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()),
+        panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
+        CreateEventTargetObject(vm, *infoPtr),
+        panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition),
+    };
+    auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    obj->SetNativePointerFieldCount(vm, 1);
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(const_cast<ClickInfo*>(infoPtr)));
     return obj;
 }
 
@@ -1293,9 +1348,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCurrentLocalPosition"),
         panda::FunctionRef::New(vm, Framework::JsGetCurrentLocalPosition));
     eventObj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     eventObj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr), FrameNodeBridge::ReleaseNativePtrFunc,
-        (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO, nativeSize);
+        (void*)NATIVE_PTR_TAG_TOUCH_EVENT_INFO);
     return eventObj;
 }
 
@@ -1429,9 +1483,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateKeyEventInfoObj(EcmaVM* vm, KeyEv
         panda::BooleanRef::New(vm, infoPtr->GetScrollLock()) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_KEY_EVENT_INFO, nativeSize);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_KEY_EVENT_INFO);
     return obj;
 }
 
@@ -1572,9 +1625,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateHoverInfo(EcmaVM* vm, HoverInfo* 
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "rollAngle"),
         panda::NumberRef::New(vm, infoPtr->GetRollAngle().value_or(0.0f)));
     eventObj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     eventObj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_HOVER_INFO, nativeSize);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_HOVER_INFO);
     return eventObj;
 }
 
@@ -1684,8 +1736,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfoObj(EcmaVM* vm, MouseInf
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
         panda::NumberRef::New(vm, info.GetForce()), panda::NumberRef::New(vm, info.GetDeviceId()),
-        panda::NumberRef::New(vm, info.GetRawDeltaX() / density),
-        panda::NumberRef::New(vm, info.GetRawDeltaY() / density),
+        panda::NumberRef::New(vm, info.GetRawDeltaX()),
+        panda::NumberRef::New(vm, info.GetRawDeltaY()),
         panda::NumberRef::New(vm, info.GetTargetDisplayId()),
         panda::NumberRef::New(vm, globalDisplayOffset.GetX() / density),
         panda::NumberRef::New(vm, globalDisplayOffset.GetY() / density) };
@@ -1726,9 +1778,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo* 
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getHistoricalPoints"),
         panda::FunctionRef::New(vm, Framework::JsGetMouseHistoricalPoints));
     obj->SetNativePointerFieldCount(vm, 1);
-    size_t nativeSize = infoPtr->GetApproximateSize();
     obj->SetNativePointerField(
-        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_MOUSE_INFO, nativeSize);
+        vm, 0, static_cast<void*>(infoPtr), ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_MOUSE_INFO);
     return obj;
 }
 

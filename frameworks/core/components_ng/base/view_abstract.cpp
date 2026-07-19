@@ -14,14 +14,10 @@
  */
 
 #include "core/components_ng/base/view_abstract.h"
+
 #include <cstdint>
 #include <functional>
 #include <unordered_map>
-#include "base/log/log_wrapper.h"
-#include "base/hiviewdfx/histogram_wrapper.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
-#include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/property/flex_property.h"
 
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "ui/base/ace_type.h"
@@ -30,6 +26,7 @@
 #include "base/geometry/calc_dimension_rect.h"
 #include "base/geometry/response_region.h"
 #include "base/hiviewdfx/histogram_wrapper.h"
+#include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"
 #include "base/utils/multi_thread.h"
@@ -40,46 +37,50 @@
 #include "core/common/container_scope.h"
 #include "core/common/event_manager.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/visual_effect/component_material_interaction.h"
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/ui_material.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/ui_material_theme.h"
+#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
 #ifdef SMART_GESTURE_SUPPORTED
 #include "core/components_ng/manager/smart_gesture/smart_gesture_manager.h"
 #endif
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
-#include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/interfaces/native/node/bubble_modifier.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
-#include "core/components_ng/pattern/list/list_event_hub.h"
-#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
-#include "core/components_ng/pattern/grid/grid_event_hub.h"
-#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
-#include "core/components_ng/pattern/text_field/text_field_paint_property.h"
-#include "core/components_ng/render/ui_material_filter_creator.h"
-#include "core/components_ng/property/union_effect_container_options.h"
-#include "core/components_ng/property/smart_gesture_property.h"
-#include "core/components_ng/property/edgelight_property.h"
-#include "core/interfaces/native/node/menu_modifier.h"
-#include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
-#include "core/components_ng/animation/geometry_transition.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
+#include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_paint_property.h"
+#include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
+#include "core/components_ng/property/edgelight_property.h"
+#include "core/components_ng/property/flex_property.h"
+#include "core/components_ng/property/smart_gesture_property.h"
+#include "core/components_ng/property/union_effect_container_options.h"
+#include "core/components_ng/render/ui_material_filter_creator.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1090,6 +1091,11 @@ void ViewAbstract::SetBackgroundImagePosition(
 void ViewAbstract::ClearResObj(const std::string resObjName)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ClearResObj(frameNode, resObjName);
+}
+
+void ViewAbstract::ClearResObj(FrameNode* frameNode, const std::string resObjName)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -1209,12 +1215,16 @@ void ViewAbstract::SetSpatialEffect(const std::optional<SpatialEffectParams>& pa
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
     if (params.has_value()) {
-        ACE_UPDATE_RENDER_CONTEXT(SpatialEffect, params.value());
-        return;
+        renderContext->UpdateSpatialEffect(params.value());
+    } else {
+        renderContext->ResetSpatialEffect();
+        renderContext->OnSpatialEffectReset();
     }
-    ACE_RESET_RENDER_CONTEXT(RenderContext, SpatialEffect);
 }
 
 void ViewAbstract::SetLightUpEffect(double radio)
@@ -4531,22 +4541,10 @@ void ViewAbstract::AddResObjWithCallBack(
         pattern->RemoveResObj(key);
         return;
     }
-    auto&& updateFunc = [index, key, isOutlineGradient, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
-                            const RefPtr<ResourceObject>& resObj) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        CHECK_NULL_VOID(resObj);
-        std::string color = pattern->GetResCacheMapByKey(key);
-        Color result;
-        if (color.empty()) {
-            ResourceParseUtils::ParseResColor(resObj, result);
-            pattern->AddResCache(key, result.ColorToString());
-        } else {
-            result = Color::FromString(color);
-        }
-        pattern->UpdateBubbleGradient(index, result, isOutlineGradient);
-    };
-    pattern->AddResObj(key, resObj, std::move(updateFunc));
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    if (modifier) {
+        modifier->addBubbleGradientResObj(pattern, key, resObj, index, isOutlineGradient);
+    }
 }
 
 void ViewAbstract::SetTransform3DMatrix(const Matrix4& matrix)
@@ -4620,7 +4618,9 @@ void ViewAbstract::BindPopup(
 
     if (popupInfo.isCurrentOnShow) {
         // Entering / Normal / Exiting
-        bool popupShowing = popupPattern ? popupPattern->IsOnShow() : false;
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier && popupPattern);
+        bool popupShowing = modifier->isOnShow(popupPattern);
         popupInfo.markNeedUpdate = popupShowing || !isShow;
     } else {
         // Invisable
@@ -4633,12 +4633,12 @@ void ViewAbstract::BindPopup(
 
     // Create new popup.
     if (popupInfo.popupId == -1 || !popupNode) {
-        if (!isUseCustom) {
-            popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param);
-        } else {
+        if (isUseCustom) {
             CHECK_NULL_VOID(customNode);
-            popupNode = BubbleView::CreateCustomBubbleNode(targetTag, targetId, customNode, param);
         }
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier);
+        popupNode = modifier->createPopupNode(targetTag, targetId, customNode, param, isUseCustom);
         if (popupNode) {
             popupId = popupNode->GetId();
         }
@@ -4670,13 +4670,10 @@ void ViewAbstract::BindPopup(
         }
     } else {
         // use param to update PopupParm
-        if (!isUseCustom) {
-            BubbleView::UpdatePopupParam(popupId, param, targetNode);
-            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        } else {
-            BubbleView::UpdateCustomPopupParam(popupId, param);
-            popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier);
+        modifier->updatePopupNode(popupId, param, targetNode, isUseCustom);
+        popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     // update PopupInfo props
     popupInfo.popupId = popupId;
@@ -4686,8 +4683,10 @@ void ViewAbstract::BindPopup(
     if (popupNode) {
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
-        popupPattern->SetPopupParam(param);
-        popupPattern->RegisterDoubleBindCallback(param->GetDoubleBindCallback());
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier && popupPattern);
+        modifier->setPopupParam(popupPattern, param);
+        modifier->registerDoubleBindCallback(popupPattern, param->GetDoubleBindCallback());
         auto accessibilityProperty = popupNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
         if (accessibilityProperty) {
             accessibilityProperty->SetAccessibilityHoverPriority(param->IsBlockEvent());
@@ -4766,7 +4765,9 @@ void ViewAbstract::HandleHoverTipsInfo(const RefPtr<PopupParam>& param, const Re
     }
     RefPtr<BubblePattern> popupPattern;
     tipsInfo.markNeedUpdate = true;
-    popupNode = BubbleView::CreateBubbleNode(targetTag, targetId, param, spanString);
+    const auto* modifierTips = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_VOID(modifierTips);
+    popupNode = modifierTips->createBubbleNode(targetTag, targetId, param, spanString);
     popupId = popupNode ? popupNode->GetId() : popupId;
     if (!showInSubWindow) {
         auto destructor = [id = targetNode->GetId()]() {
@@ -4839,12 +4840,14 @@ void ViewAbstract::AddHoverEventForTips(
             return;
         }
         if (isHover) {
-            BubbleView::UpdatePopupParam(popupId, param, targetNode);
+            const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+            CHECK_NULL_VOID(modifier);
+            modifier->updatePopupParam(popupId, param, targetNode);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             if (showInSubWindow) {
                 auto pattern = popupNode->GetPattern<NG::BubblePattern>();
                 CHECK_NULL_VOID(pattern);
-                pattern->SetIsTipsAppearing(true);
+                modifier->setIsTipsAppearing(pattern, true);
                 SubwindowManager::GetInstance()->ShowTipsNG(
                     targetNode, tipsInfo, param->GetAppearingTime(), param->GetAppearingTimeWithContinuousOperation());
                 return;
@@ -4889,8 +4892,9 @@ void ViewAbstract::AddTouchEventForTips(const RefPtr<FrameNode>& targetNode, Pop
         CHECK_NULL_VOID(popup);
         ACE_UINODE_TRACE(popup);
         auto pattern = popup->GetPattern<BubblePattern>();
-        CHECK_NULL_VOID(pattern);
-        pattern->SetIsTipsAppearing(false);
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier && pattern);
+        modifier->setIsTipsAppearing(pattern, false);
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(instanceId, SubwindowType::TYPE_TIPS);
         if (subwindow) {
             auto overlayManager = subwindow->GetOverlayManager();
@@ -4917,7 +4921,9 @@ void ViewAbstract::AddMouseEventForTips(const RefPtr<FrameNode>& targetNode, Pop
         ACE_UINODE_TRACE(popup);
         auto pattern = popup->GetPattern<BubblePattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetMouseOffset(info.GetScreenLocation());
+        const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+        CHECK_NULL_VOID(modifier);
+        modifier->setMouseOffset(pattern, info.GetScreenLocation());
     };
     auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
     mouseEvent->SetIstips(true);
@@ -4979,12 +4985,14 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
         return ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE;
     }
-    auto popupInfo = BubbleView::GetPopupInfoWithCustomNode(customNode);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_RETURN(modifier, ERROR_CODE_INTERNAL_ERROR);
+    auto popupInfo = modifier->getPopupInfoWithCustomNode(customNode);
     if (popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The customNode of popup is already existed.");
         return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
     }
-    auto overlayManager = BubbleView::GetPopupOverlayManager(customNode, targetId);
+    auto overlayManager = modifier->getPopupOverlayManager(customNode, targetId);
     if (overlayManager) {
         auto popupInfo = overlayManager->GetPopupInfo(targetId);
         if (popupInfo.popupNode) {
@@ -4993,18 +5001,7 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
         }
     }
     BindPopup(param, targetNode, customNode);
-    popupInfo = BubbleView::GetPopupInfoWithTargetId(customNode, targetId);
-    if (!popupInfo.popupNode) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
-        return ERROR_CODE_INTERNAL_ERROR;
-    }
-    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
-    if (!popupPattern) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupPattern does not exist.");
-        return ERROR_CODE_INTERNAL_ERROR;
-    }
-    popupPattern->SetCustomNode(AceType::WeakClaim(AceType::RawPtr(customNode)));
-    return ERROR_CODE_NO_ERROR;
+    return modifier->finishOpenPopup(customNode, targetId);
 }
 
 int32_t ViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode)
@@ -5027,7 +5024,9 @@ int32_t ViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist when update popup.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
-    auto popupInfo = BubbleView::GetPopupInfoWithTargetId(customNode, targetId);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_RETURN(modifier, ERROR_CODE_INTERNAL_ERROR);
+    auto popupInfo = modifier->getPopupInfoWithTargetId(customNode, targetId);
     if (!popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
@@ -5036,7 +5035,7 @@ int32_t ViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popup is not on show.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
-    BubbleView::ResetBubbleProperty(popupInfo.popupNode->GetId());
+    modifier->resetBubbleProperty(popupInfo.popupNode->GetId());
     BindPopup(param, targetNode, customNode);
     return ERROR_CODE_NO_ERROR;
 }
@@ -5062,7 +5061,9 @@ int32_t ViewAbstract::ClosePopup(const RefPtr<UINode>& customNode)
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId is error.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
-    auto overlayManager = BubbleView::GetPopupOverlayManager(customNode, targetId);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_RETURN(modifier, ERROR_CODE_INTERNAL_ERROR);
+    auto overlayManager = modifier->getPopupOverlayManager(customNode, targetId);
     if (!overlayManager) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The overlayManager of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
@@ -5085,11 +5086,13 @@ int32_t ViewAbstract::GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<UINo
 {
     CHECK_NULL_RETURN(param, ERROR_CODE_INTERNAL_ERROR);
     CHECK_NULL_RETURN(customNode, ERROR_CODE_DIALOG_CONTENT_ERROR);
-    auto popupInfo = BubbleView::GetPopupInfoWithCustomNode(customNode);
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_RETURN(modifier, ERROR_CODE_INTERNAL_ERROR);
+    auto popupInfo = modifier->getPopupInfoWithCustomNode(customNode);
     CHECK_NULL_RETURN(popupInfo.popupNode, ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
     auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_RETURN(popupPattern, ERROR_CODE_INTERNAL_ERROR);
-    param = popupPattern->GetPopupParam();
+    param = modifier->getPopupParam(popupPattern);
     CHECK_NULL_RETURN(param, ERROR_CODE_INTERNAL_ERROR);
     int32_t targetId = StringUtils::StringToInt(param->GetTargetId(), -1);
     if (targetId < 0) {
@@ -5129,15 +5132,9 @@ void ViewAbstract::DismissDialog()
             dialogNode = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
         }
     }
-    CHECK_NULL_VOID(dialogNode);
-    auto pattern = dialogNode->GetPattern();
-    CHECK_NULL_VOID(pattern);
-    auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
-    if (dialogPattern) {
-        dialogPattern->OverlayDismissDialog(dialogNode);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "destroy",
-            ComponentEventType::COMPONENT_EVENT_DIALOG);
-    }
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_VOID(dialogInnerModifier);
+    dialogInnerModifier->dismissDialog(dialogNode);
 }
 
 void ViewAbstract::ShowMenuPreview(
@@ -6846,16 +6843,16 @@ void ViewAbstract::UnRegisterMaterialInteractionEvent(FrameNode* frameNode)
 
 void ViewAbstract::HistogramImmersiveOptions(const ImmersiveMaterialConfig& config)
 {
-    int32_t state = 0;
+    uint32_t state = 0U;
     [[maybe_unused]] static constexpr int32_t HISTOGRAM_MAX_COUNT_IMMERSIVE_MATERIAL = 8;
     if (config.HasLightEffect()) {
-        state |= 0b01;
+        state |= 0b01U;
     }
     if (config.interactive) {
-        state |= 0b10;
+        state |= 0b10U;
     }
     if (config.colorInvert) {
-        state |= 0b100;
+        state |= 0b100U;
     }
     ACE_ENGINE_HISTOGRAM_ENUMERATION(
         "uiMaterial.ImmersiveMaterial.enum", state, HISTOGRAM_MAX_COUNT_IMMERSIVE_MATERIAL);
@@ -8124,6 +8121,14 @@ void ViewAbstract::CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& re
         return;
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CreateWithOpacityResourceObj(frameNode, resObj);
+}
+
+void ViewAbstract::CreateWithOpacityResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
     CHECK_NULL_VOID(frameNode);
 
     auto pattern = frameNode->GetPattern();
@@ -8137,12 +8142,12 @@ void ViewAbstract::CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& re
         double result;
         ResourceParseUtils::ParseResDouble(resObj, result);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                result = std::clamp(result, 0.0, 1.0);
-            } else {
-                if (result > 1.0 || LessNotEqual(result, 0.0)) {
-                    result = 1.0;
-                }
+            result = std::clamp(result, 0.0, 1.0);
+        } else {
+            if (result > 1.0 || LessNotEqual(result, 0.0)) {
+                result = 1.0;
             }
+        }
         if (viewAbstractOpacity.empty()) {
             pattern->AddResCache("viewAbstract.opacity", std::to_string(result));
         } else {
@@ -8411,6 +8416,9 @@ void ViewAbstract::SetSpatialEffect(FrameNode* frameNode, const std::optional<Sp
     }
     auto target = frameNode->GetRenderContext();
     ACE_RESET_NODE_RENDER_CONTEXT(target, SpatialEffect, frameNode);
+    if (target) {
+        target->OnSpatialEffectReset();
+    }
 }
  
 void ViewAbstract::SetLightUpEffect(FrameNode* frameNode, double radio)
@@ -9852,9 +9860,6 @@ void ViewAbstract::SetSmartGestureShortcut(int32_t action, bool enabled, bool se
 #ifdef SMART_GESTURE_SUPPORTED
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (action != static_cast<int32_t>(SmartGestureShortcutAction::PRIMARY)) {
-        return;
-    }
     auto smartGestureProperty = frameNode->GetOrCreateSmartGestureProperty();
     CHECK_NULL_VOID(smartGestureProperty);
     SmartGestureShortcutConfig config;

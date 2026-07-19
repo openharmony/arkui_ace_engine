@@ -121,6 +121,7 @@ public:
      * @param mainGap main-axis gap between items.
      */
     void Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap);
+    void SyncReportRange(float mainSize);
 
     /**
      * @brief Mark beginning of cache item layout and save current lanes_ state.
@@ -287,6 +288,8 @@ public:
 
     // record the new startIndex_ after changing the datasource, corresponding to the old startIndex_.
     int32_t newStartIndex_ = EMPTY_NEW_START_INDEX;
+    // Set when lane cache maps are reset and consumed once to prime cache items in the fix-offset extension.
+    bool needFixOffsetCache_ = false;
 
 private:
     inline void PrepareJump();
@@ -329,9 +332,22 @@ private:
      */
     void SyncOnEmptyLanes(float mainSize);
 
-	/**
-	 * @brief Handle end-of-content detection and adjust endIndex for zero-height trailing items
-	 */
+    struct ReportRangeContext {
+        ReportRangeContext(float viewStartBound, float viewEndBound)
+            : startBound(viewStartBound), endBound(viewEndBound)
+        {}
+
+        float startBound = 0.0f;
+        float endBound = 0.0f;
+        int32_t startIndex = Infinity<int32_t>();
+        int32_t endIndex = -1;
+    };
+
+    void UpdateReportRangeWithLane(const Lane& lane, float mainGap, ReportRangeContext& reportRange) const;
+
+    /**
+     * @brief Handle end-of-content detection and adjust endIndex for zero-height trailing items
+     */
     void HandleItemEnd(int32_t itemCnt, float mainSize);
 
     /**

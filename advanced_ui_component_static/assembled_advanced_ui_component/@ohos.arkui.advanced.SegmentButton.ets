@@ -81,7 +81,8 @@ import {
   CustomBuilder,
   PanDirection,
   ScaleOptions,
-  LongPressGesture
+  LongPressGesture,
+  Visibility
 } from '@ohos.arkui.component';
 import {
   Observed,
@@ -1807,6 +1808,9 @@ export struct SegmentButton {
     if (!this.shouldShowBackground()) {
       return undefined;
     }
+    if ((this.componentSize.height as double) === 0) {
+      return undefined;
+    }
     return this.options.backgroundSystemMaterial;
   }
 
@@ -1837,6 +1841,7 @@ export struct SegmentButton {
             .borderRadius(this.getBackgroundBorderRadius())
             .backgroundBlurStyle(this.options.backgroundBlurStyle, undefined, { disableSystemAdaptation: true })
             .systemMaterial(this.options.backgroundSystemMaterial)
+            .visibility((this.componentSize.height as double) > 0 ? Visibility.Visible : Visibility.None)
           }
           Stack() {
             if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
@@ -1858,6 +1863,7 @@ export struct SegmentButton {
           .animation({ duration: 0 })
           .borderRadius(this.getBackgroundBorderRadius())
           .translate({ x: this.selectedItemOffsetX })
+          .visibility((this.componentSize.height as double) > 0 ? Visibility.Visible : Visibility.None)
 
           SegmentButtonItemArrayComponent({
             pressArray: this.pressArray,
@@ -2328,7 +2334,7 @@ export struct SegmentButton {
       }
     }
 
-    const defaultRadius = this.componentSize.height as double / 2;
+    const defaultRadius = (this.componentSize.height as double) / 2;
     if (this.isMultiply()) {
       return this.options.iconTextRadius ?? this.options.iconTextBackgroundRadius ?? defaultRadius;
     }

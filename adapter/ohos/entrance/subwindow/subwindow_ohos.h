@@ -106,6 +106,7 @@ public:
     void OpenCustomDialogNG(const DialogProperties& dialogProps,
         std::function<void(int32_t errorCode, int32_t dialogId)>&& callback) override;
     void CloseCustomDialogNG(int32_t dialogId) override;
+    void CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback) override;
     void CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback) override;
     void UpdateCustomDialogNG(const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps,
         std::function<void(int32_t)>&& callback) override;
@@ -321,6 +322,7 @@ private:
     void InitWindowRSUIDirector(const RefPtr<Platform::AceContainer>& container);
     void ResizeWindow(double width, double height);
     void ResizeWindowForToast(const NG::ToastInfo& toastInfo);
+    void ResetWindowOffset();
 
     static int32_t id_;
     int32_t windowId_ = 0;

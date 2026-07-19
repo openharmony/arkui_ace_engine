@@ -35,6 +35,8 @@ constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
 constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
 constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
 constexpr float NORMAL_WIDTH = 4.f;
+constexpr Dimension DEFAULT_INNER_SCROLL_BAR_HEIGHT = 1.0_pct;
+constexpr Dimension DEFAULT_INNER_SCROLL_BAR_START_MARGIN = 0.0_vp;
 } // namespace
 
 void ScrollBarTestNg::SetUpTestSuite()
@@ -1291,11 +1293,13 @@ HWTEST_F(ScrollBarTestNg, UpdateScrollBarDisplay, TestSize.Level1)
  */
 HWTEST_F(ScrollBarTestNg, ScrollBarHeightTheme001, TestSize.Level1)
 {
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
     ASSERT_NE(themeManager, nullptr);
     auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
     ASSERT_NE(scrollBarTheme, nullptr);
+    auto oldScrollBarHeight = scrollBarTheme->scrollBarHeight_;
     scrollBarTheme->scrollBarHeight_ = 37.0_vp;
 
     CreateStack();
@@ -1310,7 +1314,44 @@ HWTEST_F(ScrollBarTestNg, ScrollBarHeightTheme001, TestSize.Level1)
     pattern_->scrollBar_->SetMinHeight(Dimension());
     pattern_->UpdateScrollBarRegion(0.0f, 3000.0f, Size(20.0, 300.0), Offset(0.0f, 0.0f), SCROLL_FROM_NONE);
     EXPECT_EQ(pattern_->scrollBar_->GetBarRect().Height(), 300.0);
-    EXPECT_EQ(pattern_->scrollBar_->GetActiveRect().Height(), 30.0);
+    EXPECT_EQ(pattern_->scrollBar_->GetActiveRect().Height(), 48.0);
+
+    scrollBarTheme->scrollBarHeight_ = oldScrollBarHeight;
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: ScrollBarHeightTheme002
+ * @tc.desc: Test scroll_bar_height theme value is ignored for outer scrollbar default style without child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarHeightTheme002, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    ASSERT_NE(scrollBarTheme, nullptr);
+    auto oldScrollBarHeight = scrollBarTheme->scrollBarHeight_;
+    scrollBarTheme->scrollBarHeight_ = 37.0_vp;
+
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    EXPECT_TRUE(pattern_->UseInnerScrollBar());
+    pattern_->scrollBar_->SetMinHeight(Dimension());
+    pattern_->UpdateScrollBarRegion(0.0f, 3000.0f, Size(20.0, 300.0), Offset(0.0f, 0.0f), SCROLL_FROM_NONE);
+    EXPECT_EQ(pattern_->scrollBar_->GetScrollBarHeight(), 1.0_pct);
+    EXPECT_EQ(pattern_->scrollBar_->GetTrackRect().Height(), 300.0);
+    EXPECT_EQ(pattern_->scrollBar_->GetActiveRect().Height(), 48.0);
+
+    scrollBarTheme->scrollBarHeight_ = oldScrollBarHeight;
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }
 
 /**
@@ -1320,6 +1361,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarHeightTheme001, TestSize.Level1)
  */
 HWTEST_F(ScrollBarTestNg, ScrollBarStartMarginTheme001, TestSize.Level1)
 {
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
     Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
     ASSERT_NE(themeManager, nullptr);
@@ -1341,6 +1383,71 @@ HWTEST_F(ScrollBarTestNg, ScrollBarStartMarginTheme001, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollBar_->GetActiveRect().Top(), 0.0);
 
     scrollBarTheme->startMargin_ = oldStartMargin;
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: ScrollBarStartMarginTheme002
+ * @tc.desc: Test scroll_bar_start_margin theme value is ignored for outer scrollbar default style without child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarStartMarginTheme002, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto themeManager = MockPipelineContext::GetCurrent()->GetThemeManager();
+    ASSERT_NE(themeManager, nullptr);
+    auto scrollBarTheme = themeManager->GetTheme<ScrollBarTheme>();
+    ASSERT_NE(scrollBarTheme, nullptr);
+    auto oldStartMargin = scrollBarTheme->startMargin_;
+    scrollBarTheme->startMargin_ = 12.0_vp;
+
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    EXPECT_TRUE(pattern_->UseInnerScrollBar());
+    pattern_->UpdateScrollBarRegion(0.0f, 3000.0f, Size(20.0, 300.0), Offset(0.0f, 0.0f), SCROLL_FROM_NONE);
+    EXPECT_EQ(pattern_->scrollBar_->GetScrollBarStartMargin(), 0.0_vp);
+    EXPECT_EQ(pattern_->scrollBar_->GetTrackRect().Top(), 0.0);
+    EXPECT_EQ(pattern_->scrollBar_->GetActiveRect().Top(), 0.0);
+
+    scrollBarTheme->startMargin_ = oldStartMargin;
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
+ * @tc.name: DefaultInnerScrollBarStyle001
+ * @tc.desc: Test SetScrollBar resets inner scrollbar height and start margin to default values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, DefaultInnerScrollBarStyle001, TestSize.Level1)
+{
+    auto apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
+    CreateStack();
+    CreateScroll();
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    CreateDone();
+
+    ASSERT_NE(pattern_, nullptr);
+    ASSERT_NE(pattern_->scrollBar_, nullptr);
+    EXPECT_TRUE(pattern_->UseInnerScrollBar());
+
+    pattern_->scrollBar_->SetScrollBarHeight(37.0_vp);
+    pattern_->scrollBar_->SetScrollBarStartMargin(12.0_vp);
+    EXPECT_EQ(pattern_->scrollBar_->GetScrollBarHeight(), 37.0_vp);
+    EXPECT_EQ(pattern_->scrollBar_->GetScrollBarStartMargin(), 12.0_vp);
+
+    pattern_->SetScrollBar(DisplayMode::ON);
+    EXPECT_EQ(pattern_->scrollBar_->GetScrollBarHeight(), DEFAULT_INNER_SCROLL_BAR_HEIGHT);
+    EXPECT_EQ(pattern_->scrollBar_->GetScrollBarStartMargin(), DEFAULT_INNER_SCROLL_BAR_START_MARGIN);
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }
 
 /**

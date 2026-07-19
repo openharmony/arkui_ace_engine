@@ -38,7 +38,6 @@
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-constexpr int32_t DEFAULT_CLICK_DISTANCE = 15;
 constexpr uint32_t MAX_SEARCH_DEPTH = 5;
 constexpr double MENU_ANIMATION_MAX_SCALE = 1.0f;
 constexpr double MENU_ANIMATION_MIN_OPACITY = 0.0f;
@@ -50,6 +49,7 @@ class UiMaterial;
 }
 
 namespace OHOS::Ace::NG {
+struct OptionParam;
 
 struct SelectProperties {
     std::string value;
@@ -77,10 +77,19 @@ class MenuPattern : public Pattern, public FocusView {
     DECLARE_ACE_TYPE(MenuPattern, Pattern, FocusView);
 
 public:
+    using GridMenuPasteItemBuilder =
+        std::function<RefPtr<FrameNode>(const OptionParam&, const RefPtr<FrameNode>&, int32_t)>;
+
     MenuPattern(int32_t targetId, std::string tag, MenuType type)
         : targetId_(targetId), targetTag_(std::move(tag)), type_(type)
     {}
     ~MenuPattern() override = default;
+
+    // Whether a touch point (given in the host node's local coordinate space) is still inside the host's
+    // frame bounds. Shared hit criterion for touch-up-to-dismiss used by both MenuPattern and
+    // CustomMenuItemPattern, mirroring ClickRecognizer::IsPointInRegion so that "onClick fires" and
+    // "menu dismisses" share the same criterion.
+    static bool IsOffsetInNodeBounds(const RefPtr<FrameNode>& host, const Offset& offset);
 
     bool IsAtomicNode() const override
     {
@@ -559,6 +568,25 @@ public:
         makeFunc_ = std::move(makeFunc);
     }
 
+    void SetGridMenuPasteItemBuilder(GridMenuPasteItemBuilder&& builder)
+    {
+        gridMenuPasteItemBuilder_ = std::move(builder);
+    }
+
+    void ResetGridMenuPasteItemBuilder()
+    {
+        gridMenuPasteItemBuilder_ = std::nullopt;
+    }
+
+    RefPtr<FrameNode> BuildGridMenuPasteItem(
+        const OptionParam& param, const RefPtr<FrameNode>& defaultGridItem, int32_t themeScopeId) const
+    {
+        if (!gridMenuPasteItemBuilder_.has_value()) {
+            return nullptr;
+        }
+        return gridMenuPasteItemBuilder_.value()(param, defaultGridItem, themeScopeId);
+    }
+
     void ResetBuilderFunc()
     {
         makeFunc_ = std::nullopt;
@@ -696,6 +724,16 @@ public:
         return isGridMenu_;
     }
 
+    void SetIsArrayGridMenu(bool isArrayGridMenu)
+    {
+        isArrayGridMenu_ = isArrayGridMenu;
+    }
+
+    bool GetIsArrayGridMenu() const
+    {
+        return isArrayGridMenu_;
+    }
+
     void UpdateSelectOptionTextByIndex(int32_t index, const std::string& text);
     void UpdateSelectOptionIconByIndex(int32_t index, const std::string& icon);
 
@@ -828,7 +866,7 @@ public:
 
     OffsetF GetAdjustedExtensionMenuPosition(const OffsetF& menuPosition);
 protected:
-    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode);
+    void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode, int32_t currentIndex = 0);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
     void SetAccessibilityAction();
     void SetType(MenuType value)
@@ -841,6 +879,9 @@ protected:
     }
     virtual void InitTheme(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme);
     virtual void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius);
+
+    // Whether the default menu shadow should be applied, decided by the system material
+    bool ShouldUpdateShadow() const;
 
 private:
     void UpdateMenuDividerWithMode(const RefPtr<UINode>& previousNode, const RefPtr<UINode>& currentNode,
@@ -871,16 +912,17 @@ private:
     Offset GetTransformCenter() const;
     OffsetF GetPreviewMenuAnimationOffset(const OffsetF& previewCenter, const SizeF& previewSize, float scale) const;
     void ShowPreviewMenuAnimation();
-    void ShowPreviewMenuMaterialAnimation();
+    void ShowPreviewMenuMaterialAnimation(int32_t delay = 0);
     void ShowPreviewPositionAnimation(AnimationOption& option, int32_t delay);
     void ShowPreviewMenuScaleAnimation(const RefPtr<MenuTheme>& menuTheme, AnimationOption& option, int32_t delay);
     Placement GetFinalPlacement() const;
     OffsetF GetDistortionMenuOffset(Placement placement) const;
     MenuParam GetMenuParam() const;
     bool IsUseEdgeLightAnimation() const;
-    void PlayDistortAnimation(const OffsetF& menuPosition);
-    void PlayTranslateAnimation(const RefPtr<RenderContext>& renderContext, const OffsetF& finalPlacement);
-    void PlayLightAnimation();
+    void PlayDistortAnimation(const OffsetF& menuPosition, int32_t delay = 0);
+    void PlayTranslateAnimation(
+        const RefPtr<RenderContext>& renderContext, const OffsetF& finalPlacement, int32_t delay = 0);
+    void PlayLightAnimation(int32_t delay = 0);
     void ShowMenuAppearAnimation();
     void ShowMenuAppearMaterialAnimation();
     void ShowStackMenuAppearAnimation();
@@ -927,12 +969,15 @@ private:
     RefPtr<ClickEvent> onClick_;
     RefPtr<TouchEventImpl> onTouch_;
     std::optional<Offset> lastTouchOffset_;
+    // true once the finger has moved out of the menu bounds during the current touch sequence
+    bool movedOutOfRegion_ = false;
     const int32_t targetId_ = -1;
     const std::string targetTag_;
     MenuType type_ = MenuType::MENU;
     std::vector<SelectProperties> selectProperties_;
     std::vector<SelectParam> selectParams_;
     std::optional<SelectMakeCallback> makeFunc_;
+    std::optional<GridMenuPasteItemBuilder> gridMenuPasteItemBuilder_;
 
     RefPtr<FrameNode> parentMenuItem_;
     mutable RefPtr<FrameNode> showedSubMenu_;
@@ -954,6 +999,8 @@ private:
     bool hasAnimation_ = true;
     bool needHideAfterTouch_ = true;
     bool isGridMenu_ = false;
+    bool isArrayGridMenu_ = false;
+    bool isShowDistortion_ = false;
 
     std::optional<OffsetF> lastPosition_;
     std::optional<Placement> lastPlacement_;

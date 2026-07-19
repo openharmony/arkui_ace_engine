@@ -52,6 +52,7 @@ export { LocalStorage } from "./stateManagement"
 
 export * from "./extractors";
 export * from "./hooks"
+export { getSystemDensity } from "./hooks"
 
 export {
   ArkUIExtensionComponentPeerBase

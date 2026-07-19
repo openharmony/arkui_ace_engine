@@ -31,7 +31,7 @@ export struct RefreshList {
       .padding({ left: 12, right: 12 })
     }
     .backgroundColor($r('sys.color.comp_background_focus'))
-    .title("下拉刷新")
+    .title('下拉刷新')
     .onAppear(() => {
       entry.CreateRefreshList(this.slot);
     })

@@ -20,6 +20,7 @@
 #include "bridge/cj_frontend/cppview/canvas_renderer.h"
 #include "base/memory/referenced.h"
 #include "frameworks/core/components/common/properties/paint_state.h"
+#include "core/pipeline/pipeline_base.h"
 
 
 namespace OHOS::Ace::Framework {

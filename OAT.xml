@@ -182,7 +182,6 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="examples/StrengthenTest/entry/hvigorfile.ts" desc="json文件无法添加版权"/>
                 <filteritem type="filepath" name="examples/StrengthenTest/hvigorfile.ts" desc="json文件无法添加版权"/>
                 <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/koala_projects/.*" desc="自研的前端框架资源，临时测试使用"/>
-                <filteritem type="filepath" name="frameworks/core/components/theme/theme.csv" desc="csv无法添加版权头"/>
                 <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/parser.pegjs" desc="用于测试的文件无法添加License"/>
                 <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/src/utest/resources/test.db" desc="用于测试的文件无法添加License"/>
                 <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt_pu/src/utest/resources/test.db" desc="用于测试的文件无法添加License"/>
@@ -209,7 +208,6 @@ Note:If the text contains special characters, please escape them according to th
                 <filteritem type="filepath" name="examples/StrengthenTest/entry/hvigorfile.ts" desc="json文件无法添加版权"/>
                 <filteritem type="filepath" name="examples/StrengthenTest/hvigorfile.ts" desc="json文件无法添加版权"/>
                 <filteritem type="filepath" name="frameworks/bridge/arkts_frontend/koala_projects/.*" desc="自研的前端框架资源，临时测试使用"/>
-                <filteritem type="filepath" name="frameworks/core/components/theme/theme.csv" desc="csv无法添加License"/>
                 <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/parser.pegjs" desc="用于测试的文件无法添加License"/>
                 <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt/src/utest/resources/test.db" desc="用于测试的文件无法添加License"/>
                 <filteritem type="filepath" name="frameworks/bridge/declarative_frontend/state_mgmt_pu/src/utest/resources/test.db" desc="用于测试的文件无法添加License"/>

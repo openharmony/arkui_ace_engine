@@ -21,6 +21,7 @@
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/render/ui_material_filter_creator.h"
 
 namespace OHOS::Ace {
@@ -256,11 +257,20 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     auto pipeline = node->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto colorMode = GetNodeColorMode(node);
-    return GetImmersiveMaterialConfig(options, pipeline->GetDipScale(), colorMode);
+    return GetImmersiveMaterialConfig(options, pipeline->GetDipScale(), colorMode, node);
+}
+
+void MaterialUtils::LowerGearLevel(UiMaterialLevel& materialLevel, const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    if (materialLevel == UiMaterialLevel::GENTLE && node->GetTag() == V2::SHEET_PAGE_TAG) {
+        materialLevel = UiMaterialLevel::SMOOTH;
+    }
 }
 
 std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig(
-    const std::shared_ptr<ImmersiveOptions>& options, float dipScale, ColorMode colorMode)
+    const std::shared_ptr<ImmersiveOptions>& options, float dipScale, ColorMode colorMode,
+    const RefPtr<NG::FrameNode>& node)
 {
     if (!options) {
         return std::nullopt;
@@ -269,6 +279,7 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
         colorMode = ColorMode::LIGHT;
     }
     auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    LowerGearLevel(materialLevel, node);
     ImmersiveMaterialConfig result {
         .applyShadow = options->applyShadow, .dipScale = dipScale, .interactive = options->interactive.value_or(false),
         .lightEffectOptions = options->lightEffectOptions
@@ -370,9 +381,12 @@ bool MaterialUtils::ValidColorInvert(const std::shared_ptr<ImmersiveOptions>& op
 bool MaterialUtils::GetUiMaterialFilter(
     const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter)
 {
+#ifndef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
+    // do not need judge level when customized
     if (params.key.level != UiMaterialLevel::EXQUISITE) {
         return false;
     }
+#endif
     static CreateMaterialFilterFunc createFunc = nullptr;
     static ReleaseMaterialFilterFunc releaseFunc = nullptr;
 #ifndef _WIN32
@@ -404,9 +418,12 @@ bool MaterialUtils::GetUiMaterialFilter(
 bool MaterialUtils::GetUiMaterialFilterEC(
     const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter)
 {
+#ifndef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
+    // do not need judge level when customized
     if (params.key.level != UiMaterialLevel::EXQUISITE) {
         return false;
     }
+#endif
     static CreateMaterialFilterFunc createFunc = nullptr;
     static ReleaseMaterialFilterFunc releaseFunc = nullptr;
 #ifndef _WIN32
@@ -439,9 +456,12 @@ bool MaterialUtils::GetUiMaterialFilterEC(
 bool MaterialUtils::GetUiMaterialShaderECSub(
     const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGShaderBase>& shader)
 {
+#ifndef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
+    // do not need judge level when customized
     if (params.key.level != UiMaterialLevel::EXQUISITE) {
         return false;
     }
+#endif
     static CreateMaterialFilterFunc createFunc = nullptr;
     static ReleaseMaterialFilterFunc releaseFunc = nullptr;
 #ifndef _WIN32
@@ -575,12 +595,15 @@ bool MaterialUtils::IsEmptyMaterial(const RefPtr<UiMaterial>& material)
     return material->IsEmpty();
 }
 
-RefPtr<UiMaterial> MaterialUtils::GetInitMaterial(const UiMaterialStyle style)
+RefPtr<UiMaterial> MaterialUtils::GetInitMaterial(const UiMaterialStyle style, const std::optional<bool>& interactive,
+    const std::optional<LightEffectOptions>& lightEffectOptions)
 {
     auto material = AceType::MakeRefPtr<UiMaterial>();
     material->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
     ImmersiveOptions options {};
     options.style = style;
+    options.interactive = interactive;
+    options.lightEffectOptions = lightEffectOptions;
     material->SetImmersiveOptions(options);
     return material;
 }

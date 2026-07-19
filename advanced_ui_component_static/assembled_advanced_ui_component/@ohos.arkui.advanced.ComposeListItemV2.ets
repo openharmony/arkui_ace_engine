@@ -20,12 +20,12 @@ import {
   FlexOptions, MarqueeStartPolicy, ButtonType, Color, HitTestMode, ItemAlign, ToggleType, HoverEffect, TextOverflow,
   ImageFit, SymbolEffectStrategy, $r, LocalizedMargin, Margin,
   ColumnOptions, ButtonOptions, OnCheckboxChangeCallback, FlexSpaceOptions, RowOptions, ClickEvent,
-  HoverEvent, CommonMethod
-} from '@ohos.arkui.component'
+  HoverEvent, CommonMethod, TouchEvent, TouchType
+} from '@ohos.arkui.component';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
-import { Local, Monitor, IMonitor, Param, ObservedV2, Trace } from '@ohos.arkui.stateManagement'
+import { Local, Monitor, IMonitor, Param, ObservedV2, Trace } from '@ohos.arkui.stateManagement';
 import { Theme } from '@ohos.arkui.theme';
-import hilog from '@ohos.hilog'
+import hilog from '@ohos.hilog';
 import { MeasureUtils } from '@ohos.arkui.UIContext';
 import resourceManager from '@ohos.resourceManager'
 import { LengthMetrics } from '@ohos.arkui.node';
@@ -66,6 +66,18 @@ enum ItemHeight {
 export type OnActionCallback = () => void;
 
 export type OnChangeCallback = (value: boolean) => void;
+
+export interface OperateItemCallbacks {
+  onSubFocus?: () => void;
+  onSubBlur?: () => void;
+  onSubHoverEnter?: () => void;
+  onSubHoverExit?: () => void;
+  onRequestFrontColor?: (color: ResourceColor) => void;
+}
+
+export interface ContentItemCallbacks {
+  onWrapChange?: (isWrap: boolean) => void;
+}
 
 export interface OperateIconV2Options {
   value?: ResourceStr;
@@ -348,20 +360,20 @@ class Util {
 }
 
 export class EnvironmentCallbackEntry implements EnvironmentCallback {
-  ComposeListItem: ComposeListItemV2;
+  public composeListItem: ComposeListItemV2;
 
-  constructor(ComposeListItem: ComposeListItemV2) {
-    this.ComposeListItem = ComposeListItem;
+  constructor(composeListItem: ComposeListItemV2) {
+    this.composeListItem = composeListItem;
   }
 
   onConfigurationUpdated(config: Configuration): void {
-    if (config === undefined || !this.ComposeListItem.isFollowingSystemFontScale) {
-      this.ComposeListItem.fontSizeScale = 1;
+    if (config === undefined || !this.composeListItem.isFollowingSystemFontScale) {
+      this.composeListItem.fontSizeScale = 1;
       return;
     }
     try {
-      this.ComposeListItem.fontSizeScale = Math.min(
-        this.ComposeListItem.maxFontScale, config.fontSizeScale ?? 1);
+      this.composeListItem.fontSizeScale = Math.min(
+        this.composeListItem.maxFontScale, config.fontSizeScale ?? 1);
     } catch (paramError) {
       let code = (paramError as ClassCastError).code;
       let message = (paramError as ClassCastError).message;
@@ -404,6 +416,13 @@ struct ContentItemStructV2 {
   @Local isWrapFirstText: Boolean = false;
   @Local isWrapSecondText: Boolean = false;
   @Local isWrapThirdText: Boolean = false;
+  @Param callbacks: ContentItemCallbacks | undefined = undefined;
+
+  @Monitor(['isWrapFirstText', 'isWrapSecondText', 'isWrapThirdText'])
+  onWrapStateChange(_monitor?: IMonitor): void {
+    const isWrap = this.isWrapFirstText || this.isWrapSecondText || this.isWrapThirdText;
+    this.callbacks?.onWrapChange?.(isWrap);
+  }
 
   onWillApplyTheme(theme: Theme): void {
     this.primaryTextColor = theme.colors.fontPrimary;
@@ -412,7 +431,7 @@ struct ContentItemStructV2 {
   }
 
   @Monitor(['iconStyle', 'icon', 'symbolStyle', 'primaryText', 'secondaryText', 'description'])
-  onPropChange(_monitor: IMonitor): void {
+  onPropChange(_monitor?: IMonitor): void {
     if (this.icon == null && this.symbolStyle == null && this.iconStyle == null) {
       this.itemRowSpace = SPECIAL_ITEM_ROW_SPACE;
     } else {
@@ -458,6 +477,7 @@ struct ContentItemStructV2 {
   }
 
   aboutToAppear(): void {
+    this.onPropChange();
   }
 
   @Builder
@@ -660,6 +680,7 @@ struct OperateItemStructV2 {
   @Local secondaryTextSize: Length = $r('sys.float.ohos_id_text_size_body2');
   @Local secondaryTextColors: ResourceColor = $r('sys.color.font_secondary');
   @Local iconColor: ResourceColor = $r('sys.color.composeListItem_right_icon_normal_color');
+  @Param callbacks: OperateItemCallbacks | undefined = undefined;
   private controller: OperateItemStructController = new OperateItemStructController();
 
   onWillApplyTheme(theme: Theme): void {
@@ -669,7 +690,7 @@ struct OperateItemStructV2 {
   }
 
   @Monitor(['isFocus'])
-  onFocusChange(_monitor: IMonitor): void {
+  onFocusChange(_monitor?: IMonitor): void {
     if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus) {
       this.secondaryTextColors = $r('sys.color.composeListItem_right_text_focus_color');
     } else {
@@ -680,7 +701,7 @@ struct OperateItemStructV2 {
   }
 
   @Monitor(['arrow', 'icon', 'subIcon', 'button', 'toggle', 'checkBox', 'radio', 'image', 'symbolStyle', 'text'])
-  onPropChange(_monitor: IMonitor): void {
+  onPropChange(_monitor?: IMonitor): void {
     if (this.toggle != null) {
       this.switchState = this.toggle?.isCheck ? true : false
     }
@@ -699,6 +720,8 @@ struct OperateItemStructV2 {
   }
 
   aboutToAppear(): void {
+    this.onPropChange();
+    this.onFocusChange();
     if (this.controller) {
       this.controller.changeRadioState = this.changeRadioState;
       this.controller.changeCheckboxState = this.changeCheckboxState;
@@ -720,7 +743,7 @@ struct OperateItemStructV2 {
 
   @Builder
   createButton() {
-    Button({ type: ButtonType.Normal } as ButtonOptions) {
+    Button() {
       Row() {
         Text(this.button?.text as ResourceStr)
           .focusable(true)
@@ -743,8 +766,14 @@ struct OperateItemStructV2 {
       maxLines: TEXT_MAX_LINE
     })
     .onFocus(() => {
+      this.callbacks?.onSubFocus?.();
     })
     .onHover((isHover: boolean, event: HoverEvent) => {
+      if (isHover) {
+        this.callbacks?.onSubHoverEnter?.();
+      } else {
+        this.callbacks?.onSubHoverExit?.();
+      }
     })
     .accessibilityLevel(this.button?.accessibilityLevel ?? ACCESSIBILITY_LEVEL_AUTO)
     .accessibilityText(getAccessibilityText(this.button?.accessibilityText ?? ''))
@@ -787,8 +816,14 @@ struct OperateItemStructV2 {
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .onFocus(() => {
+      this.callbacks?.onSubFocus?.();
     })
     .onHover((isHover: boolean, event: HoverEvent) => {
+      if (isHover) {
+        this.callbacks?.onSubHoverEnter?.();
+      } else {
+        this.callbacks?.onSubHoverExit?.();
+      }
     })
     .onClick(param.icon?.action)
     .accessibilityLevel(getAccessibilityLevelOnAction(param.icon?.accessibilityLevel, param.icon?.action))
@@ -882,12 +917,18 @@ struct OperateItemStructV2 {
     .height(OPERATEITEM_ICONLIKE_SIZE)
     .width(OPERATEITEM_ARROW_WIDTH)
     .onFocus(() => {
+      this.callbacks?.onSubFocus?.();
     })
     .stateEffect(this.arrow?.action !== undefined)
     .hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None)
     .onHover((isHover: boolean, event: HoverEvent) => {
       if (this.arrow?.action === undefined) {
         return;
+      }
+      if (isHover && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+        this.callbacks?.onSubHoverEnter?.();
+      } else {
+        this.callbacks?.onSubHoverExit?.();
       }
     })
     .onClick(this.arrow?.action)
@@ -918,10 +959,16 @@ struct OperateItemStructV2 {
       .width(OPERATEITEM_ICONLIKE_SIZE)
       .padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE)
       .onFocus(() => {
+        this.callbacks?.onSubFocus?.();
       })
       .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
       .flexShrink(0)
       .onHover((isHover: boolean, event: HoverEvent) => {
+        if (isHover) {
+          this.callbacks?.onSubHoverEnter?.();
+        } else {
+          this.callbacks?.onSubHoverExit?.();
+        }
       })
       .accessibilityLevel(getAccessibilityLevelOnChange(this.radio?.accessibilityLevel, this.radio?.onChange))
       .accessibilityText(getAccessibilityText(this.radio?.accessibilityText ?? ''))
@@ -948,10 +995,16 @@ struct OperateItemStructV2 {
       .width(OPERATEITEM_ICONLIKE_SIZE)
       .padding(OPERATEITEM_SELECTIONBOX_PADDING_SIZE)
       .onFocus(() => {
+        this.callbacks?.onSubFocus?.();
       })
       .hitTestBehavior(IS_SUPPORT_SUBCOMPONENT_EVENT ? HitTestMode.Block : HitTestMode.None)
       .flexShrink(0)
       .onHover((isHover: boolean, event: HoverEvent) => {
+        if (isHover) {
+          this.callbacks?.onSubHoverEnter?.();
+        } else {
+          this.callbacks?.onSubHoverExit?.();
+        }
       })
       .accessibilityLevel(getAccessibilityLevelOnChange(this.checkBox?.accessibilityLevel, this.checkBox?.onChange))
       .accessibilityText(getAccessibilityText(this.checkBox?.accessibilityText ?? ''))
@@ -983,8 +1036,14 @@ struct OperateItemStructV2 {
     .width(OPERATEITEM_ICON_CLICKABLE_SIZE)
     .justifyContent(FlexAlign.Center)
     .onFocus(() => {
+      this.callbacks?.onSubFocus?.();
     })
     .onHover((isHover: boolean, event: HoverEvent) => {
+      if (isHover) {
+        this.callbacks?.onSubHoverEnter?.();
+      } else {
+        this.callbacks?.onSubHoverExit?.();
+      }
     })
   }
 
@@ -1096,6 +1155,7 @@ struct OperateItemStructV2 {
     .constraintSize({ minHeight: TEXT_ARROW_HEIGHT })
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
     .onFocus(() => {
+      this.callbacks?.onSubFocus?.();
     })
     .padding({
       top: 0,
@@ -1108,6 +1168,11 @@ struct OperateItemStructV2 {
     .onHover((isHover: boolean, event: HoverEvent) => {
       if (this.arrow?.action === undefined) {
         return;
+      }
+      if (isHover && IS_SUPPORT_SUBCOMPONENT_EVENT) {
+        this.callbacks?.onSubHoverEnter?.();
+      } else {
+        this.callbacks?.onSubHoverExit?.();
       }
     })
     .onClick(this.arrow?.action)
@@ -1182,7 +1247,6 @@ function getAccessibilityText(resource: ResourceStr): string {
   }
 }
 
-
 function getAccessibilityLevelOnChange(accessibilityLevel?: string, onChange?: OnChangeCallback): string {
   if (accessibilityLevel) {
     return accessibilityLevel;
@@ -1229,9 +1293,31 @@ export struct ComposeListItemV2 {
   private callbackId: number = 0;
   @Local accessibilityTextBuilder: string = '';
   @Local isFocus: boolean = false;
+  @Local isPressed: boolean = false;
   @Local isWrapText: boolean = false;
   @Local listScale: ScaleOptions = { x: 1, y: 1, z: 0 } as ScaleOptions;
   private operateItemStructRef: OperateItemStructController = new OperateItemStructController();
+  private operateCallbacks: OperateItemCallbacks = {
+    onSubFocus: () => { this.canFocus = false; },
+    onSubBlur: () => { this.canFocus = true; },
+    onSubHoverEnter: () => {
+      this.canFocus = false;
+      this.canHover = false;
+      if (IS_SUPPORT_SUBCOMPONENT_EVENT) {
+        this.frontColor = this.isActive ? this.activedColor : Color.Transparent.toString();
+      }
+    },
+    onSubHoverExit: () => {
+      this.canHover = true;
+      if (this.isHover) {
+        this.frontColor = this.hoveringColor;
+      }
+    },
+    onRequestFrontColor: (color: ResourceColor) => { this.frontColor = color; },
+  };
+  private contentCallbacks: ContentItemCallbacks = {
+    onWrapChange: (isWrap: boolean) => { this.isWrapText = isWrap; },
+  };
   envCallback: EnvironmentCallbackEntry = new EnvironmentCallbackEntry(this)
   applicationContext: ApplicationContext = new ApplicationContext()
   @Local NORMAL_BG_COLOR: ResourceColor = $r('sys.color.composeListItem_container_normal_color');
@@ -1244,12 +1330,15 @@ export struct ComposeListItemV2 {
   }
 
   @Monitor(['isWrapText'])
-  onWrapChange(_monitor: IMonitor): void {
+  onWrapChange(_monitor?: IMonitor): void {
     this.containerPadding = this.getPadding();
   }
 
-  @Monitor(['contentItemV2', 'operateItemV2'])
-  onPropChange(_monitor: IMonitor): void {
+  @Monitor([
+    'contentItemV2',
+    'operateItemV2'
+  ])
+  onPropChange(_monitor?: IMonitor): void {
     this.containerDirection = this.decideContainerDirection();
     this.contentItemDirection = this.decideContentItemDirection();
     if (this.contentItemV2 === undefined) {
@@ -1262,21 +1351,19 @@ export struct ComposeListItemV2 {
       return;
     }
 
+    const iconStyle = this.contentItemV2?.iconStyle ?? IconTypeV2.BADGE;
     if (this.contentItemV2?.secondaryText === undefined && this.contentItemV2?.description === undefined) {
       if (this.contentItemV2?.icon === undefined) {
         this.itemHeight = ItemHeight.FIRST_HEIGHT;
       } else {
         const systemIconLineHeight =
           LengthMetrics.resource($r('sys.float.composeListItem_system_icon_line_height')).value as number;
-        this.itemHeight =
-          (this.contentItemV2?.iconStyle as IconTypeV2) <= IconTypeV2.HEAD_SCULPTURE ?
-            Int.toDouble(ItemHeight.SECOND_HEIGHT) : systemIconLineHeight;
+        this.itemHeight = iconStyle <= IconTypeV2.HEAD_SCULPTURE ?
+          Int.toDouble(ItemHeight.SECOND_HEIGHT) : systemIconLineHeight;
       }
     } else if (this.contentItemV2?.description === undefined) {
-      let iconStyle: undefined|IconTypeV2 = this.contentItemV2?.iconStyle;
       if (this.contentItemV2?.icon === undefined ||
-        (this.contentItemV2?.icon !== undefined && iconStyle!
-          && (iconStyle as IconTypeV2) <= IconTypeV2.SYSTEM_ICON)) {
+        (this.contentItemV2?.icon !== undefined && iconStyle <= IconTypeV2.SYSTEM_ICON)) {
         this.itemHeight = ItemHeight.THIRD_HEIGHT;
       } else {
         if (iconStyle === IconTypeV2.HEAD_SCULPTURE) {
@@ -1288,12 +1375,9 @@ export struct ComposeListItemV2 {
     } else {
       this.itemHeight = ItemHeight.FIFTH_HEIGHT;
     }
-    const iconStyle = this.contentItemV2?.iconStyle;
-    if (iconStyle !== undefined) {
-      const iconSize = ICON_SIZE_MAP.get(iconStyle);
-      if (iconSize !== undefined && iconSize >= this.itemHeight) {
-        this.itemHeight = iconSize + SAFE_LIST_PADDING;
-      }
+    const iconSize = ICON_SIZE_MAP.get(iconStyle);
+    if (iconSize !== undefined && iconSize >= this.itemHeight) {
+      this.itemHeight = iconSize + SAFE_LIST_PADDING;
     }
     if (this.operateItemV2?.arrow && this.operateItemV2?.text && this.operateItemV2?.arrow?.action) {
       this.accessibilityTextBuilder = `
@@ -1313,6 +1397,7 @@ export struct ComposeListItemV2 {
 
   aboutToAppear(): void {
     this.fontSizeScale = this.decideFontSizeScale();
+    this.onPropChange();
     try {
       let context: UIContext = this.getUIContext();
       if (context.getHostContext() !== undefined) {
@@ -1330,6 +1415,9 @@ export struct ComposeListItemV2 {
       let message: string = (paramError as ClassCastError).message;
       hilog.error(0x3900, 'Ace',
         `ComposeListItem Failed to get environment param error: ${code}, ${message}`);
+    }
+    if (IS_SUPPORT_SUBCOMPONENT_EVENT) {
+      this.onFontSizeScaleChange();
     }
   }
 
@@ -1405,7 +1493,7 @@ export struct ComposeListItemV2 {
   }
 
   @Monitor(['fontSizeScale'])
-  onFontSizeScaleChange(_monitor: IMonitor): void {
+  onFontSizeScaleChange(_monitor?: IMonitor): void {
     this.containerDirection = this.decideContainerDirection();
     this.contentItemDirection = this.decideContentItemDirection();
     if (this.fontSizeScale >= Decimal.div(FontSizeScaleLevel.LEVEL3, 100).toNumber()) {
@@ -1436,7 +1524,7 @@ export struct ComposeListItemV2 {
     if (this.containerDirection === FlexDirection.Row) {
       return LengthMetrics.vp(0);
     }
-    let iconStyleVal: number | undefined = this.contentItemV2?.iconStyle;
+    let iconStyleVal: IconTypeV2 | undefined = this.contentItemV2?.iconStyle;
     let iconSize: number = iconStyleVal !== undefined ? (ICON_SIZE_MAP.get(iconStyleVal) as number ?? 0) : 0;
     if (this.contentItemV2?.icon && iconSize && (iconSize as number) <= HEADSCULPTURE_SIZE) {
       return LengthMetrics.vp(iconSize + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
@@ -1518,7 +1606,8 @@ export struct ComposeListItemV2 {
             itemDirection: this.contentItemDirection,
             isFocus: this.isFocus,
             itemHeight: this.itemHeight,
-            isWrapText: this.isWrapText
+            isWrapText: this.isWrapText,
+            callbacks: this.contentCallbacks
           });
         }
         if (this.operateItemV2 !== null) {
@@ -1542,7 +1631,8 @@ export struct ComposeListItemV2 {
               parentCanHover: this.canHover,
               rightWidth: this.calculatedRightWidth(),
               parentDirection: this.containerDirection,
-              isFocus: this.isFocus
+              isFocus: this.isFocus,
+              callbacks: this.operateCallbacks
             })
           }
           .flexShrink(0)
@@ -1561,7 +1651,14 @@ export struct ComposeListItemV2 {
       })
       .focusable(IS_SUPPORT_SUBCOMPONENT_EVENT)
       .borderRadius($r('sys.float.composeListItem_radius'))
-      .backgroundColor(this.frontColor)
+      .backgroundColor(this.isPressed ? this.touchDownColor : this.frontColor)
+      .onTouch((event: TouchEvent) => {
+        if (event.type === TouchType.Down) {
+          this.isPressed = true;
+        } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.isPressed = false;
+        }
+      })
       .onFocus(() => {
         this.canFocus = true;
       })
@@ -1589,7 +1686,7 @@ export struct ComposeListItemV2 {
       })
       .border({
         radius: $r('sys.float.composeListItem_radius'),
-        width: this.isFocus ? ITEM_BORDER_SHOWN : 0,
+        width: this.isFocus ? ITEM_BORDER_SHOWN : $r('sys.float.composeListItem_stroke_normal_thickness'),
         color: this.isFocus ? this.focusOutlineColor : $r('sys.color.composeListItem_stroke_normal_color'),
         style: BorderStyle.Solid
       })

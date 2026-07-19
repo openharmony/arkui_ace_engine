@@ -1083,7 +1083,9 @@ void PipelineContext::PushPage(const RefPtr<PageComponent>& pageComponent, const
     ACE_FUNCTION_TRACE();
     CHECK_RUN_ON(UI);
     std::unordered_map<std::string, std::string> params { { "pageUrl", pageComponent->GetPageUrl() } };
+#ifndef CROSS_PLATFORM
     ResSchedReportScope report("push_page", params);
+#endif
     auto stageElement = stage;
     if (!stageElement) {
         // if not target stage, use root stage
@@ -1208,7 +1210,9 @@ void PipelineContext::PopPage()
         auto topElement = stageElement->GetTopPage();
         if (topElement != nullptr) {
             std::unordered_map<std::string, std::string> params { { "pageUrl", topElement->GetPageUrl() } };
+#ifndef CROSS_PLATFORM
             ResSchedReport::GetInstance().ResSchedDataReport("pop_page", params);
+#endif
         }
         stageElement->Pop();
     }
@@ -1586,7 +1590,9 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
     }
     auto scalePoint = point.CreateScalePoint(viewScale_);
     ReportConfig config;
+#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
+#endif
     if (scalePoint.type == TouchType::DOWN) {
         eventManager_->HandleOutOfRectCallbacks(
             { scalePoint.x, scalePoint.y, scalePoint.sourceType });
@@ -2720,7 +2726,9 @@ void PipelineContext::OnShow()
 {
     onShow_ = true;
     SetWindowOnShow();
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetAppForeground(true);
+#endif
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Resume();
@@ -2759,7 +2767,9 @@ void PipelineContext::OnHide()
 {
     onShow_ = false;
     SetWindowOnHide();
+#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetAppForeground(false);
+#endif
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Hide();

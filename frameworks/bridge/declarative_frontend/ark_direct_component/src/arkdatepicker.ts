@@ -14,209 +14,217 @@
  */
 
 /// <reference path='./../../ark_component/src/import.ts' />
+type ComponentObj = { component: any }
 
-class ArkDatePickerComponent extends ArkComponent {
-  constructor(nativePtr: any, classType: any) {
-    super(nativePtr, classType);
-  }
-  lunar(value: any): this {
-    modifierWithKey(this._modifiersWithKeys, DatePickerLunarModifier.identity, DatePickerLunarModifier, value);
-    return this;
-  }
-  digitalCrownSensitivity(value: any): this {
-    modifierWithKey(this._modifiersWithKeys, DatePickerDigitalCrownSensitivityModifier.identity,
-      DatePickerDigitalCrownSensitivityModifier, value);
-    return this;
-  }
-  disappearTextStyle(value: any): this {
-    modifierWithKey(this._modifiersWithKeys, DatePickerDisappearTextStyleModifier.identity,
-      DatePickerDisappearTextStyleModifier, value);
-    return this;
-  }
-  textStyle(value: any): this {
-    modifierWithKey(this._modifiersWithKeys, DatePickerTextStyleModifier.identity, DatePickerTextStyleModifier,
-      value);
-    return this;
-  }
-  selectedTextStyle(value: any): this {
-    modifierWithKey(this._modifiersWithKeys, DatePickerSelectedTextStyleModifier.identity,
-      DatePickerSelectedTextStyleModifier, value);
-    return this;
-  }
-  onChange(callback: any): this {
-    modifierWithKey(this._modifiersWithKeys, DatePickerOnChangeModifier.identity, DatePickerOnChangeModifier,
-      callback);
-    return this;
-  }
-  onDateChange(callback: any): this {
-    modifierWithKey(this._modifiersWithKeys, DatePickerOnDateChangeModifier.identity,
-      DatePickerOnDateChangeModifier, callback);
-    return this;
-  }
-  backgroundColor(value: any): this {
-    modifierWithKey(this._modifiersWithKeys, DatePickerBackgroundColorModifier.identity,
-      DatePickerBackgroundColorModifier, value);
-    return this;
-  }
-  enableHapticFeedback(value: any): this {
-    modifierWithKey(this._modifiersWithKeys, DatePickerEnableHapticFeedbackModifier.identity,
-      DatePickerEnableHapticFeedbackModifier, value);
-    return this;
-  }
-  canLoop(value: any): this {
-    modifierWithKey(this._modifiersWithKeys, DatePickerCanLoopModifier.identity, DatePickerCanLoopModifier,
-      value);
-    return this;
-  }
-}
-class DatePickerDigitalCrownSensitivityModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().datePicker.resetDigitalCrownSensitivity(node);
-    } else {
-      getUINativeModule().datePicker.setDigitalCrownSensitivity(node, this.value);
+function loadComponent(): ComponentObj | undefined {
+  if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
+    class ArkDatePickerComponent extends ArkComponent {
+      constructor(nativePtr: any, classType: any) {
+        super(nativePtr, classType);
+      }
+      lunar(value: any): this {
+        modifierWithKey(this._modifiersWithKeys, DatePickerLunarModifier.identity, DatePickerLunarModifier, value);
+        return this;
+      }
+      digitalCrownSensitivity(value: any): this {
+        modifierWithKey(this._modifiersWithKeys, DatePickerDigitalCrownSensitivityModifier.identity,
+          DatePickerDigitalCrownSensitivityModifier, value);
+        return this;
+      }
+      disappearTextStyle(value: any): this {
+        modifierWithKey(this._modifiersWithKeys, DatePickerDisappearTextStyleModifier.identity,
+          DatePickerDisappearTextStyleModifier, value);
+        return this;
+      }
+      textStyle(value: any): this {
+        modifierWithKey(this._modifiersWithKeys, DatePickerTextStyleModifier.identity, DatePickerTextStyleModifier,
+          value);
+        return this;
+      }
+      selectedTextStyle(value: any): this {
+        modifierWithKey(this._modifiersWithKeys, DatePickerSelectedTextStyleModifier.identity,
+          DatePickerSelectedTextStyleModifier, value);
+        return this;
+      }
+      onChange(callback: any): this {
+        modifierWithKey(this._modifiersWithKeys, DatePickerOnChangeModifier.identity, DatePickerOnChangeModifier,
+          callback);
+        return this;
+      }
+      onDateChange(callback: any): this {
+        modifierWithKey(this._modifiersWithKeys, DatePickerOnDateChangeModifier.identity,
+          DatePickerOnDateChangeModifier, callback);
+        return this;
+      }
+      backgroundColor(value: any): this {
+        modifierWithKey(this._modifiersWithKeys, DatePickerBackgroundColorModifier.identity,
+          DatePickerBackgroundColorModifier, value);
+        return this;
+      }
+      enableHapticFeedback(value: any): this {
+        modifierWithKey(this._modifiersWithKeys, DatePickerEnableHapticFeedbackModifier.identity,
+          DatePickerEnableHapticFeedbackModifier, value);
+        return this;
+      }
+      canLoop(value: any): this {
+        modifierWithKey(this._modifiersWithKeys, DatePickerCanLoopModifier.identity, DatePickerCanLoopModifier,
+          value);
+        return this;
+      }
     }
-  }
-}
-(DatePickerDigitalCrownSensitivityModifier as any).identity = Symbol('DigitalCrownSensitivity');
-class DatePickerLunarModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().datePicker.resetLunar(node);
-    } else {
-      getUINativeModule().datePicker.setLunar(node, this.value);
+    class DatePickerDigitalCrownSensitivityModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().datePicker.resetDigitalCrownSensitivity(node);
+        } else {
+          getUINativeModule().datePicker.setDigitalCrownSensitivity(node, this.value);
+        }
+      }
     }
-  }
-}
-(DatePickerLunarModifier as any).identity = Symbol('lunar');
-class DatePickerTextStyleModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().datePicker.resetTextStyle(node);
-    } else {
-      getUINativeModule().datePicker.setTextStyle(node, this.value?.color ?? undefined,
-        this.value?.font?.size ?? undefined, this.value?.font?.weight ?? undefined,
-        this.value?.font?.family ?? undefined, this.value?.font?.style ?? undefined);
+    (DatePickerDigitalCrownSensitivityModifier as any).identity = Symbol('DigitalCrownSensitivity');
+    class DatePickerLunarModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().datePicker.resetLunar(node);
+        } else {
+          getUINativeModule().datePicker.setLunar(node, this.value);
+        }
+      }
     }
-  }
-  checkObjectDiff(): boolean {
-    return true;
-  }
-}
-(DatePickerTextStyleModifier as any).identity = Symbol('textStyle');
-class DatePickerSelectedTextStyleModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().datePicker.resetSelectedTextStyle(node);
-    } else {
-      getUINativeModule().datePicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
-        this.value?.font?.size ?? undefined, this.value?.font?.weight ?? undefined,
-        this.value?.font?.family ?? undefined, this.value?.font?.style ?? undefined);
+    (DatePickerLunarModifier as any).identity = Symbol('lunar');
+    class DatePickerTextStyleModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().datePicker.resetTextStyle(node);
+        } else {
+          getUINativeModule().datePicker.setTextStyle(node, this.value?.color ?? undefined,
+            this.value?.font?.size ?? undefined, this.value?.font?.weight ?? undefined,
+            this.value?.font?.family ?? undefined, this.value?.font?.style ?? undefined);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return true;
+      }
     }
-  }
-  checkObjectDiff(): boolean {
-    return true;
-  }
-}
-(DatePickerSelectedTextStyleModifier as any).identity = Symbol('selectedTextStyle');
-class DatePickerDisappearTextStyleModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().datePicker.resetDisappearTextStyle(node);
-    } else {
-      getUINativeModule().datePicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
-        this.value?.font?.size ?? undefined, this.value?.font?.weight ?? undefined,
-        this.value?.font?.family ?? undefined, this.value?.font?.style ?? undefined);
+    (DatePickerTextStyleModifier as any).identity = Symbol('textStyle');
+    class DatePickerSelectedTextStyleModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().datePicker.resetSelectedTextStyle(node);
+        } else {
+          getUINativeModule().datePicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
+            this.value?.font?.size ?? undefined, this.value?.font?.weight ?? undefined,
+            this.value?.font?.family ?? undefined, this.value?.font?.style ?? undefined);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return true;
+      }
     }
-  }
-  checkObjectDiff(): boolean {
-    return true;
-  }
-}
-(DatePickerDisappearTextStyleModifier as any).identity = Symbol('disappearTextStyle');
-class DatePickerOnChangeModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().datePicker.resetDatePickerOnChange(node);
-    } else {
-      getUINativeModule().datePicker.setDatePickerOnChange(node, this.value);
+    (DatePickerSelectedTextStyleModifier as any).identity = Symbol('selectedTextStyle');
+    class DatePickerDisappearTextStyleModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().datePicker.resetDisappearTextStyle(node);
+        } else {
+          getUINativeModule().datePicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
+            this.value?.font?.size ?? undefined, this.value?.font?.weight ?? undefined,
+            this.value?.font?.family ?? undefined, this.value?.font?.style ?? undefined);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return true;
+      }
     }
-  }
-}
-(DatePickerOnChangeModifier as any).identity = Symbol('datePickerOnChange');
-class DatePickerOnDateChangeModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().datePicker.resetDatePickerOnDateChange(node);
-    } else {
-      getUINativeModule().datePicker.setDatePickerOnDateChange(node, this.value);
+    (DatePickerDisappearTextStyleModifier as any).identity = Symbol('disappearTextStyle');
+    class DatePickerOnChangeModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().datePicker.resetDatePickerOnChange(node);
+        } else {
+          getUINativeModule().datePicker.setDatePickerOnChange(node, this.value);
+        }
+      }
     }
-  }
-}
-(DatePickerOnDateChangeModifier as any).identity = Symbol('datePickerOnDateChange');
-class DatePickerBackgroundColorModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().datePicker.resetBackgroundColor(node);
-    } else {
-      getUINativeModule().datePicker.setBackgroundColor(node, this.value);
+    (DatePickerOnChangeModifier as any).identity = Symbol('datePickerOnChange');
+    class DatePickerOnDateChangeModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().datePicker.resetDatePickerOnDateChange(node);
+        } else {
+          getUINativeModule().datePicker.setDatePickerOnDateChange(node, this.value);
+        }
+      }
     }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-(DatePickerBackgroundColorModifier as any).identity = Symbol('datePickerBackgroundColor');
-class DatePickerEnableHapticFeedbackModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().datePicker.resetEnableHapticFeedback(node);
-    } else {
-      getUINativeModule().datePicker.setEnableHapticFeedback(node, this.value);
+    (DatePickerOnDateChangeModifier as any).identity = Symbol('datePickerOnDateChange');
+    class DatePickerBackgroundColorModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().datePicker.resetBackgroundColor(node);
+        } else {
+          getUINativeModule().datePicker.setBackgroundColor(node, this.value);
+        }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     }
-  }
-}
-(DatePickerEnableHapticFeedbackModifier as any).identity = Symbol('datePickerEnableHapticFeedback');
-class DatePickerCanLoopModifier extends ModifierWithKey<any> {
-  constructor(value: any) {
-    super(value);
-  }
-  applyPeer(node: any, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().datePicker.resetCanLoop(node);
-    } else {
-      getUINativeModule().datePicker.setCanLoop(node, this.value);
+    (DatePickerBackgroundColorModifier as any).identity = Symbol('datePickerBackgroundColor');
+    class DatePickerEnableHapticFeedbackModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().datePicker.resetEnableHapticFeedback(node);
+        } else {
+          getUINativeModule().datePicker.setEnableHapticFeedback(node, this.value);
+        }
+      }
     }
+    (DatePickerEnableHapticFeedbackModifier as any).identity = Symbol('datePickerEnableHapticFeedback');
+    class DatePickerCanLoopModifier extends ModifierWithKey<any> {
+      constructor(value: any) {
+        super(value);
+      }
+      applyPeer(node: any, reset: boolean): void {
+        if (reset) {
+          getUINativeModule().datePicker.resetCanLoop(node);
+        } else {
+          getUINativeModule().datePicker.setCanLoop(node, this.value);
+        }
+      }
+    }
+    (DatePickerCanLoopModifier as any).identity = Symbol('canLoop');
+
+    loadComponent.componentObj = { 'component': ArkDatePickerComponent };
   }
+  return loadComponent.componentObj;
 }
-(DatePickerCanLoopModifier as any).identity = Symbol('canLoop');
 
 class JSDatePicker extends JSViewAbstract {
   static create(params: any): void {
@@ -312,11 +320,15 @@ class JSDatePickerDialog extends JSViewAbstract {
 }
 
 function createComponent(nativePtr: any, classType: any): any {
-  return new ArkDatePickerComponent(nativePtr, classType);
+    loadComponent();
+    if (loadComponent.componentObj !== undefined) {
+        return new loadComponent.componentObj.component(nativePtr, classType);
+    }
+    return undefined;
 }
 
 function exportComponent(): void {
-  globalThis.ArkDatePickerComponent = ArkDatePickerComponent;
+  globalThis.ArkDatePickerComponent = (loadComponent as any).componentObj?.component;
 }
 
 function exportView(): void {
@@ -326,7 +338,7 @@ function exportView(): void {
 function exportViewDialog(): void {
   globalThis.DatePickerDialog = JSDatePickerDialog;
 }
-function loadComponent() {}
-export default { ArkDatePickerComponent, createComponent, exportComponent, exportView, exportViewDialog,
+
+export default { createComponent, exportComponent, exportView, exportViewDialog,
     loadComponent
 };

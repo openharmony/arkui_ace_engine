@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BADGE_BADGE_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BADGE_BADGE_THEME_H
 
+#include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
@@ -134,11 +135,27 @@ public:
 
     const Dimension& GetBadgeCircleSize()
     {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, badgeSize_);
+        auto fontManager = pipelineContext->GetFontManager();
+        CHECK_NULL_RETURN(fontManager, badgeSize_);
+        if (fontManager->GetFallbackLineSpacingStyleOptimizeFlag() &&
+            pipelineContext->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return badgeSizeForMinorLanguage_;
+        }
         return badgeSize_;
     }
 
     const Dimension& GetBadgeAgeCircleSize() const
     {
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, badgeAgeSize_);
+        auto fontManager = pipelineContext->GetFontManager();
+        CHECK_NULL_RETURN(fontManager, badgeAgeSize_);
+        if (fontManager->GetFallbackLineSpacingStyleOptimizeFlag() &&
+            pipelineContext->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            return badgeAgeSizeForMinorLanguage_;
+        }
         return badgeAgeSize_;
     }
 
@@ -191,7 +208,9 @@ private:
     Dimension badgeBorderWidth_;
     Dimension badgeOuterBorderWidth_;
     Dimension badgeSize_ = 16.0_vp;
-    Dimension badgeAgeSize_;
+    Dimension badgeSizeForMinorLanguage_ = 18.0_vp;
+    Dimension badgeAgeSize_ = 23.0_vp;
+    Dimension badgeAgeSizeForMinorLanguage_ = 26.0_vp;
     Dimension badgeAgeAddPadding_;
     Dimension littleBadgeSize_;
     Dimension numericalBadgePadding_;

@@ -18,6 +18,7 @@
 
 #include <ctime>
 #include <string>
+#include <string_view>
 #include <sys/time.h>
 #include "ui/base/utils/utils.h"
 
@@ -49,15 +50,15 @@ constexpr bool ON_TIME_CHANGE = true;
 const char CHAR_0 = '0';
 const char CHAR_9 = '9';
 const char CHAR_SPACE = ' ';
-const std::string STR_0 = "0";
-const std::string STR_PREFIX_24H = " 0";
-const std::string STR_PREFIX_12H = " ";
-const std::string DEFAULT_FORMAT = "aa hh:mm:ss";
-const std::string DEFAULT_FORMAT_24H = "HH:mm:ss";
-const std::string FORM_FORMAT = "hh:mm";
-const std::string FORM_FORMAT_24H = "HH:mm";
-const std::string FORMAT_12H = "%Y/%m/%d %I:%M:%S";
-const std::string FORMAT_24H = "%Y/%m/%d %H:%M:%S";
+constexpr std::string_view STR_0 = "0";
+constexpr std::string_view STR_PREFIX_24H = " 0";
+constexpr std::string_view STR_PREFIX_12H = " ";
+constexpr std::string_view DEFAULT_FORMAT = "aa hh:mm:ss";
+constexpr std::string_view DEFAULT_FORMAT_24H = "HH:mm:ss";
+constexpr std::string_view FORM_FORMAT = "hh:mm";
+constexpr std::string_view FORM_FORMAT_24H = "HH:mm";
+constexpr std::string_view FORMAT_12H = "%Y/%m/%d %I:%M:%S";
+constexpr std::string_view FORMAT_24H = "%Y/%m/%d %H:%M:%S";
 constexpr char TEXTCLOCK_WEEK[] = "textclock.week";
 constexpr char TEXTCLOCK_YEAR[] = "textclock.year";
 constexpr char TEXTCLOCK_MONTH[] = "textclock.month";
@@ -256,9 +257,7 @@ void TextClockPattern::InitTextClockController()
 
 void TextClockPattern::OnVisibleAreaChange(bool visible)
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK,
-        "Clock is %{public}s the visible area and clock %{public}s running",
-        visible ? "in" : "out of", visible ? "starts" : "stops");
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Clock:%{public}s", visible ? "visible" : "invisible");
     if (visible && !isInVisibleArea_) {
         isInVisibleArea_ = visible;
         UpdateTimeText();
@@ -309,7 +308,7 @@ void TextClockPattern::UpdateTimeText(bool isTimeChange)
     }
     std::string currentTime = GetCurrentFormatDateTime();
     if (currentTime.empty()) {
-        TAG_LOGE(AceLogTag::ACE_TEXT_CLOCK, "currentTime is empty");
+        TAG_LOGE(AceLogTag::ACE_TEXT_CLOCK, "currentTime empty");
         return;
     }
     if (currentTime != prevTime_ || isTimeChange) {
@@ -400,7 +399,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
     ParseInputFormat();
 
     char buffer[SIZE_OF_TIME_TEXT] = {};
-    std::string dateTimeFormat = is24H_ ? FORMAT_24H : FORMAT_12H;
+    std::string dateTimeFormat = std::string(is24H_ ? FORMAT_24H : FORMAT_12H);
     std::strftime(buffer, sizeof(buffer), dateTimeFormat.c_str(), timeZoneTime);
     CHECK_NULL_RETURN(buffer, "");
     auto duration_cast_to_millis = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch());
@@ -424,7 +423,7 @@ std::string TextClockPattern::GetCurrentFormatDateTime()
         auto host = GetHost();
         CHECK_NULL_RETURN(host, outputDateTime);
         TAG_LOGI(
-            AceLogTag::ACE_TEXT_CLOCK, "newTime:%{public}s nodeId:%{public}d", outputDateTime.c_str(), host->GetId());
+            AceLogTag::ACE_TEXT_CLOCK, "T:%{public}s ID:%{public}d", outputDateTime.c_str(), host->GetId());
     }
     return outputDateTime;
 }
@@ -819,23 +818,19 @@ std::string TextClockPattern::GetFormat() const
 {
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
     if (isForm_) {
-        auto defaultFormFormat = FORM_FORMAT;
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is24H_) {
-            defaultFormFormat = FORM_FORMAT_24H;
-        }
-        CHECK_NULL_RETURN(textClockLayoutProperty, defaultFormFormat);
-        std::string result = textClockLayoutProperty->GetFormat().value_or(defaultFormFormat);
+        auto defaultFormFormat = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is24H_
+            ? FORM_FORMAT_24H : FORM_FORMAT;
+        CHECK_NULL_RETURN(textClockLayoutProperty, std::string(defaultFormFormat));
+        std::string result = textClockLayoutProperty->GetFormat().value_or(std::string(defaultFormFormat));
         if (result.find("s") != std::string::npos || result.find("S") != std::string::npos) {
-            return defaultFormFormat;
+            return std::string(defaultFormFormat);
         }
         return result;
     }
-    auto defaultFormat = DEFAULT_FORMAT;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is24H_) {
-        defaultFormat = DEFAULT_FORMAT_24H;
-    }
-    CHECK_NULL_RETURN(textClockLayoutProperty, defaultFormat);
-    return textClockLayoutProperty->GetFormat().value_or(defaultFormat);
+    auto defaultFormat = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN) && is24H_
+        ? DEFAULT_FORMAT_24H : DEFAULT_FORMAT;
+    CHECK_NULL_RETURN(textClockLayoutProperty, std::string(defaultFormat));
+    return textClockLayoutProperty->GetFormat().value_or(std::string(defaultFormat));
 }
 
 float TextClockPattern::GetHoursWest() const
@@ -862,7 +857,7 @@ RefPtr<FrameNode> TextClockPattern::GetTextNode()
 
 void TextClockPattern::OnTimeChange()
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Time is changed and clock updates");
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Time updated");
     is24H_ = SystemProperties::Is24HourClock();
     UpdateTimeText(ON_TIME_CHANGE);
 }
@@ -912,7 +907,7 @@ RefPtr<FrameNode> TextClockPattern::BuildContentModifierNode()
 
 void TextClockPattern::OnLanguageConfigurationUpdate()
 {
-    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Language is changed and clock updates");
+    TAG_LOGI(AceLogTag::ACE_TEXT_CLOCK, "Language changed, update");
     UpdateTimeText(true);
 }
 

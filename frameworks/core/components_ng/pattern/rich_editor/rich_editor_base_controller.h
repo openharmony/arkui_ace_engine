@@ -28,6 +28,9 @@ class ACE_EXPORT RichEditorBaseController : virtual public RichEditorBaseControl
 
 public:
     void SetPattern(const WeakPtr<RichEditorPattern>& pattern);
+    WeakPtr<RichEditorPattern> GetPattern() const { return pattern_; }
+    void SetHost(const WeakPtr<FrameNode>& host);
+    RefPtr<FrameNode> GetHost();
     int32_t GetCaretOffset() override;
     RectF GetCaretRect() override;
     bool SetCaretOffset(int32_t caretPosition) override;
@@ -47,6 +50,7 @@ public:
 
 protected:
     WeakPtr<RichEditorPattern> pattern_;
+    WeakPtr<FrameNode> host_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RICH_EDITOR_RICH_EDITOR_BASE_CONTROLLER_H

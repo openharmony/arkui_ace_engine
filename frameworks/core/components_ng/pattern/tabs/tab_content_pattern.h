@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
+#include "core/components_ng/manager/recoverable/recoverable_view.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/image/image_model.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
@@ -31,9 +32,12 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+const char TABS_ETS_TAG_PATTERN[] = "Tabs";
+const char TAB_BAR_ETS_TAG_PATTERN[] = "TabBar";
+const char SWIPER_ETS_TAG_PATTERN[] = "Swiper";
 
-class ACE_EXPORT TabContentPattern : public Pattern {
-    DECLARE_ACE_TYPE(TabContentPattern, Pattern);
+class ACE_EXPORT TabContentPattern : public Pattern, public virtual RecoverableView {
+    DECLARE_ACE_TYPE(TabContentPattern, Pattern, RecoverableView);
 
 public:
     explicit TabContentPattern(const RefPtr<ShallowBuilder>& shallowBuilder)
@@ -75,13 +79,14 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        SetRecoverableViewHostNode(host);
         host->GetRenderContext()->UpdateClipEdge(true);
         FireWillShowEvent();
         auto parentNode = host->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parentNode);
         auto grandParentNode = parentNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(grandParentNode);
-        if (grandParentNode->GetTag() == V2::TABS_ETS_TAG) {
+        if (grandParentNode->GetTag() == TABS_ETS_TAG_PATTERN) {
             auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(
                 grandParentNode->GetLayoutProperty());
             CHECK_NULL_VOID(tabLayoutProperty);
@@ -105,12 +110,12 @@ public:
         CHECK_NULL_VOID(tabContentNode);
         auto parentNode = tabContentNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parentNode);
-        if (parentNode->GetTag() != V2::SWIPER_ETS_TAG) {
+        if (parentNode->GetTag() != SWIPER_ETS_TAG_PATTERN) {
             return;
         }
         auto grandParentNode = parentNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(grandParentNode);
-        if (grandParentNode->GetTag() != V2::TABS_ETS_TAG) {
+        if (grandParentNode->GetTag() != TABS_ETS_TAG_PATTERN) {
             return;
         }
 
@@ -584,6 +589,8 @@ public:
         totalExpand = totalExpand.Plus(AdjacentExpandToRect(adjustingRect, expandFromSwiper, frameRect));
         return true;
     }
+
+    void OnAttachToMainTree() override;
 
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;

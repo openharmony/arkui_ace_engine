@@ -26,7 +26,9 @@
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT ShapeModel {
+constexpr char SHAPE_ETS_TAG[] = "Shape";
+constexpr char SHAPE_CONTAINER_ETS_TAG[] = "ShapeContainer";
+class ShapeModel {
 public:
     static ShapeModel* GetInstance();
     virtual ~ShapeModel() = default;

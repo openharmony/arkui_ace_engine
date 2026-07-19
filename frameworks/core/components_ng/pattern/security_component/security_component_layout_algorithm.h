@@ -17,7 +17,6 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_element.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
@@ -114,7 +113,7 @@ private:
     bool isVertical_ = false;
     bool isNobg_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SecurityComponentLayoutAlgorithm);
-    RefPtr<ButtonLayoutProperty> buttonLayoutProperty_;
+    RefPtr<LayoutProperty> buttonLayoutProperty_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_LAYOUT_ALGORITHM_H

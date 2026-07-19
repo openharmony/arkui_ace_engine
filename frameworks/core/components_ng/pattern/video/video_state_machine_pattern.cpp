@@ -16,6 +16,10 @@
 #include "core/components_ng/pattern/video/video_state_machine_pattern.h"
 
 #include "core/components_ng/pattern/video/video_state_manager.h"
+#include "core/components_ng/pattern/video/video_accessibility_property.h"
+#include "core/components_ng/pattern/video/video_event_hub.h"
+#include "core/components_ng/pattern/video/video_layout_algorithm.h"
+#include "core/components_ng/pattern/video/video_layout_property.h"
 #include "video_node.h"
 
 #include "base/background_task_helper/background_task_helper.h"
@@ -330,7 +334,9 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoStateMachinePattern>& weak,
             CHECK_NULL_VOID(video);
             ContainerScope scope(instanceId);
             video->OnCurrentTimeChange(currentPos);
+#ifdef SUPPORT_IMAGE_ANALYZER
             video->StartUpdateImageAnalyzer();
+#endif
             }, "ArkUIVideoCurrentTimeChange");
     };
 
@@ -420,15 +426,34 @@ void SendStatisticEvent(StatisticEventType type)
 }
 } // namespace
 
+RefPtr<EventHub> VideoStateMachinePattern::CreateEventHub()
+{
+    return MakeRefPtr<VideoEventHub>();
+}
+
+RefPtr<LayoutProperty> VideoStateMachinePattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<VideoLayoutProperty>();
+}
+
+RefPtr<LayoutAlgorithm> VideoStateMachinePattern::CreateLayoutAlgorithm()
+{
+    return MakeRefPtr<VideoLayoutAlgorithm>();
+}
+
+RefPtr<AccessibilityProperty> VideoStateMachinePattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<VideoAccessibilityProperty>();
+}
+
 VideoStateMachinePattern::VideoStateMachinePattern(const RefPtr<VideoControllerAsync>& videoControllerAsync)
-    : instanceId_(Container::CurrentId()), videoControllerAsync_(videoControllerAsync)
+    : instanceId_(Container::CurrentId()), videoControllerAsync_(videoControllerAsync),
+      stateManager_(MakeRefPtr<VideoStateManager>(WeakClaim(this)))
 {}
 
 void VideoStateMachinePattern::OnControllerDestroyed()
 {
-    if (videoControllerAsync_) {
-        videoControllerAsync_->ClearPattern();
-    }
+    ClearControllerAsync();
 }
 
 void VideoStateMachinePattern::SetVideoControllerAsync(
@@ -437,13 +462,9 @@ void VideoStateMachinePattern::SetVideoControllerAsync(
     if (videoControllerAsync_ == videoControllerAsync) {
         return;
     }
-    if (videoControllerAsync_) {
-        videoControllerAsync_->ClearPattern();
-    }
+    ClearControllerAsync();
     videoControllerAsync_ = videoControllerAsync;
-    if (videoControllerAsync_) {
-        videoControllerAsync_->SetPattern(WeakClaim(this));
-    }
+    BindControllerAsync();
 }
 
 void VideoStateMachinePattern::PostSerialBgTask(std::function<void()> task, const std::string& name)
@@ -789,7 +810,9 @@ void VideoStateMachinePattern::OnPlayingStateEntered()
     if (eventHub) {
         eventHub->FireStartEvent();
     }
+#ifdef SUPPORT_IMAGE_ANALYZER
     DestroyAnalyzerOverlay();
+#endif
     ChangePlayButtonTag();
 }
 
@@ -800,7 +823,9 @@ void VideoStateMachinePattern::OnPausedStateEntered()
     if (eventHub) {
         eventHub->FirePauseEvent();
     }
+#ifdef SUPPORT_IMAGE_ANALYZER
     StartImageAnalyzer();
+#endif
     ChangePlayButtonTag();
 }
 
@@ -1008,6 +1033,12 @@ void VideoStateMachinePattern::ChangePlayerStatus(const PlaybackStatus& status)
             break;
         }
         case PlaybackStatus::PLAYBACK_COMPLETE:
+            // Player may report EOS without STARTED after seek-to-end + Play.
+            // Synthesize PLAYING first to fire onStart and clear pending PLAY.
+            if (stateManager_->IsPrepared() &&
+                stateManager_->GetPendingCommand() == VideoPlaybackCommand::PLAY) {
+                stateManager_->HandleStateTransition(VideoPlaybackCommand::PLAY);
+            }
             stateManager_->HandleStateTransition(VideoPlaybackCommand::COMPLETE);
             break;
         default:
@@ -1099,6 +1130,13 @@ void VideoStateMachinePattern::OnResolutionChange() const
 
 void VideoStateMachinePattern::OnStartRenderFrameCb()
 {
+    // A stale start-render-frame callback from a previous Play task may arrive after Reset is requested.
+    // Ignore it to avoid writing invalid video size into the layout property during reset.
+    if (stateManager_->GetPendingCommand() == VideoPlaybackCommand::RESET) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO,
+            "Video[%{public}d] OnStartRenderFrameCb ignored: RESET is pending", hostId_);
+        return;
+    }
     isInitialState_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1371,9 +1409,7 @@ void VideoStateMachinePattern::OnAttachToFrameNode()
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode, host);
     // full screen node is not supposed to register js controller event
     if (!InstanceOf<VideoStateMachineFullScreenPattern>(this)) {
-        if (videoControllerAsync_) {
-            videoControllerAsync_->SetPattern(WeakClaim(this));
-        }
+        BindControllerAsync();
     }
     CHECK_NULL_VOID(host);
     hostId_ = host->GetId();
@@ -1427,9 +1463,7 @@ void VideoStateMachinePattern::OnAttachToMainTree()
     CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
     // full screen node is not supposed to register js controller event
     if (!InstanceOf<VideoStateMachineFullScreenPattern>(this)) {
-        if (videoControllerAsync_) {
-            videoControllerAsync_->SetPattern(WeakClaim(this));
-        }
+        BindControllerAsync();
     }
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(hostId_);
@@ -1538,11 +1572,13 @@ void VideoStateMachinePattern::OnModifyDone()
     if (!AceType::InstanceOf<VideoStateMachineFullScreenPattern>(this)) {
         eventHub->SetInspectorId(host->GetInspectorIdValue(""));
     }
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     } else if (stateManager_->IsPaused() && !stateManager_->IsPlaying() && !GetAnalyzerState()) {
         StartImageAnalyzer();
     }
+#endif
     InitKeyEvent();
 }
 
@@ -2113,7 +2149,9 @@ void VideoStateMachinePattern::Start(VideoControllerAsync::AsyncCommandCallback 
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
 
+#ifdef SUPPORT_IMAGE_ANALYZER
     DestroyAnalyzerOverlay();
+#endif
 
     if (stateManager_->IsStopped()) {
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Start() from STOPPED: Step 1 Prepare (originalIntent=PLAY)", hostId_);
@@ -2466,6 +2504,7 @@ void VideoStateMachinePattern::OnFullScreenChange(bool isFullScreen)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (isEnableAnalyzer_) {
         if (!imageAnalyzerManager_) {
             EnableAnalyzer(isEnableAnalyzer_);
@@ -2474,6 +2513,7 @@ void VideoStateMachinePattern::OnFullScreenChange(bool isFullScreen)
             StartImageAnalyzer();
         }
     }
+#endif
 
     if (!SystemProperties::GetExtSurfaceEnabled()) {
         return;
@@ -2510,8 +2550,155 @@ void VideoStateMachinePattern::FullScreen()
     fullScreenPattern->RequestFullScreen(videoNode);
 }
 
+void VideoStateMachinePattern::BindControllerAsync()
+{
+    CHECK_NULL_VOID(videoControllerAsync_);
+    if (InstanceOf<VideoStateMachineFullScreenPattern>(this)) {
+        return;
+    }
+
+    videoControllerAsync_->SetStartImpl(
+        [weak = WeakClaim(this)](VideoControllerAsync::AsyncCommandCallback&& callback) {
+        auto pattern = weak.Upgrade();
+        if (!pattern) {
+            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Start: pattern is null");
+            if (callback) {
+                callback(false, "pattern is null");
+            }
+            return;
+        }
+        pattern->Start(std::move(callback));
+    });
+    videoControllerAsync_->SetPauseImpl(
+        [weak = WeakClaim(this)](VideoControllerAsync::AsyncCommandCallback&& callback) {
+        auto pattern = weak.Upgrade();
+        if (!pattern) {
+            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Pause: pattern is null");
+            if (callback) {
+                callback(false, "pattern is null");
+            }
+            return;
+        }
+        pattern->Pause(std::move(callback));
+    });
+    videoControllerAsync_->SetStopImpl([weak = WeakClaim(this)](VideoControllerAsync::AsyncCommandCallback&& callback) {
+        auto pattern = weak.Upgrade();
+        if (!pattern) {
+            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Stop: pattern is null");
+            if (callback) {
+                callback(false, "pattern is null");
+            }
+            return;
+        }
+        pattern->Stop(std::move(callback));
+    });
+    videoControllerAsync_->SetResetImpl(
+        [weak = WeakClaim(this)](VideoControllerAsync::AsyncCommandCallback&& callback) {
+        auto pattern = weak.Upgrade();
+        if (!pattern) {
+            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Reset: pattern is null");
+            if (callback) {
+                callback(false, "pattern is null");
+            }
+            return;
+        }
+        pattern->ResetMediaPlayerOnBg(std::move(callback));
+    });
+    videoControllerAsync_->SetSeekToImpl([weak = WeakClaim(this)](float time, SeekMode seekMode) {
+        auto pattern = weak.Upgrade();
+        if (!pattern) {
+            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::SeekTo: pattern is null");
+            return;
+        }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [weak, time, seekMode]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->GetInstanceId());
+                auto targetPattern = pattern->GetTargetVideoPattern();
+                CHECK_NULL_VOID(targetPattern);
+                targetPattern->SetCurrentTime(time, seekMode);
+            },
+            "ArkUIVideoSetCurrentTime");
+    });
+    videoControllerAsync_->SetRequestFullscreenImpl([weak = WeakClaim(this)](bool landscape) {
+        auto pattern = weak.Upgrade();
+        if (!pattern) {
+            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::RequestFullscreen: pattern is null");
+            return;
+        }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [weak, landscape]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->GetInstanceId());
+                if (landscape) {
+                    pattern->FullScreen();
+                    return;
+                }
+                pattern->ResetLastBoundsRect();
+                auto targetPattern = pattern->GetTargetVideoPattern();
+                CHECK_NULL_VOID(targetPattern);
+                auto fullScreenPattern = AceType::DynamicCast<NG::VideoStateMachineFullScreenPattern>(targetPattern);
+                if (fullScreenPattern) {
+                    fullScreenPattern->ExitFullScreen();
+                }
+            },
+            "ArkUIVideoFullScreen");
+    });
+    videoControllerAsync_->SetExitFullscreenImpl([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (!pattern) {
+            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::ExitFullscreen: pattern is null");
+            return;
+        }
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask(
+            [weak]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                ContainerScope scope(pattern->GetInstanceId());
+                pattern->ResetLastBoundsRect();
+                auto targetPattern = pattern->GetTargetVideoPattern();
+                CHECK_NULL_VOID(targetPattern);
+                auto fullScreenPattern = AceType::DynamicCast<NG::VideoStateMachineFullScreenPattern>(targetPattern);
+                if (fullScreenPattern) {
+                    fullScreenPattern->ExitFullScreen();
+                }
+            },
+            "ArkUIVideoExitFullScreen");
+    });
+    ownsControllerAsyncBinding_ = true;
+}
+
+void VideoStateMachinePattern::ClearControllerAsync()
+{
+    if (!ownsControllerAsyncBinding_) {
+        return;
+    }
+    if (videoControllerAsync_) {
+        videoControllerAsync_->Clear();
+    }
+    ownsControllerAsyncBinding_ = false;
+}
+
 VideoStateMachinePattern::~VideoStateMachinePattern()
 {
+    ClearControllerAsync();
     {
         std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
         if (!serialBgTaskQueue_.empty()) {
@@ -2534,9 +2721,11 @@ VideoStateMachinePattern::~VideoStateMachinePattern()
         renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
     }
 #endif
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     }
+#endif
     if (!fullScreenNodeId_.has_value()) {
         return;
     }
@@ -2639,11 +2828,13 @@ void VideoStateMachinePattern::EnableAnalyzer(bool enable)
         return;
     }
 
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(!imageAnalyzerManager_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_UINODE_TRACE(host);
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::VIDEO_CUSTOM);
+#endif
 }
 
 void VideoStateMachinePattern::SetShortcutKeyEnabled(bool isEnableShortcutKey)
@@ -2668,14 +2859,17 @@ float VideoStateMachinePattern::GetCurrentVolume() const
 
 void VideoStateMachinePattern::SetImageAnalyzerConfig(void* config)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (isEnableAnalyzer_) {
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->SetImageAnalyzerConfig(config);
     }
+#endif
 }
 
 void VideoStateMachinePattern::SetImageAIOptions(void* options)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!imageAnalyzerManager_) {
         auto host = GetHost();
         ACE_UINODE_TRACE(host);
@@ -2683,10 +2877,12 @@ void VideoStateMachinePattern::SetImageAIOptions(void* options)
     }
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->SetImageAIOptions(options);
+#endif
 }
 
 bool VideoStateMachinePattern::IsSupportImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
@@ -2694,6 +2890,9 @@ bool VideoStateMachinePattern::IsSupportImageAnalyzer()
     bool needControlBar = layoutProperty->GetControlsValue(true);
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
     return isEnableAnalyzer_ && !needControlBar && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
+#else
+    return false;
+#endif
 }
 
 bool VideoStateMachinePattern::ShouldUpdateImageAnalyzer()
@@ -2717,6 +2916,7 @@ bool VideoStateMachinePattern::ShouldUpdateImageAnalyzer()
 
 void VideoStateMachinePattern::StartImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!IsSupportImageAnalyzer() || !imageAnalyzerManager_) {
         return;
     }
@@ -2736,10 +2936,12 @@ void VideoStateMachinePattern::StartImageAnalyzer()
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
         }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
+#endif
 }
 
 void VideoStateMachinePattern::CreateAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetOverlayNode(nullptr);
@@ -2756,10 +2958,12 @@ void VideoStateMachinePattern::CreateAnalyzerOverlay()
                               contentRect_.Top() - padding.top.value_or(0) };
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap, contentOffset);
+#endif
 }
 
 void VideoStateMachinePattern::StartUpdateImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     if (!imageAnalyzerManager_->IsOverlayCreated()) {
         return;
@@ -2782,10 +2986,12 @@ void VideoStateMachinePattern::StartUpdateImageAnalyzer()
         pattern->isContentSizeChanged_ = false;
         }, ANALYZER_CAPTURE_DELAY_TIME, "ArkUIVideoUpdateAnalyzerOverlay");
     isContentSizeChanged_ = true;
+#endif
 }
 
 void VideoStateMachinePattern::UpdateAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -2803,10 +3009,12 @@ void VideoStateMachinePattern::UpdateAnalyzerOverlay()
                               contentRect_.Top() - padding.top.value_or(0) };
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap, contentOffset);
+#endif
 }
 
 void VideoStateMachinePattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzer()) {
         auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -2818,18 +3026,25 @@ void VideoStateMachinePattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryN
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode, info);
     }
+#endif
 }
 
 void VideoStateMachinePattern::DestroyAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
+#endif
 }
 
 bool VideoStateMachinePattern::GetAnalyzerState()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
     return imageAnalyzerManager_->IsOverlayCreated();
+#else
+    return false;
+#endif
 }
 
 void VideoStateMachinePattern::UpdateOverlayVisibility(VisibleType type)
@@ -2966,6 +3181,7 @@ int32_t VideoStateMachinePattern::OnInjectionEvent(const std::string& command)
 
 void VideoStateMachinePattern::ReportChangeEvent(PlaybackStatus status, double playbackSpeed, uint32_t currentPos)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()) {
         return;
     }
@@ -3003,10 +3219,12 @@ void VideoStateMachinePattern::ReportChangeEvent(PlaybackStatus status, double p
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString(),
         ComponentEventType::COMPONENT_EVENT_VIDEO);
+#endif
 }
 
 void VideoStateMachinePattern::ReportCommandResult(const std::string& event, const std::string& result, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()) {
         return;
     }
@@ -3031,6 +3249,7 @@ void VideoStateMachinePattern::ReportCommandResult(const std::string& event, con
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", videoResult->ToString(),
         ComponentEventType::COMPONENT_EVENT_VIDEO);
+#endif
 }
 
 void VideoStateMachinePattern::SetContentTransition(ContentTransitionType contentTransition)

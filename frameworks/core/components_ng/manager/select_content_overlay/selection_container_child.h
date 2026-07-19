@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <optional>
+#include <vector>
 
 #include "base/geometry/offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -50,9 +51,20 @@ enum class SelectionAreaResultType {
     CLIPPED_OUT,
 };
 
+enum class HandleVisibleContentResult {
+    INVISIBLE,
+    VISIBLE,
+    NEED_CHECK,
+};
+
 struct ScrollableParentResult {
     WeakPtr<ScrollablePattern> scrollable;
     bool isInsideContainer = false;
+};
+
+struct AncestorNodeViewPortInfo {
+    WeakPtr<FrameNode> ancestorNode;
+    RectF viewPort;
 };
 
 struct SelectionIndexRange {
@@ -125,6 +137,7 @@ public:
     virtual void UpdateChildHandleGlobalOffset() {}
     virtual OffsetF GetChildHandleGlobalOffset() const { return {}; }
     bool SelectOverlayIsOn();
+    bool HasSelection();
     void MarkChildSortDirty();
     void ResetAllSelection();
     bool HandleOnCopy();
@@ -173,6 +186,13 @@ public:
 
     virtual std::optional<RectF> GetFirstHandleRect() = 0;
     virtual std::optional<RectF> GetSecondHandleRect() = 0;
+    virtual HandleVisibleContentResult GetHandleVisibleContentRect(
+        const RectF& paintRect, RectF& visibleContentRect, HandleLevelMode handleLevelMode) = 0;
+    virtual std::optional<RectF> GetAncestorNodeViewPortForChild() = 0;
+    virtual std::vector<AncestorNodeViewPortInfo> GetAncestorNodeViewPortInfos()
+    {
+        return {};
+    }
     virtual RectF GetSelectionArea(SelectRectsType pos, SelectionAreaResultType& resultType)
     {
         resultType = SelectionAreaResultType::NONE;
@@ -206,6 +226,7 @@ public:
     virtual bool FireOnWillCopy(const std::u16string& selectedContent) { return true; }
     virtual void FireOnCopy(const std::u16string& selectedContent) {}
     virtual bool IsAskCeliaSupported() const { return false; }
+    virtual std::u16string GetSelectAllText() = 0;
     virtual SelectionCopyPayload GetSelectionCopyPayload();
     virtual RefPtr<SpanString> GetSelectedSpanString() { return nullptr; }
     virtual void ResetOriginCaretPosition() {}

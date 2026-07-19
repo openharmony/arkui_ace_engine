@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
@@ -26,6 +27,27 @@ const int32_t RESPONSE_DATA_TYPE_STRING = 0;
 const int32_t RESPONSE_DATA_TYPE_NUMBER = 1;
 const int32_t RESPONSE_DATA_TYPE_RESOURCE = 2;
 const int32_t RESPONSE_DATA_TYPE_BUFFER = 3;
+const std::string RAWFILE_PREFIX = "resource://RAWFILE/";
+const std::string BUNDLE_NAME_PREFIX = "bundleName:";
+const std::string MODULE_NAME_PREFIX = "moduleName:";
+ 
+std::string ParseRawfileWebSrc(const std::string& webSrc, const std::string& bundleName,
+    const std::string& moduleName)
+{
+    if (webSrc.substr(0, RAWFILE_PREFIX.size()) != RAWFILE_PREFIX) {
+        return webSrc;
+    }
+    auto container = OHOS::Ace::Container::CurrentSafely();
+    if (!container) {
+        return webSrc;
+    }
+    if ((!bundleName.empty() && !moduleName.empty()) &&
+        (bundleName != container->GetBundleName() || moduleName != container->GetModuleName())) {
+        return RAWFILE_PREFIX + BUNDLE_NAME_PREFIX + bundleName + "/" + MODULE_NAME_PREFIX + moduleName + "/" +
+            webSrc.substr(RAWFILE_PREFIX.size());
+    }
+    return webSrc;
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -142,8 +164,11 @@ void SetResponseDataImpl(Ark_WebResourceResponse peer,
         },
         [peer](const Ark_Resource& responseData) {
             std::optional<std::string> resourceUrl = Converter::OptConvert<std::string>(responseData);
+            std::string bundleName = Converter::Convert<std::string>(responseData.bundleName);
+            std::string moduleName = Converter::Convert<std::string>(responseData.moduleName);
             std::string url;
             if (resourceUrl) {
+                resourceUrl = ParseRawfileWebSrc(resourceUrl.value(), bundleName, moduleName);
                 auto np = resourceUrl.value().find_first_of("/");
                 url = (np == std::string::npos) ? resourceUrl.value() : resourceUrl.value().erase(np, 1);
             }

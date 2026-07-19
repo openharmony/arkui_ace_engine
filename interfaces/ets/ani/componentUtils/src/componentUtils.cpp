@@ -41,41 +41,44 @@ std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
     return content;
 }
 
+// Cached global references for classes
+static ani_ref gOffsetClass;
+static ani_ref gSizeClass;
+static ani_ref gTranslateResultClass;
+static ani_ref gScaleResultClass;
+static ani_ref gRotateResultClass;
+static ani_ref gComponentInfoClass;
+
+// Cached methods
+static ani_method gOffsetCtor;
+static ani_method gSizeCtor;
+static ani_method gTranslateResultCtor;
+static ani_method gScaleResultCtor;
+static ani_method gRotateResultCtor;
+static ani_method gComponentInfoCtor;
+static std::string gComponentInfoSignature;
+
 static ani_object CreateOffset(ani_env* env, ani_double x, ani_double y)
 {
     CHECK_NULL_RETURN(env, nullptr);
-    static const char* className = "@ohos.arkui.componentUtils.componentUtils.OffsetInner";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
-    }
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dd:", &ctor)) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(gOffsetClass, nullptr);
+    CHECK_NULL_RETURN(gOffsetCtor, nullptr);
+
     ani_object obj = {};
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, x, y)) {
+    if (ANI_OK != env->Object_New(static_cast<ani_class>(gOffsetClass), gOffsetCtor, &obj, x, y)) {
         return nullptr;
     }
     return obj;
 }
-} // namespace
 
 static ani_object getSize([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
+    CHECK_NULL_RETURN(gSizeClass, nullptr);
+    CHECK_NULL_RETURN(gSizeCtor, nullptr);
     ani_object obj = {};
-    static const char* className = "@ohos.arkui.componentUtils.componentUtils.SizeInner";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
-    }
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dd:", &ctor)) {
-        return nullptr;
-    }
     ani_double width = rectangle.size.Width();
     ani_double height = rectangle.size.Height();
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, width, height)) {
+    if (ANI_OK != env->Object_New(static_cast<ani_class>(gSizeClass), gSizeCtor, &obj, width, height)) {
         return nullptr;
     }
     return obj;
@@ -100,20 +103,14 @@ static ani_object getScreenOffset([[maybe_unused]] ani_env* env, OHOS::Ace::NG::
 
 static ani_object getTranslateResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
+    CHECK_NULL_RETURN(gTranslateResultClass, nullptr);
+    CHECK_NULL_RETURN(gTranslateResultCtor, nullptr);
     ani_object obj = {};
-    static const char* className = "@ohos.arkui.componentUtils.componentUtils.TranslateResultInner";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
-    }
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "ddd:", &ctor)) {
-        return nullptr;
-    }
     ani_double x = rectangle.translate.x;
     ani_double y = rectangle.translate.y;
     ani_double z = rectangle.translate.z;
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, x, y, z)) {
+    if (ANI_OK !=
+        env->Object_New(static_cast<ani_class>(gTranslateResultClass), gTranslateResultCtor, &obj, x, y, z)) {
         return nullptr;
     }
     return obj;
@@ -121,22 +118,17 @@ static ani_object getTranslateResult([[maybe_unused]] ani_env* env, OHOS::Ace::N
 
 static ani_object getScaleResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
+    CHECK_NULL_RETURN(gScaleResultClass, nullptr);
+    CHECK_NULL_RETURN(gScaleResultCtor, nullptr);
     ani_object obj = {};
-    static const char* className = "@ohos.arkui.componentUtils.componentUtils.ScaleResultInner";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
-    }
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "ddddd:", &ctor)) {
-        return nullptr;
-    }
     ani_double x = rectangle.scale.x;
     ani_double y = rectangle.scale.y;
     ani_double z = rectangle.scale.z;
     ani_double centerX = rectangle.scale.centerX;
     ani_double centerY = rectangle.scale.centerY;
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, x, y, z, centerX, centerY)) {
+    if (ANI_OK !=
+        env->Object_New(static_cast<ani_class>(gScaleResultClass), gScaleResultCtor,
+            &obj, x, y, z, centerX, centerY)) {
         return nullptr;
     }
     return obj;
@@ -144,23 +136,18 @@ static ani_object getScaleResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::R
 
 static ani_object getRotateResult([[maybe_unused]] ani_env* env, OHOS::Ace::NG::Rectangle rectangle)
 {
+    CHECK_NULL_RETURN(gRotateResultClass, nullptr);
+    CHECK_NULL_RETURN(gRotateResultCtor, nullptr);
     ani_object obj = {};
-    static const char* className = "@ohos.arkui.componentUtils.componentUtils.RotateResultInner";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
-    }
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dddddd:", &ctor)) {
-        return nullptr;
-    }
     ani_double x = rectangle.rotate.x;
     ani_double y = rectangle.rotate.y;
     ani_double z = rectangle.rotate.z;
     ani_double centerX = rectangle.rotate.centerX;
     ani_double centerY = rectangle.rotate.centerY;
     ani_double angle = rectangle.rotate.angle;
-    if (ANI_OK != env->Object_New(cls, ctor, &obj, x, y, z, centerX, centerY, angle)) {
+    if (ANI_OK !=
+        env->Object_New(static_cast<ani_class>(gRotateResultClass), gRotateResultCtor,
+            &obj, x, y, z, centerX, centerY, angle)) {
         return nullptr;
     }
     return obj;
@@ -211,32 +198,32 @@ static ani_object getRectangleById([[maybe_unused]] ani_env* env, ani_string id)
     ani_object transform_obj = getTransform(env, rectangle);
     CHECK_NULL_RETURN(transform_obj, nullptr);
     ani_object rectangleObj = {};
-    static const char* className = "@ohos.arkui.componentUtils.componentUtils.ComponentInfoInner";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
-    }
-    ani_method ctor;
-    SignatureBuilder signatureBuilder {};
-    signatureBuilder
-        .AddClass("@ohos.arkui.componentUtils.componentUtils.Size")
-        .AddClass("@ohos.arkui.componentUtils.componentUtils.Offset")
-        .AddClass("@ohos.arkui.componentUtils.componentUtils.Offset")
-        .AddClass("@ohos.arkui.componentUtils.componentUtils.Offset")
-        .AddClass("@ohos.arkui.componentUtils.componentUtils.TranslateResult")
-        .AddClass("@ohos.arkui.componentUtils.componentUtils.ScaleResult")
-        .AddClass("@ohos.arkui.componentUtils.componentUtils.RotateResult")
-        .AddClass("std.core.Tuple16");
-    std::string signatureStr = signatureBuilder.BuildSignatureDescriptor();
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", signatureStr.c_str(), &ctor)) {
-        return nullptr;
-    }
-    if (ANI_OK != env->Object_New(cls, ctor, &rectangleObj, size_obj, localOffset_obj, windowOffset_obj,
-        screenOffset_obj, translate_obj, scale_obj, rotate_obj, transform_obj)) {
+    CHECK_NULL_RETURN(gComponentInfoClass, nullptr);
+    CHECK_NULL_RETURN(gComponentInfoCtor, nullptr);
+    if (ANI_OK != env->Object_New(static_cast<ani_class>(gComponentInfoClass), gComponentInfoCtor, &rectangleObj,
+        size_obj, localOffset_obj, windowOffset_obj, screenOffset_obj, translate_obj, scale_obj, rotate_obj,
+        transform_obj)) {
         return nullptr;
     }
     return rectangleObj;
 }
+
+bool InitCachedClass(
+    ani_env* env, const char* className, ani_ref* outGlobalRef, ani_method* outCtor, const char* signature)
+{
+    ani_class cls;
+    if (ANI_OK != env->FindClass(className, &cls)) {
+        return false;
+    }
+    if (ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(cls), outGlobalRef)) {
+        return false;
+    }
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", signature, outCtor)) {
+        return false;
+    }
+    return true;
+}
+} // namespace
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
@@ -245,9 +232,53 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         return ANI_ERROR;
     }
 
+    if (!InitCachedClass(env,
+        "@ohos.arkui.componentUtils.componentUtils.OffsetInner", &gOffsetClass, &gOffsetCtor, "dd:")) {
+        return ANI_ERROR;
+    }
+    if (!InitCachedClass(env, "@ohos.arkui.componentUtils.componentUtils.SizeInner", &gSizeClass, &gSizeCtor, "dd:")) {
+        return ANI_ERROR;
+    }
+    if (!InitCachedClass(env, "@ohos.arkui.componentUtils.componentUtils.TranslateResultInner",
+        &gTranslateResultClass, &gTranslateResultCtor, "ddd:")) {
+        return ANI_ERROR;
+    }
+    if (!InitCachedClass(env, "@ohos.arkui.componentUtils.componentUtils.ScaleResultInner",
+        &gScaleResultClass, &gScaleResultCtor, "ddddd:")) {
+        return ANI_ERROR;
+    }
+    if (!InitCachedClass(env, "@ohos.arkui.componentUtils.componentUtils.RotateResultInner",
+        &gRotateResultClass, &gRotateResultCtor, "dddddd:")) {
+        return ANI_ERROR;
+    }
+
+    {
+        ani_class cls;
+        if (ANI_OK != env->FindClass("@ohos.arkui.componentUtils.componentUtils.ComponentInfoInner", &cls)) {
+            return ANI_ERROR;
+        }
+        if (ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(cls), &gComponentInfoClass)) {
+            return ANI_ERROR;
+        }
+
+        SignatureBuilder signatureBuilder {};
+        signatureBuilder
+            .AddClass("@ohos.arkui.componentUtils.componentUtils.Size")
+            .AddClass("@ohos.arkui.componentUtils.componentUtils.Offset")
+            .AddClass("@ohos.arkui.componentUtils.componentUtils.Offset")
+            .AddClass("@ohos.arkui.componentUtils.componentUtils.Offset")
+            .AddClass("@ohos.arkui.componentUtils.componentUtils.TranslateResult")
+            .AddClass("@ohos.arkui.componentUtils.componentUtils.ScaleResult")
+            .AddClass("@ohos.arkui.componentUtils.componentUtils.RotateResult")
+            .AddClass("std.core.Tuple16");
+        gComponentInfoSignature = signatureBuilder.BuildSignatureDescriptor();
+        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", gComponentInfoSignature.c_str(), &gComponentInfoCtor)) {
+            return ANI_ERROR;
+        }
+    }
+
     ani_namespace ns;
     if (ANI_OK != env->FindNamespace("@ohos.arkui.componentUtils.componentUtils", &ns)) {
-        std::cout << "Failed componentUtils to create namespace" << std::endl;
         return ANI_ERROR;
     }
     std::array methods = {

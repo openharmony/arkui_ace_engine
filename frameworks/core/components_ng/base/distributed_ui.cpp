@@ -17,9 +17,9 @@
 
 #include <unordered_map>
 
+#include "base/json/node_object.h"
 #include "base/ressched/ressched_report.h"
 #include "core/components_ng/pattern/common_view/common_view_pattern.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -43,6 +43,10 @@
 #include "core/components_ng/syntax/syntax_item.h"
 #include "core/components_ng/syntax/with_theme_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/interfaces/native/node/node_swiper_modifier.h"
+#include "core/interfaces/native/node/tab_content_modifier.h"
+#include "core/interfaces/native/node/tabs_modifier.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -61,6 +65,7 @@ void RestorePageNode(const RefPtr<NG::FrameNode>& pageNode)
     CHECK_NULL_VOID(pagePattern);
     pagePattern->SetOnBackPressed([]() { return true; });
 }
+
 } // namespace
 
 SerializeableObjectArray DistributedUI::DumpUITree()
@@ -270,7 +275,9 @@ void DistributedUI::ApplyOneUpdate()
         if (pendingUpdates_.empty()) {
             return;
         }
+#ifndef CROSS_PLATFORM
         ResSchedReport::GetInstance().ResSchedDataReport("click");
+#endif
         auto update = std::move(pendingUpdates_.front());
         pendingUpdates_.pop_front();
         UpdateUITreeInner(update);
@@ -495,24 +502,28 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
                         type, nodeId, []() { return AceType::MakeRefPtr<FlexLayoutPattern>(); });
                 } },
             { V2::TABS_ETS_TAG,
-                [](const std::string& type, int32_t nodeId) {
-                    return TabsModelNG::GetOrCreateTabsNode(
-                        type, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+                [](const std::string& type, int32_t nodeId) -> RefPtr<UINode> {
+                    auto modifier = NodeModifier::GetTabsCustomModifier();
+                    CHECK_NULL_RETURN(modifier, nullptr);
+                    return AceType::Claim(reinterpret_cast<UINode*>(modifier->createFrameNode(nodeId)));
                 } },
             { V2::TAB_BAR_ETS_TAG,
-                [](const std::string& type, int32_t nodeId) {
-                    return FrameNode::GetOrCreateFrameNode(
-                        type, nodeId, []() { return AceType::MakeRefPtr<TabBarPattern>(); });
+                [](const std::string& type, int32_t nodeId) -> RefPtr<UINode> {
+                    auto modifier = NodeModifier::GetTabsCustomModifier();
+                    CHECK_NULL_RETURN(modifier, nullptr);
+                    return AceType::Claim(reinterpret_cast<UINode*>(modifier->createTabBarFrameNode(nodeId)));
                 } },
             { V2::SWIPER_ETS_TAG,
-                [](const std::string& type, int32_t nodeId) {
-                    return FrameNode::GetOrCreateFrameNode(
-                        type, nodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+                [](const std::string& type, int32_t nodeId) -> RefPtr<UINode> {
+                    auto modifier = NodeModifier::GetSwiperCustomModifier();
+                    CHECK_NULL_RETURN(modifier, nullptr);
+                    return AceType::Claim(reinterpret_cast<UINode*>(modifier->createFrameNode(nodeId)));
                 } },
             { V2::TAB_CONTENT_ITEM_ETS_TAG,
-                [](const std::string& type, int32_t nodeId) {
-                    return TabContentNode::GetOrCreateTabContentNode(
-                        type, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
+                [](const std::string& type, int32_t nodeId) -> RefPtr<UINode> {
+                    auto modifier = NodeModifier::GetTabContentCustomModifier();
+                    CHECK_NULL_RETURN(modifier, nullptr);
+                    return AceType::Claim(reinterpret_cast<UINode*>(modifier->createFrameNode(nodeId)));
                 } },
             { V2::COMMON_VIEW_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
@@ -540,8 +551,7 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
                 } },
             { V2::DIVIDER_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
-                    return FrameNode::GetOrCreateFrameNode(
-                        type, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+                    return CreateDividerFrameNode(nodeId);
                 } },
         };
 

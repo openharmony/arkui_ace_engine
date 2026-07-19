@@ -1,45 +1,6 @@
 {
   "knowledge_bases": [
     {
-      "name": "Text",
-      "name_cn": "文本组件",
-      "category": "basic",
-      "type": "component",
-      "keywords": [
-        "文本显示",
-        "文字",
-        "font",
-        "span",
-        "文本样式",
-        "字体大小",
-        "文本选择",
-        "跑马灯",
-        "AI实体识别",
-        "文本拖拽",
-        "typography"
-      ],
-      "aliases": [
-        "Text组件",
-        "文本",
-        "文字组件"
-      ],
-      "file_path": "pattern/text/Text_Knowledge_Base_CN.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_model_ng.cpp",
-        "layout": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_layout_algorithm.h",
-        "property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text/text_layout_property.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/text.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextModifier.static.d.ets",
-        "capi": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/native/node/text_native_impl.h"
-      },
-      "last_updated": "2026-06-01"
-    },
-    {
       "name": "Menu",
       "name_cn": "菜单组件",
       "category": "advanced",
@@ -147,10 +108,10 @@
       ],
       "file_path": "pattern/sheet/Sheet_Knowledge_Base_CN.md",
       "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_presentation_pattern.cpp",
-        "manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
+        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/sheet/sheet_presentation_pattern.cpp",
+        "manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/sheet/sheet_manager.cpp",
         "object": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/sheet/sheet_object.cpp",
-        "style": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/overlay/sheet_style.h"
+        "style": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/sheet/sheet_style.h"
       },
       "api_paths": {
         "static": "<OH_ROOT>/interface/sdk-js/api/arkui/@ohos.arkui.advanced.SheetPanel.d.ts"
@@ -300,71 +261,6 @@
       "api_paths": {
         "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/badge.d.ts",
         "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/badge.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "Image",
-      "name_cn": "图片组件",
-      "category": "media",
-      "type": "component",
-      "keywords": [
-        "图片",
-        "image",
-        "图片加载",
-        "image sync",
-        "alt",
-        "占位图",
-        "loading",
-        "图片缓存",
-        "SVG",
-        "bitmap"
-      ],
-      "aliases": [
-        "Image组件",
-        "图片"
-      ],
-      "file_path": "pattern/image/Image_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image/image_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image/image_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/image.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/image.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "ImageAnimator",
-      "name_cn": "图片动画组件",
-      "category": "media",
-      "type": "component",
-      "keywords": [
-        "图片动画",
-        "帧动画",
-        "image animator",
-        "frame animation",
-        "图片序列",
-        "animation"
-      ],
-      "aliases": [
-        "ImageAnimator组件",
-        "图片动画",
-        "帧动画"
-      ],
-      "file_path": "pattern/image_animator/Image_Animator_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image_animator/image_animator_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/image_animator/image_animator_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/image_animator.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/imageAnimator.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageAnimatorModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageAnimatorModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -610,29 +506,6 @@
       "last_updated": "2026-02-03"
     },
     {
-      "name": "ContainerPicker",
-      "name_cn": "容器选择器组件",
-      "category": "selector",
-      "type": "component",
-      "keywords": [
-        "容器选择器",
-        "container picker",
-        "弹出选择",
-        "popup picker"
-      ],
-      "aliases": [
-        "ContainerPicker组件",
-        "容器选择器"
-      ],
-      "file_path": "pattern/container_picker/Container_Picker_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/container_picker/container_picker_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/container_picker/container_picker_model_ng.cpp"
-      },
-      "api_paths": {},
-      "last_updated": "2026-02-03"
-    },
-    {
       "name": "Counter",
       "name_cn": "计数器组件",
       "category": "selector",
@@ -692,93 +565,6 @@
         "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gauge.static.d.ets",
         "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GaugeModifier.d.ts",
         "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GaugeModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "DatePicker",
-      "name_cn": "日期选择器组件",
-      "category": "selector",
-      "type": "component",
-      "keywords": [
-        "日期选择器",
-        "date picker",
-        "date",
-        "日期",
-        "年月日"
-      ],
-      "aliases": [
-        "DatePicker组件",
-        "日期选择器"
-      ],
-      "file_path": "pattern/picker/Date_Picker_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/date_picker/date_picker_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/date_picker/date_picker_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/date_picker.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/datePicker.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/DatePickerModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/DatePickerModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "TimePicker",
-      "name_cn": "时间选择器组件",
-      "category": "selector",
-      "type": "component",
-      "keywords": [
-        "时间选择器",
-        "time picker",
-        "time",
-        "时间",
-        "时分秒"
-      ],
-      "aliases": [
-        "TimePicker组件",
-        "时间选择器"
-      ],
-      "file_path": "pattern/time_picker/Time_Picker_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/time_picker/time_picker_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/time_picker/time_picker_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/time_picker.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/timePicker.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TimePickerModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TimePickerModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "TextPicker",
-      "name_cn": "文本选择器组件",
-      "category": "selector",
-      "type": "component",
-      "keywords": [
-        "文本选择器",
-        "text picker",
-        "picker",
-        "选择器",
-        "滚动选择"
-      ],
-      "aliases": [
-        "TextPicker组件",
-        "文本选择器"
-      ],
-      "file_path": "pattern/text_picker/Text_Picker_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_picker/text_picker_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_picker/text_picker_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_picker.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textPicker.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextPickerModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextPickerModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -1279,7 +1065,7 @@
         "ArkUI资源"
       ],
       "file_path": "common/resource/Resource_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
+      "last_updated": "2026-06-15"
     },
     {
       "name": "Animation",
@@ -1811,48 +1597,6 @@
       "last_updated": "2026-05-25"
     },
     {
-      "name": "Toggle",
-      "name_cn": "开关组件",
-      "category": "selector",
-      "type": "component",
-      "keywords": [
-        "开关",
-        "切换",
-        "switch",
-        "toggle",
-        "checkbox",
-        "button",
-        "isOn",
-        "selectedColor",
-        "switchPointColor",
-        "switchStyle",
-        "ToggleType",
-        "选中",
-        "状态切换"
-      ],
-      "aliases": [
-        "Toggle组件",
-        "开关",
-        "切换按钮",
-        "Switch开关"
-      ],
-      "file_path": "pattern/toggle/Toggle_Knowledge_Base_CN.md",
-      "source_paths": {
-        "pattern_switch": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/toggle/switch_pattern.cpp",
-        "pattern_button": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/button/toggle_button_pattern.cpp",
-        "pattern_checkbox": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/toggle/toggle_model_ng.cpp",
-        "base_pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/toggle/toggle_base_pattern.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/toggle.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/toggle.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ToggleModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ToggleModifier.static.d.ets"
-      },
-      "last_updated": "2026-05-31"
-    },
-    {
       "name": "UISession",
       "name_cn": "UI会话",
       "category": "system",
@@ -1872,7 +1616,16 @@
         "Web翻译",
         "AI文本",
         "HitTest",
-        "状态管理信息"
+        "状态管理信息",
+        "PageScene",
+        "页面场景感知",
+        "TEXT_EDITOR",
+        "ui_sa",
+        "GetUIContentRemoteObj",
+        "libwm",
+        "libui_sa",
+        "libui_session",
+        "libace_compatible"
       ],
       "aliases": [
         "UiSession",
@@ -1892,10 +1645,11 @@
         "content_change_manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp",
         "sample_build": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/inner_api/ui_session/ui_session_sample/BUILD.gn",
         "sample_service": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/inner_api/ui_session/ui_session_sample/ui_sa_service.cpp",
-        "sample_config": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/inner_api/ui_session/ui_session_sample/16666.json"
+        "sample_config": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/inner_api/ui_session/ui_session_sample/16666.json",
+        "window_ui_content_remote": "<OH_ROOT>/foundation/window/window_manager/wm/src/window_session_impl.cpp"
       },
       "api_paths": {},
-      "last_updated": "2026-06-13"
+      "last_updated": "2026-07-09"
     }
   ],
   "categories": {
@@ -1903,7 +1657,6 @@
       "name": "基础组件",
       "description": "常用的基础UI组件",
       "components": [
-        "Text",
         "Search"
       ]
     },
@@ -1923,12 +1676,7 @@
       "description": "用于数据选择的组件",
       "components": [
         "CalendarPicker",
-        "ContainerPicker",
-        "Counter",
-        "DatePicker",
-        "TimePicker",
-        "TextPicker",
-        "Toggle"
+        "Counter"
       ]
     },
     "shape": {
@@ -1939,10 +1687,7 @@
     "media": {
       "name": "媒体组件",
       "description": "用于媒体内容展示的组件",
-      "components": [
-        "Image",
-        "ImageAnimator"
-      ]
+      "components": []
     },
     "data_display": {
       "name": "数据展示组件",

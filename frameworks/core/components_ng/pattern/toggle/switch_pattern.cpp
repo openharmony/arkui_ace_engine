@@ -19,7 +19,9 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/system_properties.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/frame_node.h"
@@ -377,7 +379,9 @@ void SwitchPattern::OnAfterModifyDone()
     CHECK_NULL_VOID(host);
     auto inspectorId = host->GetInspectorId().value_or("");
     if (!inspectorId.empty()) {
+#ifndef CROSS_PLATFORM
         Recorder::NodeDataCache::Get().PutBool(host, inspectorId, isOn_.value_or(false));
+#endif
     }
 }
 
@@ -1044,15 +1048,6 @@ void SwitchPattern::CreateDragFrameNode()
 
     dragFrameNode_->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(frameSize), CalcLength(frameSize)));
-
-    if (paintProperty->HasSwitchPointColor()) {
-        ViewAbstract::SetLightPosition(AceType::RawPtr(dragFrameNode_),
-            CalcDimension(pointDiameter, DimensionUnit::PX), CalcDimension(pointDiameter, DimensionUnit::PX),
-            CalcDimension(pointDiameter, DimensionUnit::PX));
-        ViewAbstract::SetLightColor(AceType::RawPtr(dragFrameNode_), paintProperty->GetSwitchPointColor().value());
-        ViewAbstract::SetLightIntensity(AceType::RawPtr(dragFrameNode_), 1.5f);
-        ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragFrameNode_), 2u);
-    }
 }
 
 void SwitchPattern::CreateDragPointNode()
@@ -1664,6 +1659,7 @@ int32_t SwitchPattern::OnInjectionEvent(const std::string& command)
 
 void SwitchPattern::ReportChangeEvent(bool isOn)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto nodeId = host->GetId();
@@ -1677,10 +1673,12 @@ void SwitchPattern::ReportChangeEvent(bool isOn)
     json->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 bool SwitchPattern::ReportInjectionResult(bool isSuccess, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto nodeId = host->GetId();
@@ -1693,6 +1691,7 @@ bool SwitchPattern::ReportInjectionResult(bool isSuccess, const std::string& rea
     result->Put("reason", reason.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "ToggleResult", result->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
     return true;
 }
 } // namespace OHOS::Ace::NG

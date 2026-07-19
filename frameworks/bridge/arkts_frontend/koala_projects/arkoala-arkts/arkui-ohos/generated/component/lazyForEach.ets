@@ -21,6 +21,10 @@ import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, SerializerBase, Des
 import { memo, memo_stable } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
 import { CallbackTransformer } from './../CallbackTransformer'
+export enum LazyForEachMemOptStrategy {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1
+}
 export enum DataOperationType {
     ADD = 'add',
     DELETE = 'delete',
@@ -41,6 +45,7 @@ export enum LazyForEachCustomComponentFreezeMode {
 export interface LazyForEachOptions {
     customComponentFreezeMode?: LazyForEachCustomComponentFreezeMode;
     releaseStrategy?: LazyForEachReleaseStrategy;
+    memoryOptimizationStrategy?: LazyForEachMemOptStrategy;
 }
 export interface DataAddOperation {
     type: DataOperationType;
@@ -103,6 +108,14 @@ export class LazyForEachOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForMemoryOptimizationStrategy = value.memoryOptimizationStrategy
+        if (valueHolderForMemoryOptimizationStrategy !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMemoryOptimizationStrategyTmpValue = (valueHolderForMemoryOptimizationStrategy as LazyForEachMemOptStrategy)
+            valueSerializer.writeInt32(valueHolderForMemoryOptimizationStrategyTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): LazyForEachOptions {
         let valueDeserializer: DeserializerBase = buffer
@@ -118,7 +131,13 @@ export class LazyForEachOptions_serializer {
             releaseStrategyTmpBuf = LazyForEachReleaseStrategy.fromValue(valueDeserializer.readInt32())
         }
         const releaseStrategyTmpResult: LazyForEachReleaseStrategy | undefined = releaseStrategyTmpBuf
-        let value: LazyForEachOptions = ({customComponentFreezeMode: customComponentFreezeModeTmpResult, releaseStrategy: releaseStrategyTmpResult} as LazyForEachOptions)
+        const memoryOptimizationStrategyTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let memoryOptimizationStrategyTmpBuf: LazyForEachMemOptStrategy | undefined = undefined
+        if ((memoryOptimizationStrategyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            memoryOptimizationStrategyTmpBuf = LazyForEachMemOptStrategy.fromValue(valueDeserializer.readInt32())
+        }
+        const memoryOptimizationStrategyTmpResult: LazyForEachMemOptStrategy | undefined = memoryOptimizationStrategyTmpBuf
+        let value: LazyForEachOptions = ({customComponentFreezeMode: customComponentFreezeModeTmpResult, releaseStrategy: releaseStrategyTmpResult, memoryOptimizationStrategy: memoryOptimizationStrategyTmpResult} as LazyForEachOptions)
         return value
     }
 }

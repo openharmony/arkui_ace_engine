@@ -18,7 +18,6 @@
 
 #include <vector>
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "arkoala_api_generated.h"
 

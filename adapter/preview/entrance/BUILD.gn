@@ -59,18 +59,22 @@ ohos_source_set("preview_entrance_source") {
       "mmi_event_convertor.cpp",
       "msdp/interaction_impl.cpp",
       "picker/picker_haptic_factory.cpp",
-      "report/reporter_impl.cpp",
       "setting_data_manager_impl.cpp",
       "subwindow_preview.cpp",
       "touch_event_convertor.cpp",
       "udmf/udmf_impl.cpp",
       "ui_content_impl.cpp",
-      "ui_session/ui_session_json_util.cpp",
       "ui_session/ui_session_manager_preview.cpp",
       "vibrator/vibrator_utils.cpp",
       "window_free_container.cpp",
-      "xcollie/xcollieInterface_impl.cpp",
     ]
+
+    if (defined(config.enable_inspector_event_reporting) && config.enable_inspector_event_reporting) {
+      sources += [
+        "report/reporter_impl.cpp",
+        "xcollie/xcollieInterface_impl.cpp",
+      ]
+    }
 
     deps = [
       "$ace_napi:ace_napi",

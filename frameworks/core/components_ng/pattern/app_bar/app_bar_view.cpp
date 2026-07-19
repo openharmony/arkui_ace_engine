@@ -27,13 +27,14 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/app_bar/app_bar_utils.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 std::function<RefPtr<FrameNode>(NG::AppBarView* appBar, const RefPtr<FrameNode>& stage)>
@@ -80,6 +81,7 @@ void AssembleUiExtensionParams(
     }
 }
 #endif
+
 } // namespace
 
 void AppBarView::SetOnBackPressedConsumed()
@@ -319,8 +321,11 @@ RefPtr<FrameNode> AppBarView::BuildMenuBar()
 
 RefPtr<FrameNode> AppBarView::BuildButton(bool isMenuButton)
 {
-    auto button = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    auto buttonHandle = buttonModifier->createFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    auto button = AceType::Claim(reinterpret_cast<FrameNode*>(buttonHandle));
+    CHECK_NULL_RETURN(button, nullptr);
     auto renderContext = button->GetRenderContext();
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     auto theme = GetAppBarTheme();
@@ -329,10 +334,10 @@ RefPtr<FrameNode> AppBarView::BuildButton(bool isMenuButton)
     auto icon = BuildIcon(isMenuButton);
     button->AddChild(icon);
 
-    auto layoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     // type
-    layoutProperty->UpdateType(ButtonType::NORMAL);
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
     // size
+    auto layoutProperty = button->GetLayoutProperty();
     layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(theme->GetButtonWidth()), CalcLength(theme->GetButtonHeight())));
     // focus style type
@@ -340,9 +345,7 @@ RefPtr<FrameNode> AppBarView::BuildButton(bool isMenuButton)
     CHECK_NULL_RETURN(focusHub, nullptr);
     focusHub->SetFocusStyleType(FocusStyleType::INNER_BORDER);
     // focus border width
-    auto buttonPattern = button->GetPattern<ButtonPattern>();
-    CHECK_NULL_RETURN(buttonPattern, nullptr);
-    buttonPattern->SetFocusBorderWidth(theme->GetFocusedOutlineWidth());
+    buttonModifier->setFocusBorderWidth(buttonHandle, theme->GetFocusedOutlineWidth());
 
     button->MarkModifyDone();
     return button;
@@ -374,8 +377,7 @@ RefPtr<FrameNode> AppBarView::BuildIcon(bool isMenuIcon)
 
 RefPtr<FrameNode> AppBarView::BuildDivider()
 {
-    auto divider = FrameNode::CreateFrameNode(
-        V2::DIVIDER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DividerPattern>());
+    auto divider = CreateDividerFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     auto theme = GetAppBarTheme();
     CHECK_NULL_RETURN(theme, nullptr);
 

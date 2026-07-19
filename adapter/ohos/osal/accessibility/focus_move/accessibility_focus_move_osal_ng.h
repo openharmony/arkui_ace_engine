@@ -18,6 +18,10 @@
 
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_move_osal.h"
 
+
+namespace OHOS::Ace::NG {
+class VirtualAccessibilityNode;
+}
 namespace OHOS::Ace::Framework {
 class JsAccessibilityManager;
 class FocusStrategyOsalNG : public FocusStrategyOsal {
@@ -47,7 +51,7 @@ public:
 private:
     Accessibility::FocusMoveResult CheckAndGetReadableInfoToRoot(
         const RefPtr<NG::FrameNode>& currentFrameNode, std::list<Accessibility::AccessibilityElementInfo>& targetInfos,
-        const int32_t windowId);
+        const int32_t windowId, Accessibility::FocusRuleType focusRuleType = Accessibility::FocusRuleType::DEFAULT);
     void UpdateBelongTreeIdAndParentWindowId(const int32_t windowId, Accessibility::FocusMoveResult &result);
 
     virtual bool CheckNodeIsAvailable(const std::shared_ptr<FocusRulesCheckNode>& node);
@@ -61,6 +65,8 @@ private:
     WeakPtr<NG::FrameNode> baseNode_;
     WeakPtr<NG::FrameNode> baseNextNode_;
     WeakPtr<NG::FrameNode> basePrevNode_;
+    WeakPtr<NG::VirtualAccessibilityNode> baseVirtualNode_;
+    WeakPtr<NG::FrameNode> hostFrameNode_;
 };
 } // OHOS::Ace::Framework
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_OSAL_ACCESSIBILITY_FOCUS_MOVE_ACCESSIBILITY_FOCUS_MOVE_OSAL_NG_H

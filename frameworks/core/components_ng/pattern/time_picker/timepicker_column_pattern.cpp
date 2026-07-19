@@ -18,6 +18,7 @@
 #include <cerrno>
 #include <climits>
 #include <cstdint>
+#include <string_view>
 #include <cstdlib>
 #include <iterator>
 #include <list>
@@ -54,7 +55,7 @@ constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
 #endif
 const int32_t HALF_NUMBER = 2;
 const uint32_t NEXT_COLOUM_DIFF = 1;
-const std::string AMPM = "amPm";
+constexpr std::string_view AMPM = "amPm";
 const char CHINESE_HOUR[] = u8"\u70b9";
 } // namespace
 
@@ -790,8 +791,8 @@ void TimePickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool nee
     CHECK_NULL_VOID(stack);
     auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
@@ -807,7 +808,7 @@ void TimePickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool nee
         borderWidth.SetBorderWidth(buttonDefaultBorderWidth_);
         borderColor.SetColor(buttonDefaultBorderColor_);
     }
-    buttonLayoutProperty->UpdateBorderWidth(borderWidth);
+    layoutProperty->UpdateBorderWidth(borderWidth);
     renderContext->UpdateBorderColor(borderColor);
     renderContext->UpdateBackgroundColor(buttonBgColor_);
 

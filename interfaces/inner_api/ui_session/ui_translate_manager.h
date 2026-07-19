@@ -19,8 +19,9 @@
 #include <functional>
 #include <vector>
 
-#include "ui_session_json_util.h"
+#include "base/json/json_util.h"
 #include "base/utils/macros.h"
+#include "ui_translate_type.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UiTranslateManager {
@@ -28,6 +29,11 @@ public:
     virtual ~UiTranslateManager() = default;
     virtual void GetWebViewCurrentLanguage() {};
     virtual void GetTranslateText(std::string extraData, bool isContinued) {};
+    virtual void GetPageTranslateText(int32_t scope, const std::string& extraData) {};
+    virtual void StartPageTranslate(int32_t scope, const std::string& extraData) {};
+    virtual void EndPageTranslate(int32_t scope) {};
+    virtual void ResetPageTranslate(int32_t nodeId) {};
+    virtual void SendPageTranslateResult(const std::vector<TranslateResult>& translateResults) {};
     virtual void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) {};
     virtual void SendTranslateResult(int32_t nodeId, std::string res) {};
     virtual void ResetTranslate(int32_t nodeId);

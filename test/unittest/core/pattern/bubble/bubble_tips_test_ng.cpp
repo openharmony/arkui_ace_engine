@@ -39,6 +39,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "core/components/common/properties/placement.h"
 
 using namespace testing;
@@ -60,8 +61,6 @@ constexpr float LINE_HEIGHT = 16.0f;
 constexpr float TEXT_WIDTH = 14.0f;
 constexpr float TEXT_PADDING = 12.0f;
 constexpr int32_t DOUBLE = 2;
-constexpr float WIDTH = 100.0f;
-constexpr float HEIGHT = 100.0f;
 constexpr Dimension TIPS_MARGIN_SPACE = 8.0_vp;
 constexpr Dimension MOUSE_WIDTH = 16.0_vp;
 constexpr Dimension MOUSE_HEIGHT = 24.0_vp;
@@ -78,6 +77,9 @@ constexpr float BUBBLE_HEIGHT = 50.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF WRAPPER_SIZE = { 1000.0f, 1000.0f };
 const SafeAreaInsets::Inset KEYBOARD_INSET = { .start = 500.f, .end = 1000.f };
+// Button number constants matching those in bubble_view.cpp
+constexpr int32_t PRIMARY_BUTTON_NUMBER = 1;
+constexpr int32_t SECONDARY_BUTTON_NUMBER = 2;
 } // namespace
 class BubbleTipsTestNg : public testing::Test {
 public:
@@ -879,126 +881,6 @@ HWTEST_F(BubbleTipsTestNg, IsPaintDoubleBorderTest002, TestSize.Level0)
 }
 
 /**
- * @tc.name: FitMouseOffset001
- * @tc.desc: Test FitMouseOffset.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleTipsTestNg, FitMouseOffset001, TestSize.Level0)
-{
-    auto targetNode = CreateTargetNode();
-    auto id = targetNode->GetId();
-    auto targetTag = targetNode->GetTag();
-    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
-    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
-    ASSERT_NE(bubblePattern, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    MockPipelineContext::GetCurrent()->displayWindowRectInfo_ = Rect(0.0, 0.0, WIDTH, HEIGHT);
-    layoutAlgorithm->followCursor_ = true;
-    layoutAlgorithm->expandDisplay_ = false;
-    const double offset = 10.0;
-    const double size = 20.0;
-    const int32_t parentId = 1;
-    const Rect subWindow(offset, offset, size, size);
-    const OffsetF targetPosition(75.0, 75.0);
-    RefPtr<PipelineContext> pipelineContext = targetNode->GetContextRefPtr();
-    auto containerId = pipelineContext->GetInstanceId();
-    AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(containerId))->isSubContainer_ = true;
-    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
-    SubwindowManager::GetInstance()->parentContainerMap_[MockContainer::CurrentId()] = parentId;
-    AceEngine::Get().AddContainer(parentId, AceType::MakeRefPtr<MockContainer>());
-    auto parentContainer = AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(parentId));
-    parentContainer->pipelineContext_ = MockPipelineContext::GetCurrentContext();
-    EXPECT_CALL(*parentContainer, GetGlobalScaledRect()).WillOnce(Return(subWindow));
-    layoutAlgorithm->targetOffset_ = OffsetF((offset + size) * HALF, (offset + size) * HALF);
-    layoutAlgorithm->FitMouseOffset(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutAlgorithm->targetOffset_, targetPosition);
-    AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(containerId))->isSubContainer_ = false;
-}
-
-/**
- * @tc.name: FitMouseOffset002
- * @tc.desc: Test FitMouseOffset.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleTipsTestNg, FitMouseOffset002, TestSize.Level0)
-{
-    auto targetNode = CreateTargetNode();
-    auto id = targetNode->GetId();
-    auto targetTag = targetNode->GetTag();
-    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
-    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
-    ASSERT_NE(bubblePattern, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    MockPipelineContext::GetCurrent()->displayWindowRectInfo_ = Rect(0.0, 0.0, WIDTH, HEIGHT);
-    layoutAlgorithm->followCursor_ = true;
-    layoutAlgorithm->expandDisplay_ = false;
-    const double offset = 10.0;
-    const double size = 20.0;
-    const Rect subWindow(offset, offset, size, size);
-    const OffsetF targetPosition((offset + size) * HALF, (offset + size) * HALF);
-    MockContainer::UpdateCurrent(1);
-    layoutAlgorithm->targetOffset_ = targetPosition;
-    layoutAlgorithm->FitMouseOffset(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutAlgorithm->targetOffset_, targetPosition);
-}
-
-/**
- * @tc.name: FitMouseOffset003
- * @tc.desc: Test FitMouseOffset.
- * @tc.type: FUNC
- */
-HWTEST_F(BubbleTipsTestNg, FitMouseOffset003, TestSize.Level0)
-{
-    auto targetNode = CreateTargetNode();
-    auto id = targetNode->GetId();
-    auto targetTag = targetNode->GetTag();
-    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, popupId, AceType::MakeRefPtr<BubblePattern>(id, targetTag));
-    auto bubblePattern = frameNode->GetPattern<BubblePattern>();
-    ASSERT_NE(bubblePattern, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    MockPipelineContext::GetCurrent()->displayWindowRectInfo_ = Rect(0.0, 0.0, WIDTH, HEIGHT);
-    layoutAlgorithm->followCursor_ = true;
-    layoutAlgorithm->expandDisplay_ = false;
-    const Rect subWindow(0.0, 0.0, 0.0, 0.0);
-    const OffsetF targetPosition(0.0, 0.0);
-    const int32_t parentId = 1;
-    RefPtr<PipelineContext> pipelineContext = targetNode->GetContextRefPtr();
-    auto containerId = pipelineContext->GetInstanceId();
-    AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(containerId))->isSubContainer_ = true;
-    auto parentContainer = AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(parentId));
-    parentContainer->pipelineContext_ = MockPipelineContext::GetCurrentContext();
-    EXPECT_CALL(*parentContainer, GetGlobalScaledRect()).WillOnce(Return(subWindow));
-    layoutAlgorithm->targetOffset_ = targetPosition;
-    layoutAlgorithm->FitMouseOffset(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutAlgorithm->targetOffset_, targetPosition);
-    AceType::DynamicCast<MockContainer>(AceEngine::Get().GetContainer(containerId))->isSubContainer_ = false;
-}
-
-/**
  * @tc.name: MeasureTipsFollowTarget001
  * @tc.desc: Test MeasureTipsFollowTarget.
  * @tc.type: FUNC
@@ -1190,4 +1072,560 @@ HWTEST_F(BubbleTipsTestNg, PopBubble003, TestSize.Level0)
     EXPECT_EQ(bubbleLayoutAlgorithm->showArrow_, false);
     pipeline->designWidthScale_ = designWidthScale;
 }
+
+/**
+ * @tc.name: CreateButtonWithFlexGrowEnabled001
+ * @tc.desc: Test BubbleView::CreateButton with enablePopupFlexGrow enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, CreateButtonWithFlexGrowEnabled001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. set enablePopupFlexGrow to 1 (enabled).
+     */
+    popupTheme->enablePopupFlexGrow_ = 1;
+
+    /**
+     * @tc.steps: step2. create target node and popup param.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+
+    /**
+     * @tc.steps: step3. create a button with button properties.
+     */
+    ButtonProperties buttonParam;
+    buttonParam.value = "Test Button";
+    buttonParam.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    buttonParam.showButton = true;
+
+    /**
+     * @tc.steps: step4. create button using BubbleView::CreateButton.
+     */
+    auto buttonNode = BubbleView::CreateButton(buttonParam, popupId, targetId, popupParam, popupTheme,
+        PRIMARY_BUTTON_NUMBER);
+    CHECK_NULL_VOID(buttonNode);
+
+    /**
+     * @tc.steps: step5. verify button has flexGrow set to 1.0f.
+     * @tc.expected: step5. button layout property should have flexGrow as 1.0f.
+     */
+    auto buttonLayoutProp = buttonNode->GetLayoutProperty();
+    ASSERT_NE(buttonLayoutProp, nullptr);
+    const auto& property = buttonLayoutProp->GetFlexItemProperty();
+    ASSERT_NE(property, nullptr);
+    auto flexGrow = property->GetFlexGrow();
+    EXPECT_FLOAT_EQ(flexGrow.value_or(0.0f), 1.0f);
+}
+
+/**
+ * @tc.name: CreateButtonWithFlexGrowDisabled001
+ * @tc.desc: Test BubbleView::CreateButton with enablePopupFlexGrow disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, CreateButtonWithFlexGrowDisabled001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. set enablePopupFlexGrow to 0 (disabled).
+     */
+    popupTheme->enablePopupFlexGrow_ = 0;
+
+    /**
+     * @tc.steps: step2. create target node and popup param.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+
+    /**
+     * @tc.steps: step3. create a button with button properties.
+     */
+    ButtonProperties buttonParam;
+    buttonParam.value = "Test Button";
+    buttonParam.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    buttonParam.showButton = true;
+
+    /**
+     * @tc.steps: step4. create button using BubbleView::CreateButton.
+     */
+    auto buttonNode = BubbleView::CreateButton(buttonParam, popupId, targetId, popupParam, popupTheme,
+        PRIMARY_BUTTON_NUMBER);
+    CHECK_NULL_VOID(buttonNode);
+
+    /**
+     * @tc.steps: step5. verify button does not have flexGrow set.
+     * @tc.expected: step5. button layout property should have flexGrow as default (0.0f).
+     */
+    auto buttonLayoutProp = buttonNode->GetLayoutProperty();
+    ASSERT_NE(buttonLayoutProp, nullptr);
+    const auto& property = buttonLayoutProp->GetFlexItemProperty();
+    ASSERT_NE(property, nullptr);
+    auto flexGrow = property->GetFlexGrow();
+    EXPECT_FLOAT_EQ(flexGrow.value_or(0.0f), 0.0f);
+}
+
+/**
+ * @tc.name: CreateButtonWithFlexGrowToggle001
+ * @tc.desc: Test BubbleView::CreateButton toggling enablePopupFlexGrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, CreateButtonWithFlexGrowToggle001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node and popup param.
+     */
+    auto targetNode = CreateTargetNode();
+    auto targetId = targetNode->GetId();
+    auto popupId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+
+    ButtonProperties buttonParam;
+    buttonParam.value = "Test Button";
+    buttonParam.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    buttonParam.showButton = true;
+
+    /**
+     * @tc.steps: step2. test with enablePopupFlexGrow disabled (0).
+     */
+    popupTheme->enablePopupFlexGrow_ = 0;
+    auto buttonNode1 = BubbleView::CreateButton(buttonParam, popupId, targetId, popupParam, popupTheme,
+        PRIMARY_BUTTON_NUMBER);
+    CHECK_NULL_VOID(buttonNode1);
+    auto buttonLayoutProp1 = buttonNode1->GetLayoutProperty();
+    ASSERT_NE(buttonLayoutProp1, nullptr);
+    const auto& property1 = buttonLayoutProp1->GetFlexItemProperty();
+    ASSERT_NE(property1, nullptr);
+    auto flexGrow1 = property1->GetFlexGrow();
+    EXPECT_FLOAT_EQ(flexGrow1.value_or(0.0f), 0.0f);
+
+    /**
+     * @tc.steps: step3. test with enablePopupFlexGrow enabled (1).
+     */
+    popupTheme->enablePopupFlexGrow_ = 1;
+    auto buttonNode2 = BubbleView::CreateButton(buttonParam, popupId, targetId, popupParam, popupTheme,
+        SECONDARY_BUTTON_NUMBER);
+    CHECK_NULL_VOID(buttonNode2);
+    auto buttonLayoutProp2 = buttonNode2->GetLayoutProperty();
+    ASSERT_NE(buttonLayoutProp2, nullptr);
+    const auto& property2 = buttonLayoutProp2->GetFlexItemProperty();
+    ASSERT_NE(property2, nullptr);
+    auto flexGrow2 = property2->GetFlexGrow();
+    EXPECT_FLOAT_EQ(flexGrow2.value_or(0.0f), 1.0f);
+}
+
+/**
+ * @tc.name: FitMouseOffset001
+ * @tc.desc: Test BubbleLayoutAlgorithm::FitMouseOffset when followCursor is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, FitMouseOffset001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create tips node and layout algorithm.
+     */
+    auto tipsNode = CreateTipsNode(CreateTipsParamForCursor(), TIPS_MSG_1);
+    auto layoutWrapper = tipsNode->CreateLayoutWrapper();
+    auto bubblePattern = tipsNode->GetPattern<BubblePattern>();
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set followCursor_ to false, expect function returns early.
+     */
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->expandDisplay_ = false;
+    layoutAlgorithm->targetOffset_ = OffsetF(100.0f, 200.0f);
+    OffsetF originalOffset = layoutAlgorithm->targetOffset_;
+
+    layoutAlgorithm->FitMouseOffset(AceType::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step3. verify targetOffset_ remains unchanged when followCursor_ is false.
+     */
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetX(), originalOffset.GetX());
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetY(), originalOffset.GetY());
+}
+
+/**
+ * @tc.name: FitMouseOffset002
+ * @tc.desc: Test BubbleLayoutAlgorithm::FitMouseOffset when expandDisplay is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, FitMouseOffset002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create tips node and layout algorithm.
+     */
+    auto tipsNode = CreateTipsNode(CreateTipsParamForCursor(), TIPS_MSG_1);
+    auto layoutWrapper = tipsNode->CreateLayoutWrapper();
+    auto bubblePattern = tipsNode->GetPattern<BubblePattern>();
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set followCursor_ to true and expandDisplay_ to true,
+     *           expect function returns early.
+     */
+    layoutAlgorithm->followCursor_ = true;
+    layoutAlgorithm->expandDisplay_ = true;
+    layoutAlgorithm->targetOffset_ = OffsetF(100.0f, 200.0f);
+    OffsetF originalOffset = layoutAlgorithm->targetOffset_;
+
+    layoutAlgorithm->FitMouseOffset(AceType::RawPtr(layoutWrapper));
+
+    /**
+     * @tc.steps: step3. verify targetOffset_ remains unchanged when expandDisplay_ is true.
+     */
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetX(), originalOffset.GetX());
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetY(), originalOffset.GetY());
+}
+
+/**
+ * @tc.name: FitMouseOffset003
+ * @tc.desc: Test BubbleLayoutAlgorithm::FitMouseOffset when layoutWrapper is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, FitMouseOffset003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create layout algorithm with nullptr layoutWrapper.
+     */
+    auto tipsNode = CreateTipsNode(CreateTipsParamForCursor(), TIPS_MSG_1);
+    auto bubblePattern = tipsNode->GetPattern<BubblePattern>();
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(bubblePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    /**
+     * @tc.steps: step2. set followCursor_ to true, expandDisplay_ to false,
+     *           and pass nullptr as layoutWrapper.
+     */
+    layoutAlgorithm->followCursor_ = true;
+    layoutAlgorithm->expandDisplay_ = false;
+    layoutAlgorithm->targetOffset_ = OffsetF(100.0f, 200.0f);
+    OffsetF originalOffset = layoutAlgorithm->targetOffset_;
+
+    layoutAlgorithm->FitMouseOffset(nullptr);
+
+    /**
+     * @tc.steps: step3. verify targetOffset_ remains unchanged when layoutWrapper is nullptr.
+     */
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetX(), originalOffset.GetX());
+    EXPECT_EQ(layoutAlgorithm->targetOffset_.GetY(), originalOffset.GetY());
+}
+
+/**
+ * @tc.name: InitTargetSizeAndPositionVisibleRect001
+ * @tc.desc: Test InitTargetSizeAndPosition uses visible rect when target is partially clipped by parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node and tips node with TARGET anchor.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->targetTag_ = targetNode->GetTag();
+    layoutAlgorithm->targetNodeId_ = targetNode->GetId();
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->isTips_ = true;
+    layoutAlgorithm->followTransformOfTarget_ = false;
+
+    /**
+     * @tc.steps: step2. set up parent-child hierarchy with clipping.
+     */
+    // target geometry: 200x200 at (100,100)
+    targetNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 200.0f));
+    auto targetRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    ASSERT_NE(targetRenderContext, nullptr);
+    targetRenderContext->SetPaintRectWithTransform(RectF(100.0f, 100.0f, 200.0f, 200.0f));
+
+    // parent: 150x150 at (0,0) — clips the target to 50x50
+    auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 150.0f, 150.0f));
+    parent->AddChild(targetNode);
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition.
+     */
+    layoutAlgorithm->InitTargetSizeAndPosition(false, nullptr);
+
+    /**
+     * @tc.expected: targetSize_ should be the visible portion (50x50), not the full frame (200x200).
+     */
+    EXPECT_EQ(layoutAlgorithm->targetSize_, SizeF(50.0f, 50.0f));
+    EXPECT_FALSE(layoutAlgorithm->targetFullyInvisible_);
+}
+
+/**
+ * @tc.name: InitTargetSizeAndPositionVisibleRect002
+ * @tc.desc: Test InitTargetSizeAndPosition sets targetFullyInvisible_ when target is fully outside parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect002, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node and tips node with TARGET anchor.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->targetTag_ = targetNode->GetTag();
+    layoutAlgorithm->targetNodeId_ = targetNode->GetId();
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->isTips_ = true;
+    layoutAlgorithm->followTransformOfTarget_ = false;
+
+    /**
+     * @tc.steps: step2. set up target fully outside parent's visible area.
+     */
+    targetNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 200.0f));
+    auto targetRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    ASSERT_NE(targetRenderContext, nullptr);
+    targetRenderContext->SetPaintRectWithTransform(RectF(200.0f, 200.0f, 200.0f, 200.0f));
+
+    // parent: 100x100 at (0,0) — target at (200,200) is fully outside
+    auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+    parent->AddChild(targetNode);
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition.
+     * @tc.expected: targetFullyInvisible_ should be true.
+     */
+    layoutAlgorithm->InitTargetSizeAndPosition(false, nullptr);
+    EXPECT_TRUE(layoutAlgorithm->targetFullyInvisible_);
+}
+
+/**
+ * @tc.name: InitTargetSizeAndPositionVisibleRect003
+ * @tc.desc: Test InitTargetSizeAndPosition uses full size when target is fully visible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect003, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node and tips node with TARGET anchor.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->targetTag_ = targetNode->GetTag();
+    layoutAlgorithm->targetNodeId_ = targetNode->GetId();
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->isTips_ = true;
+    layoutAlgorithm->followTransformOfTarget_ = false;
+
+    /**
+     * @tc.steps: step2. set up target fully within parent's visible area.
+     */
+    targetNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 200.0f));
+    auto targetRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    ASSERT_NE(targetRenderContext, nullptr);
+    targetRenderContext->SetPaintRectWithTransform(RectF(100.0f, 100.0f, 200.0f, 200.0f));
+
+    // parent: 500x500 at (0,0) — target fully visible
+    auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 500.0f, 500.0f));
+    parent->AddChild(targetNode);
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition.
+     * @tc.expected: targetSize_ should be the full frame size (200x200).
+     */
+    layoutAlgorithm->InitTargetSizeAndPosition(false, nullptr);
+    EXPECT_EQ(layoutAlgorithm->targetSize_, SizeF(200.0f, 200.0f));
+    EXPECT_FALSE(layoutAlgorithm->targetFullyInvisible_);
+}
+
+/**
+ * @tc.name: InitTargetSizeAndPositionVisibleRect004
+ * @tc.desc: Test non-tips popup in subwindow keeps full frame size when target is partially clipped.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect004, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node and bubble node (non-tips popup) for subwindow.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->targetTag_ = targetNode->GetTag();
+    layoutAlgorithm->targetNodeId_ = targetNode->GetId();
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->isTips_ = false;
+    layoutAlgorithm->followTransformOfTarget_ = false;
+
+    /**
+     * @tc.steps: step2. set up parent-child hierarchy with clipping.
+     */
+    // target geometry: 200x200 at (100,100)
+    targetNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 200.0f));
+    auto targetRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    ASSERT_NE(targetRenderContext, nullptr);
+    targetRenderContext->SetPaintRectWithTransform(RectF(100.0f, 100.0f, 200.0f, 200.0f));
+
+    // parent: 150x150 at (0,0) — clips the target to 50x50
+    auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 150.0f, 150.0f));
+    parent->AddChild(targetNode);
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition with showInSubWindow=true.
+     * @tc.expected: targetSize_ should keep the full frame size (200x200), not the visible
+     *               portion (50x50), because the non-tips popup subwindow path no longer
+     *               overwrites target with the visible rect. targetFullyInvisible_ stays false.
+     */
+    layoutAlgorithm->InitTargetSizeAndPosition(true, nullptr);
+    EXPECT_EQ(layoutAlgorithm->targetSize_, SizeF(200.0f, 200.0f));
+    EXPECT_FALSE(layoutAlgorithm->targetFullyInvisible_);
+}
+
+/**
+ * @tc.name: InitTargetSizeAndPositionVisibleRect005
+ * @tc.desc: Test non-tips popup in subwindow keeps targetFullyInvisible_ false when target is fully outside parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect005, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node and bubble node (non-tips popup) for subwindow.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->targetTag_ = targetNode->GetTag();
+    layoutAlgorithm->targetNodeId_ = targetNode->GetId();
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->isTips_ = false;
+    layoutAlgorithm->followTransformOfTarget_ = false;
+
+    /**
+     * @tc.steps: step2. set up target fully outside parent's visible area.
+     */
+    targetNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 200.0f));
+    auto targetRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    ASSERT_NE(targetRenderContext, nullptr);
+    targetRenderContext->SetPaintRectWithTransform(RectF(200.0f, 200.0f, 200.0f, 200.0f));
+
+    // parent: 100x100 at (0,0) — target at (200,200) is fully outside
+    auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 100.0f, 100.0f));
+    parent->AddChild(targetNode);
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition with showInSubWindow=true.
+     * @tc.expected: targetFullyInvisible_ stays false because the non-tips popup subwindow path
+     *               no longer computes the visible rect, so the fully-invisible guard is not
+     *               triggered. targetSize_ keeps the full frame size (200x200).
+     */
+    layoutAlgorithm->InitTargetSizeAndPosition(true, nullptr);
+    EXPECT_FALSE(layoutAlgorithm->targetFullyInvisible_);
+    EXPECT_EQ(layoutAlgorithm->targetSize_, SizeF(200.0f, 200.0f));
+}
+
+/**
+ * @tc.name: InitTargetSizeAndPositionVisibleRect006
+ * @tc.desc: Test non-tips popup in subwindow keeps full frame size when target is fully visible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTipsTestNg, InitTargetSizeAndPositionVisibleRect006, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node and bubble node (non-tips popup) for subwindow.
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto param = CreateTipsParamForCursor();
+    param->SetAnchorType(TipsAnchorType::TARGET);
+    auto tipsNode = CreateTipsNode(param, TIPS_MSG_1);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<BubbleLayoutAlgorithm>(tipsNode->layoutAlgorithm_->GetLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->targetTag_ = targetNode->GetTag();
+    layoutAlgorithm->targetNodeId_ = targetNode->GetId();
+    layoutAlgorithm->followCursor_ = false;
+    layoutAlgorithm->isTips_ = false;
+    layoutAlgorithm->followTransformOfTarget_ = false;
+
+    /**
+     * @tc.steps: step2. set up target fully within parent's visible area.
+     */
+    targetNode->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 200.0f));
+    auto targetRenderContext = AceType::DynamicCast<MockRenderContext>(targetNode->GetRenderContext());
+    ASSERT_NE(targetRenderContext, nullptr);
+    targetRenderContext->SetPaintRectWithTransform(RectF(100.0f, 100.0f, 200.0f, 200.0f));
+
+    // parent: 500x500 at (0,0) — target fully visible
+    auto parent = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    auto parentRenderContext = AceType::DynamicCast<MockRenderContext>(parent->GetRenderContext());
+    ASSERT_NE(parentRenderContext, nullptr);
+    parentRenderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 500.0f, 500.0f));
+    parent->AddChild(targetNode);
+
+    /**
+     * @tc.steps: step3. call InitTargetSizeAndPosition with showInSubWindow=true.
+     * @tc.expected: targetSize_ should be the full frame size (200x200) and
+     *               targetFullyInvisible_ should stay false.
+     */
+    layoutAlgorithm->InitTargetSizeAndPosition(true, nullptr);
+    EXPECT_EQ(layoutAlgorithm->targetSize_, SizeF(200.0f, 200.0f));
+    EXPECT_FALSE(layoutAlgorithm->targetFullyInvisible_);
+}
+
 } // namespace OHOS::Ace::NG

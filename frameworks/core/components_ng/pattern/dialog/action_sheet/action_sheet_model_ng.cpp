@@ -1,0 +1,109 @@
+/*
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "core/components_ng/pattern/dialog/action_sheet/action_sheet_model_ng.h"
+
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
+#include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
+
+namespace OHOS::Ace::NG {
+void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
+{
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto executor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    executor->PostTask(
+        [currentId = Container::CurrentId(), arg]() mutable {
+            auto container = AceEngine::Get().GetContainer(currentId);
+            CHECK_NULL_VOID(container);
+            auto isSubContainer = container->IsSubContainer();
+            auto expandDisplay = SubwindowManager::GetInstance()->GetIsExpandDisplay();
+
+            if (isSubContainer) {
+                auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+                auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
+                if (parentContainer && (expandDisplay || !parentContainer->IsSubContainer())) {
+                    currentId = parentContainerId;
+                    container = parentContainer;
+                } else {
+                    TAG_LOGW(AceLogTag::ACE_DIALOG, "subwindow can not show actionSheet in subwindow");
+                    return;
+                }
+            }
+            ContainerScope scope(currentId);
+
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+            CHECK_NULL_VOID(context);
+            auto overlayManager = context->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            if (arg.dialogLevelMode == LevelMode::EMBEDDED) {
+                auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(arg.dialogLevelUniqueId, context);
+                if (embeddedOverlay) {
+                    overlayManager = embeddedOverlay;
+                }
+            }
+            RefPtr<NG::FrameNode> dialog;
+            ACE_UINODE_TRACE(dialog);
+            if (arg.isShowInSubWindow) {
+                dialog = SubwindowManager::GetInstance()->ShowDialogNG(arg, nullptr);
+                CHECK_NULL_VOID(dialog);
+                if (arg.isModal && !container->IsUIExtensionWindow()) {
+                    DialogProperties Maskarg;
+                    Maskarg.isMask = true;
+                    Maskarg.autoCancel = arg.autoCancel;
+                    Maskarg.onWillDismiss = arg.onWillDismiss;
+                    Maskarg.shadow = arg.shadow;
+                    auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
+                    CHECK_NULL_VOID(mask);
+                    overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
+                }
+            } else {
+                dialog = overlayManager->ShowDialog(arg, nullptr, false);
+                CHECK_NULL_VOID(dialog);
+            }
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+                "onVisibleChange", "show", ComponentEventType::COMPONENT_EVENT_DIALOG);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowActionSheet");
+}
+
+void ActionSheetModelNG::SetAction(GestureEventFunc&& eventFunc, ActionSheetInfo& sheetInfo)
+{
+    sheetInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(eventFunc));
+}
+
+void ActionSheetModelNG::SetCancel(std::function<void()>&& eventFunc, DialogProperties& arg)
+{
+    arg.onCancel = eventFunc;
+}
+
+void ActionSheetModelNG::SetOnWillDismiss(
+    std::function<void(const int32_t& info, const int32_t& instanceId)>&& onWillDismissFunc, DialogProperties& arg)
+{
+    arg.onWillDismiss = std::move(onWillDismissFunc);
+}
+
+void ActionSheetModelNG::SetConfirm(
+    GestureEventFunc&& gestureEvent, std::function<void()>&& eventFunc, ButtonInfo& buttonInfo, DialogProperties& arg)
+{
+    buttonInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(gestureEvent));
+}
+} // namespace OHOS::Ace::NG

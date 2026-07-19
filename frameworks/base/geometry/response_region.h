@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 
-class ResponseRegion {
+class ACE_FORCE_EXPORT ResponseRegion {
 public:
     ResponseRegion() = default;
     ~ResponseRegion() = default;

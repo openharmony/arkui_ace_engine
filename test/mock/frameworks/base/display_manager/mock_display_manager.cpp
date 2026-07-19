@@ -33,4 +33,16 @@ FoldDisplayMode MockDisplayManager::GetFoldDisplayMode()
 {
     return static_cast<FoldDisplayMode>(1);
 }
+
+RefPtr<BaseDisplayInfo> MockDisplayManager::GetCachedDisplayInfo(uint64_t displayId)
+{
+    return nullptr;
+}
+
+uint64_t MockDisplayManager::RegisterDisplaySizeChangeCallback(DisplaySizeChangeCallback callback)
+{
+    return 0;
+}
+
+void MockDisplayManager::UnregisterDisplaySizeChangeCallback(uint64_t callbackId) {}
 } // namespace OHOS::Ace

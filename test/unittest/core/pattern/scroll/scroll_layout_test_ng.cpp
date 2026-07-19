@@ -18,8 +18,8 @@
 #include "core/components/common/layout/grid_column_info.h"
 #include "core/components/common/layout/grid_container_info.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -861,6 +861,144 @@ HWTEST_F(ScrollLayoutTestNg, ScrollEdge003, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
     FlushUITasks();
     EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
+ * @tc.name: IsScrollReachEdge001
+ * @tc.desc: Test IsScrollReachEdge returns true when scroll reaches bottom edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    CreateContent();
+    CreateScrollDone();
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
+    MockAnimationManager::GetInstance().Tick();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_TRUE(pattern_->IsScrollReachEdge());
+}
+
+/**
+ * @tc.name: IsScrollReachEdge002
+ * @tc.desc: Test IsScrollReachEdge returns false when scroll has not reached bottom edge
+ *           (content dynamically grows during scroll-to-edge animation)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge002, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    CreateContent();
+    CreateScrollDone();
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->IsAtBottom());
+
+    auto contentNode = GetChildFrameNode(frameNode_, 0);
+    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(2000.f));
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->IsScrollReachEdge());
+    EXPECT_NE(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
+}
+
+/**
+ * @tc.name: IsScrollReachEdge003
+ * @tc.desc: Test IsScrollReachEdge returns true when scroll reaches top edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge003, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_TRUE(pattern_->IsAtTop());
+    pattern_->scrollEdgeType_ = ScrollEdgeType::SCROLL_TOP;
+    EXPECT_TRUE(pattern_->IsScrollReachEdge());
+}
+
+/**
+ * @tc.name: IsScrollReachEdge004
+ * @tc.desc: Test IsScrollReachEdge with contentEndOffset at bottom edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge004, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    CreateContent();
+    CreateScrollDone();
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
+    MockAnimationManager::GetInstance().Tick();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->IsScrollReachEdge());
+}
+
+/**
+ * @tc.name: IsScrollReachEdge005
+ * @tc.desc: Test spring animation preserves scrollEdgeType when scroll has not reached edge
+ *           (core bug fix: LazyVGrid dynamic growth scenario)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge005, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    CreateContent();
+    CreateScrollDone();
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_BOTTOM);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->IsAtBottom());
+    EXPECT_NE(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
+    MockAnimationManager::GetInstance().CancelAnimations();
+
+    auto contentNode = GetChildFrameNode(frameNode_, 0);
+    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(2000.f));
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->AnimateRunning());
+    EXPECT_NE(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
+    MockAnimationManager::GetInstance().Tick();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_NONE);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+}
+
+/**
+ * @tc.name: IsScrollReachEdge006
+ * @tc.desc: Test IsScrollReachEdge returns true at right edge (horizontal scroll)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, IsScrollReachEdge006, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetAxis(Axis::HORIZONTAL);
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+
+    CreateContent();
+    CreateScrollDone();
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, true);
+    EXPECT_EQ(pattern_->scrollEdgeType_, ScrollEdgeType::SCROLL_RIGHT);
+    MockAnimationManager::GetInstance().Tick();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->IsScrollReachEdge());
 }
 
 /**

@@ -119,4 +119,9 @@ bool FontManager::GetFallbackLineSpacingStyleOptimizeFlag()
 {
     return false;
 }
+
+bool FontManager::GetPunctuationOverflowStyleOptimizeFlag()
+{
+    return punctuationOverflowStyleOptimizeFlag_;
+}
 } // namespace OHOS::Ace

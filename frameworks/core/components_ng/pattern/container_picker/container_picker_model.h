@@ -57,6 +57,9 @@ public:
     static void ProcessResourceObj(const std::string& key, const RefPtr<ResourceObject>& resObj);
     static void ProcessResourceObj(FrameNode* frameNode, const std::string& key, const RefPtr<ResourceObject>& resObj);
     static void SetChangeEvent(ContainerPickerChangeEvent&& onChange);
+
+private:
+    static std::function<void()> CreateLpxUpdateCallback(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

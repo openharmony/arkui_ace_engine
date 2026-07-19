@@ -17,18 +17,66 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
-#include "core/components/list/list_theme.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/list/list_item_theme.h"
+#include "core/components/list/list_theme.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/pattern/list/list_item_group_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/base/view_abstract.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+void ApplyLowEndHeaderFooterMaterial(const RefPtr<FrameNode>& node, const RefPtr<UiMaterial>& material)
+{
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(material);
+    auto options = material->CopyImmersiveOptions();
+    CHECK_NULL_VOID(options);
+    auto pipeline = node->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_VOID(themeConstants);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto pattern = node->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    pattern->ProcessDefaultImmersiveOptions(options);
+
+    auto resId = TokenColors::GetSystemColorResIdByIndex(TokenColors::COMP_BACKGROUND_PRIMARY);
+    renderContext->UpdateBackgroundColor(themeConstants->GetColor(resId));
+    if (options->applyShadow) {
+        renderContext->UpdateBackShadow(MaterialUtils::GetImmersiveShadow(pipeline->GetDipScale()));
+    }
+
+    auto colorMode = MaterialUtils::GetNodeColorMode(node);
+    if (colorMode == ColorMode::COLOR_MODE_UNDEFINED) {
+        colorMode = ColorMode::LIGHT;
+    }
+    ImmersiveMaterialConfig config {
+        .key =
+            UiMaterialMapKey {
+                .level = UiMaterialLevel::SMOOTH,
+                .colorMode = options->colorMode == ColorMode::COLOR_MODE_UNDEFINED ? colorMode : options->colorMode,
+            },
+        .materialColor = options->materialColor,
+        .applyShadow = options->applyShadow,
+        .dipScale = static_cast<float>(pipeline->GetDipScale()),
+        .interactive = options->interactive.value_or(false),
+        .lightEffectOptions = options->lightEffectOptions,
+    };
+    renderContext->SetImmersiveMaterialConfig(config);
+    renderContext->SetSystemMaterial(material->Copy());
+}
+} // namespace
 
 void ListItemGroupPattern::OnAttachToMainTree()
 {
@@ -800,7 +848,7 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
     host->GetGeometryNode()->SetParentLayoutConstraint(constraint);
     FrameNode::ProcessOffscreenNode(host, true);
     if ((!NearZero(adjustRefPos_) || !NearZero(adjustTotalSize_)) && !(childrenSize_ && ListChildrenSizeExist())) {
-        listPattern->UpdateChildPosInfo(indexInList_, adjustRefPos_, adjustTotalSize_);
+        listPattern->UpdateChildPosInfo(GetIndexInList(), adjustRefPos_, adjustTotalSize_);
         adjustRefPos_ = 0.0f;
         adjustTotalSize_ = 0.0f;
     }
@@ -868,6 +916,10 @@ void ListItemGroupPattern::ApplyHeaderFooterStyle(const RefPtr<FrameNode>& node)
         .style = UiMaterialStyle::THICK
     };
     material->SetImmersiveOptions(options);
+    if (MaterialUtils::IsMaterialDisabled()) {
+        ApplyLowEndHeaderFooterMaterial(node, material);
+        return;
+    }
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(node), AceType::RawPtr(material));
 }
 

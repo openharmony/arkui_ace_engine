@@ -22,8 +22,8 @@
 #include "base/i18n/localization.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/calendar/calendar_utils.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -877,8 +878,11 @@ void CalendarMonthPattern::ChangeVirtualNodeState(const CalendarDay& calendarDay
 
 RefPtr<FrameNode> CalendarMonthPattern::AddButtonNodeIntoVirtual(const CalendarDay& calendarDay)
 {
-    auto buttonNode = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    auto buttonHandle = buttonModifier->createFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    auto buttonNode = AceType::Claim(reinterpret_cast<FrameNode*>(buttonHandle));
+    CHECK_NULL_RETURN(buttonNode, nullptr);
     auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(buttonAccessibilityProperty, nullptr);
     auto host = GetHost();
@@ -1007,9 +1011,9 @@ void CalendarMonthPattern::UpdateButtonNodeWithoutTheme(RefPtr<FrameNode> frameN
     auto dayHeight = paintProperty->GetDayHeight().value_or(Dimension(0.0f)).ConvertToPx();
     auto dayWidth = paintProperty->GetDayWidth().value_or(Dimension(0.0f)).ConvertToPx();
     CHECK_NULL_VOID(frameNode);
-    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dayWidth), CalcLength(dayHeight)));
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dayWidth), CalcLength(dayHeight)));
     auto pos = GetXYByIndex(index);
     auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx() <= 0
                     ? 0.0f
@@ -1039,9 +1043,9 @@ void CalendarMonthPattern::UpdateAccessibilityButtonNode(RefPtr<FrameNode> frame
     auto dayHeight = paintProperty->GetDayHeight().value_or(theme->GetCalendarTheme().dayHeight).ConvertToPx();
     auto dayWidth = paintProperty->GetDayWidth().value_or(theme->GetCalendarTheme().dayWidth).ConvertToPx();
     CHECK_NULL_VOID(frameNode);
-    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dayWidth), CalcLength(dayHeight)));
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(dayWidth), CalcLength(dayHeight)));
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto pos = GetXYByIndex(index);

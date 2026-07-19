@@ -375,7 +375,10 @@ HWTEST_F(RichEditorCallbackContentNoChangeTestNg, OnBackPressed001, TestSize.Lev
     richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
     EXPECT_EQ(richEditorPattern->OnBackPressed(), true);
 
-    auto func = []() {};
+    auto func = []() {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+    };
     richEditorPattern->SetCustomKeyboard(func);
     richEditorPattern->RequestCustomKeyboard();
     EXPECT_EQ(richEditorPattern->OnBackPressed(), true);

@@ -18,6 +18,7 @@
 #include "base/log/ace_trace.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/pipeline/base/element_register.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 #include "frameworks/core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace {

@@ -13,11 +13,15 @@
  * limitations under the License.
  */
 
+#include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
+#include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_virtual_node_utils.h"
 #include "adapter/ohos/osal/accessibility/hover/accessibility_hover_virtual_node_utils.h"
 
 #include "base/log/log_wrapper.h"
 #include "core/accessibility/accessibility_constants.h"
+#include "core/accessibility/accessibility_manager.h"
 #include "core/accessibility/utils/accessibility_manager_utils.h"
+#include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -51,6 +55,25 @@ bool VirtualAccessibilityNode::ContainsPoint(int32_t x, int32_t y) const
 bool VirtualAccessibilityNode::Intersects(const NG::RectT<int32_t>& other) const
 {
     return rect_.IsIntersectWith(other);
+}
+
+bool VirtualAccessibilityNode::CanAccessibilityFocus(
+    const RefPtr<VirtualAccessibilityNode>& node, const RefPtr<NG::FrameNode>& containerNode) const
+{
+    CHECK_NULL_RETURN(node, false);
+    CHECK_NULL_RETURN(containerNode, false);
+
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+
+    int64_t virtualNodeAccessibilityId = NG::VirtualNodeContainerIdManager::EncodeVirtualNodeAccessibilityId(
+        NG::VirtualNodeContainerIdManager::GetInstance().GetContainerId(containerNode), node->GetNodeId());
+    auto virtualCheckNode = std::make_shared<Framework::VirtualAccessibilityNodeRulesCheckNode>(
+        node, virtualNodeAccessibilityId, containerNode);
+    bool isReadable = false;
+    auto checkResult = client->CheckNodeIsReadable(virtualCheckNode, isReadable);
+    CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, false);
+    return isReadable;
 }
 
 RefPtr<VirtualAccessibilityNode> VirtualAccessibilityNode::HitTest(int32_t x, int32_t y) const
@@ -234,6 +257,32 @@ void VirtualAccessibilityNode::TraverseChildren(
             child->TraverseChildren(visitor);
         }
     }
+}
+
+RefPtr<VirtualAccessibilityNode> VirtualAccessibilityNode::CloneTree() const
+{
+    auto root = AceType::MakeRefPtr<VirtualAccessibilityNode>();
+    CHECK_NULL_RETURN(root, nullptr);
+
+    root->nodeId_ = nodeId_;
+    root->SetAccessibilityText(GetAccessibilityText());
+    root->SetAccessibilityLevel(GetAccessibilityLevel());
+    root->SetAccessibilityGroup(GetAccessibilityGroup());
+    root->SetRole(GetRole());
+    root->SetCheckable(GetCheckable());
+    root->SetChecked(GetChecked());
+    root->SetEnabled(GetEnabled());
+    root->SetSelected(GetSelected());
+    root->rect_ = rect_;
+
+    for (const auto& child : children_) {
+        CHECK_NULL_CONTINUE(child);
+        auto childClone = child->CloneTree();
+        CHECK_NULL_CONTINUE(childClone);
+        root->AddChild(childClone);
+    }
+
+    return root;
 }
 
 } // namespace OHOS::Ace::NG

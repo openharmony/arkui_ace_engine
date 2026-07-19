@@ -15,27 +15,26 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
-#include "base/geometry/dimension.h"
-#include "base/geometry/size.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/video/video_controller_v2.h"
-#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/video/video_accessibility_property.h"
-#include "core/components_ng/pattern/video/video_event_hub.h"
-#include "core/components_ng/pattern/video/video_layout_algorithm.h"
-#include "core/components_ng/pattern/video/video_layout_property.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/video/video_controller_v2.h"
+#include "core/components_ng/pattern/video/video_styles.h"
 #include "core/components_ng/render/media_player.h"
 #include "core/components_ng/render/render_surface.h"
 #include "frameworks/base/geometry/rect.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
+#ifdef SUPPORT_IMAGE_ANALYZER
 class ImageAnalyzerManager;
+#endif
 }
 namespace OHOS::Ace::NG {
+class VideoAccessibilityProperty;
+class VideoEventHub;
+class VideoLayoutAlgorithm;
+class VideoLayoutProperty;
+
 class VideoPattern : public Pattern {
     DECLARE_ACE_TYPE(VideoPattern, Pattern);
 
@@ -56,25 +55,13 @@ public:
         return true;
     }
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<VideoEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<VideoLayoutProperty>();
-    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override;
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<VideoLayoutAlgorithm>();
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<VideoAccessibilityProperty>();
-    }
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
 
     bool IsSupportDrawModifier() const override
     {
@@ -165,6 +152,11 @@ public:
     bool GetInitialState() const
     {
         return isInitialState_;
+    }
+
+    bool OnBackPressedCallback() override
+    {
+        return OnBackPressed();
     }
 
     virtual bool OnBackPressed()
@@ -503,7 +495,9 @@ private:
 
     Rect lastBoundsRect_;
     Rect contentRect_;
+#ifdef SUPPORT_IMAGE_ANALYZER
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
+#endif
 
     ContentTransitionType contentTransition_ = ContentTransitionType::IDENTITY;
     Color surfaceBgColor_ = Color::BLACK;

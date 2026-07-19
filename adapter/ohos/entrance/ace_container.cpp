@@ -71,7 +71,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/task_executor_impl.h"
 #include "core/common/text_field_manager.h"
@@ -335,12 +335,17 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     }
     int32_t instanceId = pipelineContext->GetInstanceId();
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    // Avoid temporary dark-mode updates on the main thread affecting DC components.
-    // DC creates its own resource manager instead of using the one from the host context.
-    if (context && context->GetResourceManager() && !isDynamicUIContent) {
-        resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
-        resourceAdapter->SetBundleName(bundleName);
-        resourceAdapter->SetModuleName(moduleName);
+    if (context && context->GetResourceManager()) {
+        if (isDynamicUIContent) {
+            resourceAdapter =
+                ResourceAdapterImplV2::CreateOverrideResourceAdapter(context->GetResourceManager(), resourceInfo);
+        } else {
+            resourceAdapter = AceType::MakeRefPtr<ResourceAdapterImplV2>(context->GetResourceManager(), resourceInfo);
+        }
+        if (resourceAdapter) {
+            resourceAdapter->SetBundleName(bundleName);
+            resourceAdapter->SetModuleName(moduleName);
+        }
     } else if (ResourceManager::GetInstance().IsResourceAdapterRecord(bundleName, moduleName, instanceId)) {
         resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, instanceId);
     }
@@ -352,12 +357,10 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
         resourceAdapter->Init(resourceInfo);
     }
 
-    ThemeConstants::InitDeviceType();
     auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     pipelineContext->SetThemeManager(themeManager);
     LoadSystemThemeFromJson(assetManager, pipelineContext, context);
     themeManager->SetColorScheme(colorScheme);
-    themeManager->LoadCustomTheme(assetManager);
     themeManager->LoadResourceThemes();
 
     if (clearCache) {
@@ -386,23 +389,13 @@ void InitNavigationManagerCallback(const RefPtr<NG::PipelineContext>& context)
         auto context = weakContext.Upgrade();
         CHECK_NULL_RETURN(context, false);
         RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-        RefPtr<ThemeConstants> themeConstants = nullptr;
-        if (SystemProperties::GetResourceDecoupling()) {
-            auto container = Container::GetContainer(context->GetInstanceId());
-            CHECK_NULL_RETURN(container, false);
-            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
-                container->GetBundleName(), container->GetModuleName(), context->GetInstanceId());
-            resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-            CHECK_NULL_RETURN(resourceAdapter, false);
-        } else {
-            auto themeManager = context->GetThemeManager();
-            CHECK_NULL_RETURN(themeManager, false);
-            themeConstants = themeManager->GetThemeConstants();
-            CHECK_NULL_RETURN(themeConstants, false);
-        }
-        auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-        CHECK_NULL_RETURN(resourceWrapper, false);
-        color = resourceWrapper->GetColorByName(name);
+        auto container = Container::GetContainer(context->GetInstanceId());
+        CHECK_NULL_RETURN(container, false);
+        auto resourceObject = AceType::MakeRefPtr<ResourceObject>(
+            container->GetBundleName(), container->GetModuleName(), context->GetInstanceId());
+        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+        CHECK_NULL_RETURN(resourceAdapter, false);
+        color = resourceAdapter->GetColorByName(name);
         return true;
     };
     navMgr->SetGetSystemColorCallback(std::move(getColorCallback));
@@ -1459,11 +1452,13 @@ void AceContainer::InitializeCallback()
 
     auto&& crownEventCallback = [context = pipelineContext_, id = instanceId_](
                                     const CrownEvent& event, const std::function<void()>& markProcess) {
+#ifndef CROSS_PLATFORM
         if (event.action == CrownAction::BEGIN || event.action == CrownAction::END) {
             std::unordered_map<std::string, std::string> mapPayload;
             ResSchedReport::GetInstance().ResSchedDataReport(
                 RES_TYPE_CROWN_ROTATION_STATUS, static_cast<int32_t>(event.action), mapPayload);
         }
+#endif
         ContainerScope scope(id);
         auto crownTask = [context, event, markProcess, id]() {
             ContainerScope scope(id);
@@ -1807,7 +1802,7 @@ UIContentErrorCode AceContainer::RunPage(
                 // Manually triggered PageFault here.To be modifier
                 DynamicModuleHelper::GetInstance().TriggerPageFaultForPreLoad();
             },
-            TaskExecutor::TaskType::UI, "ArkUITriggerPageFaultForPreLoad");
+            TaskExecutor::TaskType::BACKGROUND, "ArkUITriggerPageFaultForPreLoad");
     } else {
         LOGW("Failed to get context or task executor, cannot trigger page fault for preload.");
     }
@@ -2597,6 +2592,7 @@ bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
     return false;
 }
 
+#ifndef CROSS_PLATFORM
 void AceContainer::DumpSimplifyTreeWithParamConfig(
     std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow)
 {
@@ -2605,6 +2601,7 @@ void AceContainer::DumpSimplifyTreeWithParamConfig(
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetComponentOverlayInspector(root, pipelineContext->GetRootElement(), config, isInSubWindow);
 }
+#endif
 
 void AceContainer::TriggerGarbageCollection()
 {
@@ -2803,7 +2800,9 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
         pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager, instanceId_);
+#endif
         if (pipeline) {
             LOGI("set translateManager to pipeline, instanceId:%{public}d", pipeline->GetInstanceId());
             pipeline->SaveTranslateManager(uiTranslateManager);
@@ -2821,7 +2820,9 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveTranslateManager(uiTranslateManager, instanceId_);
+#endif
     if (pipeline) {
         LOGI("set translateManager to pipeline, instanceId:%{public}d", pipeline->GetInstanceId());
         pipeline->SaveTranslateManager(uiTranslateManager);
@@ -3051,18 +3052,8 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
                                     isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT]() {
         ACE_SCOPED_TRACE("OHOS::LoadThemes()");
 
-        if (SystemProperties::GetResourceDecoupling()) {
-            InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo,
-                false, isDynamicUIContent);
-        } else {
-            ThemeConstants::InitDeviceType();
-            auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
-            pipelineContext->SetThemeManager(themeManager);
-            themeManager->InitResource(resourceInfo);
-            themeManager->SetColorScheme(colorScheme);
-            themeManager->LoadCustomTheme(assetManager);
-            themeManager->LoadResourceThemes();
-        }
+        InitResourceAndThemeManager(pipelineContext, assetManager, colorScheme, resourceInfo, context, abilityInfo,
+            false, isDynamicUIContent);
         auto themeManager = pipelineContext->GetThemeManager();
         if (themeManager) {
             pipelineContext->SetAppBgColor(themeManager->GetBackgroundColor());
@@ -3791,10 +3782,8 @@ void AceContainer::UpdateConfiguration(
     SetResourceConfiguration(resConfig);
     if (!abilityLevel) {
         themeManager->UpdateConfig(resConfig);
-        if (SystemProperties::GetResourceDecoupling()) {
-            ResourceManager::GetInstance().UpdateResourceConfig(
-                GetBundleName(), GetModuleName(), instanceId_, resConfig, !parsedConfig.themeTag.empty());
-        }
+        ResourceManager::GetInstance().UpdateResourceConfig(
+            GetBundleName(), GetModuleName(), instanceId_, resConfig, !parsedConfig.themeTag.empty());
     }
     themeManager->LoadResourceThemes();
     if (SystemProperties::ConfigChangePerform() && configurationChange.OnlyColorModeChange()) {
@@ -4018,24 +4007,14 @@ void AceContainer::UpdateResource()
     // Reload theme and resource
     CHECK_NULL_VOID(pipelineContext_);
 
-    if (SystemProperties::GetResourceDecoupling()) {
-        auto context = runtimeContext_.lock();
-        auto abilityInfo = abilityInfo_.lock();
-        if (pipelineContext_->IsFormRender()) {
-            ReleaseResourceAdapter();
-        }
-        bool isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
-        InitResourceAndThemeManager(pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo,
-            true, isDynamicUIContent);
-    } else {
-        ThemeConstants::InitDeviceType();
-        auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
-        pipelineContext_->SetThemeManager(themeManager);
-        themeManager->InitResource(resourceInfo_);
-        themeManager->SetColorScheme(colorScheme_);
-        themeManager->LoadCustomTheme(assetManager_);
-        themeManager->LoadResourceThemes();
+    auto context = runtimeContext_.lock();
+    auto abilityInfo = abilityInfo_.lock();
+    if (pipelineContext_->IsFormRender()) {
+        ReleaseResourceAdapter();
     }
+    bool isDynamicUIContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    InitResourceAndThemeManager(pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo,
+        true, isDynamicUIContent);
 
     auto cache = pipelineContext_->GetImageCache();
     if (cache) {
@@ -4704,7 +4683,9 @@ void AceContainer::AddWatchSystemParameter()
 
 void AceContainer::RemoveUISessionCallbacks()
 {
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->RemoveSaveGetCurrentInstanceId(instanceId_);
+#endif
 }
 
 void AceContainer::RemoveWatchSystemParameter()
@@ -4728,10 +4709,8 @@ void AceContainer::UpdateResourceOrientation(int32_t orientation)
     DeviceOrientation newOrientation = WindowUtils::GetDeviceOrientation(orientation);
     auto resConfig = GetResourceConfiguration();
     resConfig.SetOrientation(newOrientation);
-    if (SystemProperties::GetResourceDecoupling()) {
-        ResourceManager::GetInstance().UpdateResourceConfig(
-            GetBundleName(), GetModuleName(), instanceId_, resConfig, false);
-    }
+    ResourceManager::GetInstance().UpdateResourceConfig(
+        GetBundleName(), GetModuleName(), instanceId_, resConfig, false);
     SetResourceConfiguration(resConfig);
 }
 
@@ -4740,7 +4719,7 @@ void AceContainer::UpdateResourceDensity(double density, bool isUpdateResConfig)
     auto resConfig = GetResourceConfiguration();
     resConfig.SetDensity(density);
     SetResourceConfiguration(resConfig);
-    if (SystemProperties::GetResourceDecoupling() && (isUpdateResConfig || !IsSceneBoardWindow())) {
+    if (isUpdateResConfig || !IsSceneBoardWindow()) {
         ResourceManager::GetInstance().UpdateResourceConfig(
             GetBundleName(), GetModuleName(), instanceId_, resConfig, false);
     }

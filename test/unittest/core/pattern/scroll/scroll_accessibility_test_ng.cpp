@@ -15,6 +15,8 @@
 
 #include "gtest/gtest.h"
 #include "scroll_test_ng.h"
+
+#include "core/animation/velocity_motion.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -398,5 +400,183 @@ HWTEST_F(ScrollModelNGTestNg, SetSpecificSupportAction003, TestSize.Level1)
      */
     scrollAccessibilityProperty->SetSpecificSupportAction();
     EXPECT_EQ(scrollAccessibilityProperty->supportActions_, static_cast<uint64_t>(AceAction::ACTION_NONE));
+}
+
+/**
+ * @tc.name: ScrollA11ySourceUserSwipe001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="user" for swipe gesture
+ *           (SCROLL_FROM_UPDATE) in Scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollAccessibilityTestNg, ScrollA11ySourceUserSwipe001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Perform drag action (SCROLL_FROM_UPDATE) to trigger user scroll.
+     * @tc.expected: SCROLL_END event with scrollSource="user" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    DragAction(frameNode_, Offset(0, HEIGHT / 2), -ITEM_MAIN_SIZE, 0);
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "user");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: ScrollA11ySourceApiFling001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="api" for Fling in Scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollAccessibilityTestNg, ScrollA11ySourceApiFling001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger Fling to scroll with animation.
+     * @tc.expected: SCROLL_END event with scrollSource="api" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    Fling(1000.0);
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "api");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: ScrollA11ySourceApiAnimateTo001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="api" for smooth AnimateTo in Scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollAccessibilityTestNg, ScrollA11ySourceApiAnimateTo001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger smooth AnimateTo to scroll with animation.
+     * @tc.expected: SCROLL_END event with scrollSource="api" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    AnimateTo(Dimension(ITEM_MAIN_SIZE), 1000.0f, nullptr, true);
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "api");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: ScrollA11ySourceApiScrollToEdge001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="api" for smooth ScrollToEdge in Scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollAccessibilityTestNg, ScrollA11ySourceApiScrollToEdge001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger smooth ScrollToEdge to scroll with animation.
+     * @tc.expected: SCROLL_END event with scrollSource="api" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "api");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: ScrollA11ySourceApiScrollPage001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="api" for smooth ScrollPage in Scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollAccessibilityTestNg, ScrollA11ySourceApiScrollPage001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger smooth ScrollPage to scroll with animation.
+     * @tc.expected: SCROLL_END event with scrollSource="api" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    ScrollPage(false, true);
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "api");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: ScrollA11ySourceAccessibilityForward001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="accessibility" for
+ *           ActActionScrollForward in Scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollAccessibilityTestNg, ScrollA11ySourceAccessibilityForward001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger ActActionScrollForward.
+     * @tc.expected: SCROLL_END event with scrollSource="accessibility" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    accessibilityProperty_->ActActionScrollForward();
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "accessibility");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
+/**
+ * @tc.name: ScrollA11ySourceAccessibilityBackward001
+ * @tc.desc: Verify SCROLL_END extraEventInfo["scrollSource"]=="accessibility" for
+ *           ActActionScrollBackward in Scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollAccessibilityTestNg, ScrollA11ySourceAccessibilityBackward001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Trigger ActActionScrollBackward.
+     * @tc.expected: SCROLL_END event with scrollSource="accessibility" is fired.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    accessibilityProperty_->ActActionScrollBackward();
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "accessibility");
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
 }
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,19 +20,22 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
+#include "base/utils/macros.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 
 #include <memory>
 #include <optional>
 #include <set>
+#include <unordered_map>
 
 namespace OHOS::Ace::NG {
 class FrameNode;
+class PageTranslateNode;
 #ifndef IS_RELEASE_VERSION
 class ContentChangeDumpManager;
 #endif
 
-class ContentChangeManager final : public AceType {
+class ACE_FORCE_EXPORT ContentChangeManager final : public AceType {
     DECLARE_ACE_TYPE(ContentChangeManager, AceType);
 public:
     enum ContentIgnoreEventType : uint32_t {
@@ -47,6 +50,13 @@ public:
     void StopContentChangeReport();
     void AddOnContentChangeNode(WeakPtr<FrameNode> node);
     void RemoveOnContentChangeNode(WeakPtr<FrameNode> node);
+    void StartTextTranslateReport();
+    void StopTextTranslateReport();
+    void StartTextTranslateSnapshotReport();
+    void ReportTranslateTextNode(const WeakPtr<PageTranslateNode>& node, const std::string& text);
+    void ReportTranslateTextFrameNode(const WeakPtr<FrameNode>& node, bool isContinuous = true);
+    bool ApplyTranslateResult(int32_t nodeId, const std::string& result, int64_t version);
+    void ResetTranslateTextNode(int32_t nodeId = -1);
     bool IsContentChangeDetectEnable() const
     {
         return currentContentChangeConfig_.has_value();
@@ -56,7 +66,7 @@ public:
     void OnScrollChangeStart(const RefPtr<FrameNode>& keyNode);
     void OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode);
     void OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor);
-    void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow);
+    ACE_FORCE_EXPORT void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow);
     void OnScrollRemoved(int32_t nodeId);
     void OnTransitionAdded(int32_t nodeId);
     void OnTransitionRemoved(int32_t nodeId);
@@ -85,12 +95,35 @@ private:
     void ReportSwiperEvent(const RefPtr<FrameNode>& node, bool hasTabsAncestor);
     void StartTextAABBCollecting();
     void StopTextAABBCollecting(const RectF& rootRect);
+    bool NeedPageSceneDetect() const;
+    bool NeedContentChangeReportOrPageSceneDetect() const;
+    void NotifyPageSceneContentChanged(bool flushNow);
+    void FlushPageSceneNodeChanged();
     void ReportImageEvent();
     void RemoveImageReportTask();
     void PostImageReportTask(uint32_t delay);
     bool IsInTransitionDelayWindow() const;
+    bool IsTextTranslateActive() const;
+    int64_t UpdateTranslateVersionIfNeeded(int32_t nodeId, const std::string& text);
+    void ReportTranslateTextSnapshotNode(const WeakPtr<PageTranslateNode>& node, const std::string& text);
+    void ClearTranslateTextSnapshotCache();
+    int64_t NextTranslateTextSnapshotVersion();
+    bool HasTranslateResultVersion(const std::unordered_map<int32_t, std::pair<size_t, int64_t>>& versions,
+        int32_t nodeId, int64_t version) const;
+    bool ApplyTranslateResultToNode(const RefPtr<PageTranslateNode>& node, const std::string& result, int64_t version);
+    bool ApplyTranslateResultWithCache(const std::set<WeakPtr<PageTranslateNode>>& nodes,
+        const std::unordered_map<int32_t, std::pair<size_t, int64_t>>& versions, int32_t nodeId,
+        const std::string& result, int64_t version);
+    void ResetTranslateNode(const RefPtr<PageTranslateNode>& node);
+    void ResetTranslateNodes(std::set<WeakPtr<PageTranslateNode>>& nodes, int32_t nodeId);
 
     std::set<WeakPtr<FrameNode>> onContentChangeNodes_;
+    std::set<WeakPtr<PageTranslateNode>> translateTextNodes_;
+    std::unordered_map<int32_t, std::pair<size_t, int64_t>> translateTextVersions_;
+    std::set<WeakPtr<PageTranslateNode>> translateTextSnapshotNodes_;
+    std::unordered_map<int32_t, std::pair<size_t, int64_t>> translateTextSnapshotVersions_;
+    int64_t translateTextSnapshotVersion_ = 0;
+    bool textTranslateActive_ = false;
     std::optional<ContentChangeConfig> currentContentChangeConfig_;
 
     static constexpr uint64_t NS_PER_MS = 1000000;

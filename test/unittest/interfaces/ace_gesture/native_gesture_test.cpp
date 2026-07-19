@@ -1402,17 +1402,30 @@ HWTEST_F(NativeGestureTest, GestureImplTest0043, TestSize.Level1)
 
 /**
  * @tc.name: GestureImplTest0044
- * @tc.desc: Test the SetInnerGestureParallelTo function.
+ * @tc.desc: Test the SetInnerGestureParallelTo function with null parallelInnerGesture.
  * @tc.type: FUNC
  */
 HWTEST_F(NativeGestureTest, GestureImplTest0044, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. call SetInnerGestureParallelTo with null parallelInnerGesture.
+     * @tc.expected: return ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
     auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     void* userData = reinterpret_cast<void*>(new int);
     auto ret = OHOS::Ace::GestureModel::SetInnerGestureParallelTo(gestureNode, userData, nullptr);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2. Verify error message contains correct error code and function name.
+     * @tc.expected: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
+     */
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
+    std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("SetInnerGestureParallelTo"), std::string::npos);
 }
 
 /**
@@ -2212,4 +2225,29 @@ HWTEST_F(NativeGestureTest, GestureImplTest0086, TestSize.Level1)
     auto ret = OH_ArkUI_SetArkUIGestureRecognizerDisposeNotify(panGesture, callback, nullptr);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
     gestureAPI->dispose(panGesture);
+}
+
+/**
+ * @tc.name: GestureImplTest0087
+ * @tc.desc: Test the SetInnerGestureParallelTo function with null node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, GestureImplTest0087, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call SetInnerGestureParallelTo with null node.
+     * @tc.expected: return ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
+    void* userData = reinterpret_cast<void*>(new int);
+    auto ret = OHOS::Ace::GestureModel::SetInnerGestureParallelTo(nullptr, userData, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+
+    /**
+     * @tc.steps: step2. Verify error message contains correct error code and function name.
+     * @tc.expected: Error message should contain ERROR_CODE_PARAM_INVALID and function name.
+     */
+    const char* errorMsg = OHOS::Ace::ErrorMessageManager::GetInstance().GetErrorMessage();
+    std::string errorCodeStr = std::to_string(static_cast<int32_t>(ARKUI_ERROR_CODE_PARAM_INVALID));
+    EXPECT_NE(std::string(errorMsg).find(errorCodeStr), std::string::npos);
+    EXPECT_NE(std::string(errorMsg).find("SetInnerGestureParallelTo"), std::string::npos);
 }

@@ -36,7 +36,7 @@ public:
         count_ = count;
     }
 
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     int32_t count_;
@@ -49,7 +49,7 @@ public:
         duration_ = duration;
     }
 
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     long long duration_;
@@ -61,7 +61,7 @@ public:
     {
         direction_ = direction;
     }
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     int32_t direction_;
@@ -73,7 +73,7 @@ public:
     {
         scale_ = scale;
     }
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     double scale_;
@@ -85,7 +85,7 @@ public:
     {
         angle_ = angle;
     }
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     double angle_;
@@ -112,7 +112,7 @@ public:
     {
         actualSpeed_ = actualSpeed;
     }
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     int32_t direction_;
@@ -127,7 +127,7 @@ public:
     {
         count_ = count;
     }
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     int32_t count_;
@@ -175,7 +175,7 @@ public:
         dropId_ = dropId;
     }
 
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     std::string hostName_;
@@ -206,7 +206,7 @@ public:
     {
         windowID_ = windowID;
     }
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     TimeStamp time_;
@@ -237,7 +237,7 @@ public:
     {
         mouseButton_ = mouseButton;
     }
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     TimeStamp time_;
@@ -269,7 +269,7 @@ public:
     {
         action_ = action;
     }
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     TimeStamp time_;
@@ -312,7 +312,7 @@ public:
     {
         axisValues_ = axisValues;
     }
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     AxisValue axisValues_;
@@ -346,7 +346,7 @@ public:
     {
         action_ = action;
     }
-    std::shared_ptr<InspectorJsonValue> GetJsonData() const override;
+    std::shared_ptr<JsonValue> GetJsonData() const override;
 
 private:
     std::string eventType_;

@@ -632,5 +632,56 @@ bool AccessibilityHoverManagerForThirdNG::OnDumpChildInfoForThirdRecursive(
     return true;
 }
 
+void AccessibilityHoverManagerForThirdNG::DumpSetThirdCustomProperty(const DumpInfoArgument& argument,
+    const std::vector<std::string>& params,
+    const std::shared_ptr<JsThirdProviderInteractionOperation>& jsThirdProviderOperator)
+{
+    DumpLog::GetInstance().Print("DumpSetThirdCustomProperty start");
+    DumpLog::GetInstance().Print("elementId: " + std::to_string(argument.nodeId));
+
+    AccessibilityVirtualNode accessibilityVirtualNode;
+    accessibilityVirtualNode.SetAccessibilityText(argument.customAccessibilityText);
+    accessibilityVirtualNode.SetAccessibilityLevel(argument.customAccessibilityLevel);
+    accessibilityVirtualNode.SetCustomComponentType(argument.customRole);
+    accessibilityVirtualNode.SetCheckable(argument.customCheckable);
+    accessibilityVirtualNode.SetChecked(argument.customChecked);
+    accessibilityVirtualNode.SetEnabled(argument.customEnabled);
+    accessibilityVirtualNode.SetSelected(argument.customSelected);
+    accessibilityVirtualNode.SetAccessibilityGroup(argument.customGroup);
+
+    MockDumpOperatorCallBack callback;
+    jsThirdProviderOperator->UpdateCustomAccessibilityProperty(argument.nodeId, accessibilityVirtualNode, 0, callback);
+
+    DumpLog::GetInstance().Print("accessibilityText: " + argument.customAccessibilityText);
+    DumpLog::GetInstance().Print("accessibilityLevel: " + argument.customAccessibilityLevel);
+    DumpLog::GetInstance().Print("role: " + argument.customRole);
+    DumpLog::GetInstance().Print("checkable: " + std::to_string(argument.customCheckable));
+    DumpLog::GetInstance().Print("checked: " + std::to_string(argument.customChecked));
+    DumpLog::GetInstance().Print("enabled: " + std::to_string(argument.customEnabled));
+    DumpLog::GetInstance().Print("selected: " + std::to_string(argument.customSelected));
+    DumpLog::GetInstance().Print("Result: Set thirdCustomProperty Done");
+}
+
+void AccessibilityHoverManagerForThirdNG::DumpGetThirdCustomProperty(
+    int64_t elementId, const std::shared_ptr<JsThirdProviderInteractionOperation>& jsThirdProviderOperator)
+{
+    DumpLog::GetInstance().Print("DumpGetThirdCustomProperty start");
+    DumpLog::GetInstance().Print("elementId: " + std::to_string(elementId));
+    auto customProperty = jsThirdProviderOperator ?
+        jsThirdProviderOperator->GetThirdCustomProperty(elementId) : nullptr;
+    if (customProperty) {
+        DumpLog::GetInstance().Print("accessibilityText: " + customProperty->GetAccessibilityText());
+        DumpLog::GetInstance().Print("accessibilityLevel: " + customProperty->GetAccessibilityLevel());
+        DumpLog::GetInstance().Print("role: " + customProperty->GetRole());
+        DumpLog::GetInstance().Print("checkable: " + std::to_string(customProperty->GetCheckable()));
+        DumpLog::GetInstance().Print("checked: " + std::to_string(customProperty->GetChecked()));
+        DumpLog::GetInstance().Print("enabled: " + std::to_string(customProperty->GetEnabled()));
+        DumpLog::GetInstance().Print("selected: " + std::to_string(customProperty->GetSelected()));
+        DumpLog::GetInstance().Print("accessibilityGroup: " + std::to_string(customProperty->GetAccessibilityGroup()));
+    } else {
+        DumpLog::GetInstance().Print("No third custom property found");
+    }
+    DumpLog::GetInstance().Print("Result: GetThirdCustomProperty Done");
+}
 
 } // namespace OHOS::Ace::Framework

@@ -1050,7 +1050,7 @@ export class CounterComponent extends ViewPU {
   updateInlineStyleOptions() {
     if (this.initFlag) {
       this.initFlag = false;
-      const truncatedValue = Math.trunc(this.inlineStyleOptions.value);
+      const truncatedValue = Math.trunc(this.inlineStyleOptions.value ?? 0);
       this.value = Number.isFinite(truncatedValue) ? truncatedValue : 0;
       this.onChange?.(this.value);
       this.inputValue = this.value.toString();
@@ -1883,10 +1883,18 @@ export class CounterComponent extends ViewPU {
     }
   }
   getIncreaseStr() {
-    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    try {
+      return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    } catch (error) {
+      return '';
+    }
   }
   getReduceStr() {
-    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    try {
+      return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    } catch (error) {
+      return '';
+    }
   }
   initialRender() {
     this.observeComponentCreation2((elmtId, isInitialRender) => {

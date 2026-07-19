@@ -28,7 +28,6 @@
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -44,6 +43,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -56,15 +56,17 @@ constexpr int32_t SWIPER_Z_INDEX = 0;
 constexpr int32_t DIVIDER_Z_INDEX = 2;
 constexpr int32_t TAB_BAR_Z_INDEX = 3;
 constexpr int32_t EFFECT_Z_INDEX = 1;
+const char TABS_ETS_TAG[] = "Tabs";
+const char TAB_BAR_ETS_TAG[] = "TabBar";
 } // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<SwiperController>& swiperController)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d][index:%d]", V2::TABS_ETS_TAG, nodeId, index);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d][index:%d]", TABS_ETS_TAG, nodeId, index);
     ACE_UINODE_TRACE(nodeId);
-    auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    auto tabsNode = GetOrCreateTabsNode(TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     InitTabsNode(tabsNode, swiperController);
     ViewStackProcessor::GetInstance()->Push(tabsNode);
 
@@ -88,6 +90,7 @@ RefPtr<SwiperController> TabsModelNG::GetSwiperController(const RefPtr<FrameNode
     const RefPtr<SwiperController>& swiperController)
 {
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
     auto tabTheme = swiperNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, nullptr);
@@ -178,12 +181,11 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     // Create Swiper node to contain TabContent.
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
         V2::SWIPER_ETS_TAG, tabsNode->GetSwiperId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, tabsNode->GetDividerId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(tabsNode->GetDividerId());
 
     // Create TabBar to contain TabBar of TabContent.
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(
-        V2::TAB_BAR_ETS_TAG, tabsNode->GetTabBarId(), []() { return AceType::MakeRefPtr<TabBarPattern>(); });
+        TAB_BAR_ETS_TAG, tabsNode->GetTabBarId(), []() { return AceType::MakeRefPtr<TabBarPattern>(); });
     if (auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>(); tabBarPattern) {
         tabBarPattern->SetController(GetSwiperController(swiperNode, swiperController));
     }
@@ -230,9 +232,10 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
 RefPtr<FrameNode> TabsModelNG::CreateFrameNode(int32_t nodeId)
 {
     ACE_UINODE_TRACE(nodeId);
-    auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    auto tabsNode = GetOrCreateTabsNode(TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     InitTabsNode(tabsNode, nullptr);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_RETURN(tabBarNode, nullptr);
     tabBarNode->MarkModifyDone();
     return tabsNode;
 }
@@ -1133,6 +1136,17 @@ void TabsModelNG::SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimat
     swiperPattern->SetTabsCustomContentTransition(std::move(onCustomAnimation));
 }
 
+void TabsModelNG::SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetTabsCustomContentTransition(std::move(onCustomAnimation));
+}
+
 void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
@@ -1240,7 +1254,7 @@ void TabsModelNG::SetTabsController(FrameNode* frameNode, const RefPtr<SwiperCon
     CHECK_NULL_VOID(frameNode);
     ACE_UINODE_TRACE(frameNode);
     auto nodeId = frameNode->GetId();
-    auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    auto tabsNode = GetOrCreateTabsNode(TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     CHECK_NULL_VOID(tabsNode);
     InitTabsNode(tabsNode, tabsController);
 }
@@ -1417,6 +1431,61 @@ void TabsModelNG::CreateWithResourceObj(TabJsResType jsResourceType, const RefPt
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern<TabsPattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string key = "tabs." + std::to_string(static_cast<int32_t>(jsResourceType));
+        pattern->RemoveResObj(key);
+    }
+    switch (jsResourceType) {
+        case TabJsResType::BAR_BACKGROUND_COLOR:
+            HandleBarBackgroundColor(frameNode, resObj);
+            break;
+        case TabJsResType::BAR_WIDTH:
+            HandleBarWidth(frameNode, resObj);
+            break;
+        case TabJsResType::BAR_HEIGHT:
+            HandleBarHeight(frameNode, resObj);
+            break;
+        case TabJsResType::BAR_GRID_GUTTER:
+            HandleBarGridGutter(frameNode, resObj);
+            break;
+        case TabJsResType::BAR_GRID_MARGIN:
+            HandleBarGridMargin(frameNode, resObj);
+            break;
+        case TabJsResType::DIVIDER_STROKE_WIDTH:
+            HandleDividerStrokeWidth(frameNode, resObj);
+            break;
+        case TabJsResType::DIVIDER_COLOR:
+            HandleDividerColor(frameNode, resObj);
+            break;
+        case TabJsResType::DIVIDER_START_MARGIN:
+            HandleDividerStartMargin(frameNode, resObj);
+            break;
+        case TabJsResType::DIVIDER_END_MARGIN:
+            HandleDividerEndMargin(frameNode, resObj);
+            break;
+        case TabJsResType::SCROLLABLE_BAR_MARGIN:
+            HandleScrollableBarMargin(frameNode, resObj);
+            break;
+        case TabJsResType::COLOR:
+            HandleBackgroundEffectColor(frameNode, resObj);
+            break;
+        case TabJsResType::INACTIVE_COLOR:
+            HandleBackgroundEffectInactiveColor(frameNode, resObj);
+            break;
+        case TabJsResType::BlurStyle_INACTIVE_COLOR:
+            HandleBackgroundBlurStyleInactiveColor(frameNode, resObj);
+            break;
+        default:
+            break;
+    }
+}
+
+void TabsModelNG::CreateWithResourceObj(
+    FrameNode* frameNode, TabJsResType jsResourceType, const RefPtr<ResourceObject>& resObj)
+{
     CHECK_NULL_VOID(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern<TabsPattern>();

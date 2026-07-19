@@ -55,6 +55,7 @@ class RSNGShapeBase;
 
 namespace OHOS::Ace {
 struct SharedTransitionOption;
+class ShapeRect;
 class UiMaterial;
 struct UiMaterialInfo;
 struct ImmersiveMaterialConfig;
@@ -532,6 +533,7 @@ public:
     virtual void OnSphericalEffectUpdate(double radio) {}
     virtual void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) {}
     virtual void OnSpatialEffectUpdate(const SpatialEffectParams& params) {}
+    virtual void OnSpatialEffectReset() {}
     virtual void OnLightUpEffectUpdate(double radio) {}
     virtual void OnClickEffectLevelUpdate(const ClickEffectInfo& info) {}
     virtual void OnRenderGroupUpdate(bool isRenderGroup) {}

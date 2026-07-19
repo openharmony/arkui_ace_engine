@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
+#include "base/geometry/shape.h"
 #include "core/common/container.h"
 #include <cmath>
 #include "ui/base/utils/utils.h"
@@ -35,7 +36,9 @@
 #include "core/components_ng/pattern/text/text_layout_adapter.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_styles.h"
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
 #include "core/components_ng/pattern/text_field/auto_fill_controller.h"
+#endif
 #include "core/components_ng/pattern/text_field/text_field_content_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -82,8 +85,9 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     CHECK_NULL_VOID(textFieldPaintProperty);
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isTextArea = pattern->IsTextArea();
-    UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
+    UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle);
     UpdateStrokeJoinStyle(textFieldLayoutProperty, textStyle);
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto autofillController = pattern->GetOrCreateAutoFillController();
     CHECK_NULL_VOID(autofillController);
     auto autoFillAnimationStatus = autofillController->GetAutoFillAnimationStatus();
@@ -94,6 +98,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         UpdateTextStyleTextOverflowAndWordBreak(
             textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty, textFieldTheme->TextFadeoutEnabled());
     } else {
+#endif
         if (!pattern->GetTextUtf16Value().empty()) {
             UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
                 textFieldPaintProperty->HasTextColorFlagByUser());
@@ -114,7 +119,9 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
                 return;
             }
         }
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     }
+#endif
     ConstructTextStylesAppend(frameNode, textStyle, pattern, showPlaceHolder);
 }
 
@@ -316,7 +323,7 @@ void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double 
             pipeline->GetMaxAppFontScale());
         float fontScale = std::min(pipeline->GetFontScaleFromEnv(frameNode), maxFontScale);
         indentValue = Dimension(indentValue).ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true,
-            pattern->GetEnvFontScale());
+            textFieldLayoutProperty->GetEnvFontScale());
         if (!textIndent_.NormalizeToPx(pipeline->GetDipScale(),
             fontScale, pipeline->GetLogicScale(), width, indentValue)) {
             return;
@@ -772,7 +779,7 @@ float TextFieldLayoutAlgorithm::GetVisualTextWidth() const
 }
 
 void TextFieldLayoutAlgorithm::UpdateTextStyleFontScale(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty,
-    TextStyle& textStyle, const RefPtr<TextFieldPattern>& pattern)
+    TextStyle& textStyle)
 {
     if (textFieldLayoutProperty->HasMaxFontScale()) {
         textStyle.SetMaxFontScale(textFieldLayoutProperty->GetMaxFontScale().value());
@@ -780,7 +787,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleFontScale(const RefPtr<TextFieldLa
     if (textFieldLayoutProperty->HasMinFontScale()) {
         textStyle.SetMinFontScale(textFieldLayoutProperty->GetMinFontScale().value());
     }
-    textStyle.SetEnvFontScale(pattern->GetEnvFontScale());
+    textStyle.SetEnvFontScale(textFieldLayoutProperty->GetEnvFontScale());
 }
 
 void TextFieldLayoutAlgorithm::UpdateTextStyleSetTextColor(const RefPtr<FrameNode>& frameNode,
@@ -1215,6 +1222,7 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
 void TextFieldLayoutAlgorithm::CreateAutoFillParagraph(const TextStyle& textStyle, std::u16string content,
     bool needObscureText, int32_t nakedCharPosition, CreateParagraphData paragraphData)
 {
+#ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto paraStyle = GetParagraphStyle(textStyle, content, paragraphData.fontSize);
     if (!paragraphData.disableTextAlign) {
         paraStyle.align = textStyle.GetTextAlign();
@@ -1236,6 +1244,7 @@ void TextFieldLayoutAlgorithm::CreateAutoFillParagraph(const TextStyle& textStyl
         paragraph_->PopStyle();
     }
     paragraph_->Build();
+#endif
 }
 
 TextDirection TextFieldLayoutAlgorithm::GetTextDirection(
@@ -1606,7 +1615,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
     if (layoutProperty->HasMinFontScale()) {
         placeholderTextStyle.SetMinFontScale(layoutProperty->GetMinFontScale().value());
     }
-    placeholderTextStyle.SetEnvFontScale(pattern->GetEnvFontScale());
+    placeholderTextStyle.SetEnvFontScale(layoutProperty->GetEnvFontScale());
     placeholderTextStyle.SetLineSpacing(theme->GetPlaceholderLineSpacing());
 }
 

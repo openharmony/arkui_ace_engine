@@ -228,15 +228,24 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
     ani_type type;
     env->Object_GetType(obj, &type);
 
-    ani_method onMeasureSizeMethod;
-    std::function<void(NG::LayoutWrapper* layoutWrapper)> onMeasureSize = nullptr;
-
-    if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "onMeasureSize", nullptr,
-        &onMeasureSizeMethod)) {
-        return 0;
+    static ani_ref customComponentObj = nullptr;
+    if (!customComponentObj) {
+        if (env->GlobalReference_Create(type, &customComponentObj) != ANI_OK) {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "Failed to create global reference.");
+        }
     }
 
-    onMeasureSize = [vm, weakRef, onMeasureSizeMethod](OHOS::Ace::NG::LayoutWrapper* layoutWrapper) {
+    static ani_method onMeasureSizeMethod = nullptr;
+    std::function<void(NG::LayoutWrapper* layoutWrapper)> onMeasureSize = nullptr;
+
+    if (!onMeasureSizeMethod) {
+        if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "onMeasureSize", nullptr,
+            &onMeasureSizeMethod)) {
+            return 0;
+        }
+    }
+
+    onMeasureSize = [vm, weakRef](OHOS::Ace::NG::LayoutWrapper* layoutWrapper) {
         ani_env* env = nullptr;
         if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
             return;
@@ -315,15 +324,17 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
         env->DestroyLocalScope();
     };
 
-    ani_method onPlaceChildrenMethod;
+    static ani_method onPlaceChildrenMethod = nullptr;
     std::function<void(NG::LayoutWrapper* layoutWrapper)> onPlaceChildren = nullptr;
 
-    if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(type), "onPlaceChildren", nullptr,
-        &onPlaceChildrenMethod)) {
-        return 0;
+    if (!onPlaceChildrenMethod) {
+        if (ANI_OK != env->Class_FindMethod(static_cast<ani_class>(customComponentObj), "onPlaceChildren", nullptr,
+            &onPlaceChildrenMethod)) {
+            return 0;
+        }
     }
 
-    onPlaceChildren = [vm, weakRef, onPlaceChildrenMethod](OHOS::Ace::NG::LayoutWrapper* layoutWrapper) {
+    onPlaceChildren = [vm, weakRef](OHOS::Ace::NG::LayoutWrapper* layoutWrapper) {
         ani_env* env = nullptr;
         if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
             return;

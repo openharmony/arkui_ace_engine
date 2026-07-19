@@ -17,11 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_NG_ENVIRONMENT_MANAGER_H
 
 #include <any>
-#include <array>
-#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -31,31 +30,35 @@
 
 namespace OHOS::Ace::NG {
 
+class EnvironmentManager;
+class FrameNode;
 class UINode;
+class WithEnvNode;
 
-enum class EnvConsumerPhase : uint8_t {
+enum class SystemEnvImplicitNotifyMode : uint8_t {
     NONE = 0,
-    BUILD,
-    MODIFY,
-    LAYOUT,
-    PAINT,
+    FULL,
+    PRECISE,
 };
 
-class ACE_FORCE_EXPORT ScopedEnvConsumer final {
-public:
-    explicit ScopedEnvConsumer(const RefPtr<UINode>& node, EnvConsumerPhase phase = EnvConsumerPhase::NONE);
-    ~ScopedEnvConsumer();
+struct SystemEnvDispatchContext {
+    EnvironmentManager& manager;
+    RefPtr<UINode> node;
+    RefPtr<FrameNode> frameNode;
+    std::string_view key;
+};
 
-private:
-    WeakPtr<UINode> previousNode_;
-    EnvConsumerPhase previousPhase_ = EnvConsumerPhase::NONE;
-    bool active_ = false;
+using SystemEnvDispatchCallback = void (*)(const SystemEnvDispatchContext& context);
 
-    ACE_DISALLOW_COPY_AND_MOVE(ScopedEnvConsumer);
+struct SystemEnvHandler {
+    std::string_view key;
+    SystemEnvImplicitNotifyMode implicitNotifyMode = SystemEnvImplicitNotifyMode::NONE;
+    SystemEnvDispatchCallback dispatchImplicit = nullptr;
 };
 
 enum class EnvironmentPropertyKind : uint8_t {
-    ENV = 0,
+    SYSTEM = 0,
+    ENV = SYSTEM,
     CUSTOM,
 };
 
@@ -66,33 +69,43 @@ class ACE_FORCE_EXPORT EnvironmentManager : public virtual AceType {
     DECLARE_ACE_TYPE(EnvironmentManager, AceType);
 
 public:
-    EnvironmentManager() = default;
+    EnvironmentManager();
     ~EnvironmentManager() override = default;
 
-    static RefPtr<UINode> GetCurrentEnvConsumerNode();
     static void RegisterValueChangedCallback(
         EnvironmentPropertyKind kind, const std::string& key, EnvironmentValueChangedCallback callback);
+
+    void RegisterSystemEnvHandler(const SystemEnvHandler& handler);
+    SystemEnvImplicitNotifyMode GetSystemEnvImplicitNotifyMode(std::string_view key) const;
+    void DispatchImplicitSystemEnvChanged(const SystemEnvDispatchContext& context);
 
     bool RemoveSystemEnvValue(const RefPtr<UINode>& scope, const std::string& key);
     bool SetSystemEnvValue(const RefPtr<UINode>& scope, const std::string& key, SystemEnvValue value);
     bool FindSystemEnvValueByKey(const RefPtr<UINode>& consumer, const std::string& key, SystemEnvValue& outValue);
-
     bool RemoveCustomEnvValue(const RefPtr<UINode>& scope, const std::string& key);
     bool SetCustomEnvValue(const RefPtr<UINode>& scope, const std::string& key, std::any value);
     bool FindCustomEnvValueByKey(const RefPtr<UINode>& consumer, const std::string& key, std::any& outValue);
     bool ResolveSystemEnvValueForImplicitReader(
         const RefPtr<UINode>& reader, const std::string& key, SystemEnvValue& outValue) const;
 
-    void OnNodeAttached(const RefPtr<UINode>& node);
-    void OnNodeDetached(const RefPtr<UINode>& node);
-
 private:
-    struct DependentEntry {
+    enum class EnvironmentValueChangeType : uint8_t {
+        ADD = 0,
+        UPDATE,
+        REMOVE,
+    };
+
+    struct ExplicitEnvReaderRecord {
         // UINode::GetId() can be reused after node destruction. Keep the weak pointer
         // to verify that the registry entry still belongs to the same live node.
         WeakPtr<UINode> weak;
-        // Keys that this node has queried and is currently depending on.
-        std::unordered_set<std::string> keys;
+        // Each key records the WithEnv scope that currently owns this reader. Empty weak means miss.
+        std::unordered_map<std::string, WeakPtr<WithEnvNode>> ownerScopes;
+    };
+
+    struct EnvScopeReaderRecord {
+        WeakPtr<WithEnvNode> weak;
+        std::unordered_map<std::string, std::unordered_set<int32_t>> readerIdsByKey;
     };
 
     struct ChangedEnvValue {
@@ -100,24 +113,55 @@ private:
         std::optional<std::any> customValue;
     };
 
-    using DependentRegistry = std::unordered_map<int32_t, DependentEntry>;
+    using ExplicitEnvReaderRegistry = std::unordered_map<int32_t, ExplicitEnvReaderRecord>;
+    using EnvScopeReaderRegistry = std::unordered_map<int32_t, EnvScopeReaderRecord>;
 
-    bool ResolveSystemEnvValue(const RefPtr<UINode>& startScope, const std::string& key,
-        SystemEnvValue& outValue) const;
-    bool ResolveCustomEnvValue(const RefPtr<UINode>& startScope, const std::string& key, std::any& outValue) const;
+    std::optional<SystemEnvValue> ResolveSystemValue(const RefPtr<UINode>& startScope, const std::string& key) const;
+    std::optional<std::any> ResolveCustomValue(const RefPtr<UINode>& startScope, const std::string& key) const;
+    RefPtr<WithEnvNode> ResolveOwnerScope(
+        const RefPtr<UINode>& startScope, EnvironmentPropertyKind kind, const std::string& key) const;
 
-    void RegisterDependency(EnvironmentPropertyKind kind, const RefPtr<UINode>& dependentNode, const std::string& key);
-    void EraseDependency(EnvironmentPropertyKind kind, int32_t nodeId, const std::string& key);
+    void RegisterExplicitSystemEnvReader(const RefPtr<UINode>& readerNode, const std::string& key);
+    void RegisterExplicitCustomEnvReader(const RefPtr<UINode>& readerNode, const std::string& key);
+    void RegisterExplicitEnvReader(ExplicitEnvReaderRegistry& readerRegistry, EnvScopeReaderRegistry& scopeRegistry,
+        const RefPtr<UINode>& readerNode, EnvironmentPropertyKind kind, const std::string& key);
+
+    void AddExplicitReaderToScope(EnvScopeReaderRegistry& scopeRegistry,
+        const RefPtr<WithEnvNode>& ownerScope, int32_t readerId, const std::string& key);
+    void RemoveExplicitReaderFromScope(EnvScopeReaderRegistry& scopeRegistry,
+        const RefPtr<WithEnvNode>& ownerScope, int32_t readerId, const std::string& key);
+    void RemoveExplicitReaderFromAllScopes(EnvScopeReaderRegistry& scopeRegistry, int32_t readerId,
+        const std::unordered_map<std::string, WeakPtr<WithEnvNode>>& ownerScopes);
+    bool RebindExplicitEnvReader(ExplicitEnvReaderRegistry& readerRegistry, EnvScopeReaderRegistry& scopeRegistry,
+        const RefPtr<UINode>& readerNode, EnvironmentPropertyKind kind, const std::string& key);
 
     void NotifyValueChanged(const RefPtr<UINode>& scope, EnvironmentPropertyKind kind, const std::string& key,
-        const std::optional<ChangedEnvValue>& changedValue = std::nullopt);
-    void DispatchValueChangedToAffectedNode(const RefPtr<UINode>& node, EnvironmentPropertyKind kind,
-        const std::string& key, const std::optional<ChangedEnvValue>& changedValue = std::nullopt);
+        EnvironmentValueChangeType changeType, const std::optional<ChangedEnvValue>& changedValue = std::nullopt);
+    void NotifyImplicitSystemEnvChanged(
+        const RefPtr<UINode>& scope, const std::string& key, EnvironmentValueChangeType changeType);
+    void NotifyPreciseImplicitSystemEnvChanged(
+        const RefPtr<UINode>& scope, const std::string& key, EnvironmentValueChangeType changeType);
+    void NotifyExplicitEnvChanged(const RefPtr<UINode>& scope, EnvironmentPropertyKind kind, const std::string& key,
+        EnvironmentValueChangeType changeType, const std::optional<ChangedEnvValue>& changedValue);
+    void NotifyLegacyExplicitEnvChanged(const RefPtr<UINode>& scope, EnvironmentPropertyKind kind,
+        const std::string& key, const std::optional<ChangedEnvValue>& changedValue);
+    void NotifyExplicitReadersOwnedByScope(ExplicitEnvReaderRegistry& readerRegistry,
+        EnvScopeReaderRegistry& scopeRegistry, const RefPtr<WithEnvNode>& ownerScope, EnvironmentPropertyKind kind,
+        const std::string& key, const std::optional<ChangedEnvValue>& changedValue);
+    void RebindExplicitReadersUnderScope(ExplicitEnvReaderRegistry& readerRegistry,
+        EnvScopeReaderRegistry& scopeRegistry, const RefPtr<UINode>& scope, EnvironmentPropertyKind kind,
+        const std::string& key, const std::optional<ChangedEnvValue>& changedValue);
 
-    void FireAllRegisteredCallbacksOf(const RefPtr<UINode>& liveNode);
+    const SystemEnvHandler* FindSystemEnvHandler(std::string_view key) const;
+    void DispatchImplicitSystemEnvChangedToNode(const RefPtr<UINode>& node, const std::string& key);
+    void DispatchExplicitEnvChanged(const RefPtr<UINode>& node, EnvironmentPropertyKind kind, const std::string& key,
+        const std::optional<ChangedEnvValue>& changedValue);
 
-    static constexpr size_t PROPERTY_KIND_COUNT = 2;
-    std::array<DependentRegistry, PROPERTY_KIND_COUNT> dependents_;
+    ExplicitEnvReaderRegistry systemExplicitReaders_;
+    ExplicitEnvReaderRegistry customExplicitReaders_;
+    EnvScopeReaderRegistry systemExplicitScopes_;
+    EnvScopeReaderRegistry customExplicitScopes_;
+    std::unordered_map<std::string_view, SystemEnvHandler> systemEnvHandlers_;
 };
 
 } // namespace OHOS::Ace::NG

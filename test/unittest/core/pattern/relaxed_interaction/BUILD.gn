@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("relaxed_interaction_manager_test_ng") {
-  module_name = "Pattern-RelaxedInteraction"
+  module_name = "Gesture-BasicAndCombinationGesture"
   type = "new"
   cflags = [ "-fno-access-control" ]
   sources = [

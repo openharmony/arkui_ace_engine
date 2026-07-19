@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "window control demo"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "window control entry"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "WindowCtrlDemo"
+    }
+  ]
+}

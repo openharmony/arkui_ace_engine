@@ -14,6 +14,7 @@
  */
 
 #include "list_test_ng.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "core/animation/velocity_motion.h"
@@ -867,11 +868,6 @@ HWTEST_F(ListScrollerTestNg, JumpToItemInGroup006, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[1].startPos, 175);
 }
 
-namespace {
-constexpr float SCROLL_FIXED_VELOCITY = 200.f;
-constexpr float OFFSET_TIME = 100.f;
-constexpr int32_t TIME_CHANGED_COUNTS = 20 * 20;
-} // namespace
 /**
  * @tc.name: PositionController007
  * @tc.desc: Test PositionController function with Axis::VERTICAL

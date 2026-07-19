@@ -1126,4 +1126,66 @@ HWTEST_F(MenuLayout1TwoTestNg, GetMaxWidthTest02, TestSize.Level1)
     EXPECT_FLOAT_EQ(maxWidth, 0.0f);
     delete (wrapper);
 }
+
+/**
+ * @tc.name: UpdateConstraintBaseOnMenuItems001
+ * @tc.desc: Test UpdateConstraintBaseOnMenuItems when maxChildrenWidth is greater than 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TwoTestNg, UpdateConstraintBaseOnMenuItems001, TestSize.Level1)
+{
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+
+    for (int32_t i = 0; i < 3; ++i) {
+        auto itemPattern = AceType::MakeRefPtr<MenuItemPattern>();
+        auto menuItem = AceType::MakeRefPtr<FrameNode>("", -1, itemPattern);
+        auto itemGeoNode = AceType::MakeRefPtr<GeometryNode>();
+        itemGeoNode->SetFrameSize(SizeF(50.0f * (i + 1), MENU_SIZE_HEIGHT / 3));
+        auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(menuItem, itemGeoNode, layoutProp);
+        wrapper->AppendChild(childWrapper);
+        multiMenu->AddChild(menuItem);
+    }
+
+    LayoutConstraintF constraint;
+    constraint.maxSize = FULL_SCREEN_SIZE;
+    constraint.percentReference = FULL_SCREEN_SIZE;
+
+    algorithm->UpdateConstraintBaseOnMenuItems(wrapper, constraint);
+    EXPECT_TRUE(constraint.selfIdealSize.Width().has_value());
+    EXPECT_FLOAT_EQ(constraint.selfIdealSize.Width().value(), 150.0f);
+
+    delete (wrapper);
+}
+
+/**
+ * @tc.name: UpdateConstraintBaseOnMenuItems002
+ * @tc.desc: Test UpdateConstraintBaseOnMenuItems when maxChildrenWidth is 0 (constraint should not be set).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuLayout1TwoTestNg, UpdateConstraintBaseOnMenuItems002, TestSize.Level1)
+{
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MULTI_MENU);
+    auto multiMenu = AceType::MakeRefPtr<FrameNode>("", -1, menuPattern);
+    auto algorithm = AceType::MakeRefPtr<MultiMenuLayoutAlgorithm>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+    auto layoutProp = AceType::MakeRefPtr<MenuLayoutProperty>();
+    auto* wrapper = new LayoutWrapperNode(multiMenu, geometryNode, layoutProp);
+
+    LayoutConstraintF constraint;
+    constraint.maxSize = FULL_SCREEN_SIZE;
+    constraint.percentReference = FULL_SCREEN_SIZE;
+    auto originalWidth = constraint.selfIdealSize.Width();
+
+    algorithm->UpdateConstraintBaseOnMenuItems(wrapper, constraint);
+    EXPECT_EQ(constraint.selfIdealSize.Width(), originalWidth);
+
+    delete (wrapper);
+}
 } // namespace OHOS::Ace::NG

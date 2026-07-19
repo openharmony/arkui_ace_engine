@@ -370,23 +370,14 @@ bool ParallelPageRouterManager::LoadRelatedPage(const std::string& url, const Re
     return true;
 }
 
-RefPtr<ResourceWrapper> ParallelPageRouterManager::CreateResourceWrapper()
+RefPtr<ResourceAdapter> ParallelPageRouterManager::CreateResourceAdapter()
 {
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
-        if (!resourceAdapter) {
-            return nullptr;
-        }
-    } else {
-        themeConstants = Framework::JSViewAbstract::GetThemeConstants();
-        if (!themeConstants) {
-            return nullptr;
-        }
+    resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
+    if (!resourceAdapter) {
+        return nullptr;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
+    return resourceAdapter;
 }
 
 bool ParallelPageRouterManager::ShouldDetectHomePage(
@@ -507,6 +498,15 @@ bool ParallelPageRouterManager::CheckStackSize(const RouterPageInfo& target, boo
 
 bool ParallelPageRouterManager::StartPop()
 {
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto forceSplitMgr = context->GetForceSplitManager();
+    CHECK_NULL_RETURN(forceSplitMgr, false);
+    if (forceSplitMgr->IsForceSplitDragging()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't pop during dragging");
+        return true;
+    }
+
     if (pageRouterStack_.size() > 1) {
         auto penultimatePage = pageRouterStack_.rbegin();
         std::advance(penultimatePage, 1);

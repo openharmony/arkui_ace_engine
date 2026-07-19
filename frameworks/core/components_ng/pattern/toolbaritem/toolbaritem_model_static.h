@@ -24,7 +24,6 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ToolBarItemModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetToolbarBuilder(FrameNode* frameNode, std::function<void()>&& buildFunc);
     static void SetPlacement(FrameNode* frameNode, int32_t placement);
 };
 

@@ -467,7 +467,9 @@ void MultiMenuLayoutAlgorithm::UpdateConstraintBaseOnMenuItems(
 {
     // multiMenu children are menuItem or menuItemGroup, constrain width is same as the menu
     auto maxChildrenWidth = GetChildrenMaxWidth(layoutWrapper, constraint);
-    constraint.selfIdealSize.SetWidth(maxChildrenWidth);
+    if (GreatNotEqual(maxChildrenWidth, 0.0f)) {
+        constraint.selfIdealSize.SetWidth(maxChildrenWidth);
+    }
 }
 
 float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(

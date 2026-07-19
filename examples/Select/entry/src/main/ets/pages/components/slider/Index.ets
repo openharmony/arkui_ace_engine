@@ -42,7 +42,8 @@ export struct SliderIndex {
     { name: 'SliderShowSteps', path: 'SliderShowSteps' },
     { name: 'SliderBlockColor', path: 'SliderBlockColor' },
     { name: 'Slider组合场景16', path: 'SliderLevel16' },
-    { name: 'SliderTrackColorMetrics', path: 'SliderTrackColorMetrics' }
+    { name: 'SliderTrackColorMetrics', path: 'SliderTrackColorMetrics' },
+    { name: 'SliderMaterialIndex', path: 'SliderMaterialIndex' }
   ]
 
   build() {

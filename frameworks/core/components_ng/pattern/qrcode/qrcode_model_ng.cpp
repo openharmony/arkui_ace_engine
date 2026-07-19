@@ -96,6 +96,11 @@ void QRCodeModelNG::SetQRBackgroundColor(FrameNode* frameNode, const Color& colo
     ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, BackgroundColor, color, frameNode);
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, color, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(QRCodePaintProperty, QRBackgroundColorSetByUser, true, frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto headRoomColor = color.GetHeadRoomColor();
+    renderContext->SetHDRColorHeadRoom(
+        headRoomColor.has_value() ? headRoomColor.value().headRoom : 1.0f);
 }
 
 void QRCodeModelNG::SetContentOpacity(FrameNode* frameNode, const double opacity)

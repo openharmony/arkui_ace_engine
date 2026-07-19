@@ -383,7 +383,9 @@ void RadioPattern::OnAfterModifyDone()
     }
     auto eventHub = host->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
+#ifndef CROSS_PLATFORM
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, eventHub->GetValue(), preCheck_);
+#endif
 }
 
 void RadioPattern::InitClickEvent()
@@ -1249,18 +1251,19 @@ bool RadioPattern::ReportOnChangeEvent(int32_t nodeId, bool isChecked, bool forc
             return false;
         }
     }
-
-    auto params = InspectorJsonUtil::CreateObject();
+#ifndef CROSS_PLATFORM
+    auto params = JsonUtil::Create();
     CHECK_NULL_RETURN(params, false);
     params->Put("checked", isChecked);
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put("Radio", "onChange");
     value->Put("params", params);
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
         "ReportOnChangeEvent radio report: %{public}s!", value->ToString().c_str());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
     return true;
 }
 

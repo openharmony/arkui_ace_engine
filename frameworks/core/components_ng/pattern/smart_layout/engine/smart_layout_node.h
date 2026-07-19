@@ -134,6 +134,11 @@ public:
      */
     void ApplyRowConstraints();
 
+    /**
+     * @brief Apply general constraints using stored bounding box
+     */
+    void ApplyGeneralConstraints();
+
     // Getters for context
     LayoutContext& GetContext() { return context_; }
     const LayoutContext& GetContext() const { return context_; }
@@ -154,6 +159,10 @@ public:
      * @return SmartLayoutRect representing the union bounding box of all children
      */
     SmartLayoutRect GetChildrenBoundingBox() const;
+
+    // Bounding box for flex wrap
+    void SetBoundingBox(const SmartLayoutRect& box) { boundingBox_ = box; }
+    const SmartLayoutRect& GetBoundingBox() const { return boundingBox_; }
 
     // Setters for space
     void SetSpace(const EdgesSpaces& space) { space_ = space; }
@@ -183,6 +192,7 @@ private:
     NodePosition position_ = {};
     NodeSize size_ = {};
     ScaleInfo scaleInfo_ = {};
+    SmartLayoutRect boundingBox_ = {};
     EdgesSpaces space_ = {};
     SmartLayoutNode* parent_ = nullptr;
     std::vector<std::shared_ptr<SmartLayoutNode>> children_;

@@ -28,6 +28,8 @@
 namespace OHOS::Ace::Ani {
 
 namespace {
+constexpr int32_t SPECIFIED_CAPACITY = 16;
+
 enum class AnimatableExtendPropertyType : int32_t {
     UNKNOWN = -1,
     NUMBER = 0,
@@ -454,11 +456,16 @@ void PageTransitionSetOnEnter(ani_env* env, ani_object aniClass, ani_fn_object o
     std::function<void(ArkUIAniRouteType, float)> onEnterEvent = [env, globalCallback](
                                                                      ArkUIAniRouteType type, float value) {
         ani_fn_object callback = static_cast<ani_fn_object>(globalCallback->GetValue());
+        if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
+            HILOGW("onEnter failed. CreateLocalScope error");
+            return;
+        }
         ani_status status = ANI_OK;
         ani_enum_item typeEnum;
         bool getEnumResult = GetRouteTypeEnum(env, type, typeEnum);
         if (!getEnumResult) {
             HILOGW("onEnter failed. GetRouteTypeEnum error");
+            env->DestroyLocalScope();
             return;
         }
         ani_object valueRef = AniUtils::CreateDouble(env, value);
@@ -467,6 +474,7 @@ void PageTransitionSetOnEnter(ani_env* env, ani_object aniClass, ani_fn_object o
         if ((status = env->FunctionalObject_Call(callback, 2, valueArr, &result)) != ANI_OK) {
             HILOGW("call onEnter function error, status:%{public}d", status);
         }
+        env->DestroyLocalScope();
     };
     animationModifier->pageTransitionSetOnEnter(&onEnterEvent);
 }
@@ -492,11 +500,16 @@ void PageTransitionSetOnExit(ani_env* env, ani_object aniClass, ani_fn_object on
     std::function<void(ArkUIAniRouteType, float)> onExitEvent = [env, globalCallback](
                                                                     ArkUIAniRouteType type, float value) {
         ani_fn_object callback = static_cast<ani_fn_object>(globalCallback->GetValue());
+        if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
+            HILOGW("onExit failed. CreateLocalScope error");
+            return;
+        }
         ani_status status = ANI_OK;
         ani_enum_item typeEnum;
         bool getEnumResult = GetRouteTypeEnum(env, type, typeEnum);
         if (!getEnumResult) {
             HILOGW("onExit failed. GetRouteTypeEnum error");
+            env->DestroyLocalScope();
             return;
         }
         ani_object valueRef = AniUtils::CreateDouble(env, value);
@@ -505,6 +518,7 @@ void PageTransitionSetOnExit(ani_env* env, ani_object aniClass, ani_fn_object on
         if ((status = env->FunctionalObject_Call(callback, 2, valueArr, &result)) != ANI_OK) {
             HILOGW("call onExit function error, status:%{public}d", status);
         }
+        env->DestroyLocalScope();
     };
     animationModifier->pageTransitionSetOnExit(&onExitEvent);
 }

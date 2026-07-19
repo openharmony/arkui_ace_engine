@@ -14,8 +14,12 @@
  */
 
 #include "core/common/resource/resource_manager.h"
+#include "core/components/theme/resource_adapter.h"
 
 namespace OHOS::Ace {
+ResourceManager::ResourceManager() = default;
+ResourceManager::~ResourceManager() = default;
+
 ResourceManager& ResourceManager::GetInstance()
 {
     static ResourceManager instance;

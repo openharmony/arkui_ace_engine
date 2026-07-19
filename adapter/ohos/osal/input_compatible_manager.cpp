@@ -118,6 +118,11 @@ bool InputCompatibleManager::IsCompatibleConvertingEnabledFor(Kit::InputCompatib
         AceApplicationInfo::GetInstance().SetMouseTransformEnable(convertingEnabledResult[source]);
         return convertingEnabledResult[source];
     }
+
+    if (AceApplicationInfo::GetInstance().IsSystemApp()) {
+        return false;
+    }
+
     if (productPolicy_) {
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "Load So successfully");
         convertingEnabledResult[source] = productPolicy_->IsInputCompatibleConvertingNeeded(source);

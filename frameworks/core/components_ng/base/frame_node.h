@@ -824,6 +824,10 @@ public:
         AccessibilityEventType eventType, int64_t stackNodeId, WindowsContentChangeTypes windowsContentChangeType);
 
     void OnAccessibilityEvent(AccessibilityEventType eventType, const std::string& textAnnouncedForAccessibility);
+
+    void OnAccessibilityEvent(
+        AccessibilityEventType eventType, const std::map<std::string, std::string>& extraEventInfo);
+
     void MarkNeedRenderOnly();
 
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
@@ -1017,6 +1021,7 @@ public:
     std::string ProvideRestoreInfo();
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
+    static std::vector<RefPtr<FrameNode>> GetNodesByIdWithCleanup(std::unordered_set<int32_t>& set);
     static std::vector<FrameNode*> GetNodesPtrById(const std::unordered_set<int32_t>& set);
 
     double GetPreviewScaleVal();
@@ -1275,7 +1280,9 @@ public:
     void AttachContext(PipelineContext* context, bool recursive = false) override;
     void DetachContext(bool recursive = false) override;
 
+#ifndef CROSS_PLATFORM
     void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
+#endif
 
     bool GetIsGeometryTransitionIn() const
     {
@@ -1624,6 +1631,7 @@ public:
     void RegisterLpxUpdateCallback(LpxAttribute attribute, std::function<void()>&& callback);
     void UnRegisterLpxUpdateCallback(LpxAttribute attribute);
     void FireLpxUpdateCallbacks();
+    bool IsNeedLazyLayout() const;
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1756,7 +1764,9 @@ private:
 
     int32_t GetNodeExpectedRate();
 
+#ifndef CROSS_PLATFORM
     void RecordExposureInner();
+#endif
 
     const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const;
 
@@ -1953,7 +1963,9 @@ private:
 
     std::map<std::string, std::function<void()>> destroyCallbacks_;
 
+#ifndef CROSS_PLATFORM
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
+#endif
     RefPtr<SamplerManager> samplerManager_;
 
     std::pair<uint64_t, OffsetF> cachedGlobalOffset_ = { 0, OffsetF() };
@@ -2072,7 +2084,7 @@ extern template RefPtr<DialogAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
 extern template RefPtr<GaugeAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GaugeAccessibilityProperty>() const;
-extern template RefPtr<GridAccessibilityProperty>
+extern template ACE_FORCE_EXPORT RefPtr<GridAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
 extern template RefPtr<GridItemAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GridItemAccessibilityProperty>() const;

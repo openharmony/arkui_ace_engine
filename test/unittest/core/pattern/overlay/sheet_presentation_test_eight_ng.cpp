@@ -31,8 +31,9 @@
 #include "base/geometry/rect.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_view.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 
 using namespace testing;
@@ -98,6 +99,14 @@ void SheetPresentationTestEightNg::SetSheetTheme(RefPtr<SheetTheme> sheetTheme)
                 return nullptr;
             }
         });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(
+        [sheetTheme = AceType::WeakClaim(AceType::RawPtr(sheetTheme))](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == SheetTheme::TypeId()) {
+            return sheetTheme.Upgrade();
+        } else {
+            return nullptr;
+        }
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
@@ -939,7 +948,7 @@ HWTEST_F(SheetPresentationTestEightNg, UpdateSheetBackgroundColor002, TestSize.L
 
     auto renderContext = sheetNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    EXPECT_FALSE(renderContext->HasBackgroundColor());
+    EXPECT_TRUE(renderContext->HasBackgroundColor());
 
     SheetPresentationTestEightNg::TearDownTestCase();
 }

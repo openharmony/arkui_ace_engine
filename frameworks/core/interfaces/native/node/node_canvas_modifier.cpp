@@ -14,54 +14,23 @@
  */
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 
-#include "core/components_ng/pattern/canvas/canvas_model_ng.h"
+#include "ui/base/utils/utils.h"
 
-namespace OHOS::Ace::NG::NodeModifier {
+#include "core/common/dynamic_module_helper.h"
 
-void SetCanvasOnReady(ArkUINodeHandle node, void* callback)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (callback) {
-        auto onReady = reinterpret_cast<std::function<void(bool, CanvasUnit)>*>(callback);
-        CanvasModelNG::SetOnReady(frameNode, std::move(*onReady));
-    } else {
-        CanvasModelNG::ResetOnReady(frameNode);
-    }
-}
+namespace OHOS::Ace::NG {
 
-void ResetCanvasOnReady(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CanvasModelNG::ResetOnReady(frameNode);
-}
-
-void SetCanvasEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CanvasModelNG::EnableAnalyzer(frameNode, static_cast<bool>(value));
-}
-
-void ResetCanvasEnableAnalyzer(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    CanvasModelNG::EnableAnalyzer(frameNode, false);
-}
-
+namespace NodeModifier {
 const ArkUICanvasModifier* GetCanvasModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUICanvasModifier modifier = {
-        .setCanvasOnReady = SetCanvasOnReady,
-        .resetCanvasOnReady = ResetCanvasOnReady,
-        .setCanvasEnableAnalyzer = SetCanvasEnableAnalyzer,
-        .resetCanvasEnableAnalyzer = ResetCanvasEnableAnalyzer,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const ArkUICanvasModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Canvas");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUICanvasModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
-} // namespace OHOS::Ace::NG::NodeModifier
+
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG

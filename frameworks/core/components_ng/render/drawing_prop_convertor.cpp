@@ -16,6 +16,7 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 #include "core/components/common/properties/text_style.h"
+#include "ui/properties/linear_color.h"
 
 namespace OHOS::Ace {
 namespace {

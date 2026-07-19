@@ -41,7 +41,7 @@ using InBarRegionCallback = std::function<bool(const PointF&, SourceType source)
 using GetAnimateVelocityCallback = std::function<double()>;
 using ClickJudgeCallback = std::function<bool(const PointF&)>;
 
-class ScrollableEvent : public AceType {
+class ACE_FORCE_EXPORT ScrollableEvent : public AceType {
     DECLARE_ACE_TYPE(ScrollableEvent, AceType);
 public:
     explicit ScrollableEvent(Axis axis);

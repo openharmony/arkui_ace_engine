@@ -180,6 +180,9 @@ public:
 
     // navigation interactive animation
     static constexpr char ABILITY_OR_PAGE_SWITCH_INTERACTIVE[] = "ABILITY_OR_PAGE_SWITCH_INTERACTIVE";
+
+    // sidebar float window
+    static constexpr char FLOAT_START_FROM_SIDEBAR[] = "FLOAT_START_FROM_SIDEBAR";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

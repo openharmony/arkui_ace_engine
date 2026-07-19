@@ -22,14 +22,18 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_property.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_algorithm.h"
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -351,6 +355,76 @@ HWTEST_F(LazyGridLayoutTest, RowsGapTest001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->cachedEndIndex_, 11);
     EXPECT_EQ(pattern_->layoutInfo_->layoutedStartIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->layoutedEndIndex_, 11);
+}
+
+/**
+ * @tc.name: RowsGapTest002
+ * @tc.desc: Shrink rowGap repeatedly while scrolled to the bottom; the last row stays bottom-pinned
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, RowsGapTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll > LazyVGrid with 20 items (2 lanes) and rowGap = 30
+     * @tc.expected: 10 rows, totalMainSize = 10 * ITEM_HEIGHT + 9 * 30 = 1270
+     */
+    CreateScroll();
+    CreateLazyGridLayout();
+    auto rowGap = 30.0f;
+    LazyVGridLayoutModel::SetRowGap(AceType::RawPtr(frameNode_), Dimension(rowGap));
+    CreateContent(20);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to the bottom
+     * @tc.expected: last row (index 18/19) bottom-aligned, on-screen top y = SCROLL_HEIGHT - ITEM_HEIGHT = 350
+     */
+    scrollablePattern_->UpdateCurrentOffset(-1000, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 12);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * rowGap);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 19), 350);
+
+    /**
+     * @tc.steps: step3. Shrink rowGap 30 -> 20
+     * @tc.expected: last row stays bottom-pinned, on-screen top y stays 350 (no jump)
+     */
+    rowGap = 20.0f;
+    LazyVGridLayoutModel::SetRowGap(AceType::RawPtr(frameNode_), Dimension(rowGap));
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 12);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * rowGap);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 19), 350);
+
+    /**
+     * @tc.steps: step4. Shrink rowGap 20 -> 10
+     * @tc.expected: last row on-screen top y stays 350
+     */
+    rowGap = 10.0f;
+    LazyVGridLayoutModel::SetRowGap(AceType::RawPtr(frameNode_), Dimension(rowGap));
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * rowGap);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 19), 350);
+
+    /**
+     * @tc.steps: step5. Shrink rowGap 10 -> 0
+     * @tc.expected: last row on-screen top y stays 350
+     */
+    rowGap = 0.0f;
+    LazyVGridLayoutModel::SetRowGap(AceType::RawPtr(frameNode_), Dimension(rowGap));
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), SCROLL_HEIGHT - 10 * ITEM_HEIGHT - 9 * rowGap);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 19), 350);
 }
 
 /**
@@ -1172,6 +1246,93 @@ HWTEST_F(LazyGridLayoutTest, AddDelChildrenTest002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->totalMainSize_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 0);
     EXPECT_EQ(GetChildHeight(scrollableFrameNode_, 0), 0);
+}
+
+/**
+ * @tc.name: AddDelChildrenTest003
+ * @tc.desc: Repeatedly delete bottom children while scrolled to the bottom; the last row stays bottom-pinned
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, AddDelChildrenTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll > LazyVGrid with 40 items (2 lanes)
+     * @tc.expected: 20 rows, totalMainSize = 20 * ITEM_HEIGHT = 2000, scrollable range = 2000 - SCROLL_HEIGHT = 1550
+     */
+    CreateScroll();
+    CreateLazyGridLayout();
+    CreateContent(40);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to the bottom
+     * @tc.expected: visible range 30-39 (last 5 rows), scroll offset = SCROLL_HEIGHT - 20 * ITEM_HEIGHT = -1550,
+     *               last row bottom-aligned (on-screen top y = SCROLL_HEIGHT - ITEM_HEIGHT = 350)
+     */
+    scrollablePattern_->UpdateCurrentOffset(-2000, SCROLL_FROM_UPDATE);
+    FlushUITasks(scrollableFrameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 40);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 30);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 39);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -1550);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 39), 350);
+
+    /**
+     * @tc.steps: step3. Delete the last 10 (bottom) children, then flush once
+     * @tc.expected: the remaining 30 items (15 rows) become the whole content and the scroll re-clamps to the new
+     *               bottom; totalItemCount = 30, offset = SCROLL_HEIGHT - 15 * ITEM_HEIGHT = -1050,
+     *               last row on-screen top y stays 350
+     */
+    for (int32_t i = 0; i < 10; i++) {
+        frameNode_->RemoveChild(frameNode_->GetLastChild());
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 30);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 20);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 29);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -1050);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 29), 350);
+
+    /**
+     * @tc.steps: step4. Delete the last 10 (bottom) children, then flush once
+     * @tc.expected: the remaining 20 items (10 rows) become the whole content and the scroll re-clamps to the new
+     *               bottom; totalItemCount = 20, offset = SCROLL_HEIGHT - 10 * ITEM_HEIGHT = -550,
+     *               last row on-screen top y stays 350
+     */
+    for (int32_t i = 0; i < 10; i++) {
+        frameNode_->RemoveChild(frameNode_->GetLastChild());
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 20);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 19);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -550);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 19), 350);
+
+    /**
+     * @tc.steps: step5. Delete the last 10 (bottom) children, then flush once
+     * @tc.expected: the remaining 10 items (5 rows) become the whole content and the scroll re-clamps to the new
+     *               bottom; totalItemCount = 10, offset = SCROLL_HEIGHT - 5 * ITEM_HEIGHT = -50,
+     *               last row on-screen top y stays 350
+     */
+    for (int32_t i = 0; i < 10; i++) {
+        frameNode_->RemoveChild(frameNode_->GetLastChild());
+    }
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks(scrollableFrameNode_);
+    FlushIdleTask(pattern_);
+    FlushIdleTask(pattern_);
+    EXPECT_EQ(pattern_->layoutInfo_->totalItemCount_, 10);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleStartIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->visibleEndIndex_, 9);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0), -50);
+    EXPECT_EQ(GetChildY(scrollableFrameNode_, 0) + GetChildY(frameNode_, 9), 350);
 }
 
 /**
@@ -2475,6 +2636,29 @@ HWTEST_F(LazyGridLayoutTest, LayoutPolicyTest001, TestSize.Level1)
     EXPECT_EQ(size, SizeF(500.0f, 300.0f));
     EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
 }
+
+/**
+ * @tc.name: UpdatePosMapStartIncludesSpaceWidth001
+ * @tc.desc: Rebase from a non-zero first cached line must include row gap in the estimated line position.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, UpdatePosMapStartIncludesSpaceWidth001, TestSize.Level1)
+{
+    LazyGridLayoutInfo layoutInfo;
+    layoutInfo.SetLanes(2);
+    layoutInfo.SetSpace(10.0f);
+    layoutInfo.SetTotalItemCount(6);
+    layoutInfo.SetPosMap(4, { 0, 200.0f, 300.0f });
+    layoutInfo.SetPosMap(5, { 1, 200.0f, 300.0f });
+
+    layoutInfo.UpdatePosMap(0.0f);
+
+    EXPECT_FLOAT_EQ(layoutInfo.posMap_[4].startPos, 220.0f);
+    EXPECT_FLOAT_EQ(layoutInfo.posMap_[4].endPos, 320.0f);
+    EXPECT_FLOAT_EQ(layoutInfo.posMap_[5].startPos, 220.0f);
+    EXPECT_FLOAT_EQ(layoutInfo.posMap_[5].endPos, 320.0f);
+    EXPECT_FLOAT_EQ(layoutInfo.totalMainSize_, 320.0f);
+}
 /**
  * @tc.name: FirstFrameWindowSeedsWithUnknownBody001
  * @tc.desc: First layout with an already-scrolled viewport (body extent unknown): the forward window must fall back
@@ -2503,5 +2687,86 @@ HWTEST_F(LazyGridLayoutTest, FirstFrameWindowSeedsWithUnknownBody001, TestSize.L
     algorithm.GetEndIndexInfo(index, pos);
     EXPECT_EQ(index, 9);
     EXPECT_FLOAT_EQ(pos, 0.0f);
+}
+
+/**
+ * @tc.name: SkipLayoutWhenNotOnMainTree001
+ * @tc.desc: Test LazyGridLayoutAlgorithm UpdateReferencePos logic when conditions for skip layout are met.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, SkipLayoutWhenNotOnMainTree001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyGridLayoutInfo>();
+    auto algorithm = AceType::MakeRefPtr<LazyGridLayoutAlgorithm>(layoutInfo);
+    algorithm->SetAxis(Axis::VERTICAL);
+    
+    // Test case 1: totalItemCount > lanes, conditions should trigger skip layout
+    algorithm->totalItemCount_ = 10;
+    algorithm->lanes_ = 2;
+    algorithm->needSkipLayout_ = false;
+    algorithm->needAllLayout_ = true;
+    
+    // Create minimal test node structure
+    auto parentPattern = AceType::MakeRefPtr<WaterFlowPattern>();
+    parentPattern->SetAxis(Axis::VERTICAL);
+    auto parentLayoutProperty = AceType::MakeRefPtr<WaterFlowLayoutProperty>();
+    auto parentGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    parentGeometryNode->SetFrameSize(SizeF(SCROLL_WIDTH, SCROLL_HEIGHT));
+    
+    auto parentFrameNode =
+        FrameNode::CreateFrameNode(V2::WATERFLOW_ETS_TAG, -1, parentPattern, parentLayoutProperty);
+    parentFrameNode->geometryNode_ = parentGeometryNode;
+    parentFrameNode->onMainTree_ = true;
+    
+    LayoutConstraintF parentConstraint;
+    parentConstraint.maxSize = SizeF(SCROLL_WIDTH, SCROLL_HEIGHT);
+    parentConstraint.percentReference = SizeF(SCROLL_WIDTH, SCROLL_HEIGHT);
+    parentLayoutProperty->layoutConstraint_ = parentConstraint;
+    
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<LazyGridLayoutPattern>());
+    auto layoutProperty = AceType::MakeRefPtr<LazyGridLayoutProperty>();
+    frameNode->layoutProperty_ = layoutProperty;
+    frameNode->onMainTree_ = false;
+    frameNode->MountToParent(parentFrameNode, DEFAULT_NODE_SLOT, true); // silently = true to avoid AttachToMainTree
+    
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(SCROLL_WIDTH, SCROLL_HEIGHT));
+    geometryNode->SetParentLayoutConstraint(parentConstraint);
+    frameNode->geometryNode_ = geometryNode;
+    
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
+    auto algorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
+    layoutWrapper->SetLayoutAlgorithm(algorithmWrapper);
+    
+    // Verify all preconditions
+    EXPECT_TRUE(algorithm->totalItemCount_ > algorithm->lanes_);
+    EXPECT_FALSE(frameNode->IsOnMainTree());
+    EXPECT_FALSE(frameNode->IsNeedLazyLayout());
+    
+    auto parent = frameNode->GetParentFrameNode();
+    ASSERT_NE(parent, nullptr);
+    EXPECT_EQ(parent->GetTag(), V2::WATERFLOW_ETS_TAG);
+    
+    std::optional<ViewPosReference> posRef;
+    algorithm->UpdateReferencePos(AceType::RawPtr(layoutWrapper), posRef);
+    
+    // After calling ValidateAndSetLazyLayoutParent, isNeedLazyLayout should be set to true
+    EXPECT_TRUE(frameNode->IsNeedLazyLayout());
+    
+    // With all conditions met, needSkipLayout should be true and posMap should be empty
+    EXPECT_TRUE(algorithm->needSkipLayout_);
+    EXPECT_TRUE(layoutInfo->posMap_.empty());
+    
+    // Test case 2: totalItemCount <= lanes, should NOT skip layout
+    algorithm->needSkipLayout_ = true;
+    algorithm->totalItemCount_ = 2;
+    algorithm->lanes_ = 2;
+    frameNode->layoutProperty_->needLazyLayout_ = false; // reset for test
+    
+    posRef.reset();
+    algorithm->UpdateReferencePos(AceType::RawPtr(layoutWrapper), posRef);
+    
+    // When totalItemCount <= lanes, skip condition should not be triggered
+    EXPECT_FALSE(algorithm->needSkipLayout_);
 }
 } // namespace OHOS::Ace::NG

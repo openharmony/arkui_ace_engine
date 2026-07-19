@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace {
 
-class ResourceWrapper;
+class ResourceAdapter;
 
 class ACE_FORCE_EXPORT ResourceParseUtilsBase : public AceType {
     DECLARE_ACE_TYPE(ResourceParseUtilsBase, AceType);
@@ -76,9 +76,9 @@ protected:
     static void InvertColorWithResource(const RefPtr<ResourceObject>& resObj, Color& result,
         const ColorMode& colorMode);
     static bool ParseResColorWithName(const RefPtr<ResourceObject>& resObj, Color& result,
-        RefPtr<ResourceWrapper>& resourceWrapper, const ColorMode& colorMode);
+        RefPtr<ResourceAdapter>& resourceAdapter, const ColorMode& colorMode);
     static bool ParseResStringObj(const std::vector<ResourceObjectParams>& params,
-        RefPtr<ResourceWrapper>& resourceWrapper, std::string& result, int32_t type);
+        RefPtr<ResourceAdapter>& resourceAdapter, std::string& result, int32_t type);
 };
 
 } // namespace OHOS::Ace

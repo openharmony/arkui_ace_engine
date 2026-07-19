@@ -125,10 +125,9 @@ public:
     void SetIsFromReset(bool isFromReset);
 
     void SetImageDfxConfig(const NG::ImageDfxConfig& imageDfxConfig);
-
+    const NG::ImageDfxConfig& GetImageDfxConfig() const;
     void SetImageHdr(bool isHdr);
     bool IsImageHdr() const;
-    NG::ImageDfxConfig GetImageDfxConfig() const;
 
     bool IsSurportCachePixelmap() const;
 

@@ -685,10 +685,8 @@ void SetCustomCallbackWithCheck(ani_env* env, ani_object obj, ani_long ptr, ani_
     auto frameNodeClass = static_cast<ani_class>(frameNodeType);
     ani_method getterMethod = nullptr;
     ani_method onDrawMethod = nullptr;
-    if ((status = env->Class_FindMethod(frameNodeClass, "onDraw", "C{arkui.Graphics.DrawContext}:", &onDrawMethod)) !=
+    if ((status = env->Class_FindMethod(frameNodeClass, "onDraw", "C{arkui.Graphics.DrawContext}:", &onDrawMethod)) ==
         ANI_OK) {
-        HILOGI("Class_FindMethod onDraw failed, status : %{public}d", status);
-    } else {
         ani_method onDrawWrapperMethod = nullptr;
         env->Class_FindMethod(frameNodeClass, "onDrawWrapper", "C{arkui.Graphics.DrawContext}:", &onDrawWrapperMethod);
         auto funcOnDrawAni = std::make_shared<CommonModuleCallbackAni>(env, frameNode);
@@ -699,12 +697,10 @@ void SetCustomCallbackWithCheck(ani_env* env, ani_object obj, ani_long ptr, ani_
     }
     if ((status = env->Class_FindMethod(frameNodeClass, "onLayout", "C{arkui.Graphics.Vector2}:", &getterMethod)) !=
         ANI_OK) {
-        HILOGI("Class_FindMethod onLayout failed, status : %{public}d", status);
         return;
     }
     if ((status = env->Class_FindMethod(
         frameNodeClass, "onMeasure", "C{arkui.FrameNode.LayoutConstraint}:", &getterMethod)) != ANI_OK) {
-        HILOGI("Class_FindMethod onMeasure failed, status : %{public}d", status);
         return;
     }
     void* fnMeasureFun = nullptr;
@@ -771,6 +767,36 @@ ani_long BuilderProxyNodeMockConstruct(ani_env* env, [[maybe_unused]] ani_object
     auto mockNode = modifier->getCommonAniModifier()->builderProxyNodeMockConstruct(nodeId);
     CHECK_NULL_RETURN(mockNode, nativeObj);
     return reinterpret_cast<ani_long>(mockNode);
+}
+
+void SetOnNodeDestroyEvent(
+    ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_fn_object event)
+{
+    CHECK_NULL_VOID(env);
+    auto* arkNode = reinterpret_cast<ArkUINodeHandle>(ptr);
+    CHECK_NULL_VOID(arkNode);
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_VOID(modifier);
+    auto commonModifier = modifier->getCommonAniModifier();
+    CHECK_NULL_VOID(commonModifier);
+    auto callbackRef = std::make_shared<CommonModuleCallbackAni>(env, static_cast<ani_ref>(event));
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    auto onDestroy = [vm, func = callbackRef](int32_t nodeId) {
+        CHECK_NULL_VOID(vm);
+        CHECK_NULL_VOID(func);
+        ani_env* env = nullptr;
+        auto attachCurrentThreadStatus = GetAniEnv(vm, &env);
+        CHECK_NULL_VOID(env);
+        ani_ref arg = AniUtils::CreateInt32(env, nodeId);
+        CHECK_NULL_VOID(arg);
+        ani_ref ret = nullptr;
+        func->Call(env, 1, &arg, &ret);
+        if (attachCurrentThreadStatus == ANI_OK) {
+            vm->DetachCurrentThread();
+        }
+    };
+    commonModifier->setOnNodeDestroyEvent(arkNode, std::move(onDestroy));
 }
 
 void RemoveComponentFromFrameNode(ani_env* env, ani_object obj, ani_long node, ani_long content)

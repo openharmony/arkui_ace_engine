@@ -32,6 +32,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/shape/path_model_ng.h"
 #include "core/components_ng/pattern/shape/path_paint_property.h"
+#include "core/components_ng/pattern/shape/path_layout_algorithm.h"
 #include "core/components_ng/pattern/shape/path_pattern.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
 #include "core/components_ng/pattern/shape/shape_model_ng.h"

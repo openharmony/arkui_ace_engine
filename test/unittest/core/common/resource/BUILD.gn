@@ -36,6 +36,7 @@ ace_unittest("resource_parse_utils_test_ng") {
   module_name = "Resource-ResourceParse"
   type = "new"
   sources = [
-    "resource_parse_utils_test_ng.cpp"
+    "resource_parse_utils_test_ng.cpp",
+    "resource_parse_utils_test.cpp",
   ]
 }

@@ -169,7 +169,9 @@ DeclarativeFrontend::~DeclarativeFrontend() noexcept
 void DeclarativeFrontend::Destroy()
 {
     // The call doesn't change the page pop status
+#ifndef CROSS_PLATFORM
     Recorder::NodeDataCache::Get().OnBeforePagePop(true);
+#endif
     CHECK_RUN_ON(JS);
     LOGI("DeclarativeFrontend Destroy begin.");
     // To guarantee the jsEngine_ and delegate_ released in js thread
@@ -703,6 +705,12 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
             return jsEngine->PreloadNamedRouter(name, std::move(loadFinishCallback));
         };
 
+        auto updatePageUrlCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+            void* customNode, const std::string& pageName) -> bool {
+            auto engine = weakEngine.Upgrade();
+            CHECK_NULL_RETURN(engine, false);
+            return engine->UpdatePageUrl(customNode, pageName);
+        };
         auto pageRouterManager = NG::PageRouterManagerFactory::CreateManager();
         pageRouterManager->SetLoadDynamicPageCallback(std::move(loadDynamicPageCallback));
         pageRouterManager->SetLoadJsCallback(std::move(loadPageCallback));
@@ -716,6 +724,7 @@ void DeclarativeFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>&
         pageRouterManager->SetRestoreNamedRouterInfoCallback(std::move(restoreNamedRouterInfoCallback));
         pageRouterManager->SetIsNamedRouterNeedPreloadCallback(std::move(isNamedRouterNeedPreloadCallback));
         pageRouterManager->SetPreloadNamedRouterCallback(std::move(preloadNamedRouterCallback));
+        pageRouterManager->SetUpdatePageUrlCallback(std::move(updatePageUrlCallback));
         delegate_->SetPageRouterManager(pageRouterManager);
 
 #if defined(PREVIEW)

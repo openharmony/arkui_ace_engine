@@ -14,6 +14,7 @@
  */
 
 #include "test/mock/frameworks/base/image/mock_pixel_map.h"
+#include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
@@ -1320,6 +1321,82 @@ HWTEST_F(TextTestSevenNg, SetGradientShaderStyle009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetGradientShaderStyle010
+ * @tc.desc: Test ResetGradientShaderStyle removes registered gradient resource object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle010, TestSize.Level1)
+{
+    bool configChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+    ASSERT_TRUE(SystemProperties::ConfigChangePerform());
+
+    TextModelNG textModel;
+    textModel.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    gradient.AddColor(GradientColor(Color::RED));
+    gradient.AddColor(GradientColor(Color::BLUE));
+    textModel.SetGradientShaderStyle(gradient);
+
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    const auto& keys = pattern->resourceMgr_->GetResKeyArray();
+    EXPECT_NE(std::find(keys.begin(), keys.end(), "TextGradient.gradient"), keys.end());
+
+    textModel.ResetGradientShaderStyle();
+
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->HasGradientShaderStyle());
+    EXPECT_FALSE(layoutProperty->HasColorShaderStyle());
+    EXPECT_EQ(pattern->resourceMgr_, nullptr);
+
+    g_isConfigChangePerform = configChangePerform;
+}
+
+/**
+ * @tc.name: SetGradientShaderStyle011
+ * @tc.desc: Test ResetGradientShaderStyle only removes gradient resource object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SetGradientShaderStyle011, TestSize.Level1)
+{
+    bool configChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+    ASSERT_TRUE(SystemProperties::ConfigChangePerform());
+
+    TextModelNG textModel;
+    textModel.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto otherResObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    pattern->AddResObj("TextGradient.other", otherResObj, [](const RefPtr<ResourceObject>&) {});
+
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    gradient.AddColor(GradientColor(Color::RED));
+    textModel.SetGradientShaderStyle(gradient);
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+
+    textModel.ResetGradientShaderStyle();
+
+    ASSERT_NE(pattern->resourceMgr_, nullptr);
+    const auto& keys = pattern->resourceMgr_->GetResKeyArray();
+    EXPECT_EQ(std::find(keys.begin(), keys.end(), "TextGradient.gradient"), keys.end());
+    EXPECT_NE(std::find(keys.begin(), keys.end(), "TextGradient.other"), keys.end());
+
+    g_isConfigChangePerform = configChangePerform;
+}
+
+/**
  * @tc.name: SetExternalDrawCallback001
  * @tc.desc: Test SetExternalDrawCallback with valid frameNode and callback.
  * @tc.type: FUNC
@@ -1513,5 +1590,131 @@ HWTEST_F(TextTestSevenNg, SetSelectedBackgroundColor001, TestSize.Level1)
     EXPECT_EQ(resultColor.GetRed(), 0x00);
     EXPECT_EQ(resultColor.GetGreen(), 0xFF);
     EXPECT_EQ(resultColor.GetBlue(), 0x00);
+}
+
+/**
+ * @tc.name: GetTailIndentInJson001
+ * @tc.desc: Test GetTailIndentInJson with single positive tail indent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetTailIndentInJson001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and get layout property.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set single positive tail indent and call GetTailIndentInJson.
+     * @tc.expected: returns non-empty JSON array string.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(20.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textLayoutProperty->UpdateTailIndents(tailIndents);
+
+    auto result = textLayoutProperty->GetTailIndentInJson();
+    EXPECT_FALSE(result.empty());
+    EXPECT_TRUE(result.find("20") != std::string::npos);
+}
+
+/**
+ * @tc.name: GetTailIndentInJson002
+ * @tc.desc: Test GetTailIndentInJson with multiple tail indent values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetTailIndentInJson002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and get layout property.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set multiple tail indents values and call GetTailIndentInJson.
+     * @tc.expected: returns JSON array string containing all dimension values.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(10.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(20.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(30.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textLayoutProperty->UpdateTailIndents(tailIndents);
+
+    auto result = textLayoutProperty->GetTailIndentInJson();
+    EXPECT_FALSE(result.empty());
+    EXPECT_TRUE(result.find("10") != std::string::npos);
+    EXPECT_TRUE(result.find("20") != std::string::npos);
+    EXPECT_TRUE(result.find("30") != std::string::npos);
+}
+
+/**
+ * @tc.name: GetTailIndentInJson003
+ * @tc.desc: Test GetTailIndentInJson without setting tail indent (no property).
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetTailIndentInJson003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and get layout property without setting tail indents.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetTailIndentInJson without setting tail indents.
+     * @tc.expected: returns empty string.
+     */
+    auto result = textLayoutProperty->GetTailIndentInJson();
+    EXPECT_TRUE(result.empty());
+}
+
+/**
+ * @tc.name: GetTailIndentInJson004
+ * @tc.desc: Test GetTailIndentInJson with negative and zero dimension values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, GetTailIndentInJson004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and get layout property.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set tail indents with negative and zero values.
+     * @tc.expected: returns non-empty string containing all dimension values including negative.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(-10.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(0.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(15.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textLayoutProperty->UpdateTailIndents(tailIndents);
+
+    auto result = textLayoutProperty->GetTailIndentInJson();
+    EXPECT_FALSE(result.empty());
 }
 } // namespace OHOS::Ace::NG

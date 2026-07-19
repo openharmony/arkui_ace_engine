@@ -22,6 +22,7 @@
 #include "core/animation/bilateral_spring_node.h"
 #include "core/common/text_field_manager.h"
 #include "core/components/box/drag_drop_event.h"
+#include "core/components/positioned/positioned_component.h"
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll/render_single_child_scroll.h"
 #include "core/components/scroll/scroll_fade_effect.h"

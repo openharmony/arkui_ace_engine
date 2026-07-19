@@ -1,0 +1,386 @@
+diff --git a/wm/include/window_agent.h b/wm/include/window_agent.h
+index a83103e14a..058692b3c1 100644
+--- a/wm/include/window_agent.h
++++ b/wm/include/window_agent.h
+@@ -57,6 +57,7 @@ public:
+     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event) override;
+     void NotifyForegroundInteractiveStatus(bool interactive) override;
+     void NotifyMMIServiceOnline(uint32_t winId) override;
++    WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
+
+ private:
+     sptr<WindowImpl> window_;
+diff --git a/wm/include/window_impl.h b/wm/include/window_impl.h
+index acb1f822fc..b073a284ab 100644
+--- a/wm/include/window_impl.h
++++ b/wm/include/window_impl.h
+@@ -37,6 +37,7 @@
+ #include "window_transition_info.h"
+ #include "wm_common_inner.h"
+ #include "wm_common.h"
++#include "ws_common.h"
+
+ using OHOS::AppExecFwk::DisplayOrientation;
+
+@@ -320,6 +321,7 @@ public:
+     virtual Ace::UIContent* GetUIContentWithId(uint32_t winId) const override;
+     Ace::UIContent* GetUIContent() const override;
+     std::shared_ptr<Ace::UIContent> GetUIContentSharedPtr() const;
++    WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj);
+     virtual void OnNewWant(const AAFwk::Want& want) override;
+     virtual void SetRequestedOrientation(Orientation orientation, bool needAnimation = true) override;
+     virtual Orientation GetRequestedOrientation() override;
+diff --git a/wm/include/zidl/window_interface.h b/wm/include/zidl/window_interface.h
+index f1196eaae6..6ec06d13f1 100644
+--- a/wm/include/zidl/window_interface.h
++++ b/wm/include/zidl/window_interface.h
+@@ -21,6 +21,7 @@
+ #include "window_property.h"
+ #include "wm_common.h"
+ #include "wm_common_inner.h"
++#include "ws_common.h"
+
+ namespace OHOS {
+ namespace Rosen {
+@@ -56,6 +57,7 @@ public:
+         TRANS_ID_GET_ROUTER_STACK_INFO,
+         TRANS_ID_NOTIFY_FOREGROUND_INTERACTIVE_STATUS,
+         TRANS_ID_NOTIFY_MMI_SERVICE_ONLINE,
++        TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ,
+     };
+
+     virtual WMError UpdateWindowRect(const struct Rect& rect, bool decoStatus, WindowSizeChangeReason reason,
+@@ -88,6 +90,10 @@ public:
+         const std::shared_ptr<RSTransaction>& rsTransaction = nullptr) = 0;
+     virtual void NotifyForegroundInteractiveStatus(bool interactive) = 0;
+     virtual void NotifyMMIServiceOnline(uint32_t winId) = 0;
++    virtual WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
++    {
++        return WSError::WS_ERROR_DEVICE_NOT_SUPPORT;
++    }
+ };
+ } // namespace Rosen
+ } // namespace OHOS
+diff --git a/wm/include/zidl/window_proxy.h b/wm/include/zidl/window_proxy.h
+index 134daaf8a2..f230ce3c22 100644
+--- a/wm/include/zidl/window_proxy.h
++++ b/wm/include/zidl/window_proxy.h
+@@ -60,6 +60,7 @@ public:
+     void ConsumeKeyEvent(std::shared_ptr<MMI::KeyEvent> event) override;
+     void NotifyForegroundInteractiveStatus(bool interactive) override;
+     void NotifyMMIServiceOnline(uint32_t winId) override;
++    WSError GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj) override;
+
+ private:
+     static inline BrokerDelegator<WindowProxy> delegator_;
+diff --git a/wm/src/window_agent.cpp b/wm/src/window_agent.cpp
+index 34ee1f9bca..3eaad19f8c 100644
+--- a/wm/src/window_agent.cpp
++++ b/wm/src/window_agent.cpp
+@@ -288,5 +288,17 @@ void WindowAgent::NotifyMMIServiceOnline(uint32_t winId)
+     window_->NotifyMMIServiceOnline(winId);
+ }
+
++WSError WindowAgent::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
++{
++    if (window_ == nullptr) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window_ is nullptr");
++        return WSError::WS_ERROR_NULLPTR;
++    }
++    WSError errCode = window_->GetUIContentRemoteObj(uiContentRemoteObj);
++    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "WindowAgent GetUIContentRemoteObj, winId:%{public}u, err:%{public}d, "
++        "remote:%{public}d", window_->GetWindowId(), static_cast<int32_t>(errCode), uiContentRemoteObj != nullptr);
++    return errCode;
++}
++
+ } // namespace Rosen
+ } // namespace OHOS
+diff --git a/wm/src/window_impl.cpp b/wm/src/window_impl.cpp
+index f43dbf810a..df05c307ae 100644
+--- a/wm/src/window_impl.cpp
++++ b/wm/src/window_impl.cpp
+@@ -671,6 +671,22 @@ std::shared_ptr<Ace::UIContent> WindowImpl::GetUIContentSharedPtr() const
+     return uiContent_;
+ }
+
++WSError WindowImpl::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
++{
++    auto uiContent = GetUIContentSharedPtr();
++    if (uiContent == nullptr) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent is null, winId:%{public}u", GetWindowId());
++        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
++    }
++    uiContentRemoteObj = uiContent->GetRemoteObj();
++    if (uiContentRemoteObj == nullptr) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent remote is null, winId:%{public}u", GetWindowId());
++        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
++    }
++    TLOGI(WmsLogTag::WMS_ATTRIBUTE, "get uiContent remote success, winId:%{public}u", GetWindowId());
++    return WSError::WS_OK;
++}
++
+ void WindowImpl::OnNewWant(const AAFwk::Want& want)
+ {
+     WLOGI("Window [name:%{public}s, id:%{public}u]", name_.c_str(), property_->GetWindowId());
+diff --git a/wm/src/window_session_impl.cpp b/wm/src/window_session_impl.cpp
+index 81275bea42..1cf8f692b2 100644
+--- a/wm/src/window_session_impl.cpp
++++ b/wm/src/window_session_impl.cpp
+@@ -4809,6 +4809,31 @@ WSError WindowSessionImpl::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentR
+         return WSError::WS_ERROR_NULLPTR;
+     }
+     uiContentRemoteObj = uiContent->GetRemoteObj();
++    if (uiContentRemoteObj != nullptr) {
++        return WSError::WS_OK;
++    }
++    TLOGW(WmsLogTag::WMS_ATTRIBUTE, "current uiContent remote is null, id:%{public}d, name:%{public}s",
++        GetPersistentId(), GetWindowName().c_str());
++    std::shared_lock<std::shared_mutex> lock(windowSessionMutex_);
++    for (const auto& [name, windowInfo] : windowSessionMap_) {
++        auto window = windowInfo.second;
++        if (window == nullptr || window.GetRefPtr() == this) {
++            continue;
++        }
++        auto fallbackUIContent = window->GetUIContentSharedPtr();
++        if (fallbackUIContent == nullptr) {
++            continue;
++        }
++        uiContentRemoteObj = fallbackUIContent->GetRemoteObj();
++        if (uiContentRemoteObj != nullptr) {
++            TLOGI(WmsLogTag::WMS_ATTRIBUTE,
++                "get fallback uiContent remote, currentId:%{public}d, fallbackId:%{public}d, fallbackName:%{public}s",
++                GetPersistentId(), window->GetPersistentId(), name.c_str());
++            return WSError::WS_OK;
++        }
++    }
++    TLOGE(WmsLogTag::WMS_ATTRIBUTE, "uiContent remote is nullptr, no fallback found, id:%{public}d",
++        GetPersistentId());
+     return WSError::WS_OK;
+ }
+
+diff --git a/wm/src/zidl/window_proxy.cpp b/wm/src/zidl/window_proxy.cpp
+index edbd791f3f..490333933f 100644
+--- a/wm/src/zidl/window_proxy.cpp
++++ b/wm/src/zidl/window_proxy.cpp
+@@ -780,6 +780,38 @@ void WindowProxy::NotifyMMIServiceOnline(uint32_t winId)
+     }
+ }
+
++WSError WindowProxy::GetUIContentRemoteObj(sptr<IRemoteObject>& uiContentRemoteObj)
++{
++    MessageParcel data;
++    MessageParcel reply;
++    MessageOption option;
++    if (!data.WriteInterfaceToken(GetDescriptor())) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
++        return WSError::WS_ERROR_IPC_FAILED;
++    }
++    sptr<IRemoteObject> remote = Remote();
++    if (remote == nullptr) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
++        return WSError::WS_ERROR_IPC_FAILED;
++    }
++    if (remote->SendRequest(static_cast<uint32_t>(WindowMessage::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ),
++        data, reply, option) != ERR_NONE) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
++        return WSError::WS_ERROR_IPC_FAILED;
++    }
++    WSError errCode = static_cast<WSError>(reply.ReadInt32());
++    if (errCode != WSError::WS_OK) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetUIContentRemoteObj failed, err:%{public}d",
++            static_cast<int32_t>(errCode));
++        return errCode;
++    }
++    uiContentRemoteObj = reply.ReadRemoteObject();
++    if (uiContentRemoteObj == nullptr) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read uiContentRemoteObj failed");
++        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
++    }
++    return WSError::WS_OK;
++}
++
+ } // namespace Rosen
+ } // namespace OHOS
+-
+diff --git a/wm/src/zidl/window_stub.cpp b/wm/src/zidl/window_stub.cpp
+index 46569f57d5..88c774c318 100644
+--- a/wm/src/zidl/window_stub.cpp
++++ b/wm/src/zidl/window_stub.cpp
+@@ -328,6 +328,19 @@ int WindowStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParce
+             NotifyMMIServiceOnline(winId);
+             break;
+         }
++        case WindowMessage::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ: {
++            sptr<IRemoteObject> uiContentRemoteObj = nullptr;
++            WSError errCode = GetUIContentRemoteObj(uiContentRemoteObj);
++            if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
++                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write error code failed");
++                return ERR_INVALID_DATA;
++            }
++            if (errCode == WSError::WS_OK && !reply.WriteRemoteObject(uiContentRemoteObj)) {
++                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write uiContentRemoteObj failed");
++                return ERR_INVALID_DATA;
++            }
++            break;
++        }
+         default:
+             WLOGFW("unknown transaction code %{public}d", code);
+             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+diff --git a/wmserver/include/window_manager_service.h b/wmserver/include/window_manager_service.h
+index 07b8c9b22f..7ba5ad64d7 100644
+--- a/wmserver/include/window_manager_service.h
++++ b/wmserver/include/window_manager_service.h
+@@ -156,6 +156,7 @@ public:
+     void SetMaximizeMode(MaximizeMode maximizeMode) override;
+     MaximizeMode GetMaximizeMode() override;
+     void GetFocusWindowInfo(FocusChangeInfo& focusInfo, DisplayId displayId = DEFAULT_DISPLAY_ID) override;
++    WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj) override;
+     void GetAllGroupInfo(std::unordered_map<DisplayId, DisplayGroupId>& displayId2GroupIdMap,
+                          std::vector<sptr<FocusChangeInfo>>& allFocusInfoList) override {};
+
+diff --git a/wmserver/include/zidl/window_manager_interface.h b/wmserver/include/zidl/window_manager_interface.h
+index 5775c63bb6..b7ddf510d1 100644
+--- a/wmserver/include/zidl/window_manager_interface.h
++++ b/wmserver/include/zidl/window_manager_interface.h
+@@ -103,6 +103,7 @@ public:
+         TRANS_ID_REMOVE_IMAGE_FOR_RECENT,
+         TRANS_ID_GET_FLOAT_VIEW_LIMITS,
+         TRANS_ID_GET_WINDOW_STATE_SNAPSHOT,
++        TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ,
+     };
+     virtual WMError CreateWindow(sptr<IWindow>& window, sptr<WindowProperty>& property,
+         const std::shared_ptr<RSSurfaceNode>& surfaceNode,
+diff --git a/wmserver/include/zidl/window_manager_proxy.h b/wmserver/include/zidl/window_manager_proxy.h
+index d3b85a0fd3..3adeb29e3d 100644
+--- a/wmserver/include/zidl/window_manager_proxy.h
++++ b/wmserver/include/zidl/window_manager_proxy.h
+@@ -78,6 +78,7 @@ public:
+     WMError SetGestureNavigationEnabled(bool enable) override;
+     void DispatchKeyEvent(uint32_t windowId, std::shared_ptr<MMI::KeyEvent> event) override;
+     void NotifyDumpInfoResult(const std::vector<std::string>& info) override;
++    WSError GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj) override;
+     WMError GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
+         std::vector<sptr<RSWindowAnimationTarget>>& targets) override;
+     void SetMaximizeMode(MaximizeMode maximizeMode) override;
+diff --git a/wmserver/src/window_manager_service.cpp b/wmserver/src/window_manager_service.cpp
+index 94b362edd9..8be7188dc3 100644
+--- a/wmserver/src/window_manager_service.cpp
++++ b/wmserver/src/window_manager_service.cpp
+@@ -1711,6 +1711,40 @@ void WindowManagerService::GetFocusWindowInfo(FocusChangeInfo& focusInfo, Displa
+     windowController_->GetFocusWindowInfo(focusInfo);
+ }
+
++WSError WindowManagerService::GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj)
++{
++    if (!Permission::IsSystemCalling()) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetUIContentRemoteObj permission denied, persistentId:%{public}d",
++            persistentId);
++        return WSError::WS_ERROR_INVALID_PERMISSION;
++    }
++    auto task = [this, persistentId, &uiContentRemoteObj]() -> WSError {
++        if (windowRoot_ == nullptr) {
++            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "windowRoot_ is null, persistentId:%{public}d", persistentId);
++            return WSError::WS_ERROR_NULLPTR;
++        }
++        sptr<WindowNode> node = windowRoot_->GetWindowNode(static_cast<uint32_t>(persistentId));
++        if (node == nullptr) {
++            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window node is null, persistentId:%{public}d", persistentId);
++            return WSError::WS_ERROR_INVALID_WINDOW;
++        }
++        sptr<IWindow> windowToken = node->GetWindowToken();
++        if (windowToken == nullptr) {
++            TLOGE(WmsLogTag::WMS_ATTRIBUTE, "window token is null, persistentId:%{public}d", persistentId);
++            return WSError::WS_ERROR_NULLPTR;
++        }
++        WSError errCode = windowToken->GetUIContentRemoteObj(uiContentRemoteObj);
++        TLOGI(WmsLogTag::WMS_ATTRIBUTE,
++            "GetUIContentRemoteObj from app, persistentId:%{public}d, err:%{public}d, remote:%{public}d",
++            persistentId, static_cast<int32_t>(errCode), uiContentRemoteObj != nullptr);
++        if (errCode == WSError::WS_OK && uiContentRemoteObj == nullptr) {
++            return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
++        }
++        return errCode;
++    };
++    return PostSyncTask(task, "GetUIContentRemoteObj");
++}
++
+ void WindowManagerService::InitRSUIDirector()
+ {
+     rsUiDirector_ = RSUIDirector::Create(nullptr);
+diff --git a/wmserver/src/zidl/window_manager_proxy.cpp b/wmserver/src/zidl/window_manager_proxy.cpp
+index 2ca608878d..b9f2f57364 100644
+--- a/wmserver/src/zidl/window_manager_proxy.cpp
++++ b/wmserver/src/zidl/window_manager_proxy.cpp
+@@ -1255,6 +1255,43 @@ void WindowManagerProxy::NotifyDumpInfoResult(const std::vector<std::string>& in
+     }
+ }
+
++WSError WindowManagerProxy::GetUIContentRemoteObj(int32_t persistentId, sptr<IRemoteObject>& uiContentRemoteObj)
++{
++    MessageParcel data;
++    MessageParcel reply;
++    MessageOption option;
++    if (!data.WriteInterfaceToken(GetDescriptor())) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "WriteInterfaceToken failed");
++        return WSError::WS_ERROR_IPC_FAILED;
++    }
++    if (!data.WriteInt32(persistentId)) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write persistentId failed");
++        return WSError::WS_ERROR_IPC_FAILED;
++    }
++    sptr<IRemoteObject> remote = Remote();
++    if (remote == nullptr) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "remote is null");
++        return WSError::WS_ERROR_IPC_FAILED;
++    }
++    if (remote->SendRequest(static_cast<uint32_t>(WindowManagerMessage::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ),
++        data, reply, option) != ERR_NONE) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "SendRequest failed");
++        return WSError::WS_ERROR_IPC_FAILED;
++    }
++    WSError errCode = static_cast<WSError>(reply.ReadInt32());
++    if (errCode != WSError::WS_OK) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "GetUIContentRemoteObj failed, err:%{public}d",
++            static_cast<int32_t>(errCode));
++        return errCode;
++    }
++    uiContentRemoteObj = reply.ReadRemoteObject();
++    if (uiContentRemoteObj == nullptr) {
++        TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read uiContentRemoteObj failed");
++        return WSError::WS_ERROR_NO_UI_CONTENT_ERROR;
++    }
++    return WSError::WS_OK;
++}
++
+ WMError WindowManagerProxy::GetWindowAnimationTargets(std::vector<uint32_t> missionIds,
+     std::vector<sptr<RSWindowAnimationTarget>>& targets)
+ {
+diff --git a/wmserver/src/zidl/window_manager_stub.cpp b/wmserver/src/zidl/window_manager_stub.cpp
+index e18ea27006..ed84e8ad64 100644
+--- a/wmserver/src/zidl/window_manager_stub.cpp
++++ b/wmserver/src/zidl/window_manager_stub.cpp
+@@ -564,6 +564,24 @@ int32_t WindowManagerStub::OnRemoteRequest(uint32_t code, MessageParcel& data, M
+             reply.WriteParcelable(&focusInfo);
+             break;
+         }
++        case WindowManagerMessage::TRANS_ID_GET_UI_CONTENT_REMOTE_OBJ: {
++            int32_t persistentId = 0;
++            if (!data.ReadInt32(persistentId)) {
++                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Read persistentId failed");
++                return ERR_INVALID_DATA;
++            }
++            sptr<IRemoteObject> uiContentRemoteObj = nullptr;
++            WSError errCode = GetUIContentRemoteObj(persistentId, uiContentRemoteObj);
++            if (!reply.WriteInt32(static_cast<int32_t>(errCode))) {
++                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write error code failed");
++                return ERR_INVALID_DATA;
++            }
++            if (errCode == WSError::WS_OK && !reply.WriteRemoteObject(uiContentRemoteObj)) {
++                TLOGE(WmsLogTag::WMS_ATTRIBUTE, "Write uiContentRemoteObj failed");
++                return ERR_INVALID_DATA;
++            }
++            break;
++        }
+         default:
+             WLOGFW("unknown transaction code %{public}d", code);
+             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

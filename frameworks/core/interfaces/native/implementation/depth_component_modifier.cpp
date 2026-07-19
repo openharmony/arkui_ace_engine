@@ -125,13 +125,16 @@ void SetDepthComponentOptionsImpl(Ark_NativePointer node,
             }
         },
         []() {});
-    if (bgSource) {
-        DepthComponentModel::SetBackgroundSource(frameNode, *bgSource);
-    }
+    DepthComponentModel::SetBackgroundSource(frameNode,
+        bgSource.value_or(OHOS::Ace::DepthBackgroundSource()));
     if (options && options->tag != INTEROP_TAG_UNDEFINED) {
         auto depthSpace = Converter::OptConvert<OHOS::Ace::DepthSpaceType>(options->value.depthSpace);
         if (depthSpace) {
             DepthComponentModel::SetDepthSpace(frameNode, *depthSpace);
+        }
+        auto render3DScale = Converter::OptConvert<float>(options->value.render3DScale);
+        if (render3DScale && GreatNotEqual(*render3DScale, 0.0f) && LessOrEqual(*render3DScale, 1.0f)) {
+            DepthComponentModel::SetRender3DScale(frameNode, *render3DScale);
         }
     }
 }
@@ -183,7 +186,7 @@ void SetDepthMapImpl(Ark_NativePointer node,
                 applyDepthMap(*info);
             }
         },
-        []() {});
+        [&applyDepthMap]() { applyDepthMap(ImageSourceInfo()); });
 }
 
 void SetCameraImpl(Ark_NativePointer node,
@@ -194,17 +197,6 @@ void SetCameraImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto camera = Converter::OptConvert<OHOS::Ace::DepthCameraParams>(*value);
     if (camera) {
-        if (!camera->cameraBufferCrop) {
-            OHOS::Ace::CameraBufferCrop defaultCrop;
-            auto geoNode = frameNode->GetGeometryNode();
-            if (geoNode) {
-                defaultCrop.bufferWidth = static_cast<int32_t>(geoNode->GetFrameSize().Width());
-                defaultCrop.bufferHeight = static_cast<int32_t>(geoNode->GetFrameSize().Height());
-            }
-            defaultCrop.cropOffset = {0.0f, 0.0f};
-            defaultCrop.cropScale = 1.0f;
-            camera->cameraBufferCrop = defaultCrop;
-        }
         DepthComponentModel::SetCamera(frameNode, *camera);
     }
 }

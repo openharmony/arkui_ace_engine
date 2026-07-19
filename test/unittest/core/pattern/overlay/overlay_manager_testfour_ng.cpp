@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,30 +16,29 @@
 #include <cstdint>
 
 #include "gtest/gtest.h"
-
 #define private public
 #define protected public
-
-#include "test/mock/frameworks/base/window/mock_foldable_window.h"
-#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
+#include "test/mock/frameworks/base/window/mock_foldable_window.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
-
 #include "test/unittest/core/event/frame_node_on_tree.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/ace_engine.h"
 #include "core/common/frontend.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
+#include "core/components_ng/pattern/dialog/dialog_inner_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -48,13 +47,12 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
-#include "core/common/ace_engine.h"
-#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -177,7 +175,10 @@ HWTEST_F(OverlayManagerTestFourNg, RemoveDialog001, TestSize.Level1)
     ASSERT_NE(overlay, nullptr);
     bool ret = overlayManager->RemoveDialog(overlay, true, true);
     EXPECT_TRUE(ret);
-    overlayManager->backPressEvent_ = []() { return false; };
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->backPressEvent_ = []() { return false; };
     overlay->eventHub_ = AceType::MakeRefPtr<EventHub>();
     ret = overlayManager->RemoveDialog(overlay, true, false);
     EXPECT_TRUE(ret);
@@ -223,11 +224,14 @@ HWTEST_F(OverlayManagerTestFourNg, RemoveMaskFromMap001, TestSize.Level1)
     auto dialogNode = FrameNode::CreateFrameNode(
         V2::MENU_ETS_TAG, ZERO, AceType::MakeRefPtr<MenuPattern>(TARGET_ID, TEXT_TAG, MenuType::MENU));
     ASSERT_NE(dialogNode, nullptr);
-    overlayManager->maskNodeIdMap_.emplace(ONE, ONE);
-    overlayManager->maskNodeIdMap_.emplace(ZERO, ZERO);
-    overlayManager->maskNodeIdMap_.emplace(TWO, TWO);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->maskNodeIdMap_.emplace(ONE, ONE);
+    dialogInnerManager->maskNodeIdMap_.emplace(ZERO, ZERO);
+    dialogInnerManager->maskNodeIdMap_.emplace(TWO, TWO);
     overlayManager->RemoveMaskFromMap(dialogNode);
-    EXPECT_EQ(overlayManager->maskNodeIdMap_.size(), TWO);
+    EXPECT_EQ(dialogInnerManager->maskNodeIdMap_.size(), TWO);
 }
 
 /**
@@ -705,12 +709,52 @@ HWTEST_F(OverlayManagerTestFourNg, MountCustomKeyboard001, TestSize.Level1)
     ASSERT_NE(customKeyboard, nullptr);
     
     int32_t targetId = TARGET_ID;
-    overlayManager.MountCustomKeyboard(customKeyboard, targetId);
+    auto ret = overlayManager.MountCustomKeyboard(customKeyboard, targetId);
     
+    EXPECT_TRUE(ret);
     EXPECT_NE(overlayManager.customKeyboardMap_.find(targetId), overlayManager.customKeyboardMap_.end());
     EXPECT_EQ(overlayManager.customKeyboardMap_[targetId], customKeyboard);
     auto customKeyboardNode = overlayManager.customKeyboardNode_.Upgrade();
     EXPECT_EQ(customKeyboardNode, customKeyboard);
     EXPECT_EQ(overlayManager.oldTargetId_, targetId);
+}
+
+/**
+ * @tc.name: MountCustomKeyboard002
+ * @tc.desc: Test MountCustomKeyboard does not persist state when mount is blocked by modal uec.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFourNg, MountCustomKeyboard002, TestSize.Level1)
+{
+    RefPtr<FrameNode> rootNode = AceType::MakeRefPtr<FrameNode>("STAGE", TARGET_ID, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto pipeline = rootNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    auto contentNode = FrameNode::CreateFrameNode("CONTENT", TARGET_ID_NEW_THREE, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(rootNode);
+
+    auto modalNode = FrameNode::CreateFrameNode(
+        V2::MODAL_PAGE_TAG, TARGET_ID_NEW_ONE, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(modalNode, nullptr);
+    modalNode->MountToParent(rootNode);
+    rootNode->UpdateModalUiextensionCount(true);
+    modalNode->SetIsAllowAddChildBelowModalUec(false);
+
+    OverlayManager overlayManager(rootNode);
+    overlayManager.rootNodeWeak_ = rootNode;
+
+    auto customKeyboard = FrameNode::CreateFrameNode(
+        V2::KEYBOARD_ETS_TAG, TARGET_ID_NEW_TWO, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(customKeyboard, nullptr);
+
+    int32_t targetId = TARGET_ID;
+    auto ret = overlayManager.MountCustomKeyboard(customKeyboard, targetId);
+
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(customKeyboard->GetParent(), nullptr);
+    EXPECT_EQ(overlayManager.customKeyboardMap_.find(targetId), overlayManager.customKeyboardMap_.end());
+    EXPECT_EQ(overlayManager.customKeyboardNode_.Upgrade(), nullptr);
 }
 } // namespace OHOS::Ace::NG

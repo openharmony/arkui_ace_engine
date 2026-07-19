@@ -86,7 +86,9 @@ public:
         }
         hasFinished_ = true;
         if (!isTimeout) {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+#endif
         }
         finishCallback_();
         if (endCallback_) {

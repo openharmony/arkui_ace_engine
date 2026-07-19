@@ -28,6 +28,11 @@ class ViewPartialUpdateModelImpl : public ViewPartialUpdateModel {
 public:
     RefPtr<AceType> CreateNode(NodeInfoPU&& info) override;
     bool MarkNeedUpdate(const WeakPtr<AceType>& node) override;
+    bool TryReleaseExpiringNode(const WeakPtr<AceType>& node, std::string reuseId) override
+    {
+        /* not used here */
+        return false;
+    }
     void FlushUpdateTask(const UpdateTask& task) override;
     void FinishUpdate(const WeakPtr<AceType>& viewNode, int32_t id,
         std::function<void(const UpdateTask&)>&& emplaceTaskFunc) override;

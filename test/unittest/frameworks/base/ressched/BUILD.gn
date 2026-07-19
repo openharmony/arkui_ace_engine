@@ -26,6 +26,7 @@ ace_unittest("ressched_report_test") {
   ]
 
   sources = [
+    "$ace_root/test/mock/adapter/ohos/osal/mock_dynamic_module_helper.cpp",
     "$ace_root/adapter/ohos/osal/ressched_report.cpp",
     "$ace_root/frameworks/base/ressched/ressched_click_optimizer.cpp",
     "$ace_root/frameworks/base/ressched/ressched_report.cpp",
@@ -113,7 +114,6 @@ ace_unittest("ressched_report_test") {
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_modifier_adapter.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_paragraph.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_pixmap_image.cpp",
-    "$ace_root/test/mock/frameworks/core/components_ng/render/mock_render_context.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_render_surface_creator.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_texteffect.cpp",
     "$ace_root/test/mock/frameworks/core/rosen/testing_typography_style.cpp",
@@ -136,6 +136,7 @@ ace_unittest("ressched_report_test") {
     "$ace_root/test/unittest:ace_components_gestures",
     "$ace_root/test/unittest:ace_components_layout",
     "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_mock",
     "$ace_root/test/unittest:ace_components_pattern",
     "$ace_root/test/unittest:ace_components_property",
     "$ace_root/test/unittest:ace_components_render",

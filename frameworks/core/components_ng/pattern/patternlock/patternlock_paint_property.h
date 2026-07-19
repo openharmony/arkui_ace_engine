@@ -16,12 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATTERNLOCK_PATTERNLOCK_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PATTERNLOCK_PATTERNLOCK_PAINT_PROPERTY_H
 
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class PatternLockPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(PatternLockPaintProperty, PaintProperty);

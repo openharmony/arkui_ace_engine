@@ -14,7 +14,15 @@
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("$ace_root/frameworks/core/components_ng/components.gni")
 
+config("xcomponent_bridge_config") {
+  defines = [ "USE_ARK_ENGINE" ]
+  if (use_hilog) {
+    defines += [ "USE_HILOG" ]
+  }
+}
+
 build_component_ng("xcomponent_pattern_ng") {
+  configs = [ ":xcomponent_bridge_config" ]
   sources = [
     "xcomponent_accessibility_child_tree_callback.cpp",
     "xcomponent_accessibility_provider.cpp",
@@ -33,14 +41,36 @@ build_component_ng("xcomponent_pattern_ng") {
     "xcomponent_utils.cpp",
   ]
 
+  ark_sources = [
+    "bridge/arkts_native_xcomponent_bridge.cpp",
+    "bridge/arkts_native_xcomponent_node_bridge.cpp",
+    "bridge/xcomponent_ani_modifier.cpp",
+    "bridge/xcomponent_controller_accessor.cpp",
+    "bridge/xcomponent_controller_extender_accessor.cpp",
+    "bridge/xcomponent_controller_peer_impl.cpp",
+    "bridge/xcomponent_dynamic_modifier.cpp",
+    "bridge/xcomponent_dynamic_module.cpp",
+    "bridge/xcomponent_model_impl.cpp",
+    "bridge/xcomponent_node.cpp",
+  ]
+
+  if (!ace_engine_feature_wearable) {
+    ark_sources += [ "bridge/xcomponent_static_modifier.cpp" ]
+  }
+
+  deps = []
   if (is_ohos_standard_system) {
-    deps = [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
-    external_deps = [
-      "c_utils:utils",
-      "graphic_2d:librender_service_client",
-      "hilog:libhilog",
-    ]
-  } else if (is_arkui_x) {
-    deps = [ "$ace_graphic/rosen/modules/render_service_client:librender_service_client_static" ]
+    if (!build_ohos_sdk) {
+      external_deps = [
+        "c_utils:utils",
+        "graphic_2d:librender_service_client",
+        "hilog:libhilog",
+      ]
+    }
+  }
+  if (!build_ohos_sdk) {
+    if (!is_arkui_x) {
+      deps += [ "${ace_root}/interfaces/inner_api/ui_session" ]
+    }
   }
 }

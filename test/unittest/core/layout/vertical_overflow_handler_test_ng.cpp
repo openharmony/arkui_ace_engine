@@ -1174,4 +1174,22 @@ HWTEST_F(OverflowTestNg, InitOffsetAfterLayoutFirstCallTest, TestSize.Level1)
     EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(-1), expectedChildFrameTop);
     EXPECT_EQ(vOverflowHandler->offsetToChildFrameBottom_, expectedOffsetToBottom);
 }
+
+/**
+ * @tc.name: CachedPathHashSetAndGetTest
+ * @tc.desc: SetCachedPathHash stores the value and GetCachedPathHash returns it.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverflowTestNg, CachedPathHashSetAndGetTest, TestSize.Level1)
+{
+    VerticalOverflowHandler handler;
+    EXPECT_TRUE(handler.GetCachedPathHash().empty());
+
+    handler.SetCachedPathHash("deadbeef");
+    EXPECT_EQ(handler.GetCachedPathHash(), "deadbeef");
+
+    // Overwrite with a different value to confirm the setter is not a one-shot.
+    handler.SetCachedPathHash("cafef00d");
+    EXPECT_EQ(handler.GetCachedPathHash(), "cafef00d");
+}
 } // namespace OHOS::Ace::NG

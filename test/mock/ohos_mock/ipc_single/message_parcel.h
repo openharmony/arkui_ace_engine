@@ -155,6 +155,12 @@ public:
         return 0;
     }
 
+    bool ReadInt32(int32_t& value)
+    {
+        value = 0;
+        return true;
+    }
+
     bool WriteInt32(int32_t value)
     {
         return true;

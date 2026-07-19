@@ -18,9 +18,9 @@
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/manager/recoverable/recoverable_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
@@ -495,8 +495,24 @@ std::unique_ptr<JsonValue> NavigationManager::GetNavigationJsonInfo()
         if (!navigationPattern) {
             continue;
         }
+        auto stack = navigationPattern->GetNavigationStack();
+        if (!stack) {
+            continue;
+        }
         auto navigationInfo = JsonUtil::Create(true);
         navigationInfo->Put("id", iter.first.c_str());
+        auto homeDestination =
+            AceType::DynamicCast<NavDestinationNodeBase>(navigation->GetNavBarOrHomeDestinationNode());
+        if (homeDestination) {
+            auto context = pipeline_.Upgrade();
+            CHECK_NULL_RETURN(context, nullptr);
+            auto recoverableMgr = context->GetRecoverableManager();
+            CHECK_NULL_RETURN(recoverableMgr, nullptr);
+            std::string result;
+            if (recoverableMgr->GetRestoreByPage(true, homeDestination->GetId(), result)) {
+                navigationInfo->Put("home", result.c_str());
+            }
+        }
         navigationInfo->Put("stack", navigationPattern->GetNavdestinationJsonArray());
         allNavigationInfo->Put(navigationInfo);
     }
@@ -510,10 +526,16 @@ void NavigationManager::StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue>
         TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Navigation recovery info invalid, can not restore!");
         return;
     }
+    auto context = pipeline_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto recoverableMgr = context->GetRecoverableManager();
+    CHECK_NULL_VOID(recoverableMgr);
     auto arraySize = allNavigationInfo->GetArraySize();
     for (int32_t i = 0; i < arraySize; ++ i) {
         auto navigationInfo = allNavigationInfo->GetArrayItem(i);
         auto navigationId = navigationInfo->GetString("id");
+        auto homeInfo = navigationInfo->GetString("home");
+        recoverableMgr->SetNavigationHomeInfo(navigationId, homeInfo);
         auto stackInfo = navigationInfo->GetValue("stack");
         if (!stackInfo->IsArray()) {
             continue;
@@ -525,7 +547,14 @@ void NavigationManager::StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue>
             auto name = navdestinationInfo->GetString("name");
             auto param = navdestinationInfo->GetString("param");
             auto mode = navdestinationInfo->GetInt("mode");
-            navdestinationsInfo.emplace_back(NavdestinationRecoveryInfo(name, param, mode));
+            auto state = navdestinationInfo->GetString("state");
+            NavdestinationRecoveryInfo info(name, param, mode, 0, state);
+            info.moduleName = navdestinationInfo->GetString("moduleName");
+            info.fileName = navdestinationInfo->GetString("fileName");
+            if (navdestinationInfo->Contains("componentInfo")) {
+                info.componentInfo = navdestinationInfo->GetString("componentInfo");
+            }
+            navdestinationsInfo.emplace_back(info);
         }
         navigationRecoveryInfo_[navigationId] = navdestinationsInfo;
     }
@@ -825,6 +854,10 @@ void NavigationManager::RestoreNavDestinationInfo(const std::string& navDestinat
     auto name = navDestinationJson->GetString("name");
     auto param = navDestinationJson->GetString("param");
     auto mode = navDestinationJson->GetInt("mode");
+    NavdestinationRecoveryInfo info(name, param, mode);
+    if (navDestinationJson->Contains("componentInfo")) {
+        info.componentInfo = navDestinationJson->GetString("componentInfo");
+    }
     if (isColdStart) {
         // for cold start case
         auto navigationId = navDestinationJson->GetString("navigationId", "");
@@ -832,7 +865,7 @@ void NavigationManager::RestoreNavDestinationInfo(const std::string& navDestinat
             TAG_LOGW(AceLogTag::ACE_NAVIGATION, "will restore %{public}s without navigationId, "
                 "it may lead to error in multi-navigation case!", name.c_str());
         }
-        navigationRecoveryInfo_[navigationId] = { NavdestinationRecoveryInfo(name, param, mode) };
+        navigationRecoveryInfo_[navigationId] = { info };
         return;
     }
     // for hot start case
@@ -846,7 +879,7 @@ void NavigationManager::RestoreNavDestinationInfo(const std::string& navDestinat
     CHECK_NULL_VOID(pattern);
     auto navigationStack = pattern->GetNavigationStack();
     CHECK_NULL_VOID(navigationStack);
-    navigationStack->CallPushDestinationInner(NavdestinationRecoveryInfo(name, param, mode));
+    navigationStack->CallPushDestinationInner(info);
 }
 
 std::optional<NavdestinationRecoveryInfo> NavigationManager::ParseNavdestinationRecoveryInfo(

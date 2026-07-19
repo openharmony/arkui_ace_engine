@@ -1390,4 +1390,93 @@ HWTEST_F(ParagraphCacheTestNg, LayoutParagraphsSameNonZeroWidth001, TestSize.Lev
     alg.LayoutParagraphs(TEST_WIDTH_SAME);
 }
 
+// ==================== ConvertToPxDistributeWithEnv (UPDATE_DIMENSION_STYLE_TO_PX) Tests ====================
+// Note: envFontScale PX-conversion tests (UpdateTextStyleFromPropertyEnvFontScale001/Clamped/NoScale)
+// previously relied on Pattern::SetEnvFontScale which has been removed. The envFontScale is now
+// resolved lazily via LayoutProperty::GetEnvFontScale from the environment manager. Coverage of
+// the FP->PX conversion path with environment-driven fontScale is provided by
+// pipeline_context_font_scale_env_test_ng.cpp.
+
+// ==================== ConvertToPxDistributeWithEnv (CreateSpanParagraphStyle) Tests ====================
+
+/**
+ * @tc.name: CreateSpanParagraphStyleFontSizeWithEnv001
+ * @tc.desc: Test CreateSpanParagraphStyle uses textStyle envFontScale when converting span fontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, CreateSpanParagraphStyleFontSizeWithEnv001, TestSize.Level1)
+{
+    auto cache = AceType::MakeRefPtr<LRUMap<uint64_t, ParagraphCacheInfo>>();
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, true, textStyle, cache);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+
+    std::list<RefPtr<SpanItem>> group;
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+    constexpr double fpFontSize = 10.0;
+    spanItem->fontStyle->UpdateFontSize(Dimension(fpFontSize, DimensionUnit::FP));
+    spanItem->content = u"Test";
+    group.push_back(spanItem);
+
+    TextStyle envTextStyle;
+    envTextStyle.SetEnvFontScale(2.0f);
+    ParagraphStyle paraStyle;
+    paraStyle.maxLines = 100;
+    int32_t maxLines = 100;
+
+    auto result = alg.CreateSpanParagraphStyle(
+        AceType::RawPtr(layoutWrapper), group, paraStyle, envTextStyle, maxLines, true, false);
+    // envFontScale=2.0, dipScale=1.0 => px = 10.0 * 1.0 * 2.0 = 20.0
+    EXPECT_DOUBLE_EQ(result.fontSize, fpFontSize * 2.0);
+}
+
+/**
+ * @tc.name: CreateSpanParagraphStyleFontSizeEnvClamped001
+ * @tc.desc: Test CreateSpanParagraphStyle clamps envFontScale by MinFontScale/MaxFontScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphCacheTestNg, CreateSpanParagraphStyleFontSizeEnvClamped001, TestSize.Level1)
+{
+    auto cache = AceType::MakeRefPtr<LRUMap<uint64_t, ParagraphCacheInfo>>();
+    auto pManager = AceType::MakeRefPtr<ParagraphManager>();
+    std::list<RefPtr<SpanItem>> spans;
+    TextStyle textStyle;
+    TextLayoutAlgorithm alg(spans, pManager, true, textStyle, cache);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, TEST_NODE_ID, pattern);
+    auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
+
+    std::list<RefPtr<SpanItem>> group;
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItem, nullptr);
+    ASSERT_NE(spanItem->fontStyle, nullptr);
+    constexpr double fpFontSize = 10.0;
+    spanItem->fontStyle->UpdateFontSize(Dimension(fpFontSize, DimensionUnit::FP));
+    spanItem->content = u"Test";
+    group.push_back(spanItem);
+
+    TextStyle envTextStyle;
+    envTextStyle.SetEnvFontScale(5.0f);
+    constexpr float minFontScale = 0.0f;
+    constexpr float maxFontScale = 2.0f;
+    envTextStyle.SetMinFontScale(minFontScale);
+    envTextStyle.SetMaxFontScale(maxFontScale);
+    ParagraphStyle paraStyle;
+    paraStyle.maxLines = 100;
+    int32_t maxLines = 100;
+
+    auto result = alg.CreateSpanParagraphStyle(
+        AceType::RawPtr(layoutWrapper), group, paraStyle, envTextStyle, maxLines, true, false);
+    // envFontScale=5.0 clamped to [0.0, 2.0] => 2.0 => px = 10.0 * 1.0 * 2.0 = 20.0
+    EXPECT_DOUBLE_EQ(result.fontSize, fpFontSize * maxFontScale);
+}
+
 } // namespace OHOS::Ace::NG

@@ -65,9 +65,14 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
         apsMonitor_->SetApsScene(sceneId, true);
     }
     PerfInterfaces::Start(sceneId, type, note);
+#ifndef CROSS_PLATFORM
     if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
         ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_start");
     }
+    if (sceneId == PerfConstants::FLOAT_START_FROM_SIDEBAR) {
+        ResSchedReport::GetInstance().ResSchedDataReport("float_start_from_sidebar_start");
+    }
+#endif
 }
 
 void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note)
@@ -91,9 +96,14 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
     }
 
     PerfInterfaces::End(sceneId, isRsRender);
+#ifndef CROSS_PLATFORM
     if (sceneId == PerfConstants::ABILITY_OR_PAGE_SWITCH) {
         ResSchedReport::GetInstance().ResSchedDataReport("ability_or_page_switch_end");
     }
+    if (sceneId == PerfConstants::FLOAT_START_FROM_SIDEBAR) {
+        ResSchedReport::GetInstance().ResSchedDataReport("float_start_from_sidebar_end");
+    }
+#endif
 }
 
 void PerfMonitor::EndCommercial(const std::string& sceneId, bool isRsRender)

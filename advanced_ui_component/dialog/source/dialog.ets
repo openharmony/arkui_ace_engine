@@ -60,6 +60,9 @@ const MAX_FONT_SCALE: number = 2;
 const FADEOUT_GRADIENT_WIDTH: number = 32;
 const FADEOUT_ENABLE: string = 'true';
 
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: number = 125836945;
+const PUNCTUATION_OVERFLOW_DEFAULT_VALUE: boolean = true;
+
 // 'sys.float.alert_container_max_width'
 const MAX_DIALOG_WIDTH: number = getNumberByResourceId(125831042, 400);
 // 'sys.float.padding_level8'
@@ -247,8 +250,8 @@ export struct TipsDialog {
           .focusable(false)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
-          .wordBreak(WordBreak.HYPHENATION)
           .orphanCharOptimization(true)
+          .punctuationOverflow(getPunctuationOverflowEnabled())
       }
     }
     .accessibilityGroup(true)
@@ -317,8 +320,8 @@ export struct TipsDialog {
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .width('100%')
               .fallbackLineSpacing(true)
-              .wordBreak(WordBreak.HYPHENATION)
               .orphanCharOptimization(true)
+              .punctuationOverflow(getPunctuationOverflowEnabled())
           }
           .padding({ bottom: $r('sys.float.padding_level8') })
         }
@@ -341,8 +344,8 @@ export struct TipsDialog {
                 }
               })
               .fallbackLineSpacing(true)
-              .wordBreak(WordBreak.HYPHENATION)
               .orphanCharOptimization(true)
+              .punctuationOverflow(getPunctuationOverflowEnabled())
           }
         }
       }
@@ -519,8 +522,8 @@ export struct SelectDialog {
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .fallbackLineSpacing(true)
-              .wordBreak(WordBreak.HYPHENATION)
               .orphanCharOptimization(true)
+              .punctuationOverflow(getPunctuationOverflowEnabled())
           }.paddingContentStyle().width('100%')
         }
         List() {
@@ -536,8 +539,8 @@ export struct SelectDialog {
                       .layoutWeight(1)
                       .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
                       .fallbackLineSpacing(true)
-                      .wordBreak(WordBreak.HYPHENATION)
                       .orphanCharOptimization(true)
+                      .punctuationOverflow(getPunctuationOverflowEnabled())
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndex === index)
@@ -787,8 +790,8 @@ export struct ConfirmDialog {
             })
             .width('100%')
             .fallbackLineSpacing(true)
-            .wordBreak(WordBreak.HYPHENATION)
             .orphanCharOptimization(true)
+            .punctuationOverflow(getPunctuationOverflowEnabled())
         }
         .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
         .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -822,8 +825,8 @@ export struct ConfirmDialog {
         .layoutWeight(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
         .fallbackLineSpacing(true)
-        .wordBreak(WordBreak.HYPHENATION)
         .orphanCharOptimization(true)
+        .punctuationOverflow(getPunctuationOverflowEnabled())
     }
     .accessibilityGroup(true)
     .accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.isChecked))
@@ -970,8 +973,8 @@ export struct AlertDialog {
             }
           })
           .fallbackLineSpacing(true)
-          .wordBreak(WordBreak.HYPHENATION)
           .orphanCharOptimization(true)
+          .punctuationOverflow(getPunctuationOverflowEnabled())
       }
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
@@ -1360,8 +1363,8 @@ struct CustomDialogContentComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
           .fallbackLineSpacing(true)
-          .wordBreak(WordBreak.HYPHENATION)
           .orphanCharOptimization(true)
+          .punctuationOverflow(getPunctuationOverflowEnabled())
       }
       .width('100%')
 
@@ -1382,8 +1385,8 @@ struct CustomDialogContentComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
           .fallbackLineSpacing(true)
-          .wordBreak(WordBreak.HYPHENATION)
           .orphanCharOptimization(true)
+          .punctuationOverflow(getPunctuationOverflowEnabled())
       }
       .width('100%')
     }
@@ -1798,6 +1801,29 @@ function getNumberByResourceId(resourceId: number, defaultValue: number, allowZe
   }
 }
 
+function getPunctuationOverflowEnabled(): boolean {
+  try {
+    let configValue: string = resourceManager.getSysResourceManager()
+      ?.getStringSync(SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED);
+    
+    if (configValue === 'true') {
+      return true;
+    } else if (configValue === 'false') {
+      return false;
+    } else {
+      hilog.warn(0x3900, 'Ace', 
+        `Punctuation overflow config invalid value: ${configValue}, use default: ${PUNCTUATION_OVERFLOW_DEFAULT_VALUE}`);
+      return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+    }
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', 
+      `Failed to get punctuation overflow config, code: ${code}, message: ${message}`);
+    return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+  }
+}
+
 /**
  * lazy init
  *
@@ -2027,8 +2053,8 @@ export struct LoadingDialog {
           })
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .fallbackLineSpacing(true)
-          .wordBreak(WordBreak.HYPHENATION)
           .orphanCharOptimization(true)
+          .punctuationOverflow(getPunctuationOverflowEnabled())
         LoadingProgress()
           .color(this.loadingProgressIconColorWithTheme)
           .width(LOADING_PROGRESS_WIDTH)

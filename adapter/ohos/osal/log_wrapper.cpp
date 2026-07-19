@@ -35,7 +35,6 @@ constexpr const char* INSTANCE_ID_GEN_REASONS[] = {
     "singleton",
     "foreground",
     "undefined",
-    "local",
 };
 #endif
 } // namespace

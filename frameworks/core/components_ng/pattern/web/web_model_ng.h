@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -254,6 +254,7 @@ public:
     void SetOptimizeParserBudgetEnabled(bool enable) override;
     void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) override;
     void SetWebMediaAVSessionEnabled(bool isEnabled) override;
+    void SetWebMediaNetworkProxyEnabled(bool isEnabled) override;
     void SetEnableDataDetector(bool isEnabled) override;
     void SetDataDetectorConfig(const TextDetectConfig& config) override;
     void SetEnableSelectedDataDetector(bool isEnabled) override;
@@ -447,11 +448,18 @@ public:
     static void SetEnableScrollDirectionalLock(FrameNode* frameNode, bool enabled, int32_t type);
     static void SetNativeVideoPlayerConfig(FrameNode* frameNode, bool enable, bool shouldOverlay);
     static void SetWebMediaAVSessionEnabled(FrameNode* frameNode, bool isEnabled);
+    static void SetWebMediaNetworkProxyEnabled(FrameNode* frameNode, bool isEnabled);
     static void SetEnableDrag(FrameNode* frameNode, bool isEnabled);
     static void SetScrollbarLayoutPolicy(FrameNode* frameNode, ScrollbarLayoutPolicy layoutPolicy);
     static void SetInputMethodAttachedId(
         FrameNode* frameNode, std::function<void()>&& jsCallback);
     static void SetEnableFullscreenVideoOverlay(FrameNode* frameNode, bool enable);
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+    using PopupResultCallback = std::function<void(int32_t, bool)>;
+    static void SetPopupResultCallback(PopupResultCallback&& callback);
+private:
+    static PopupResultCallback popupResultCallback_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WEB_WEB_MODEL_NG_H

@@ -17,6 +17,8 @@
 #include "core/common/event_manager.h"
 
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/common/event_dump.h"
 
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/common/mock_window.h"
@@ -45,6 +47,7 @@ struct RectCallbackListImpl {
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t EVENT_HANDLE_DIV = 100000;
 RefPtr<FrameNode> CreateFrameNodeGroup(int32_t targetId, size_t childCount)
 {
     auto pagePattern = AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>());
@@ -1311,5 +1314,391 @@ HWTEST_F(EventManagerTestNg, EventManagerTest103, TestSize.Level1)
     EXPECT_EQ(eventManager->hitTestFrameNodeListener_.size(), 0);
     eventManager->NotifyHitTestFrameNodeListener(firstPoint);
     EXPECT_EQ(eventManager->hitTestFrameNodeListener_.size(), 0);
+}
+
+/**
+ * @tc.name: LogTouchTestRecognizerStates007
+ * @tc.desc: Test LogTouchTestRecognizerStates with empty eventTreeList
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates007, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    eventManager->eventTree_.eventTreeList.clear();
+    eventManager->LogTouchTestRecognizerStates(1);
+    EXPECT_TRUE(eventManager->eventTree_.eventTreeList.empty());
+}
+
+/**
+ * @tc.name: LogTouchTestRecognizerStates002
+ * @tc.desc: Test LogTouchTestRecognizerStates with gestureSnapshot that should be skipped
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    NG::EventTree eventTree;
+    NG::FrameNodeSnapshot frameNodeSnapshot;
+    frameNodeSnapshot.nodeId = 100;
+    frameNodeSnapshot.tag = "Button";
+    eventTree.hitTestTree.push_back(frameNodeSnapshot);
+
+    auto skipGesture = AceType::MakeRefPtr<GestureSnapshot>();
+    skipGesture->type = "TouchEventActuator";
+    skipGesture->nodeId = 100;
+    eventTree.gestureTree[1].push_back(skipGesture);
+
+    auto exclusiveGesture = AceType::MakeRefPtr<GestureSnapshot>();
+    exclusiveGesture->type = "ExclusiveRecognizer";
+    exclusiveGesture->nodeId = 100;
+    eventTree.gestureTree[1].push_back(exclusiveGesture);
+
+    auto parallelGesture = AceType::MakeRefPtr<GestureSnapshot>();
+    parallelGesture->type = "ParallelRecognizer";
+    parallelGesture->nodeId = 100;
+    eventTree.gestureTree[1].push_back(parallelGesture);
+
+    auto sequenceGesture = AceType::MakeRefPtr<GestureSnapshot>();
+    sequenceGesture->type = "SequenceRecognizer";
+    sequenceGesture->nodeId = 100;
+    eventTree.gestureTree[1].push_back(sequenceGesture);
+
+    eventManager->eventTree_.eventTreeList.push_back(eventTree);
+    eventManager->LogTouchTestRecognizerStates(1);
+    EXPECT_EQ(eventManager->eventTree_.eventTreeList.size(), 1);
+}
+
+/**
+ * @tc.name: LogTouchTestRecognizerStates003
+ * @tc.desc: Test LogTouchTestRecognizerStates with valid gestureSnapshot and Down procedure
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates003, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    NG::EventTree eventTree;
+    NG::FrameNodeSnapshot frameNodeSnapshot;
+    frameNodeSnapshot.nodeId = 100;
+    frameNodeSnapshot.tag = "Button";
+    eventTree.hitTestTree.push_back(frameNodeSnapshot);
+
+    auto validGesture = AceType::MakeRefPtr<GestureSnapshot>();
+    validGesture->type = "ClickRecognizer";
+    validGesture->nodeId = 100;
+    StateRecord downRecord("TouchDown", "", "Ready", "Accept", 0);
+    validGesture->stateHistory.push_back(downRecord);
+    eventTree.gestureTree[1].push_back(validGesture);
+
+    eventManager->eventTree_.eventTreeList.push_back(eventTree);
+    eventManager->LogTouchTestRecognizerStates(1);
+    EXPECT_EQ(eventManager->eventTree_.eventTreeList.size(), 1);
+}
+
+/**
+ * @tc.name: LogTouchTestRecognizerStates004
+ * @tc.desc: Test LogTouchTestRecognizerStates with Move and Up procedure
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates004, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    NG::EventTree eventTree;
+    NG::FrameNodeSnapshot frameNodeSnapshot;
+    frameNodeSnapshot.nodeId = 100;
+    frameNodeSnapshot.tag = "Button";
+    eventTree.hitTestTree.push_back(frameNodeSnapshot);
+
+    auto validGesture = AceType::MakeRefPtr<GestureSnapshot>();
+    validGesture->type = "PanRecognizer";
+    validGesture->nodeId = 100;
+    StateRecord moveRecord("TouchMove", "", "Detecting", "Pending", 0);
+    validGesture->stateHistory.push_back(moveRecord);
+    StateRecord upRecord("TouchUp", "extra", "Ready", "Reject", 0);
+    validGesture->stateHistory.push_back(upRecord);
+    eventTree.gestureTree[1].push_back(validGesture);
+
+    eventManager->eventTree_.eventTreeList.push_back(eventTree);
+    eventManager->LogTouchTestRecognizerStates(1);
+    EXPECT_EQ(eventManager->eventTree_.eventTreeList.size(), 1);
+}
+
+/**
+ * @tc.name: LogTouchTestRecognizerStates005
+ * @tc.desc: Test LogTouchTestRecognizerStates with gestureSnapshot type containing "Recognizer"
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates005, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    NG::EventTree eventTree;
+    NG::FrameNodeSnapshot frameNodeSnapshot;
+    frameNodeSnapshot.nodeId = 200;
+    frameNodeSnapshot.tag = "Column";
+    eventTree.hitTestTree.push_back(frameNodeSnapshot);
+
+    auto swipeGesture = AceType::MakeRefPtr<GestureSnapshot>();
+    swipeGesture->type = "SwipeRecognizer";
+    swipeGesture->nodeId = 200;
+    StateRecord downRecord("TouchDown", "", "Ready", "Accept", 0);
+    swipeGesture->stateHistory.push_back(downRecord);
+    eventTree.gestureTree[2].push_back(swipeGesture);
+
+    eventManager->eventTree_.eventTreeList.push_back(eventTree);
+    eventManager->LogTouchTestRecognizerStates(2);
+    EXPECT_EQ(eventManager->eventTree_.eventTreeList.size(), 1);
+}
+
+/**
+ * @tc.name: LogTouchTestRecognizerStates006
+ * @tc.desc: Test LogTouchTestRecognizerStates with gestureSnapshot that has no matching nodeId
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, LogTouchTestRecognizerStates006, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    NG::EventTree eventTree;
+    NG::FrameNodeSnapshot frameNodeSnapshot;
+    frameNodeSnapshot.nodeId = 100;
+    frameNodeSnapshot.tag = "Button";
+    eventTree.hitTestTree.push_back(frameNodeSnapshot);
+
+    auto gesture = AceType::MakeRefPtr<GestureSnapshot>();
+    gesture->type = "ClickRecognizer";
+    gesture->nodeId = 999;
+    StateRecord downRecord("TouchDown", "", "Ready", "Accept", 0);
+    gesture->stateHistory.push_back(downRecord);
+    eventTree.gestureTree[1].push_back(gesture);
+
+    eventManager->eventTree_.eventTreeList.push_back(eventTree);
+    eventManager->LogTouchTestRecognizerStates(1);
+    EXPECT_EQ(eventManager->eventTree_.eventTreeList.size(), 1);
+}
+
+/**
+ * @tc.name: CheckMousePendingRecognizersState002
+ * @tc.desc: Test CheckMousePendingRecognizersState with non-MOUSE sourceType
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CheckMousePendingRecognizersState002, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent event;
+    event.sourceType = SourceType::TOUCH;
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    eventManager->mousePendingRecognizers_.push_back(WeakPtr<NG::NGGestureRecognizer>(clickRecognizer));
+
+    eventManager->CheckMousePendingRecognizersState(event);
+    EXPECT_TRUE(eventManager->mousePendingRecognizers_.empty());
+}
+
+/**
+ * @tc.name: CheckMousePendingRecognizersState003
+ * @tc.desc: Test CheckMousePendingRecognizersState with null recognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CheckMousePendingRecognizersState003, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent event;
+    event.sourceType = SourceType::MOUSE;
+    event.eventHandleId = 0;
+
+    WeakPtr<NG::NGGestureRecognizer> nullRecognizer;
+    eventManager->mousePendingRecognizers_.push_back(nullRecognizer);
+
+    eventManager->CheckMousePendingRecognizersState(event);
+    EXPECT_TRUE(eventManager->mousePendingRecognizers_.empty());
+}
+
+/**
+ * @tc.name: CheckMousePendingRecognizersState004
+ * @tc.desc: Test CheckMousePendingRecognizersState with recognizer not in PENDING/PENDING_BLOCKED state
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CheckMousePendingRecognizersState004, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent event;
+    event.sourceType = SourceType::MOUSE;
+    event.eventHandleId = 0;
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->refereeState_ = RefereeState::SUCCEED;
+    eventManager->mousePendingRecognizers_.push_back(WeakPtr<NG::NGGestureRecognizer>(clickRecognizer));
+
+    eventManager->CheckMousePendingRecognizersState(event);
+    EXPECT_TRUE(eventManager->mousePendingRecognizers_.empty());
+}
+
+/**
+ * @tc.name: CheckMousePendingRecognizersState005
+ * @tc.desc: Test CheckMousePendingRecognizersState with different referee (isNotSameReferee)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CheckMousePendingRecognizersState005, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent event;
+    event.sourceType = SourceType::MOUSE;
+    event.eventHandleId = EVENT_HANDLE_DIV;
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+
+    auto otherReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+    clickRecognizer->referee_ = WeakPtr<NG::GestureReferee>(otherReferee);
+
+    auto differentReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+    eventManager->postEventRefereeWithStrategyNG_[1] = differentReferee;
+
+    eventManager->mousePendingRecognizers_.push_back(WeakPtr<NG::NGGestureRecognizer>(clickRecognizer));
+
+    eventManager->CheckMousePendingRecognizersState(event);
+    EXPECT_TRUE(eventManager->mousePendingRecognizers_.empty());
+}
+
+/**
+ * @tc.name: CheckMousePendingRecognizersState006
+ * @tc.desc: Test CheckMousePendingRecognizersState with PENDING state and same referee
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CheckMousePendingRecognizersState006, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent event;
+    event.sourceType = SourceType::MOUSE;
+    event.eventHandleId = EVENT_HANDLE_DIV;
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+
+    auto sameReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+    clickRecognizer->referee_ = WeakPtr<NG::GestureReferee>(sameReferee);
+    eventManager->postEventRefereeWithStrategyNG_[1] = sameReferee;
+
+    eventManager->mousePendingRecognizers_.push_back(WeakPtr<NG::NGGestureRecognizer>(clickRecognizer));
+
+    eventManager->CheckMousePendingRecognizersState(event);
+    EXPECT_TRUE(eventManager->mousePendingRecognizers_.empty());
+}
+
+/**
+ * @tc.name: CheckMousePendingRecognizersState007
+ * @tc.desc: Test CheckMousePendingRecognizersState with PENDING_BLOCKED state and same referee
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CheckMousePendingRecognizersState007, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent event;
+    event.sourceType = SourceType::MOUSE;
+    event.eventHandleId = EVENT_HANDLE_DIV;
+
+    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    panRecognizer->refereeState_ = RefereeState::PENDING_BLOCKED;
+
+    auto sameReferee = AceType::MakeRefPtr<NG::GestureReferee>();
+    panRecognizer->referee_ = WeakPtr<NG::GestureReferee>(sameReferee);
+    eventManager->postEventRefereeWithStrategyNG_[1] = sameReferee;
+
+    eventManager->mousePendingRecognizers_.push_back(WeakPtr<NG::NGGestureRecognizer>(panRecognizer));
+
+    eventManager->CheckMousePendingRecognizersState(event);
+    EXPECT_TRUE(eventManager->mousePendingRecognizers_.empty());
+}
+
+/**
+ * @tc.name: CheckMousePendingRecognizersState008
+ * @tc.desc: Test CheckMousePendingRecognizersState with null referee on recognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CheckMousePendingRecognizersState008, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent event;
+    event.sourceType = SourceType::MOUSE;
+    event.eventHandleId = 0;
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+    clickRecognizer->referee_ = WeakPtr<NG::GestureReferee>();
+
+    eventManager->mousePendingRecognizers_.push_back(WeakPtr<NG::NGGestureRecognizer>(clickRecognizer));
+
+    eventManager->CheckMousePendingRecognizersState(event);
+    EXPECT_TRUE(eventManager->mousePendingRecognizers_.empty());
+}
+
+/**
+ * @tc.name: CheckMousePendingRecognizersState009
+ * @tc.desc: Test CheckMousePendingRecognizersState with eventHandleId not matching any postEventReferee
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CheckMousePendingRecognizersState009, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent event;
+    event.sourceType = SourceType::MOUSE;
+    event.eventHandleId = EVENT_HANDLE_DIV * 5;
+
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>();
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+
+    auto referee = AceType::MakeRefPtr<NG::GestureReferee>();
+    clickRecognizer->referee_ = WeakPtr<NG::GestureReferee>(referee);
+    eventManager->postEventRefereeWithStrategyNG_[1] = referee;
+
+    eventManager->mousePendingRecognizers_.push_back(WeakPtr<NG::NGGestureRecognizer>(clickRecognizer));
+
+    eventManager->CheckMousePendingRecognizersState(event);
+    EXPECT_TRUE(eventManager->mousePendingRecognizers_.empty());
+}
+
+/**
+ * @tc.name: CheckMousePendingRecognizersState010
+ * @tc.desc: Test CheckMousePendingRecognizersState with empty pendingRecognizers
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, CheckMousePendingRecognizersState010, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    TouchEvent event;
+    event.sourceType = SourceType::MOUSE;
+    eventManager->mousePendingRecognizers_.clear();
+
+    eventManager->CheckMousePendingRecognizersState(event);
+    EXPECT_TRUE(eventManager->mousePendingRecognizers_.empty());
 }
 } // namespace OHOS::Ace::NG

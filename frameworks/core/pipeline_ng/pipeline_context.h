@@ -21,8 +21,10 @@
 #include <list>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include "interfaces/inner_api/ace/arkui_rect.h"
+#include "interfaces/inner_api/ui_session/ui_translate_type.h"
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/frame_info.h"
@@ -33,7 +35,6 @@
 #include "core/event/pointer_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "core/common/ace_translate_manager.h"
@@ -91,6 +92,7 @@ class ToolbarManager;
 class UIExtensionManager;
 class AccessibilityManagerNG;
 class ForceSplitManager;
+class RecoverableManager;
 class FormVisibleManager;
 class FormEventManager;
 class FormGestureManager;
@@ -857,6 +859,8 @@ public:
 
     const RefPtr<ForceSplitManager>& GetForceSplitManager() const;
 
+    const RefPtr<RecoverableManager>& GetRecoverableManager() const;
+
     double CalcPageWidth(double rootWidth) const override;
 
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const;
@@ -1054,7 +1058,6 @@ public:
     }
 
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
-    bool CheckThreadSafe();
 
     bool IsHoverModeChange() const
     {
@@ -1084,15 +1087,12 @@ public:
         uiTranslateManager_ = uiTranslateManager;
     }
 
-    void RegisterListenerForTranslate(const WeakPtr<NG::FrameNode> node)
-    {
-        uiTranslateManager_->AddTranslateListener(node);
-    }
-
-    void UnRegisterListenerForTranslate(int32_t nodeId)
-    {
-        uiTranslateManager_->RemoveTranslateListener(nodeId);
-    }
+    void RegisterListenerForTranslate(const WeakPtr<NG::FrameNode> node);
+    void UnRegisterListenerForTranslate(int32_t nodeId);
+    void GetArkUIPageTranslateText(bool isContinuous);
+    void EndArkUIPageTranslate();
+    void ResetArkUIPageTranslate(int32_t nodeId);
+    void SendArkUIPageTranslateResult(const std::vector<TranslateResult>& translateResults);
 
     void SetEnableSwipeBack(bool isEnable) override;
     void SetIsRecycleInvisibleImageMemory(bool isEnable) override
@@ -1150,7 +1150,9 @@ public:
     std::shared_ptr<Rosen::RSUIDirector> GetRSUIDirector();
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
     {
+#ifndef CROSS_PLATFORM
         uiTranslateManager_->AddPixelMap(nodeId, pixelMap);
+#endif
     }
 
     ACE_FORCE_EXPORT WeakPtr<AIWriteAdapter> GetOrCreateAIWriteAdapter();
@@ -1160,14 +1162,6 @@ public:
     void UnregisterRotationEndCallback(int32_t callbackId)
     {
         rotationEndCallbackMap_.erase(callbackId);
-    }
-    void SetUseEnvManager(bool isEnable)
-    {
-        isUseEnvManager_ = isEnable;
-    }
-    bool GetUseEnvManager()
-    {
-        return isUseEnvManager_;
     }
     void SetEnvManagerActive(bool isActive)
     {
@@ -1293,8 +1287,10 @@ protected:
     void DispatchDisplaySync(uint64_t nanoTimestamp) override;
     void FlushAnimation(uint64_t nanoTimestamp) override;
     bool OnDumpInfo(const std::vector<std::string>& params) const override;
+#ifndef CROSS_PLATFORM
     void OnDumpRecorderStart(const std::vector<std::string>& params) const;
     void TriggerFrameDumpFuncIfExist() const;
+#endif
 
     void OnVirtualKeyboardHeightChange(float keyboardHeight,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, const float safeHeight = 0.0f,
@@ -1620,6 +1616,7 @@ private:
     RefPtr<MemoryManager> memoryMgr_;
     RefPtr<NavigationManager> navigationMgr_;
     RefPtr<ForceSplitManager> forceSplitMgr_;
+    RefPtr<RecoverableManager> recoverableMgr_;
     RefPtr<FormVisibleManager> formVisibleMgr_;
     RefPtr<FormEventManager> formEventMgr_;
     RefPtr<FormGestureManager> formGestureMgr_;

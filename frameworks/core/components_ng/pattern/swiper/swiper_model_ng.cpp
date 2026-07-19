@@ -85,6 +85,16 @@ RefPtr<FrameNode> SwiperModelNG::CreateFrameNode(int32_t nodeId)
     return swiperNode;
 }
 
+RefPtr<FrameNode> SwiperModelNG::CreateArcSwiperFrameNode(int32_t nodeId)
+{
+    ACE_UINODE_TRACE(nodeId);
+    auto swiperNode = AceType::MakeRefPtr<SwiperNode>(
+        V2::ARC_SWIPER_ETS_TAG, nodeId, AceType::MakeRefPtr<ArcSwiperPattern>());
+    swiperNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(swiperNode);
+    return swiperNode;
+}
+
 void SwiperModelNG::SetDirection(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, Direction, axis);
@@ -400,6 +410,14 @@ void SwiperModelNG::SetJSIndicatorController(std::function<void()> resetFunc)
     pattern->SetJSIndicatorController(resetFunc);
 }
 
+void SwiperModelNG::SetJSIndicatorController(FrameNode* frameNode, std::function<void()> resetFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetJSIndicatorController(resetFunc);
+}
+
 void SwiperModelNG::ResetJSIndicatorController()
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -467,6 +485,20 @@ void SwiperModelNG::SetOnChangeEvent(std::function<void(const BaseEventInfo* inf
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    pattern->UpdateOnChangeEvent([event = std::move(onChangeEvent)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnChangeEvent(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
 
     pattern->UpdateOnChangeEvent([event = std::move(onChangeEvent)](int32_t index) {
@@ -601,6 +633,14 @@ void SwiperModelNG::SetIndicatorController(RefPtr<JSIndicatorControllerBase> con
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(swiperNode);
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorController(controller);
+}
+
+void SwiperModelNG::SetIndicatorController(FrameNode* frameNode, RefPtr<JSIndicatorControllerBase> controller)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetIndicatorController(controller);
 }
@@ -755,6 +795,24 @@ void SwiperModelNG::SetDirection(FrameNode* frameNode, Axis axis)
 void SwiperModelNG::SetDisableSwipe(FrameNode* frameNode, bool disableSwipe)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisableSwipe, disableSwipe, frameNode);
+}
+
+void SwiperModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t sensitivity)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
+#endif
+}
+
+void SwiperModelNG::SetDisableTransitionAnimation(FrameNode* frameNode, bool isDisable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDisableTransitionAnimation(isDisable);
 }
 
 void SwiperModelNG::SetItemSpace(FrameNode* frameNode, const Dimension& itemSpace)
@@ -1713,9 +1771,57 @@ void SwiperModelNG::ProcessNextMarginWithResourceObj(const RefPtr<ResourceObject
     }
 }
 
+void SwiperModelNG::ProcessNextMarginWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            CalcDimension result;
+            if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result) || LessNotEqual(result.Value(), 0.0)) {
+                result.SetValue(0.0);
+            }
+            pattern->ResetOnForceMeasure();
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, result, node);
+        };
+        pattern->AddResObj("swiper.nextMargin", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper.nextMargin");
+    }
+}
+
 void SwiperModelNG::ProcessPreviousMarginWithResourceObj(const RefPtr<ResourceObject>& resObj)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (resObj) {
+        auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto node = weak.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto pattern = node->GetPattern<SwiperPattern>();
+            CHECK_NULL_VOID(pattern);
+            CalcDimension result;
+            if (!ResourceParseUtils::ParseResDimensionVpNG(resObj, result) || LessNotEqual(result.Value(), 0.0)) {
+                result.SetValue(0.0);
+            }
+            pattern->ResetOnForceMeasure();
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, result, node);
+        };
+        pattern->AddResObj("swiper.prevMargin", resObj, std::move(updateFunc));
+    } else {
+        pattern->RemoveResObj("swiper.prevMargin");
+    }
+}
+
+void SwiperModelNG::ProcessPreviousMarginWithResourceObj(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1888,6 +1994,11 @@ void SwiperModelNG::ResetDisplayCountWithObject(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MinSize, frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, FillType, frameNode);
+}
+
+void SwiperModelNG::SetIgnoreHiddenItem(FrameNode* frameNode, bool ignoreHiddenItem)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IgnoreHiddenItem, ignoreHiddenItem, frameNode);
 }
 
 bool SwiperModelNG::CallSwiperStartFakeDrag(FrameNode* frameNode)

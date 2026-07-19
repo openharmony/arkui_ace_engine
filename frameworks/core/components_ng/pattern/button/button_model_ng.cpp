@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
@@ -24,8 +25,11 @@
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-
 namespace OHOS::Ace::NG {
+namespace {
+const char BUTTON_ETS_TAG[] = "Button";
+} // namespace
+
 void ButtonModelNG::SetFontSize(const Dimension& fontSize)
 {
     ACE_CHECK_LPX_ATTRIBUTE(fontSize, LpxAttribute::LPX_FONT_SIZE);
@@ -108,6 +112,13 @@ void ButtonModelNG::SetButtonStyleOnly(const std::optional<ButtonStyleMode>& but
     }
 }
 
+void ButtonModelNG::SetButtonStyleOnly(FrameNode* frameNode, const std::optional<ButtonStyleMode>& buttonStyle)
+{
+    if (buttonStyle.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value(), frameNode);
+    }
+}
+
 void ButtonModelNG::ParseButtonResColor(const RefPtr<FrameNode>& frameNode,
     const RefPtr<ResourceObject>& resObj, Color& result, const ButtonColorType buttonColorType)
 {
@@ -178,13 +189,20 @@ void ButtonModelNG::CreateWithStringResourceObj(const RefPtr<ResourceObject>& re
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    CreateWithStringResourceObj(frameNode, resObj, buttonStringType);
+}
+
+void ButtonModelNG::CreateWithStringResourceObj(
+    FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const ButtonStringType buttonStringType)
+{
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ButtonPattern>();
     CHECK_NULL_VOID(pattern);
     std::string key = "button" + StringTypeToStr(buttonStringType);
     pattern->RemoveResObj(key);
     CHECK_NULL_VOID(resObj);
     auto&& updateFunc = [buttonStringType, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
-        const RefPtr<ResourceObject>& resObj) {
+                            const RefPtr<ResourceObject>& resObj) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         std::string result;
@@ -472,6 +490,13 @@ void ButtonModelNG::SetRole(FrameNode* frameNode, const std::optional<ButtonRole
     }
 }
 
+void ButtonModelNG::SetRoleOnly(FrameNode* frameNode, const std::optional<ButtonRole>& buttonRole)
+{
+    if (buttonRole.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonRole, buttonRole.value(), frameNode);
+    }
+}
+
 void ButtonModelNG::SetButtonStyle(FrameNode* frameNode, const std::optional<ButtonStyleMode>& buttonStyle)
 {
     if (buttonStyle.has_value()) {
@@ -536,9 +561,9 @@ void ButtonModelNG::CreateWithLabel(const std::string& label)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::BUTTON_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", BUTTON_ETS_TAG, nodeId);
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);
     ACE_UINODE_TRACE(buttonNode);
     if (buttonNode->GetChildren().empty()) {
@@ -628,7 +653,7 @@ void ButtonModelNG::Create(const std::string& tagName)
 
 RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     ACE_UINODE_TRACE(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -667,6 +692,12 @@ void ButtonModelNG::Padding(const PaddingProperty& paddingNew, const Edge& paddi
 void ButtonModelNG::OnClick(GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold)
 {
     ViewAbstract::SetOnClick(std::move(tapEventFunc), distanceThreshold);
+}
+
+void ButtonModelNG::OnClick(
+    FrameNode* frameNode, GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc, double distanceThreshold)
+{
+    ViewAbstract::SetOnClick(frameNode, std::move(tapEventFunc), distanceThreshold);
 }
 
 void ButtonModelNG::BackgroundColor(const Color& color, const bool& colorFlag)
@@ -821,6 +852,7 @@ void ButtonModelNG::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const
     CHECK_NULL_VOID(buttonTheme);
     auto textStyle = buttonTheme->GetTextStyle();
     textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         textLayoutProperty->UpdateOrphanCharOptimization(true);
         textLayoutProperty->UpdateWordBreak(WordBreak::HYPHENATION);

@@ -486,6 +486,92 @@ HWTEST_F(GridLayoutInfoTest, FindInMatrix003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FindInMatrix004
+ * @tc.desc: Test FindInMatrix when index=0 and crossCount_=0
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 0;
+    info.gridMatrix_ = MATRIX_DEMO_3;
+
+    EXPECT_EQ(info.FindInMatrix(0), info.gridMatrix_.end());
+}
+
+/**
+ * @tc.name: FindInMatrix005
+ * @tc.desc: Test FindInMatrix when index=0 with empty matrix
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix005, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_.clear();
+
+    EXPECT_EQ(info.FindInMatrix(0), info.gridMatrix_.end());
+}
+
+/**
+ * @tc.name: FindInMatrix006
+ * @tc.desc: Test FindInMatrix when index=0 at the first row (normal case)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix006, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_ = MATRIX_DEMO_3;
+
+    auto it = info.FindInMatrix(0);
+    EXPECT_EQ(it, info.gridMatrix_.begin());
+    bool found = false;
+    for (auto [_, item] : it->second) {
+        if (item == 0) {
+            found = true;
+            break;
+        }
+    }
+    EXPECT_TRUE(found);
+}
+
+/**
+ * @tc.name: FindInMatrix007
+ * @tc.desc: Test FindInMatrix when index=0 not at the first row (invariant broken)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix007, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    // row 0 has items 1 and 2, but NOT item 0
+    info.gridMatrix_ = {
+        { 0, { { 0, 1 }, { 1, 2 } } },
+        { 1, { { 0, 3 }, { 1, 4 } } },
+    };
+
+    EXPECT_EQ(info.FindInMatrix(0), info.gridMatrix_.end());
+}
+
+/**
+ * @tc.name: FindInMatrix008
+ * @tc.desc: Test FindInMatrix when index=0 and first row is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, FindInMatrix008, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.crossCount_ = 2;
+    info.gridMatrix_ = {
+        { 0, {} },
+        { 1, { { 0, 3 }, { 1, 4 } } },
+    };
+
+    EXPECT_EQ(info.FindInMatrix(0), info.gridMatrix_.end());
+}
+
+/**
  * @tc.name: ClearMatrixToEnd001
  * @tc.desc: Test GridLayoutInfo::ClearMatrixToEnd
  * @tc.type: FUNC
@@ -2384,6 +2470,66 @@ HWTEST_F(GridLayoutInfoTest, GetContentOffsetUseAccumulatedLineHeights007, TestS
     float expectedResult = 50.0f + mainGap + 100.0f + mainGap + 50.0f + mainGap - info.currentOffset_;
     float result = info.GetContentOffset(option, mainGap);
     EXPECT_FLOAT_EQ(result, expectedResult);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeightRegular002
+ * @tc.desc: test GetContentHeight returns 0.0f when childrenCount_ is 0 (regular grid),
+ *           must not return -mainGap (negative).
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeightRegular002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.hasBigItem_ = false;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f } };
+    info.crossCount_ = 2;
+    info.childrenCount_ = 0;
+    info.repeatDifference_ = 0;
+
+    EXPECT_FLOAT_EQ(info.GetContentHeight(1.0f), 0.0f);
+    EXPECT_FLOAT_EQ(info.GetContentHeight(10.0f), 0.0f);
+    EXPECT_FLOAT_EQ(info.GetContentHeight(0.0f), 0.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeightOfRegularGrid001
+ * @tc.desc: test GetContentHeightOfRegularGrid returns 0.0f when childrenCount is 0,
+ *           regardless of mainGap. Guards against returning -mainGap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeightOfRegularGrid001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f } };
+    info.crossCount_ = 2;
+    info.childrenCount_ = 0;
+    info.repeatDifference_ = 0;
+
+    EXPECT_FLOAT_EQ(info.GetContentHeightOfRegularGrid(1.0f), 0.0f);
+    EXPECT_FLOAT_EQ(info.GetContentHeightOfRegularGrid(12.0f), 0.0f);
+    EXPECT_FLOAT_EQ(info.GetContentHeightOfRegularGrid(0.0f), 0.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeightOfRegularGrid002
+ * @tc.desc: test GetContentHeightOfRegularGrid returns 0.0f when
+ *           childrenCount_ + repeatDifference_ <= 0 (defensive case).
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentHeightOfRegularGrid002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f } };
+    info.crossCount_ = 2;
+
+    info.childrenCount_ = 2;
+    info.repeatDifference_ = -2;
+    EXPECT_FLOAT_EQ(info.GetContentHeightOfRegularGrid(5.0f), 0.0f);
+
+    info.childrenCount_ = 1;
+    info.repeatDifference_ = -5;
+    EXPECT_FLOAT_EQ(info.GetContentHeightOfRegularGrid(5.0f), 0.0f);
 }
 
 } // namespace OHOS::Ace::NG

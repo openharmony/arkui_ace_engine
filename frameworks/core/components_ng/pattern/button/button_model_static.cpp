@@ -17,6 +17,7 @@
 #include "ui/base/utils/utils.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
@@ -26,6 +27,9 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const char BUTTON_ETS_TAG[] = "Button";
+} // namespace
 
 void ButtonModelStatic::SetRole(FrameNode* frameNode, const std::optional<ButtonRole>& optButtonRole)
 {
@@ -135,7 +139,7 @@ void ButtonModelStatic::SetLabel(FrameNode* frameNode, const char* label)
 
 RefPtr<FrameNode> ButtonModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, nullptr);
@@ -153,6 +157,28 @@ RefPtr<FrameNode> ButtonModelStatic::CreateFrameNode(int32_t nodeId)
 void ButtonModelStatic::BackgroundColor(FrameNode* frameNode, const Color& color, const bool& colorFlag)
 {
     ViewAbstract::SetBackgroundColor(frameNode, color);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, BackgroundColorFlagByUser, colorFlag, frameNode);
+}
+
+void ButtonModelStatic::BackgroundColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    Color backgroundColor = Color::TRANSPARENT;
+    bool colorFlag = false;
+    if (color.has_value()) {
+        backgroundColor = color.value();
+        colorFlag = true;
+    } else {
+        auto context = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_VOID(context);
+        auto buttonTheme = context->GetTheme<ButtonTheme>();
+        CHECK_NULL_VOID(buttonTheme);
+        auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        ButtonStyleMode buttonStyleMode = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+        ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+        backgroundColor = buttonTheme->GetBgColor(buttonStyleMode, buttonRole);
+    }
+    BackgroundColor(frameNode, backgroundColor, colorFlag);
 }
 
 void ButtonModelStatic::SetBorderRadius(FrameNode* frameNode, const Dimension& radius)
@@ -495,6 +521,7 @@ void ButtonModelStatic::SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, c
     CHECK_NULL_VOID(buttonTheme);
     auto textStyle = buttonTheme->GetTextStyle();
     textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     if (textNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         textLayoutProperty->UpdateOrphanCharOptimization(true);
         textLayoutProperty->UpdateWordBreak(WordBreak::HYPHENATION);

@@ -170,9 +170,17 @@ private:
     bool RecoverCachedHelper(int32_t itemIdx, bool front);
 
     /**
-     * @brief Measure all items in view to check if any item's height changed.
+     * @brief Measure items whose property flags require measurement, or all items requested by the
+     * parent, and check for height changes. Dirty lazy-layout items are skipped: every path that
+     * reaches Layout re-measures them, and the targetIndex_ path skips Layout entirely.
+     * @param forceMeasure whether to measure all items in view.
      */
-    bool ItemHeightChanged() const;
+    bool CheckItemSizeChanged(bool forceMeasure) const;
+
+    /**
+     * @brief CheckItemSizeChanged() implementation for a single lane.
+     */
+    bool LaneItemSizeChanged(const WaterFlowLayoutInfoSW::Lane& lane, size_t laneIdx, bool forceMeasure) const;
 
     /**
      * @brief Data validity check
@@ -190,8 +198,15 @@ private:
      */
     void LayoutSection(size_t idx, const OffsetF& paddingOffset, float selfCrossLen, bool reverse, bool rtl);
     void LayoutFooter(const OffsetF& paddingOffset, bool reverse);
+    void DeactivateFooter() const;
 
     void SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx) override;
+    void PreloadFixOffsetCacheIfNeeded(int32_t cacheCount);
+    void SyncPreloadFixOffsetCache(int32_t cacheCount);
+    bool GetItemMainRange(int32_t itemIdx, float& itemStart, float& itemEnd) const;
+    bool ItemIntersectsActiveBounds(int32_t itemIdx, float startBound, float endBound) const;
+    void ExpandActiveRangeInFixOffset(int32_t cacheCount, int32_t& activeStartIndex, int32_t& activeEndIndex) const;
+
     /**
      * @brief shared implementation to preload a cache item.
      * @return true if the item is successfully preloaded.

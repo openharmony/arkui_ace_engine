@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ struct TouchpadInteractionListener {
 };
 
 // The gesture event hub is mainly used to handle common gesture events.
-class ACE_EXPORT InputEventHub : public virtual AceType {
+class ACE_FORCE_EXPORT InputEventHub : public virtual AceType {
     DECLARE_ACE_TYPE(InputEventHub, AceType);
 public:
     explicit InputEventHub(const WeakPtr<EventHub>& eventHub);
@@ -81,7 +81,7 @@ public:
         }
     }
 
-    void SetHoverEffect(HoverEffectType type);
+    ACE_FORCE_EXPORT void SetHoverEffect(HoverEffectType type);
 
     HoverEffectType GetHoverEffect()
     {

@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "ArkTS Focus Example"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "ArkTS Focus"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "ArkTS Focus"
+    }
+  ]
+}

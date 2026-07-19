@@ -31,6 +31,7 @@
 #include "core/components_ng/token_theme/token_theme.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/token_theme/token_colors.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
@@ -73,6 +74,27 @@ public:
 
 private:
     UiMaterialLevel backupLevel_;
+};
+
+class ScopeUiMaterialTransparency {
+public:
+    explicit ScopeUiMaterialTransparency(UiMaterialLevel level, UiMaterialTransparency transparency)
+    {
+        backupLevelMap_ = TransparencyUtils::GetLevelMap();
+        backupTransparencyLevelGet_ = TransparencyUtils::transparencyLevelGet_;
+        TransparencyUtils::GetLevelMap()[level] = transparency;
+        TransparencyUtils::transparencyLevelGet_ = true;
+    }
+
+    ~ScopeUiMaterialTransparency()
+    {
+        TransparencyUtils::GetLevelMap() = backupLevelMap_;
+        TransparencyUtils::transparencyLevelGet_ = backupTransparencyLevelGet_;
+    }
+
+private:
+    TransparencyLevelMap backupLevelMap_;
+    bool backupTransparencyLevelGet_ = false;
 };
 
 class ScopeUIMaterialState {
@@ -133,6 +155,16 @@ RefPtr<FrameNode> CreateImageNode(bool isSvg)
     }
     node->InitializePatternAndContext();
     return node;
+}
+
+RefPtr<UiMaterial> CreateMaterialWithApplyShadow(bool applyShadow)
+{
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    CHECK_NULL_RETURN(material, nullptr);
+    ImmersiveOptions options;
+    options.applyShadow = applyShadow;
+    material->SetImmersiveOptions(options);
+    return material;
 }
 
 RefPtr<FrameNode> CreateFramePatternNode(const std::string& tag)
@@ -708,6 +740,52 @@ HWTEST_F(TitleBarPatternTestTwoNg, IsApplyShadowEnabled004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ShouldEnableTitleBarClip001
+ * @tc.desc: Verify title bar clip is disabled when applyShadow is enabled or scroll effect is gradual blur.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, ShouldEnableTitleBarClip001, TestSize.Level1)
+{
+    struct TestCase {
+        bool applyShadow = false;
+        std::optional<ScrollEffectType> scrollEffectType;
+        bool expectedClip = true;
+    };
+    const std::vector<TestCase> testCases = {
+        { false, std::nullopt, true },
+        { true, std::nullopt, false },
+        { false, ScrollEffectType::COMMON_BLUR, true },
+        { true, ScrollEffectType::COMMON_BLUR, false },
+        { false, ScrollEffectType::GRADUAL_BLUR, false },
+        { true, ScrollEffectType::GRADUAL_BLUR, false },
+    };
+
+    for (const auto& testCase : testCases) {
+        auto titleBarNode = CreateTitleBarNode();
+        ASSERT_NE(titleBarNode, nullptr);
+        auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+        ASSERT_NE(titleBarPattern, nullptr);
+        if (testCase.scrollEffectType.has_value()) {
+            titleBarPattern->options_.bgOptions.scrollEffectOptions = ScrollEffectOptions();
+            titleBarPattern->options_.bgOptions.scrollEffectOptions->scrollEffectType =
+                testCase.scrollEffectType.value();
+        } else {
+            titleBarPattern->options_.bgOptions.scrollEffectOptions.reset();
+        }
+
+        auto material = CreateMaterialWithApplyShadow(testCase.applyShadow);
+        ASSERT_NE(material, nullptr);
+        EXPECT_EQ(titleBarPattern->ShouldEnableTitleBarClip(material), testCase.expectedClip);
+
+        titleBarPattern->UpdateTitleBarClipForMask(titleBarPattern->ShouldEnableTitleBarClip(material));
+        auto titleBarRenderContext = titleBarNode->GetRenderContext();
+        ASSERT_NE(titleBarRenderContext, nullptr);
+        ASSERT_TRUE(titleBarRenderContext->GetClipEdge().has_value());
+        EXPECT_EQ(titleBarRenderContext->GetClipEdge().value(), testCase.expectedClip);
+    }
+}
+
+/**
  * @tc.name: IsTransparencyListenerNeeded001
  * @tc.desc: Branch: materialLevel != EXQUISITE && materialLevel != GENTLE => false
  *           IsTransparencyListenerNeeded returns false when material level is not supported
@@ -854,6 +932,7 @@ HWTEST_F(TitleBarPatternTestTwoNg, InitScrollEffectOptions_GradualBlur_DisablesC
 HWTEST_F(TitleBarPatternTestTwoNg, InitScrollEffectOptions_Disabled_RemovesEffectNodes, TestSize.Level1)
 {
     ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    ScopeUiMaterialTransparency transparency(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THIN);
     auto context = CreateScrollEffectTestContext(ScrollEffectType::COMMON_BLUR);
     ASSERT_NE(context.titleBarNode, nullptr);
     ScopedTitleBarTokenTheme scopedTheme(context.titleBarNode);
@@ -885,6 +964,33 @@ HWTEST_F(TitleBarPatternTestTwoNg, InitScrollEffectOptions_Disabled_RemovesEffec
     ASSERT_NE(titleBarRenderContext, nullptr);
     ASSERT_TRUE(titleBarRenderContext->GetClipEdge().has_value());
     EXPECT_TRUE(titleBarRenderContext->GetClipEdge().value());
+}
+
+/**
+ * @tc.name: InitScrollEffectOptions_Disabled_KeepsClipDisabledWithApplyShadow
+ * @tc.desc: Verify disabling scroll effect does not restore clip when current material requires shadow overflow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, InitScrollEffectOptions_Disabled_KeepsClipDisabledWithApplyShadow, TestSize.Level1)
+{
+    ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    auto context = CreateScrollEffectTestContext(ScrollEffectType::COMMON_BLUR);
+    ASSERT_NE(context.titleBarNode, nullptr);
+    ScopedTitleBarTokenTheme scopedTheme(context.titleBarNode);
+    scopedTheme.SetColorMode(ColorMode::LIGHT);
+    InitScrollEffectForContext(context);
+
+    context.titleBarPattern->options_.material = CreateMaterialWithApplyShadow(true);
+    context.titleBarPattern->options_.bgOptions.scrollEffectOptions.reset();
+    context.titleBarPattern->InitScrollEffectOptions();
+
+    EXPECT_FALSE(context.titleBarPattern->IsScrollEffectEnabled());
+    EXPECT_EQ(context.titleBarPattern->GetTitleBarMaskNode(), nullptr);
+    EXPECT_EQ(context.titleBarPattern->GetTitleBarMaskBlurNode(), nullptr);
+    auto titleBarRenderContext = context.titleBarNode->GetRenderContext();
+    ASSERT_NE(titleBarRenderContext, nullptr);
+    ASSERT_TRUE(titleBarRenderContext->GetClipEdge().has_value());
+    EXPECT_FALSE(titleBarRenderContext->GetClipEdge().value());
 }
 
 /**
@@ -1027,6 +1133,7 @@ HWTEST_F(TitleBarPatternTestTwoNg, PrepareScrollEffectTitleBarBgStyles_SmoothMat
 HWTEST_F(TitleBarPatternTestTwoNg, UpdateBackgroundBlurStyle_CommonBlur_RenderSeparation, TestSize.Level1)
 {
     ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    ScopeUiMaterialTransparency transparency(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THIN);
     auto context = CreateScrollEffectTestContext(ScrollEffectType::COMMON_BLUR);
     ASSERT_NE(context.titleBarNode, nullptr);
     ScopedTitleBarTokenTheme scopedTheme(context.titleBarNode);
@@ -1183,6 +1290,7 @@ HWTEST_F(TitleBarPatternTestTwoNg, OnColorConfigurationUpdate_CommonBlur_MidScro
     TestSize.Level1)
 {
     ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    ScopeUiMaterialTransparency transparency(UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THIN);
     auto context = CreateScrollEffectTestContext(ScrollEffectType::COMMON_BLUR);
     ASSERT_NE(context.titleBarNode, nullptr);
     ScopedTitleBarTokenTheme scopedTheme(context.titleBarNode);

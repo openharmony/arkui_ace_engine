@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 constexpr float TITLE_OFFSET_PERCENT  = 0.02f;

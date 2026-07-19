@@ -19,7 +19,9 @@
 
 #include "menu_item_model.h"
 
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/select/select_theme.h"
@@ -51,6 +53,7 @@
 #endif
 #include "interfaces/inner_api/ui_session/param_config.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -199,6 +202,7 @@ void MenuItemPattern::AttachBottomDivider()
     auto index = parent->GetChildIndex(host);
     if (index >= 0) {
         bottomDivider_->MountToParent(parent, ++index);
+        bottomDivider_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -602,11 +606,14 @@ void MenuItemPattern::OnAfterModifyDone()
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
     auto content = itemProperty->GetContent().value_or("");
+#ifndef CROSS_PLATFORM
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, content, isSelected_);
+#endif
 }
 
 void MenuItemPattern::RecordChangeEvent() const
 {
+#ifndef CROSS_PLATFORM
     if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         return;
     }
@@ -625,6 +632,7 @@ void MenuItemPattern::RecordChangeEvent() const
         .SetHost(host);
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, content, isSelected_);
+#endif
 }
 
 RefPtr<FrameNode> MenuItemPattern::GetMenuWrapper()
@@ -1553,12 +1561,24 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
 
     // close menu when touch up
     // can't use onClick because that conflicts with interactions developers might set to the customNode
-    // recognize gesture as click if touch up position is close to last touch down position
+    // Treat the gesture as a click iff the finger stays inside the item bounds during the whole touch
+    // sequence (down/move/up). This mirrors ClickRecognizer::IsPointInRegion so that "onClick fires" and
+    // "menu closes" share the same hit criterion, instead of the old down->up straight-line distance check
+    // which is stricter than onClick and caused the menu not to close on an in-bounds swipe before lift-up.
     if (touchType == TouchType::DOWN) {
         lastTouchOffset_ = std::make_unique<Offset>(touches.front().GetLocalLocation());
+        movedOutOfRegion_ = false;
+    } else if (touchType == TouchType::MOVE) {
+        // mirror ClickRecognizer: once the finger leaves the item bounds, it is no longer a click
+        if (!movedOutOfRegion_ &&
+            !MenuPattern::IsOffsetInNodeBounds(GetHost(), touches.front().GetLocalLocation())) {
+            movedOutOfRegion_ = true;
+        }
     } else if (touchType == TouchType::UP) {
         auto touchUpOffset = touches.front().GetLocalLocation();
-        if (lastTouchOffset_ && (touchUpOffset - *lastTouchOffset_).GetDistance() <= DEFAULT_CLICK_DISTANCE) {
+        bool isClick = lastTouchOffset_ && !movedOutOfRegion_ &&
+            MenuPattern::IsOffsetInNodeBounds(GetHost(), touchUpOffset);
+        if (isClick) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 HandleOnChange();
             }
@@ -1568,6 +1588,7 @@ void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
             }
         }
         lastTouchOffset_.reset();
+        movedOutOfRegion_ = false;
     }
 }
 
@@ -2571,6 +2592,7 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto textProperty = node->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
     textProperty->UpdateEnableSmallLanguageTruncation(true);
+    textProperty->UpdateEnablePunctuationOverflowOptimize(true);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipEdge(isTextFadeOut_);
@@ -3813,10 +3835,9 @@ void MenuItemPattern::UpdateOptionStyle()
     CHECK_NULL_VOID(menuPattern);
     auto selectNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
     CHECK_NULL_VOID(selectNode);
-    auto selectPattern = selectNode->GetPattern<SelectPattern>();
-    CHECK_NULL_VOID(selectPattern);
     auto selectPaintProperty = selectNode->GetPaintProperty<SelectPaintProperty>();
     CHECK_NULL_VOID(selectPaintProperty);
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
     if (isSelected_) {
         if (SystemProperties::ConfigChangePerform()) {
             ApplySelectedThemeStyles(selectPaintProperty, menuNode);
@@ -3826,7 +3847,9 @@ void MenuItemPattern::UpdateOptionStyle()
         if (optionSelectedApply_) {
             ApplyTextModifier(optionSelectedApply_);
         }
-        selectPattern->UpdateSelectedOptionFontFromPattern(host);
+        if (customModifier) {
+            customModifier->updateSelectedOptionFontFromPattern(selectNode, host);
+        }
     } else {
         if (SystemProperties::ConfigChangePerform()) {
             ApplyOptionThemeStyles(selectPaintProperty);
@@ -3836,7 +3859,9 @@ void MenuItemPattern::UpdateOptionStyle()
         if (optionApply_) {
             ApplyTextModifier(optionApply_);
         }
-        selectPattern->UpdateOptionFontFromPattern(host);
+        if (customModifier) {
+            customModifier->updateOptionFontFromPattern(selectNode, host);
+        }
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -3914,23 +3939,25 @@ void MenuItemPattern::ApplyOptionThemeStyles(const RefPtr<SelectPaintProperty>& 
 
 void MenuItemPattern::ReportEvent()
 {
+#ifndef CROSS_PLATFORM
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto itemProperty = GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_VOID(itemProperty);
     auto content = itemProperty->GetContent().value_or("");
-    auto result = InspectorJsonUtil::CreateObject();
+    auto result = JsonUtil::Create();
     result->Put("event", "onchange");
     result->Put("id", host->GetId());
     result->Put("type", host->GetTag().c_str());
     result->Put("status", isSelected_ ? "Selected" : "UnSelected");
     result->Put("text", content.c_str());
     result->Put("description", host->GetAutoEventParamValue("").c_str());
-    auto json = InspectorJsonUtil::Create();
+    auto json = JsonUtil::CreateSharedPtrJson();
     json->Put("onchangeResult", result);
     std::string jsString = json->ToString();
     TAG_LOGD(AceLogTag::ACE_MENU, "[menuitem ReportComponentChangeEvent] result %{public}s", jsString.c_str());
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", jsString.c_str(),
         ComponentEventType::COMPONENT_EVENT_MENU);
+#endif
 }
 } // namespace OHOS::Ace::NG

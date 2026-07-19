@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -34,9 +34,11 @@ public:
     static bool IsUINodeGcEnabled();
     static bool IsPageOverflowEnabled();
     static bool IsRnOverflowEnable();
-    static bool IsDialogCorrectionEnabled();
+    ACE_FORCE_EXPORT static bool IsDialogCorrectionEnabled();
     static std::string GetArkWebAutoLayoutConfig();
     static bool IsSmartLayoutEnabled();
+    static bool IsSmartLayoutPageOverflowFixEnabled(const std::string& pathHash = "");
+    static bool IsSmartLayoutWidgetSplitEnabled(const std::string& pageUrl = "");
 };
 } // namespace OHOS::Ace
 

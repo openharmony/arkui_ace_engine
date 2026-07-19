@@ -13,16 +13,82 @@
  * limitations under the License.
  */
 
-class RefreshModifier extends ArkRefreshComponent implements AttributeModifier<RefreshAttribute> {
+class LazyArkRefreshComponent extends ArkComponent {
+  static module: RefreshComponentModule | undefined = undefined;
 
-    constructor(nativePtr: KNode, classType: ModifierType) {
-      super(nativePtr, classType);
-      this._modifiersWithKeys = new ModifierMap();
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkRefreshComponent.module === undefined) {
+      LazyArkRefreshComponent.module = globalThis.requireNapi('arkui.components.arkrefresh');
     }
-    
-    applyNormalAttribute(instance: RefreshAttribute): void {
-      ModifierUtils.applySetOnChange(this);
-      ModifierUtils.applyAndMergeModifier<RefreshAttribute, ArkRefreshComponent, ArkComponent>(instance, this);
-    }
+
+    this.lazyComponent = LazyArkRefreshComponent.module.createComponent(nativePtr, classType);
   }
-  
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  allowChildCount(): number {
+    return 1;
+  }
+
+  initialize(value: any): this {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+
+  onStateChange(value: (state: number) => void): this {
+    this.lazyComponent.onStateChange(value);
+    return this;
+  }
+
+  onRefreshing(value: () => void): this {
+    this.lazyComponent.onRefreshing(value);
+    return this;
+  }
+
+  refreshOffset(value: number | Resource): this {
+    this.lazyComponent.refreshOffset(value);
+    return this;
+  }
+
+  pullToRefresh(value: boolean): this {
+    this.lazyComponent.pullToRefresh(value);
+    return this;
+  }
+
+  pullUpToCancelRefresh(value: boolean): this {
+    this.lazyComponent.pullUpToCancelRefresh(value);
+    return this;
+  }
+
+  pullDownRatio(value: number): this {
+    this.lazyComponent.pullDownRatio(value);
+    return this;
+  }
+
+  onOffsetChange(value: Callback<number>): this {
+    this.lazyComponent.onOffsetChange(value);
+    return this;
+  }
+
+  maxPullDownDistance(value: number | Resource): this {
+    this.lazyComponent.maxPullDownDistance(value);
+    return this;
+  }
+}
+
+class RefreshModifier extends LazyArkRefreshComponent implements AttributeModifier<RefreshAttribute> {
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
+  }
+
+  applyNormalAttribute(instance: RefreshAttribute): void {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier<RefreshAttribute, ArkRefreshComponent, ArkComponent>(instance, this);
+  }
+}

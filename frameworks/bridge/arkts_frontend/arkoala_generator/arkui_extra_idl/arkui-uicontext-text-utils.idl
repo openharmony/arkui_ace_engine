@@ -14,6 +14,7 @@
  */
 package arkui.component.idlize;
 import arkui.component.textCommon.TextMenuOptions as TextMenuOptions;
+import arkui.component.textCommon.TextMenuItemId as TextMenuItemId;
 
 [Entity=Class]
 interface GlobalScopeUicontextFontScale {
@@ -24,4 +25,6 @@ interface GlobalScopeUicontextFontScale {
 [Entity=Class]
 interface GlobalScopeUicontextTextMenu {
     static void setMenuOptions(TextMenuOptions options);
+    static void disableSystemServiceMenuItems(boolean disable);
+    static void disableMenuItems(sequence<TextMenuItemId> items);
 };

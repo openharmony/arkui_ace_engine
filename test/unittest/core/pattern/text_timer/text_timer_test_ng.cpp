@@ -55,7 +55,7 @@ constexpr int32_t START_TIME = 5000;
 constexpr bool IS_COUNT_DOWN = false;
 constexpr bool IS_COUNT_DOWN_2 = true;
 const std::string TEXT_TIMER_FORMAT = "HH:mm:ss.SSS";
-const std::u16string FORMAT_DATA = u"08:00:00";
+static constexpr char16_t FORMAT_DATA[] = u"08:00:00";
 const int64_t UTC_1 = 1000000000000;
 const int64_t UTC_2 = 2000000000000;
 const int64_t ELAPSED_TIME_1 = 100;
@@ -988,6 +988,9 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest001, TestSize.Level0)
  */
 HWTEST_F(TextTimerTestNg, TextTimerPatternTest002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: Create framenode and Init.
+     */
     auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
@@ -1013,11 +1016,17 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest002, TestSize.Level0)
  */
 HWTEST_F(TextTimerTestNg, TextTimerPatternTest003, TestSize.Level0)
 {
+    /**
+     * @tc.steps: Create framenode and Init.
+     */
     auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     ASSERT_NE(pattern, nullptr);
 
+    /**
+     * @tc.steps: Test with different font size
+     */
     const double testSizeValue = 20.0;
     Dimension testSize(testSizeValue, DimensionUnit::VP);
     pattern->UpdateFontSize(testSize, true);

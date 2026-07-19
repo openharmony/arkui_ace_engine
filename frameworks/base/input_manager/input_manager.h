@@ -51,11 +51,9 @@ public:
 
     static KeyboardType GetKeyboardType(int32_t deviceId);
 
-    static bool IsKeyboardConnected();
+    ACE_FORCE_EXPORT static bool IsKeyboardConnected();
 
     static bool GetSystemHotkeys(std::vector<HotKey>& hotkeys);
-
-    static size_t GetApproximatePointerEventSize();
 };
 
 } // namespace OHOS::Ace

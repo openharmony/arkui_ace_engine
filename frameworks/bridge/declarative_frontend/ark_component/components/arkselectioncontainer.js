@@ -158,7 +158,6 @@ class SelectionContainerOnTextSelectionChangeModifier extends ModifierWithKey {
 }
 SelectionContainerOnTextSelectionChangeModifier.identity = Symbol('selectionContainerOnTextSelectionChange');
 
-// ===== Part B: ArkSelectionContainerComponent =====
 
 class ArkSelectionContainerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
@@ -223,8 +222,8 @@ class ArkSelectionContainerComponent extends ArkComponent {
 // ===== Part C: JSSelectionContainer (static API) =====
 
 class SelectionContainer extends JSContainerBase {
-  static create() {
-    getUINativeModule().selectionContainer.create();
+  static create(value) {
+    getUINativeModule().selectionContainer.create(value);
   }
 
   static copyOption(value) {
@@ -305,10 +304,34 @@ const SelectionContainerTextJoinStyle = {
   DIRECT: 1,
 };
 
+// ===== Part C+: SelectionContainerController (dynamic) =====
+
+class SelectionContainerController {
+  constructor() {
+    this.nodeId_ = -1;
+    this.epoch_ = -1;
+  }
+
+  closeSelectionMenu() {
+    if (this.nodeId_ < 0 || this.epoch_ < 0) {
+      return;
+    }
+    getUINativeModule().selectionContainer.closeSelectionMenu(this.nodeId_, this.epoch_);
+  }
+
+  clearTextSelection() {
+    if (this.nodeId_ < 0 || this.epoch_ < 0) {
+      return;
+    }
+    getUINativeModule().selectionContainer.clearTextSelection(this.nodeId_, this.epoch_);
+  }
+}
+
 // ===== Part D: Exports =====
 
 function createComponent(nativePtr, classType) {
   return new ArkSelectionContainerComponent(nativePtr, classType);
 }
 
-export default { SelectionContainer, createComponent, SelectionContainerTextJoinStyle };
+export default { SelectionContainer, createComponent, SelectionContainerTextJoinStyle,
+  SelectionContainerController };

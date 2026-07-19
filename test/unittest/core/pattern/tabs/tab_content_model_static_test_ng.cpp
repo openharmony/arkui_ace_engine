@@ -1257,13 +1257,15 @@ HWTEST_F(TabContentModelStaticTestNg, InitTabText_LowApiVersion, TestSize.Level1
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
     auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_FALSE(textLayoutProperty->HasEnablePunctuationOverflowOptimize());
     TabContentModelStatic::InitTabText(textLayoutProperty);
-    EXPECT_TRUE(true);
+    EXPECT_TRUE(textLayoutProperty->HasEnablePunctuationOverflowOptimize());
+    EXPECT_TRUE(textLayoutProperty->GetEnablePunctuationOverflowOptimizeValue(false));
 }
 
 /**
  * @tc.name: InitTabText_NullTextProperty
- * @tc.desc: InitTabText with null textLayoutProperty should not crash
+ * @tc.desc: InitTabText with null textLayoutProperty should not crash due to early CHECK_NULL_VOID
  * @tc.type: FUNC
  */
 HWTEST_F(TabContentModelStaticTestNg, InitTabText_NullTextProperty, TestSize.Level1)
@@ -1272,6 +1274,51 @@ HWTEST_F(TabContentModelStaticTestNg, InitTabText_NullTextProperty, TestSize.Lev
         static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
     TabContentModelStatic::InitTabText(nullptr);
     EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: InitTabText_EnablePunctuationOverflowOptimizeSetBeforeApiCheck001
+ * @tc.desc: InitTabText sets EnablePunctuationOverflowOptimize before API version check so it is true even on low API
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabContentModelStaticTestNg, InitTabText_EnablePunctuationOverflowOptimizeSetBeforeApiCheck001,
+    TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    TabContentModelStatic::InitTabText(textLayoutProperty);
+    EXPECT_TRUE(textLayoutProperty->GetEnablePunctuationOverflowOptimizeValue(false));
+}
+
+/**
+ * @tc.name: InitTabText_CheckNullVoidMovedBeforeEnablePunctuationOverflowOptimize001
+ * @tc.desc: Verify CHECK_NULL_VOID is before UpdateEnablePunctuationOverflowOptimize so null input safely returns
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabContentModelStaticTestNg, InitTabText_CheckNullVoidMovedBeforeEnablePunctuationOverflowOptimize001,
+    TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_FIVE));
+    TabContentModelStatic::InitTabText(nullptr);
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: InitTabText_HighApiVersionEnablePunctuationOverflowOptimize001
+ * @tc.desc: InitTabText with high API version sets EnablePunctuationOverflowOptimize and OrphanCharOptimization
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabContentModelStaticTestNg, InitTabText_HighApiVersionEnablePunctuationOverflowOptimize001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    TabContentModelStatic::InitTabText(textLayoutProperty);
+    EXPECT_TRUE(textLayoutProperty->GetEnablePunctuationOverflowOptimizeValue(false));
 }
 
 } // namespace OHOS::Ace::NG

@@ -23,6 +23,7 @@
 #include "arkoala_api_generated.h"
 #include "../capi_gen140_compat.h"
 
+#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
@@ -126,7 +127,6 @@ public:
         themeManager_ = AceType::MakeRefPtr<::testing::NiceMock<MockThemeManager>>();
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
 
-        g_isResourceDecoupling = false;
         // assume using of test/mock/frameworks/core/common/mock_theme_constants.cpp in build
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))

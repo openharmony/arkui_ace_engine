@@ -438,7 +438,9 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         HandleGestureAccept(info, type, GestureListenerType::SWIPE);
         ACE_BENCH_MARK_TRACE("SwipeGesture_end");
         callbackFunction(info);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         HandleReports(info, type);
+#endif
     }
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     ReportToGestureDebugManager(type, GestureListenerType::SWIPE);
@@ -494,6 +496,7 @@ void SwipeRecognizer::GetGestureEventInfo(GestureEvent& info)
     info.SetInputEventType(inputEventType_);
 }
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void SwipeRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
 {
     if (type != GestureCallbackType::ACTION) {
@@ -512,9 +515,13 @@ void SwipeRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
     swipeReport.SetFingerList(info.GetFingerList());
     Reporter::GetInstance().HandleUISessionReporting(swipeReport);
 }
+#endif
 
 GestureJudgeResult SwipeRecognizer::TriggerGestureJudgeCallback()
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return GestureJudgeResult::REJECT;
+    }
     auto frameNode = GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(frameNode, GestureJudgeResult::CONTINUE);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();

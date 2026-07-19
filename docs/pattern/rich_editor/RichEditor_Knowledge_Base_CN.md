@@ -555,7 +555,7 @@ JS/ArkTS接口    CAPI接口
 - **组件指南**：[组件指南](https://gitcode.com/openharmony/docs/blob/master/zh-cn/application-dev/ui/arkts-common-components-richeditor.md)
 - **API参考**：[API参考](https://gitcode.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis-arkui/arkui-ts/ts-basic-components-richeditor.md)
 - **开发文档**：`frameworks/core/components_ng/pattern/rich_editor/docs/`
-- **Text组件知识库**：`docs/pattern/text/Text_Knowledge_Base_CN.md`
+- **Text组件知识库**：`docs/kb/components/basic/text.md`
 
 ### 版本历史
 

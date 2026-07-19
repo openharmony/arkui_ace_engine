@@ -15,6 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
 
+#include <cmath>
+
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -128,7 +130,7 @@ void JSScrollableBase::SetScrollBarHeight(const JSCallbackInfo& info)
     auto args = info[0];
     if (!args->IsObject() ||
         !JSViewAbstract::ParseJsLengthMetricsVpWithResObj(JSRef<JSObject>::Cast(args), parsedValue, resObj) ||
-        LessNotEqual(parsedValue.Value(), 0.0)) {
+        std::isnan(parsedValue.Value()) || LessNotEqual(parsedValue.Value(), 0.0)) {
         auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
         NG::ScrollableModelNG::ResetScrollBarHeight(frameNode);

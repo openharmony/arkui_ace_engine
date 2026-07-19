@@ -21,7 +21,8 @@ import {
   BorderStyle, TouchEvent, TouchType, KeyEvent, KeyType, Button, ButtonType, SymbolGlyph, SymbolEffectStrategy,
   SymbolEffect, Resource, Image, Stack, Alignment, ImageFit, Circle, Direction, ShadowStyle, $r, Margin,
   Padding, ButtonOptions, HoverEvent, ClickEvent, TapGestureHandler, PanGestureHandler,
-  GestureEvent, applyStyles, CustomDialog, CustomDialogControllerOptions, CustomLayout, Callback
+  GestureEvent, applyStyles, CustomDialog, CustomDialogControllerOptions, CustomLayout, Callback,
+  AccessibilityRoleType
 } from '@ohos.arkui.component';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
 
@@ -29,6 +30,7 @@ import display from '@ohos.display'
 import hilog from '@ohos.hilog';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import resourceManager from '@ohos.resourceManager';
+import { BusinessError } from '@ohos.base';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
@@ -277,7 +279,7 @@ export struct EditableTitleBar {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(true)
-        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
+        .accessibilityRole(AccessibilityRoleType.TITLE_BAR)
 
         Row() {
           this.rightMenuItemsLayout();
@@ -676,8 +678,14 @@ export struct ImageMenuItem {
 
   private getAccessibilityDescription(): string | undefined {
     if (Util.isResourceType(this.item.accessibilityDescription)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.item.accessibilityDescription as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.item.accessibilityDescription as Resource).id);
+      } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'EditableTitleBar', `getStringSync failed, code: ${code}, message: ${message}`);
+      }
     } else if (this.item.accessibilityDescription && this.item.accessibilityDescription !== '') {
       return this.item.accessibilityDescription as string;
     }

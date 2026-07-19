@@ -36,7 +36,7 @@ constexpr int NUM_3 = 3;
 constexpr int NUM_4 = 4;
 constexpr Dimension DEFAULT_TEXTSTYLE_FONTSIZE = 16.0_fp;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
-const std::string FORMAT_FONT = "%s|%s";
+constexpr std::string_view FORMAT_FONT = "%s|%s";
 namespace {
 bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
 {
@@ -217,7 +217,7 @@ ArkUINativeModuleValue CalendarPickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* 
         fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
     }
 
-    std::string fontInfo = StringUtils::FormatString(FORMAT_FONT.c_str(), fontSize.c_str(), fontWeight.c_str());
+    std::string fontInfo = StringUtils::FormatString(FORMAT_FONT.data(), fontSize.c_str(), fontWeight.c_str());
     textStyleStruct.fontInfo = fontInfo.c_str();
     textStyleStruct.textColor = textColor.GetValue();
     textStyleStruct.fontSizeRawPtr = AceType::RawPtr(fontSizeResObj);

@@ -1,0 +1,186 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include <string>
+#include "arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model_static.h"
+#include "core/components_ng/pattern/list/list_properties.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/validators.h"
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+struct LazyGridLayoutCombinedStaticModifiers {
+    const void* attributeModifier;
+    const void* vGridModifier;
+};
+
+namespace LazyGridLayoutAttributeModifier {
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
+{
+    auto frameNode = LazyGridLayoutModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void SetRowsGapImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    if (convValue && convValue->Value() < 0.0f) {
+        convValue = Dimension(0.0f, convValue->Unit());
+    }
+    LazyGridLayoutModelStatic::SetRowGap(frameNode, convValue);
+}
+
+void SetColumnsGapImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    if (convValue && convValue->Value() < 0.0f) {
+        convValue = Dimension(0.0f, convValue->Unit());
+    }
+    LazyGridLayoutModelStatic::SetColumnGap(frameNode, convValue);
+}
+
+void SetHeaderImpl(Ark_NativePointer node, const Opt_CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optBuilder = Converter::GetOptPtr(builder);
+    if (!optBuilder) {
+        LazyGridLayoutModelStatic::RemoveHeader(frameNode);
+        return;
+    }
+    CallbackHelper(*optBuilder)
+        .BuildAsync([weakNode = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            CHECK_NULL_VOID(uiNode);
+            auto host = weakNode.Upgrade();
+            CHECK_NULL_VOID(host);
+            LazyGridLayoutModelStatic::SetHeader(AceType::RawPtr(host), uiNode);
+        }, node);
+}
+
+void SetFooterImpl(Ark_NativePointer node, const Opt_CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optBuilder = Converter::GetOptPtr(builder);
+    if (!optBuilder) {
+        LazyGridLayoutModelStatic::RemoveFooter(frameNode);
+        return;
+    }
+    CallbackHelper(*optBuilder)
+        .BuildAsync([weakNode = AceType::WeakClaim(frameNode)](const RefPtr<UINode>& uiNode) {
+            CHECK_NULL_VOID(uiNode);
+            auto host = weakNode.Upgrade();
+            CHECK_NULL_VOID(host);
+            LazyGridLayoutModelStatic::SetFooter(AceType::RawPtr(host), uiNode);
+        }, node);
+}
+
+void SetStickyImpl(Ark_NativePointer node, const Opt_StickyStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto style = Converter::OptConvertPtr<V2::StickyStyle>(value);
+    LazyGridLayoutModelStatic::SetSticky(frameNode, EnumToInt(style));
+}
+
+void SetOnVisibleIndexesChangeImpl(Ark_NativePointer node, const Opt_OnVisibleIndexesChangeCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        LazyGridLayoutModelStatic::SetOnVisibleIndexesChange(frameNode, nullptr);
+        return;
+    }
+    auto onVisibleIndexesChange = [arkCallback = CallbackHelper(*optValue)](const int32_t start, const int32_t end) {
+        auto arkStart = Converter::ArkValue<Ark_Int32>(start);
+        auto arkEnd = Converter::ArkValue<Ark_Int32>(end);
+        arkCallback.Invoke(arkStart, arkEnd);
+    };
+    LazyGridLayoutModelStatic::SetOnVisibleIndexesChange(frameNode, std::move(onVisibleIndexesChange));
+}
+} // namespace LazyGridLayoutAttributeModifier
+
+namespace LazyVGridLayoutModifier {
+Ark_NativePointer ConstructImpl(Ark_Int32 id, Ark_Int32 flags)
+{
+    auto frameNode = LazyGridLayoutModelStatic::CreateFrameNode(id);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+} // namespace LazyVGridLayoutModifier
+
+namespace LazyVGridLayoutInterfaceModifier {
+void SetLazyVGridLayoutOptionsImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+} // namespace LazyVGridLayoutInterfaceModifier
+
+namespace LazyVGridLayoutAttributeModifier {
+void SetColumnsTemplateImpl(Ark_NativePointer node, const Opt_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<std::string>(*value).value_or("");
+    LazyVGridLayoutModelStatic::SetColumnsTemplate(frameNode, convValue);
+}
+} // namespace LazyVGridLayoutAttributeModifier
+
+const GENERATED_ArkUILazyGridLayoutAttributeModifier* GetLazyGridLayoutAttributeStaticModifier()
+{
+    static const GENERATED_ArkUILazyGridLayoutAttributeModifier impl {
+        LazyGridLayoutAttributeModifier::ConstructImpl,
+        LazyGridLayoutAttributeModifier::SetRowsGapImpl,
+        LazyGridLayoutAttributeModifier::SetColumnsGapImpl,
+        LazyGridLayoutAttributeModifier::SetHeaderImpl,
+        LazyGridLayoutAttributeModifier::SetFooterImpl,
+        LazyGridLayoutAttributeModifier::SetStickyImpl,
+        LazyGridLayoutAttributeModifier::SetOnVisibleIndexesChangeImpl,
+    };
+    return &impl;
+}
+
+const GENERATED_ArkUILazyVGridLayoutModifier* GetLazyVGridLayoutStaticModifier()
+{
+    static const GENERATED_ArkUILazyVGridLayoutModifier impl {
+        LazyVGridLayoutModifier::ConstructImpl,
+        LazyVGridLayoutInterfaceModifier::SetLazyVGridLayoutOptionsImpl,
+        LazyVGridLayoutAttributeModifier::SetColumnsTemplateImpl,
+    };
+    return &impl;
+}
+
+const LazyGridLayoutCombinedStaticModifiers* GetLazyGridLayoutCombinedStaticModifiers()
+{
+    static const LazyGridLayoutCombinedStaticModifiers combined {
+        GetLazyGridLayoutAttributeStaticModifier(),
+        GetLazyVGridLayoutStaticModifier(),
+    };
+    return &combined;
+}
+} // namespace OHOS::Ace::NG::GeneratedModifier

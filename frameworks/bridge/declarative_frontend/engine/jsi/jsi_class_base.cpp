@@ -16,8 +16,36 @@
 #include "jsi_class_base.h"
 
 #include <memory>
+#include <unordered_set>
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+std::unordered_set<JsiClassBase::UnDeclareFunc>& GetUnDeclareRegistry()
+{
+    static thread_local std::unordered_set<JsiClassBase::UnDeclareFunc> registry;
+    return registry;
+}
+} // namespace
+
+void JsiClassBase::RegisterUnDeclare(UnDeclareFunc func)
+{
+    if (func == nullptr) {
+        return;
+    }
+    GetUnDeclareRegistry().insert(func);
+}
+
+void JsiClassBase::UnDeclareAll()
+{
+    for (const auto& func : GetUnDeclareRegistry()) {
+        if (func != nullptr) {
+            func();
+        }
+    }
+    GetUnDeclareRegistry().clear();
+}
+
 void JsiClassBase::DeclareImpl(const char* name, std::string& className,
     JsiFunctionMap& staticFns, JsiFunctionMap& customFns,
     JsiFunctionMap& customGetFns, JsiFunctionMap& customSetFns,

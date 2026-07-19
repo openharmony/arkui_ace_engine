@@ -28,8 +28,8 @@ import { default as drawing } from '@ohos.graphics.drawing'
 import { LengthMetrics as arkui_Graphics_LengthMetrics, LengthMetricsUnit as arkui_Graphics_LengthMetricsUnit, ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
 import { Color as arkui_component_enums_Color, BorderStyle, FontWeight, FontStyle, DividerMode, PresetFillType } from './enums'
 import { OutlineStyle, AccessibilityRoleType } from './common'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { global_resource_Resource_serializer } from './../framework/resource'
+import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 export class ColorFilterInternal {
     public static fromPtr(ptr: KPointer): ColorFilter {
         return new ColorFilter(MaterializedBaseTag.NOP, ptr)
@@ -260,6 +260,9 @@ export interface AccessibilityOptions {
 export interface AccessibilityActionOptions {
     scrollStep?: int32;
 }
+export interface AccessibilityNextFocusParams {
+    isConsiderDescendants?: boolean;
+}
 export interface AccessibilityCustomAction {
     name: ResourceStr;
     onAction: VoidCallback;
@@ -311,49 +314,27 @@ export class AccessibilityActionOptions_serializer {
         return value
     }
 }
-export class AccessibilityCustomAction_serializer {
-    public static write(buffer: SerializerBase, value: AccessibilityCustomAction): void {
+export class AccessibilityNextFocusParams_serializer {
+    public static write(buffer: SerializerBase, value: AccessibilityNextFocusParams): void {
         let valueSerializer: SerializerBase = buffer
-        const valueHolderForName = value.name
-        if (valueHolderForName instanceof string) {
-            valueSerializer.writeInt8((0).toByte())
-            const valueHolderForNameForIdx0 = valueHolderForName as string
-            valueSerializer.writeString(valueHolderForNameForIdx0)
-        } else if (valueHolderForName instanceof Resource) {
-            valueSerializer.writeInt8((1).toByte())
-            const valueHolderForNameForIdx1 = valueHolderForName as Resource
-            global_resource_Resource_serializer.write(valueSerializer, valueHolderForNameForIdx1)
-        }
-        const valueHolderForOnAction = value.onAction
-        valueSerializer.holdAndWriteCallback(valueHolderForOnAction)
-    }
-    public static read(buffer: DeserializerBase): AccessibilityCustomAction {
-        let valueDeserializer: DeserializerBase = buffer
-        const nameTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
-        let nameTmpBuf: string | Resource | undefined
-        if (nameTmpBufUnionSelector == (0).toByte()) {
-            nameTmpBuf = (valueDeserializer.readString() as string)
-        } else if (nameTmpBufUnionSelector == (1).toByte()) {
-            nameTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
+        const valueHolderForIsConsiderDescendants = value.isConsiderDescendants
+        if (valueHolderForIsConsiderDescendants !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsConsiderDescendantsTmpValue = valueHolderForIsConsiderDescendants!
+            valueSerializer.writeBoolean(valueHolderForIsConsiderDescendantsTmpValue)
         } else {
-            throw new Error('One of the branches for nameTmpBuf has to be chosen through deserialisation.')
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        const nameTmpResult: ResourceStr = (nameTmpBuf as string | Resource)
-        const onActionTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
-        const onActionTmpBufBufCall: KPointer = valueDeserializer.readPointer()
-        const onActionTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
-        const onActionTmpBufClosure = ():void => {
-            const onActionTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
-            onActionTmpBufBufArgsSerializer.writeInt32(onActionTmpBufBufResource.resourceId);
-            onActionTmpBufBufArgsSerializer.writePointer(onActionTmpBufBufCall);
-            onActionTmpBufBufArgsSerializer.writePointer(onActionTmpBufBufCallSync);
-            InteropNativeModule._CallCallbackSync(10, 553494831, onActionTmpBufBufArgsSerializer.asBuffer(), onActionTmpBufBufArgsSerializer.length());
-            onActionTmpBufBufArgsSerializer.release();
-            return;
+    }
+    public static read(buffer: DeserializerBase): AccessibilityNextFocusParams {
+        let valueDeserializer: DeserializerBase = buffer
+        const isConsiderDescendantsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let isConsiderDescendantsTmpBuf: boolean | undefined = undefined
+        if ((isConsiderDescendantsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isConsiderDescendantsTmpBuf = valueDeserializer.readBoolean()
         }
-        resourceFinalizerRegister(onActionTmpBufClosure, onActionTmpBufBufResource)
-        const onActionTmpResult: VoidCallback = onActionTmpBufClosure
-        let value: AccessibilityCustomAction = ({name: nameTmpResult, onAction: onActionTmpResult} as AccessibilityCustomAction)
+        const isConsiderDescendantsTmpResult: boolean | undefined = isConsiderDescendantsTmpBuf
+        let value: AccessibilityNextFocusParams = ({isConsiderDescendants: isConsiderDescendantsTmpResult} as AccessibilityNextFocusParams)
         return value
     }
 }
@@ -720,6 +701,52 @@ export class ItemFillPolicy_serializer {
         }
         const fillTypeTmpResult: ResponsiveFillType | undefined = fillTypeTmpBuf
         let value: ItemFillPolicy = ({fillType: fillTypeTmpResult} as ItemFillPolicy)
+        return value
+    }
+}
+export class AccessibilityCustomAction_serializer {
+    public static write(buffer: SerializerBase, value: AccessibilityCustomAction): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForName = value.name
+        if (valueHolderForName instanceof string) {
+            valueSerializer.writeInt8((0).toByte())
+            const valueHolderForNameForIdx0 = valueHolderForName as string
+            valueSerializer.writeString(valueHolderForNameForIdx0)
+        } else if (valueHolderForName instanceof Resource) {
+            valueSerializer.writeInt8((1).toByte())
+            const valueHolderForNameForIdx1 = valueHolderForName as Resource
+            global_resource_Resource_serializer.write(valueSerializer, valueHolderForNameForIdx1)
+        }
+        const valueHolderForOnAction = value.onAction
+        valueSerializer.holdAndWriteCallback(valueHolderForOnAction)
+    }
+    public static read(buffer: DeserializerBase): AccessibilityCustomAction {
+        let valueDeserializer: DeserializerBase = buffer
+        const nameTmpBufUnionSelector: int32 = valueDeserializer.readInt8()
+        let nameTmpBuf: string | Resource | undefined
+        if (nameTmpBufUnionSelector == (0).toByte()) {
+            nameTmpBuf = (valueDeserializer.readString() as string)
+        } else if (nameTmpBufUnionSelector == (1).toByte()) {
+            nameTmpBuf = global_resource_Resource_serializer.read(valueDeserializer)
+        } else {
+            throw new Error('One of the branches for nameTmpBuf has to be chosen through deserialisation.')
+        }
+        const nameTmpResult: ResourceStr = (nameTmpBuf as string | Resource)
+        const onActionTmpBufBufResource: CallbackResource = valueDeserializer.readCallbackResource()
+        const onActionTmpBufBufCall: KPointer = valueDeserializer.readPointer()
+        const onActionTmpBufBufCallSync: KPointer = valueDeserializer.readPointer()
+        const onActionTmpBufClosure = ():void => {
+            const onActionTmpBufBufArgsSerializer: SerializerBase = SerializerBase.hold();
+            onActionTmpBufBufArgsSerializer.writeInt32(onActionTmpBufBufResource.resourceId);
+            onActionTmpBufBufArgsSerializer.writePointer(onActionTmpBufBufCall);
+            onActionTmpBufBufArgsSerializer.writePointer(onActionTmpBufBufCallSync);
+            InteropNativeModule._CallCallbackSync(10, 553494831, onActionTmpBufBufArgsSerializer.asBuffer(), onActionTmpBufBufArgsSerializer.length());
+            onActionTmpBufBufArgsSerializer.release();
+            return;
+        }
+        resourceFinalizerRegister(onActionTmpBufClosure, onActionTmpBufBufResource)
+        const onActionTmpResult: VoidCallback = onActionTmpBufClosure
+        let value: AccessibilityCustomAction = ({name: nameTmpResult, onAction: onActionTmpResult} as AccessibilityCustomAction)
         return value
     }
 }

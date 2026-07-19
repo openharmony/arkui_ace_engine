@@ -502,26 +502,44 @@ void SetTailIndentsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<NG::TailIndents> indent = std::nullopt;
-    if (value && value->tag != INTEROP_TAG_UNDEFINED) {
-        NG::TailIndents tailIndents;
-        NG::TailIndentsArray indentsArray;
-        if (value->value.selector == 0) {
-            auto singleValue = Converter::Convert<Dimension>(value->value.value0);
-            indentsArray.push_back(singleValue);
-        } else if (value->value.selector == 1) {
-            auto& arrayValue = value->value.value1;
-            for (int i = 0; i < arrayValue.length; i++) {
-                auto dim = Converter::Convert<Dimension>(*(arrayValue.array + i));
-                indentsArray.push_back(dim);
-            }
-        }
+    if (!value || value->tag == INTEROP_TAG_UNDEFINED) {
+        TextModelStatic::SetTailIndents(frameNode, indent);
+        return;
+    }
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
 
-        if (!indentsArray.empty()) {
-            tailIndents.indentsArray = indentsArray;
-            indent = tailIndents;
+    auto convertDimensionWithPrecision = [](const Ark_LengthMetrics& metrics) -> Dimension {
+        double doubleValue = static_cast<double>(metrics.value);
+        auto unit = Converter::OptConvert<DimensionUnit>(metrics.unit)
+            .value_or(DimensionUnit::VP);
+        return Dimension(doubleValue, unit);
+    };
+
+    if (value->value.selector == 0) {
+        auto dim = convertDimensionWithPrecision(value->value.value0);
+        if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
+            dim.Reset();
+        }
+        indentsArray.emplace_back(dim);
+    } else if (value->value.selector == 1) {
+        auto& arrayValue = value->value.value1;
+        CHECK_NULL_VOID(arrayValue.array);
+        indentsArray.reserve(arrayValue.length);
+        for (int32_t i = 0; i < arrayValue.length; i++) {
+            auto dim = convertDimensionWithPrecision(*(arrayValue.array + i));
+            if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
+                dim.Reset();
+            }
+            indentsArray.emplace_back(dim);
         }
     }
-
+    if (indentsArray.empty()) {
+        TextModelStatic::SetTailIndents(frameNode, indent);
+        return;
+    }
+    tailIndents.indentsArray = std::move(indentsArray);
+    indent = tailIndents;
     TextModelStatic::SetTailIndents(frameNode, indent);
 }
 void SetWordBreakImpl(Ark_NativePointer node,

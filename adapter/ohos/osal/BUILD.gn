@@ -32,6 +32,9 @@ template("ace_osal_ohos_source_set") {
     if (ace_engine_feature_enable_upgrade_skia) {
       defines += [ "USE_NEW_SKIA" ]
     }
+    if (is_arkui_x) {
+      defines += [ "CROSS_PLATFORM" ]
+    }
     if (is_ohos_standard_system) {
       external_deps = [
         "hilog:libhilog",
@@ -75,10 +78,6 @@ template("ace_osal_ohos_source_set") {
       "feature_manager.cpp",
       "feature_param.cpp",
       "frame_report.cpp",
-      "image_analyzer_adapter_impl.cpp",
-      "image_analyzer_loader.cpp",
-      "image_analyzer_manager.cpp",
-      "image_analyzer_mgr.cpp",
       "image_perf_ohos.cpp",
       "input_compatible_manager.cpp",
       "input_method_manager_ohos.cpp",
@@ -118,6 +117,16 @@ template("ace_osal_ohos_source_set") {
     if (defined(config.enable_standard_input) && config.enable_standard_input) {
       sources += [ "ime_extra_config_ohos.cpp" ]
     }
+
+    if (defined(config.image_analyzer_support) && config.image_analyzer_support) {
+      sources += [
+        "image_analyzer_adapter_impl.cpp",
+        "image_analyzer_loader.cpp",
+        "image_analyzer_manager.cpp",
+        "image_analyzer_mgr.cpp",
+        ]
+    }
+
     external_deps += [
       "ability_runtime:app_manager",
       "hicollie:libhicollie",

@@ -561,6 +561,31 @@
       "buildFunction": "SliderTrackColorMetricsBuilder"
     },
     {
+      "name": "SliderMaterialIndex",
+      "pageSourceFile": "src/main/ets/pages/components/slider/material/sliderMaterialIndex.ets",
+      "buildFunction": "SliderMaterialIndexBuilder"
+    },
+    {
+      "name": "SliderMaterialOriginalApi",
+      "pageSourceFile": "src/main/ets/pages/components/slider/material/sliderMaterialOriginalApi.ets",
+      "buildFunction": "SliderMaterialOriginalApiBuilder"
+    },
+    {
+      "name": "SliderMaterialThreeStyles",
+      "pageSourceFile": "src/main/ets/pages/components/slider/material/sliderMaterialThreeStyles.ets",
+      "buildFunction": "SliderMaterialThreeStylesBuilder"
+    },
+    {
+      "name": "SliderMaterialDifferentSizes",
+      "pageSourceFile": "src/main/ets/pages/components/slider/material/sliderMaterialDifferentSizes.ets",
+      "buildFunction": "SliderMaterialDifferentSizesBuilder"
+    },
+    {
+      "name": "SliderMaterialOtherScenarios",
+      "pageSourceFile": "src/main/ets/pages/components/slider/material/sliderMaterialOtherScenarios.ets",
+      "buildFunction": "SliderMaterialOtherScenariosBuilder"
+    },
+    {
       "name": "RadioIndex",
       "pageSourceFile": "src/main/ets/pages/components/radio/Index.ets",
       "buildFunction": "RadioIndexBuilder"

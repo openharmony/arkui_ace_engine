@@ -14,6 +14,7 @@
  */
 
 #include "list_test_ng.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_caches.h"
 #include "core/components_ng/render/paint_wrapper.h"
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
@@ -27,8 +28,8 @@
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
@@ -355,6 +356,30 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset003, TestSize.Level1)
     offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
     expectOffset = { 0, -ITEM_MAIN_SIZE };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
+}
+
+/**
+ * @tc.name: StackFromEndItemGroupOverScroll001
+ * @tc.desc: Test top overScroll with stackFromEnd ListItemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, StackFromEndItemGroupOverScroll001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateListItemGroups(1, V2::ListItemGroupStyle::NONE, TOTAL_ITEM_NUMBER);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    ASSERT_TRUE(pattern_->IsAtTop());
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(ITEM_MAIN_SIZE);
+    EXPECT_TRUE(pattern_->IsAtTop());
+    EXPECT_TRUE(pattern_->IsOutOfBoundary(false));
+    EXPECT_TRUE(Positive(GetChildY(frameNode_, 0)));
 }
 
 /**

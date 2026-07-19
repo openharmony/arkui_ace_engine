@@ -16,12 +16,13 @@
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 
 
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/common/resource/resource_parse_utils.h"
 
 using namespace testing;

@@ -47,6 +47,12 @@ template("build_component_ng") {
       }
     }
 
+    if (defined(component_ng_deps)) {
+      foreach(item, component_ng_deps) {
+        extra_deps += [ "$ace_root/frameworks/core/components_ng/pattern/${item}:ace_core_components_${item}_pattern_ng_${platform}" ]
+      }
+    }
+
     if (defined(platform_deps)) {
       foreach(item, platform_deps) {
         extra_deps += [ "${item}_${platform}" ]
@@ -242,6 +248,13 @@ template("build_component_ng") {
         }
       }
 
+      if (defined(config.enable_auto_fill_controller) &&
+          config.enable_auto_fill_controller) {
+        if (defined(invoker.auto_fill_controller_sources)) {
+          sources += invoker.auto_fill_controller_sources
+        }
+      }
+
       if (defined(config.gesture_debug_boundary_support) &&
           config.gesture_debug_boundary_support &&
           defined(invoker.gesture_debug_sources)) {
@@ -252,6 +265,18 @@ template("build_component_ng") {
           config.smart_gesture_support && defined(invoker.smart_gesture_sources)) {
         sources += invoker.smart_gesture_sources
       }
+
+      if (defined(config.image_analyzer_support) &&
+          config.image_analyzer_support &&
+          defined(invoker.image_analyzer_sources)) {
+        sources += invoker.image_analyzer_sources
+      }
+
+      if (defined(config.enable_inspector_event_reporting) &&
+          config.enable_inspector_event_reporting &&
+          defined(invoker.inspector_event_reporting_sources)) {
+        sources += invoker.inspector_event_reporting_sources
+      }
     }
   }
 
@@ -259,6 +284,9 @@ template("build_component_ng") {
     build_component_ng_impl(item.name) {
       platform = item.name
       defines = []
+      if (defined(invoker.defines)) {
+        defines += invoker.defines
+      }
       defines += uicast_configs.uicast_defines
 
       if (defined(item.config)) {

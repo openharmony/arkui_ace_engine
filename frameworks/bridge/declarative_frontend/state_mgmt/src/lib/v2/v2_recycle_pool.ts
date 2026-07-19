@@ -326,10 +326,10 @@ class RecyclePoolV2 {
      * @param {number} key - The element ID to be removed from the map.
      */
     delete(key: number): void {
-      if (!this.fwdMap_[key]) {
+      if (!this.fwdMap_.has(key)) {
         return;
       }
-      const rev = this.fwdMap_[key];
+      const rev = this.fwdMap_.get(key);
       this.fwdMap_.delete(key);
       this.revMap_.delete(rev);
     }
@@ -343,7 +343,7 @@ class RecyclePoolV2 {
      * @returns {number | undefined} - The mapped ID or undefined if no mapping exists.
      */
     get(key: number): number | undefined {
-      return this.fwdMap_[key] || this.revMap_[key];
+      return this.fwdMap_.get(key) ?? this.revMap_.get(key);
     }
 
     /**
@@ -354,7 +354,7 @@ class RecyclePoolV2 {
      * @param {Array<number>} pair - A pair of old and new element IDs to be added to the mapping.
      */
     add(pair: [number, number]): void {
-      this.fwdMap_[pair[0]] = pair[1];
-      this.revMap_[pair[1]] = pair[0];
+      this.fwdMap_.set(pair[0], pair[1]);
+      this.revMap_.set(pair[1], pair[0]);
     }
   }

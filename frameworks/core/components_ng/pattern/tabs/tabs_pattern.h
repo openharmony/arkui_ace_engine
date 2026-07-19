@@ -20,6 +20,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/manager/recoverable/recoverable_view.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
@@ -41,8 +42,8 @@ constexpr float FLOATING_BAR_SCALE_ENLARGED = 1.15f;
 
 class TabsNode;
 
-class TabsPattern : public Pattern {
-    DECLARE_ACE_TYPE(TabsPattern, Pattern);
+class TabsPattern : public Pattern, public virtual RecoverableView {
+    DECLARE_ACE_TYPE(TabsPattern, Pattern, RecoverableView);
 
 public:
     TabsPattern() = default;
@@ -184,6 +185,7 @@ public:
 
     void OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*height*/, WindowSizeChangeReason type) override;
     void OnAttachToMainTree() override;
+    bool OnSaveData(std::string& data) override;
     void OnDetachFromMainTree() override;
     void ResetTabBarFollowHandPosition();
     void SetFloatingBarMargin(std::optional<float> floatingBarMargin)

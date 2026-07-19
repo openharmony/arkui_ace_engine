@@ -15,30 +15,34 @@
 
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
 
-#include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
-#include "core/components_ng/pattern/date_picker/picker_change_event.h"
-#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
-#include "core/pipeline/container_window_manager.h"
 #include <cstdint>
 #include <ctime>
 
-#include "core/components_ng/render/drawing.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_change_event.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
-#include "core/components_ng/pattern/picker_utils/toss_animation_controller.h"
+#include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
+#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
+#include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
+#include "core/components_ng/pattern/time_picker/timepicker_layout_utils.h"
+#include "core/components_ng/render/drawing.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -142,7 +146,7 @@ void TimePickerRowPattern::SetButtonIdeaSize()
         CHECK_NULL_VOID(timePickerColumnNode);
         auto columnNodeHeight = timePickerColumnNode->GetGeometryNode()->GetFrameSize().Height();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        auto buttonLayoutProperty = buttonNode->GetLayoutProperty();
         UpdateButtonConfirmLayoutProperty(buttonLayoutProperty);
         auto standardButtonHeight = static_cast<float>((height - PRESS_INTERVAL).ConvertToPx());
         auto maxButtonHeight = static_cast<float>(columnNodeHeight);
@@ -152,7 +156,10 @@ void TimePickerRowPattern::SetButtonIdeaSize()
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(buttonHeight)));
             buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+            auto* rowBtnModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(rowBtnModifier);
+            rowBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(
+                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), true);
         } else {
             auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
             UpdateFocusStyles(buttonLayoutProperty, timePickerColumnNode, height, isFocusButton);
@@ -168,7 +175,7 @@ void TimePickerRowPattern::SetButtonIdeaSize()
     }
 }
 
-void TimePickerRowPattern::UpdateFocusStyles(const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty,
+void TimePickerRowPattern::UpdateFocusStyles(const RefPtr<LayoutProperty>& buttonLayoutProperty,
     const RefPtr<FrameNode>& timePickerColumnNode, const Dimension& height, bool isFocusButton)
 {
     auto columnNode = DynamicCast<FrameNode>(timePickerColumnNode->GetLastChild());
@@ -182,12 +189,17 @@ void TimePickerRowPattern::UpdateFocusStyles(const RefPtr<ButtonLayoutProperty>&
     UpdateColumnButtonStyles(columnNode, isFocusButton, false);
 }
 
-void TimePickerRowPattern::UpdateButtonConfirmLayoutProperty(const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty)
+void TimePickerRowPattern::UpdateButtonConfirmLayoutProperty(const RefPtr<LayoutProperty>& buttonLayoutProperty)
 {
     CHECK_NULL_VOID(buttonLayoutProperty);
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(pickerSelectorItemRadius_));
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonNode = buttonLayoutProperty->GetHost();
+    CHECK_NULL_VOID(buttonNode);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
+    buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, BorderRadiusProperty(pickerSelectorItemRadius_));
 }
 
 void TimePickerRowPattern::InitSelectorProps()
@@ -506,27 +518,45 @@ void TimePickerRowPattern::SetCallBack()
     });
 }
 
+bool TimePickerRowPattern::CheckOnModifyDonePrerequisites(const RefPtr<FrameNode>& host)
+{
+    if (!host) {
+        return false;
+    }
+    auto pipeline = host->GetContext();
+    if (!pipeline) {
+        return false;
+    }
+    auto windowManager = pipeline->GetWindowManager();
+    if (!windowManager) {
+        return false;
+    }
+    isWindowFullscreen_ = (windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FULLSCREEN);
+    return true;
+}
+
 void TimePickerRowPattern::OnModifyDone()
 {
+    CHECK_EQUAL_VOID(isModifyDone_, true);
+    isModifyDone_ = true;
     Pattern::CheckLocalized();
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    if (!CheckOnModifyDonePrerequisites(host)) {
+        isModifyDone_ = false;
+        return;
+    }
     auto pickerProperty = host->GetLayoutProperty<TimePickerLayoutProperty>();
-    CHECK_NULL_VOID(pickerProperty);
-
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_VOID(windowManager);
-    auto windowMode = windowManager->GetWindowMode();
-    isWindowFullscreen_ = (windowMode == WindowMode::WINDOW_MODE_FULLSCREEN);
-
+    if (!pickerProperty) {
+        isModifyDone_ = false;
+        return;
+    }
     isForceUpdate_ = isForceUpdate_ ||
         (loop_ != pickerProperty->GetLoopValue(true)) ||
         (hour24_ != pickerProperty->GetIsUseMilitaryTimeValue(false));
     if (isFiredTimeChange_ && !isForceUpdate_ && !isDateTimeOptionUpdate_) {
         isFiredTimeChange_ = false;
         ColumnPatternInitHapticController();
+        isModifyDone_ = false;
         return;
     }
     LimitSelectedTimeInRange();
@@ -552,6 +582,7 @@ void TimePickerRowPattern::OnModifyDone()
     }
     SetDefaultFocus();
     InitSelectorProps();
+    isModifyDone_ = false;
 }
 
 void TimePickerRowPattern::InitSelect()
@@ -627,12 +658,18 @@ void TimePickerRowPattern::CreateAmPmNode()
         auto stackAmPmNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::STACK_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
         auto buttonNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::BUTTON_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+            ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+                auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+                CHECK_NULL_RETURN(buttonModifier, nullptr);
+                auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+                CHECK_NULL_RETURN(rawPattern, nullptr);
+                return AceType::Claim(rawPattern);
+            });
         auto blendNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         auto columnBlendNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::COLUMN_ETS_TAG, blendNodeId,
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         buttonNode->MountToParent(stackAmPmNode);
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        auto buttonLayoutProperty = buttonNode->GetLayoutProperty();
         amPmColumnNode->MountToParent(columnBlendNode);
         columnBlendNode->MountToParent(stackAmPmNode);
         auto layoutProperty = stackAmPmNode->GetLayoutProperty<LayoutProperty>();
@@ -640,14 +677,17 @@ void TimePickerRowPattern::CreateAmPmNode()
         layoutProperty->UpdateLayoutWeight(1);
         amPmTimeOrder_ == "01" ? stackAmPmNode->MountToParent(host) : stackAmPmNode->MountToParent(host, 0);
         if (SetAmPmButtonIdeaSize() > 0) {
-            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+            buttonLayoutProperty = buttonNode->GetLayoutProperty();
             buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-            buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-            buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
+            auto* rowBtnModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(rowBtnModifier);
+            ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+            rowBtnModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
+            rowBtnModifier->updateBorderRadiusToLayoutProp(buttonHandle, BorderRadiusProperty(PRESS_RADIUS));
             buttonLayoutProperty->UpdateUserDefinedIdealSize(
                 CalcSize(CalcLength(SetAmPmButtonIdeaSize()), CalcLength(height - PRESS_INTERVAL)));
             buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+            rowBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
             buttonNode->MarkModifyDone();
             buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
@@ -677,7 +717,13 @@ void TimePickerRowPattern::CreateOrDeleteSecondNode()
             auto stackSecondNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::STACK_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
             auto buttonSecondNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::BUTTON_ETS_TAG,
-                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+                ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+                    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+                    CHECK_NULL_RETURN(buttonModifier, nullptr);
+                    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+                    CHECK_NULL_RETURN(rawPattern, nullptr);
+                    return AceType::Claim(rawPattern);
+                });
             auto blendNodeId = ElementRegister::GetInstance()->MakeUniqueId();
             auto columnBlendNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::COLUMN_ETS_TAG, blendNodeId,
                 []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -1259,9 +1305,9 @@ void TimePickerRowPattern::UpdateButtonMargin(
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     isRtl = isConfirmOrNextNode ? isRtl : !isRtl;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
+        TimePickerDialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true);
     } else {
-        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
+        TimePickerDialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false);
     }
     buttonNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -2372,8 +2418,10 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(contentRowNode);
     auto layoutRenderContext = contentRowNode->GetRenderContext();
     CHECK_NULL_VOID(layoutRenderContext);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-        !DialogView::IsSupportBlurStyle(buttonTitleNode, isShowInSubWindow_)) {
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    bool isSupportBlurStyle =
+        dialogInnerModifier ? dialogInnerModifier->isSupportBlurStyle(buttonTitleNode, isShowInSubWindow_) : false;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) || !isSupportBlurStyle) {
         layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     host->MarkModifyDone();
@@ -2725,13 +2773,13 @@ bool TimePickerRowPattern::ReportTimeChangeEvent(int32_t nodeId, const std::stri
     int32_t minute = dataJson->GetInt("minute");
     int32_t second = dataJson->GetInt("second");
 
-    auto params = InspectorJsonUtil::CreateObject();
+    auto params = JsonUtil::Create();
     CHECK_NULL_RETURN(params, false);
     params->Put("hour", hour);
     params->Put("minute", minute);
     params->Put("second", second);
 
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
 
     if (GetIsShowInDialog()) {
@@ -2744,25 +2792,27 @@ bool TimePickerRowPattern::ReportTimeChangeEvent(int32_t nodeId, const std::stri
         value->Put("TimePicker", "onTimeChange");
     }
     value->Put("params", params);
-
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+#ifndef CROSS_PLATFORM
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 
 bool TimePickerRowPattern::ReportCommandResult(int32_t nodeId, const std::string& event,
     const std::string& result, const std::string& reason)
 {
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put("event", event.c_str());
     value->Put("result", result.c_str());
     if (!reason.empty()) {
         value->Put("reason", reason.c_str());
     }
-
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "TimePickerResult", value,
+#ifndef CROSS_PLATFORM
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "TimePickerResult", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 } // namespace OHOS::Ace::NG

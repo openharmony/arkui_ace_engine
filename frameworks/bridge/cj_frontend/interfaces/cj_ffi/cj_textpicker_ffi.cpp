@@ -19,12 +19,28 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
+#include "core/components_ng/pattern/text_picker/textpicker_model.h"
+#include "core/common/dynamic_module_helper.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace {
+
+NG::TextPickerModelNG* GetTextPickerModel()
+{
+    static NG::TextPickerModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextPicker");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find TextPicker dynamic module");
+        }
+        model = reinterpret_cast<NG::TextPickerModelNG*>(module->GetModel());
+    }
+    return model;
+}
+
 std::map<std::string, NG::DialogTextEvent> TextPickerDialogEvent(
     std::function<void(CJTextPickerResult)> accept, std::function<void(CJTextPickerResult)> change)
 {
@@ -173,7 +189,7 @@ void FfiOHOSAceFrameworkTextPickerCreate(VectorStringPtr vecContent, uint32_t se
     CHECK_NULL_VOID(theme);
 
     uint32_t kind = NG::TEXT;
-    TextPickerModel::GetInstance()->SetSingleRange(true);
+    GetTextPickerModel()->SetSingleRange(true);
 
     std::vector<NG::RangeContent> result;
 
@@ -184,11 +200,11 @@ void FfiOHOSAceFrameworkTextPickerCreate(VectorStringPtr vecContent, uint32_t se
         result.emplace_back(content);
     }
 
-    TextPickerModel::GetInstance()->Create(theme, kind);
-    TextPickerModel::GetInstance()->SetRange(result);
-    TextPickerModel::GetInstance()->SetSelected(selected);
-    TextPickerModel::GetInstance()->SetValue(value);
-    TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
+    GetTextPickerModel()->Create(theme, kind);
+    GetTextPickerModel()->SetRange(result);
+    GetTextPickerModel()->SetSelected(selected);
+    GetTextPickerModel()->SetValue(value);
+    GetTextPickerModel()->SetDefaultAttributes(theme);
 
     return;
 }
@@ -198,7 +214,7 @@ void FfiOHOSAceFrameworkTextPickerCreateSingle(CJTextArrayParamSingle params)
     const auto& actualVec = reinterpret_cast<std::vector<std::string>*>(params.result);
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-    TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
+    GetTextPickerModel()->SetDefaultAttributes(theme);
 
     std::vector<NG::RangeContent> result;
 
@@ -221,22 +237,22 @@ void FfiOHOSAceFrameworkTextPickerCreateSingle(CJTextArrayParamSingle params)
         lambda(value[0].c_str());
     };
 
-    TextPickerModel::GetInstance()->SetSingleRange(true);
-    TextPickerModel::GetInstance()->Create(theme, params.kind);
-    TextPickerModel::GetInstance()->SetRange(result);
-    TextPickerModel::GetInstance()->SetSelected(params.selected);
-    TextPickerModel::GetInstance()->SetValue(params.value);
-    TextPickerModel::GetInstance()->HasUserDefinedOpacity();
-    TextPickerModel::GetInstance()->SetOnValueChangeEvent(std::move(valuechangeEvent));
-    TextPickerModel::GetInstance()->SetOnSelectedChangeEvent(std::move(selectedchangeEvent));
+    GetTextPickerModel()->SetSingleRange(true);
+    GetTextPickerModel()->Create(theme, params.kind);
+    GetTextPickerModel()->SetRange(result);
+    GetTextPickerModel()->SetSelected(params.selected);
+    GetTextPickerModel()->SetValue(params.value);
+    GetTextPickerModel()->HasUserDefinedOpacity();
+    GetTextPickerModel()->SetOnValueChangeEvent(std::move(valuechangeEvent));
+    GetTextPickerModel()->SetOnSelectedChangeEvent(std::move(selectedchangeEvent));
 }
 
 void FfiOHOSAceFrameworkTextPickerCreateMulti(CJTextArrayParamMulti params)
 {
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-    TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
-    TextPickerModel::GetInstance()->MultiInit(theme);
+    GetTextPickerModel()->SetDefaultAttributes(theme);
+    GetTextPickerModel()->MultiInit(theme);
 
     const auto& valuesVec = reinterpret_cast<std::vector<std::string>*>(params.values);
     const auto& selectedVec = reinterpret_cast<std::vector<std::uint32_t>*>(params.selecteds);
@@ -272,14 +288,14 @@ void FfiOHOSAceFrameworkTextPickerCreateMulti(CJTextArrayParamMulti params)
         delete transValues;
     };
 
-    TextPickerModel::GetInstance()->SetSelecteds(*selectedVec);
-    TextPickerModel::GetInstance()->SetValues(*valuesVec);
-    TextPickerModel::GetInstance()->SetIsCascade(params.isCascade);
-    TextPickerModel::GetInstance()->SetHasSelectAttr(params.isHasSelectAttr);
-    TextPickerModel::GetInstance()->SetColumns(options);
-    TextPickerModel::GetInstance()->HasUserDefinedOpacity();
-    TextPickerModel::GetInstance()->SetOnValueChangeEvent(std::move(valuechangeEvent));
-    TextPickerModel::GetInstance()->SetOnSelectedChangeEvent(std::move(selectedchangeEvent));
+    GetTextPickerModel()->SetSelecteds(*selectedVec);
+    GetTextPickerModel()->SetValues(*valuesVec);
+    GetTextPickerModel()->SetIsCascade(params.isCascade);
+    GetTextPickerModel()->SetHasSelectAttr(params.isHasSelectAttr);
+    GetTextPickerModel()->SetColumns(options);
+    GetTextPickerModel()->HasUserDefinedOpacity();
+    GetTextPickerModel()->SetOnValueChangeEvent(std::move(valuechangeEvent));
+    GetTextPickerModel()->SetOnSelectedChangeEvent(std::move(selectedchangeEvent));
 }
 
 void generateCascadeOptions(
@@ -303,8 +319,8 @@ void FfiOHOSAceFrameworkTextPickerCreateCascade(CJTextArrayParamMulti params)
 {
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-    TextPickerModel::GetInstance()->SetDefaultAttributes(theme);
-    TextPickerModel::GetInstance()->MultiInit(theme);
+    GetTextPickerModel()->SetDefaultAttributes(theme);
+    GetTextPickerModel()->MultiInit(theme);
 
     const auto& valuesVec = reinterpret_cast<std::vector<std::string>*>(params.values);
     const auto& selectedVec = reinterpret_cast<std::vector<std::uint32_t>*>(params.selecteds);
@@ -337,26 +353,26 @@ void FfiOHOSAceFrameworkTextPickerCreateCascade(CJTextArrayParamMulti params)
         delete transValues;
     };
 
-    TextPickerModel::GetInstance()->SetSelecteds(*selectedVec);
-    TextPickerModel::GetInstance()->SetValues(*valuesVec);
-    TextPickerModel::GetInstance()->SetIsCascade(params.isCascade);
-    TextPickerModel::GetInstance()->SetHasSelectAttr(params.isHasSelectAttr);
-    TextPickerModel::GetInstance()->SetColumns(options);
-    TextPickerModel::GetInstance()->HasUserDefinedOpacity();
-    TextPickerModel::GetInstance()->SetOnValueChangeEvent(std::move(valuechangeEvent));
-    TextPickerModel::GetInstance()->SetOnSelectedChangeEvent(std::move(selectedchangeEvent));
+    GetTextPickerModel()->SetSelecteds(*selectedVec);
+    GetTextPickerModel()->SetValues(*valuesVec);
+    GetTextPickerModel()->SetIsCascade(params.isCascade);
+    GetTextPickerModel()->SetHasSelectAttr(params.isHasSelectAttr);
+    GetTextPickerModel()->SetColumns(options);
+    GetTextPickerModel()->HasUserDefinedOpacity();
+    GetTextPickerModel()->SetOnValueChangeEvent(std::move(valuechangeEvent));
+    GetTextPickerModel()->SetOnSelectedChangeEvent(std::move(selectedchangeEvent));
 }
 
 void FfiOHOSAceFrameworkTextPickerSetDefaultPickerItemHeight(double height, int32_t unit)
 {
     Dimension heightDime(height, static_cast<DimensionUnit>(unit));
-    TextPickerModel::GetInstance()->SetDefaultPickerItemHeight(heightDime);
+    GetTextPickerModel()->SetDefaultPickerItemHeight(heightDime);
     return;
 }
 
 void FfiOHOSAceFrameworkTextPickerSetCanLoop(bool value)
 {
-    TextPickerModel::GetInstance()->SetCanLoop(value);
+    GetTextPickerModel()->SetCanLoop(value);
 }
 
 void FfiOHOSAceFrameworkTextPickerSetTextStyle(
@@ -377,7 +393,7 @@ void FfiOHOSAceFrameworkTextPickerSetTextStyle(
     textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
     textStyle.fontStyle = static_cast<FontStyle>(style);
 
-    TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+    GetTextPickerModel()->SetNormalTextStyle(theme, textStyle);
 }
 
 void FfiOHOSAceFrameworkTextPickerSetDisappearTextStyle(
@@ -398,7 +414,7 @@ void FfiOHOSAceFrameworkTextPickerSetDisappearTextStyle(
     textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
     textStyle.fontStyle = static_cast<FontStyle>(style);
 
-    TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+    GetTextPickerModel()->SetDisappearTextStyle(theme, textStyle);
 }
 
 void FfiOHOSAceFrameworkTextPickerSetSelectedTextStyle(
@@ -419,13 +435,13 @@ void FfiOHOSAceFrameworkTextPickerSetSelectedTextStyle(
     textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
     textStyle.fontStyle = static_cast<FontStyle>(style);
 
-    TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+    GetTextPickerModel()->SetSelectedTextStyle(theme, textStyle);
 }
 
 void FfiOHOSAceFrameworkTextPickerSetGradientHeight(double length, int32_t unit)
 {
     Dimension gradientDime(length, static_cast<DimensionUnit>(unit));
-    TextPickerModel::GetInstance()->SetGradientHeight(gradientDime);
+    GetTextPickerModel()->SetGradientHeight(gradientDime);
 }
 
 void FfiOHOSAceFrameworkTextPickerSetDivider(DividerParams params)
@@ -440,18 +456,18 @@ void FfiOHOSAceFrameworkTextPickerSetDivider(DividerParams params)
     divider.startMargin = startMarginDime;
     divider.endMargin = endMarginDime;
 
-    TextPickerModel::GetInstance()->SetDivider(divider);
+    GetTextPickerModel()->SetDivider(divider);
 }
 
 void FfiOHOSAceFrameworkTextPickerSetSelectedIndexSingle(uint32_t value)
 {
-    TextPickerModel::GetInstance()->SetSelected(value);
+    GetTextPickerModel()->SetSelected(value);
 }
 
 void FfiOHOSAceFrameworkTextPickerSetSelectedIndexMulti(VectorUInt32Handle values)
 {
     const auto& indexarray = *reinterpret_cast<std::vector<uint32_t>*>(values);
-    TextPickerModel::GetInstance()->SetSelecteds(indexarray);
+    GetTextPickerModel()->SetSelecteds(indexarray);
 }
 
 void FfiOHOSAceFrameworkTextPickerOnChange(void (*callback)(CJTextPickerResult pickerResult))
@@ -464,7 +480,7 @@ void FfiOHOSAceFrameworkTextPickerOnChange(void (*callback)(CJTextPickerResult p
         lambda(ffiClickInfo);
     };
 
-    TextPickerModel::GetInstance()->SetOnCascadeChange(std::move(onChange));
+    GetTextPickerModel()->SetOnCascadeChange(std::move(onChange));
     return;
 }
 
@@ -482,6 +498,6 @@ void FfiOHOSAceFrameworkTextPickerDialogShow(VectorStringPtr vecContent, CJDialo
 void FfiOHOSAceFrameworkTextPickerSetOpacity(double opacity)
 {
     ViewAbstractModel::GetInstance()->SetOpacity(opacity);
-    TextPickerModel::GetInstance()->HasUserDefinedOpacity();
+    GetTextPickerModel()->HasUserDefinedOpacity();
 }
 }

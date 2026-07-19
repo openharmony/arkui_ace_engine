@@ -133,13 +133,12 @@ struct EffectOption {
         jsonBrightnessOption->Put("policy", POLICY[static_cast<int>(policy)]);
         jsonBrightnessOption->Put("type", BLUR_TYPE[static_cast<int>(blurType)]);
         jsonBrightnessOption->Put("inactiveColor", inactiveColor.ColorToString().c_str());
-        auto grayscale = "[0,0]";
+        std::string grayscale = "[0,0]";
         if (blurOption.grayscale.size() > 1) {
             grayscale =
-                ("[" + std::to_string(blurOption.grayscale[0]) + "," + std::to_string(blurOption.grayscale[1]) + "]")
-                    .c_str();
+                "[" + std::to_string(blurOption.grayscale[0]) + "," + std::to_string(blurOption.grayscale[1]) + "]";
         }
-        jsonBrightnessOption->Put("blurOption", grayscale);
+        jsonBrightnessOption->Put("blurOption", grayscale.c_str());
         jsonEffect->Put("options", jsonBrightnessOption);
         return jsonEffect;
     }
@@ -242,13 +241,12 @@ struct BlurStyleOption {
         jsonBlurStyleOption->Put("type", BLUR_TYPE[static_cast<int>(blurType)]);
         jsonBlurStyleOption->Put("inactiveColor", inactiveColor.ColorToString().c_str());
         jsonBlurStyleOption->Put("scale", scale);
-        auto grayscale = "[0,0]";
+        std::string grayscale = "[0,0]";
         if (blurOption.grayscale.size() > 1) {
             grayscale =
-                ("[" + std::to_string(blurOption.grayscale[0]) + "," + std::to_string(blurOption.grayscale[1]) + "]")
-                    .c_str();
+                "[" + std::to_string(blurOption.grayscale[0]) + "," + std::to_string(blurOption.grayscale[1]) + "]";
         }
-        jsonBlurStyleOption->Put("blurOption", grayscale);
+        jsonBlurStyleOption->Put("blurOption", grayscale.c_str());
         jsonBlurStyle->Put("options", jsonBlurStyleOption);
 
         json->PutExtAttr("backgroundBlurStyle", jsonBlurStyle, filter);

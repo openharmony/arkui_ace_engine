@@ -114,7 +114,7 @@ RefPtr<WindowScene> WindowSceneTest::CreateWindowSceneForStartingWindowTest(Rose
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->startingWindow_ = AceType::RawPtr(startingWindowNode);
     CHECK_EQUAL_RETURN(windowScene->startingWindow_, nullptr, nullptr);
-    windowScene->startingWindow_->renderContext_ = AceType::MakeRefPtr<RosenRenderContext>();
+    windowScene->startingWindow_->renderContext_ = AceType::MakeRefPtr<RenderContext>();
     CHECK_EQUAL_RETURN(windowScene->startingWindow_->renderContext_, nullptr, nullptr);
     return windowScene;
 }

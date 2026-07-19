@@ -69,6 +69,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     bool matchChildren = ShouldMatchChildrenByLayoutPolicy(mainSize, layoutPolicy, info_.axis_);
     Init(props);
+    CalculateContentClipFixOffset(wrapper_, mainSize, mainGap_);
 
     if (info_.targetIndex_) {
         MeasureToTarget();
@@ -80,6 +81,7 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         MeasureOnOffset(mainSize);
     }
+    info_.SyncReportRange(mainSize, mainGap_);
 
     if (props->GetAlignItems().value_or(GridItemAlignment::DEFAULT) == GridItemAlignment::STRETCH) {
         GridLayoutBaseAlgorithm::AdjustChildrenHeight(layoutWrapper);
@@ -295,7 +297,7 @@ inline float GetPrevHeight(const GridLayoutInfo& info, float mainGap)
 
 void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 {
-    float heightToFill = mainSize - info_.currentOffset_ - GetPrevHeight(info_, mainGap_);
+    float heightToFill = info_.GetViewEndBound(mainSize) - info_.currentOffset_ - GetPrevHeight(info_, mainGap_);
     if (Positive(heightToFill)) {
         GridIrregularFiller filler(&info_, wrapper_);
         filler.Fill({ crossLens_, crossGap_, mainGap_ }, heightToFill, info_.endMainLineIndex_);
@@ -304,7 +306,8 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
     GridLayoutRangeSolver solver(&info_, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
     UpdateStartInfo(info_, res);
-    auto [endMainLineIdx, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - res.pos, res.row);
+    auto [endMainLineIdx, endIdx] =
+        solver.SolveForwardForEndIdx(mainGap_, info_.GetViewEndBound(mainSize) - res.pos, res.row);
     info_.endMainLineIndex_ = endMainLineIdx;
     info_.endIndex_ = endIdx;
 
@@ -342,7 +345,7 @@ void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize, bool toAdjust
     }
     UpdateStartInfo(info_, res);
 
-    auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - res.pos, res.row);
+    auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, info_.GetViewEndBound(mainSize) - res.pos, res.row);
     info_.endMainLineIndex_ = endLine;
     info_.endIndex_ = endIdx;
 }
@@ -372,10 +375,12 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
 {
     Jump(mainSize, true);
 
+    bool reevaluated = false;
     if (info_.extraOffset_ && !NearZero(*info_.extraOffset_)) {
         info_.prevOffset_ = info_.currentOffset_;
         info_.currentOffset_ += *info_.extraOffset_;
         MeasureOnOffset(mainSize);
+        reevaluated = true;
     }
     if (!NearZero(postJumpOffset_)) {
         if (Positive(info_.currentOffset_)) {
@@ -392,10 +397,21 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
         info_.prevOffset_ = info_.currentOffset_;
         info_.currentOffset_ += info_.contentStartOffset_;
         MeasureOnOffset(mainSize);
+        reevaluated = true;
     }
     if (info_.scrollAlign_ == ScrollAlign::END && !NearZero(info_.contentEndOffset_)) {
         info_.prevOffset_ = info_.currentOffset_;
         info_.currentOffset_ -= info_.contentEndOffset_;
+        MeasureOnOffset(mainSize);
+        reevaluated = true;
+    }
+    // If contentClip extension is active and MeasureOnOffset was not triggered above,
+    // re-evaluate the range to fill the extension areas that FindRangeOnJump doesn't fill
+    // (end extension via GetViewEndBound in MeasureForward, start extension via
+    // FindStartingRow which accounts for startFixOffset_).
+    if (!reevaluated &&
+        (GreatNotEqual(info_.startFixOffset_, 0.0f) || GreatNotEqual(info_.endFixOffset_, 0.0f))) {
+        info_.prevOffset_ = info_.currentOffset_;
         MeasureOnOffset(mainSize);
     }
 }

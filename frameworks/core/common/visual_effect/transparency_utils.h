@@ -25,6 +25,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "ui/base/macros.h"
 #include "ui/base/referenced.h"
 
 namespace OHOS::Ace {
@@ -48,7 +49,7 @@ using TransparencyIdMap = std::unordered_map<int32_t, TransparencyMapData>;
 
 class TransparencyUtils {
 public:
-    static int32_t GetTransparencyLevel(int32_t materialLevel);
+    static ACE_FORCE_EXPORT int32_t GetTransparencyLevel(int32_t materialLevel);
     static std::optional<int32_t> RegisterTransparencyListener(
         const WeakPtr<NG::FrameNode>& node, TransparencyCallback&& callback);
     static void UnRegisterTransparencyListener(int32_t callbackId);

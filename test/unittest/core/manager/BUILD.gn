@@ -54,6 +54,7 @@ ace_unittest("drag_drop_manager_test_ng") {
     "drag_drop_manager_test_ng_coverage.cpp",
     "drag_drop_manager_test_ng_plus.cpp",
     "drag_drop_manager_test_ng_property_config.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_grid_modifier.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {
@@ -137,14 +138,14 @@ ace_unittest("shared_overlay_manager_test_ng") {
 }
 
 ace_unittest("smart_gesture_decider_test_ng") {
-  module_name = "SmartGesture-Decider"
+  module_name = "Gesture-BasicAndCombinationGesture"
   type = "new"
   sources = [ "smart_gesture_decider_test_ng.cpp" ]
   defines = [ "SMART_GESTURE_SUPPORTED" ]
 }
 
 ace_unittest("smart_gesture_manager_test_ng") {
-  module_name = "SmartGesture-Manager"
+  module_name = "Gesture-BasicAndCombinationGesture"
   type = "new"
   sources = [ "smart_gesture_manager_test_ng.cpp" ]
   defines = [ "SMART_GESTURE_SUPPORTED" ]
@@ -169,7 +170,7 @@ ace_unittest("frame_rate_manager_test_ng") {
 }
 
 ace_unittest("gesture_debug_boundary_manager_test_ng") {
-  module_name = "Gesture-DebugBoundaryManager"
+  module_name = "CommonProperties-InteractionProperties"
   type = "new"
   sources = [ "gesture_debug_boundary_manager_test_ng.cpp" ]
   defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
@@ -224,9 +225,13 @@ ace_unittest("theme_manager_test_ng") {
     # "$ace_root/frameworks/core/components_ng/pattern/date_picker/picker_theme.cpp",
     "$ace_root/frameworks/core/components/checkable/checkable_theme.cpp",
     "$ace_root/frameworks/core/components/dialog/dialog_theme.cpp",
+    "$ace_root/frameworks/core/components/navigation_bar/navigation_bar_theme.cpp",
+    "$ace_root/frameworks/core/components/swiper/swiper_indicator_theme.cpp",
+    "$ace_root/frameworks/core/components/tab_bar/tab_theme.cpp",
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager_multi_thread.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_theme.cpp",
     "theme_manager_test_ng.cpp",
     "theme_test.cpp",
   ]
@@ -244,12 +249,89 @@ ace_unittest("content_change_manager_test_ng") {
   sources = [ "content_change_manager_test_ng.cpp" ]
 }
 
+ace_unittest("recoverable_manager_test_ng") {
+  module_name = "NavigationSet-Indicator"
+  type = "new"
+  sources = [ "recoverable_manager_test_ng.cpp" ]
+}
+
+config("content_change_manager_translate_test_config") {
+  visibility = [ ":content_change_manager_translate_test_ng" ]
+
+  include_dirs = [
+    "$ace_root",
+    "$ace_root/frameworks",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
+  ]
+
+  cflags_cc = [
+    "-Wno-unused-private-field",
+    "-Wno-thread-safety-attributes",
+    "-Wno-thread-safety-analysis",
+    "-Wno-non-c-typedef-for-linkage",
+    "-fvisibility-inlines-hidden",
+  ]
+
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-g",
+  ]
+
+  ldflags = [ "-Wl,--gc-sections,--as-needed" ]
+
+  defines = [
+    "ACE_UNITTEST",
+    "OHOS_STANDARD_SYSTEM",
+  ]
+}
+
+ohos_unittest("content_change_manager_translate_test_ng") {
+  module_out_path = "ace_engine/TextSet-Text/components"
+  sources = [
+    "$ace_root/frameworks/base/log/log_wrapper.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
+    "$ace_root/test/mock/frameworks/base/utils/mock_lifecycle_checkable.cpp",
+    "$ace_root/test/mock/frameworks/base/geometry/mock_matrix4.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/base/mock_ui_node.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/layout/mock_layout_property.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/layout/mock_layout_wrapper.cpp",
+    "$ace_root/test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.cpp",
+    "content_change_manager_translate_mock_pattern.cpp",
+    "content_change_manager_translate_test_ng.cpp",
+  ]
+
+  configs = [ ":content_change_manager_translate_test_config" ]
+
+  deps = [
+    "$ace_root/test/mock/frameworks/core/components_ng/base:mock_frame_node_base",
+    "$ace_root/test/unittest:ace_unittest_log",
+  ]
+
+  external_deps = [
+    "googletest:gmock",
+    "googletest:gtest_main",
+  ]
+}
+
+ace_unittest("page_scene_rule_manager_test_ng") {
+  module_name = "TextSet-Text"
+  type = "new"
+  sources = [
+    "$ace_root/frameworks/core/components_ng/manager/page_scene/page_scene_rule_manager.cpp",
+    "page_scene_rule_manager_test_ng.cpp",
+  ]
+}
+
 group("core_manager_unittest") {
   testonly = true
   deps = [
     ":active_recognizer_manager_test_ng",
     ":avoid_info_manager_test_ng",
     ":content_change_manager_test_ng",
+    ":content_change_manager_translate_test_ng",
     ":display_sync_manager_test_ng",
     ":drag_animation_helper_test_ng",
     ":drag_drop_behavior_reporter_test_ng",
@@ -268,7 +350,9 @@ group("core_manager_unittest") {
     ":full_screen_manager_test_ng",
     ":json_report_test_ng",
     ":navigation_manager_test_ng",
+    ":page_scene_rule_manager_test_ng",
     ":post_event_manager_test_ng",
+    ":recoverable_manager_test_ng",
     ":safe_area_manager_test_ng",
     ":scroll_adjust_manager_test_ng",
     ":select_overlay_manager_test_ng",

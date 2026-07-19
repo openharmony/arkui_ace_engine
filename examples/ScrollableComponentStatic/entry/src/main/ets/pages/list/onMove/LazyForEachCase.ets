@@ -1,5 +1,6 @@
+'use static'
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use static'
-
 import {
   Entry,
   Text,
@@ -22,16 +21,17 @@ import {
   Button,
   ClickEvent,
   List,
+  ListOptions,
   ListItem,
   ForEach,
   Color,
   Row,
-  ClickEvent,
   LazyForEach,
   DynamicNode,
   OnMoveHandler,
   ItemDragEventHandler,
-  IDataSource,TextAlign,
+  IDataSource,
+  TextAlign,
   DataChangeListener
 } from '@ohos.arkui.component'
 import { State } from '@ohos.arkui.stateManagement'
@@ -39,16 +39,16 @@ import hilog from '@ohos.hilog'
 
 // BasicDataSource implements the IDataSource interface, used for managing listener monitoring and
 // notifying LazyForEach of data updates
-class BasicDataSource<string> implements IDataSource<string> {
+class BasicDataSource<T> implements IDataSource<T> {
   private listeners: Array<DataChangeListener> = Array<DataChangeListener>();
-  private originDataArray: Array<string> = [];
+  private originDataArray: Array<T> = [];
 
-  public totalCount(): number {
+  public totalCount(): int {
     return this.originDataArray.length;
   }
 
-  public getData(index: number): string {
-    return this.originDataArray[index.toInt()];
+  public getData(index: int): T {
+    return this.originDataArray[index];
   }
 
   // This method is called by the framework to add listener monitoring to the data source for the
@@ -70,57 +70,62 @@ class BasicDataSource<string> implements IDataSource<string> {
 
   // Notify the LazyForEach component that all child components need to be reloaded
   notifyDataReload(): void {
-    this.listeners.forEach(listener => {
+    for (let i: int = 0; i < this.listeners.length; i++) {
+      const listener: DataChangeListener = this.listeners[i];
       listener.onDataReloaded();
-    });
+    }
   }
 
   // Notify the LazyForEach component that a child component needs to be added at the corresponding
   // index
-  notifyDataAdd(index: number): void {
-    this.listeners.forEach(listener => {
+  notifyDataAdd(index: int): void {
+    for (let i: int = 0; i < this.listeners.length; i++) {
+      const listener: DataChangeListener = this.listeners[i];
       listener.onDataAdd(index);
-    });
+    }
   }
 
   // Notify the LazyForEach component that data has changed at the corresponding index and the child
   // component needs to be rebuilt
-  notifyDataChange(index: number): void {
-    this.listeners.forEach(listener => {
+  notifyDataChange(index: int): void {
+    for (let i: int = 0; i < this.listeners.length; i++) {
+      const listener: DataChangeListener = this.listeners[i];
       listener.onDataChange(index);
-    });
+    }
   }
 
   // Notify the LazyForEach component that the child component at the corresponding index needs to be
   // deleted
-  notifyDataDelete(index: number): void {
-    this.listeners.forEach(listener => {
+  notifyDataDelete(index: int): void {
+    for (let i: int = 0; i < this.listeners.length; i++) {
+      const listener: DataChangeListener = this.listeners[i];
       listener.onDataDelete(index);
-    });
+    }
   }
 
   // Notify the LazyForEach component to swap child components at the from and to indices
-  notifyDataMove(from: number, to: number): void {
-    this.listeners.forEach(listener => {
+  notifyDataMove(from: int, to: int): void {
+    for (let i: int = 0; i < this.listeners.length; i++) {
+      const listener: DataChangeListener = this.listeners[i];
       listener.onDataMove(from, to);
-    });
+    }
   }
 }
 
 class MyDataSource extends BasicDataSource<string> {
-  private dataArray: string[] = [];
+  private dataArray: Array<string> = [];
 
-  public totalCount(): number {
+  public totalCount(): int {
     return this.dataArray.length;
   }
 
-  public getData(index: number): string {
-    return this.dataArray[index.toInt()];
+  public getData(index: int): string {
+    return this.dataArray[index];
   }
 
-  public moveDataWithoutNotify(from: number, to: number): void {
-    let tmp = this.dataArray.splice(from as int, 1);
-    this.dataArray.splice(to as int, 0, tmp[0]);
+  public moveDataWithoutNotify(from: int, to: int): void {
+    let tmp = this.dataArray.splice(from, 1);
+    this.dataArray.splice(to, 0, tmp[0]);
   }
 
   public pushData(data: string): void {
@@ -143,7 +148,7 @@ struct MyStateSample {
 
   build() {
     Row() {
-      List() {
+      List({} as ListOptions) {
         LazyForEach(this.data, (item: string) => {
           ListItem() {
             Text(item.toString())
@@ -155,22 +160,22 @@ struct MyStateSample {
           .backgroundColor('#FFFFFFFF')
         }, (item: string) => item)
           .onMove(!this.onMoveValid ? undefined :
-            (from: number, to: number) => {
+            (from: int, to: int) => {
               this.data.moveDataWithoutNotify(from, to);
               console.log('listTest onMove From: ' + from);
               console.log('listTest onMove To: ' + to);
             } as OnMoveHandler,
             {
-              onLongPress: (index: number) => {
+              onLongPress: (index: int) => {
                 console.log('listTest onLongPress: ' + index);
               },
-              onDrop: (index: number) => {
+              onDrop: (index: int) => {
                 console.log('listTest onDrop: ' + index);
               },
-              onDragStart: (index: number) => {
+              onDragStart: (index: int) => {
                 console.log('listTest onDragStart: ' + index);
               },
-              onMoveThrough: (from: number, to: number) => {
+              onMoveThrough: (from: int, to: int) => {
                 console.log('listTest onMoveThrough From: ' + from);
                 console.log('listTest onMoveThrough To: ' + to);
               }  as OnMoveHandler

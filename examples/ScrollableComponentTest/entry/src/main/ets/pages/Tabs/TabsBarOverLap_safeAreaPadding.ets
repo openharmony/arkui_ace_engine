@@ -22,7 +22,7 @@ struct barHeightTest {
   build() {
     Column() {
       Text(`barOverlap ${this.barOverlap}`).fontSize(16)
-      Button("barOverlap变化").width('100%').margin({ bottom: '12vp' })
+      Button('barOverlap变化').width('100%').margin({ bottom: '12vp' })
         .onClick((event?: ClickEvent) => {
           if (this.barOverlap) {
             this.barOverlap = false;
@@ -36,7 +36,7 @@ struct barHeightTest {
             Grid() {
               ForEach(this.arr, (item: number) => {
                 GridItem() {
-                  Text("item" + item)
+                  Text('item' + item)
                     .width('80%')
                     .height(200)
                     .fontSize(16)

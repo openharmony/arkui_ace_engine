@@ -353,11 +353,6 @@ public:
         return action_;
     }
 
-    size_t GetApproximateSize() const
-    {
-        return sizeof(*this) + GetApproximateBaseEventSize();
-    }
-
 private:
     float absXValue = 0.0f;
     float absYValue = 0.0f;

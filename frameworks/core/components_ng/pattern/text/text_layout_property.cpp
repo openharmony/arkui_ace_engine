@@ -69,6 +69,20 @@ std::unique_ptr<JsonValue> ConvertFontVariationsToJson(const FONT_VARIATIONS_LIS
 }
 } // namespace
 
+std::string TextLayoutProperty::GetTailIndentInJson() const
+{
+    CHECK_NULL_RETURN(HasTailIndents(), "");
+    auto tailIndentsValue = GetTailIndents();
+    CHECK_NULL_RETURN(tailIndentsValue.has_value() && tailIndentsValue->indentsArray.has_value(), "");
+    auto jsonTailIndentsArr = JsonUtil::CreateArray(true);
+    for (const auto& dim : tailIndentsValue->indentsArray.value()) {
+        auto dimJson = JsonUtil::Create(true);
+        dimJson->Put("dimension", dim.ToString().c_str());
+        jsonTailIndentsArr->Put(dimJson);
+    }
+    return jsonTailIndentsArr->ToString();
+}
+
 std::string TextLayoutProperty::GetCopyOptionString() const
 {
     std::string copyOptionString = "CopyOptions.None";
@@ -116,6 +130,31 @@ void TextLayoutProperty::OnEnableSmallLanguageTruncationUpdate(bool value)
     CHECK_NULL_VOID(textPattern);
     auto flag = textPattern->GetFallbackLineSpacingStyleOptimizeFlag();
     textPattern->SetFallbackLineSpacingAndIncludeFontPadding(flag);
+}
+
+void TextLayoutProperty::UpdateEnablePunctuationOverflowOptimize(const bool& value)
+{
+    if (propEnablePunctuationOverflowOptimize_.has_value() &&
+        NearEqual(propEnablePunctuationOverflowOptimize_.value(), value)) {
+        return;
+    }
+    propEnablePunctuationOverflowOptimize_ = value;
+    UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    propNeedReCreateParagraph_ = true;
+    OnEnablePunctuationOverflowOptimizeUpdate(value);
+}
+
+void TextLayoutProperty::OnEnablePunctuationOverflowOptimizeUpdate(bool value)
+{
+    if (!value) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textPattern = host->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    auto flag = textPattern->GetPunctuationOverflowStyleOptimizeFlag();
+    textPattern->SetPunctuationOverflowByFlag(flag);
 }
 
 std::string TextLayoutProperty::GetTextMarqueeOptionsString() const
@@ -296,6 +335,10 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
         GetSelectedDragPreviewStyleValue(theme->GetDragBackgroundColor()).ColorToString().c_str(), filter);
     json->PutExtAttr("incrementalUpdatePolicy", V2::ConvertWrapIncrementalUpdatePolicyToString(
         GetIncrementalUpdatePolicy().value_or(IncrementalUpdatePolicy::NONE)).c_str(), filter);
+    auto tailIndentJsonStr = GetTailIndentInJson();
+    if (!tailIndentJsonStr.empty()) {
+        json->PutExtAttr("tailIndents", tailIndentJsonStr.c_str(), filter);
+    }
 }
 
 void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)

@@ -19,8 +19,9 @@ import {
   SizeResult, ForEach, Color, BorderStyle, TouchEvent, TouchType, KeyEvent, KeyType,
   Button, ButtonType, SymbolGlyph, SymbolEffectStrategy, SymbolEffect, ImageFit, BlurStyle, SafeAreaType,
   SafeAreaEdge, Direction, ShadowStyle, $r, Margin, Padding, ButtonOptions, HoverEvent, ClickEvent,
-  UIContext, Resource, Stack, Alignment, ResourceStr,
-  ResourceColor, LocalizedMargin, GestureModifier, UIGestureEvent, LongPressGestureHandler
+  UIContext, Resource, Stack, Alignment, ResourceStr, CommonMethod,
+  ResourceColor, LocalizedMargin, GestureModifier, UIGestureEvent, LongPressGestureHandler,
+  AccessibilityRoleType
 } from '@ohos.arkui.component';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
 import { LengthMetrics } from '@ohos.arkui.node';
@@ -28,6 +29,7 @@ import { Param, Local, Monitor, IMonitor, ObservedV2, Trace, Require } from '@oh
 import { Theme } from '@ohos.arkui.theme';
 
 import hilog from '@ohos.hilog';
+import { BusinessError } from '@ohos.base';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
@@ -232,6 +234,10 @@ const SYMBOL_SIZE_V2 = '24vp';
 const SYMBOL_TITLE_SIZE_V2 = '64vp';
 const TITLE_VP_V2: number = 20;
 const SUBTITLE_VP_V2: number = 14;
+const DIALOG_MAX_FONT_SIZE_V2: number = 3.2;
+const DIALOG_SCREEN_WIDTH_V2: number = 640;
+const DIALOG_VERTICAL_SCREEN_LINES_V2: int = 6;
+const DIALOG_HORIZONTAL_SCREEN_LINES_V2: int = 1;
 
 const TITLE_F_V2: number = getNumberByResourceV2(125831095, TITLE_VP_V2);
 const SUBTITLE_F_V2: number = getNumberByResourceV2(125831097, SUBTITLE_VP_V2);
@@ -284,26 +290,29 @@ export class ButtonGestureModifierV2 implements GestureModifier {
 
 export class EnvironmentCallbackEntryV2 implements EnvironmentCallback {
   private imageMenuItem: ImageMenuItemV2;
-  private localFontSize: number = 1;
-  private localIsFollowing: boolean = false;
-  private localMaxScale: number = 1;
 
   constructor(imageMenuItem: ImageMenuItemV2) {
     this.imageMenuItem = imageMenuItem;
-    this.localFontSize = imageMenuItem.fontSizeV2;
-    this.localIsFollowing = imageMenuItem.isFollowingSystemFontScaleV2;
-    this.localMaxScale = imageMenuItem.maxFontScaleV2;
   }
 
   onConfigurationUpdated(config: Configuration): void {
-    if (config === undefined || !this.localIsFollowing) {
-      this.localFontSize = 1;
-      this.imageMenuItem.onFontSizeUpdate(this.localFontSize);
+    try {
+      let uiContent: UIContext = this.imageMenuItem.getUIContext();
+      this.imageMenuItem.isFollowingSystemFontScaleV2 = uiContent.isFollowingSystemFontScale();
+      this.imageMenuItem.maxFontScaleV2 = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: undefined | int = (err as ClassCastError)?.code;
+      let message: undefined | string = (err as ClassCastError)?.message;
+      hilog.error(0x3900, 'EditableTitleBarV2',
+        `Failed to update fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+    if (config === undefined || !this.imageMenuItem.isFollowingSystemFontScaleV2) {
+      this.imageMenuItem.onFontSizeUpdate(1);
       return;
     }
     try {
-      this.localFontSize = Math.min(this.localMaxScale, config.fontSizeScale ?? 1);
-      this.imageMenuItem.onFontSizeUpdate(this.localFontSize);
+      let newFontSize = Math.min(this.imageMenuItem.maxFontScaleV2, config.fontSizeScale ?? 1);
+      this.imageMenuItem.onFontSizeUpdate(newFontSize);
     } catch (paramError) {
       let code = (paramError as ClassCastError)?.code;
       let message = (paramError as ClassCastError)?.message;
@@ -479,7 +488,7 @@ export struct EditableTitleBarV2 {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(true)
-        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
+        .accessibilityRole(AccessibilityRoleType.TITLE_BAR)
 
         Row() {
           this.rightMenuItemsLayoutV2();
@@ -506,6 +515,7 @@ export struct EditableTitleBarV2 {
       attributeV2: ItemTypeV2.Image,
       fontSizeV2: this.fontSizeV2,
       imageMenuItemIdV2: `ImageMenuItem_${this.getUniqueId()}`,
+      isImageItemV2: true,
     })
   }
 
@@ -699,19 +709,78 @@ export struct ImageMenuItemV2 {
   @Param imageMenuItemIdV2?: string = undefined;
   @Param fontSizeV2: number = 1;
   @Param editableTitleBarThemeV2: EditableTitleBarThemeV2 = new EditableTitleBarThemeV2();
+  @Param isImageItemV2?: boolean = false;
 
   @Local private isOnFocusV2: boolean = false;
   @Local private isOnHoverV2: boolean = false;
   @Local private isOnClickV2: boolean = false;
-  @Local private isInFocusedStyleV2: boolean = false;
   @Local fontSizeInternalV2: number = 1;
-
-  private buttonGestureModifierLocal: ButtonGestureModifierV2 = new ButtonGestureModifierV2(
+  @Local private dialogIdV2?: int = undefined;
+  @Local private maxLinesV2: int = 1;
+  private isDialogClosingV2: boolean = false;
+  isFollowingSystemFontScaleV2: boolean = false;
+  maxFontScaleV2: number = 1;
+  private systemFontScaleV2?: number = 1;
+  minFontSize: number = 1.75;
+  @Local buttonGestureModifierLocal: ButtonGestureModifierV2 = new ButtonGestureModifierV2(
     (): void => this.onOpenDialogV2(),
     (): void => this.onCloseDialogV2()
   );
+  private applicationContext?: common.ApplicationContext = undefined;
+  private callbackId?: int = undefined;
+  private envCallbackV2?: EnvironmentCallbackEntryV2 = undefined;
 
   aboutToAppear(): void {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScaleV2 = uiContent.isFollowingSystemFontScale();
+      this.maxFontScaleV2 = uiContent.getMaxFontScale();
+    } catch (err) {
+      let code: undefined | int = (err as ClassCastError)?.code;
+      let message: undefined | string = (err as ClassCastError)?.message;
+      hilog.error(0x3900, 'EditableTitleBarV2',
+        `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+    }
+    this.fontSizeInternalV2 = this.decideFontScaleV2();
+    this.buttonGestureModifierLocal = new ButtonGestureModifierV2(
+      (): void => this.onOpenDialogV2(),
+      (): void => this.onCloseDialogV2()
+    );
+    this.buttonGestureModifierLocal.fontSize = this.fontSizeInternalV2;
+    this.envCallbackV2 = new EnvironmentCallbackEntryV2(this);
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      if (context !== undefined) {
+        this.applicationContext = context.getApplicationContext();
+        this.callbackId = this.applicationContext!.onEnvironment(this.envCallbackV2!);
+      }
+    } catch (paramError) {
+      let code = (paramError as ClassCastError)?.code;
+      let message = (paramError as ClassCastError)?.message;
+      hilog.error(0x3900, 'EditableTitleBarV2',
+        `Failed to register environment callback, code: ${code}, message: ${message}`);
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (this.callbackId !== undefined && this.applicationContext !== undefined) {
+      try {
+        this.applicationContext!.offEnvironment(this.callbackId!);
+      } catch (paramError) {
+        let code = (paramError as ClassCastError)?.code;
+        let message = (paramError as ClassCastError)?.message;
+        hilog.error(0x3900, 'EditableTitleBarV2',
+          `Failed to unregister environment callback, code: ${code}, message: ${message}`);
+      }
+    }
+  }
+
+  @Monitor(['fontSizeInternalV2'])
+  onFontSizeUpdated(monitor: IMonitor): void {
+    this.buttonGestureModifierLocal = new ButtonGestureModifierV2(
+      (): void => this.onOpenDialogV2(),
+      (): void => this.onCloseDialogV2()
+    );
     this.buttonGestureModifierLocal.fontSize = this.fontSizeInternalV2;
   }
 
@@ -719,18 +788,160 @@ export struct ImageMenuItemV2 {
     this.fontSizeInternalV2 = newSize;
   }
 
-  get isFollowingSystemFontScaleV2(): boolean {
-    return false;
-  }
-
-  get maxFontScaleV2(): number {
-    return 1;
+  decideFontScaleV2(): number {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      if (uiContent.getHostContext() != undefined) {
+        this.systemFontScaleV2 = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+      }
+      if (!this.isFollowingSystemFontScaleV2) {
+        return 1;
+      }
+      return Math.min(this.systemFontScaleV2 as number, this.maxFontScaleV2);
+    } catch (exception) {
+      let code: undefined | int = (exception as ClassCastError)?.code;
+      let message: undefined | string = (exception as ClassCastError)?.message;
+      hilog.error(0x3900, 'EditableTitleBarV2',
+        `Failed to decideFontScaleV2,cause, code: ${code}, message: ${message}`);
+      return 1;
+    }
   }
 
   private onOpenDialogV2(): void {
+    this.isDialogClosingV2 = false;
+    try {
+      let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+      if (context !== undefined) {
+        let mainWindowStage = context.windowStage.getMainWindowSync();
+        let properties: window.WindowProperties = mainWindowStage!.getWindowProperties();
+        let rect = properties.windowRect;
+        if (this.getUIContext().px2vp(rect.height) > DIALOG_SCREEN_WIDTH_V2) {
+          this.maxLinesV2 = DIALOG_VERTICAL_SCREEN_LINES_V2;
+        } else {
+          this.maxLinesV2 = DIALOG_HORIZONTAL_SCREEN_LINES_V2;
+        }
+      }
+    } catch (exception) {
+      let code: undefined | int = (exception as ClassCastError)?.code;
+      let message: undefined | string = (exception as ClassCastError)?.message;
+      hilog.error(0x3900, 'EditableTitleBarV2',
+        `Failed to getMainWindowSync,cause, code: ${code}, message: ${message}`);
+    }
+    this.getUIContext().getPromptAction().openCustomDialog({
+      builder: this.composeTitleBarDialogBuilder,
+      maskColor: Color.Transparent,
+      isModal: true,
+      backgroundBlurStyle: BlurStyle.COMPONENT_ULTRA_THICK,
+      backgroundColor: Color.Transparent,
+      shadow: ShadowStyle.OUTER_DEFAULT_LG,
+      cornerRadius: $r('sys.float.corner_radius_level10'),
+      width: this.fontSizeInternalV2 === DIALOG_MAX_FONT_SIZE_V2 ? MAX_DIALOG_V2 : MIN_DIALOG_V2,
+    } as promptAction.CustomDialogOptions).then((id: int) => {
+      this.dialogIdV2 = id;
+      if (this.isDialogClosingV2) {
+        this.getUIContext().getPromptAction().closeCustomDialog(id);
+        this.dialogIdV2 = undefined;
+        this.isDialogClosingV2 = false;
+      }
+    }).catch((error: Error) => {
+      hilog.error(0x3900, 'EditableTitleBarV2', `Failed to openCustomDialog: ${error.message}`);
+    });
   }
 
   private onCloseDialogV2(): void {
+    if (this.dialogIdV2 !== undefined) {
+      this.getUIContext().getPromptAction().closeCustomDialog(this.dialogIdV2 as int);
+      this.dialogIdV2 = undefined;
+    } else {
+      this.isDialogClosingV2 = true;
+    }
+  }
+
+  @Builder
+  composeTitleBarDialogBuilder(): void {
+    if (this.itemV2.label ? this.itemV2.label : this.textDialogV2()) {
+      Column() {
+        if (this.itemV2.symbolStyle !== undefined && !this.isImageItemV2) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.icon_primary')])
+            .attributeModifier(this.itemV2.symbolStyle)
+            .fontSize(SYMBOL_TITLE_SIZE_V2)
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(new SymbolEffect(), false)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            } as Margin)
+        } else {
+          if (UtilV2.isSymbolResource(this.itemV2.value) && !this.isImageItemV2) {
+            SymbolGlyph(this.itemV2.value as Resource)
+              .fontSize(SYMBOL_TITLE_SIZE_V2)
+              .fontColor([$r('sys.color.icon_primary')])
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              } as Margin)
+          } else {
+            Image(this.itemV2.value)
+              .width(IMAGE_SIZE_V2)
+              .height(IMAGE_SIZE_V2)
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              } as Margin)
+              .fillColor($r('sys.color.icon_primary'))
+          }
+        }
+        Column() {
+          Text(this.itemV2.label ? this.itemV2.label : this.textDialogV2())
+            .fontSize(TEXT_EDITABLE_DIALOG_V2)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+            .maxLines(this.maxLinesV2)
+            .width('100%')
+            .textAlign(TextAlign.Center)
+            .fontColor($r('sys.color.font_primary'))
+        }
+        .width('100%')
+        .padding({
+          left: $r('sys.float.padding_level4'),
+          right: $r('sys.float.padding_level4'),
+          bottom: $r('sys.float.padding_level12'),
+        } as Padding)
+      }
+      .width(this.fontSizeInternalV2 === DIALOG_MAX_FONT_SIZE_V2 ? MAX_DIALOG_V2 : MIN_DIALOG_V2)
+      .constraintSize({ minHeight: this.fontSizeInternalV2 === DIALOG_MAX_FONT_SIZE_V2 ? MAX_DIALOG_V2 : MIN_DIALOG_V2 })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius($r('sys.float.corner_radius_level10'))
+    } else {
+      Column() {
+        if (this.itemV2.symbolStyle !== undefined && !this.isImageItemV2) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.icon_primary')])
+            .attributeModifier(this.itemV2.symbolStyle)
+            .fontSize(SYMBOL_TITLE_SIZE_V2)
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(new SymbolEffect(), false)
+        } else {
+          if (UtilV2.isSymbolResource(this.itemV2.value) && !this.isImageItemV2) {
+            SymbolGlyph(this.itemV2.value as Resource)
+              .fontSize(SYMBOL_TITLE_SIZE_V2)
+              .fontColor([$r('sys.color.icon_primary')])
+          } else {
+            Image(this.itemV2.value)
+              .width(IMAGE_SIZE_V2)
+              .height(IMAGE_SIZE_V2)
+              .fillColor($r('sys.color.icon_primary'))
+          }
+        }
+      }
+      .width(this.fontSizeInternalV2 === DIALOG_MAX_FONT_SIZE_V2 ? MAX_DIALOG_V2 : MIN_DIALOG_V2)
+      .constraintSize({ minHeight: this.fontSizeInternalV2 === DIALOG_MAX_FONT_SIZE_V2 ? MAX_DIALOG_V2 : MIN_DIALOG_V2 })
+      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
+      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
+      .borderRadius($r('sys.float.corner_radius_level10'))
+      .justifyContent(FlexAlign.Center)
+    }
   }
 
   private textDialogV2(): ResourceStr {
@@ -743,6 +954,22 @@ export struct ImageMenuItemV2 {
     } else {
       return this.itemV2.label ? this.itemV2.label as ResourceStr : '' as ResourceStr;
     }
+  }
+
+  focusedStyle(instance: CommonMethod): void {
+    instance.border({
+      radius: $r('sys.float.titlebar_icon_background_shape'),
+      width: $r('sys.float.titlebar_icon_background_focus_outline_weight'),
+      color: this.editableTitleBarThemeV2.iconBackgroundFocusOutlineColor,
+      style: BorderStyle.Solid
+    })
+  }
+
+  notInFocusedStyle(instance: CommonMethod): void {
+    instance.border({
+      radius: $r('sys.float.titlebar_icon_background_shape'),
+      width: EditableTitleBarV2.commonZeroV2
+    })
   }
 
   getBgColorV2(): ResourceColor {
@@ -833,8 +1060,15 @@ export struct ImageMenuItemV2 {
 
   private getAccessibilityDescriptionV2(): string | undefined {
     if (UtilV2.isResourceType(this.itemV2.accessibilityDescription)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.itemV2.accessibilityDescription as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.itemV2.accessibilityDescription as Resource).id);
+      } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'EditableTitleBarV2', `getStringSync failed, code: ${code}, message: ${message}`);
+        return '';
+      }
     } else if (this.itemV2.accessibilityDescription && this.itemV2.accessibilityDescription !== '') {
       return this.itemV2.accessibilityDescription as string;
     }
@@ -893,24 +1127,19 @@ export struct ImageMenuItemV2 {
     .focusOnTouch(true)
     .foregroundColor(this.getFgColorV2())
     .backgroundColor(this.getBgColorV2())
-    .border({
-      radius: $r('sys.float.titlebar_icon_background_shape'),
-      width: this.isInFocusedStyleV2 ?
-        $r('sys.float.titlebar_icon_background_focus_outline_weight') : EditableTitleBarV2.commonZeroV2,
-      color: this.isInFocusedStyleV2 ?
-        this.editableTitleBarThemeV2.iconBackgroundFocusOutlineColor : Color.Transparent,
-      style: BorderStyle.Solid,
+    .stateStyles({
+      focused: (instance: CommonMethod) => this.focusedStyle(instance),
+      normal: (instance: CommonMethod) => this.notInFocusedStyle(instance),
+      pressed: (instance: CommonMethod) => this.notInFocusedStyle(instance)
     })
     .onFocus(() => {
       if (!this.itemV2.isEnabled) {
         return;
       }
       this.isOnFocusV2 = true;
-      this.isInFocusedStyleV2 = true;
     })
     .onBlur(() => {
       this.isOnFocusV2 = false;
-      this.isInFocusedStyleV2 = false;
     })
     .onHover((isOn: boolean, event?: HoverEvent) => {
       if (!this.itemV2.isEnabled) {
@@ -942,6 +1171,9 @@ export struct ImageMenuItemV2 {
       }
       if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         this.isOnClickV2 = false;
+        if (this.fontSizeInternalV2 >= this.minFontSize) {
+          this.onCloseDialogV2();
+        }
       }
     })
     .onClick((event?: ClickEvent) => {
@@ -972,24 +1204,19 @@ export struct ImageMenuItemV2 {
         .enabled(this.itemV2.isEnabled)
         .foregroundColor(this.getFgColorV2())
         .backgroundColor(EditableTitleBarV2.noneColorV2)
-        .border({
-          radius: $r('sys.float.titlebar_icon_background_shape'),
-          width: this.isInFocusedStyleV2 ?
-            $r('sys.float.titlebar_icon_background_focus_outline_weight') : EditableTitleBarV2.commonZeroV2,
-          color: this.isInFocusedStyleV2 ?
-            this.editableTitleBarThemeV2.iconBackgroundFocusOutlineColor : Color.Transparent,
-          style: BorderStyle.Solid,
+        .stateStyles({
+          focused: (instance: CommonMethod) => this.focusedStyle(instance),
+          normal: (instance: CommonMethod) => this.notInFocusedStyle(instance),
+          pressed: (instance: CommonMethod) => this.notInFocusedStyle(instance)
         })
         .onFocus(() => {
           if (!this.itemV2.isEnabled) {
             return;
           }
           this.isOnFocusV2 = true;
-          this.isInFocusedStyleV2 = true;
         })
         .onBlur(() => {
           this.isOnFocusV2 = false;
-          this.isInFocusedStyleV2 = false;
         })
         .onHover((isOn: boolean, event?: HoverEvent) => {
           if (!this.itemV2.isEnabled) {
@@ -1021,6 +1248,9 @@ export struct ImageMenuItemV2 {
           }
           if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
             this.isOnClickV2 = false;
+            if (this.fontSizeInternalV2 >= this.minFontSize) {
+              this.onCloseDialogV2();
+            }
           }
         })
         .onClick((event?: ClickEvent) => {

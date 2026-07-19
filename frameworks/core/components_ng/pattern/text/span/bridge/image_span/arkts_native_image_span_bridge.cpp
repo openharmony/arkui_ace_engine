@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/text/span/image_span_view.h"
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/log/ace_scoring_log.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -280,12 +281,15 @@ ArkUINativeModuleValue ImageSpanBridge::SetOnComplete(ArkUIRuntimeCallInfo *runt
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(LoadImageSuccessEvent&)> callback = [frameNode, isJsView,
+    auto targetNode = AceType::WeakClaim(frameNode);
+    std::function<void(LoadImageSuccessEvent&)> callback = [node = targetNode, isJsView,
         func = panda::CopyableGlobal(vm, func)](LoadImageSuccessEvent& event) {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        ACE_SCORING_EVENT("ImageSpan.onComplete");
+        PipelineContext::SetCallBackNode(node);
         const char* keys[] = { "width", "height", "componentWidth", "componentHeight", "loadingStatus", "contentWidth",
             "contentHeight", "contentOffsetX", "contentOffsetY" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetWidth()),
@@ -337,12 +341,15 @@ ArkUINativeModuleValue ImageSpanBridge::SetOnError(ArkUIRuntimeCallInfo *runtime
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(LoadImageFailEvent&)> callback = [frameNode, isJsView,
+    auto targetNode = AceType::WeakClaim(frameNode);
+    std::function<void(LoadImageFailEvent&)> callback = [node = targetNode, isJsView,
         func = panda::CopyableGlobal(vm, func)](LoadImageFailEvent& event) {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        ACE_SCORING_EVENT("ImageSpan.onError");
+        PipelineContext::SetCallBackNode(node);
         const char* keys[] = { "componentWidth", "componentHeight", "message" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, event.GetComponentWidth()),
             panda::NumberRef::New(vm, event.GetComponentHeight()),

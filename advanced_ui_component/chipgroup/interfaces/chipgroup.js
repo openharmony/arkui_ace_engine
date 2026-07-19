@@ -25,6 +25,7 @@ const Chip = requireNapi('arkui.advanced.Chip').Chip;
 const ChipSize = requireNapi('arkui.advanced.Chip').ChipSize;
 const uiMaterial = requireNapi('arkui.uiMaterial');
 const deviceInfo = requireNapi('deviceInfo');
+const i18n = requireNapi('i18n');
 const noop = selectedIndexes => {};
 const colorStops = [
   ['rgba(0, 0, 0, 1)', 0],
@@ -150,7 +151,13 @@ function parseDimension(uiContext, value, isValid, defaultValue) {
         return value;
       }
     } else if (temp.type === 10003) {
-      if (resourceManager && isValidDimensionString(resourceManager.getStringSync(temp.id))) {
+      let stringValue = '';
+      try {
+        stringValue = resourceManager.getStringSync(temp.id);
+      } catch (err) {
+        stringValue = '';
+      }
+      if (resourceManager && isValidDimensionString(stringValue)) {
         return value;
       }
     }
@@ -748,6 +755,9 @@ export class ChipGroup extends ViewPU {
   isMultiple() {
     return this.multiple ?? false;
   }
+  isRTL() {
+    return i18n.isRTL(i18n.System.getAppPreferredLanguage());
+  }
   getChipGroupItemSpace() {
     if (this.chipGroupSpace == undefined) {
       return defaultTheme.chipGroupSpace.itemSpace;
@@ -972,7 +982,7 @@ export class ChipGroup extends ViewPU {
             Stack.create();
             Stack.width(iconGroupSuffixTheme.normalBackgroundSize);
             Stack.height(LayoutPolicy.matchParent);
-            Stack.linearGradient({ angle: 90, colors: colorStops });
+            Stack.linearGradient({ angle: this.isRTL() ? 270 : 90, colors: colorStops });
             Stack.blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN);
             Stack.hitTestBehavior(HitTestMode.None);
           }, Stack);

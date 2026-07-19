@@ -10,6 +10,7 @@
         "src/calendar_picker_modifier.ts",
         "src/checkbox_modifier.ts",
         "src/checkboxgroup_modifier.ts",
+        "src/common_shape_modifier.ts",
         "src/circle_modifier.ts",
         "src/common_modifier.ts",
         "src/column_modifier.ts",
@@ -94,7 +95,8 @@
         "src/video_modifier.ts",
         "src/water_flow_modifier.ts",
         "src/lazy_column_layout_modifier.ts",
-        "src/lazy_water_flow_layout_modifier.ts"
+        "src/lazy_water_flow_layout_modifier.ts",
+        "src/xcomponent_modifier.ts",
     ],
     "compilerOptions": {
         "module": "none",

@@ -120,7 +120,7 @@ void SelectableContainerPattern::OnEditModeOptionsChanged()
 
 bool SelectableContainerPattern::NeedBackPressHandler() const
 {
-    return GetEnableEditMode();
+    return HasEnableEditModeBinding() && GetEnableEditMode();
 }
 
 bool SelectableContainerPattern::HandleBackPress()
@@ -683,6 +683,7 @@ void SelectableContainerPattern::InitSwipeSelectEvent()
         { SourceTool::PEN, DEFAULT_PEN_PAN_DISTANCE.ConvertToPx() } };
     gestureHub->AddPanEvent(swipeSelectPanEvent_, panDirection, 1, distanceMap);
     gestureHub->SetPanEventType(GestureTypeName::BOXSELECT);
+    gestureHub->SetPanCanCoexistWithScroll(true);
     gestureHub->SetPanEventTag("SWIPESELECT");
     gestureHub->SetExcludedAxisForPanEvent(true);
     gestureHub->SetOnGestureJudgeNativeBegin([weak = WeakClaim(this)](const RefPtr<NG::GestureInfo>& gestureInfo,

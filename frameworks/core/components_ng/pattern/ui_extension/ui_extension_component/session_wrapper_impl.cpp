@@ -784,11 +784,20 @@ void SessionWrapperImpl::UpdateWantPtr(std::shared_ptr<AAFwk::Want>& wantPtr)
     AAFwk::WantParams menuBarWantParam;
     UpdateMenuBarWantPtr(wantPtr, menuBarWantParam);
     configParam.SetParam(UIEXTENSION_CONFIG_MENUBAR, AAFwk::WantParamWrapper::Box(menuBarWantParam));
-    auto mode = container->GetWindowMode();
-    configParam.SetParam(UIEXTENSION_CONFIG_WINDOW_MODE, AAFwk::Integer::Box(static_cast<int32_t>(mode)));
+    if (IsWindowModeFollowHost()) {
+        auto mode = container->GetWindowMode();
+        configParam.SetParam(UIEXTENSION_CONFIG_WINDOW_MODE, AAFwk::Integer::Box(static_cast<int32_t>(mode)));
+    }
     AAFwk::WantParams wantParam(wantPtr->GetParams());
     wantParam.SetParam(UIEXTENSION_CONFIG_FIELD, AAFwk::WantParamWrapper::Box(configParam));
     wantPtr->SetParams(wantParam);
+}
+
+bool SessionWrapperImpl::IsWindowModeFollowHost() const
+{
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetIsWindowModeFollowHost();
 }
 
 void SessionWrapperImpl::UpdateConfigParamByContainerHandler(AAFwk::WantParams& configParam)

@@ -234,7 +234,7 @@ void ScrollableModelStatic::SetMaxFlingSpeed(FrameNode* frameNode, const std::op
 
 void ScrollableModelStatic::SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& rect)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, rect), frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, ContentClip(mode, rect), frameNode);
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN

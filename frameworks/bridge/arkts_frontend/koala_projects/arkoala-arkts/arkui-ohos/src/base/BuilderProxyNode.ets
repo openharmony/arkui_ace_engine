@@ -46,4 +46,7 @@ export class ArkBuilderProxyNodePeer extends PeerNode {
     get hasChild():boolean{
         return this._hasChild;
     }
+    public registerDestroyEvent(event: (nodeId: int) => void) {
+        ArkUIAniModule._SetOnNodeDestroyEvent(this.getPeerPtr(), event);
+    }
 }

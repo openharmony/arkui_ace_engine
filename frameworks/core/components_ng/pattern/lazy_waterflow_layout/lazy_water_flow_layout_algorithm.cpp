@@ -101,7 +101,9 @@ void LazyWaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         extendedViewStart_ = viewStart_;
         extendedViewEnd_ = viewEnd_;
     }
-    MeasureItems(layoutWrapper);
+    if (!needSkipLayout_) {
+        MeasureItems(layoutWrapper);
+    }
     SetFrameSize(layoutWrapper, contentIdealSize, padding);
 }
 
@@ -307,6 +309,7 @@ void LazyWaterFlowLayoutAlgorithm::ApplyFallbackReferencePos(
     LayoutWrapper* layoutWrapper, const std::optional<ViewPosReference>& posRef)
 {
     referenceEdge_ = ReferenceEdge::START;
+    startReferenceViewportOffset_ = 0.0f;
     auto hostNode = layoutWrapper->GetHostNode();
     const bool missingDirectWaterFlowRef =
         !posRef.has_value() && LazyLayoutUtils::HasDirectWaterFlowAncestor(hostNode);
@@ -353,11 +356,24 @@ void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
 {
     CHECK_NULL_VOID(layoutWrapper);
     headerAdjustOffset_ = 0.0f;
+    startReferenceViewportOffset_ = 0.0f;
     if (!posRef.has_value()) {
-        posRef = GetReferencePos(layoutWrapper->GetHostNode());
+        auto host = layoutWrapper->GetHostNode();
+        // When LazyWaterFlowLayout is used under LazyForEach, cached nodes from LazyForEach are not mounted on the
+        // component tree. LazyWaterFlowLayout has not executed onAttachToMainTree, so isNeedLazyLayout flag is not set.
+        // In this scenario, skip layout first to avoid full loading which would break lazy loading.
+        // However, if total item count is less than 1 row, load all items directly.
+        int32_t lanesCount = static_cast<int32_t>(crossLens_.size());
+        if ((totalItemCount_ > lanesCount) && host && !host->IsOnMainTree() && !host->IsNeedLazyLayout() &&
+            LazyLayoutUtils::ValidateAndSetLazyLayoutParent(host, Axis::VERTICAL)) {
+            needSkipLayout_ = true;
+            return;
+        }
+        posRef = GetReferencePos(host);
     }
     if (!posRef.has_value() || posRef.value().axis != Axis::VERTICAL) {
         ApplyFallbackReferencePos(layoutWrapper, posRef);
+        needSkipLayout_ = false;
         return;
     }
 
@@ -368,6 +384,9 @@ void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
     float referencePos = posRef.value().referencePos;
     viewExtStart_ = posRef.value().viewExtStart;
     viewExtEnd_ = posRef.value().viewExtEnd;
+    if (posRef.value().referenceEdge == ReferenceEdge::START) {
+        startReferenceViewportOffset_ = referencePos - posRef.value().viewPosStart;
+    }
     stickyTopInset_ = posRef.value().stickyInsetStart;
     stickyBottomInset_ = posRef.value().stickyInsetEnd;
     if (posRef.value().referenceEdge == ReferenceEdge::START) {
@@ -386,6 +405,7 @@ void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
     cacheEndPos_ = viewEnd_ + cacheExtent;
     MakeViewportBodyLocal();
     UpdateHeaderAdjustOffset();
+    needSkipLayout_ = false;
 }
 
 void LazyWaterFlowLayoutAlgorithm::UpdateGap(
@@ -876,15 +896,32 @@ void LazyWaterFlowLayoutAlgorithm::SyncLaneGeometry()
     }
 }
 
-// Fill/Clear use the cache window so scroll frames synchronously materialize the half-screen buffer.
+// Fill visible content during normal layout, then let idle predict extend into the cache window.
 float LazyWaterFlowLayoutAlgorithm::ResolveFrontBoundary() const
 {
-    return cacheStartPos_;
+    return IsPredictPass() ? cacheStartPos_ : viewStart_;
 }
 
 float LazyWaterFlowLayoutAlgorithm::ResolveBackBoundary() const
 {
-    return cacheEndPos_;
+    if (ShouldProbeBodyBelowViewport()) {
+        return ProbeBackBoundary();
+    }
+    return IsPredictPass() ? cacheEndPos_ : viewEnd_;
+}
+
+// Body just below the viewport with nothing measured yet: NeedPredict cannot bootstrap from an empty
+// posMap_, so the normal pass probes one row instead of synchronously filling the half-screen cache.
+bool LazyWaterFlowLayoutAlgorithm::ShouldProbeBodyBelowViewport() const
+{
+    return !IsPredictPass() && LessOrEqual(viewEnd_, 0.0f) && GreatNotEqual(cacheEndPos_, 0.0f);
+}
+
+float LazyWaterFlowLayoutAlgorithm::ProbeBackBoundary() const
+{
+    // Just past the body origin: each lane fills exactly its first item.
+    constexpr float BODY_PROBE_EXTENT = 1.0f;
+    return std::min(cacheEndPos_, BODY_PROBE_EXTENT);
 }
 
 int32_t LazyWaterFlowLayoutAlgorithm::CheckReset()
@@ -1113,8 +1150,9 @@ std::optional<float> LazyWaterFlowLayoutAlgorithm::MeasureChild(
     auto rawIndex = GetRawIndexForItem(index);
     auto startPos = referenceEdge == ReferenceEdge::START ? referencePos : referencePos - cachedSize.value_or(0.0f);
     auto endPos = referenceEdge == ReferenceEdge::START ? referencePos + cachedSize.value_or(0.0f) : referencePos;
-    const bool maybeVisible = endPos > viewStart_ && startPos < viewEnd_;
-    auto child = GetOrCreateChildWrapper(layoutWrapper, rawIndex, maybeVisible);
+    const bool maybeVisible = IsChildMaybeVisible(startPos, endPos, cachedSize.has_value(), referenceEdge);
+    const bool allowCacheCreate = AllowProbeCacheCreate(startPos, cachedSize.has_value(), referenceEdge);
+    auto child = GetOrCreateChildWrapper(layoutWrapper, rawIndex, maybeVisible, allowCacheCreate);
     if (!child) {
         return cachedSize;
     }
@@ -1134,6 +1172,25 @@ std::optional<float> LazyWaterFlowLayoutAlgorithm::MeasureChild(
     return childMainSize;
 }
 
+bool LazyWaterFlowLayoutAlgorithm::IsChildMaybeVisible(
+    float startPos, float endPos, bool sizeKnown, ReferenceEdge referenceEdge) const
+{
+    if (sizeKnown) {
+        return endPos > viewStart_ && startPos < viewEnd_;
+    }
+    // Unknown size: only the reference edge is real; assume visible whenever the item can reach the viewport.
+    return referenceEdge == ReferenceEdge::START ? LessNotEqual(startPos, viewEnd_)
+                                                 : GreatNotEqual(endPos, viewStart_);
+}
+
+// Only unmeasured probe-row items need a real node; known heights fill the lane without one.
+bool LazyWaterFlowLayoutAlgorithm::AllowProbeCacheCreate(
+    float startPos, bool sizeKnown, ReferenceEdge referenceEdge) const
+{
+    return !sizeKnown && referenceEdge == ReferenceEdge::START && ShouldProbeBodyBelowViewport() &&
+        LessOrEqual(startPos, ProbeBackBoundary());
+}
+
 RefPtr<LayoutWrapper> LazyWaterFlowLayoutAlgorithm::GetExistingChildWrapper(
     LayoutWrapper* layoutWrapper, int32_t rawIndex) const
 {
@@ -1143,7 +1200,7 @@ RefPtr<LayoutWrapper> LazyWaterFlowLayoutAlgorithm::GetExistingChildWrapper(
 }
 
 RefPtr<LayoutWrapper> LazyWaterFlowLayoutAlgorithm::GetOrCreateChildWrapper(
-    LayoutWrapper* layoutWrapper, int32_t rawIndex, bool maybeVisible) const
+    LayoutWrapper* layoutWrapper, int32_t rawIndex, bool maybeVisible, bool allowCacheCreate) const
 {
     CHECK_NULL_RETURN(layoutWrapper, nullptr);
     // maybeVisible drives whether LazyForEach assigns the node to the active or cache set; getting it wrong
@@ -1153,7 +1210,7 @@ RefPtr<LayoutWrapper> LazyWaterFlowLayoutAlgorithm::GetOrCreateChildWrapper(
     }
     auto isCacheItem = !maybeVisible;
     auto child = layoutWrapper->GetChildByIndex(rawIndex, isCacheItem);
-    if (!child) {
+    if (!child && (IsPredictPass() || allowCacheCreate)) {
         child = layoutWrapper->GetOrCreateChildByIndex(rawIndex, !isCacheItem, isCacheItem);
     }
     return child;
@@ -1272,14 +1329,20 @@ void LazyWaterFlowLayoutAlgorithm::FinishMeasureItems(LayoutWrapper* layoutWrapp
         layoutInfo_->ClearDataChanges();
         return;
     }
+    const bool hasDataChange = layoutInfo_->hasDataChange_;
     UpdateAdjustOffset(prevFrameSnapshot);
+    if (!hasDataChange) {
+        layoutInfo_->adjustOffset_ = AdjustOffset();
+    }
+    const auto consumedOffset =
+        referenceEdge_ == ReferenceEdge::END ? layoutInfo_->adjustOffset_.end : layoutInfo_->adjustOffset_.start;
     // Header resize is a section-level shift on top of the body-local anchor diff.
     layoutInfo_->adjustOffset_.start += headerAdjustOffset_;
-    // Parent consumes adjustOffset after Measure; mirror the same delta into this frame's layout range.
-    auto consumedOffset =
-        referenceEdge_ == ReferenceEdge::END ? layoutInfo_->adjustOffset_.end : layoutInfo_->adjustOffset_.start;
-    if (!NearZero(consumedOffset)) {
-        ApplyAdjustedMeasureWindow(layoutWrapper, consumedOffset);
+    // Mirror the exported parent delta into this frame's layout range.
+    // No-data body re-anchor is internal; header resize remains exported.
+    const auto exportedOffset = consumedOffset + headerAdjustOffset_;
+    if (!NearZero(exportedOffset)) {
+        ApplyAdjustedMeasureWindow(layoutWrapper, exportedOffset);
     }
     layoutInfo_->ClearDataChanges();
 }
@@ -1287,16 +1350,17 @@ void LazyWaterFlowLayoutAlgorithm::FinishMeasureItems(LayoutWrapper* layoutWrapp
 void LazyWaterFlowLayoutAlgorithm::ApplyAdjustedMeasureWindow(LayoutWrapper* layoutWrapper, float consumedOffset)
 {
     LazyWaterFlowLayoutUtils::ShiftMeasureWindow(consumedOffset, viewStart_, viewEnd_, cacheStartPos_, cacheEndPos_);
-    // The shifted cache window is the one the parent will display after consuming adjustOffset; refill its edges
-    // so the next frame doesn't show a gap before the user scrolls.
+    // Refill the shifted window edges so the next frame shows no gap before idle extends the cache.
     auto fillMaxMainSize = CollectMaxMainSize(layoutInfo_->lanes_, 0.0f);
+    const auto frontBoundary = ResolveFrontBoundary();
+    const auto backBoundary = ResolveBackBoundary();
     const int32_t endIndex = layoutInfo_->EndIndex();
     if (endIndex >= 0) {
-        FillBack(layoutWrapper, cacheEndPos_, endIndex + 1, totalItemCount_ - 1, fillMaxMainSize);
+        FillBack(layoutWrapper, backBoundary, endIndex + 1, totalItemCount_ - 1, fillMaxMainSize);
     }
     const int32_t startIndex = layoutInfo_->StartIndex();
     if (startIndex > 0) {
-        FillFront(layoutWrapper, cacheStartPos_, startIndex - 1, 0, fillMaxMainSize);
+        FillFront(layoutWrapper, frontBoundary, startIndex - 1, 0, fillMaxMainSize);
     }
     layoutInfo_->SyncItemPositions(mainGap_);
     layoutInfo_->EstimateItemSize();
@@ -1478,6 +1542,16 @@ float LazyWaterFlowLayoutAlgorithm::GetBodyMainSize() const
     return std::max(0.0f, totalMainSize_ - layoutInfo_->headerMainSize_ - layoutInfo_->footerMainSize_);
 }
 
+bool LazyWaterFlowLayoutAlgorithm::ShouldKeepStartBoundaryOnFrontInsert(
+    const PrevFrameSnapshot& prevFrameSnapshot) const
+{
+    CHECK_NULL_RETURN(layoutInfo_, false);
+    const auto& anchor = prevFrameSnapshot.anchor;
+    return referenceEdge_ == ReferenceEdge::START && layoutInfo_->hasDataChange_ && anchor.startIndex >= 0 &&
+        anchor.startPos.has_value() && layoutInfo_->newStartIndex_ == anchor.startIndex &&
+        NearZero(anchor.startPos->startPos) && GreatNotEqual(startReferenceViewportOffset_, 0.0f);
+}
+
 void LazyWaterFlowLayoutAlgorithm::UpdateAdjustOffset(const PrevFrameSnapshot& prevFrameSnapshot)
 {
     layoutInfo_->adjustOffset_ = {};
@@ -1494,6 +1568,10 @@ void LazyWaterFlowLayoutAlgorithm::UpdateAdjustOffset(const PrevFrameSnapshot& p
         return;
     }
     const auto totalDelta = GetBodyMainSize() - anchor.totalMainSize;
+    if (ShouldKeepStartBoundaryOnFrontInsert(prevFrameSnapshot)) {
+        layoutInfo_->adjustOffset_.end = totalDelta;
+        return;
+    }
     if (referenceEdge_ == ReferenceEdge::START && layoutInfo_->hasDataChange_ && anchor.startIndex < 0 &&
         LessNotEqual(totalDelta, 0.0f)) {
         // The previous leading anchor was deleted. Let remaining items move up and avoid parent compensation.

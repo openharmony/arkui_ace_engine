@@ -14,6 +14,7 @@
  */
 
 #include "arc_list_test_ng.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/syntax/for_each_node.h"
@@ -333,4 +334,91 @@ HWTEST_F(ArcListCommonTestNg, GetScrollUpdateFriction002, TestSize.Level1)
     EXPECT_EQ(jsonStr, "{\"extraInfo\":\"info\"}");
 }
 #endif
+
+/**
+ * @tc.name: ArcListFireFocusGetChildByIndexWithItemStartIndex001
+ * @tc.desc: Test that with itemStartIndex_=1 (header present), physical child at
+ *           focusIndex_+itemStartIndex_ is the correct ArcListItem, while physical
+ *           child at focusIndex_ (without offset) is the header node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListCommonTestNg, ArcListFireFocusGetChildByIndexWithItemStartIndex001, TestSize.Level1)
+{
+    ArcListPattern list;
+    auto frameNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 0, AceType::MakeRefPtr<ArcListPattern>());
+    list.frameNode_ = frameNode;
+
+    auto headerNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    frameNode->AddChild(headerNode);
+    for (int32_t i = 0; i < 5; i++) {
+        auto itemNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ITEM_ETS_TAG, 10 + i, AceType::MakeRefPtr<Pattern>());
+        frameNode->AddChild(itemNode);
+    }
+
+    list.itemStartIndex_ = 1;
+    list.focusIndex_ = 0;
+
+    auto host = list.GetHost();
+    auto childWithOffset = host->GetChildAtIndex(list.focusIndex_.value() + list.itemStartIndex_);
+    ASSERT_NE(childWithOffset, nullptr);
+    EXPECT_EQ(childWithOffset->GetTag(), V2::ARC_LIST_ITEM_ETS_TAG);
+
+    auto childWithoutOffset = host->GetChildAtIndex(list.focusIndex_.value());
+    ASSERT_NE(childWithoutOffset, nullptr);
+    EXPECT_NE(childWithoutOffset->GetTag(), V2::ARC_LIST_ITEM_ETS_TAG);
+}
+
+/**
+ * @tc.name: ArcListUpdateStartIndexWithItemStartIndex001
+ * @tc.desc: Test ArcList UpdateStartIndex sets scrollSource_ correctly with itemStartIndex_ offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListCommonTestNg, ArcListUpdateStartIndexWithItemStartIndex001, TestSize.Level1)
+{
+    ArcListPattern list;
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, 2, listItemPattern);
+    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
+    RefPtr<FocusManager> focusManager = AceType::MakeRefPtr<FocusManager>(pipe);
+    focusManager->isFocusActive_ = true;
+    pipe->focusManager_ = focusManager;
+    frameNode->context_ = AceType::RawPtr(pipe);
+    WeakPtr<FrameNode> node = frameNode;
+    listItemPattern->frameNode_ = frameNode;
+    list.frameNode_ = frameNode;
+    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
+    focusNode->currentFocus_ = true;
+    auto listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    frameNode->focusHub_ = focusNode;
+
+    /**
+     * @tc.steps: step1. itemStartIndex_ = 0, focusIndex_ outside viewport
+     * @tc.expected: UpdateStartIndex sets scrollSource_ to SCROLL_FROM_FOCUS_JUMP
+     */
+    list.itemStartIndex_ = 0;
+    list.focusIndex_ = 2;
+    list.startIndex_ = 5;
+    list.endIndex_ = 10;
+    list.maxListItemIndex_ = 10;
+    auto result1 = list.UpdateStartIndex(2, -1);
+    EXPECT_FALSE(result1);
+    EXPECT_EQ(list.scrollSource_, SCROLL_FROM_FOCUS_JUMP);
+
+    /**
+     * @tc.steps: step2. itemStartIndex_ = 1, focusIndex_ outside viewport
+     * @tc.expected: UpdateStartIndex still sets scrollSource_ to SCROLL_FROM_FOCUS_JUMP
+     */
+    list.itemStartIndex_ = 1;
+    list.focusIndex_ = 2;
+    list.startIndex_ = 5;
+    list.endIndex_ = 10;
+    list.maxListItemIndex_ = 10;
+    auto result2 = list.UpdateStartIndex(2, -1);
+    EXPECT_FALSE(result2);
+    EXPECT_EQ(list.scrollSource_, SCROLL_FROM_FOCUS_JUMP);
+}
+
 } // namespace OHOS::Ace::NG

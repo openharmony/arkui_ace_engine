@@ -372,6 +372,7 @@ ace_unittest("arkts_dynamic_pattern_test") {
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/scene/window_scene.cpp",
     "$ace_root/test/mock/adapter/ohos/entrance/mock_ace_extra_input_data.cpp",
     "$ace_root/test/mock/adapter/ohos/entrance/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/mock/interfaces/mock_node_modifiers.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_manager.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",

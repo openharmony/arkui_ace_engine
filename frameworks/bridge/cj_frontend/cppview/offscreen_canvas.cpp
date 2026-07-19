@@ -19,16 +19,56 @@
 
 #include "bridge/cj_frontend/cppview/offscreen_rendering_context.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+
+RefPtr<AceType> CreateOffscreenPattern(int32_t width, int32_t height)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->createOffscreenPattern, nullptr);
+    return bridge->createOffscreenPattern(width, height);
+}
+
+void UpdateOffscreenSize(const RefPtr<AceType>& offscreenPattern, int32_t width, int32_t height)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->updateOffscreenSize);
+    bridge->updateOffscreenSize(offscreenPattern, width, height);
+}
+
+RefPtr<PixelMap> TransferOffscreenToImageBitmap(const RefPtr<AceType>& offscreenPattern)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->transferOffscreenToImageBitmap, nullptr);
+    return bridge->transferOffscreenToImageBitmap(offscreenPattern);
+}
+
+#ifndef PIXEL_MAP_SUPPORTED
+std::unique_ptr<ImageData> GetImageData(
+    const RefPtr<AceType>& offscreenPattern, double left, double top, double width, double height)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->getOffscreenImageData, nullptr);
+    return bridge->getOffscreenImageData(offscreenPattern, left, top, width, height);
+}
+#endif
+
+} // namespace
+
 NativeOffscreenCanvas::NativeOffscreenCanvas(double height, double width, int32_t unit) : FFIData()
 {
     SetUnit(static_cast<CanvasUnit>(unit));
     double density = GetDensity();
     SetHeight(height * density);
     SetWidth(width * density);
-    offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
-        static_cast<int32_t>(this->width_), static_cast<int32_t>(this->height_));
+    offscreenCanvasPattern_ =
+        CreateOffscreenPattern(static_cast<int32_t>(this->width_), static_cast<int32_t>(this->height_));
 }
 
 NativeOffscreenCanvas::~NativeOffscreenCanvas()
@@ -42,7 +82,7 @@ void NativeOffscreenCanvas::NativeSetHeihgt(double height)
     height *= density;
     if (height_ != height) {
         height_ = height;
-        offscreenCanvasPattern_->UpdateSize(width_, height_);
+        UpdateOffscreenSize(offscreenCanvasPattern_, static_cast<int32_t>(width_), static_cast<int32_t>(height_));
         if (offscreenCanvasContext_ != nullptr) {
             offscreenCanvasContext_->SetHeight(height_);
         }
@@ -55,7 +95,7 @@ void NativeOffscreenCanvas::NativeSetWidth(double width)
     width *= density;
     if (width_ != width) {
         width_ = width;
-        offscreenCanvasPattern_->UpdateSize(width_, width_);
+        UpdateOffscreenSize(offscreenCanvasPattern_, static_cast<int32_t>(width_), static_cast<int32_t>(height_));
         if (offscreenCanvasContext_ != nullptr) {
             offscreenCanvasContext_->SetWidth(width_);
         }
@@ -106,12 +146,12 @@ int64_t NativeOffscreenCanvas::TransferToImageBitmap()
     if (offscreenCanvasPattern_ == nullptr || offscreenCanvasContext_ == nullptr) {
         return 0;
     }
-    auto pixelMap = offscreenCanvasPattern_->TransferToImageBitmap();
+    auto pixelMap = TransferOffscreenToImageBitmap(offscreenCanvasPattern_);
     auto renderImage = FFIData::Create<CJRenderImage>();
     renderImage->InitCJRenderImage(pixelMap);
 
 #ifndef PIXEL_MAP_SUPPORTED
-    auto imageData = offscreenCanvasPattern_->GetImageData(0, 0, width_, height_);
+    auto imageData = GetImageData(offscreenCanvasPattern_, 0, 0, width_, height_);
     if (imageData == nullptr) {
         return nullptr;
     }

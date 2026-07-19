@@ -16,7 +16,7 @@
 #include "ani_utils.h"
 #include <sstream>
 #include <iostream>
-
+#include <charconv>
 #include <string>
 
 namespace OHOS::Ace::Ani {
@@ -240,7 +240,11 @@ std::optional<ani_int> AniUtils::StdStringToANIInt(ani_env *env, std::string str
 {
     ani_int arg_int{};
     CHECK_NULL_RETURN(env, arg_int);
-    int32_t intValue = std::stoi(str);
+    int32_t intValue = 0;
+    auto result = std::from_chars(str.data(), str.data() + str.size(), intValue);
+    if (result.ec != std::errc() || result.ptr != str.data() + str.size()) {
+        return {};
+    }
     arg_int = static_cast<ani_int>(intValue);
     return arg_int;
 }
@@ -266,11 +270,11 @@ static ani_object WrapBusinessError(ani_env* env, const char *msg)
         return nullptr;
     }
 
-    if ((status = env->FindClass("std.core.Error", &cls)) != ANI_OK) {
+    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
         return nullptr;
     }
 
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{std.core.ErrorOptions}:", &method)) !=
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
         ANI_OK) {
         return nullptr;
     }
@@ -289,7 +293,7 @@ ani_ref AniUtils::CreateBusinessError(ani_env* env, const char *msg, ani_int cod
         return nullptr;
     }
     ani_method ctor;
-    if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{std.core.Error}:", &ctor)) != ANI_OK) {
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &ctor)) != ANI_OK) {
         return nullptr;
     }
     ani_object error = WrapBusinessError(env, msg);

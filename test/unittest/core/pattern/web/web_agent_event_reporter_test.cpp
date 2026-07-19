@@ -45,7 +45,7 @@ class MockReporterForSpecificEvent : public WebAgentEventReporter {
 public:
     using WebAgentEventReporter::WebAgentEventReporter;
     MOCK_METHOD(RectF, ConvertToWindow, (const RectF& rect, bool addComponentOffset), (override));
-    MOCK_METHOD(void, ReportEventImediately, (const std::shared_ptr<InspectorJsonValue>& eventJson), (override));
+    MOCK_METHOD(void, ReportEventImediately, (const std::shared_ptr<JsonValue>& eventJson), (override));
     MOCK_METHOD(void, ProcessScrollQueue, (), (override));
 };
 

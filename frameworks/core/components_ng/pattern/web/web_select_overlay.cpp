@@ -17,6 +17,7 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <algorithm>
+#include <string_view>
 #include <optional>
 
 #include "base/utils/utils.h"
@@ -36,7 +37,7 @@ namespace OHOS::Ace::NG {
 constexpr Dimension SELECT_HANDLE_DEFAULT_HEIGHT = 16.0_vp;
 constexpr float SELECT_MENE_HEIGHT = 140.0f;
 constexpr int32_t HALF = 2;
-const std::string ASK_CELIA_TAG = "askCelia";
+static constexpr std::string_view ASK_CELIA_TAG = "askCelia";
 
 namespace {
 struct InitStrategyTools {
@@ -1014,7 +1015,7 @@ void WebSelectOverlay::HandleOnAskCelia()
 {
     auto pattern = GetPattern<WebPattern>();
     CHECK_NULL_VOID(pattern);
-    auto vectorStringFunc = pattern->textDetectResult_.menuOptionAndAction.find(ASK_CELIA_TAG);
+    auto vectorStringFunc = pattern->textDetectResult_.menuOptionAndAction.find(std::string(ASK_CELIA_TAG));
     if (vectorStringFunc == pattern->textDetectResult_.menuOptionAndAction.end() || vectorStringFunc->second.empty()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "HandleOnAskCelia failed no askCelia option.");
     } else {
@@ -1576,7 +1577,8 @@ void WebSelectOverlay::InitMenuAvoidStrategyAboutParam(MenuAvoidStrategyMember& 
 void WebSelectOverlay::InitMenuAvoidStrategyAboutKeyboard(MenuAvoidStrategyMember& member, InitStrategyTools& tools)
 {
     auto& safeAreaManager = tools.safeAreaManager;
-    auto keyboardInset = safeAreaManager->GetKeyboardInset().Combine(safeAreaManager->GetKeyboardWebInset());
+    auto keyboardInset =
+        safeAreaManager->GetKeyboardInsetWithoutProcess().Combine(safeAreaManager->GetKeyboardWebInsetWithoutProcess());
 
     member.keyboardInsetStart = static_cast<double>(keyboardInset.start);
     member.keyboardHeight = static_cast<double>(keyboardInset.Length());

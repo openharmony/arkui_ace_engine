@@ -23,7 +23,8 @@
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
-#include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
+#include "core/components_ng/pattern/xcomponent/bridge/xcomponent_controller_peer_impl.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -90,8 +91,18 @@ std::shared_ptr<XComponentController> XComponentController::GetXComponentControl
         HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue env is null");
         return nullptr;
     }
+    ani_ref nativeObjRef;
+    if (env->Object_GetFieldByName_Ref(controller, "nativeObj", &nativeObjRef) != ANI_OK) {
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get nativeObj");
+        return nullptr;
+    }
+    if (nativeObjRef == nullptr) {
+        HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue nativeObj is null");
+        return nullptr;
+    }
+    ani_object nativeObj = static_cast<ani_object>(nativeObjRef);
     ani_ref ref;
-    if (env->Object_GetFieldByName_Ref(controller, "peer", &ref) != ANI_OK) {
+    if (env->Object_GetFieldByName_Ref(nativeObj, "peer", &ref) != ANI_OK) {
         HILOG_ERROR("XComponentController GetXComponentControllerFromAniValue cannot get peer");
         return nullptr;
     }

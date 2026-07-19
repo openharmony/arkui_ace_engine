@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "ecmascript/napi/include/jsnapi.h"
+#include "napi/native_api.h"
 #include "ui/resource/node_info.h"
 
 namespace OHOS::Rosen {
@@ -27,10 +28,17 @@ class BrightnessBlender;
 }
 
 namespace OHOS::Ace {
-class ResourceWrapper;
+class ResourceAdapter;
+struct SelectParam;
+}
+
+namespace OHOS::Ace::Framework {
+class JSRenderingContextBase;
 }
 
 namespace OHOS::Ace::NG {
+class MenuItemConfiguration;
+struct MenuParam;
 using ArkUIRuntimeCallInfo = panda::JsiRuntimeCallInfo;
 using panda::JSValueRef;
 using panda::ObjectRef;
@@ -146,14 +154,14 @@ public:
         DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsDimensionFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
         DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
-        const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result);
+        const RefPtr<ResourceAdapter>& resourceAdapter, CalcDimension& result);
     static bool ParseJsDimensionFromResourceNG(
         const EcmaVM* vm, const Local<JSValueRef>& jsObj, DimensionUnit dimensionUnit, CalcDimension& result);
     static bool ParseJsDimensionFromResourceNG(const EcmaVM* vm, const Local<JSValueRef>& jsObj,
         DimensionUnit dimensionUnit, CalcDimension& result, RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsDimensionNGFromResourceByName(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj,
         DimensionUnit dimensionUnit, const RefPtr<ResourceObject>& resourceObject,
-        const RefPtr<ResourceWrapper>& resourceWrapper, CalcDimension& result);
+        const RefPtr<ResourceAdapter>& resourceAdapter, CalcDimension& result);
     static bool ParseStringArray(
         const EcmaVM* vm, const Local<JSValueRef>& arg, std::string* array, int32_t defaultLength);
     static bool ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, int32_t &result);
@@ -202,8 +210,8 @@ public:
         const EcmaVM *vm, const Local<JSValueRef> &value, CalcDimension &result, bool enableCheckInvalidvalue = true);
     static bool ParseJsDimensionVp(const EcmaVM* vm, const Local<JSValueRef>& value,
         CalcDimension& result, RefPtr<ResourceObject>& resourceObject, bool enableCheckInvalidvalue = true);
-    static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
-        DimensionUnit defaultUnit, bool isSupportPercent = true);
+    ACE_FORCE_EXPORT static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue,
+        CalcDimension &result, DimensionUnit defaultUnit, bool isSupportPercent = true);
     static bool ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         DimensionUnit defaultUnit, RefPtr<ResourceObject>& resourceObject, bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
@@ -216,6 +224,11 @@ public:
         RefPtr<ResourceObject>& resourceObject, bool isJsView = false);
     static bool ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
         RefPtr<ResourceObject>& resourceObject, bool isJsView = false);
+    static bool ParseJsMediaWithBundleName(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+        std::string& bundleName, std::string& moduleName);
+    static bool ParseJsMediaWithBundleName(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+        std::string& bundleName, std::string& moduleName, RefPtr<ResourceObject>& resourceObject);
     static bool ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>& jsValue, double& result,
         RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result);
@@ -337,7 +350,7 @@ public:
         RefPtr<ResourceObject>& resourceObject);
     static void GetJsMediaBundleInfo(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& bundleName, std::string& moduleName);
-    static bool ParseJsColorStrategy(
+    ACE_FORCE_EXPORT static bool ParseJsColorStrategy(
         const EcmaVM* vm, const Local<JSValueRef>& value, ForegroundColorStrategy& strategy);
     static bool GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &jsOnIconSrc,
         const Local<JSValueRef> &jsOffIconSrc, PasswordIcon& result);
@@ -347,6 +360,8 @@ public:
                              ArkUISizeType& result, RefPtr<ResourceObject>& resObj);
     static void ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
                              ArkUISizeType& result, std::vector<RefPtr<ResourceObject>>& resObjs);
+    static void GetNewPadding(
+        const EcmaVM *vm, const Local<JSValueRef>& value, bool& hasRegist, NG::PaddingProperty& padding);
     static void ParseMargin(
         const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result);
     static void ParseMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
@@ -356,7 +371,7 @@ public:
     static bool ParseResponseRegion(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue,
         ArkUI_Float32* regionValues, int32_t* regionUnits, uint32_t length);
-    static bool CheckLengthMetrics(EcmaVM* vm, const Local<panda::ObjectRef>& jsObject);
+    static bool CheckLengthMetrics(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObject);
     static bool ParseLocalizedMargin(
         const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result);
     static bool ParseLocalizedPadding(
@@ -364,6 +379,8 @@ public:
     static bool ParseJsDimensionRect(const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue, DimensionRect& result);
     static bool ParseJsResponseRegion(const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue,
         ArkUI_Float32* values, int32_t* units, uint32_t length);
+    static void JsRemoteMessage(
+        const EcmaVM* vm, const Local<JSValueRef>& arg, OHOS::Ace::RemoteCallback& remoteCallback);
     static bool HandleCallbackJobs(
         const EcmaVM* vm, panda::TryCatch& trycatch, const Local<JSValueRef>& resultException);
     static bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstArg, const EcmaVM* vm);
@@ -428,6 +445,9 @@ public:
     static RefPtr<PixelMap> GetDrawablePixmap(const EcmaVM* vm, Local<JSValueRef> obj);
     static Rosen::BrightnessBlender* CreateRSBrightnessBlenderFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
     static void* UnwrapNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj);
+    static napi_value CreateNapiValue(const EcmaVM* vm, const Local<JSValueRef>& obj);
+    static Local<panda::ObjectRef> CreateDrawingRenderingContext(
+        Framework::JSRenderingContextBase** outCppPtr);
 #if !defined(PREVIEW)
     static RefPtr<PixelMap> CreatePixelMapFromNapiValue(const EcmaVM* vm, Local<JSValueRef> obj);
 #endif
@@ -559,6 +579,8 @@ public:
     static bool GetNativeNode(const EcmaVM* vm, const Local<JSValueRef>& value, ArkUINodeHandle& nativeNode);
     static RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<JSValueRef>& jsObj);
     static RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<panda::ObjectRef>& obj);
+    static RefPtr<OHOS::Ace::ThemeConstants> GetThemeConstants(
+        const EcmaVM* vm, const Local<JSValueRef>& jsObj = Local<JSValueRef>());
     static bool ParseAllBorderRadiuses(
         EcmaVM* vm, panda::Local<panda::ObjectRef> object, BorderRadiusOption& borderRadius);
     static NG::BorderRadiusProperty BorderRadiusProperty(
@@ -577,22 +599,46 @@ public:
         EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonColor& commonColor);
     static NG::BorderColorProperty GetBorderColor(const CommonColor& commonColor);
     static bool ParseCommonMarginOrPaddingCorner(
-        EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonCalcDimension& commonCalcDimension);
+        const EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonCalcDimension& commonCalcDimension);
     static void SetToggleBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void ParseToggleParams(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUI_Params& params);
     static void SetButtonBorderRadiusByJs(
         const EcmaVM* vm, ArkUINodeHandle& nativeNode, const Local<JSValueRef>& value);
     static void SetRenderStrategy(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t length);
+    static void ParseMenuOutlineWidth(
+        EcmaVM* vm, const panda::Local<panda::JSValueRef>& outlineWidthValue, MenuParam& menuParam);
+    static void ParseMenuOutlineColor(
+        EcmaVM* vm, const panda::Local<panda::JSValueRef>& outlineColorValue, MenuParam& menuParam);
+    static bool ParseLengthMetricsToPositiveDimension(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result, RefPtr<ResourceObject>& resObj);
+    static void SetTextStyleApply(
+        EcmaVM* vm, std::function<void(WeakPtr<NG::FrameNode>)>& textStyleApply, const Local<JSValueRef> modifierObj);
+    static Local<JSValueRef> GetSelectLocalHandle(EcmaVM* vm, MenuItemConfiguration& config);
+    static SelectParam GetSelectParam(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void SetSymbolModifier(
+        std::vector<SelectParam>& params, const size_t i, const Local<JSValueRef>& selectSymbolIcon);
 
+    static bool ParseLengthMetricsToDimension(const EcmaVM* vm, const Local<JSValueRef>& jsValue, CalcDimension& result,
+        RefPtr<ResourceObject>& resObj, DimensionUnit defaultUnit = DimensionUnit::FP);
+    static void ParseJsLengthMetricsToDimension(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, Dimension& result, RefPtr<ResourceObject>& resObj);
+    static bool ParseJsBool(const EcmaVM* vm, const Local<JSValueRef>& jsValue, bool& result);
+    static RefPtr<ResourceAdapter> CreateResourceAdapter(RefPtr<ResourceObject>& resourceObject);
     template<typename T>
     static T GetPropertyValue(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t propertyIndex, T defaultValue);
+    static Local<ObjectRef> CreateItemDragInfo(const EcmaVM* vm, const ItemDragInfo& info);
+    static bool SetJSWidth(const Local<JSValueRef>& jsValue);
+    static bool SetJSHeight(const Local<JSValueRef>& jsValue);
+    static void SetJsBindContextMenu(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
     static bool ParseAllBorderRadiuses(EcmaVM* vm, panda::Local<panda::ObjectRef> object,
         BorderRadiusOption& borderRadius, std::shared_ptr<TextBackgroundStyle>& textBackgroundStyle);
     void static ParseMarginOrPaddingCorner(
-        EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj, CommonCalcDimension& commonCalcDimension);
+        const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj, CommonCalcDimension& commonCalcDimension);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

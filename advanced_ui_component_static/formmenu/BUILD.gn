@@ -17,6 +17,16 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 
 #构建ANI库
 ohos_shared_library("formmenu_ani") {
+  branch_protector_ret = "pac_ret"
+  
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    cfi_no_nvcall = true
+    cfi_vcall_icall_only = true
+    debug = false
+  }
+
   shlib_type = "ani"
   deps = [ "$ace_root/build:libace_compatible" ]
   include_dirs = [ "./include" ]

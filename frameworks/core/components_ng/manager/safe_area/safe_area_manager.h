@@ -74,9 +74,11 @@ public:
      */
     bool UpdateNavSafeArea(const SafeAreaInsets& safeArea);
 
-    bool CheckFloatNavSafeArea(const SafeAreaInsets& safeArea);
+    bool CheckFloatNavSafeArea(
+        const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize = NG::OptionalSize<uint32_t>());
 
-    bool UpdateFloatNavSafeArea(const SafeAreaInsets& safeArea);
+    bool UpdateFloatNavSafeArea(
+        const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize = NG::OptionalSize<uint32_t>());
 
     /**
      * @brief Retrieves the system safe area insets.
@@ -203,6 +205,11 @@ public:
             SafeAreaInsets::Inset inset;
             return inset;
         }
+        return keyboardWebInset_;
+    }
+
+    SafeAreaInsets::Inset GetKeyboardWebInsetWithoutProcess() const
+    {
         return keyboardWebInset_;
     }
 

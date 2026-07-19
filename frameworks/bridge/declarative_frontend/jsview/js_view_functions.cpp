@@ -202,16 +202,40 @@ bool ViewFunctions::ExecuteReleaseRecyclePool(int32_t remainingTimeMs, bool isPr
     }
 }
 
-void ViewFunctions::ExecuteSetActive(bool active, bool isReuse)
+void ViewFunctions::ExecuteEnableReleaseExpiringNodes(bool enable, const std::vector<std::string>& reuseIds)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+    ACE_SCOPED_TRACE("ViewFunctions::ExecuteEnableReleaseExpiringNodes");
+    auto func = jsEnableReleaseExpiringNodesFunc_.Lock();
+    if (!func->IsEmpty()) {
+        // Convert std::vector to JS array
+        JSRef<JSArray> jsArray = JSRef<JSArray>::New();
+        for (size_t i = 0; i < reuseIds.size(); ++i) {
+            jsArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(reuseIds.at(i))));
+        }
+        JSRef<JSVal> params[2]; // 2 parampeters: bool enable, std::vector<std::string> reuseIds
+        params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(enable)));
+        params[1] = jsArray;
+        func->Call(jsObject_.Lock(), 2, params); // 2 parampeters: bool enable, std::vector<std::string> reuseIds
+    } else {
+        LOGE("the enable release expiring nodes func is null");
+    }
+}
+
+void ViewFunctions::ExecuteSetActive(bool active, bool isReuse, bool suppressActiveLifecycle)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     auto func = jsSetActive_.Lock();
     if (!func->IsEmpty()) {
         JSFastNativeScope scope(func->GetEcmaVM());
-        JSRef<JSVal> params[2]; // 2: the count of parameter
+        JSRef<JSVal> params[3]; // 3: the count of parameter
         params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(active)));
         params[1] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(isReuse)));
-        func->Call(jsObject_.Lock(), 2, params); // 2: the count of parameter
+        constexpr int32_t suppressActiveLifecycleNumInParams = 2; // 2: params array index for suppressActiveLifecycle
+        params[suppressActiveLifecycleNumInParams] = JSRef<JSVal>(
+            JSVal(JsiValueConvertor::toJsiValue(suppressActiveLifecycle))
+        );
+        func->Call(jsObject_.Lock(), 3, params); // 3: the count of parameter
     } else {
         LOGE("the set active func is null");
     }
@@ -367,6 +391,11 @@ void ViewFunctions::InitViewFunctions(
         JSRef<JSVal> jsReleaseRecyclePoolFunc = jsObject->GetProperty("__releaseRecyclePool__Internal");
         if (jsReleaseRecyclePoolFunc->IsFunction()) {
             jsReleaseRecyclePoolFunc_ = JSRef<JSFunc>::Cast(jsReleaseRecyclePoolFunc);
+        }
+
+        JSRef<JSVal> jsEnableReleaseExpiringNodesFunc = jsObject->GetProperty("__enableReleaseExpiringNodes__Internal");
+        if (jsEnableReleaseExpiringNodesFunc->IsFunction()) {
+            jsEnableReleaseExpiringNodesFunc_ = JSRef<JSFunc>::Cast(jsEnableReleaseExpiringNodesFunc);
         }
 
         JSRef<JSVal> jsAboutToRecycleFunc = jsObject->GetProperty("aboutToRecycleInternal");
@@ -559,13 +588,17 @@ void ViewFunctions::ExecuteRender()
 void ViewFunctions::ExecuteAppear()
 {
     ExecuteFunction(jsAppearFunc_, "aboutToAppear");
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("aboutToAppear");
+#endif
 }
 
 void ViewFunctions::ExecuteDisappear()
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("aboutToDisappear");
+#endif
 
     if (jsDisappearFunc_.IsEmpty()) {
         return;
@@ -584,7 +617,9 @@ void ViewFunctions::ExecuteDisappear()
 void ViewFunctions::ExecuteDidBuild()
 {
     ExecuteFunction(jsDidBuildFunc_, "onDidBuild");
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("onDidBuild");
+#endif
 }
 
 void ViewFunctions::ExecuteAboutToRecycle()
@@ -684,7 +719,9 @@ void ViewFunctions::ExecuteOnRenderDone()
     ExecuteFunction(jsRenderDoneFunc_, "onRenderDone");
     // for developer callback.
     ExecuteFunction(jsBuildDoneFunc_, "onBuildDone");
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("onBuildDone");
+#endif
 }
 
 void ViewFunctions::ExecuteTransition()
@@ -700,13 +737,17 @@ bool ViewFunctions::HasPageTransition() const
 void ViewFunctions::ExecuteShow()
 {
     ExecuteFunction(jsOnShowFunc_, "onPageShow");
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("onPageShow");
+#endif
 }
 
 void ViewFunctions::ExecuteHide()
 {
     ExecuteFunction(jsOnHideFunc_, "onPageHide");
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->ReportLifeCycleEvent("onPageHide");
+#endif
 }
 
 void ViewFunctions::ExecuteInitiallyProvidedValue(const std::string& jsonData)

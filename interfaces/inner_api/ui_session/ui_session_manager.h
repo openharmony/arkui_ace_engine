@@ -19,16 +19,19 @@
 #include <cstdint>
 #include <functional>
 #include <map>
-#include <unordered_map>
-#include <set>
+#include <memory>
 #include <mutex>
+#include <set>
 #include <shared_mutex>
+#include <unordered_map>
+#include <vector>
 
 #include "base/utils/macros.h"
 
 #include "param_config.h"
+#include "ui_content_errors.h"
 #include "ui_content_proxy_error_code.h"
-#include "ui_session_json_util.h"
+#include "ui_translate_type.h"
 #include "ui_translate_manager.h"
 
 namespace OHOS {
@@ -40,6 +43,7 @@ class PixelMap;
 } // namespace Media
 } // namespace OHOS
 namespace OHOS::Ace {
+class InspectorJsonValue;
 class ACE_FORCE_EXPORT UiSessionManager {
 public:
     using InspectorFunction = std::function<void(bool onlyNeedVisible, ParamConfig config)>;
@@ -58,6 +62,12 @@ public:
         std::function<void(const std::vector<int32_t>&, const std::map<int32_t, std::vector<int32_t>>&)>;
 
     using GetWebInfoByRequestFunction = std::function<void(int32_t, const std::string&)>;
+    using GetAbilityLanguageInfoFunction = std::function<int32_t(std::string&, std::string&)>;
+    using PageTranslateTextFunction = std::function<void(bool)>;
+    using PageTranslateEndFunction = std::function<void()>;
+    using PageTranslateResetFunction = std::function<void(int32_t)>;
+    using PageTranslateResultFunction = std::function<void(const std::vector<TranslateResult>&)>;
+    using PageSceneDetectFunction = std::function<void(int32_t, const std::string&, bool)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -93,7 +103,7 @@ public:
      * @description: execute click callback when page some component change occurs
      */
     virtual void ReportComponentChangeEvent(int32_t nodeId, const std::string& key,
-        const std::shared_ptr<InspectorJsonValue>& value, uint32_t eventType) {};
+        const std::string& value, uint32_t eventType) {};
 
     /**
      * @description: execute callback when scroll event occurs
@@ -191,6 +201,9 @@ public:
         int32_t instanceId) {};
     virtual void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) {};
     virtual void RemoveSaveGetCurrentInstanceId(int32_t instanceId) {};
+    virtual void SaveArkUIPageTranslateFunctions(PageTranslateTextFunction&& getTextFunction,
+        PageTranslateTextFunction&& startFunction, PageTranslateEndFunction&& endFunction,
+        PageTranslateResetFunction&& resetFunction, PageTranslateResultFunction&& resultFunction) {};
     virtual std::shared_ptr<UiTranslateManager> GetCurrentTranslateManager() {
         std::shared_ptr<UiTranslateManager> currentTranslateManager = nullptr;
         return currentTranslateManager;
@@ -202,7 +215,26 @@ public:
     virtual void SendCurrentLanguage(std::string result) {};
     virtual void SaveProcessId(std::string key, int32_t id) {};
     virtual void EraseProcessId(const std::string& key, int32_t targetPid) {};
+    virtual void MarkPageTranslateOwner(int32_t processId) {};
+    virtual void OnPageTranslateResultHandled(int32_t processId) {};
     virtual void GetWebTranslateText(std::string extraData, bool isContinued) {};
+    virtual int32_t GetPageTranslateText(const std::string& request)
+    {
+        return FAILED;
+    };
+    virtual int32_t StartPageTranslate(const std::string& request)
+    {
+        return FAILED;
+    };
+    virtual void EndPageTranslate() {};
+    virtual void ResetPageTranslate(int32_t nodeId = -1) {};
+    virtual void SendPageTranslateResult(const std::string& result) {};
+    virtual void SendPageTextToAI(int32_t nodeId, const std::string& text, int64_t version) {};
+    virtual int32_t GetCurrentAbilityLanguageInfo(std::string& language, std::string& region)
+    {
+        return FAILED;
+    };
+    virtual void SaveGetCurrentAbilityLanguageInfoFunction(GetAbilityLanguageInfoFunction&& callback) {};
     virtual void GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
         const std::string& jsonPath, bool onlyVisible = false) {};
     virtual void SendWebTextToAI(int32_t nodeId, std::string res) {};
@@ -248,6 +280,28 @@ public:
     virtual void SetStartContentChangeDetectCallback(std::function<void(ContentChangeConfig)>&&) {};
     virtual void SetStopContentChangeDetectCallback(std::function<void()>&&) {};
     virtual void ReportGetStateMgmtInfo(std::vector<std::string> results) {};
+    virtual int32_t RegisterPageSceneRules(int32_t processId, const std::string& ruleJson)
+    {
+        return NOT_CONNECTED;
+    };
+    virtual int32_t UnregisterPageSceneRules(int32_t processId, const std::string& ruleSetId)
+    {
+        return NOT_CONNECTED;
+    };
+    virtual int32_t GetPageScene(int32_t processId, const std::string& ruleJsonOrRuleSetId)
+    {
+        return NOT_CONNECTED;
+    };
+    virtual bool GetPageSceneRulesRegistered()
+    {
+        return false;
+    };
+    virtual void ReportPageSceneEvent(int32_t processId, const std::string& sceneJson, bool isGetResult) {};
+    virtual void CompleteGetPageScene(int32_t processId) {};
+    virtual void NotifyPageSceneNodeChanged(const std::string& nodeTag, bool isAttach) {};
+    virtual void NotifyPageSceneContentChanged() {};
+    virtual void FlushPageSceneNodeChanged() {};
+    virtual void SavePageSceneDetectFunction(PageSceneDetectFunction&& function) {};
 
 protected:
     UiSessionManager() = default;
@@ -264,6 +318,7 @@ protected:
     std::atomic<int32_t> scrollEventRegisterProcesses_ = 0;
     std::atomic<int32_t> lifeCycleEventRegisterProcesses_ = 0;
     std::atomic<int32_t> selectTextEventRegisterProcesses_ = 0;
+    std::atomic<int32_t> pageSceneRuleRegisterProcesses_ = 0;
     bool webFocusEventRegistered = false;
     std::mutex webFocusEventRegisteredMutex_;
     InspectorFunction inspectorFunction_ = 0;
@@ -312,7 +367,17 @@ protected:
     std::mutex stopContentChangeDetectCallbackMutex_;
     GetWebInfoByRequestFunction getWebInfoByRequestCallback_;
     std::mutex getWebInfoByRequestCallbackMutex_;
+    GetAbilityLanguageInfoFunction getAbilityLanguageInfoCallback_;
+    std::mutex getAbilityLanguageInfoCallbackMutex_;
+    PageTranslateTextFunction getArkUIPageTranslateTextFunction_;
+    PageTranslateTextFunction startArkUIPageTranslateFunction_;
+    PageTranslateEndFunction endArkUIPageTranslateFunction_;
+    PageTranslateResetFunction resetArkUIPageTranslateFunction_;
+    PageTranslateResultFunction sendArkUIPageTranslateResultFunction_;
+    std::mutex arkUIPageTranslateFunctionMutex_;
     RelaxedCommandFunction relaxedCommandFunction_ = nullptr;
+    PageSceneDetectFunction pageSceneDetectFunction_;
+    std::mutex pageSceneDetectFunctionMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H

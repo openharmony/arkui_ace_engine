@@ -22,12 +22,14 @@
 
 #include "base/utils/noncopyable.h"
 #include "base/view_data/view_data_wrap.h"
-#include "core/common/container_consts.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 #include "core/common/resource/pattern_resource_manager.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/smart_gesture/smart_gesture_types.h"
+#include "core/components_ng/pattern/lazy_container_item_helper.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/node_paint_method.h"
@@ -238,23 +240,6 @@ public:
         PropagateForegroundColorToChildren();
     }
 
-    virtual bool NeedReadFontScaleFromEnv()
-    {
-        return false;
-    }
-
-    void ReadFontScaleFromEnv();
-
-    std::optional<float> GetEnvFontScale() const
-    {
-        return envFontScale_;
-    }
-
-    void SetEnvFontScale(const std::optional<float>& fontScale)
-    {
-        envFontScale_ = fontScale;
-    }
-
     void PropagateForegroundColorToChildren();
 
     void UpdateChildRenderContext(
@@ -331,6 +316,23 @@ public:
     PipelineContext* GetContext() const;
 
     RenderContext* GetRenderContext() const;
+
+    // Per-child index carrier for lazy containers (List / ListItemGroup). Lazily created when a container
+    // indexes this child during layout; lets generic (non-ListItem) children carry an indexInList /
+    // indexInListItemGroup so they can participate in scrollToIndex / onScrollIndex / focus navigation.
+    // Stays nullptr for patterns never placed in such a container (zero cost). Lives on the child so it is
+    // destroyed together with the child — no stale entries when LazyForEach recycles children.
+    const RefPtr<LazyContainerItemHelper>& GetOrCreateLazyContainerItemHelper()
+    {
+        if (!lazyContainerItemHelper_) {
+            lazyContainerItemHelper_ = MakeRefPtr<LazyContainerItemHelper>();
+        }
+        return lazyContainerItemHelper_;
+    }
+    const RefPtr<LazyContainerItemHelper>& GetLazyContainerItemHelper() const
+    {
+        return lazyContainerItemHelper_;
+    }
 
     virtual void DumpInfo() {}
     virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
@@ -594,15 +596,6 @@ public:
 
     virtual void OnFocusNodeChange(FocusReason focusReason) {}
     virtual void OnCollectRemoved() {}
-    virtual std::string GetCurrentLanguage()
-    {
-        return nullptr;
-    };
-    virtual void GetTranslateText(
-        std::string extraData, std::function<void(std::string)> callback, bool isContinued) {};
-    virtual void SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids) {};
-    virtual void EndTranslate() {};
-    virtual void SendTranslateResult(std::string results) {};
     int32_t OnRecvCommand(const std::string& command);
     virtual std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content)
     {
@@ -745,7 +738,7 @@ protected:
 
     WeakPtr<FrameNode> frameNode_;
     RefPtr<PatternResourceManager> resourceMgr_;
-    std::optional<float> envFontScale_;
+    RefPtr<LazyContainerItemHelper> lazyContainerItemHelper_;
 
     std::function<bool()> onNeedSoftkeyboardCallback_;
 private:

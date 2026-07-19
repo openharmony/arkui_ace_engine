@@ -74,15 +74,22 @@ ani_object DragEventGetData([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_
     }
     std::shared_ptr<OHOS::UDMF::UnifiedData> unifiedData(unifiedDataPtr);
     auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
-    ani_boolean isUnifiedData;
+    ani_boolean isUnifiedData = ANI_FALSE;
     ani_class dataClass;
-    env->FindClass("@ohos.data.unifiedDataChannel.unifiedDataChannel.UnifiedData", &dataClass);
-    env->Object_InstanceOf(unifiedData_obj, dataClass, &isUnifiedData);
+    auto status = env->FindClass("@ohos.data.unifiedDataChannel.unifiedDataChannel.UnifiedData", &dataClass);
+    if (ANI_OK != status) {
+        HILOGE("AceDrag: find UnifiedData class failed status = %{public}d", static_cast<int32_t>(status));
+        return result_obj;
+    }
+    status = env->Object_InstanceOf(unifiedData_obj, dataClass, &isUnifiedData);
+    if (ANI_OK != status) {
+        HILOGE("AceDrag: Object_InstanceOf failed status = %{public}d", static_cast<int32_t>(status));
+        return result_obj;
+    }
     if (!isUnifiedData) {
         return result_obj;
     }
     return unifiedData_obj;
-    return {};
 }
 
 ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,

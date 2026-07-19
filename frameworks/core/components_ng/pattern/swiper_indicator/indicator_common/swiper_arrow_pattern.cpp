@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -25,6 +26,10 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const char SWIPER_LEFT_ARROW_ETS_TAG[] = "LeftArrow";
+const char SWIPER_RIGHT_ARROW_ETS_TAG[] = "RightArrow";
+} // namespace
 void SwiperArrowPattern::OnModifyDone()
 {
     ACE_UINODE_TRACE(GetHost());
@@ -88,7 +93,7 @@ void SwiperArrowPattern::OnClick() const
     CHECK_NULL_VOID(swiperController);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+    if (host->GetTag() == SWIPER_LEFT_ARROW_ETS_TAG) {
         if (swiperPattern->IsHorizontalAndRightToLeft()) {
             swiperController->ShowNext();
         } else {
@@ -96,7 +101,7 @@ void SwiperArrowPattern::OnClick() const
         }
         return;
     }
-    if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+    if (host->GetTag() == SWIPER_RIGHT_ARROW_ETS_TAG) {
         if (swiperPattern->IsHorizontalAndRightToLeft()) {
             swiperController->ShowPrevious();
         } else {
@@ -202,7 +207,7 @@ void SwiperArrowPattern::InitAccessibilityText()
     CHECK_NULL_VOID(swiperPattern);
     auto preAccessibilityText = swiperIndicatorTheme->GetPreAccessibilityText();
     auto nextAccessibilityText = swiperIndicatorTheme->GetNextAccessibilityText();
-    if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
+    if (host->GetTag() == SWIPER_LEFT_ARROW_ETS_TAG) {
         std::string accessibilityLeftText = "";
         if (swiperPattern->IsHorizontalAndRightToLeft()) {
             accessibilityLeftText = nextAccessibilityText;
@@ -212,7 +217,7 @@ void SwiperArrowPattern::InitAccessibilityText()
         accessibilityProperty->SetAccessibilityText(accessibilityLeftText);
         accessibilityProperty->SetAccessibilityCustomRole("button");
     }
-    if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
+    if (host->GetTag() == SWIPER_RIGHT_ARROW_ETS_TAG) {
         std::string accessibilityRightText = "";
         if (swiperPattern->IsHorizontalAndRightToLeft()) {
             accessibilityRightText = preAccessibilityText;
@@ -226,8 +231,14 @@ void SwiperArrowPattern::InitAccessibilityText()
 
 void SwiperArrowPattern::InitNavigationArrow()
 {
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     auto buttonAccessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(buttonAccessibilityProperty);
     buttonAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
@@ -252,12 +263,11 @@ void SwiperArrowPattern::InitNavigationArrow()
     host->AddChild(buttonNode);
     buttonNode->AddChild(imageNode);
     UpdateArrowContent();
-    auto pattern = buttonNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->HandleBackgroundColor();
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->handleButtonBackgroundColor(buttonHandle);
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::CIRCLE);
 }
 
 int32_t SwiperArrowPattern::TotalCount() const
@@ -386,8 +396,8 @@ std::tuple<bool, bool, bool> SwiperArrowPattern::CheckHoverStatus()
     if (swiperPattern->IsHorizontalAndRightToLeft()) {
         std::swap(leftArrowIsHidden, rightArrowIsHidden);
     }
-    auto isLeftArrow = host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG;
-    auto isRightArrow = host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG;
+    auto isLeftArrow = host->GetTag() == SWIPER_LEFT_ARROW_ETS_TAG;
+    auto isRightArrow = host->GetTag() == SWIPER_RIGHT_ARROW_ETS_TAG;
     auto isLoop = swiperArrowLayoutProperty->GetLoopValue(true);
     auto needHideArrow = (((isLeftArrow && leftArrowIsHidden) || (isRightArrow && rightArrowIsHidden)) && !isLoop)
         || (swiperPattern->RealTotalCount() <= displayCount_);
@@ -468,14 +478,14 @@ void SwiperArrowPattern::UpdateArrowContentBySymbol(RefPtr<FrameNode>& buttonNod
     auto swiperIndicatorTheme = host->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     bool isRtl = swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (V2::SWIPER_LEFT_ARROW_ETS_TAG == host->GetTag()) {
+    if (SWIPER_LEFT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(
                 isRtl ? swiperIndicatorTheme->GetRightSymbolId() : swiperIndicatorTheme->GetLeftSymbolId()));
         } else {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(swiperIndicatorTheme->GetUpSymbolId()));
         }
-    } else if (V2::SWIPER_RIGHT_ARROW_ETS_TAG == host->GetTag()) {
+    } else if (SWIPER_RIGHT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(
                 isRtl ? swiperIndicatorTheme->GetLeftSymbolId() : swiperIndicatorTheme->GetRightSymbolId()));
@@ -488,10 +498,10 @@ void SwiperArrowPattern::UpdateArrowContentBySymbol(RefPtr<FrameNode>& buttonNod
     if (!swiperArrowLayoutProperty->GetEnabledValue(true)) {
         buttonNode->GetRenderContext()->UpdateBackgroundColor(
             backgroundColor_.BlendOpacity(swiperIndicatorTheme->GetArrowDisabledAlpha()));
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        if (buttonLayoutProperty) {
-            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-        }
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), true);
         symbolLayoutProperty->UpdateSymbolColorList({ swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(
             swiperIndicatorTheme->GetArrowDisabledAlpha()) });
     }
@@ -514,13 +524,13 @@ void SwiperArrowPattern::UpdateArrowContentByImage(RefPtr<FrameNode>& buttonNode
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (V2::SWIPER_LEFT_ARROW_ETS_TAG == host->GetTag()) {
+    if (SWIPER_LEFT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
         } else {
             imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG);
         }
-    } else if (V2::SWIPER_RIGHT_ARROW_ETS_TAG == host->GetTag()) {
+    } else if (SWIPER_RIGHT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
         } else {
@@ -533,10 +543,10 @@ void SwiperArrowPattern::UpdateArrowContentByImage(RefPtr<FrameNode>& buttonNode
         CHECK_NULL_VOID(swiperIndicatorTheme);
         buttonNode->GetRenderContext()->UpdateBackgroundColor(
             backgroundColor_.BlendOpacity(swiperIndicatorTheme->GetArrowDisabledAlpha()));
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        if (buttonLayoutProperty) {
-            buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-        }
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)), true);
         imageSourceInfo.SetFillColor(swiperArrowLayoutProperty->GetArrowColorValue().BlendOpacity(
             swiperIndicatorTheme->GetArrowDisabledAlpha()));
     }
@@ -558,10 +568,13 @@ void SwiperArrowPattern::UpdateArrowContent()
         swiperArrowLayoutProperty->GetIsShowBackgroundValue(false)
             ? swiperArrowLayoutProperty->GetBackgroundColorValue(backgroundColor_)
             : Color::TRANSPARENT);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(swiperArrowLayoutProperty->GetBackgroundSizeValue()),
             CalcLength(swiperArrowLayoutProperty->GetBackgroundSizeValue())));
     backgroundColor_ = buttonRenderContext->GetBackgroundColorValue(Color::TRANSPARENT);

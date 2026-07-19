@@ -31,6 +31,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline/base/constants.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map.h"
@@ -521,6 +522,38 @@ JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject,
     return jsImage;
 }
 
+void DrawCanvasImage(const RefPtr<RenderingContext2DModel>& context, const ImageInfo& imageInfo)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->drawCanvasImage);
+    bridge->drawCanvasImage(context, imageInfo);
+}
+
+void DrawCanvasSvgImage(const RefPtr<RenderingContext2DModel>& context, const ImageInfo& imageInfo)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->drawCanvasSvgImage);
+    bridge->drawCanvasSvgImage(context, imageInfo);
+}
+
+void DrawCanvasPixelMap(const RefPtr<RenderingContext2DModel>& context, const ImageInfo& imageInfo)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->drawCanvasPixelMap);
+    bridge->drawCanvasPixelMap(context, imageInfo);
+}
+
+void PutCanvasImageData(const RefPtr<RenderingContext2DModel>& context, const ImageData& imageData)
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->putCanvasImageData);
+    bridge->putCanvasImageData(context, imageData);
+}
+
 void JSCanvasRenderer::DrawSvgImage(const JSCallbackInfo& info, JSRenderImage* jsImage)
 {
     CanvasImage image;
@@ -532,7 +565,7 @@ void JSCanvasRenderer::DrawSvgImage(const JSCallbackInfo& info, JSRenderImage* j
     imageInfo.svgDom = jsImage->GetSvgDom();
     CHECK_NULL_VOID(imageInfo.svgDom);
     imageInfo.imageFit = jsImage->GetImageFit();
-    renderingContext2DModel_->DrawSvgImage(imageInfo);
+    DrawCanvasSvgImage(renderingContext2DModel_, imageInfo);
 }
 
 void JSCanvasRenderer::DrawImage(const JSCallbackInfo& info, JSRenderImage* jsImage)
@@ -546,14 +579,14 @@ void JSCanvasRenderer::DrawImage(const JSCallbackInfo& info, JSRenderImage* jsIm
     imageInfo.pixelMap = jsImage->GetPixelMap();
     CHECK_NULL_VOID(imageInfo.pixelMap);
     imageInfo.image = image;
-    renderingContext2DModel_->DrawPixelMap(imageInfo);
+    DrawCanvasPixelMap(renderingContext2DModel_, imageInfo);
 #else
     image.src = jsImage->GetSrc();
     image.imageData = jsImage->GetImageData();
     imageInfo.image = image;
     imageInfo.imgWidth = jsImage->GetWidth();
     imageInfo.imgHeight = jsImage->GetHeight();
-    renderingContext2DModel_->DrawImage(imageInfo);
+    DrawCanvasImage(renderingContext2DModel_, imageInfo);
 #endif
 }
 
@@ -569,7 +602,7 @@ void JSCanvasRenderer::DrawPixelMap(const JSCallbackInfo& info)
     CHECK_NULL_VOID(runtime);
     imageInfo.pixelMap = CreatePixelMapFromNapiValue(info[0], runtime->GetNativeEngine());
     CHECK_NULL_VOID(imageInfo.pixelMap);
-    renderingContext2DModel_->DrawPixelMap(imageInfo);
+    DrawCanvasPixelMap(renderingContext2DModel_, imageInfo);
 #endif
 }
 
@@ -766,7 +799,7 @@ void JSCanvasRenderer::JsPutImageData(const JSCallbackInfo& info)
         }
     }
 
-    renderingContext2DModel_->PutImageData(imageData);
+    PutCanvasImageData(renderingContext2DModel_, imageData);
 }
 
 void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& imageData)
@@ -925,7 +958,7 @@ void JSCanvasRenderer::JsSetPixelMap(const JSCallbackInfo& info)
         CHECK_NULL_VOID(runtime);
         imageInfo.pixelMap = CreatePixelMapFromNapiValue(info[0], runtime->GetNativeEngine());
         CHECK_NULL_VOID(imageInfo.pixelMap);
-        renderingContext2DModel_->DrawPixelMap(imageInfo);
+        DrawCanvasPixelMap(renderingContext2DModel_, imageInfo);
     }
 #else
     TAG_LOGI(

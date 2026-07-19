@@ -34,6 +34,7 @@ constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORC
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 const auto MASK_COUNT = 2;
 const auto IMAGE_INDICATOR_COUNT = 1;
+const char TAB_CONTENT_ITEM_ETS_TAG[] = "TabContent";
 }
 void TabContentModelStatic::SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder)
 {
@@ -298,7 +299,7 @@ RefPtr<FrameNode> TabContentModelStatic::CreateFrameNode(int32_t nodeId)
 {
     ACE_UINODE_TRACE(nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
-        V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
+        TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     auto tabTheme = frameNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, nullptr);
     auto layout = frameNode->GetLayoutProperty<TabContentLayoutProperty>();
@@ -772,10 +773,11 @@ void TabContentModelStatic::AddTabBarItem(const RefPtr<UINode>& tabContent, int3
 
 void TabContentModelStatic::InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return;
     }
-    CHECK_NULL_VOID(textLayoutProperty);
     auto& textStyle = textLayoutProperty->GetTextLineStyle();
     CHECK_NULL_VOID(textStyle);
     textStyle->UpdateOrphanCharOptimization(true);

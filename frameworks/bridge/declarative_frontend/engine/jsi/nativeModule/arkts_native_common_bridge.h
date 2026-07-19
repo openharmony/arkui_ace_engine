@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_COMMON_BRIDGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_COMMON_BRIDGE_H
 
+#include "ui/base/macros.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "core/components_ng/pattern/gesture/gesture_model.h"
 
@@ -34,7 +35,7 @@ public:
     static ArkUINativeModuleValue SetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue ResetHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    ACE_FORCE_EXPORT static ArkUINativeModuleValue ResetHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBorderWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -117,6 +118,8 @@ public:
     static ArkUINativeModuleValue ResetBackgroundImageResizable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetBackgroundImageSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundImageSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static bool ParseJsBackgroundImageOptions(
+        const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& repeatIndex, bool& syncMode);
     static ArkUINativeModuleValue SetBackgroundImage(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackgroundImage(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTranslate(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -333,7 +336,7 @@ public:
     static Local<panda::ObjectRef> CreateEventTargetObject(EcmaVM* vm, const std::shared_ptr<BaseGestureEvent>& info);
     static Local<panda::ObjectRef> CreateAreaObject(EcmaVM* vm, const RectF& rect, const OffsetF& origin);
     static Local<panda::ObjectRef> InnerCreateHoverInfoObj(EcmaVM* vm, HoverInfo& hoverInfo);
-    static Local<panda::ObjectRef> CreateHoverInfo(EcmaVM* vm, HoverInfo* hoverInfo);
+    ACE_FORCE_EXPORT static Local<panda::ObjectRef> CreateHoverInfo(EcmaVM* vm, HoverInfo* hoverInfo);
     static Local<panda::ObjectRef> CreateTouchTestInfo(EcmaVM* vm, const NG::TouchTestInfo& info);
     static Local<panda::ObjectRef> CreateRectangle(EcmaVM* vm, const NG::RectF& rect);
     static void GetGestureCommonValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& priority, int32_t& mask);
@@ -543,6 +546,9 @@ public:
     static ArkUINativeModuleValue ResetOnNeedSoftkeyboard(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetDoubleSided(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDoubleSided(ArkUIRuntimeCallInfo* runtimeCallInfo);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+    static void ReportClickEvent(const WeakPtr<NG::FrameNode>& weakNode, const std::u16string text = u"");
+#endif
 };
 } // namespace OHOS::Ace::NG
 

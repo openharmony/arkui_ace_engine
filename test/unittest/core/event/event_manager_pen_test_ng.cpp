@@ -600,6 +600,7 @@ HWTEST_F(EventManagerTestNg, DispatchPenHoverMoveEventNG020, TestSize.Level1)
     EXPECT_FALSE(eventManager->curPenHoverMoveResultsMap_.empty());
 }
 
+ /**
  * @tc.name: PenHoverTest0021
  * @tc.desc: Test PenHoverTest function.
  */

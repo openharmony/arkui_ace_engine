@@ -30,6 +30,10 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 bool g_isOnEditChangeCalled = false;
+bool g_isAboutToIMEInputCalled = false;
+bool g_isAboutToDeleteCalled = false;
+bool g_isOnWillChangeCalled = false;
+bool g_isOnStyledStringWillChangeCalled = false;
 } // namespace
  
 class RichEditorEventTestNg : public RichEditorCommonTestNg {
@@ -745,6 +749,12 @@ HWTEST_F(RichEditorEventTestNg, RichEditorEventHub005, TestSize.Level0)
     EXPECT_TRUE(eventHub->FireOnWillChange(value));
     EXPECT_TRUE(eventHub->FireOnStyledStringWillChange(info));
 
+    /**
+     * @tc.steps: step3. FireOnStyledStringDidChange event when callback is null
+     */
+    EXPECT_FALSE(eventHub->HasOnStyledStringDidChange());
+    eventHub->FireOnStyledStringDidChange(info);
+
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -1016,5 +1026,409 @@ HWTEST_F(RichEditorEventTestNg, SetOnCopy, TestSize.Level0)
     EXPECT_TRUE(event.IsPreventDefault());
     eventHub->FireOnPaste(event);
     EXPECT_FALSE(event.IsPreventDefault());
+}
+
+/**
+ * @tc.name: FireAboutToIMEInput001
+ * @tc.desc: test FireAboutToIMEInput when aboutToIMEInput_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireAboutToIMEInput001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    // aboutToIMEInput_ is null by default
+    RichEditorInsertValue info;
+    EXPECT_TRUE(eventHub->FireAboutToIMEInput(info));
+}
+
+/**
+ * @tc.name: FireAboutToIMEInput002
+ * @tc.desc: test FireAboutToIMEInput when callback returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireAboutToIMEInput002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    g_isAboutToIMEInputCalled = false;
+    auto callback = [](const RichEditorInsertValue& info) {
+        g_isAboutToIMEInputCalled = true;
+        return true;
+    };
+    eventHub->SetAboutToIMEInput(std::move(callback));
+
+    RichEditorInsertValue info;
+    info.SetInsertOffset(5);
+    info.SetInsertValue(INIT_VALUE_1);
+    EXPECT_TRUE(eventHub->FireAboutToIMEInput(info));
+    EXPECT_TRUE(g_isAboutToIMEInputCalled);
+}
+
+/**
+ * @tc.name: FireAboutToIMEInput003
+ * @tc.desc: test FireAboutToIMEInput when callback returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireAboutToIMEInput003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    g_isAboutToIMEInputCalled = false;
+    auto callback = [](const RichEditorInsertValue& info) {
+        g_isAboutToIMEInputCalled = true;
+        return false;
+    };
+    eventHub->SetAboutToIMEInput(std::move(callback));
+
+    RichEditorInsertValue info;
+    EXPECT_FALSE(eventHub->FireAboutToIMEInput(info));
+    EXPECT_TRUE(g_isAboutToIMEInputCalled);
+}
+
+/**
+ * @tc.name: FireAboutToIMEInput004
+ * @tc.desc: test SetAboutToIMEInput reset to null, FireAboutToIMEInput returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireAboutToIMEInput004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto callback = [](const RichEditorInsertValue& info) { return true; };
+    eventHub->SetAboutToIMEInput(std::move(callback));
+
+    // Reset to null
+    eventHub->SetAboutToIMEInput(nullptr);
+    RichEditorInsertValue info;
+    EXPECT_TRUE(eventHub->FireAboutToIMEInput(info));
+}
+
+/**
+ * @tc.name: FireAboutToDelete001
+ * @tc.desc: test FireAboutToDelete when aboutToDelete_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireAboutToDelete001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    // aboutToDelete_ is null by default
+    RichEditorDeleteValue info;
+    EXPECT_TRUE(eventHub->FireAboutToDelete(info));
+}
+
+/**
+ * @tc.name: FireAboutToDelete002
+ * @tc.desc: test FireAboutToDelete when callback returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireAboutToDelete002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    g_isAboutToDeleteCalled = false;
+    auto callback = [](const RichEditorDeleteValue& info) {
+        g_isAboutToDeleteCalled = true;
+        return true;
+    };
+    eventHub->SetAboutToDelete(std::move(callback));
+
+    RichEditorDeleteValue info;
+    info.SetOffset(3);
+    info.SetLength(2);
+    info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
+    EXPECT_TRUE(eventHub->FireAboutToDelete(info));
+    EXPECT_TRUE(g_isAboutToDeleteCalled);
+}
+
+/**
+ * @tc.name: FireAboutToDelete003
+ * @tc.desc: test FireAboutToDelete when callback returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireAboutToDelete003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    g_isAboutToDeleteCalled = false;
+    auto callback = [](const RichEditorDeleteValue& info) {
+        g_isAboutToDeleteCalled = true;
+        return false;
+    };
+    eventHub->SetAboutToDelete(std::move(callback));
+
+    RichEditorDeleteValue info;
+    EXPECT_FALSE(eventHub->FireAboutToDelete(info));
+    EXPECT_TRUE(g_isAboutToDeleteCalled);
+}
+
+/**
+ * @tc.name: FireAboutToDelete004
+ * @tc.desc: test SetAboutToDelete reset to null, FireAboutToDelete returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireAboutToDelete004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto callback = [](const RichEditorDeleteValue& info) { return true; };
+    eventHub->SetAboutToDelete(std::move(callback));
+
+    // Reset to null
+    eventHub->SetAboutToDelete(nullptr);
+    RichEditorDeleteValue info;
+    EXPECT_TRUE(eventHub->FireAboutToDelete(info));
+}
+
+/**
+ * @tc.name: FireOnWillChange001
+ * @tc.desc: test FireOnWillChange when onWillChange_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireOnWillChange001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    // onWillChange_ is null by default
+    RichEditorChangeValue info;
+    EXPECT_TRUE(eventHub->FireOnWillChange(info));
+    EXPECT_FALSE(eventHub->HasOnWillChange());
+}
+
+/**
+ * @tc.name: FireOnWillChange002
+ * @tc.desc: test FireOnWillChange when callback returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireOnWillChange002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    g_isOnWillChangeCalled = false;
+    auto callback = [](const RichEditorChangeValue& info) {
+        g_isOnWillChangeCalled = true;
+        return true;
+    };
+    eventHub->SetOnWillChange(std::move(callback));
+
+    EXPECT_TRUE(eventHub->HasOnWillChange());
+
+    RichEditorChangeValue info;
+    EXPECT_TRUE(eventHub->FireOnWillChange(info));
+    EXPECT_TRUE(g_isOnWillChangeCalled);
+}
+
+/**
+ * @tc.name: FireOnWillChange003
+ * @tc.desc: test FireOnWillChange when callback returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireOnWillChange003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    g_isOnWillChangeCalled = false;
+    auto callback = [](const RichEditorChangeValue& info) {
+        g_isOnWillChangeCalled = true;
+        return false;
+    };
+    eventHub->SetOnWillChange(std::move(callback));
+
+    EXPECT_TRUE(eventHub->HasOnWillChange());
+
+    RichEditorChangeValue info;
+    EXPECT_FALSE(eventHub->FireOnWillChange(info));
+    EXPECT_TRUE(g_isOnWillChangeCalled);
+}
+
+/**
+ * @tc.name: FireOnWillChange004
+ * @tc.desc: test SetOnWillChange reset to null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireOnWillChange004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto callback = [](const RichEditorChangeValue& info) { return true; };
+    eventHub->SetOnWillChange(std::move(callback));
+    EXPECT_TRUE(eventHub->HasOnWillChange());
+
+    // Reset to null
+    eventHub->SetOnWillChange(nullptr);
+    EXPECT_FALSE(eventHub->HasOnWillChange());
+
+    RichEditorChangeValue info;
+    EXPECT_TRUE(eventHub->FireOnWillChange(info));
+}
+
+/**
+ * @tc.name: FireOnStyledStringWillChange001
+ * @tc.desc: test FireOnStyledStringWillChange when onStyledStringWillChange_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireOnStyledStringWillChange001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    // onStyledStringWillChange_ is null by default
+    StyledStringChangeValue info;
+    EXPECT_TRUE(eventHub->FireOnStyledStringWillChange(info));
+    EXPECT_FALSE(eventHub->HasOnStyledStringWillChange());
+}
+
+/**
+ * @tc.name: FireOnStyledStringWillChange002
+ * @tc.desc: test FireOnStyledStringWillChange when callback returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireOnStyledStringWillChange002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    g_isOnStyledStringWillChangeCalled = false;
+    auto callback = [](const StyledStringChangeValue& info) {
+        g_isOnStyledStringWillChangeCalled = true;
+        return true;
+    };
+    eventHub->SetOnStyledStringWillChange(std::move(callback));
+
+    EXPECT_TRUE(eventHub->HasOnStyledStringWillChange());
+
+    StyledStringChangeValue info;
+    EXPECT_TRUE(eventHub->FireOnStyledStringWillChange(info));
+    EXPECT_TRUE(g_isOnStyledStringWillChangeCalled);
+}
+
+/**
+ * @tc.name: FireOnStyledStringWillChange003
+ * @tc.desc: test FireOnStyledStringWillChange when callback returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireOnStyledStringWillChange003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    g_isOnStyledStringWillChangeCalled = false;
+    auto callback = [](const StyledStringChangeValue& info) {
+        g_isOnStyledStringWillChangeCalled = true;
+        return false;
+    };
+    eventHub->SetOnStyledStringWillChange(std::move(callback));
+
+    EXPECT_TRUE(eventHub->HasOnStyledStringWillChange());
+
+    StyledStringChangeValue info;
+    EXPECT_FALSE(eventHub->FireOnStyledStringWillChange(info));
+    EXPECT_TRUE(g_isOnStyledStringWillChangeCalled);
+}
+
+/**
+ * @tc.name: FireOnStyledStringWillChange004
+ * @tc.desc: test SetOnStyledStringWillChange reset to null
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, FireOnStyledStringWillChange004, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto callback = [](const StyledStringChangeValue& info) { return true; };
+    eventHub->SetOnStyledStringWillChange(std::move(callback));
+    EXPECT_TRUE(eventHub->HasOnStyledStringWillChange());
+
+    // Reset to null
+    eventHub->SetOnStyledStringWillChange(nullptr);
+    EXPECT_FALSE(eventHub->HasOnStyledStringWillChange());
+
+    StyledStringChangeValue info;
+    EXPECT_TRUE(eventHub->FireOnStyledStringWillChange(info));
+}
+
+/**
+ * @tc.name: HasOnStyledStringDidChange001
+ * @tc.desc: test HasOnStyledStringDidChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEventTestNg, HasOnStyledStringDidChange001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    EXPECT_FALSE(eventHub->HasOnStyledStringDidChange());
+
+    auto callback = [](const StyledStringChangeValue& info) {};
+    eventHub->SetOnStyledStringDidChange(std::move(callback));
+    EXPECT_TRUE(eventHub->HasOnStyledStringDidChange());
+
+    eventHub->SetOnStyledStringDidChange(nullptr);
+    EXPECT_FALSE(eventHub->HasOnStyledStringDidChange());
 }
 }

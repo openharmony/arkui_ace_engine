@@ -15,41 +15,45 @@
 
 #include "core/components_ng/pattern/date_picker/datepicker_pattern.h"
 
-#include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
-
 #include <algorithm>
-
-#include "base/log/log.h"
-#include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
-#include "core/components_ng/pattern/date_picker/datepicker_event_hub.h"
-#include "core/components_ng/pattern/date_picker/picker_change_event.h"
-#include "core/components_ng/pattern/date_picker/picker_data.h"
 #include <functional>
 #include <stdint.h>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "compatible/components/picker/picker_base_component.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
 #include "base/i18n/date_time_sequence.h"
+#include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
-#include "compatible/components/picker/picker_base_component.h"
 #include "core/common/dynamic_module_helper.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components/theme/icon_theme.h"
-#include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/date_picker/bridge/datepicker_util.h"
+#include "core/components_ng/pattern/date_picker/datepicker_column_pattern.h"
+#include "core/components_ng/pattern/date_picker/datepicker_event_hub.h"
+#include "core/components_ng/pattern/date_picker/picker_change_event.h"
+#include "core/components_ng/pattern/date_picker/picker_data.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/picker_utils/picker_layout_property.h"
+#include "core/components_ng/pattern/picker_utils/picker_layout_utils.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
+#include "core/interfaces/native/node/view_model.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/interfaces/native/node/view_model.h"
-#include "core/components_ng/pattern/date_picker/bridge/datepicker_util.h"
-#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -174,24 +178,28 @@ bool DatePickerPattern::UpdateFocusStyles(const RefPtr<PickerTheme>& pickerTheme
     auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
     auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
     CHECK_NULL_RETURN(buttonNode, false);
-    auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    buttonConfirmLayoutProperty->UpdateType(ButtonType::NORMAL);
-    buttonConfirmLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(selectorItemRadius_));
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, false);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
+    buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, BorderRadiusProperty(selectorItemRadius_));
     auto standardButtonHeight = static_cast<float>((height - PRESS_INTERVAL).ConvertToPx());
     auto maxButtonHeight = static_cast<float>(datePickerColumnNode->GetGeometryNode()->GetFrameSize().Height());
     auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
     if (!useButtonFocusArea_) {
         auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
-        buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+        layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
         buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
     } else {
         auto pickerPadding = pickerTheme->GetPickerPadding();
         standardButtonHeight = static_cast<float>((height - pickerPadding * RATE).ConvertToPx());
         auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
-        buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
+        layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(width - pickerPadding.ConvertToPx() * RATE), CalcLength(buttonHeight)));
         auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
         UpdateColumnButtonStyles(columnNode, isFocusButton, false);
@@ -547,9 +555,9 @@ void DatePickerPattern::UpdateButtonMargin(
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     isRtl = isConfirmOrNextNode ? isRtl : !isRtl;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::DATEPICKER_DIALOG);
+        DatePickerDialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true);
     } else {
-        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::DATEPICKER_DIALOG);
+        DatePickerDialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false);
     }
     buttonNode->GetLayoutProperty()->UpdateMargin(margin);
 }
@@ -778,8 +786,10 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(buttonTitleNode);
     auto titleLayoutRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_VOID(titleLayoutRenderContext);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
-        !DialogView::IsSupportBlurStyle(buttonTitleNode, isShowInSubWindow_)) {
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    bool isSupportBlurStyle =
+        dialogInnerModifier ? dialogInnerModifier->isSupportBlurStyle(buttonTitleNode, isShowInSubWindow_) : false;
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN) || !isSupportBlurStyle) {
         titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
     }
     UpdateTitleTextColor(buttonTitleNode, pickerTheme);
@@ -1279,20 +1289,22 @@ void DatePickerPattern::FlushMonthDaysColumn()
 bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string& compName,
     const std::string& eventName, const std::string& eventData)
 {
+#ifndef CROSS_PLATFORM
     auto dataJson = JsonUtil::ParseJsonString(eventData);
     CHECK_NULL_RETURN(dataJson, false);
-    auto params = InspectorJsonUtil::CreateObject();
+    auto params = JsonUtil::Create();
     CHECK_NULL_RETURN(params, false);
     params->Put("year", static_cast<int32_t>(dataJson->GetUInt("year")));
     params->Put("month", static_cast<int32_t>(dataJson->GetUInt("month") + 1)); // month: 1-12
     params->Put("day", static_cast<int32_t>(dataJson->GetUInt("day")));
 
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put(compName.c_str(), eventName.c_str());
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 
@@ -1306,8 +1318,8 @@ bool DatePickerPattern::ReportDialogDateChangeEvent(int32_t nodeId, const std::s
         !dataJson->Contains("hour") || !dataJson->Contains("minute")) {
         return false;
     }
-
-    auto params = InspectorJsonUtil::CreateObject();
+#ifndef CROSS_PLATFORM
+    auto params = JsonUtil::Create();
     CHECK_NULL_RETURN(params, false);
     params->Put("year", static_cast<int32_t>(dataJson->GetUInt("year")));
     params->Put("month", static_cast<int32_t>(dataJson->GetUInt("month") + 1));
@@ -1316,12 +1328,13 @@ bool DatePickerPattern::ReportDialogDateChangeEvent(int32_t nodeId, const std::s
     params->Put("minute", static_cast<int32_t>(dataJson->GetUInt("minute")));
     params->Put("second", 0);
 
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put(compName.c_str(), eventName.c_str());
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 
@@ -3532,7 +3545,8 @@ bool DatePickerPattern::IsJsonObject(const std::unique_ptr<JsonValue>& json)
 bool DatePickerPattern::ReportCommandResult(int32_t nodeId, const std::string& event,
     const std::string& result, const std::string& reason)
 {
-    auto value = InspectorJsonUtil::Create();
+#ifndef CROSS_PLATFORM
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put("event", event.c_str());
     value->Put("result", result.c_str());
@@ -3540,8 +3554,9 @@ bool DatePickerPattern::ReportCommandResult(int32_t nodeId, const std::string& e
         value->Put("reason", reason.c_str());
     }
 
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "DatePickerResult", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "DatePickerResult", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 

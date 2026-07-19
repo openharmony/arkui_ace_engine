@@ -26,8 +26,6 @@ namespace OHOS::Rosen {
 }
 namespace OHOS::Ace {
 
-class ScopedCanvas;
-
 class RosenRenderCalendar : public RenderCalendar {
     DECLARE_ACE_TYPE(RosenRenderCalendar, RenderCalendar);
 

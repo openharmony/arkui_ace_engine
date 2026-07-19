@@ -26,8 +26,7 @@
 #include "core/components_ng/event/pan_event.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/button/bridge/button_custom_modifier.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -37,6 +36,7 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -207,10 +207,13 @@ void AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode)
         auto buttonNode = buttonWk.Upgrade();
         auto imageNode = imageWk.Upgrade();
         CHECK_NULL_VOID(buttonNode && imageNode);
-        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
-        CHECK_NULL_VOID(buttonPattern);
-        if (info.GetAction() != MouseAction::MOVE || !buttonPattern->GetIsInHover()) {
-            buttonPattern->SetLocalLocation(info.GetLocalLocation());
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+        CHECK_NULL_VOID(buttonHandle);
+        if (info.GetAction() != MouseAction::MOVE || !buttonModifier->getButtonHover(buttonHandle)) {
+            auto location = info.GetLocalLocation();
+            buttonModifier->setButtonLocalLocation(buttonHandle, info.GetLocalLocation());
             return;
         }
         auto buttonNodeRenderContext = buttonNode->GetRenderContext();
@@ -249,14 +252,16 @@ void AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode)
         auto buttonNode = buttonWk.Upgrade();
         auto imageNode = imageWk.Upgrade();
         CHECK_NULL_VOID(buttonNode && imageNode);
-        auto buttonPattern = AceType::DynamicCast<ButtonPattern>(buttonNode->GetPattern());
-        CHECK_NULL_VOID(buttonPattern);
-        buttonPattern->SetInHover(isHover);
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+        CHECK_NULL_VOID(buttonHandle);
+        buttonModifier->setButtonHover(buttonHandle, isHover);
         float halfSize = TITLE_ICON_SIZE.Value() / 2.0f;
         auto icurve = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.2f, 1.0f);
         float maxDis = sqrt(pow(halfSize, 2.0) + pow(halfSize, 2.0));
-        float curDis = sqrt(pow(buttonPattern->GetLocalLocation().GetX() - halfSize, 2.0) +
-                            pow(buttonPattern->GetLocalLocation().GetY() - halfSize, 2.0));
+        float curDis = sqrt(pow(buttonModifier->getButtonLocalLocation(buttonHandle).GetX() - halfSize, 2.0) +
+                            pow(buttonModifier->getButtonLocalLocation(buttonHandle).GetY() - halfSize, 2.0));
         float currentScale = 1 + 0.1 * icurve->Move((maxDis - curDis) / (maxDis));
         g_baseScale = currentScale > g_baseScale ? currentScale : g_baseScale;
         auto buttonNodeRenderContext = buttonNode->GetRenderContext();
@@ -372,15 +377,19 @@ void SetupButtonResponseRegion(const RefPtr<FrameNode>& buttonNode)
 
 void SetupButtonLayoutProperties(const RefPtr<FrameNode>& buttonNode, bool isCloseButton)
 {
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::CIRCLE);
+
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(TITLE_BUTTON_SIZE), CalcLength(TITLE_BUTTON_SIZE)));
-    
+
     MarginProperty margin;
     margin.right = CalcLength(isCloseButton ? TITLE_PADDING_END : TITLE_ELEMENT_MARGIN_HORIZONTAL);
-    buttonLayoutProperty->UpdateMargin(margin);
+    layoutProperty->UpdateMargin(margin);
     buttonNode->MarkModifyDone();
 }
 
@@ -655,8 +664,11 @@ RefPtr<FrameNode> BuildControlButtonForCj(
     auto imageIcon = CreateButtonImageIcon(icon, isCloseButton);
     CHECK_NULL_RETURN(imageIcon, nullptr);
 
-    auto buttonNode = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    auto buttonHandle = buttonModifier->createFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    auto buttonNode = AceType::Claim(reinterpret_cast<FrameNode*>(buttonHandle));
+    CHECK_NULL_RETURN(buttonNode, nullptr);
     auto buttonFocus = buttonNode->GetFocusHub();
     if (buttonFocus) {
         buttonFocus->SetFocusable(false);

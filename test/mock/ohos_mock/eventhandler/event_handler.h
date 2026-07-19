@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_MOCK_EVENTHANDLER_EVENT_HANDLER_H
 #define FOUNDATION_ACE_MOCK_EVENTHANDLER_EVENT_HANDLER_H
 
+#include <string>
 #include <memory>
 
 namespace OHOS {
@@ -30,6 +31,22 @@ public:
     {
         return nullptr;
     }
+
+    template<typename Task>
+    bool PostTask(Task&& task, const std::string& name, int32_t delayTime)
+    {
+        return true;
+    }
+
+    template<typename Task>
+    bool PostTask(Task&& task, const char* name, int32_t delayTime)
+    {
+        return true;
+    }
+
+    void RemoveTask(const std::string& name) {}
+
+    void RemoveTask(const char* name) {}
 };
 
 } // namespace AppExecFwk

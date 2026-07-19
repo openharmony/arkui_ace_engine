@@ -145,7 +145,7 @@ export class UIUtilsImpl {
     }
 
     public makeV1Observed<T>(value: T): T {
-        if (!(value instanceof Object)) {
+        if (!(value && typeof value === 'object') || !(value instanceof Object)) {
             return value;
         }
         const isProxy = StateMgmtTool.isObjectLiteral(value);
@@ -184,8 +184,8 @@ export class UIUtilsImpl {
     }
 
     public makeObserved<T>(value: T, allowDeep: boolean): T {
-        if (!(value instanceof Object)) {
-            return value;
+        if (!value || typeof value !== 'object') {
+            return value as T;
         }
         if (isDynamicObject(value)) {
             value = getRawObject(value as T);

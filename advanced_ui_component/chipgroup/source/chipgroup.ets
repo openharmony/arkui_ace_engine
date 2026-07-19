@@ -25,6 +25,7 @@ import {
 } from '@ohos.arkui.advanced.Chip';
 import uiMaterial from '@ohos.arkui.uiMaterial';
 import deviceInfo from '@ohos.deviceInfo';
+import i18n from '@ohos.i18n';
 
 interface ChipGroupTheme {
   itemStyle: ChipGroupStyleTheme;
@@ -187,7 +188,13 @@ function parseDimension<T>(
         return value as T;
       }
     } else if (temp.type === 10003) {
-      if (resourceManager && isValidDimensionString(resourceManager.getStringSync(temp.id))) {
+      let stringValue: string = '';
+      try {
+        stringValue = resourceManager.getStringSync(temp.id);
+      } catch (err) {
+        stringValue = '';
+      }
+      if (resourceManager && isValidDimensionString(stringValue)) {
         return value as T;
       }
     }
@@ -535,6 +542,10 @@ export struct ChipGroup {
     return this.multiple ?? false;
   }
 
+  private isRTL(): boolean {
+    return i18n.isRTL(i18n.System.getAppPreferredLanguage());
+  }
+
   private getChipGroupItemSpace() {
     if (this.chipGroupSpace == undefined) {
       return defaultTheme.chipGroupSpace.itemSpace
@@ -706,7 +717,7 @@ export struct ChipGroup {
           Stack()
             .width(iconGroupSuffixTheme.normalBackgroundSize)
             .height(LayoutPolicy.matchParent)
-            .linearGradient({ angle: 90, colors: colorStops })
+            .linearGradient({ angle: this.isRTL() ? 270 : 90, colors: colorStops })
             .blendMode(BlendMode.DST_IN, BlendApplyType.OFFSCREEN)
             .hitTestBehavior(HitTestMode.None)
         }

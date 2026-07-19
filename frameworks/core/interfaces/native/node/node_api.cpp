@@ -18,17 +18,21 @@
 #include <securec.h>
 #include <vector>
 
+#include "interfaces/native/native_type.h"
+
 #include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/canvas_rendering_context_2d_modifier.h"
-#include "core/interfaces/native/node/custom_dialog_model.h"
+#include "core/interfaces/native/node/checkboxgroup_modifier.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/drag_adapter_impl.h"
 #include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/interfaces/native/node/grid_modifier.h"
@@ -36,13 +40,14 @@
 #include "core/interfaces/native/node/node_adapter_impl.h"
 #include "core/interfaces/native/node/node_animate.h"
 #include "core/interfaces/native/node/node_api_multi_thread.h"
+#include "core/interfaces/native/node/node_arc_swiper_modifier.h"
 #include "core/interfaces/native/node/node_canvas_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
 #include "core/interfaces/native/node/node_container_picker_modifier.h"
 #include "core/interfaces/native/node/node_custom_node_ext_modifier.h"
-#include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
+#include "core/interfaces/native/node/node_drag_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/interfaces/native/node/node_list_item_modifier.h"
@@ -50,8 +55,8 @@
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
-#include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/interfaces/native/node/node_span_modifier.h"
+#include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
@@ -67,13 +72,10 @@
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/runtime/runtime_init.h"
+#include "core/interfaces/native/utility/error_message_macros.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/html_utils.h"
-#include "core/interfaces/native/utility/error_message_macros.h"
-#include "interfaces/native/native_type.h"
-#include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -647,20 +649,13 @@ const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSliderChange,
 };
 
-const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::SetSwiperChange,
-    NodeModifier::SetSwiperAnimationStart,
-    NodeModifier::SetSwiperAnimationEnd,
-    NodeModifier::SetSwiperGestureSwipe,
-    NodeModifier::SetSwiperOnContentDidScroll,
-    NodeModifier::SetSwiperSelected,
-    NodeModifier::SetSwiperUnselected,
-    NodeModifier::SetSwiperContentWillScroll,
-    NodeModifier::SetSwiperScrollStateChanged,
-};
-
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::SetCanvasOnReady,
+    [](ArkUINodeHandle node, void* extraParam) {
+        auto* modifier = NodeModifier::GetCanvasModifier();
+        if (modifier && modifier->setCanvasOnReady) {
+            modifier->setCanvasOnReady(node, extraParam);
+        }
+    },
 };
 
 const ComponentAsyncEventHandler listNodeAsyncEventHandlers[] = {
@@ -689,27 +684,6 @@ const ComponentAsyncEventHandler ARC_LIST_NODE_ASYNC_EVENT_HANDLERS[] = {
 
 const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetListItemOnSelect,
-};
-
-const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
-    nullptr,
-    NodeModifier::SetOnGridScrollStart,
-    NodeModifier::SetOnGridScrollStop,
-    NodeModifier::SetOnGridScrollIndex,
-    NodeModifier::SetOnGridScrollFrameBegin,
-    NodeModifier::SetOnGridWillScroll,
-    NodeModifier::SetOnGridDidScroll,
-    NodeModifier::SetOnGridScrollBarUpdate,
-    NodeModifier::SetGridOnItemDragStart,
-    NodeModifier::SetGridOnItemDragEnter,
-    NodeModifier::SetGridOnItemDragMove,
-    NodeModifier::SetGridOnItemDragLeave,
-    NodeModifier::SetGridOnItemDrop,
-    NodeModifier::SetOnGridEditModeChange,
-};
-
-const ComponentAsyncEventHandler GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::SetOnGridItemSelect,
 };
 
 const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -916,6 +890,13 @@ const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     nullptr,
 };
 
+const ResetComponentAsyncEventHandler ARC_SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+};
+
 const ResetComponentAsyncEventHandler CANVAS_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
 };
@@ -946,27 +927,6 @@ const ResetComponentAsyncEventHandler ARC_LIST_NODE_RESET_ASYNC_EVENT_HANDLERS[]
 
 const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetListItemOnSelect,
-};
-
-const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
-    nullptr,
-    NodeModifier::ResetOnGridScrollStart,
-    NodeModifier::ResetOnGridScrollStop,
-    NodeModifier::ResetOnGridScrollIndex,
-    NodeModifier::ResetOnGridScrollFrameBegin,
-    NodeModifier::ResetOnGridWillScroll,
-    NodeModifier::ResetOnGridDidScroll,
-    NodeModifier::ResetOnGridScrollBarUpdate,
-    NodeModifier::ResetOnGridItemDragEnter,
-    NodeModifier::ResetOnGridItemDragLeave,
-    NodeModifier::ResetOnGridItemDragMove,
-    NodeModifier::ResetOnGridItemDragStart,
-    NodeModifier::ResetOnGridItemDrop,
-    NodeModifier::ResetOnGridEditModeChange,
-};
-
-const ResetComponentAsyncEventHandler GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::ResetOnGridItemSelect,
 };
 
 const ResetComponentAsyncEventHandler ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -1157,12 +1117,21 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             break;
         }
         case ARKUI_SWIPER: {
-            // swiper event type.
-            if (subKind >= sizeof(SWIPER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* swiperModifier = NodeModifier::GetSwiperModifier();
+            if (swiperModifier) {
+                eventHandle = reinterpret_cast<ComponentAsyncEventHandler>(
+                    swiperModifier->getAsyncEventHandlers(subKind));
+                CHECK_NULL_VOID(eventHandle);
             }
-            eventHandle = SWIPER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_ARC_SWIPER: {
+            auto* arcSwiperModifier = NodeModifier::GetArcSwiperModifier();
+            if (arcSwiperModifier) {
+                eventHandle =
+                    reinterpret_cast<ComponentAsyncEventHandler>(arcSwiperModifier->getAsyncEventHandlers(subKind));
+                CHECK_NULL_VOID(eventHandle);
+            }
             break;
         }
         case ARKUI_CANVAS: {
@@ -1208,24 +1177,22 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             break;
         }
         case ARKUI_GRID: {
-            // grid event type.
-            if (subKind >= sizeof(GRID_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* gridModifier = NodeModifier::GetGridModifier();
+            if (gridModifier) {
+                eventHandle = reinterpret_cast<ComponentAsyncEventHandler>(gridModifier->getEventSetHandler(subKind));
             }
-            eventHandle = GRID_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_GRID_ITEM: {
-            // grid item event type.
-            if (subKind >= sizeof(GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* gridItemModifier = NodeModifier::GetGridItemModifier();
+            if (gridItemModifier) {
+                eventHandle =
+                    reinterpret_cast<ComponentAsyncEventHandler>(gridItemModifier->getEventSetHandler(subKind));
             }
-            eventHandle = GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-        case ARKUI_ALPHABET_INDEXER: {
+        case ARKUI_ALPHABET_INDEXER:
+        case ARKUI_ARC_ALPHABET_INDEXER: {
             auto* alphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier();
             if (alphabetIndexerModifier) {
                 eventHandle = reinterpret_cast<ComponentAsyncEventHandler>(
@@ -1466,6 +1433,16 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+        case ARKUI_ARC_SWIPER: {
+            if (subKind >=
+                sizeof(ARC_SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = ARC_SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         case ARKUI_CANVAS: {
             if (subKind >= sizeof(CANVAS_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
                 TAG_LOGE(
@@ -1515,27 +1492,23 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             break;
         }
         case ARKUI_GRID: {
-            // grid event type.
-            if (subKind >= sizeof(GRID_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
-                TAG_LOGE(
-                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* gridModifier = NodeModifier::GetGridModifier();
+            if (gridModifier) {
+                eventHandle =
+                    reinterpret_cast<ResetComponentAsyncEventHandler>(gridModifier->getEventResetHandler(subKind));
             }
-            eventHandle = GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_GRID_ITEM: {
-            // grid item event type.
-            if (subKind >=
-                sizeof(GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
-                TAG_LOGE(
-                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* gridItemModifier = NodeModifier::GetGridItemModifier();
+            if (gridItemModifier) {
+                eventHandle =
+                    reinterpret_cast<ResetComponentAsyncEventHandler>(gridItemModifier->getEventResetHandler(subKind));
             }
-            eventHandle = GRID_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
-        case ARKUI_ALPHABET_INDEXER: {
+        case ARKUI_ALPHABET_INDEXER:
+        case ARKUI_ARC_ALPHABET_INDEXER: {
             // alphabet indexer event type.
             if (subKind >= sizeof(ALPHABET_INDEXER_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(
                 ResetComponentAsyncEventHandler)) {
@@ -2281,325 +2254,6 @@ const CJUIBasicAPI* GetCJUIBasicAPI()
     return &basicImpl;
 }
 
-ArkUIDialogHandle CreateDialog()
-{
-    return CustomDialog::CreateDialog();
-}
-
-void DisposeDialog(ArkUIDialogHandle handle)
-{
-    CustomDialog::DisposeDialog(handle);
-}
-
-ArkUI_Int32 SetDialogContent(ArkUIDialogHandle handle, ArkUINodeHandle contentNode)
-{
-    return CustomDialog::SetDialogContent(handle, contentNode);
-}
-
-ArkUI_Int32 RemoveDialogContent(ArkUIDialogHandle handle)
-{
-    return CustomDialog::RemoveDialogContent(handle);
-}
-
-ArkUI_Int32 SetDialogContentAlignment(
-    ArkUIDialogHandle handle, ArkUI_Int32 alignment, ArkUI_Float32 offsetX, ArkUI_Float32 offsetY)
-{
-    return CustomDialog::SetDialogContentAlignment(handle, alignment, offsetX, offsetY);
-}
-
-ArkUI_Int32 ResetDialogContentAlignment(ArkUIDialogHandle handle)
-{
-    return CustomDialog::ResetDialogContentAlignment(handle);
-}
-
-ArkUI_Int32 SetDialogModalMode(ArkUIDialogHandle handle, ArkUI_Bool isModal)
-{
-    return CustomDialog::SetDialogModalMode(handle, isModal);
-}
-
-ArkUI_Int32 SetDialogAutoCancel(ArkUIDialogHandle handle, ArkUI_Bool autoCancel)
-{
-    return CustomDialog::SetDialogAutoCancel(handle, autoCancel);
-}
-
-ArkUI_Int32 SetDialogMask(ArkUIDialogHandle handle, ArkUI_Uint32 maskColor, ArkUIRect* rect)
-{
-    return CustomDialog::SetDialogMask(handle, maskColor, rect);
-}
-
-ArkUI_Int32 SetDialogBackgroundColor(ArkUIDialogHandle handle, uint32_t backgroundColor)
-{
-    return CustomDialog::SetDialogBackgroundColor(handle, backgroundColor);
-}
-
-ArkUI_Int32 SetDialogBackgroundColorWithColorSpace(
-    ArkUIDialogHandle handle, uint32_t backgroundColor, int32_t ColorSpace)
-{
-    return CustomDialog::SetDialogBackgroundColor(handle, backgroundColor);
-}
-
-ArkUI_Int32 SetDialogCornerRadius(
-    ArkUIDialogHandle handle, float topLeft, float topRight, float bottomLeft, float bottomRight)
-{
-    return CustomDialog::SetDialogCornerRadius(handle, topLeft, topRight, bottomLeft, bottomRight);
-}
-
-ArkUI_Int32 SetDialogGridColumnCount(ArkUIDialogHandle handle, int32_t gridCount)
-{
-    return CustomDialog::SetDialogGridColumnCount(handle, gridCount);
-}
-
-ArkUI_Int32 EnableDialogCustomStyle(ArkUIDialogHandle handle, ArkUI_Bool enableCustomStyle)
-{
-    return CustomDialog::EnableDialogCustomStyle(handle, enableCustomStyle);
-}
-
-ArkUI_Int32 EnableDialogCustomAnimation(ArkUIDialogHandle handle, ArkUI_Bool enableCustomAnimation)
-{
-    return CustomDialog::EnableDialogCustomAnimation(handle, enableCustomAnimation);
-}
-
-ArkUI_Int32 ShowDialog(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow)
-{
-    return CustomDialog::ShowDialog(handle, showInSubWindow);
-}
-
-ArkUI_Int32 CloseDialog(ArkUIDialogHandle handle)
-{
-    return CustomDialog::CloseDialog(handle);
-}
-
-// Register closing event
-ArkUI_Int32 RegisterOnWillDialogDismiss(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32))
-{
-    return CustomDialog::RegisterOnWillDialogDismiss(handle, eventHandler);
-}
-
-// Register closing event
-ArkUI_Int32 RegisterOnWillDismissWithUserData(
-    ArkUIDialogHandle handler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event))
-{
-    return CustomDialog::RegisterOnWillDialogDismissWithUserData(handler, userData, callback);
-}
-
-ArkUI_Int32 SetKeyboardAvoidDistance(ArkUIDialogHandle handle, float distance, ArkUI_Int32 unit)
-{
-    return CustomDialog::SetKeyboardAvoidDistance(handle, distance, unit);
-}
-
-ArkUI_Int32 SetDialogLevelMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
-{
-    return CustomDialog::SetLevelMode(handle, mode);
-}
-
-ArkUI_Int32 SetDialogLevelUniqueId(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId)
-{
-    return CustomDialog::SetLevelUniqueId(handle, uniqueId);
-}
-
-ArkUI_Int32 SetDialogImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode)
-{
-    return CustomDialog::SetImmersiveMode(handle, mode);
-}
-
-ArkUI_Int32 SetLevelOrder(ArkUIDialogHandle handle, ArkUI_Float64 levelOrder)
-{
-    return CustomDialog::SetLevelOrder(handle, levelOrder);
-}
-
-ArkUI_Int32 RegisterOnWillAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
-{
-    return CustomDialog::RegisterOnWillAppearDialog(handle, userData, callback);
-}
-
-ArkUI_Int32 RegisterOnDidAppear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
-{
-    return CustomDialog::RegisterOnDidAppearDialog(handle, userData, callback);
-}
-
-ArkUI_Int32 RegisterOnWillDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
-{
-    return CustomDialog::RegisterOnWillDisappearDialog(handle, userData, callback);
-}
-
-ArkUI_Int32 RegisterOnDidDisappear(ArkUIDialogHandle handle, void* userData, void (*callback)(void* userData))
-{
-    return CustomDialog::RegisterOnDidDisappearDialog(handle, userData, callback);
-}
-
-ArkUI_Int32 SetDialogBorderWidth(ArkUIDialogHandle handle, ArkUI_Float32 top, ArkUI_Float32 right, ArkUI_Float32 bottom,
-    ArkUI_Float32 left, ArkUI_Int32 unit)
-{
-    return CustomDialog::SetDialogBorderWidth(handle, top, right, bottom, left, unit);
-}
-
-ArkUI_Int32 SetDialogBorderColor(ArkUIDialogHandle handle, uint32_t top, uint32_t right, uint32_t bottom, uint32_t left)
-{
-    return CustomDialog::SetDialogBorderColor(handle, top, right, bottom, left);
-}
-
-ArkUI_Int32 SetDialogBorderStyle(ArkUIDialogHandle handle, int32_t top, int32_t right, int32_t bottom, int32_t left)
-{
-    return CustomDialog::SetDialogBorderStyle(handle, top, right, bottom, left);
-}
-
-ArkUI_Int32 SetDialogWidth(ArkUIDialogHandle handle, float width, ArkUI_Int32 unit)
-{
-    return CustomDialog::SetWidth(handle, width, unit);
-}
-
-ArkUI_Int32 SetDialogHeight(ArkUIDialogHandle handle, float height, ArkUI_Int32 unit)
-{
-    return CustomDialog::SetHeight(handle, height, unit);
-}
-
-ArkUI_Int32 SetDialogShadow(ArkUIDialogHandle handle, ArkUI_Int32 shadow)
-{
-    return CustomDialog::SetShadow(handle, shadow);
-}
-
-ArkUI_Int32 SetDialogCustomShadow(ArkUIDialogHandle handle, const ArkUIInt32orFloat32* shadows, ArkUI_Int32 length)
-{
-    return CustomDialog::SetDialogCustomShadow(handle, shadows, length);
-}
-
-ArkUI_Int32 SetSystemMaterial(ArkUIDialogHandle handle, ArkUI_ImmersiveMaterial* material)
-{
-    return CustomDialog::SetSystemMaterial(handle, material);
-}
-
-ArkUI_Int32 SetDialogBackgroundBlurStyle(ArkUIDialogHandle handle, ArkUI_Int32 blurStyle)
-{
-    return CustomDialog::SetBackgroundBlurStyle(handle, blurStyle);
-}
-
-ArkUI_Int32 SetDialogKeyboardAvoidMode(ArkUIDialogHandle handle, ArkUI_Int32 keyboardAvoidMode)
-{
-    return CustomDialog::SetKeyboardAvoidMode(handle, keyboardAvoidMode);
-}
-
-ArkUI_Int32 EnableDialogHoverMode(ArkUIDialogHandle handle, ArkUI_Bool enableHoverMode)
-{
-    return CustomDialog::EnableHoverMode(handle, enableHoverMode);
-}
-
-ArkUI_Int32 SetDialogHoverModeArea(ArkUIDialogHandle handle, ArkUI_Int32 hoverModeAreaType)
-{
-    return CustomDialog::SetHoverModeArea(handle, hoverModeAreaType);
-}
-
-ArkUI_Int32 SetDialogFocusable(ArkUIDialogHandle handle, ArkUI_Bool focusable)
-{
-    return CustomDialog::SetFocusable(handle, focusable);
-}
-
-ArkUI_Int32 GetDialogState(ArkUIDialogHandle handle, ArkUI_Int32* dialogState)
-{
-    return CustomDialog::GetDialogState(handle, dialogState);
-}
-
-ArkUI_Int32 OpenCustomDialog(ArkUIDialogHandle handle, void(*callback)(ArkUI_Int32 dialogId))
-{
-    return CustomDialog::OpenCustomDialog(handle, callback);
-}
-
-ArkUI_Int32 OpenCustomDialogWithErrorCallback(
-    ArkUIDialogHandle handle, void* userData, void (*callback)(int32_t errorCode, int32_t dialogId, void* userData))
-{
-    return CustomDialog::OpenCustomDialogWithErrorCallback(handle, userData, callback);
-}
-
-ArkUI_Int32 UpdateCustomDialog(ArkUIDialogHandle handle, void(*callback)(int32_t dialogId))
-{
-    return CustomDialog::UpdateCustomDialog(handle, callback);
-}
-
-ArkUI_Int32 CloseCustomDialog(ArkUI_Int32 dialogId)
-{
-    return CustomDialog::CloseCustomDialog(dialogId);
-}
-
-ArkUI_Int32 SetDialogSubwindowMode(ArkUIDialogHandle handle, ArkUI_Bool showInSubWindow)
-{
-    return CustomDialog::SetDialogSubwindowMode(handle, showInSubWindow);
-}
-
-ArkUI_Int32 SetDialogDisplayModeInSubWindow(ArkUIDialogHandle handle, ArkUI_Int32 displayModeInSubWindow)
-{
-    return CustomDialog::SetDialogDisplayModeInSubWindow(handle, displayModeInSubWindow);
-}
-
-ArkUI_Int32 SetBackgroundBlurStyleOptions(ArkUIDialogHandle handle, ArkUI_Int32 (*intArray)[3], ArkUI_Float32 scale,
-    ArkUI_Uint32 (*uintArray)[3], ArkUI_Bool isValidColor)
-{
-    return CustomDialog::SetBackgroundBlurStyleOptions(handle, intArray, scale, uintArray, isValidColor);
-}
-
-ArkUI_Int32 SetBackgroundEffect(ArkUIDialogHandle handle, ArkUI_Float32 (*floatArray)[3], ArkUI_Int32 (*intArray)[2],
-    ArkUI_Uint32 (*uintArray)[4], ArkUI_Bool (*boolArray)[2])
-{
-    return CustomDialog::SetBackgroundEffect(handle, floatArray, intArray, uintArray, boolArray);
-}
-
-const ArkUIDialogAPI* GetDialogAPI()
-{
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIDialogAPI dialogImpl = {
-        .create = CreateDialog,
-        .dispose = DisposeDialog,
-        .setContent = SetDialogContent,
-        .removeContent = RemoveDialogContent,
-        .setContentAlignment = SetDialogContentAlignment,
-        .resetContentAlignment = ResetDialogContentAlignment,
-        .setModalMode = SetDialogModalMode,
-        .setAutoCancel = SetDialogAutoCancel,
-        .setMask = SetDialogMask,
-        .setBackgroundColor = SetDialogBackgroundColor,
-        .setBackgroundColorWIthColorSpace = SetDialogBackgroundColorWithColorSpace,
-        .setCornerRadius = SetDialogCornerRadius,
-        .setGridColumnCount = SetDialogGridColumnCount,
-        .enableCustomStyle = EnableDialogCustomStyle,
-        .enableCustomAnimation = EnableDialogCustomAnimation,
-        .show = ShowDialog,
-        .close = CloseDialog,
-        .registerOnWillDismiss = RegisterOnWillDialogDismiss,
-        .registerOnWillDismissWithUserData = RegisterOnWillDismissWithUserData,
-        .getState = GetDialogState,
-        .setKeyboardAvoidDistance = SetKeyboardAvoidDistance,
-        .setLevelMode = SetDialogLevelMode,
-        .setLevelUniqueId = SetDialogLevelUniqueId,
-        .setImmersiveMode = SetDialogImmersiveMode,
-        .setLevelOrder = SetLevelOrder,
-        .registerOnWillAppear = RegisterOnWillAppear,
-        .registerOnDidAppear = RegisterOnDidAppear,
-        .registerOnWillDisappear = RegisterOnWillDisappear,
-        .registerOnDidDisappear = RegisterOnDidDisappear,
-        .setBorderWidth = SetDialogBorderWidth,
-        .setBorderColor = SetDialogBorderColor,
-        .setBorderStyle = SetDialogBorderStyle,
-        .setWidth = SetDialogWidth,
-        .setHeight = SetDialogHeight,
-        .setShadow = SetDialogShadow,
-        .setCustomShadow = SetDialogCustomShadow,
-        .setBackgroundBlurStyle = SetDialogBackgroundBlurStyle,
-        .setKeyboardAvoidMode = SetDialogKeyboardAvoidMode,
-        .enableHoverMode = EnableDialogHoverMode,
-        .setHoverModeArea = SetDialogHoverModeArea,
-        .setFocusable = SetDialogFocusable,
-        .openCustomDialog = OpenCustomDialog,
-        .updateCustomDialog = UpdateCustomDialog,
-        .closeCustomDialog = CloseCustomDialog,
-        .setSubwindowMode = SetDialogSubwindowMode,
-        .setDisplayModeInSubWindow = SetDialogDisplayModeInSubWindow,
-        .setSystemMaterial = SetSystemMaterial,
-        .setBackgroundBlurStyleOptions = SetBackgroundBlurStyleOptions,
-        .setBackgroundEffect = SetBackgroundEffect,
-        .openCustomDialogWithErrorCallback = OpenCustomDialogWithErrorCallback,
-    };
-    CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
-    return &dialogImpl;
-}
-
 void ShowCrash(ArkUI_CharPtr message)
 {
     TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Arkoala crash: %{public}s", message);
@@ -2997,7 +2651,7 @@ ArkUIFullNodeAPI impl_full = {
     .getAnimation = GetAnimationAPI,        // Animation
     .getNavigation = GetNavigationAPI,       // Navigation
     .getGraphicsAPI = GetGraphicsAPI,         // Graphics
-    .getDialogAPI = GetDialogAPI,
+    .getDialogAPI = NodeModifier::GetDialogAPI,
     .getExtendedAPI = GetExtendedAPI,         // Extended
     .getNodeAdapterAPI = NodeAdapter::GetNodeAdapterAPI,         // adapter.
     .getDragAdapterAPI = DragAdapter::GetDragAdapterAPI,        // drag adapter.
@@ -3077,33 +2731,6 @@ const CJUIGraphicsAPI* GetCJUIGraphicsAPI()
     return &api;
 }
 
-const CJUIDialogAPI* GetCJUIDialogAPI()
-{
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUIDialogAPI dialogImpl = {
-        .create = CreateDialog,
-        .dispose = DisposeDialog,
-        .setContent = SetDialogContent,
-        .removeContent = RemoveDialogContent,
-        .setContentAlignment = SetDialogContentAlignment,
-        .resetContentAlignment = ResetDialogContentAlignment,
-        .setModalMode = SetDialogModalMode,
-        .setAutoCancel = SetDialogAutoCancel,
-        .setMask = SetDialogMask,
-        .setBackgroundColor = SetDialogBackgroundColor,
-        .setBackgroundColorWithColorSpace = SetDialogBackgroundColorWithColorSpace,
-        .setCornerRadius = SetDialogCornerRadius,
-        .setGridColumnCount = SetDialogGridColumnCount,
-        .enableCustomStyle = EnableDialogCustomStyle,
-        .enableCustomAnimation = EnableDialogCustomAnimation,
-        .show = ShowDialog,
-        .close = CloseDialog,
-        .registerOnWillDismiss = RegisterOnWillDialogDismiss,
-    };
-    CHECK_INITIALIZED_FIELDS_END(dialogImpl, 0, 0, 0); // don't move this line
-    return &dialogImpl;
-}
-
 const CJUIExtendedNodeAPI* GetCJUIExtendedAPI()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -3157,7 +2784,7 @@ CJUIFullNodeAPI fullCJUIApi {
     .getAnimation = GetCJUIAnimationAPI,        // Animation
     .getNavigation = GetCJUINavigationAPI,       // Navigation
     .getGraphicsAPI = GetCJUIGraphicsAPI,         // Graphics
-    .getDialogAPI = GetCJUIDialogAPI,
+    .getDialogAPI = NodeModifier::GetCJUIDialogAPI,
     .getExtendedAPI = GetCJUIExtendedAPI,         // Extended
     .getNodeAdapterAPI = NodeAdapter::GetCJUINodeAdapterAPI,         // adapter.
 };

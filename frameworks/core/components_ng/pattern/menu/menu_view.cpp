@@ -1538,6 +1538,9 @@ static int32_t ComputeEffectiveGridCount(const std::vector<OptionParam>& params,
     }
     for (const auto& menuItemUINode : children) {
         auto menuItemNode = AceType::DynamicCast<FrameNode>(menuItemUINode);
+        if (!menuItemNode) {
+            continue;
+        }
         auto param = ExtractOneMenuItemParam(menuItemNode);
         if (!param.value.empty()) {
             hasAnyText = true;
@@ -1572,10 +1575,14 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     SetMenuFocusRule(menuNode);
     bool hasGrid = IsGridStyleEnabled(menuParam) && !params.empty();
     if (hasGrid) {
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        if (menuPattern) {
+            menuPattern->SetIsArrayGridMenu(true);
+        }
         int32_t gridCount = ComputeEffectiveGridCount(params, nullptr, menuParam.gridStyle.value());
         std::vector<OptionParam> gridParams(params.begin(), params.begin() + gridCount);
         std::vector<OptionParam> listParams(params.begin() + gridCount, params.end());
-        bool isDown = menuParam.gridStyle->position == MenuGridPosition::DOWN;
+        bool isDown = menuParam.gridStyle->position == MenuGridPosition::BOTTOM;
         if (isDown) {
             if (!listParams.empty()) {
                 MountOptionToColumn(listParams, menuNode, menuParam, column, themeScopeId);
@@ -1648,10 +1655,14 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
 
     bool hasGrid = IsGridStyleEnabled(menuParam) && !params.empty();
     if (hasGrid) {
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        if (menuPattern) {
+            menuPattern->SetIsArrayGridMenu(true);
+        }
         int32_t gridCount = ComputeEffectiveGridCount(params, nullptr, menuParam.gridStyle.value());
         std::vector<OptionParam> gridParams(params.begin(), params.begin() + gridCount);
         std::vector<OptionParam> listParams(params.begin() + gridCount, params.end());
-        bool isDown = menuParam.gridStyle->position == MenuGridPosition::DOWN;
+        bool isDown = menuParam.gridStyle->position == MenuGridPosition::BOTTOM;
         if (isDown) {
             if (!listParams.empty()) {
                 MountOptionToColumn(listParams, menuNode, menuParam, column, themeScopeId);
@@ -2073,10 +2084,7 @@ RefPtr<FrameNode> MenuView::Create(
         optionNode->MarkModifyDone();
         optionNode->MountToParent(column);
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        MenuParam menuParam;
-        UpdateMenuBorderEffect(menuNode, wrapperNode, menuParam);
-    }
+
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
     auto scrollPattern = scroll->GetPattern<ScrollPattern>();
@@ -2489,72 +2497,99 @@ void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPt
     NodeThemeScopeIdUpdate(menuNode, themeScopeId, menuParam.isColorModeFollowTarget);
 }
 
-RefPtr<FrameNode> MenuView::CreateGridItem(const OptionParam& param, int32_t index,
-    const WeakPtr<FrameNode>& menuWeak)
+namespace {
+void UpdateGridNodeThemeScopeId(const RefPtr<FrameNode>& node, int32_t themeScopeId)
+{
+    CHECK_NULL_VOID(node);
+    if (!themeScopeId || !node->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        return;
+    }
+    node->UpdateThemeScopeId(themeScopeId);
+}
+
+RefPtr<FrameNode> CreateGridItemContent(const OptionParam& param, int32_t themeScopeId, bool fillParent)
 {
     auto itemId = ElementRegister::GetInstance()->MakeUniqueId();
     auto columnNode = FrameNode::CreateFrameNode(
         COLUMN_ETS_TAG, itemId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(columnNode, nullptr);
+    UpdateGridNodeThemeScopeId(columnNode, themeScopeId);
+    auto theme = columnNode->GetTheme<SelectTheme>(true);
+    CHECK_NULL_RETURN(theme, nullptr);
     auto columnProps = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnProps, nullptr);
     columnProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
     columnProps->UpdateMainAxisAlign(FlexAlign::CENTER);
 
-    auto pipeline = columnNode->GetContextWithCheck();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_RETURN(theme, nullptr);
-    
     PaddingProperty itemPadding;
     itemPadding.left = CalcLength(theme->GetGridMenuItemPadding());
     itemPadding.right = CalcLength(theme->GetGridMenuItemPadding());
     columnProps->UpdatePadding(itemPadding);
 
     bool hasText = !param.value.empty();
-    bool hasIcon = !param.icon.empty();
+    bool hasSymbol = param.symbol != nullptr;
+    bool hasIcon = hasSymbol || !param.icon.empty();
 
     Dimension itemHeight = hasText ? GRID_ITEM_WITH_TEXT : GRID_ITEM_ICON_ONLY;
-    columnProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(itemHeight)));
-
-    auto renderContext = columnNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    BorderRadiusProperty borderRadius;
-    borderRadius.SetRadius(theme->GetGridMenuCornerRadius());
-    renderContext->UpdateBorderRadius(borderRadius);
+    columnProps->UpdateUserDefinedIdealSize(fillParent ?
+        CalcSize(CalcLength(1.0f, DimensionUnit::PERCENT), CalcLength(itemHeight)) :
+        CalcSize(std::nullopt, CalcLength(itemHeight)));
 
     // create icon node
     if (hasIcon) {
-        auto iconNode = FrameNode::CreateFrameNode(
-            IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-        CHECK_NULL_RETURN(iconNode, nullptr);
-        auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
-        ImageSourceInfo info(param.icon);
-        iconProps->UpdateImageSourceInfo(info);
-        iconProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(GRID_ICON_SIZE), CalcLength(GRID_ICON_SIZE)));
-        iconProps->UpdateAlignment(Alignment::CENTER);
-        auto iconRenderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
-        if (iconRenderProperty) {
-            iconRenderProperty->UpdateSvgFillColor(theme->GetGridMenuIconColor());
+        if (hasSymbol) {
+            auto iconNode = FrameNode::GetOrCreateFrameNode(SYMBOL_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+            CHECK_NULL_RETURN(iconNode, nullptr);
+            auto symbolProps = iconNode->GetLayoutProperty<TextLayoutProperty>();
+            CHECK_NULL_RETURN(symbolProps, nullptr);
+            symbolProps->UpdateFontSize(Dimension(GRID_ICON_SIZE));
+            symbolProps->UpdateSymbolColorList({ theme->GetGridMenuIconColor() });
+            symbolProps->UpdateAlignment(Alignment::CENTER);
+            if (hasText) {
+                MarginProperty iconMargin;
+                iconMargin.bottom = CalcLength(theme->GetGridMenuIconTextSpace());
+                symbolProps->UpdateMargin(iconMargin);
+            }
+            param.symbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(iconNode)));
+            iconNode->MountToParent(columnNode);
+            iconNode->MarkModifyDone();
+        } else {
+            auto iconNode = FrameNode::CreateFrameNode(
+                IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+            CHECK_NULL_RETURN(iconNode, nullptr);
+            UpdateGridNodeThemeScopeId(iconNode, themeScopeId);
+            auto iconProps = iconNode->GetLayoutProperty<ImageLayoutProperty>();
+            ImageSourceInfo info(param.icon);
+            iconProps->UpdateImageSourceInfo(info);
+            iconProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(GRID_ICON_SIZE), CalcLength(GRID_ICON_SIZE)));
+            iconProps->UpdateAlignment(Alignment::CENTER);
+            auto iconRenderProperty = iconNode->GetPaintProperty<ImageRenderProperty>();
+            if (iconRenderProperty) {
+                iconRenderProperty->UpdateSvgFillColor(theme->GetGridMenuIconColor());
+            }
+            if (hasText) {
+                MarginProperty iconMargin;
+                iconMargin.bottom = CalcLength(theme->GetGridMenuIconTextSpace());
+                iconProps->UpdateMargin(iconMargin);
+            }
+            iconNode->MountToParent(columnNode);
+            iconNode->MarkModifyDone();
         }
-        if (hasText) {
-            MarginProperty iconMargin;
-            iconMargin.bottom = CalcLength(theme->GetGridMenuIconTextSpace());
-            iconProps->UpdateMargin(iconMargin);
-        }
-        iconNode->MountToParent(columnNode);
-        iconNode->MarkModifyDone();
     }
 
     if (hasText) {
         auto textId = ElementRegister::GetInstance()->MakeUniqueId();
         auto textNode = FrameNode::CreateFrameNode(TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_RETURN(textNode, nullptr);
+        UpdateGridNodeThemeScopeId(textNode, themeScopeId);
         auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(textProperty, nullptr);
-        textProperty->UpdateMaxLines(1);
-        textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
         textProperty->UpdateFontSize(theme->GetGridMenuFontSize());
+        if (!param.isTextMenuGridMenuItem) {
+            textProperty->UpdateMaxLines(1);
+            textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        }
         textProperty->UpdateFontWeight(theme->GetGridMenuFontWeight());
         textProperty->UpdateTextColor(theme->GetGridMenuFontColor());
         textProperty->UpdateContent(param.value);
@@ -2566,34 +2601,45 @@ RefPtr<FrameNode> MenuView::CreateGridItem(const OptionParam& param, int32_t ind
         textNode->MountToParent(columnNode);
         textNode->MarkModifyDone();
     }
+    columnNode->MarkModifyDone();
+    return columnNode;
+}
 
-    auto eventHub = columnNode->GetEventHub<EventHub>();
-    CHECK_NULL_RETURN(eventHub, nullptr);
-    eventHub->SetEnabled(param.enabled);
-
-    auto gestureHub = columnNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(columnNode, nullptr);
-
-    auto inputHub = columnNode->GetOrCreateInputEventHub();
-    auto gridMenuHoverColor = theme->GetGridMenuHoverColor();
+void InitGridItemFeedback(const RefPtr<FrameNode>& itemNode, const RefPtr<SelectTheme>& theme)
+{
+    CHECK_NULL_VOID(itemNode);
+    CHECK_NULL_VOID(theme);
+    auto renderContext = itemNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(theme->GetGridMenuCornerRadius());
+    renderContext->UpdateBorderRadius(borderRadius);
+    auto gestureHub = itemNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto inputHub = itemNode->GetOrCreateInputEventHub();
+    auto initialMenuHoverColor = theme->GetGridMenuHoverColor();
     if (inputHub) {
         inputHub->SetHoverEvent(
-            [gridMenuHoverColor, weakItem = AceType::WeakClaim(AceType::RawPtr(columnNode))](
+            [initialMenuHoverColor, weakItem = AceType::WeakClaim(AceType::RawPtr(itemNode))](
                 bool isHover, HoverInfo& info) {
                 auto item = weakItem.Upgrade();
                 CHECK_NULL_VOID(item);
+                auto theme = item->GetTheme<SelectTheme>(true);
+                auto gridMenuHoverColor = theme ? theme->GetGridMenuHoverColor() : initialMenuHoverColor;
                 auto rc = item->GetRenderContext();
                 CHECK_NULL_VOID(rc);
                 rc->UpdateBackgroundColor(isHover ? gridMenuHoverColor : Color::TRANSPARENT);
             });
     }
 
-    auto gridMenuClickedColor = theme->GetGridMenuClickedColor();
+    auto initialMenuClickedColor = theme->GetGridMenuClickedColor();
     gestureHub->SetTouchEvent(
-        [gridMenuClickedColor, weakItem = AceType::WeakClaim(AceType::RawPtr(columnNode))](
+        [initialMenuClickedColor, weakItem = AceType::WeakClaim(AceType::RawPtr(itemNode))](
             TouchEventInfo& info) {
             auto item = weakItem.Upgrade();
             CHECK_NULL_VOID(item);
+            auto theme = item->GetTheme<SelectTheme>(true);
+            auto gridMenuClickedColor = theme ? theme->GetGridMenuClickedColor() : initialMenuClickedColor;
             auto rc = item->GetRenderContext();
             CHECK_NULL_VOID(rc);
             auto touches = info.GetTouches();
@@ -2606,7 +2652,14 @@ RefPtr<FrameNode> MenuView::CreateGridItem(const OptionParam& param, int32_t ind
                 }
             }
         });
-    auto action = param.action;
+}
+
+void InitGridItemClick(const RefPtr<FrameNode>& itemNode, const std::function<void()>& action,
+    const WeakPtr<FrameNode>& menuWeak)
+{
+    CHECK_NULL_VOID(itemNode);
+    auto gestureHub = itemNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
     gestureHub->SetUserOnClick([action, menuWeak](GestureEvent& info) {
         if (action) {
             action();
@@ -2617,13 +2670,36 @@ RefPtr<FrameNode> MenuView::CreateGridItem(const OptionParam& param, int32_t ind
         CHECK_NULL_VOID(menuPattern);
         menuPattern->HideMenu();
     });
+}
 
-    columnNode->MarkModifyDone();
-    return columnNode;
+} // namespace
+
+RefPtr<FrameNode> MenuView::CreateGridItem(const OptionParam& param, int32_t index,
+    const WeakPtr<FrameNode>& menuWeak, int32_t themeScopeId, RefPtr<MenuPattern> customMenuPattern)
+{
+    auto contentColumn = CreateGridItemContent(param, themeScopeId, false);
+    CHECK_NULL_RETURN(contentColumn, nullptr);
+    auto theme = contentColumn->GetTheme<SelectTheme>(true);
+    CHECK_NULL_RETURN(theme, nullptr);
+    if (customMenuPattern) {
+        auto customGridPasteItem = customMenuPattern->BuildGridMenuPasteItem(param, contentColumn, themeScopeId);
+        if (customGridPasteItem) {
+            InitGridItemFeedback(customGridPasteItem, theme);
+            customGridPasteItem->MarkModifyDone();
+            return customGridPasteItem;
+        }
+    }
+    auto eventHub = contentColumn->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    eventHub->SetEnabled(param.enabled);
+    InitGridItemFeedback(contentColumn, theme);
+    InitGridItemClick(contentColumn, param.action, menuWeak);
+    contentColumn->MarkModifyDone();
+    return contentColumn;
 }
 
 void MenuView::MountGridSection(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
-    const MenuParam& menuParam, const RefPtr<FrameNode>& outerColumn)
+    const MenuParam& menuParam, const RefPtr<FrameNode>& outerColumn, RefPtr<MenuPattern> customMenuPattern)
 {
     CHECK_NULL_VOID(menuParam.gridStyle);
     const auto& gridStyle = menuParam.gridStyle.value();
@@ -2637,9 +2713,8 @@ void MenuView::MountGridSection(std::vector<OptionParam>& params, const RefPtr<F
     int32_t maxColumns = hasText ? GRID_MENU_MAX_COLUMN_WITH_TEXT : GRID_MENU_MAX_COLUMN_ICON_ONLY;
     int32_t horizontalSize = std::clamp(gridStyle.horizontalSize, 1, maxColumns);
 
-    auto pipeline = menuNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    auto themeScopeId = outerColumn->GetThemeScopeId();
+    auto theme = outerColumn->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
 
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -2650,6 +2725,7 @@ void MenuView::MountGridSection(std::vector<OptionParam>& params, const RefPtr<F
     auto gridContainer = FrameNode::CreateFrameNode(
         V2::COLUMN_ETS_TAG, gridContainerId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(gridContainer);
+    UpdateGridNodeThemeScopeId(gridContainer, themeScopeId);
     auto gridContainerProps = gridContainer->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(gridContainerProps);
     gridContainerProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
@@ -2660,15 +2736,19 @@ void MenuView::MountGridSection(std::vector<OptionParam>& params, const RefPtr<F
     gridPadding.bottom = CalcLength(theme->GetGridMenuContainerPadding());
     gridContainerProps->UpdatePadding(gridPadding);
 
+    auto visibleGridCount = std::min(params.size(), static_cast<size_t>(gridCount));
+    bool hasTextMenuGridItem = std::any_of(params.begin(), params.begin() + visibleGridCount,
+        [](const OptionParam& param) { return param.isTextMenuGridMenuItem; });
     int32_t itemIndex = 0;
     while (itemIndex < gridCount) {
         auto rowId = ElementRegister::GetInstance()->MakeUniqueId();
         auto rowNode = FrameNode::CreateFrameNode(
             V2::ROW_ETS_TAG, rowId, AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_BREAK(rowNode);
+        UpdateGridNodeThemeScopeId(rowNode, themeScopeId);
         auto rowProps = rowNode->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_BREAK(rowProps);
-        rowProps->UpdateCrossAxisAlign(FlexAlign::CENTER);
+        rowProps->UpdateCrossAxisAlign(hasTextMenuGridItem ? FlexAlign::FLEX_START : FlexAlign::CENTER);
         rowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
         if (menuPattern->GetIsGridMenu()) {
             rowProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(1.0f, DimensionUnit::PERCENT), std::nullopt));
@@ -2677,13 +2757,18 @@ void MenuView::MountGridSection(std::vector<OptionParam>& params, const RefPtr<F
         float percentWidth = 1.0f / static_cast<float>(horizontalSize);
 
         for (int32_t col = 0; col < horizontalSize && itemIndex < gridCount; ++col, ++itemIndex) {
-            auto gridItem = CreateGridItem(params[itemIndex], itemIndex, weakMenu);
+            auto gridItem = CreateGridItem(params[itemIndex], itemIndex, weakMenu, themeScopeId, customMenuPattern);
             CHECK_NULL_CONTINUE(gridItem);
             auto itemLayoutProps = gridItem->GetLayoutProperty();
             CHECK_NULL_CONTINUE(itemLayoutProps);
 
-            itemLayoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(CalcLength(percentWidth, DimensionUnit::PERCENT), std::nullopt));
+            if (params[itemIndex].isPasteOption) {
+                itemLayoutProps->UpdateUserDefinedIdealSize(
+                    CalcSize(CalcLength(percentWidth, DimensionUnit::PERCENT), CalcLength(0.0, DimensionUnit::AUTO)));
+            } else {
+                itemLayoutProps->UpdateUserDefinedIdealSize(
+                    CalcSize(CalcLength(percentWidth, DimensionUnit::PERCENT), std::nullopt));
+            }
             auto gridItemEventHub = gridItem->GetEventHub<EventHub>();
             if (gridItemEventHub) {
                 gridItemEventHub->SetEnabled(params[itemIndex].enabled);
@@ -2710,9 +2795,8 @@ void MenuView::MountGridSectionDivider(const RefPtr<FrameNode>& column)
     auto dividerNode = FrameNode::CreateFrameNode(
         V2::COLUMN_ETS_TAG, dividerId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_VOID(dividerNode);
-    auto pipeline = dividerNode->GetContextWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
+    UpdateGridNodeThemeScopeId(dividerNode, column ? column->GetThemeScopeId() : 0);
+    auto theme = dividerNode->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
     auto dividerProps = dividerNode->GetLayoutProperty();
     CHECK_NULL_VOID(dividerProps);
@@ -3289,6 +3373,28 @@ bool MenuView::IsGridStyleEnabled(const MenuParam& menuParam)
     return menuParam.gridStyle.has_value() && menuParam.gridStyle->count > 0;
 }
 
+static RefPtr<FrameNode> GetMenuItemNodeFromCustomChild(const RefPtr<FrameNode>& childFrame)
+{
+    CHECK_NULL_RETURN(childFrame, nullptr);
+    if (childFrame->GetTag() == MENU_ITEM_ETS_TAG) {
+        return childFrame;
+    }
+    if (childFrame->GetTag() != "RelativeContainer") {
+        return nullptr;
+    }
+    for (const auto& rowChild : childFrame->GetChildren()) {
+        auto rowFrame = AceType::DynamicCast<FrameNode>(rowChild);
+        CHECK_NULL_CONTINUE(rowFrame);
+        for (const auto& candidate : rowFrame->GetChildren()) {
+            auto menuItemFrame = AceType::DynamicCast<FrameNode>(candidate);
+            if (menuItemFrame && menuItemFrame->GetTag() == MENU_ITEM_ETS_TAG) {
+                return menuItemFrame;
+            }
+        }
+    }
+    return nullptr;
+}
+
 bool MenuView::IsMenuWithOnlyMenuItems(const RefPtr<FrameNode>& customMenuNode)
 {
     if (!customMenuNode || customMenuNode->GetTag() != MENU_ETS_TAG) {
@@ -3300,20 +3406,18 @@ bool MenuView::IsMenuWithOnlyMenuItems(const RefPtr<FrameNode>& customMenuNode)
     }
     for (const auto& child : children) {
         auto childFrame = AceType::DynamicCast<FrameNode>(child);
-        if (!childFrame) {
-            return false;
-        }
-        const auto& tag = childFrame->GetTag();
-        if (tag != MENU_ITEM_ETS_TAG) {
+        if (!GetMenuItemNodeFromCustomChild(childFrame)) {
             return false;
         }
     }
     return true;
 }
 
-static OptionParam ExtractOneMenuItemParam(const RefPtr<FrameNode>& menuItemNode)
+static OptionParam ExtractOneMenuItemParam(const RefPtr<FrameNode>& customChildNode)
 {
     OptionParam param;
+    auto menuItemNode = GetMenuItemNodeFromCustomChild(customChildNode);
+    CHECK_NULL_RETURN(menuItemNode, param);
     auto layoutProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     if (layoutProperty) {
         param.value = layoutProperty->GetContent().value_or("");
@@ -3321,15 +3425,37 @@ static OptionParam ExtractOneMenuItemParam(const RefPtr<FrameNode>& menuItemNode
         if (startIcon.has_value()) {
             param.icon = startIcon->GetSrc();
         }
+        auto startSymbol = layoutProperty->GetStartSymbol();
+        if (startSymbol) {
+            param.symbol = startSymbol;
+        }
     }
     auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
     if (pattern) {
         param.enabled = !pattern->IsDisabled();
+        param.isTextMenuGridMenuItem = pattern->IsTextMenuGridMenuItem();
+        auto pasteButton = pattern->GetPasteButton();
+        if (pasteButton) {
+            auto pasteEventHub = pasteButton->GetEventHub<EventHub>();
+            if (pasteEventHub) {
+                param.enabled = pasteEventHub->IsEnabled();
+            }
+            param.isPasteOption = true;
+        }
     }
     auto eventHub = menuItemNode->GetEventHub<MenuItemEventHub>();
     if (eventHub) {
-        param.action = eventHub->GetJsCallback();
+        if (eventHub->GetJsCallback()) {
+            param.action = eventHub->GetJsCallback();
+        } else {
+            param.action = eventHub->GetSelectOverlayMenuOnClick();
+        }
     }
+    TAG_LOGD(AceLogTag::ACE_MENU,
+        "Extract menu item param, name:%{public}s, enabled:%{public}d, paste:%{public}d, grid:%{public}d, "
+        "childTag:%{public}s",
+        param.value.c_str(), param.enabled, param.isPasteOption, param.isTextMenuGridMenuItem,
+        customChildNode->GetTag().c_str());
     return param;
 }
 
@@ -3360,16 +3486,20 @@ RefPtr<FrameNode> MenuView::BuildGridListColumn(const RefPtr<FrameNode>& customM
     if (gridParams.empty()) {
         return nullptr;
     }
+    TAG_LOGD(AceLogTag::ACE_MENU, "Build grid list column, gridCount:%{public}d, remainListCount:%{public}zu",
+        gridCount, customMenuNode->GetChildren().size());
 
     // Build grid container
     auto gridContainer = FrameNode::CreateFrameNode(COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     CHECK_NULL_RETURN(gridContainer, nullptr);
-    MountGridSection(gridParams, menuNode, menuParam, gridContainer);
+    UpdateGridNodeThemeScopeId(gridContainer, themeScopeId);
+    auto customMenuPattern = customMenuNode->GetPattern<MenuPattern>();
+    MountGridSection(gridParams, menuNode, menuParam, gridContainer, customMenuPattern);
     gridContainer->MarkModifyDone();
 
     bool hasListContent = !customMenuNode->GetChildren().empty();
-    bool isDown = gridStyle.position == MenuGridPosition::DOWN;
+    bool isDown = gridStyle.position == MenuGridPosition::BOTTOM;
 
     // Position grid container and divider
     if (!isDown) {
@@ -3391,14 +3521,33 @@ RefPtr<FrameNode> MenuView::BuildGridListColumn(const RefPtr<FrameNode>& customM
 
     // Set dividers on remaining MenuItems
     int listIndex = 0;
+    auto theme = menuNode->GetTheme<SelectTheme>(true);
+    CHECK_NULL_RETURN(theme, nullptr);
     for (const auto& child : customMenuNode->GetChildren()) {
+        if (theme->GetExpandDisplay() || SystemProperties::IsPCMode()) {
+            break;
+        }
         auto childFrame = AceType::DynamicCast<FrameNode>(child);
         if (!childFrame || childFrame->GetTag() != MENU_ITEM_ETS_TAG) {
             continue;
         }
-        auto pattern = childFrame->GetPattern<MenuItemPattern>();
-        if (pattern) {
-            pattern->UpdateNeedDivider(listIndex > 0);
+        if (listIndex > 0) {
+            auto paintProperty = childFrame->GetPaintProperty<MenuItemPaintProperty>();
+            CHECK_NULL_RETURN(paintProperty, nullptr);
+            auto strokeWidth = theme->GetDefaultDividerWidth();
+            auto startMargin = theme->GetDefaultDividerStartMargin();
+            auto endMargin = theme->GetDefaultDividerEndMargin();
+            auto color = theme->GetLineColor();
+            auto iconContentPadding = theme->GetIconContentPadding();
+            auto endIconWidth = theme->GetEndIconWidth();
+            auto menuIconPadding = theme->GetMenuIconPadding();
+            auto finalStartMargin = startMargin + iconContentPadding + endIconWidth + menuIconPadding;
+            paintProperty->UpdateStrokeWidth(strokeWidth);
+            paintProperty->UpdateStartMargin(finalStartMargin);
+            paintProperty->UpdateEndMargin(endMargin);
+            paintProperty->UpdateDividerColor(color);
+            childFrame->MarkModifyDone();
+            childFrame->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
         listIndex++;
     }

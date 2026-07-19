@@ -22,15 +22,15 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from './alertDialog'
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, OnVisibleIndexesChangeCallback, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, LinearGradientOptions, RadialGradientOptions, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, LinearGradientOptions_serializer, RadialGradientOptions_serializer, EventTarget_serializer, TouchObject_serializer } from './common'
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, Bindable_WidthBreakpoint_serializer, Bindable_HeightBreakpoint_serializer, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, OnVisibleIndexesChangeCallback, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, LinearGradientOptions, RadialGradientOptions, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, LinearGradientOptions_serializer, RadialGradientOptions_serializer, EventTarget_serializer, TouchObject_serializer } from './common'
 import { extractors, TouchEvent, ContentModifier, XComponentController, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
 import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ItemFillPolicy_serializer, ItemFillPolicy, DrawingCanvas, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
 import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
 import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
-import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, CompetitionStrategy, Color as arkui_component_enums_Color, AnimationPropertyType, EventQueryType, RawInputEventType, HorizontalAlign, Curve, DialogDisplayMode, BorderStyle, TouchType, ColorSpace } from './enums'
-import { ScrollState, UIListEvent, UIListEventInternal } from './list'
+import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, CompetitionStrategy, Color as arkui_component_enums_Color, WidthBreakpoint, HeightBreakpoint, AnimationPropertyType, EventQueryType, RawInputEventType, HorizontalAlign, Curve, DialogDisplayMode, BorderStyle, TouchType, ColorSpace } from './enums'
+import { ScrollState, StickyStyle, UIListEvent, UIListEventInternal } from './list'
 import { SwipeActionOptions_serializer, SwipeActionOptions } from './listItem'
 import { ArcScrollBarOptions_serializer } from './../framework/ohos.arkui.ArcScrollBar'
 import { ArcScrollBarOptions } from '@ohos.arkui.ArcScrollBar'
@@ -62,13 +62,12 @@ import { DatePickerDialogOptions_serializer, DatePickerDialogOptions } from './d
 import { LayoutConstraint_serializer, InteractionEventBindingInfo_serializer } from './../framework/FrameNode'
 import { FrameNode, UIStatesChangeHandler, LayoutConstraint, InteractionEventBindingInfo } from 'arkui.FrameNode'
 import { CustomBuilder } from './builder'
-import { StickyStyle } from './list'
 import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask, PanGestureHandlerOptions_serializer, PanGestureHandlerOptions, GestureRecognizer, GestureRecognizerInternal, GestureEvent_serializer, GestureRecognizer_serializer } from './gesture'
 import { default as image } from '@ohos.multimedia.image'
 import { font_FontOptions_serializer, font_FontInfo_serializer, font_UIFontConfig_serializer } from './../framework/ohos.font'
 import { default as font } from '@ohos.font'
 import { MeasureOptions_serializer } from './../framework/ohos.measure'
-import { TextLayoutOptions_serializer, TextLayoutOptions, TextMenuOptions_serializer, TextMenuOptions } from './textCommon'
+import { TextLayoutOptions_serializer, TextLayoutOptions, TextMenuOptions_serializer, TextMenuOptions, TextMenuItemId, TextMenuItemId_serializer } from './textCommon'
 import { text_Paragraph_serializer } from './../framework/ohos.graphics.text'
 import { MeasureOptions } from '@ohos.measure'
 import { StyledString, StyledStringInternal, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, CustomSpanDrawInfo_serializer } from './styledString'
@@ -1755,6 +1754,80 @@ export class CommonShape implements MaterializedBase {
         thisSerializer.release()
         const obj: CommonShape = CommonShapeInternal.fromPtr(retval)
         return obj
+    }
+}
+export class ContainerReaderExtender {
+    public static containerReaderConstructor(id: int32): KPointer {
+        const id_casted = id as (int32)
+        return ContainerReaderExtender.containerReaderConstructor_serialize(id_casted)
+    }
+    public static setContainerReaderOptions(node: KPointer, size: Size, onChange: Callback_SizeInfo_Void, widthBreakpoint: Bindable<WidthBreakpoint> | undefined, heightBreakpoint: Bindable<HeightBreakpoint> | undefined): void {
+        const node_casted = node as (KPointer)
+        const size_casted = size as (Size)
+        const onChange_casted = onChange as (Callback_SizeInfo_Void)
+        const widthBreakpoint_casted = widthBreakpoint as (Bindable<WidthBreakpoint> | undefined)
+        const heightBreakpoint_casted = heightBreakpoint as (Bindable<HeightBreakpoint> | undefined)
+        ContainerReaderExtender.setContainerReaderOptions_serialize(node_casted, size_casted, onChange_casted, widthBreakpoint_casted, heightBreakpoint_casted)
+        return
+    }
+    public static breakpointConfig(node: KPointer, width?: Array<double>, height?: Array<double>): void {
+        const node_casted = node as (KPointer)
+        const width_casted = width as (Array<double> | undefined)
+        const height_casted = height as (Array<double> | undefined)
+        ContainerReaderExtender.breakpointConfig_serialize(node_casted, width_casted, height_casted)
+        return
+    }
+    private static containerReaderConstructor_serialize(id: int32): KPointer {
+        const retval = ArkUIGeneratedNativeModule._ContainerReaderExtender_containerReaderConstructor(id)
+        return retval
+    }
+    private static setContainerReaderOptions_serialize(node: KPointer, size: Size, onChange: Callback_SizeInfo_Void, widthBreakpoint: Bindable<WidthBreakpoint> | undefined, heightBreakpoint: Bindable<HeightBreakpoint> | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        Size_serializer.write(thisSerializer, size)
+        thisSerializer.holdAndWriteCallback(onChange)
+        if (widthBreakpoint !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const widthBreakpointTmpValue = widthBreakpoint!
+            Bindable_WidthBreakpoint_serializer.write(thisSerializer, widthBreakpointTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (heightBreakpoint !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const heightBreakpointTmpValue = heightBreakpoint!
+            Bindable_HeightBreakpoint_serializer.write(thisSerializer, heightBreakpointTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ContainerReaderExtender_setContainerReaderOptions(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static breakpointConfig_serialize(node: KPointer, width?: Array<double>, height?: Array<double>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (width !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const widthTmpValue = width!
+            thisSerializer.writeInt32((widthTmpValue.length).toInt())
+            for (let widthTmpValueCounterI = 0; widthTmpValueCounterI < widthTmpValue.length; widthTmpValueCounterI++) {
+                const widthTmpValueTmpElement: double = widthTmpValue[widthTmpValueCounterI]
+                thisSerializer.writeFloat64(widthTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (height !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const heightTmpValue = height!
+            thisSerializer.writeInt32((heightTmpValue.length).toInt())
+            for (let heightTmpValueCounterI = 0; heightTmpValueCounterI < heightTmpValue.length; heightTmpValueCounterI++) {
+                const heightTmpValueTmpElement: double = heightTmpValue[heightTmpValueCounterI]
+                thisSerializer.writeFloat64(heightTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ContainerReaderExtender_breakpointConfig(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class ContentModifierHelper {
@@ -3655,10 +3728,33 @@ export class GlobalScopeUicontextTextMenu {
         GlobalScopeUicontextTextMenu.setMenuOptions_serialize(options_casted)
         return
     }
+    public static disableSystemServiceMenuItems(disable: boolean): void {
+        const disable_casted = disable as (boolean)
+        GlobalScopeUicontextTextMenu.disableSystemServiceMenuItems_serialize(disable_casted)
+        return
+    }
+    public static disableMenuItems(items: Array<TextMenuItemId>): void {
+        const items_casted = items as (Array<TextMenuItemId>)
+        GlobalScopeUicontextTextMenu.disableMenuItems_serialize(items_casted)
+        return
+    }
     private static setMenuOptions_serialize(options: TextMenuOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         TextMenuOptions_serializer.write(thisSerializer, options)
         ArkUIGeneratedNativeModule._GlobalScopeUicontextTextMenu_setMenuOptions(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static disableSystemServiceMenuItems_serialize(disable: boolean): void {
+        ArkUIGeneratedNativeModule._GlobalScopeUicontextTextMenu_disableSystemServiceMenuItems(disable ? true : false)
+    }
+    private static disableMenuItems_serialize(items: Array<TextMenuItemId>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.writeInt32((items.length).toInt())
+        for (let itemsCounterI = 0; itemsCounterI < items.length; itemsCounterI++) {
+            const itemsTmpElement: TextMenuItemId = items[itemsCounterI]
+            TextMenuItemId_serializer.write(thisSerializer, itemsTmpElement)
+        }
+        ArkUIGeneratedNativeModule._GlobalScopeUicontextTextMenu_disableMenuItems(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -3959,6 +4055,24 @@ export class LazyColumnLayoutExtender {
         LazyColumnLayoutExtender.alignItems_serialize(node_casted, value_casted)
         return
     }
+    public static header(node: KPointer, builder?: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder | undefined)
+        LazyColumnLayoutExtender.header_serialize(node_casted, builder_casted)
+        return
+    }
+    public static footer(node: KPointer, builder?: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder | undefined)
+        LazyColumnLayoutExtender.footer_serialize(node_casted, builder_casted)
+        return
+    }
+    public static sticky(node: KPointer, sticky?: StickyStyle): void {
+        const node_casted = node as (KPointer)
+        const sticky_casted = sticky as (StickyStyle | undefined)
+        LazyColumnLayoutExtender.sticky_serialize(node_casted, sticky_casted)
+        return
+    }
     public static onVisibleIndexesChange(node: KPointer, callback_?: OnVisibleIndexesChangeCallback): void {
         const node_casted = node as (KPointer)
         const callback__casted = callback_ as (OnVisibleIndexesChangeCallback | undefined)
@@ -3996,36 +4110,6 @@ export class LazyColumnLayoutExtender {
         ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_alignItems(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private static onVisibleIndexesChange_serialize(node: KPointer, callback_?: OnVisibleIndexesChangeCallback): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (callback_ !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const callback_TmpValue = callback_!
-            thisSerializer.holdAndWriteCallback(callback_TmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_onVisibleIndexesChange(node, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    public static header(node: KPointer, builder?: CustomBuilder): void {
-        const node_casted = node as (KPointer)
-        const builder_casted = builder as (CustomBuilder | undefined)
-        LazyColumnLayoutExtender.header_serialize(node_casted, builder_casted)
-        return
-    }
-    public static footer(node: KPointer, builder?: CustomBuilder): void {
-        const node_casted = node as (KPointer)
-        const builder_casted = builder as (CustomBuilder | undefined)
-        LazyColumnLayoutExtender.footer_serialize(node_casted, builder_casted)
-        return
-    }
-    public static sticky(node: KPointer, sticky?: StickyStyle): void {
-        const node_casted = node as (KPointer)
-        const sticky_casted = sticky as (StickyStyle | undefined)
-        LazyColumnLayoutExtender.sticky_serialize(node_casted, sticky_casted)
-        return
-    }
     private static header_serialize(node: KPointer, builder?: CustomBuilder): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (builder !== undefined) {
@@ -4062,6 +4146,18 @@ export class LazyColumnLayoutExtender {
         ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_sticky(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    private static onVisibleIndexesChange_serialize(node: KPointer, callback_?: OnVisibleIndexesChangeCallback): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyColumnLayoutExtender_onVisibleIndexesChange(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export class LazyForEachOps {
     public static NotifyChange(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
@@ -4072,12 +4168,15 @@ export class LazyForEachOps {
         LazyForEachOps.NotifyChange_serialize(node_casted, startIndex_casted, endIndex_casted, count_casted)
         return
     }
-    public static Sync(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate): void {
+    public static Sync(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate, clear: Callback_ClearCache, repeatMemOptStrategy: int32, release: Callback_ReleaseItemByIndex): void {
         const node_casted = node as (KPointer)
         const totalCount_casted = totalCount as (int32)
         const creator_casted = creator as (Callback_CreateItem)
         const updater_casted = updater as (Callback_RangeUpdate)
-        LazyForEachOps.Sync_serialize(node_casted, totalCount_casted, creator_casted, updater_casted)
+        const clear_casted = clear as (Callback_ClearCache)
+        const repeatMemOptStrategy_casted = repeatMemOptStrategy as (int32)
+        const release_casted = release as (Callback_ReleaseItemByIndex)
+        LazyForEachOps.Sync_serialize(node_casted, totalCount_casted, creator_casted, updater_casted, clear_casted, repeatMemOptStrategy_casted, release_casted)
         return
     }
     public static SyncOnMoveOps(node: KPointer, onMoveFromToOps: Callback_OnMoveFromTo, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
@@ -4097,11 +4196,13 @@ export class LazyForEachOps {
     private static NotifyChange_serialize(node: KPointer, startIndex: int32, endIndex: int32, count: int32): void {
         ArkUIGeneratedNativeModule._LazyForEachOps_NotifyChange(node, startIndex, endIndex, count)
     }
-    private static Sync_serialize(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate): void {
+    private static Sync_serialize(node: KPointer, totalCount: int32, creator: Callback_CreateItem, updater: Callback_RangeUpdate, clear: Callback_ClearCache, repeatMemOptStrategy: int32, release: Callback_ReleaseItemByIndex): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         thisSerializer.holdAndWriteCallback(creator)
         thisSerializer.holdAndWriteCallback(updater)
-        ArkUIGeneratedNativeModule._LazyForEachOps_Sync(node, totalCount, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.holdAndWriteCallback(clear)
+        thisSerializer.holdAndWriteCallback(release)
+        ArkUIGeneratedNativeModule._LazyForEachOps_Sync(node, totalCount, thisSerializer.asBuffer(), thisSerializer.length(), repeatMemOptStrategy)
         thisSerializer.release()
     }
     private static SyncOnMoveOps_serialize(node: KPointer, onMoveFromToOps: Callback_OnMoveFromTo, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
@@ -4157,6 +4258,24 @@ export class LazyWaterFlowLayoutExtender {
         const node_casted = node as (KPointer)
         const value_casted = value as (string | ItemFillPolicy | undefined)
         LazyWaterFlowLayoutExtender.columnsTemplate_serialize(node_casted, value_casted)
+        return
+    }
+    public static header(node: KPointer, builder?: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder | undefined)
+        LazyWaterFlowLayoutExtender.header_serialize(node_casted, builder_casted)
+        return
+    }
+    public static footer(node: KPointer, builder?: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder | undefined)
+        LazyWaterFlowLayoutExtender.footer_serialize(node_casted, builder_casted)
+        return
+    }
+    public static sticky(node: KPointer, sticky?: StickyStyle): void {
+        const node_casted = node as (KPointer)
+        const sticky_casted = sticky as (StickyStyle | undefined)
+        LazyWaterFlowLayoutExtender.sticky_serialize(node_casted, sticky_casted)
         return
     }
     public static onVisibleIndexesChange(node: KPointer, callback_?: OnVisibleIndexesChangeCallback): void {
@@ -4216,36 +4335,6 @@ export class LazyWaterFlowLayoutExtender {
         ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_columnsTemplate(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private static onVisibleIndexesChange_serialize(node: KPointer, callback_?: OnVisibleIndexesChangeCallback): void {
-        const thisSerializer: SerializerBase = SerializerBase.hold()
-        if (callback_ !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const callback_TmpValue = callback_!
-            thisSerializer.holdAndWriteCallback(callback_TmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_onVisibleIndexesChange(node, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    public static header(node: KPointer, builder?: CustomBuilder): void {
-        const node_casted = node as (KPointer)
-        const builder_casted = builder as (CustomBuilder | undefined)
-        LazyWaterFlowLayoutExtender.header_serialize(node_casted, builder_casted)
-        return
-    }
-    public static footer(node: KPointer, builder?: CustomBuilder): void {
-        const node_casted = node as (KPointer)
-        const builder_casted = builder as (CustomBuilder | undefined)
-        LazyWaterFlowLayoutExtender.footer_serialize(node_casted, builder_casted)
-        return
-    }
-    public static sticky(node: KPointer, sticky?: StickyStyle): void {
-        const node_casted = node as (KPointer)
-        const sticky_casted = sticky as (StickyStyle | undefined)
-        LazyWaterFlowLayoutExtender.sticky_serialize(node_casted, sticky_casted)
-        return
-    }
     private static header_serialize(node: KPointer, builder?: CustomBuilder): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (builder !== undefined) {
@@ -4280,6 +4369,18 @@ export class LazyWaterFlowLayoutExtender {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_sticky(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static onVisibleIndexesChange_serialize(node: KPointer, callback_?: OnVisibleIndexesChangeCallback): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._LazyWaterFlowLayoutExtender_onVisibleIndexesChange(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -6794,6 +6895,10 @@ export class TouchEventExtender {
         TouchEventExtender.preventDefault_serialize(ptr_casted)
         return
     }
+    public static isPreventDefaultAllowed(ptr: KPointer): boolean {
+        const ptr_casted = ptr as (KPointer)
+        return TouchEventExtender.isPreventDefaultAllowed_serialize(ptr_casted)
+    }
     private static getNativePtr_serialize(event: TouchEvent): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         const eventTransformed: TouchEventProxy = extractors.transform_Ark_TouchEvent_to_Ark_TouchEventProxy(event)
@@ -6823,6 +6928,10 @@ export class TouchEventExtender {
     }
     private static preventDefault_serialize(ptr: KPointer): void {
         ArkUIGeneratedNativeModule._TouchEventExtender_preventDefault(ptr)
+    }
+    private static isPreventDefaultAllowed_serialize(ptr: KPointer): boolean {
+        const retval = ArkUIGeneratedNativeModule._TouchEventExtender_isPreventDefaultAllowed(ptr)
+        return retval
     }
 }
 export class UIContextAtomicServiceBar {
@@ -7279,6 +7388,7 @@ export enum ArcDirectionInner {
 export type AnimationStartHandler = (index: int32, targetIndex: int32, extraInfo: SwiperAnimationEvent) => void;
 export type AnimationEndHandler = (index: int32, extraInfo: SwiperAnimationEvent) => void;
 export type GestureSwipeHandler = (index: int32, extraInfo: SwiperAnimationEvent) => void;
+export type Callback_SizeInfo_Void = (size: Size) => void;
 export interface ComponentInfo {
     size: Size;
     localOffset: Offset_componentutils;
@@ -7388,6 +7498,8 @@ export interface CustomDialogControllerExternalOptionsExtender {
 export type Callback_RangeUpdate = (start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) => void;
 export type Callback_CreateItem = (index: int32) => KPointer;
 export type Callback_OnMoveFromTo = (from: int32, to: int32) => void;
+export type Callback_ClearCache = () => void;
+export type Callback_ReleaseItemByIndex = (index: int32) => void;
 export class LengthMetricsCustom {
     unit: number = initializers.arkui.component.idlize.LengthMetricsCustomNS.unit;
     value: number = initializers.arkui.component.idlize.LengthMetricsCustomNS.value;
@@ -9593,129 +9705,6 @@ export class LightEffectOptionsInner_serializer {
         return value
     }
 }
-export class ImmersiveOptionsInner_serializer {
-    public static write(buffer: SerializerBase, value: ImmersiveOptionsInner): void {
-        let valueSerializer: SerializerBase = buffer
-        const valueHolderForStyle = value.style
-        if (valueHolderForStyle !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForStyleTmpValue = valueHolderForStyle!
-            valueSerializer.writeInt32(valueHolderForStyleTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForMaterialColor = value.materialColor
-        if (valueHolderForMaterialColor !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForMaterialColorTmpValue = valueHolderForMaterialColor!
-            if (valueHolderForMaterialColorTmpValue instanceof arkui_component_enums_Color) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForMaterialColorTmpValueForIdx0 = valueHolderForMaterialColorTmpValue as arkui_component_enums_Color
-                valueSerializer.writeInt32((valueHolderForMaterialColorTmpValueForIdx0.getOrdinal()) % (12))
-            } else if (valueHolderForMaterialColorTmpValue instanceof int32) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForMaterialColorTmpValueForIdx1 = valueHolderForMaterialColorTmpValue as int32
-                valueSerializer.writeInt32(valueHolderForMaterialColorTmpValueForIdx1)
-            } else if (valueHolderForMaterialColorTmpValue instanceof string) {
-                valueSerializer.writeInt8((2).toByte())
-                const valueHolderForMaterialColorTmpValueForIdx2 = valueHolderForMaterialColorTmpValue as string
-                valueSerializer.writeString(valueHolderForMaterialColorTmpValueForIdx2)
-            } else if (valueHolderForMaterialColorTmpValue instanceof arkui_component_units_Resource) {
-                valueSerializer.writeInt8((3).toByte())
-                const valueHolderForMaterialColorTmpValueForIdx3 = valueHolderForMaterialColorTmpValue as arkui_component_units_Resource
-                global_resource_Resource_serializer.write(valueSerializer, valueHolderForMaterialColorTmpValueForIdx3)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForColorInvert = value.colorInvert
-        if (valueHolderForColorInvert !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForColorInvertTmpValue = valueHolderForColorInvert!
-            valueSerializer.writeBoolean(valueHolderForColorInvertTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForApplyShadow = value.applyShadow
-        if (valueHolderForApplyShadow !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForApplyShadowTmpValue = valueHolderForApplyShadow!
-            valueSerializer.writeBoolean(valueHolderForApplyShadowTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForInteractive = value.interactive
-        if (valueHolderForInteractive !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForInteractiveTmpValue = valueHolderForInteractive!
-            valueSerializer.writeBoolean(valueHolderForInteractiveTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForLightEffect = value.lightEffect
-        if (valueHolderForLightEffect !== null) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForLightEffectTmpValue = valueHolderForLightEffect!
-            LightEffectOptionsInner_serializer.write(valueSerializer, valueHolderForLightEffectTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): ImmersiveOptionsInner {
-        let valueDeserializer: DeserializerBase = buffer
-        const styleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let styleTmpBuf: int32 | undefined = undefined
-        if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            styleTmpBuf = valueDeserializer.readInt32()
-        }
-        const styleTmpResult: int32 | undefined = styleTmpBuf
-        const materialColorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let materialColorTmpBuf: ResourceColor | undefined = undefined
-        if ((materialColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const materialColorTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
-            let materialColorTmpBufOpt: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
-            if (materialColorTmpBufOptUnionSelector == (0).toByte()) {
-                materialColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
-            } else if (materialColorTmpBufOptUnionSelector == (1).toByte()) {
-                materialColorTmpBufOpt = valueDeserializer.readInt32()
-            } else if (materialColorTmpBufOptUnionSelector == (2).toByte()) {
-                materialColorTmpBufOpt = (valueDeserializer.readString() as string)
-            } else if (materialColorTmpBufOptUnionSelector == (3).toByte()) {
-                materialColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
-            } else {
-                throw new Error('One of the branches for materialColorTmpBufOpt has to be chosen through deserialisation.')
-            }
-            materialColorTmpBuf = (materialColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
-        }
-        const materialColorTmpResult: ResourceColor | undefined = materialColorTmpBuf
-        const colorInvertTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let colorInvertTmpBuf: boolean | undefined = undefined
-        if ((colorInvertTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            colorInvertTmpBuf = valueDeserializer.readBoolean()
-        }
-        const colorInvertTmpResult: boolean | undefined = colorInvertTmpBuf
-        const applyShadowTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let applyShadowTmpBuf: boolean | undefined = undefined
-        if ((applyShadowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            applyShadowTmpBuf = valueDeserializer.readBoolean()
-        }
-        const applyShadowTmpResult: boolean | undefined = applyShadowTmpBuf
-        const interactiveTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let interactiveTmpBuf: boolean | undefined = undefined
-        if ((interactiveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            interactiveTmpBuf = valueDeserializer.readBoolean()
-        }
-        const interactiveTmpResult: boolean | undefined = interactiveTmpBuf
-        const lightEffectTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let lightEffectTmpBuf: LightEffectOptionsInner | null = null
-        if ((lightEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            lightEffectTmpBuf = LightEffectOptionsInner_serializer.read(valueDeserializer)
-        }
-        const lightEffectTmpResult: LightEffectOptionsInner | null | undefined = lightEffectTmpBuf
-        let value: ImmersiveOptionsInner = ({style: styleTmpResult, materialColor: materialColorTmpResult, colorInvert: colorInvertTmpResult, applyShadow: applyShadowTmpResult, interactive: interactiveTmpResult, lightEffect: lightEffectTmpResult} as ImmersiveOptionsInner)
-        return value
-    }
-}
 export class NodeEdgesLengthMetrics_serializer {
     public static write(buffer: SerializerBase, value: NodeEdgesLengthMetrics): void {
         let valueSerializer: SerializerBase = buffer
@@ -10301,6 +10290,129 @@ export class EmitterPropertyInner_serializer {
         }
         const annulusRegionTmpResult: ParticleAnnulusRegionInner | undefined = annulusRegionTmpBuf
         let value: EmitterPropertyInner = ({index: indexTmpResult, emitRate: emitRateTmpResult, position: positionTmpResult, size: sizeTmpResult, annulusRegion: annulusRegionTmpResult} as EmitterPropertyInner)
+        return value
+    }
+}
+export class ImmersiveOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: ImmersiveOptionsInner): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForStyle = value.style
+        if (valueHolderForStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStyleTmpValue = valueHolderForStyle!
+            valueSerializer.writeInt32(valueHolderForStyleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForMaterialColor = value.materialColor
+        if (valueHolderForMaterialColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForMaterialColorTmpValue = valueHolderForMaterialColor!
+            if (valueHolderForMaterialColorTmpValue instanceof arkui_component_enums_Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForMaterialColorTmpValueForIdx0 = valueHolderForMaterialColorTmpValue as arkui_component_enums_Color
+                valueSerializer.writeInt32((valueHolderForMaterialColorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (valueHolderForMaterialColorTmpValue instanceof int32) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForMaterialColorTmpValueForIdx1 = valueHolderForMaterialColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForMaterialColorTmpValueForIdx1)
+            } else if (valueHolderForMaterialColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForMaterialColorTmpValueForIdx2 = valueHolderForMaterialColorTmpValue as string
+                valueSerializer.writeString(valueHolderForMaterialColorTmpValueForIdx2)
+            } else if (valueHolderForMaterialColorTmpValue instanceof arkui_component_units_Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForMaterialColorTmpValueForIdx3 = valueHolderForMaterialColorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(valueSerializer, valueHolderForMaterialColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForColorInvert = value.colorInvert
+        if (valueHolderForColorInvert !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForColorInvertTmpValue = valueHolderForColorInvert!
+            valueSerializer.writeBoolean(valueHolderForColorInvertTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForApplyShadow = value.applyShadow
+        if (valueHolderForApplyShadow !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForApplyShadowTmpValue = valueHolderForApplyShadow!
+            valueSerializer.writeBoolean(valueHolderForApplyShadowTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForInteractive = value.interactive
+        if (valueHolderForInteractive !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForInteractiveTmpValue = valueHolderForInteractive!
+            valueSerializer.writeBoolean(valueHolderForInteractiveTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLightEffect = value.lightEffect
+        if (valueHolderForLightEffect !== null) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLightEffectTmpValue = valueHolderForLightEffect!
+            LightEffectOptionsInner_serializer.write(valueSerializer, valueHolderForLightEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ImmersiveOptionsInner {
+        let valueDeserializer: DeserializerBase = buffer
+        const styleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let styleTmpBuf: int32 | undefined = undefined
+        if ((styleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            styleTmpBuf = valueDeserializer.readInt32()
+        }
+        const styleTmpResult: int32 | undefined = styleTmpBuf
+        const materialColorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let materialColorTmpBuf: ResourceColor | undefined = undefined
+        if ((materialColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const materialColorTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let materialColorTmpBufOpt: arkui_component_enums_Color | int32 | string | arkui_component_units_Resource | undefined
+            if (materialColorTmpBufOptUnionSelector == (0).toByte()) {
+                materialColorTmpBufOpt = arkui_component_enums_Color.values()[valueDeserializer.readInt32()]
+            } else if (materialColorTmpBufOptUnionSelector == (1).toByte()) {
+                materialColorTmpBufOpt = valueDeserializer.readInt32()
+            } else if (materialColorTmpBufOptUnionSelector == (2).toByte()) {
+                materialColorTmpBufOpt = (valueDeserializer.readString() as string)
+            } else if (materialColorTmpBufOptUnionSelector == (3).toByte()) {
+                materialColorTmpBufOpt = global_resource_Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for materialColorTmpBufOpt has to be chosen through deserialisation.')
+            }
+            materialColorTmpBuf = (materialColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
+        }
+        const materialColorTmpResult: ResourceColor | undefined = materialColorTmpBuf
+        const colorInvertTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let colorInvertTmpBuf: boolean | undefined = undefined
+        if ((colorInvertTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            colorInvertTmpBuf = valueDeserializer.readBoolean()
+        }
+        const colorInvertTmpResult: boolean | undefined = colorInvertTmpBuf
+        const applyShadowTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let applyShadowTmpBuf: boolean | undefined = undefined
+        if ((applyShadowTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            applyShadowTmpBuf = valueDeserializer.readBoolean()
+        }
+        const applyShadowTmpResult: boolean | undefined = applyShadowTmpBuf
+        const interactiveTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let interactiveTmpBuf: boolean | undefined = undefined
+        if ((interactiveTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            interactiveTmpBuf = valueDeserializer.readBoolean()
+        }
+        const interactiveTmpResult: boolean | undefined = interactiveTmpBuf
+        const lightEffectTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let lightEffectTmpBuf: LightEffectOptionsInner | null = null
+        if ((lightEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            lightEffectTmpBuf = LightEffectOptionsInner_serializer.read(valueDeserializer)
+        }
+        const lightEffectTmpResult: LightEffectOptionsInner | null | undefined = lightEffectTmpBuf
+        let value: ImmersiveOptionsInner = ({style: styleTmpResult, materialColor: materialColorTmpResult, colorInvert: colorInvertTmpResult, applyShadow: applyShadowTmpResult, interactive: interactiveTmpResult, lightEffect: lightEffectTmpResult} as ImmersiveOptionsInner)
         return value
     }
 }

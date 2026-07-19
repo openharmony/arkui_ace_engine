@@ -68,7 +68,11 @@ ArkUINativeModuleValue NativeUtilsBridge::CreateStrongRef(EcmaVM* vm, const RefP
     auto* nativeRef = new NativeStrongRef(ref);
     auto nativeStrongRef = panda::ObjectRef::New(vm);
     nativeStrongRef->SetNativePointerFieldCount(vm, 1);
-    nativeStrongRef->SetConcurrentNativePointerField(vm, 0, nativeRef, &DestructorInterceptor<NativeStrongRef>);
+    if (NativeRefManager::GetInstance().IsRunOnMainThread()) {
+        nativeStrongRef->SetConcurrentNativePointerField(vm, 0, nativeRef, &DestructorInterceptor<NativeStrongRef>);
+    } else {
+        nativeStrongRef->SetNativePointerField(vm, 0, nativeRef, &SyncDestructorInterceptor<NativeStrongRef>);
+    }
     nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNativeHandle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NativeUtilsBridge::GetNativeHandleForStrong));
     nativeStrongRef->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNativeHandleVal"),

@@ -23,8 +23,9 @@
 3. 新增当前 Ability 实例语言地区 innerAPI：`GetCurrentAbilityLanguageInfo(std::string& language, std::string& region)`，采用同步 IPC，通过 reply 返回 `language` 和 `region`。
 4. UI 上报链路扩展 `UiReportProxy` / `UiReportStub`，保存 SA callback 并上报 `nodeId/text/version`。
 5. 大文本统一复用现有 `LargeStringAshmem` 共享内存方式，普通小文本仍可走 parcel 字段。
-6. 在 `UiReportStub` 增加请求 callback timeout 和 5s 译文等待 watchdog 的注册、取消、告警入口。
-7. 为每次 Get/Start 请求生成 requestId，timeout task、callback 触发和迟到回调丢弃都必须基于 requestId 校验。
+6. 在 `UiReportStub` 增加单次 Get 请求 callback timeout，以及 5s 译文等待 watchdog 的注册、取消、告警入口；连续 Start 初始无文本不使用 callback timeout 触发 End/Reset。
+7. 为单次 Get 请求生成 requestId，timeout task、callback 触发和迟到回调丢弃都必须基于 requestId 校验；连续 Start 记录会话 owner pid，用于后续死亡恢复和 End/Reset 清理。
+8. `SendPageTranslateResult` 参数解析必须先筛出合法项：合法项要求 `nodeId >= 0`、数字 `version`、非空 `translatedText/text`；批量没有任何合法项时返回 `PARAM_INVALID`。
 
 ### 不做什么
 
@@ -47,7 +48,7 @@
 | DATA-MIN | SA payload 仅 `nodeId/text/version` |
 | ABILITY-LANGUAGE | 当前 Ability 语言地区接口仅返回 `language/region`，必须走同步 IPC reply，不走 report channel，不注册翻译 callback，不触发 timeout/watchdog |
 | BIG-TEXT-IPC | 大文本使用 `LargeStringAshmem` |
-| DFX | 请求 timeout 清 callback；译文等待 watchdog 默认 5s 只告警 |
+| DFX | 单次 Get 请求 timeout 清 callback 和一次性现场；Start 初始无文本不自动 End；译文等待 watchdog 默认 5s，只对 `nodeId >= 0` 真实节点启动且只告警 |
 | BUILD-MIN | 只编译 ui_session/adapter 相关 so 目标和必要单测；除非局部目标无法覆盖链接关系，否则不要求全量 `ace_engine` |
 | SMALL-FUNCTION-REUSE | IPC 序列化/反序列化、普通文本与 ashmem 分流、timeout/watchdog 注册取消、非正文日志摘要必须抽成职责单一的小函数复用，避免 proxy/stub/report 多处分支复制 |
 
@@ -71,8 +72,10 @@
 - 当前已存在的页面翻译 transaction/接口声明被复用和补齐，不出现第二套同义 transaction 或 proxy/stub 方法。
 - `GetCurrentAbilityLanguageInfo` 可通过同步 IPC reply 返回 `language` 和 `region`，且不依赖 `ReportService` 文本上报链路。
 - 大文本翻译 payload 能通过 `LargeStringAshmem` 写入和读取。
-- 请求 timeout 与译文等待 watchdog 行为可单测验证。
-- 请求 timeout 时除清 callback 外，必须调用 manager 清理入口或返回明确 cleanup action 给 TASK-002，确保 End/Reset 级现场清理可被串联。
+- 单次 Get 请求 timeout 与译文等待 watchdog 行为可单测验证。
+- 单次 Get 请求 timeout 时除清 callback 外，必须调用 manager 清理入口或返回明确 cleanup action 给 TASK-002，清理一次性请求现场、snapshot cache 和调用方 translate pid；不得把连续 Start 的初始无文本当作 timeout 触发 End/Reset。
+- `SendPageTranslateResult` 对缺失 `nodeId/version`、`nodeId < 0`、译文为空、全批无合法项返回 `PARAM_INVALID`；批量中合法项可继续处理，单条回填失败不阻塞其他合法项。
+- `nodeId < 0` 的 empty/no-content 哨兵不得启动译文等待 watchdog，也不得作为合法译文结果写入。
 - 迟到 callback 或 timeout 的 requestId 与当前 pending requestId 不匹配时，只记录非正文日志并丢弃，不得重新进入会话或覆盖新 callback。
 - 日志不打印原文/译文，只打印 requestId、nodeId、version、长度、elapsedMs、错误码。
 - 新增 IPC/DFX 代码不存在重复的 payload 写读、ashmem 阈值判断、task 注册取消逻辑；共享逻辑集中到私有 helper 或局部静态函数。
@@ -87,5 +90,6 @@
 
 - [ ] 编译 `adapter/ohos/entrance/ui_session` 所属 so/组件目标；若无法定位局部目标，再升级到 `ace_engine`
 - [ ] Uisession IPC 单测覆盖普通文本和大文本 ashmem
-- [ ] DFX 单测覆盖请求 timeout、5s watchdog、取消 watchdog
+- [ ] DFX 单测覆盖单次 Get 请求 timeout、真实节点 5s watchdog、取消 watchdog、`nodeId < 0` 哨兵不启动 watchdog
 - [ ] DFX 单测覆盖 requestId 生成/匹配、timeout 现场清理调用、迟到回调丢弃
+- [ ] IPC/result 单测覆盖非法 result payload 和批量全无合法项返回 `PARAM_INVALID`

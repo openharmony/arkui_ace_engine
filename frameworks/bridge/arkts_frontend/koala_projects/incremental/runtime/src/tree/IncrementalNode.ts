@@ -29,6 +29,7 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
     private _next: IncrementalNode | undefined = undefined
     private _parent: IncrementalNode | undefined = undefined
     private _incremental: IncrementalNode | undefined = undefined
+    private _forbidRecycle: boolean = false
 
     /**
      * This callback is called when a child node is added to this parent.
@@ -90,6 +91,20 @@ export class IncrementalNode implements Disposable, ReadonlyTreeNode {
      */
     get disabledStateUpdates(): boolean {
         return false
+    }
+
+    /**
+     * @returns `true` if this node should bypass the reusable pool and be disposed directly.
+     */
+    get forbidRecycle(): boolean {
+        return this._forbidRecycle
+    }
+
+    /**
+     * This flag is checked by the runtime before attempting to recycle a reusable child scope.
+     */
+    set forbidRecycle(value: boolean) {
+        this._forbidRecycle = value
     }
 
     /**

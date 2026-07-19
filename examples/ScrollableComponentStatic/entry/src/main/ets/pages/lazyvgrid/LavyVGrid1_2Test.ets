@@ -1,5 +1,6 @@
+'use static'
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use static'
 import {
   Text,
   TextAttribute,
@@ -20,7 +20,6 @@ import {
   Component,
   Button,
   ButtonAttribute,
-  UserView,
   WaterFlow,
   LazyVGridLayout,
   GridLayoutOptions,
@@ -38,10 +37,8 @@ import {
   Entry,
   Scroller,
   ColumnOptions,
-  ForEach,
   OnScrollCallback,
   ClickEvent,
-  ScrollState,
   TextAlign,
   LengthMetrics
 } from '@ohos.arkui.component'
@@ -52,12 +49,12 @@ import hilog from '@ohos.hilog'
 @Entry
 @Component
 struct LazyVGridLayoutSample1 {
-  private arr:Array<number> = [];
+  private arr:Array<int> = [];
   build() {
     Column() {
       WaterFlow() {
         LazyVGridLayout() {
-          ForEach(this.arr, (item:number)=>{
+          ForEach(this.arr, (item:int)=>{
             Text('item' + item.toString())
               .height(64)
               .width('100%')

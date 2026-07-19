@@ -33,7 +33,7 @@ public:
     explicit DefaultDataChangeListener(JSView* parentView) : parentView_(parentView) {}
     ~DefaultDataChangeListener() override = default;
 
-    void OnDataReloaded() override
+    void OnDataReloaded(bool reuseImmediately = false) override
     {
         if (parentView_ != nullptr) {
             parentView_->MarkNeedUpdate();

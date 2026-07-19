@@ -16,7 +16,9 @@
 #ifndef SCROLLABLE_COMPONENT_COMPONENTS_WATERFLOW_H
 #define SCROLLABLE_COMPONENT_COMPONENTS_WATERFLOW_H
 
+#include <functional>
 #include <memory>
+#include <vector>
 #include <arkui/native_interface.h>
 #include <arkui/native_node.h>
 #include <arkui/native_type.h>
@@ -62,6 +64,7 @@ struct SingleSectionParams {
 class WaterFlow {
 public:
     static ArkUI_NodeHandle CreateWaterFlowInfiniteScrollingEarly();
+    static ArkUI_NodeHandle CreateWaterFlowCapiShowcase();
 
     WaterFlow()
     {
@@ -76,6 +79,10 @@ public:
 
     ~WaterFlow()
     {
+        for (auto event : waterFlowEvents_) {
+            api_->unregisterNodeEvent(waterFlow_, event);
+        }
+        waterFlowEvents_.clear();
         scrollGuard_.Release();
 
         adapter_.reset();
@@ -121,6 +128,12 @@ public:
         section_ = section;
     }
 
+    void ResetSection()
+    {
+        api_->resetAttribute(waterFlow_, NODE_WATER_FLOW_SECTION_OPTION);
+        section_.reset();
+    }
+
     // ---- Layout / template / gap ----
     void SetLayoutDirection(int32_t direction)
     {
@@ -153,10 +166,22 @@ public:
         SetAttributeInt32(api_, waterFlow_, NODE_WATER_FLOW_CACHED_COUNT, count);
     }
 
+    void SetCachedCount(int32_t count, bool showCached)
+    {
+        ArkUI_NumberValue v[] = {{.i32 = count}, {.i32 = showCached ? 1 : 0}};
+        ArkUI_AttributeItem item{v, 2};
+        api_->setAttribute(waterFlow_, NODE_WATER_FLOW_CACHED_COUNT, &item);
+    }
+
     void SetFooter(ArkUI_NodeHandle footer)
     {
         ArkUI_AttributeItem item{nullptr, 0, nullptr, footer};
         api_->setAttribute(waterFlow_, NODE_WATER_FLOW_FOOTER, &item);
+    }
+
+    void ResetFooter()
+    {
+        api_->resetAttribute(waterFlow_, NODE_WATER_FLOW_FOOTER);
     }
 
     void ScrollToIndex(int32_t index, int32_t align)
@@ -166,11 +191,40 @@ public:
         api_->setAttribute(waterFlow_, NODE_WATER_FLOW_SCROLL_TO_INDEX, &item);
     }
 
+    void ScrollToIndex(int32_t index, bool animation, int32_t align, float extraOffset)
+    {
+        ArkUI_NumberValue v[] = {
+            {.i32 = index}, {.i32 = animation ? 1 : 0}, {.i32 = align}, {.f32 = extraOffset}};
+        ArkUI_AttributeItem item{v, 4};
+        api_->setAttribute(waterFlow_, NODE_WATER_FLOW_SCROLL_TO_INDEX, &item);
+    }
+
+    void SetItemConstraintSize(float minWidth, float maxWidth, float minHeight, float maxHeight)
+    {
+        ArkUI_NumberValue v[] = {{.f32 = minWidth}, {.f32 = maxWidth}, {.f32 = minHeight}, {.f32 = maxHeight}};
+        ArkUI_AttributeItem item{v, 4};
+        api_->setAttribute(waterFlow_, NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE, &item);
+    }
+
     void SetItemConstraintSize(float mainMin, float mainMax)
     {
-        ArkUI_NumberValue v[] = {{.f32 = mainMin}, {.f32 = mainMax}};
-        ArkUI_AttributeItem item{v, 2};
-        api_->setAttribute(waterFlow_, NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE, &item);
+        SetItemConstraintSize(0.0f, 10000.0f, mainMin, mainMax);
+    }
+
+    void SetColumnTemplateItemFillPolicy(int32_t policy)
+    {
+        constexpr auto attr = static_cast<ArkUI_NodeAttributeType>(1010013);
+        ArkUI_NumberValue v[] = {{.i32 = policy}};
+        ArkUI_AttributeItem item{v, 1};
+        api_->setAttribute(waterFlow_, attr, &item);
+    }
+
+    void SetSupportEmptyBranchInLazyLoading(bool enabled)
+    {
+        constexpr auto attr = static_cast<ArkUI_NodeAttributeType>(1010014);
+        ArkUI_NumberValue v[] = {{.i32 = enabled ? 1 : 0}};
+        ArkUI_AttributeItem item{v, 1};
+        api_->setAttribute(waterFlow_, attr, &item);
     }
 
     void SetLayoutMode(ArkUI_WaterFlowLayoutMode mode)
@@ -193,6 +247,96 @@ public:
         SetAttributeFloat32(api_, waterFlow_, NODE_SCROLL_FLING_SPEED_LIMIT, limit);
     }
 
+    void SetFadingEdge(int32_t fadingEdge)
+    {
+        SetAttributeInt32(api_, waterFlow_, NODE_SCROLL_FADING_EDGE, fadingEdge);
+    }
+
+    void SetScrollBar(int32_t displayMode)
+    {
+        SetAttributeInt32(api_, waterFlow_, NODE_SCROLL_BAR_DISPLAY_MODE, displayMode);
+    }
+
+    void SetScrollBarWidth(float width)
+    {
+        SetAttributeFloat32(api_, waterFlow_, NODE_SCROLL_BAR_WIDTH, width);
+    }
+
+    void SetScrollBarColor(uint32_t color)
+    {
+        SetAttributeUInt32(api_, waterFlow_, NODE_SCROLL_BAR_COLOR, color);
+    }
+
+    void SetScrollEnabled(bool enabled)
+    {
+        SetAttributeInt32(api_, waterFlow_, NODE_SCROLL_ENABLE_SCROLL_INTERACTION, enabled ? 1 : 0);
+    }
+
+    void SetNestedScroll(int32_t forward, int32_t backward)
+    {
+        ArkUI_NumberValue v[] = {{.i32 = forward}, {.i32 = backward}};
+        ArkUI_AttributeItem item{v, 2};
+        api_->setAttribute(waterFlow_, NODE_SCROLL_NESTED_SCROLL, &item);
+    }
+
+    void SetEdgeEffect(int32_t edgeEffect, bool alwaysEnabled, int32_t effectEdge)
+    {
+        ArkUI_NumberValue v[] = {
+            {.i32 = edgeEffect}, {.i32 = alwaysEnabled ? 1 : 0}, {.i32 = effectEdge}};
+        ArkUI_AttributeItem item{v, 3};
+        api_->setAttribute(waterFlow_, NODE_SCROLL_EDGE_EFFECT, &item);
+    }
+
+    void ScrollBy(float hDistance, float vDistance)
+    {
+        ArkUI_NumberValue v[] = {{.f32 = hDistance}, {.f32 = vDistance}};
+        ArkUI_AttributeItem item{v, 2};
+        api_->setAttribute(waterFlow_, NODE_SCROLL_BY, &item);
+    }
+
+    void ScrollTo(float hOffset, float vOffset)
+    {
+        ArkUI_NumberValue v[] = {{.f32 = hOffset}, {.f32 = vOffset}};
+        ArkUI_AttributeItem item{v, 2};
+        api_->setAttribute(waterFlow_, NODE_SCROLL_OFFSET, &item);
+    }
+
+    void ScrollPage(bool next, bool animation)
+    {
+        ArkUI_NumberValue v[] = {{.i32 = next ? 1 : 0}, {.i32 = animation ? 1 : 0}};
+        ArkUI_AttributeItem item{v, 2};
+        api_->setAttribute(waterFlow_, NODE_SCROLL_PAGE, &item);
+    }
+
+    void ScrollEdge(int32_t edge)
+    {
+        ArkUI_NumberValue v[] = {{.i32 = edge}};
+        ArkUI_AttributeItem item{v, 1};
+        api_->setAttribute(waterFlow_, NODE_SCROLL_EDGE, &item);
+    }
+
+    void RegisterWaterFlowEvents()
+    {
+        if (waterFlowEventsRegistered_ || api_ == nullptr || waterFlow_ == nullptr) {
+            return;
+        }
+        const ArkUI_NodeEventType events[] = {
+            NODE_ON_WILL_SCROLL,
+            NODE_WATER_FLOW_ON_DID_SCROLL,
+            NODE_WATER_FLOW_ON_SCROLL_INDEX,
+        };
+        for (auto event : events) {
+            api_->registerNodeEvent(waterFlow_, event, 0, this);
+            waterFlowEvents_.push_back(event);
+        }
+        waterFlowEventsRegistered_ = true;
+    }
+
+    void SetEventHandler(std::function<void(ArkUI_NodeEvent*)> handler)
+    {
+        eventHandler_ = std::move(handler);
+    }
+
     // ---- 通用滚动外观/行为预设 ----
     void SetScrollCommon()
     {
@@ -208,8 +352,7 @@ public:
         SetAttributeFloat32(api_, waterFlow_, NODE_SCROLL_FLING_SPEED_LIMIT, K_DEFAULT_FLING_SPEED_LIMIT);
 
         // 嵌套滚动策略 & 渐隐边缘
-        SetAttributeInt32(api_, waterFlow_, NODE_SCROLL_NESTED_SCROLL,
-                          static_cast<int>(ARKUI_SCROLL_NESTED_MODE_SELF_FIRST));
+        SetNestedScroll(ARKUI_SCROLL_NESTED_MODE_SELF_FIRST, ARKUI_SCROLL_NESTED_MODE_SELF_FIRST);
         SetAttributeInt32(api_, waterFlow_, NODE_SCROLL_FADING_EDGE, K_DEFAULT_FADING_EDGE);
     }
 
@@ -243,7 +386,17 @@ public:
 private:
     static void StaticEvent(ArkUI_NodeEvent *ev)
     {
-        (void)ev;
+        auto *self = reinterpret_cast<WaterFlow *>(OH_ArkUI_NodeEvent_GetUserData(ev));
+        if (self != nullptr) {
+            self->OnEvent(ev);
+        }
+    }
+
+    void OnEvent(ArkUI_NodeEvent *ev)
+    {
+        if (eventHandler_) {
+            eventHandler_(ev);
+        }
     }
 
     static bool ValidateSingleSectionParams(const SingleSectionParams &p)
@@ -298,6 +451,9 @@ private:
     ArkUI_NodeHandle waterFlow_ = nullptr;
     std::shared_ptr<WaterFlowSection> section_ = nullptr;
     std::shared_ptr<ArkUINodeAdapter> adapter_;
+    std::function<void(ArkUI_NodeEvent*)> eventHandler_;
+    std::vector<ArkUI_NodeEventType> waterFlowEvents_;
+    bool waterFlowEventsRegistered_ = false;
 
     ScrollEventGuard scrollGuard_;
 };

@@ -70,6 +70,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_unbind_views.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_context_module.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_module_manager.h"
@@ -89,8 +90,8 @@
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 #include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
-#include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "frameworks/core/interfaces/native/node/node_api.h"
+#include "frameworks/core/interfaces/native/node/node_xcomponent_modifier.h"
 
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
@@ -531,7 +532,6 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
 
     runtime_->SetEmbedderData(this);
     runtime_->RegisterUncaughtExceptionHandler(JsiBaseUtils::ReportJsErrorEvent);
-
 #if !defined(PREVIEW)
     for (const auto& [key, value] : extraNativeObject) {
         shared_ptr<JsValue> nativeValue = runtime_->NewNativePointer(value);
@@ -807,6 +807,8 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
 void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime)
 {
     static const std::vector<std::pair<std::string, std::string>> componentToAbcName = {
+        { "Badge", "arkui.components.arkbadge" },
+        { "Button", "arkui.components.arkbutton" },
         { "CalendarPicker", "arkui.components.arkcalendarpicker" },
         { "CalendarPickerDialog", "arkui.components.arkcalendarpicker" },
         { "Checkbox", "arkui.components.arkcheckbox" },
@@ -817,6 +819,9 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "FolderStack", "arkui.components.arkfolderstack" },
 #endif
         { "Gauge", "arkui.components.arkgauge" },
+        { "Grid", "arkui.components.arkgrid" },
+        { "GridItem", "arkui.components.arkgriditem" },
+        { "GridContainer", "arkui.components.arkgridcontainer" },
         { "Hyperlink", "arkui.components.arkhyperlink" },
         { "ImageSpan", "arkui.components.arkimagespan" },
         { "Indexer", "arkui.components.arkalphabetindexer" },
@@ -828,22 +833,55 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Rating", "arkui.components.arkrating" },
         { "Richeditor", "arkui.components.arkricheditor" },
         { "SymbolSpan", "arkui.components.arksymbolspan" },
+        { "Refresh", "arkui.components.arkrefresh" },
         { "RowSplit", "arkui.components.arkrowsplit" },
         { "Search", "arkui.components.arksearch" },
         { "Sidebar", "arkui.components.arksidebarcontainer" },
         { "Slider", "arkui.components.arkslider" },
+        { "LoadingProgress", "arkui.components.arkloadingprogress" },
         { "Stepper", "arkui.components.arkstepper" },
         { "StepperItem", "arkui.components.arkstepperitem" },
         { "SymbolGlyph", "arkui.components.arksymbolglyph" },
+        { "TextArea", "arkui.components.arktextarea" },
+        { "TextInput", "arkui.components.arktextinput" },
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
+        { "Video", "arkui.components.arkvideo" },
         { "Toggle", "arkui.components.arktoggle" },
+        { "ToolBarItem", "arkui.components.arktoolbaritem" },
         { "WaterFlow", "arkui.components.arkwaterflow" },
         { "LazyColumnLayout", "arkui.components.arklazycolumnlayout" },
+        { "LazyVGridLayout", "arkui.components.arklazygridlayout" },
         { "LazyVWaterFlowLayout", "arkui.components.arklazywaterflowlayout" },
+        { "Swiper", "arkui.components.arkswiper" },
+        { "IndicatorComponent", "arkui.components.arkswiperindicator" },
+        { "Tabs", "arkui.components.arktabs" },
+        { "TabContent", "arkui.components.arktabcontent" },
+        { "CommonShape", "arkui.components.arkcommonshape" },
+        { "Circle", "arkui.components.arkcircle" },
+        { "Ellipse", "arkui.components.arkellipse" },
+        { "Line", "arkui.components.arkline" },
+        { "Polyline", "arkui.components.arkpolyline" },
+        { "Polygon", "arkui.components.arkpolygon" },
+        { "Path", "arkui.components.arkpath" },
+        { "Rect", "arkui.components.arkrect" },
+        { "Shape", "arkui.components.arkshape" },
         { "ImageAnimator", "arkui.components.arkimageanimator" },
         { "DatePicker", "arkui.components.arkdatepicker" },
         { "DatePickerDialog", "arkui.components.arkdatepicker" },
+        { "TextPicker", "arkui.components.arktextpicker" },
+        { "TextPickerDialog", "arkui.components.arktextpicker" },
+        { "Progress", "arkui.components.arkprogress" },
+        { "TextTimer", "arkui.components.arktexttimer" },
+        { "Select", "arkui.components.arkselect" },
+        { "Navigator", "arkui.components.arknavigator" },
+        { "Panel", "arkui.components.arkpanel" },
+        { "Divider", "arkui.components.arkdivider" },
+        { "RelativeContainer", "arkui.components.arkrelativecontainer" },
+        { "Blank", "arkui.components.arkblank" },
+        { "GridRow", "arkui.components.arkgridrow" },
+        { "GridCol", "arkui.components.arkgridcol" },
+        { "XComponent", "arkui.components.arkxcomponent" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
     shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");
@@ -960,6 +998,23 @@ void JsiDeclarativeEngineInstance::RemoveInvalidEnv(void* env)
 {
     validCustomRuntime_.erase(env);
     IFunctionBinding::functions.erase(env);
+}
+
+void JsiDeclarativeEngineInstance::UnloadAceModule()
+{
+#ifdef CROSS_PLATFORM
+    JsUnbindViews();
+    JsiDeclarativeEngine::UnloadAceModule();
+    isModulePreloaded_ = false;
+    isModuleInitialized_ = false;
+    {
+        std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
+        globalRuntime_ = nullptr;
+    }
+    localRuntime_ = nullptr;
+    cardRuntime_ = nullptr;
+    g_declarativeRuntime = nullptr;
+#endif
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
@@ -1617,6 +1672,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
         nativeEngine_ = nativeArkEngine;
         arkRuntime->SetNativeEngine(nativeArkEngine);
     }
+    RegisterContainerScopeFunc();
     engineInstance_->SetInstanceId(instanceId_);
     engineInstance_->SetDebugMode(NeedDebugBreakPoint());
 #if defined(PREVIEW)
@@ -1637,6 +1693,7 @@ bool JsiDeclarativeEngine::Initialize(const RefPtr<FrontendDelegate>& delegate)
 
     if (nativeEngine_ == nullptr) {
         nativeEngine_ = new ArkNativeEngine(vm, static_cast<void*>(this));
+        RegisterContainerScopeFunc();
     }
     EngineTask(sharedRuntime);
     std::vector<shared_ptr<JsValue>> argv = { runtime->NewNumber(instanceId_) };
@@ -1725,6 +1782,14 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         EvaluateAbcFile(arkRuntime, NG::GetSystemPath("jsEnumStyle.abc"));
     };
     nativeEngine_->SetInitWorkerFunc(initWorkerFunc);
+}
+
+void JsiDeclarativeEngine::RegisterContainerScopeFunc()
+{
+    CHECK_NULL_VOID(nativeEngine_);
+    nativeEngine_->SetGetContainerScopeIdFunc(ContainerScope::CurrentId);
+    nativeEngine_->SetInitContainerScopeFunc(ContainerScope::UpdateCurrent);
+    nativeEngine_->SetFinishContainerScopeFunc(ContainerScope::RestoreCurrent);
 }
 
 #ifdef OHOS_PLATFORM
@@ -2546,6 +2611,7 @@ std::unique_ptr<JsonValue> JsiDeclarativeEngine::GetNamedRouterInfo()
         jsonItem->Put("moduleName", property.moduleName.c_str());
         jsonItem->Put("pagePath", property.pagePath.c_str());
         jsonItem->Put("ohmUrl", property.ohmUrl.c_str());
+        jsonItem->Put("newUrl", property.newUrl.c_str());
         jsonNamedRouterInfo->Put(jsonItem);
         ++recordIter;
     }
@@ -2573,6 +2639,7 @@ void JsiDeclarativeEngine::RestoreNamedRouterInfo(std::unique_ptr<JsonValue> nam
         auto moduleNameJsonValue = item->GetValue("moduleName");
         auto pagePathJsonValue = item->GetValue("pagePath");
         auto ohmUrlJsonValue = item->GetValue("ohmUrl");
+        auto newUrl = item->GetValue("newUrl");
         if (!nameJsonValue || !nameJsonValue->IsString() ||
             !bundleNameJsonValue || !bundleNameJsonValue->IsString() ||
             !moduleNameJsonValue || !moduleNameJsonValue->IsString() ||
@@ -2583,14 +2650,19 @@ void JsiDeclarativeEngine::RestoreNamedRouterInfo(std::unique_ptr<JsonValue> nam
         }
 
         std::string name = nameJsonValue->GetString();
+        if (namedRouterRegisterMap_.find(name) != namedRouterRegisterMap_.end()) {
+            TAG_LOGW(AceLogTag::ACE_ROUTER, "restore page(%{public}s) is existed", name.c_str());
+            continue;
+        }
         property.bundleName = bundleNameJsonValue->GetString();
         property.moduleName = moduleNameJsonValue->GetString();
         property.pagePath = pagePathJsonValue->GetString();
         property.ohmUrl = ohmUrlJsonValue->GetString();
-        namedRouterMap.emplace(name, property);
+        if (newUrl && newUrl->IsString()) {
+            property.newUrl = newUrl->GetString();
+        }
+        namedRouterRegisterMap_.emplace(name, property);
     }
-
-    std::swap(namedRouterRegisterMap_, namedRouterMap);
 }
 
 bool JsiDeclarativeEngine::IsNamedRouterNeedPreload(const std::string& name)
@@ -2622,19 +2694,30 @@ void JsiDeclarativeEngine::PreloadNamedRouter(const std::string& name, std::func
     const auto& moduleName = it->second.moduleName;
     const auto& pagePath = it->second.pagePath;
     std::string ohmUrl = it->second.ohmUrl + ".js";
+    const auto& newUrl = it->second.newUrl;
     TAG_LOGI(AceLogTag::ACE_ROUTER, "preload named rotuer, bundleName:"
-        "%{public}s, moduleName: %{public}s, pagePath: %{public}s, ohmUrl: %{public}s",
-        bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), ohmUrl.c_str());
+        "%{public}s, moduleName: %{public}s, pagePath: %{public}s, ohmUrl: %{public}s, newUrl: %{public}s",
+        bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), ohmUrl.c_str(), newUrl.c_str());
 
-    auto callback = [weak = AceType::WeakClaim(this), ohmUrl, finishCallback = loadFinishCallback]() {
+    auto callback = [weak = AceType::WeakClaim(this), ohmUrl, newUrl, moduleName,
+        finishCallback = loadFinishCallback]() {
         auto jsEngine = weak.Upgrade();
         CHECK_NULL_VOID(jsEngine);
         bool loadSuccess = true;
-        jsEngine->LoadPageSource(ohmUrl, [ohmUrl, &loadSuccess](const std::string& errorMsg, int32_t errorCode) {
+        jsEngine->LoadPageSource(ohmUrl, [ohmUrl, newUrl, moduleName, weak, &loadSuccess](
+            const std::string& errorMsg, int32_t errorCode) {
             TAG_LOGW(AceLogTag::ACE_ROUTER,
                 "Failed to load page source: %{public}s, errorCode: %{public}d, errorMsg: %{public}s", ohmUrl.c_str(),
                 errorCode, errorMsg.c_str());
             loadSuccess = false;
+            // load new normalize ohmurl
+            auto jsEngine = weak.Upgrade();
+            CHECK_NULL_VOID(jsEngine);
+            if (jsEngine->LoadNavDestinationSource("", moduleName, newUrl, false) != 0) {
+                TAG_LOGI(AceLogTag::ACE_ROUTER, "restore load new normalize file(%{public}s) failed", newUrl.c_str());
+                return;
+            }
+            loadSuccess = true;
         });
         if (finishCallback) {
             finishCallback(loadSuccess);
@@ -2783,9 +2866,11 @@ void JsiDeclarativeEngine::FireSyncEvent(const std::string& eventId, const std::
 
 void JsiDeclarativeEngine::InitXComponent(const std::string& componentId)
 {
+#ifdef XCOMPONENT_SUPPORTED
     ACE_DCHECK(engineInstance_);
     std::tie(nativeXComponentImpl_, nativeXComponent_) =
         XComponentClient::GetInstance().GetNativeXComponentFromXcomponentsMap(componentId);
+#endif
 }
 
 void JsiDeclarativeEngine::FireExternalEvent(
@@ -2793,29 +2878,28 @@ void JsiDeclarativeEngine::FireExternalEvent(
 {
     CHECK_RUN_ON(JS);
 
+#ifdef XCOMPONENT_SUPPORTED
     if (Container::IsCurrentUseNewPipeline()) {
         ACE_DCHECK(engineInstance_);
         auto xcFrameNode = NG::FrameNode::GetFrameNode(V2::XCOMPONENT_ETS_TAG, static_cast<int32_t>(nodeId));
         if (!xcFrameNode) {
             return;
         }
-        auto xcPattern = DynamicCast<NG::XComponentPattern>(xcFrameNode->GetPattern());
-        CHECK_NULL_VOID(xcPattern);
-        CHECK_EQUAL_VOID(xcPattern->GetLibraryName().has_value(), false);
-        std::weak_ptr<OH_NativeXComponent> weakNativeXComponent;
-        RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
-        std::tie(nativeXComponentImpl, weakNativeXComponent) = xcPattern->GetNativeXComponent();
-        auto nativeXComponent = weakNativeXComponent.lock();
+        auto* frameNode = AceType::RawPtr(xcFrameNode);
+        auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
+        CHECK_NULL_VOID(xcomponentModifier);
+        CHECK_NULL_VOID(xcomponentModifier->getLibraryName);
+        bool hasLibraryName = false;
+        auto libraryName = std::string(xcomponentModifier->getLibraryName(frameNode, &hasLibraryName));
+        CHECK_EQUAL_VOID(hasLibraryName, false);
+        CHECK_NULL_VOID(xcomponentModifier->getNativeXComponent);
+        auto nativeXComponent = reinterpret_cast<OH_NativeXComponent*>(
+            xcomponentModifier->getNativeXComponent(frameNode, componentId.c_str()));
         CHECK_NULL_VOID(nativeXComponent);
-        CHECK_NULL_VOID(nativeXComponentImpl);
 
-        nativeXComponentImpl->SetXComponentId(componentId);
-
-#ifdef XCOMPONENT_SUPPORTED
-        xcPattern->SetExpectedRateRangeInit();
-        xcPattern->OnFrameEventInit();
-        xcPattern->UnregisterOnFrameEventInit();
-#endif
+        if (xcomponentModifier->initExternalEventCallbacks) {
+            xcomponentModifier->initExternalEventCallbacks(frameNode);
+        }
         auto* arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
         if (arkNativeEngine == nullptr) {
             return;
@@ -2827,34 +2911,35 @@ void JsiDeclarativeEngine::FireExternalEvent(
             return;
         }
         std::string arguments;
-        auto soPath = xcPattern->GetSoPath().value_or("");
+        CHECK_NULL_VOID(xcomponentModifier->getSoPath);
+        auto soPath = std::string(xcomponentModifier->getSoPath(frameNode));
         auto runtime = engineInstance_->GetJsRuntime();
         shared_ptr<ArkJSRuntime> pandaRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
         LocalScope scope(pandaRuntime->GetEcmaVm());
-        auto objXComp = arkNativeEngine->LoadModuleByName(xcPattern->GetLibraryName().value(), true, arguments,
-            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent.get()), soPath);
+        auto objXComp = arkNativeEngine->LoadModuleByName(libraryName, true, arguments,
+            OH_NATIVE_XCOMPONENT_OBJ, reinterpret_cast<void*>(nativeXComponent), soPath);
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
             napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
             return;
         }
 
         auto objContext = JsiObject(objXComp);
-        JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
-        OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
+        OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(
+            const_cast<EcmaVM*>(pandaRuntime->GetEcmaVm()), componentId, objContext.GetLocalHandle());
         napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
-        auto type = xcPattern->GetType();
+        CHECK_NULL_VOID(xcomponentModifier->getXComponentType);
+        auto type = static_cast<XComponentType>(xcomponentModifier->getXComponentType(frameNode));
         if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
-            auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
-                auto pattern = weakPattern.Upgrade();
-                if (!pattern) {
-                    return;
-                }
+            auto task = [weak = WeakClaim(this), weakNode = AceType::WeakClaim(AceType::RawPtr(xcFrameNode))]() {
+                auto frameNode = weakNode.Upgrade();
+                CHECK_NULL_VOID(frameNode);
                 auto bridge = weak.Upgrade();
                 if (bridge) {
-#ifdef XCOMPONENT_SUPPORTED
-                    pattern->NativeXComponentInit();
-#endif
+                    auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
+                    if (xcomponentModifier && xcomponentModifier->nativeXComponentInit) {
+                        xcomponentModifier->nativeXComponentInit(AceType::RawPtr(frameNode));
+                    }
                 }
             };
 
@@ -2926,8 +3011,8 @@ void JsiDeclarativeEngine::FireExternalEvent(
     }
 
     auto objContext = JsiObject(objXComp);
-    JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
-    XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
+    XComponentClient::GetInstance().AddJsValToJsValMap(
+        const_cast<EcmaVM*>(pandaRuntime->GetEcmaVm()), componentId, objContext.GetLocalHandle());
     napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
     auto task = [weak = WeakClaim(this), xcomponent]() {
@@ -2937,10 +3022,11 @@ void JsiDeclarativeEngine::FireExternalEvent(
         }
         auto bridge = weak.Upgrade();
         if (bridge) {
-#ifdef XCOMPONENT_SUPPORTED
-            pool->NativeXComponentInit(
-                bridge->nativeXComponent_, AceType::WeakClaim(AceType::RawPtr(bridge->nativeXComponentImpl_)));
-#endif
+            auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
+            if (xcomponentModifier && xcomponentModifier->legacyNativeXComponentInit) {
+                xcomponentModifier->legacyNativeXComponentInit(AceType::RawPtr(pool), bridge->nativeXComponent_,
+                    AceType::RawPtr(bridge->nativeXComponentImpl_));
+            }
         }
     };
 
@@ -2949,6 +3035,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         return;
     }
     delegate->PostSyncTaskToPage(task, "ArkUINativeXComponentInit");
+#endif
 #endif
 }
 
@@ -3157,6 +3244,21 @@ std::string JsiDeclarativeEngine::GetPagePath(const std::string& url)
 void JsiDeclarativeEngine::ResetNamedRouterRegisterMap()
 {
     namedRouterRegisterMap_.clear();
+}
+
+void JsiDeclarativeEngine::UnloadAceModule()
+{
+#ifdef CROSS_PLATFORM
+    namedRouterRegisterMap_.clear();
+    emptyNamedRouterRegisterMap_.clear();
+    routerPathInfoMap_.clear();
+    for (auto& [name, builder] : builderMap_) {
+        builder.FreeGlobalHandleAddr();
+    }
+    builderMap_.clear();
+    obj_.FreeGlobalHandleAddr();
+    obj_.Empty();
+#endif
 }
 
 std::string JsiDeclarativeEngine::GetFullPathInfo(const std::string& url)
@@ -3765,5 +3867,40 @@ bool JsiDeclarativeEngineInstance::RegisterStringCacheTable(const EcmaVM* vm, in
     return true;
 }
 
+bool JsiDeclarativeEngine::UpdatePageUrl(void* customNode, const std::string& pageName)
+{
+    CHECK_RUN_ON(JS);
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    CHECK_NULL_RETURN(runtime, false);
+    LocalScope scope(runtime->GetEcmaVm());
+    CHECK_NULL_RETURN(customNode, false);
+    auto thisVal = (JSRef<JSObject>*)(customNode);
+    CHECK_NULL_RETURN(thisVal, false);
+    JSRef<JSObject> thisObj = *(thisVal);
+    if (thisObj->IsEmpty()) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "get custom object in page failed");
+        return false;
+    }
+    auto constructor = thisObj->GetProperty("constructor");
+    if (constructor->IsUndefined()) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "custom object constructor is undefined");
+        return false;
+    }
+    std::string moduleName;
+    std::string fileName;
+    bool res = runtime->GetOhmUrlByObject(JSRef<JSObject>::Cast(constructor)->GetLocalHandle(), moduleName, fileName);
+    if (!res) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "get ohmurl form jsObject failed");
+        return false;
+    }
+    // update pageUrl info
+    auto iter = namedRouterRegisterMap_.find(pageName);
+    if (iter == namedRouterRegisterMap_.end()) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "get pageName(%{public}s) failed", pageName.c_str());
+        return false;
+    }
+    iter->second.newUrl = fileName;
+    return true;
+}
 // ArkTsCard end
 } // namespace OHOS::Ace::Framework

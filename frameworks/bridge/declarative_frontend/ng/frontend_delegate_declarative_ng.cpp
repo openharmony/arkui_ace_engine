@@ -782,7 +782,8 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .onDidAppear = dialogAttr.onDidAppear,
         .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear,
-        .onWillDisappear = dialogAttr.onWillDisappear,
+        .onWillDisappear = dialogAttr.onWillDisappear, .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode, .edgeLightMode = dialogAttr.edgeLightMode
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -899,7 +900,9 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .focusable = dialogAttr.focusable,
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode, .edgeLightMode = dialogAttr.edgeLightMode,
     };
     ParsePartialPropertiesFromAttr(dialogProperties, dialogAttr);
     return dialogProperties;
@@ -946,6 +949,27 @@ void FrontendDelegateDeclarativeNG::CloseCustomDialog(const int32_t dialogId)
     auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
     MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay);
     return;
+}
+
+void FrontendDelegateDeclarativeNG::CloseCustomDialog(const int32_t dialogId, std::function<void(int32_t)> &&callback)
+{
+    auto task = [dialogId, callback](const RefPtr<NG::OverlayManager>& overlayManager) mutable {
+        CHECK_NULL_VOID(overlayManager);
+        auto needCallback = true;
+        auto finalCallback = [&needCallback, callback](int32_t errorCode) {
+            callback(errorCode);
+        };
+        overlayManager->CloseCustomDialog(dialogId, std::move(finalCallback));
+    };
+    auto dialogNode = NG::FrameNode::GetFrameNodeOnly(V2::DIALOG_ETS_TAG, dialogId);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
+    if (currentOverlay == nullptr && dialogNode) {
+        auto pipeline = dialogNode->GetContext();
+        if (pipeline) {
+            currentOverlay = pipeline->GetOverlayManager();
+        }
+    }
+    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay);
 }
 
 void FrontendDelegateDeclarativeNG::CloseCustomDialog(const WeakPtr<NG::UINode>& node,
@@ -1072,6 +1096,8 @@ void FrontendDelegateDeclarativeNG::ShowActionMenu(const PromptDialogAttr& dialo
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
         .systemMaterial = dialogAttr.systemMaterial,
+        .distortionMode = dialogAttr.distortionMode,
+        .edgeLightMode = dialogAttr.edgeLightMode,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {

@@ -20,6 +20,7 @@
 #include "interfaces/inner_api/ace/constants.h"
 #include "ui/base/utils/utils.h"
 #include "base/utils/system_properties.h"
+#include "bridge/arkts_frontend/ani_local_scope.h"
 #include "bridge/arkts_frontend/entry/arkts_entry_loader.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -145,6 +146,7 @@ bool ParseRouterStateInfo(ani_env* env, ani_ref result, RouterStateInfo& state)
 
 void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 {
+    ScopedAniLocalScope localScope(env);
     ani_boolean errorExists;
     env->ExistUnhandledError(&errorExists);
     ani_status status;
@@ -183,6 +185,7 @@ void RunArkoalaEventLoop(ani_env* env, ani_ref app)
 // fire all arkoala callbacks at the tail of vsync (PipelineContext::FlushVsync)
 void FireAllArkoalaAsyncEvents(ani_env* env, ani_ref app)
 {
+    ScopedAniLocalScope localScope(env);
     ani_class appClass;
     ANI_CALL(env, FindClass(KOALA_APP_INFO.className, &appClass), return);
 

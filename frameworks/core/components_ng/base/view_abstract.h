@@ -32,8 +32,10 @@
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/layout/position_param.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/background_image.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/blend_mode.h"
+#include "core/components/common/properties/blur_style_option.h"
 #include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/sys_options.h"
@@ -72,6 +74,7 @@ class Blender;
 namespace OHOS::Ace {
 class ImageSourceInfo;
 class BasicShape;
+class BorderImage;
 class SpanString;
 class CalcDimensionRect;
 class ResponseRegion;
@@ -94,12 +97,13 @@ struct ACE_FORCE_EXPORT OptionParam {
     std::optional<Dimension> symbolUserDefinedIdealFontSize = std::nullopt;
     bool disableSystemClick = false;
     uint32_t symbolId = 0;
-    std::optional<Color> symbolColor;
+    bool isTextMenuGridMenuItem = false;
 
     // Used for security controls.
     bool isPasteOption = false;
 
     bool isAIMenuOption = false;
+    bool isAIWriteOption = false;
     bool isAskCeliaOption = false;
     std::vector<OptionParam> subMenuItems = {};
 
@@ -223,6 +227,7 @@ public:
         BackgroundImageSize& bgImgSize, const RefPtr<ResourceObject>& resObj, const std::string direction);
     static void SetBackgroundImagePosition(BackgroundImagePosition &bgImgPosition);
     static void ClearResObj(const std::string resObjName);
+    static void ClearResObj(FrameNode* frameNode, const std::string resObjName);
     static void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
     static void SetMotionBlur(const MotionBlurOption& motionBlurOption);
     static void SetBackgroundEffect(const EffectOption& effectOption, const SysOptions& sysOptions = SysOptions());
@@ -284,6 +289,7 @@ public:
     static void CheckNodeBorderDashWidthLPX(FrameNode* frameNode, const BorderWidthProperty& value);
     static void SetOpacity(double opacity);
     static void CreateWithOpacityResourceObj(const RefPtr<ResourceObject>& resobj);
+    static void CreateWithOpacityResourceObj(FrameNode* framenode, const RefPtr<ResourceObject>& resobj);
     static void SetAllowDrop(const std::set<std::string> &allowDrop);
     static void SetDrawModifier(const RefPtr<NG::DrawModifier>& drawModifier);
     static void* GetFrameNode();

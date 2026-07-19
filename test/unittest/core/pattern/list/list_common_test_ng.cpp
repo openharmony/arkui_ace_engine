@@ -5548,6 +5548,59 @@ HWTEST_F(ListCommonTestNg, FireFocus002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListUpdateStartIndexWithItemStartIndex001
+ * @tc.desc: Test List UpdateStartIndex uses GetChildByIndex with itemStartIndex_ offset (standalone pattern)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, ListUpdateStartIndexWithItemStartIndex001, TestSize.Level1)
+{
+    ListPattern list;
+    RefPtr<ShallowBuilder> shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(nullptr);
+    RefPtr<ListItemPattern> listItemPattern =
+        AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, V2::ListItemStyle::CARD);
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listItemPattern);
+    RefPtr<PipelineContext> pipe = AceType::MakeRefPtr<PipelineContext>();
+    RefPtr<FocusManager> focusManager = AceType::MakeRefPtr<FocusManager>(pipe);
+    focusManager->isFocusActive_ = true;
+    pipe->focusManager_ = focusManager;
+    frameNode->context_ = AceType::RawPtr(pipe);
+    WeakPtr<FrameNode> node = frameNode;
+    listItemPattern->frameNode_ = frameNode;
+    list.frameNode_ = frameNode;
+    RefPtr<FocusHub> focusNode = AceType::MakeRefPtr<FocusHub>(node);
+    focusNode->currentFocus_ = true;
+    auto listLayoutProperty = AceType::MakeRefPtr<ListLayoutProperty>();
+    frameNode->layoutProperty_ = listLayoutProperty;
+    frameNode->focusHub_ = focusNode;
+
+    /**
+     * @tc.steps: step1. itemStartIndex_ = 0, focusIndex_ outside viewport
+     * @tc.expected: UpdateStartIndex scrolls to focus node
+     */
+    list.itemStartIndex_ = 0;
+    list.focusIndex_ = 2;
+    list.startIndex_ = 5;
+    list.endIndex_ = 10;
+    list.maxListItemIndex_ = 10;
+    auto result1 = list.UpdateStartIndex(2, -1);
+    EXPECT_FALSE(result1);
+    EXPECT_EQ(list.scrollSource_, SCROLL_FROM_FOCUS_JUMP);
+
+    /**
+     * @tc.steps: step2. itemStartIndex_ = 2, focusIndex_ outside viewport
+     * @tc.expected: UpdateStartIndex uses focusIndex_ + itemStartIndex_ for GetChildByIndex
+     */
+    list.itemStartIndex_ = 2;
+    list.focusIndex_ = 2;
+    list.startIndex_ = 5;
+    list.endIndex_ = 10;
+    list.maxListItemIndex_ = 10;
+    auto result2 = list.UpdateStartIndex(2, -1);
+    EXPECT_FALSE(result2);
+    EXPECT_EQ(list.scrollSource_, SCROLL_FROM_FOCUS_JUMP);
+}
+
+/**
  * @tc.name: FireFocusInListItemGroup001
  * @tc.desc: Test FireFocusInListItemGroup
  * @tc.type: FUNC

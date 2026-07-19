@@ -250,6 +250,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
             "font",
             "arkui.uicontext",
             "arkui.components.arkgauge",
+            "arkui.components.arkbutton",
             "arkui.components.arkcheckbox",
             "arkui.components.arkcheckboxgroup",
             "arkui.components.arkrating",
@@ -286,7 +287,6 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
             "arkui.components.arktextarea",
             "arkui.components.arkgrid",
             "arkui.components.arkgriditem",
-            "arkui.components.arkbutton",
             "arkui.components.arktoolbaritem",
             "arkui.components.arklazygridlayout",
             "arkui.components.arkloadingprogress",
@@ -305,6 +305,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
             "arkui.components.arkimageanimator",
             "arkui.components.arkprogress",
             "arkui.components.arktexttimer",
+            "arkui.components.arkcommonshape",
             "arkui.components.arkcircle",
             "arkui.components.arkellipse",
             "arkui.components.arkline",
@@ -323,6 +324,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
             "arkui.components.arkcanvas",
             "arkui.components.arkpanel",
             "arkui.components.arkgridcontainer",
+            "arkui.components.arkrefresh",
         };
         for (const char* allowedModule : allowedModules) {
             if (std::strcmp(moduleName, allowedModule) == 0) {

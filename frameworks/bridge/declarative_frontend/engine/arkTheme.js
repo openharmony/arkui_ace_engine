@@ -1196,26 +1196,28 @@ class ArkThemeWhiteList {
 }
 // Keep whiteList sorted A~Z (binary search depends on it).
 ArkThemeWhiteList.whiteList = [
-    'Badge',
     'Button',
     'JSAlphabetIndexer',
+    'JSBadge',
+    'JSButton',
     'JSCounter',
     'JSDataPanel',
     'JSDatePicker',
+    'JSLoadingProgress',
     'JSMenu',
     'JSMenuItem',
     'JSPatternLock',
+    'JSProgress',
     'JSQRCode',
     'JSRadio',
-    'JSTextClock',
-    'JSTimePicker',
-    'LoadingProgress',
-    'Progress',
-    'Scroll',
     'JSSearch',
-    'Swiper',
+    'JSSwiper',
+    'JSTextClock',
+    'JSTextPicker',
+    'JSTimePicker',
+    'JSXComponent',
+    'Scroll',
     'Text',
-    'TextPicker',
 ];
 
 export default { ArkThemeScopeManager };

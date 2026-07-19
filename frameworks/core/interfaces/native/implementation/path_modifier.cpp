@@ -13,86 +13,30 @@
  * limitations under the License.
  */
 
-#include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
-#include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
-#include "core/components_ng/pattern/shape/path_model_ng.h"
-#include "core/components_ng/pattern/shape/path_model_static.h"
-
-namespace OHOS::Ace::NG {
-namespace {
-struct PathOptions {
-    std::optional<Dimension> width;
-    std::optional<Dimension> height;
-    std::optional<std::string> commands;
-};
-}
-
-namespace Converter {
-template<>
-PathOptions Convert(const Ark_PathOptions& src)
-{
-    return {
-        .width = Converter::OptConvert<Dimension>(src.width),
-        .height = Converter::OptConvert<Dimension>(src.height),
-        .commands = OptConvert<std::string>(src.commands),
-    };
-}
-} // namespace Converter
-} // namespace OHOS::Ace::NG
+#include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace PathModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = PathModelStatic::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // PathModifier
-namespace PathInterfaceModifier {
-void SetPathOptionsImpl(Ark_NativePointer node,
-                        const Opt_PathOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto opt = Converter::OptConvertPtr<PathOptions>(options);
-    if (opt && opt->width) {
-        ShapeAbstractModelNG::SetWidth(frameNode, *(opt->width));
-    }
-    if (opt && opt->height) {
-        ShapeAbstractModelNG::SetHeight(frameNode, *(opt->height));
-    }
-    if (opt && opt->commands) {
-        PathModelNG::SetCommands(frameNode, *(opt->commands));
-    }
-}
-} // PathInterfaceModifier
-namespace PathAttributeModifier {
-void SetCommandsImpl(Ark_NativePointer node,
-                     const Opt_ResourceStr* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<std::string>(value);
-    if (!convValue) {
-        PathModelNG::SetCommands(frameNode, "");
-        return;
-    }
-    PathModelNG::SetCommands(frameNode, *convValue);
-}
-} // PathAttributeModifier
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUIPathModifier* GetPathStaticModifier();
+#endif
+
 const GENERATED_ArkUIPathModifier* GetPathModifier()
 {
-    static const GENERATED_ArkUIPathModifier ArkUIPathModifierImpl {
-        PathModifier::ConstructImpl,
-        PathInterfaceModifier::SetPathOptionsImpl,
-        PathAttributeModifier::SetCommandsImpl,
-    };
-    return &ArkUIPathModifierImpl;
-}
+    static const GENERATED_ArkUIPathModifier* cachedModifier = nullptr;
 
+    if (cachedModifier == nullptr) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GetPathStaticModifier();
+#else
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Path");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIPathModifier*>(module->GetStaticModifier());
+#endif
+    }
+
+    return cachedModifier;
 }
+} // namespace OHOS::Ace::NG::GeneratedModifier

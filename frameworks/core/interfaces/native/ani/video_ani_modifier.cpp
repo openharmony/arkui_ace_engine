@@ -17,17 +17,18 @@
 
 #include "base/log/log.h"
 #include "base/json/json_util.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/video/video_model_static.h"
+#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
 
 void SetVideoOnError(ArkUINodeHandle node, std::function<void(const std::string&)>&& onError)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(onError);
-    VideoModelStatic::SetOnError(frameNode, std::move(onError));
+    auto* nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    auto* videoModifier = nodeModifiers->getVideoModifier();
+    CHECK_NULL_VOID(videoModifier);
+    videoModifier->setOnError(node, reinterpret_cast<void*>(&onError));
 }
 
 void ParseVideoError(const std::string& jsonStr, int32_t& code, std::string& message)

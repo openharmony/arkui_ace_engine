@@ -16,16 +16,17 @@
 #include "core/common/container.h"
 
 #include <cstdio>
+#include <string_view>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "base/image/file_uri_helper.h"
 #include "base/resource/data_provider_manager.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components_ng/pattern/video/media_player_callback.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -43,7 +44,7 @@ constexpr uint32_t MEDIA_RESOURCE_MATCH_SIZE = 2;
 const int32_t RAWFILE_PREFIX_LENGTH = strlen("resource://RAWFILE/");
 const std::regex MEDIA_RES_ID_REGEX(R"(^resource://\w+/([0-9]+)\.\w+$)", std::regex::icase);
 const std::regex MEDIA_APP_RES_ID_REGEX(R"(^resource://.*/([0-9]+)\.\w+$)", std::regex::icase);
-const std::string FA_RESOURCE_PREFIX = "assets/entry/";
+constexpr std::string_view FA_RESOURCE_PREFIX = "assets/entry/";
 const std::regex MEDIA_APP_RES_PATH_REGEX(R"(^resource://RAWFILE/(.*)$)");
 
 OHOS::Media::PlayerSeekMode ConvertToMediaSeekMode(SeekMode seekMode)
@@ -176,9 +177,18 @@ bool RosenMediaPlayer::SetSourceByFd(int32_t fd)
         LOGE("Video media player get stat failed.");
         return false;
     }
-    auto size = statBuf.st_size;
-    if (mediaPlayer_ && mediaPlayer_->SetSource(fd, 0, size) != 0) {
-        LOGE("Video media player etSource failed");
+    int64_t current = static_cast<int64_t>(lseek(fd, 0, SEEK_CUR));
+    if (current == -1) {
+        LOGE("Video media player lseek failed.");
+        return false;
+    }
+    int64_t size = static_cast<int64_t>(statBuf.st_size) - current;
+    if (size <= 0) {
+        LOGE("Video media player check size failed.");
+        return false;
+    }
+    if (mediaPlayer_ && mediaPlayer_->SetSource(fd, current, size) != 0) {
+        LOGE("Video media player SetSource failed");
         return false;
     }
     return true;
@@ -216,7 +226,7 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     if (!container->IsUseStageModel()) {
-        videoFilePath = FA_RESOURCE_PREFIX + videoFilePath;
+        videoFilePath = std::string(FA_RESOURCE_PREFIX) + videoFilePath;
     }
     auto getFileInfoState = assetManager->GetFileInfo(videoFilePath, fileInfo);
     if (!getFileInfoState) {
@@ -248,24 +258,15 @@ bool RosenMediaPlayer::RawFileWithModuleInfoPlay(const std::string& src, const s
 {
     auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, Container::CurrentIdSafely());
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-        CHECK_NULL_RETURN(resourceAdapter, false);
-        resourceAdapter->UpdateResourceManager(bundleName, moduleName);
-    } else {
-        auto themeManager = PipelineBase::CurrentThemeManager();
-        CHECK_NULL_RETURN(themeManager, false);
-        themeConstants = themeManager->GetThemeConstants();
-        CHECK_NULL_RETURN(themeConstants, false);
-    }
+    resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+    CHECK_NULL_RETURN(resourceAdapter, false);
+    resourceAdapter->UpdateResourceManager(bundleName, moduleName);
 
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     std::string rawFile;
     RawfileDescription rawfileDescription;
     rawfileDescription.fd = -1;
     if (GetResourceId(src, rawFile)) {
-        if (!resourceWrapper->GetRawFD(rawFile, rawfileDescription)) {
+        if (!resourceAdapter->GetRawFD(rawFile, rawfileDescription)) {
             TAG_LOGW(AceLogTag::ACE_VIDEO, "get video data by name failed");
             return false;
         }
@@ -295,7 +296,7 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     if (!container->IsUseStageModel()) {
-        path = FA_RESOURCE_PREFIX + path;
+        path = std::string(FA_RESOURCE_PREFIX) + path;
     }
     MediaFileInfo fileInfo;
     auto getFileInfoState = assetManager->GetFileInfo(path, fileInfo);

@@ -24,7 +24,7 @@ void WithEnvRemoveSystemEnvProperty(ani_env* env, ani_object aniClass, ani_long 
 void WithEnvSetSystemEnvProperty(ani_env* env, ani_object aniClass, ani_long ptr, ani_string key, ani_ref value);
 void WithEnvSetCustomEnvProperty(ani_env* env, ani_object aniClass, ani_long ptr, ani_int key, ani_ref value);
 void WithEnvRemoveCustomEnvProperty(ani_env* env, ani_object aniClass, ani_long ptr, ani_int key);
-ani_ref CustomNodeFindCustomEnvValueByKey(ani_env* env, ani_object aniClass, ani_long ptr, ani_int key);
+ani_object CustomNodeFindCustomEnvValueByKey(ani_env* env, ani_object aniClass, ani_long ptr, ani_int key);
 ani_ref CustomNodeFindSystemEnvValueByKey(ani_env* env, ani_object aniClass, ani_long ptr, ani_string key);
 void CustomNodeRegisterOnCustomEnvUpdate(ani_env* env, ani_object aniClass, ani_long ptr, ani_fn_object callback);
 void CustomNodeRegisterOnSystemEnvUpdate(ani_env* env, ani_object aniClass, ani_long ptr, ani_fn_object callback);

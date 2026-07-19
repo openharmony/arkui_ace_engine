@@ -146,35 +146,39 @@ declare class ArkWaterFlowComponent extends ArkScrollable implements CommonMetho
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkCircleComponent extends ArkComponent implements CommonMethod<CircleAttribute> {
+declare class ArkCommonShapeComponent extends ArkComponent implements CommonMethod<ShapeAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkEllipseComponent extends ArkComponent implements CommonMethod<EllipseAttribute> {
+declare class ArkCircleComponent extends ArkCommonShapeComponent implements CommonMethod<CircleAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkLineComponent extends ArkComponent implements CommonMethod<LineAttribute> {
+declare class ArkEllipseComponent extends ArkCommonShapeComponent implements CommonMethod<EllipseAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkPathComponent extends ArkComponent implements CommonMethod<PathAttribute> {
+declare class ArkLineComponent extends ArkCommonShapeComponent implements CommonMethod<LineAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkPolygonComponent extends ArkComponent implements CommonMethod<PolygonAttribute> {
+declare class ArkPathComponent extends ArkCommonShapeComponent implements CommonMethod<PathAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkPolylineComponent extends ArkComponent implements CommonMethod<PolylineAttribute> {
+declare class ArkPolygonComponent extends ArkCommonShapeComponent implements CommonMethod<PolygonAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkRectComponent extends ArkComponent implements CommonMethod<RectAttribute> {
+declare class ArkPolylineComponent extends ArkCommonShapeComponent implements CommonMethod<PolylineAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
-declare class ArkShapeComponent extends ArkComponent implements CommonMethod<ShapeAttribute> {
+declare class ArkRectComponent extends ArkCommonShapeComponent implements CommonMethod<RectAttribute> {
+    constructor(nativePtr: KNode, classType?: ModifierType);
+}
+
+declare class ArkShapeComponent extends ArkCommonShapeComponent implements CommonMethod<ShapeAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
 }
 
@@ -288,24 +292,24 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
 
 declare class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    type(value: object): ButtonAttribute;
-    stateEffect(value: boolean): ButtonAttribute;
-    fontColor(value: ResourceColor): ButtonAttribute;
-    fontSize(value: number | string | Resource): ButtonAttribute;
-    fontWeight(value: number | FontWeight | string): ButtonAttribute;
-    fontStyle(value: FontStyle): ButtonAttribute;
-    fontFamily(value: Resource | string): ButtonAttribute;
-    labelStyle(value: object): ButtonAttribute;
-    fontFeature(value: string): ButtonAttribute;
-    size(value: object): ButtonAttribute;
-    role(value: object): ButtonAttribute;
-    buttonStyle(value: object): ButtonAttribute;
-    controlSize(value: object): ButtonAttribute;
-    onClick(callback: (event: ClickEvent, result: object) => void): ButtonAttribute;
-    minFontSize(value: number | string | Resource): ButtonAttribute;
-    maxFontSize(value: number | string | Resource): ButtonAttribute;
-    height(value: Length): ButtonAttribute;
-    width(value: Length): ButtonAttribute;
+    type(value: ButtonType): this;
+    stateEffect(value: boolean): this;
+    fontColor(value: ResourceColor): this;
+    fontSize(value: number | string | Resource): this;
+    fontWeight(value: number | FontWeight | string): this;
+    fontStyle(value: FontStyle): this;
+    fontFamily(value: Resource | string): this;
+    labelStyle(value: LabelStyle): this;
+    fontFeature(value: string): this;
+    size(value: SizeOptions): this;
+    role(value: ButtonRole): this;
+    buttonStyle(value: ButtonStyleMode): this;
+    controlSize(value: ControlSize): this;
+    onClick(callback: (event: ClickEvent, result: ButtonCallbackResult) => void): this;
+    minFontSize(value: number | string | Resource): this;
+    maxFontSize(value: number | string | Resource): this;
+    height(value: Length): this;
+    width(value: Length): this;
     backgroundColor(value: ResourceColor): this;
     border(value: BorderOptions): this;
     borderStyle(value: BorderStyle | EdgeStyles): this;
@@ -604,9 +608,4 @@ type AlphabetIndexerConfiguration = object;
 type CheckboxConfiguration = object;
 type MarkStyle = object;
 type LabelStyle = object;
-type ButtonType = object;
-type ButtonSize = object;
-type ButtonRole = object;
-type ButtonStyleMode = object;
-type ControlSize = object;
 type ButtonCallbackResult = object;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 
 namespace OHOS::Ace::NG {
+
+const char BADGE_ETS_TAG[] = "Badge";
 class ACE_EXPORT BadgeModelNG : public OHOS::Ace::BadgeModel {
 public:
     void Create(BadgeParameters& badgeParameters) override;
@@ -49,9 +51,38 @@ public:
     void ProcessBorderWidth(const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
     void ProcessOuterBorderWidth(
         const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
+    static void CreateModel(
+        BadgeParameters& badgeParameters, bool isDefaultFontSize = true, bool isDefaultBadgeSize = true);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void CreateJSBadgeByFrameNode(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters,
+        bool isDefaultFontSize, bool isDefaultBadgeSize);
     static void SetBadgeParam(
         FrameNode* frameNode, BadgeParameters& badgeParameters, bool isDefaultFontSize, bool isDefaultBadgeSize);
+    static void CreateWithResObj(const RefPtr<FrameNode>& frameNode, BadgeParameters& badgeParameters);
+    static void ProcessBadgeValueStatic(
+        const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
+    static void ProcessBadgeTextColorStatic(const RefPtr<BadgePattern>& BadgePattern,
+        RefPtr<ResourceObject>& resourceObject, const RefPtr<FrameNode>& frameNode);
+    static void ProcessBadgeColorStatic(const RefPtr<BadgePattern>& badgePattern,
+        RefPtr<ResourceObject>& resourceObject, const RefPtr<FrameNode>& frameNode);
+    static void ProcessBorderColorStatic(const RefPtr<BadgePattern>& BadgePattern,
+        RefPtr<ResourceObject>& resourceObject, const RefPtr<FrameNode>& frameNode);
+    static void ProcessOuterBorderColorStatic(
+        const RefPtr<BadgePattern>& badgePattern, RefPtr<ResourceObject>& resourceObject);
+    static void ProcessFontWeightStatic(
+        const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
+    static void ProcessFontSizeStatic(
+        const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
+    static void ProcessBadgeSizeStatic(
+        const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
+    static void ProcessBadgePositionXStatic(
+        const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
+    static void ProcessBadgePositionYStatic(
+        const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
+    static void ProcessBorderWidthStatic(
+        const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
+    static void ProcessOuterBorderWidthStatic(
+        const RefPtr<BadgePattern>& badgePattern, const RefPtr<ResourceObject>& resourceObject);
 
 private:
     static void UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefPtr<FrameNode>& frameNode);

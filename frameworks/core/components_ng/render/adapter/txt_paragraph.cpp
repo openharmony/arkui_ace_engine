@@ -25,8 +25,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::u16string ELLIPSIS = u"\u2026";
-const std::u16string SYMBOL_TRANS = u"\uF0001";
+static constexpr char16_t ELLIPSIS[] = u"\u2026";
+static constexpr char16_t SYMBOL_TRANS[] = u"\uF0001";
 const int32_t LENGTH_INCREMENT = 2;
 constexpr int32_t THOUSAND = 1000;
 constexpr char16_t NEWLINE_CODE = u'\n';
@@ -110,14 +110,13 @@ void TxtParagraph::ConvertTypographyStyle(Rosen::TypographyStyle& style, const P
     if (paraStyle.tailIndents.has_value() && paraStyle.tailIndents->HasValue()) {
         style.tailIndents.clear();
         for (const auto& indent : paraStyle.tailIndents->indentsArray.value()) {
-            style.tailIndents.push_back(indent.ConvertToPx());
+            if (indent.Unit() == DimensionUnit::PERCENT || indent.IsNegative()) {
+                style.tailIndents.push_back(0.0);
+            } else {
+                style.tailIndents.push_back(indent.ConvertToPx());
+            }
         }
     }
-#if !defined(FLUTTER_2_5) && !defined(NEW_SKIA)
-    // keep WordBreak define same with WordBreakType in minikin
-    style.wordBreakType = static_cast<Rosen::WordBreakType>(paraStyle.wordBreak);
-    style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle.lineBreakStrategy);
-#endif
 }
 
 void TxtParagraph::PushStyle(const TextStyle& style)

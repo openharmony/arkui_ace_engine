@@ -30,7 +30,6 @@ export class ArkUINativeModule {
     native static _DisposeNode(ptr0: KPointer): void
     @ani.unsafe.Direct
     native static _DumpTreeNode(ptr0: KPointer): void
-    @ani.unsafe.Direct
     native static _AddChild(ptr1: KPointer, ptr2: KPointer): KInt
     @ani.unsafe.Direct
     native static _RemoveChild(ptr0: KPointer, ptr2: KPointer): void

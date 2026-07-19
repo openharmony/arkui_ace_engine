@@ -18,7 +18,9 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/shape/shape_container_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_container_pattern.h"
+#include "core/components_ng/pattern/shape/shape_paint_property.h"
 
 namespace OHOS::Ace::NG {
 constexpr double FILL_OPACITY_MIN = 0.0f;
@@ -146,7 +148,7 @@ void ShapeModelStatic::SetViewPort(FrameNode* frameNode,
 RefPtr<NG::FrameNode> ShapeModelStatic::CreateFrameNode(int32_t nodeId)
 {
     return FrameNode::CreateFrameNode(
-        V2::SHAPE_ETS_TAG, nodeId, AceType::MakeRefPtr<ShapeContainerPattern>());
+        SHAPE_ETS_TAG, nodeId, AceType::MakeRefPtr<ShapeContainerPattern>());
 }
 
 } // namespace OHOS::Ace::NG

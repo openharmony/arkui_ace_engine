@@ -102,6 +102,19 @@ public:
         int32_t webId,
         const std::string& request,
         const GetWebInfoByRequestCallback& finishCallback) override;
+    int32_t GetPageTranslateText(
+        const std::string& request, const PageTranslateTextCallback& eventCallback) override;
+    int32_t StartPageTranslate(
+        const std::string& request, const PageTranslateTextCallback& eventCallback) override;
+    int32_t EndPageTranslate() override;
+    int32_t ResetPageTranslate(int32_t nodeId = -1) override;
+    int32_t SendPageTranslateResult(const std::string& result) override;
+    int32_t GetCurrentAbilityLanguageInfo(std::string& language, std::string& region) override;
+    int32_t RegisterPageSceneRules(
+        const std::string& ruleJson, const PageSceneEventCallback& eventCallback) override;
+    int32_t UnregisterPageSceneRules(const std::string& ruleSetId) override;
+    int32_t GetPageScene(
+        const std::string& ruleJsonOrRuleSetId, const PageSceneEventCallback& eventCallback) override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H

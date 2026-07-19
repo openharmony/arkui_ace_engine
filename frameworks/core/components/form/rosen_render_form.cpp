@@ -15,6 +15,7 @@
 
 #include "core/components/form/rosen_render_form.h"
 
+#include "core/common/draw_delegate.h"
 #include "core/components/form/render_form.h"
 #include "core/pipeline/base/render_node.h"
 

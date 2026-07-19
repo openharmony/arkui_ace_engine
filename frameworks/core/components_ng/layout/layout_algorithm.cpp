@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/smart_layout/smart_layout_algorithm.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -37,6 +38,8 @@ const std::unordered_set<std::string> SMART_LAYOUT_ENABLED_COMPONENTS = {
     OHOS::Ace::V2::COLUMN_ETS_TAG,
     OHOS::Ace::V2::ROW_ETS_TAG,
     OHOS::Ace::V2::FLEX_ETS_TAG,
+    OHOS::Ace::V2::STACK_ETS_TAG,
+    OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG,
 };
 
 bool IsComponentSupportSmartLayout(const RefPtr<FrameNode>& hostNode)
@@ -92,7 +95,7 @@ std::optional<SizeF> LayoutAlgorithmWrapper::MeasureContent(
 
 Kit::LayoutConstraintInfo GetLayoutConstraint(const std::optional<LayoutConstraintF>& contentConstraint)
 {
-    Kit::LayoutConstraintInfo layoutConstraintInfo;
+    Kit::LayoutConstraintInfo layoutConstraintInfo = {};
     if (contentConstraint.has_value()) {
         layoutConstraintInfo.minWidth = contentConstraint.value().minSize.Width();
         layoutConstraintInfo.minHeight = contentConstraint.value().minSize.Height();
@@ -127,6 +130,7 @@ void LayoutAlgorithmWrapper::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
     layoutAlgorithm_->Layout(layoutWrapper);
+    HandleContentOverflowWithSmartLayout(layoutWrapper);
 }
 
 void LayoutAlgorithmWrapper::SetAbsLayoutAlgorithm(const RefPtr<Kit::LayoutAlgorithm>& absLayoutAlgorithm)
@@ -225,14 +229,15 @@ bool LayoutAlgorithm::IsContentOverflow(LayoutWrapper* layoutWrapper, OverflowCo
 void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    if (HandleContentOverflowWithSmartLayout(layoutWrapper)) {
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    if (IsSmartLayoutEffective(hostNode)) {
+        // Already handled by smart layout
         return;
     }
     if (!FeatureParam::IsPageOverflowEnabled()) {
         return;
     }
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(hostNode);
     if (OVERFLOW_ENABLED_COMPONENTS.find(hostNode->GetTag()) == OVERFLOW_ENABLED_COMPONENTS.end()) {
         return;
     }
@@ -250,9 +255,12 @@ void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
 bool LayoutAlgorithm::HandleContentOverflowWithSmartLayout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
-    if (!FeatureParam::IsSmartLayoutEnabled() || !IsComponentSupportSmartLayout(layoutWrapper->GetHostNode())) {
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, false);
+    if (!IsSmartLayoutEffective(hostNode)) {
         return false;
     }
+
     TryRestoreSmartLayoutForHost(layoutWrapper);
     if (!IsContentOverflowForSmartLayout(layoutWrapper)) {
         return false;
@@ -305,12 +313,16 @@ void LayoutAlgorithm::TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper)
 
 void LayoutAlgorithm::HandleStackContentOverflow(LayoutWrapper* layoutWrapper)
 {
-    if (!FeatureParam::IsPageOverflowEnabled()) {
-        return;
-    }
     CHECK_NULL_VOID(layoutWrapper);
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
+    if (IsSmartLayoutEffective(hostNode)) {
+        // Already handled by smart layout
+        return;
+    }
+    if (!FeatureParam::IsPageOverflowEnabled()) {
+        return;
+    }
     if (OVERFLOW_ENABLED_COMPONENTS.find(hostNode->GetTag()) == OVERFLOW_ENABLED_COMPONENTS.end()) {
         return;
     }
@@ -351,4 +363,51 @@ void LayoutAlgorithm::HandleStackContentOverflow(LayoutWrapper* layoutWrapper)
     vOverflowHandler->CreateContentRect();
     vOverflowHandler->HandleContentOverflow();
 }
+
+uint64_t LayoutAlgorithm::NodePath2Hash(const std::string& path)
+{
+    // 0xcbf29ce484222325ULL: FNV-1a 64-bit offset basis, initial hash value
+    const uint64_t FNV_OFFSET = 0xcbf29ce484222325ULL;
+    // 0x100000001b3ULL: FNV-1a 64-bit prime, used for mixing each character
+    const uint64_t FNV_PRIME = 0x100000001b3ULL;
+    uint64_t hash = FNV_OFFSET;
+    for (unsigned char c : path) {
+        hash ^= c;
+        hash *= FNV_PRIME;
+    }
+    return hash;
+}
+
+std::string LayoutAlgorithm::ComputeCurrentPathHash(FrameNode* hostNode)
+{
+    CHECK_NULL_RETURN(hostNode, "");
+    auto* context = hostNode->GetContext();
+    std::string bundleName = context ? context->GetBundleName() : "";
+    std::string path = bundleName + ":" + hostNode->GetPath();
+    uint64_t hash = NodePath2Hash(path);
+    std::stringstream ss;
+    ss << std::hex << hash;
+    return ss.str();
+}
+
+bool LayoutAlgorithm::IsSmartLayoutEffective(const RefPtr<FrameNode>& hostNode)
+{
+    if (!FeatureParam::IsSmartLayoutPageOverflowFixEnabled() || !hostNode ||
+        !IsComponentSupportSmartLayout(hostNode) || !hostNode->IsOnMainTree()) {
+        return false;
+    }
+
+    auto pattern = hostNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    const auto& vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(hostNode)));
+    CHECK_NULL_RETURN(vOverflowHandler, false);
+    std::string pathHash = vOverflowHandler->GetCachedPathHash();
+    if (pathHash.empty()) {
+        pathHash = ComputeCurrentPathHash(AceType::RawPtr(hostNode));
+        vOverflowHandler->SetCachedPathHash(pathHash);
+    }
+    return FeatureParam::IsSmartLayoutPageOverflowFixEnabled(pathHash);
+}
+
 } // namespace OHOS::Ace::NG

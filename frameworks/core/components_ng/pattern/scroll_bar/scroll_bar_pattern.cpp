@@ -31,7 +31,19 @@ constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
 constexpr uint32_t MILLIS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
 constexpr uint64_t MIN_VSYNC_DIFF_TIME = 1000 * 1000; // min is 1ms
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
+constexpr Dimension DEFAULT_INNER_SCROLL_BAR_HEIGHT = 1.0_pct;
+constexpr Dimension DEFAULT_INNER_SCROLL_BAR_START_MARGIN = 0.0_vp;
 } // namespace
+
+ScrollBarPattern::~ScrollBarPattern()
+{
+    if (scrollBarProxy_) {
+        scrollBarProxy_->UnRegisterScrollBar(AceType::WeakClaim(this));
+    }
+    scrollBarProxy_ = nullptr;
+    scrollableEvent_ = nullptr;
+    disappearAnimation_ = nullptr;
+}
 
 void ScrollBarPattern::OnAttachToFrameNode()
 {
@@ -251,6 +263,10 @@ void ScrollBarPattern::SetScrollBar(DisplayMode displayMode)
     auto positionMode = GetPositionMode();
     scrollBar_->SetPositionMode(positionMode);
     scrollBar_->SetUseInnerScrollBar(UseInnerScrollBar());
+    if (UseInnerScrollBar()) {
+        scrollBar_->SetScrollBarHeight(DEFAULT_INNER_SCROLL_BAR_HEIGHT);
+        scrollBar_->SetScrollBarStartMargin(DEFAULT_INNER_SCROLL_BAR_START_MARGIN);
+    }
     if (scrollBarOverlayModifier_) {
         scrollBarOverlayModifier_->SetPositionMode(positionMode);
     }

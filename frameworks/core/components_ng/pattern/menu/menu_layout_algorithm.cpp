@@ -629,17 +629,14 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     auto windowManager = pipelineContext->GetWindowManager();
     isContainerModal_ = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        if (!canExpandCurrentWindow_ && isContainerModal_) {
-            LimitContainerModalMenuRect(width_, height_, menuPattern);
-        } else {
-            AdjustWrapperRectForPCMode(host);
-        }
-    }
+    auto parentOffset = host->GetPaintRectOffset(true, true);
+    width_ -= parentOffset.GetX();
+    height_ -= parentOffset.GetY();
     CalculateSafeAreaIntersection(safeAreaInsets);
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
-    TAG_LOGI(AceLogTag::ACE_MENU, "InitWrapperRect with safeAreaInsets : %{public}s", wrapperRect_.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_MENU, "InitWrapperRect with safeAreaInsets : %{public}s offset: %{public}s",
+        wrapperRect_.ToString().c_str(), parentOffset.ToString().c_str());
 }
 
 void MenuLayoutAlgorithm::CalculateSafeAreaIntersection(const SafeAreaInsets& safeAreaInsets)
@@ -1203,6 +1200,9 @@ void MenuLayoutAlgorithm::CalculateIdealSize(LayoutWrapper* layoutWrapper,
     CHECK_NULL_VOID(host);
     auto pattern = host->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(pattern);
+    if (pattern->GetIsArrayGridMenu()) {
+        childConstraint.maxSize.SetWidth(std::min(childConstraint.minSize.Width(), childConstraint.maxSize.Width()));
+    }
     float idealHeight = 0.0f;
     float idealWidth = 0.0f;
     std::list<RefPtr<LayoutWrapper>> builderChildList;
@@ -1443,9 +1443,11 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuGreateThan(
         auto menuSize = menuGeometryNode->GetMarginFrameSize();
         if (GreatNotEqual(param_.menuItemTotalHeight, previewHalfHeight)) {
             menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), previewHalfHeight));
+            childMarginFrameSize_ = SizeF(menuSize.Width(), previewHalfHeight);
             totalSize = SizeF(totalSize.Width(), previewHalfHeight + previewSize.Height());
         } else {
             menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), param_.menuItemTotalHeight));
+            childMarginFrameSize_ = SizeF(menuSize.Width(), param_.menuItemTotalHeight);
             totalSize = SizeF(totalSize.Width(), param_.menuItemTotalHeight + previewSize.Height());
         }
     }
@@ -1461,6 +1463,7 @@ void MenuLayoutAlgorithm::LayoutNormalTopPreviewBottomMenuGreateThan(
             unitSpace = delta / totalSize.Height();
             auto menuSize = menuGeometryNode->GetMarginFrameSize();
             menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), (1 - unitSpace) * menuSize.Height()));
+            childMarginFrameSize_ = SizeF(menuSize.Width(), (1 - unitSpace) * menuSize.Height());
         }
         previewGeometryNode->SetFrameSize(SizeF((1 - unitSpace) * previewSize.Width() / previewScale_,
             (1 - unitSpace) * previewSize.Height() / previewScale_));
@@ -1545,9 +1548,11 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuGreateThan(
         auto menuSize = menuGeometryNode->GetMarginFrameSize();
         if (GreatNotEqual(param_.menuItemTotalHeight, previewHalfHeight)) {
             menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), previewHalfHeight));
+            childMarginFrameSize_ = SizeF(menuSize.Width(), previewHalfHeight);
             totalSize = SizeF(totalSize.Width(), previewHalfHeight + previewSize.Height());
         } else {
             menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), param_.menuItemTotalHeight));
+            childMarginFrameSize_ = SizeF(menuSize.Width(), param_.menuItemTotalHeight);
             totalSize = SizeF(totalSize.Width(), param_.menuItemTotalHeight + previewSize.Height());
         }
     }
@@ -1563,6 +1568,7 @@ void MenuLayoutAlgorithm::LayoutNormalBottomPreviewTopMenuGreateThan(
             unitSpace = delta / totalSize.Height();
             auto menuSize = menuGeometryNode->GetMarginFrameSize();
             menuGeometryNode->SetFrameSize(SizeF(menuSize.Width(), (1 - unitSpace) * menuSize.Height()));
+            childMarginFrameSize_ = SizeF(menuSize.Width(), (1 - unitSpace) * menuSize.Height());
         }
         previewGeometryNode->SetFrameSize(SizeF((1 - unitSpace) * previewSize.Width() / previewScale_,
             (1 - unitSpace) * previewSize.Height() / previewScale_));
@@ -1727,6 +1733,7 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(
     auto menuSize = menuGeometryNode->GetMarginFrameSize();
     menuGeometryNode->SetFrameSize(
         SizeF(menuSize.Width(), std::min<float>(param_.menuItemTotalHeight, heightLeftSpace)));
+    childMarginFrameSize_ = SizeF(menuSize.Width(), std::min<float>(param_.menuItemTotalHeight, heightLeftSpace));
     menuSize = menuGeometryNode->GetMarginFrameSize();
     auto offsetX = targetCenterOffset.GetX() - previewSize.Width() / HALF;
     auto offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / HALF,
@@ -1780,6 +1787,7 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuGreateThan(
     auto menuSize = menuGeometryNode->GetMarginFrameSize();
     menuGeometryNode->SetFrameSize(
         SizeF(menuSize.Width(), std::min<float>(param_.menuItemTotalHeight, heightLeftSpace)));
+    childMarginFrameSize_ = SizeF(menuSize.Width(), std::min<float>(param_.menuItemTotalHeight, heightLeftSpace));
     menuSize = menuGeometryNode->GetMarginFrameSize();
     auto offsetX = 0.0f;
     auto offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
@@ -1832,6 +1840,7 @@ void MenuLayoutAlgorithm::LayoutPreviewMenuGreateThanForConstant(
     if (GreatNotEqual(heightLeftSpace, 0.0f) && GreatNotEqual(menuSize.Height(), heightLeftSpace)) {
         menuGeometryNode->SetFrameSize(
             SizeF(menuSize.Width(), std::min<float>(param_.menuItemTotalHeight, heightLeftSpace)));
+        childMarginFrameSize_ = SizeF(menuSize.Width(), std::min<float>(param_.menuItemTotalHeight, heightLeftSpace));
     }
 
     x = x + (previewSize.Width() - previewSize.Width() / previewScale_) / HALF;
@@ -2620,17 +2629,6 @@ void MenuLayoutAlgorithm::LimitContainerModalMenuRect(
     rectHeight -= containerOffsetY;
 }
 
-void MenuLayoutAlgorithm::AdjustWrapperRectForPCMode(const RefPtr<FrameNode>& host)
-{
-    CHECK_NULL_VOID(host);
-    if (!SystemProperties::IsPCMode()) {
-        return;
-    }
-    auto parentOffset = host->GetPaintRectOffset(true, true);
-    width_ -= parentOffset.GetX();
-    height_ -= parentOffset.GetY();
-}
-
 void MenuLayoutAlgorithm::UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint)
 {
     RefPtr<GridColumnInfo> columnInfo;
@@ -2820,6 +2818,10 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
     auto maxChildrenWidth = optionConstraint.minSize.Width();
     auto optionsLayoutWrapper = GetOptionsLayoutWrappper(layoutWrapper);
     for (const auto& optionWrapper : optionsLayoutWrapper) {
+        auto optionHostNode = optionWrapper->GetHostNode();
+        if (optionHostNode && optionHostNode->GetTag() != OPTION_ETS_TAG) {
+            continue;
+        }
         optionWrapper->GetLayoutProperty()->ResetCalcMinSize();
         optionWrapper->Measure(optionConstraint);
         auto childSize = optionWrapper->GetGeometryNode()->GetMarginFrameSize();

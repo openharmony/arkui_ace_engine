@@ -14,25 +14,30 @@
  */
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
-#include "base/utils/utf_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/render/render_context.h"
-#include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
-#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
+#include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
+#include "core/components_ng/pattern/time_picker/timepicker_layout_utils.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"
+#include "core/components_ng/render/render_context.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -221,9 +226,10 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     auto timePickerPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     timePickerPattern->SetContentRowNode(contentRow);
     timePickerPattern->SetbuttonTitleNode(buttonTitleNode);
-    auto buttonTitlePattern = buttonTitleNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_RETURN(buttonTitlePattern, nullptr);
-    buttonTitlePattern->SetSkipColorConfigurationUpdate();
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    buttonModifier->setSkipColorConfigurationUpdate(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonTitleNode)));
 
     if (isNeedAging) {
         for (uint32_t i = 1; i < timePickerNode->GetChildren().size(); i++) {
@@ -243,7 +249,9 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
             layoutProperty->UpdateLayoutWeight(0);
         }
     }
-    auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, nullptr);
+    auto dialogNode = dialogInnerModifier->createDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
     auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(dialogPattern, nullptr);
@@ -302,7 +310,13 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto nextPrevButtonNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     CHECK_NULL_RETURN(nextPrevButtonNode, nullptr);
     auto textNextPrevNode = FrameNode::CreateFrameNode(TimePickerUtil::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -331,24 +345,25 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     auto event = UpdateTimePickerSwitchEvent(timeNode, textNextPrevNode, dialogTheme, nextPrevButtonNode,
         timePickerSwitchEvent);
     eventNextPrevHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(event)));
-    auto buttonNextPrevEventHub = nextPrevButtonNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_RETURN(buttonNextPrevEventHub, nullptr);
-    buttonNextPrevEventHub->SetStateEffect(true);
-    auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    buttonNextPrevLayoutProperty->UpdateLabel(GetDialogAgingButtonText(true));
+    auto* nextPrevBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(nextPrevBtnModifier, nullptr);
+    auto buttonNextPrevHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(nextPrevButtonNode));
+    nextPrevBtnModifier->setStateEffectToEventHub(buttonNextPrevHandle, true);
+    auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty();
+    nextPrevBtnModifier->updateLabelToLayoutProp(buttonNextPrevHandle, GetDialogAgingButtonText(true));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        buttonNextPrevLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+        nextPrevBtnModifier->updateTypeToLayoutProp(buttonNextPrevHandle, ButtonType::ROUNDED_RECTANGLE);
     } else {
-        buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
+        nextPrevBtnModifier->updateTypeToLayoutProp(buttonNextPrevHandle, ButtonType::CAPSULE);
     }
     buttonNextPrevLayoutProperty->UpdateFlexShrink(1.0);
     UpdateConfirmButtonMargin(buttonNextPrevLayoutProperty, dialogTheme);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         buttonNextPrevLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
-        buttonNextPrevLayoutProperty->UpdateMaxLines(1);
-        buttonNextPrevLayoutProperty->UpdateFontSize(
+        nextPrevBtnModifier->updateMaxLinesToLayoutProp(buttonNextPrevHandle, 1);
+        nextPrevBtnModifier->updateFontSizeToLayoutProp(buttonNextPrevHandle,
             ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             buttonNextPrevLayoutProperty->UpdateUserDefinedIdealSize(
@@ -359,7 +374,8 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     }
     auto buttonNextPrevRenderContext = nextPrevButtonNode->GetRenderContext();
     buttonNextPrevRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    buttonNextPrevLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    nextPrevBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(nextPrevButtonNode)), true);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonNextPrevLayoutProperty, buttonNextPrevRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, nextPrevButtonNode, false);
     nextPrevButtonNode->MarkModifyDone();
@@ -388,8 +404,7 @@ std::function<void(const GestureEvent&)> TimePickerDialogView::UpdateTimePickerS
         CHECK_NULL_VOID(nextPrevButtonNode);
         auto dialogTheme = dialogThemeWeak.Upgrade();
         CHECK_NULL_VOID(dialogTheme);
-        auto buttonNextPrevLayoutProperty
-                                = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty();
         CHECK_NULL_VOID(buttonNextPrevLayoutProperty);
         timePickerEventHub->FireDialogAcceptEvent(pickerPattern->GetSelectedObject(true));
         func();
@@ -423,8 +438,13 @@ RefPtr<FrameNode> TimePickerDialogView::CreateColumnNode()
 RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode()
 {
     auto buttonId = ElementRegister::GetInstance()->MakeUniqueId();
-    return FrameNode::GetOrCreateFrameNode(
-        TimePickerUtil::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    return FrameNode::GetOrCreateFrameNode(TimePickerUtil::BUTTON_ETS_TAG, buttonId, []() -> RefPtr<Pattern> {
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonModifier, nullptr);
+        auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+        CHECK_NULL_RETURN(rawPattern, nullptr);
+        return AceType::Claim(rawPattern);
+    });
 }
 
 RefPtr<FrameNode> TimePickerDialogView::CreateDividerNode(const RefPtr<FrameNode>& dateNode, bool isCreateDivider)
@@ -440,8 +460,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateDividerNode(const RefPtr<FrameNode
     } else {
         dividerNodeId = pickerPattern->GetDividerId();
     }
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        TimePickerUtil::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(dividerNodeId);
     CHECK_NULL_RETURN(dividerNode, nullptr);
 
     auto dividerPaintProps = dividerNode->GetPaintProperty<DividerRenderProperty>();
@@ -488,7 +507,13 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     auto pickerPattern = dateNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_RETURN(pickerPattern, nullptr);
     auto buttonTitleNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     auto textTitleNodeId = pickerPattern->GetTitleId();
     auto textTitleNode =
         FrameNode::CreateFrameNode(TimePickerUtil::TEXT_ETS_TAG, textTitleNodeId, AceType::MakeRefPtr<TextPattern>());
@@ -516,9 +541,10 @@ RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<Frame
     auto buttonTitleRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonTitleRenderContext, nullptr);
     buttonTitleRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    auto buttonLayoutProperty = buttonTitleNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonTitleNode)), true);
     auto layoutProps = buttonTitleNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProps, nullptr);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
@@ -721,26 +747,33 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
 
     auto buttonConfirmNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     auto textConfirmNode = FrameNode::CreateFrameNode(TimePickerUtil::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(buttonConfirmNode, nullptr);
     CHECK_NULL_RETURN(textConfirmNode, nullptr);
     auto textLayoutProperty = textConfirmNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonConfirmLayoutProperty = buttonConfirmNode->GetLayoutProperty();
     CHECK_NULL_RETURN(buttonConfirmLayoutProperty, nullptr);
     UpdateConfirmButtonTextLayoutProperty(textLayoutProperty, pickerTheme, buttonConfirmLayoutProperty);
     auto columnPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
     columnPattern->SetConfirmNode(buttonConfirmNode);
-    auto buttonConfirmEventHub = buttonConfirmNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_RETURN(buttonConfirmEventHub, nullptr);
-    buttonConfirmEventHub->SetStateEffect(true);
+    auto* confirmBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(confirmBtnModifier, nullptr);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonConfirmNode));
+    confirmBtnModifier->setStateEffectToEventHub(nodeHandle, true);
 
     UpdateButtonLayoutProperty(buttonConfirmLayoutProperty, pickerTheme);
     auto buttonConfirmRenderContext = buttonConfirmNode->GetRenderContext();
     buttonConfirmRenderContext->UpdateBackgroundColor(buttonColor_);
-    buttonConfirmLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    confirmBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
     UpdateButtonStyles(buttonInfos, ACCEPT_BUTTON_INDEX, buttonConfirmLayoutProperty, buttonConfirmRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonConfirmNode, true);
 
@@ -764,15 +797,20 @@ RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode
 }
 
 void TimePickerDialogView::UpdateButtonLayoutProperty(
-    const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
+    const RefPtr<LayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<PickerTheme>& pickerTheme)
 {
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
-    buttonConfirmLayoutProperty->UpdateLabel(GetDialogNormalButtonText(true));
+    auto buttonNode = buttonConfirmLayoutProperty->GetHost();
+    CHECK_NULL_VOID(buttonNode);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->updateLabelToLayoutProp(buttonHandle, GetDialogNormalButtonText(true));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+        buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::ROUNDED_RECTANGLE);
     } else {
-        buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
+        buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::CAPSULE);
     }
     buttonConfirmLayoutProperty->UpdateFlexShrink(1.0);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -783,8 +821,8 @@ void TimePickerDialogView::UpdateButtonLayoutProperty(
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
-        buttonConfirmLayoutProperty->UpdateMaxLines(1);
-        buttonConfirmLayoutProperty->UpdateFontSize(
+        buttonModifier->updateMaxLinesToLayoutProp(buttonHandle, 1);
+        buttonModifier->updateFontSizeToLayoutProp(buttonHandle,
             ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
@@ -798,32 +836,38 @@ void TimePickerDialogView::UpdateButtonLayoutProperty(
 }
 
 void TimePickerDialogView::UpdateConfirmButtonMargin(
-    const RefPtr<ButtonLayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<DialogTheme>& dialogTheme)
+    const RefPtr<LayoutProperty>& buttonConfirmLayoutProperty, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
+        TimePickerDialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, true);
     } else {
-        DialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false, ModuleDialogType::TIMEPICKER_DIALOG);
+        TimePickerDialogTypeMargin::UpdateDialogMargin(isRtl, margin, dialogTheme, false);
     }
     buttonConfirmLayoutProperty->UpdateMargin(margin);
 }
 
-void TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(const RefPtr<TextLayoutProperty> &textLayoutProperty,
-    const RefPtr<PickerTheme> &pickerTheme, const RefPtr<ButtonLayoutProperty> &buttonConfirmLayoutProperty)
+void TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<PickerTheme>& pickerTheme, const RefPtr<LayoutProperty>& buttonConfirmLayoutProperty)
 {
     CHECK_NULL_VOID(textLayoutProperty);
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
+    auto buttonConfirmNode = buttonConfirmLayoutProperty->GetHost();
+    CHECK_NULL_VOID(buttonConfirmNode);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonConfirmNode));
     textLayoutProperty->UpdateContent(GetDialogNormalButtonText(true));
     if (useButtonFocusArea_) {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
-        buttonConfirmLayoutProperty->UpdateFontColor(pickerTheme->GetTitleStyle().GetTextColor());
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle, pickerTheme->GetTitleStyle().GetTextColor());
     } else {
         textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-        buttonConfirmLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle,
+            pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
-    buttonConfirmLayoutProperty->UpdateFontColorFlagByUser(true);
+    buttonModifier->updateFontColorFlagByUserToLayoutProp(buttonHandle, true);
     if (!NeedAdaptForAging()) {
         textLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -838,15 +882,14 @@ void TimePickerDialogView::UpdateConfirmButtonTextLayoutProperty(const RefPtr<Te
 }
 
 void TimePickerDialogView::UpdateCancelButtonMargin(
-    const RefPtr<ButtonLayoutProperty>& buttonCancelLayoutProperty, const RefPtr<DialogTheme>& dialogTheme)
+    const RefPtr<LayoutProperty>& buttonCancelLayoutProperty, const RefPtr<DialogTheme>& dialogTheme)
 {
     MarginProperty margin;
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, true, ModuleDialogType::TIMEPICKER_DIALOG);
+        TimePickerDialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, true);
     } else {
-        DialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, false,
-            ModuleDialogType::TIMEPICKER_DIALOG);
+        TimePickerDialogTypeMargin::UpdateDialogMargin(!isRtl, margin, dialogTheme, false);
     }
     buttonCancelLayoutProperty->UpdateMargin(margin);
 }
@@ -860,14 +903,20 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(TimePickerUtil::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     CHECK_NULL_RETURN(buttonCancelNode, nullptr);
     auto textCancelNode = FrameNode::CreateFrameNode(TimePickerUtil::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textCancelNode, nullptr);
     auto textCancelLayoutProperty = textCancelNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textCancelLayoutProperty, nullptr);
-    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty();
     CHECK_NULL_RETURN(buttonCancelLayoutProperty, nullptr);
     UpdateCancelButtonTextLayoutProperty(textCancelLayoutProperty, pickerTheme, buttonCancelLayoutProperty);
     auto columnPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
@@ -877,24 +926,24 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     CHECK_NULL_RETURN(eventCancelHub, nullptr);
     eventCancelHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(std::move(cancelEvent)));
 
-    auto buttonCancelEventHub = buttonCancelNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_RETURN(buttonCancelEventHub, nullptr);
-    buttonCancelEventHub->SetStateEffect(true);
-
-    buttonCancelLayoutProperty->UpdateLabel(GetDialogNormalButtonText(false));
+    auto* cancelBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(cancelBtnModifier, nullptr);
+    auto buttonCancelHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonCancelNode));
+    cancelBtnModifier->setStateEffectToEventHub(buttonCancelHandle, true);
+    cancelBtnModifier->updateLabelToLayoutProp(buttonCancelHandle, GetDialogNormalButtonText(false));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+        cancelBtnModifier->updateTypeToLayoutProp(buttonCancelHandle, ButtonType::ROUNDED_RECTANGLE);
     } else {
-        buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
+        cancelBtnModifier->updateTypeToLayoutProp(buttonCancelHandle, ButtonType::CAPSULE);
     }
     buttonCancelLayoutProperty->UpdateFlexShrink(1.0);
     UpdateCancelButtonMargin(buttonCancelLayoutProperty, dialogTheme);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(pickerTheme->GetButtonWidth()), std::nullopt));
-        buttonCancelLayoutProperty->UpdateMaxLines(1);
-        buttonCancelLayoutProperty->UpdateFontSize(
+        cancelBtnModifier->updateMaxLinesToLayoutProp(buttonCancelHandle, 1);
+        cancelBtnModifier->updateFontSizeToLayoutProp(buttonCancelHandle,
             ConvertFontScaleValue(pickerTheme->GetOptionStyle(false, false).GetFontSize(), 0.0_vp, false, true));
     } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             buttonCancelLayoutProperty->UpdateUserDefinedIdealSize(
@@ -906,7 +955,8 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
 
     auto buttonCancelRenderContext = buttonCancelNode->GetRenderContext();
     buttonCancelRenderContext->UpdateBackgroundColor(buttonColor_);
-    buttonCancelLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    cancelBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonCancelNode)), true);
     UpdateButtonStyles(buttonInfos, CANCEL_BUTTON_INDEX, buttonCancelLayoutProperty, buttonCancelRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonCancelNode, false);
     buttonCancelNode->MarkModifyDone();
@@ -914,20 +964,26 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
 }
 
 void TimePickerDialogView::UpdateCancelButtonTextLayoutProperty(
-    const RefPtr<TextLayoutProperty> &textCancelLayoutProperty, const RefPtr<PickerTheme> &pickerTheme,
-    const RefPtr<ButtonLayoutProperty> &buttonCancelLayoutProperty)
+    const RefPtr<TextLayoutProperty>& textCancelLayoutProperty, const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<LayoutProperty>& buttonCancelLayoutProperty)
 {
     CHECK_NULL_VOID(textCancelLayoutProperty);
     CHECK_NULL_VOID(buttonCancelLayoutProperty);
+    auto buttonCancelNode = buttonCancelLayoutProperty->GetHost();
+    CHECK_NULL_VOID(buttonCancelNode);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonCancelNode));
     textCancelLayoutProperty->UpdateContent(GetDialogNormalButtonText(false));
     if (useButtonFocusArea_) {
         textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetTitleStyle().GetTextColor());
-        buttonCancelLayoutProperty->UpdateFontColor(pickerTheme->GetTitleStyle().GetTextColor());
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle, pickerTheme->GetTitleStyle().GetTextColor());
     } else {
         textCancelLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
-        buttonCancelLayoutProperty->UpdateFontColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle,
+            pickerTheme->GetOptionStyle(true, false).GetTextColor());
     }
-    buttonCancelLayoutProperty->UpdateFontColorFlagByUser(true);
+    buttonModifier->updateFontColorFlagByUserToLayoutProp(buttonHandle, true);
     if (!NeedAdaptForAging()) {
         textCancelLayoutProperty->UpdateMaxFontScale(pickerTheme->GetNormalFontScale());
     }
@@ -942,77 +998,84 @@ void TimePickerDialogView::UpdateCancelButtonTextLayoutProperty(
 }
 
 void TimePickerDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-    const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext)
+    const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext)
 {
     if (index >= buttonInfos.size()) {
         return;
     }
     CHECK_NULL_VOID(buttonLayoutProperty);
+    auto buttonNode = buttonLayoutProperty->GetHost();
+    CHECK_NULL_VOID(buttonNode);
     CHECK_NULL_VOID(buttonRenderContext);
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
     CHECK_NULL_VOID(buttonTheme);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
     if (buttonInfos[index].type.has_value()) {
-        buttonLayoutProperty->UpdateType(buttonInfos[index].type.value());
+        buttonModifier->updateTypeToLayoutProp(buttonHandle, buttonInfos[index].type.value());
     }
     UpdateButtonStyleAndRole(buttonInfos, index, buttonLayoutProperty, buttonRenderContext, buttonTheme);
     if (buttonInfos[index].fontSize.has_value()) {
-        buttonLayoutProperty->UpdateFontSize(
+        buttonModifier->updateFontSizeToLayoutProp(buttonHandle,
             ConvertFontScaleValue(buttonInfos[index].fontSize.value(), 0.0_vp, false, true));
     }
     if (buttonInfos[index].fontColor.has_value()) {
-        buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
-        buttonLayoutProperty->UpdateFontColorFlagByUser(true);
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle, buttonInfos[index].fontColor.value());
+        buttonModifier->updateFontColorFlagByUserToLayoutProp(buttonHandle, true);
     }
     if (buttonInfos[index].fontWeight.has_value()) {
-        buttonLayoutProperty->UpdateFontWeight(buttonInfos[index].fontWeight.value());
+        buttonModifier->updateFontWeightToLayoutProp(buttonHandle, buttonInfos[index].fontWeight.value());
     }
     if (buttonInfos[index].fontStyle.has_value()) {
-        buttonLayoutProperty->UpdateFontStyle(buttonInfos[index].fontStyle.value());
+        buttonModifier->updateFontStyleToLayoutProp(buttonHandle, buttonInfos[index].fontStyle.value());
     }
     if (buttonInfos[index].fontFamily.has_value()) {
-        buttonLayoutProperty->UpdateFontFamily(buttonInfos[index].fontFamily.value());
+        buttonModifier->updateFontFamilyToLayoutProp(buttonHandle, buttonInfos[index].fontFamily.value());
     }
     if (buttonInfos[index].borderRadius.has_value()) {
-        buttonLayoutProperty->UpdateBorderRadius(buttonInfos[index].borderRadius.value());
+        buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, buttonInfos[index].borderRadius.value());
     }
     if (buttonInfos[index].backgroundColor.has_value()) {
         buttonRenderContext->UpdateBackgroundColor(buttonInfos[index].backgroundColor.value());
-        buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
     }
 }
 
 void TimePickerDialogView::UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-    const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+    const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
     const RefPtr<ButtonTheme>& buttonTheme)
 {
     if (index >= buttonInfos.size()) {
         return;
     }
     CHECK_NULL_VOID(buttonLayoutProperty);
+    auto buttonNode = buttonLayoutProperty->GetHost();
+    CHECK_NULL_VOID(buttonNode);
     CHECK_NULL_VOID(buttonRenderContext);
     CHECK_NULL_VOID(buttonTheme);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
     if (buttonInfos[index].role.has_value()) {
-        buttonLayoutProperty->UpdateButtonRole(buttonInfos[index].role.value());
-        ButtonStyleMode buttonStyleMode;
-        if (buttonInfos[index].buttonStyle.has_value()) {
-            buttonStyleMode = buttonInfos[index].buttonStyle.value();
-        } else {
-            buttonStyleMode = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-        }
+        buttonModifier->updateButtonRoleToLayoutProp(buttonHandle, buttonInfos[index].role.value());
+        ButtonStyleMode buttonStyleMode = buttonInfos[index].buttonStyle.has_value()
+            ? buttonInfos[index].buttonStyle.value()
+            : buttonModifier->getButtonStyleFromLayoutProp(buttonHandle).value_or(ButtonStyleMode::EMPHASIZE);
         auto bgColor = buttonTheme->GetBgColor(buttonStyleMode, buttonInfos[index].role.value());
         auto textColor = buttonTheme->GetTextColor(buttonStyleMode, buttonInfos[index].role.value());
         buttonRenderContext->UpdateBackgroundColor(bgColor);
-        buttonLayoutProperty->UpdateFontColor(textColor);
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle, textColor);
     }
     if (buttonInfos[index].buttonStyle.has_value()) {
-        buttonLayoutProperty->UpdateButtonStyle(buttonInfos[index].buttonStyle.value());
-        ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+        buttonModifier->updateButtonStyleToLayoutProp(buttonHandle, buttonInfos[index].buttonStyle.value());
+        ButtonRole buttonRole = buttonModifier->getButtonRoleFromLayoutProp(buttonHandle).value_or(ButtonRole::NORMAL);
         auto bgColor = buttonTheme->GetBgColor(buttonInfos[index].buttonStyle.value(), buttonRole);
         auto textColor = buttonTheme->GetTextColor(buttonInfos[index].buttonStyle.value(), buttonRole);
         buttonRenderContext->UpdateBackgroundColor(bgColor);
-        buttonLayoutProperty->UpdateFontColor(textColor);
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle, textColor);
     }
 }
 

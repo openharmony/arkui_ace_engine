@@ -177,7 +177,10 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestRequestKeyboard001, Test
 
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
-    auto func = [] {};
+    auto func = []() {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+    };
 
     auto customKeyboardBuilder = richEditorPattern->customKeyboardBuilder_;
     richEditorPattern->customKeyboardBuilder_ = func;
@@ -199,7 +202,10 @@ HWTEST_F(RichEditorKeyboardTestNg, RichEditorPatternTestCloseCustomKeyboard001, 
 
     auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
     MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
-    auto func = []() {};
+    auto func = []() {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+    };
     auto oldFunc = richEditorPattern->customKeyboardBuilder_;
 
     richEditorPattern->customKeyboardBuilder_ = func;
@@ -231,7 +237,10 @@ HWTEST_F(RichEditorKeyboardTestNg, RequestCustomKeyboard, TestSize.Level0)
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY));
 
     richEditorPattern->SetCustomKeyboardOption(true);
-    auto func = []() {};
+    auto func = []() {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+    };
     richEditorPattern->customKeyboardBuilder_ = func;
 
     EXPECT_EQ(richEditorPattern->isCustomKeyboardAttached_, false);

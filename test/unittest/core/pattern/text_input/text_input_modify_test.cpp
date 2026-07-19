@@ -40,7 +40,7 @@ constexpr int32_t DEFAULT_VALUE = 0;
 constexpr int32_t ID = 0;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
 const std::string HELLO_TEXT = "hello";
-const std::u16string HELLO_TEXT_U16 = u"hello";
+static constexpr char16_t HELLO_TEXT_U16[] = u"hello";
 const std::string DEFAULT_PLACE_HOLDER = "please input text here";
 const std::string LOWERCASE_FILTER = "[a-z]";
 const std::string NUMBER_FILTER = "^[0-9]*$";
@@ -218,11 +218,19 @@ HWTEST_F(TextFieldModifyTest, TextinputCaretPositionOnHandleMove001, TestSize.Le
     OffsetF localOffset1(1.0f, 1.0f);
     EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset1, true), 0);
 
+    /**
+     * @tc.steps: step3. Create localoffset.
+     * tc.expected: step3. Check if the value is right.
+     */
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset2(720.0f, 1.0f);
     EXPECT_EQ(pattern_->selectOverlay_->GetCaretPositionOnHandleMove(localOffset2, true), 26);
 
+    /**
+     * @tc.steps: step4. Create localoffset.
+     * tc.expected: step4. Check if the value is right.
+     */
     FlushLayoutTask(frameNode_);
     GetFocus();
     OffsetF localOffset3(30.0f, 1.0f);
@@ -1316,7 +1324,10 @@ HWTEST_F(TextFieldModifyTest, RequestKeyboard001, TestSize.Level1)
     /**
      * @tc.steps: step2. Set SetCustomKeyboard.
      */
-    pattern_->SetCustomKeyboard([]() {});
+    pattern_->SetCustomKeyboard([]() {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+    });
     pattern_->DumpInfo();
     pattern_->DumpAdvanceInfo();
 
@@ -1348,7 +1359,7 @@ HWTEST_F(TextFieldModifyTest, RequestKeyboard002, TestSize.Level1)
     /**
      * @tc.steps: step3. call RequestKeyboard.
      */
-    EXPECT_TRUE(pattern_->RequestKeyboard(true, true, true));
+    EXPECT_FALSE(pattern_->RequestKeyboard(true, true, true));
 }
 
 /**

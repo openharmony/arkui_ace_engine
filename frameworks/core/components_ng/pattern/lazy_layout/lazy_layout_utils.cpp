@@ -21,6 +21,11 @@
 
 namespace OHOS::Ace::NG {
 
+static bool IsLazyLayoutScrollableContainer(const std::string& tag)
+{
+    return tag == V2::SCROLL_ETS_TAG || tag == V2::WATERFLOW_ETS_TAG || tag == V2::LIST_ETS_TAG;
+}
+
 bool LazyLayoutUtils::IsAllowedIntermediateNode(const RefPtr<UINode>& node)
 {
     CHECK_NULL_RETURN(node, false);
@@ -38,8 +43,7 @@ bool LazyLayoutUtils::IsVerticalScrollableParent(const RefPtr<UINode>& node)
 bool LazyLayoutUtils::IsScrollableParent(const RefPtr<UINode>& node, Axis axis)
 {
     CHECK_NULL_RETURN(node, false);
-    const auto& tag = node->GetTag();
-    if (tag != V2::SCROLL_ETS_TAG && tag != V2::WATERFLOW_ETS_TAG && tag != V2::LIST_ETS_TAG) {
+    if (!IsLazyLayoutScrollableContainer(node->GetTag())) {
         return false;
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(node);
@@ -62,22 +66,49 @@ void LazyLayoutUtils::ValidateLazyLayoutParentWithAxis(
     host->SetNeedLazyLayout(true);
     auto parent = host->GetParent();
     while (parent) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(parent);
-        if (!frameNode) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!parentFrameNode) {
             parent = parent->GetParent();
             continue;
         }
         if (IsAllowedIntermediateNode(parent)) {
-            frameNode->SetNeedLazyLayout(true);
+            parentFrameNode->SetNeedLazyLayout(true);
             parent = parent->GetParent();
             continue;
         }
-        if (IsScrollableParent(parent, axis)) {
+        const auto& parentTag = parent->GetTag();
+        if (!IsLazyLayoutScrollableContainer(parentTag)) {
+            LOGF_ABORT("%{public}s cannot be used under the %{public}s",
+                componentName.c_str(), parentTag.c_str());
+        }
+        auto scrollable = parentFrameNode->GetPattern<ScrollablePattern>();
+        if (!scrollable) {
+            LOGF_ABORT("%{public}s cannot be used under the %{public}s",
+                componentName.c_str(), parentTag.c_str());
+        }
+        if (scrollable->GetAxis() == axis) {
             return;
         }
-        LOGF_ABORT("%{public}s cannot be used under the %{public}s",
-            componentName.c_str(), parent->GetTag().c_str());
+        LOGF_ABORT("%{public}s requires parent %{public}s to be %{public}s direction",
+            componentName.c_str(), parentTag.c_str(), axis == Axis::VERTICAL ? "vertical" : "horizontal");
     }
+}
+
+bool LazyLayoutUtils::ValidateAndSetLazyLayoutParent(const RefPtr<FrameNode>& host, Axis axis)
+{
+    CHECK_NULL_RETURN(host, false);
+    auto parent = host->GetParentFrameNode();
+    CHECK_NULL_RETURN(parent, false);
+    if (IsScrollableParent(parent, axis)) {
+        host->SetNeedLazyLayout(true);
+        return true;
+    } else if (IsAllowedIntermediateNode(parent)) {
+        if (ValidateAndSetLazyLayoutParent(parent, axis)) {
+            host->SetNeedLazyLayout(true);
+            return true;
+        }
+    }
+    return false;
 }
 
 bool IsInExtraTags(const std::string& tag, const std::vector<std::string>& extraAllowedTags)

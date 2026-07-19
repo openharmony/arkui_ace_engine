@@ -16,7 +16,7 @@
 import {
     $r, Row, List, Text, Edge, Color, Radio, Image, Scroll, Column, Length, Button, Margin, ForEach,
     Builder, Divider, KeyType, Scroller, ListItem, Padding, BarState, ScrollBar, ImageFit, BlurStyle, FlexAlign, KeyEvent,
-    Direction, TextAlign, Resource, PixelMap, SheetInfo, Checkbox, Visibility, SizeResult, UIContext, ClickEvent,
+    Direction, TextAlign, Resource, PixelMap, SheetInfo, Checkbox, Visibility, SizeResult, ClickEvent,
     ScrollState, Placement, Dimension, EdgeEffect, Layoutable, ButtonRole, applyStyles, ButtonType, ResourceStr,
     Measurable, SizeOptions, FontWeight, HitTestMode, ShadowStyle, VerticalAlign, focusControl, TextOverflow,
     BuilderParam, GeometryInfo, ResourceColor, ComponentV2, ButtonOptions, MeasureResult, CustomBuilder, GestureControl,
@@ -39,6 +39,7 @@ import {
   import resourceManager from '@ohos.resourceManager';
   import { KeyCode } from '@ohos.multimodalInput.keyCode';
   import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
+  import { BusinessError } from '@ohos.base';
   
   const TITLE_MAX_LINES: int = 2;
   const HORIZON_BUTTON_MAX_COUNT: int = 2;
@@ -94,17 +95,43 @@ import {
   const ALERT_BUTTON_STYLE: number = getNumberByResourceId(125831085, 2, true);
   // 'sys.float.alert_title_alignment'
   const ALERT_TITLE_ALIGNMENT: number = getEnumNumberByResourceId(125831126, 1);
-  const SCROLL_BAR_OFFSET: number = 20;
-  const SELECT_DIALOG_SCROLL_BAR_OFFSET: number = 4;
-  
-  export type AdvancedDialogV2OnCheckedChange = (checked: boolean) => void;
-  
-  export type AdvancedDialogV2ButtonAction = () => void;
+const SCROLL_BAR_OFFSET: number = 20;
+const SELECT_DIALOG_SCROLL_BAR_OFFSET: number = 4;
 
-  function textAttributeExtension(this: TextAttribute): TextAttribute {
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: long = 125836945;
+const PUNCTUATION_OVERFLOW_DEFAULT_VALUE: boolean = true;
+
+export type AdvancedDialogV2OnCheckedChange = (checked: boolean) => void;
+  
+export type AdvancedDialogV2ButtonAction = () => void;
+
+function getPunctuationOverflowEnabled(): boolean {
+  try {
+    let configValue: string = resourceManager.getSysResourceManager()
+      ?.getStringSync(SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED);
+    
+    if (configValue === 'true') {
+      return true;
+    } else if (configValue === 'false') {
+      return false;
+    } else {
+      hilog.warn(0x3900, 'AdvanceDialogV2', 
+        `Punctuation overflow config invalid value: ${configValue}, use default: ${PUNCTUATION_OVERFLOW_DEFAULT_VALUE}`);
+      return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+    }
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'AdvanceDialogV2', 
+      `Failed to get punctuation overflow config, code: ${code}, message: ${message}`);
+    return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+  }
+}
+
+function textAttributeExtension(this: TextAttribute): TextAttribute {
     this.fallbackLineSpacing(true);
-    this.wordBreak(WordBreak.HYPHENATION);
     this.orphanCharOptimization(true);
+    this.punctuationOverflow(getPunctuationOverflowEnabled());
     return this;
   }
   

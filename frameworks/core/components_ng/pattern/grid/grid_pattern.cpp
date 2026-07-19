@@ -22,6 +22,7 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/system_properties.h"
+#include "core/common/container.h"
 #include "core/animation/curves.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
@@ -64,22 +65,61 @@ RefPtr<LayoutProperty> GridPattern::CreateLayoutProperty()
     return MakeRefPtr<GridLayoutProperty>();
 }
 
+void GridPattern::SetLayoutAlgorithmContentClip(const RefPtr<GridLayoutBaseAlgorithm>& algorithm)
+{
+    CHECK_NULL_VOID(algorithm);
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    if (!paintProperty || !paintProperty->HasContentClip()) {
+        safeAreaPad_.reset();
+        return;
+    }
+    auto clip = paintProperty->GetContentClipValue();
+    auto mode = clip.first;
+    if (mode == ContentClipMode::DEFAULT) {
+        mode = paintProperty->GetDefaultContentClip();
+    }
+    algorithm->SetContentClipMode(mode);
+    if (mode != ContentClipMode::SAFE_AREA) {
+        safeAreaPad_.reset();
+    }
+    if (mode == ContentClipMode::SAFE_AREA && safeAreaPad_.has_value()) {
+        algorithm->SetContentClipSafeAreaPad(safeAreaPad_);
+    } else if (mode == ContentClipMode::CUSTOM) {
+        algorithm->SetContentClipShape(clip.second);
+    }
+}
+
+RefPtr<LayoutAlgorithm> GridPattern::CreateScrollLayoutAlgorithm(
+    bool hasLayoutOptions, bool disableSkip, bool canOverScrollStart, bool canOverScrollEnd)
+{
+    RefPtr<GridScrollLayoutAlgorithm> result;
+    if (!hasLayoutOptions) {
+        result = MakeRefPtr<GridScrollLayoutAlgorithm>(info_);
+    } else {
+        result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(info_);
+    }
+    result->SetCanOverScrollStart(canOverScrollStart);
+    result->SetCanOverScrollEnd(canOverScrollEnd);
+    result->SetScrollSource(GetScrollSource());
+    if (ScrollablePattern::AnimateRunning()) {
+        result->SetLineSkipping(!disableSkip);
+    }
+    SetLayoutAlgorithmContentClip(result);
+    return result;
+}
+
 RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 {
     auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, nullptr);
     auto columnsTemplate = gridLayoutProperty->GetColumnsTemplate();
     auto itemFillPolicy = gridLayoutProperty->GetItemFillPolicy();
-    bool setColumns = false;
-    if (itemFillPolicy.has_value() || columnsTemplate.has_value()) {
-        setColumns = true;
-    }
+    bool setColumns = itemFillPolicy.has_value() || columnsTemplate.has_value();
     auto rowTemplate = gridLayoutProperty->GetRowsTemplate();
     bool setRows = rowTemplate.has_value();
     if (!setColumns && !setRows) {
         return MakeRefPtr<GridAdaptiveLayoutAlgorithm>(info_);
     }
-
     if (targetIndex_.has_value()) {
         info_.targetIndex_ = targetIndex_;
     }
@@ -91,31 +131,47 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
     const bool disableSkip = IsOutOfBoundary(true) || (ScrollablePattern::AnimateRunning() && !IsBackToTopRunning());
     const bool canOverScrollStart = CanOverScrollStart(GetScrollSource()) || preSpring_;
-    const bool canOverScrollEnd = CanOverScrollEnd(GetScrollSource()) || preSpring_;
+    const bool canOverScrollEnd = (CanOverScrollEnd(GetScrollSource()) || preSpring_) &&
+                                  (info_.repeatDifference_ == 0);
     if (userDefined_) {
-        auto algo = MakeRefPtr<GridCustomLayoutAlgorithm>(
-            info_, canOverScrollStart, canOverScrollEnd && (info_.repeatDifference_ == 0));
+        auto algo = MakeRefPtr<GridCustomLayoutAlgorithm>(info_, canOverScrollStart, canOverScrollEnd);
+        SetLayoutAlgorithmContentClip(algo);
         return algo;
     }
     if (UseIrregularLayout()) {
-        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(
-            info_, canOverScrollStart, canOverScrollEnd && (info_.repeatDifference_ == 0));
+        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(info_, canOverScrollStart, canOverScrollEnd);
         algo->SetEnableSkip(!disableSkip);
+        SetLayoutAlgorithmContentClip(algo);
         return algo;
     }
-    RefPtr<GridScrollLayoutAlgorithm> result;
-    if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
-        result = MakeRefPtr<GridScrollLayoutAlgorithm>(info_);
-    } else {
-        result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(info_);
+    return CreateScrollLayoutAlgorithm(gridLayoutProperty->GetLayoutOptions().has_value(),
+        disableSkip, canOverScrollStart, canOverScrollEnd);
+}
+
+void GridPattern::PostponedTaskForIgnore(LayoutSafeAreaBundleType type)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (type != LayoutSafeAreaBundleType::CONTENT_CLIP_SAFE_AREA) {
+        host->PostponedTaskForIgnoreDefault();
+        return;
     }
-    result->SetCanOverScrollStart(canOverScrollStart);
-    result->SetCanOverScrollEnd(canOverScrollEnd && (info_.repeatDifference_ == 0));
-    result->SetScrollSource(GetScrollSource());
-    if (ScrollablePattern::AnimateRunning()) {
-        result->SetLineSkipping(!disableSkip);
+    // Grid: measureInNextFrame_ lives on the algorithm, not GridLayoutInfo, so unlike WaterFlow/List
+    // the live flag is unavailable here and the guard is omitted. The safeAreaPad_ equality check below
+    // terminates the two-pass loop: pass 1 sets safeAreaPad_ (was nullopt) and triggers pass 2; pass 2 finds
+    // it unchanged and returns early (no pass 3).
+    const auto safeAreaPad = host->GetAccumulatedSafeAreaExpand(true,
+        { .type = NG::LAYOUT_SAFE_AREA_TYPE_SYSTEM, .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL },
+        IgnoreStrategy::AXIS_INSENSITIVE);
+    if (safeAreaPad_.has_value() && safeAreaPad_ == safeAreaPad) {
+        return;
     }
-    return result;
+    safeAreaPad_ = safeAreaPad;
+    const auto& layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    host->SetLayoutDirtyMarked(true);
+    host->CreateLayoutTask(true, LayoutType::NONE);
 }
 
 void GridPattern::BeforeCreateLayoutWrapper()
@@ -160,6 +216,7 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
     }
     paint->SetContentModifier(gridContentModifier_);
     UpdateFadingEdge(paint);
+    paint->SetSafeAreaExpand(safeAreaPad_);
     return paint;
 }
 
@@ -396,12 +453,16 @@ void GridPattern::MarkSwipeItemSelected(int32_t index, bool isSelected)
 
 void GridPattern::FireOnScrollStart(bool withPerfMonitor)
 {
+#ifndef CROSS_PLATFORM
     ScrollablePattern::RecordScrollEvent(Recorder::EventType::SCROLL_START);
+#endif
     UIObserverHandler::GetInstance().NotifyScrollEventStateChange(
         AceType::WeakClaim(this), ScrollEventType::SCROLL_START);
     SuggestOpIncGroup(true);
     if (withPerfMonitor) {
+#ifndef CROSS_PLATFORM
         PerfMonitor::GetPerfMonitor()->StartCommercial(PerfConstants::APP_LIST_FLING, PerfActionType::FIRST_MOVE, "");
+#endif
     }
     if (GetScrollAbort()) {
         return;
@@ -414,6 +475,7 @@ void GridPattern::FireOnScrollStart(bool withPerfMonitor)
         scrollStop_ = false;
         return;
     }
+    SetIsScrolling(true);
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         scrollBar->PlayScrollBarAppearAnimation();
@@ -521,11 +583,11 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
 void GridPattern::FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex)
 {
     CHECK_NULL_VOID(indexChanged && onScrollIndex);
-    int32_t endIndex = info_.endIndex_;
+    int32_t endIndex = info_.reportEndIndex_;
     if (SystemProperties::IsWhiteBlockEnabled()) {
-        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(info_.endIndex_);
+        endIndex = ScrollAdjustmanager::GetInstance().AdjustEndIndex(info_.reportEndIndex_);
     }
-    onScrollIndex(info_.startIndex_, endIndex);
+    onScrollIndex(info_.reportStartIndex_, endIndex);
 }
 
 SizeF GridPattern::GetContentSize() const
@@ -578,6 +640,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return false;
     }
     SetScrollSource(source);
+    MarkUserScrollSource(source);
     FireAndCleanScrollingListener();
     if (info_.synced_) {
         info_.prevOffset_ = info_.currentOffset_;
@@ -687,11 +750,11 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         endHeight_ = info_.currentHeight_ + overScroll;
     }
     if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
-        bool indexChanged = (startIndex_ != info_.startIndex_) || (endIndex_ != info_.endIndex_);
+        bool indexChanged = (startIndex_ != info_.reportStartIndex_) || (endIndex_ != info_.reportEndIndex_);
         ProcessEvent(indexChanged, info_.currentHeight_ - info_.prevHeight_);
         info_.prevHeight_ = info_.currentHeight_;
-        startIndex_ = info_.startIndex_;
-        endIndex_ = info_.endIndex_;
+        startIndex_ = info_.reportStartIndex_;
+        endIndex_ = info_.reportEndIndex_;
         if (isConfigScrollable_) {
             focusHandler_.ProcessFocusEvent(keyEvent_, indexChanged);
         }
@@ -704,6 +767,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     UpdateScrollBarOffset();
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
+    if (!IsScrolling()) {
+        // Reset accessibilityScrollSource_ when scrolling is not in progress
+        SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
+    }
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
             GetScrollBar()->ScheduleDisappearDelayTask();
@@ -782,7 +849,8 @@ void GridPattern::ProcessEvent(bool indexChanged, float finalOffset)
     FireOnScrollIndex(indexChanged, onScrollIndex);
     FireOnScrollIndex(indexChanged, onJsFrameNodeScrollIndex);
     if (indexChanged) {
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLLING_EVENT, info_.startIndex_, info_.endIndex_);
+        host->OnAccessibilityEvent(
+            AccessibilityEventType::SCROLLING_EVENT, info_.reportStartIndex_, info_.reportEndIndex_);
     }
     auto onReachStart = gridEventHub->GetOnReachStart();
     auto onJSFrameNodeReachStart = gridEventHub->GetJSFrameNodeOnReachStart();
@@ -819,6 +887,7 @@ int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
 void GridPattern::ScrollToFocusNodeIndex(int32_t index)
 {
     StopAnimate();
+    SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
     UpdateStartIndex(index);
     auto pipeline = GetContext();
     if (pipeline) {
@@ -841,6 +910,7 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
         return false;
     }
     StopAnimate();
+    SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
     auto ret = UpdateStartIndex(scrollToIndex);
     auto* pipeline = GetContext();
     if (pipeline) {
@@ -851,10 +921,14 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 
 ScrollOffsetAbility GridPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
-    (void)isAccessibility;
-    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
+    return { [wp = WeakClaim(this), isAccessibility](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
+                if (isAccessibility) {
+                    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
+                } else {
+                    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
+                }
                 pattern->ScrollBy(-moveOffset);
                 return true;
             },
@@ -866,6 +940,7 @@ std::function<bool(int32_t)> GridPattern::GetScrollIndexAbility()
     return [wp = WeakClaim(this)](int32_t index) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         if (index == FocusHub::SCROLL_TO_HEAD) {
             pattern->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
         } else if (index == FocusHub::SCROLL_TO_TAIL) {
@@ -914,6 +989,7 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
     if ((event.code == KeyCode::KEY_PAGE_DOWN) || (event.code == KeyCode::KEY_PAGE_UP)) {
+        SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         ScrollPage(event.code == KeyCode::KEY_PAGE_UP);
     }
 
@@ -1427,6 +1503,8 @@ void GridPattern::DumpAdvanceInfo()
     DumpLog::GetInstance().AddDesc("totalHeightOfItemsInView:" + std::to_string(info_.totalHeightOfItemsInView_));
     DumpLog::GetInstance().AddDesc("startIndex:" + std::to_string(info_.startIndex_));
     DumpLog::GetInstance().AddDesc("endIndex:" + std::to_string(info_.endIndex_));
+    DumpLog::GetInstance().AddDesc("reportStartIndex:" + std::to_string(info_.reportStartIndex_));
+    DumpLog::GetInstance().AddDesc("reportEndIndex:" + std::to_string(info_.reportEndIndex_));
     DumpLog::GetInstance().AddDesc("jumpIndex:" + std::to_string(info_.jumpIndex_));
     DumpLog::GetInstance().AddDesc("crossCount:" + std::to_string(info_.crossCount_));
     DumpLog::GetInstance().AddDesc("childrenCount:" + std::to_string(info_.childrenCount_));
@@ -2016,6 +2094,7 @@ float GridPattern::GetOffsetWithLimit(float offset) const
 
 void GridPattern::ReportOnItemGridEvent(const std::string& event)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -2034,6 +2113,7 @@ void GridPattern::ReportOnItemGridEvent(const std::string& event)
     result->Put("result", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 std::string GridPattern::GetLayoutMode() const

@@ -19,6 +19,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_event_hub.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
@@ -74,6 +75,28 @@ OffsetF ListItemDragManager::GetParentPaddingOffset()
     return OffsetF(left, top);
 }
 
+PanDirection ListItemDragManager::GetDragEventPanDirection()
+{
+    PanDirection panDirection;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, panDirection);
+    auto listItemEventHub = host->GetEventHub<ListItemEventHub>();
+    CHECK_NULL_RETURN(listItemEventHub, panDirection);
+    auto pattern = host->GetPattern<ListItemPattern>();
+    CHECK_NULL_RETURN(pattern, panDirection);
+    if (!pattern->HasStartNode() && !pattern->HasEndNode() && !listItemEventHub->GetStartOnDelete() &&
+        !listItemEventHub->GetEndOnDelete()) {
+        return panDirection;
+    }
+
+    auto parent = listNode_.Upgrade();
+    CHECK_NULL_RETURN(parent, panDirection);
+    auto listPattern = parent->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(listPattern, panDirection);
+    panDirection.type = listPattern->GetAxis() == Axis::VERTICAL ? PanDirection::VERTICAL : PanDirection::HORIZONTAL;
+    return panDirection;
+}
+
 void ListItemDragManager::InitDragDropEvent()
 {
     auto host = GetHost();
@@ -118,7 +141,8 @@ void ListItemDragManager::InitDragDropEvent()
     auto dragEvent = MakeRefPtr<DragEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     dragEvent->SetLongPressEventFunc(std::move(actionLongPress));
-    gestureHub->SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+    auto panDirection = GetDragEventPanDirection();
+    gestureHub->SetDragEvent(dragEvent, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
     auto dragEventActuator = gestureHub->GetDragEventActuator();
     CHECK_NULL_VOID(dragEventActuator);
     dragEventActuator->SetIsForDragDrop(true);

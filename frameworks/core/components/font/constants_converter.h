@@ -85,7 +85,7 @@ OHOS::Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationSty
 
 ACE_FORCE_EXPORT void ConvertTxtStyle(const TextStyle &textStyle,
     const WeakPtr<PipelineBase> &context, OHOS::Rosen::TextStyle &txtStyle);
-void ConvertTxtStyle(const TextStyle& textStyle, OHOS::Rosen::TextStyle& txtStyle);
+ACE_FORCE_EXPORT void ConvertTxtStyle(const TextStyle& textStyle, OHOS::Rosen::TextStyle& txtStyle);
 
 void ConvertSymbolTxtStyle(const TextStyle& textStyle, OHOS::Rosen::TextStyle& txtStyle);
 
@@ -98,7 +98,9 @@ void ConvertPlaceholderRun(const PlaceholderRun& span, OHOS::Rosen::PlaceholderS
 ACE_FORCE_EXPORT SkColor ConvertSkColor(Color color);
 void ConvertForegroundPaint(const TextStyle& textStyle, double width, double height, Rosen::TextStyle& txtStyle);
 float GetVariableFontWeight(FontWeight fontWeight);
-void SetFontWeightVariations(Rosen::TextStyle& txtStyle, float fontWeightScale, const TextStyle& textStyle);
+ACE_FORCE_EXPORT void SetFontWeightVariations(
+    Rosen::TextStyle& txtStyle, float fontWeightScale, const TextStyle& textStyle);
+
 std::vector<Rosen::Drawing::Color> ConvertColors(const std::vector<Color>& colors);
 std::shared_ptr<Rosen::SymbolGradient> CreateNativeGradient(const SymbolGradient& grad);
 std::optional<Rosen::SymbolShadow> ConvertToNativeSymbolShadow(const SymbolShadow& shadow);

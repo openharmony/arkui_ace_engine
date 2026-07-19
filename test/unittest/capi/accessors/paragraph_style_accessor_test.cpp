@@ -40,6 +40,10 @@ constexpr auto TEST_TEXT_ALIGN = TextAlign::RIGHT;
 constexpr auto TEST_LINES_NUM = 5;
 constexpr auto TEST_TEXT_OVERFLOW = TextOverflow::ELLIPSIS;
 constexpr auto TEST_WORD_BREAK = WordBreak::BREAK_ALL;
+constexpr auto TEST_TAIL_INDENT_VALUE_1 = 50.0;
+constexpr auto TEST_TAIL_INDENT_VALUE_2 = 30.0;
+constexpr auto TEST_TAIL_INDENT_NEGATIVE = -10.0;
+constexpr auto TEST_TAIL_INDENT_PERCENT_VALUE = 10.0;
 }
 
 class ParagraphStyleAccessorTest
@@ -65,6 +69,31 @@ public:
         holder = leadingMargin;
 
         return accessor_->construct(&param_);
+    }
+
+    static ParagraphStylePeer* CreatePeerWithTailIndent(const std::vector<double>& indentValues,
+        DimensionUnit unit = DimensionUnit::VP)
+    {
+        Opt_ParagraphStyleInterface localParam {};
+        Converter::ConvContext ctx;
+        
+        auto& interface = TypeHelper::WriteTo(localParam);
+        interface.textAlign = Converter::ArkValue<Opt_TextAlign>(TEST_TEXT_ALIGN);
+        
+        auto& tailIndentUnion = TypeHelper::WriteTo(interface.tailIndents);
+        if (indentValues.size() == 1) {
+            tailIndentUnion.selector = 0;
+            tailIndentUnion.value0 = Converter::ArkValue<Ark_LengthMetrics>(Dimension(indentValues[0], unit));
+        } else {
+            tailIndentUnion.selector = 1;
+            auto arrayData = ctx.AllocateArray<Array_LengthMetrics>(indentValues.size());
+            for (size_t i = 0; i < indentValues.size(); i++) {
+                arrayData.array[i] = Converter::ArkValue<Ark_LengthMetrics>(Dimension(indentValues[i], unit));
+            }
+            tailIndentUnion.value1 = arrayData;
+        }
+        
+        return accessor_->construct(&localParam);
     }
 
 private:
@@ -159,4 +188,72 @@ HWTEST_F(ParagraphStyleAccessorTest, DISABLED_getLeadingMarginTest, TestSize.Lev
         },
         []() {});
 }
+
+/**
+ * @tc.name: getTailIndentsTest001
+ * @tc.desc: Test normal single value tailIndents
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphStyleAccessorTest, getTailIndentsTest001, TestSize.Level1)
+{
+    auto localPeer = CreatePeerWithTailIndent({TEST_TAIL_INDENT_VALUE_1});
+    ASSERT_NE(accessor_->getTailIndents, nullptr);
+    auto testVal = accessor_->getTailIndents(localPeer);
+    ASSERT_NE(testVal.tag, InteropTag::INTEROP_TAG_UNDEFINED);
+    ASSERT_NE(testVal.value.array, nullptr);
+    EXPECT_EQ(testVal.value.length, 1);
+    EXPECT_DOUBLE_EQ(testVal.value.array[0], TEST_TAIL_INDENT_VALUE_1);
+}
+
+/**
+ * @tc.name: getTailIndentsTest002
+ * @tc.desc: Test negative value validation - should be reset to 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphStyleAccessorTest, getTailIndentsTest002, TestSize.Level1)
+{
+    auto localPeer = CreatePeerWithTailIndent({TEST_TAIL_INDENT_NEGATIVE});
+    ASSERT_NE(accessor_->getTailIndents, nullptr);
+    auto testVal = accessor_->getTailIndents(localPeer);
+    ASSERT_NE(testVal.tag, InteropTag::INTEROP_TAG_UNDEFINED);
+    ASSERT_NE(testVal.value.array, nullptr);
+    EXPECT_EQ(testVal.value.length, 1);
+    EXPECT_DOUBLE_EQ(testVal.value.array[0], 0.0);
+}
+
+/**
+ * @tc.name: getTailIndentsTest003
+ * @tc.desc: Test array mode with mixed values - negative value should be reset to 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphStyleAccessorTest, getTailIndentsTest003, TestSize.Level1)
+{
+    auto localPeer = CreatePeerWithTailIndent({TEST_TAIL_INDENT_VALUE_1,
+        TEST_TAIL_INDENT_NEGATIVE, TEST_TAIL_INDENT_VALUE_2});
+    ASSERT_NE(accessor_->getTailIndents, nullptr);
+    auto testVal = accessor_->getTailIndents(localPeer);
+    ASSERT_NE(testVal.tag, InteropTag::INTEROP_TAG_UNDEFINED);
+    ASSERT_NE(testVal.value.array, nullptr);
+    EXPECT_EQ(testVal.value.length, 3);
+    EXPECT_DOUBLE_EQ(testVal.value.array[0], TEST_TAIL_INDENT_VALUE_1);
+    EXPECT_DOUBLE_EQ(testVal.value.array[1], 0.0);
+    EXPECT_DOUBLE_EQ(testVal.value.array[2], TEST_TAIL_INDENT_VALUE_2);
+}
+
+/**
+ * @tc.name: getTailIndentsTest004
+ * @tc.desc: Test percent value validation - should be reset to 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphStyleAccessorTest, getTailIndentsTest004, TestSize.Level1)
+{
+    auto localPeer = CreatePeerWithTailIndent({TEST_TAIL_INDENT_PERCENT_VALUE}, DimensionUnit::PERCENT);
+    ASSERT_NE(accessor_->getTailIndents, nullptr);
+    auto testVal = accessor_->getTailIndents(localPeer);
+    ASSERT_NE(testVal.tag, InteropTag::INTEROP_TAG_UNDEFINED);
+    ASSERT_NE(testVal.value.array, nullptr);
+    EXPECT_EQ(testVal.value.length, 1);
+    EXPECT_DOUBLE_EQ(testVal.value.array[0], 0.0);
+}
+
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/linear_split/linear_split_pattern.h"
 #include "core/common/container.h"
 
+#include <string_view>
+
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -25,7 +27,7 @@ namespace {
 constexpr std::size_t DEFAULT_DRAG_INDEX = -1;
 constexpr std::size_t SPLIT_INDEX_INC_ONE = 1;
 constexpr std::size_t SPLIT_INDEX_INC_TWO = 2;
-const std::string SPLIT_DRAG_SCENE = "split_drag_scene";
+constexpr std::string_view SPLIT_DRAG_SCENE = "split_drag_scene";
 const double DEFAULT_SPLIT_HEIGHT = 2.0;
 } // namespace
 
@@ -56,7 +58,7 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
-        host->AddFRCSceneInfo(SPLIT_DRAG_SCENE, 0.0f, SceneStatus::END);
+        host->AddFRCSceneInfo(std::string(SPLIT_DRAG_SCENE), 0.0f, SceneStatus::END);
     };
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
@@ -521,10 +523,10 @@ void LinearSplitPattern::UpdateDragFRCSceneInfo(const GestureEvent& info, SceneS
     CHECK_NULL_VOID(host);
     if (splitType_ == SplitType::ROW_SPLIT) {
         host->AddFRCSceneInfo(
-            SPLIT_DRAG_SCENE, fabs(static_cast<float>(info.GetVelocity().GetVelocityX())), sceneStatus);
+            std::string(SPLIT_DRAG_SCENE), fabs(static_cast<float>(info.GetVelocity().GetVelocityX())), sceneStatus);
     } else {
         host->AddFRCSceneInfo(
-            SPLIT_DRAG_SCENE, fabs(static_cast<float>(info.GetVelocity().GetVelocityY())), sceneStatus);
+            std::string(SPLIT_DRAG_SCENE), fabs(static_cast<float>(info.GetVelocity().GetVelocityY())), sceneStatus);
     }
 }
 

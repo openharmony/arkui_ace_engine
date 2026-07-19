@@ -84,6 +84,16 @@ if (defined(global_parts_info.inputmethod_imf)) {
 } else {
   enable_standard_input = false
 }
+if (is_arkui_x) {
+  enable_inspector_event_reporting = false
+} else {
+  enable_inspector_event_reporting = true
+}
+if (is_arkui_x) {
+  enable_auto_fill_controller = false
+} else {
+  enable_auto_fill_controller = true
+}
 build_container_scope_lib = true
 multiple_window_support = true
 enable_ability_component = true
@@ -101,6 +111,11 @@ if (defined(global_parts_info.graphic_graphic_3d)) {
   model_component_support = true
 } else {
   model_component_support = false
+}
+if (is_arkui_x) {
+    image_analyzer_support = false
+} else {
+    image_analyzer_support = true
 }
 
 window_scene_support = true
@@ -185,6 +200,14 @@ if (enable_standard_input) {
   defines += [ "ENABLE_STANDARD_INPUT" ]
 }
 
+if (enable_inspector_event_reporting) {
+  defines += [ "ENABLE_INSPECTOR_EVENT_REPORTING" ]
+}
+
+if (enable_auto_fill_controller) {
+  defines += [ "ENABLE_AUTO_FILL_CONTROLLER" ]
+}
+
 if (multiple_window_support) {
   defines += [ "MULTIPLE_WINDOW_SUPPORTED" ]
 }
@@ -199,6 +222,10 @@ if (use_build_in_js_engine) {
 
 if (window_scene_support) {
   defines += [ "WINDOW_SCENE_SUPPORTED" ]
+}
+
+if (image_analyzer_support) {
+  defines += [ "SUPPORT_IMAGE_ANALYZER" ]
 }
 
 if (enable_drag_framework) {

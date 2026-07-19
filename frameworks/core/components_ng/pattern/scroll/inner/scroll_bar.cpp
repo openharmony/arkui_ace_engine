@@ -32,6 +32,7 @@ constexpr uint32_t MILLIS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
 constexpr uint64_t MIN_VSYNC_DIFF_TIME = 1000 * 1000; // min is 1ms
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 constexpr Dimension SMALL_SCROLL_BAR_REGION_THRESHOLD = 240.0_vp;
+constexpr Dimension DEFAULT_SCROLL_BAR_MIN_HEIGHT = 48.0_vp;
 constexpr Dimension SMALL_SCROLL_BAR_MIN_HEIGHT = 8.0_vp;
 constexpr double SMALL_SCROLL_BAR_MIN_SIZE_RATIO = 0.2;
 #ifdef ARKUI_WEARABLE
@@ -143,6 +144,10 @@ BarDirection ScrollBar::CheckBarDirection(const Point& point)
 
 void ScrollBar::FlushBarWidth(const RefPtr<PipelineContext>& context)
 {
+    if (NearZero(viewPortSize_.Width()) && NearZero(viewPortSize_.Height())) {
+        return;
+    }
+
     if (shapeMode_ == ShapeMode::RECT) {
         SetRectTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_, SCROLL_FROM_NONE, context);
     } else {
@@ -226,6 +231,11 @@ void ScrollBar::UpdateActiveRectOffset(double activeMainOffset)
 void ScrollBar::SetBarRegion(const Offset& offset, const Size& size, const RefPtr<PipelineContext>& context)
 {
     if (shapeMode_ == ShapeMode::RECT) {
+        if (NearZero(scrollBarHeight_.Value())) {
+            barRect_ = Rect();
+            trackRect_ = Rect();
+            return;
+        }
         double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
         double avoidStart = !scrollBarMargin_ ? NormalizeToPx(scrollBarStartMargin_, context) : 0.0;
         double avoidEnd = 0.0;
@@ -246,32 +256,24 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size, const RefPt
             std::max(NormalizeToPx(startReservedHeight_, context), avoidStart) + scrollBarMarginStart;
         double height = std::max(size.Height() - reserved, 0.0);
         auto hoverWidth = isUserNormalWidth_ ? barWidth_ : NormalizeToPx(hoverWidth_, context);
-        auto normalBackgroundWidth = NormalizeToPx(normalBackgroundWidth_, context);
-        if (GreatNotEqual(normalBackgroundWidth, 0.0)) {
-            hoverWidth = std::max(normalBackgroundWidth, barWidth_);
-        }
+        auto trackWidth =
+            barWidth_ != 0 ? std::max(NormalizeToPx(normalBackgroundWidth_, context), barWidth_) : 0;
         if (positionMode_ == PositionMode::LEFT) {
             auto padding = NormalizeToPx(padding_.Left(), context);
-            auto trackWidth = std::max(hoverWidth - padding, barWidth_);
-            auto barX = padding;
-            auto trackX = barX - (trackWidth - barWidth_) * FACTOR_HALF;
+            auto trackX = padding - (trackWidth - barWidth_) * FACTOR_HALF;
             barRect_ = Rect(padding, 0.0, hoverWidth, height) + offset;
             trackRect_ = Rect(trackX, trackMainOffset, trackWidth, barRegionSize_) + offset;
         } else if (positionMode_ == PositionMode::RIGHT) {
             auto padding = NormalizeToPx(padding_.Right(), context);
-            auto trackWidth = std::max(hoverWidth - padding, barWidth_);
-            auto barX = size.Width() - barWidth_ - padding + NormalizeToPx(position_);
-            auto trackX = barX - (trackWidth - barWidth_) * FACTOR_HALF;
+            auto trackX = size.Width() - trackWidth - padding + (trackWidth - barWidth_) * FACTOR_HALF;
             barRect_ = Rect(size.Width() - hoverWidth - padding, 0.0, hoverWidth, height) + offset;
             trackRect_ = Rect(trackX, trackMainOffset, trackWidth, barRegionSize_) + offset;
         } else if (positionMode_ == PositionMode::BOTTOM) {
-            auto trackWidth = std::max(size.Width() - reserved, 0.0);
+            auto barWidth = std::max(size.Width() - reserved, 0.0);
             auto padding = NormalizeToPx(padding_.Bottom(), context);
-            auto trackHeight = std::max(hoverWidth - padding, barWidth_);
-            auto barY = size.Height() - barWidth_ - padding + NormalizeToPx(position_);
-            auto trackY = barY - (trackHeight - barWidth_) * FACTOR_HALF;
-            barRect_ = Rect(0.0, size.Height() - hoverWidth - padding, trackWidth, hoverWidth) + offset;
-            trackRect_ = Rect(trackMainOffset, trackY, barRegionSize_, trackHeight) + offset;
+            auto trackY = size.Height() - trackWidth - padding + (trackWidth - barWidth_) * FACTOR_HALF;
+            barRect_ = Rect(0.0, size.Height() - hoverWidth - padding, barWidth, hoverWidth) + offset;
+            trackRect_ = Rect(trackMainOffset, trackY, barRegionSize_, trackWidth) + offset;
         }
     }
 }
@@ -279,6 +281,12 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size, const RefPt
 void ScrollBar::SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset,
     double estimatedHeight, int32_t scrollSource, const RefPtr<PipelineContext>& context)
 {
+    if (NearZero(scrollBarHeight_.Value())) {
+        barRegionSize_ = 0.0;
+        activeRect_ = Rect();
+        trackRect_ = Rect();
+        return;
+    }
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
     double avoidStart = !scrollBarMargin_ ? NormalizeToPx(scrollBarStartMargin_, context) : 0.0;
     double avoidEnd = 0.0;
@@ -303,7 +311,7 @@ void ScrollBar::SetRectTrickRegion(const Offset& offset, const Size& size, const
     if (LessOrEqual(estimatedHeight, 0.0)) {
         return;
     }
-    const auto defaultMinSize = NormalizeToPx(minHeight_, context);
+    const auto defaultMinSize = NormalizeToPx(DEFAULT_SCROLL_BAR_MIN_HEIGHT, context);
     const auto smallRegionThreshold = NormalizeToPx(SMALL_SCROLL_BAR_REGION_THRESHOLD, context);
     const auto smallRegionMinSize = std::max(
         barRegionSize_ * SMALL_SCROLL_BAR_MIN_SIZE_RATIO, NormalizeToPx(SMALL_SCROLL_BAR_MIN_HEIGHT, context));
@@ -367,8 +375,7 @@ void ScrollBar::CalcScrollBarRegion(double activeMainOffset, double activeSize, 
     if (positionMode_ == PositionMode::LEFT) {
         inactiveSize = activeRect_.Height();
         inactiveMainOffset = activeRect_.Top();
-        activeRect_ = Rect(-NormalizeToPx(position_) + NormalizeToPx(padding_.Left()),
-            activeMainOffset, barWidth_, activeSize) + offset;
+        activeRect_ = Rect(NormalizeToPx(padding_.Left()), activeMainOffset, barWidth_, activeSize) + offset;
         if (isUserNormalWidth_) {
             touchRegion_ = activeRect_;
             hoverRegion_ = activeRect_;
@@ -379,7 +386,7 @@ void ScrollBar::CalcScrollBarRegion(double activeMainOffset, double activeSize, 
     } else if (positionMode_ == PositionMode::RIGHT) {
         inactiveSize = activeRect_.Height();
         inactiveMainOffset = activeRect_.Top();
-        double x = size.Width() - barWidth_ - NormalizeToPx(padding_.Right()) + NormalizeToPx(position_);
+        double x = size.Width() - barWidth_ - NormalizeToPx(padding_.Right());
         activeRect_ = Rect(x, activeMainOffset, barWidth_, activeSize) + offset;
         // Update the hot region
         if (isUserNormalWidth_) {
@@ -396,7 +403,7 @@ void ScrollBar::CalcScrollBarRegion(double activeMainOffset, double activeSize, 
     } else if (positionMode_ == PositionMode::BOTTOM) {
         inactiveSize = activeRect_.Width();
         inactiveMainOffset = activeRect_.Left();
-        auto positionY = size.Height() - barWidth_ - NormalizeToPx(padding_.Bottom()) + NormalizeToPx(position_);
+        auto positionY = size.Height() - barWidth_ - NormalizeToPx(padding_.Bottom());
         activeRect_ = Rect(activeMainOffset, positionY, activeSize, barWidth_) + offset;
         if (isUserNormalWidth_) {
             touchRegion_ = activeRect_;
@@ -478,13 +485,8 @@ double ScrollBar::NormalizeTrackSizeToPx(double maxTrackSize, const RefPtr<Pipel
     auto trackSize = scrollBarHeight_.Unit() == DimensionUnit::PERCENT
         ? scrollBarHeight_.ConvertToPxWithSize(maxTrackSize)
         : NormalizeToPx(scrollBarHeight_, context);
-    trackSize = std::clamp(trackSize, 0.0, maxTrackSize);
-    const auto smallRegionThreshold = NormalizeToPx(SMALL_SCROLL_BAR_REGION_THRESHOLD, context);
-    const auto defaultMinSize = NormalizeToPx(minHeight_, context);
-    const auto smallRegionMinSize = std::max(
-        trackSize * SMALL_SCROLL_BAR_MIN_SIZE_RATIO, NormalizeToPx(SMALL_SCROLL_BAR_MIN_HEIGHT, context));
-    const auto effectiveMinSize = trackSize < smallRegionThreshold ? smallRegionMinSize : defaultMinSize;
-    return std::max(trackSize, effectiveMinSize);
+    trackSize = std::clamp(trackSize, NormalizeToPx(SMALL_SCROLL_BAR_MIN_HEIGHT, context), maxTrackSize);
+    return trackSize;
 }
 
 void ScrollBar::SetGestureEvent()
@@ -1147,6 +1149,7 @@ void ScrollBar::GetPanDirectionDumpInfo()
 void ScrollBar::DumpAdvanceInfo()
 {
     DumpLog::GetInstance().AddDesc(std::string("activeRect: ").append(activeRect_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("trackRect: ").append(trackRect_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("touchRegion: ").append(touchRegion_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("hoverRegion: ").append(hoverRegion_.ToString()));
     DumpLog::GetInstance().AddDesc(std::string("normalWidth: ").append(normalWidth_.ToString()));
@@ -1405,6 +1408,7 @@ void ScrollBar::GetPanDirectionDumpInfo(std::unique_ptr<JsonValue>& json)
 void ScrollBar::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     json->Put("activeRect", activeRect_.ToString().c_str());
+    json->Put("trackRect", trackRect_.ToString().c_str());
     json->Put("touchRegion", touchRegion_.ToString().c_str());
     json->Put("hoverRegion", hoverRegion_.ToString().c_str());
     json->Put("normalWidth", normalWidth_.ToString().c_str());

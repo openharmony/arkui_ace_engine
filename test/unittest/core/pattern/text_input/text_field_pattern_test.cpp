@@ -664,8 +664,14 @@ HWTEST_F(TextFieldPatternTest, TextPattern024, TestSize.Level1)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
+    /**
+     * @tc.steps: step2. create pattern
+     */
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. call AutoFillValueChanged
+     */
     pattern->isFillRequestFinish_ = true;
     pattern->AutoFillValueChanged();
 }
@@ -2128,11 +2134,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern083, TestSize.Level0)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
+    /**
+     * @tc.steps: step2. GetPattern.
+     */
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
     Offset offset(1.0, 1.0);
     pattern->enableTouchAndHoverEffect_ = false;
+    /**
+     * @tc.steps: step3. HandleTouchDown.
+     */
     pattern->HandleTouchDown(offset);
     pattern->enableTouchAndHoverEffect_ = true;
     pattern->isMousePressed_ = true;
@@ -2373,7 +2385,13 @@ HWTEST_F(TextFieldPatternTest, TextPattern093, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. GetFocusHub.
+     */
     pattern->GetFocusHub()->currentFocus_ = false;
+    /**
+     * @tc.steps: step3. TwinklingByFocus.
+     */
     pattern->TwinklingByFocus();
 }
 
@@ -3407,6 +3425,9 @@ HWTEST_F(TextFieldPatternTest, TextPatternGetWindowIdFromPipeline001, TestSize.L
  */
 HWTEST_F(TextFieldPatternTest, TextPattern109, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. create target node.
+     */
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -3414,9 +3435,17 @@ HWTEST_F(TextFieldPatternTest, TextPattern109, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(textFieldLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. update placeholder value and call DumpSimplifyInfo
+     */
     textFieldLayoutProperty->UpdatePlaceholder(DEFAULT_TEXT_U16);
     std::shared_ptr<JsonValue> json = std::make_shared<JsonValue>();
     pattern->DumpSimplifyInfo(json);
+
+    /**
+     * @tc.steps: step3. verify placeholder is dumped correctly
+     */
     EXPECT_EQ(json->GetString("placeholder", DEFAULT_TEXT), DEFAULT_TEXT);
 }
 

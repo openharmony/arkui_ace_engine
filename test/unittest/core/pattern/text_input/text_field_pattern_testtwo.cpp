@@ -338,7 +338,10 @@ HWTEST_F(TextFieldPatternTestTwo, HandleDoubleClickEvent001, TestSize.Level0)
     auto focusHub = pattern->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
-    pattern->customKeyboardBuilder_ = []() {};
+    pattern->customKeyboardBuilder_ = []() {
+        RowModelNG rowModel;
+        rowModel.Create(std::nullopt, nullptr, "");
+    };
 
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
@@ -1496,6 +1499,30 @@ HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange004, TestSize.Level0)
     pattern->textCache_ = "abc";
     pattern->AddTextFireOnChange();
     EXPECT_EQ(pattern->textCache_, "abcd");
+}
+
+/**
+ * @tc.name: AddTextFireOnChange005
+ * @tc.desc: Test AddTextFireOnChange with preview text (IME composing), textCache_ should stay at committed text
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestTwo, AddTextFireOnChange005, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto layoutProperty = textFieldNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateTextInputType(TextInputType::USER_NAME);
+    pattern->textObscured_ = false;
+    pattern->hasPreviewText_ = true;
+    pattern->bodyTextInPreivewing_ = u"hello";
+    pattern->contentController_->content_ = u"hello\u4f60\u597d";
+    pattern->textCache_ = "hello";
+    pattern->AddTextFireOnChange();
+    EXPECT_EQ(pattern->textCache_, "hello");
 }
 
 /**

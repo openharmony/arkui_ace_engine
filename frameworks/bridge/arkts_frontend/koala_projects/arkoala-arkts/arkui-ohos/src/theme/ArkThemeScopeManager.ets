@@ -155,12 +155,25 @@ export class ArkThemeScopeManager {
      * @param ownerComponent The ArkCustomComponent whose theme should be determined.
      * @returns The ArkThemeBase instance to be used for the component.
      */
-    public getFinalTheme(ownerComponent: ArkCustomComponent): ArkThemeBase {
+    private static sanitizeTheme(theme: Theme): Theme {
+        let sanitizedColors = ArkColorsImpl.sanitizeColors(theme.colors);
+        let sanitizedDarkColors = ArkColorsImpl.sanitizeColors(theme.darkColors);
+        if (sanitizedColors === theme.colors && sanitizedDarkColors === theme.darkColors) {
+            return theme;
+        }
+        let sanitized: Theme = {
+            colors: sanitizedColors,
+            darkColors: sanitizedDarkColors,
+        } as Theme;
+        return sanitized;
+    }
+
+    public getFinalTheme(ownerComponent: ArkCustomComponent): Theme {
         const themeScopeId = ownerComponent.getThemeScopeId();
         if (themeScopeId === undefined) {
-            return this.defaultTheme ?? ArkThemeScopeManager.systemTheme;
+            return ArkThemeScopeManager.sanitizeTheme(this.defaultTheme ?? ArkThemeScopeManager.systemTheme);
         }
-        return this.getThemeByScopeId(themeScopeId);
+        return ArkThemeScopeManager.sanitizeTheme(this.getThemeByScopeId(themeScopeId));
     }
 
     /**
@@ -377,10 +390,10 @@ export class ArkThemeScopeManager {
         const theme = ArkThemeBase.copyCustomTheme(customTheme);
 
         if (theme?.colors) {
-            ArkColorsImpl.expandByBrandColor(theme!.colors!);
+            theme!.colors = ArkColorsImpl.expandByBrandColor(theme!.colors!);
         }
         if (theme?.darkColors) {
-            ArkColorsImpl.expandByBrandColor(theme!.darkColors!, true);
+            theme!.darkColors = ArkColorsImpl.expandByBrandColor(theme!.darkColors!, true);
         }
         return theme;
     }
@@ -404,8 +417,9 @@ export class ArkThemeScopeManager {
      * Notifies listeners about app Theme change
      */
     private notifyGlobalThemeChanged(theme: Theme) {
+        let sanitizedTheme = ArkThemeScopeManager.sanitizeTheme(theme);
         this.listeners.forEach((listener) => {
-            listener.onGlobalThemeChanged(theme);
+            listener.onGlobalThemeChanged(sanitizedTheme);
         });
     }
 
@@ -562,7 +576,7 @@ export class ArkThemeScopeManager {
         }
         for (const component of components) {
             if (component) {
-                component.onWillApplyTheme(themeWillApply);
+                component.onWillApplyTheme(ArkThemeScopeManager.sanitizeTheme(themeWillApply));
             }
         }
     }

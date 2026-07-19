@@ -76,13 +76,13 @@ public:
     DragDropManager();
     ~DragDropManager();
 
-    RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
+    ACE_FORCE_EXPORT RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
         const RefPtr<PixelMap>& pixelMap, const GestureEvent& info, const RefPtr<EventHub>& eventHub);
-    RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
+    ACE_FORCE_EXPORT RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
         const RefPtr<UINode>& customNode, const GestureEvent& info, const RefPtr<EventHub>& eventHub);
     RefPtr<DragDropProxy> CreateTextDragDropProxy();
 
-    void RemoveDragFrameNode(int32_t id);
+    ACE_FORCE_EXPORT void RemoveDragFrameNode(int32_t id);
 
     void AddGridDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
@@ -372,7 +372,7 @@ public:
         draggingPressedState_ = pointerPressed;
     }
 
-    bool IsDraggingPressed(int32_t currentPointerId) const;
+    ACE_FORCE_EXPORT bool IsDraggingPressed(int32_t currentPointerId) const;
 
     bool IsSameDraggingPointer(int32_t currentPointerId) const
     {
@@ -577,7 +577,7 @@ public:
         return dragTotalMovePosition_;
     }
 
-    bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
+    ACE_FORCE_EXPORT bool IsDropAllowed(const RefPtr<FrameNode>& dragFrameNode);
     
     void SetDragAction(const std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction>& dragAction)
     {
@@ -801,6 +801,8 @@ private:
     void ReportOnItemDropEvent(
         DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY);
     void RequireDragAnimationType();
+    void HandleDragCancel(const Point& point, const DragPointerEvent& pointerEvent,
+        const RefPtr<FrameNode>& preTargetFrameNode, const std::string& extraInfo, int32_t windowId);
 
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;

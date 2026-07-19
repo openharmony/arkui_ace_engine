@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,7 +25,7 @@
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
@@ -626,7 +626,8 @@ void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHa
             break;
     }
 }
-void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src){
+ACE_FORCE_EXPORT void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src)
+{
     switch (src) {
         case PromptActionCommonState::UNINITIALIZED: dst = ARK_PROMPT_ACTION_COMMON_STATE_UNINITIALIZED; break;
         case PromptActionCommonState::INITIALIZED: dst = ARK_PROMPT_ACTION_COMMON_STATE_INITIALIZED; break;

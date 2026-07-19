@@ -41,9 +41,7 @@
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -52,6 +50,7 @@
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
+#include "core/interfaces/native/node/bubble_modifier.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
@@ -60,6 +59,7 @@
 #include "core/components_ng/property/overlay_property.h"
 #include "core/image/image_source_info.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/event/event_constants.h"
 #ifdef SMART_GESTURE_SUPPORTED
@@ -1251,13 +1251,15 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     auto context = GetSheetContext(sheetStyle);
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    auto* sheetModifier = NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_VOID(sheetModifier);
     if (sheetStyle.showInPage.value_or(false)) {
-        overlayManager = SheetManager::FindPageNodeOverlay(targetNode, isShow);
+        overlayManager = sheetModifier->findPageNodeOverlay(targetNode, isShow, false);
     }
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
-    SheetManager::GetInstance().RegisterDestroyCallback(targetNode, sheetStyle, instanceId);
+    sheetModifier->registerDestroyCallback(targetNode, sheetStyle, instanceId);
 
     if (sheetStyle.showInSubWindow.value_or(false)) {
         if (isShow) {
@@ -1268,7 +1270,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
                 std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
                 std::move(sheetSpringBack), targetNode);
         } else {
-            SheetManager::GetInstance().CloseSheetInSubWindow(SheetKey(targetNode->GetId()));
+            sheetModifier->closeSheetInSubWindow(targetNode->GetId());
         }
         return;
     }
@@ -1282,12 +1284,14 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 
 void ViewAbstractModelNG::DismissSheet()
 {
-    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
+    auto* sheetManagerModifier = NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_VOID(sheetManagerModifier);
+    int32_t sheetId = sheetManagerModifier->getDismissSheetId();
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
     CHECK_NULL_VOID(sheet);
-    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->OverlayDismissSheet();
+    auto* sheetPatternModifier = NodeModifier::GetSheetPatternInnerModifier();
+    CHECK_NULL_VOID(sheetPatternModifier);
+    sheetPatternModifier->sheetOverlayDismissSheet(sheet);
 }
 
 void ViewAbstractModelNG::DismissContentCover()
@@ -1301,12 +1305,14 @@ void ViewAbstractModelNG::DismissContentCover()
 
 void ViewAbstractModelNG::SheetSpringBack()
 {
-    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
+    auto* sheetManagerModifier = NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_VOID(sheetManagerModifier);
+    int32_t sheetId = sheetManagerModifier->getDismissSheetId();
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
     CHECK_NULL_VOID(sheet);
-    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_VOID(sheetPattern);
-    sheetPattern->OverlaySheetSpringBack();
+    auto* sheetPatternModifier = NodeModifier::GetSheetPatternInnerModifier();
+    CHECK_NULL_VOID(sheetPatternModifier);
+    sheetPatternModifier->sheetOverlaySheetSpringBack(sheet);
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)
@@ -1821,19 +1827,9 @@ void ViewAbstractModelNG::UpdateColor(const RefPtr<NG::FrameNode>& frameNode, co
 {
     auto pattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(pattern);
-    switch (type) {
-        case POPUPTYPE_TEXTCOLOR:
-            pattern->UpdateBubbleText(color);
-            break;
-        case POPUPTYPE_POPUPCOLOR:
-            pattern->UpdateBubbleBackGroundColor(color);
-            break;
-        case POPUPTYPE_MASKCOLOR:
-            pattern->UpdateMaskColor(color);
-            break;
-        default:
-            break;
-    }
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->updateColor(pattern, type, color);
 }
 
 void ViewAbstractModelNG::CreateWithColorResourceObj(
@@ -1868,21 +1864,10 @@ void ViewAbstractModelNG::CreateWithBoolResourceObj(
     CHECK_NULL_VOID(pattern);
     std::string key = "popupMask";
     pattern->RemoveResObj(key);
-    CHECK_NULL_VOID(maskResObj);
-    auto&& updateFunc = [pattern, key](const RefPtr<ResourceObject>& maskResObj) {
-        std::string mask = pattern->GetResCacheMapByKey(key);
-        bool result;
-        if (mask.empty()) {
-            ResourceParseUtils::ParseResBool(maskResObj, result);
-            std::string maskValue = result ? "true" : "false";
-            pattern->AddResCache(key, maskValue);
-        } else {
-            result = mask == "true";
-        }
-        pattern->UpdateMask(result);
-    };
-    updateFunc(maskResObj);
-    pattern->AddResObj(key, maskResObj, std::move(updateFunc));
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    if (modifier) {
+        modifier->addBubbleMaskResObj(pattern, key, maskResObj);
+    }
 }
 
 std::string ViewAbstractModelNG::PopupOptionTypeStr(const PopupOptionsType& type)
@@ -1911,45 +1896,9 @@ void ViewAbstractModelNG::ParseOptionsDimension(const RefPtr<NG::FrameNode>& fra
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(pattern);
-    switch (type) {
-        case POPUP_OPTIONTYPE_ARROWWIDTH:
-            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
-                pattern->UpdateArrowWidth(dimension);
-            }
-            return;
-        case POPUP_OPTIONTYPE_ARROWHEIGHT:
-            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
-                pattern->UpdateArrowHeight(dimension);
-            }
-            return;
-        case POPUP_OPTIONTYPE_OUTLINEWIDTH:
-            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
-                pattern->SetOutlineWidth(dimension);
-                frameNode->MarkModifyDone();
-                frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-            }
-            return;
-        case POPUP_OPTIONTYPE_BORDERWIDTH:
-            if (ResourceParseUtils::ParseResDimensionVp(dimensionResObj, dimension)) {
-                pattern->SetInnerBorderWidth(dimension);
-                frameNode->MarkModifyDone();
-                frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
-            }
-            return;
-        case POPUP_OPTIONTYPE_WIDTH:
-            if (ResourceParseUtils::ParseResDimensionVpNG(dimensionResObj, dimension)) {
-                pattern->UpdateWidth(dimension);
-            }
-            return;
-        case POPUP_OPTIONTYPE_RADIUS:
-            if (ResourceParseUtils::ParseResDimensionVpNG(dimensionResObj, dimension)) {
-                pattern->UpdateRadius(dimension);
-            }
-            return;
-        default:
-            return;
-    }
-    return;
+    const auto* modifier = NodeModifier::GetBubbleInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->parseOptionsDimension(pattern, dimensionResObj, type);
 }
 
 void ViewAbstractModelNG::RegisterRadiusesResObj(

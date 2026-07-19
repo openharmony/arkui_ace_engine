@@ -74,12 +74,6 @@ HWTEST_F(ScrollEffectTestNg, SpringEffect001, TestSize.Level1)
     springEffect->ProcessScrollOver(0.0);
     EXPECT_NE(springEffect->scrollable_->GetSpringProperty(), nullptr);
 
-    springEffect->scrollable_->springOffsetProperty_ = nullptr;
-    pattern_->SetDirection(FlexDirection::ROW_REVERSE);
-    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
-    springEffect->ProcessScrollOver(0.0);
-    EXPECT_NE(springEffect->scrollable_->GetSpringProperty(), nullptr);
-
     springEffect->SetScrollable(nullptr);
     springEffect->ProcessScrollOver(0.0);
     springEffect->initTrailingCallback_ = nullptr;
@@ -120,11 +114,6 @@ HWTEST_F(ScrollEffectTestNg, SpringEffect002, TestSize.Level1)
     springEffect->ProcessSpringUpdate();
     EXPECT_EQ(springEffect->scrollable_->state_, Scrollable::AnimationState::IDLE);
 
-    pattern_->SetDirection(FlexDirection::ROW_REVERSE);
-    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
-    springEffect->ProcessSpringUpdate();
-    EXPECT_EQ(springEffect->scrollable_->state_, Scrollable::AnimationState::IDLE);
-
     springEffect->SetScrollable(nullptr);
     springEffect->ProcessSpringUpdate();
     springEffect->initTrailingCallback_ = nullptr;
@@ -138,6 +127,66 @@ HWTEST_F(ScrollEffectTestNg, SpringEffect002, TestSize.Level1)
     springEffect->currentPositionCallback_ = nullptr;
     springEffect->ProcessSpringUpdate();
     EXPECT_EQ(springEffect->scrollable_, nullptr);
+}
+
+/**
+ * @tc.name: SetEdgeEffectCallbackInitLeading001
+ * @tc.desc: Verify initLeadingCallback returns negative scrollable distance for non-reverse scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetEdgeEffectCallbackInitLeading001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(600.f);
+    CreateScrollDone();
+
+    auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(pattern_->GetScrollEdgeEffect());
+    ASSERT_NE(springEffect, nullptr);
+    ASSERT_NE(springEffect->initLeadingCallback_, nullptr);
+    ASSERT_TRUE(GreatNotEqual(pattern_->GetScrollableDistance(), 0.0f));
+    EXPECT_TRUE(NearEqual(springEffect->initLeadingCallback_(), -pattern_->GetScrollableDistance()));
+}
+
+/**
+ * @tc.name: SetEdgeEffectCallbackInitLeading002
+ * @tc.desc: Verify initLeadingCallback returns zero when scrollable distance is not positive.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetEdgeEffectCallbackInitLeading002, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(HEIGHT / 2.0f);
+    CreateScrollDone();
+
+    auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(pattern_->GetScrollEdgeEffect());
+    ASSERT_NE(springEffect, nullptr);
+    ASSERT_NE(springEffect->initLeadingCallback_, nullptr);
+    ASSERT_FALSE(GreatNotEqual(pattern_->GetScrollableDistance(), 0.0f));
+    EXPECT_TRUE(NearEqual(springEffect->initLeadingCallback_(), 0.0));
+}
+
+/**
+ * @tc.name: SetEdgeEffectCallbackTrailing001
+ * @tc.desc: Verify trailing callbacks stay at zero without reverse direction support.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEffectTestNg, SetEdgeEffectCallbackTrailing001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent(600.f);
+    CreateScrollDone();
+
+    auto springEffect = AceType::DynamicCast<ScrollSpringEffect>(pattern_->GetScrollEdgeEffect());
+    ASSERT_NE(springEffect, nullptr);
+    ASSERT_NE(springEffect->trailingCallback_, nullptr);
+    ASSERT_NE(springEffect->initTrailingCallback_, nullptr);
+    ASSERT_NE(springEffect->initLeadingCallback_, nullptr);
+    EXPECT_TRUE(NearEqual(springEffect->trailingCallback_(), 0.0));
+    EXPECT_TRUE(NearEqual(springEffect->initTrailingCallback_(), 0.0));
+    EXPECT_TRUE(NearEqual(springEffect->initLeadingCallback_(), -pattern_->GetScrollableDistance()));
 }
 
 /**

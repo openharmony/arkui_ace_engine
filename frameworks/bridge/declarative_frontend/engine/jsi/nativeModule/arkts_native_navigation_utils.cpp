@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_utils.h"
 
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/common/resource/resource_parse_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -154,6 +155,40 @@ void NativeNavigationUtils::ParseTitleOptions(const EcmaVM* vm, const Local<JSVa
     auto materialProperty = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "systemMaterial"));
     if (materialProperty->IsObject(vm)) {
         options.material = ArkTSUtils::UnwrapNapiValue(vm, materialProperty);
+    }
+    auto scrollEffectOptionsProperty = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "scrollEffectOptions"));
+    if (scrollEffectOptionsProperty->IsObject(vm)) {
+        auto scrollEffectOptionsObj = scrollEffectOptionsProperty->ToObject(vm);
+        auto scrollEffectTypeProp = scrollEffectOptionsObj->Get(vm,
+            panda::StringRef::NewFromUtf8(vm, "scrollEffectType"));
+        auto scrollEffectType = static_cast<int32_t>(NG::ScrollEffectType::COMMON_BLUR);
+        if (scrollEffectTypeProp->IsNumber()) {
+            auto scrollEffectTypeValue = scrollEffectTypeProp->Int32Value(vm);
+            if (scrollEffectTypeValue >= static_cast<int32_t>(NG::ScrollEffectType::COMMON_BLUR) &&
+                scrollEffectTypeValue <= static_cast<int32_t>(NG::ScrollEffectType::GRADUAL_BLUR)) {
+                scrollEffectType = scrollEffectTypeValue;
+            }
+        }
+        options.scrollEffectOptions.scrollEffectType = ArkUIOptionalInt { 1, scrollEffectType };
+        CalcDimension startOffset;
+        auto startOffsetProp = scrollEffectOptionsObj->Get(vm,
+            panda::StringRef::NewFromUtf8(vm, "blurEffectiveStartOffset"));
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, startOffsetProp, startOffset)) {
+            options.scrollEffectOptions.blurEffectiveStartOffset.isSet = 1;
+            options.scrollEffectOptions.blurEffectiveStartOffset.dimension.value = startOffset.Value();
+            options.scrollEffectOptions.blurEffectiveStartOffset.dimension.units =
+                static_cast<int32_t>(startOffset.Unit());
+        }
+        CalcDimension endOffset;
+        auto endOffsetProp = scrollEffectOptionsObj->Get(vm,
+            panda::StringRef::NewFromUtf8(vm, "blurEffectiveEndOffset"));
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, endOffsetProp, endOffset)) {
+            options.scrollEffectOptions.blurEffectiveEndOffset.isSet = 1;
+            options.scrollEffectOptions.blurEffectiveEndOffset.dimension.value = endOffset.Value();
+            options.scrollEffectOptions.blurEffectiveEndOffset.dimension.units =
+                static_cast<int32_t>(endOffset.Unit());
+        }
+        options.scrollEffectOptions.isSet = true;
     }
 }
 

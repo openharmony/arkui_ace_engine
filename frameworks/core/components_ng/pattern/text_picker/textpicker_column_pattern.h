@@ -34,6 +34,7 @@ class PickerTheme;
 #include "core/components_ng/pattern/text_picker/textpicker_overscroll.h"
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 #include "core/components_ng/pattern/text_picker/toss_animation_controller.h"
+#include "core/components_ng/base/modifier.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif

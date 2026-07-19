@@ -99,12 +99,12 @@ void BadgePattern::OnModifyDone()
             ReportComponentChangeEvent("onValueChange");
         }
     }
-    auto circleSize = layoutProperty->GetBadgeCircleSize();
     auto badgeTheme = frameNode->GetTheme<BadgeTheme>(true);
     CHECK_NULL_VOID(badgeTheme);
+    Dimension circleSize = layoutProperty->GetBadgeCircleSizeValue(badgeTheme->GetBadgeCircleSize());
     Dimension width = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
     Dimension outerWidth = layoutProperty->GetBadgeOuterBorderWidthValue(badgeTheme->GetBadgeOuterBorderWidth());
-    if (LessOrEqual(circleSize->ConvertToPx(), 0)) {
+    if (LessOrEqual(circleSize.Value(), 0)) {
         badgeVisible = true;
         width.Reset();
         outerWidth.Reset();
@@ -327,9 +327,9 @@ void BadgePattern::ReportComponentChangeEvent(const std::string& event)
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     value->Put("Badge", event.data());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(), "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(), "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_SELECT);
 #endif
 }

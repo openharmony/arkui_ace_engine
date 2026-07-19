@@ -36,6 +36,7 @@ namespace OHOS::Ace::NG {
 
 class FrameNode;
 class UINode;
+class LazyForEachNode;
 
 enum class LazyForEachReleaseStrategy {
     BATCH = 0,
@@ -69,7 +70,7 @@ typedef struct OperationInfo {
 using LazyForEachChild = std::pair<std::string, RefPtr<UINode>>;
 using LazyForEachCacheChild = std::pair<int32_t, RefPtr<UINode>>;
 
-class ACE_EXPORT LazyForEachBuilder : public virtual AceType {
+class ACE_FORCE_EXPORT LazyForEachBuilder : public virtual AceType {
     DECLARE_ACE_TYPE(NG::LazyForEachBuilder, AceType);
 public:
     LazyForEachBuilder() = default;
@@ -94,7 +95,7 @@ public:
         OnExpandChildrenOnInitialInNG();
     }
 
-    void OnDataReloaded();
+    void OnDataReloaded(bool reuseImmediately = false);
 
     bool OnDataAdded(size_t index);
 
@@ -144,7 +145,7 @@ public:
     void OperateExchange(V2::Operation& operation, int32_t& initialIndex,
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
 
-    void OperateReload(std::map<int32_t, LazyForEachChild>& expiringTemp);
+    void OperateReload(std::map<int32_t, LazyForEachChild>& expiringTemp, bool reuseImmediately = false);
 
     void ThrowRepeatOperationError(int32_t index);
 
@@ -308,6 +309,11 @@ public:
     void SetEnableSyncLoad(bool value);
     void SetIsSyncLoad(bool value);
     void ProcessSyncLoadTempChildren(std::list<RefPtr<UINode>>& children);
+    bool ReleaseExpiringNode(std::string reuseId);
+    void RecordRecyclableNode(std::string reuseId, std::string key, WeakPtr<UINode> recycleNode);
+    void TryRecordRecyclableNodeRecursively(std::string key, RefPtr<UINode> node);
+    void SetLazyForEachNode(const WeakPtr<LazyForEachNode>& node);
+    RefPtr<LazyForEachNode> GetLazyForEachNode() const;
 
 protected:
     virtual int32_t OnGetTotalCount() = 0;
@@ -376,6 +382,9 @@ private:
     int32_t activeRangeStart_ = -1;
     int32_t activeRangeEnd_ = -1;
     void RecordActiveRange(int32_t start, int32_t end);
+    std::map<std::string, std::map<std::string, std::set<WeakPtr<UINode>>>> recyclableNodeSet_;
+    std::set<std::string> GetReuseIdsCanBeRecycled() const;
+    WeakPtr<LazyForEachNode> lazyForEachNode_;
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);
 };
 } // namespace OHOS::Ace::NG

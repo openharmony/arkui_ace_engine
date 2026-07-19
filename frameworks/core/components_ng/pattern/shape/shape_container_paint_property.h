@@ -19,7 +19,6 @@
 #include <string>
 
 #include "base/geometry/ng/image_mesh.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_view_box.h"
 #include "core/components_ng/property/property.h"
@@ -27,6 +26,8 @@
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT ShapeContainerPaintProperty : public ShapePaintProperty {
     DECLARE_ACE_TYPE(ShapeContainerPaintProperty, ShapePaintProperty);
 

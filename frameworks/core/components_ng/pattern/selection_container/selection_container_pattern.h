@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/selection_container/selection_container_layout_property.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
+#include "core/components_ng/pattern/selection_container/selection_container_controller_holder.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 
 namespace OHOS::Ace {
@@ -65,6 +66,18 @@ public:
     RefPtr<FrameNode> GetHostNode() const override;
     void CloseSelectOverlay(
         bool animation = false, CloseReason reason = CloseReason::CLOSE_REASON_NORMAL) override;
+    void CloseSelectionMenu();
+    void ClearTextSelection();
+    // Pins the JS controller so it is not GC'd while the container is alive.
+    void SetControllerHolder(std::shared_ptr<SelectionContainerControllerHolder> holder)
+    {
+        controllerHolder_ = std::move(holder);
+    }
+    // Monotonic per-instance id (never reused, unlike node id) to guard against node id reuse.
+    int32_t GetSelectionEpoch() const
+    {
+        return selectionEpoch_;
+    }
     void ProcessOverlay(const OverlayRequest& request) override;
     void SwitchToOverlayMode() override;
     void ToggleMenu() override;
@@ -97,6 +110,8 @@ public:
     CopyOptions GetCopyOption() const override;
     std::optional<Color> GetSelectedBackgroundColor() const override;
     void OnModifyDone() override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void DumpInfo() override;
     void MarkContainerPropertyUpdate(uint32_t flags);
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
     std::u16string GetTextJoinSeparator() const
@@ -162,6 +177,9 @@ public:
     }
 
 private:
+    std::u16string GetSelectAllText();
+    std::u16string GetSelectionTextForMenuItemClick(const MenuItemParam& menuItemParam);
+    void DismissMenuAfterCopy();
     void ApplySelectionSummaryDelta(const ChildSelectionSummary& summary, int32_t delta);
     void RecomputeSelectedTypeFromSummary();
     TextResponseType textResponseType_ = TextResponseType::NONE;
@@ -170,6 +188,9 @@ private:
     std::function<bool(const MenuItemParam&, const std::u16string&)> onMenuItemClickWithText_;
 
     RefPtr<SelectionSelectOverlay> GetOrCreateSelectionSelectOverlay();
+    std::string GetBindSelectionMenuInJson() const;
+    std::string GetCaretColorStr() const;
+    std::string GetSelectedBackgroundColorStr() const;
     void InitKeyEvent();
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     void WriteClipboard(const std::u16string& clipboardText,
@@ -187,6 +208,9 @@ private:
     void RefreshMouseLeftSelectionOnFrameNodeChanged();
     FrameNodeChangeInfoFlag CollectFlagsFromChildToHost(const RefPtr<FrameNode>& childHost, int32_t containerId);
     RefPtr<SelectionSelectOverlay> selectionSelectOverlay_;
+    std::shared_ptr<SelectionContainerControllerHolder> controllerHolder_;
+    static int32_t ClaimSelectionContainerEpoch();
+    int32_t selectionEpoch_ = ClaimSelectionContainerEpoch();
     WeakPtr<ScrollablePattern> scrollableParent_;
     bool scrollableParentIsInsideContainer_ = false;
     bool isTriggerParentToScroll_ = false;

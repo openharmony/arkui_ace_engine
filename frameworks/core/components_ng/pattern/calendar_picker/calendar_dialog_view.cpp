@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,37 +14,44 @@
  */
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 
-#include "core/components/calendar/calendar_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include <utility>
+
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/i18n/localization.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
+#include "core/common/font_manager.h"
+#include "core/common/resource/resource_parse_utils.h"
+#include "core/components/calendar/calendar_theme.h"
 #include "core/components/common/properties/shadow_config.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 #include "core/components_ng/pattern/calendar/calendar_pattern.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
+#include "core/interfaces/native/node/node_swiper_custom_modifier.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_event_hub.h"
-#include "core/common/container.h"
-#include "core/common/font_manager.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -61,6 +68,7 @@ constexpr size_t CANCEL_BUTTON_BACKGROUND_COLOR_INDEX = 1;
 constexpr size_t ACCEPT_BUTTON_FONT_COLOR_INDEX = 2;
 constexpr size_t ACCEPT_BUTTON_BACKGROUND_COLOR_INDEX = 3;
 constexpr float CALENDAR_PICKER_TEXT_MAX_SCALE = 1.45f;
+const char BUTTON_ETS_TAG[] = "Button";
 
 void ApplyBlurStyleColorModeForApi26(const RefPtr<FrameNode>& dialogNode, BlurStyleOption& styleOption)
 {
@@ -77,6 +85,7 @@ void ApplyBlurStyleColorModeForApi26(const RefPtr<FrameNode>& dialogNode, BlurSt
         }
     }
 }
+
 } // namespace
 
 bool CalendarDialogView::CheckOrientationChange()
@@ -143,7 +152,9 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     scrollFrameNode->MountToParent(contentColumn);
 
     auto entryNode = settingData.entryNode.Upgrade();
-    auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn, entryNode);
+    const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, nullptr);
+    auto dialogNode = dialogInnerModifier->createDialogNodeWithThemeNode(dialogProperties, contentColumn, entryNode);
     CHECK_NULL_RETURN(dialogNode, nullptr);
     if (entryNode) {
         auto pickerPattern = entryNode->GetPattern<CalendarPickerPattern>();
@@ -409,13 +420,22 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
     borderRadius.SetRadius(radius);
 
     // Create button node
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(
+        BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     CHECK_NULL_RETURN(buttonNode, nullptr);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
-    buttonLayoutProperty->UpdateType(ButtonType::CIRCLE);
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, nullptr);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::CIRCLE);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(theme->GetCalendarImageWidthHeight()), CalcLength(theme->GetCalendarImageWidthHeight())));
     auto buttonRenderContext = buttonNode->GetRenderContext();
     CHECK_NULL_RETURN(buttonRenderContext, nullptr);
@@ -426,7 +446,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleImageNode(
     } else if (resourceId == InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG) {
         margin.left = CalcLength(theme->GetCalendarTitleImagePadding());
     }
-    buttonLayoutProperty->UpdateMargin(margin);
+    layoutProperty->UpdateMargin(margin);
 
     // Create image node
     auto imageNode = FrameNode::CreateFrameNode(
@@ -591,16 +611,10 @@ RefPtr<FrameNode> CalendarDialogView::CreateScrollNode()
 
 RefPtr<FrameNode> CalendarDialogView::CreateCalendarSwiperNode()
 {
-    auto swiperNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    CHECK_NULL_RETURN(swiperNode, nullptr);
-    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
-    swiperLayoutProperty->UpdateIndex(CURRENT_MONTH_INDEX);
-    swiperLayoutProperty->UpdateShowIndicator(false);
-    swiperLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    swiperLayoutProperty->UpdateLoop(true);
-    swiperLayoutProperty->UpdateDisableSwipe(false);
+    auto* modifier = GetSwiperCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto swiperNode = AceType::Claim(reinterpret_cast<FrameNode*>(
+        modifier->createCalendarSwiperNode(ElementRegister::GetInstance()->MakeUniqueId())));
     return swiperNode;
 }
 
@@ -686,8 +700,14 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto buttonNode = FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     CHECK_NULL_RETURN(buttonNode, nullptr);
     RefPtr<CalendarTheme> calendarTheme = buttonNode->GetTheme<CalendarTheme>(true);
     CHECK_NULL_RETURN(calendarTheme, nullptr);
@@ -719,17 +739,18 @@ RefPtr<FrameNode> CalendarDialogView::CreateButtonNode(bool isConfirm, const std
     textNode->MountToParent(buttonNode);
 
     UpdateButtonLayoutProperty(buttonNode, isConfirm, buttonInfos, pipeline);
-    auto buttonEventHub = buttonNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_RETURN(buttonEventHub, nullptr);
-    buttonEventHub->SetStateEffect(true);
+    auto* btnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(btnModifier, nullptr);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    btnModifier->setStateEffectToEventHub(nodeHandle, true);
 
     auto buttonRenderContext = buttonNode->GetRenderContext();
     auto defaultBGColor =
         calendarTheme->GetIsButtonTransparent() ? Color::TRANSPARENT : calendarTheme->GetDialogButtonBackgroundColor();
     buttonRenderContext->UpdateBackgroundColor(defaultBGColor);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(buttonLayoutProperty, nullptr);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    btnModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
     auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
     UpdateButtonStyles(buttonInfos, index, buttonLayoutProperty, buttonRenderContext);
     UpdateButtonDefaultFocus(buttonInfos, buttonNode, isConfirm);
@@ -744,24 +765,28 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
     CHECK_NULL_VOID(calendarTheme);
     auto dialogTheme = buttonNode->GetTheme<DialogTheme>(true);
     auto pickerTheme = buttonNode->GetTheme<PickerTheme>(true);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto* calDlgBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(calDlgBtnModifier);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     auto index = isConfirm ? ACCEPT_BUTTON_INDEX : CANCEL_BUTTON_INDEX;
     if (index < buttonInfos.size() &&
         (buttonInfos[index].role.has_value() || buttonInfos[index].buttonStyle.has_value() ||
             buttonInfos[index].fontSize.has_value() || buttonInfos[index].fontColor.has_value() ||
             buttonInfos[index].fontWeight.has_value() || buttonInfos[index].fontStyle.has_value() ||
             buttonInfos[index].fontFamily.has_value())) {
-        buttonLayoutProperty->UpdateLabel(isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText());
+        calDlgBtnModifier->updateLabelToLayoutProp(buttonHandle,
+            isConfirm ? dialogTheme->GetConfirmText() : dialogTheme->GetCancelText());
     }
-    buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     if (buttonNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
-        buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
+        calDlgBtnModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::ROUNDED_RECTANGLE);
     } else {
-        buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
+        calDlgBtnModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::CAPSULE);
     }
 
-    buttonLayoutProperty->UpdateFlexShrink(1.0);
+    layoutProperty->UpdateFlexShrink(1.0);
     CalcLength width;
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         width = CalcLength(1.0, DimensionUnit::PERCENT);
@@ -778,13 +803,13 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
         auto baseFontSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
         auto maxTextScale = CALENDAR_PICKER_TEXT_MAX_SCALE;
         if (fontSizeScale < calendarTheme->GetCalendarPickerLargeScale() || CheckOrientationChange()) {
-            buttonLayoutProperty->UpdateFontSize(baseFontSize);
+            calDlgBtnModifier->updateFontSizeToLayoutProp(buttonHandle, baseFontSize);
         } else {
             fontSizeScale = fontSizeScale > maxTextScale ? maxTextScale : fontSizeScale;
             // Button label text will still be scaled by framework fontScale once.
             // Use compensated font size here so final rendered size is capped by maxTextScale.
             auto compensatedScale = GreatNotEqual(rawFontSizeScale, 0.0f) ? (fontSizeScale / rawFontSizeScale) : 1.0f;
-            buttonLayoutProperty->UpdateFontSize(baseFontSize * compensatedScale);
+            calDlgBtnModifier->updateFontSizeToLayoutProp(buttonHandle, baseFontSize * compensatedScale);
         }
         heightScale = rawFontSizeScale > maxTextScale ? maxTextScale : rawFontSizeScale;
     }
@@ -793,19 +818,19 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
                 ? Dimension(pipeline->GetRootWidth()).ConvertToVp() >= deviceHeightLimit
                 : Dimension(pipeline->GetRootHeight()).ConvertToVp() >= deviceHeightLimit);
     if (skipDialogButtonAging) {
-        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+        layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(width, std::nullopt));
     } else if (useLargeButtonHeight) {
-        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+        layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(width, CalcLength(calendarTheme->GetCalendarActionLargeRowHeight())));
     } else {
-        buttonLayoutProperty->UpdateUserDefinedIdealSize(
+        layoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(width, CalcLength(calendarTheme->GetCalendarActionRowHeight())));
     }
 }
 
 void CalendarDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-    const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext)
+    const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext)
 {
     if (index >= buttonInfos.size()) {
         return;
@@ -816,35 +841,44 @@ void CalendarDialogView::UpdateButtonStyles(const std::vector<ButtonInfo>& butto
     CHECK_NULL_VOID(host);
     auto buttonTheme = host->GetTheme<ButtonTheme>(true);
     CHECK_NULL_VOID(buttonTheme);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(host));
     if (buttonInfos[index].type.has_value()) {
-        buttonLayoutProperty->UpdateType(buttonInfos[index].type.value());
+        buttonModifier->updateTypeToLayoutProp(buttonHandle, buttonInfos[index].type.value());
     }
     UpdateButtonStyleAndRole(buttonInfos, index, buttonLayoutProperty, buttonRenderContext, buttonTheme);
     if (buttonInfos[index].fontSize.has_value()) {
-        buttonLayoutProperty->UpdateFontSize(buttonInfos[index].fontSize.value());
+        buttonModifier->updateFontSizeToLayoutProp(buttonHandle, buttonInfos[index].fontSize.value());
     }
     if (buttonInfos[index].fontColor.has_value()) {
-        buttonLayoutProperty->UpdateFontColor(buttonInfos[index].fontColor.value());
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle, buttonInfos[index].fontColor.value());
     }
     if (buttonInfos[index].fontWeight.has_value()) {
-        buttonLayoutProperty->UpdateFontWeight(buttonInfos[index].fontWeight.value());
+        buttonModifier->updateFontWeightToLayoutProp(buttonHandle, buttonInfos[index].fontWeight.value());
     }
     if (buttonInfos[index].fontStyle.has_value()) {
-        buttonLayoutProperty->UpdateFontStyle(buttonInfos[index].fontStyle.value());
+        buttonModifier->updateFontStyleToLayoutProp(buttonHandle, buttonInfos[index].fontStyle.value());
     }
     if (buttonInfos[index].fontFamily.has_value()) {
-        buttonLayoutProperty->UpdateFontFamily(buttonInfos[index].fontFamily.value());
+        buttonModifier->updateFontFamilyToLayoutProp(buttonHandle, buttonInfos[index].fontFamily.value());
     }
     if (buttonInfos[index].borderRadius.has_value()) {
-        buttonLayoutProperty->UpdateBorderRadius(buttonInfos[index].borderRadius.value());
+        const auto& borderRadius = buttonInfos[index].borderRadius.value();
+        buttonModifier->setButtonBorderRadius(buttonHandle,
+            borderRadius.radiusTopLeft,
+            borderRadius.radiusTopRight,
+            borderRadius.radiusBottomLeft,
+            borderRadius.radiusBottomRight);
     }
     if (buttonInfos[index].backgroundColor.has_value()) {
         buttonRenderContext->UpdateBackgroundColor(buttonInfos[index].backgroundColor.value());
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
     }
 }
 
 void CalendarDialogView::UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
-    const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
+    const RefPtr<LayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
     const RefPtr<ButtonTheme>& buttonTheme)
 {
     if (index >= buttonInfos.size()) {
@@ -853,26 +887,28 @@ void CalendarDialogView::UpdateButtonStyleAndRole(const std::vector<ButtonInfo>&
     CHECK_NULL_VOID(buttonLayoutProperty);
     CHECK_NULL_VOID(buttonRenderContext);
     CHECK_NULL_VOID(buttonTheme);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonNode = buttonLayoutProperty->GetHost();
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
     if (buttonInfos[index].role.has_value()) {
-        buttonLayoutProperty->UpdateButtonRole(buttonInfos[index].role.value());
-        ButtonStyleMode buttonStyleMode;
-        if (buttonInfos[index].buttonStyle.has_value()) {
-            buttonStyleMode = buttonInfos[index].buttonStyle.value();
-        } else {
-            buttonStyleMode = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
-        }
+        buttonModifier->updateButtonRoleToLayoutProp(buttonHandle, buttonInfos[index].role.value());
+        ButtonStyleMode buttonStyleMode = buttonInfos[index].buttonStyle.has_value()
+            ? buttonInfos[index].buttonStyle.value()
+            : buttonModifier->getButtonStyleFromLayoutProp(buttonHandle).value_or(ButtonStyleMode::EMPHASIZE);
         auto bgColor = buttonTheme->GetBgColor(buttonStyleMode, buttonInfos[index].role.value());
         auto textColor = buttonTheme->GetTextColor(buttonStyleMode, buttonInfos[index].role.value());
         buttonRenderContext->UpdateBackgroundColor(bgColor);
-        buttonLayoutProperty->UpdateFontColor(textColor);
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle, textColor);
     }
     if (buttonInfos[index].buttonStyle.has_value()) {
-        buttonLayoutProperty->UpdateButtonStyle(buttonInfos[index].buttonStyle.value());
-        ButtonRole buttonRole = buttonLayoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+        buttonModifier->updateButtonStyleToLayoutProp(buttonHandle, buttonInfos[index].buttonStyle.value());
+        ButtonRole buttonRole = buttonModifier->getButtonRoleFromLayoutProp(buttonHandle).value_or(ButtonRole::NORMAL);
         auto bgColor = buttonTheme->GetBgColor(buttonInfos[index].buttonStyle.value(), buttonRole);
         auto textColor = buttonTheme->GetTextColor(buttonInfos[index].buttonStyle.value(), buttonRole);
         buttonRenderContext->UpdateBackgroundColor(bgColor);
-        buttonLayoutProperty->UpdateFontColor(textColor);
+        buttonModifier->updateFontColorToLayoutProp(buttonHandle, textColor);
     }
 }
 
@@ -914,8 +950,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCancelNode(
 
 RefPtr<FrameNode> CalendarDialogView::CreateDividerNode()
 {
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(V2::DIVIDER_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
     CHECK_NULL_RETURN(dividerNode, nullptr);
     RefPtr<CalendarTheme> theme = dividerNode->GetTheme<CalendarTheme>(true);
     CHECK_NULL_RETURN(theme, nullptr);
@@ -1343,7 +1378,7 @@ void CalendarDialogView::UpdateButtons(
     }
 
     CalendarDialogView::UpdateButtonLayoutProperty(buttonNode, buttonIndex, buttonInfos, pipelineContext);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty();
     CHECK_NULL_VOID(buttonLayoutProperty);
     CalendarDialogView::UpdateButtonStyles(
         buttonInfos, buttonIndex, buttonLayoutProperty, buttonNode->GetRenderContext());
@@ -1407,17 +1442,19 @@ bool CalendarDialogView::ReportChangeEvent(const RefPtr<FrameNode>& frameNode, c
 bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& compName,
     const std::string& eventName, const PickerDate& pickerDate)
 {
-    auto params = InspectorJsonUtil::CreateObject();
+#ifndef CROSS_PLATFORM
+    auto params = JsonUtil::Create();
     CHECK_NULL_RETURN(params, false);
     params->Put("year", static_cast<int32_t>(pickerDate.GetYear()));
     params->Put("month", static_cast<int32_t>(pickerDate.GetMonth()));
     params->Put("day", static_cast<int32_t>(pickerDate.GetDay()));
-    auto value = InspectorJsonUtil::Create();
+    auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_RETURN(value, false);
     value->Put(compName.c_str(), eventName.c_str());
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value,
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", value->ToString(),
         ComponentEventType::COMPONENT_EVENT_PICKER);
+#endif
     return true;
 }
 

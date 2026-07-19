@@ -273,7 +273,6 @@ public:
 
     // input transformation
     bool hasUnidentifiedLits = false; // if the literals contains unidentified lits
-    void ReadFromFile(const std::string& fileName, const std::vector<std::string>& softCNames = {});
     void SplitString(std::string& inString, std::vector<std::string>& strVec, std::string pattern) const;
     void BuildLits(std::string& inString);
     void BuildInstanceOriginal(const std::vector<std::string>& unitLits = {});

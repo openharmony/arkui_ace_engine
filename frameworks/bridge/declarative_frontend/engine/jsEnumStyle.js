@@ -1136,13 +1136,6 @@ let SwiperDisplayMode;
   SwiperDisplayMode[SwiperDisplayMode.AUTO_LINEAR = 1] = 'AUTO_LINEAR';
 })(SwiperDisplayMode || (SwiperDisplayMode = {}));
 
-var EdgeEffect;
-(function (EdgeEffect) {
-  EdgeEffect[EdgeEffect.Spring = 0] = 'Spring';
-  EdgeEffect[EdgeEffect.Fade = 1] = 'Fade';
-  EdgeEffect[EdgeEffect.None = 2] = 'None';
-})(EdgeEffect || (EdgeEffect = {}));
-
 let DatePickerType;
 (function (DatePickerType) {
   DatePickerType[DatePickerType.Time = 0] = 'Time';
@@ -2410,6 +2403,10 @@ class DotIndicator extends Indicator {
   }
   space(value) {
     this.spaceValue = value;
+    return this;
+  }
+  indicatorIcon(value) {
+    this.indicatorIconValue = value;
     return this;
   }
 }
@@ -5332,7 +5329,7 @@ let ResolveStrategy;
     ResolveStrategy[ResolveStrategy.UNDEFINED = 5] = 'UNDEFINED';
 })(ResolveStrategy || (ResolveStrategy = {}));
 
-var ScrollEffectType;
+let ScrollEffectType;
 (function (ScrollEffectType) {
     ScrollEffectType[ScrollEffectType.COMMON_BLUR = 0] = "COMMON_BLUR";
     ScrollEffectType[ScrollEffectType.GRADUAL_BLUR = 1] = "GRADUAL_BLUR";

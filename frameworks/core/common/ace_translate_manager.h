@@ -16,30 +16,46 @@
 #ifndef FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H
 #define FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H
 #include <functional>
+#include <map>
+#include <memory>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #include "interfaces/inner_api/ui_session/ui_translate_manager.h"
 #include "interfaces/inner_api/ui_session/ui_content_proxy_error_code.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "base/thread/task_executor.h"
+
+namespace OHOS::Ace::NG {
+class PageTranslateNode;
+} // namespace OHOS::Ace::NG
+
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UiTranslateManagerImpl : public UiTranslateManager,
     public std::enable_shared_from_this<UiTranslateManagerImpl> {
 public:
     explicit UiTranslateManagerImpl(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {};
+#ifndef CROSS_PLATFORM
     void AddTranslateListener(const WeakPtr<NG::FrameNode> node);
     void RemoveTranslateListener(int32_t nodeId);
     void GetWebViewCurrentLanguage() override;
     void GetTranslateText(std::string extraData, bool isContinued) override;
+    void GetPageTranslateText(int32_t scope, const std::string& extraData) override;
+    void StartPageTranslate(int32_t scope, const std::string& extraData) override;
+    void EndPageTranslate(int32_t scope) override;
+    void ResetPageTranslate(int32_t nodeId) override;
+    void SendPageTranslateResult(const std::vector<TranslateResult>& translateResults) override;
     void SendTranslateResult(int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids) override;
     void ResetTranslate(int32_t nodeId) override;
     void SendTranslateResult(int32_t nodeId, std::string res) override;
     void ClearMap() override;
     void SendPixelMap();
-    void GetAllPixelMap(RefPtr<NG::FrameNode> pageNode);
     void TravelFindPixelMap(RefPtr<NG::UINode> currentNode);
-    void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap);
     void GetMultiImagesById(uint32_t windowId, const std::vector<int32_t>& arkUIIds,
         const std::map<int32_t, std::vector<int32_t>>& arkWebs);
     void GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request);
+    void ForEachArkUITranslateFrameNode(const std::function<void(const WeakPtr<NG::FrameNode>&)>& callback) const;
     void SetArkUIQueryErrorCode(MultiImageQueryErrorCode errorCode);
     void SetArkWebQueryErrorCode(MultiImageQueryErrorCode errorCode);
     MultiImageQueryErrorCode GetArkWebQueryErrorCode() const;
@@ -51,8 +67,24 @@ public:
     void MarkCurrentWebImageQueryDone(int32_t currentWebId);
     void AddArkWebImageMap(int32_t webId, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>& webImageMap);
     void PostToUI(const std::function<void()>& task) override;
+#else
+    void ResetTranslate(int32_t nodeId) override
+    {
+        (void)nodeId;
+    }
+    void ClearMap() override {}
+#endif
+    void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap);
+    void GetAllPixelMap(RefPtr<NG::FrameNode> pageNode);
 
 private:
+    struct TranslateListener {
+        // ArkUI text controls are reported through FrameNode and handled by ContentChangeManager.
+        WeakPtr<NG::FrameNode> frameNode;
+        // ArkWeb nodes are dispatched through PageTranslateNode APIs for Web script-based translation.
+        WeakPtr<NG::PageTranslateNode> translateNode;
+    };
+#ifndef CROSS_PLATFORM
     void TraverseAddArkUIComponentImages(const size_t componentQueryCnt, const std::vector<int32_t>& arkUIIds);
     void TraverseAddArkWebImages(const std::vector<int32_t>& webImageIds, int32_t windowId, int32_t webComponentId,
         const std::function<void(int32_t, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>&,
@@ -64,6 +96,8 @@ private:
     void GetPixelMapFromImageTypeNode(RefPtr<NG::FrameNode> frameNode,
         std::shared_ptr<Media::PixelMap>& componentPixelMap);
     bool CheckAllWebQueryTaskFinish() const;
+    bool IsArkWebTranslateListener(const TranslateListener& listener) const;
+    bool HasArkWebTranslateListener() const;
     int32_t windowId_ = 0;
 
     // mark if all web image queries have finished within QUERY_IMAGES_TIMEOUT_TIME.
@@ -91,8 +125,9 @@ private:
     std::map<int32_t, std::map<int32_t, std::shared_ptr<Media::PixelMap>>> arkWebImages_;
 
     static constexpr int32_t QUERY_IMAGES_TIMEOUT_TIME = 1500;
-    std::map<int32_t, WeakPtr<NG::FrameNode>> listenerMap_;
+    std::map<int32_t, TranslateListener> listenerMap_;
     std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> pixelMap_;
+#endif
     RefPtr<TaskExecutor> taskExecutor_;
 };
 } // namespace OHOS::Ace

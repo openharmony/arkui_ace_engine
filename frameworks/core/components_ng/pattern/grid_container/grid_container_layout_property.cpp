@@ -17,11 +17,6 @@
 
 namespace OHOS::Ace::NG {
 
-void GridContainerLayoutProperty::RegistGridChild(const RefPtr<FrameNode>& child)
-{
-    childrenFramenode_.emplace_back(child);
-}
-
 void GridContainerLayoutProperty::OnContainerInfoUpdate(const GridContainerInfo& /* info */)
 {
     auto p = childrenFramenode_.begin();

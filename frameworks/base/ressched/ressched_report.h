@@ -68,7 +68,7 @@ using ReportSyncEventFunc = int32_t (*)(const uint32_t resType, const int64_t va
 ReportDataFunc ACE_EXPORT LoadReportDataFunc();
 ReportSyncEventFunc ACE_EXPORT LoadReportSyncEventFunc();
 
-class ACE_EXPORT ResSchedReport final {
+class ResSchedReport final {
 public:
     ACE_FORCE_EXPORT static ResSchedReport& GetInstance();
     ACE_FORCE_EXPORT void ResSchedDataReport(const char* name,
@@ -79,8 +79,6 @@ public:
     void ResSchedDataReport(uint32_t resType, int32_t value = 0,
         const std::unordered_map<std::string, std::string>& payload = {});
     void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config);
-    void OnTouchEvent(const TouchEvent& touchEvent, const ReportConfig& config,
-                      const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled);
     void ResScheSyncEventReport(const uint32_t resType, const int64_t value,
         const std::unordered_map<std::string, std::string>& payload,
         std::unordered_map<std::string, std::string>& reply);
@@ -99,7 +97,7 @@ public:
     void OnAxisEvent(const AxisEvent& axisEvent);
     void AxisEventReportEnd();
     void HandlePageTransition(const PageTransitionInfo& pageTransitionInfo, const uint32_t windowId);
-    void HandleSwiperChange(std::unordered_map<std::string, std::string>& payload);
+    ACE_FORCE_EXPORT void HandleSwiperChange(std::unordered_map<std::string, std::string>& payload);
     static std::atomic<int32_t> createPageCount; // not consider multi-instances.
     static bool triggerExecuted; // not consider multi-instances.
     int64_t GetTid();
@@ -109,10 +107,7 @@ public:
 private:
     ResSchedReport();
     ~ResSchedReport() {}
-    void HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config,
-                         const WeakPtr<NG::FrameNode>& weakNode, bool isClickExtEnabled = false);
-    void CollectComponentInfo(const WeakPtr<NG::FrameNode>& weakNode,
-                              std::unordered_map<std::string, std::string>& payload);
+    void HandleTouchDown(const TouchEvent& touchEvent, const ReportConfig& config);
     void HandleTouchUp(const TouchEvent& touchEvent, const ReportConfig& config);
     bool IsRateLimit(int64_t maxCount, std::chrono::seconds durTime,
         int64_t& keyEventCount, std::chrono::steady_clock::time_point& startTime);

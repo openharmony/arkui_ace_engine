@@ -695,7 +695,7 @@ public:
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
-    void RequestCustomKeyboardBuilder();
+    bool RequestCustomKeyboardBuilder();
     bool CloseCustomKeyboard();
     void UpdateUrlStyle(RefPtr<SpanNode>& spanNode, const std::optional<std::u16string>& urlAddressOpt);
     const std::u16string& GetPasteStr() const;
@@ -716,6 +716,7 @@ public:
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
     void OnColorModeChange(uint32_t colorMode) override;
     void OnColorConfigurationUpdate() override;
+    void HandleColorConfigurationUpdate();
     bool IsDisabled() const;
     float GetLineHeight() const override;
     size_t GetLineCount() const override;
@@ -742,9 +743,7 @@ public:
     const RectF& GetTextRect() const override;
     float GetScrollOffset() const;
     RefPtr<ScrollBar> GetScrollControllerBar();
-    void StopScrolling();
     void ClearAISpanRects();
-    void HandleScrollStart();
     std::vector<RectF> CalculateSelectedRect(int32_t start, int32_t end);
     void ScrollToVisible(std::optional<int32_t> start, std::optional<int32_t> end);
     bool OnScrollCallback(float offset, int32_t source) override;
@@ -899,12 +898,10 @@ public:
     }
     bool IsFreeScrollEnabled() const;
     RefPtr<RichEditorScrollController> GetScrollController() const;
-    bool HandleHorizontalScroll(bool needUpdateOffset);
+    void HandleFreeScroll(bool needUpdateOffset);
+    void HandleFixedScroll();
     void RemoveOverlayModifier();
-    void ScheduleDisappearDelayTask();
-    bool IsMouseOverScrollBar(const MouseInfo& info);
     bool IsShortCutBlocked() override;
-    void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
     Color GetScrollBarColor() const;
     void UpdatePlaceholderFontColor(const Color& color);
     void MarkContentNodeForRender() override;
@@ -930,18 +927,28 @@ public:
     bool HasRenderTransform();
     VectorF GetHostScale() const;
 
-protected:
-    RefPtr<TextSelectOverlay> GetOrCreateSelectOverlay() override;
-    RefPtr<TextSelectOverlay> GetSelectOverlay() const override;
-    bool CanStartAITask() const override;
-
     template<typename T>
     RefPtr<T> GetTheme() const
     {
+        if (isAPI26Plus) {
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, nullptr);
+            return host->GetTheme<T>(true);
+        }
         auto pipelineContext = GetContext();
         CHECK_NULL_RETURN(pipelineContext, {});
         return pipelineContext->GetTheme<T>();
     }
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId = -1) override;
+    void UpdateStyledStringByColorMode();
+    void UpdateSpanNodeByColorMode();
+    void UpdateLayoutPropertyColor();
+
+protected:
+    RefPtr<TextSelectOverlay> GetOrCreateSelectOverlay() override;
+    RefPtr<TextSelectOverlay> GetSelectOverlay() const override;
+    bool CanStartAITask() const override;
 
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
@@ -1187,16 +1194,12 @@ private:
     void CheckScrollable();
     void UpdateMagnifierStateAfterLayout(bool frameSizeChange);
     void UpdateScrollStateAfterLayout(bool shouldDisappear);
-    void OnAutoScroll(AutoScrollParam param);
+    void HandleMouseAutoScroll(AutoScrollParam param);
     void StopAutoScroll();
     void AutoScrollByEdgeDetection(AutoScrollParam param, OffsetF offset, EdgeDetectionStrategy strategy);
-    float MoveTextRect(float offset);
     void SetNeedMoveCaretToContentRect();
     void MoveCaretToContentRect();
-    void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
-    void MoveCaretToContentRectHorizontal(const OffsetF& caretOffset);
-    void MoveCaretToContentRectVertical(const OffsetF& caretOffset, float caretHeight);
-    void MoveCaretToContentRect(float offset, int32_t source);
+    float GetOverlayCaretWidth() const;
     bool IsCaretInContentArea();
     bool IsTextArea() const override;
     void UpdateRichTextRectOffsetWithPadding();
@@ -1320,6 +1323,7 @@ private:
     const bool isAPI16Plus;
     const bool isAPI18Plus;
     const bool isAPI20Plus;
+    const bool isAPI26Plus;
     bool shiftFlag_ = false;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;
@@ -1371,8 +1375,6 @@ private:
     RefPtr<RichEditorStyledStringController> richEditorStyledStringController_;
     MoveDirection moveDirection_ = MoveDirection::FORWARD;
     RectF frameRect_;
-    std::optional<struct UpdateSpanStyle> typingStyle_;
-    std::optional<TextStyle> typingTextStyle_;
     std::list<ResultObject> dragResultObjects_;
     std::optional<Color> caretColor_;
     std::optional<Color> selectedBackgroundColor_;

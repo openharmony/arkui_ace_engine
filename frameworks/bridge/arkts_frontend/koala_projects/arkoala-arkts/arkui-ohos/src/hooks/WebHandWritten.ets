@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { ArkWebComponent, JavaScriptProxy, CredentialType, MaterializedBase } from "#generated"
+import { MaterializedBase } from "@koalaui/interop"
+import { ArkWebComponent, JavaScriptProxy, CredentialType } from "#generated"
 import { ArkUIAniModule } from "arkui.ani"
 import { canIUse } from '@internal.full.global'
 

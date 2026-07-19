@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include <map>
 #include <mutex>
 #include <string>
-
+#include <string_view>
 
 #include "base/memory/referenced.h"
 #include "base/geometry/dimension.h"
@@ -41,7 +41,7 @@ enum class ScreenSizeType {
 };
 
 constexpr size_t SCREEN_SIZE_COUNT = static_cast<size_t>(ScreenSizeType::XL) + 1;
-const inline std::map<ScreenSizeType, std::string> SCREEN_SIZE_VALUES = {
+const inline std::map<ScreenSizeType, std::string_view> SCREEN_SIZE_VALUES = {
     {ScreenSizeType::XS, "xs"},
     {ScreenSizeType::SM, "sm"},
     {ScreenSizeType::MD, "md"},
@@ -85,7 +85,7 @@ public:
         return dipScale_;
     }
 
-    ScreenSizeType GetSize(double width) const;
+    ACE_FORCE_EXPORT ScreenSizeType GetSize(double width) const;
 
     ScreenSizeType GetCurrentSize() const
     {

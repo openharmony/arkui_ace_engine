@@ -15,6 +15,7 @@
 
 #include "ui_observer_listener.h"
 #include "js_native_api.h"
+#include "core/common/container.h"
 #include "core/event/ace_events.h"
 #include "interfaces/napi/kits/observer/gesture/gesture_observer_listener.h"
 

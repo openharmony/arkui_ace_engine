@@ -19,7 +19,6 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
-#include "core/animation/animator.h"
 #include "core/animation/spring_motion.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/list/list_item_theme.h"
@@ -31,6 +30,10 @@
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+
+namespace OHOS::Ace {
+class Animator;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 class ForEachBaseNode;
@@ -58,10 +61,8 @@ public:
 
     void SwipeBackward();
 
-    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder) : shallowBuilder_(shallowBuilder) {}
-    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle)
-        : listItemStyle_(listItemStyle), shallowBuilder_(shallowBuilder)
-    {}
+    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder);
+    explicit ListItemPattern(const RefPtr<ShallowBuilder>& shallowBuilder, V2::ListItemStyle listItemStyle);
     ~ListItemPattern() override;
 
     void OnRecycle() override;
@@ -147,24 +148,29 @@ public:
         }
     }
 
+    // Index accessors forward to LazyContainerItemHelper (held on the base Pattern) so that the storage
+    // is shared with generic children and destroyed together with this item. Defaults match the previous
+    // bare members: indexInList = 0, indexInListItemGroup = -1.
     int32_t GetIndexInList() const
     {
-        return indexInList_;
+        const auto& helper = GetLazyContainerItemHelper();
+        return helper ? helper->GetIndexInList() : 0;
     }
 
     void SetIndexInList(int32_t index)
     {
-        indexInList_ = index;
+        GetOrCreateLazyContainerItemHelper()->SetIndexInList(index);
     }
 
     int32_t GetIndexInListItemGroup() const
     {
-        return indexInListItemGroup_;
+        const auto& helper = GetLazyContainerItemHelper();
+        return helper ? helper->GetIndexInListItemGroup() : -1;
     }
 
     void SetIndexInListItemGroup(int32_t index)
     {
-        indexInListItemGroup_ = index;
+        GetOrCreateLazyContainerItemHelper()->SetIndexInListItemGroup(index);
     }
 
     void SetNeedReserveEditModeCheckBoxSpace(bool needReserveEditModeCheckBoxSpace)
@@ -211,7 +217,10 @@ public:
 
     SwipeActionState GetSwipeActionState();
 
-    bool FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target);
+    bool FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target)
+    {
+        return LazyContainerItemHelper::FindHeadOrTailChild(childFocus, step, target);
+    }
 
     bool IsEnableChildrenMatchParent() override
     {
@@ -289,8 +298,7 @@ private:
     void BuildItemPositionInfo(std::unique_ptr<JsonValue>& json);
     RefPtr<ShallowBuilder> shallowBuilder_;
 
-    int32_t indexInList_ = 0;
-    int32_t indexInListItemGroup_ = -1;
+    // indexInList_ / indexInListItemGroup_ moved to LazyContainerItemHelper (base Pattern member).
 
     // swiperAction
     int32_t startNodeIndex_ = -1;

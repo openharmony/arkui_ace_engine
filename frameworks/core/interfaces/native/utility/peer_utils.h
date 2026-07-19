@@ -17,6 +17,7 @@
 
 #include <type_traits>
 #include <unordered_map>
+#include "ui/base/macros.h"
 
 #ifdef ARKUI_CAPI_UNITTEST
 #include <gtest/gtest.h>
@@ -80,7 +81,7 @@ private:
 #endif
 
 public:
-    static std::vector<std::string> CreateAIError(OHOS::Ace::ImageAnalyzerState state);
+    static ACE_FORCE_EXPORT std::vector<std::string> CreateAIError(OHOS::Ace::ImageAnalyzerState state);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_X_COMPONENT_CONTROLLER_PEER_IMPL_H

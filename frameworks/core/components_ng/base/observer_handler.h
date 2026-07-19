@@ -19,15 +19,20 @@
 #include <functional>
 #include <optional>
 #include <string>
-#include <utility>
 
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/common/frontend.h"
-#include "core/common/container.h"
+#include "base/utils/macros.h"
 #include "core/common/window_size_breakpoint.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+
+struct napi_value__;
+using napi_value = napi_value__*;
+
+namespace OHOS::Ace {
+class GestureEvent;
+class ClickInfo;
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
 enum class NavDestinationState {
@@ -45,7 +50,7 @@ enum class NavDestinationState {
     ON_BACKPRESS = 100,
 };
 
-struct NavDestinationInfo {
+struct ACE_FORCE_EXPORT NavDestinationInfo {
     std::string navigationId;
     std::string name;
     NavDestinationState state;
@@ -59,57 +64,18 @@ struct NavDestinationInfo {
     std::optional<SizeF> size;
 
     NavDestinationInfo() = default;
-
-    NavDestinationInfo(std::string id, std::string name, NavDestinationState state)
-        : navigationId(std::move(id)), name(std::move(name)), state(state)
-    {}
-
+    NavDestinationInfo(std::string id, std::string name, NavDestinationState state);
     NavDestinationInfo(std::string id, std::string name, NavDestinationState state,
-        int32_t index, napi_value param, std::string navDesId)
-        : navigationId(std::move(id)), name(std::move(name)), state(state),
-          index(index), param(param), navDestinationId(std::move(navDesId))
-    {}
-
+        int32_t index, napi_value param, std::string navDesId);
     NavDestinationInfo(std::string id, std::string name, NavDestinationState state,
-        int32_t index, napi_value param, std::string navDesId, NavDestinationMode mode, int32_t uniqueId)
-        : navigationId(std::move(id)), name(std::move(name)), state(state),
-        index(index), param(param), navDestinationId(std::move(navDesId)), mode(mode), uniqueId(std::move(uniqueId))
-    {}
-
+        int32_t index, napi_value param, std::string navDesId, NavDestinationMode mode, int32_t uniqueId);
     NavDestinationInfo(std::string id, std::string name, NavDestinationState state, int32_t index, napi_value param,
-        std::string navDesId, NavDestinationMode mode, int32_t uniqueId, int32_t navigationUniqueId)
-        : navigationId(std::move(id)), name(std::move(name)), state(state), index(index), param(param),
-          navDestinationId(std::move(navDesId)), mode(mode),
-          uniqueId(std::move(uniqueId)), navigationUniqueId(std::move(navigationUniqueId))
-    {}
-
+        std::string navDesId, NavDestinationMode mode, int32_t uniqueId, int32_t navigationUniqueId);
     NavDestinationInfo(std::string id, std::string name, NavDestinationState state, int32_t index, napi_value param,
-                       std::string navDesId, NavDestinationMode mode, int32_t uniqueId, std::optional<SizeF> size)
-        : navigationId(std::move(id)),
-          name(std::move(name)),
-          state(state),
-          index(index),
-          param(param),
-          navDestinationId(std::move(navDesId)),
-          mode(mode),
-          uniqueId(std::move(uniqueId)),
-          size(std::move(size))
-    {}
-
+                       std::string navDesId, NavDestinationMode mode, int32_t uniqueId, std::optional<SizeF> size);
     NavDestinationInfo(std::string id, std::string name, NavDestinationState state, int32_t index, napi_value param,
                        std::string navDesId, NavDestinationMode mode, int32_t uniqueId, int32_t navigationUniqueId,
-                       std::optional<SizeF> size)
-        : navigationId(std::move(id)),
-          name(std::move(name)),
-          state(state),
-          index(index),
-          param(param),
-          navDestinationId(std::move(navDesId)),
-          mode(mode),
-          uniqueId(std::move(uniqueId)),
-          navigationUniqueId(std::move(navigationUniqueId)),
-          size(std::move(size))
-    {}
+                       std::optional<SizeF> size);
 };
 
 enum class ScrollEventType {
@@ -117,32 +83,27 @@ enum class ScrollEventType {
     SCROLL_STOP = 1,
 };
 
-struct ScrollEventInfo {
+struct ACE_FORCE_EXPORT ScrollEventInfo {
     std::string id;
     int32_t uniqueId;
     ScrollEventType scrollEvent;
     float offset;
     Ace::Axis axis;
 
-    ScrollEventInfo(std::string id, int32_t uniqueId, ScrollEventType scrollEvent, float offset, Ace::Axis axis)
-        : id(std::move(id)), uniqueId(uniqueId), scrollEvent(scrollEvent), offset(offset), axis(axis)
-    {}
+    ScrollEventInfo(std::string id, int32_t uniqueId, ScrollEventType scrollEvent, float offset, Ace::Axis axis);
 };
 
-struct NavDestinationSwitchInfo {
+struct ACE_FORCE_EXPORT NavDestinationSwitchInfo {
     // UIContext
     std::optional<NavDestinationInfo> from;
     std::optional<NavDestinationInfo> to;
     NavigationOperation operation;
 
     NavDestinationSwitchInfo(std::optional<NavDestinationInfo>&& fromInfo, std::optional<NavDestinationInfo>&& toInfo,
-        NavigationOperation op)
-        : from(std::forward<std::optional<NavDestinationInfo>>(fromInfo)),
-          to(std::forward<std::optional<NavDestinationInfo>>(toInfo)), operation(op)
-    {}
+        NavigationOperation op);
 };
 
-struct RouterPageInfoNG {
+struct ACE_FORCE_EXPORT RouterPageInfoNG {
     int32_t index;
     std::string name;
     std::string path;
@@ -151,26 +112,17 @@ struct RouterPageInfoNG {
     std::optional<SizeF> size;
 
     RouterPageInfoNG(int32_t index, std::string name, std::string path, RouterPageState state,
-        std::string pageId)
-        : index(index), name(std::move(name)), path(std::move(path)), state(state),
-          pageId(std::move(pageId))
-    {}
+        std::string pageId);
     RouterPageInfoNG(int32_t index, std::string name, std::string path, RouterPageState state,
-        std::string pageId, std::optional<SizeF> size)
-        : index(index), name(std::move(name)), path(std::move(path)), state(state),
-          pageId(std::move(pageId)), size(size)
-    {}
+        std::string pageId, std::optional<SizeF> size);
 };
 
-struct AbilityContextInfo {
+struct ACE_FORCE_EXPORT AbilityContextInfo {
     std::string name = "";
     std::string bundleName = "";
     std::string moduleName = "";
 
-    bool IsEqual(const AbilityContextInfo& info) const
-    {
-        return name == info.name && bundleName == info.bundleName && moduleName == info.moduleName;
-    }
+    bool IsEqual(const AbilityContextInfo& info) const;
 };
 
 enum class TabContentState {
@@ -178,7 +130,7 @@ enum class TabContentState {
     ON_HIDE = 1,
 };
 
-struct TabContentInfo {
+struct ACE_FORCE_EXPORT TabContentInfo {
     std::string tabContentId;
     int32_t tabContentUniqueId = 0;
     TabContentState state;
@@ -188,10 +140,7 @@ struct TabContentInfo {
     std::optional<int32_t> lastIndex;
 
     TabContentInfo(std::string tabContentId, int32_t tabContentUniqueId, TabContentState state, int32_t index,
-        std::string id, int32_t uniqueId)
-        : tabContentId(std::move(tabContentId)), tabContentUniqueId(tabContentUniqueId), state(state), index(index),
-        id(std::move(id)), uniqueId(uniqueId)
-    {}
+        std::string id, int32_t uniqueId);
 };
 
 enum class PanGestureState {
@@ -204,22 +153,18 @@ struct PanGestureInfo {
     CurrentCallbackState callbackState;
 };
 
-struct TextChangeEventInfo {
+struct ACE_FORCE_EXPORT TextChangeEventInfo {
     std::string id;
     int32_t uniqueId;
     std::string content;
-    TextChangeEventInfo(std::string id, int32_t uniqueId, std::string content)
-        : id(std::move(id)), uniqueId(uniqueId), content(std::move(content))
-    {}
+    TextChangeEventInfo(std::string id, int32_t uniqueId, std::string content);
 };
 
-struct SwiperItemInfoNG {
+struct ACE_FORCE_EXPORT SwiperItemInfoNG {
     int32_t uniqueId = -1;
     int32_t index = -1;
 
-    SwiperItemInfoNG(int32_t uniqueId, int32_t index)
-        : uniqueId(uniqueId), index(index)
-    {}
+    SwiperItemInfoNG(int32_t uniqueId, int32_t index);
 };
 
 struct SwiperContentInfo {
@@ -246,14 +191,10 @@ using GlobalGestureListenerCallback = std::function<void(const GestureTriggerInf
 // Storage structure for global gesture listeners
 // Uses bitwise combined key: (gestureType << 32 | phase) as unique identifier
 // Each combined key maps to a single callback with its resourceId (new callback overwrites old one)
-struct GlobalGestureListenerStorage {
+struct ACE_FORCE_EXPORT GlobalGestureListenerStorage {
     static constexpr uint32_t GESTURE_TYPE_SHIFT_BITS = 32;
 
-    // Combine gesture type and phase into single 64-bit key using bitwise operation
-    static uint64_t CombineKey(GestureListenerType gestureType, GestureActionPhase phase)
-    {
-        return (static_cast<uint64_t>(gestureType) << GESTURE_TYPE_SHIFT_BITS) | static_cast<uint64_t>(phase);
-    }
+    static uint64_t CombineKey(GestureListenerType gestureType, GestureActionPhase phase);
 
     // Store callback along with its resourceId
     struct CallbackInfo {

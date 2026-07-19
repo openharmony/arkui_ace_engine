@@ -17,6 +17,7 @@ ace_unittest("event_manager_test_ng") {
   module_name = "Component-Snapshot"
   type = "new"
   sources = [
+    "$ace_root/test/mock/frameworks/base/mousestyle/mock_mouse_style.cpp",
     "$ace_root/frameworks/core/event/resample_algo.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_watch_dog.cpp",
     "$ace_root/test/mock/frameworks/core/common/mock_window.cpp",
@@ -120,6 +121,7 @@ ace_unittest("focus_hub_test_ng") {
     "focus_core/focus_creatbox_test.cpp",
     "focus_core/focus_hub_test_ng.cpp",
     "focus_core/focus_hub_test_ng_branch_coverage.cpp",
+    "focus_core/focus_hub_test_ng_branch_coverage_three.cpp",
     "focus_core/focus_hub_test_ng_branch_coverage_two.cpp",
     "focus_core/focus_hub_test_ng_for_property_config.cpp",
     "focus_core/focus_hub_test_ng_for_property_config_two.cpp",
@@ -272,7 +274,7 @@ ace_unittest("focus_event_handler_test_ng") {
 }
 
 ace_unittest("key_event_test_ng") {
-  module_name = "KeyEvent-UnitTest"
+  module_name = "FocusManager"
   type = "new"
   sources = [ "key_event_test_ng.cpp" ]
 }
@@ -286,7 +288,7 @@ group("core_event_unittest") {
     ":drag_drop_event_test_ng",
     ":drag_event_test_ng",
     ":event_hub_test_ng",
-    # ":event_manager_test_ng",
+    ":event_manager_test_ng",
     ":focus_box_test_ng",
     ":focus_event_handler_test_ng",
     ":focus_hub_test_ng",

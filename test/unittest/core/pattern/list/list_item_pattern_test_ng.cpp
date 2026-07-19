@@ -19,6 +19,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 #include "list_test_ng.h"
 
+#include "core/components_ng/event/state_style_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"

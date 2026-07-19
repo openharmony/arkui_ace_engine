@@ -23,6 +23,7 @@
 #include <optional>
 #include <queue>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -42,7 +43,9 @@
 #endif
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/event/statusbar/statusbar_event_proxy.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
 
 namespace OHOS::Ace {
 class BezierVariableVelocityMotion;
@@ -68,7 +71,6 @@ struct ScrollBarProperty;
 class ScrollBarOverlayModifier;
 class ScrollBarProxy;
 class ScrollEdgeEffect;
-class SheetPresentationPattern;
 class TouchEventImpl;
 enum class DragEventType;
 #ifndef WEARABLE_PRODUCT
@@ -103,6 +105,13 @@ enum class ScrollError {
     SCROLL_BOTTOM_ERROR,
     SCROLL_NOT_SCROLLABLE_ERROR,
     SCROLL_ERROR_OTHER
+};
+enum class AccessibilityScrollSource {
+    NONE,
+    USER,
+    API,
+    ACCESSIBILITY,
+    FOCUS,
 };
 struct ScrollOffsetAbility {
     std::function<bool(float)> scrollFunc = nullptr;
@@ -236,6 +245,13 @@ public:
     {
         CHECK_NULL_RETURN(scrollableEvent_, nullptr);
         return scrollableEvent_->GetScrollable();
+    }
+
+    void SetScrollPanEscape(const std::unordered_set<int32_t>& fingerIds)
+    {
+        auto scrollable = GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        scrollable->SetEscapeModeForScroll(fingerIds);
     }
 
     virtual bool OnScrollCallback(float offset, int32_t source);
@@ -583,6 +599,15 @@ public:
         scrollSource_ = scrollSource;
     }
 
+    void SetAccessibilityScrollSource(AccessibilityScrollSource source)
+    {
+        accessibilityScrollSource_ = source;
+    }
+
+    std::string GetAccessibilityScrollSource();
+
+    void MarkUserScrollSource(int32_t source);
+
     int32_t GetScrollSource() const
     {
         return scrollSource_;
@@ -650,6 +675,11 @@ public:
     }
 
     virtual void SetScrollEdgeType(ScrollEdgeType scrollEdgeType) {}
+
+    virtual bool IsScrollReachEdge() const
+    {
+        return true;
+    }
 
     virtual void Fling(double flingVelocity);
 
@@ -772,7 +802,7 @@ public:
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
-    void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
+    ACE_FORCE_EXPORT void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
 
     Axis GetScrollablePanDirection()
     {
@@ -828,8 +858,8 @@ public:
 
     PositionMode GetPositionMode();
 
-    void HandleMoveEventInComp(const PointF& point, bool needExpandHotZone = false);
-    void HandleLeaveHotzoneEvent();
+    ACE_FORCE_EXPORT void HandleMoveEventInComp(const PointF& point, bool needExpandHotZone = false);
+    ACE_FORCE_EXPORT void HandleLeaveHotzoneEvent();
     void SetHotZoneScrollCallback(std::function<void(void)>&& func)
     {
         hotZoneScrollCallback_ = func;
@@ -892,6 +922,11 @@ public:
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_RETURN(scrollable, false);
         return scrollable->GetNestedScrolling();
+    }
+
+    void SetIsScrolling(bool isScrolling)
+    {
+        isScrolling_ = isScrolling;
     }
 
     bool IsScrolling() const
@@ -996,14 +1031,14 @@ public:
     }
     void ProcessScrollOverDrag(double velocity, bool isNestScroller);
 
-    static double GetDefaultFriction();
+    ACE_FORCE_EXPORT static double GetDefaultFriction();
 
     void SetCanOverScroll(bool val);
 
     void ContentChangeReport(
         const RefPtr<FrameNode>& keyNode, uint32_t type = ContentChangeManager::NONE);
 
-    void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
+    ACE_FORCE_EXPORT void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
 
     bool EnableCachePredictNodes() const override
     {
@@ -1011,7 +1046,7 @@ public:
     }
 
 protected:
-    void SuggestOpIncGroup(bool flag);
+    ACE_FORCE_EXPORT void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;
     void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTreeMultiThread();
@@ -1041,6 +1076,7 @@ protected:
 
     virtual void OnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
     void FireOnScrollStop(const OnScrollStopEvent& onScrollStop, const OnScrollStopEvent& onJSFrameNodeScrollStop);
+    void FireAccessibilityScrollEndEvent();
     void FireObserverOnPanActionEnd(GestureEvent& info);
 
     float FireOnWillScroll(float offset) const;
@@ -1109,7 +1145,9 @@ protected:
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
 #endif
 
+#ifndef CROSS_PLATFORM
     void RecordScrollEvent(Recorder::EventType eventType);
+#endif
 
     RefPtr<Animator> GetOrCreateAnimator();
     void StopActiveScrollAnimation();
@@ -1155,6 +1193,8 @@ private:
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
         const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers);
+    void OnTouchTestDoneHandlePreventRecognizer(
+        const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers, bool isHitTestBlock);
     bool IsNeedPreventRecognizer(const RefPtr<NGGestureRecognizer>& recognizer,
         bool isChild, bool isHitTestBlock) const;
     bool IsInComponent(PointF point);
@@ -1254,6 +1294,7 @@ private:
     RefPtr<RefreshCoordination> refreshCoordination_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     int32_t lastScrollSource_ = SCROLL_FROM_NONE;
+    AccessibilityScrollSource accessibilityScrollSource_ = AccessibilityScrollSource::NONE;
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
@@ -1287,7 +1328,7 @@ private:
         bool isFadingTop, bool isFadingBottom, float fadeFrameSize, const RefPtr<ScrollablePaintMethod>& paint);
 
     RefPtr<NavDestinationPatternBase> navBarPattern_;
-    RefPtr<SheetPresentationPattern> sheetPattern_;
+    RefPtr<Pattern> sheetPattern_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;

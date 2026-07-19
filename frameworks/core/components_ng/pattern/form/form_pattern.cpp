@@ -35,6 +35,7 @@
 #include "base/utils/system_properties.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/form_manager.h"
+#include "core/interfaces/native/node/rect_modifier.h"
 #include "core/components/form/resource/form_manager_delegate.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -128,6 +129,16 @@ PriorityType GetFormTaskPriority()
 {
     static PriorityType formTaskPriority = GetFormTaskPriorityType();
     return formTaskPriority;
+}
+
+RefPtr<FrameNode> CreateRectFrameNode()
+{
+    auto modifier = NG::NodeModifier::GetRectModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto* node = modifier->createRectFrameNode(nodeId);
+    CHECK_NULL_RETURN(node, nullptr);
+    return AceType::Claim<FrameNode>(reinterpret_cast<FrameNode*>(node));
 }
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
@@ -706,6 +717,11 @@ void FormPattern::UpdateImageNode()
     layoutConstraint.maxSize = idealSize;
     imageNode->UpdateLayoutConstraint(layoutConstraint);
     pixelLayoutProperty->UpdateImageSourceInfo(pixelSourceInfo);
+    if (!isDynamic_) {
+        auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_VOID(imageRenderProperty);
+        imageRenderProperty->UpdateImageInterpolation(ImageInterpolation::MEDIUM);
+    }
     auto externalContext = DynamicCast<NG::RosenRenderContext>(imageNode->GetRenderContext());
     CHECK_NULL_VOID(externalContext);
     externalContext->SetVisible(true);
@@ -1655,8 +1671,8 @@ RefPtr<FrameNode> FormPattern::CreateColumnNode(FormChildNodeType formChildNodeT
 RefPtr<FrameNode> FormPattern::CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
     const MarginProperty& margin, uint32_t fillColor, double opacity)
 {
-    auto rectNode = FrameNode::CreateFrameNode(V2::RECT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<RectPattern>());
+    auto rectNode = CreateRectFrameNode();
+    CHECK_NULL_RETURN(rectNode, nullptr);
     MeasureProperty layoutConstraint;
     layoutConstraint.selfIdealSize = idealSize;
     layoutConstraint.maxSize = idealSize;

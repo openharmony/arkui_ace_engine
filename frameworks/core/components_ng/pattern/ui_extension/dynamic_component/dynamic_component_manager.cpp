@@ -232,6 +232,22 @@ sptr<OHOS::Rosen::OccupiedAreaChangeInfo> DynamicComponentSafeManager::GetOccupi
     return info;
 }
 
+void DynamicComponentSafeManager::SetDynamicViewportConfig(int32_t hostId, const OHOS::Ace::ViewportConfig& config)
+{
+    std::unique_lock<std::shared_mutex> lock(avoidAreasMutex_);
+    dcViewportConfigs_[hostId] = config;
+}
+
+OHOS::Ace::ViewportConfig DynamicComponentSafeManager::GetDynamicViewportConfig(int32_t hostId) const
+{
+    std::shared_lock<std::shared_mutex> lock(avoidAreasMutex_);
+    auto it = dcViewportConfigs_.find(hostId);
+    if (it != dcViewportConfigs_.end()) {
+        return it->second;
+    }
+    return viewportConfig_;
+}
+
 void DynamicComponentSafeManager::UpdateAllDCAvoidArea(int32_t instanceId, const OHOS::Rosen::AvoidArea avoidArea,
     OHOS::Rosen::AvoidAreaType type)
 {
@@ -243,10 +259,24 @@ void DynamicComponentSafeManager::UpdateAllDCAvoidArea(int32_t instanceId, const
         CHECK_NULL_CONTINUE(pattern);
         auto dynamicPattern = AceType::DynamicCast<OHOS::Ace::NG::DynamicPattern>(pattern);
         CHECK_NULL_CONTINUE(dynamicPattern);
-        CHECK_NULL_CONTINUE(dynamicPattern->GetUIContent());
-        dynamicPattern->GetUIContent()->UpdateViewportConfig(viewportConfig_,
-            static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason_),
-            rsTransaction_, GetAvoidAreaIntersection(GetAvoidArea(), viewportConfig_), GetOccupiedAreaChangeInfo());
+        auto dcHost = dynamicPattern->GetHost();
+        CHECK_NULL_CONTINUE(dcHost);
+        int32_t dcHostId = dcHost->GetId();
+        auto dcUiContent = dynamicPattern->GetUIContent();
+        CHECK_NULL_CONTINUE(dcUiContent);
+        int32_t dcInstanceId = dcUiContent->GetInstanceId();
+        auto dcPipelineContext = NG::PipelineContext::GetContextByContainerId(dcInstanceId);
+        CHECK_NULL_CONTINUE(dcPipelineContext);
+        auto task = [dcUiContent, updateConfig = GetDynamicViewportConfig(dcHostId),
+            reason = static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason_),
+            rsTransaction = rsTransaction_, avoidAreas, newInfo = GetOccupiedAreaChangeInfo()]() {
+            ContainerScope scope(dcUiContent->GetInstanceId());
+            dcUiContent->UpdateViewportConfig(updateConfig, reason, rsTransaction, avoidAreas, newInfo);
+        };
+        auto taskExecutor = dcPipelineContext->GetTaskExecutor();
+        CHECK_NULL_CONTINUE(taskExecutor);
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI,
+            "ArkUiDynamicComponentUpdateAllDCAvoidArea", PriorityType::VIP);
     }
 }
 
@@ -287,7 +317,8 @@ bool DynamicComponentSafeManager::UpdateDynamicKeyBoardAvoid(const RefPtr<Pipeli
         sptr<Rosen::OccupiedAreaChangeInfo> newInfo = new Rosen::OccupiedAreaChangeInfo(
             info->type_, info->rect_, info->safeHeight_, info->textFieldPositionY_, info->textFieldHeight_);
         newInfo->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
-        auto task = [dcUiContent, updateConfig = dcDynamicComponentSafeManager->viewportConfig_,
+        auto task = [dcUiContent, updateConfig =
+            dcDynamicComponentSafeManager->GetDynamicViewportConfig(host->GetId()),
             reason = static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason),
             rsTransaction, avoidAreas, newInfo, dcDynamicComponentSafeManager]() {
             ContainerScope scope(dcUiContent->GetInstanceId());

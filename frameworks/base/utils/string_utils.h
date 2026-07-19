@@ -123,7 +123,7 @@ bool UnstringifyCalcDimension(
 
 ACE_FORCE_EXPORT std::string ReplaceChar(std::string str, char old_char, char new_char);
 
-double StringToDegree(const std::string& value);
+ACE_FORCE_EXPORT double StringToDegree(const std::string& value);
 // StringToDegree with check. If the string is valid, change result and return true, otherwise return false.
 bool StringToDegree(const std::string& value, double& result);
 
@@ -158,7 +158,7 @@ inline void DeleteAllMark(std::string& str, const char mark)
 }
 
 ACE_FORCE_EXPORT std::string TrimStr(const std::string& str, char cTrim = ' ');
-void TrimStrLeadingAndTrailing(std::string& str, char cTrim = ' ');
+ACE_FORCE_EXPORT void TrimStrLeadingAndTrailing(std::string& str, char cTrim = ' ');
 
 ACE_FORCE_EXPORT void SplitStr(
     const std::string& str, const std::string& sep, std::vector<std::string>& out, bool needTrim = true);

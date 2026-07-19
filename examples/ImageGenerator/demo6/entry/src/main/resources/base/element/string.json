@@ -1,0 +1,16 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "image share demo"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "image share entry"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "ImageShareDemo"
+    }
+  ]
+}

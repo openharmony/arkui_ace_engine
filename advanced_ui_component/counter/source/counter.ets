@@ -462,7 +462,7 @@ export struct CounterComponent {
   private updateInlineStyleOptions() {
     if (this.initFlag) {
       this.initFlag = false;
-      const truncatedValue = Math.trunc(this.inlineStyleOptions.value);
+      const truncatedValue = Math.trunc(this.inlineStyleOptions.value ?? 0);
       this.value = Number.isFinite(truncatedValue) ? truncatedValue : 0;
       this.onChange?.(this.value);
       this.inputValue = this.value.toString();
@@ -1282,11 +1282,19 @@ export struct CounterComponent {
   }
 
   private getIncreaseStr(): string {
-    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    try {
+      return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    } catch (error) {
+      return '';
+    }
   }
 
   private getReduceStr(): string {
-    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    try {
+      return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    } catch (error) {
+      return '';
+    } 
   }
 
   build() {

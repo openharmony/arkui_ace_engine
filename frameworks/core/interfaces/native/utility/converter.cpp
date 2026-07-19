@@ -32,13 +32,14 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/depth_option.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components/tab_bar/tab_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_theme.h"
 #include "core/components_ng/pattern/container_picker/container_picker_utils.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/pattern/date_picker/picker_date.h"
 #include "core/components_ng/pattern/date_picker/picker_time.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h" // PreviewBadge
@@ -70,15 +71,11 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr int32_t NUM_0 = 0;
-    constexpr int32_t NUM_1 = 1;
-    constexpr int32_t NUM_2 = 2;
     constexpr int32_t STD_TM_START_YEAR = 1900;
     constexpr uint32_t DEFAULT_DURATION = 1000; // ms
     constexpr double NUM_DOUBLE_0 = 0.;
     constexpr double NUM_DOUBLE_1 = 1.;
     constexpr double NUM_DOUBLE_100 = 100.;
-    constexpr int32_t NUM_PERCENT_100 = 100;
     constexpr int32_t DEFAULT_MULTIPLE = 100;
     constexpr uint16_t UTF16_BOM = 0xFEFF;
     constexpr int32_t DEFAULT_NAVDESTINATION_TRANSITION_DURATION = 1000;
@@ -382,16 +379,9 @@ ResourceConverter::ResourceConverter(const Ark_Resource& resource)
     bundleName_ = Convert<std::string>(resource.bundleName);
     moduleName_ = Convert<std::string>(resource.moduleName);
     params_ = OptConvert<std::vector<ParamType>>(resource.params).value_or(std::vector<ParamType>{});
-    themeConstants_ = GetThemeConstants(nullptr, bundleName_.c_str(), moduleName_.c_str());
-    if (!themeConstants_) {
-        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
-        auto themeManager = context->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        themeConstants_ = themeManager->GetThemeConstants(bundleName_.c_str(), moduleName_.c_str());
-    }
     auto resObj = AceType::MakeRefPtr<ResourceObject>(bundleName_, moduleName_, Container::CurrentIdSafely());
     auto resAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-    resWrapper_ = AceType::MakeRefPtr<ResourceWrapper>(themeConstants_, resAdapter);
+    resAdapter_ = resAdapter;
 }
 
 std::optional<std::string> ResourceConverter::GetResourceName()
@@ -410,10 +400,10 @@ std::optional<std::string> ResourceConverter::GetStringResource()
 {
     std::optional<std::string> result;
     if (id_ != -1) {
-        result = resWrapper_->GetString(id_);
+        result = resAdapter_->GetString(id_);
         ReplaceHolder(result, params_, 0);
     } else if (auto name = GetResourceName(); name) {
-        result = resWrapper_->GetStringByName(*name);
+        result = resAdapter_->GetStringByName(*name);
         ReplaceHolder(result, params_, 1);
     } else {
         LOGE("Unknown resource value OHOS::Ace::NG::Converter::ResourceConverter");
@@ -425,7 +415,7 @@ std::optional<std::string> ResourceConverter::GetRawfilePath()
 {
     std::optional<std::string> result;
     if (auto name = GetResourceName(); name) {
-        result = resWrapper_->GetRawfile(*name);
+        result = resAdapter_->GetRawfile(*name);
     }
     return result;
 }
@@ -434,9 +424,9 @@ std::optional<std::string> ResourceConverter::GetMediaPath()
 {
     std::optional<std::string> result;
     if (id_ != -1) {
-        result = resWrapper_->GetMediaPath(id_);
+        result = resAdapter_->GetMediaPath(id_);
     } else if (auto name = GetResourceName(); name) {
-        result = resWrapper_->GetMediaPathByName(*name);
+        result = resAdapter_->GetMediaPathByName(*name);
     }
     return result;
 }
@@ -456,12 +446,12 @@ std::optional<std::string> ResourceConverter::GetPluralResource()
     std::optional<std::string> result;
     if (id_ != -1) {
         if (auto count = GetIntParam(params_, 0); count) {
-            result = resWrapper_->GetPluralString(id_, *count);
+            result = resAdapter_->GetPluralString(id_, *count);
             ReplaceHolder(result, params_, 1);
         }
     } else if (auto name = GetResourceName(); name) {
         if (auto count = GetIntParam(params_, 1); count) {
-            result = resWrapper_->GetPluralStringByName(*name, *count);
+            result = resAdapter_->GetPluralStringByName(*name, *count);
             ReplaceHolder(result, params_, 2);  // 2 means data get from params_[2]
         }
     } else {
@@ -474,9 +464,9 @@ std::optional<int32_t> ResourceConverter::GetIntegerResource()
 {
     std::optional<int32_t> result;
     if (id_ != -1) {
-        result = resWrapper_->GetInt(id_);
+        result = resAdapter_->GetInt(id_);
     } else if (auto name = GetResourceName(); name) {
-        result = resWrapper_->GetIntByName(*name);
+        result = resAdapter_->GetIntByName(*name);
     } else {
         LOGE("Unknown INTEGER value OHOS::Ace::NG::Converter::ResourceConverter");
     }
@@ -487,9 +477,9 @@ std::optional<double> ResourceConverter::GetFloatResource()
 {
     std::optional<double> result;
     if (id_ != -1) {
-        result = resWrapper_->GetDouble(id_);
+        result = resAdapter_->GetDouble(id_);
     } else if (auto name = GetResourceName(); name) {
-        result = resWrapper_->GetDoubleByName(*name);
+        result = resAdapter_->GetDoubleByName(*name);
     } else {
         LOGE("Unknown FLOAT value OHOS::Ace::NG::Converter::ResourceConverter");
     }
@@ -499,7 +489,7 @@ std::optional<double> ResourceConverter::GetFloatResource()
 std::optional<std::string> ResourceConverter::ToString()
 {
     std::optional<std::string> result;
-    CHECK_NULL_RETURN(resWrapper_, result);
+    CHECK_NULL_RETURN(resAdapter_, result);
 
     if (type_ == ResourceType::STRING) {
         result = GetStringResource();
@@ -523,12 +513,12 @@ std::optional<std::string> ResourceConverter::ToString()
 
 std::optional<StringArray> ResourceConverter::ToStringArray()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::STRARRAY) {
         if (id_ != -1) {
-            return resWrapper_->GetStringArray(id_);
+            return resAdapter_->GetStringArray(id_);
         } else if (auto name = GetResourceName(); name) {
-            return resWrapper_->GetStringArrayByName(*name);
+            return resAdapter_->GetStringArrayByName(*name);
         } else {
             LOGE("Unknown STRARRAY value OHOS::Ace::NG::Converter::ResourceConverter");
         }
@@ -538,13 +528,13 @@ std::optional<StringArray> ResourceConverter::ToStringArray()
 
 std::optional<StringArray> ResourceConverter::ToFontFamilies()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::STRING) {
         std::optional<std::string> str;
         if (id_ != -1) {
-            str = resWrapper_->GetString(id_);
+            str = resAdapter_->GetString(id_);
         } else if (auto name = GetResourceName(); name) {
-            str = resWrapper_->GetStringByName(*name);
+            str = resAdapter_->GetStringByName(*name);
         } else {
             LOGE("ResourceConverter::ToFontFamilies Unknown resource value");
         }
@@ -571,16 +561,16 @@ std::optional<CalcDimension> ResourceConverter::ToCalcDimension()
 
 std::optional<CalcDimension> ResourceConverter::GetDimensionInner()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::INTEGER) {
         auto resource = GetIntegerResource();
         if (!resource) return std::nullopt;
         return Dimension(*resource, DimensionUnit::VP);
     } else if (type_ == ResourceType::FLOAT) {
         if (id_ != -1) {
-            return resWrapper_->GetDimension(id_);
+            return resAdapter_->GetDimension(id_);
         } else if (auto name = GetResourceName(); name) {
-            return resWrapper_->GetDimensionByName(*name);
+            return resAdapter_->GetDimensionByName(*name);
         } else {
             LOGE("ResourceConverter::ToCalcDimension Unknown resource value");
         }
@@ -596,7 +586,7 @@ std::optional<CalcDimension> ResourceConverter::GetDimensionInner()
 
 std::optional<CalcLength> ResourceConverter::ToCalcLength()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     auto dimOpt = ToCalcDimension();
     if (!dimOpt.has_value()) {
         return std::nullopt;
@@ -610,26 +600,26 @@ std::optional<CalcLength> ResourceConverter::ToCalcLength()
 std::optional<float> ResourceConverter::ToFloat()
 {
     std::optional<float> optFloat = std::nullopt;
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::FLOAT) {
         if (id_ != -1) {
-            optFloat = static_cast<float>(resWrapper_->GetDouble(id_));
+            optFloat = static_cast<float>(resAdapter_->GetDouble(id_));
         } else if (auto name = GetResourceName(); name) {
-            optFloat = static_cast<float>(resWrapper_->GetDoubleByName(*name));
+            optFloat = static_cast<float>(resAdapter_->GetDoubleByName(*name));
         }
     } else if (type_ == ResourceType::INTEGER) {
         if (id_ != -1) {
-            optFloat = static_cast<float>(resWrapper_->GetInt(id_));
+            optFloat = static_cast<float>(resAdapter_->GetInt(id_));
         } else if (auto name = GetResourceName(); name) {
-            optFloat = static_cast<float>(resWrapper_->GetIntByName(*name));
+            optFloat = static_cast<float>(resAdapter_->GetIntByName(*name));
         }
     } else if (type_ == ResourceType::STRING) {
         std::optional<std::string> result;
         if (id_ != -1) {
-            result = resWrapper_->GetString(id_);
+            result = resAdapter_->GetString(id_);
             ReplaceHolder(result, params_, 0);
         } else if (auto name = GetResourceName(); name) {
-            result = resWrapper_->GetStringByName(*name);
+            result = resAdapter_->GetStringByName(*name);
             ReplaceHolder(result, params_, 1);
         }
         if (result.has_value()) {
@@ -644,7 +634,7 @@ std::optional<float> ResourceConverter::ToFloat()
 
 std::optional<int32_t> ResourceConverter::ToInt()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::INTEGER) {
         return GetIntegerResource();
     }
@@ -653,7 +643,7 @@ std::optional<int32_t> ResourceConverter::ToInt()
 
 std::optional<uint32_t> ResourceConverter::ToSymbol()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::STRING) {
         auto result = GetStringResource();
         if (result.has_value() && !result.value().empty()) {
@@ -662,9 +652,9 @@ std::optional<uint32_t> ResourceConverter::ToSymbol()
         }
     }
     if (id_ != -1 && type_ == ResourceType::SYMBOL) {
-        return resWrapper_->GetSymbolById(id_);
+        return resAdapter_->GetSymbolById(id_);
     } else if (auto name = GetResourceName(); name) {
-        return resWrapper_->GetSymbolByName(name->c_str());
+        return resAdapter_->GetSymbolByName(name->c_str());
     }
     return std::nullopt;
 }
@@ -672,7 +662,7 @@ std::optional<uint32_t> ResourceConverter::ToSymbol()
 std::optional<Color> ResourceConverter::ToColor()
 {
     std::optional<Color> result;
-    CHECK_NULL_RETURN(resWrapper_, result);
+    CHECK_NULL_RETURN(resAdapter_, result);
     switch (type_) {
         case ResourceType::STRING: {
             Color color;
@@ -690,9 +680,9 @@ std::optional<Color> ResourceConverter::ToColor()
 
         case ResourceType::COLOR:
             if (id_ != -1) {
-                result = resWrapper_->GetColor(id_);
+                result = resAdapter_->GetColor(id_);
             } else if (auto name = GetResourceName(); name) {
-                result = resWrapper_->GetColorByName(*name);
+                result = resAdapter_->GetColorByName(*name);
             }
             break;
 
@@ -705,9 +695,9 @@ std::optional<Color> ResourceConverter::ToColor()
 
 std::optional<bool> ResourceConverter::ToBoolean()
 {
-    CHECK_NULL_RETURN(resWrapper_, std::nullopt);
+    CHECK_NULL_RETURN(resAdapter_, std::nullopt);
     if (type_ == ResourceType::BOOLEAN) {
-        return resWrapper_->GetBoolean(id_);
+        return resAdapter_->GetBoolean(id_);
     }
     return std::nullopt;
 }
@@ -740,7 +730,7 @@ void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src)
 }
 
 template<>
-void AssignCast(std::optional<CalcDimension>& dst, const Ark_Resource& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<CalcDimension>& dst, const Ark_Resource& src)
 {
     ResourceConverter converter(src);
     dst = converter.ToCalcDimension();
@@ -1052,7 +1042,7 @@ Dimension Convert(const Ark_String& src)
 }
 
 template<>
-CalcDimension Convert(const Ark_String& src)
+ACE_FORCE_EXPORT CalcDimension Convert(const Ark_String& src)
 {
     auto str = Convert<std::string>(src);
     return StringUtils::StringToCalcDimension(str, false, ConverterState::defDimensionUnit);
@@ -1069,13 +1059,13 @@ CalcLength Convert(const Ark_String& src)
 }
 
 template<>
-CalcDimension Convert(const Ark_Number& src)
+ACE_FORCE_EXPORT CalcDimension Convert(const Ark_Number& src)
 {
     return Convert<Dimension>(src);
 }
 
 template<>
-CalcDimension Convert(const Ark_Float64& src)
+ACE_FORCE_EXPORT CalcDimension Convert(const Ark_Float64& src)
 {
     return Convert<Dimension>(src);
 }
@@ -1168,7 +1158,7 @@ float Convert(const Ark_Float32& src)
 }
 
 template<>
-int Convert(const Ark_Float64& src)
+ACE_FORCE_EXPORT int Convert(const Ark_Float64& src)
 {
     return static_cast<int>(src);
 }
@@ -1225,7 +1215,7 @@ RadioStyle Convert(const Ark_RadioStyle& src)
 }
 
 template<>
-BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
+ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
 {
     BorderRadiusProperty property;
     CalcDimension topStart;
@@ -1293,7 +1283,7 @@ BorderRadiusPropertyOpt Convert(const Ark_LocalizedBorderRadiuses& src)
 }
 
 template<>
-BorderStyleProperty Convert(const Ark_BorderStyle& src)
+ACE_FORCE_EXPORT BorderStyleProperty Convert(const Ark_BorderStyle& src)
 {
     BorderStyleProperty property;
     auto style = OptConvert<BorderStyle>(src);
@@ -1465,7 +1455,6 @@ ACE_FORCE_EXPORT void AssignCast (std::optional<Gradient>& dst, const Ark_Linear
 {
     Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
-    auto peer = reinterpret_cast<LinearGradientPeer*>(src);
     auto gradientColors = src->colorStops;
 
     if (gradientColors.size() == 1) {
@@ -1920,7 +1909,6 @@ NG::NavigationBackgroundOptions Convert(const Ark_MoreButtonOptions& src)
     }
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
         styleOptions.blurStyle =
             Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle.value).value_or(BlurStyle::NO_MATERIAL);
     }
@@ -1953,7 +1941,6 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationToolbarOptions& src)
     }
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
         styleOptions.blurStyle =
             Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle.value).value_or(BlurStyle::NO_MATERIAL);
     }
@@ -2172,7 +2159,7 @@ RefPtr<BasicShape> Convert(const Ark_RectShape& src)
 }
 
 template<>
-RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
+ACE_FORCE_EXPORT RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
 {
     auto effectPeer = src;
     if (effectPeer) {
@@ -2183,19 +2170,19 @@ RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
 }
 
 template<>
-RefPtr<Curve> Convert(const Ark_String& src)
+ACE_FORCE_EXPORT RefPtr<Curve> Convert(const Ark_String& src)
 {
     return Framework::CreateCurve(Converter::Convert<std::string>(src), false);
 }
 
 template<>
-RefPtr<Curve> Convert(const Ark_curves_ICurve& src)
+ACE_FORCE_EXPORT RefPtr<Curve> Convert(const Ark_curves_ICurve& src)
 {
     return src ? src->handler : nullptr;
 }
 
 template<>
-void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_String& src)
 {
     auto curve = Framework::CreateCurve(Converter::Convert<std::string>(src), false);
     if (curve) {
@@ -2233,7 +2220,7 @@ RenderingContextOptions Convert(const Ark_RenderingContextOptions& src)
 }
 
 template<>
-void AssignCast(std::optional<float>& dst, const Ark_String& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<float>& dst, const Ark_String& src)
 {
     auto value = Convert<std::string>(src);
     double result;
@@ -2466,7 +2453,7 @@ template ACE_FORCE_EXPORT std::optional<Dimension>
 OptConvertFromArkNumStrRes<Opt_Union_F64_String_Resource, Ark_Float64>(
     const Opt_Union_F64_String_Resource&, DimensionUnit);
 
-std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
+ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkLength(const Ark_Length& src, DimensionUnit defaultUnit)
 {
     std::optional<Dimension> dimension = std::nullopt;
     Converter::VisitUnion(src,
@@ -2789,6 +2776,129 @@ static RefPtr<T> GetTheme()
 }
 
 template<>
+ACE_FORCE_EXPORT IconStyle Convert(const Ark_TabBarIconStyle& src)
+{
+    IconStyle iconStyle;
+    auto selectedColor = OptConvert<Color>(src.selectedColor);
+    if (selectedColor) {
+        iconStyle.selectedColor = selectedColor.value();
+    }
+    auto unselectedColor = OptConvert<Color>(src.unselectedColor);
+    if (unselectedColor) {
+        iconStyle.unselectedColor = unselectedColor.value();
+    }
+    return iconStyle;
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<SelectedMode>& dst, const Ark_SelectedMode& src)
+{
+    switch (src) {
+        case ARK_SELECTED_MODE_INDICATOR:
+            dst = SelectedMode::INDICATOR;
+            break;
+        case ARK_SELECTED_MODE_BOARD:
+            dst = SelectedMode::BOARD;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_SelectedMode: %{public}d", src);
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<BoardStyle>& dst, const Ark_BoardStyle& src)
+{
+    std::optional<Dimension> borderRadius = Converter::OptConvert<Dimension>(src.borderRadius);
+    Validator::ValidateNonNegative(borderRadius);
+    Validator::ValidateNonPercent(borderRadius);
+    if (borderRadius) {
+        dst = BoardStyle();
+        dst->borderRadius = borderRadius.value();
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<LayoutMode>& dst, const Ark_LayoutMode& src)
+{
+    switch (src) {
+        case ARK_LAYOUT_MODE_AUTO:
+            dst = LayoutMode::AUTO;
+            break;
+        case ARK_LAYOUT_MODE_VERTICAL:
+            dst = LayoutMode::VERTICAL;
+            break;
+        case ARK_LAYOUT_MODE_HORIZONTAL:
+            dst = LayoutMode::HORIZONTAL;
+            break;
+        default:
+            LOGE("Unexpected enum value in Ark_LayoutMode: %{public}d", src);
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<IndicatorStyle>& dst, const Ark_SubTabBarIndicatorStyle& src)
+{
+    dst = IndicatorStyle();
+    auto tabTheme = GetTheme<TabTheme>();
+    if (tabTheme) {
+        dst->color = tabTheme->GetActiveIndicatorColor();
+        dst->height = tabTheme->GetActiveIndicatorWidth();
+        dst->marginTop = tabTheme->GetSubTabIndicatorGap();
+    }
+    std::optional<Color> color = Converter::OptConvert<Color>(src.color);
+    if (color) {
+        dst->color = color.value();
+    }
+    std::optional<Dimension> height = Converter::OptConvert<Dimension>(src.height);
+    Validator::ValidateNonNegative(height);
+    Validator::ValidateNonPercent(height);
+    if (height) {
+        dst->height = height.value();
+    }
+    std::optional<Dimension> width = Converter::OptConvert<Dimension>(src.width);
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonPercent(width);
+    if (width) {
+        dst->width = width.value();
+    }
+    std::optional<Dimension> borderRadius = Converter::OptConvert<Dimension>(src.borderRadius);
+    Validator::ValidateNonNegative(borderRadius);
+    Validator::ValidateNonPercent(borderRadius);
+    if (borderRadius) {
+        dst->borderRadius = borderRadius.value();
+    }
+    std::optional<Dimension> marginTop = Converter::OptConvert<Dimension>(src.marginTop);
+    Validator::ValidateNonNegative(marginTop);
+    Validator::ValidateNonPercent(marginTop);
+    if (marginTop) {
+        dst->marginTop = marginTop.value();
+    }
+}
+
+template<>
+ACE_FORCE_EXPORT void AssignCast(std::optional<LabelStyle>& dst, const Ark_TabBarLabelStyle& src)
+{
+    dst = LabelStyle();
+    dst->textOverflow = Converter::OptConvert<TextOverflow>(src.overflow);
+    auto maxLines = Converter::OptConvert<int32_t>(src.maxLines);
+    if (maxLines) {
+        maxLines = std::max(maxLines.value(), 1);
+    }
+    dst->maxLines = maxLines;
+    dst->heightAdaptivePolicy = Converter::OptConvert<TextHeightAdaptivePolicy>(src.heightAdaptivePolicy);
+    auto minFontSize = Converter::OptConvertFromF64ResourceStr(src.minFontSize, DimensionUnit::FP);
+    Validator::ValidateNonNegative(minFontSize);
+    Validator::ValidateNonPercent(minFontSize);
+    dst->minFontSize = minFontSize;
+    auto maxFontSize = Converter::OptConvertFromF64ResourceStr(src.maxFontSize, DimensionUnit::FP);
+    Validator::ValidateNonNegative(maxFontSize);
+    Validator::ValidateNonPercent(maxFontSize);
+    dst->maxFontSize = maxFontSize;
+    dst->unselectedColor = Converter::OptConvert<Color>(src.unselectedColor);
+    dst->selectedColor = Converter::OptConvert<Color>(src.selectedColor);
+}
+
+template<>
 PaddingProperty Convert(const Ark_LengthMetrics& src)
 {
     return PaddingPropertyFromCalcLength(OptConvert<CalcLength>(src));
@@ -2885,7 +2995,7 @@ AnimateParam Convert(const Ark_AnimateParam& src)
 }
 
 template<>
-AnimationOption Convert(const Ark_AnimateParam& src)
+ACE_FORCE_EXPORT AnimationOption Convert(const Ark_AnimateParam& src)
 {
     AnimationOption option;
     // If the attribute does not exist, the default value is used.
@@ -2963,7 +3073,7 @@ BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
 }
 
 template<>
-BorderColorProperty Convert(const Ark_EdgeColors& src)
+ACE_FORCE_EXPORT BorderColorProperty Convert(const Ark_EdgeColors& src)
 {
     BorderColorProperty dst;
     dst.leftColor = OptConvert<Color>(src.left);
@@ -2975,7 +3085,7 @@ BorderColorProperty Convert(const Ark_EdgeColors& src)
 }
 
 template<>
-BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
+ACE_FORCE_EXPORT BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 {
     BorderColorProperty dst;
     dst.leftColor = OptConvert<Color>(src.start);
@@ -2992,7 +3102,7 @@ BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
 
 
 template<>
-BorderColorProperty Convert(const Ark_ResourceColor& src)
+ACE_FORCE_EXPORT BorderColorProperty Convert(const Ark_ResourceColor& src)
 {
     BorderColorProperty dst;
     if (auto borderColor = Converter::OptConvert<Color>(src); borderColor.has_value()) {
@@ -3047,7 +3157,7 @@ BorderRadiusProperty Convert(const Ark_LengthMetrics& src)
 }
 
 template<>
-BorderRadiusProperty Convert(const Ark_Number& src)
+ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_Number& src)
 {
     return BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
 }
@@ -3059,13 +3169,13 @@ BorderRadiusProperty Convert(const Ark_Float64& src)
 }
 
 template<>
-BorderRadiusProperty Convert(const Ark_String& src)
+ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_String& src)
 {
     return BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderRadiusProperty Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_Resource& src)
 {
     return BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
 }
@@ -3111,7 +3221,7 @@ BorderRadiusPropertyOpt Convert(const Ark_Resource& src)
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
 {
     BorderWidthProperty dst;
     dst.leftDimen = OptConvert<Dimension>(src.left);
@@ -3127,7 +3237,7 @@ BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src)
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_EdgeWidths& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_EdgeWidths& src)
 {
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
@@ -3149,37 +3259,37 @@ static BorderWidthProperty BorderWidthPropertyFromDimension(std::optional<Dimens
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_LengthMetrics& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LengthMetrics& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_Number& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Number& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_Float64& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Float64& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_String& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_String& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Resource& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
 {
     BorderWidthProperty widthProperty;
     widthProperty.topDimen = Converter::OptConvert<Dimension>(src.top);
@@ -3199,7 +3309,7 @@ BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
 }
 
 template<>
-BorderStyleProperty Convert(const Ark_EdgeStyles& src)
+ACE_FORCE_EXPORT BorderStyleProperty Convert(const Ark_EdgeStyles& src)
 {
     BorderStyleProperty property;
     property.styleLeft = OptConvert<BorderStyle>(src.left);
@@ -3345,7 +3455,7 @@ ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src)
 }
 
 template<>
-void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src)
+ACE_FORCE_EXPORT void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& src)
 {
     if (auto colorOpt = OptConvert<Color>(src); colorOpt) {
         if (!dst) {
@@ -3356,7 +3466,7 @@ void AssignTo(std::optional<BorderColorProperty> &dst, const Ark_ResourceColor& 
 }
 
 template<>
-void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from)
+ACE_FORCE_EXPORT void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from)
 {
     PreviewBadge ret;
     ret.mode = from ? PreviewBadgeMode::AUTO : PreviewBadgeMode::NO_BADGE;
@@ -3364,7 +3474,7 @@ void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Boolean& from)
 }
 
 template<>
-void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Int32& from)
+ACE_FORCE_EXPORT void AssignTo(std::optional<PreviewBadge>& dst, const Ark_Int32& from)
 {
     PreviewBadge ret;
     if (from >= 0) {
@@ -3408,13 +3518,13 @@ void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor
 }
 
 template<>
-PickerValueType Convert(const Ark_String& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Ark_String& src)
 {
     return Converter::Convert<std::string>(src);
 }
 
 template<>
-PickerValueType Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Ark_Resource& src)
 {
     auto value = Converter::OptConvert<std::string>(src);
     if (value) {
@@ -3424,20 +3534,20 @@ PickerValueType Convert(const Ark_Resource& src)
 }
 
 template<>
-PickerValueType Convert(const Array_ResourceStr& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Array_ResourceStr& src)
 {
     auto value = Converter::Convert<std::vector<std::optional<std::string>>>(src);
     return Squash(value);
 }
 
 template<>
-PickerValueType Convert(const Array_String& src)
+ACE_FORCE_EXPORT PickerValueType Convert(const Array_String& src)
 {
     return Converter::Convert<std::vector<std::string>>(src);
 }
 
 template<>
-PickerSelectedType Convert(const Ark_Int32& src)
+ACE_FORCE_EXPORT PickerSelectedType Convert(const Ark_Int32& src)
 {
     auto selected = Converter::Convert<int32_t>(src);
     if (selected < 0) {
@@ -3447,7 +3557,7 @@ PickerSelectedType Convert(const Ark_Int32& src)
 }
 
 template<>
-PickerSelectedType Convert(const Array_I32& src)
+ACE_FORCE_EXPORT PickerSelectedType Convert(const Array_I32& src)
 {
     std::vector<uint32_t> dst;
     std::vector<int32_t> tmp = Converter::Convert<std::vector<int32_t>>(src);
@@ -3596,7 +3706,7 @@ void AssignCast(
 }
 
 template<>
-PickerRangeType Convert(const Array_String& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_String& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     std::vector<std::string> tmp;
@@ -3612,7 +3722,7 @@ PickerRangeType Convert(const Array_String& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_Array_String& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_Array_String& src)
 {
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
     std::vector<std::vector<std::string>> tmp;
@@ -3629,7 +3739,7 @@ PickerRangeType Convert(const Array_Array_String& src)
 }
 
 template<>
-PickerRangeType Convert(const Ark_Resource& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Ark_Resource& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     auto tmp = Converter::OptConvert<std::vector<std::string>>(src);
@@ -3646,7 +3756,7 @@ PickerRangeType Convert(const Ark_Resource& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_TextPickerRangeContent& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_TextPickerRangeContent& src)
 {
     std::pair<bool, std::vector<NG::RangeContent>> dst;
     dst.second = Converter::Convert<std::vector<NG::RangeContent>>(src);
@@ -3655,7 +3765,7 @@ PickerRangeType Convert(const Array_TextPickerRangeContent& src)
 }
 
 template<>
-PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
+ACE_FORCE_EXPORT PickerRangeType Convert(const Array_TextCascadePickerRangeContent& src)
 {
     std::pair<bool, std::vector<NG::TextCascadePickerOptions>> dst;
     dst.second = Converter::Convert<std::vector<NG::TextCascadePickerOptions>>(src);
@@ -3830,13 +3940,13 @@ TextRange Convert(const Ark_TextRange& src)
     return dst;
 }
 template<>
-bool Convert(const Ark_LineSpacingOptions& src)
+ACE_FORCE_EXPORT bool Convert(const Ark_LineSpacingOptions& src)
 {
     return Converter::OptConvert<bool>(src.onlyBetweenLines).value_or(false);
 }
 
 template<>
-OverflowMode Convert(const Ark_MaxLinesOptions& src)
+ACE_FORCE_EXPORT OverflowMode Convert(const Ark_MaxLinesOptions& src)
 {
     auto overflowMode = Converter::OptConvert<OverflowMode>(src.overflowMode);
     return overflowMode.value();
@@ -3981,6 +4091,7 @@ void AssignCast(std::optional<NavigationTitlebarOptions>& dst, const Ark_Navigat
     dst->brOptions = Converter::Convert<NavigationBarOptions>(value);
     dst->textOptions = Converter::Convert<NavigationTextOptions>(value);
     dst->enableHoverMode = Converter::OptConvert<bool>(value.enableHoverMode).value_or(false);
+    dst->material = Converter::OptConvert<UiMaterial*>(value.systemMaterial).value_or(nullptr);
 }
 
 template<>
@@ -4019,7 +4130,6 @@ NG::NavigationBackgroundOptions Convert(const Ark_NavigationTitleOptions& src)
     }
 
     if (src.backgroundBlurStyle.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto blurStyle = static_cast<int32_t>(src.backgroundBlurStyle.value);
         styleOptions.blurStyle =
             Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle.value).value_or(BlurStyle::NO_MATERIAL);
     }
@@ -4310,7 +4420,7 @@ StrokeJoinStyle Convert(const Ark_StrokeJoinStyle& src)
     return StrokeJoinStyle::MITER_JOIN;
 }
 template<>
-void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
 {
     auto peer = src;
     if (peer && peer->levelOrder) {
@@ -4318,7 +4428,7 @@ void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src)
     }
 }
 template<>
-void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src)
 {
     auto peer = src;
     if (peer && peer->levelOrder) {
@@ -4399,7 +4509,17 @@ void AssignCast(std::optional<OHOS::Rosen::Blender*>& dst, const Ark_uiEffect_Br
 }
 
 template<>
-void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<UiMaterial*>& dst, uiMaterial_MaterialPeer* const& src)
+{
+    if (!src) {
+        dst = std::nullopt;
+        return;
+    }
+    dst = reinterpret_cast<UiMaterial*>(src);
+}
+
+template<>
+void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_ImmersiveMaterial& src)
 {
     if (!src) {
         dst = std::nullopt;
@@ -4482,6 +4602,15 @@ void AssignCast(std::optional<UnionEffectContainerOptions>& dst, const Ark_Union
     dst = UnionEffectContainerOptions{};
     auto spacing = Converter::OptConvert<float>(src.spacing);
     dst->spacing = spacing.value_or(0.0f);
+}
+
+template<>
+void AssignCast(std::optional<OHOS::Ace::TextDecorationOptions>& dst, const Ark_DecorationOptions& src)
+{
+    OHOS::Ace::TextDecorationOptions result;
+    auto enableMultiType = Converter::OptConvert<bool>(src.enableMultiType);
+    result.enableMultiType = enableMultiType;
+    dst = result;
 }
 
 template<>

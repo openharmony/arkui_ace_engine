@@ -141,7 +141,8 @@ HWTEST_F(ResSchedClickOptimizerTest, GetComponentTextRecursiveTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     std::string text1 = "";
-    ResSchedClickOptimizer::GetComponentTextRecursive(host, text1, 0);
+    int32_t maxNodes = INT_MAX;
+    optimizer_->GetComponentTextRecursive(host, text1, 0, maxNodes);
     EXPECT_EQ(text1, "");
 
     /**
@@ -152,7 +153,7 @@ HWTEST_F(ResSchedClickOptimizerTest, GetComponentTextRecursiveTest001, TestSize.
     std::string text2 = "";
     accessibilityProperty->SetText("");
     accessibilityProperty->SetAccessibilityText("");
-    ResSchedClickOptimizer::GetComponentTextRecursive(host, text2, 1);
+    optimizer_->GetComponentTextRecursive(host, text2, 1, maxNodes);
     EXPECT_EQ(text2, "");
 
     /**
@@ -161,7 +162,7 @@ HWTEST_F(ResSchedClickOptimizerTest, GetComponentTextRecursiveTest001, TestSize.
      * @tc.expected: step2. result equals.
      */
     std::string text3 = "123";
-    ResSchedClickOptimizer::GetComponentTextRecursive(host, text3, 1);
+    optimizer_->GetComponentTextRecursive(host, text3, 1, maxNodes);
     EXPECT_EQ(text3, "123");
 
     /**
@@ -171,7 +172,7 @@ HWTEST_F(ResSchedClickOptimizerTest, GetComponentTextRecursiveTest001, TestSize.
      */
     std::string text4 = "";
     accessibilityProperty->SetText("test");
-    ResSchedClickOptimizer::GetComponentTextRecursive(host, text4, 1);
+    optimizer_->GetComponentTextRecursive(host, text4, 1, maxNodes);
     EXPECT_EQ(text4, "test");
 
     /**
@@ -181,7 +182,7 @@ HWTEST_F(ResSchedClickOptimizerTest, GetComponentTextRecursiveTest001, TestSize.
      */
     std::string text5 = "123";
     accessibilityProperty->SetText("test");
-    ResSchedClickOptimizer::GetComponentTextRecursive(host, text5, 1);
+    optimizer_->GetComponentTextRecursive(host, text5, 1, maxNodes);
     EXPECT_EQ(text5, "123,test");
 }
 } // namespace OHOS::Ace

@@ -14,13 +14,16 @@
  */
 
 #include "base/geometry/ng/size_t.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_unbind_views.h"
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
+#include "core/common/plugin_manager.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient_binding.h"
 #include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient_binding.h"
+#include "bridge/declarative_frontend/jsview/js_column.h"
 #include "bridge/declarative_frontend/jsview/js_mock.h"
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
@@ -29,17 +32,14 @@
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_gesture_recognizer.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
-#include "frameworks/bridge/declarative_frontend/jsview/action_sheet/js_action_sheet.h"
-#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_canvas_pattern.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
+#include "frameworks/bridge/declarative_frontend/jsview/canvas/js_drawing_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
+#include "frameworks/bridge/declarative_frontend/jsview/dialog/js_action_sheet.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_alert_dialog.h"
 #include "frameworks/bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_animator.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_badge.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_blank.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
@@ -49,7 +49,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ellipse_shape.h"
@@ -60,42 +59,29 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_form_link.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_grid.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_grid_col.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_grid_container.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_lazy_grid.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_line.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_item_group.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list_children_main_size.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_loading_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_magnifier_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navrouter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_particle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_path_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_persistent.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_recycle_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_refresh.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h"
@@ -104,23 +90,18 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_select.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_histogram.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller_binding.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_swiper_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_clock_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textinput.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_textpicker.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_texttimer_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_union_effect_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
@@ -137,13 +118,11 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #else
 #include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #endif
 
 #ifdef VIDEO_SUPPORTED
-#include "frameworks/bridge/declarative_frontend/jsview/js_video.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_async.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_async_binding.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_binding.h"
 #endif
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_embedded_component.h"
@@ -171,8 +150,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_remote_window.h"
 #endif
 #if defined(XCOMPONENT_SUPPORTED)
-#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller_binding.h"
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
 #include "frameworks/bridge/declarative_frontend/jsview/js_sceneview.h"
@@ -190,6 +168,7 @@
 #include "bridge/declarative_frontend/jsview/menu/js_context_menu.h"
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "bridge/declarative_frontend/jsview/text_menu/js_text_menu.h"
+#include "core/common/plugin_manager.h"
 #ifdef EFFECT_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_effect_component.h"
 #endif
@@ -330,12 +309,12 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSStack::JSBind(globalObj);
     JSImage::JSBind(globalObj);
     JSLazyForEach::JSBind(globalObj);
-    JSLazyVGridLayout::JSBind(globalObj);
     JSList::JSBind(globalObj);
     JSListItem::JSBind(globalObj);
     JSListChildrenMainSize::JSBind(globalObj);
     JSLocalStorage::JSBind(globalObj);
     JSStateMgmtProfiler::JSBind(globalObj);
+    JSStateMgmtHistogram::JSBind(globalObj);
     JSPersistent::JSBind(globalObj);
     JSEnvironment::JSBind(globalObj);
     JSFlexImpl::JSBind(globalObj);
@@ -357,17 +336,13 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSLineSpacingSpan::JSBind(globalObj);
     JSUrlSpan::JSBind(globalObj);
     JSTextLayout::JSBind(globalObj);
-    JSTabs::JSBind(globalObj);
-    JSTabContent::JSBind(globalObj);
-    JSTabsController::JSBind(globalObj);
+    JSTabsControllerBinding::JSBind(globalObj);
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
     JSRepeatVirtualScroll::JSBind(globalObj);
     JSRepeatVirtualScroll2::JSBind(globalObj);
     JSIfElse::JSBind(globalObj);
-    JSDivider::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
-    JSNavigator::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
     JSWithTheme::JSBind(globalObj);
     JSRichEditorController::JSBind(globalObj);
@@ -376,9 +351,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSContainerModal::JSBind(globalObj);
     JSAppBar::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
-    JSVideo::JSBind(globalObj);
-    JSVideoController::JSBind(globalObj);
-    JSVideoControllerAsync::JSBind(globalObj);
+    JSVideoControllerAsyncBinding::JSBind(globalObj);
+    JSVideoControllerBinding::JSBind(globalObj);
 #endif
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponent::JSBind(globalObj);
@@ -399,8 +373,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSRemoteWindow::JSBind(globalObj);
 #endif
 #if defined(XCOMPONENT_SUPPORTED)
-    JSXComponent::JSBind(globalObj);
-    JSXComponentController::JSBind(globalObj);
+    JSXComponentControllerBinding::JSBind(globalObj);
 #endif
 #if defined(MODEL_COMPONENT_SUPPORTED)
     JSSceneView::JSBind(globalObj);
@@ -420,66 +393,41 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSIsolatedComponent::JSBind(globalObj);
 #endif
 #endif
-    JSGrid::JSBind(globalObj);
-    JSGridItem::JSBind(globalObj);
-    JSSwiper::JSBind(globalObj);
     JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSScrollBar::JSBind(globalObj);
-    JSButton::JSBind(globalObj);
     JSRectShape::JSBind(globalObj);
     JSEllipseShape::JSBind(globalObj);
     JSCircleShape::JSBind(globalObj);
     JSPathShape::JSBind(globalObj);
     JSRect::JSBind(globalObj);
     JSAnimator::JSBind(globalObj);
-    JSCanvas::JSBind(globalObj);
     JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSListItemGroup::JSBind(globalObj);
-    JSLoadingProgress::JSBind(globalObj);
-    JSProgress::JSBind(globalObj);
-    JSGridContainer::JSBind(globalObj);
-    JSGridRow::JSBind(globalObj);
-    JSGridCol::JSBind(globalObj);
-    JSBlank::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
-    JSShape::JSBind(globalObj);
     JSPath::JSBind(globalObj);
     JSCircle::JSBind(globalObj);
-    JSLine::JSBind(globalObj);
-    JSPolygon::JSBind(globalObj);
-    JSPolyline::JSBind(globalObj);
     JSEllipse::JSBind(globalObj);
-    JSTextPicker::JSBind(globalObj);
     JSContainerPicker::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
-    JSTextPickerDialog::JSBind(globalObj);
-#endif
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);
-    JSTextArea::JSBind(globalObj);
-    JSTextInput::JSBind(globalObj);
-    JSBadge::JSBind(globalObj);
     JSMagnifierController::JSBind(globalObj);
     JSGesture::JSBind(globalObj);
     JSPanGestureOption::JSBind(globalObj);
-    JSSwiperController::JSBind(globalObj);
+    JSSwiperControllerBinding::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
     JSCanvasImageData::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
-    JSSelect::JSBind(globalObj);
     JSSearchController::JSBind(globalObj);
     JSTextClockControllerBinding::JSBind(globalObj);
     JSClipboard::JSBind(globalObj);
-    JSTextTimer::JSBind(globalObj);
     JSTextAreaController::JSBind(globalObj);
     JSTextInputController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
-    JSRefresh::JSBind(globalObj);
     JSWaterFlowSectionsBinding::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSRecycleView::JSBind(globalObj);
@@ -492,7 +440,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSNavDestination::JSBind(globalObj);
     JSNavRouter::JSBind(globalObj);
     JSViewContext::JSBind(globalObj);
-    JSSlidingPanel::JSBind(globalObj);
     JSCanvasPattern::JSBind(globalObj);
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
@@ -508,7 +455,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSBindLibs("arkui.patternlock", "PatternLock");
     JSBindLibs("arkui.patternlockcontroller", "PatternLockController", true);
 #else
-    JSRelativeContainer::JSBind(globalObj);
     JSPatternLockControllerBinding::JSBind(globalObj);
 #endif
     // add missing binds to ng build
@@ -559,12 +505,18 @@ void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
     JSCanvasPattern::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
     JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
+    JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);
     JSPath2D::JSBind(globalObj);
     JSCanvasImageData::JSBind(globalObj);
     JSMock::JSBind(globalObj);
+}
+
+void JsUnbindViews()
+{
+    JsiClassBase::UnDeclareAll();
 }
 
 } // namespace OHOS::Ace::Framework

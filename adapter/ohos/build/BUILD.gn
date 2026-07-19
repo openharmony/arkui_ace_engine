@@ -16,41 +16,75 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_controller.gni")
 
 component_modules = [
+  "button",
+  "badge",
   "container_reader",
   "dynamiclayout",
   "counter",
   "data_panel",
   "gauge",
+  "gridlayout",
   "hyperlink",
   "text_clock",
+  "text_field",
+  "video",
   "checkbox",
+  "canvas",
   "patternlock",
   "qrcode",
   "rating",
+  "relative_container",
   "waterflow",
   "lazy_waterflow_layout",
   "linear_split",
   "side_bar",
+  "spacing",
   "marquee",
+  "progress",
+  "texttimer",
+  "navigator",
   "search",
+  "sheet",
   "stepper",
   "radio",
+  "shape",
   "slider",
   "time_picker",
   "calendar_picker",
   "indexer",
+  "loading_progress",
   "symbol",
   "span",
   "rich_editor",
   "menu",
+  "toolbaritem",
   "lazy_column_layout",
+  "tabswiper",
   "toggle",
+  "dialog",
   "image_animator",
-  "date_picker"
+  "date_picker",
+  "lazy_grid_layout",
+  "refresh",
+  "text_picker",
+  "select",
+  "grid",
+  "bubble",
+  "panel",
+  "xcomponent",
 ]
 
 if (!ace_engine_feature_wearable) {
     component_modules += [ "folder_stack", ]
+}
+
+# ArcList/ArcScrollBar split SOs (libarclist.z.so / libarcscrollbar.z.so) are
+# built only for cross-platform (arkuiX); other builds keep them in the main SO.
+if (is_arkui_x) {
+    component_modules += [
+        "arc_list",
+        "arc_scroll_bar",
+    ]
 }
 
 component_modules_libs = []
@@ -78,6 +112,10 @@ foreach(module, component_modules) {
       "$ace_root/build:libace_compatible",
       "$ace_root/frameworks/core:ace_container_scope"
     ]
+
+    if (module == "xcomponent") {
+      deps += [ "$ace_root/interfaces/inner_api/ace:ace_uicontent" ]
+    }
 
     part_name = ace_engine_part
     subsystem_name = ace_engine_subsystem

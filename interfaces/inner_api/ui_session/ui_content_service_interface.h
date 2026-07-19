@@ -17,10 +17,15 @@
 #define FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H
 
 #include "iremote_broker.h"
+#include <functional>
 #include <map>
+#include <string>
+#include <vector>
 #include "ui/base/macros.h"
 #include "param_config.h"
+#include "ui_content_errors.h"
 #include "ui_content_proxy_error_code.h"
+#include "ui_translate_type.h"
 #include "event_handler.h"
 
 namespace OHOS {
@@ -32,8 +37,11 @@ class ImageSource;
 namespace OHOS::Ace {
 using GetWebInfoByRequestCallback =
     std::function<void(int32_t, int32_t, const std::string&, const std::string&, WebRequestErrorCode)>;
+using PageTranslateTextCallback = std::function<void(int32_t, const std::string&, int64_t)>;
+using PageSceneEventCallback = std::function<void(const std::string&)>;
 
 constexpr int32_t DEFAULT_INSPECTOR_TREE_CALLBACK_TIMEOUT_MS = 1500;
+constexpr int32_t DEFAULT_PAGE_TRANSLATE_CALLBACK_TIMEOUT_MS = 5000;
 
 class ACE_FORCE_EXPORT IUiContentService : public OHOS::IRemoteBroker {
 public:
@@ -85,6 +93,15 @@ public:
         REQUEST_STATE_MGMT_INFO,
         GET_MULTI_IMAGES_BY_ID,
         GET_WEBINFO_BY_REQUEST,
+        GET_PAGE_TRANSLATE_TEXT,
+        START_PAGE_TRANSLATE,
+        END_PAGE_TRANSLATE,
+        RESET_PAGE_TRANSLATE,
+        SEND_PAGE_TRANSLATE_RESULT,
+        GET_CURRENT_ABILITY_LANGUAGE_INFO,
+        REGISTER_PAGE_SCENE_RULES,
+        UNREGISTER_PAGE_SCENE_RULES,
+        GET_PAGE_SCENE,
     };
 
     /**
@@ -380,6 +397,46 @@ public:
         int32_t webId,
         const std::string& request,
         const GetWebInfoByRequestCallback& finishCallback) = 0;
+    virtual int32_t GetPageTranslateText(
+        const std::string& request, const PageTranslateTextCallback& eventCallback)
+    {
+        return FAILED;
+    }
+    virtual int32_t StartPageTranslate(
+        const std::string& request, const PageTranslateTextCallback& eventCallback)
+    {
+        return FAILED;
+    }
+    virtual int32_t EndPageTranslate()
+    {
+        return FAILED;
+    }
+    virtual int32_t ResetPageTranslate(int32_t nodeId = -1)
+    {
+        return FAILED;
+    }
+    virtual int32_t SendPageTranslateResult(const std::string& result)
+    {
+        return FAILED;
+    }
+    virtual int32_t GetCurrentAbilityLanguageInfo(std::string& language, std::string& region)
+    {
+        return FAILED;
+    }
+    virtual int32_t RegisterPageSceneRules(
+        const std::string& ruleJson, const PageSceneEventCallback& eventCallback)
+    {
+        return FAILED;
+    }
+    virtual int32_t UnregisterPageSceneRules(const std::string& ruleSetId)
+    {
+        return FAILED;
+    }
+    virtual int32_t GetPageScene(
+        const std::string& ruleJsonOrRuleSetId, const PageSceneEventCallback& eventCallback)
+    {
+        return FAILED;
+    }
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
@@ -411,6 +468,8 @@ public:
         SEND_ARKUI_IMAGES_BY_ID,
         SEND_ARKWEB_IMAGES_BY_ID,
         SEND_WEB_INFO_BY_REQUEST,
+        SEND_PAGE_TEXT,
+        REPORT_PAGE_SCENE_EVENT,
     };
 
     /**
@@ -531,6 +590,8 @@ public:
         int32_t webId,
         const std::string& request,
         const std::string& result, WebRequestErrorCode errorCode) = 0;
+    virtual void SendPageText(int32_t nodeId, const std::string& text, int64_t version) {}
+    virtual void ReportPageSceneEvent(const std::string& sceneJson) {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

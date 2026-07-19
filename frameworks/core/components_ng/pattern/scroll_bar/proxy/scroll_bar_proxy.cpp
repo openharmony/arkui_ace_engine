@@ -23,8 +23,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t SCROLL_FROM_BAR = 6; // Source type of scroll.
-
 bool CheckScrollable(const RefPtr<Pattern>& pattern)
 {
     return AceType::InstanceOf<ScrollablePattern>(pattern);
@@ -457,6 +455,10 @@ void ScrollBarProxy::SyncLayout(const OffsetF& offset, const SizeF& viewSize, co
         }
         auto scrollableNodeOffset = scrollBar->GetAxis() == Axis::HORIZONTAL ? -offset.GetX() : -offset.GetY();
         scrollBar->SetScrollableNodeOffset(scrollableNodeOffset);
+        if (scrollBar->UseInnerScrollBar()) {
+            scrollBar->UpdateScrollBarOffset(SCROLL_FROM_NONE);
+            continue;
+        }
         if (!host->CheckNeedForceMeasureAndLayout()) {
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }

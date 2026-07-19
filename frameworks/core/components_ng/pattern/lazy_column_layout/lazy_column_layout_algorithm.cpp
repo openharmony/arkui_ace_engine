@@ -35,7 +35,6 @@ void LazyColumnLayoutAlgorithm::ShiftLayoutWindow(float delta)
     if (NearZero(delta)) {
         return;
     }
-    referencePos_ += delta;
     startPos_ += delta;
     endPos_ += delta;
     cacheStartPos_ += delta;
@@ -76,7 +75,7 @@ void LazyColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasurePredictItems(layoutWrapper, layoutProperty, contentIdealSize);
     } else if (needAllLayout_) {
         MeasureAllItems(layoutWrapper);
-    } else {
+    } else if (!needSkipLayout_) {
         MeasureItemsLazy(layoutWrapper);
     }
 
@@ -150,16 +149,29 @@ void LazyColumnLayoutAlgorithm::UpdatePosReference(LayoutWrapper* layoutWrapper,
 {
     headerAdjustOffset_ = 0.0f;
     if (!posRef.has_value()) {
-        posRef = LazyLayoutUtils::GetViewPosReference(layoutWrapper->GetHostNode());
+        auto host = layoutWrapper->GetHostNode();
+        // When LazyColumnLayout is used under LazyForEach, cached nodes from LazyForEach are not mounted on the
+        // component tree. LazyColumnLayout has not executed onAttachToMainTree, so isNeedLazyLayout flag is not set.
+        // In this scenario, skip layout first to avoid full loading which would break lazy loading.
+        // However, if total item count is less than 1 row, load all items directly.
+        if ((totalItemCount_ > 1) && host && !host->IsOnMainTree() && !host->IsNeedLazyLayout() &&
+            LazyLayoutUtils::ValidateAndSetLazyLayoutParent(host, Axis::VERTICAL)) {
+            needAllLayout_ = false;
+            needSkipLayout_ = true;
+            return;
+        }
+        posRef = LazyLayoutUtils::GetViewPosReference(host);
     }
     if (!posRef.has_value() || posRef.value().axis != Axis::VERTICAL) {
         needAllLayout_ = true;
+        needSkipLayout_ = false;
         stickyTopInset_ = 0.0f;
         stickyBottomInset_ = 0.0f;
         return;
     }
     forwardLayout_ = posRef.value().referenceEdge == ReferenceEdge::START;
-    referencePos_ = posRef.value().referencePos;
+    // for self-triggered prediction, reuse the referencePos_ adjusted by adjustOffset from the previous frame.
+    referencePos_ = layoutInfo_->deadline_.has_value() ? layoutInfo_->referencePos_ : posRef.value().referencePos;
     viewExtStart_ = posRef.value().viewExtStart;
     viewExtEnd_ = posRef.value().viewExtEnd;
     stickyTopInset_ = posRef.value().stickyInsetStart;
@@ -187,6 +199,7 @@ void LazyColumnLayoutAlgorithm::UpdatePosReference(LayoutWrapper* layoutWrapper,
         cacheEndPos_ -= headerMainSize;
     }
     needAllLayout_ = false;
+    needSkipLayout_ = false;
     // When not in own idle task but parent is doing predictive layout in idle,
     // inherit deadline and cache positions
     if (!layoutInfo_->deadline_.has_value() && posRef.value().deadline.has_value()) {
@@ -327,6 +340,11 @@ void LazyColumnLayoutAlgorithm::GetStartIndexInfo(int32_t& index, float& pos)
         ++nextIt;
     }
     if (LessOrEqual(it->second.startPos - space_, startPos_)) {
+        if (it->first >= totalItemCount_) {
+            index = totalItemCount_;
+            pos = prevBodyMainSize_ + space_;
+            return;
+        }
         index = it->first;
         pos = it->second.startPos;
         return;
@@ -527,6 +545,7 @@ void LazyColumnLayoutAlgorithm::MeasureBackward(LayoutWrapper* layoutWrapper, in
 
 void LazyColumnLayoutAlgorithm::CheckRecycle()
 {
+    FixIndexRange(layoutInfo_->startIndex_, layoutInfo_->endIndex_);
     auto it = layoutInfo_->posMap_.find(layoutInfo_->startIndex_);
     while (it != layoutInfo_->posMap_.end()) {
         if (LessNotEqual(it->second.endPos, startPos_)) {
@@ -674,6 +693,8 @@ void LazyColumnLayoutAlgorithm::MeasureItemsLazy(LayoutWrapper* layoutWrapper)
     }
     // Report the pre-shifted header compensation; never apply it to the window a second time.
     layoutInfo_->adjustOffset_.start += headerAdjustOffset_;
+    referencePos_ = forwardLayout_ ? referencePos_ - layoutInfo_->adjustOffset_.start
+                                   : referencePos_ + layoutInfo_->adjustOffset_.end;
     totalMainSize_ = layoutInfo_->totalMainSize_;
     CalculateVisibleStartIndex();
     CalculateVisibleEndIndex();
@@ -790,13 +811,16 @@ void LazyColumnLayoutAlgorithm::PredictLayoutForward(
     LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset)
 {
     int32_t currIndex = layoutInfo_->layoutedEndIndex_;
+    float currPos = layoutInfo_->layoutedEnd_;
     // Allow forward prediction when not yet laid out (currIndex<0) with forward layout,
     // or when already laid out (currIndex>=0) with item in posMap
     if ((currIndex < 0 && !forwardLayout_) ||
         (currIndex >= 0 && layoutInfo_->posMap_.find(currIndex) == layoutInfo_->posMap_.end())) {
+        layoutedEndIndex_ = currIndex;
+        cachedEndIndex_ = std::max(layoutInfo_->cachedEndIndex_, currIndex);
+        layoutedEnd_ = currPos;
         return;
     }
-    float currPos = layoutInfo_->layoutedEnd_;
     auto deadline = layoutInfo_->deadline_.value();
     while (currIndex < totalItemCount_ - 1 && LessNotEqual(currPos, layoutInfo_->cacheEndPos_)) {
         if (GetSysTimestamp() > deadline) {
@@ -833,16 +857,21 @@ void LazyColumnLayoutAlgorithm::PredictLayoutBackward(
     LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset)
 {
     int32_t currIndex = layoutInfo_->layoutedStartIndex_;
+    float currPos = layoutInfo_->layoutedStart_;
     // Allow backward prediction when not yet laid out (currIndex<0) with backward layout,
     // or when already laid out (currIndex>=0) with item in posMap
     if ((currIndex < 0 && forwardLayout_) ||
         (currIndex >= 0 && layoutInfo_->posMap_.find(currIndex) == layoutInfo_->posMap_.end())) {
+        layoutedStartIndex_ = currIndex;
+        cachedStartIndex_ = layoutInfo_->cachedStartIndex_ >= 0
+            ? std::min(layoutInfo_->cachedStartIndex_, currIndex)
+            : currIndex;
+        layoutedStart_ = currPos;
         return;
     }
     if (currIndex < 0 && !forwardLayout_) {
         currIndex = totalItemCount_;
     }
-    float currPos = layoutInfo_->layoutedStart_;
     auto deadline = layoutInfo_->deadline_.value();
     while (currIndex > 0 && (GreatNotEqual(currPos, layoutInfo_->cacheStartPos_))) {
         if (GetSysTimestamp() > deadline) {
@@ -1088,6 +1117,7 @@ void LazyColumnLayoutAlgorithm::LayoutCachedItems(
         }
         layoutWrapper->SetActiveChildRange(std::optional<ActiveChildSets>(activeChildSets), std::nullopt);
     }
+    layoutInfo_->referencePos_ = referencePos_;
     layoutInfo_->layoutedStart_ = layoutedStart_;
     layoutInfo_->layoutedEnd_ = layoutedEnd_;
     layoutInfo_->layoutedStartIndex_ = layoutedStartIndex_;

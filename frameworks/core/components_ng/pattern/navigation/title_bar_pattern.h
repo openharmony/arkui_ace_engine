@@ -507,6 +507,7 @@ private:
     void UpdateBackButtonColor();
     void UpdateBackgroundBlurStyle();
     void PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrollEffectType);
+    bool ShouldEnableTitleBarClip(const RefPtr<UiMaterial>& material) const;
     void UpdateTitleBarClipForMask(bool enableClip);
     void ResetTitleBarMaskBlendEffect();
     void UpdateTitleBarMaskBlendEffect(ScrollEffectType scrollEffectType);
@@ -538,6 +539,7 @@ private:
     void UpdateIsBackgroundDark();
     void OnLuminanceUpdate(uint32_t luminance);
     bool IsColorInvertEnabled();
+    bool IsBrightnessBlendEnabled();
     static bool IsApplyShadowEnabled(const RefPtr<UiMaterial>& material);
     void InitColorPickerIfNeeded();
     void UnregisterColorPicker();

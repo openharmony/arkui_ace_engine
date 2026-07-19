@@ -53,6 +53,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/video/video_event_hub.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
@@ -65,6 +66,7 @@
 #include "core/components_ng/pattern/video/video_styles.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/image/image_source_info.h"
+#include "video_test_property_common.h"
 
 namespace OHOS::Ace::NG {
 
@@ -82,18 +84,6 @@ public:
 
     MOCK_METHOD0(GetVideoWidth, int32_t());
     MOCK_METHOD0(GetVideoHeight, int32_t());
-};
-
-struct TestProperty {
-    std::optional<std::string> src;
-    std::optional<double> progressRate;
-    std::optional<std::string> posterUrl;
-    std::optional<bool> showFirstFrame;
-    std::optional<bool> muted;
-    std::optional<bool> autoPlay;
-    std::optional<bool> controls;
-    std::optional<bool> loop;
-    std::optional<ImageFit> objectFit;
 };
 
 namespace {

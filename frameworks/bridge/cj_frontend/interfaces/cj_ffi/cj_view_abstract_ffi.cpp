@@ -1044,10 +1044,10 @@ void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId, CJSharedT
     sharedOption = std::make_shared<SharedTransitionOption>();
 
     sharedOption->duration = option.duration;
-    sharedOption->curve = CreateCurve(std::string(option.curve), false);
+    sharedOption->curve = CreateCurve(std::string(option.curve != nullptr ? option.curve : ""), false);
 
     MotionPathOption motionPathOption;
-    if (!std::string(option.motionPathOption.path).empty()) {
+    if (option.motionPathOption.path != nullptr && !std::string(option.motionPathOption.path).empty()) {
         motionPathOption.SetPath(std::string(option.motionPathOption.path));
         double from = option.motionPathOption.from;
         double to = option.motionPathOption.to;
@@ -1069,7 +1069,7 @@ void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId, CJSharedT
     sharedOption->zIndex = option.zIndex;
     sharedOption->type = static_cast<SharedTransitionEffectType>(option.type);
 
-    ViewAbstractModel::GetInstance()->SetSharedTransition(std::string(shareId), sharedOption);
+    ViewAbstractModel::GetInstance()->SetSharedTransition(std::string(shareId != nullptr ? shareId : ""), sharedOption);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTransitionOptions option)
@@ -1087,7 +1087,7 @@ void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTr
             break;
     }
     ViewAbstractModel::GetInstance()->SetGeometryTransition(
-        std::string(id), followWithoutTransition, doRegisterSharedTransition);
+        std::string(id != nullptr ? id : ""), followWithoutTransition, doRegisterSharedTransition);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetBlur(double value)
@@ -2805,8 +2805,13 @@ void ParseSheetStyleV2(CJSheetOptionsV2 option, NG::SheetStyle& sheetStyle)
 void ParseSheetTitle(
     NativeOptionCallBack title, NG::SheetStyle& sheetStyle, std::function<void()>& titleBuilderFunction)
 {
-    sheetStyle.isTitleBuilder = true;
-    titleBuilderFunction = title.hasValue ? CJLambda::Create(title.value) : ([]() -> void {});
+    if (title.hasValue) {
+        sheetStyle.isTitleBuilder = true;
+        titleBuilderFunction = CJLambda::Create(title.value);
+    } else if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+        sheetStyle.isTitleBuilder = true;
+        titleBuilderFunction = ([]() -> void {});
+    }
 }
 
 void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option)
@@ -3232,14 +3237,14 @@ void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithDragItemInfo(CJDragItemInf
     dragPreviewInfo.pixelMap = nullptr;
 #endif
 
-    dragPreviewInfo.extraInfo = std::string(value.extraInfo);
+    dragPreviewInfo.extraInfo = std::string(value.extraInfo != nullptr ? value.extraInfo : "");
     ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithString(const char* value)
 {
     NG::DragDropInfo dragPreviewInfo;
-    dragPreviewInfo.inspectorId = std::string(value);
+    dragPreviewInfo.inspectorId = std::string(value != nullptr ? value : "");
     ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
 }
 
@@ -3259,7 +3264,7 @@ void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithString(
     RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
     uint8_t imageBorderBitsets = 0;
 
-    borderImage->SetSrc(std::string(source));
+    borderImage->SetSrc(std::string(source != nullptr ? source : ""));
     imageBorderBitsets |= BorderImage::SOURCE_BIT;
 
     ParceBorderImageParam(borderImage, imageBorderBitsets, option);
@@ -3469,7 +3474,7 @@ RefPtr<PixelMap> ParseDragPreviewPixelMap(int64_t pixelMapId)
 
 bool CheckDarkResource(const RefPtr<ResourceObject>& resObj)
 {
-    if (!SystemProperties::GetResourceDecoupling() || !resObj) {
+    if (!resObj) {
         return false;
     }
     auto resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);

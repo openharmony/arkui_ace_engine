@@ -17,13 +17,18 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H
 
 #include "base/memory/ace_type.h"
-#include "base/resource/asset_manager.h"
 #include "core/components/theme/theme.h"
-#include "core/components/theme/theme_constants.h"
 
 #include "ui/view/theme/theme_style.h"
 
 namespace OHOS::Ace {
+
+enum class ColorScheme : int32_t;
+class ThemeConstants;
+class Color;
+class ResourceInfo;
+class ResourceConfiguration;
+
 class ACE_EXPORT ThemeManager : public AceType {
     DECLARE_ACE_TYPE(ThemeManager, AceType);
 
@@ -45,8 +50,6 @@ public:
     }
 
     virtual void ParseSystemTheme() {}
-
-    virtual void LoadCustomTheme(const RefPtr<AssetManager>& assetManager) {}
 
     virtual void SetColorScheme(ColorScheme colorScheme) {}
 

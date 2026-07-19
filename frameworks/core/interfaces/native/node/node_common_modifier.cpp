@@ -30,7 +30,7 @@
 #include "core/common/dynamic_module_helper.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/components/common/layout/constants.h"
@@ -159,6 +159,7 @@ enum TransitionEffectType {
     TRANSITION_EFFECT_ROTATE,
     TRANSITION_EFFECT_MOVE,
     TRANSITION_EFFECT_ASYMMETRIC,
+    TRANSITION_EFFECT_IDENTITY,
 };
 
 struct GestureCollectTouchRecognizerHandle {
@@ -8980,6 +8981,11 @@ RefPtr<NG::ChainedTransitionEffect> ParseTransition(ArkUITransitionEffectOption*
             transitionEffect = AceType::MakeRefPtr<NG::ChainedAsymmetricEffect>(appearEffect, disappearEffect);
             break;
         }
+
+        case TransitionEffectType::TRANSITION_EFFECT_IDENTITY: {
+            transitionEffect = AceType::MakeRefPtr<NG::ChainedIdentityEffect>();
+            break;
+        }
     }
 
     CHECK_NULL_RETURN(transitionEffect, nullptr);
@@ -10899,8 +10905,8 @@ void SetCommonOnMouse(ArkUINodeHandle node, void* userData)
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
-        event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
-        event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
+        event.mouseEvent.rawDeltaX = info.GetRawDeltaX();
+        event.mouseEvent.rawDeltaY = info.GetRawDeltaY();
         event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
         std::array<ArkUIHistoryMouseEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
         SetMouseHistoricalPoints(event.mouseEvent, info, density, allHistoryEvents);
@@ -13392,8 +13398,8 @@ void SetOnMouse(ArkUINodeHandle node, void* extraParam)
         event.mouseEvent.actionTouchPoint.screenY = info.GetScreenLocation().GetY() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayX = info.GetGlobalDisplayLocation().GetX() / density;
         event.mouseEvent.actionTouchPoint.globalDisplayY = info.GetGlobalDisplayLocation().GetY() / density;
-        event.mouseEvent.rawDeltaX = info.GetRawDeltaX() / density;
-        event.mouseEvent.rawDeltaY = info.GetRawDeltaY() / density;
+        event.mouseEvent.rawDeltaX = info.GetRawDeltaX();
+        event.mouseEvent.rawDeltaY = info.GetRawDeltaY();
         event.mouseEvent.targetDisplayId = info.GetTargetDisplayId();
         std::array<ArkUIHistoryMouseEvent, MAX_HISTORY_EVENT_COUNT> allHistoryEvents;
         SetMouseHistoricalPoints(event.mouseEvent, info, density, allHistoryEvents);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,73 @@
  * limitations under the License.
  */
 
-class TextTimerModifier extends ArkTextTimerComponent implements AttributeModifier<TextTimerAttribute> {
+class LazyArkTextTimerComponent extends ArkComponent {
+  static module: TextTimerComponentModule | undefined = undefined;
+  constructor(nativePtr: KNode, classType: ModifierType) {
+   super(nativePtr, classType);
+   if (LazyArkTextTimerComponent.module === undefined) {
+     LazyArkTextTimerComponent.module = globalThis.requireNapi('arkui.components.arktexttimer');
+   }
+
+   this.lazyComponent = LazyArkTextTimerComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+   this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  fontColor(value: ResourceColor): LazyArkTextTimerComponent {
+   this.lazyComponent.fontColor(value);
+   return this;
+  }
+
+  fontSize(value: Length): LazyArkTextTimerComponent {
+   this.lazyComponent.fontSize(value);
+   return this;
+  }
+
+  fontWeight(value: number | FontWeight | ResourceStr): LazyArkTextTimerComponent {
+   this.lazyComponent.fontWeight(value);
+   return this;
+  }
+
+  fontStyle(value: FontStyle): LazyArkTextTimerComponent {
+    this.lazyComponent.fontStyle(value);
+    return this;
+  }
+
+  fontFamily(value: ResourceStr): LazyArkTextTimerComponent {
+    this.lazyComponent.fontFamily(value);
+    return this;
+  }
+
+  format(value: string): LazyArkTextTimerComponent {
+    this.lazyComponent.format(value);
+    return this;
+  }
+
+  textShadow(value: ShadowOptions | Array<ShadowOptions>): LazyArkTextTimerComponent {
+    this.lazyComponent.textShadow(value);
+    return this;
+  }
+
+  onTimer(value: (utc: number, elapsedTime: number) => void): LazyArkTextTimerComponent {
+    this.lazyComponent.onTimer(value);
+    return this;
+  }
+
+  initialize(value: Object[]): this {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+}
+
+class TextTimerModifier extends LazyArkTextTimerComponent implements AttributeModifier<TextTimerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: TextTimerAttribute): void {

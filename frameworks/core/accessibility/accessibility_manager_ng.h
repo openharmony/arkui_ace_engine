@@ -134,6 +134,10 @@ private:
     bool ExecuteChildNodeHoverTransparentCallback(const RefPtr<FrameNode>& root,  const PointF& point,
         const TouchEvent& event, AccessibilityHoverState& hoverState);
 
+    bool NotifyHoverEventToVirtualNode(const RefPtr<FrameNode>& node,
+        const RefPtr<FrameNode>& rootNode, const PointF& pointRoot,
+        SourceType sourceType, AccessibilityHoverEventType eventType, TimeStamp time);
+
     AccessibilityHoverStateManager hoverStateManager_;
 };
 } // namespace NG

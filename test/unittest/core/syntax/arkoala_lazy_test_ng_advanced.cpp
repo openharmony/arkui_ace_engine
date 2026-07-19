@@ -47,6 +47,12 @@ constexpr int32_t INDEX_2 = 2;
 constexpr int32_t INDEX_3 = 3;
 constexpr int32_t INDEX_5 = 5;
 constexpr int32_t INDEX_NEGATIVE = -1;
+
+void SetCallbacksForTest(const RefPtr<ArkoalaLazyNode>& node, ArkoalaLazyNode::CreateItemCb create,
+    ArkoalaLazyNode::UpdateRangeCb update)
+{
+    node->SetCallbacks(create, update, []() {}, [](int32_t) {});
+}
 } // namespace
 
 class ArkoalaLazyAdvancedTestNg : public testing::Test {
@@ -109,7 +115,7 @@ HWTEST_F(ArkoalaLazyAdvancedTestNg, ArkoalaLazySetCallbacksTest002, TestSize.Lev
 
     auto updateCallback = [](int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache) {};
 
-    node->SetCallbacks(createCallback, updateCallback);
+    SetCallbacksForTest(node, createCallback, updateCallback);
 }
 
 /**
@@ -258,7 +264,7 @@ HWTEST_F(ArkoalaLazyAdvancedTestNg, ArkoalaLazyBuildAllChildrenTest012, TestSize
 
     auto updateCallback = [](int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache) {};
 
-    node->SetCallbacks(createCallback, updateCallback);
+    SetCallbacksForTest(node, createCallback, updateCallback);
     node->BuildAllChildren();
 }
 

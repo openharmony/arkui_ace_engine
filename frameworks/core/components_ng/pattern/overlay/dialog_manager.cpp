@@ -16,16 +16,17 @@
 
 #include "base/error/error_code.h"
 #include "core/common/container.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/common/ace_engine.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
 #include "core/components_ng/render/render_context.h"
@@ -65,7 +66,9 @@ RefPtr<OverlayManager> DialogManager::FindPageNodeOverlay(const RefPtr<FrameNode
     if (currentNode == nullptr || !currentNode->IsOnMainTree()) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "dialog node does not exist or not on main tree.");
     } else {
-        return SheetManager::FindPageNodeOverlay(currentNode, true, true);
+        auto* sheetModifier = NodeModifier::GetSheetManagerInnerModifier();
+        CHECK_NULL_RETURN(sheetModifier, nullptr);
+        return sheetModifier->findPageNodeOverlay(currentNode, true, true);
     }
     return nullptr;
 }
@@ -203,7 +206,8 @@ bool DialogManager::ShouldApplySystemMaterialShadow(const RefPtr<UiMaterial>& sy
     }
 
     auto immersiveOptions = systemMaterial->GetImmersiveOptions();
-    return immersiveOptions && immersiveOptions->applyShadow;
+    CHECK_NULL_RETURN(immersiveOptions, true);
+    return immersiveOptions->applyShadow;
 }
 
 bool DialogManager::HandleSmoothImmersiveMaterial(
@@ -249,6 +253,38 @@ void DialogManager::SetSmoothImmersiveShadow(
     auto dipScale = pipelineContext->GetDipScale();
     auto shadow = Ace::MaterialUtils::GetImmersiveShadow(dipScale);
     renderContext->UpdateBackShadow(shadow);
+}
+
+bool DialogManager::IsUseImmersiveDistortionEffect()
+{
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel == UiMaterialLevel::SMOOTH) {
+        return false;
+    }
+    auto transparencyLevel = static_cast<UiMaterialTransparency>(
+        TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel)));
+    if (materialLevel == UiMaterialLevel::EXQUISITE) {
+        return transparencyLevel == UiMaterialTransparency::NORMAL ||
+               transparencyLevel == UiMaterialTransparency::THIN;
+    }
+    // GENTLE: distortion is false for all transparency levels
+    return false;
+}
+
+bool DialogManager::IsUseImmersiveEdgeLightEffect()
+{
+    auto materialLevel = SystemProperties::GetUiMaterialLevel();
+    if (materialLevel == UiMaterialLevel::SMOOTH) {
+        return false;
+    }
+    auto transparencyLevel = static_cast<UiMaterialTransparency>(
+        TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel)));
+    if (materialLevel == UiMaterialLevel::EXQUISITE) {
+        return transparencyLevel == UiMaterialTransparency::NORMAL ||
+               transparencyLevel == UiMaterialTransparency::THIN;
+    }
+    // GENTLE: edge light is true only for GENTLE_THIN
+    return transparencyLevel == UiMaterialTransparency::GENTLE_THIN;
 }
 
 } // namespace OHOS::Ace::NG

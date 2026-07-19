@@ -416,6 +416,8 @@ public:
         return isStaticPlaceholder_;
     }
 
+    void InitNavigationId();
+
     //-------for force split------- begin------
     void SetDividerWidth(float width)
     {

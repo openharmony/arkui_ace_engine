@@ -26,6 +26,9 @@ ohos_shared_library("performanceMonitor_ani") {
     "runtime_core:ani",
   ]
   configs = [ "$ace_root:ace_config" ]
+  if (is_arkui_x) {
+    defines += [ "CROSS_PLATFORM" ]
+  }
   part_name = "ace_engine"
   subsystem_name = "arkui"
   output_extension = "so"

@@ -35,6 +35,11 @@ enum class ReusableMemOptStrategy {
     ENABLE_AUTO_CACHE_OPTIMIZATION = 1
 };
 
+enum class StaReusableMemOptStrategy {
+    DEFAULT = 0,
+    ENABLE_AUTO_CACHE_OPTIMIZATION = 1
+};
+
 class ACE_FORCE_EXPORT CustomNodeBase : public virtual AceType {
     DECLARE_ACE_TYPE(CustomNodeBase, AceType);
 
@@ -56,6 +61,7 @@ public:
     ReusableMemOptStrategy GetReusableMemOptStrategy();
     void TryEnableParentCustomNodeMemOpt();
     void SetReleaseRecyclePoolFunction(std::function<bool(int32_t, bool, bool)>&& callback);
+    void SetEnableReleaseExpiringNodesFunction(std::function<void(bool, const std::vector<std::string>&)>&& callback);
 
     void SetThisFunc(std::function<void*()>&& getThisFunc);
     void* FireThisFunc();
@@ -104,8 +110,8 @@ public:
     void FireOnReuseFunc(void* params);
 
     // called for Component freezing
-    void SetSetActiveFunc(std::function<void(bool, bool)>&& func);
-    void FireSetActiveFunc(bool active, bool isReuse = false);
+    void SetSetActiveFunc(std::function<void(bool, bool, bool)>&& func);
+    void FireSetActiveFunc(bool active, bool isReuse = false, bool suppressActiveLifecycle = false);
 
     // called for DFX
     void SetExtraInfo(const ExtraInfo extraInfo);
@@ -117,6 +123,11 @@ public:
 
     void SetOnDumpInspectorFunc(std::function<std::string()>&& func);
     std::string FireOnDumpInspectorFunc();
+    void SetClearParentReusePoolFunc(std::function<void()>&& func);
+    void FireClearParentReusePoolFunc();
+    void SetMemOptGetter(std::function<int32_t()>&& func);
+    int32_t GetMemOpt() const;
+    void SetStaMemopt(int32_t opt);
 
     // called for PageTransition animation
     void SetPageTransitionFunction(std::function<void()>&& pageTransitionFunc);
@@ -156,8 +167,11 @@ protected:
     ExtraInfo extraInfo_;
     bool isV2_ = false;
     ReusableMemOptStrategy reusableMemOptStrategy_ = ReusableMemOptStrategy::DEFAULT;
+    StaReusableMemOptStrategy staReusableMemOptStrategy_ = StaReusableMemOptStrategy::DEFAULT;
     // int32_t remainingTimeMs, bool isProgressive, bool shouldCollect
     std::function<bool(int32_t, bool, bool)> releaseRecyclePoolFunc_;
+    // bool enable, const std::vector<std::string>& reuseIds
+    std::function<void(bool, const std::vector<std::string>&)> enableReleaseExpiringNodesFunc_;
     bool executeFireOnAppear_ = false;
     std::string reuseId_;
     std::string creatorId_;
@@ -174,14 +188,16 @@ private:
     std::function<bool(int32_t)> hasNodeUpdateFunc_;
     std::function<void(RefPtr<CustomNodeBase>)> recycleCustomNodeFunc_;
     std::function<void()> recycleRenderFunc_;
-    std::function<void(bool, bool)> setActiveFunc_;
+    std::function<void(bool, bool, bool)> setActiveFunc_;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc_;
     std::function<std::string()> onDumpInspectorFunc_;
     std::function<void()> clearAllRecycleFunc_;
+    std::function<void()> clearParentReusePoolFunc_;
     std::function<void*()> getThisFunc_;
     std::function<void()> onRecycleFunc_;
     std::function<void(void*)> onReuseFunc_;
     std::function<bool(int32_t)> triggerLifecycleFunc_;
+    std::function<int32_t()> getMemOptFunc_;
     bool needRebuild_ = false;
     RecycleNodeInfo recycleInfo_;
 };

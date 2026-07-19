@@ -121,7 +121,9 @@ public:
     static Ace::FontWeight GetFontWeight(FrameNode* frameNode);
     static Color GetFontColor(FrameNode* frameNode);
     static void SetRole(FrameNode* frameNode, const std::optional<ButtonRole>& buttonRole);
+    static void SetRoleOnly(FrameNode* frameNode, const std::optional<ButtonRole>& buttonRole);
     static void SetButtonStyle(FrameNode* frameNode, const std::optional<ButtonStyleMode>& buttonStyle);
+    static void SetButtonStyleOnly(FrameNode* frameNode, const std::optional<ButtonStyleMode>& buttonStyle);
     static void SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&& jsMake);
     static void TriggerClick(FrameNode* frameNode, double xPos, double yPos);
     static void SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize);
@@ -136,6 +138,10 @@ public:
     static float GetMaxFontScale(FrameNode* frameNode);
     void ResetTextAlign() override;
     static void ResetTextAlign(FrameNode* frameNode);
+    static void OnClick(FrameNode* frameNode, GestureEventFunc&& tapEventFunc, ClickEventFunc&& clickEventFunc,
+        double distanceThreshold);
+    static void CreateWithStringResourceObj(
+        FrameNode* frameNode, const RefPtr<ResourceObject>& resObj, const ButtonStringType buttonStringType);
 
 private:
     static void CreateWithLabel(const std::string& label);

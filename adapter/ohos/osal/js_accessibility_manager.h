@@ -142,6 +142,10 @@ enum class SearchSurfaceIdType : int32_t {
     SEARCH_ALL = 0,
     SEARCH_HEAD,
     SEARCH_TAIL,
+    SEARCH_HEAD_LINK,
+    SEARCH_TAIL_LINK,
+    SEARCH_HEAD_TITLE,
+    SEARCH_TAIL_TITLE,
 };
 
 class JsAccessibilityManager : public AccessibilityNodeManager,
@@ -332,10 +336,17 @@ public:
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId,
         const RefPtr<NG::WebPattern>& webPattern);
     void WebFocusMoveSearchByComponent(AccessibilityElementInfo& nodeInfo, const RefPtr<NG::WebPattern>& webPattern,
-        const int32_t direction, RefPtr<PipelineBase> context);
+        const int32_t direction, RefPtr<PipelineBase> context, FocusMoveResult& result,
+        int32_t focusRuleType = static_cast<int32_t>(FocusRuleType::DEFAULT), uint32_t searchDepth = 0);
     void WebFocusMoveSearchNG(int64_t elementId, int32_t direction,
         Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
         const RefPtr<NG::WebPattern>& webPattern);
+    void WebFocusMoveSearchWithCondition(const int64_t elementId,
+        const Accessibility::AccessibilityFocusMoveParam& param, const int32_t requestId,
+        Accessibility::AccessibilityElementOperatorCallback& callback, const RefPtr<NG::WebPattern>& webPattern);
+    FocusMoveResult WebFocusMoveSearchWithConditionNG(int64_t elementId, int32_t direction, int32_t focusRuleType,
+        Accessibility::AccessibilityElementInfo& info,
+        const RefPtr<PipelineBase>& context, const RefPtr<NG::WebPattern>& webPattern);
     void ExecuteWebAction(const int64_t elementId, const ActionParam& param, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t windowId,
         const RefPtr<NG::WebPattern>& webPattern);
@@ -349,6 +360,7 @@ public:
     void GetWebCursorPosition(const int64_t elementId, const int32_t requestId,
         AccessibilityElementOperatorCallback& callback, const RefPtr<NG::WebPattern>& webPattern);
     int64_t ConvertToSplitElementId(int64_t elementId);
+    bool GetWebDumpQueryType(const std::string& webAccFun, int32_t& mode, int32_t& direction);
     bool DumpElementInfosIfNeed(const DumpInfoArgument& argument, std::list<AccessibilityElementInfo>& infos,
         const RefPtr<NG::WebPattern>& webPattern, uint32_t windowId);
     void ExecuteWebDump(const DumpInfoArgument& argument, std::list<AccessibilityElementInfo>& infos,
@@ -544,12 +556,29 @@ public:
         AccessibilityElementInfo& nodeInfo,
         int64_t parentAccessibilityId);
 
+    void AddAccessibilityVirtualNode(const int64_t elementId,
+        const std::vector<AccessibilityVirtualNode>& nodes, const int32_t requestId,
+        AccessibilityElementOperatorCallback& callback, const int32_t windowId);
+    void RemoveAccessibilityVirtualNode(const int64_t elementId, const int32_t requestId,
+        AccessibilityElementOperatorCallback& callback, const int32_t windowId);
+
     void AddVirtualNodeChildrenToInfos(
         std::list<AccessibilityElementInfo>& infos,
         const RefPtr<NG::FrameNode>& hostNode,
         const RefPtr<NG::VirtualAccessibilityNode>& virtualNode,
         const CommonProperty& commonProperty,
         int64_t virtualNodeAccessibilityId);
+    void FillEventInfoWithVirtualNode(
+        const RefPtr<NG::FrameNode>& parentNode,
+        const RefPtr<NG::VirtualAccessibilityNode>& virtualNode,
+        AccessibilityEventInfo& eventInfo,
+        const RefPtr<NG::PipelineContext>& context,
+        int64_t elementId);
+    void SendEventToAccessibilityWithVirtualNode(
+        const AccessibilityEvent& accessibilityEvent,
+        const RefPtr<NG::FrameNode>& parentNode,
+        const RefPtr<NG::VirtualAccessibilityNode>& virtualNode,
+        const RefPtr<PipelineBase>& context);
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -807,12 +836,41 @@ private:
     void DumpInjectActionTest(const std::vector<std::string>& params);
     void DumpExecuteActionTest(const std::vector<std::string>& params);
     void DumpCustomActionTest(const std::vector<std::string>& params);
+    void DumpSetComponentTypeTest(const std::vector<std::string>& params);
+    void DumpClearComponentTypeTest(const std::vector<std::string>& params);
     void DumpEmbedSearchTest(const std::vector<std::string>& params);
     void DumpEmbedHoverTestNG(const std::vector<std::string>& params, uint32_t windowId);
     void DumpSetCheckListTest(const std::vector<std::string>& params);
     void DumpGetCheckListTest(const std::vector<std::string>& params);
 
     void DumpSpecificPropertySearchTest(const std::vector<std::string>& params, uint32_t windowId);
+
+    void DumpSetCustomPropertyTest(const DumpInfoArgument& argument);
+    void DumpGetCustomPropertyTest(int64_t nodeId);
+    bool ParseSetCustomPropertyParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+    bool ParseGetCustomPropertyParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+
+    void DumpAddVirtualNodeTest(const DumpInfoArgument& argument);
+    void DumpRemoveVirtualNodeTest(const DumpInfoArgument& argument);
+    void DumpGetVirtualNodeTest(const DumpInfoArgument& argument);
+    bool ParseAddVirtualNodeParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+    bool ParseRemoveVirtualNodeParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+    bool ParseGetVirtualNodeParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+    bool ParsePerformVirtualNodeActionParams(std::vector<std::string>::const_iterator& arg,
+        const std::vector<std::string>& params, DumpInfoArgument& argument);
+
+    void DumpPerformVirtualNodeActionTest(const DumpInfoArgument& argument);
+    void DumpVirtualAccessibilityNodeTree(const RefPtr<NG::FrameNode>& hostNode,
+        const RefPtr<NG::VirtualAccessibilityNode>& virtualNode, int32_t depth);
+
+    void UpdateAccessibilityElementInfo(const int64_t elementId,
+        const AccessibilityVirtualNode& accessibilityVirtualNode, const int32_t requestId,
+        AccessibilityElementOperatorCallback& callback, const int32_t windowId);
 
     void GenerateCommonPropertyForWeb(const RefPtr<PipelineBase>& context, CommonProperty& output,
             const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node);

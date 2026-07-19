@@ -16,10 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_PICTURE_DRAWABLE_DESCRIPTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_PICTURE_DRAWABLE_DESCRIPTOR_H
 
+#include <cstdint>
+#include <functional>
+#include <mutex>
 #include <unordered_map>
 
 #include "base/image/picture.h"
 #include "base/image/contrast_enhancer_image.h"
+#include "base/thread/cancelable_callback.h"
 #include "core/drawable/drawable_descriptor.h"
 
 namespace OHOS::Ace {
@@ -52,7 +56,9 @@ public:
     void SetHdrComposition(const HdrCompositionConfig& config);
 
     RefPtr<PixelMap> GetPixelMap() override;
+
     DrawableDescriptorLoadResult LoadSync() override;
+
     void LoadAsync(const LoadCallback&& callback) override;
 
     void RegisterUpdateCallback(int32_t nodeId, const UpdateCallback&& callback) override;
@@ -62,14 +68,34 @@ public:
     void Invalidate() override;
 
 private:
+    struct LoadSnapshot {
+        RefPtr<Picture> picture;
+        HdrCompositionConfig hdrConfig;
+    };
+
     bool IsHdrConfigValid() const;
-    RefPtr<PixelMap> DoComposeFOV();
+    static bool IsHdrConfigValid(const HdrCompositionConfig& config);
+    LoadSnapshot CreateLoadSnapshot() const;
+    LoadSnapshot CreateLoadSnapshotLocked() const;
+    RefPtr<PixelMap> LoadPixelMap(const LoadSnapshot& snapshot);
+    CancelableCallback<void()> EnqueueInvalidateTask();
+    std::function<void()> MakeInvalidateTask(const LoadSnapshot& snapshot);
+    CancelableCallback<void()> TakeNextInvalidateTask();
+    void PostInvalidateTask(CancelableCallback<void()> task);
+    void RunInvalidateTask(const LoadSnapshot& snapshot);
+    RefPtr<PixelMap> DoComposeFOV(const LoadSnapshot& snapshot);
 
     RefPtr<Picture> picture_;
     RefPtr<PixelMap> cachedPixelMap_;
     std::unordered_map<int32_t, UpdateCallback> updateCallbacks_;
     HdrCompositionConfig hdrConfig_;
     RefPtr<ContrastEnhancerImage> enhancer_;
+    mutable std::mutex stateMutex_;
+
+    // Single-slot serial queue for invalidate: one task can be posted or running,
+    // and this slot keeps only the newest request waiting behind it.
+    CancelableCallback<void()> latestPendingInvalidateTask_;
+    bool isInvalidateTaskInFlight_ = false;
 };
 } // namespace OHOS::Ace
 

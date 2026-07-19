@@ -428,6 +428,18 @@ public:
     {
         pasteButton_ = pasteButton;
     }
+    inline RefPtr<FrameNode> GetPasteButton() const
+    {
+        return pasteButton_;
+    }
+    inline void SetIsTextMenuGridMenuItem(bool isTextMenuGridMenuItem)
+    {
+        isTextMenuGridMenuItem_ = isTextMenuGridMenuItem;
+    }
+    inline bool IsTextMenuGridMenuItem() const
+    {
+        return isTextMenuGridMenuItem_;
+    }
     inline void SetOptionFontColor(const Color& color)
     {
         optionFontColor_ = color;
@@ -679,6 +691,7 @@ friend class ServiceCollaborationMenuAceHelper;
     bool blockClick_ = false;
     bool hasOptionWidth_ = false;
     bool isHover_ = false;
+    bool isTextMenuGridMenuItem_ = false;
     bool isOptionPattern_ = false;  // if it is OptionPattern
     bool showDefaultSelectedIcon_ = false;
     bool isSelectOption_ = false;
@@ -719,6 +732,8 @@ private:
         return true;
     }
     std::unique_ptr<Offset> lastTouchOffset_;
+    // true once the finger has moved out of the item bounds during the current touch sequence
+    bool movedOutOfRegion_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_PATTERN_H

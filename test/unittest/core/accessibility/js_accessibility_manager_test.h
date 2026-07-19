@@ -91,26 +91,40 @@ public:
     void SetUpdateCustomAccessibilityPropertyResult(
         const OperateVirtualNodeResult result, const int32_t requestId) override
     {
+        mockOperateResult_ = result;
+        mockRequestId = requestId;
+        updatePropertyCalled_ = true;
     }
 
     void SetAddAccessibilityVirtualNodeResult(
         const OperateVirtualNodeResult result, const int32_t requestId) override
     {
+        mockOperateResult_ = result;
+        mockRequestId = requestId;
+        addVirtualNodeCalled_ = true;
     }
 
     void SetRemoveAccessibilityVirtualNodeResult(
         const OperateVirtualNodeResult result, const int32_t requestId) override
     {
+        mockOperateResult_ = result;
+        mockRequestId = requestId;
+        removeVirtualNodeCalled_ = true;
     }
 
     std::list<Accessibility::AccessibilityElementInfo> mockInfos_;
     Accessibility::AccessibilityElementInfo mockInfo_;
     Accessibility::FocusMoveResult mockResult_;
+    Accessibility::OperateVirtualNodeResult mockOperateResult_ =
+        Accessibility::OperateVirtualNodeResult::INTERNAL_ERROR;
     int32_t mockRequestId = 0;
     bool mockSucceeded_ = false;
     bool mockFocusable_ = false;
     int32_t mockCursorPosition_ = 0;
     bool called_ = false;
+    bool updatePropertyCalled_ = false;
+    bool addVirtualNodeCalled_ = false;
+    bool removeVirtualNodeCalled_ = false;
 
     void Reset()
     {
@@ -120,6 +134,10 @@ public:
         mockFocusable_ = false;
         mockCursorPosition_ = 0;
         called_ = false;
+        updatePropertyCalled_ = false;
+        addVirtualNodeCalled_ = false;
+        removeVirtualNodeCalled_ = false;
+        mockOperateResult_ = Accessibility::OperateVirtualNodeResult::INTERNAL_ERROR;
     }
 };
 }  // namespace OHOS::Ace

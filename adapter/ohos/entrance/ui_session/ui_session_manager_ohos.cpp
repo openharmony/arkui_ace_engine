@@ -15,9 +15,232 @@
 
 #include "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_trace.h"
+#include "adapter/ohos/entrance/ui_session/ui_translate_request_util.h"
+#include "interfaces/inner_api/ui_session/ui_session_json_util.h"
+
+#include <algorithm>
+#include <cctype>
+
+#include "cJSON.h"
 
 namespace OHOS::Ace {
+namespace {
+constexpr int32_t PAGE_SCENE_MAX_ID_LENGTH = 128;
+constexpr int32_t PAGE_SCENE_RULE_VERSION = 1;
+constexpr char PAGE_SCENE_VERSION[] = "version";
+constexpr char PAGE_SCENE_RULE_SET_ID[] = "ruleSetId";
+constexpr char PAGE_SCENE_SOURCE_CONFIG[] = "sourceConfig";
+constexpr char PAGE_SCENE_ARKUI_SOURCE[] = "arkui";
+constexpr char PAGE_SCENE_RULES[] = "rules";
+constexpr char PAGE_SCENE_RULE_ID[] = "ruleId";
+constexpr char PAGE_SCENE_SCENE_TYPE[] = "sceneType";
+constexpr char PAGE_SCENE_ENABLED[] = "enabled";
+constexpr char PAGE_SCENE_SELECTOR[] = "selector";
+constexpr char PAGE_SCENE_NODE_TYPES[] = "nodeTypes";
+constexpr char PAGE_SCENE_CONDITION[] = "condition";
+constexpr char PAGE_SCENE_OPERATOR[] = "operator";
+constexpr char PAGE_SCENE_THRESHOLD[] = "threshold";
+constexpr char PAGE_SCENE_POLICY[] = "policy";
+constexpr char PAGE_SCENE_REPORT_ON_REGISTER[] = "reportOnRegister";
+constexpr char PAGE_SCENE_TEXT_EDITOR_SCENE[] = "TEXT_EDITOR";
+constexpr char PAGE_SCENE_COUNT_GTE_OPERATOR[] = "COUNT_GTE";
+constexpr char PAGE_SCENE_TEXT_INPUT_TAG[] = "TextInput";
+constexpr char PAGE_SCENE_TEXT_AREA_TAG[] = "TextArea";
+constexpr char PAGE_SCENE_SEARCH_TAG[] = "Search";
+constexpr char PAGE_SCENE_SEARCH_FIELD_TAG[] = "SearchField";
+constexpr char PAGE_SCENE_RICH_EDITOR_TAG[] = "RichEditor";
+
+bool IsValidPageSceneId(const std::string& id)
+{
+    if (id.empty() || id.size() > PAGE_SCENE_MAX_ID_LENGTH) {
+        return false;
+    }
+    return std::all_of(id.begin(), id.end(), [](char ch) {
+        return std::isalnum(static_cast<unsigned char>(ch)) || ch == '_' || ch == '-';
+    });
+}
+
+bool IsPageSceneTextInputNode(const std::string& nodeTag)
+{
+    return nodeTag == PAGE_SCENE_TEXT_INPUT_TAG || nodeTag == PAGE_SCENE_TEXT_AREA_TAG ||
+           nodeTag == PAGE_SCENE_SEARCH_TAG || nodeTag == PAGE_SCENE_SEARCH_FIELD_TAG ||
+           nodeTag == PAGE_SCENE_RICH_EDITOR_TAG;
+}
+
+bool IsPageSceneInputControlNode(const std::string& nodeTag)
+{
+    return nodeTag == PAGE_SCENE_TEXT_INPUT_TAG || nodeTag == PAGE_SCENE_TEXT_AREA_TAG ||
+           nodeTag == PAGE_SCENE_SEARCH_TAG || nodeTag == PAGE_SCENE_RICH_EDITOR_TAG;
+}
+
+std::string NormalizePageSceneNodeType(const std::string& nodeTag)
+{
+    return nodeTag == PAGE_SCENE_SEARCH_FIELD_TAG ? PAGE_SCENE_SEARCH_TAG : nodeTag;
+}
+
+std::string GetJsonString(const JsonObject* object, const char* key)
+{
+    if (object == nullptr || key == nullptr) {
+        return "";
+    }
+    auto item = cJSON_GetObjectItem(object, key);
+    return (cJSON_IsString(item) && item->valuestring != nullptr) ? item->valuestring : "";
+}
+
+bool GetJsonBool(const JsonObject* object, const char* key, bool defaultValue)
+{
+    if (object == nullptr || key == nullptr) {
+        return defaultValue;
+    }
+    auto item = cJSON_GetObjectItem(object, key);
+    return cJSON_IsBool(item) ? cJSON_IsTrue(item) : defaultValue;
+}
+
+int32_t GetJsonInt(const JsonObject* object, const char* key, int32_t defaultValue)
+{
+    if (object == nullptr || key == nullptr) {
+        return defaultValue;
+    }
+    auto item = cJSON_GetObjectItem(object, key);
+    return cJSON_IsNumber(item) ? item->valueint : defaultValue;
+}
+
+bool IsSupportedArkuiPageScene(const std::string& sceneType)
+{
+    return sceneType == PAGE_SCENE_TEXT_EDITOR_SCENE;
+}
+
+std::set<std::string> ExtractTextInputNodeTypes(const JsonObject* ruleJsonValue)
+{
+    std::set<std::string> nodeTypeSet;
+    auto selector = cJSON_GetObjectItem(ruleJsonValue, PAGE_SCENE_SELECTOR);
+    if (!cJSON_IsObject(selector)) {
+        return nodeTypeSet;
+    }
+    auto nodeTypes = cJSON_GetObjectItem(selector, PAGE_SCENE_NODE_TYPES);
+    if (!cJSON_IsArray(nodeTypes) || cJSON_GetArraySize(nodeTypes) <= 0) {
+        return nodeTypeSet;
+    }
+    auto nodeTypeSize = cJSON_GetArraySize(nodeTypes);
+    for (int32_t index = 0; index < nodeTypeSize; ++index) {
+        auto nodeType = cJSON_GetArrayItem(nodeTypes, index);
+        if (!cJSON_IsString(nodeType) || nodeType->valuestring == nullptr) {
+            continue;
+        }
+        auto normalizedType = NormalizePageSceneNodeType(nodeType->valuestring);
+        if (IsPageSceneTextInputNode(normalizedType)) {
+            nodeTypeSet.emplace(normalizedType);
+        }
+    }
+    return nodeTypeSet;
+}
+
+bool HasCountGreaterThanOrEqualCondition(const JsonObject* ruleJsonValue)
+{
+    auto condition = cJSON_GetObjectItem(ruleJsonValue, PAGE_SCENE_CONDITION);
+    if (!cJSON_IsObject(condition)) {
+        return false;
+    }
+    return GetJsonString(condition, PAGE_SCENE_OPERATOR) == PAGE_SCENE_COUNT_GTE_OPERATOR &&
+           GetJsonInt(condition, PAGE_SCENE_THRESHOLD, 0) > 0;
+}
+
+bool IsSupportedArkuiPageSceneRule(const std::string& ruleId, const std::string& sceneType,
+    const std::set<std::string>& nodeTypes, const JsonObject* ruleJsonValue)
+{
+    return IsValidPageSceneId(ruleId) && IsSupportedArkuiPageScene(sceneType) &&
+           !nodeTypes.empty() && HasCountGreaterThanOrEqualCondition(ruleJsonValue);
+}
+
+std::string PrintJsonUnformatted(const JsonObject* object)
+{
+    if (object == nullptr) {
+        return "";
+    }
+    std::string result;
+    auto unformatted = cJSON_PrintUnformatted(object);
+    if (unformatted != nullptr) {
+        result = unformatted;
+        cJSON_free(unformatted);
+    }
+    return result;
+}
+
+std::string BuildPageSceneRuleJson(const JsonObject* root, const JsonObject* ruleJsonValue)
+{
+    auto scopedRuleSet = cJSON_Duplicate(root, true);
+    if (scopedRuleSet == nullptr) {
+        return "";
+    }
+    auto scopedRules = cJSON_CreateArray();
+    auto scopedRule = cJSON_Duplicate(ruleJsonValue, true);
+    if (scopedRules == nullptr || scopedRule == nullptr) {
+        cJSON_Delete(scopedRuleSet);
+        cJSON_Delete(scopedRules);
+        cJSON_Delete(scopedRule);
+        return "";
+    }
+    cJSON_AddItemToArray(scopedRules, scopedRule);
+    if (!cJSON_ReplaceItemInObject(scopedRuleSet, PAGE_SCENE_RULES, scopedRules)) {
+        cJSON_Delete(scopedRuleSet);
+        cJSON_Delete(scopedRules);
+        return "";
+    }
+    auto result = PrintJsonUnformatted(scopedRuleSet);
+    cJSON_Delete(scopedRuleSet);
+    return result;
+}
+
+void LogPageSceneRuleParseFailed(const std::string& ruleJson, const char* parseEnd)
+{
+    size_t offset = 0;
+    if (parseEnd != nullptr && parseEnd >= ruleJson.c_str()) {
+        offset = static_cast<size_t>(parseEnd - ruleJson.c_str());
+    }
+    LOGW("Parse page scene rule failed, length:%{public}zu, offset:%{public}zu", ruleJson.length(), offset);
+}
+} // namespace
+
 constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 131072;
+namespace {
+constexpr char TRANSLATE_PROCESS_KEY[] = "translate";
+
+struct PageTranslateRequestInfo {
+    int32_t scope = PageTranslateRequestUtil::ARKUI_ARKWEB_TRANSLATE_SCOPE;
+    std::string extraData;
+    bool valid = true;
+};
+
+bool HasScope(int32_t scope, int32_t target)
+{
+    return (scope & target) != 0;
+}
+
+PageTranslateRequestInfo ParsePageTranslateRequest(const std::string& request)
+{
+    PageTranslateRequestInfo info;
+    auto json = InspectorJsonUtil::ParseJsonString(request);
+    if (json == nullptr || !json->IsObject()) {
+        info.extraData = request;
+        return info;
+    }
+    auto scopeValue = json->GetValue("scope");
+    if (scopeValue != nullptr) {
+        if (!scopeValue->IsNumber()) {
+            info.valid = false;
+            return info;
+        }
+        auto scope = scopeValue->GetInt();
+        if (!PageTranslateRequestUtil::IsTranslateScopeValid(scope)) {
+            info.valid = false;
+            return info;
+        }
+        info.scope = scope;
+    }
+    info.extraData = json->GetString("extraData", "");
+    return info;
+}
+} // namespace
 
 UiSessionManager* UiSessionManager::GetInstance()
 {
@@ -95,7 +318,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
 }
 
 void UiSessionManagerOhos::ReportComponentChangeEvent(
-    int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value, uint32_t eventType)
+    int32_t nodeId, const std::string& key, const std::string& value, uint32_t eventType)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
@@ -104,7 +327,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
             NeedComponentChangeTypeReporting(eventType)) {
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
-            data->Put(key.data(), value->ToString().data());
+            data->Put(key.data(), value.data());
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
             LOGW("report component event failed, process id:%{public}d", pair.first);
@@ -174,24 +397,419 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
 {
     // add death callback
     auto uiReportProxyRecipient = new UiReportProxyRecipient([processId, this]() {
-        std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-        std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
         LOGW("agent process dead,processId:%{public}d", processId);
-        auto translateIter = processMap_.find("translate");
-        if (translateIter != processMap_.end() && translateIter->second.size() == 1 &&
-            *translateIter->second.begin() == processId) {
+        bool shouldResetWebTranslate = false;
+        bool shouldResetPageTranslate = false;
+        {
+            std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+            std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+            auto translateIter = processMap_.find(TRANSLATE_PROCESS_KEY);
+            bool isTranslateProcess = translateIter != processMap_.end() &&
+                                      translateIter->second.find(processId) != translateIter->second.end();
+            if (isTranslateProcess) {
+                shouldResetWebTranslate = translateIter->second.size() == 1;
+                std::lock_guard<std::mutex> pageTranslateLock(pageTranslateSessionMutex_);
+                shouldResetPageTranslate = pageTranslateStarted_ &&
+                                           (pageTranslateOwnerPid_ == processId || pageTranslateOwnerPid_ < 0);
+                if (shouldResetPageTranslate) {
+                    pageTranslateStarted_ = false;
+                    pageTranslateScope_ = 0;
+                    pageTranslateOwnerPid_ = -1;
+                }
+            }
+            // reportMap remove this processId
+            this->reportObjectMap_.erase(processId);
+            // processMap remove this processId
+            for (auto& [_, processSet] : processMap_) {
+                processSet.erase(processId);
+            }
+        }
+        if (shouldResetWebTranslate) {
             ResetTranslate(-1);
         }
-        // reportMap remove this processId
-        this->reportObjectMap_.erase(processId);
-        // processMap remove this processId
-        for (auto& [_, processSet] : processMap_) {
-            processSet.erase(processId);
+        if (shouldResetPageTranslate) {
+            ResetPageTranslate(-1);
+        }
+        {
+            std::lock_guard<std::mutex> lock(pageSceneMutex_);
+            if (pageSceneRuleSets_.erase(processId) > 0) {
+                ErasePendingPageSceneRulesLocked(processId);
+                auto previousCount = pageSceneRuleRegisterProcesses_.fetch_sub(1);
+                if (previousCount <= 1 || !HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE)) {
+                    pageSceneInputNodeCount_.store(0);
+                    pendingPageSceneDetectRules_.clear();
+                }
+            }
+            pendingPageSceneGets_.erase(processId);
         }
     });
     reportStub->AddDeathRecipient(uiReportProxyRecipient);
     std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     reportObjectMap_[processId] = reportStub;
+}
+
+int32_t UiSessionManagerOhos::RegisterPageSceneRules(int32_t processId, const std::string& ruleJson)
+{
+    sptr<IRemoteObject> reportObject;
+    {
+        std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+        auto reportIter = reportObjectMap_.find(processId);
+        if (reportIter != reportObjectMap_.end()) {
+            reportObject = reportIter->second;
+        }
+    }
+    if (reportObject == nullptr) {
+        LOGW("RegisterPageSceneRules report object is null, process id:%{public}d", processId);
+        return NOT_CONNECTED;
+    }
+    auto ruleSetInfo = ExtractPageSceneRuleSetInfo(ruleJson);
+    if (ruleSetInfo.ruleSetId.empty()) {
+        LOGW("RegisterPageSceneRules invalid rule json, process id:%{public}d", processId);
+        return PARAM_INVALID;
+    }
+    {
+        std::lock_guard<std::mutex> lock(pageSceneMutex_);
+        bool hadTextEditorRule = HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE);
+        if (pageSceneRuleSets_.find(processId) != pageSceneRuleSets_.end()) {
+            LOGW("RegisterPageSceneRules duplicated, process id:%{public}d", processId);
+            return LAST_UNFINISH;
+        }
+        pageSceneRuleSets_[processId] = ruleSetInfo;
+        auto previousCount = pageSceneRuleRegisterProcesses_.fetch_add(1);
+        if (previousCount == 0 ||
+            (!hadTextEditorRule && HasPageSceneRule(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, false, ""))) {
+            pageSceneInputNodeCount_.store(0);
+        }
+    }
+    SaveProcessId("pageScene", processId);
+    auto registerRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, true, "");
+    for (const auto& registerRuleJson : registerRuleJsons) {
+        TriggerPageSceneDetect(processId, registerRuleJson, false);
+    }
+    return NO_ERROR;
+}
+
+int32_t UiSessionManagerOhos::UnregisterPageSceneRules(int32_t processId, const std::string& ruleSetId)
+{
+    if (ruleSetId.empty()) {
+        return PARAM_INVALID;
+    }
+    {
+        std::lock_guard<std::mutex> lock(pageSceneMutex_);
+        auto iter = pageSceneRuleSets_.find(processId);
+        if (iter == pageSceneRuleSets_.end() || iter->second.ruleSetId != ruleSetId) {
+            return PARAM_INVALID;
+        }
+        pageSceneRuleSets_.erase(iter);
+        ErasePendingPageSceneRulesLocked(processId);
+        auto previousCount = pageSceneRuleRegisterProcesses_.fetch_sub(1);
+        if (previousCount <= 1 || !HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE)) {
+            pageSceneInputNodeCount_.store(0);
+            pendingPageSceneDetectRules_.clear();
+        }
+        pendingPageSceneGets_.erase(processId);
+    }
+    EraseProcessId("pageScene", processId);
+    TriggerPageSceneDetect(processId, "", false);
+    return NO_ERROR;
+}
+
+int32_t UiSessionManagerOhos::GetPageScene(int32_t processId, const std::string& ruleJsonOrRuleSetId)
+{
+    std::string ruleJson;
+    if (ruleJsonOrRuleSetId.empty()) {
+        return PARAM_INVALID;
+    }
+    {
+        std::lock_guard<std::mutex> lock(pageSceneMutex_);
+        if (pendingPageSceneGets_.find(processId) != pendingPageSceneGets_.end()) {
+            LOGW("GetPageScene duplicated, process id:%{public}d", processId);
+            return LAST_UNFINISH;
+        }
+        auto iter = pageSceneRuleSets_.find(processId);
+        if (iter != pageSceneRuleSets_.end() && iter->second.ruleSetId == ruleJsonOrRuleSetId) {
+            auto ruleJsons = GetPageSceneRuleJsons(iter->second, PAGE_SCENE_TEXT_EDITOR_SCENE, false, "");
+            if (!ruleJsons.empty()) {
+                ruleJson = ruleJsons.front();
+            }
+        } else {
+            auto ruleSetInfo = ExtractPageSceneRuleSetInfo(ruleJsonOrRuleSetId);
+            auto ruleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, false, "");
+            if (!ruleJsons.empty()) {
+                ruleJson = ruleJsons.front();
+            }
+        }
+        if (ruleJson.empty()) {
+            return PARAM_INVALID;
+        }
+        pendingPageSceneGets_.insert(processId);
+    }
+    TriggerPageSceneDetect(processId, ruleJson, true);
+    return NO_ERROR;
+}
+
+bool UiSessionManagerOhos::GetPageSceneRulesRegistered()
+{
+    return pageSceneRuleRegisterProcesses_.load() > 0 ? true : false;
+}
+
+void UiSessionManagerOhos::ReportPageSceneEvent(int32_t processId, const std::string& sceneJson, bool isGetResult)
+{
+    sptr<IRemoteObject> reportObject;
+    {
+        std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+        auto reportIter = reportObjectMap_.find(processId);
+        if (reportIter != reportObjectMap_.end()) {
+            reportObject = reportIter->second;
+        }
+    }
+    auto reportService = iface_cast<ReportService>(reportObject);
+    if (reportService != nullptr) {
+        reportService->ReportPageSceneEvent(sceneJson);
+    } else {
+        LOGW("ReportPageSceneEvent failed, process id:%{public}d", processId);
+    }
+    if (isGetResult) {
+        CompleteGetPageScene(processId);
+    }
+}
+
+void UiSessionManagerOhos::CompleteGetPageScene(int32_t processId)
+{
+    std::lock_guard<std::mutex> lock(pageSceneMutex_);
+    pendingPageSceneGets_.erase(processId);
+}
+
+void UiSessionManagerOhos::NotifyPageSceneNodeChanged(const std::string& nodeTag, bool isAttach)
+{
+    if (!IsPageSceneInputControlNode(nodeTag)) {
+        return;
+    }
+    auto ruleJsons = GetPageSceneRuleJsonsForNodeChange(nodeTag, PAGE_SCENE_TEXT_EDITOR_SCENE);
+    if (ruleJsons.empty()) {
+        return;
+    }
+    if (isAttach) {
+        pageSceneInputNodeCount_.fetch_add(1);
+    } else {
+        auto inputNodeCount = pageSceneInputNodeCount_.load();
+        while (inputNodeCount > 0) {
+            if (pageSceneInputNodeCount_.compare_exchange_weak(inputNodeCount, inputNodeCount - 1)) {
+                break;
+            }
+        }
+    }
+    {
+        std::lock_guard<std::mutex> lock(pageSceneMutex_);
+        for (const auto& [pid, ruleJson] : ruleJsons) {
+            if (pageSceneRuleSets_.find(pid) == pageSceneRuleSets_.end()) {
+                continue;
+            }
+            pendingPageSceneDetectRules_.emplace(pid, ruleJson);
+        }
+    }
+}
+
+void UiSessionManagerOhos::NotifyPageSceneContentChanged()
+{
+    std::lock_guard<std::mutex> lock(pageSceneMutex_);
+    for (const auto& [pid, ruleSetInfo] : pageSceneRuleSets_) {
+        auto ruleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, false, "");
+        for (const auto& ruleJson : ruleJsons) {
+            pendingPageSceneDetectRules_.emplace(pid, ruleJson);
+        }
+    }
+}
+
+void UiSessionManagerOhos::FlushPageSceneNodeChanged()
+{
+    std::vector<std::pair<int32_t, std::string>> ruleJsons;
+    {
+        std::lock_guard<std::mutex> lock(pageSceneMutex_);
+        if (pendingPageSceneDetectRules_.empty()) {
+            return;
+        }
+        ruleJsons.assign(pendingPageSceneDetectRules_.begin(), pendingPageSceneDetectRules_.end());
+        pendingPageSceneDetectRules_.clear();
+    }
+    for (const auto& [pid, ruleJson] : ruleJsons) {
+        TriggerPageSceneDetect(pid, ruleJson, false);
+    }
+}
+
+void UiSessionManagerOhos::SavePageSceneDetectFunction(PageSceneDetectFunction&& function)
+{
+    std::lock_guard<std::mutex> lock(pageSceneDetectFunctionMutex_);
+    pageSceneDetectFunction_ = std::move(function);
+}
+
+void UiSessionManagerOhos::ErasePendingPageSceneRulesLocked(int32_t processId)
+{
+    for (auto iter = pendingPageSceneDetectRules_.begin(); iter != pendingPageSceneDetectRules_.end();) {
+        if (iter->first == processId) {
+            iter = pendingPageSceneDetectRules_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+void UiSessionManagerOhos::TriggerPageSceneDetect(int32_t processId, const std::string& ruleJson, bool isGetResult)
+{
+    PageSceneDetectFunction pageSceneDetectFunction;
+    {
+        std::lock_guard<std::mutex> lock(pageSceneDetectFunctionMutex_);
+        pageSceneDetectFunction = pageSceneDetectFunction_;
+    }
+    if (!pageSceneDetectFunction) {
+        LOGW("TriggerPageSceneDetect callback is null, process id:%{public}d", processId);
+        if (isGetResult) {
+            CompleteGetPageScene(processId);
+        }
+        return;
+    }
+    pageSceneDetectFunction(processId, ruleJson, isGetResult);
+}
+
+UiSessionManagerOhos::PageSceneRuleSetInfo UiSessionManagerOhos::ExtractPageSceneRuleSetInfo(
+    const std::string& ruleJson) const
+{
+    PageSceneRuleSetInfo ruleSetInfo;
+    ruleSetInfo.ruleJson = ruleJson;
+    const char* parseEnd = nullptr;
+    auto root = cJSON_ParseWithOpts(ruleJson.c_str(), &parseEnd, true);
+    if (!cJSON_IsObject(root)) {
+        LogPageSceneRuleParseFailed(ruleJson, parseEnd);
+        cJSON_Delete(root);
+        return ruleSetInfo;
+    }
+    auto version = GetJsonInt(root, PAGE_SCENE_VERSION, 0);
+    if (version != PAGE_SCENE_RULE_VERSION) {
+        LOGW("Parse page scene rule failed, unsupported version:%{public}d", version);
+        cJSON_Delete(root);
+        return ruleSetInfo;
+    }
+    ruleSetInfo.version = version;
+    auto ruleSetId = GetJsonString(root, PAGE_SCENE_RULE_SET_ID);
+    if (!IsValidPageSceneId(ruleSetId)) {
+        LOGW("Parse page scene rule failed, invalid ruleSetId length:%{public}zu", ruleSetId.length());
+        cJSON_Delete(root);
+        return ruleSetInfo;
+    }
+    ruleSetInfo.ruleSetId = ruleSetId;
+    auto sourceConfig = cJSON_GetObjectItem(root, PAGE_SCENE_SOURCE_CONFIG);
+    if (cJSON_IsObject(sourceConfig)) {
+        ruleSetInfo.arkuiEnabled = GetJsonBool(sourceConfig, PAGE_SCENE_ARKUI_SOURCE, true);
+    }
+
+    auto rules = cJSON_GetObjectItem(root, PAGE_SCENE_RULES);
+    if (!cJSON_IsArray(rules)) {
+        cJSON_Delete(root);
+        return ruleSetInfo;
+    }
+    auto ruleSize = cJSON_GetArraySize(rules);
+    for (int32_t index = 0; index < ruleSize; ++index) {
+        auto ruleJsonValue = cJSON_GetArrayItem(rules, index);
+        if (!cJSON_IsObject(ruleJsonValue)) {
+            continue;
+        }
+        PageSceneRuleInfo ruleInfo;
+        ruleInfo.ruleId = GetJsonString(ruleJsonValue, PAGE_SCENE_RULE_ID);
+        ruleInfo.sceneType = GetJsonString(ruleJsonValue, PAGE_SCENE_SCENE_TYPE);
+        if (ruleInfo.ruleId.empty() || ruleInfo.sceneType.empty()) {
+            continue;
+        }
+        ruleInfo.enabled = GetJsonBool(ruleJsonValue, PAGE_SCENE_ENABLED, true);
+        auto policy = cJSON_GetObjectItem(ruleJsonValue, PAGE_SCENE_POLICY);
+        if (cJSON_IsObject(policy)) {
+            ruleInfo.reportOnRegister = GetJsonBool(policy, PAGE_SCENE_REPORT_ON_REGISTER, true);
+        }
+        ruleInfo.nodeTypes = ExtractTextInputNodeTypes(ruleJsonValue);
+        if (IsSupportedArkuiPageSceneRule(ruleInfo.ruleId, ruleInfo.sceneType, ruleInfo.nodeTypes, ruleJsonValue)) {
+            ruleInfo.ruleJson = BuildPageSceneRuleJson(root, ruleJsonValue);
+            ruleInfo.supported = !ruleInfo.ruleJson.empty();
+        }
+        ruleSetInfo.rules.emplace_back(ruleInfo);
+    }
+    cJSON_Delete(root);
+    return ruleSetInfo;
+}
+
+std::string UiSessionManagerOhos::ExtractPageSceneRuleSetId(const std::string& ruleJson) const
+{
+    return ExtractPageSceneRuleSetInfo(ruleJson).ruleSetId;
+}
+
+bool UiSessionManagerOhos::IsPageSceneRuleMatched(const PageSceneRuleInfo& rule, const std::string& sceneType,
+    bool requireRegisterPolicy, const std::string& nodeType) const
+{
+    if (!rule.enabled || !rule.supported || rule.sceneType != sceneType || rule.ruleJson.empty()) {
+        return false;
+    }
+    if (!nodeType.empty() && rule.nodeTypes.find(nodeType) == rule.nodeTypes.end()) {
+        return false;
+    }
+    if (requireRegisterPolicy && !rule.reportOnRegister) {
+        return false;
+    }
+    return true;
+}
+
+bool UiSessionManagerOhos::HasPageSceneRule(
+    const PageSceneRuleSetInfo& ruleSetInfo, const std::string& sceneType, bool requireRegisterPolicy,
+    const std::string& nodeType) const
+{
+    if (!ruleSetInfo.arkuiEnabled) {
+        return false;
+    }
+    for (const auto& rule : ruleSetInfo.rules) {
+        if (IsPageSceneRuleMatched(rule, sceneType, requireRegisterPolicy, nodeType)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::vector<std::string> UiSessionManagerOhos::GetPageSceneRuleJsons(
+    const PageSceneRuleSetInfo& ruleSetInfo, const std::string& sceneType, bool requireRegisterPolicy,
+    const std::string& nodeType) const
+{
+    std::vector<std::string> ruleJsons;
+    if (!ruleSetInfo.arkuiEnabled) {
+        return ruleJsons;
+    }
+    for (const auto& rule : ruleSetInfo.rules) {
+        if (!IsPageSceneRuleMatched(rule, sceneType, requireRegisterPolicy, nodeType)) {
+            continue;
+        }
+        ruleJsons.emplace_back(rule.ruleJson);
+    }
+    return ruleJsons;
+}
+
+bool UiSessionManagerOhos::HasRegisteredPageSceneRuleLocked(const std::string& sceneType) const
+{
+    for (const auto& [_, ruleSetInfo] : pageSceneRuleSets_) {
+        if (HasPageSceneRule(ruleSetInfo, sceneType, false, "")) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::vector<std::pair<int32_t, std::string>> UiSessionManagerOhos::GetPageSceneRuleJsonsForNodeChange(
+    const std::string& nodeTag, const std::string& sceneType)
+{
+    std::vector<std::pair<int32_t, std::string>> ruleJsons;
+    auto nodeType = NormalizePageSceneNodeType(nodeTag);
+    std::lock_guard<std::mutex> lock(pageSceneMutex_);
+    for (const auto& [pid, ruleSetInfo] : pageSceneRuleSets_) {
+        auto scopedRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, sceneType, false, nodeType);
+        for (const auto& ruleJson : scopedRuleJsons) {
+            ruleJsons.emplace_back(pid, ruleJson);
+        }
+    }
+    return ruleJsons;
 }
 
 void UiSessionManagerOhos::SetClickEventRegistered(bool status)
@@ -587,6 +1205,30 @@ void UiSessionManagerOhos::RemoveSaveGetCurrentInstanceId(int32_t instanceId)
     translateManagerMap_.erase(instanceId);
 }
 
+void UiSessionManagerOhos::SaveArkUIPageTranslateFunctions(PageTranslateTextFunction&& getTextFunction,
+    PageTranslateTextFunction&& startFunction, PageTranslateEndFunction&& endFunction,
+    PageTranslateResetFunction&& resetFunction, PageTranslateResultFunction&& resultFunction)
+{
+    std::lock_guard<std::mutex> lock(arkUIPageTranslateFunctionMutex_);
+    getArkUIPageTranslateTextFunction_ = std::move(getTextFunction);
+    startArkUIPageTranslateFunction_ = std::move(startFunction);
+    endArkUIPageTranslateFunction_ = std::move(endFunction);
+    resetArkUIPageTranslateFunction_ = std::move(resetFunction);
+    sendArkUIPageTranslateResultFunction_ = std::move(resultFunction);
+}
+
+void UiSessionManagerOhos::GetArkUIPageTranslateFunctions(PageTranslateTextFunction& getTextFunction,
+    PageTranslateTextFunction& startFunction, PageTranslateEndFunction& endFunction,
+    PageTranslateResetFunction& resetFunction, PageTranslateResultFunction& resultFunction)
+{
+    std::lock_guard<std::mutex> lock(arkUIPageTranslateFunctionMutex_);
+    getTextFunction = getArkUIPageTranslateTextFunction_;
+    startFunction = startArkUIPageTranslateFunction_;
+    endFunction = endArkUIPageTranslateFunction_;
+    resetFunction = resetArkUIPageTranslateFunction_;
+    resultFunction = sendArkUIPageTranslateResultFunction_;
+}
+
 std::shared_ptr<UiTranslateManager> UiSessionManagerOhos::GetCurrentTranslateManager()
 {
     std::function<int32_t()> getInstanceIdCallback;
@@ -612,16 +1254,28 @@ std::shared_ptr<UiTranslateManager> UiSessionManagerOhos::GetCurrentTranslateMan
     return nullptr;
 }
 
-void UiSessionManagerOhos::GetWebViewLanguage()
+bool UiSessionManagerOhos::PostToCurrentTranslateManager(
+    const char* caller, std::function<void(const std::shared_ptr<UiTranslateManager>&)>&& task)
 {
     auto currentTranslateManager = GetCurrentTranslateManager();
-    if (currentTranslateManager) {
-        currentTranslateManager->PostToUI([currentTranslateManager]() {
-            currentTranslateManager->GetWebViewCurrentLanguage();
-        });
-    } else {
-        LOGE("translateManager is nullptr ,translate failed");
+    if (!currentTranslateManager) {
+        LOGE("%{public}s translateManager is nullptr", caller);
+        return false;
     }
+    currentTranslateManager->PostToUI([currentTranslateManager, task = std::move(task)]() {
+        task(currentTranslateManager);
+    });
+    return true;
+}
+
+void UiSessionManagerOhos::GetWebViewLanguage()
+{
+#ifndef CROSS_PLATFORM
+    PostToCurrentTranslateManager(
+        "GetWebViewLanguage", [](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->GetWebViewCurrentLanguage();
+        });
+#endif
 }
 
 void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback)
@@ -731,6 +1385,9 @@ void UiSessionManagerOhos::SendSpecifiedContentOffsets(const std::vector<std::pa
 void UiSessionManagerOhos::SaveProcessId(std::string key, int32_t id)
 {
     std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
+    if (key == TRANSLATE_PROCESS_KEY) {
+        processMap_[key].clear();
+    }
     processMap_[key].emplace(id);
 }
 
@@ -744,44 +1401,231 @@ void UiSessionManagerOhos::EraseProcessId(const std::string& key, int32_t target
     processIter->second.erase(targetPid);
 }
 
+void UiSessionManagerOhos::MarkPageTranslateOwner(int32_t processId)
+{
+    std::lock_guard<std::mutex> lock(pageTranslateSessionMutex_);
+    if (pageTranslateStarted_) {
+        pageTranslateOwnerPid_ = processId;
+    }
+}
+
+void UiSessionManagerOhos::OnPageTranslateResultHandled(int32_t processId)
+{
+    bool shouldEraseProcess = true;
+    {
+        std::lock_guard<std::mutex> lock(pageTranslateSessionMutex_);
+        shouldEraseProcess = !pageTranslateStarted_ || pageTranslateOwnerPid_ != processId;
+    }
+    if (shouldEraseProcess) {
+        EraseProcessId(TRANSLATE_PROCESS_KEY, processId);
+    }
+}
+
 void UiSessionManagerOhos::SendCurrentLanguage(std::string result)
 {
-    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
-    std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    auto processIter = processMap_.find("translate");
-    if (processIter == processMap_.end() || processIter->second.empty()) {
-        LOGW("SendCurrentLanguage no report proxy");
-        return;
-    }
-    for (const auto& pid : processIter->second) {
-        auto reportIter = reportObjectMap_.find(pid);
-        auto reportService =
-            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
-        if (reportService != nullptr) {
-            reportService->SendCurrentLanguage(result);
-        } else {
-            LOGW("Send current language failed, process id:%{public}d", pid);
+    int32_t processId = -1;
+    sptr<ReportService> reportService;
+    {
+        std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+        std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
+        auto processIter = processMap_.find(TRANSLATE_PROCESS_KEY);
+        if (processIter == processMap_.end() || processIter->second.empty()) {
+            LOGW("SendCurrentLanguage no report proxy");
+            return;
         }
+        processId = *processIter->second.begin();
+        auto reportIter = reportObjectMap_.find(processId);
+        reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
+    }
+    if (reportService != nullptr) {
+        reportService->SendCurrentLanguage(result);
+    } else {
+        LOGW("Send current language failed, process id:%{public}d", processId);
     }
 }
 
 void UiSessionManagerOhos::GetWebTranslateText(std::string extraData, bool isContinued)
 {
-    auto currentTranslateManager = GetCurrentTranslateManager();
-    if (currentTranslateManager) {
-        currentTranslateManager->PostToUI([currentTranslateManager, extraData, isContinued]() {
-            currentTranslateManager->GetTranslateText(extraData, isContinued);
+#ifndef CROSS_PLATFORM
+    PostToCurrentTranslateManager("GetWebTranslateText",
+        [extraData, isContinued](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->GetTranslateText(extraData, isContinued);
         });
-    } else {
-        LOGE("translateManager is nullptr ,translate failed");
+#endif
+}
+
+int32_t UiSessionManagerOhos::GetPageTranslateText(const std::string& request)
+{
+    auto requestInfo = ParsePageTranslateRequest(request);
+    if (!requestInfo.valid) {
+        LOGW("GetPageTranslateText invalid request scope");
+        return PARAM_INVALID;
     }
+    PageTranslateTextFunction getTextFunction;
+    PageTranslateTextFunction startFunction;
+    PageTranslateEndFunction endFunction;
+    PageTranslateResetFunction resetFunction;
+    PageTranslateResultFunction resultFunction;
+    GetArkUIPageTranslateFunctions(getTextFunction, startFunction, endFunction, resetFunction, resultFunction);
+    if (!PostToCurrentTranslateManager("GetPageTranslateText",
+        [requestInfo, getTextFunction](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->GetPageTranslateText(requestInfo.scope, requestInfo.extraData);
+            if (HasScope(requestInfo.scope, PageTranslateRequestUtil::ARKUI_TRANSLATE_SCOPE) && getTextFunction) {
+                getTextFunction(false);
+            }
+        })) {
+        return FAILED;
+    }
+    return NO_ERROR;
+}
+
+int32_t UiSessionManagerOhos::StartPageTranslate(const std::string& request)
+{
+    auto requestInfo = ParsePageTranslateRequest(request);
+    if (!requestInfo.valid) {
+        LOGW("StartPageTranslate invalid request scope");
+        return PARAM_INVALID;
+    }
+    auto currentTranslateManager = GetCurrentTranslateManager();
+    if (!currentTranslateManager) {
+        LOGE("StartPageTranslate translateManager is nullptr");
+        return FAILED;
+    }
+    {
+        std::lock_guard<std::mutex> lock(pageTranslateSessionMutex_);
+        pageTranslateScope_ = requestInfo.scope;
+        pageTranslateStarted_ = true;
+        pageTranslateOwnerPid_ = -1;
+    }
+    PageTranslateTextFunction getTextFunction;
+    PageTranslateTextFunction startFunction;
+    PageTranslateEndFunction endFunction;
+    PageTranslateResetFunction resetFunction;
+    PageTranslateResultFunction resultFunction;
+    GetArkUIPageTranslateFunctions(getTextFunction, startFunction, endFunction, resetFunction, resultFunction);
+    currentTranslateManager->PostToUI([currentTranslateManager, requestInfo, startFunction]() {
+        currentTranslateManager->StartPageTranslate(requestInfo.scope, requestInfo.extraData);
+        if (HasScope(requestInfo.scope, PageTranslateRequestUtil::ARKUI_TRANSLATE_SCOPE) && startFunction) {
+            startFunction(true);
+        }
+    });
+    return NO_ERROR;
+}
+
+void UiSessionManagerOhos::EndPageTranslate()
+{
+    int32_t scope = PageTranslateRequestUtil::ARKUI_ARKWEB_TRANSLATE_SCOPE;
+    {
+        std::lock_guard<std::mutex> lock(pageTranslateSessionMutex_);
+        scope = pageTranslateScope_ == 0 ? PageTranslateRequestUtil::ARKUI_ARKWEB_TRANSLATE_SCOPE : pageTranslateScope_;
+        pageTranslateStarted_ = false;
+        pageTranslateScope_ = 0;
+        pageTranslateOwnerPid_ = -1;
+    }
+    PageTranslateTextFunction getTextFunction;
+    PageTranslateTextFunction startFunction;
+    PageTranslateEndFunction endFunction;
+    PageTranslateResetFunction resetFunction;
+    PageTranslateResultFunction resultFunction;
+    GetArkUIPageTranslateFunctions(getTextFunction, startFunction, endFunction, resetFunction, resultFunction);
+    PostToCurrentTranslateManager(
+        "EndPageTranslate", [scope, endFunction](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->EndPageTranslate(scope);
+            if (HasScope(scope, PageTranslateRequestUtil::ARKUI_TRANSLATE_SCOPE) && endFunction) {
+                endFunction();
+            }
+        });
+}
+
+void UiSessionManagerOhos::ResetPageTranslate(int32_t nodeId)
+{
+    PageTranslateTextFunction getTextFunction;
+    PageTranslateTextFunction startFunction;
+    PageTranslateEndFunction endFunction;
+    PageTranslateResetFunction resetFunction;
+    PageTranslateResultFunction resultFunction;
+    GetArkUIPageTranslateFunctions(getTextFunction, startFunction, endFunction, resetFunction, resultFunction);
+    PostToCurrentTranslateManager("ResetPageTranslate",
+        [nodeId, resetFunction](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->ResetPageTranslate(nodeId);
+            if (resetFunction) {
+                resetFunction(nodeId);
+            }
+        });
+}
+
+void UiSessionManagerOhos::SendPageTranslateResult(const std::string& result)
+{
+    std::vector<TranslateResult> translateResults;
+    if (!PageTranslateRequestUtil::ParseTranslateResults(result, translateResults)) {
+        LOGW("SendPageTranslateResult parse result failed");
+        return;
+    }
+    PageTranslateTextFunction getTextFunction;
+    PageTranslateTextFunction startFunction;
+    PageTranslateEndFunction endFunction;
+    PageTranslateResetFunction resetFunction;
+    PageTranslateResultFunction resultFunction;
+    GetArkUIPageTranslateFunctions(getTextFunction, startFunction, endFunction, resetFunction, resultFunction);
+    PostToCurrentTranslateManager("SendPageTranslateResult",
+        [translateResults, resultFunction](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->SendPageTranslateResult(translateResults);
+            if (resultFunction) {
+                resultFunction(translateResults);
+            }
+        });
+}
+
+void UiSessionManagerOhos::SendPageTextToAI(int32_t nodeId, const std::string& text, int64_t version)
+{
+    int32_t processId = -1;
+    sptr<ReportService> reportService;
+    {
+        std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
+        std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
+        auto processIter = processMap_.find(TRANSLATE_PROCESS_KEY);
+        if (processIter == processMap_.end() || processIter->second.empty()) {
+            LOGW("SendPageTextToAI no report proxy");
+            return;
+        }
+        processId = *processIter->second.begin();
+        auto reportIter = reportObjectMap_.find(processId);
+        reportService =
+            (reportIter != reportObjectMap_.end()) ? iface_cast<ReportService>(reportIter->second) : nullptr;
+    }
+    if (reportService != nullptr) {
+        reportService->SendPageText(nodeId, text, version);
+    } else {
+        LOGW("Send page text to ai failed, process id:%{public}d", processId);
+    }
+}
+
+int32_t UiSessionManagerOhos::GetCurrentAbilityLanguageInfo(std::string& language, std::string& region)
+{
+    GetAbilityLanguageInfoFunction callback;
+    {
+        std::lock_guard<std::mutex> lock(getAbilityLanguageInfoCallbackMutex_);
+        callback = getAbilityLanguageInfoCallback_;
+    }
+    if (!callback) {
+        LOGW("GetCurrentAbilityLanguageInfo callback is not registered");
+        return FAILED;
+    }
+    return callback(language, region);
+}
+
+void UiSessionManagerOhos::SaveGetCurrentAbilityLanguageInfoFunction(GetAbilityLanguageInfoFunction&& callback)
+{
+    std::lock_guard<std::mutex> lock(getAbilityLanguageInfoCallbackMutex_);
+    getAbilityLanguageInfoCallback_ = std::move(callback);
 }
 
 void UiSessionManagerOhos::SendWebTextToAI(int32_t nodeId, std::string res)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::shared_lock<std::shared_mutex> processMapLock(processMapMutex_);
-    auto processIter = processMap_.find("translate");
+    auto processIter = processMap_.find(TRANSLATE_PROCESS_KEY);
     if (processIter == processMap_.end() || processIter->second.empty()) {
         LOGW("SendWebTextToAI no report proxy");
         return;
@@ -801,38 +1645,32 @@ void UiSessionManagerOhos::SendWebTextToAI(int32_t nodeId, std::string res)
 void UiSessionManagerOhos::SendTranslateResult(
     int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids)
 {
-    auto currentTranslateManager = GetCurrentTranslateManager();
-    if (currentTranslateManager) {
-        currentTranslateManager->PostToUI([currentTranslateManager, nodeId, results, ids]() {
-            currentTranslateManager->SendTranslateResult(nodeId, results, ids);
+#ifndef CROSS_PLATFORM
+    PostToCurrentTranslateManager("SendTranslateResult",
+        [nodeId, results, ids](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->SendTranslateResult(nodeId, results, ids);
         });
-    } else {
-        LOGE("translateManager is nullptr ,translate failed");
-    }
+#endif
 }
 
 void UiSessionManagerOhos::SendTranslateResult(int32_t nodeId, std::string res)
 {
-    auto currentTranslateManager = GetCurrentTranslateManager();
-    if (currentTranslateManager) {
-        currentTranslateManager->PostToUI([currentTranslateManager, nodeId, res]() {
-            currentTranslateManager->SendTranslateResult(nodeId, res);
+#ifndef CROSS_PLATFORM
+    PostToCurrentTranslateManager("SendTranslateResult",
+        [nodeId, res](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->SendTranslateResult(nodeId, res);
         });
-    } else {
-        LOGE("translateManager is nullptr ,translate failed");
-    }
+#endif
 }
 
 void UiSessionManagerOhos::ResetTranslate(int32_t nodeId)
 {
-    auto currentTranslateManager = GetCurrentTranslateManager();
-    if (currentTranslateManager) {
-        currentTranslateManager->PostToUI([currentTranslateManager, nodeId]() {
-            currentTranslateManager->ResetTranslate(nodeId);
+#ifndef CROSS_PLATFORM
+    PostToCurrentTranslateManager("ResetTranslate",
+        [nodeId](const std::shared_ptr<UiTranslateManager>& translateManager) {
+            translateManager->ResetTranslate(nodeId);
         });
-    } else {
-        LOGE("translateManager is nullptr ,translate failed");
-    }
+#endif
 }
 
 void UiSessionManagerOhos::GetPixelMap()
@@ -913,6 +1751,7 @@ void UiSessionManagerOhos::SendArkWebImagesById(int32_t windowId, const std::map
 
 void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps)
 {
+#ifndef CROSS_PLATFORM
     auto currentTranslateManager = GetCurrentTranslateManager();
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
@@ -940,6 +1779,7 @@ void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std
         });
     }
     processIter->second.clear();
+#endif
 }
 
 void UiSessionManagerOhos::SendCommand(const std::string& command)

@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/progress/progress_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ProgressPattern::SetBuilderFuncMultiThread()
+ACE_FORCE_EXPORT void ProgressPattern::SetBuilderFuncMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);

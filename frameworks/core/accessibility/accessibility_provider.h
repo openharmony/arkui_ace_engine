@@ -55,7 +55,11 @@ public:
         const ArkUI_AccessibilityEventInfo& accessibilityEvent,
         void (*callback)(int32_t errorCode)) = 0;
     virtual void SendThirdAccessibilityProvider(
-        const std::weak_ptr<ThirdAccessibilityManager>& thirdAccessibilityManager) {};
+        const std::weak_ptr<ThirdAccessibilityManager>& thirdAccessibilityManager) {}
+    virtual std::weak_ptr<ThirdAccessibilityManager> GetThirdAccessibilityManager()
+    {
+        return std::weak_ptr<ThirdAccessibilityManager>();
+    }
 };
 } // namespace OHOS::Ace
 

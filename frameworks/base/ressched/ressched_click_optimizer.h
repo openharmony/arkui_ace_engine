@@ -51,13 +51,18 @@ public:
         depth_ = std::clamp(value, 0, MAX_DEPTH);
     }
 
-    static void GetComponentTextRecursive(const WeakPtr<NG::FrameNode> weakNode, std::string& text,
-        const int32_t remain, const int32_t maxNodes = INT_MAX);
+    void HandleTouchClickableFrameNodeReport(const WeakPtr<NG::FrameNode>& frameNode);
 
 private:
+    bool BuildComponentPayload(const WeakPtr<NG::FrameNode>& weakNode,
+        std::unordered_map<std::string, std::string>& payload, const int32_t depth, int32_t maxNodes = INT_MAX);
+    void GetComponentTextRecursive(const WeakPtr<NG::FrameNode> weakNode, std::string& text,
+        const int32_t remain, int32_t& maxNodes);
+
     bool isInit_ = false;
     std::atomic_bool clickExtEnabled_ = false;
     std::atomic<int32_t> depth_ = DEFAULT_DEPTH;
+    std::atomic<uint64_t> lastClickReportedTimestamp_ = 0;
 
     static constexpr int32_t MAX_DEPTH = 20;
     static constexpr int32_t DEFAULT_DEPTH = 5;

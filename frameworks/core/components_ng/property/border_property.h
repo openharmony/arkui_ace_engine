@@ -16,14 +16,18 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_BORDER_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_BORDER_PROPERTY_H
 
+#include <memory>
 #include <optional>
 #include <unordered_map>
 #include <functional>
 #include "base/geometry/dimension.h"
-#include "base/json/json_util.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/common/resource/resource_object.h"
+
+namespace OHOS::Ace {
+class JsonValue;
+}
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -273,7 +277,7 @@ struct BorderColorProperty {
                (bottomColor == value.bottomColor);
     }
 
-    std::string ToString() const;
+    ACE_FORCE_EXPORT std::string ToString() const;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
         const InspectorFilter& filter, bool isOutline = false) const;
@@ -381,7 +385,7 @@ struct ACE_FORCE_EXPORT BorderWidthPropertyT<Dimension> {
     void ToDashJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
         const InspectorFilter& filter, const std::string& keyValue) const;
 
-    std::string ToString() const;
+    ACE_FORCE_EXPORT std::string ToString() const;
 
     void AddResource(
         const std::string& key,

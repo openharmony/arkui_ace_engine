@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,45 +13,47 @@
  * limitations under the License.
  */
 #include "gtest/gtest.h"
-
 #define private public
 #define protected public
-
 #include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
-
 #include "test/unittest/core/event/frame_node_on_tree.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "core/common/frontend.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/common/frontend.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
+#include "core/components_ng/pattern/dialog/dialog_inner_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/stage/stage_pattern.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/menu/menu_manager.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components_ng/pattern/toast/toast_view.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 
@@ -516,19 +518,19 @@ HWTEST_F(OverlayManagerTwoTestNg, CheckPageNeedAvoidKeyboard001, TestSize.Level1
 }
 
 /**
- * @tc.name: isMaskNode001
- * @tc.desc: Test isMaskNode
+ * @tc.name: IsMaskNode001
+ * @tc.desc: Test IsMaskNode
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayManagerTwoTestNg, isMaskNode001, TestSize.Level1)
+HWTEST_F(OverlayManagerTwoTestNg, IsMaskNode001, TestSize.Level1)
 {
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
-    EXPECT_FALSE(overlayManager->isMaskNode(2));
+    EXPECT_FALSE(overlayManager->IsMaskNode(2));
 
     overlayManager->SetMaskNodeId(1, 1);
     overlayManager->SetMaskNodeId(2, 2);
-    EXPECT_TRUE(overlayManager->isMaskNode(1));
+    EXPECT_TRUE(overlayManager->IsMaskNode(1));
 }
 
 /**
@@ -632,9 +634,11 @@ HWTEST_F(OverlayManagerTwoTestNg, OnUIExtensionWindowSizeChange001, TestSize.Lev
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
 
     overlayManager->OnUIExtensionWindowSizeChange();
-
-    overlayManager->dialogMap_.insert({ 1, rootNode });
-    overlayManager->dialogMap_.insert({ 2, dialogNode });
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->dialogMap_.insert({ 1, rootNode });
+    dialogInnerManager->dialogMap_.insert({ 2, dialogNode });
 
     overlayManager->OnUIExtensionWindowSizeChange();
     EXPECT_FALSE(dialogNode->GetPattern<DialogPattern>()->isUIExtensionSubWindow_);
@@ -673,13 +677,17 @@ HWTEST_F(OverlayManagerTwoTestNg, ShowCalendarDialog001, TestSize.Level1)
 {
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
 
     overlayManager->PopModalDialog(2);
 
-    overlayManager->maskNodeIdMap_.insert({ 1, 1 });
+    dialogInnerManager->maskNodeIdMap_.insert({ 1, 1 });
     overlayManager->PopModalDialog(2);
 
-    overlayManager->maskNodeIdMap_.insert({ 2, 2 });
+    dialogInnerManager->maskNodeIdMap_.insert({ 2, 2 });
     overlayManager->PopModalDialog(2);
 
     auto subwindow = AceType::MakeRefPtr<MockSubwindow>();
@@ -1129,7 +1137,10 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
     MockContainer::Current()->SetIsSceneBoardWindow(true);
-    overlayManager->OpenDialogAnimation(dialogNode_, props);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
     /**
@@ -1145,7 +1156,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation, TestSize.Level1)
     };
     auto maskNode_ = DialogView::CreateDialogNode(props, nullptr);
     EXPECT_NE(maskNode_, nullptr);
-    overlayManager->OpenDialogAnimation(maskNode_, maskProps);
+    dialogInnerManager->OpenDialogAnimation(overlayManager, maskNode_, maskProps);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
@@ -1180,7 +1191,10 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation002, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
     MockContainer::Current()->SetIsSceneBoardWindow(true);
-    overlayManager->OpenDialogAnimation(dialogNode_, props);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
     auto contentNode1_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
@@ -1189,7 +1203,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation002, TestSize.Level1)
     EXPECT_NE(dialogNode1_, nullptr);
     MockContainer::Current()->SetIsSceneBoardWindow(true);
     props.levelOrder = std::make_optional(1.0);
-    overlayManager->OpenDialogAnimation(dialogNode1_, props);
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode1_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
@@ -1224,7 +1238,10 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation003, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
     MockContainer::Current()->SetIsSceneBoardWindow(true);
-    overlayManager->OpenDialogAnimation(dialogNode_, props);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
     auto contentNode1_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
@@ -1233,7 +1250,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation003, TestSize.Level1)
     EXPECT_NE(dialogNode1_, nullptr);
     MockContainer::Current()->SetIsSceneBoardWindow(true);
     props.levelOrder = std::make_optional(1.0);
-    overlayManager->OpenDialogAnimation(dialogNode1_, props);
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode1_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
     auto contentNode2_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
@@ -1241,7 +1258,7 @@ HWTEST_F(OverlayManagerTwoTestNg, OpenDialogAnimation003, TestSize.Level1)
     auto dialogNode2_ = DialogView::CreateDialogNode(props, contentNode2_);
     EXPECT_NE(dialogNode2_, nullptr);
     props.levelOrder = std::make_optional(0.0);
-    overlayManager->OpenDialogAnimation(dialogNode2_, props);
+    dialogInnerManager->OpenDialogAnimation(overlayManager, dialogNode2_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
@@ -1276,7 +1293,10 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
     MockContainer::Current()->SetIsSceneBoardWindow(true);
-    overlayManager->SetDialogTransitionEffect(dialogNode_, props);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->SetDialogTransitionEffect(overlayManager, dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
@@ -1311,7 +1331,10 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect002, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
     MockContainer::Current()->SetIsSceneBoardWindow(true);
-    overlayManager->SetDialogTransitionEffect(dialogNode_, props);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->SetDialogTransitionEffect(overlayManager, dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
     auto contentNode1_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
@@ -1319,7 +1342,7 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect002, TestSize.Level1)
     auto dialogNode1_ = DialogView::CreateDialogNode(props, contentNode1_);
     EXPECT_NE(dialogNode1_, nullptr);
     props.levelOrder = std::make_optional(1.0);
-    overlayManager->SetDialogTransitionEffect(dialogNode1_, props);
+    dialogInnerManager->SetDialogTransitionEffect(overlayManager, dialogNode1_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
@@ -1354,7 +1377,10 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect003, TestSize.Level1)
     auto dialogNode_ = DialogView::CreateDialogNode(props, contentNode_);
     EXPECT_NE(dialogNode_, nullptr);
     MockContainer::Current()->SetIsSceneBoardWindow(true);
-    overlayManager->SetDialogTransitionEffect(dialogNode_, props);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
+    dialogInnerManager->SetDialogTransitionEffect(overlayManager, dialogNode_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 
     auto contentNode1_ = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
@@ -1362,7 +1388,7 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect003, TestSize.Level1)
     auto dialogNode1_ = DialogView::CreateDialogNode(props, contentNode1_);
     EXPECT_NE(dialogNode1_, nullptr);
     props.levelOrder = std::make_optional(1.0);
-    overlayManager->SetDialogTransitionEffect(dialogNode1_, props);
+    dialogInnerManager->SetDialogTransitionEffect(overlayManager, dialogNode1_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
     overlayManager->PutLevelOrder(dialogNode1_, props.levelOrder);
 
@@ -1371,7 +1397,7 @@ HWTEST_F(OverlayManagerTwoTestNg, SetDialogTransitionEffect003, TestSize.Level1)
     auto dialogNode2_ = DialogView::CreateDialogNode(props, contentNode2_);
     EXPECT_NE(dialogNode2_, nullptr);
     props.levelOrder = std::make_optional(0.0);
-    overlayManager->SetDialogTransitionEffect(dialogNode2_, props);
+    dialogInnerManager->SetDialogTransitionEffect(overlayManager, dialogNode2_, props);
     EXPECT_EQ(rootNode_->GetChildren().size(), 1);
 }
 
@@ -2279,10 +2305,10 @@ HWTEST_F(OverlayManagerTwoTestNg, PopMenuAnimation, TestSize.Level1)
     menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
     EXPECT_EQ(menuPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
     EXPECT_EQ(menuWrapperPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
-    menuNode->renderContext_ = AceType::MakeRefPtr<RosenRenderContext>();
+    menuNode->renderContext_ = AceType::MakeRefPtr<RenderContext>();
     auto deformRenderContext = menuNode->GetRenderContext();
     EXPECT_NE(deformRenderContext, nullptr);
-    auto renderContext = AceType::DynamicCast<RosenRenderContext>(deformRenderContext);
+    auto renderContext = AceType::DynamicCast<RenderContext>(deformRenderContext);
     EXPECT_NE(renderContext, nullptr);
     EXPECT_FALSE(renderContext->HasDisappearTransition());
     menuManager->PopMenuAnimation(menuNode, overlayManager, true, true);

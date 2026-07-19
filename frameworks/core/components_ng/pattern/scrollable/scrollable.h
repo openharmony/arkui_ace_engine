@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_SCROLLABLE_NG_H
 
 #include <functional>
+#include <unordered_set>
 
 #include "base/geometry/dimension.h"
 #include "base/thread/cancelable_callback.h"
@@ -82,7 +83,7 @@ using OnDidStopFlingCallback = std::function<void()>;
 class FrameNode;
 class PipelineContext;
 
-class Scrollable : public TouchEventTarget {
+class ACE_FORCE_EXPORT Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:
@@ -165,6 +166,12 @@ public:
         if (panRecognizerNG_) {
             panRecognizerNG_->SetIsAllowMouse(isAllowMouse);
         }
+    }
+
+    void SetEscapeModeForScroll(const std::unordered_set<int32_t>& fingerIds)
+    {
+        CHECK_NULL_VOID(panRecognizerNG_);
+        panRecognizerNG_->SetEscapeModeForPan(fingerIds);
     }
 
     void SetScrollEndCallback(const ScrollEventCallback& scrollEndCallback)

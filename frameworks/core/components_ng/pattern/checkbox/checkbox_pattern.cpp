@@ -327,7 +327,9 @@ void CheckBoxPattern::OnAfterModifyDone()
     }
     auto eventHub = host->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
+#ifndef CROSS_PLATFORM
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, eventHub->GetName(), lastSelect_);
+#endif
 }
 
 void CheckBoxPattern::InitClickEvent()
@@ -1296,6 +1298,7 @@ int32_t CheckBoxPattern::OnInjectionEvent(const std::string& command)
 
 void CheckBoxPattern::ReportChangeEvent(bool selectStatus)
 {
+#ifndef CROSS_PLATFORM
     bool isToggle = AceType::InstanceOf<ToggleCheckBoxPattern>(Claim(this));
     CHECK_EQUAL_VOID(isToggle, true);
     auto params = JsonUtil::Create();
@@ -1311,10 +1314,12 @@ void CheckBoxPattern::ReportChangeEvent(bool selectStatus)
     json->Put("nodeId", id);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString(),
         ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 void CheckBoxPattern::ReportToggleChangeEvent(bool isOn)
 {
+#ifndef CROSS_PLATFORM
     bool isToggle = AceType::InstanceOf<ToggleCheckBoxPattern>(Claim(this));
     CHECK_NE_VOID(isToggle, true);
     auto host = GetHost();
@@ -1330,6 +1335,7 @@ void CheckBoxPattern::ReportToggleChangeEvent(bool isOn)
     json->Put("params", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent(
         "result", json->ToString(), ComponentEventType::COMPONENT_EVENT_SELECT);
+#endif
 }
 
 void CheckBoxPattern::RegisterVisibleAreaChange()

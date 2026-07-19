@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,13 +15,12 @@
 
 #include "bridge/declarative_frontend/jsview/dialog/js_custom_dialog_controller.h"
 
-#include "bridge/declarative_frontend/engine/js_converter.h"
-
 #include "base/hiviewdfx/histogram_wrapper.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
 #include "bridge/declarative_frontend/jsview/models/custom_dialog_controller_model_impl.h"
@@ -29,34 +28,28 @@
 #include "core/common/container.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/overlay/level_order.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace {
-std::unique_ptr<CustomDialogControllerModel> CustomDialogControllerModel::instance_ = nullptr;
-std::mutex CustomDialogControllerModel::mutex_;
 CustomDialogControllerModel* CustomDialogControllerModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::CustomDialogControllerModelNG());
+    return NG::NodeModifier::GetCustomDialogControllerModel();
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::CustomDialogControllerModelNG());
-            } else {
-                instance_.reset(new Framework::CustomDialogControllerModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        return NG::NodeModifier::GetCustomDialogControllerModel();
+    } else {
+        static Framework::CustomDialogControllerModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 } // namespace OHOS::Ace
 
@@ -74,7 +67,8 @@ const std::vector<DistortionMode> DIALOG_DISTORTION_MODE = { DistortionMode::DIS
 const std::vector<EdgeLightMode> DIALOG_EDGELIGHT_MODE = { EdgeLightMode::EDGELIGHT_AUTO,
     EdgeLightMode::EDGELIGHT_ENABLED, EdgeLightMode::EDGELIGHT_DISABLED };
 const std::vector<DialogDisplayModeInSubWindow> DIALOG_DISPLAY_MODE_IN_SUBWINDOW = {
-    DialogDisplayModeInSubWindow::SCREEN_BASED, DialogDisplayModeInSubWindow::WINDOW_BASED };
+    DialogDisplayModeInSubWindow::SCREEN_BASED, DialogDisplayModeInSubWindow::WINDOW_BASED
+};
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
 
@@ -402,6 +396,9 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         instance->IncRefCount();
         info.SetReturnValue(AceType::RawPtr(instance));
     } else {
+        auto instance = AceType::MakeRefPtr<JSCustomDialogController>(nullptr);
+        instance->IncRefCount();
+        info.SetReturnValue(AceType::RawPtr(instance));
         TAG_LOGE(AceLogTag::ACE_DIALOG, "CustomDialogController::ConstructorCallback failed!");
         ACE_ENGINE_HISTOGRAM_BOOLEAN("Component.CustomDialogController", 1);
     }
@@ -418,9 +415,11 @@ void JSCustomDialogController::DestructorCallback(JSCustomDialogController* cont
 void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 {
     if (!jsBuilderFunction_) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "JsOpenDialog failed, jsBuilderFunction is nullptr!");
         return;
     }
     if (this->ownerView_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "JsOpenDialog failed, ownerView is nullptr!");
         return;
     }
     auto containerId = this->ownerView_->GetInstanceId();

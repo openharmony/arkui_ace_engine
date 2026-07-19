@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/video/video_pattern.h"
 
+#include <string_view>
+
 #include "video_node.h"
 
 #include "base/background_task_helper/background_task_helper.h"
@@ -33,6 +35,10 @@
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/pattern/video/video_theme.h"
+#include "core/components_ng/pattern/video/video_accessibility_property.h"
+#include "core/components_ng/pattern/video/video_event_hub.h"
+#include "core/components_ng/pattern/video/video_layout_algorithm.h"
+#include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -56,8 +62,8 @@ namespace {
 using HiddenChangeEvent = std::function<void(bool)>;
 constexpr uint32_t SECONDS_PER_HOUR = 3600;
 constexpr uint32_t SECONDS_PER_MINUTE = 60;
-const std::string FORMAT_HH_MM_SS = "%02d:%02d:%02d";
-const std::string FORMAT_MM_SS = "%02d:%02d";
+constexpr std::string_view FORMAT_HH_MM_SS = "%02d:%02d:%02d";
+constexpr std::string_view FORMAT_MM_SS = "%02d:%02d";
 constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
 constexpr uint32_t CURRENT_POS = 1;
 constexpr uint32_t SLIDER_POS = 2;
@@ -67,7 +73,6 @@ constexpr int32_t AVERAGE_VALUE = 2;
 constexpr int32_t ANALYZER_DELAY_TIME = 100;
 constexpr int32_t ANALYZER_CAPTURE_DELAY_TIME = 1000;
 const Dimension LIFT_HEIGHT = 28.0_vp;
-const std::string PNG_FILE_EXTENSION = "png";
 constexpr int32_t MEDIA_TYPE_AUD = 0;
 constexpr float VOLUME_STEP = 0.05f;
 constexpr float SPEED_0_125_X = 0.125;
@@ -109,9 +114,9 @@ std::string IntTimeToText(uint32_t time)
     auto seconds = time % SECONDS_PER_MINUTE;
     if (time >= SECONDS_PER_HOUR) {
         auto hours = time / SECONDS_PER_HOUR;
-        return StringUtils::FormatString(FORMAT_HH_MM_SS.c_str(), hours, minutes, seconds);
+        return StringUtils::FormatString(FORMAT_HH_MM_SS.data(), hours, minutes, seconds);
     }
-    return StringUtils::FormatString(FORMAT_MM_SS.c_str(), minutes, seconds);
+    return StringUtils::FormatString(FORMAT_MM_SS.data(), minutes, seconds);
 }
 
 SizeF CalculateFitContain(const SizeF& videoSize, const SizeF& layoutSize)
@@ -329,7 +334,9 @@ void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPt
             CHECK_NULL_VOID(video);
             ContainerScope scope(instanceId);
             video->OnCurrentTimeChange(currentPos);
+#ifdef SUPPORT_IMAGE_ANALYZER
             video->StartUpdateImageAnalyzer();
+#endif
             }, "ArkUIVideoCurrentTimeChange");
     };
 
@@ -418,6 +425,26 @@ void SendStatisticEvent(StatisticEventType type)
     statisticEventReporter->SendEvent(type);
 }
 } // namespace
+
+RefPtr<EventHub> VideoPattern::CreateEventHub()
+{
+    return MakeRefPtr<VideoEventHub>();
+}
+
+RefPtr<LayoutProperty> VideoPattern::CreateLayoutProperty()
+{
+    return MakeRefPtr<VideoLayoutProperty>();
+}
+
+RefPtr<LayoutAlgorithm> VideoPattern::CreateLayoutAlgorithm()
+{
+    return MakeRefPtr<VideoLayoutAlgorithm>();
+}
+
+RefPtr<AccessibilityProperty> VideoPattern::CreateAccessibilityProperty()
+{
+    return MakeRefPtr<VideoAccessibilityProperty>();
+}
 
 VideoPattern::VideoPattern(const RefPtr<VideoControllerV2>& videoController)
     : instanceId_(Container::CurrentId()), videoControllerV2_(videoController)
@@ -1271,11 +1298,13 @@ void VideoPattern::OnModifyDone()
     if (!AceType::InstanceOf<VideoFullScreenPattern>(this)) {
         eventHub->SetInspectorId(host->GetInspectorIdValue(""));
     }
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     } else if (isPaused_ && !isPlaying_ && !GetAnalyzerState()) {
         StartImageAnalyzer();
     }
+#endif
     InitKeyEvent();
 }
 
@@ -1971,7 +2000,9 @@ void VideoPattern::Start()
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
 
+#ifdef SUPPORT_IMAGE_ANALYZER
     DestroyAnalyzerOverlay();
+#endif
     isPaused_ = false;
 
     auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
@@ -2023,7 +2054,9 @@ void VideoPattern::Pause()
 
     if (ret != -1 && !isPaused_) {
         isPaused_ = true;
+#ifdef SUPPORT_IMAGE_ANALYZER
         StartImageAnalyzer();
+#endif
     }
 }
 
@@ -2193,6 +2226,7 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (isEnableAnalyzer_) {
         if (!imageAnalyzerManager_) {
             EnableAnalyzer(isEnableAnalyzer_);
@@ -2201,6 +2235,7 @@ void VideoPattern::OnFullScreenChange(bool isFullScreen)
             StartImageAnalyzer();
         }
     }
+#endif
 
     if (!SystemProperties::GetExtSurfaceEnabled()) {
         return;
@@ -2244,9 +2279,11 @@ VideoPattern::~VideoPattern()
         renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
     }
 #endif
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     }
+#endif
     if (!fullScreenNodeId_.has_value()) {
         return;
     }
@@ -2347,11 +2384,13 @@ void VideoPattern::EnableAnalyzer(bool enable)
         return;
     }
 
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(!imageAnalyzerManager_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_UINODE_TRACE(host);
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::VIDEO_CUSTOM);
+#endif
 }
 
 void VideoPattern::SetShortcutKeyEnabled(bool isEnableShortcutKey)
@@ -2376,14 +2415,17 @@ float VideoPattern::GetCurrentVolume() const
 
 void VideoPattern::SetImageAnalyzerConfig(void* config)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (isEnableAnalyzer_) {
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->SetImageAnalyzerConfig(config);
     }
+#endif
 }
 
 void VideoPattern::SetImageAIOptions(void* options)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!imageAnalyzerManager_) {
         auto host = GetHost();
         ACE_UINODE_TRACE(host);
@@ -2391,10 +2433,12 @@ void VideoPattern::SetImageAIOptions(void* options)
     }
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->SetImageAIOptions(options);
+#endif
 }
 
 bool VideoPattern::IsSupportImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto layoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
@@ -2402,6 +2446,9 @@ bool VideoPattern::IsSupportImageAnalyzer()
     bool needControlBar = layoutProperty->GetControlsValue(true);
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
     return isEnableAnalyzer_ && !needControlBar && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
+#else
+    return false;
+#endif
 }
 
 bool VideoPattern::ShouldUpdateImageAnalyzer()
@@ -2425,6 +2472,7 @@ bool VideoPattern::ShouldUpdateImageAnalyzer()
 
 void VideoPattern::StartImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!IsSupportImageAnalyzer() || !imageAnalyzerManager_) {
         return;
     }
@@ -2444,10 +2492,12 @@ void VideoPattern::StartImageAnalyzer()
         CHECK_NULL_VOID(pattern);
         pattern->CreateAnalyzerOverlay();
         }, ANALYZER_DELAY_TIME, "ArkUIVideoCreateAnalyzerOverlay");
+#endif
 }
 
 void VideoPattern::CreateAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetOverlayNode(nullptr);
@@ -2464,10 +2514,12 @@ void VideoPattern::CreateAnalyzerOverlay()
                               contentRect_.Top() - padding.top.value_or(0) };
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap, contentOffset);
+#endif
 }
 
 void VideoPattern::StartUpdateImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     if (!imageAnalyzerManager_->IsOverlayCreated()) {
         return;
@@ -2490,10 +2542,12 @@ void VideoPattern::StartUpdateImageAnalyzer()
         pattern->isContentSizeChanged_ = false;
         }, ANALYZER_CAPTURE_DELAY_TIME, "ArkUIVideoUpdateAnalyzerOverlay");
     isContentSizeChanged_ = true;
+#endif
 }
 
 void VideoPattern::UpdateAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -2511,10 +2565,12 @@ void VideoPattern::UpdateAnalyzerOverlay()
                               contentRect_.Top() - padding.top.value_or(0) };
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap, contentOffset);
+#endif
 }
 
 void VideoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzer()) {
         auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
@@ -2526,18 +2582,25 @@ void VideoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geomet
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode, info);
     }
+#endif
 }
 
 void VideoPattern::DestroyAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
+#endif
 }
 
 bool VideoPattern::GetAnalyzerState()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
     return imageAnalyzerManager_->IsOverlayCreated();
+#else
+    return false;
+#endif
 }
 
 void VideoPattern::UpdateOverlayVisibility(VisibleType type)
@@ -2674,6 +2737,7 @@ int32_t VideoPattern::OnInjectionEvent(const std::string& command)
 
 void VideoPattern::ReportChangeEvent(PlaybackStatus status, double playbackSpeed, uint32_t currentPos)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()) {
         return;
     }
@@ -2711,10 +2775,12 @@ void VideoPattern::ReportChangeEvent(PlaybackStatus status, double playbackSpeed
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString(),
         ComponentEventType::COMPONENT_EVENT_VIDEO);
+#endif
 }
 
 void VideoPattern::ReportCommandResult(const std::string& event, const std::string& result, const std::string& reason)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()) {
         return;
     }
@@ -2739,6 +2805,7 @@ void VideoPattern::ReportCommandResult(const std::string& event, const std::stri
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", videoResult->ToString(),
         ComponentEventType::COMPONENT_EVENT_VIDEO);
+#endif
 }
 
 void VideoPattern::SetVideoController(const RefPtr<VideoControllerV2>& videoController)

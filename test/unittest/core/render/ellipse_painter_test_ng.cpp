@@ -24,8 +24,8 @@
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
-#include "core/components_ng/render/ellipse_painter.h"
-#include "core/components_ng/render/shape_painter.h"
+#include "core/components_ng/pattern/shape/ellipse_painter.h"
+#include "core/components_ng/pattern/shape/shape_painter.h"
 
 #undef private
 #undef protected

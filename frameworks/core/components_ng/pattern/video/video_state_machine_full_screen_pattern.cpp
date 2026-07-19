@@ -17,8 +17,16 @@
 
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+VideoStateMachineFullScreenPattern::VideoStateMachineFullScreenPattern(
+    const RefPtr<VideoControllerAsync>& videoControllerAsync)
+    : VideoStateMachinePattern(videoControllerAsync)
+{}
+
+VideoStateMachineFullScreenPattern::~VideoStateMachineFullScreenPattern() = default;
+
 void VideoStateMachineFullScreenPattern::InitFullScreenParam(const RefPtr<VideoStateMachinePattern>& videoPattern,
     const RefPtr<RenderSurface>& renderSurface, const RefPtr<MediaPlayer>& mediaPlayer,
     const RefPtr<RenderContext>& context)

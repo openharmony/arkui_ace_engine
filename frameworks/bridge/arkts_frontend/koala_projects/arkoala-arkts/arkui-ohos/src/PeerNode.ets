@@ -14,14 +14,14 @@
  */
 
 import { int32, KoalaCallsiteKey } from "@koalaui/common"
-import { Disposable, IncrementalNode, scheduleCallback, GlobalStateManager, MutableState, mutableState } from "@koalaui/runtime"
+import { Disposable, IncrementalNode, scheduleCallback, GlobalStateManager, MutableState, mutableState, callScheduledCallbacks } from "@koalaui/runtime"
 import { NativePeerNode } from "./NativePeerNode"
 import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer, StateStylesOps } from "#generated"
 import { ReusablePool } from "./ReusablePool"
 import { StateUpdateLoop } from "./stateManagement"
 import { RecordData } from "@ohos.base"
-import { ArkUIAniModule } from 'arkui.ani';
+import { ArkUIAniModule } from "arkui.ani"
 import { ExtendableComponent } from './component/extendableComponent'
 import { ElementInfo } from './stateManagement/utils';
 import { ArkCustomComponentRootPeer } from './component/staticComponents';
@@ -336,6 +336,26 @@ export class PeerNode extends IncrementalNode {
         this._reusePool?.get(reuseKey)?.setMaxSize(size)
     }
 
+    clearReusePool(): void {
+        if (!this._reusePool) {
+            return
+        }
+        if (!this.isKind(RootPeerType)) {
+            if (this.parent?.isKind(PeerNodeType)) {
+                (this.parent as PeerNode).clearReusePool()
+            }
+            return
+        }
+        scheduleCallback(() => {
+            this._reusePool!.forEach((pool: ReusablePool) => {
+                pool.dispose()
+            })
+            this._reusePool!.clear()
+            this._reusePool = undefined
+        })
+        callScheduledCallbacks();
+    }
+
     setOnRecycle(cb: () => void): void {
         this._onRecycle = cb
     }
@@ -450,6 +470,10 @@ export class PeerNode extends IncrementalNode {
                 StateUpdateLoop.add(() => {
                     this._uiStateStyle!.value = state
                 })
+                if (StateUpdateLoop.canRequestFrame) {
+                    ArkUIAniModule._CustomNode_RequestFrame();
+                    StateUpdateLoop.canRequestFrame = false;
+                }
             }, curState)
             return this._uiStateStyle!;
         }

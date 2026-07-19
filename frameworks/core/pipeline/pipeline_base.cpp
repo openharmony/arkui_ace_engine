@@ -22,6 +22,7 @@
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
+#include "base/log/log_wrapper.h"
 #include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -43,6 +44,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/ui_node_gc.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline/container_window_manager.h"
@@ -1111,6 +1113,13 @@ void PipelineBase::RemoveJsFormVsyncCallback(int32_t subWindowId)
     jsFormVsyncCallbacks_.erase(subWindowId);
 }
 
+void PipelineBase::NotifyWindowAttachStateChange(bool status)
+{
+    if (window_) {
+        window_->NotifyWindowAttachStateChange(status);
+    }
+}
+
 bool PipelineBase::MaybeRelease()
 {
     CHECK_NULL_RETURN(taskExecutor_, true);
@@ -1185,6 +1194,16 @@ void PipelineBase::SetUiDvsyncSwitch(bool on)
         window_->SetUiDvsyncSwitch(on);
     }
     lastUiDvsyncStatus_ = on;
+}
+
+bool PipelineBase::CheckThreadSafe()
+{
+    CHECK_NULL_RETURN(taskExecutor_, true);
+    if (!isFormRender_ && !taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        LogBacktrace();
+        return false;
+    }
+    return true;
 }
 
 bool PipelineBase::CheckIfGetTheme()

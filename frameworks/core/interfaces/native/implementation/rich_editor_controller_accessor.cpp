@@ -555,6 +555,7 @@ RangeOptions Convert(const Ark_RichEditorRange& src)
 void ProcessShaderStyle(Ark_RichEditorParagraphStyle& dst, const std::optional<NG::Gradient>& gradientOpt,
     const std::optional<Color>& color, ConvContext *ctx)
 {
+    dst.shaderStyle = Converter::ArkValue<Opt_ShaderStyleProxy>();
     CHECK_EQUAL_VOID(gradientOpt.has_value(), color.has_value());
     Ark_ShaderStyleProxy proxy;
     proxy.linearGradientOptions = Converter::ArkValue<Opt_LinearGradientOptions>(Ark_Empty(), ctx);

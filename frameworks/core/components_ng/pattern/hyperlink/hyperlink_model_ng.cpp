@@ -76,6 +76,7 @@ void HyperlinkModelNG::SetTextStyle(
     CHECK_NULL_VOID(textTheme);
     auto textStyle = textTheme->GetTextStyle();
     textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     if (hyperlinkNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         textLayoutProperty->UpdateOrphanCharOptimization(true);
     }

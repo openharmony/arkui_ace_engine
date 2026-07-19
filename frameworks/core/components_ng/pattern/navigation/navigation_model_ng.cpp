@@ -26,10 +26,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -43,6 +40,7 @@
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -55,6 +53,7 @@
 #include "frameworks/base/system_bar/system_bar_style.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -224,6 +223,7 @@ void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
     titleBarPattern->SetNeedResetMainTitleProperty(true);
     titleBarPattern->SetNeedResetSubTitleProperty(true);
 }
+
 } // namespace
 bool NavigationModelNG::navBarWidthDoubleBind_ = false;
 
@@ -436,8 +436,7 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
     if (!navigationGroupNode->GetDividerNode()) {
         int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DIVIDER_ETS_TAG, dividerNodeId);
-        auto dividerNode = FrameNode::GetOrCreateFrameNode(
-            V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        auto dividerNode = CreateDividerFrameNode(dividerNodeId);
         navigationGroupNode->AddChild(dividerNode);
         navigationGroupNode->SetDividerNode(dividerNode);
 
@@ -874,19 +873,23 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
 
 bool NavigationModelNG::CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode)
 {
-    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
-    CHECK_NULL_RETURN(buttonPattern, false);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, false);
+    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_RETURN(rawPattern, false);
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, false);
-    buttonPattern->SetSkipColorConfigurationUpdate();
-    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
-        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
-        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
-    }
     backButtonNode = FrameNode::CreateFrameNode(
-        V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
+        V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(rawPattern));
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(backButtonNode));
+    buttonModifier->setSkipColorConfigurationUpdate(nodeHandle);
+    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonModifier->setBlendColor(
+            nodeHandle, theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetBackgroundFocusOutlineColor());
+        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetBackgroundFocusOutlineWeight());
+    }
     auto focusHub = backButtonNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     focusHub->SetFocusDependence(FocusDependence::SELF);
@@ -909,8 +912,10 @@ bool NavigationModelNG::CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode)
 
 bool NavigationModelNG::UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode)
 {
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(backButtonLayoutProperty, false);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, false);
+    auto layoutProperty = backButtonNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, false);
     auto renderContext = backButtonNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
     auto backButtonWidth = BACK_BUTTON_SIZE;
@@ -929,20 +934,21 @@ bool NavigationModelNG::UpdateBackButtonProperty(const RefPtr<FrameNode>& backBu
     }
     BorderWidthProperty borderWidthProperty;
     borderWidthProperty.SetBorderWidth(theme->GetIconBorderWidth());
-    backButtonLayoutProperty->UpdateBorderWidth(borderWidthProperty);
+    layoutProperty->UpdateBorderWidth(borderWidthProperty);
     BorderColorProperty borderColorProperty;
     borderColorProperty.SetColor(theme->GetIconBorderColor());
     renderContext->UpdateBorderColor(borderColorProperty);
-    backButtonLayoutProperty->UpdateUserDefinedIdealSize(
+    layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(backButtonWidth), CalcLength(backButtonHeight)));
-    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(backButtonRadiusSize));
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(backButtonNode));
+    buttonModifier->updateBorderRadiusToLayoutProp(nodeHandle, BorderRadiusProperty(backButtonRadiusSize));
     renderContext->UpdateBackgroundColor(backButtonColor);
-    backButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
     PaddingProperty padding;
     padding.SetEdges(CalcLength(backButtonPadding));
-    backButtonLayoutProperty->UpdatePadding(padding);
-    backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdatePadding(padding);
+    buttonModifier->updateTypeToLayoutProp(nodeHandle, ButtonType::NORMAL);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     return true;
 }
 
@@ -2880,8 +2886,7 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
     // divider node
     if (!navigationGroupNode->GetDividerNode()) {
         int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto dividerNode = FrameNode::GetOrCreateFrameNode(
-            V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        auto dividerNode = CreateDividerFrameNode(dividerNodeId);
         navigationGroupNode->AddChild(dividerNode);
         navigationGroupNode->SetDividerNode(dividerNode);
 

@@ -280,6 +280,9 @@ HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level0)
     options.value = INIT_VALUE_1;
     options.style = style;
     auto index1 = richEditorController->AddTextSpan(options);
+    /**
+     * @tc.steps: step3. check index
+     */
     EXPECT_EQ(index1, 0);
     auto index2 = richEditorController->AddTextSpan(options);
     EXPECT_EQ(index2, 1);
@@ -295,10 +298,16 @@ HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level0)
  */
 HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan002, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
+    /**
+     * @tc.steps: step2. add text span
+     */
     TextSpanOptions options;
     options.value = INIT_VALUE_1;
     options.useThemeFontColor = false;
@@ -889,10 +898,16 @@ HWTEST_F(RichEditorAddSpanTestNg, ResetSelectionAfterAddSpan001, TestSize.Level0
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    /**
+ 	 * @tc.steps: step1. set selector
+ 	 */
     richEditorPattern->textSelector_.baseOffset = 1;
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->isEditing_ = true;
     richEditorPattern->ResetSelectionAfterAddSpan(false);
+    /**
+ 	 * @tc.steps: step2. test caretTwinklingTask
+ 	 */
     EXPECT_TRUE(richEditorPattern->caretTwinklingTask_.Cancel());
 }
 

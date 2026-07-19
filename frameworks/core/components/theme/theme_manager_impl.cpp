@@ -66,7 +66,6 @@
 #include "core/components/theme/corner_mark_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components/theme/shadow_theme.h"
-#include "core/components/theme/theme_constants_defines.h"
 #include "core/components/theme/ui_material_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components/toggle/toggle_theme.h"
@@ -475,17 +474,10 @@ Color ThemeManagerImpl::GetBackgroundColor() const
     }
     // Parse attr from system theme style.
     auto themeStyle = themeConstants_->GetThemeStyle();
-    auto prebuildColor = themeConstants_->GetColor(THEME_APP_BACKGROUND);
     if (!themeStyle) {
-        return prebuildColor;
+        return Color::WHITE;
     }
-    if (themeStyle->HasAttr(THEME_ATTR_BG_COLOR) && !themeConstants_->HasCustomStyle(THEME_APP_BACKGROUND)) {
-        // Get from resource.
-        return themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, Color::BLACK);
-    } else {
-        // Get from prebuild or custom color.
-        return prebuildColor;
-    }
+    return themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, Color::WHITE);
 }
 
 void ThemeManagerImpl::LoadResourceThemes()

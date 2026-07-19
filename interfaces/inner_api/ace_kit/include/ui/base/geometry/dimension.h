@@ -20,7 +20,6 @@
 #include <string>
 
 #include "ui/base/macros.h"
-#include "ui/base/utils/utils.h"
 
 #define NEAR_ZERO(value) ((value > 0.0) ? ((value - 0.0) <= 0.000001f) : ((0.0 - value) <= 0.000001f))
 
@@ -97,22 +96,12 @@ public:
     /**
      * @brief Resets the dimension to default state (0.0 PX).
      */
-    void Reset()
-    {
-        value_ = 0.0;
-        unit_ = DimensionUnit::PX;
-    }
-
+    void Reset();
     /**
      * @brief Resets the dimension if the current value is NaN (Not a Number).
      * This is used to handle invalid floating-point values.
      */
-    void ResetInvalidValue()
-    {
-        if (std::isnan(value_)) {
-            Reset();
-        }
-    }
+    void ResetInvalidValue();
 
     /**
      * @brief Gets the numeric value of the dimension.
@@ -122,16 +111,11 @@ public:
     {
         return value_;
     }
-
     /**
      * @brief Sets the numeric value of the dimension.
      * @param value The new value to set.
      */
-    void SetValue(double value)
-    {
-        value_ = value;
-    }
-
+    void SetValue(double value);
     /**
      * @brief Gets the unit of the dimension.
      * @return The dimension unit.
@@ -140,51 +124,32 @@ public:
     {
         return unit_;
     }
-
     /**
      * @brief Sets the unit of the dimension.
      * @param unit The new unit to set.
      */
-    void SetUnit(DimensionUnit unit)
-    {
-        unit_ = unit;
-    }
+    void SetUnit(DimensionUnit unit);
 
     /**
      * @brief Checks if the dimension value is valid (greater than 0).
      * @return True if value > 0, false otherwise.
      */
-    bool IsValid() const
-    {
-        return GreatNotEqual(value_, 0.0);
-    }
-
+    bool IsValid() const;
     /**
      * @brief Checks if the dimension value is non-negative (greater than or equal to 0).
      * @return True if value >= 0, false otherwise.
      */
-    bool IsNonNegative() const
-    {
-        return NonNegative(value_);
-    }
-
+    bool IsNonNegative() const;
     /**
      * @brief Checks if the dimension value is non-positive (less than or equal to 0).
      * @return True if value <= 0, false otherwise.
      */
-    bool IsNonPositive() const
-    {
-        return NonPositive(value_);
-    }
-
+    bool IsNonPositive() const;
     /**
      * @brief Checks if the dimension value is negative (less than 0).
      * @return True if value < 0, false otherwise.
      */
-    bool IsNegative() const
-    {
-        return !NonNegative(value_);
-    }
+    bool IsNegative() const;
 
     /**
      * @brief Converts the dimension to pixels using the specified scale factor.
@@ -193,13 +158,7 @@ public:
      * @deprecated This method is deprecated. Use ConvertToPx() instead.
      */
     // Deprecated: don't use this to covert to px.
-    double ConvertToPx(double dipScale) const
-    {
-        if (unit_ == DimensionUnit::VP || unit_ == DimensionUnit::FP) {
-            return value_ * dipScale;
-        }
-        return value_;
-    }
+    double ConvertToPx(double dipScale) const;
 
     /**
      * @brief Converts the dimension to VP (Virtual Pixels).
@@ -241,7 +200,6 @@ public:
      */
     double ConvertToPxDistribute(
         std::optional<float> minOptional, std::optional<float> maxOptional, bool allowScale = true) const;
-
     /**
      * @brief Converts the dimension to pixels using custom font scale constraints.
      * @param minFontScale Minimum font scale factor.
@@ -278,18 +236,7 @@ public:
      * @param unit The target unit to convert to.
      * @return The dimension value in the specified unit.
      */
-    double GetNativeValue(DimensionUnit unit) const
-    {
-        if (unit_ == unit || unit == DimensionUnit::PERCENT) {
-            return value_;
-        } else if (unit == DimensionUnit::PX) {
-            return ConvertToPx();
-        } else if (unit == DimensionUnit::FP) {
-            return ConvertToFp();
-        } else {
-            return ConvertToVp();
-        }
-    }
+    double GetNativeValue(DimensionUnit unit) const;
 
     /**
      * @brief Converts the dimension to pixels with support for percentage units.
@@ -319,7 +266,6 @@ public:
     {
         return Dimension(value_ * value, unit_);
     }
-
     /**
      * @brief Divides the dimension by a scalar value.
      * @param value The scalar value to divide by.
@@ -328,33 +274,23 @@ public:
      */
     constexpr Dimension operator/(double value) const
     {
-        // NearZero cannot be used in a constant expression
         if (NEAR_ZERO(value)) {
             return {};
         }
         return Dimension(value_ / value, unit_);
     }
-
     /**
      * @brief Checks if two dimensions are equal.
      * @param dimension The dimension to compare with.
      * @return True if both units and values are equal, false otherwise.
      */
-    bool operator==(const Dimension& dimension) const
-    {
-        return (unit_ == dimension.unit_) && NearEqual(value_, dimension.value_);
-    }
-
+    bool operator==(const Dimension& dimension) const;
     /**
      * @brief Checks if two dimensions are not equal.
      * @param dimension The dimension to compare with.
      * @return True if units or values are different, false otherwise.
      */
-    bool operator!=(const Dimension& dimension) const
-    {
-        return !operator==(dimension);
-    }
-
+    bool operator!=(const Dimension& dimension) const;
     /**
      * @brief Adds two dimensions with the same unit.
      * @param dimension The dimension to add.
@@ -369,20 +305,13 @@ public:
         ACE_DCHECK(unit_ == dimension.unit_);
         return Dimension(value_ + dimension.value_, unit_);
     }
-
     /**
      * @brief Adds another dimension to this dimension and assigns the result.
      * @param dimension The dimension to add.
      * @return Reference to this dimension after addition.
      * @note Both dimensions must have the same unit, otherwise a DCHECK is triggered.
      */
-    Dimension& operator+=(const Dimension& dimension)
-    {
-        ACE_DCHECK(unit_ == dimension.unit_);
-        value_ += dimension.value_;
-        return *this;
-    }
-
+    Dimension& operator+=(const Dimension& dimension);
     /**
      * @brief Subtracts another dimension from this dimension.
      * @param dimension The dimension to subtract.
@@ -397,7 +326,6 @@ public:
         ACE_DCHECK(unit_ == dimension.unit_);
         return Dimension(value_ - dimension.value_, unit_);
     }
-
     /**
      * @brief Returns the negated dimension (opposite sign).
      * @return A new dimension with negated value and same unit.
@@ -406,43 +334,27 @@ public:
     {
         return Dimension(-value_, unit_);
     }
-
     /**
      * @brief Subtracts another dimension from this dimension and assigns the result.
      * @param dimension The dimension to subtract.
      * @return Reference to this dimension after subtraction.
      * @note Both dimensions must have the same unit, otherwise a DCHECK is triggered.
      */
-    Dimension& operator-=(const Dimension& dimension)
-    {
-        ACE_DCHECK(unit_ == dimension.unit_);
-        value_ -= dimension.value_;
-        return *this;
-    }
-
+    Dimension& operator-=(const Dimension& dimension);
     /**
      * @brief Checks if this dimension is greater than another dimension.
      * @param dimension The dimension to compare with.
      * @return True if this dimension's value is greater, false otherwise.
      * @note Both dimensions must have the same unit, otherwise a DCHECK is triggered.
      */
-    bool operator>(const Dimension& dimension) const
-    {
-        ACE_DCHECK(unit_ == dimension.unit_);
-        return (value_ > dimension.value_);
-    }
-
+    bool operator>(const Dimension& dimension) const;
     /**
      * @brief Checks if this dimension is less than another dimension.
      * @param dimension The dimension to compare with.
      * @return True if this dimension's value is less, false otherwise.
      * @note Both dimensions must have the same unit, otherwise a DCHECK is triggered.
      */
-    bool operator<(const Dimension& dimension) const
-    {
-        ACE_DCHECK(unit_ == dimension.unit_);
-        return (value_ < dimension.value_);
-    }
+    bool operator<(const Dimension& dimension) const;
 
     /**
      * @brief Converts the dimension to a string representation.

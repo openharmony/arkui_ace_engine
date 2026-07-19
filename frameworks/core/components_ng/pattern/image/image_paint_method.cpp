@@ -46,7 +46,7 @@ void NormalizeRadius(BorderRadiusArray& radius, const SizeF& size)
 }
 } // namespace
 
-void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxConfig& imageDfxConfig)
+void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper)
 {
     auto renderCtx = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
@@ -137,7 +137,7 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
         config.dynamicMode = DynamicRangeMode::HIGH;
     }
     if (renderProps->GetNeedBorderRadiusValue(false)) {
-        UpdateBorderRadius(paintWrapper, canvasImage_->GetImageDfxConfig());
+        UpdateBorderRadius(paintWrapper);
     }
     auto ImageFit = renderProps->GetImageFit().value_or(ImageFit::COVER);
     if (ImageFit == ImageFit::MATRIX) {

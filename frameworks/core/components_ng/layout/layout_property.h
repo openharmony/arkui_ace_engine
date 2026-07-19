@@ -38,6 +38,7 @@
 #include "core/components_ng/property/magic_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
+#include "core/components_ng/manager/environment/env_reader_cache.h"
 #include "ui/properties/safe_area_insets.h"
 
 namespace OHOS::Ace::NG {
@@ -87,7 +88,19 @@ public:
 
     TextDirection GetLayoutDirection() const;
 
+    virtual bool NeedReadFontScaleFromEnv() const
+    {
+        return false;
+    }
+
+    std::optional<float> GetEnvFontScale() const;
+
     TextDirection GetNonAutoLayoutDirection() const;
+
+    void MarkEnvDirty(std::string_view key)
+    {
+        envReaderCache_.MarkDirty(key);
+    }
 
     uint32_t GetBackgroundIgnoresLayoutSafeAreaEdges() const;
     uint32_t GetLocalizedBackgroundIgnoresLayoutSafeAreaEdges() const;
@@ -377,6 +390,7 @@ private:
     std::unique_ptr<GridProperty> gridProperty_;
     std::optional<MeasureType> measureType_;
     std::optional<TextDirection> layoutDirection_;
+    mutable EnvReaderCache envReaderCache_;
     std::optional<RectF> layoutRect_;
     std::optional<Dimension> markAnchorStart_;
     std::optional<uint32_t> backgroundIgnoresLayoutSafeAreaEdges_;

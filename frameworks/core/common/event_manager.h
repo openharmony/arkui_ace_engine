@@ -213,7 +213,7 @@ public:
 
     RefPtr<NG::GestureReferee> GetGestureRefereeNG(const RefPtr<NG::NGGestureRecognizer>& recognizer)
     {
-        if (recognizer && recognizer->IsPostEventResult()) {
+        if (recognizer && recognizer->IsPostTouchEventResult()) {
             return postEventRefereeNG_;
         }
         return refereeNG_;
@@ -287,6 +287,7 @@ public:
 
     void DumpEventWithCount(const std::vector<std::string>& params, NG::EventTreeType type, bool hasJson = false);
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     NG::EventTouchInfoRecord& GetEventTouchInfoRecord()
     {
         return eventTouchInfo_;
@@ -299,6 +300,7 @@ public:
     void AddDumpTouchInfo(const TouchEvent& event);
 
     bool CheckTouchInfoDump();
+#endif
 
     void AddGestureSnapshot(
         int32_t finger, int32_t depth, const RefPtr<TouchEventTarget>& target, NG::EventTreeType type);
@@ -339,10 +341,10 @@ public:
     {
         return lastTouchEventEndTimestamp_;
     }
-
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     void RecordHitEmptyMessage(
         const TouchEvent& touchPoint, const std::string& resultInfo, const RefPtr<NG::FrameNode>& frameNode);
-
+#endif
     void CheckAndLogLastReceivedTouchEventInfo(int32_t eventId, TouchType type);
 
     void CheckAndLogLastConsumedTouchEventInfo(int32_t eventId, TouchType type);
@@ -433,6 +435,7 @@ public:
     {
         return isDragCancelPending_;
     }
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     bool IsUseDumpTouchInfo() const
     {
         return eventTouchInfo_.isUseDumpTouchInfo_;
@@ -441,6 +444,7 @@ public:
     {
         eventTouchInfo_.isUseDumpTouchInfo_ = isUseDumpTouchInfo;
     }
+#endif
     TouchEvent& GetLastTouchEvent()
     {
         return lastTouchEvent_;
@@ -516,6 +520,9 @@ private:
     void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);
     void DispatchTouchEventToTouchTestResult(const TouchEvent& touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
+    void ProcessPostEventDownPhase(const TouchEvent& point, const TouchTestResult& targets);
+    void ProcessTouchEventDownPhase(const TouchEvent& point, const TouchTestResult& targets,
+        const RefPtr<NG::GestureReferee>& currentReferee, int32_t touchId);
     void SetResponseLinkRecognizers(
         const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers, bool isPostEvent = false);
     void FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
@@ -596,7 +603,9 @@ private:
     RefPtr<CoastingAxisEventGenerator> coastingAxisEventGenerator_;
     NG::EventTreeRecord eventTree_;
     NG::EventTreeRecord postEventTree_;
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     NG::EventTouchInfoRecord eventTouchInfo_;
+#endif
     RefPtr<NG::ResponseCtrl> responseCtrl_;
     TimeStamp lastEventTime_;
     int64_t lastTouchEventEndTimestamp_ = 0;

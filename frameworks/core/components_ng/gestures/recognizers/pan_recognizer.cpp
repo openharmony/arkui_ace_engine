@@ -20,12 +20,14 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "core/common/container.h"
 #include "core/common/event_manager.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/manager/event/json_report.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -379,7 +381,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     // escape is gone, the request itself is stale and must be re-armed
     // next time a multi-select Pan starts on a fresh finger.
     if (fingersId_.empty()) {
-        escapeRequested_ = false;
+        isLocked_ = false;
     }
     if (currentFingers_ < fingers_) {
         if (isNeedResetVoluntarily_ && currentFingers_ == 1) {
@@ -494,7 +496,6 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::DETECTING) {
         auto result = IsPanGestureAccept();
         if (result == GestureAcceptResult::ACCEPT) {
-            FilterCoexistingGestureFingers();
             if (HandlePanAccept()) {
                 return;
             }
@@ -636,6 +637,7 @@ bool PanRecognizer::HandlePanAccept()
         }
         return true;
     }
+    SetScrollEscapeForPan();
     if (IsBridgeMode()) {
         OnAccepted();
         return false;
@@ -815,7 +817,7 @@ void PanRecognizer::OnResetStatus()
     isFlushTouchEventsEnd_ = false;
     isForDrag_ = false;
     isStartTriggered_ = false;
-    escapeRequested_ = false;
+    isLocked_ = false;
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->GetTouchOptimizer()) {
         pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
@@ -939,7 +941,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
             // callback may be overwritten in its invoke so we copy it first
             auto callbackFunction = *panEndOnDisableState_;
             callbackFunction(info);
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
             HandleReports(info, type);
+#endif
             localMatrix_.clear();
             return;
         }
@@ -957,8 +961,9 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     ReportToGestureDebugManager(type, GestureListenerType::PAN);
 #endif
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     HandleReports(info, type);
-
+#endif
     if (type == GestureCallbackType::END || type == GestureCallbackType::CANCEL) {
         localMatrix_.clear();
     }
@@ -973,6 +978,7 @@ void PanRecognizer::HandleCallbackReports(
     HandlePanGestureAccept(info, panGestureState, type);
 }
 
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void PanRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
 {
     if (type == GestureCallbackType::ACTION || type == GestureCallbackType::UPDATE) {
@@ -988,9 +994,13 @@ void PanRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType 
     panReport.SetPoint(info.GetGlobalPoint());
     Reporter::GetInstance().HandleUISessionReporting(panReport);
 }
+#endif
 
 GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
 {
+    if (gestureInfo_ && gestureInfo_->GetDisposeTag()) {
+        return GestureJudgeResult::REJECT;
+    }
     auto frameNode = GetAttachedNode().Upgrade();
     CHECK_NULL_RETURN(frameNode, GestureJudgeResult::CONTINUE);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
@@ -1341,6 +1351,7 @@ void PanRecognizer::UpdateTouchEventInfo(const TouchEvent& event)
 
 void PanRecognizer::DispatchPanStartedToPerf(const TouchEvent& event)
 {
+#ifndef CROSS_PLATFORM
     int64_t inputTime = event.time.time_since_epoch().count();
     if (inputTime <= 0 || event.sourceType != SourceType::TOUCH) {
         return;
@@ -1350,6 +1361,7 @@ void PanRecognizer::DispatchPanStartedToPerf(const TouchEvent& event)
         return;
     }
     pMonitor->RecordInputEvent(FIRST_MOVE, PERF_TOUCH_EVENT, inputTime);
+#endif
 }
 
 void PanRecognizer::DumpVelocityInfo(int32_t fingerId)
@@ -1514,5 +1526,48 @@ void PanRecognizer::FilterCoexistingGestureFingers()
         "PanRecognizer: escaped %{public}d parallel Pan(s) for %{public}zu finger(s)",
         affected, fingers.size());
     return;
+}
+
+void PanRecognizer::SetScrollEscapeForPan()
+{
+    auto fingers = GetCurrentFingerIds();
+    if (fingers.empty()) {
+        return;
+    }
+    if (!canCoexistWithScroll_) {
+        //need set escape for select pan.
+        for (const auto& item : responseLinkRecognizer_) {
+            if (item.Invalid()) {
+                continue;
+            }
+            auto innerRecognizer = item.Upgrade();
+            auto panRecognizer = AceType::DynamicCast<PanRecognizer>(innerRecognizer);
+            if (!panRecognizer) {
+                continue;
+            }
+            if (panRecognizer->CanCoexistWithScroll()) {
+                panRecognizer->SetEscapeModeForPan(fingers);
+                break;
+            }
+        }
+        return;
+    }
+    SetTriggeredIds(fingers);
+    isLocked_ = true;
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto scrollablePattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(scrollablePattern);
+    scrollablePattern->SetScrollPanEscape(fingers);
+    TAG_LOGI(AceLogTag::ACE_GESTURE,
+        "PanRecognizer: escaped scroll Pan(s) for %{public}zu finger(s)", fingers.size());
+}
+
+bool PanRecognizer::IsFingerEscaped(int32_t fingerId) const
+{
+    if (isLocked_) {
+        return !IsTriggeredIds(fingerId);
+    }
+    return NGGestureRecognizer::IsFingerEscaped(fingerId);
 }
 } // namespace OHOS::Ace::NG

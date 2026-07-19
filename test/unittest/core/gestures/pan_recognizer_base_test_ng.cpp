@@ -767,46 +767,6 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerSetEscapeModeForPanTest002, TestS
 }
 
 /**
- * @tc.name: PanRecognizerEscapeModeResetOnResetStatusTest001
- * @tc.desc: OnResetStatus clears escape state and escapeRequested_
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerEscapeModeResetOnResetStatusTest001, TestSize.Level1)
-{
-    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
-    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
-
-    pan->escapedFingerIds_.insert(ESCAPE_FINGER_ID_0);
-    pan->escapeRequested_ = true;
-
-    pan->ResetStatus();
-
-    EXPECT_FALSE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
-    EXPECT_FALSE(pan->escapeRequested_);
-}
-
-/**
- * @tc.name: PanRecognizerEscapeModeUpEventResetsTest001
- * @tc.desc: escapeRequested_ is cleared once all fingers are lifted
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerEscapeModeUpEventResetsTest001, TestSize.Level1)
-{
-    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
-    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
-    pan->SetCanCoexistWithScroll(true);
-    pan->escapeRequested_ = true;
-    pan->fingersId_.insert(ESCAPE_FINGER_ID_0);
-
-    TouchEvent upEvent;
-    upEvent.id = ESCAPE_FINGER_ID_0;
-    upEvent.type = TouchType::UP;
-    pan->HandleTouchUpEvent(upEvent);
-
-    EXPECT_FALSE(pan->escapeRequested_);
-}
-
-/**
  * @tc.name: PanRecognizerFilterCoexistingGestureFingers001
  * @tc.desc: FilterCoexistingGestureFingers is a no-op when referee_ is null and no pipeline context
  * @tc.type: FUNC
@@ -999,5 +959,99 @@ HWTEST_F(PanRecognizerBaseTestNg, GestureRecognizerProcessTouchEventEscapeTest00
     pan->ProcessTouchEvent(downEvent);
 
     EXPECT_EQ(pan->lastTouchEvent_.id, ESCAPE_FINGER_ID_0);
+}
+
+/**
+ * @tc.name: GetRawGlobalLocation_NormalPath
+ * @tc.desc: GetRawGlobalLocation returns globalPoint coordinates when gestureInfo is null (default path).
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, GetRawGlobalLocation_NormalPath, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    pan->globalPoint_ = Point(100.0f, 200.0f);
+
+    auto result = pan->GetRawGlobalLocation(0);
+
+    EXPECT_EQ(result.GetX(), 100.0f);
+    EXPECT_EQ(result.GetY(), 200.0f);
+}
+
+/**
+ * @tc.name: GetRawGlobalLocation_NullGestureInfo
+ * @tc.desc: GetRawGlobalLocation returns globalPoint coordinates when gestureInfo_ is explicitly null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, GetRawGlobalLocation_NullGestureInfo, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    pan->globalPoint_ = Point(50.0f, 80.0f);
+    pan->gestureInfo_ = nullptr;
+
+    auto result = pan->GetRawGlobalLocation(0);
+
+    EXPECT_EQ(result.GetX(), 50.0f);
+    EXPECT_EQ(result.GetY(), 80.0f);
+}
+
+/**
+ * @tc.name: GetRawGlobalLocation_NonBoxSelectGestureInfo
+ * @tc.desc: GetRawGlobalLocation returns globalPoint coordinates when gestureInfo type is not BOXSELECT.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, GetRawGlobalLocation_NonBoxSelectGestureInfo, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    pan->globalPoint_ = Point(150.0f, 250.0f);
+    pan->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE);
+
+    auto result = pan->GetRawGlobalLocation(0);
+
+    EXPECT_EQ(result.GetX(), 150.0f);
+    EXPECT_EQ(result.GetY(), 250.0f);
+}
+
+/**
+ * @tc.name: GetRawGlobalLocation_BoxSelectWithHistory
+ * @tc.desc: GetRawGlobalLocation returns history event coordinates
+ * when gestureInfo is BOXSELECT and history is non-empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, GetRawGlobalLocation_BoxSelectWithHistory, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    pan->globalPoint_ = Point(100.0f, 200.0f);
+    pan->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>(GestureTypeName::BOXSELECT);
+    TouchEvent historyEvent;
+    historyEvent.SetX(300.0f);
+    historyEvent.SetY(400.0f);
+    pan->lastTouchEvent_.history.push_back(historyEvent);
+
+    auto result = pan->GetRawGlobalLocation(0);
+
+    EXPECT_EQ(result.GetX(), 300.0f);
+    EXPECT_EQ(result.GetY(), 400.0f);
+}
+
+/**
+ * @tc.name: GetRawGlobalLocation_BoxSelectEmptyHistory
+ * @tc.desc: GetRawGlobalLocation returns globalPoint coordinates when gestureInfo is BOXSELECT but history is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, GetRawGlobalLocation_BoxSelectEmptyHistory, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    pan->globalPoint_ = Point(100.0f, 200.0f);
+    pan->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>(GestureTypeName::BOXSELECT);
+
+    auto result = pan->GetRawGlobalLocation(0);
+
+    EXPECT_EQ(result.GetX(), 100.0f);
+    EXPECT_EQ(result.GetY(), 200.0f);
 }
 } // namespace OHOS::Ace::NG

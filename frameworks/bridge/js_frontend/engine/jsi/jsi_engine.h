@@ -183,6 +183,7 @@ private:
     void RegisterInitWorkerFunc();
     void RegisterOffWorkerFunc();
     void RegisterAssetFunc();
+    void RegisterContainerScopeFunc();
     bool ExecuteAbc(const std::string& fileName);
     bool CallAppFunc(const std::string& appFuncName);
     bool CallAppFunc(const std::string& appFuncName, std::vector<shared_ptr<JsValue>>& argv);

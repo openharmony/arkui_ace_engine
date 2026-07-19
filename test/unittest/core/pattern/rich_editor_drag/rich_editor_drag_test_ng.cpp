@@ -700,4 +700,269 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragStart001, TestSize.Level0)
     richPattern->HandleDragStart(nullptr, "");
     EXPECT_TRUE(richPattern->isDragSponsor_);
 }
+
+/**
+ * @tc.name: CreateTextDragData001
+ * @tc.desc: Test CreateTextDragData with horizontal scrolling enabled and disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, CreateTextDragData001, TestSize.Level0)
+{
+    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditor = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditor, nullptr);
+    auto dragInfo = std::make_shared<TextDragInfo>();
+    auto dragPattern = AceType::MakeRefPtr<RichEditorDragPattern>(richEditor, dragInfo);
+    RectF textRect(0, 0, 100, 50);
+    OffsetF localDragOffset(10.0f, 20.0f);
+    OffsetF globalDragOffset(30.0f, 40.0f);
+    RectF leftHandler(0, 0, 0, 20);
+    RectF rightHandler(100, 0, 0, 20);
+
+    // Branch: GetHorizontalScrolling() is false -> contentLeft_ stays nullopt
+    richEditor->isHorizontalScrolling_ = false;
+    auto data = dragPattern->CreateTextDragData(
+        textRect, localDragOffset, globalDragOffset, leftHandler, rightHandler);
+    EXPECT_FALSE(data.contentLeft_.has_value());
+
+    // Branch: GetHorizontalScrolling() is true -> contentLeft_ = contentRect.Left() + offsetXValue
+    richEditor->isHorizontalScrolling_ = true;
+    richEditor->contentRect_ = RectF(50, 0, 200, 100);
+    data = dragPattern->CreateTextDragData(
+        textRect, localDragOffset, globalDragOffset, leftHandler, rightHandler);
+    EXPECT_TRUE(data.contentLeft_.has_value());
+    EXPECT_EQ(data.contentLeft_.value(), 40.0f);
+}
+
+/**
+ * @tc.name: AdjustHandlers001
+ * @tc.desc: Test AdjustHandlers with different handler Y positions and horizontal scrolling states.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, AdjustHandlers001, TestSize.Level0)
+{
+    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditor = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditor, nullptr);
+    auto dragInfo = std::make_shared<TextDragInfo>();
+    auto dragPattern = AceType::MakeRefPtr<RichEditorDragPattern>(richEditor, dragInfo);
+    RectF contentRect(10, 0, 200, 100);
+
+    // Branch: leftHandler.Y != rightHandler.Y && !isHorizontalScrolling -> early return, no adjustment
+    richEditor->isHorizontalScrolling_ = false;
+    RectF leftHandler(5, 0, 0, 20);
+    RectF rightHandler(250, 30, 0, 20);
+    dragPattern->AdjustHandlers(contentRect, leftHandler, rightHandler);
+    EXPECT_EQ(leftHandler.GetX(), 5.0f);
+    EXPECT_EQ(rightHandler.GetX(), 250.0f);
+
+    // Branch: leftHandler.Y == rightHandler.Y -> handlers adjusted to contentRect bounds
+    leftHandler = RectF(5, 0, 0, 20);
+    rightHandler = RectF(250, 0, 0, 20);
+    dragPattern->AdjustHandlers(contentRect, leftHandler, rightHandler);
+    EXPECT_EQ(leftHandler.GetX(), 10.0f);
+    EXPECT_EQ(rightHandler.GetX(), 210.0f);
+
+    // Branch: leftHandler.Y != rightHandler.Y && isHorizontalScrolling -> handlers adjusted
+    richEditor->isHorizontalScrolling_ = true;
+    leftHandler = RectF(5, 0, 0, 20);
+    rightHandler = RectF(250, 30, 0, 20);
+    dragPattern->AdjustHandlers(contentRect, leftHandler, rightHandler);
+    EXPECT_EQ(leftHandler.GetX(), 10.0f);
+    EXPECT_EQ(rightHandler.GetX(), 210.0f);
+}
+
+/**
+ * @tc.name: AdjustMaxWidth001
+ * @tc.desc: Test AdjustMaxWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, AdjustMaxWidth001, TestSize.Level0)
+{
+    auto info = std::make_shared<TextDragInfo>();
+    RectF contentRect(0.0f, 0.0f, 100.0f, 50.0f);
+    std::vector<RectF> boxes;
+    float width = 0.0f;
+
+    // Branch: richEditor null
+    auto textNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    auto dragPattern = AceType::MakeRefPtr<RichEditorDragPattern>(textPattern, info);
+    dragPattern->AdjustMaxWidth(width, contentRect, boxes);
+    EXPECT_EQ(width, 100.0f);
+
+    // Branch: NearZero(maxSelectedWidth) + !isHorizontalScrolling
+    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, 2, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    dragPattern = AceType::MakeRefPtr<RichEditorDragPattern>(richEditorPattern, info);
+    info->maxSelectedWidth = 0.0f;
+    richEditorPattern->isHorizontalScrolling_ = false;
+    width = 0.0f;
+    dragPattern->AdjustMaxWidth(width, contentRect, boxes);
+    EXPECT_EQ(width, 100.0f);
+
+    // Branch: !NearZero(maxSelectedWidth) + !isHorizontalScrolling
+    info->maxSelectedWidth = 200.0f;
+    width = 0.0f;
+    dragPattern->AdjustMaxWidth(width, contentRect, boxes);
+    EXPECT_EQ(width, 200.0f);
+
+    // Branch: NearZero(maxSelectedWidth) + isHorizontalScrolling
+    info->maxSelectedWidth = 0.0f;
+    richEditorPattern->isHorizontalScrolling_ = true;
+    width = 0.0f;
+    dragPattern->AdjustMaxWidth(width, contentRect, boxes);
+    EXPECT_EQ(width, 100.0f);
+
+    // Branch: !NearZero(maxSelectedWidth) + isHorizontalScrolling
+    info->maxSelectedWidth = 200.0f;
+    width = 0.0f;
+    dragPattern->AdjustMaxWidth(width, contentRect, boxes);
+    EXPECT_EQ(width, 100.0f);
+}
+
+/**
+ * @tc.name: RichEditorDragOverlayModifierTestNG005
+ * @tc.desc: Test PaintImage when imageChildren size exceeds rectsForPlaceholders size
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG005, TestSize.Level1)
+{
+    auto richEditorNode = FrameNode::GetOrCreateFrameNode(
+        V2::RICH_EDITOR_ETS_TAG, 1, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(richEditorNode, nullptr);
+    TextDragInfo info;
+    auto dragNode = RichEditorDragPattern::CreateDragNode(richEditorNode, info);
+    ASSERT_NE(dragNode, nullptr);
+    auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
+    ASSERT_NE(richEditorDragPattern, nullptr);
+    richEditorDragPattern->CreateNodePaintMethod();
+    ASSERT_NE(richEditorDragPattern->overlayModifier_, nullptr);
+    auto richEditorDragOverlayModifier =
+        AceType::DynamicCast<RichEditorDragOverlayModifier>(richEditorDragPattern->overlayModifier_);
+    ASSERT_NE(richEditorDragOverlayModifier, nullptr);
+
+    auto* stack = ViewStackProcessor::GetInstance();
+    std::list<RefPtr<FrameNode>> imageChildren;
+    auto imageNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageNode2 = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageNode3 = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    imageChildren.push_back(imageNode1);
+    imageChildren.push_back(imageNode2);
+    imageChildren.push_back(imageNode3);
+
+    std::vector<RectF> rectsForPlaceholders = { RectF(0.0f, 0.0f, 100.0f, 100.0f) };
+    richEditorDragPattern->InitSpanImageLayout(imageChildren, rectsForPlaceholders);
+
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+
+    DrawingContext context { rsCanvas, 50.0f, 50.0f };
+    richEditorDragOverlayModifier->PaintImage(context);
+    // The test verifies that PaintImage does not crash when imageChildren size exceeds rectsForPlaceholders size
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CreateDragNode006
+ * @tc.desc: test CreateDragNode when placeholderIndex contains negative index
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, CreateDragNode006, TestSize.Level1)
+{
+    auto hostNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(hostNode, nullptr);
+    TextDragInfo info;
+    auto textPattern = hostNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    std::list<RefPtr<FrameNode>> imageChildren;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    imageChildren.push_back(imageNode);
+    imageChildren.push_back(imageNode1);
+    textPattern->placeholderIndex_ = { -1, 1 };
+    textPattern->rectsForPlaceholders_ = { RectF(0.0f, 0.0f, 100.0f, 100.0f), RectF(20.0f, 20.0f, 200.0f, 200.0f) };
+    textPattern->textSelector_.baseOffset = 0;
+    textPattern->textSelector_.destinationOffset = 10;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    ParagraphManager::ParagraphInfo paragraphInfo1;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo1.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    paragraphInfo1.end = 10;
+    textPattern->pManager_->paragraphs_.emplace_back(paragraphInfo);
+    textPattern->pManager_->paragraphs_.emplace_back(paragraphInfo1);
+    auto dragNode = RichEditorDragPattern::CreateDragNode(hostNode, imageChildren, info);
+    EXPECT_NE(dragNode, nullptr);
+}
+
+/**
+ * @tc.name: CreateDragNode007
+ * @tc.desc: test CreateDragNode when imageChildren size exceeds rectsForPlaceholders size
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, CreateDragNode007, TestSize.Level1)
+{
+    auto hostNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(hostNode, nullptr);
+    TextDragInfo info;
+    auto textPattern = hostNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    std::list<RefPtr<FrameNode>> imageChildren;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageNode2 = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    imageChildren.push_back(imageNode);
+    imageChildren.push_back(imageNode1);
+    imageChildren.push_back(imageNode2);
+    // placeholderIndex size must >= imageChildren size
+    // but some indices exceed rectsForPlaceholders size to trigger the bounds check
+    textPattern->placeholderIndex_ = { 0, 100, 200 };
+    textPattern->rectsForPlaceholders_ = { RectF(0.0f, 0.0f, 100.0f, 100.0f) };
+    textPattern->textSelector_.baseOffset = 0;
+    textPattern->textSelector_.destinationOffset = 10;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    ParagraphManager::ParagraphInfo paragraphInfo1;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo1.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    paragraphInfo1.end = 10;
+    textPattern->pManager_->paragraphs_.emplace_back(paragraphInfo);
+    textPattern->pManager_->paragraphs_.emplace_back(paragraphInfo1);
+    auto dragNode = RichEditorDragPattern::CreateDragNode(hostNode, imageChildren, info);
+    EXPECT_NE(dragNode, nullptr);
+}
 } // namespace OHOS::Ace::NG

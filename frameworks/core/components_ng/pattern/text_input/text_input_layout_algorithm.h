@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 class TextFieldPattern;
-class TextInputLayoutAlgorithm : public TextFieldLayoutAlgorithm {
+class ACE_FORCE_EXPORT TextInputLayoutAlgorithm : public TextFieldLayoutAlgorithm {
     DECLARE_ACE_TYPE(TextInputLayoutAlgorithm, TextFieldLayoutAlgorithm);
 
 public:

@@ -16,11 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_STACK_STACK_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_STACK_STACK_ELEMENT_H
 
-#include "core/components/bubble/bubble_element.h"
-#include "core/components/dialog_tween/dialog_tween_element.h"
 #include "core/pipeline/base/component_group_element.h"
 
 namespace OHOS::Ace {
+
+class BubbleElement;
+class DialogTweenElement;
 
 class ACE_FORCE_EXPORT StackElement : public ComponentGroupElement, public FocusGroup {
     DECLARE_ACE_TYPE(StackElement, ComponentGroupElement, FocusGroup);

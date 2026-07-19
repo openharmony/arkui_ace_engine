@@ -17,11 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_DRAWING_LAYOUT_UTILS_H
 
 #include "base/memory/ace_type.h"
+#include "base/utils/macros.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace::NG {
-void MeasureLayoutPolicySize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, SizeF& size);
+ACE_FORCE_EXPORT void MeasureLayoutPolicySize(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, SizeF& size);
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_LAYOUTS_DRAWING_LAYOUT_UTILS_H

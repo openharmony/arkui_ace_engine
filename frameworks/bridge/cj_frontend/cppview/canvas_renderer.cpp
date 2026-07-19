@@ -28,6 +28,7 @@
 #include "bridge/cj_frontend/cppview/render_image.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 #include "core/pipeline/base/constants.h"
 
 using namespace OHOS;
@@ -41,18 +42,33 @@ constexpr int32_t ALPHA_INDEX = 3;
 constexpr uint32_t PIXEL_SIZE = 4;
 constexpr double DIFF = 1e-10;
 const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" }; // Default value is low.
+
+RefPtr<RenderingContext2DModel> CreateCanvasRenderingContextModel()
+{
+    auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, nullptr);
+    CHECK_NULL_RETURN(bridge->createCanvasRenderingContext2DModel, nullptr);
+    return bridge->createCanvasRenderingContext2DModel();
+}
+
+void CreateZeroImageData(NativeImageData& imageData)
+{
+    imageData.width_ = 0;
+    imageData.height_ = 0;
+    imageData.data.clear();
+}
 } // namespace
 
 NativeCanvasRenderer::NativeCanvasRenderer(bool antialias) : FFIData()
 {
-    renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+    renderingContext2DModel_ = CreateCanvasRenderingContextModel();
     antialias_ = antialias;
     density_ = PipelineBase::GetCurrentDensity();
 }
 
 NativeCanvasRenderer::NativeCanvasRenderer() : FFIData()
 {
-    renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+    renderingContext2DModel_ = CreateCanvasRenderingContextModel();
     density_ = PipelineBase::GetCurrentDensity();
 }
 
@@ -819,15 +835,23 @@ int64_t NativeCanvasRenderer::CreateImageData(const double height, const double 
 {
     auto imageData = FFIData::Create<NativeImageData>();
     double density = GetDensity();
-    int32_t finalWidth = static_cast<int32_t>(std::abs(width * density + DIFF));
-    int32_t finalHeight = static_cast<int32_t>(std::abs(height * density + DIFF));
-    int32_t result = finalWidth * finalHeight * PIXEL_SIZE;
+    double fWidth = std::abs(width * density + DIFF);
+    double fHeight = std::abs(height * density + DIFF);
+    // Height or Width is ZERO or Overflow.
+    if (fWidth > INT32_MAX || fHeight > INT32_MAX ||
+        (fHeight > 0 && fWidth > (static_cast<double>(INT32_MAX) / fHeight))) {
+        CreateZeroImageData(*imageData);
+        return imageData->GetID();
+    }
+    int32_t finalWidth = static_cast<int32_t>(fWidth);
+    int32_t finalHeight = static_cast<int32_t>(fHeight);
+    size_t result = static_cast<size_t>(finalWidth) * static_cast<size_t>(finalHeight) * PIXEL_SIZE;
     std::vector<uint8_t> bufferArray;
-    for (int32_t i = 0; i < result; i++) {
+    for (size_t i = 0; i < result; i++) {
         bufferArray.emplace_back(0xff);
     }
     imageData->height_ = finalHeight;
-    imageData->width_ = finalHeight;
+    imageData->width_ = finalWidth;
     imageData->data = bufferArray;
     return imageData->GetID();
 }
@@ -836,15 +860,23 @@ int64_t NativeCanvasRenderer::CreateImageData(const sptr<NativeImageData> imageD
 {
     auto ret = FFIData::Create<NativeImageData>();
     double density = GetDensity();
-    int32_t finalWidth = static_cast<int32_t>(std::abs(imageData->width_ * density + DIFF));
-    int32_t finalHeight = static_cast<int32_t>(std::abs(imageData->height_ * density + DIFF));
-    int32_t result = finalWidth * finalHeight * PIXEL_SIZE;
+    double fWidth = std::abs(imageData->width_ * density + DIFF);
+    double fHeight = std::abs(imageData->height_ * density + DIFF);
+    // Height or Width is ZERO or Overflow.
+    if (fWidth > INT32_MAX || fHeight > INT32_MAX ||
+        (fHeight > 0 && fWidth > (static_cast<double>(INT32_MAX) / fHeight))) {
+        CreateZeroImageData(*ret);
+        return ret->GetID();
+    }
+    int32_t finalWidth = static_cast<int32_t>(fWidth);
+    int32_t finalHeight = static_cast<int32_t>(fHeight);
+    size_t result = static_cast<size_t>(finalWidth) * static_cast<size_t>(finalHeight) * PIXEL_SIZE;
     std::vector<uint8_t> bufferArray;
-    for (int32_t i = 0; i < result; i++) {
+    for (size_t i = 0; i < result; i++) {
         bufferArray.emplace_back(0xff);
     }
     ret->height_ = finalHeight;
-    ret->width_ = finalHeight;
+    ret->width_ = finalWidth;
     ret->data = bufferArray;
     return ret->GetID();
 }

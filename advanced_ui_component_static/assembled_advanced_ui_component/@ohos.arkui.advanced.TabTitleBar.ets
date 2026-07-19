@@ -848,8 +848,15 @@ struct ImageMenuItem {
       let accessibilityText: string = '';
       let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
       if (uiContent) {
-        accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
-          .getStringSync((this.item.accessibilityText as Resource).id as Long)
+        try {
+          accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
+            .getStringSync((this.item.accessibilityText as Resource).id as Long)
+        } catch (error) {
+          let code: number | undefined = (error as BusinessError).code;
+          let message: string | undefined = (error as BusinessError).message;
+          hilog.error(0x3900, 'AdvancedTabTitleBar', `getStringSync failed, code: ${code}, message: ${message}`);
+          accessibilityText = '';
+        }
       }
       return accessibilityText as string;
     }
@@ -873,8 +880,15 @@ struct ImageMenuItem {
         let accessibilityText: string = '';
         let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         if (uiContent) {
-          accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
-            .getStringSync((this.item.accessibilityText as Resource).id as Long)
+          try {
+            accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
+              .getStringSync((this.item.accessibilityText as Resource).id as Long)
+          } catch (error) {
+            let code: number | undefined = (error as BusinessError).code;
+            let message: string | undefined = (error as BusinessError).message;
+            hilog.error(0x3900, 'AdvancedTabTitleBar', `getStringSync failed, code: ${code}, message: ${message}`);
+            accessibilityText = '';
+          }
         }
         return accessibilityText as string;
       }
@@ -906,8 +920,15 @@ struct ImageMenuItem {
         let accessibilityDescription: string = ' ';
         let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         if (uiContent) {
-          accessibilityDescription = (uiContent as common.UIAbilityContext).resourceManager
-            .getStringSync((this.item.accessibilityDescription as Resource).id as Long)
+          try {
+            accessibilityDescription = (uiContent as common.UIAbilityContext).resourceManager
+              .getStringSync((this.item.accessibilityDescription as Resource).id as Long)
+          } catch (error) {
+            let code: number | undefined = (error as BusinessError).code;
+            let message: string | undefined = (error as BusinessError).message;
+            hilog.error(0x3900, 'AdvancedTabTitleBar', `getStringSync failed, code: ${code}, message: ${message}`);
+            accessibilityDescription = '';
+          }
         }
         return accessibilityDescription as string;
       }

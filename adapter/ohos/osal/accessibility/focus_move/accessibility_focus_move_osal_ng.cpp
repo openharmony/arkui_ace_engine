@@ -15,8 +15,11 @@
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_move_osal_ng.h"
 #include "adapter/ohos/osal/js_accessibility_manager.h"
 #include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_frame_node_utils.h"
+#include "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_virtual_node_utils.h"
+#include "adapter/ohos/osal/accessibility/hover/accessibility_hover_virtual_node_utils.h"
 
 #include "frameworks/core/accessibility/node_utils/accessibility_frame_node_utils.h"
+#include "frameworks/core/accessibility/utils/accessibility_manager_utils.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
@@ -75,6 +78,8 @@ bool FocusStrategyOsalNG::UpdateOriginNodeInfo(int64_t elementId)
     NG::AccessibilityFrameNodeUtils::UpdateAccessibilityVisibleToRoot(node); // to improve performance
     rootNode_ = rootNode;
     baseNode_ = node;
+    hostFrameNode_ = nullptr;
+    baseVirtualNode_ = nullptr;
     return true;
 }
 
@@ -201,7 +206,7 @@ bool FocusStrategyOsalNG::CheckNodeIsAvailable(
 
 Accessibility::FocusMoveResult FocusStrategyOsalNG::CheckAndGetReadableInfoToRoot(
     const RefPtr<NG::FrameNode>& currentFrameNode, std::list<Accessibility::AccessibilityElementInfo>& targetInfos,
-    const int32_t windowId)
+    const int32_t windowId, Accessibility::FocusRuleType focusRuleType)
 {
     Accessibility::FocusMoveResult result = {
         .resultType = FocusMoveResultType::SEARCH_FAIL,
@@ -220,6 +225,11 @@ Accessibility::FocusMoveResult FocusStrategyOsalNG::CheckAndGetReadableInfoToRoo
     std::shared_ptr<FocusRulesCheckNode> checkNode =
         std::static_pointer_cast<FocusRulesCheckNode>(inputNode);
     while (checkNode) {
+        if (!CheckNodeMatchedFocusType(checkNode, focusRuleType)) {
+            checkNode = checkNode->GetAceParent();
+            continue;
+        }
+
         auto checkResult = client->CheckNodeIsReadable(checkNode, isReadable);
         CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, result);
         if (isReadable) {
@@ -277,19 +287,22 @@ Accessibility::FocusMoveResult FocusStrategyOsalNG::DetectElementInfoFocusableTh
     if (!client) {
         return result;
     }
+
+    auto isFocusType = CheckNodeMatchedFocusType(checkNode, param.type);
     auto checkResult = client->CheckNodeIsReadable(checkNode, isReadable);
     CHECK_NE_RETURN(checkResult, Accessibility::RET_OK, result);
-    if (detectParam.needCheckValid && isReadable) {
+    if (detectParam.needCheckValid && isFocusType && isReadable) {
         if (!CheckNodeIsAvailable(checkNode)) {
             result.resultType = FocusMoveResultType::SEARCH_FAIL;
             return result;
         }
     }
-    if (!isReadable && detectParam.changeToAncestorFocusable) {
-        return CheckAndGetReadableInfoToRoot(baseNode, targetInfos, windowId);
+    if (!isFocusType && !isReadable && detectParam.changeToAncestorFocusable) {
+        return CheckAndGetReadableInfoToRoot(baseNode, targetInfos, windowId, param.type);
     }
 
-    result.resultType = isReadable ? FocusMoveResultType::SEARCH_SUCCESS : FocusMoveResultType::SEARCH_FAIL;
+    auto canFocus = isFocusType && isReadable;
+    result.resultType = canFocus ? FocusMoveResultType::SEARCH_SUCCESS : FocusMoveResultType::SEARCH_FAIL;
     result.changeToNewInfo = false;
     if (isInFocusMove && result.resultType == FocusMoveResultType::SEARCH_FAIL) {
         result.resultType = FocusMoveResultType::SEARCH_NEXT;

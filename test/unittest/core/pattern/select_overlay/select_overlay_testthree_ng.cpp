@@ -31,10 +31,13 @@
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 
+#include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
 #include "core/components_ng/pattern/select_overlay/magnifier.h"
@@ -1226,13 +1229,14 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001
      * @tc.steps: step3. Call CreatExtensionMenu
      */
     std::vector<OptionParam> params;
-    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 0, params);
-    EXPECT_EQ(params.size(), 0);
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 0, params, paramIds);
+    EXPECT_EQ(params.size(), 2);
     auto call = infoPtr->callerFrameNode.Upgrade();
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     ASSERT_NE(selectTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
-    selectOverlayNode->CreatExtensionMenu(std::move(params), call);
+    selectOverlayNode->CreatExtensionMenu(std::move(params), call, 0);
 
     /**
      * @tc.steps: step4. Verify styleOption color mode conversion
@@ -1299,6 +1303,647 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeGetExtensionMenuOutterrMen
 
     auto menu = selectOverlayNode->GetExtensionMenuOutterrMenu(params, menuParam, caller);
     EXPECT_EQ(menu, nullptr);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_GetExtensionMenuOutterrMenu003
+ * @tc.desc: Test GetExtensionMenuOutterrMenu uses selectMenu as target when new animation is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNode_GetExtensionMenuOutterrMenu003, TestSize.Level1)
+{
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        return textOverlayTheme;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([getTheme](ThemeType type) -> RefPtr<Theme> { return getTheme(type); });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) -> RefPtr<Theme> { return getTheme(type); });
+
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<TextPattern>();
+        });
+    ASSERT_NE(caller, nullptr);
+    caller->themeScopeId_ = 100;
+    caller->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto info = std::make_shared<SelectOverlayInfo>();
+    info->callerFrameNode = caller;
+    auto selectOverlayNode = CreateSelectOverlayNodeForTest(info);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    ASSERT_NE(selectOverlayNode->selectMenu_, nullptr);
+    selectOverlayNode->selectMenu_->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(selectOverlayNode->backButton_, nullptr);
+
+    std::vector<OptionParam> params;
+    params.emplace_back("copy", "", []() {});
+    MenuParam menuParam;
+    BlurStyleOption styleOption;
+    styleOption.colorMode = ThemeColorMode::SYSTEM;
+    menuParam.blurStyleOption = styleOption;
+
+    auto menu = selectOverlayNode->GetExtensionMenuOutterrMenu(params, menuParam, caller);
+    ASSERT_NE(menu, nullptr);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    EXPECT_EQ(menuPattern->targetId_, selectOverlayNode->selectMenu_->GetId());
+    EXPECT_EQ(menuPattern->targetTag_, selectOverlayNode->selectMenu_->GetTag());
+    EXPECT_EQ(selectOverlayNode->selectMenu_->GetThemeScopeId(), caller->GetThemeScopeId());
+
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto innerMenuNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto innerMenuPattern = innerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(innerMenuPattern, nullptr);
+    EXPECT_TRUE(innerMenuPattern->IsExtensionInnerMenu());
+    EXPECT_TRUE(innerMenuPattern->gridMenuPasteItemBuilder_.has_value());
+
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNode_GetExtensionMenuOutterrMenu004
+ * @tc.desc: Test GetExtensionMenuOutterrMenu uses backButton as target when new animation is disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNode_GetExtensionMenuOutterrMenu004, TestSize.Level1)
+{
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        return textOverlayTheme;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_))
+        .WillRepeatedly([getTheme](ThemeType type) -> RefPtr<Theme> { return getTheme(type); });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) -> RefPtr<Theme> { return getTheme(type); });
+
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<TextPattern>();
+        });
+    ASSERT_NE(caller, nullptr);
+    caller->themeScopeId_ = 100;
+    caller->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    auto info = std::make_shared<SelectOverlayInfo>();
+    info->callerFrameNode = caller;
+    auto selectOverlayNode = CreateSelectOverlayNodeForTest(info);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    ASSERT_NE(selectOverlayNode->selectMenu_, nullptr);
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(selectOverlayNode->backButton_, nullptr);
+
+    std::vector<OptionParam> params;
+    params.emplace_back("copy", "", []() {});
+    MenuParam menuParam;
+    BlurStyleOption styleOption;
+    styleOption.colorMode = ThemeColorMode::SYSTEM;
+    menuParam.blurStyleOption = styleOption;
+
+    auto menu = selectOverlayNode->GetExtensionMenuOutterrMenu(params, menuParam, caller);
+    ASSERT_NE(menu, nullptr);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    EXPECT_EQ(menuPattern->targetId_, selectOverlayNode->backButton_->GetId());
+    EXPECT_EQ(menuPattern->targetTag_, "SelectMoreOrBackButton");
+
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto innerMenuNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto innerMenuPattern = innerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(innerMenuPattern, nullptr);
+    EXPECT_TRUE(innerMenuPattern->IsExtensionInnerMenu());
+    EXPECT_FALSE(innerMenuPattern->gridMenuPasteItemBuilder_.has_value());
+
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeAddExtensionMenuOptionsGridToolbar001
+ * @tc.desc: Test shown system grid item does not create extension menu when new animation is disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeAddExtensionMenuOptionsGridToolbar001, TestSize.Level1)
+{
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        return nullptr;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) { return getTheme(type); });
+
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.showCopy = true;
+    selectInfo.menuCallback.onCopy = []() {};
+    auto info = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<TextPattern>();
+        });
+    ASSERT_NE(caller, nullptr);
+    caller->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    info->callerFrameNode = caller;
+    auto selectOverlayNode = CreateSelectOverlayNodeForTest(info);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->isShowInDefaultMenu_[1] = true;
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(selectOverlayNode->backButton_, nullptr);
+
+    selectOverlayNode->AddExtensionMenuOptions(info, 0);
+    EXPECT_EQ(selectOverlayNode->extensionMenu_, nullptr);
+
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeAddCreateMenuExtensionMenuParamsGridToolbar001
+ * @tc.desc: Test enabled system grid item is still kept in extension menu when it is already shown in toolbar.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeAddCreateMenuExtensionMenuParamsGridToolbar001,
+    TestSize.Level1)
+{
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        return nullptr;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) { return getTheme(type); });
+
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.showCopy = true;
+    selectInfo.menuCallback.onCopy = []() {};
+    auto info = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<TextPattern>();
+        });
+    ASSERT_NE(caller, nullptr);
+    caller->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    info->callerFrameNode = caller;
+    auto selectOverlayNode = CreateSelectOverlayNodeForTest(info);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    std::vector<MenuOptionsParam> menuOptionItems = {
+        { .id = OH_DEFAULT_COPY, .content = "copy" },
+        { .id = "custom_extension_item", .content = "custom_extension_item" },
+    };
+    std::vector<OptionParam> params;
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, info, 1, params, paramIds);
+
+    ASSERT_EQ(params.size(), 2);
+    ASSERT_EQ(paramIds.size(), 2);
+    EXPECT_EQ(paramIds[0], OH_DEFAULT_COPY);
+    EXPECT_EQ(paramIds[1], "custom_extension_item");
+
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeAddCreateMenuExtensionMenuParamsGridToolbar002
+ * @tc.desc: Test disabled system grid item is skipped from extension menu when it only appears before startIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeAddCreateMenuExtensionMenuParamsGridToolbar002,
+    TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        return nullptr;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) { return getTheme(type); });
+
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.showCopy = false;
+    auto info = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto selectOverlayNode = CreateSelectOverlayNodeForTest(info);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    std::vector<MenuOptionsParam> menuOptionItems = {
+        { .id = OH_DEFAULT_COPY, .content = "copy" },
+        { .id = "custom_extension_item", .content = "custom_extension_item" },
+    };
+    std::vector<OptionParam> params;
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, info, 1, params, paramIds);
+
+    ASSERT_EQ(params.size(), 1);
+    ASSERT_EQ(paramIds.size(), 1);
+    EXPECT_EQ(paramIds[0], "custom_extension_item");
+}
+
+/**
+ * @tc.name: SelectOverlayNodeAddCreateMenuExtensionMenuParamsGridToolbar003
+ * @tc.desc: Test shown system grid item is skipped from extension menu when new animation is disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeAddCreateMenuExtensionMenuParamsGridToolbar003,
+    TestSize.Level1)
+{
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        return nullptr;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) { return getTheme(type); });
+
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuInfo.showCopy = true;
+    selectInfo.menuCallback.onCopy = []() {};
+    auto info = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<TextPattern>();
+        });
+    ASSERT_NE(caller, nullptr);
+    caller->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    info->callerFrameNode = caller;
+    auto selectOverlayNode = CreateSelectOverlayNodeForTest(info);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    std::vector<MenuOptionsParam> menuOptionItems = {
+        { .id = OH_DEFAULT_COPY, .content = "copy" },
+        { .id = "custom_extension_item", .content = "custom_extension_item" },
+    };
+    std::vector<OptionParam> params;
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, info, 1, params, paramIds);
+
+    ASSERT_EQ(params.size(), 1);
+    ASSERT_EQ(paramIds.size(), 1);
+    EXPECT_EQ(paramIds[0], "custom_extension_item");
+
+    g_uiMaterialLevel = backupLevel;
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+    MockContainer::Current()->SetApiTargetVersion(backupContainerApiVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeAddCreateMenuExtensionMenuParamsSubMenu001
+ * @tc.desc: Test AddCreateMenuExtensionMenuParams populates submenu option params recursively.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeAddCreateMenuExtensionMenuParamsSubMenu001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        return nullptr;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) { return getTheme(type); });
+
+    SelectOverlayInfo selectInfo;
+    selectInfo.menuCallback.onPaste = []() {};
+    auto info = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto selectOverlayNode = CreateSelectOverlayNodeForTest(info);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    MenuOptionsParam subMenuPaste;
+    subMenuPaste.id = OH_DEFAULT_PASTE;
+    subMenuPaste.content = "paste";
+    MenuOptionsParam subMenuCustom;
+    subMenuCustom.id = "submenu_custom_item";
+    subMenuCustom.content = "submenu_custom_item";
+    MenuOptionsParam menuItem;
+    menuItem.id = "menu_with_submenu";
+    menuItem.content = "menu_with_submenu";
+    menuItem.subMenuItems = { subMenuPaste, subMenuCustom };
+
+    std::vector<OptionParam> params;
+    std::vector<std::string> paramIds;
+    selectOverlayNode->AddCreateMenuExtensionMenuParams({ menuItem }, info, 0, params, paramIds);
+
+    ASSERT_EQ(params.size(), 1);
+    ASSERT_EQ(paramIds.size(), 1);
+    EXPECT_EQ(paramIds[0], "menu_with_submenu");
+    ASSERT_EQ(params[0].subMenuItems.size(), 2);
+    EXPECT_TRUE(params[0].subMenuItems[0].isPasteOption);
+    EXPECT_EQ(params[0].subMenuItems[1].value, "submenu_custom_item");
+}
+
+/**
+ * @tc.name: SelectOverlayNodeCreatExtensionMenuGridStyle001
+ * @tc.desc: Test extension menu enables grid style and paste builder only when new animation is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuGridStyle001, TestSize.Level1)
+{
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::EXQUISITE;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        return nullptr;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) { return getTheme(type); });
+
+    auto info = std::make_shared<SelectOverlayInfo>();
+    auto selectOverlayNode = CreateSelectOverlayNodeForTest(info);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(selectOverlayNode->backButton_, nullptr);
+
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<TextPattern>();
+        });
+    ASSERT_NE(caller, nullptr);
+    caller->themeScopeId_ = 100;
+    caller->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    std::vector<OptionParam> params;
+    params.emplace_back("copy", "", []() {});
+    params.emplace_back("paste", "", []() {});
+    params.emplace_back("cut", "", []() {});
+    params[0].symbol = selectOverlayNode->GetSymbolFunc(OH_DEFAULT_COPY);
+    params[1].symbol = selectOverlayNode->GetSymbolFunc(OH_DEFAULT_PASTE);
+    params[2].symbol = selectOverlayNode->GetSymbolFunc(OH_DEFAULT_CUT);
+    params[0].isTextMenuGridMenuItem = true;
+    params[1].isTextMenuGridMenuItem = true;
+    params[2].isTextMenuGridMenuItem = true;
+    params[1].isPasteOption = true;
+
+    selectOverlayNode->CreatExtensionMenu(std::move(params), caller, 3);
+
+    ASSERT_NE(selectOverlayNode->extensionMenu_, nullptr);
+    auto outerMenuPattern = selectOverlayNode->extensionMenu_->GetPattern<MenuPattern>();
+    ASSERT_NE(outerMenuPattern, nullptr);
+    EXPECT_TRUE(outerMenuPattern->GetIsGridMenu());
+    EXPECT_TRUE(outerMenuPattern->GetIsExtensionMenuEnableNewAnimation());
+
+    auto scrollNode = AceType::DynamicCast<FrameNode>(selectOverlayNode->extensionMenu_->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto innerMenuNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto innerMenuPattern = innerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(innerMenuPattern, nullptr);
+    ASSERT_TRUE(innerMenuPattern->gridMenuPasteItemBuilder_.has_value());
+
+    auto menuItems = innerMenuPattern->GetMenuItems();
+    ASSERT_EQ(menuItems.size(), 3);
+    auto copyLayoutProperty = menuItems[0]->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(copyLayoutProperty, nullptr);
+    EXPECT_TRUE(static_cast<bool>(copyLayoutProperty->GetStartSymbol()));
+    auto pasteLayoutProperty = menuItems[1]->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(pasteLayoutProperty, nullptr);
+    EXPECT_TRUE(static_cast<bool>(pasteLayoutProperty->GetStartSymbol()));
+    auto cutLayoutProperty = menuItems[2]->GetLayoutProperty<MenuItemLayoutProperty>();
+    ASSERT_NE(cutLayoutProperty, nullptr);
+    EXPECT_TRUE(static_cast<bool>(cutLayoutProperty->GetStartSymbol()));
+    auto pastePattern = menuItems[1]->GetPattern<MenuItemPattern>();
+    ASSERT_NE(pastePattern, nullptr);
+    EXPECT_TRUE(pastePattern->IsTextMenuGridMenuItem());
+#ifdef OHOS_PLATFORM
+    EXPECT_NE(pastePattern->GetPasteButton(), nullptr);
+#endif
+
+    g_uiMaterialLevel = backupLevel;
+    MockContainer::Current()->SetApiTargetVersion(backupContainerApiVersion);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
+}
+
+/**
+ * @tc.name: SelectOverlayNodeCreatExtensionMenuGridStyle002
+ * @tc.desc: Test extension menu keeps grid style disabled when smooth material disables new animation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuGridStyle002, TestSize.Level1)
+{
+    APIVersionGuard apiVersionGuard(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    auto backupContainerApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto backupMinPlatformVersion = MockPipelineContext::GetCurrent()->GetMinPlatformVersion();
+    auto backupLevel = g_uiMaterialLevel;
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    g_uiMaterialLevel = UiMaterialLevel::SMOOTH;
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    ASSERT_NE(textOverlayTheme, nullptr);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto getTheme = [textOverlayTheme, selectTheme](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return textOverlayTheme;
+        }
+        if (type == SelectTheme::TypeId()) {
+            return selectTheme;
+        }
+        return nullptr;
+    };
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Invoke(getTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([getTheme](ThemeType type, int32_t) { return getTheme(type); });
+
+    auto info = std::make_shared<SelectOverlayInfo>();
+    auto selectOverlayNode = CreateSelectOverlayNodeForTest(info);
+    ASSERT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    ASSERT_NE(selectOverlayNode->backButton_, nullptr);
+
+    auto caller = FrameNode::GetOrCreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), []() {
+            return AceType::MakeRefPtr<TextPattern>();
+        });
+    ASSERT_NE(caller, nullptr);
+    caller->themeScopeId_ = 100;
+    caller->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+
+    std::vector<OptionParam> params;
+    params.emplace_back("copy", "", []() {});
+    params.emplace_back("paste", "", []() {});
+    params.emplace_back("cut", "", []() {});
+    params[1].isPasteOption = true;
+
+    selectOverlayNode->CreatExtensionMenu(std::move(params), caller, 3);
+
+    ASSERT_NE(selectOverlayNode->extensionMenu_, nullptr);
+    auto outerMenuPattern = selectOverlayNode->extensionMenu_->GetPattern<MenuPattern>();
+    ASSERT_NE(outerMenuPattern, nullptr);
+    EXPECT_FALSE(outerMenuPattern->GetIsGridMenu());
+    EXPECT_FALSE(outerMenuPattern->GetIsExtensionMenuEnableNewAnimation());
+
+    auto scrollNode = AceType::DynamicCast<FrameNode>(selectOverlayNode->extensionMenu_->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto innerMenuNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(innerMenuNode, nullptr);
+    auto innerMenuPattern = innerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(innerMenuPattern, nullptr);
+    EXPECT_FALSE(innerMenuPattern->gridMenuPasteItemBuilder_.has_value());
+
+    g_uiMaterialLevel = backupLevel;
+    MockContainer::Current()->SetApiTargetVersion(backupContainerApiVersion);
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(backupMinPlatformVersion);
 }
 
 } // namespace OHOS::Ace::NG

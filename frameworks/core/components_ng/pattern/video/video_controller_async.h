@@ -18,16 +18,8 @@
 
 #include <functional>
 #include <string>
-
-#include "base/log/log.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/thread/task_executor.h"
 #include "core/components_ng/pattern/video/video_utils.h"
-
-namespace OHOS::Ace::NG {
-class VideoStateMachinePattern;
-}
 
 namespace OHOS::Ace {
 
@@ -36,28 +28,47 @@ class VideoControllerAsync : public virtual AceType {
 
 public:
     using AsyncCommandCallback = std::function<void(bool success, const std::string& reason)>;
+    using StartImpl = std::function<void(AsyncCommandCallback&&)>;
+    using PauseImpl = std::function<void(AsyncCommandCallback&&)>;
+    using StopImpl = std::function<void(AsyncCommandCallback&&)>;
+    using ResetImpl = std::function<void(AsyncCommandCallback&&)>;
+    using SeekToImpl = std::function<void(float, SeekMode)>;
+    using RequestFullscreenImpl = std::function<void(bool)>;
+    using ExitFullscreenImpl = std::function<void()>;
 
-    explicit VideoControllerAsync(const WeakPtr<NG::VideoStateMachinePattern>& pattern);
-    ~VideoControllerAsync() override = default;
+    VideoControllerAsync();
+    ~VideoControllerAsync() override;
 
     void Start(AsyncCommandCallback&& callback);
     void Pause(AsyncCommandCallback&& callback);
     void Stop(AsyncCommandCallback&& callback);
     void Reset(AsyncCommandCallback&& callback);
-
     void SeekTo(float time, SeekMode seekMode);
     void RequestFullscreen(bool landscape);
     void ExitFullscreen();
 
-    void SetPattern(const WeakPtr<NG::VideoStateMachinePattern>& pattern);
+    void SetStartImpl(StartImpl&& startImpl);
+    void SetPauseImpl(PauseImpl&& pauseImpl);
+    void SetStopImpl(StopImpl&& stopImpl);
+    void SetResetImpl(ResetImpl&& resetImpl);
+    void SetSeekToImpl(SeekToImpl&& seekToImpl);
+    void SetRequestFullscreenImpl(RequestFullscreenImpl&& requestFullscreenImpl);
+    void SetExitFullscreenImpl(ExitFullscreenImpl&& exitFullscreenImpl);
 
-    void ClearPattern()
-    {
-        pattern_.Reset();
-    }
+    virtual void Clear();
+    bool IsBound() const;
 
 private:
-    WeakPtr<NG::VideoStateMachinePattern> pattern_;
+    static void ReportNullPattern(const char* method, AsyncCommandCallback&& callback);
+    static void ReportNullPattern(const char* method);
+
+    StartImpl startImpl_;
+    PauseImpl pauseImpl_;
+    StopImpl stopImpl_;
+    ResetImpl resetImpl_;
+    SeekToImpl seekToImpl_;
+    RequestFullscreenImpl requestFullscreenImpl_;
+    ExitFullscreenImpl exitFullscreenImpl_;
 };
 
 } // namespace OHOS::Ace

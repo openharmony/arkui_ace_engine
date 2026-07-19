@@ -25,7 +25,6 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/core/common/back_press_handler_manager.cpp",
     "$ace_root/frameworks/core/common/input_event_monitor_manager.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
-    "$ace_root/frameworks/core/components_ng/manager/environment/system_env_dispatcher.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/with_env_node.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",
     "$ace_root/frameworks/core/pipeline_ng/compatible_manager.cpp",
@@ -87,6 +86,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/common/mock_window.cpp",
     "$ace_root/test/mock/frameworks/core/common/resource/mock_resource_manager.cpp",
     "$ace_root/test/mock/frameworks/core/common/resource/mock_resource_parse_utils.cpp",
+    "$ace_root/test/mock/frameworks/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/frameworks/core/components/common/layout/mock_screen_system_manager.cpp",
     "$ace_root/test/mock/frameworks/core/components/common/properties/mock_color.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/animation/mock_geometry_transition.cpp",
@@ -167,6 +167,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/image/mock_image_cache.cpp",
     "$ace_root/test/mock/frameworks/core/image/mock_image_file_cache.cpp",
     "$ace_root/test/mock/frameworks/core/image/mock_image_source_info.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_dialog_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline/base/mock_constants.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline_ng/mock_ui_task_scheduler.cpp",
@@ -196,4 +197,21 @@ ace_unittest("pipeline_context_test_ng") {
   if (defined(resourceschedule_ffrt_support) && resourceschedule_ffrt_support) {
     sources += [ "$ace_root/test/mock/frameworks/base/longframe/mock_long_frame_report.cpp" ]
   }
+}
+
+ace_unittest("compatible_manager_test_ng") {
+  type = "pipeline"
+  module_name = "Pipeline"
+  sources = [
+    "$ace_root/frameworks/base/log/log_wrapper.cpp",
+    "$ace_root/frameworks/core/pipeline_ng/compatible_manager.cpp",
+    "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
+    "$ace_root/test/mock/frameworks/core/event/mock_touch_event_all.cpp",
+    "compatible_manager_test_ng.cpp",
+  ]
+  external_deps = [ "bounds_checking_function:libsec_static" ]
+  extra_deps = []
+  extra_deps += [
+    "$ace_root/test/unittest:ace_unittest_log",
+  ]
 }

@@ -148,15 +148,9 @@ public:
         return errorMsg_;
     }
 
-    void SetImageDfxConfig(const ImageDfxConfig& imageDfxConfig)
+    const ImageDfxConfig& GetImageDfxConfig() const
     {
-        imageDfxConfig_ = imageDfxConfig;
-    }
-
-
-    const ImageDfxConfig& GetImageDfxConfig()
-    {
-        return imageDfxConfig_;
+        return src_.GetImageDfxConfig();
     }
 
     void SetTraceInfo(int32_t id, const std::string& tag)
@@ -234,7 +228,6 @@ private:
     std::atomic<bool> needDataReadyCallBack_ = false;
     // to determine whether the image needs to be reloaded
     int32_t sizeLevel_ = -1;
-    ImageDfxConfig imageDfxConfig_;
 
     ImageFit imageFit_ = ImageFit::COVER;
     std::unique_ptr<SizeF> sourceSizePtr_ = nullptr;

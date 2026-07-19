@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 
 #include <string>
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
@@ -805,7 +806,7 @@ ArkUINativeModuleValue SpanBridge::SetOnHover(ArkUIRuntimeCallInfo *runtimeCallI
             // The infoPtr can only be bound to a JS object, and its lifetime belongs to that object.
             // It is not allowed to hold this address elsewhere.
             auto infoPtr = new HoverInfo(info);
-            auto obj = FrameNodeBridge::CreateHoverInfo(vm, infoPtr);
+            auto obj = CommonBridge::CreateHoverInfo(vm, infoPtr);
 
             panda::Local<panda::JSValueRef> params[NUM_2] = {
                 panda::BooleanRef::New(vm, isHover), obj };

@@ -44,8 +44,8 @@ class DragCtrl<T> {
   constructor(
     context: UIContext,
     scroller: ListScroller,
-    getData: (groupIndex: number, itemIndex: number) => T,
-    move: (fromGroupIndex: number, fromItemIndex: number, toGroupIndex: number, toItemIndex: number) => void
+    public getData: (groupIndex: number, itemIndex: number) => T,
+    public move: (fromGroupIndex: number, fromItemIndex: number, toGroupIndex: number, toItemIndex: number) => void
   ) {
     this.context = context;
     this.scroller = scroller;

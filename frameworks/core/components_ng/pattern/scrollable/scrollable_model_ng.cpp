@@ -462,7 +462,7 @@ void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<ShapeR
     ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetContentClip",
         static_cast<int32_t>(mode) + static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_CONTENT_ONLY),
         static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_DEFAULT));
-    ContentClip contentClip = std::make_pair(mode, shape);
+    ContentClip contentClip(mode, shape);
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, contentClip);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -489,7 +489,7 @@ void ScrollableModelNG::SetContentClip(FrameNode* frameNode, ContentClipMode mod
     ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetContentClip",
         static_cast<int32_t>(mode) + static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_CONTENT_ONLY),
         static_cast<int32_t>(ScrollableErrorCode::CLIP_CONTENT_DEFAULT));
-    ContentClip contentClip = std::make_pair(mode, rect);
+    ContentClip contentClip(mode, rect);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, contentClip, frameNode);
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
@@ -502,7 +502,7 @@ void ScrollableModelNG::ResetContentClip(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateContentClip({ paintProperty->GetDefaultContentClip(), nullptr });
+    paintProperty->UpdateContentClip(ContentClip(paintProperty->GetDefaultContentClip(), nullptr));
     auto layoutProperty = frameNode->GetLayoutProperty<ScrollableLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateContentClip(std::nullopt);

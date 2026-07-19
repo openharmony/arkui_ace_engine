@@ -35,8 +35,6 @@
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_ng/pattern/blank/blank_model_ng.h"
-#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
@@ -50,6 +48,7 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_static.h"
+#include "core/interfaces/native/node/progress_modifier.h"
 #include "core/components_ng/pattern/progress/progress_model_static.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
@@ -97,6 +96,7 @@
 #include "core/interfaces/native/implementation/search_modifier_impl.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 #include "frameworks/core/interfaces/native/implementation/layout_policy_peer_impl.h"
@@ -109,6 +109,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/animation/geometry_transition.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -717,9 +718,9 @@ auto g_popupCommonParamWithValidator = [](const auto& src, RefPtr<PopupParam>& p
         popupParam->SetHasTransition(true);
         popupParam->SetTransitionEffects(popupTransitionEffectsOpt.value());
     }
-    auto avoidTargetOpt = OptConvert<AvoidanceMode>(src.avoidTarget);
-    if (avoidTargetOpt.has_value()) {
-        popupParam->SetAvoidTarget(avoidTargetOpt.value());
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    if (customModifier) {
+        customModifier->setAvoidTarget(popupParam, src.avoidTarget);
     }
     auto outlineWidthOpt = Converter::OptConvert<CalcDimension>(src.outlineWidth);
     Validator::ValidateNonNegative(outlineWidthOpt);
@@ -2421,6 +2422,16 @@ const ArkUICounterModifier* GetCounterModifier()
     }
     return cachedModifier;
 }
+const ArkUIBlankModifier* GetBlankDynamicModifier()
+{
+    static const ArkUIBlankModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Blank");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIBlankModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
+}
 void SetWidthInternal(FrameNode *frameNode, std::optional<CalcDimension> value)
 {
     Validator::ValidateNonNegative(value);
@@ -2499,7 +2510,12 @@ void SetBlankHeight(FrameNode *frameNode, std::optional<CalcDimension> value)
     if (!value.has_value()) {
         return;
     }
-    BlankModelNG::SetHeight(frameNode, value.value());
+    auto arkUIBlankModifier = GetBlankDynamicModifier();
+    CHECK_NULL_VOID(arkUIBlankModifier);
+    auto node = reinterpret_cast<ArkUINodeHandle>(frameNode);
+    ArkUI_Float32 height = value.value().Value();
+    ArkUI_Int32 unit = static_cast<ArkUI_Int32>(value.value().Unit());
+    arkUIBlankModifier->setBlankHeight(node, height, unit);
 }
 void SetHeightImpl(Ark_NativePointer node,
                    const Opt_Union_Length_LayoutPolicy* value)
@@ -2762,11 +2778,19 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto colorValue = Converter::OptConvertPtr<Color>(value);
+    if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
+        auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->setBackgroundColorToModelStatic(frameNode, colorValue);
+        return;
+    }
     if (!colorValue) {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, Color::TRANSPARENT);
     }
     if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
-        SelectModelStatic::SetBackgroundColor(frameNode, colorValue);
+        auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+        CHECK_NULL_VOID(customModifier);
+        customModifier->setBackgroundColor(frameNode, colorValue);
     } else if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
         TextFieldModifier::SetBackgroundColorImpl(node, value);
     } else if (frameNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
@@ -2778,10 +2802,14 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
         }
         NavDestinationModelStatic::SetBackgroundColor(frameNode, backgroundColor, isValid);
     } else if (frameNode->GetTag() == V2::PROGRESS_ETS_TAG) {
-        ProgressModelStatic::SetBackgroundColor(frameNode, colorValue);
+        auto progressModifier = NG::NodeModifier::GetProgressCustomModifier();
+        CHECK_NULL_VOID(progressModifier);
+        progressModifier->setBackgroundColorToModelStatic(frameNode, colorValue);
     } else if (frameNode->GetTag() == V2::TOGGLE_ETS_TAG) {
         if (colorValue.has_value()) {
-            ToggleButtonModelNG::SetBackgroundColor(frameNode, colorValue.value());
+            auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(buttonModifier);
+            buttonModifier->setToggleBackgroundColor(reinterpret_cast<ArkUINodeHandle>(node), colorValue.value());
         }
     } else {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue);
@@ -3091,8 +3119,14 @@ void SetBorderRadiusImpl(Ark_NativePointer node,
     if (radiuses) {
         // Implement Reset value
         if (frameNode->GetTag() == V2::BUTTON_ETS_TAG) {
-            ButtonModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
-                radiuses.value().radiusBottomLeft, radiuses.value().radiusBottomRight);
+            auto buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_VOID(buttonModifier);
+            const auto& borderRadius = radiuses.value();
+            buttonModifier->setButtonBorderRadius(reinterpret_cast<ArkUINodeHandle>(node),
+                borderRadius.radiusTopLeft,
+                borderRadius.radiusTopRight,
+                borderRadius.radiusBottomLeft,
+                borderRadius.radiusBottomRight);
         }
         if (frameNode->GetTag() == V2::IMAGE_ETS_TAG) {
             ImageModelNG::SetBorderRadius(frameNode, radiuses.value().radiusTopLeft, radiuses.value().radiusTopRight,
@@ -6477,15 +6511,14 @@ void SetBindPopupImpl(Ark_NativePointer node,
 void CallMenuOnModifyDone(RefPtr<UINode> uiNode)
 {
     CHECK_NULL_VOID(uiNode);
-    auto child = uiNode->GetFirstChild();
-    CHECK_NULL_VOID(child);
-    auto menuNode = child->GetFirstChild();
-    if (menuNode && menuNode->GetTag() == V2::MENU_ETS_TAG) {
-        auto menuFrameNode = AceType::DynamicCast<FrameNode>(menuNode);
-        CHECK_NULL_VOID(menuFrameNode);
-        auto menuModifier = NG::NodeModifier::GetMenuInnerModifier();
-        CHECK_NULL_VOID(menuModifier);
-        menuModifier->menuOnModifyDone(menuFrameNode);
+    
+    for (const auto& child : uiNode->GetChildren()) {
+        CallMenuOnModifyDone(child);
+    }
+    
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    if (frameNode) {
+        frameNode->MarkModifyDone();
     }
 }
 void BindMenuBase(Ark_NativePointer node,

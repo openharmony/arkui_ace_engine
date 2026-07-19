@@ -19,7 +19,6 @@
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/frame_scene_status.h"
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
@@ -34,6 +33,7 @@
 #include "core/components_ng/render/animation_utils.h"
 #endif
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 class JSIndicatorControllerBase;
 struct SwiperItemInfoNG;
 
@@ -63,6 +63,8 @@ constexpr int32_t NEW_STYLE_MIN_TURN_PAGE_VELOCITY = 780;
 constexpr float SWIPER_CURVE_MASS = 1.0f;
 constexpr float SWIPER_CURVE_STIFFNESS = 328.0f;
 constexpr float SWIPER_CURVE_DAMPING = 34.0f;
+const char SWIPER_INDICATOR_ETS_TAG_PATTERN[] = "SwiperIndicator";
+const char INDICATOR_ETS_TAG_PATTERN[] = "IndicatorComponent";
 
 class ACE_FORCE_EXPORT SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
@@ -643,6 +645,7 @@ public:
 
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
+    bool IsIgnoreHiddenItem() const;
     int32_t DisplayIndicatorTotalCount() const;
     bool IsAutoLinear() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
@@ -1396,7 +1399,7 @@ private:
     RefPtr<FrameNode> GetCommonIndicatorNode();
     bool IsIndicator(const std::string& tag) const
     {
-        return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
+        return tag == SWIPER_INDICATOR_ETS_TAG_PATTERN || tag == INDICATOR_ETS_TAG_PATTERN;
     }
 
     void CheckAndReportEvent();
@@ -1624,6 +1627,8 @@ private:
     VelocityTracker velocityTracker_;
     Offset offsetXY_;
     std::optional<float> lastDragByOffset_;
+
+    bool lastSetRenderGroup_ = false;
 };
 } // namespace OHOS::Ace::NG
 

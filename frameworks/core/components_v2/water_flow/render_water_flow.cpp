@@ -15,6 +15,8 @@
 
 #include "core/components_v2/water_flow/render_water_flow.h"
 
+#include <string_view>
+
 #include "base/log/event_report.h"
 #include "base/log/log_wrapper.h"
 #include "core/animation/curve_animation.h"
@@ -33,7 +35,7 @@ constexpr int32_t DEFAULT_DEPTH = 10;
 constexpr double MAX_CONSTRAINT_SCALE = 3.0;
 constexpr double CENTER_POINT = 2.0;
 constexpr int32_t CACHE_SIZE_SCALE = 3;
-const std::string UNIT_AUTO = "auto";
+constexpr std::string_view UNIT_AUTO = "auto";
 } // namespace
 
 RenderWaterFlow::~RenderWaterFlow()

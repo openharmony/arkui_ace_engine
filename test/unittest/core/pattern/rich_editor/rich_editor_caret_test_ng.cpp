@@ -135,20 +135,20 @@ HWTEST_F(RichEditorCaretTestNg, MoveCaretToContentRect001, TestSize.Level0)
     richEditorPattern->contentRect_ = RectF(0, 5, 100, 60);
     auto offsetF = OffsetF(0.0f, 0.5f);
     richEditorPattern->isShowPlaceholder_ = false;
-    richEditorPattern->MoveCaretToContentRect(offsetF, 80.0f);
+    richEditorPattern->scrollController_->MoveCaretToContentRect(offsetF, 80.0f);
     EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
 
     /**
      * @tc.steps: step2. set MoveCaretToContentRect second parameter
      */
-    richEditorPattern->MoveCaretToContentRect(offsetF, 40.0f);
+    richEditorPattern->scrollController_->MoveCaretToContentRect(offsetF, 40.0f);
     EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
 
     /**
      * @tc.steps: step3. set MoveCaretToContentRect first parameter
      */
     auto offsetFtemp = OffsetF(0.0f, 10.0f);
-    richEditorPattern->MoveCaretToContentRect(offsetFtemp, 40.0f);
+    richEditorPattern->scrollController_->MoveCaretToContentRect(offsetFtemp, 40.0f);
     EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
 }
 
@@ -1167,5 +1167,123 @@ HWTEST_F(RichEditorCaretTestNg, UpdateEditingValue001, TestSize.Level2)
 
     richEditorPattern->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
+}
+
+/**
+ * @tc.name: CalculateCaretOffsetAndHeight001
+ * @tc.desc: test CalculateCaretOffsetAndHeight covering placeholder and affinity branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, CalculateCaretOffsetAndHeight001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateNodePaintMethod();
+    pattern->OnAttachToFrameNode();
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(pattern->overlayMod_);
+    ASSERT_NE(overlayMod, nullptr);
+    overlayMod->SetCaretWidth(10.0f);
+    // Setup mock paragraph: upstream (50,10) h=20, downstream (100,10) h=25
+    CaretMetricsF metricsUp = { OffsetF(50.0f, 10.0f), 20.0f };
+    CaretMetricsF metricsDown = { OffsetF(100.0f, 10.0f), 25.0f };
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(0.0f));
+    EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream(0, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(metricsUp), Return(true)));
+    EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(0, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(metricsDown), Return(true)));
+    pattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 6 });
+    pattern->richTextRect_ = RectF(0, 0, 200, 200);
+    pattern->contentRect_ = RectF(0, 0, 200, 200);
+    pattern->caretPosition_ = 0;
+
+    // Branch: isShowPlaceholder_=true, textAlign=START
+    pattern->isShowPlaceholder_ = true;
+    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    layoutProperty->UpdateTextAlign(TextAlign::START);
+    auto result = pattern->CalculateCaretOffsetAndHeight();
+    EXPECT_EQ(result.first.GetX(), 50.0f);
+    EXPECT_EQ(result.second, 20.0f);
+
+    // Branch: isShowPlaceholder_=true, textAlign=END
+    layoutProperty->UpdateTextAlign(TextAlign::END);
+    result = pattern->CalculateCaretOffsetAndHeight();
+    // caretBoundaryRect.Right() = contentRect_.Right() - caretWidth = 200-10 = 190
+    EXPECT_EQ(result.first.GetX(), 190.0f);
+
+    // Branch: isShowPlaceholder_=false, DEFAULT affinity, isCaretPosInLineEnd=true -> downstream
+    pattern->isShowPlaceholder_ = false;
+    layoutProperty->UpdateTextAlign(TextAlign::START);
+    pattern->caretAffinityPolicy_ = CaretAffinityPolicy::DEFAULT;
+    result = pattern->CalculateCaretOffsetAndHeight();
+    EXPECT_EQ(result.first.GetX(), 100.0f);
+    EXPECT_EQ(result.second, 25.0f);
+
+    // Branch: isShowPlaceholder_=false, UPSTREAM_FIRST, isCaretPosInLineEnd=true -> upstream
+    pattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
+    result = pattern->CalculateCaretOffsetAndHeight();
+    EXPECT_EQ(result.first.GetX(), 50.0f);
+    EXPECT_EQ(result.second, 20.0f);
+
+    // Branch: isShowPlaceholder_=false, DOWNSTREAM_FIRST, isCaretPosInLineEnd=true -> downstream
+    pattern->caretAffinityPolicy_ = CaretAffinityPolicy::DOWNSTREAM_FIRST;
+    result = pattern->CalculateCaretOffsetAndHeight();
+    EXPECT_EQ(result.first.GetX(), 100.0f);
+    EXPECT_EQ(result.second, 25.0f);
+}
+
+/**
+ * @tc.name: CalculateCaretOffsetAndHeight002
+ * @tc.desc: test CalculateCaretOffsetAndHeight covering right boundary and not-in-line-end branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorCaretTestNg, CalculateCaretOffsetAndHeight002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->CreateNodePaintMethod();
+    pattern->OnAttachToFrameNode();
+    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(pattern->overlayMod_);
+    ASSERT_NE(overlayMod, nullptr);
+    overlayMod->SetCaretWidth(10.0f);
+    // Setup mock: upstream (50,10) h=20, downstream (90,10) h=25
+    CaretMetricsF metricsUp = { OffsetF(50.0f, 10.0f), 20.0f };
+    CaretMetricsF metricsDown = { OffsetF(90.0f, 10.0f), 25.0f };
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(0.0f));
+    EXPECT_CALL(*paragraph, ComputeOffsetForCaretUpstream(0, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(metricsUp), Return(true)));
+    EXPECT_CALL(*paragraph, ComputeOffsetForCaretDownstream(0, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(metricsDown), Return(true)));
+    pattern->paragraphs_.AddParagraph({ .paragraph = paragraph, .start = 0, .end = 6 });
+    pattern->richTextRect_ = RectF(0, 0, 200, 200);
+    pattern->contentRect_ = RectF(0, 0, 100, 200);
+    pattern->caretPosition_ = 0;
+    pattern->isShowPlaceholder_ = false;
+    pattern->caretAffinityPolicy_ = CaretAffinityPolicy::DEFAULT;
+
+    // Branch: right boundary - caretOffset.GetX()>=caretBoundaryRect.Right() -> subtract caretWidth
+    // caretBoundaryRect.Right() = 100-10=90, downstream x=90, GreatOrEqual(90,90)=true
+    auto result = pattern->CalculateCaretOffsetAndHeight();
+    EXPECT_EQ(result.first.GetX(), 80.0f); // 90 - caretWidth(10)
+    EXPECT_EQ(result.second, 25.0f);
+
+    // Branch: not in line end - same x for up/down -> use upstream
+    CaretMetricsF metricsUpSame = { OffsetF(50.0f, 10.0f), 20.0f };
+    CaretMetricsF metricsDownSame = { OffsetF(50.0f, 10.0f), 25.0f };
+    auto paragraph2 = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph2, GetHeight()).WillRepeatedly(Return(0.0f));
+    EXPECT_CALL(*paragraph2, ComputeOffsetForCaretUpstream(0, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(metricsUpSame), Return(true)));
+    EXPECT_CALL(*paragraph2, ComputeOffsetForCaretDownstream(0, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(metricsDownSame), Return(true)));
+    pattern->paragraphs_.Reset();
+    pattern->paragraphs_.AddParagraph({ .paragraph = paragraph2, .start = 0, .end = 6 });
+    pattern->contentRect_ = RectF(0, 0, 200, 200);
+    result = pattern->CalculateCaretOffsetAndHeight();
+    EXPECT_EQ(result.first.GetX(), 50.0f);
+    EXPECT_EQ(result.second, 20.0f);
 }
 }

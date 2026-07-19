@@ -20,9 +20,9 @@
 #include "base/i18n/localization.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/button/button_theme.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -184,10 +184,11 @@ void NavToolbarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
             CHECK_NULL_VOID(pipeline);
             auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
             CHECK_NULL_VOID(buttonTheme);
-            auto buttonPattern = toolBarItemNode->GetPattern<ButtonPattern>();
-            CHECK_NULL_VOID(buttonPattern);
             if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_NINETEEN)) {
-                buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
+                auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+                CHECK_NULL_VOID(buttonModifier);
+                buttonModifier->setClickedColor(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(toolBarItemNode)),
+                    buttonTheme->GetClickedColor());
             }
             if (!toolBarPattern->moveIndex_.has_value()) {
                 toolBarPattern->moveIndex_ = index;
@@ -227,9 +228,10 @@ void NavToolbarPattern::HandleLongPressEvent(const GestureEvent& info)
         CHECK_NULL_VOID(pipeline);
         auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
-        auto buttonPattern = toolBarItem->GetPattern<ButtonPattern>();
-        CHECK_NULL_VOID(buttonPattern);
-        buttonPattern->SetClickedColor(buttonTheme->GetClickedColor());
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        buttonModifier->setClickedColor(
+            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(toolBarItem)), buttonTheme->GetClickedColor());
     }
 }
 

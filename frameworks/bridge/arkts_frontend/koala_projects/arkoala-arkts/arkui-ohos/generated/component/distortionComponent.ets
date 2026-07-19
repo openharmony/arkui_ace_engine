@@ -120,6 +120,21 @@ export function DistortionComponentImpl(
     })
 }
 
+@memo
+export function DistortionComponent(
+    @memo @memo_skip
+    style: ((attributes: DistortionComponentAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkDistortionComponentComponent>((): ArkDistortionComponentComponent => {
+        return new ArkDistortionComponentComponent()
+    })
+    NodeAttach<ArkDistortionComponentPeer>((): ArkDistortionComponentPeer => ArkDistortionComponentPeer.create(receiver), (_: ArkDistortionComponentPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
 export class DistortionParam_serializer {
     public static write(buffer: SerializerBase, value: DistortionParam): void {
         let valueSerializer: SerializerBase = buffer

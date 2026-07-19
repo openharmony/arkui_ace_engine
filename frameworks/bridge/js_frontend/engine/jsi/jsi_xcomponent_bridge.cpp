@@ -18,6 +18,7 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #include "frameworks/core/common/ace_view.h"
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
+#include "frameworks/core/interfaces/native/node/node_xcomponent_modifier.h"
 
 namespace OHOS::Ace::Framework {
 JsiXComponentBridge::JsiXComponentBridge()
@@ -129,9 +130,11 @@ void JsiXComponentBridge::HandleContext(const shared_ptr<JsRuntime>& runtime, No
         }
         auto bridge = weak.Upgrade();
         if (bridge) {
-            pool->NativeXComponentInit(
-                bridge->nativeXComponent_,
-                AceType::WeakClaim(AceType::RawPtr(bridge->nativeXcomponentImpl_)));
+            auto xcomponentModifier = NG::NodeModifier::GetXComponentCustomModifier();
+            if (xcomponentModifier && xcomponentModifier->legacyNativeXComponentInit) {
+                xcomponentModifier->legacyNativeXComponentInit(AceType::RawPtr(pool), bridge->nativeXComponent_,
+                    AceType::RawPtr(bridge->nativeXcomponentImpl_));
+            }
         }
     };
 

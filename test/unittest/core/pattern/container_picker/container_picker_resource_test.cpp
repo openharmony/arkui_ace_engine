@@ -55,6 +55,8 @@ RefPtr<Theme> GetTheme(ThemeType type)
 {
     if (type == PickerTheme::TypeId()) {
         return MockThemeDefault::GetPickerTheme();
+    } else if (type == ContainerPickerTheme::TypeId()) {
+        return AceType::MakeRefPtr<ContainerPickerTheme>();
     } else {
         return nullptr;
     }
@@ -653,7 +655,7 @@ HWTEST_F(ContainerPickerResourceTest, ToJsonValueTest003, TestSize.Level1)
 
 /**
  * @tc.name: ToJsonValueTest004
- * @tc.desc: selectionIndicator strokeWidth and dividerColor match host GetTheme PickerTheme defaults
+ * @tc.desc: selectionIndicator strokeWidth and dividerColor match host GetTheme ContainerPickerTheme defaults
  *           (node-scoped theme).
  * @tc.type: FUNC
  */
@@ -665,7 +667,7 @@ HWTEST_F(ContainerPickerResourceTest, ToJsonValueTest004, TestSize.Level1)
     auto property = pattern->GetLayoutProperty<ContainerPickerLayoutProperty>();
     ASSERT_NE(property, nullptr);
 
-    auto pickerTheme = frameNode->GetTheme<PickerTheme>(true);
+    auto pickerTheme = frameNode->GetTheme<ContainerPickerTheme>(true);
     ASSERT_NE(pickerTheme, nullptr);
 
     const InspectorFilter filter;
@@ -673,8 +675,8 @@ HWTEST_F(ContainerPickerResourceTest, ToJsonValueTest004, TestSize.Level1)
     property->ToJsonValue(jsonValue, filter);
     auto selectionIndicator = jsonValue->GetObject("selectionIndicator");
     ASSERT_NE(selectionIndicator, nullptr);
-    EXPECT_EQ(selectionIndicator->GetString("strokeWidth"), pickerTheme->GetDividerThickness().ToString());
-    EXPECT_EQ(selectionIndicator->GetString("dividerColor"), pickerTheme->GetDividerColor().ColorToString());
+    EXPECT_EQ(selectionIndicator->GetString("strokeWidth"), pickerTheme->GetStrokeWidth().ToString());
+    EXPECT_EQ(selectionIndicator->GetString("dividerColor"), pickerTheme->GetIndicatorDividerColor().ColorToString());
 }
 
 } // namespace OHOS::Ace::NG

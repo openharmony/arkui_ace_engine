@@ -23,7 +23,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
@@ -32,20 +31,20 @@
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_render_property.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
+
+#include <string_view>
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t TEXTFIELD_INDEX = 0;
-const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
-const std::string INSPECTOR_PREFIX = "__SearchField__";
+constexpr std::string_view DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
+constexpr std::string_view INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
     "Button__", "Divider__" };
 constexpr int32_t DIVIDER_INDEX = 5;
-const char DIVIDER_ETS_TAG[] = "Divider";
 const char SEARCH_Field_ETS_TAG[] = "SearchField";
+
 } // namespace
 
 void SearchModelNG::CreateTextFieldMultiThread(const RefPtr<SearchNode>& parentNode,
@@ -59,10 +58,12 @@ void SearchModelNG::CreateTextFieldMultiThread(const RefPtr<SearchNode>& parentN
     ACE_UINODE_TRACE(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
+    std::set<std::string> allowDropSet({
+        DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, std::string(DROP_TYPE_STYLED_STRING) });
     frameNode->SetAllowDrop(allowDropSet);
     auto parentInspector = parentNode->GetInspectorIdValue("");
-    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[TEXTFIELD_INDEX] + parentInspector);
+    frameNode->UpdateInspectorId(std::string(INSPECTOR_PREFIX) +
+        SPECICALIZED_INSPECTOR_INDEXS[TEXTFIELD_INDEX] + parentInspector);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto textValue = pattern->GetTextUtf16Value();
@@ -121,11 +122,11 @@ void SearchModelNG::CreateDividerMultiThread(const RefPtr<SearchNode>& parentNod
     }
     auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetDividerId();
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(nodeId);
     CHECK_NULL_VOID(dividerNode);
     ACE_UINODE_TRACE(dividerNode);
-    dividerNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);
+    dividerNode->UpdateInspectorId(std::string(INSPECTOR_PREFIX) +
+        SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);
     dividerNode->MountToParent(parentNode);
     dividerNode->MarkModifyDone();
     auto searchPattern = parentNode->GetPattern<SearchPattern>();

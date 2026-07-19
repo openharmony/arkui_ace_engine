@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,9 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include "ui/base/macros.h"
+
+#include "ui/base/macros.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -27,12 +30,12 @@ namespace OHOS::Ace::NG {
  * It provides information about the areas of the screen that are not covered by app's UI elements,
  * such as the status bar, navigation bar, or notch.
  */
-struct SafeAreaInsets {
+struct ACE_FORCE_EXPORT SafeAreaInsets {
     /**
      * @brief Represents an Inset in one direction of the screen with start/end values in pixel index. For example, a
      * status bar of height 120px would be Inset(start = 0, end = 119) in Top direction.
      */
-    struct Inset {
+    struct ACE_FORCE_EXPORT Inset {
         uint32_t start = 0;
         uint32_t end = 0;
 
@@ -66,13 +69,13 @@ struct SafeAreaInsets {
          * @param other The other inset to combine with.
          * @return The combined inset.
          */
-        Inset Combine(const Inset& other) const;
+        ACE_FORCE_EXPORT Inset Combine(const Inset& other) const;
 
         bool operator==(const Inset& other) const
         {
             return start == other.start && end == other.end;
         }
-        std::string ToString() const;
+        ACE_FORCE_EXPORT std::string ToString() const;
     };
 
     Inset left_;
@@ -88,7 +91,7 @@ struct SafeAreaInsets {
 
     bool IsValid() const;
 
-    std::string ToString() const;
+    ACE_FORCE_EXPORT std::string ToString() const;
 
     bool operator==(const SafeAreaInsets& other) const
     {

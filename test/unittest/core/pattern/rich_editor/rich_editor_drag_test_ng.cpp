@@ -1381,7 +1381,7 @@ HWTEST_F(RichEditorDragTestNg, BeforeDrag002, TestSize.Level2)
     struct UpdateSpanStyle typingStyle;
     TextStyle textStyle;
     richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-    richEditorPattern->typingTextStyle_.reset();
+    richEditorPattern->SetTypingStyle(std::nullopt, std::nullopt);
     RichEditorChangeValue changeValue;
     int32_t innerPosition = 0;
     RichEditorPattern::OperationRecord record;
@@ -1389,7 +1389,7 @@ HWTEST_F(RichEditorDragTestNg, BeforeDrag002, TestSize.Level2)
     record.beforeCaretPosition = 20;
 
     richEditorPattern->BeforeDrag(changeValue, innerPosition, record);
-    EXPECT_FALSE(richEditorPattern->typingTextStyle_.has_value());
+    EXPECT_FALSE(richEditorPattern->GetTypingStyle().has_value());
     EXPECT_NE(innerPosition, 0);
 }
 

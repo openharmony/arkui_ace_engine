@@ -203,6 +203,60 @@ HWTEST_F(ScrollBarLayoutTestNg, UpdateScrollBarOffset001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FreeScrollBarWithoutChild001
+ * @tc.desc: Test default style of two outer scrollBars without child in Free scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarLayoutTestNg, FreeScrollBarWithoutChild001, TestSize.Level1)
+{
+    const int32_t apiTargetVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    CreateStack(Alignment::BOTTOM_RIGHT);
+    CreateScroll(CONTENT_MAIN_SIZE, Axis::FREE);
+    auto scrollContent = GetChildFrameNode(scrollNode_, 0);
+    ASSERT_NE(scrollContent, nullptr);
+    ViewAbstract::SetWidth(AceType::RawPtr(scrollContent), CalcLength(CONTENT_MAIN_SIZE));
+    ViewAbstract::SetHeight(AceType::RawPtr(scrollContent), CalcLength(CONTENT_MAIN_SIZE));
+
+    CreateScrollBar(true, true, Axis::VERTICAL, DisplayMode::ON);
+    auto verticalFrameNode = frameNode_;
+    auto verticalPattern = pattern_;
+    ASSERT_NE(verticalPattern, nullptr);
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateScrollBar(true, true, Axis::HORIZONTAL, DisplayMode::ON);
+    auto horizontalFrameNode = frameNode_;
+    auto horizontalPattern = pattern_;
+    ASSERT_NE(horizontalPattern, nullptr);
+
+    CreateDone();
+    FlushUITasks();
+
+    ASSERT_NE(verticalFrameNode, nullptr);
+    ASSERT_NE(horizontalFrameNode, nullptr);
+    ASSERT_NE(verticalPattern->scrollBar_, nullptr);
+    ASSERT_NE(horizontalPattern->scrollBar_, nullptr);
+    EXPECT_FALSE(verticalPattern->HasChild());
+    EXPECT_FALSE(horizontalPattern->HasChild());
+    EXPECT_TRUE(verticalPattern->UseInnerScrollBar());
+    EXPECT_TRUE(horizontalPattern->UseInnerScrollBar());
+    EXPECT_TRUE(verticalPattern->scrollBar_->IsScrollable());
+    EXPECT_TRUE(horizontalPattern->scrollBar_->IsScrollable());
+    EXPECT_EQ(verticalPattern->scrollBar_->GetPositionMode(), PositionMode::RIGHT);
+    EXPECT_EQ(horizontalPattern->scrollBar_->GetPositionMode(), PositionMode::BOTTOM);
+
+    auto verticalActiveRect = verticalPattern->scrollBar_->GetActiveRect();
+    auto horizontalActiveRect = horizontalPattern->scrollBar_->GetActiveRect();
+    EXPECT_GT(verticalActiveRect.Width(), 0.0);
+    EXPECT_GT(verticalActiveRect.Height(), 0.0);
+    EXPECT_GT(horizontalActiveRect.Width(), 0.0);
+    EXPECT_GT(horizontalActiveRect.Height(), 0.0);
+    EXPECT_GT(verticalActiveRect.Height(), verticalActiveRect.Width());
+    EXPECT_GT(horizontalActiveRect.Width(), horizontalActiveRect.Height());
+
+    Container::Current()->SetApiTargetVersion(apiTargetVersion);
+}
+
+/**
  * @tc.name: SetScrollBar001
  * @tc.desc: Test SetScrollBar in VERSION_TWELVE
  * @tc.type: FUNC

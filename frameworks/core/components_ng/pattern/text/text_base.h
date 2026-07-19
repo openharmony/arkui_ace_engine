@@ -79,7 +79,7 @@ namespace TextChangeType {
     const std::string REMOVE = "removeText";
 };
 
-class TextGestureSelector : public virtual AceType {
+class ACE_FORCE_EXPORT TextGestureSelector : public virtual AceType {
     DECLARE_ACE_TYPE(TextGestureSelector, AceType);
 
 public:

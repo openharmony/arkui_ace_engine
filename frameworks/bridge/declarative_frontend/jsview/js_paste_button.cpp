@@ -170,18 +170,18 @@ void JSPasteButton::JsOnClick(const JSCallbackInfo& info)
 
 void JSPasteButton::SetAccessibilityRole(const JSCallbackInfo& info)
 {
+    AccessibilityRoleType accRoleType = AccessibilityRoleType::ROLE_NONE;
     if (info.Length() < 1 || !info[0]->IsNumber()) {
+        std::string roleStr = AccessibilityStaticUtils::GetRoleByType(accRoleType);
+        ViewAbstractModel::GetInstance()->SetAccessibilityRole(roleStr, false);
         return;
     }
     uint32_t roleValue = 0;
     ParseJsInteger(info[0], roleValue);
 
     auto secRoleType = static_cast<SecurityComponentRoleType>(roleValue);
-    AccessibilityRoleType accRoleType;
     if (secRoleType == SecurityComponentRoleType::BUTTON) {
         accRoleType = AccessibilityRoleType::BUTTON;
-    } else {
-        accRoleType = AccessibilityRoleType::ROLE_NONE;
     }
 
     std::string roleStr = AccessibilityStaticUtils::GetRoleByType(accRoleType);

@@ -23,7 +23,7 @@
 #include "core/gestures/gesture_event.h"
 
 namespace OHOS::Ace::NG {
-class MultipleClickRecognizer : public AceType {
+class ACE_FORCE_EXPORT MultipleClickRecognizer : public AceType {
     DECLARE_ACE_TYPE(MultipleClickRecognizer, AceType);
 
 public:

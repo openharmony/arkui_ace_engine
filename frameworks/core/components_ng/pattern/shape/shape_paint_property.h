@@ -22,11 +22,11 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 class ACE_EXPORT ShapePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ShapePaintProperty, PaintProperty);
@@ -112,7 +112,7 @@ public:
         json->PutExtAttr("antiAlias", propAntiAlias_.value_or(ANTIALIAS_DEFAULT) ? "true" : "false", filter);
     }
 
-    void UpdateShapeProperty(const RefPtr<ShapePaintProperty>& target);
+    ACE_FORCE_EXPORT void UpdateShapeProperty(const RefPtr<ShapePaintProperty>& target);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Fill, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FillOpacity, double, PROPERTY_UPDATE_RENDER);

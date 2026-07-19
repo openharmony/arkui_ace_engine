@@ -18,6 +18,7 @@
 
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/theme/resource_adapter.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager.h"
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
 
@@ -61,11 +62,6 @@ public:
         themeConstants_->ParseTheme();
     }
 
-    void LoadCustomTheme(const RefPtr<AssetManager>& assetManager) override
-    {
-        themeConstants_->LoadCustomStyle(assetManager);
-    }
-
     /*
      * Color scheme of the whole window, app bg color will be change in transparent scheme.
      */
@@ -76,7 +72,7 @@ public:
 
     /*
      * Get color value from AppTheme (if exists) or system theme style.
-     * Prebuilt background color will be returned if AppTheme and system theme style both not exists.
+     * White will be returned if AppTheme and system theme style both do not provide background color.
      * @return App background color.
      */
     Color GetBackgroundColor() const override;

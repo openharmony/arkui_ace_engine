@@ -23,12 +23,6 @@
 
 namespace OHOS::Ace::Framework {
 
-class JSTextInput : public JSViewAbstract {
-public:
-    static void JSBind(BindingTarget globalObj);
-    static void Create(const JSCallbackInfo& info);
-};
-
 class JSTextInputController final : public virtual AceType {
     DECLARE_ACE_TYPE(JSTextInputController, AceType);
 

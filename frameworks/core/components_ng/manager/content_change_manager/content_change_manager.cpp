@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+/**
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,14 @@
 
 #include "content_change_manager.h"
 
+#include <cinttypes>
 #include <sstream>
 
 #include "base/log/ace_trace.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/page_translate/page_translate_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
@@ -332,74 +334,325 @@ void ContentChangeManager::RemoveOnContentChangeNode(WeakPtr<FrameNode> node)
     onContentChangeNodes_.erase(node);
 }
 
+void ContentChangeManager::StartTextTranslateReport()
+{
+    textTranslateActive_ = true;
+    translateTextNodes_.clear();
+    translateTextVersions_.clear();
+    ClearTranslateTextSnapshotCache();
+}
+
+void ContentChangeManager::StopTextTranslateReport()
+{
+    textTranslateActive_ = false;
+    ResetTranslateTextNode();
+    translateTextNodes_.clear();
+    translateTextVersions_.clear();
+    ClearTranslateTextSnapshotCache();
+}
+
+void ContentChangeManager::StartTextTranslateSnapshotReport()
+{
+    ClearTranslateTextSnapshotCache();
+    NextTranslateTextSnapshotVersion();
+}
+
+bool ContentChangeManager::IsTextTranslateActive() const
+{
+    return textTranslateActive_;
+}
+
+int64_t ContentChangeManager::UpdateTranslateVersionIfNeeded(int32_t nodeId, const std::string& text)
+{
+    auto hash = std::hash<std::string> {}(text);
+    auto iter = translateTextVersions_.find(nodeId);
+    if (iter == translateTextVersions_.end()) {
+        translateTextVersions_[nodeId] = { hash, 1 };
+        return 1;
+    }
+    if (iter->second.first == hash) {
+        return -1;
+    }
+    iter->second.first = hash;
+    ++iter->second.second;
+    return iter->second.second;
+}
+
+void ContentChangeManager::ReportTranslateTextNode(const WeakPtr<PageTranslateNode>& node, const std::string& text)
+{
+    if (!IsTextTranslateActive() || text.empty()) {
+        return;
+    }
+    auto translateNode = node.Upgrade();
+    CHECK_NULL_VOID(translateNode);
+    auto nodeId = translateNode->GetPageTranslateNodeId();
+    if (nodeId < 0) {
+        LOGW("ReportTranslateTextNode invalid nodeId:%{public}d", nodeId);
+        return;
+    }
+    translateTextNodes_.emplace(node);
+    auto version = UpdateTranslateVersionIfNeeded(nodeId, text);
+    if (version < 0) {
+        return;
+    }
+    if (version > 1) {
+        ResetTranslateNode(translateNode);
+    }
+    UiSessionManager::GetInstance()->SendPageTextToAI(nodeId, text, version);
+}
+
+void ContentChangeManager::ClearTranslateTextSnapshotCache()
+{
+    translateTextSnapshotNodes_.clear();
+    translateTextSnapshotVersions_.clear();
+}
+
+int64_t ContentChangeManager::NextTranslateTextSnapshotVersion()
+{
+    if (translateTextSnapshotVersion_ == INT64_MAX) {
+        translateTextSnapshotVersion_ = 0;
+    }
+    return ++translateTextSnapshotVersion_;
+}
+
+void ContentChangeManager::ReportTranslateTextSnapshotNode(const WeakPtr<PageTranslateNode>& node,
+    const std::string& text)
+{
+    if (text.empty()) {
+        return;
+    }
+    auto translateNode = node.Upgrade();
+    CHECK_NULL_VOID(translateNode);
+    auto nodeId = translateNode->GetPageTranslateNodeId();
+    if (nodeId < 0) {
+        LOGW("ReportTranslateTextSnapshotNode invalid nodeId:%{public}d", nodeId);
+        return;
+    }
+    translateTextSnapshotNodes_.emplace(node);
+    translateTextSnapshotVersions_[nodeId] = { std::hash<std::string> {}(text), translateTextSnapshotVersion_ };
+    UiSessionManager::GetInstance()->SendPageTextToAI(nodeId, text, translateTextSnapshotVersion_);
+}
+
+void ContentChangeManager::ReportTranslateTextFrameNode(const WeakPtr<FrameNode>& node, bool isContinuous)
+{
+    auto frameNode = node.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    auto translateNode = AceType::DynamicCast<PageTranslateNode>(pattern);
+    CHECK_NULL_VOID(translateNode);
+    auto text = translateNode->GetPageTranslateTextForReport();
+    if (text.empty()) {
+        return;
+    }
+    auto visibleRect = frameNode->GetTransformRectRelativeToWindowOnlyVisible();
+    if (LessOrEqual(visibleRect.Width(), 0.0f) || LessOrEqual(visibleRect.Height(), 0.0f)) {
+        return;
+    }
+    if (isContinuous) {
+        ReportTranslateTextNode(WeakPtr<PageTranslateNode>(translateNode), text);
+        return;
+    }
+    ReportTranslateTextSnapshotNode(WeakPtr<PageTranslateNode>(translateNode), text);
+}
+
+bool ContentChangeManager::ApplyTranslateResultToNode(
+    const RefPtr<PageTranslateNode>& node, const std::string& result, int64_t version)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto nodeId = node->GetPageTranslateNodeId();
+    CHECK_NULL_RETURN(nodeId >= 0, false);
+    auto applied = node->ApplyPageTranslateResult(result, version);
+    LOGI("ApplyTranslateResult nodeId:%{public}d version:%{public}" PRId64 " textLen:%{public}zu applied:%{public}d",
+        nodeId, version, result.size(), applied);
+    return applied;
+}
+
+bool ContentChangeManager::ApplyTranslateResult(int32_t nodeId, const std::string& result, int64_t version)
+{
+    if (nodeId < 0 || result.empty() || version < 0) {
+        LOGW("ApplyTranslateResult invalid input nodeId:%{public}d version:%{public}" PRId64 " textLen:%{public}zu",
+            nodeId, version, result.length());
+        return false;
+    }
+    if (HasTranslateResultVersion(translateTextSnapshotVersions_, nodeId, version)) {
+        return ApplyTranslateResultWithCache(
+            translateTextSnapshotNodes_, translateTextSnapshotVersions_, nodeId, result, version);
+    }
+    return ApplyTranslateResultWithCache(translateTextNodes_, translateTextVersions_, nodeId, result, version);
+}
+
+bool ContentChangeManager::HasTranslateResultVersion(
+    const std::unordered_map<int32_t, std::pair<size_t, int64_t>>& versions, int32_t nodeId, int64_t version) const
+{
+    auto iter = versions.find(nodeId);
+    return iter != versions.end() && iter->second.second == version;
+}
+
+bool ContentChangeManager::ApplyTranslateResultWithCache(const std::set<WeakPtr<PageTranslateNode>>& nodes,
+    const std::unordered_map<int32_t, std::pair<size_t, int64_t>>& versions, int32_t nodeId,
+    const std::string& result, int64_t version)
+{
+    auto versionIter = versions.find(nodeId);
+    if (versionIter == versions.end() || versionIter->second.second != version) {
+        LOGW("ApplyTranslateResult version mismatch nodeId:%{public}d version:%{public}" PRId64
+             " cacheHit:%{public}d cachedVersion:%{public}" PRId64,
+            nodeId, version, versionIter != versions.end(),
+            versionIter == versions.end() ? 0 : versionIter->second.second);
+        return false;
+    }
+    for (const auto& node : nodes) {
+        auto translateNode = node.Upgrade();
+        if (!translateNode) {
+            continue;
+        }
+        if (translateNode->GetPageTranslateNodeId() == nodeId) {
+            auto currentText = translateNode->GetPageTranslateTextForReport();
+            auto currentHash = std::hash<std::string> {}(currentText);
+            if (currentText.empty() || currentHash != versionIter->second.first) {
+                LOGW("ApplyTranslateResult source text changed nodeId:%{public}d version:%{public}" PRId64,
+                    nodeId, version);
+                return false;
+            }
+            return ApplyTranslateResultToNode(translateNode, result, version);
+        }
+    }
+    LOGW("ApplyTranslateResult node not found nodeId:%{public}d cachedNodes:%{public}zu",
+        nodeId, nodes.size());
+    return false;
+}
+
+void ContentChangeManager::ResetTranslateNode(const RefPtr<PageTranslateNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    node->ResetPageTranslate();
+}
+
+void ContentChangeManager::ResetTranslateNodes(std::set<WeakPtr<PageTranslateNode>>& nodes, int32_t nodeId)
+{
+    for (auto iter = nodes.begin(); iter != nodes.end();) {
+        auto translateNode = iter->Upgrade();
+        if (!translateNode) {
+            iter = nodes.erase(iter);
+            continue;
+        }
+        if (nodeId < 0) {
+            ResetTranslateNode(translateNode);
+            ++iter;
+            continue;
+        }
+        if (translateNode->GetPageTranslateNodeId() == nodeId) {
+            ResetTranslateNode(translateNode);
+            nodes.erase(iter);
+            break;
+        }
+        ++iter;
+    }
+}
+
+void ContentChangeManager::ResetTranslateTextNode(int32_t nodeId)
+{
+    ResetTranslateNodes(translateTextNodes_, nodeId);
+    ResetTranslateNodes(translateTextSnapshotNodes_, nodeId);
+    if (nodeId < 0) {
+        translateTextVersions_.clear();
+        translateTextSnapshotVersions_.clear();
+        return;
+    }
+    translateTextVersions_.erase(nodeId);
+    translateTextSnapshotVersions_.erase(nodeId);
+}
+
 void ContentChangeManager::OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode)
 {
     CHECK_NULL_VOID(keyNode);
     OnTransitionRemoved(keyNode->GetId());
-    if (!IsContentChangeDetectEnable()) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if (!contentChangeEnabled && !pageSceneEnabled) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnPageTransitionEnd");
-    auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
-    keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
-    UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::PAGE, simpleTree->ToString());
-    lastTransitionReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
+    if (contentChangeEnabled) {
+        auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
+        keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
+        UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::PAGE, simpleTree->ToString());
+        lastTransitionReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifndef IS_RELEASE_VERSION
-    dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::PAGE, keyNode->GetId(), keyNode->GetTag()));
+        dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::PAGE, keyNode->GetId(), keyNode->GetTag()));
 #endif
+    }
+    NotifyPageSceneContentChanged(true);
 }
 
 void ContentChangeManager::OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode)
 {
     CHECK_NULL_VOID(keyNode);
-    if (!IsContentChangeDetectEnable()) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if (!contentChangeEnabled && !pageSceneEnabled) {
         OnScrollRemoved(keyNode->GetId());
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnScrollChangeEnd");
     scrollingNodes_.erase(keyNode->GetId());
 #ifndef IS_RELEASE_VERSION
-    dumpMgr_->AddScrollRecord(std::make_tuple(false, keyNode->GetId(), keyNode->GetTag(), scrollingNodes_.size()));
+    if (contentChangeEnabled) {
+        dumpMgr_->AddScrollRecord(std::make_tuple(false, keyNode->GetId(), keyNode->GetTag(), scrollingNodes_.size()));
+    }
 #endif
     if (!scrollingNodes_.empty()) {
         return;
     }
-    UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::SCROLL, "");
+    if (contentChangeEnabled) {
+        UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::SCROLL, "");
 #ifndef IS_RELEASE_VERSION
-    dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::SCROLL, keyNode->GetId(), keyNode->GetTag()));
+        dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::SCROLL, keyNode->GetId(), keyNode->GetTag()));
 #endif
+    }
+    NotifyPageSceneContentChanged(true);
 }
 
 void ContentChangeManager::OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor)
 {
     CHECK_NULL_VOID(keyNode);
     OnTransitionRemoved(keyNode->GetId());
-    if (!IsContentChangeDetectEnable()) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if (!contentChangeEnabled && !pageSceneEnabled) {
         return;
     }
 
     ACE_SCOPED_TRACE("[ContentChangeManager] OnSwiperChangeEnd");
-    changedSwiperNodes_.emplace(std::make_pair(WeakPtr(keyNode), hasTabsAncestor));
+    if (contentChangeEnabled) {
+        changedSwiperNodes_.emplace(std::make_pair(WeakPtr(keyNode), hasTabsAncestor));
+    }
+    NotifyPageSceneContentChanged(false);
 }
 
 void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if ((!contentChangeEnabled && !pageSceneEnabled) || !keyNode) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnDialogChangeEnd");
-    auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
-    if (isShow) {
-        keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
-    } else {
-        simpleTree->Put("$type", keyNode->GetTag().c_str());
-    }
-    simpleTree->Put("show", isShow);
-    UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::DIALOG, simpleTree->ToString());
+    if (contentChangeEnabled) {
+        auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
+        if (isShow) {
+            keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
+        } else {
+            simpleTree->Put("$type", keyNode->GetTag().c_str());
+        }
+        simpleTree->Put("show", isShow);
+        UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::DIALOG, simpleTree->ToString());
 #ifndef IS_RELEASE_VERSION
-    int32_t nodeId = keyNode->GetId() * (isShow ? 1 : -1);
-    dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::DIALOG, nodeId, keyNode->GetTag()));
+        int32_t nodeId = keyNode->GetId() * (isShow ? 1 : -1);
+        dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::DIALOG, nodeId, keyNode->GetTag()));
 #endif
+    }
+    NotifyPageSceneContentChanged(true);
 }
 
 void ContentChangeManager::OnTextChangeEnd(const RectF& rect, const RectF& rootRect)
@@ -427,12 +680,19 @@ void ContentChangeManager::OnVsyncStart()
 
 void ContentChangeManager::OnVsyncEnd(const RectF& rootRect)
 {
-    if (!IsContentChangeDetectEnable()) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if (!contentChangeEnabled && !pageSceneEnabled) {
         return;
     }
 
-    ProcessSwiperNodes();
-    StopTextAABBCollecting(rootRect);
+    if (contentChangeEnabled) {
+        ProcessSwiperNodes();
+        StopTextAABBCollecting(rootRect);
+    }
+    if (pageSceneEnabled) {
+        FlushPageSceneNodeChanged();
+    }
 }
 
 void ContentChangeManager::ProcessSwiperNodes()
@@ -549,6 +809,40 @@ void ContentChangeManager::StopTextAABBCollecting(const RectF& rootRect)
     textCollecting_ = false;
 }
 
+bool ContentChangeManager::NeedPageSceneDetect() const
+{
+    auto uiSessionManager = UiSessionManager::GetInstance();
+    return uiSessionManager && uiSessionManager->GetPageSceneRulesRegistered();
+}
+
+bool ContentChangeManager::NeedContentChangeReportOrPageSceneDetect() const
+{
+    return IsContentChangeDetectEnable() || NeedPageSceneDetect();
+}
+
+void ContentChangeManager::NotifyPageSceneContentChanged(bool flushNow)
+{
+    auto uiSessionManager = UiSessionManager::GetInstance();
+    if (!uiSessionManager || !uiSessionManager->GetPageSceneRulesRegistered()) {
+        return;
+    }
+    uiSessionManager->NotifyPageSceneContentChanged();
+    if (flushNow) {
+        FlushPageSceneNodeChanged();
+    }
+}
+
+void ContentChangeManager::FlushPageSceneNodeChanged()
+{
+    if (IsScrolling() || IsTransitioning() || IsSwiperScrolling()) {
+        return;
+    }
+    auto uiSessionManager = UiSessionManager::GetInstance();
+    if (uiSessionManager && uiSessionManager->GetPageSceneRulesRegistered()) {
+        uiSessionManager->FlushPageSceneNodeChanged();
+    }
+}
+
 void ContentChangeManager::OnSwiperScrollEnd(const RefPtr<FrameNode>& keyNode)
 {
     CHECK_NULL_VOID(keyNode);
@@ -570,12 +864,16 @@ bool ContentChangeManager::IsSwiperScrolling() const
 
 void ContentChangeManager::OnScrollChangeStart(const RefPtr<FrameNode>& keyNode)
 {
-    if (!IsContentChangeDetectEnable() || !keyNode) {
+    bool contentChangeEnabled = IsContentChangeDetectEnable();
+    bool pageSceneEnabled = NeedPageSceneDetect();
+    if ((!contentChangeEnabled && !pageSceneEnabled) || !keyNode) {
         return;
     }
     scrollingNodes_.emplace(keyNode->GetId());
 #ifndef IS_RELEASE_VERSION
-    dumpMgr_->AddScrollRecord(std::make_tuple(true, keyNode->GetId(), keyNode->GetTag(), scrollingNodes_.size()));
+    if (contentChangeEnabled) {
+        dumpMgr_->AddScrollRecord(std::make_tuple(true, keyNode->GetId(), keyNode->GetTag(), scrollingNodes_.size()));
+    }
 #endif
 }
 
@@ -588,7 +886,7 @@ void ContentChangeManager::OnScrollRemoved(int32_t nodeId)
 
 void ContentChangeManager::OnTransitionAdded(int32_t nodeId)
 {
-    if (!IsContentChangeDetectEnable()) {
+    if (!NeedContentChangeReportOrPageSceneDetect()) {
         return;
     }
     transitioningNodes_.emplace(nodeId);

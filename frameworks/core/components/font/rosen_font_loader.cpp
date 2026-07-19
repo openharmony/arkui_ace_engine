@@ -20,10 +20,10 @@
 #include "base/network/download_manager.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/pipeline/base/rosen_render_context.h"
+#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
 
@@ -231,17 +231,8 @@ void RosenFontLoader::LoadFromResource(
             }
             auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, context->GetInstanceId());
             RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-            RefPtr<ThemeConstants> themeConstants = nullptr;
-            if (SystemProperties::GetResourceDecoupling()) {
-                resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
-                CHECK_NULL_VOID(resourceAdapter);
-            } else {
-                auto themeManager = PipelineBase::CurrentThemeManager();
-                CHECK_NULL_VOID(themeManager);
-                themeConstants = themeManager->GetThemeConstants();
-                CHECK_NULL_VOID(themeConstants);
-            }
-            auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
+            resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+            CHECK_NULL_VOID(resourceAdapter);
             std::string rawFile;
             std::unique_ptr<uint8_t[]> data;
             size_t dataLen = 0;
@@ -255,7 +246,7 @@ void RosenFontLoader::LoadFromResource(
                 return;
             }
 
-            if (!resourceWrapper->GetRawFileData(rawFile, dataLen, data, bundleName, moduleName) || !data.get()) {
+            if (!resourceAdapter->GetRawFileData(rawFile, dataLen, data, bundleName, moduleName) || !data.get()) {
                 TAG_LOGW(AceLogTag::ACE_FONT, "Get font data by rawFile failed, src:%{private}s, rawFile:%{public}s",
                     fontLoader->familySrc_.c_str(), rawFile.c_str());
                 return;

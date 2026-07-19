@@ -43,6 +43,7 @@ private:
     void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
     float ComputeCrossPosition(int32_t crossIndex) const;
+    bool GetCrossOffset(int32_t crossIndex, float crossSize, bool isRtl, float& crossOffset) const;
     void InitialItemsCrossSize(const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const SizeF& frameSize,
         int32_t childrenCount, double originalWidth);
     int32_t GetChildIndexWithFooter(int32_t index) const
@@ -57,6 +58,8 @@ private:
      * @brief Handle end-of-content detection and adjust endIndex for zero-height trailing items
      */
     void HandleItemEnd(int32_t currentIndex);
+    void HandleItemEndAndSyncReportRange(float mainSize, int32_t currentIndex);
+    void KeepTrailingZeroHeightItemsInReportRange();
 
     std::map<int32_t, float> itemsCrossSize_;
     std::map<int32_t, float> itemsCrossPosition_;

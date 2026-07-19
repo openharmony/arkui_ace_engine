@@ -95,3 +95,62 @@ ohos_shared_library("arclist") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
+
+if (is_arkui_x) {
+  foreach(item, ace_platforms) {
+    ohos_shared_library("arkui_arclist_" + item.name) {
+      output_name = "arkui_arclist"
+      defines = [ "USE_ARK_ENGINE" ]
+      sources = [
+        "${component_ext_path}/arc_list/arc_list_napi.cpp",
+        "${component_ext_path}/ext_common/ext_napi_utils.cpp",
+      ]
+
+      include_dirs = [
+        "${component_ext_path}/ext_common/",
+        "${component_ext_path}/arc_list/",
+        "${ace_root}/frameworks",
+        "$root_out_dir/arkui/framework",
+        "${ace_root}/interfaces/inner_api/ace_kit/include",
+      ]
+      include_dirs += additional_include_dirs
+
+      deps = [
+        ":gen_obj_src_arkui_arclist_abc",
+        "$ace_root/frameworks/core/components_ng/pattern/arc_list:ace_core_components_arc_list_pattern_ng_" + item.name,
+        "//plugins/libs/napi:napi_" + item.name,
+      ]
+
+      config = {}
+      if (defined(item.config)) {
+        config = item.config
+      }
+      if (defined(config.libace_target)) {
+        deps += [ config.libace_target ]
+      }
+
+      if (!use_mac) {
+        ldflags = [ "-Wl,--gc-sections" ]
+      }
+
+      cflags = [
+        "-fvisibility=hidden",
+        "-fdata-sections",
+        "-ffunction-sections",
+        "-Os",
+      ]
+
+      if (ace_engine_feature_enable_digital_crown) {
+        cflags += [ "-DSUPPORT_DIGITAL_CROWN" ]
+      }
+
+      cflags_cc = [
+        "-fvisibility-inlines-hidden",
+        "-Os",
+      ]
+
+      subsystem_name = ace_engine_subsystem
+      part_name = ace_engine_part
+    }
+  }
+}

@@ -15,8 +15,9 @@
 # limitations under the License.
 
 """
-知识库索引检索工具。通过关键字搜索 docs/knowledge_base_INDEX.json，
-返回匹配的知识库条目（名称、路径、关键词、源码路径等）。
+知识库索引检索工具。优先搜索 docs/context_registry.json，
+再兼容搜索 docs/knowledge_base_INDEX.json，返回匹配的知识库条目
+（名称、路径、关键词、源码路径等）。
 
 用法:
   python3 docs/kb_search.py <关键字>              # 模糊搜索（name/name_cn/keywords/aliases/category）
@@ -34,15 +35,69 @@ import argparse
 from pathlib import Path
 
 
-def load_index(script_path: str) -> list:
-    """加载知识库索引 JSON。"""
+def normalize_registry_entry(entry: dict) -> dict:
+    """将 context_registry 条目转换为 INDEX 检索结构。"""
+    kb_path = entry.get("kb")
+    file_path = ""
+    if kb_path:
+        file_path = kb_path[5:] if kb_path.startswith("docs/") else kb_path
+    return {
+        "name": entry.get("name", entry.get("id", "")),
+        "name_cn": entry.get("name_cn", ""),
+        "category": entry.get("category", ""),
+        "type": entry.get("kind", entry.get("type", "")),
+        "keywords": entry.get("keywords", []),
+        "aliases": entry.get("aliases", []),
+        "file_path": file_path,
+        "legacy_kb": entry.get("legacy_kb"),
+        "spec_domain": entry.get("spec_domain"),
+        "func_id": entry.get("func_id"),
+        "source_paths": entry.get("source_paths", {}),
+        "api_paths": entry.get("api_paths", {}),
+        "test_paths": entry.get("test_paths", []),
+        "last_updated": entry.get("last_verified", entry.get("last_updated", "")),
+        "_source": "context_registry",
+    }
+
+
+def load_registry(script_path: str) -> list:
+    """加载新版上下文 registry。"""
+    registry_path = Path(script_path).resolve().parent / "context_registry.json"
+    if not registry_path.exists():
+        return []
+    with open(registry_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return [normalize_registry_entry(e) for e in data.get("contexts", [])]
+
+
+def load_kb_index(script_path: str) -> list:
+    """加载旧知识库索引 JSON。"""
     index_path = Path(script_path).resolve().parent / "knowledge_base_INDEX.json"
     if not index_path.exists():
-        print(f"错误: 索引文件不存在 {index_path}", file=sys.stderr)
-        sys.exit(1)
+        return []
     with open(index_path, "r", encoding="utf-8") as f:
         data = json.load(f)
-    return data.get("knowledge_bases", [])
+    entries = data.get("knowledge_bases", [])
+    for entry in entries:
+        entry.setdefault("_source", "knowledge_base_INDEX")
+    return entries
+
+
+def load_index(script_path: str) -> list:
+    """加载 registry + INDEX，并按 name 去重，registry 优先。"""
+    entries = []
+    seen_names = set()
+    for entry in load_registry(script_path) + load_kb_index(script_path):
+        name = entry.get("name", "").lower()
+        if name and name in seen_names:
+            continue
+        if name:
+            seen_names.add(name)
+        entries.append(entry)
+    if not entries:
+        print("错误: 未找到 docs/context_registry.json 或 docs/knowledge_base_INDEX.json", file=sys.stderr)
+        sys.exit(1)
+    return entries
 
 
 def match_entry(entry: dict, keyword: str, field: str = None) -> bool:
@@ -58,6 +113,8 @@ def match_entry(entry: dict, keyword: str, field: str = None) -> bool:
         "aliases": entry.get("aliases", []),
         "category": [entry.get("category", "")],
         "type": [entry.get("type", "")],
+        "spec_domain": [entry.get("spec_domain", ""), entry.get("func_id", "")],
+        "test_paths": entry.get("test_paths", []),
         "source_paths": list(src.keys()) + list(src.values()),
         "api_paths": list(api.keys()) + list(api.values()),
     }
@@ -79,6 +136,10 @@ def format_entry(entry: dict, index: int) -> str:
     lines.append(f"--- [{index}] {entry.get('name', 'N/A')} ({entry.get('name_cn', 'N/A')}) ---")
     lines.append(f"  分类: {entry.get('category', 'N/A')} | 类型: {entry.get('type', 'N/A')}")
     lines.append(f"  知识库: docs/{entry.get('file_path', 'N/A')}")
+    if entry.get("legacy_kb"):
+        lines.append(f"  旧知识库: {entry.get('legacy_kb')}")
+    if entry.get("spec_domain"):
+        lines.append(f"  Spec: {entry.get('func_id', 'N/A')} -> {entry.get('spec_domain')}")
 
     src = entry.get("source_paths", {})
     if src:
@@ -89,6 +150,10 @@ def format_entry(entry: dict, index: int) -> str:
     if api:
         api_items = [f"{k}: {v}" for k, v in api.items()]
         lines.append(f"  API: {', '.join(api_items)}")
+
+    tests = entry.get("test_paths", [])
+    if tests:
+        lines.append(f"  测试: {', '.join(tests)}")
 
     kw = entry.get("keywords", [])
     if kw:
@@ -104,7 +169,9 @@ def format_entry(entry: dict, index: int) -> str:
 def main():
     parser = argparse.ArgumentParser(description="知识库索引检索工具")
     parser.add_argument("keyword", nargs="?", help="搜索关键字")
-    parser.add_argument("--field", help="限定搜索字段 (name/name_cn/keywords/aliases/category/type/source_paths/api_paths)")
+    parser.add_argument(
+        "--field",
+        help="限定搜索字段 (name/name_cn/keywords/aliases/category/type/spec_domain/test_paths/source_paths/api_paths)")
     parser.add_argument("--category", help="按分类过滤（如 component, layout）")
     parser.add_argument("--list-categories", action="store_true", help="列出所有分类")
     parser.add_argument("--list-all", action="store_true", help="列出所有知识库名称")

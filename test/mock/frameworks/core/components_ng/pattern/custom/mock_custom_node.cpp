@@ -22,6 +22,11 @@ RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::strin
     return node;
 }
 
+void CustomNode::OnAttachToMainTree(bool recursive)
+{
+    UINode::OnAttachToMainTree(recursive);
+}
+
 void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {}
 
@@ -52,7 +57,7 @@ bool CustomNode::RenderCustomChild(int64_t deadline)
     return true;
 }
 
-void CustomNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
+void CustomNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse, bool suppressActiveLifecycle)
 {
 }
 

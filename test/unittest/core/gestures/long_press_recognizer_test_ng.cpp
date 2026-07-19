@@ -2533,4 +2533,57 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerPrintCurrentFingersInfoTe
     longPressRecognizer->PrintCurrentFingersInfo();
     EXPECT_EQ(longPressRecognizer->touchPoints_.size(), 2);
 }
+
+/**
+ * @tc.name: LongPressRecognizerTriggerGestureJudgeCallbackDisposeTagTest001
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTriggerGestureJudgeCallbackDisposeTagTest001, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    longPressRecognizer->AttachFrameNode(frameNode);
+
+    longPressRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    longPressRecognizer->gestureInfo_->SetDisposeTag(true);
+    auto result = longPressRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::REJECT);
+}
+
+/**
+ * @tc.name: LongPressRecognizerTriggerGestureJudgeCallbackDisposeTagTest002
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo disposeTag is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTriggerGestureJudgeCallbackDisposeTagTest002, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    longPressRecognizer->AttachFrameNode(frameNode);
+
+    longPressRecognizer->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>();
+    longPressRecognizer->gestureInfo_->SetDisposeTag(false);
+    auto result = longPressRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: LongPressRecognizerTriggerGestureJudgeCallbackDisposeTagTest003
+ * @tc.desc: Test TriggerGestureJudgeCallback when gestureInfo is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTriggerGestureJudgeCallbackDisposeTagTest003, TestSize.Level1)
+{
+    RefPtr<LongPressRecognizer> longPressRecognizer =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    longPressRecognizer->AttachFrameNode(frameNode);
+
+    longPressRecognizer->gestureInfo_ = nullptr;
+    auto result = longPressRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
 } // namespace OHOS::Ace::NG

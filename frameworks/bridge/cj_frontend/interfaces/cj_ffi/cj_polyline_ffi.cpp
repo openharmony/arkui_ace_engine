@@ -16,6 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_polyline_ffi.h"
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/shape/polygon_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -23,12 +24,25 @@ using namespace OHOS::Ace::Framework;
 
 namespace {
 const int SIZE_CHECK = 2;
+
+NG::PolygonModelNG* GetPolylineModel()
+{
+    static NG::PolygonModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Polyline");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find polyline dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::PolygonModelNG*>(module->GetModel());
+    }
+    return cachedModel;
 }
+} // namespace
 
 extern "C" {
 void FfiOHOSAceFrameworkPolylineCreate(double width, int32_t widthUnit, double height, int32_t heightUnit)
 {
-    PolygonModel::GetInstance()->Create(false);
+    GetPolylineModel()->Create(false);
     if (width > 0.0) {
         FfiOHOSAceFrameworkShapeSetWidth(width, widthUnit);
     }
@@ -52,6 +66,6 @@ void FfiOHOSAceFrameworkPolylineSetPoints(VectorFloat64Ptr xPointVec, VectorFloa
         point.second = Dimension(yPointVector[i], DimensionUnit::VP);
         points.push_back(point);
     }
-    PolygonModel::GetInstance()->SetPoints(points);
+    GetPolylineModel()->SetPoints(points);
 }
 }

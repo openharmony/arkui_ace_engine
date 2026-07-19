@@ -24,7 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
-class TaihangOptimizer final : public std::enable_shared_from_this<TaihangOptimizer> {
+class ACE_FORCE_EXPORT TaihangOptimizer final : public std::enable_shared_from_this<TaihangOptimizer> {
 public:
     TaihangOptimizer() = default;
     ~TaihangOptimizer() = default;
@@ -32,7 +32,7 @@ public:
     bool IsInited();
     void SetEnable(bool value);
     bool IsEnable();
-    bool CheckSwiperPageValid(const std::string& pageNames);
+    bool CheckSwiperPageValid(const std::string& pageName);
     void ComponentPreMake(const std::unordered_map<std::string, std::string> extInfo);
     void HandleSwiperPreMake(const std::unordered_map<std::string, std::string> extInfo);
     void PostSwiperPreMakeTask(RefPtr<NG::FrameNode>& node, int32_t index);

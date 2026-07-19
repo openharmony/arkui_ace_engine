@@ -32,6 +32,7 @@ import {
   import common from '@ohos.app.ability.common';
   import window from '@ohos.window';
   import hilog from '@ohos.hilog';
+  import { BusinessError } from '@ohos.base';
   
   export enum ItemState {
     ENABLE = 1,
@@ -357,9 +358,16 @@ import {
       } else if (typeof resource === 'undefined') {
         return this.toStringFormat(this.toolBarList[Double.toInt(index)]?.content);
       } else {
-        let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-        getStringSync((resource as Resource).id)
-        return str as string;
+        try {
+          let str: string | undefined = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+          getStringSync((resource as Resource).id)
+          return str as string;
+        } catch (error) {
+          let code: number | undefined = (error as BusinessError).code;
+          let message: string | undefined = (error as BusinessError).message;
+          hilog.error(0x3900, 'ToolBar', `getStringSync failed, code: ${code}, message: ${message}`);
+          return '';
+        }
       }
     }
   
@@ -369,9 +377,16 @@ import {
       } else if (typeof resource === 'undefined') {
         return '' as string;
       } else {
-        let str = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
-        getStringSync((resource as Resource).id)
-        return str as string;
+        try {
+          let str: string | undefined = (this.getUIContext().getHostContext() as common.UIAbilityContext)?.resourceManager?.
+          getStringSync((resource as Resource).id)
+          return str as string;
+        } catch (error) {
+          let code: number | undefined = (error as BusinessError).code;
+          let message: string | undefined = (error as BusinessError).message;
+          hilog.error(0x3900, 'ToolBar', `getStringSync failed, code: ${code}, message: ${message}`);
+          return '';
+        }
       }
     }
   

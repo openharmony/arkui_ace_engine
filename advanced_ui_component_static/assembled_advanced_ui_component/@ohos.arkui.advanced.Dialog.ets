@@ -61,10 +61,33 @@ class CustomThemeImpl implements CustomTheme {
   }
 }
 
+function getPunctuationOverflowEnabled(): boolean {
+  try {
+    let configValue: string = resourceManager.getSysResourceManager()
+      ?.getStringSync(SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED);
+    
+    if (configValue === 'true') {
+      return true;
+    } else if (configValue === 'false') {
+      return false;
+    } else {
+      hilog.warn(0x3900, 'AdvanceDialog', 
+        `Punctuation overflow config invalid value: ${configValue}, use default: ${PUNCTUATION_OVERFLOW_DEFAULT_VALUE}`);
+      return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+    }
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'AdvanceDialog', 
+      `Failed to get punctuation overflow config, code: ${code}, message: ${message}`);
+    return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+  }
+}
+
 function textAttributeExtension(this: TextAttribute): TextAttribute {
   this.fallbackLineSpacing(true);
-  this.wordBreak(WordBreak.HYPHENATION);
   this.orphanCharOptimization(true);
+  this.punctuationOverflow(getPunctuationOverflowEnabled());
   return this;
 }
 
@@ -93,6 +116,9 @@ const VERSION_TWELVE: number = 50000012;
 const MAX_FONT_SCALE: number = 2;
 const FADEOUT_GRADIENT_WIDTH: number = 32;
 const FADEOUT_ENABLE: string = 'true';
+
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: long = 125836945;
+const PUNCTUATION_OVERFLOW_DEFAULT_VALUE: boolean = true;
 
 // 'sys.float.alert_container_max_width'
 const MAX_DIALOG_WIDTH: number = getNumberByResourceId(125831042, 400);

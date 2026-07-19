@@ -17,6 +17,7 @@
 
 #include "core/common/container.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/toast/toast_layout_property.h"
 
 namespace OHOS::Ace {
 void SubwindowManager::ShowToastStatic(const NG::ToastInfo& toastInfo, std::function<void(int32_t)>&& callback)

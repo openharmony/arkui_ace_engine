@@ -68,12 +68,13 @@ public:
         const std::shared_ptr<FocusRulesCheckNode>& checkNode);
 
     virtual bool CheckIsReadable(
-        const std::shared_ptr<FocusRulesCheckNode>& checkNode);
+        const std::shared_ptr<FocusRulesCheckNode>& checkNode, Accessibility::FocusRuleType focusRuleType);
 
     virtual bool CheckIsReadableRulesEnable();
 
     bool NeedChangeToReadableNodeThroughAncestor(
-        const std::shared_ptr<FocusRulesCheckNode>& checkNode, std::shared_ptr<FocusRulesCheckNode>& targetNode);
+        const std::shared_ptr<FocusRulesCheckNode>& checkNode, std::shared_ptr<FocusRulesCheckNode>& targetNode,
+        Accessibility::FocusRuleType focusRuleType = Accessibility::FocusRuleType::DEFAULT);
 
 private:
     AceFocusMoveDetailCondition GetAceCondition(

@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT VideoModelNG : public OHOS::Ace::VideoModel {
+class ACE_FORCE_EXPORT VideoModelNG : public OHOS::Ace::VideoModel {
 public:
     void Create(const RefPtr<VideoControllerV2>& videoController) override;
     void Create(const RefPtr<VideoControllerAsync>& videoControllerAsync) override;
@@ -53,6 +53,16 @@ public:
     void SetImageAnalyzerConfig(void* config) override;
     void SetImageAIOptions(void *options) override;
     void SetContentTransition(ContentTransitionType contentTransition) override;
+    static void CreateModelNG(const RefPtr<VideoControllerV2>& videoController);
+    static void CreateModelNG(const RefPtr<VideoControllerAsync>& videoControllerAsync);
+    static void SetSrc(
+        FrameNode* frameNode, const std::string& src, const std::string& bundleName, const std::string& moduleName);
+    static void SetShowFirstFrame(FrameNode* frameNode, bool showFirstFrame);
+    static void SetProgressRate(FrameNode* frameNode, double progressRate);
+    static void SetPosterSourceInfo(FrameNode* frameNode,
+        const std::string& posterUrl, const std::string& bundleName, const std::string& moduleName);
+    static void SetPosterSourceByPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pixMap);
+    static void SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition);
     static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
     static void SetControls(FrameNode* frameNode, bool controls);
     static void SetObjectFit(FrameNode* frameNode, ImageFit objectFit);
@@ -72,6 +82,7 @@ public:
     static void SetOnStop(FrameNode* frameNode, VideoEventFunc&& onStop);
     static void EnableAnalyzer(FrameNode* frameNode, bool enable);
     static void SetImageAnalyzerConfig(FrameNode* frameNode, void* config);
+    static void SetImageAIOptions(FrameNode* frameNode, void* options);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIDEO_VIDEO_MODEL_NG_H

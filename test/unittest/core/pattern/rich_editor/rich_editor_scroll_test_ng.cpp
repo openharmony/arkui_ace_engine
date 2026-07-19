@@ -255,11 +255,11 @@ HWTEST_F(RichEditorScrollTestOneNg, InitScrollablePattern002, TestSize.Level0)
 
     auto offsetF = OffsetF(5.0f, 30.0f);
     richEditorPattern->isShowPlaceholder_ = false;
-    richEditorPattern->MoveCaretToContentRect(offsetF, 40.0f);
+    richEditorPattern->scrollController_->MoveCaretToContentRect(offsetF, 40.0f);
     EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
 
     auto offsetFtemp = OffsetF(5.0f, 6.0f);
-    richEditorPattern->MoveCaretToContentRect(offsetFtemp, 40.0f);
+    richEditorPattern->scrollController_->MoveCaretToContentRect(offsetFtemp, 40.0f);
     EXPECT_EQ(richEditorPattern->GetTextRect(), richEditorPattern->richTextRect_);
 }
 
@@ -328,19 +328,19 @@ HWTEST_F(RichEditorScrollTestOneNg, OnAutoScroll001, TestSize.Level0)
      */
     param.isFirstHandle = true;
     param.autoScrollEvent = AutoScrollEvent::HANDLE;
-    richEditorPattern->OnAutoScroll(param);
+    richEditorPattern->scrollController_->OnAutoScroll(param);
     EXPECT_TRUE(param.showScrollbar);
     /**
      * @tc.steps: step3. change parameter and call function.
      */
     param.autoScrollEvent = AutoScrollEvent::DRAG;
-    richEditorPattern->OnAutoScroll(param);
+    richEditorPattern->scrollController_->OnAutoScroll(param);
     EXPECT_TRUE(param.showScrollbar);
     /**
      * @tc.steps: step4. change parameter and call function.
      */
     param.autoScrollEvent = AutoScrollEvent::MOUSE;
-    richEditorPattern->OnAutoScroll(param);
+    richEditorPattern->scrollController_->OnAutoScroll(param);
     EXPECT_TRUE(param.showScrollbar);
 }
 
@@ -564,12 +564,12 @@ HWTEST_F(RichEditorScrollTestOneNg, UpdateScrollBarColor001, TestSize.Level0)
     richEditorPattern->CreateLayoutProperty();
     richEditorPattern->InitScrollablePattern();
     auto color = Color::GREEN;
-    richEditorPattern->UpdateScrollBarColor(color, true);
+    richEditorPattern->scrollController_->UpdateScrollBarColor(color, true);
     auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
     ASSERT_NE(property, nullptr);
     auto scrollBarColor = property->GetScrollBarColorValue(Color());
     EXPECT_EQ(color, scrollBarColor);
-    richEditorPattern->UpdateScrollBarColor(std::nullopt, true);
+    richEditorPattern->scrollController_->UpdateScrollBarColor(std::nullopt, true);
     property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
     ASSERT_NE(property, nullptr);
     scrollBarColor = property->GetScrollBarColorValue(Color());
@@ -588,7 +588,7 @@ HWTEST_F(RichEditorScrollTestOneNg, GetScrollBarColor001, TestSize.Level0)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->CreateLayoutProperty();
     richEditorPattern->InitScrollablePattern();
-    richEditorPattern->UpdateScrollBarColor(Color::GREEN, true);
+    richEditorPattern->scrollController_->UpdateScrollBarColor(Color::GREEN, true);
     auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
     ASSERT_NE(property, nullptr);
     auto color = property->GetScrollBarColorValue(Color());

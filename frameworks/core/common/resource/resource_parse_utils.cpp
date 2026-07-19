@@ -19,16 +19,11 @@
 #include <cstdint>
 
 #include "base/utils/utf_helper.h"
-#include "core/common/card_scope.h"
 #include "core/common/container.h"
-#ifdef PLUGIN_COMPONENT_SUPPORTED
-#include "core/common/plugin_manager.h"
-#endif
 #include "core/common/color_inverter.h"
 #include "core/common/resource/resource_manager.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/components/theme/resource_adapter.h"
-#include "core/pipeline/pipeline_base.h"
+#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
@@ -48,91 +43,14 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
     return result;
 }
 
-RefPtr<ThemeConstants> ResourceParseUtils::GetThemeConstants(const RefPtr<ResourceObject>& resObj)
+RefPtr<ResourceAdapter> CreateResourceAdapter()
 {
-    std::string bundleName;
-    std::string moduleName;
-    if (resObj) {
-        bundleName = resObj->GetBundleName();
-        moduleName = resObj->GetModuleName();
-    }
-
-#if !defined(ACE_UNITTEST)
-    auto cardId = CardScope::CurrentId();
-    if (cardId != INVALID_CARD_ID) {
-        auto container = Container::Current();
-        auto weak = container->GetCardPipeline(cardId);
-        auto cardPipelineContext = weak.Upgrade();
-        CHECK_NULL_RETURN(cardPipelineContext, nullptr);
-        auto cardThemeManager = cardPipelineContext->GetThemeManager();
-        CHECK_NULL_RETURN(cardThemeManager, nullptr);
-        return cardThemeManager->GetThemeConstants(bundleName, moduleName);
-    }
-#endif
-
-#ifdef PLUGIN_COMPONENT_SUPPORTED
-    if (Container::CurrentId() >= MIN_PLUGIN_SUBCONTAINER_ID) {
-        auto pluginContainer = PluginManager::GetInstance().GetPluginSubContainer(Container::CurrentId());
-        if (!pluginContainer) {
-            return nullptr;
-        }
-        auto pluginPipelineContext = pluginContainer->GetPipelineContext();
-        if (!pluginPipelineContext) {
-            return nullptr;
-        }
-        auto pluginThemeManager = pluginPipelineContext->GetThemeManager();
-        if (!pluginThemeManager) {
-            return nullptr;
-        }
-        return pluginThemeManager->GetThemeConstants(bundleName, moduleName);
-    }
-#endif
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    return themeManager->GetThemeConstants(bundleName, moduleName);
+    return ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
 }
 
-RefPtr<ResourceWrapper> CreateResourceWrapper()
+RefPtr<ResourceAdapter> GetOrCreateResourceAdapter(const RefPtr<ResourceObject>& resObj)
 {
-    RefPtr<ResourceObject> resObj;
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
-        if (!resourceAdapter) {
-            return nullptr;
-        }
-    } else {
-        themeConstants = ResourceParseUtils::GetThemeConstants(resObj);
-        if (!themeConstants) {
-            return nullptr;
-        }
-    }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
-}
-
-RefPtr<ResourceWrapper> GetOrCreateResourceWrapper(const RefPtr<ResourceObject>& resObj)
-{
-    RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
-        if (!resourceAdapter) {
-            return nullptr;
-        }
-    } else {
-        themeConstants = ResourceParseUtils::GetThemeConstants(resObj);
-        if (!themeConstants) {
-            return nullptr;
-        }
-    }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
+    return ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
 }
 
 RefPtr<ResourceObject> CompleteResourceObject(const std::unique_ptr<JsonValue>& json)
@@ -308,8 +226,8 @@ bool ResourceParseUtilsBase::ParseResIntegerArray(const RefPtr<ResourceObject>& 
         return false;
     }
 
-    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
-    if (!resourceWrapper) {
+    auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
+    if (!resourceAdapter) {
         return false;
     }
 
@@ -320,13 +238,13 @@ bool ResourceParseUtilsBase::ParseResIntegerArray(const RefPtr<ResourceObject>& 
             return false;
         }
         if (resType == static_cast<int32_t>(ResourceType::INTARRAY)) {
-            result = resourceWrapper->GetIntArrayByName(params[0].value.value());
+            result = resourceAdapter->GetIntArrayByName(params[0].value.value());
             return true;
         }
         return false;
     }
     if (resType == static_cast<int32_t>(ResourceType::INTARRAY)) {
-        result = resourceWrapper->GetIntArray(resId);
+        result = resourceAdapter->GetIntArray(resId);
         return true;
     }
     return false;
@@ -340,8 +258,8 @@ bool ResourceParseUtilsBase::ParseResStrArray(const RefPtr<ResourceObject>& resO
         return false;
     }
 
-    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
-    if (!resourceWrapper) {
+    auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
+    if (!resourceAdapter) {
         return false;
     }
 
@@ -352,13 +270,13 @@ bool ResourceParseUtilsBase::ParseResStrArray(const RefPtr<ResourceObject>& resO
             return false;
         }
         if (resType == static_cast<int32_t>(ResourceType::STRARRAY)) {
-            result = resourceWrapper->GetStringArrayByName(params[0].value.value());
+            result = resourceAdapter->GetStringArrayByName(params[0].value.value());
             return true;
         }
         return false;
     }
     if (resType == static_cast<int32_t>(ResourceType::STRARRAY)) {
-        result = resourceWrapper->GetStringArray(resId);
+        result = resourceAdapter->GetStringArray(resId);
         return true;
     }
     return false;
@@ -369,8 +287,8 @@ bool ResourceParseUtilsBase::ParseResFontFamilies(
 {
     CHECK_NULL_RETURN(resObj, false);
     result.clear();
-    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
-    if (!resourceWrapper) {
+    auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
+    if (!resourceAdapter) {
         return false;
     }
 
@@ -380,10 +298,10 @@ bool ResourceParseUtilsBase::ParseResFontFamilies(
         if (params.empty()) {
             return false;
         }
-        result.emplace_back(resourceWrapper->GetStringByName(params[0].value.value()));
+        result.emplace_back(resourceAdapter->GetStringByName(params[0].value.value()));
         return true;
     }
-    result.emplace_back(resourceWrapper->GetString(resId));
+    result.emplace_back(resourceAdapter->GetString(resId));
     return true;
 }
 
@@ -400,13 +318,14 @@ void ResourceParseUtilsBase::InvertColorWithResource(const RefPtr<ResourceObject
 }
 
 bool ResourceParseUtilsBase::ParseResColorWithName(const RefPtr<ResourceObject>& resObj, Color& result,
-    RefPtr<ResourceWrapper>& resourceWrapper, const ColorMode& colorMode)
+    RefPtr<ResourceAdapter>& resourceAdapter, const ColorMode& colorMode)
 {
+    CHECK_NULL_RETURN(resourceAdapter, false);
     auto params = resObj->GetParams();
     if (params.empty()) {
         return false;
     }
-    result = resourceWrapper->GetColorByName(params[0].value.value());
+    result = resourceAdapter->GetColorByName(params[0].value.value());
     InvertColorWithResource(resObj, result, colorMode);
     return true;
 }
@@ -432,28 +351,28 @@ bool ResourceParseUtilsBase::ParseResColor(const RefPtr<ResourceObject>& resObj,
     if (resObj->GetInstanceId() == UNKNOWN_INSTANCE_ID) {
         resObj->SetInstanceId(Container::CurrentIdSafely());
     }
-    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
-    CHECK_NULL_RETURN(resourceWrapper, false);
+    auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
+    CHECK_NULL_RETURN(resourceAdapter, false);
     auto resId = resObj->GetId();
     if (resId == -1) {
-        return ParseResColorWithName(resObj, result, resourceWrapper, colorMode);
+        return ParseResColorWithName(resObj, result, resourceAdapter, colorMode);
     }
 
     auto type = resObj->GetType();
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resId);
+        auto value = resourceAdapter->GetString(resId);
         bool state = Color::ParseColorString(value, result);
         InvertColorWithResource(resObj, result, colorMode);
         return state;
     }
     if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = resourceWrapper->GetInt(resId);
+        auto value = resourceAdapter->GetInt(resId);
         result = Color(ColorAlphaAdapt(value));
         InvertColorWithResource(resObj, result, colorMode);
         return true;
     }
     if (type == static_cast<int32_t>(ResourceType::COLOR)) {
-        result = resourceWrapper->GetColor(resId);
+        result = resourceAdapter->GetColor(resId);
         result.SetResourceId(resId);
         if (adaptMaterial) {
             result.FillColorPlaceholderIfNeed(resId);
@@ -473,9 +392,7 @@ bool ResourceParseUtilsBase::ParseResColorWithColorMode(const RefPtr<ResourceObj
     if (resObj->GetInstanceId() == UNKNOWN_INSTANCE_ID) {
         resObj->SetInstanceId(container->GetInstanceId());
     }
-    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
-    CHECK_NULL_RETURN(resourceWrapper, false);
-    auto resourceAdapter = resourceWrapper->GetResourceAdapter();
+    auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
     auto colorModeValue = resourceAdapter ? resourceAdapter->GetResourceColorMode() : container->GetColorMode();
     ResourceManager::GetInstance().UpdateColorMode(
         container->GetBundleName(), container->GetModuleName(), container->GetInstanceId(), colorMode);
@@ -498,14 +415,15 @@ bool ResourceParseUtilsBase::ParseResString(const RefPtr<ResourceObject>& resObj
 }
 
 bool ResourceParseUtilsBase::ParseResStringObj(const std::vector<ResourceObjectParams>& params,
-    RefPtr<ResourceWrapper>& resourceWrapper, std::string& result, int32_t type)
+    RefPtr<ResourceAdapter>& resourceAdapter, std::string& result, int32_t type)
 {
     if (params.empty()) {
         return false;
     }
+    CHECK_NULL_RETURN(resourceAdapter, false);
     auto param = params[0];
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto originStr = resourceWrapper->GetStringByName(param.value.value());
+        auto originStr = resourceAdapter->GetStringByName(param.value.value());
         ReplaceHolder(originStr, params, 1);
         result = originStr;
     } else if (type == static_cast<int32_t>(ResourceType::PLURAL)) {
@@ -515,9 +433,13 @@ bool ResourceParseUtilsBase::ParseResStringObj(const std::vector<ResourceObjectP
             return false;
         }
         count = StringUtils::StringToInt(countJsVal.value.value());
-        auto pluralStr = resourceWrapper->GetPluralStringByName(param.value.value(), count);
+        auto pluralStr = resourceAdapter->GetPluralStringByName(param.value.value(), count);
         ReplaceHolder(pluralStr, params, 2); // params[2] applys pluralStr.
         result = pluralStr;
+    } else if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
+        result = std::to_string(resourceAdapter->GetDoubleByName(param.value.value()));
+    } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+        result = std::to_string(resourceAdapter->GetIntByName(param.value.value()));
     } else {
         return false;
     }
@@ -532,16 +454,16 @@ bool ResourceParseUtilsBase::ParseResString(const RefPtr<ResourceObject>& resObj
         return false;
     }
     auto params = resObj->GetParams();
-    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
-    if (!resourceWrapper) {
+    auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
+    if (!resourceAdapter) {
         return false;
     }
     auto resIdNum = resObj->GetId();
     if (resIdNum == -1) {
-        return ResourceParseUtilsBase::ParseResStringObj(params, resourceWrapper, result, type);
+        return ResourceParseUtilsBase::ParseResStringObj(params, resourceAdapter, result, type);
     }
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto originStr = resourceWrapper->GetString(resIdNum);
+        auto originStr = resourceAdapter->GetString(resIdNum);
         ReplaceHolder(originStr, params, 0);
         result = originStr;
     } else if (type == static_cast<int32_t>(ResourceType::PLURAL)) {
@@ -554,13 +476,13 @@ bool ResourceParseUtilsBase::ParseResString(const RefPtr<ResourceObject>& resObj
             return false;
         }
         count = StringUtils::StringToInt(countJsVal.value.value());
-        auto pluralStr = resourceWrapper->GetPluralString(resIdNum, count);
+        auto pluralStr = resourceAdapter->GetPluralString(resIdNum, count);
         ReplaceHolder(pluralStr, params, 1);
         result = pluralStr;
     } else if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
-        result = std::to_string(resourceWrapper->GetDouble(resIdNum));
+        result = std::to_string(resourceAdapter->GetDouble(resIdNum));
     } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        result = std::to_string(resourceWrapper->GetInt(resIdNum));
+        result = std::to_string(resourceAdapter->GetInt(resIdNum));
     } else {
         return false;
     }
@@ -573,8 +495,8 @@ bool ResourceParseUtilsBase::ParseResMedia(const RefPtr<ResourceObject>& resObj,
     auto type = resObj->GetType();
     auto resIdNum = resObj->GetId();
     if (type != UNKNOWN_RESOURCE_TYPE) {
-        auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
-        if (!resourceWrapper) {
+        auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
+        if (!resourceAdapter) {
             return false;
         }
         if (type == static_cast<int32_t>(ResourceType::RAWFILE)) {
@@ -586,7 +508,7 @@ bool ResourceParseUtilsBase::ParseResMedia(const RefPtr<ResourceObject>& resObj,
             if (fileName.type != ResourceObjectParamType::STRING) {
                 return false;
             }
-            result = resourceWrapper->GetRawfile(fileName.value.value());
+            result = resourceAdapter->GetRawfile(fileName.value.value());
             return true;
         }
         if (resIdNum == -1) {
@@ -595,19 +517,19 @@ bool ResourceParseUtilsBase::ParseResMedia(const RefPtr<ResourceObject>& resObj,
                 return false;
             }
             if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
-                result = resourceWrapper->GetMediaPathByName(params[0].value.value());
+                result = resourceAdapter->GetMediaPathByName(params[0].value.value());
                 return true;
             }
             if (type == static_cast<int32_t>(ResourceType::STRING)) {
-                result = resourceWrapper->GetStringByName(params[0].value.value());
+                result = resourceAdapter->GetStringByName(params[0].value.value());
                 return true;
             }
             return false;
         } else if (type == static_cast<int32_t>(ResourceType::MEDIA)) {
-            result = resourceWrapper->GetMediaPath(resIdNum);
+            result = resourceAdapter->GetMediaPath(resIdNum);
             return true;
         } else if (type == static_cast<int32_t>(ResourceType::STRING)) {
-            result = resourceWrapper->GetString(resIdNum);
+            result = resourceAdapter->GetString(resIdNum);
             return true;
         }
     }
@@ -622,8 +544,8 @@ bool ResourceParseUtilsBase::ParseResBool(const RefPtr<ResourceObject>& resObj, 
         return false;
     }
 
-    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
-    if (!resourceWrapper) {
+    auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
+    if (!resourceAdapter) {
         return false;
     }
     auto resIdNum = resObj->GetId();
@@ -633,13 +555,13 @@ bool ResourceParseUtilsBase::ParseResBool(const RefPtr<ResourceObject>& resObj, 
             return false;
         }
         if (type == static_cast<int32_t>(ResourceType::BOOLEAN)) {
-            result = resourceWrapper->GetBooleanByName(params[0].value.value());
+            result = resourceAdapter->GetBooleanByName(params[0].value.value());
             return true;
         }
         return false;
     }
     if (type == static_cast<int32_t>(ResourceType::BOOLEAN)) {
-        result = resourceWrapper->GetBoolean(resIdNum);
+        result = resourceAdapter->GetBoolean(resIdNum);
         return true;
     }
     return false;
@@ -648,8 +570,8 @@ bool ResourceParseUtilsBase::ParseResBool(const RefPtr<ResourceObject>& resObj, 
 bool ResourceParseUtilsBase::ParseResourceToDouble(const RefPtr<ResourceObject>& resObj, double& result)
 {
     CHECK_NULL_RETURN(resObj, false);
-    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
-    if (!resourceWrapper) {
+    auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
+    if (!resourceAdapter) {
         return false;
     }
     auto resIdNum = resObj->GetId();
@@ -661,25 +583,25 @@ bool ResourceParseUtilsBase::ParseResourceToDouble(const RefPtr<ResourceObject>&
         }
         auto param = params[0];
         if (type == static_cast<int32_t>(ResourceType::STRING)) {
-            auto numberStr = resourceWrapper->GetStringByName(param.value.value());
+            auto numberStr = resourceAdapter->GetStringByName(param.value.value());
             return StringUtils::StringToDouble(numberStr, result);
         } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-            result = resourceWrapper->GetIntByName(param.value.value());
+            result = resourceAdapter->GetIntByName(param.value.value());
             return true;
         } else if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
-            result = resourceWrapper->GetDoubleByName(param.value.value());
+            result = resourceAdapter->GetDoubleByName(param.value.value());
             return true;
         }
         return false;
     }
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto numberStr = resourceWrapper->GetString(resIdNum);
+        auto numberStr = resourceAdapter->GetString(resIdNum);
         return StringUtils::StringToDouble(numberStr, result);
     } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        result = resourceWrapper->GetInt(resIdNum);
+        result = resourceAdapter->GetInt(resIdNum);
         return true;
     } else if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDouble(resIdNum);
+        result = resourceAdapter->GetDouble(resIdNum);
         return true;
     }
     return false;
@@ -706,8 +628,8 @@ bool ResourceParseUtilsBase::ParseResDimensionNG(
     const RefPtr<ResourceObject>& resObj, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent)
 {
     CHECK_NULL_RETURN(resObj, false);
-    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
-    if (!resourceWrapper) {
+    auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
+    if (!resourceAdapter) {
         return false;
     }
     auto resIdNum = resObj->GetId();
@@ -719,25 +641,25 @@ bool ResourceParseUtilsBase::ParseResDimensionNG(
         }
         auto param = params[0];
         if (type == static_cast<int32_t>(ResourceType::STRING)) {
-            auto value = resourceWrapper->GetStringByName(param.value.value());
+            auto value = resourceAdapter->GetStringByName(param.value.value());
             return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
         } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-            auto value = std::to_string(resourceWrapper->GetIntByName(param.value.value()));
+            auto value = std::to_string(resourceAdapter->GetIntByName(param.value.value()));
             StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
             return true;
         }
-        result = resourceWrapper->GetDimensionByName(param.value.value());
+        result = resourceAdapter->GetDimensionByName(param.value.value());
         return true;
     }
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resIdNum);
+        auto value = resourceAdapter->GetString(resIdNum);
         return StringUtils::StringToCalcDimensionNG(value, result, false, defaultUnit);
     } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(resIdNum));
+        auto value = std::to_string(resourceAdapter->GetInt(resIdNum));
         StringUtils::StringToDimensionWithUnitNG(value, result, defaultUnit);
         return true;
     } else if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDimension(resIdNum);
+        result = resourceAdapter->GetDimension(resIdNum);
         return true;
     }
     return false;
@@ -764,8 +686,8 @@ bool ResourceParseUtilsBase::ParseResDimension(
     const RefPtr<ResourceObject>& resObj, CalcDimension& result, DimensionUnit defaultUnit)
 {
     CHECK_NULL_RETURN(resObj, false);
-    auto resourceWrapper = GetOrCreateResourceWrapper(resObj);
-    if (!resourceWrapper) {
+    auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
+    if (!resourceAdapter) {
         return false;
     }
     auto resIdNum = resObj->GetId();
@@ -780,27 +702,27 @@ bool ResourceParseUtilsBase::ParseResDimension(
         }
         auto param = params[0];
         if (type == static_cast<int32_t>(ResourceType::STRING)) {
-            auto value = resourceWrapper->GetStringByName(param.value.value());
+            auto value = resourceAdapter->GetStringByName(param.value.value());
             result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
             return true;
         } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-            auto value = std::to_string(resourceWrapper->GetIntByName(param.value.value()));
+            auto value = std::to_string(resourceAdapter->GetIntByName(param.value.value()));
             result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
             return true;
         }
-        result = resourceWrapper->GetDimensionByName(param.value.value());
+        result = resourceAdapter->GetDimensionByName(param.value.value());
         return true;
     }
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resIdNum);
+        auto value = resourceAdapter->GetString(resIdNum);
         result = StringUtils::StringToCalcDimension(value, false, defaultUnit);
         return true;
     } else if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(resIdNum));
+        auto value = std::to_string(resourceAdapter->GetInt(resIdNum));
         result = StringUtils::StringToDimensionWithUnit(value, defaultUnit);
         return true;
     }
-    result = resourceWrapper->GetDimension(resIdNum);
+    result = resourceAdapter->GetDimension(resIdNum);
     return true;
 }
 
@@ -812,22 +734,40 @@ bool ResourceParseUtilsBase::ParseResResource(const RefPtr<ResourceObject>& resO
     if (type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
-    resIdNum = resIdNum == UNKNOWN_RESOURCE_ID ? 0 : resIdNum;
-
-    auto resourceWrapper = CreateResourceWrapper();
-    CHECK_NULL_RETURN(resourceWrapper, false);
+    auto resourceAdapter = GetOrCreateResourceAdapter(resObj);
+    CHECK_NULL_RETURN(resourceAdapter, false);
+    if (resIdNum == UNKNOWN_RESOURCE_ID) {
+        auto params = resObj->GetParams();
+        if (params.empty()) {
+            return false;
+        }
+        auto param = params[0];
+        if (type == static_cast<int32_t>(ResourceType::STRING)) {
+            auto value = resourceAdapter->GetStringByName(param.value.value());
+            return StringUtils::StringToCalcDimensionNG(value, result, false);
+        }
+        if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
+            auto value = std::to_string(resourceAdapter->GetIntByName(param.value.value()));
+            StringUtils::StringToDimensionWithUnitNG(value, result);
+            return true;
+        }
+        if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
+            result = resourceAdapter->GetDimensionByName(param.value.value());
+            return true;
+        }
+        return false;
+    }
     if (type == static_cast<int32_t>(ResourceType::STRING)) {
-        auto value = resourceWrapper->GetString(resIdNum);
+        auto value = resourceAdapter->GetString(resIdNum);
         return StringUtils::StringToCalcDimensionNG(value, result, false);
     }
     if (type == static_cast<int32_t>(ResourceType::INTEGER)) {
-        auto value = std::to_string(resourceWrapper->GetInt(resIdNum));
+        auto value = std::to_string(resourceAdapter->GetInt(resIdNum));
         StringUtils::StringToDimensionWithUnitNG(value, result);
         return true;
     }
-
     if (type == static_cast<int32_t>(ResourceType::FLOAT)) {
-        result = resourceWrapper->GetDimension(resIdNum);
+        result = resourceAdapter->GetDimension(resIdNum);
         return true;
     }
     return false;

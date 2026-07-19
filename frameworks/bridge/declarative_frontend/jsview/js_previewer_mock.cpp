@@ -417,6 +417,19 @@ void JSXComponentController::JSBind(BindingTarget globalObj)
 
 void JSXComponentController::Mock(const JSCallbackInfo& info) {}
 
+void JSXComponentControllerBinding::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSXComponentControllerBinding>::Declare("XComponentController");
+    JSClass<JSXComponentControllerBinding>::StaticMethod(
+        "getXComponentSurfaceId", &JSXComponentControllerBinding::Mock);
+    JSClass<JSXComponentControllerBinding>::StaticMethod("getXComponentContext", &JSXComponentControllerBinding::Mock);
+    JSClass<JSXComponentControllerBinding>::StaticMethod(
+        "setXComponentSurfaceSize", &JSXComponentControllerBinding::Mock);
+    JSClass<JSXComponentControllerBinding>::Bind(globalObj);
+}
+
+void JSXComponentControllerBinding::Mock(const JSCallbackInfo& info) {}
+
 void JSVideo::Create(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0 || !info[0]->IsObject()) {
@@ -474,6 +487,21 @@ void JSVideoController::JSBind(BindingTarget globalObj)
 }
 
 void JSVideoController::Mock(const JSCallbackInfo& info) {}
+
+void JSVideoControllerAsync::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSVideoControllerAsync>::Declare("VideoControllerAsync");
+    JSClass<JSVideoControllerAsync>::StaticMethod("start", &JSVideoControllerAsync::Mock);
+    JSClass<JSVideoControllerAsync>::StaticMethod("pause", &JSVideoControllerAsync::Mock);
+    JSClass<JSVideoControllerAsync>::StaticMethod("stop", &JSVideoControllerAsync::Mock);
+    JSClass<JSVideoControllerAsync>::StaticMethod("setCurrentTime", &JSVideoControllerAsync::Mock);
+    JSClass<JSVideoControllerAsync>::StaticMethod("requestFullscreen", &JSVideoControllerAsync::Mock);
+    JSClass<JSVideoControllerAsync>::StaticMethod("exitFullscreen", &JSVideoControllerAsync::Mock);
+    JSClass<JSVideoControllerAsync>::StaticMethod("reset", &JSVideoControllerAsync::Mock);
+    JSClass<JSVideoControllerAsync>::Bind(globalObj);
+}
+
+void JSVideoControllerAsync::Mock(const JSCallbackInfo& info) {}
 
 void JSPlugin::Create(const JSCallbackInfo& info)
 {

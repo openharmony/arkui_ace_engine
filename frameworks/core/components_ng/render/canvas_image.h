@@ -128,9 +128,14 @@ public:
         return *paintConfig_;
     }
 
-    inline ImageDfxConfig& GetImageDfxConfig()
+    const ImageDfxConfig& GetImageDfxConfig() const
     {
-        return imageDfxConfig_;
+        return imageSrcInfo_.GetImageDfxConfig();
+    }
+
+    void SetImageDfxConfig(const ImageDfxConfig& imageDfxConfig)
+    {
+        imageSrcInfo_.SetImageDfxConfig(imageDfxConfig);
     }
 
     inline ImageSourceInfo& GetImageSourceInfo()
@@ -153,11 +158,6 @@ public:
     virtual RefPtr<PixelMap> GetFirstPixelMap()
     {
         return nullptr;
-    }
-
-    inline void SetImageDfxConfig(const ImageDfxConfig& imageDfxConfig)
-    {
-        imageDfxConfig_ = imageDfxConfig;
     }
 
     inline void SetImageSourceInfo(const ImageSourceInfo& imageSrcInfo)
@@ -187,7 +187,6 @@ protected:
 
 private:
     std::unique_ptr<ImagePaintConfig> paintConfig_;
-    ImageDfxConfig imageDfxConfig_;
     ImageSourceInfo imageSrcInfo_;
     // Callback function executed after the graphics rendering is complete.
     std::function<void(const RenderedImageInfo&)> drawCompleteCallback_ = nullptr;

@@ -20,12 +20,25 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
-#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_info_sw.h"
 #include "core/components_ng/syntax/if_else_model_ng.h"
 #include "core/components_ng/syntax/if_else_node.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+PaddingProperty CreatePadding(float left, float top, float right, float bottom)
+{
+    PaddingProperty padding;
+    padding.left = CalcLength(left);
+    padding.right = CalcLength(right);
+    padding.top = CalcLength(top);
+    padding.bottom = CalcLength(bottom);
+    return padding;
+}
+} // namespace
+
 class WaterFlowSWTest : public WaterFlowTestNg {
 protected:
     void GetWaterFlow() override
@@ -1127,5 +1140,187 @@ HWTEST_F(WaterFlowSWTest, BackToTopFallback002, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(info_->startIndex_, startBefore);
     EXPECT_FALSE(pattern_->IsAtTop());
+}
+
+/**
+ * @tc.name: CacheExtensionAfterHardJump
+ * @tc.desc: After scrolling and then jumping (ScrollAlign::START) to an index far outside the
+ *           current viewport, Jump() takes the hard-reset path (ResetWithLaneOffset), which wipes
+ *           idxToLane_ / idxToHeight_. The cachedCount extension just above the new viewport must
+ *           still be built synchronously in the same frame, instead of only reappearing once the
+ *           async PreloadItems idle task eventually runs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, CacheExtensionAfterHardJump, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(3);
+    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 300.0f, 0.0f, 0.0f));
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    CreateWaterFlowItems(100);
+    CreateDone();
+
+    // scroll down first so the layout has scroll history unrelated to the jump target
+    UpdateCurrentOffset(-1500.0f);
+    const int32_t startBeforeJump = info_->startIndex_;
+    ASSERT_GT(startBeforeJump, 0);
+
+    // jump far enough that ItemCloseToView() is false, forcing Jump()'s hard-reset branch
+    ScrollToIndex(95, false, ScrollAlign::START);
+
+    const int32_t start = info_->startIndex_;
+    ASSERT_GT(start, 0);
+    ASSERT_GT(info_->startFixOffset_, 0.0f);
+    // the cachedCount items directly above the new viewport must already have a lane assigned
+    // synchronously; before the fix these were only filled later by the async PreloadItems task.
+    for (int32_t i = std::max(0, start - 3); i < start; ++i) {
+        EXPECT_TRUE(info_->idxToLane_.count(i));
+        ASSERT_TRUE(GetItem(i, true));
+        EXPECT_TRUE(GetItem(i, true)->IsActive());
+    }
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    FlushUITasks(frameNode_);
+    const int32_t endCacheIndex = info_->endIndex_ + 1;
+    if (endCacheIndex < info_->ItemCnt(info_->GetChildrenCount())) {
+        auto endCache = GetItem(endCacheIndex, true);
+        ASSERT_TRUE(endCache);
+        EXPECT_FALSE(endCache->IsActive());
+    }
+
+    // lanes_ must still hold only the stable viewport (see the "REQUIRES" comment on lanes_ in
+    // water_flow_layout_info_sw.h): the cache extension above must be reachable via idxToLane_ /
+    // idxToHeight_ for RecoverCacheItems to rebuild later, but must NOT be permanently baked into
+    // lanes_ itself. StartIndex()/EndIndex() short-circuit to the frozen members once synced_ is
+    // true, so scan lanes_ directly to catch a regression back to a version that left cache items
+    // sitting in lanes_ (which would corrupt StartIndex()/EndIndex() on the next unsynced frame).
+    int32_t scannedMin = start;
+    int32_t scannedMax = info_->endIndex_;
+    bool foundAnyLane = false;
+    for (const auto& section : info_->lanes_) {
+        for (const auto& lane : section) {
+            if (lane.items_.empty()) {
+                continue;
+            }
+            foundAnyLane = true;
+            scannedMin = std::min(scannedMin, lane.items_.front().idx);
+            scannedMax = std::max(scannedMax, lane.items_.back().idx);
+        }
+    }
+    ASSERT_TRUE(foundAnyLane);
+    EXPECT_EQ(scannedMin, start);
+    EXPECT_EQ(scannedMax, info_->endIndex_);
+}
+
+/**
+ * @tc.name: CacheExtensionAfterHardJumpEnd
+ * @tc.desc: After a hard jump with ScrollAlign::END, only the end fix-offset extension should activate
+ *           hidden cache items. Start-side cache items remain inactive when startFixOffset_ is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, CacheExtensionAfterHardJumpEnd, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(3);
+    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, 300.0f));
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    CreateWaterFlowItems(100);
+    CreateDone();
+
+    ScrollToIndex(80, false, ScrollAlign::END);
+
+    const int32_t end = info_->endIndex_;
+    ASSERT_LT(end, info_->ItemCnt(info_->GetChildrenCount()) - 1);
+    ASSERT_EQ(info_->startFixOffset_, 0.0f);
+    ASSERT_GT(info_->endFixOffset_, 0.0f);
+    const int32_t endCacheIndex = end + 1;
+    EXPECT_TRUE(info_->idxToLane_.count(endCacheIndex));
+    ASSERT_TRUE(GetItem(endCacheIndex, true));
+    EXPECT_TRUE(GetItem(endCacheIndex, true)->IsActive());
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    FlushUITasks(frameNode_);
+    const int32_t startCacheIndex = info_->startIndex_ - 1;
+    if (startCacheIndex >= 0) {
+        auto startCache = GetItem(startCacheIndex, true);
+        ASSERT_TRUE(startCache);
+        EXPECT_FALSE(startCache->IsActive());
+    }
+}
+
+/**
+ * @tc.name: CacheExtensionAfterDataUpdateReset
+ * @tc.desc: A LazyForEach deletion at the visible range makes CheckReset() take the
+ *           ResetWithLaneOffset path. The start fix-offset cache should be synchronously rebuilt
+ *           in the same frame, without waiting for the async cache preload task.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, CacheExtensionAfterDataUpdateReset, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(3);
+    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 300.0f, 0.0f, 0.0f));
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    auto mockLazy = CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+
+    ScrollToIndex(50, false, ScrollAlign::START);
+    const int32_t startBeforeUpdate = info_->startIndex_;
+    ASSERT_GT(startBeforeUpdate, 0);
+    ASSERT_GT(info_->startFixOffset_, 0.0f);
+
+    const int32_t deleteIndex = startBeforeUpdate;
+    DeleteItemInLazyForEach(deleteIndex);
+    mockLazy->SetTotalCount(99);
+    ASSERT_EQ(info_->newStartIndex_, INVALID_NEW_START_INDEX);
+    FlushUITasks(frameNode_);
+
+    const int32_t start = info_->startIndex_;
+    ASSERT_GT(start, 0);
+    ASSERT_GT(info_->startFixOffset_, 0.0f);
+    EXPECT_FALSE(info_->needFixOffsetCache_);
+    for (int32_t i = std::max(0, start - 3); i < start; ++i) {
+        EXPECT_TRUE(info_->idxToLane_.count(i));
+        ASSERT_TRUE(GetItem(i, true));
+        EXPECT_TRUE(GetItem(i, true)->IsActive());
+    }
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    FlushUITasks(frameNode_);
+    const int32_t endCacheIndex = info_->endIndex_ + 1;
+    if (endCacheIndex < info_->ItemCnt(info_->GetChildrenCount())) {
+        auto endCache = GetItem(endCacheIndex, true);
+        ASSERT_TRUE(endCache);
+        EXPECT_FALSE(endCache->IsActive());
+    }
+}
+
+/**
+ * @tc.name: CacheExtensionAfterHardJumpShowCache
+ * @tc.desc: showCachedItems=true keeps the normal cache activation behavior and does not leave a pending
+ *           fix-offset cache preload after a hard jump.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, CacheExtensionAfterHardJumpShowCache, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(3, true);
+    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 300.0f, 0.0f, 0.0f));
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    CreateWaterFlowItems(100);
+    CreateDone();
+
+    ScrollToIndex(95, false, ScrollAlign::START);
+
+    ASSERT_GT(info_->startIndex_, 0);
+    ASSERT_GT(info_->startFixOffset_, 0.0f);
+    EXPECT_FALSE(info_->needFixOffsetCache_);
+    const int32_t startCacheIndex = info_->startIndex_ - 1;
+    ASSERT_TRUE(GetItem(startCacheIndex, true));
+    EXPECT_TRUE(GetItem(startCacheIndex, true)->IsActive());
 }
 } // namespace OHOS::Ace::NG

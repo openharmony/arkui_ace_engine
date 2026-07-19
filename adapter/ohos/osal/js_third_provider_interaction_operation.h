@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_ACCESSIBILITY_JS_THIRD_PROVIDER_INTERATION_OPERATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_ACCESSIBILITY_JS_THIRD_PROVIDER_INTERATION_OPERATION_H
 
+#include <mutex>
+#include <unordered_map>
 
 #include "core/accessibility/accessibility_provider.h"
 #include "core/accessibility/third_accessibility_manager.h"
@@ -121,6 +123,12 @@ public:
         std::shared_ptr<ArkUI_AccessibilityElementInfo>& nativeInfo);
 
     void CheckAndSendHoverEnterByReadableRules(int64_t thirdElementId);
+
+    void SetThirdCustomProperty(int64_t elementId, const RefPtr<NG::CustomAccessibilityProperty>& property);
+    RefPtr<NG::CustomAccessibilityProperty> GetThirdCustomProperty(int64_t elementId) override;
+    void RemoveThirdCustomProperty(int64_t elementId);
+    void ClearAllThirdCustomProperties();
+
 private:
     void GetHostRectTranslateInfo(NodeConfig& config);
     void GetNodeConfig(NodeConfig& nodeConfig);
@@ -184,6 +192,9 @@ private:
     WeakPtr<JsAccessibilityManager> jsAccessibilityManager_;
     WeakPtr<NG::FrameNode> host_;
     int32_t belongTreeId_ = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+
+    mutable std::mutex thirdCustomPropertiesMutex_;
+    std::unordered_map<int64_t, RefPtr<NG::CustomAccessibilityProperty>> thirdCustomProperties_;
 };
 } // namespace OHOS::Ace::Framework
 

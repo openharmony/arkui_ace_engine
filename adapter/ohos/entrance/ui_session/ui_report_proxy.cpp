@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 
 #include "adapter/ohos/entrance/ui_session/include/large_string_ashmem.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
+#include "interfaces/inner_api/ui_session/ui_session_json_util.h"
+#include "interfaces/inner_api/ui_session/ui_session_ipc_util.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace {
@@ -215,11 +217,13 @@ void UiReportProxy::ReportHitTestNodeInfos(const std::string& data, int32_t part
 
 void UiReportProxy::OnComponentChange(const std::string& key, const std::string& value)
 {
+#ifndef CROSS_PLATFORM
     if (UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         auto result = InspectorJsonUtil::Create(true);
         result->Put(key.c_str(), value.c_str());
         ReportComponentChangeEvent(result->ToString());
     }
+#endif
 }
 
 void UiReportProxy::ReportWebUnfocusEvent(int64_t accessibilityId, const std::string& data)
@@ -587,6 +591,25 @@ void UiReportProxy::ReportGetStateMgmtInfo(std::vector<std::string> results)
     }
 }
 
+void UiReportProxy::ReportPageSceneEvent(const std::string& sceneJson)
+{
+    MessageParcel messageData;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!messageData.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("ReportPageSceneEvent write interface token failed");
+        return;
+    }
+    if (!messageData.WriteString(sceneJson)) {
+        LOGW("ReportPageSceneEvent write scene json failed");
+        return;
+    }
+    int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_PAGE_SCENE_EVENT, messageData, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("ReportPageSceneEvent send request failed, errorCode is %{public}d", sendRequestErrorCode);
+    }
+}
+
 void UiReportProxy::SendWebInfoRequestResult(
     uint32_t windowId,
     int32_t webId,
@@ -632,6 +655,32 @@ void UiReportProxy::SendWebInfoRequestResult(
     int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_WEB_INFO_BY_REQUEST, data, reply, option);
     if (sendRequestErrorCode != ERR_NONE) {
         LOGW("SendWebInfoRequestResult send request failed, errorCode is %{public}d", sendRequestErrorCode);
+    }
+}
+
+void UiReportProxy::SendPageText(int32_t nodeId, const std::string& text, int64_t version)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendPageText write interface token failed");
+        return;
+    }
+    if (!data.WriteInt32(nodeId)) {
+        LOGW("SendPageText write nodeId failed");
+        return;
+    }
+    if (!data.WriteInt64(version)) {
+        LOGW("SendPageText write version failed");
+        return;
+    }
+    if (!UiSessionIpcUtil::WriteStringWithAshmemFlag(data, SEND_PAGE_TEXT, text, "SendPageText")) {
+        return;
+    }
+    int32_t sendRequestErrorCode = Remote()->SendRequest(SEND_PAGE_TEXT, data, reply, option);
+    if (sendRequestErrorCode != ERR_NONE) {
+        LOGW("SendPageText send request failed, errorCode is %{public}d", sendRequestErrorCode);
     }
 }
 } // namespace OHOS::Ace

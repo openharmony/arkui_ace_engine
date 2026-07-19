@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "base/resource/shared_image_manager.h"
 #include "core/common/container_scope.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
@@ -50,12 +51,13 @@ void SubContainer::Initialize()
         return;
     }
 
-    if (!outSidePipelineContext_.Upgrade()) {
+    auto outSidePipelineContext = outSidePipelineContext_.Upgrade();
+    if (!outSidePipelineContext) {
         LOGE("no pipeline context for create form component container.");
         return;
     }
 
-    auto executor = outSidePipelineContext_.Upgrade()->GetTaskExecutor();
+    auto executor = outSidePipelineContext->GetTaskExecutor();
     if (!executor) {
         LOGE("could not got main pipeline executor");
         return;
@@ -117,8 +119,14 @@ void SubContainer::UpdateRootElementSize()
         return;
     }
 
-    surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidth);
-    surfaceHeight_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootHeight);
+    auto outSidePipelineContext = outSidePipelineContext_.Upgrade();
+    if (!outSidePipelineContext) {
+        LOGW("no pipeline context for create form component container.");
+        return;
+    }
+    surfaceWidth_ = outSidePipelineContext->NormalizeToPx(rootWidth);
+    surfaceHeight_ = outSidePipelineContext->NormalizeToPx(rootHeight);
+
     if (pipelineContext_) {
         pipelineContext_->SetRootSize(density_, rootWidth.Value(), rootHeight.Value());
     }
@@ -506,9 +514,16 @@ void SubContainer::InitCardThemeManager(const std::string &path, int32_t instanc
     const std::map<std::string, sptr<AppExecFwk::FormAshmem>> &imageDataMap, RefPtr<AssetManager> assetManager)
 {
     ContainerScope scope(instanceId_);
-    density_ = outSidePipelineContext_.Upgrade()->GetDensity();
-    auto eventManager = outSidePipelineContext_.Upgrade()->GetEventManager();
+    auto outSidePipelineContext = outSidePipelineContext_.Upgrade();
+    if (!outSidePipelineContext) {
+        LOGW("no pipeline context for create form component container.");
+        return;
+    }
+
+    density_ = outSidePipelineContext->GetDensity();
+    auto eventManager = outSidePipelineContext->GetEventManager();
     pipelineContext_->SetEventManager(eventManager);
+
     ProcessSharedImage(imageDataMap);
     UpdateRootElementSize();
     pipelineContext_->SetIsJsCard(true);  // JSCard & eTSCard both use this flag
@@ -532,9 +547,8 @@ void SubContainer::InitCardThemeManager(const std::string &path, int32_t instanc
         cardThemeManager->InitResource(cardResourceInfo);
         cardThemeManager->LoadSystemTheme(cardResourceInfo.GetThemeId());
         auto weakTheme = AceType::WeakClaim(AceType::RawPtr(cardThemeManager));
-        auto weakAsset = AceType::WeakClaim(AceType::RawPtr(assetManager));
         taskExecutor_->PostTask(
-            [weakTheme, weakAsset]() {
+            [weakTheme]() {
                 auto themeManager = weakTheme.Upgrade();
                 if (themeManager == nullptr) {
                     LOGE("themeManager or aceView is null!");
@@ -542,7 +556,6 @@ void SubContainer::InitCardThemeManager(const std::string &path, int32_t instanc
                 }
                 themeManager->ParseSystemTheme();
                 themeManager->SetColorScheme(ColorScheme::SCHEME_LIGHT);
-                themeManager->LoadCustomTheme(weakAsset.Upgrade());
             },
             TaskExecutor::TaskType::UI, "ArkUIFormLoadTheme");
     }

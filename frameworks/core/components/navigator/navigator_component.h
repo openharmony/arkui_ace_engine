@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT NavigatorComponent : public SoleChildComponent {
+class ACE_FORCE_EXPORT NavigatorComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(NavigatorComponent, SoleChildComponent);
 
 public:

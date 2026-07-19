@@ -19,7 +19,7 @@
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUIDividerModifier* GetDividerModifier();
+const ACE_FORCE_EXPORT ArkUIDividerModifier* GetDividerModifier();
 const CJUIDividerModifier* GetCJUIDividerModifier();
 }
 

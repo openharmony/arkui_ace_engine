@@ -23,15 +23,16 @@
 #include "base/utils/noncopyable.h"
 #include "frameworks/bridge/common/manifest/manifest_appinfo.h"
 #include "frameworks/bridge/common/manifest/manifest_router.h"
-#include "frameworks/bridge/common/manifest/manifest_widget.h"
 #include "frameworks/bridge/common/manifest/manifest_window.h"
 
 namespace OHOS::Ace::Framework {
 
+class ManifestWidgetGroup;
+
 class ACE_FORCE_EXPORT ManifestParser : public Referenced {
 public:
     ManifestParser();
-    ~ManifestParser() override = default;
+    ~ManifestParser() override;
 
     const RefPtr<ManifestAppInfo>& GetAppInfo() const;
     const RefPtr<ManifestRouter>& GetRouter() const;

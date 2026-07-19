@@ -143,7 +143,6 @@ frameworks/core/pipeline/
 │   ├── element_register.h/cpp     # Element 注册表
 │   ├── render_context.h           # 渲染上下文
 │   ├── rosen_render_context.cpp   # Rosen 渲染上下文
-│   ├── flutter_render_context.cpp # Flutter 渲染上下文
 │   ├── factories/                 # 工厂类
 │   │   ├── render_node_factory.h/cpp
 │   │   └── render_factory.h

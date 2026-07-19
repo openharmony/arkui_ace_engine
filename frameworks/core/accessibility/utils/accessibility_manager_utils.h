@@ -183,7 +183,7 @@ public:
 
     void AddAccessibilityEvent(const int32_t containerId, const int32_t pageId, AccessibilityEvent& event)
     {
-        TimeStamp now = std::chrono::steady_clock::now();
+        TimeStamp now = std::chrono::high_resolution_clock::now();
         auto& eventList = pageEvent_[containerId];
         eventList.emplace_back(std::make_tuple(pageId, event, now));
 
@@ -495,8 +495,8 @@ private:
     VirtualNodeContainerIdManager(const VirtualNodeContainerIdManager&) = delete;
     VirtualNodeContainerIdManager& operator=(const VirtualNodeContainerIdManager&) = delete;
 
-    // Find next available container ID
-    uint8_t FindNextAvailableId();
+    // Find next available container ID. Caller MUST already hold mutex_.
+    uint8_t FindNextAvailableIdLocked();
 
     // Container ID range
     static constexpr uint8_t MIN_CONTAINER_ID = 1;

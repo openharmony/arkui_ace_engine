@@ -19,11 +19,12 @@
 #include "ui/base/geometry/offset.h"
 #include "ui/base/event_source.h"
 #include "ui/base/macros.h"
-#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT Point {
+class Offset;
+
+class ACE_FORCE_EXPORT Point {
 public:
     Point() = default;
     ~Point() = default;
@@ -114,38 +115,13 @@ public:
         return sourceType_;
     }
 
-    void Rotate(const Point& center, double angle)
-    {
-        double x = (x_ - center.GetX()) * std::cos(angle) - (y_ - center.GetY()) * std::sin(angle) + center.GetX();
-        double y = (x_ - center.GetX()) * std::sin(angle) + (y_ - center.GetY()) * std::cos(angle) + center.GetY();
-        x_ = x;
-        y_ = y;
-    }
+    void Rotate(const Point& center, double angle);
 
-    Point operator-(const Offset& offset) const
-    {
-        return Point(x_ - offset.GetX(), y_ - offset.GetY());
-    }
-
-    Point operator+(const Offset& offset) const
-    {
-        return Point(x_ + offset.GetX(), y_ + offset.GetY());
-    }
-
-    Offset operator-(const Point& point) const
-    {
-        return Offset(x_ - point.x_, y_ - point.y_);
-    }
-
-    bool operator==(const Point& point) const
-    {
-        return NearEqual(x_, point.x_) && NearEqual(y_, point.y_);
-    }
-
-    bool operator!=(const Point& point) const
-    {
-        return !operator==(point);
-    }
+    Point operator-(const Offset& offset) const;
+    Point operator+(const Offset& offset) const;
+    Offset operator-(const Point& point) const;
+    bool operator==(const Point& point) const;
+    bool operator!=(const Point& point) const;
 
 private:
     double x_ = 0.0;

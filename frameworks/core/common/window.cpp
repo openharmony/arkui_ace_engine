@@ -130,6 +130,10 @@ WidthBreakpoint Window::GetWidthBreakpoint(const WidthLayoutBreakPoint &layoutBr
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     if (pipeline) {
         width = pipeline->CalcPageWidth(width);
+        auto density = pipeline->GetWindowDensity();
+        if (GreatNotEqual(density, 1.0)) {
+            return GetCalcWidthBreakpoint(layoutBreakpoints, density, width);
+        }
     }
     return GetCalcWidthBreakpoint(layoutBreakpoints, density_, width);
 }

@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "core/components_ng/pattern/grid/grid_focus.h"
+#include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 
@@ -47,6 +48,12 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
+
+    bool PostponedTaskForIgnoreCustomized() override
+    {
+        return true;
+    }
+    void PostponedTaskForIgnore(LayoutSafeAreaBundleType type) override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
 
@@ -141,7 +148,7 @@ public:
         info_.ResetPositionFlags();
     }
 
-    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    ACE_FORCE_EXPORT void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 
@@ -356,6 +363,10 @@ private:
 
     std::string GetLayoutMode() const;
 
+    void SetLayoutAlgorithmContentClip(const RefPtr<GridLayoutBaseAlgorithm>& algorithm);
+    RefPtr<LayoutAlgorithm> CreateScrollLayoutAlgorithm(
+        bool hasLayoutOptions, bool disableSkip, bool canOverScrollStart, bool canOverScrollEnd);
+
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
     bool scrollable_ = true;
@@ -364,6 +375,7 @@ private:
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
     bool userDefined_ = false; // true if onGetStartIndex
     bool prevMeasureBreak_ = false;
+    std::optional<ExpandEdges> safeAreaPad_;
 
     RefPtr<GridContentModifier> gridContentModifier_;
 

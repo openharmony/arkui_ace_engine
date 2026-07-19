@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1433,6 +1433,7 @@ public:
             if (!JSViewAbstract::ParseJsMedia(args[0], resourceUrl)) {
                 return;
             }
+            JSWeb::ParseRawfileWebSrc(args[0], resourceUrl);
             auto np = resourceUrl.find_first_of("/");
             url = (np == std::string::npos) ? resourceUrl : resourceUrl.erase(np, 1);
             response_->SetResourceUrl(url);
@@ -2617,6 +2618,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentStart", &JSWeb::RunJavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentEnd", &JSWeb::RunJavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
+    JSClass<JSWeb>::StaticMethod("enableMediaNetworkProxy", &JSWeb::EnableMediaNetworkProxy);
     JSClass<JSWeb>::StaticMethod("enableDataDetector", &JSWeb::EnableDataDetector);
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
     JSClass<JSWeb>::StaticMethod("enableSelectedDataDetector", &JSWeb::EnableSelectedDataDetector);
@@ -3567,6 +3569,13 @@ void JSWeb::Create(const JSCallbackInfo& info)
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
             napi_close_handle_scope(env, scope);
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+            int32_t parentNWebId = -1;
+            auto controllerRef = webviewController;
+            if (JSWebWindowNewHandler::ExistController(controllerRef, parentNWebId) && parentNWebId != -1) {
+                WebModel::GetInstance()->NotifyPopupWindowResult(parentNWebId, true);
+            }
+#endif
         };
 
         auto setHapPathFunction = controller->GetProperty("innerSetHapPath");
@@ -3809,6 +3818,7 @@ void JSWeb::OnProgressChange(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->ExecuteWithValue(*eventInfo);
     };
     WebModel::GetInstance()->SetOnProgressChange(jsCallback);
@@ -3833,6 +3843,7 @@ void JSWeb::OnTitleReceive(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebTitleReceiveEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetOnTitleReceive(jsCallback);
@@ -3979,6 +3990,7 @@ void JSWeb::OnDownloadStart(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<DownloadStartEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetOnDownloadStart(jsCallback);
@@ -4003,6 +4015,7 @@ void JSWeb::OnHttpAuthRequest(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebHttpAuthEvent>(info);
+        CHECK_NULL_RETURN(eventInfo, false);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
             return message->ToBoolean();
@@ -4036,6 +4049,7 @@ void JSWeb::OnSslErrorRequest(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info);
+        CHECK_NULL_RETURN(eventInfo, false);
         func->Execute(*eventInfo);
         return true;
     };
@@ -4061,6 +4075,7 @@ void JSWeb::OnAllSslErrorRequest(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebAllSslErrorEvent>(info);
+        CHECK_NULL_RETURN(eventInfo, false);
         func->Execute(*eventInfo);
         return true;
     };
@@ -4086,6 +4101,7 @@ void JSWeb::OnSslSelectCertRequest(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslSelectCertEvent>(info);
+        CHECK_NULL_RETURN(eventInfo, false);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
             return message->ToBoolean();
@@ -4246,6 +4262,7 @@ void JSWeb::OnErrorReceive(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedErrorEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetOnErrorReceive(jsCallback);
@@ -4270,6 +4287,7 @@ void JSWeb::OnHttpErrorReceive(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedHttpErrorEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetOnHttpErrorReceive(jsCallback);
@@ -4320,6 +4338,7 @@ void JSWeb::OnInterceptRequest(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<OnInterceptRequestEvent>(info);
+        CHECK_NULL_RETURN(eventInfo, nullptr);
         JSRef<JSVal> obj = func->ExecuteWithValue(*eventInfo);
         if (!obj->IsObject()) {
             return nullptr;
@@ -4409,6 +4428,7 @@ void JSWeb::OnUrlLoadIntercept(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<UrlLoadInterceptEvent>(info);
+        CHECK_NULL_RETURN(eventInfo, false);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
             return message->ToBoolean();
@@ -4438,6 +4458,7 @@ void JSWeb::OnLoadIntercept(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
+        CHECK_NULL_RETURN(eventInfo, false);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
             return message->ToBoolean();
@@ -4513,6 +4534,7 @@ void JSWeb::OnFileSelectorShow(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
+        CHECK_NULL_RETURN(eventInfo, false);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
             return message->ToBoolean();
@@ -5040,6 +5062,7 @@ void JSWeb::OnRefreshAccessedHistory(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<RefreshAccessedHistoryEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetRefreshAccessedHistoryId(jsCallback);
@@ -5176,6 +5199,7 @@ void JSWeb::OnResourceLoad(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<ResourceLoadEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetResourceLoadId(jsCallback);
@@ -5397,6 +5421,7 @@ void JSWeb::OnSearchResultReceive(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<SearchResultReceiveEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetSearchResultReceiveEventId(jsCallback);
@@ -6049,6 +6074,7 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
         executor->PostSyncTask([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<DataResubmittedEvent>(info.get());
+            CHECK_NULL_VOID(eventInfo);
             postFunc->Execute(*eventInfo);
             }, TaskExecutor::TaskType::UI, "ArkUIWebDataResubmitted");
     };
@@ -6118,6 +6144,7 @@ void JSWeb::OnFaviconReceived(const JSCallbackInfo& args)
         executor->PostTask([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<FaviconReceivedEvent>(info.get());
+            CHECK_NULL_VOID(eventInfo);
             postFunc->Execute(*eventInfo);
             }, TaskExecutor::TaskType::UI, "ArkUIWebFaviconReceived");
     };
@@ -6155,6 +6182,7 @@ void JSWeb::OnTouchIconUrlReceived(const JSCallbackInfo& args)
         executor->PostTask([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<TouchIconUrlEvent>(info.get());
+            CHECK_NULL_VOID(eventInfo);
             postFunc->Execute(*eventInfo);
             }, TaskExecutor::TaskType::UI, "ArkUIWebTouchIconUrlReceived");
     };
@@ -6517,6 +6545,7 @@ void JSWeb::OnSafeBrowsingCheckResult(const JSCallbackInfo& args)
         executor->PostTask([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<SafeBrowsingCheckResultEvent>(info.get());
+            CHECK_NULL_VOID(eventInfo);
             postFunc->Execute(*eventInfo);
             }, TaskExecutor::TaskType::UI, "ArkUIWebSafeBrowsingCheckResult");
     };
@@ -6557,6 +6586,7 @@ void JSWeb::OnNavigationEntryCommitted(const JSCallbackInfo& args)
         executor->PostTask([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<NavigationEntryCommittedEvent>(info.get());
+            CHECK_NULL_VOID(eventInfo);
             postFunc->Execute(*eventInfo);
             }, TaskExecutor::TaskType::UI, "ArkUIWebNavigationEntryCommitted");
     };
@@ -6595,6 +6625,7 @@ void JSWeb::OnIntelligentTrackingPreventionResult(const JSCallbackInfo& args)
         executor->PostTask([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<IntelligentTrackingPreventionResultEvent>(info.get());
+            CHECK_NULL_VOID(eventInfo);
             postFunc->Execute(*eventInfo);
             }, TaskExecutor::TaskType::UI, "ArkUIWebIntelligentTrackingPreventionResult");
     };
@@ -6935,6 +6966,7 @@ void JSWeb::OnNativeEmbedObjectParamChange(const JSCallbackInfo& args)
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedParamDataInfo>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetNativeEmbedObjectParamChangeId(jsCallback);
@@ -7218,6 +7250,7 @@ void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadOverrideEvent>(info);
+        CHECK_NULL_RETURN(eventInfo, false);
         JSRef<JSVal> message = func->ExecuteWithValue(*eventInfo);
         if (message->IsBoolean()) {
             return message->ToBoolean();
@@ -7559,6 +7592,7 @@ void JSWeb::OnAdsBlocked(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<AdsBlockedEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetAdsBlockedEventId(jsCallback);
@@ -7627,6 +7661,15 @@ void JSWeb::EnableWebAVSession(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetWebMediaAVSessionEnabled(isEnabled);
+}
+
+void JSWeb::EnableMediaNetworkProxy(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetWebMediaNetworkProxyEnabled(isEnabled);
 }
 
 void JSWeb::EnableDataDetector(const JSCallbackInfo& args)
@@ -7711,6 +7754,7 @@ void JSWeb::OnLoadStarted(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadStartedEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetOnLoadStarted(jsCallback);
@@ -7736,6 +7780,7 @@ void JSWeb::OnLoadFinished(const JSCallbackInfo& args)
             pipelineContext->UpdateCurrentActiveNode(node);
         }
         auto* eventInfo = TypeInfoHelper::DynamicCast<LoadFinishedEvent>(info);
+        CHECK_NULL_VOID(eventInfo);
         func->Execute(*eventInfo);
     };
     WebModel::GetInstance()->SetOnLoadFinished(jsCallback);
@@ -8041,6 +8086,7 @@ void JSWeb::OnSafeBrowsingCheckFinish(const JSCallbackInfo& args)
         executor->PostTask([execCtx, postFunc = func, info]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto* eventInfo = TypeInfoHelper::DynamicCast<SafeBrowsingCheckResultEvent>(info.get());
+            CHECK_NULL_VOID(eventInfo);
             CHECK_NULL_VOID(postFunc);
             postFunc->Execute(*eventInfo);
             }, TaskExecutor::TaskType::UI, "ArkUIWebSafeBrowsingCheckResult");

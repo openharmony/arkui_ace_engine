@@ -20,6 +20,8 @@
 
 namespace OHOS::Ace {
 namespace {
+constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_DEPTH = 5;
+constexpr int32_t MAX_TOUCH_DOWN_RECURSIVE_NODES = 20;
 constexpr int32_t MAX_UPDATE_TEXT_LENGTH = 1024;
 
 bool SafeConvertStringToInt32(const std::string& str, int32_t& result)
@@ -68,7 +70,9 @@ void ResSchedClickOptimizer::Init()
 
         std::unordered_map<std::string, std::string> payload;
         std::unordered_map<std::string, std::string> reply;
+#ifndef CROSS_PLATFORM
         optimizerRef->SetClickExtEnabled(ResSchedReport::GetInstance().AppClickExtEnableCheck(payload, reply));
+#endif
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "CLICK_EXT_ENABLE_CHECK Result: %{public}d",
             static_cast<int32_t>(optimizerRef->clickExtEnabled_));
 
@@ -84,29 +88,55 @@ void ResSchedClickOptimizer::Init()
 
 void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, const GestureEvent& gestureEvent)
 {
-    if (!GetClickExtEnabled()) {
-        ResSchedReport::GetInstance().ResSchedDataReport("click");
-        return;
-    }
+    auto currentTimestamp = gestureEvent.GetTimeStamp().time_since_epoch().count();
+    CHECK_EQUAL_VOID(currentTimestamp, lastClickReportedTimestamp_.load(std::memory_order_relaxed));
+    lastClickReportedTimestamp_.store(currentTimestamp, std::memory_order_relaxed);
 
     std::unordered_map<std::string, std::string> payload;
+    if (!BuildComponentPayload(weakNode, payload, GetDepth())) {
+#ifndef CROSS_PLATFORM
+        ResSchedReport::GetInstance().ResSchedDataReport("click");
+#endif
+        return;
+    }
+#ifndef CROSS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("click", payload);
+#endif
+}
+
+void ResSchedClickOptimizer::HandleTouchClickableFrameNodeReport(const WeakPtr<NG::FrameNode>& frameNode)
+{
+    std::unordered_map<std::string, std::string> payload;
+    bool ret = BuildComponentPayload(frameNode, payload, MAX_TOUCH_DOWN_RECURSIVE_DEPTH,
+        MAX_TOUCH_DOWN_RECURSIVE_NODES);
+    CHECK_EQUAL_VOID(ret, false);
+#ifndef CROSS_PLATFORM
+    ResSchedReport::GetInstance().ResSchedDataReport("touch clickable frameNode", payload);
+#endif
+}
+
+bool ResSchedClickOptimizer::BuildComponentPayload(const WeakPtr<NG::FrameNode>& weakNode,
+    std::unordered_map<std::string, std::string>& payload, const int32_t depth, int32_t maxNodes)
+{
+    CHECK_EQUAL_RETURN(clickExtEnabled_, false, false);
+
     payload["pid"] = std::to_string(AceApplicationInfo::GetInstance().GetPid());
     payload["uid"] = std::to_string(AceApplicationInfo::GetInstance().GetUid());
     payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
     payload["abilityName"] = AceApplicationInfo::GetInstance().GetAbilityName();
     std::string text = "";
     std::string path = "";
-    GetComponentTextRecursive(weakNode, text, GetDepth());
+    GetComponentTextRecursive(weakNode, text, depth, maxNodes);
     CheckPayloadTextEmpty(weakNode, text);
     GetPayloadPath(weakNode, path);
 
     payload["path"] = path.substr(0, MAX_UPDATE_TEXT_LENGTH);
     payload["text"] = text.substr(0, MAX_UPDATE_TEXT_LENGTH);
-    ResSchedReport::GetInstance().ResSchedDataReport("click", payload);
+    return true;
 }
 
 void ResSchedClickOptimizer::GetComponentTextRecursive(
-    const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain, const int32_t maxNodes)
+    const WeakPtr<NG::FrameNode> weakNode, std::string& text, const int32_t remain, int32_t& maxNodes)
 {
     CHECK_EQUAL_VOID(remain <= 0, true);
     CHECK_EQUAL_VOID(maxNodes <= 0, true);
@@ -121,12 +151,12 @@ void ResSchedClickOptimizer::GetComponentTextRecursive(
     if (nodeText.empty()) {
         nodeText = accessibilityProperty->GetAccessibilityText();
     }
-
     MergeText(text, nodeText);
 
+    maxNodes--;
     auto& children = node->GetFrameChildren();
     for (auto& childWeak : children) {
-        GetComponentTextRecursive(childWeak, text, remain - 1, maxNodes - 1);
+        GetComponentTextRecursive(childWeak, text, remain - 1, maxNodes);
     }
 }
 } // namespace OHOS::Ace

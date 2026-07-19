@@ -17,6 +17,7 @@
 #include "core/components_ng/base/modifier.h"
 
 #include <optional>
+#include <string_view>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -75,9 +76,9 @@ const auto TRANSLATE_THRESHOLD = 26.0f;
 const auto TRANSLATE_FRAME_RATE = 120;
 const auto TRANSLATE_FRAME_RATE_RANGE =
     AceType::MakeRefPtr<FrameRateRange>(0, TRANSLATE_FRAME_RATE, TRANSLATE_FRAME_RATE);
-const std::string TAB_BAR_PROPERTY_NAME = "tabBar";
-const std::string INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
-const std::string INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
+constexpr std::string_view TAB_BAR_PROPERTY_NAME = "tabBar";
+constexpr std::string_view INDICATOR_OFFSET_PROPERTY_NAME = "indicatorOffset";
+constexpr std::string_view INDICATOR_WIDTH_PROPERTY_NAME = "translateWidth";
 
 ImageSourceInfo CreateSourceInfo(const std::shared_ptr<std::string>& src, RefPtr<PixelMap>& pixelMap,
     const std::string& bundleName, const std::string& moduleName)
@@ -589,8 +590,10 @@ void TabBarPattern::AddMaskItemClickEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto childCount = host->GetChildren().size() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
-
+    auto childCount = GetChildrenSize();
+    if (childCount < 0) {
+        return;
+    }
     for (int32_t maskIndex = 0; maskIndex < MASK_COUNT; maskIndex++) {
         auto maskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(childCount + maskIndex));
         CHECK_NULL_VOID(maskNode);
@@ -645,7 +648,7 @@ void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto index = tabBar->CalculateSelectedIndex(info.GetLocalLocation());
         auto host = tabBar->GetHost();
         CHECK_NULL_VOID(host);
-        auto totalCount = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+        auto totalCount = tabBar->GetChildrenSize();
         if (tabBar && tabBar->dialogNode_ && index >= 0 && index < totalCount) {
             if (!tabBar->moveIndex_.has_value()) {
                 tabBar->moveIndex_ = index;
@@ -784,7 +787,7 @@ bool TabBarPattern::CanScroll() const
     auto visibleItemEndIndex = visibleItemPosition_.rbegin()->first;
     auto visibleItemStartPos = visibleItemPosition_.begin()->second.startPos;
     auto visibleItemEndPos = visibleItemPosition_.rbegin()->second.endPos;
-    auto childCount = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto childCount = GetChildrenSize();
     auto contentMainSize = GetContentSize().MainSize(layoutProperty->GetAxis().value_or(Axis::HORIZONTAL));
     return visibleItemStartIndex > 0 || LessNotEqual(visibleItemStartPos, scrollMargin_) ||
         visibleItemEndIndex < (childCount - 1) || GreatNotEqual(visibleItemEndPos, contentMainSize - scrollMargin_);
@@ -868,7 +871,7 @@ void TabBarPattern::HandleMouseEvent(const MouseInfo& info)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto totalCount = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto totalCount = GetChildrenSize();
     if (totalCount < 0) {
         return;
     }
@@ -1035,14 +1038,14 @@ std::optional<int32_t> TabBarPattern::GetNextFocusIndicator(int32_t indicator, F
         indicator -= 1;
     } else if (step == (axis_ == Axis::HORIZONTAL ? (isRTL_ ? FocusStep::LEFT : FocusStep::RIGHT) : FocusStep::DOWN) ||
         step == FocusStep::TAB) {
-        if (indicator >= host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT - 1) {
+        if (indicator >= GetChildrenSize() - 1) {
             return std::nullopt;
         }
         indicator += 1;
     } else if (step == (axis_ == Axis::HORIZONTAL ? FocusStep::LEFT_END : FocusStep::UP_END)) {
         indicator = 0;
     } else if (step == (axis_ == Axis::HORIZONTAL ? FocusStep::RIGHT_END : FocusStep::DOWN_END)) {
-        indicator = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT - 1;
+        indicator = GetChildrenSize() - 1;
     } else {
         return std::nullopt;
     }
@@ -1300,7 +1303,7 @@ void TabBarPattern::UpdateChildrenClipEdge()
         clipEdge = false;
     }
     if (clipEdge != clipEdge_) {
-        int32_t totalCount = tabBarNode->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+        int32_t totalCount = GetChildrenSize();
         for (int32_t index = 0; index < totalCount; index++) {
             auto childNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
             CHECK_NULL_VOID(childNode);
@@ -1556,7 +1559,7 @@ void TabBarPattern::HandleClick(SourceType type, int32_t index)
         }
     }
 
-    auto totalCount = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto totalCount = GetChildrenSize();
     if (totalCount < 0) {
         return;
     }
@@ -1601,7 +1604,9 @@ void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
         OnCustomContentTransition(indicator, index);
     } else {
         if (duration > 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
             animationTargetIndex_ = index;
@@ -1643,7 +1648,7 @@ void TabBarPattern::HandleBottomTabBarChange(int32_t index)
                                    tabBarStyles_[index] == TabBarStyle::BOTTOMTABBATSTYLE)) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        auto childCount = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+        auto childCount = GetChildrenSize();
         int32_t selectedIndex = -1;
         int32_t unselectedIndex = -1;
         if (preIndex < childCount && tabBarStyles_[preIndex] == TabBarStyle::BOTTOMTABBATSTYLE && CheckSvg(preIndex)) {
@@ -1728,7 +1733,7 @@ void TabBarPattern::GetBottomTabBarImageSizeAndOffset(const std::vector<int32_t>
     ImageSourceInfo info;
     auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(info);
 
-    auto maskPosition = host->GetChildren().size() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto maskPosition = GetChildrenSize();
     if (maskPosition < 0) {
         return;
     }
@@ -1766,7 +1771,7 @@ void TabBarPattern::UpdateBottomTabBarImageColor(const std::vector<int32_t>& sel
     auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().front());
     CHECK_NULL_VOID(imageNode);
 
-    auto maskPosition = host->GetChildren().size() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto maskPosition = GetChildrenSize();
     if (maskPosition < 0) {
         return;
     }
@@ -1911,7 +1916,7 @@ void TabBarPattern::ChangeMask(int32_t index, float imageSize, const OffsetF& or
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto maskPosition = host->GetChildren().size() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto maskPosition = GetChildrenSize();
     if (index < 0 || NearZero(imageSize) || maskPosition < 0) {
         return;
     }
@@ -1979,7 +1984,9 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
         OnCustomContentTransition(indicator, index);
     } else {
         if (duration> 0 && tabsPattern->GetAnimateMode() != TabAnimateMode::NO_ANIMATION) {
+#ifndef CROSS_PLATFORM
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::APP_TAB_SWITCH, PerfActionType::LAST_UP, "");
+#endif
             tabContentWillChangeFlag_ = true;
             swiperController_->SwipeTo(index);
         } else {
@@ -2008,7 +2015,7 @@ void TabBarPattern::HandleTouchEvent(TouchType touchType, int32_t index)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto totalCount = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto totalCount = GetChildrenSize();
     if (IsContainsBuilder() || totalCount < 0) {
         return;
     }
@@ -2254,7 +2261,7 @@ void TabBarPattern::UpdateGradientRegions(bool needMarkDirty)
     auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
-    auto childCount = tabBarNode->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto childCount = GetChildrenSize();
     auto mainSize = GetContentSize().MainSize(axis);
 
     std::fill(gradientRegions_.begin(), gradientRegions_.end(), false);
@@ -2533,7 +2540,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
 
     currentOffset_ = 0.0f;
     CHECK_NULL_VOID(host);
-    host->CreateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, 0, [weak](float value) {
+    host->CreateAnimatablePropertyFloat(std::string(TAB_BAR_PROPERTY_NAME), 0, [weak](float value) {
         auto tabBarPattern = weak.Upgrade();
         CHECK_NULL_VOID(tabBarPattern);
         tabBarPattern->currentDelta_ = value - tabBarPattern->currentOffset_;
@@ -2542,7 +2549,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     });
-    host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, currentOffset_);
+    host->UpdateAnimatablePropertyFloat(std::string(TAB_BAR_PROPERTY_NAME), currentOffset_);
     translateAnimationIsRunning_ = true;
     auto pipeline = host->GetContextRefPtr();
     translateAnimation_ = AnimationUtils::StartAnimation(
@@ -2550,7 +2557,7 @@ void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float t
         [weakHost = WeakClaim(RawPtr(host)), targetCurrentOffset]() {
             auto host = weakHost.Upgrade();
             CHECK_NULL_VOID(host);
-            host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, targetCurrentOffset);
+            host->UpdateAnimatablePropertyFloat(std::string(TAB_BAR_PROPERTY_NAME), targetCurrentOffset);
         },
         [weak]() {
             auto tabBarPattern = weak.Upgrade();
@@ -2570,11 +2577,11 @@ void TabBarPattern::PlayIndicatorTranslateAnimation(AnimationOption option, Rect
     turnPageRate_ = 0.0f;
     indicatorStartPos_ = originalPaintRect.GetX() + originalPaintRect.Width() / HALF_OF_WIDTH;
     indicatorEndPos_ = targetPaintRect.GetX() + targetPaintRect.Width() / HALF_OF_WIDTH + targetOffset;
-    auto propertyName = INDICATOR_OFFSET_PROPERTY_NAME;
+    auto propertyName = std::string(INDICATOR_OFFSET_PROPERTY_NAME);
     if (NearZero(indicatorEndPos_ - indicatorStartPos_)) {
         indicatorStartPos_ = originalPaintRect.Width();
         indicatorEndPos_ = targetPaintRect.Width();
-        propertyName = INDICATOR_WIDTH_PROPERTY_NAME;
+        propertyName = std::string(INDICATOR_WIDTH_PROPERTY_NAME);
     }
     CreateIndicatorTranslateProperty(host, propertyName);
 
@@ -2642,7 +2649,7 @@ void TabBarPattern::StopTranslateAnimation(bool isImmediately)
                 CHECK_NULL_VOID(pattern);
                 auto host = pattern->GetHost();
                 CHECK_NULL_VOID(host);
-                host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, pattern->currentOffset_);
+                host->UpdateAnimatablePropertyFloat(std::string(TAB_BAR_PROPERTY_NAME), pattern->currentOffset_);
             },
             nullptr, nullptr, pipeline);
     } else {
@@ -2716,8 +2723,7 @@ RectF TabBarPattern::GetOriginalPaintRect(int32_t currentIndex)
                 originalPaintRect.SetLeft(visibleItemPosition_.begin()->second.startPos - originalPaintRect.Width());
             }
             currentIndicatorOffset_ = originalPaintRect.GetX() + originalPaintRect.Width() / HALF_OF_WIDTH;
-        } else if (currentIndex < host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT &&
-            currentIndex > visibleItemPosition_.rbegin()->first) {
+        } else if (currentIndex < GetChildrenSize() && currentIndex > visibleItemPosition_.rbegin()->first) {
             if (isRTL_) {
                 originalPaintRect.SetLeft(
                     mainSize - visibleItemPosition_.rbegin()->second.endPos - originalPaintRect.Width());
@@ -2848,7 +2854,7 @@ void TabBarPattern::GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& i
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto totalCount = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto totalCount = GetChildrenSize();
     if (!IsValidIndex(swiperStartIndex_) || swiperStartIndex_ >= totalCount ||
         swiperStartIndex_ >= static_cast<int32_t>(indicatorStyles_.size())) {
         return;
@@ -3009,7 +3015,7 @@ bool TabBarPattern::IsAtBottom() const
 
     auto visibleItemEndIndex = visibleItemPosition_.rbegin()->first;
     auto visibleItemEndPos = visibleItemPosition_.rbegin()->second.endPos;
-    auto childCount = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto childCount = GetChildrenSize();
     auto mainSize = GetContentSize().MainSize(axis_);
     return visibleItemEndIndex == (childCount - 1) && LessOrEqual(visibleItemEndPos, mainSize - scrollMargin_);
 }
@@ -3044,10 +3050,9 @@ void TabBarPattern::SetAccessibilityAction()
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
-            frameNode->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT > 1) {
+            pattern->GetChildrenSize() > 1) {
             auto index =
-                std::clamp(pattern->accessibilityFocusIndicator_ + 1, 0, frameNode->TotalChildCount() -
-                MASK_COUNT - IMAGE_INDICATOR_COUNT - 1);
+                std::clamp(pattern->accessibilityFocusIndicator_ + 1, 0, pattern->GetChildrenSize() - 1);
             pattern->FocusCurrentOffset(index);
             // AccessibilityEventType::SCROLL_END
         }
@@ -3061,10 +3066,9 @@ void TabBarPattern::SetAccessibilityAction()
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
-           frameNode->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT > 1) {
+           pattern->GetChildrenSize() > 1) {
             auto index =
-                std::clamp(pattern->accessibilityFocusIndicator_ - 1, 0, frameNode->TotalChildCount() -
-                MASK_COUNT - IMAGE_INDICATOR_COUNT - 1);
+                std::clamp(pattern->accessibilityFocusIndicator_ - 1, 0, pattern->GetChildrenSize() - 1);
             pattern->FocusCurrentOffset(index);
             // AccessibilityEventType::SCROLL_END
         }
@@ -3258,7 +3262,7 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
-    auto totalCount = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    auto totalCount = GetChildrenSize();
     CHECK_NULL_VOID(layoutProperty);
     swiperStartIndex_ = std::clamp(swiperStartIndex_, 0, totalCount - 1);
     CHECK_NULL_VOID(IsValidIndex(swiperStartIndex_));
@@ -3326,7 +3330,9 @@ void TabBarPattern::InitTurnPageRateEvent()
     if (!animationEndEvent_) {
         AnimationEndEvent animationEndEvent =
             [weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
+#ifndef CROSS_PLATFORM
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
+#endif
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 auto host = pattern->GetHost();
@@ -3441,10 +3447,7 @@ void TabBarPattern::UpdateAnimationDuration()
  
 void TabBarPattern::ChangeIndex(int32_t index)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto totalChildCount = host->TotalChildCount();
-    int32_t totalCount = static_cast<int32_t>(totalChildCount) - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    int32_t totalCount = GetChildrenSize();
     if (NonPositive(totalCount)) {
         return;
     }
@@ -3540,7 +3543,7 @@ int32_t TabBarPattern::GetLoopIndex(int32_t originalIndex) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, originalIndex);
-    auto totalCount = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    int32_t totalCount = GetChildrenSize();
     if (totalCount <= 0) {
         return originalIndex;
     }
@@ -3618,7 +3621,7 @@ void TabBarPattern::AdjustTabBarInfo()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    int32_t totalTabsBarItems = host->TotalChildCount() - MASK_COUNT - IMAGE_INDICATOR_COUNT;
+    int32_t totalTabsBarItems = GetChildrenSize();
     if (static_cast<int32_t>(tabBarItemIds_.size()) <= totalTabsBarItems) {
         NotifyTabBarItemsChange();
         return;
@@ -3923,7 +3926,7 @@ int32_t TabBarPattern::GetChildrenSize() const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0);
-    return static_cast<int32_t>(host->GetChildren().size() - MASK_COUNT - IMAGE_INDICATOR_COUNT);
+    return static_cast<int32_t>(host->GetChildren().size()) - MASK_COUNT - IMAGE_INDICATOR_COUNT;
 }
 
 int32_t TabBarPattern::GetSelectChildIndex(const Offset& offset)

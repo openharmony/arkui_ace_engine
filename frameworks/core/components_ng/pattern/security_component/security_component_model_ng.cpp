@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/security_component/security_component_model_ng.h"
 
 #include "core/components/common/properties/text_enums.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -30,6 +29,7 @@
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -102,9 +102,11 @@ void SecurityComponentModelNG::InitChildNode(FrameNode* frameNode, const Securit
     GetIconResourceFuncType getIconResource, GetTextResourceFuncType getTextResource)
 {
     bool isButtonVisible = (style.backgroundType != BUTTON_TYPE_NULL);
-    auto buttonNode = FrameNode::CreateFrameNode(
-        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<ButtonPattern>());
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = buttonModifier->createFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    auto buttonNode = AceType::Claim(reinterpret_cast<FrameNode*>(buttonHandle));
+    CHECK_NULL_VOID(buttonNode);
     buttonNode->SetInternal();
 
     if (isButtonVisible) {
@@ -184,9 +186,11 @@ RefPtr<FrameNode> SecurityComponentModelNG::InitChild(const std::string& tag, in
     CHECK_NULL_RETURN(frameNode, nullptr);
     if (frameNode->GetChildren().empty()) {
         bool isButtonVisible = (style.backgroundType != BUTTON_TYPE_NULL);
-        auto buttonNode = FrameNode::CreateFrameNode(
-            V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<ButtonPattern>());
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonModifier, nullptr);
+        auto buttonHandle = buttonModifier->createFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+        auto buttonNode = AceType::Claim(reinterpret_cast<FrameNode*>(buttonHandle));
+        CHECK_NULL_RETURN(buttonNode, nullptr);
         buttonNode->SetInternal();
 
         if (isButtonVisible) {
@@ -316,8 +320,8 @@ void SecurityComponentModelNG::SetDefaultSymbolIconStyle(
 void SecurityComponentModelNG::SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
     int32_t type)
 {
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     const auto& renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto secCompTheme = GetTheme();
@@ -328,7 +332,7 @@ void SecurityComponentModelNG::SetDefaultBackgroundButton(const RefPtr<FrameNode
     renderContext->UpdateBorderColor(borderColor);
     BorderWidthProperty widthProp;
     widthProp.SetBorderWidth(secCompTheme->GetBorderWidth());
-    buttonLayoutProperty->UpdateBorderWidth(widthProp);
+    layoutProperty->UpdateBorderWidth(widthProp);
     BorderStyleProperty style;
     style.SetBorderStyle(BorderStyle::NONE);
     renderContext->UpdateBorderStyle(style);
@@ -336,19 +340,25 @@ void SecurityComponentModelNG::SetDefaultBackgroundButton(const RefPtr<FrameNode
     if (type == static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE)) {
         buttonRadius = secCompTheme->GetDefaultBorderRadius();
     }
-    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
-    buttonLayoutProperty->UpdateType(static_cast<ButtonType>(type));
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, BorderRadiusProperty(buttonRadius));
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, static_cast<ButtonType>(type));
 }
 
 void SecurityComponentModelNG::SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode)
 {
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
     const auto& renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
+    auto* secBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(secBtnModifier);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    secBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
+    secBtnModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
 }
 
 template<typename T>

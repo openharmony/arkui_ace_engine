@@ -23,7 +23,7 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> ToolBarItemModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto toolbaritemNode = FrameNode::GetOrCreateFrameNode(
-        V2::TOOLBARITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ToolBarItemPattern>(); });
+        TOOLBARITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ToolBarItemPattern>(); });
     return toolbaritemNode;
 }
 

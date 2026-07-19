@@ -190,7 +190,14 @@ public:
     }
     void SendThirdAccessibilityProvider(
         const std::weak_ptr<ThirdAccessibilityManager>& thirdAccessibilityManager)
-        override {}
+        override
+    {
+        thirdAccessibilityManager_ = thirdAccessibilityManager;
+    }
+    std::weak_ptr<ThirdAccessibilityManager> GetThirdAccessibilityManager() override
+    {
+        return thirdAccessibilityManager_;
+    }
 
 public:
     void SetInjectResult(int32_t injectResult)
@@ -204,6 +211,7 @@ public:
     }
 
     ProviderMockResult providerMockResult_;
+    std::weak_ptr<ThirdAccessibilityManager> thirdAccessibilityManager_;
 };
 
 }  // namespace OHOS::Ace

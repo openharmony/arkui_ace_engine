@@ -22,6 +22,8 @@
 namespace OHOS::Ace::NG {
 
 namespace {
+const char FLEX_ETS_TAG[] = "Flex";
+
 FlexDirection GetFlexDirection(const RefPtr<UINode>& node)
 {
     auto tag = node->GetTag();
@@ -31,7 +33,7 @@ FlexDirection GetFlexDirection(const RefPtr<UINode>& node)
     if (tag == V2::COLUMN_ETS_TAG) {
         return FlexDirection::COLUMN;
     }
-    if (tag != V2::FLEX_ETS_TAG) {
+    if (tag != FLEX_ETS_TAG) {
         return FlexDirection::ROW;
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(node);

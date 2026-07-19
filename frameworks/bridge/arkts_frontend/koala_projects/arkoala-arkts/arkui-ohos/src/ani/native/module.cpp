@@ -60,6 +60,7 @@
 #include "security_component/paste_button_module.h"
 #include "security_component/save_button_module.h"
 #include "dynamiclayout/dynamiclayout_module.h"
+#include "lazy_dynamic_layout/lazy_dynamic_layout_module.h"
 #include "with_env/with_env_module.h"
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
@@ -105,6 +106,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_SetDynamicLayoutGridLayoutAlgorithm",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetDynamicLayoutGridLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_LazyDynamicLayout_construct",
+            "ii:l",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::LazyDynamicLayoutConstruct)
+        },
+        ani_native_function {
+            "_SetLazyDynamicLayoutCustomLayoutAlgorithm",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetLazyDynamicLayoutCustomLayoutAlgorithm)
+        },
+        ani_native_function {
+            "_SetLazyDynamicLayoutOnVisibleIndexesChange",
+            "lC{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetLazyDynamicLayoutOnVisibleIndexesChange)
         },
         ani_native_function {
             "_WithEnv_construct",
@@ -572,6 +588,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeMockConstruct)
         },
         ani_native_function {
+            "_SetOnNodeDestroyEvent",
+            "lC{std.core.Function1}:",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetOnNodeDestroyEvent)
+        },
+        ani_native_function {
             "_ContentSlot_construct",
             "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ContentSlotConstruct)
@@ -792,6 +813,9 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         ani_native_function { "_Drawable_CreateAnimatedDrawableByString", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreateAnimatedDrawableByString)
         },
+        ani_native_function { "_Drawable_CreatePictureDrawable", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePictureDrawable)
+        },
         ani_native_function { "_Drawable_CreatePixelMap", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableCreatePixelMap)
         },
@@ -818,6 +842,12 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         },
         ani_native_function { "_Drawable_SetBlendMode", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableSetBlendMode)
+        },
+        ani_native_function { "_Drawable_SetHdrComposition", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableSetHdrComposition)
+        },
+        ani_native_function { "_Drawable_Invalidate", nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableInvalidate)
         },
         ani_native_function { "_Drawable_NativeTransferStatic", nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DrawableNativeTransferStatic)
@@ -914,6 +944,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_UiMaterial_ConvertToECSubMaterial",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialConvertToECSubMaterial)
+        },
+        ani_native_function {
+            "_UiMaterial_GetGlobalMaterialLevel",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialGetGlobalMaterialLevel)
+        },
+        ani_native_function {
+            "_UiMaterial_IsImmersiveMaterialSupported",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialIsImmersiveMaterialSupported)
         },
         ani_native_function {
             "_CreateViewStackProcessor",

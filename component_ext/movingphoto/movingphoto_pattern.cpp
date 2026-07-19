@@ -317,16 +317,23 @@ void MovingPhotoPattern::InitEvent()
     }
 
     if (touchEvent_) {
-        gestureHub->AddTouchEvent(touchEvent_);
+        if (isEnableAnalyzer_) {
+            gestureHub->RemoveTouchEvent(touchEvent_);
+            touchEvent_ = nullptr;
+        } else {
+            gestureHub->AddTouchEvent(touchEvent_);
+        }
         return;
     }
-    auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleTouchEvent(info);
-    };
-    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
-    gestureHub->AddTouchEvent(touchEvent_);
+    if (!isEnableAnalyzer_) {
+        auto touchTask = [weak = WeakClaim(this)](TouchEventInfo& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleTouchEvent(info);
+        };
+        touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+        gestureHub->AddTouchEvent(touchEvent_);
+    }
 }
 
 void MovingPhotoPattern::LongPressEventModify(bool status)
@@ -2245,6 +2252,7 @@ void MovingPhotoPattern::HandleImageAnalyzerPlayCallBack()
         mediaPlayer_->GetDuration(duration);
         SetAutoPlayPeriod(PERIOD_START, duration * US_CONVERT);
     }
+    isGestureTriggeredLongPress_ = true;
     Start();
 }
 
@@ -2269,11 +2277,8 @@ void MovingPhotoPattern::Start()
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (cameraPostprocessingEnabled_) {
-        if (isGestureTriggeredLongPress_) {
-            mediaPlayer_->SetCameraPostprocessing(true);
-            isGestureTriggeredLongPress_ = false;
-        }
-        mediaPlayer_->SetCameraPostprocessing(false);
+        mediaPlayer_->SetCameraPostprocessing(isGestureTriggeredLongPress_);
+        isGestureTriggeredLongPress_ = false;
     }
 
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
@@ -2496,7 +2501,9 @@ void MovingPhotoPattern::EnableAnalyzer(bool enabled)
 void MovingPhotoPattern::SetImageAIOptions(void* options)
 {
     if (!imageAnalyzerManager_) {
-        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::MOVINGPHOTO);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::MOVINGPHOTO);
     }
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->SetImageAIOptions(options);
@@ -2562,23 +2569,29 @@ void MovingPhotoPattern::CreateAnalyzerOverlay()
     if (imageAnalyzerManager_->IsOverlayCreated()) {
         return;
     }
-    GetPixelMap();
-    int64_t coverPosition = GetUriCoverPosition();
-    auto onCanPlay = [weak = AceType::WeakClaim(this)](bool canPlay) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleAnalyzerPlayEvent(canPlay);
-    };
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto movingPhotoNodeSize = geometryNode->GetContentSize();
+    int64_t coverPosition = GetUriCoverPosition();
     MovingPhotoAnalyzerInfo info = {uri_, coverPosition,
                                     movingPhotoNodeSize.Width(),
                                     movingPhotoNodeSize.Height()};
-    imageAnalyzerManager_->SetOnCanPlayCallback(std::move(onCanPlay));
-    imageAnalyzerManager_->CreateMovingPhotoAnalyzerOverlay(pixelMap_, info);
+    std::weak_ptr<ImageAnalyzerManager> weakAnalyzer = imageAnalyzerManager_;
+    LoadPixelMapAsync([weak = WeakClaim(this), info, weakAnalyzer](const RefPtr<PixelMap>& pixelMap) {
+        auto pattern = weak.Upgrade();
+        auto imageAnalyzerManager = weakAnalyzer.lock();
+        CHECK_NULL_VOID(pattern && pixelMap && imageAnalyzerManager);
+        auto onCanPlay = [weak](bool canPlay) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleAnalyzerPlayEvent(canPlay);
+        };
+        imageAnalyzerManager->SetOnCanPlayCallback(std::move(onCanPlay));
+        imageAnalyzerManager->CreateMovingPhotoAnalyzerOverlay(pixelMap, info);
+    });
 }
 
 void MovingPhotoPattern::StartUpdateImageAnalyzer()
@@ -2613,18 +2626,22 @@ void MovingPhotoPattern::UpdateAnalyzerOverlay()
     if (!IsSupportImageAnalyzer() || !imageAnalyzerManager_->IsOverlayCreated()) {
         return;
     }
-    GetPixelMap();
-    int64_t coverPosition = GetUriCoverPosition();
     UpdateOverlayVisibility(VisibleType::VISIBLE);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto movingPhotoNodeSize = geometryNode->GetContentSize();
+    int64_t coverPosition = GetUriCoverPosition();
     MovingPhotoAnalyzerInfo info = {uri_, coverPosition,
                                     movingPhotoNodeSize.Width(),
                                     movingPhotoNodeSize.Height()};
-    imageAnalyzerManager_->UpdateMovingPhotoAnalyzerOverlay(pixelMap_, info);
+    std::weak_ptr<ImageAnalyzerManager> weakAnalyzer = imageAnalyzerManager_;
+    LoadPixelMapAsync([info, weakAnalyzer](const RefPtr<PixelMap>& pixelMap) {
+        auto imageAnalyzerManager = weakAnalyzer.lock();
+        CHECK_NULL_VOID(pixelMap && imageAnalyzerManager);
+        imageAnalyzerManager->UpdateMovingPhotoAnalyzerOverlay(pixelMap, info);
+    });
 }
 
 void MovingPhotoPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
@@ -2683,25 +2700,52 @@ void MovingPhotoPattern::UpdateOverlayVisibility(VisibleType type)
     prop->UpdateVisibility(type);
 }
 
-void MovingPhotoPattern::GetPixelMap()
+RefPtr<PixelMap> LoadPixelMapFromUri(const std::string& uri)
 {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
+    CHECK_NULL_RETURN(dataProvider, nullptr);
+    std::string imageSrc = dataProvider->GetMovingPhotoImagePath(uri);
+    std::string thumbnailUrl = uri + THUMBNAIL_MEDIUM_JOINT + imageSrc;
+    void* pixelMapMediauniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(thumbnailUrl);
+    CHECK_NULL_RETURN(pixelMapMediauniquePtr, nullptr);
+    return PixelMap::CreatePixelMapFromDataAbility(pixelMapMediauniquePtr);
+}
+
+void MovingPhotoPattern::LoadPixelMapAsync(const PixelMapCallback& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto uiCallback = [context, callback, weak = WeakClaim(this)]
+        (const RefPtr<PixelMap> pixelMap, const std::string currentUrl) {
+        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        uiTaskExecutor.PostTask([callback, weak, pixelMap, currentUrl]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->uri_ != currentUrl) {
+                TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "Uri has changed");
+                return;
+            }
+            if (callback) {
+                TAG_LOGD(AceLogTag::ACE_MOVING_PHOTO, "Exec callback in ui thread");
+                callback(pixelMap);
+            }
+            }, "ArkUIMovingPhotoPixelMapCallback");
+    };
+
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!layoutProperty->HasMovingPhotoUri() || !layoutProperty->HasVideoSource()) {
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "GetPixelMap MovingPhoto source is null.");
         return;
     }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dataProvider = AceType::DynamicCast<DataProviderManagerStandard>(pipeline->GetDataProviderManager());
-    CHECK_NULL_VOID(dataProvider);
-    std::string imageSrc = dataProvider->GetMovingPhotoImagePath(uri_);
-    std::string thumbnailUrl = uri_ + THUMBNAIL_MEDIUM_JOINT + imageSrc;
-    void* pixelMapMediauniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(thumbnailUrl);
-    CHECK_NULL_VOID(pixelMapMediauniquePtr);
-    auto pixelMap = PixelMap::CreatePixelMapFromDataAbility(pixelMapMediauniquePtr);
-    CHECK_NULL_VOID(pixelMap);
-    pixelMap_ = pixelMap;
+    auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
+    bgTaskExecutor.PostTask([uiCallback, currentUri = uri_]() {
+        auto pixelMap = LoadPixelMapFromUri(currentUri);
+        uiCallback(pixelMap, currentUri);
+        }, "ArkUIMovingPhotoLoadPixelMapAsync");
 }
 
 int64_t MovingPhotoPattern::GetUriCoverPosition()

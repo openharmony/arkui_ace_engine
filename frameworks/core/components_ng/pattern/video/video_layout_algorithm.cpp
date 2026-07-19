@@ -15,10 +15,11 @@
 
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 
-#include "core/components_ng/pattern/video/video_theme.h"
-#include "core/components_ng/layout/drawing_layout_utils.h"
+#include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_state_machine_pattern.h"
+#include "core/components_ng/pattern/video/video_theme.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -37,6 +38,26 @@ float CalControlBarHeight(bool needLift = false)
         controlsHeight += LIFT_HEIGHT.ConvertToPx();
     }
     return static_cast<float>(controlsHeight);
+}
+
+void MeasureVideoLayoutPolicySize(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, SizeF& size)
+{
+    const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutPolicy = layoutProperty->GetLayoutPolicyProperty();
+    CHECK_NULL_VOID(layoutPolicy.has_value());
+
+    if (layoutPolicy->IsWidthMatch() && contentConstraint.parentIdealSize.Width().has_value()) {
+        size.SetWidth(contentConstraint.parentIdealSize.Width().value());
+    } else if (layoutPolicy->IsWidthAdaptive()) {
+        size.SetWidth(0.0);
+    }
+
+    if (layoutPolicy->IsHeightMatch() && contentConstraint.parentIdealSize.Height().has_value()) {
+        size.SetHeight(contentConstraint.parentIdealSize.Height().value());
+    } else if (layoutPolicy->IsHeightAdaptive()) {
+        size.SetHeight(0.0);
+    }
 }
 } // namespace
 VideoLayoutAlgorithm::VideoLayoutAlgorithm() = default;
@@ -136,7 +157,7 @@ std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
         }
         auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
                                                                      : contentConstraint.maxSize;
-        MeasureLayoutPolicySize(contentConstraint, layoutWrapper, layoutSize);
+        MeasureVideoLayoutPolicySize(contentConstraint, layoutWrapper, layoutSize);
         return layoutSize;
     }
     auto videoPattern = DynamicCast<VideoPattern>(pattern);
@@ -146,7 +167,7 @@ std::optional<SizeF> VideoLayoutAlgorithm::MeasureContent(
     }
     auto layoutSize = contentConstraint.selfIdealSize.IsValid() ? contentConstraint.selfIdealSize.ConvertToSizeT()
                                                                  : contentConstraint.maxSize;
-    MeasureLayoutPolicySize(contentConstraint, layoutWrapper, layoutSize);
+    MeasureVideoLayoutPolicySize(contentConstraint, layoutWrapper, layoutSize);
     return layoutSize;
 }
 

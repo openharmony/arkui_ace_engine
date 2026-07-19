@@ -199,6 +199,11 @@ bool IsMeasureDebugTraceEnabled()
     return (system::GetParameter("persist.ace.trace.measure.debug.enabled", "false") == "true");
 }
 
+bool IsSkipSecondaryMeasuredEnabled()
+{
+    return (system::GetParameter("persist.ace.measure.skip.secondary.enabled", "false") == "true");
+}
+
 bool IsSafeAreaDebugTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.safeArea.debug.enabled", "false") == "true");
@@ -455,11 +460,6 @@ bool IsExtSurfaceEnabled()
 bool IsEnableScrollableItemPool()
 {
     return system::GetBoolParameter("persist.ace.scrollablepool.enabled", false);
-}
-
-bool IsResourceDecoupling()
-{
-    return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
 }
 
 bool IsAcePerformanceMonitorEnabled()
@@ -735,6 +735,7 @@ bool SystemProperties::dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEna
 bool SystemProperties::cacheNavigationNodeEnable_ = IsCacheNavigationNodeEnable();
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
 bool SystemProperties::measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+bool SystemProperties::skipSecondaryMeasuredEnable_ = IsSkipSecondaryMeasuredEnabled();
 bool SystemProperties::safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
 bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
@@ -792,7 +793,6 @@ ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 ACE_WEAK_SYM bool SystemProperties::windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
-bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::configChangePerform_ = IsConfigChangePerform();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 std::optional<bool> SystemProperties::arkUIHookEnabled_ = IsArkUIHookEnabled();
@@ -983,6 +983,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEnabled();
         syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
         measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+        skipSecondaryMeasuredEnable_ = IsSkipSecondaryMeasuredEnabled();
         vsyncModeTraceEnable_ = IsVsyncModeDebugTraceEnabled();
         safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
         pixelRoundEnable_ = IsPixelRoundEnabled();
@@ -1007,7 +1008,6 @@ void SystemProperties::ReadSystemParametersCallOnce()
         traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
         stateManagerEnable_.store(IsStateManagerEnable());
         arkUIHookEnabled_ = IsArkUIHookEnabled();
-        resourceDecoupling_ = IsResourceDecoupling();
         gridCacheEnabled_ = IsGridCacheEnabled();
         gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
         sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
@@ -1156,11 +1156,6 @@ ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 bool SystemProperties::IsFormAnimationLimited()
 {
     return system::GetBoolParameter("persist.sys.arkui.formAnimationLimit", true);
-}
-
-bool SystemProperties::GetResourceDecoupling()
-{
-    return resourceDecoupling_;
 }
 
 bool SystemProperties::IsPCMode()

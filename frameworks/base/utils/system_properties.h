@@ -456,6 +456,11 @@ public:
         return measureDebugTraceEnable_;
     }
 
+    static bool GetSkipSecondaryMeasuredEnabled()
+    {
+        return skipSecondaryMeasuredEnable_;
+    }
+
     static bool GetSafeAreaDebugTraceEnabled()
     {
         return safeAreaDebugTraceEnable_;
@@ -582,8 +587,6 @@ public:
     static bool GetIsUseMemoryMonitor();
 
     static bool IsFormAnimationLimited();
-
-    static bool GetResourceDecoupling();
 
     static bool IsPCMode();
 
@@ -803,6 +806,7 @@ private:
     static bool cacheNavigationNodeEnable_;
     static bool syncDebugTraceEnable_;
     static bool measureDebugTraceEnable_;
+    static bool skipSecondaryMeasuredEnable_;
     static bool safeAreaDebugTraceEnable_;
     static bool pixelRoundEnable_;
     static bool textTraceEnable_;
@@ -861,7 +865,6 @@ private:
     static int32_t imageFileCacheConvertAstcThreshold_;
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
-    static bool resourceDecoupling_;
     static bool configChangePerform_;
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;

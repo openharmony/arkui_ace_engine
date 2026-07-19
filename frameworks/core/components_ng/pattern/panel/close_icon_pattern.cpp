@@ -16,6 +16,8 @@
 #include "core/components_ng/pattern/panel/close_icon_pattern.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 void CloseIconPattern::OnModifyDone()
@@ -36,18 +38,25 @@ void CloseIconPattern::InitCloseIcon()
     auto closeIconLayoutProperty = GetCloseIconLayoutProperty();
     CHECK_NULL_VOID(closeIconLayoutProperty);
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+        ElementRegister::GetInstance()->MakeUniqueId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
+    auto layoutProperty = buttonNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(closeIconLayoutProperty->GetCloseIconWidthValue()),
             CalcLength(closeIconLayoutProperty->GetCloseIconHeightValue())));
     buttonNode->MarkModifyDone();
-    auto pattern = buttonNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSkipColorConfigurationUpdate();
+    buttonModifier->setSkipColorConfigurationUpdate(buttonHandle);
     auto imageNode = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();

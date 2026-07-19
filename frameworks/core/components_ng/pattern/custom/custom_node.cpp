@@ -22,6 +22,7 @@
 #include "base/thread/task_executor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
 
 namespace {
 constexpr int64_t CACHE_TASK_DELAY_TIME = 2000000000;
@@ -45,6 +46,16 @@ void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
         extraInfos_ = *extraInfos;
     }
     UINode::Build(extraInfos);
+}
+
+void CustomNode::OnAttachToMainTree(bool val)
+{
+    UINode::OnAttachToMainTree(val);
+    auto memopt = GetMemOpt();
+    SetStaMemopt(memopt);
+    if (staReusableMemOptStrategy_ == StaReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        StartMemOpt();
+    }
 }
 
 bool CustomNode::Render(int64_t deadline)
@@ -155,11 +166,11 @@ bool CustomNode::RenderCustomChild(int64_t deadline)
     return UINode::RenderCustomChild(deadline);
 }
 
-void CustomNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
+void CustomNode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse, bool suppressActiveLifecycle)
 {
     if (GetJsActive() != active) {
         SetJsActive(active);
-        FireSetActiveFunc(active, isReuse);
+        FireSetActiveFunc(active, isReuse, suppressActiveLifecycle);
     }
 }
 
@@ -311,6 +322,14 @@ void CustomNode::DumpInfo()
     FireOnDumpInfoFunc({ "RecyclePool" });
 }
 
+void CustomNode::FireClearParentReusePoolIfNeeded()
+{
+    if (GetMemOpt() <= 0) {
+        return;
+    }
+    FireClearParentReusePoolFunc();
+}
+
 void CustomNode::FireRecycleRenderFunc()
 {
     if (HasRecycleRenderFunc()) {
@@ -457,6 +476,9 @@ void CustomNode::CleanCache(bool syncClean, bool clearAll)
     TAG_LOGI(AceLogTag::ACE_STATE_MGMT,
         "CustomNode.CleanCache id[%{public}d] syncClean[%{public}d]", GetId(), syncClean);
     ACE_SCOPED_TRACE("CustomNode.CleanCache id[%d] syncClean[%d]", GetId(), syncClean);
+    if (staReusableMemOptStrategy_ == StaReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+        FireClearParentReusePoolIfNeeded();
+    }
     if (!syncClean) {
         needCleanCacheOnIdle_ = true;
         stopMemOptAfterRelease_ = clearAll;
@@ -544,6 +566,14 @@ void CustomNode::PostMemOptTask()
                 node->SetParentVisibility(visible);
                 visible ? node->CancelScheduledCleanCacheTask() : node->ScheduleCleanCacheTask();
             }
+            if (node->staReusableMemOptStrategy_ == StaReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
+                node->CancelScheduledCleanCacheTask();
+                auto parentNode = node->GetParentCustomNode();
+                CHECK_NULL_VOID(parentNode);
+                if (!parentNode->CheckParentFrameNodeVisibility()) {
+                    node->FireClearParentReusePoolIfNeeded();
+                }
+            }
             node->TryExecuteScheduledCacheTask();
             node->PostMemOptTask();
         },
@@ -571,6 +601,44 @@ void CustomNode::PostIdleTask()
         // Call CleanCacheOnIdle with remaining time
         node->CleanCacheOnIdle(static_cast<int32_t>(remainingTimeMs));
     });
+}
+
+bool CustomNode::ReleaseExpiringNode(std::string reuseId)
+{
+    for (auto it = LazyForEachForReleaseExpiringNode_.begin(); it != LazyForEachForReleaseExpiringNode_.end();) {
+        auto node = it->Upgrade();
+        if (!node) {
+            it = LazyForEachForReleaseExpiringNode_.erase(it);
+            continue;
+        }
+        auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(node);
+        if (!lazyForEachNode) {
+            it = LazyForEachForReleaseExpiringNode_.erase(it);
+            continue;
+        }
+        if (lazyForEachNode->ReleaseExpiringNode(reuseId)) {
+            return true;
+        }
+        ++it;
+    }
+    return false;
+}
+
+void CustomNode::EnableReleaseExpiringNode(const WeakPtr<LazyForEachNode>& node, const std::set<std::string>& reuseIds)
+{
+    CHECK_NULL_VOID(enableReleaseExpiringNodesFunc_);
+    std::vector<std::string> reuseIdVector(reuseIds.begin(), reuseIds.end());
+    enableReleaseExpiringNodesFunc_(true, reuseIdVector);
+    LazyForEachForReleaseExpiringNode_.insert(node);
+}
+
+void CustomNode::DisableReleaseExpiringNode(const WeakPtr<LazyForEachNode>& node)
+{
+    LazyForEachForReleaseExpiringNode_.erase(node);
+    CHECK_NULL_VOID(enableReleaseExpiringNodesFunc_);
+    if (LazyForEachForReleaseExpiringNode_.empty()) {
+        enableReleaseExpiringNodesFunc_(false, {});
+    }
 }
 
 } // namespace OHOS::Ace::NG

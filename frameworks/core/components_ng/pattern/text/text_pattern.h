@@ -49,7 +49,6 @@
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_controller.h"
-#include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
@@ -137,16 +136,11 @@ public:
     void DumpTextStyleInfo3();
     void DumpTextStyleInfo4();
     void DumpTextStyleInfo5();
+    void DumpTextStyleInfo6();
     void DumpInfoRes();
     void DumpSpanItem();
     void DumpScaleInfo();
     void DumpTextEngineInfo();
-
-    bool NeedReadFontScaleFromEnv() override
-    {
-        return true;
-    }
-
     void DumpParagraphsInfo();
     TextSelector GetTextSelector() const;
     const std::u16string& GetTextForDisplay() const;
@@ -483,7 +477,9 @@ public:
     bool IsMeasured() const;
     ACE_FORCE_EXPORT int32_t OnInjectionEvent(const std::string& command) override;
     bool GetFallbackLineSpacingStyleOptimizeFlag();
+    bool GetPunctuationOverflowStyleOptimizeFlag();
     bool SetFallbackLineSpacingAndIncludeFontPadding(bool flag);
+    bool SetPunctuationOverflowByFlag(bool flag);
     virtual void ClearParagraphCache() {};
 
     void BindJSTextController(std::function<void()>&& bindFunc) {
@@ -568,6 +564,9 @@ protected:
     bool CheckAndClick(const RefPtr<SpanItem>& item);
     bool CalculateClickedSpanPosition(const PointF& textOffset);
     bool SelectOverlayIsOn();
+    bool HasAnySelectionInContainer();
+    bool IsSelfSelectedInContainer();
+    bool HasOwnSelection();
     bool IsSelectOverlayUsingMouse();
     void HideSelectionMenu(bool noAnimation = false, bool showSubMenu = false);
     void HiddenMenu();
@@ -724,7 +723,7 @@ private:
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftReleaseForLocal(const MouseInfo& info, MouseStatus oldMouseStatus, int32_t start, int32_t end);
     void HandleMouseLeftReleaseForContainer(
-        const MouseInfo& info, const Offset& textOffset, MouseStatus oldMouseStatus, int32_t start, int32_t end);
+        const MouseInfo& info, const Offset& textOffset, MouseStatus oldMouseStatus, bool mousePressReleaseNoChange);
     void ResetMouseReleaseState(const MouseInfo& info);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
     void UpdateSourceType(SourceType sourceType);

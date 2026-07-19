@@ -115,6 +115,8 @@ public:
     int32_t LoadDestinationFile(const std::string& bundleName, const std::string& moduleName,
         const std::string& pageSourceFile, bool isSingleton);
 
+    bool GetOhmUrlByObject(const Local<ObjectRef>& object, std::string& moduleName, std::string& fileName);
+
     const EcmaVM* GetEcmaVm() const override
     {
         return GetThreadVm() ? GetThreadVm() : vm_;

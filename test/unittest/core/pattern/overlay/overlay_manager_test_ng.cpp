@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 #include <mutex>
-#include "core/accessibility/accessibility_manager.h"
 #include <optional>
 #include <string>
 
 #include "gtest/gtest.h"
 
+#include "core/accessibility/accessibility_manager.h"
 #define private public
 #define protected public
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
@@ -41,8 +41,8 @@
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/icon_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -52,7 +52,9 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
+#include "core/components_ng/pattern/dialog/dialog_inner_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
@@ -62,27 +64,26 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_paint_method.h"
-#include "core/components_ng/pattern/overlay/sheet_drag_bar_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_layout_algorithm.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_style.h"
-#include "core/components_ng/pattern/overlay/sheet_theme.h"
-#include "core/components_ng/pattern/overlay/sheet_view.h"
-#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
-#include "core/components_ng/pattern/text_picker/textpicker_types.h"
+#include "core/components_ng/pattern/sheet/sheet_drag_bar_paint_method.h"
+#include "core/components_ng/pattern/sheet/sheet_drag_bar_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_layout_algorithm.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/sheet/sheet_theme.h"
+#include "core/components_ng/pattern/sheet/sheet_view.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
+#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_picker/textpicker_types.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/components/theme/icon_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -5077,11 +5078,15 @@ HWTEST_F(OverlayManagerTestNg, PlaySheetTransition001, TestSize.Level1)
      */
     auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->CheckDialogInnerManager();
+    auto dialogInnerManager = AceType::DynamicCast<DialogInnerManager>(overlayManager->dialogInnerManager_);
+    ASSERT_NE(dialogInnerManager, nullptr);
     RefPtr<UINode> customNode;
     /**
      * @tc.steps: step2. test RebuildCustomBuilder
      */
-    auto result = overlayManager->RebuildCustomBuilder(customNode);
+    auto result = dialogInnerManager->RebuildCustomBuilder(customNode);
     EXPECT_EQ(result, nullptr);
 }
 

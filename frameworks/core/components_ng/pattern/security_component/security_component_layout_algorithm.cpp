@@ -16,10 +16,10 @@
 #include "core/components_ng/pattern/security_component/security_component_layout_algorithm.h"
 
 #include "core/components/common/properties/alignment.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/components_ng/pattern/symbol/constants.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "unicode/uchar.h"
 
 namespace {
@@ -74,7 +74,7 @@ void SecurityComponentLayoutAlgorithm::MeasureButton(LayoutWrapper* layoutWrappe
 {
     auto buttonWrapper = GetChildWrapper(layoutWrapper, V2::BUTTON_ETS_TAG);
     CHECK_NULL_VOID(buttonWrapper);
-    auto buttonLayoutProperty = DynamicCast<ButtonLayoutProperty>(buttonWrapper->GetLayoutProperty());
+    auto buttonLayoutProperty = buttonWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto buttonConstraint = CreateDefaultChildConstraint(securityComponentProperty);
     if (securityComponentProperty->GetBackgroundType() == static_cast<int32_t>(ButtonType::CIRCLE)) {
@@ -709,7 +709,13 @@ bool SecurityComponentLayoutAlgorithm::BottomRightCompDistance(float obtainedRad
 
 bool SecurityComponentLayoutAlgorithm::IsTextOutOfRangeInNormal()
 {
-    auto borderRadius = buttonLayoutProperty_->GetBorderRadius();
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, false);
+    CHECK_NULL_RETURN(buttonLayoutProperty_, false);
+    auto buttonNode = buttonLayoutProperty_->GetHost();
+    CHECK_NULL_RETURN(buttonNode, false);
+    ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    const auto& borderRadius = buttonModifier->getBorderRadiusFromLayoutProp(buttonHandle);
     if (!borderRadius.has_value()) {
         return false;
     }
@@ -771,9 +777,9 @@ bool SecurityComponentLayoutAlgorithm::GetTextLimitExceededFlag(RefPtr<SecurityC
     RefPtr<FrameNode>& frameNode, std::optional<SizeF>& currentTextSize)
 {
     CHECK_NULL_RETURN(frameNode, false);
-    auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
+    RefPtr<FrameNode> buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
     CHECK_NULL_RETURN(buttonNode, false);
-    buttonLayoutProperty_ = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    buttonLayoutProperty_ = buttonNode->GetLayoutProperty();
     CHECK_NULL_RETURN(buttonLayoutProperty_, false);
 
     auto res = text_.GetCurrentTextSize(currentTextSize, currentFontSize_);
@@ -866,9 +872,10 @@ bool SecurityComponentLayoutAlgorithm::GetIconExceededFlag(RefPtr<SecurityCompon
         property->GetBackgroundType() == static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE)) {
         auto buttonNode = GetSecCompChildNode(frameNode, V2::BUTTON_ETS_TAG);
         CHECK_NULL_RETURN(buttonNode, false);
-        auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_RETURN(bgProp, false);
-        const auto& borderRadius = bgProp->GetBorderRadius();
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_RETURN(buttonModifier, false);
+        ArkUINodeHandle buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+        const auto& borderRadius = buttonModifier->getBorderRadiusFromLayoutProp(buttonHandle);
         if (borderRadius.has_value()) {
             radius = borderRadius.value();
         }

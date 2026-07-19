@@ -17,8 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOXGROUP_CHECKBOXGROUP_EVENT_HUB_H
 
 #include "base/memory/ace_type.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components/checkable/checkable_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -52,6 +54,7 @@ public:
         if (!groupRet) {
             return;
         }
+#ifndef CROSS_PLATFORM
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;
             auto host = GetFrameNode();
@@ -68,6 +71,7 @@ public:
             builder.SetTextArray(groupRet->GetNameList()).SetText(groupname_);
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
         }
+#endif
     }
 
     const std::string& GetGroupName()

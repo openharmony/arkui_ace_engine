@@ -67,7 +67,7 @@ struct ArkUI_Node {
     void* gridLayoutOptions =  nullptr;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 23;
+constexpr int BASIC_COMPONENT_NUM = 24;
 struct ArkUI_GuidelineStyle {
     std::string id;
     ArkUI_Axis direction;
@@ -139,6 +139,7 @@ inline bool UsePXUnit(ArkUI_NodeHandle nodePtr)
 
 bool InitialFullImpl();
 ArkUIFullNodeAPI* GetFullImpl();
+ArkUIFullNodeAPI* GetOrCreateFullImpl();
 ArkUIFullNodeAPI* GetFullImplForErrorMessage();
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type);
 void DisposeNativeSource(ArkUI_NodeHandle nativePtr);

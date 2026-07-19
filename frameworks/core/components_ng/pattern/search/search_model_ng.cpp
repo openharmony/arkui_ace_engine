@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <string_view>
+
 #include "base/utils/multi_thread.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
@@ -24,21 +26,21 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/search/search_layout_property.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/components_ng/pattern/divider/divider_node_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -52,13 +54,12 @@ constexpr float MAX_FONT_SCALE = 2.0f;
 const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::vector<std::string> SPECICALIZED_INSPECTOR_INDEXS = { "", "Image__", "CancelImage__", "CancelButton__",
     "Button__", "Divider__" };
-const std::string DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
+constexpr std::string_view DROP_TYPE_STYLED_STRING = "ApplicationDefinedType";
 constexpr Dimension ICON_HEIGHT = 16.0_vp;
 const char SEARCH_Field_ETS_TAG[] = "SearchField";
 const char SEARCH_ETS_TAG[] = "Search";
 const char BUTTON_ETS_TAG[] = "Button";
 const char TEXT_ETS_TAG[] = "Text";
-const char DIVIDER_ETS_TAG[] = "Divider";
 
 void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
 {
@@ -128,7 +129,9 @@ void SearchModelNG::UpdateSearchNodeBorderProps(const RefPtr<SearchNode>& frameN
     if (searchTheme->GetCancelButtonStyle() != CancelButtonStyle::INPUT) {
         layoutProperty->UpdateCancelButtonStyle(searchTheme->GetCancelButtonStyle());
     }
-    if (!layoutProperty->GetBorderWidthProperty()) {
+    // Use searchTheme->GetBorderWidth() to distinguish TV scene
+    // Only the TV scene has to set border properties
+    if (!layoutProperty->GetBorderWidthProperty() && GreatNotEqual(searchTheme->GetBorderWidth().Value(), 0.0)) {
         if (!renderContext->HasBorderWidth()) {
             BorderWidthProperty borderWidth;
             borderWidth.SetBorderWidth(searchTheme->GetBorderWidth());
@@ -251,7 +254,7 @@ void SearchModelNG::SetSearchButton(const std::string& text)
     auto searchButtonRenderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(searchButtonRenderContext);
 
-    auto searchButtonEvent = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    auto searchButtonEvent = buttonFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(searchButtonEvent);
 
     if (!text.empty()) {
@@ -397,10 +400,11 @@ void SearchModelNG::SetSearchButtonFontSize(const Dimension& value)
     CHECK_NULL_VOID(frameNode);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
-    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
 
-    buttonLayoutProperty->UpdateFontSize(value);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    buttonModifier->updateFontSizeToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonFrameNode)), value);
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -421,9 +425,11 @@ void SearchModelNG::SetSearchButtonAutoDisable(bool needToDisable)
     CHECK_NULL_VOID(frameNode);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
-    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateAutoDisable(needToDisable);
+    auto* modifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(modifier->updateAutoDisableToLayoutProp);
+    modifier->updateAutoDisableToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonFrameNode)), needToDisable);
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -1072,10 +1078,12 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     CHECK_NULL_VOID(pipeline);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    std::set<std::string> allowDropSet({ DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, DROP_TYPE_STYLED_STRING });
+    std::set<std::string> allowDropSet({
+        DROP_TYPE_PLAIN_TEXT, DROP_TYPE_HYPERLINK, std::string(DROP_TYPE_STYLED_STRING) });
     frameNode->SetAllowDrop(allowDropSet);
     auto parentInspector = parentNode->GetInspectorIdValue("");
-    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[TEXTFIELD_INDEX] + parentInspector);
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX +
+        SPECICALIZED_INSPECTOR_INDEXS[TEXTFIELD_INDEX] + parentInspector);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     pattern->InitTheme();
     auto textValue = pattern->GetTextUtf16Value();
@@ -1171,7 +1179,13 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetButtonId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, nodeId, []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -1184,17 +1198,17 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
 
     auto buttonRenderContext = frameNode->GetRenderContext();
     buttonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(buttonPattern);
-    buttonPattern->SetApplyShadow(false);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
+    buttonModifier->setApplyShadow(nodeHandle, false);
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(textFrameNode);
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateEnableSmallLanguageTruncation(true);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     std::u16string defaultText = u"Search";
     textLayoutProperty->UpdateContent(defaultText);
     textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
@@ -1207,12 +1221,13 @@ void SearchModelNG::CreateButton(const RefPtr<SearchNode>& parentNode, bool hasB
     padding.right = CalcLength(searchTheme->GetSearchButtonTextPadding());
     textLayoutProperty->UpdatePadding(padding);
 
-    auto searchButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
+    auto searchButtonEvent = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(searchButtonEvent);
     searchButtonEvent->SetEnabled(false);
     auto pattern = parentNode->GetPattern<SearchPattern>();
     CHECK_NULL_VOID(pattern);
-    frameNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[BUTTON_INDEX] + parentInspector);
+    frameNode->UpdateInspectorId(INSPECTOR_PREFIX +
+        SPECICALIZED_INSPECTOR_INDEXS[BUTTON_INDEX] + parentInspector);
     pattern->SetButtonNode(frameNode);
     frameNode->MountToParent(parentNode);
     frameNode->MarkModifyDone();
@@ -1226,8 +1241,7 @@ void SearchModelNG::CreateDivider(const RefPtr<SearchNode>& parentNode, bool has
     FREE_NODE_CHECK(parentNode, CreateDivider, parentNode, hasDividerNode);
     auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetDividerId();
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        DIVIDER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+    auto dividerNode = CreateDividerFrameNode(nodeId);
     CHECK_NULL_VOID(dividerNode);
 
     auto searchTheme = dividerNode->GetTheme<SearchTheme>(true);
@@ -1242,7 +1256,8 @@ void SearchModelNG::CreateDivider(const RefPtr<SearchNode>& parentNode, bool has
     dividerLayoutProperty->UpdateVertical(true);
     dividerLayoutProperty->UpdateStrokeWidth(searchDividerWidth);
 
-    dividerNode->UpdateInspectorId(INSPECTOR_PREFIX + SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);
+    dividerNode->UpdateInspectorId(INSPECTOR_PREFIX +
+        SPECICALIZED_INSPECTOR_INDEXS[DIVIDER_INDEX] + parentInspector);
     dividerNode->MountToParent(parentNode);
     dividerNode->MarkModifyDone();
 }
@@ -1257,7 +1272,13 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     auto parentInspector = parentNode->GetInspectorIdValue("");
     auto nodeId = parentNode->GetCancelButtonId();
     auto frameNode =
-        FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, nodeId, []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -1274,11 +1295,13 @@ void SearchModelNG::CreateCancelButton(const RefPtr<SearchNode>& parentNode, boo
     auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
-    auto cancelButtonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    cancelButtonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-    cancelButtonLayoutProperty->UpdateType(ButtonType::CIRCLE);
-    cancelButtonLayoutProperty->UpdateFontSize(searchTheme->GetFontSize());
-    auto cancelButtonEvent = frameNode->GetEventHub<ButtonEventHub>();
+    auto* searchCancelBtnModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(searchCancelBtnModifier);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+    searchCancelBtnModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
+    searchCancelBtnModifier->updateTypeToLayoutProp(nodeHandle, ButtonType::CIRCLE);
+    searchCancelBtnModifier->updateFontSizeToLayoutProp(nodeHandle, searchTheme->GetFontSize());
+    auto cancelButtonEvent = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(cancelButtonEvent);
     cancelButtonEvent->SetEnabled(false);
     auto pattern = parentNode->GetPattern<SearchPattern>();
@@ -1543,7 +1566,7 @@ void SearchModelNG::SetSearchButton(FrameNode* frameNode, const std::string& tex
     auto searchButtonRenderContext = buttonFrameNode->GetRenderContext();
     CHECK_NULL_VOID(searchButtonRenderContext);
 
-    auto searchButtonEvent = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    auto searchButtonEvent = buttonFrameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(searchButtonEvent);
 
     if (!text.empty()) {
@@ -1567,10 +1590,11 @@ void SearchModelNG::SetSearchButtonFontSize(FrameNode* frameNode, const Dimensio
     CHECK_NULL_VOID(frameNode);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
-    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
 
-    buttonLayoutProperty->UpdateFontSize(value);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    buttonModifier->updateFontSizeToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonFrameNode)), value);
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -1583,11 +1607,12 @@ void SearchModelNG::SetSearchButtonFontColor(FrameNode* frameNode, const Color& 
     CHECK_NULL_VOID(frameNode);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
-    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
 
-    buttonLayoutProperty->UpdateFontColor(color);
-    buttonLayoutProperty->UpdateFontColorFlagByUser(true);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonFrameNode));
+    buttonModifier->updateFontColorToLayoutProp(buttonHandle, color);
+    buttonModifier->updateFontColorFlagByUserToLayoutProp(buttonHandle, true);
 
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1602,9 +1627,11 @@ void SearchModelNG::SetSearchButtonAutoDisable(FrameNode* frameNode, bool needTo
     CHECK_NULL_VOID(frameNode);
     auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(buttonFrameNode);
-    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateAutoDisable(needToDisable);
+    auto* modifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(modifier->updateAutoDisableToLayoutProp);
+    modifier->updateAutoDisableToLayoutProp(
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonFrameNode)), needToDisable);
     buttonFrameNode->MarkModifyDone();
     buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -2611,7 +2638,6 @@ void SearchModelNG::SetBackBorderRadius()
         (isRTL ? radius.radiusBottomEnd : radius.radiusBottomStart);
     radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
         (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
-
 
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textFieldPaintProperty);

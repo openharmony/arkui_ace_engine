@@ -538,15 +538,25 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest023, TestSize.Level0)
  */
 HWTEST_F(TextTestNgEleven, TextModelStaticTest024, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern, get textLayoutProperty.
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
 
+    /**
+     * @tc.steps: step2. set valid TextIndent value and verify has_value is true.
+     */
     auto dimensionOpt = std::make_optional<Dimension>();
     TextModelStatic::SetTextIndent(frameNode.GetRawPtr(), dimensionOpt);
     EXPECT_TRUE(layoutProperty->GetTextIndent().has_value());
+
+    /**
+     * @tc.steps: step3. set nullopt TextIndent value and verify has_value is false.
+     */
     std::optional<Dimension> emptyDimension = std::nullopt;
     TextModelStatic::SetTextIndent(frameNode.GetRawPtr(), emptyDimension);
     EXPECT_FALSE(layoutProperty->GetTextIndent().has_value());
@@ -559,14 +569,24 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest024, TestSize.Level0)
  */
 HWTEST_F(TextTestNgEleven, TextModelStaticTest025, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern, get textLayoutProperty.
+     */
     auto pattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
     ASSERT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
 
+    /**
+     * @tc.steps: step2. set valid WordBreak value and verify has_value is true.
+     */
     TextModelStatic::SetWordBreak(frameNode.GetRawPtr(), std::make_optional(WordBreak::BREAK_ALL));
     EXPECT_TRUE(layoutProperty->GetWordBreak().has_value());
+
+    /**
+     * @tc.steps: step3. set nullopt WordBreak value and verify has_value is false.
+     */
     TextModelStatic::SetWordBreak(frameNode.GetRawPtr(), std::nullopt);
     EXPECT_FALSE(layoutProperty->GetWordBreak().has_value());
 }
@@ -897,5 +917,273 @@ HWTEST_F(TextTestNgEleven, TextModelStaticTest040, TestSize.Level0)
     
     TextModelStatic::SetOrphanCharOptimization(frameNode.GetRawPtr(), false);
     EXPECT_EQ(layoutProperty->GetOrphanCharOptimization().value(), false);
+}
+
+/**
+ * @tc.name: TextLayoutPropertyCloneFallbackLineSpacing001
+ * @tc.desc: test Clone preserves FallbackLineSpacing property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEleven, TextLayoutPropertyCloneFallbackLineSpacing001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: Create Text node and set FallbackLineSpacing to true.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateFallbackLineSpacing(true);
+    EXPECT_TRUE(layoutProperty->GetFallbackLineSpacing().value());
+
+    /**
+     * @tc.steps: Clone the layout property.
+     * @tc.expected: FallbackLineSpacing is preserved in the cloned property.
+     */
+    auto cloned = AceType::DynamicCast<TextLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(cloned, nullptr);
+    EXPECT_TRUE(cloned->HasFallbackLineSpacing());
+    EXPECT_TRUE(cloned->GetFallbackLineSpacing().value());
+
+    /**
+     * @tc.steps: Set FallbackLineSpacing to false and clone again.
+     * @tc.expected: Cloned FallbackLineSpacing is false.
+     */
+    layoutProperty->UpdateFallbackLineSpacing(false);
+    auto clonedFalse = AceType::DynamicCast<TextLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedFalse, nullptr);
+    EXPECT_TRUE(clonedFalse->HasFallbackLineSpacing());
+    EXPECT_FALSE(clonedFalse->GetFallbackLineSpacing().value());
+}
+
+/**
+ * @tc.name: TextLayoutPropertyCloneIncludeFontPadding001
+ * @tc.desc: test Clone preserves IncludeFontPadding property
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEleven, TextLayoutPropertyCloneIncludeFontPadding001, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateIncludeFontPadding(false);
+    EXPECT_FALSE(layoutProperty->GetIncludeFontPadding().value());
+
+    auto cloned = AceType::DynamicCast<TextLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(cloned, nullptr);
+    EXPECT_TRUE(cloned->HasIncludeFontPadding());
+    EXPECT_FALSE(cloned->GetIncludeFontPadding().value());
+}
+
+namespace {
+constexpr double LINE_HEIGHT_MULTIPLY_VALUE = 1.5;
+constexpr double MIN_LINE_HEIGHT_VALUE = 10.0;
+constexpr double MAX_LINE_HEIGHT_VALUE = 100.0;
+constexpr uint32_t MIN_LINES_VALUE = 5;
+
+void SetMissingProps(const RefPtr<TextLayoutProperty>& prop)
+{
+    prop->UpdateMinLines(MIN_LINES_VALUE);
+    prop->UpdateLineHeightMultiply(LINE_HEIGHT_MULTIPLY_VALUE);
+    prop->UpdateMinimumLineHeight(Dimension(MIN_LINE_HEIGHT_VALUE));
+    prop->UpdateMaximumLineHeight(Dimension(MAX_LINE_HEIGHT_VALUE));
+    prop->UpdateTextFlipEnableBlur(true);
+    prop->UpdateTextFlipDirection(TextFlipDirection::UP);
+    prop->UpdateEnableAutoSpacing(true);
+    prop->UpdateCopyOption(CopyOptions::InApp);
+    prop->UpdateTextSelectableMode(TextSelectableMode::SELECTABLE_FOCUSABLE);
+    prop->UpdateIsAnimationNeeded(true);
+    prop->UpdateIsTextMaxlinesFirst(true);
+    prop->UpdateIncrementalUpdatePolicy(IncrementalUpdatePolicy::PARAGRAPH_CACHE);
+    prop->UpdateTextEffectStrategy(TextEffectStrategy::FLIP);
+    prop->UpdateColorShaderStyle(Color::RED);
+    prop->UpdateEnablePunctuationOverflowOptimize(true);
+    prop->propEnableSmallLanguageTruncation_ = true;
+    prop->UpdateSelectedDragPreviewStyle(Color::BLACK);
+    prop->UpdateCopyOptionFlagByUser(true);
+    prop->UpdateTextColorFlagByUser(true);
+    prop->UpdateSelectedBackgroundColorFlagByUser(true);
+}
+
+void VerifyClonedMissingProps(const RefPtr<TextLayoutProperty>& cloned)
+{
+    EXPECT_EQ(cloned->GetMinLines().value(), MIN_LINES_VALUE);
+    EXPECT_EQ(cloned->GetLineHeightMultiply().value(), LINE_HEIGHT_MULTIPLY_VALUE);
+    EXPECT_EQ(cloned->GetMinimumLineHeight().value(), Dimension(MIN_LINE_HEIGHT_VALUE));
+    EXPECT_EQ(cloned->GetMaximumLineHeight().value(), Dimension(MAX_LINE_HEIGHT_VALUE));
+    EXPECT_TRUE(cloned->GetTextFlipEnableBlur().value());
+    EXPECT_EQ(cloned->GetTextFlipDirection().value(), TextFlipDirection::UP);
+    EXPECT_TRUE(cloned->GetEnableAutoSpacing().value());
+    EXPECT_EQ(cloned->GetCopyOption().value(), CopyOptions::InApp);
+    EXPECT_EQ(cloned->GetTextSelectableMode().value(), TextSelectableMode::SELECTABLE_FOCUSABLE);
+    EXPECT_TRUE(cloned->GetIsAnimationNeeded().value());
+    EXPECT_TRUE(cloned->GetIsTextMaxlinesFirst().value());
+    EXPECT_EQ(cloned->GetIncrementalUpdatePolicy().value(), IncrementalUpdatePolicy::PARAGRAPH_CACHE);
+    EXPECT_EQ(cloned->GetTextEffectStrategy().value(), TextEffectStrategy::FLIP);
+    EXPECT_EQ(cloned->GetColorShaderStyle().value(), Color::RED);
+    EXPECT_TRUE(cloned->GetEnableSmallLanguageTruncation().value());
+    EXPECT_TRUE(cloned->GetEnablePunctuationOverflowOptimize().value());
+    EXPECT_EQ(cloned->GetSelectedDragPreviewStyle().value(), Color::BLACK);
+    EXPECT_TRUE(cloned->GetCopyOptionFlagByUser().value());
+    EXPECT_TRUE(cloned->GetTextColorFlagByUser().value());
+    EXPECT_TRUE(cloned->GetSelectedBackgroundColorFlagByUser().value());
+}
+
+void VerifyResetMissingProps(const RefPtr<TextLayoutProperty>& prop)
+{
+    EXPECT_FALSE(prop->HasMinLines());
+    EXPECT_FALSE(prop->HasLineHeightMultiply());
+    EXPECT_FALSE(prop->HasMinimumLineHeight());
+    EXPECT_FALSE(prop->HasMaximumLineHeight());
+    EXPECT_FALSE(prop->HasTextFlipEnableBlur());
+    EXPECT_FALSE(prop->HasTextFlipDirection());
+    EXPECT_FALSE(prop->HasEnableAutoSpacing());
+    EXPECT_FALSE(prop->HasCopyOption());
+    EXPECT_FALSE(prop->HasTextSelectableMode());
+    EXPECT_FALSE(prop->HasIsAnimationNeeded());
+    EXPECT_FALSE(prop->HasIsTextMaxlinesFirst());
+    EXPECT_FALSE(prop->HasIncrementalUpdatePolicy());
+    EXPECT_FALSE(prop->HasTextEffectStrategy());
+    EXPECT_FALSE(prop->HasColorShaderStyle());
+    EXPECT_FALSE(prop->HasEnableSmallLanguageTruncation());
+    EXPECT_FALSE(prop->HasEnablePunctuationOverflowOptimize());
+    EXPECT_FALSE(prop->HasSelectedDragPreviewStyle());
+    EXPECT_FALSE(prop->HasCopyOptionFlagByUser());
+    EXPECT_FALSE(prop->HasTextColorFlagByUser());
+    EXPECT_FALSE(prop->HasSelectedBackgroundColorFlagByUser());
+}
+} // namespace
+
+/**
+ * @tc.name: TextLayoutPropertyCloneMissingProps001
+ * @tc.desc: test Clone preserves multiple newly-added properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEleven, TextLayoutPropertyCloneMissingProps001, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    SetMissingProps(layoutProperty);
+
+    auto cloned = AceType::DynamicCast<TextLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(cloned, nullptr);
+    VerifyClonedMissingProps(cloned);
+}
+
+/**
+ * @tc.name: TextLayoutPropertyResetMissingProps001
+ * @tc.desc: test Reset clears newly-added properties
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEleven, TextLayoutPropertyResetMissingProps001, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    layoutProperty->UpdateFallbackLineSpacing(true);
+    layoutProperty->UpdateIncludeFontPadding(false);
+    SetMissingProps(layoutProperty);
+
+    layoutProperty->Reset();
+
+    EXPECT_FALSE(layoutProperty->HasFallbackLineSpacing());
+    EXPECT_FALSE(layoutProperty->HasIncludeFontPadding());
+    VerifyResetMissingProps(layoutProperty);
+}
+
+/**
+ * @tc.name: TextGeometryTransitionFallbackLineSpacing001
+ * @tc.desc: test fallbackLineSpacing is preserved when geometryTransition is configured and Clone is called,
+ *           simulating the layout pass triggered by JsGeometryTransition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEleven, TextGeometryTransitionFallbackLineSpacing001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create Text node.
+     */
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Set FallbackLineSpacing to true (the property that was being cleared).
+     * @tc.expected: FallbackLineSpacing is set on the original property.
+     */
+    TextModelStatic::SetFallbackLineSpacing(frameNode.GetRawPtr(), std::make_optional(true));
+    ASSERT_TRUE(layoutProperty->GetFallbackLineSpacing().has_value());
+    EXPECT_TRUE(layoutProperty->GetFallbackLineSpacing().value());
+
+    /**
+     * @tc.steps: step3. Configure geometryTransition (the JS entry is JsGeometryTransition,
+     *           which calls UpdateGeometryTransition on the layout property). This triggers
+     *           PROPERTY_UPDATE_LAYOUT | PROPERTY_UPDATE_MEASURE, causing a layout pass that
+     *           clones the layout property via FrameNode::UpdateLayoutWrapper.
+     */
+    layoutProperty->UpdateGeometryTransition("test_geometry_transition_id");
+
+    /**
+     * @tc.steps: step4. Clone the layout property, simulating what FrameNode::UpdateLayoutWrapper
+     *           does during the layout pass triggered by geometryTransition.
+     * @tc.expected: FallbackLineSpacing is preserved in the cloned property, not cleared.
+     */
+    auto cloned = AceType::DynamicCast<TextLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(cloned, nullptr);
+    EXPECT_TRUE(cloned->HasFallbackLineSpacing());
+    EXPECT_TRUE(cloned->GetFallbackLineSpacing().value());
+
+    /**
+     * @tc.steps: step5. Verify IncludeFontPadding is also preserved in the combined scenario.
+     */
+    layoutProperty->UpdateIncludeFontPadding(true);
+    auto clonedWithBoth = AceType::DynamicCast<TextLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(clonedWithBoth, nullptr);
+    EXPECT_TRUE(clonedWithBoth->HasFallbackLineSpacing());
+    EXPECT_TRUE(clonedWithBoth->GetFallbackLineSpacing().value());
+    EXPECT_TRUE(clonedWithBoth->HasIncludeFontPadding());
+    EXPECT_TRUE(clonedWithBoth->GetIncludeFontPadding().value());
+}
+
+/**
+ * @tc.name: TextGeometryTransitionFallbackLineSpacing002
+ * @tc.desc: test fallbackLineSpacing is preserved across multiple Clone calls when
+ *           geometryTransition is configured, verifying no value loss across layout passes
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgEleven, TextGeometryTransitionFallbackLineSpacing002, TestSize.Level0)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    TextModelStatic::SetFallbackLineSpacing(frameNode.GetRawPtr(), std::make_optional(true));
+    layoutProperty->UpdateGeometryTransition("test_geometry_transition_id_002");
+
+    // Simulate multiple layout passes, each cloning the layout property
+    auto firstClone = AceType::DynamicCast<TextLayoutProperty>(layoutProperty->Clone());
+    ASSERT_NE(firstClone, nullptr);
+    ASSERT_TRUE(firstClone->GetFallbackLineSpacing().has_value());
+    EXPECT_TRUE(firstClone->GetFallbackLineSpacing().value());
+
+    auto secondClone = AceType::DynamicCast<TextLayoutProperty>(firstClone->Clone());
+    ASSERT_NE(secondClone, nullptr);
+    ASSERT_TRUE(secondClone->GetFallbackLineSpacing().has_value());
+    EXPECT_TRUE(secondClone->GetFallbackLineSpacing().value());
 }
 } // namespace OHOS::Ace::NG

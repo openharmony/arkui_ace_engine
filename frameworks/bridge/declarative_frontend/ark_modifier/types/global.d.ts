@@ -67,7 +67,23 @@ interface AlphabetIndexerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface BadgeComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface BlankComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface DividerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface CalendarPickerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface ButtonComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
@@ -101,11 +117,50 @@ interface GaugeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface GridContainerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface NavigatorComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+interface GridRowComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface GridColComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface SwiperComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface TabsComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface TabContentComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface IndicatorComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface HyperlinkComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
 interface ImageAnimatorComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface LazyVGridLayoutComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface LoadingProgressComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
@@ -129,6 +184,10 @@ interface PatternLockComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface ProgressComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface QRCodeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -138,6 +197,10 @@ interface RadioComponentModule {
 }
 
 interface RatingComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface RelativeContainerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
@@ -153,7 +216,22 @@ interface RowSplitComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface RefreshComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface SearchComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface SelectComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+interface TextAreaComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface TextInputComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
@@ -185,6 +263,10 @@ interface TextClockComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
+interface TextTimerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
 interface TimePickerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -194,6 +276,50 @@ interface ToggleComponentModule {
 }
 
 interface WaterFlowComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface TextPickerComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface GridComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface GridItemComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface RectComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface ShapeComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface PathComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface LineComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface PolylineComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface PolygonComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface CircleComponentModule {
+    createComponent(nativePtr: KNode, classType: ModifierType): any;
+}
+
+interface XComponentComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 

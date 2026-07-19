@@ -104,7 +104,9 @@ public:
     static std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfig(
         const std::shared_ptr<ImmersiveOptions>& options, const RefPtr<NG::FrameNode>& node);
     static std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfig(
-        const std::shared_ptr<ImmersiveOptions>& options, float dipScale, ColorMode colorMode);
+        const std::shared_ptr<ImmersiveOptions>& options, float dipScale, ColorMode colorMode,
+        const RefPtr<NG::FrameNode>& node = nullptr);
+    static void LowerGearLevel(UiMaterialLevel& materialLevel, const RefPtr<NG::FrameNode>& node);
     // Get material config with component scale adjustment (for drag scenario)
     static std::optional<ImmersiveMaterialConfig> GetImmersiveMaterialConfigWithScale(
         const std::shared_ptr<ImmersiveOptions>& options, const RefPtr<NG::FrameNode>& node, float componentScale);
@@ -123,7 +125,9 @@ public:
     static bool IsMaterialDisabled();
     static bool IsMaterialEnabled();
     static bool IsEmptyMaterial(const RefPtr<UiMaterial>& material);
-    static RefPtr<UiMaterial> GetInitMaterial(const UiMaterialStyle style);
+    static RefPtr<UiMaterial> GetInitMaterial(const UiMaterialStyle style,
+        const std::optional<bool>& interactive = std::nullopt,
+        const std::optional<LightEffectOptions>& lightEffectOptions = std::nullopt);
     static bool IsEnableMaterialParam(const RefPtr<UiMaterial>& material);
     static const UiMaterial* PreProcessMaterial(const UiMaterial* material);
     static std::shared_ptr<Rosen::Filter> CreateRosenFilter(const ImmersiveMaterialConfig& params);

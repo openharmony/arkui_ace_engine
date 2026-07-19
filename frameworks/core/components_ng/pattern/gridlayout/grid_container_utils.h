@@ -1,0 +1,71 @@
+/*
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRIDLAYOUT_GRID_LAYOUT_GRID_COL_UTILS_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRIDLAYOUT_GRID_LAYOUT_GRID_COL_UTILS_H
+
+#include <utility>
+
+#include "base/memory/ace_type.h"
+#include "core/common/window.h"
+#include "core/components_v2/grid_layout/grid_container_util_class.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/base/geometry/size.h"
+#include "frameworks/core/pipeline/pipeline_context.h"
+
+namespace OHOS::Ace {
+// Forward declarations
+struct WidthLayoutBreakPoint;
+
+} // namespace OHOS::Ace
+
+namespace OHOS::Ace::V2 {
+inline constexpr size_t MAX_NUMBER_BREAKPOINT = 6;
+
+class GridContainerUtils : public AceType {
+    DECLARE_ACE_TYPE(GridContainerUtils, AceType);
+
+public:
+    ~GridContainerUtils() override = default;
+
+    static int CalcBreakPoint(const RefPtr<GridSizeInfo>& threshold, double windowWidth);
+    static WidthBreakpoint GetWidthBreakpoint(
+        const WidthLayoutBreakPoint &custlayoutBreakpoints, const RefPtr<PipelineBase> &pipeline, bool userDefine);
+    static GridSizeType ProcessGridSizeType(const V2::BreakPoints& breakpoints, const Size& size,
+        const WindowMode& mode, const RefPtr<PipelineBase>& pipeline = nullptr);
+    static std::pair<Dimension, Dimension> ProcessGutter(GridSizeType sizeType, const Gutter& gutter);
+
+    static int32_t ProcessColumn(GridSizeType sizeType, const GridContainerSize& columnNum);
+    static double ProcessColumnWidth(const std::pair<double, double>& gutter, int32_t columnNum, double size);
+    static void InheritGridRowColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+        int32_t *containerSizeArray, int32_t size);
+    static void InheritGridRowOption(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+        std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT]);
+    static void InheritGridColumns(const RefPtr<V2::GridContainerSize>& gridContainerSize,
+        std::optional<int32_t> (&containerSizeArray)[MAX_NUMBER_BREAKPOINT]);
+    static void SaveGridRowGutterOptionxResObjXsSmMd(const RefPtr<V2::Gutter>& gutter,
+        RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT]);
+    static void SaveGridRowGutterOptionxResObjLgXlXXl(const RefPtr<V2::Gutter>& gutter,
+        RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT]);
+    static void SaveGridRowGutterOptionyResObjXsSmMd(const RefPtr<V2::Gutter>& gutter,
+        RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT]);
+    static void SaveGridRowGutterOptionyResObjLgXlXXl(const RefPtr<V2::Gutter>& gutter,
+        RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT]);
+    static void InheritGridRowGutterOption(const RefPtr<V2::Gutter>& gutter,
+        std::optional<CalcDimension> (&gutterSizeArray)[MAX_NUMBER_BREAKPOINT],
+        RefPtr<ResourceObject> (&gutterSizeArrayResObj)[MAX_NUMBER_BREAKPOINT], bool isHorizontal);
+};
+} // namespace OHOS::Ace::V2
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRIDLAYOUT_GRID_LAYOUT_GRID_COL_UTILS_H

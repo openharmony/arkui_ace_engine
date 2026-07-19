@@ -14,7 +14,7 @@
  */
 
 #include "core/common/container.h"
-#include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
+#include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/interfaces/native/utility/promise_helper.h"
@@ -26,11 +26,9 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 CanvasRenderingContext2DPeerImpl::CanvasRenderingContext2DPeerImpl()
 {
-#ifdef NG_BUILD
-    renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
-#else
-    if (Container::IsCurrentUseNewPipeline()) {
-        renderingContext2DModel_ = AceType::MakeRefPtr<NG::CanvasRenderingContext2DModelNG>();
+    auto* bridge = GetCanvasRuntimeBridgeFromModule();
+    if (bridge && bridge->createCanvasRenderingContext2DModel) {
+        renderingContext2DModel_ = bridge->createCanvasRenderingContext2DModel();
         auto onAttach = [weakCtx = WeakClaim(this)]() {
             auto ctx = weakCtx.Upgrade();
             CHECK_NULL_VOID(ctx);
@@ -41,15 +39,11 @@ CanvasRenderingContext2DPeerImpl::CanvasRenderingContext2DPeerImpl()
             CHECK_NULL_VOID(ctx);
             ctx->OnDetachFromCanvas();
         };
-        auto canvasRenderingContext2DModel =
-            AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-        CHECK_NULL_VOID(canvasRenderingContext2DModel);
-        canvasRenderingContext2DModel->SetOnAttach(onAttach);
-        canvasRenderingContext2DModel->SetOnDetach(onDetach);
-    } else {
-        renderingContext2DModel_ = nullptr;
+        if (bridge->setCanvasRenderingContext2DCallbacks) {
+            bridge->setCanvasRenderingContext2DCallbacks(
+                renderingContext2DModel_, std::move(onAttach), std::move(onDetach));
+        }
     }
-#endif
 }
 void CanvasRenderingContext2DPeerImpl::SetOptions(const std::optional<RenderingContextSettingsPeer*>& optSettings)
 {
@@ -158,11 +152,11 @@ void CanvasRenderingContext2DPeerImpl::StartImageAnalyzer(Ark_VMContext vmContex
 
     promise->StartAsync(vmContext, *asyncWorker, [peer = Claim(this), wrapConfigFunc = wrapAnalyzerConfigImpl,
         onAnalyzed = std::move(onAnalyzed)]() {
-        auto model = AceType::DynamicCast<CanvasRenderingContext2DModel>(peer->renderingContext2DModel_);
-        if (model) {
+        auto* bridge = GetCanvasRuntimeBridgeFromModule();
+        if (bridge && bridge->startCanvasImageAnalyzer) {
             OnAnalyzedCallback optOnAnalyzed = std::move(onAnalyzed);
             void* config = wrapConfigFunc == nullptr ? nullptr : wrapConfigFunc();
-            model->StartImageAnalyzer(config, optOnAnalyzed);
+            bridge->startCanvasImageAnalyzer(peer->renderingContext2DModel_, config, optOnAnalyzed);
         } else {
             onAnalyzed(ImageAnalyzerState::STOPPED);
         }
@@ -173,17 +167,19 @@ void CanvasRenderingContext2DPeerImpl::StopImageAnalyzer()
 {
     CHECK_NULL_VOID(renderingContext2DModel_);
     ContainerScope scope(instanceId_);
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_VOID(canvasRenderingContext2DModel);
-    canvasRenderingContext2DModel->StopImageAnalyzer();
+    auto* bridge = GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_VOID(bridge);
+    CHECK_NULL_VOID(bridge->stopCanvasImageAnalyzer);
+    bridge->stopCanvasImageAnalyzer(renderingContext2DModel_);
 }
 double CanvasRenderingContext2DPeerImpl::GetHeight()
 {
     double height = 0.0;
     CHECK_NULL_RETURN(renderingContext2DModel_, height);
-    auto renderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_RETURN(renderingContext2DModel_, height);
-    renderingContext2DModel->GetHeight(height);
+    auto* bridge = GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, height);
+    CHECK_NULL_RETURN(bridge->getCanvasRenderingContext2DHeight, height);
+    bridge->getCanvasRenderingContext2DHeight(renderingContext2DModel_, height);
     double density = GetDensity();
     if (density == 0) {
         return height;
@@ -195,9 +191,10 @@ double CanvasRenderingContext2DPeerImpl::GetWidth()
 {
     double width = 0.0;
     CHECK_NULL_RETURN(renderingContext2DModel_, width);
-    auto renderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_RETURN(renderingContext2DModel_, width);
-    renderingContext2DModel->GetWidth(width);
+    auto* bridge = GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, width);
+    CHECK_NULL_RETURN(bridge->getCanvasRenderingContext2DWidth, width);
+    bridge->getCanvasRenderingContext2DWidth(renderingContext2DModel_, width);
     double density = GetDensity();
     if (density == 0) {
         return width;
@@ -208,9 +205,10 @@ double CanvasRenderingContext2DPeerImpl::GetWidth()
 int32_t CanvasRenderingContext2DPeerImpl::GetCanvasId()
 {
     CHECK_NULL_RETURN(renderingContext2DModel_, -1);
-    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
-    CHECK_NULL_RETURN(canvasRenderingContext2DModel, -1);
-    return canvasRenderingContext2DModel->GetId();
+    auto* bridge = GetCanvasRuntimeBridgeFromModule();
+    CHECK_NULL_RETURN(bridge, -1);
+    CHECK_NULL_RETURN(bridge->getCanvasRenderingContext2DId, -1);
+    return bridge->getCanvasRenderingContext2DId(renderingContext2DModel_);
 }
 void CanvasRenderingContext2DPeerImpl::SetRenderingContextOptions(const RenderingContextOptions& options)
 {

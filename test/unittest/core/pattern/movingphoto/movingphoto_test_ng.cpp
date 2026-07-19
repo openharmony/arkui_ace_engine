@@ -1474,4 +1474,91 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest033, TestSize.Level1)
     movingPhotoPattern->SetMovingPhotoController(movingPhotoController);
     EXPECT_EQ(movingPhotoPattern->GetMovingPhotoController(), movingPhotoController);
 }
+
+/**
+ * @tc.name: MovingPhotoPatternTest034
+ * @tc.desc: Test OnResolutionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create MovingPhoto successfully
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto pattern = frameNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnResolutionChange
+     * @tc.expected: step2. related functions will be called
+     */
+    pattern->OnResolutionChange();
+
+    auto property = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
+    ASSERT_TRUE(property->HasVideoSize());
+    EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Width(), 100);
+    EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Height(), 100);
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest035
+ * @tc.desc: Test OnResolutionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create MovingPhoto successfully
+     */
+    auto frameNode = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto movingPhotoPattern = frameNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(movingPhotoPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnResolutionChange
+     * @tc.expected: step2. related functions will be called
+     */
+    movingPhotoPattern->OnResolutionChange();
+
+    auto property = frameNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
+    ASSERT_TRUE(property->HasVideoSize());
+    EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Height(), 100);
+    EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Width(), 100);
+}
+
+/**
+ * @tc.name: MovingPhotoPatternTest036
+ * @tc.desc: Test OnResolutionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest036, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create MovingPhoto successfully
+     */
+    auto movingPhotoNode = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_NE(movingPhotoNode, nullptr);
+    EXPECT_EQ(movingPhotoNode->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto pattern = movingPhotoNode->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnResolutionChange
+     * @tc.expected: step2. related functions will be called
+     */
+    pattern->OnResolutionChange();
+
+    auto property = movingPhotoNode->GetLayoutProperty<MovingPhotoLayoutProperty>();
+    ASSERT_TRUE(property->HasVideoSize());
+    EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Height(), 100);
+    EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Width(), 100);
+}
 } //namespace OHOS::Ace::NG

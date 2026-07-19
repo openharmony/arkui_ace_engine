@@ -214,6 +214,28 @@ HWTEST_F(SwiperIndicatorTestNg, UpdateSelectedCenterXOnDrag008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSelectedCenterXOnDrag009
+ * @tc.desc: Test OverlengthDotIndicatorModifier UpdateSelectedCenterXOnDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, UpdateSelectedCenterXOnDrag009, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 0.0f);
+    itemHalfSizes[0] = 10.0f;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    modifier.overlongSelectedEndCenterX_.first = 5.0f;
+    modifier.overlongSelectedEndCenterX_.second = 2.0f;
+    modifier.isDraggingIndicator_ = false;
+    modifier.hasCustomIcon_ = false;
+    modifier.isSwiperTouchDown_ = true;
+    modifier.targetSelectedIndex_ = 1;
+    modifier.UpdateSelectedCenterXOnDrag(itemHalfSizes);
+    EXPECT_EQ(modifier.overlongSelectedEndCenterX_.first, 0.0f);
+}
+
+/**
  * @tc.name: GetMoveRateOnAllMove001
  * @tc.desc: Test OverlengthDotIndicatorModifier GetMoveRateOnAllMove
  * @tc.type: FUNC
@@ -1497,5 +1519,94 @@ HWTEST_F(SwiperIndicatorTestNg, NeedUpdateWhenAnimationFinish007, TestSize.Level
     modifier.maxDisplayCount_ = 6;
     auto result = modifier.NeedUpdateWhenAnimationFinish();
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: NotInDraggingWithUseAlone001
+ * @tc.desc: Test NotInDraggingWithUseAlone with isBindIndicator_ true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, NotInDraggingWithUseAlone001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.isBindIndicator_ = true;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_INIT;
+    EXPECT_FALSE(modifier.NotInDraggingWithUseAlone());
+}
+
+/**
+ * @tc.name: NotInDraggingWithUseAlone002
+ * @tc.desc: Test NotInDraggingWithUseAlone with isBindIndicator_ false and GESTURE_STATE_INIT
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, NotInDraggingWithUseAlone002, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.isBindIndicator_ = false;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_INIT;
+    EXPECT_TRUE(modifier.NotInDraggingWithUseAlone());
+}
+
+/**
+ * @tc.name: NotInDraggingWithUseAlone003
+ * @tc.desc: Test NotInDraggingWithUseAlone with isBindIndicator_ false and GESTURE_STATE_NONE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, NotInDraggingWithUseAlone003, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.isBindIndicator_ = false;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_NONE;
+    EXPECT_TRUE(modifier.NotInDraggingWithUseAlone());
+}
+
+/**
+ * @tc.name: NotInDraggingWithUseAlone004
+ * @tc.desc: Test NotInDraggingWithUseAlone with isBindIndicator_ false and active gesture state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, NotInDraggingWithUseAlone004, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    modifier.isBindIndicator_ = false;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    EXPECT_FALSE(modifier.NotInDraggingWithUseAlone());
+    modifier.gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    EXPECT_FALSE(modifier.NotInDraggingWithUseAlone());
+    modifier.gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    EXPECT_FALSE(modifier.NotInDraggingWithUseAlone());
+    modifier.gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    EXPECT_FALSE(modifier.NotInDraggingWithUseAlone());
+}
+
+/**
+ * @tc.name: CalcAnimationEndCenterXNotInDragging001
+ * @tc.desc: Test CalcAnimationEndCenterX with NotInDraggingWithUseAlone true entering all-point-move path
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CalcAnimationEndCenterXNotInDragging001, TestSize.Level1)
+{
+    OverlengthDotIndicatorModifier modifier;
+    LinearVector<float> itemHalfSizes(3, 10.0f);
+    modifier.touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.maxDisplayCount_ = 6;
+    modifier.isSwiperTouchDown_ = false;
+    modifier.isBindIndicator_ = false;
+    modifier.gestureState_ = GestureState::GESTURE_STATE_INIT;
+    modifier.currentSelectedIndex_ = 4;
+    modifier.targetSelectedIndex_ = 4;
+    modifier.animationStartIndex_ = 5;
+    modifier.animationEndIndex_ = 4;
+    modifier.realItemCount_ = 10;
+    modifier.moveDirection_ = OverlongIndicatorMove::MOVE_BACKWARD;
+    modifier.animationStartCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorHeight_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationStartIndicatorWidth_ = { 10.0f, 10.0f, 10.0f };
+    modifier.animationEndCenterX_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    modifier.animationEndIndicatorWidth_ = { 10.0f, 10.0f };
+    modifier.animationEndIndicatorHeight_ = { 10.0f, 10.0f };
+    modifier.CalcAnimationEndCenterX(itemHalfSizes);
+    EXPECT_EQ(modifier.moveDirection_, OverlongIndicatorMove::NONE);
 }
 } // namespace OHOS::Ace::NG

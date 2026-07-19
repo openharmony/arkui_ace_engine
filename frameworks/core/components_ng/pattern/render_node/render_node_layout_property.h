@@ -16,10 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RENDER_NODE_RENDER_NODE_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RENDER_NODE_RENDER_NODE_LAYOUT_PROPERTY_H
 
-#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 
 namespace OHOS::Ace::NG {
+class InspectorFilter;
+
 class ACE_EXPORT RenderNodeLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(RenderNodeLayoutProperty, LayoutProperty);
 

@@ -32,6 +32,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/state_style_manager.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"

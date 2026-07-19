@@ -63,9 +63,9 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
-#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -761,7 +761,6 @@ void SubwindowOhos::ShowTipsNG(int32_t targetId, const NG::PopupInfo& popupInfo,
     if (!pattern->IsTipsAppearing()) {
         return;
     }
-    pattern->SetIsTipsAppearing(false);
     popupTargetId_ = targetId;
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
@@ -869,7 +868,9 @@ void SubwindowOhos::ShowWindow(bool needFocus)
     if (ifNeedSetCurrentWindow_) {
         SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
     }
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(window_->GetWindowName(), "onPageChange");
+#endif
 }
 
 void SubwindowOhos::HideWindow()
@@ -971,7 +972,9 @@ void SubwindowOhos::HideWindow()
     event.windowId = context->GetWindowId();
     event.windowChangeTypes = WINDOW_UPDATE_REMOVED;
     context->SendEventToAccessibility(event);
+#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->OnRouterChange(window_->GetWindowName(), "onPageChange");
+#endif
 }
 
 void SubwindowOhos::ContainerModalUnFocus()
@@ -1410,7 +1413,9 @@ int32_t SubwindowOhos::ShowBindSheetByUIContext(
     }
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
-    return NG::SheetManager::GetInstance().OpenBindSheetByUIContext(sheetContentNode, std::move(buildtitleNodeFunc),
+    auto* sheetModifier = NG::NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_RETURN(sheetModifier, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    return sheetModifier->openBindSheetByUIContext(sheetContentNode, std::move(buildtitleNodeFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
         std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
@@ -1421,16 +1426,18 @@ int32_t SubwindowOhos::UpdateBindSheetByUIContext(
     const RefPtr<NG::FrameNode> &sheetContentNode, const NG::SheetStyle &sheetStyle, bool isPartialUpdate)
 {
     ContainerScope scope(childContainerId_);
-    return NG::SheetManager::GetInstance().UpdateBindSheetByUIContext(
-        sheetContentNode, sheetStyle, isPartialUpdate, childContainerId_);
+    auto* sheetModifier = NG::NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_RETURN(sheetModifier, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    return sheetModifier->updateBindSheetByUIContext(sheetContentNode, sheetStyle, isPartialUpdate, childContainerId_);
 }
 
 int32_t SubwindowOhos::CloseBindSheetByUIContext(
     const RefPtr<NG::FrameNode> &sheetContentNode)
 {
     ContainerScope scope(childContainerId_);
-    return NG::SheetManager::GetInstance().CloseBindSheetByUIContext(
-        sheetContentNode, childContainerId_);
+    auto* sheetModifier = NG::NodeModifier::GetSheetManagerInnerModifier();
+    CHECK_NULL_RETURN(sheetModifier, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    return sheetModifier->closeBindSheetByUIContext(sheetContentNode, childContainerId_);
 }
 
 RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
@@ -1499,7 +1506,7 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
-    auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc), false, std::move(callback));
+    auto dialog = overlay->ShowDialogWithErrorCallback(dialogProps, std::move(buildFunc), false, std::move(callback));
     CHECK_NULL_RETURN(dialog, nullptr);
     if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
         SetNodeId(dialog->GetId());
@@ -1657,7 +1664,7 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps,
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
     ContainerScope scope(childContainerId_);
-    auto dialog = overlay->OpenCustomDialog(dialogProps, std::move(callback));
+    auto dialog = overlay->OpenCustomDialogWithErrorCallback(dialogProps, std::move(callback));
     CHECK_NULL_VOID(dialog);
     if (parentAceContainer->IsUIExtensionWindow() && dialogProps.isModal) {
         SetNodeId(dialog->GetId());
@@ -1679,6 +1686,12 @@ void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId)
     CHECK_NULL_VOID(overlay);
     ContainerScope scope(childContainerId_);
     return overlay->CloseCustomDialog(dialogId);
+}
+
+void SubwindowOhos::CloseCustomDialogNG(int32_t dialogId, std::function<void(int32_t)> &&callback)
+{
+    CloseCustomDialogNG(dialogId);
+    callback(0);
 }
 
 void SubwindowOhos::CloseCustomDialogNG(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
@@ -1983,6 +1996,7 @@ void SubwindowOhos::ResizeWindowForToast(const NG::ToastInfo& toastInfo)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
+    ResetWindowOffset();
     // for float window in landscape mode.
     auto needFollowParentWindowLayout = toastInfo.showMode == NG::ToastShowMode::TOP_MOST &&
                                         !parentContainer->IsSceneBoardWindow() &&
@@ -1998,6 +2012,19 @@ void SubwindowOhos::ResizeWindowForToast(const NG::ToastInfo& toastInfo)
         ResizeWindow(rect.Width(), rect.Height());
     } else {
         ResizeWindow();
+    }
+}
+
+void SubwindowOhos::ResetWindowOffset()
+{
+    CHECK_NULL_VOID(window_);
+    if (isShowed_) {
+        return;
+    }
+    OHOS::Rosen::WMError ret = window_->MoveTo(0, 0);
+    if (ret != OHOS::Rosen::WMError::WM_OK) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "Failed to reset window offset, code: %{public}d",
+            static_cast<int32_t>(ret));
     }
 }
 
@@ -2508,6 +2535,7 @@ void SubwindowOhos::MarkDirtyDialogSafeArea()
     CHECK_NULL_VOID(aceContainer);
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
     CHECK_NULL_VOID(context);
+    ContainerScope scope(context->GetInstanceId());
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
     auto lastChild = rootNode->GetLastChild();

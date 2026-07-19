@@ -17,10 +17,15 @@
 
 #include "adapter/ohos/capability/clipboard/clipboard_impl.h"
 #include "base/geometry/ng/point_t.h"
+#include "base/json/json_util.h"
+#include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/clipboard/clipboard_proxy.h"
+#include "core/components/common/layout/layout_constants_string_utils.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -105,6 +110,50 @@ std::u16string SelectionContainerPattern::GetSelectionText()
     return selectedText;
 }
 
+std::u16string SelectionContainerPattern::GetSelectAllText()
+{
+    auto childList = GetChildList();
+    std::u16string selectedText;
+    bool isFirst = true;
+    for (const auto& weakChild : childList) {
+        auto child = weakChild.Upgrade();
+        CHECK_NULL_CONTINUE(child);
+        if (!child->HasSelectableText()) {
+            continue;
+        }
+        auto childSelectedText = child->GetSelectAllText();
+        if (childSelectedText.empty()) {
+            continue;
+        }
+        if (!isFirst) {
+            auto separator = GetTextJoinSeparator();
+            if (!separator.empty()) {
+                selectedText.append(separator);
+            }
+        }
+        selectedText.append(childSelectedText);
+        isFirst = false;
+    }
+    return selectedText;
+}
+
+std::u16string SelectionContainerPattern::GetSelectionTextForMenuItemClick(const MenuItemParam& menuItemParam)
+{
+    if (menuItemParam.menuOptionsParam.id == OH_DEFAULT_SELECT_ALL) {
+        return GetSelectAllText();
+    }
+    return GetSelectionText();
+}
+
+void SelectionContainerPattern::DismissMenuAfterCopy()
+{
+    if (IsUsingMouse()) {
+        CloseSelectOverlay();
+        return;
+    }
+    HideMenu(true);
+}
+
 RefPtr<FrameNode> SelectionContainerPattern::GetHostNode() const
 {
     return GetHost();
@@ -124,6 +173,25 @@ void SelectionContainerPattern::CloseSelectOverlay(bool animation, CloseReason r
     auto overlay = GetOrCreateSelectionSelectOverlay();
     CHECK_NULL_VOID(overlay);
     overlay->CloseOverlay(animation, reason);
+}
+
+int32_t SelectionContainerPattern::ClaimSelectionContainerEpoch()
+{
+    static int32_t counter = 0;
+    return counter++;
+}
+
+void SelectionContainerPattern::CloseSelectionMenu()
+{
+    OnChildResponseTypeChanged(TextResponseType::NONE);
+    CloseSelectOverlay(true);
+}
+
+void SelectionContainerPattern::ClearTextSelection()
+{
+    OnChildResponseTypeChanged(TextResponseType::NONE);
+    ResetAllSelection();
+    CloseSelectOverlay(true);
 }
 
 void SelectionContainerPattern::ProcessOverlay(const OverlayRequest& request)
@@ -440,7 +508,8 @@ void SelectionContainerPattern::OnSelectionMenuOptionsUpdate(const NG::OnCreateM
             if (!pattern->onMenuItemClickWithText_) {
                 return false;
             }
-            return pattern->onMenuItemClickWithText_(menuItemParam, pattern->GetSelectionText());
+            return pattern->onMenuItemClickWithText_(
+                menuItemParam, pattern->GetSelectionTextForMenuItemClick(menuItemParam));
         };
     }
     overlay->OnSelectionMenuOptionsUpdate(
@@ -460,19 +529,19 @@ void SelectionContainerPattern::HandleOnCopy()
         static_cast<int32_t>(copyOption), data.allowedChildren.size(), data.clipboardText.length());
 
     if (data.clipboardText.empty()) {
-        overlay->HideMenu(true);
+        DismissMenuAfterCopy();
         return;
     }
 
     bool containerAllowed = FireOnWillCopy(data.clipboardText);
     if (!containerAllowed) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "HandleOnCopy blocked by container onWillCopy");
-        overlay->HideMenu(true);
+        DismissMenuAfterCopy();
         return;
     }
 
     WriteClipboard(data.clipboardText, data.mergedSpanString, data.hasSpanString, copyOption);
-    overlay->HideMenu(true);
+    DismissMenuAfterCopy();
 
     for (const auto& item : data.allowedChildren) {
         item.child->FireOnCopy(item.payload.plainText);
@@ -705,6 +774,109 @@ std::optional<Color> SelectionContainerPattern::GetSelectedBackgroundColor() con
     auto layoutProperty = host->GetLayoutProperty<SelectionContainerLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     return layoutProperty->GetSelectedBackgroundColor();
+}
+
+static std::string TextJoinStyleToString(SelectionContainerTextJoinStyle style)
+{
+    return style == SelectionContainerTextJoinStyle::DIRECT ? "DIRECT" : "NEWLINE";
+}
+
+std::string SelectionContainerPattern::GetCaretColorStr() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, "");
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    auto layoutProperty = host->GetLayoutProperty<SelectionContainerLayoutProperty>();
+    if (layoutProperty && layoutProperty->GetCaretColor()) {
+        return layoutProperty->GetCaretColor()->ColorToString();
+    }
+    return theme->GetCaretColor().ColorToString();
+}
+
+std::string SelectionContainerPattern::GetSelectedBackgroundColorStr() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, "");
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, "");
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, "");
+    auto layoutProperty = host->GetLayoutProperty<SelectionContainerLayoutProperty>();
+    if (layoutProperty && layoutProperty->GetSelectedBackgroundColor()) {
+        return layoutProperty->GetSelectedBackgroundColor()->ColorToString();
+    }
+    return theme->GetSelectedColor().ColorToString();
+}
+
+void SelectionContainerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json,
+    const InspectorFilter& filter) const
+{
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    // pattern-level attributes (copyOption is dumped by SelectionContainerLayoutProperty::ToJsonValue)
+    json->PutExtAttr("enableHapticFeedback", enableHapticFeedback_ ? "true" : "false", filter);
+    json->PutExtAttr("textJoinStyle", TextJoinStyleToString(textJoinStyle_).c_str(), filter);
+    json->PutExtAttr("caretColor", GetCaretColorStr().c_str(), filter);
+    json->PutExtAttr("selectedBackgroundColor", GetSelectedBackgroundColorStr().c_str(), filter);
+
+    // menu config: bindSelectionMenu only (editMenuOptions callbacks live in overlay; Text omits them too)
+    json->PutExtAttr("bindSelectionMenu", GetBindSelectionMenuInJson().c_str(), filter);
+
+    // cross-node selection runtime state
+    auto* self = const_cast<SelectionContainerPattern*>(this);
+    json->PutExtAttr("content", UtfUtils::Str16ToStr8(self->GetSelectionText()).c_str(), filter);
+    json->PutExtAttr("selectedType",
+        std::to_string(TextSpanTypeMapper::GetJsSpanType(selectedType_.value_or(TextSpanType::NONE), true))
+            .c_str(),
+        filter);
+    json->PutExtAttr("selectedTextCount", std::to_string(selectedTextCount_).c_str(), filter);
+    json->PutExtAttr("selectedImageCount", std::to_string(selectedImageCount_).c_str(), filter);
+    json->PutExtAttr("selectedBuilderCount", std::to_string(selectedBuilderCount_).c_str(), filter);
+    json->PutExtAttr("selectedMixedCount", std::to_string(selectedMixedCount_).c_str(), filter);
+}
+
+void SelectionContainerPattern::DumpInfo()
+{
+    StackPattern::DumpInfo();
+    auto& dumpLog = DumpLog::GetInstance();
+
+    dumpLog.AddDesc(std::string("copyOption: ").append(StringUtils::ToString(GetCopyOption())));
+    dumpLog.AddDesc(std::string("caretColor: ").append(GetCaretColorStr()));
+    dumpLog.AddDesc(std::string("selectedBackgroundColor: ").append(GetSelectedBackgroundColorStr()));
+    dumpLog.AddDesc(std::string("enableHapticFeedback: ").append(enableHapticFeedback_ ? "true" : "false"));
+    dumpLog.AddDesc(std::string("textJoinStyle: ").append(TextJoinStyleToString(textJoinStyle_)));
+
+    dumpLog.AddDesc(std::string("content: ").append(UtfUtils::Str16ToStr8(GetSelectionText())));
+    dumpLog.AddDesc(std::string("selectedType: ")
+                        .append(std::to_string(
+                            TextSpanTypeMapper::GetJsSpanType(selectedType_.value_or(TextSpanType::NONE), true))));
+    dumpLog.AddDesc(std::string("childCount: text=").append(std::to_string(selectedTextCount_))
+                        .append(", image=").append(std::to_string(selectedImageCount_))
+                        .append(", builder=").append(std::to_string(selectedBuilderCount_))
+                        .append(", mixed=").append(std::to_string(selectedMixedCount_)));
+    dumpLog.AddDesc(
+        std::string("bindSelectionMenu registered: ").append(std::to_string(selectionMenuMap_.size())));
+}
+
+std::string SelectionContainerPattern::GetBindSelectionMenuInJson() const
+{
+    auto jsonArray = JsonUtil::CreateArray(true);
+    for (auto& [spanResponsePair, params] : selectionMenuMap_) {
+        if (!params) {
+            continue;
+        }
+        auto& [spanType, responseType] = spanResponsePair;
+        auto jsonItem = JsonUtil::Create(true);
+        jsonItem->Put("spanType", TextSpanTypeMapper::GetJsSpanType(spanType, params->isValid));
+        jsonItem->Put("responseType", static_cast<int32_t>(responseType));
+        jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType::SELECTION_MENU));
+        jsonArray->Put(jsonItem);
+    }
+    return StringUtils::RestoreBackslash(jsonArray->ToString());
 }
 
 void SelectionContainerPattern::OnModifyDone()

@@ -26,6 +26,7 @@
 #include "core/common/color_inverter.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #undef private
 #undef protected
@@ -39,6 +40,92 @@ extern RefPtr<ResourceObject> CompleteResourceObject(const std::unique_ptr<JsonV
 extern std::string GetReplaceContentStr(
     int pos, const std::string& type, const std::vector<ResourceObjectParams> params, int32_t containCount);
 extern void ReplaceHolder(std::string& originStr, const std::vector<ResourceObjectParams> params, int32_t containCount);
+
+namespace {
+constexpr int32_t RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID = 246810;
+constexpr char RESOURCE_PARSE_UTILS_STRING_NAME[] = "test.resource.string.by_name";
+constexpr char RESOURCE_PARSE_UTILS_INTEGER_NAME[] = "test.resource.integer.by_name";
+constexpr char RESOURCE_PARSE_UTILS_DOUBLE_NAME[] = "test.resource.double.by_name";
+constexpr char RESOURCE_PARSE_UTILS_DIMENSION_NAME[] = "test.resource.dimension.by_name";
+constexpr double RESOURCE_DIMENSION_VALUE = 10.0f;
+constexpr int32_t RESOURCE_INT_VALUE = 10;
+constexpr double RESOURCE_DOUBLE_VALUE = 10.5f;
+
+class ByNameAwareResourceAdapter final : public ResourceAdapter {
+    DECLARE_ACE_TYPE(ByNameAwareResourceAdapter, ResourceAdapter);
+
+public:
+    Color GetColor(uint32_t /*resId*/) override
+    {
+        return Color();
+    }
+
+    Dimension GetDimension(uint32_t /*resId*/) override
+    {
+        return Dimension(1.0, DimensionUnit::PX);
+    }
+
+    Dimension GetDimensionByName(const std::string& resName) override
+    {
+        if (resName == RESOURCE_PARSE_UTILS_DIMENSION_NAME) {
+            return Dimension(RESOURCE_DIMENSION_VALUE, DimensionUnit::VP);
+        }
+        return Dimension();
+    }
+
+    std::string GetString(uint32_t /*resId*/) override
+    {
+        return "1px";
+    }
+
+    std::string GetStringByName(const std::string& resName) override
+    {
+        if (resName == RESOURCE_PARSE_UTILS_STRING_NAME) {
+            return "24vp";
+        }
+        return "";
+    }
+
+    std::vector<std::string> GetStringArray(uint32_t /*resId*/) const override
+    {
+        return {};
+    }
+
+    double GetDouble(uint32_t /*resId*/) override
+    {
+        return -1.0;
+    }
+
+    double GetDoubleByName(const std::string& resName) override
+    {
+        if (resName == RESOURCE_PARSE_UTILS_DOUBLE_NAME) {
+            return RESOURCE_DOUBLE_VALUE;
+        }
+        return 0.0;
+    }
+
+    int32_t GetInt(uint32_t /*resId*/) override
+    {
+        return 1;
+    }
+
+    int32_t GetIntByName(const std::string& resName) override
+    {
+        if (resName == RESOURCE_PARSE_UTILS_INTEGER_NAME) {
+            return RESOURCE_INT_VALUE;
+        }
+        return 0;
+    }
+};
+
+RefPtr<ResourceObject> CreateByNameResourceObject(const std::string& name, ResourceType type)
+{
+    std::vector<ResourceObjectParams> params;
+    params.emplace_back(ResourceObjectParams { .value = name, .type = ResourceObjectParamType::STRING });
+    return AceType::MakeRefPtr<ResourceObject>(
+        -1, static_cast<int32_t>(type), params, "", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID);
+}
+} // namespace
 
 /**
  * @tc.name: ResourceParseUtilsTest001
@@ -72,12 +159,6 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest001, TestSize.Level1)
     RefPtr<ResourceObject> resObjWithErrId = AceType::MakeRefPtr<ResourceObject>(100000, -1,
         resObjParamsList, "com.example.test", "entry", 100000);
     EXPECT_FALSE(ResourceParseUtils::ParseResourceToDouble(resObjWithErrId, doubleRes));
-
-    g_isResourceDecoupling = false;
-    EXPECT_FALSE(ResourceParseUtils::ParseResResource(resObjWithId, dimension));
-    EXPECT_FALSE(ResourceParseUtils::ParseResDimensionNG(resObjWithErrId, dimension, DimensionUnit::VP));
-    EXPECT_FALSE(ResourceParseUtils::ParseResColor(resObjWithName, color));
-    g_isResourceDecoupling = true;
 
     ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
     RefPtr<ResourceObject> stringObj = AceType::MakeRefPtr<ResourceObject>(1, 10003,
@@ -606,11 +687,9 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest015, TestSize.Level1)
     std::vector<ResourceObjectParams> params;
     std::string result;
     int32_t type = static_cast<int32_t>(ResourceType::PLURAL);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ResourceWrapper> resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
-    bool success = ResourceParseUtils::ParseResStringObj(params, resourceWrapper, result, type);
+    bool success = ResourceParseUtils::ParseResStringObj(params, resourceAdapter, result, type);
 
     /**
      * @tc.steps: step3. Verify the result.
@@ -635,17 +714,15 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest016, TestSize.Level1)
     params.push_back(param);
     std::string result;
     int32_t type = static_cast<int32_t>(ResourceType::STRING);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ResourceWrapper> resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
-    bool success = ResourceParseUtils::ParseResStringObj(params, resourceWrapper, result, type);
+    bool success = ResourceParseUtils::ParseResStringObj(params, resourceAdapter, result, type);
 
     /**
      * @tc.steps: step3. Verify the result.
-     * @tc.expect: result is true.
+     * @tc.expect: result is false.
      */
-    EXPECT_TRUE(success);
+    EXPECT_FALSE(success);
 }
 
 /**
@@ -666,11 +743,9 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest017, TestSize.Level1)
     params.push_back(param2);
     std::string result;
     int32_t type = static_cast<int32_t>(ResourceType::PLURAL);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ResourceWrapper> resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
-    bool success = ResourceParseUtils::ParseResStringObj(params, resourceWrapper, result, type);
+    bool success = ResourceParseUtils::ParseResStringObj(params, resourceAdapter, result, type);
 
     /**
      * @tc.steps: step3. Verify the result.
@@ -697,17 +772,15 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest018, TestSize.Level1)
     params.push_back(param2);
     std::string result;
     int32_t type = static_cast<int32_t>(ResourceType::PLURAL);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ResourceWrapper> resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
-    bool success = ResourceParseUtils::ParseResStringObj(params, resourceWrapper, result, type);
+    bool success = ResourceParseUtils::ParseResStringObj(params, resourceAdapter, result, type);
 
     /**
      * @tc.steps: step3. Verify the result.
-     * @tc.expect: result is true.
+     * @tc.expect: result is false.
      */
-    EXPECT_TRUE(success);
+    EXPECT_FALSE(success);
 }
 
 /**
@@ -726,11 +799,9 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest019, TestSize.Level1)
     params.push_back(param);
     std::string result;
     int32_t type = static_cast<int32_t>(ResourceType::BOOLEAN);
-    RefPtr<ThemeConstants> themeConstants = nullptr;
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ResourceWrapper> resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
 
-    bool success = ResourceParseUtils::ParseResStringObj(params, resourceWrapper, result, type);
+    bool success = ResourceParseUtils::ParseResStringObj(params, resourceAdapter, result, type);
 
     /**
      * @tc.steps: step3. Verify the result.
@@ -1207,18 +1278,16 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest031, TestSize.Level1)
 
 /**
  * @tc.name: ResourceParseUtilsTest032
- * @tc.desc: Test ParseResStrArray when GetOrCreateResourceWrapper fails.
+ * @tc.desc: Test ParseResStrArray when GetOrCreateResourceAdapter fails.
  * @tc.type: FUNC
  */
 HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest032, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set resource decoupling to false.
-     * @tc.steps: step2. Create valid resource object.
-     * @tc.steps: step3. Call ParseResStrArray.
-     * @tc.expect: Return false because GetOrCreateResourceWrapper fails.
+     * @tc.steps: step1. Create valid resource object.
+     * @tc.steps: step2. Call ParseResStrArray.
+     * @tc.expect: Return false because GetOrCreateResourceAdapter fails.
      */
-    g_isResourceDecoupling = false;
     std::vector<ResourceObjectParams> params;
     auto resObj = AceType::MakeRefPtr<ResourceObject>(1,
         static_cast<int32_t>(ResourceType::STRARRAY), params, "", "", 100000);
@@ -1234,12 +1303,11 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest032, TestSize.Level1)
 HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest033, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set resource decoupling to true and add resource adapter.
+     * @tc.steps: step1. Add resource adapter.
      * @tc.steps: step2. Create resource object with resId == -1 and empty params.
      * @tc.steps: step3. Call ParseResStrArray.
      * @tc.expect: Return false because params is empty.
      */
-    g_isResourceDecoupling = true;
     auto resourceAdapter = ResourceAdapter::Create();
     ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
     
@@ -1258,12 +1326,11 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest033, TestSize.Level1)
 HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest034, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set resource decoupling to true and add resource adapter.
+     * @tc.steps: step1. Add resource adapter.
      * @tc.steps: step2. Create resource object with resId == -1 and valid params.
      * @tc.steps: step3. Call ParseResStrArray.
      * @tc.expect: Return true but result may be empty due to no actual resource.
      */
-    g_isResourceDecoupling = true;
     auto resourceAdapter = ResourceAdapter::Create();
     ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
     
@@ -1284,12 +1351,11 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest034, TestSize.Level1)
 HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest035, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set resource decoupling to true and add resource adapter.
+     * @tc.steps: step1. Add resource adapter.
      * @tc.steps: step2. Create resource object with valid resId.
      * @tc.steps: step3. Call ParseResStrArray.
      * @tc.expect: Return true but result may be empty due to no actual resource.
      */
-    g_isResourceDecoupling = true;
     auto resourceAdapter = ResourceAdapter::Create();
     ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
     
@@ -1308,12 +1374,11 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest035, TestSize.Level1)
 HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest036, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Set resource decoupling to true and add resource adapter.
+     * @tc.steps: step1. Add resource adapter.
      * @tc.steps: step2. Create resource object with valid resId but wrong type.
      * @tc.steps: step3. Call ParseResStrArray.
      * @tc.expect: Return false because resource type is not STRARRAY.
      */
-    g_isResourceDecoupling = true;
     auto resourceAdapter = ResourceAdapter::Create();
     ResourceManager::GetInstance().AddResourceAdapter("", "", Container::CurrentIdSafely(), resourceAdapter);
 
@@ -1606,7 +1671,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest044, TestSize.Level1)
     std::vector<ResourceObjectParams> params;
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(1,
         static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
-    // This will return false because GetOrCreateResourceWrapper will fail without proper setup
+    // This will return false because GetOrCreateResourceAdapter will fail without proper setup
     double result;
     EXPECT_FALSE(ResourceParseUtils::ParseResourceToDouble(resObj, result));
 }
@@ -1722,7 +1787,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest047, TestSize.Level1)
     std::vector<ResourceObjectParams> params;
     resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::STRING),
         params, "", "", 100000);
-    // This will return false because GetOrCreateResourceWrapper will fail without proper setup
+    // This will return false because GetOrCreateResourceAdapter will fail without proper setup
     EXPECT_FALSE(ResourceParseUtils::ParseResDimensionNG(resObj, result, DimensionUnit::VP));
 }
 
@@ -1870,7 +1935,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest051, TestSize.Level1)
     std::vector<ResourceObjectParams> params;
     resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::STRING),
         params, "", "", 100000);
-    // This will return false because GetOrCreateResourceWrapper will fail without proper setup
+    // This will return false because GetOrCreateResourceAdapter will fail without proper setup
     EXPECT_TRUE(ResourceParseUtils::ParseResDimension(resObj, result, DimensionUnit::VP));
 
     /**
@@ -1991,7 +2056,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest054, TestSize.Level1)
      */
     resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::BOOLEAN),
         params, "", "", 100000);
-    // This will return false because GetOrCreateResourceWrapper will fail without proper setup
+    // This will return false because GetOrCreateResourceAdapter will fail without proper setup
     EXPECT_TRUE(ResourceParseUtils::ParseResBool(resObj, result));
 }
 
@@ -2089,7 +2154,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest057, TestSize.Level1)
      */
     resObj = AceType::MakeRefPtr<ResourceObject>(1, static_cast<int32_t>(ResourceType::STRING),
         params, "", "", 100000);
-    // This will return false because CreateResourceWrapper will fail without proper setup
+    // This will return false because CreateResourceAdapter will fail without proper setup
     EXPECT_FALSE(ResourceParseUtils::ParseResResource(resObj, result));
 }
 
@@ -2180,7 +2245,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest061, TestSize.Level1)
 
     ColorMode colorMode = ColorMode::LIGHT;
     Color result;
-    // This will still return false because GetOrCreateResourceWrapper will fail without proper setup
+    // This will still return false because GetOrCreateResourceAdapter will fail without proper setup
     EXPECT_FALSE(ResourceParseUtils::ParseResColorWithColorMode(resObj, result, colorMode));
     // But we can verify that the instanceId was set
     EXPECT_EQ(resObj->GetInstanceId(), -1);
@@ -2264,7 +2329,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest064, TestSize.Level1)
     std::vector<ResourceObjectParams> params;
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>(-1,
         static_cast<int32_t>(ResourceType::STRING), params, "", "", 100000);
-    // This will return false because GetOrCreateResourceWrapper will fail without proper setup
+    // This will return false because GetOrCreateResourceAdapter will fail without proper setup
     std::vector<std::string> result;
     EXPECT_FALSE(ResourceParseUtils::ParseResFontFamilies(resObj, result));
 }
@@ -2425,5 +2490,59 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest068, TestSize.Level1)
     
     result = GetReplaceContentStr(0, "f", params, 0);
     EXPECT_NE(result, "45.670000"); // Double to string conversion may have precision
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest074
+ * @tc.desc: Test ParseResString uses by-name branches for FLOAT and INTEGER resources.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest074, TestSize.Level1)
+{
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID);
+    RefPtr<ResourceAdapter> resourceAdapter = AceType::MakeRefPtr<ByNameAwareResourceAdapter>();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID, resourceAdapter);
+
+    std::string result;
+    auto floatResObj = CreateByNameResourceObject(RESOURCE_PARSE_UTILS_DOUBLE_NAME, ResourceType::FLOAT);
+    EXPECT_TRUE(ResourceParseUtils::ParseResString(floatResObj, result));
+    EXPECT_EQ(result, "10.500000");
+
+    result.clear();
+    auto intResObj = CreateByNameResourceObject(RESOURCE_PARSE_UTILS_INTEGER_NAME, ResourceType::INTEGER);
+    EXPECT_TRUE(ResourceParseUtils::ParseResString(intResObj, result));
+    EXPECT_EQ(result, "10");
+
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID);
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTest075
+ * @tc.desc: Test ParseResResource uses by-name branches when resource id is -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest075, TestSize.Level1)
+{
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID);
+    RefPtr<ResourceAdapter> resourceAdapter = AceType::MakeRefPtr<ByNameAwareResourceAdapter>();
+    ResourceManager::GetInstance().AddResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID, resourceAdapter);
+
+    CalcDimension result;
+    auto stringResObj = CreateByNameResourceObject(RESOURCE_PARSE_UTILS_STRING_NAME, ResourceType::STRING);
+    EXPECT_TRUE(ResourceParseUtils::ParseResResource(stringResObj, result));
+    EXPECT_EQ(result.Value(), 24.0);
+    EXPECT_EQ(result.Unit(), DimensionUnit::VP);
+
+    auto intResObj = CreateByNameResourceObject(RESOURCE_PARSE_UTILS_INTEGER_NAME, ResourceType::INTEGER);
+    EXPECT_TRUE(ResourceParseUtils::ParseResResource(intResObj, result));
+    EXPECT_EQ(result.Value(), 10.0);
+    EXPECT_EQ(result.Unit(), DimensionUnit::PX);
+
+    auto floatResObj = CreateByNameResourceObject(RESOURCE_PARSE_UTILS_DIMENSION_NAME, ResourceType::FLOAT);
+    EXPECT_TRUE(ResourceParseUtils::ParseResResource(floatResObj, result));
+    EXPECT_EQ(result.Value(), 10.0);
+    EXPECT_EQ(result.Unit(), DimensionUnit::VP);
+
+    ResourceManager::GetInstance().RemoveResourceAdapter("", "", RESOURCE_PARSE_UTILS_TEST_INSTANCE_ID);
 }
 } // namespace OHOS::Ace

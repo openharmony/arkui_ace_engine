@@ -40,7 +40,7 @@ export class ComposeTitleBarV2MenuItem {
   @Trace
   public symbolStyle?: SymbolGlyphModifier;
   @Trace
-  public isEnabled?: boolean = true;
+  public isEnabled?: boolean = false;
   @Trace
   public action?: OnActionCallback;
   @Trace
@@ -56,7 +56,7 @@ export class ComposeTitleBarV2MenuItem {
     if (params) {
       this.value = params.value;
       this.symbolStyle = params.symbolStyle;
-      this.isEnabled = params.isEnabled ?? true;
+      this.isEnabled = params.isEnabled ?? false;
       this.action = params.action;
       this.label = params.label;
       this.accessibilityText = params.accessibilityText;
@@ -64,7 +64,7 @@ export class ComposeTitleBarV2MenuItem {
       this.accessibilityDescription = params.accessibilityDescription;
     } else {
       this.value = '';
-      this.isEnabled = true;
+      this.isEnabled = false;
       this.accessibilityLevel = 'auto';
     }
   }
@@ -194,7 +194,7 @@ export struct ComposeTitleBarV2 {
           .constraintSize({ maxWidth: this.titleMaxWidth })
         }
         .accessibilityGroup(true)
-        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
+        .accessibilityRole(AccessibilityRoleType.TITLE_BAR)
       }
       .margin({ left: $r('sys.float.ohos_id_default_padding_start') })
 
@@ -487,6 +487,18 @@ struct CollapsibleMenuSectionV2 {
             })
             .onClick(() => this.isPopupShown = true)
             .gestureModifier(this.getItemGestureModifier())
+            .bindPopup(this.isPopupShown, {
+              builder: this.popupBuilder,
+              placement: Placement.Bottom,
+              popupColor: Color.White,
+              enableArrow: false,
+              onStateChange: (e: PopupStateChangeParam) => {
+                this.isPopupShown = e.isVisible;
+                if (!e.isVisible) {
+                  this.isMoreIconOnClick = false;
+                }
+              }
+            })
           }
         }
       }

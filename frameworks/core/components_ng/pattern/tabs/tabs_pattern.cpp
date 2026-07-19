@@ -22,8 +22,12 @@
 #include "base/log/ace_checker.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_recorder.h"
+#endif
+#ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
+#endif
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/base/observer_handler.h"
@@ -61,12 +65,16 @@ constexpr uint32_t MASK_COLOR_DARK = 0x99000000;
 
 const RefPtr<Curve> FOLLOW_HAND_ANIMATION_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0, 1.0, 224.0, 25.0);
 constexpr int32_t FOLLOW_HAND_ANIMATION_PART2_DELAY = 150;
+const char TAB_BAR_ETS_TAG[] = "TabBar";
+const char TABS_BACKGROUND_MASK_ETS_TAG[] = "BackgroundMask";
+const char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
 } // namespace
 
 void TabsPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    SetRecoverableViewHostNode(host);
     auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
     host->GetRenderContext()->SetClipToFrame(!tabTheme->GetIsChangeFocusTextStyle());
@@ -328,6 +336,7 @@ void TabsPattern::RecordChangeEvent(int32_t index)
 {
     auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_VOID(tabsNode);
+#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto inspectorId = tabsNode->GetInspectorId().value_or("");
         auto tabBarText = GetTabBarTextByIndex(index);
@@ -343,6 +352,7 @@ void TabsPattern::RecordChangeEvent(int32_t index)
             Recorder::NodeDataCache::Get().PutMultiple(tabsNode, inspectorId, tabBarText, index);
         }
     }
+#endif
 }
 
 std::string TabsPattern::GetTabBarTextByIndex(int32_t index) const
@@ -355,7 +365,9 @@ std::string TabsPattern::GetTabBarTextByIndex(int32_t index) const
     CHECK_NULL_RETURN(tabBarItem, "");
     auto node = AceType::DynamicCast<FrameNode>(tabBarItem);
     CHECK_NULL_RETURN(node, "");
-    return node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, "");
+    return accessibilityProperty->GetGroupText(true);
 }
 
 void TabsPattern::SetOnTabBarClickEvent(std::function<void(const BaseEventInfo*)>&& event)
@@ -519,7 +531,9 @@ void TabsPattern::OnAfterModifyDone()
     CHECK_NULL_VOID(property);
     auto index = property->GetIndexValue(0);
     auto tabBarText = GetTabBarTextByIndex(index);
+#ifndef CROSS_PLATFORM
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, tabBarText, index);
+#endif
 }
 
 void TabsPattern::SetOnIndexChangeEvent(std::function<void(const BaseEventInfo*)>&& event)
@@ -649,7 +663,7 @@ WeakPtr<FocusHub> TabsPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto swiperFocusNode = swiperNode->GetFocusHub();
     CHECK_NULL_RETURN(swiperFocusNode, nullptr);
 
-    if (curFocusNode->GetFrameName() == V2::TAB_BAR_ETS_TAG) {
+    if (curFocusNode->GetFrameName() == TAB_BAR_ETS_TAG) {
         if (tabBarPosition == BarPosition::START) {
             if (step == FocusStep::TAB || (axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
                 (axis == Axis::VERTICAL && (isRTL ? step == FocusStep::LEFT : step == FocusStep::RIGHT))) {
@@ -789,6 +803,16 @@ void TabsPattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(swiperNode);
     auto tabsLayoutProperty = GetLayoutProperty<TabsLayoutProperty>();
     CHECK_NULL_VOID(tabsLayoutProperty);
+    if (isInit_) {
+        std::string result;
+        if (GetRestoreInfo(result)) {
+            auto info = JsonUtil::ParseJsonString(result);
+            auto index = info->GetInt64("index");
+            auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+            CHECK_NULL_VOID(layoutProperty);
+            layoutProperty->UpdateIndexSetByUser(index);
+        }
+    }
     UpdateIndex(tabsNode, tabBarNode, swiperNode, tabsLayoutProperty);
 
     if (isInit_) {
@@ -797,7 +821,7 @@ void TabsPattern::BeforeCreateLayoutWrapper()
         swiperPattern->SetOnHiddenChangeForParent();
         auto parent = tabsNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parent);
-        while (parent && parent->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        while (parent && parent->GetTag() != NAVDESTINATION_VIEW_ETS_TAG) {
             parent = parent->GetAncestorNodeOfFrame(false);
         }
         if (!parent) {
@@ -894,6 +918,7 @@ void TabsPattern::HandleChildrenUpdated(const RefPtr<FrameNode>& swiperNode, con
     for (const auto& tabBarItemNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(tabBarItemNode);
         auto tabBarItemFrameNode = AceType::DynamicCast<FrameNode>(tabBarItemNode);
+        CHECK_NULL_VOID(tabBarItemFrameNode);
         tabBarItems[tabBarItemFrameNode->GetId()] = tabBarItemFrameNode;
     }
     std::stack<RefPtr<UINode>> stack;
@@ -1196,7 +1221,7 @@ void TabsPattern::InitFloatingBar()
     if (isBarOverlap && isHorizontal && isBarPositionEnd && isFloatingStyle) {
         isFloatingBar_ = true;
         if (!tabsNode->HasBackgroundMaskNode()) {
-            auto backgroundMaskNode = FrameNode::GetOrCreateFrameNode(V2::TABS_BACKGROUND_MASK_ETS_TAG,
+            auto backgroundMaskNode = FrameNode::GetOrCreateFrameNode(TABS_BACKGROUND_MASK_ETS_TAG,
                 tabsNode->GetBackgroundMaskId(), []() { return AceType::MakeRefPtr<StackPattern>(); });
             backgroundMaskNode->MountToParent(tabsNode, BG_MASK_INDEX);
             backgroundMaskNode->SetHitTestMode(HitTestMode::HTMNONE);
@@ -1308,12 +1333,28 @@ void TabsPattern::OnAttachToMainTree()
     CHECK_NULL_VOID(context);
     auto id = host->GetId();
     context->AddWindowSizeChangeCallback(id);
+    auto customId = host->GetInspectorId().value_or("");
+    RegisterRecoverable(customId);
+}
+
+bool TabsPattern::OnSaveData(std::string& data)
+{
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto layoutProperty = hostNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto info = JsonUtil::Create();
+    CHECK_NULL_RETURN(info, false);
+    info->Put("index", layoutProperty->GetIndexValue(0));
+    data = info->ToString();
+    return true;
 }
 
 void TabsPattern::OnDetachFromMainTree()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    UnregisterRecoverable();
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture && touchListener_) {
         gesture->RemoveTouchEvent(touchListener_);

@@ -280,11 +280,92 @@ HWTEST_F(WindowPatternTest, CreateSnapshotWindow, TestSize.Level0)
 }
 
 /**
- * @tc.name: OnAttachToFrameNode
- * @tc.desc: OnAttachToFrameNode Test
+ * @tc.name: OnAttachToFrameNode_StateDisconnect
+ * @tc.desc: Test OnAttachToFrameNode when state is STATE_DISCONNECT
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternTest, OnAttachToFrameNode, TestSize.Level0)
+HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateDisconnect, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    sceneSession_->state_ = Rosen::SessionState::STATE_DISCONNECT;
+    sceneSession_->SetShowRecent(true);
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(sceneSession_->GetShowRecent(), true);
+}
+
+/**
+ * @tc.name: OnAttachToFrameNode_StateBackground
+ * @tc.desc: Test OnAttachToFrameNode when state is STATE_BACKGROUND with different scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateBackground, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    sceneSession_->state_ = Rosen::SessionState::STATE_BACKGROUND;
+    sceneSession_->SetShowRecent(false);
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = false;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+
+    sceneSession_->SetShowRecent(false);
+    sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
+    sceneSession_->isAppLockControl_.store(false);
+    windowScene_->dmaReclaimEnabled_ = true;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+    EXPECT_EQ(windowScene_->appWindowDelayAdded_, false);
+
+    sceneSession_->SetShowRecent(false);
+    sceneSession_->isAppLockControl_.store(true);
+    windowScene_->dmaReclaimEnabled_ = true;
+    windowScene_->appWindowDelayAdded_ = false;
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+    EXPECT_EQ(windowScene_->appWindowDelayAdded_, false);
+
+    sceneSession_->SetShowRecent(true);
+    sceneSession_->isAppLockControl_.store(false);
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+
+    sceneSession_->SetShowRecent(true);
+    sceneSession_->isAppLockControl_.store(true);
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+}
+
+/**
+ * @tc.name: OnAttachToFrameNode_StateActive
+ * @tc.desc: Test OnAttachToFrameNode when state is STATE_ACTIVE with different scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateActive, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+
+    sceneSession_->state_ = Rosen::SessionState::STATE_ACTIVE;
+    sceneSession_->SetShowRecent(false);
+    sceneSession_->isAppLockControl_.store(false);
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+
+    sceneSession_->isAppLockControl_.store(true);
+    windowScene_->WindowPattern::OnAttachToFrameNode();
+    EXPECT_EQ(windowScene_->attachToFrameNodeFlag_, true);
+}
+
+/**
+ * @tc.name: OnAttachToFrameNode_StateDisconnect_MultiScenario
+ * @tc.desc: Test OnAttachToFrameNode when state is STATE_DISCONNECT with different scenarios
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, OnAttachToFrameNode_StateDisconnect_MultiScenario, TestSize.Level1)
 {
     ASSERT_NE(windowScene_, nullptr);
     ASSERT_NE(windowScene_->GetHost(), nullptr);

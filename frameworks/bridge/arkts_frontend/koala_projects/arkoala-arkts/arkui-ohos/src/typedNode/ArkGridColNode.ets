@@ -24,17 +24,17 @@ export class ArkGridColNode extends ArkBaseNode implements GridColAttribute {
         if (param.length > 1) {
             throw new Error('more than 1 parameters');
         }
-        let option_casted: GridColOptions | undefined = undefined;
+        let optionCasted: GridColOptions | undefined = undefined;
         if (param.length === 1) {
-            option_casted = param[0] as (GridColOptions | undefined);
+            optionCasted = param[0] as (GridColOptions | undefined);
         }
-        this.getPeer()?.setGridColOptionsAttribute(option_casted);
+        this.getPeer()?.setGridColOptionsAttribute(optionCasted);
         return this;
     }
 
     initialize(option?: GridColOptions): this {
-        const option_casted = option as (GridColOptions | undefined);
-        this.getPeer()?.setGridColOptionsAttribute(option_casted);
+        const optionCasted = option as (GridColOptions | undefined);
+        this.getPeer()?.setGridColOptionsAttribute(optionCasted);
         return this;
     }
 
@@ -42,21 +42,25 @@ export class ArkGridColNode extends ArkBaseNode implements GridColAttribute {
         return this.peer as ArkGridColPeer;
     }
 
+    allowChildCount(): number {
+        return 1;
+    }
+
     span(value: int32 | GridColColumnOption | undefined): this {
-        const value_casted = value as (int32 | GridColColumnOption | undefined);
-        this.getPeer()?.setSpanAttribute(value_casted);
+        const valueCasted = value as (int32 | GridColColumnOption | undefined);
+        this.getPeer()?.setSpanAttribute(valueCasted);
         return this;
     }
 
     gridColOffset(value: int32 | GridColColumnOption | undefined): this {
-        const value_casted = value as (int32 | GridColColumnOption | undefined);
-        this.getPeer()?.setGridColOffsetAttribute(value_casted);
+        const valueCasted = value as (int32 | GridColColumnOption | undefined);
+        this.getPeer()?.setGridColOffsetAttribute(valueCasted);
         return this;
     }
 
     order(value: int32 | GridColColumnOption | undefined): this {
-        const value_casted = value as (int32 | GridColColumnOption | undefined);
-        this.getPeer()?.setOrderAttribute(value_casted);
+        const valueCasted = value as (int32 | GridColColumnOption | undefined);
+        this.getPeer()?.setOrderAttribute(valueCasted);
         return this;
     }
 }

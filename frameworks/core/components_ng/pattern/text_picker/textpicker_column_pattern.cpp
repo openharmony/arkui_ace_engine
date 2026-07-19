@@ -19,6 +19,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <string_view>
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/geometry/dimension.h"
@@ -35,7 +36,6 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -52,7 +52,7 @@ const uint32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const Dimension ICON_SIZE = 24.0_vp;
 const Dimension ICON_TEXT_SPACE = 8.0_vp;
 const std::vector<std::string> FONT_FAMILY_DEFAULT = { "sans-serif" };
-const std::string MEASURE_STRING = "TEST";
+constexpr std::string_view MEASURE_STRING = "TEST";
 const int32_t HALF_NUMBER = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
 const double CURVE_MOVE_THRESHOLD = 0.5;
@@ -304,7 +304,7 @@ void TextPickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool nee
     CHECK_NULL_VOID(stack);
     auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
     CHECK_NULL_VOID(buttonNode);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty();
     CHECK_NULL_VOID(buttonLayoutProperty);
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1185,6 +1185,7 @@ void TextPickerColumnPattern::UpdateDefaultTextProperties(const RefPtr<TextLayou
     textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     textLayoutProperty->UpdateMaxLines(1);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
 
     CHECK_EQUAL_VOID(optionProperties_.empty(), true);
     InitTextHeightAndFontHeight(currentIndex, middleIndex, optionProperties_[currentIndex]);
@@ -1199,7 +1200,7 @@ void TextPickerColumnPattern::AddAnimationTextProperties(
     TextProperties properties{};
     if (textLayoutProperty->HasFontSize()) {
         MeasureContext measureContext;
-        measureContext.textContent = MEASURE_STRING;
+        measureContext.textContent = std::string(MEASURE_STRING);
         measureContext.fontSize = textLayoutProperty->GetFontSize().value();
         if (textLayoutProperty->HasFontFamily()) {
             auto fontFamilyVector = textLayoutProperty->GetFontFamily().value();
@@ -1276,6 +1277,7 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     if (isTextFadeOut_) {
         textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
     }
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     AddAnimationTextProperties(currentIndex, textLayoutProperty);
 }
 
@@ -2433,7 +2435,7 @@ void TextPickerColumnPattern::InitTextHeightAndFontHeight(uint32_t childIndex, u
     auto theme = pipeline->GetTheme<PickerTheme>();
 
     MeasureContext measureContext;
-    measureContext.textContent = MEASURE_STRING;
+    measureContext.textContent = std::string(MEASURE_STRING);
     measureContext.fontFamily = FONT_FAMILY_DEFAULT[0];
 
     if (childIndex == midIndex) {

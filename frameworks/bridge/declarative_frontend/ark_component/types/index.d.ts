@@ -1297,6 +1297,8 @@ declare type NavigationMenuItem = any
 declare type NavigationMenuOptions = any
 declare type ToolbarItem = any
 declare type NavigationToolbarOptions = any
+declare type SymbolGlyphModifier = any
+declare interface IndicatorIconInfo { index: number; icon: ResourceStr | SymbolGlyphModifier }
 
 // Missing types for ArkParticle
 declare type DisturbanceFieldOptions = any

@@ -17,13 +17,12 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/ellipse_model_static.h"
 #include "core/components_ng/pattern/shape/ellipse_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 
 RefPtr<FrameNode> EllipseModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    return FrameNode::CreateFrameNode(V2::ELLIPSE_ETS_TAG, nodeId, AceType::MakeRefPtr<EllipsePattern>());
+    return FrameNode::CreateFrameNode(ELLIPSE_ETS_TAG, nodeId, AceType::MakeRefPtr<EllipsePattern>());
 }
 
 } // namespace OHOS::Ace::NG

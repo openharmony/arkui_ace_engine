@@ -237,6 +237,7 @@ export class FrameNode implements MaterializedBase {
     public nodeType_?: string | undefined = undefined;
     private nodeAdapterRef_ ?: NodeAdapter;
     protected _supportMultiThread: boolean = false;
+    shouldInitRenderNode_: boolean = false;
 
     getType(): string {
         return 'CustomFrameNode';
@@ -261,6 +262,9 @@ export class FrameNode implements MaterializedBase {
             this._gestureEvent!.setPeer(PeerNode.findPeerByNativeId(this._nodeId));
         }
         return this._gestureEvent as UIGestureEvent;
+    }
+    constructor(uiContext: UIContext) {
+        this(uiContext, undefined, undefined, undefined);
     }
     constructor(uiContext: UIContext, options?: FrameNodeOptions) {
         this(uiContext, options, undefined, undefined);
@@ -299,7 +303,7 @@ export class FrameNode implements MaterializedBase {
             ArkUIAniModule._Common_Sync_InstanceId(instanceId);
             const isCustomFrameNode = type === undefined || type === 'CustomFrameNode';
             if (isCustomFrameNode) {
-                this.renderNode_ = new RenderNode('CustomFrameNode')
+                this.shouldInitRenderNode_ = true;
                 const ctorPtr: KPointer = ptr ? ptr : FrameNodeExtender.constructorFrameNode(this._supportMultiThread)
                 this.peer = new Finalizable(ctorPtr, FrameNode.getFinalizer())
                 this.nodePtr_ = this.peer?.ptr
@@ -308,10 +312,6 @@ export class FrameNode implements MaterializedBase {
                 const retval = ptr ? ptr : FrameNodeExtender.createTypedFrameNode(type as string, this._supportMultiThread);
                 this.peer = new Finalizable(retval, FrameNode.getFinalizer());
                 this.nodePtr_ = this.peer?.ptr
-            }
-            this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
-            if (this.renderNode_ && isCustomFrameNode) {
-                this.renderNode_!.peer = new Finalizable(FrameNodeExtender.getRenderNode(this.peer!.ptr), RenderNode.getFinalizer());
             }
             this._nodeId = FrameNodeExtender.getIdByFrameNode(this.peer!.ptr);
             ArkUIAniModule._Common_Restore_InstanceId();
@@ -853,7 +853,12 @@ export class FrameNode implements MaterializedBase {
             index_casted = index;
         }
         const oldParent = this.getParent();
-        if (oldParent && !oldParent.isModifiable() || !targetParent.isModifiable() || !targetParent.checkValid(this)) {
+        const isOldParentCrossLanguage = oldParent && (oldParent!.getType() === 'ProxyFrameNode') &&
+            (oldParent!.checkIfCanCrossLanguageTreeOperating());
+        const isTargetParentCrossLanguage = (targetParent!.getType() === 'ProxyFrameNode') &&
+            (targetParent!.checkIfCanCrossLanguageTreeOperating());
+        if ((oldParent && !(oldParent.isModifiable() || isOldParentCrossLanguage)) ||
+            !(targetParent.isModifiable() || isTargetParentCrossLanguage) || !targetParent.checkValid(this)) {
             const error = Error('The FrameNode is not modifiable.');
             throw new BusinessError(100021, error);
         }
@@ -905,6 +910,14 @@ export class FrameNode implements MaterializedBase {
     }
     public getRenderNode(): RenderNode | null {
         ArkUIAniModule._CheckThreadValid(true, 0);
+        if (this.shouldInitRenderNode_ && (!this.isDisposed_) && (!this.renderNode_)) {
+            this.shouldInitRenderNode_ = false;
+            this.renderNode_ = new RenderNode('CustomFrameNode')
+            this.renderNode_?.setFrameNode(new WeakRef<FrameNode>(this))
+            if (this.renderNode_) {
+                this.renderNode_!.peer = new Finalizable(FrameNodeExtender.getRenderNode(this.peer!.ptr), RenderNode.getFinalizer());
+            }
+        }
         return (this.renderNode_ && this.renderNode_?.peer?.ptr) ? this.renderNode_! : null;
     }
     public static getFrameNodePtr(node: FrameNode): KPointer {
@@ -1109,8 +1122,34 @@ export class ProxyFrameNode extends ImmutableFrameNode {
         return 'ProxyFrameNode';
     }
     moveTo(targetParent: FrameNode, index?: int): void {
-        const error = Error('The FrameNode is not modifiable.');
-        throw new BusinessError(100021, error);
+        if (!this.checkIfCanCrossLanguageTreeOperating()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        if (targetParent === undefined || targetParent === null) {
+            return;
+        }
+        let index_casted: int = -1;
+        if (index !== undefined && index !== null) {
+            index_casted = index;
+        }
+        const oldParent = this.getParent();
+        const isOldParentCrossLanguage = oldParent && (oldParent!.getType() === 'ProxyFrameNode') &&
+            (oldParent!.checkIfCanCrossLanguageTreeOperating());
+        const isTargetParentCrossLanguage = (targetParent!.getType() === 'ProxyFrameNode') &&
+            (targetParent!.checkIfCanCrossLanguageTreeOperating());
+        if ((oldParent && !(oldParent.isModifiable() || isOldParentCrossLanguage)) ||
+            !(targetParent.isModifiable() || isTargetParentCrossLanguage) || !targetParent.checkValid(this)) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        const targetParent_casted = targetParent as (FrameNode);
+        let result = FrameNodeExtender.moveTo(this, targetParent_casted, index_casted);
+        if (result === ERROR_CODE_NODE_IS_ADOPTED) {
+            const error = Error('The current node has already been adopted.');
+            throw new BusinessError(100027, error);
+        }
+        return;
     }
     public getRenderNode(): RenderNode | null {
         return null;

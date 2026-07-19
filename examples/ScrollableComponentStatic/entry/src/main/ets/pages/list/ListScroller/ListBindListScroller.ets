@@ -1,5 +1,6 @@
+'use static'
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use static'
-
 import {
   Entry,
   Text,
@@ -25,8 +24,10 @@ import {
   ListDividerOptions,
   RectResult,
   List,
+  ListOptions,
   ListItem,
   ListItemGroup,
+  ListItemGroupOptions,
   ForEach,
   ListScroller,
   EdgeEffect,
@@ -40,7 +41,6 @@ import {
   ListItemStyle,
   Color,
   Row,
-  ClickEvent,
   SwipeEdgeEffect,
   CustomBuilder,
   Builder,
@@ -57,8 +57,7 @@ import {
   VisibleListContentInfo,
   ListItemGroupArea,
   ScrollDirection,
-  StickyStyle,
-  Scroll,
+  StickyStyle
 } from '@ohos.arkui.component'
 import { State } from '@ohos.arkui.stateManagement'
 import hilog from '@ohos.hilog'
@@ -67,7 +66,7 @@ import hilog from '@ohos.hilog'
 @Component
 struct MyStateSample {
   @State smooth: boolean = false;
-  @State numbers: Array<string> = [];
+  @State numbers: string[] = [] as string[];
   private listScroller: ListScroller = new ListScroller();
 
   aboutToAppear()
@@ -168,7 +167,13 @@ struct MyStateSample {
           Button(`getItemRect(1)`)
             .fontSize(20)
             .onClick((e: ClickEvent) => {
-              let tmp = this.listScroller.getItemRect(1);
+              let tmp: RectResult;
+              try {
+                tmp = this.listScroller.getItemRect(1);
+              } catch (error) {
+                console.error('Failed to get item rect for index 1:', error);
+                return;
+              }
               console.info(`listTest getItemRect x: ${tmp.x}, y: ${tmp.y}, width: ${tmp.width}, height: ${tmp.height}`)
             })
           Button(`getItemRectInGroup(0, 4)`)
@@ -189,7 +194,7 @@ struct MyStateSample {
       }
       .scrollable(ScrollDirection.Horizontal)
       List({ space: 10, initialIndex: 11, scroller: this.listScroller }) {
-        ForEach(this.numbers, (day: string, index: number) => {
+        ForEach(this.numbers, (day: string, index: int) => {
           ListItemGroup({
             style: ListItemGroupStyle.CARD,
             header: () => {
@@ -199,7 +204,7 @@ struct MyStateSample {
               this.itemHead('Footer')
             } as CustomBuilder
           }) {
-            ForEach(this.numbers, (innerDay: string, innerIndex: number) => {
+            ForEach(this.numbers, (innerDay: string, innerIndex: int) => {
               ListItem({ style: ListItemStyle.CARD }) {
                 Text(`group: ${index}, item: ${innerIndex}`)
                   .fontSize(20)
@@ -214,7 +219,7 @@ struct MyStateSample {
             endMargin: 20
           } as ListDividerOptions)
         })
-        ForEach(this.numbers, (day: string, index: number) => {
+        ForEach(this.numbers, (day: string, index: int) => {
           ListItem() {
             Text(day)
               .fontSize(20)

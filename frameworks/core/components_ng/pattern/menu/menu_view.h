@@ -119,6 +119,8 @@ public:
     static void SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void UpdateStyleOptionColorMode(const OHOS::Ace::ColorMode colorMode, BlurStyleOption& styleOption,
         bool isColorModeFollowTarget = true);
+    static void UpdateMenuBorderEffect(
+        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
 
 private:
     static void UpdateMenuPaintProperty(
@@ -134,8 +136,6 @@ private:
         const RefPtr<PipelineContext>& pipelineContext);
     static bool ApplySystemMaterialForMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<UiMaterial>& systemMaterial,
         const RefPtr<RenderContext>& renderContext);
-    static void UpdateMenuBorderEffect(
-        const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& wrapperNode, const MenuParam& menuParam);
     static void UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
     static void NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode);
     static void ContextMenuChildMountProc(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
@@ -154,9 +154,11 @@ private:
     static void MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
         const MenuParam& menuParam, RefPtr<FrameNode> column, int32_t themeScopeId);
     static void MountGridSection(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
-        const MenuParam& menuParam, const RefPtr<FrameNode>& outerColumn);
+        const MenuParam& menuParam, const RefPtr<FrameNode>& outerColumn,
+        RefPtr<MenuPattern> customMenuPattern = nullptr);
     static RefPtr<FrameNode> CreateGridItem(
-        const OptionParam& param, int32_t index, const WeakPtr<FrameNode>& menuWeak = nullptr);
+        const OptionParam& param, int32_t index, const WeakPtr<FrameNode>& menuWeak = nullptr,
+        int32_t themeScopeId = 0, RefPtr<MenuPattern> customMenuPattern = nullptr);
     static void MountGridSectionDivider(const RefPtr<FrameNode>& column);
 
     // Custom builder grid support

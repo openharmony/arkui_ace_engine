@@ -60,7 +60,6 @@ public:
     RefPtr<PaintWrapper> CreateMockPaintWrapper(const RefPtr<FrameNode>& node);
 
     RefPtr<ContainerPickerPaintMethod> paintMethod_;
-    RefPtr<PickerTheme> mockTheme_;
 };
 
 void ContainerPickerPaintMethodTest::SetUpTestSuite()
@@ -84,14 +83,12 @@ void ContainerPickerPaintMethodTest::SetUp()
 {
     TestNG::SetUp();
     paintMethod_ = AceType::MakeRefPtr<ContainerPickerPaintMethod>();
-    mockTheme_ = AceType::MakeRefPtr<PickerTheme>();
 }
 
 void ContainerPickerPaintMethodTest::TearDown()
 {
     TestNG::TearDown();
     paintMethod_ = nullptr;
-    mockTheme_ = nullptr;
 }
 
 RefPtr<FrameNode> ContainerPickerPaintMethodTest::CreateContainerPickerNode()
@@ -464,11 +461,6 @@ HWTEST_F(ContainerPickerPaintMethodTest, PaintSelectionIndicatorDividerTest002, 
     auto layoutProperty = node->GetLayoutProperty<ContainerPickerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     layoutProperty->UpdateIndicatorType(static_cast<int32_t>(PickerIndicatorType::DIVIDER));
-
-    // Mock pipeline context and theme
-    auto pipelineContext = MockPipelineContext::GetCurrent();
-    float defaultThickness = 2.0f;
-    mockTheme_->dividerThickness_ = Dimension(defaultThickness);
 
     /**
      * @tc.steps: step2. Test with stroke width equal to half of item height

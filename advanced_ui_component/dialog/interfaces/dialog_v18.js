@@ -58,6 +58,8 @@ const VERSION_TWELVE = 50000012;
 const MAX_FONT_SCALE = 2;
 const FADEOUT_GRADIENT_WIDTH = 32;
 const FADEOUT_ENABLE = 'true';
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED = 125836945;
+const PUNCTUATION_OVERFLOW_DEFAULT_VALUE = true;
 const MAX_DIALOG_WIDTH = getNumberByResourceId(125831042, 400);
 const BUTTON_HORIZONTAL_PADDING = getNumberByResourceId(125830927, 16);
 const BODY_L = getNumberByResourceId(125830970, 16);
@@ -700,8 +702,8 @@ export class TipsDialog extends ViewPU {
                         Text.focusable(false);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.fallbackLineSpacing(true);
-                        Text.wordBreak(WordBreak.HYPHENATION);
                         Text.orphanCharOptimization(true);
+                        Text.punctuationOverflow(getPunctuationOverflowEnabled());
                     }, Text);
                     Text.pop();
                 });
@@ -771,8 +773,8 @@ export class TipsDialog extends ViewPU {
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.width('100%');
                         Text.fallbackLineSpacing(true);
-                        Text.wordBreak(WordBreak.HYPHENATION);
                         Text.orphanCharOptimization(true);
+                        Text.punctuationOverflow(getPunctuationOverflowEnabled());
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -808,8 +810,8 @@ export class TipsDialog extends ViewPU {
                             }
                         });
                         Text.fallbackLineSpacing(true);
-                        Text.wordBreak(WordBreak.HYPHENATION);
                         Text.orphanCharOptimization(true);
+                        Text.punctuationOverflow(getPunctuationOverflowEnabled());
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -1203,8 +1205,8 @@ export class SelectDialog extends ViewPU {
                         Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.fallbackLineSpacing(true);
-                        Text.wordBreak(WordBreak.HYPHENATION);
                         Text.orphanCharOptimization(true);
+                        Text.punctuationOverflow(getPunctuationOverflowEnabled());
                     }, Text);
                     Text.pop();
                     Row.pop();
@@ -1342,8 +1344,8 @@ export class SelectDialog extends ViewPU {
                             Text.layoutWeight(1);
                             Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
                             Text.fallbackLineSpacing(true);
-                            Text.wordBreak(WordBreak.HYPHENATION);
                             Text.orphanCharOptimization(true);
+                            Text.punctuationOverflow(getPunctuationOverflowEnabled());
                         }, Text);
                         Text.pop();
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1814,8 +1816,8 @@ export class ConfirmDialog extends ViewPU {
             });
             Text.width('100%');
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(getPunctuationOverflowEnabled());
         }, Text);
         Text.pop();
         Column.pop();
@@ -1889,8 +1891,8 @@ export class ConfirmDialog extends ViewPU {
             Text.layoutWeight(1);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(getPunctuationOverflowEnabled());
         }, Text);
         Text.pop();
         Row.pop();
@@ -2268,8 +2270,8 @@ export class AlertDialog extends ViewPU {
                 }
             });
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(getPunctuationOverflowEnabled());
         }, Text);
         Text.pop();
         Scroll.pop();
@@ -3283,8 +3285,8 @@ class CustomDialogContentComponent extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(getPunctuationOverflowEnabled());
         }, Text);
         Text.pop();
         Row.pop();
@@ -3326,8 +3328,8 @@ class CustomDialogContentComponent extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(getPunctuationOverflowEnabled());
         }, Text);
         Text.pop();
         Row.pop();
@@ -3903,6 +3905,28 @@ function getNumberByResourceId(resourceId, defaultValue, allowZero) {
         return defaultValue;
     }
 }
+function getPunctuationOverflowEnabled() {
+    try {
+        let configValue = resourceManager.getSysResourceManager()
+            ?.getStringSync(SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED);
+        if (configValue === 'true') {
+            return true;
+        }
+        else if (configValue === 'false') {
+            return false;
+        }
+        else {
+            hilog.warn(0x3900, 'Ace', `Punctuation overflow config invalid value: ${configValue}, use default: ${PUNCTUATION_OVERFLOW_DEFAULT_VALUE}`);
+            return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+        }
+    }
+    catch (error) {
+        let code = error.code;
+        let message = error.message;
+        hilog.error(0x3900, 'Ace', `Failed to get punctuation overflow config, code: ${code}, message: ${message}`);
+        return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+    }
+}
 function lazyInit(initializer) {
     let value = null;
     return () => {
@@ -4163,8 +4187,8 @@ export class LoadingDialog extends ViewPU {
             });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.fallbackLineSpacing(true);
-            Text.wordBreak(WordBreak.HYPHENATION);
             Text.orphanCharOptimization(true);
+            Text.punctuationOverflow(getPunctuationOverflowEnabled());
         }, Text);
         Text.pop();
         this.observeComponentCreation2((elmtId, isInitialRender) => {

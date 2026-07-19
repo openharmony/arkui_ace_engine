@@ -18,7 +18,6 @@
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navdestination_node_base.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -128,7 +127,7 @@ void TitleBarNode::UpdateJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     SetMenuJsonValue(json, filter);
     auto backButton = AceType::DynamicCast<FrameNode>(backButton_);
     CHECK_NULL_VOID(backButton);
-    auto layoutProperty = backButton->GetLayoutProperty<ButtonLayoutProperty>();
+    auto layoutProperty = backButton->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
         return;

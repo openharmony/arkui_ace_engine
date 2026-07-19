@@ -23,33 +23,37 @@ export class ArkGridRowNode extends ArkBaseNode implements GridRowAttribute {
         if (param.length > 1) {
             throw new Error('more than 1 parameters');
         }
-        let option_casted: GridRowOptions | undefined = undefined;
+        let optionCasted: GridRowOptions | undefined = undefined;
         if (param.length === 1) {
-            option_casted = param[0] as (GridRowOptions | undefined);
+            optionCasted = param[0] as (GridRowOptions | undefined);
         }
-        this.getPeer()?.setGridRowOptionsAttribute(option_casted);
+        this.getPeer()?.setGridRowOptionsAttribute(optionCasted);
         return this;
     }
 
     getPeer(): ArkGridRowPeer {
         return this.peer as ArkGridRowPeer;
     }
+
+    allowChildTypes(): string[] {
+        return ['GridCol'];
+    }
     
     initialize(option?: GridRowOptions): this {
-        const option_casted = option as (GridRowOptions | undefined);
-        this.getPeer()?.setGridRowOptionsAttribute(option_casted);
+        const optionCasted = option as (GridRowOptions | undefined);
+        this.getPeer()?.setGridRowOptionsAttribute(optionCasted);
         return this;
     }
 
     onBreakpointChange(value: ((breakpoints: string) => void) | undefined): this {
-        const value_casted = value as (((breakpoints: string) => void) | undefined);
-        this.getPeer()?.setOnBreakpointChangeAttribute(value_casted);
+        const valueCasted = value as (((breakpoints: string) => void) | undefined);
+        this.getPeer()?.setOnBreakpointChangeAttribute(valueCasted);
         return this;
     }
 
     alignItems(value: ItemAlign | undefined): this {
-        const value_casted = value as (ItemAlign | undefined);
-        this.getPeer()?.setAlignItemsAttribute(value_casted);
+        const valueCasted = value as (ItemAlign | undefined);
+        this.getPeer()?.setAlignItemsAttribute(valueCasted);
         return this;
     }
 }

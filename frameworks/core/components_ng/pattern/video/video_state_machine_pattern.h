@@ -18,33 +18,32 @@
 #include <mutex>
 #include <queue>
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/size.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/video/video_controller_async.h"
-#include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/video/video_accessibility_property.h"
-#include "core/components_ng/pattern/video/video_event_hub.h"
-#include "core/components_ng/pattern/video/video_layout_algorithm.h"
-#include "core/components_ng/pattern/video/video_layout_property.h"
+#include "core/components_ng/pattern/video/video_controller_async.h"
 #include "core/components_ng/pattern/video/video_state_manager.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/video/video_styles.h"
 #include "core/components_ng/render/media_player.h"
 #include "core/components_ng/render/render_surface.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/rect.h"
 
 namespace OHOS::Ace {
+#ifdef SUPPORT_IMAGE_ANALYZER
 class ImageAnalyzerManager;
+#endif
 }
 namespace OHOS::Ace::NG {
+class VideoAccessibilityProperty;
+class VideoEventHub;
+class VideoLayoutAlgorithm;
+class VideoLayoutProperty;
+class VideoStateManager;
+
 class VideoStateMachinePattern : public Pattern {
     DECLARE_ACE_TYPE(VideoStateMachinePattern, Pattern);
     friend class VideoStateManager;
     friend class VideoStateMachineFullScreenPattern;
-    friend class ::OHOS::Ace::VideoControllerAsync;
 
 public:
     using HiddenChangeEvent = std::function<void(bool)>;
@@ -66,25 +65,13 @@ public:
         return true;
     }
 
-    RefPtr<EventHub> CreateEventHub() override
-    {
-        return MakeRefPtr<VideoEventHub>();
-    }
+    RefPtr<EventHub> CreateEventHub() override;
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override
-    {
-        return MakeRefPtr<VideoLayoutProperty>();
-    }
+    RefPtr<LayoutProperty> CreateLayoutProperty() override;
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        return MakeRefPtr<VideoLayoutAlgorithm>();
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
-    {
-        return MakeRefPtr<VideoAccessibilityProperty>();
-    }
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
 
     bool IsSupportDrawModifier() const override
     {
@@ -175,6 +162,11 @@ public:
     bool GetInitialState() const
     {
         return isInitialState_;
+    }
+
+    bool OnBackPressedCallback() override
+    {
+        return OnBackPressed();
     }
 
     virtual bool OnBackPressed()
@@ -426,6 +418,8 @@ private:
     void ReportChangeEventOnUIThread(PlaybackStatus status, double playbackSpeed, uint32_t currentPos);
     void ReportCommandResultOnUIThread(
         const std::string& event, const std::string& result, const std::string& reason = "");
+    void BindControllerAsync();
+    void ClearControllerAsync();
 
     std::string GetDumpInfo();
     void GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json);
@@ -446,7 +440,7 @@ private:
     bool showFirstFrame_ = false;
     bool isInitialState_ = true; // First play state is true. Play or seek will set it to false.
 
-    RefPtr<VideoStateManager> stateManager_ = MakeRefPtr<VideoStateManager>(WeakClaim(this));
+    RefPtr<VideoStateManager> stateManager_;
 
     bool TransitionTo(VideoPlaybackState newState);
     bool TransitionToIfAllowed(VideoPlaybackState newState, const char* caller);
@@ -485,7 +479,9 @@ private:
 
     Rect lastBoundsRect_;
     Rect contentRect_;
+#ifdef SUPPORT_IMAGE_ANALYZER
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
+#endif
 
     ContentTransitionType contentTransition_ = ContentTransitionType::IDENTITY;
     Color surfaceBgColor_ = Color::BLACK;
@@ -510,6 +506,7 @@ private:
     std::mutex serialBgQueueMutex_;
     std::queue<SerialBgTask> serialBgTaskQueue_;
     bool isDrainingSerialBgQueue_ = false;
+    bool ownsControllerAsyncBinding_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoStateMachinePattern);
 };

@@ -49,7 +49,7 @@ void IsUserDefinedFontFamily(const std::string& pos)
 }
 
 panda::Local<panda::DateRef> GetDateObj(
-    EcmaVM* vm, const std::unique_ptr<JsonValue>& selectedJson, bool isDatePicker)
+    const EcmaVM* vm, const std::unique_ptr<JsonValue>& selectedJson, bool isDatePicker)
 {
     std::tm dateTime {};
     auto year = selectedJson->GetValue("year");
@@ -154,6 +154,24 @@ PickerTime ParseTime(const EcmaVM* vm, const Local<JSValueRef>& timeVal)
     return pickerTime;
 }
 
+void ParseBackgroundColor(ArkUINodeHandle& nativeNode, Color& color, RefPtr<ResourceObject>& colorResObj)
+{
+    auto bgColorRawPtr = AceType::RawPtr(colorResObj);
+    auto headRoomOptional = color.GetHeadRoomColor();
+    if (headRoomOptional.has_value()) {
+        auto colorWithHeadRoom = headRoomOptional.value();
+        ArkUI_Float32 hdrValues[5] = { static_cast<ArkUI_Float32>(colorWithHeadRoom.red),
+            static_cast<ArkUI_Float32>(colorWithHeadRoom.green), static_cast<ArkUI_Float32>(colorWithHeadRoom.blue),
+            static_cast<ArkUI_Float32>(colorWithHeadRoom.alpha),
+            static_cast<ArkUI_Float32>(colorWithHeadRoom.headRoom) };
+        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorForHDR(
+            nativeNode, color.GetColorSpace(), hdrValues, bgColorRawPtr);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorWithColorSpace(
+            nativeNode, color.GetValue(), color.GetColorSpace(), nullptr);
+    }
+}
+
 void ParseSelectedDateTimeObject(
     ArkUIRuntimeCallInfo* runtimeCallInfo, const panda::Local<panda::ObjectRef>& selectedObject, bool isDatePicker)
 {
@@ -167,7 +185,8 @@ void ParseSelectedDateTimeObject(
     panda::Local<panda::FunctionRef> func = changeEventVal->ToObject(vm);
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     std::function<void(const BaseEventInfo*)> changeEvent =
-        [vm, func = panda::CopyableGlobal(vm, func), node = targetNode, isDatePicker](const BaseEventInfo* info) {
+        [func = panda::CopyableGlobal(vm, func), node = targetNode, isDatePicker](const BaseEventInfo* info) {
+            auto vm = func.GetEcmaVM();
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -490,9 +509,10 @@ void SetJSDatePickerOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
         return;
     }
     Local<panda::FunctionRef> jsfunc = callbackArg->ToObject(vm);
-    std::function<void(const BaseEventInfo*)> onChange = [vm, func = panda::CopyableGlobal(vm, jsfunc),
+    std::function<void(const BaseEventInfo*)> onChange = [func = panda::CopyableGlobal(vm, jsfunc),
                                                              node = AceType::WeakClaim(frameNode)](
                                                              const BaseEventInfo* index) {
+        auto vm = func.GetEcmaVM();
         CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -525,9 +545,10 @@ void SetJSDatePickerOnDateChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
         return;
     }
     Local<panda::FunctionRef> jsfunc = callbackArg->ToObject(vm);
-    std::function<void(const BaseEventInfo*)> onChange = [vm, func = panda::CopyableGlobal(vm, jsfunc),
+    std::function<void(const BaseEventInfo*)> onChange = [func = panda::CopyableGlobal(vm, jsfunc),
                                                              node = AceType::WeakClaim(frameNode)](
                                                              const BaseEventInfo* index) {
+        auto vm = func.GetEcmaVM();
         CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
@@ -908,6 +929,8 @@ ArkUINativeModuleValue DatePickerBridge::ResetLunar(ArkUIRuntimeCallInfo* runtim
 
 ArkUINativeModuleValue DatePickerBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
+    CommonBridge::SetBackgroundColor(runtimeCallInfo);
+
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
@@ -928,11 +951,11 @@ ArkUINativeModuleValue DatePickerBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
             GetArkUINodeModifiers()->getDatePickerModifier()->setBackgroundColorWithResourceObj(
                 color.GetValue(), reinterpret_cast<void*>(AceType::RawPtr(colorResObj)));
         } else {
-            if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+            RefPtr<ResourceObject> colorResObj;
+            if (!ArkTSUtils::ParseJsColor(vm, colorArg, color, colorResObj)) {
                 return panda::JSValueRef::Undefined(vm);
             }
-            GetArkUINodeModifiers()->getCommonModifier()->setBackgroundColorWithColorSpace(
-                nativeNode, color.GetValue(), color.GetColorSpace(), nullptr);
+            ParseBackgroundColor(nativeNode, color, colorResObj);
         }
         GetArkUINodeModifiers()->getDatePickerModifier()->setDatePickerBackgroundColorWithColorSpace(
             nativeNode, color.GetValue(), color.GetColorSpace());

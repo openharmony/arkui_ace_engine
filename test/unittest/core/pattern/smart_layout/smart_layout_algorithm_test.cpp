@@ -27,6 +27,7 @@
 // NOLINTEND
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/flex/flex_layout_pattern.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -231,6 +232,11 @@ public:
         applyRowCount_++;
     }
 
+    void ApplyGeneralConstraints() override
+    {
+        applyGeneralCount_++;
+    }
+
     int64_t GetNodeId() const override
     {
         return nodeId_;
@@ -258,6 +264,9 @@ public:
 
     SmartLayoutRect GetChildrenBoundingBox() const override
     {
+        if (forceInvalidBoundingBox_) {
+            return SmartLayoutRect();
+        }
         if (children_.empty()) {
             return boundingBox_;
         }
@@ -297,9 +306,14 @@ public:
         size_.height.value = height;
     }
 
-    void SetBoundingBox(const SmartLayoutRect& rect)
+    void SetBoundingBox(const SmartLayoutRect& rect) override
     {
         boundingBox_ = rect;
+    }
+
+    const SmartLayoutRect& GetBoundingBox() const override
+    {
+        return boundingBox_;
     }
 
     void SetSolveResult(bool result)
@@ -315,6 +329,8 @@ public:
     bool solveCalled_ = false;
     int32_t applyColumnCount_ = 0;
     int32_t applyRowCount_ = 0;
+    int32_t applyGeneralCount_ = 0;
+    bool forceInvalidBoundingBox_ = false;
     std::vector<ChildLayoutInfo> createdInfos_;
 
 private:
@@ -405,9 +421,10 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest001, TestSize.Level1)
     SmartLayoutAlgorithm algorithm;
     EXPECT_EQ(algorithm.GetLayoutTypeFromWrapper(nullptr), SmartLayoutType::UNKNOWN);
 
+    // Non Column/Row/Flex tags fall back to the general (bounding-box) layout type.
     auto hostNode = CreateTestFrameNode("unknown", 1);
     auto wrapper = AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(WeakPtr<FrameNode>(hostNode), "unknown");
-    EXPECT_EQ(algorithm.GetLayoutTypeFromWrapper(wrapper.GetRawPtr()), SmartLayoutType::UNKNOWN);
+    EXPECT_EQ(algorithm.GetLayoutTypeFromWrapper(wrapper.GetRawPtr()), SmartLayoutType::GENERAL);
 }
 
 /**
@@ -1205,6 +1222,85 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest034, TestSize.Level1)
     matchWrapper->GetLayoutProperty()->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
     algorithm.ApplyChildLayout(matchWrapper, nodeMap, 1.0, 0.0, 0.0);
     EXPECT_FALSE(matchWrapper->layoutCalled_);
+}
+
+/**
+ * @tc.name: SmartLayoutAlgorithmTest035
+ * @tc.desc: Test GetLayoutTypeFromWrapper returns GENERAL for a wrapping Flex container
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest035, TestSize.Level1)
+{
+    SmartLayoutAlgorithm algorithm;
+    auto hostNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 35, AceType::MakeRefPtr<FlexLayoutPattern>(true));
+    auto wrapper = AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(WeakPtr<FrameNode>(hostNode), V2::FLEX_ETS_TAG);
+    EXPECT_EQ(algorithm.GetLayoutTypeFromWrapper(wrapper.GetRawPtr()), SmartLayoutType::GENERAL);
+}
+
+/**
+ * @tc.name: SmartLayoutAlgorithmTest036
+ * @tc.desc: Test ExecuteLayout GENERAL path applies general constraints with a valid bounding box,
+ *           and bails out before solving when the bounding box is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest036, TestSize.Level1)
+{
+    auto buildWrapper = [](int32_t id, RefPtr<FrameNode>& parentHostOut, RefPtr<FrameNode>& childHostOut) {
+        parentHostOut = CreateTestFrameNode(V2::FLEX_ETS_TAG, id);
+        auto parentWrapper = AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(
+            WeakPtr<FrameNode>(parentHostOut), V2::FLEX_ETS_TAG);
+        auto parentGeo = AceType::MakeRefPtr<GeometryNode>();
+        parentGeo->SetFrameSize(SizeF(200.0f, 200.0f));
+        parentWrapper->SetGeometry(parentGeo);
+        parentWrapper->SetLayoutProp(AceType::MakeRefPtr<FlexLayoutProperty>());
+        childHostOut = CreateTestFrameNode(V2::TEXT_ETS_TAG, id + 1);
+        auto childWrapper = AceType::MakeRefPtr<SmartLayoutAlgorithmTestWrapper>(
+            WeakPtr<FrameNode>(childHostOut), V2::TEXT_ETS_TAG);
+        auto childGeo = AceType::MakeRefPtr<GeometryNode>();
+        childGeo->SetFrameSize(SizeF(50.0f, 50.0f));
+        childGeo->SetFrameOffset(OffsetF(10.0f, 10.0f));
+        childWrapper->SetGeometry(childGeo);
+        parentWrapper->AddChild(childWrapper);
+        return parentWrapper;
+    };
+
+    // Helper: run ExecuteLayout(GENERAL) with configurable FakeEngine state.
+    // Returns (result, root) for assertion. Engine is cleaned up internally.
+    auto runGeneral = [&buildWrapper](int32_t id, bool solveResult, bool forceInvalidBB) {
+        SmartLayoutAlgorithm algorithm;
+        RefPtr<FrameNode> parentHost;
+        RefPtr<FrameNode> childHost;
+        auto wrapper = buildWrapper(id, parentHost, childHost);
+        auto* engine = new SmartLayoutAlgorithmFakeEngine();
+        engine->rootNode_->SetSolveResult(solveResult);
+        engine->rootNode_->forceInvalidBoundingBox_ = forceInvalidBB;
+        bool result = false;
+        {
+            SmartLayoutEngineLoaderGuard guard(engine);
+            result = algorithm.ExecuteLayout(wrapper.GetRawPtr(), SmartLayoutType::GENERAL);
+        }
+        auto root = std::static_pointer_cast<SmartLayoutAlgorithmFakeNode>(algorithm.rootNode_);
+        delete engine;
+        return std::make_pair(result, root);
+    };
+
+    // Valid bounding box: general constraints applied, solved and results applied (covers GENERAL offset branch).
+    {
+        auto [result, root] = runGeneral(360, true, false);
+        EXPECT_TRUE(result);
+        EXPECT_EQ(root->applyGeneralCount_, 1);
+        EXPECT_TRUE(root->solveCalled_);
+    }
+
+    // Invalid bounding box: guard bails out before solving.
+    // forceInvalidBoundingBox_ makes GetChildrenBoundingBox() return invalid rect,
+    // so ProcessLayoutChildren skips SetBoundingBox, leaving GetBoundingBox() at default (invalid).
+    {
+        auto [result, root] = runGeneral(380, true, true);
+        EXPECT_FALSE(result);
+        EXPECT_EQ(root->applyGeneralCount_, 0);
+        EXPECT_FALSE(root->solveCalled_);
+    }
 }
 
 } // namespace OHOS::Ace::NG

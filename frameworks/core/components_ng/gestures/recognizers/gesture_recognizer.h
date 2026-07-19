@@ -18,7 +18,6 @@
 
 #include <functional>
 #include <memory>
-#include <unordered_map>
 #include <unordered_set>
 
 #include "base/memory/referenced.h"
@@ -31,6 +30,7 @@
 // Forward declarations and type aliases from gesture_event.h
 namespace OHOS::Ace {
 class GestureEvent;
+struct AxisEvent;
 using GestureEventFunc = std::function<void(GestureEvent& info)>;
 using GestureEventNoParameter = std::function<void()>;
 }
@@ -310,6 +310,7 @@ public:
         enabled_ = true;
         OnResetStatus();
         ResetEscapeMode();
+        ResetTriggeredIds();
     }
 
     // called to reset status manually without rejected callback.
@@ -323,6 +324,7 @@ public:
         responseLinkRecognizer_.clear();
         enabled_ = true;
         ResetEscapeMode();
+        ResetTriggeredIds();
     }
     virtual bool CheckTouchId(int32_t touchId) = 0;
 
@@ -489,7 +491,7 @@ public:
         escapedFingerIds_.insert(existingFingers.begin(), existingFingers.end());
     }
 
-    bool IsFingerEscaped(int32_t fingerId) const
+    virtual bool IsFingerEscaped(int32_t fingerId) const
     {
         return escapedFingerIds_.find(fingerId) != escapedFingerIds_.end();
     }
@@ -501,6 +503,21 @@ public:
 
     // Hook: subclasses with per-finger state must override and clean it up.
     virtual void OnFingerEscaped(int32_t /*fingerId*/) {}
+
+    void SetTriggeredIds(const std::unordered_set<int32_t>& existingFingers)
+    {
+        triggeredFingerIds_.insert(existingFingers.begin(), existingFingers.end());
+    }
+
+    bool IsTriggeredIds(int32_t fingerId) const
+    {
+        return triggeredFingerIds_.find(fingerId) != triggeredFingerIds_.end();
+    }
+
+    void ResetTriggeredIds()
+    {
+        triggeredFingerIds_.clear();
+    }
 
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
@@ -517,7 +534,9 @@ protected:
     virtual void HandleTouchUpEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchMoveEvent(const TouchEvent& event) = 0;
     virtual void HandleTouchCancelEvent(const TouchEvent& event) = 0;
+#ifdef ENABLE_INSPECTOR_EVENT_REPORTING
     virtual void HandleReports(const GestureEvent& info, GestureCallbackType type) {};
+#endif
     virtual void HandleTouchDownEvent(const AxisEvent& event) {}
     virtual void HandleTouchUpEvent(const AxisEvent& event) {}
     virtual void HandleTouchMoveEvent(const AxisEvent& event) {}
@@ -597,6 +616,7 @@ protected:
     WeakPtr<NG::GestureReferee> referee_;
 
     std::unordered_set<int32_t> escapedFingerIds_;
+    std::unordered_set<int32_t> triggeredFingerIds_;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

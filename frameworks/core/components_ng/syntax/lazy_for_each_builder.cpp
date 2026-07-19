@@ -15,9 +15,11 @@
 
 #include "core/components_ng/syntax/for_each_base_node.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "base/log/dump_log.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
     std::pair<std::string, RefPtr<UINode>> LazyForEachBuilder::GetChildByIndex(
@@ -61,7 +63,7 @@ namespace OHOS::Ace::NG {
         return {};
     }
 
-    void LazyForEachBuilder::OnDataReloaded()
+    void LazyForEachBuilder::OnDataReloaded(bool reuseImmediately)
     {
         for (auto& [key, node] : expiringItem_) {
             node.first = -1;
@@ -76,6 +78,23 @@ namespace OHOS::Ace::NG {
         }
         cachedItems_.clear();
         needTransition = true;
+        CHECK_EQUAL_VOID(reuseImmediately, false);
+        auto lazyForEachNode = GetLazyForEachNode();
+        CHECK_NULL_VOID(lazyForEachNode);
+        for (const auto& [key, node] : expiringItem_) {
+            if (node.second) {
+                TryRecordRecyclableNodeRecursively(key + "__MarkedByReuseImmediately__Internal", node.second);
+            }
+        }
+        CHECK_EQUAL_VOID(recyclableNodeSet_.empty(), true);
+        // Add suffix to all keys in expiringItem_ to avoid reused by LazyForEach
+        std::unordered_map<std::string, LazyForEachCacheChild> newExpiringItem;
+        for (const auto& [key, node] : expiringItem_) {
+            newExpiringItem[key + "__MarkedByReuseImmediately__Internal"] = node;
+        }
+        expiringItem_ = std::move(newExpiringItem);
+        auto reuseIds = GetReuseIdsCanBeRecycled();
+        lazyForEachNode->EnableParentCustomNodeReleaseExpiringNode(reuseIds);
     }
 
     bool LazyForEachBuilder::OnDataAdded(size_t index)
@@ -527,7 +546,7 @@ namespace OHOS::Ace::NG {
                 OperateExchange(operation, initialIndex, cachedTemp, expiringTemp);
                 break;
             case OP::RELOAD:
-                OperateReload(expiringTemp);
+                OperateReload(expiringTemp, operation.reuseImmediately);
                 return true;
         }
         return false;
@@ -734,13 +753,13 @@ namespace OHOS::Ace::NG {
         }
     }
 
-    void LazyForEachBuilder::OperateReload(std::map<int32_t, LazyForEachChild>& expiringTemp)
+    void LazyForEachBuilder::OperateReload(std::map<int32_t, LazyForEachChild>& expiringTemp, bool reuseImmediately)
     {
         for (auto& [index, node] : expiringTemp) {
             expiringItem_.emplace(node.first, LazyForEachCacheChild(index, node.second));
         }
         operationList_.clear();
-        OnDataReloaded();
+        OnDataReloaded(reuseImmediately);
     }
 
     void LazyForEachBuilder::ThrowRepeatOperationError(int32_t index)
@@ -787,8 +806,7 @@ namespace OHOS::Ace::NG {
 
         ProcessCachedIndex(cache, idleIndexes);
 
-        bool result = true;
-        result = ProcessPreBuildingIndex(cache, deadline, itemConstraint, canRunLongPredictTask, idleIndexes);
+        bool result = ProcessPreBuildingIndex(cache, deadline, itemConstraint, canRunLongPredictTask, idleIndexes);
         if (!result) {
             expiringItem_.swap(cache);
             ProcessOffscreenNodesNotInExpiring(cache);
@@ -815,7 +833,10 @@ namespace OHOS::Ace::NG {
         if (reduceCache_) {
             ProcessNodesForCleanCache(cache);
         }
-        reduceCache_ = result ? false : reduceCache_;
+        if (result) {
+            reduceCache_ = false;
+            recyclableNodeSet_.clear();
+        }
         return result;
     }
 
@@ -1508,4 +1529,106 @@ namespace OHOS::Ace::NG {
         activeRangeStart_ = start;
         activeRangeEnd_ = end;
     }
+
+    bool LazyForEachBuilder::ReleaseExpiringNode(std::string reuseId)
+    {
+        constexpr int32_t MIN_RELEASE_COUNT = 5;
+        int32_t releasedCount = 0;
+        auto reuseIdIter = recyclableNodeSet_.find(reuseId);
+        if (reuseIdIter == recyclableNodeSet_.end()) {
+            return false;
+        }
+        auto& keyToNodeSetMap = reuseIdIter->second;
+        if (keyToNodeSetMap.empty()) {
+            return false;
+        }
+        for (auto nodeIter = keyToNodeSetMap.begin(); nodeIter != keyToNodeSetMap.end() &&
+             releasedCount < MIN_RELEASE_COUNT; nodeIter = keyToNodeSetMap.begin()) {
+            std::string key = nodeIter->first;
+            int32_t nodeCount = 0;
+            for (const auto& weakNode : nodeIter->second) {
+                auto validNode = weakNode.Upgrade();
+                if (validNode) {
+                    nodeCount++;
+                }
+            }
+            if (!nodeCount) {
+                keyToNodeSetMap.erase(key);
+                continue;
+            }
+            auto expiringIter = expiringItem_.find(key);
+            if (expiringIter != expiringItem_.end()) {
+                NotifyDataDeleted(expiringIter->second.second, static_cast<size_t>(expiringIter->second.first), true);
+                ProcessOffscreenNode(expiringIter->second.second, true);
+                NotifyItemDeleted(RawPtr(expiringIter->second.second), key);
+                if (expiringIter->second.second) {
+                    expiringIter->second.second->DetachFromMainTree();
+                }
+                expiringItem_.erase(expiringIter);
+                releasedCount += nodeCount;
+            }
+            for (auto& [reuseId, map] : recyclableNodeSet_) {
+                map.erase(key);
+            }
+        }
+        return releasedCount >= MIN_RELEASE_COUNT;
+    }
+
+    void LazyForEachBuilder::RecordRecyclableNode(
+        std::string reuseId, std::string key, WeakPtr<UINode> recycleNode)
+    {
+        auto reuseIdIter = recyclableNodeSet_.find(reuseId);
+        if (reuseIdIter == recyclableNodeSet_.end()) {
+            // ReuseId doesn't exist, create new entry with nodeId and node set
+            recyclableNodeSet_.insert({reuseId, {{key, {recycleNode}}}});
+            return;
+        }
+        auto& keyToNodeSetMap = reuseIdIter->second;
+        auto nodeKeyIter = keyToNodeSetMap.find(key);
+        if (nodeKeyIter == keyToNodeSetMap.end()) {
+            // ReuseId exists but nodeKey doesn't, create new entry
+            keyToNodeSetMap.insert({key, {recycleNode}});
+            return;
+        }
+        // Both reuseId and nodeKey exist, add to existing node set
+        nodeKeyIter->second.insert(recycleNode);
+    }
+
+    void LazyForEachBuilder::TryRecordRecyclableNodeRecursively(std::string key, RefPtr<UINode> node)
+    {
+        CHECK_NULL_VOID(node);
+        auto tag = node->GetTag();
+        CHECK_EQUAL_VOID(tag, V2::JS_VIEW_ETS_TAG);
+        if (tag == V2::RECYCLE_VIEW_ETS_TAG) {
+            auto child = node->GetFirstChild();
+            CHECK_NULL_VOID(child);
+            auto customNode = AceType::DynamicCast<CustomNode>(child);
+            CHECK_NULL_VOID(customNode);
+            RecordRecyclableNode(customNode->GetReuseId(), key, AceType::WeakClaim(RawPtr(customNode)));
+            return;
+        }
+        for (auto& child : node->GetChildren(true)) {
+            TryRecordRecyclableNodeRecursively(key, child);
+        }
+    }
+
+    std::set<std::string> LazyForEachBuilder::GetReuseIdsCanBeRecycled() const
+    {
+        std::set<std::string> reuseIds;
+        for (const auto& [reuseId, nodeMap] : recyclableNodeSet_) {
+            reuseIds.insert(reuseId);
+        }
+        return reuseIds;
+    }
+
+    void LazyForEachBuilder::SetLazyForEachNode(const WeakPtr<LazyForEachNode>& node)
+    {
+        lazyForEachNode_ = node;
+    }
+
+    RefPtr<LazyForEachNode> LazyForEachBuilder::GetLazyForEachNode() const
+    {
+        return lazyForEachNode_.Upgrade();
+    }
+
 }

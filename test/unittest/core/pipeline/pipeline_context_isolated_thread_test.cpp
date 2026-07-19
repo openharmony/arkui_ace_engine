@@ -116,6 +116,7 @@ HWTEST_F(PipelineContextIsolatedThreadTest, PipelineContextIsolatedThreadTest_Ad
 {
     auto pipeline = PipelineContextIsolatedThreadTest::context_;
     ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushDirtyPropertyNodes();
 
     auto node = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(node, nullptr);

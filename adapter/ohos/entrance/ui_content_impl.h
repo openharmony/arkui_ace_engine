@@ -83,6 +83,7 @@ public:
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
     void Background() override;
+    void NotifyWindowAttachStateChange(bool status) override;
     void PostPreFreezeRegisterTask(bool isRegister);
     void Focus() override;
     void UnFocus() override;
@@ -140,6 +141,7 @@ public:
     void RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor);
+    void SaveArkUIPageTranslateFunctions(const WeakPtr<TaskExecutor>& taskExecutor);
     void ChangeSensitiveNodes(bool isSensitive) override;
 
     // Window color
@@ -388,7 +390,6 @@ public:
 
     void SetFontScaleAndWeightScale(const RefPtr<Platform::AceContainer>& container, int32_t instanceId);
 
-    void SetForceSplitEnable(bool isForceSplit, ForceSplitMode mode, bool needUpdateViewport = false) override;
     void SetForceSplitConfig(const std::optional<ForceSplitConfig>& splitConfig) override;
 
     void AddDestructCallback(void* key, const std::function<void()>& callback)

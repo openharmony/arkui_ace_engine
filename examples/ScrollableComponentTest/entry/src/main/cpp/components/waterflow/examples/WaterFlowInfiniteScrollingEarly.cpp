@@ -27,7 +27,7 @@
 #include "components/waterflow/WaterFlow.h"
 
 namespace {
-constexpr char K_ITEM_TITLE_PREFIX[] = "FlowItem ";
+constexpr char K_ITEM_TITLE_PREFIX[] = "item ";
 constexpr float K_FONT_SIZE = 16.0f;
 
 constexpr float K_MAIN_A = 120.0f;
@@ -66,7 +66,12 @@ constexpr int K_AUTO_MAX_ITEMS = 100000;
 
 constexpr float K_MAIN_SEQ[] = {K_MAIN_A, K_MAIN_B, K_MAIN_C};
 constexpr size_t K_MAIN_SEQ_COUNT = sizeof(K_MAIN_SEQ) / sizeof(K_MAIN_SEQ[0]);
-constexpr uint32_t K_PALETTE[] = {0xFF6A5ACD, 0xFF00FFFF, 0xFF00FF7F, 0xFFDA70D6, 0xFFFFC0CB};
+constexpr uint32_t K_PAGE_BG = 0xFFF4F7FA;
+constexpr uint32_t K_PANEL_BG = 0xFFFFFFFF;
+constexpr uint32_t K_TEXT_PRIMARY = 0xFF1B2430;
+constexpr uint32_t K_TEXT_SECONDARY = 0xFF667085;
+constexpr uint32_t K_FOOTER_BG = 0xFFEAF0F8;
+constexpr uint32_t K_PALETTE[] = {0xFFFFE4D6, 0xFFD7F7E6, 0xFFDCEBFF, 0xFFFFF0B8, 0xFFEBDFFF, 0xFFD8F3FF};
 constexpr size_t K_PALETTE_COUNT = sizeof(K_PALETTE) / sizeof(K_PALETTE[0]);
 } // namespace
 
@@ -124,6 +129,7 @@ static inline void BindText(ArkUI_NativeNodeAPI_1 *api, ArkUI_NodeHandle flowIte
 
     SetTextContent(api, text, gItems[static_cast<size_t>(index)].c_str());
     SetAttributeFloat32(api, text, NODE_FONT_SIZE, K_FONT_SIZE);
+    SetAttributeUInt32(api, text, NODE_FONT_COLOR, K_TEXT_PRIMARY);
 }
 
 /**
@@ -231,11 +237,12 @@ static ArkUI_NodeHandle CreateFooter()
     ArkUI_NodeHandle text = api->createNode(ARKUI_NODE_TEXT);
     SetTextContent(api, text, "到底啦…");
     SetAttributeFloat32(api, text, NODE_FONT_SIZE, 14.0f);
+    SetAttributeUInt32(api, text, NODE_FONT_COLOR, K_TEXT_SECONDARY);
 
     ArkUI_NodeHandle footer = api->createNode(ARKUI_NODE_FLOW_ITEM);
     SetAttributeFloat32(api, footer, NODE_WIDTH_PERCENT, 1.0f);
     SetAttributeFloat32(api, footer, NODE_HEIGHT, 48.0f);
-    SetAttributeUInt32(api, footer, NODE_BACKGROUND_COLOR, 0x11000000U);
+    SetAttributeUInt32(api, footer, NODE_BACKGROUND_COLOR, K_FOOTER_BG);
     api->addChild(footer, text);
     return footer;
 }
@@ -263,6 +270,11 @@ static void SetupNodeAndAdapter()
     gNode = std::make_shared<WaterFlow>();
     gNode->SetHeight(K_WATER_FLOW_H);
     gNode->SetWidth(K_WATER_FLOW_W);
+    ArkUI_NativeNodeAPI_1 *api = nullptr;
+    OH_ArkUI_GetModuleInterface(ARKUI_NATIVE_NODE, ArkUI_NativeNodeAPI_1, api);
+    if (api) {
+        SetAttributeUInt32(api, gNode->GetWaterFlow(), NODE_BACKGROUND_COLOR, K_PANEL_BG);
+    }
     gNode->SetScrollCommon();
     gNode->SetLayoutDirection(K_LAYOUT_DIRECTION_RTL);
     gNode->SetColumnTemplate(K_COLUMN_TEMPLATE);
@@ -315,6 +327,7 @@ ArkUI_NodeHandle WaterFlow::CreateWaterFlowInfiniteScrollingEarly()
     }
     SetAttributeFloat32(api, page, NODE_WIDTH_PERCENT, 1.0f);
     SetAttributeFloat32(api, page, NODE_HEIGHT_PERCENT, 1.0f);
+    SetAttributeUInt32(api, page, NODE_BACKGROUND_COLOR, K_PAGE_BG);
 
     ArkUI_NodeHandle waterflow = BuildWaterFlow();
     if (waterflow) {

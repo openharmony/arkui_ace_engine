@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,9 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_alert_dialog_ffi.h"
 
 #include "cj_lambda.h"
-#include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
+
 #include "bridge/common/utils/engine_helper.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 
 using namespace OHOS::Ace;
 
@@ -65,7 +66,7 @@ extern "C" {
         auto cancel = [lambda = CJLambda::Create(alertDialog.cancel)]() {
             lambda();
         };
-        AlertDialogModel::GetInstance()->SetOnCancel(cancel, properties);
+        NG::NodeModifier::GetAlertDialogModel()->SetOnCancel(cancel, properties);
 
         // Parse alignment
         auto alignment = alertDialog.alignment;
@@ -155,7 +156,7 @@ extern "C" {
         auto action = [lambda = CJLambda::Create(objInner.action)]() {
             lambda();
         };
-        AlertDialogModel::GetInstance()->SetParseButtonObj(action, buttonInfo, properties, property);
+        NG::NodeModifier::GetAlertDialogModel()->SetParseButtonObj(action, buttonInfo, properties, property);
 
         if (buttonInfo.IsValid()) {
             properties.buttons.emplace_back(buttonInfo);
@@ -173,7 +174,7 @@ extern "C" {
 
         ParseButtonObj(properties, confirm, "confirm");
 
-        AlertDialogModel::GetInstance()->SetShowDialog(properties);
+        NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
     }
 
     void FfiOHOSShowAlertDialogParamWithButtons(
@@ -191,7 +192,7 @@ extern "C" {
 
         ParseButtonObj(properties, secondaryButton, "secondaryButton");
 
-        AlertDialogModel::GetInstance()->SetShowDialog(properties);
+        NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
     }
 
     void ParseButtonArray(
@@ -226,7 +227,7 @@ extern "C" {
             properties.buttonDirection = DIALOG_BUTTONS_DIRECTION[buttonDirection];
         }
 
-        AlertDialogModel::GetInstance()->SetShowDialog(properties);
+        NG::NodeModifier::GetAlertDialogModel()->SetShowDialog(properties);
     }
 }
 }

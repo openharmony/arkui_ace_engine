@@ -14,15 +14,18 @@
  */
 
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
+
+#include <string_view>
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/utils/utils.h"
 #include "session/host/include/session.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "base/geometry/dimension.h"
+#include "base/resource/data_provider_manager.h"
 #include "base/utils/system_properties.h"
-#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_log.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/property/gradient_property.h"
@@ -38,8 +41,8 @@ using namespace OHOS::Security::SecurityComponent;
 namespace {
 constexpr uint64_t SECOND_TO_MILLISECOND = 1000;
 constexpr float HALF = 2.0f;
-const std::string SEC_COMP_ID = "security component id = ";
-const std::string SEC_COMP_TYPE = ", security component type = ";
+constexpr std::string_view SEC_COMP_ID = "security component id = ";
+constexpr std::string_view SEC_COMP_TYPE = ", security component type = ";
 constexpr int32_t PARENT_EFFECT_CHECK_FUNC_NUM = 15;
 }
 
@@ -51,6 +54,17 @@ static std::vector<uintptr_t> g_callList = {
 
 SecurityComponentProbe SecurityComponentHandler::probe;
 SecurityComponent::SecCompUiRegister uiRegister(g_callList, &SecurityComponentHandler::probe);
+
+bool SecurityComponentHandler::QuerySmartEdgeState()
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto dataProviderManager = pipeline->GetDataProviderManager();
+    CHECK_NULL_RETURN(dataProviderManager, false);
+    return dataProviderManager->QuerySmartEdgeState();
+}
 
 bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY)
 {
@@ -67,13 +81,16 @@ bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double&
 }
 
 bool SecurityComponentHandler::GetWindowRect(RefPtr<FrameNode>& node,
-    OHOS::Security::SecurityComponent::SecCompRect& winRect)
+    OHOS::Security::SecurityComponent::SecCompRect& winRect, bool isSmartEdgeState)
 {
     auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto rect = pipelineContext->GetDisplayWindowRectInfo();
+    if (isSmartEdgeState && container->IsUIExtensionWindow()) {
+        rect = container->GetUIExtensionHostWindowRect();
+    }
     winRect.x_ = rect.Left();
     winRect.y_ = rect.Top();
     winRect.width_ = rect.Right() - rect.Left();
@@ -334,9 +351,11 @@ float SecurityComponentHandler::GetBorderRadius(RefPtr<FrameNode>& node, const N
 
     RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
     CHECK_NULL_RETURN(buttonNode, 0.0);
-    auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(bgProp, 0.0);
-    auto borderRadius = bgProp->GetBorderRadius();
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_RETURN(buttonModifier, 0.0);
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    const auto& borderRadius = buttonModifier->getBorderRadiusFromLayoutProp(buttonHandle);
+
     float radius = 0.0;
 
     switch (direction) {
@@ -702,14 +721,14 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
         }
         if (CheckRenderEffect(node, parentNode, message, buttonInfo) ||
             CheckParentBorder(parentNode, frameRect, message)) {
-            message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType + message;
+            message = std::string(SEC_COMP_ID) + scId + std::string(SEC_COMP_TYPE) + scType + message;
             return true;
         }
         CheckOverlayNode(parentNode, node, message, buttonInfo);
         if (CheckLinearGradientBlur(parentNode, node, buttonInfo.hasNonCompatibleChange_, buttonInfo.blurRadius_)) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s LinearGradientBlur is set, " \
                 "security component is invalid", parentNode->GetTag().c_str());
-            message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType +
+            message = std::string(SEC_COMP_ID) + scId + std::string(SEC_COMP_TYPE) + scType +
                 ", attribute linearGradientBlur of parent component " +
                 parentNode->GetTag() + " is set";
             return true;
@@ -833,7 +852,8 @@ bool SecurityComponentHandler::InitButtonRect(OHOS::Security::SecurityComponent:
         return false;
     }
 
-    if (!GetWindowRect(node, buttonInfo.windowRect_)) {
+    buttonInfo.isSmartEdgeState_ = QuerySmartEdgeState();
+    if (!GetWindowRect(node, buttonInfo.windowRect_, buttonInfo.isSmartEdgeState_)) {
         SC_LOG_WARN("InitBaseInfoWarning: Get window rect failed");
         return false;
     }
@@ -960,9 +980,9 @@ bool InitSCButtonInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo
             buttonInfo.bgColor_.value = renderContext->GetBackgroundColor().value().GetValue();
         }
 
-        auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_RETURN(bgProp, false);
-        const auto& borderWidth = bgProp->GetBorderWidthProperty();
+        auto layoutProperty = buttonNode->GetLayoutProperty();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        const auto& borderWidth = layoutProperty->GetBorderWidthProperty();
         if (borderWidth != nullptr) {
             if (borderWidth->leftDimen.has_value()) {
                 buttonInfo.borderWidth_ = borderWidth->leftDimen.value().ConvertToVp();
@@ -1029,9 +1049,11 @@ void SecurityComponentHandler::WriteButtonInfo(
     } else {
         RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
         CHECK_NULL_VOID(buttonNode);
-        auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(bgProp);
-        const auto& borderRadius = bgProp->GetBorderRadius();
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+        const auto& borderRadius = buttonModifier->getBorderRadiusFromLayoutProp(buttonHandle);
+
         if (borderRadius.has_value()) {
             buttonInfo.borderRadius_.leftBottom = borderRadius->radiusBottomLeft.value_or(Dimension(0.0)).ConvertToPx();
             buttonInfo.borderRadius_.leftTop = borderRadius->radiusTopLeft.value_or(Dimension(0.0)).ConvertToPx();
@@ -1371,7 +1393,8 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEventInner(int32_t
         return res;
     }
     if (!message.empty() && message != "PARENT_HAVE_INVALID_EFFECT") {
-        message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE + node->GetTag() + message;
+        message = std::string(SEC_COMP_ID) + std::to_string(node->GetId()) + std::string(SEC_COMP_TYPE) +
+            node->GetTag() + message;
     }
 
     if (res == SC_SERVICE_ERROR_COMPONENT_INFO_INVALID && !message.empty() &&
@@ -1387,14 +1410,14 @@ void SecurityComponentHandler::CheckSecurityComponentClickEvent(const RefPtr<Fra
     if (layoutProperty && layoutProperty->GetIsMaxLineLimitExceeded().has_value() &&
         layoutProperty->GetIsMaxLineLimitExceeded().value()) {
         SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is cliped by lines.");
-        message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE +
+        message = std::string(SEC_COMP_ID) + std::to_string(node->GetId()) + std::string(SEC_COMP_TYPE) +
             node->GetTag() + ", the text of the security component is cliped by lines";
         return;
     }
     if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
         layoutProperty->GetIsTextLimitExceeded().value()) {
         SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is out of range.");
-        message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE +
+        message = std::string(SEC_COMP_ID) + std::to_string(node->GetId()) + std::string(SEC_COMP_TYPE) +
             node->GetTag() + ", the text of the security component is out of range";
         return;
     }
@@ -1403,7 +1426,8 @@ void SecurityComponentHandler::CheckSecurityComponentClickEvent(const RefPtr<Fra
     }
     if (CheckComponentCoveredStatus(node->GetId(), message)) {
         SC_LOG_ERROR("SecurityComponentCheckFail: Security component is covered by another component.");
-        message = SEC_COMP_ID + std::to_string(node->GetId()) + SEC_COMP_TYPE + node->GetTag() + message;
+        message = std::string(SEC_COMP_ID) + std::to_string(node->GetId()) + std::string(SEC_COMP_TYPE) +
+            node->GetTag() + message;
         return;
     }
 }

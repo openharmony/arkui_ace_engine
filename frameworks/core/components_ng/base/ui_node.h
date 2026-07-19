@@ -22,27 +22,26 @@
 #include <memory>
 #include <set>
 #include <string>
-#include <unordered_map>
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/performance_check_types.h"
 #include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
 #include "base/utils/macros.h"
-#include "core/common/resource/resource_configuration.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/theme/theme.h"
-#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
-#include "interfaces/inner_api/ace_kit/include/json/json_util.h"
+#include "interfaces/inner_api/ace_kit/include/ui/base/inspector_filter.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 
 namespace OHOS::Ace {
 
 enum class PlatformVersion;
+class JsonValue;
+struct ConfigurationChange;
 
 namespace NG {
     class NGGestureRecognizer;
@@ -61,6 +60,7 @@ using ResponseLinkResult = std::list<WeakPtr<NG::NGGestureRecognizer>>;
 
 namespace OHOS::Ace::NG {
 class AccessibilityProperty;
+class ExportTextureInfo;
 class FocusHub;
 class LayoutWrapperNode;
 class FrameNode;
@@ -265,7 +265,7 @@ public:
     }
 
     // Return children for get inspector tree calling, return cache children directly
-    virtual const std::list<RefPtr<UINode>>& GetChildrenForInspector(bool needCacheNode = false) const
+    virtual std::list<RefPtr<UINode>> GetChildrenForInspector(bool needCacheNode = false) const
     {
         return children_;
     }
@@ -354,10 +354,12 @@ public:
     void DumpSimplifyTreeBase(std::shared_ptr<JsonValue>& current);
     void DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current);
     void DumpSimplifyTreeNode(std::shared_ptr<JsonValue>& current, ParamConfig config);
+#ifndef CROSS_PLATFORM
     void DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current,
         bool onlyNeedVisible, ParamConfig config = ParamConfig(),
         std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker = nullptr,
         double parentFinalOpacity = DEFAULT_NODE_OPACITY);
+#endif
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
@@ -526,7 +528,8 @@ public:
 
     virtual void SetActive(bool active, bool needRebuildRenderContext = false);
 
-    virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false, bool isReuse = false);
+    virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false,
+        bool isReuse = false, bool suppressActiveLifecycle = false);
 
     virtual void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility);
 
@@ -1307,9 +1310,11 @@ protected:
 private:
     struct RectCullingState;
 
+#ifndef CROSS_PLATFORM
     void DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
         ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker,
         double parentFinalOpacity, const RectCullingState& rectCullingState);
+#endif
     RectCullingState CreateRectCullingState(bool onlyNeedVisible, ParamConfig config);
     RectCullingState CreateChildRectCullingState(const RectCullingState& rectCullingState);
     bool IsCulledByRect(const RectCullingState& rectCullingState, bool hasInspectableChildren);

@@ -906,9 +906,21 @@ function restoreSet(target: Any, source: Any, classNameToCreator: Map<string, St
     });
 }
 
+function safeSetField(
+    field: reflect.InstanceField, realTarget: Any, value: Any
+): void {
+    try {
+        field.setValue(realTarget as Object, value);
+    } catch (e) {}
+}
+
 function restorePrimitiveField(field: reflect.InstanceField, realTarget: Any, srcVal: Any,
-    key: string, onError?: CollectionCoderErrorCallback): void {
+    key: string, source: Any, onError?: CollectionCoderErrorCallback): void {
     if (srcVal === undefined) {
+        if (!(source as Record<string, Any>).has(key)) {
+            return;
+        }
+        safeSetField(field, realTarget, undefined);
         return;
     }
     try {
@@ -917,7 +929,7 @@ function restorePrimitiveField(field: reflect.InstanceField, realTarget: Any, sr
         const tgtVal = field.getValue(realTarget as Object) as Any;
         const coerced = coercePrimitive(srcVal, tgtVal, key, onError);
         if (coerced !== undefined) {
-            field.setValue(realTarget as Object, coerced);
+            safeSetField(field, realTarget, coerced);
         }
     }
 }
@@ -928,7 +940,7 @@ function restoreCircularRefField(field: reflect.InstanceField, realTarget: Any,
     if (srcVal instanceof Date && tgtVal !== undefined && tgtVal !== null && tgtVal instanceof Date) {
         (tgtVal as Date).setTime((mappedVal as Date).getTime());
     } else {
-        field.setValue(realTarget as Object, mappedVal);
+        safeSetField(field, realTarget, mappedVal);
     }
 }
 
@@ -937,7 +949,7 @@ function restoreDateField(field: reflect.InstanceField, realTarget: Any,
     if (tgtVal !== undefined && tgtVal !== null && tgtVal instanceof Date) {
         (tgtVal as Date).setTime((srcVal as Date).getTime());
     } else {
-        field.setValue(realTarget as Object, srcVal);
+        safeSetField(field, realTarget, srcVal);
     }
 }
 
@@ -960,12 +972,12 @@ function restoreNestedField(field: reflect.InstanceField, realTarget: Any,
                     return;
                 }
             } catch (e) {}
-            field.setValue(realTarget as Object, newInstance);
+            safeSetField(field, realTarget, newInstance);
             restoreObject(newInstance, srcVal, classNameToCreator, visitedTargets, visitedSources, onError);
             return;
         }
     }
-    field.setValue(realTarget as Object, srcVal);
+    safeSetField(field, realTarget, srcVal);
 }
 
 function restoreField(field: reflect.InstanceField, realTarget: Any, source: Any,
@@ -977,7 +989,7 @@ function restoreField(field: reflect.InstanceField, realTarget: Any, source: Any
     const tgtVal: Any = field.getValue(realTarget as Object) as Any;
 
     if (typeof srcVal !== 'object' || srcVal === null) {
-        restorePrimitiveField(field, realTarget, srcVal, key, onError);
+        restorePrimitiveField(field, realTarget, srcVal, key, source, onError);
         return;
     }
 
@@ -995,7 +1007,7 @@ function restoreField(field: reflect.InstanceField, realTarget: Any, source: Any
         if (tgtVal !== undefined && tgtVal !== null) {
             restoreObject(tgtVal, srcVal, classNameToCreator, visitedTargets, visitedSources, onError);
         } else {
-            field.setValue(realTarget as Object, srcVal);
+            safeSetField(field, realTarget, srcVal);
         }
         return;
     }

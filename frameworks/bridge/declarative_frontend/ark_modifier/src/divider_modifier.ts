@@ -13,15 +13,52 @@
  * limitations under the License.
  */
 
-class DividerModifier extends ArkDividerComponent implements AttributeModifier<DividerAttribute> {
+class LazyArkDividerComponent extends ArkComponent {
+  static module: DividerComponentModule | undefined = undefined;
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkDividerComponent.module === undefined) {
+      LazyArkDividerComponent.module = globalThis.requireNapi('arkui.components.arkdivider');
+    }
+    this.lazyComponent = LazyArkDividerComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  vertical(value: boolean): this {
+    this.lazyComponent.vertical(value);
+    return this;
+  }
+
+  color(value: ResourceColor): this {
+    this.lazyComponent.color(value);
+    return this;
+  }
+
+  strokeWidth(value: number | string): this {
+    this.lazyComponent.strokeWidth(value);
+    return this;
+  }
+
+  lineCap(value: LineCapStyle): this {
+    this.lazyComponent.lineCap(value);
+    return this;
+  }
+}
+
+class DividerModifier extends LazyArkDividerComponent implements AttributeModifier<DividerAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: DividerAttribute): void {
     ModifierUtils.applySetOnChange(this);
-    ModifierUtils.applyAndMergeModifier<DividerAttribute, ArkDividerComponent, ArkComponent>(instance, this);
+    ModifierUtils.applyAndMergeModifier<DividerAttribute, LazyArkDividerComponent, ArkComponent>(instance, this);
   }
 }

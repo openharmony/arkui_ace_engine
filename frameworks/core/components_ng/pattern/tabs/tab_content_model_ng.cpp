@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -49,11 +50,12 @@ constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_F
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 const auto MASK_COUNT = 2;
 const auto IMAGE_INDICATOR_COUNT = 1;
-const std::string KEY_PADDING = "tabContent.tabBarPadding";
-const std::string KEY_PADDING_LEFT = "tabContent.tabBarPadding.left";
-const std::string KEY_PADDING_RIGHT = "tabContent.tabBarPadding.right";
-const std::string KEY_PADDING_TOP = "tabContent.tabBarPadding.top";
-const std::string KEY_PADDING_BOTTOM = "tabContent.tabBarPadding.bottom";
+constexpr std::string_view KEY_PADDING = "tabContent.tabBarPadding";
+constexpr std::string_view KEY_PADDING_LEFT = "tabContent.tabBarPadding.left";
+constexpr std::string_view KEY_PADDING_RIGHT = "tabContent.tabBarPadding.right";
+constexpr std::string_view KEY_PADDING_TOP = "tabContent.tabBarPadding.top";
+constexpr std::string_view KEY_PADDING_BOTTOM = "tabContent.tabBarPadding.bottom";
+const char TAB_CONTENT_ITEM_ETS_TAG[] = "TabContent";
 }
 
 void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
@@ -65,15 +67,15 @@ void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
         ScopedViewStackProcessor scopedViewStackProcessor;
         deepRenderFunc();
         auto deepChild = ViewStackProcessor::GetInstance()->Finish();
-        auto parent = FrameNode::GetFrameNode(V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId);
+        auto parent = FrameNode::GetFrameNode(TAB_CONTENT_ITEM_ETS_TAG, nodeId);
         if (deepChild && parent) {
             deepChild->MountToParent(parent);
         }
         return deepChild;
     };
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", TAB_CONTENT_ITEM_ETS_TAG, nodeId);
     ACE_UINODE_TRACE(nodeId);
-    auto frameNode = TabContentNode::GetOrCreateTabContentNode(V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId,
+    auto frameNode = TabContentNode::GetOrCreateTabContentNode(TAB_CONTENT_ITEM_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
             return AceType::MakeRefPtr<TabContentPattern>(shallowBuilder);
         });
@@ -97,10 +99,10 @@ void TabContentModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", TAB_CONTENT_ITEM_ETS_TAG, nodeId);
     ACE_UINODE_TRACE(nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
-        V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
+        TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     stack->Push(frameNode);
     auto tabTheme = frameNode->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(tabTheme);
@@ -112,7 +114,7 @@ RefPtr<FrameNode> TabContentModelNG::CreateFrameNode(int32_t nodeId)
 {
     ACE_UINODE_TRACE(nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
-        V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
+        TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     auto tabTheme = frameNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, nullptr);
     auto layout = frameNode->GetLayoutProperty<TabContentLayoutProperty>();
@@ -775,10 +777,10 @@ bool TabContentModelNG::CreatePaddingWithResourceObj(FrameNode* frameNode, const
     CHECK_NULL_RETURN(pattern, false);
     const std::string key = "tabContent.tabBarPadding";
     pattern->RemoveResObj(key);
-    pattern->RemoveResObj(KEY_PADDING_LEFT);
-    pattern->RemoveResObj(KEY_PADDING_RIGHT);
-    pattern->RemoveResObj(KEY_PADDING_TOP);
-    pattern->RemoveResObj(KEY_PADDING_BOTTOM);
+    pattern->RemoveResObj(std::string(KEY_PADDING_LEFT));
+    pattern->RemoveResObj(std::string(KEY_PADDING_RIGHT));
+    pattern->RemoveResObj(std::string(KEY_PADDING_TOP));
+    pattern->RemoveResObj(std::string(KEY_PADDING_BOTTOM));
     CHECK_NULL_RETURN(resObj, true);
 
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
@@ -830,8 +832,8 @@ bool TabContentModelNG::CreatePaddingLeftWithResourceObj(FrameNode* frameNode,
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    pattern->RemoveResObj(KEY_PADDING);
-    pattern->RemoveResObj(KEY_PADDING_LEFT);
+    pattern->RemoveResObj(std::string(KEY_PADDING));
+    pattern->RemoveResObj(std::string(KEY_PADDING_LEFT));
     CHECK_NULL_RETURN(resObjLeft, true);
 
     auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
@@ -853,7 +855,7 @@ bool TabContentModelNG::CreatePaddingLeftWithResourceObj(FrameNode* frameNode,
         }
         pattern->SetPadding(padding);
     };
-    pattern->AddResObj(KEY_PADDING_LEFT, resObjLeft, std::move(updateFunc));
+    pattern->AddResObj(std::string(KEY_PADDING_LEFT), resObjLeft, std::move(updateFunc));
     return true;
 }
 
@@ -863,8 +865,8 @@ bool TabContentModelNG::CreatePaddingRightWithResourceObj(FrameNode* frameNode,
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    pattern->RemoveResObj(KEY_PADDING);
-    pattern->RemoveResObj(KEY_PADDING_RIGHT);
+    pattern->RemoveResObj(std::string(KEY_PADDING));
+    pattern->RemoveResObj(std::string(KEY_PADDING_RIGHT));
     CHECK_NULL_RETURN(resObjRight, true);
 
     auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
@@ -886,7 +888,7 @@ bool TabContentModelNG::CreatePaddingRightWithResourceObj(FrameNode* frameNode,
         }
         pattern->SetPadding(padding);
     };
-    pattern->AddResObj(KEY_PADDING_RIGHT, resObjRight, std::move(updateFunc));
+    pattern->AddResObj(std::string(KEY_PADDING_RIGHT), resObjRight, std::move(updateFunc));
     return true;
 }
 
@@ -896,8 +898,8 @@ bool TabContentModelNG::CreatePaddingTopWithResourceObj(FrameNode* frameNode,
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    pattern->RemoveResObj(KEY_PADDING);
-    pattern->RemoveResObj(KEY_PADDING_TOP);
+    pattern->RemoveResObj(std::string(KEY_PADDING));
+    pattern->RemoveResObj(std::string(KEY_PADDING_TOP));
     CHECK_NULL_RETURN(resObjTop, true);
 
     auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
@@ -918,7 +920,7 @@ bool TabContentModelNG::CreatePaddingTopWithResourceObj(FrameNode* frameNode,
         }
         pattern->SetPadding(padding);
     };
-    pattern->AddResObj(KEY_PADDING_TOP, resObjTop, std::move(updateFunc));
+    pattern->AddResObj(std::string(KEY_PADDING_TOP), resObjTop, std::move(updateFunc));
     return true;
 }
 
@@ -928,8 +930,8 @@ bool TabContentModelNG::CreatePaddingBottomWithResourceObj(FrameNode* frameNode,
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    pattern->RemoveResObj(KEY_PADDING);
-    pattern->RemoveResObj(KEY_PADDING_BOTTOM);
+    pattern->RemoveResObj(std::string(KEY_PADDING));
+    pattern->RemoveResObj(std::string(KEY_PADDING_BOTTOM));
     CHECK_NULL_RETURN(resObjBottom, true);
 
     auto&& updateFunc = [weakNode = AceType::WeakClaim(frameNode), isSubTabStyle](
@@ -951,7 +953,7 @@ bool TabContentModelNG::CreatePaddingBottomWithResourceObj(FrameNode* frameNode,
         }
         pattern->SetPadding(padding);
     };
-    pattern->AddResObj(KEY_PADDING_BOTTOM, resObjBottom, std::move(updateFunc));
+    pattern->AddResObj(std::string(KEY_PADDING_BOTTOM), resObjBottom, std::move(updateFunc));
     return true;
 }
 
@@ -1370,6 +1372,210 @@ void TabContentModelNG::SetCustomStyleNode(const RefPtr<FrameNode>& customStyleN
     pattern->SetCustomStyleNode(customStyleNode);
 }
 
+void TabContentModelNG::CreateTabContent()
+{
+    TabContentModelNG().Create();
+}
+
+void TabContentModelNG::CreateTabContent(std::function<void()>&& deepRenderFunc)
+{
+    TabContentModelNG().Create(std::move(deepRenderFunc));
+}
+
+void TabContentModelNG::PopTabContent()
+{
+    TabContentModelNG().Pop();
+}
+
+RefPtr<TabContentPattern> TabContentModelNG::GetTabContentPattern(FrameNode* node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    return node->GetPattern<TabContentPattern>();
+}
+
+void TabContentModelNG::SetCustomStyleNode(FrameNode* node, const RefPtr<FrameNode>& customStyleNode)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomStyleNode(customStyleNode);
+}
+
+void TabContentModelNG::SetTabBar(FrameNode* node, const std::optional<std::string>& text,
+    const std::optional<std::string>& icon, const std::optional<TabBarSymbol>& tabBarSymbol,
+    TabBarBuilderFunc&& builder, bool /*useContentOnly*/)
+{
+    CHECK_NULL_VOID(node);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Icon, icon.value_or(""), node);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, Text, text.value_or(""), node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTabBar(text.value_or(""), icon.value_or(""), tabBarSymbol, std::move(builder));
+    pattern->SetTabBarWithContent(nullptr);
+}
+
+void TabContentModelNG::SetTabBarWithContent(FrameNode* node, const RefPtr<UINode>& content)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTabBarWithContent(content);
+}
+
+void TabContentModelNG::SetTabBarStyle(FrameNode* node, TabBarStyle tabBarStyle)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetTabBarStyle(tabBarStyle);
+}
+
+void TabContentModelNG::SetIndicator(FrameNode* node, const IndicatorStyle& indicator)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIndicatorStyle(indicator);
+}
+
+void TabContentModelNG::SetDrawableIndicatorConfig(FrameNode* node, const ImageInfoConfig& config)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDrawableIndicatorConfig(config);
+}
+
+void TabContentModelNG::SetDrawableIndicatorFlag(FrameNode* node, bool isDrawableIndicator)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDrawableIndicatorFlag(isDrawableIndicator);
+}
+
+void TabContentModelNG::SetIndicatorColorByUser(FrameNode* node, bool isByUser)
+{
+    CHECK_NULL_VOID(node);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, IndicatorColorSetByUser, isByUser, node);
+}
+
+void TabContentModelNG::SetBoard(FrameNode* node, const BoardStyle& board)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBoardStyle(board);
+}
+
+void TabContentModelNG::SetSelectedMode(FrameNode* node, SelectedMode selectedMode)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSelectedMode(selectedMode);
+}
+
+void TabContentModelNG::SetLabelStyle(FrameNode* node, const LabelStyle& labelStyle)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetLabelStyle(labelStyle);
+}
+
+void TabContentModelNG::SetLabelUnselectedColorByUser(FrameNode* node, bool isByUser)
+{
+    CHECK_NULL_VOID(node);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, LabelUnselectedColorSetByUser, isByUser, node);
+}
+
+void TabContentModelNG::SetLabelSelectedColorByUser(FrameNode* node, bool isByUser)
+{
+    CHECK_NULL_VOID(node);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, LabelSelectedColorSetByUser, isByUser, node);
+}
+
+void TabContentModelNG::SetIconStyle(FrameNode* node, const IconStyle& iconStyle)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIconStyle(iconStyle);
+}
+
+void TabContentModelNG::SetIconUnselectedColorByUser(FrameNode* node, bool isByUser)
+{
+    CHECK_NULL_VOID(node);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, IconUnselectedColorSetByUser, isByUser, node);
+}
+
+void TabContentModelNG::SetIconSelectedColorByUser(FrameNode* node, bool isByUser)
+{
+    CHECK_NULL_VOID(node);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, IconSelectedColorSetByUser, isByUser, node);
+}
+
+void TabContentModelNG::SetPadding(FrameNode* node, const PaddingProperty& padding)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    if (padding.left.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.left.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
+    if (padding.right.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.right.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
+    if (padding.top.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.top.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
+    if (padding.bottom.has_value()) {
+        ACE_CHECK_LPX_ATTRIBUTE(padding.bottom.value().GetDimension(), LpxAttribute::ALWAYS);
+    }
+    pattern->SetPadding(padding);
+}
+
+void TabContentModelNG::SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetUseLocalizedPadding(useLocalizedPadding);
+}
+
+void TabContentModelNG::SetLayoutMode(FrameNode* node, LayoutMode layoutMode)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetLayoutMode(layoutMode);
+}
+
+void TabContentModelNG::SetVerticalAlign(FrameNode* node, FlexAlign verticalAlign)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetVerticalAlign(verticalAlign);
+}
+
+void TabContentModelNG::SetSymmetricExtensible(FrameNode* node, bool isExtensible)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSymmetricExtensible(isExtensible);
+}
+
+void TabContentModelNG::SetId(FrameNode* node, const std::string& id)
+{
+    CHECK_NULL_VOID(node);
+    auto pattern = GetTabContentPattern(node);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetId(id);
+}
+
 void TabContentModelNG::SetTabBarBuilder(FrameNode* node, TabBarBuilderFunc&& builder)
 {
     CHECK_NULL_VOID(node);
@@ -1405,10 +1611,11 @@ void TabContentModelNG::SetOnWillHide(FrameNode* tabContentNode, std::function<v
 
 void TabContentModelNG::InitTabText(const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateEnablePunctuationOverflowOptimize(true);
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         return;
     }
-    CHECK_NULL_VOID(textLayoutProperty);
     auto& textStyle = textLayoutProperty->GetTextLineStyle();
     CHECK_NULL_VOID(textStyle);
     textStyle->UpdateOrphanCharOptimization(true);

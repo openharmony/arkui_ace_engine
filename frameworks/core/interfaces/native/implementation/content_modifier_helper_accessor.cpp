@@ -17,7 +17,7 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/common/dynamic_module_helper.h"
-#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/button/bridge/button_content_modifier_helper.h"
 #include "core/components_ng/pattern/checkbox/bridge/checkbox_content_modifier_helper.h"
 #include "core/components_ng/pattern/checkboxgroup/bridge/checkboxgroup_content_modifier_helper.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
@@ -28,8 +28,11 @@
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/loading_progress/bridge/content_modifier_helper.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
-#include "core/components_ng/pattern/progress/progress_model_ng.h"
+#include "core/components_ng/pattern/progress/bridge/progress_custom_modifier.h"
+#include "core/components_ng/pattern/progress/progress_date.h"
+#include "core/interfaces/native/node/progress_modifier.h"
 #include "core/components_ng/pattern/radio/bridge/radio_content_modifier_helper.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/rating/bridge/rating_content_modifier_helper.h"
@@ -40,6 +43,7 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/text_clock/bridge/text_clock_content_modifier_helper.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
+#include "core/components_ng/pattern/texttimer/bridge/text_timer_content_modifier_helper.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/toggle/bridge/toggle_content_modifier_helper.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -51,10 +55,31 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/object_keeper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/select/select_model_ng.h"
+#include "core/interfaces/native/node/select_modifier.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+const GENERATED_ArkUIButtonContentModifier* GetButtonStaticContentModifier();
 const GENERATED_ArkUICheckboxContentModifier* GetCheckboxStaticContentModifier();
 namespace {
+const GENERATED_ArkUIButtonContentModifier* GetButtonContentModifier()
+{
+#ifdef ARKUI_CAPI_UNITTEST
+    return GetButtonStaticContentModifier();
+#else
+    static const GENERATED_ArkUIButtonContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Button");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIButtonContentModifier*>(
+            module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+#endif
+}
+
 const GENERATED_ArkUICheckboxContentModifier* GetCheckboxContentModifier()
 {
 #ifdef ACE_UNITTEST
@@ -150,6 +175,34 @@ const ArkUIToggleStaticContentModifier* GetToggleContentModifier()
     return cachedModifier;
 }
 
+const ArkUILoadingProgressContentModifier* GetLoadingProgressContentModifier()
+{
+    static const ArkUILoadingProgressContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("LoadingProgress");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find loadingprogress dynamic module");
+        }
+        cachedModifier = reinterpret_cast<const ArkUILoadingProgressContentModifier*>(
+            module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+}
+
+const ArkUITextTimerContentModifier* GetTextTimerContentModifier()
+{
+    static const ArkUITextTimerContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextTimer");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find texttimer dynamic module");
+        }
+        cachedModifier = reinterpret_cast<const ArkUITextTimerContentModifier*>(
+            module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+}
+
 RefPtr<FrameNode> GetOrCreateContentBoxNode(Ark_NativePointer node)
 {
     auto boxNode = GeneratedApiImpl::GetContentNode(node);
@@ -175,37 +228,17 @@ void ContentModifierButtonImpl(Ark_NativePointer node,
                                const Ark_Object* contentModifier,
                                const ButtonModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        ButtonConfiguration config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_ButtonConfiguration arkConfig;
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.label = Converter::ArkValue<Ark_String>(config.label_, Converter::FC);
-        arkConfig.pressed = Converter::ArkValue<Ark_Boolean>(config.pressed_);
-        std::function<void(Ark_Float64, Ark_Float64)> handler = [frameNode](Ark_Float64 arkX, Ark_Float64 arkY) {
-            auto x = Converter::Convert<int32_t>(arkX);
-            auto y = Converter::Convert<int32_t>(arkY);
-            ButtonModelNG::TriggerClick(frameNode, x, y);
-        };
-        auto triggerCallback = CallbackKeeper::Claim<ButtonTriggerClickCallback>(handler);
-        arkConfig.triggerClick = triggerCallback.ArkValue();
-        auto boxNode = GetOrCreateContentBoxNode(node);
-        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            ReplaceContentBoxNodeChild(boxNode, uiNode);
-            }, node, arkConfig);
-        return boxNode;
-    };
-    ButtonModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    CHECK_NULL_VOID(node);
+    auto modifier = GetButtonContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierButtonImpl(node, contentModifier, builder);
 }
 void ResetContentModifierButtonImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetBuilderFunc(frameNode, nullptr);
+    CHECK_NULL_VOID(node);
+    auto modifier = GetButtonContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierButtonImpl(node);
 }
 void ContentModifierCheckBoxImpl(Ark_NativePointer node,
                                  const Ark_Object* contentModifier,
@@ -277,31 +310,32 @@ void ContentModifierLoadingProgressImpl(Ark_NativePointer node,
                                         const Ark_Object* contentModifier,
                                         const LoadingProgressModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(contentModifier);
-    CHECK_NULL_VOID(builder);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        LoadingProgressConfiguration config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_LoadingProgressConfiguration arkConfig;
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.enableLoading = Converter::ArkValue<Ark_Boolean>(config.enableloading_);
-        auto boxNode = GetOrCreateContentBoxNode(node);
-        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            ReplaceContentBoxNodeChild(boxNode, uiNode);
-            }, node, arkConfig);
-        return boxNode;
-    };
-    LoadingProgressModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    CHECK_NULL_VOID(node);
+    auto* modifier = GetLoadingProgressContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierLoadingProgressImpl(node, contentModifier, builder);
 }
 void ResetContentModifierLoadingProgressImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetBuilderFunc(frameNode, nullptr);
+    CHECK_NULL_VOID(node);
+    auto* modifier = GetLoadingProgressContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierLoadingProgressImpl(node);
+}
+void ContentModifierTextTimerImpl(
+    Ark_NativePointer node, const Ark_Object* contentModifier, const TextTimerModifierBuilder* builder)
+{
+    CHECK_NULL_VOID(node);
+    auto* modifier = GetTextTimerContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierTextTimerImpl(node, contentModifier, builder);
+}
+void ResetContentModifierTextTimerImpl(Ark_NativePointer node)
+{
+    CHECK_NULL_VOID(node);
+    auto* modifier = GetTextTimerContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierTextTimerImpl(node);
 }
 void ContentModifierProgressImpl(Ark_NativePointer node,
                                  const Ark_Object* contentModifier,
@@ -324,13 +358,17 @@ void ContentModifierProgressImpl(Ark_NativePointer node,
             }, node, arkConfig);
         return boxNode;
     };
-    ProgressModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    auto progressModifier = NG::NodeModifier::GetProgressCustomModifier();
+    CHECK_NULL_VOID(progressModifier);
+    progressModifier->setBuilderFuncToModelNG(frameNode, std::move(builderFunc));
 }
 void ResetContentModifierProgressImpl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ProgressModelNG::SetBuilderFunc(frameNode, nullptr);
+    auto progressModifier = NG::NodeModifier::GetProgressCustomModifier();
+    CHECK_NULL_VOID(progressModifier);
+    progressModifier->setBuilderFuncToModelNG(frameNode, nullptr);
 }
 void ContentModifierRadioImpl(Ark_NativePointer node,
                               const Ark_Object* contentModifier,
@@ -384,7 +422,7 @@ void ContentModifierMenuItemImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
     auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        MenuItemConfiguration config) -> RefPtr<FrameNode> {
+                           MenuItemConfiguration config) -> RefPtr<FrameNode> {
         Ark_ContentModifier contentModifier = (*objectKeeper).get();
         Ark_MenuItemConfiguration arkConfig = PeerUtils::CreatePeer<MenuItemConfigurationPeer>();
         arkConfig->contentModifier_ = contentModifier;
@@ -425,13 +463,17 @@ void ContentModifierMenuItemImpl(Ark_NativePointer node,
             }, node, arkConfig);
         return boxNode;
     };
-    SelectModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    customModifier->setBuilderFunc(frameNode, std::move(builderFunc));
 }
 void ResetContentModifierMenuItemImpl(Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SelectModelNG::ResetBuilderFunc(frameNode);
+    auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
+    CHECK_NULL_VOID(customModifier);
+    customModifier->resetBuilderFunc(frameNode);
 }
 const GENERATED_ArkUISliderContentModifier* GetSliderContentModifier()
 {
@@ -476,38 +518,7 @@ void ResetContentModifierTextClockImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(modifier);
     modifier->resetContentModifierTextClockImpl(node);
 }
-void ContentModifierTextTimerImpl(Ark_NativePointer node,
-                                  const Ark_Object* contentModifier,
-                                  const TextTimerModifierBuilder* builder)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        TextTimerConfiguration config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_TextTimerConfiguration arkConfig;
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.count = Converter::ArkValue<Ark_Int64>(config.count_);
-        arkConfig.isCountDown = Converter::ArkValue<Ark_Boolean>(config.isCountDown_);
-        arkConfig.started = Converter::ArkValue<Ark_Boolean>(config.started_);
-        arkConfig.elapsedTime = Converter::ArkValue<Ark_Int64>(static_cast<int32_t>(config.elapsedTime_));
-        arkConfig.startTime = Converter::ArkValue<Opt_Int32>(config.startTime_);
-        auto boxNode = GetOrCreateContentBoxNode(node);
-        arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
-            ReplaceContentBoxNodeChild(boxNode, uiNode);
-            }, node, arkConfig);
-        return boxNode;
-    };
-    TextTimerModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
-}
-void ResetContentModifierTextTimerImpl(Ark_NativePointer node)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextTimerModelNG::SetBuilderFunc(frameNode, nullptr);
-}
+
 void ContentModifierToggleImpl(
     Ark_NativePointer node, const Ark_Object* contentModifier, const ToggleModifierBuilder* builder)
 {

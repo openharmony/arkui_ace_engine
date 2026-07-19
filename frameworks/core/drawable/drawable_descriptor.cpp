@@ -21,7 +21,6 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
-#include "core/common/resource/resource_wrapper.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/drawable/animated_drawable_descriptor.h"
 #include "core/drawable/drawable_descriptor_info.h"
@@ -39,29 +38,14 @@ constexpr int32_t STRING = 10003;
 constexpr int32_t MEDIA = 20000;
 constexpr int32_t RAWFILE = 30000;
 
-RefPtr<ResourceWrapper> CreateResourceWrapperDrawableDescriptor()
+RefPtr<ResourceAdapter> CreateResourceAdapterDrawableDescriptor()
 {
     RefPtr<ResourceAdapter> resourceAdapter = nullptr;
-    RefPtr<ThemeConstants> themeConstants = nullptr;
-    if (SystemProperties::GetResourceDecoupling()) {
-        resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
-        if (!resourceAdapter) {
-            return nullptr;
-        }
-    } else {
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, nullptr);
-        auto pipelineContext = container->GetPipelineContext();
-        CHECK_NULL_RETURN(pipelineContext, nullptr);
-        auto themeManager = pipelineContext->GetThemeManager();
-        CHECK_NULL_RETURN(themeManager, nullptr);
-        themeConstants = themeManager->GetThemeConstants("", "");
-        if (!themeConstants) {
-            return nullptr;
-        }
+    resourceAdapter = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
+    if (!resourceAdapter) {
+        return nullptr;
     }
-    auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
-    return resourceWrapper;
+    return resourceAdapter;
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_AnimatedDrawableDescriptor_SetPixelMapList(
@@ -273,25 +257,25 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_ParseStaticMedia(
         return;
     }
     std::string param(paramC);
-    auto resourceWrapper = CreateResourceWrapperDrawableDescriptor();
-    CHECK_NULL_VOID(resourceWrapper);
+    auto resourceAdapter = CreateResourceAdapterDrawableDescriptor();
+    CHECK_NULL_VOID(resourceAdapter);
     if (type == static_cast<int32_t>(RAWFILE)) {
-        res->src = resourceWrapper->GetRawfile(param);
+        res->src = resourceAdapter->GetRawfile(param);
         return;
     }
     if (resId == -1) {
         if (type == static_cast<int32_t>(MEDIA)) {
-            res->src = resourceWrapper->GetMediaPathByName(param);
+            res->src = resourceAdapter->GetMediaPathByName(param);
             return;
         }
         if (type == static_cast<int32_t>(STRING)) {
-            res->src = resourceWrapper->GetStringByName(param);
+            res->src = resourceAdapter->GetStringByName(param);
             return;
         }
     } else if (type == static_cast<int32_t>(MEDIA)) {
-        res->src = resourceWrapper->GetMediaPath(resId);
+        res->src = resourceAdapter->GetMediaPath(resId);
     } else if (type == static_cast<int32_t>(STRING)) {
-        res->src = resourceWrapper->GetString(resId);
+        res->src = resourceAdapter->GetString(resId);
     }
 }
 } // namespace OHOS::Ace

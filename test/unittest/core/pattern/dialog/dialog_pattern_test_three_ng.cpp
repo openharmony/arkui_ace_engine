@@ -23,56 +23,55 @@
 #include "core/common/display_info.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline/base/constants.h"
-
 #define private public
 #define protected public
-#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
+#include "interfaces/inner_api/ace_kit/include/ui/properties/dirty_flag.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/base/subwindow/mock_subwindow.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/event/frame_node_on_tree.h"
 
-#include "core/accessibility/accessibility_manager_ng.h"
 #include "base/log/dump_log.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "core/accessibility/accessibility_manager_ng.h"
+#include "core/common/ace_engine.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/common/resource/resource_object.h"
+#include "core/components/button/button_theme.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/blur_style_option.h"
+#include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components/select/select_theme.h"
-#include "core/components/button/button_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
+#include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/dialog/alert_dialog_model_ng.h"
-#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
+#include "core/components_ng/pattern/dialog/action_sheet/action_sheet_model_ng.h"
+#include "core/components_ng/pattern/dialog/alert_dialog/alert_dialog_model_ng.h"
+#include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model_ng.h"
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_layout_algorithm.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "test/unittest/core/event/frame_node_on_tree.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/common/ace_engine.h"
-#include "core/common/resource/resource_object.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/blur_style_option.h"
-#include "core/components/common/properties/shadow.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "interfaces/inner_api/ace_kit/include/ui/properties/dirty_flag.h"
-#include "core/components/common/properties/ui_material.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -196,122 +195,6 @@ RefPtr<FrameNode> DialogPatternTestThreeNg::CreateMenu(const std::vector<ButtonI
     auto buttonRow = CreateButton("");
     buttonRow->MountToParent(menu);
     return menu;
-}
-
-/**
- * @tc.name: OnDirtyLayoutWrapperSwap_WithDistortionEnabled001
- * @tc.desc: Test OnDirtyLayoutWrapperSwap with distortion enabled
- * @tc.type: FUNC
- */
-HWTEST_F(DialogPatternTestThreeNg, OnDirtyLayoutWrapperSwap_WithDistortionEnabled001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create dialog node and set up material properties for distortion
-     * @tc.expected: The dialog node created successfully
-     */
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DialogPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Create content node and mount to dialog
-     * @tc.expected: Content node mounted successfully
-     */
-    auto contentNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(frameNode);
-
-    /**
-     * @tc.steps: step3. Set distortion mode to ENABLED
-     * @tc.expected: Distortion mode set successfully
-     */
-    pattern->dialogProperties_.distortionMode = DistortionMode::DISTORTION_ENABLED;
-    pattern->dialogProperties_.systemMaterial = AceType::MakeRefPtr<UiMaterial>();
-
-    /**
-     * @tc.steps: step4. Create LayoutWrapper and DirtySwapConfig
-     * @tc.expected: Wrapper and config created successfully
-     */
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-
-    /**
-     * @tc.steps: step5. Call OnDirtyLayoutWrapperSwap with distortion enabled
-     * @tc.expected: Function returns true and distortion animation is triggered
-     */
-    auto result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_TRUE(result);
-    EXPECT_TRUE(pattern->isDistortAnimationExecuting_.has_value());
-}
-
-/**
- * @tc.name: OnDirtyLayoutWrapperSwap_WithDistortionAnimationExecuting001
- * @tc.desc: Test OnDirtyLayoutWrapperSwap when distortion animation is already executing
- * @tc.type: FUNC
- */
-HWTEST_F(DialogPatternTestThreeNg, OnDirtyLayoutWrapperSwap_WithDistortionAnimationExecuting001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create dialog node and set up material properties
-     * @tc.expected: The dialog node created successfully
-     */
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DialogPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Create content node and mount to dialog
-     * @tc.expected: Content node mounted successfully
-     */
-    auto contentNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ASSERT_NE(contentNode, nullptr);
-    contentNode->MountToParent(frameNode);
-
-    /**
-     * @tc.steps: step3. Set distortion mode to ENABLED and mark animation as executing
-     * @tc.expected: Properties set successfully
-     */
-    pattern->dialogProperties_.distortionMode = DistortionMode::DISTORTION_ENABLED;
-    pattern->dialogProperties_.systemMaterial = AceType::MakeRefPtr<UiMaterial>();
-    pattern->isDistortAnimationExecuting_ = true;
-
-    /**
-     * @tc.steps: step4. Create LayoutWrapper and DirtySwapConfig
-     * @tc.expected: Wrapper and config created successfully
-     */
-    auto geometryNode = frameNode->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto layoutProperty = frameNode->GetLayoutProperty();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
-    ASSERT_NE(layoutWrapper, nullptr);
-
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    config.skipLayout = true;
-
-    /**
-     * @tc.steps: step5. Call OnDirtyLayoutWrapperSwap with distortion animation executing
-     * @tc.expected: Function returns false because animation is still executing
-     */
-    auto result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(result);
 }
 
 /**
@@ -550,112 +433,4 @@ HWTEST_F(DialogPatternTestThreeNg, OnDirtyLayoutWrapperSwap_WithBothDistortionAn
     auto result = pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(result);
 }
-
-/**
- * @tc.name: PlayDistortion_WithValidDialogNode001
- * @tc.desc: Test PlayDistortion with valid dialog node structure
- * @tc.type: FUNC
- */
-HWTEST_F(DialogPatternTestThreeNg, PlayDistortion_WithValidDialogNode001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create dialog node with proper structure
-     * @tc.expected: The dialog node created successfully
-     */
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DialogPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Create content column node and mount to dialog
-     * @tc.expected: Content column node mounted successfully
-     */
-    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ASSERT_NE(contentColumn, nullptr);
-    contentColumn->MountToParent(frameNode);
-
-    /**
-     * @tc.steps: step3. Create text node as child of content column for render context
-     * @tc.expected: Text node mounted successfully
-     */
-    auto textNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textNode, nullptr);
-    textNode->MountToParent(contentColumn);
-
-    /**
-     * @tc.steps: step4. Set dialog properties to enable distortion
-     * @tc.expected: Properties set successfully
-     */
-    pattern->dialogProperties_.systemMaterial = AceType::MakeRefPtr<UiMaterial>();
-
-    /**
-     * @tc.steps: step5. Call PlayDistortion
-     * @tc.expected: No crash, distortion animation is applied
-     */
-    pattern->PlayDistortion();
-    EXPECT_TRUE(pattern->isDistortAnimationExecuting_);
-}
-
-/**
- * @tc.name: PlayDistortion_WithMultipleChildNodes001
- * @tc.desc: Test PlayDistortion with multiple child nodes in content column
- * @tc.type: FUNC
- */
-HWTEST_F(DialogPatternTestThreeNg, PlayDistortion_WithMultipleChildNodes001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create dialog node with proper structure
-     * @tc.expected: The dialog node created successfully
-     */
-    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
-    ASSERT_NE(dialogTheme, nullptr);
-    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(
-        V2::ALERT_DIALOG_ETS_TAG, 1, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
-    ASSERT_NE(frameNode, nullptr);
-    auto pattern = frameNode->GetPattern<DialogPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Create content column node and mount to dialog
-     * @tc.expected: Content column node mounted successfully
-     */
-    auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    ASSERT_NE(contentColumn, nullptr);
-    contentColumn->MountToParent(frameNode);
-
-    /**
-     * @tc.steps: step3. Create multiple child nodes
-     * @tc.expected: All child nodes mounted successfully
-     */
-    auto textNode1 = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textNode1, nullptr);
-    textNode1->MountToParent(contentColumn);
-
-    auto textNode2 = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textNode2, nullptr);
-    textNode2->MountToParent(contentColumn);
-
-    /**
-     * @tc.steps: step4. Set dialog properties
-     * @tc.expected: Properties set successfully
-     */
-    pattern->dialogProperties_.systemMaterial = AceType::MakeRefPtr<UiMaterial>();
-
-    /**
-     * @tc.steps: step5. Call PlayDistortion
-     * @tc.expected: No crash, distortion animation is applied to all child nodes
-     */
-    pattern->PlayDistortion();
-    EXPECT_TRUE(pattern->isDistortAnimationExecuting_);
-}
-
 } // namespace OHOS::Ace::NG

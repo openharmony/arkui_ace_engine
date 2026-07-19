@@ -19,7 +19,7 @@
 #include "core/components_ng/pattern/relative_container/relative_container_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT RelativeContainerModelNG : public OHOS::Ace::RelativeContainerModel {
+class ACE_FORCE_EXPORT RelativeContainerModelNG : public OHOS::Ace::RelativeContainerModel {
 public:
     void Create() override;
     void SetBarrier(const std::vector<BarrierInfo>& barrierInfo) override;

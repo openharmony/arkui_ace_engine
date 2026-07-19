@@ -1,5 +1,6 @@
+'use static'
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use static'
-
 import {
   Entry,
   Text,
@@ -25,8 +24,10 @@ import {
   ListDividerOptions,
   RectResult,
   List,
+  ListOptions,
   ListItem,
   ListItemGroup,
+  ListItemGroupOptions,
   ForEach,
   ListScroller,
   EdgeEffect,
@@ -40,7 +41,6 @@ import {
   ListItemStyle,
   Color,
   Row,
-  ClickEvent,
   SwipeEdgeEffect,
   CustomBuilder,
   Builder,
@@ -55,7 +55,7 @@ import {
   ScrollSource,
   OnScrollVisibleContentChangeCallback,
   VisibleListContentInfo,
-  StickyStyle,
+  StickyStyle
 } from '@ohos.arkui.component'
 import { State } from '@ohos.arkui.stateManagement'
 import hilog from '@ohos.hilog'
@@ -64,7 +64,7 @@ import hilog from '@ohos.hilog'
 @Component
 struct SwipeActionTest {
   @State selectedFlag: boolean = false;
-  @State numbers: Array<string> = [];
+  @State numbers: string[] = [] as string[];
   @State enterEndDeleteAreaString: string = 'not enterEndDeleteArea';
   @State exitEndDeleteAreaString: string = 'not exitEndDeleteArea';
   private listScroller: ListScroller = new ListScroller();
@@ -113,7 +113,7 @@ struct SwipeActionTest {
       Text(this.exitEndDeleteAreaString)
         .fontSize(20)
       List({ space: 10, initialIndex: 0, scroller: this.listScroller }) {
-        ForEach(this.numbers, (day: string, index: number) => {
+        ForEach(this.numbers, (day: string, index: int) => {
           ListItem() {
             Text(day)
               .fontSize(20)

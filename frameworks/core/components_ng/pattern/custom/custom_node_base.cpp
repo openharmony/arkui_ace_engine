@@ -167,15 +167,15 @@ void CustomNodeBase::ResetRecycle()
     recycleRenderFunc_ = nullptr;
 }
 
-void CustomNodeBase::SetSetActiveFunc(std::function<void(bool, bool)>&& func)
+void CustomNodeBase::SetSetActiveFunc(std::function<void(bool, bool, bool)>&& func)
 {
     setActiveFunc_ = std::move(func);
 }
 
-void CustomNodeBase::FireSetActiveFunc(bool active, bool isReuse)
+void CustomNodeBase::FireSetActiveFunc(bool active, bool isReuse, bool suppressActiveLifecycle)
 {
     if (setActiveFunc_) {
-        setActiveFunc_(active, isReuse);
+        setActiveFunc_(active, isReuse, suppressActiveLifecycle);
     }
 }
 
@@ -202,10 +202,13 @@ void CustomNodeBase::Reset()
     recycleRenderFunc_ = nullptr;
     onDumpInfoFunc_ = nullptr;
     onDumpInspectorFunc_ = nullptr;
+    clearParentReusePoolFunc_ = nullptr;
     getThisFunc_ = nullptr;
     onRecycleFunc_ = nullptr;
     onReuseFunc_ = nullptr;
     releaseRecyclePoolFunc_ = nullptr;
+    getMemOptFunc_ = nullptr;
+    enableReleaseExpiringNodesFunc_ = nullptr;
 }
 
 void CustomNodeBase::SetJSViewName(std::string&& name)
@@ -246,6 +249,12 @@ void CustomNodeBase::SetReusableMemOptStrategy(int32_t reusableMemOptStrategy)
 void CustomNodeBase::SetReleaseRecyclePoolFunction(std::function<bool(int32_t, bool, bool)>&& callback)
 {
     releaseRecyclePoolFunc_ = std::move(callback);
+}
+
+void CustomNodeBase::SetEnableReleaseExpiringNodesFunction(
+    std::function<void(bool, const std::vector<std::string>&)>&& callback)
+{
+    enableReleaseExpiringNodesFunc_ = std::move(callback);
 }
 
 void CustomNodeBase::TryEnableParentCustomNodeMemOpt()
@@ -299,6 +308,19 @@ std::string CustomNodeBase::FireOnDumpInspectorFunc()
         return onDumpInspectorFunc_();
     }
     return "";
+}
+
+void CustomNodeBase::SetClearParentReusePoolFunc(std::function<void()>&& func)
+{
+    clearParentReusePoolFunc_ = std::move(func);
+}
+
+void CustomNodeBase::FireClearParentReusePoolFunc()
+{
+    if (clearParentReusePoolFunc_) {
+        ACE_SCOPED_TRACE("CustomNode:FireClearParentReusePoolFunc %s", GetJSViewName().c_str());
+        clearParentReusePoolFunc_();
+    }
 }
 
 bool CustomNodeBase::CheckFireOnAppear()
@@ -357,6 +379,22 @@ void CustomNodeBase::SetOnDumpInfoFunc(std::function<void(const std::vector<std:
 void CustomNodeBase::SetOnDumpInspectorFunc(std::function<std::string()>&& func)
 {
     onDumpInspectorFunc_ = func;
+}
+
+void CustomNodeBase::SetMemOptGetter(std::function<int32_t()>&& func)
+{
+    getMemOptFunc_ = std::move(func);
+}
+
+int32_t CustomNodeBase::GetMemOpt() const
+{
+    return getMemOptFunc_ ? getMemOptFunc_() : 0;
+}
+
+void CustomNodeBase::SetStaMemopt(int32_t opt)
+{
+    staReusableMemOptStrategy_ =
+        (opt == 1)? StaReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION: StaReusableMemOptStrategy::DEFAULT;
 }
 
 void CustomNodeBase::SetClearAllRecycleFunc(std::function<void()>&& func)

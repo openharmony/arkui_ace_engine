@@ -26,6 +26,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
+#include "core/components_ng/pattern/text/text_event_hub.h"
 
 
 namespace OHOS::Ace::NG {
@@ -198,18 +199,23 @@ HWTEST_F(TextTestNgNine, GetGlobalOffset001, TestSize.Level1)
      */
     auto [host, pattern] = Init();
     auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(host, nullptr);
+    ASSERT_NE(pattern, nullptr);
 
     /**
      * @tc.steps: step3. construct 3 groups cases and corresponding expected results.
      * @tc.expected: Running GetGlobalOffset function and check the result with expected results.
+     * GetGlobalOffset computes: hostPaintOffset - rootOffset, so expected = hostPaintOffset - rootOffset.
      */
     std::vector<OffsetF> offsetCases = { { 3.0, 5.0 }, { 4.0, 5.0 }, { 6.0, 7.0 } };
-    std::vector<Offset> expectResults = { { -3.0, -5.0 }, { -4.0, -5.0 }, { -6.0, -7.0 } };
     for (uint32_t turn = 0; turn < offsetCases.size(); ++turn) {
         pipeline->rootNode_->GetGeometryNode()->SetFrameOffset(offsetCases[turn]);
         Offset tmp;
         pattern->GetGlobalOffset(tmp);
-        EXPECT_EQ(tmp, expectResults[turn]);
+        auto hostPaintOffset = host->GetPaintRectOffsetNG(false, true);
+        auto rootOffset = pipeline->GetRootRect().GetOffset();
+        Offset expected(hostPaintOffset.GetX() - rootOffset.GetX(), hostPaintOffset.GetY() - rootOffset.GetY());
+        EXPECT_EQ(tmp, expected);
     }
 }
 
@@ -1755,5 +1761,156 @@ HWTEST_F(TextTestNgNine, SetTailIndents004, TestSize.Level1)
     auto tailIndentsValue = textLayoutProperty->GetTailIndents();
     ASSERT_TRUE(tailIndentsValue.has_value());
     EXPECT_FALSE(tailIndentsValue->HasValue());
+}
+
+/**
+ * @tc.name: SetTailIndents005
+ * @tc.desc: test SetTailIndents with negative dimension value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with negative dimension value.
+     * @tc.expected: the negative value is stored in the property.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(-10.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textModelNG.SetTailIndents(tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    ASSERT_TRUE(tailIndentsValue->indentsArray.has_value());
+    EXPECT_EQ(tailIndentsValue->indentsArray->size(), 1);
+    EXPECT_TRUE(tailIndentsValue->indentsArray->at(0).IsNegative());
+}
+
+/**
+ * @tc.name: SetTailIndents006
+ * @tc.desc: test SetTailIndents with percent dimension value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with percent dimension value.
+     * @tc.expected: the percent value is stored in the property.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(0.5, DimensionUnit::PERCENT));
+    tailIndents.indentsArray = indentsArray;
+    textModelNG.SetTailIndents(tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    ASSERT_TRUE(tailIndentsValue->indentsArray.has_value());
+    EXPECT_EQ(tailIndentsValue->indentsArray->size(), 1);
+    EXPECT_EQ(tailIndentsValue->indentsArray->at(0).Unit(), DimensionUnit::PERCENT);
+}
+
+/**
+ * @tc.name: SetTailIndents007
+ * @tc.desc: test SetTailIndents with mixed array containing positive, negative, and percent values
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with mixed array.
+     * @tc.expected: all values are stored in the property including negative and percent.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(20.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(-5.0, DimensionUnit::VP));
+    indentsArray.push_back(Dimension(0.3, DimensionUnit::PERCENT));
+    indentsArray.push_back(Dimension(0.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textModelNG.SetTailIndents(tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    ASSERT_TRUE(tailIndentsValue->indentsArray.has_value());
+    EXPECT_EQ(tailIndentsValue->indentsArray->size(), 4);
+    EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(0).ConvertToVp(), 20.0f);
+    EXPECT_TRUE(tailIndentsValue->indentsArray->at(1).IsNegative());
+    EXPECT_EQ(tailIndentsValue->indentsArray->at(2).Unit(), DimensionUnit::PERCENT);
+    EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(3).ConvertToVp(), 0.0f);
+}
+
+/**
+ * @tc.name: SetTailIndents008
+ * @tc.desc: test SetTailIndents with zero dimension value (not negative, should be kept)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgNine, SetTailIndents008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern and some environment for running process.
+     */
+    auto [host, pattern] = Init();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
+    /**
+     * @tc.steps: step2. Run SetTailIndents with zero dimension value.
+     * @tc.expected: zero value is stored and not considered negative.
+     */
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    indentsArray.push_back(Dimension(0.0, DimensionUnit::VP));
+    tailIndents.indentsArray = indentsArray;
+    textModelNG.SetTailIndents(tailIndents);
+
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto tailIndentsValue = textLayoutProperty->GetTailIndents();
+    ASSERT_TRUE(tailIndentsValue.has_value());
+    ASSERT_TRUE(tailIndentsValue->indentsArray.has_value());
+    EXPECT_EQ(tailIndentsValue->indentsArray->size(), 1);
+    EXPECT_FALSE(tailIndentsValue->indentsArray->at(0).IsNegative());
+    EXPECT_FLOAT_EQ(tailIndentsValue->indentsArray->at(0).ConvertToVp(), 0.0f);
 }
 } // namespace OHOS::Ace::NG

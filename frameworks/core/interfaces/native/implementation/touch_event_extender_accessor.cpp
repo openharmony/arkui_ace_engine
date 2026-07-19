@@ -13,11 +13,14 @@
  * limitations under the License.
  */
 
+#include <unordered_set>
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "ui/event/touch_event.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+static const std::unordered_set<std::string> g_touchPreventDefPattern = { "Hyperlink" };
+
 namespace TouchEventExtenderAccessor {
 Ark_NativePointer GetNativePtrImpl(const Ark_TouchEventProxy* event)
 {
@@ -46,6 +49,17 @@ void PreventDefaultImpl(Ark_NativePointer node)
         eventInfo->SetPreventDefault(true);
     }
 }
+Ark_Boolean IsPreventDefaultAllowed(Ark_NativePointer node) {
+    auto eventInfo = static_cast<TouchEventInfo*>(node);
+    if (eventInfo) {
+        auto patternName = eventInfo->GetPatternName();
+        if (g_touchPreventDefPattern.find(patternName.c_str()) == g_touchPreventDefPattern.end()) {
+            return Converter::ArkValue<Ark_Boolean>(false);
+        }
+        return Converter::ArkValue<Ark_Boolean>(true);
+    }
+    return Converter::ArkValue<Ark_Boolean>(false);
+}
 } // TouchEventExtenderAccessor
 const GENERATED_ArkUITouchEventExtenderAccessor* GetTouchEventExtenderAccessor()
 {
@@ -54,6 +68,7 @@ const GENERATED_ArkUITouchEventExtenderAccessor* GetTouchEventExtenderAccessor()
         TouchEventExtenderAccessor::StopPropagationImpl,
         TouchEventExtenderAccessor::GetHistoricalPointsImpl,
         TouchEventExtenderAccessor::PreventDefaultImpl,
+        TouchEventExtenderAccessor::IsPreventDefaultAllowed,
     };
     return &TouchEventExtenderAccessorImpl;
 }

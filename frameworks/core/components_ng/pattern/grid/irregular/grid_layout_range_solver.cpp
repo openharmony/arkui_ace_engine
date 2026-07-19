@@ -36,9 +36,39 @@ Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
         return { info_->startMainLineIndex_, info_->startIndex_, 0.0f };
     }
     if (Negative(info_->currentOffset_)) {
+        // With startFixOffset_ > 0 (contentClip extension), use SkipLinesAboveView which
+        // accounts for the clip start bound. When startFixOffset_ == 0 (CONTENT_ONLY),
+        // fall back to SolveForward to preserve the exact original boundary behavior.
+        if (GreatNotEqual(info_->startFixOffset_, 0.0f)) {
+            auto res = SolveForwardWithExtension(mainGap);
+            if (res.has_value()) {
+                return res.value();
+            }
+        }
         return SolveForward(mainGap, -info_->currentOffset_, info_->startMainLineIndex_);
     }
-    return SolveBackward(mainGap, info_->currentOffset_, info_->startMainLineIndex_);
+    // currentOffset_ > 0: blank at start. With startFixOffset_ > 0, the blank can extend into the
+    // clip extension area (down to -startFixOffset_), so increase targetLen by startFixOffset_ and
+    // correct the returned offset. When startFixOffset_ == 0, both adjustments are no-ops.
+    auto res = SolveBackward(mainGap, info_->currentOffset_ + info_->startFixOffset_, info_->startMainLineIndex_);
+    res.pos -= info_->startFixOffset_;
+    return res;
+}
+
+std::optional<GridLayoutRangeSolver::StartingRowInfo> GridLayoutRangeSolver::SolveForwardWithExtension(float mainGap)
+{
+    auto [it, offset] = info_->SkipLinesAboveView(mainGap);
+    if (it == info_->lineHeightMap_.end()) {
+        return std::nullopt;
+    }
+    auto [startRow, startIdx] = CheckMultiRow(it->first);
+    for (int32_t i = it->first; i > startRow; --i) {
+        auto prevIt = info_->lineHeightMap_.find(i - 1);
+        if (prevIt != info_->lineHeightMap_.end()) {
+            offset -= prevIt->second + mainGap;
+        }
+    }
+    return StartingRowInfo { startRow, startIdx, offset };
 }
 
 using RangeInfo = GridLayoutRangeSolver::RangeInfo;
@@ -54,8 +84,9 @@ RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpIdx, int32_t jumpLi
         case ScrollAlign::START: {
             auto [startRow, startIdx] = CheckMultiRow(jumpLineIdx);
             float offset = -info_->GetHeightInRange(startRow, jumpLineIdx, mainGap);
-            auto [endLineIdx, endIdx] =
-                SolveForwardForEndIdx(mainGap, mainSize - info_->contentStartOffset_, jumpLineIdx);
+            // Use GetViewEndBound so the end extension (endFixOffset_) is filled on jump.
+            auto [endLineIdx, endIdx] = SolveForwardForEndIdx(
+                mainGap, info_->GetViewEndBound(mainSize) - info_->contentStartOffset_, jumpLineIdx);
             return { startRow, startIdx, offset, endLineIdx, endIdx };
         }
         case ScrollAlign::CENTER: {

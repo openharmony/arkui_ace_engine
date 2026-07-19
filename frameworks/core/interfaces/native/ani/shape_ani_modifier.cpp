@@ -14,32 +14,18 @@
  */
 
 #include "shape_ani_modifier.h"
-
-#include "base/log/log.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/shape/shape_model_static.h"
-#if defined(PIXEL_MAP_SUPPORTED)
-#include "pixel_map.h"
-#include "base/image/pixel_map.h"
-#endif
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG {
 
-void SetShapePixelMap(ArkUINodeHandle node, void* pixelMap)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(pixelMap);
-#if defined(PIXEL_MAP_SUPPORTED)
-    auto pixelMapRef = PixelMap::CreatePixelMap(pixelMap);
-    ShapeModelStatic::InitBox(frameNode, pixelMapRef);
-#endif
-}
-
 const ArkUIAniShapeModifier* GetShapeAniModifier()
 {
-    static const ArkUIAniShapeModifier impl = { .setPixelMap = OHOS::Ace::NG::SetShapePixelMap };
-    return &impl;
+    static const ArkUIAniShapeModifier* cachedModifier = nullptr;
+    if (!cachedModifier) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Shape");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIAniShapeModifier*>(module->GetAniModifier());
+    }
+    return cachedModifier;
 }
-
 } // namespace OHOS::Ace::NG

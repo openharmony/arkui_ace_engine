@@ -26,6 +26,7 @@ import {
 import { SymbolGlyphModifier, TextModifier } from '@ohos.arkui.modifier';
 import resourceManager from '@ohos.resourceManager';
 import hilog from '@ohos.hilog';
+import { BusinessError } from '@ohos.base';
 import HashMap from '@ohos.util.HashMap';
 import { LengthMetrics, LengthUnit, ColorMetrics } from '@ohos.arkui.node';
 import { Theme } from '@ohos.arkui.theme';
@@ -60,6 +61,9 @@ const ICON_REGION_Y: number = -6;
 const SINGLE_ICON_REGION_X: number = -12;
 const SINGLE_ICON_NUMBER: number = 1;
 const PADDING_LEFT: number = 2;
+
+const SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED: long = 125836945;
+const PUNCTUATION_OVERFLOW_DEFAULT_VALUE: boolean = true;
 
 export declare type SubHeaderV2IconType = ResourceStr | SymbolGlyphModifier;
 
@@ -230,6 +234,29 @@ export class SubHeaderTheme {
   public rightIconColor: ResourceColor = $r('sys.color.icon_primary');
 }
 
+function getPunctuationOverflowEnabled(): boolean {
+  try {
+    let configValue: string = resourceManager.getSysResourceManager()
+      ?.getStringSync(SYS_RESOURCE_ID_PUNCTUATION_OVERFLOW_ENABLED);
+    
+    if (configValue === 'true') {
+      return true;
+    } else if (configValue === 'false') {
+      return false;
+    } else {
+      hilog.warn(0x3900, 'AdvanceSubHeaderV2', 
+        `Punctuation overflow config invalid value: ${configValue}, use default: ${PUNCTUATION_OVERFLOW_DEFAULT_VALUE}`);
+      return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+    }
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'AdvanceSubHeaderV2', 
+      `Failed to get punctuation overflow config, code: ${code}, message: ${message}`);
+    return PUNCTUATION_OVERFLOW_DEFAULT_VALUE;
+  }
+}
+
 function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): TextAttribute {
   this.fontSize(`${getResourceValue('sys.float.Subtitle_S')}fp`);
   this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_secondary'));
@@ -238,8 +265,8 @@ function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): TextAt
   this.textOverflow({ overflow: TextOverflow.Ellipsis });
   this.align(fontStyle?.alignment);
   this.fallbackLineSpacing(true);
-  this.wordBreak(WordBreak.HYPHENATION);
   this.orphanCharOptimization(true);
+  this.punctuationOverflow(getPunctuationOverflowEnabled());
   return this;
 }
 
@@ -251,8 +278,8 @@ function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): TextAttr
   this.textOverflow({ overflow: TextOverflow.Ellipsis });
   this.align(fontStyle?.alignment);
   this.fallbackLineSpacing(true);
-  this.wordBreak(WordBreak.HYPHENATION);
   this.orphanCharOptimization(true);
+  this.punctuationOverflow(getPunctuationOverflowEnabled());
   return this;
 }
 
@@ -626,8 +653,15 @@ export struct SubHeaderV2 {
       return '';
     }
     if (Util.isResourceType(this.operationItems[0].accessibilityDescription)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager.getStringSync(
-        (this.operationItems[0].accessibilityDescription as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager.getStringSync(
+          (this.operationItems[0].accessibilityDescription as Resource).id);
+      } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'SubHeaderV2', `getStringSync failed, code: ${code}, message: ${message}`);
+        return '';
+      }
     } else if (this.operationItems[0].accessibilityDescription &&
       this.operationItems[0].accessibilityDescription !== '') {
       return this.operationItems[0].accessibilityDescription as string;
@@ -1042,8 +1076,15 @@ export struct SubHeaderV2 {
       return '';
     }
     if (Util.isResourceType(this.operationItems[0].accessibilityText)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.operationItems[0].accessibilityText as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.operationItems[0].accessibilityText as Resource).id);
+      } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'SubHeaderV2', `getStringSync failed, code: ${code}, message: ${message}`);
+        return '';
+      }
     } else if (this.operationItems[0].accessibilityText) {
       return this.operationItems[0].accessibilityText as string;
     } else {
@@ -1089,8 +1130,15 @@ export struct SubHeaderV2 {
       return '';
     }
     if (Util.isResourceType(this.title?.titleAccessibilityText)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.title?.titleAccessibilityText as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.title?.titleAccessibilityText as Resource).id);
+      } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'SubHeaderV2', `getStringSync failed, code: ${code}, message: ${message}`);
+        return '';
+      }
     }
     return this.title?.titleAccessibilityText as string;
   }
@@ -1251,8 +1299,15 @@ struct SingleIconStyle {
 
   private getRightIconAccessibilityText(): string | undefined {
     if (Util.isResourceType(this.item?.accessibilityText)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.item?.accessibilityText as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.item?.accessibilityText as Resource).id);
+      } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'SubHeaderV2', `getStringSync failed, code: ${code}, message: ${message}`);
+        return '';
+      }
     } else if (this.item?.accessibilityText) {
       return this.item?.accessibilityText as string;
     }
@@ -1268,8 +1323,15 @@ struct SingleIconStyle {
 
   private getRightIconAccessibilityDescription(): string | undefined {
     if (Util.isResourceType(this.item?.accessibilityDescription)) {
-      return (this.getUIContext().getHostContext() as common.Context).resourceManager
-        .getStringSync((this.item?.accessibilityDescription as Resource).id);
+      try {
+        return (this.getUIContext().getHostContext() as common.Context).resourceManager
+          .getStringSync((this.item?.accessibilityDescription as Resource).id);
+      } catch (error) {
+        let code: number | undefined = (error as BusinessError).code;
+        let message: string | undefined = (error as BusinessError).message;
+        hilog.error(0x3900, 'SubHeaderV2', `getStringSync failed, code: ${code}, message: ${message}`);
+        return '';
+      }
     } else if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
       return this.item?.accessibilityDescription as string;
     }

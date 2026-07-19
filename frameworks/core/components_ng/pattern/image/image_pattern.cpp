@@ -43,6 +43,7 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/image_provider/image_utils.h"
+#include "core/components_ng/render/image_painter.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/canvas_image.h"
@@ -427,6 +428,7 @@ void ImagePattern::ApplyAIModificationsToImage()
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzerFeature()) {
         if (isPixelMapChanged_) {
             UpdateAnalyzerOverlay();
@@ -444,6 +446,7 @@ void ImagePattern::ApplyAIModificationsToImage()
             },
             "ArkUIImageCreateAnalyzerOverlay");
     }
+#endif
 }
 
 void ImagePattern::ReportPerfData(const RefPtr<NG::FrameNode>& host, int32_t state)
@@ -473,6 +476,7 @@ void ImagePattern::ReportCompleteLoadEvent(const RefPtr<FrameNode>& host)
     if (imageDfxConfig_.GetSrcType() != static_cast<int32_t>(SrcType::NETWORK) && !(image_->GetPixelMap())) {
         return;
     }
+#ifndef CROSS_PLATFORM
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
@@ -482,6 +486,7 @@ void ImagePattern::ReportCompleteLoadEvent(const RefPtr<FrameNode>& host)
     auto reportImageType =
         imageDfxConfig_.GetSrcType() == static_cast<int32_t>(SrcType::NETWORK) ? "network" : "pixelmap";
     mgr->OnImageChangeEnd(WeakPtr(host), reportImageType, rootNode->GetRectWithRender());
+#endif
 }
 
 void ImagePattern::OnImageLoadSuccess()
@@ -507,12 +512,11 @@ void ImagePattern::OnImageLoadSuccess()
     srcRect_ = loadingCtx_->GetSrcRect();
     dstRect_ = loadingCtx_->GetDstRect();
     auto srcInfo = loadingCtx_->GetSourceInfo();
-    auto frameCount = loadingCtx_->GetFrameCount();
     imageDfxConfig_.SetFrameSize(geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
 
     image_->SetImageDfxConfig(imageDfxConfig_);
 
-    SetImagePaintConfig(image_, srcRect_, dstRect_, srcInfo, frameCount);
+    SetImagePaintConfig(image_, loadingCtx_);
     if (srcInfo.IsSvg()) {
         UpdateSvgSmoothEdgeValue();
     }
@@ -934,17 +938,40 @@ void ImagePattern::UpdateSvgSmoothEdgeValue()
     renderProp->UpdateSmoothEdge(std::max(smoothEdge_, renderProp->GetSmoothEdge().value_or(0.0f)));
 }
 
-void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
-    const RectF& dstRect, const ImageSourceInfo& sourceInfo, int32_t frameCount)
+void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage,
+    const RefPtr<ImageLoadingContext>& ctx)
 {
+    CHECK_NULL_VOID(canvasImage);
+    CHECK_NULL_VOID(ctx);
     auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+
+    ImageFit imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+    std::optional<SizeF> sourceSize = layoutProps->GetSourceSize();
+    int32_t frameCount = ctx->GetFrameCount();
+    auto sourceInfo = ctx->GetSourceInfo();
+
+    // Compute srcRect/dstRect from the live component content size instead of trusting
+    // loadingCtx->GetDstRect(), which can lag behind the latest resize when MakeCanvasImageIfNeed
+    // skips re-decode (sizeLevel unchanged). Resizable drawing (DrawImageNine / DrawImageLattice)
+    // uses dstRect_ directly, so it must match the current component size to render correctly.
+    RectF srcRect;
+    RectF dstRect;
+    auto rawSize = ctx->GetImageSize();
+    if (rawSize.IsPositive() && geometryNode->GetContent()) {
+        ImagePainter::ApplyImageFit(imageFit, sourceSize.value_or(rawSize),
+            geometryNode->GetContentSize(), srcRect, dstRect);
+    }
 
     ImagePaintConfig config {
         .srcRect_ = srcRect,
         .dstRect_ = dstRect,
     };
-    config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+    config.imageFit_ = imageFit;
     config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
     if (GreatNotEqual(frameCount, 1)) {
@@ -1034,7 +1061,7 @@ void ImagePattern::CreateModifier()
     if (!contentMod_) {
         contentMod_ = MakeRefPtr<ImageContentModifier>(WeakClaim(this));
     }
-    if (!overlayMod_) {
+    if (!overlayMod_ && copyOption_ != CopyOptions::None) {
         overlayMod_ = MakeRefPtr<ImageOverlayModifier>(selectedColor_);
     }
     if (!imagePaintMethod_) {
@@ -1050,9 +1077,11 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     const auto& dstSize = dirty->GetGeometryNode()->GetContentSize();
     StartDecoding(dstSize);
     LoadingContext();
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzerFeature()) {
         UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
     }
+#endif
     return image_ || altErrorImage_ || altImage_;
 }
 
@@ -1062,8 +1091,7 @@ void ImagePattern::LoadingContext()
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) && image_) {
             loadingCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(), loadingCtx_->GetSrc(),
-                loadingCtx_->GetFrameCount());
+            SetImagePaintConfig(image_, loadingCtx_);
         }
     }
     if (altErrorCtx_ && altErrorCtx_->GetImageObject() != nullptr) {
@@ -1071,8 +1099,7 @@ void ImagePattern::LoadingContext()
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
             altErrorImage_) {
             altErrorCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(altErrorImage_, altErrorCtx_->GetSrcRect(), altErrorCtx_->GetDstRect(),
-                altErrorCtx_->GetSrc(), altErrorCtx_->GetFrameCount());
+            SetImagePaintConfig(altErrorImage_, altErrorCtx_);
         }
     }
     if (altLoadingCtx_ && altLoadingCtx_->GetImageObject() != nullptr) {
@@ -1080,8 +1107,7 @@ void ImagePattern::LoadingContext()
         if (renderProp && (renderProp->HasImageResizableSlice() || renderProp->HasImageResizableLattice()) &&
             altImage_) {
             altLoadingCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(altImage_, altLoadingCtx_->GetSrcRect(), altLoadingCtx_->GetDstRect(),
-                altLoadingCtx_->GetSrc(), altLoadingCtx_->GetFrameCount());
+            SetImagePaintConfig(altImage_, altLoadingCtx_);
         }
     }
 }
@@ -1100,7 +1126,9 @@ void ImagePattern::CreateObscuredImage()
     if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
         if (!obscuredImage_) {
             obscuredImage_ = MakeRefPtr<ObscuredImage>();
-            SetImagePaintConfig(obscuredImage_, srcRect_, dstRect_, sourceInfo);
+            if (loadingCtx_) {
+                SetImagePaintConfig(obscuredImage_, loadingCtx_);
+            }
         }
     }
 }
@@ -1274,7 +1302,9 @@ void ImagePattern::OnModifyDone()
     UpdateGestureAndDragWhenModify();
     CHECK_EQUAL_VOID(CheckImagePrivacyForCopyOption(), true);
     CloseSelectOverlay();
+#ifdef SUPPORT_IMAGE_ANALYZER
     UpdateOffsetForImageAnalyzerOverlay();
+#endif
     SetFrameOffsetForOverlayNode();
     InitOnKeyEvent();
 }
@@ -1421,6 +1451,7 @@ void ImagePattern::InitOnKeyEvent()
 
 void ImagePattern::OnKeyEvent(const KeyEvent& event)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (imageAnalyzerManager_) {
         auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
@@ -1429,6 +1460,7 @@ void ImagePattern::OnKeyEvent(const KeyEvent& event)
             imageAnalyzerManager_->UpdateKeyEvent(event);
         }
     }
+#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
@@ -1488,6 +1520,7 @@ bool ImagePattern::CheckImagePrivacyForCopyOption()
 
 void ImagePattern::UpdateOffsetForImageAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (imageAnalyzerManager_ && imageAnalyzerManager_->IsOverlayCreated()) {
         if (!IsSupportImageAnalyzerFeature()) {
             DestroyAnalyzerOverlay();
@@ -1495,6 +1528,7 @@ void ImagePattern::UpdateOffsetForImageAnalyzerOverlay()
             UpdateAnalyzerOverlayLayout();
         }
     }
+#endif
 }
 
 // SetUsingContentRectForRenderFrame is set for image paint
@@ -1577,8 +1611,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         pattern->altImage_->SetImageDfxConfig(pattern->altImageDfxConfig_);
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
-        pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
-            pattern->altLoadingCtx_->GetSourceInfo(), pattern->altLoadingCtx_->GetFrameCount());
+        pattern->SetImagePaintConfig(pattern->altImage_, pattern->altLoadingCtx_);
 
         pattern->PrepareAnimation(pattern->altImage_);
 
@@ -2547,10 +2580,12 @@ void ImagePattern::EnableAnalyzer(bool value)
         return;
     }
 
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
     }
     RegisterVisibleAreaChange(true);
+#endif
 }
 
 bool ImagePattern::IsEnableAnalyzer() const
@@ -2568,30 +2603,39 @@ void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig& config)
 
 void ImagePattern::SetImageAnalyzerConfig(void* config)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (isEnableAnalyzer_) {
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->SetImageAnalyzerConfig(config);
     }
+#endif
 }
 
 void ImagePattern::SetImageAIOptions(void* options)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
     }
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->SetImageAIOptions(options);
+#endif
 }
 
 bool ImagePattern::IsSupportImageAnalyzerFeature()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
     return isEnableAnalyzer_ && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && loadingCtx_->GetFrameCount() <= 1 &&
            imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
+#else
+    return false;
+#endif
 }
 
 void ImagePattern::CreateAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     if (imageAnalyzerManager_->IsOverlayCreated()) {
         return;
@@ -2601,10 +2645,12 @@ void ImagePattern::CreateAnalyzerOverlay()
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
+#endif
 }
 
 void ImagePattern::UpdateAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     if (!IsSupportImageAnalyzerFeature() || !imageAnalyzerManager_->IsOverlayCreated()) {
         return;
@@ -2614,30 +2660,39 @@ void ImagePattern::UpdateAnalyzerOverlay()
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
+#endif
 }
 
 void ImagePattern::UpdateAnalyzerOverlayLayout()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerOverlayLayout();
+#endif
 }
 
 void ImagePattern::DestroyAnalyzerOverlay()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
+#endif
 }
 
 void ImagePattern::ReleaseImageAnalyzer()
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->ReleaseImageAnalyzer();
+#endif
 }
 
 void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
+#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
+#endif
 }
 
 bool ImagePattern::AllowVisibleAreaCheck() const
@@ -2783,7 +2838,9 @@ void ImagePattern::ResetImageAndAlt()
     contentMod_ = nullptr;
     imagePaintMethod_ = nullptr;
     CloseSelectOverlay();
+#ifdef SUPPORT_IMAGE_ANALYZER
     DestroyAnalyzerOverlay();
+#endif
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     frameNode->SetTrimMemRecycle(false);
 }
@@ -2898,6 +2955,7 @@ void ImagePattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 
 void ImagePattern::AddPixelMapToUiManager()
 {
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(image_);
     auto pixmap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixmap);
@@ -2906,6 +2964,7 @@ void ImagePattern::AddPixelMapToUiManager()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddPixelMap(host->GetId(), pixmap);
+#endif
 }
 
 FocusPattern ImagePattern::GetFocusPattern() const
@@ -3058,8 +3117,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAltError()
         pattern->altErrorImage_->SetImageDfxConfig(pattern->altErrorImageDfxConfig_);
         pattern->altErrorSrcRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetSrcRect());
         pattern->altErrorDstRect_ = std::make_unique<RectF>(pattern->altErrorCtx_->GetDstRect());
-        pattern->SetImagePaintConfig(pattern->altErrorImage_, *pattern->altErrorSrcRect_, *pattern->altErrorDstRect_,
-            pattern->altErrorCtx_->GetSourceInfo(), pattern->altErrorCtx_->GetFrameCount());
+        pattern->SetImagePaintConfig(pattern->altErrorImage_, pattern->altErrorCtx_);
 
         pattern->PrepareAnimation(pattern->altErrorImage_);
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

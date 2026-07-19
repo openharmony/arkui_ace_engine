@@ -1298,8 +1298,10 @@ void JSTextField::CreateJsTextFieldCommonEvent(const JSCallbackInfo &info)
         JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
         JSRef<JSVal> param[2] = {keyEvent, dataObject};
         func->Execute(param);
+#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onSubmit",
             ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
     };
     TextFieldModel::GetInstance()->SetOnSubmit(std::move(callback));
 }
@@ -2062,7 +2064,7 @@ void JSTextField::SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam)
     UnRegisterResource("cancelButtonIconColorDefault");
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() &&
-        ParseJsColor(iconColorProp, iconColor, colorObject)) {
+        ParseJsColorForMaterial(iconColorProp, iconColor, colorObject)) {
         if (SystemProperties::ConfigChangePerform() && colorObject) {
             RegisterResource<Color>("cancelButtonIconColor", colorObject, iconColor);
         }

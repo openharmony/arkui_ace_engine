@@ -415,9 +415,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     predictSnapEndPos_ = predictSnapEndPos;
 
     if (isScrollEnd_) {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, false);
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        FireAccessibilityScrollEndEvent();
         // AccessibilityEventType::SCROLL_END
         isScrollEnd_ = false;
     }
@@ -479,6 +477,10 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
+    if (!IsScrolling()) {
+        // Reset accessibilityScrollSource_ when scrolling is not in progress
+        SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
+    }
     MarkSelectedItems();
     UpdateListDirectionInCardStyle();
     snapTrigByScrollBar_ = false;
@@ -1370,6 +1372,7 @@ bool ListPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
 
     SetScrollSource(source);
+    MarkUserScrollSource(source);
     FireAndCleanScrollingListener();
     auto lastDelta = currentDelta_;
     currentDelta_ = currentDelta_ - offset;
@@ -1816,7 +1819,6 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     }
     return nullptr;
 }
-
 void ListPattern::VerifyFocusIndex(int32_t& nextIndex, int32_t& nextIndexInGroup, const ListItemGroupPara& param)
 {
     if (nextIndexInGroup < 0) {
@@ -1874,14 +1876,24 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
         }
         auto childItemPattern = AceType::DynamicCast<ListItemPattern>(childPattern);
         if (!childItemPattern) {
+            // Non-ListItem: could be a ListItemGroup header/footer, or a generic child.
             auto parentNode = childFrame->GetParentFrameNode();
-            CHECK_NULL_RETURN(parentNode, false);
-            auto parentPattern = AceType::DynamicCast<ListItemGroupPattern>(parentNode->GetPattern());
-            CHECK_NULL_RETURN(parentPattern, false);
-            if (parentPattern->GetIndexInList() == tarMainIndex) {
+            auto parentPattern = parentNode ?
+                AceType::DynamicCast<ListItemGroupPattern>(parentNode->GetPattern()) : nullptr;
+            if (parentPattern && parentPattern->GetIndexInList() == tarMainIndex) {
                 if ((parentPattern->GetHeaderNode() == childFrame && tarGroupIndex == -1) ||
                     (parentPattern->GetFooterNode() == childFrame &&
                      tarGroupIndex == parentPattern->GetTotalItemCount())) {
+                    target = childFocus;
+                    return true;
+                }
+            }
+            // Generic child fallback: read the index from the child's own helper (base Pattern member).
+            const auto& childHelper = childPattern->GetLazyContainerItemHelper();
+            if (childHelper) {
+                auto curIndex = childHelper->GetIndexInList();
+                auto curIndexInGroup = childHelper->GetIndexInListItemGroup();
+                if (curIndex == tarMainIndex && curIndexInGroup == tarGroupIndex) {
                     target = childFocus;
                     return true;
                 }
@@ -1902,11 +1914,20 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
 bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 {
     CHECK_NULL_RETURN(focusFrameNode, false);
-    auto focusPattern = focusFrameNode->GetPattern<ListItemPattern>();
-    CHECK_NULL_RETURN(focusPattern, false);
-    auto curIndex = focusPattern->GetIndexInList();
+    // ListItemGroup is handled by its own scroll path; bail here.
+    if (focusFrameNode->GetTag() == V2::LIST_ITEM_GROUP_ETS_TAG) {
+        return false;
+    }
+    auto pattern = focusFrameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    // Unified: read indexInList from the child's own LazyContainerItemHelper. ListItem forwards
+    // GetIndexInList to the same helper, so no type-specific branch is needed.
+    const auto& helper = pattern->GetLazyContainerItemHelper();
+    // if the listItem does not be measured, scroll to zero.
+    int32_t curIndex = helper ? helper->GetIndexInList() : 0;
+    SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // triggered by smart gesture
     ScrollToIndex(curIndex, smooth_, GetScrollToNodeAlign());
-    auto pipeline = GetContext();
+    const auto& pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
     }
@@ -1915,11 +1936,15 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 
 ScrollOffsetAbility ListPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
-    (void)isAccessibility;
     return {
-        [wp = WeakClaim(this)](float moveOffset) -> bool {
+        [wp = WeakClaim(this), isAccessibility](float moveOffset) -> bool {
             auto pattern = wp.Upgrade();
             CHECK_NULL_RETURN(pattern, false);
+            if (isAccessibility) {
+                pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
+            } else {
+                pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
+            }
             pattern->ScrollBy(-moveOffset);
             return true;
         },
@@ -1934,6 +1959,7 @@ std::function<bool(int32_t)> ListPattern::GetScrollIndexAbility()
     return [wp = WeakClaim(this)](int32_t index) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         if (index == FocusHub::SCROLL_TO_HEAD) {
             // When the focus framework calls to find Head and Tail, it should reset. Otherwise, due to scrolling, the
             // newly acquired focus will immediately lose focus and set depend to SELF.
@@ -1954,6 +1980,7 @@ std::function<bool(int32_t)> ListPattern::GetScrollIndexAbility()
 WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
     int32_t curIndexInGroup, int32_t moveStep, FocusStep step)
 {
+    SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
     bool isScrollIndex = ScrollListForFocus(nextIndex, curIndex, nextIndexInGroup);
     bool needFindNextFocusNode = ScrollListItemGroupForFocus(
         nextIndex, curIndex, nextIndexInGroup, curIndexInGroup, moveStep, step, isScrollIndex);
@@ -4712,12 +4739,25 @@ WeakPtr<FocusHub> ListPattern::FindChildFocusNodeByIndex(
         auto childItemPattern = AceType::DynamicCast<ListItemPattern>(childPattern);
         if (!childItemPattern) {
             auto childItemGroupPattern = AceType::DynamicCast<ListItemGroupPattern>(childPattern);
-            CHECK_NULL_RETURN(childItemGroupPattern, false);
-            if (childItemGroupPattern->GetIndexInList() == tarMainIndex) {
-                auto tempStep = JudgeFocusStep(tarMainIndex, step, curFocusIndex, focusWrapMode, isVertical);
-                bool isFindTailOrHead = childItemGroupPattern->FindHeadOrTailChild(childFocus, tempStep, target);
-                target = isFindTailOrHead ? target : childFocus;
-                return true;
+            if (childItemGroupPattern) {
+                if (childItemGroupPattern->GetIndexInList() == tarMainIndex) {
+                    auto tempStep =
+                        JudgeFocusStep(tarMainIndex, step, curFocusIndex, focusWrapMode, isVertical);
+                    bool isFindTailOrHead = childItemGroupPattern->FindHeadOrTailChild(childFocus, tempStep, target);
+                    target = isFindTailOrHead ? target : childFocus;
+                    return true;
+                }
+                return false;
+            }
+            // Generic child fallback: read the index from the child's own helper (Text/Row/Button/...).
+            const auto& childHelper = childPattern->GetLazyContainerItemHelper();
+            if (childHelper) {
+                auto curIndex = childHelper->GetIndexInList();
+                if (curIndex == tarMainIndex) {
+                    auto isFindTailOrHead = childHelper->FindHeadOrTailChild(childFocus, step, target);
+                    target = !isFindTailOrHead ? childFocus : target;
+                    return true;
+                }
             }
             return false;
         }
@@ -4837,13 +4877,15 @@ void ListPattern::DetermineMultiLaneStep(
 
 int32_t ListPattern::GetCurrentFocusIndex(const RefPtr<Pattern>& curPattern)
 {
-    auto curItemPattern = AceType::DynamicCast<ListItemPattern>(curPattern);
-    if (!curItemPattern) {
-        auto curItemGroupPattern = AceType::DynamicCast<ListItemGroupPattern>(curPattern);
-        CHECK_NULL_RETURN(curItemGroupPattern, -1);
-        return curItemGroupPattern->GetIndexInList();
+    CHECK_NULL_RETURN(curPattern, -1);
+    // Unified: read indexInList from the child's own LazyContainerItemHelper (held on the base Pattern).
+    // ListItem / ListItemGroup forward GetIndexInList to the same helper, so no type-specific branch needed.
+    const auto& helper = curPattern->GetLazyContainerItemHelper();
+    if (helper) {
+        return helper->GetIndexInList();
     }
-    return curItemPattern->GetIndexInList();
+    // the default value is zero when listItem is not measured.
+    return 0;
 }
 
 void ListPattern::AdjustFocusStepForRtl(FocusStep& step, bool isVertical)
@@ -5142,6 +5184,7 @@ bool ListPattern::UpdateStartIndex(int32_t index, int32_t indexInGroup)
     CHECK_NULL_RETURN(host, false);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     SetScrollSource(SCROLL_FROM_FOCUS_JUMP);
+    SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
 
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
@@ -5150,7 +5193,7 @@ bool ListPattern::UpdateStartIndex(int32_t index, int32_t indexInGroup)
     if (!focusIndex_.has_value() || focusIndex_.value() < 0) {
         return false;
     }
-    auto child = host->GetChildByIndex(static_cast<uint32_t>(focusIndex_.value()));
+    auto child = host->GetChildByIndex(static_cast<uint32_t>(focusIndex_.value() + itemStartIndex_));
     if (child && focusGroupIndex_.has_value()) {
         auto childNode = child->GetHostNode();
         CHECK_NULL_RETURN(childNode, false);
@@ -5212,7 +5255,7 @@ void ListPattern::FireFocus()
 
     if (IsInViewport(focusIndex_.value())) {
         if (focusGroupIndex_.has_value()) {
-            auto groupWrapper = host->GetChildByIndex(focusIndex_.value());
+            auto groupWrapper = host->GetChildByIndex(focusIndex_.value() + itemStartIndex_);
             CHECK_NULL_VOID(groupWrapper);
             auto groupNode = groupWrapper->GetHostNode();
             CHECK_NULL_VOID(groupNode);
@@ -5221,7 +5264,7 @@ void ListPattern::FireFocus()
             FireFocusInListItemGroup(focusIndex_.value());
             return;
         }
-        auto child = host->GetChildByIndex(focusIndex_.value());
+        auto child = host->GetChildByIndex(focusIndex_.value() + itemStartIndex_);
         CHECK_NULL_VOID(child);
         auto childNode = child->GetHostNode();
         CHECK_NULL_VOID(childNode);
@@ -5367,13 +5410,10 @@ int32_t ListPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
     CHECK_NULL_RETURN(tarFrame, -1);
     auto tarPattern = tarFrame->GetPattern();
     CHECK_NULL_RETURN(tarPattern, -1);
-    auto tarItemPattern = AceType::DynamicCast<ListItemPattern>(tarPattern);
-    if (!tarItemPattern) {
-        auto tarGroupPattern = AceType::DynamicCast<ListItemGroupPattern>(tarPattern);
-        CHECK_NULL_RETURN(tarGroupPattern, -1);
-        return tarGroupPattern->GetIndexInList();
-    }
-    return tarItemPattern->GetIndexInList();
+    // Unified: read indexInList from the child's own LazyContainerItemHelper.
+    const auto& helper = tarPattern->GetLazyContainerItemHelper();
+    // the default value is zero when listItem is not measured.
+    return helper ? helper->GetIndexInList() : 0;
 }
 
 void ListPattern::ScrollToFocusNodeIndex(int32_t index)
@@ -5400,6 +5440,7 @@ void ListPattern::ScrollToFocusNodeIndex(int32_t index)
 
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         SetScrollSource(SCROLL_FROM_FOCUS_JUMP);
+        SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         auto pipeline = host->GetContext();
         if (pipeline) {
             pipeline->FlushUITasks();
@@ -5426,6 +5467,7 @@ void ListPattern::ResetForExtScroll()
 
 void ListPattern::ReportOnItemListEvent(const std::string& event)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -5444,10 +5486,12 @@ void ListPattern::ReportOnItemListEvent(const std::string& event)
     result->Put("result", params);
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex)
 {
+#ifndef CROSS_PLATFORM
     if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
         return;
     }
@@ -5476,6 +5520,7 @@ void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t 
 
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
         ComponentEventType::COMPONENT_EVENT_SCROLL);
+#endif
 }
 
 int32_t ListPattern::OnInjectionEvent(const std::string& command)

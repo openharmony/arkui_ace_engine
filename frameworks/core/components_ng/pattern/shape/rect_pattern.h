@@ -16,9 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SHAPE_RECT_PATTERN_H
 
-#include "base/memory/referenced.h"
-#include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/rect_paint_method.h"
 #include "core/components_ng/pattern/shape/rect_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_pattern.h"
@@ -31,31 +28,10 @@ class RectPattern : public ShapePattern {
 public:
     RectPattern() = default;
     ~RectPattern() override = default;
-    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
-    {
-        if (!shapeOverlayModifier_) {
-            shapeOverlayModifier_ = MakeRefPtr<ShapeOverlayModifier>();
-        }
-        return MakeRefPtr<RectPaintMethod>(GetAncestorPaintProperty(), shapeOverlayModifier_);
-    }
-    RefPtr<PaintProperty> CreatePaintProperty() override
-    {
-        return MakeRefPtr<RectPaintProperty>();
-    }
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
+    RefPtr<PaintProperty> CreatePaintProperty() override;
 
-    void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) override
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto pixelRoundContentOffset = geometryNode->GetPixelRoundContentOffset();
-        auto pixelRoundContentSize = geometryNode->GetPixelRoundContentSize();
-        auto rectPaintProperty = host->GetPaintProperty<RectPaintProperty>();
-        CHECK_NULL_VOID(rectPaintProperty);
-        rectPaintProperty->SetContentOffset(pixelRoundContentOffset);
-        rectPaintProperty->SetContentSize(pixelRoundContentSize);
-    }
+    void OnPixelRoundFinish(const SizeF& pixelGridRoundSize) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RectPattern);

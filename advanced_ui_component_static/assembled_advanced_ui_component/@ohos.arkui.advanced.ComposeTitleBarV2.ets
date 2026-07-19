@@ -22,7 +22,8 @@ import {
   GeometryInfo, Layoutable, ConstraintSizeOptions, focusControl, PopupStateChangeParam,
   SymbolEffectStrategy, SymbolEffect, TextAlign, BlurStyle, ButtonOptions, HoverEvent,
   KeyEvent, TouchEvent, ClickEvent, ShadowStyle, Margin, $r,
-  ResourceStr, Resource, UIGestureEvent, LongPressGestureHandler, Padding, GestureModifier
+  ResourceStr, Resource, UIGestureEvent, LongPressGestureHandler, Padding, GestureModifier,
+  AccessibilityRoleType
 } from '@ohos.arkui.component';
 import { Param, Local, Monitor, IMonitor, ObservedV2, Trace } from '@ohos.arkui.stateManagement';
 import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
@@ -176,6 +177,7 @@ export struct ComposeTitleBarV2 {
           item: new ComposeTitleBarV2MenuItem({
             value: this.PUBLIC_BACK,
             isEnabled: true,
+            label: $r('sys.string.icon_back'),
             action: () => {
               this.getUIContext()?.getRouter()?.back()
             }
@@ -228,7 +230,7 @@ export struct ComposeTitleBarV2 {
           .constraintSize({ maxWidth: this.titleMaxWidth })
         }
         .accessibilityGroup(true)
-        .accessibilityDescription($r('sys.string.subheader_accessibility_title'))
+        .accessibilityRole(AccessibilityRoleType.TITLE_BAR)
       }
       .margin({ left: $r('sys.float.ohos_id_default_padding_start') } as Margin)
       if ((this.menuItems?.length ?? 0) > 0) {
@@ -382,6 +384,11 @@ struct CollapsibleMenuSectionV2 {
       builder: this.composeTitleBarDialogBuilder,
       maskColor: Color.Transparent,
       isModal: true,
+      backgroundBlurStyle: BlurStyle.COMPONENT_ULTRA_THICK,
+      backgroundColor: Color.Transparent,
+      shadow: ShadowStyle.OUTER_DEFAULT_LG,
+      cornerRadius: $r('sys.float.corner_radius_level10'),
+      width: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE,
     } as promptAction.CustomDialogOptions).then((id: int) => {
       this.dialogId = id;
     }).catch((error: Error) => {
@@ -447,11 +454,7 @@ struct CollapsibleMenuSectionV2 {
           bottom: $r('sys.float.padding_level12'),
         } as Padding)
       }
-      .width(this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE)
       .constraintSize({ minHeight: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
-      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
-      .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
         if (this.item.symbolStyle) {
@@ -474,11 +477,7 @@ struct CollapsibleMenuSectionV2 {
           }
         }
       }
-      .width(this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE)
       .constraintSize({ minHeight: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
-      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
-      .borderRadius($r('sys.float.corner_radius_level10'))
       .justifyContent(FlexAlign.Center)
     }
   }
@@ -773,6 +772,11 @@ struct ImageMenuItemV2 {
       builder: this.composeTitleBarDialogBuilder,
       maskColor: Color.Transparent,
       isModal: true,
+      backgroundBlurStyle: BlurStyle.COMPONENT_ULTRA_THICK,
+      backgroundColor: Color.Transparent,
+      shadow: ShadowStyle.OUTER_DEFAULT_LG,
+      cornerRadius: $r('sys.float.corner_radius_level10'),
+      width: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE,
     } as promptAction.CustomDialogOptions).then((id: int) => {
       this.dialogId = id;
     }).catch((error: Error) => {
@@ -838,11 +842,7 @@ struct ImageMenuItemV2 {
           bottom: $r('sys.float.padding_level12'),
         } as Padding)
       }
-      .width(this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE)
       .constraintSize({ minHeight: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
-      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
-      .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
         if (this.item.symbolStyle) {
@@ -865,11 +865,7 @@ struct ImageMenuItemV2 {
           }
         }
       }
-      .width(this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE)
       .constraintSize({ minHeight: this.fontSize === DIALOG_MAX_FONT_SIZE ? MAX_DIALOG_SIZE : MIN_DIALOG_SIZE })
-      .backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK, undefined, { disableSystemAdaptation: true })
-      .shadow(ShadowStyle.OUTER_DEFAULT_LG)
-      .borderRadius($r('sys.float.corner_radius_level10'))
       .justifyContent(FlexAlign.Center)
     }
   }

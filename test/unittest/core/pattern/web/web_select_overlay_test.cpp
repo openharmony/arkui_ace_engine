@@ -18,6 +18,7 @@
 #define private public
 #define protected public
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "foundation/arkui/ace_engine/frameworks/core/common/ai/image_analyzer_manager.h"
 #include "foundation/arkui/ace_engine/interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
@@ -41,6 +42,7 @@
 #include "core/components/theme/theme.h"
 #include "core/components/web/web_event.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
@@ -7433,6 +7435,35 @@ HWTEST_F(WebSelectOverlayTest, OnOverlayMouseEvent, TestSize.Level1)
 
     EXPECT_EQ(overlay.startSelectionHandle_->GetX(), 0);
     EXPECT_EQ(overlay.startSelectionHandle_->GetY(), 0);
+#endif
+}
+
+/**
+ * @tc.name: OnHandleGlobalTouchEvent_002
+ * @tc.desc: Test OnHandleGlobalTouchEvent with touch up to close overlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, OnHandleGlobalTouchEvent_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto webFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(webFrameNode, nullptr);
+    stack->Push(webFrameNode);
+    auto webPattern = webFrameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    WeakPtr<TextBase> textBase = nullptr;
+    WebSelectOverlay overlay(textBase);
+    overlay.isShowHandle_ = true;
+    overlay.quickMenuCallback_ = std::make_shared<NWebQuickMenuCallbackMock>();
+
+    // Test touch up closes overlay
+    overlay.OnHandleGlobalTouchEvent(SourceType::TOUCH, TouchType::UP, true);
+    EXPECT_TRUE(overlay.IsShowHandle());
 #endif
 }
 } // namespace OHOS::Ace::NG

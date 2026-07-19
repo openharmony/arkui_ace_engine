@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,12 +21,11 @@
 #include "cj_lambda.h"
 
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/jsview/models/action_sheet_model_impl.h"
 #include "core/common/container.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -265,7 +264,7 @@ void ParseActionSheetOptions(DialogProperties& properties, NativeActionSheetOpti
     // Parse cancel
     if (options.cancel.hasValue) {
         auto cancel = [lambda = CJLambda::Create(options.cancel.value)]() { lambda(); };
-        ActionSheetModel::GetInstance()->SetCancel(cancel, properties);
+        NG::NodeModifier::GetActionSheetModel()->SetCancel(cancel, properties);
     }
     if (options.showInSubWindow.hasValue) {
         properties.isShowInSubWindow = options.showInSubWindow.value;
@@ -279,7 +278,7 @@ void ParseActionSheetOptions(DialogProperties& properties, NativeActionSheetOpti
         std::function<void(const int32_t& info, const int32_t& infoTem)> onWillDismissFunc =
             [nativeFunc = CJLambda::Create(options.onWillDismiss.value)](
                 const int32_t& info, const int32_t& infoTem) { nativeFunc(info); };
-        ActionSheetModel::GetInstance()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
+        NG::NodeModifier::GetActionSheetModel()->SetOnWillDismiss(std::move(onWillDismissFunc), properties);
     }
     // Parse transition
     if (options.transition.hasValue) {
@@ -288,7 +287,7 @@ void ParseActionSheetOptions(DialogProperties& properties, NativeActionSheetOpti
             properties.transitionEffect = nativeTransitionEffect->effect;
         }
     }
-    ActionSheetModel::GetInstance()->ShowActionSheet(properties);
+    NG::NodeModifier::GetActionSheetModel()->ShowActionSheet(properties);
 }
 } // namespace
 

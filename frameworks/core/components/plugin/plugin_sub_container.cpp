@@ -14,6 +14,7 @@
  */
 
 #include "core/components/plugin/plugin_sub_container.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 
 #include "ability_info.h"
@@ -353,29 +354,23 @@ void PluginSubContainer::SetPluginComponentTheme(
     }
     pluginResourceInfo.SetResourceConfiguration(resConfig);
     RefPtr<ThemeManagerImpl> pluginThemeManager;
-    if (SystemProperties::GetResourceDecoupling()) {
-        auto resourceAdapter = ResourceAdapter::CreateV2();
-        ResourceManager::GetInstance().RegisterMainResourceAdapter("", "", instanceId_, resourceAdapter);
-        pluginThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
-    } else {
-        pluginThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
-    }
+    auto resourceAdapter = ResourceAdapter::CreateV2();
+    ResourceManager::GetInstance().RegisterMainResourceAdapter("", "", instanceId_, resourceAdapter);
+    pluginThemeManager = AceType::MakeRefPtr<ThemeManagerImpl>(resourceAdapter);
     pipelineContext_->SetThemeManager(pluginThemeManager);
     if (pluginThemeManager) {
         // Init resource, load theme map, do not parse yet.
         pluginThemeManager->InitResource(pluginResourceInfo);
         pluginThemeManager->LoadSystemTheme(pluginResourceInfo.GetThemeId());
         auto weakTheme = AceType::WeakClaim(AceType::RawPtr(pluginThemeManager));
-        auto weakAsset = AceType::WeakClaim(AceType::RawPtr(assetManager));
         taskExecutor_->PostTask(
-            [weakTheme, weakAsset]() {
+            [weakTheme]() {
                 auto themeManager = weakTheme.Upgrade();
                 if (themeManager == nullptr) {
                     return;
                 }
                 themeManager->ParseSystemTheme();
                 themeManager->SetColorScheme(ColorScheme::SCHEME_LIGHT);
-                themeManager->LoadCustomTheme(weakAsset.Upgrade());
             },
             TaskExecutor::TaskType::UI, "ArkUIPluginLoadTheme");
     }

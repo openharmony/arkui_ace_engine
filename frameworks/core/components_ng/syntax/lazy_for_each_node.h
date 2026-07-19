@@ -77,7 +77,7 @@ public:
         std::list<std::optional<std::string>>&& nodeIds,
         std::unordered_map<int32_t, std::optional<std::string>>&& cachedItems);
 
-    void OnDataReloaded() override;
+    void OnDataReloaded(bool reuseImmediately = false) override;
     void OnDataAdded(size_t index) override;
     void OnDataBulkAdded(size_t index, size_t count) override;
     void OnDataDeleted(size_t index) override;
@@ -128,7 +128,7 @@ public:
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
     void LoadChildren(bool notDetach) const;
 
-    const std::list<RefPtr<UINode>>& GetChildrenForInspector(bool needCacheNode = false) const override;
+    std::list<RefPtr<UINode>> GetChildrenForInspector(bool needCacheNode = false) const override;
 
     void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
     {
@@ -137,7 +137,8 @@ public:
             builder_->SetCacheCount(cacheCount);
         }
     }
-    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false,
+        bool isReuse = false, bool suppressActiveLifecycle = false) override
     {
         if (builder_) {
             builder_->SetJSViewActive(active);
@@ -247,6 +248,9 @@ public:
 
     void SetEnableSyncLoad(bool value) override;
     void SetIsSyncLoad(bool value) override;
+    void EnableParentCustomNodeReleaseExpiringNode(const std::set<std::string>& reuseIds);
+    void DisableParentCustomNodeReleaseExpiringNode();
+    bool ReleaseExpiringNode(std::string reuseId);
 
 protected:
     void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
@@ -301,6 +305,8 @@ private:
 
     bool IsCachedCountReduced(int32_t cacheStart, int32_t cacheEnd);
 
+    void TryTriggleAdditionalLayout();
+
     // The index values of the start and end of the current children nodes and the corresponding keys.
     std::list<std::optional<std::string>> ids_;
     std::list<int32_t> predictItems_;
@@ -312,7 +318,8 @@ private:
     mutable std::list<RefPtr<UINode>> tempChildren_;
     mutable std::list<RefPtr<UINode>> children_;
     mutable bool needPredict_ = false;
-    mutable std::list<RefPtr<UINode>> childrenWithCache_;
+    mutable int32_t childrenDepth_ = 0;
+    bool hasSetActiveChildRangeInGetChildren_ = false;
     bool needMarkParent_ = true;
     bool isActive_ = true;
     int32_t startIndex_ = 0;
@@ -326,6 +333,7 @@ private:
     int64_t setActiveRangeTime_ = 0;
     int32_t oldCacheStart_ = 0;
     int32_t oldCacheEnd_ = 0;
+    bool isParentCustomNodeReleaseExpiringNodeEnabled_ = false;
 
     RefPtr<LazyForEachBuilder> builder_;
 

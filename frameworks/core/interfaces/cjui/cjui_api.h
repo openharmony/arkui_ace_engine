@@ -522,9 +522,9 @@ struct CJUICommonShapeModifier {
     void (*resetStrokeLineCap)(ArkUINodeHandle node);
     void (*setStrokeLineJoin)(ArkUINodeHandle node, ArkUI_Int32 lineJoinStyle);
     void (*resetStrokeLineJoin)(ArkUINodeHandle node);
-    void (*setShapeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resObjPtr);
+    void (*setShapeWidth)(ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit, void* resObjPtr);
     void (*resetShapeWidth)(ArkUINodeHandle node);
-    void (*setShapeHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resObjPtr);
+    void (*setShapeHeight)(ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit, void* resObjPtr);
     void (*resetShapeHeight)(ArkUINodeHandle node);
     void (*setShapeForegroundColor)(ArkUINodeHandle node, ArkUI_Int32 isColor, ArkUI_Uint32 color, void* resObjPtr);
     void (*resetShapeForegroundColor)(ArkUINodeHandle node);
@@ -1604,6 +1604,7 @@ struct CJUIProgressModifier {
     void (*setProgressInitialize)(
         ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Float32 total, ArkUI_Int32 progressStyle);
     void (*resetProgressInitialize)(ArkUINodeHandle node);
+    void (*resetProgressBackgroundColorWithColorSpace)(ArkUINodeHandle node);
 };
 
 struct CJUIPluginModifier {
@@ -1747,7 +1748,7 @@ struct CJUITextAreaModifier {
     void (*resetTextAreaOnChange)(ArkUINodeHandle node);
     void (*setTextAreaEnterKeyType)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextAreaEnterKeyType)(ArkUINodeHandle node);
-    void (*setTextAreaInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback);
+    void (*setTextAreaInputFilter)(ArkUINodeHandle node, ArkUI_CharPtr value, void* callback, void* resRawPtr);
     void (*resetTextAreaInputFilter)(ArkUINodeHandle node);
     void (*setTextAreaOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetTextAreaOnTextSelectionChange)(ArkUINodeHandle node);
@@ -1956,7 +1957,8 @@ struct CJUITextInputModifier {
     ArkUI_Float32 (*getTextInputLineHeight)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputMaxLines)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getTextInputFontFeature)(ArkUINodeHandle node);
-    void (*setTextInputCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance);
+    void (*setTextInputCustomKeyboard)(
+        ArkUINodeHandle node, ArkUINodeHandle customKeyboard, bool supportAvoidance, bool isJsView);
     ArkUINodeHandle (*getTextInputCustomKeyboard)(ArkUINodeHandle node);
     ArkUI_Int32 (*getTextInputCustomKeyboardOption)(ArkUINodeHandle node);
     void (*resetTextInputCustomKeyboard)(ArkUINodeHandle node);
@@ -2256,6 +2258,8 @@ struct CJUIWebModifier {
     void (*resetEnableNativeMediaPlayer)(ArkUINodeHandle node);
     void (*setEnableWebAVSession)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableWebAVSession)(ArkUINodeHandle node);
+    void (*setEnableMediaNetworkProxy)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableMediaNetworkProxy)(ArkUINodeHandle node);
     void (*setEnableDrag)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableDrag)(ArkUINodeHandle node);
     void (*setScrollbarLayoutPolicy)(ArkUINodeHandle node, ArkUI_Int32 value);
@@ -2612,6 +2616,7 @@ struct CJUIBadgeModifier {
     void (*setBadgeCount)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setBadgeMaxCount)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setBadgeFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*createBadge)(const struct ArkUIBadgeParam* style, const struct ArkUIBadgeJSParam* badgeJSParam);
 };
 
 struct CJUIRefreshModifier {
@@ -2698,13 +2703,15 @@ struct CJUILoadingProgressModifier {
     ArkUI_Uint32 (*getColor)(ArkUINodeHandle node);
     void (*setColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
-    void (*resetColor)(ArkUINodeHandle node);
+    void (*resetColor)(ArkUINodeHandle node, bool isJsView);
     ArkUI_Bool (*getEnableLoading)(ArkUINodeHandle node);
     void (*setEnableLoading)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableLoading)(ArkUINodeHandle node);
     void (*setForegroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*setForegroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* foregroundColorRawPtr);
-    void (*resetForegroundColor)(ArkUINodeHandle node);
+    void (*setForegroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* foregroundColorRawPtr, bool isJsView);
+    void (*resetForegroundColor)(ArkUINodeHandle node, bool isJsView, void* foregroundColorRawPtr);
+    ArkUINodeHandle (*createLoadingProgressFrameNode)(ArkUI_Uint32 nodeId);
+    void (*createLoadingProgress)();
 };
 
 struct CJUIImageAnimatorModifier {
@@ -3504,7 +3511,7 @@ struct CJUIQRCodeModifier {
     void (*resetQRColor)(ArkUINodeHandle node);
     void (*setQRBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setQRBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
-    void (*resetQRBackgroundColor)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetQRBackgroundColor)(ArkUINodeHandle node);
     void (*setContentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*setContentOpacityPtr)(ArkUINodeHandle node, ArkUI_Float32 opacity, void* opacityRawPtr);
     void (*resetContentOpacity)(ArkUINodeHandle node);
@@ -3585,10 +3592,10 @@ struct CJUIXComponentModifier {
     ArkUI_CharPtr (*getXComponentSurfaceId)(ArkUIXComponentControllerHandle controller);
     ArkUIXComponentControllerHandle (*getXComponentController)(ArkUINodeHandle node);
 
-    void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Bool isJsView);
     void (*setXComponentBackgroundColorWithColorSpace)(
-        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
-    void (*resetXComponentBackgroundColor)(ArkUINodeHandle node);
+        ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, ArkUI_Bool isJsView);
+    void (*resetXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Bool isJsView);
     void (*setXComponentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*resetXComponentOpacity)(ArkUINodeHandle node);
     void (*setXComponentId)(ArkUINodeHandle node, ArkUI_CharPtr id);
@@ -3601,6 +3608,15 @@ struct CJUIXComponentModifier {
     void* (*getNativeXComponent)(ArkUINodeHandle node);
     void (*setXComponentLibraryname)(ArkUINodeHandle node, ArkUI_CharPtr libraryname);
     void (*setImageAIOptions)(ArkUINodeHandle node, void* options);
+    void (*createXComponent)(ArkUI_CharPtr id, ArkUI_Int32 type, ArkUI_CharPtr libraryName, void* controller);
+    void (*setControllerOnCreated)(ArkUINodeHandle node, ArkUI_Int64 controllerId,
+        void (*callback)(ArkUI_Int64 controllerId, ArkUI_CharPtr surfaceId, ArkUI_CharPtr xcomponentId));
+    void (*setControllerOnChanged)(ArkUINodeHandle node, ArkUI_Int64 controllerId,
+        void (*callback)(ArkUI_Int64 controllerId, ArkUI_CharPtr surfaceId, ArkUI_Float32 left, ArkUI_Float32 top,
+            ArkUI_Float32 width, ArkUI_Float32 height));
+    void (*setControllerOnDestroyed)(ArkUINodeHandle node, ArkUI_Int64 controllerId,
+        void (*callback)(ArkUI_Int64 controllerId, ArkUI_CharPtr surfaceId, ArkUI_CharPtr xcomponentId));
+    void (*setXComponentEnableSecure)(ArkUINodeHandle node, ArkUI_Bool isSecure);
 };
 
 struct CJUIStateModifier {

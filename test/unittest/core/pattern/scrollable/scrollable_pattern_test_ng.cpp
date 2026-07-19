@@ -1722,7 +1722,7 @@ HWTEST_F(ScrollablePatternTestNg, ContentClipToStr001, TestSize.Level1)
     RefPtr<ScrollablePaintProperty> scrollablePaintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
     scrollablePaintProperty->propContentClip_ = std::nullopt;
     RefPtr<ShapeRect> shapeRect = AceType::MakeRefPtr<ShapeRect>();
-    auto contentClip = std::make_pair(ContentClipMode::BOUNDARY, shapeRect);
+    auto contentClip = ContentClip(ContentClipMode::BOUNDARY, shapeRect);
     scrollablePaintProperty->UpdateContentClip(contentClip);
     auto result = scrollablePaintProperty->ContentClipToStr();
     EXPECT_EQ(result, "ContentClipMode.BOUNDARY");
@@ -1738,7 +1738,7 @@ HWTEST_F(ScrollablePatternTestNg, ContentClipToStr002, TestSize.Level1)
     RefPtr<ScrollablePaintProperty> scrollablePaintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
     scrollablePaintProperty->propContentClip_ = std::nullopt;
     RefPtr<ShapeRect> shapeRect = AceType::MakeRefPtr<ShapeRect>();
-    auto contentClip = std::make_pair(ContentClipMode::CUSTOM, shapeRect);
+    auto contentClip = ContentClip(ContentClipMode::CUSTOM, shapeRect);
     scrollablePaintProperty->UpdateContentClip(contentClip);
     auto result = scrollablePaintProperty->ContentClipToStr();
     EXPECT_EQ(result, "RectShape");
@@ -1754,7 +1754,7 @@ HWTEST_F(ScrollablePatternTestNg, ContentClipToStr003, TestSize.Level1)
     RefPtr<ScrollablePaintProperty> scrollablePaintProperty = AceType::MakeRefPtr<ScrollablePaintProperty>();
     scrollablePaintProperty->propContentClip_ = std::nullopt;
     RefPtr<ShapeRect> shapeRect = AceType::MakeRefPtr<ShapeRect>();
-    auto contentClip = std::make_pair(ContentClipMode::SAFE_AREA, shapeRect);
+    auto contentClip = ContentClip(ContentClipMode::SAFE_AREA, shapeRect);
     scrollablePaintProperty->UpdateContentClip(contentClip);
     auto result = scrollablePaintProperty->ContentClipToStr();
     EXPECT_EQ(result, "ContentClipMode.SAFE_AREA");
@@ -1771,7 +1771,7 @@ HWTEST_F(ScrollablePatternTestNg, ContentClipToStr004, TestSize.Level1)
     scrollablePaintProperty->propContentClip_ = std::nullopt;
     int32_t number = 6;
     RefPtr<ShapeRect> shapeRect = AceType::MakeRefPtr<ShapeRect>();
-    auto contentClip = std::make_pair(static_cast<ContentClipMode>(number), shapeRect);
+    auto contentClip = ContentClip(static_cast<ContentClipMode>(number), shapeRect);
     scrollablePaintProperty->UpdateContentClip(contentClip);
     auto result = scrollablePaintProperty->ContentClipToStr();
     EXPECT_EQ(result, "");

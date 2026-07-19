@@ -36,8 +36,8 @@ public:
     std::unique_ptr<JsonValue> ToEmitterPropertyJsonValue(const EmitterProperty& emitterProperty) const;
     void UpdateDisturbance(const std::vector<ParticleDisturbance>& disturbance);
     void UpdateRippleFields(const std::vector<ParticleRippleField>& rippleFields);
-    void UpdateVelocityFields(const std::vector<ParticleVelocityField>& velocityFields);
-    void updateEmitterPosition(std::vector<EmitterProperty>& property);
+    ACE_FORCE_EXPORT void UpdateVelocityFields(const std::vector<ParticleVelocityField>& velocityFields);
+    ACE_FORCE_EXPORT void updateEmitterPosition(std::vector<EmitterProperty>& property);
 
     bool HaveUnVisibleParent() const
     {

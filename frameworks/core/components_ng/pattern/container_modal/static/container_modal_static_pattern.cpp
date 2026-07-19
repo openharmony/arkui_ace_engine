@@ -119,10 +119,9 @@ void ContainerModalStaticPattern::CallMenuWidthChange(int32_t resId)
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     std::string text = "";
-    if (SystemProperties::GetResourceDecoupling()) {
-        auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter(context->GetInstanceId());
-        text = resAdapter->GetString(resId);
-    }
+    auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter(context->GetInstanceId());
+    CHECK_NULL_VOID(resAdapter);
+    text = resAdapter->GetString(resId);
     if (text.empty()) {
         TAG_LOGW(AceLogTag::ACE_APPBAR, "text is empty");
         return;

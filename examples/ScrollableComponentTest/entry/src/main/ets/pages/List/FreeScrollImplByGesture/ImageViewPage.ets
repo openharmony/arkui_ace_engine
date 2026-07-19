@@ -114,5 +114,5 @@ export class PreviewState {
 
 // Page navigation parameter type
 export class PageParams {
-  index: number = 0;
+  public index: number = 0;
 }

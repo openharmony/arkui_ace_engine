@@ -25,10 +25,35 @@ sptr<Ashmem> Ashmem::CreateAshmem(const char *name, int32_t size)
 
 Ashmem::Ashmem(int fd, int32_t size)
 {
+    size_ = size;
 }
 
 Ashmem::~Ashmem() = default;
 
 void Ashmem::CloseAshmem() {}
 void Ashmem::UnmapAshmem() {}
+bool Ashmem::MapReadAndWriteAshmem()
+{
+    return true;
+}
+
+bool Ashmem::WriteToAshmem(const void *data, int32_t size, int32_t offset)
+{
+    return true;
+}
+
+bool Ashmem::MapReadOnlyAshmem()
+{
+    return true;
+}
+
+int32_t Ashmem::GetAshmemSize() const
+{
+    return size_;
+}
+
+const void* Ashmem::ReadFromAshmem(int32_t size, int32_t offset) const
+{
+    return nullptr;
+}
 }

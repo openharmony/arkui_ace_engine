@@ -1,0 +1,45 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "arkoala_api_generated.h"
+
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/xcomponent/bridge/xcomponent_controller_peer_impl.h"
+#include "core/interfaces/native/utility/converter.h"
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+namespace XComponentControllerExtenderAccessor {
+void StartImageAnalyzerImpl(Ark_VMContext vmContext,
+                            Ark_AsyncWorkerPtr asyncWorker,
+                            const Ark_XComponentControllerWrapper* wrapper,
+                            const Ark_ImageAnalyzerConfig* config,
+                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_VOID(wrapper);
+    CHECK_NULL_VOID(wrapper->nativeObj);
+    wrapper->nativeObj->TriggerStartImageAnalyzer(vmContext, asyncWorker, config, outputArgumentForReturningPromise);
+#endif //XCOMPONENT_SUPPORTED
+}
+} // namespace XComponentControllerExtenderAccessor
+
+const GENERATED_ArkUIXComponentControllerExtenderAccessor* GetXComponentControllerExtenderStaticAccessor()
+{
+    static const GENERATED_ArkUIXComponentControllerExtenderAccessor XComponentControllerExtenderAccessorImpl {
+        XComponentControllerExtenderAccessor::StartImageAnalyzerImpl,
+    };
+    return &XComponentControllerExtenderAccessorImpl;
+}
+} // namespace OHOS::Ace::NG::GeneratedModifier

@@ -19,7 +19,6 @@
 #include <vector>
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
-#include "core/event/key_code.h"
 #include "core/event/touch_event.h"
 #include "core/event/mouse_constants.h"
 
@@ -28,6 +27,8 @@ class PointerEvent;
 } // namespace OHOS::MMI
 
 namespace OHOS::Ace {
+
+enum class KeyCode : int32_t;
 
 class MouseInfo;
 constexpr int32_t MOUSE_PRESS_LEFT = 1;
@@ -293,8 +294,6 @@ public:
         return isRightButtonEventFromDoulbeTap_;
     }
 
-    size_t GetApproximateSize() const;
-
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     MouseButton button_ = MouseButton::NONE_BUTTON;
@@ -378,11 +377,6 @@ public:
     MouseAction GetMouseAction() const
     {
         return mouseAction_;
-    }
-
-    size_t GetApproximateSize() const
-    {
-        return sizeof(*this) + GetApproximateBaseEventSize();
     }
 
 private:

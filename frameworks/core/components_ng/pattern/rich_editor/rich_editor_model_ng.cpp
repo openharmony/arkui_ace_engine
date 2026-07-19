@@ -17,6 +17,7 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 namespace OHOS::Ace::NG {
@@ -73,11 +74,15 @@ void RichEditorModelNG::InitRichEditorModel(bool isStyledStringMode, const RefPt
     richEditorLayoutProperty->UpdateWordBreak(WordBreak::BREAK_WORD);
     richEditorLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     if (isStyledStringMode) {
-        richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
-        richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));
+        auto controller = AceType::MakeRefPtr<RichEditorStyledStringController>();
+        controller->SetPattern(WeakPtr(richEditorPattern));
+        controller->SetHost(WeakPtr(frameNode));
+        richEditorPattern->SetRichEditorStyledStringController(controller);
     } else {
-        richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-        richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
+        auto controller = AceType::MakeRefPtr<RichEditorController>();
+        controller->SetPattern(WeakPtr(richEditorPattern));
+        controller->SetHost(WeakPtr(frameNode));
+        richEditorPattern->SetRichEditorController(controller);
     }
     richEditorPattern->InitSurfaceChangedCallback();
     richEditorPattern->InitSurfacePositionChangedCallback();
@@ -1143,7 +1148,7 @@ void RichEditorModelNG::SetScrollBarColor(std::optional<Color> value)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->UpdateScrollBarColor(value, true);
+    richEditorPattern->GetScrollController()->UpdateScrollBarColor(value, true);
 }
 
 void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
@@ -1207,7 +1212,7 @@ void RichEditorModelNG::SetScrollBarColor(FrameNode* frameNode, std::optional<Co
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->UpdateScrollBarColor(value, true);
+    richEditorPattern->GetScrollController()->UpdateScrollBarColor(value, true);
 }
 
 void RichEditorModelNG::SetSelectedDragPreviewStyle(const Color& value)

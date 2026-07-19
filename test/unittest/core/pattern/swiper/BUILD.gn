@@ -18,6 +18,7 @@ ace_unittest("swiper_test_ng") {
   type = "new"
 
   sources = [
+    "$ace_root/test/mock/frameworks/base/mousestyle/mock_mouse_style.cpp",
     "arc_swiper_indicator_modifiy_test_ng.cpp",
     "arc_swiper_indicator_pattern_test.cpp",
     "arc_swiper_pattern_advanced_test_ng.cpp",
@@ -43,6 +44,7 @@ ace_unittest("swiper_test_ng") {
     "swiper_fakedrag_test_ng.cpp",
     "swiper_flex_layout_test_ng.cpp",
     "swiper_helper_test_ng.cpp",
+    "swiper_ignore_hidden_item_test_ng.cpp",
     "swiper_indicator_common_test_ng.cpp",
     "swiper_indicator_extent_test_ng.cpp",
     "swiper_indicator_extent_test_two_ng.cpp",
@@ -57,6 +59,7 @@ ace_unittest("swiper_test_ng") {
     "swiper_model_test_ng.cpp",
     "swiper_overlength_indicator_modifier_test_ng.cpp",
     "swiper_pattern_test_ng.cpp",
+    "swiper_render_group_test_ng.cpp",
     "swiper_test_ng.cpp",
     "swiper_test_ng_impl.cpp",
     "swiper_ui_observer_test_ng.cpp",

@@ -159,8 +159,10 @@ public:
 
     virtual void* GetView() const = 0;
 
+#ifndef CROSS_PLATFORM
     virtual void DumpSimplifyTreeWithParamConfig(
         std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) {};
+#endif
 
     // Trigger garbage collection
     virtual void TriggerGarbageCollection() {}
@@ -781,7 +783,7 @@ private:
 protected:
     // Container creation timestamp for enhanced error messages
     // Used to provide context when container lookup fails
-    int64_t createTime_;
+    int64_t createTime_ = 0;
     bool firstUpdateData_ = true;
     std::string cardHapPath_;
     bool useNewPipeline_ = false;

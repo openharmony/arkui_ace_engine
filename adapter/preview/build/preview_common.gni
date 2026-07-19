@@ -27,11 +27,14 @@ advance_components_support = false
 connect_server_support = false
 enable_rosen_backend = true
 enable_standard_input = false
+enable_inspector_event_reporting = true
+enable_auto_fill_controller = true
 video_components_support = false
 web_components_support = false
 preview_support = true
 model_component_support = false
 window_scene_support = false
+image_analyzer_support = true
 build_for_preview = true
 
 # js engine common configs
@@ -107,8 +110,20 @@ if (defined(model_component_support) && model_component_support) {
   defines += [ "MODEL_COMPONENT_SUPPORTED" ]
 }
 
+if (defined(enable_inspector_event_reporting) && enable_inspector_event_reporting) {
+  defines += [ "ENABLE_INSPECTOR_EVENT_REPORTING" ]
+}
+
+if (defined(image_analyzer_support) && image_analyzer_support) {
+  defines += [ "SUPPORT_IMAGE_ANALYZER" ]
+}
+
 if (defined(enable_rosen_backend) && enable_rosen_backend) {
   defines += [ "ENABLE_ROSEN_BACKEND" ]
+}
+
+if (defined(enable_auto_fill_controller) && enable_auto_fill_controller) {
+  defines += [ "ENABLE_AUTO_FILL_CONTROLLER" ]
 }
 
 if (defined(window_scene_support) && window_scene_support) {

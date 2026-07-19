@@ -262,7 +262,9 @@ void TabsLayoutAlgorithm::LayoutBackgroundMask(LayoutWrapper* layoutWrapper)
         backgroundMaskGeometryNode ? backgroundMaskGeometryNode->GetMarginFrameSize() : SizeF();
     auto offset =
         OffsetF(0.0f, frameSize.CrossSize(axis) - backgroundMaskFrameSize.CrossSize(axis) + paddingOffset.GetY());
-    backgroundMaskGeometryNode->SetMarginFrameOffset(offset);
+    if (backgroundMaskGeometryNode) {
+        backgroundMaskGeometryNode->SetMarginFrameOffset(offset);
+    }
     backgroundMaskWrapper->Layout();
 }
 

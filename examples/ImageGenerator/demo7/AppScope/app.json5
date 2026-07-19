@@ -1,0 +1,9 @@
+{
+  "app": {
+    "bundleName": "com.example.windowctrl",
+    "vendor": "example",
+    "versionCode": 1000000,
+    "versionName": "1.0.0",
+    "label": "$string:app_name"
+  }
+}

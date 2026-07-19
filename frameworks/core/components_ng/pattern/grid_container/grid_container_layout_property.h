@@ -63,7 +63,10 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     void UpdateChild(RefPtr<GridProperty>& child, const GridContainerInfo& info);
-    void RegistGridChild(const RefPtr<FrameNode>& child);
+    void RegistGridChild(const RefPtr<FrameNode>& child)
+    {
+        childrenFramenode_.emplace_back(child);
+    }
     void BuildWidth(float width);
     void SetReserveObj(const RefPtr<GridContainerLayoutProperty>& obj)
     {

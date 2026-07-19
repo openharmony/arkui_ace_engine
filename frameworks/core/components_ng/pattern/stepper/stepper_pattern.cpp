@@ -18,18 +18,42 @@
 #include <algorithm>
 
 #include "base/i18n/localization.h"
-#include "core/components_ng/pattern/button/button_event_hub.h"
-#include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components/common/layout/constants.h"
+#include "core/interfaces/native/node/node_swiper_custom_modifier.h"
+#include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "core/components_ng/pattern/stepper/stepper_constants.h"
 #include "core/components_ng/pattern/stepper/stepper_item_layout_property.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/interfaces/native/node/node_button_modifier.h"
+#include "core/interfaces/native/node/node_loading_progress_modifier.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const ArkUISwiperCustomModifier* GetStepperSwiperModifier()
+{
+    return GetSwiperCustomModifier();
+}
+
+bool IsSwiperAnimationStopped(const RefPtr<FrameNode>& swiperNode)
+{
+    CHECK_NULL_RETURN(swiperNode, true);
+    auto modifier = GetStepperSwiperModifier();
+    CHECK_NULL_RETURN(modifier, true);
+    return modifier->isAnimationStopped(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperNode)));
+}
+
+void SwipeToSwiperNode(const RefPtr<FrameNode>& swiperNode, int32_t index)
+{
+    CHECK_NULL_VOID(swiperNode);
+    auto modifier = GetStepperSwiperModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->swipeTo(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperNode)), index);
+}
+} // namespace
 
 void StepperPattern::OnModifyDone()
 {
@@ -39,7 +63,9 @@ void StepperPattern::OnModifyDone()
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
     CHECK_NULL_VOID(swiperNode);
-    index_ = swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->GetIndex().value_or(0);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    index_ = swiperLayoutProperty->GetIndex().value_or(0);
 
     auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
@@ -74,7 +100,9 @@ void StepperPattern::OnHostChildUpdateDone()
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
     CHECK_NULL_VOID(swiperNode);
-    index_ = swiperNode->GetLayoutProperty<SwiperLayoutProperty>()->GetIndex().value_or(0);
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    index_ = swiperLayoutProperty->GetIndex().value_or(0);
     auto swiperEventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     maxIndex_ = TotalCount();
@@ -159,23 +187,24 @@ void StepperPattern::CreateLeftButtonNode()
     CHECK_NULL_VOID(stepperTheme);
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
     // Create buttonNode
     auto buttonId = hostNode->GetLeftButtonId();
-    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
-    CHECK_NULL_VOID(buttonPattern);
-    buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
-    buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
-    auto buttonNode = FrameNode::CreateFrameNode(BUTTON_ETS_TAG, buttonId, buttonPattern);
+    auto buttonHandle = buttonModifier->createFrameNode(buttonId);
+    CHECK_NULL_VOID(buttonHandle);
+    auto buttonNode = AceType::Claim(reinterpret_cast<FrameNode*>(buttonHandle));
+    CHECK_NULL_VOID(buttonNode);
+    buttonModifier->setComponentButtonType(buttonHandle, ComponentButtonType::STEPPER);
+    buttonModifier->setFocusBorderColor(buttonHandle, stepperTheme->GetFocusColor());
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusDependence(FocusDependence::SELF);
     buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(buttonLayoutProperty);
-    buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-    buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(stepperTheme->GetRadius()));
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
+    buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
+    buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, BorderRadiusProperty(stepperTheme->GetRadius()));
     buttonNode->MountToParent(hostNode);
     buttonNode->MarkModifyDone();
 
@@ -272,12 +301,14 @@ void StepperPattern::CreateRightButtonNode(int32_t index)
     auto hostNode = DynamicCast<StepperNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto swiperNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId()));
+    CHECK_NULL_VOID(swiperNode);
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index)));
     CHECK_NULL_VOID(stepperItemNode);
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
-    auto labelStatus =
-        stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetLabelStatus().value_or("normal");
+    auto stepperItemLayoutProperty = stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>();
+    CHECK_NULL_VOID(stepperItemLayoutProperty);
+    auto labelStatus = stepperItemLayoutProperty->GetLabelStatus().value_or("normal");
     if (labelStatus == "normal") {
         if (index == maxIndex_) {
             CreateArrowlessRightButtonNode(index, false, theme->GetStepperStart());
@@ -317,26 +348,31 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     }
     auto hasRightButton = hostNode->HasRightButtonNode();
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        BUTTON_ETS_TAG, hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        BUTTON_ETS_TAG, hostNode->GetRightButtonId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     if (hasRightButton) {
         buttonNode->Clean(true);
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } else {
-        auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
-        CHECK_NULL_VOID(buttonPattern);
-        buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
-        buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+        buttonModifier->setComponentButtonType(buttonHandle, ComponentButtonType::STEPPER);
+        buttonModifier->setFocusBorderColor(buttonHandle, stepperTheme->GetFocusColor());
         buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        buttonLayoutProperty->UpdateBackgroundColorFlagByUser(true);
-        CHECK_NULL_VOID(buttonLayoutProperty);
-        buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-        buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(stepperTheme->GetRadius()));
+        buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(buttonHandle, true);
+        buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
+        buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+        buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, BorderRadiusProperty(stepperTheme->GetRadius()));
         buttonNode->MountToParent(hostNode);
     }
-    isDisabled ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
-               : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
+    isDisabled ? buttonNode->GetEventHub<EventHub>()->SetEnabled(false)
+               : buttonNode->GetEventHub<EventHub>()->SetEnabled(true);
     if (!isDisabled) {
         auto focusHub = buttonNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -417,9 +453,12 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, bool isDisabl
     CHECK_NULL_VOID(hostNode);
     // get rightLabel
     auto swiperNode = hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId()));
+    CHECK_NULL_VOID(swiperNode);
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index)));
-    auto rightLabel =
-        stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>()->GetRightLabel().value_or(defaultContent);
+    CHECK_NULL_VOID(stepperItemNode);
+    auto stepperItemLayoutProperty = stepperItemNode->GetLayoutProperty<StepperItemLayoutProperty>();
+    CHECK_NULL_VOID(stepperItemLayoutProperty);
+    auto rightLabel = stepperItemLayoutProperty->GetRightLabel().value_or(defaultContent);
     // Create or get buttonNode
     if (isLoadingButton_) {
         hostNode->RemoveRightButtonNode();
@@ -427,25 +466,30 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, bool isDisabl
     }
     auto hasRightButton = hostNode->HasRightButtonNode();
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        BUTTON_ETS_TAG, hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        BUTTON_ETS_TAG, hostNode->GetRightButtonId(), []() -> RefPtr<Pattern> {
+            auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+            CHECK_NULL_RETURN(buttonModifier, nullptr);
+            auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
+            CHECK_NULL_RETURN(rawPattern, nullptr);
+            return AceType::Claim(rawPattern);
+        });
     if (hasRightButton) {
         buttonNode->Clean(true);
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     } else {
-        auto buttonPattern = buttonNode->GetPattern<ButtonPattern>();
-        CHECK_NULL_VOID(buttonPattern);
-        buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
-        buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
+        auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+        CHECK_NULL_VOID(buttonModifier);
+        auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+        buttonModifier->setComponentButtonType(buttonHandle, ComponentButtonType::STEPPER);
+        buttonModifier->setFocusBorderColor(buttonHandle, stepperTheme->GetFocusColor());
         buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(buttonLayoutProperty);
-        buttonLayoutProperty->UpdateType(ButtonType::NORMAL);
-        buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-        buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(stepperTheme->GetRadius()));
+        buttonModifier->updateTypeToLayoutProp(buttonHandle, ButtonType::NORMAL);
+        buttonNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+        buttonModifier->updateBorderRadiusToLayoutProp(buttonHandle, BorderRadiusProperty(stepperTheme->GetRadius()));
         buttonNode->MountToParent(hostNode);
     }
-    isDisabled ? buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(false)
-               : buttonNode->GetEventHub<ButtonEventHub>()->SetEnabled(true);
+    isDisabled ? buttonNode->GetEventHub<EventHub>()->SetEnabled(false)
+               : buttonNode->GetEventHub<EventHub>()->SetEnabled(true);
     if (!isDisabled) {
         auto focusHub = buttonNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -486,12 +530,18 @@ void StepperPattern::CreateWaitingRightButtonNode()
     CHECK_NULL_VOID(hostNode);
     // Create loadingProgressNode
     hostNode->RemoveRightButtonNode();
-    auto loadingProgressNode = FrameNode::GetOrCreateFrameNode(LOADING_PROGRESS_ETS_TAG,
-        hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
-    loadingProgressNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+    auto* loadingProgressModifier = NG::NodeModifier::GetLoadingProgressModifier();
+    CHECK_NULL_VOID(loadingProgressModifier);
+    auto loadingProgressNode = AceType::Claim(reinterpret_cast<FrameNode*>(
+        loadingProgressModifier->createLoadingProgressFrameNode(hostNode->GetRightButtonId())));
+    CHECK_NULL_VOID(loadingProgressNode);
+    auto progressLayoutProperty = loadingProgressNode->GetLayoutProperty();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    progressLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(stepperTheme->GetProgressDiameter()), CalcLength(stepperTheme->GetProgressDiameter())));
-    loadingProgressNode->GetPaintProperty<LoadingProgressPaintProperty>()->UpdateColor(
-        stepperTheme->GetProgressColor());
+    auto progressPaintProperty = loadingProgressNode->GetPaintProperty<LoadingProgressPaintProperty>();
+    CHECK_NULL_VOID(progressPaintProperty);
+    progressPaintProperty->UpdateColor(stepperTheme->GetProgressColor());
     loadingProgressNode->GetRenderContext()->UpdateForegroundColor(stepperTheme->GetProgressColor());
     loadingProgressNode->MountToParent(hostNode);
     loadingProgressNode->MarkModifyDone();
@@ -544,14 +594,12 @@ void StepperPattern::HandlingLeftButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
-    auto swiperAnimationController = swiperNode->GetPattern<SwiperPattern>()->GetController();
-    if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
+    if (!IsSwiperAnimationStopped(swiperNode)) {
         return;
     }
-    auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
     stepperHub->FireChangeEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
     stepperHub->FirePreviousEvent(index_, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
-    swiperController->SwipeTo(std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
+    SwipeToSwiperNode(swiperNode, std::clamp<int32_t>(index_ - 1, 0, maxIndex_));
 }
 
 void StepperPattern::HandlingRightButtonClickEvent()
@@ -562,8 +610,7 @@ void StepperPattern::HandlingRightButtonClickEvent()
     CHECK_NULL_VOID(stepperHub);
     auto swiperNode =
         DynamicCast<FrameNode>(hostNode->GetChildAtIndex(hostNode->GetChildIndexById(hostNode->GetSwiperId())));
-    auto swiperAnimationController = swiperNode->GetPattern<SwiperPattern>()->GetController();
-    if (swiperAnimationController && !swiperAnimationController->IsStopped()) {
+    if (!IsSwiperAnimationStopped(swiperNode)) {
         return;
     }
     auto stepperItemNode = DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(static_cast<int32_t>(index_)));
@@ -578,8 +625,7 @@ void StepperPattern::HandlingRightButtonClickEvent()
         } else {
             stepperHub->FireChangeEvent(index_, std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
             stepperHub->FireNextEvent(index_, std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
-            auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
-            swiperController->SwipeTo(std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
+            SwipeToSwiperNode(swiperNode, std::clamp<int32_t>(index_ + 1, 0, maxIndex_));
         }
     }
 }
@@ -720,9 +766,9 @@ void StepperPattern::OnColorConfigurationUpdate()
 
 void StepperPattern::ButtonSkipColorConfigurationUpdate(const RefPtr<FrameNode>& buttonNode)
 {
-    auto pattern = buttonNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetSkipColorConfigurationUpdate();
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    buttonModifier->setSkipColorConfigurationUpdate(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode)));
 }
 
 void StepperPattern::OnLanguageConfigurationUpdate()

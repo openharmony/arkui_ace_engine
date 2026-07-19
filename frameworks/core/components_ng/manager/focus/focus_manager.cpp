@@ -598,13 +598,8 @@ void FocusManager::WindowFocus(bool isFocus)
         }
     } else {
         auto container = Container::Current();
-        if (container && (container->IsUIExtensionWindow() || container->IsDynamicRender())) {
-            TAG_LOGI(AceLogTag::ACE_FOCUS,
-                "Request default focus on current focus view: %{public}s/%{public}d",
-                curFocusView->GetFrameName().c_str(),
-                curFocusView->GetFrameId());
-            curFocusView->SetIsViewRootScopeFocused(false);
-            curFocusView->RequestDefaultFocus();
+        if (container) {
+            HandleContainer(curFocusView, container);
         }
     }
 
@@ -754,5 +749,30 @@ bool FocusManager::ExtendOrActivateFocus(const RefPtr<FocusView>& curFocusView, 
     }
     auto isActive = SetIsFocusActive(true, reason);
     return isExtend || isActive;
+}
+
+void FocusManager::HandleContainer(const RefPtr<FocusView>& curFocusView, const RefPtr<Container>& container)
+{
+    if (container->IsDynamicRender()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Request default focus on current focus view: %{public}s/%{public}d",
+            curFocusView->GetFrameName().c_str(),
+            curFocusView->GetFrameId());
+        curFocusView->SetIsViewRootScopeFocused(false);
+        curFocusView->RequestDefaultFocus();
+    }
+    if (container->IsUIExtensionWindow()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "Request default focus on current focus view: %{public}s/%{public}d",
+            curFocusView->GetFrameName().c_str(),
+            curFocusView->GetFrameId());
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
+            if (GetIsFocusActive())
+                curFocusView->SetIsViewRootScopeFocused(false);
+        } else {
+            curFocusView->SetIsViewRootScopeFocused(false);
+        }
+        curFocusView->RequestDefaultFocus();
+    }
 }
 } // namespace OHOS::Ace::NG

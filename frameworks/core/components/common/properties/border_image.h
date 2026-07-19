@@ -21,7 +21,6 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/offset.h"
 #include "base/geometry/size.h"
-#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/border_image_edge.h"
 #include "core/components/common/properties/color.h"

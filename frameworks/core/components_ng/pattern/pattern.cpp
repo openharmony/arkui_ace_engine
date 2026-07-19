@@ -116,18 +116,10 @@ FocusPattern Pattern::GetFocusPattern() const
     return {};
 }
 
-void Pattern::ReadFontScaleFromEnv()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    envFontScale_ = pipeline->ResolveFontScaleFromEnv(host);
-}
-
 GestureEventFunc Pattern::GetLongPressEventRecorder()
 {
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+#ifndef CROSS_PLATFORM
         if (!Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             return;
         }
@@ -151,6 +143,7 @@ GestureEventFunc Pattern::GetLongPressEventRecorder()
             builder.SetExtra(Recorder::KEY_NODE_RECT, std::move(rect));
         }
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+#endif
     };
     return longPressCallback;
 }

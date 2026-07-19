@@ -390,7 +390,10 @@ void SetMinFontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(minSize);
-    auto fontSize = Converter::OptConvert<Dimension>(*minSize);
+    std::optional<Dimension> fontSize;
+    if (minSize->tag != INTEROP_TAG_UNDEFINED) {
+        fontSize = Converter::OptConvertFromArkNumStrRes(minSize->value);
+    }
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     SecurityComponentModelNG::SetAdaptMinFontSize(frameNode, fontSize);
@@ -401,7 +404,10 @@ void SetMaxFontSizeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(maxSize);
-    auto fontSize = Converter::OptConvert<Dimension>(*maxSize);
+    std::optional<Dimension> fontSize;
+    if (maxSize->tag != INTEROP_TAG_UNDEFINED) {
+        fontSize = Converter::OptConvertFromArkNumStrRes(maxSize->value);
+    }
     Validator::ValidateNonNegative(fontSize);
     Validator::ValidateNonPercent(fontSize);
     SecurityComponentModelNG::SetAdaptMaxFontSize(frameNode, fontSize);

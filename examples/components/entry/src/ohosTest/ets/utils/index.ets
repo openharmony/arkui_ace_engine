@@ -210,7 +210,7 @@ export async function scroll(distance: number) {
   let rect = await scroll.getBounds();
   let curve = curves.interpolatingSpring(10, 1, 228, 30)
   if (scroller) {
-    const yOffset: number = scroller.currentOffset().yOffset;
+    const yOffset: number = scroller.currentOffset()?.yOffset ?? 0;
     scroller.scrollTo({
       xOffset: 0,
       yOffset: yOffset + px2vp(distance - rect.top - 5),
