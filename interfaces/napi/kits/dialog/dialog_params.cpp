@@ -19,6 +19,7 @@
 #include "base/log/log.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/ui_material.h"
@@ -40,6 +41,7 @@ using Napi::ParseStyle;
 constexpr int32_t DIALOG_BUTTON_NUM_MAX = INT32_MAX;
 constexpr int32_t CALLBACK_TYPE_SUCCESS = 0;
 constexpr int32_t CALLBACK_TYPE_MOUNT_ERROR = 2;
+const int32_t BG_BLUR_STYLE_MAX_INDEX = 13;
 
 const std::vector<DialogDisplayModeInSubWindow> DIALOG_DISPLAY_MODE_IN_SUBWINDOW = {
     DialogDisplayModeInSubWindow::SCREEN_BASED, DialogDisplayModeInSubWindow::WINDOW_BASED };
@@ -199,11 +201,43 @@ void GetDialogButtonDirection(napi_env env, napi_value options, DialogProperties
     }
 }
 
-void GetDialogAlignment(napi_env env, napi_value options, DialogProperties& dialogProps)
+void UpdateDialogAlignment(DialogAlignment& alignment)
 {
-    int32_t alignment = 0;
-    if (Napi::GetInt32Property(env, options, "alignment", alignment)) {
-        dialogProps.alignment = static_cast<DialogAlignment>(alignment);
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (alignment == DialogAlignment::TOP_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::TOP_END;
+        }
+    } else if (alignment == DialogAlignment::TOP_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::TOP_START;
+        }
+    } else if (alignment == DialogAlignment::CENTER_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::CENTER_END;
+        }
+    } else if (alignment == DialogAlignment::CENTER_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::CENTER_START;
+        }
+    } else if (alignment == DialogAlignment::BOTTOM_START) {
+        if (isRtl) {
+            alignment = DialogAlignment::BOTTOM_END;
+        }
+    } else if (alignment == DialogAlignment::BOTTOM_END) {
+        if (isRtl) {
+            alignment = DialogAlignment::BOTTOM_START;
+        }
+    }
+}
+
+void GetDialogAlignment(napi_env env, napi_value options, DialogProperties& dialogProps,
+    std::optional<DialogAlignment>& alignment)
+{
+    int32_t alignmentValue = 0;
+    if (Napi::GetInt32Property(env, options, "alignment", alignmentValue)) {
+        dialogProps.alignment = static_cast<DialogAlignment>(alignmentValue);
+        alignment = dialogProps.alignment;
     }
 }
 
@@ -280,6 +314,20 @@ void GetDialogOnWillDismiss(napi_env env, napi_value options, DialogProperties& 
             }
             napi_close_handle_scope(env, scope);
         };
+        dialogProps.onWillDismissRelease = [env, dismissRef]() {
+            if (!dismissRef) {
+                return;
+            }
+            napi_handle_scope scope = nullptr;
+            auto status = napi_open_handle_scope(env, &scope);
+            if ((status != napi_ok) || (scope == nullptr)) {
+                TAG_LOGE(AceLogTag::ACE_DIALOG,
+                    "onWillDismissRelease of the dialog failed to open the scope of the handle.");
+                return;
+            }
+            napi_delete_reference(env, dismissRef);
+            napi_close_handle_scope(env, scope);
+        };
     }
 }
 
@@ -297,7 +345,8 @@ RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect(napi_env env, napi_value
     return nullptr;
 }
 
-void GetDialogOffset(napi_env env, napi_value options, DialogProperties& dialogProps)
+void GetDialogOffset(napi_env env, napi_value options, DialogProperties& dialogProps,
+    std::optional<DimensionOffset>& offset)
 {
     napi_value offsetApi = nullptr;
     napi_valuetype valueType = napi_undefined;
@@ -315,6 +364,7 @@ void GetDialogOffset(napi_env env, napi_value options, DialogProperties& dialogP
     if (ParseNapiDimension(env, dx, dxApi, DimensionUnit::VP) &&
         ParseNapiDimension(env, dy, dyApi, DimensionUnit::VP)) {
         dialogProps.offset = DimensionOffset { dx, dy };
+        offset = dialogProps.offset;
     }
 }
 
@@ -373,7 +423,9 @@ void GetDialogBackgroundBlurStyle(napi_env env, napi_value options, DialogProper
     if (valueType == napi_number) {
         int32_t num = 0;
         napi_get_value_int32(env, blurStyleApi, &num);
-        dialogProps.backgroundBlurStyle = num;
+        if (num >= 0 && num < BG_BLUR_STYLE_MAX_INDEX) {
+            dialogProps.backgroundBlurStyle = num;
+        }
     }
 }
 
@@ -974,11 +1026,13 @@ bool GetDialogBaseOptions(napi_env env, napi_value options, DialogProperties& di
         return false;
     }
 
+    std::optional<DialogAlignment> alignment;
+    std::optional<DimensionOffset> offset;
     Napi::GetBoolProperty(env, options, "autoCancel", dialogProps.autoCancel);
     Napi::GetBoolProperty(env, options, "isModal", dialogProps.isModal);
     Napi::GetBoolProperty(env, options, "showInSubWindow", dialogProps.isShowInSubWindow);
     Napi::GetBoolProperty(env, options, "focusable", dialogProps.focusable);
-    GetDialogAlignment(env, options, dialogProps);
+    GetDialogAlignment(env, options, dialogProps, alignment);
 
     // Visual properties
     GetDialogWidthAndHeight(env, options, dialogProps);
@@ -993,9 +1047,34 @@ bool GetDialogBaseOptions(napi_env env, napi_value options, DialogProperties& di
     GetDialogShadow(env, options, dialogProps);
 
     // Position and mask
-    GetDialogOffset(env, options, dialogProps);
+    GetDialogOffset(env, options, dialogProps, offset);
     GetDialogMaskRect(env, options, dialogProps);
     GetDialogMaskColor(env, options, dialogProps);
+
+    // Language change callback for RTL mirroring of alignment/offset/maskRect
+    dialogProps.onLanguageChange = [alignment, offset, maskRect = dialogProps.maskRect,
+        updateAlignment = UpdateDialogAlignment](DialogProperties& dialogProps) {
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (alignment.has_value()) {
+            DialogAlignment align = alignment.value();
+            updateAlignment(align);
+            dialogProps.alignment = align;
+        }
+        if (offset.has_value()) {
+            DimensionOffset pmOffset = offset.value();
+            Dimension offsetX = isRtl ? pmOffset.GetX() * (-1) : pmOffset.GetX();
+            pmOffset.SetX(offsetX);
+            dialogProps.offset = pmOffset;
+        }
+        if (maskRect.has_value()) {
+            DimensionRect pmMaskRect = maskRect.value();
+            auto maskOffset = pmMaskRect.GetOffset();
+            Dimension offsetX = isRtl ? maskOffset.GetX() * (-1) : maskOffset.GetX();
+            maskOffset.SetX(offsetX);
+            pmMaskRect.SetOffset(maskOffset);
+            dialogProps.maskRect = pmMaskRect;
+        }
+    };
 
     // DialogController
     {
