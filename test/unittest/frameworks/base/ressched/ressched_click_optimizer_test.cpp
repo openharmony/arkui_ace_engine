@@ -118,6 +118,32 @@ HWTEST_F(ResSchedClickOptimizerTest, ReportClickTest001, TestSize.Level1)
     optimizer_->ReportClick(host, info);
     EXPECT_EQ(optimizer_->GetClickExtEnabled(), true);
     EXPECT_EQ(optimizer_->GetDepth(), 20);
+
+    /**
+     * @tc.steps: step2. call ReportClick and compare result.
+     * @tc.steps: case3: when timestamp differs from lastClickReportedTimestamp_ and clickExtEnabled_ is false
+     * @tc.expected: step2. lastClickReportedTimestamp_ should be updated
+     */
+    optimizer_->SetClickExtEnabled(false);
+    optimizer_->lastClickReportedTimestamp_.store(1000, std::memory_order_relaxed);
+    GestureEvent info3 = GestureEvent();
+    info3.SetTimeStamp(TimeStamp() + std::chrono::milliseconds(2000));
+    optimizer_->ReportClick(host, info3);
+    EXPECT_EQ(optimizer_->lastClickReportedTimestamp_.load(std::memory_order_relaxed), 2000000000);
+
+    /**
+     * @tc.steps: step2. call ReportClick and compare result.
+     * @tc.steps: case4: when timestamp differs from lastClickReportedTimestamp_ and clickExtEnabled_ is true
+     * @tc.expected: step2. lastClickReportedTimestamp_ should be updated and depth should be set correctly
+     */
+    optimizer_->SetClickExtEnabled(true);
+    optimizer_->SetDepth(15);
+    optimizer_->lastClickReportedTimestamp_.store(3000, std::memory_order_relaxed);
+    GestureEvent info4 = GestureEvent();
+    info4.SetTimeStamp(TimeStamp() + std::chrono::milliseconds(4000));
+    optimizer_->ReportClick(host, info4);
+    EXPECT_EQ(optimizer_->lastClickReportedTimestamp_.load(std::memory_order_relaxed), 4000000000);
+    optimizer_->SetClickExtEnabled(false);
 }
 
 /**
