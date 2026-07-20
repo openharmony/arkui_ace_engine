@@ -167,9 +167,9 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
     CHECK_NULL_RETURN(focusViewFrame, nullptr);
     auto focusViewHub = focusViewFrame->GetFocusHub();
     CHECK_NULL_RETURN(focusViewHub, nullptr);
-    std::list<int32_t> rootScopeDeepth = GetRouteOfFirstScope();
+    std::list<int32_t> rootScopeDepth = GetRouteOfFirstScope();
     RefPtr<FocusHub> rootScope = focusViewHub;
-    for (auto index : rootScopeDeepth) {
+    for (auto index : rootScopeDepth) {
         bool hit = rootScope->AnyChildFocusHub([&rootScope, &index](const RefPtr<FocusHub>& focusNode) {
             if (--index < 0) {
                 rootScope = focusNode;
@@ -216,13 +216,13 @@ bool FocusView::IsViewRootScopeHasLastFocus()
     auto lastFocusHub = weakLastFocusHub.Upgrade();
     CHECK_NULL_RETURN(lastFocusHub, true);
 
-    std::list<int32_t> rootScopeDeepth = GetRouteOfFirstScope();
+    std::list<int32_t> rootScopeDepth = GetRouteOfFirstScope();
     RefPtr<FocusHub> rootScope = focusViewHub;
 
-    if (rootScopeDeepth.empty()) {
+    if (rootScopeDepth.empty()) {
         return true;
     }
-    for (auto index : rootScopeDeepth) {
+    for (auto index : rootScopeDepth) {
         bool hit = rootScope->AnyChildFocusHub([&rootScope, &index](const RefPtr<FocusHub>& focusNode) {
             if (--index < 0) {
                 rootScope = focusNode;
