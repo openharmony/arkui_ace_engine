@@ -76,14 +76,17 @@ struct DumpInfoArgument {
     int32_t virtualNodeTop = 0;
     int32_t virtualNodeWidth = 0;
     int32_t virtualNodeHeight = 0;
+    std::string customText;
     std::string customAccessibilityText;
     std::string customAccessibilityLevel;
     std::string customRole;
+    std::string customAccessibilityRole;
     bool customCheckable = false;
     bool customChecked = false;
     bool customEnabled = true;
     bool customSelected = false;
     bool customGroup = false;
+    bool customClickable = false;
     int32_t performAction = 0;
     int64_t webAccId = -1;
     int32_t focusMoveRule = -1;
