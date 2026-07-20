@@ -773,7 +773,6 @@ std::string GetDeviceInfo()
     infoList->Put("sdkMinorApiVersion", minorTmp.empty() ? -1 :
         static_cast<int32_t>(std::strtol(minorTmp.c_str(), &minorEnd, SYSTEM_BASE)));
     std::string tmp = SystemProperties::GetApiVersion();
-
     if (tmp != SystemProperties::INVALID_PARAM) {
         char* tmpEnd = nullptr;
         infoList->Put("apiVersion", static_cast<int32_t>(
