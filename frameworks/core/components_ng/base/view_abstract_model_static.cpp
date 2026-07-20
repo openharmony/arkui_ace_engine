@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/sheet/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
+#include "core/components_ng/syntax/static/detached_free_root_node.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/sheet_modifier.h"
@@ -113,6 +114,38 @@ bool CheckDimensionUseLPX(const Dimension& dim)
 bool CheckDimensionUseLPX(const std::optional<Dimension>& dim)
 {
     return dim.has_value() && dim.value().Unit() == DimensionUnit::LPX;
+}
+
+RefPtr<NG::UINode> UnwrapAccessibilityVirtualNode(RefPtr<NG::UINode> virtualNode)
+{
+    if (!AceType::InstanceOf<NG::DetachedFreeRootProxyNode>(virtualNode)) {
+        return virtualNode;
+    }
+    auto proxyNode = virtualNode;
+    auto freeRoot = proxyNode->GetFirstChild();
+    if (freeRoot && AceType::InstanceOf<NG::DetachedFreeRootNode>(freeRoot)) {
+        auto inner = freeRoot->GetFirstChild();
+        if (inner) {
+            freeRoot->RemoveChild(inner);
+        }
+        proxyNode->RemoveChild(freeRoot);
+        return inner;
+    }
+    return freeRoot;
+}
+
+void SetupAccessibilityVirtualFrameNode(const RefPtr<FrameNode>& node, const RefPtr<NG::UINode>& virtualNode,
+    const RefPtr<AccessibilityProperty>& accessibilityProperty)
+{
+    auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
+    CHECK_NULL_VOID(virtualFrameNode);
+    virtualFrameNode->MarkNeedSyncRenderTree(true);
+    virtualFrameNode->SetAccessibilityNodeVirtual();
+    virtualFrameNode->SetAccessibilityVirtualNodeParent(node);
+    virtualFrameNode->SetFirstAccessibilityVirtualNode();
+    node->HasAccessibilityVirtualNode(true);
+    accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
+    node->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 } // namespace
@@ -998,17 +1031,8 @@ void ViewAbstractModelStatic::SetAccessibilityVirtualNode(FrameNode* frameNode,
                 accessibilityProperty->SaveAccessibilityVirtualNode(nullptr);
                 return;
             }
-            auto virtualNode = buildFunc();
-            if (AceType::InstanceOf<NG::DetachedFreeRootProxyNode>(virtualNode)) {
-                virtualNode = virtualNode->GetFirstChild();
-            }
-            auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
-            CHECK_NULL_VOID(virtualFrameNode);
-            virtualFrameNode->SetAccessibilityNodeVirtual();
-            virtualFrameNode->SetAccessibilityVirtualNodeParent(node);
-            virtualFrameNode->SetFirstAccessibilityVirtualNode();
-            node->HasAccessibilityVirtualNode(true);
-            accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
+            auto virtualNode = UnwrapAccessibilityVirtualNode(buildFunc());
+            SetupAccessibilityVirtualFrameNode(node, virtualNode, accessibilityProperty);
     };
     auto SetAccessibilityVirtualNodeMultiThread = [weakNode, SetAccessibilityVirtualNodeTask]
         (const std::function<RefPtr<NG::UINode>()>& buildFunc) {
@@ -1019,7 +1043,13 @@ void ViewAbstractModelStatic::SetAccessibilityVirtualNode(FrameNode* frameNode,
             });
     };
     FREE_NODE_CHECK(frameNode, SetAccessibilityVirtualNode, buildFunc);
-    SetAccessibilityVirtualNodeTask(weakNode, buildFunc);
+    if (frameNode->IsOnMainTree()) {
+        SetAccessibilityVirtualNodeTask(weakNode, buildFunc);
+    } else {
+        frameNode->PostAfterAttachMainTreeTask([weakNode, buildFunc, SetAccessibilityVirtualNodeTask] {
+            SetAccessibilityVirtualNodeTask(weakNode, buildFunc);
+        });
+    }
 }
 
 void ViewAbstractModelStatic::SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus)
