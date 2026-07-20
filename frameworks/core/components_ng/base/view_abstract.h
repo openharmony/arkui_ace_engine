@@ -1213,6 +1213,18 @@ public:
 
     static std::function<void()> GetPixelStretchEffectFuncForLPX(PixStretchEffectOption option);
 
+    static std::function<void()> GetBorderDashGapFuncForLPX(const Dimension& value);
+
+    static std::function<void()> GetBorderDashGapFuncForLPX(const BorderWidthProperty& value);
+
+    static std::function<void()> GetBorderRadiusFuncForLPX(const Dimension& value);
+
+    static std::function<void()> GetBorderRadiusFuncForLPX(const BorderRadiusProperty& value);
+
+    static std::function<void()> GetDashWidthFuncForLPX(const Dimension& value);
+
+    static std::function<void()> GetDashWidthFuncForLPX(const BorderWidthProperty& value);
+
     static void SetJSFrameNodeOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void ClearJSFrameNodeOnReachStart(FrameNode* frameNode);
     static void SetJSFrameNodeOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);

@@ -5093,7 +5093,7 @@ void SetExpandSafeArea(ArkUINodeHandle node, ArkUI_Uint32 safeAreaType, ArkUI_Ui
     opts.type = safeAreaType;
     opts.edges = safeAreaEdge;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
-    EventReport::SendComponentExceptionNG(ComponentExcepTypeNG::SAFE_AREA_TYPE_NODE_ERR);
+    EventReport::SendComponentExceptionNG(ComponentExcepTypeNG::SAFE_AREA_TYPE_NODE_ERR, NUM_0);
 }
 
 void ResetExpandSafeArea(ArkUINodeHandle node)
@@ -5104,7 +5104,7 @@ void ResetExpandSafeArea(ArkUINodeHandle node)
     opts.type = DEFAULT_SAFE_AREA_TYPE;
     opts.edges = DEFAULT_SAFE_AREA_EDGE;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
-    EventReport::SendComponentExceptionNG(ComponentExcepTypeNG::SAFE_AREA_TYPE_NODE_ERR);
+    EventReport::SendComponentExceptionNG(ComponentExcepTypeNG::SAFE_AREA_TYPE_NODE_ERR, NUM_1);
 }
 
 void SetIgnoreLayoutSafeArea(ArkUINodeHandle node, ArkUI_Uint32 layoutSafeAreaType, ArkUI_Uint32 layoutSafeAreaEdges)
