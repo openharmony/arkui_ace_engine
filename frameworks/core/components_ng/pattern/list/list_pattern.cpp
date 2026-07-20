@@ -1923,11 +1923,13 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     // Unified: read indexInList from the child's own LazyContainerItemHelper. ListItem forwards
     // GetIndexInList to the same helper, so no type-specific branch is needed.
     const auto& helper = pattern->GetLazyContainerItemHelper();
-    // if the listItem does not be measured, scroll to zero.
-    int32_t curIndex = helper ? helper->GetIndexInList() : 0;
+    int32_t curIndex = helper ? helper->GetIndexInList() : -1;
+    if (curIndex < 0) {
+        return false;
+    }
     SetAccessibilityScrollSource(AccessibilityScrollSource::USER); // triggered by smart gesture
     ScrollToIndex(curIndex, smooth_, GetScrollToNodeAlign());
-    const auto& pipeline = GetContext();
+    auto pipeline = GetContext();
     if (pipeline) {
         pipeline->FlushUITasks();
     }
@@ -4888,8 +4890,7 @@ int32_t ListPattern::GetCurrentFocusIndex(const RefPtr<Pattern>& curPattern)
     if (helper) {
         return helper->GetIndexInList();
     }
-    // the default value is zero when listItem is not measured.
-    return 0;
+    return -1;
 }
 
 void ListPattern::AdjustFocusStepForRtl(FocusStep& step, bool isVertical)
@@ -5416,8 +5417,7 @@ int32_t ListPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
     CHECK_NULL_RETURN(tarPattern, -1);
     // Unified: read indexInList from the child's own LazyContainerItemHelper.
     const auto& helper = tarPattern->GetLazyContainerItemHelper();
-    // the default value is zero when listItem is not measured.
-    return helper ? helper->GetIndexInList() : 0;
+    return helper ? helper->GetIndexInList() : -1;
 }
 
 void ListPattern::ScrollToFocusNodeIndex(int32_t index)

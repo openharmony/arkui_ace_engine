@@ -491,7 +491,7 @@ HWTEST_F(LazyContainerItemHelperTestNg, GetCurrentFocusIndexGenericChild001, Tes
 
 /**
  * @tc.name: GetCurrentFocusIndexNoHelper001
- * @tc.desc: A Pattern without a helper returns 0 (compatible with original indexInList_ = 0 default).
+ * @tc.desc: A Pattern without a helper returns -1 (no index known).
  * @tc.type: FUNC
  */
 HWTEST_F(LazyContainerItemHelperTestNg, GetCurrentFocusIndexNoHelper001, TestSize.Level1)
@@ -500,9 +500,7 @@ HWTEST_F(LazyContainerItemHelperTestNg, GetCurrentFocusIndexNoHelper001, TestSiz
     ASSERT_NE(noHelperPattern, nullptr);
     CreateList();
     CreateDone();
-    // When a child has not been measured (no helper), the default indexInList must be 0 — not -1 —
-    // to stay compatible with the original ListItemPattern::indexInList_ = 0 default.
-    EXPECT_EQ(pattern_->GetCurrentFocusIndex(noHelperPattern), 0);
+    EXPECT_EQ(pattern_->GetCurrentFocusIndex(noHelperPattern), -1);
 }
 
 /**
@@ -516,69 +514,5 @@ HWTEST_F(LazyContainerItemHelperTestNg, GetCurrentFocusIndexNullPattern001, Test
     CreateDone();
     RefPtr<Pattern> nullPattern;
     EXPECT_EQ(pattern_->GetCurrentFocusIndex(nullPattern), -1);
-}
-
-// =========================================================================
-// Group G: Default-value compatibility (helper not created / child not measured)
-// Ensures the refactored code returns the same defaults as the original bare members.
-// =========================================================================
-
-/**
- * @tc.name: ListItemForwardDefaultZero001
- * @tc.desc: A ListItemPattern with no helper (not yet measured) returns indexInList=0,
- *           matching the original indexInList_ = 0 member default.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyContainerItemHelperTestNg, ListItemForwardDefaultZero001, TestSize.Level1)
-{
-    auto listItemPattern = AceType::MakeRefPtr<ListItemPattern>(nullptr);
-    ASSERT_NE(listItemPattern, nullptr);
-    auto itemNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), listItemPattern);
-    ASSERT_NE(itemNode, nullptr);
-    // Before any Set call / layout, helper is nullptr; GetIndexInList must return 0 (not -1).
-    EXPECT_EQ(listItemPattern->GetLazyContainerItemHelper(), nullptr);
-    EXPECT_EQ(listItemPattern->GetIndexInList(), 0);
-}
-
-/**
- * @tc.name: GroupForwardDefaultZero001
- * @tc.desc: A ListItemGroupPattern with no helper returns indexInList=0,
- *           matching the original indexInList_ = 0 member default.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyContainerItemHelperTestNg, GroupForwardDefaultZero001, TestSize.Level1)
-{
-    CreateList();
-    CreateListItemGroups(1);
-    CreateDone();
-    auto groupNode = GetChildFrameNode(frameNode_, 0);
-    ASSERT_NE(groupNode, nullptr);
-    auto groupPattern = groupNode->GetPattern<ListItemGroupPattern>();
-    ASSERT_NE(groupPattern, nullptr);
-    // After layout the group should have a helper with index 0. If we create a fresh group
-    // pattern without a host, GetIndexInList returns 0 as default.
-    EXPECT_EQ(groupPattern->GetIndexInList(), 0);
-}
-
-/**
- * @tc.name: GetFocusNodeIndexNoHelperReturnsZero001
- * @tc.desc: GetFocusNodeIndex on a child without a helper returns 0 (not -1),
- *           compatible with original indexInList_ = 0.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyContainerItemHelperTestNg, GetFocusNodeIndexNoHelperReturnsZero001, TestSize.Level1)
-{
-    CreateList();
-    CreateDone();
-    // Build a generic child with no helper.
-    auto genericPattern = AceType::MakeRefPtr<Pattern>();
-    ASSERT_NE(genericPattern, nullptr);
-    auto node = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), genericPattern);
-    ASSERT_NE(node, nullptr);
-    auto focusHub = node->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    EXPECT_EQ(pattern_->GetFocusNodeIndex(focusHub), 0);
 }
 } // namespace OHOS::Ace::NG

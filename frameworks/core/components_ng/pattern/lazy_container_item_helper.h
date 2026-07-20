@@ -84,7 +84,7 @@ public:
      * @param target [out] receives the found head/tail focus node.
      * @return true if a head/tail node was found.
      */
-    static bool FindHeadOrTailChild(
+    bool FindHeadOrTailChild(
         const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target);
 
 private:
