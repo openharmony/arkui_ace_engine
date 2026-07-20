@@ -19,9 +19,25 @@ group("core_pattern_unittest") {
   deps = []
   if (is_host_product) {
     deps += [
+      "grid:grid_static_test_ng",
+      "grid:grid_test_custom",
+      "grid:grid_test_ng",
+      "grid:grid_test_regular",
       "image:image_test_ng",
       "image_animator:image_animator_test_ng",
+      "lazy_layout:dynamiclayout_grid_test_ng",
+      "lazy_layout:lazy_column_layout_test",
+      "lazy_layout:lazy_grid_layout_test",
+      "lazy_waterflow_layout:lazy_water_flow_layout_test",
+      "lazydynamiclayout:lazydynamiclayout_test_ng",
+      "refresh:refresh_test_ng",
+      "scroll:scroll_test_ng",
+      "scroll_bar:scroll_bar_test_ng",
       "text:text_test_ng",
+      "waterflow:water_flow_test_generated",
+      "waterflow:water_flow_test_original",
+      "waterflow:water_flow_test_segmented",
+      "waterflow:water_flow_test_sw",
     ]
   } else {
     deps += [

@@ -17,7 +17,12 @@
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_LAZY_LAYOUT_LAZY_GRID_LAYOUT_LAZY_FOR_EACH_TEST_H
 
 #include "test/unittest/core/pattern/lazy_layout/grid_layout/lazy_grid_layout_test.h"
+
+#define private public
+#define protected public
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#undef private
+#undef protected
 
 namespace OHOS::Ace::NG {
 using namespace testing;

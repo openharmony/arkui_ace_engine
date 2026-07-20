@@ -25,8 +25,6 @@ bridge_test_output_path = "ace_engine/ace_engine/bridge"
 frameworks_test_output_path = "ace_engine/ace_engine/frameworks"
 
 template("ace_unittest") {
-  forward_variables_from(invoker, "*")
-
   type = "components"
   module_name = "ace_engine"
   flutter_skia = false
@@ -40,7 +38,7 @@ template("ace_unittest") {
 
   # temporary support
   if (defined(invoker.external_deps)) {
-    ace_external_deps += external_deps
+    ace_external_deps += invoker.external_deps
   }
 
   if (defined(invoker.render)) {
@@ -49,10 +47,6 @@ template("ace_unittest") {
 
   if (defined(invoker.type)) {
     type = invoker.type
-  }
-
-  if (defined(invoker.module_output)) {
-    module_output = invoker.module_output
   }
 
   if (defined(invoker.module_name)) {
@@ -118,7 +112,8 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_core_animation",
         "$ace_root/test/unittest:ace_core_extra",
       ]
-      if (defined(cflags)) {
+      if (defined(invoker.cflags)) {
+        cflags = invoker.cflags
         cflags += [ "-fvisibility=hidden" ]
       } else {
         cflags = [ "-fvisibility=hidden" ]
@@ -127,7 +122,7 @@ template("ace_unittest") {
       configs = ace_unittest_config
 
       if (defined(invoker.defines)) {
-        defines += invoker.defines
+        defines = invoker.defines
       }
 
       external_deps = []
@@ -161,13 +156,18 @@ template("ace_unittest") {
       sources += invoker.sources
       include_dirs = []
       include_dirs += include_dir
-      deps = [ "$ace_root/test/unittest:ace_components_deps" ]
+      deps = []
+      deps += [ "$ace_root/test/unittest:ace_components_deps" ]
       deps += ace_unittest_deps
 
       configs = []
       configs = ace_unittest_config
-      if (defined(cflags)) {
-        cflags += cflags
+      if (defined(invoker.cflags)) {
+        cflags = invoker.cflags
+      }
+
+      if (defined(invoker.defines)) {
+        defines = invoker.defines
       }
 
       external_deps = []
