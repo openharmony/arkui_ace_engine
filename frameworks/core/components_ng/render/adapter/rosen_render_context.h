@@ -662,7 +662,7 @@ public:
     void SetSurfaceCaptureCallback(std::function<std::shared_ptr<Media::PixelMap>()> callback);
 #endif
 
-    void FlushContentModifierImmediately(const RefPtr<ContentModifier>& modifier);
+    void FlushContentModifierImmediately(const RefPtr<ContentModifier>& modifier) override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
