@@ -1920,10 +1920,19 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     }
     auto pattern = focusFrameNode->GetPattern();
     CHECK_NULL_RETURN(pattern, false);
-    // Unified: read indexInList from the child's own LazyContainerItemHelper. ListItem forwards
-    // GetIndexInList to the same helper, so no type-specific branch is needed.
-    const auto& helper = pattern->GetLazyContainerItemHelper();
-    int32_t curIndex = helper ? helper->GetIndexInList() : -1;
+    // Resolve the list index: ListItem reports it directly; a generic child reverse-looks it up via the
+    // LazyContainerItemHelper populated at layout time.
+    int32_t curIndex = -1;
+    auto listItem = AceType::DynamicCast<ListItemPattern>(pattern);
+    if (listItem) {
+        curIndex = listItem->GetIndexInList();
+    } else {
+        // Generic child: read the index from the child's own helper (base Pattern member).
+        const auto& helper = pattern->GetLazyContainerItemHelper();
+        if (helper) {
+            curIndex = helper->GetIndexInList();
+        }
+    }
     if (curIndex < 0) {
         return false;
     }
@@ -4884,8 +4893,16 @@ void ListPattern::DetermineMultiLaneStep(
 int32_t ListPattern::GetCurrentFocusIndex(const RefPtr<Pattern>& curPattern)
 {
     CHECK_NULL_RETURN(curPattern, -1);
-    // Unified: read indexInList from the child's own LazyContainerItemHelper (held on the base Pattern).
-    // ListItem / ListItemGroup forward GetIndexInList to the same helper, so no type-specific branch needed.
+    // ListItem / ListItemGroup report their index directly.
+    auto curItemPattern = AceType::DynamicCast<ListItemPattern>(curPattern);
+    if (curItemPattern) {
+        return curItemPattern->GetIndexInList();
+    }
+    auto curItemGroupPattern = AceType::DynamicCast<ListItemGroupPattern>(curPattern);
+    if (curItemGroupPattern) {
+        return curItemGroupPattern->GetIndexInList();
+    }
+    // Generic child (Text/Row/Button/...): read the index from the child's own helper.
     const auto& helper = curPattern->GetLazyContainerItemHelper();
     if (helper) {
         return helper->GetIndexInList();
@@ -5415,9 +5432,13 @@ int32_t ListPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
     CHECK_NULL_RETURN(tarFrame, -1);
     auto tarPattern = tarFrame->GetPattern();
     CHECK_NULL_RETURN(tarPattern, -1);
-    // Unified: read indexInList from the child's own LazyContainerItemHelper.
-    const auto& helper = tarPattern->GetLazyContainerItemHelper();
-    return helper ? helper->GetIndexInList() : -1;
+    auto tarItemPattern = AceType::DynamicCast<ListItemPattern>(tarPattern);
+    if (!tarItemPattern) {
+        auto tarGroupPattern = AceType::DynamicCast<ListItemGroupPattern>(tarPattern);
+        CHECK_NULL_RETURN(tarGroupPattern, -1);
+        return tarGroupPattern->GetIndexInList();
+    }
+    return tarItemPattern->GetIndexInList();
 }
 
 void ListPattern::ScrollToFocusNodeIndex(int32_t index)

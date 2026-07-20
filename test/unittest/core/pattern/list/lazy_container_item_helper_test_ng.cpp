@@ -385,8 +385,7 @@ HWTEST_F(LazyContainerItemHelperTestNg, GroupForwardSetGet002, TestSize.Level1)
 
 /**
  * @tc.name: SetListItemIndexWritesHelper001
- * @tc.desc: After layout, each laid-out ListItem's own helper carries its list index. Due to lazy
- *           loading only visible items are measured, so we verify the range [startIndex_, endIndex_].
+ * @tc.desc: After layout, each ListItem's own helper carries its list index.
  * @tc.type: FUNC
  */
 HWTEST_F(LazyContainerItemHelperTestNg, SetListItemIndexWritesHelper001, TestSize.Level1)
@@ -395,9 +394,7 @@ HWTEST_F(LazyContainerItemHelperTestNg, SetListItemIndexWritesHelper001, TestSiz
     CreateList();
     CreateListItems(itemCount);
     CreateDone();
-    // Only items in [startIndex_, endIndex_] are actually laid out by the lazy layout system;
-    // SetListItemIndex runs during layout, so only these items have a helper with the index set.
-    for (int32_t i = pattern_->startIndex_; i <= pattern_->endIndex_; ++i) {
+    for (int32_t i = 0; i < itemCount; ++i) {
         auto item = GetChildFrameNode(frameNode_, i);
         ASSERT_NE(item, nullptr);
         auto pattern = item->GetPattern<ListItemPattern>();
