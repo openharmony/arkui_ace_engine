@@ -46,10 +46,10 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/pattern/date_picker/picker_types.h"
+#include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/xcomponent/bridge/xcomponent_controller_peer_impl.h"
 #include "core/components_v2/inspector/inspector.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/implementation/canvas_runtime_bridge.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
@@ -1469,7 +1469,10 @@ panda::Local<panda::JSValueRef> HookVideoSetAnalyzerConfig(panda::JsiRuntimeCall
     }
     auto videoPointer = static_cast<int64_t>(videoValueRef->ToNumber(vm)->Value());
     auto* videoFrameNode = reinterpret_cast<NG::FrameNode*>(videoPointer);
-    CHECK_NULL_RETURN(videoFrameNode, panda::JSValueRef::Undefined(vm));
+    auto videoPattern = videoFrameNode->GetPattern<NG::VideoPattern>();
+    if (!videoPattern) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     panda::Local<panda::JSValueRef> analyzerConfigValueRef = runtimeCallInfo->GetCallArgRef(1);
     if (analyzerConfigValueRef.IsNull() || analyzerConfigValueRef->IsUndefined()) {
         return panda::JSValueRef::Undefined(vm);
@@ -1482,45 +1485,7 @@ panda::Local<panda::JSValueRef> HookVideoSetAnalyzerConfig(panda::JsiRuntimeCall
     Framework::ScopeRAII scopeRAII(env);
     JSValueWrapper configWrapper = analyzerConfigValueRef;
     napi_value configValue = nativeEngine->ValueToNapiValue(configWrapper);
-    auto* nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto* videoModifier = nodeModifiers->getVideoModifier();
-    CHECK_NULL_RETURN(videoModifier, panda::JSValueRef::Undefined(vm));
-    videoModifier->setAnalyzerConfig(reinterpret_cast<ArkUINodeHandle>(videoFrameNode), configValue);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-panda::Local<panda::JSValueRef> HookVideoSetImageAIOptions(panda::JsiRuntimeCallInfo* runtimeCallInfo)
-{
-    ContainerScope scope(Container::CurrentIdSafely());
-    auto* vm = runtimeCallInfo->GetVM();
-    if (vm == nullptr) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    panda::Local<panda::JSValueRef> videoValueRef = runtimeCallInfo->GetCallArgRef(0);
-    if (!(videoValueRef->IsNumber())) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    auto videoPointer = static_cast<int64_t>(videoValueRef->ToNumber(vm)->Value());
-    auto* videoFrameNode = reinterpret_cast<NG::FrameNode*>(videoPointer);
-    CHECK_NULL_RETURN(videoFrameNode, panda::JSValueRef::Undefined(vm));
-    panda::Local<panda::JSValueRef> imageAIOptionsValueRef = runtimeCallInfo->GetCallArgRef(1);
-    if (imageAIOptionsValueRef.IsNull() || imageAIOptionsValueRef->IsUndefined()) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, panda::JSValueRef::Undefined(vm));
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    CHECK_NULL_RETURN(nativeEngine, panda::JSValueRef::Undefined(vm));
-    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
-    Framework::ScopeRAII scopeRAII(env);
-    JSValueWrapper optionsWrapper = imageAIOptionsValueRef;
-    napi_value optionsValue = nativeEngine->ValueToNapiValue(optionsWrapper);
-    auto* nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    auto* videoModifier = nodeModifiers->getVideoModifier();
-    CHECK_NULL_RETURN(videoModifier, panda::JSValueRef::Undefined(vm));
-    videoModifier->setNodeImageAIOptions(reinterpret_cast<ArkUINodeHandle>(videoFrameNode), optionsValue);
+    videoPattern->SetImageAnalyzerConfig(configValue);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2331,7 +2296,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "hookCanvasSetAnalyzerConfig"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HookCanvasSetAnalyzerConfig));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapVideoImageAIOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HookVideoSetImageAIOptions));
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), WrapImageAIOptions<NG::VideoPattern>));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "hookVideoSetAnalyzerConfig"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), HookVideoSetAnalyzerConfig));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "wrapXComponentImageAIOptions"),

@@ -27,7 +27,6 @@ component_modules = [
   "hyperlink",
   "text_clock",
   "text_field",
-  "video",
   "checkbox",
   "canvas",
   "patternlock",

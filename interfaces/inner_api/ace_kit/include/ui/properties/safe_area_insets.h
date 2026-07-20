@@ -30,12 +30,12 @@ namespace OHOS::Ace::NG {
  * It provides information about the areas of the screen that are not covered by app's UI elements,
  * such as the status bar, navigation bar, or notch.
  */
-struct ACE_FORCE_EXPORT SafeAreaInsets {
+struct SafeAreaInsets {
     /**
      * @brief Represents an Inset in one direction of the screen with start/end values in pixel index. For example, a
      * status bar of height 120px would be Inset(start = 0, end = 119) in Top direction.
      */
-    struct ACE_FORCE_EXPORT Inset {
+    struct Inset {
         uint32_t start = 0;
         uint32_t end = 0;
 

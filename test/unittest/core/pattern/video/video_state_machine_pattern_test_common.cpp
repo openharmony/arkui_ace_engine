@@ -49,7 +49,8 @@ void VideoStateMachinePatternTestNg::SetUp()
 
 RefPtr<FrameNode> VideoStateMachinePatternTestNg::CreateVideoNode(TestProperty& testProperty)
 {
-    auto videoControllerAsync = AceType::MakeRefPtr<VideoControllerAsync>();
+    WeakPtr<VideoStateMachinePattern> emptyPattern;
+    auto videoControllerAsync = AceType::MakeRefPtr<VideoControllerAsync>(emptyPattern);
     VideoModelNG().Create(videoControllerAsync);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);

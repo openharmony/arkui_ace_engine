@@ -29,7 +29,7 @@ using namespace testing::ext;
 namespace {
 class MockVideoControllerAsync : public VideoControllerAsync {
 public:
-    MockVideoControllerAsync() = default;
+    MockVideoControllerAsync() : VideoControllerAsync(WeakPtr<VideoStateMachinePattern>()) {}
     ~MockVideoControllerAsync() override = default;
 
     MOCK_METHOD(void, Start, (AsyncCommandCallback && callback), (override));

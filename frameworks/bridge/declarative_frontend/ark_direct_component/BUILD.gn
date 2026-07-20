@@ -95,15 +95,6 @@ ohos_abc("arkswiperindicator") {
   part_name = ace_engine_part
 }
 
-ohos_abc("arkvideo") {
-  sources = [ "./src/arkvideo.ts" ]
-  output_name = "arkvideo"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
 ohos_abc("arkdatapanel") {
   sources = [ "./src/arkdatapanel.ts" ]
   output_name = "arkdatapanel"

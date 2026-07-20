@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/resource/ext_texture.h"
+#include "core/components_ng/pattern/video/resource/ext_texture.h"
 
 #include "base/log/log.h"
 #include "base/subwindow/subwindow_manager.h"

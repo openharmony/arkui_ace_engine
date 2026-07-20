@@ -157,11 +157,4 @@ const ArkUISliderCustomModifier* GetSliderCustomModifier()
     return &modifier;
 }
 } // namespace NodeModifier
-
-namespace CustomModifier {
-const ArkUISliderCustomModifier* GetSliderCustomModifier()
-{
-    return NodeModifier::GetSliderCustomModifier();
-}
-} // namespace CustomModifier
 } // namespace OHOS::Ace::NG

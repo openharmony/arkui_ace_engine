@@ -16,13 +16,11 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_VIDEO_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_VIDEO_MODIFIER_H
 
-#include "core/components_ng/pattern/video/bridge/video_controller_async_custom_modifier.h"
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIVideoModifier* GetVideoModifier();
 const CJUIVideoModifier* GetCJUIVideoModifier();
-ACE_FORCE_EXPORT const ArkUIVideoControllerAsyncModifier* GetVideoControllerAsyncCustomModifier();
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_VIDEO_MODIFIER_H

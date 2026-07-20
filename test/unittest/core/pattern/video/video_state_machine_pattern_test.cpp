@@ -269,7 +269,7 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnStartRenderFr
 
 /**
  * @tc.name: VideoStateMachinePatternOnControllerDestroyed001
- * @tc.desc: Test OnControllerDestroyed clears controller binding.
+ * @tc.desc: Test OnControllerDestroyed clears videoControllerAsync reference.
  * @tc.type: FUNC
  */
 HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnControllerDestroyed001, TestSize.Level1)
@@ -279,15 +279,15 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnControllerDes
     auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
     ASSERT_TRUE(pattern);
 
-    auto controller = AceType::MakeRefPtr<VideoControllerAsync>();
-    pattern->SetVideoControllerAsync(controller);
+    // Inject a controller since CreateVideoNode may return cached node without controller
+    WeakPtr<VideoStateMachinePattern> weakPattern = AceType::WeakClaim(AceType::RawPtr(pattern));
+    auto controller = AceType::MakeRefPtr<VideoControllerAsync>(weakPattern);
+    pattern->videoControllerAsync_ = controller;
     EXPECT_NE(pattern->videoControllerAsync_, nullptr);
-    EXPECT_TRUE(controller->IsBound());
     pattern->OnControllerDestroyed();
     // OnControllerDestroyed only clears the internal pattern reference,
     // it does not destroy the controller object itself.
     EXPECT_NE(pattern->videoControllerAsync_, nullptr);
-    EXPECT_FALSE(controller->IsBound());
 }
 
 /**

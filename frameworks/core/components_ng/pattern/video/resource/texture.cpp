@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/render/resource/texture.h"
+#include "core/components_ng/pattern/video/resource/texture.h"
 
 namespace OHOS::Ace {
 

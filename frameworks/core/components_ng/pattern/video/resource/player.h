@@ -13,16 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_RESOURCE_PLAYER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_RESOURCE_PLAYER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_RESOURCE_PLAYER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_RESOURCE_PLAYER_H
 
 #include <atomic>
 #include <list>
 
 #include "core/animation/scheduler.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/render/resource/resource.h"
-#include "core/components_ng/render/resource/texture.h"
+#include "core/components_ng/pattern/video/resource/resource.h"
+#include "core/components_ng/pattern/video/resource/texture.h"
 
 namespace OHOS::Ace {
 
@@ -186,4 +186,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_RESOURCE_PLAYER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_VIDEO_RESOURCE_PLAYER_H

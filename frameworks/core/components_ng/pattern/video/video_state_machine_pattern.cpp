@@ -453,7 +453,9 @@ VideoStateMachinePattern::VideoStateMachinePattern(const RefPtr<VideoControllerA
 
 void VideoStateMachinePattern::OnControllerDestroyed()
 {
-    ClearControllerAsync();
+    if (videoControllerAsync_) {
+        videoControllerAsync_->ClearPattern();
+    }
 }
 
 void VideoStateMachinePattern::SetVideoControllerAsync(
@@ -462,9 +464,13 @@ void VideoStateMachinePattern::SetVideoControllerAsync(
     if (videoControllerAsync_ == videoControllerAsync) {
         return;
     }
-    ClearControllerAsync();
+    if (videoControllerAsync_) {
+        videoControllerAsync_->ClearPattern();
+    }
     videoControllerAsync_ = videoControllerAsync;
-    BindControllerAsync();
+    if (videoControllerAsync_) {
+        videoControllerAsync_->SetPattern(WeakClaim(this));
+    }
 }
 
 void VideoStateMachinePattern::PostSerialBgTask(std::function<void()> task, const std::string& name)
@@ -1409,7 +1415,9 @@ void VideoStateMachinePattern::OnAttachToFrameNode()
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode, host);
     // full screen node is not supposed to register js controller event
     if (!InstanceOf<VideoStateMachineFullScreenPattern>(this)) {
-        BindControllerAsync();
+        if (videoControllerAsync_) {
+            videoControllerAsync_->SetPattern(WeakClaim(this));
+        }
     }
     CHECK_NULL_VOID(host);
     hostId_ = host->GetId();
@@ -1463,7 +1471,9 @@ void VideoStateMachinePattern::OnAttachToMainTree()
     CHECK_EQUAL_VOID(host->IsThreadSafeNode(), false);
     // full screen node is not supposed to register js controller event
     if (!InstanceOf<VideoStateMachineFullScreenPattern>(this)) {
-        BindControllerAsync();
+        if (videoControllerAsync_) {
+            videoControllerAsync_->SetPattern(WeakClaim(this));
+        }
     }
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(hostId_);
@@ -2550,155 +2560,8 @@ void VideoStateMachinePattern::FullScreen()
     fullScreenPattern->RequestFullScreen(videoNode);
 }
 
-void VideoStateMachinePattern::BindControllerAsync()
-{
-    CHECK_NULL_VOID(videoControllerAsync_);
-    if (InstanceOf<VideoStateMachineFullScreenPattern>(this)) {
-        return;
-    }
-
-    videoControllerAsync_->SetStartImpl(
-        [weak = WeakClaim(this)](VideoControllerAsync::AsyncCommandCallback&& callback) {
-        auto pattern = weak.Upgrade();
-        if (!pattern) {
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Start: pattern is null");
-            if (callback) {
-                callback(false, "pattern is null");
-            }
-            return;
-        }
-        pattern->Start(std::move(callback));
-    });
-    videoControllerAsync_->SetPauseImpl(
-        [weak = WeakClaim(this)](VideoControllerAsync::AsyncCommandCallback&& callback) {
-        auto pattern = weak.Upgrade();
-        if (!pattern) {
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Pause: pattern is null");
-            if (callback) {
-                callback(false, "pattern is null");
-            }
-            return;
-        }
-        pattern->Pause(std::move(callback));
-    });
-    videoControllerAsync_->SetStopImpl([weak = WeakClaim(this)](VideoControllerAsync::AsyncCommandCallback&& callback) {
-        auto pattern = weak.Upgrade();
-        if (!pattern) {
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Stop: pattern is null");
-            if (callback) {
-                callback(false, "pattern is null");
-            }
-            return;
-        }
-        pattern->Stop(std::move(callback));
-    });
-    videoControllerAsync_->SetResetImpl(
-        [weak = WeakClaim(this)](VideoControllerAsync::AsyncCommandCallback&& callback) {
-        auto pattern = weak.Upgrade();
-        if (!pattern) {
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Reset: pattern is null");
-            if (callback) {
-                callback(false, "pattern is null");
-            }
-            return;
-        }
-        pattern->ResetMediaPlayerOnBg(std::move(callback));
-    });
-    videoControllerAsync_->SetSeekToImpl([weak = WeakClaim(this)](float time, SeekMode seekMode) {
-        auto pattern = weak.Upgrade();
-        if (!pattern) {
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::SeekTo: pattern is null");
-            return;
-        }
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask(
-            [weak, time, seekMode]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                ContainerScope scope(pattern->GetInstanceId());
-                auto targetPattern = pattern->GetTargetVideoPattern();
-                CHECK_NULL_VOID(targetPattern);
-                targetPattern->SetCurrentTime(time, seekMode);
-            },
-            "ArkUIVideoSetCurrentTime");
-    });
-    videoControllerAsync_->SetRequestFullscreenImpl([weak = WeakClaim(this)](bool landscape) {
-        auto pattern = weak.Upgrade();
-        if (!pattern) {
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::RequestFullscreen: pattern is null");
-            return;
-        }
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask(
-            [weak, landscape]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                ContainerScope scope(pattern->GetInstanceId());
-                if (landscape) {
-                    pattern->FullScreen();
-                    return;
-                }
-                pattern->ResetLastBoundsRect();
-                auto targetPattern = pattern->GetTargetVideoPattern();
-                CHECK_NULL_VOID(targetPattern);
-                auto fullScreenPattern = AceType::DynamicCast<NG::VideoStateMachineFullScreenPattern>(targetPattern);
-                if (fullScreenPattern) {
-                    fullScreenPattern->ExitFullScreen();
-                }
-            },
-            "ArkUIVideoFullScreen");
-    });
-    videoControllerAsync_->SetExitFullscreenImpl([weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        if (!pattern) {
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::ExitFullscreen: pattern is null");
-            return;
-        }
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostTask(
-            [weak]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                ContainerScope scope(pattern->GetInstanceId());
-                pattern->ResetLastBoundsRect();
-                auto targetPattern = pattern->GetTargetVideoPattern();
-                CHECK_NULL_VOID(targetPattern);
-                auto fullScreenPattern = AceType::DynamicCast<NG::VideoStateMachineFullScreenPattern>(targetPattern);
-                if (fullScreenPattern) {
-                    fullScreenPattern->ExitFullScreen();
-                }
-            },
-            "ArkUIVideoExitFullScreen");
-    });
-    ownsControllerAsyncBinding_ = true;
-}
-
-void VideoStateMachinePattern::ClearControllerAsync()
-{
-    if (!ownsControllerAsyncBinding_) {
-        return;
-    }
-    if (videoControllerAsync_) {
-        videoControllerAsync_->Clear();
-    }
-    ownsControllerAsyncBinding_ = false;
-}
-
 VideoStateMachinePattern::~VideoStateMachinePattern()
 {
-    ClearControllerAsync();
     {
         std::lock_guard<std::mutex> lock(serialBgQueueMutex_);
         if (!serialBgTaskQueue_.empty()) {

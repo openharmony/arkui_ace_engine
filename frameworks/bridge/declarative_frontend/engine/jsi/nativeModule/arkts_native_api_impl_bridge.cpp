@@ -46,6 +46,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_particle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_selection_container_bridge.h"
@@ -499,7 +500,6 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         {"Sidebar"},
         {"Indexer"},
         { "TextClock" },
-        { "Video" },
         { "TextInput" },
         { "TextArea" },
         {"Checkbox"},
@@ -653,6 +653,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     linearIndicator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChange"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LinearIndicatorBridge::ResetOnChange));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "linearIndicator"), linearIndicator);
+
+    RegisterVideoAttributes(object, vm);
 
     auto navDestination = panda::ObjectRef::New(vm);
     navDestination->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHideTitleBar"),
@@ -2593,6 +2595,175 @@ void ArkUINativeModule::RegisterWebAttributes(Local<panda::ObjectRef> object, Ec
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "web"), web);
 }
 #endif
+
+void ArkUINativeModule::RegisterVideoAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto video = panda::ObjectRef::New(vm);
+#ifdef PREVIEW
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoPlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoPlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setControls"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetControls"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMuted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMuted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShortcutKeyEnabled"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShortcutKeyEnabled"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVideoSurfaceBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVideoSurfaceBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPause"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPause"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFullscreenChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFullscreenChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPrepared"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPrepared"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSeeking"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSeeking"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSeeked"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSeeked"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnUpdate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnUpdate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnStop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnStop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAnalyzer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAnalyzer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAnalyzerConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAnalyzerConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+#else
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoPlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetAutoPlay));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoPlay"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetAutoPlay));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setControls"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetControls));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetControls"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetControls));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetObjectFit));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetObjectFit"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetObjectFit));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetLoop));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetLoop));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMuted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetMuted));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMuted"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetMuted));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShortcutKeyEnabled"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetShortcutKeyEnabled));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShortcutKeyEnabled"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetShortcutKeyEnabled));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVideoSurfaceBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetVideoSurfaceBackgroundColor));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVideoSurfaceBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetVideoSurfaceBackgroundColor));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOnStart));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnStart"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOnStart));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPause"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOnPause));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPause"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOnPause));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOnFinish));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFinish"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOnFinish));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFullscreenChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOnFullscreenChange));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFullscreenChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOnFullscreenChange));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPrepared"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOnPrepared));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPrepared"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOnPrepared));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSeeking"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOnSeeking));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSeeking"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOnSeeking));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSeeked"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOnSeeked));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSeeked"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOnSeeked));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnUpdate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOnUpdate));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnUpdate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOnUpdate));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOnError));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnError"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOnError));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnStop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOnStop));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnStop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOnStop));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAnalyzer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetEnableAnalyzer));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAnalyzer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetEnableAnalyzer));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAnalyzerConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetAnalyzerConfig));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAnalyzerConfig"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetAnalyzerConfig));
+#endif
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOpacity));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetOpacity));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetTransition));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetTransition));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "video"), video);
+}
 
 void ArkUINativeModule::RegisterContainerPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {

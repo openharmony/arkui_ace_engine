@@ -15,33 +15,12 @@
 
 #include "cj_video_ffi.h"
 
-#include <cstdlib>
-
-#include "core/common/dynamic_module_helper.h"
 
 #include "cj_lambda.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
-
-namespace {
-OHOS::Ace::VideoModel* GetVideoModel()
-{
-    static auto* model = []() {
-        auto* module = OHOS::Ace::DynamicModuleHelper::GetInstance().GetDynamicModule("Video");
-        if (module == nullptr) {
-            LOGF_ABORT("Cannot get Video dynamicModule");
-        }
-        auto* dynamicModel = reinterpret_cast<OHOS::Ace::VideoModel*>(module->GetModel());
-        if (dynamicModel == nullptr) {
-            LOGF_ABORT("Cannot get VideoModel from dynamicModule");
-        }
-        return dynamicModel;
-    }();
-    return model;
-}
-} // namespace
 
 namespace OHOS::Ace::Framework {
 NativeVideoController::NativeVideoController() : FFIData()
@@ -107,10 +86,10 @@ void FfiOHOSAceFrameworkVideoCreate(const char* src, double progressRate, const 
 {
     auto controller = FFIData::GetData<NativeVideoController>(controllerId);
     if (controller) {
-        GetVideoModel()->Create(controller->GetController());
-        GetVideoModel()->SetSrc(src, "", "");
-        GetVideoModel()->SetProgressRate(progressRate);
-        GetVideoModel()->SetPosterSourceInfo(preview, "", "");
+        VideoModel::GetInstance()->Create(controller->GetController());
+        VideoModel::GetInstance()->SetSrc(src, "", "");
+        VideoModel::GetInstance()->SetProgressRate(progressRate);
+        VideoModel::GetInstance()->SetPosterSourceInfo(preview, "", "");
     } else {
         LOGE("video controller id is invalid");
     }
@@ -118,62 +97,62 @@ void FfiOHOSAceFrameworkVideoCreate(const char* src, double progressRate, const 
 
 void FfiOHOSAceFrameworkVideoMuted(bool muted)
 {
-    GetVideoModel()->SetMuted(muted);
+    VideoModel::GetInstance()->SetMuted(muted);
 }
 
 void FfiOHOSAceFrameworkVideoAutoPlay(bool autoPlay)
 {
-    GetVideoModel()->SetAutoPlay(autoPlay);
+    VideoModel::GetInstance()->SetAutoPlay(autoPlay);
 }
 
 void FfiOHOSAceFrameworkVideoControls(bool controls)
 {
-    GetVideoModel()->SetControls(controls);
+    VideoModel::GetInstance()->SetControls(controls);
 }
 
 void FfiOHOSAceFrameworkVideoObjectFit(int32_t objectFit)
 {
-    GetVideoModel()->SetObjectFit(static_cast<ImageFit>(objectFit));
+    VideoModel::GetInstance()->SetObjectFit(static_cast<ImageFit>(objectFit));
 }
 
 void FfiOHOSAceFrameworkVideoLoop(bool loop)
 {
-    GetVideoModel()->SetLoop(loop);
+    VideoModel::GetInstance()->SetLoop(loop);
 }
 
 void FfiOHOSAceFrameworkVideoEnableAnalyzer(bool enable)
 {
-    GetVideoModel()->EnableAnalyzer(enable);
+    VideoModel::GetInstance()->EnableAnalyzer(enable);
 }
 
 void FfiOHOSAceFrameworkVideoOnStart(void (*callback)(const char* value))
 {
     auto func = [ffiCallback = CJLambda::Create(callback)](const std::string& param) { ffiCallback(param.c_str()); };
-    GetVideoModel()->SetOnStart(std::move(func));
+    VideoModel::GetInstance()->SetOnStart(std::move(func));
 }
 
 void FfiOHOSAceFrameworkVideoOnPause(void (*callback)(const char* value))
 {
     auto func = [ffiCallback = CJLambda::Create(callback)](const std::string& param) { ffiCallback(param.c_str()); };
-    GetVideoModel()->SetOnPause(std::move(func));
+    VideoModel::GetInstance()->SetOnPause(std::move(func));
 }
 
 void FfiOHOSAceFrameworkVideoOnFinish(void (*callback)(const char* value))
 {
     auto func = [ffiCallback = CJLambda::Create(callback)](const std::string& param) { ffiCallback(param.c_str()); };
-    GetVideoModel()->SetOnFinish(std::move(func));
+    VideoModel::GetInstance()->SetOnFinish(std::move(func));
 }
 
 void FfiOHOSAceFrameworkVideoOnError(void (*callback)(const char* value))
 {
     auto func = [ffiCallback = CJLambda::Create(callback)](const std::string& param) { ffiCallback(param.c_str()); };
-    GetVideoModel()->SetOnError(std::move(func));
+    VideoModel::GetInstance()->SetOnError(std::move(func));
 }
 
 void FfiOHOSAceFrameworkVideoOnStop(void (*callback)(const char* value))
 {
     auto func = [ffiCallback = CJLambda::Create(callback)](const std::string& param) { ffiCallback(param.c_str()); };
-    GetVideoModel()->SetOnStop(std::move(func));
+    VideoModel::GetInstance()->SetOnStop(std::move(func));
 }
 
 void FfiOHOSAceFrameworkVideoOnPrepared(void (*callback)(int32_t value))
@@ -187,7 +166,7 @@ void FfiOHOSAceFrameworkVideoOnPrepared(void (*callback)(int32_t value))
         auto res = json->GetValue("duration")->GetInt();
         ffiCallback(res);
     };
-    GetVideoModel()->SetOnPrepared(std::move(func));
+    VideoModel::GetInstance()->SetOnPrepared(std::move(func));
 }
 
 void FfiOHOSAceFrameworkVideoOnSeeking(void (*callback)(int32_t value))
@@ -201,7 +180,7 @@ void FfiOHOSAceFrameworkVideoOnSeeking(void (*callback)(int32_t value))
         auto res = json->GetValue("time")->GetInt();
         ffiCallback(res);
     };
-    GetVideoModel()->SetOnSeeking(std::move(func));
+    VideoModel::GetInstance()->SetOnSeeking(std::move(func));
 }
 
 void FfiOHOSAceFrameworkVideoOnSeeked(void (*callback)(int32_t value))
@@ -215,7 +194,7 @@ void FfiOHOSAceFrameworkVideoOnSeeked(void (*callback)(int32_t value))
         auto res = json->GetValue("time")->GetInt();
         ffiCallback(res);
     };
-    GetVideoModel()->SetOnSeeked(std::move(func));
+    VideoModel::GetInstance()->SetOnSeeked(std::move(func));
 }
 
 void FfiOHOSAceFrameworkVideoOnUpdate(void (*callback)(int32_t value))
@@ -229,7 +208,7 @@ void FfiOHOSAceFrameworkVideoOnUpdate(void (*callback)(int32_t value))
         auto res = json->GetValue("time")->GetInt();
         ffiCallback(res);
     };
-    GetVideoModel()->SetOnUpdate(std::move(func));
+    VideoModel::GetInstance()->SetOnUpdate(std::move(func));
 }
 
 void FfiOHOSAceFrameworkVideoOnFullscreenChange(void (*callback)(bool value))
@@ -243,7 +222,7 @@ void FfiOHOSAceFrameworkVideoOnFullscreenChange(void (*callback)(bool value))
         auto res = json->GetValue("fullscreen")->GetBool();
         ffiCallback(res);
     };
-    GetVideoModel()->SetOnFullScreenChange(std::move(func));
+    VideoModel::GetInstance()->SetOnFullScreenChange(std::move(func));
 }
 
 int64_t FfiOHOSAceFrameworkVideoControllerCreate()

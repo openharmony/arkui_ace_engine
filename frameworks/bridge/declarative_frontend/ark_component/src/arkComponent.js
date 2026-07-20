@@ -4876,6 +4876,441 @@ if (globalThis.Text !== undefined) {
 }
 
 /// <reference path='./import.ts' />
+class VideoObjectFitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetObjectFit(node);
+    }
+    else {
+      getUINativeModule().video.setObjectFit(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoObjectFitModifier.identity = Symbol('videoObjectFit');
+class VideoAutoPlayModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetAutoPlay(node);
+    }
+    else {
+      getUINativeModule().video.setAutoPlay(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoAutoPlayModifier.identity = Symbol('videoAutoPlayr');
+class VideoControlsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetControls(node);
+    }
+    else {
+      getUINativeModule().video.setControls(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoControlsModifier.identity = Symbol('videoControls');
+class VideoLoopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetLoop(node);
+    }
+    else {
+      getUINativeModule().video.setLoop(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoLoopModifier.identity = Symbol('videoLoop');
+class VideoMutedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetMuted(node);
+    }
+    else {
+      getUINativeModule().video.setMuted(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoMutedModifier.identity = Symbol('videoMuted');
+class VideoOpacityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOpacity(node);
+    }
+    else {
+      getUINativeModule().video.setOpacity(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoOpacityModifier.identity = Symbol('videoOpacity');
+class VideoSurfaceBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetVideoSurfaceBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().video.setVideoSurfaceBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoSurfaceBackgroundColorModifier.identity = Symbol('videoSurfaceBackgroundColor');
+class VideoTransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetTransition(node);
+    }
+    else {
+      getUINativeModule().video.setTransition(node, this.value.transitionEffect, this.value.callback);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+VideoTransitionModifier.identity = Symbol('videoTransition');
+class VideoEnableShortcutKeyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetShortcutKeyEnabled(node);
+    } else {
+      getUINativeModule().video.setShortcutKeyEnabled(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoEnableShortcutKeyModifier.identity = Symbol('videoEnableShortcutKey');
+
+class VideoOnStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnStart(node);
+    } else {
+      getUINativeModule().video.setOnStart(node, this.value);
+    }
+  }
+}
+VideoOnStartModifier.identity = Symbol('videoOnStart');
+
+class VideoOnPauseModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnPause(node);
+    } else {
+      getUINativeModule().video.setOnPause(node, this.value);
+    }
+  }
+}
+VideoOnPauseModifier.identity = Symbol('videoOnPause');
+
+class VideoOnFinishModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnFinish(node);
+    } else {
+      getUINativeModule().video.setOnFinish(node, this.value);
+    }
+  }
+}
+VideoOnFinishModifier.identity = Symbol('videoOnFinish');
+
+class VideoOnFullscreenChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnFullscreenChange(node);
+    } else {
+      getUINativeModule().video.setOnFullscreenChange(node, this.value);
+    }
+  }
+}
+VideoOnFullscreenChangeModifier.identity = Symbol('videoOnFullscreenChange');
+
+class VideoOnPreparedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnPrepared(node);
+    } else {
+      getUINativeModule().video.setOnPrepared(node, this.value);
+    }
+  }
+}
+VideoOnPreparedModifier.identity = Symbol('videoOnPrepared');
+
+class VideoOnSeekingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnSeeking(node);
+    } else {
+      getUINativeModule().video.setOnSeeking(node, this.value);
+    }
+  }
+}
+VideoOnSeekingModifier.identity = Symbol('videoOnSeeking');
+
+class VideoOnSeekedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnSeeked(node);
+    } else {
+      getUINativeModule().video.setOnSeeked(node, this.value);
+    }
+  }
+}
+VideoOnSeekedModifier.identity = Symbol('videoOnSeeked');
+
+class VideoOnUpdateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnUpdate(node);
+    } else {
+      getUINativeModule().video.setOnUpdate(node, this.value);
+    }
+  }
+}
+VideoOnUpdateModifier.identity = Symbol('videoOnUpdate');
+
+class VideoOnErrorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnError(node);
+    } else {
+      getUINativeModule().video.setOnError(node, this.value);
+    }
+  }
+}
+VideoOnErrorModifier.identity = Symbol('videoOnError');
+
+class VideoOnStopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOnStop(node);
+    } else {
+      getUINativeModule().video.setOnStop(node, this.value);
+    }
+  }
+}
+VideoOnStopModifier.identity = Symbol('videoOnStop');
+
+class VideoEnableAnalyzerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetEnableAnalyzer(node);
+    } else {
+      getUINativeModule().video.setEnableAnalyzer(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoEnableAnalyzerModifier.identity = Symbol('videoEnableAnalyzer');
+
+class VideoAnalyzerConfigModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetAnalyzerConfig(node);
+    } else {
+      getUINativeModule().video.setAnalyzerConfig(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoAnalyzerConfigModifier.identity = Symbol('videoAnalyzerConfig');
+
+class ArkVideoComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  muted(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoMutedModifier.identity, VideoMutedModifier, value);
+    return this;
+  }
+  autoPlay(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoAutoPlayModifier.identity, VideoAutoPlayModifier, value);
+    return this;
+  }
+  surfaceBackgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoSurfaceBackgroundColorModifier.identity,
+      VideoSurfaceBackgroundColorModifier, value);
+    return this;
+  }
+  controls(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoControlsModifier.identity, VideoControlsModifier, value);
+    return this;
+  }
+  loop(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoLoopModifier.identity, VideoLoopModifier, value);
+    return this;
+  }
+  objectFit(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoObjectFitModifier.identity, VideoObjectFitModifier, value);
+    return this;
+  }
+  enableShortcutKey(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoEnableShortcutKeyModifier.identity, VideoEnableShortcutKeyModifier, value);
+    return this;
+  }
+  opacity(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoOpacityModifier.identity, VideoOpacityModifier, value);
+    return this;
+  }
+  transition(value, callback) {
+    let arkTransition = new ArkTransition();
+    arkTransition.transitionEffect = value;
+    if (typeof callback === 'function') {
+      arkTransition.callback = callback;
+    }
+    modifierWithKey(this._modifiersWithKeys, VideoTransitionModifier.identity, VideoTransitionModifier, arkTransition);
+    return this;
+  }
+  onStart(callback) {
+    modifierWithKey(this._modifiersWithKeys, VideoOnStartModifier.identity, VideoOnStartModifier, callback);
+    return this;
+  }
+  onPause(callback) {
+    modifierWithKey(this._modifiersWithKeys, VideoOnPauseModifier.identity, VideoOnPauseModifier, callback);
+    return this;
+  }
+  onFinish(event) {
+    modifierWithKey(this._modifiersWithKeys, VideoOnFinishModifier.identity, VideoOnFinishModifier, event);
+    return this;
+  }
+  onFullscreenChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, VideoOnFullscreenChangeModifier.identity,
+      VideoOnFullscreenChangeModifier, callback);
+    return this;
+  }
+  onPrepared(callback) {
+    modifierWithKey(this._modifiersWithKeys, VideoOnPreparedModifier.identity, VideoOnPreparedModifier, callback);
+    return this;
+  }
+  onSeeking(callback) {
+    modifierWithKey(this._modifiersWithKeys, VideoOnSeekingModifier.identity, VideoOnSeekingModifier, callback);
+    return this;
+  }
+  onSeeked(callback) {
+    modifierWithKey(this._modifiersWithKeys, VideoOnSeekedModifier.identity, VideoOnSeekedModifier, callback);
+    return this;
+  }
+  onUpdate(callback) {
+    modifierWithKey(this._modifiersWithKeys, VideoOnUpdateModifier.identity, VideoOnUpdateModifier, callback);
+    return this;
+  }
+  onError(callback) {
+    modifierWithKey(this._modifiersWithKeys, VideoOnErrorModifier.identity, VideoOnErrorModifier, callback);
+    return this;
+  }
+  onStop(callback) {
+    modifierWithKey(this._modifiersWithKeys, VideoOnStopModifier.identity, VideoOnStopModifier, callback);
+    return this;
+  }
+  enableAnalyzer(enable) {
+    modifierWithKey(this._modifiersWithKeys, VideoEnableAnalyzerModifier.identity, VideoEnableAnalyzerModifier, enable);
+    return this;
+  }
+  analyzerConfig(config) {
+    modifierWithKey(this._modifiersWithKeys, VideoAnalyzerConfigModifier.identity, VideoAnalyzerConfigModifier, config);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.Video !== undefined) {
+  globalThis.Video.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkVideoComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.VideoModifier(nativePtr, classType);
+    });
+  };
+}
+
+/// <reference path='./import.ts' />
 class ArkBorderStyle {
   constructor() {
     this.type = undefined;

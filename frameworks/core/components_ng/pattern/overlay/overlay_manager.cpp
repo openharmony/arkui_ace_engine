@@ -95,6 +95,7 @@
 #include "core/components_ng/pattern/time_picker/timepicker_dialog_view.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
+#include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
 
@@ -2593,9 +2594,10 @@ int32_t OverlayManager::ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefP
     bool isBackPressed, bool isPageRouter)
 {
     auto pattern = overlay->GetPattern();
-    if (overlay->GetTag() == V2::VIDEO_ETS_TAG) {
-        CHECK_NULL_RETURN(pattern, OVERLAY_EXISTS);
-        return pattern->OnBackPressedCallback() ? OVERLAY_REMOVE : OVERLAY_EXISTS;
+    if (InstanceOf<VideoFullScreenPattern>(pattern)) {
+        auto videoPattern = DynamicCast<VideoFullScreenPattern>(pattern);
+        CHECK_NULL_RETURN(videoPattern, OVERLAY_EXISTS);
+        return videoPattern->ExitFullScreen() ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     // OVERLAY_REMOVE if popup was removed, OVERLAY_NOTHING if not handle it
     if (overlay->GetTag() == V2::SHEET_WRAPPER_TAG) {

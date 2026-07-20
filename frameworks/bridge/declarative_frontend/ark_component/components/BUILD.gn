@@ -110,7 +110,6 @@ special_components = [
   "arkcanvas",
   "arkgrid",
   "arkgriditem",
-  "arkvideo",
   "arkdatapanel",
   "arktextclock",
   "arkloadingprogress",

@@ -10523,9 +10523,6 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("edgeLight", &JSViewAbstract::JSEdgeLight);
     JSClass<JSViewAbstract>::StaticMethod("doubleSided", &JSViewAbstract::JSDoubleSided);
 
-    JSClass<JSViewAbstract>::StaticMethod("opacityPassThrough", &JSViewAbstract::JsOpacityPassThrough);
-    JSClass<JSViewAbstract>::StaticMethod("transitionPassThrough", &JSViewAbstract::JsTransitionPassThrough);
-
     JSClass<JSViewAbstract>::Bind(globalObj);
 }
 

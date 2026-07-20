@@ -180,7 +180,7 @@ const char COUNTER_ETS_TAG[] = "Counter";
 
 // flex
 const char FLEX_COMPONENT_TAG[] = "FlexComponentV2";
-ACE_FORCE_EXPORT const char FLEX_ETS_TAG[] = "Flex";
+const char FLEX_ETS_TAG[] = "Flex";
 const char WRAP_COMPONENT_TAG[] = "WrapComponent";
 const char WRAP_ETS_TAG[] = "Flex";
 
@@ -699,7 +699,7 @@ const char UNDEFINED_NODE_ETS_TAG[] = "";
 const char UNION_EFFECT_CONTAINER_ETS_TAG[] = "UnionEffectContainer";
 
 // Custom
-ACE_FORCE_EXPORT const char CUSTOM_ETS_TAG[] = "Custom";
+const char CUSTOM_ETS_TAG[] = "Custom";
 
 // LazyColumnLayout
 const char LAZY_COLUMN_LAYOUT_ETS_TAG[] = "LazyColumnLayout";

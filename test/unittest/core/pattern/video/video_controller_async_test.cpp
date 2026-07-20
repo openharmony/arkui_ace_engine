@@ -73,7 +73,8 @@ void VideoControllerAsyncTestNg::SetUp()
 
 RefPtr<FrameNode> VideoControllerAsyncTestNg::CreateVideoNodeWithController(RefPtr<VideoControllerAsync>& controller)
 {
-    controller = AceType::MakeRefPtr<VideoControllerAsync>();
+    WeakPtr<VideoStateMachinePattern> emptyPattern;
+    controller = AceType::MakeRefPtr<VideoControllerAsync>(emptyPattern);
     VideoModelNG().Create(controller);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -91,14 +92,15 @@ RefPtr<FrameNode> VideoControllerAsyncTestNg::CreateVideoNodeWithController(RefP
  */
 HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncConstructor001, TestSize.Level1)
 {
-    auto controller = AceType::MakeRefPtr<VideoControllerAsync>();
+    WeakPtr<VideoStateMachinePattern> emptyPattern;
+    auto controller = AceType::MakeRefPtr<VideoControllerAsync>(emptyPattern);
     ASSERT_NE(controller, nullptr);
-    EXPECT_FALSE(controller->IsBound());
+    EXPECT_TRUE(controller->pattern_.Invalid());
 }
 
 /**
  * @tc.name: VideoControllerAsyncSetPattern001
- * @tc.desc: Test controller is bound during video creation.
+ * @tc.desc: Test SetPattern updates pattern reference.
  * @tc.type: FUNC
  */
 HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncSetPattern001, TestSize.Level1)
@@ -111,7 +113,8 @@ HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncSetPattern001, TestSize
     auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
     ASSERT_NE(pattern, nullptr);
 
-    EXPECT_TRUE(controller->IsBound());
+    controller->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    EXPECT_FALSE(controller->pattern_.Invalid());
 }
 
 /**
@@ -121,7 +124,8 @@ HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncSetPattern001, TestSize
  */
 HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncStart001, TestSize.Level1)
 {
-    auto controller = AceType::MakeRefPtr<VideoControllerAsync>();
+    WeakPtr<VideoStateMachinePattern> emptyPattern;
+    auto controller = AceType::MakeRefPtr<VideoControllerAsync>(emptyPattern);
     
     bool callbackCalled = false;
     bool callbackSuccess = false;
@@ -145,7 +149,8 @@ HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncStart001, TestSize.Leve
  */
 HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncPause001, TestSize.Level1)
 {
-    auto controller = AceType::MakeRefPtr<VideoControllerAsync>();
+    WeakPtr<VideoStateMachinePattern> emptyPattern;
+    auto controller = AceType::MakeRefPtr<VideoControllerAsync>(emptyPattern);
     
     bool callbackCalled = false;
     controller->Pause([&callbackCalled](bool success, const std::string& reason) {
@@ -164,7 +169,8 @@ HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncPause001, TestSize.Leve
  */
 HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncStop001, TestSize.Level1)
 {
-    auto controller = AceType::MakeRefPtr<VideoControllerAsync>();
+    WeakPtr<VideoStateMachinePattern> emptyPattern;
+    auto controller = AceType::MakeRefPtr<VideoControllerAsync>(emptyPattern);
     
     bool callbackCalled = false;
     controller->Stop([&callbackCalled](bool success, const std::string& reason) {
@@ -183,7 +189,8 @@ HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncStop001, TestSize.Level
  */
 HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncReset001, TestSize.Level1)
 {
-    auto controller = AceType::MakeRefPtr<VideoControllerAsync>();
+    WeakPtr<VideoStateMachinePattern> emptyPattern;
+    auto controller = AceType::MakeRefPtr<VideoControllerAsync>(emptyPattern);
     
     bool callbackCalled = false;
     controller->Reset([&callbackCalled](bool success, const std::string& reason) {
@@ -197,7 +204,7 @@ HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncReset001, TestSize.Leve
 
 /**
  * @tc.name: VideoControllerAsyncClearPattern001
- * @tc.desc: Test Clear resets bound callbacks.
+ * @tc.desc: Test ClearPattern resets pattern reference.
  * @tc.type: FUNC
  */
 HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncClearPattern001, TestSize.Level1)
@@ -206,9 +213,9 @@ HWTEST_F(VideoControllerAsyncTestNg, VideoControllerAsyncClearPattern001, TestSi
     auto frameNode = CreateVideoNodeWithController(controller);
     ASSERT_NE(frameNode, nullptr);
     
-    EXPECT_TRUE(controller->IsBound());
-    controller->Clear();
-    EXPECT_FALSE(controller->IsBound());
+    EXPECT_FALSE(controller->pattern_.Invalid());
+    controller->ClearPattern();
+    EXPECT_TRUE(controller->pattern_.Invalid());
 }
 
 } // namespace OHOS::Ace::NG

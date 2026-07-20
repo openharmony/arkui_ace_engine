@@ -75,7 +75,6 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "ContainerReader", "containerreader" },
         { "Counter", "counter" },
         { "DataPanel", "datapanel" },
-        { "Video", "video" },
         {"TextClock", "textclock"},
         { "TextInput", "textfield" },
         { "TextArea", "textfield" },

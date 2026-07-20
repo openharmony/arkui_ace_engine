@@ -846,7 +846,6 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "TextInput", "arkui.components.arktextinput" },
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
-        { "Video", "arkui.components.arkvideo" },
         { "Toggle", "arkui.components.arktoggle" },
         { "ToolBarItem", "arkui.components.arktoolbaritem" },
         { "WaterFlow", "arkui.components.arkwaterflow" },

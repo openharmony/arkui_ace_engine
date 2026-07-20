@@ -154,11 +154,6 @@ public:
         return isInitialState_;
     }
 
-    bool OnBackPressedCallback() override
-    {
-        return OnBackPressed();
-    }
-
     virtual bool OnBackPressed()
     {
         return false;

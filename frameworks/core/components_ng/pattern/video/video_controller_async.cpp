@@ -15,142 +15,160 @@
 
 #include "core/components_ng/pattern/video/video_controller_async.h"
 
-#include <utility>
-
-#include "base/log/log.h"
+#include "base/thread/task_executor.h"
+#include "core/common/container_scope.h"
+#include "core/components_ng/pattern/video/video_state_machine_full_screen_pattern.h"
+#include "core/components_ng/pattern/video/video_state_machine_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 
-VideoControllerAsync::VideoControllerAsync() = default;
+VideoControllerAsync::VideoControllerAsync(const WeakPtr<NG::VideoStateMachinePattern>& pattern)
+    : pattern_(pattern)
+{}
 
-VideoControllerAsync::~VideoControllerAsync() = default;
+void VideoControllerAsync::SetPattern(const WeakPtr<NG::VideoStateMachinePattern>& pattern)
+{
+    if (!pattern_.Invalid() && pattern_.Upgrade()) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::SetPattern: pattern already set, overwriting");
+    }
+    pattern_ = pattern;
+}
 
 void VideoControllerAsync::Start(AsyncCommandCallback&& callback)
 {
-    if (!startImpl_) {
-        ReportNullPattern("Start", std::move(callback));
+    auto pattern = pattern_.Upgrade();
+    if (!pattern) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Start: pattern is null");
+        if (callback) {
+            callback(false, "pattern is null");
+        }
         return;
     }
-    startImpl_(std::move(callback));
+    pattern->Start(std::move(callback));
 }
 
 void VideoControllerAsync::Pause(AsyncCommandCallback&& callback)
 {
-    if (!pauseImpl_) {
-        ReportNullPattern("Pause", std::move(callback));
+    auto pattern = pattern_.Upgrade();
+    if (!pattern) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Pause: pattern is null");
+        if (callback) {
+            callback(false, "pattern is null");
+        }
         return;
     }
-    pauseImpl_(std::move(callback));
+    pattern->Pause(std::move(callback));
 }
 
 void VideoControllerAsync::Stop(AsyncCommandCallback&& callback)
 {
-    if (!stopImpl_) {
-        ReportNullPattern("Stop", std::move(callback));
+    auto pattern = pattern_.Upgrade();
+    if (!pattern) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Stop: pattern is null");
+        if (callback) {
+            callback(false, "pattern is null");
+        }
         return;
     }
-    stopImpl_(std::move(callback));
+    pattern->Stop(std::move(callback));
 }
 
 void VideoControllerAsync::Reset(AsyncCommandCallback&& callback)
 {
-    if (!resetImpl_) {
-        ReportNullPattern("Reset", std::move(callback));
+    auto pattern = pattern_.Upgrade();
+    if (!pattern) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::Reset: pattern is null");
+        if (callback) {
+            callback(false, "pattern is null");
+        }
         return;
     }
-    resetImpl_(std::move(callback));
+    pattern->ResetMediaPlayerOnBg(std::move(callback));
 }
 
 void VideoControllerAsync::SeekTo(float time, SeekMode seekMode)
 {
-    if (!seekToImpl_) {
-        ReportNullPattern("SeekTo");
+    auto pattern = pattern_.Upgrade();
+    if (!pattern) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::SeekTo: pattern is null");
         return;
     }
-    seekToImpl_(time, seekMode);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask(
+        [weak = pattern_, time, seekMode]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            ContainerScope scope(pattern->GetInstanceId());
+            auto targetPattern = pattern->GetTargetVideoPattern();
+            CHECK_NULL_VOID(targetPattern);
+            targetPattern->SetCurrentTime(time, seekMode);
+        },
+        "ArkUIVideoSetCurrentTime");
 }
 
 void VideoControllerAsync::RequestFullscreen(bool landscape)
 {
-    if (!requestFullscreenImpl_) {
-        ReportNullPattern("RequestFullscreen");
+    auto pattern = pattern_.Upgrade();
+    if (!pattern) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::RequestFullscreen: pattern is null");
         return;
     }
-    requestFullscreenImpl_(landscape);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask(
+        [weak = pattern_, landscape]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            ContainerScope scope(pattern->GetInstanceId());
+            if (landscape) {
+                pattern->FullScreen();
+            } else {
+                pattern->ResetLastBoundsRect();
+                auto targetPattern = pattern->GetTargetVideoPattern();
+                CHECK_NULL_VOID(targetPattern);
+                auto fullScreenPattern = AceType::DynamicCast<NG::VideoStateMachineFullScreenPattern>(targetPattern);
+                if (fullScreenPattern) {
+                    fullScreenPattern->ExitFullScreen();
+                }
+            }
+        },
+        "ArkUIVideoFullScreen");
 }
 
 void VideoControllerAsync::ExitFullscreen()
 {
-    if (!exitFullscreenImpl_) {
-        ReportNullPattern("ExitFullscreen");
+    auto pattern = pattern_.Upgrade();
+    if (!pattern) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::ExitFullscreen: pattern is null");
         return;
     }
-    exitFullscreenImpl_();
-}
-
-void VideoControllerAsync::SetStartImpl(StartImpl&& startImpl)
-{
-    startImpl_ = std::move(startImpl);
-}
-
-void VideoControllerAsync::SetPauseImpl(PauseImpl&& pauseImpl)
-{
-    pauseImpl_ = std::move(pauseImpl);
-}
-
-void VideoControllerAsync::SetStopImpl(StopImpl&& stopImpl)
-{
-    stopImpl_ = std::move(stopImpl);
-}
-
-void VideoControllerAsync::SetResetImpl(ResetImpl&& resetImpl)
-{
-    resetImpl_ = std::move(resetImpl);
-}
-
-void VideoControllerAsync::SetSeekToImpl(SeekToImpl&& seekToImpl)
-{
-    seekToImpl_ = std::move(seekToImpl);
-}
-
-void VideoControllerAsync::SetRequestFullscreenImpl(RequestFullscreenImpl&& requestFullscreenImpl)
-{
-    requestFullscreenImpl_ = std::move(requestFullscreenImpl);
-}
-
-void VideoControllerAsync::SetExitFullscreenImpl(ExitFullscreenImpl&& exitFullscreenImpl)
-{
-    exitFullscreenImpl_ = std::move(exitFullscreenImpl);
-}
-
-void VideoControllerAsync::Clear()
-{
-    startImpl_ = nullptr;
-    pauseImpl_ = nullptr;
-    stopImpl_ = nullptr;
-    resetImpl_ = nullptr;
-    seekToImpl_ = nullptr;
-    requestFullscreenImpl_ = nullptr;
-    exitFullscreenImpl_ = nullptr;
-}
-
-bool VideoControllerAsync::IsBound() const
-{
-    return startImpl_ || pauseImpl_ || stopImpl_ || resetImpl_ || seekToImpl_ || requestFullscreenImpl_ ||
-           exitFullscreenImpl_;
-}
-
-void VideoControllerAsync::ReportNullPattern(const char* method, AsyncCommandCallback&& callback)
-{
-    TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::%{public}s: pattern is null", method);
-    if (callback) {
-        callback(false, "pattern is null");
-    }
-}
-
-void VideoControllerAsync::ReportNullPattern(const char* method)
-{
-    TAG_LOGW(AceLogTag::ACE_VIDEO, "VideoControllerAsync::%{public}s: pattern is null", method);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    uiTaskExecutor.PostTask(
+        [weak = pattern_]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            ContainerScope scope(pattern->GetInstanceId());
+            pattern->ResetLastBoundsRect();
+            auto targetPattern = pattern->GetTargetVideoPattern();
+            CHECK_NULL_VOID(targetPattern);
+            auto fullScreenPattern = AceType::DynamicCast<NG::VideoStateMachineFullScreenPattern>(targetPattern);
+            if (fullScreenPattern) {
+                fullScreenPattern->ExitFullScreen();
+            }
+        },
+        "ArkUIVideoExitFullScreen");
 }
 
 } // namespace OHOS::Ace

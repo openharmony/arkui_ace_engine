@@ -117,25 +117,25 @@ struct MeasureProperty {
                (selfIdealSize == measureProperty.selfIdealSize);
     }
 
-    ACE_FORCE_EXPORT bool UpdateSelfIdealSizeWithCheck(const CalcSize& size);
+    bool UpdateSelfIdealSizeWithCheck(const CalcSize& size);
 
-    ACE_FORCE_EXPORT bool ClearSelfIdealSize(bool clearWidth, bool clearHeight);
+    bool ClearSelfIdealSize(bool clearWidth, bool clearHeight);
 
     ACE_FORCE_EXPORT bool UpdateMaxSizeWithCheck(const CalcSize& size);
 
     ACE_FORCE_EXPORT bool UpdateMinSizeWithCheck(const CalcSize& size);
 
-    ACE_FORCE_EXPORT bool PercentWidth() const;
+    bool PercentWidth() const;
 
-    ACE_FORCE_EXPORT bool PercentHeight() const;
+    bool PercentHeight() const;
 
     std::string ToString() const;
 
-    ACE_FORCE_EXPORT void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
     void ToJsonValue_GetJsonSize(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 
-    ACE_FORCE_EXPORT static MeasureProperty FromJson(const std::unique_ptr<JsonValue>& json);
+    static MeasureProperty FromJson(const std::unique_ptr<JsonValue>& json);
 };
 
 } // namespace OHOS::Ace::NG

@@ -5189,14 +5189,6 @@ struct ArkUIVideoModifier {
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setAnalyzerConfig)(ArkUINodeHandle node, void* config);
     void (*resetAnalyzerConfig)(ArkUINodeHandle node);
-    void (*createModel)(void* videoController);
-    void (*setSrc)(ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
-    void (*setShowFirstFrame)(ArkUI_Bool showFirstFrame);
-    void (*setProgressRate)(ArkUI_Float64 progressRate);
-    void (*setImageAIOptions)(void* options);
-    void (*setPosterSourceInfo)(ArkUI_CharPtr posterUrl, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
-    void (*setPosterSourceByPixelMap)(void* pixelMap);
-    void (*setNodeImageAIOptions)(ArkUINodeHandle node, void* options);
 };
 
 struct ArkUIVideoControllerModifier {

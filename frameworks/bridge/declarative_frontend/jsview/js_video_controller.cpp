@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_binding.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
@@ -30,30 +30,29 @@ const std::vector<SeekMode> SEEK_MODE = { SeekMode::SEEK_PREVIOUS_SYNC, SeekMode
 
 } // namespace
 
-void JSVideoControllerBinding::JSBind(BindingTarget globalObj)
+void JSVideoController::JSBind(BindingTarget globalObj)
 {
     JSClass<JSVideoController>::Declare("VideoController");
-    JSClass<JSVideoController>::CustomMethod("start", &JSVideoControllerBinding::Start);
-    JSClass<JSVideoController>::CustomMethod("pause", &JSVideoControllerBinding::Pause);
-    JSClass<JSVideoController>::CustomMethod("stop", &JSVideoControllerBinding::Stop);
-    JSClass<JSVideoController>::CustomMethod("setCurrentTime", &JSVideoControllerBinding::SetCurrentTime);
-    JSClass<JSVideoController>::CustomMethod("requestFullscreen", &JSVideoControllerBinding::RequestFullscreen);
-    JSClass<JSVideoController>::CustomMethod("exitFullscreen", &JSVideoControllerBinding::ExitFullscreen);
-    JSClass<JSVideoController>::CustomMethod("reset", &JSVideoControllerBinding::Reset);
-    JSClass<JSVideoController>::Bind(
-        globalObj, JSVideoControllerBinding::Constructor, JSVideoControllerBinding::Destructor);
+    JSClass<JSVideoController>::CustomMethod("start", &JSVideoController::Start);
+    JSClass<JSVideoController>::CustomMethod("pause", &JSVideoController::Pause);
+    JSClass<JSVideoController>::CustomMethod("stop", &JSVideoController::Stop);
+    JSClass<JSVideoController>::CustomMethod("setCurrentTime", &JSVideoController::SetCurrentTime);
+    JSClass<JSVideoController>::CustomMethod("requestFullscreen", &JSVideoController::RequestFullscreen);
+    JSClass<JSVideoController>::CustomMethod("exitFullscreen", &JSVideoController::ExitFullscreen);
+    JSClass<JSVideoController>::CustomMethod("reset", &JSVideoController::Reset);
+    JSClass<JSVideoController>::Bind(globalObj, JSVideoController::Constructor, JSVideoController::Destructor);
 }
 
-void JSVideoControllerBinding::Constructor(const JSCallbackInfo& args)
+void JSVideoController::Constructor(const JSCallbackInfo& args)
 {
-    auto videoController = Referenced::MakeRefPtr<JSVideoControllerBinding>();
+    auto videoController = Referenced::MakeRefPtr<JSVideoController>();
     videoController->IncRefCount();
     RefPtr<VideoControllerV2> controller = AceType::MakeRefPtr<VideoControllerV2>();
     videoController->SetController(controller);
     args.SetReturnValue(Referenced::RawPtr(videoController));
 }
 
-void JSVideoControllerBinding::Destructor(JSVideoController* videoController)
+void JSVideoController::Destructor(JSVideoController* videoController)
 {
     if (videoController) {
         const auto& controller = videoController->GetController();
@@ -64,47 +63,43 @@ void JSVideoControllerBinding::Destructor(JSVideoController* videoController)
     }
 }
 
-void JSVideoControllerBinding::Reset(const JSCallbackInfo& args)
+void JSVideoController::Reset(const JSCallbackInfo& args)
 {
-    const auto& controller = GetController();
-    if (controller) {
-        controller->Reset();
+    if (videoController_) {
+        videoController_->Reset();
     }
 }
 
-void JSVideoControllerBinding::Start(const JSCallbackInfo& args)
+void JSVideoController::Start(const JSCallbackInfo& args)
 {
-    ContainerScope scope(GetInstanceId());
-    const auto& controller = GetController();
-    if (controller) {
+    ContainerScope scope(instanceId_);
+    if (videoController_) {
 #ifdef SUPPORT_JSSTACK
         HiviewDFX::ReportXPowerJsStackSysEvent(args.GetVm(), "STREAM_CHANGE", "SRC=Video");
 #endif
-        controller->Start();
+        videoController_->Start();
     }
 }
 
-void JSVideoControllerBinding::Pause(const JSCallbackInfo& args)
+void JSVideoController::Pause(const JSCallbackInfo& args)
 {
-    ContainerScope scope(GetInstanceId());
-    const auto& controller = GetController();
-    if (controller) {
-        controller->Pause();
+    ContainerScope scope(instanceId_);
+    if (videoController_) {
+        videoController_->Pause();
     }
 }
 
-void JSVideoControllerBinding::Stop(const JSCallbackInfo& args)
+void JSVideoController::Stop(const JSCallbackInfo& args)
 {
-    ContainerScope scope(GetInstanceId());
-    const auto& controller = GetController();
-    if (controller) {
-        controller->Stop();
+    ContainerScope scope(instanceId_);
+    if (videoController_) {
+        videoController_->Stop();
     }
 }
 
-void JSVideoControllerBinding::SetCurrentTime(const JSCallbackInfo& args)
+void JSVideoController::SetCurrentTime(const JSCallbackInfo& args)
 {
-    ContainerScope scope(GetInstanceId());
+    ContainerScope scope(instanceId_);
     float value = 0;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], value)) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "JSVideoController set current time with invalid params");
@@ -116,33 +111,30 @@ void JSVideoControllerBinding::SetCurrentTime(const JSCallbackInfo& args)
         seekMode = SEEK_MODE[args[1]->ToNumber<int32_t>()];
     }
 
-    const auto& controller = GetController();
-    if (controller) {
-        controller->SeekTo(value, seekMode);
+    if (videoController_) {
+        videoController_->SeekTo(value, seekMode);
     }
 }
 
-void JSVideoControllerBinding::RequestFullscreen(const JSCallbackInfo& args)
+void JSVideoController::RequestFullscreen(const JSCallbackInfo& args)
 {
-    ContainerScope scope(GetInstanceId());
+    ContainerScope scope(instanceId_);
     bool landscape = true;
     if (args.Length() < 1 || !ConvertFromJSValue(args[0], landscape)) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "JSVideoController request full screen with invalid params");
         return;
     }
 
-    const auto& controller = GetController();
-    if (controller) {
-        controller->RequestFullscreen(landscape);
+    if (videoController_) {
+        videoController_->RequestFullscreen(landscape);
     }
 }
 
-void JSVideoControllerBinding::ExitFullscreen(const JSCallbackInfo& args)
+void JSVideoController::ExitFullscreen(const JSCallbackInfo& args)
 {
-    ContainerScope scope(GetInstanceId());
-    const auto& controller = GetController();
-    if (controller) {
-        controller->ExitFullscreen(false);
+    ContainerScope scope(instanceId_);
+    if (videoController_) {
+        videoController_->ExitFullscreen(false);
     }
 }
 

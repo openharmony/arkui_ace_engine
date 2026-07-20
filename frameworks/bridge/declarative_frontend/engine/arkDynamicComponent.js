@@ -153,19 +153,6 @@ if (globalThis.Button === undefined) {
   };
 }
 
-// @ts-ignore
-if (globalThis.Video === undefined) {
-  globalThis.Video = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Video');
-      let module = globalThis.requireNapi('arkui.components.arkvideo');
-      module.exportView();
-      module.loadComponent();
-      getUINativeModule().video.create(params);
-    },
-    name: 'JSVideo'
-  };
-}
 
 // @ts-ignore
 if (globalThis.Rating === undefined) {

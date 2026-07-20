@@ -20,8 +20,8 @@
 
 #include "base/utils/utils.h"
 #include "core/components/image/image_component.h"
-#include "core/components_ng/render/resource/player.h"
-#include "core/components_ng/render/resource/texture.h"
+#include "core/components_ng/pattern/video/resource/player.h"
+#include "core/components_ng/pattern/video/resource/texture.h"
 #include "compatible/components/video/texture_component.h"
 #include "core/components_ng/pattern/video/video_controller_v2.h"
 #include "core/components_ng/pattern/video/video_utils.h"
