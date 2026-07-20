@@ -1192,7 +1192,7 @@ void XComponentPattern::InitializeAccessibility()
 
 void XComponentPattern::UninitializeAccessibility(FrameNode* frameNode)
 {
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "UninitializeAccessibility");
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "UninitializeAccessibility");
     CHECK_NULL_VOID(frameNode);
     int64_t accessibilityId = frameNode->GetAccessibilityId();
     auto pipeline = frameNode->GetContextRefPtr();
@@ -1295,7 +1295,7 @@ void XComponentPattern::OnSetAccessibilityChildTree(
 
 void XComponentPattern::InitializeAccessibilityCallback()
 {
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "InitializeAccessibilityCallback");
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "InitializeAccessibilityCallback");
     CHECK_NULL_VOID(nativeXComponentImpl_);
     auto nativeProvider = nativeXComponentImpl_->GetAccessbilityProvider();
     CHECK_NULL_VOID(nativeProvider);
@@ -1309,7 +1309,7 @@ void XComponentPattern::InitializeAccessibilityCallback()
 
 void XComponentPattern::HandleRegisterAccessibilityEvent(bool isRegister)
 {
-    TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "HandleRegisterAccessibilityEvent, "
+    TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleRegisterAccessibilityEvent, "
         "isRegister: %{public}d.", isRegister);
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     auto host = GetHost();
