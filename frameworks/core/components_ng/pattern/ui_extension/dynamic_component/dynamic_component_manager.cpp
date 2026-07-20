@@ -267,11 +267,17 @@ void DynamicComponentSafeManager::UpdateAllDCAvoidArea(int32_t instanceId, const
         int32_t dcInstanceId = dcUiContent->GetInstanceId();
         auto dcPipelineContext = NG::PipelineContext::GetContextByContainerId(dcInstanceId);
         CHECK_NULL_CONTINUE(dcPipelineContext);
-        auto task = [dcUiContent, updateConfig = GetDynamicViewportConfig(dcHostId),
+        auto task = [weakPipeline = WeakPtr<NG::PipelineContext>(dcPipelineContext),
+            dcUiContent, dcHostId,
             reason = static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason_),
             rsTransaction = rsTransaction_, avoidAreas, newInfo = GetOccupiedAreaChangeInfo()]() {
             ContainerScope scope(dcUiContent->GetInstanceId());
-            dcUiContent->UpdateViewportConfig(updateConfig, reason, rsTransaction, avoidAreas, newInfo);
+            auto pipeline = weakPipeline.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            auto safeManager = pipeline->GetDynamicComponentSafeManager();
+            auto config = safeManager->GetDynamicViewportConfig(dcHostId);
+            auto avoidAreaMap = safeManager->GetAvoidAreaIntersection(avoidAreas, config);
+            dcUiContent->UpdateViewportConfig(config, reason, rsTransaction, avoidAreaMap, newInfo);
         };
         auto taskExecutor = dcPipelineContext->GetTaskExecutor();
         CHECK_NULL_CONTINUE(taskExecutor);
