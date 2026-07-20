@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/video/resource/ext_texture.h"
 
 #include "base/log/log.h"
+#include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
 #ifdef RS_ENABLE_VK
 #include "render_service_base/include/platform/common/rs_system_properties.h"
@@ -151,7 +152,10 @@ void ExtTexture::OnRefresh(const std::string& param)
     instanceId_ = GetIntParam(param, INSTANCE_ID);
     textureId_ = GetIntParam(param, TEXTURE_ID);
     if (onTextureRefresh_) {
-        onTextureRefresh_(instanceId_, textureId_);
+        int32_t containerId = SubwindowManager::GetInstance()->GetContainerId(
+            static_cast<uint32_t>(instanceId_));
+        int32_t resolvedInstanceId = (containerId >= 0) ? containerId : instanceId_;
+        onTextureRefresh_(resolvedInstanceId, textureId_);
     }
 }
 
