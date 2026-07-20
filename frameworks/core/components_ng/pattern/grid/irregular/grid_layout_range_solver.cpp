@@ -33,6 +33,15 @@ Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
         return { 0, 0, 0.0f };
     }
     if (NearZero(info_->currentOffset_)) {
+        // With startFixOffset_ > 0 (contentClip extension), items above the start line that
+        // fit in the clip extension area should be included. Use SolveBackward to find the
+        // new start line, matching the currentOffset_ > 0 branch below. When startFixOffset_
+        // == 0 (CONTENT_ONLY) or no items above exist, fall back to the original behavior.
+        if (GreatNotEqual(info_->startFixOffset_, 0.0f) && info_->startMainLineIndex_ > 0) {
+            auto res = SolveBackward(mainGap, info_->startFixOffset_, info_->startMainLineIndex_);
+            res.pos -= info_->startFixOffset_;
+            return res;
+        }
         return { info_->startMainLineIndex_, info_->startIndex_, 0.0f };
     }
     if (Negative(info_->currentOffset_)) {

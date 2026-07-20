@@ -914,6 +914,63 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
     return { .itemIdx = 0, .y = 0, .x = 0 };
 }
 
+int32_t GridLayoutInfo::FindItemStartRow(int32_t startRow, int32_t colIdx) const
+{
+    int32_t r = startRow;
+    while (r > 0) {
+        auto rowIt = gridMatrix_.find(r);
+        if (rowIt == gridMatrix_.end() || rowIt->second.empty()) {
+            break;
+        }
+        auto colIt = rowIt->second.find(colIdx);
+        if (colIt == rowIt->second.end() || colIt->second >= 0) {
+            break;
+        }
+        --r;
+    }
+    return r;
+}
+
+GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindStartIdx(int32_t startLine) const
+{
+    auto it = gridMatrix_.find(startLine);
+    if (it == gridMatrix_.end() || it->second.empty()) {
+        return {};
+    }
+
+    const auto& row = it->second;
+    int32_t bestItem = -1;
+    int32_t bestStartRow = startLine + 1; // larger than any valid start row
+
+    for (const auto& [col, val] : row) {
+        if (val == 0) {
+            return {
+                .itemIdx = 0,
+                .y = 0,
+                .x = col
+            };
+        }
+        int32_t itemIdx;
+        int32_t itemStartRow;
+        if (val > 0) {
+            itemIdx = val;
+            itemStartRow = startLine;
+        } else {
+            itemIdx = -val;
+            itemStartRow = FindItemStartRow(startLine, col);
+        }
+        if (itemStartRow < bestStartRow) {
+            bestStartRow = itemStartRow;
+            bestItem = itemIdx;
+        }
+    }
+
+    if (bestItem < 0) {
+        return { .itemIdx = 0, .y = 0, .x = 0 };
+    }
+    return { .itemIdx = bestItem, .y = bestStartRow, .x = 0 };
+}
+
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
 {
     auto gridIt = gridMatrix_.lower_bound(idx);
@@ -1291,7 +1348,7 @@ void GridLayoutInfo::SyncReportRange(float mainSize, float mainGap)
     }
     auto startLineIt = gridMatrix_.find(reportStartLine);
     if (startLineIt != gridMatrix_.end() && !startLineIt->second.empty()) {
-        reportStartIndex_ = startLineIt->second.begin()->second;
+        reportStartIndex_ = FindStartIdx(reportStartLine).itemIdx;
     } else {
         reportStartIndex_ = startIndex_;
     }
@@ -1317,7 +1374,7 @@ void GridLayoutInfo::SyncReportRange(float mainSize, float mainGap)
     }
     auto endLineIt = gridMatrix_.find(reportEndLine);
     if (endLineIt != gridMatrix_.end() && !endLineIt->second.empty()) {
-        reportEndIndex_ = endLineIt->second.rbegin()->second;
+        reportEndIndex_ = FindEndIdx(reportEndLine).itemIdx;
     } else {
         reportEndIndex_ = endIndex_;
     }
