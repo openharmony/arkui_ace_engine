@@ -493,6 +493,49 @@ HWTEST_F(ListPositionMapTestNg, ListPositionMapUpdatePosWithCheck004, TestSize.L
 }
 
 /**
+ * @tc.name: ListPositionMapUpdatePosRangeKeepsIsLazyChild001
+ * @tc.desc: Test ListPositionMap UpdatePosRange keeps existing isLazyChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapUpdatePosRangeKeepsIsLazyChild001, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+    listPositionMap->UpdatePos(0, { 0.0f, 100.0f, false, true });
+    listPositionMap->UpdatePos(1, { 110.0f, 100.0f, false, false });
+
+    listPositionMap->UpdatePosRange(0, 2, { 20.0f, 200.0f, true }, 10.0f, 1);
+
+    auto lazyResult = listPositionMap->GetPositionInfo(0);
+    EXPECT_EQ(lazyResult.mainPos, 20.0f);
+    EXPECT_EQ(lazyResult.mainSize, 200.0f);
+    EXPECT_TRUE(lazyResult.isGroup);
+    EXPECT_TRUE(lazyResult.isLazyChild);
+
+    auto normalResult = listPositionMap->GetPositionInfo(1);
+    EXPECT_EQ(normalResult.mainPos, 230.0f);
+    EXPECT_EQ(normalResult.mainSize, 200.0f);
+    EXPECT_TRUE(normalResult.isGroup);
+    EXPECT_FALSE(normalResult.isLazyChild);
+}
+
+/**
+ * @tc.name: ListPositionMapUpdatePosWithCheckUpdatesIsLazyChild001
+ * @tc.desc: Test ListPositionMap UpdatePosWithCheck updates isLazyChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapUpdatePosWithCheckUpdatesIsLazyChild001, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+    listPositionMap->UpdatePos(0, { 0.0f, 200.0f, false, false });
+
+    listPositionMap->UpdatePosWithCheck(0, { 0.0f, 100.0f, false, true });
+
+    auto result = listPositionMap->GetPositionInfo(0);
+    EXPECT_EQ(result.mainSize, 200.0f);
+    EXPECT_TRUE(result.isLazyChild);
+}
+
+/**
  * @tc.name: ListPositionMapOptimizeBeforeMeasure001
  * @tc.desc: Test ListPositionMap OptimizeBeforeMeasure with zero offset
  * @tc.type: FUNC

@@ -35,7 +35,8 @@ class UINode;
 struct ListPositionInfo {
     float mainPos;
     float mainSize;
-    bool isGroup;
+    bool isGroup = false;
+    bool isLazyChild = false;
 };
 
 enum class ListPosMapUpdate {

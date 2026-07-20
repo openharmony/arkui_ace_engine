@@ -576,7 +576,7 @@ HWTEST_F(ListAlgorithmTestNg, CheckJumpToIndex001, TestSize.Level1)
     listLayoutAlgorithm->contentMainSize_ = 1.0f;
     listLayoutAlgorithm->posMap_ = AceType::MakeRefPtr<ListPositionMap>();
     ListItemGroupLayoutInfo groupInfo = { true, true, 4.0f, 2.0f, 4.0f, 2.0f };
-    ListItemInfo listItemInfo = { 2, 2.0f, 4.0f, true, true, 1.0f, 2.0f, groupInfo };
+    ListItemInfo listItemInfo = { 2, 2.0f, 4.0f, true, false, true, 1.0f, 2.0f, groupInfo };
     listLayoutAlgorithm->itemPosition_[0] = listItemInfo;
     listLayoutAlgorithm->CheckJumpToIndex();
     EXPECT_EQ(listLayoutAlgorithm->groupItemAverageHeight_, 4.0f);
@@ -1668,5 +1668,24 @@ HWTEST_F(ListAlgorithmTestNg, ProcessCacheCount001, TestSize.Level1)
     EXPECT_EQ(listLayoutAlgorithm->startFixOffset_, 10.0f);  // 10.0f: preset startFixOffset
     EXPECT_EQ(listLayoutAlgorithm->endFixOffset_, 15.0f);  // 15.0f: preset endFixOffset
 }
-} // namespace OHOS::Ace::NG
 
+/**
+ * @tc.name: ListLayoutAlgorithmCanUseInfoInPosMapWithLazyChild001
+ * @tc.desc: Test CanUseInfoInPosMap rejects oversized lazy child
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListAlgorithmTestNg, ListLayoutAlgorithmCanUseInfoInPosMapWithLazyChild001, TestSize.Level1)
+{
+    RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm = AceType::MakeRefPtr<ListLayoutAlgorithm>(2);
+    listLayoutAlgorithm->contentMainSize_ = 100.0f;
+    listLayoutAlgorithm->totalItemCount_ = 3;
+    listLayoutAlgorithm->posMap_ = AceType::MakeRefPtr<ListPositionMap>();
+    listLayoutAlgorithm->posMap_->UpdatePos(0, { 0.0f, 250.0f, false, false });
+    listLayoutAlgorithm->posMap_->UpdatePos(1, { 260.0f, 250.0f, true, false });
+    listLayoutAlgorithm->posMap_->UpdatePos(2, { 520.0f, 250.0f, false, true });
+
+    EXPECT_TRUE(listLayoutAlgorithm->CanUseInfoInPosMap(0, 0.0f));
+    EXPECT_FALSE(listLayoutAlgorithm->CanUseInfoInPosMap(1, 0.0f));
+    EXPECT_FALSE(listLayoutAlgorithm->CanUseInfoInPosMap(2, 0.0f));
+}
+} // namespace OHOS::Ace::NG
