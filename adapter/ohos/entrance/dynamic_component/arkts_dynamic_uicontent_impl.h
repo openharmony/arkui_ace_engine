@@ -47,7 +47,8 @@ public:
 
     void InitializeArktsDynamicUIContentImpl(
         const DynamicInitialConfig& config, sptr<IRemoteObject> connectorToRender = nullptr);
-    UIContentErrorCode CommonInitializeDc(const std::string& contentInfo);
+    UIContentErrorCode CommonInitializeDc(
+        const std::string& contentInfo, sptr<IRemoteObject> connectorToRender = nullptr);
 
 private:
     void CommonInitializeAceApplicationInfo();

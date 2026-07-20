@@ -280,7 +280,7 @@ void ArktsDynamicComponentRendererImpl::InitUiContent(OHOS::AbilityRuntime::Cont
     DynamicInitialConfig dynamicInitialConfig;
     BuildDynamicInitialConfig(dynamicInitialConfig);
     auto connector = GetConnectToRender();
-    uiContent_->InitializeArktsDynamicUIContentImpl(dynamicInitialConfig);
+    uiContent_->InitializeArktsDynamicUIContentImpl(dynamicInitialConfig, connector);
 
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(hostInstanceId_);
     if (runtimeContext) {
