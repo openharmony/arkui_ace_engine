@@ -18,7 +18,6 @@
 
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/video/video_controller_v2.h"
-#include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 
@@ -28,8 +27,8 @@ class VideoFullScreenPattern : public VideoPattern, public FocusView {
 
 public:
     VideoFullScreenPattern() = delete;
-    explicit VideoFullScreenPattern(const RefPtr<VideoControllerV2>& videoController);
-    ~VideoFullScreenPattern() override;
+    explicit VideoFullScreenPattern(const RefPtr<VideoControllerV2>& videoController) : VideoPattern(videoController) {}
+    ~VideoFullScreenPattern() override = default;
     void InitFullScreenParam(const RefPtr<VideoPattern>& video, const RefPtr<RenderSurface>& renderSurface,
         const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderContext>& context);
     void RequestFullScreen(const RefPtr<VideoNode>& videoNode);

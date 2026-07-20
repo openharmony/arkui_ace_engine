@@ -18,14 +18,22 @@
 #include <mutex>
 #include <queue>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/size.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/video/video_controller_async.h"
+#include "core/components_ng/image_provider/image_loading_context.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/video/video_accessibility_property.h"
+#include "core/components_ng/pattern/video/video_event_hub.h"
+#include "core/components_ng/pattern/video/video_layout_algorithm.h"
+#include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_state_manager.h"
-#include "core/components_ng/pattern/video/video_styles.h"
+#include "core/components_ng/property/property.h"
 #include "core/components_ng/render/media_player.h"
 #include "core/components_ng/render/render_surface.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/geometry/rect.h"
 
 namespace OHOS::Ace {
@@ -34,12 +42,6 @@ class ImageAnalyzerManager;
 #endif
 }
 namespace OHOS::Ace::NG {
-class VideoAccessibilityProperty;
-class VideoEventHub;
-class VideoLayoutAlgorithm;
-class VideoLayoutProperty;
-class VideoStateManager;
-
 class VideoStateMachinePattern : public Pattern {
     DECLARE_ACE_TYPE(VideoStateMachinePattern, Pattern);
     friend class VideoStateManager;
@@ -66,13 +68,25 @@ public:
         return true;
     }
 
-    RefPtr<EventHub> CreateEventHub() override;
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<VideoEventHub>();
+    }
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override;
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<VideoLayoutProperty>();
+    }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
+    {
+        return MakeRefPtr<VideoLayoutAlgorithm>();
+    }
 
-    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override;
+    RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
+    {
+        return MakeRefPtr<VideoAccessibilityProperty>();
+    }
 
     bool IsSupportDrawModifier() const override
     {
@@ -434,7 +448,7 @@ private:
     bool showFirstFrame_ = false;
     bool isInitialState_ = true; // First play state is true. Play or seek will set it to false.
 
-    RefPtr<VideoStateManager> stateManager_;
+    RefPtr<VideoStateManager> stateManager_ = MakeRefPtr<VideoStateManager>(WeakClaim(this));
 
     bool TransitionTo(VideoPlaybackState newState);
     bool TransitionToIfAllowed(VideoPlaybackState newState, const char* caller);

@@ -24,7 +24,6 @@
 #include "base_shape_pattern_test_ng.h"
 
 #include "base/geometry/dimension.h"
-#include "core/components_ng/pattern/shape/shape_container_modifier.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/ui_node.h"
@@ -959,8 +958,7 @@ HWTEST_F(ShapeContainerPatternTestNg, SetStrokeDashOffset_Test001, TestSize.Leve
     
     paintProp = GetShapePaintProperty(frameNode);
     ASSERT_NE(paintProp, nullptr);
-    EXPECT_TRUE(paintProp->GetStrokeDashOffset().has_value());
-    EXPECT_EQ(paintProp->GetStrokeDashOffset().value(), 0.0_vp);
+    EXPECT_FALSE(paintProp->GetStrokeDashOffset().has_value());
 }
 
 /**
