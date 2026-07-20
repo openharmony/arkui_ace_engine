@@ -29,7 +29,7 @@ struct Index {
           Text(this.message)
             .fontSize(20)
             .fontColor(Color.White)
-            .backgroundColor("#262626")
+            .backgroundColor('#262626')
             .textAlign(TextAlign.Center)
             .focusable(true)
             .focusOnTouch(true)
