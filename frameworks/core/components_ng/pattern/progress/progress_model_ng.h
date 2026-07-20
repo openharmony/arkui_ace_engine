@@ -121,6 +121,7 @@ public:
     static void ResetBorderRadius(FrameNode* frameNode);
     static void ResetColor(FrameNode* frameNode);
     static void ResetBackgroundColor(FrameNode* frameNode);
+    static void SetBackgroundColorByUser(FrameNode* frameNode, bool value);
     static void ResetBorderColor(FrameNode* frameNode);
     static void SetProgressColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetLSStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);

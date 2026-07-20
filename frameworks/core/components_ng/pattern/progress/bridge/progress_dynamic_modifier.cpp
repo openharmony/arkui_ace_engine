@@ -488,6 +488,7 @@ void SetProgressBackgroundColor(ArkUINodeHandle node, uint32_t color)
     auto *frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ProgressModelNG::SetBackgroundColor(frameNode, Color(color));
+    ProgressModelNG::SetBackgroundColorByUser(frameNode, true);
 }
 
 void SetProgressBackgroundColorWithColorSpace(
@@ -507,6 +508,7 @@ void SetProgressBackgroundColorWithColorSpace(
     }
 
     ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
+    ProgressModelNG::SetBackgroundColorByUser(frameNode, true);
 }
 
 void ResetProgressBackgroundColorWithColorSpace(ArkUINodeHandle node)
@@ -514,6 +516,7 @@ void ResetProgressBackgroundColorWithColorSpace(ArkUINodeHandle node)
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     ProgressModelNG::ResetBackgroundColor(frameNode);
+    ProgressModelNG::SetBackgroundColorByUser(frameNode, false);
     ProgressModelNG::CreateWithResourceObj(frameNode, JsProgressResourceType::BackgroundColor, nullptr);
 }
 
@@ -530,6 +533,7 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
         progresstype != ProgressType::CAPSULE && SystemProperties::ConfigChangePerform()) {
         ProgressModelNG::ResetBackgroundColor(frameNode);
+        ProgressModelNG::SetBackgroundColorByUser(frameNode, false);
         ProgressModelNG::CreateWithResourceObj(frameNode, JsProgressResourceType::BackgroundColor, nullptr);
         return;
     }
@@ -549,6 +553,7 @@ void ResetProgressBackgroundColor(ArkUINodeHandle node)
     }
 
     ProgressModelNG::SetBackgroundColor(frameNode, backgroundColor);
+    ProgressModelNG::SetBackgroundColorByUser(frameNode, false);
 }
 
 ArkUI_Float32 GetProgressValue(ArkUINodeHandle node)
