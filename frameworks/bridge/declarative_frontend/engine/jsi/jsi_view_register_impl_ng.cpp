@@ -124,6 +124,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_async_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller_binding.h"
 #endif
+#if defined(PREVIEW)
+#include "frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.h"
+#endif
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "frameworks/bridge/declarative_frontend/jsview/js_embedded_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_security_ui_extension.h"
@@ -350,6 +353,9 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSLayoutManager::JSBind(globalObj);
     JSContainerModal::JSBind(globalObj);
     JSAppBar::JSBind(globalObj);
+#ifdef PREVIEW
+    JSVideo::JSBind(globalObj);
+#endif
 #ifdef VIDEO_SUPPORTED
     JSVideoControllerAsyncBinding::JSBind(globalObj);
     JSVideoControllerBinding::JSBind(globalObj);
