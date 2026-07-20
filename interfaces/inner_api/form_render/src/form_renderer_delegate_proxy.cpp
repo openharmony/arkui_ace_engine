@@ -314,10 +314,10 @@ int32_t FormRendererDelegateProxy::OnCheckManagerDelegate(bool &checkFlag)
         HILOG_ERROR("return errCode: %{public}d", errCode);
         return errCode;
     }
-    int32_t errCode2 = reply.ReadBool(checkFlag);
-    if (errCode2 != ERR_OK) {
-        HILOG_ERROR("return errCode: %{public}d", errCode2);
-        return errCode2;
+    errCode = reply.ReadBool(checkFlag);
+    if (errCode != ERR_OK) {
+        HILOG_ERROR("return errCode: %{public}d", errCode);
+        return errCode;
     }
     return ERR_OK;
 }

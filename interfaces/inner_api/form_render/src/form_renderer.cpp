@@ -180,9 +180,8 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
     proxy_ = want.GetRemoteObject(FORM_RENDERER_PROCESS_ON_ADD_SURFACE);
     renderingMode_ = (AppExecFwk::Constants::RenderingMode)want.GetIntParam(
         OHOS::AppExecFwk::Constants::PARAM_FORM_RENDERINGMODE_KEY, 0);
-    auto minRenderingMode = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
-    auto maxRenderingMode = AppExecFwk::Constants::RenderingMode::SINGLE_COLOR;
-    if (renderingMode_ > maxRenderingMode || renderingMode_ < minRenderingMode) {
+    if (renderingMode_ > AppExecFwk::Constants::RenderingMode::SINGLE_COLOR ||
+        renderingMode_ < AppExecFwk::Constants::RenderingMode::FULL_COLOR) {
         renderingMode_ = AppExecFwk::Constants::RenderingMode::FULL_COLOR;
     }
     enableBlurBackground_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_ENABLE_BLUR_BACKGROUND_KEY,
@@ -196,9 +195,8 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
     obscurationMode_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_FORM_OBSCURED_KEY, false);
     formLocation_ = static_cast<AppExecFwk::Constants::FormLocation>(
         want.GetIntParam(OHOS::AppExecFwk::Constants::FORM_LOCATION_KEY, -1));  // -1: FormLocation::OTHER
-    auto minFormLocation = AppExecFwk::Constants::FormLocation::OTHER;
-    auto maxFormLocation = AppExecFwk::Constants::FormLocation::FORM_LOCATION_END;
-    if (formLocation_ > maxFormLocation || formLocation_ < minFormLocation) {
+    if (formLocation_ > AppExecFwk::Constants::FormLocation::FORM_LOCATION_END ||
+        formLocation_ < AppExecFwk::Constants::FormLocation::OTHER) {
         formLocation_ = AppExecFwk::Constants::FormLocation::OTHER;
     }
     deleteBackgroundImage_ = want.GetBoolParam(OHOS::AppExecFwk::Constants::PARAM_DELETE_BACKGROUND_IMAGE, false);
@@ -346,11 +344,9 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth, 
     float resizedWidth = width - borderWidth * DOUBLE;
     float resizedHeight = height - borderWidth * DOUBLE;
     if (width <= 0 || height <= 0 || borderWidth < 0 || formViewScale < 0 || resizedWidth <= 0 || resizedHeight <= 0) {
-        HILOG_ERROR("Invalid parameters detected in surface change event. "
-                "width: %.2f, height: %.2f, borderWidth: %.2f, formViewScale: %.2f, "
-                "resizedWidth: %.2f, resizedHeight: %.2f. "
-                "All values must be positive except borderWidth which must be non-negative.",
-                width, height, borderWidth, formViewScale, resizedWidth, resizedHeight);
+        HILOG_ERROR("invalid param: width: %.2f, height: %.2f, borderWidth: %.2f, formViewScale: %.2f, "
+            "resizedWidth: %.2f, resizedHeight: %.2f.", width, height, borderWidth, formViewScale, resizedWidth,
+            resizedHeight);
         return;
     }
     if (!NearEqual(width, width_) || !NearEqual(height, height_) || !NearEqual(borderWidth, lastBorderWidth_) ||
