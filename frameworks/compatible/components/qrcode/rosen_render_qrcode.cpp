@@ -152,7 +152,8 @@ RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& 
 }
 #endif
 
-bool RosenRenderQrcode::GetQrcodeMomule(int32_t xPos, int32_t yPos, const QrcodeImage& qrCode)
+bool RosenRenderQrcode::GetQrcodeMomule(int32_t xPos,
+    int32_t yPos, const QrcodeImage& qrCode) const
 {
     uint32_t qrWidth = qrCode.width;
     if (qrWidth == 0 || qrCode.data == nullptr) {

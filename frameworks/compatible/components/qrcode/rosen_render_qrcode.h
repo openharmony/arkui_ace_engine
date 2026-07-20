@@ -55,7 +55,7 @@ public:
     RSBitmap ProcessQrcodeData(int32_t width, const QrcodeImage& qrCode);
 #endif
 private:
-    bool GetQrcodeMomule(int32_t x, int32_t y, const QrcodeImage& qrCode);
+    bool GetQrcodeMomule(int32_t x, int32_t y, const QrcodeImage& qrCode) const;
 };
 
 } // namespace OHOS::Ace

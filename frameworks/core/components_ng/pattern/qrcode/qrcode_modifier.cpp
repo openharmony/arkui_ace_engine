@@ -120,7 +120,8 @@ uint32_t QRCodeModifier::ConvertColorFromHighToLow(const Color& color) const
     return convertedColor.value;
 }
 
-bool QRCodeModifier::GetQrcodeMomule(int32_t xPos, int32_t yPos, const QrcodeImage& qrCode)
+bool QRCodeModifier::GetQrcodeMomule(int32_t xPos,
+    int32_t yPos, const QrcodeImage& qrCode) const
 {
     uint32_t qrWidth = qrCode.width;
     if (qrWidth == 0 || qrCode.data == nullptr) {
