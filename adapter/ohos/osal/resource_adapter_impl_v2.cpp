@@ -33,6 +33,7 @@ constexpr uint32_t OHOS_THEME_ID = 125829872; // ohos_theme
 constexpr uint32_t RESOURCE_COLOR_TYPE = 10001; // ohos_theme
 const Color ERROR_VALUE_COLOR = Color(0xff000000);
 constexpr uint32_t INVALID_RESOURCE_ID = UINT32_MAX;
+constexpr char COMP_BACKGROUND_PRIMARY_TRAN[] = "sys.color.comp_background_primary_tran";
 
 void CheckThemeId(int32_t& themeId)
 {
@@ -489,10 +490,12 @@ Color ResourceAdapterImplV2::GetColorByName(const std::string& resName)
     CHECK_NULL_RETURN(manager, Color(result));
     auto state = manager->GetColorByName(actualResName.c_str(), result);
     if (state != Global::Resource::SUCCESS) {
-        TAG_LOGW(AceLogTag::ACE_RESOURCE,
-            "Get color by name error, name=%{public}s, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
-            "%{public}s",
-            resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
+        if (resName != COMP_BACKGROUND_PRIMARY_TRAN) {
+            TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                "Get color by name error, name=%{public}s, errorCode=%{public}d, bundleName: %{public}s, moduleName: "
+                "%{public}s",
+                resName.c_str(), state, GetBundleName().c_str(), GetModuleName().c_str());
+        }
         auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
         ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
             resName, "Color", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
