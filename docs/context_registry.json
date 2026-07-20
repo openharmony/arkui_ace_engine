@@ -1,7 +1,641 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-13",
+  "last_updated": "2026-07-18",
   "contexts": [
+    {
+      "id": "LayoutFramework",
+      "name": "Layout Framework",
+      "name_cn": "布局框架",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "Layout Framework",
+        "布局框架",
+        "布局流程",
+        "Measure",
+        "Layout",
+        "UITaskScheduler",
+        "FrameNode",
+        "LayoutWrapper",
+        "LayoutAlgorithm",
+        "LayoutProperty",
+        "GeometryNode",
+        "dirty layout",
+        "geometry sync"
+      ],
+      "aliases": [
+        "布局系统",
+        "Layout Flow",
+        "布局机制",
+        "NG布局框架"
+      ],
+      "kb": "docs/kb/architecture/layout-framework.md",
+      "spec_domain": "specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline",
+      "func_id": "03-01-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pipeline": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "scheduler": "frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "layout_wrapper": "frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "layout_wrapper_node": "frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+        "layout_algorithm": "frameworks/core/components_ng/layout/layout_algorithm.cpp",
+        "box_layout_algorithm": "frameworks/core/components_ng/layout/box_layout_algorithm.cpp",
+        "layout_property": "frameworks/core/components_ng/layout/layout_property.cpp",
+        "geometry_node": "frameworks/core/components_ng/base/geometry_node.cpp",
+        "render_context": "frameworks/core/components_ng/render/render_context.h",
+        "rosen_render_context": "frameworks/core/components_ng/render/adapter/rosen_render_context.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/layout/",
+        "test/unittest/core/base/frame_node_test_ng.cpp",
+        "test/unittest/core/base/geometry_node_test_ng.cpp",
+        "test/unittest/core/property/layout_constraint_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
+    {
+      "id": "LayoutAttributes",
+      "name": "Layout Attributes",
+      "name_cn": "布局属性",
+      "kind": "common_capability",
+      "category": "layout",
+      "keywords": [
+        "Layout Attributes",
+        "布局属性",
+        "width",
+        "height",
+        "constraintSize",
+        "padding",
+        "margin",
+        "position",
+        "offset",
+        "align",
+        "layoutDirection",
+        "flexGrow",
+        "layoutWeight"
+      ],
+      "aliases": [
+        "基础布局属性",
+        "通用布局属性",
+        "Common布局属性",
+        "LayoutProperties"
+      ],
+      "kb": "docs/kb/capabilities/layout-attributes.md",
+      "spec_domain": "specs/04-common-capability/03-common-attributes/01-layout-attributes",
+      "func_id": "04-03-01",
+      "spec_status": "active",
+      "source_paths": {
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "dynamic_model": "frameworks/core/components_ng/base/view_abstract_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/base/view_abstract_model_static.cpp",
+        "layout_property": "frameworks/core/components_ng/layout/layout_property.cpp",
+        "measure_property": "frameworks/core/components_ng/property/measure_property.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp",
+        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_common_modifier.cpp",
+        "static_modifier": "frameworks/core/interfaces/native/implementation/common_method_modifier.cpp",
+        "style_modifier": "interfaces/native/node/style_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/layout/",
+        "test/unittest/core/property/layout_constraint_test_ng.cpp",
+        "test/unittest/core/base/",
+        "test/unittest/capi/modifiers/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
+    {
+      "id": "SafeArea",
+      "name": "Safe Area Mechanism",
+      "name_cn": "安全区域机制",
+      "kind": "common_capability",
+      "category": "layout",
+      "keywords": [
+        "Safe Area",
+        "安全区域",
+        "expandSafeArea",
+        "ignoreLayoutSafeArea",
+        "safeAreaPadding",
+        "SafeAreaManager",
+        "AvoidArea",
+        "keyboard avoidance",
+        "PostponedTaskForIgnore"
+      ],
+      "aliases": [
+        "Safe Area Mechanism",
+        "安全区机制",
+        "安全区避让",
+        "Ignore Layout Safe Area",
+        "IgnoreLayoutSafeArea",
+        "忽略布局安全区"
+      ],
+      "kb": "docs/kb/capabilities/safe-area.md",
+      "spec_domain": "specs/04-common-capability/02-safe-area/01-safe-area-mechanism",
+      "func_id": "04-02-01",
+      "spec_status": "pending",
+      "source_paths": {
+        "insets": "frameworks/core/components_ng/property/safe_area_insets.cpp",
+        "manager": "frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
+        "layout_property": "frameworks/core/components_ng/layout/layout_property.cpp",
+        "layout_wrapper": "frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "scheduler": "frameworks/core/pipeline_ng/ui_task_scheduler.cpp",
+        "pipeline": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp",
+        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_common_modifier.cpp",
+        "static_modifier": "frameworks/core/interfaces/native/implementation/common_method_modifier.cpp",
+        "ohos_window_entry": "adapter/ohos/entrance/ui_content_impl.cpp",
+        "viewport": "adapter/ohos/osal/page_viewport_config_ohos.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/layout/safe_area/",
+        "test/unittest/core/manager/safe_area_manager_test_ng.cpp",
+        "test/unittest/core/manager/safe_area_manager_test_ng_part_two.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
+    {
+      "id": "Blank",
+      "name": "Blank",
+      "name_cn": "空白填充组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "Blank",
+        "空白填充",
+        "占位",
+        "min",
+        "color",
+        "spacing",
+        "flex layout"
+      ],
+      "aliases": [
+        "Blank组件",
+        "空白组件",
+        "占位组件",
+        "BlankPattern"
+      ],
+      "kb": "docs/kb/components/basic/blank.md",
+      "spec_domain": "specs/05-ui-components/01-layout-components/01-blank",
+      "func_id": "05-01-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/blank/blank_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/blank/blank_model_ng.cpp",
+        "property": "frameworks/core/components_ng/pattern/blank/blank_layout_property.h",
+        "paint": "frameworks/core/components_ng/pattern/blank/blank_paint_method.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/blank/bridge/arkts_native_blank_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/blank/bridge/blank_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/blank/bridge/blank_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/blank/bridge/blank_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/blank_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/blank.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/blank.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/BlankModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/BlankModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/blank/",
+        "test/unittest/capi/modifiers/blank_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
+    {
+      "id": "Divider",
+      "name": "Divider",
+      "name_cn": "分隔线组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "Divider",
+        "分隔线",
+        "vertical",
+        "strokeWidth",
+        "lineCap",
+        "divider color",
+        "spacing"
+      ],
+      "aliases": [
+        "Divider组件",
+        "分割线",
+        "分隔符组件",
+        "DividerPattern"
+      ],
+      "kb": "docs/kb/components/basic/divider.md",
+      "spec_domain": "specs/05-ui-components/01-layout-components/02-divider",
+      "func_id": "05-01-02",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/divider/divider_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/divider/divider_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/divider/divider_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/divider/divider_layout_property.h",
+        "paint": "frameworks/core/components_ng/pattern/divider/divider_paint_method.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/divider/bridge/arkts_native_divider_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/divider/bridge/divider_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/divider/bridge/divider_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/divider/bridge/divider_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/divider_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/divider.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/divider.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/DividerModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/DividerModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/divider/",
+        "test/unittest/capi/modifiers/divider_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
+    {
+      "id": "Column",
+      "name": "Column",
+      "name_cn": "纵向布局组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "Column",
+        "纵向布局",
+        "vertical layout",
+        "space",
+        "justifyContent",
+        "alignItems",
+        "reverse"
+      ],
+      "aliases": [
+        "Column组件",
+        "列布局",
+        "纵向线性布局",
+        "LinearLayout Column"
+      ],
+      "kb": "docs/kb/components/container/column.md",
+      "spec_domain": "specs/05-ui-components/01-layout-components/03-column",
+      "func_id": "05-01-03",
+      "spec_status": "active",
+      "source_paths": {
+        "model": "frameworks/core/components_ng/pattern/linear_layout/column_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/linear_layout/column_model_ng_static.cpp",
+        "pattern": "frameworks/core/components_ng/pattern/linear_layout/linear_layout_pattern.h",
+        "property": "frameworks/core/components_ng/pattern/linear_layout/linear_layout_property.h",
+        "algorithm": "frameworks/core/components_ng/pattern/linear_layout/linear_layout_algorithm.h",
+        "flex_algorithm": "frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_column.cpp",
+        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/column_modifier.cpp",
+        "static_modifier": "frameworks/core/interfaces/native/implementation/column_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/column.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/column.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ColumnModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ColumnModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/linear_layout/",
+        "test/unittest/capi/modifiers/column_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
+    {
+      "id": "Flex",
+      "name": "Flex",
+      "name_cn": "弹性布局组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "Flex",
+        "弹性布局",
+        "Wrap",
+        "换行布局",
+        "direction",
+        "wrap",
+        "justifyContent",
+        "alignItems",
+        "alignContent"
+      ],
+      "aliases": [
+        "Flex组件",
+        "弹性布局",
+        "Wrap组件",
+        "换行容器",
+        "FlexLayout"
+      ],
+      "kb": "docs/kb/components/container/flex.md",
+      "spec_domain": "specs/05-ui-components/01-layout-components/05-flex",
+      "func_id": "05-01-05",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/flex/flex_layout_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/flex/flex_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/flex/flex_model_ng_static.cpp",
+        "property": "frameworks/core/components_ng/pattern/flex/flex_layout_property.h",
+        "algorithm": "frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
+        "wrap_algorithm": "frameworks/core/components_ng/pattern/flex/wrap_layout_algorithm.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_flex.cpp",
+        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/flex_modifier.cpp",
+        "static_modifier": "frameworks/core/interfaces/native/implementation/flex_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/flex.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/flex.static.d.ets",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/FlexModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/flex/",
+        "test/unittest/capi/modifiers/flex_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
+    {
+      "id": "GridCol",
+      "name": "GridCol",
+      "name_cn": "响应式栅格列组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "GridCol",
+        "响应式栅格列",
+        "span",
+        "offset",
+        "order",
+        "breakpoint",
+        "grid layout"
+      ],
+      "aliases": [
+        "GridCol组件",
+        "栅格列",
+        "响应式列",
+        "Grid Column"
+      ],
+      "kb": "docs/kb/components/container/grid_col.md",
+      "spec_domain": "specs/05-ui-components/01-layout-components/06-grid-col",
+      "func_id": "05-01-06",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/grid_col/grid_col_layout_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/grid_col/grid_col_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/grid_col/grid_col_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/grid_col/grid_col_layout_property.cpp",
+        "shared_utils": "frameworks/core/components_ng/pattern/gridlayout/grid_container_utils.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/grid_col/bridge/arkts_native_grid_col_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/grid_col/bridge/grid_col_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/grid_col/bridge/grid_col_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/grid_col/bridge/grid_col_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/grid_col_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/grid_col.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gridCol.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GridColModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GridColModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/grid_col/",
+        "test/unittest/capi/modifiers/grid_col_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
+    {
+      "id": "GridRow",
+      "name": "GridRow",
+      "name_cn": "响应式栅格行组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "GridRow",
+        "响应式栅格行",
+        "columns",
+        "gutter",
+        "breakpoints",
+        "onBreakpointChange",
+        "RTL",
+        "grid layout"
+      ],
+      "aliases": [
+        "GridRow组件",
+        "栅格行",
+        "响应式行",
+        "Grid Row"
+      ],
+      "kb": "docs/kb/components/container/grid_row.md",
+      "spec_domain": "specs/05-ui-components/01-layout-components/07-grid-row",
+      "func_id": "05-01-07",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/grid_row/grid_row_layout_pattern.cpp",
+        "multithread_pattern": "frameworks/core/components_ng/pattern/grid_row/grid_row_layout_pattern_multi_thread.cpp",
+        "model": "frameworks/core/components_ng/pattern/grid_row/grid_row_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/grid_row/grid_row_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/grid_row/grid_row_layout_property.cpp",
+        "event_hub": "frameworks/core/components_ng/pattern/grid_row/grid_row_event_hub.h",
+        "shared_utils": "frameworks/core/components_ng/pattern/gridlayout/grid_container_utils.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/grid_row/bridge/arkts_native_grid_row_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/grid_row/bridge/grid_row_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/grid_row/bridge/grid_row_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/grid_row/bridge/grid_row_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/grid_row_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/grid_row.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gridRow.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GridRowModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GridRowModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/grid_row/",
+        "test/unittest/capi/modifiers/grid_row_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
+    {
+      "id": "Row",
+      "name": "Row",
+      "name_cn": "横向布局组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "Row",
+        "横向布局",
+        "horizontal layout",
+        "space",
+        "justifyContent",
+        "alignItems",
+        "reverse"
+      ],
+      "aliases": [
+        "Row组件",
+        "行布局",
+        "横向线性布局",
+        "LinearLayout Row"
+      ],
+      "kb": "docs/kb/components/container/row.md",
+      "spec_domain": "specs/05-ui-components/01-layout-components/09-row",
+      "func_id": "05-01-09",
+      "spec_status": "active",
+      "source_paths": {
+        "model": "frameworks/core/components_ng/pattern/linear_layout/row_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/linear_layout/row_model_ng_static.cpp",
+        "pattern": "frameworks/core/components_ng/pattern/linear_layout/linear_layout_pattern.h",
+        "property": "frameworks/core/components_ng/pattern/linear_layout/linear_layout_property.h",
+        "algorithm": "frameworks/core/components_ng/pattern/linear_layout/linear_layout_algorithm.h",
+        "flex_algorithm": "frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_row.cpp",
+        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/row_modifier.cpp",
+        "static_modifier": "frameworks/core/interfaces/native/implementation/row_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/row.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/row.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/RowModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RowModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/linear_layout/",
+        "test/unittest/capi/modifiers/row_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
+    {
+      "id": "Stack",
+      "name": "Stack",
+      "name_cn": "层叠布局组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "Stack",
+        "层叠布局",
+        "overlay layout",
+        "alignContent",
+        "stack alignment",
+        "z order"
+      ],
+      "aliases": [
+        "Stack组件",
+        "堆叠布局",
+        "层叠容器",
+        "StackPattern"
+      ],
+      "kb": "docs/kb/components/container/stack.md",
+      "spec_domain": "specs/05-ui-components/01-layout-components/11-stack",
+      "func_id": "05-01-11",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/stack/stack_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/stack/stack_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/stack/stack_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/stack/stack_layout_property.h",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_stack.cpp",
+        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.cpp",
+        "static_frontend": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkStackNode.ets",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_stack_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/stack.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/stack.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/StackModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/StackModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/stack/",
+        "test/unittest/capi/modifiers/stack_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
+    {
+      "id": "FolderStack",
+      "name": "FolderStack",
+      "name_cn": "折叠屏层叠布局组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "FolderStack",
+        "折叠屏布局",
+        "fold crease",
+        "partition",
+        "hoverMode",
+        "fold status",
+        "auto rotation"
+      ],
+      "aliases": [
+        "FolderStack组件",
+        "折叠屏容器",
+        "折痕避让布局",
+        "Folder Stack"
+      ],
+      "kb": "docs/kb/components/container/folder_stack.md",
+      "spec_domain": "specs/05-ui-components/01-layout-components/12-folder-stack",
+      "func_id": "05-01-12",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/folder_stack/folder_stack_pattern.cpp",
+        "multithread_pattern": "frameworks/core/components_ng/pattern/folder_stack/folder_stack_multithread_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/folder_stack/folder_stack_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/folder_stack/folder_stack_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/folder_stack/folder_stack_event_hub.h",
+        "bridge": "frameworks/core/components_ng/pattern/folder_stack/bridge/arkts_native_folder_stack_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/folder_stack/bridge/folder_stack_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/folder_stack/bridge/folder_stack_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/folder_stack/bridge/folder_stack_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_folder_stack_modifier.cpp",
+        "display_adapter": "adapter/ohos/osal/display_info_utils.cpp",
+        "event_report": "adapter/ohos/osal/event_report.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/folder_stack.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/folderStack.static.d.ets",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/FolderStackModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/folder_stack/",
+        "test/unittest/capi/modifiers/folder_stack_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-18"
+    },
     {
       "id": "Text",
       "name": "Text",
