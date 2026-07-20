@@ -23,7 +23,6 @@
 #include "core/components_ng/render/adapter/component_snapshot.h"
 
 namespace OHOS::Ace {
-#ifndef CROSS_PLATFORM
 void UiTranslateManagerImpl::AddTranslateListener(const WeakPtr<NG::FrameNode> node)
 {
     auto frameNode = node.Upgrade();
@@ -37,8 +36,6 @@ void UiTranslateManagerImpl::RemoveTranslateListener(int32_t nodeId)
     listenerMap_.erase(nodeId);
     LOGI("RemoveTranslateListener WebView nodeId:%{public}d", nodeId);
 }
-
-#ifndef CROSS_PLATFORM
 void UiTranslateManagerImpl::GetWebViewCurrentLanguage()
 {
     for (auto listener : listenerMap_) {
@@ -58,9 +55,7 @@ void UiTranslateManagerImpl::GetWebViewCurrentLanguage()
         UiSessionManager::GetInstance()->SendCurrentLanguage(result->ToString());
     }
 }
-#endif
 
-#ifndef CROSS_PLATFORM
 void UiTranslateManagerImpl::GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request)
 {
 #ifdef WEB_SUPPORTED
@@ -84,9 +79,6 @@ void UiTranslateManagerImpl::GetWebInfoByRequest(uint32_t windowId, int32_t webI
     LOGW("GetWebInfoByRequest not supportted on this platform.");
 #endif
 }
-#endif
-
-#ifndef CROSS_PLATFORM
 void UiTranslateManagerImpl::GetTranslateText(std::string extraData, bool isContinued)
 {
     if (listenerMap_.empty()) {
@@ -108,7 +100,6 @@ void UiTranslateManagerImpl::GetTranslateText(std::string extraData, bool isCont
         pattern->GetTranslateText(extraData, cb, isContinued);
     }
 }
-#endif
 
 void UiTranslateManagerImpl::SendTranslateResult(
     int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids)
@@ -173,9 +164,7 @@ void UiTranslateManagerImpl::ClearMap()
 void UiTranslateManagerImpl::SendPixelMap()
 {
     LOGI("manager start sendPixelMap");
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SendPixelMap(pixelMap_);
-#endif
 }
 
 void UiTranslateManagerImpl::AddArkWebImageMap(
@@ -270,9 +259,7 @@ void UiTranslateManagerImpl::PostArkWebQueryTasksToSingleWeb(std::weak_ptr<UiTra
                             uiTranslateManagerImpl->SetArkWebQueryErrorCode(errorCode);
                         }
                         uiTranslateManagerImpl->AddArkWebImageMap(webId, imagesInOneWeb);
-#ifndef CROSS_PLATFORM
                         uiTranslateManagerImpl->SendArkWebImagesById();
-#endif
                     };
             uiTranslateManagerImpl->TraverseAddArkWebImages(webImageIds, windowId, webId, getWebImagesCallback);
         },
@@ -295,9 +282,7 @@ void UiTranslateManagerImpl::PostArkWebQueryTasks(std::weak_ptr<UiTranslateManag
             return;
         }
         uiTranslateManagerImpl->SetArkWebQueryErrorCode(MultiImageQueryErrorCode::TIMEOUT);
-#ifndef CROSS_PLATFORM
         uiTranslateManagerImpl->DoSendArkWebImagesById(false);
-#endif
     };
     taskExecutor_->PostDelayedTask(setRejectTimeoutArkWebImageQuery,
         TaskExecutor::TaskType::UI, QUERY_IMAGES_TIMEOUT_TIME, "ArkUISetRejectTimeoutArkWebImageQuery");
@@ -341,9 +326,7 @@ void UiTranslateManagerImpl::GetMultiImagesById(uint32_t windowId, const std::ve
                 auto uiTranslateManagerImpl = weak.lock();
                 CHECK_NULL_VOID(uiTranslateManagerImpl);
                 uiTranslateManagerImpl->TraverseAddArkUIComponentImages(componentQueryCnt, arkUIIds);
-#ifndef CROSS_PLATFORM
                 uiTranslateManagerImpl->SendArkUIImagesById();
-#endif
             },
             TaskExecutor::TaskType::UI, "ArkUIHandleTranslateManagerGetArkUIImagesByIds");
     } else {
@@ -420,16 +403,12 @@ void UiTranslateManagerImpl::GetPixelMapFromFrameNode(int32_t frameNodeId,
     }
 }
 
-#ifndef CROSS_PLATFORM
 void UiTranslateManagerImpl::SendArkUIImagesById()
 {
     UiSessionManager::GetInstance()->SendArkUIImagesById(windowId_, arkUIComponentImages_, arkUIQueryErrorCode_);
     arkUIComponentImages_.clear();
     arkUIQueryErrorCode_ = MultiImageQueryErrorCode::OK;
 }
-#endif
-
-#ifndef CROSS_PLATFORM
 void UiTranslateManagerImpl::DoSendArkWebImagesById(bool triggerFromArkWebCallback)
 {
     if (hasSendArkWebQueryResult_) {
@@ -452,7 +431,6 @@ void UiTranslateManagerImpl::DoSendArkWebImagesById(bool triggerFromArkWebCallba
     arkWebQueryErrorCode_ = MultiImageQueryErrorCode::OK;
     hasSendArkWebQueryResult_ = true;
 }
-#endif
 
 bool UiTranslateManagerImpl::CheckAllWebQueryTaskFinish() const
 {
@@ -464,7 +442,6 @@ bool UiTranslateManagerImpl::CheckAllWebQueryTaskFinish() const
     return true;
 }
 
-#ifndef CROSS_PLATFORM
 void UiTranslateManagerImpl::SendArkWebImagesById()
 {
     bool allWebQueryTasksFinish = CheckAllWebQueryTaskFinish();
@@ -472,7 +449,6 @@ void UiTranslateManagerImpl::SendArkWebImagesById()
         DoSendArkWebImagesById(true);
     }
 }
-#endif
 
 void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap)
 {
@@ -483,7 +459,6 @@ void UiTranslateManagerImpl::AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelM
 
 void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
 {
-#ifndef CROSS_PLATFORM
     std::list<RefPtr<NG::FrameNode>> result;
     pageNode->FindTopNavDestination(result);
     if (result.empty()) {
@@ -497,7 +472,6 @@ void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
     }
     
     SendPixelMap();
-#endif
 }
 
 void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
@@ -524,5 +498,4 @@ void UiTranslateManagerImpl::PostToUI(const std::function<void()>& task)
         taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIHandleUiTranslateManager");
     }
 }
-#endif
 } // namespace OHOS::Ace

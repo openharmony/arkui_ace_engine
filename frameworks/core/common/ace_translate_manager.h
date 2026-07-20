@@ -25,7 +25,6 @@ class ACE_FORCE_EXPORT UiTranslateManagerImpl : public UiTranslateManager,
     public std::enable_shared_from_this<UiTranslateManagerImpl> {
 public:
     explicit UiTranslateManagerImpl(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {};
-#ifndef CROSS_PLATFORM
     void AddTranslateListener(const WeakPtr<NG::FrameNode> node);
     void RemoveTranslateListener(int32_t nodeId);
     void GetWebViewCurrentLanguage() override;
@@ -50,18 +49,10 @@ public:
     void MarkCurrentWebImageQueryDone(int32_t currentWebId);
     void AddArkWebImageMap(int32_t webId, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>& webImageMap);
     void PostToUI(const std::function<void()>& task) override;
-#else
-    void ResetTranslate(int32_t nodeId) override
-    {
-        (void)nodeId;
-    }
-    void ClearMap() override {}
-#endif
     void AddPixelMap(int32_t nodeId, RefPtr<PixelMap> pixelMap);
     void GetAllPixelMap(RefPtr<NG::FrameNode> pageNode);
 
 private:
-#ifndef CROSS_PLATFORM
     void TraverseAddArkUIComponentImages(const size_t componentQueryCnt, const std::vector<int32_t>& arkUIIds);
     void TraverseAddArkWebImages(const std::vector<int32_t>& webImageIds, int32_t windowId, int32_t webComponentId,
         const std::function<void(int32_t, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>&,
@@ -102,7 +93,6 @@ private:
     static constexpr int32_t QUERY_IMAGES_TIMEOUT_TIME = 1500;
     std::map<int32_t, WeakPtr<NG::FrameNode>> listenerMap_;
     std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> pixelMap_;
-#endif
     RefPtr<TaskExecutor> taskExecutor_;
 };
 } // namespace OHOS::Ace

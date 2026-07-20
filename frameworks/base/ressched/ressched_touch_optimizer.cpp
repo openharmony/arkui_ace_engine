@@ -435,7 +435,6 @@ void ResSchedTouchOptimizer::DispatchPointSelect(bool resampleEnable, TouchEvent
 bool ResSchedTouchOptimizer::RVSEnableCheck()
 {
     std::call_once(rvsOnceFlag_, [this]() {
-#ifndef CROSS_PLATFORM
         auto task = [this]() {
             std::unordered_map<std::string, std::string> payload;
             std::unordered_map<std::string, std::string> reply;
@@ -444,7 +443,6 @@ bool ResSchedTouchOptimizer::RVSEnableCheck()
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "RVS_ENABLE_CHECK Result: %{public}d", static_cast<int32_t>(rvsEnable_));
         };
         BackgroundTaskExecutor::GetInstance().PostTask(task);
-#endif
     });
     return rvsEnable_ && vsyncPeriod_  <= THRESHOLD_FOR_TPFLUSH_VSYNC_PERIOD;
 }

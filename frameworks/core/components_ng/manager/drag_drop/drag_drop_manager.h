@@ -798,8 +798,10 @@ private:
     void SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
         std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler,
         const RefPtr<NG::PipelineContext>& pipeline);
+#ifndef CROSS_PLATFORM
     void ReportOnItemDropEvent(
         DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY);
+#endif
     void RequireDragAnimationType();
     void HandleDragCancel(const Point& point, const DragPointerEvent& pointerEvent,
         const RefPtr<FrameNode>& preTargetFrameNode, const std::string& extraInfo, int32_t windowId);

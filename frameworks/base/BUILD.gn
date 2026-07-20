@@ -75,14 +75,11 @@ template("ace_base_source_set") {
       "log/ace_tracker.cpp",
       "log/dump_log.cpp",
       "log/dump_recorder.cpp",
-      "log/jank_frame_report.cpp",
       "log/log_wrapper.cpp",
       "memory/memory_monitor.cpp",
       "mousestyle/mouse_style.cpp",
-      "ressched/ressched_click_optimizer.cpp",
       "perfmonitor/perf_monitor.cpp",
-      "ressched/ressched_touch_optimizer.cpp",
-      "ressched/taihang_optimizer.cpp",
+      "ressched/ressched_report.cpp",
       "subwindow/subwindow_manager.cpp",
       "subwindow/subwindow_manager_static.cpp",
       "thread/background_task_executor.cpp",
@@ -101,9 +98,13 @@ template("ace_base_source_set") {
       "utils/utf_helper.cpp",
       "utils/utils.cpp",
     ]
+
     if (!is_arkui_x) {
       sources += [
-        "ressched/ressched_report.cpp",
+        "ressched/ressched_click_optimizer.cpp",
+        "ressched/ressched_touch_optimizer.cpp",
+        "ressched/taihang_optimizer.cpp",
+        "log/jank_frame_report.cpp",
       ]
     }
 
