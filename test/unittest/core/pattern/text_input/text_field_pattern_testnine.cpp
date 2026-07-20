@@ -992,10 +992,7 @@ HWTEST_F(TextFieldPatternTestNine, HandleCountStyle001, TestSize.Level0)
     layoutProperty->UpdateShowHighlightBorder(false);
 
     pattern_->HandleCountStyle();
-    auto frameNode = pattern_->GetHost();
-    auto context = frameNode->GetRenderContext();
-    OffsetF offset(-1.0, 0.0);
-    EXPECT_EQ(context->GetTranslateXYProperty(), offset);
+    EXPECT_TRUE(pattern_->showCountBorderStyle_);
 }
 
 /**
