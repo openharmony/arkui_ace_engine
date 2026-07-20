@@ -20,12 +20,10 @@
 #include "ui_event_observer.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#ifndef CROSS_PLATFORM
 #include "core/common/recorder/event_controller.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/inspector_tree_collector.h"
 #include "core/common/recorder/node_data_cache.h"
-#endif
 #include "core/components_ng/base/simplified_inspector.h"
 #include "core/components_ng/pattern/page_translate/page_translate_node.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -33,7 +31,6 @@
 
 namespace OHOS::Ace {
 namespace {
-#ifndef CROSS_PLATFORM
 std::string GetWebLanguageByNodeId(int32_t nodeId)
 {
     auto& weakNodeCache = Recorder::EventRecorder::Get().GetWeakNodeMap();
@@ -49,7 +46,6 @@ std::string GetWebLanguageByNodeId(int32_t nodeId)
     CHECK_NULL_RETURN(translateNode, "");
     return translateNode->GetCurrentLanguage();
 }
-#endif
 
 std::string GetCurrentPageParam()
 {
@@ -75,7 +71,6 @@ std::string GetCurrentPageParam()
 }
 } // namespace
 
-#ifndef CROSS_PLATFORM
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_RegisterUIEventObserver(
     const std::string& config, const std::shared_ptr<UIEventObserver>& observer)
 {
@@ -95,7 +90,6 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetNodeProperty(
     TAG_LOGI(AceLogTag::ACE_UIEVENT, "GetNodeProperty.");
     Recorder::NodeDataCache::Get().GetNodeData(pageUrl, nodeProperties);
 }
-#endif
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeParams& params, std::string& tree)
 {
@@ -103,11 +97,8 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeP
         tree = GetCurrentPageParam();
         return;
     }
-#ifndef CROSS_PLATFORM
+
     auto containerId = Recorder::EventRecorder::Get().GetContainerId(params.inspectorType == InspectorPageType::FOCUS);
-#else
-    auto containerId = Container::CurrentIdSafely();
-#endif
     auto container = Container::GetContainer(containerId);
     if (!container) {
         return;
@@ -129,11 +120,7 @@ extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTree(const TreeP
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_GetSimplifiedInspectorTreeAsync(
     const TreeParams& params, OnInspectorTreeResult&& callback)
 {
-#ifndef CROSS_PLATFORM
     auto containerId = Recorder::EventRecorder::Get().GetContainerId(params.inspectorType == InspectorPageType::FOCUS);
-#else
-    auto containerId = Container::CurrentIdSafely();
-#endif
     auto container = Container::GetContainer(containerId);
     if (!container) {
         return;

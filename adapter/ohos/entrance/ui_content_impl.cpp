@@ -2102,10 +2102,8 @@ void UIContentImpl::SetAceApplicationInfo(std::shared_ptr<OHOS::AbilityRuntime::
         std::unordered_map<std::string, std::string> reply;
         payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
         payload["targetApiVersion"] = std::to_string(AceApplicationInfo::GetInstance().GetApiTargetVersion());
-#ifndef CROSS_PLATFORM
         g_isDynamicVsync = ResSchedReport::GetInstance().AppWhiteListCheck(payload, reply);
         ResSchedReport::GetInstance().AppVsyncEnableScene(payload, reply);
-#endif
         const std::string& replyResult = reply["result"];
         bool hasCommonScene = replyResult.find(SCENE_COMMON_CHAR) != std::string::npos;
         bool hasStartScene = replyResult.find(SCENE_START_CHAR) != std::string::npos;
@@ -2470,9 +2468,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
 #endif
 #ifdef APS_ENABLE
     ApsMonitorImpl::GetInstance().SetContainerInstanceId(instanceId_);
-#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetApsMonitor(&ApsMonitorImpl::GetInstance());
-#endif
 #endif
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
     ResschedEventListener::GetInstance()->RegisterToRSS(window->GetWindowId(), instanceId_);
@@ -2546,9 +2542,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         container->SetSrcEntrance(info->srcEntrance);
     }
 
-#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->SetApplicationInfo();
-#endif
 
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
@@ -2847,14 +2841,12 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             InitUISessionManagerCallbacks(taskExecutor);
         }
     }
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveBaseInfo(std::string("bundleName:")
                                                      .append(bundleName)
                                                      .append(",moduleName:")
                                                      .append(moduleName)
                                                      .append(",abilityName:")
                                                      .append(abilityName));
-#endif
     UpdateFontScale(context->GetConfiguration());
     auto thpExtraManager = AceType::MakeRefPtr<NG::THPExtraManagerImpl>();
     if (thpExtraManager->Init()) {
@@ -2976,12 +2968,10 @@ void UIContentImpl::Foreground()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window foreground", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
-#ifndef CROSS_PLATFORM
     if (window_ != nullptr && window_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
         PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsBegin();
     }
-#endif
     if (!isDynamicRender_) {
         ContainerScope::UpdateRecentForeground(instanceId_);
     }
@@ -2999,18 +2989,14 @@ void UIContentImpl::Foreground()
 
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
-#ifndef CROSS_PLATFORM
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, true);
-#endif
 }
 
 void UIContentImpl::Background()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window background", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
-#ifndef CROSS_PLATFORM
     PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsEnd();
-#endif
     if (!isFormRender_ && !isDynamicRender_) {
         // Register instanceId from pre-freeze flush when app goes to background.
         PostPreFreezeRegisterTask(true);
@@ -3019,9 +3005,7 @@ void UIContentImpl::Background()
 
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
-#ifndef CROSS_PLATFORM
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
-#endif
 }
 
 void UIContentImpl::NotifyWindowAttachStateChange(bool status)
@@ -3111,9 +3095,7 @@ void UIContentImpl::Focus()
     Platform::AceContainer::OnActive(instanceId_);
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
-#ifndef CROSS_PLATFORM
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
-#endif
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
@@ -3357,11 +3339,9 @@ bool UIContentImpl::ProcessBackPressed()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: OnBackPressed called", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
-#ifndef CROSS_PLATFORM
     Recorder::EventParamsBuilder builder;
     builder.SetEventType(Recorder::EventType::BACK_PRESSED);
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
-#endif
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     if (container->IsUIExtensionWindow() && !container->WindowIsShow()) {
@@ -3373,10 +3353,8 @@ bool UIContentImpl::ProcessBackPressed()
         []() {
             auto value = JsonUtil::CreateSharedPtrJson();
             value->Put("GestureType", "backpressed");
-#ifndef CROSS_PLATFORM
             UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString(),
                 ComponentEventType::COMPONENT_EVENT_GESTURE);
-#endif
         },
         TaskExecutor::TaskType::UI, "ArkUIReportBackPressedEvent");
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
@@ -3395,9 +3373,7 @@ bool UIContentImpl::ProcessBackPressed()
                     ret = true;
                 }
             } else {
-#ifndef CROSS_PLATFORM
                 PerfMonitor::GetPerfMonitor()->RecordInputEvent(LAST_UP, UNKNOWN_SOURCE, 0);
-#endif
                 if (Platform::AceContainer::OnBackPressed(instanceId_)) {
                     ret = true;
                 }
@@ -4043,12 +4019,10 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
         return;
     }
 
-#ifndef CROSS_PLATFORM
     if (SystemProperties::GetWindowRectResizeEnabled()) {
         PerfMonitor::GetPerfMonitor()->RecordWindowRectResize(static_cast<OHOS::Ace::WindowSizeChangeReason>(reason),
             bundleName_);
     }
-#endif
     UpdateViewportConfigWithAnimation(config, reason, {}, rsTransaction, avoidAreas, info);
 }
 
@@ -6221,9 +6195,7 @@ void sendCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
             },
             TaskExecutor::TaskType::UI, "UiSessionSendCommandKeyCode");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveSendCommandFunction(sendCommandCallback);
-#endif
 }
 
 void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6244,9 +6216,7 @@ void UIContentImpl::RelaxedCommandCallbackInner(const WeakPtr<TaskExecutor>& tas
             },
             TaskExecutor::TaskType::UI, "UiSessionRelaxedSendCommand");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveRelaxedCommandFunction(relaxedCommandCallback);
-#endif
 #endif
 }
 
@@ -6269,9 +6239,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
             },
             TaskExecutor::TaskType::UI, GET_INSPECTOR_TREE_TIMEOUT_TIME, "UiSessionGetInspectorTree");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveInspectorTreeFunction(callback);
-#endif
     auto webCallback = [weakTaskExecutor = taskExecutor](bool isRegister) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
@@ -6284,9 +6252,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
             TaskExecutor::TaskType::UI, "UiSessionRegisterWebPattern",
             TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveRegisterForWebFunction(webCallback);
-#endif
     SetupGetPixelMapCallback(taskExecutor);
     SetupGetImagesByIdCallback(taskExecutor);
     RegisterGetCurrentPageName(taskExecutor);
@@ -6431,7 +6397,6 @@ void UIContentImpl::SaveArkUIPageTranslateFunctions(const WeakPtr<TaskExecutor>&
 
 void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-#ifndef CROSS_PLATFORM
     auto&& getWebInfoCallback = [weakTaskExecutor = taskExecutor](int32_t webId, const std::string& request) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
@@ -6446,7 +6411,6 @@ void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>&
             TaskExecutor::TaskType::UI, "UiSessionWebInfoByRequest");
     };
     UiSessionManager::GetInstance()->SaveGetWebInfoByRequestFunction(getWebInfoCallback);
-#endif
 }
 
 void UIContentImpl::RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6464,16 +6428,12 @@ void UIContentImpl::RegisterGetSpecifiedContentOffsetsCallback(const WeakPtr<Tas
                     return;
                 }
                 offsets = node->GetSpecifiedContentOffsets(content);
-#ifndef CROSS_PLATFORM
                 UiSessionManager::GetInstance()->SendSpecifiedContentOffsets(offsets);
-#endif
             },
             TaskExecutor::TaskType::UI, "UiSessionGetSpecifiedContentOffsets");
         return offsets;
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveGetSpecifiedContentOffsetsFunction(getSpecifiedContentOffsetsCallback);
-#endif
 }
 
 void UIContentImpl::RegisterHighlightSpecifiedContentCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6493,9 +6453,7 @@ void UIContentImpl::RegisterHighlightSpecifiedContentCallback(const WeakPtr<Task
             },
             TaskExecutor::TaskType::UI, "UiSessionHighlightSpecifiedContent");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveHighlightSpecifiedContentFunction(highlightSpecifiedContentCallback);
-#endif
 }
 
 void UIContentImpl::RegisterSelectTextCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6511,9 +6469,7 @@ void UIContentImpl::RegisterSelectTextCallback(const WeakPtr<TaskExecutor>& task
             },
             TaskExecutor::TaskType::UI, "UiSessionSelectText");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveSelectTextFunction(selectTextCallback);
-#endif
 }
 
 void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6529,14 +6485,11 @@ void UIContentImpl::SaveGetHitTestInfoCallback(const WeakPtr<TaskExecutor>& task
             },
             TaskExecutor::TaskType::UI, "UiSessionGetHitTestInfos");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveGetHitTestInfoCallback(getHitTestInfoCallback);
-#endif
 }
 
 void UIContentImpl::SetupGetImagesByIdCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-#ifndef CROSS_PLATFORM
     auto getImagesById = [weakTaskExecutor = taskExecutor](const std::vector<int32_t>& arkUIIds,
         const std::map<int32_t, std::vector<int32_t>>& arkWebs) {
             auto taskExecutor = weakTaskExecutor.Upgrade();
@@ -6553,12 +6506,10 @@ void UIContentImpl::SetupGetImagesByIdCallback(const WeakPtr<TaskExecutor>& task
                 TaskExecutor::TaskType::UI, "UiSessionGetImagesById");
         };
     UiSessionManager::GetInstance()->SaveGetImagesByIdFunction(getImagesById);
-#endif
 }
 
 void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-#ifndef CROSS_PLATFORM
     auto getPixelMapCallback = [weakTaskExecutor = taskExecutor]() {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
@@ -6571,7 +6522,6 @@ void UIContentImpl::SetupGetPixelMapCallback(const WeakPtr<TaskExecutor>& taskEx
             TaskExecutor::TaskType::UI, "UiSessionGetPixelMap");
     };
     UiSessionManager::GetInstance()->SaveGetPixelMapFunction(getPixelMapCallback);
-#endif
 }
 
 void UIContentImpl::SaveGetCurrentInstanceId()
@@ -6583,9 +6533,7 @@ void UIContentImpl::SaveGetCurrentInstanceId()
             CHECK_NULL_RETURN(pipeline, -1);
             return pipeline->GetInstanceId();
         };
-#ifndef CROSS_PLATFORM
         UiSessionManager::GetInstance()->SaveGetCurrentInstanceIdCallback(saveInstanceIdCallback);
-#endif
     });
 }
 
@@ -6604,9 +6552,7 @@ void UIContentImpl::RegisterGetCurrentPageName(const WeakPtr<TaskExecutor>& task
             TaskExecutor::TaskType::UI, "UiSessionGetPageName");
         return pageName;
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->RegisterPipeLineGetCurrentPageName(getPageNameCallback);
-#endif
 }
 
 void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor>& taskExecutor)
@@ -6631,9 +6577,7 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor
             TaskExecutor::TaskType::UI, "UiSessionSendCommandAsyncPattern");
         return result;
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveForSendCommandAsyncFunction(sendCommandAsync);
-#endif
     auto sendCommand = [weakTaskExecutor = taskExecutor](int32_t id, const std::string& command) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
         CHECK_NULL_VOID(taskExecutor);
@@ -6648,9 +6592,7 @@ void UIContentImpl::InitSendCommandFunctionsCallbacks(const WeakPtr<TaskExecutor
             },
             TaskExecutor::TaskType::UI, "UiSessionSendCommandPattern");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveForSendCommandFunction(sendCommand);
-#endif
 }
 
 bool UIContentImpl::SendUIExtProprty(uint32_t code, const AAFwk::Want& data,
@@ -6951,9 +6893,7 @@ void UIContentImpl::RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskEx
             TaskExecutor::TaskType::UI, "UiSessionExeAppAIFunction");
         return result;
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->RegisterPipeLineExeAppAIFunction(exeAppAIFunctionCallback);
-#endif
 }
 
 int32_t UIContentImpl::GetUIContentWindowID(int32_t instanceId)
@@ -6975,7 +6915,6 @@ OHOS::Rosen::Window* UIContentImpl::GetUIContentWindow()
 
 void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SetStartContentChangeDetectCallback([weakTaskExecutor = taskExecutor]
         (ContentChangeConfig config) {
         auto taskExecutor = weakTaskExecutor.Upgrade();
@@ -7021,7 +6960,6 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
             },
             TaskExecutor::TaskType::UI, "UiSessionContentChangeDetectStop");
     });
-#endif
 }
 
 void UIContentImpl::SetXComponentDisplayConstraintEnabled(bool isEnable)
@@ -7077,9 +7015,7 @@ void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& ta
             },
             TaskExecutor::TaskType::UI, "UiSessionGetStateMgmtInfo");
     };
-#ifndef CROSS_PLATFORM
     UiSessionManager::GetInstance()->SaveGetStateMgmtInfoFunction(getStateMgmtInfoCallback);
-#endif
 }
 
 const EcmaVM* UIContentImpl::GetEcmaVMOnJsThread() const

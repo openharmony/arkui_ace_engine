@@ -48,9 +48,6 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
-#ifndef CROSS_PLATFORM
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
@@ -58,22 +55,19 @@
 #include "base/log/ace_trace.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
-#ifndef CROSS_PLATFORM
-#include "base/log/dump_recorder.h"
-#endif
 #include "base/log/event_report.h"
 #include "base/memory/ace_type.h"
 #include "base/mousestyle/mouse_style.h"
-#ifndef CROSS_PLATFORM
-#include "base/perfmonitor/perf_monitor.h"
-#endif
 #include "base/resource/shared_image_manager.h"
-#include "base/ressched/ressched_click_optimizer.h"
 #ifndef CROSS_PLATFORM
+#include "base/log/dump_recorder.h"
+#include "base/perfmonitor/perf_monitor.h"
+#include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
-#endif
 #include "base/ressched/ressched_touch_optimizer.h"
 #include "base/ressched/taihang_optimizer.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 #include "base/thread/background_task_executor.h"
 #include "base/utils/cpu_boost.h"
 #include "base/utils/feature_manager.h"
@@ -431,16 +425,16 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
         uiExtensionManager_->SetInstanceId(instanceId);
     }
 #endif
+    recycleManager_ = std::make_unique<RecycleManager>();
+#ifndef CROSS_PLATFORM
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
-    recycleManager_ = std::make_unique<RecycleManager>();
     clickOptimizer_->Init();
-#ifndef CROSS_PLATFORM
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
-#endif
-    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+#endif
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     // Snapshot the thread's isolated state at pipeline creation time.
     // This determines the pipeline's IsolatedThread identity for its entire lifecycle.
     isIsolatedThread_ = ContainerScope::IsIsolatedThread();
@@ -473,16 +467,17 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
         uiExtensionManager_->SetInstanceId(instanceId);
     }
 #endif
+
+    recycleManager_ = std::make_unique<RecycleManager>();
+#ifndef CROSS_PLATFORM
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
-    recycleManager_ = std::make_unique<RecycleManager>();
-    clickOptimizer_->Init();
-#ifndef CROSS_PLATFORM
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
-#endif
-    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    clickOptimizer_->Init();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+#endif
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     // Snapshot the thread's isolated state at pipeline creation time.
     isIsolatedThread_ = ContainerScope::IsIsolatedThread();
 }
@@ -509,16 +504,16 @@ PipelineContext::PipelineContext()
         uiExtensionManager_->SetPipelineContext(WeakClaim(this));
     }
 #endif
+    recycleManager_ = std::make_unique<RecycleManager>();
+#ifndef CROSS_PLATFORM
     touchOptimizer_ = std::make_unique<ResSchedTouchOptimizer>();
     clickOptimizer_ = std::make_shared<ResSchedClickOptimizer>();
-    recycleManager_ = std::make_unique<RecycleManager>();
-    clickOptimizer_->Init();
-#ifndef CROSS_PLATFORM
     contentChangeMgr_ = MakeRefPtr<ContentChangeManager>(taskExecutor_);
-#endif
-    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
+    clickOptimizer_->Init();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
     taihangOptimizer_->Init();
+#endif
+    dynamicComponentSafeManager_ = AceType::MakeRefPtr<DynamicComponentSafeManager>();
     // Snapshot the thread's isolated state at pipeline creation time.
     isIsolatedThread_ = ContainerScope::IsIsolatedThread();
 }
@@ -904,9 +899,11 @@ void PipelineContext::FlushDirtyNodeUpdate()
 #endif
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushBuild();
     }
+#endif
 
     // freeze node unlock before build begin.
     FlushFreezeNode();
@@ -939,14 +936,16 @@ void PipelineContext::FlushDirtyNodeUpdate()
 
     FlushTSUpdates();
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushBuild();
     }
-#if !defined(IS_RELEASE_VERSION) && !defined(CROSS_PLATFORM)
+#if !defined(IS_RELEASE_VERSION)
     int64_t duration = GetCurrentTimestampMicroSecond() - startTime;
     if (duration > SINGLE_FRAME_TIME_MICROSEC) {
         PerfMonitor::GetPerfMonitor()->SetSubHealthInfo("SUBHEALTH", "FlushDirtyNodeUpdate", duration);
     }
+#endif
 #endif
 }
 
@@ -1191,10 +1190,12 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     uint64_t vsyncPeriod = static_cast<uint64_t>(window_->GetVSyncPeriod());
+#ifndef CROSS_PLATFORM
     if (touchOptimizer_) {
         touchOptimizer_->SetLastVsyncTimeStamp(nanoTimestamp);
         touchOptimizer_->SetVsyncPeriod(vsyncPeriod);
     }
+#endif
     uint64_t timeStamp = (nanoTimestamp > vsyncPeriod) ? (nanoTimestamp - vsyncPeriod + ONE_MS_IN_NS) : ONE_MS_IN_NS;
     resampleTimeStamp_ = (timeStamp > compensationValue_) ? (timeStamp - compensationValue_) : 0;
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -1366,11 +1367,13 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
 #ifdef COMPONENT_TEST_ENABLED
     ComponentTest::UpdatePipelineStatus();
 #endif // COMPONENT_TEST_ENABLED
+#ifndef CROSS_PLATFORM
     if (touchOptimizer_ && (touchOptimizer_->GetIsTpFlushFrameDisplayPeriod() ||
                                touchOptimizer_->GetIsFirstFrameAfterTpFlushFrameDisplayPeriod())) {
         ACE_SCOPED_TRACE("TpFlush RequestFrame");
         RequestFrame();
     }
+#endif
     FireFrameMetricsCallBack(frameMetrics);
     // First vsync may come before rootNode_ is created.
 #ifndef CROSS_PLATFORM
@@ -1549,16 +1552,20 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
     displaySyncManager->SetRefreshRateMode(window_->GetCurrentRefreshRateMode());
     displaySyncManager->SetVsyncPeriod(window_->GetVSyncPeriod());
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushAnimation();
     }
+#endif
 
     scheduleTasks_.clear();
     displaySyncManager->DispatchFunc(nanoTimestamp);
 
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().EndFlushAnimation();
     }
+#endif
 
     int32_t displaySyncRate = displaySyncManager->GetDisplaySyncRate();
     uint32_t displaySyncType = displaySyncManager->GetDisplaySyncType();
@@ -4003,6 +4010,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         NotifyDragTouchEvent(scalePoint, node);
         hasIdleTasks_ = true;
+#ifndef CROSS_PLATFORM
         if (touchOptimizer_) {
             TouchEvent pointWithReverseSignal = touchOptimizer_->SetPointReverseSignal(point);
             touchEvents.get().push_back(pointWithReverseSignal);
@@ -4019,16 +4027,21 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
                 RequestFrame();
             }
         } else {
+#endif
             touchEvents.get().push_back(point);
             RequestFrame();
+#ifndef CROSS_PLATFORM
         }
+#endif
         return;
     }
 
     if (scalePoint.type == TouchType::UP) {
+#ifndef CROSS_PLATFORM
         if (touchOptimizer_) {
             touchOptimizer_->EndTpFlushVsyncPeriod();
         }
+#endif
         lastTouchTime_ = GetTimeFromExternalTimer();
         CompensateTouchMoveEvent(scalePoint);
         PostTaskResponseRegion(DEFAULT_DELAY_THP);
@@ -4826,11 +4839,15 @@ void PipelineContext::ConsumeTouchEventsInterpolation(const std::unordered_set<i
         auto stamp =
             std::chrono::duration_cast<std::chrono::nanoseconds>(touchIter->second.time.time_since_epoch()).count();
         if (targetTimeStamp > static_cast<uint64_t>(stamp)) {
+#ifndef CROSS_PLATFORM
             if (touchOptimizer_ && touchOptimizer_->GetIsTpFlushFrameDisplayPeriod()) {
                 targetTimeStamp = static_cast<uint64_t>(stamp) - ONE_MS_IN_NS;
             } else {
                 continue;
             }
+#else
+            continue;
+#endif
         }
         TouchEvent newTouchEvent;
         if (eventManager_->GetResampleTouchEvent(
@@ -4876,6 +4893,7 @@ void PipelineContext::ConsumeTouchEvents(
         }
         lastDispatchTime[touchId] = GetVsyncTime() - compensationValue_;
         auto it = newIdTouchPoints.find(touchId);
+#ifndef CROSS_PLATFORM
         if (touchOptimizer_ && touchOptimizer_->RVSEnableCheck()) {
             TouchEvent resultPoint;
             TouchEvent resamplePoint;
@@ -4887,12 +4905,15 @@ void PipelineContext::ConsumeTouchEvents(
             }
             touchEvents.emplace_back(resultPoint);
         } else {
+#endif
             if (it != newIdTouchPoints.end()) {
                 touchEvents.emplace_back(it->second);
             } else {
                 touchEvents.emplace_back(idToTouchPoints[touchId]);
             }
+#ifndef CROSS_PLATFORM
         }
+#endif
         ids.erase(touchId);
     }
     eventManager_->SetLastDispatchTime(std::move(lastDispatchTime));
@@ -8283,6 +8304,7 @@ void PipelineContext::ResSchedReportAxisEvent(const AxisEvent& event) const
 #endif
 }
 
+#ifndef CROSS_PLATFORM
 const std::unique_ptr<ResSchedTouchOptimizer>& PipelineContext::GetTouchOptimizer() const
 {
     return touchOptimizer_;
@@ -8297,6 +8319,7 @@ const std::shared_ptr<TaihangOptimizer>& PipelineContext::GetTaihangOptimizer() 
 {
     return taihangOptimizer_;
 }
+#endif
 
 void PipelineContext::SetParentPipeline(const WeakPtr<PipelineBase>& weakPipeline)
 {

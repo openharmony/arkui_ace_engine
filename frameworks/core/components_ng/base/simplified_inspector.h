@@ -34,7 +34,9 @@ public:
     std::string GetInspector();
     void GetInspectorAsync(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
     void GetInspectorBackgroundAsync(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
+#ifndef CROSS_PLATFORM
     void ExecuteUICommand(const std::shared_ptr<Recorder::InspectorTreeCollector>& collector);
+#endif
 
     void GetComponentImageInfo(std::shared_ptr<ComponentResult>& result);
 

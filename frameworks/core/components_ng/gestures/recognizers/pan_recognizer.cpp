@@ -18,8 +18,10 @@
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 
 #include "base/perfmonitor/perf_monitor.h"
+#ifndef CROSS_PLATFORM
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#endif
 #include "core/common/container.h"
 #include "core/common/event_manager.h"
 #include "core/components_ng/gestures/gesture_referee.h"
@@ -49,10 +51,12 @@ void PanRecognizer::ForceCleanRecognizer()
     touchPointsDistance_.clear();
     localMatrix_.clear();
     isStartTriggered_ = false;
+#ifndef CROSS_PLATFORM
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->GetTouchOptimizer()) {
         pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
     }
+#endif
 }
 
 PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount)
@@ -199,12 +203,14 @@ void PanRecognizer::OnAccepted()
         isStartTriggered_ = false;
         SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
     }
+#ifndef CROSS_PLATFORM
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->GetTouchOptimizer()) {
         pipeline->GetTouchOptimizer()->SetSlideAccept(true);
         pipeline->GetTouchOptimizer()->SetSlideDirection(static_cast<int32_t>(panVelocity_.GetDirection()));
         pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
     }
+#endif
 }
 
 void PanRecognizer::OnRejected()
@@ -416,10 +422,12 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             isStartTriggered_ = false;
             SendCallbackMsg(onActionEnd_, GestureCallbackType::END);
             averageDistance_.Reset();
+#ifndef CROSS_PLATFORM
             auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             if (pipeline && pipeline->GetTouchOptimizer()) {
                 pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
             }
+#endif
             AddOverTimeTrace();
             LogStateChange(refereeState_, RefereeState::READY, StateChangeReason::PAN_FINGER_UP);
             lastRefereeState_ = RefereeState::READY;
@@ -818,10 +826,12 @@ void PanRecognizer::OnResetStatus()
     isForDrag_ = false;
     isStartTriggered_ = false;
     isLocked_ = false;
+#ifndef CROSS_PLATFORM
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->GetTouchOptimizer()) {
         pipeline->GetTouchOptimizer()->SetSlideAcceptOffset(averageDistance_);
     }
+#endif
 }
 
 void PanRecognizer::OnSucceedCancel()
@@ -882,6 +892,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     info.SetInputXDeltaSlope(touchPoint.inputXDeltaSlope);
     info.SetInputYDeltaSlope(touchPoint.inputYDeltaSlope);
 
+#ifndef CROSS_PLATFORM
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->GetTouchOptimizer()) {
         info.SetMainDelta((pipeline->GetTouchOptimizer()->HandleMainDelta(mainDelta_,
@@ -889,6 +900,9 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     } else {
         info.SetMainDelta(mainDelta_ / static_cast<double>(touchPoints_.size()));
     }
+#else
+    info.SetMainDelta(mainDelta_ / static_cast<double>(touchPoints_.size()));
+#endif
     if (inputEventType_ == InputEventType::AXIS) {
         info.SetScreenLocation(lastAxisEvent_.GetScreenOffset());
         info.SetGlobalDisplayLocation(lastAxisEvent_.GetGlobalDisplayOffset());

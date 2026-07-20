@@ -230,9 +230,11 @@ void UITaskScheduler::FlushPostponedLayoutTask(bool forceUseMainThread)
 void UITaskScheduler::FlushRenderTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().BeginFlushRender();
     }
+#endif
 
     auto dirtyRenderNodes = std::move(dirtyRenderNodes_);
     // Priority task creation
