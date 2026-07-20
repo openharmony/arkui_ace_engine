@@ -17,8 +17,8 @@
 
 #include "base/log/log.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
-#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/sheet/sheet_presentation_property.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

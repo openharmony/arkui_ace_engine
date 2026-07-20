@@ -31,7 +31,6 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
@@ -59,56 +58,6 @@ constexpr size_t OPTION_ACCEPT_BUTTON_INDEX = 1;
 constexpr int32_t MIN_MONTH = 1;
 constexpr int32_t MIN_DAY = 1;
 const char BUTTON_ETS_TAG[] = "Button";
-ArkUINodeHandle GetNodeHandle(const RefPtr<FrameNode>& frameNode)
-{
-    return reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
-}
-
-const ArkUISwiperModifier* GetSwiperModifier()
-{
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_RETURN(nodeModifiers, nullptr);
-    auto swiperModifier = nodeModifiers->getSwiperModifier();
-    CHECK_NULL_RETURN(swiperModifier, nullptr);
-    return swiperModifier;
-}
-
-std::optional<int32_t> GetSwiperCurrentIndex(const RefPtr<FrameNode>& swiperNode)
-{
-    CHECK_NULL_RETURN(swiperNode, std::nullopt);
-    auto swiperModifier = GetSwiperModifier();
-    CHECK_NULL_RETURN(swiperModifier, std::nullopt);
-    CHECK_NULL_RETURN(swiperModifier->getSwiperCurrentIndex, std::nullopt);
-    return swiperModifier->getSwiperCurrentIndex(GetNodeHandle(swiperNode), false);
-}
-
-bool FinishSwiperAnimation(const RefPtr<FrameNode>& swiperNode)
-{
-    CHECK_NULL_RETURN(swiperNode, false);
-    auto swiperModifier = GetSwiperModifier();
-    CHECK_NULL_RETURN(swiperModifier, false);
-    CHECK_NULL_RETURN(swiperModifier->setSwiperFinishAnimation, false);
-    swiperModifier->setSwiperFinishAnimation(GetNodeHandle(swiperNode));
-    return true;
-}
-
-void ShowSwiperPrevious(const RefPtr<FrameNode>& swiperNode)
-{
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperModifier = GetSwiperModifier();
-    CHECK_NULL_VOID(swiperModifier);
-    CHECK_NULL_VOID(swiperModifier->callSwiperShowPrevious);
-    swiperModifier->callSwiperShowPrevious(GetNodeHandle(swiperNode));
-}
-
-void ShowSwiperNext(const RefPtr<FrameNode>& swiperNode)
-{
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperModifier = GetSwiperModifier();
-    CHECK_NULL_VOID(swiperModifier);
-    CHECK_NULL_VOID(swiperModifier->callSwiperShowNext);
-    swiperModifier->callSwiperShowNext(GetNodeHandle(swiperNode));
-}
 } // namespace
 
 FocusPattern CalendarDialogPattern::GetFocusPattern() const
@@ -675,11 +624,11 @@ bool CalendarDialogPattern::HandleKeyEvent(const KeyEvent& event)
 
 bool CalendarDialogPattern::HandleCalendarNodeKeyEvent(const KeyEvent& event)
 {
-    auto swiperNode = GetSwiperFrameNode();
-    CHECK_NULL_RETURN(swiperNode, false);
-    if (!FinishSwiperAnimation(swiperNode)) {
-        return false;
-    }
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_RETURN(swiperPattern, false);
+    auto swiperController = swiperPattern->GetSwiperController();
+    CHECK_NULL_RETURN(swiperController, false);
+    swiperController->FinishAnimation();
     auto calendarPattern = GetCalendarPattern();
     CHECK_NULL_RETURN(calendarPattern, false);
     ObtainedMonth currentMonthData = calendarPattern->GetCurrentMonthData();
@@ -898,14 +847,13 @@ void CalendarDialogPattern::UpdateSwiperNode(const ObtainedMonth& monthData, boo
 {
     auto calendarPattern = GetCalendarPattern();
     CHECK_NULL_VOID(calendarPattern);
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_VOID(swiperPattern);
+    int32_t currentIndex = swiperPattern->GetCurrentIndex();
+    int32_t targetIndex = (currentIndex + SWIPER_CHILDREN_SIZE + (isPrev ? -1 : 1)) % SWIPER_CHILDREN_SIZE;
+
     auto swiperNode = GetSwiperFrameNode();
     CHECK_NULL_VOID(swiperNode);
-    auto currentIndex = GetSwiperCurrentIndex(swiperNode);
-    if (!currentIndex.has_value()) {
-        return;
-    }
-    int32_t targetIndex = (currentIndex.value() + SWIPER_CHILDREN_SIZE + (isPrev ? -1 : 1)) % SWIPER_CHILDREN_SIZE;
-
     auto monthFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(targetIndex));
     CHECK_NULL_VOID(monthFrameNode);
     auto monthPattern = monthFrameNode->GetPattern<CalendarMonthPattern>();
@@ -922,9 +870,9 @@ void CalendarDialogPattern::UpdateSwiperNode(const ObtainedMonth& monthData, boo
     monthFrameNode->MarkModifyDone();
     monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     if (isPrev) {
-        ShowSwiperPrevious(swiperNode);
+        swiperPattern->ShowPrevious();
     } else {
-        ShowSwiperNext(swiperNode);
+        swiperPattern->ShowNext();
     }
 }
 
@@ -944,14 +892,14 @@ void CalendarDialogPattern::UpdateSwiperNodeFocusedDay(const CalendarDay& focuse
     if (it != targetMonthData.days.end()) {
         focusedDay_ = *it;
         it->isKeyFocused = true;
-        auto swiperNode = GetSwiperFrameNode();
-        CHECK_NULL_VOID(swiperNode);
+        auto swiperPattern = GetSwiperPattern();
+        CHECK_NULL_VOID(swiperPattern);
         if (isPrev) {
             calendarPattern->SetPreMonthData(targetMonthData);
-            ShowSwiperPrevious(swiperNode);
+            swiperPattern->ShowPrevious();
         } else {
             calendarPattern->SetNextMonthData(targetMonthData);
-            ShowSwiperNext(swiperNode);
+            swiperPattern->ShowNext();
         }
     }
 }
@@ -990,8 +938,8 @@ void CalendarDialogPattern::PaintNonCurrentMonthFocusState(int32_t focusedDayInd
 {
     auto calendarPattern = GetCalendarPattern();
     CHECK_NULL_VOID(calendarPattern);
-    auto swiperNode = GetSwiperFrameNode();
-    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_VOID(swiperPattern);
 
     ObtainedMonth currentMonthData = calendarPattern->GetCurrentMonthData();
     ObtainedMonth preMonthData = calendarPattern->GetPreMonthData();
@@ -1006,13 +954,13 @@ void CalendarDialogPattern::PaintNonCurrentMonthFocusState(int32_t focusedDayInd
         focusedDay_ = preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0];
         preMonthData.days[preMonthData.days.size() ? preMonthData.days.size() - 1 : 0].isKeyFocused = true;
         calendarPattern->SetPreMonthData(preMonthData);
-        ShowSwiperPrevious(swiperNode);
+        swiperPattern->ShowPrevious();
         return;
     } else if (focusedDayIndex == static_cast<int32_t>(currentMonthData.days.size())) {
         focusedDay_ = nextMonthData.days[0];
         nextMonthData.days[0].isKeyFocused = true;
         calendarPattern->SetNextMonthData(nextMonthData);
-        ShowSwiperNext(swiperNode);
+        swiperPattern->ShowNext();
         return;
     }
     UpdateNonCurrentMonthFocusedDay(focusedDayIndex);
@@ -1167,11 +1115,9 @@ void CalendarDialogPattern::InitTitleArrowsEvent()
 
 void CalendarDialogPattern::HandleTitleArrowsClickEvent(int32_t nodeIndex)
 {
-    auto swiperNode = GetSwiperFrameNode();
-    CHECK_NULL_VOID(swiperNode);
-    if (!FinishSwiperAnimation(swiperNode)) {
-        return;
-    }
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->GetSwiperController()->FinishAnimation();
 
     auto calendarPattern = GetCalendarPattern();
     CHECK_NULL_VOID(calendarPattern);
@@ -1188,11 +1134,11 @@ void CalendarDialogPattern::HandleTitleArrowsClickEvent(int32_t nodeIndex)
             break;
         }
         case TITLE_LAST_MONTH_BUTTON_NODE_INDEX: {
-            ShowSwiperPrevious(swiperNode);
+            swiperPattern->ShowPrevious();
             break;
         }
         case TITLE_NEXT_MONTH_BUTTON_NODE_INDEX: {
-            ShowSwiperNext(swiperNode);
+            swiperPattern->ShowNext();
             break;
         }
         case TITLE_NEXT_YEAR_BUTTON_NODE_INDEX: {
@@ -1286,11 +1232,9 @@ void CalendarDialogPattern::FireChangeByKeyEvent(PickerDate& selectedDay)
 
     auto swiperNode = AceType::DynamicCast<FrameNode>(calendarNode->GetFirstChild());
     CHECK_NULL_VOID(swiperNode);
-    auto currentIndex = GetSwiperCurrentIndex(swiperNode);
-    if (!currentIndex.has_value()) {
-        return;
-    }
-    auto monthNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(currentIndex.value()));
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto monthNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(swiperPattern->GetCurrentIndex()));
     CHECK_NULL_VOID(monthNode);
     auto eventHub = monthNode->GetEventHub<CalendarEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1423,6 +1367,13 @@ RefPtr<FrameNode> CalendarDialogPattern::GetSwiperFrameNode()
     auto swiperNode = calendarFrameNode->GetChildren().front();
     CHECK_NULL_RETURN(swiperNode, nullptr);
     return AceType::DynamicCast<FrameNode>(swiperNode);
+}
+
+RefPtr<SwiperPattern> CalendarDialogPattern::GetSwiperPattern()
+{
+    auto swiperFrameNode = GetSwiperFrameNode();
+    CHECK_NULL_RETURN(swiperFrameNode, nullptr);
+    return swiperFrameNode->GetPattern<SwiperPattern>();
 }
 
 void CalendarDialogPattern::OnEnterKeyEvent(const KeyEvent& event)
@@ -1676,11 +1627,10 @@ void CalendarDialogPattern::MarkMonthNodeDirty()
 {
     auto swiperNode = GetSwiperFrameNode();
     CHECK_NULL_VOID(swiperNode);
-    auto currentIndex = GetSwiperCurrentIndex(swiperNode);
-    if (!currentIndex.has_value()) {
-        return;
-    }
-    auto monthFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(currentIndex.value()));
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_VOID(swiperPattern);
+    int32_t currentIndex = swiperPattern->GetCurrentIndex();
+    auto monthFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildAtIndex(currentIndex));
     if (monthFrameNode) {
         monthFrameNode->MarkModifyDone();
         monthFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);

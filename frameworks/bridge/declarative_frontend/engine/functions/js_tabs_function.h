@@ -16,11 +16,10 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_TABS_FUNCTION_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_FUNCTION_JS_TABS_FUNCTION_H
 
-#include "base/memory/referenced.h"
+#include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 
 namespace OHOS::Ace::Framework {
-
 class JsTabsFunction : public JsFunction {
     DECLARE_ACE_TYPE(JsTabsFunction, JsFunction);
 
@@ -37,7 +36,7 @@ public:
 
     JSRef<JSVal> Execute(int32_t fromIndex, int32_t toIndex);
     void Execute(int32_t selectedIndex, int32_t index, float position, float mainAxisLength);
-    void Execute(const RefPtr<AceType>& proxy);
+    void Execute(const RefPtr<TabContentTransitionProxy>& proxy);
 };
 
 class JsTabContentTransitionProxy : public Referenced {
@@ -49,12 +48,12 @@ public:
     void GetToIndex(const JSCallbackInfo& args);
     void FinishTransition(const JSCallbackInfo& args);
 
-    void SetProxy(const RefPtr<AceType>& proxy)
+    void SetProxy(const RefPtr<TabContentTransitionProxy>& proxy)
     {
         proxy_ = proxy;
     }
 
-    const RefPtr<AceType>& GetProxy() const
+    RefPtr<TabContentTransitionProxy> GetProxy() const
     {
         return proxy_;
     }
@@ -62,7 +61,7 @@ public:
 private:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JsTabContentTransitionProxy* proxy);
-    RefPtr<AceType> proxy_;
+    RefPtr<TabContentTransitionProxy> proxy_;
 };
 } // namespace OHOS::Ace::Framework
 

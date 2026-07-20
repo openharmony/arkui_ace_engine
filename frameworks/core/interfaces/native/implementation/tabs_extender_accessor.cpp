@@ -13,25 +13,28 @@
  * limitations under the License.
  */
 
-#include "base/log/log_wrapper.h"
-#include "core/common/dynamic_module_helper.h"
-#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/tabs/tabs_model_static.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace TabsExtenderAccessor {
+void ApplyAttributesFinishImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkModifyDone();
+    TabsModelStatic::ApplyAttributesFinish(frameNode);
+}
+} // TabsExtenderAccessor
 const GENERATED_ArkUITabsExtenderAccessor* GetTabsExtenderAccessor()
 {
-    static const GENERATED_ArkUITabsExtenderAccessor* cachedAccessor = nullptr;
-    if (cachedAccessor == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Tabs");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find tabs dynamic module");
-        }
-        cachedAccessor = reinterpret_cast<const GENERATED_ArkUITabsExtenderAccessor*>(
-            module->GetCustomModifier("tabsExtenderAccessor"));
-        if (cachedAccessor == nullptr) {
-            LOGF_ABORT("Can't find tabs extender accessor");
-        }
-    }
-    return cachedAccessor;
+    static const GENERATED_ArkUITabsExtenderAccessor TabsExtenderAccessorImpl {
+        TabsExtenderAccessor::ApplyAttributesFinishImpl,
+    };
+    return &TabsExtenderAccessorImpl;
 }
-} // namespace OHOS::Ace::NG::GeneratedModifier
+
+}

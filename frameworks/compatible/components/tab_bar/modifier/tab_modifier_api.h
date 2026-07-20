@@ -20,7 +20,6 @@
 #include <list>
 
 #include "base/memory/ace_type.h"
-#include "ui/view/components/tabs/tabs_constants.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,7 +48,6 @@ struct ArkUIInnerTabsModifier {
     void (*setIndexByController)(const RefPtr<AceType>& controller, int32_t index, bool blockEvent);
     void (*setInitialIndex)(const RefPtr<AceType>& controller, int32_t index);
     void (*setTabBarChangeListener)(const RefPtr<AceType>& controller, const TabBarChangeListener& listener);
-    void (*create)(BarPosition barPosition, const RefPtr<AceType>& swiperController);
 };
 
 struct ArkUIInnerTabBarModifier {

@@ -21,6 +21,7 @@
 #include "core/components_ng/manager/recoverable/recoverable_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 

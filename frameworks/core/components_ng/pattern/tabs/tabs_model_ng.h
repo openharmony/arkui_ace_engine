@@ -160,9 +160,6 @@ public:
 
     static void SetBarFloatingStyle(FrameNode* frameNode, const BarFloatingStyleParameters& parameters);
     static void ResetBarFloatingStyle(FrameNode* frameNode);
-    static void CreateWithResourceObj(
-        FrameNode* frameNode, TabJsResType colorType, const RefPtr<ResourceObject>& resObj);
-    static void SetOnCustomAnimation(FrameNode* frameNode, TabsCustomAnimationEvent&& onCustomAnimation);
 
 private:
     static void InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperController>& swiperController);

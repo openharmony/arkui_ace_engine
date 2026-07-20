@@ -15,7 +15,7 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DISMISS_CONTENT_COVER_ACTION_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DISMISS_CONTENT_COVER_ACTION_PEER_H
 
-#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 
 struct DismissContentCoverActionPeer {
     OHOS::Ace::NG::BindSheetDismissReason reason;

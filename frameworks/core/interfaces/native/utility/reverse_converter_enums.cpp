@@ -25,7 +25,7 @@
 #include "core/components/web/web_event.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"

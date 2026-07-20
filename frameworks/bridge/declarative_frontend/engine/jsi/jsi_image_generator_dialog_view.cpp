@@ -21,7 +21,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {

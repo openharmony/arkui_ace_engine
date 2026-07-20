@@ -23,7 +23,6 @@ namespace {
 constexpr double DEFAULT_VELOCITY_COEFFICIENT = 1.0;
 constexpr float DEFAULT_STIFFNESS = 328.0f;
 constexpr float DEFAULT_DAMPING = 34.0f;
-constexpr char THEME_PATTERN_SWIPER_LOCAL[] = "swiper_pattern";
 } // namespace
 
 RefPtr<SwiperTheme> SwiperTheme::Builder::Build(const RefPtr<ThemeConstants>& themeConstants) const
@@ -42,7 +41,7 @@ void SwiperTheme::Builder::ParsePattern(
     if (!themeStyle) {
         return;
     }
-    auto pattern = themeStyle->GetPatternByName(THEME_PATTERN_SWIPER_LOCAL);
+    auto pattern = themeStyle->GetPatternByName(THEME_PATTERN_SWIPER);
     if (!pattern) {
         return;
     }

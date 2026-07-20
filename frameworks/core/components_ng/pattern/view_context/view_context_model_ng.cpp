@@ -18,7 +18,8 @@
 
 #include "base/error/error_code.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "core/interfaces/native/node/sheet_modifier.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -87,9 +88,7 @@ int32_t ViewContextModelNG::OpenBindSheet(
             std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
             std::move(sheetSpringBack), currentInstanceId, targetId);
     }
-    auto* sheetModifier = NodeModifier::GetSheetManagerInnerModifier();
-    CHECK_NULL_RETURN(sheetModifier, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
-    return sheetModifier->openBindSheetByUIContext(sheetContentNode, std::move(titleBuildFunc),
+    return SheetManager::GetInstance().OpenBindSheetByUIContext(sheetContentNode, std::move(titleBuildFunc),
         sheetStyle, std::move(onAppear), std::move(onDisappear), std::move(shouldDismiss), std::move(onWillDismiss),
         std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
         std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
@@ -103,16 +102,14 @@ int32_t ViewContextModelNG::UpdateBindSheet(const RefPtr<NG::FrameNode>& sheetCo
     CHECK_NULL_RETURN(scroll, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
     auto sheetPage = AceType::DynamicCast<FrameNode>(scroll->GetParent());
     CHECK_NULL_RETURN(sheetPage, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
-    auto* sheetPatternModifier = NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_RETURN(sheetPatternModifier, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
-    auto currentsheetStyle = sheetPatternModifier->sheetGetSheetStyleValue(sheetPage);
+    auto layoutProperty = sheetPage->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    auto currentsheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (currentsheetStyle.showInSubWindow.value_or(false)) {
         return SubwindowManager::GetInstance()->UpdateBindSheetByUIContext(
             sheetContentNode, sheetStyle, isPartialUpdate, currentInstanceId);
     }
-    auto* sheetManagerModifier = NodeModifier::GetSheetManagerInnerModifier();
-    CHECK_NULL_RETURN(sheetManagerModifier, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
-    return sheetManagerModifier->updateBindSheetByUIContext(
+    return SheetManager::GetInstance().UpdateBindSheetByUIContext(
         sheetContentNode, sheetStyle, isPartialUpdate, currentInstanceId);
 }
 
@@ -122,14 +119,12 @@ int32_t ViewContextModelNG::CloseBindSheet(const RefPtr<NG::FrameNode>& sheetCon
     CHECK_NULL_RETURN(scroll, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
     auto sheetPage = AceType::DynamicCast<FrameNode>(scroll->GetParent());
     CHECK_NULL_RETURN(sheetPage, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
-    auto* sheetPatternModifier = NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_RETURN(sheetPatternModifier, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
-    auto currentsheetStyle = sheetPatternModifier->sheetGetSheetStyleValue(sheetPage);
+    auto layoutProperty = sheetPage->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
+    auto currentsheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (currentsheetStyle.showInSubWindow.value_or(false)) {
         return SubwindowManager::GetInstance()->CloseBindSheetByUIContext(sheetContentNode, currentInstanceId);
     }
-    auto* sheetManagerModifier = NodeModifier::GetSheetManagerInnerModifier();
-    CHECK_NULL_RETURN(sheetManagerModifier, ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND);
-    return sheetManagerModifier->closeBindSheetByUIContext(sheetContentNode, currentInstanceId);
+    return SheetManager::GetInstance().CloseBindSheetByUIContext(sheetContentNode, currentInstanceId);
 }
 } // namespace OHOS::Ace::NG

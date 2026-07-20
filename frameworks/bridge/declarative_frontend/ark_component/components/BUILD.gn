@@ -114,11 +114,6 @@ special_components = [
   "arkpatternlock",
   "arksymbolspan",
   "arkcounter",
-  "arknavigator",
-  "arktabs",
-  "arkswiper",
-  "arkswiperindicator",
-  "arktabcontent",
   "arktoggle",
   "arkimageanimator",
   "arkdatepicker",
@@ -129,7 +124,6 @@ special_components = [
   "arkbutton",
   "arktextinput",
   "arktextarea",
-  "arkpanel",
 ]
 
 if (qrcodegen_support) {

@@ -24,6 +24,9 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_transitioneffect.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
+#include "core/components/swiper/swiper_controller.h"
+#include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
+#include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/property/transition_property.h"
 
 namespace OHOS::Ace::Framework {
@@ -42,37 +45,46 @@ public:
         return controller_;
     }
 
-    void SetSwiperController(const RefPtr<AceType>& swiperController)
+    void SetSwiperController(const RefPtr<NG::TabsControllerNG>& swiperController)
     {
         swiperController_ = swiperController;
     }
 
-    const RefPtr<AceType>& GetSwiperController() const
+    const RefPtr<NG::TabsControllerNG>& GetSwiperController() const
     {
         return swiperController_;
     }
 
 private:
     RefPtr<AceType> controller_;
-    RefPtr<AceType> swiperController_; // used by ng structure
+    RefPtr<NG::TabsControllerNG> swiperController_; // used by ng structure
 };
 
 class ACE_EXPORT CJTabContentTransitionProxy : public OHOS::FFI::FFIData {
     DECL_TYPE(CJTabContentTransitionProxy, OHOS::FFI::FFIData)
 public:
-    explicit CJTabContentTransitionProxy(const RefPtr<AceType>& proxy)
+    explicit CJTabContentTransitionProxy(const RefPtr<TabContentTransitionProxy>& proxy)
     {
         proxy_ = proxy;
     }
 
-    int32_t getFromIndex();
+    int32_t getFromIndex()
+    {
+        return proxy_->GetFromIndex();
+    }
 
-    int32_t getToIndex();
+    int32_t getToIndex()
+    {
+        return proxy_->GetToIndex();
+    }
 
-    void finishTransition();
+    void finishTransition()
+    {
+        proxy_->FinishTransition();
+    }
 
 private:
-    RefPtr<AceType> proxy_;
+    RefPtr<TabContentTransitionProxy> proxy_;
 };
 } // namespace OHOS::Ace::Framework
 

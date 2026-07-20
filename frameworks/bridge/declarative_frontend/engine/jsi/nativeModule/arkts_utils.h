@@ -219,11 +219,6 @@ public:
         RefPtr<ResourceObject>& resourceObject, bool isJsView = false);
     static bool ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
         RefPtr<ResourceObject>& resourceObject, bool isJsView = false);
-    static bool ParseJsMediaWithBundleName(
-        const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
-        std::string& bundleName, std::string& moduleName);
-    static bool ParseJsMediaWithBundleName(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
-        std::string& bundleName, std::string& moduleName, RefPtr<ResourceObject>& resourceObject);
     static bool ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>& jsValue, double& result,
         RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result);

@@ -12,44 +12,107 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "core/interfaces/native/node/tab_content_modifier.h"
-#include "core/common/dynamic_module_helper.h"
+
+#include "bridge/common/utils/engine_helper.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
+
+void SetTabContentBuilder(ArkUINodeHandle node, ArkUI_Int32 methodId)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto builder = [methodId]() {
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        ArkUIEventCallbackArg args[] = {};
+        auto dispatch = ViewModel::GetCallbackMethod();
+        CHECK_NULL_VOID(dispatch);
+        auto vmContext = reinterpret_cast<ArkUIVMContext>(nativeEngine);
+        CHECK_NULL_VOID(vmContext);
+        dispatch->CallInt(vmContext, methodId, 0, args);
+    };
+    TabContentModelNG::SetTabBarBuilder(frameNode, std::move(builder));
+}
+
+void SetTabContentLabel(ArkUINodeHandle node, ArkUI_CharPtr label)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabContentModelNG::SetTabBarLabel(frameNode, label);
+
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    TabContentModelNG::CreateTextContentWithResourceObj(frameNode, nullptr);
+}
+
+void SetTabContentOnWillShow(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillShow = reinterpret_cast<std::function<void()>*>(callback);
+        TabContentModelNG::SetOnWillShow(frameNode, std::move(*onWillShow));
+    } else {
+        TabContentModelNG::SetOnWillShow(frameNode, nullptr);
+    }
+}
+
+void ResetTabContentOnWillShow(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabContentModelNG::SetOnWillShow(frameNode, nullptr);
+}
+
+void SetTabContentOnWillHide(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillHide = reinterpret_cast<std::function<void()>*>(callback);
+        TabContentModelNG::SetOnWillHide(frameNode, std::move(*onWillHide));
+    } else {
+        TabContentModelNG::SetOnWillHide(frameNode, nullptr);
+    }
+}
+
+void ResetTabContentOnWillHide(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabContentModelNG::SetOnWillHide(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUITabContentModifier* GetTabContentModifier()
 {
-    static const ArkUITabContentModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TabContent");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const ArkUITabContentModifier*>(module->GetDynamicModifier());
-    }
-    return cachedModifier;
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUITabContentModifier modifier = {
+        .setTabContentBuilder = SetTabContentBuilder,
+        .setTabContentLabel = SetTabContentLabel,
+        .setTabContentOnWillShow = SetTabContentOnWillShow,
+        .resetTabContentOnWillShow = ResetTabContentOnWillShow,
+        .setTabContentOnWillHide = SetTabContentOnWillHide,
+        .resetTabContentOnWillHide = ResetTabContentOnWillHide,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
+    return &modifier;
 }
 
 const CJUITabContentModifier* GetCJUITabContentModifier()
 {
-    static const CJUITabContentModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TabContent");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const CJUITabContentModifier*>(module->GetCjModifier());
-    }
-    return cachedModifier;
-}
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUITabContentModifier modifier = {
+        .setTabContentBuilder = SetTabContentBuilder,
+        .setTabContentLabel = SetTabContentLabel,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
-const ArkUITabContentCustomModifier* GetTabContentCustomModifier()
-{
-    static const ArkUITabContentCustomModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TabContent");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier =
-            reinterpret_cast<const ArkUITabContentCustomModifier*>(module->GetCustomModifier("customModifier"));
-    }
-    return cachedModifier;
+    return &modifier;
 }
 }
-} // namespace OHOS::Ace::NG
+}

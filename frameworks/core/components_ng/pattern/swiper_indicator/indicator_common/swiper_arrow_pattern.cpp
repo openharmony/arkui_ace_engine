@@ -26,10 +26,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const char SWIPER_LEFT_ARROW_ETS_TAG[] = "LeftArrow";
-const char SWIPER_RIGHT_ARROW_ETS_TAG[] = "RightArrow";
-} // namespace
 void SwiperArrowPattern::OnModifyDone()
 {
     ACE_UINODE_TRACE(GetHost());
@@ -93,7 +89,7 @@ void SwiperArrowPattern::OnClick() const
     CHECK_NULL_VOID(swiperController);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (host->GetTag() == SWIPER_LEFT_ARROW_ETS_TAG) {
+    if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
         if (swiperPattern->IsHorizontalAndRightToLeft()) {
             swiperController->ShowNext();
         } else {
@@ -101,7 +97,7 @@ void SwiperArrowPattern::OnClick() const
         }
         return;
     }
-    if (host->GetTag() == SWIPER_RIGHT_ARROW_ETS_TAG) {
+    if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
         if (swiperPattern->IsHorizontalAndRightToLeft()) {
             swiperController->ShowPrevious();
         } else {
@@ -207,7 +203,7 @@ void SwiperArrowPattern::InitAccessibilityText()
     CHECK_NULL_VOID(swiperPattern);
     auto preAccessibilityText = swiperIndicatorTheme->GetPreAccessibilityText();
     auto nextAccessibilityText = swiperIndicatorTheme->GetNextAccessibilityText();
-    if (host->GetTag() == SWIPER_LEFT_ARROW_ETS_TAG) {
+    if (host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG) {
         std::string accessibilityLeftText = "";
         if (swiperPattern->IsHorizontalAndRightToLeft()) {
             accessibilityLeftText = nextAccessibilityText;
@@ -217,7 +213,7 @@ void SwiperArrowPattern::InitAccessibilityText()
         accessibilityProperty->SetAccessibilityText(accessibilityLeftText);
         accessibilityProperty->SetAccessibilityCustomRole("button");
     }
-    if (host->GetTag() == SWIPER_RIGHT_ARROW_ETS_TAG) {
+    if (host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG) {
         std::string accessibilityRightText = "";
         if (swiperPattern->IsHorizontalAndRightToLeft()) {
             accessibilityRightText = preAccessibilityText;
@@ -396,8 +392,8 @@ std::tuple<bool, bool, bool> SwiperArrowPattern::CheckHoverStatus()
     if (swiperPattern->IsHorizontalAndRightToLeft()) {
         std::swap(leftArrowIsHidden, rightArrowIsHidden);
     }
-    auto isLeftArrow = host->GetTag() == SWIPER_LEFT_ARROW_ETS_TAG;
-    auto isRightArrow = host->GetTag() == SWIPER_RIGHT_ARROW_ETS_TAG;
+    auto isLeftArrow = host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG;
+    auto isRightArrow = host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG;
     auto isLoop = swiperArrowLayoutProperty->GetLoopValue(true);
     auto needHideArrow = (((isLeftArrow && leftArrowIsHidden) || (isRightArrow && rightArrowIsHidden)) && !isLoop)
         || (swiperPattern->RealTotalCount() <= displayCount_);
@@ -478,14 +474,14 @@ void SwiperArrowPattern::UpdateArrowContentBySymbol(RefPtr<FrameNode>& buttonNod
     auto swiperIndicatorTheme = host->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     bool isRtl = swiperLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (SWIPER_LEFT_ARROW_ETS_TAG == host->GetTag()) {
+    if (V2::SWIPER_LEFT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(
                 isRtl ? swiperIndicatorTheme->GetRightSymbolId() : swiperIndicatorTheme->GetLeftSymbolId()));
         } else {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(swiperIndicatorTheme->GetUpSymbolId()));
         }
-    } else if (SWIPER_RIGHT_ARROW_ETS_TAG == host->GetTag()) {
+    } else if (V2::SWIPER_RIGHT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             symbolLayoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(
                 isRtl ? swiperIndicatorTheme->GetLeftSymbolId() : swiperIndicatorTheme->GetRightSymbolId()));
@@ -524,13 +520,13 @@ void SwiperArrowPattern::UpdateArrowContentByImage(RefPtr<FrameNode>& buttonNode
     CHECK_NULL_VOID(swiperLayoutProperty);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (SWIPER_LEFT_ARROW_ETS_TAG == host->GetTag()) {
+    if (V2::SWIPER_LEFT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_LEFT_SVG);
         } else {
             imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_UP_SVG);
         }
-    } else if (SWIPER_RIGHT_ARROW_ETS_TAG == host->GetTag()) {
+    } else if (V2::SWIPER_RIGHT_ARROW_ETS_TAG == host->GetTag()) {
         if (swiperLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
             imageSourceInfo.SetResourceId(InternalResource::ResourceId::IC_PUBLIC_ARROW_RIGHT_SVG);
         } else {

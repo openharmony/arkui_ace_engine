@@ -256,15 +256,6 @@ struct ArkUICornerRadius {
     ArkUI_Float32 bottomRight;
 };
 
-struct ArkUIColorHeadRoom {
-    ArkUI_Float32 red;
-    ArkUI_Float32 green;
-    ArkUI_Float32 blue;
-    ArkUI_Float32 alpha;
-    ArkUI_Float32 headRoom;
-    ArkUI_Int32 colorSpace;
-};
-
 struct ArkUIBorderWidth {
     ArkUI_Float32 top;
     ArkUI_Float32 right;
@@ -4835,8 +4826,6 @@ struct ArkUISwiperModifier {
     void (*resetSwiperOnAnimationEnd)(ArkUINodeHandle node);
     void (*setSwiperOnGestureSwipe)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnGestureSwipe)(ArkUINodeHandle node);
-    void (*setSwiperCustomContentTransition)(ArkUINodeHandle node, void* transition);
-    void (*resetSwiperCustomContentTransition)(ArkUINodeHandle node);
     void (*setSwiperOnContentDidScroll)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnContentDidScroll)(ArkUINodeHandle node);
     ArkUI_Int32 (*getIndicatorInteractive)(ArkUINodeHandle node);
@@ -4874,32 +4863,6 @@ struct ArkUISwiperModifier {
     void (*setSwiperCachedIndependent)(ArkUINodeHandle node, ArkUI_Bool independent);
     void (*resetSwiperCachedIndependent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperCachedIndependent)(ArkUINodeHandle node);
-    void (*setSwiperCurveByCurve)(ArkUINodeHandle node, void* curve);
-    void (*setSwiperIndicatorController)(ArkUINodeHandle node, void* controller, void* resetFunc);
-    void (*resetSwiperIndicatorController)(ArkUINodeHandle node);
-    void (*resetSwiperIndicatorControllerIfNeeded)(ArkUINodeHandle node, void* controller);
-    void* (*getSwiperIndicatorController)(ArkUINodeHandle node);
-    void (*setSwiperBindIndicator)(ArkUINodeHandle node, ArkUI_Bool bind);
-    void (*setSwiperIndicatorIsBoolean)(ArkUINodeHandle node, ArkUI_Bool isBoolean);
-    void (*setSwiperShowIndicator)(ArkUINodeHandle node, ArkUI_Bool showIndicator);
-    void (*setJsViewSwiperIndicator)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
-    void (*setJsViewSwiperIndicatorRaw)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr, const void* resObjs);
-    void (*setSwiperIndicatorStyleByParameters)(ArkUINodeHandle node, void* swiperParameters,
-        ArkUI_Bool setCustomSize, ArkUI_Bool isCustomSize);
-    void (*setSwiperIndicatorStyleByArrowParameters)(ArkUINodeHandle node, void* arrowParams);
-    void* (*getAsyncEventHandlers)(uint32_t kind);
-    void (*setSwiperOnChangeEvent)(ArkUINodeHandle node, void* callback);
-    void (*setSwiperMainSizeWidth)();
-    void (*setSwiperMainSizeHeight)();
-    ArkUI_Int32 (*getSwiperCurrentIndex)(ArkUINodeHandle node, ArkUI_Bool original);
-    void* (*create)(ArkUI_Bool isCreateArc);
-    void (*setSwiperDisplayArrowForJs)(ArkUINodeHandle node, ArkUI_Bool original);
-    void (*setSwiperHoverShowForJs)(ArkUINodeHandle node, ArkUI_Bool original);
-    void (*setJsViewStyle)(ArkUINodeHandle node, ArkUI_Bool isDot, void* swiperParameters);
-    void (*setJsShowIndicator)(ArkUINodeHandle node, ArkUI_Bool isShow);
-    void (*setSwiperIndexForJs)(ArkUINodeHandle node, ArkUI_Int32 index);
-    void (*setJsSwiperRemoteMessage)(ArkUINodeHandle node, ArkUI_VoidPtr remoteMessageFunc);
-    void (*setJsSwiperOnClick)(ArkUINodeHandle node, ArkUI_VoidPtr clickFunc);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -4947,7 +4910,6 @@ struct ArkUIArcSwiperModifier {
     void (*callArcSwiperShowNext)(ArkUINodeHandle node);
     void (*callArcSwiperShowPrevious)(ArkUINodeHandle node);
     void (*callArcSwiperFinishAnimation)(ArkUINodeHandle node);
-    void* (*getAsyncEventHandlers)(uint32_t kind);
 };
 
 struct ArkUIIndicatorComponentModifier {
@@ -4963,9 +4925,6 @@ struct ArkUIIndicatorComponentModifier {
     void (*resetLoop)(ArkUINodeHandle node);
     void (*setVertical)(ArkUINodeHandle node, ArkUI_Bool isVertical);
     void (*resetVertical)(ArkUINodeHandle node);
-    void (*setJsViewStyle)(ArkUINodeHandle node, ArkUI_Bool isDot, void* swiperParameters);
-    void* (*create)();
-    void (*setIsIndicatorCustomSize)(ArkUINodeHandle node, ArkUI_Bool isCustomSize);
 };
 
 struct ArkUIStackModifier {
@@ -5000,7 +4959,6 @@ struct ArkUINavigatorModifier {
     void (*resetActive)(ArkUINodeHandle node);
     void (*setParams)(ArkUINodeHandle node, ArkUI_CharPtr args);
     void (*resetParams)(ArkUINodeHandle node);
-    void (*setIsDefSize)(ArkUI_Bool isWidth);
 };
 
 struct ArkUINodeContainerModifier {
@@ -5569,8 +5527,6 @@ struct ArkUIScrollerModifier {
 };
 
 struct ArkUITabsModifier {
-    void (*createTabs)(ArkUI_Int32 barPosition, ArkUI_Int32 index, ArkUINodeHandle tabsController, ArkUINodeHandle tabController);
-    void (*popTabs)();
     void (*setTabBarMode)(ArkUINodeHandle node, ArkUI_Int32 tabsBarMode);
     void (*setScrollableBarModeOptions)(
         ArkUINodeHandle node, const ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_Int32 layoutStyle);
@@ -5583,7 +5539,6 @@ struct ArkUITabsModifier {
     void (*setTabOnUnselected)(ArkUINodeHandle node, void* callback);
     void (*setTabsOnContentDidScroll)(ArkUINodeHandle node, void* callback);
     void (*setBarBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*setBarBackgroundColorByUser)(ArkUINodeHandle node, ArkUI_Bool colorByUser);
     void (*setBarBackgroundBlurStyle)(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption);
     void (*setBarOverlap)(ArkUINodeHandle node, ArkUI_Bool overlap);
     void (*setIsVertical)(ArkUINodeHandle node, ArkUI_Bool isVertical);
@@ -5653,7 +5608,6 @@ struct ArkUITabsModifier {
     void (*resetTabsOnContentWillChange)(ArkUINodeHandle node);
     void (*setTabsIsCustomAnimation)(ArkUINodeHandle node, ArkUI_Bool isCustom);
     void (*resetTabsIsCustomAnimation)(ArkUINodeHandle node);
-    void (*setTabsOnCustomAnimation)(ArkUINodeHandle node, void* callback);
     void (*createScrollableBarModeOptionsWithResourceObj)(ArkUINodeHandle node, void* marginRawPtr);
     void (*createBarGridAlignWithResourceObj)(ArkUINodeHandle node,
         void* columnGutterRawPtr, void* columnMarginRawPtr);
@@ -5667,7 +5621,6 @@ struct ArkUITabsModifier {
         void* colorRawPtr, void* inactiveColorRawPtr);
     void (*setTabsBarFloatingStyle)(ArkUINodeHandle node, void* paramRawPtr);
     void (*resetTabsBarFloatingStyle)(ArkUINodeHandle node);
-    void (*createWithResourceObj)(ArkUINodeHandle node, void* paramRawPtr);
 };
 
 struct ArkUIStepperItemModifier {
@@ -5695,37 +5648,12 @@ struct ArkUIStepperModifier {
     void (*setStepperOnChangeEvent)(ArkUINodeHandle node, void* callback);
 };
 struct ArkUITabContentModifier {
-    void (*createTabContent)(void* builder);
-    void (*popTabContent)();
     void (*setTabContentBuilder)(ArkUINodeHandle node, ArkUI_Int32 methodId);
     void (*setTabContentLabel)(ArkUINodeHandle node, ArkUI_CharPtr label);
     void (*setTabContentOnWillShow)(ArkUINodeHandle node, void* callback);
     void (*resetTabContentOnWillShow)(ArkUINodeHandle node);
     void (*setTabContentOnWillHide)(ArkUINodeHandle node, void* callback);
     void (*resetTabContentOnWillHide)(ArkUINodeHandle node);
-    void (*createWithResourceObj)(ArkUINodeHandle node, void* paramRawPtr);
-    void (*setCustomStyleNode)(ArkUINodeHandle node, ArkUINodeHandle customNode);
-    void (*setDrawableIndicatorConfig)(ArkUINodeHandle node, void* config);
-    void (*setDrawableIndicatorFlag)(ArkUINodeHandle node, ArkUI_Bool isDrawableIndicator);
-    void (*setIndicatorColorByUser)(ArkUINodeHandle node, ArkUI_Bool isByUser);
-    void (*setIndicator)(ArkUINodeHandle node, void* indicator);
-    void (*setSelectedMode)(ArkUINodeHandle node, ArkUI_Int32 selectedMode);
-    void (*setBoard)(ArkUINodeHandle node, void* board);
-    void (*setLabelStyle)(ArkUINodeHandle node, void* labelStyle, ArkUI_Bool isSubTabStyle);
-    void (*setLabelUnselectedColorByUser)(ArkUINodeHandle node, ArkUI_Bool isByUser);
-    void (*setLabelSelectedColorByUser)(ArkUINodeHandle node, ArkUI_Bool isByUser);
-    void (*setPadding)(ArkUINodeHandle node, void* padding, ArkUI_Bool isSubTabStyle);
-    void (*setUseLocalizedPadding)(ArkUINodeHandle node, ArkUI_Bool useLocalizedPadding);
-    void (*createPaddingHorWithResourceObj)(ArkUINodeHandle node, void* paramRawPtr);
-    void (*createPaddingVerWithResourceObj)(ArkUINodeHandle node, void* paramRawPtr);
-    void (*setLayoutMode)(ArkUINodeHandle node, ArkUI_Int32 layoutMode);
-    void (*setVerticalAlign)(ArkUINodeHandle node, ArkUI_Int32 verticalAlign);
-    void (*setSymmetricExtensible)(ArkUINodeHandle node, ArkUI_Bool isExtensible);
-    void (*setIconStyle)(ArkUINodeHandle node, void* iconStyle);
-    void (*setIconUnselectedColorByUser)(ArkUINodeHandle node, ArkUI_Bool isByUser);
-    void (*setIconSelectedColorByUser)(ArkUINodeHandle node, ArkUI_Bool isByUser);
-    void (*setId)(ArkUINodeHandle node, ArkUI_CharPtr id);
-    void (*setTabBar)(ArkUINodeHandle node, void* paramRawPtr, bool fromJsView);
 };
 
 struct ArkUITabsControllerModifier {
@@ -8885,16 +8813,6 @@ struct ArkUIPanelModifier {
     void (*resetDragBar)(ArkUINodeHandle node);
     void (*setShow)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetShow)(ArkUINodeHandle node);
-    void (*createPanel)(ArkUI_Bool isShow);
-    void (*pop)();
-    void (*setModeChangeEvent)(void* modeChangeEvent);
-    void (*setBackgroundColorForHDR)(ArkUINodeHandle node, ArkUIColorHeadRoom color);
-    void (*setPanelBackgroundColorWithColorSpace)(ArkUI_Uint32 color, ArkUI_Int32 colorSpace);
-    void (*setPanelBorderWidth)(ArkUI_Float32 value, ArkUI_Int32 unit);
-    void (*setPanelBorderStyle)(ArkUI_Int32 borderStyle);
-    void (*setPanelBorderColor)(ArkUI_Uint32 color);
-    void (*setOnSizeChange)(void* onSizeChange);
-    void (*setOnHeightChange)(void* onHeightChange);
 };
 
 struct ArkUIRadioModifier {

@@ -15,7 +15,6 @@
 
 #include "compatible/components/tab_bar/dom/dom_tab_bar.h"
 #include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
-#include "compatible/components/tab_bar/models/tabs_model_impl.h"
 #include "compatible/components/tab_bar/v2/tabs_helper.h"
 
 #include "base/memory/ace_type.h"
@@ -189,13 +188,6 @@ void SetTabBarChangeListener(const RefPtr<AceType>& controller, const TabBarChan
     tabController->SetTabBarChangeListener(listener);
 }
 
-void Create(BarPosition barPosition, const RefPtr<AceType>& swiperController)
-{
-    CHECK_NULL_VOID(swiperController);
-    Framework::TabsModelImpl model;
-    model.Create(barPosition, swiperController);
-}
-
 const ArkUIInnerTabsModifier* GetTabsInnerModifier()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
@@ -205,7 +197,6 @@ const ArkUIInnerTabsModifier* GetTabsInnerModifier()
         .setIndexByController = SetIndexByController,
         .setInitialIndex = SetInitialIndex,
         .setTabBarChangeListener = SetTabBarChangeListener,
-        .create = Create,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, 0, 0, 0); // don't move this line
     return &impl;

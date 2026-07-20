@@ -15,7 +15,6 @@
 
 #include "foundation/arkui/ace_engine/interfaces/native/native_gesture.h"
 #include "core/interfaces/native/node/node_gesture_modifier.h"
-#include "core/interfaces/native/node/node_swiper_modifier.h"
 #include <securec.h>
 
 #include "base/error/error_code.h"
@@ -1155,10 +1154,9 @@ ArkUI_Int32 gestureEventTargetInfoIsScrollBegin(ArkUIGestureEventTargetInfo* inf
         *ret = scrollablePattern->IsAtTop();
         return ERROR_CODE_NO_ERROR;
     }
-    if (frameNode->GetTag() == V2::SWIPER_ETS_TAG) {
-        auto swiperModifier = NG::NodeModifier::GetSwiperCustomModifier();
-        CHECK_NULL_RETURN(swiperModifier, ERROR_CODE_PARAM_INVALID);
-        *ret = swiperModifier->isAtStart(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    auto swiperPattern = frameNode->GetPattern<NG::SwiperPattern>();
+    if (swiperPattern) {
+        *ret = swiperPattern->IsAtStart();
         return ERROR_CODE_NO_ERROR;
     }
     return ERROR_CODE_NON_SCROLLABLE_CONTAINER;
@@ -1173,10 +1171,9 @@ ArkUI_Int32 gestureEventTargetInfoIsScrollEnd(ArkUIGestureEventTargetInfo* info,
         *ret = scrollablePattern->IsAtBottom();
         return ERROR_CODE_NO_ERROR;
     }
-    if (frameNode->GetTag() == V2::SWIPER_ETS_TAG) {
-        auto swiperModifier = NG::NodeModifier::GetSwiperCustomModifier();
-        CHECK_NULL_RETURN(swiperModifier, ERROR_CODE_PARAM_INVALID);
-        *ret = swiperModifier->isAtEnd(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode)));
+    auto swiperPattern = frameNode->GetPattern<NG::SwiperPattern>();
+    if (swiperPattern) {
+        *ret = swiperPattern->IsAtEnd();
         return ERROR_CODE_NO_ERROR;
     }
     return ERROR_CODE_NON_SCROLLABLE_CONTAINER;

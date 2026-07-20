@@ -24,7 +24,7 @@
 #include "ui/animation/frame_rate_range.h"
 
 namespace OHOS::Ace::NG {
-class ACE_FORCE_EXPORT FrameRateManager : public virtual AceType {
+class FrameRateManager : public virtual AceType {
     DECLARE_ACE_TYPE(FrameRateManager, AceType);
 
 public:

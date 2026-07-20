@@ -16,8 +16,8 @@
 #include "arkoala_api_generated.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_model_static.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_static.h"
 #include "core/interfaces/native/implementation/lazy_build_accessor.h"
-#include "core/interfaces/native/node/tab_content_modifier.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
@@ -62,10 +62,7 @@ void SetTabContentLazyBuilderImpl(Ark_NativePointer node,
         return nullptr;
     };
     auto shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender));
-    auto tabContentModifier = NodeModifier::GetTabContentCustomModifier();
-    CHECK_NULL_VOID(tabContentModifier);
-    tabContentModifier->setShallowBuilder(
-        reinterpret_cast<ArkUINodeHandle>(frameNode), reinterpret_cast<void*>(AceType::RawPtr(shallowBuilder)));
+    TabContentModelStatic::SetShallowBuilder(frameNode, shallowBuilder);
 }
 } // LazyBuildAccessor
 const GENERATED_ArkUILazyBuildAccessor* GetLazyBuildAccessor()

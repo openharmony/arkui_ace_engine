@@ -43,7 +43,7 @@ Sheet 组件在 ACE Engine 中存在两套实现：
 | 架构 | 位置 | 状态 | 说明 |
 |-----|------|------|------|
 | **Legacy 架构** | `frameworks/core/components/semi_modal/` | ⚠️ 已废弃 | 旧版实现，不建议使用 |
-| **NG 架构** | `frameworks/core/components_ng/pattern/sheet/` | ✅ 推荐 | 新版实现，功能完善 |
+| **NG 架构** | `frameworks/core/components_ng/pattern/overlay/` | ✅ 推荐 | 新版实现，功能完善 |
 
 **本知识库重点关注 NG 架构**。
 
@@ -61,35 +61,37 @@ Sheet 组件在 ACE Engine 中存在两套实现：
 ### NG 架构目录树
 
 ```
-frameworks/core/components_ng/pattern/sheet/
-├── sheet_presentation_pattern.h            # 主 Pattern 类（核心）
-├── sheet_presentation_pattern.cpp          # 主 Pattern 实现
-├── sheet_presentation_property.h           # 属性定义
-├── sheet_presentation_property.cpp         # 属性实现
-├── sheet_presentation_layout_algorithm.h   # 布局算法
-├── sheet_presentation_layout_algorithm.cpp # 布局实现
-├── sheet_style.h                           # 样式数据结构（枚举、SheetStyle）
-├── sheet_manager.h                         # 管理器（单例）
-├── sheet_manager.cpp                       # 管理器实现
-├── sheet_view.cpp                          # 视图创建
-├── sheet_wrapper_pattern.h                 # 包装器 Pattern
-├── sheet_wrapper_pattern.cpp               # 包装器实现
-├── sheet_drag_bar_pattern.h                # 拖拽条 Pattern
-├── sheet_drag_bar_pattern.cpp              # 拖拽条实现
-├── sheet_object.h                          # 抽象基类
-├── sheet_object.cpp                        # 基类实现
-├── side/
-│   ├── sheet_side_object.h                 # 侧边半模态专用
-│   ├── sheet_side_object.cpp
-│   └── sheet_presentation_side_layout_algorithm.h
-├── content_cover/
-│   ├── sheet_content_cover_object.h        # 内容覆盖型半模态
-│   ├── sheet_content_cover_object.cpp
-│   └── sheet_content_cover_layout_algorithm.h
-└── minimize/
-    ├── sheet_minimize_object.h             # 最小化模式
-    ├── sheet_minimize_object.cpp
-    └── sheet_presentation_minimize_layout_algorithm.h
+frameworks/core/components_ng/pattern/
+├── overlay/
+│   ├── sheet_presentation_pattern.h        # 主 Pattern 类（核心）
+│   ├── sheet_presentation_pattern.cpp      # 主 Pattern 实现
+│   ├── sheet_presentation_property.h       # 属性定义
+│   ├── sheet_presentation_property.cpp     # 属性实现
+│   ├── sheet_presentation_layout_algorithm.h    # 布局算法
+│   ├── sheet_presentation_layout_algorithm.cpp  # 布局实现
+│   ├── sheet_style.h                       # 样式数据结构（枚举、SheetStyle）
+│   ├── sheet_manager.h                     # 管理器（单例）
+│   ├── sheet_manager.cpp                   # 管理器实现
+│   ├── sheet_view.cpp                      # 视图创建
+│   ├── sheet_wrapper_pattern.h             # 包装器 Pattern
+│   ├── sheet_wrapper_pattern.cpp           # 包装器实现
+│   └── sheet_drag_bar_pattern.h/cpp        # 拖拽条 Pattern
+│
+└── sheet/
+    ├── sheet_object.h                      # 抽象基类
+    ├── sheet_object.cpp                    # 基类实现
+    ├── side/
+    │   ├── sheet_side_object.h             # 侧边半模态专用
+    │   ├── sheet_side_object.cpp
+    │   └── sheet_presentation_side_layout_algorithm.h
+    ├── content_cover/
+    │   ├── sheet_content_cover_object.h    # 内容覆盖型半模态
+    │   ├── sheet_content_cover_object.cpp
+    │   └── sheet_content_cover_layout_algorithm.h
+    └── minimize/
+        ├── sheet_minimize_object.h         # 最小化模式
+        ├── sheet_minimize_object.cpp
+        └── sheet_presentation_minimize_layout_algorithm.h
 ```
 
 ### 测试目录
@@ -114,7 +116,7 @@ test/unittest/core/pattern/overlay/
 ```
                      ┌──────────────────────────────────────────────────────────────┐
                      │                SheetPresentationPattern                       │
-                     │           (sheet/sheet_presentation_pattern.h:52)          │
+                     │           (overlay/sheet_presentation_pattern.h:52)          │
                      └──────────────────────────────────────────────────────────────┘
                                           │
           ┌───────────────┬───────────────┼───────────────┬───────────────┐
@@ -151,12 +153,12 @@ test/unittest/core/pattern/overlay/
 
 | 类名 | 文件位置 | 核心职责 | 继承基类数量 |
 |-----|---------|---------|-------------|
-| **SheetPresentationPattern** | [sheet/sheet_presentation_pattern.h:52](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:52) | 主 Pattern 类，管理半模态生命周期、布局、交互 | 6 个基类 |
-| **SheetManager** | [sheet/sheet_manager.h:156](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_manager.h:156) | 单例管理器，负责创建/更新/关闭半模态 | Singleton<SheetManager> |
+| **SheetPresentationPattern** | [overlay/sheet_presentation_pattern.h:52](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:52) | 主 Pattern 类，管理半模态生命周期、布局、交互 | 6 个基类 |
+| **SheetManager** | [overlay/sheet_manager.h:156](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_manager.h:156) | 单例管理器，负责创建/更新/关闭半模态 | Singleton<SheetManager> |
 | **SheetObject** | [sheet/sheet_object.h:32](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_object.h:32) | 抽象基类，定义不同类型半模态的通用行为 | AceType |
 | **SheetSideObject** | `sheet/side/sheet_side_object.h` | 侧边半模态专用实现 | SheetObject |
 | **SheetContentCoverObject** | `sheet/content_cover/sheet_content_cover_object.h` | 内容覆盖型半模态实现 | SheetObject |
-| **SheetPresentationProperty** | `sheet/sheet_presentation_property.h` | 属性管理，存储 SheetStyle | LayoutProperty |
+| **SheetPresentationProperty** | `overlay/sheet_presentation_property.h` | 属性管理，存储 SheetStyle | LayoutProperty |
 
 ---
 
@@ -164,7 +166,7 @@ test/unittest/core/pattern/overlay/
 
 ### SheetPresentationPattern 核心职责
 
-**位置**: [sheet/sheet_presentation_pattern.h:52](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:52)
+**位置**: [overlay/sheet_presentation_pattern.h:52](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:52)
 
 #### 多继承实现
 
@@ -191,7 +193,7 @@ class SheetPresentationPattern :
 
 #### 1. OnModifyDone（属性修改完成）
 
-**位置**: [sheet/sheet_presentation_pattern.cpp:92](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.cpp:92)
+**位置**: [overlay/sheet_presentation_pattern.cpp:92](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.cpp:92)
 
 ```cpp
 void SheetPresentationPattern::OnModifyDone()
@@ -246,7 +248,7 @@ void SheetPresentationPattern::OnModifyDone()
 - 更新滚动高度
 - 触发动画（如需要）
 
-**代码位置**: [sheet/sheet_presentation_pattern.h:1134](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:1134)
+**代码位置**: [overlay/sheet_presentation_pattern.h:1134](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:1134)
 
 ```cpp
 bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
@@ -255,7 +257,7 @@ bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 #### 4. OnDetachFromFrameNode（从节点分离）
 
-**位置**: [sheet/sheet_presentation_pattern.h:1127](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:1127)
+**位置**: [overlay/sheet_presentation_pattern.h:1127](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:1127)
 
 ```cpp
 void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -273,7 +275,7 @@ void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
 #### 拖拽事件
 
-**位置**: [sheet/sheet_presentation_pattern.h:320-324](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:320-324)
+**位置**: [overlay/sheet_presentation_pattern.h:320-324](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:320-324)
 
 ```cpp
 void HandleDragStart();                        // 拖拽开始
@@ -306,7 +308,7 @@ constexpr float SHEET_VELOCITY_THRESHOLD = 1000.0f;  // 速度阈值
 
 #### 滚动事件
 
-**位置**: [sheet/sheet_presentation_pattern.h:924-936](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:924-936)
+**位置**: [overlay/sheet_presentation_pattern.h:924-936](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:924-936)
 
 ```cpp
 // 实现 NestableScrollContainer 接口
@@ -333,7 +335,7 @@ bool HandleScrollVelocity(float velocity,
 
 #### 键盘事件
 
-**位置**: [sheet/sheet_presentation_pattern.h:316](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:316)
+**位置**: [overlay/sheet_presentation_pattern.h:316](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:316)
 
 ```cpp
 void InitOnkeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -381,7 +383,7 @@ void SheetTransition(bool isTransitionIn, float dragVelocity = 0.0f);
 
 ### SheetStyle 数据结构
 
-**位置**: [sheet/sheet_style.h:179-315](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_style.h:179-315)
+**位置**: [overlay/sheet_style.h:179-315](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_style.h:179-315)
 
 #### 核心属性
 
@@ -439,7 +441,7 @@ struct SheetStyle {
 
 ### SheetType 枚举
 
-**位置**: [sheet/sheet_style.h:53-63](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_style.h:53-63)
+**位置**: [overlay/sheet_style.h:53-63](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_style.h:53-63)
 
 ```cpp
 enum SheetType {
@@ -457,7 +459,7 @@ enum SheetType {
 
 ### SheetMode 枚举
 
-**位置**: [sheet/sheet_style.h:47-51](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_style.h:47-51)
+**位置**: [overlay/sheet_style.h:47-51](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_style.h:47-51)
 
 ```cpp
 enum SheetMode {
@@ -469,7 +471,7 @@ enum SheetMode {
 
 ### SheetHeight 结构
 
-**位置**: [sheet/sheet_style.h:156-169](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_style.h:156-169)
+**位置**: [overlay/sheet_style.h:156-169](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_style.h:156-169)
 
 ```cpp
 struct SheetHeight {
@@ -483,7 +485,7 @@ struct SheetHeight {
 
 ### SheetKeyboardAvoidMode 枚举
 
-**位置**: [sheet/sheet_style.h:171-177](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_style.h:171-177)
+**位置**: [overlay/sheet_style.h:171-177](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_style.h:171-177)
 
 ```cpp
 enum class SheetKeyboardAvoidMode {
@@ -497,7 +499,7 @@ enum class SheetKeyboardAvoidMode {
 
 ### ScrollSizeMode 枚举
 
-**位置**: [sheet/sheet_style.h:151-154](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_style.h:151-154)
+**位置**: [overlay/sheet_style.h:151-154](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_style.h:151-154)
 
 ```cpp
 enum ScrollSizeMode {
@@ -607,7 +609,7 @@ onSpringBack(callback: () => void): SheetPanel;
 
 #### SheetManager API
 
-**位置**: [sheet/sheet_manager.h:156-233](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_manager.h:156-233)
+**位置**: [overlay/sheet_manager.h:156-233](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_manager.h:156-233)
 
 ```cpp
 class SheetManager : public Singleton<SheetManager> {
@@ -697,7 +699,7 @@ public:
 
 #### SheetPresentationPattern API
 
-**位置**: [sheet/sheet_presentation_pattern.h:62-1082](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:62-1082)
+**位置**: [overlay/sheet_presentation_pattern.h:62-1082](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:62-1082)
 
 ##### 生命周期管理
 
@@ -932,7 +934,7 @@ void SetSpringBack(bool value);
 
 ### 1. 自动类型选择（状态模式）
 
-**位置**: [sheet/sheet_manager.h:24-154](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_manager.h:24-154)
+**位置**: [overlay/sheet_manager.h:24-154](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_manager.h:24-154)
 
 #### 状态模式实现
 
@@ -984,7 +986,7 @@ class WidthLGState : public State { /* 气泡 */ };
 
 ### 2. 桥接模式（动态类型切换）
 
-**位置**: [sheet/sheet_presentation_pattern.h:1034-1041](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:1034-1041)
+**位置**: [overlay/sheet_presentation_pattern.h:1034-1041](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:1034-1041)
 
 #### 实现方式
 
@@ -1032,7 +1034,7 @@ public:
 
 ### 3. 键盘避让机制
 
-**位置**: [sheet/sheet_presentation_pattern.h:303](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:303)
+**位置**: [overlay/sheet_presentation_pattern.h:303](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:303)
 
 #### 实现流程
 
@@ -1117,7 +1119,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
 
 ### 4. 嵌套滚动实现
 
-**位置**: [sheet/sheet_presentation_pattern.h:924-936](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:924-936)
+**位置**: [overlay/sheet_presentation_pattern.h:924-936](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:924-936)
 
 #### 滚动协调机制
 
@@ -1182,7 +1184,7 @@ void SheetPresentationPattern::OnScrollEndRecursive(
 
 ### 5. 多档位高度（Detents）
 
-**位置**: [sheet/sheet_style.h:192](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_style.h:192)
+**位置**: [overlay/sheet_style.h:192](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_style.h:192)
 
 #### 实现方式
 
@@ -1598,7 +1600,7 @@ hdc shell hilog -t ACE_SHEET > sheet_log.txt
 
 #### 获取半模态组件信息
 
-**位置**: [sheet/sheet_presentation_pattern.h:886-887](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:886-887)
+**位置**: [overlay/sheet_presentation_pattern.h:886-887](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:886-887)
 
 ```cpp
 void DumpAdvanceInfo() override;
@@ -2099,7 +2101,7 @@ void SheetPresentationPattern::InitFoldCreaseRegion() {
 
 ### A. 关键常量
 
-**位置**: [sheet/sheet_presentation_pattern.cpp:66-89](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.cpp:66-89)
+**位置**: [overlay/sheet_presentation_pattern.cpp:66-89](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.cpp:66-89)
 
 ```cpp
 // 档位常量
@@ -2128,7 +2130,7 @@ constexpr int32_t SHEET_HALF_HEIGHT = 2;
 
 ### B. 弹簧曲线参数
 
-**位置**: [sheet/sheet_style.h:39-45](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_style.h:39-45)
+**位置**: [overlay/sheet_style.h:39-45](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_style.h:39-45)
 
 ```cpp
 // 物理参数
@@ -2146,7 +2148,7 @@ constexpr int32_t SHEET_ANIMATION_DURATION = 580;  // 拖拽动画 580ms
 
 ### C. 关闭原因枚举
 
-**位置**: [sheet/sheet_presentation_pattern.h:45-51](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\sheet\sheet_presentation_pattern.h:45-51)
+**位置**: [overlay/sheet_presentation_pattern.h:45-51](d:\Code\arkui_ace_engine_2_4\frameworks\core\components_ng\pattern\overlay\sheet_presentation_pattern.h:45-51)
 
 ```cpp
 enum class BindSheetDismissReason {

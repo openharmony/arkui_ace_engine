@@ -44,7 +44,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
-#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -52,7 +52,6 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
-#include "core/components_ng/pattern/toast/toast_view.h"
 
 using namespace testing;
 using namespace testing::ext;

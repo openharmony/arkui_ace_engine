@@ -22,9 +22,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
-#include "core/interfaces/native/node/node_swiper_modifier.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 extern const char _binary_arkui_arcswiper_abc_start[];
@@ -37,28 +35,26 @@ static constexpr const int32_t DEFAULT_DURATION = 400;
 static constexpr const int32_t THREE_CLOCK_DIRECTION = 0;
 static constexpr const int32_t SIX_CLOCK_DIRECTION = 1;
 static constexpr const int32_t NINE_CLOCK_DIRECTION = 2;
-
-ArkUINodeHandle GetArcSwiperNode()
-{
-    return reinterpret_cast<ArkUINodeHandle>(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-}
-
-RefPtr<SwiperController> GetArcSwiperController()
-{
-    auto modifier = NG::NodeModifier::GetSwiperModifier();
-    CHECK_NULL_RETURN(modifier, nullptr);
-    return AceType::Claim(reinterpret_cast<SwiperController*>(modifier->create(true)));
-}
 } // namespace
+
+std::unique_ptr<SwiperModel> SwiperModel::instance_ = nullptr;
+std::mutex SwiperModel::mutex_;
+
+SwiperModel* SwiperModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+            instance_.reset(new NG::SwiperModelNG());
+        }
+    }
+    return instance_.get();
+}
 
 napi_value JsCreate(napi_env env, napi_callback_info info)
 {
-    auto controller = GetArcSwiperController();
-    auto node = GetArcSwiperNode();
-    CHECK_NULL_RETURN(node, ExtNapiUtils::CreateNull(env));
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setIndicatorTypeNG(node, static_cast<ArkUI_Int32>(SwiperIndicatorType::ARC_DOT));
+    auto controller = SwiperModel::GetInstance()->Create(true);
+    SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::ARC_DOT);
 
     size_t argc = MAX_ARG_NUM;
     napi_value argv[MAX_ARG_NUM] = { nullptr };
@@ -86,9 +82,7 @@ napi_value JsIndex(napi_env env, napi_callback_info info)
         index = ExtNapiUtils::GetCInt32(env, argv[0]);
     }
     index = index < 0 ? 0 : index;
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setIndexNG(GetArcSwiperNode(), index);
+    SwiperModel::GetInstance()->SetIndex(index);
 
     return ExtNapiUtils::CreateNull(env);
 }
@@ -137,16 +131,12 @@ napi_value JsIndicator(napi_env env, napi_callback_info info)
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_boolean)) {
         showIndicator = ExtNapiUtils::GetBool(env, argv[0]);
     } else {
-        auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-        CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-        modifier->setIndicatorIsBooleanNG(GetArcSwiperNode(), false);
+        SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
         SwiperArcDotParameters swiperParameters = GetArcDotIndicatorInfo(env, argv[0]);
-        modifier->setArcDotIndicatorStyleNG(GetArcSwiperNode(), &swiperParameters);
+        SwiperModel::GetInstance()->SetArcDotIndicatorStyle(swiperParameters);
     }
 
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setShowIndicatorNG(GetArcSwiperNode(), showIndicator);
+    SwiperModel::GetInstance()->SetShowIndicator(showIndicator);
 
     return ExtNapiUtils::CreateNull(env);
 }
@@ -163,9 +153,7 @@ napi_value JsDuration(napi_env env, napi_callback_info info)
         duration = ExtNapiUtils::GetCInt32(env, argv[0]);
     }
     duration = duration < 0 ? DEFAULT_DURATION : duration;
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setDurationNG(GetArcSwiperNode(), duration);
+    SwiperModel::GetInstance()->SetDuration(duration);
 
     return ExtNapiUtils::CreateNull(env);
 }
@@ -181,9 +169,7 @@ napi_value JsVertical(napi_env env, napi_callback_info info)
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_boolean)) {
         isVertical = ExtNapiUtils::GetBool(env, argv[0]);
     }
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setDirectionNG(GetArcSwiperNode(), static_cast<ArkUI_Int32>(isVertical ? Axis::VERTICAL : Axis::HORIZONTAL));
+    SwiperModel::GetInstance()->SetDirection(isVertical ? Axis::VERTICAL : Axis::HORIZONTAL);
 
     return ExtNapiUtils::CreateNull(env);
 }
@@ -199,9 +185,7 @@ napi_value JsDisableSwipe(napi_env env, napi_callback_info info)
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_boolean)) {
         isDisable = ExtNapiUtils::GetBool(env, argv[0]);
     }
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setDisableSwipeNG(GetArcSwiperNode(), isDisable);
+    SwiperModel::GetInstance()->SetDisableSwipe(isDisable);
 
     return ExtNapiUtils::CreateNull(env);
 }
@@ -217,7 +201,7 @@ napi_value JsOnChange(napi_env env, napi_callback_info info)
         return ExtNapiUtils::CreateNull(env);
     }
     auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, argv[0]);
-    std::function<void(const BaseEventInfo*)> onChange = [asyncEvent](const BaseEventInfo* info) {
+    auto onChange = [asyncEvent](const BaseEventInfo* info) {
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(asyncEvent->GetEnv(), &scope);
         CHECK_NULL_VOID(scope);
@@ -233,9 +217,7 @@ napi_value JsOnChange(napi_env env, napi_callback_info info)
 
         napi_close_handle_scope(asyncEvent->GetEnv(), scope);
     };
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setOnChangeNG(GetArcSwiperNode(), reinterpret_cast<void*>(&onChange));
+    SwiperModel::GetInstance()->SetOnChange(std::move(onChange));
     return ExtNapiUtils::CreateNull(env);
 }
 
@@ -302,8 +284,7 @@ napi_value JsOnAnimationStart(napi_env env, napi_callback_info info)
         return ExtNapiUtils::CreateNull(env);
     }
     auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, argv[0]);
-    AnimationStartEvent onAnimationStart = [asyncEvent](int32_t index, int32_t targetIndex,
-        const AnimationCallbackInfo& info) {
+    auto onAnimationStart = [asyncEvent](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {
         napi_env env = asyncEvent->GetEnv();
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
@@ -318,9 +299,7 @@ napi_value JsOnAnimationStart(napi_env env, napi_callback_info info)
 
         napi_close_handle_scope(env, scope);
     };
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setOnAnimationStartNG(GetArcSwiperNode(), reinterpret_cast<void*>(&onAnimationStart));
+    SwiperModel::GetInstance()->SetOnAnimationStart(std::move(onAnimationStart));
     return ExtNapiUtils::CreateNull(env);
 }
 
@@ -335,7 +314,7 @@ napi_value JsOnAnimationEnd(napi_env env, napi_callback_info info)
         return ExtNapiUtils::CreateNull(env);
     }
     auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, argv[0]);
-    AnimationEndEvent onAnimationEnd = [asyncEvent](int32_t index, const AnimationCallbackInfo& info) {
+    auto onAnimationEnd = [asyncEvent](int32_t index, const AnimationCallbackInfo& info) {
         napi_env env = asyncEvent->GetEnv();
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
@@ -349,9 +328,7 @@ napi_value JsOnAnimationEnd(napi_env env, napi_callback_info info)
 
         napi_close_handle_scope(env, scope);
     };
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setOnAnimationEndNG(GetArcSwiperNode(), reinterpret_cast<void*>(&onAnimationEnd));
+    SwiperModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
     return ExtNapiUtils::CreateNull(env);
 }
 
@@ -366,7 +343,7 @@ napi_value JsOnGestureSwipe(napi_env env, napi_callback_info info)
         return ExtNapiUtils::CreateNull(env);
     }
     auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, argv[0]);
-    GestureSwipeEvent onGestureSwipe = [asyncEvent](int32_t index, const AnimationCallbackInfo& info) {
+    auto onGestureSwipe = [asyncEvent](int32_t index, const AnimationCallbackInfo& info) {
         napi_env env = asyncEvent->GetEnv();
         napi_handle_scope scope = nullptr;
         napi_open_handle_scope(env, &scope);
@@ -380,9 +357,7 @@ napi_value JsOnGestureSwipe(napi_env env, napi_callback_info info)
 
         napi_close_handle_scope(env, scope);
     };
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setOnGestureSwipeNG(GetArcSwiperNode(), reinterpret_cast<void*>(&onGestureSwipe));
+    SwiperModel::GetInstance()->SetOnGestureSwipe(std::move(onGestureSwipe));
     return ExtNapiUtils::CreateNull(env);
 }
 
@@ -398,9 +373,7 @@ napi_value JsSetDigitalCrownSensitivity(napi_env env, napi_callback_info info)
         sensitivity = static_cast<int32_t>(ExtNapiUtils::GetCInt32(env, argv[0]));
     }
 
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setDigitalCrownSensitivityNG(GetArcSwiperNode(), sensitivity);
+    SwiperModel::GetInstance()->SetDigitalCrownSensitivity(sensitivity);
     return ExtNapiUtils::CreateNull(env);
 }
 
@@ -420,9 +393,7 @@ napi_value JsSetEffectMode(napi_env env, napi_callback_info info)
             edgeEffect = EdgeEffect::SPRING;
         }
 
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setEdgeEffectNG(GetArcSwiperNode(), static_cast<ArkUI_Int32>(edgeEffect));
+    SwiperModel::GetInstance()->SetEdgeEffect(edgeEffect);
     return ExtNapiUtils::CreateNull(env);
 }
 
@@ -449,8 +420,7 @@ napi_value JsSetCustomContentTransition(napi_env env, napi_callback_info info)
     napi_value jsTransition = ExtNapiUtils::GetNamedProperty(env, argv[0], "transition");
     if (ExtNapiUtils::CheckTypeForNapiValue(env, jsTransition, napi_function)) {
         auto asyncEvent = std::make_shared<NapiAsyncEvent>(env, jsTransition);
-        std::function<void(const RefPtr<SwiperContentTransitionProxy>&)> onTransition =
-            [asyncEvent](const RefPtr<SwiperContentTransitionProxy>& proxy) {
+        auto onTransition = [asyncEvent](const RefPtr<SwiperContentTransitionProxy>& proxy) {
             napi_env env = asyncEvent->GetEnv();
             napi_handle_scope scope = nullptr;
             napi_open_handle_scope(env, &scope);
@@ -463,9 +433,7 @@ napi_value JsSetCustomContentTransition(napi_env env, napi_callback_info info)
         };
         transitionInfo.transition = std::move(onTransition);
     }
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setCustomContentTransitionNG(GetArcSwiperNode(), reinterpret_cast<void*>(&transitionInfo));
+    SwiperModel::GetInstance()->SetCustomContentTransition(transitionInfo);
     return ExtNapiUtils::CreateNull(env);
 }
 
@@ -480,9 +448,7 @@ napi_value JsSetDisableTransitionAnimation(napi_env env, napi_callback_info info
     if (ExtNapiUtils::CheckTypeForNapiValue(env, argv[0], napi_boolean)) {
         isDisable = ExtNapiUtils::GetBool(env, argv[0]);
     }
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, ExtNapiUtils::CreateNull(env));
-    modifier->setDisableTransitionAnimationNG(GetArcSwiperNode(), isDisable);
+    SwiperModel::GetInstance()->SetDisableTransitionAnimation(isDisable);
 
     return ExtNapiUtils::CreateNull(env);
 }

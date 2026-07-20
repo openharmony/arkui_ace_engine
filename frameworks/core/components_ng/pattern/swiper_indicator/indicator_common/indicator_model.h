@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-class IndicatorModel {
+class ACE_EXPORT IndicatorModel {
 public:
     static IndicatorModel* GetInstance();
     virtual ~IndicatorModel() = default;

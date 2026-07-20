@@ -26,7 +26,7 @@
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/raw_input_event_wrapper_peer.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
-#include "core/components_ng/pattern/tabs/bridge/tabs_controller_modifier_peer_impl.h"
+#include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

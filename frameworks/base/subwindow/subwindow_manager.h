@@ -251,8 +251,7 @@ public:
     void AddSubwindow(int32_t instanceId, SubwindowType windowType, RefPtr<Subwindow> subwindow, int32_t nodeId = -1);
     const std::vector<RefPtr<Subwindow>> GetSortSubwindow(int32_t instanceId);
     ACE_FORCE_EXPORT void RemoveSubwindowByNodeId(const int32_t nodeId);
-    ACE_FORCE_EXPORT void SetWindowAnchorInfo(
-        const NG::OffsetF &offset, SubwindowType type, int32_t nodeId, int32_t instanceId);
+    void SetWindowAnchorInfo(const NG::OffsetF &offset, SubwindowType type, int32_t nodeId, int32_t instanceId);
     void AddInstanceSubwindowMap(int32_t subInstanceId, RefPtr<Subwindow> subwindow);
     bool HasDialogOrPopup(int32_t containerId);
     bool ShouldEnableDragEventForSubwindow(int32_t containerId, bool isRestartDrag);

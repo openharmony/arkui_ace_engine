@@ -34,12 +34,13 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
-#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
 #include "core/components_ng/syntax/static/detached_free_root_proxy_node.h"
 #include "core/interfaces/native/node/menu_modifier.h"
-#include "core/interfaces/native/node/sheet_modifier.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components/common/properties/placement.h"
@@ -867,15 +868,13 @@ void ViewAbstractModelStatic::BindSheet(FrameNode* frameNode, bool isShow,
     auto context = GetSheetContext(sheetStyle);
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
-    auto* sheetModifier = NodeModifier::GetSheetManagerInnerModifier();
-    CHECK_NULL_VOID(sheetModifier);
     if (sheetStyle.showInPage.value_or(false)) {
-        overlayManager = sheetModifier->findPageNodeOverlay(targetNode, isShow, false);
+        overlayManager = SheetManager::FindPageNodeOverlay(targetNode, isShow);
     }
     CHECK_NULL_VOID(overlayManager);
 
     // delete Sheet when target node destroy
-    sheetModifier->registerDestroyCallback(targetNode, sheetStyle, instanceId);
+    SheetManager::GetInstance().RegisterDestroyCallback(targetNode, sheetStyle, instanceId);
 
     if (sheetStyle.showInSubWindow.value_or(false)) {
         if (isShow) {
@@ -886,7 +885,7 @@ void ViewAbstractModelStatic::BindSheet(FrameNode* frameNode, bool isShow,
                 std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
                 std::move(sheetSpringBack), targetNode);
         } else {
-            sheetModifier->closeSheetInSubWindow(targetNode->GetId());
+            SheetManager::GetInstance().CloseSheetInSubWindow(SheetKey(targetNode->GetId()));
         }
         return;
     }
@@ -943,14 +942,12 @@ std::vector<float> ViewAbstractModelStatic::GetRenderNodePropertyValue(
 
 void ViewAbstractModelStatic::DismissSheetStatic()
 {
-    auto* sheetManagerModifier = NodeModifier::GetSheetManagerInnerModifier();
-    CHECK_NULL_VOID(sheetManagerModifier);
-    int32_t sheetId = sheetManagerModifier->getDismissSheetId();
+    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
     CHECK_NULL_VOID(sheet);
-    auto* sheetPatternModifier = NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    sheetPatternModifier->sheetOverlayDismissSheet(sheet);
+    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->OverlayDismissSheet();
 }
 
 void ViewAbstractModelStatic::DismissContentCoverStatic()
@@ -964,14 +961,12 @@ void ViewAbstractModelStatic::DismissContentCoverStatic()
 
 void ViewAbstractModelStatic::SheetSpringBackStatic()
 {
-    auto* sheetManagerModifier = NodeModifier::GetSheetManagerInnerModifier();
-    CHECK_NULL_VOID(sheetManagerModifier);
-    int32_t sheetId = sheetManagerModifier->getDismissSheetId();
+    auto sheetId = SheetManager::GetInstance().GetDismissSheet();
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
     CHECK_NULL_VOID(sheet);
-    auto* sheetPatternModifier = NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    sheetPatternModifier->sheetOverlaySheetSpringBack(sheet);
+    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->OverlaySheetSpringBack();
 }
 
 void ViewAbstractModelStatic::SetAccessibilityTextHint(FrameNode* frameNode, const std::string& text)

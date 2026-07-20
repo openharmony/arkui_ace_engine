@@ -34,7 +34,6 @@ constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORC
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 const auto MASK_COUNT = 2;
 const auto IMAGE_INDICATOR_COUNT = 1;
-const char TAB_CONTENT_ITEM_ETS_TAG[] = "TabContent";
 }
 void TabContentModelStatic::SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder)
 {
@@ -299,7 +298,7 @@ RefPtr<FrameNode> TabContentModelStatic::CreateFrameNode(int32_t nodeId)
 {
     ACE_UINODE_TRACE(nodeId);
     auto frameNode = TabContentNode::GetOrCreateTabContentNode(
-        TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
+        V2::TAB_CONTENT_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
     auto tabTheme = frameNode->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, nullptr);
     auto layout = frameNode->GetLayoutProperty<TabContentLayoutProperty>();

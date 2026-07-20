@@ -15,8 +15,8 @@
 
 #include "core/components_ng/pattern/sheet/side/sheet_presentation_side_layout_algorithm.h"
 
-#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/sheet/side/sheet_side_object.h"
 
 namespace OHOS::Ace::NG {

@@ -22,18 +22,15 @@
 #include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const char INDICATOR_ETS_TAG[] = "IndicatorComponent";
-} // namespace
 RefPtr<IndicatorController> IndicatorModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_RETURN(stack, nullptr);
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", INDICATOR_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::INDICATOR_ETS_TAG, nodeId);
     ACE_UINODE_TRACE(nodeId);
     auto indicatorNode = FrameNode::GetOrCreateFrameNode(
-        INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
+        V2::INDICATOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
 
     stack->Push(indicatorNode);
     auto pattern = indicatorNode->GetPattern<IndicatorPattern>();
@@ -46,7 +43,7 @@ RefPtr<FrameNode> IndicatorModelNG::CreateFrameNode(int32_t nodeId)
 {
     ACE_UINODE_TRACE(nodeId);
     return FrameNode::CreateFrameNode(
-        INDICATOR_ETS_TAG, nodeId, AceType::MakeRefPtr<IndicatorPattern>());
+        V2::INDICATOR_ETS_TAG, nodeId, AceType::MakeRefPtr<IndicatorPattern>());
 }
 
 void IndicatorModelNG::SetShowIndicator(bool showIndicator)

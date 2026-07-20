@@ -21,15 +21,9 @@
 
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/swiper/swiper_controller.h"
-#include "core/components_ng/pattern/tabs/bridge/tabs_controller_modifier_api.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
-#include "base/log/log_wrapper.h"
 #include "core/common/dynamic_module_helper.h"
-#include "core/components_ng/pattern/tabs/tabs_model.h"
-#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
-#include "core/components_ng/pattern/tabs/bridge/tabs_transition_proxy_modifier_api.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -53,34 +47,6 @@ const std::vector<TextOverflow> TEXT_OVER_FLOWS = { TextOverflow::CLIP, TextOver
     TextOverflow::MARQUEE };
 } // namespace
 
-namespace OHOS::Ace {
-NG::TabsModelNG* GetTabsModel()
-{
-    static NG::TabsModelNG* model = nullptr;
-    if (model == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Tabs");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find tabs dynamic module");
-        }
-        model = reinterpret_cast<NG::TabsModelNG*>(module->GetModel());
-    }
-    return model;
-}
-
-NG::TabContentModelNG* GetTabContentModel()
-{
-    static NG::TabContentModelNG* model = nullptr;
-    if (model == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TabContent");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find tabcontent dynamic module");
-        }
-        model = reinterpret_cast<NG::TabContentModelNG*>(module->GetModel());
-    }
-    return model;
-}
-} // namespace OHOS::Ace
-
 namespace OHOS::Ace::Framework {
 
 namespace {
@@ -97,30 +63,6 @@ const ArkUIInnerTabsModifier* GetTabsInnerModifier()
     }
     return cachedModifier;
 }
-
-const NG::NodeModifier::ArkUITabsControllerModifier* GetTabsControllerModifier()
-{
-    static const NG::NodeModifier::ArkUITabsControllerModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Tabs");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const NG::NodeModifier::ArkUITabsControllerModifier*>(
-            module->GetCustomModifier("tabsController"));
-    }
-    return cachedModifier;
-}
-
-const NG::NodeModifier::ArkUITabContentTransitionModifier* GetTransitionProxyModifier()
-{
-    static const NG::NodeModifier::ArkUITabContentTransitionModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Tabs");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const NG::NodeModifier::ArkUITabContentTransitionModifier*>(
-            module->GetCustomModifier("tabsTransitionProxy"));
-    }
-    return cachedModifier;
-}
 } // namespace
 
 TabsController::TabsController() : FFIData()
@@ -128,9 +70,7 @@ TabsController::TabsController() : FFIData()
     if (auto modifier = GetTabsInnerModifier()) {
         controller_ = modifier->getController(++g_tabControllerId);
     }
-    if (auto* modifier = GetTabsControllerModifier()) {
-        swiperController_ = modifier->createController();
-    }
+    swiperController_ = AceType::MakeRefPtr<NG::TabsControllerNG>();
     LOGI("Native TabsController constructed: %{public}" PRId64, GetID());
 }
 
@@ -143,9 +83,11 @@ void TabsController::ChangeIndex(int32_t index)
 {
     LOGI("Native TabsController %{public}" PRId64 "ChangeIndex: %{public}d", GetID(), index);
     if (swiperController_) {
-        if (auto* modifier = GetTabsControllerModifier()) {
-            modifier->changeIndex(swiperController_, index);
+        const auto& updateCubicCurveCallback = swiperController_->GetUpdateCubicCurveCallback();
+        if (updateCubicCurveCallback != nullptr) {
+            updateCubicCurveCallback();
         }
+        swiperController_->SwipeTo(index);
     }
     if (controller_) {
         if (auto modifier = GetTabsInnerModifier()) {
@@ -157,52 +99,22 @@ void TabsController::ChangeIndex(int32_t index)
 void TabsController::PreloadItems(std::set<int32_t> indexSet)
 {
     if (swiperController_) {
-        if (auto* modifier = GetTabsControllerModifier()) {
-            std::vector<int32_t> indexVec(indexSet.begin(), indexSet.end());
-            modifier->preloadItems(swiperController_, indexVec.data(), static_cast<int32_t>(indexVec.size()));
-        }
+        swiperController_->PreloadItems(indexSet);
     }
 }
 
 void TabsController::SetTabBarTranslate(NG::TranslateOptions options)
 {
     if (swiperController_) {
-        if (auto* modifier = GetTabsControllerModifier()) {
-            modifier->setTabBarTranslate(swiperController_, options.x.Value(), options.y.Value(), options.z.Value(),
-                static_cast<int32_t>(options.x.Unit()), static_cast<int32_t>(options.y.Unit()),
-                static_cast<int32_t>(options.z.Unit()));
-        }
+        swiperController_->SetTabBarTranslate(options);
     }
 }
 
 void TabsController::SetTabBarOpacity(double opacity)
 {
     if (swiperController_) {
-        if (auto* modifier = GetTabsControllerModifier()) {
-            modifier->setTabBarOpacity(swiperController_, opacity);
-        }
+        swiperController_->SetTabBarOpacity(opacity);
     }
-}
-
-int32_t CJTabContentTransitionProxy::getFromIndex()
-{
-    auto* modifier = GetTransitionProxyModifier();
-    CHECK_NULL_RETURN(modifier, 0);
-    return modifier->getFromIndex(proxy_);
-}
-
-int32_t CJTabContentTransitionProxy::getToIndex()
-{
-    auto* modifier = GetTransitionProxyModifier();
-    CHECK_NULL_RETURN(modifier, 0);
-    return modifier->getToIndex(proxy_);
-}
-
-void CJTabContentTransitionProxy::finishTransition()
-{
-    auto* modifier = GetTransitionProxyModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->finishTransition(proxy_);
 }
 
 } // namespace OHOS::Ace::Framework
@@ -222,26 +134,24 @@ void FfiOHOSAceFrameworkTabsCreate(int32_t barPosition, int64_t controllerId, in
     RefPtr<SwiperController> swiperController;
 
     tabController = nativeTabsController->GetController();
-    swiperController = AceType::DynamicCast<SwiperController>(nativeTabsController->GetSwiperController());
+    swiperController = nativeTabsController->GetSwiperController();
     if (auto modifier = GetTabsInnerModifier()) {
         modifier->setInitialIndex(tabController, index);
     }
 #ifdef NG_BUILD
-    auto* innerModifier = GetTabsInnerModifier();
-    CHECK_NULL_VOID(innerModifier);
-    innerModifier->create(BAR_POSITIONS[barPosition], tabController);
+    TabsModel::GetInstance()->Create(BAR_POSITIONS[barPosition], index, swiperController);
 #else
     if (Container::IsCurrentUseNewPipeline()) {
-        GetTabsModel()->Create(BAR_POSITIONS[barPosition], index, swiperController);
+        TabsModel::GetInstance()->Create(BAR_POSITIONS[barPosition], index, swiperController);
     } else {
-        GetTabsInnerModifier()->create(BAR_POSITIONS[barPosition], tabController);
+        TabsModel::GetInstance()->Create(BAR_POSITIONS[barPosition], tabController);
     }
 #endif
 }
 
 void FfiOHOSAceFrameworkTabsPop()
 {
-    GetTabsModel()->Pop();
+    TabsModel::GetInstance()->Pop();
 }
 
 void FfiOHOSAceFrameworkTabsSetWidth(double width, int32_t unit)
@@ -251,11 +161,11 @@ void FfiOHOSAceFrameworkTabsSetWidth(double width, int32_t unit)
     Dimension value(width, static_cast<DimensionUnit>(unit));
     if (value.Unit() == DimensionUnit::AUTO) {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
-        GetTabsModel()->SetWidthAuto(true);
+        TabsModel::GetInstance()->SetWidthAuto(true);
         return;
     }
 
-    GetTabsModel()->SetWidthAuto(false);
+    TabsModel::GetInstance()->SetWidthAuto(false);
 }
 
 void FfiOHOSAceFrameworkTabsSetHeight(double height, int32_t unit)
@@ -265,17 +175,17 @@ void FfiOHOSAceFrameworkTabsSetHeight(double height, int32_t unit)
     Dimension value(height, static_cast<DimensionUnit>(unit));
     if (value.Unit() == DimensionUnit::AUTO) {
         ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
-        GetTabsModel()->SetHeightAuto(true);
+        TabsModel::GetInstance()->SetHeightAuto(true);
         return;
     }
 
-    GetTabsModel()->SetHeightAuto(false);
+    TabsModel::GetInstance()->SetHeightAuto(false);
 }
 
 void FfiOHOSAceFrameworkTabsSetBarWidth(double width, int32_t unit)
 {
     Dimension value(width, static_cast<DimensionUnit>(unit));
-    GetTabsModel()->SetTabBarWidth(value);
+    TabsModel::GetInstance()->SetTabBarWidth(value);
 }
 
 void FfiOHOSAceFrameworkTabsSetBarHeight(double height, int32_t unit)
@@ -285,8 +195,8 @@ void FfiOHOSAceFrameworkTabsSetBarHeight(double height, int32_t unit)
     if (value.Unit() == DimensionUnit::AUTO) {
         adaptiveHeight = true;
     }
-    GetTabsModel()->SetTabBarHeight(value);
-    GetTabsModel()->SetBarAdaptiveHeight(adaptiveHeight);
+    TabsModel::GetInstance()->SetTabBarHeight(value);
+    TabsModel::GetInstance()->SetBarAdaptiveHeight(adaptiveHeight);
 }
 
 void FfiOHOSAceFrameworkTabsSetBarMode(int32_t barMode)
@@ -295,7 +205,7 @@ void FfiOHOSAceFrameworkTabsSetBarMode(int32_t barMode)
         LOGE("invalid value for tab bar mode");
         return;
     }
-    GetTabsModel()->SetTabBarMode(TAB_BAR_MODES[barMode]);
+    TabsModel::GetInstance()->SetTabBarMode(TAB_BAR_MODES[barMode]);
 }
 
 void FfiOHOSAceFrameworkTabsSetBarModeWithOptions(int32_t barMode, CJTabsScrollableBarModeOptions options)
@@ -320,29 +230,29 @@ void FfiOHOSAceFrameworkTabsSetBarModeWithOptions(int32_t barMode, CJTabsScrolla
         } else {
             option.nonScrollableLayoutStyle = static_cast<LayoutStyle>(options.nonScrollableLayoutStyle);
         }
-        GetTabsModel()->SetScrollableBarModeOptions(option);
+        TabsModel::GetInstance()->SetScrollableBarModeOptions(option);
     }
-    GetTabsModel()->SetTabBarMode(barModeEnum);
+    TabsModel::GetInstance()->SetTabBarMode(barModeEnum);
 }
 
 void FfiOHOSAceFrameworkTabsSetIndex(int32_t index)
 {
-    GetTabsModel()->SetIndex(index);
+    TabsModel::GetInstance()->SetIndex(index);
 }
 
 void FfiOHOSAceFrameworkTabsSetVertical(bool isVertical)
 {
-    GetTabsModel()->SetIsVertical(isVertical);
+    TabsModel::GetInstance()->SetIsVertical(isVertical);
 }
 
 void FfiOHOSAceFrameworkTabsSetScrollable(bool isScrollable)
 {
-    GetTabsModel()->SetScrollable(isScrollable);
+    TabsModel::GetInstance()->SetScrollable(isScrollable);
 }
 
 void FfiOHOSAceFrameworkTabsSetAnimationDuration(float duration)
 {
-    GetTabsModel()->SetAnimationDuration(duration);
+    TabsModel::GetInstance()->SetAnimationDuration(duration);
 }
 
 void FfiOHOSAceFrameworkTabsSetAnimateMode(int32_t animateMode)
@@ -351,7 +261,7 @@ void FfiOHOSAceFrameworkTabsSetAnimateMode(int32_t animateMode)
         LOGE("invalid value for tab animate mode");
         return;
     }
-    GetTabsModel()->SetAnimateMode(TAB_ANIMATE_MODES[animateMode]);
+    TabsModel::GetInstance()->SetAnimateMode(TAB_ANIMATE_MODES[animateMode]);
 }
 
 void FfiOHOSAceFrameworkTabsSetBarPosition(int32_t barPosition)
@@ -360,7 +270,7 @@ void FfiOHOSAceFrameworkTabsSetBarPosition(int32_t barPosition)
         LOGE("invalid value for bar position");
         return;
     }
-    GetTabsModel()->SetTabBarPosition(BAR_POSITIONS[barPosition]);
+    TabsModel::GetInstance()->SetTabBarPosition(BAR_POSITIONS[barPosition]);
 }
 
 void FfiOHOSAceFrameworkTabsSetDivider(CJTabsDividerStyle dividerStyle)
@@ -389,22 +299,22 @@ void FfiOHOSAceFrameworkTabsSetDivider(CJTabsDividerStyle dividerStyle)
         divider.endMargin = endMargin;
     }
 
-    GetTabsModel()->SetDivider(divider);
+    TabsModel::GetInstance()->SetDivider(divider);
 }
 
 void FfiOHOSAceFrameworkTabsSetFadingEdge(bool fadingEdge)
 {
-    GetTabsModel()->SetFadingEdge(fadingEdge);
+    TabsModel::GetInstance()->SetFadingEdge(fadingEdge);
 }
 
 void FfiOHOSAceFrameworkTabsSetBarOverlap(bool barOverlap)
 {
-    GetTabsModel()->SetBarOverlap(barOverlap);
+    TabsModel::GetInstance()->SetBarOverlap(barOverlap);
 }
 
 void FfiOHOSAceFrameworkTabsSetBarBackgroundColor(uint32_t backgroundColor)
 {
-    GetTabsModel()->SetBarBackgroundColor(Color(backgroundColor));
+    TabsModel::GetInstance()->SetBarBackgroundColor(Color(backgroundColor));
 }
 
 void FfiOHOSAceFrameworkTabsSetBarBackgroundBlurStyle(int32_t blurStyle)
@@ -414,7 +324,7 @@ void FfiOHOSAceFrameworkTabsSetBarBackgroundBlurStyle(int32_t blurStyle)
         blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
         styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
     }
-    GetTabsModel()->SetBarBackgroundBlurStyle(styleOption);
+    TabsModel::GetInstance()->SetBarBackgroundBlurStyle(styleOption);
 }
 
 void FfiOHOSAceFrameworkTabsSetBarBackgroundBlurStyleWithOptions(
@@ -458,7 +368,7 @@ void FfiOHOSAceFrameworkTabsSetBarBackgroundBlurStyleWithOptions(
         blurOption.grayscale = cjGrayScale;
     }
     styleOption.blurOption = blurOption;
-    GetTabsModel()->SetBarBackgroundBlurStyle(styleOption);
+    TabsModel::GetInstance()->SetBarBackgroundBlurStyle(styleOption);
 }
 
 void FfiOHOSAceFrameworkTabsSetBarGridAlign(CJTabsBarGridColumnOptions options)
@@ -482,7 +392,7 @@ void FfiOHOSAceFrameworkTabsSetBarGridAlign(CJTabsBarGridColumnOptions options)
     if (margin.IsNonNegative() && margin.Unit() != DimensionUnit::PERCENT) {
         columnOption.margin = margin;
     }
-    GetTabsModel()->SetBarGridAlign(columnOption);
+    TabsModel::GetInstance()->SetBarGridAlign(columnOption);
 }
 
 void FfiOHOSAceFrameworkTabsSetEdgeEffect(int32_t edgeEffect)
@@ -492,7 +402,7 @@ void FfiOHOSAceFrameworkTabsSetEdgeEffect(int32_t edgeEffect)
         edgeEffect <= static_cast<int32_t>(EdgeEffect::NONE)) {
         edgeEffectData = static_cast<EdgeEffect>(edgeEffect);
     }
-    GetTabsModel()->SetEdgeEffect(edgeEffectData);
+    TabsModel::GetInstance()->SetEdgeEffect(edgeEffectData);
 }
 
 void FfiOHOSAceFrameworkTabsSetBarBackgroundEffect(CJTabsBackgroundEffectOptions options)
@@ -534,7 +444,7 @@ void FfiOHOSAceFrameworkTabsSetBarBackgroundEffect(CJTabsBackgroundEffectOptions
         effectOption.isValidColor = true;
     }
 
-    GetTabsModel()->SetBarBackgroundEffect(effectOption);
+    TabsModel::GetInstance()->SetBarBackgroundEffect(effectOption);
 }
 
 void FfiOHOSAceFrameworkTabsOnChange(void (*callback)(int32_t index))
@@ -547,7 +457,7 @@ void FfiOHOSAceFrameworkTabsOnChange(void (*callback)(int32_t index))
         }
         lambda(tabsInfo->GetIndex());
     };
-    GetTabsModel()->SetOnChange(std::move(onChange));
+    TabsModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
 void FfiOHOSAceFrameworkTabsOnTabBarClick(void (*callback)(int32_t index))
@@ -560,7 +470,7 @@ void FfiOHOSAceFrameworkTabsOnTabBarClick(void (*callback)(int32_t index))
         }
         lambda(tabsInfo->GetIndex());
     };
-    GetTabsModel()->SetOnTabBarClick(std::move(onTabBarClick));
+    TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
 }
 
 void FfiOHOSAceFrameworkTabsOnAnimationStart(
@@ -580,7 +490,7 @@ void FfiOHOSAceFrameworkTabsOnAnimationStart(
         }
         lambda(ngIndex, ngTargetIndex, tabsAnimationEvent);
     };
-    GetTabsModel()->SetOnAnimationStart(std::move(onAnimationStart));
+    TabsModel::GetInstance()->SetOnAnimationStart(std::move(onAnimationStart));
 }
 
 void FfiOHOSAceFrameworkTabsOnAnimationEnd(void (*callback)(int32_t index, CJTabsAnimationEvent event))
@@ -598,7 +508,7 @@ void FfiOHOSAceFrameworkTabsOnAnimationEnd(void (*callback)(int32_t index, CJTab
         }
         lambda(ngIndex, tabsAnimationEvent);
     };
-    GetTabsModel()->SetOnAnimationEnd(std::move(onAnimationEnd));
+    TabsModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
 }
 
 void FfiOHOSAceFrameworkTabsOnGestureSwipe(void (*callback)(int32_t index, CJTabsAnimationEvent event))
@@ -616,7 +526,7 @@ void FfiOHOSAceFrameworkTabsOnGestureSwipe(void (*callback)(int32_t index, CJTab
         }
         lambda(ngIndex, tabsAnimationEvent);
     };
-    GetTabsModel()->SetOnGestureSwipe(std::move(onGestureSwipe));
+    TabsModel::GetInstance()->SetOnGestureSwipe(std::move(onGestureSwipe));
 }
 
 void FfiOHOSAceFrameworkTabsCustomContentTransition(
@@ -628,7 +538,7 @@ void FfiOHOSAceFrameworkTabsCustomContentTransition(
 
         CJTabContentAnimatedTransition ret = lambda(from, to);
         if (ret.isUndefined) {
-            GetTabsModel()->SetIsCustomAnimation(false);
+            TabsModel::GetInstance()->SetIsCustomAnimation(false);
             return transitionInfo;
         }
 
@@ -645,8 +555,8 @@ void FfiOHOSAceFrameworkTabsCustomContentTransition(
 
         return transitionInfo;
     };
-    GetTabsModel()->SetIsCustomAnimation(true);
-    GetTabsModel()->SetOnCustomAnimation(std::move(onCustomAnimation));
+    TabsModel::GetInstance()->SetIsCustomAnimation(true);
+    TabsModel::GetInstance()->SetOnCustomAnimation(std::move(onCustomAnimation));
 }
 
 void FfiOHOSAceFrameworkTabsCustomAnimationFinishTransition(int64_t id)
@@ -659,7 +569,7 @@ void FfiOHOSAceFrameworkTabsOnContentWillChange(bool (*callback)(int32_t current
 {
     auto onContentWillChange = [lambda = CJLambda::Create(callback)](int32_t ngCurrentIndex,
                                    int32_t ngComingIndex) -> bool { return lambda(ngCurrentIndex, ngComingIndex); };
-    GetTabsModel()->SetOnContentWillChange(std::move(onContentWillChange));
+    TabsModel::GetInstance()->SetOnContentWillChange(std::move(onContentWillChange));
 }
 
 int64_t FfiOHOSAceFrameworkTabsControllerCtor()
@@ -713,34 +623,34 @@ void FfiOHOSAceFrameworkTabsControllerSetTabBarOpacity(int64_t selfId, double op
 
 void FfiOHOSAceFrameworkTabContentCreate()
 {
-    GetTabContentModel()->Create();
+    TabContentModel::GetInstance()->Create();
 }
 
 void FfiOHOSAceFrameworkTabContentPop()
 {
-    GetTabContentModel()->Pop();
+    TabContentModel::GetInstance()->Pop();
 }
 
 void FfiOHOSAceFrameworkTabContentSetTabBar(const char* content)
 {
-    GetTabContentModel()->SetTabBarStyle(TabBarStyle::NOSTYLE);
-    GetTabContentModel()->SetTabBar(content, std::nullopt, std::nullopt, nullptr, true);
-    GetTabContentModel()->SetTabBarWithContent(nullptr);
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
+    TabContentModel::GetInstance()->SetTabBar(content, std::nullopt, std::nullopt, nullptr, true);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void FfiOHOSAceFrameworkTabContentSetTabBarWithIcon(const char* icon, const char* text)
 {
-    GetTabContentModel()->SetTabBarStyle(TabBarStyle::NOSTYLE);
-    GetTabContentModel()->SetTabBar(text, icon, std::nullopt, nullptr, false);
-    GetTabContentModel()->SetTabBarWithContent(nullptr);
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
+    TabContentModel::GetInstance()->SetTabBar(text, icon, std::nullopt, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void FfiOHOSAceFrameworkTabContentSetTabBarWithComponent(void (*callback)())
 {
-    GetTabContentModel()->SetTabBarStyle(TabBarStyle::NOSTYLE);
-    GetTabContentModel()->SetTabBar(
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
+    TabContentModel::GetInstance()->SetTabBar(
         std::nullopt, std::nullopt, std::nullopt, CJLambda::Create(callback), false);
-    GetTabContentModel()->SetTabBarWithContent(nullptr);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void SetPadding(CJPadding cjPadding, bool isSubTabStyle)
@@ -782,7 +692,7 @@ void SetPadding(CJPadding cjPadding, bool isSubTabStyle)
     }
 
     if (cjPadding.paddingType == static_cast<int32_t>(PaddingType::LENGTH)) {
-        GetTabContentModel()->SetPadding(padding);
+        TabContentModel::GetInstance()->SetPadding(padding);
         return;
     }
 
@@ -790,8 +700,8 @@ void SetPadding(CJPadding cjPadding, bool isSubTabStyle)
         useLocalizedPadding = true;
     }
 
-    GetTabContentModel()->SetPadding(padding);
-    GetTabContentModel()->SetUseLocalizedPadding(useLocalizedPadding);
+    TabContentModel::GetInstance()->SetPadding(padding);
+    TabContentModel::GetInstance()->SetUseLocalizedPadding(useLocalizedPadding);
 }
 
 void SetLayoutMode(int32_t layoutMode)
@@ -801,7 +711,7 @@ void SetLayoutMode(int32_t layoutMode)
         layoutMode <= static_cast<int32_t>(LayoutMode::HORIZONTAL)) {
         mode = static_cast<LayoutMode>(layoutMode);
     }
-    GetTabContentModel()->SetLayoutMode(mode);
+    TabContentModel::GetInstance()->SetLayoutMode(mode);
 }
 
 void SetVerticalAlign(int32_t verticalAlign)
@@ -811,12 +721,12 @@ void SetVerticalAlign(int32_t verticalAlign)
         verticalAlign <= static_cast<int32_t>(FlexAlign::FLEX_END)) {
         align = static_cast<FlexAlign>(verticalAlign);
     }
-    GetTabContentModel()->SetVerticalAlign(align);
+    TabContentModel::GetInstance()->SetVerticalAlign(align);
 }
 
 void SetSymmetricExtensible(bool isExtensible)
 {
-    GetTabContentModel()->SetSymmetricExtensible(isExtensible);
+    TabContentModel::GetInstance()->SetSymmetricExtensible(isExtensible);
 }
 
 void GetFontContent(CJFont font, LabelStyle& labelStyle, bool isSubTabStyle)
@@ -910,7 +820,7 @@ void SetLabelStyle(CJTabContentLabelStyle cjLabelStyle, bool isSubTabStyle)
 
     CompleteParameters(labelStyle, isSubTabStyle);
 
-    GetTabContentModel()->SetLabelStyle(labelStyle);
+    TabContentModel::GetInstance()->SetLabelStyle(labelStyle);
 }
 
 void SetIconStyle(CJTabBarIconStyle style)
@@ -918,12 +828,12 @@ void SetIconStyle(CJTabBarIconStyle style)
     IconStyle iconStyle;
     iconStyle.unselectedColor = Color(style.unselectedColor);
     iconStyle.selectedColor = Color(style.selectedColor);
-    GetTabContentModel()->SetIconStyle(iconStyle);
+    TabContentModel::GetInstance()->SetIconStyle(iconStyle);
 }
 
 void SetId(const char* id)
 {
-    GetTabContentModel()->SetId(id);
+    TabContentModel::GetInstance()->SetId(id);
 }
 
 void SetIndicator(CJTabContentIndicatorStyle cjIndicator)
@@ -966,16 +876,16 @@ void SetIndicator(CJTabContentIndicatorStyle cjIndicator)
     } else {
         indicator.marginTop = indicatorMarginTop;
     }
-    GetTabContentModel()->SetIndicator(indicator);
+    TabContentModel::GetInstance()->SetIndicator(indicator);
 }
 
 void SetSelectedMode(int32_t selectedMode)
 {
     if (selectedMode < static_cast<int32_t>(SelectedMode::INDICATOR) ||
         selectedMode > static_cast<int32_t>(SelectedMode::BOARD)) {
-        GetTabContentModel()->SetSelectedMode(SelectedMode::INDICATOR);
+        TabContentModel::GetInstance()->SetSelectedMode(SelectedMode::INDICATOR);
     } else {
-        GetTabContentModel()->SetSelectedMode(static_cast<SelectedMode>(selectedMode));
+        TabContentModel::GetInstance()->SetSelectedMode(static_cast<SelectedMode>(selectedMode));
     }
 }
 
@@ -991,7 +901,7 @@ void SetBoard(CJBoardStyle cjBoardStyle)
     } else {
         board.borderRadius = borderRadius;
     }
-    GetTabContentModel()->SetBoard(board);
+    TabContentModel::GetInstance()->SetBoard(board);
 }
 
 void FfiOHOSAceFrameworkTabContentSetTabBarWithSubTabBarStyle(CJSubTabBarStyle subTabBarStyle)
@@ -1010,9 +920,9 @@ void FfiOHOSAceFrameworkTabContentSetTabBarWithSubTabBarStyle(CJSubTabBarStyle s
 
     SetId(subTabBarStyle.id);
 
-    GetTabContentModel()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
-    GetTabContentModel()->SetTabBar(contentOpt, std::nullopt, std::nullopt, nullptr, false);
-    GetTabContentModel()->SetTabBarWithContent(nullptr);
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, std::nullopt, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void FfiOHOSAceFrameworkTabContentSetTabBarWithBottomTabBarStyle(CJBottomTabBarStyle bottomTabBarStyle)
@@ -1044,26 +954,26 @@ void FfiOHOSAceFrameworkTabContentSetTabBarWithBottomTabBarStyle(CJBottomTabBarS
 
     SetId(bottomTabBarStyle.id);
 
-    GetTabContentModel()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
-    GetTabContentModel()->SetTabBar(textOpt, iconOpt, tabBarSymbol, nullptr, false);
-    GetTabContentModel()->SetTabBarWithContent(nullptr);
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, tabBarSymbol, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void FfiOHOSAceFrameworkTabContentOnWillShow(void (*callback)())
 {
     auto onWillShow = [lambda = CJLambda::Create(callback)]() { lambda(); };
-    GetTabContentModel()->SetOnWillShow(std::move(onWillShow));
+    TabContentModel::GetInstance()->SetOnWillShow(std::move(onWillShow));
 }
 
 void FfiOHOSAceFrameworkTabContentOnWillHide(void (*callback)())
 {
     auto onWillHide = [lambda = CJLambda::Create(callback)]() { lambda(); };
-    GetTabContentModel()->SetOnWillHide(std::move(onWillHide));
+    TabContentModel::GetInstance()->SetOnWillHide(std::move(onWillHide));
 }
 
 void FfiOHOSAceFrameworkTabContentPUCreate(void (*callback)())
 {
     auto childBuild = CJLambda::Create(callback);
-    GetTabContentModel()->Create(std::move(childBuild));
+    TabContentModel::GetInstance()->Create(std::move(childBuild));
 }
 }

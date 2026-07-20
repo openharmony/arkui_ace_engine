@@ -33,12 +33,12 @@ class ArkThemeWhiteList {
         'JSProgress',
         'JSQRCode',
         'JSRadio',
-        'JSSearch',
-        'JSSwiper',
         'JSTextClock',
         'JSTextPicker',
         'JSTimePicker',
         'Scroll',
+        'JSSearch',
+        'Swiper',
         'Text',
     ];
 

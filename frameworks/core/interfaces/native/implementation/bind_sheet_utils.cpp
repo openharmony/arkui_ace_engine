@@ -15,7 +15,7 @@
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 
 #include "core/components_ng/pattern/overlay/modal_style.h"
-#include "core/components_ng/pattern/sheet/sheet_theme.h"
+#include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/interfaces/native/implementation/spring_back_action_peer.h"
 #include "core/interfaces/native/implementation/sheet_dismiss_peer.h"
 #include "core/interfaces/native/implementation/dismiss_sheet_action_peer.h"

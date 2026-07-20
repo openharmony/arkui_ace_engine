@@ -157,7 +157,6 @@
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
@@ -6033,12 +6032,8 @@ bool FrameNode::IsVerticalScrollable() const
     if (scrollablePattern && scrollablePattern->GetAxis() == Axis::VERTICAL) {
         return true;
     }
-    if (GetTag() == V2::SWIPER_ETS_TAG) {
-        auto swiperModifier = NodeModifier::GetSwiperCustomModifier();
-        return swiperModifier && static_cast<Axis>(swiperModifier->getDirection(
-            reinterpret_cast<ArkUINodeHandle>(const_cast<FrameNode*>(this)))) == Axis::VERTICAL;
-    }
-    return false;
+    auto swiperPattern = AceType::DynamicCast<SwiperPattern>(pattern_);
+    return (swiperPattern && swiperPattern->GetDirection() == Axis::VERTICAL);
 }
 
 // This will call child and self measure process.
@@ -9000,8 +8995,7 @@ FrameNode::GetAccessibilityProperty<SecurityComponentAccessibilityProperty>() co
 template RefPtr<SelectAccessibilityProperty> FrameNode::GetAccessibilityProperty<SelectAccessibilityProperty>() const;
 template RefPtr<SliderAccessibilityProperty> FrameNode::GetAccessibilityProperty<SliderAccessibilityProperty>() const;
 template RefPtr<StepperAccessibilityProperty> FrameNode::GetAccessibilityProperty<StepperAccessibilityProperty>() const;
-template ACE_FORCE_EXPORT RefPtr<SwiperAccessibilityProperty>
-FrameNode::GetAccessibilityProperty<SwiperAccessibilityProperty>() const;
+template RefPtr<SwiperAccessibilityProperty> FrameNode::GetAccessibilityProperty<SwiperAccessibilityProperty>() const;
 template RefPtr<SwiperIndicatorAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>() const;
 template RefPtr<SwitchAccessibilityProperty> FrameNode::GetAccessibilityProperty<SwitchAccessibilityProperty>() const;

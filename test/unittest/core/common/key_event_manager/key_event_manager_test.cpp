@@ -32,7 +32,7 @@
 #include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/sheet/sheet_manager.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "frameworks/base/input_manager/input_manager.h"

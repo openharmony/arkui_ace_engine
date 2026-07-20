@@ -33,10 +33,6 @@
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/qrcode_modifier.h"
-#include "core/interfaces/native/node/node_swiper_modifier.h"
-#include "core/interfaces/native/node/node_arc_swiper_modifier.h"
-#include "core/interfaces/native/node/tab_content_modifier.h"
-#include "core/interfaces/native/node/tabs_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/progress_modifier.h"
@@ -67,6 +63,8 @@
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
+#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
@@ -81,6 +79,7 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
@@ -223,16 +222,19 @@ void* createArcListNode(ArkUI_Int32 nodeId)
 
 void* createSwiperNode(ArkUI_Int32 nodeId)
 {
-    auto modifier = NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, nullptr);
-    return modifier->createFrameNode(nodeId);
+    auto frameNode = SwiperModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createArcSwiperNode(ArkUI_Int32 nodeId)
 {
-    auto modifier = NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, nullptr);
-    return modifier->createArcFrameNodeNG(nodeId);
+    auto frameNode = SwiperModelNG::CreateArcSwiperFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    SwiperModelNG::SetIndicatorType(AceType::RawPtr(frameNode), SwiperIndicatorType::ARC_DOT);
+    return AceType::RawPtr(frameNode);
 }
 
 void* createTextAreaNode(ArkUI_Int32 nodeId)
@@ -510,9 +512,9 @@ void* createGridNode(ArkUI_Int32 nodeId)
 
 void* createTabsNode(ArkUI_Int32 nodeId)
 {
-    auto modifier = NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_RETURN(modifier, nullptr);
-    return modifier->createFrameNode(nodeId);
+    auto frameNode = TabsModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createGridItemNode(ArkUI_Int32 nodeId)
@@ -605,9 +607,10 @@ void* createSelectNode(ArkUI_Int32 nodeId)
 
 void* createTabContentNode(ArkUI_Int32 nodeId)
 {
-    auto modifier = NodeModifier::GetTabContentCustomModifier();
-    CHECK_NULL_RETURN(modifier, nullptr);
-    return modifier->createFrameNode(nodeId);
+    auto frameNode = TabContentModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createCustomSpanNode(ArkUI_Int32 nodeId)
@@ -992,7 +995,7 @@ void SetCallbackMethod(ArkUIAPICallbackMethod* method)
     callbacks = method;
 }
 
-ACE_FORCE_EXPORT ArkUIAPICallbackMethod* GetCallbackMethod()
+ArkUIAPICallbackMethod* GetCallbackMethod()
 {
     return callbacks;
 }

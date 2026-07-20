@@ -14,14 +14,13 @@
  */
 
 #include "component_test/core/combination_isscrollable.h"
-#include "ui/base/utils/utils.h"
 
 #include "core/components_ng/pattern/stepper/stepper_node.h"
 #include "core/components_ng/pattern/stepper/stepper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
-#include "core/interfaces/native/node/node_swiper_modifier.h"
 
 namespace OHOS::Ace {
 CombinationIsScrollable::CombinationIsScrollable(const RefPtr<NG::FrameNode> frameNode)
@@ -50,14 +49,13 @@ bool CombinationIsScrollable::IsComponentExist()
 
 bool CombinationIsScrollable::IsComponentScrollable() const
 {
-    auto modifier = NG::NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_RETURN(modifier, false);
     if (isSwiper_) {
+        auto swiperPattern = AceType::DynamicCast<OHOS::Ace::NG::SwiperPattern>(pattern_);
+        CHECK_NULL_RETURN(swiperPattern, false);
         auto swiperLayoutProperty = frameNode_->GetLayoutProperty<OHOS::Ace::NG::SwiperLayoutProperty>();
         CHECK_NULL_RETURN(swiperLayoutProperty, false);
         bool isLoop = swiperLayoutProperty->GetLoop().value_or(true);
-        if (!isLoop && modifier->getTotalCount(
-            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode_))) <= 1) {
+        if (!isLoop && swiperPattern->TotalCount() <= 1) {
             return false;
         }
         return true;
@@ -68,18 +66,20 @@ bool CombinationIsScrollable::IsComponentScrollable() const
         auto swiperNode = AceType::DynamicCast<NG::FrameNode>(
             swiperFrameNode->GetChildAtIndex(swiperFrameNode->GetChildIndexById(swiperFrameNode->GetSwiperId())));
         CHECK_NULL_RETURN(swiperNode, false);
+        auto swiperPattern = swiperNode->GetPattern<OHOS::Ace::NG::SwiperPattern>();
+        CHECK_NULL_RETURN(swiperPattern, false);
         auto swiperLayoutProperty = swiperNode->GetLayoutProperty<OHOS::Ace::NG::SwiperLayoutProperty>();
         CHECK_NULL_RETURN(swiperLayoutProperty, false);
         bool isLoop = swiperLayoutProperty->GetLoop().value_or(true);
-        return (!isLoop && modifier->getTotalCount(
-            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperNode))) <= 1) ? false : true;
+        return (!isLoop && swiperPattern->TotalCount() <= 1) ? false : true;
     }
     auto tabBarPattern = frameNode_->GetPattern<OHOS::Ace::NG::TabBarPattern>();
+    auto swiperPattern = frameNode_->GetPattern<OHOS::Ace::NG::SwiperPattern>();
     CHECK_NULL_RETURN(tabBarPattern, false);
     auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<OHOS::Ace::NG::TabBarLayoutProperty>();
     CHECK_NULL_RETURN(tabBarLayoutProperty, false);
     if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
-        modifier->getTotalCount(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode_))) > 1) {
+        swiperPattern->TotalCount() > 1) {
         return true;
     }
     return false;

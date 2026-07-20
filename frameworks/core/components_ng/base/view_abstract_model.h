@@ -40,7 +40,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/overlay/content_cover_param.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
-#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/layout_policy_property.h"

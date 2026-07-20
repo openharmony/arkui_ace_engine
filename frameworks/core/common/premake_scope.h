@@ -24,7 +24,7 @@
 #include "base/log/log_wrapper.h"
 namespace OHOS::Ace {
 
-class ACE_FORCE_EXPORT PreMakeScope final {
+class ACE_EXPORT PreMakeScope final {
 public:
     PreMakeScope()
     {
