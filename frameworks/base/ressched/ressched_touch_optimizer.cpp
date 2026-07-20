@@ -130,7 +130,7 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsync(const TouchEvent& touchEvent)
     isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     bool result = NeedTpFlushVsyncInner(touchEvent);
     if (isTpFlushFrameDisplayPeriod_ && !result) {
-        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush end");
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush end");
         ACE_SCOPED_TRACE("TpFlush end");
         isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
     }
@@ -157,7 +157,7 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsyncInner(const TouchEvent& touchEvent)
     }
     // If slide is accepted, TPflush first frame
     if (slideAccept_) {
-        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush first frame");
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush first frame");
         ACE_SCOPED_TRACE("TpFlush first frame");
         slideAccept_ = false;
         return true;
@@ -165,14 +165,14 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsyncInner(const TouchEvent& touchEvent)
     // If last frame was TP triggered and current Vsync count differs,
     // trigger TP flush to avoid frame drop
     if (lastTpFlush_ && vsyncFlushed_) {
-        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush continue");
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush continue");
         ACE_SCOPED_TRACE("TpFlush continue");
         return true;
     }
     // If current direction is reversed and last frame wasn't TP triggered,
     // trigger TP flush to avoid frame drop
     if (!lastTpFlush_ && (RVSDirectionStateCheck(touchEvent.xReverse) || RVSDirectionStateCheck(touchEvent.yReverse))) {
-        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush reversed");
+        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush reversed");
         ACE_SCOPED_TRACE("TpFlush reversed");
         return true;
     }
@@ -269,11 +269,11 @@ bool ResSchedTouchOptimizer::RVSPointCheckWithSignal(TouchEvent& touchEvent, con
             // Update reverse signal for the specified axis
             if (axis == RVS_AXIS::RVS_AXIS_X) {
                 touchEvent.xReverse = direction;
-                TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck xReverse with signal");
+                TAG_LOGD(AceLogTag::ACE_UIEVENT, "RVSCheck xReverse with signal");
                 ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d] with signal", axis, direction);
             } else {
                 touchEvent.yReverse = direction;
-                TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck yReverse with signal");
+                TAG_LOGD(AceLogTag::ACE_UIEVENT, "RVSCheck yReverse with signal");
                 ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d] with signal", axis, direction);
             }
             return true;
@@ -324,12 +324,12 @@ bool ResSchedTouchOptimizer::RVSPointCheckWithoutSignal(TouchEvent& touchEvent, 
             // Update reverse signal for the specified axis
             if (axis == RVS_AXIS::RVS_AXIS_X) {
                 touchEvent.xReverse = direction;
-                TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck xReverse without signal");
+                TAG_LOGD(AceLogTag::ACE_UIEVENT, "RVSCheck xReverse without signal");
                 ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d] without signal", axis, direction);
                 return true;
             } else {
                 touchEvent.yReverse = direction;
-                TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck yReverse without signal");
+                TAG_LOGD(AceLogTag::ACE_UIEVENT, "RVSCheck yReverse without signal");
                 ACE_SCOPED_TRACE("RVSCheck signal RVSHappen[%d][%d] without signal", axis, direction);
                 return true;
             }
@@ -385,7 +385,7 @@ void ResSchedTouchOptimizer::UpdateState(const int32_t id, const int32_t state, 
     std::unordered_map<int32_t, int32_t>& stateTag = (axis == RVS_AXIS::RVS_AXIS_X) ? stateTagX_ : stateTagY_;
     stateTag[id] = state;
     ACE_SCOPED_TRACE("RVSCheck state changed[%d][%d]", axis, stateTag[id]);
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "RVSCheck state changed[%d][%d]", axis, stateTag[id]);
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "RVSCheck state changed[%d][%d]", axis, stateTag[id]);
 }
 
 /*
@@ -440,7 +440,7 @@ bool ResSchedTouchOptimizer::RVSEnableCheck()
             std::unordered_map<std::string, std::string> reply;
             payload["bundleName"] = AceApplicationInfo::GetInstance().GetPackageName();
             rvsEnable_ = ResSchedReport::GetInstance().AppRVSEnableCheck(payload, reply);
-            TAG_LOGI(AceLogTag::ACE_OVERLAY, "RVS_ENABLE_CHECK Result: %{public}d", static_cast<int32_t>(rvsEnable_));
+            TAG_LOGD(AceLogTag::ACE_OVERLAY, "RVS_ENABLE_CHECK Result: %{public}d", static_cast<int32_t>(rvsEnable_));
         };
         BackgroundTaskExecutor::GetInstance().PostTask(task);
     });
@@ -768,7 +768,7 @@ TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& point
 
 void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
 {
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush end by up event");
+    TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush end by up event");
     ACE_SCOPED_TRACE("TpFlush end by up event");
     lastTpFlush_ = false;
     vsyncPeriod_ = 0;
