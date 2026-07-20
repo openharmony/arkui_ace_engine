@@ -43,12 +43,12 @@ void QRCodeModifier::onDraw(DrawingContext& context)
     auto backgroundColor = backgroundColor_->Get();
     color = color.BlendOpacity(opacity);
     QrcodeImage* qrCode = QrcodeImageEncodeString(value.c_str(), QRCODE_ECC::QRCODE_ECC_MEDIUM);
-    if (qrCode == nullptr) {
+    if ((qrCode == nullptr) || (qrCode->width == 0) || (qrCode->data == nullptr)) {
         TAG_LOGE(AceLogTag::ACE_QRCODE, "QRCodeModifier::onDraw qrCode is null");
         return;
     }
     uint32_t qrWidth = qrCode->width;
-    if (qrWidth == 0 || qrCodeSize <= 0 || qrCodeSize < static_cast<float>(qrWidth)) {
+    if ((qrCodeSize <= 0) || (qrCodeSize < static_cast<float>(qrWidth))) {
         QrcodeImageFree(qrCode);
         TAG_LOGE(AceLogTag::ACE_QRCODE, "QRCodeSize is too small. QRCodeSize: %{public}f", qrCodeSize);
         return;
@@ -132,7 +132,7 @@ bool QRCodeModifier::GetQrcodeMomule(int32_t xPos, int32_t yPos, const QrcodeIma
         return false;
     }
 
-    if ((xPos < 0) || (xPos > qrWidth) || (yPos < 0) || (yPos > qrWidth)) {
+    if ((xPos < 0) || (xPos >= qrWidth) || (yPos < 0) || (yPos >= qrWidth)) {
         return false;
     }
 

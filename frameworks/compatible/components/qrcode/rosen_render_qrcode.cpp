@@ -28,17 +28,18 @@ namespace OHOS::Ace {
 void RosenRenderQrcode::Paint(RenderContext& context, const Offset& offset)
 {
     QrcodeImage* qrCode = QrcodeImageEncodeString(value_.c_str(), QRCODE_ECC::QRCODE_ECC_MEDIUM);
-    if (qrCode == nullptr) {
+    if ((qrCode == nullptr) || (qrCode->width == 0) || (qrCode->data == nullptr)) {
         LOGE("RosenRenderQrcode::DrawQRCode qrcode is null");
         return;
     }
-    uint32_t width = qrCode->width;
-    if (width == 0 || width_ <= 0 || width_ < width) {
+    uint32_t qrWidth = qrCode->width;
+    if ((width_ <= 0) || (width_ < qrWidth)) {
         LOGE("RosenRenderQrcode::DrawQRCode qrcode create error");
+        QrcodeImageFree(qrCode);
         return;
     }
-    int32_t blockWidth = width_ / width;
-    int32_t sizeInPixel = blockWidth * width;
+    int32_t blockWidth = width_ / qrWidth;
+    int32_t sizeInPixel = blockWidth * qrWidth;
     auto qrOffset =
         Alignment::GetAlignPosition(Size(width_, height_), Size(sizeInPixel, sizeInPixel), Alignment::CENTER);
     DrawQRCode(context, offset + qrOffset, sizeInPixel, *qrCode);
@@ -111,19 +112,19 @@ SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& 
     if (!qrcode_) {
         return skBitmap;
     }
-    skBitmap.allocPixels(imageInfo);	 
-     void* rawData = skBitmap.getPixels();	 
-     CHECK_NULL_RETURN(rawData, skBitmap);	 
-     uint32_t* data = reinterpret_cast<uint32_t*>(rawData);	 
-     int32_t blockWidth = width / qrCode.width;	 
-     for (int32_t i = 0; i < width; i++) {	 
-         for (int32_t j = 0; j < width; j++) {	 
-             data[i * width + j] = GetQrcodeMomule(j / blockWidth, i / blockWidth, qrCode)	 
-                                       ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())	 
-                                       : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());	 
-         }	 
-     }	 
-     return skBitmap;
+    skBitmap.allocPixels(imageInfo);
+    void* rawData = skBitmap.getPixels();
+    CHECK_NULL_RETURN(rawData, skBitmap);	 
+    uint32_t* data = reinterpret_cast<uint32_t*>(rawData);
+    int32_t blockWidth = width / qrCode.width;
+    for (int32_t i = 0; i < width; i++) {
+        for (int32_t j = 0; j < width; j++) {
+            data[i * width + j] = GetQrcodeMomule(j / blockWidth, i / blockWidth, qrCode)
+                                      ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())
+                                      : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());
+        }
+    }
+    return skBitmap;
 }
 #else
 RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& qrCode)
@@ -135,19 +136,19 @@ RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& 
     if (!qrcode_) {
         return bitmap;
     }
-     bitmap.Build(width, width, format);	 
-     void* rawData = bitmap.GetPixels();	 
-     CHECK_NULL_RETURN(rawData, bitmap);	 
-     uint32_t* data = reinterpret_cast<uint32_t*>(rawData);	 
-     int32_t blockWidth = width / qrCode.width;	 
-     for (int32_t i = 0; i < width; i++) {	 
-         for (int32_t j = 0; j < width; j++) {	 
-             data[i * width + j] = GetQrcodeMomule(j / blockWidth, i / blockWidth, qrCode)	 
-                                       ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())	 
-                                       : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());	 
-         }	 
-     }	 
-     return bitmap;
+    bitmap.Build(width, width, format);
+    void* rawData = bitmap.GetPixels();
+    CHECK_NULL_RETURN(rawData, bitmap);
+    uint32_t* data = reinterpret_cast<uint32_t*>(rawData);
+    int32_t blockWidth = width / qrCode.width;
+    for (int32_t i = 0; i < width; i++) {
+        for (int32_t j = 0; j < width; j++) {
+            data[i * width + j] = GetQrcodeMomule(j / blockWidth, i / blockWidth, qrCode)
+                                      ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())
+                                      : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());
+        }
+    }
+    return bitmap;
 }
 #endif
 
@@ -158,7 +159,7 @@ bool RosenRenderQrcode::GetQrcodeMomule(int32_t xPos, int32_t yPos, const Qrcode
         return false;
     }
 
-    if ((xPos < 0) || (xPos > qrWidth) || (yPos < 0) || (yPos > qrWidth)) {
+    if ((xPos < 0) || (xPos >= qrWidth) || (yPos < 0) || (yPos >= qrWidth)) {
         return false;
     }
 
