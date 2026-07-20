@@ -90,7 +90,7 @@ RSBitmap QRCodeModifier::CreateBitMap(
     int32_t maxHeight = 0;
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
-            if (GetQrcodeMomule(j / blockWidth, i / blockWidth, qrCode)) {
+            if (GetQrcodeModule(j / blockWidth, i / blockWidth, qrCode)) {
                 data[i * width + j] = ConvertColorFromHighToLow(color);
                 maxWidth = i > maxWidth ? i : maxWidth;
                 maxHeight = j > maxHeight ? j : maxHeight;
@@ -102,7 +102,7 @@ RSBitmap QRCodeModifier::CreateBitMap(
     }
     for (int32_t i = 0; i <= maxWidth; i++) {
         for (int32_t j = 0; j <= maxHeight; j++) {
-            if (!GetQrcodeMomule(j / blockWidth, i / blockWidth, qrCode)) {
+            if (!GetQrcodeModule(j / blockWidth, i / blockWidth, qrCode)) {
                 data[i * width + j] = ConvertColorFromHighToLow(backgroundColor);
             }
         }
@@ -120,7 +120,7 @@ uint32_t QRCodeModifier::ConvertColorFromHighToLow(const Color& color) const
     return convertedColor.value;
 }
 
-bool QRCodeModifier::GetQrcodeMomule(int32_t xPos,
+bool QRCodeModifier::GetQrcodeModule(int32_t xPos,
     int32_t yPos, const QrcodeImage& qrCode) const
 {
     uint32_t qrWidth = qrCode.width;

@@ -119,7 +119,7 @@ SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& 
     int32_t blockWidth = width / qrCode.width;
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
-            data[i * width + j] = GetQrcodeMomule(j / blockWidth, i / blockWidth, qrCode)
+            data[i * width + j] = GetQrcodeModule(j / blockWidth, i / blockWidth, qrCode)
                                       ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())
                                       : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());
         }
@@ -143,7 +143,7 @@ RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& 
     int32_t blockWidth = width / qrCode.width;
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
-            data[i * width + j] = GetQrcodeMomule(j / blockWidth, i / blockWidth, qrCode)
+            data[i * width + j] = GetQrcodeModule(j / blockWidth, i / blockWidth, qrCode)
                                       ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())
                                       : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());
         }
@@ -152,7 +152,7 @@ RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& 
 }
 #endif
 
-bool RosenRenderQrcode::GetQrcodeMomule(int32_t xPos,
+bool RosenRenderQrcode::GetQrcodeModule(int32_t xPos,
     int32_t yPos, const QrcodeImage& qrCode) const
 {
     uint32_t qrWidth = qrCode.width;
