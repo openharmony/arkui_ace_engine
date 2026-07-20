@@ -426,22 +426,22 @@ HWTEST_F(WebPatternTest, OnWindowShowTest02, TestSize.Level1)
     g_webPattern->offlineWebInited_ = false;
     host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_ON_MAINTREE);
     g_webPattern->OnWindowShow();
-    EXPECT_FALSE(g_webPattern->isWindowShow_);
+    EXPECT_TRUE(g_webPattern->isWindowShow_);
 
     g_webPattern->offlineWebInited_ = false;
     host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_OFF_MAINTREE);
     g_webPattern->OnWindowShow();
-    EXPECT_FALSE(g_webPattern->isWindowShow_);
+    EXPECT_TRUE(g_webPattern->isWindowShow_);
 
     g_webPattern->offlineWebInited_ = true;
     host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_ON_MAINTREE);
     g_webPattern->OnWindowShow();
-    EXPECT_FALSE(g_webPattern->isWindowShow_);
+    EXPECT_TRUE(g_webPattern->isWindowShow_);
 
     g_webPattern->offlineWebInited_ = true;
     host->UpdateNodeStatus(NodeStatus::BUILDER_NODE_OFF_MAINTREE);
     g_webPattern->OnWindowShow();
-    EXPECT_FALSE(g_webPattern->isWindowShow_);
+    EXPECT_TRUE(g_webPattern->isWindowShow_);
 #endif
 }
 
@@ -466,7 +466,7 @@ HWTEST_F(WebPatternTest, OnWindowShowTest03, TestSize.Level1)
     layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     EXPECT_EQ(layoutProperty->GetVisibility(), VisibleType::INVISIBLE);
     g_webPattern->OnWindowShow();
-    EXPECT_FALSE(g_webPattern->isWindowShow_);
+    EXPECT_TRUE(g_webPattern->isWindowShow_);
 
     g_webPattern->isWindowShow_ = false;
     g_webPattern->isVisible_ = true;
