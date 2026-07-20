@@ -918,7 +918,7 @@ namespace OHOS::Ace::NG {
             auto tempNode = node.second;
             auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
             if (!pair.second) {
-                TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+                TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
                 ProcessOffscreenNode(tempNode, true);
             }
         }
@@ -946,7 +946,7 @@ namespace OHOS::Ace::NG {
                 auto tempNode = node.second;
                 auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
                 if (!pair.second) {
-                    TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+                    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
                     ProcessOffscreenNode(tempNode, true);
                 }
                 needBuild = true;
@@ -1018,7 +1018,7 @@ namespace OHOS::Ace::NG {
         if (pair.second) {
             ProcessOffscreenNode(itemInfo.second, false);
         } else {
-            TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+            TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
         }
 
         itemInfo.second->Build(nullptr);
