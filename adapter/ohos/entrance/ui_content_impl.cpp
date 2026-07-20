@@ -262,7 +262,7 @@ bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
 
     auto mode = rsWindow->GetWindowMode();
     return mode == Rosen::WindowMode::WINDOW_MODE_FLOATING || mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+            mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY || mode == Rosen::WindowMode::WINDOW_MODE_SPLIT;
 }
 
 void AddResConfigInfo(
