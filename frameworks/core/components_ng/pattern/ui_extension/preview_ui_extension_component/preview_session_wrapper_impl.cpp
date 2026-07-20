@@ -370,7 +370,7 @@ void PreviewSessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Ses
 }
 
 void PreviewSessionWrapperImpl::SetConnectToRenderInner(
-    RefPtr<Platform::AceContainer> container, Rosen::SessionInfo& extensionSessionInfo)
+    const RefPtr<Platform::AceContainer>& container, Rosen::SessionInfo& extensionSessionInfo)
 {
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
