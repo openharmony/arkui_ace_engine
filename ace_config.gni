@@ -297,7 +297,7 @@ if (defined(global_parts_info.multimedia_audio_framework)) {
   enable_audio_framework = false
 }
 
-if (defined(global_parts_info.thirdparty_qrcodegen) || is_arkui_x) {
+if (defined(global_parts_info.commonlibrary_qrcode_generator) || is_arkui_x) {
   qrcodegen_support = true
   ace_common_defines += [ "QRCODEGEN_SUPPORT" ]
 } else {
