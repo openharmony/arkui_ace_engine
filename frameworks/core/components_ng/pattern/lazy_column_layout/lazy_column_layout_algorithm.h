@@ -63,6 +63,10 @@ private:
     void GetEndIndexInfo(int32_t& index, float& pos);
     bool NeedLazyLayout(const RefPtr<LayoutWrapper>& childWrapper);
     LayoutConstraintF GetLazyLayoutConstraint(float referencePos, bool forwardLayout);
+    // Publish a materialized item's sticky-header state to its previous lazy sibling; only this single-axis
+    // container has a unique next vertical section (protocol: LazyLayoutPattern::PublishNextStickyHeaderGap).
+    void UpdateSiblingHandoffGap(
+        LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& wrapper, int32_t itemIndex) const;
     AdjustOffset GetAdjustOffset(const RefPtr<LayoutWrapper>& item);
     void ApplyLazyNodeAdjustOffset(const RefPtr<LayoutWrapper>& wrapper, float& referencePos, bool forward);
     void MeasureForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos);

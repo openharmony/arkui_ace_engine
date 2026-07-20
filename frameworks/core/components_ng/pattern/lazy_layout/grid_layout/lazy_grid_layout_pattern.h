@@ -125,6 +125,8 @@ public:
         return ret;
     }
 
+    bool HasStickyHeader() const override;
+
     void SetOnVisibleIndexesChange(std::function<void(int32_t, int32_t)>&& onVisibleIndexesChange)
     {
         onVisibleIndexesChange_ = std::move(onVisibleIndexesChange);
