@@ -41,6 +41,9 @@ using Napi::ParseStyle;
 constexpr int32_t DIALOG_BUTTON_NUM_MAX = INT32_MAX;
 constexpr int32_t CALLBACK_TYPE_SUCCESS = 0;
 constexpr int32_t CALLBACK_TYPE_MOUNT_ERROR = 2;
+// Max valid index of public BlurStyle enum (values 0..12). Sync with:
+// - C++ enum: interfaces/inner_api/ace_kit/include/ui/properties/blur_style_option.h
+// - Public d.ts: frameworks/bridge/declarative_frontend/ark_component/types/index.d.ts
 const int32_t BG_BLUR_STYLE_MAX_INDEX = 13;
 
 const std::vector<DialogDisplayModeInSubWindow> DIALOG_DISPLAY_MODE_IN_SUBWINDOW = {
