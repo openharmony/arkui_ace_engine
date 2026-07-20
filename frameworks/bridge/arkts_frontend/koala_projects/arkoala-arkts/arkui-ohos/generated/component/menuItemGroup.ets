@@ -149,7 +149,7 @@ export class MenuItemGroupOptions_serializer {
                     const valueHolderForHeaderTmpValueForIdx0ForIdx1 = valueHolderForHeaderTmpValueForIdx0 as arkui_component_units_Resource
                     global_resource_Resource_serializer.write(valueSerializer, valueHolderForHeaderTmpValueForIdx0ForIdx1)
                 }
-            } else if (valueHolderForHeaderTmpValue instanceof CustomBuilder) {
+            } else if (valueHolderForHeaderTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForHeaderTmpValueForIdx1 = valueHolderForHeaderTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForHeaderTmpValueForIdx1))
@@ -173,7 +173,7 @@ export class MenuItemGroupOptions_serializer {
                     const valueHolderForFooterTmpValueForIdx0ForIdx1 = valueHolderForFooterTmpValueForIdx0 as arkui_component_units_Resource
                     global_resource_Resource_serializer.write(valueSerializer, valueHolderForFooterTmpValueForIdx0ForIdx1)
                 }
-            } else if (valueHolderForFooterTmpValue instanceof CustomBuilder) {
+            } else if (valueHolderForFooterTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForFooterTmpValueForIdx1 = valueHolderForFooterTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForFooterTmpValueForIdx1))

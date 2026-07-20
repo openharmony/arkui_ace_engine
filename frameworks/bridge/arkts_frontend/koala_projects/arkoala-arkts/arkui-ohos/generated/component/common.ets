@@ -5952,7 +5952,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilder) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0 = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
@@ -6444,7 +6444,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (preview !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const previewTmpValue = preview!
-            if (previewTmpValue instanceof CustomBuilder) {
+            if (previewTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const previewTmpValueForIdx0 = previewTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(previewTmpValueForIdx0))
@@ -6479,7 +6479,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0 = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof CustomBuilder) {
+            } else if (valueTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx1))
@@ -6641,7 +6641,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilder) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const contentTmpValueForIdx1 = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx1))
@@ -6695,7 +6695,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilder) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const contentTmpValueForIdx1 = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx1))
@@ -6760,7 +6760,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilder) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0 = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
@@ -6826,7 +6826,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilderT<ResponseType>) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any, p0: Any) => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0 = contentTmpValue as CustomBuilderT<ResponseType>
                 const contentTmpValueForIdx0Transformed: CustomNodeBuilderT<ResponseType> = extractors.transform_CustomBuilderT_ResponseType_to_CustomNodeBuilderT_ResponseType(contentTmpValueForIdx0)
@@ -6915,7 +6915,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const contentTmpValue = content!
-            if (contentTmpValue instanceof CustomBuilder) {
+            if (contentTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const contentTmpValueForIdx0 = contentTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
@@ -21169,7 +21169,7 @@ export class ContextMenuOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPreviewTmpValueForIdx0 = valueHolderForPreviewTmpValue as MenuPreviewMode
                 valueSerializer.writeInt32(valueHolderForPreviewTmpValueForIdx0.valueOf())
-            } else if (valueHolderForPreviewTmpValue instanceof CustomBuilder) {
+            } else if (valueHolderForPreviewTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPreviewTmpValueForIdx1 = valueHolderForPreviewTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForPreviewTmpValueForIdx1))
@@ -22348,7 +22348,7 @@ export class CustomPopupOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx0 = valueHolderForOnWillDismissTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForOnWillDismissTmpValueForIdx0)
-            } else if (valueHolderForOnWillDismissTmpValue instanceof Callback<DismissPopupAction, void>) {
+            } else if (valueHolderForOnWillDismissTmpValue instanceof ((p0: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx1 = valueHolderForOnWillDismissTmpValue as Callback<DismissPopupAction, void>
                 valueSerializer.holdAndWriteCallback(valueHolderForOnWillDismissTmpValueForIdx1)
@@ -23074,7 +23074,7 @@ export class MenuOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPreviewTmpValueForIdx0 = valueHolderForPreviewTmpValue as MenuPreviewMode
                 valueSerializer.writeInt32(valueHolderForPreviewTmpValueForIdx0.valueOf())
-            } else if (valueHolderForPreviewTmpValue instanceof CustomBuilder) {
+            } else if (valueHolderForPreviewTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPreviewTmpValueForIdx1 = valueHolderForPreviewTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForPreviewTmpValueForIdx1))
@@ -24688,7 +24688,7 @@ export class PopupCommonOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx0 = valueHolderForOnWillDismissTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForOnWillDismissTmpValueForIdx0)
-            } else if (valueHolderForOnWillDismissTmpValue instanceof Callback<DismissPopupAction, void>) {
+            } else if (valueHolderForOnWillDismissTmpValue instanceof ((p0: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx1 = valueHolderForOnWillDismissTmpValue as Callback<DismissPopupAction, void>
                 valueSerializer.holdAndWriteCallback(valueHolderForOnWillDismissTmpValueForIdx1)
@@ -25501,7 +25501,7 @@ export class SheetOptions_serializer {
         if (valueHolderForDetents !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForDetentsTmpValue = valueHolderForDetents!
-            if ((valueHolderForDetentsTmpValue instanceof SingleLengthDetent) && ((valueHolderForDetentsTmpValue.length) == (1))) {
+            if ((valueHolderForDetentsTmpValue instanceof Tuple1) && ((valueHolderForDetentsTmpValue.length) == (1))) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForDetentsTmpValueForIdx0 = valueHolderForDetentsTmpValue as SingleLengthDetent
                 const valueHolderForDetentsTmpValueForIdx0_0 = valueHolderForDetentsTmpValueForIdx0[0]
@@ -25526,7 +25526,7 @@ export class SheetOptions_serializer {
                         global_resource_Resource_serializer.write(valueSerializer, valueHolderForDetentsTmpValueForIdx0_0ForIdx1ForIdx2)
                     }
                 }
-            } else if ((valueHolderForDetentsTmpValue instanceof DoubleLengthDetents) && ((valueHolderForDetentsTmpValue.length) == (2))) {
+            } else if ((valueHolderForDetentsTmpValue instanceof Tuple2) && ((valueHolderForDetentsTmpValue.length) == (2))) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForDetentsTmpValueForIdx1 = valueHolderForDetentsTmpValue as DoubleLengthDetents
                 const valueHolderForDetentsTmpValueForIdx1_0 = valueHolderForDetentsTmpValueForIdx1[0]
@@ -25579,7 +25579,7 @@ export class SheetOptions_serializer {
                 } else {
                     valueSerializer.writeInt8(RuntimeType.UNDEFINED)
                 }
-            } else if ((valueHolderForDetentsTmpValue instanceof TripleLengthDetents) && ((valueHolderForDetentsTmpValue.length) == (3))) {
+            } else if ((valueHolderForDetentsTmpValue instanceof Tuple3) && ((valueHolderForDetentsTmpValue.length) == (3))) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForDetentsTmpValueForIdx2 = valueHolderForDetentsTmpValue as TripleLengthDetents
                 const valueHolderForDetentsTmpValueForIdx2_0 = valueHolderForDetentsTmpValueForIdx2[0]
@@ -25704,7 +25704,7 @@ export class SheetOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTitleTmpValueForIdx0 = valueHolderForTitleTmpValue as SheetTitleOptions
                 SheetTitleOptions_serializer.write(valueSerializer, valueHolderForTitleTmpValueForIdx0)
-            } else if (valueHolderForTitleTmpValue instanceof CustomBuilder) {
+            } else if (valueHolderForTitleTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTitleTmpValueForIdx1 = valueHolderForTitleTmpValue as CustomBuilder
                 valueSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueHolderForTitleTmpValueForIdx1))
@@ -27095,7 +27095,7 @@ export class PopupOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx0 = valueHolderForOnWillDismissTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForOnWillDismissTmpValueForIdx0)
-            } else if (valueHolderForOnWillDismissTmpValue instanceof Callback<DismissPopupAction, void>) {
+            } else if (valueHolderForOnWillDismissTmpValue instanceof ((p0: Any) => never)) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForOnWillDismissTmpValueForIdx1 = valueHolderForOnWillDismissTmpValue as Callback<DismissPopupAction, void>
                 valueSerializer.holdAndWriteCallback(valueHolderForOnWillDismissTmpValueForIdx1)
