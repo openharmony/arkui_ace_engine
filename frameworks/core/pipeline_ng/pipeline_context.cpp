@@ -585,7 +585,7 @@ std::string PipelineContext::GetNavDestinationJSViewName(const RefPtr<PageInfo>&
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     CHECK_NULL_RETURN(navigationPattern, "");
 
-    const auto& navDestinationNodes = pattern->GetAllNavDestinationNodes();
+    const auto& navDestinationNodes = navigationPattern->GetAllNavDestinationNodes();
     int32_t size = static_cast<int32_t>(navDestinationNodes.size());
     if (size == 0) {
         return "";
