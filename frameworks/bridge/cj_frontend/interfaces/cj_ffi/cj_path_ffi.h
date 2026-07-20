@@ -18,12 +18,15 @@
 
 #include <cstdint>
 
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkPathCreate(const char* commands);
 CJ_EXPORT void FfiOHOSAceFrameworkPathCreateWithSize(
     double width, int32_t widthUnit, double height, int32_t heightUnit, const char* commands);
+CJ_EXPORT void FfiOHOSAceFrameworkPathCreateWithSizeEx(
+    NativeOptionLength width, NativeOptionLength height, const char* commands);
 CJ_EXPORT void FfiOHOSAceFrameworkPathSetCommands(const char* commands);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkPathInsCreate(const char* commands);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkPathInsCreateWithSize(
