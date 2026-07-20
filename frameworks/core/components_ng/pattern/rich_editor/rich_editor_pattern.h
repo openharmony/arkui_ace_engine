@@ -906,6 +906,7 @@ public:
     void UpdatePlaceholderFontColor(const Color& color);
     void MarkContentNodeForRender() override;
     void CreateRichEditorOverlayModifier();
+    void BindScrollBarOverlayModifier();
     RefPtr<TextOverlayModifier> GetOverlayModifier() const;
     RefPtr<AIWriteAdapter> GetAIWriteAdapter();
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
