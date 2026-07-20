@@ -2496,6 +2496,19 @@ bool OverlayManager::RemoveOverlay(bool isBackPressed, bool isPageRouter)
     SetDragNodeNeedClean(true);
     auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, false);
+    if (overlayNode_ && isBackPressed && overlayInfo_.has_value() && overlayInfo_.value().enableBackPressedEvent &&
+        overlayInfo_.value().onBackPress) {
+        auto componentNode = GetLastChildNotRemoving(overlayNode_);
+        if (componentNode) {
+            bool intercepted = overlayInfo_.value().onBackPress();
+            if (intercepted) {
+                TAG_LOGD(AceLogTag::ACE_OVERLAY, "overlay back press intercepted by onBackPress callback");
+                return true;
+            }
+            TAG_LOGD(AceLogTag::ACE_OVERLAY, "overlay back press transparent to lower layer by onBackPress callback");
+            return false;
+        }
+    }
     // There is overlay under the root node or it is in atomicservice
     if (rootNode->GetChildren().size() > ROOT_MIN_NODE || pipeline->GetInstallationFree()) {
         // stage node is at index 0, remove overlay at last
@@ -7466,6 +7479,19 @@ bool OverlayManager::SetOverlayManagerOptions(const OverlayManagerInfo& overlayI
     }
     overlayInfo_ = overlayInfo;
     return true;
+}
+
+bool OverlayManager::IsDescendantOfOverlay(const RefPtr<FrameNode>& node)
+{
+    auto parent = node->GetParent();
+    while (parent) {
+        if (parent->GetTag() == V2::OVERLAY_ETS_TAG ||
+            parent->GetTag() == V2::ORDER_OVERLAY_ETS_TAG) {
+            return true;
+        }
+        parent = parent->GetParent();
+    }
+    return false;
 }
 
 } // namespace OHOS::Ace::NG

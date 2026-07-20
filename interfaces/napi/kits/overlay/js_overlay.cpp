@@ -339,6 +339,25 @@ static napi_value JSSetOverlayManagerOptions(napi_env env, napi_callback_info in
         napi_get_named_property(env, argv, "enableBackPressedEvent", &enableBackPressedEventNApi);
         napi_get_value_bool(env, renderRootOverlayNApi, &overlayInfo.renderRootOverlay);
         napi_get_value_bool(env, enableBackPressedEventNApi, &overlayInfo.enableBackPressedEvent);
+        napi_value onBackPressNApi = nullptr;
+        napi_get_named_property(env, argv, "onBackPress", &onBackPressNApi);
+        napi_valuetype callbackType = napi_undefined;
+        napi_typeof(env, onBackPressNApi, &callbackType);
+        if (callbackType == napi_function) {
+            napi_ref callbackRef = nullptr;
+            napi_create_reference(env, onBackPressNApi, 1, &callbackRef);
+            overlayInfo.onBackPress = [env, callbackRef]() -> bool {
+                napi_value callback = nullptr;
+                napi_get_reference_value(env, callbackRef, &callback);
+                napi_value undefined = nullptr;
+                napi_get_undefined(env, &undefined);
+                napi_value result = nullptr;
+                napi_call_function(env, undefined, callback, 0, nullptr, &result);
+                bool intercepted = false;
+                napi_get_value_bool(env, result, &intercepted);
+                return intercepted;
+            };
+        }
     } else if (valueType != napi_undefined && valueType != napi_null) {
         NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
         return nullptr;

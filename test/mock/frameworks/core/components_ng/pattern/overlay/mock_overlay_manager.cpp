@@ -157,4 +157,10 @@ RefPtr<FrameNode> OverlayManager::GetPixelMapContentNode(bool isSubwindowOverlay
 {
     return nullptr;
 }
+
+bool OverlayManager::IsDescendantOfOverlay(const RefPtr<FrameNode>& node)
+{
+    (void)node;
+    return false;
+}
 } // namespace OHOS::Ace::NG
