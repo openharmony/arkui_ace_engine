@@ -645,6 +645,7 @@ napi_modules = [
           "router",
           "animator",
           "overlay",
+          "uimaterial",
         ]
       },
     ]
