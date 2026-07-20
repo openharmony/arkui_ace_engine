@@ -1021,7 +1021,7 @@ void MenuPattern::UpdateSelectOptionTextByIndex(int32_t index, const std::string
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = GetOptions();
-    if (index >= static_cast<int32_t>(children.size())) {
+    if (index < 0 || index >= static_cast<int32_t>(children.size())) {
         return;
     }
     auto childIt = children.at(index);
@@ -1044,7 +1044,7 @@ void MenuPattern::UpdateSelectOptionIconByIndex(int32_t index, const std::string
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     const auto& children = GetOptions();
-    if (index >= static_cast<int32_t>(children.size())) {
+    if (index < 0 || index >= static_cast<int32_t>(children.size())) {
         return;
     }
     auto childIt = children.at(index);
