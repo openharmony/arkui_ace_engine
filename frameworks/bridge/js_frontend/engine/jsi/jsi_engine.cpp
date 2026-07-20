@@ -764,14 +764,11 @@ std::string GetDeviceInfo()
     infoList->Put("manufacturer", SystemProperties::GetManufacturer().c_str());
     infoList->Put("model", SystemProperties::GetModel().c_str());
     infoList->Put("product", SystemProperties::GetProduct().c_str());
-    std::string patchTmp = SystemProperties::GetSdkPatchApiVersion();
-    char* patchEnd = nullptr;
-    nfoList->Put("sdkPatchApiVersion", patchTmp.empty() ? -1 :
-        static_cast<int32_t>(std::strtol(patchTmp.c_str(), &patchEnd, SYSTEM_BASE)));
-    std::string minorTmp = SystemProperties::GetSdkMinorApiVersion();
-    char* minorEnd = nullptr;
-    infoList->Put("sdkMinorApiVersion", minorTmp.empty() ? -1 :
-        static_cast<int32_t>(std::strtol(minorTmp.c_str(), &minorEnd, SYSTEM_BASE)));
+    auto parseVersion = [](const std::string& str) -> int32_t {
+        return str.empty() ? -1 : static_cast<int32_t>(std::strtol(str.c_str(), nullptr, SYSTEM_BASE));
+    };
+    infoList->Put("sdkPatchApiVersion", parseVersion(SystemProperties::GetSdkPatchApiVersion()));
+    infoList->Put("sdkMinorApiVersion", parseVersion(SystemProperties::GetSdkMinorApiVersion()));
     std::string tmp = SystemProperties::GetApiVersion();
     if (tmp != SystemProperties::INVALID_PARAM) {
         char* tmpEnd = nullptr;
