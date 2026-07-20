@@ -367,11 +367,11 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: ClickEventActuatorTest007
+ * @tc.name: TouchDownNotifiedToClickTest001
  * @tc.desc: test IsTouchDownNotifiedToClick covers both branches.
  * @tc.type: FUNC
  */
-HWTEST_F(ClickEventTestNg, ClickEventActuatorTest007, TestSize.Level1)
+HWTEST_F(ClickEventTestNg, TouchDownNotifiedToClickTest001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create EventHub and ClickEventActuator.
