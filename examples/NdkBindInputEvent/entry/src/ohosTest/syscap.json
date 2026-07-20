@@ -1,0 +1,15 @@
+{
+  "devices": {
+    "general": ["default","tablet"],
+    "custom": [
+      {
+        "xts": [
+          "SystemCapability.ArkUI.ArkUI.Full",
+          "SystemCapability.ArkUI.ArkUI.Circle",
+          "SystemCapability.Security.DeviceSecurityLevel",
+          "SystemCapability.UserIAM.UserAuth.PinAuth"
+        ]
+      }
+    ]
+  }
+}
