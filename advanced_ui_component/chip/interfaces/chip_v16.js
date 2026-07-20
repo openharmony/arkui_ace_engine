@@ -2132,7 +2132,13 @@ export class ChipComponent extends ViewPU {
           console.error('[Chip] failed to get resourceManager.');
           return false;
         }
-        return this.isValidLengthString(resourceManager.getStringSync(resource));
+        let stringValue = '';
+        try {
+          stringValue = resourceManager.getStringSync(resource);
+        } catch (err) {
+          stringValue = '';
+        }
+        return this.isValidLengthString(stringValue);
       }
       const result = this.getResourceNumber(resource);
       return result !== null && result >= 0;
