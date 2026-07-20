@@ -24,9 +24,11 @@
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/property/accessibility_property.h"
 
+#ifndef CROSS_PLATFORM
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_report.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#endif
 #include "core/common/recorder/event_definition.h"
 #include "core/common/recorder/event_recorder.h"
 #include "frameworks/core/common/extra_modules/extra_modules_manager.h"
@@ -311,7 +313,9 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
     InitGlobalValue(event.sourceType);
     UpdateInfoWithDownEvent(event);
+#ifndef CROSS_PLATFORM
     ReportTouchDownToResSched();
+#endif
 }
 
 void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
@@ -391,7 +395,9 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
+#ifndef CROSS_PLATFORM
     ResetTouchDownNotifiedToClickFlag();
+#endif
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
         : static_cast<int32_t>(MouseAction::RELEASE);
     if (fingersId_.find(event.id) != fingersId_.end()) {
@@ -474,7 +480,9 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
+#ifndef CROSS_PLATFORM
     ResetTouchDownNotifiedToClickFlag();
+#endif
     lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
         : static_cast<int32_t>(MouseAction::CANCEL);
     extraInfo_ += "cancel received.";
@@ -641,7 +649,9 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         auto onActionFunction = *onAction;
         HandleGestureAccept(info, type, GestureListenerType::TAP);
         ACE_BENCH_MARK_TRACE("TapGesture_end");
+#ifndef CROSS_PLATFORM
         HandleReportClick(info);
+#endif
         auto node = GetAttachedNode().Upgrade();
         if (node && node->GetEnableClickSoundEffect()) {
             PlayClickSoundEffect(static_cast<int32_t>(info.GetScreenLocation().GetX()),
@@ -651,7 +661,9 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
 #ifdef ENABLE_INSPECTOR_EVENT_REPORTING
         HandleReports(info, type);
 #endif
+#ifndef CROSS_PLATFORM
         RecordClickEventIfNeed(info);
+#endif
     }
 #ifdef GESTURE_DEBUG_BOUNDARY_SUPPORTED
     ReportToGestureDebugManager(type, GestureListenerType::TAP);
@@ -686,6 +698,7 @@ void ClickRecognizer::PlayClickSoundEffect(int32_t abscissa, int32_t ordinate)
 #endif
 }
 
+#ifndef CROSS_PLATFORM
 void ClickRecognizer::HandleReportClick(const GestureEvent& info)
 {
     auto frameNode = GetAttachedNode().Upgrade();
@@ -695,6 +708,7 @@ void ClickRecognizer::HandleReportClick(const GestureEvent& info)
     CHECK_NULL_VOID(pipeline->GetClickOptimizer());
     pipeline->GetClickOptimizer()->ReportClick(frameNode, info);
 }
+#endif
 
 #ifdef ENABLE_INSPECTOR_EVENT_REPORTING
 void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
@@ -723,9 +737,9 @@ void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
 }
 #endif
 
+#ifndef CROSS_PLATFORM
 void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
 {
-#ifndef CROSS_PLATFORM
     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
         auto host = GetAttachedNode().Upgrade();
         CHECK_NULL_VOID(host);
@@ -748,8 +762,8 @@ void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
         }
         Recorder::EventRecorder::Get().OnClick(std::move(builder));
     }
-#endif
 }
+#endif
 
 GestureJudgeResult ClickRecognizer::TriggerGestureJudgeCallback()
 {
@@ -939,6 +953,7 @@ std::string ClickRecognizer::GetGestureInfoString() const
     return gestureInfoStr;
 }
 
+#ifndef CROSS_PLATFORM
 void ClickRecognizer::ReportTouchDownToResSched()
 {
     CHECK_EQUAL_VOID(shouldReportTouchDown_, false);
@@ -964,4 +979,5 @@ void ClickRecognizer::ResetTouchDownNotifiedToClickFlag()
     CHECK_NULL_VOID(touchOptimizer);
     touchOptimizer->SetTouchDownNotifiedToClick(false);
 }
+#endif
 } // namespace OHOS::Ace::NG

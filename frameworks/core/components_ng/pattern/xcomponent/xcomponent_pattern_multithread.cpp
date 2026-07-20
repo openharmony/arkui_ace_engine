@@ -219,9 +219,11 @@ void XComponentPattern::OnDetachFromFrameNodeMultiThread(FrameNode* frameNode)
 #endif
         }
     }
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().DisableSelfRender();
     }
+#endif
 }
 
 void XComponentPatternV2::OnAttachToMainTreeMultiThread(const RefPtr<FrameNode>& host)
@@ -278,9 +280,11 @@ void XComponentPatternV2::OnDetachFromMainTreeMultiThread(const RefPtr<FrameNode
 
 void XComponentPatternV2::OnDetachFromFrameNodeMultiThread()
 {
+#ifndef CROSS_PLATFORM
     if (FrameReport::GetInstance().GetEnable()) {
         FrameReport::GetInstance().DisableSelfRender();
     }
+#endif
     HandleSurfaceDestroyed();
     
     CHECK_NULL_VOID(surfaceHolder_);

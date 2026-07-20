@@ -693,7 +693,9 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
         }
     }
 #endif
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_SCROLL);
+#endif
     ACE_SCOPED_TRACE("HandleDragStart, inputEventType:%d, sourceTool:%d, IsMouseWheelScroll:%u, "
                      "IsAxisAnimationRunning:%u, IsSnapAnimationRunning:%u, id:%d, tag:%s",
         info.GetInputEventType(), info.GetSourceTool(), isAxisEvent, IsAxisAnimationRunning(), IsSnapAnimationRunning(),
@@ -771,7 +773,9 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     auto prevMainDelta = isReverseCallback_ && isReverseCallback_() ? -mainDelta : mainDelta;
     mainDelta = Round(prevMainDelta);
     prevRemainDelta_ = prevMainDelta - mainDelta;
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().RecordFrameUpdate();
+#endif
     auto source = SCROLL_FROM_UPDATE;
     auto isAxisEvent = IsMouseWheelScroll(info);
     if (isAxisEvent) {
@@ -914,7 +918,9 @@ void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
     isSlow_ = LessNotEqual(std::abs(lastGestureVelocity_), SLOW_FRICTION_THRESHOLD);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     lastPos_ = GetDragOffset();
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
+#endif
     double mainPosition = Round(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     bool isWillFling = false;
     if (!moved_ || isAxisEvent) {
@@ -979,7 +985,9 @@ void Scrollable::ProcessAxisEndEvent()
     scrollPause_ = false;
     isTouching_ = false;
     isDragUpdateStop_ = false;
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().ClearFrameJankFlag(JANK_RUNNING_SCROLL);
+#endif
     if (CanStayOverScroll()) {
         HandleOverScroll(0);
         SetCanStayOverScroll(false);

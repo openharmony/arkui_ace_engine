@@ -14,21 +14,16 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/ng/page_router_manager.h"
-
-#ifndef CROSS_PLATFORM
-#include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#endif
 #include "bridge/common/utils/engine_helper.h"
 #include "base/i18n/localization.h"
-#ifndef CROSS_PLATFORM
-#include "base/ressched/ressched_report.h"
-#include "base/perfmonitor/perf_monitor.h"
-#endif
 #include "bridge/js_frontend/engine/jsi/ark_js_runtime.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/common/event_manager.h"
 #ifndef CROSS_PLATFORM
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "base/ressched/ressched_report.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/common/recorder/node_data_cache.h"
 #endif
 #include "core/common/thread_checker.h"
