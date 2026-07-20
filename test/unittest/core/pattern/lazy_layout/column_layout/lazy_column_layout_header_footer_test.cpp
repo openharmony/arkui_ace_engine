@@ -18,16 +18,39 @@
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/unittest/core/pattern/lazy_layout/lazy_edge_test_helper.h"
 
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_model.h"
 #include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_layout/header_footer_utils.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
+#include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model.h"
+#include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_pattern.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
+
+constexpr float HANDOFF_SPACE = 12.0f;
+constexpr float HANDOFF_HEADER_HEIGHT = 60.0f;
+constexpr float GRID_MARGIN = 5.0f;
+constexpr float WATER_FLOW_MARGIN = 7.0f;
+constexpr float EXPECTED_GRID_HANDOFF_GAP = HANDOFF_SPACE + GRID_MARGIN + WATER_FLOW_MARGIN;
+constexpr int32_t GRID_ITEM_COUNT = 2;
+constexpr int32_t WATER_FLOW_ITEM_COUNT = 10;
+
+struct StickyHandoffScene {
+    RefPtr<LazyColumnLayoutPattern> outerPattern;
+    RefPtr<FrameNode> childColumnNode;
+    RefPtr<FrameNode> gridNode;
+    RefPtr<LazyGridLayoutPattern> gridPattern;
+    RefPtr<FrameNode> waterFlowNode;
+    RefPtr<LazyWaterFlowLayoutPattern> waterFlowPattern;
+};
 
 class LazyColumnLayoutHeaderFooterTest : public LazyColumnLayoutTest {
 public:
@@ -38,9 +61,285 @@ public:
         CreateLazyWithEdges<LazyColumnLayoutModel>(
             *this, [this]() { CreateLazyColumnLayout(); }, headerHeight, itemCount, footerHeight, sticky);
     }
+
+    StickyHandoffScene CreateStickyHandoffScene();
+    void FlushStickyToggleCascade(const RefPtr<FrameNode>& node, StickyStyle stickyStyle);
+    void VerifyInitialHandoff(const StickyHandoffScene& scene);
+    void ScrollGridToHandoff(
+        const StickyHandoffScene& scene, RefPtr<MockRenderContext>& gridFooterRenderContext);
+    void VerifyStickyToggleHandoff(const StickyHandoffScene& scene);
+    void VerifyGridFooterAfterHandoff(
+        const StickyHandoffScene& scene, const RefPtr<MockRenderContext>& gridFooterRenderContext);
 };
 
+class StickyStateTestPattern : public LazyLayoutPattern {
+    DECLARE_ACE_TYPE(StickyStateTestPattern, LazyLayoutPattern);
+
+public:
+    AdjustOffset GetAdjustOffset() const override
+    {
+        return {};
+    }
+
+    AdjustOffset GetAndResetAdjustOffset() override
+    {
+        return {};
+    }
+
+    bool HasStickyHeader() const override
+    {
+        return hasStickyHeader_;
+    }
+
+    void SetHasStickyHeader(bool value)
+    {
+        hasStickyHeader_ = value;
+    }
+
+private:
+    bool hasStickyHeader_ = false;
+};
+
+StickyHandoffScene LazyColumnLayoutHeaderFooterTest::CreateStickyHandoffScene()
+{
+    StickyHandoffScene scene;
+    CreateScroll();
+    CreateLazyColumnLayout();
+    scene.outerPattern = pattern_;
+    LazyColumnLayoutModel::SetSpace(Dimension(HANDOFF_SPACE));
+
+    CreateLazyColumnLayout();
+    scene.childColumnNode = frameNode_;
+    LazyColumnLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyColumnLayoutModel::SetHeader([]() { CreateLazyTestEdge(HANDOFF_HEADER_HEIGHT); });
+    CreateContent(1);
+    LazyColumnLayoutModel::SetFooter([]() { CreateLazyTestEdge(40.0f); });
+    ViewStackProcessor::GetInstance()->Pop();
+
+    CreateLazyVGridLayout();
+    scene.gridNode = lazyGridFrameNode_;
+    scene.gridPattern = lazyGridPattern_;
+    ViewAbstract::SetMargin(CalcLength(GRID_MARGIN));
+    LazyGridLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyGridLayoutModel::SetHeader([]() { CreateLazyTestEdge(HANDOFF_HEADER_HEIGHT); });
+    CreateContent(GRID_ITEM_COUNT);
+    LazyGridLayoutModel::SetFooter([]() { CreateLazyTestEdge(40.0f); });
+    ViewStackProcessor::GetInstance()->Pop();
+
+    LazyVWaterFlowLayoutModel waterFlowModel;
+    waterFlowModel.Create();
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    ViewAbstract::SetMargin(CalcLength(WATER_FLOW_MARGIN));
+    LazyVWaterFlowLayoutModel::SetColumnsTemplate("1fr 1fr");
+    scene.waterFlowNode = GetMainFrameNode();
+    scene.waterFlowPattern = scene.waterFlowNode->GetPattern<LazyWaterFlowLayoutPattern>();
+    LazyWaterFlowLayoutModel::SetSticky(StickyStyle::BOTH);
+    LazyWaterFlowLayoutModel::SetHeader([]() { CreateLazyTestEdge(HANDOFF_HEADER_HEIGHT); });
+    CreateContent(WATER_FLOW_ITEM_COUNT);
+    LazyWaterFlowLayoutModel::SetFooter([]() { CreateLazyTestEdge(40.0f); });
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+    return scene;
+}
+
+void LazyColumnLayoutHeaderFooterTest::FlushStickyToggleCascade(
+    const RefPtr<FrameNode>& node, StickyStyle stickyStyle)
+{
+    // Dirty marking mirrors frontend apply; three flushes cover the child -> parent -> previous-sibling turns.
+    LazyVWaterFlowLayoutModel::SetSticky(AceType::RawPtr(node), stickyStyle);
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    FlushUITasks();
+    FlushUITasks();
+}
+
+void LazyColumnLayoutHeaderFooterTest::VerifyInitialHandoff(const StickyHandoffScene& scene)
+{
+    auto childColumnPattern = LazyLayoutUtils::GetLazyLayoutPattern(scene.childColumnNode);
+    ASSERT_NE(childColumnPattern, nullptr);
+    EXPECT_TRUE(childColumnPattern->HasStickyHeader());
+    EXPECT_TRUE(scene.gridPattern->HasStickyHeader());
+    EXPECT_TRUE(scene.waterFlowPattern->HasStickyHeader());
+    ASSERT_TRUE(childColumnPattern->GetNextStickyHeaderGap().has_value());
+    EXPECT_FLOAT_EQ(childColumnPattern->GetNextStickyHeaderGap().value(), HANDOFF_SPACE + GRID_MARGIN);
+    ASSERT_TRUE(scene.gridPattern->GetNextStickyHeaderGap().has_value());
+    EXPECT_FLOAT_EQ(scene.gridPattern->GetNextStickyHeaderGap().value(), EXPECTED_GRID_HANDOFF_GAP);
+    EXPECT_FALSE(scene.waterFlowPattern->GetNextStickyHeaderGap().has_value());
+
+    // A layout wrapper created before a publish must read the updated gap without another measure pass.
+    auto gridLayoutWrapper = scene.gridNode->CreateLayoutWrapper();
+    ASSERT_NE(gridLayoutWrapper, nullptr);
+    scene.gridPattern->PublishNextStickyHeaderGap(std::nullopt);
+    EXPECT_FALSE(HeaderFooterUtils::GetNextStickyHeaderGap(AceType::RawPtr(gridLayoutWrapper)).has_value());
+    scene.gridPattern->PublishNextStickyHeaderGap(EXPECTED_GRID_HANDOFF_GAP);
+    auto liveHandoffGap = HeaderFooterUtils::GetNextStickyHeaderGap(AceType::RawPtr(gridLayoutWrapper));
+    ASSERT_TRUE(liveHandoffGap.has_value());
+    EXPECT_FLOAT_EQ(liveHandoffGap.value(), EXPECTED_GRID_HANDOFF_GAP);
+}
+
+void LazyColumnLayoutHeaderFooterTest::ScrollGridToHandoff(
+    const StickyHandoffScene& scene, RefPtr<MockRenderContext>& gridFooterRenderContext)
+{
+    ASSERT_TRUE(scene.outerPattern->layoutInfo_->posMap_.count(1));
+    auto gridHeader = scene.gridPattern->GetHeaderNode();
+    auto gridFooter = scene.gridPattern->GetFooterNode();
+    ASSERT_NE(gridHeader, nullptr);
+    ASSERT_NE(gridFooter, nullptr);
+    const auto gridStart = scene.outerPattern->layoutInfo_->posMap_.at(1).startPos;
+    scrollablePattern_->UpdateCurrentOffset(
+        -(gridStart + scene.gridPattern->layoutInfo_->totalMainSize_), SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    EXPECT_TRUE(gridFooter->IsActive());
+    auto gridHeaderRenderContext = gridHeader->GetRenderContext();
+    gridFooterRenderContext = AceType::DynamicCast<MockRenderContext>(gridFooter->GetRenderContext());
+    ASSERT_NE(gridHeaderRenderContext, nullptr);
+    ASSERT_NE(gridFooterRenderContext, nullptr);
+    EXPECT_TRUE(gridFooterRenderContext->isVisible_);
+    auto gridHeaderZIndex = gridHeaderRenderContext->GetZIndex();
+    auto gridFooterZIndex = gridFooterRenderContext->GetZIndex();
+    ASSERT_TRUE(gridHeaderZIndex.has_value());
+    ASSERT_TRUE(gridFooterZIndex.has_value());
+    EXPECT_EQ(gridHeaderZIndex.value(), HeaderFooterUtils::STICKY_HEADER_Z_INDEX);
+    EXPECT_EQ(gridFooterZIndex.value(), HeaderFooterUtils::STICKY_FOOTER_Z_INDEX);
+
+    const float expectedHeaderY = scene.gridPattern->layoutInfo_->totalMainSize_ + EXPECTED_GRID_HANDOFF_GAP -
+                                  scene.gridPattern->GetHeaderMainSize();
+    EXPECT_FLOAT_EQ(GetChildY(scene.gridNode, 0), expectedHeaderY);
+}
+
+void LazyColumnLayoutHeaderFooterTest::VerifyStickyToggleHandoff(const StickyHandoffScene& scene)
+{
+    const float expectedHandoffY = scene.gridPattern->layoutInfo_->totalMainSize_ + EXPECTED_GRID_HANDOFF_GAP -
+                                   scene.gridPattern->GetHeaderMainSize();
+    FlushStickyToggleCascade(scene.waterFlowNode, StickyStyle::NONE);
+    EXPECT_FALSE(scene.gridPattern->GetNextStickyHeaderGap().has_value());
+    const float expectedStandaloneY = scene.gridPattern->layoutInfo_->totalMainSize_ -
+                                      scene.gridPattern->GetFooterMainSize() -
+                                      scene.gridPattern->GetHeaderMainSize();
+    EXPECT_FLOAT_EQ(GetChildY(scene.gridNode, 0), expectedStandaloneY);
+
+    FlushStickyToggleCascade(scene.waterFlowNode, StickyStyle::BOTH);
+    ASSERT_TRUE(scene.gridPattern->GetNextStickyHeaderGap().has_value());
+    EXPECT_FLOAT_EQ(scene.gridPattern->GetNextStickyHeaderGap().value(), EXPECTED_GRID_HANDOFF_GAP);
+    EXPECT_FLOAT_EQ(GetChildY(scene.gridNode, 0), expectedHandoffY);
+}
+
+void LazyColumnLayoutHeaderFooterTest::VerifyGridFooterAfterHandoff(
+    const StickyHandoffScene& scene, const RefPtr<MockRenderContext>& gridFooterRenderContext)
+{
+    scrollablePattern_->UpdateCurrentOffset(30.0f, SCROLL_FROM_UPDATE);
+    FlushUITasks();
+    auto gridFooter = scene.gridPattern->GetFooterNode();
+    ASSERT_NE(gridFooter, nullptr);
+    ASSERT_NE(gridFooterRenderContext, nullptr);
+    EXPECT_TRUE(gridFooter->IsActive());
+    EXPECT_TRUE(gridFooterRenderContext->isVisible_);
+    scene.gridPattern->OnDetachFromMainTree();
+    EXPECT_FALSE(scene.gridPattern->GetNextStickyHeaderGap().has_value());
+}
+
 } // namespace
+
+/**
+ * @tc.name: StickyHeaderHandoffAcrossLazyComponents001
+ * @tc.desc: LazyColumnLayout forwards sibling-header handoff semantics across Column, Grid and WaterFlow sections;
+ *           the outgoing Grid footer stays rendered during collision and scrolls behind the higher sticky header.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutHeaderFooterTest, StickyHeaderHandoffAcrossLazyComponents001, TestSize.Level1)
+{
+    auto scene = CreateStickyHandoffScene();
+    ASSERT_NE(scene.outerPattern, nullptr);
+    ASSERT_NE(scene.childColumnNode, nullptr);
+    ASSERT_NE(scene.gridNode, nullptr);
+    ASSERT_NE(scene.gridPattern, nullptr);
+    ASSERT_NE(scene.waterFlowNode, nullptr);
+    ASSERT_NE(scene.waterFlowPattern, nullptr);
+
+    VerifyInitialHandoff(scene);
+    RefPtr<MockRenderContext> gridFooterRenderContext;
+    ScrollGridToHandoff(scene, gridFooterRenderContext);
+    VerifyStickyToggleHandoff(scene);
+    VerifyGridFooterAfterHandoff(scene, gridFooterRenderContext);
+}
+
+/**
+ * @tc.name: LazyPatternLookupStopsAtOrdinaryFrame001
+ * @tc.desc: Sibling handoff lookup may cross only FrameNodes explicitly participating in lazy layout; an ordinary
+ *           wrapper must not be mistaken for a lazy section because its first-child spine contains one.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutHeaderFooterTest, LazyPatternLookupStopsAtOrdinaryFrame001, TestSize.Level1)
+{
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto lazyNode = FrameNode::CreateFrameNode(V2::LAZY_COLUMN_LAYOUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LazyColumnLayoutPattern>());
+    ASSERT_NE(wrapperNode, nullptr);
+    ASSERT_NE(lazyNode, nullptr);
+    wrapperNode->AddChild(lazyNode);
+
+    EXPECT_EQ(LazyLayoutUtils::GetLazyLayoutPattern(wrapperNode), nullptr);
+    wrapperNode->SetNeedLazyLayout(true);
+    EXPECT_EQ(LazyLayoutUtils::GetLazyLayoutPattern(wrapperNode), lazyNode->GetPattern<LazyLayoutPattern>());
+}
+
+/**
+ * @tc.name: StickyHeaderParentNotificationIsBounded001
+ * @tc.desc: Effective sticky-header changes notify the nearest lazy parent through lazy proxy FrameNodes only;
+ *           first observation and the first observation after detach do not schedule a redundant parent pass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutHeaderFooterTest, StickyHeaderParentNotificationIsBounded001, TestSize.Level1)
+{
+    auto parentPattern = AceType::MakeRefPtr<StickyStateTestPattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::LAZY_COLUMN_LAYOUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), parentPattern);
+    auto proxyNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto childPattern = AceType::MakeRefPtr<StickyStateTestPattern>();
+    auto childNode = FrameNode::CreateFrameNode(V2::LAZY_COLUMN_LAYOUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), childPattern);
+    auto ordinaryProxyNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto boundedChildPattern = AceType::MakeRefPtr<StickyStateTestPattern>();
+    auto boundedChildNode = FrameNode::CreateFrameNode(V2::LAZY_COLUMN_LAYOUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), boundedChildPattern);
+    ASSERT_NE(parentNode, nullptr);
+    ASSERT_NE(proxyNode, nullptr);
+    ASSERT_NE(childNode, nullptr);
+    ASSERT_NE(ordinaryProxyNode, nullptr);
+    ASSERT_NE(boundedChildNode, nullptr);
+    parentNode->AddChild(proxyNode);
+    proxyNode->AddChild(childNode);
+    proxyNode->SetNeedLazyLayout(true);
+    parentNode->AddChild(ordinaryProxyNode);
+    ordinaryProxyNode->AddChild(boundedChildNode);
+
+    auto parentLayoutProperty = parentNode->GetLayoutProperty();
+    ASSERT_NE(parentLayoutProperty, nullptr);
+    parentLayoutProperty->CleanDirty();
+    childPattern->NotifyParentOnStickyHeaderChange();
+    EXPECT_EQ(parentLayoutProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_NORMAL);
+
+    childPattern->SetHasStickyHeader(true);
+    childPattern->NotifyParentOnStickyHeaderChange();
+    EXPECT_EQ(parentLayoutProperty->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST,
+        PROPERTY_UPDATE_BY_CHILD_REQUEST);
+
+    parentLayoutProperty->CleanDirty();
+    EXPECT_FALSE(ordinaryProxyNode->GetLayoutProperty()->GetNeedLazyLayout());
+    boundedChildPattern->NotifyParentOnStickyHeaderChange();
+    boundedChildPattern->SetHasStickyHeader(true);
+    boundedChildPattern->NotifyParentOnStickyHeaderChange();
+    EXPECT_EQ(parentLayoutProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_NORMAL);
+
+    parentLayoutProperty->CleanDirty();
+    childPattern->OnDetachFromMainTree();
+    childPattern->SetHasStickyHeader(false);
+    childPattern->NotifyParentOnStickyHeaderChange();
+    EXPECT_EQ(parentLayoutProperty->GetPropertyChangeFlag(), PROPERTY_UPDATE_NORMAL);
+}
 
 /**
  * @tc.name: NestedGridItemsRenderWithHeaderFooter001
@@ -394,5 +693,36 @@ HWTEST_F(LazyColumnLayoutHeaderFooterTest, EndAnchoredPureEdgeResizeKeepsAdjacen
     ResizeLazyEdge(*this, footerNode, 100.0f);
     ASSERT_EQ(pattern_->GetFooterMainSize(), 100.0f);
     EXPECT_FLOAT_EQ(adjacencyGap(), 0.0f);
+}
+
+/**
+ * @tc.name: StableBodyExtentDoesNotAccumulateEdges001
+ * @tc.desc: A regular lazy pass with no item-position update must reuse the previous BODY extent. The published
+ *           SECTION extent must not be treated as body and have header/footer appended again on alternating frames.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyColumnLayoutHeaderFooterTest, StableBodyExtentDoesNotAccumulateEdges001, TestSize.Level1)
+{
+    auto info = AceType::MakeRefPtr<LazyColumnLayoutInfo>();
+    info->headerMainSize_ = 60.0f;
+    info->footerMainSize_ = 40.0f;
+    info->totalMainSize_ = 420.0f; // published SECTION: 60 header + 320 body + 40 footer
+
+    LazyColumnLayoutAlgorithm algorithm(info);
+    algorithm.CaptureFrameBaseline();
+
+    EXPECT_FLOAT_EQ(algorithm.totalMainSize_, 420.0f); // retained for reference-position conversion
+    EXPECT_FLOAT_EQ(algorithm.prevBodyMainSize_, 320.0f);
+    EXPECT_FLOAT_EQ(info->totalMainSize_, 320.0f); // working model is body-local
+
+    info->UpdatePosMap(algorithm.prevBodyMainSize_); // no updated item positions
+    EXPECT_FLOAT_EQ(info->totalMainSize_, 320.0f);
+    EXPECT_FLOAT_EQ(info->adjustOffset_.start, 0.0f);
+    EXPECT_FLOAT_EQ(info->adjustOffset_.end, 0.0f);
+
+    info->totalMainSize_ += info->headerMainSize_ + info->footerMainSize_;
+    EXPECT_FLOAT_EQ(info->totalMainSize_, 420.0f);
+    algorithm.CaptureFrameBaseline();
+    EXPECT_FLOAT_EQ(info->totalMainSize_, 320.0f);
 }
 } // namespace OHOS::Ace::NG

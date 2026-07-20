@@ -74,6 +74,11 @@ StickyStyle LazyGridLayoutPattern::GetStickyStyle() const
     return layoutProperty->GetStickyStyle().value_or(StickyStyle::NONE);
 }
 
+bool LazyGridLayoutPattern::HasStickyHeader() const
+{
+    return GetHeaderNode() && HeaderFooterUtils::IsHeaderSticky(GetStickyStyle());
+}
+
 float LazyGridLayoutPattern::GetHeaderMainSize() const
 {
     return layoutInfo_ ? layoutInfo_->headerMainSize_ : 0.0f;
@@ -363,11 +368,13 @@ void LazyGridLayoutPattern::DumpAdvanceInfo()
 {
     CHECK_NULL_VOID(layoutInfo_);
     layoutInfo_->DumpAdvanceInfo();
+    DumpStickyHeaderHandoffInfo();
 }
 
 void LazyGridLayoutPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(layoutInfo_);
     layoutInfo_->DumpAdvanceInfo(json);
+    DumpStickyHeaderHandoffInfo(json);
 }
 } // namespace OHOS::Ace::NG

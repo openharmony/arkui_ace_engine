@@ -5172,6 +5172,7 @@
       VTT?for?OHOS::Ace::ShapeComponent;
       VTT?for?OHOS::Ace::ShapeContainerComponent;
       OHOS::Ace::NG::LazyLayoutUtils*;
+      OHOS::Ace::NG::LazyLayoutPattern*;
       OHOS::Ace::NG::HeaderFooterUtils*;
       "OHOS::Ace::NG::NodeModifier::GetButtonModifier()";
       "OHOS::Ace::NG::NodeModifier::GetCJUIButtonModifier()";
