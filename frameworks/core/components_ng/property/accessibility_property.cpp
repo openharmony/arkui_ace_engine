@@ -1908,6 +1908,7 @@ void AccessibilityProperty::SetAccessibilityCustomActions(
         }
     }
     accessibilityCustomActions_ = std::move(actions);
+    NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
 }
 
 std::vector<AccessibilityCustomAction> AccessibilityProperty::GetAccessibilityCustomActions()
