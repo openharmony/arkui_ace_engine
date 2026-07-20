@@ -16,10 +16,6 @@
 #include "core/components_ng/pattern/video/video_state_machine_pattern.h"
 
 #include "core/components_ng/pattern/video/video_state_manager.h"
-#include "core/components_ng/pattern/video/video_accessibility_property.h"
-#include "core/components_ng/pattern/video/video_event_hub.h"
-#include "core/components_ng/pattern/video/video_layout_algorithm.h"
-#include "core/components_ng/pattern/video/video_layout_property.h"
 #include "video_node.h"
 
 #include "base/background_task_helper/background_task_helper.h"
@@ -426,29 +422,8 @@ void SendStatisticEvent(StatisticEventType type)
 }
 } // namespace
 
-RefPtr<EventHub> VideoStateMachinePattern::CreateEventHub()
-{
-    return MakeRefPtr<VideoEventHub>();
-}
-
-RefPtr<LayoutProperty> VideoStateMachinePattern::CreateLayoutProperty()
-{
-    return MakeRefPtr<VideoLayoutProperty>();
-}
-
-RefPtr<LayoutAlgorithm> VideoStateMachinePattern::CreateLayoutAlgorithm()
-{
-    return MakeRefPtr<VideoLayoutAlgorithm>();
-}
-
-RefPtr<AccessibilityProperty> VideoStateMachinePattern::CreateAccessibilityProperty()
-{
-    return MakeRefPtr<VideoAccessibilityProperty>();
-}
-
 VideoStateMachinePattern::VideoStateMachinePattern(const RefPtr<VideoControllerAsync>& videoControllerAsync)
-    : instanceId_(Container::CurrentId()), videoControllerAsync_(videoControllerAsync),
-      stateManager_(MakeRefPtr<VideoStateManager>(WeakClaim(this)))
+    : instanceId_(Container::CurrentId()), videoControllerAsync_(videoControllerAsync)
 {}
 
 void VideoStateMachinePattern::OnControllerDestroyed()

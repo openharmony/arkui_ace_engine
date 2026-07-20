@@ -18,7 +18,6 @@
 
 #include "core/components_ng/manager/focus/focus_view.h"
 #include "core/components_ng/pattern/video/video_controller_async.h"
-#include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_state_machine_pattern.h"
 
@@ -28,8 +27,9 @@ class VideoStateMachineFullScreenPattern : public VideoStateMachinePattern, publ
 
 public:
     VideoStateMachineFullScreenPattern() = delete;
-    explicit VideoStateMachineFullScreenPattern(const RefPtr<VideoControllerAsync>& videoControllerAsync);
-    ~VideoStateMachineFullScreenPattern() override;
+    explicit VideoStateMachineFullScreenPattern(const RefPtr<VideoControllerAsync>& videoControllerAsync)
+        : VideoStateMachinePattern(videoControllerAsync) {}
+    ~VideoStateMachineFullScreenPattern() override = default;
     void InitFullScreenParam(const RefPtr<VideoStateMachinePattern>& video, const RefPtr<RenderSurface>& renderSurface,
         const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderContext>& context);
     void RequestFullScreen(const RefPtr<VideoNode>& videoNode);
