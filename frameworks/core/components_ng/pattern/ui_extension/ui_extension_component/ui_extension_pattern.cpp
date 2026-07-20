@@ -1676,7 +1676,7 @@ void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAF
 
 void UIExtensionPattern::FireOnReceiveCallback(const AAFwk::WantParams& params)
 {
-    UIEXT_LOGI("OnReceive the current state is '%{public}s'.", ToString(state_));
+    UIEXT_LOGD("OnReceive the current state is '%{public}s'.", ToString(state_));
     if (onReceiveCallback_) {
         ContainerScope scope(instanceId_);
         onReceiveCallback_(params);
