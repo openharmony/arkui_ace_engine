@@ -4367,6 +4367,12 @@ std::u16string TextPattern::GetSelectedSpanText(std::u16string value, int32_t st
     }
 }
 
+std::optional<float> TextPattern::GetEnvFontScaleFromLayout()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    return textLayoutProperty ? textLayoutProperty->GetEnvFontScale() : std::nullopt;
+}
+
 TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
 {
     TextStyleResult textStyle;
@@ -4392,6 +4398,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     auto lm = node->GetLeadingMarginValue({});
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     auto envFontScale = textLayoutProperty ? textLayoutProperty->GetEnvFontScale() : std::nullopt;
+    textStyle.envFontScale = envFontScale;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         textStyle.fontSize =
             node->GetFontSizeValue(Dimension(16.0f, DimensionUnit::VP)).ConvertToFpWithEnv(envFontScale);

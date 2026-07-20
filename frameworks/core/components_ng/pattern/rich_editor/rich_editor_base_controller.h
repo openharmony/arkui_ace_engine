@@ -29,6 +29,7 @@ class ACE_EXPORT RichEditorBaseController : virtual public RichEditorBaseControl
 public:
     void SetPattern(const WeakPtr<RichEditorPattern>& pattern);
     WeakPtr<RichEditorPattern> GetPattern() const { return pattern_; }
+    std::optional<float> GetEnvFontScale() const;
     void SetHost(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost();
     int32_t GetCaretOffset() override;

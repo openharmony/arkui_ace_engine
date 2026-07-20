@@ -238,6 +238,7 @@ public:
     std::u16string GetSelectedSpanText(std::u16string value, int32_t start, int32_t end, bool includeStartHalf = false,
         bool includeEndHalf = true, bool getSubstrDirectly = true) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
+    std::optional<float> GetEnvFontScaleFromLayout();
     SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);
     virtual RefPtr<UINode> GetChildByIndex(int32_t index) const;
     RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;

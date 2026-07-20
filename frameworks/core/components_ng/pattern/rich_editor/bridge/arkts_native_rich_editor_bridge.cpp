@@ -619,7 +619,8 @@ Local<panda::ObjectRef> CreateParagraphStyle(EcmaVM *vm, const TextStyleResult& 
     }
     if (textStyleResult.paragraphSpacing.has_value()) {
         returnObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "paragraphSpacing"),
-            panda::NumberRef::New(vm, static_cast<double>(textStyleResult.paragraphSpacing.value().ConvertToFp())));
+            panda::NumberRef::New(vm, static_cast<double>(
+                textStyleResult.paragraphSpacing.value().ConvertToFpWithEnv(textStyleResult.envFontScale))));
     }
     if (textStyleResult.textVerticalAlign.has_value()) {
         returnObject->Set(vm, panda::StringRef::NewFromUtf8(vm, "textVerticalAlign"),
