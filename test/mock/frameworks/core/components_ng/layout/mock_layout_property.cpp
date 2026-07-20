@@ -253,7 +253,14 @@ void LayoutProperty::UpdateOuterBorderWidth(const BorderWidthProperty& value) {}
 
 void LayoutProperty::UpdateAlignment(Alignment value) {}
 
-void LayoutProperty::UpdateLocalizedAlignment(std::string value) {}
+void LayoutProperty::UpdateLocalizedAlignment(std::string value)
+{
+    if (!positionProperty_) {
+        positionProperty_ = std::make_unique<PositionProperty>();
+    }
+    positionProperty_->UpdateLocalizedAlignmentRaw(value);
+    positionProperty_->UpdateLocalizedAlignment(value);
+}
 
 void LayoutProperty::UpdateLayoutGravity(Alignment value) {}
 
