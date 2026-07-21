@@ -91,7 +91,7 @@ HWTEST_F(CircleHdrRuntimeTestNg, CirclePaintMethodHeadRoom001, TestSize.Level0)
         CirclePaintMethod paintMethod;
         auto drawFunction = paintMethod.GetContentDrawFunction(AceType::RawPtr(paintWrapper));
         EXPECT_NE(drawFunction, nullptr);
-        EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 2);
+        EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 1);
         EXPECT_FLOAT_EQ(testRenderContext->lastHdrHeadRoom_, strokeHeadRoom);
     }
 
@@ -100,8 +100,7 @@ HWTEST_F(CircleHdrRuntimeTestNg, CirclePaintMethodHeadRoom001, TestSize.Level0)
         CirclePaintMethod paintMethod;
         auto drawFunction = paintMethod.GetContentDrawFunction(AceType::RawPtr(paintWrapper));
         EXPECT_NE(drawFunction, nullptr);
-        EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 1);
-        EXPECT_FLOAT_EQ(testRenderContext->lastHdrHeadRoom_, 1.0f);
+        EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 0);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -32,8 +32,11 @@ public:
     CirclePaintMethod() = default;
     CirclePaintMethod(
         const RefPtr<ShapePaintProperty>& shapePaintProperty,
-        const RefPtr<ShapeOverlayModifier>& shapeOverlayModifier)
-        : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier)
+        const RefPtr<ShapeOverlayModifier>& shapeOverlayModifier,
+        std::optional<float>* lastFillHdrHeadRoom = nullptr,
+        std::optional<float>* lastStrokeHdrHeadRoom = nullptr)
+        : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier),
+          lastFillHdrHeadRoom_(lastFillHdrHeadRoom), lastStrokeHdrHeadRoom_(lastStrokeHdrHeadRoom)
     {}
     ~CirclePaintMethod() override = default;
 
@@ -41,9 +44,11 @@ public:
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
-    void UpdateFillHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const;
-    void UpdateStrokeHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const;
+    void UpdateFillHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty);
+    void UpdateStrokeHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty);
 
+    std::optional<float>* lastFillHdrHeadRoom_ = nullptr;
+    std::optional<float>* lastStrokeHdrHeadRoom_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(CirclePaintMethod);
 };
 

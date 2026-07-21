@@ -105,6 +105,7 @@ private:
     // No animatable
     std::shared_ptr<Rosen::RSProperty<Gradient>> gradient_;
     ColorSpace colorSpace_ = ColorSpace::SRGB;
+    mutable std::optional<float> lastHdrColorHeadRoom_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_GRADIENT_STYLE_MODIFIER_H
