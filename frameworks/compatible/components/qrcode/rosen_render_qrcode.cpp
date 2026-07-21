@@ -28,8 +28,13 @@ namespace OHOS::Ace {
 void RosenRenderQrcode::Paint(RenderContext& context, const Offset& offset)
 {
     QrcodeImage* qrCode = QrcodeImageEncodeString(value_.c_str(), QRCODE_ECC::QRCODE_ECC_MEDIUM);
-    if ((qrCode == nullptr) || (qrCode->width == 0) || (qrCode->data == nullptr)) {
+    if (qrCode == nullptr) {
         LOGE("RosenRenderQrcode::DrawQRCode qrcode is null");
+        return;
+    }
+    if ((qrCode->width == 0) || (qrCode->data == nullptr)) {
+        LOGE("RosenRenderQrcode::DrawQRCode qrcode width is 0 or data is null");
+        QrcodeImageFree(qrCode);
         return;
     }
     uint32_t qrWidth = qrCode->width;

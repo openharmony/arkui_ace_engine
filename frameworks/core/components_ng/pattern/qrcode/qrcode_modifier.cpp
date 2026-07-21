@@ -42,8 +42,13 @@ void QRCodeModifier::onDraw(DrawingContext& context)
     auto color = color_->Get();
     auto backgroundColor = backgroundColor_->Get();
     QrcodeImage* qrCode = QrcodeImageEncodeString(value.c_str(), QRCODE_ECC::QRCODE_ECC_MEDIUM);
-    if ((qrCode == nullptr) || (qrCode->width == 0) || (qrCode->data == nullptr)) {
+    if (qrCode == nullptr) {
         TAG_LOGE(AceLogTag::ACE_QRCODE, "QRCodeModifier::onDraw qrCode is null");
+        return;
+    }
+    if ((qrCode->width == 0) || (qrCode->data == nullptr)) {
+        LOGE("QRCodeModifier::onDraw qrcode width is 0 or data is null");
+        QrcodeImageFree(qrCode);
         return;
     }
     uint32_t qrWidth = qrCode->width;
