@@ -242,9 +242,8 @@ void OH_ArkUI_CustomDialog_OpenDialogWithCallback(
     if (!impl || !options) {
         if (callback) {
             callback(ARKUI_ERROR_CODE_PARAM_INVALID, -1, userData);
-        } else {
-            return;
         }
+        return;
     }
 
     auto dialogAPI = impl->getDialogAPI();
