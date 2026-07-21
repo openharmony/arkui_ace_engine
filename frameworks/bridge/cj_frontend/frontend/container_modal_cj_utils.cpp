@@ -460,7 +460,8 @@ bool IsWindowMaximizedForCjTitleBar(const RefPtr<PipelineContext>& pipeline)
     auto windowMode = wm->GetWindowMode();
     MaximizeMode mode = wm->GetCurrentWindowMaximizeMode();
     return mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
-        windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
+        windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+        windowMode == WindowMode::WINDOW_MODE_SPLIT;
 }
 
 void UpdateMaximizeButtonIcon(const RefPtr<FrameNode>& maximizeBtn, bool isRecover)
