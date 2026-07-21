@@ -1345,4 +1345,81 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, MenuCallbackTest011, TestSize.Level1)
     menuPattern_->HandleDragEnd(0.0f, 200.0f, 3000.0f);
 }
 
+/**
+ * @tc.name: GetSelectMenuWidthFromThemeTest001
+ * @tc.desc: Test GetSelectMenuWidthFromTheme when theme width is small.
+ *           Covers: if (LessNotEqual(finalWidth, minSelectWidth)) branch = true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetSelectMenuWidthFromThemeTest001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    selectTheme->optionNormalWidth_ = 0.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto width = menuPattern_->GetSelectMenuWidthFromTheme();
+    EXPECT_GE(width, 0.0f);
+}
+
+/**
+ * @tc.name: GetSelectMenuWidthFromThemeTest002
+ * @tc.desc: Test GetSelectMenuWidthFromTheme when theme width is large.
+ *           Covers: if (LessNotEqual(finalWidth, minSelectWidth)) branch = false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetSelectMenuWidthFromThemeTest002, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    selectTheme->optionNormalWidth_ = 100.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto width = menuPattern_->GetSelectMenuWidthFromTheme();
+    float expectedWidth = (100.0f + 8.0f);
+    EXPECT_FLOAT_EQ(width, expectedWidth);
+}
+
+/**
+ * @tc.name: GetSelectMenuWidthFromThemeTest003
+ * @tc.desc: Test GetSelectMenuWidthFromTheme with borderline theme width (equal to threshold).
+ *           Covers: if (LessNotEqual(finalWidth, minSelectWidth)) branch = false (finalWidth == minSelectWidth).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetSelectMenuWidthFromThemeTest003, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    selectTheme->optionNormalWidth_ = 56.0_vp;
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(selectTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto width = menuPattern_->GetSelectMenuWidthFromTheme();
+    float expectedWidth = (56.0f + 8.0f);
+    EXPECT_FLOAT_EQ(width, expectedWidth);
+}
+
 } // namespace OHOS::Ace::NG
