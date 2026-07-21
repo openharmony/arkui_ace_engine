@@ -13,62 +13,11 @@
  * limitations under the License.
  */
 
-class LazyArkIndicatorComponent extends ArkComponent {
-  static module: IndicatorComponentModule | undefined = undefined;
-
-  constructor(nativePtr: KNode, classType: ModifierType) {
-    super(nativePtr, classType);
-    if (LazyArkIndicatorComponent.module === undefined) {
-      LazyArkIndicatorComponent.module = globalThis.requireNapi('arkui.components.arkswiperindicator');
-    }
-    this.lazyComponent = LazyArkIndicatorComponent.module.createComponent(nativePtr, classType);
-  }
-
-  setMap(): void {
-    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
-  }
-
-  allowChildCount(): number {
-    return this.lazyComponent.allowChildCount();
-  }
-
-  initialIndex(value: number): this {
-    this.lazyComponent.initialIndex(value);
-    return this;
-  }
-
-  count(value: number): this {
-    this.lazyComponent.count(value);
-    return this;
-  }
-
-  style(value: DotIndicator | DigitIndicator): this {
-    this.lazyComponent.style(value);
-    return this;
-  }
-
-  loop(value: boolean): this {
-    this.lazyComponent.loop(value);
-    return this;
-  }
-
-  vertical(value: boolean): this {
-    this.lazyComponent.vertical(value);
-    return this;
-  }
-
-  onChange(value: Callback<number>): this {
-    this.lazyComponent.onChange(value);
-    return this;
-  }
-}
-
-class IndicatorComponentModifier extends LazyArkIndicatorComponent implements AttributeModifier<IndicatorComponentAttribute> {
+class IndicatorComponentModifier extends ArkIndicatorComponentComponent implements AttributeModifier<IndicatorComponentAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
-    this.setMap();
   }
 
   applyNormalAttribute(instance: IndicatorComponentAttribute): void {

@@ -83,7 +83,10 @@
 #include "core/components_ng/pattern/overlay/level_order.h"
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_container_pattern.h"
-#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_manager.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_view.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_pattern.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -105,7 +108,6 @@
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/dialog_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
-#include "core/interfaces/native/node/sheet_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -565,11 +567,12 @@ void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& containerNode)
     const auto& nodeTag = containerNode->GetTag();
     if (nodeTag == V2::SHEET_PAGE_TAG) {
         // BindSheet does not use subwindowManage. If use subwindow for display, autosave is started in the main window.
-        auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-        CHECK_NULL_VOID(sheetModifier);
-        if (sheetModifier->sheetHasInstanceId(containerNode)) {
-            auto targetNode = FrameNode::GetFrameNode(
-                sheetModifier->sheetGetTargetTag(containerNode), sheetModifier->sheetGetTargetId(containerNode));
+        auto layoutProperty = containerNode->GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto currentStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+        if (currentStyle.instanceId.has_value()) {
+            auto pattern = containerNode->GetPattern<SheetPresentationPattern>();
+            auto targetNode = FrameNode::GetFrameNode(pattern->GetTargetTag(), pattern->GetTargetId());
             CHECK_NULL_VOID(targetNode);
             containerId = targetNode->GetInstanceId();
         }
@@ -2119,9 +2122,11 @@ void OverlayManager::SendAccessibilityEventToNextOrderNode(const RefPtr<FrameNod
     }
 
     if (newTopNode->GetTag() == V2::SHEET_WRAPPER_TAG) {
-        auto* sheetModifier = NG::NodeModifier::GetSheetWrapperInnerModifier();
-        CHECK_NULL_VOID(sheetModifier);
-        newTopNode = sheetModifier->sheetWrapperGetSheetPageNode(newTopNode);
+        auto pattern = newTopNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        auto sheetWrapperPattern = DynamicCast<SheetWrapperPattern>(pattern);
+        CHECK_NULL_VOID(sheetWrapperPattern);
+        newTopNode = sheetWrapperPattern->GetSheetPageNode();
         CHECK_NULL_VOID(newTopNode);
     }
     newTopNode->OnAccessibilityEvent(
@@ -2664,9 +2669,9 @@ bool OverlayManager::RemoveModalInOverlay()
     auto topModalNode = GetModalStackTop();
     CHECK_NULL_RETURN(topModalNode, false);
     if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
-        auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-        CHECK_NULL_RETURN(sheetModifier, false);
-        sheetModifier->sheetInteractiveDismiss(topModalNode, BindSheetDismissReason::BACK_PRESSED);
+        auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_RETURN(sheetPattern, false);
+        sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::BACK_PRESSED);
         return true;
     } else if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
         auto modalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
@@ -2687,9 +2692,9 @@ bool OverlayManager::RemoveModalInOverlay()
         return false;
     }
     PopTopModalNode();
-    auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG && sheetModifier) {
-        sheetMap_.erase(sheetModifier->sheetGetSheetKey(topModalNode));
+    auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
+    if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG && sheetPattern) {
+        sheetMap_.erase(sheetPattern->GetSheetKey());
     }
     if (topModalNode->GetTag() == V2::MODAL_PAGE_TAG) {
         auto modalPattern = AceType::DynamicCast<ModalPresentationPattern>(pattern);
@@ -2767,9 +2772,9 @@ bool OverlayManager::RemoveAllModalInOverlayByStack()
                 FireNavigationStateChange(true);
             }
         }
-        auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-        if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG && sheetModifier) {
-            sheetMap_.erase(sheetModifier->sheetGetSheetKey(topModalNode));
+        auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
+        if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG && sheetPattern) {
+            sheetMap_.erase(sheetPattern->GetSheetKey());
         }
         FireModalPageHide();
         SaveLastModalNode();
@@ -2824,9 +2829,9 @@ bool OverlayManager::OnRemoveAllModalInOverlayByList()
                 FireNavigationStateChange(true);
             }
         }
-        auto *sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-        if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG && sheetModifier) {
-            sheetMap_.erase(sheetModifier->sheetGetSheetKey(topModalNode));
+        auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
+        if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG && sheetPattern) {
+            sheetMap_.erase(sheetPattern->GetSheetKey());
         }
         modalIter = modalList_.erase(modalIter);
     }
@@ -2991,12 +2996,10 @@ bool OverlayManager::SheetPageExitProcess(const RefPtr<FrameNode>& topModalNode)
 {
     auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetLastChild());
     CHECK_NULL_RETURN(builder, false);
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_RETURN(sheetPatternModifier, false);
-    sheetPatternModifier->sheetOnWillDisappear(topModalNode);
+    topModalNode->GetPattern<SheetPresentationPattern>()->OnWillDisappear();
     if (builder->GetRenderContext()->HasDisappearTransition()) {
-        if (!sheetPatternModifier->sheetIsExecuteOnDisappear(topModalNode)) {
-            sheetPatternModifier->sheetOnDisappear(topModalNode);
+        if (!topModalNode->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
+            topModalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
         }
         topModalNode->Clean(false, true);
         topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -3005,13 +3008,13 @@ bool OverlayManager::SheetPageExitProcess(const RefPtr<FrameNode>& topModalNode)
     if (maskNode) {
         PlaySheetMaskTransition(maskNode, topModalNode, false);
     }
-    auto sheetType = sheetPatternModifier->sheetGetSheetTypeNoProcess(topModalNode);
+    auto sheetType = topModalNode->GetPattern<SheetPresentationPattern>()->GetSheetTypeNoProcess();
     if (sheetType == SheetType::SHEET_POPUP) {
         PlayBubbleStyleSheetTransition(topModalNode, false);
     } else {
         PlaySheetTransition(topModalNode, false);
     }
-    sheetPatternModifier->sheetFireCallback(topModalNode, "false");
+    topModalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
     return true;
 }
 
@@ -3071,8 +3074,7 @@ bool OverlayManager::RemoveOverlayInSubwindow()
     CHECK_NULL_RETURN(overlay, false);
     auto pattern = overlay->GetPattern();
     auto ret = RemoveOverlayCommon(rootNode, overlay, pattern, false, false);
-    auto* sheetModifier = NG::NodeModifier::GetSheetWrapperInnerModifier();
-    if (sheetModifier && sheetModifier->sheetIsWrapperPattern(pattern)) {
+    if (InstanceOf<SheetWrapperPattern>(pattern)) {
         ret = RemoveModalInOverlay() ? OVERLAY_REMOVE : OVERLAY_EXISTS;
     }
     if (ret == OVERLAY_EXISTS) {
@@ -3640,6 +3642,8 @@ void OverlayManager::InitSheetMask(
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
+    auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(sheetLayoutProps);
     maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         UpdateSheetMaskBackgroundColor(maskNode, maskRenderContext, sheetStyle);
@@ -3650,36 +3654,32 @@ void OverlayManager::InitSheetMask(
             [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
                 auto sheet = weak.Upgrade();
                 CHECK_NULL_VOID(sheet);
-                auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-                CHECK_NULL_VOID(sheetPatternModifier);
-                if (sheetPatternModifier->sheetIsDragging(sheet)) {
+                auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+                CHECK_NULL_VOID(sheetPattern);
+                if (sheetPattern->IsDragging()) {
                     return;
                 }
-                sheetPatternModifier->sheetInteractiveDismiss(sheet, BindSheetDismissReason::TOUCH_OUTSIDE);
+                sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
             });
         auto maskNodeId = maskNode->GetId();
         sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
         eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
         eventConfirmHub->SetNodeClickDistance(DISTANCE_THRESHOLD);
-        auto* sheetManagerModifier = NG::NodeModifier::GetSheetManagerInnerModifier();
-        CHECK_NULL_VOID(sheetManagerModifier);
-        sheetManagerModifier->setMaskInteractive(maskNode, true);
+        SheetManager::SetMaskInteractive(maskNode, true);
         if (!sheetStyle.interactive.has_value()) {
-            auto *sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-            CHECK_NULL_VOID(sheetPatternModifier);
-            if (sheetPatternModifier->sheetGetSheetTypeNoProcess(sheetNode) == SheetType::SHEET_POPUP) {
+            if (sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetTypeNoProcess() == SheetType::SHEET_POPUP) {
                 maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                     HitTestMode::HTMTRANSPARENT);
                 eventConfirmHub->RemoveClickEvent(sheetMaskClickEvent);
                 sheetMaskClickEventMap_.erase(maskNodeId);
-                sheetManagerModifier->setMaskInteractive(maskNode, false);
+                SheetManager::SetMaskInteractive(maskNode, false);
             }
         } else if (sheetStyle.interactive == true) {
             maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                 HitTestMode::HTMTRANSPARENT);
             eventConfirmHub->RemoveClickEvent(sheetMaskClickEvent);
             sheetMaskClickEventMap_.erase(maskNodeId);
-            sheetManagerModifier->setMaskInteractive(maskNode, false);
+            SheetManager::SetMaskInteractive(maskNode, false);
         }
     }
 }
@@ -3722,18 +3722,17 @@ void OverlayManager::CloseSheet(const SheetKey& sheetKey)
         SaveLastModalNode();
         return;
     }
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    sheetPatternModifier->sheetSetShowState(sheetNode, false);
-    auto buildContent = sheetPatternModifier->sheetGetFirstFrameNodeOfBuilder(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    sheetPattern->SetShowState(false);
+    auto buildContent = sheetPattern->GetFirstFrameNodeOfBuilder();
     CHECK_NULL_VOID(buildContent);
-    sheetPatternModifier->sheetOnWillDisappear(sheetNode);
-
+    sheetPattern->OnWillDisappear();
     if (buildContent->GetRenderContext()->HasDisappearTransition()) {
-        if (!sheetPatternModifier->sheetIsExecuteOnDisappear(sheetNode)) {
-            sheetPatternModifier->sheetOnDisappear(sheetNode);
+        if (!sheetPattern->IsExecuteOnDisappear()) {
+            sheetPattern->OnDisappear();
         }
-        sheetPatternModifier->sheetOnDisappear(sheetNode);
+        sheetPattern->OnDisappear();
         sheetNode->Clean(false, true);
         sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -3742,13 +3741,13 @@ void OverlayManager::CloseSheet(const SheetKey& sheetKey)
     if (maskNode) {
         PlaySheetMaskTransition(maskNode, sheetNode, false);
     }
-    auto sheetType = sheetPatternModifier->sheetGetSheetTypeNoProcess(sheetNode);
+    auto sheetType = sheetPattern->GetSheetTypeNoProcess();
     if (sheetType == SheetType::SHEET_POPUP) {
         PlayBubbleStyleSheetTransition(sheetNode, false);
     } else {
         PlaySheetTransition(sheetNode, false);
     }
-    sheetPatternModifier->sheetSetDismissProcess(sheetNode, true);
+    sheetPattern->SetDismissProcess(true);
     sheetMap_.erase(sheetKey);
     CleanViewContextMap(Container::CurrentId(), sheetKey.contentId);
     RemoveSheetNode(sheetNode);
@@ -3769,9 +3768,9 @@ void OverlayManager::DismissSheet()
     auto sheetNode = iter->second.Upgrade();
     CHECK_NULL_VOID(sheetNode);
     if (sheetNode->GetTag() == V2::SHEET_PAGE_TAG) {
-        auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-        CHECK_NULL_VOID(sheetPatternModifier);
-        sheetPatternModifier->sheetDismissSheetAction(sheetNode);
+        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
+        sheetPattern->DismissSheet();
     }
 }
 
@@ -3808,9 +3807,9 @@ void OverlayManager::SheetSpringBack()
     auto sheetNode = sheetMap_[dismissTarget_.sheetKey].Upgrade();
     CHECK_NULL_VOID(sheetNode);
     if (sheetNode->GetTag() == V2::SHEET_PAGE_TAG) {
-        auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-        CHECK_NULL_VOID(sheetPatternModifier);
-        sheetPatternModifier->sheetSheetSpringBack(sheetNode);
+        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
+        sheetPattern->SheetSpringBack();
     }
 }
 
@@ -3886,10 +3885,10 @@ void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
 void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
 {
     CHECK_NULL_VOID(sheetNode);
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    auto showInSubWindow = sheetPatternModifier->sheetGetSheetStyleValue(sheetNode).showInSubWindow.value_or(false);
-    auto sheetWrapper = sheetPatternModifier->sheetGetParentSkipEffectComponent(sheetNode);
+    const auto& layoutProp = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    auto showInSubWindow = layoutProp->GetSheetStyleValue(SheetStyle()).showInSubWindow.value_or(false);
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     auto wrapperParent = sheetWrapper->GetParent();
     CHECK_NULL_VOID(wrapperParent);
@@ -3903,10 +3902,10 @@ void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
         SendAccessibilityEventToNextOrderNode(topOrderNode);
         return;
     }
-    auto* sheetWrapperModifier = NG::NodeModifier::GetSheetWrapperInnerModifier();
-    CHECK_NULL_VOID(sheetWrapperModifier);
-    auto maskNode = sheetWrapperModifier->sheetWrapperGetSheetMaskNode(sheetWrapper);
-    if (!sheetWrapperModifier->sheetWrapperShowInUEC(sheetWrapper) && maskNode) {
+    auto sheetWrapperPattern = sheetWrapper->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_VOID(sheetWrapperPattern);
+    auto maskNode = sheetWrapperPattern->GetSheetMaskNode();
+    if (!sheetWrapperPattern->ShowInUEC() && maskNode) {
         // detele mask in main subwindow
         auto parent = maskNode->GetParent();
         if (parent) {
@@ -3917,25 +3916,28 @@ void OverlayManager::RemoveSheet(RefPtr<FrameNode> sheetNode)
     }
     CHECK_NULL_VOID(maskNode);
     // detele sheet wrapper in subwindow
-    auto subWindowId = sheetWrapperModifier->sheetWrapperGetSubWindowId(sheetWrapper);
-    SubwindowManager::GetInstance()->DeleteHotAreas(subWindowId, maskNode->GetId(), SubwindowType::TYPE_SHEET);
-    SubwindowManager::GetInstance()->DeleteHotAreas(subWindowId, sheetNode->GetId(), SubwindowType::TYPE_SHEET);
+    SubwindowManager::GetInstance()->DeleteHotAreas(sheetWrapperPattern->GetSubWindowId(),
+        maskNode->GetId(), SubwindowType::TYPE_SHEET);
+    SubwindowManager::GetInstance()->DeleteHotAreas(sheetWrapperPattern->GetSubWindowId(),
+        sheetNode->GetId(), SubwindowType::TYPE_SHEET);
     wrapperParent->RemoveChild(sheetWrapper);
     wrapperParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    SubwindowManager::GetInstance()->HideSheetSubWindow(subWindowId);
+    SubwindowManager::GetInstance()->HideSheetSubWindow(sheetWrapperPattern->GetSubWindowId());
 }
 
 void OverlayManager::PlaySheetTransition(
     RefPtr<FrameNode> sheetNode, bool isTransitionIn, bool isFirstTransition)
 {
     CHECK_NULL_VOID(sheetNode);
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    if (sheetPatternModifier->sheetIsSheetObjectBase(sheetNode) && isTransitionIn && isFirstTransition &&
-        NearZero(sheetPatternModifier->sheetGetSheetHeightForTranslate(sheetNode))) {
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto sheetObject = sheetPattern->GetSheetObject();
+    CHECK_NULL_VOID(sheetObject);
+    if (sheetObject->IsSheetObjectBase() && isTransitionIn && isFirstTransition &&
+        NearZero(sheetPattern->GetSheetHeightForTranslate())) {
         return;
     }
-    sheetPatternModifier->sheetSheetTransitionForOverlay(sheetNode, isTransitionIn, isFirstTransition);
+    sheetPattern->SheetTransitionForOverlay(isTransitionIn, isFirstTransition);
 }
 
 void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::string&)>&& callback,
@@ -3953,10 +3955,8 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
         return;
     }
     if (sheetStyle.enableFloatingDragBar.value_or(false)) {
-        auto *sheetViewModifier = NG::NodeModifier::GetSheetViewInnerModifier();
-        CHECK_NULL_VOID(sheetViewModifier);
         sheetStyle.enableFloatingDragBar =
-            (sheetStyle.showDragBar.value_or(true) && !sheetViewModifier->sheetIsSingleDetents(sheetStyle) &&
+            (sheetStyle.showDragBar.value_or(true) && !SheetView::IsSingleDetents(sheetStyle) &&
                 !sheetStyle.isTitleBuilder.value_or(false));
     }
     SheetKey sheetKey(targetId);
@@ -4043,17 +4043,16 @@ void OverlayManager::UpdateSheetRender(
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = sheetPageNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
 
-    sheetPatternModifier->sheetClearSheetRenderMaterial(sheetPageNode);
-    SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle, isPartialUpdate);
+    sheetNodePattern->ClearSheetRenderMaterial();
+    SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle);
     // if use effectComponent, set blur on effectComponent, not on sheetpage
-    if (sheetStyle.backgroundBlurStyle.has_value() &&
-        !sheetPatternModifier->sheetCheckIfUseEffectComponent(sheetPageNode, sheetStyle)) {
+    if (sheetStyle.backgroundBlurStyle.has_value() && !sheetNodePattern->CheckIfUseEffectComponent(sheetStyle)) {
         SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
     }
-    sheetPatternModifier->sheetSetSheetBorderWidth(sheetPageNode);
+    sheetNodePattern->SetSheetBorderWidth();
     if (sheetStyle.borderStyle.has_value()) {
         sheetRenderContext->UpdateBorderStyle(sheetStyle.borderStyle.value());
     }
@@ -4066,18 +4065,18 @@ void OverlayManager::UpdateSheetRender(
             ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, sheetStyle.shadow.value(), sheetPageNode);
         } else if (sheetTheme->IsOuterBorderEnable()) {
             auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
-            auto shadow = sheetPatternModifier->sheetGetShadowFromTheme(sheetPageNode, style);
+            auto shadow = sheetNodePattern->GetShadowFromTheme(style);
             sheetRenderContext->UpdateBackShadow(shadow);
             ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, sheetPageNode);
         } else if (!isPartialUpdate) {
-            auto shadow = sheetPatternModifier->sheetGetShadowFromTheme(sheetPageNode, ShadowStyle::None);
+            auto shadow = sheetNodePattern->GetShadowFromTheme(ShadowStyle::None);
             sheetRenderContext->UpdateBackShadow(shadow);
             ACE_UPDATE_NODE_RENDER_CONTEXT(PreBackShadow, shadow, sheetPageNode);
         }
     }
-    sheetPatternModifier->sheetUpdateMaskBackgroundColor(sheetPageNode);
+    sheetNodePattern->UpdateMaskBackgroundColor();
 
-    sheetPatternModifier->sheetSetSheetRenderMaterial(sheetPageNode);
+    sheetNodePattern->SetSheetRenderMaterial();
 }
 void OverlayManager::UpdateSheetRenderProperty(const RefPtr<FrameNode>& sheetNode,
     const NG::SheetStyle& currentStyle, bool isPartialUpdate)
@@ -4100,77 +4099,92 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
     std::function<void(const float)>&& onTypeDidChange,
     std::function<void()>&& sheetSpringBack)
 {
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
     if (sheetNode->GetTag() != V2::SHEET_PAGE_TAG ||
-        sheetPatternModifier->sheetGetTargetId(sheetNode) != targetId) {
+        sheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
         return;
     }
+    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
 
-    sheetPatternModifier->sheetIsNeedPlayTransition(sheetNode, sheetStyle);
+    sheetNodePattern->IsNeedPlayTransition(sheetStyle);
     auto currentStyle = sheetStyle;
     if (isStartByUIContext) {
         currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
-        sheetPatternModifier->sheetUpdateSheetTypeAndObject(sheetNode, currentStyle);
+        sheetNodePattern->UpdateSheetType();
+        sheetNodePattern->SetSheetEdgeLightMode(currentStyle);
+        sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
         UpdateSheetRenderProperty(sheetNode, currentStyle, isPartialUpdate);
-        sheetPatternModifier->sheetUpdateDragBarStatus(sheetNode);
-        sheetPatternModifier->sheetUpdateTitleColumnSize(sheetNode);
+        sheetNodePattern->UpdateDragBarStatus();
+        sheetNodePattern->UpdateTitleColumnSize();
     } else {
-        sheetPatternModifier->sheetUpdateSheetCallbacks(sheetNode, std::move(onAppear), std::move(onDisappear),
-            std::move(shouldDismiss), std::move(onWillDismiss), std::move(onWillAppear), std::move(onWillDisappear),
-            std::move(onHeightDidChange), std::move(onDetentsDidChange), std::move(onWidthDidChange),
-            std::move(onTypeDidChange), std::move(sheetSpringBack));
-        sheetPatternModifier->sheetLayoutPropUpdateSheetStyle(sheetNode, sheetStyle);
-        sheetPatternModifier->sheetUpdateSheetTypeAndObject(sheetNode, sheetStyle);
+        sheetNodePattern->UpdateOnAppear(std::move(onAppear));
+        sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
+        sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
+        sheetNodePattern->UpdateOnWillDismiss(std::move(onWillDismiss));
+        sheetNodePattern->UpdateOnWillAppear(std::move(onWillAppear));
+        sheetNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
+        sheetNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
+        sheetNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
+        sheetNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
+        sheetNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
+        sheetNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
+        auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+        layoutProperty->UpdateSheetStyle(sheetStyle);
+        sheetNodePattern->UpdateSheetType();
+        sheetNodePattern->SetSheetEdgeLightMode(sheetStyle);
+        sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
         UpdateSheetRenderProperty(sheetNode, sheetStyle, isPartialUpdate);
     }
     if (SystemProperties::ConfigChangePerform()) {
         // Register the resource update function when sheet node update resource.
-        sheetPatternModifier->sheetUpdateSheetParamResource(sheetNode, currentStyle);
+        sheetNodePattern->UpdateSheetParamResource(sheetNode, currentStyle);
     }
-    sheetPatternModifier->sheetSetBottomOffset(sheetNode, sheetStyle);
+    sheetNodePattern->SetBottomOffset(sheetStyle);
     // MarkModifyDone must be called after UpdateSheetObject. InitSheetMode depends on SheetObject.
     sheetNode->MarkModifyDone();
 
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto sheetWrapper = sheetPatternModifier->sheetGetParentSkipEffectComponent(sheetNode);
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
     ComputeSheetOffset(currentStyle, sheetNode);
     // The animation generated by the developer actively switching the SheetType, does not rely on PlaySheetTransition,
     // but on the above FlushUITasks, and ondirty.
-    auto sheetType = sheetPatternModifier->sheetGetSheetTypeNoProcess(sheetNode);
-    if (sheetType != SheetType::SHEET_POPUP && sheetPatternModifier->sheetGetIsPlayTransition(sheetNode)) {
+    auto sheetType = sheetNodePattern->GetSheetTypeNoProcess();
+    if (sheetType != SheetType::SHEET_POPUP && sheetNodePattern->GetIsPlayTransition()) {
         PlaySheetTransition(sheetNode, true, false);
     }
 }
 
 void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const NG::SheetStyle& sheetStyle)
 {
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-
-    sheetPatternModifier->sheetIsNeedPlayTransition(sheetNode, sheetStyle);
-    sheetPatternModifier->sheetLayoutPropUpdateSheetStyle(sheetNode, sheetStyle);
-    sheetPatternModifier->sheetUpdateSheetTypeAndObject(sheetNode, sheetStyle);
+    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+ 
+    sheetNodePattern->IsNeedPlayTransition(sheetStyle);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetNodePattern->UpdateSheetType();
+    sheetNodePattern->SetSheetEdgeLightMode(sheetStyle);
+    sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
     UpdateSheetRenderProperty(sheetNode, sheetStyle, false);
-    sheetPatternModifier->sheetSetBottomOffset(sheetNode, sheetStyle);
+    sheetNodePattern->SetBottomOffset(sheetStyle);
     sheetNode->MarkModifyDone();
     auto pipeline = sheetNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto sheetWrapper = sheetPatternModifier->sheetGetParentSkipEffectComponent(sheetNode);
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_VOID(sheetWrapper);
     sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ComputeSheetOffset(sheetStyle, sheetNode);
 
     // The animation generated by the developer actively switching the SheetType, does not rely on PlaySheetTransition,
     // but on the above FlushUITasks, and ondirty.
-    auto sheetType = sheetPatternModifier->sheetGetSheetTypeNoProcess(sheetNode);
-    if (sheetType != SheetType::SHEET_POPUP && sheetPatternModifier->sheetGetIsPlayTransition(sheetNode)) {
+    auto sheetType = sheetNodePattern->GetSheetTypeNoProcess();
+    if (sheetType != SheetType::SHEET_POPUP && sheetNodePattern->GetIsPlayTransition()) {
         PlaySheetTransition(sheetNode, true, false);
     }
 }
@@ -4178,9 +4192,9 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
 SheetStyle OverlayManager::UpdateSheetStyle(
     const RefPtr<FrameNode>& sheetNode, const SheetStyle& sheetStyle, bool isPartialUpdate)
 {
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_RETURN(sheetPatternModifier, sheetStyle);
-    auto currentStyle = sheetPatternModifier->sheetGetSheetStyleValue(sheetNode);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProperty, sheetStyle);
+    auto currentStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     if (isPartialUpdate) {
         currentStyle.PartialUpdate(sheetStyle);
     } else {
@@ -4197,7 +4211,7 @@ SheetStyle OverlayManager::UpdateSheetStyle(
         currentStyle.sheetSubtitle =
             sheetStyle.sheetSubtitle.has_value() ? sheetStyle.sheetSubtitle : currentSheetSubtitle;
     }
-    sheetPatternModifier->sheetLayoutPropUpdateSheetStyle(sheetNode, currentStyle);
+    layoutProperty->UpdateSheetStyle(currentStyle);
     return currentStyle;
 }
 
@@ -4227,9 +4241,9 @@ void OverlayManager::OpenImageGenerator(BindSheetCreateParam&& param, int32_t in
     }
     auto sheetNode = AceType::DynamicCast<FrameNode>(parent);
     if (sheetNode) {
-        auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-        if (sheetPatternModifier) {
-            sheetPatternModifier->sheetSetEnableDragControl(sheetNode, false);
+        auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        if (pattern) {
+            pattern->SetEnableDragControl(false);
         }
     }
 }
@@ -4270,9 +4284,7 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
         }
     }
     CHECK_NULL_VOID(targetNode);
-    auto* sheetViewModifier = NG::NodeModifier::GetSheetViewInnerModifier();
-    CHECK_NULL_VOID(sheetViewModifier);
-    auto sheetNode = sheetViewModifier->createSheetPage(
+    auto sheetNode = SheetView::CreateSheetPage(
         targetNode->GetId(), targetNode->GetTag(), sheetContentNode, titleBuilder, std::move(callback), sheetStyle);
     CHECK_NULL_VOID(sheetNode);
     if (sheetNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
@@ -4285,11 +4297,11 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
         std::move(onTypeDidChange), std::move(sheetSpringBack));
     SaveSheetPageNode(sheetNode, sheetContentNode, targetNode, isStartByUIContext);
     InitSheetWrapperAction(sheetNode, targetNode, sheetStyle);
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    auto sheetWrapper = sheetPatternModifier->sheetGetParentSkipEffectComponent(sheetNode);
+    auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+    auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     if (sheetWrapper && !sheetWrapper->IsOnMainTree() &&
-        (sheetPatternModifier->sheetHasOnWillAppear(sheetNode) || sheetPatternModifier->sheetHasOnAppear(sheetNode))) {
+        (sheetNodePattern->GetSheetOnWillAppear() || sheetNodePattern->GetSheetOnAppear())) {
         auto context = sheetNode->GetContext();
         CHECK_NULL_VOID(context);
         auto reporter = context->GetStatisticEventReporter();
@@ -4298,21 +4310,21 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     }
     if (SystemProperties::ConfigChangePerform()) {
         // Register the resource update function as required during sheet node creation.
-        sheetPatternModifier->sheetUpdateSheetParamResource(sheetNode, sheetStyle);
+        sheetNodePattern->UpdateSheetParamResource(sheetNode, sheetStyle);
     }
-    sheetPatternModifier->sheetUpdateIndexByDetentSelection(sheetNode, sheetStyle, true);
+    sheetNodePattern->UpdateIndexByDetentSelection(sheetStyle, true);
     ComputeSheetOffset(sheetStyle, sheetNode);
-    sheetPatternModifier->sheetOnWillAppear(sheetNode);
+    sheetNodePattern->OnWillAppear();
 
     // fire navigation onActive
     FireNavigationLifecycle(sheetNode, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
         true, static_cast<int32_t>(NavDestinationActiveReason::SHEET));
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        sheetPatternModifier->sheetOnAppear(sheetNode);
+        sheetNodePattern->OnAppear();
     }
 
     // start transition animation
-    auto sheetType = sheetPatternModifier->sheetGetSheetTypeNoProcess(sheetNode);
+    auto sheetType = sheetNodePattern->GetSheetTypeNoProcess();
     if (sheetType == SheetType::SHEET_POPUP) {
         PlayBubbleStyleSheetTransition(sheetNode, true);
     } else {
@@ -4326,10 +4338,10 @@ RefPtr<FrameNode> OverlayManager::MountSheetEffectComponent(
 #ifdef ENABLE_ROSEN_BACKEND
     CHECK_NULL_RETURN(sheetWrapperNode, nullptr);
     CHECK_NULL_RETURN(sheetPageNode, nullptr);
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_RETURN(sheetPatternModifier, nullptr);
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetNodePattern, nullptr);
 
-    if (!sheetPatternModifier->sheetCheckIfUseEffectComponent(sheetPageNode, sheetStyle)) {
+    if (!sheetNodePattern->CheckIfUseEffectComponent(sheetStyle)) {
         return nullptr;
     }
     auto sheetECNode = FrameNode::CreateFrameNode(V2::EFFECT_COMPONENT_ETS_TAG,
@@ -4341,9 +4353,9 @@ RefPtr<FrameNode> OverlayManager::MountSheetEffectComponent(
     auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureEventHub, nullptr);
     gestureEventHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
-    auto* sheetWrapperModifier = NG::NodeModifier::GetSheetWrapperInnerModifier();
-    CHECK_NULL_RETURN(sheetWrapperModifier, nullptr);
-    sheetWrapperModifier->sheetWrapperSetSheetECNode(sheetWrapperNode, sheetECNode);
+    auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
+    sheetWrapperPattern->SetSheetECNode(sheetECNode);
 
     if (sheetStyle.systemMaterial) {
         auto ecRSContext = sheetECNode->GetRenderContext();
@@ -4371,12 +4383,9 @@ RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<Fram
     // create and mount sheetWrapperNode
     auto rootNode = FindWindowScene(targetNode);
     CHECK_NULL_RETURN(rootNode, nullptr);
-
-    auto* sheetWrapperModifier = NG::NodeModifier::GetSheetWrapperInnerModifier();
-    CHECK_NULL_RETURN(sheetWrapperModifier, nullptr);
     auto sheetWrapperNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
-        sheetWrapperModifier->sheetWrapperCreatePattern(targetNode->GetId(), targetNode->GetTag()));
+        AceType::MakeRefPtr<SheetWrapperPattern>(targetNode->GetId(), targetNode->GetTag()));
     CHECK_NULL_RETURN(sheetWrapperNode, nullptr);
     ACE_UINODE_TRACE(sheetWrapperNode);
     if (sheetNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
@@ -4387,20 +4396,20 @@ RefPtr<FrameNode> OverlayManager::MountSheetWrapperAndChildren(const RefPtr<Fram
     if (sheetStyle.showInSubWindow.value_or(false)) {
         TAG_LOGI(AceLogTag::ACE_SHEET, "show in subwindow mount sheet wrapper");
         sheetWrapperNode->MountToParent(rootNode);
-        auto* sheetViewModifier = NG::NodeModifier::GetSheetViewInnerModifier();
-        CHECK_NULL_RETURN(sheetViewModifier, nullptr);
-        return sheetViewModifier->createSheetMaskShowInSubwindow(sheetNode, sheetWrapperNode, targetNode, sheetStyle);
+        return SheetView::CreateSheetMaskShowInSubwindow(sheetNode, sheetWrapperNode, targetNode, sheetStyle);
     }
     if (!sheetECNode) {
         sheetNode->MountToParent(sheetWrapperNode);
     } else {
         sheetNode->MountToParent(sheetECNode);
     }
+    auto sheetWrapperPattern = sheetWrapperNode->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
     if (SystemProperties::ConfigChangePerform()) {
         // Register the resource update function as required during sheet mask node creation.
-        sheetWrapperModifier->sheetWrapperUpdateSheetMaskResource(sheetWrapperNode, sheetNode, sheetStyle);
+        sheetWrapperPattern->UpdateSheetMaskResource(sheetWrapperNode, sheetNode, sheetStyle);
     }
-    sheetWrapperModifier->sheetWrapperSetSheetPageNode(sheetWrapperNode, sheetNode);
+    sheetWrapperPattern->SetSheetPageNode(sheetNode);
     auto levelOrder = GetLevelOrder(sheetWrapperNode);
     MountToParentWithService(rootNode, sheetWrapperNode, levelOrder);
     return sheetWrapperNode;
@@ -4436,13 +4445,20 @@ void OverlayManager::SetSheetProperty(
     std::function<void()>&& sheetSpringBack)
 {
     UpdateSheetRender(sheetPageNode, sheetStyle, true);
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    sheetPatternModifier->sheetSetBottomOffset(sheetPageNode, sheetStyle);
-    sheetPatternModifier->sheetUpdateSheetCallbacks(sheetPageNode, std::move(onAppear), std::move(onDisappear),
-        std::move(shouldDismiss), std::move(onWillDismiss), std::move(onWillAppear), std::move(onWillDisappear),
-        std::move(onHeightDidChange), std::move(onDetentsDidChange), std::move(onWidthDidChange),
-        std::move(onTypeDidChange), std::move(sheetSpringBack));
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+    sheetNodePattern->SetBottomOffset(sheetStyle);
+    sheetNodePattern->UpdateOnAppear(std::move(onAppear));
+    sheetNodePattern->UpdateOnDisappear(std::move(onDisappear));
+    sheetNodePattern->UpdateShouldDismiss(std::move(shouldDismiss));
+    sheetNodePattern->UpdateOnWillDismiss(std::move(onWillDismiss));
+    sheetNodePattern->UpdateOnWillAppear(std::move(onWillAppear));
+    sheetNodePattern->UpdateOnWillDisappear(std::move(onWillDisappear));
+    sheetNodePattern->UpdateOnHeightDidChange(std::move(onHeightDidChange));
+    sheetNodePattern->UpdateOnDetentsDidChange(std::move(onDetentsDidChange));
+    sheetNodePattern->UpdateOnWidthDidChange(std::move(onWidthDidChange));
+    sheetNodePattern->UpdateOnTypeDidChange(std::move(onTypeDidChange));
+    sheetNodePattern->UpdateSheetSpringBack(std::move(sheetSpringBack));
 }
 
 void OverlayManager::SaveSheetPageNode(
@@ -4459,14 +4475,14 @@ void OverlayManager::SaveSheetPageNode(
     } else {
         sheetKey = SheetKey(targetId);
     }
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    sheetPatternModifier->sheetSetSheetKey(sheetPageNode, sheetKey);
+    auto sheetNodePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
+    sheetNodePattern->SetSheetKey(sheetKey);
     sheetMap_.emplace(sheetKey, WeakClaim(RawPtr(sheetPageNode)));
     modalStack_.push(WeakClaim(RawPtr(sheetPageNode)));
     modalList_.emplace_back(WeakClaim(RawPtr(sheetPageNode)));
     SaveLastModalNode();
-    sheetPatternModifier->sheetSetOverlay(sheetPageNode, AceType::WeakClaim(this));
+    sheetNodePattern->SetOverlay(AceType::WeakClaim(this));
 }
 
 bool OverlayManager::CheckTargetIdIsValid(int32_t targetId)
@@ -4504,6 +4520,8 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
+    auto sheetLayoutProps = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(sheetLayoutProps);
     maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
 
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -4517,32 +4535,28 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
 
         auto maskNodeId = maskNode->GetId();
         auto iter = sheetMaskClickEventMap_.find(maskNodeId);
-        auto* sheetManagerModifier = NG::NodeModifier::GetSheetManagerInnerModifier();
-        CHECK_NULL_VOID(sheetManagerModifier);
         if (iter == sheetMaskClickEventMap_.end() &&
             sheetStyle.interactive.has_value() && !sheetStyle.interactive.value()) {
             auto sheetMaskClickEvent = AceType::MakeRefPtr<NG::ClickEvent>(
                 [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
                     auto sheet = weak.Upgrade();
                     CHECK_NULL_VOID(sheet);
-                    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-                    CHECK_NULL_VOID(sheetPatternModifier);
-                    if (sheetPatternModifier->sheetIsDragging(sheet)) {
+                    auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+                    CHECK_NULL_VOID(sheetPattern);
+                    if (sheetPattern->IsDragging()) {
                         return;
                     }
-                    sheetPatternModifier->sheetInteractiveDismiss(sheet, BindSheetDismissReason::TOUCH_OUTSIDE);
+                    sheetPattern->SheetInteractiveDismiss(BindSheetDismissReason::TOUCH_OUTSIDE);
                 });
-            sheetManagerModifier->setMaskInteractive(maskNode, true);
+            SheetManager::SetMaskInteractive(maskNode, true);
             sheetMaskClickEventMap_.emplace(maskNodeId, sheetMaskClickEvent);
             eventConfirmHub->AddClickEvent(sheetMaskClickEvent);
             eventConfirmHub->SetNodeClickDistance(DISTANCE_THRESHOLD);
             return;
         }
 
-        auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-        CHECK_NULL_VOID(sheetPatternModifier);
         if ((!sheetStyle.interactive.has_value() && !isPartialUpdate &&
-                sheetPatternModifier->sheetGetSheetTypeNoProcess(sheetNode) == SheetType::SHEET_POPUP) ||
+                sheetNode->GetPattern<SheetPresentationPattern>()->GetSheetTypeNoProcess() == SheetType::SHEET_POPUP) ||
             sheetStyle.interactive.value_or(false)) {
             maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                 HitTestMode::HTMTRANSPARENT);
@@ -4551,33 +4565,33 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
                 eventConfirmHub->RemoveClickEvent(iter->second);
                 sheetMaskClickEventMap_.erase(maskNodeId);
             }
-            sheetManagerModifier->setMaskInteractive(maskNode, false);
+            SheetManager::SetMaskInteractive(maskNode, false);
         }
     }
 }
 
 void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn)
 {
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
     if (isTransitionIn) {
-        sheetPatternModifier->sheetResetToInvisible(sheetNode);
-        sheetPatternModifier->sheetStartOffsetEnteringAnimation(sheetNode);
-        sheetPatternModifier->sheetFireCommonCallback(sheetNode);
-        sheetPatternModifier->sheetStartAlphaEnteringAnimation(sheetNode, [sheetWK = WeakClaim(RawPtr(sheetNode))] {
+        sheetPattern->ResetToInvisible();
+        sheetPattern->StartOffsetEnteringAnimation();
+        sheetPattern->FireCommonCallback();
+        sheetPattern->StartAlphaEnteringAnimation([sheetWK = WeakClaim(RawPtr(sheetNode))] {
             auto sheet = sheetWK.Upgrade();
             CHECK_NULL_VOID(sheet);
+            auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+            CHECK_NULL_VOID(sheetPattern);
             if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                auto* modifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-                CHECK_NULL_VOID(modifier);
-                modifier->sheetOnAppear(sheet);
+                sheetPattern->OnAppear();
             }
         });
     } else {
-        sheetPatternModifier->sheetStartOffsetExitingAnimation(sheetNode);
-        sheetPatternModifier->sheetStartAlphaExitingAnimation(sheetNode,
+        sheetPattern->StartOffsetExitingAnimation();
+        sheetPattern->StartAlphaExitingAnimation(
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), id = Container::CurrentId(),
-                 weakOverlayManager = WeakClaim(this)] {
+                    weakOverlayManager = WeakClaim(this)] {
                 ContainerScope scope(id);
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
@@ -4591,16 +4605,14 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
                         CHECK_NULL_VOID(sheet && overlayManager);
 
                         ContainerScope scope(id);
-                        auto* modifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-                        CHECK_NULL_VOID(modifier);
-                        if (!modifier->sheetIsExecuteOnDisappear(sheet)) {
-                            modifier->sheetOnDisappear(sheet);
+                        if (!sheet->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
+                            sheet->GetPattern<SheetPresentationPattern>()->OnDisappear();
                         }
                         overlayManager->FireAutoSave(sheet);
                         overlayManager->RemoveSheet(sheet);
                     },
                     TaskExecutor::TaskType::UI, "ArkUIOverlaySheetExitingAnimation");
-        });
+            });
     }
 }
 
@@ -4614,9 +4626,9 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode,
     option.SetFillMode(FillMode::FORWARDS);
     auto context = maskNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    auto backgroundColor = sheetPatternModifier->sheetGetMaskBackgroundColor(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto backgroundColor = sheetPattern->GetMaskBackgroundColor();
     auto pipeline = sheetNode->GetContextRefPtr();
     if (isTransitionIn) {
         context->UpdateBackgroundColor(backgroundColor.ChangeOpacity(0.0f));
@@ -4696,19 +4708,19 @@ bool OverlayManager::CheckTopModalNode(const RefPtr<FrameNode>& topModalNode, in
 
 void OverlayManager::ComputeSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode)
 {
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    auto sheetMaxHeight = sheetPatternModifier->sheetGetPageHeightWithoutOffset(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     auto geometryNode = sheetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto sheetHeight = geometryNode->GetFrameSize().Height();
 
-    auto sheetType = sheetPatternModifier->sheetGetSheetTypeNoProcess(sheetNode);
+    auto sheetType = sheetPattern->GetSheetTypeNoProcess();
     switch (sheetType) {
         case SheetType::SHEET_BOTTOMLANDSPACE:
             if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, largeHeight);
+                sheetPattern->SetSheetHeightForTranslate(largeHeight);
                 break;
             }
             [[fallthrough]];
@@ -4724,19 +4736,17 @@ void OverlayManager::ComputeSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr
             }
             break;
         case SheetType::SHEET_CENTER:
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(
-                sheetNode, (sheetHeight + sheetMaxHeight) / SHEET_HALF_SIZE);
+            sheetPattern->SetSheetHeightForTranslate((sheetHeight + sheetMaxHeight) / SHEET_HALF_SIZE);
 
             if (sheetStyle.showInSubWindow.value_or(false)) {
-                sheetPatternModifier->sheetSetSheetHeightForTranslate(
-                    sheetNode, sheetMaxHeight - sheetPatternModifier->sheetGetSheetOffset(sheetNode));
+                sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight - sheetPattern->GetSheetOffset());
             }
             break;
         case SheetType::SHEET_POPUP:
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, sheetMaxHeight);
+            sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight);
             break;
         case SheetType::SHEET_MINIMIZE:
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, 0.0f);
+            sheetPattern->SetSheetHeightForTranslate(0.0f);
             break;
         default:
             break;
@@ -4747,39 +4757,39 @@ void OverlayManager::ComputeSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr
 void OverlayManager::CheckDeviceInLandscape(
     NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode, float& sheetTopSafeArea)
 {
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_BOTTOM &&
-        sheetPatternModifier->sheetIsPhoneInLandscape(sheetNode)) {
+        sheetPattern->IsPhoneInLandScape()) {
         sheetTopSafeArea = 0.0f;
     }
 }
 
 void OverlayManager::ComputeSingleGearSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode)
 {
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    auto sheetMaxHeight = sheetPatternModifier->sheetGetPageHeightWithoutOffset(sheetNode);
-    auto sheetTopSafeArea = sheetPatternModifier->sheetGetSheetTopSafeArea(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
+    auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
 
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
     if (sheetStyle.sheetHeight.sheetMode.has_value()) {
+        auto context = sheetNode->GetContext();
+        CHECK_NULL_VOID(context);
         auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         CHECK_NULL_VOID(sheetTheme);
         if (sheetStyle.sheetHeight.sheetMode == SheetMode::MEDIUM) {
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(
-                sheetNode, sheetMaxHeight * sheetTheme->GetMediumPercent());
+            sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * sheetTheme->GetMediumPercent());
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, sheetMaxHeight * MEDIUM_SIZE_PRE);
+                sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * MEDIUM_SIZE_PRE);
             }
         } else if (sheetStyle.sheetHeight.sheetMode == SheetMode::LARGE) {
             auto height = sheetTheme->GetHeightApplyFullScreen() ? sheetMaxHeight : largeHeight;
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, height * sheetTheme->GetLargePercent());
+            sheetPattern->SetSheetHeightForTranslate(height * sheetTheme->GetLargePercent());
         } else if (sheetStyle.sheetHeight.sheetMode == SheetMode::AUTO) {
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(
-                sheetNode, sheetPatternModifier->sheetGetFitContentHeight(sheetNode));
-            if (GreatNotEqual(sheetPatternModifier->sheetGetSheetHeightForTranslate(sheetNode), largeHeight)) {
-                sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, largeHeight);
+            sheetPattern->SetSheetHeightForTranslate(sheetPattern->GetFitContentHeight());
+            if (GreatNotEqual(sheetPattern->GetSheetHeightForTranslate(), largeHeight)) {
+                sheetPattern->SetSheetHeightForTranslate(largeHeight);
             }
         }
     } else {
@@ -4790,42 +4800,40 @@ void OverlayManager::ComputeSingleGearSheetOffset(const NG::SheetStyle& sheetSty
             height = sheetStyle.sheetHeight.height->ConvertToPx();
         }
         if (height > largeHeight) {
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, largeHeight);
+            sheetPattern->SetSheetHeightForTranslate(largeHeight);
         } else if (height < 0) {
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, largeHeight);
+            sheetPattern->SetSheetHeightForTranslate(largeHeight);
         } else {
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, height);
+            sheetPattern->SetSheetHeightForTranslate(height);
         }
     }
 }
 
 void OverlayManager::ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode)
 {
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    auto sheetMaxHeight = sheetPatternModifier->sheetGetPageHeightWithoutOffset(sheetNode);
-    auto sheetTopSafeArea = sheetPatternModifier->sheetGetSheetTopSafeArea(sheetNode);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto sheetMaxHeight = sheetPattern->GetPageHeightWithoutOffset();
+    auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
-    auto selection = sheetStyle.detents[sheetPatternModifier->sheetGetDetentsFinalIndex(sheetNode)];
+    auto selection = sheetStyle.detents[sheetPattern->GetDetentsFinalIndex()];
     if (selection.sheetMode.has_value()) {
         auto context = sheetNode->GetContext();
         CHECK_NULL_VOID(context);
         auto sheetTheme = sheetNode->GetTheme<SheetTheme>(true);
         CHECK_NULL_VOID(sheetTheme);
         if (selection.sheetMode == SheetMode::MEDIUM) {
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(
-                sheetNode, sheetMaxHeight * sheetTheme->GetMediumPercent());
+            sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * sheetTheme->GetMediumPercent());
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, sheetMaxHeight * MEDIUM_SIZE_PRE);
+                sheetPattern->SetSheetHeightForTranslate(sheetMaxHeight * MEDIUM_SIZE_PRE);
             }
         } else if (selection.sheetMode == SheetMode::LARGE) {
             auto height = sheetTheme->GetHeightApplyFullScreen() ? sheetMaxHeight : largeHeight;
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, height * sheetTheme->GetLargePercent());
+            sheetPattern->SetSheetHeightForTranslate(height * sheetTheme->GetLargePercent());
         } else if (selection.sheetMode == SheetMode::AUTO) {
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(
-                sheetNode, sheetPatternModifier->sheetGetFitContentHeight(sheetNode));
-            if (GreatNotEqual(sheetPatternModifier->sheetGetSheetHeightForTranslate(sheetNode), largeHeight)) {
-                sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, largeHeight);
+            sheetPattern->SetSheetHeightForTranslate(sheetPattern->GetFitContentHeight());
+            if (GreatNotEqual(sheetPattern->GetSheetHeightForTranslate(), largeHeight)) {
+                sheetPattern->SetSheetHeightForTranslate(largeHeight);
             }
         }
     } else {
@@ -4836,11 +4844,11 @@ void OverlayManager::ComputeDetentsSheetOffset(const NG::SheetStyle& sheetStyle,
             height = selection.height->ConvertToPx();
         }
         if (height > largeHeight) {
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, largeHeight);
+            sheetPattern->SetSheetHeightForTranslate(largeHeight);
         } else if (height < 0) {
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, largeHeight);
+            sheetPattern->SetSheetHeightForTranslate(largeHeight);
         } else {
-            sheetPatternModifier->sheetSetSheetHeightForTranslate(sheetNode, height);
+            sheetPattern->SetSheetHeightForTranslate(height);
         }
     }
 }
@@ -4849,20 +4857,20 @@ void OverlayManager::OnMainWindowSizeChange(int32_t subWindowId, WindowSizeChang
     for (auto iter = sheetMap_.begin(); iter != sheetMap_.end(); iter++) {
         auto sheetNode = (*iter).second.Upgrade();
         CHECK_NULL_VOID(sheetNode);
-        auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-        CHECK_NULL_VOID(sheetPatternModifier);
-        if (sheetPatternModifier->sheetIsShowInSubWindow(sheetNode)) {
-            auto sheetParent = sheetPatternModifier->sheetGetParentSkipEffectComponent(sheetNode);
+        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        if (sheetPattern->IsShowInSubWindow()) {
+            auto sheetParent = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
             CHECK_NULL_VOID(sheetParent);
-            auto* sheetWrapperModifier = NG::NodeModifier::GetSheetWrapperInnerModifier();
-            CHECK_NULL_VOID(sheetWrapperModifier);
-            sheetWrapperModifier->sheetWrapperInitMainWindowRect(sheetParent, subWindowId);
+            auto sheetWrapperPattern = sheetParent->GetPattern<SheetWrapperPattern>();
+            CHECK_NULL_VOID(sheetWrapperPattern);
+            sheetWrapperPattern->InitMainWindowRect(subWindowId);
             if (!(reason == WindowSizeChangeReason::DRAG_START || reason == WindowSizeChangeReason::DRAG_END ||
                     reason == WindowSizeChangeReason::DRAG_MOVE)) {
                 sheetParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
-            if (sheetPatternModifier->sheetGetSheetObjectType(sheetNode) == SheetType::SHEET_POPUP &&
-                !sheetWrapperModifier->sheetWrapperShowInUEC(sheetParent)) {
+            auto sheetObject = sheetPattern->GetSheetObject();
+            CHECK_NULL_VOID(sheetObject);
+            if (sheetObject->GetSheetType() == SheetType::SHEET_POPUP && !sheetWrapperPattern->ShowInUEC()) {
                 sheetParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
         }
@@ -4884,9 +4892,7 @@ void OverlayManager::CleanSheet(const RefPtr<FrameNode>& sheetNode, const SheetK
     if (mapSheetNode->GetTag() != V2::SHEET_PAGE_TAG) {
         return;
     }
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetPatternModifier);
-    if (sheetPatternModifier->sheetGetTargetId(mapSheetNode) != sheetKey.targetId) {
+    if (mapSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != sheetKey.targetId) {
         return;
     }
     ModalPageLostFocus(mapSheetNode);
@@ -4912,9 +4918,7 @@ void OverlayManager::DeleteModal(int32_t targetId, bool needOnWillDisappear)
             currentTargetId = modalNode->GetPattern<ModalPresentationPattern>()->GetTargetId();
         } else if (modalNode->GetTag() == V2::SHEET_PAGE_TAG) {
             isModal = false;
-            auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-            CHECK_NULL_VOID(sheetPatternModifier);
-            currentTargetId = sheetPatternModifier->sheetGetTargetId(modalNode);
+            currentTargetId = modalNode->GetPattern<SheetPresentationPattern>()->GetTargetId();
         } else {
             return;
         }
@@ -4960,14 +4964,14 @@ void OverlayManager::DeleteModalNode(
         CHECK_NULL_VOID(lastModalContext);
         lastModalContext->UpdateOpacity(MODAL_OPACITY_VALUE);
     } else {
-        auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-        CHECK_NULL_VOID(sheetModifier);
+        auto sheetPattern = modalNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
         if (needOnWillDisappear) {
-            sheetModifier->sheetOnWillDisappear(modalNode);
+            sheetPattern->OnWillDisappear();
         }
-        sheetModifier->sheetOnDisappear(modalNode);
-        sheetModifier->sheetFireCallback(modalNode, "false");
-        sheetMap_.erase(sheetModifier->sheetGetSheetKey(modalNode));
+        sheetPattern->OnDisappear();
+        sheetPattern->FireCallback("false");
+        sheetMap_.erase(sheetPattern->GetSheetKey());
         RemoveSheet(modalNode);
     }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
@@ -4987,15 +4991,15 @@ RefPtr<FrameNode> OverlayManager::GetSheetMask(const RefPtr<FrameNode>& sheetNod
 {
     // get bindsheet masknode
     CHECK_NULL_RETURN(sheetNode, nullptr);
-    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_RETURN(sheetPatternModifier, nullptr);
-    auto showInSubWindow = sheetPatternModifier->sheetGetSheetStyleValue(sheetNode).showInSubWindow.value_or(false);
-    auto sheetParent = sheetPatternModifier->sheetGetParentSkipEffectComponent(sheetNode);
+    const auto& layoutProp = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_RETURN(layoutProp, nullptr);
+    auto showInSubWindow = layoutProp->GetSheetStyleValue(SheetStyle()).showInSubWindow.value_or(false);
+    auto sheetParent = SheetPresentationPattern::GetParentSkipEffectComponent(sheetNode);
     CHECK_NULL_RETURN(sheetParent, nullptr);
     if (showInSubWindow) {
-        auto* sheetWrapperModifier = NG::NodeModifier::GetSheetWrapperInnerModifier();
-        CHECK_NULL_RETURN(sheetWrapperModifier, nullptr);
-        return sheetWrapperModifier->sheetWrapperGetSheetMaskNode(sheetParent);
+        auto sheetWrapperPattern = sheetParent->GetPattern<SheetWrapperPattern>();
+        CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
+        return sheetWrapperPattern->GetSheetMaskNode();
     }
     return DynamicCast<FrameNode>(sheetParent);
 }

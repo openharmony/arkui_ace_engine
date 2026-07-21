@@ -20,7 +20,6 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/task_executor.h"
-#include "base/utils/macros.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 
 #include <memory>
@@ -33,7 +32,7 @@ class FrameNode;
 class ContentChangeDumpManager;
 #endif
 
-class ACE_FORCE_EXPORT ContentChangeManager final : public AceType {
+class ContentChangeManager final : public AceType {
     DECLARE_ACE_TYPE(ContentChangeManager, AceType);
 public:
     enum ContentIgnoreEventType : uint32_t {
@@ -57,7 +56,7 @@ public:
     void OnScrollChangeStart(const RefPtr<FrameNode>& keyNode);
     void OnScrollChangeEnd(const RefPtr<FrameNode>& keyNode);
     void OnSwiperChangeEnd(const RefPtr<FrameNode>& keyNode, bool hasTabsAncestor);
-    ACE_FORCE_EXPORT void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow);
+    void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow);
     void OnScrollRemoved(int32_t nodeId);
     void OnTransitionAdded(int32_t nodeId);
     void OnTransitionRemoved(int32_t nodeId);

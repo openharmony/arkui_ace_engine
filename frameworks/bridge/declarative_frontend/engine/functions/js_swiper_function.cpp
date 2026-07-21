@@ -15,25 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_swiper_function.h"
 
-#include "core/common/dynamic_module_helper.h"
-#include "core/components_ng/pattern/swiper/swiper_model.h"
-#include "core/components_ng/pattern/swiper/bridge/swiper_transition_proxy_modifier_api.h"
 
 namespace OHOS::Ace::Framework {
-namespace {
-const NG::NodeModifier::ArkUISwiperContentTransitionModifier* GetTransitionProxyModifier()
-{
-    static const NG::NodeModifier::ArkUISwiperContentTransitionModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Swiper");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const NG::NodeModifier::ArkUISwiperContentTransitionModifier*>(
-            module->GetCustomModifier("swiperTransitionProxy"));
-    }
-    return cachedModifier;
-}
-} // namespace
-
 void JsSwiperContentTransitionProxy::JSBind(BindingTarget globalObj)
 {
     JSClass<JsSwiperContentTransitionProxy>::Declare("SwiperContentTransitionProxy");
@@ -61,8 +44,8 @@ void JsSwiperContentTransitionProxy::SetSelectedIndex(const JSCallbackInfo& args
 void JsSwiperContentTransitionProxy::GetSelectedIndex(const JSCallbackInfo& args)
 {
     auto selectedIndex = 0;
-    if (auto* modifier = GetTransitionProxyModifier()) {
-        selectedIndex = modifier->getSelectedIndex(proxy_);
+    if (proxy_) {
+        selectedIndex = proxy_->GetSelectedIndex();
     }
     auto fromRef = JSRef<JSVal>::Make(JSVal(ToJSValue(selectedIndex)));
     args.SetReturnValue(fromRef);
@@ -76,8 +59,8 @@ void JsSwiperContentTransitionProxy::SetIndex(const JSCallbackInfo& args)
 void JsSwiperContentTransitionProxy::GetIndex(const JSCallbackInfo& args)
 {
     auto index = 0;
-    if (auto* modifier = GetTransitionProxyModifier()) {
-        index = modifier->getIndex(proxy_);
+    if (proxy_) {
+        index = proxy_->GetIndex();
     }
     auto fromRef = JSRef<JSVal>::Make(JSVal(ToJSValue(index)));
     args.SetReturnValue(fromRef);
@@ -91,8 +74,8 @@ void JsSwiperContentTransitionProxy::SetPosition(const JSCallbackInfo& args)
 void JsSwiperContentTransitionProxy::GetPosition(const JSCallbackInfo& args)
 {
     auto position = 0.0f;
-    if (auto* modifier = GetTransitionProxyModifier()) {
-        position = modifier->getPosition(proxy_);
+    if (proxy_) {
+        position = proxy_->GetPosition();
     }
     auto toRef = JSRef<JSVal>::Make(JSVal(ToJSValue(position)));
     args.SetReturnValue(toRef);
@@ -106,8 +89,8 @@ void JsSwiperContentTransitionProxy::SetMainAxisLength(const JSCallbackInfo& arg
 void JsSwiperContentTransitionProxy::GetMainAxisLength(const JSCallbackInfo& args)
 {
     auto mainAxisLength = 0.0f;
-    if (auto* modifier = GetTransitionProxyModifier()) {
-        mainAxisLength = modifier->getMainAxisLength(proxy_);
+    if (proxy_) {
+        mainAxisLength = proxy_->GetMainAxisLength();
     }
     auto toRef = JSRef<JSVal>::Make(JSVal(ToJSValue(mainAxisLength)));
     args.SetReturnValue(toRef);
@@ -115,8 +98,8 @@ void JsSwiperContentTransitionProxy::GetMainAxisLength(const JSCallbackInfo& arg
 
 void JsSwiperContentTransitionProxy::FinishTransition(const JSCallbackInfo& args)
 {
-    if (auto* modifier = GetTransitionProxyModifier()) {
-        modifier->finishTransition(proxy_);
+    if (proxy_) {
+        proxy_->FinishTransition();
     }
 }
 
@@ -188,7 +171,7 @@ void JsSwiperFunction::Execute(int32_t errorCode)
     JsFunction::ExecuteJS(1, params);
 }
 
-void JsSwiperFunction::Execute(const RefPtr<AceType>& proxy)
+void JsSwiperFunction::Execute(const RefPtr<SwiperContentTransitionProxy>& proxy)
 {
     JSRef<JSObject> proxyObj = JSClass<JsSwiperContentTransitionProxy>::NewInstance();
     auto jsProxy = Referenced::Claim(proxyObj->Unwrap<JsSwiperContentTransitionProxy>());

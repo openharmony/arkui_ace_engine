@@ -60,14 +60,17 @@ private:
     static void RegisterNavigationAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterImageAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNavRouterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterNavigatorAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterNodeContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRenderNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFrameNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPathAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPolygonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -76,13 +79,16 @@ private:
     static void RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterSwiperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterTabContentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFlexAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterResourceAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM *vm);
+    static void RegisterIndicatorComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterWebAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 #ifdef WINDOW_SCENE_SUPPORTED
     static void RegisterEmbeddedComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

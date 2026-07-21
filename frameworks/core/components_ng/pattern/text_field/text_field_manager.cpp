@@ -26,11 +26,11 @@
 #include "core/common/ime/text_input_type.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/interfaces/native/node/sheet_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -427,10 +427,10 @@ void TextFieldManagerNG::AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField
         parent = parent->GetAncestorNodeOfFrame(true);
     }
     CHECK_NULL_VOID(parent);
-    auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-    CHECK_NULL_VOID(sheetModifier);
+    auto sheetNodePattern = parent->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetNodePattern);
     TAG_LOGI(ACE_KEYBOARD, "AvoidKB in sheet");
-    sheetModifier->sheetAvoidSafeArea(parent, true);
+    sheetNodePattern->AvoidSafeArea(true);
 }
 
 RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textField)

@@ -37,7 +37,7 @@ using GestureJudgeFunc = std::function<GestureJudgeResult(
 using GestureRecognizerJudgeFunc = std::function<GestureJudgeResult(const std::shared_ptr<BaseGestureEvent>& info,
     const RefPtr<NGGestureRecognizer>& current, const std::list<WeakPtr<NGGestureRecognizer>>& others)>;
 
-class ACE_FORCE_EXPORT TargetComponent : public virtual AceType {
+class ACE_EXPORT TargetComponent : public virtual AceType {
     DECLARE_ACE_TYPE(TargetComponent, AceType);
 
 public:

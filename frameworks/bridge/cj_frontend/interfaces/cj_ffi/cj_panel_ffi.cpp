@@ -16,8 +16,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_panel_ffi.h"
 
 #include "cj_lambda.h"
-#include "base/log/log_wrapper.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/panel/sliding_panel_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -31,23 +29,10 @@ const std::vector<VisibleType> PANEL_VISIBLE_TYPES = { VisibleType::GONE, Visibl
     VisibleType::INVISIBLE };
 } // namespace
 
-NG::SlidingPanelModelNG* GetPanelModel()
-{
-    static NG::SlidingPanelModelNG* model = nullptr;
-    if (model == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Panel");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find panel dynamic module");
-        }
-        model = reinterpret_cast<NG::SlidingPanelModelNG*>(module->GetModel());
-    }
-    return model;
-}
-
 extern "C" {
 void FfiOHOSAceFrameworkPanelCreate(bool isShow)
 {
-    GetPanelModel()->Create(isShow);
+    SlidingPanelModel::GetInstance()->Create(isShow);
 }
 
 void FfiOHOSAceFrameworkPanelType(int32_t type)
@@ -56,7 +41,7 @@ void FfiOHOSAceFrameworkPanelType(int32_t type)
         LOGE("invalid value for panel type");
         return;
     }
-    GetPanelModel()->SetPanelType(PANEL_TYPES[type]);
+    SlidingPanelModel::GetInstance()->SetPanelType(PANEL_TYPES[type]);
 }
 
 void FfiOHOSAceFrameworkPanelMode(int32_t mode)
@@ -65,43 +50,43 @@ void FfiOHOSAceFrameworkPanelMode(int32_t mode)
         LOGE("invalid value for panel mode");
         return;
     }
-    GetPanelModel()->SetPanelMode(PANEL_MODES[mode]);
+    SlidingPanelModel::GetInstance()->SetPanelMode(PANEL_MODES[mode]);
 }
 
 void FfiOHOSAceFrameworkPanelDragBar(bool val)
 {
-    GetPanelModel()->SetHasDragBar(val);
+    SlidingPanelModel::GetInstance()->SetHasDragBar(val);
 }
 
 void FfiOHOSAceFrameworkPanelFullHeight(double height, int32_t unit)
 {
     Dimension fullHeight = Dimension(height, static_cast<DimensionUnit>(unit));
-    GetPanelModel()->SetFullHeight(fullHeight);
+    SlidingPanelModel::GetInstance()->SetFullHeight(fullHeight);
 }
 void FfiOHOSAceFrameworkPanelHalfHeight(double height, int32_t unit)
 {
     Dimension halfHeight = Dimension(height, static_cast<DimensionUnit>(unit));
-    GetPanelModel()->SetHalfHeight(halfHeight);
+    SlidingPanelModel::GetInstance()->SetHalfHeight(halfHeight);
 }
 void FfiOHOSAceFrameworkPanelMiniHeight(double height, int32_t unit)
 {
     Dimension minHeight = Dimension(height, static_cast<DimensionUnit>(unit));
-    GetPanelModel()->SetMiniHeight(minHeight);
+    SlidingPanelModel::GetInstance()->SetMiniHeight(minHeight);
 }
 
 void FfiOHOSAceFrameworkPanelShow(bool isShow)
 {
-    GetPanelModel()->SetIsShow(isShow);
+    SlidingPanelModel::GetInstance()->SetIsShow(isShow);
 }
 
 void FfiOHOSAceFrameworkPanelShowCloseIcon(bool showCloseIcon)
 {
-    GetPanelModel()->SetShowCloseIcon(showCloseIcon);
+    SlidingPanelModel::GetInstance()->SetShowCloseIcon(showCloseIcon);
 }
 
 void FfiOHOSAceFrameworkPanelBackgroundMask(uint32_t color)
 {
-    GetPanelModel()->SetBackgroundMask(Color(color));
+    SlidingPanelModel::GetInstance()->SetBackgroundMask(Color(color));
 }
 
 void FfiOHOSAceFrameworkPanelOnChange(void (*callback)(double width, double height, int32_t mode))
@@ -116,23 +101,23 @@ void FfiOHOSAceFrameworkPanelOnChange(void (*callback)(double width, double heig
         auto mode = static_cast<int32_t>(eventInfo->GetMode());
         ffiCallback(width, height, mode);
     };
-    GetPanelModel()->SetOnSizeChange(std::move(onSizeChangeNG));
+    SlidingPanelModel::GetInstance()->SetOnSizeChange(std::move(onSizeChangeNG));
 }
 
 void FfiOHOSAceFrameworkPanelOnHeightChange(void (*callback)(double height))
 {
     auto onHeightChangeNG = [ffiCallback = CJLambda::Create(callback)](double height) { ffiCallback(height); };
-    GetPanelModel()->SetOnHeightChange(std::move(onHeightChangeNG));
+    SlidingPanelModel::GetInstance()->SetOnHeightChange(std::move(onHeightChangeNG));
 }
 
 void FfiOHOSAceFrameworkPanelPop()
 {
-    GetPanelModel()->Pop();
+    SlidingPanelModel::GetInstance()->Pop();
 }
 
 void FfiOHOSAceFrameworkPanelBackgroundColor(uint32_t color)
 {
-    GetPanelModel()->SetBackgroundColor(Color(color));
+    SlidingPanelModel::GetInstance()->SetBackgroundColor(Color(color));
 }
 void FfiOHOSAceFrameworkPanelBorder(CJBorder params)
 {
@@ -142,18 +127,18 @@ void FfiOHOSAceFrameworkPanelBorder(CJBorder params)
         LOGE("invalid value for border style");
         return;
     }
-    GetPanelModel()->SetBorderWidth(widthDime);
-    GetPanelModel()->SetBorderStyle(BORDER_STYLES[params.style]);
-    GetPanelModel()->SetBorderColor(Color(params.color));
+    SlidingPanelModel::GetInstance()->SetBorderWidth(widthDime);
+    SlidingPanelModel::GetInstance()->SetBorderStyle(BORDER_STYLES[params.style]);
+    SlidingPanelModel::GetInstance()->SetBorderColor(Color(params.color));
     ViewAbstractModel::GetInstance()->SetBorderRadius(radiusDime);
 }
 void FfiOHOSAceFrameworkPanelBorderWidth(double width, int32_t unit)
 {
-    GetPanelModel()->SetBorderWidth(Dimension(width, static_cast<DimensionUnit>(unit)));
+    SlidingPanelModel::GetInstance()->SetBorderWidth(Dimension(width, static_cast<DimensionUnit>(unit)));
 }
 void FfiOHOSAceFrameworkPanelBorderColor(uint32_t color)
 {
-    GetPanelModel()->SetBorderColor(Color(color));
+    SlidingPanelModel::GetInstance()->SetBorderColor(Color(color));
 }
 void FfiOHOSAceFrameworkPanelBorderRadius(double radius, int32_t unit)
 {
@@ -165,6 +150,6 @@ void FfiOHOSAceFrameworkPanelBorderStyle(int32_t style)
         LOGE("invalid value for border style");
         return;
     }
-    GetPanelModel()->SetBorderStyle(BORDER_STYLES[style]);
+    SlidingPanelModel::GetInstance()->SetBorderStyle(BORDER_STYLES[style]);
 }
 }

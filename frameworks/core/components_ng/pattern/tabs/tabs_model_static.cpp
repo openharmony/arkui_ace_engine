@@ -50,14 +50,12 @@ constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORC
                                 static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
                                 static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
                                 static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
-const char TABS_ETS_TAG[] = "Tabs";
-const char TAB_BAR_ETS_TAG[] = "TabBar";
 } // namespace
 
 RefPtr<FrameNode> TabsModelStatic::CreateFrameNode(int32_t nodeId)
 {
     ACE_UINODE_TRACE(nodeId);
-    auto tabsNode = GetOrCreateTabsNode(TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
     InitTabsNode(tabsNode, nullptr);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     tabBarNode->MarkModifyDone();
@@ -112,7 +110,7 @@ void TabsModelStatic::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<Swipe
 
     // Create TabBar to contain TabBar of TabContent.
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(
-        TAB_BAR_ETS_TAG, tabsNode->GetTabBarId(), []() { return AceType::MakeRefPtr<TabBarPattern>(); });
+        V2::TAB_BAR_ETS_TAG, tabsNode->GetTabBarId(), []() { return AceType::MakeRefPtr<TabBarPattern>(); });
     if (auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>(); tabBarPattern) {
         tabBarPattern->SetController(GetSwiperController(swiperNode, swiperController));
     }

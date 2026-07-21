@@ -27,11 +27,11 @@
 #include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
 #include "core/interfaces/native/node/node_textpicker_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
-#include "core/interfaces/native/node/sheet_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -274,9 +274,8 @@ void DialogInnerManager::FireNavigationLifecycle(
             return;
         }
     } else if (node->GetTag() == SHEET_PAGE_TAG) {
-        auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
-        CHECK_NULL_VOID(sheetModifier);
-        if (sheetModifier->sheetIsShowInPage(frameNode)) {
+        auto layoutProperty = frameNode->GetLayoutProperty<SheetPresentationProperty>();
+        if (layoutProperty && layoutProperty->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false)) {
             return;
         }
     }

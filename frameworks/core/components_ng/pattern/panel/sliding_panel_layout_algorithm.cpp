@@ -29,7 +29,6 @@ constexpr Dimension BLANK_MIN_HEIGHT = 8.0_vp;
 constexpr Dimension DRAG_UP_THRESHOLD = 48.0_vp;
 constexpr double HALF_VALUS = 2.0;
 constexpr int32_t DOUBLENESS = 2;
-const char PANEL_CLOSE_ICON_ETS_TAG[] = "CloseIcon";
 
 } // namespace
 
@@ -79,7 +78,7 @@ void SlidingPanelLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (colunmNodeWrapper) {
         colunmNodeWrapper->Measure(childLayoutConstraint);
     }
-    auto closeIconWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, PANEL_CLOSE_ICON_ETS_TAG);
+    auto closeIconWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::PANEL_CLOSE_ICON_ETS_TAG);
     if (closeIconWrapper) {
         MeasureCloseIcon(closeIconWrapper, layoutProperty);
     }
@@ -136,7 +135,7 @@ void SlidingPanelLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     columnWrapper->Layout();
 
-    auto closeIconWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, PANEL_CLOSE_ICON_ETS_TAG);
+    auto closeIconWrapper = GetNodeLayoutWrapperByTag(layoutWrapper, V2::PANEL_CLOSE_ICON_ETS_TAG);
     CHECK_NULL_VOID(closeIconWrapper);
     auto closeIconLayoutProperty = AceType::DynamicCast<CloseIconLayoutProperty>(closeIconWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(closeIconLayoutProperty);

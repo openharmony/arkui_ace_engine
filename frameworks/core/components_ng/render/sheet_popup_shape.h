@@ -18,9 +18,8 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
-#include "base/utils/macros.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 #include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Rosen {
@@ -42,9 +41,9 @@ public:
     static std::shared_ptr<OHOS::Rosen::RSNGShapeBase> DrawClipPathRightSDF(const SizeF& sheetSize,
         const NG::BorderRadiusProperty& sheetRadius, const SheetArrowPosition arrowPosition,
         const OffsetF& arrowOffset);
-    ACE_FORCE_EXPORT static std::shared_ptr<OHOS::Rosen::RSNGShapeBase> GetPopupStyleSheetClipPathSDF(
-        const SizeF& sheetSize, const NG::BorderRadiusProperty& sheetRadius, const Placement placement,
-        const SheetArrowPosition arrowPosition, const OffsetF& arrowOffset);
+    static std::shared_ptr<OHOS::Rosen::RSNGShapeBase> GetPopupStyleSheetClipPathSDF(const SizeF& sheetSize,
+        const NG::BorderRadiusProperty& sheetRadius, const Placement placement, const SheetArrowPosition arrowPosition,
+        const OffsetF& arrowOffset);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_SHEET_POPUP_SHAPE_H

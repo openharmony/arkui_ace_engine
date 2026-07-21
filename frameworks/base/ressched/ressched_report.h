@@ -68,7 +68,7 @@ using ReportSyncEventFunc = int32_t (*)(const uint32_t resType, const int64_t va
 ReportDataFunc ACE_EXPORT LoadReportDataFunc();
 ReportSyncEventFunc ACE_EXPORT LoadReportSyncEventFunc();
 
-class ResSchedReport final {
+class ACE_EXPORT ResSchedReport final {
 public:
     ACE_FORCE_EXPORT static ResSchedReport& GetInstance();
     ACE_FORCE_EXPORT void ResSchedDataReport(const char* name,
@@ -97,7 +97,7 @@ public:
     void OnAxisEvent(const AxisEvent& axisEvent);
     void AxisEventReportEnd();
     void HandlePageTransition(const PageTransitionInfo& pageTransitionInfo, const uint32_t windowId);
-    ACE_FORCE_EXPORT void HandleSwiperChange(std::unordered_map<std::string, std::string>& payload);
+    void HandleSwiperChange(std::unordered_map<std::string, std::string>& payload);
     static std::atomic<int32_t> createPageCount; // not consider multi-instances.
     static bool triggerExecuted; // not consider multi-instances.
     int64_t GetTid();

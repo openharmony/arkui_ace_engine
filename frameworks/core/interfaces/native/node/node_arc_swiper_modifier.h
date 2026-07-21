@@ -20,5 +20,9 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIArcSwiperModifier* GetArcSwiperModifier();
+void SetArcSwiperChange(ArkUINodeHandle node, void* extraParam);
+void SetArcSwiperAnimationStart(ArkUINodeHandle node, void* extraParam);
+void SetArcSwiperAnimationEnd(ArkUINodeHandle node, void* extraParam);
+void SetArcSwiperGestureSwipe(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_ARC_SWIPER_MODIFIER_H

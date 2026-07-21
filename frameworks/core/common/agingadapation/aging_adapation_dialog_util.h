@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_FORCE_EXPORT AgingAdapationDialogUtil {
+class AgingAdapationDialogUtil {
 public:
     static RefPtr<FrameNode> ShowLongPressDialog(
         const std::string& message, const RefPtr<FrameNode>& iconNode, bool isWithDialogTheme = false);

@@ -154,7 +154,7 @@ private:
     std::optional<Dimension> focusPadding;
 };
 
-class ACE_FORCE_EXPORT FocusPattern : public virtual AceType {
+class ACE_EXPORT FocusPattern : public virtual AceType {
     DECLARE_ACE_TYPE(FocusPattern, AceType);
 
 public:

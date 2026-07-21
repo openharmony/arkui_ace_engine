@@ -113,8 +113,7 @@ ACE_FORCE_EXPORT void AddPaddingToSize(const PaddingPropertyF& padding, Optional
 
 ACE_FORCE_EXPORT void MinusPaddingToSize(const PaddingPropertyF& padding, OptionalSizeF& size);
 
-ACE_FORCE_EXPORT PaddingPropertyF AdjacentExpandToRect(
-    RectF& adjustingRect, PaddingPropertyF& frameExpand, RectF& frameRect);
+PaddingPropertyF AdjacentExpandToRect(RectF& adjustingRect, PaddingPropertyF& frameExpand, RectF& frameRect);
 
 ACE_FORCE_EXPORT float GetCrossAxisSize(const SizeF& size, Axis axis);
 

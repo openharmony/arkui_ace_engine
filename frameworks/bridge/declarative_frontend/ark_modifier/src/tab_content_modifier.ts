@@ -13,62 +13,11 @@
  * limitations under the License.
  */
 
-class LazyArkTabContentComponent extends ArkComponent {
-    static module: TabContentComponentModule | undefined = undefined;
-
-    constructor(nativePtr: KNode, classType: ModifierType) {
-      super(nativePtr, classType);
-      if (LazyArkTabContentComponent.module === undefined) {
-        LazyArkTabContentComponent.module = globalThis.requireNapi('arkui.components.arktabcontent');
-      }
-      this.lazyComponent = LazyArkTabContentComponent.module.createComponent(nativePtr, classType);
-    }
-
-    setMap(): void {
-      this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
-    }
-
-    allowChildCount(): number {
-      return this.lazyComponent.allowChildCount();
-    }
-
-    tabBar(value: SubTabBarStyle | BottomTabBarStyle | ComponentContent): this {
-      this.lazyComponent.tabBar(value);
-      return this;
-    }
-
-    size(value: SizeOptions): this {
-      this.lazyComponent.size(value);
-      return this;
-    }
-
-    width(value: Length): this {
-      this.lazyComponent.width(value);
-      return this;
-    }
-
-    height(value: Length): this {
-      this.lazyComponent.height(value);
-      return this;
-    }
-
-    onWillShow(event: VoidCallback): this {
-      this.lazyComponent.onWillShow(event);
-      return this;
-    }
-
-    onWillHide(event: VoidCallback): this {
-      this.lazyComponent.onWillHide(event);
-      return this;
-    }
-  }
-
-class TabContentModifier extends LazyArkTabContentComponent implements AttributeModifier<TabContentAttribute> {
+class TabContentModifier extends ArkTabContentComponent implements AttributeModifier<TabContentAttribute> {
 
     constructor(nativePtr: KNode, classType: ModifierType) {
       super(nativePtr, classType);
       this._modifiersWithKeys = new ModifierMap();
-      this.setMap();
     }
     
     applyNormalAttribute(instance: TabContentAttribute): void {
@@ -76,4 +25,4 @@ class TabContentModifier extends LazyArkTabContentComponent implements Attribute
       ModifierUtils.applyAndMergeModifier<TabContentAttribute, ArkTabContentComponent, ArkComponent>(instance, this);
     }
   }
-   
+  

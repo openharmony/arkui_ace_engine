@@ -32,9 +32,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-const char TABS_ETS_TAG_PATTERN[] = "Tabs";
-const char TAB_BAR_ETS_TAG_PATTERN[] = "TabBar";
-const char SWIPER_ETS_TAG_PATTERN[] = "Swiper";
 
 class ACE_EXPORT TabContentPattern : public Pattern, public virtual RecoverableView {
     DECLARE_ACE_TYPE(TabContentPattern, Pattern, RecoverableView);
@@ -86,7 +83,7 @@ public:
         CHECK_NULL_VOID(parentNode);
         auto grandParentNode = parentNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(grandParentNode);
-        if (grandParentNode->GetTag() == TABS_ETS_TAG_PATTERN) {
+        if (grandParentNode->GetTag() == V2::TABS_ETS_TAG) {
             auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(
                 grandParentNode->GetLayoutProperty());
             CHECK_NULL_VOID(tabLayoutProperty);
@@ -110,12 +107,12 @@ public:
         CHECK_NULL_VOID(tabContentNode);
         auto parentNode = tabContentNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parentNode);
-        if (parentNode->GetTag() != SWIPER_ETS_TAG_PATTERN) {
+        if (parentNode->GetTag() != V2::SWIPER_ETS_TAG) {
             return;
         }
         auto grandParentNode = parentNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(grandParentNode);
-        if (grandParentNode->GetTag() != TABS_ETS_TAG_PATTERN) {
+        if (grandParentNode->GetTag() != V2::TABS_ETS_TAG) {
             return;
         }
 

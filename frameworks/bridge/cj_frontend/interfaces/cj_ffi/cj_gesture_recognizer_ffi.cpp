@@ -16,28 +16,12 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_gesture_recognizer_ffi.h"
 
 #include "bridge/common/utils/utils.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
-#include "core/components_ng/pattern/swiper/bridge/swiper_custom_modifier.h"
 
 using namespace OHOS;
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
-
-namespace {
-const ArkUISwiperCustomModifier* GetSwiperCustomModifier()
-{
-    static const ArkUISwiperCustomModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Swiper");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier =
-            reinterpret_cast<const ArkUISwiperCustomModifier*>(module->GetCustomModifier("customModifier"));
-    }
-    return cachedModifier;
-}
-} // namespace
 
 std::string CJGestureRecognizer::GetTag() const
 {
@@ -131,9 +115,16 @@ sptr<CJEventTargetInfo> CJGestureRecognizer::GetEventTargetInfo() const
     if (!attachNode) {
         return nullptr;
     }
-    if (attachNode->GetPattern<NG::ScrollablePattern>() || attachNode->GetTag() == V2::SWIPER_ETS_TAG) {
+    RefPtr<NG::Pattern> pattern;
+    if (auto scrollablePattern = attachNode->GetPattern<NG::ScrollablePattern>()) {
+        pattern = scrollablePattern;
+    }
+    if (auto swiperPattern = attachNode->GetPattern<NG::SwiperPattern>()) {
+        pattern = swiperPattern;
+    }
+    if (pattern) {
         auto scrollableTarget = FFIData::Create<CJScrollableTargetInfo>();
-        scrollableTarget->SetNode(attachNode);
+        scrollableTarget->SetPattern(pattern);
         scrollableTarget->SetId(attachNode->GetInspectorIdValue(""));
         scrollableTarget->SetType(CJEventTargetInfoType::SCROLLABLE);
         return scrollableTarget;
@@ -145,32 +136,30 @@ sptr<CJEventTargetInfo> CJGestureRecognizer::GetEventTargetInfo() const
 
 bool CJScrollableTargetInfo::IsBegin() const
 {
-    auto node = node_.Upgrade();
-    if (!node) {
+    auto pattern = pattern_.Upgrade();
+    if (!pattern) {
         return false;
     }
-    if (auto scrollablePattern = node->GetPattern<NG::ScrollablePattern>()) {
+    if (auto scrollablePattern = AceType::DynamicCast<NG::ScrollablePattern>(pattern)) {
         return scrollablePattern->IsAtTop();
     }
-    if (node->GetTag() == V2::SWIPER_ETS_TAG) {
-        auto swiperModifier = GetSwiperCustomModifier();
-        return swiperModifier && swiperModifier->isAtStart(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(node)));
+    if (auto swiperPattern = AceType::DynamicCast<NG::SwiperPattern>(pattern)) {
+        return swiperPattern->IsAtStart();
     }
     return false;
 }
 
 bool CJScrollableTargetInfo::IsEnd() const
 {
-    auto node = node_.Upgrade();
-    if (!node) {
+    auto pattern = pattern_.Upgrade();
+    if (!pattern) {
         return false;
     }
-    if (auto scrollablePattern = node->GetPattern<NG::ScrollablePattern>()) {
+    if (auto scrollablePattern = AceType::DynamicCast<NG::ScrollablePattern>(pattern)) {
         return scrollablePattern->IsAtBottom();
     }
-    if (node->GetTag() == V2::SWIPER_ETS_TAG) {
-        auto swiperModifier = GetSwiperCustomModifier();
-        return swiperModifier && swiperModifier->isAtEnd(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(node)));
+    if (auto swiperPattern = AceType::DynamicCast<NG::SwiperPattern>(pattern)) {
+        return swiperPattern->IsAtEnd();
     }
     return false;
 }

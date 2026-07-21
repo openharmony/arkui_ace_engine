@@ -33,7 +33,6 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/calendar/calendar_utils.h"
-#include "core/interfaces/native/node/node_swiper_modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -150,10 +149,9 @@ void CalendarPattern::OnModifyDone()
         JumpTo(preFrameNode, currentFrameNode, nextFrameNode, swiperFrameNode);
         return;
     }
-    auto swiperModifier = NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_VOID(swiperModifier);
-    auto currentIndex = swiperModifier->getCurrentIndex(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperFrameNode)), false);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto currentIndex = swiperPattern->GetCurrentIndex();
     currentMonthIndex_ = currentIndex;
 
     // Set calendat data according to the index.
@@ -215,10 +213,8 @@ void CalendarPattern::InitSwiperChangeDoneEvent()
     CHECK_NULL_VOID(swiperFrameNode);
     auto swiperEventHub = swiperFrameNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
-    auto swiperModifier = NodeModifier::GetSwiperCustomModifier();
-    uint8_t totalCount = swiperModifier ? static_cast<uint8_t>(swiperModifier->getTotalCount(
-                                              reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperFrameNode))))
-                                        : TOTAL_COUNT;
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    uint8_t totalCount = swiperPattern ? static_cast<uint8_t>(swiperPattern->TotalCount()) : TOTAL_COUNT;
     CHECK_EQUAL_VOID(totalCount, 0);
 
     auto changeEventWithPreIndex = std::make_shared<ChangeEventWithPreIndex>(
@@ -329,10 +325,9 @@ void CalendarPattern::JumpTo(const RefPtr<FrameNode>& preFrameNode, const RefPtr
     CHECK_NULL_VOID(currentPattern);
     auto nextPattern = nextFrameNode->GetPattern<CalendarMonthPattern>();
     CHECK_NULL_VOID(nextPattern);
-    auto swiperModifier = NodeModifier::GetSwiperCustomModifier();
-    CHECK_NULL_VOID(swiperModifier);
-    auto currentIndex = swiperModifier->getCurrentIndex(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(swiperFrameNode)), false);
+    auto swiperPattern = swiperFrameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto currentIndex = swiperPattern->GetCurrentIndex();
     currentMonthIndex_ = currentIndex;
     if (goTo_) {
         JumpTo(currentMonth_);

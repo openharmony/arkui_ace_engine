@@ -15,24 +15,8 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_tabs_function.h"
 
-#include "core/common/dynamic_module.h"
-#include "core/common/dynamic_module_helper.h"
-#include "core/components_ng/pattern/tabs/bridge/tabs_transition_proxy_modifier_api.h"
-
 namespace OHOS::Ace::Framework {
 constexpr int PARAM_COUNT_FOUR = 4;
-
-const NG::NodeModifier::ArkUITabContentTransitionModifier* GetTransitionProxyModifier()
-{
-    static const NG::NodeModifier::ArkUITabContentTransitionModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Tabs");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const NG::NodeModifier::ArkUITabContentTransitionModifier*>(
-            module->GetCustomModifier("tabsTransitionProxy"));
-    }
-    return cachedModifier;
-}
 
 void JsTabContentTransitionProxy::JSBind(BindingTarget globalObj)
 {
@@ -55,8 +39,8 @@ void JsTabContentTransitionProxy::SetFromIndex(const JSCallbackInfo& args)
 void JsTabContentTransitionProxy::GetFromIndex(const JSCallbackInfo& args)
 {
     auto fromIndex = 0;
-    if (auto* modifier = GetTransitionProxyModifier()) {
-        fromIndex = modifier->getFromIndex(proxy_);
+    if (proxy_) {
+        fromIndex = proxy_->GetFromIndex();
     }
     auto fromRef = JSRef<JSVal>::Make(JSVal(ToJSValue(fromIndex)));
     args.SetReturnValue(fromRef);
@@ -70,8 +54,8 @@ void JsTabContentTransitionProxy::SetToIndex(const JSCallbackInfo& args)
 void JsTabContentTransitionProxy::GetToIndex(const JSCallbackInfo& args)
 {
     auto toIndex = 0;
-    if (auto* modifier = GetTransitionProxyModifier()) {
-        toIndex = modifier->getToIndex(proxy_);
+    if (proxy_) {
+        toIndex = proxy_->GetToIndex();
     }
     auto toRef = JSRef<JSVal>::Make(JSVal(ToJSValue(toIndex)));
     args.SetReturnValue(toRef);
@@ -79,8 +63,8 @@ void JsTabContentTransitionProxy::GetToIndex(const JSCallbackInfo& args)
 
 void JsTabContentTransitionProxy::FinishTransition(const JSCallbackInfo& args)
 {
-    if (auto* modifier = GetTransitionProxyModifier()) {
-        modifier->finishTransition(proxy_);
+    if (proxy_) {
+        proxy_->FinishTransition();
     }
 }
 
@@ -123,7 +107,7 @@ void JsTabsFunction::Execute(int32_t selectedIndex, int32_t index, float positio
     JsFunction::ExecuteJS(PARAM_COUNT_FOUR, params);
 }
 
-void JsTabsFunction::Execute(const RefPtr<AceType>& proxy)
+void JsTabsFunction::Execute(const RefPtr<TabContentTransitionProxy>& proxy)
 {
     JSRef<JSObject> proxyObj = JSClass<JsTabContentTransitionProxy>::NewInstance();
     auto jsProxy = Referenced::Claim(proxyObj->Unwrap<JsTabContentTransitionProxy>());

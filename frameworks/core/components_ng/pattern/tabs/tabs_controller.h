@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TABS_CONTROLLER_H
 
 #include "core/components/swiper/swiper_controller.h"
-#include "ui/properties/ng/transition_property.h"
 
 namespace OHOS::Ace::NG {
 

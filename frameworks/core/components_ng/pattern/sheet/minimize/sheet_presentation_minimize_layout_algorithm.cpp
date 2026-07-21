@@ -15,8 +15,8 @@
 
 #include "core/components_ng/pattern/sheet/minimize/sheet_presentation_minimize_layout_algorithm.h"
 
-#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
-#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/components_ng/pattern/sheet/minimize/sheet_minimize_object.h"
 
 namespace OHOS::Ace::NG {

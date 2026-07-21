@@ -70,7 +70,7 @@ typedef struct OperationInfo {
 using LazyForEachChild = std::pair<std::string, RefPtr<UINode>>;
 using LazyForEachCacheChild = std::pair<int32_t, RefPtr<UINode>>;
 
-class ACE_FORCE_EXPORT LazyForEachBuilder : public virtual AceType {
+class ACE_EXPORT LazyForEachBuilder : public virtual AceType {
     DECLARE_ACE_TYPE(NG::LazyForEachBuilder, AceType);
 public:
     LazyForEachBuilder() = default;

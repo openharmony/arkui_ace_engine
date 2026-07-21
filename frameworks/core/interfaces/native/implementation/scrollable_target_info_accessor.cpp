@@ -16,7 +16,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/interfaces/native/node/node_swiper_modifier.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
@@ -43,15 +42,11 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_Boolean IsBeginImpl(Ark_ScrollableTargetInfo peer)
 {
     const auto pattern = peer ? peer->GetPattern() : nullptr;
-    const auto host = pattern ? pattern->GetHost() : nullptr;
     Ark_Boolean result = Converter::ArkValue<Ark_Boolean>(false);
     if (auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern)) {
         result = Converter::ArkValue<Ark_Boolean>(scrollablePattern->IsAtTop());
-    } else if (host && host->GetTag() == V2::SWIPER_ETS_TAG) {
-        auto swiperModifier = NodeModifier::GetSwiperCustomModifier();
-        result = Converter::ArkValue<Ark_Boolean>(
-            swiperModifier && swiperModifier->isAtStart(
-                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(host))));
+    } else if (auto swiperPattern = AceType::DynamicCast<SwiperPattern>(pattern)) {
+        result = Converter::ArkValue<Ark_Boolean>(swiperPattern->IsAtStart());
     } else {
         result = Converter::ArkValue<Ark_Boolean>(false);
     }
@@ -60,15 +55,11 @@ Ark_Boolean IsBeginImpl(Ark_ScrollableTargetInfo peer)
 Ark_Boolean IsEndImpl(Ark_ScrollableTargetInfo peer)
 {
     const auto pattern = peer ? peer->GetPattern() : nullptr;
-    const auto host = pattern ? pattern->GetHost() : nullptr;
     Ark_Boolean result;
     if (auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(pattern)) {
         result = Converter::ArkValue<Ark_Boolean>(scrollablePattern->IsAtBottom());
-    } else if (host && host->GetTag() == V2::SWIPER_ETS_TAG) {
-        auto swiperModifier = NodeModifier::GetSwiperCustomModifier();
-        result = Converter::ArkValue<Ark_Boolean>(
-            swiperModifier && swiperModifier->isAtEnd(
-                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(host))));
+    } else if (auto swiperPattern = AceType::DynamicCast<SwiperPattern>(pattern)) {
+        result = Converter::ArkValue<Ark_Boolean>(swiperPattern->IsAtEnd());
     } else {
         result = Converter::ArkValue<Ark_Boolean>(false);
     }

@@ -15,62 +15,44 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_navigator_ffi.h"
 
-#include "base/log/log_wrapper.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
-namespace OHOS::Ace {
-// Should use CJUIModifier API later
-NG::NavigatorModelNG* GetNavigatorModel()
-{
-    static NG::NavigatorModelNG* model = nullptr;
-    if (model == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Navigator");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find navigator dynamic module");
-        }
-        model = reinterpret_cast<NG::NavigatorModelNG*>(module->GetModel());
-    }
-    return model;
-}
-} // namespace OHOS::Ace
-
 extern "C" {
 void FfiOHOSAceFrameworkNavigatorCreate(const char* target, int32_t type)
 {
-    GetNavigatorModel()->Create();
-    GetNavigatorModel()->SetUri(target);
+    NavigatorModel::GetInstance()->Create();
+    NavigatorModel::GetInstance()->SetUri(target);
     NavigatorType navigatorType = NavigatorType(type);
     if (navigatorType == NavigatorType::DEFAULT) {
-        GetNavigatorModel()->SetType(NavigatorType::PUSH);
+        NavigatorModel::GetInstance()->SetType(NavigatorType::PUSH);
     } else {
-        GetNavigatorModel()->SetType(navigatorType);
+        NavigatorModel::GetInstance()->SetType(navigatorType);
     }
 }
 
 void FfiOHOSAceFrameworkNavigatorSetParams(const char* args)
 {
-    GetNavigatorModel()->SetParams(args);
+    NavigatorModel::GetInstance()->SetParams(args);
 }
 
 void FfiOHOSAceFrameworkNavigatorSetActive(bool active)
 {
-    GetNavigatorModel()->SetActive(active);
+    NavigatorModel::GetInstance()->SetActive(active);
 }
 
 void FfiOHOSAceFrameworkNavigatorSetWidth(double width, int32_t unit)
 {
-    GetNavigatorModel()->SetIsDefWidth(true);
+    NavigatorModel::GetInstance()->SetIsDefWidth(true);
     FfiOHOSAceFrameworkViewAbstractSetWidth(width, unit);
 }
 
 void FfiOHOSAceFrameworkNavigatorSetHeight(double height, int32_t unit)
 {
-    GetNavigatorModel()->SetIsDefHeight(true);
+    NavigatorModel::GetInstance()->SetIsDefHeight(true);
     FfiOHOSAceFrameworkViewAbstractSetHeight(height, unit);
 }
 

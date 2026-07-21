@@ -50,42 +50,6 @@ ohos_abc("arkgriditem") {
   part_name = ace_engine_part
 }
 
-ohos_abc("arktabs") {
-  sources = [ "./src/arktabs.ts" ]
-  output_name = "arktabs"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("arktabcontent") {
-  sources = [ "./src/arktabcontent.ts" ]
-  output_name = "arktabcontent"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("arkswiper") {
-  sources = [ "./src/arkswiper.ts" ]
-  output_name = "arkswiper"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("arkswiperindicator") {
-  sources = [ "./src/arkswiperindicator.ts" ]
-  output_name = "arkswiperindicator"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
 ohos_abc("arkdatapanel") {
   sources = [ "./src/arkdatapanel.ts" ]
   output_name = "arkdatapanel"
@@ -211,27 +175,9 @@ ohos_abc("arkdatepicker") {
   part_name = ace_engine_part
 }
 
-ohos_abc("arkpanel") {
-  sources = [ "./src/arkpanel.ts" ]
-  output_name = "arkpanel"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
 ohos_abc("arklazygridlayout") {
   sources = [ "./src/arklazygridlayout.ts" ]
   output_name = "arklazygridlayout"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
- }
-
-ohos_abc("arknavigator") {
-  sources = [ "./src/arknavigator.ts" ]
-  output_name = "arknavigator"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem

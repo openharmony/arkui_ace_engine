@@ -20,9 +20,9 @@
 
 #include "ffi_remote_data.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_gesture_ffi.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/gestures/gesture_info.h"
 #include "bridge/cj_frontend/cppview/gesture.h"
 
@@ -77,9 +77,9 @@ class CJScrollableTargetInfo : public CJEventTargetInfo {
 public:
     CJScrollableTargetInfo() : CJEventTargetInfo() {}
 
-    void SetNode(const WeakPtr<NG::FrameNode>& node)
+    void SetPattern(const WeakPtr<NG::Pattern>& pattern)
     {
-        node_ = node;
+        pattern_ = pattern;
     }
 
     bool IsBegin() const;
@@ -87,7 +87,7 @@ public:
     bool IsEnd() const;
 
 private:
-    WeakPtr<NG::FrameNode> node_;
+    WeakPtr<NG::Pattern> pattern_;
 };
 
 class CJGestureRecognizer : public OHOS::FFI::FFIData {

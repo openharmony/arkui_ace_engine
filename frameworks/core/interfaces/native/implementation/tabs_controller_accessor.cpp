@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,104 @@
  * limitations under the License.
  */
 
-#include "base/log/log_wrapper.h"
-#include "core/common/dynamic_module_helper.h"
-#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "tabs_controller_modifier_peer_impl.h"
+
+#include "base/error/error_code.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/promise_helper.h"
+#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+namespace TabsControllerAccessor {
+void DestroyPeerImpl(Ark_TabsController peer)
+{
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
+}
+Ark_TabsController ConstructImpl()
+{
+    auto peerImpl = Referenced::MakeRefPtr<TabsControllerPeerImpl>();
+    peerImpl->IncRefCount();
+    return reinterpret_cast<TabsControllerPeer *>(Referenced::RawPtr(peerImpl));
+}
+Ark_NativePointer GetFinalizerImpl()
+{
+    return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
+void ChangeIndexImpl(Ark_TabsController peer,
+                     Ark_Int32 value)
+{
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto index = Converter::Convert<Ark_Int32>(value);
+    peerImpl->TriggerChangeIndex(index);
+}
+void PreloadItemsImpl(Ark_VMContext vmContext,
+                      Ark_AsyncWorkerPtr asyncWorker,
+                      Ark_TabsController peer,
+                      const Opt_Array_I32* indices,
+                      const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
+{
+    CHECK_NULL_VOID(asyncWorker);
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto promise = std::make_shared<PromiseHelper<Callback_Opt_Array_String_Void>>(outputArgumentForReturningPromise);
+    auto finishFunc = [promise](const int32_t errCode, const std::string errStr) {
+        if (errCode == ERROR_CODE_NO_ERROR) {
+            promise->Resolve();
+        } else {
+            promise->Reject({std::to_string(errCode), errStr});
+        }
+    };
+    peerImpl->TriggerSetPreloadFinishCallback(finishFunc);
+    auto indexVectOpt = !indices ? std::nullopt : Converter::OptConvert<std::vector<int32_t>>(*indices);
+    auto execFunc = [peerImpl, indexVectOpt = std::move(indexVectOpt)]() {
+        if (indexVectOpt) {
+            std::set<int32_t> indexSet(indexVectOpt->begin(), indexVectOpt->end());
+            peerImpl->TriggerPreloadItems(indexSet);
+        } else {
+            peerImpl->TriggerPreloadItems({});
+        }
+    };
+    promise->StartAsync(vmContext, *asyncWorker, execFunc);
+}
+void SetTabBarTranslateImpl(Ark_TabsController peer,
+                            const Ark_TranslateOptions* translate)
+{
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(translate);
+    NG::TranslateOptions convValue;
+    convValue.x = Converter::OptConvert<CalcDimension>(translate->x).value_or(convValue.x);
+    convValue.y = Converter::OptConvert<CalcDimension>(translate->y).value_or(convValue.y);
+    convValue.z = Converter::OptConvert<CalcDimension>(translate->z).value_or(convValue.z);
+    peerImpl->TriggerSetTabBarTranslate(convValue);
+}
+void SetTabBarOpacityImpl(Ark_TabsController peer,
+                          Ark_Float64 opacity)
+{
+    auto peerImpl = reinterpret_cast<TabsControllerPeerImpl *>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto convValue = Converter::Convert<float>(opacity);
+    peerImpl->TriggerSetTabBarOpacity(convValue);
+}
+} // TabsControllerAccessor
 const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor()
 {
-    static const GENERATED_ArkUITabsControllerAccessor* cachedAccessor = nullptr;
-    if (cachedAccessor == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Tabs");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find tabs dynamic module");
-        }
-        cachedAccessor = reinterpret_cast<const GENERATED_ArkUITabsControllerAccessor*>(
-            module->GetCustomModifier("tabsControllerAccessor"));
-        if (cachedAccessor == nullptr) {
-            LOGF_ABORT("Can't find tabs controller accessor");
-        }
-    }
-    return cachedAccessor;
+    static const GENERATED_ArkUITabsControllerAccessor TabsControllerAccessorImpl {
+        TabsControllerAccessor::DestroyPeerImpl,
+        TabsControllerAccessor::ConstructImpl,
+        TabsControllerAccessor::GetFinalizerImpl,
+        TabsControllerAccessor::ChangeIndexImpl,
+        TabsControllerAccessor::PreloadItemsImpl,
+        TabsControllerAccessor::SetTabBarTranslateImpl,
+        TabsControllerAccessor::SetTabBarOpacityImpl,
+    };
+    return &TabsControllerAccessorImpl;
 }
-} // namespace OHOS::Ace::NG::GeneratedModifier
+
+}

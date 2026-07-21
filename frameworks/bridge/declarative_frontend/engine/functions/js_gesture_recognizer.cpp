@@ -20,7 +20,6 @@
 #include "core/common/event_manager.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/components_ng/gestures/tap_gesture.h"
-#include "core/interfaces/native/node/node_swiper_modifier.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -79,11 +78,9 @@ void JSScrollableTargetInfo::IsBegin(const JSCallbackInfo& args)
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(scrollablePattern->IsAtTop())));
         return;
     }
-    auto host = pattern->GetHost();
-    if (host && host->GetTag() == V2::SWIPER_ETS_TAG) {
-        auto swiperModifier = NG::NodeModifier::GetSwiperCustomModifier();
-        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(swiperModifier &&
-            swiperModifier->isAtStart(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(host))))));
+    auto swiperPattern = AceType::DynamicCast<NG::SwiperPattern>(pattern);
+    if (swiperPattern) {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(swiperPattern->IsAtStart())));
     }
 }
 
@@ -99,11 +96,9 @@ void JSScrollableTargetInfo::IsEnd(const JSCallbackInfo& args)
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(scrollablePattern->IsAtBottom())));
         return;
     }
-    auto host = pattern->GetHost();
-    if (host && host->GetTag() == V2::SWIPER_ETS_TAG) {
-        auto swiperModifier = NG::NodeModifier::GetSwiperCustomModifier();
-        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(swiperModifier &&
-            swiperModifier->isAtEnd(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(host))))));
+    auto swiperPattern = AceType::DynamicCast<NG::SwiperPattern>(pattern);
+    if (swiperPattern) {
+        args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(swiperPattern->IsAtEnd())));
     }
 }
 

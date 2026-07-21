@@ -21,7 +21,6 @@
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/components_ng/pattern/tabs/tab_content_model.h"
 #include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/pattern/image/image_model.h"
 
 struct SubTabBarStylePeer final : public OHOS::Ace::Referenced {
     std::optional<std::string> content = std::nullopt;

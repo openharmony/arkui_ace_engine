@@ -23,7 +23,7 @@
 
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "interfaces/native/native_type.h"

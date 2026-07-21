@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/swiper/bridge/swiper_controller_modifier_peer_impl.h"
+#include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
 
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/converter.h"

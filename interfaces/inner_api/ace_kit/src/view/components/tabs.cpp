@@ -19,9 +19,9 @@
 #include "ui/base/ace_type.h"
 #include "ui/view_stack/view_stack_processor.h"
 
-#include "core/interfaces/native/node/tabs_modifier.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
+#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
@@ -43,9 +43,7 @@ struct TabsThemeInfo {
 Tabs::Tabs()
 {
     int32_t nodeId = Ace::Kit::ViewStackProcessor::ClaimNodeId();
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    auto aceNode = AceType::Claim(reinterpret_cast<NG::FrameNode*>(modifier->createFrameNode(nodeId)));
+    auto aceNode = NG::TabsModelNG::CreateFrameNode(nodeId);
     node_ = AceType::MakeRefPtr<FrameNodeImpl>(aceNode);
 }
 
@@ -117,30 +115,21 @@ void Tabs::SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption)
 {
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setBarBackgroundBlurStyle(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        const_cast<BlurStyleOption*>(&styleOption));
+    NG::TabsModelNG::SetBarBackgroundBlurStyle(Referenced::RawPtr(tabsNode), styleOption);
 }
 
 void Tabs::SetBarBackgroundColor(const Color& backgroundColor)
 {
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setBarBackgroundColor(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        backgroundColor.GetValue());
+    NG::TabsModelNG::SetBarBackgroundColor(Referenced::RawPtr(tabsNode), backgroundColor);
 }
 
 void Tabs::SetBarBackgroundEffect(const EffectOption& effectOption)
 {
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setBarBackgroundEffect(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        const_cast<EffectOption*>(&effectOption));
+    NG::TabsModelNG::SetBarBackgroundEffect(Referenced::RawPtr(tabsNode), effectOption);
 }
 
 uint32_t Tabs::GetAnimationDuration()
@@ -203,10 +192,7 @@ void Tabs::SetTabBarWidth(const Dimension& tabBarWidth)
 {
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setTabBarWidth(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        const_cast<Dimension*>(&tabBarWidth));
+    NG::TabsModelNG::SetTabBarWidth(Referenced::RawPtr(tabsNode), tabBarWidth);
 }
 
 Dimension Tabs::GetTabBarWidth() const
@@ -222,10 +208,7 @@ void Tabs::SetTabBarHeight(const Dimension& tabBarHeight)
 {
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setTabBarHeight(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        const_cast<Dimension*>(&tabBarHeight));
+    NG::TabsModelNG::SetTabBarHeight(Referenced::RawPtr(tabsNode), tabBarHeight);
 }
 
 Dimension Tabs::GetTabBarHeight() const
@@ -248,48 +231,35 @@ void Tabs::SetDivider(const TabsItemDivider& divider)
     aceDivider.startMargin = divider.startMargin;
     aceDivider.endMargin = divider.endMargin;
     aceDivider.isNull = divider.isNull;
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setDivider(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)), &aceDivider);
+    NG::TabsModelNG::SetDivider(Referenced::RawPtr(tabsNode), aceDivider);
 }
 
 void Tabs::SetDividerColorByUser(bool isByUser)
 {
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setDividerColorByUser(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)), isByUser);
+    NG::TabsModelNG::SetDividerColorByUser(Referenced::RawPtr(tabsNode), isByUser);
 }
 
 void Tabs::SetEffectNodeOption(const TabsEffectNodeOption& option)
 {
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setEffectNodeOption(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        const_cast<TabsEffectNodeOption*>(&option));
+    NG::TabsModelNG::SetEffectNodeOption(Referenced::RawPtr(tabsNode), option);
 }
 
 void Tabs::SetTabBarMode(const TabBarMode& barMode)
 {
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setTabBarMode(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        static_cast<ArkUI_Int32>(barMode));
+    NG::TabsModelNG::SetTabBarMode(Referenced::RawPtr(tabsNode), barMode);
 }
 
 void Tabs::SetScrollableBarModeOptions(const ScrollableBarModeOptions& option)
 {
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setScrollableBarModeOptions(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        const_cast<ScrollableBarModeOptions*>(&option));
+    NG::TabsModelNG::SetScrollableBarModeOptions(Referenced::RawPtr(tabsNode), option);
 }
 
 RefPtr<NG::TabsControllerNG> GetTabsControllerNode(const RefPtr<FrameNode>& node)
@@ -350,6 +320,8 @@ void Tabs::SetOnChange(OnChangeEvent onChangeEvent)
     CHECK_NULL_VOID(frameNodeImpl);
     auto aceFrameNode = frameNodeImpl->GetAceNode();
     CHECK_NULL_VOID(aceFrameNode);
+    auto tabPattern = aceFrameNode->GetPattern<NG::TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
     auto onChange = [onChangeEvent](const BaseEventInfo* info) {
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
@@ -357,9 +329,7 @@ void Tabs::SetOnChange(OnChangeEvent onChangeEvent)
         }
         onChangeEvent(tabsInfo->GetIndex());
     };
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setOnChange(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(aceFrameNode)), &onChange);
+    tabPattern->SetOnChangeEvent(std::move(onChange));
 }
 
 void Tabs::SetOnTabBarClick(OnTabBarClickEvent onTabBarClickEvent)
@@ -368,6 +338,8 @@ void Tabs::SetOnTabBarClick(OnTabBarClickEvent onTabBarClickEvent)
     CHECK_NULL_VOID(frameNodeImpl);
     auto aceFrameNode = frameNodeImpl->GetAceNode();
     CHECK_NULL_VOID(aceFrameNode);
+    auto tabPattern = aceFrameNode->GetPattern<NG::TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
     auto onTabBarClick = [onTabBarClickEvent](const BaseEventInfo* info) {
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
@@ -375,27 +347,21 @@ void Tabs::SetOnTabBarClick(OnTabBarClickEvent onTabBarClickEvent)
         }
         onTabBarClickEvent(tabsInfo->GetIndex());
     };
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setOnTabBarClick(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(aceFrameNode)), &onTabBarClick);
+    tabPattern->SetOnTabBarClickEvent(std::move(onTabBarClick));
 }
 
 void Tabs::SetOnGestureSwipe(OnGestureSwipeEvent onGestureSwipe)
 {
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setOnGestureSwipe(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)), &onGestureSwipe);
+    NG::TabsModelNG::SetOnGestureSwipe(Referenced::RawPtr(tabsNode), std::move(onGestureSwipe));
 }
 
 void Tabs::SetOnAnimationStart(OnAnimationStartEvent onAnimationStart)
 {
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setOnAnimationStart(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)), &onAnimationStart);
+    NG::TabsModelNG::SetOnAnimationStart(Referenced::RawPtr(tabsNode), std::move(onAnimationStart));
 }
 
 void Tabs::SetOnTabBarItemsChange(OnTabBarItemsChangeEvent&& event)
@@ -404,9 +370,9 @@ void Tabs::SetOnTabBarItemsChange(OnTabBarItemsChangeEvent&& event)
     CHECK_NULL_VOID(tabBarNode);
     auto aceFrameNode = reinterpret_cast<NG::FrameNode*>(tabBarNode->GetHandle());
     CHECK_NULL_VOID(aceFrameNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setTabBarItemsChangeEvent(reinterpret_cast<ArkUINodeHandle>(aceFrameNode), &event);
+    auto tabBarPattern = aceFrameNode->GetPattern<NG::TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->SetOnTabBarItemsChangeEvent(std::move(event));
 }
 
 void UpdateNormalTabBarItem(bool isFolded, RefPtr<NG::FrameNode>& tabBarChildFrameNode,
@@ -415,11 +381,9 @@ void UpdateNormalTabBarItem(bool isFolded, RefPtr<NG::FrameNode>& tabBarChildFra
     CHECK_NULL_VOID(tabBarChildFrameNode);
     NG::ViewAbstract::SetTranslate(tabBarChildFrameNode.GetRawPtr(), {
         isFolded ? Ace::Dimension(translateX) : Ace::Dimension{}, 0.0, 0.0 });
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    NG::TabBarParamType itemType = static_cast<NG::TabBarParamType>(
-        modifier->getTabBarItemType(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabBarNode)),
-            tabBarChildFrameNode->GetId()));
+    auto tabBarPattern = tabBarNode->GetPattern<NG::TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    NG::TabBarParamType itemType = tabBarPattern->GetTabBarItemType(tabBarChildFrameNode->GetId());
     if (itemType == NG::TabBarParamType::NORMAL) {
         auto linearLayoutProperty = tabBarChildFrameNode->GetLayoutProperty<NG::LinearLayoutProperty>();
         CHECK_NULL_VOID(linearLayoutProperty);
@@ -428,8 +392,6 @@ void UpdateNormalTabBarItem(bool isFolded, RefPtr<NG::FrameNode>& tabBarChildFra
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<NG::TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        auto tabBarPattern = tabBarNode->GetPattern<NG::TabBarPattern>();
-        CHECK_NULL_VOID(tabBarPattern);
         const auto style = tabBarPattern->GetBottomTabLabelStyle(tabBarChildFrameNode->GetId());
         if (style.minFontSize) {
             textLayoutProperty->UpdateAdaptMinFontSize(isFolded ? Ace::Dimension{0} : style.minFontSize.value());
@@ -460,12 +422,10 @@ void Tabs::SetTabBarFolded(bool isFolded)
     NG::ViewAbstract::SetHitTestMode(tabBarNode.GetRawPtr(),
         isFolded ? NG::HitTestMode::HTMNONE : NG::HitTestMode::HTMDEFAULT);
     auto tabBarChildren = tabBarNode->GetChildren();
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->setShouldPlayMaskAnimation(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabBarNode)),
-        !isFolded);
-    const auto tabBarItemsSize = modifier->getTabBarItemSize(
-        reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabBarNode)));
+    auto tabBarPattern = tabBarNode->GetPattern<NG::TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    tabBarPattern->SetShouldPlayMaskAnimation(!isFolded);
+    const auto tabBarItemsSize = tabBarPattern->GetTabBarItemSize();
     CHECK_NULL_VOID(tabBarItemsSize);
     auto tabsPattern = tabsNode->GetPattern<NG::TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
@@ -532,10 +492,7 @@ void Tabs::SetTabBarWidth(const Dimension& tabBarWidth, const RefPtr<ResourceObj
     }
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->handleBarWidth(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        AceType::RawPtr(resObj));
+    NG::TabsModelNG::HandleBarWidth(Referenced::RawPtr(tabsNode), resObj);
 }
 
 void Tabs::SetTabBarHeight(const Dimension& tabBarHeight, const RefPtr<ResourceObject>& resObj)
@@ -547,10 +504,7 @@ void Tabs::SetTabBarHeight(const Dimension& tabBarHeight, const RefPtr<ResourceO
     }
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->handleBarHeight(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        AceType::RawPtr(resObj));
+    NG::TabsModelNG::HandleBarHeight(Referenced::RawPtr(tabsNode), resObj);
 }
 
 void Tabs::SetDivider(const TabsItemDivider& divider, const RefPtr<ResourceObject>& widthResObj,
@@ -563,16 +517,10 @@ void Tabs::SetDivider(const TabsItemDivider& divider, const RefPtr<ResourceObjec
     }
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->handleDividerStrokeWidth(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        AceType::RawPtr(widthResObj));
-    modifier->handleDividerColor(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        AceType::RawPtr(colorResObj));
-    modifier->handleDividerStartMargin(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        AceType::RawPtr(startMarginResObj));
-    modifier->handleDividerEndMargin(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        AceType::RawPtr(endMarginResObj));
+    NG::TabsModelNG::HandleDividerStrokeWidth(Referenced::RawPtr(tabsNode), widthResObj);
+    NG::TabsModelNG::HandleDividerColor(Referenced::RawPtr(tabsNode), colorResObj);
+    NG::TabsModelNG::HandleDividerStartMargin(Referenced::RawPtr(tabsNode), startMarginResObj);
+    NG::TabsModelNG::HandleDividerEndMargin(Referenced::RawPtr(tabsNode), endMarginResObj);
 }
 
 void Tabs::SetScrollableBarModeOptions(const ScrollableBarModeOptions& option, const RefPtr<ResourceObject>& resObj)
@@ -584,10 +532,7 @@ void Tabs::SetScrollableBarModeOptions(const ScrollableBarModeOptions& option, c
     }
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->handleScrollableBarMargin(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        AceType::RawPtr(resObj));
+    NG::TabsModelNG::HandleScrollableBarMargin(Referenced::RawPtr(tabsNode), resObj);
 }
 
 void Tabs::SetEffectNodeOption(const TabsEffectNodeOption& option, const RefPtr<ResourceObject>& resObj)
@@ -599,10 +544,7 @@ void Tabs::SetEffectNodeOption(const TabsEffectNodeOption& option, const RefPtr<
     }
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->handleBarGridGutter(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        AceType::RawPtr(resObj));
+    NG::TabsModelNG::HandleBarGridGutter(Referenced::RawPtr(tabsNode), resObj);
 }
 
 void Tabs::SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption, const RefPtr<ResourceObject>& resObj)
@@ -614,10 +556,7 @@ void Tabs::SetBarBackgroundBlurStyle(const BlurStyleOption& styleOption, const R
     }
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->handleBackgroundBlurStyleInactiveColor(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        AceType::RawPtr(resObj));
+    NG::TabsModelNG::HandleBackgroundBlurStyleInactiveColor(Referenced::RawPtr(tabsNode), resObj);
 }
 
 void Tabs::SetBarBackgroundColor(const Color& backgroundColor, const RefPtr<ResourceObject>& resObj)
@@ -629,10 +568,7 @@ void Tabs::SetBarBackgroundColor(const Color& backgroundColor, const RefPtr<Reso
     }
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->handleBarBackgroundColor(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        AceType::RawPtr(resObj));
+    NG::TabsModelNG::HandleBarBackgroundColor(Referenced::RawPtr(tabsNode), resObj);
 }
 
 void Tabs::SetBarBackgroundEffect(const EffectOption& effectOption, const RefPtr<ResourceObject>& resObj)
@@ -644,9 +580,6 @@ void Tabs::SetBarBackgroundEffect(const EffectOption& effectOption, const RefPtr
     }
     auto tabsNode = GetTabsNode(node_);
     CHECK_NULL_VOID(tabsNode);
-    auto modifier = NG::NodeModifier::GetTabsCustomModifier();
-    CHECK_NULL_VOID(modifier);
-    modifier->handleBackgroundEffectInactiveColor(reinterpret_cast<ArkUINodeHandle>(Referenced::RawPtr(tabsNode)),
-        AceType::RawPtr(resObj));
+    NG::TabsModelNG::HandleBackgroundEffectInactiveColor(Referenced::RawPtr(tabsNode), resObj);
 }
 } // namespace OHOS::Ace::Kit

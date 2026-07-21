@@ -24,7 +24,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT TaihangOptimizer final : public std::enable_shared_from_this<TaihangOptimizer> {
+class TaihangOptimizer final : public std::enable_shared_from_this<TaihangOptimizer> {
 public:
     TaihangOptimizer() = default;
     ~TaihangOptimizer() = default;

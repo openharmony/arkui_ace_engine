@@ -40,9 +40,6 @@
 #include "core/components/theme/resource_adapter.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
 #include "frameworks/core/components/theme/shadow_theme.h"
-#ifdef PLUGIN_COMPONENT_SUPPORTED
-#include "core/common/plugin_manager.h"
-#endif
 #include "frameworks/core/components_ng/pattern/toggle/toggle_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "frameworks/core/components_ng/pattern/menu/menu_theme.h"
@@ -1655,9 +1652,6 @@ bool ArkTSUtils::ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &j
 bool ArkTSUtils::ParseJsDimensionNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
     DimensionUnit defaultUnit, RefPtr<ResourceObject>& resourceObject, bool isSupportPercent)
 {
-    if (jsValue.IsEmpty() || jsValue->IsNull() || jsValue->IsUndefined()) {
-        return false;
-    }
     if (!jsValue->IsNumber() && !jsValue->IsString(vm) && !jsValue->IsObject(vm)) {
         return false;
     }
@@ -2363,29 +2357,6 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueR
         return false;
     }
     return false;
-}
-
-bool ArkTSUtils::ParseJsMediaWithBundleName(
-    const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
-    std::string& bundleName, std::string& moduleName)
-{
-    RefPtr<ResourceObject> resObj;
-    return ParseJsMediaWithBundleName(vm, jsValue, result, bundleName, moduleName, resObj);
-}
-
-bool ArkTSUtils::ParseJsMediaWithBundleName(
-    const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
-    std::string& bundleName, std::string& moduleName, RefPtr<ResourceObject>& resourceObject)
-{
-    GetJsMediaBundleInfo(vm, jsValue, bundleName, moduleName);
-    if (!jsValue->IsObject(vm) && !jsValue->IsString(vm)) {
-        return !bundleName.empty() && !moduleName.empty();
-    }
-    if (jsValue->IsString(vm)) {
-        result = jsValue->ToString(vm)->ToString(vm);
-        return true;
-    }
-    return ParseJsMediaFromResource(vm, jsValue, result, resourceObject);
 }
 
 void ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &value, std::string& result)
@@ -4970,8 +4941,6 @@ template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<Color>(
     const EcmaVM*, const Local<JSValueRef>&, Color&, RefPtr<ResourceObject>&);
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<CalcDimension>(
     const EcmaVM*, const Local<JSValueRef>&, CalcDimension&, RefPtr<ResourceObject>&);
-template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<int>(
-    const EcmaVM*, const Local<JSValueRef>&, int&, RefPtr<ResourceObject>&);
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValueNG<Dimension>(
     const EcmaVM*, const Local<JSValueRef>&, Dimension&, RefPtr<ResourceObject>&);
 template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValueNG<CalcDimension>(

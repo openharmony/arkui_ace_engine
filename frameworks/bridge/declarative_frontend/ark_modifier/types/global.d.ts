@@ -109,26 +109,6 @@ interface GaugeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
-interface NavigatorComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
-interface SwiperComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
-interface TabsComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
-interface TabContentComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
-interface IndicatorComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
 interface HyperlinkComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }

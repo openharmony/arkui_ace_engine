@@ -37,9 +37,7 @@ component_modules = [
   "marquee",
   "progress",
   "texttimer",
-  "navigator",
   "search",
-  "sheet",
   "stepper",
   "radio",
   "slider",
@@ -52,7 +50,6 @@ component_modules = [
   "rich_editor",
   "menu",
   "lazy_column_layout",
-  "tabswiper",
   "toggle",
   "dialog",
   "image_animator",
@@ -63,7 +60,6 @@ component_modules = [
   "select",
   "grid",
   "bubble",
-  "panel",
 ]
 
 if (!ace_engine_feature_wearable) {

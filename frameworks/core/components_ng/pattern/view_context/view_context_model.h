@@ -19,7 +19,7 @@
 #include <mutex>
 
 #include "core/components/common/properties/animation_option.h"
-#include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/components_ng/pattern/overlay/sheet_style.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT ViewContextModel {

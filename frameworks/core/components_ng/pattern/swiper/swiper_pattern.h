@@ -63,8 +63,6 @@ constexpr int32_t NEW_STYLE_MIN_TURN_PAGE_VELOCITY = 780;
 constexpr float SWIPER_CURVE_MASS = 1.0f;
 constexpr float SWIPER_CURVE_STIFFNESS = 328.0f;
 constexpr float SWIPER_CURVE_DAMPING = 34.0f;
-const char SWIPER_INDICATOR_ETS_TAG_PATTERN[] = "SwiperIndicator";
-const char INDICATOR_ETS_TAG_PATTERN[] = "IndicatorComponent";
 
 class ACE_FORCE_EXPORT SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
@@ -1398,7 +1396,7 @@ private:
     RefPtr<FrameNode> GetCommonIndicatorNode();
     bool IsIndicator(const std::string& tag) const
     {
-        return tag == SWIPER_INDICATOR_ETS_TAG_PATTERN || tag == INDICATOR_ETS_TAG_PATTERN;
+        return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
     }
 
     void CheckAndReportEvent();

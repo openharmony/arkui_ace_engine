@@ -649,6 +649,25 @@ const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSliderChange,
 };
 
+const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetSwiperChange,
+    NodeModifier::SetSwiperAnimationStart,
+    NodeModifier::SetSwiperAnimationEnd,
+    NodeModifier::SetSwiperGestureSwipe,
+    NodeModifier::SetSwiperOnContentDidScroll,
+    NodeModifier::SetSwiperSelected,
+    NodeModifier::SetSwiperUnselected,
+    NodeModifier::SetSwiperContentWillScroll,
+    NodeModifier::SetSwiperScrollStateChanged,
+};
+
+const ComponentAsyncEventHandler ARC_SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetArcSwiperChange,
+    NodeModifier::SetArcSwiperAnimationStart,
+    NodeModifier::SetArcSwiperAnimationEnd,
+    NodeModifier::SetArcSwiperGestureSwipe,
+};
+
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCanvasOnReady,
 };
@@ -1112,21 +1131,20 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             break;
         }
         case ARKUI_SWIPER: {
-            auto* swiperModifier = NodeModifier::GetSwiperModifier();
-            if (swiperModifier) {
-                eventHandle = reinterpret_cast<ComponentAsyncEventHandler>(
-                    swiperModifier->getAsyncEventHandlers(subKind));
-                CHECK_NULL_VOID(eventHandle);
+            // swiper event type.
+            if (subKind >= sizeof(SWIPER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
             }
+            eventHandle = SWIPER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_ARC_SWIPER: {
-            auto* arcSwiperModifier = NodeModifier::GetArcSwiperModifier();
-            if (arcSwiperModifier) {
-                eventHandle =
-                    reinterpret_cast<ComponentAsyncEventHandler>(arcSwiperModifier->getAsyncEventHandlers(subKind));
-                CHECK_NULL_VOID(eventHandle);
+            if (subKind >= sizeof(ARC_SWIPER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
             }
+            eventHandle = ARC_SWIPER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_CANVAS: {
