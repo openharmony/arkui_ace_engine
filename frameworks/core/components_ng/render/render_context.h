@@ -133,6 +133,7 @@ public:
     virtual void FlushKitContentModifier(const RefPtr<Kit::Modifier>& modifier) {}
     virtual void FlushForegroundModifier(const RefPtr<Modifier>& modifier) {}
     virtual void FlushOverlayModifier(const RefPtr<Modifier>& modifier) {}
+    virtual void FlushContentModifierImmediately(const RefPtr<ContentModifier>& modifier) {}
 
     virtual void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
 

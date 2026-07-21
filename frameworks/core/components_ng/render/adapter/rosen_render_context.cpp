@@ -702,12 +702,7 @@ void RosenRenderContext::CreateNodeByType(
             break;
         }
         case ContextType::INCREMENTAL_CANVAS: {
-            if (RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
-                rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode, rsContext);
-                rsNode_->SetHybridRenderCanvas(true);
-            } else {
-                rsNode_ = Rosen::RSCanvasDrawingNode::Create(false, isTextureExportNode, rsContext);
-            }
+            rsNode_ = Rosen::RSCanvasDrawingNode::Create(false, isTextureExportNode, rsContext);
             break;
         }
         case ContextType::UNION: {
@@ -2486,13 +2481,6 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
 
 bool RosenRenderContext::GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdList> drawCmdList)
 {
-    if (RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
-        auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
-        if (!rsCanvasNode || !rsCanvasNode->IsHybridRenderCanvas()) {
-            return false;
-        }
-        return rsCanvasNode->GetBitmap(bitmap, drawCmdList);
-    }
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     if (!rsCanvasDrawingNode) {
         return false;
@@ -2503,13 +2491,6 @@ bool RosenRenderContext::GetBitmap(RSBitmap& bitmap, std::shared_ptr<RSDrawCmdLi
 bool RosenRenderContext::GetPixelMap(const std::shared_ptr<Media::PixelMap>& pixelMap,
     std::shared_ptr<RSDrawCmdList> drawCmdList, Rosen::Drawing::Rect* rect)
 {
-    if (RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
-        auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
-        if (!rsCanvasNode || !rsCanvasNode->IsHybridRenderCanvas()) {
-            return false;
-        }
-        return rsCanvasNode->GetPixelmap(pixelMap, drawCmdList, rect);
-    }
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     if (!rsCanvasDrawingNode) {
         return false;
@@ -4929,6 +4910,14 @@ void RosenRenderContext::FlushContentModifier(const RefPtr<Modifier>& modifier)
     rsNode_->SetIsCustomTextType(contentModifier->GetIsCustomFont());
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
+}
+
+void RosenRenderContext::FlushContentModifierImmediately(const RefPtr<ContentModifier>& modifier)
+{
+    FREE_RS_CONTEXT_CHECK(FlushContentModifierImmediately, modifier);
+    CHECK_NULL_VOID(modifier);
+    auto modifierAdapter = std::static_pointer_cast<ContentModifierAdapter>(ConvertContentModifier(modifier));
+    modifierAdapter->FlushContentModifierImmediately();
 }
 
 void RosenRenderContext::FlushKitContentModifier(const RefPtr<Kit::Modifier>& modifier)
@@ -8177,14 +8166,6 @@ int32_t RosenRenderContext::GetRotateDegree()
 void RosenRenderContext::ResetSurface(int width, int height)
 {
     FREE_RS_CONTEXT_CHECK(ResetSurface, width, height);
-    if (RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::CANVAS)) {
-        auto rsCanvasNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasNode>(rsNode_);
-        CHECK_NULL_VOID(rsCanvasNode);
-        if (rsCanvasNode->IsHybridRenderCanvas()) {
-            rsCanvasNode->ResetSurface(width, height);
-        }
-        return;
-    }
     auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode_);
     CHECK_NULL_VOID(rsCanvasDrawingNode);
     rsCanvasDrawingNode->ResetSurface(width, height);

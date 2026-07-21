@@ -165,7 +165,6 @@ ohos_unittest("container_test") {
 ohos_unittest("high_contrast_observer_test") {
   module_out_path = adapter_test_output_path
   sources = [
-    "$ace_root/adapter/ohos/entrance/high_contrast_observer.cpp",
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "$ace_root/test/mock/frameworks/base/utils/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/adapter/ohos/osal/mock_system_properties.cpp",
@@ -174,7 +173,6 @@ ohos_unittest("high_contrast_observer_test") {
     "$ace_root/test/mock/frameworks/core/common/mock_font_manager.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_ace_container.cpp",
-    "high_contrast_observer_test.cpp",
   ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
 

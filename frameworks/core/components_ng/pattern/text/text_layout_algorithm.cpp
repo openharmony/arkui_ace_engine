@@ -212,18 +212,6 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
         return SizeF {};
     }
     CHECK_NULL_RETURN(paragraphManager_, std::nullopt);
-#ifdef ENABLE_ROSEN_BACKEND
-    auto pipeline = host->GetContext();
-    auto fontManager = pipeline == nullptr ? nullptr : pipeline->GetFontManager();
-    if (fontManager != nullptr && Rosen::RSUIDirector::IsHybridRenderEnabled()) {
-        if (static_cast<uint32_t>(paragraphManager_->GetLineCount()) >=
-            Rosen::RSUIDirector::GetHybridRenderTextBlobLenCount()) {
-            fontManager->AddHybridRenderNode(host);
-        } else {
-            fontManager->RemoveHybridRenderNode(host);
-        }
-    }
-#endif
     auto height = paragraphManager_->GetHeight();
     auto maxWidth = paragraphManager_->GetMaxWidth();
     auto longestLine = paragraphManager_->GetLongestLine();

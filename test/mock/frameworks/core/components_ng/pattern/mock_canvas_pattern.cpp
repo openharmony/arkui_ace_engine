@@ -25,6 +25,9 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/canvas/canvas_modifier.h"
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "render_service_client/core/ui/rs_ui_director.h"
+#endif
 
 namespace OHOS::Ace::NG {
 
@@ -162,8 +165,17 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         CHECK_NULL_VOID(contentModifier_);
-        contentModifier_->SetNeedResetSurface();
         contentModifier_->SetRenderContext(renderContext);
+        bool hybridRenderEnabled = false;
+#ifdef ENABLE_ROSEN_BACKEND
+        hybridRenderEnabled = Rosen::RSUIDirector::GetHybridRenderCanvasEnabled();
+#endif
+        if (hybridRenderEnabled) {
+            contentModifier_->ResetSurface(static_cast<int>(currentPixelGridRoundSize.Width()),
+                static_cast<int>(currentPixelGridRoundSize.Height()));
+        } else {
+            contentModifier_->SetNeedResetSurface();
+        }
         CHECK_NULL_VOID(paintMethod_);
         paintMethod_->UpdateRecordingCanvas(currentPixelGridRoundSize.Width(), currentPixelGridRoundSize.Height());
         FireReadyEvent();

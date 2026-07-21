@@ -116,8 +116,6 @@ public:
     }
     void TextColorModifier(const Color& value);
     void ContentModifierDump();
-    void SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext, const RefPtr<TextPattern>& textPattern,
-        const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host);
     void SetRacePercentFloat(float value);
     OffsetF GetPaintOffset() const
     {

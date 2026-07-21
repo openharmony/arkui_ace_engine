@@ -107,9 +107,6 @@ const std::string& FontManager::GetAppCustomFont() const
     return appCustomFont_;
 }
 
-void FontManager::AddHybridRenderNode(const WeakPtr<NG::UINode>& node) {}
-void FontManager::RemoveHybridRenderNode(const WeakPtr<NG::UINode>& node) {}
-void FontManager::UpdateHybridRenderNodes() {}
 void FontManager::StartAbilityOnInstallAppInStore(const std::string& appName) const {}
 void FontManager::OnPreviewMenuOptionClick(TextDataDetectType type, const std::string& content) {}
 void FontManager::StartAbilityOnCalendar(const std::map<std::string, std::string>& params) const {}
