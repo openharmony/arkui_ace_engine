@@ -99,6 +99,7 @@ build_component_ng("pattern_ng") {
     "image/image_pattern_multi_thread.cpp",
     "image/image_render_property.cpp",
     "lazy_layout/header_footer_utils.cpp",
+    "lazy_layout/lazy_layout_pattern.cpp",
     "lazy_layout/lazy_layout_utils.cpp",
     "linear_indicator/linear_indicator_accessibility_property.cpp",
     "linear_indicator/linear_indicator_controller.cpp",

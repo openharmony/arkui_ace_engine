@@ -64,6 +64,11 @@ void LazyWaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutInfo_);
     auto layoutProperty = AceType::DynamicCast<LazyWaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+    auto hostNode = layoutWrapper->GetHostNode();
+    auto pattern = hostNode ? hostNode->GetPattern<LazyLayoutPattern>() : nullptr;
+    if (pattern) {
+        pattern->NotifyParentOnStickyHeaderChange();
+    }
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto contentConstraintOpt = layoutProperty->GetContentLayoutConstraint();
@@ -71,7 +76,6 @@ void LazyWaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     auto contentConstraint = contentConstraintOpt.value();
-    auto hostNode = layoutWrapper->GetHostNode();
     const bool fullRangeMeasure = LazyWaterFlowLayoutUtils::NeedFullRangeForDirectWaterFlow(hostNode) ||
         (contentConstraint.viewPosRef.has_value() && contentConstraint.viewPosRef->axis != Axis::VERTICAL);
     topAnchorRebased_ = false;
@@ -1599,14 +1603,13 @@ void LazyWaterFlowLayoutAlgorithm::LayoutItems(LayoutWrapper* layoutWrapper, con
 {
     CHECK_NULL_VOID(layoutWrapper);
     CHECK_NULL_VOID(layoutInfo_);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
     auto stickyStyle = ResolveStickyStyle(layoutWrapper);
+    const auto nextStickyHeaderGap = HeaderFooterUtils::GetNextStickyHeaderGap(layoutWrapper);
     const auto headerMainSize = layoutInfo_->headerMainSize_;
     const auto footerMainSize = layoutInfo_->footerMainSize_;
     // Body-local: viewStart_/viewEnd_ are body coords; add the header back so sticky math runs in section coords.
     const HeaderFooterStickyMetrics stickyMetrics { viewStart_ + headerMainSize, viewEnd_ + headerMainSize,
-        totalMainSize_, headerMainSize, footerMainSize, stickyTopInset_, stickyBottomInset_ };
+        totalMainSize_, headerMainSize, footerMainSize, stickyTopInset_, stickyBottomInset_, nextStickyHeaderGap };
     const auto stickyHeaderPos = HeaderFooterUtils::CalcStickyHeaderPos(stickyMetrics);
     const auto stickyFooterPos = HeaderFooterUtils::CalcStickyFooterPos(stickyMetrics);
 
@@ -1625,8 +1628,8 @@ void LazyWaterFlowLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, co
 {
     auto isSticky = HeaderFooterUtils::IsHeaderSticky(stickyStyle);
     auto offset = paddingOffset + (isSticky ? OffsetF(0.0f, stickyHeaderPos) : OffsetF());
-    HeaderFooterUtils::LayoutEdge(
-        layoutWrapper, headerIndex_, offset, isSticky, layoutDirection_ == TextDirection::RTL, crossSize_);
+    HeaderFooterUtils::LayoutEdge(layoutWrapper, headerIndex_, offset, isSticky,
+        layoutDirection_ == TextDirection::RTL, crossSize_, HeaderFooterUtils::STICKY_HEADER_Z_INDEX);
 }
 
 void LazyWaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset,

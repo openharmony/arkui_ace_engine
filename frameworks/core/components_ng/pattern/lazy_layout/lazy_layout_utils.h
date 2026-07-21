@@ -24,6 +24,8 @@
 
 namespace OHOS::Ace::NG {
 
+class LazyLayoutPattern;
+
 // Ancestor WaterFlow + whether the path crosses a FlowItem (a path through FlowItem makes the WaterFlow's
 // lane count irrelevant to the lazy contract).
 struct WaterFlowAncestorInfo {
@@ -42,6 +44,9 @@ struct ACE_FORCE_EXPORT LazyLayoutUtils {
     static std::optional<ViewPosReference> GetViewPosReference(
         const RefPtr<FrameNode>& frameNode,
         const std::vector<std::string>& extraAllowedTags = {});
+    // Find the first LazyLayoutPattern through a proxy chain whose FrameNodes were explicitly marked as
+    // participating in lazy layout. Ordinary wrapper/content FrameNodes are traversal boundaries.
+    static RefPtr<LazyLayoutPattern> GetLazyLayoutPattern(const RefPtr<UINode>& node);
 
     // Forward parent-reserved insets through the child layout constraint, so contentOffset changes are visible
     // to constraint comparison and trigger a fresh child lazy layout.

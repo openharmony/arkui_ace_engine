@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -144,6 +145,26 @@ std::optional<ViewPosReference> LazyLayoutUtils::GetViewPosReference(
     CHECK_NULL_RETURN(viewPosRefOpt, std::nullopt);
     layoutProperty->ConstraintViewPosRef(viewPosRefOpt.value());
     return viewPosRefOpt;
+}
+
+RefPtr<LazyLayoutPattern> LazyLayoutUtils::GetLazyLayoutPattern(const RefPtr<UINode>& node)
+{
+    auto child = node;
+    while (child) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(child);
+        if (frameNode) {
+            auto pattern = frameNode->GetPattern<LazyLayoutPattern>();
+            if (pattern) {
+                return pattern;
+            }
+            auto layoutProperty = frameNode->GetLayoutProperty();
+            if (!layoutProperty || !layoutProperty->GetNeedLazyLayout()) {
+                return nullptr;
+            }
+        }
+        child = child->GetFirstChild();
+    }
+    return nullptr;
 }
 
 bool LazyLayoutUtils::HasDirectWaterFlowAncestor(const RefPtr<FrameNode>& frameNode)

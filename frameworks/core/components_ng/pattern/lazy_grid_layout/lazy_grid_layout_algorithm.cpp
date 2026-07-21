@@ -50,6 +50,11 @@ void LazyGridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     totalItemCount_ = CalculateItemCount(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<LazyGridLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
+    auto hostNode = layoutWrapper->GetHostNode();
+    auto pattern = hostNode ? hostNode->GetPattern<LazyLayoutPattern>() : nullptr;
+    if (pattern) {
+        pattern->NotifyParentOnStickyHeaderChange();
+    }
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     auto contentConstraint = layoutProperty->GetContentLayoutConstraint().value();
     auto contentIdealSize = CreateIdealSize(contentConstraint, axis_, layoutProperty->GetMeasureType());
@@ -64,6 +69,9 @@ void LazyGridLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // Header first: UpdateReferencePos needs this frame's header to convert the viewport to body coords.
     MeasureHeader(layoutWrapper);
     UpdateReferencePos(layoutWrapper, contentConstraint.viewPosRef);
+
+    // Section extent was needed above for backward-anchor conversion; item-window math below is body-local.
+    totalMainSize_ = prevBodyMainSize_;
 
     // DynamicLayout branch: non-lazy loading mode =====
     if (isDynamicLayout_) {
@@ -107,6 +115,9 @@ void LazyGridLayoutAlgorithm::CaptureFrameBaseline()
     totalMainSize_ = layoutInfo_->totalMainSize_;
     // Edge sizes still hold last frame's values here.
     prevBodyMainSize_ = std::max(0.0f, totalMainSize_ - layoutInfo_->headerMainSize_ - layoutInfo_->footerMainSize_);
+    // UpdatePosMap() treats layoutInfo_ as body-local; keep the published section extent (edges included) out of
+    // it, or a no-item-update pass appends the edge slots twice.
+    layoutInfo_->totalMainSize_ = prevBodyMainSize_;
     // Body known via prev extent or live items; edges alone must not count (empty -> non-empty would mis-clamp).
     hadMeasuredItems_ = Positive(prevBodyMainSize_) || !layoutInfo_->posMap_.empty();
     // Defensive: non-lazy paths (empty data / full layout) must not leak last frame's adjust to the parent.
@@ -188,13 +199,14 @@ void LazyGridLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float crossSize = GetCrossAxisSize(size, axis_);
 
     auto stickyStyle = ResolveStickyStyle(layoutWrapper);
+    const auto nextStickyHeaderGap = HeaderFooterUtils::GetNextStickyHeaderGap(layoutWrapper);
     const auto headerMainSize = layoutInfo_->headerMainSize_;
     const auto footerMainSize = layoutInfo_->footerMainSize_;
     // Sticky math expects view/section coords (header included) in the same frame as totalMainSize_. LazyGrid
     // stores startPos_/endPos_ in body-local coords (header subtracted in UpdateReferencePos); add the header
     // back so the metrics match totalMainSize_'s section frame.
     const HeaderFooterStickyMetrics stickyMetrics { startPos_ + headerMainSize, endPos_ + headerMainSize,
-        totalMainSize_, headerMainSize, footerMainSize, stickyTopInset_, stickyBottomInset_ };
+        totalMainSize_, headerMainSize, footerMainSize, stickyTopInset_, stickyBottomInset_, nextStickyHeaderGap };
     const auto stickyHeaderPos = HeaderFooterUtils::CalcStickyHeaderPos(stickyMetrics);
     const auto stickyFooterPos = HeaderFooterUtils::CalcStickyFooterPos(stickyMetrics);
 
@@ -1270,7 +1282,8 @@ void LazyGridLayoutAlgorithm::LayoutHeader(LayoutWrapper* layoutWrapper, const O
     auto isSticky = HeaderFooterUtils::IsHeaderSticky(stickyStyle);
     auto offset = paddingOffset + (isSticky ? OffsetF(0.0f, stickyHeaderPos) : OffsetF());
     const bool isRtl = layoutDirection_ == TextDirection::RTL && axis_ == Axis::VERTICAL;
-    HeaderFooterUtils::LayoutEdge(layoutWrapper, headerIndex_, offset, isSticky, isRtl, crossSize_);
+    HeaderFooterUtils::LayoutEdge(layoutWrapper, headerIndex_, offset, isSticky, isRtl, crossSize_,
+        HeaderFooterUtils::STICKY_HEADER_Z_INDEX);
 }
 
 void LazyGridLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset,
