@@ -157,7 +157,6 @@ const JSRef<JSObject>& JSDrawingRenderingContext::GetOrCreateContext2D(bool anti
         renderContext->SetUnit(unit_);
         renderContext->SetDensity();
     }
-    // 解析info[1],把antialias给到pattern
     auto customPaintPattern = AceType::DynamicCast<NG::CanvasPattern>(canvasPattern_.Upgrade());
     if (customPaintPattern) {
         customPaintPattern->SetAntiAlias(antialias);
