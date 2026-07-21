@@ -635,7 +635,7 @@ void SetXComponentBackgroundColor(ArkUINodeHandle node, uint32_t color, ArkUI_Bo
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (!XComponentModel::IsBackGroundColorAvailable(type)) {
         return;
     }
@@ -651,7 +651,7 @@ void SetXComponentBackgroundColorWithColorSpace(
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (!XComponentModel::IsBackGroundColorAvailable(type)) {
         return;
     }
@@ -673,7 +673,7 @@ void SetXComponentBackgroundColorForHDR(ArkUINodeHandle node, ArkUI_Int32 colorS
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (!XComponentModel::IsBackGroundColorAvailable(type)) {
         return;
     }
@@ -704,7 +704,7 @@ void ResetXComponentBackgroundColor(ArkUINodeHandle node, ArkUI_Bool isJsView = 
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (!XComponentModel::IsBackGroundColorAvailable(type)) {
         return;
     }
@@ -1206,7 +1206,7 @@ void SetXComponentOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
         return;
     }
@@ -1220,7 +1220,7 @@ void ResetXComponentOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
         return;
     }
@@ -1260,7 +1260,7 @@ ArkUI_Int32 GetXComponentType(ArkUINodeHandle node)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    return static_cast<ArkUI_Int32>(XComponentModelNG::GetXComponentType(frameNode));
+    return static_cast<ArkUI_Int32>(XComponentModelNG::GetType(frameNode));
 }
 
 ArkUI_Uint32 GetXComponentSurfaceWidth(ArkUINodeHandle node)
@@ -1423,7 +1423,7 @@ void SetXComponentRenderFit(ArkUINodeHandle node, ArkUI_Int32 renderFitNumber)
         renderFitNumber <= static_cast<int32_t>(RenderFit::RESIZE_COVER_BOTTOM_RIGHT)) {
         renderFit = static_cast<RenderFit>(renderFitNumber);
     }
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
@@ -1502,7 +1502,7 @@ ArkUI_Bool GetXComponentEnableAnalyzer(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
-    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    auto type = XComponentModelNG::GetType(frameNode);
     if (type != XComponentType::SURFACE && type != XComponentType::TEXTURE) {
         return false;
     }

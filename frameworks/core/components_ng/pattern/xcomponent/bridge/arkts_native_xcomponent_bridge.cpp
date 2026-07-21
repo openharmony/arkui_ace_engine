@@ -164,7 +164,7 @@ void SetControllerOnChanged(
 {
     if (changedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = changedFunc;
-        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func),
+        SurfaceChangedEvent onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func),
                                     thisObj = panda::CopyableGlobal(vm, thisObj), node = AceType::WeakClaim(frameNode)](
                                     const std::string& surfaceId, const NG::RectF& rect) {
             panda::LocalScope pandaScope(vm);
@@ -189,7 +189,7 @@ void SetControllerOnDestroyed(
 {
     if (destroyedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = destroyedFunc;
-        auto onSurfaceDestroyed =
+        SurfaceDestroyedEvent onSurfaceDestroyed =
             [vm, func = panda::CopyableGlobal(vm, func), thisObj = panda::CopyableGlobal(vm, thisObj),
                 node = AceType::WeakClaim(frameNode)](const std::string& surfaceId, const std::string& xcomponentId) {
                 panda::LocalScope pandaScope(vm);
@@ -473,7 +473,7 @@ void ParseImageAIOptions(const EcmaVM* vm, ArkUINodeHandle nativeNode, const Loc
 }
 
 void XComponentBridge::ExtractInfoToXComponentOptions(XComponentOptions& options,
-    panda::Local<panda::ObjectRef> controllerObj, Local<panda::ObjectRef>& paramObject,
+    panda::Local<panda::ObjectRef>& controllerObj, Local<panda::ObjectRef>& paramObject,
     ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -494,6 +494,7 @@ void XComponentBridge::ExtractInfoToXComponentOptions(XComponentOptions& options
 
     auto controllerArg = ArkTSUtils::GetProperty(vm, paramObject, "controller");
     if (!controllerArg.IsNull() && controllerArg->IsObject(vm)) {
+        controllerObj = controllerArg->ToObject(vm);
         auto* jsController = static_cast<Framework::JSXComponentController*>(
             Local<panda::ObjectRef>(controllerArg)->GetNativePointerField(vm, 0));
         if (jsController) {
@@ -808,7 +809,7 @@ ArkUINativeModuleValue XComponentBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
-    if (secondArg.IsNull() || secondArg->IsUndefined()) {
+    if (secondArg.IsNull()) {
         return panda::JSValueRef::Undefined(vm);
     }
     ArkUINodeHandle nativeNode = nullptr;
@@ -817,6 +818,7 @@ ArkUINativeModuleValue XComponentBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
     bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     if (isJsView && secondArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentBackgroundColor(nativeNode, isJsView);
         return panda::JSValueRef::Undefined(vm);
     }
     Color color;
