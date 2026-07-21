@@ -1920,6 +1920,9 @@ void DialogPattern::UpdateSheetIconAndText()
     CHECK_NULL_VOID(sheetContainer);
     int32_t sheetIndex = 0;
     for (const auto& sheet : sheetContainer->GetChildren()) {
+        if (sheetIndex >= static_cast<int32_t>(dialogProperties_.sheetsInfo.size())) {
+            break;
+        }
         auto itemRow = DynamicCast<FrameNode>(sheet->GetFirstChild());
         CHECK_NULL_VOID(itemRow);
 
