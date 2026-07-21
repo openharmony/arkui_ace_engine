@@ -135,5 +135,5 @@ void LinearSplitModelNG::ResetResObj(FrameNode* frameNode, const std::string& ke
     CHECK_NULL_VOID(pattern);
     pattern->RemoveResObj(key);
 }
-} // namespace OHOS::Ace::NG
+}
 // namespace OHOS::Ace::NG

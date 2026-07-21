@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ void SetCanvasClosePath(ArkUINodeHandle node)
     canvasPattern->ClosePath();
 }
 
-void SetCanvasFill(ArkUINodeHandle node, const char* value)
+void SetCanvasFill(ArkUINodeHandle node, const char *value)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasFill: value: %{public}s", value);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -68,7 +68,7 @@ void SetCanvasMoveTo(ArkUINodeHandle node, float x, float y)
     canvasPattern->MoveTo(x, y);
 }
 
-void SetCanvasArc(ArkUINodeHandle node, ArkUICanvasArcOptions* options)
+void SetCanvasArc(ArkUINodeHandle node, ArkUICanvasArcOptions *options)
 {
     CHECK_NULL_VOID(options);
     TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasArc: x: %{public}f, y: %{public}f, \
@@ -97,7 +97,10 @@ void SetCanvasLineTo(ArkUINodeHandle node, float x, float y)
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
     auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
-    canvasPattern->LineTo(Dimension(x, DimensionUnit::VP).ConvertToPx(), Dimension(y, DimensionUnit::VP).ConvertToPx());
+    canvasPattern->LineTo(
+        Dimension(x, DimensionUnit::VP).ConvertToPx(),
+        Dimension(y, DimensionUnit::VP).ConvertToPx()
+    );
 }
 
 void SetCanvasStrokeStyle(ArkUINodeHandle node, int color)

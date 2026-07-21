@@ -430,9 +430,6 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(
         ColumnSplitChildConstrain(layoutWrapper, item, index);
         if (isFirstSetPos) {
             childrenDragPos_[index] = childOffsetCross;
-            if (index != 0) {
-                childOffsetCross += startMargin;
-            }
         } else {
             childOffsetCross = childrenDragPos_[index];
         }

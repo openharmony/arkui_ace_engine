@@ -147,9 +147,9 @@ public:
 
     virtual void SetSurfaceBufferOpaque(bool isOpaque) {}
 
-    virtual void SetIsNeedSyncGeometryProperties(bool isNeedSyncGeometryProperties) {}
-
     virtual void SetKeyBoardAvoidRect(RectF keyBoardAvoidRect) {}
+
+    virtual void SetIsNeedSyncGeometryProperties(bool isNeedSyncGeometryProperties) {}
 
     virtual std::string GetPSurfaceName()
     {
