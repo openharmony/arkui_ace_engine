@@ -4070,10 +4070,17 @@ void OverlayManager::UpdateSheetRender(
 
     sheetPatternModifier->sheetClearSheetRenderMaterial(sheetPageNode);
     SetSheetBackgroundColor(sheetPageNode, sheetTheme, sheetStyle, isPartialUpdate);
+    auto sheetParent = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
+    // if sheet first transition, set blur on effectComponent.
+    bool setBlurOnEffectComponent =
+        sheetPatternModifier->sheetCheckIfUseEffectComponent(sheetPageNode, sheetStyle) && !sheetParent;
     // if use effectComponent, set blur on effectComponent, not on sheetpage
-    if (sheetStyle.backgroundBlurStyle.has_value() &&
-        !sheetPatternModifier->sheetCheckIfUseEffectComponent(sheetPageNode, sheetStyle)) {
-        SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
+    if (sheetStyle.backgroundBlurStyle.has_value() && !setBlurOnEffectComponent) {
+        if (sheetParent && sheetParent->GetTag() == V2::EFFECT_COMPONENT_ETS_TAG) {
+            SetSheetBackgroundBlurStyle(sheetParent, sheetStyle.backgroundBlurStyle.value());
+        } else {
+            SetSheetBackgroundBlurStyle(sheetPageNode, sheetStyle.backgroundBlurStyle.value());
+        }
     }
     sheetPatternModifier->sheetSetSheetBorderWidth(sheetPageNode);
     if (sheetStyle.borderStyle.has_value()) {
@@ -4100,6 +4107,7 @@ void OverlayManager::UpdateSheetRender(
     sheetPatternModifier->sheetUpdateMaskBackgroundColor(sheetPageNode);
 
     sheetPatternModifier->sheetSetSheetRenderMaterial(sheetPageNode);
+    sheetPatternModifier->sheetSetSheetBlurSnapshotFreeze(sheetPageNode, sheetStyle, isPartialUpdate);
 }
 void OverlayManager::UpdateSheetRenderProperty(const RefPtr<FrameNode>& sheetNode,
     const NG::SheetStyle& currentStyle, bool isPartialUpdate)
@@ -4367,20 +4375,22 @@ RefPtr<FrameNode> OverlayManager::MountSheetEffectComponent(
     CHECK_NULL_RETURN(sheetWrapperModifier, nullptr);
     sheetWrapperModifier->sheetWrapperSetSheetECNode(sheetWrapperNode, sheetECNode);
 
+    bool enableFreeze =
+        sheetStyle.blurSnapshotOptions.has_value() && sheetStyle.blurSnapshotOptions->enableFreeze.value_or(false);
+
+    auto ecRSContext = sheetECNode->GetRenderContext();
+    CHECK_NULL_RETURN(ecRSContext, nullptr);
     if (sheetStyle.systemMaterial) {
-        auto ecRSContext = sheetECNode->GetRenderContext();
-        CHECK_NULL_RETURN(ecRSContext, nullptr);
         sheetStyle.systemMaterialEC = ViewAbstract::ConvertToImmersiveEC(sheetStyle.systemMaterial);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetECNode), AceType::RawPtr(sheetStyle.systemMaterialEC));
     }
     if (sheetStyle.backgroundBlurStyle.has_value()) {
-        auto ecRSContext = sheetECNode->GetRenderContext();
-        CHECK_NULL_RETURN(ecRSContext, nullptr);
         SetSheetBackgroundBlurStyle(sheetECNode, sheetStyle.backgroundBlurStyle.value());
         auto sheetNodeRSContext = sheetPageNode->GetRenderContext();
         CHECK_NULL_RETURN(sheetNodeRSContext, nullptr);
         sheetNodeRSContext->UpdateUseEffect(true);
     }
+    ecRSContext->UpdateFreeze(enableFreeze);
     return sheetECNode;
 #else
     return nullptr;

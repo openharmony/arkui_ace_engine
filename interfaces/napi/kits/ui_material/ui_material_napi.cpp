@@ -338,7 +338,7 @@ napi_value UiMaterialNapi::JSGetEmpty(napi_env env, napi_callback_info info)
 void UiMaterialNapi::ConvertToImmersiveOptionsEC(ImmersiveOptions& newOptions)
 {
     newOptions.style = ConvertToECStyle(newOptions.style);
-    newOptions.materialColor = Color::TRANSPARENT;
+    newOptions.materialColor = std::nullopt;
     newOptions.applyShadow = false;
     newOptions.disableLightEffect = true;
     newOptions.interactive = false;
@@ -493,6 +493,18 @@ napi_status UiMaterialNapi::EnumImmersiveStyleInit(napi_env env, napi_value expo
         { "REGULAR", static_cast<int32_t>(UiMaterialStyle::REGULAR) },
         { "THICK", static_cast<int32_t>(UiMaterialStyle::THICK) },
         { "ULTRA_THICK", static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK) },
+
+        { "ULTRA_THIN_EC", static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) },
+        { "THIN_EC", static_cast<int32_t>(UiMaterialStyle::THIN_EC) },
+        { "REGULAR_EC", static_cast<int32_t>(UiMaterialStyle::REGULAR_EC) },
+        { "THICK_EC", static_cast<int32_t>(UiMaterialStyle::THICK_EC) },
+        { "ULTRA_THICK_EC", static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC) },
+
+        { "ULTRA_THIN_EC_SUB", static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) },
+        { "THIN_EC_SUB", static_cast<int32_t>(UiMaterialStyle::THIN_EC_SUB) },
+        { "REGULAR_EC_SUB", static_cast<int32_t>(UiMaterialStyle::REGULAR_EC_SUB) },
+        { "THICK_EC_SUB", static_cast<int32_t>(UiMaterialStyle::THICK_EC_SUB) },
+        { "ULTRA_THICK_EC_SUB", static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB) },
     };
     return EnumInit(env, exports, enumClassName, enumStructs);
 }

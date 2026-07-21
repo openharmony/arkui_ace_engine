@@ -64,7 +64,7 @@ UiMaterialStyle ConvertToECSubStyle(UiMaterialStyle from)
 void ConvertToImmersiveOptionsEC(std::shared_ptr<ImmersiveOptions>& newOptions)
 {
     newOptions->style = ConvertToECStyle(newOptions->style);
-    newOptions->materialColor = Color::TRANSPARENT;
+    newOptions->materialColor = std::nullopt;
     newOptions->applyShadow = false;
     newOptions->disableLightEffect = true;
     newOptions->interactive = false;

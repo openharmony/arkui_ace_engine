@@ -63,7 +63,7 @@ struct UiMaterialParam {
 
 struct ImmersiveMaterialConfig {
     UiMaterialMapKey key {};
-    Color materialColor;
+    std::optional<Color> materialColor = std::nullopt;
     bool colorInvert = false;
     bool applyShadow = true;
     float dipScale = 1.0f;
@@ -96,6 +96,7 @@ class ACE_FORCE_EXPORT MaterialUtils {
 public:
     // get type of material to MaterialType enum, return MaterialType::NONE if invalid number,
     // return std::nullopt if material is nullptr.
+    static bool IsImmersiveMaterialSupported(const UiMaterial* material);
     static std::optional<MaterialType> GetTypeFromMaterial(const UiMaterial* material);
     static ColorMode GetResourceColorMode(NG::PipelineContext* pipeline);
     static bool CallSetMaterial(NG::FrameNode* node, const UiMaterial* material);

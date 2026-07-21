@@ -2034,8 +2034,10 @@ RefPtr<UiMaterial> TitleBarPattern::GetOrCreateGradualBlurMaterial()
     ImmersiveOptions options;
     options.style = UiMaterialStyle::ULTRA_THIN;
     options.colorInvert = true;
-    options.materialColor = tokenColors->CompBackgroundGray();
-    options.materialColor = options.materialColor.ChangeOpacity(0);
+    if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
+        options.materialColor = tokenColors->CompBackgroundGray();
+        options.materialColor = options.materialColor->ChangeOpacity(0);
+    }
     options.applyShadow = true;
     options.interactive = true;
     LightEffectOptions lightEffectOptions;
@@ -2095,8 +2097,10 @@ void TitleBarPattern::UpdateTitleBarUIEffectForColorModeChange()
         CHECK_NULL_BREAK(gradualBlurMaterial_);
         auto options = gradualBlurMaterial_->CopyImmersiveOptions();
         CHECK_NULL_BREAK(options);
-        options->materialColor = tokenColors->compBackgroundGray;
-        options->materialColor = options->materialColor.ChangeOpacity(0);
+        if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
+            options->materialColor = tokenColors->compBackgroundGray;
+            options->materialColor = options->materialColor->ChangeOpacity(0);
+        }
         gradualBlurMaterial_->SetImmersiveOptions(*options);
     } while (false);
     if (options_.material || !MaterialUtils::IsMaterialEnabled()) {

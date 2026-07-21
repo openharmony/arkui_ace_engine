@@ -17,6 +17,7 @@
 
 #include "interfaces/inner_api/ace/utils.h"
 
+#include "core/common/resource/resource_parse_utils.h"
 #include "core/common/color_inverter.h"
 #include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/theme/resource_adapter.h"
@@ -145,6 +146,17 @@ std::optional<MaterialType> MaterialUtils::GetTypeFromMaterial(const UiMaterial*
     }
     return MaterialType::NONE;
 }
+
+bool MaterialUtils::IsImmersiveMaterialSupported(const UiMaterial* material)
+{
+    auto materialTypeOpt = GetTypeFromMaterial(material);
+    auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
+    if (!SystemProperties::IsDeviceSystemMaterialSupported() && materialType == MaterialType::IMMERSIVE) {
+        return false;
+    }
+    return true;
+}
+
 ColorMode MaterialUtils::GetResourceColorMode(NG::PipelineContext* pipeline)
 {
     CHECK_NULL_RETURN(pipeline, ColorMode::LIGHT);
@@ -287,9 +299,14 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     if (materialLevel == UiMaterialLevel::SMOOTH) {
         result.key = UiMaterialMapKey {
             .level = UiMaterialLevel::SMOOTH,
-            .colorMode = (options->colorMode == ColorMode::COLOR_MODE_UNDEFINED) ?
-                                    colorMode : options->colorMode,
+            .colorMode = (options->colorMode == ColorMode::COLOR_MODE_UNDEFINED) ? colorMode : options->colorMode,
         };
+        result.materialColor = options->materialColor;
+        Color materialColor;
+        if (ResourceParseUtilsBase::ParseResColorWithColorMode(
+                options->colorResObj, materialColor, result.key.colorMode)) {
+            result.materialColor = materialColor;
+        }
         return result;
     }
     int32_t transparency = TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel));
@@ -307,6 +324,10 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
         .transparency = static_cast<UiMaterialTransparency>(transparency),
         .colorMode = colorMode,
     };
+    Color materialColor;
+    if (ResourceParseUtilsBase::ParseResColorWithColorMode(options->colorResObj, materialColor, result.key.colorMode)) {
+        result.materialColor = materialColor;
+    }
     return result;
 }
 

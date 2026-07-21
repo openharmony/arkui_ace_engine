@@ -177,7 +177,7 @@ void ConvertToImmersiveOptionsEC(std::shared_ptr<ImmersiveOptions>& newOptions)
 {
     CHECK_NULL_VOID(newOptions);
     newOptions->style = ConvertToECStyle(newOptions->style);
-    newOptions->materialColor = Color::TRANSPARENT;
+    newOptions->materialColor = std::nullopt;
     newOptions->applyShadow = false;
     newOptions->disableLightEffect = true;
     newOptions->interactive = false;
@@ -6655,8 +6655,8 @@ RefPtr<UiMaterial> ViewAbstract::ConvertToImmersiveECSub(RefPtr<UiMaterial>& mat
     CHECK_NULL_RETURN(newMaterial, material);
     auto newOptions = newMaterial->GetImmersiveOptions();
     CHECK_NULL_RETURN(newOptions, material);
-    ConvertToImmersiveOptionsECSub(options);
-    newMaterial->SetImmersiveOptions(*options);
+    ConvertToImmersiveOptionsECSub(newOptions);
+    newMaterial->SetImmersiveOptions(*newOptions);
     return newMaterial;
 }
 
@@ -6680,6 +6680,9 @@ void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* mat
     auto nativeMaterial = MaterialUtils::PreProcessMaterial(material);
     if (!MaterialUtils::CallSetMaterial(frameNode, nativeMaterial)) {
         ViewAbstract::SetSystemMaterialImmediate(frameNode, nativeMaterial);
+    }
+    if (material && !MaterialUtils::IsImmersiveMaterialSupported(material)) {
+        return;
     }
     renderContext->SetSystemMaterial(nativeMaterial ? nativeMaterial->Copy() : nullptr);
 }
@@ -6778,6 +6781,9 @@ void ViewAbstract::ResetBorderAndBackgroundEffect(
 
 void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material)
 {
+    if (material && !MaterialUtils::IsImmersiveMaterialSupported(material)) {
+        return;
+    }
     auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
     auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
     auto immersiveOptionsPtr = material ? material->CopyImmersiveOptions() : nullptr;
@@ -7003,6 +7009,9 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
         if (!params) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "Get immersive param failed");
             return;
+        }
+        if (config->materialColor.has_value()) {
+            params->backgroundColor = config->materialColor.value();
         }
         ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);

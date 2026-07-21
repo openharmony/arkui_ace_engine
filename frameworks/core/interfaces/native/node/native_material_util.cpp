@@ -26,7 +26,9 @@ RefPtr<UiMaterial> CreateUiMaterialFromHandle(ArkUI_ImmersiveMaterialHandle hand
     uiMaterial->SetType(static_cast<int32_t>(MaterialType::IMMERSIVE));
     ImmersiveOptions options {};
     options.style = static_cast<UiMaterialStyle>(handle->style);
-    options.materialColor = Color(handle->materialColor);
+    if (handle->materialColorByUser) {
+        options.materialColor = Color(handle->materialColor);
+    }
     options.applyShadow = handle->applyShadow;
     if (handle->hasInteractive) {
         options.interactive = handle->interactive;
@@ -49,7 +51,10 @@ bool CreateHandleFromUiMaterial(const RefPtr<UiMaterial>& material, ArkUI_Immers
     // here applies default value.
     *out = ArkUI_ImmersiveMaterial();
     out->style = static_cast<ArkUI_ImmersiveStyle>(static_cast<int32_t>(options->style));
-    out->materialColor = options->materialColor.GetValue();
+    if (options->materialColor.has_value()) {
+        out->materialColorByUser = true;
+        out->materialColor = options->materialColor.value().GetValue();
+    }
     out->applyShadow = options->applyShadow;
     if (options->interactive.has_value()) {
         out->hasInteractive = true;

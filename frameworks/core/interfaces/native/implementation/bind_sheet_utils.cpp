@@ -14,6 +14,8 @@
  */
 #include "frameworks/core/interfaces/native/implementation/bind_sheet_utils.h"
 
+#include "core/common/container.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/sheet/sheet_theme.h"
 #include "core/interfaces/native/implementation/spring_back_action_peer.h"
@@ -177,6 +179,16 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
     auto material = OptConvert<UiMaterial*>(sheetOptions.systemMaterial).value_or(nullptr);
     sheetStyle.systemMaterial = material ? material->Copy() : nullptr;
 #endif // WRONG_GEN_v140
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) &&
+        MaterialUtils::IsMaterialEnabled() && !sheetStyle.systemMaterial) {
+        sheetStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::ULTRA_THICK);
+    }
+    if (sheetStyle.systemMaterial &&
+        !MaterialUtils::IsImmersiveMaterialSupported(sheetStyle.systemMaterial.GetRawPtr())) {
+        sheetStyle.systemMaterial = nullptr;
+    }
+
     auto effectEdge = OptConvert<int>(sheetOptions.effectEdge.value).value_or(3);
     switch (effectEdge) {
         case EFFECT_EDGE_ZERO:
@@ -195,7 +207,7 @@ void BindSheetUtil::ParseSheetParams(SheetStyle& sheetStyle, const Ark_SheetOpti
     sheetStyle.radius = OptConvert<NG::BorderRadiusProperty>(sheetOptions.radius);
     sheetStyle.detentSelection = OptConvert<SheetHeight>(sheetOptions.detentSelection);
     sheetStyle.showInSubWindow = OptConvert<bool>(sheetOptions.showInSubWindow).value_or(false);
-    sheetStyle.enableBlurSnapshot = OptConvert<bool>(sheetOptions.enableBlurSnapshot).value_or(false);
+    sheetStyle.blurSnapshotOptions = OptConvert<BlurSnapshotOptions>(sheetOptions.blurSnapshot);
     sheetStyle.placement = OptConvert<Placement>(sheetOptions.placement);
     sheetStyle.placementOnTarget = OptConvert<bool>(sheetOptions.placementOnTarget).value_or(true);
     Validator::ValidateNonNegative(sheetStyle.width);

@@ -38,7 +38,7 @@ struct LightEffectOptions {
 
 struct ImmersiveOptions {
     UiMaterialStyle style = UiMaterialStyle::REGULAR;
-    Color materialColor = Color::TRANSPARENT;
+    std::optional<Color> materialColor = std::nullopt;
     bool colorInvert = false;
     bool applyShadow = true;
     // when disableLightEffect is true, do not add lightEffect. lightEffectOptions has no effect.

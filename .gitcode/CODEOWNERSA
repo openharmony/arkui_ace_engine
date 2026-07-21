@@ -2907,6 +2907,7 @@ frameworks/core/interfaces/native/node/menu_item_group_modifier.cpp @arkuipopupw
 frameworks/core/interfaces/native/node/menu_item_group_modifier.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/node/menu_modifier.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/node/menu_modifier.h @arkuipopupwindow_all
+frameworks/core/interfaces/native/node/native_material_util.cpp @arkuicodepulse
 frameworks/core/interfaces/native/node/nav_destination_modifier.cpp @arkui_navigation
 frameworks/core/interfaces/native/node/nav_destination_modifier.h @arkui_navigation
 frameworks/core/interfaces/native/node/navigation_modifier.cpp @arkui_navigation
@@ -3209,6 +3210,7 @@ interfaces/inner_api/ui_session/ @arkui_framework_xnode
 interfaces/inner_api/xcomponent_controller/ @ArkUI_ability_group
 interfaces/inner_api/ace_kit/include/ @arkui_architecture
 interfaces/inner_api/ace_kit/include/ui/properties/ui_material_enums.h @arkuicodepulse
+interfaces/inner_api/ace_kit/include/ui/properties/ui_material.h @arkuicodepulse
 interfaces/inner_api/ace_kit/src/ @arkui_framework_xnode
 interfaces/inner_api/ace_kit/src/view/components/symbol.cpp @huawei_g_five
 
@@ -4761,6 +4763,8 @@ interfaces/native/node/grid_layout_option.cpp @arkuiscroll
 interfaces/native/node/grid_layout_option.h @arkuiscroll
 interfaces/native/node/native_interface_focus.cpp @ArkUI_Event
 interfaces/native/node/native_node_ani.cpp @arkui_framework_xnode
+interfaces/native/node/native_material_impl.h @arkuicodepulse
+interfaces/native/node/native_material_impl.cpp @arkuicodepulse
 interfaces/native/node/node_component_snapshot.cpp @ArkUI_Event
 interfaces/native/node/node_component_snapshot.h @ArkUI_Event
 interfaces/native/node/node_visual_effect.cpp @arkuicodepulse

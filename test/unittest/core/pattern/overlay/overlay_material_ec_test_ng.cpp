@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/sheet/sheet_drag_bar_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 #include "core/components_ng/pattern/sheet/sheet_theme.h"
 #include "core/components_ng/pattern/sheet/sheet_view.h"
 #include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
@@ -176,7 +177,7 @@ HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponent001, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
@@ -196,7 +197,7 @@ HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponent001, TestSize.Level1)
 
 /**
  * @tc.name: CheckIfUseEffectComponent002
- * @tc.desc: Test CheckIfUseEffectComponent with enableBlurSnapshot=false
+ * @tc.desc: Test CheckIfUseEffectComponent with blurSnapshotOptions not set
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponent002, TestSize.Level1)
@@ -212,7 +213,6 @@ HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponent002, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = false;
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     CreateSheetBuilder();
@@ -246,7 +246,7 @@ HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponent003, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
     sheetStyle.sheetType = SheetType::SHEET_POPUP;
 
@@ -283,7 +283,7 @@ HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponent004, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     CreateSheetBuilder();
@@ -317,7 +317,7 @@ HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponent005, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     sheetStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
 
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
@@ -352,7 +352,7 @@ HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponent006, TestSize.Level1)
     SheetStyle sheetStyle;
     sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
-    sheetStyle.enableBlurSnapshot = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     auto semiMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
     semiMaterial->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
     sheetStyle.systemMaterial = semiMaterial;
@@ -569,7 +569,7 @@ HWTEST_F(OverlayMaterialECTestNg, SheetStylePartialUpdate001, TestSize.Level1)
 
 /**
  * @tc.name: SheetStylePartialUpdate002
- * @tc.desc: Test SheetStyle PartialUpdate with enableBlurSnapshot
+ * @tc.desc: Test SheetStyle PartialUpdate with blurSnapshotOptions
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayMaterialECTestNg, SheetStylePartialUpdate002, TestSize.Level1)
@@ -579,11 +579,11 @@ HWTEST_F(OverlayMaterialECTestNg, SheetStylePartialUpdate002, TestSize.Level1)
     original.showDragBar = true;
 
     SheetStyle update;
-    update.enableBlurSnapshot = true;
+    update.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
 
     original.PartialUpdate(update);
-    EXPECT_TRUE(original.enableBlurSnapshot.has_value());
-    EXPECT_TRUE(original.enableBlurSnapshot.value());
+    EXPECT_TRUE(original.blurSnapshotOptions.has_value());
+    EXPECT_TRUE(original.blurSnapshotOptions->enableFreeze.value_or(false));
 }
 
 /**
@@ -614,7 +614,7 @@ HWTEST_F(OverlayMaterialECTestNg, SheetStylePartialUpdate004, TestSize.Level1)
     SheetStyle original;
     original.sheetHeight.sheetMode = SheetMode::MEDIUM;
     original.showDragBar = true;
-    original.enableBlurSnapshot = true;
+    original.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     auto material = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
     original.systemMaterial = material;
 
@@ -622,8 +622,8 @@ HWTEST_F(OverlayMaterialECTestNg, SheetStylePartialUpdate004, TestSize.Level1)
     update.sheetHeight.sheetMode = SheetMode::LARGE;
 
     original.PartialUpdate(update);
-    EXPECT_TRUE(original.enableBlurSnapshot.has_value());
-    EXPECT_TRUE(original.enableBlurSnapshot.value());
+    EXPECT_TRUE(original.blurSnapshotOptions.has_value());
+    EXPECT_TRUE(original.blurSnapshotOptions->enableFreeze.value_or(false));
     EXPECT_TRUE(original.systemMaterial);
     EXPECT_EQ(original.sheetHeight.sheetMode, SheetMode::LARGE);
 }
@@ -1007,22 +1007,22 @@ HWTEST_F(OverlayMaterialECTestNg, UiMaterialStyleECCreate003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SheetStyleEnableBlurSnapshot001
- * @tc.desc: Test SheetStyle enableBlurSnapshot field
+ * @tc.name: SheetStyleBlurSnapshotOptions001
+ * @tc.desc: Test SheetStyle blurSnapshotOptions field
  * @tc.type: FUNC
  */
-HWTEST_F(OverlayMaterialECTestNg, SheetStyleEnableBlurSnapshot001, TestSize.Level1)
+HWTEST_F(OverlayMaterialECTestNg, SheetStyleBlurSnapshotOptions001, TestSize.Level1)
 {
     SheetStyle style;
-    EXPECT_FALSE(style.enableBlurSnapshot.has_value());
+    EXPECT_FALSE(style.blurSnapshotOptions.has_value());
 
-    style.enableBlurSnapshot = true;
-    EXPECT_TRUE(style.enableBlurSnapshot.has_value());
-    EXPECT_TRUE(style.enableBlurSnapshot.value());
+    style.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
+    EXPECT_TRUE(style.blurSnapshotOptions.has_value());
+    EXPECT_TRUE(style.blurSnapshotOptions->enableFreeze.value_or(false));
 
-    style.enableBlurSnapshot = false;
-    EXPECT_TRUE(style.enableBlurSnapshot.has_value());
-    EXPECT_FALSE(style.enableBlurSnapshot.value());
+    style.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = false };
+    EXPECT_TRUE(style.blurSnapshotOptions.has_value());
+    EXPECT_FALSE(style.blurSnapshotOptions->enableFreeze.value_or(true));
 }
 
 /**
@@ -1105,18 +1105,18 @@ HWTEST_F(OverlayMaterialECTestNg, SheetStyleOperatorEqual001, TestSize.Level1)
 
 /**
  * @tc.name: SheetStyleOperatorEqual002
- * @tc.desc: Test SheetStyle operator== with enableBlurSnapshot
+ * @tc.desc: Test SheetStyle operator== with blurSnapshotOptions
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayMaterialECTestNg, SheetStyleOperatorEqual002, TestSize.Level1)
 {
     SheetStyle style1;
     SheetStyle style2;
-    style1.enableBlurSnapshot = true;
-    style2.enableBlurSnapshot = true;
+    style1.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
+    style2.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = true };
     EXPECT_TRUE(style1 == style2);
 
-    style2.enableBlurSnapshot = false;
+    style2.blurSnapshotOptions = BlurSnapshotOptions{ .enableFreeze = false };
     EXPECT_FALSE(style1 == style2);
 }
 
@@ -1791,5 +1791,789 @@ HWTEST_F(OverlayMaterialECTestNg, SheetPopupInfo002, TestSize.Level1)
     EXPECT_FLOAT_EQ(info.sheetOffsetX, 0.f);
     EXPECT_FLOAT_EQ(info.sheetOffsetY, 0.f);
     EXPECT_FALSE(info.keyboardShow);
+}
+
+/**
+ * @tc.name: BlurSnapshotOptionsDefault001
+ * @tc.desc: Test BlurSnapshotOptions default state (enableFreeze is nullopt)
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, BlurSnapshotOptionsDefault001, TestSize.Level1)
+{
+    BlurSnapshotOptions options;
+    EXPECT_FALSE(options.enableFreeze.has_value());
+}
+
+/**
+ * @tc.name: BlurSnapshotOptionsEnableFreeze001
+ * @tc.desc: Test BlurSnapshotOptions with enableFreeze set to true
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, BlurSnapshotOptionsEnableFreeze001, TestSize.Level1)
+{
+    BlurSnapshotOptions options;
+    options.enableFreeze = true;
+    EXPECT_TRUE(options.enableFreeze.has_value());
+    EXPECT_TRUE(options.enableFreeze.value());
+}
+
+/**
+ * @tc.name: BlurSnapshotOptionsEnableFreeze002
+ * @tc.desc: Test BlurSnapshotOptions with enableFreeze set to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, BlurSnapshotOptionsEnableFreeze002, TestSize.Level1)
+{
+    BlurSnapshotOptions options;
+    options.enableFreeze = false;
+    EXPECT_TRUE(options.enableFreeze.has_value());
+    EXPECT_FALSE(options.enableFreeze.value());
+}
+
+/**
+ * @tc.name: BlurSnapshotOptionsOperatorEqual001
+ * @tc.desc: Test BlurSnapshotOptions operator== both nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, BlurSnapshotOptionsOperatorEqual001, TestSize.Level1)
+{
+    BlurSnapshotOptions a;
+    BlurSnapshotOptions b;
+    EXPECT_TRUE(a == b);
+}
+
+/**
+ * @tc.name: BlurSnapshotOptionsOperatorEqual002
+ * @tc.desc: Test BlurSnapshotOptions operator== both same value true
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, BlurSnapshotOptionsOperatorEqual002, TestSize.Level1)
+{
+    BlurSnapshotOptions a { .enableFreeze = true };
+    BlurSnapshotOptions b { .enableFreeze = true };
+    EXPECT_TRUE(a == b);
+}
+
+/**
+ * @tc.name: BlurSnapshotOptionsOperatorEqual003
+ * @tc.desc: Test BlurSnapshotOptions operator== both same value false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, BlurSnapshotOptionsOperatorEqual003, TestSize.Level1)
+{
+    BlurSnapshotOptions a { .enableFreeze = false };
+    BlurSnapshotOptions b { .enableFreeze = false };
+    EXPECT_TRUE(a == b);
+}
+
+/**
+ * @tc.name: BlurSnapshotOptionsOperatorEqual004
+ * @tc.desc: Test BlurSnapshotOptions operator== one nullopt one valued
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, BlurSnapshotOptionsOperatorEqual004, TestSize.Level1)
+{
+    BlurSnapshotOptions a;
+    BlurSnapshotOptions b { .enableFreeze = true };
+    EXPECT_FALSE(a == b);
+}
+
+/**
+ * @tc.name: BlurSnapshotOptionsOperatorEqual005
+ * @tc.desc: Test BlurSnapshotOptions operator== different values (true vs false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, BlurSnapshotOptionsOperatorEqual005, TestSize.Level1)
+{
+    BlurSnapshotOptions a { .enableFreeze = true };
+    BlurSnapshotOptions b { .enableFreeze = false };
+    EXPECT_FALSE(a == b);
+}
+
+/**
+ * @tc.name: SheetStyleBlurSnapshotOptionsDefault001
+ * @tc.desc: Test SheetStyle blurSnapshotOptions default is nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SheetStyleBlurSnapshotOptionsDefault001, TestSize.Level1)
+{
+    SheetStyle style;
+    EXPECT_FALSE(style.blurSnapshotOptions.has_value());
+}
+
+/**
+ * @tc.name: SheetStyleBlurSnapshotOptionsAssign001
+ * @tc.desc: Test SheetStyle blurSnapshotOptions assignment with enableFreeze=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SheetStyleBlurSnapshotOptionsAssign001, TestSize.Level1)
+{
+    SheetStyle style;
+    style.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    EXPECT_TRUE(style.blurSnapshotOptions.has_value());
+    EXPECT_TRUE(style.blurSnapshotOptions->enableFreeze.value_or(false));
+}
+
+/**
+ * @tc.name: SheetStyleBlurSnapshotOptionsAssign002
+ * @tc.desc: Test SheetStyle blurSnapshotOptions assignment with enableFreeze=nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SheetStyleBlurSnapshotOptionsAssign002, TestSize.Level1)
+{
+    SheetStyle style;
+    style.blurSnapshotOptions = BlurSnapshotOptions {};
+    EXPECT_TRUE(style.blurSnapshotOptions.has_value());
+    EXPECT_FALSE(style.blurSnapshotOptions->enableFreeze.has_value());
+    EXPECT_FALSE(style.blurSnapshotOptions->enableFreeze.value_or(false));
+    EXPECT_TRUE(style.blurSnapshotOptions->enableFreeze.value_or(true));
+}
+
+/**
+ * @tc.name: SheetStyleBlurSnapshotOptionsReset001
+ * @tc.desc: Test SheetStyle blurSnapshotOptions reset to nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SheetStyleBlurSnapshotOptionsReset001, TestSize.Level1)
+{
+    SheetStyle style;
+    style.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    EXPECT_TRUE(style.blurSnapshotOptions.has_value());
+    style.blurSnapshotOptions.reset();
+    EXPECT_FALSE(style.blurSnapshotOptions.has_value());
+}
+
+/**
+ * @tc.name: SheetStylePartialUpdateBlurSnapshotOptions001
+ * @tc.desc: Test SheetStyle PartialUpdate with blurSnapshotOptions has value
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SheetStylePartialUpdateBlurSnapshotOptions001, TestSize.Level1)
+{
+    SheetStyle original;
+    original.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    SheetStyle update;
+    update.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    original.PartialUpdate(update);
+    EXPECT_TRUE(original.blurSnapshotOptions.has_value());
+    EXPECT_TRUE(original.blurSnapshotOptions->enableFreeze.value_or(false));
+}
+
+/**
+ * @tc.name: SheetStylePartialUpdateBlurSnapshotOptions002
+ * @tc.desc: Test SheetStyle PartialUpdate keeps existing blurSnapshotOptions when update has no value
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SheetStylePartialUpdateBlurSnapshotOptions002, TestSize.Level1)
+{
+    SheetStyle original;
+    original.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    original.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    SheetStyle update;
+    update.sheetHeight.sheetMode = SheetMode::LARGE;
+    original.PartialUpdate(update);
+    EXPECT_TRUE(original.blurSnapshotOptions.has_value());
+    EXPECT_TRUE(original.blurSnapshotOptions->enableFreeze.value_or(false));
+    EXPECT_EQ(original.sheetHeight.sheetMode, SheetMode::LARGE);
+}
+
+/**
+ * @tc.name: SheetStyleOperatorEqualBlurSnapshotOptions001
+ * @tc.desc: Test SheetStyle operator== both have same blurSnapshotOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SheetStyleOperatorEqualBlurSnapshotOptions001, TestSize.Level1)
+{
+    SheetStyle style1;
+    SheetStyle style2;
+    style1.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    style2.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    EXPECT_TRUE(style1 == style2);
+}
+
+/**
+ * @tc.name: SheetStyleOperatorEqualBlurSnapshotOptions002
+ * @tc.desc: Test SheetStyle operator== different blurSnapshotOptions (true vs false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SheetStyleOperatorEqualBlurSnapshotOptions002, TestSize.Level1)
+{
+    SheetStyle style1;
+    SheetStyle style2;
+    style1.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    style2.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = false };
+    EXPECT_FALSE(style1 == style2);
+}
+
+/**
+ * @tc.name: SheetStyleOperatorEqualBlurSnapshotOptions003
+ * @tc.desc: Test SheetStyle operator== one has blurSnapshotOptions one does not
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SheetStyleOperatorEqualBlurSnapshotOptions003, TestSize.Level1)
+{
+    SheetStyle style1;
+    SheetStyle style2;
+    style1.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    EXPECT_FALSE(style1 == style2);
+}
+
+/**
+ * @tc.name: CheckIfUseEffectComponentBlurSnapshotOptions001
+ * @tc.desc: Test CheckIfUseEffectComponent with blurSnapshotOptions has value, backgroundBlurStyle present
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponentBlurSnapshotOptions001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.showDragBar = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_TRUE(topModalNode);
+    auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_TRUE(sheetPattern);
+    EXPECT_TRUE(sheetPattern->CheckIfUseEffectComponent(sheetStyle));
+}
+
+/**
+ * @tc.name: CheckIfUseEffectComponentBlurSnapshotOptions002
+ * @tc.desc: Test CheckIfUseEffectComponent without blurSnapshotOptions returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponentBlurSnapshotOptions002, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.showDragBar = true;
+    sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_TRUE(topModalNode);
+    auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_TRUE(sheetPattern);
+    EXPECT_FALSE(sheetPattern->CheckIfUseEffectComponent(sheetStyle));
+}
+
+/**
+ * @tc.name: CheckIfUseEffectComponentBlurSnapshotOptions003
+ * @tc.desc: Test CheckIfUseEffectComponent with blurSnapshotOptions nullopt enableFreeze and backgroundBlurStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponentBlurSnapshotOptions003, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.showDragBar = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions {};
+    sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_TRUE(topModalNode);
+    auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_TRUE(sheetPattern);
+    EXPECT_TRUE(sheetPattern->CheckIfUseEffectComponent(sheetStyle));
+}
+
+/**
+ * @tc.name: CheckIfUseEffectComponentBlurSnapshotOptions004
+ * @tc.desc: Test CheckIfUseEffectComponent with SEMI_TRANSPARENT material early exit
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponentBlurSnapshotOptions004, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.showDragBar = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    auto semiMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
+    semiMaterial->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    sheetStyle.systemMaterial = semiMaterial;
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_TRUE(topModalNode);
+    auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_TRUE(sheetPattern);
+    EXPECT_FALSE(sheetPattern->CheckIfUseEffectComponent(sheetStyle));
+}
+
+/**
+ * @tc.name: CheckIfUseEffectComponentBlurSnapshotOptions005
+ * @tc.desc: Test CheckIfUseEffectComponent with blurSnapshotOptions and IMMERSIVE systemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, CheckIfUseEffectComponentBlurSnapshotOptions005, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.showDragBar = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    sheetStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_TRUE(topModalNode);
+    auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_TRUE(sheetPattern);
+    EXPECT_TRUE(sheetPattern->CheckIfUseEffectComponent(sheetStyle));
+}
+
+/**
+ * @tc.name: SetSheetBlurSnapshotFreezeNullSheetPage001
+ * @tc.desc: Test SetSheetBlurSnapshotFreeze with null sheetPageNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SetSheetBlurSnapshotFreezeNullSheetPage001, TestSize.Level1)
+{
+    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    ASSERT_TRUE(sheetPatternModifier);
+    SheetStyle sheetStyle;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    RefPtr<FrameNode> nullNode = nullptr;
+    sheetPatternModifier->sheetSetSheetBlurSnapshotFreeze(nullNode, sheetStyle, false);
+}
+
+/**
+ * @tc.name: SetSheetBlurSnapshotFreezeNullPattern001
+ * @tc.desc: Test SetSheetBlurSnapshotFreeze with node that has no SheetPresentationPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SetSheetBlurSnapshotFreezeNullPattern001, TestSize.Level1)
+{
+    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    ASSERT_TRUE(sheetPatternModifier);
+    SheetStyle sheetStyle;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    auto sheetPageNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    sheetPatternModifier->sheetSetSheetBlurSnapshotFreeze(sheetPageNode, sheetStyle, false);
+}
+
+/**
+ * @tc.name: SetSheetBlurSnapshotFreezeNotUseEC001
+ * @tc.desc: Test SetSheetBlurSnapshotFreeze returns early when CheckIfUseEffectComponent is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SetSheetBlurSnapshotFreezeNotUseEC001, TestSize.Level1)
+{
+    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    ASSERT_TRUE(sheetPatternModifier);
+    SheetStyle sheetStyle;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    auto sheetPageNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(-1, "", nullptr));
+    sheetPatternModifier->sheetSetSheetBlurSnapshotFreeze(sheetPageNode, sheetStyle, false);
+}
+
+/**
+ * @tc.name: SetSheetBlurSnapshotFreezePartialUpdateNoValue001
+ * @tc.desc: Test SetSheetBlurSnapshotFreeze returns early on partial update with no blurSnapshotOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SetSheetBlurSnapshotFreezePartialUpdateNoValue001, TestSize.Level1)
+{
+    auto ecNode = FrameNode::CreateFrameNode(
+        V2::EFFECT_COMPONENT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto sheetPageNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(-1, "", nullptr));
+    sheetPageNode->MountToParent(ecNode);
+
+    SheetStyle sheetStyle;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
+
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_TRUE(sheetPattern);
+
+    SheetStyle partialStyle;
+    partialStyle.sheetHeight.sheetMode = SheetMode::LARGE;
+
+    auto ecRSContext = ecNode->GetRenderContext();
+    ASSERT_TRUE(ecRSContext);
+    ecRSContext->UpdateFreeze(false);
+
+    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    ASSERT_TRUE(sheetPatternModifier);
+    sheetPatternModifier->sheetSetSheetBlurSnapshotFreeze(sheetPageNode, partialStyle, true);
+
+    EXPECT_FALSE(ecRSContext->GetFreeze().value_or(false));
+}
+
+/**
+ * @tc.name: SetSheetBlurSnapshotFreezeECNodeTag001
+ * @tc.desc: Test SetSheetBlurSnapshotFreeze updates freeze when parent is EFFECT_COMPONENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SetSheetBlurSnapshotFreezeECNodeTag001, TestSize.Level1)
+{
+    auto ecNode = FrameNode::CreateFrameNode(
+        V2::EFFECT_COMPONENT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto sheetPageNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(-1, "", nullptr));
+    sheetPageNode->MountToParent(ecNode);
+
+    SheetStyle sheetStyle;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
+
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_TRUE(sheetPattern);
+
+    auto ecRSContext = ecNode->GetRenderContext();
+    ASSERT_TRUE(ecRSContext);
+    ecRSContext->UpdateFreeze(false);
+
+    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    ASSERT_TRUE(sheetPatternModifier);
+    sheetPatternModifier->sheetSetSheetBlurSnapshotFreeze(sheetPageNode, sheetStyle, false);
+
+    EXPECT_TRUE(ecRSContext->GetFreeze().value_or(false));
+}
+
+/**
+ * @tc.name: SetSheetBlurSnapshotFreezeECNodeTag002
+ * @tc.desc: Test SetSheetBlurSnapshotFreeze sets freeze false when enableFreeze is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SetSheetBlurSnapshotFreezeECNodeTag002, TestSize.Level1)
+{
+    auto ecNode = FrameNode::CreateFrameNode(
+        V2::EFFECT_COMPONENT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto sheetPageNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(-1, "", nullptr));
+    sheetPageNode->MountToParent(ecNode);
+
+    SheetStyle sheetStyle;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = false };
+    sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
+
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_TRUE(sheetPattern);
+
+    auto ecRSContext = ecNode->GetRenderContext();
+    ASSERT_TRUE(ecRSContext);
+    ecRSContext->UpdateFreeze(true);
+
+    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    ASSERT_TRUE(sheetPatternModifier);
+    sheetPatternModifier->sheetSetSheetBlurSnapshotFreeze(sheetPageNode, sheetStyle, false);
+
+    EXPECT_FALSE(ecRSContext->GetFreeze().value_or(true));
+}
+
+/**
+ * @tc.name: SetSheetBlurSnapshotFreezeECNodeTag003
+ * @tc.desc: Test SetSheetBlurSnapshotFreeze with enableFreeze nullopt defaults to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SetSheetBlurSnapshotFreezeECNodeTag003, TestSize.Level1)
+{
+    auto ecNode = FrameNode::CreateFrameNode(
+        V2::EFFECT_COMPONENT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto sheetPageNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(-1, "", nullptr));
+    sheetPageNode->MountToParent(ecNode);
+
+    SheetStyle sheetStyle;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions {};
+    sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
+
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_TRUE(sheetPattern);
+
+    auto ecRSContext = ecNode->GetRenderContext();
+    ASSERT_TRUE(ecRSContext);
+    ecRSContext->UpdateFreeze(true);
+
+    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    ASSERT_TRUE(sheetPatternModifier);
+    sheetPatternModifier->sheetSetSheetBlurSnapshotFreeze(sheetPageNode, sheetStyle, false);
+
+    EXPECT_FALSE(ecRSContext->GetFreeze().value_or(true));
+}
+
+/**
+ * @tc.name: SetSheetBlurSnapshotFreezeNonECParent001
+ * @tc.desc: Test SetSheetBlurSnapshotFreeze skips when parent is not EFFECT_COMPONENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, SetSheetBlurSnapshotFreezeNonECParent001, TestSize.Level1)
+{
+    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto sheetPageNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetPresentationPattern>(-1, "", nullptr));
+    sheetPageNode->MountToParent(columnNode);
+
+    SheetStyle sheetStyle;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
+
+    auto sheetPattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_TRUE(sheetPattern);
+
+    auto* sheetPatternModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    ASSERT_TRUE(sheetPatternModifier);
+    sheetPatternModifier->sheetSetSheetBlurSnapshotFreeze(sheetPageNode, sheetStyle, false);
+}
+
+/**
+ * @tc.name: MountSheetEffectComponentFreezeSystemMaterial001
+ * @tc.desc: Test MountSheetEffectComponent with enableFreeze=true and systemMaterial
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, MountSheetEffectComponentFreezeSystemMaterial001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.showDragBar = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    sheetStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_TRUE(topModalNode);
+
+    auto sheetWrapperNode =
+        FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<SheetWrapperPattern>(targetNode->GetId(), targetNode->GetTag()));
+    sheetWrapperNode->MountToParent(rootNode);
+
+    auto sheetNodePattern = topModalNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_TRUE(sheetNodePattern);
+    EXPECT_TRUE(sheetNodePattern->CheckIfUseEffectComponent(sheetStyle));
+
+    auto ecNode = overlayManager->MountSheetEffectComponent(sheetWrapperNode, sheetStyle, topModalNode);
+    if (ecNode) {
+        EXPECT_EQ(ecNode->GetTag(), V2::EFFECT_COMPONENT_ETS_TAG);
+        auto ecRSContext = ecNode->GetRenderContext();
+        ASSERT_TRUE(ecRSContext);
+        EXPECT_TRUE(ecRSContext->GetFreeze().value_or(false));
+    }
+}
+
+/**
+ * @tc.name: MountSheetEffectComponentFreezeBlurStyle001
+ * @tc.desc: Test MountSheetEffectComponent with enableFreeze=true and backgroundBlurStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, MountSheetEffectComponentFreezeBlurStyle001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.showDragBar = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = true };
+    sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_TRUE(topModalNode);
+
+    auto sheetWrapperNode =
+        FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<SheetWrapperPattern>(targetNode->GetId(), targetNode->GetTag()));
+    sheetWrapperNode->MountToParent(rootNode);
+
+    auto ecNode = overlayManager->MountSheetEffectComponent(sheetWrapperNode, sheetStyle, topModalNode);
+    if (ecNode) {
+        EXPECT_EQ(ecNode->GetTag(), V2::EFFECT_COMPONENT_ETS_TAG);
+        auto ecRSContext = ecNode->GetRenderContext();
+        ASSERT_TRUE(ecRSContext);
+        EXPECT_TRUE(ecRSContext->GetFreeze().value_or(false));
+    }
+}
+
+/**
+ * @tc.name: MountSheetEffectComponentNoFreeze001
+ * @tc.desc: Test MountSheetEffectComponent with enableFreeze=false does not call UpdateFreeze
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, MountSheetEffectComponentNoFreeze001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.showDragBar = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions { .enableFreeze = false };
+    sheetStyle.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THIN);
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_TRUE(topModalNode);
+
+    auto sheetWrapperNode =
+        FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<SheetWrapperPattern>(targetNode->GetId(), targetNode->GetTag()));
+    sheetWrapperNode->MountToParent(rootNode);
+
+    auto ecNode = overlayManager->MountSheetEffectComponent(sheetWrapperNode, sheetStyle, topModalNode);
+    if (ecNode) {
+        EXPECT_EQ(ecNode->GetTag(), V2::EFFECT_COMPONENT_ETS_TAG);
+        auto ecRSContext = ecNode->GetRenderContext();
+        ASSERT_TRUE(ecRSContext);
+        EXPECT_FALSE(ecRSContext->GetFreeze().value_or(false));
+    }
+}
+
+/**
+ * @tc.name: MountSheetEffectComponentNulloptFreeze001
+ * @tc.desc: Test MountSheetEffectComponent with blurSnapshotOptions nullopt enableFreeze defaults to false
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, MountSheetEffectComponentNulloptFreeze001, TestSize.Level1)
+{
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.showDragBar = true;
+    sheetStyle.blurSnapshotOptions = BlurSnapshotOptions {};
+    sheetStyle.backgroundBlurStyle = BlurStyleOption { .blurStyle = BlurStyle::COMPONENT_THICK };
+
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    CreateSheetBuilder();
+    overlayManager->OnBindSheet(true, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, targetNode);
+
+    auto topModalNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_TRUE(topModalNode);
+
+    auto sheetWrapperNode =
+        FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<SheetWrapperPattern>(targetNode->GetId(), targetNode->GetTag()));
+    sheetWrapperNode->MountToParent(rootNode);
+
+    auto ecNode = overlayManager->MountSheetEffectComponent(sheetWrapperNode, sheetStyle, topModalNode);
+    if (ecNode) {
+        EXPECT_EQ(ecNode->GetTag(), V2::EFFECT_COMPONENT_ETS_TAG);
+        auto ecRSContext = ecNode->GetRenderContext();
+        ASSERT_TRUE(ecRSContext);
+        EXPECT_FALSE(ecRSContext->GetFreeze().value_or(false));
+    }
+}
+
+/**
+ * @tc.name: BindSheetCreateParamBlurSnapshotOptions001
+ * @tc.desc: Test BindSheetCreateParam with blurSnapshotOptions nullopt enableFreeze
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayMaterialECTestNg, BindSheetCreateParamBlurSnapshotOptions001, TestSize.Level1)
+{
+    SheetStyle style;
+    style.systemMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::REGULAR_EC);
+    style.blurSnapshotOptions = BlurSnapshotOptions {};
+
+    BindSheetCreateParam param;
+    param.style = style;
+    EXPECT_TRUE(param.style.systemMaterial);
+    EXPECT_TRUE(param.style.blurSnapshotOptions.has_value());
+    EXPECT_FALSE(param.style.blurSnapshotOptions->enableFreeze.has_value());
 }
 } // namespace OHOS::Ace::NG
