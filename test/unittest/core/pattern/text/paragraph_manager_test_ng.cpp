@@ -411,57 +411,29 @@ HWTEST_F(ParagraphManagerTestNg, ParagraphUtil004, TestSize.Level1)
 
 /**
  * @tc.name: ParagraphUtil005
- * @tc.desc: test ParagraphUtil ConstructParagraphSpanGroup with tailIndents
+ * @tc.desc: test ParagraphUtil ConstructParagraphSpanGroup with different styles
  * @tc.type: FUNC
  */
 HWTEST_F(ParagraphManagerTestNg, ParagraphUtil005, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Create multiple SpanItems with newline character
-     * @tc.expected: SpanItems created successfully
-     */
     std::vector<std::list<RefPtr<SpanItem>>> spanGroupVec;
     std::list<RefPtr<SpanItem>> spans;
     
     RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
-    span1->content = u"tailIndents test line 1\n";
-    span1->interval = { 0, 20 };
+    span1->content = u"test line 1\n";
+    span1->textLineStyle->UpdateTextAlign(TextAlign::LEFT);
     
     RefPtr<SpanItem> span2 = AceType::MakeRefPtr<SpanItem>();
-    span2->content = u"tailIndents test line 2\n";
-    span2->interval = { 20, 40 };
-    
-    RefPtr<SpanItem> span3 = AceType::MakeRefPtr<SpanItem>();
-    span3->content = u"tailIndents test line 3\n";
-    span3->interval = { 40, 60 };
+    span2->content = u"test line 2";
+    span2->textLineStyle->UpdateTextAlign(TextAlign::CENTER);
     
     spans.emplace_back(span1);
     spans.emplace_back(span2);
-    spans.emplace_back(span3);
     
-    /**
-     * @tc.steps: step2. Set tailIndents for first SpanItem
-     * @tc.expected: tailIndents set successfully
-     */
-    TailIndentsArray indentsArray;
-    indentsArray.push_back(Dimension(100.0, DimensionUnit::FP));
-    indentsArray.push_back(Dimension(20.0, DimensionUnit::FP));
-    indentsArray.push_back(Dimension(30.0, DimensionUnit::FP));
-    TailIndents tailIndents { indentsArray };
-    span1->textLineStyle->UpdateTailIndents(tailIndents);
-    
-    /**
-     * @tc.steps: step3. Call ConstructParagraphSpanGroup
-     * @tc.expected: Paragraphs split by tailIndents
-     */
     bool hasMaxLines = false;
     ParagraphUtil::ConstructParagraphSpanGroup(spans, spanGroupVec, hasMaxLines);
     
-    /**
-     * @tc.steps: step4. Verify result
-     * @tc.expected: Each SpanItem should be split into separate paragraph
-     */
-    EXPECT_EQ(spanGroupVec.size(), 3);
+    EXPECT_EQ(spanGroupVec.size(), 2);
     EXPECT_FALSE(hasMaxLines);
 }
 

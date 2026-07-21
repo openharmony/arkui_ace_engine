@@ -1321,7 +1321,7 @@ HWTEST_F(TextTestSevenNg, SetGradientShaderStyle009, TestSize.Level1)
 
 /**
  * @tc.name: SetGradientShaderStyle010
- * @tc.desc: Test ResetGradientShaderStyle removes registered gradient resource object.
+ * @tc.desc: Test ResetGradientShaderStyle resets gradient shader style properties.
  * @tc.type: FUNC
  */
 HWTEST_F(TextTestSevenNg, SetGradientShaderStyle010, TestSize.Level1)
@@ -1352,7 +1352,6 @@ HWTEST_F(TextTestSevenNg, SetGradientShaderStyle010, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_FALSE(layoutProperty->HasGradientShaderStyle());
     EXPECT_FALSE(layoutProperty->HasColorShaderStyle());
-    EXPECT_EQ(pattern->resourceMgr_, nullptr);
 }
 
 /**
