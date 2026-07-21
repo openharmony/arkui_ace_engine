@@ -174,9 +174,6 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     bool hasSwiperNode = tabsNode->HasSwiperNode();
     bool hasTabBarNode = tabsNode->HasTabBarNode();
     bool hasDividerNode = tabsNode->HasDividerNode();
-    bool hasSelectedMaskNode = tabsNode->HasSelectedMaskNode();
-    bool hasUnselectedMaskNode = tabsNode->HasUnselectedMaskNode();
-    bool hasIndicatorNode = tabsNode->HasIndicatorNode();
 
     // Create Swiper node to contain TabContent.
     auto swiperNode = FrameNode::GetOrCreateFrameNode(
@@ -196,15 +193,6 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
         tabBarLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
     }
 
-    auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetSelectedMaskId(),
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-
-    auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetUnselectedMaskId(),
-        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-
-    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, tabsNode->GetIndicatorId(),
-        []() { return AceType::MakeRefPtr<ImagePattern>(); });
-
     if (!hasSwiperNode) {
         swiperNode->MountToParent(tabsNode);
     }
@@ -214,19 +202,38 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
     if (!hasTabBarNode) {
         tabBarNode->MountToParent(tabsNode);
     }
+    // Internal child nodes of TabBar (selectedMask, unselectedMask, indicator)
+    // are created lazily in InitTabBarChildNodes when first TabContent is added.
+}
+
+void TabsModelNG::InitTabBarChildNodes(RefPtr<TabsNode> tabsNode)
+{
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+
+    bool hasSelectedMaskNode = tabsNode->HasSelectedMaskNode();
+    bool hasUnselectedMaskNode = tabsNode->HasUnselectedMaskNode();
+    bool hasIndicatorNode = tabsNode->HasIndicatorNode();
+
     if (!hasSelectedMaskNode) {
+        auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetSelectedMaskId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         selectedMaskNode->MountToParent(tabBarNode);
         InitSelectedMaskNode(selectedMaskNode);
     }
     if (!hasUnselectedMaskNode) {
+        auto unselectedMaskNode = FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, tabsNode->GetUnselectedMaskId(),
+            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         unselectedMaskNode->MountToParent(tabBarNode);
         InitUnselectedMaskNode(unselectedMaskNode);
     }
-
     if (!hasIndicatorNode) {
+        auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, tabsNode->GetIndicatorId(),
+            []() { return AceType::MakeRefPtr<ImagePattern>(); });
         indicatorNode->MountToParent(tabBarNode);
         InitImageIndicatorNode(indicatorNode);
     }
+    tabsNode->SetTabBarChildNodesInitialized(true);
 }
 
 RefPtr<FrameNode> TabsModelNG::CreateFrameNode(int32_t nodeId)
