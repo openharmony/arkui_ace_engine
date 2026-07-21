@@ -170,10 +170,11 @@ ArkUINativeModuleValue ScrollableBridge::SetOnReachStart(ArkUIRuntimeCallInfo* r
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void(void)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
 
@@ -208,10 +209,11 @@ ArkUINativeModuleValue ScrollableBridge::SetOnReachEnd(ArkUIRuntimeCallInfo* run
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void(void)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
 
@@ -438,11 +440,11 @@ ArkUINativeModuleValue ScrollableBridge::SetOnWillScroll(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<ScrollFrameResult(CalcDimension, ScrollState, ScrollSource)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+        [vm, weakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
             const CalcDimension& scrollOffset, const ScrollState& scrollState, ScrollSource scrollSource) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(weakNode);
 
             panda::Local<panda::NumberRef> offsetParam =
                 panda::NumberRef::New(vm, static_cast<double>(scrollOffset.ConvertToVp()));
@@ -494,12 +496,13 @@ ArkUINativeModuleValue ScrollableBridge::SetOnDidScroll(ArkUIRuntimeCallInfo* ru
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(Dimension, ScrollState)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(Dimension, ScrollState)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](
                                                                const CalcDimension& scrollOffset,
                                                                const ScrollState& scrollState) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         panda::Local<panda::NumberRef> offsetParam =
             panda::NumberRef::New(vm, static_cast<double>(scrollOffset.ConvertToVp()));
@@ -540,11 +543,11 @@ ArkUINativeModuleValue ScrollableBridge::SetOnScrollFrameBegin(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     std::function<ScrollFrameResult(Dimension, ScrollState)> callback =
-        [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+        [vm, weakNode = AceType::WeakClaim(frameNode), func = panda::CopyableGlobal(vm, func)](
             Dimension offset, ScrollState state) -> ScrollFrameResult {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         panda::Local<panda::NumberRef> offsetParam =
             panda::NumberRef::New(vm, static_cast<double>(offset.ConvertToVp()));
@@ -596,10 +599,11 @@ ArkUINativeModuleValue ScrollableBridge::SetOnScrollStart(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getScrollableModifier()->setOnScrollStartCallBack(
@@ -633,10 +637,11 @@ ArkUINativeModuleValue ScrollableBridge::SetOnScrollStop(ArkUIRuntimeCallInfo* r
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(void)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void(void)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getScrollableModifier()->setOnScrollStopCallBack(
@@ -670,11 +675,12 @@ ArkUINativeModuleValue ScrollableBridge::SetOnWillStopDragging(ArkUIRuntimeCallI
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(Dimension)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(Dimension)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](
                                                                const CalcDimension& velocity) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         panda::Local<panda::NumberRef> velocityParam =
             panda::NumberRef::New(vm, static_cast<double>(velocity.ConvertToVp()));
@@ -713,10 +719,11 @@ ArkUINativeModuleValue ScrollableBridge::SetOnWillStartDragging(ArkUIRuntimeCall
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getScrollableModifier()->setOnWillStartDragging(
@@ -750,11 +757,12 @@ ArkUINativeModuleValue ScrollableBridge::SetOnDidStopDragging(ArkUIRuntimeCallIn
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(bool)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(bool)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)](
                                                                bool isAnimate) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         // 1: Array length
         panda::Local<panda::JSValueRef> params[1] = { panda::BooleanRef::New(vm, isAnimate) };
         func->Call(vm, func.ToLocal(), params, 1); // 1: Array length
@@ -790,10 +798,11 @@ ArkUINativeModuleValue ScrollableBridge::SetOnWillStartFling(ArkUIRuntimeCallInf
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getScrollableModifier()->setOnWillStartFling(
@@ -827,10 +836,11 @@ ArkUINativeModuleValue ScrollableBridge::SetOnDidStopFling(ArkUIRuntimeCallInfo*
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getScrollableModifier()->setOnDidStopFling(
