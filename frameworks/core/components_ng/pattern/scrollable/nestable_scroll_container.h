@@ -78,7 +78,7 @@ public:
         return false;
     }
 
-    ACE_FORCE_EXPORT void UpdateNestedModeForChildren(const NestedScrollOptions& childNestedScroll);
+    void UpdateNestedModeForChildren(const NestedScrollOptions& childNestedScroll);
 
     void SetNestedScroll(const NestedScrollOptions& nestedScroll, bool isFixedNestedScrollMode = false);
 
@@ -87,7 +87,7 @@ public:
         return nestedScroll_;
     }
 
-    ACE_FORCE_EXPORT void SetParentScrollable();
+    void SetParentScrollable();
 
     RefPtr<NestableScrollContainer> GetNestedScrollParent()
     {

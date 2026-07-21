@@ -246,23 +246,23 @@ if (globalThis.Marquee === undefined) {
 }
 
 // @ts-ignore
-if (globalThis.Refresh === undefined) {
-  globalThis.Refresh = {
-    create: function(params) {
-      getUINativeModule().loadNativeModule('Refresh');
-      let module = globalThis.requireNapi('arkui.components.arkrefresh');
+if (globalThis.Navigator === undefined) {
+  globalThis.Navigator = {
+    create: function (params) {
+      getUINativeModule().loadNativeModule('Navigator');
+      let module = globalThis.requireNapi('arkui.components.arknavigator');
       module.exportView();
       module.loadComponent();
-      getUINativeModule().refresh.create(params);
+      getUINativeModule().navigator.create(params);
     },
-    name: 'JSRefresh'
+    name: 'JSNavigator'
   }
 }
 
-// @ts-ignore
+// @ts-ignore 
 if (globalThis.Radio === undefined) {
   globalThis.Radio = {
-    create: function(params) {
+    create: function (params) {
       getUINativeModule().loadNativeModule('Radio');
       let module = globalThis.requireNapi('arkui.components.arkradio');
       module.exportView();
@@ -696,34 +696,6 @@ if (globalThis.ImageAnimator === undefined) {
 }
 
 // @ts-ignore
-if (globalThis.Grid === undefined) {
-  globalThis.Grid = {
-    create: function(scroller, options) {
-      getUINativeModule().loadNativeModule('Grid');
-      let module = globalThis.requireNapi('arkui.components.arkgrid');
-      module.exportView();
-      module.loadComponent();
-      getUINativeModule().grid.create(scroller, options);
-    },
-    name: 'Grid'
-  }
-}
-
-// @ts-ignore
-if (globalThis.GridItem === undefined) {
-  globalThis.GridItem = {
-    create: function(func, isLazy, style) {
-      getUINativeModule().loadNativeModule('GridItem');
-      let module = globalThis.requireNapi('arkui.components.arkgriditem');
-      module.exportView();
-      module.loadComponent();
-      getUINativeModule().gridItem.create(func, isLazy, style);
-    },
-    name: 'GridItem'
-  }
-}
-
-// @ts-ignore
 if (globalThis.DatePicker === undefined) {
   globalThis.DatePicker = {
     create: function(params) {
@@ -748,20 +720,6 @@ if (globalThis.DatePickerDialog === undefined) {
       getUINativeModule().datePickerDialog.show(params);
     }
   }
-}
-
-// @ts-ignore
-if (globalThis.LazyVGridLayout === undefined) {
-  globalThis.LazyVGridLayout = {
-    create: function () {
-      getUINativeModule().loadNativeModule('LazyVGridLayout');
-      let module = globalThis.requireNapi('arkui.components.arklazygridlayout');
-      module.exportView();
-      module.loadComponent();
-      getUINativeModule().lazyVGridLayout.create();
-    },
-    name: 'JSLazyVGridLayout'
-  };
 }
 
 // @ts-ignore

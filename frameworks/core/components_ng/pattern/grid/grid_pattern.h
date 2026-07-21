@@ -148,7 +148,7 @@ public:
         info_.ResetPositionFlags();
     }
 
-    ACE_FORCE_EXPORT void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     bool UpdateCurrentOffset(float offset, int32_t source) override;
 

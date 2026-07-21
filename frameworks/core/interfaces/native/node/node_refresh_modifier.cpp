@@ -14,43 +14,297 @@
  */
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 
-#include "core/common/dynamic_module_helper.h"
-#include "core/interfaces/native/node/node_api.h"
-#include "frameworks/base/log/log_wrapper.h"
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
+#include "core/interfaces/native/node/node_refresh_modifier.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const float ERROR_FLOAT_CODE = -1.0f;
 
+void SetRefreshing(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetRefreshing(frameNode, static_cast<bool>(value));
+}
+
+ArkUI_Bool GetRefreshing(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Bool>(RefreshModelNG::GetRefreshing(frameNode));
+}
+
+void SetRefreshOffset(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_VoidPtr resObjRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetRefreshOffset(frameNode, Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit)));
+    RefreshModelNG::CreateWithResourceObjRefreshOffset(
+        frameNode, AceType::Claim(static_cast<ResourceObject*>(resObjRawPtr)));
+}
+
+void ResetRefreshOffset(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetRefreshOffset(frameNode, Dimension(0.0f, DimensionUnit::VP));
+    RefreshModelNG::CreateWithResourceObjRefreshOffset(frameNode, nullptr);
+}
+
+void SetPullToRefresh(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetPullToRefresh(frameNode, value);
+}
+
+void ResetPullToRefresh(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetPullToRefresh(frameNode, true);
+}
+
+void SetPullUpToCancelRefresh(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetPullUpToCancelRefresh(frameNode, value);
+}
+
+void ResetPullUpToCancelRefresh(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetPullUpToCancelRefresh(frameNode, true);
+}
+
+void SetRefreshContent(ArkUINodeHandle node, ArkUINodeHandle content)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto contentNode = reinterpret_cast<FrameNode*>(content);
+    CHECK_NULL_VOID(contentNode);
+    RefreshModelNG::SetCustomBuilder(frameNode, contentNode);
+}
+
+void SetPullDownRatio(ArkUINodeHandle node, ArkUI_Float32 ratio)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float value = 0.0;
+    if (LessNotEqual(ratio, 0.0)) {
+        value = 0.0;
+    } else if (GreatNotEqual(ratio, 1.0)) {
+        value = 1.0;
+    }
+    value = ratio ;
+    std::optional<float> ratioValue = value;
+    RefreshModelNG::SetPullDownRatio(frameNode, ratioValue);
+}
+
+void ResetPullDownRatio(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<float> ratioValue = std::nullopt;
+    RefreshModelNG::SetPullDownRatio(frameNode, ratioValue);
+}
+
+ArkUI_Float32 GetPullDownRatio(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return RefreshModelNG::GetPullDownRatio(frameNode);
+}
+
+ArkUI_Float32 GetRefreshOffset(ArkUINodeHandle node, ArkUI_Int32 unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return RefreshModelNG::GetRefreshOffset(frameNode).GetNativeValue(static_cast<DimensionUnit>(unit));
+}
+
+ArkUI_Bool GetPullToRefresh(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Bool>(RefreshModelNG::GetPullToRefresh(frameNode));
+}
+
+ArkUI_Bool GetPullUpToCancelRefresh(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<ArkUI_Bool>(RefreshModelNG::GetPullUpToCancelRefresh(frameNode));
+}
+
+void SetRefreshOnStateChangeCallback(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onStateChangeEvent = reinterpret_cast<StateChangeEvent*>(callback);
+        RefreshModelNG::SetOnStateChange(frameNode, std::move(*onStateChangeEvent));
+    } else {
+        RefreshModelNG::SetOnStateChange(frameNode, nullptr);
+    }
+}
+
+void ResetRefreshOnStateChangeCallback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnStateChange(frameNode, nullptr);
+}
+
+void SetOnRefreshingCallback(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onRefreshingEvent = reinterpret_cast<RefreshingEvent*>(callback);
+        RefreshModelNG::SetOnRefreshing(frameNode, std::move(*onRefreshingEvent));
+    } else {
+        RefreshModelNG::SetOnRefreshing(frameNode, nullptr);
+    }
+}
+
+void ResetOnRefreshingCallback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnRefreshing(frameNode, nullptr);
+}
+
+void SetRefreshOnOffsetChangeCallback(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onOffsetChangeEvent = reinterpret_cast<OffsetChangeEvent*>(callback);
+        RefreshModelNG::SetOnOffsetChange(frameNode, std::move(*onOffsetChangeEvent));
+    } else {
+        RefreshModelNG::SetOnOffsetChange(frameNode, nullptr);
+    }
+}
+
+void ResetRefreshOnOffsetChangeCallback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnOffsetChange(frameNode, nullptr);
+}
+
+void SetMaxPullDownDistance(ArkUINodeHandle node, ArkUI_Float32 distance, ArkUI_VoidPtr resObjRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<float> distanceValue = std::max(distance, 0.0f);
+    RefreshModelNG::SetMaxPullDownDistance(frameNode, distanceValue);
+    RefreshModelNG::CreateWithResourceObjMaxPullDownDistance(
+        frameNode, AceType::Claim(static_cast<ResourceObject*>(resObjRawPtr)));
+}
+
+void ResetMaxPullDownDistance(ArkUINodeHandle node, ArkUI_VoidPtr resObjRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::optional<float> distanceValue = std::nullopt;
+    RefreshModelNG::SetMaxPullDownDistance(frameNode, distanceValue);
+    RefreshModelNG::CreateWithResourceObjMaxPullDownDistance(
+        frameNode, AceType::Claim(static_cast<ResourceObject*>(resObjRawPtr)));
+}
+
+ArkUI_Float32 GetMaxPullDownDistance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return RefreshModelNG::GetMaxPullDownDistance(frameNode);
+}
+
+void SetOnStepOffsetChangeCallback(ArkUINodeHandle node,
+    void (*callback)(const ArkUI_Float32 offset, void* extraData, const bool isDrag), void* extraData)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode && callback);
+    auto onChange = [callback, extraData](const float offset, const bool isDrag) {
+        callback(offset, extraData, isDrag);
+    };
+    RefreshModelNG::SetStepOffsetChange(frameNode, std::move(onChange));
+}
+
+void ResetOnStepOffsetChangeCallback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetStepOffsetChange(frameNode, nullptr);
+}
+} // namespace
 namespace NodeModifier {
 
 const ArkUIRefreshModifier* GetRefreshModifier()
 {
-    static const ArkUIRefreshModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Refresh");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const ArkUIRefreshModifier*>(module->GetDynamicModifier());
-    }
-    return cachedModifier;
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIRefreshModifier modifier = {
+        .setRefreshing = SetRefreshing,
+        .getRefreshing = GetRefreshing,
+        .setRefreshOffset = SetRefreshOffset,
+        .resetRefreshOffset = ResetRefreshOffset,
+        .setPullToRefresh = SetPullToRefresh,
+        .resetPullToRefresh = ResetPullToRefresh,
+        .setPullUpToCancelRefresh = SetPullUpToCancelRefresh,
+        .resetPullUpToCancelRefresh = ResetPullUpToCancelRefresh,
+        .setRefreshContent = SetRefreshContent,
+        .setPullDownRatio = SetPullDownRatio,
+        .resetPullDownRatio = ResetPullDownRatio,
+        .getPullDownRatio = GetPullDownRatio,
+        .getRefreshOffset = GetRefreshOffset,
+        .getPullToRefresh = GetPullToRefresh,
+        .getPullUpToCancelRefresh = GetPullUpToCancelRefresh,
+        .setRefreshOnStateChangeCallback = SetRefreshOnStateChangeCallback,
+        .resetRefreshOnStateChangeCallback = ResetRefreshOnStateChangeCallback,
+        .setOnRefreshingCallback = SetOnRefreshingCallback,
+        .resetOnRefreshingCallback = ResetOnRefreshingCallback,
+        .setRefreshOnOffsetChangeCallback = SetRefreshOnOffsetChangeCallback,
+        .resetRefreshOnOffsetChangeCallback = ResetRefreshOnOffsetChangeCallback,
+        .setMaxPullDownDistance = SetMaxPullDownDistance,
+        .resetMaxPullDownDistance = ResetMaxPullDownDistance,
+        .getMaxPullDownDistance = GetMaxPullDownDistance,
+        .setOnStepOffsetChangeCallback = SetOnStepOffsetChangeCallback,
+        .resetOnStepOffsetChangeCallback = ResetOnStepOffsetChangeCallback,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+    return &modifier;
 }
 
 const CJUIRefreshModifier* GetCJUIRefreshModifier()
 {
-    static const CJUIRefreshModifier* cachedModifier = nullptr;
-    if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Refresh");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const CJUIRefreshModifier*>(module->GetCjModifier());
-    }
-    return cachedModifier;
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIRefreshModifier modifier = {
+        .setRefreshing = SetRefreshing,
+        .getRefreshing = GetRefreshing,
+        .setRefreshContent = SetRefreshContent,
+        .setRefreshOffset = SetRefreshOffset,
+        .resetRefreshOffset = ResetRefreshOffset,
+        .setPullToRefresh = SetPullToRefresh,
+        .resetPullToRefresh = ResetPullToRefresh,
+        .setPullDownRatio = SetPullDownRatio,
+        .resetPullDownRatio = ResetPullDownRatio,
+        .getPullDownRatio = GetPullDownRatio,
+        .getRefreshOffset = GetRefreshOffset,
+        .getPullToRefresh = GetPullToRefresh,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+    return &modifier;
 }
 
 void SetRefreshOnStateChange(ArkUINodeHandle node, void* extraParam)
 {
-    auto* modifier = GetRefreshModifier();
-    CHECK_NULL_VOID(modifier);
-    CHECK_NULL_VOID(modifier->setRefreshOnStateChangeCallback);
-    
-    std::function<void(const int32_t)> onEvent = [node, extraParam](const int32_t value) {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const int32_t value) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -58,32 +312,28 @@ void SetRefreshOnStateChange(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[0].i32 = value;
         SendArkUISyncEvent(&event);
     };
-    modifier->setRefreshOnStateChangeCallback(node, reinterpret_cast<void*>(&onEvent));
+    RefreshModelNG::SetOnStateChange(frameNode, std::move(onEvent));
 }
 
 void SetOnRefreshing(ArkUINodeHandle node, void* extraParam)
 {
-    auto* modifier = GetRefreshModifier();
-    CHECK_NULL_VOID(modifier);
-    CHECK_NULL_VOID(modifier->setOnRefreshingCallback);
-    
-    std::function<void()> onEvent = [node, extraParam]() {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam]() {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_REFRESH_REFRESHING;
         SendArkUISyncEvent(&event);
     };
-    modifier->setOnRefreshingCallback(node, reinterpret_cast<void*>(&onEvent));
+    RefreshModelNG::SetOnRefreshing(frameNode, std::move(onEvent));
 }
 
 void SetRefreshOnOffsetChange(ArkUINodeHandle node, void* extraParam)
 {
-    auto* modifier = GetRefreshModifier();
-    CHECK_NULL_VOID(modifier);
-    CHECK_NULL_VOID(modifier->setRefreshOnOffsetChangeCallback);
-    
-    std::function<void(const float)> onEvent = [node, extraParam](const float value) {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const float value) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -91,16 +341,14 @@ void SetRefreshOnOffsetChange(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[0].f32 = value;
         SendArkUISyncEvent(&event);
     };
-    modifier->setRefreshOnOffsetChangeCallback(node, reinterpret_cast<void*>(&onEvent));
+    RefreshModelNG::SetOnOffsetChange(frameNode, std::move(onEvent));
 }
 
 void SetRefreshChangeEvent(ArkUINodeHandle node, void* extraParam)
 {
-    auto* modifier = GetRefreshModifier();
-    CHECK_NULL_VOID(modifier);
-    CHECK_NULL_VOID(modifier->setOnChangeEvent);
-    
-    std::function<void(const std::string&)> onEvent = [node, extraParam](const std::string& value) {
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, extraParam](const std::string& value) {
         ArkUINodeEvent event;
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
@@ -109,39 +357,32 @@ void SetRefreshChangeEvent(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[0].u32 = newValue;
         SendArkUISyncEvent(&event);
     };
-    modifier->setOnChangeEvent(node, reinterpret_cast<void*>(&onEvent));
+    RefreshModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
 
 void ResetRefreshOnStateChange(ArkUINodeHandle node)
 {
-    auto* modifier = GetRefreshModifier();
-    CHECK_NULL_VOID(modifier);
-    CHECK_NULL_VOID(modifier->resetRefreshOnStateChangeCallback);
-    modifier->resetRefreshOnStateChangeCallback(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnStateChange(frameNode, nullptr);
 }
-
 void ResetOnRefreshing(ArkUINodeHandle node)
 {
-    auto* modifier = GetRefreshModifier();
-    CHECK_NULL_VOID(modifier);
-    CHECK_NULL_VOID(modifier->resetOnRefreshingCallback);
-    modifier->resetOnRefreshingCallback(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnRefreshing(frameNode, nullptr);
 }
-
 void ResetRefreshOnOffsetChange(ArkUINodeHandle node)
 {
-    auto* modifier = GetRefreshModifier();
-    CHECK_NULL_VOID(modifier);
-    CHECK_NULL_VOID(modifier->resetRefreshOnOffsetChangeCallback);
-    modifier->resetRefreshOnOffsetChangeCallback(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetOnOffsetChange(frameNode, nullptr);
 }
-
 void ResetRefreshChangeEvent(ArkUINodeHandle node)
 {
-    auto* modifier = GetRefreshModifier();
-    CHECK_NULL_VOID(modifier);
-    CHECK_NULL_VOID(modifier->resetOnChangeEvent);
-    modifier->resetOnChangeEvent(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RefreshModelNG::SetChangeEvent(frameNode, nullptr);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

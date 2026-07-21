@@ -20,7 +20,7 @@
 #include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class ACE_FORCE_EXPORT ScrollBarAccessibilityProperty : public AccessibilityProperty {
+class ScrollBarAccessibilityProperty : public AccessibilityProperty {
     DECLARE_ACE_TYPE(ScrollBarAccessibilityProperty, AccessibilityProperty);
 
 public:

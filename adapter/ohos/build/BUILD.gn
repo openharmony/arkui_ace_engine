@@ -54,25 +54,13 @@ component_modules = [
   "dialog",
   "image_animator",
   "date_picker",
-  "lazy_grid_layout",
-  "refresh",
   "text_picker",
   "select",
-  "grid",
   "bubble",
 ]
 
 if (!ace_engine_feature_wearable) {
     component_modules += [ "folder_stack", ]
-}
-
-# ArcList/ArcScrollBar split SOs (libarclist.z.so / libarcscrollbar.z.so) are
-# built only for cross-platform (arkuiX); other builds keep them in the main SO.
-if (is_arkui_x) {
-    component_modules += [
-        "arc_list",
-        "arc_scroll_bar",
-    ]
 }
 
 component_modules_libs = []

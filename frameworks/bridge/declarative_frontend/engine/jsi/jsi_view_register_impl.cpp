@@ -63,8 +63,10 @@
 #include "bridge/declarative_frontend/jsview/js_form_button.h"
 #endif
 #include "bridge/declarative_frontend/jsview/js_form_link.h"
+#include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "bridge/declarative_frontend/jsview/js_grid_col.h"
 #include "bridge/declarative_frontend/jsview/js_grid_container.h"
+#include "bridge/declarative_frontend/jsview/js_grid_item.h"
 #include "bridge/declarative_frontend/jsview/js_grid_row.h"
 #include "bridge/declarative_frontend/jsview/js_if_else.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
@@ -75,6 +77,7 @@
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
+#include "bridge/declarative_frontend/jsview/js_lazy_grid.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "bridge/declarative_frontend/jsview/js_linear_indicator.h"
@@ -106,6 +109,7 @@
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
 #include "bridge/declarative_frontend/jsview/js_with_env.h"
+#include "bridge/declarative_frontend/jsview/js_refresh.h"
 #include "bridge/declarative_frontend/jsview/js_relative_container.h"
 #include "bridge/declarative_frontend/jsview/js_repeat.h"
 #include "bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
@@ -515,6 +519,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextLayout", JSTextLayout::JSBind },
     { "Canvas", JSCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
+    { "LazyVGridLayout", JSLazyVGridLayout::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
     { "ListItemGroup", JSListItemGroup::JSBind },
@@ -522,6 +527,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Image", JSImage::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
+    { "Grid", JSGrid::JSBind },
+    { "GridItem", JSGridItem::JSBind },
     { "GridContainer", JSGridContainer::JSBind },
     { "Stack", JSStack::JSBind },
     { "ForEach", JSForEach::JSBind },
@@ -652,6 +659,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },
     { "TextTimerController", JSTextTimerController::JSBind },
+    { "Refresh", JSRefresh::JSBind },
     { "NativeWaterFlowSection", JSWaterFlowSectionsBinding::JSBind },
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },

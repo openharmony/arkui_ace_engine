@@ -16,13 +16,13 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -714,9 +714,9 @@ void LazyForEachNode::InitDragManager(const RefPtr<FrameNode>& childNode)
         CHECK_NULL_VOID(pattern);
         pattern->InitDragManager(AceType::Claim(this));
     } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-        auto pattern = NodeModifier::GetGridItemCustomModifier();
+        auto pattern = childNode->GetPattern<GridItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->initDragManager(childNode, AceType::Claim(this));
+        pattern->InitDragManager(AceType::Claim(this));
     }
 }
 
@@ -748,14 +748,14 @@ void LazyForEachNode::InitAllChilrenDragManager(bool init)
                 pattern->DeInitDragManager();
             }
         } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-            auto pattern = NodeModifier::GetGridItemCustomModifier();
+            auto pattern = item->GetPattern<GridItemPattern>();
             if (!pattern) {
                 continue;
             }
             if (init) {
-                pattern->initDragManager(item, AceType::Claim(this));
+                pattern->InitDragManager(AceType::Claim(this));
             } else {
-                pattern->deInitDragManager(item);
+                pattern->DeInitDragManager();
             }
         }
     }

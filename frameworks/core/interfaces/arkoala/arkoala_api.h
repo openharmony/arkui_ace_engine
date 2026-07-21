@@ -4681,16 +4681,13 @@ struct ArkUIListModifier {
     void (*setBackPressCloseSwipeAction)(ArkUINodeHandle node, ArkUI_Bool closeSwipeAction);
     void (*resetBackPressCloseSwipeAction)(ArkUINodeHandle node);
     ArkUI_Bool (*getBackPressCloseSwipeAction)(ArkUINodeHandle node);
-    ArkUI_Bool (*getChainAnimation)(ArkUINodeHandle node);
-};
-
-struct ArkUIArcListModifier {
     void (*setDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 sensitivity);
     ArkUI_Int32 (*getDigitalCrownSensitivity)(ArkUINodeHandle node);
     void (*resetDigitalCrownSensitivity)(ArkUINodeHandle node);
     void (*setArcListHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
     ArkUINodeHandle (*getArcListHeader)(ArkUINodeHandle node);
     void (*resetArcListHeader)(ArkUINodeHandle node);
+    ArkUI_Bool (*getChainAnimation)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -4967,7 +4964,6 @@ struct ArkUINodeContainerModifier {
 };
 
 struct ArkUILazyGridLayoutModifier {
-    void (*create)();
     void (*setColumnsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap);
     void (*resetColumnsGap)(ArkUINodeHandle node);
     void (*setRowsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* rowsGap);
@@ -5142,18 +5138,14 @@ struct ArkUIGridModifier {
     void (*resetGridRowsTemplate)(ArkUINodeHandle node);
     void (*setGridColumnsGap)(
         ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap, void* columnGapRawPtr);
-    void (*setGridColumnsGapByJs)(
-        ArkUINodeHandle node, const struct ArkUIResourceLength* columnsGap, void* columnGapRawPtr);
     void (*resetGridColumnsGap)(ArkUINodeHandle node);
     void (*setGridRowsGap)(ArkUINodeHandle node, const struct ArkUIResourceLength* rowsGap, void* rowsGapRawPtr);
-    void (*setGridRowsGapByJs)(ArkUINodeHandle node, const struct ArkUIResourceLength* rowsGap, void* rowsGapRawPtr);
     void (*resetGridRowsGap)(ArkUINodeHandle node);
     void (*setGridScrollBar)(ArkUINodeHandle node, ArkUI_Int32 scrollBar);
     void (*resetGridScrollBar)(ArkUINodeHandle node);
     ArkUI_Int32 (*getGridScrollBar)(ArkUINodeHandle node);
     void (*setGridScrollBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetGridScrollBarWidth)(ArkUINodeHandle node);
-    void (*setScrollBarWidthString)(ArkUINodeHandle node, ArkUI_CharPtr scrollBarWidthStr);
     ArkUI_Float32 (*getGridScrollBarWidth)(ArkUINodeHandle node);
     void (*setGridScrollBarWidthResObj)(ArkUINodeHandle node, ArkUI_VoidPtr resObjRawPtr);
     void (*setGridScrollBarColor)(ArkUINodeHandle node, ArkUI_Uint32 scrollBarColor);
@@ -5212,7 +5204,7 @@ struct ArkUIGridModifier {
     void (*setSyncLoad)(ArkUINodeHandle node, ArkUI_Bool syncLoad);
     void (*resetSyncLoad)(ArkUINodeHandle node);
     ArkUI_Bool (*getSyncLoad)(ArkUINodeHandle node);
-    void (*setEditModeOptions)(ArkUINodeHandle node, void* options);
+    void (*setEditModeOptions)(ArkUINodeHandle node, ArkUIEditModeOptions options);
     void (*resetEditModeOptions)(ArkUINodeHandle node);
     void (*getEditModeOptions)(ArkUINodeHandle node, ArkUI_Int32 (*values)[3]);
     void (*setGridFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
@@ -5222,12 +5214,6 @@ struct ArkUIGridModifier {
     void (*resetOnGridScrollIndex)(ArkUINodeHandle node);
     void (*setOnGridScrollBarUpdateCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnGridScrollBarUpdate)(ArkUINodeHandle node);
-    void (*setOnGridScroll)(ArkUINodeHandle node, void* callback);
-    void (*setOnGridReachStart)(ArkUINodeHandle node, void* callback);
-    void (*setOnGridReachEnd)(ArkUINodeHandle node, void* callback);
-    void (*setOnGridScrollStart)(ArkUINodeHandle node, void* callback);
-    void (*setOnGridScrollStop)(ArkUINodeHandle node, void* callback);
-    void (*setOnGridScrollFrameBegin)(ArkUINodeHandle node, void* callback);
     void (*setOnGridItemDragStart)(ArkUINodeHandle node, void* callback);
     void (*resetOnGridItemDragStart)(ArkUINodeHandle node);
     void (*setOnGridItemDragEnter)(ArkUINodeHandle node, void* callback);
@@ -5262,22 +5248,6 @@ struct ArkUIGridModifier {
     ArkUI_Bool (*getGridEnableEditMode)(ArkUINodeHandle node);
     void (*setOnGridEditModeChangeCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnGridEditModeChange)(ArkUINodeHandle node);
-    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
-    void (*create)(void* controller, void* proxy);
-    void* (*createPositionController)();
-    void* (*createScrollBarProxy)();
-    void* (*getEventSetHandler)(uint32_t kind);
-    void* (*getEventResetHandler)(uint32_t kind);
-    void (*initScroller)(ArkUINodeHandle node, void* controller, void* proxy);
-    void (*setLayoutOptions)(ArkUINodeHandle node, void* option);
-    void (*popGrid)();
-    ArkUI_Int32 (*getDisplayMode)(ArkUINodeHandle node);
-    void (*setEnableEditMode)(ArkUINodeHandle node, ArkUI_Bool enable);
-    void (*setEnableEditModeChangeEvent)(ArkUINodeHandle node, void* event);
-    void (*setSupportDragAnimation)(ArkUINodeHandle node, ArkUI_Bool support);
-    void (*setDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
-    void (*setHeight)(ArkUINodeHandle node, ArkUI_Float64 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue);
-    void (*setOnScrollToIndex)(ArkUINodeHandle node, void* callback);
 };
 
 struct ArkUIGridItemModifier {
@@ -5302,16 +5272,6 @@ struct ArkUIGridItemModifier {
     void (*resetGridItemOnSelect)(ArkUINodeHandle node);
     void (*setOnGridItemSelect)(ArkUINodeHandle node, void* extraParam);
     void (*resetOnGridItemSelect)(ArkUINodeHandle node);
-    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
-    void (*createStyle)(ArkUI_Int32 style);
-    void (*create)(void* deepRenderFunc, ArkUI_Bool isLazy, ArkUI_Int32 style);
-    void* (*getEventSetHandler)(uint32_t kind);
-    void* (*getEventResetHandler)(uint32_t kind);
-    void (*setForceRebuild)(ArkUINodeHandle node, ArkUI_Bool forceRebuild);
-    void (*setWidthImpl)(ArkUI_CharPtr str, ArkUI_Float64 val, ArkUI_Int32 unit);
-    void (*setHeightImpl)(ArkUI_CharPtr str, ArkUI_Float64 val, ArkUI_Int32 unit);
-    void (*setSelectChangeEvent)(ArkUINodeHandle node, void* selectChangeEvent);
-    void (*bindContextMenu)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollableModifier {
@@ -5487,9 +5447,6 @@ struct ArkUIListItemModifier {
     void (*resetListItemStyle)(ArkUINodeHandle node);
     ArkUI_Int32 (*expand)(ArkUINodeHandle node, ArkUI_Int32 direction);
     ArkUI_Int32 (*collapse)(ArkUINodeHandle node);
-};
-
-struct ArkUIArcListItemModifier {
     void (*setAutoScale)(ArkUINodeHandle node, ArkUI_Bool autoScale);
     ArkUI_Bool (*getAutoScale)(ArkUINodeHandle node);
     void (*resetAutoScale)(ArkUINodeHandle node);
@@ -5509,10 +5466,6 @@ struct ArkUIScrollBarModifier {
     void (*setScrollBarScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetScrollBarScrollBarColor)(ArkUINodeHandle node);
     void (*createScrollBarScrollBarColorWithResourceObj)(ArkUINodeHandle node, void* colorRawPtr);
-};
-
-struct ArkUIArcScrollBarModifier {
-    void* reserved;
 };
 
 struct ArkUIScrollerModifier {
@@ -7539,21 +7492,6 @@ struct ArkUIRefreshModifier {
     void (*setOnStepOffsetChangeCallback)(ArkUINodeHandle node,
         void (*callback)(const ArkUI_Float32 offset, void* extraData, const bool isDrag), void* extraData);
     void (*resetOnStepOffsetChangeCallback)(ArkUINodeHandle node);
-    ArkUINodeHandle (*createRefreshFrameNode)(ArkUI_Uint32 nodeId);
-    void (*initCoordinationEvent)(ArkUINodeHandle node, void* callback);
-    void (*setFriction)(ArkUINodeHandle node, ArkUI_Float32 friction);
-    void (*resetFriction)(ArkUINodeHandle node);
-    void (*setOnChangeEvent)(ArkUINodeHandle node, void* callback);
-    void (*resetOnChangeEvent)(ArkUINodeHandle node);
-    void (*setBuilder)(ArkUINodeHandle node, void* callback);
-    void (*resetBuilder)(ArkUINodeHandle node);
-    void (*createRefresh)();
-    void (*setIsCustomBuilderExist)(ArkUINodeHandle node, ArkUI_Bool isExist);
-    void (*resetIsCustomBuilderExist)(ArkUINodeHandle node);
-    void (*setLoadingText)(ArkUINodeHandle node, const char* text, ArkUI_VoidPtr resObjRawPtr);
-    void (*resetLoadingText)(ArkUINodeHandle node);
-    void (*setIndicatorOffset)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_VoidPtr resObjRawPtr);
-    void (*resetIndicatorOffset)(ArkUINodeHandle node);
 };
 
 struct ArkUIHyperlinkModifier {
@@ -9999,9 +9937,6 @@ struct ArkUINodeModifiers {
     const ArkUILazyWaterFlowLayoutModifier* (*getLazyWaterFlowLayoutModifier)();
     const ArkUIMaterialModifier* (*getMaterialModifier)();
     const ArkUISelectionContainerModifier* (*getSelectionContainerModifier)();
-    const ArkUIArcListModifier* (*getArcListModifier)();
-    const ArkUIArcListItemModifier* (*getArcListItemModifier)();
-    const ArkUIArcScrollBarModifier* (*getArcScrollBarModifier)();
 };
 
 // same as inner defines in property.h

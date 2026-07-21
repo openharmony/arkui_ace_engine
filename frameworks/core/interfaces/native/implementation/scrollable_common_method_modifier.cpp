@@ -29,7 +29,6 @@
 #include "arkoala_api_generated.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
-#include "core/interfaces/native/node/grid_modifier.h"
 
 #include "rect_shape_peer.h"
 
@@ -159,9 +158,7 @@ void SetEnableScrollInteractionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(layoutProp);
     const auto id = AceType::TypeId(layoutProp);
     if (GridLayoutProperty::TypeId() == id) {
-        auto* modifier = NG::NodeModifier::GetGridModifier();
-        CHECK_NULL_VOID(modifier);
-        modifier->setEnableScroll(reinterpret_cast<ArkUINodeHandle>(frameNode), convValue.value_or(true));
+        GridModelNG::SetScrollEnabled(frameNode, convValue.value_or(true));
     } else if (ListLayoutProperty::TypeId() == id) {
         ListModelNG::SetScrollEnabled(frameNode, convValue.value_or(true));
     } else if (ScrollLayoutProperty::TypeId() == id) {

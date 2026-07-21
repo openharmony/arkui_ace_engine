@@ -37,12 +37,20 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_FORCE_EXPORT ScrollBarPattern : public Pattern {
+class ScrollBarPattern : public Pattern {
     DECLARE_ACE_TYPE(ScrollBarPattern, Pattern);
 
 public:
     ScrollBarPattern() = default;
-    ~ScrollBarPattern() override;
+    ~ScrollBarPattern() override
+    {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->UnRegisterScrollBar(AceType::WeakClaim(this));
+        }
+        scrollBarProxy_ = nullptr;
+        scrollableEvent_ = nullptr;
+        disappearAnimation_ = nullptr;
+    }
 
     bool IsAtomicNode() const override
     {

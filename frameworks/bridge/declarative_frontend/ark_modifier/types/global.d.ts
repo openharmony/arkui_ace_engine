@@ -117,10 +117,6 @@ interface ImageAnimatorComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
-interface LazyVGridLayoutComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
 interface LoadingProgressComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -170,10 +166,6 @@ interface ImageSpanComponentModule {
 }
 
 interface RowSplitComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
-interface RefreshComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
@@ -237,14 +229,6 @@ interface WaterFlowComponentModule {
 }
 
 interface TextPickerComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
-interface GridComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
-interface GridItemComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 

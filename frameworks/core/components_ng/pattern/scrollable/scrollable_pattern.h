@@ -796,7 +796,7 @@ public:
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
-    ACE_FORCE_EXPORT void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
+    void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
 
     Axis GetScrollablePanDirection()
     {
@@ -852,8 +852,8 @@ public:
 
     PositionMode GetPositionMode();
 
-    ACE_FORCE_EXPORT void HandleMoveEventInComp(const PointF& point, bool needExpandHotZone = false);
-    ACE_FORCE_EXPORT void HandleLeaveHotzoneEvent();
+    void HandleMoveEventInComp(const PointF& point, bool needExpandHotZone = false);
+    void HandleLeaveHotzoneEvent();
     void SetHotZoneScrollCallback(std::function<void(void)>&& func)
     {
         hotZoneScrollCallback_ = func;
@@ -1025,14 +1025,14 @@ public:
     }
     void ProcessScrollOverDrag(double velocity, bool isNestScroller);
 
-    ACE_FORCE_EXPORT static double GetDefaultFriction();
+    static double GetDefaultFriction();
 
     void SetCanOverScroll(bool val);
 
     void ContentChangeReport(
         const RefPtr<FrameNode>& keyNode, uint32_t type = ContentChangeManager::NONE);
 
-    ACE_FORCE_EXPORT void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
+    void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
 
     bool EnableCachePredictNodes() const override
     {
@@ -1040,7 +1040,7 @@ public:
     }
 
 protected:
-    ACE_FORCE_EXPORT void SuggestOpIncGroup(bool flag);
+    void SuggestOpIncGroup(bool flag);
     void OnAttachToFrameNode() override;
     void OnAttachToFrameNodeMultiThread();
     void OnAttachToMainTreeMultiThread();
