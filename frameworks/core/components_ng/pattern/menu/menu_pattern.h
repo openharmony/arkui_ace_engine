@@ -865,6 +865,7 @@ public:
     }
 
     OffsetF GetAdjustedExtensionMenuPosition(const OffsetF& menuPosition);
+    Offset GetTransformCenter() const;
 protected:
     void UpdateMenuItemChildren(const RefPtr<UINode>& host, RefPtr<UINode>& previousNode, int32_t currentIndex = 0);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
@@ -909,7 +910,6 @@ private:
 
     void DisableTabInMenu();
 
-    Offset GetTransformCenter() const;
     OffsetF GetPreviewMenuAnimationOffset(const OffsetF& previewCenter, const SizeF& previewSize, float scale) const;
     void ShowPreviewMenuAnimation();
     void ShowPreviewMenuMaterialAnimation(int32_t delay = 0);

@@ -123,6 +123,11 @@ public:
         menuPlacement_ = placement;
     }
 
+    Placement GetMenuPlacement() const
+    {
+        return menuPlacement_;
+    }
+
     void SetFirstShow()
     {
         isFirstShow_ = true;
