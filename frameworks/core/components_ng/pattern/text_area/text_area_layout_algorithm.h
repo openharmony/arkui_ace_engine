@@ -18,7 +18,7 @@
 
 #include "core/components_ng/pattern/text_field/text_field_layout_algorithm.h"
 namespace OHOS::Ace::NG {
-class ACE_FORCE_EXPORT TextAreaLayoutAlgorithm : public TextFieldLayoutAlgorithm {
+class TextAreaLayoutAlgorithm : public TextFieldLayoutAlgorithm {
     DECLARE_ACE_TYPE(TextAreaLayoutAlgorithm, TextFieldLayoutAlgorithm);
 
 public:

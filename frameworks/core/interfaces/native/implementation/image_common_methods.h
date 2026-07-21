@@ -24,12 +24,11 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageCommonMethods {
-// similar as in the js_image.cpp
+// similar as in the js_image.cpp/js_image_span.cpp
 const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
     1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0
 };
 
-ACE_FORCE_EXPORT void ApplyColorFilterValues(
-    Ark_NativePointer node, const Opt_Union_ColorFilter_drawing_ColorFilter* value);
+void ApplyColorFilterValues(Ark_NativePointer node, const Opt_Union_ColorFilter_drawing_ColorFilter* value);
 } // namespace ImageCommonMethods
 } // namespace OHOS::Ace::NG::GeneratedModifier

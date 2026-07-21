@@ -101,16 +101,10 @@ foreach(item, arkui_modules) {
 # Special components (directly referenced from ark_direct_component)
 # TODO: Unify arkui_modules and special_components arrays in future refactoring
 special_components = [
-  "arkimagespan",
   "arkgauge",
-  "arkbadge",
   "arkdatapanel",
   "arktextclock",
-  "arkloadingprogress",
-  "arkprogress",
-  "arktexttimer",
   "arkpatternlock",
-  "arksymbolspan",
   "arkcounter",
   "arktoggle",
   "arkimageanimator",
@@ -118,8 +112,6 @@ special_components = [
   "arktextpicker",
   "arkselect",
   "arkbutton",
-  "arktextinput",
-  "arktextarea",
 ]
 
 if (qrcodegen_support) {

@@ -23,15 +23,6 @@ ohos_abc("arkgauge") {
   part_name = ace_engine_part
 }
 
-ohos_abc("arkimagespan") {
-  sources = [ "./src/arkimagespan.ts" ]
-  output_name = "arkimagespan"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
 ohos_abc("arktabs") {
   sources = [ "./src/arktabs.ts" ]
   output_name = "arktabs"
@@ -86,36 +77,9 @@ ohos_abc("arktextclock") {
   part_name = ace_engine_part
 }
 
-ohos_abc("arkprogress") {
-  sources = [ "./src/arkprogress.ts" ]
-  output_name = "arkprogress"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("arktexttimer") {
-  sources = [ "./src/arktexttimer.ts" ]
-  output_name = "arktexttimer"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
 ohos_abc("arkpatternlock") {
   sources = [ "./src/arkpatternlock.ts" ]
   output_name = "arkpatternlock"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("arksymbolspan") {
-  sources = [ "./src/arksymbolspan.ts" ]
-  output_name = "arksymbolspan"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem
@@ -140,15 +104,6 @@ ohos_abc("arkqrcode") {
   part_name = ace_engine_part
 }
 
-ohos_abc("arkloadingprogress") {
-  sources = [ "./src/arkloadingprogress.ts" ]
-  output_name = "arkloadingprogress"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
 ohos_abc("arkbutton") {
   sources = [ "./src/arkbutton.ts" ]
   output_name = "arkbutton"
@@ -160,15 +115,6 @@ ohos_abc("arkbutton") {
 ohos_abc("arktoggle") {
   sources = [ "./src/arktoggle.ts" ]
   output_name = "arktoggle"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("arkbadge") {
-  sources = [ "./src/arkbadge.ts" ]
-  output_name = "arkbadge"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem
@@ -223,24 +169,6 @@ ohos_abc("arktextpicker") {
 ohos_abc("arkselect") {
   sources = [ "./src/arkselect.ts" ]
   output_name = "arkselect"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("arktextinput") {
-  sources = [ "./src/arktextinput.ts" ]
-  output_name = "arktextinput"
-  install_images = [ "system" ]
-  module_install_dir = "etc/abc/arkui/components"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
-}
-
-ohos_abc("arktextarea") {
-  sources = [ "./src/arktextarea.ts" ]
-  output_name = "arktextarea"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem

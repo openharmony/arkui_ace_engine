@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,27 +19,10 @@
 #include <string>
 #include "cj_lambda.h"
 #include "bridge/common/utils/utils.h"
-#include "core/common/dynamic_module_helper.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
-
-namespace OHOS::Ace {
-
-NG::TextTimerModelNG* GetTextTimerModel()
-{
-    static NG::TextTimerModelNG* cachedModel = nullptr;
-    if (cachedModel == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextTimer");
-        if (module == nullptr || module->GetModel() == nullptr) {
-            LOGF_ABORT("Can't find text timer dynamic module");
-        }
-        cachedModel = reinterpret_cast<NG::TextTimerModelNG*>(module->GetModel());
-    }
-    return cachedModel;
-}
-} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -101,12 +84,12 @@ void FfiTextTimerVectorNativeTextShadowDelete(VectorNativeTextTimerShadow vec)
 
 void FfiOHOSAceFrameworkTextTimerCreate(bool isCountDown, int64_t count, int64_t controllerId)
 {
-    auto textTimer = GetTextTimerModel()->Create();
+    auto textTimer = TextTimerModel::GetInstance()->Create();
 
-    GetTextTimerModel()->SetIsCountDown(isCountDown);
+    TextTimerModel::GetInstance()->SetIsCountDown(isCountDown);
     if (isCountDown) {
         if (count > 0 && count < MAX_COUNT_DOWN) {
-            GetTextTimerModel()->SetInputCount(count);
+            TextTimerModel::GetInstance()->SetInputCount(count);
         } else {
             LOGE("Parameter out of range, use default value.");
         }
@@ -130,7 +113,7 @@ void FfiOHOSAceFrameworkTextTimerSetFormat(const char* value)
             LOGE("The arg is wrong, because of format matching error.");
             return;
         }
-        GetTextTimerModel()->SetFormat(valueString);
+        TextTimerModel::GetInstance()->SetFormat(valueString);
         return;
     }
 
@@ -151,23 +134,23 @@ void FfiOHOSAceFrameworkTextTimerSetFormat(const char* value)
     if (pos != std::string::npos) {
         format.replace(pos, sizeof("hh") - 1, "HH");
     }
-    GetTextTimerModel()->SetFormat(format);
+    TextTimerModel::GetInstance()->SetFormat(format);
 }
 
 void FfiOHOSAceFrameworkTextTimerSetFontSize(double fontSize, int32_t unit)
 {
     Dimension value(fontSize, static_cast<DimensionUnit>(unit));
-    GetTextTimerModel()->SetFontSize(value);
+    TextTimerModel::GetInstance()->SetFontSize(value);
 }
 
 void FfiOHOSAceFrameworkTextTimerSetFontWeight(const char* fontWeight)
 {
-    GetTextTimerModel()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
+    TextTimerModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(fontWeight));
 }
 
 void FfiOHOSAceFrameworkTextTimerSetFontColor(uint32_t textColor)
 {
-    GetTextTimerModel()->SetTextColor(Color(textColor));
+    TextTimerModel::GetInstance()->SetTextColor(Color(textColor));
 }
 
 void FfiOHOSAceFrameworkTextTimerResetFontColor()
@@ -177,7 +160,7 @@ void FfiOHOSAceFrameworkTextTimerResetFontColor()
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     Color textColor = theme->GetTextStyle().GetTextColor();
-    GetTextTimerModel()->SetTextColor(textColor);
+    TextTimerModel::GetInstance()->SetTextColor(textColor);
 }
 
 void FfiOHOSAceFrameworkTextTimerSetFontStyle(int32_t fontStyle)
@@ -186,14 +169,14 @@ void FfiOHOSAceFrameworkTextTimerSetFontStyle(int32_t fontStyle)
         LOGE("invalid value for font style");
         return;
     }
-    GetTextTimerModel()->SetItalicFontStyle(FONT_STYLES[fontStyle]);
+    TextTimerModel::GetInstance()->SetItalicFontStyle(FONT_STYLES[fontStyle]);
 }
 
 void FfiOHOSAceFrameworkTextTimerSetFontFamily(const char* fontFamily)
 {
     std::vector<std::string> fontFamilies;
     fontFamilies = ConvertStrToFontFamilies(fontFamily);
-    GetTextTimerModel()->SetFontFamily(fontFamilies);
+    TextTimerModel::GetInstance()->SetFontFamily(fontFamilies);
 }
 
 void FfiOHOSAceFrameworkTextTimerSetTextShadow(VectorStringPtr vecContent)
@@ -213,14 +196,14 @@ void FfiOHOSAceFrameworkTextTimerSetTextShadow(VectorStringPtr vecContent)
         shadows[i].SetShadowType(nativeTextShadowVec[i].type == 0 ? ShadowType::COLOR : ShadowType::BLUR);
     }
     
-    GetTextTimerModel()->SetTextShadow(shadows);
+    TextTimerModel::GetInstance()->SetTextShadow(shadows);
 }
 
 void FfiOHOSAceFrameworkTextTimerSetOnTimer(void (*callback)(int64_t utc, int64_t elapsedTime))
 {
     auto lambda = [lambda = CJLambda::Create(callback)](const long utc,
                       const long elapsedTime) -> void { lambda(utc, elapsedTime); };
-    GetTextTimerModel()->SetOnTimer(lambda);
+    TextTimerModel::GetInstance()->SetOnTimer(lambda);
 }
 
 int64_t FfiOHOSAceFrameworkTextTimerControllerCtor()

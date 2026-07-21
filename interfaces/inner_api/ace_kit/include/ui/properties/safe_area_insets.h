@@ -18,7 +18,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "ui/base/macros.h"
 
 #include "ui/base/macros.h"
 
@@ -69,7 +68,7 @@ struct SafeAreaInsets {
          * @param other The other inset to combine with.
          * @return The combined inset.
          */
-        ACE_FORCE_EXPORT Inset Combine(const Inset& other) const;
+        Inset Combine(const Inset& other) const;
 
         bool operator==(const Inset& other) const
         {

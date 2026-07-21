@@ -22,9 +22,6 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
 
 namespace OHOS::Ace::NG {
-
-const char LOADING_PROGRESS_ETS_TAG[] = "LoadingProgress";
-
 class LoadingProgressConfiguration : public CommonConfiguration {
 public:
     LoadingProgressConfiguration(bool enableloading, bool enabled)
@@ -34,7 +31,7 @@ public:
 };
 using LoadingProgressMakeCallback =
     std::function<RefPtr<FrameNode>(const LoadingProgressConfiguration& loadingProgressConfiguration)>;
-class ACE_FORCE_EXPORT LoadingProgressModelNG : public OHOS::Ace::LoadingProgressModel {
+class ACE_EXPORT LoadingProgressModelNG : public OHOS::Ace::LoadingProgressModel {
 public:
     void Create() override;
     void SetColor(const Color& value) override;
@@ -45,7 +42,6 @@ public:
     void CreateWithResourceObj(
         LoadingProgressResourceType LoadingProgressResourceType, const RefPtr<ResourceObject>& resObj) override;
 
-    static void CreateModel();
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static uint32_t GetColor(FrameNode* frameNode);
     static void SetColor(FrameNode* frameNode, const Color& value);
@@ -55,7 +51,6 @@ public:
     static void SetForegroundColor(FrameNode* frameNode, const Color& value);
     static void SetBuilderFunc(FrameNode* frameNode, NG::LoadingProgressMakeCallback&& jsMake);
     static void ResetColor(FrameNode* frameNode);
-    static void ResetColor(FrameNode* frameNode, bool isJsView);
     static void ResetForegroundColor(FrameNode* frameNode);
     static void SetForegroundColorParseFailed(FrameNode* frameNode, bool isParseFailed);
     static void CreateWithResourceObj(FrameNode* frameNode, LoadingProgressResourceType LoadingProgressResourceType,
