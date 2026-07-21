@@ -27,6 +27,7 @@
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -38,6 +39,8 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/property/geometry_property.h"
+#include "core/components/theme/shadow_theme.h"
+#include "ui/properties/ui_material.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "ui/gestures/gesture_event.h"
 
@@ -1420,6 +1423,462 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetSelectMenuWidthFromThemeTest003, Te
     auto width = menuPattern_->GetSelectMenuWidthFromTheme();
     float expectedWidth = (56.0f + 8.0f);
     EXPECT_FLOAT_EQ(width, expectedWidth);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdateTest001
+ * @tc.desc: Test OnColorConfigurationUpdate for loop with option that has MenuItemPattern.
+ *           Covers: if (!optionsPattern) branch = false (has pattern → SetFontColor).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnColorConfigurationUpdateTest001, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+    menuPattern_->SetIsSelectMenu(false);
+
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuPattern_->AddOptionNode(menuItemNode);
+
+    menuPattern_->OnColorConfigurationUpdate();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdateTest002
+ * @tc.desc: Test OnColorConfigurationUpdate for loop with option that has NO MenuItemPattern.
+ *           Covers: if (!optionsPattern) branch = true (no pattern → continue).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnColorConfigurationUpdateTest002, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+    menuPattern_->SetIsSelectMenu(false);
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    menuPattern_->AddOptionNode(textNode);
+
+    menuPattern_->OnColorConfigurationUpdate();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdateTest003
+ * @tc.desc: Test OnColorConfigurationUpdate for loop with mixed options (with and without MenuItemPattern).
+ *           Covers: both if (!optionsPattern) true and false in one for loop iteration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnColorConfigurationUpdateTest003, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+    menuPattern_->SetIsSelectMenu(false);
+
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuPattern_->AddOptionNode(menuItemNode);
+
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    menuPattern_->AddOptionNode(textNode);
+
+    menuPattern_->OnColorConfigurationUpdate();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdateTest004
+ * @tc.desc: Test OnColorConfigurationUpdate when isSelectMenu=true and ConfigChangePerform=true.
+ *           Covers: else if (SystemProperties::ConfigChangePerform()) branch = true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnColorConfigurationUpdateTest004, TestSize.Level1)
+{
+    bool savedConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = true;
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+    menuPattern_->SetIsSelectMenu(true);
+
+    menuPattern_->OnColorConfigurationUpdate();
+    EXPECT_TRUE(g_isConfigChangePerform);
+
+    g_isConfigChangePerform = savedConfigChangePerform;
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdateTest005
+ * @tc.desc: Test OnColorConfigurationUpdate when isSelectMenu=true and ConfigChangePerform=false.
+ *           Covers: neither if(!isSelectMenu_) nor else-if branch (both skipped).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnColorConfigurationUpdateTest005, TestSize.Level1)
+{
+    bool savedConfigChangePerform = g_isConfigChangePerform;
+    g_isConfigChangePerform = false;
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+    menuPattern_->SetIsSelectMenu(true);
+
+    menuPattern_->OnColorConfigurationUpdate();
+    EXPECT_FALSE(g_isConfigChangePerform);
+
+    g_isConfigChangePerform = savedConfigChangePerform;
+}
+
+/**
+ * @tc.name: ApplyDesktopMenuThemeTest001
+ * @tc.desc: Test ApplyDesktopMenuTheme when ShouldUpdateShadow()=true and GetShadowFromTheme()=true.
+ *           Covers: if (ShouldUpdateShadow() && GetShadowFromTheme(...)) = true && true → if body entered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, ApplyDesktopMenuThemeTest001, TestSize.Level1)
+{
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto shadowTheme = AceType::MakeRefPtr<ShadowTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(shadowTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(shadowTheme));
+
+    auto innerMenuPattern = AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, EMPTY_TEXT, TYPE);
+    ASSERT_NE(innerMenuPattern, nullptr);
+    menuFrameNode_ = FrameNode::CreateFrameNode(
+        V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(), innerMenuPattern);
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    innerMenuPattern->ApplyDesktopMenuTheme();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: ApplyDesktopMenuThemeTest002
+ * @tc.desc: Test ApplyDesktopMenuTheme when ShouldUpdateShadow()=true and GetShadowFromTheme()=false.
+ *           Covers: if (ShouldUpdateShadow() && GetShadowFromTheme(...)) = true && false → if body not entered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, ApplyDesktopMenuThemeTest002, TestSize.Level1)
+{
+    auto innerMenuPattern = AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, EMPTY_TEXT, TYPE);
+    ASSERT_NE(innerMenuPattern, nullptr);
+    menuFrameNode_ = FrameNode::CreateFrameNode(
+        V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(), innerMenuPattern);
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    innerMenuPattern->ApplyDesktopMenuTheme();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: ApplyDesktopMenuThemeTest003
+ * @tc.desc: Test ApplyDesktopMenuTheme when ShouldUpdateShadow()=false (material with SEMI_TRANSPARENT type).
+ *           Covers: if (ShouldUpdateShadow() && GetShadowFromTheme(...)) = false (short-circuit).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, ApplyDesktopMenuThemeTest003, TestSize.Level1)
+{
+    auto wrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(TARGET_ID));
+    ASSERT_NE(wrapperNode, nullptr);
+    auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(wrapperPattern, nullptr);
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    MenuParam menuParam;
+    menuParam.systemMaterial = material;
+    wrapperPattern->menuParam_ = menuParam;
+
+    auto innerMenuPattern = AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, EMPTY_TEXT, TYPE);
+    ASSERT_NE(innerMenuPattern, nullptr);
+    menuFrameNode_ = FrameNode::CreateFrameNode(
+        V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(), innerMenuPattern);
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuFrameNode_->MountToParent(wrapperNode);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    innerMenuPattern->ApplyDesktopMenuTheme();
+    SUCCEED();
+}
+
+/**
+ * @tc.name: GetFirstMenuItemTest001
+ * @tc.desc: Test GetFirstMenuItem inner if: child non-null && tag==JS_VIEW (true && true).
+ *           Tree: host → JS_VIEW → JS_VIEW → MENU_ITEM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetFirstMenuItemTest001, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto jsView1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(jsView1, nullptr);
+    jsView1->MountToParent(menuFrameNode_);
+
+    auto jsView2 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(jsView2, nullptr);
+    jsView2->MountToParent(jsView1);
+
+    auto menuItem = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuItem, nullptr);
+    menuItem->MountToParent(jsView2);
+
+    auto result = menuPattern_->GetFirstMenuItem();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetTag(), std::string(V2::MENU_ITEM_ETS_TAG));
+}
+
+/**
+ * @tc.name: GetFirstMenuItemTest002
+ * @tc.desc: Test GetFirstMenuItem inner if: child non-null && tag!=JS_VIEW (true && false).
+ *           Tree: host → JS_VIEW → MENU_ITEM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetFirstMenuItemTest002, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto jsView = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(jsView, nullptr);
+    jsView->MountToParent(menuFrameNode_);
+
+    auto menuItem = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuItem, nullptr);
+    menuItem->MountToParent(jsView);
+
+    auto result = menuPattern_->GetFirstMenuItem();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetTag(), std::string(V2::MENU_ITEM_ETS_TAG));
+}
+
+/**
+ * @tc.name: GetFirstMenuItemTest003
+ * @tc.desc: Test GetFirstMenuItem inner if: child null (false, short-circuit).
+ *           Tree: host → JS_VIEW (no children).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetFirstMenuItemTest003, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto jsView = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(jsView, nullptr);
+    jsView->MountToParent(menuFrameNode_);
+
+    auto result = menuPattern_->GetFirstMenuItem();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: GetLastMenuItemTest001
+ * @tc.desc: Test GetLastMenuItem inner if: child non-null && tag==JS_VIEW (true && true).
+ *           Tree: host → JS_VIEW → JS_VIEW → MENU_ITEM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetLastMenuItemTest001, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto jsView1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(jsView1, nullptr);
+    jsView1->MountToParent(menuFrameNode_);
+
+    auto jsView2 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(jsView2, nullptr);
+    jsView2->MountToParent(jsView1);
+
+    auto menuItem = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuItem, nullptr);
+    menuItem->MountToParent(jsView2);
+
+    auto result = menuPattern_->GetLastMenuItem();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetTag(), std::string(V2::MENU_ITEM_ETS_TAG));
+}
+
+/**
+ * @tc.name: GetLastMenuItemTest002
+ * @tc.desc: Test GetLastMenuItem inner if: child non-null && tag!=JS_VIEW (true && false).
+ *           Tree: host → JS_VIEW → MENU_ITEM.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetLastMenuItemTest002, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto jsView = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(jsView, nullptr);
+    jsView->MountToParent(menuFrameNode_);
+
+    auto menuItem = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(menuItem, nullptr);
+    menuItem->MountToParent(jsView);
+
+    auto result = menuPattern_->GetLastMenuItem();
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetTag(), std::string(V2::MENU_ITEM_ETS_TAG));
+}
+
+/**
+ * @tc.name: GetLastMenuItemTest003
+ * @tc.desc: Test GetLastMenuItem inner if: child null (false, short-circuit).
+ *           Tree: host → JS_VIEW (no children).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetLastMenuItemTest003, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto jsView = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(jsView, nullptr);
+    jsView->MountToParent(menuFrameNode_);
+
+    auto result = menuPattern_->GetLastMenuItem();
+    EXPECT_EQ(result, nullptr);
+}
+
+/**
+ * @tc.name: PlayTranslateAnimationTest001
+ * @tc.desc: Test PlayTranslateAnimation with isShowHoverImage_=true.
+ *           Covers: both if (isShowHoverImage_) branches = true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, PlayTranslateAnimationTest001, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+    menuPattern_->SetIsShowHoverImage(true);
+
+    auto renderContext = menuFrameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    OffsetF offset(10.0f, 20.0f);
+    menuPattern_->PlayTranslateAnimation(renderContext, offset, 100);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: PlayTranslateAnimationTest002
+ * @tc.desc: Test PlayTranslateAnimation with isShowHoverImage_=false.
+ *           Covers: both if (isShowHoverImage_) branches = false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, PlayTranslateAnimationTest002, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+    menuPattern_->SetIsShowHoverImage(false);
+
+    auto renderContext = menuFrameNode_->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    OffsetF offset(10.0f, 20.0f);
+    menuPattern_->PlayTranslateAnimation(renderContext, offset, 100);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: PlayDistortAnimationTest001
+ * @tc.desc: Test PlayDistortAnimation with isShowHoverImage_=true.
+ *           Covers: both if (isShowHoverImage_) branches = true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, PlayDistortAnimationTest001, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+    menuPattern_->SetIsShowHoverImage(true);
+
+    OffsetF menuPosition(50.0f, 100.0f);
+    menuPattern_->PlayDistortAnimation(menuPosition, 100);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: PlayDistortAnimationTest002
+ * @tc.desc: Test PlayDistortAnimation with isShowHoverImage_=false.
+ *           Covers: both if (isShowHoverImage_) branches = false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, PlayDistortAnimationTest002, TestSize.Level1)
+{
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuFrameNode_->context_ = MockPipelineContext::GetCurrent().GetRawPtr();
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+    menuPattern_->SetIsShowHoverImage(false);
+
+    OffsetF menuPosition(50.0f, 100.0f);
+    menuPattern_->PlayDistortAnimation(menuPosition, 100);
+    SUCCEED();
 }
 
 } // namespace OHOS::Ace::NG
