@@ -764,6 +764,14 @@ void ProgressModelNG::ResetBackgroundColor(FrameNode* frameNode)
     ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
+void ProgressModelNG::SetBackgroundColorByUser(FrameNode* frameNode, bool value)
+{
+    auto pattern = frameNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetUserInitiatedBgColor(value);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColorSetByUser, value, frameNode);
+}
+
 bool ProgressModelNG::isCapsule() const
 {
     const bool result = false;
