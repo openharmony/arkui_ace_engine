@@ -75,9 +75,11 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
         auto onVsync = [id, timeStampNanos, frameCount] {
             int64_t ts = GetSysTimestamp();
             ArkUIPerfMonitor::GetInstance().StartPerf();
+#ifndef CROSS_PLATFORM
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushBegin();
             }
+#endif
             ContainerScope scope(id);
             // use container to get window can make sure the window is valid
             auto container = Container::Current();
@@ -100,10 +102,12 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window,
                     timeStampNanos, ts, refreshPeriod, frameBufferCount, deadline);
             }
             pipeline->OnIdle(deadline);
+#ifndef CROSS_PLATFORM
             JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
             if (FrameReport::GetInstance().GetEnable()) {
                 FrameReport::GetInstance().FlushEnd();
             }
+#endif
             window->SetLastVsyncEndTimestamp(GetSysTimestamp());
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
@@ -402,7 +406,9 @@ void RosenWindow::FlushTasks(std::function<void()> callback)
     } else {
         rsUIDirector_->SendMessages(callback);
     }
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().JsAnimationToRsRecord();
+#endif
 }
 
 void RosenWindow::FlushLayoutSize(int32_t width, int32_t height)

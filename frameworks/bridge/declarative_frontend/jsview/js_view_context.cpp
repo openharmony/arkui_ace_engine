@@ -279,7 +279,9 @@ void StartAnimationForStageMode(const RefPtr<PipelineBase>& pipelineContext, con
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+#ifndef CROSS_PLATFORM
         JankFrameReport::GetInstance().RecordAnimateEnd();
+#endif
     } else {
         pipelineContext->RequestFrame();
     }
@@ -310,7 +312,9 @@ void StartAnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, Animat
     if (immediately) {
         pipelineContext->FlushModifier();
         pipelineContext->FlushMessages();
+#ifndef CROSS_PLATFORM
         JankFrameReport::GetInstance().RecordAnimateEnd();
+#endif
     } else {
         pipelineContext->RequestFrame();
     }
@@ -686,7 +690,9 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         option.GetCurve()->ToString().c_str(), option.GetIteration());
     option.SetAnimationInterface(AnimationInterface::ANIMATION);
     ViewContextModel::GetInstance()->openAnimation(option);
+#ifndef CROSS_PLATFORM
     JankFrameReport::GetInstance().ReportJSAnimation();
+#endif
 }
 
 void JSViewContext::JSAnimateTo(const JSCallbackInfo& info)
