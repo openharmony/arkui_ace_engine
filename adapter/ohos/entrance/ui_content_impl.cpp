@@ -4029,15 +4029,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str(),
                 keyboardRect.ToString().c_str());
         }
-        auto logTask = [bundleName = bundleName_, moduleName = moduleName_, instanceId = instanceId_,
-            config, reason, rsTransaction, stringifiedMap, keyboardRect]() {
-            TAG_LOGI(ACE_LAYOUT,
-                "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, "
-                "windowSizeChangeReason %{public}d,"
-                " is rsTransaction nullptr %{public}d, %{public}s, keyboardRect %{public}s", bundleName.c_str(),
-                moduleName.c_str(), instanceId, config.ToString().c_str(), static_cast<uint32_t>(reason),
-                rsTransaction == nullptr, stringifiedMap.c_str(), keyboardRect.ToString().c_str());
-            };
+        auto logTask = [config, reason, rsTransaction, stringifiedMap, keyboardRect]() {
+            TAG_LOGI(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardRect %{public}s",
+                config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
+                stringifiedMap.c_str(), keyboardRect.ToString().c_str());
+        };
         taskTimeForComeIn_.taskName = "ArkUIUpdateViewportConfigWithKeyboardInfo";
         ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
     } else {
@@ -4048,15 +4044,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str());
         }
-        auto logTask = [bundleName = bundleName_, moduleName = moduleName_, instanceId = instanceId_,
- 	            config, reason, rsTransaction, stringifiedMap]() {
-                TAG_LOGI(ACE_LAYOUT,
-                    "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, "
-                    "windowSizeChangeReason %{public}d,"
-                    " is rsTransaction nullptr %{public}d, %{public}s, keyboardInfo is null", bundleName.c_str(),
-                    moduleName.c_str(), instanceId, config.ToString().c_str(), static_cast<uint32_t>(reason),
-                    rsTransaction == nullptr, stringifiedMap.c_str());
-                };
+        auto logTask = [config, reason, rsTransaction, stringifiedMap]() {
+            TAG_LOGI(ACE_LAYOUT, "UVC %{public}s, WSCR %{public}d, IRN %{public}d, %{public}s, keyboardInfo is null",
+                config.ToString().c_str(), static_cast<uint32_t>(reason), rsTransaction == nullptr,
+                stringifiedMap.c_str());
+        };
         taskTimeForComeIn_.taskName = "ArkUIUpdateViewportConfigWithoutKeyboardInfo";
         ArkUIDelayLogTask::PostReductionTask(logTask, taskTimeForComeIn_, LOG_DELAY_TIME);
     }
