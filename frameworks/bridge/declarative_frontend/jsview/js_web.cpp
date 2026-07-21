@@ -7301,11 +7301,11 @@ void JSWeb::EnableNativeVideoPlayer(const JSCallbackInfo& args)
     std::optional<bool> enable;
     std::optional<bool> shouldOverlay;
     JSRef<JSVal> enableJsValue = paramObject->GetProperty("enable");
-    if (enableJsValue->IsBoolean()) {
+    if (!enableJsValue.IsEmpty() && enableJsValue->IsBoolean()) {
         enable = enableJsValue->ToBoolean();
     }
     JSRef<JSVal> shouldOverlayJsValue = paramObject->GetProperty("shouldOverlay");
-    if (shouldOverlayJsValue->IsBoolean()) {
+    if (!shouldOverlayJsValue.IsEmpty() && shouldOverlayJsValue->IsBoolean()) {
         shouldOverlay = shouldOverlayJsValue->ToBoolean();
     }
     if (!enable || !shouldOverlay) {
