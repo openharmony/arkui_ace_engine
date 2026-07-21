@@ -6385,7 +6385,9 @@ void FrameNode::UpdateFocusState()
     auto focusHub = GetFocusHub();
     if (focusHub && focusHub->IsCurrentFocus()) {
         focusHub->ClearFocusState(false);
-        focusHub->PaintFocusState(false);
+        if (focusHub->PaintFocusState(false)) {
+            focusHub->RaiseZIndex();
+        }
     }
 }
 

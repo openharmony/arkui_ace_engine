@@ -22,6 +22,7 @@
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/focus/focus_manager.h"
 #include "core/components_ng/manager/privacy_sensitive/privacy_sensitive_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -3891,5 +3892,95 @@ HWTEST_F(FrameNodeTestNg, GetNodesByIdWithCleanup005, TestSize.Level1)
     EXPECT_TRUE(nodeIds.find(validId) != nodeIds.end());
     EXPECT_TRUE(nodeIds.find(nonFrameId) != nodeIds.end());
     EXPECT_TRUE(nodeIds.find(invalidId) == nodeIds.end());
+}
+
+/**
+ * @tc.name: FrameNodeUpdateFocusState001
+ * @tc.desc: Test UpdateFocusState when focus hub is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateFocusState001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode without focus hub.
+     * @tc.expected: focus hub is null, UpdateFocusState does nothing and no crash.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetFocusHub(), nullptr);
+    frameNode->UpdateFocusState();
+}
+
+/**
+ * @tc.name: FrameNodeUpdateFocusState002
+ * @tc.desc: Test UpdateFocusState when focus hub exists but not current focus
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateFocusState002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and create focus hub.
+     * @tc.expected: not current focus, the if block is skipped and no zIndex raised.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = false;
+
+    frameNode->UpdateFocusState();
+    EXPECT_FALSE(focusHub->isRaisedZIndex_);
+}
+
+/**
+ * @tc.name: FrameNodeUpdateFocusState003
+ * @tc.desc: Test UpdateFocusState when current focus is true but PaintFocusState returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateFocusState003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and create focus hub.
+     * @tc.steps: step2. set current focus true but focus not active, PaintFocusState returns false.
+     * @tc.expected: ClearFocusState is called but RaiseZIndex is not called.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+
+    frameNode->UpdateFocusState();
+    EXPECT_FALSE(focusHub->isRaisedZIndex_);
+}
+
+/**
+ * @tc.name: FrameNodeUpdateFocusState004
+ * @tc.desc: Test UpdateFocusState when current focus is true and PaintFocusState returns true
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeUpdateFocusState004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and create focus hub.
+     * @tc.steps: step2. set current focus, focus active and focus style type FORCE_NONE.
+     * @tc.expected: PaintFocusState returns true, RaiseZIndex is called and zIndex is raised.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("node", 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    focusHub->SetFocusStyleType(FocusStyleType::FORCE_NONE);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto focusManager = context->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
+
+    frameNode->UpdateFocusState();
+    EXPECT_TRUE(focusHub->isRaisedZIndex_);
+
+    focusManager->isFocusActive_ = false;
 }
 } // namespace OHOS::Ace::NG

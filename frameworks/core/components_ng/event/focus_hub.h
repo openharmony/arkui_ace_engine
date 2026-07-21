@@ -751,6 +751,8 @@ public:
     void SetFocusScopePriorityMultiThread(const std::string& focusScopeId, const uint32_t focusPriority);
     // multi thread function end
 
+    void RaiseZIndex(); // Recover z-index in ClearFocusState
+
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
@@ -819,8 +821,6 @@ private:
     bool IsInFocusGroup();
     bool IsNestingFocusGroup();
     void SetLastWeakFocusNodeWholeScope(const std::string& focusScopeId);
-
-    void RaiseZIndex(); // Recover z-index in ClearFocusState
 
     bool RequestFocusImmediatelyInner(FocusReason reason = FocusReason::DEFAULT);
     bool RequestUserNextFocus(const FocusEvent& event);
