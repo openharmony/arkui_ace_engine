@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
@@ -2285,6 +2287,7 @@ void MenuPattern::PlayDistortAnimation(const OffsetF& menuPosition, int32_t dela
     ConfigDistortParam(finalPlacement, param, param1, param2, param3);
     OffsetF offset = GetDistortionMenuOffset(finalPlacement);
     PlayTranslateAnimation(renderContext, offset, delay);
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::MENU_LIGHT_SENSE_ANIMATION, PerfActionType::LAST_UP, "");
     AnimationOption option;
     option.SetDuration(MATERIAL_DISTORT_ANIMATION_DURATION);
     if (isShowHoverImage_) {
@@ -2333,7 +2336,9 @@ void MenuPattern::PlayDistortAnimation(const OffsetF& menuPosition, int32_t dela
         if (menuChildRenderContext) {
             menuChildRenderContext->UpdateForegroundFilterDistortionParam(param5);
         }
-    }, nullptr, nullptr, host->GetContextRefPtr());
+    }, []() {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::MENU_LIGHT_SENSE_ANIMATION, true);
+    }, nullptr, host->GetContextRefPtr());
     // for menu disappear animation
     renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));
     renderContext->UpdateOpacity(1.0f);

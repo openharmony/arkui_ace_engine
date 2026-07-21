@@ -17,6 +17,8 @@
 
 #include "ui/animation/curves.h"
 
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_style.h"
 
@@ -70,6 +72,8 @@ std::function<void()> SheetEdgeLightBase::GetSheetEdgeLightAnimateEvent(RefPtr<F
         auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
         SheetEdgeLightBase::SetSheetEdgeLightTransitionStart(sheetNode);
+        PerfMonitor::GetPerfMonitor()->Start(
+            PerfConstants::BINDSHEET_LIGHT_SENSE_ANIMATION, PerfActionType::LAST_UP, "");
     };
 }
 
@@ -83,6 +87,7 @@ std::function<void()> SheetEdgeLightBase::GetSheetEdgeLightAnimateFinishEvent(Re
         SheetEdgeLightBase::SetSheetEdgeLightTransitionEnd(sheetNode);
     };
     const std::function<void()> edgeLightFinishEvent = [sheetWK = AceType::WeakClaim(AceType::RawPtr(sheetNode))]() {
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::BINDSHEET_LIGHT_SENSE_ANIMATION, true);
         auto sheetNode = sheetWK.Upgrade();
         CHECK_NULL_VOID(sheetNode);
         auto renderContext = sheetNode->GetRenderContext();

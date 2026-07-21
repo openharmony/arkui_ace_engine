@@ -183,6 +183,15 @@ public:
 
     // sidebar float window
     static constexpr char FLOAT_START_FROM_SIDEBAR[] = "FLOAT_START_FROM_SIDEBAR";
+
+    // menu interactive animation
+    static constexpr char MENU_LIGHT_SENSE_ANIMATION[] = "MENU_LIGHT_SENSE_ANIMATION";
+
+    // dialog interactive animation
+    static constexpr char DIALOG_LIGHT_SENSE_ANIMATION[] = "DIALOG_LIGHT_SENSE_ANIMATION";
+
+    // bindsheet interactive animation
+    static constexpr char BINDSHEET_LIGHT_SENSE_ANIMATION[] = "BINDSHEET_LIGHT_SENSE_ANIMATION";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

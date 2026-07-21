@@ -19,6 +19,8 @@
 
 #include "base/error/error_code.h"
 #include "base/hiviewdfx/histogram_wrapper.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -495,6 +497,7 @@ void DialogInnerManager::OpenDialogAnimationInner(const RefPtr<OverlayManager>& 
             auto dialogPattern = node->GetPattern<DialogPattern>();
             dialogPattern->CallDialogDidAppearCallback();
             overlayManager->ContentChangeReport(node, true);
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::DIALOG_LIGHT_SENSE_ANIMATION, true);
         };
         dialogPattern->RegisterOnFinishEvent(onFinishEvent);
         if (isTopOrder && isReadFirstNode) {
