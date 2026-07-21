@@ -16,6 +16,12 @@
 /// <reference path='./../../ark_component/src/import.ts' />
 type ComponentObj = { component: any }
 
+getUINativeModule().loadNativeModule('CommonShape');
+let commonModule = globalThis.requireNapi('arkui.components.arkcommonshape');
+commonModule.exportView();
+commonModule.loadComponent();
+commonModule.exportComponent();
+
 function loadComponent(): ComponentObj | undefined {
   if (loadComponent.componentObj === undefined && globalThis.__ArkComponent__ !== undefined) {
     class ArkMesh {
