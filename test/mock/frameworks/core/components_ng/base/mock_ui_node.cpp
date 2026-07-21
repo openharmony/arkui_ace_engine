@@ -377,6 +377,10 @@ void UINode::UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isCl
 
 void UINode::UpdateDrawLayoutChildObserver(const RefPtr<UINode>& child) {}
 
+void UINode::UpdateDrawObserverUniqueIdFlag(bool isDrawObserver) {}
+
+void UINode::UpdateLayoutObserverUniqueIdFlag(bool isLayoutObserver) {}
+
 void UINode::UpdateGeometryTransition() {}
 
 void UINode::UpdateLayoutPropertyFlag() {}

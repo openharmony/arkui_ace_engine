@@ -1190,6 +1190,10 @@ public:
 
     virtual void DumpSimplifyInfoWithParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig());
     void UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver);
+    void UpdateDrawObserverUniqueIdFlag(bool isDrawObserver);
+    void UpdateLayoutObserverUniqueIdFlag(bool isLayoutObserver);
+    bool GetDrawObserverUniqueIdFlag() const;
+    bool GetLayoutObserverUniqueIdFlag() const;
 
     UINodeType GetNodeType() const
     {
@@ -1431,6 +1435,8 @@ private:
 
     bool isStaticNode_ = false;
     bool isAdopted_ = false;
+    bool isDrawUniqueIdObserver_ = false;
+    bool isLayoutUniqueIdObserver_ = false;
     std::string inspectorLabel_;
     bool isPreMake_ = false;
 };

@@ -64,6 +64,8 @@ constexpr int32_t ERROR_CODE_UIEXTENSION_DESTRUCTION_FAILED = 100020;
 constexpr int32_t ERROR_CODE_UIEXTENSION_TRANSPARENT = 100021;
 // Parameter error.
 constexpr int32_t ERROR_CODE_PARAM_ERROR = 100023;
+// The inspector get ui context failed.
+constexpr int32_t ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED = 100022;
 // The inspector parameter depth must bu greater than zero.
 constexpr int32_t ERROR_CODE_INSPECTOR_PARAM_DEPTH_INVALID  = 100024;
 

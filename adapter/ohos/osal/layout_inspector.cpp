@@ -32,15 +32,15 @@
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/entrance/rs_adapter.h"
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
-#include "base/log/ace_checker.h"
-#include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
-#include "base/websocket/websocket_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/connect_server_manager.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "core/pipeline_ng/pipeline_context.h"
+#include "base/websocket/websocket_manager.h"
+#include "frameworks/base/log/ace_checker.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
 namespace OHOS::Ace {
 
@@ -264,7 +264,7 @@ bool LayoutInspector::GetInteractionEventStatus()
 void LayoutInspector::TriggerArkUIInteractionEventStatus(const std::string& message)
 {
     std::unique_lock<std::shared_mutex> lock(interactionEventStatusMutex_);
-    enableInteractionEventReport_ = message.find("InteractionEventOpen", 0) != std::string::npos ? true : false;
+    enableInteractionEventReport_ = message.find("InteractionEventOpen", 0) != std::string::npos;
 }
 
 void LayoutInspector::SetStateProfilerStatus(bool status)
@@ -291,7 +291,7 @@ void LayoutInspector::SetCallback(int32_t instanceId)
     CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
         WebSocketManager::SetProfilerCallBack([](bool status) { return SetStateProfilerStatus(status); });
-        WebSocketManager::SetSwitchCallback(
+        OHOS::AbilityRuntime::ConnectServerManager::Get().SetSwitchCallback(
             [](int32_t containerId) { return CreateLayoutInfo(containerId); }, instanceId);
         WebSocketManager::SetRecordCallback(LayoutInspector::HandleStartRecord, LayoutInspector::HandleStopRecord);
         WebSocketManager::RegisterConnectServerCallback(LayoutInspector::ConnectServerCallback);
@@ -306,7 +306,8 @@ void LayoutInspector::SetCallback(int32_t instanceId)
     SendInstanceMessageCallBack sendInstanceMessageCallBack = [](int32_t id) {
         WebSocketManager::SetProfilerCallBack(
             [](bool status) { return SetStateProfilerStatus(status); });
-        WebSocketManager::SetSwitchCallback([](int32_t containerId) { return CreateLayoutInfo(containerId); }, id);
+        OHOS::AbilityRuntime::ConnectServerManager::Get().SetSwitchCallback(
+            [](int32_t containerId) { return CreateLayoutInfo(containerId); }, id);
     };
     WebSocketManager::RegisterSendInstanceMessageCallback(sendInstanceMessageCallBack);
 }

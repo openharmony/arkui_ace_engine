@@ -25,10 +25,6 @@
 #include "rec_node.h"
 
 namespace OHOS::Ace::NG {
-const char KEY_METHOD[] = "method";
-const char KEY_PARAMS[] = "params";
-const char KEY_PARAM_NEED_FREE_NODES[] = "isNeedFreeNodes";
-
 const uint32_t INSPECTOR_INVALID_WINDOW_ID = 0;
 const int32_t INVALID_METHOD_ID = -1;
 class InspectorFilter;

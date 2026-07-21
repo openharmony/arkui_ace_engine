@@ -31,6 +31,7 @@ import { ObserveSingleton } from './stateManagement/base/observeSingleton';
 import { setNeedCreate } from "arkui/ArkComponentRoot"
 import { findPeerNode } from "./PeerNode"
 import { InteropNativeModule } from "@koalaui/interop"
+import { registerNativeModuleLibraryName } from "@koalaui/interop"
 import { __context, __id } from '@koalaui/runtime'
 
 const CUSTOM_TITLE_BAR_CLASS: string = "@ohos.window.titlebar.component.System__Reserved_$$$__UI__TitleBar__Component"
@@ -43,6 +44,10 @@ abstract class DummyCustomComponent extends CustomComponent<DummyCustomComponent
 export class XBarProxy {
     // static titleBarComponentMap: Map<KLong, CustomComponent> = new Map();
     static initializeXBarProxy(): void {
+        registerNativeModuleLibraryName("InteropNativeModule", "ArkoalaNative_ark.z")
+        registerNativeModuleLibraryName("ArkUINativeModule", "ArkoalaNative_ark.z")
+        registerNativeModuleLibraryName("ArkUIGeneratedNativeModule", "ArkoalaNative_ark.z")
+        registerNativeModuleLibraryName("TestNativeModule", "ArkoalaNative_ark.z")
         console.log(`[createXBarCustomComponent]initializeXBarProxy`);
         ArkUIAniModule._XBar_Set_ComponentCreateFunc(createXBarCustomComponent<DummyCustomComponent, undefined>)
     }
@@ -121,6 +126,8 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
     console.log(`[createXBarCustomComponent]getUIContextById`)
     const manager = GlobalStateManager.instance;
     const node = manager.updatableNode(new IncrementalNode(), (context: StateContext) => {
+        const frozen = manager.frozen;
+        manager.frozen = true;
         ArkUIAniModule._Common_Sync_InstanceId(uiContext.getInstanceId());
         let r = OBSERVE.renderingComponent;
         OBSERVE.renderingComponent = ObserveSingleton.RenderingComponentV1;
@@ -129,6 +136,7 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
         setNeedCreate(needCreate);
         OBSERVE.renderingComponent = r;
         ArkUIAniModule._Common_Restore_InstanceId();
+        manager.frozen = frozen;
     });
     console.log(`[createXBarCustomComponent]updatableNode`)
     const inc = node.value;

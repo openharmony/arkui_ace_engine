@@ -2918,6 +2918,22 @@ RefPtr<Theme> UINode::GetThemeByType(ThemeType type, bool useApiVersionIsolation
     CHECK_NULL_RETURN(context, nullptr);
     return context->GetThemeByType(type, GetThemeScopeIdForTheme(useApiVersionIsolation));
 }
+void UINode::UpdateDrawObserverUniqueIdFlag(bool isDrawObserver)
+{
+    isDrawUniqueIdObserver_ = isDrawObserver;
+}
+void UINode::UpdateLayoutObserverUniqueIdFlag(bool isLayoutObserver)
+{
+    isLayoutUniqueIdObserver_ = isLayoutObserver;
+}
+bool UINode::GetDrawObserverUniqueIdFlag() const
+{
+    return isDrawUniqueIdObserver_;
+}
+bool UINode::GetLayoutObserverUniqueIdFlag() const
+{
+    return isLayoutUniqueIdObserver_;
+}
 
 void UINode::UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver)
 {

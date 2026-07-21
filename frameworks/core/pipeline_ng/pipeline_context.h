@@ -1225,6 +1225,8 @@ public:
     void UpdateDrawLayoutChildObserver(int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver) override;
     void UpdateDrawLayoutChildObserver(
         const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver) override;
+    void UpdateDrawObserverFlag(int32_t uniqueId, bool isDrawObserver) override;
+    void UpdateLayoutObserverFlag(int32_t uniqueId, bool isLayoutObserver) override;
 
     const RefPtr<InspectorOffscreenNodesMgr>& GetInspectorOffscreenNodesMgr();
 
