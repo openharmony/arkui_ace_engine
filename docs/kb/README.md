@@ -77,10 +77,23 @@ docs/kb/
 | UIPickerComponent | UI选择器容器组件 | `docs/kb/components/selector/ui_picker_component.md` | 已迁移，旧 KB 已移除 |
 | AlphabetIndexer | 字母索引组件 | `docs/kb/components/data_display/alphabet_indexer.md` | 新建 |
 | Router | 路由管理 | `docs/kb/api/router.md` | 新建（不推荐，推荐 Navigation） |
-| StateMgmtV1Core | V1 状态管理核心逻辑 | `docs/kb/architecture/state_management/v1_core.md` | 已注册 |
-| StateMgmtV2Core | V2 状态管理核心逻辑 | `docs/kb/architecture/state_management/v2_core.md` | 已注册 |
-| StateMgmtV1Decorators | V1 状态管理装饰器 | `docs/kb/architecture/state_management/v1_decorators.md` | 已注册 |
-| StateMgmtV2Decorators | V2 状态管理装饰器 | `docs/kb/architecture/state_management/v2_decorators.md` | 已注册 |
+| StateMgmtV1Core | V1 状态管理核心逻辑 | `docs/kb/frontend/state_management/v1_core.md` | 已注册 |
+| StateMgmtV2Core | V2 状态管理核心逻辑 | `docs/kb/frontend/state_management/v2_core.md` | 已注册 |
+| StateMgmtV1Decorators | V1 状态管理装饰器 | `docs/kb/frontend/state_management/v1_decorators.md` | 已注册 |
+| StateMgmtV2Decorators | V2 状态管理装饰器 | `docs/kb/frontend/state_management/v2_decorators.md` | 已注册 |
+| StateMgmt | 状态管理总览 | `docs/kb/frontend/state_management.md` | 已注册 |
+| StateMgmtStorage | 状态管理存储体系 | `docs/kb/frontend/state_management/storage.md` | 已注册 |
+| StateMgmtInfrastructure | 状态管理基础设施 | `docs/kb/frontend/state_management/infrastructure.md` | 已注册 |
+| StateMgmtCppBindings | 状态管理 C++ 绑定 | `docs/kb/frontend/state_management/cpp_bindings.md` | 已注册 |
+| StateMgmtCustomComponent | 状态管理自定义组件机制 | `docs/kb/frontend/state_management/custom_component.md` | 已注册 |
+| StateMgmtInterop | 状态管理 Interop 桥接 | `docs/kb/frontend/state_management/interop_bridge.md` | 已注册 |
+| StateMgmtStaticV1Core | 静态 V1 状态管理核心逻辑 | `docs/kb/frontend/state_management/static_v1_core.md` | 新建 |
+| StateMgmtStaticV1Decorators | 静态 V1 装饰器与数据对象 | `docs/kb/frontend/state_management/static_v1_decorators.md` | 新建 |
+| StateMgmtStaticV2Core | 静态 V2 状态管理核心逻辑 | `docs/kb/frontend/state_management/static_v2_core.md` | 新建 |
+| StateMgmtStaticV2Decorators | 静态 V2 装饰器与数据对象 | `docs/kb/frontend/state_management/static_v2_decorators.md` | 新建 |
+| StateMgmtStaticStorage | 静态存储体系 | `docs/kb/frontend/state_management/static_storage.md` | 新建 |
+| StateMgmtStaticInterop | 静态 Interop 桥接 | `docs/kb/frontend/state_management/static_interop_bridge.md` | 新建 |
+| StateMgmtStaticCustomComponent | 静态自定义组件状态相关 | `docs/kb/frontend/state_management/static_custom_component.md` | 新建 |
 | WindowMechanism | 窗口机制 | `docs/kb/architecture/window-mechanism.md` | 新建 |
 | DFXLogging | DFX 日志 | `docs/kb/architecture/dfx/logging.md` | 新建 |
 | DFXMemoryManagement | DFX 内存管理 | `docs/kb/architecture/dfx/memory-management.md` | 新建 |

@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-25",
+  "last_updated": "2026-07-27",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -2642,8 +2642,8 @@
         "ObservedPropertyPU",
         "PU 核心"
       ],
-      "kb": "docs/kb/architecture/state_management/v1_core.md",
-      "spec_status": "pending",
+      "kb": "docs/kb/frontend/state_management/v1_core.md",
+      "spec_status": "active",
       "source_paths": {
         "pu_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_view.ts",
         "pu_observed_property_abstract": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_observed_property_abstract.ts",
@@ -2659,15 +2659,17 @@
         "fu_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/full_update/fu_view.ts"
       },
       "api_paths": {
-        "v1_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common/stateMgmt.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/stateMgmt.static.d.ets"
+        "v1_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
       },
       "test_paths": [
         "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v1_tests/",
         "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/common_tests/"
       ],
       "status": "active",
-      "last_verified": "2026-07-13"
+      "last_verified": "2026-07-27",
+      "func_id": "07-02-01",
+      "spec_domain": "specs/07-frontend/02-state-management/01-v1-component-state"
     },
     {
       "id": "StateMgmtV2Core",
@@ -2695,8 +2697,8 @@
         "ObserveV2 单例",
         "V2 依赖图"
       ],
-      "kb": "docs/kb/architecture/state_management/v2_core.md",
-      "spec_status": "pending",
+      "kb": "docs/kb/frontend/state_management/v2_core.md",
+      "spec_status": "active",
       "source_paths": {
         "v2_change_observation": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_change_observation.ts",
         "v2_observed_proxy": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_observed_proxy.ts",
@@ -2712,16 +2714,18 @@
         "v2_data_coder": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_data_coder/"
       },
       "api_paths": {
-        "v2_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common/stateMgmtV2.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/stateMgmt.static.d.ets",
-        "statemanagement_module": "<OH_ROOT>/interface/sdk-js/api/arkui/@ohos.arkui.StateManagement.d.ts"
+        "v2_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets",
+        "statemanagement_module": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.StateManagement.d.ts"
       },
       "test_paths": [
         "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v2_tests/",
         "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/env_tests/"
       ],
       "status": "active",
-      "last_verified": "2026-07-13"
+      "last_verified": "2026-07-27",
+      "func_id": "07-02-04",
+      "spec_domain": "specs/07-frontend/02-state-management/04-v2-component-state"
     },
     {
       "id": "StateMgmtV1Decorators",
@@ -2749,8 +2753,8 @@
         "@State @Prop @Link",
         "@Provide @Consume"
       ],
-      "kb": "docs/kb/architecture/state_management/v1_decorators.md",
-      "spec_status": "pending",
+      "kb": "docs/kb/frontend/state_management/v1_decorators.md",
+      "spec_status": "active",
       "source_paths": {
         "pu_observed_property": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_observed_property.ts",
         "pu_synced_one_way": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_synced_property_one_way.ts",
@@ -2762,15 +2766,17 @@
         "pu_builder_proxy": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_builder_proxy.ts"
       },
       "api_paths": {
-        "v1_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common/stateMgmt.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/stateMgmt.static.d.ets"
+        "v1_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
       },
       "test_paths": [
         "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v1_tests/",
         "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/repeat_tests/"
       ],
       "status": "active",
-      "last_verified": "2026-07-13"
+      "last_verified": "2026-07-27",
+      "func_id": "07-02-01",
+      "spec_domain": "specs/07-frontend/02-state-management/01-v1-component-state"
     },
     {
       "id": "StateMgmtV2Decorators",
@@ -2801,8 +2807,8 @@
         "@ObservedV2 @Trace",
         "@Param @Once @Event"
       ],
-      "kb": "docs/kb/architecture/state_management/v2_decorators.md",
-      "spec_status": "pending",
+      "kb": "docs/kb/frontend/state_management/v2_decorators.md",
+      "spec_status": "active",
       "source_paths": {
         "v2_decorators": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_decorators.ts",
         "v2_change_observation": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_change_observation.ts",
@@ -2814,16 +2820,18 @@
         "ui_utils": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/ui_utils.ts"
       },
       "api_paths": {
-        "v2_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common/stateMgmtV2.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/stateMgmt.static.d.ets",
-        "statemanagement_module": "<OH_ROOT>/interface/sdk-js/api/arkui/@ohos.arkui.StateManagement.d.ts"
+        "v2_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets",
+        "statemanagement_module": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.StateManagement.d.ts"
       },
       "test_paths": [
         "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v2_tests/",
         "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/env_tests/"
       ],
       "status": "active",
-      "last_verified": "2026-07-13"
+      "last_verified": "2026-07-27",
+      "func_id": "07-02-04",
+      "spec_domain": "specs/07-frontend/02-state-management/04-v2-component-state"
     },
     {
       "id": "WindowMechanism",
@@ -4336,6 +4344,370 @@
       "last_verified": "2026-07-27"
     },
     {
+      "id": "StateMgmt",
+      "name": "State Management",
+      "name_cn": "状态管理总览",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "状态管理",
+        "state management",
+        "状态变量",
+        "依赖收集",
+        "变更通知",
+        "局部重渲染",
+        "ViewPU",
+        "ViewV2",
+        "ObserveV2",
+        "ObservedProperty",
+        "装饰器",
+        "状态订阅"
+      ],
+      "aliases": [
+        "状态管理",
+        "StateMgmt",
+        "State Management",
+        "状态管理子系统"
+      ],
+      "kb": "docs/kb/frontend/state_management.md",
+      "spec_status": "pending",
+      "source_paths": {
+        "ts_library_root": "frameworks/bridge/declarative_frontend/state_mgmt/",
+        "module_entry": "frameworks/bridge/declarative_frontend/state_mgmt/src/index.ts",
+        "lib_root": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/",
+        "common": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/",
+        "partial_update": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/",
+        "full_update": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/full_update/",
+        "puv2_common": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/",
+        "v2": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/",
+        "sdk": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/",
+        "interop": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/",
+        "pipeline_context": "frameworks/core/pipeline_ng/pipeline_context.cpp"
+      },
+      "api_paths": {
+        "v1_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "v2_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets",
+        "statemanagement_module": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.StateManagement.d.ts"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-13"
+    },
+    {
+      "id": "StateMgmtInfrastructure",
+      "name": "State Management Infrastructure",
+      "name_cn": "状态管理基础设施",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "基础设施",
+        "ConfigureStateMgmt",
+        "stateMgmtConsole",
+        "stateMgmtDFX",
+        "stateMgmtProfiler",
+        "UINodeRegisterProxy",
+        "UpdateFuncRecord",
+        "UIUtils",
+        "ObservedUtil",
+        "SubscribableAbstract",
+        "WeakRefPool",
+        "needsV2Observe"
+      ],
+      "aliases": [
+        "基础设施",
+        "Infrastructure",
+        "公共基础层",
+        "DFX/Profiler"
+      ],
+      "kb": "docs/kb/frontend/state_management/infrastructure.md",
+      "spec_status": "active",
+      "source_paths": {
+        "configure": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/state_mgmt_configure.ts",
+        "console_trace": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/state_mgmt_console_trace.ts",
+        "dfx": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/state_mgmt_dfx.ts",
+        "profiler": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/state_mgmt_profiler.ts",
+        "utils": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/utils.ts",
+        "weakref_pool": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/weakref_pool.ts",
+        "uinode_registry_proxy": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_uinode_registry_proxy.ts",
+        "updatefunc": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_updatefunc.ts",
+        "subscribable_abstract": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/subscribable_abstract.ts",
+        "ui_utils": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/ui_utils.ts",
+        "observed_util": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/observed_util.ts"
+      },
+      "api_paths": {
+        "statemanagement_module": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.StateManagement.d.ts"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/common_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27",
+      "func_id": "07-02-07",
+      "spec_domain": "specs/07-frontend/02-state-management/07-state-management-utilities"
+    },
+    {
+      "id": "StateMgmtCppBindings",
+      "name": "State Management C++ Bindings",
+      "name_cn": "状态管理 C++ 绑定与宿主节点",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "C++ 绑定",
+        "JSI",
+        "stateMgmt.abc",
+        "JSViewPartialUpdate",
+        "ViewFunctions",
+        "CustomNode",
+        "CustomNodeBase",
+        "ElementRegister",
+        "ViewStackProcessor",
+        "JSLocalStorage",
+        "JSPersistent",
+        "JSEnvironment",
+        "isV2_"
+      ],
+      "aliases": [
+        "C++ 绑定",
+        "Cpp Bindings",
+        "宿主节点",
+        "CustomNode 宿主"
+      ],
+      "kb": "docs/kb/frontend/state_management/cpp_bindings.md",
+      "spec_status": "active",
+      "source_paths": {
+        "jsi_engine": "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.cpp",
+        "js_view": "frameworks/bridge/declarative_frontend/jsview/js_view.cpp",
+        "js_view_functions": "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h",
+        "js_local_storage": "frameworks/bridge/declarative_frontend/jsview/js_local_storage.cpp",
+        "js_persistent": "frameworks/bridge/declarative_frontend/jsview/js_persistent.cpp",
+        "js_environment": "frameworks/bridge/declarative_frontend/jsview/js_environment.cpp",
+        "js_state_mgmt_profiler": "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.cpp",
+        "custom_node": "frameworks/core/components_ng/pattern/custom/custom_node.cpp",
+        "custom_node_base": "frameworks/core/components_ng/pattern/custom/custom_node_base.cpp",
+        "element_register": "frameworks/core/pipeline/base/element_register.cpp",
+        "view_stack_processor": "frameworks/core/components_ng/base/view_stack_processor.cpp",
+        "pipeline_context": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "frontend": "frameworks/core/common/frontend.h"
+      },
+      "api_paths": {},
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v1_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v2_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27",
+      "func_id": "07-02-01",
+      "spec_domain": "specs/07-frontend/02-state-management/01-v1-component-state"
+    },
+    {
+      "id": "StateMgmtStorage",
+      "name": "State Management Storage",
+      "name_cn": "状态管理存储体系",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "存储体系",
+        "AppStorage",
+        "LocalStorage",
+        "PersistentStorage",
+        "Environment",
+        "AppStorageV2",
+        "PersistenceV2",
+        "IStorage",
+        "DataCoder",
+        "PersistenceV2Impl",
+        "StorageHelper",
+        "持久化"
+      ],
+      "aliases": [
+        "存储体系",
+        "Storage",
+        "AppStorage/LocalStorage",
+        "PersistentStorage"
+      ],
+      "kb": "docs/kb/frontend/state_management/storage.md",
+      "spec_status": "active",
+      "source_paths": {
+        "local_storage": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/local_storage.ts",
+        "app_storage": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/app_storage.ts",
+        "persistent_storage": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/persistent_storage.ts",
+        "environment": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/environment.ts",
+        "i_storage": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/i_storage.ts",
+        "i_environment_backend": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/i_environment_backend.ts",
+        "v2_persistence": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/v2_persistence.ts",
+        "v2_data_coder": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_data_coder/",
+        "js_local_storage": "frameworks/bridge/declarative_frontend/jsview/js_local_storage.cpp",
+        "js_persistent": "frameworks/bridge/declarative_frontend/jsview/js_persistent.cpp",
+        "js_environment": "frameworks/bridge/declarative_frontend/jsview/js_environment.cpp"
+      },
+      "api_paths": {
+        "v1_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "statemanagement_module": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.StateManagement.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/common_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v2_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/env_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27",
+      "func_id": "07-02-03",
+      "spec_domain": "specs/07-frontend/02-state-management/03-v1-app-state"
+    },
+    {
+      "id": "StateMgmtCustomComponent",
+      "name": "State Management Custom Component",
+      "name_cn": "自定义组件机制",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "自定义组件",
+        "@Component",
+        "@ComponentV2",
+        "observeComponentCreation2",
+        "updateDirtyElements",
+        "组件复用",
+        "RecycleManager",
+        "RecyclePoolV2",
+        "freezeWhenInactive",
+        "生命周期状态机",
+        "@Builder",
+        "makeBuilderParameterProxy"
+      ],
+      "aliases": [
+        "自定义组件机制",
+        "Custom Component",
+        "ViewPU/ViewV2",
+        "组件复用与生命周期"
+      ],
+      "kb": "docs/kb/frontend/state_management/custom_component.md",
+      "spec_status": "active",
+      "source_paths": {
+        "pu_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_view.ts",
+        "v2_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_view.ts",
+        "puv2_view_base": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_view_base.ts",
+        "pu_lifecycle": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/pu_lifecycle.ts",
+        "pu_recycle_manager": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_recycle_manager.ts",
+        "v2_recycle_pool": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_recycle_pool.ts",
+        "puv2_globalreuse": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_globalreuse.ts",
+        "puv2_updatefunc": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_updatefunc.ts",
+        "pu_builder_proxy": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_builder_proxy.ts",
+        "custom_node": "frameworks/core/components_ng/pattern/custom/custom_node.cpp"
+      },
+      "api_paths": {
+        "v1_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "v2_decorators_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v1_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v2_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/repeat_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/common_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27",
+      "func_id": "07-03-01",
+      "spec_domain": "specs/07-frontend/03-custom-components/01-componentization"
+    },
+    {
+      "id": "StateMgmtInterop",
+      "name": "State Management Interop Bridge",
+      "name_cn": "状态管理 Interop 桥接",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "Interop",
+        "互操作",
+        "动态静态前端桥接",
+        "InteropConfigureStateMgmt",
+        "InteropExtractorModule",
+        "InteropStorage",
+        "ViewInterop",
+        "BuilderViewV2",
+        "deepCopyStaticProxy",
+        "isStaticProxy",
+        "needsInterop",
+        "createCompatibleNodeWithFunc"
+      ],
+      "aliases": [
+        "Interop 桥接",
+        "Interop Bridge",
+        "动态静态互操作",
+        "Static Interop"
+      ],
+      "kb": "docs/kb/frontend/state_management/interop_bridge.md",
+      "spec_status": "active",
+      "source_paths": {
+        "interop_configure": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop_configure.ts",
+        "interop_module": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop_module.ts",
+        "interop": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop.ts",
+        "interop_storage": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop_storage.ts",
+        "v2_interop_storage": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/v2_interop_storage.ts",
+        "interop_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop_view.ts",
+        "interop_builder": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/interop_builder.ts",
+        "v2_builder": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/interop/v2_builder.ts"
+      },
+      "api_paths": {},
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/common_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27",
+      "func_id": "07-02-14",
+      "spec_domain": "specs/07-frontend/02-state-management/14-state-management-interop"
+    },
+    {
+      "id": "StateMgmtStaticV1Core",
+      "name": "Static State Management V1 Core",
+      "name_cn": "静态V1状态管理核心逻辑",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "静态V1核心",
+        "arkoala",
+        "DecoratedV1VariableBase",
+        "IStateMgmtFactory",
+        "STATE_MGMT_FACTORY",
+        "ObserveSingleton",
+        "MutableStateMeta",
+        "装饰变量工厂"
+      ],
+      "aliases": [
+        "静态 V1 核心",
+        "Static V1 Core",
+        "arkoala V1 核心"
+      ],
+      "kb": "docs/kb/frontend/state_management/static_v1_core.md",
+      "func_id": "07-02-08",
+      "spec_domain": "specs/07-frontend/02-state-management/08-static-v1-component-state",
+      "spec_status": "active",
+      "source_paths": {
+        "l0_root": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/",
+        "l1_root": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/",
+        "decorator_base": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorBase.ts",
+        "factory": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/stateMgmtFactory.ts",
+        "factory_internal": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/factoryInternal.ts",
+        "observe_singleton": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/observeSingleton.ts",
+        "mutable_state_meta": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/mutableStateMeta.ts",
+        "index": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/index.ts"
+      },
+      "api_paths": {
+        "v1_decorators_static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets",
+        "barrel": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/",
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/mock/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27"
+    },
+    {
       "id": "OHPlatformAdapter",
       "name": "OH Platform Adapter",
       "name_cn": "OH平台适配层",
@@ -4390,6 +4762,64 @@
         "test/unittest/adapter/ohos/osal/feature_manager/feature_manager_test.cpp",
         "test/unittest/adapter/ohos/entrance/rs_adapter_test.cpp",
         "test/mock/frameworks/core/common/mock_container.h"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27"
+    },
+    {
+      "id": "StateMgmtStaticV1Decorators",
+      "name": "Static State Management V1 Decorators",
+      "name_cn": "静态V1装饰器与数据对象观测",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "静态V1装饰器",
+        "@State",
+        "@Prop",
+        "@PropRef",
+        "@Link",
+        "@Provide",
+        "@Consume",
+        "@ObjectLink",
+        "@Watch",
+        "InterfaceProxyHandler",
+        "WrappedArray",
+        "@Track",
+        "arkoala"
+      ],
+      "aliases": [
+        "静态 V1 装饰器",
+        "Static V1 Decorators",
+        "arkoala V1 装饰器"
+      ],
+      "kb": "docs/kb/frontend/state_management/static_v1_decorators.md",
+      "func_id": "07-02-08",
+      "spec_domain": "specs/07-frontend/02-state-management/08-static-v1-component-state",
+      "spec_status": "active",
+      "source_paths": {
+        "decorator_impl": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/",
+        "state": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorState.ts",
+        "prop": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorProp.ts",
+        "prop_ref": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorPropRef.ts",
+        "link": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorLink.ts",
+        "provide": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorProvide.ts",
+        "consume": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorConsume.ts",
+        "object_link": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorObjectLink.ts",
+        "watch": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorWatch.ts",
+        "storage_link": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorStorageLink.ts",
+        "observed_proxy": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/tools/arkts/observeInterfaceProxy.ts",
+        "wrapped_array": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/observeWrappedArray.ts",
+        "ui_utils_impl": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/uiUtilsImpl.ts",
+        "utils": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/utils.ts"
+      },
+      "api_paths": {
+        "v1_decorators_static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets",
+        "utils_static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/utils.static.d.ets",
+        "barrel": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/",
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/tools/arkts/"
       ],
       "status": "active",
       "last_verified": "2026-07-27"
@@ -4478,6 +4908,48 @@
       "last_verified": "2026-07-27"
     },
     {
+      "id": "StateMgmtStaticV2Core",
+      "name": "Static State Management V2 Core",
+      "name_cn": "静态V2状态管理核心逻辑",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "静态V2核心",
+        "DecoratedV2VariableBase",
+        "StateUpdateLoop",
+        "autoProxyObject",
+        "ObserveSingleton",
+        "DecoratorBackingValue",
+        "arkoala"
+      ],
+      "aliases": [
+        "静态 V2 核心",
+        "Static V2 Core",
+        "arkoala V2 核心"
+      ],
+      "kb": "docs/kb/frontend/state_management/static_v2_core.md",
+      "func_id": "07-02-11",
+      "spec_domain": "specs/07-frontend/02-state-management/11-static-v2-component-state",
+      "spec_status": "active",
+      "source_paths": {
+        "decorator_base": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorBase.ts",
+        "state_update_loop": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/stateUpdateLoop.ts",
+        "ui_utils_impl": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/uiUtilsImpl.ts",
+        "observe_singleton": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/observeSingleton.ts",
+        "backing_value": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/base/backingValue.ts"
+      },
+      "api_paths": {
+        "v2_decorators_static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets",
+        "utils_static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/utils.static.d.ets",
+        "barrel": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27"
+    },
+    {
       "id": "BasicRenderPipeline",
       "name": "Basic Render Pipeline",
       "name_cn": "基础渲染管线",
@@ -4536,6 +5008,212 @@
         "test/unittest/core/base/frame_node_test_ng.cpp",
         "test/mock/frameworks/core/pipeline_ng/mock_ui_task_scheduler.cpp",
         "test/unittest/adapter/ohos/entrance/rs_adapter_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27"
+    },
+    {
+      "id": "StateMgmtStaticV2Decorators",
+      "name": "Static State Management V2 Decorators",
+      "name_cn": "静态V2装饰器与数据对象观测",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "静态V2装饰器",
+        "@Local",
+        "@Param",
+        "@Once",
+        "@Provider",
+        "@Consumer",
+        "@Monitor",
+        "@SyncMonitor",
+        "@Computed",
+        "@ObservedV2",
+        "@Trace",
+        "UIPlugin",
+        "MutableStateMeta",
+        "enableCompatibleObservedV2ForStatic",
+        "arkoala"
+      ],
+      "aliases": [
+        "静态 V2 装饰器",
+        "Static V2 Decorators",
+        "arkoala V2 装饰器",
+        "UIPlugin 转换"
+      ],
+      "kb": "docs/kb/frontend/state_management/static_v2_decorators.md",
+      "func_id": "07-02-11",
+      "spec_domain": "specs/07-frontend/02-state-management/11-static-v2-component-state",
+      "spec_status": "active",
+      "source_paths": {
+        "decorator_impl": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/",
+        "local": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorLocal.ts",
+        "param": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorParam.ts",
+        "param_once": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorParamOnce.ts",
+        "provider": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorProvider.ts",
+        "consumer": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorConsumer.ts",
+        "monitor": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorMonitor.ts",
+        "computed": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorComputed.ts",
+        "v2_interop_backing": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopBackingValue.ts",
+        "interop_component": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets"
+      },
+      "api_paths": {
+        "v2_decorators_static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets",
+        "barrel": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/",
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/mock/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27"
+    },
+    {
+      "id": "StateMgmtStaticStorage",
+      "name": "Static State Management Storage",
+      "name_cn": "静态存储体系",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "静态存储",
+        "LocalStorage",
+        "AppStorage",
+        "PersistentStorage",
+        "Environment",
+        "AppStorageV2",
+        "PersistenceV2",
+        "V2CollectionCoder",
+        "InteropStorage",
+        "InteropAppStorageV2",
+        "AniStorage",
+        "AniEnvironment",
+        "arkoala"
+      ],
+      "aliases": [
+        "静态存储体系",
+        "Static Storage",
+        "arkoala 存储"
+      ],
+      "kb": "docs/kb/frontend/state_management/static_storage.md",
+      "func_id": "07-02-10",
+      "spec_domain": "specs/07-frontend/02-state-management/10-static-v1-app-state",
+      "spec_status": "active",
+      "source_paths": {
+        "storage_root": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/storage/",
+        "local_storage": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/storage/localStorage.ts",
+        "app_storage": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/storage/appStorage.ts",
+        "persistent_storage": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/storage/persistentStorage.ts",
+        "environment": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/storage/environment.ts",
+        "app_storage_v2": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/storage/appStorageV2.ts",
+        "persistence_v2": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/storage/persistenceV2.ts",
+        "v2_collection_coder": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/storage/v2CollectionCoder.ts",
+        "storage_base": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/storage/storageBase.ts",
+        "interop_storage": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopStorage.ts",
+        "interop_storage_v2": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopStorageV2.ts",
+        "ani_native": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/stateMgmt/stateMgmt_module.cpp"
+      },
+      "api_paths": {
+        "v1_storage_decorators_static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets",
+        "v1_storage_static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/storage/localStorage.static.d.ets",
+        "v2_storage_static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/storage/appStorageV2.static.d.ets",
+        "barrel": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/storage/",
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/mock/",
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/stateMgmt/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27"
+    },
+    {
+      "id": "StateMgmtStaticInterop",
+      "name": "Static State Management Interop Bridge",
+      "name_cn": "静态状态管理互操作桥",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "静态互操作",
+        "InteropState",
+        "openInterop",
+        "CompatiblePeerNode",
+        "compatibleComponent",
+        "getCompatibleState",
+        "enableCompatibleObservedV2ForStatic",
+        "staticStateBindObservedObject",
+        "InteropStorage",
+        "BuilderViewV2",
+        "ViewStackProcessor",
+        "arkoala"
+      ],
+      "aliases": [
+        "静态 Interop 桥",
+        "Static Interop Bridge",
+        "arkoala 互操作"
+      ],
+      "kb": "docs/kb/frontend/state_management/static_interop_bridge.md",
+      "func_id": "07-02-14",
+      "spec_domain": "specs/07-frontend/02-state-management/14-state-management-interop",
+      "spec_status": "active",
+      "source_paths": {
+        "interop_storage": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopStorage.ts",
+        "interop_storage_v2": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopStorageV2.ts",
+        "interop_backing_value": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopBackingValue.ts",
+        "interop_binding": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/interop/interopBinding.ts",
+        "component_interop": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interop.ets",
+        "extendable_interop": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/interopExtendableComponent.ets",
+        "interop_watch": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorInteropWatch.ts",
+        "ani_interop": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/interop/interop_module.cpp"
+      },
+      "api_paths": {},
+      "test_paths": [
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/mock/",
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/interop/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27"
+    },
+    {
+      "id": "StateMgmtStaticCustomComponent",
+      "name": "Static Custom Component State",
+      "name_cn": "静态自定义组件状态相关",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "静态自定义组件",
+        "BaseCustomComponent",
+        "CustomComponentV2",
+        "GlobalReusePool",
+        "GlobalReusePoolRegistry",
+        "preRender",
+        "@ReusableV2",
+        "@Reusable",
+        "resetOnReuse",
+        "arkoala"
+      ],
+      "aliases": [
+        "静态自定义组件状态",
+        "Static Custom Component",
+        "arkoala 自定义组件"
+      ],
+      "kb": "docs/kb/frontend/state_management/static_custom_component.md",
+      "func_id": "07-03-07",
+      "spec_domain": "specs/07-frontend/03-custom-components/07-static-custom-component-state",
+      "spec_status": "active",
+      "source_paths": {
+        "custom_component": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/customComponent.ets",
+        "global_reuse_pool_decorator": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/decoratorImpl/decoratorGlobalReusePool.ts",
+        "global_reuse_pool": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/tools/globalReusePool.ts"
+      },
+      "api_paths": {
+        "component_decorators_static": "<OH_ROOT>/interface/sdk-js/api/arkui/incremental/annotation.static.d.ets",
+        "v2_lifecycle_decorators_static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets",
+        "utils_static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/utils.static.d.ets",
+        "barrel": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/",
+        "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/stateManagement/tools/"
       ],
       "status": "active",
       "last_verified": "2026-07-27"
