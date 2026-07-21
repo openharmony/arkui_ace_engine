@@ -307,7 +307,7 @@ void DynamicComponentRendererImpl::InitUiContent(
 
     DynamicInitialConfig dynamicInitialConfig;
     BuildDynamicInitialConfig(dynamicInitialConfig);
-    auto connector = GetconnectToRender();
+    auto connector = GetConnectToRender();
     uiContent_->InitializeDynamic(dynamicInitialConfig, connector);
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(hostInstanceId_);
     if (runtimeContext) {
@@ -349,7 +349,7 @@ void DynamicComponentRendererImpl::InitUiContent(
     rendererDumpInfo_.loadAbcTime = GetCurrentTimestamp();
 }
 
-sptr<IRemoteObject> DynamicComponentRendererImpl::GetconnectToRender()
+sptr<IRemoteObject> DynamicComponentRendererImpl::GetConnectToRender()
 {
     auto hostContainer = Container::GetContainer(hostInstanceId_);
     CHECK_NULL_RETURN(hostContainer, nullptr);

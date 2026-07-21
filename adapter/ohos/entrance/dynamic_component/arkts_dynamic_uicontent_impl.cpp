@@ -261,7 +261,8 @@ ArktsDynamicUIContentImpl::~ArktsDynamicUIContentImpl()
     TAG_LOGI(aceLogTag_, "destory ArktsDynamicUIContentImpl");
 }
 
-void ArktsDynamicUIContentImpl::InitializeArktsDynamicUIContentImpl(const DynamicInitialConfig& config)
+void ArktsDynamicUIContentImpl::InitializeArktsDynamicUIContentImpl(
+    const DynamicInitialConfig& config, sptr<IRemoteObject> connectorToRender)
 {
     if (uIContentType_ != UIContentType::DYNAMIC_COMPONENT) {
         TAG_LOGW(aceLogTag_, "UIContentType is not DYNAMIC_COMPONENT");
@@ -285,7 +286,7 @@ void ArktsDynamicUIContentImpl::InitializeArktsDynamicUIContentImpl(const Dynami
     }
 
     taskWrapper_.reset(taskWrapper);
-    CommonInitializeDc(config.abcPath);
+    CommonInitializeDc(config.abcPath, connectorToRender);
     AddWatchSystemParameter();
 
     TAG_LOGI(aceLogTag_, "[%{public}s][%{public}s][%{public}d]: InitializeDynamic, startUrl"
@@ -302,7 +303,8 @@ void ArktsDynamicUIContentImpl::InitializeArktsDynamicUIContentImpl(const Dynami
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
-UIContentErrorCode ArktsDynamicUIContentImpl::CommonInitializeDc(const std::string& contentInfo)
+UIContentErrorCode ArktsDynamicUIContentImpl::CommonInitializeDc(
+    const std::string& contentInfo, sptr<IRemoteObject> connectorToRender)
 {
     ACE_FUNCTION_TRACE();
     startUrl_ = contentInfo;
@@ -339,7 +341,7 @@ UIContentErrorCode ArktsDynamicUIContentImpl::CommonInitializeDc(const std::stri
     AfterContainerInitialize();
 
     // create ace_view
-    RefPtr<Platform::AceViewOhos> aceView = CreateAceView(density);
+    RefPtr<Platform::AceViewOhos> aceView = CreateAceView(density, connectorToRender);
     CHECK_NULL_RETURN(aceView, UIContentErrorCode::NULL_POINTER);
     // after frontend initialize
     HandleCommonInitializeWindowFocus();
@@ -609,7 +611,8 @@ void ArktsDynamicUIContentImpl::AfterContainerInitialize()
         moduleName_.c_str(), instanceId_, resPath.c_str(), hapPath.c_str());
 }
 
-RefPtr<Platform::AceViewOhos> ArktsDynamicUIContentImpl::CreateAceView(float &density)
+RefPtr<Platform::AceViewOhos> ArktsDynamicUIContentImpl::CreateAceView(
+    float &density, sptr<IRemoteObject> connectorToRender)
 {
     RefPtr<Platform::AceViewOhos> aceView = nullptr;
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -629,7 +632,7 @@ RefPtr<Platform::AceViewOhos> ArktsDynamicUIContentImpl::CreateAceView(float &de
     auto errorCode = UIContentErrorCode::NO_ERRORS;
     if (isFormRender_) {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, round(formWidth_),
-            round(formHeight_), window_);
+            round(formHeight_), window_, connectorToRender);
         if (errorCode > 0) {
             return aceView;
         }
