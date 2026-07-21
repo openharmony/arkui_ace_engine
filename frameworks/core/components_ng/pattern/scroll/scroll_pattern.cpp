@@ -174,6 +174,10 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (!SetScrollProperties(dirty, host)) {
         return false;
     }
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->ResetDragUpdateDelta();
+    }
     UpdateScrollBarOffset();
     if (config.frameSizeChange && isInitialized_) {
         if (GetScrollBar() != nullptr) {

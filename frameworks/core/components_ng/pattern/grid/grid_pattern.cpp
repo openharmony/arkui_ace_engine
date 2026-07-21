@@ -650,6 +650,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto gridLayoutAlgorithm = DynamicCast<GridLayoutBaseAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(gridLayoutAlgorithm, false);
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->ResetDragUpdateDelta();
+    }
     const auto& gridLayoutInfo = gridLayoutAlgorithm->GetGridLayoutInfo();
     if (!gridLayoutAlgorithm->MeasureInNextFrame()) {
         auto eventhub = GetEventHub<GridEventHub>();
