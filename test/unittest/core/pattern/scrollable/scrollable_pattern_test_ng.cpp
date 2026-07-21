@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <memory>
+
 #include <gmock/gmock.h>
 
 #include "gtest/gtest.h"
@@ -1631,6 +1633,113 @@ HWTEST_F(ScrollablePatternTestNg, HandleDragEnd004, TestSize.Level1)
     scrollable->HandleDragEnd(info, true);
     EXPECT_EQ(scrollable->dragStartPosition_, 0.0f);
     EXPECT_EQ(scrollable->dragEndPosition_, 0.0f);
+}
+
+/**
+ * @tc.name: HandleDragEnd005
+ * @tc.desc: Test drag update delta is reset after Pattern layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, HandleDragEnd005, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    auto totalOffset = std::make_shared<double>(0.0);
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>(
+        [totalOffset](double offset, int32_t) {
+            *totalOffset += offset;
+            return true;
+        },
+        Axis::VERTICAL);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->SetUseFlushUITasks(true);
+    scrollable->context_ = context;
+
+    GestureEvent startInfo;
+    GestureEvent updateInfo;
+    updateInfo.SetMainDelta(10.0);
+    GestureEvent endInfo;
+    endInfo.SetMainDelta(10.0);
+
+    scrollable->HandleDragStart(startInfo);
+    scrollable->HandleDragUpdate(updateInfo);
+    scrollable->HandleDragEnd(endInfo);
+    EXPECT_EQ(*totalOffset, 20.0);
+    EXPECT_EQ(scrollable->lastMainDelta_, 10.0);
+
+    *totalOffset = 0.0;
+    scrollable->HandleDragStart(startInfo);
+    scrollable->HandleDragUpdate(updateInfo);
+    scrollable->ResetDragUpdateDelta();
+    EXPECT_FALSE(scrollable->dragUpdateDelta_.has_value());
+    scrollable->HandleDragEnd(endInfo);
+    EXPECT_EQ(*totalOffset, 20.0);
+    EXPECT_EQ(scrollable->lastMainDelta_, 10.0);
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: HandleDragEnd006
+ * @tc.desc: Test Scrollable retains the previous drag update delta at drag start.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, HandleDragEnd006, TestSize.Level1)
+{
+    RefPtr<Scrollable> scrollable =
+        AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, Axis::VERTICAL);
+    scrollable->dragUpdateDelta_ = 1.0;
+
+    GestureEvent info;
+    scrollable->HandleDragStart(info);
+
+    EXPECT_TRUE(scrollable->dragUpdateDelta_.has_value());
+}
+
+/**
+ * @tc.name: HandleDragEnd007
+ * @tc.desc: Test Scrollable retains the drag update delta until Pattern layout completes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, HandleDragEnd007, TestSize.Level1)
+{
+    MockPipelineContext::SetUp();
+    RefPtr<Scrollable> scrollable =
+        AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, Axis::VERTICAL);
+    auto context = MockPipelineContext::GetCurrent();
+    ASSERT_NE(context, nullptr);
+    context->SetUseFlushUITasks(true);
+    scrollable->context_ = context;
+    GestureEvent info;
+    info.SetMainDelta(10.0);
+    scrollable->HandleDragUpdate(info);
+
+    ASSERT_TRUE(scrollable->dragUpdateDelta_.has_value());
+    EXPECT_EQ(*scrollable->dragUpdateDelta_, 10.0);
+    context->taskScheduler_->FlushAfterLayoutTask();
+    EXPECT_TRUE(scrollable->dragUpdateDelta_.has_value());
+    MockPipelineContext::TearDown();
+}
+
+/**
+ * @tc.name: HandleDragEnd008
+ * @tc.desc: Test drag end without an update processes its own delta
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, HandleDragEnd008, TestSize.Level1)
+{
+    auto totalOffset = std::make_shared<double>(0.0);
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>(
+        [totalOffset](double offset, int32_t) {
+            *totalOffset += offset;
+            return true;
+        },
+        Axis::VERTICAL);
+    GestureEvent info;
+    info.SetMainDelta(10.0);
+    scrollable->HandleDragEnd(info);
+
+    EXPECT_EQ(*totalOffset, 10.0);
+    EXPECT_EQ(scrollable->lastMainDelta_, 10.0);
 }
 
 /**
