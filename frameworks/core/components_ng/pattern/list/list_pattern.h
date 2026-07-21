@@ -405,7 +405,6 @@ public:
     {
         return static_cast<bool>(childrenSize_);
     }
-
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 
     SizeF GetChildrenExpandedSize() override;

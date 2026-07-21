@@ -1484,8 +1484,8 @@ bool ListItemPattern::GetLayouted() const
 
 void ListItemPattern::DumpAdvanceInfo()
 {
-    DumpLog::GetInstance().AddDesc("indexInList:" + std::to_string(GetIndexInList()));
-    DumpLog::GetInstance().AddDesc("indexInListItemGroup:" + std::to_string(GetIndexInListItemGroup()));
+    DumpLog::GetInstance().AddDesc("indexInList:" + std::to_string(indexInList_));
+    DumpLog::GetInstance().AddDesc("indexInListItemGroup:" + std::to_string(indexInListItemGroup_));
     DumpLog::GetInstance().AddDesc("swiperAction.startNodeIndex:" + std::to_string(startNodeIndex_));
     DumpLog::GetInstance().AddDesc("swiperAction.endNodeIndex:" + std::to_string(endNodeIndex_));
     DumpLog::GetInstance().AddDesc("swiperAction.childNodeIndex:" + std::to_string(childNodeIndex_));
@@ -1578,7 +1578,7 @@ bool ListItemPattern::ClickJudge(const PointF& localPoint)
     CHECK_NULL_RETURN(renderContext, false);
     RectF paintRect = renderContext->GetPaintRectWithoutTransform();
     auto offset = paintRect.GetOffset();
-    if (GetIndexInListItemGroup() != -1) {
+    if (indexInListItemGroup_ != -1) {
         auto parentFrameNode = GetParentFrameNode();
         CHECK_NULL_RETURN(parentFrameNode, false);
         auto parentRenderContext = parentFrameNode->GetRenderContext();
@@ -1642,8 +1642,8 @@ FocusPattern ListItemPattern::GetFocusPattern() const
 
 void ListItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
 {
-    json->Put("indexInList", GetIndexInList());
-    json->Put("indexInListItemGroup", GetIndexInListItemGroup());
+    json->Put("indexInList", indexInList_);
+    json->Put("indexInListItemGroup", indexInListItemGroup_);
     json->Put("swiperAction.startNodeIndex", startNodeIndex_);
     json->Put("swiperAction.endNodeIndex", endNodeIndex_);
     json->Put("swiperAction.childNodeIndex", childNodeIndex_);
@@ -1706,6 +1706,38 @@ void ListItemPattern::HandleFocusEvent()
     } else {
         pattern->ResetGroupFocusIndex();
     }
+}
+
+bool ListItemPattern::FindHeadOrTailChild(const RefPtr<FocusHub>& childFocus, FocusStep step, WeakPtr<FocusHub>& target)
+{
+    CHECK_NULL_RETURN(childFocus, false);
+    // Support moving focus to the first item of the List when pressing HOME
+    // and to the last item of the List when pressing END.
+    auto isHome = step == FocusStep::LEFT_END || step == FocusStep::UP_END;
+    auto isEnd = step == FocusStep::RIGHT_END || step == FocusStep::DOWN_END;
+    bool isFindTailOrHead = false;
+    if (isHome) {
+        isFindTailOrHead = childFocus->AnyChildFocusHub([&target](const RefPtr<FocusHub>& node) {
+            auto headNode = node->GetHeadOrTailChild(true);
+            if (headNode) {
+                target = headNode;
+                return true;
+            }
+            return false;
+        });
+    } else if (isEnd) {
+        isFindTailOrHead = childFocus->AnyChildFocusHub(
+            [&target](const RefPtr<FocusHub>& node) {
+                auto tailNode = node->GetHeadOrTailChild(false);
+                if (tailNode) {
+                    target = tailNode;
+                    return true;
+                }
+                return false;
+            },
+            true);
+    }
+    return isFindTailOrHead;
 }
 
 } // namespace OHOS::Ace::NG
