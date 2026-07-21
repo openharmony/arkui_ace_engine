@@ -20,7 +20,6 @@
 #include <regex>
 #include <utility>
 
-#include "base/geometry/shape.h"
 #include "frame_information.h"
 #include "grid_layout_option.h"
 #include "native_material_impl.h"

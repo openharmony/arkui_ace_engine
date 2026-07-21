@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
-#include "base/geometry/shape.h"
 #include "core/common/container.h"
 
 #include <utility>

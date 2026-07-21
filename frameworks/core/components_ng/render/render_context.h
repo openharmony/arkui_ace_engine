@@ -55,7 +55,6 @@ class RSNGShapeBase;
 
 namespace OHOS::Ace {
 struct SharedTransitionOption;
-class ShapeRect;
 class UiMaterial;
 struct UiMaterialInfo;
 struct ImmersiveMaterialConfig;

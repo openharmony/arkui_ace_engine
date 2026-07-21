@@ -33,10 +33,6 @@ class TextTimerEventHub;
 class TextTimerAccessibilityProperty;
 }
 
-namespace OHOS::Ace {
-class Scheduler;
-}
-
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline/base/element_register.h"
@@ -49,7 +45,7 @@ class TextTimerPattern : public Pattern {
 
 public:
     TextTimerPattern();
-    ~TextTimerPattern() override;
+    ~TextTimerPattern() override = default;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override;
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;

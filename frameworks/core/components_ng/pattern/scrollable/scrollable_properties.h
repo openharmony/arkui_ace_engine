@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/rect.h"
+#include "base/geometry/shape.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/gestures/gesture_event.h"
 #include "ui/properties/scrollable_properties.h"
@@ -32,8 +33,6 @@ class TouchEventImpl;
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
-
-class ShapeRect;
 constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
 constexpr float DEFAULT_SCROLL_TO_STIFFNESS = 227.0f;
 constexpr float DEFAULT_SCROLL_TO_DAMPING = 33.0f;
@@ -103,20 +102,7 @@ enum class ContentClipMode {
     DEFAULT,      // Different scrollable components have different default clip values.
 };
 
-struct ACE_FORCE_EXPORT ContentClip {
-    ContentClipMode first;
-    RefPtr<ShapeRect> second;
-
-    ContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape);
-    ContentClip(const ContentClip& other);
-    ContentClip(ContentClip&& other);
-    ContentClip& operator=(const ContentClip& other);
-    ContentClip& operator=(ContentClip&& other);
-    ~ContentClip();
-
-    bool operator==(const ContentClip& other) const;
-    bool operator!=(const ContentClip& other) const;
-};
+using ContentClip = std::pair<ContentClipMode, RefPtr<ShapeRect>>;
 } // namespace NG
 
 using NestedState = NG::NestedState;

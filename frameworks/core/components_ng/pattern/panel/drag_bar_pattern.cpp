@@ -48,9 +48,6 @@ const OffsetT<Dimension> POINT_R_EXPAND = OffsetT<Dimension>(47.0_vp, 9.0_vp);  
 
 } // namespace
 
-DragBarPattern::DragBarPattern() = default;
-DragBarPattern::~DragBarPattern() = default;
-
 void DragBarPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();

@@ -20,7 +20,6 @@
 
 #include "base/log/dump_log.h"
 #include "base/i18n/localization.h"
-#include "core/animation/scheduler.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/texttimer/text_timer_accessibility_property.h"
@@ -66,8 +65,6 @@ TextTimerPattern::TextTimerPattern()
 {
     textTimerController_ = MakeRefPtr<TextTimerController>();
 }
-
-TextTimerPattern::~TextTimerPattern() = default;
 
 void TextTimerPattern::FireChangeEvent()
 {

@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/slider/slider_content_modifier.h"
 
-#include "base/geometry/shape.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/pattern/slider/slider_paint_property.h"
 #include "core/components_ng/pattern/slider/slider_pattern.h"
