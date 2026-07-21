@@ -60,7 +60,6 @@ private:
     RSBitmap CreateBitMap(
         int32_t width, const QrcodeImage& qrCode, const Color& color, const Color& backgroundColor) const;
     uint32_t ConvertColorFromHighToLow(const Color& color) const;
-    bool GetQrcodeModule(int32_t x, int32_t y, const QrcodeImage& qrCode) const;
 
     RefPtr<AnimatablePropertyFloat> opacity_;
     RefPtr<PropertyFloat> qrCodeSize_;

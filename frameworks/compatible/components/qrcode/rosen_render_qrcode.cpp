@@ -124,7 +124,7 @@ SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& 
     int32_t blockWidth = width / qrCode.width;
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
-            data[i * width + j] = GetQrcodeModule(j / blockWidth, i / blockWidth, qrCode)
+            data[i * width + j] = QrcodeGetModule(&qrCode, j / blockWidth, i / blockWidth)
                                       ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())
                                       : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());
         }
@@ -148,7 +148,7 @@ RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& 
     int32_t blockWidth = width / qrCode.width;
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
-            data[i * width + j] = GetQrcodeModule(j / blockWidth, i / blockWidth, qrCode)
+            data[i * width + j] = QrcodeGetModule(&qrCode, j / blockWidth, i / blockWidth)
                                       ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())
                                       : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());
         }
@@ -156,20 +156,4 @@ RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& 
     return bitmap;
 }
 #endif
-
-bool RosenRenderQrcode::GetQrcodeModule(int32_t xPos,
-    int32_t yPos, const QrcodeImage& qrCode) const
-{
-    uint32_t qrWidth = qrCode.width;
-    if (qrWidth == 0 || qrCode.data == nullptr) {
-        return false;
-    }
-
-    if ((xPos < 0) || (xPos >= qrWidth) || (yPos < 0) || (yPos >= qrWidth)) {
-        return false;
-    }
-
-    uint8_t* sourceData = qrCode.data;
-    return (*(sourceData + yPos * qrWidth + xPos) & 1);
-}
 } // namespace OHOS::Ace

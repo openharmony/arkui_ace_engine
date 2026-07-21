@@ -101,7 +101,7 @@ RSBitmap QRCodeModifier::CreateBitMap(
     int32_t maxHeight = 0;
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
-            if (GetQrcodeModule(j / blockWidth, i / blockWidth, qrCode)) {
+            if (QrcodeGetModule(&qrCode, j / blockWidth, i / blockWidth)) {
                 data[i * width + j] = ConvertColorFromHighToLow(color);
                 maxWidth = i > maxWidth ? i : maxWidth;
                 maxHeight = j > maxHeight ? j : maxHeight;
@@ -113,7 +113,7 @@ RSBitmap QRCodeModifier::CreateBitMap(
     }
     for (int32_t i = 0; i <= maxWidth; i++) {
         for (int32_t j = 0; j <= maxHeight; j++) {
-            if (!GetQrcodeModule(j / blockWidth, i / blockWidth, qrCode)) {
+            if (!QrcodeGetModule(&qrCode, j / blockWidth, i / blockWidth)) {
                 data[i * width + j] = ConvertColorFromHighToLow(backgroundColor);
             }
         }
@@ -129,22 +129,6 @@ uint32_t QRCodeModifier::ConvertColorFromHighToLow(const Color& color) const
     convertedColor.argb.red = color.GetRed();
     convertedColor.argb.alpha = color.GetAlpha();
     return convertedColor.value;
-}
-
-bool QRCodeModifier::GetQrcodeModule(int32_t xPos,
-    int32_t yPos, const QrcodeImage& qrCode) const
-{
-    uint32_t qrWidth = qrCode.width;
-    if (qrWidth == 0 || qrCode.data == nullptr) {
-        return false;
-    }
-
-    if ((xPos < 0) || (xPos >= qrWidth) || (yPos < 0) || (yPos >= qrWidth)) {
-        return false;
-    }
-
-    uint8_t* sourceData = qrCode.data;
-    return (*(sourceData + yPos * qrWidth + xPos) & 1);
 }
 
 void QRCodeModifier::SetQRCodeOpacity(float opacity)
