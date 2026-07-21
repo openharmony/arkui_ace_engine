@@ -120,6 +120,24 @@ void DispatchDirectionChanged(const SystemEnvDispatchContext& context)
     frameNode->OnConfigurationUpdate(configurationChange);
 }
 
+void DispatchFontScaleChanged(const SystemEnvDispatchContext& context)
+{
+    auto customNode = AceType::DynamicCast<CustomNode>(context.node);
+    if (customNode) {
+        customNode->MarkNeedUpdate();
+    }
+
+    auto frameNode = context.frameNode;
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->MarkEnvDirty(ENV_KEY_FONT_SCALE);
+    }
+    ConfigurationChange configurationChange;
+    configurationChange.fontScaleUpdate = true;
+    frameNode->OnConfigurationUpdate(configurationChange);
+}
+
 } // namespace
 
 EnvironmentManager::EnvironmentManager()
@@ -128,6 +146,11 @@ EnvironmentManager::EnvironmentManager()
         ENV_KEY_DIRECTION,
         SystemEnvImplicitNotifyMode::FULL,
         DispatchDirectionChanged,
+    });
+    RegisterSystemEnvHandler({
+        ENV_KEY_FONT_SCALE,
+        SystemEnvImplicitNotifyMode::FULL,
+        DispatchFontScaleChanged,
     });
 }
 

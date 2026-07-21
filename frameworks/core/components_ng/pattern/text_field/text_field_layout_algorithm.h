@@ -207,7 +207,7 @@ private:
     static void UpdateTextStyleLineHeight(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle);
     static void UpdateTextStyleFontScale(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty,
-        TextStyle& textStyle, const RefPtr<TextFieldPattern>& pattern);
+        TextStyle& textStyle);
     static void UpdatePlaceholderTextStyleSetTextColor(
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<FrameNode>& frameNode,
         TextStyle& textStyle, bool isDisabled, bool isTextColorByUser);

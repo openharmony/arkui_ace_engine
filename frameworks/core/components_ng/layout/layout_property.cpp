@@ -1397,6 +1397,24 @@ TextDirection LayoutProperty::GetLayoutDirection() const
     return directionEnv.value_or(TextDirection::AUTO);
 }
 
+std::optional<float> LayoutProperty::GetEnvFontScale() const
+{
+    if (!NeedReadFontScaleFromEnv()) {
+        return std::nullopt;
+    }
+    auto host = GetHost();
+    auto pipeline = host ? host->GetContext() : nullptr;
+    if (!host || !pipeline || !pipeline->IsEnvManagerActive()) {
+        return std::nullopt;
+    }
+    auto& [fontScaleEnv, fontScaleEnvDirty] = envReaderCache_.fontScale;
+    if (fontScaleEnvDirty) {
+        fontScaleEnv = pipeline->ResolveFontScaleFromEnv(host);
+        fontScaleEnvDirty = false;
+    }
+    return fontScaleEnv;
+}
+
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const
 {
     auto direction = GetLayoutDirection();

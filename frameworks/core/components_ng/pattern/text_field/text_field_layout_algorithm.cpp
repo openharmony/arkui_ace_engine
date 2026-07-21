@@ -84,7 +84,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     CHECK_NULL_VOID(textFieldPaintProperty);
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isTextArea = pattern->IsTextArea();
-    UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
+    UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle);
     UpdateStrokeJoinStyle(textFieldLayoutProperty, textStyle);
 #ifdef ENABLE_AUTO_FILL_CONTROLLER
     auto autofillController = pattern->GetOrCreateAutoFillController();
@@ -322,7 +322,7 @@ void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double 
             pipeline->GetMaxAppFontScale());
         float fontScale = std::min(pipeline->GetFontScaleFromEnv(frameNode), maxFontScale);
         indentValue = Dimension(indentValue).ConvertToPxDistributeWithEnv(minFontScale, maxFontScale, true,
-            pattern->GetEnvFontScale());
+            textFieldLayoutProperty->GetEnvFontScale());
         if (!textIndent_.NormalizeToPx(pipeline->GetDipScale(),
             fontScale, pipeline->GetLogicScale(), width, indentValue)) {
             return;
@@ -778,7 +778,7 @@ float TextFieldLayoutAlgorithm::GetVisualTextWidth() const
 }
 
 void TextFieldLayoutAlgorithm::UpdateTextStyleFontScale(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty,
-    TextStyle& textStyle, const RefPtr<TextFieldPattern>& pattern)
+    TextStyle& textStyle)
 {
     if (textFieldLayoutProperty->HasMaxFontScale()) {
         textStyle.SetMaxFontScale(textFieldLayoutProperty->GetMaxFontScale().value());
@@ -786,7 +786,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleFontScale(const RefPtr<TextFieldLa
     if (textFieldLayoutProperty->HasMinFontScale()) {
         textStyle.SetMinFontScale(textFieldLayoutProperty->GetMinFontScale().value());
     }
-    textStyle.SetEnvFontScale(pattern->GetEnvFontScale());
+    textStyle.SetEnvFontScale(textFieldLayoutProperty->GetEnvFontScale());
 }
 
 void TextFieldLayoutAlgorithm::UpdateTextStyleSetTextColor(const RefPtr<FrameNode>& frameNode,
@@ -1614,7 +1614,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
     if (layoutProperty->HasMinFontScale()) {
         placeholderTextStyle.SetMinFontScale(layoutProperty->GetMinFontScale().value());
     }
-    placeholderTextStyle.SetEnvFontScale(pattern->GetEnvFontScale());
+    placeholderTextStyle.SetEnvFontScale(layoutProperty->GetEnvFontScale());
     placeholderTextStyle.SetLineSpacing(theme->GetPlaceholderLineSpacing());
 }
 

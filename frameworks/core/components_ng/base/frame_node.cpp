@@ -1872,6 +1872,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     TriggerRsProfilerNodeMountCallbackIfExist();
     if (layoutProperty_) {
         layoutProperty_->MarkEnvDirty(ENV_KEY_DIRECTION);
+        layoutProperty_->MarkEnvDirty(ENV_KEY_FONT_SCALE);
     }
     if (eventHub_) {
         eventHub_->FireOnAttach();
