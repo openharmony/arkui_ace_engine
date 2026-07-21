@@ -29,6 +29,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
@@ -1307,5 +1308,30 @@ HWTEST_F(ViewAbstractModelStaticTestNg, FocusBoxAndScopeSetters, TestSize.Level1
     ViewAbstractModelStatic::SetFocusScopePriority(AceType::RawPtr(frameNode), std::nullopt, std::nullopt);
     EXPECT_FALSE(focusHub->GetFocusBox().GetStyle().has_value());
     EXPECT_EQ(focusHub->focusPriority_, FocusPriority::AUTO);
+}
+
+/**
+ * @tc.name: FocusBoxLpxAttribute001
+ * @tc.desc: Test static focus box style registers and unregisters LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelStaticTestNg, FocusBoxLpxAttribute001, TestSize.Level1)
+{
+    auto frameNode = CreateStaticFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    FocusBoxStyle lpxStyle;
+    lpxStyle.strokeWidth = Dimension(STATIC_TEST_FLOAT_TWO, DimensionUnit::LPX);
+    lpxStyle.margin = Dimension(STATIC_TEST_FLOAT_THREE, DimensionUnit::LPX);
+    ViewAbstractModelStatic::SetFocusBoxStyle(AceType::RawPtr(frameNode), lpxStyle);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_STROKE), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_MARGIN), 1);
+
+    FocusBoxStyle vpStyle;
+    vpStyle.strokeWidth = Dimension(STATIC_TEST_FLOAT_TWO, DimensionUnit::VP);
+    vpStyle.margin = Dimension(STATIC_TEST_FLOAT_THREE, DimensionUnit::VP);
+    ViewAbstractModelStatic::SetFocusBoxStyle(AceType::RawPtr(frameNode), vpStyle);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_STROKE), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_MARGIN), 0);
 }
 } // namespace OHOS::Ace::NG

@@ -15,8 +15,15 @@
 #include "test/unittest/core/base/view_abstract_test_ng.h"
 #include "core/common/event_manager.h"
 
+#include "base/geometry/calc_dimension.h"
+#include "base/geometry/calc_dimension_rect.h"
+#include "base/geometry/dimension_offset.h"
+#include "base/geometry/dimension_rect.h"
+#include "base/geometry/response_region.h"
+#include "base/image/image_resizable_slice.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/select/select_theme.h"
+#include "core/components_ng/event/focus_box.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
@@ -1551,6 +1558,214 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashWidth003, TestSize.Level1)
     vpProp.rightDimen = vpDim;
     ViewAbstract::SetDashWidth(vpProp);
     EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxResponseRegionList001
+ * @tc.desc: Test response region list APIs register and unregister LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxResponseRegionList001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    CalcDimension lpxDim(10.0, DimensionUnit::LPX);
+    CalcDimension vpDim(10.0, DimensionUnit::VP);
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> lpxRegionMap;
+    lpxRegionMap[ResponseRegionSupportedTool::ALL].emplace_back(lpxDim, lpxDim, lpxDim, lpxDim);
+
+    ViewAbstract::SetResponseRegionList(lpxRegionMap, true);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_WIDTH), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_HEIGHT), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_X), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_Y), 1);
+
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> vpRegionMap;
+    vpRegionMap[ResponseRegionSupportedTool::ALL].emplace_back(vpDim, vpDim, vpDim, vpDim);
+    ViewAbstract::SetResponseRegionList(vpRegionMap, true);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_WIDTH), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_HEIGHT), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_X), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_Y), 0);
+
+    std::vector<ResponseRegion> lpxRegions = {
+        ResponseRegion(ResponseRegionSupportedTool::ALL, lpxDim, lpxDim, lpxDim, lpxDim) };
+    ViewAbstract::SetResponseRegionList(frameNode, lpxRegions);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_WIDTH), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_HEIGHT), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_X), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_Y), 1);
+
+    std::vector<ResponseRegion> vpRegions = {
+        ResponseRegion(ResponseRegionSupportedTool::ALL, vpDim, vpDim, vpDim, vpDim) };
+    ViewAbstract::SetResponseRegionList(frameNode, vpRegions);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_WIDTH), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_HEIGHT), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_X), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_LIST_Y), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxResponseRegion001
+ * @tc.desc: Test response region APIs register and unregister LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxResponseRegion001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+    std::vector<DimensionRect> lpxRegions = {
+        DimensionRect(lpxDim, lpxDim, DimensionOffset(lpxDim, lpxDim)) };
+
+    ViewAbstract::SetResponseRegion(lpxRegions);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_WIDTH), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_HEIGHT), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_X), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_Y), 1);
+
+    std::vector<DimensionRect> vpRegions = {
+        DimensionRect(vpDim, vpDim, DimensionOffset(vpDim, vpDim)) };
+    ViewAbstract::SetResponseRegion(vpRegions);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_WIDTH), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_HEIGHT), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_X), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_Y), 0);
+
+    ViewAbstract::SetResponseRegion(frameNode, lpxRegions);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_WIDTH), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_HEIGHT), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_X), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_Y), 1);
+
+    ViewAbstract::SetResponseRegion(frameNode, vpRegions);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_WIDTH), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_HEIGHT), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_X), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_RESPONSE_REGION_Y), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxMouseResponseRegion001
+ * @tc.desc: Test mouse response region APIs register and unregister LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxMouseResponseRegion001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+    std::vector<DimensionRect> lpxRegions = {
+        DimensionRect(lpxDim, lpxDim, DimensionOffset(lpxDim, lpxDim)) };
+    std::vector<DimensionRect> vpRegions = {
+        DimensionRect(vpDim, vpDim, DimensionOffset(vpDim, vpDim)) };
+
+    ViewAbstract::SetMouseResponseRegion(lpxRegions);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_WIDTH), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_HEIGHT), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_X), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_Y), 1);
+
+    ViewAbstract::SetMouseResponseRegion(vpRegions);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_WIDTH), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_HEIGHT), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_X), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_Y), 0);
+
+    ViewAbstract::SetMouseResponseRegion(frameNode, lpxRegions);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_WIDTH), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_HEIGHT), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_X), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_Y), 1);
+
+    ViewAbstract::SetMouseResponseRegion(frameNode, vpRegions);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_WIDTH), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_HEIGHT), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_X), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_MOUSE_RESPONSE_REGION_Y), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxFocusBoxStyle001
+ * @tc.desc: Test focus box style APIs register and unregister LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxFocusBoxStyle001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+
+    FocusBoxStyle lpxStyle;
+    lpxStyle.strokeWidth = Dimension(10.0, DimensionUnit::LPX);
+    lpxStyle.margin = Dimension(10.0, DimensionUnit::LPX);
+    ViewAbstract::SetFocusBoxStyle(lpxStyle);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_STROKE), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_MARGIN), 1);
+
+    FocusBoxStyle vpStyle;
+    vpStyle.strokeWidth = Dimension(10.0, DimensionUnit::VP);
+    vpStyle.margin = Dimension(10.0, DimensionUnit::VP);
+    ViewAbstract::SetFocusBoxStyle(vpStyle);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_STROKE), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_MARGIN), 0);
+
+    ViewAbstract::SetFocusBoxStyle(frameNode, lpxStyle, false);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_STROKE), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_MARGIN), 1);
+
+    ViewAbstract::SetFocusBoxStyle(frameNode, vpStyle, false);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_STROKE), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_FOCUS_BOX_MARGIN), 0);
+}
+
+/**
+ * @tc.name: ViewAbstractLpxBackgroundImageResizableSlice001
+ * @tc.desc: Test background image resizable slice APIs register and unregister LPX attributes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxBackgroundImageResizableSlice001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->AttachToMainTree();
+    ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
+
+    Dimension lpxDim(10.0, DimensionUnit::LPX);
+    Dimension vpDim(10.0, DimensionUnit::VP);
+    ImageResizableSlice lpxSlice { lpxDim, lpxDim, lpxDim, lpxDim };
+    ViewAbstract::SetBackgroundImageResizableSlice(lpxSlice);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_LEFT), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_RIGHT), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_TOP), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_BOTTOM), 1);
+
+    ImageResizableSlice vpSlice { vpDim, vpDim, vpDim, vpDim };
+    ViewAbstract::SetBackgroundImageResizableSlice(vpSlice);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_LEFT), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_RIGHT), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_TOP), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_BOTTOM), 0);
+
+    ViewAbstract::SetBackgroundImageResizableSlice(frameNode, lpxSlice, false);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_LEFT), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_RIGHT), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_TOP), 1);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_BOTTOM), 1);
+
+    ViewAbstract::SetBackgroundImageResizableSlice(frameNode, vpSlice, false);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_LEFT), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_RIGHT), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_TOP), 0);
+    EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_BORDER_IMAGE_BOTTOM), 0);
 }
 
 } // namespace OHOS::Ace::NG
