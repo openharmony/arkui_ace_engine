@@ -24,6 +24,8 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/multi_thread.h"
@@ -3605,6 +3607,7 @@ void DialogPattern::PlayDistortion()
     AnimationOption option;
     option.SetDuration(1000);
     option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 322, 27)); // Spring curve
+    PerfMonitor::GetPerfMonitor()->Start(PerfConstants::DIALOG_LIGHT_SENSE_ANIMATION, PerfActionType::LAST_UP, "");
     renderContext->ScaleAnimation(option, INITIAL_ZOOM_FACTOR, 1);
     renderContext->UpdateTranslateInXY(
         OffsetF(0, renderContext->GetPaintRectWithoutTransform().Height() * TRANSLATEY_RATIO));
