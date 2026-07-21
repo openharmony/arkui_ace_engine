@@ -279,7 +279,8 @@ void ArktsDynamicComponentRendererImpl::InitUiContent(OHOS::AbilityRuntime::Cont
 
     DynamicInitialConfig dynamicInitialConfig;
     BuildDynamicInitialConfig(dynamicInitialConfig);
-    uiContent_->InitializeArktsDynamicUIContentImpl(dynamicInitialConfig);
+    auto connector = GetConnectToRender();
+    uiContent_->InitializeArktsDynamicUIContentImpl(dynamicInitialConfig, connector);
 
     auto runtimeContext = Platform::AceContainer::GetRuntimeContext(hostInstanceId_);
     if (runtimeContext) {
@@ -311,6 +312,21 @@ void ArktsDynamicComponentRendererImpl::InitUiContent(OHOS::AbilityRuntime::Cont
     }
     InitializeDynamicAccessibility();
     rendererDumpInfo_.loadAbcTime = GetCurrentTimestamp();
+}
+
+sptr<IRemoteObject> ArktsDynamicComponentRendererImpl::GetConnectToRender()
+{
+    auto hostContainer = Container::GetContainer(hostInstanceId_);
+    CHECK_NULL_RETURN(hostContainer, nullptr);
+    auto pipeline = hostContainer->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_RETURN(window, nullptr);
+    auto rsUIDirector = window->GetRSUIDirector();
+    CHECK_NULL_RETURN(rsUIDirector, nullptr);
+    auto rsUIContext = rsUIDirector->GetRSUIContext();
+    CHECK_NULL_RETURN(rsUIContext, nullptr);
+    return rsUIContext->GetConnectToRender();
 }
 
 void ArktsDynamicComponentRendererImpl::RegisterContainerHandler()

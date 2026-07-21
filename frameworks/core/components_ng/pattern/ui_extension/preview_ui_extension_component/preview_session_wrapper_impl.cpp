@@ -359,7 +359,7 @@ void PreviewSessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Ses
     extensionSessionInfo.parentWindowType_ = parentWindowType;
     extensionSessionInfo.uiExtensionUsage_ = static_cast<uint32_t>(config.uiExtensionUsage);
     extensionSessionInfo.isAsyncModalBinding_ = config.isAsyncModalBinding;
-    SetConnectTORenderInner(container, extensionSessionInfo);
+    SetConnectToRenderInner(container, extensionSessionInfo);
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);
     lifecycleListener_ = std::make_shared<PreviewUIExtensionLifecycleListener>(
@@ -369,8 +369,8 @@ void PreviewSessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Ses
     RegisterDataConsumer();
 }
 
-void PreviewSessionWrapperImpl::SetConnectTORenderInner(
-    RefPtr<Platform::AceContainer> container, Rosen::SessionInfo& extensionSessionInfo)
+void PreviewSessionWrapperImpl::SetConnectToRenderInner(
+    const RefPtr<Platform::AceContainer>& container, Rosen::SessionInfo& extensionSessionInfo)
 {
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_VOID(pipeline);
@@ -381,6 +381,7 @@ void PreviewSessionWrapperImpl::SetConnectTORenderInner(
     auto rsUIContext = rsUIDirector->GetRSUIContext();
     CHECK_NULL_VOID(rsUIContext);
     extensionSessionInfo.connectToRenderToken_ = rsUIContext->GetConnectToRender();
+    PLATFORM_LOGI("PreviewUIExtension get connectToRenderToken success.");
 }
 
 void PreviewSessionWrapperImpl::DestroySession()
