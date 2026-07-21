@@ -134,7 +134,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
     }
     const float prevOffset = pattern->GetPrevOffset();
-    syncLoad_ = layoutProperty->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
+    syncLoad_ = layoutProperty->GetSyncLoad().value_or(true) || matchChildren ||
                 layoutInfo_->targetIndex_.has_value() || !NearEqual(layoutInfo_->currentOffset_, prevOffset);
     double originalWidth = idealSize.Width();
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);

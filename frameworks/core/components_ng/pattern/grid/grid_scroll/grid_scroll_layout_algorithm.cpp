@@ -71,7 +71,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         return;
     }
     bool matchChildren = ShouldMatchChildrenByLayoutPolicy(GetMainAxisSize(frameSize_, axis), layoutPolicy, axis);
-    syncLoad_ = gridLayoutProperty->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
+    syncLoad_ = gridLayoutProperty->GetSyncLoad().value_or(true) || matchChildren ||
                 info_.targetIndex_.has_value() || !NearEqual(info_.currentOffset_, info_.prevOffset_);
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize_);
     double originalWidth = frameSize_.Width();

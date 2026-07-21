@@ -84,7 +84,7 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     InitUnlayoutedItems();
 
     const float prevOffset = pattern->GetPrevOffset();
-    syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
+    syncLoad_ = props_->GetSyncLoad().value_or(true) || matchChildren ||
                 info_->targetIndex_.has_value() || !NearEqual(info_->currentOffset_, prevOffset);
     GetExpandArea(props_, info_);
     // set mainSize_ before Init(), whose dirty scan may measure items
