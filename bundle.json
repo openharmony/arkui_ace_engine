@@ -124,11 +124,11 @@
                 "resource_schedule_service",
                 "background_task_mgr",
                 "request",
-                "qrcodegen",
                 "sdk",
                 "screenlock_mgr",
                 "video_processing_engine",
-                "egl"
+                "egl",
+                "qrcode_generator"
             ],
             "third_party": []
         },

@@ -19,7 +19,7 @@
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkBitmap.h"
 #endif
-#include "qrcodegen.hpp"
+#include "qrcode_generator.h"
 
 #include "compatible/components/qrcode/render_qrcode.h"
 #ifdef USE_ROSEN_DRAWING
@@ -47,12 +47,12 @@ public:
     ~RosenRenderQrcode() override = default;
 
     void Paint(RenderContext& context, const Offset& offset) override;
-    void DrawQRCode(RenderContext& context, const Offset& topLeft, int32_t size, const qrcodegen::QrCode& qrCode);
+    void DrawQRCode(RenderContext& context, const Offset& topLeft, int32_t size, const QrcodeImage& qrCode);
     uint32_t ConvertColorFromHighToLow(const Color& color);
 #ifndef USE_ROSEN_DRAWING
-    SkBitmap ProcessQrcodeData(int32_t width, const qrcodegen::QrCode& qrCode);
+    SkBitmap ProcessQrcodeData(int32_t width, const QrcodeImage& qrCode);
 #else
-    RSBitmap ProcessQrcodeData(int32_t width, const qrcodegen::QrCode& qrCode);
+    RSBitmap ProcessQrcodeData(int32_t width, const QrcodeImage& qrCode);
 #endif
 };
 

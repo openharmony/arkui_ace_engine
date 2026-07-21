@@ -583,11 +583,11 @@ template("ace_compatible_source") {
     }
     if (qrcodegen_support) {
       if (is_arkui_x) {
-        deps += [ "//third_party/qrcodegen:ace_engine_qrcode" ]
+        deps += [ "//commonlibrary/qrcode_generator:qrcodegen" ]
       } else {
-        external_deps += [ "qrcodegen:ace_engine_qrcode" ]
+        external_deps += [ "qrcode_generator:qrcodegen" ]
+      }
     }
-  }
  }
 }
 

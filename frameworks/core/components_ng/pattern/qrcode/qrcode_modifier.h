@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODIFIER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODIFIER_H
 
-#include "qrcodegen.hpp"
+#include "qrcode_generator.h"
 
 #include "base/geometry/arc.h"
 #include "base/geometry/dimension.h"
@@ -58,7 +58,7 @@ public:
 
 private:
     RSBitmap CreateBitMap(
-        int32_t width, const qrcodegen::QrCode& qrCode, const Color& color, const Color& backgroundColor) const;
+        int32_t width, const QrcodeImage& qrCode, const Color& color, const Color& backgroundColor) const;
     uint32_t ConvertColorFromHighToLow(const Color& color) const;
 
     RefPtr<AnimatablePropertyFloat> opacity_;
