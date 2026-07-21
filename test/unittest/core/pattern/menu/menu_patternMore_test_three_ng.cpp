@@ -29,6 +29,10 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/security_component/security_component_paint_property.h"
+#include "core/components_ng/syntax/if_else_node.h"
 #include "core/components_ng/property/geometry_property.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 
@@ -701,4 +705,330 @@ HWTEST_F(MenuPatternGetAdjustedPosTestNg, GetAdjustedExtensionMenuPosition023, T
         (selectMenuPaintRect.Width() - extensionMenuSize.Width()) / 2.0f;
     EXPECT_NEAR(result.GetX(), expectedX, 0.01f);
 }
+/**
+ * @tc.name: OnThemeScopeUpdateTest001
+ * @tc.desc: Test UpdateGridMenuItemThemeRecursively via OnThemeScopeUpdate with a text node option.
+ *           Covers: textLayoutProperty != null, renderContext != null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnThemeScopeUpdateTest001, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    menuPattern_->AddOptionNode(textNode);
+
+    auto ret = menuPattern_->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(ret);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest002
+ * @tc.desc: Test UpdateGridMenuItemThemeRecursively via OnThemeScopeUpdate with a plain node option.
+ *           Covers: textLayoutProperty == null, imageRenderProperty == null,
+ *           securityPaintProperty == null, no children.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnThemeScopeUpdateTest002, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto plainNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(plainNode, nullptr);
+    menuPattern_->AddOptionNode(plainNode);
+
+    auto ret = menuPattern_->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(ret);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest003
+ * @tc.desc: Test UpdateGridMenuItemThemeRecursively via OnThemeScopeUpdate with an image node option.
+ *           Covers: imageRenderProperty != null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnThemeScopeUpdateTest003, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto imageNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageNode, nullptr);
+    menuPattern_->AddOptionNode(imageNode);
+
+    auto ret = menuPattern_->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(ret);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest004
+ * @tc.desc: Test UpdateGridMenuItemThemeRecursively via OnThemeScopeUpdate with a security component node.
+ *           Covers: securityPaintProperty != null, API >= 26 (iconColor branch true).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnThemeScopeUpdateTest004, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto securityNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(securityNode, nullptr);
+    securityNode->paintProperty_ = AceType::MakeRefPtr<SecurityComponentPaintProperty>();
+    menuPattern_->AddOptionNode(securityNode);
+
+    auto ret = menuPattern_->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(ret);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest005
+ * @tc.desc: Test UpdateGridMenuItemThemeRecursively via OnThemeScopeUpdate with a node that has
+ *           FrameNode children. Covers: has children, childFrame != null (recursion).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnThemeScopeUpdateTest005, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto parentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(parentNode, nullptr);
+
+    auto textChild = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textChild, nullptr);
+    textChild->MountToParent(parentNode);
+
+    menuPattern_->AddOptionNode(parentNode);
+
+    auto ret = menuPattern_->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(ret);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest006
+ * @tc.desc: Test UpdateGridMenuItemThemeRecursively via OnThemeScopeUpdate with a node that has
+ *           a non-FrameNode child (IfElseNode). Covers: has children, childFrame == null (continue).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnThemeScopeUpdateTest006, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto parentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(parentNode, nullptr);
+
+    auto ifElseChild = AceType::MakeRefPtr<IfElseNode>(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(ifElseChild, nullptr);
+    ifElseChild->MountToParent(parentNode);
+
+    menuPattern_->AddOptionNode(parentNode);
+
+    auto ret = menuPattern_->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(ret);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest007
+ * @tc.desc: Test UpdateGridMenuItemThemeRecursively via OnThemeScopeUpdate with a multi-level
+ *           recursive tree. Covers: deeper recursion with mixed property types at each level.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnThemeScopeUpdateTest007, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto textChild = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textChild, nullptr);
+    textChild->MountToParent(rootNode);
+
+    auto imageGrandChild = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageGrandChild, nullptr);
+    imageGrandChild->MountToParent(textChild);
+
+    menuPattern_->AddOptionNode(rootNode);
+
+    auto ret = menuPattern_->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(ret);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest008
+ * @tc.desc: Test UpdateGridMenuItemThemeRecursively via OnThemeScopeUpdate with a mixed tree
+ *           containing text, image, security, plain, and non-FrameNode children.
+ *           Covers all property branches and recursion in a single call.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnThemeScopeUpdateTest008, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(rootNode, nullptr);
+
+    auto textChild = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textChild, nullptr);
+    textChild->MountToParent(rootNode);
+
+    auto imageChild = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    ASSERT_NE(imageChild, nullptr);
+    imageChild->MountToParent(rootNode);
+
+    auto securityChild = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(securityChild, nullptr);
+    securityChild->paintProperty_ = AceType::MakeRefPtr<SecurityComponentPaintProperty>();
+    securityChild->MountToParent(rootNode);
+
+    auto ifElseChild = AceType::MakeRefPtr<IfElseNode>(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(ifElseChild, nullptr);
+    ifElseChild->MountToParent(rootNode);
+
+    menuPattern_->AddOptionNode(rootNode);
+
+    auto ret = menuPattern_->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(ret);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest009
+ * @tc.desc: Test OnThemeScopeUpdate with API version below 26. Returns false early,
+ *           does not reach UpdateGridMenuItemThemeRecursively.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnThemeScopeUpdateTest009, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    menuPattern_->AddOptionNode(textNode);
+
+    auto ret = menuPattern_->OnThemeScopeUpdate(1);
+    EXPECT_FALSE(ret);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
+/**
+ * @tc.name: OnThemeScopeUpdateTest010
+ * @tc.desc: Test OnThemeScopeUpdate with themeScopeId == 0. Returns false early,
+ *           does not reach UpdateGridMenuItemThemeRecursively.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPatternGetAdjustedPosTestNg, OnThemeScopeUpdateTest010, TestSize.Level1)
+{
+    int32_t setApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+
+    menuFrameNode_ = CreateMenuFrameNode();
+    ASSERT_NE(menuFrameNode_, nullptr);
+    menuPattern_ = menuFrameNode_->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern_, nullptr);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    menuPattern_->AddOptionNode(textNode);
+
+    auto ret = menuPattern_->OnThemeScopeUpdate(0);
+    EXPECT_FALSE(ret);
+
+    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
+}
+
 } // namespace OHOS::Ace::NG
