@@ -36,8 +36,8 @@
 - frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_property.cpp — 修改：属性实现(ACE宏自动)
 - frameworks/core/components_ng/pattern/rich_editor/rich_editor_event_hub.h — 修改：3个方法声明+1个成员(行329后+行350后)
 - frameworks/core/components_ng/pattern/rich_editor/rich_editor_event_hub.cpp — 修改：3个方法实现
-- frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.h — 修改：追加 FilterWithInputFilter 声明
-- frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp — 修改：FilterWithInputFilter 实现 + 2处插入点(L6840前 + L451前)
+- frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.h — 修改：追加 FilterWithInputFilter + FilterInitializeText 声明
+- frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp — 修改：FilterWithInputFilter + FilterInitializeText 实现 + 2处插入点(L6840前 + L451前) + SetInputFilter 属性变更回调
 - frameworks/core/components_ng/pattern/text_field/text_filter_utils.h — 新建：TextFilterUtils namespace 下 FilterWithRegex + ContentToWstring + ContentToU16string + RemoveErrorTextFromValue 函数声明
 - frameworks/core/components_ng/pattern/text_field/text_filter_utils.cpp — 新建：上述 4 个函数实现（从 content_controller.cpp 迁移）
 - frameworks/core/components_ng/pattern/text_field/content_controller.h — 修改：删除 RemoveErrorTextFromValue 静态成员声明(L103)；保留 FilterWithRegex 声明(L104) 作为 wrapper
@@ -59,6 +59,7 @@
 | AC-8 | spec.md | TASK-3 | C API 单测 | 是 |
 | AC-9 | spec.md | TASK-3 | C API 单测 | 是 |
 | AC-11 | spec.md | TASK-3 | C API 单测 | 是 |
+| AC-12 | spec.md | TASK-3 | C API 单测 | 是 |
 
 ## Task 列表
 
@@ -66,7 +67,7 @@
 |---------|------|----------|---------|----------|----------|----------|
 | TASK-1 | CAPI 属性链路：inputFilter 设置/获取/重置 | native_node.h, rich_editor_properties.def, style_modifier.cpp, arkoala_api.h, rich_editor_dynamic_modifier.cpp, rich_editor_model.h/ng, rich_editor_layout_property.h/.cpp | AC-1, AC-2, AC-3, AC-10 | TASK-0 | 4 条 AC 通过单测 | linux_unittest_capi 构建 + capi_all_modifiers_test |
 | TASK-2 | CAPI 事件链路：onInputFilterError 注册/触发/注销 | event_converter.cpp, arkoala_api.h(事件部分), rich_editor_dynamic_modifier.cpp(事件部分), rich_editor_model.h/ng(事件部分), rich_editor_event_hub.h/.cpp | AC-4, AC-5, AC-6 | TASK-1 | 3 条 AC 通过单测 | linux_unittest_capi 构建 + capi_all_modifiers_test |
-| TASK-3 | Pattern 过滤逻辑 + 共享工具提取 | rich_editor_pattern.h/.cpp, text_filter_utils.h/.cpp(新建), content_controller.cpp | AC-7, AC-8, AC-9, AC-11 | TASK-1, TASK-2 | 4 条 AC 通过单测 + TextField 回归 | linux_unittest_capi + TextField 单测回归 |
+| TASK-3 | Pattern 过滤逻辑 + 生效条件 + 正则变更重新过滤 | rich_editor_pattern.h/.cpp, text_filter_utils.h/.cpp(新建), content_controller.cpp | AC-7, AC-8, AC-9, AC-11, AC-12 | TASK-1, TASK-2 | 5 条 AC 通过单测 + TextField 回归 | linux_unittest_capi + TextField 单测回归 |
 
 ## Task 详情
 
@@ -100,6 +101,7 @@
 | Rule ID | Must / Must Not |
 |---------|-----------------|
 | design.md D-1 | Must 提取为共享函数（方案 A-1） |
+| design.md D-1 | Must not 引入新的跨组件依赖（RichEditor 已有 12 处 text_field #include，text_filter_utils 仅增加 1 处引用，不构成新依赖） |
 | AGENTS.md | Must not 新增对其他 OpenHarmony 系统模块的依赖 |
 
 **Steps**
@@ -248,57 +250,67 @@ R-3: 被拒字符通过 pStr 回传；R-4: 回调注册成功；R-5: 注销后�
 
 ---
 
-### TASK-3: Pattern 过滤逻辑实现 + 生效条件
+### TASK-3: Pattern 过滤逻辑实现 + 生效条件 + 正则变更重新过滤
 
 | 字段 | 内容 |
 |------|------|
-| 任务目标 | 在 RichEditorPattern 中实现 FilterWithInputFilter 过滤方法，含生效条件检查、正则过滤调用、错误回调触发，并在 ProcessInsertValue 和 InsertValueInStyledString 中插入过滤调用 |
-| AC 映射 | AC-7, AC-8, AC-9, AC-11 |
+| 任务目标 | 在 RichEditorPattern 中实现 FilterWithInputFilter 过滤方法（含生效条件检查、正则过滤调用、错误回调触发），在 ProcessInsertValue 和 InsertValueInStyledString 中插入过滤调用；实现 FilterInitializeText 正则变更全量重新过滤（静默执行，与 TextInput 一致） |
+| AC 映射 | AC-7, AC-8, AC-9, AC-11, AC-12 |
 | 前置依赖 | TASK-0 (共享工具) + TASK-1 (LayoutProperty InputFilter) + TASK-2 (EventHub onInputFilterError) |
 | 非目标 | 不修改 TextField 过滤逻辑；不实现两阶段过滤机制 |
-| 完成判据 | 4 条过滤逻辑 AC 通过 C API 单测 + TextField 单测回归 |
+| 完成判据 | 5 条过滤逻辑 AC 通过 C API 单测 + TextField 单测回归 |
 | 停止条件 | 发现 ProcessInsertValue/InsertValueInStyledString 插入点位置与预期不符，停止并回传 |
 
 **Files**
 
 | 操作 | 文件 | 说明 |
 |------|------|------|
-| Modify | frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.h | 追加 FilterWithInputFilter 私有方法声明 |
-| Modify | frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp | 实现 FilterWithInputFilter + ProcessInsertValue(L6840前)插入 + InsertValueInStyledString(L451前)插入 |
+| Modify | frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.h | 追加 FilterWithInputFilter + FilterInitializeText 私有方法声明 |
+| Modify | frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp | 实现 FilterWithInputFilter + FilterInitializeText + ProcessInsertValue(L6840前)插入 + InsertValueInStyledString(L451前)插入 + SetInputFilter 属性变更回调 |
 
 **Spec Context**
 
-AC-7: WHEN isSpanStringMode_=true && isSingleLineMode_=true THEN 过滤生效
-AC-8: WHEN isSpanStringMode_=false || isSingleLineMode_=false THEN 不生效
+AC-7: WHEN isSpanStringMode_=true THEN 过滤生效（含单行和多行）
+AC-8: WHEN isSpanStringMode_=false THEN 不生效
 AC-9: WHEN inputFilter + maxLength THEN 过滤优先级 inputFilter→maxLength
 AC-11: WHEN "\n" 不匹配 regex THEN "\n" 被过滤不插入
+AC-12: WHEN inputFilter 正则变更 THEN 静默全量重新过滤 + onInputFilterError 触发（与 TextInput 一致，不触发 onWillChange）；StyledString SpanItem/SpanBase 由 RemoveString 内置机制自动处理（详见 design.md StyledString 章节）
 
-R-6: spanString+singleLine 条件；R-7: 条件不满足时忽略；R-8: 过滤→截断顺序；R-9: "\n"过滤
+R-6: spanString 条件（isSpanStringMode_ 构造时设置、运行期不变）；R-7: 条件不满足时忽略；R-8: 过滤→截断顺序（与 TextInput FilterValue 一致，与 PreprocessString 不同）；R-9: "\n"过滤；R-11: 正则变更静默全量重新过滤（与 TextInput 一致）
 
 **Required Rules**
 
 | Rule ID | Must / Must Not |
 |---------|-----------------|
-| design.md C-1 | Must 仅 isSpanStringMode_ && isSingleLineMode_ 生效 |
-| design.md C-2 | Must 过滤优先级 inputFilter → maxLength |
+| design.md C-1 | Must 仅 isSpanStringMode_ 生效（含单行和多行模式） |
+| design.md C-2 | Must 过滤优先级 inputFilter → maxLength（先过滤再截断；与 TextInput FilterValue 一致，与 PreprocessString 不同，差异可接受） |
 | design.md C-7 | Must inputFilter 过滤在所有内容回调之前执行，回调拿过滤+截断后的值 |
-| design.md C-8 | Must 仅单阶段过滤（仅过滤插入值，不对全量二次过滤） |
+| design.md C-8 | Must 仅单阶段过滤（仅过滤插入值，不对全量二次过滤）；正则变更时全量重新过滤 |
+| design.md C-9 | Must 正则变更时静默全量重新过滤（不触发 onWillChange，与 TextInput 一致） |
 | design.md D-5 | Must 过滤插入点在 ProcessTextTruncationOperation 之前 |
 | design.md D-1 | Must 使用 text_filter_utils::FilterWithRegex（方案 A-1） |
+| design.md D-6 | Must 正则变更时调用 FilterInitializeText 静默全量重新过滤 |
 
 **Steps**
 
-- [ ] rich_editor_pattern.h 追加 FilterWithInputFilter 私有方法声明
 - [ ] rich_editor_pattern.cpp 实现 FilterWithInputFilter：
-  - ① 检查 isSpanStringMode_ && isSingleLineMode_
+  - ① 检查 isSpanStringMode_（含单行和多行）
   - ② 从 LayoutProperty 读取 InputFilter 正则
   - ③ 调用 text_filter_utils::FilterWithRegex
   - ④ 有被拒字符 → FireOnInputFilterError
   - ⑤ 修改传入 text
 - [ ] ProcessInsertValue (行6840前) 插入 `if (!FilterWithInputFilter(text)) { return; }`
 - [ ] InsertValueInStyledString (行451前) 插入 `if (!FilterWithInputFilter(subValue)) { return; }`
+- [ ] rich_editor_pattern.cpp 实现 FilterInitializeText：
+  - ① 从 LayoutProperty 读取新 InputFilter 正则
+  - ② 获取已有 StyledString 全量内容（styledString_->GetU16string()）
+  - ③ 调用 text_filter_utils::FilterWithRegex 对全量内容做正则过滤（静默执行，不触发 onWillChange）
+  - ④ 逐个被拒字符位置，调用 styledString_->RemoveString(pos, len) 移除被拒字符（SpanItem/SpanBase 由 RemoveString 内置机制自动处理：5种重叠场景+偏移修正+SpanItem按行分裂+SpanBase自动合并，详见 design.md StyledString 章节）
+  - ⑤ 有被拒字符 → FireOnInputFilterError 通知
+  - ⑥ 与 TextInput 行为一致（isFilterChanged_ 在 SetInputFilter 时未被设为 true）
+- [ ] 在 SetInputFilter 属性变更回调中触发 FilterInitializeText（参考 text_field_pattern.cpp L13860-13867）
 - [ ] 构建 linux_unittest_capi 验证编译通过
-- [ ] 编写 C API 单测用例覆盖 AC-7/AC-8/AC-9/AC-11
+- [ ] 编写 C API 单测用例覆盖 AC-7/AC-8/AC-9/AC-11/AC-12
 - [ ] 运行 TextField 单测回归验证 FilterWithRegex 改用共享函数后行为不变
 
 **Completion Evidence**

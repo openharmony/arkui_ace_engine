@@ -68,14 +68,15 @@ target_release:
 - ArkTS 1.2 强基(IDLize)路径适配
 - ArkTS 1.1 动态(JSI Bridge)路径适配
 - 属性字符串接口（仅提供组件属性接口）
-- 多行模式下的 inputFilter 生效（仅 isSpanStringMode_ && isSingleLineMode_ 下生效）
+- 多行模式下的 inputFilter 生效不在范围内（但 spanString+多行模式已纳入范围）
+- 属性变更时重新过滤的机制需在 design.md 中设计（静默执行，与 TextInput 一致）
 - ArkTS 前端 inputFilter 行为变更
 
 ### 初始假设
 
 | 假设 | 类型 | 验证方式 | 状态 |
 |------|------|----------|------|
-| inputFilter 仅在 isSpanStringMode_ && isSingleLineMode_ 下生效 | 技术 | 源码确认 isSpanStringMode_ (TextPattern:667) 和 isSingleLineMode_ (RichEditorPattern:1487) | 已验证 |
+| inputFilter 仅在 isSpanStringMode_ 下生效（含单行和多行） | 技术 | 源码确认 isSpanStringMode_ (TextPattern:667)；TextInput/TextArea 的 inputFilter 无模式限制，RichEditor 仅 spanString 模式生效 | 已验证（已更新） |
 | 事件数据提取方式与 TextInput 一致（OH_ArkUI_NodeEvent_GetStringAsyncEvent） | 技术 | 源码核对 ArkUI_StringAsyncEvent 结构体和提取函数 | 已验证 |
 | RichEditor 属性路由使用 X-macro .def 驱动（非手写函数指针数组） | 技术 | 源码核对 rich_editor_properties.def 和 style_modifier.cpp 展开 | 已验证 |
 | 过滤优先级：inputFilter → maxLength（与 TextInput 一致） | 技术 | 源码核对 ProcessInsertValue 和 ProcessTextTruncationOperation 顺序 | 已验证 |
@@ -120,7 +121,7 @@ target_release:
 
 | 日期 | 参与人 | 讨论主题 | 结论 | 后续动作 |
 |------|--------|----------|------|----------|
-| 2026-07-15 | ArkUI NDK 团队 | 生效范围 | 仅 isSpanStringMode_ && isSingleLineMode_ 下生效 | 确认 |
+| 2026-07-15 | ArkUI NDK 团队 | 生效范围 | 仅 isSpanStringMode_ 下生效（含单行和多行），取消 isSingleLineMode_ 限制 | 确认（已更新） |
 | 2026-07-15 | ArkUI NDK 团队 | 复用方案 | 推荐 A（提取共享 FilterWithRegex），B（inline）为备选 | 后续 design.md 决策 |
 | 2026-07-15 | ArkUI NDK 团队 | Enter键处理 | "\n" 被 inputFilter 过滤，过滤后文本为空则不插入 | 确认 |
 | 2026-07-15 | ArkUI NDK 团队 | 优先级 | inputFilter → maxLength，与 TextInput 一致 | 确认 |
@@ -161,7 +162,7 @@ target_release:
 | 问题 | 回答 | 确认人 | 状态 |
 |------|------|--------|------|
 | 核心功能包含哪些？ | inputFilter 正则设置/获取/重置 + onInputFilterError 回调注册/触发/注销 | ArkUI NDK 团队 | 已确认 |
-| 明确不包含哪些？ | 属性字符串接口、1.2强基/1.1动态路径、多行模式生效 | ArkUI NDK 团队 | 已确认 |
+| 明确不包含哪些？ | 属性字符串接口、1.2强基/1.1动态路径、非 spanString 模式生效 | ArkUI NDK 团队 | 已确认 |
 | 是否有分期策略？ | 无，一次性交付 | ArkUI NDK 团队 | 已确认 |
 
 ### 子系统影响
@@ -185,7 +186,7 @@ target_release:
 | 类别 | 核心问题 | 结论 | 确认人 | 状态 |
 |------|----------|------|--------|------|
 | 兼容性 | 向后兼容？ | 是，纯新增接口 | ArkUI NDK 团队 | 已确认 |
-| 性能 | 正则过滤性能？ | regex_replace 已在 TextField 验证，RichEditor 仅单行模式生效，影响可控 | ArkUI NDK 团队 | 已确认 |
+| 性能 | 正则过滤性能？ | regex_replace 已在 TextField 验证，RichEditor 仅 spanString 模式生效（含单行和多行），影响可控 | ArkUI NDK 团队 | 已确认 |
 | 安全 | 权限/数据安全？ | 无新权限、不存储敏感数据 | ArkUI NDK 团队 | 已确认 |
 | 可靠性 | 过滤误拒/误放？ | regex 为白名单模式，逻辑与 TextInput 一致 | ArkUI NDK 团队 | 已确认 |
 
@@ -197,7 +198,8 @@ target_release:
 
 | 风险 | 类型 | 影响 | 缓解措施 | 状态 |
 |------|------|------|----------|------|
-| RichEditor 过滤逻辑与 TextInput 存在差异（无 ContentController 两阶段机制） | 技术 | 中 | Pattern 层直接执行，仅作用于插入值 | 已确认 |
+| RichEditor 过滤逻辑与 TextInput 存在差异（无 ContentController 两阶段机制） | 技术 | 中 | Pattern 层直接执行，仅作用于插入值；正则变更时全量重新过滤 | 已确认 |
+| 正则变更时全量重新过滤的实现复杂度 | 技术 | 中 | 参考 TextInput FilterInitializeText 机制，静默执行（不触发 onWillChange） | 已确认 |
 | 枚举值编号需在现有范围末尾追加 | 技术 | 低 | 紧跟现有最大值编号 | 已确认 |
 
 ### AC 完整性
@@ -238,7 +240,7 @@ target_release:
 
 ### 问题陈述
 
-RichEditor 组件（CAPI 中对应 ARKUI_NODE_TEXT_EDITOR）缺少 inputFilter 正则约束输入和 onInputFilterError 过滤失败回调能力，与 TextInput/TextArea 已有的同功能不对齐。需要补齐 CAPI 路径的 inputFilter 全链路支持，仅在属性字符串+单行模式下生效。
+RichEditor 组件（CAPI 中对应 ARKUI_NODE_TEXT_EDITOR）缺少 inputFilter 正则约束输入和 onInputFilterError 过滤失败回调能力，与 TextInput/TextArea 已有的同功能不对齐。需要补齐 CAPI 路径的 inputFilter 全链路支持，在属性字符串模式下生效（含单行和多行），且正则变更时对已有内容做全量重新过滤（静默执行，与 TextInput 一致，不触发 onWillChange 确认）。
 
 ### 目标和成功指标
 
@@ -247,6 +249,7 @@ RichEditor 组件（CAPI 中对应 ARKUI_NODE_TEXT_EDITOR）缺少 inputFilter �
 | CAPI 支持 inputFilter 设置/获取/重置 | setter/getter/resetter 函数可用 | C API 单元测试 |
 | CAPI 支持 onInputFilterError 回调注册/触发/注销 | 回调可注册、过滤失败可触发、可注销 | C API 单元测试 + UI 交互验证 |
 | 过滤行为与 TextInput 一致 | inputFilter → maxLength 优先级、正则白名单语义、事件数据格式 | 对比测试 |
+| 正则变更时已有内容重新过滤 | 全量内容静默重新过滤（与 TextInput 一致，不触发 onWillChange 确认） | 对比测试 |
 
 ### 用户故事与 AC
 
@@ -254,7 +257,7 @@ RichEditor 组件（CAPI 中对应 ARKUI_NODE_TEXT_EDITOR）缺少 inputFilter �
 |----------|----------|--------|
 | US-1 | 作为 NDK 开发者，我想要通过 C API 设置 TextEditor 的正则输入约束，以便过滤非法字符 | P0 |
 | US-2 | 作为 NDK 开发者，我想要通过 C API 注册过滤失败回调，以便获知被过滤掉的字符内容 | P0 |
-| US-3 | 作为 NDK 开发者，我想要在单行+属性字符串模式下使用 inputFilter 控制输入行为 | P1 |
+| US-3 | 作为 NDK 开发者，我想要在属性字符串模式（含单行和多行）下使用 inputFilter 控制输入行为 | P1 |
 
 | AC编号 | 验收标准 | 类型 | 关联Story |
 |--------|----------|------|-----------|
@@ -264,16 +267,17 @@ RichEditor 组件（CAPI 中对应 ARKUI_NODE_TEXT_EDITOR）缺少 inputFilter �
 | AC-4 | WHEN registerNodeEvent(node, NODE_TEXT_EDITOR_ON_INPUT_FILTER_ERROR, targetId, userData) THEN 过滤失败回调注册成功 | 正常 | US-2 |
 | AC-5 | WHEN 输入字符被 inputFilter 过滤掉 THEN 通过 OH_ArkUI_NodeEvent_GetStringAsyncEvent 可获取被拒字符的 pStr | 正常 | US-2 |
 | AC-6 | WHEN unregisterNodeEvent(node, NODE_TEXT_EDITOR_ON_INPUT_FILTER_ERROR) THEN 回调注销成功，后续过滤失败不再触发回调 | 正常 | US-2 |
-| AC-7 | WHEN isSpanStringMode_=true 且 isSingleLineMode_=true THEN inputFilter 过滤逻辑生效 | 正常 | US-3 |
-| AC-8 | WHEN isSpanStringMode_=false 或 isSingleLineMode_=false THEN inputFilter 设置被忽略，不执行过滤 | 边界 | US-3 |
+| AC-7 | WHEN isSpanStringMode_=true THEN inputFilter 过滤逻辑生效（含单行和多行模式） | 正常 | US-3 |
+| AC-8 | WHEN isSpanStringMode_=false THEN inputFilter 设置被忽略，不执行过滤 | 边界 | US-3 |
 | AC-9 | WHEN inputFilter 正则生效且 maxLength 也设置 THEN 过滤优先级为 inputFilter → maxLength（先过滤再截断） | 正常 | US-3 |
 | AC-10 | WHEN inputFilter 正则为空字符串 THEN 过滤不生效，等同于不设置 | 边界 | US-1 |
 | AC-11 | WHEN 单行模式下 Enter 键输入 "\n" 且 inputFilter 不匹配 "\n" THEN "\n" 被过滤掉，不插入 | 边界 | US-3 |
+| AC-12 | WHEN inputFilter 正则变更（从 A 变为 B）THEN 对已有内容做全量重新过滤（静默执行，与 TextInput 一致，不触发 onWillChange 确认）；被拒字符通过 onInputFilterError 回调通知 | 正常 | US-3 |
 
 ### 范围边界
 
-**包含：** CAPI inputFilter 属性/事件全链路实现、过滤工具复用、C API 单元测试
-**不包含：** 属性字符串接口、1.2强基/1.1动态路径、多行模式生效、ArkTS 前端行为变更
+**包含：** CAPI inputFilter 属性/事件全链路实现、过滤工具复用、属性变更时全量重新过滤（静默执行，与 TextInput 一致）、C API 单元测试
+**不包含：** 属性字符串接口、1.2强基/1.1动态路径、非 spanString 模式生效、ArkTS 前端行为变更
 
 ### 影响范围
 
@@ -295,7 +299,7 @@ RichEditor 组件（CAPI 中对应 ARKUI_NODE_TEXT_EDITOR）缺少 inputFilter �
 
 | 维度 | 涉及？ | 依据 | 若涉及，进入哪个下游文档 |
 |------|--------|------|--------------------------|
-| 性能 | 否 | 正则过滤已在 TextField 验证，RichEditor 仅单行模式生效 | N/A |
+| 性能 | 否 | 正则过滤已在 TextField 验证，RichEditor spanString 模式生效；全量重新过滤仅在正则变更时触发，频次可控 | N/A |
 | 安全与权限 | 否 | 无新权限/无数据访问 | N/A |
 | 兼容性 | 否 | 纯新增接口，不修改已有接口行为 | N/A |
 | API/SDK | 是 | 新增 System API 2 个枚举值 | design.md / spec.md |

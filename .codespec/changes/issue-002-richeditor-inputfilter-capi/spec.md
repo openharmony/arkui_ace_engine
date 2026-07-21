@@ -52,20 +52,21 @@
 | AC-5 | WHEN 输入字符被 inputFilter 过滤掉 THEN 通过 `OH_ArkUI_NodeEvent_GetStringAsyncEvent(event)` 可获取被拒字符的 `ArkUI_StringAsyncEvent.pStr`（事件内部构造使用 kind=TEXT_INPUT + textInputEvent，详见 design.md D-3） | 正常 |
 | AC-6 | WHEN 调用 `unregisterNodeEvent(node, NODE_TEXT_EDITOR_ON_INPUT_FILTER_ERROR)` THEN 回调注销成功，后续过滤失败不再触发该回调 | 正常 |
 
-### US-3: 单行+属性字符串模式下使用 inputFilter
+### US-3: 属性字符串模式下使用 inputFilter
 
 **作为** NDK 应用开发者,
-**我想要** 在单行+属性字符串模式下使用 inputFilter 控制输入行为,
-**以便** 确保正则过滤和 maxLength 截断协同生效。
+**我想要** 在属性字符串模式（含单行和多行）下使用 inputFilter 控制输入行为,
+**以便** 确保正则过滤和 maxLength 截断协同生效，且正则变更时已有内容能被正确重新过滤。
 
 **验收标准：**
 
 | AC编号 | 验收标准 | 类型 |
 |--------|----------|------|
-| AC-7 | WHEN isSpanStringMode_=true 且 isSingleLineMode_=true THEN inputFilter 过滤逻辑生效，输入内容受正则约束 | 正常 |
-| AC-8 | WHEN isSpanStringMode_=false 或 isSingleLineMode_=false THEN inputFilter 设置被忽略，不执行过滤逻辑 | 边界 |
+| AC-7 | WHEN isSpanStringMode_=true THEN inputFilter 过滤逻辑生效（含单行和多行模式） | 正常 |
+| AC-8 | WHEN isSpanStringMode_=false THEN inputFilter 设置被忽略，不执行过滤 | 边界 |
 | AC-9 | WHEN inputFilter 正则生效且 maxLength 也设置 THEN 过滤优先级为 inputFilter → maxLength（先过滤再截断） | 正常 |
 | AC-11 | WHEN 单行模式下 Enter 键输入 "\n" 且 inputFilter 不匹配 "\n" THEN "\n" 被过滤掉，不插入，不触发 onSubmit 的 NEW_LINE 分支 | 边界 |
+| AC-12 | WHEN inputFilter 正则变更（从 A 变为 B）THEN 对已有内容做全量重新过滤（静默执行，与 TextInput 一致，不触发 onWillChange 确认）；被拒字符通过 onInputFilterError 回调通知；StyledString 的 SpanItem/SpanBase 由 RemoveString 内置机制自动处理（分裂/截断/偏移修正/合并，详见 design.md StyledString 章节） | 正常 |
 
 ## 验收追溯
 
@@ -82,6 +83,7 @@
 | AC-9 | R-8 | TASK-3 | C API 单测 | evidence/ |
 | AC-10 | R-2 | TASK-1 | C API 单测 | evidence/ |
 | AC-11 | R-9 | TASK-3 | C API 单测 | evidence/ |
+| AC-12 | R-11 | TASK-3 | C API 单测 | evidence/ |
 
 ## 规则定义
 
@@ -92,11 +94,12 @@
 | R-3 | 行为 | 输入字符不匹配 inputFilter 正则白名单 | 被拒字符通过 `OH_ArkUI_NodeEvent_GetStringAsyncEvent` 的 `.pStr` 回传给用户 | 仅在已注册 onInputFilterError 回调时触发；pStr 为被拒字符的 UTF-8 字符串 | AC-5 |
 | R-4 | 行为 | registerNodeEvent(NODE_TEXT_EDITOR_ON_INPUT_FILTER_ERROR, ...) | 回调注册成功，过滤事件可通过全局 eventReceiver 接收 | 回调与正则设置是两次独立调用；注销回调不会清除正则 | AC-4 |
 | R-5 | 行为 | unregisterNodeEvent(NODE_TEXT_EDITOR_ON_INPUT_FILTER_ERROR) | 回调注销成功，后续过滤失败不再触发回调 | 注销后正则仍然生效，仅不再通知 | AC-6 |
-| R-6 | 条件 | isSpanStringMode_=true 且 isSingleLineMode_=true 且 inputFilter 非空 | 过滤逻辑生效，输入内容受正则约束 | 两个模式条件缺一不可 | AC-7 |
-| R-7 | 条件 | isSpanStringMode_=false 或 isSingleLineMode_=false | inputFilter 设置被忽略，不执行过滤逻辑 | 设置值仍可通过 getAttribute 获取，但不生效 | AC-8 |
-| R-8 | 顺序 | inputFilter 非空且 maxLength 有值 | 过滤优先级: inputFilter → maxLength（先过滤再截断） | 与 TextInput 的优先级一致 | AC-9 |
+| R-6 | 条件 | isSpanStringMode_=true 且 inputFilter 非空 | 过滤逻辑生效，输入内容受正则约束（含单行和多行模式） | isSpanStringMode_ 必须为 true，无 isSingleLineMode_ 限制 | AC-7 |
+| R-7 | 条件 | isSpanStringMode_=false | inputFilter 设置被忽略，不执行过滤逻辑 | 设置值仍可通过 getAttribute 获取，但不生效 | AC-8 |
+| R-8 | 顺序 | inputFilter 非空且 maxLength 有值 | 过滤优先级: inputFilter → maxLength（先过滤再截断） | 与 TextInput 的 FilterValue 第二阶段一致；与 PreprocessString 第一阶段不同（先截断再过滤），差异可接受 | AC-9 |
 | R-9 | 边界 | 单行模式下 Enter 键输入 "\n" 且 inputFilter 不匹配 "\n" | "\n" 被过滤掉，不插入，不触发 onSubmit(NEW_LINE) 分支 | 过滤后文本为空则不插入 | AC-11 |
 | R-10 | 顺序 | inputFilter 过滤执行时，aboutToIMEInput/onWillChange/onDidChange 等回调尚未触发 | 回调拿到的值是过滤+截断后的值，而非原始输入值 | 与 TextInput 的回调值顺序一致（参考文档3.3） | AC-7 |
+| R-11 | 行为 | inputFilter 正则变更（从 A 变为 B）且已有内容不为空 | 对已有内容做全量静默重新过滤（不触发 onWillChange，与 TextInput 一致）：提取全量纯文本 → FilterWithRegex → 逐个被拒字符 RemoveString → FireOnInputFilterError → 更新内容 | 与 TextInput 的静默重新过滤一致（isFilterChanged_ 在 SetInputFilter 时未被设为 true，不触发 onWillChange）；StyledString 的 SpanItem/SpanBase 修正由 RemoveString 内置机制自动完成（5种重叠场景+偏移修正+SpanItem按行分裂+SpanBase自动合并，详见 design.md StyledString 章节） | AC-12 |
 
 ## 验证映射
 
@@ -108,11 +111,12 @@
 | VM-4 | R-4 / AC-4 | C API 单测 | registerNodeEvent 回调注册 |
 | VM-5 | R-3 / AC-5 | C API 单测 + UI交互 | 过滤失败回调触发，pStr 正确 |
 | VM-6 | R-5 / AC-6 | C API 单测 | unregisterNodeEvent 回调注销 |
-| VM-7 | R-6, R-10 / AC-7 | C API 单测 | spanString+singleLine 模式生效 + 回调拿到过滤后值 |
-| VM-8 | R-7 / AC-8 | C API 单测 | 非 spanString/singleLine 模式不生效 |
+| VM-7 | R-6, R-10 / AC-7 | C API 单测 | spanString 模式生效 + 回调拿到过滤后值 |
+| VM-8 | R-7 / AC-8 | C API 单测 | 非 spanString 模式不生效 |
 | VM-9 | R-8 / AC-9 | C API 单测 | inputFilter → maxLength 优先级 |
 | VM-10 | R-2 / AC-10 | C API 单测 | 空字符串等效于不设置 |
 | VM-11 | R-9 / AC-11 | C API 单测 | "\n" 被过滤不插入 |
+| VM-12 | R-11 / AC-12 | C API 单测 | 正则变更时静默全量重新过滤 + onInputFilterError 触发 |
 
 ## API 变更分析
 
@@ -191,8 +195,8 @@
 
 | # | 触发条件 | 预期行为 | 关联 AC |
 |---|----------|----------|---------|
-| 1 | isSpanStringMode_=true 且 isSingleLineMode_=true 且 InputFilter 非空 | 对 text 执行正则过滤，移除不匹配字符；有被拒字符时 FireOnInputFilterError；修改 text 返回 true | AC-7 |
-| 2 | isSpanStringMode_=false 或 isSingleLineMode_=false | 不执行过滤，返回 true（不阻止后续 maxLength 检查） | AC-8 |
+| 1 | isSpanStringMode_=true 且 InputFilter 非空 | 对 text 执行正则过滤，移除不匹配字符；有被拒字符时 FireOnInputFilterError；修改 text 返回 true | AC-7 |
+| 2 | isSpanStringMode_=false | 不执行过滤，返回 true（不阻止后续 maxLength 检查） | AC-8 |
 | 3 | InputFilter 为空或未设置 | 不执行过滤，返回 true | AC-8 |
 | 4 | 过滤后 text 为空（如 "\n" 全被过滤） | text 为空，返回 true；后续 ProcessTextTruncationOperation 处理空文本 | AC-11 |
 
@@ -211,17 +215,18 @@
 | 遵循 C API X-macro 属性路由模式 | 新增条目追加在 .def 末尾 | design.md D-4 | AC-1, AC-2, AC-3 |
 | 遵循 C API 事件提取机制 | 使用 OH_ArkUI_NodeEvent_GetStringAsyncEvent | design.md C-5 | AC-5 |
 | 属性与事件必须分两次独立调用 | setAttribute + registerNodeEvent 分别操作 | design.md C-6 | AC-4 |
-| 仅 spanString+singleLine 模式生效 | FilterWithInputFilter 内部条件检查 | design.md C-1 | AC-7, AC-8 |
-| 过滤优先级 inputFilter → maxLength | 插入点在 ProcessTextTruncationOperation 之前 | design.md C-2 | AC-9 |
+| 仅 spanString 模式生效 | FilterWithInputFilter 内部条件检查；isSpanStringMode_ 通过构造函数一次性设置（运行期不变）；含单行和多行模式 | design.md C-1 | AC-7, AC-8 |
+| 过滤优先级 inputFilter → maxLength（先过滤再截断） | 插入点在 ProcessTextTruncationOperation 之前；与 TextInput FilterValue 第二阶段一致，与 PreprocessString 第一阶段不同，差异可接受 | design.md C-2 | AC-9 |
 | 遵循 AGENTS.md 约束 | 不修改 Public API 签名/语义/错误码 | AGENTS.md | 全部 |
 | inputFilter 过滤在回调之前 | 回调拿到的值是过滤+截断后的值 | design.md C-7 | AC-7 |
-| RichEditor 仅单阶段过滤 | 仅过滤插入值，不对全量二次过滤 | design.md C-8 | AC-7 |
+| RichEditor 仅单阶段过滤 | 仅过滤插入值，不对全量二次过滤；正则变更时全量重新过滤 | design.md C-8 | AC-7 |
+| 正则变更时全量重新过滤（静默执行，与 TextInput 一致） | 静默过滤，不触发 onWillChange；被拒字符触发 onInputFilterError；StyledString SpanItem/SpanBase 由 RemoveString 内置机制自动处理（详见 design.md StyledString 章节） | design.md C-9, D-6, StyledString 章节 | AC-12 |
 
 ## 非功能性需求
 
 | 类型 | 指标/阈值 | 验证方式 | 证据 |
 |------|-----------|----------|------|
-| 可测试性 | 所有 11 条 AC 可通过 C API 单测覆盖 | linux_unittest_capi | evidence/ |
+| 可测试性 | 所有 12 条 AC 可通过 C API 单测覆盖 | linux_unittest_capi | evidence/ |
 | 性能 | FilterWithRegex 正则过滤耗时 ≤ TextField 同函数耗时 | benchmark 对比 | evidence/ |
 | 向后兼容 | 不影响现有 TextInput/TextArea inputFilter 行为 | 回归单测 | evidence/ |
 
@@ -238,9 +243,9 @@
 
 - [x] 无"待定""TBD""TODO"等占位符
 - [x] 所有 AC 使用 WHEN/THEN 格式，可独立测试
-- [x] 范围边界明确（仅 CAPI、仅 spanString+singleLine、不涉及 1.2/1.1 路径）
+- [x] 范围边界明确（仅 CAPI、仅 spanString 模式含单行和多行、正则变更全量重新过滤、不涉及 1.2/1.1 路径）
 - [x] 无语义模糊表述
-- [x] AC 与规则表交叉一致（11 AC ↔ 10 规则，全覆盖）
+- [x] AC 与规则表交叉一致（12 AC ↔ 11 规则，全覆盖）
 - [x] 规则表每条有触发条件、预期行为、边界/约束
 - [x] API 变更分析包含枚举值、参数格式、数据提取方式
 - [x] 兼容性声明明确（纯新增接口、向后兼容）
