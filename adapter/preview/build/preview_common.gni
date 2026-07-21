@@ -34,7 +34,6 @@ web_components_support = false
 preview_support = true
 model_component_support = false
 window_scene_support = false
-image_analyzer_support = true
 build_for_preview = true
 
 # js engine common configs
@@ -112,10 +111,6 @@ if (defined(model_component_support) && model_component_support) {
 
 if (defined(enable_inspector_event_reporting) && enable_inspector_event_reporting) {
   defines += [ "ENABLE_INSPECTOR_EVENT_REPORTING" ]
-}
-
-if (defined(image_analyzer_support) && image_analyzer_support) {
-  defines += [ "SUPPORT_IMAGE_ANALYZER" ]
 }
 
 if (defined(enable_rosen_backend) && enable_rosen_backend) {

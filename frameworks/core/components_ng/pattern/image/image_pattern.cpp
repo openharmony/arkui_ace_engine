@@ -427,7 +427,6 @@ void ImagePattern::ApplyAIModificationsToImage()
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzerFeature()) {
         if (isPixelMapChanged_) {
             UpdateAnalyzerOverlay();
@@ -445,7 +444,6 @@ void ImagePattern::ApplyAIModificationsToImage()
             },
             "ArkUIImageCreateAnalyzerOverlay");
     }
-#endif
 }
 
 void ImagePattern::ReportPerfData(const RefPtr<NG::FrameNode>& host, int32_t state)
@@ -1052,11 +1050,9 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     const auto& dstSize = dirty->GetGeometryNode()->GetContentSize();
     StartDecoding(dstSize);
     LoadingContext();
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzerFeature()) {
         UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
     }
-#endif
     return image_ || altErrorImage_ || altImage_;
 }
 
@@ -1278,9 +1274,7 @@ void ImagePattern::OnModifyDone()
     UpdateGestureAndDragWhenModify();
     CHECK_EQUAL_VOID(CheckImagePrivacyForCopyOption(), true);
     CloseSelectOverlay();
-#ifdef SUPPORT_IMAGE_ANALYZER
     UpdateOffsetForImageAnalyzerOverlay();
-#endif
     SetFrameOffsetForOverlayNode();
     InitOnKeyEvent();
 }
@@ -1427,7 +1421,6 @@ void ImagePattern::InitOnKeyEvent()
 
 void ImagePattern::OnKeyEvent(const KeyEvent& event)
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (imageAnalyzerManager_) {
         auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
@@ -1436,7 +1429,6 @@ void ImagePattern::OnKeyEvent(const KeyEvent& event)
             imageAnalyzerManager_->UpdateKeyEvent(event);
         }
     }
-#endif
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto focusHub = host->GetFocusHub();
@@ -1496,7 +1488,6 @@ bool ImagePattern::CheckImagePrivacyForCopyOption()
 
 void ImagePattern::UpdateOffsetForImageAnalyzerOverlay()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (imageAnalyzerManager_ && imageAnalyzerManager_->IsOverlayCreated()) {
         if (!IsSupportImageAnalyzerFeature()) {
             DestroyAnalyzerOverlay();
@@ -1504,7 +1495,6 @@ void ImagePattern::UpdateOffsetForImageAnalyzerOverlay()
             UpdateAnalyzerOverlayLayout();
         }
     }
-#endif
 }
 
 // SetUsingContentRectForRenderFrame is set for image paint
@@ -2557,12 +2547,10 @@ void ImagePattern::EnableAnalyzer(bool value)
         return;
     }
 
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
     }
     RegisterVisibleAreaChange(true);
-#endif
 }
 
 bool ImagePattern::IsEnableAnalyzer() const
@@ -2580,39 +2568,30 @@ void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig& config)
 
 void ImagePattern::SetImageAnalyzerConfig(void* config)
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (isEnableAnalyzer_) {
         CHECK_NULL_VOID(imageAnalyzerManager_);
         imageAnalyzerManager_->SetImageAnalyzerConfig(config);
     }
-#endif
 }
 
 void ImagePattern::SetImageAIOptions(void* options)
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::IMAGE);
     }
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->SetImageAIOptions(options);
-#endif
 }
 
 bool ImagePattern::IsSupportImageAnalyzerFeature()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_RETURN(imageAnalyzerManager_, false);
     return isEnableAnalyzer_ && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && loadingCtx_->GetFrameCount() <= 1 &&
            imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
-#else
-    return false;
-#endif
 }
 
 void ImagePattern::CreateAnalyzerOverlay()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     if (imageAnalyzerManager_->IsOverlayCreated()) {
         return;
@@ -2622,12 +2601,10 @@ void ImagePattern::CreateAnalyzerOverlay()
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
-#endif
 }
 
 void ImagePattern::UpdateAnalyzerOverlay()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     if (!IsSupportImageAnalyzerFeature() || !imageAnalyzerManager_->IsOverlayCreated()) {
         return;
@@ -2637,39 +2614,30 @@ void ImagePattern::UpdateAnalyzerOverlay()
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
-#endif
 }
 
 void ImagePattern::UpdateAnalyzerOverlayLayout()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerOverlayLayout();
-#endif
 }
 
 void ImagePattern::DestroyAnalyzerOverlay()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
-#endif
 }
 
 void ImagePattern::ReleaseImageAnalyzer()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->ReleaseImageAnalyzer();
-#endif
 }
 
 void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
-#endif
 }
 
 bool ImagePattern::AllowVisibleAreaCheck() const
@@ -2815,9 +2783,7 @@ void ImagePattern::ResetImageAndAlt()
     contentMod_ = nullptr;
     imagePaintMethod_ = nullptr;
     CloseSelectOverlay();
-#ifdef SUPPORT_IMAGE_ANALYZER
     DestroyAnalyzerOverlay();
-#endif
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     frameNode->SetTrimMemRecycle(false);
 }

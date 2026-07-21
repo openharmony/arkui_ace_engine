@@ -40,9 +40,7 @@
 // Forward declarations to reduce header dependencies
 namespace OHOS::Ace {
 class Clipboard;
-#ifdef SUPPORT_IMAGE_ANALYZER
 class ImageAnalyzerManager;
-#endif
 class ImageSourceInfo;
 class PixelMap;
 struct CanvasImage;
@@ -407,9 +405,7 @@ private:
     RefPtr<InputEvent> mouseEvent_;
     RefPtr<Clipboard> clipboard_;
     RefPtr<SelectOverlayProxy> selectOverlay_;
-#ifdef SUPPORT_IMAGE_ANALYZER
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
-#endif
     ImageDfxConfig imageDfxConfig_;
     ImageDfxConfig altImageDfxConfig_;
     ImageDfxConfig altErrorImageDfxConfig_;

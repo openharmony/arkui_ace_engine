@@ -266,12 +266,6 @@ template("build_component_ng") {
         sources += invoker.smart_gesture_sources
       }
 
-      if (defined(config.image_analyzer_support) &&
-          config.image_analyzer_support &&
-          defined(invoker.image_analyzer_sources)) {
-        sources += invoker.image_analyzer_sources
-      }
-
       if (defined(config.enable_inspector_event_reporting) &&
           config.enable_inspector_event_reporting &&
           defined(invoker.inspector_event_reporting_sources)) {

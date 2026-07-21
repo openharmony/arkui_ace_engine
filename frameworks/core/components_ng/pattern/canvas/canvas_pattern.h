@@ -26,9 +26,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
-#ifdef SUPPORT_IMAGE_ANALYZER
 class ImageAnalyzerManager;
-#endif
 }
 
 namespace OHOS::Ace::NG {
@@ -267,9 +265,7 @@ private:
     SizeF dirtyPixelGridRoundSize_ = { -1, -1 };
     SizeF lastDirtyPixelGridRoundSize_ = { -1, -1 };
     DirtySwapConfig recordConfig_;
-#ifdef SUPPORT_IMAGE_ANALYZER
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
-#endif
     bool isEnableAnalyzer_ = false;
     RefPtr<CanvasModifier> contentModifier_;
     bool isAttached_ = false;

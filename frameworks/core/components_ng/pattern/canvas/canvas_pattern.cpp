@@ -34,11 +34,9 @@ constexpr float DEFAULT_SDR_HEADROOM = 1.0f;
 
 CanvasPattern::~CanvasPattern()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzerFeature()) {
         ReleaseImageAnalyzer();
     }
-#endif
 }
 
 void CanvasPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -171,11 +169,9 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
     }
 
     if (needReset) {
-#ifdef SUPPORT_IMAGE_ANALYZER
         if (IsSupportImageAnalyzerFeature()) {
             imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
         }
-#endif
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         CHECK_NULL_VOID(contentModifier_);
@@ -800,7 +796,6 @@ void CanvasPattern::EnableAnalyzer(bool enable)
         return;
     }
 
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(!imageAnalyzerManager_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -813,23 +808,19 @@ void CanvasPattern::EnableAnalyzer(bool enable)
         CHECK_NULL_VOID(pattern);
         pattern->DestroyAnalyzerOverlay();
     });
-#endif
 }
 
 void CanvasPattern::SetImageAIOptions(void* options)
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::CANVAS);
     }
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->SetImageAIOptions(options);
-#endif
 }
 
 void CanvasPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (!IsSupportImageAnalyzerFeature()) {
         CHECK_NULL_VOID(onAnalyzed);
         (onAnalyzed.value())(ImageAnalyzerState::UNSUPPORTED);
@@ -852,28 +843,20 @@ void CanvasPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnaly
             pattern->CreateAnalyzerOverlay();
         },
         "ArkUICanvasStartImageAnalyzer");
-#endif
 }
 
 void CanvasPattern::StopImageAnalyzer()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     DestroyAnalyzerOverlay();
-#endif
 }
 
 bool CanvasPattern::IsSupportImageAnalyzerFeature()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     return isEnableAnalyzer_ && imageAnalyzerManager_ && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
-#else
-    return false;
-#endif
 }
 
 void CanvasPattern::CreateAnalyzerOverlay()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetOverlayNode(nullptr);
@@ -884,12 +867,10 @@ void CanvasPattern::CreateAnalyzerOverlay()
     if (IsSupportImageAnalyzerFeature()) {
         imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
     }
-#endif
 }
 
 void CanvasPattern::UpdateAnalyzerOverlay()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -898,23 +879,18 @@ void CanvasPattern::UpdateAnalyzerOverlay()
     CHECK_NULL_VOID(pixelMap);
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
-#endif
 }
 
 void CanvasPattern::DestroyAnalyzerOverlay()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
-#endif
 }
 
 void CanvasPattern::ReleaseImageAnalyzer()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->ReleaseImageAnalyzer();
-#endif
 }
 
 void CanvasPattern::DumpInfo()

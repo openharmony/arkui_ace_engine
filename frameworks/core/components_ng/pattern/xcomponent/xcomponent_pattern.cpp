@@ -2407,28 +2407,23 @@ void XComponentPattern::EnableAnalyzer(bool enable)
         return;
     }
 
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(!imageAnalyzerManager_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::XCOMPONENT);
-#endif
 }
 
 void XComponentPattern::SetImageAIOptions(void* options)
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (!imageAnalyzerManager_) {
         imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::XCOMPONENT);
     }
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->SetImageAIOptions(options);
-#endif
 }
 
 void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnalyzed)
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (!IsSupportImageAnalyzerFeature()) {
         CHECK_NULL_VOID(onAnalyzed);
         (onAnalyzed.value())(ImageAnalyzerState::UNSUPPORTED);
@@ -2451,28 +2446,20 @@ void XComponentPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onA
             pattern->CreateAnalyzerOverlay();
         },
         "ArkUIXComponentCreateAnalyzerOverlay");
-#endif
 }
 
 void XComponentPattern::StopImageAnalyzer()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     DestroyAnalyzerOverlay();
-#endif
 }
 
 bool XComponentPattern::IsSupportImageAnalyzerFeature()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     return isEnableAnalyzer_ && imageAnalyzerManager_ && imageAnalyzerManager_->IsSupportImageAnalyzerFeature();
-#else
-    return false;
-#endif
 }
 
 void XComponentPattern::CreateAnalyzerOverlay()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetOverlayNode(nullptr);
@@ -2490,12 +2477,10 @@ void XComponentPattern::CreateAnalyzerOverlay()
 
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->CreateAnalyzerOverlay(pixelMap);
-#endif
 }
 
 void XComponentPattern::UpdateAnalyzerOverlay()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
@@ -2504,32 +2489,25 @@ void XComponentPattern::UpdateAnalyzerOverlay()
     CHECK_NULL_VOID(pixelMap);
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->UpdateAnalyzerOverlay(pixelMap);
-#endif
 }
 
 void XComponentPattern::UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode)
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     if (IsSupportImageAnalyzerFeature()) {
         imageAnalyzerManager_->UpdateAnalyzerUIConfig(geometryNode);
     }
-#endif
 }
 
 void XComponentPattern::DestroyAnalyzerOverlay()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->DestroyAnalyzerOverlay();
-#endif
 }
 
 void XComponentPattern::ReleaseImageAnalyzer()
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->ReleaseImageAnalyzer();
-#endif
 }
 
 void XComponentPattern::SetSurfaceRotation(bool isLock)
@@ -2636,7 +2614,6 @@ bool XComponentPattern::GetEnableAnalyzer()
 
 void XComponentPattern::NativeStartImageAnalyzer(std::function<void(int32_t)>& callback)
 {
-#ifdef SUPPORT_IMAGE_ANALYZER
     CHECK_NULL_VOID(callback);
     if (!isOnTree_ || !isEnableAnalyzer_) {
         return callback(ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED);
@@ -2674,7 +2651,6 @@ void XComponentPattern::NativeStartImageAnalyzer(std::function<void(int32_t)>& c
             pattern->CreateAnalyzerOverlay();
         },
         "ArkUIXComponentCreateAnalyzerOverlay");
-#endif
 }
 
 RSCanvas* XComponentPattern::LockCanvas()
