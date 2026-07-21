@@ -4796,10 +4796,19 @@ int32_t SetFocusBox(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->size != NUM_3) {
         return ERROR_CODE_PARAM_INVALID;
     }
+    auto margin = item->value[0].f32;
+    auto strokeWidth = item->value[1].f32;
+    auto hasValue = NUM_7;
+    if (margin >= FLT_MAX) {
+        hasValue &= ~4;
+    }
+    if (strokeWidth >= FLT_MAX || strokeWidth < 0.0f) {
+        hasValue &= ~2;
+    }
     auto* fullImpl = GetFullImpl();
     int32_t unit = GetDefaultUnit(node, UNIT_FP);
-    fullImpl->getNodeModifiers()->getCommonModifier()->setFocusBoxStyle(node->uiNodeHandle, item->value[0].f32, unit,
-        item->value[1].f32, unit, item->value[2].u32, NUM_7, nullptr);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setFocusBoxStyle(node->uiNodeHandle, margin, unit,
+        strokeWidth, unit, item->value[2].u32, hasValue, nullptr);
     return ERROR_CODE_NO_ERROR;
 }
 
