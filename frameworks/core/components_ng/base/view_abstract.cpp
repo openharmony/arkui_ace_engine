@@ -4890,16 +4890,23 @@ void ViewAbstract::AddHoverEventForTips(
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
-    auto hoverTask = [targetNode, targetId, tipsInfo, param, overlayManager, showInSubWindow, popupId, popupNode,
-                         containerId](bool isHover) {
+    auto hoverTask = [weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode)), targetId, tipsInfo, param,
+                         weakOverlay = AceType::WeakClaim(AceType::RawPtr(overlayManager)), showInSubWindow, popupId,
+                         weakPopup = AceType::WeakClaim(AceType::RawPtr(popupNode)), containerId](bool isHover) {
+        auto targetNode = weakTarget.Upgrade();
+        auto overlayManager = weakOverlay.Upgrade();
+        auto popupNode = weakPopup.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
         if (isHover && !overlayManager->GetPopupInfo(targetId).isTips &&
             overlayManager->GetPopupInfo(targetId).popupNode) {
             return;
         }
         if (isHover) {
+            CHECK_NULL_VOID(targetNode);
             const auto* modifier = NodeModifier::GetBubbleInnerModifier();
             CHECK_NULL_VOID(modifier);
             modifier->updatePopupParam(popupId, param, targetNode);
+            CHECK_NULL_VOID(popupNode);
             popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             if (showInSubWindow) {
                 auto pattern = popupNode->GetPattern<NG::BubblePattern>();
