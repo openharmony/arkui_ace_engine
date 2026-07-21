@@ -13,22 +13,23 @@
  * limitations under the License.
  */
 
+/// <reference path='./import.ts' />
 
 interface StackParam {
   alignContent: Alignment
 }
 
-class ArkStackComponent extends ArkComponent {
+class ArkStackComponent extends ArkComponent implements StackAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  initialize(value: Object[]): this {
+  initialize(value: Object[]): StackAttribute {
     if (value[0] !== undefined) {
       this.alignContent((value[0] as StackParam).alignContent);
     }
     return this
   }
-  alignContent(value: Alignment): this {
+  alignContent(value: Alignment): StackAttribute {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
     return this;
   }
@@ -36,7 +37,7 @@ class ArkStackComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
     return this;
   }
-  pointLight(value: PointLightStyle): this {
+  pointLight(value: PointLightStyle): StackAttribute {
     modifierWithKey(this._modifiersWithKeys, StackPointLightModifier.identity, StackPointLightModifier, value);
     return this;
   }
@@ -110,20 +111,18 @@ class StackSyncLoadModifier extends ModifierWithKey<boolean | undefined> {
   static identity: Symbol = Symbol('stackSyncLoad');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().stack.resetSyncLoad(node);
+      getUINativeModule().stack.resetStackSyncLoad(node);
     } else {
-      getUINativeModule().stack.setSyncLoad(node, this.value);
+      getUINativeModule().stack.setStackSyncLoad(node, this.value);
     }
   }
 }
 
 // @ts-ignore
-if (globalThis.Stack !== undefined) {
-  (globalThis as any).Stack.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkStackComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.StackModifier(nativePtr, classType);
-    });
-  };
-}
+globalThis.Stack.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkStackComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.StackModifier(nativePtr, classType);
+  });
+};

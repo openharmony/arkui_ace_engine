@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+/// <reference path='./import.ts' />
 class RowAlignItemsModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -126,41 +127,39 @@ interface RowParam {
   space: string | number;
 }
 
-class ArkRowComponent extends ArkComponent {
+class ArkRowComponent extends ArkComponent implements RowAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  initialize(value: Object[]): this {
+  initialize(value: Object[]): RowAttribute {
     if (value[0] !== undefined) {
       modifierWithKey(this._modifiersWithKeys, RowSpaceModifier.identity, RowSpaceModifier, (value[0] as RowParam).space);
     }
     return this
   }
-  alignItems(value: VerticalAlign): this {
+  alignItems(value: VerticalAlign): RowAttribute {
     modifierWithKey(this._modifiersWithKeys, RowAlignItemsModifier.identity, RowAlignItemsModifier, value);
     return this;
   }
-  justifyContent(value: FlexAlign): this {
+  justifyContent(value: FlexAlign): RowAttribute {
     modifierWithKey(this._modifiersWithKeys, RowJustifyContentlModifier.identity, RowJustifyContentlModifier, value);
     return this;
   }
-  pointLight(value: PointLightStyle): this {
+  pointLight(value: PointLightStyle): RowAttribute {
     modifierWithKey(this._modifiersWithKeys, RowPointLightModifier.identity, RowPointLightModifier, value);
     return this;
   }
-  reverse(value: boolean | undefined): this {
+  reverse(value: boolean | undefined): RowAttribute {
     modifierWithKey(this._modifiersWithKeys, RowReverseModifier.identity, RowReverseModifier, value);
     return this;
   }
 }
 
 // @ts-ignore
-if (globalThis.Row !== undefined) {
-  (globalThis as any).Row.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkRowComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.RowModifier(nativePtr, classType);
-    });
-  };
-}
+globalThis.Row.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkRowComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.RowModifier(nativePtr, classType);
+  });
+};

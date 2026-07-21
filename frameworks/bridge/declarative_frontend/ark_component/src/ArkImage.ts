@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+/// <reference path='./import.ts' />
 class ImageColorFilterModifier extends ModifierWithKey<ColorFilter | DrawingColorFilter> {
   constructor(value: ColorFilter) {
     super(value);
@@ -161,18 +162,18 @@ class ImageResizableModifier extends ModifierWithKey<ResizableOptions> {
       if (!isUndefined(this.value.lattice) && !isNull(this.value.lattice)) {
         getUINativeModule().image.setResizableLattice(node, this.value.lattice);
       }
-      let sliceTop: Length | undefined;
-      let sliceRight: Length | undefined;
-      let sliceBottom: Length | undefined;
-      let sliceLeft: Length | undefined;
       if (!isUndefined(this.value.slice) && !isNull(this.value.slice)) {
+        let sliceTop: Length | undefined;
+        let sliceRight: Length | undefined;
+        let sliceBottom: Length | undefined;
+        let sliceLeft: Length | undefined;
         let tmpSlice = this.value.slice as EdgeWidths;
         sliceTop = tmpSlice.top;
         sliceRight = tmpSlice.right;
         sliceBottom = tmpSlice.bottom;
         sliceLeft = tmpSlice.left;
+        getUINativeModule().image.setResizable(node, sliceTop, sliceRight, sliceBottom, sliceLeft);
       }
-      getUINativeModule().image.setResizable(node, sliceTop, sliceRight, sliceBottom, sliceLeft);
     }
   }
 }
@@ -467,7 +468,7 @@ class ImageBorderModifier extends ModifierWithKey<BorderOptions> {
       let styleRight;
       let styleBottom;
       let styleLeft;
-      if (!isUndefined(this.value.style) && this.value.style !== null) {
+      if (!isUndefined(this.value.style) && this.value.style != null) {
         if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
           styleTop = this.value.style;
           styleRight = this.value.style;
@@ -648,9 +649,6 @@ class ImageOnFinishModifier extends ModifierWithKey<VoidCallback> {
 }
 
 class ImageRotateOrientationModifier extends ModifierWithKey<ImageRotateOrientation> {
-  constructor(value: ImageRotateOrientation) {
-    super(value);
-  }
   static identity: Symbol = Symbol('imageOrientation');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -771,7 +769,7 @@ class ImageAntiAliasModifier extends ModifierWithKey<boolean> {
     super(value);
   }
   static identity: Symbol = Symbol('antialiased');
-  applyPeer(node: KNode, reset: boolean): void {
+  applyPeer(node: KNode, reset: boolean, component?: ArkComponent): void {
     if (reset) {
       getUINativeModule().image.resetAntiAlias(node);
     } else {
@@ -782,7 +780,7 @@ class ImageAntiAliasModifier extends ModifierWithKey<boolean> {
     return this.stageValue !== this.value;
   }
 }
-class ArkImageComponent extends ArkComponent {
+class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
@@ -817,10 +815,6 @@ class ArkImageComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ImageEdgeAntialiasingModifier.identity, ImageEdgeAntialiasingModifier, value);
     return this;
   }
-  resizable(value: ResizableOptions): this {
-    modifierWithKey(this._modifiersWithKeys, ImageResizableModifier.identity, ImageResizableModifier, value);
-    return this;
-  }
   alt(value: ResourceStr): this {
     modifierWithKey(this._modifiersWithKeys, ImageAltModifier.identity, ImageAltModifier, value);
     return this;
@@ -831,6 +825,10 @@ class ArkImageComponent extends ArkComponent {
   }
   fitOriginalSize(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageFitOriginalSizeModifier.identity, ImageFitOriginalSizeModifier, value);
+    return this;
+  }
+  pointLight(value: PointLightStyle): this {
+    modifierWithKey(this._modifiersWithKeys, ImagePointLightModifier.identity, ImagePointLightModifier, value);
     return this;
   }
   fillColor(value: ResourceColor): this {
@@ -862,18 +860,9 @@ class ArkImageComponent extends ArkComponent {
       ImageRenderModeModifier, value);
     return this;
   }
-  orientation(value: ImageRotateOrientaion): this {
-    modifierWithKey(
-    this._modifiersWithKeys, ImageRotateOrientationModifier.identity, ImageRotateOrientationModifier, value);
-    return this;
-  }
   interpolation(value: ImageInterpolation): this {
     modifierWithKey(this._modifiersWithKeys, ImageInterpolationModifier.identity,
       ImageInterpolationModifier, value);
-    return this;
-  }
-  pointLight(value: PointLightStyle): this {
-    modifierWithKey(this._modifiersWithKeys, ImagePointLightModifier.identity, ImagePointLightModifier, value);
     return this;
   }
   sourceSize(value: { width: number; height: number }): this {
@@ -914,7 +903,7 @@ class ArkImageComponent extends ArkComponent {
       contentOffsetY: number;
     }) => void,
   ): this {
-    modifierWithKey(this._modifiersWithKeys, ImageOnCompleteModifier.identity, ImageOnCompleteModifier, callback);
+    modifierWithKey(this._modifiersWithKeys, ImageOnCompleteModifier.identity, ImageOnCompleteModifier, value);
     return this;
   }
   onError(callback: (event: {
@@ -955,6 +944,11 @@ class ArkImageComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ImageHdrBrightnessModifier.identity, ImageHdrBrightnessModifier, value);
     return this;
   }
+  orientation(value: ImageRotateOrientaion): this {
+    modifierWithKey(
+    this._modifiersWithKeys, ImageRotateOrientationModifier.identity, ImageRotateOrientationModifier, value);
+    return this;
+  }
   enhancedImageQuality(value: ResolutionQuality): this {
     modifierWithKey(
       this._modifiersWithKeys, ImageDynamicRangeModeModifier.identity, ImageDynamicRangeModeModifier, value);
@@ -970,6 +964,10 @@ class ArkImageComponent extends ArkComponent {
   }
   analyzerConfig(value: object): this {
     modifierWithKey(this._modifiersWithKeys, ImageAnalyzerConfigModifier.identity, ImageAnalyzerConfigModifier, value);
+    return this;
+  }
+  resizable(value: ResizableOptions): this {
+    modifierWithKey(this._modifiersWithKeys, ImageResizableModifier.identity, ImageResizableModifier, value);
     return this;
   }
   supportSvg2(value: boolean): this {
