@@ -181,6 +181,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
   ]
 
   deps = [
+    "$ace_root/interfaces/inner_api/ace:ace_uicontent",
     ":ace_web_pattern_test_sources",
   ]
 
@@ -195,7 +196,6 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "ability_runtime:app_manager",
     "ability_runtime:runtime",
     "accessibility:accessibility_common",
-    "ace_engine:ace_uicontent",
     "app_file_service:fileuri_native",
     "bounds_checking_function:libsec_static",
     "cJSON:cjson",
@@ -332,6 +332,7 @@ ohos_unittest("web_accessibility_event_report_unit_test_ohos") {
   ]
 
   deps = [
+    "$ace_root/interfaces/inner_api/ace:ace_uicontent",
     ":ace_web_pattern_test_sources",
   ]
 
@@ -339,7 +340,6 @@ ohos_unittest("web_accessibility_event_report_unit_test_ohos") {
     "ability_base:want",
     "accessibility:accessibilityclient",
     "accessibility:accessibilityconfig",
-    "ace_engine:ace_uicontent",
     "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "ffrt:libffrt",

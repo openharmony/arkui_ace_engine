@@ -753,6 +753,7 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
   ]
 
   deps = [
+    "$ace_root/interfaces/inner_api/ace:ace_uicontent",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -783,7 +784,6 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "ability_runtime:app_manager",
     "ability_runtime:runtime",
     "accessibility:accessibility_common",
-    "ace_engine:ace_uicontent",
     "app_file_service:fileuri_native",
     "bounds_checking_function:libsec_static",
     "cJSON:cjson",
