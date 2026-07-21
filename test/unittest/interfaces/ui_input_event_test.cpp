@@ -20,6 +20,12 @@
 
 #include "core/components_ng/base/ui_node.h"
 
+extern "C" {
+float HandleCClickEventCurrentLocalY(const ArkUI_UIInputEvent* event);
+float HandleCMouseEventCurrentLocalY(const ArkUI_UIInputEvent* event);
+float HandleTouchEventCurrentLocalY(const ArkUI_UIInputEvent* event);
+}
+
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace {
@@ -1008,6 +1014,120 @@ HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest007, TestSize.Level1)
 
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 0), CURRENT_LOCAL_WINDOW_X);
     EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 0), CURRENT_LOCAL_WINDOW_Y);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest008
+ * @tc.desc: Test mouse current local by index falls back to node coordinates when node id is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest008, TestSize.Level1)
+{
+    ArkUIMouseEvent mouseEvent {};
+    mouseEvent.actionTouchPoint = MakeTouchPoint(
+        CURRENT_LOCAL_FALLBACK_X, CURRENT_LOCAL_FALLBACK_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y);
+    auto uiInputEvent = MakeUiInputEvent(&mouseEvent, C_MOUSE_EVENT_ID, INVALID_NODE_ID);
+
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 0), CURRENT_LOCAL_FALLBACK_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 0), CURRENT_LOCAL_FALLBACK_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest009
+ * @tc.desc: Test axis current local by index falls back to node coordinates when node id is invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest009, TestSize.Level1)
+{
+    ArkUIAxisEvent axisEvent {};
+    axisEvent.actionTouchPoint = MakeTouchPoint(
+        CURRENT_LOCAL_FALLBACK_X, CURRENT_LOCAL_FALLBACK_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y);
+    auto uiInputEvent = MakeUiInputEvent(&axisEvent, C_AXIS_EVENT_ID, INVALID_NODE_ID);
+
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 0), CURRENT_LOCAL_FALLBACK_X);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 0), CURRENT_LOCAL_FALLBACK_Y);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest010
+ * @tc.desc: Test mouse current local by index returns 0.0f when pointer index is non-zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest010, TestSize.Level1)
+{
+    ArkUIMouseEvent mouseEvent {};
+    mouseEvent.actionTouchPoint = MakeTouchPoint(
+        CURRENT_LOCAL_FALLBACK_X, CURRENT_LOCAL_FALLBACK_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y);
+    auto uiInputEvent = MakeUiInputEvent(&mouseEvent, C_MOUSE_EVENT_ID, INVALID_NODE_ID);
+
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 1), 0.0f);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 1), 0.0f);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest011
+ * @tc.desc: Test axis current local by index returns 0.0f when pointer index is non-zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest011, TestSize.Level1)
+{
+    ArkUIAxisEvent axisEvent {};
+    axisEvent.actionTouchPoint = MakeTouchPoint(
+        CURRENT_LOCAL_FALLBACK_X, CURRENT_LOCAL_FALLBACK_Y, CURRENT_LOCAL_WINDOW_X, CURRENT_LOCAL_WINDOW_Y);
+    auto uiInputEvent = MakeUiInputEvent(&axisEvent, C_AXIS_EVENT_ID, INVALID_NODE_ID);
+
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(&uiInputEvent, 1), 0.0f);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(&uiInputEvent, 1), 0.0f);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest012
+ * @tc.desc: Test HandleCClickEventCurrentLocalY returns 0.0f when event is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest012, TestSize.Level1)
+{
+    ::g_scenarioSupportCheckResult = ARKUI_ERROR_CODE_NO_ERROR;
+    ::g_latestEventStatus = ARKUI_ERROR_CODE_NO_ERROR;
+
+    EXPECT_EQ(::HandleCClickEventCurrentLocalY(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest013
+ * @tc.desc: Test HandleCMouseEventCurrentLocalY returns 0.0f when event is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest013, TestSize.Level1)
+{
+    ::g_scenarioSupportCheckResult = ARKUI_ERROR_CODE_NO_ERROR;
+    ::g_latestEventStatus = ARKUI_ERROR_CODE_NO_ERROR;
+
+    EXPECT_EQ(::HandleCMouseEventCurrentLocalY(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: PointerEventCurrentLocalTest014
+ * @tc.desc: Test HandleTouchEventCurrentLocalY returns 0.0f when event is null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest014, TestSize.Level1)
+{
+    ::g_scenarioSupportCheckResult = ARKUI_ERROR_CODE_NO_ERROR;
+    ::g_latestEventStatus = ARKUI_ERROR_CODE_NO_ERROR;
+
+    EXPECT_EQ(::HandleTouchEventCurrentLocalY(nullptr), 0.0f);
+    EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_PARAM_INVALID);
 }
 
 /**

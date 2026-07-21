@@ -1202,6 +1202,7 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(const ArkUI_UIInputEvent* ev
         case C_TOUCH_EVENT_ID: {
             auto result = HandleCTouchEventCurrentLocalXByIndex(event, pointerIndex);
             RETURN_RET_WITH_STATUS_CHECK(result.value, result.errorCode);
+            break;
         }
         case C_MOUSE_EVENT_ID: {
             const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
@@ -1216,6 +1217,7 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(const ArkUI_UIInputEvent* ev
                 { mouseEvent->actionTouchPoint.windowX, mouseEvent->actionTouchPoint.windowY },
                 { mouseEvent->actionTouchPoint.nodeX, mouseEvent->actionTouchPoint.nodeY }, event->usePXUnit);
             RETURN_RET_WITH_STATUS_CHECK(ret.xComponent, ARKUI_ERROR_CODE_NO_ERROR);
+            break;
         }
         case C_AXIS_EVENT_ID: {
             const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
@@ -1230,6 +1232,7 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(const ArkUI_UIInputEvent* ev
                 { axisEvent->actionTouchPoint.windowX, axisEvent->actionTouchPoint.windowY },
                 { axisEvent->actionTouchPoint.nodeX, axisEvent->actionTouchPoint.nodeY }, event->usePXUnit);
             RETURN_RET_WITH_STATUS_CHECK(ret.xComponent, ARKUI_ERROR_CODE_NO_ERROR);
+            break;
         }
         default:
             break;
@@ -1239,6 +1242,9 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalXByIndex(const ArkUI_UIInputEvent* ev
 
 float HandleCClickEventCurrentLocalY(const ArkUI_UIInputEvent* event)
 {
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
     const auto* clickEvent = reinterpret_cast<ArkUIClickEvent*>(event->inputEvent);
     if (!clickEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -1270,6 +1276,9 @@ float HandleCTouchEventCurrentLocalY(const ArkUI_UIInputEvent* event)
 
 float HandleCMouseEventCurrentLocalY(const ArkUI_UIInputEvent* event)
 {
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
     const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
     if (!mouseEvent) {
         RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -1302,6 +1311,9 @@ float HandleCAxisEventCurrentLocalY(const ArkUI_UIInputEvent* event)
 
 float HandleTouchEventCurrentLocalY(const ArkUI_UIInputEvent* event)
 {
+    if (!event) {
+        RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
+    }
     const auto* touchEvent = reinterpret_cast<const OHOS::Ace::TouchEvent*>(event->inputEvent);
     if (touchEvent) {
         auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
@@ -1386,6 +1398,7 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(const ArkUI_UIInputEvent* ev
         case C_TOUCH_EVENT_ID: {
             auto result = HandleCTouchEventCurrentLocalYByIndex(event, pointerIndex);
             RETURN_RET_WITH_STATUS_CHECK(result.value, result.errorCode);
+            break;
         }
         case C_MOUSE_EVENT_ID: {
             const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
@@ -1394,12 +1407,13 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(const ArkUI_UIInputEvent* ev
             }
             auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
             if (!fullImpl) {
-                RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+                RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             auto ret = fullImpl->getNodeModifiers()->getCommonModifier()->getCurrentLocation(event->nodeId,
                 { mouseEvent->actionTouchPoint.windowX, mouseEvent->actionTouchPoint.windowY },
                 { mouseEvent->actionTouchPoint.nodeX, mouseEvent->actionTouchPoint.nodeY }, event->usePXUnit);
             RETURN_RET_WITH_STATUS_CHECK(ret.yComponent, ARKUI_ERROR_CODE_NO_ERROR);
+            break;
         }
         case C_AXIS_EVENT_ID: {
             const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
@@ -1408,12 +1422,13 @@ float OH_ArkUI_PointerEvent_GetCurrentLocalYByIndex(const ArkUI_UIInputEvent* ev
             }
             auto fullImpl = OHOS::Ace::NodeModel::GetOrCreateFullImpl();
             if (!fullImpl) {
-                RETURN_RET_WITH_STATUS_CHECK(ARKUI_ERROR_CODE_PARAM_INVALID, ARKUI_ERROR_CODE_PARAM_INVALID);
+                RETURN_RET_WITH_STATUS_CHECK(0.0f, ARKUI_ERROR_CODE_PARAM_INVALID);
             }
             auto ret = fullImpl->getNodeModifiers()->getCommonModifier()->getCurrentLocation(event->nodeId,
                 { axisEvent->actionTouchPoint.windowX, axisEvent->actionTouchPoint.windowY },
                 { axisEvent->actionTouchPoint.nodeX, axisEvent->actionTouchPoint.nodeY }, event->usePXUnit);
             RETURN_RET_WITH_STATUS_CHECK(ret.yComponent, ARKUI_ERROR_CODE_NO_ERROR);
+            break;
         }
         default:
             break;
