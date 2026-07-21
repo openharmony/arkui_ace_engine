@@ -3937,6 +3937,20 @@ int32_t ListPattern::GetItemAtPosition(float offsetX, float offsetY) const
     return itemIndex.index;
 }
 
+bool ListPattern::IsPointInHotZone(const PointF& localPoint, const Rect& itemRect, float hotZoneWidth) const
+{
+    if (GetAxis() == Axis::HORIZONTAL) {
+        auto hotZoneTop = std::max(0.0f, static_cast<float>(itemRect.Height()) - hotZoneWidth);
+        return !LessNotEqual(localPoint.GetY(), hotZoneTop) && !LessNotEqual(localPoint.GetX(), 0.0f) &&
+               !GreatNotEqual(localPoint.GetX(), static_cast<float>(itemRect.Width())) &&
+               !GreatNotEqual(localPoint.GetY(), static_cast<float>(itemRect.Height()));
+    }
+    auto hotZoneLeft = std::max(0.0f, static_cast<float>(itemRect.Width()) - hotZoneWidth);
+    return !LessNotEqual(localPoint.GetX(), hotZoneLeft) && !LessNotEqual(localPoint.GetY(), 0.0f) &&
+           !GreatNotEqual(localPoint.GetY(), static_cast<float>(itemRect.Height())) &&
+           !GreatNotEqual(localPoint.GetX(), static_cast<float>(itemRect.Width()));
+}
+
 bool ListPattern::IsInEditModeHotZone(const PointF& point) const
 {
     auto host = GetHost();
@@ -3968,12 +3982,7 @@ bool ListPattern::IsInEditModeHotZone(const PointF& point) const
     PointF localPoint(point.GetX() - static_cast<float>(itemRect.Left()),
         point.GetY() - static_cast<float>(itemRect.Top()));
     auto hotZoneWidth = GetEditModeCheckBoxHotZoneWidthPx(host);
-    auto hotZoneLeft = std::max(0.0f, static_cast<float>(itemRect.Width()) - hotZoneWidth);
-    if (LessNotEqual(localPoint.GetX(), hotZoneLeft) || LessNotEqual(localPoint.GetY(), 0.0f) ||
-        GreatNotEqual(localPoint.GetY(), static_cast<float>(itemRect.Height()))) {
-        return false;
-    }
-    return true;
+    return IsPointInHotZone(localPoint, itemRect, hotZoneWidth);
 }
 
 void ListPattern::MarkSwipeItemSelected(int32_t index, bool isSelected)
@@ -4163,34 +4172,29 @@ void ListPattern::ApplyEditModeToCachedItems(bool enabled)
         return;
     }
     bool needReserveCheckBoxSpace = enabled && NeedJudgeWithHotZone();
-    auto applyEditModeToItem =
-        [weakPattern = WeakClaim(this), enabled, needReserveCheckBoxSpace](int32_t index) -> bool {
-            auto pattern = weakPattern.Upgrade();
-            CHECK_NULL_RETURN(pattern, false);
-            auto host = pattern->GetHost();
-            CHECK_NULL_RETURN(host, false);
-            auto childWrapper = host->GetChildByIndex(index + pattern->itemStartIndex_, true);
-            if (!childWrapper) {
-                return false;
-            }
-            auto child = childWrapper->GetHostNode();
-            CHECK_NULL_RETURN(child, false);
-            SetEditModeForListItemOrGroup(child, enabled, needReserveCheckBoxSpace);
-            return true;
-        };
 
     auto startIndex = itemPosition_.begin()->first;
     for (int32_t index = startIndex - 1; index >= 0; --index) {
-        if (!applyEditModeToItem(index)) {
-            break;
+        auto childWrapper = host->GetChildByIndex(index + itemStartIndex_, true);
+        if (!childWrapper) {
+            continue;
+        }
+        auto child = childWrapper->GetHostNode();
+        if (child) {
+            SetEditModeForListItemOrGroup(child, enabled, needReserveCheckBoxSpace);
         }
     }
 
     int32_t totalCount = std::max(maxListItemIndex_ + 1, 0);
     auto endIndex = itemPosition_.rbegin()->first;
     for (int32_t index = endIndex + 1; index < totalCount; ++index) {
-        if (!applyEditModeToItem(index)) {
-            break;
+        auto childWrapper = host->GetChildByIndex(index + itemStartIndex_, true);
+        if (!childWrapper) {
+            continue;
+        }
+        auto child = childWrapper->GetHostNode();
+        if (child) {
+            SetEditModeForListItemOrGroup(child, enabled, needReserveCheckBoxSpace);
         }
     }
 }
