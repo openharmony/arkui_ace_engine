@@ -5194,8 +5194,7 @@
       "OHOS::Ace::ElementRegister::ReSyncGeometryTransition(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> const&, OHOS::Ace::AnimationOption const&)";
       vtable?for?OHOS::Ace::NG::ScrollSpringEffect;
       VTT?for?OHOS::Ace::NG::ScrollSpringEffect;
-      "OHOS::Ace::TaihangOptimizer::CheckSwiperPathValid(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";    
-      "OHOS::Ace::TaihangOptimizer::CheckSwiperPageValid(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";    
+      "OHOS::Ace::TaihangOptimizer::CheckSwiperPageValid(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::ButtonPattern::HandleBackgroundColor()";
       "OHOS::Ace::NG::SymbolEffectOptions::SymbolEffectOptions(OHOS::Ace::SymbolEffectType)";
       "OHOS::Ace::NG::ScrollableEvent::SetScrollable(OHOS::Ace::RefPtr<OHOS::Ace::NG::Scrollable> const&)";

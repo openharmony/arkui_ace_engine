@@ -128,12 +128,14 @@ void ResschedEventListener::OnComponentPreMake(std::unordered_map<std::string, s
     }
     auto pageInfo = context->GetLastPageInfo();
     CHECK_NULL_VOID(pageInfo);
-    auto url = pageInfo->GetPageUrl();
+    auto fullPath = pageInfo->GetFullPath();
     auto currentPageName = context->GetNavDestinationPageName(pageInfo);
+    auto currentJsViewName = context->GetNavDestinationJSViewName(pageInfo);
     // In extInfo, pagename is set to url or navDestination pagename.
-    if (pageName != url && pageName != currentPageName) {
-        LOGE("OnComponentPreMake page name does not match, pageName:%{public}s, url:%{public}s,"
-            "currentPageName:%{public}s", pageName.c_str(), url.c_str(), currentPageName.c_str());
+    if (pageName != fullPath && pageName != currentPageName && pageName != currentJsViewName) {
+        LOGE("OnComponentPreMake pageName does not match, pageName:%{public}s, "
+            "fullPath:%{public}s, currentPageName:%{public}s, currentJsViewName:%{public}s",
+            pageName.c_str(), fullPath.c_str(), currentPageName.c_str(), currentJsViewName.c_str());
         return;
     }
 

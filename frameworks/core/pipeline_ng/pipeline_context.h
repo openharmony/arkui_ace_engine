@@ -219,6 +219,8 @@ public:
 
     std::string GetNavDestinationPageName(const RefPtr<PageInfo>& pageInfo) const;
 
+    std::string GetNavDestinationJSViewName(const RefPtr<PageInfo>& pageInfo) const;
+
     std::string GetCurrentPageName();
 
     void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;

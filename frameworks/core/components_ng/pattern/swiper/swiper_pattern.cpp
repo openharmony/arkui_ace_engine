@@ -1792,8 +1792,12 @@ void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
     }
 
     CHECK_NULL_VOID(pipeline->GetTaihangOptimizer());
-    auto curPageName = pipeline->GetCurrentPageName();
-    if (pipeline->GetTaihangOptimizer()->CheckSwiperPageValid(curPageName) && !isInAutoPlay_) {
+    auto pageInfo = pipeline->GetLastPageInfo();
+    CHECK_NULL_VOID(pageInfo);
+    auto fullPath = pageInfo->GetFullPath();
+    auto pageName = pipeline->GetNavDestinationPageName(pageInfo);
+    auto jsViewName = pipeline->GetNavDestinationJSViewName(pageInfo);
+    if (pipeline->GetTaihangOptimizer()->CheckSwiperPageValid(fullPath, pageName, jsViewName) && !isInAutoPlay_) {
         RefPtr<NG::UINode> curUINode = host;
         std::string path = curUINode->GetPath();
         std::unordered_map<std::string, std::string> payload;
