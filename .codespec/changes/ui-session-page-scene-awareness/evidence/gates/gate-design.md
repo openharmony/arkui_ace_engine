@@ -6,7 +6,7 @@
 | 现有代码事实已核验 | 通过 | `design.md` 引用 `ui_content_service_interface.h`、`ui_content_stub.cpp`、`ui_session_manager.h`、`ui_session_manager_ohos.*`、`ui_content_impl.cpp` 等真实源码位置 |
 | UISession 接口方案已明确 | 通过 | 明确 `RegisterPageSceneRules`、`UnregisterPageSceneRules`、`GetPageScene` 和 `ReportPageSceneEvent` 的职责、callback 路由及 DFX 并发保护 |
 | 规则解析和扩展模型已明确 | 通过 | 明确 `PageSceneRuleManager`、ruleSet/rule/report 状态结构、校验规则和 scene/operator/source 扩展方式 |
-| 首批 ArkUI 匹配设计已明确 | 通过 | 明确 `TEXT_EDITOR` tag 白名单、`PageSceneInputCountTracker` 页面可见输入控件计数维护、首次注册初始化扫描、文本输入类控件上下树增量维护、可见性/可获焦/rect 计算策略 |
+| 首批 ArkUI 匹配设计已明确 | 通过 | 明确 `TEXT_EDITOR` tag 白名单、稳定点全量扫描、上下树仅挂起待检测规则、页面窗口范围过滤、可见性/可获焦/rect 计算和节点 ID 列表去重策略 |
 | Web 透传边界已明确 | 通过 | 明确 `webRules` 注册透传、反注册和查询请求透传 |
 | UIExtension 透传边界已明确 | 通过 | 明确规则注册、反注册、查询请求透传 |
 | 隐私和安全约束已明确 | 通过 | 默认不上报文本正文，日志只输出摘要，非法 ruleJson 不保存不触发 |

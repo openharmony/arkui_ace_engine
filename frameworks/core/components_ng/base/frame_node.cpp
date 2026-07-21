@@ -1916,14 +1916,14 @@ void FrameNode::OnAttachToMainTree(bool recursive)
         context->AddDirtyPropertyNode(Claim(this));
     }
     if (!hasPendingRequest_) {
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
         UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, true);
 #endif
         return;
     }
     context->RequestFrame();
     hasPendingRequest_ = false;
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
     UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, true);
 #endif
 }
@@ -2204,7 +2204,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->OnAccessibilityDetachFromMainTree();
-#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
     UiSessionManager::GetInstance()->NotifyPageSceneNodeChanged(tag_, false);
 #endif
 }

@@ -67,6 +67,8 @@ constexpr float THIRD_NODE_X = 50.0f;
 constexpr float THIRD_NODE_Y = 140.0f;
 constexpr float INPUT_WIDTH = 200.0f;
 constexpr float INPUT_HEIGHT = 40.0f;
+constexpr float OFFSCREEN_NODE_Y = ROOT_HEIGHT + INPUT_HEIGHT;
+constexpr float MOVED_NODE_OFFSET = 100.0f;
 const std::string TEST_PAGE_NAME = "pages/Index";
 const std::string TEST_RULE_SET_ID = "default_scene_rules";
 const std::string TEST_RULE_ID = "text_editor_rule_001";
@@ -78,7 +80,8 @@ const std::string FIRST_PLACEHOLDER_TEXT = "input account";
 const std::u16string FIRST_PLACEHOLDER_TEXT_U16 = u"input account";
 
 std::string BuildRuleJson(bool includeUnfocusable = false, bool includeText = false,
-    bool deduplicate = true, int32_t minReportIntervalMs = DEFAULT_MIN_REPORT_INTERVAL_MS)
+    bool deduplicate = true, int32_t minReportIntervalMs = DEFAULT_MIN_REPORT_INTERVAL_MS,
+    bool onlyVisible = true)
 {
     return std::string(R"({
         "version": 1,
@@ -100,7 +103,7 @@ std::string BuildRuleJson(bool includeUnfocusable = false, bool includeText = fa
                 "sceneType": "TEXT_EDITOR",
                 "enabled": true,
                 "scope": {
-                    "onlyVisible": true
+                    "onlyVisible":)" + (onlyVisible ? "true" : "false") + R"(
                 },
                 "selector": {
                     "nodeTypes": ["TextInput", "TextArea", "Search", "RichEditor"]
@@ -232,6 +235,18 @@ void AddChild(const RefPtr<FrameNode>& parent, const RefPtr<FrameNode>& child)
     ASSERT_NE(parent, nullptr);
     ASSERT_NE(child, nullptr);
     child->MountToParent(parent);
+}
+
+void UpdateNodeRect(const RefPtr<FrameNode>& node, const RectF& paintRect)
+{
+    ASSERT_NE(node, nullptr);
+    auto geometryNode = node->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameOffset(OffsetF(paintRect.GetX(), paintRect.GetY()));
+    geometryNode->SetFrameSize(SizeF(paintRect.Width(), paintRect.Height()));
+    auto renderContext = AceType::DynamicCast<MockRenderContext>(node->GetRenderContext());
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->SetPaintRectWithTransform(paintRect);
 }
 } // namespace
 
@@ -548,5 +563,108 @@ HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene006, Tes
     ASSERT_TRUE(reenterResult.has_value());
     EXPECT_TRUE(reenterResult->matched);
     EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, reenterResult.value()));
+}
+
+/**
+ * @tc.name: PageSceneRuleManager_MatchPageScene007
+ * @tc.desc: Test onlyVisible filters inputs outside the page viewport while disabled onlyVisible keeps them.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene007, TestSize.Level1)
+{
+    auto pageRoot = CreatePageRoot();
+    AddChild(pageRoot, CreateTextInputNode(
+        TEST_TEXT_INPUT_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+    AddChild(pageRoot, CreateTextInputNode(
+        TEST_TEXT_AREA_ID, RectF(SECOND_NODE_X, OFFSCREEN_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+
+    PageSceneRuleManager manager;
+    auto visibleOnlyResult = manager.MatchPageScene(
+        TEST_PROCESS_ID, BuildRuleJson(), pageRoot, TEST_PAGE_NAME, true);
+    ASSERT_TRUE(visibleOnlyResult.has_value());
+    EXPECT_FALSE(visibleOnlyResult->matched);
+    EXPECT_EQ(visibleOnlyResult->matchedCount, ONE_MATCHED_NODE);
+    ASSERT_EQ(visibleOnlyResult->nodeIds.size(), ONE_MATCHED_NODE);
+    EXPECT_EQ(visibleOnlyResult->nodeIds.front(), TEST_TEXT_INPUT_ID);
+
+    auto allNodesResult = manager.MatchPageScene(
+        TEST_PROCESS_ID, BuildRuleJson(false, false, true, DEFAULT_MIN_REPORT_INTERVAL_MS, false),
+        pageRoot, TEST_PAGE_NAME, false);
+    ASSERT_TRUE(allNodesResult.has_value());
+    EXPECT_TRUE(allNodesResult->matched);
+    EXPECT_EQ(allNodesResult->matchedCount, TWO_MATCHED_NODES);
+}
+
+/**
+ * @tc.name: PageSceneRuleManager_MatchPageScene008
+ * @tc.desc: Test coordinate-only changes are deduplicated when the matched node ID list is unchanged.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene008, TestSize.Level1)
+{
+    auto pageRoot = CreatePageRoot();
+    auto textInputNode = CreateTextInputNode(
+        TEST_TEXT_INPUT_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT));
+    auto textAreaNode = CreateTextInputNode(
+        TEST_TEXT_AREA_ID, RectF(SECOND_NODE_X, SECOND_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT));
+    AddChild(pageRoot, textInputNode);
+    AddChild(pageRoot, textAreaNode);
+
+    PageSceneRuleManager manager;
+    auto initialResult = manager.MatchPageScene(TEST_PROCESS_ID,
+        BuildRuleJson(false, false, true, 0), pageRoot, TEST_PAGE_NAME, false);
+    ASSERT_TRUE(initialResult.has_value());
+    EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, initialResult.value()));
+
+    UpdateNodeRect(textInputNode, RectF(
+        FIRST_NODE_X + MOVED_NODE_OFFSET, FIRST_NODE_Y + MOVED_NODE_OFFSET, INPUT_WIDTH, INPUT_HEIGHT));
+    UpdateNodeRect(textAreaNode, RectF(
+        SECOND_NODE_X + MOVED_NODE_OFFSET, SECOND_NODE_Y + MOVED_NODE_OFFSET, INPUT_WIDTH, INPUT_HEIGHT));
+    auto movedResult = manager.MatchPageScene(TEST_PROCESS_ID,
+        BuildRuleJson(false, false, true, 0), pageRoot, TEST_PAGE_NAME, false);
+
+    ASSERT_TRUE(movedResult.has_value());
+    EXPECT_EQ(movedResult->nodeIds, initialResult->nodeIds);
+    EXPECT_FALSE(manager.ShouldReport(TEST_PROCESS_ID, movedResult.value()));
+}
+
+/**
+ * @tc.name: PageSceneRuleManager_MatchPageScene009
+ * @tc.desc: Test leaving the viewport or replacing an attached input changes node IDs and produces a new state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PageSceneRuleManagerTestNg, PageSceneRuleManager_MatchPageScene009, TestSize.Level1)
+{
+    auto matchedRoot = CreatePageRoot();
+    AddChild(matchedRoot, CreateTextInputNode(
+        TEST_TEXT_INPUT_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+    auto textAreaNode = CreateTextInputNode(
+        TEST_TEXT_AREA_ID, RectF(SECOND_NODE_X, SECOND_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT));
+    AddChild(matchedRoot, textAreaNode);
+
+    PageSceneRuleManager manager;
+    auto initialResult = manager.MatchPageScene(TEST_PROCESS_ID,
+        BuildRuleJson(false, false, true, 0), matchedRoot, TEST_PAGE_NAME, false);
+    ASSERT_TRUE(initialResult.has_value());
+    EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, initialResult.value()));
+
+    UpdateNodeRect(textAreaNode, RectF(SECOND_NODE_X, OFFSCREEN_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT));
+    auto offscreenResult = manager.MatchPageScene(TEST_PROCESS_ID,
+        BuildRuleJson(false, false, true, 0), matchedRoot, TEST_PAGE_NAME, false);
+    ASSERT_TRUE(offscreenResult.has_value());
+    EXPECT_FALSE(offscreenResult->matched);
+    EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, offscreenResult.value()));
+
+    auto replacedRoot = CreatePageRoot();
+    AddChild(replacedRoot, CreateTextInputNode(
+        TEST_TEXT_INPUT_ID, RectF(FIRST_NODE_X, FIRST_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+    AddChild(replacedRoot, CreateTextInputNode(
+        TEST_SEARCH_ID, RectF(SECOND_NODE_X, SECOND_NODE_Y, INPUT_WIDTH, INPUT_HEIGHT)));
+    auto replacedResult = manager.MatchPageScene(TEST_PROCESS_ID,
+        BuildRuleJson(false, false, true, 0), replacedRoot, TEST_PAGE_NAME, false);
+    ASSERT_TRUE(replacedResult.has_value());
+    EXPECT_TRUE(replacedResult->matched);
+    EXPECT_EQ(replacedResult->nodeIds, (std::vector<int32_t> { TEST_TEXT_INPUT_ID, TEST_SEARCH_ID }));
+    EXPECT_TRUE(manager.ShouldReport(TEST_PROCESS_ID, replacedResult.value()));
 }
 } // namespace OHOS::Ace::NG

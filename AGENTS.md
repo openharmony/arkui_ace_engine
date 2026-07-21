@@ -14,7 +14,7 @@ This file defines working rules for agents in `ace_engine`.
 
 ```bash
 # Build ace_engine (from OpenHarmony root)
-./build.sh --product-name rk3568 --build-target ace_engine
+./build.sh --product-name rk3568 --build-target ace_engine --ccache
 
 # Build SDK variant
 ./build.sh --product-name ohos-sdk --build-target ace_engine
@@ -22,6 +22,42 @@ This file defines working rules for agents in `ace_engine`.
 # Build a GN target
 ./build.sh --product-name rk3568 --build-target //foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text:text_pattern
 ```
+
+### Required Validation Policy
+
+- After modifying business code under `frameworks/`, `adapter/`, `interfaces/`, or related production paths, the final build evidence must include a complete `ace_engine` build:
+
+  ```bash
+  # Run from the OpenHarmony root.
+  ./build.sh --product-name rk3568 --build-target ace_engine --ccache
+  ```
+
+- A single object build, a local GN target, or `-fsyntax-only` may be used for fast diagnosis, but does not replace the final complete `ace_engine` build.
+- TDD must use Linux x86_64 Host unit tests that can be executed without a device. The test must be both built and actually run; compilation, linking, or syntax checking alone is not passing TDD evidence.
+
+### Host TDD Build and Run (No Device Required)
+
+```bash
+# First build or full Host unit-test build, from the OpenHarmony root.
+./build.sh --product-name host_product --build-target unittest --ccache --skip-download
+
+# After the Host build graph exists, build a targeted test from the OpenHarmony root.
+prebuilts/build-tools/linux-x86/bin/ninja \
+  -w dupbuild=warn \
+  -C out/host/host_product \
+  <test_target>
+
+# Verify that the produced test is a Linux x86-64 Host binary.
+file out/host/host_product/tests/unittest/ace_engine/<category>/<test_binary>
+
+# Execute the targeted test or test case directly on the Host.
+out/host/host_product/tests/unittest/ace_engine/<category>/<test_binary> \
+  --gtest_filter='<Suite.Case>'
+```
+
+- Use the actual GN/Ninja target name from the Host build graph. Do not assume that a target beginning with `//` is accepted by the generated Ninja graph.
+- Record the executed test binary, gtest filter when used, and actual passed/failed counts.
+- ARM/rk3568 test binaries are not the default evidence for no-device TDD because they cannot normally be executed directly on the Linux x86_64 Host.
 
 ### Unit Test / Benchmark Build
 
@@ -181,7 +217,10 @@ Detailed templates/rules: `docs/knowledge_base_README.md`.
 ## 7. Testing Guidance
 
 - Test path should mirror source layout.
-- Run targeted unit tests for changed modules first, then broader regression tests if impact is large.
+- For TDD, build and run the relevant Linux x86_64 Host test first; test compilation alone is insufficient.
+- Confirm the test executable architecture with `file <test_binary>` and record the actual gtest result counts.
+- Run broader Host regression tests when the impact is large.
+- After business code changes, complete the overall `ace_engine` build described in the required validation policy before claiming completion.
 - For C API related changes:
   - Build `linux_unittest_capi`
   - Run relevant `capi_*` test executables
