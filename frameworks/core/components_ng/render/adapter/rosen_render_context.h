@@ -661,7 +661,7 @@ public:
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     // cross-platform only: used by XComponent to register a surface capture callback for component snapshot.
-    void SetSurfaceCaptureCallback(std::function<std::shared_ptr<Media::PixelMap>()> callback);
+    ACE_FORCE_EXPORT void SetSurfaceCaptureCallback(std::function<std::shared_ptr<Media::PixelMap>()> callback);
 #endif
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
