@@ -202,7 +202,7 @@ void FolderStackLayoutAlgorithm::RangeCalculation(const RefPtr<FolderStackGroupN
         creaseY = static_cast<int32_t>(foldCrease.Bottom() - foldCrease.Height());
         creaseHeight = static_cast<int32_t>(foldCrease.Height());
     }
-
+    
     preHoverStackHeight_ = static_cast<float>(creaseY - length);
     preControlPartsStackHeight_ = static_cast<float>(size.Height() - creaseHeight - preHoverStackHeight_);
     controlPartsStackRect_ = OffsetF(0.0f, creaseY - length + creaseHeight);

@@ -129,6 +129,7 @@ enum class IgnoreStrategy {
     STRIDE_OVER,
     AXIS_INSENSITIVE
 };
+
 class ACE_FORCE_EXPORT LayoutWrapper : public virtual AceType {
     DECLARE_ACE_TYPE(LayoutWrapper, AceType);
 public:
@@ -254,7 +255,6 @@ public:
             .edges = NG::LAYOUT_SAFE_AREA_EDGE_ALL },
         IgnoreStrategy strategy = IgnoreStrategy::NORMAL);
     void ResetSafeAreaPadding();
-
     bool SkipSyncGeometryNode() const
     {
         return needSkipSyncGeometryNode_;

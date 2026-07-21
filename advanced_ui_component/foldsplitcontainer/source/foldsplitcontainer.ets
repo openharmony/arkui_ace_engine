@@ -193,7 +193,7 @@ export interface FoldedRegionLayoutOptions {
  * @atomicservice
  * @since 12
  */
-export enum PresetSplitRatio {
+export enum PresetSplitRatio:double {
   /**
    * 1:1
    *

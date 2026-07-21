@@ -1042,7 +1042,7 @@ PaddingPropertyF LayoutProperty::CreatePaddingAndBorder(bool includeSafeAreaPadd
 PaddingPropertyF LayoutProperty::CreatePaddingAndBorderInner(RefPtr<FrameNode>& host,
     bool includeSafeAreaPadding, bool forceReCreate)
 {
-    PaddingPropertyF safeAreaPadding { 0.0f, 0.0f, 0.0f, 0.0f};
+    PaddingPropertyF safeAreaPadding {0.0f, 0.0f, 0.0f, 0.0f};
     if (includeSafeAreaPadding) {
         safeAreaPadding = GetOrCreateSafeAreaPaddingInner(host, forceReCreate);
         SetDefaultValue(safeAreaPadding, 0.0f);
