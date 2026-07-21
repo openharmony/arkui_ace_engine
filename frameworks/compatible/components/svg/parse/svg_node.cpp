@@ -15,8 +15,6 @@
 
 #include "frameworks/compatible/components/svg/parse/svg_node.h"
 
-#include "base/geometry/shape.h"
-#include "core/components/common/properties/clip_path.h"
 #include "frameworks/compatible/components/svg/parse/svg_gradient.h"
 
 namespace OHOS::Ace {

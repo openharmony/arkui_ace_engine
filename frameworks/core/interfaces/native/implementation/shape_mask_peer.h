@@ -15,14 +15,7 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SHAPE_MASK_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_SHAPE_MASK_PEER_IMPL_H
 
-namespace OHOS::Ace {
-class ShapeRect;
-class Circle;
-}
-
-namespace OHOS::Ace::NG {
-class PeerUtils;
-}
+#include "base/geometry/shape.h"
 
 using OHOS::Ace::AceType;
 using OHOS::Ace::Dimension;
@@ -34,16 +27,43 @@ const float DEFAULT_WIDTH = 0.0f;
 
 struct BaseShapePeer {
     BaseShapePeer() = default;
-    virtual ~BaseShapePeer();
+    virtual ~BaseShapePeer() = default;
 
-    void SetRectShape(const RefPtr<OHOS::Ace::ShapeRect>& value);
-    void SetRoundRectShape(const RefPtr<OHOS::Ace::ShapeRect>& value);
-    void SetCircleShape(const RefPtr<OHOS::Ace::Circle>& value);
-    void SetOvalShape(const RefPtr<OHOS::Ace::ShapeRect>& value);
-    void SetCommandPath(const std::string& value);
+    void SetRectShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
+    {
+        ResetAll();
+        rect = value;
+    }
+    void SetRoundRectShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
+    {
+        ResetAll();
+        roundRect = value;
+    }
+    void SetCircleShape(const RefPtr<OHOS::Ace::Circle>& value)
+    {
+        ResetAll();
+        circle = value;
+    }
+    void SetOvalShape(const RefPtr<OHOS::Ace::ShapeRect>& value)
+    {
+        ResetAll();
+        oval = value;
+    }
+    void SetCommandPath(const std::string& value)
+    {
+        ResetAll();
+        path = value;
+    }
 
 private:
-    void ResetAll();
+    void ResetAll()
+    {
+        rect = nullptr;
+        roundRect = nullptr;
+        circle = nullptr;
+        oval = nullptr;
+        path = std::nullopt;
+    }
 
 public:
     RefPtr<OHOS::Ace::ShapeRect> rect = nullptr;
