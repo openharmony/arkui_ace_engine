@@ -341,7 +341,7 @@ void ParallelStageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto stagePattern = AceType::DynamicCast<ParallelStagePattern>(hostNode->GetPattern());
     CHECK_NULL_VOID(stagePattern);
     if (!stagePattern->GetIsSplit()) {
-        BoxLayoutAlgorithm::Layout(layoutWrapper);
+        StageLayoutAlgorithm::Layout(layoutWrapper);
         return;
     }
 

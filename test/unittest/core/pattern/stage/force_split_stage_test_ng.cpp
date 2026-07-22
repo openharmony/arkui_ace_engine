@@ -34,6 +34,8 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/stage/page_info.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
@@ -117,6 +119,30 @@ void SetRouterPageFrameSize(const RefPtr<FrameNode>& page, float width)
     ASSERT_NE(geometryNode, nullptr);
     geometryNode->SetFrameSize(SizeF(width, width));
 }
+
+class PipelineSafeAreaStateGuard final {
+public:
+    PipelineSafeAreaStateGuard(
+        const RefPtr<MockPipelineContext>& pipeline, const RefPtr<SafeAreaManager>& safeAreaManager)
+        : pipeline_(pipeline), safeAreaManager_(safeAreaManager),
+          systemSafeArea_(safeAreaManager->GetSystemSafeArea()), isFullScreen_(safeAreaManager->IsFullScreen()),
+          useFlushUITasks_(pipeline->UseFlushUITasks())
+    {}
+
+    ~PipelineSafeAreaStateGuard()
+    {
+        pipeline_->UpdateSystemSafeArea(systemSafeArea_, false);
+        safeAreaManager_->SetIsFullScreen(isFullScreen_);
+        pipeline_->SetUseFlushUITasks(useFlushUITasks_);
+    }
+
+private:
+    RefPtr<MockPipelineContext> pipeline_;
+    RefPtr<SafeAreaManager> safeAreaManager_;
+    SafeAreaInsets systemSafeArea_;
+    bool isFullScreen_ = false;
+    bool useFlushUITasks_ = false;
+};
 }
 
 class ParallelStageTestNg : public testing::Test {
@@ -262,6 +288,84 @@ HWTEST_F(ParallelStageTestNg, ParallelStagePatternTest001, TestSize.Level1)
     ASSERT_TRUE(stagePattern->HasDividerNode());
     dividerNode = stagePattern->GetDividerNode();
     ASSERT_NE(dividerNode, nullptr);
+}
+
+/**
+ * @tc.name: ParallelStageLayoutAlgorithmStackModeSafeArea001
+ * @tc.desc: Verify a match-parent page child expands through the whole safe area in stack mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParallelStageTestNg, ParallelStageLayoutAlgorithmStackModeSafeArea001, TestSize.Level1)
+{
+    constexpr float windowWidth = 720.0f;
+    constexpr float windowHeight = 1280.0f;
+    constexpr float safeAreaLeft = 20.0f;
+    constexpr float safeAreaRight = 20.0f;
+    constexpr float safeAreaTop = 80.0f;
+    constexpr float safeAreaBottom = 100.0f;
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    PipelineSafeAreaStateGuard stateGuard(pipeline, safeAreaManager);
+    pipeline->SetUseFlushUITasks(false);
+    safeAreaManager->SetIsFullScreen(true);
+    // Asymmetric vertical insets center the page at y = 90 before it is corrected to the safe-area top at y = 80.
+    SafeAreaInsets safeAreaInsets;
+    safeAreaInsets.left_ = { 0, static_cast<uint32_t>(safeAreaLeft) };
+    safeAreaInsets.top_ = { 0, static_cast<uint32_t>(safeAreaTop) };
+    safeAreaInsets.right_ = {
+        static_cast<uint32_t>(windowWidth - safeAreaRight), static_cast<uint32_t>(windowWidth) };
+    safeAreaInsets.bottom_ = {
+        static_cast<uint32_t>(windowHeight - safeAreaBottom), static_cast<uint32_t>(windowHeight) };
+    pipeline->UpdateSystemSafeArea(safeAreaInsets, false);
+
+    auto stagePattern = AceType::MakeRefPtr<ParallelStagePattern>();
+    stagePattern->mode_ = PageMode::STACK;
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), stagePattern, true);
+    auto pageNode = CreateRouterPage("safe_area_page");
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    ASSERT_NE(stageNode, nullptr);
+    ASSERT_NE(pageNode, nullptr);
+    ASSERT_NE(childNode, nullptr);
+    pageNode->MountToParent(stageNode);
+    childNode->MountToParent(pageNode);
+    stageNode->SetActive();
+    pageNode->SetActive();
+    childNode->SetActive();
+
+    stageNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(windowWidth), CalcLength(windowHeight)));
+    auto childLayoutProperty = childNode->GetLayoutProperty();
+    ASSERT_NE(childLayoutProperty, nullptr);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+    childLayoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+    childLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts({
+        .type = LAYOUT_SAFE_AREA_TYPE_SYSTEM,
+        .edges = LAYOUT_SAFE_AREA_EDGE_ALL,
+        .rawEdges = LAYOUT_SAFE_AREA_EDGE_ALL,
+    });
+
+    stageNode->SetLayoutDirtyMarked(false);
+    pageNode->SetLayoutDirtyMarked(false);
+    childNode->SetLayoutDirtyMarked(false);
+    pipeline->SetUseFlushUITasks(true);
+    stageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    pipeline->FlushUITasks();
+
+    auto pageGeometryNode = pageNode->GetGeometryNode();
+    auto childGeometryNode = childNode->GetGeometryNode();
+    ASSERT_NE(pageGeometryNode, nullptr);
+    ASSERT_NE(childGeometryNode, nullptr);
+    // Measuring the delayed child while the page is still centered at y = 90 produces a wrong height of 1190.
+    EXPECT_EQ(pageGeometryNode->GetMarginFrameOffset(), OffsetF(safeAreaLeft, safeAreaTop));
+    EXPECT_EQ(pageGeometryNode->GetFrameSize(),
+        SizeF(windowWidth - safeAreaLeft - safeAreaRight, windowHeight - safeAreaTop - safeAreaBottom));
+    EXPECT_EQ(childGeometryNode->GetFrameSize(), SizeF(windowWidth, windowHeight));
+    EXPECT_EQ(childGeometryNode->GetMarginFrameOffset(), OffsetF(-safeAreaLeft, -safeAreaTop));
 }
 
 /**
