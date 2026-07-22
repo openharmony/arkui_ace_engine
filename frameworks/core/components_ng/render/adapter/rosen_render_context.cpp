@@ -619,6 +619,21 @@ std::shared_ptr<Rosen::RSUIContext> RosenRenderContext::GetRSUIContext(PipelineC
     return rsUIDirector->GetRSUIContext();
 }
 
+std::shared_ptr<Rosen::RSUIContext> RosenRenderContext::GetOrCreateRSUIContext(PipelineContext* pipeline)
+{
+    auto rsContext = GetRSUIContext(pipeline);
+    if (rsContext != nullptr) {
+        return rsContext;
+    }
+    if (rsUIDirector_ != nullptr) {
+        return rsUIDirector_->GetRSUIContext();
+    }
+    TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
+    rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create(nullptr);
+    CHECK_NULL_RETURN(rsUIDirector_, nullptr);
+    return rsUIDirector_->GetRSUIContext();
+}
+
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode,
     FrameNode* host)
 {
@@ -641,12 +656,7 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         return;
     }
     auto pipeline = GetPipelineContext();
-    std::shared_ptr<Rosen::RSUIContext> rsContext = GetRSUIContext(pipeline);
-    if (rsContext == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
-        rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create(nullptr);
-        rsContext = rsUIDirector_->GetRSUIContext();
-    }
+    std::shared_ptr<Rosen::RSUIContext> rsContext = GetOrCreateRSUIContext(pipeline);
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
 
     if (isRoot) {
@@ -727,7 +737,7 @@ void RosenRenderContext::SetEffectLayer(const ContextParam& param)
     std::shared_ptr<Rosen::RSUIContext> rsContext;
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto pipeline = GetPipelineContext();
-        rsContext = GetRSUIContext(pipeline);
+        rsContext = GetOrCreateRSUIContext(pipeline);
     }
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or("") };
     rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsContext);
