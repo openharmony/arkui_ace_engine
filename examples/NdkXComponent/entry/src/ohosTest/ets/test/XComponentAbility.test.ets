@@ -17,7 +17,7 @@ import AbilityDelegatorRegistry from '@ohos.app.ability.abilityDelegatorRegistry
 import { describe, it, expect } from '@ohos/hypium';
 import { Driver, ON } from '@ohos.UiTest';
 
-const TAG = '[Sample_NDK_XComponent]';
+const TAG = '[Sample_XComponent]';
 
 export default function abilityTest() {
 

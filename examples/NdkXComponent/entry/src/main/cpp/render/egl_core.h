@@ -20,7 +20,7 @@
 #include <GLES3/gl3.h>
 #include "string"
 
-namespace NativeXComponentSample {
+namespace NdkXComponentSample {
 class EGLCore {
 public:
     explicit EGLCore() {}
@@ -56,5 +56,5 @@ private:
     int height_;
     GLfloat widthPercent_;
 };
-} // namespace NativeXComponentSample
+} // namespace NdkXComponentSample
 #endif // NATIVE_XCOMPONENT_EGL_CORE_H

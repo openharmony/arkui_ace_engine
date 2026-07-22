@@ -19,10 +19,10 @@ import {NodeContent} from '@kit.ArkUI';
 @Entry
 @Component
 struct Index {
-  @State currentStatus: string = "init";
+  @State currentStatus: string = 'init';
   private nodeContent: NodeContent = new NodeContent();
   aboutToAppear():void{
-    nativeNode.createNativeNode(this.nodeContent,"ygb");
+    nativeNode.createNativeNode(this.nodeContent,'sample');
   }
 
   build() {
@@ -53,7 +53,7 @@ struct Index {
           hasChangeColor = nativeNode.getStatus().hasChangeColor;
         }
         if (hasChangeColor) {
-          this.currentStatus = "change color";
+          this.currentStatus = 'change color';
         }
       })
       .margin({
@@ -76,7 +76,7 @@ struct Index {
                 hasDraw = nativeNode.getStatus().hasDraw;
               }
               if (hasDraw) {
-                this.currentStatus = "draw star";
+                this.currentStatus = 'draw star';
               }
           })
           .width('53.6%')

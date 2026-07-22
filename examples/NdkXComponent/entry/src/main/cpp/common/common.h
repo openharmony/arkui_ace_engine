@@ -22,10 +22,10 @@
 #include <GLES3/gl3.h>
 #include <napi/native_api.h>
 
-namespace NativeXComponentSample {
+namespace NdkXComponentSample {
 /**
  * Log print domain.
  */
 const unsigned int LOG_PRINT_DOMAIN = 0xFF00;
-} // namespace NativeXComponentSample
+} // namespace NdkXComponentSample
 #endif // NATIVE_XCOMPONENT_COMMON_H

@@ -12,21 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// [Start surface_holder_type_node_ets]
+
 import native from 'libnativerender.so';
 import { FrameNode, NodeController, typeNode, UIContext } from '@kit.ArkUI';
 
 class MyNodeController extends NodeController {
-  // [StartExclude surface_holder_type_node_ets]
   public xComponent: typeNode.XComponent | undefined = undefined;
   public xComponentId: string = 'xcp' + (new Date().getTime());
   public node: FrameNode | undefined = undefined;
   public column: typeNode.Column | undefined = undefined;
   public attachButton: typeNode.Button | undefined = undefined;
   public detachButton: typeNode.Button | undefined = undefined;
-  // [EndExclude surface_holder_type_node_ets]
+
   makeNode(uiContext: UIContext): FrameNode | null {
-    // [StartExclude surface_holder_type_node_ets]
     this.node = new FrameNode(uiContext);
     this.column = typeNode.createNode(uiContext, 'Column')
     this.column.initialize()
@@ -37,25 +35,21 @@ class MyNodeController extends NodeController {
     } catch (error) {
       console.error('Fail to append child: ', error);
     }
-    // [EndExclude surface_holder_type_node_ets]
-    // 创建XComponent组件节点
-    this.xComponent = typeNode.createNode(uiContext, 'XComponent', { type: XComponentType.SURFACE });
+    this.xComponent = typeNode.createNode(uiContext, 'XComponent', 
+      {type: XComponentType.SURFACE}); // NOLINT
     this.xComponent.attribute
       .id(this.xComponentId)
       .focusable(true)
       .focusOnTouch(true)
     native.bindNode(this.xComponentId, this.xComponent)
-    // [StartExclude surface_holder_type_node_ets]
     try {
       this.column.appendChild(this.xComponent);
     } catch (error) {
       console.error('Fail to append child: ', error);
     }
-
     return this.node;
-    // [EndExclude surface_holder_type_node_ets]
   }
-  // [StartExclude surface_holder_type_node_ets]
+
   aboutToDisappear(): void {
     native.unbindNode(this.xComponentId)
     try {
@@ -65,19 +59,15 @@ class MyNodeController extends NodeController {
     }
     this.xComponent?.dispose();
   }
-  // [EndExclude surface_holder_type_node_ets]
 }
 
-// [StartExclude surface_holder_type_node_ets]
 @Builder
 export function SurfaceHolderTypeNodeBuilder(name: string, param: Object) {
   SurfaceHolderTypeNode()
 }
-// [EndExclude surface_holder_type_node_ets]
 
 @Component
 export struct SurfaceHolderTypeNode {
-  // [StartExclude surface_holder_type_node_ets]
   @State isShow: boolean = true;
   @State minRate: number = 0;
   @State maxRate: number = 120;
@@ -86,13 +76,11 @@ export struct SurfaceHolderTypeNode {
   @State needSoftKeyboardState: string = 'needSoftKeyboard=' + this.needSoftKeyboard;
   @State text: string = '单指点击XComponent软键盘消失';
   controller: TextInputController = new TextInputController();
-  // [EndExclude surface_holder_type_node_ets]
   myNodeController: MyNodeController = new MyNodeController();
 
   build() {
     NavDestination() {
       Column() {
-        // [StartExclude surface_holder_type_node_ets]
         TextInput({ text: this.text, placeholder: 'please input ...', controller: this.controller })
           .id('textInput')
           .placeholderColor(Color.Grey)
@@ -106,7 +94,6 @@ export struct SurfaceHolderTypeNode {
           .onChange((value: string) => {
             this.text = value
           })
-        // [EndExclude surface_holder_type_node_ets]
         Column() {
           if (this.isShow) {
             NodeContainer(this.myNodeController)
@@ -117,7 +104,6 @@ export struct SurfaceHolderTypeNode {
               .defaultFocus(true)
           }
         }.height(200)
-        // [StartExclude surface_holder_type_node_ets]
         Row({ space: 5 }) {
           Button('Draw Star')
             .onClick(() => {
@@ -211,10 +197,8 @@ export struct SurfaceHolderTypeNode {
             left: 12,
             right: 12
           })
-          // [EndExclude surface_holder_type_node_ets]
       }
       .width('100%')
     }
   }
 }
-// [End surface_holder_type_node_ets]

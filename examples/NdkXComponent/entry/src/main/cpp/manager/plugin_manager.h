@@ -24,7 +24,7 @@
 #include <unordered_map>
 #include "render/egl_core.h"
 
-namespace NativeXComponentSample {
+namespace NdkXComponentSample {
 class PluginManager {
 public:
     
@@ -59,5 +59,5 @@ public:
     static int32_t hasDraw_;
     static int32_t hasChangeColor_;
 };
-} // namespace NativeXComponentSample
+} // namespace NdkXComponentSample
 #endif // NATIVE_XCOMPONENT_PLUGIN_MANAGER_H

@@ -30,7 +30,7 @@
 #define XC_HEIGHT 300
 #define ARG_CNT 2
 
-namespace NativeXComponentSample {
+namespace NdkXComponentSample {
 PluginManager PluginManager::pluginManager_;
 OH_NativeXComponent_Callback PluginManager::callback_;
 static ArkUI_NativeNodeAPI_1* nodeAPI;
@@ -269,17 +269,18 @@ napi_value PluginManager::createNativeNode(napi_env env, napi_callback_info info
         auto nodeContentEvent = [](ArkUI_NodeContentEvent *event) {
             ArkUI_NodeContentHandle handle = OH_ArkUI_NodeContentEvent_GetNodeContentHandle(event);
             std::string *userDate = reinterpret_cast<std::string*>(OH_ArkUI_NodeContent_GetUserData(handle));
-            if (OH_ArkUI_NodeContentEvent_GetEventType(event) == NODE_CONTENT_EVENT_ON_ATTACH_TO_WINDOW) {
-                ArkUI_NodeHandle testNode;
-                if (userDate) {
-                    testNode = CreateNodeHandle(*userDate);
-                    delete userDate;
-                    userDate = nullptr;
-                } else {
-                    testNode = CreateNodeHandle("noUserData");
-                }
-                OH_ArkUI_NodeContent_AddNode(handle, testNode);
+            if (OH_ArkUI_NodeContentEvent_GetEventType(event) != NODE_CONTENT_EVENT_ON_ATTACH_TO_WINDOW) {
+                return;
             }
+            ArkUI_NodeHandle testNode;
+            if (userDate) {
+                testNode = CreateNodeHandle(*userDate);
+                delete userDate;
+                userDate = nullptr;
+            } else {
+                testNode = CreateNodeHandle("noUserData");
+            }
+            OH_ArkUI_NodeContent_AddNode(handle, testNode);
         };
         OH_ArkUI_NodeContent_RegisterCallback(nodeContentHandle_, nodeContentEvent);
     }
@@ -350,4 +351,4 @@ void PluginManager::OnSurfaceChanged(OH_NativeXComponent* component, void* windo
                  "OnSurfaceChanged ret=%{public}d width=%{public}lu, height=%{public}lu", ret, width_, height_);
 }
 
-} // namespace NativeXComponentSample
+} // namespace NdkXComponentSample

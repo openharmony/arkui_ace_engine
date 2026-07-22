@@ -12,15 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// [Start surface_holder_declarative_ets]
 import native from 'libnativerender.so';
 
-// [StartExclude surface_holder_declarative_ets]
 @Builder
 export function SurfaceHolderDeclarativeBuilder(name: string, param: Object) {
   SurfaceHolderDeclarative()
 }
-// [EndExclude surface_holder_declarative_ets]
 
 @Component
 export struct SurfaceHolderDeclarative {
@@ -29,7 +26,6 @@ export struct SurfaceHolderDeclarative {
 
   build() {
     NavDestination() {
-      // [StartExclude surface_holder_declarative_ets]
       Column() {
         Row() {
           Text('SurfaceHolder Declarative Sample')
@@ -43,12 +39,10 @@ export struct SurfaceHolderDeclarative {
         .margin({ top: 24 })
         .width('100%')
         .height(56)
-      // [EndExclude surface_holder_declarative_ets]
         Column({ space: 10 }) {
           // 创建XComponent组件
-          // [Start surface_holder_declarative_create_ets]
           XComponent({
-            type: XComponentType.SURFACE,
+            type: XComponentType.SURFACE, // NOLINT
           })
             .id('XComponentSurfaceHolder')
             .onAttach(() => {
@@ -56,15 +50,13 @@ export struct SurfaceHolderDeclarative {
               if (!this.xcNode) {
                 return;
               }
-              native.bindNode('XComponentSurfaceHolder', this.xcNode); // 跨语言调用至Native侧获取SurfaceHolder并绑定Surface生命周期回调
+              native.bindNode('XComponentSurfaceHolder', this.xcNode);
               this.currentStatus = 'index';
             })
             .onDetach(() => {
               native.unbindNode('XComponentSurfaceHolder');
               this.xcNode = null;
             })
-          // [End surface_holder_declarative_create_ets]
-          // [StartExclude surface_holder_declarative_ets]
           Text(this.currentStatus)
             .fontSize('24fp')
             .fontWeight(500)
@@ -111,8 +103,6 @@ export struct SurfaceHolderDeclarative {
       }
       .width('100%')
       .height('100%')
-      // [EndExclude surface_holder_declarative_ets]
     }
   }
 }
-// [End surface_holder_declarative_ets]

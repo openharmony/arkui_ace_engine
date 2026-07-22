@@ -25,7 +25,7 @@
 
 #include "../common/common.h"
 
-namespace NativeXComponentSample {
+namespace NdkXComponentSample {
 namespace {
 constexpr int32_t NUM_4 = 4;
 /**
@@ -226,7 +226,7 @@ bool EGLCore::EglContextInit(void* window, int width, int height)
 
 bool EGLCore::CreateEnvironment()
 {
-    // Create surface.
+    // Create EGL window surface (EGLSurface is defined by the Khronos EGL specification).
     if (eglWindow_ == nullptr) {
         OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "EGLCore", "eglWindow_ is null");
         return false;
@@ -517,7 +517,7 @@ GLuint EGLCore::LoadShader(GLenum type, const char* shaderSrc)
 
     char* infoLog = (char*)malloc(sizeof(char) * (infoLen + 1));
     if (infoLog != nullptr) {
-        memset(infoLog, 0, infoLen + 1);
+        memset_s(infoLog, infoLen + 1, 0, infoLen + 1);
         glGetShaderInfoLog(shader, infoLen, nullptr, infoLog);
         OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "EGLCore", "glCompileShader error = %s", infoLog);
         free(infoLog);
@@ -530,23 +530,19 @@ GLuint EGLCore::LoadShader(GLenum type, const char* shaderSrc)
 GLuint EGLCore::CreateProgram(const char* vertexShader, const char* fragShader)
 {
     if ((vertexShader == nullptr) || (fragShader == nullptr)) {
-        OH_LOG_Print(
-            LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "EGLCore", "createProgram: vertexShader or fragShader is null");
+        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "EGLCore", "vertexShader or fragShader is null");
         return PROGRAM_ERROR;
     }
-
     GLuint vertex = LoadShader(GL_VERTEX_SHADER, vertexShader);
     if (vertex == PROGRAM_ERROR) {
         OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "EGLCore", "createProgram vertex error");
         return PROGRAM_ERROR;
     }
-
     GLuint fragment = LoadShader(GL_FRAGMENT_SHADER, fragShader);
     if (fragment == PROGRAM_ERROR) {
         OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "EGLCore", "createProgram fragment error");
         return PROGRAM_ERROR;
     }
-
     GLuint program = glCreateProgram();
     if (program == PROGRAM_ERROR) {
         OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "EGLCore", "createProgram program error");
@@ -554,12 +550,9 @@ GLuint EGLCore::CreateProgram(const char* vertexShader, const char* fragShader)
         glDeleteShader(fragment);
         return PROGRAM_ERROR;
     }
-
-    // The gl function has no return value.
     glAttachShader(program, vertex);
     glAttachShader(program, fragment);
     glLinkProgram(program);
-
     GLint linked;
     glGetProgramiv(program, GL_LINK_STATUS, &linked);
     if (linked != 0) {
@@ -567,17 +560,18 @@ GLuint EGLCore::CreateProgram(const char* vertexShader, const char* fragShader)
         glDeleteShader(fragment);
         return program;
     }
-
     OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "EGLCore", "createProgram linked error");
     GLint infoLen = 0;
     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLen);
     if (infoLen > 1) {
         char* infoLog = (char*)malloc(sizeof(char) * (infoLen + 1));
-        memset(infoLog, 0, infoLen + 1);
-        glGetProgramInfoLog(program, infoLen, nullptr, infoLog);
-        OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "EGLCore", "glLinkProgram error = %s", infoLog);
-        free(infoLog);
-        infoLog = nullptr;
+        if (infoLog != nullptr) {
+            memset_s(infoLog, infoLen + 1, 0, infoLen + 1);
+            glGetProgramInfoLog(program, infoLen, nullptr, infoLog);
+            OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "EGLCore", "glLinkProgram error = %s", infoLog);
+            free(infoLog);
+            infoLog = nullptr;
+        }
     }
     glDeleteShader(vertex);
     glDeleteShader(fragment);
@@ -608,4 +602,4 @@ void EGLCore::Release()
         OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "EGLCore", "Release eglTerminate failed");
     }
 }
-} // namespace NativeXComponentSample
+} // namespace NdkXComponentSample

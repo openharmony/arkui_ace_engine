@@ -216,10 +216,8 @@ napi_value PluginManager::NapiDrawPattern(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-// [Start native_xcomponent_get_native_window]
 void OnSurfaceCreatedCB(OH_NativeXComponent *component, void *window)
 {
-    // [StartExclude native_xcomponent_get_native_window]
     OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "XComponent_Native", "OnSurfaceCreatedCB");
     int32_t ret;
     char idStr[OH_XCOMPONENT_ID_LEN_MAX + 1] = {};
@@ -234,11 +232,10 @@ void OnSurfaceCreatedCB(OH_NativeXComponent *component, void *window)
                  id.c_str());
     auto *pluginManger = PluginManager::GetInstance();
     pluginManger->OnSurfaceCreated(component, window);
-    // [EndExclude native_xcomponent_get_native_window]
 }
+
 void OnSurfaceChangedCB(OH_NativeXComponent *component, void *window)
 {
-    // [StartExclude native_xcomponent_get_native_window]
     OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "XComponent_Native", "OnSurfaceChangedCB");
     int32_t ret;
     char idStr[OH_XCOMPONENT_ID_LEN_MAX + 1] = {};
@@ -250,11 +247,9 @@ void OnSurfaceChangedCB(OH_NativeXComponent *component, void *window)
     std::string id(idStr);
     auto *pluginManger = PluginManager::GetInstance();
     pluginManger->OnSurfaceChanged(component, window);
-    // [EndExclude native_xcomponent_get_native_window]
 }
 void OnSurfaceDestroyedCB(OH_NativeXComponent *component, void *window)
 {
-    // [StartExclude native_xcomponent_get_native_window]
     OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "Callback", "OnSurfaceDestroyedCB");
     int32_t ret;
     char idStr[OH_XCOMPONENT_ID_LEN_MAX + 1] = {};
@@ -266,11 +261,9 @@ void OnSurfaceDestroyedCB(OH_NativeXComponent *component, void *window)
     std::string id(idStr);
     auto *pluginManger = PluginManager::GetInstance();
     pluginManger->OnSurfaceDestroyed(component, window);
-    // [EndExclude native_xcomponent_get_native_window]
 }
 void DispatchTouchEventCB(OH_NativeXComponent *component, void *window)
 {
-    // [StartExclude native_xcomponent_get_native_window]
     OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "Callback", "DispatchTouchEventCB");
     int32_t ret;
     char idStr[OH_XCOMPONENT_ID_LEN_MAX + 1] = {};
@@ -282,9 +275,8 @@ void DispatchTouchEventCB(OH_NativeXComponent *component, void *window)
     std::string id(idStr);
     auto *pluginManger = PluginManager::GetInstance();
     pluginManger->DispatchTouchEvent(component, window);
-    // [EndExclude native_xcomponent_get_native_window]
 }
-// [End native_xcomponent_get_native_window]
+
 PluginManager::PluginManager()
 {
     eglcore_ = new EGLCore();
@@ -338,11 +330,9 @@ ArkUI_NodeHandle CreateNodeHandle(const std::string &tag)
     return column;
 }
 
-// [Start surface_holder_ndk_create_xc_node]
 ArkUI_NodeHandle CreateNodeHandleUsingSurfaceHolder(const std::string &tag)
 {
     ArkUI_NodeHandle column = nodeAPI->createNode(ARKUI_NODE_COLUMN);
-    // [StartExclude surface_holder_ndk_create_xc_node]
     ArkUI_NumberValue value[] = {480};
     ArkUI_NumberValue value1[] = {{.u32 = 15}, {.f32 = 15}};
     ArkUI_AttributeItem item = {value, 1, "changeSize"};
@@ -350,9 +340,7 @@ ArkUI_NodeHandle CreateNodeHandleUsingSurfaceHolder(const std::string &tag)
     nodeAPI->setAttribute(column, NODE_WIDTH, &item);
     value[0].f32 = COLUMN_MARGIN;
     nodeAPI->setAttribute(column, NODE_MARGIN, &item);
-    // [EndExclude surface_holder_ndk_create_xc_node]
     xc = nodeAPI->createNode(ARKUI_NODE_XCOMPONENT); // 创建XComponent节点
-    // [StartExclude surface_holder_ndk_create_xc_node]
     value[0].u32 = ARKUI_XCOMPONENT_TYPE_SURFACE;
     nodeAPI->setAttribute(xc, NODE_XCOMPONENT_TYPE, &item);
     nodeAPI->setAttribute(xc, NODE_XCOMPONENT_ID, &item);
@@ -369,7 +357,6 @@ ArkUI_NodeHandle CreateNodeHandleUsingSurfaceHolder(const std::string &tag)
     nodeAPI->setAttribute(xc, NODE_HEIGHT, &itemSize);
     ArkUI_AttributeItem item2 = {value, 1, "ndkxcomponent"};
     nodeAPI->setAttribute(xc, NODE_ID, &item2);
-    // [EndExclude surface_holder_ndk_create_xc_node]
     OH_ArkUI_SurfaceHolder *holder = OH_ArkUI_SurfaceHolder_Create(xc); // 获取SurfaceHolder
     PluginManager::surfaceHolderMap_[xc] = holder;
     PluginManager::nodeHandleMap_[tag] = xc;
@@ -390,12 +377,9 @@ ArkUI_NodeHandle CreateNodeHandleUsingSurfaceHolder(const std::string &tag)
     nodeAPI->addChild(column, xc); // 将XComponent挂载到Column下
     return column;
 }
-// [End surface_holder_ndk_create_xc_node]
 
-// [Start surface_holder_ndk_createNode]
 napi_value PluginManager::createNativeNode(napi_env env, napi_callback_info info)
 {
-    // [StartExclude surface_holder_ndk_createNode]
     if ((env == nullptr) || (info == nullptr)) {
         OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "PluginManager", "CreateNativeNode env or info is null");
         return nullptr;
@@ -409,19 +393,16 @@ napi_value PluginManager::createNativeNode(napi_env env, napi_callback_info info
         napi_throw_type_error(env, NULL, "Wrong number of arguments");
         return nullptr;
     }
-    // [EndExclude surface_holder_ndk_createNode]
     ArkUI_NodeContentHandle nodeContentHandle_ = nullptr;
     OH_ArkUI_GetNodeContentFromNapiValue(env, args[0], &nodeContentHandle_);
     nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1 *>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
     std::string tag = value2String(env, args[1]);
-    // [StartExclude surface_holder_ndk_createNode]
     OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "PluginManager", "tag=%{public}s", tag.c_str());
     int32_t ret = OH_ArkUI_NodeContent_SetUserData(nodeContentHandle_, new std::string(tag));
     if (ret != ARKUI_ERROR_CODE_NO_ERROR) {
         OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "PluginManager", "setUserData failed error=%{public}d", ret);
     }
-    // [EndExclude surface_holder_ndk_createNode]
     if (nodeAPI != nullptr && nodeAPI->createNode != nullptr && nodeAPI->addChild != nullptr) {
         OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "PluginManager", "CreateNativeNode tag=%{public}s",
                      tag.c_str());
@@ -436,11 +417,8 @@ napi_value PluginManager::createNativeNode(napi_env env, napi_callback_info info
             }
             ArkUI_NodeHandle testNode;
             if (userData->find("SurfaceHolder") == std::string::npos) {
-                // [StartExclude surface_holder_ndk_createNode]
                 testNode = CreateNodeHandle(*userData);
-                // [EndExclude surface_holder_ndk_createNode]
             } else {
-                // 创建XComponent组件并使用SurfaceHolder管理Surface生命周期
                 testNode = CreateNodeHandleUsingSurfaceHolder(*userData);
             }
             delete userData;
@@ -451,7 +429,6 @@ napi_value PluginManager::createNativeNode(napi_env env, napi_callback_info info
     }
     return nullptr;
 }
-// [End surface_holder_ndk_createNode]
 
 void PluginManager::OnSurfaceCreated(OH_NativeXComponent *component, void *window)
 {
@@ -562,7 +539,6 @@ napi_value PluginManager::GetContext(napi_env env, napi_callback_info info)
     return exports;
 }
 
-// [Start native_xcomponent_declarative_get_native_xcomponent]
 void PluginManager::Export(napi_env env, napi_value exports)
 {
     if ((env == nullptr) || (exports == nullptr)) {
@@ -604,7 +580,6 @@ void PluginManager::Export(napi_env env, napi_value exports)
         }
     }
 }
-// [End native_xcomponent_declarative_get_native_xcomponent]
 
 void PluginManager::SetNativeXComponent(std::string &id, OH_NativeXComponent *nativeXComponent)
 {
@@ -625,8 +600,6 @@ PluginRender *PluginManager::GetRender(std::string &id)
     return pluginRenderMap_[id];
 }
 
-// [Start surface_holder_declarative_c_bind]
-// [Start surface_holder_declarative_surface_callback]
 napi_value PluginManager::BindNode(napi_env env, napi_callback_info info)
 {
     size_t argc = 2;
@@ -646,32 +619,21 @@ napi_value PluginManager::BindNode(napi_env env, napi_callback_info info)
     OH_ArkUI_SurfaceCallback_SetSurfaceChangedEvent(callback, OnSurfaceChangedNative); // 注册OnSurfaceChanged回调
     OH_ArkUI_SurfaceCallback_SetSurfaceDestroyedEvent(callback, OnSurfaceDestroyedNative); // 注册OnSurfaceDestroyed回调
     OH_ArkUI_SurfaceHolder_AddSurfaceCallback(holder, callback);                // 注册SurfaceCallback回调
-    // [StartExclude surface_holder_declarative_c_bind]
-    // [StartExclude surface_holder_declarative_surface_callback]
+
     OH_ArkUI_SurfaceCallback_SetSurfaceShowEvent(callback, OnSurfaceShowNative);           // 注册OnSurfaceShow回调
     OH_ArkUI_SurfaceCallback_SetSurfaceHideEvent(callback, OnSurfaceHideNative);           // 注册OnSurfaceHide回调
     OH_ArkUI_XComponent_RegisterOnFrameCallback(handle, OnFrameCallbackNative); // 注册OnFrameCallback回调
-    // [Start surface_holder_declarative_register_event]
+
     if (!nodeAPI->addNodeEventReceiver(handle, onEvent)) { // 添加事件监听，返回成功码 0
         OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "onBind", "addNodeEventReceiver error");
     }
     if (!nodeAPI->registerNodeEvent(handle, NODE_TOUCH_EVENT, 0, nullptr)) { // 用C接口注册touch事件，返回成功码 0
         OH_LOG_Print(LOG_APP, LOG_ERROR, LOG_PRINT_DOMAIN, "onBind", "registerTouchEvent error");
     }
-    // [End surface_holder_declarative_register_event]
     provider_ = OH_ArkUI_AccessibilityProvider_Create(handle); // 创建一个ArkUI_AccessibilityProvider类型的对象
-    /**
-     * 获取ArkUI_AccessibilityProvider后，如果注册无障碍回调函数请参考：
-     * https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/ui/ndk-accessibility-xcomponent.md
-     * **/
-    // [EndExclude surface_holder_declarative_c_bind]
-    // [EndExclude surface_holder_declarative_surface_callback]
     return nullptr;
 }
-// [End surface_holder_declarative_c_bind]
-// [End surface_holder_declarative_surface_callback]
 
-// [Start surface_holder_declarative_c_unbind]
 napi_value PluginManager::UnbindNode(napi_env env, napi_callback_info info)
 {
     size_t argc = 1;
@@ -684,10 +646,8 @@ napi_value PluginManager::UnbindNode(napi_env env, napi_callback_info info)
         return nullptr;
     }
     node = nodeHandleMap_[nodeId];
-    // [StartExclude surface_holder_declarative_c_bind]
     OH_ArkUI_XComponent_UnregisterOnFrameCallback(node); // 解注册帧回调
     OH_ArkUI_AccessibilityProvider_Dispose(provider_);   // 销毁ArkUI_AccessibilityProvider
-    // [EndExclude surface_holder_declarative_c_bind]
     auto holder = surfaceHolderMap_[node];
     if (PluginManager::callbackMap_.count(holder)) {
         auto callback = PluginManager::callbackMap_[holder];
@@ -702,7 +662,6 @@ napi_value PluginManager::UnbindNode(napi_env env, napi_callback_info info)
     nodeHandleMap_.erase(nodeId);
     return nullptr;
 }
-// [End surface_holder_declarative_c_unbind]
 
 napi_value PluginManager::SetFrameRate(napi_env env, napi_callback_info info)
 {

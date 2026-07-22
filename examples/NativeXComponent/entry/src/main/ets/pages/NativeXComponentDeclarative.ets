@@ -42,11 +42,10 @@ export struct NativeXComponentDeclarative {
         .height(56)
 
         Column({ space: 10 }) {
-          // [Start native_xcomponent_declarative_create_ets]
           XComponent({
             id: 'xcomponentId',
-            type: XComponentType.SURFACE,
-            libraryname: 'nativerender' // 利用id和libraryname属性在Native侧获取NativeXcomponent并绑定Surface生命周期
+            type: XComponentType.SURFACE, // NOLINT
+            libraryname: 'nativerender'
           })
             .onLoad((xComponentContext) => {
               this.xComponentContext = xComponentContext as XComponentContext;
@@ -56,7 +55,6 @@ export struct NativeXComponentDeclarative {
               console.info('onDestroy');
             })
             .id('xcomponent')
-          // [End native_xcomponent_declarative_create_ets]
 
           Text(this.currentStatus)
             .fontSize('24fp')

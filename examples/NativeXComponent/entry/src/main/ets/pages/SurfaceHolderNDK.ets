@@ -12,15 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// [Start surface_holder_ndk_ets]
+
 import nativeNode from 'libnativerender.so';
 import { NodeContent } from '@kit.ArkUI';
-// [StartExclude surface_holder_ndk_ets]
+
 @Builder
 export function SurfaceHolderNDKBuilder(name: string, param: Object) {
   SurfaceHolderNDK()
 }
-// [EndExclude surface_holder_ndk_ets]
 
 @Component
 export struct SurfaceHolderNDK {
@@ -35,9 +34,8 @@ export struct SurfaceHolderNDK {
   build() {
     NavDestination() {
       Column() {
-        // [StartExclude surface_holder_ndk_ets]
         Row() {
-          Text('SurfaceHolder NDK Sample')
+          Text('SurfaceHolder Sample')
             .fontSize('24fp')
             .fontWeight(500)
             .margin({
@@ -48,10 +46,8 @@ export struct SurfaceHolderNDK {
         .margin({ top: 24 })
         .width('100%')
         .height(56)
-        // [EndExclude surface_holder_ndk_ets]
         Column({ space: 10 }) {
           ContentSlot(this.nodeContent);
-          // [StartExclude surface_holder_ndk_ets]
           Column().height(20)
           Text(this.currentStatus)
             .fontSize('24fp')
@@ -97,11 +93,9 @@ export struct SurfaceHolderNDK {
         .justifyContent(FlexAlign.Center)
         .alignItems(VerticalAlign.Bottom)
         .layoutWeight(1)
-        // [EndExclude surface_holder_ndk_ets]
       }
       .width('100%')
       .height('100%')
     }
   }
 }
-// [End surface_holder_ndk_ets]

@@ -31,7 +31,6 @@ struct Index {
               .onClick(() => {
                 this.pageInfos.pushPath({ name: 'SurfaceHolderDeclarative' });
               })
-            Text('  使用ArkTS声明式方法创建XComponent，并使用SurfaceHolder相关接口')
           }
           .width('100%')
           .height('100%')
@@ -56,7 +55,6 @@ struct Index {
               .onClick(() => {
                 this.pageInfos.pushPath({ name: 'SurfaceHolderTypeNode' });
               })
-            Text('  使用自定义节点创建XComponent，并使用SurfaceHolder相关接口')
           }
           .width('100%')
           .height('100%')
@@ -81,13 +79,12 @@ struct Index {
               .onClick(() => {
                 this.pageInfos.pushPath({ name: 'SurfaceHolderNDK' });
               })
-            Text('  使用NDK接口创建XComponent，并使用SurfaceHolder相关接口')
           }
           .width('100%')
           .height('100%')
           .justifyContent(FlexAlign.Start)
         }
-        .tabBar(SubTabBarStyle.of('NDK SurfaceHolder')
+        .tabBar(SubTabBarStyle.of('SurfaceHolder')
           .labelStyle({
             overflow: TextOverflow.Clip,
             maxLines: 2,
@@ -106,7 +103,6 @@ struct Index {
               .onClick(() => {
                 this.pageInfos.pushPath({ name: 'NativeXComponentDeclarative' });
               })
-            Text('  使用ArkTS声明式方法创建XComponent，并使用NativeXComponent相关接口')
           }
           .width('100%')
           .height('100%')
@@ -131,13 +127,12 @@ struct Index {
               .onClick(() => {
                 this.pageInfos.pushPath({ name: 'NativeXComponentNDK' });
               })
-            Text('  使用NDK接口创建XComponent，并使用NativeXComponent相关接口')
           }
           .width('100%')
           .height('100%')
           .justifyContent(FlexAlign.Start)
         }
-        .tabBar(SubTabBarStyle.of('NDK NativeXComponent')
+        .tabBar(SubTabBarStyle.of('NativeXComponent')
           .labelStyle({
             overflow: TextOverflow.Clip,
             maxLines: 2,
