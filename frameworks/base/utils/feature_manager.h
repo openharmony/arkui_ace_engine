@@ -35,6 +35,8 @@ public:
     int32_t GetFeatureParam(const std::string& key, std::string& value);
 #ifdef ACE_UNITTEST
     void ResetForTest();
+    void SetFeatureParamForTest(const std::string& key, const std::string& value, int32_t code = SUCCESS);
+    void ClearFeatureParamForTest();
 #endif
 
 private:
