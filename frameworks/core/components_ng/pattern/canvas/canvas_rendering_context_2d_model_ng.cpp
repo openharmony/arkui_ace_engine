@@ -769,11 +769,4 @@ void CanvasRenderingContext2DModelNG::StopImageAnalyzer()
     CHECK_NULL_VOID(pattern);
     pattern->StopImageAnalyzer();
 }
-
-void CanvasRenderingContext2DModelNG::SetPatternInstanceId(int32_t id)
-{
-    auto pattern = weakPattern_.Upgrade();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetPatternInstanceId(id);
-}
 } // namespace OHOS::Ace::NG

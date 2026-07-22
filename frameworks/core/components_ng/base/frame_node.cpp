@@ -158,7 +158,6 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
-#include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/base/mount_policy.h"
@@ -3604,19 +3603,6 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
     }
     isRenderDirtyMarked_ = true;
     if (isRenderBoundary) {
-#if defined(OHOS_PLATFORM)
-        if (ownedTid_ != 0) {
-            uint64_t currentTid = static_cast<uint64_t>(gettid());
-            if (ownedTid_ != currentTid) {
-                int32_t contextInstanceId = context->GetInstanceId();
-                TAG_LOGI(AceLogTag::ACE_DEFAULT_DOMAIN,
-                    "MarkNeedRender OwnedTid:%{public}" PRIu64 " ContextInstanceId:%{public}d "
-                    "FrameNodeInstanceId:%{public}d",
-                    ownedTid_, contextInstanceId, GetInstanceId());
-                LogBacktrace();
-            }
-        }
-#endif
         context->AddDirtyRenderNode(Claim(this));
         return;
     }

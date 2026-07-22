@@ -1084,9 +1084,4 @@ void CanvasPattern::SetImmediateRender(bool immediateRender)
     }
     paintMethod_->SetCanvasRenderContext(canvasRenderContext);
 }
-
-void CanvasPattern::SetPatternInstanceId(int32_t id)
-{
-    patternInstanceId_ = id;
-}
 } // namespace OHOS::Ace::NG

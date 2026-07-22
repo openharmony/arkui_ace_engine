@@ -226,12 +226,6 @@ public:
     void SetImmediateRender(bool immediateRender);
     void SetRSCanvasForDrawingContext();
 
-    void SetPatternInstanceId(int32_t id);
-    int32_t GetPatternInstanceId() const
-    {
-        return patternInstanceId_;
-    }
-
 private:
     void OnVisibleChange(bool isVisible) override;
     void OnAttachToFrameNode() override;
@@ -279,7 +273,6 @@ private:
     std::optional<bool> immediateRender_ = std::nullopt;
     bool hasRegisteredVisibleAreaChange_ = false;
 
-    int32_t patternInstanceId_ = INSTANCE_ID_UNDEFINED;
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };
 } // namespace OHOS::Ace::NG
