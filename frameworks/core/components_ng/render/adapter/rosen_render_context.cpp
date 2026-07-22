@@ -7355,7 +7355,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 // for window surfaceNode, remove surfaceNode explicitly
                 frameParent->GetRenderContext()->RemoveChild(Claim(this));
             }
-            if (transitionUserCallback_ && !disappearingTransitionCount_) {
+            if (transitionUserCallback_ && *transitionUserCallback_ && !disappearingTransitionCount_) {
                 PostTransitionUserOutCallback();
             }
             return;
@@ -7418,8 +7418,8 @@ void RosenRenderContext::OnTransitionInFinish()
     CHECK_NULL_VOID(parent);
     if (host->IsVisible()) {
         // trigger transition through visibility
-        if (transitionInCallback_) {
-            transitionInCallback_();
+        if (transitionInCallback_ && *transitionInCallback_) {
+            (*transitionInCallback_)();
         }
     }
 }
@@ -7444,8 +7444,8 @@ void RosenRenderContext::OnTransitionOutFinish()
     if (!host->IsVisible()) {
         // trigger transition through visibility
         if (host->IsOnMainTree()) {
-            if (transitionOutCallback_) {
-                transitionOutCallback_();
+            if (transitionOutCallback_ && *transitionOutCallback_) {
+                (*transitionOutCallback_)();
             }
             parent->MarkNeedSyncRenderTree();
             parent->RebuildRenderContextTree();
@@ -7511,8 +7511,8 @@ RefPtr<UINode> RosenRenderContext::GetModalNode(const RefPtr<UINode>& breakPoint
 
 void RosenRenderContext::FireTransitionUserCallback(bool isTransitionIn)
 {
-    if (transitionUserCallback_) {
-        auto callback = transitionUserCallback_;
+    if (transitionUserCallback_ && *transitionUserCallback_) {
+        auto callback = *transitionUserCallback_;
         callback(isTransitionIn);
     }
 }
@@ -7523,7 +7523,7 @@ void RosenRenderContext::PostTransitionUserOutCallback()
     CHECK_NULL_VOID(taskExecutor);
     // post the callback to let it run on isolate environment
     taskExecutor->PostTask(
-        [callback = transitionUserCallback_]() {
+        [callback = (transitionUserCallback_ ? *transitionUserCallback_ : TransitionFinishCallback())]() {
             if (callback) {
                 callback(false);
             }
@@ -7996,19 +7996,28 @@ void RosenRenderContext::SetTranslate(float translateX, float translateY, float 
 void RosenRenderContext::SetTransitionInCallback(std::function<void()>&& callback)
 {
     FREE_RS_CONTEXT_CHECK_MOVE(SetTransitionInCallback, callback);
-    transitionInCallback_ = std::move(callback);
+    if (!transitionInCallback_) {
+        transitionInCallback_ = std::make_unique<std::function<void()>>();
+    }
+    *transitionInCallback_ = std::move(callback);
 }
 
 void RosenRenderContext::SetTransitionOutCallback(std::function<void()>&& callback)
 {
     FREE_RS_CONTEXT_CHECK_MOVE(SetTransitionOutCallback, callback);
-    transitionOutCallback_ = std::move(callback);
+    if (!transitionOutCallback_) {
+        transitionOutCallback_ = std::make_unique<std::function<void()>>();
+    }
+    *transitionOutCallback_ = std::move(callback);
 }
 
 void RosenRenderContext::SetTransitionUserCallback(TransitionFinishCallback&& callback)
 {
     FREE_RS_CONTEXT_CHECK_MOVE(SetTransitionUserCallback, callback);
-    transitionUserCallback_ = std::move(callback);
+    if (!transitionUserCallback_) {
+        transitionUserCallback_ = std::make_unique<TransitionFinishCallback>();
+    }
+    *transitionUserCallback_ = std::move(callback);
 }
 
 OffsetF RosenRenderContext::GetBaseTransalteInXY() const
@@ -8730,13 +8739,13 @@ bool RosenRenderContext::SetKeyFrameNodeOpacityAnimation(int32_t duration, int32
             if (isDragEnd) {
                 RemoveKeyFrameNode();
             }
-            if (callbackAnimateEnd_) {
-                callbackAnimateEnd_();
+            if (callbackAnimateEnd_ && *callbackAnimateEnd_) {
+                (*callbackAnimateEnd_)();
             }
             FlushImplicitTransaction();
             animationFlag = false;
-            if (callbackCachedAnimateAction_) {
-                callbackCachedAnimateAction_();
+            if (callbackCachedAnimateAction_ && *callbackCachedAnimateAction_) {
+                (*callbackCachedAnimateAction_)();
             }
         });
     return true;
