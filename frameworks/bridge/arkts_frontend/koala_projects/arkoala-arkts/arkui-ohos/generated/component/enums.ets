@@ -647,9 +647,7 @@ export enum SystemProperties {
     WINDOW_AVOID_AREA = 'system.window.avoidarea',
     WINDOW_AVOID_AREA_PX = 'system.window.avoidarea.px',
     WINDOW_SIZE = 'system.window.size',
-    WINDOW_SIZE_PX = 'system.window.size.px',
-    WINDOW_IS_FOCUSED = 'system.window.focused',
-    WINDOW_IS_HIGHLIGHTED = 'system.window.highlighted'
+    WINDOW_SIZE_PX = 'system.window.size.px'
 }
 export enum GestureCollectIntervention {
     CONTINUE = 0,
@@ -681,6 +679,10 @@ export enum InputEventInterceptAction {
     CONTINUE = 0,
     BLOCK = 1
 }
+export enum UIMaterialAnimationMode {
+    IMMERSIVE = 0,
+    NONE = 1
+}
 export enum GestureShortcut {
     PRIMARY = 0
 }
@@ -696,4 +698,14 @@ export enum OperateIntention {
     TAP = 0,
     SLIDE_FORWARD = 1,
     BACK_PRESS = 2
+}
+export enum EdgeLightPosition {
+    TOP_LEFT = 0,
+    TOP_RIGHT = 1,
+    BOTTOM_LEFT = 2,
+    BOTTOM_RIGHT = 3,
+    TOP = 4,
+    BOTTOM = 5,
+    LEFT = 6,
+    RIGHT = 7
 }

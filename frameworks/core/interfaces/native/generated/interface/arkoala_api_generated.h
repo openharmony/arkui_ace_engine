@@ -7462,7 +7462,7 @@ typedef enum Ark_text_TextDecorationType {
     ARK_TEXT_TEXT_DECORATION_TYPE_NONE = 0,
     ARK_TEXT_TEXT_DECORATION_TYPE_UNDERLINE = 1,
     ARK_TEXT_TEXT_DECORATION_TYPE_OVERLINE = 2,
-    ARK_TEXT_TEXT_DECORATION_TYPE_LINE_THROUGH = 3,
+    ARK_TEXT_TEXT_DECORATION_TYPE_LINE_THROUGH = 4,
 } Ark_text_TextDecorationType;
 typedef struct Opt_text_TextDecorationType {
     Ark_Tag tag;
@@ -24340,9 +24340,6 @@ typedef struct Ark_TextPickerDialogOptions {
     Opt_Boolean enableHoverMode;
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Boolean enableHapticFeedback;
-    Opt_uiMaterial_Material systemMaterial;
-    Opt_DistortionMode distortionMode;
-    Opt_EdgeLightMode edgeLightMode;
 } Ark_TextPickerDialogOptions;
 typedef struct Opt_TextPickerDialogOptions {
     Ark_Tag tag;
@@ -28620,7 +28617,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setEnableFullscreenVideoOverlay)(Ark_NativePointer node,
                                             const Opt_Boolean* value);
     void (*setEnableMediaNetworkProxy)(Ark_NativePointer node,
-                                  const Opt_Boolean* value);
+                                       const Opt_Boolean* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,
                                        const Opt_String* tag,
                                        const Opt_String* type);

@@ -467,9 +467,6 @@ export class ArkSpanPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SpanAttribute_setDebugLine(this.peer.ptr, sourceLine, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setApplyAttributesFinishAttribute(): void {
-        ArkUIGeneratedNativeModule._SpanAttribute_setApplyAttributesFinish(this.peer.ptr)
-    }
 }
 export interface TextBackgroundStyle {
     color?: ResourceColor;
@@ -549,9 +546,6 @@ export interface SpanAttribute {
     }
     debugLine(sourceLine: string, moduleName?: string): this {
         throw new Error('Unimplemented method debugLine')
-    }
-    applyAttributesFinish(): void {
-        throw new Error('Unimplemented method applyAttributesFinish')
     }
     attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         throw new Error('Unimplemented method attributeModifier')
@@ -699,10 +693,6 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
         const moduleName_casted = moduleName as (string | undefined)
         this.getPeer()?.setDebugLineAttribute(sourceLine_casted, moduleName_casted)
         return this
-    }
-    public applyAttributesFinish(): void {
-        this.getPeer()?.setApplyAttributesFinishAttribute()
-        return
     }
     public attributeModifier(value: AttributeModifier<SpanAttribute> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {

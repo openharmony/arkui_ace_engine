@@ -21,12 +21,12 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { SelectionOptions_serializer, RectResult_serializer, SelectionOptions, RectResult, ArkCommonMethodPeer, CommonMethod, Callback as arkui_component_common_Callback, ShadowOptions, PixelMap, ClickEvent, HoverEvent, HapticFeedbackMode, ArkCommonMethodComponent, ClickEvent_serializer, ShadowOptions_serializer, HoverEvent_serializer } from './common'
-import { LayoutManager_serializer, PreviewText_serializer, TextRange_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextRange, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, TextDataDetectorConfig, OnDidChangeCallback, IMEClient, EditMenuOptions, KeyboardAppearance, SelectedDragPreviewStyle, MenuType, TextVerticalAlign, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextChangeReason, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from './textCommon'
+import { LayoutManager_serializer, PreviewText_serializer, TextRange_serializer, TextEditControllerEx, TextEditControllerExInternal, LayoutManager, LayoutManagerInternal, PreviewText, TextRange, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, SelectedDragPreviewStyle_serializer, TextDataDetectorConfig, OnDidChangeCallback, IMEClient, EditMenuOptions, KeyboardAppearance, SelectedDragPreviewStyle, MenuType, StrokeJoinStyle, TextVerticalAlign, TextDirection, DecorationStyleResult, AccessibilitySpanOptions, TextChangeReason, AccessibilitySpanOptions_serializer, DecorationStyleResult_serializer, StyledStringChangedListener_serializer, StyledStringController, StyledStringControllerInternal, StyledStringChangedListener } from './textCommon'
 import { StyledString, StyledStringInternal, DecorationStyleInterface, DecorationStyleInterface_serializer, StyledString_serializer, MutableStyledString_serializer, MutableStyledString, MutableStyledStringInternal } from './styledString'
 import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { ColorMetricsExt, ColorMetricsExt_serializer, CustomNodeBuilder } from './idlize'
-import { extractors, AttributeModifier, hookRichEditorAttributeModifier, AttributeUpdater } from '#handwritten'
+import { ColorMetricsExt, ColorMetricsExt_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer, CustomNodeBuilder } from './idlize'
+import { extractors, AttributeModifier, ShaderStyle, hookRichEditorAttributeModifier, AttributeUpdater } from '#handwritten'
 import { ComponentContentBase_serializer } from './../framework/ComponentContent'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
@@ -933,6 +933,18 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setHorizontalScrolling(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setPunctuationOverflowAttribute(value: boolean | undefined): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._RichEditorAttribute_setPunctuationOverflow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setBindSelectionMenuAttribute(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         if (spanType !== undefined) {
@@ -1069,6 +1081,7 @@ export interface RichEditorTextStyle {
     textBackgroundStyle?: TextBackgroundStyle;
     strokeWidth?: arkui_Graphics_LengthMetrics | double;
     strokeColor?: ResourceColor;
+    strokeJoinStyle?: StrokeJoinStyle;
 }
 export interface LeadingMarginPlaceholder {
     pixelMap: PixelMap;
@@ -1082,6 +1095,7 @@ export interface RichEditorParagraphStyle {
     lineBreakStrategy?: LineBreakStrategy;
     paragraphSpacing?: double;
     textDirection?: TextDirection;
+    shaderStyle?: ShaderStyle;
 }
 export interface RichEditorTextSpan {
     spanPosition: RichEditorSpanPosition;
@@ -1120,6 +1134,7 @@ export interface RichEditorTextStyleResult {
     textBackgroundStyle?: TextBackgroundStyle;
     strokeWidth?: double;
     strokeColor?: ResourceColor;
+    strokeJoinStyle?: StrokeJoinStyle;
 }
 export interface RichEditorParagraphResult {
     style: RichEditorParagraphStyle;
@@ -1385,6 +1400,9 @@ export interface RichEditorAttribute extends CommonMethod {
     horizontalScrolling(value: boolean | undefined): this {
         throw new Error('Unimplemented method horizontalScrolling')
     }
+    punctuationOverflow(value: boolean | undefined): this {
+        throw new Error('Unimplemented method punctuationOverflow')
+    }
     bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
         throw new Error('Unimplemented method bindSelectionMenu')
     }
@@ -1625,6 +1643,11 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
     public horizontalScrolling(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setHorizontalScrollingAttribute(value_casted)
+        return this
+    }
+    public punctuationOverflow(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setPunctuationOverflowAttribute(value_casted)
         return this
     }
     public bindSelectionMenu(spanType: RichEditorSpanType | undefined, content: CustomBuilder | undefined, responseType: ResponseType | RichEditorResponseType | undefined, options?: SelectionMenuOptions): this {
@@ -2918,195 +2941,6 @@ export class RichEditorLayoutStyle_serializer {
         return value
     }
 }
-export class RichEditorParagraphStyle_serializer {
-    public static write(buffer: SerializerBase, value: RichEditorParagraphStyle): void {
-        let valueSerializer: SerializerBase = buffer
-        const valueHolderForTextAlign = value.textAlign
-        if (valueHolderForTextAlign !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForTextAlignTmpValue = (valueHolderForTextAlign as TextAlign)
-            valueSerializer.writeInt32(valueHolderForTextAlignTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForTextVerticalAlign = value.textVerticalAlign
-        if (valueHolderForTextVerticalAlign !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForTextVerticalAlignTmpValue = (valueHolderForTextVerticalAlign as TextVerticalAlign)
-            valueSerializer.writeInt32(valueHolderForTextVerticalAlignTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForLeadingMargin = value.leadingMargin
-        if (valueHolderForLeadingMargin !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForLeadingMarginTmpValue = valueHolderForLeadingMargin!
-            if (valueHolderForLeadingMarginTmpValue instanceof Dimension) {
-                valueSerializer.writeInt8((0).toByte())
-                const valueHolderForLeadingMarginTmpValueForIdx0 = valueHolderForLeadingMarginTmpValue as Dimension
-                if (valueHolderForLeadingMarginTmpValueForIdx0 instanceof string) {
-                    valueSerializer.writeInt8((0).toByte())
-                    const valueHolderForLeadingMarginTmpValueForIdx0ForIdx0 = valueHolderForLeadingMarginTmpValueForIdx0 as string
-                    valueSerializer.writeString(valueHolderForLeadingMarginTmpValueForIdx0ForIdx0)
-                } else if (valueHolderForLeadingMarginTmpValueForIdx0 instanceof number) {
-                    valueSerializer.writeInt8((1).toByte())
-                    const valueHolderForLeadingMarginTmpValueForIdx0ForIdx1 = valueHolderForLeadingMarginTmpValueForIdx0 as number
-                    valueSerializer.writeNumber(valueHolderForLeadingMarginTmpValueForIdx0ForIdx1)
-                } else if (valueHolderForLeadingMarginTmpValueForIdx0 instanceof global_resource_Resource) {
-                    valueSerializer.writeInt8((2).toByte())
-                    const valueHolderForLeadingMarginTmpValueForIdx0ForIdx2 = valueHolderForLeadingMarginTmpValueForIdx0 as global_resource_Resource
-                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx0ForIdx2)
-                }
-            } else if (valueHolderForLeadingMarginTmpValue instanceof LeadingMarginPlaceholder) {
-                valueSerializer.writeInt8((1).toByte())
-                const valueHolderForLeadingMarginTmpValueForIdx1 = valueHolderForLeadingMarginTmpValue as LeadingMarginPlaceholder
-                LeadingMarginPlaceholder_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx1)
-            }
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForWordBreak = value.wordBreak
-        if (valueHolderForWordBreak !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForWordBreakTmpValue = (valueHolderForWordBreak as WordBreak)
-            valueSerializer.writeInt32(valueHolderForWordBreakTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForLineBreakStrategy = value.lineBreakStrategy
-        if (valueHolderForLineBreakStrategy !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForLineBreakStrategyTmpValue = (valueHolderForLineBreakStrategy as LineBreakStrategy)
-            valueSerializer.writeInt32(valueHolderForLineBreakStrategyTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForParagraphSpacing = value.paragraphSpacing
-        if (valueHolderForParagraphSpacing !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForParagraphSpacingTmpValue = valueHolderForParagraphSpacing!
-            valueSerializer.writeFloat64(valueHolderForParagraphSpacingTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForTextDirection = value.textDirection
-        if (valueHolderForTextDirection !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForTextDirectionTmpValue = (valueHolderForTextDirection as TextDirection)
-            valueSerializer.writeInt32(valueHolderForTextDirectionTmpValue.valueOf())
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-    }
-    public static read(buffer: DeserializerBase): RichEditorParagraphStyle {
-        let valueDeserializer: DeserializerBase = buffer
-        const textAlignTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let textAlignTmpBuf: TextAlign | undefined = undefined
-        if ((textAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            textAlignTmpBuf = TextAlign.fromValue(valueDeserializer.readInt32())
-        }
-        const textAlignTmpResult: TextAlign | undefined = textAlignTmpBuf
-        const textVerticalAlignTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let textVerticalAlignTmpBuf: TextVerticalAlign | undefined = undefined
-        if ((textVerticalAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            textVerticalAlignTmpBuf = TextVerticalAlign.fromValue(valueDeserializer.readInt32())
-        }
-        const textVerticalAlignTmpResult: TextVerticalAlign | undefined = textVerticalAlignTmpBuf
-        const leadingMarginTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let leadingMarginTmpBuf: Dimension | LeadingMarginPlaceholder | undefined = undefined
-        if ((leadingMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const leadingMarginTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
-            let leadingMarginTmpBufOpt: Dimension | LeadingMarginPlaceholder | undefined
-            if (leadingMarginTmpBufOptUnionSelector == (0).toByte()) {
-                const leadingMarginTmpBufOptBufUUnionSelector: int32 = valueDeserializer.readInt8()
-                let leadingMarginTmpBufOptBufU: string | number | global_resource_Resource | undefined
-                if (leadingMarginTmpBufOptBufUUnionSelector == (0).toByte()) {
-                    leadingMarginTmpBufOptBufU = (valueDeserializer.readString() as string)
-                } else if (leadingMarginTmpBufOptBufUUnionSelector == (1).toByte()) {
-                    leadingMarginTmpBufOptBufU = (valueDeserializer.readNumber() as number)
-                } else if (leadingMarginTmpBufOptBufUUnionSelector == (2).toByte()) {
-                    leadingMarginTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
-                } else {
-                    throw new Error('One of the branches for leadingMarginTmpBufOptBufU has to be chosen through deserialisation.')
-                }
-                leadingMarginTmpBufOpt = (leadingMarginTmpBufOptBufU as string | number | global_resource_Resource)
-            } else if (leadingMarginTmpBufOptUnionSelector == (1).toByte()) {
-                leadingMarginTmpBufOpt = LeadingMarginPlaceholder_serializer.read(valueDeserializer)
-            } else {
-                throw new Error('One of the branches for leadingMarginTmpBufOpt has to be chosen through deserialisation.')
-            }
-            leadingMarginTmpBuf = (leadingMarginTmpBufOpt as Dimension | LeadingMarginPlaceholder)
-        }
-        const leadingMarginTmpResult: Dimension | LeadingMarginPlaceholder | undefined = leadingMarginTmpBuf
-        const wordBreakTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let wordBreakTmpBuf: WordBreak | undefined = undefined
-        if ((wordBreakTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            wordBreakTmpBuf = WordBreak.fromValue(valueDeserializer.readInt32())
-        }
-        const wordBreakTmpResult: WordBreak | undefined = wordBreakTmpBuf
-        const lineBreakStrategyTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let lineBreakStrategyTmpBuf: LineBreakStrategy | undefined = undefined
-        if ((lineBreakStrategyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            lineBreakStrategyTmpBuf = LineBreakStrategy.fromValue(valueDeserializer.readInt32())
-        }
-        const lineBreakStrategyTmpResult: LineBreakStrategy | undefined = lineBreakStrategyTmpBuf
-        const paragraphSpacingTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let paragraphSpacingTmpBuf: double | undefined = undefined
-        if ((paragraphSpacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            paragraphSpacingTmpBuf = valueDeserializer.readFloat64()
-        }
-        const paragraphSpacingTmpResult: double | undefined = paragraphSpacingTmpBuf
-        const textDirectionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let textDirectionTmpBuf: TextDirection | undefined = undefined
-        if ((textDirectionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            textDirectionTmpBuf = TextDirection.fromValue(valueDeserializer.readInt32())
-        }
-        const textDirectionTmpResult: TextDirection | undefined = textDirectionTmpBuf
-        let value: RichEditorParagraphStyle = ({textAlign: textAlignTmpResult, textVerticalAlign: textVerticalAlignTmpResult, leadingMargin: leadingMarginTmpResult, wordBreak: wordBreakTmpResult, lineBreakStrategy: lineBreakStrategyTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult} as RichEditorParagraphStyle)
-        return value
-    }
-}
-export class RichEditorParagraphStyleOptions_serializer {
-    public static write(buffer: SerializerBase, value: RichEditorParagraphStyleOptions): void {
-        let valueSerializer: SerializerBase = buffer
-        const valueHolderForStart = value.start
-        if (valueHolderForStart !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForStartTmpValue = valueHolderForStart!
-            valueSerializer.writeInt32(valueHolderForStartTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForEnd = value.end
-        if (valueHolderForEnd !== undefined) {
-            valueSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueHolderForEndTmpValue = valueHolderForEnd!
-            valueSerializer.writeInt32(valueHolderForEndTmpValue)
-        } else {
-            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        const valueHolderForStyle = value.style
-        RichEditorParagraphStyle_serializer.write(valueSerializer, valueHolderForStyle)
-    }
-    public static read(buffer: DeserializerBase): RichEditorParagraphStyleOptions {
-        let valueDeserializer: DeserializerBase = buffer
-        const startTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let startTmpBuf: int32 | undefined = undefined
-        if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            startTmpBuf = valueDeserializer.readInt32()
-        }
-        const startTmpResult: int32 | undefined = startTmpBuf
-        const endTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
-        let endTmpBuf: int32 | undefined = undefined
-        if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            endTmpBuf = valueDeserializer.readInt32()
-        }
-        const endTmpResult: int32 | undefined = endTmpBuf
-        const styleTmpResult: RichEditorParagraphStyle = RichEditorParagraphStyle_serializer.read(valueDeserializer)
-        let value: RichEditorParagraphStyleOptions = ({start: startTmpResult, end: endTmpResult, style: styleTmpResult} as RichEditorParagraphStyleOptions)
-        return value
-    }
-}
 export class RichEditorImageSpanStyle_serializer {
     public static write(buffer: SerializerBase, value: RichEditorImageSpanStyle): void {
         let valueSerializer: SerializerBase = buffer
@@ -3262,24 +3096,208 @@ export class RichEditorImageSpanStyleResult_serializer {
         return value
     }
 }
-export class RichEditorParagraphResult_serializer {
-    public static write(buffer: SerializerBase, value: RichEditorParagraphResult): void {
+export class RichEditorParagraphStyle_serializer {
+    public static write(buffer: SerializerBase, value: RichEditorParagraphStyle): void {
         let valueSerializer: SerializerBase = buffer
+        const valueHolderForTextAlign = value.textAlign
+        if (valueHolderForTextAlign !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextAlignTmpValue = (valueHolderForTextAlign as TextAlign)
+            valueSerializer.writeInt32(valueHolderForTextAlignTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForTextVerticalAlign = value.textVerticalAlign
+        if (valueHolderForTextVerticalAlign !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextVerticalAlignTmpValue = (valueHolderForTextVerticalAlign as TextVerticalAlign)
+            valueSerializer.writeInt32(valueHolderForTextVerticalAlignTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLeadingMargin = value.leadingMargin
+        if (valueHolderForLeadingMargin !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLeadingMarginTmpValue = valueHolderForLeadingMargin!
+            if (valueHolderForLeadingMarginTmpValue instanceof Dimension) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForLeadingMarginTmpValueForIdx0 = valueHolderForLeadingMarginTmpValue as Dimension
+                if (valueHolderForLeadingMarginTmpValueForIdx0 instanceof string) {
+                    valueSerializer.writeInt8((0).toByte())
+                    const valueHolderForLeadingMarginTmpValueForIdx0ForIdx0 = valueHolderForLeadingMarginTmpValueForIdx0 as string
+                    valueSerializer.writeString(valueHolderForLeadingMarginTmpValueForIdx0ForIdx0)
+                } else if (valueHolderForLeadingMarginTmpValueForIdx0 instanceof number) {
+                    valueSerializer.writeInt8((1).toByte())
+                    const valueHolderForLeadingMarginTmpValueForIdx0ForIdx1 = valueHolderForLeadingMarginTmpValueForIdx0 as number
+                    valueSerializer.writeNumber(valueHolderForLeadingMarginTmpValueForIdx0ForIdx1)
+                } else if (valueHolderForLeadingMarginTmpValueForIdx0 instanceof global_resource_Resource) {
+                    valueSerializer.writeInt8((2).toByte())
+                    const valueHolderForLeadingMarginTmpValueForIdx0ForIdx2 = valueHolderForLeadingMarginTmpValueForIdx0 as global_resource_Resource
+                    global_resource_Resource_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx0ForIdx2)
+                }
+            } else if (valueHolderForLeadingMarginTmpValue instanceof LeadingMarginPlaceholder) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForLeadingMarginTmpValueForIdx1 = valueHolderForLeadingMarginTmpValue as LeadingMarginPlaceholder
+                LeadingMarginPlaceholder_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForWordBreak = value.wordBreak
+        if (valueHolderForWordBreak !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWordBreakTmpValue = (valueHolderForWordBreak as WordBreak)
+            valueSerializer.writeInt32(valueHolderForWordBreakTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForLineBreakStrategy = value.lineBreakStrategy
+        if (valueHolderForLineBreakStrategy !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLineBreakStrategyTmpValue = (valueHolderForLineBreakStrategy as LineBreakStrategy)
+            valueSerializer.writeInt32(valueHolderForLineBreakStrategyTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForParagraphSpacing = value.paragraphSpacing
+        if (valueHolderForParagraphSpacing !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForParagraphSpacingTmpValue = valueHolderForParagraphSpacing!
+            valueSerializer.writeFloat64(valueHolderForParagraphSpacingTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForTextDirection = value.textDirection
+        if (valueHolderForTextDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextDirectionTmpValue = (valueHolderForTextDirection as TextDirection)
+            valueSerializer.writeInt32(valueHolderForTextDirectionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForShaderStyle = value.shaderStyle
+        if (valueHolderForShaderStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShaderStyleTmpValue = valueHolderForShaderStyle!
+            const valueHolderForShaderStyleTmpValueTransformed: ShaderStyleProxy = extractors.transform_Ark_ShaderStyle_to_Ark_ShaderStyleProxy(valueHolderForShaderStyleTmpValue)
+            ShaderStyleProxy_serializer.write(valueSerializer, valueHolderForShaderStyleTmpValueTransformed)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): RichEditorParagraphStyle {
+        let valueDeserializer: DeserializerBase = buffer
+        const textAlignTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let textAlignTmpBuf: TextAlign | undefined = undefined
+        if ((textAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textAlignTmpBuf = TextAlign.fromValue(valueDeserializer.readInt32())
+        }
+        const textAlignTmpResult: TextAlign | undefined = textAlignTmpBuf
+        const textVerticalAlignTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let textVerticalAlignTmpBuf: TextVerticalAlign | undefined = undefined
+        if ((textVerticalAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textVerticalAlignTmpBuf = TextVerticalAlign.fromValue(valueDeserializer.readInt32())
+        }
+        const textVerticalAlignTmpResult: TextVerticalAlign | undefined = textVerticalAlignTmpBuf
+        const leadingMarginTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let leadingMarginTmpBuf: Dimension | LeadingMarginPlaceholder | undefined = undefined
+        if ((leadingMarginTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const leadingMarginTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
+            let leadingMarginTmpBufOpt: Dimension | LeadingMarginPlaceholder | undefined
+            if (leadingMarginTmpBufOptUnionSelector == (0).toByte()) {
+                const leadingMarginTmpBufOptBufUUnionSelector: int32 = valueDeserializer.readInt8()
+                let leadingMarginTmpBufOptBufU: string | number | global_resource_Resource | undefined
+                if (leadingMarginTmpBufOptBufUUnionSelector == (0).toByte()) {
+                    leadingMarginTmpBufOptBufU = (valueDeserializer.readString() as string)
+                } else if (leadingMarginTmpBufOptBufUUnionSelector == (1).toByte()) {
+                    leadingMarginTmpBufOptBufU = (valueDeserializer.readNumber() as number)
+                } else if (leadingMarginTmpBufOptBufUUnionSelector == (2).toByte()) {
+                    leadingMarginTmpBufOptBufU = global_resource_Resource_serializer.read(valueDeserializer)
+                } else {
+                    throw new Error('One of the branches for leadingMarginTmpBufOptBufU has to be chosen through deserialisation.')
+                }
+                leadingMarginTmpBufOpt = (leadingMarginTmpBufOptBufU as string | number | global_resource_Resource)
+            } else if (leadingMarginTmpBufOptUnionSelector == (1).toByte()) {
+                leadingMarginTmpBufOpt = LeadingMarginPlaceholder_serializer.read(valueDeserializer)
+            } else {
+                throw new Error('One of the branches for leadingMarginTmpBufOpt has to be chosen through deserialisation.')
+            }
+            leadingMarginTmpBuf = (leadingMarginTmpBufOpt as Dimension | LeadingMarginPlaceholder)
+        }
+        const leadingMarginTmpResult: Dimension | LeadingMarginPlaceholder | undefined = leadingMarginTmpBuf
+        const wordBreakTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let wordBreakTmpBuf: WordBreak | undefined = undefined
+        if ((wordBreakTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            wordBreakTmpBuf = WordBreak.fromValue(valueDeserializer.readInt32())
+        }
+        const wordBreakTmpResult: WordBreak | undefined = wordBreakTmpBuf
+        const lineBreakStrategyTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let lineBreakStrategyTmpBuf: LineBreakStrategy | undefined = undefined
+        if ((lineBreakStrategyTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            lineBreakStrategyTmpBuf = LineBreakStrategy.fromValue(valueDeserializer.readInt32())
+        }
+        const lineBreakStrategyTmpResult: LineBreakStrategy | undefined = lineBreakStrategyTmpBuf
+        const paragraphSpacingTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let paragraphSpacingTmpBuf: double | undefined = undefined
+        if ((paragraphSpacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            paragraphSpacingTmpBuf = valueDeserializer.readFloat64()
+        }
+        const paragraphSpacingTmpResult: double | undefined = paragraphSpacingTmpBuf
+        const textDirectionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let textDirectionTmpBuf: TextDirection | undefined = undefined
+        if ((textDirectionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textDirectionTmpBuf = TextDirection.fromValue(valueDeserializer.readInt32())
+        }
+        const textDirectionTmpResult: TextDirection | undefined = textDirectionTmpBuf
+        const shaderStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let shaderStyleTmpBuf: ShaderStyle | undefined = undefined
+        if ((shaderStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const shaderStyleTmpBufOptDeserialized: ShaderStyleProxy = ShaderStyleProxy_serializer.read(valueDeserializer)
+            shaderStyleTmpBuf = extractors.transform_Ark_ShaderStyleProxy_to_Ark_ShaderStyle(shaderStyleTmpBufOptDeserialized)
+        }
+        const shaderStyleTmpResult: ShaderStyle | undefined = shaderStyleTmpBuf
+        let value: RichEditorParagraphStyle = ({textAlign: textAlignTmpResult, textVerticalAlign: textVerticalAlignTmpResult, leadingMargin: leadingMarginTmpResult, wordBreak: wordBreakTmpResult, lineBreakStrategy: lineBreakStrategyTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult, shaderStyle: shaderStyleTmpResult} as RichEditorParagraphStyle)
+        return value
+    }
+}
+export class RichEditorParagraphStyleOptions_serializer {
+    public static write(buffer: SerializerBase, value: RichEditorParagraphStyleOptions): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForStart = value.start
+        if (valueHolderForStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartTmpValue = valueHolderForStart!
+            valueSerializer.writeInt32(valueHolderForStartTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEnd = value.end
+        if (valueHolderForEnd !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEndTmpValue = valueHolderForEnd!
+            valueSerializer.writeInt32(valueHolderForEndTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForStyle = value.style
         RichEditorParagraphStyle_serializer.write(valueSerializer, valueHolderForStyle)
-        const valueHolderForRange = value.range
-        const valueHolderForRange_0 = valueHolderForRange[0]
-        valueSerializer.writeInt32(valueHolderForRange_0)
-        const valueHolderForRange_1 = valueHolderForRange[1]
-        valueSerializer.writeInt32(valueHolderForRange_1)
     }
-    public static read(buffer: DeserializerBase): RichEditorParagraphResult {
+    public static read(buffer: DeserializerBase): RichEditorParagraphStyleOptions {
         let valueDeserializer: DeserializerBase = buffer
+        const startTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let startTmpBuf: int32 | undefined = undefined
+        if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            startTmpBuf = valueDeserializer.readInt32()
+        }
+        const startTmpResult: int32 | undefined = startTmpBuf
+        const endTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let endTmpBuf: int32 | undefined = undefined
+        if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            endTmpBuf = valueDeserializer.readInt32()
+        }
+        const endTmpResult: int32 | undefined = endTmpBuf
         const styleTmpResult: RichEditorParagraphStyle = RichEditorParagraphStyle_serializer.read(valueDeserializer)
-        const rangeTmpBufValue0: int32 = valueDeserializer.readInt32()
-        const rangeTmpBufValue1: int32 = valueDeserializer.readInt32()
-        const rangeTmpResult: [ int32, int32 ] = ([rangeTmpBufValue0, rangeTmpBufValue1] as [ int32, int32 ])
-        let value: RichEditorParagraphResult = ({style: styleTmpResult, range: rangeTmpResult} as RichEditorParagraphResult)
+        let value: RichEditorParagraphStyleOptions = ({start: startTmpResult, end: endTmpResult, style: styleTmpResult} as RichEditorParagraphStyleOptions)
         return value
     }
 }
@@ -3510,6 +3528,14 @@ export class RichEditorTextStyle_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForStrokeJoinStyle = value.strokeJoinStyle
+        if (valueHolderForStrokeJoinStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrokeJoinStyleTmpValue = (valueHolderForStrokeJoinStyle as StrokeJoinStyle)
+            valueSerializer.writeInt32(valueHolderForStrokeJoinStyleTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): RichEditorTextStyle {
         let valueDeserializer: DeserializerBase = buffer
@@ -3696,7 +3722,13 @@ export class RichEditorTextStyle_serializer {
             strokeColorTmpBuf = (strokeColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const strokeColorTmpResult: ResourceColor | undefined = strokeColorTmpBuf
-        let value: RichEditorTextStyle = ({fontColor: fontColorTmpResult, fontSize: fontSizeTmpResult, fontStyle: fontStyleTmpResult, fontWeight: fontWeightTmpResult, fontFamily: fontFamilyTmpResult, decoration: decorationTmpResult, textShadow: textShadowTmpResult, letterSpacing: letterSpacingTmpResult, lineHeight: lineHeightTmpResult, halfLeading: halfLeadingTmpResult, fontFeature: fontFeatureTmpResult, textBackgroundStyle: textBackgroundStyleTmpResult, strokeWidth: strokeWidthTmpResult, strokeColor: strokeColorTmpResult} as RichEditorTextStyle)
+        const strokeJoinStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let strokeJoinStyleTmpBuf: StrokeJoinStyle | undefined = undefined
+        if ((strokeJoinStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            strokeJoinStyleTmpBuf = StrokeJoinStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const strokeJoinStyleTmpResult: StrokeJoinStyle | undefined = strokeJoinStyleTmpBuf
+        let value: RichEditorTextStyle = ({fontColor: fontColorTmpResult, fontSize: fontSizeTmpResult, fontStyle: fontStyleTmpResult, fontWeight: fontWeightTmpResult, fontFamily: fontFamilyTmpResult, decoration: decorationTmpResult, textShadow: textShadowTmpResult, letterSpacing: letterSpacingTmpResult, lineHeight: lineHeightTmpResult, halfLeading: halfLeadingTmpResult, fontFeature: fontFeatureTmpResult, textBackgroundStyle: textBackgroundStyleTmpResult, strokeWidth: strokeWidthTmpResult, strokeColor: strokeColorTmpResult, strokeJoinStyle: strokeJoinStyleTmpResult} as RichEditorTextStyle)
         return value
     }
 }
@@ -3815,6 +3847,14 @@ export class RichEditorTextStyleResult_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForStrokeJoinStyle = value.strokeJoinStyle
+        if (valueHolderForStrokeJoinStyle !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStrokeJoinStyleTmpValue = (valueHolderForStrokeJoinStyle as StrokeJoinStyle)
+            valueSerializer.writeInt32(valueHolderForStrokeJoinStyleTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): RichEditorTextStyleResult {
         let valueDeserializer: DeserializerBase = buffer
@@ -3902,7 +3942,13 @@ export class RichEditorTextStyleResult_serializer {
             strokeColorTmpBuf = (strokeColorTmpBufOpt as arkui_component_enums_Color | int32 | string | arkui_component_units_Resource)
         }
         const strokeColorTmpResult: ResourceColor | undefined = strokeColorTmpBuf
-        let value: RichEditorTextStyleResult = ({fontColor: fontColorTmpResult, fontSize: fontSizeTmpResult, fontStyle: fontStyleTmpResult, fontWeight: fontWeightTmpResult, fontFamily: fontFamilyTmpResult, decoration: decorationTmpResult, textShadow: textShadowTmpResult, letterSpacing: letterSpacingTmpResult, lineHeight: lineHeightTmpResult, halfLeading: halfLeadingTmpResult, fontFeature: fontFeatureTmpResult, textBackgroundStyle: textBackgroundStyleTmpResult, strokeWidth: strokeWidthTmpResult, strokeColor: strokeColorTmpResult} as RichEditorTextStyleResult)
+        const strokeJoinStyleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let strokeJoinStyleTmpBuf: StrokeJoinStyle | undefined = undefined
+        if ((strokeJoinStyleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            strokeJoinStyleTmpBuf = StrokeJoinStyle.fromValue(valueDeserializer.readInt32())
+        }
+        const strokeJoinStyleTmpResult: StrokeJoinStyle | undefined = strokeJoinStyleTmpBuf
+        let value: RichEditorTextStyleResult = ({fontColor: fontColorTmpResult, fontSize: fontSizeTmpResult, fontStyle: fontStyleTmpResult, fontWeight: fontWeightTmpResult, fontFamily: fontFamilyTmpResult, decoration: decorationTmpResult, textShadow: textShadowTmpResult, letterSpacing: letterSpacingTmpResult, lineHeight: lineHeightTmpResult, halfLeading: halfLeadingTmpResult, fontFeature: fontFeatureTmpResult, textBackgroundStyle: textBackgroundStyleTmpResult, strokeWidth: strokeWidthTmpResult, strokeColor: strokeColorTmpResult, strokeJoinStyle: strokeJoinStyleTmpResult} as RichEditorTextStyleResult)
         return value
     }
 }
@@ -4149,6 +4195,27 @@ export class RichEditorImageSpanResult_serializer {
         const offsetInSpanTmpBufValue1: int32 = valueDeserializer.readInt32()
         const offsetInSpanTmpResult: [ int32, int32 ] = ([offsetInSpanTmpBufValue0, offsetInSpanTmpBufValue1] as [ int32, int32 ])
         let value: RichEditorImageSpanResult = ({spanPosition: spanPositionTmpResult, valuePixelMap: valuePixelMapTmpResult, valueResourceStr: valueResourceStrTmpResult, imageStyle: imageStyleTmpResult, offsetInSpan: offsetInSpanTmpResult} as RichEditorImageSpanResult)
+        return value
+    }
+}
+export class RichEditorParagraphResult_serializer {
+    public static write(buffer: SerializerBase, value: RichEditorParagraphResult): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForStyle = value.style
+        RichEditorParagraphStyle_serializer.write(valueSerializer, valueHolderForStyle)
+        const valueHolderForRange = value.range
+        const valueHolderForRange_0 = valueHolderForRange[0]
+        valueSerializer.writeInt32(valueHolderForRange_0)
+        const valueHolderForRange_1 = valueHolderForRange[1]
+        valueSerializer.writeInt32(valueHolderForRange_1)
+    }
+    public static read(buffer: DeserializerBase): RichEditorParagraphResult {
+        let valueDeserializer: DeserializerBase = buffer
+        const styleTmpResult: RichEditorParagraphStyle = RichEditorParagraphStyle_serializer.read(valueDeserializer)
+        const rangeTmpBufValue0: int32 = valueDeserializer.readInt32()
+        const rangeTmpBufValue1: int32 = valueDeserializer.readInt32()
+        const rangeTmpResult: [ int32, int32 ] = ([rangeTmpBufValue0, rangeTmpBufValue1] as [ int32, int32 ])
+        let value: RichEditorParagraphResult = ({style: styleTmpResult, range: rangeTmpResult} as RichEditorParagraphResult)
         return value
     }
 }

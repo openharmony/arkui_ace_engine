@@ -97,7 +97,8 @@ group("napi_group") {
       "$ace_root/interfaces/napi/kits/dialog:dialog_napi",
       "$ace_root/interfaces/napi/kits/drawabledescriptor:drawabledescriptor",
       "$ace_root/interfaces/napi/kits/plugincomponent:plugincomponent",
-      "$ace_root/interfaces/napi/kits/intelligence/image_generation:imagegeneration"
+      "$ace_root/interfaces/napi/kits/intelligence/image_generation:imagegeneration",
+      "$ace_root/interfaces/napi/kits/visual_test:visualtest"
     ]
   }
 }
