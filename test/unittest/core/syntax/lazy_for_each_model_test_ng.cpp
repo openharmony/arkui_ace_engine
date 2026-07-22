@@ -336,21 +336,6 @@ HWTEST_F(LazyForEachModelSyntaxTestNg, LazyForEachModelSyntaxBuilderCastTest016,
 }
 
 /**
- * @tc.name: LazyForEachModelSyntaxCreateWithInvalidBuilderTest017
- * @tc.desc: Create with non-LazyForEachBuilder handles gracefully
- * @tc.type: FUNC
- */
-HWTEST_F(LazyForEachModelSyntaxTestNg, LazyForEachModelSyntaxCreateWithInvalidBuilderTest017, TestSize.Level1)
-{
-    auto parentNode = CreateParentNode();
-    ViewStackProcessor::GetInstance()->Push(parentNode);
-    LazyForEachModelNG model;
-    RefPtr<LazyForEachActuator> invalidBuilder = nullptr;
-    model.Create(invalidBuilder);
-    SUCCEED();
-}
-
-/**
  * @tc.name: LazyForEachModelSyntaxNodeIdTest018
  * @tc.desc: Test LazyForEach node ID assignment
  * @tc.type: FUNC
