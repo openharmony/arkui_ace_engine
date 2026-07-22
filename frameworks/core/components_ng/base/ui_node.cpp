@@ -195,11 +195,11 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
     context_ = context;
     context_->RegisterAttachedNode(this);
     instanceId_ = context->GetInstanceId();
-    // IsolatedThread consistency validation: warn if node and pipeline
+    // IsolatedThread consistency validation: log if node and pipeline
     // belong to different thread domains (e.g., node created in dc thread
     // attaching to non-dc pipeline, or vice versa).
     if (isIsolatedThread_ != context->IsIsolatedThread()) {
-        LOGW("AttachContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
+        LOGD("AttachContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "context instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
     }
@@ -1906,46 +1906,32 @@ PipelineContext* UINode::GetContext() const
         } else {
             context = PipelineContext::GetCurrentContextPtrSafely();
         }
-    }
-    // IsolatedThread consistency validation: warn if node and resolved pipeline
-    // belong to different thread domains during context resolution.
-    if (context && isIsolatedThread_ != context->IsIsolatedThread()) {
-        LOGW("GetContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
-            "pipeline instanceId=%{public}d isolated=%{public}d",
-            nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
+        // IsolatedThread consistency validation: log if node and resolved pipeline
+        // belong to different thread domains during context resolution.
+        if (context && isIsolatedThread_ != context->IsIsolatedThread()) {
+            LOGD("GetContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
+                "pipeline instanceId=%{public}d isolated=%{public}d",
+                nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
+        }
     }
     return context;
 }
 
 PipelineContext* UINode::GetAttachedContext() const
 {
-    // IsolatedThread consistency validation: warn if node and attached pipeline
-    // belong to different thread domains.
-    if (context_ && isIsolatedThread_ != context_->IsIsolatedThread()) {
-        LOGW("GetAttachedContext IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
-            "pipeline instanceId=%{public}d isolated=%{public}d",
-            nodeId_, isIsolatedThread_, context_->GetInstanceId(), context_->IsIsolatedThread());
-    }
     return context_;
 }
 
 PipelineContext* UINode::GetContextWithCheck()
 {
     if (context_) {
-        // IsolatedThread consistency validation: warn if node and attached pipeline
-        // belong to different thread domains (cached context path).
-        if (isIsolatedThread_ != context_->IsIsolatedThread()) {
-            LOGW("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
-                "pipeline instanceId=%{public}d isolated=%{public}d",
-                nodeId_, isIsolatedThread_, context_->GetInstanceId(), context_->IsIsolatedThread());
-        }
         return context_;
     }
     auto* context = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
-    // IsolatedThread consistency validation: warn if node and resolved pipeline
+    // IsolatedThread consistency validation: log if node and resolved pipeline
     // belong to different thread domains (fallback resolution path).
     if (context && isIsolatedThread_ != context->IsIsolatedThread()) {
-        LOGW("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
+        LOGD("GetContextWithCheck IsolatedThread mismatch: node=%{public}d isolated=%{public}d, "
             "pipeline instanceId=%{public}d isolated=%{public}d",
             nodeId_, isIsolatedThread_, context->GetInstanceId(), context->IsIsolatedThread());
     }
