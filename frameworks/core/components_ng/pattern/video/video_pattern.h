@@ -33,9 +33,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
-#ifdef SUPPORT_IMAGE_ANALYZER
 class ImageAnalyzerManager;
-#endif
 }
 namespace OHOS::Ace::NG {
 class VideoPattern : public Pattern {
@@ -505,9 +503,7 @@ private:
 
     Rect lastBoundsRect_;
     Rect contentRect_;
-#ifdef SUPPORT_IMAGE_ANALYZER
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
-#endif
 
     ContentTransitionType contentTransition_ = ContentTransitionType::IDENTITY;
     Color surfaceBgColor_ = Color::BLACK;
