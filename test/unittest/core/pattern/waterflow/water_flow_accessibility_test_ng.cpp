@@ -238,4 +238,35 @@ HWTEST_F(WaterFlowAccessibilityTestNg, WaterFlowA11ySourceAccessibilityBackward0
     EXPECT_EQ(captured->extraEventInfo["scrollSource"], "accessibility");
     EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
 }
+
+/**
+ * @tc.name: WaterFlowA11ySourceResetOnLayout001
+ * @tc.desc: Verify accessibilityScrollSource_ is reset to NONE by
+ *           OnDirtyLayoutWrapperSwap when scrolling is not in progress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowAccessibilityTestNg, WaterFlowA11ySourceResetOnLayout001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    CreateWaterFlow();
+    CreateWaterFlowItems(TOTAL_LINE_NUMBER);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Set accessibilityScrollSource_ to USER manually.
+     * @tc.expected: GetAccessibilityScrollSource() returns "user".
+     */
+    pattern_->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
+    EXPECT_EQ(pattern_->GetAccessibilityScrollSource(), "user");
+
+    /**
+     * @tc.steps: step2. Mark node dirty and flush layout to trigger
+     *           OnDirtyLayoutWrapperSwap with !IsScrolling().
+     * @tc.expected: accessibilityScrollSource_ is reset to NONE.
+     */
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushUITasks(frameNode_);
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+}
+
 } // namespace OHOS::Ace::NG

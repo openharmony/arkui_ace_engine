@@ -579,4 +579,45 @@ HWTEST_F(ScrollAccessibilityTestNg, ScrollA11ySourceAccessibilityBackward001, Te
     EXPECT_EQ(captured->extraEventInfo["scrollSource"], "accessibility");
     EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
 }
+
+/**
+ * @tc.name: ScrollA11ySourceBarFling001
+ * @tc.desc: Verify MarkUserScrollSource(SCROLL_FROM_BAR_FLING) does NOT force
+ *           accessibilityScrollSource_ to USER (source-neutral reclassification).
+ *           SCROLL_FROM_BAR still forces USER.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollAccessibilityTestNg, ScrollA11ySourceBarFling001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    /**
+     * @tc.steps: step1. Set accessibilityScrollSource_ to NONE, then call
+     *           MarkUserScrollSource(SCROLL_FROM_BAR_FLING).
+     * @tc.expected: accessibilityScrollSource_ stays NONE (BAR_FLING is source-neutral).
+     */
+    pattern_->SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
+    pattern_->MarkUserScrollSource(SCROLL_FROM_BAR_FLING);
+    EXPECT_TRUE(pattern_->GetAccessibilityScrollSource().empty());
+
+    /**
+     * @tc.steps: step2. Call MarkUserScrollSource(SCROLL_FROM_BAR) to verify
+     *           user-gesture sources still force USER.
+     * @tc.expected: accessibilityScrollSource_ is "user".
+     */
+    pattern_->MarkUserScrollSource(SCROLL_FROM_BAR);
+    EXPECT_EQ(pattern_->GetAccessibilityScrollSource(), "user");
+
+    /**
+     * @tc.steps: step3. Call MarkUserScrollSource(SCROLL_FROM_BAR_FLING) again
+     *           after USER was set.
+     * @tc.expected: accessibilityScrollSource_ stays "user" (BAR_FLING preserves it).
+     */
+    pattern_->MarkUserScrollSource(SCROLL_FROM_BAR_FLING);
+    EXPECT_EQ(pattern_->GetAccessibilityScrollSource(), "user");
+}
+
 } // namespace OHOS::Ace::NG

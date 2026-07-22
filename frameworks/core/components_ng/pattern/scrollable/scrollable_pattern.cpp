@@ -3188,6 +3188,10 @@ void ScrollablePattern::OnScrollEndRecursiveInner(const std::optional<float>& ve
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
     if (!isScrollToOverAnimation_ && parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
+        auto scrollablePattern = AceType::DynamicCast<ScrollablePattern>(parent);
+        if (scrollablePattern) {
+            scrollablePattern->SetAccessibilityScrollSource(accessibilityScrollSource_);
+        }
         parent->OnScrollEndRecursive(velocity);
     }
     isScrollToOverAnimation_ = false;
@@ -3583,6 +3587,13 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
     host->SetSuggestOpIncActivatedOnce();
 }
 
+void ScrollablePattern::ResetAccessibilityScrollSourceIfIdle()
+{
+    if (!IsScrolling() && ScrollableIdle()) {
+        SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
+    }
+}
+
 std::string ScrollablePattern::GetAccessibilityScrollSource()
 {
     switch (accessibilityScrollSource_) {
@@ -3602,10 +3613,10 @@ std::string ScrollablePattern::GetAccessibilityScrollSource()
 void ScrollablePattern::MarkUserScrollSource(int32_t source)
 {
     // When scrollSource_ is one of the user-typed values below
-    // (UPDATE/AXIS/CROWN/STATUSBAR/BAR/BAR_FLING/BAR_OVER_DRAG), it clearly indicates a user gesture, so
+    // (UPDATE/AXIS/CROWN/STATUSBAR/BAR/BAR_OVER_DRAG), it clearly indicates a user gesture, so
     // accessibilityScrollSource_ is forced to USER. Otherwise, for the source-neutral values
-    // (JUMP/FOCUS_JUMP/ANIMATION/ANIMATION_SPRING/ANIMATION_CONTROLLER), accessibilityScrollSource_ is left unchanged
-    // (falls through to default).
+    // (JUMP/FOCUS_JUMP/BAR_FLING/ANIMATION/ANIMATION_SPRING/ANIMATION_CONTROLLER),
+    // accessibilityScrollSource_ is left unchanged (falls through to default).
 
     switch (source) {
         case SCROLL_FROM_UPDATE: // drag
@@ -3613,7 +3624,6 @@ void ScrollablePattern::MarkUserScrollSource(int32_t source)
         case SCROLL_FROM_CROWN: // rotary crown
         case SCROLL_FROM_STATUSBAR: // click status bar to scroll to top
         case SCROLL_FROM_BAR: // drag scrollbar
-        case SCROLL_FROM_BAR_FLING: // fling after dragging scrollbar
         case SCROLL_FROM_BAR_OVER_DRAG: // drag scrollbar over boundary
             accessibilityScrollSource_ = AccessibilityScrollSource::USER;
             break;
@@ -3694,7 +3704,6 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     }
     AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
     SetScrollSource(SCROLL_FROM_NONE);
-    SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
     ResetLastSnapTargetIndex();
     ResetScrollableSnapDirection();
     auto pipeline = host->GetContext();
