@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "canvas_renderer_peer_impl.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/decoration.h"
 #include "matrix2d_peer_impl.h"
 
 struct CanvasPatternPeer : OHOS::Ace::Referenced {

@@ -17,7 +17,6 @@
 
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_component.h"
-#include "core/components/common/properties/decoration.h"
 #include "core/components/image/image_component.h"
 #include "compatible/components/list_v2/render_list.h"
 

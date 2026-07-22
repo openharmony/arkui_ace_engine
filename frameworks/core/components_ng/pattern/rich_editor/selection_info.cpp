@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/image/pixel_map.h"
 #include "core/components_ng/pattern/rich_editor/selection_info.h"
 
 namespace OHOS::Ace {

@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/element.h"
 #include "core/pipeline/base/render_component.h"
+#include "frameworks/core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components/common/properties/decoration.h"
 #include "core/components/navigation_bar/navigation_bar_element.h"
 #include "core/event/ace_event_helper.h"
 

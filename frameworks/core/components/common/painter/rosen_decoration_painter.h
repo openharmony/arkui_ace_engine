@@ -45,7 +45,6 @@ struct SkSize;
 namespace OHOS::Ace {
 
 class Border;
-class Gradient;
 class Offset;
 class Size;
 

@@ -18,6 +18,7 @@
 
 #include "core/components/box/box_component.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/panel/panel_component.h"
 #include "core/pipeline/base/sole_child_component.h"
 

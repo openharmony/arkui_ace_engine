@@ -15,8 +15,6 @@
 
 #include "core/components_ng/render/adapter/rich_editor_paragraph.h"
 
-#include "base/log/ace_trace.h"
-
 namespace OHOS::Ace::NG {
 RefPtr<Paragraph> Paragraph::CreateRichEditorParagraph(
     const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection, bool isSingleLineMode)

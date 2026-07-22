@@ -15,7 +15,6 @@
 
 #include "core/components/counter/counter_component.h"
 
-#include "core/components/common/properties/decoration.h"
 #include "core/components/counter/counter_element.h"
 
 namespace OHOS::Ace {

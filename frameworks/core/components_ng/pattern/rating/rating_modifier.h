@@ -18,7 +18,6 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "core/animation/curves.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/rating/rating_theme.h"
 #include "core/components_ng/base/frame_node.h"
