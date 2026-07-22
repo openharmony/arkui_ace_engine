@@ -78,6 +78,7 @@ struct SpanOptionBase;
 struct SpanPositionInfo;
 struct SymbolSpanOptions;
 struct RangeOptions;
+enum class ColorMode;
 
 namespace NG {
 class EventHub;
@@ -299,7 +300,7 @@ public:
         Color originCaretColor = Color(0x4D000000);
         const Dimension showFloatingCaretDistance = 10.0_vp;
         void Reset();
-        void UpdateOriginCaretColor();
+        void UpdateOriginCaretColor(ColorMode colorMode);
         void UpdateByTouchMove(const Offset& offset, double distance, const RectF& boundaryRect);
     };
     const FloatingCaretState& GetFloatingCaretState() const;
@@ -929,6 +930,8 @@ public:
 
     bool HasRenderTransform();
     VectorF GetHostScale() const;
+    ColorMode GetColorMode() const;
+    ColorMode GetDisplayColorMode() const;
 
 protected:
     RefPtr<TextSelectOverlay> GetOrCreateSelectOverlay() override;
