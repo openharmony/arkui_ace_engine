@@ -49,6 +49,7 @@ build_component("web") {
       "init:libbegetutil",
       "ipc:ipc_core",
       "napi:ace_napi",
+      "node:node_header_notice",
       "opengles:libGLES",
       "webview:cj_webview_ffi",
       "webview:libnweb",
