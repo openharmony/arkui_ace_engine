@@ -4914,6 +4914,10 @@ void SelectOverlayNode::SwitchToOverlayMode()
 void SelectOverlayNode::UpdateSelectMenuBg(const RefPtr<FrameNode>& caller)
 {
     CHECK_NULL_VOID(selectMenu_);
+    auto menuPattern = selectMenu_->GetPattern<MenuPattern>();
+    if (menuPattern && menuPattern->IsSelectOverlayCustomMenu()) {
+        return;
+    }
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto textOverlayTheme = pipelineContext->GetTheme<TextOverlayTheme>();
