@@ -178,6 +178,7 @@ public:
 
 private:
     std::u16string GetSelectAllText();
+    void SelectAllChildren(const std::vector<WeakPtr<SelectionContainerChild>>& childList);
     std::u16string GetSelectionTextForMenuItemClick(const MenuItemParam& menuItemParam);
     void DismissMenuAfterCopy();
     void ApplySelectionSummaryDelta(const ChildSelectionSummary& summary, int32_t delta);
