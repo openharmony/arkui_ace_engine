@@ -21,6 +21,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
@@ -87,6 +88,8 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest001
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
      * @tc.steps: step1. Create mock theme manager and some parameters.
@@ -110,6 +113,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest001
     EXPECT_EQ(layoutAlgorithm.horizontalPadding_, DEFAULT_PADDING_SIZE.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.verticalPadding_, DEFAULT_PADDING_SIZE.ConvertToPx());
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 
 /**
