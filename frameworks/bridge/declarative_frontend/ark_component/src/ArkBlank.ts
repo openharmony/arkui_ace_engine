@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+/// <reference path='./import.ts' />
 class BlankColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
@@ -31,7 +32,7 @@ class BlankColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class BlankHeightModifier extends ModifierWithKey<Length> {
-  constructor(value: Length) {
+  constructor(value: ResourceColor) {
     super(value);
   }
   static identity: Symbol = Symbol('blankHeight');
@@ -65,11 +66,11 @@ class BlankMinModifier extends ModifierWithKey<number | string> {
   }
 }
 
-class ArkBlankComponent extends ArkComponent {
+class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  color(value: ResourceColor): this {
+  color(value: ResourceColor): BlankAttribute {
     modifierWithKey(this._modifiersWithKeys, BlankColorModifier.identity, BlankColorModifier, value);
     return this;
   }
@@ -78,7 +79,7 @@ class ArkBlankComponent extends ArkComponent {
     return this;
   }
 
-  initialize(value : Object[]): this{
+  initialize(value : Object[]): BlankAttribute{
     if (value[0] !== undefined){
       modifierWithKey(this._modifiersWithKeys, BlankMinModifier.identity, BlankMinModifier, value[0]);
     }
@@ -91,42 +92,10 @@ class ArkBlankComponent extends ArkComponent {
 }
 
 // @ts-ignore
-if (globalThis.Blank !== undefined) {
-  (globalThis as any).Blank.attributeModifier = function (modifier: ArkComponent): void {
-    attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-      return new ArkBlankComponent(nativePtr);
-    }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-      return new modifierJS.BlankModifier(nativePtr, classType);
-    });
-  };
-}
-
-// @ts-ignore
-globalThis.applySymbolGlyphModifierToNode = function (modifier: ArkComponent, nodePtr: KNode): void {
-  getUINativeModule().loadNativeModule('SymbolGlyph');
-  let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
-  let component = module.createComponent(nodePtr);
-  applyUIAttributes(modifier as any, nodePtr, component);
-  component.applyModifierPatch();
-};
-
-// @ts-ignore
-globalThis.applyImageModifierToNode = function (modifier: ArkComponent, nodePtr: KNode): void {
-  let component = new ArkImageComponent(nodePtr);
-  applyUIAttributes(modifier as any, nodePtr, component);
-  component.applyModifierPatch();
-};
-
-// @ts-ignore
-globalThis.applyTextModifierToNode = function (modifier: ArkComponent, nodePtr: KNode): void {
-  let component = new ArkTextComponent(nodePtr);
-  applyUIAttributes(modifier as any, nodePtr, component);
-  component.applyModifierPatch();
-};
-
-// @ts-ignore
-globalThis.applyCommonModifierToNode = function (modifier: ArkComponent, nodePtr: KNode): void {
-  let component = new ArkComponent(nodePtr);
-  applyUIAttributes(modifier as any, nodePtr, component);
-  component.applyModifierPatch();
+globalThis.Blank.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkBlankComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.BlankModifier(nativePtr, classType);
+  });
 };

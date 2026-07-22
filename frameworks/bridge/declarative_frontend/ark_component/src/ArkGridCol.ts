@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+/// <reference path='./import.ts' />
 class GridColSpanModifier extends ModifierWithKey<ArkGridColColumnOption> {
   constructor(value: ArkGridColColumnOption) {
     super(value);
@@ -35,12 +36,12 @@ class GridColSpanModifier extends ModifierWithKey<ArkGridColColumnOption> {
     if (isNumber(this.stageValue) && isNumber(this.value)) {
       return this.stageValue !== this.value;
     } else if (isObject(this.stageValue) && isObject(this.value)) {
-      return this.stageValue?.xs !== this.value?.xs ||
-        this.stageValue?.sm !== this.value?.sm ||
-        this.stageValue?.md !== this.value?.md ||
-        this.stageValue?.lg !== this.value?.lg ||
-        this.stageValue?.xl !== this.value?.xl ||
-        this.stageValue?.xxl !== this.value?.xxl;
+      return this.stageValue.xs !== this.value.xs ||
+        this.stageValue.sm !== this.value.sm ||
+        this.stageValue.md !== this.value.md ||
+        this.stageValue.lg !== this.value.lg ||
+        this.stageValue.xl !== this.value.xl ||
+        this.stageValue.xxl !== this.value.xxl;
     } else {
       return true;
     }
@@ -68,12 +69,12 @@ class GridColOffsetModifier extends ModifierWithKey<ArkGridColColumnOption> {
     if (isNumber(this.stageValue) && isNumber(this.value)) {
       return this.stageValue !== this.value;
     } else if (isObject(this.stageValue) && isObject(this.value)) {
-      return this.stageValue?.xs !== this.value?.xs ||
-        this.stageValue?.sm !== this.value?.sm ||
-        this.stageValue?.md !== this.value?.md ||
-        this.stageValue?.lg !== this.value?.lg ||
-        this.stageValue?.xl !== this.value?.xl ||
-        this.stageValue?.xxl !== this.value?.xxl;
+      return this.stageValue.xs !== this.value.xs ||
+        this.stageValue.sm !== this.value.sm ||
+        this.stageValue.md !== this.value.md ||
+        this.stageValue.lg !== this.value.lg ||
+        this.stageValue.xl !== this.value.xl ||
+        this.stageValue.xxl !== this.value.xxl;
     } else {
       return true;
     }
@@ -101,12 +102,12 @@ class GridColOrderModifier extends ModifierWithKey<ArkGridColColumnOption> {
     if (isNumber(this.stageValue) && isNumber(this.value)) {
       return this.stageValue !== this.value;
     } else if (isObject(this.stageValue) && isObject(this.value)) {
-      return this.stageValue?.xs !== this.value?.xs ||
-        this.stageValue?.sm !== this.value?.sm ||
-        this.stageValue?.md !== this.value?.md ||
-        this.stageValue?.lg !== this.value?.lg ||
-        this.stageValue?.xl !== this.value?.xl ||
-        this.stageValue?.xxl !== this.value?.xxl;
+      return this.stageValue.xs !== this.value.xs ||
+        this.stageValue.sm !== this.value.sm ||
+        this.stageValue.md !== this.value.md ||
+        this.stageValue.lg !== this.value.lg ||
+        this.stageValue.xl !== this.value.xl ||
+        this.stageValue.xxl !== this.value.xxl;
     } else {
       return true;
     }
@@ -117,26 +118,26 @@ interface GridColParam {
   offset?: number | GridColColumnOption;
   order?: number | GridColColumnOption;
 }
-class ArkGridColComponent extends ArkComponent {
+class ArkGridColComponent extends ArkComponent implements GridColAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
   allowChildCount(): number {
     return 1;
   }
-  span(value: number | GridColColumnOption): this {
+  span(value: number | GridColColumnOption): GridColAttribute {
     modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity, GridColSpanModifier, value);
     return this;
   }
-  gridColOffset(value: number | GridColColumnOption): this {
+  gridColOffset(value: number | GridColColumnOption): GridColAttribute {
     modifierWithKey(this._modifiersWithKeys, GridColOffsetModifier.identity, GridColOffsetModifier, value);
     return this;
   }
-  order(value: number | GridColColumnOption): this {
+  order(value: number | GridColColumnOption): GridColAttribute {
     modifierWithKey(this._modifiersWithKeys, GridColOrderModifier.identity, GridColOrderModifier, value);
     return this;
   }
-  initialize(value: Object[]): this {
+  initialize(value: Object[]): GridColAttribute {
     if (value[0] !== undefined) {
       modifierWithKey(this._modifiersWithKeys, GridColSpanModifier.identity,
         GridColSpanModifier, (value[0] as GridColParam).span);
@@ -157,12 +158,10 @@ class ArkGridColComponent extends ArkComponent {
 }
 
 // @ts-ignore
-if (globalThis.GridCol !== undefined) {
-  (globalThis as any).GridCol.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkGridColComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.GridColModifier(nativePtr, classType);
-    });
-  };
-}
+globalThis.GridCol.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkGridColComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.GridColModifier(nativePtr, classType);
+  });
+};

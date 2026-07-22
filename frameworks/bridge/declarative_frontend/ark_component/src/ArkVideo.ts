@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+/// <reference path='./import.ts' />
 
 class VideoObjectFitModifier extends ModifierWithKey<ImageFit> {
   constructor(value: ImageFit) {
@@ -47,9 +48,6 @@ class VideoAutoPlayModifier extends ModifierWithKey<boolean> {
   }
 }
 class VideoControlsModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('videoControls');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -63,9 +61,6 @@ class VideoControlsModifier extends ModifierWithKey<boolean> {
   }
 }
 class VideoLoopModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('videoLoop');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -79,9 +74,6 @@ class VideoLoopModifier extends ModifierWithKey<boolean> {
   }
 }
 class VideoMutedModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
-    super(value);
-  }
   static identity: Symbol = Symbol('videoMuted');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -167,9 +159,9 @@ class VideoOnStartModifier extends ModifierWithKey<VoidCallback> {
   static identity: Symbol = Symbol('videoOnStart');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetOnStart(node);
+      getUINativeModule().video.resetVideoOnStart(node);
     } else {
-      getUINativeModule().video.setOnStart(node, this.value);
+      getUINativeModule().video.setVideoOnStart(node, this.value);
     }
   }
 }
@@ -181,9 +173,9 @@ class VideoOnPauseModifier extends ModifierWithKey<VoidCallback> {
   static identity: Symbol = Symbol('videoOnPause');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetOnPause(node);
+      getUINativeModule().video.resetVideoOnPause(node);
     } else {
-      getUINativeModule().video.setOnPause(node, this.value);
+      getUINativeModule().video.setVideoOnPause(node, this.value);
     }
   }
 }
@@ -195,9 +187,9 @@ class VideoOnFinishModifier extends ModifierWithKey<VoidCallback> {
   static identity: Symbol = Symbol('videoOnFinish');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetOnFinish(node);
+      getUINativeModule().video.resetVideoOnFinish(node);
     } else {
-      getUINativeModule().video.setOnFinish(node, this.value);
+      getUINativeModule().video.setVideoOnFinish(node, this.value);
     }
   }
 }
@@ -209,9 +201,9 @@ class VideoOnFullscreenChangeModifier extends ModifierWithKey<Callback<Fullscree
   static identity: Symbol = Symbol('videoOnFullscreenChange');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetOnFullscreenChange(node);
+      getUINativeModule().video.resetVideoOnFullscreenChange(node);
     } else {
-      getUINativeModule().video.setOnFullscreenChange(node, this.value);
+      getUINativeModule().video.setVideoOnFullscreenChange(node, this.value);
     }
   }
 }
@@ -223,9 +215,9 @@ class VideoOnPreparedModifier extends ModifierWithKey<Callback<PreparedInfo>> {
   static identity: Symbol = Symbol('videoOnPrepared');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetOnPrepared(node);
+      getUINativeModule().video.resetVideoOnPrepared(node);
     } else {
-      getUINativeModule().video.setOnPrepared(node, this.value);
+      getUINativeModule().video.setVideoOnPrepared(node, this.value);
     }
   }
 }
@@ -237,9 +229,9 @@ class VideoOnSeekingModifier extends ModifierWithKey<Callback<PlaybackInfo>> {
   static identity: Symbol = Symbol('videoOnSeeking');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetOnSeeking(node);
+      getUINativeModule().video.resetVideoOnSeeking(node);
     } else {
-      getUINativeModule().video.setOnSeeking(node, this.value);
+      getUINativeModule().video.setVideoOnSeeking(node, this.value);
     }
   }
 }
@@ -251,9 +243,9 @@ class VideoOnSeekedModifier extends ModifierWithKey<Callback<PlaybackInfo>> {
   static identity: Symbol = Symbol('videoOnSeeked');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetOnSeeked(node);
+      getUINativeModule().video.resetVideoOnSeeked(node);
     } else {
-      getUINativeModule().video.setOnSeeked(node, this.value);
+      getUINativeModule().video.setVideoOnSeeked(node, this.value);
     }
   }
 }
@@ -265,9 +257,9 @@ class VideoOnUpdateModifier extends ModifierWithKey<Callback<PlaybackInfo>> {
   static identity: Symbol = Symbol('videoOnUpdate');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetOnUpdate(node);
+      getUINativeModule().video.resetVideoOnUpdate(node);
     } else {
-      getUINativeModule().video.setOnUpdate(node, this.value);
+      getUINativeModule().video.setVideoOnUpdate(node, this.value);
     }
   }
 }
@@ -279,9 +271,9 @@ class VideoOnErrorModifier extends ModifierWithKey<VoidCallback | ErrorCallback>
   static identity: Symbol = Symbol('videoOnError');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetOnError(node);
+      getUINativeModule().video.resetVideoOnError(node);
     } else {
-      getUINativeModule().video.setOnError(node, this.value);
+      getUINativeModule().video.setVideoOnError(node, this.value);
     }
   }
 }
@@ -293,9 +285,9 @@ class VideoOnStopModifier extends ModifierWithKey<Callback<void>> {
   static identity: Symbol = Symbol('videoOnStop');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetOnStop(node);
+      getUINativeModule().video.resetVideoOnStop(node);
     } else {
-      getUINativeModule().video.setOnStop(node, this.value);
+      getUINativeModule().video.setVideoOnStop(node, this.value);
     }
   }
 }
@@ -307,9 +299,9 @@ class VideoEnableAnalyzerModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('videoEnableAnalyzer');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetEnableAnalyzer(node);
+      getUINativeModule().video.resetVideoEnableAnalyzer(node);
     } else {
-      getUINativeModule().video.setEnableAnalyzer(node, this.value);
+      getUINativeModule().video.setVideoEnableAnalyzer(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -324,9 +316,9 @@ class VideoAnalyzerConfigModifier extends ModifierWithKey<ImageAnalyzerConfig> {
   static identity: Symbol = Symbol('videoAnalyzerConfig');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().video.resetAnalyzerConfig(node);
+      getUINativeModule().video.resetVideoAnalyzerConfig(node);
     } else {
-      getUINativeModule().video.setAnalyzerConfig(node, this.value);
+      getUINativeModule().video.setVideoAnalyzerConfig(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -334,47 +326,43 @@ class VideoAnalyzerConfigModifier extends ModifierWithKey<ImageAnalyzerConfig> {
   }
 }
 
-class ArkVideoComponent extends ArkComponent {
+class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  muted(value: boolean): this {
+  muted(value: boolean): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoMutedModifier.identity,
       VideoMutedModifier, value);
     return this;
   }
-  autoPlay(value: boolean): this {
+  autoPlay(value: boolean): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoAutoPlayModifier.identity,
       VideoAutoPlayModifier, value);
     return this;
   }
-  surfaceBackgroundColor(value: ResourceColor): this {
+  surfaceBackgroundColor(value: ResourceColor): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoSurfaceBackgroundColorModifier.identity,
       VideoSurfaceBackgroundColorModifier, value);
     return this;
   }
-  controls(value: boolean): this {
+  controls(value: boolean): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoControlsModifier.identity,
       VideoControlsModifier, value);
     return this;
   }
-  loop(value: boolean): this {
+  loop(value: boolean): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoLoopModifier.identity,
       VideoLoopModifier, value);
     return this;
   }
-  objectFit(value: ImageFit): this {
+  objectFit(value: ImageFit): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoObjectFitModifier.identity,
       VideoObjectFitModifier, value);
     return this;
   }
-  enableShortcutKey(value: boolean): this {
+  enableShortcutKey(value: boolean): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoEnableShortcutKeyModifier.identity,
       VideoEnableShortcutKeyModifier, value);
-    return this;
-  }
-  opacity(value: number | Resource): this {
-    modifierWithKey(this._modifiersWithKeys, VideoOpacityModifier.identity, VideoOpacityModifier, value);
     return this;
   }
   transition(value: TransitionOptions | TransitionEffect, callback: (transitionIn: boolean) => void): this {
@@ -386,75 +374,72 @@ class ArkVideoComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, VideoTransitionModifier.identity, VideoTransitionModifier, arkTransition);
     return this;
   }
-  onStart(callback: VoidCallback): this {
+  onStart(event: VoidCallback): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoOnStartModifier.identity,
-      VideoOnStartModifier, callback);
+      VideoOnStartModifier, event);
     return this;
   }
-  onPause(event: VoidCallback): this {
+  onPause(event: VoidCallback): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoOnPauseModifier.identity,
       VideoOnPauseModifier, event);
     return this;
   }
-  onFinish(event: VoidCallback): this {
+  onFinish(event: VoidCallback): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoOnFinishModifier.identity,
       VideoOnFinishModifier, event);
     return this;
   }
-  onFullscreenChange(callback: Callback<FullscreenInfo>): this {
+  onFullscreenChange(callback: Callback<FullscreenInfo>): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoOnFullscreenChangeModifier.identity,
       VideoOnFullscreenChangeModifier, callback);
     return this;
   }
-  onPrepared(callback: Callback<PreparedInfo>): this {
+  onPrepared(callback: (callback: Callback<PreparedInfo>): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoOnPreparedModifier.identity,
       VideoOnPreparedModifier, callback);
     return this;
   }
-  onSeeking(callback: Callback<PlaybackInfo>): this {
+  onSeeking(callback: Callback<PlaybackInfo>): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoOnSeekingModifier.identity,
       VideoOnSeekingModifier, callback);
     return this;
   }
-  onSeeked(callback: Callback<PlaybackInfo>): this {
+  onSeeked(callback: Callback<PlaybackInfo>): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoOnSeekedModifier.identity,
       VideoOnSeekedModifier, callback);
     return this;
   }
-  onUpdate(callback: Callback<PlaybackInfo>): this {
+  onUpdate(callback: Callback<PlaybackInfo>): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoOnUpdateModifier.identity,
       VideoOnUpdateModifier, callback);
     return this;
   }
-  onError(callback: VoidCallback | ErrorCallback): this {
+  onError(event: VoidCallback | ErrorCallback): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoOnErrorModifier.identity,
-      VideoOnErrorModifier, callback);
+      VideoOnErrorModifier, event);
     return this;
   }
-  onStop(event: Callback<void>): this {
+  onStop(event: Callback<void>): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoOnStopModifier.identity,
       VideoOnStopModifier, event);
     return this;
   }
-  enableAnalyzer(enable: boolean): this {
+  enableAnalyzer(enable: boolean): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoEnableAnalyzerModifier.identity,
       VideoEnableAnalyzerModifier, enable);
     return this;
   }
-  analyzerConfig(config: ImageAnalyzerConfig): this {
+  analyzerConfig(config: ImageAnalyzerConfig): VideoAttribute {
     modifierWithKey(this._modifiersWithKeys, VideoAnalyzerConfigModifier.identity,
       VideoAnalyzerConfigModifier, config);
     return this;
   }
 }
-
 // @ts-ignore
-if (globalThis.Video !== undefined) {
-  (globalThis as any).Video.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkVideoComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.VideoModifier(nativePtr, classType);
-    });
-  };
-}
+globalThis.Video.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkVideoComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.VideoModifier(nativePtr, classType);
+  });
+};

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+/// <reference path='./import.ts' />
 type TextFontVariation = { axis: string; value: number; isNormalized?: boolean };
 
 class TextEnableDataDetectorModifier extends ModifierWithKey<boolean> {
@@ -103,8 +104,8 @@ class FontSizeModifier extends ModifierWithKey<number | string | Resource> {
   }
 }
 
-class FontWeightModifier extends ModifierWithKey<ArkFontWeight> {
-  constructor(value: ArkFontWeight) {
+class FontWeightModifier extends ModifierWithKey<string | Resource> {
+  constructor(value: string | Resource) {
     super(value);
   }
   static identity: Symbol = Symbol('textFontWeight');
@@ -112,7 +113,7 @@ class FontWeightModifier extends ModifierWithKey<ArkFontWeight> {
     if (reset) {
       getUINativeModule().text.resetFontWeight(node);
     } else {
-      getUINativeModule().text.setFontWeight(node, this.value.value, this.value.enableVariableFontWeight);
+      getUINativeModule().text.setFontWeight(node, this.value);
     }
   }
 }
@@ -514,7 +515,8 @@ class TextLineSpacingModifier extends ModifierWithKey<ArkLineSpacing> {
     } else if (!isObject(this.value)) {
       getUINativeModule().text.resetLineSpacing(node);
     } else {
-      getUINativeModule().text.setLineSpacing(node, this.value.value, this.value.onlyBetweenLines);
+      getUINativeModule().text.setLineSpacing(node, this.value.value.value, this.value.value.unit,
+        this.value.onlyBetweenLines);
     }
   }
  
@@ -568,9 +570,6 @@ class TextPunctuationOverflowModifier extends ModifierWithKey<boolean> {
     } else {
       getUINativeModule().text.setPunctuationOverflow(node, this.value!);
     }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -690,8 +689,8 @@ class TextTextShadowModifier extends ModifierWithKey<ShadowOptions | Array<Shado
   }
 }
 
-class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle; thicknessScale?: number }> {
-  constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle; thicknessScale?: number }) {
+class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }> {
+  constructor(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }) {
     super(value);
   }
   static identity: Symbol = Symbol('textDecoration');
@@ -699,13 +698,12 @@ class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType;
     if (reset) {
       getUINativeModule().text.resetDecoration(node);
     } else {
-      getUINativeModule().text.setDecoration(node, this.value!.type, this.value!.color, this.value!.style, this.value!.thicknessScale);
+      getUINativeModule().text.setDecoration(node, this.value!.type, this.value!.color, this.value!.style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style ||
-        this.stageValue.thicknessScale !== this.value.thicknessScale) {
+    if (this.stageValue.type !== this.value.type || this.stageValue.style !== this.value.style) {
       return true;
     }
     if (!isResource(this.stageValue.color) && !isResource(this.value.color)) {
@@ -716,8 +714,8 @@ class TextDecorationModifier extends ModifierWithKey<{ type: TextDecorationType;
   }
 }
 
-class TextFontModifier extends ModifierWithKey<ArkTextFont> {
-  constructor(value: ArkTextFont) {
+class TextFontModifier extends ModifierWithKey<Font> {
+  constructor(value: Font) {
     super(value);
   }
   static identity: Symbol = Symbol('textFont');
@@ -725,14 +723,12 @@ class TextFontModifier extends ModifierWithKey<ArkTextFont> {
     if (reset) {
       getUINativeModule().text.resetFont(node);
     } else {
-      getUINativeModule().text.setFont(node, this.value.value.size, this.value.value.weight, this.value.value.family,
-        this.value.value.style, this.value.enableVariableFontWeight);
+      getUINativeModule().text.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style ||
-      this.stageValue.enableVariableFontWeight !== this.value.enableVariableFontWeight) {
+    if (this.stageValue.weight !== this.value.weight || this.stageValue.style !== this.value.style) {
       return true;
     }
     if ((!isResource(this.stageValue.size) && !isResource(this.value.size) &&
@@ -891,18 +887,12 @@ class TextDataDetectorConfigModifier extends ModifierWithKey<TextDataDetectorCon
     if (reset) {
       getUINativeModule().text.resetDataDetectorConfig(node);
     } else {
-      getUINativeModule().text.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate,
-        this.value.color, this.value.decorationType, this.value.decorationColor, this.value.decorationStyle, this.value.enablePreviewMenu);
+      getUINativeModule().text.setDataDetectorConfig(node, this.value.types, this.value.onDetectResultUpdate);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.types, this.value.types) ||
-    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate) ||
-    !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
-    !isBaseOrResourceEqual(this.stageValue.decorationType, this.value.decorationType) ||
-    !isBaseOrResourceEqual(this.stageValue.decorationColor, this.value.decorationColor) ||
-    !isBaseOrResourceEqual(this.stageValue.decorationStyle, this.value.decorationStyle) ||
-    !isBaseOrResourceEqual(this.stageValue.enablePreviewMenu, this.value.enablePreviewMenu);
+    !isBaseOrResourceEqual(this.stageValue.onDetectResultUpdate, this.value.onDetectResultUpdate);
   }
 }
 
@@ -995,23 +985,6 @@ class TextHalfLeadingModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class TextOnClickModifier extends ModifierWithKey<Callback<void, void>> {
-  constructor(value: Callback<void, void>) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('textOnClick');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().text.resetOnClick(node);
-    } else {
-      getUINativeModule().text.setOnClick(node, this.value);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-
 class TextEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -1059,37 +1032,6 @@ class TextOnMarqueeStateChangeModifier extends ModifierWithKey<(state: MarqueeSt
     } else {
       getUINativeModule().text.setOnMarqueeStateChange(node, this.value);
     }
-  }
-}
-
-class TextResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
-  constructor(value: Array<Rectangle> | Rectangle) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('textResponseRegion');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().text.resetResponseRegion(node);
-    } else {
-      let responseRegion: Array<string | number | Resource> = [];
-      if (Array.isArray(this.value)) {
-        for (let i = 0; i < this.value.length; i++) {
-          responseRegion.push((this.value[i].x ?? 'PLACEHOLDER') as string | number | Resource);
-          responseRegion.push((this.value[i].y ?? 'PLACEHOLDER') as string | number | Resource);
-          responseRegion.push((this.value[i].width ?? 'PLACEHOLDER') as string | number | Resource);
-          responseRegion.push((this.value[i].height ?? 'PLACEHOLDER') as string | number | Resource);
-        }
-      } else {
-        responseRegion.push((this.value.x ?? 'PLACEHOLDER') as string | number | Resource);
-        responseRegion.push((this.value.y ?? 'PLACEHOLDER') as string | number | Resource);
-        responseRegion.push((this.value.width ?? 'PLACEHOLDER') as string | number | Resource);
-        responseRegion.push((this.value.height ?? 'PLACEHOLDER') as string | number | Resource);
-      }
-      getUINativeModule().text.setResponseRegion(node, responseRegion, responseRegion.length);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -1172,15 +1114,6 @@ class TextShaderStyleModifier extends ModifierWithKey<{
   colors: Array<[ ResourceColor, number ]>;
   repeating?: boolean;
   color: ResourceColor;
-  options?: {
-    center: Array<any>;
-    radius: number | string;
-    angle?: number | string;
-    direction?: GradientDirection;
-    colors: Array<[ ResourceColor, number ]>;
-    repeating?: boolean;
-    color: ResourceColor;
-  };
 }> {
   constructor(value: {
     center: Array<any>;
@@ -1231,24 +1164,6 @@ class TextVerticalAlignModifier extends ModifierWithKey<TextVerticalAlign> {
   }
 }
 
-class TextContentTransitionModifier extends ModifierWithKey<{ flipDirection: number; enableBlur?: boolean }> {
-  constructor(value: { flipDirection: number; enableBlur?: boolean }) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('textContentTransition');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().text.resetTextContentTransition(node);
-    } else {
-      getUINativeModule().text.setTextContentTransition(node, this.value.flipDirection, this.value.enableBlur);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.flipDirection, this.value.flipDirection) ||
-      !isBaseOrResourceEqual(this.stageValue.enableBlur, this.value.enableBlur);
-  }
-}
-
 class TextSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelectedDragPreviewStyle> {
   constructor(value: ArkSelectedDragPreviewStyle) {
       super(value);
@@ -1262,8 +1177,7 @@ class TextSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelectedDr
     }
     }
   checkObjectDiff(): boolean {
-      return !isBaseOrResourceEqual(this.stageValue, this.value) ||
-      !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
+      return !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
   }
 }
 
@@ -1341,7 +1255,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   allowChildTypes(): string[] {
     return ['Span', 'ImageSpan', 'SymbolSpan', 'ContainerSpan'];
   }
-  initialize(value: Object[]): this {
+  initialize(value: Object[]): void {
     modifierWithKey(this._modifiersWithKeys, TextContentModifier.identity, TextContentModifier, value[0]);
     modifierWithKey(this._modifiersWithKeys, TextControllerModifier.identity, TextControllerModifier, value[1]);
     return this;
@@ -1355,119 +1269,109 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   dataDetectorConfig(config: TextDataDetectorConfig): this {
-    if (config === undefined || config === null) {
-      return this;
-    }
     let detectorConfig = new TextDataDetectorConfig();
     detectorConfig.types = config.types;
     detectorConfig.onDetectResultUpdate = config.onDetectResultUpdate;
-    detectorConfig.color = config.color;
-    if (config.decoration) {
-      detectorConfig.decorationType = config.decoration.type;
-      detectorConfig.decorationColor = config.decoration.color;
-      detectorConfig.decorationStyle = config.decoration.style;
-    }
-    detectorConfig.enablePreviewMenu = config.enablePreviewMenu;
     modifierWithKey(this._modifiersWithKeys, TextDataDetectorConfigModifier.identity, TextDataDetectorConfigModifier, detectorConfig);
     return this;
   }
-  font(value: Font, options?: { enableVariableFontWeight?: boolean }): this {
-    if (value === undefined || value === null) {
-      return this;
-    }
-    let arkTextFont = new ArkTextFont();
-    arkTextFont.value = value;
-    arkTextFont.enableVariableFontWeight = options?.enableVariableFontWeight;
-    modifierWithKey(this._modifiersWithKeys, TextFontModifier.identity, TextFontModifier, arkTextFont);
+  font(value: Font): TextAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextFontModifier.identity, TextFontModifier, value);
     return this;
   }
-  fontColor(value: ResourceColor): this {
+  fontColor(value: ResourceColor): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, FontColorModifier.identity, FontColorModifier, value);
     return this;
   }
-  fontSize(value: number | string | Resource): this {
+  fontSize(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, FontSizeModifier.identity, FontSizeModifier, value);
     return this;
   }
-  minFontSize(value: number | string | Resource): this {
+  minFontSize(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMinFontSizeModifier.identity, TextMinFontSizeModifier, value);
     return this;
   }
-  maxFontSize(value: number | string | Resource): this {
+  maxFontSize(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMaxFontSizeModifier.identity, TextMaxFontSizeModifier, value);
     return this;
   }
-  minFontScale(value: number | Resource): this {
+  minFontScale(value: number | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMinFontScaleModifier.identity, TextMinFontScaleModifier, value);
     return this;
   }
-  maxFontScale(value: number | Resource): this {
+  maxFontScale(value: number | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMaxFontScaleModifier.identity, TextMaxFontScaleModifier, value);
     return this;
   }
-  fontStyle(value: FontStyle): this {
+  fontStyle(value: FontStyle): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, FontStyleModifier.identity, FontStyleModifier, value);
     return this;
   }
-  fontWeight(value: number | FontWeight | string | Resource, options?: { enableVariableFontWeight?: boolean }): this {
-    let arkFontWeight = new ArkFontWeight();
-    arkFontWeight.value = value;
-    arkFontWeight.enableVariableFontWeight = options?.enableVariableFontWeight;
-    modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, arkFontWeight);
+  fontWeight(value: number | FontWeight | string | Resource): TextAttribute {
+    let fontWeightStr: string = '400';
+    if (isNumber(value)) {
+      fontWeightStr = value.toString();
+    } else if (isString(value)) {
+      fontWeightStr = String(value);
+    } else if (isResource(value)) {
+        modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, value);
+        return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, FontWeightModifier.identity, FontWeightModifier, fontWeightStr);
     return this;
   }
-  textAlign(value: TextAlign): this {
+  textAlign(value: TextAlign): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAlignModifier.identity, TextAlignModifier, value);
     return this;
   }
-  textContentAlign(value: TextContentAlign): this {
+  textContentAlign(value: TextContentAlign): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextContentAlignModifier.identity, TextContentAlignModifier, value);
     return this;
   }
-  lineHeight(value: number | string | Resource): this {
+  lineHeight(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLineHeightModifier.identity, TextLineHeightModifier, value);
     return this;
   }
-  maxLineHeight(value: LengthMetrics): this {
+  maxLineHeight(value: LengthMetrics): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMaxLineHeightModifier.identity, TextMaxLineHeightModifier, value);
     return this;
   }
-  minLineHeight(value: LengthMetrics): this {
+  minLineHeight(value: LengthMetrics): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMinLineHeightModifier.identity, TextMinLineHeightModifier, value);
     return this;
   }
-  lineHeightMultiple(value: number): this {
+  lineHeightMultiple(value: number): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLineHeightMultipleModifier.identity, TextLineHeightMultipleModifier, value);
     return this;
   }
-  textOverflow(value: { overflow: TextOverflow }): this {
+  textOverflow(value: { overflow: TextOverflow }): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextTextOverflowModifier.identity, TextTextOverflowModifier, value);
     return this;
   }
-  fontFamily(value: string | Resource): this {
+  fontFamily(value: string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextFontFamilyModifier.identity, TextFontFamilyModifier, value);
     return this;
   }
-  maxLines(value: number): this {
+  maxLines(value: number): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMaxLinesModifier.identity, TextMaxLinesModifier, value);
     return this;
   }
-  minLines(value: number): this {
+  minLines(value: number): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextMinLinesModifier.identity, TextMinLinesModifier, value);
     return this;
   }
-  decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): this {
+  decoration(value: { type: TextDecorationType; color?: ResourceColor; style?: TextDecorationStyle }): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextDecorationModifier.identity, TextDecorationModifier, value);
     return this;
   }
-  letterSpacing(value: number | string | Resource): this {
+  letterSpacing(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLetterSpacingModifier.identity, TextLetterSpacingModifier, value);
     return this;
   }
-  lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): this {
+  lineSpacing(value: LengthMetrics, options?: LineSpacingOptions): TextAttribute {
     let arkLineSpacing = new ArkLineSpacing();
     arkLineSpacing.value = value;
-    arkLineSpacing.onlyBetweenLines = options?.onlyBetweenLines;
+    arkLineSpacing.onlyBetweenLines = options.onlyBetweenLines;
     modifierWithKey(this._modifiersWithKeys, TextLineSpacingModifier.identity, TextLineSpacingModifier, arkLineSpacing);
     return this;
   }
@@ -1475,7 +1379,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextOptimizeTrailingSpaceModifier.identity, TextOptimizeTrailingSpaceModifier, value);
     return this;
   }
-  fontVariations(value: Array<TextFontVariation>): this {
+  fontVariations(value: Array<TextFontVariation>): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextFontVariationsModifier.identity, TextFontVariationsModifier, value);
     return this;
   }
@@ -1487,15 +1391,15 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextPunctuationOverflowModifier.identity, TextPunctuationOverflowModifier, value);
     return this;
   }
-  textCase(value: TextCase): this {
+  textCase(value: TextCase): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextTextCaseModifier.identity, TextTextCaseModifier, value);
     return this;
   }
-  baselineOffset(value: number | string | Resource): this {
+  baselineOffset(value: number | string | Resource): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextBaselineOffsetModifier.identity, TextBaselineOffsetModifier, value);
     return this;
   }
-  copyOption(value: CopyOptions): this {
+  copyOption(value: CopyOptions): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextCopyOptionModifier.identity, TextCopyOptionModifier, value);
     return this;
   }
@@ -1507,62 +1411,62 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextPrivacySensitiveModifier.identity, TextPrivacySensitiveModifier, value);
     return this;
   }
-  textShadow(value: ShadowOptions | Array<ShadowOptions>): this {
+  textShadow(value: ShadowOptions | Array<ShadowOptions>): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextTextShadowModifier.identity, TextTextShadowModifier, value);
     return this;
   }
-  heightAdaptivePolicy(value: TextHeightAdaptivePolicy): this {
+  heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextHeightAdaptivePolicyModifier.identity, TextHeightAdaptivePolicyModifier, value);
     return this;
   }
-  textIndent(value: Length): this {
+  textIndent(value: Length): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextTextIndentModifier.identity, TextTextIndentModifier, value);
     return this;
   }
-  wordBreak(value: WordBreak): this {
+  wordBreak(value: WordBreak): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextWordBreakModifier.identity, TextWordBreakModifier, value);
     return this;
   }
-  lineBreakStrategy(value: LineBreakStrategy): this {
+  lineBreakStrategy(value: LineBreakStrategy): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextLineBreakStrategyModifier.identity,
       TextLineBreakStrategyModifier, value);
     return this;
   }
-  onWillCopy(callback: Callback<string, boolean>): this {
+  onWillCopy(callback: Callback<string, boolean>): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextOnWillCopyModifier.identity,
       TextOnWillCopyModifier, callback);
     return this;
   }
-  onCopy(callback: (value: string) => void): this {
+  onCopy(callback: (value: string) => void): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextOnCopyModifier.identity,
       TextOnCopyModifier, callback);
     return this;
   }
-  selection(selectionStart: number, selectionEnd: number): this {
+  selection(selectionStart: number, selectionEnd: number): TextAttribute {
     let arkSelection = new ArkSelection();
     arkSelection.selectionStart = selectionStart;
     arkSelection.selectionEnd = selectionEnd;
     modifierWithKey(this._modifiersWithKeys, TextSelectionModifier.identity, TextSelectionModifier, arkSelection);
     return this;
   }
-  textSelectable(value: TextSelectableMode): this {
+  textSelectable(value: TextSelectableMode): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextSelectableModifier.identity, TextSelectableModifier, value);
     return this;
   }
-  caretColor(value: ResourceColor): this {
+  caretColor(value: ResourceColor): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextCaretColorModifier.identity, TextCaretColorModifier, value);
     return this;
   }
-  selectedBackgroundColor(value: ResourceColor): this {
+  selectedBackgroundColor(value: ResourceColor): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextSelectedBackgroundColorModifier.identity,
       TextSelectedBackgroundColorModifier, value);
     return this;
   }
-  ellipsisMode(value: EllipsisMode): this {
+  ellipsisMode(value: EllipsisMode): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextEllipsisModeModifier.identity, TextEllipsisModeModifier, value);
     return this;
   }
-  fontFeature(value: FontFeature): this {
+  fontFeature(value: FontFeature): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextFontFeatureModifier.identity, TextFontFeatureModifier, value);
     return this;
   }
@@ -1570,7 +1474,7 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextClipModifier.identity, TextClipModifier, value);
     return this;
   }
-  foregroundColor(value: ResourceColor | ColoringStrategy): this {
+  foregroundColor(value: ResourceColor | ColoringStrategy): void {
     modifierWithKey(
       this._modifiersWithKeys, TextForegroundColorModifier.identity, TextForegroundColorModifier, value);
     return this;
@@ -1585,17 +1489,9 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
       TextEditMenuOptionsModifier, value);
     return this;
   }
-  halfLeading(value: boolean): this {
+  halfLeading(value: boolean): TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextHalfLeadingModifier.identity,
       TextHalfLeadingModifier, value);
-    return this;
-  }
-  onClick(value: (event?: ClickEvent) => void): this {
-    modifierWithKey(this._modifiersWithKeys, TextOnClickModifier.identity, TextOnClickModifier, value as any);
-    return this;
-  }
-  responseRegion(value: Array<Rectangle> | Rectangle): this {
-    modifierWithKey(this._modifiersWithKeys, TextResponseRegionModifier.identity, TextResponseRegionModifier, value);
     return this;
   }
   enableHapticFeedback(value: boolean): this {
@@ -1644,19 +1540,15 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     modifierWithKey(this._modifiersWithKeys, TextVerticalAlignModifier.identity, TextVerticalAlignModifier, value);
     return this;
   }
-  contentTransition(value: { flipDirection: number; enableBlur?: boolean }): this {
-    modifierWithKey(this._modifiersWithKeys, TextContentTransitionModifier.identity, TextContentTransitionModifier, value);
-    return this;
-  }
-  textDirection(value: TextDirection): this {
-    modifierWithKey(this._modifiersWithKeys, TextDirectionModifier.identity, TextDirectionModifier, value);
-    return this;
-  }
   selectedDragPreviewStyle(value: SelectedDragPreviewStyle): this {
     let arkSelectedDragPreviewStyle = new ArkSelectedDragPreviewStyle();
     arkSelectedDragPreviewStyle.color = value?.color;
     modifierWithKey(this._modifiersWithKeys, TextSelectedDragPreviewStyleModifier.identity,
         TextSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
+    return this;
+  }
+  textDirection(value: TextDirection): this {
+    modifierWithKey(this._modifiersWithKeys, TextDirectionModifier.identity, TextDirectionModifier, value);
     return this;
   }
   incrementalUpdatePolicy(value: IncrementalUpdatePolicy): this {
@@ -1670,12 +1562,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
 }
 // @ts-ignore
-if (globalThis.Text !== undefined) {
-  (globalThis as any).Text.attributeModifier = function (modifier: ArkComponent): void {
-    attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
-      return new ArkTextComponent(nativePtr);
-    }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
-      return new modifierJS.TextModifier(nativePtr, classType);
-    });
-  };
-}
+globalThis.Text.attributeModifier = function (modifier: ArkComponent): void {
+  attributeModifierFunc.call(this, modifier, (nativePtr: KNode) => {
+    return new ArkTextComponent(nativePtr);
+  }, (nativePtr: KNode, classType: ModifierType, modifierJS: ModifierJS) => {
+    return new modifierJS.TextModifier(nativePtr, classType);
+  });
+};
