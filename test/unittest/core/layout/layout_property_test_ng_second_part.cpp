@@ -14,7 +14,6 @@
  */
 
 #include "layout_property_test_ng.h"
-#include "core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 
@@ -347,7 +346,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateAllGeometryTransition002, TestSize.Level0)
      */
     SystemProperties::debugEnabled_ = true;
     layoutProperty->UpdateGeometryTransition("test1", true, true);
-    EXPECT_EQ(layoutProperty->geometryTransition_.Upgrade()->GetId(), "test1");
+    EXPECT_EQ(layoutProperty->geometryTransition_.Upgrade()->id_, "test1");
 }
 
 /**

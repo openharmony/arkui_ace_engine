@@ -29,17 +29,13 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/common/ace_engine.h"
 #include "core/common/clipboard/clipboard.h"
-#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
-#include "core/image/image_cache.h"
 #include "core/common/manager_interface.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/statistic_event_reporter.h"
-#include "core/common/thp_extra_manager.h"
 #include "core/common/window.h"
-#include "core/components/theme/resource_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/ui_node_gc.h"
@@ -1264,100 +1260,6 @@ RefPtr<EventManager> PipelineBase::GetEventManager() const
 RefPtr<PlatformResRegister> PipelineBase::GetPlatformResRegister() const
 {
     return platformResRegister_;
-}
-
-void PipelineBase::SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
-{
-    thpExtraMgr_ = thpExtraMgr;
-}
-
-const RefPtr<NG::THPExtraManager>& PipelineBase::GetTHPExtraManager() const
-{
-    return thpExtraMgr_;
-}
-
-void PipelineBase::UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter)
-{
-    std::unique_lock<std::shared_mutex> lock(themeMtx_);
-    CHECK_NULL_VOID(themeManager_);
-    auto themeConstants = themeManager_->GetThemeConstants();
-    CHECK_NULL_VOID(themeConstants);
-    themeConstants->UpdateResourceAdapter(adapter);
-}
-
-void PipelineBase::SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
-{
-    drawDelegate_ = std::move(delegate);
-}
-
-void PipelineBase::OnSurfaceDensityChanged(double density)
-{
-    // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
-    // thread.
-    std::lock_guard lock(densityChangeMutex_);
-    for (auto&& [id, callback] : densityChangedCallbacks_) {
-        if (callback) {
-            callback(density);
-        }
-    }
-}
-
-int32_t PipelineBase::RegisterDensityChangedCallback(std::function<void(double)>&& callback)
-{
-    if (callback) {
-        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
-        // thread.
-        std::lock_guard lock(densityChangeMutex_);
-        densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
-        return densityChangeCallbackId_;
-    }
-    return 0;
-}
-
-void PipelineBase::UnregisterDensityChangedCallback(int32_t callbackId)
-{
-    // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
-    // thread.
-    std::lock_guard lock(densityChangeMutex_);
-    densityChangedCallbacks_.erase(callbackId);
-}
-
-const RefPtr<UIDisplaySyncManager>& PipelineBase::GetOrCreateUIDisplaySyncManager()
-{
-    std::call_once(displaySyncFlag_, [this]() {
-        if (!uiDisplaySyncManager_) {
-            uiDisplaySyncManager_ = MakeRefPtr<UIDisplaySyncManager>();
-        }
-    });
-    return uiDisplaySyncManager_;
-}
-
-bool PipelineBase::NotifyVirtualKeyBoard(
-    int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) const
-{
-    bool isConsume = false;
-    for (const auto& [nodeId, iterVirtualKeyBoardCallback] : virtualKeyBoardCallback_) {
-        if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard, isCustomKeyboard)) {
-            isConsume = true;
-        }
-    }
-    return isConsume;
-}
-
-void PipelineBase::NotifyConfigurationChange()
-{
-    for (const auto& [nodeId, callback] : configChangedCallback_) {
-        if (callback) {
-            callback();
-        }
-    }
-}
-
-void PipelineBase::PostTaskToRT(std::function<void()>&& task)
-{
-    if (postRTTaskCallback_) {
-        postRTTaskCallback_(std::move(task));
-    }
 }
 
 } // namespace OHOS::Ace

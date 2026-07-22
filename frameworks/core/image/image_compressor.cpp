@@ -29,7 +29,6 @@
 #include "base/thread/background_task_executor.h"
 #include "core/image/image_compressor.h"
 #include "core/image/image_file_cache.h"
-#include "core/image/image_cache.h"
 
 namespace OHOS::Ace {
 __attribute__((constructor)) void load(void)

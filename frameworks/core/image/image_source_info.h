@@ -23,6 +23,7 @@
 #include "base/geometry/size.h"
 #include "base/image/pixel_map.h"
 #include "base/resource/internal_resource.h"
+#include "base/utils/device_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
@@ -86,7 +87,10 @@ public:
         const Color& color);
     void SetBundleName(const std::string& bundleName);
     void SetModuleName(const std::string& moduleName);
-    void SetIsUriPureNumber(bool isUriPureNumber = false);
+    void SetIsUriPureNumber(bool isUriPureNumber = false)
+    {
+        isUriPureNumber_ = isUriPureNumber;
+    }
     void Reset();
 
     // interfaces to get infomation from [ImageSourceInfo]
@@ -112,28 +116,60 @@ public:
     std::string GetTaskKey() const;
     void SetContainerId(int32_t containerId);
     int32_t GetContainerId() const;
-    bool GetIsUriPureNumber() const;
+    bool GetIsUriPureNumber() const
+    {
+        return isUriPureNumber_;
+    }
     bool SupportObjCache() const;
-    void SetNeedCache(bool needCache);
+    void SetNeedCache(bool needCache)
+    {
+        needCache_ = needCache;
+    }
     void SetSkipCacheRead(bool skipCacheRead);
     bool IsSkipCacheRead() const;
-    ColorMode GetLocalColorMode() const;
+
+    ColorMode GetLocalColorMode() const
+    {
+        return localColorMode_;
+    }
     
     void UpdateLocalColorMode(ColorMode localColorMode);
 
-    bool IsFromReset() const;
-    void SetIsFromReset(bool isFromReset);
+    bool IsFromReset()
+    {
+        return isFromReset_;
+    }
+    void SetIsFromReset(bool isFromReset)
+    {
+        isFromReset_ = isFromReset;
+    }
 
-    void SetImageDfxConfig(const NG::ImageDfxConfig& imageDfxConfig);
+    void SetImageDfxConfig(const NG::ImageDfxConfig& imageDfxConfig)
+    {
+        imageDfxConfig_ = imageDfxConfig;
+    }
 
     void SetImageHdr(bool isHdr);
     bool IsImageHdr() const;
-    NG::ImageDfxConfig GetImageDfxConfig() const;
+    NG::ImageDfxConfig GetImageDfxConfig() const
+    {
+        return imageDfxConfig_;
+    }
 
-    bool IsSurportCachePixelmap() const;
+    bool IsSurportCachePixelmap() const
+    {
+        return srcType_ == SrcType::NETWORK || srcType_ == SrcType::RESOURCE;
+    }
 
-    void SetSupportSvg2(bool enable);
-    bool IsSupportSvg2() const;
+    void SetSupportSvg2(bool enable)
+    {
+        supportSvg2_ = enable;
+    }
+
+    bool IsSupportSvg2() const
+    {
+        return supportSvg2_;
+    }
 
     void SetReloadKey(const std::optional<std::string>& reloadKey);
     const std::optional<std::string>& GetReloadKey() const;

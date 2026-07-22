@@ -178,8 +178,4 @@ bool Pattern::HandleTextBoxComponentCommand(
     CHECK_NULL_RETURN(params && params->IsObject(), false);
     return true;
 }
-
-void Pattern::AttachToFrameNode(const WeakPtr<FrameNode>&) {}
-RefPtr<FrameNode> Pattern::GetHost() const { return nullptr; }
-
 } // namespace OHOS::Ace::NG

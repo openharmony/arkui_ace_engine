@@ -31,7 +31,6 @@
 #include "core/common/builder_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -46,7 +45,6 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-
 class UINodeTestNgTwo : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -1538,4 +1536,5 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo076, TestSize.Level1)
     EXPECT_EQ(root->GetFrameNodeByUniqueIdInSubTree(-1), nullptr);
     EXPECT_EQ(root->GetFrameNodeByUniqueIdInSubTree(999999), nullptr);
 }
+
 } // namespace OHOS::Ace::NG

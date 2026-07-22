@@ -41,6 +41,7 @@
 #include "core/event/touch_event.h"
 #include "core/focus/focus_node.h"
 #include "core/gestures/gesture_referee.h"
+#include "core/event/resample_algo.h"
 
 namespace OHOS::Ace {
 namespace NG {

@@ -23,6 +23,7 @@
 #include <set>
 #include <string>
 
+#include "ui/base/versions.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/performance_check_types.h"
@@ -60,7 +61,6 @@ using ResponseLinkResult = std::list<WeakPtr<NG::NGGestureRecognizer>>;
 
 namespace OHOS::Ace::NG {
 class AccessibilityProperty;
-class ExportTextureInfo;
 class FocusHub;
 class LayoutWrapperNode;
 class FrameNode;
@@ -242,7 +242,14 @@ public:
         return false;
     }
 
-    void UpdateModalUiextensionCount(bool addNode);
+    void UpdateModalUiextensionCount(bool addNode)
+    {
+        if (addNode) {
+            modalUiextensionCount_++;
+        } else {
+            modalUiextensionCount_--;
+        }
+    }
 
     int32_t TotalChildCount() const;
     virtual void UpdateGeometryTransition();
@@ -270,9 +277,21 @@ public:
         return children_;
     }
 
-    RefPtr<UINode> GetLastChild() const;
+    RefPtr<UINode> GetLastChild() const
+    {
+        if (children_.empty()) {
+            return nullptr;
+        }
+        return children_.back();
+    }
 
-    RefPtr<UINode> GetFirstChild() const;
+    RefPtr<UINode> GetFirstChild() const
+    {
+        if (children_.empty()) {
+            return nullptr;
+        }
+        return children_.front();
+    }
 
     void GenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& visibleList);
     std::list<RefPtr<UINode>> MergeChildrenWithDisappearingChildren();
@@ -379,7 +398,13 @@ public:
         return accessibilityId_;
     }
 
-    void SetDepth(int32_t depth);
+    void SetDepth(int32_t depth)
+    {
+        depth_ = depth;
+        for (auto& child : children_) {
+            child->SetDepth(depth_ + 1);
+        }
+    }
 
     bool IsRootNode() const
     {
@@ -419,7 +444,13 @@ public:
     }
 
     // TODO: SetHostPageId step on mount to page.
-    void SetHostPageId(int32_t id);
+    void SetHostPageId(int32_t id)
+    {
+        hostPageId_ = id;
+        for (auto& child : children_) {
+            child->SetHostPageId(id);
+        }
+    }
 
     void SetRemoveSilently(bool removeSilently)
     {
@@ -499,7 +530,12 @@ public:
 
     virtual void MarkNeedFrameFlushDirty(PropertyChangeFlag extraFlag = PROPERTY_UPDATE_NORMAL);
 
-    virtual void FlushUpdateAndMarkDirty();
+    virtual void FlushUpdateAndMarkDirty()
+    {
+        for (const auto& child : children_) {
+            child->FlushUpdateAndMarkDirty();
+        }
+    }
 
     virtual void MarkNeedSyncRenderTree(bool needRebuild = false);
 
@@ -697,7 +733,13 @@ public:
     // return value: true if the node can be removed immediately.
     virtual bool OnRemoveFromParent(bool allowTransition);
 
-    void MarkForceMeasure();
+    void MarkForceMeasure()
+    {
+        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        for (const auto& child : children_) {
+            child->MarkForceMeasure();
+        }
+    }
 
     std::string GetCurrentCustomNodeInfo();
     static int64_t GenerateAccessibilityId();
@@ -775,14 +817,26 @@ public:
         return (flag & nodeFlag_) == flag;
     }
 
-    void SetAccessibilityNodeVirtual();
+    void SetAccessibilityNodeVirtual()
+    {
+        isAccessibilityVirtualNode_ = true;
+        for (auto& it : GetChildren()) {
+            it->SetAccessibilityNodeVirtual();
+        }
+    }
 
     bool IsAccessibilityVirtualNode() const
     {
         return isAccessibilityVirtualNode_;
     }
 
-    void SetAccessibilityVirtualNodeParent(const RefPtr<UINode>& parent);
+    void SetAccessibilityVirtualNodeParent(const RefPtr<UINode>& parent)
+    {
+        parentForAccessibilityVirtualNode_ = parent;
+        for (auto& it : GetChildren()) {
+            it->SetAccessibilityVirtualNodeParent(parent);
+        }
+    }
 
     WeakPtr<UINode> GetVirtualNodeParent() const
     {
@@ -843,7 +897,12 @@ public:
         return layoutTags_;
     }
 
-    virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn);
+    virtual void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn)
+    {
+        for (const auto& child : GetChildren()) {
+            child->SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+        }
+    }
 
     virtual void SetOnNodeDestroyCallback(std::function<void(int32_t)>&& destroyCallback)
     {
@@ -974,7 +1033,13 @@ public:
         return isMoving_;
     }
 
-    void setIsMoving(bool isMoving);
+    void setIsMoving(bool isMoving)
+    {
+        isMoving_ = isMoving;
+        for (auto& child : children_) {
+            child->setIsMoving(isMoving);
+        }
+    }
 
     bool isCrossLanguageAttributeSetting() const
     {

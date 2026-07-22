@@ -416,12 +416,4 @@ bool LayoutProperty::GetIsUserSetBackgroundColor() const
 {
     return isUserSetBackgroundColor_;
 }
-
-std::optional<NG::RectF> LayoutProperty::GetLayoutRect() const
-{
-    return std::nullopt;
-}
-
-void LayoutProperty::SetLayoutRect(const RectF&) {}
-
 } // namespace OHOS::Ace::NG

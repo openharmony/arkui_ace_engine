@@ -793,16 +793,4 @@ ACE_FORCE_EXPORT RefPtr<T> FrameNode::GetAccessibilityProperty() const
 
 template RefPtr<AccessibilityProperty> FrameNode::GetAccessibilityProperty<AccessibilityProperty>() const;
 
-void FrameNode::SetGeometryTransitionInRecursive(bool) {}
-void FrameNode::ProcessPropertyDiff() {}
-void FrameNode::SetLayoutProperty(const RefPtr<LayoutProperty>& layoutProperty)
-{
-    layoutProperty_ = layoutProperty;
-    if (layoutProperty_) {
-        layoutProperty_->SetHost(WeakClaim(this));
-    }
-}
-void FrameNode::SetVisibleAreaInnerCallback(const std::vector<double>&, const VisibleCallbackInfo&, bool) {}
-void FrameNode::SetVisibleAreaUserCallback(const std::vector<double>&, const VisibleCallbackInfo&) {}
-
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 #include <shared_mutex>
 
 #include "base/utils/noncopyable.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_provider.h"
 #include "core/components_ng/image_provider/svg_dom_base.h"

@@ -24,7 +24,6 @@
 #include "gtest/gtest.h"
 
 #include "base/memory/ace_type.h"
-#include "core/components_ng/export_texture_info/export_texture_info.h"
 #define protected public
 #define private public
 #include "test/mock/frameworks/core/common/mock_container.h"

@@ -22,9 +22,9 @@
 #include "core/components_ng/pattern/picker_utils/dialog_event_types.h"
 #include "core/components_ng/pattern/calendar/calendar_model_ng.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.h"
+#include "core/components_ng/pattern/date_picker/picker_data.h"
 
 namespace OHOS::Ace {
-class PickerDate;
 class PipelineBase;
 } // namespace OHOS::Ace
 

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_DRAWABLE_DESCRIPTOR_INFO_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_DRAWABLE_DRAWABLE_DESCRIPTOR_INFO_H
 
+#include "base/image/pixel_map.h"
 #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {

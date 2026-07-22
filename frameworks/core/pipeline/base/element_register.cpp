@@ -21,7 +21,6 @@
 #include "core/common/layout_inspector.h"
 #include "core/components_v2/common/element_proxy.h"
 #include "core/components_ng/render/render_context.h"
-#include "frameworks/core/components_ng/animation/geometry_transition.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
 namespace OHOS::Ace {

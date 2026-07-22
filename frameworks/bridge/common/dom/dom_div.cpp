@@ -17,7 +17,6 @@
 
 #include "base/log/event_report.h"
 #include "core/common/ace_application_info.h"
-#include "core/components/flex/flex_component.h"
 #include "core/components/focus_collaboration/focus_collaboration_component.h"
 #include "frameworks/bridge/common/dom/dom_reflect_map.h"
 #include "frameworks/bridge/common/utils/utils.h"

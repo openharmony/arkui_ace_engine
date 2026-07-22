@@ -18,23 +18,13 @@
 #include "compatible/components/text_field/text_field_component.h"
 #include "compatible/components/video/texture_component.h"
 #include "core/components/common/properties/decoration.h"
-#include "core/components/declaration/common/declaration_creator_manager.h"
 #include "core/components/web/web_component.h"
 #include "core/components/xcomponent/xcomponent_component.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/bridge/common/dom/dom_div.h"
 #include "frameworks/bridge/common/utils/utils.h"
-#include "core/components/flex/flex_item_component.h"
-#include "core/components/mouse_listener/mouse_listener_component.h"
-#ifndef WEARABLE_PRODUCT
-#include "core/components/multimodal/multimodal_component.h"
-#endif
-#include "core/components/positioned/positioned_component.h"
-#include "core/components/shared_transition/shared_transition_component.h"
 
 namespace OHOS::Ace::Framework {
-
-
 namespace {
 
 constexpr uint32_t TRANSFORM_SINGLE = 1;
@@ -571,14 +561,6 @@ void DOMNode::CreatePropertyAnimation(const std::string& property)
             propertyAnimation.second(*this);
         }
     }
-}
-
-RefPtr<SingleChild> DOMNode::GetLastCommonParent()
-{
-    if (sharedTransitionComponent_) {
-        return sharedTransitionComponent_;
-    }
-    return boxComponent_;
 }
 
 RefPtr<KeyframeAnimation<float>> DOMNode::SetPropertyFloatAnimationKeyframe(float begin, float end)

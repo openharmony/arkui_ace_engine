@@ -571,13 +571,6 @@ void PipelineContext::SetAppIcon(const RefPtr<PixelMap>& icon) {}
 
 void PipelineContext::OnTransformHintChanged(uint32_t transform) {}
 
-int32_t PipelineContext::RegisterTransformHintChangeCallback(std::function<void(uint32_t)>&& callback)
-{
-    return 0;
-}
-
-void PipelineContext::UnregisterTransformHintChangedCallback(int32_t callbackId) {}
-
 void PipelineContext::SetRootRect(double width, double height, double offset)
 {
     rootWidth_ = width;
@@ -720,13 +713,6 @@ void PipelineContext::OriginalAvoidanceLogic(
 void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus) {}
 
 void PipelineContext::OnRawKeyboardChangedCallback() {}
-
-int32_t PipelineContext::RegisterRawKeyboardChangedCallback(std::function<void()>&& callback)
-{
-    return 0;
-}
-
-void PipelineContext::UnRegisterRawKeyboardChangedCallback(int32_t callbackId) {}
 
 void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
 
@@ -1458,6 +1444,8 @@ void PipelineContext::InitManagers()
     formGestureMgr_ = MakeRefPtr<FormGestureManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
 }
+void PipelineContext::OnSurfaceDensityChanged(double density) {}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -2014,87 +2002,8 @@ bool PipelineContext::GetIsRequestVsync()
     return window_->GetIsRequestVsync();
 }
 
-RectF PipelineContext::GetRootRect()
-{
-    return {};
-}
-
-void PipelineContext::SetAreaChangeNodeMinDepth(int32_t depth) {}
-
-void PipelineContext::SetIsDisappearChangeNodeMinDepth(int32_t depth) {}
-
-int32_t PipelineContext::RegisterSurfaceChangedCallback(
-    std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
-{
-    static int32_t nextId = 0;
-    int32_t id = ++nextId;
-    surfaceChangedCallbackMap_.emplace(id, std::move(callback));
-    return id;
-}
-
-void PipelineContext::UnregisterSurfaceChangedCallback(int32_t callbackId)
-{
-    surfaceChangedCallbackMap_.erase(callbackId);
-}
-
-void PipelineContext::RemoveGestureTask(const DelayedTask& task) {}
-
-void PipelineContext::UnregisterSurfacePositionChangedCallback(int32_t callbackId)
-{
-    surfacePositionChangedCallbackMap_.erase(callbackId);
-}
-
-int32_t PipelineContext::RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback)
-{
-    return 0;
-}
-
-void PipelineContext::UnRegisterFoldStatusChangedCallback(int32_t callbackId) {}
-
-int32_t PipelineContext::RegisterHalfFoldHoverChangedCallback(std::function<void(bool)>&& callback)
-{
-    return 0;
-}
-
-void PipelineContext::UnRegisterHalfFoldHoverChangedCallback(int32_t callbackId) {}
-
-int32_t PipelineContext::RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
-{
-    return 0;
-}
-
-void PipelineContext::UnRegisterFoldDisplayModeChangedCallback(int32_t callbackId) {}
-
-int32_t PipelineContext::RegisterSurfacePositionChangedCallback(std::function<void(int, int)>&& callback)
-{
-    static int32_t nextPosId = 0;
-    int32_t id = ++nextPosId;
-    surfacePositionChangedCallbackMap_.emplace(id, std::move(callback));
-    return id;
-}
-
-int32_t PipelineContext::RegisterRotationEndCallback(std::function<void()>&& callback)
-{
-    return 0;
-}
-
-void PipelineContext::OnSurfaceDensityChanged(double density) {}
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
-void PipelineBase::OnSurfaceDensityChanged(double density) {}
-
-const RefPtr<UIDisplaySyncManager>& PipelineBase::GetOrCreateUIDisplaySyncManager()
-{
-    static RefPtr<UIDisplaySyncManager> manager;
-    return manager;
-}
-
-int32_t PipelineBase::RegisterDensityChangedCallback(std::function<void(double)>&& callback)
-{
-    return 0;
-}
-
-void PipelineBase::UnregisterDensityChangedCallback(int) {}
 
 } // namespace OHOS::Ace

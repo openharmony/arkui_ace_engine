@@ -16,13 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_PICKER_TOSS_ANIMATION_CONTROLLER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TEXT_PICKER_TOSS_ANIMATION_CONTROLLER_H
 
-#include "core/animation/curve.h"
+#include "compatible/components/picker/picker_animation.h"
 #include "base/memory/ace_type.h"
 
-namespace OHOS::Ace {
-class PickerTheme;
-}
-
+#include "core/components_ng/pattern/date_picker/picker_theme.h"
 namespace OHOS::Ace::NG {
 class PipelineContext;
 class AnimatablePropertyFloat;

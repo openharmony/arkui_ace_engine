@@ -19,7 +19,8 @@
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
 
-#include "base/geometry/dimension.h"
+#include "base/image/drawing_color_filter.h"
+#include "base/image/drawing_lattice.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
@@ -40,7 +41,6 @@ class Blender;
 }
 
 namespace OHOS::Ace {
-class DrawingColorFilter;
 class UiMaterial;
 } // namespace OHOS::Ace
 
