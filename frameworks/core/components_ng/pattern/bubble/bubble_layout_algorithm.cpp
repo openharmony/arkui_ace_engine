@@ -2866,6 +2866,15 @@ void BubbleLayoutAlgorithm::UpdateClipOffset(const RefPtr<FrameNode>& frameNode)
         auto bubbleSDFShape = GetBubbleSDFShape();
         renderContext->ClearClipBounds();
         renderContext->SetSDFShape(bubbleSDFShape);
+        auto grandChildNode = AceType::DynamicCast<FrameNode>(childNode->GetFirstChild());
+        if (grandChildNode) {
+            auto grandChildRenderContext = grandChildNode->GetRenderContext();
+            if (grandChildRenderContext) {
+                BorderRadiusProperty borderRadius;
+                borderRadius.SetRadius(borderRadius_);
+                grandChildRenderContext->UpdateBorderRadius(borderRadius);
+            }
+        }
     } else {
         renderContext->SetSDFShape(nullptr);
         renderContext->ResetShadowPath();
