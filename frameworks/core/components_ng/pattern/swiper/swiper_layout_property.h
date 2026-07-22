@@ -168,6 +168,7 @@ public:
         json->PutExtAttr("swipeByGroup", propSwipeByGroup_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("maintainVisibleContentPosition",
             propMaintainVisibleContentPosition_.value_or(false) ? "true" : "false", filter);
+        json->PutExtAttr("ignoreHiddenItem", propIgnoreHiddenItem_.value_or(false) ? "true" : "false", filter);
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override

@@ -27361,6 +27361,8 @@ typedef struct GENERATED_ArkUISwiperModifier {
                                    const Opt_ContentWillScrollCallback* value);
     void (*setMaintainVisibleContentPosition)(Ark_NativePointer node,
                                               const Opt_Boolean* value);
+    void (*setIgnoreHiddenItem)(Ark_NativePointer node,
+                                const Opt_Boolean* value);
     void (*setAutoPlay1)(Ark_NativePointer node,
                          const Opt_Boolean* autoPlay,
                          const Opt_AutoPlayOptions* options);

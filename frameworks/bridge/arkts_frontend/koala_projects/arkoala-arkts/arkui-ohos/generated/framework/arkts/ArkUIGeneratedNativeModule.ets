@@ -2380,6 +2380,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SwiperAttribute_setMaintainVisibleContentPosition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _SwiperAttribute_setIgnoreHiddenItem(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _SwiperAttribute_setAutoPlay1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _SwiperAttribute_setDisplayArrow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
