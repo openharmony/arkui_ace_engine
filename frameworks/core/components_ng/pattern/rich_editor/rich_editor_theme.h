@@ -56,8 +56,6 @@ public:
             ParsePattern(themeConstants, theme);
             return theme;
         }
-
-    protected:
         void InitThemeDefaults(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
         {
             CHECK_NULL_VOID(theme && themeConstants);
@@ -271,6 +269,7 @@ public:
     }
 protected:
     RichEditorTheme() = default;
+
     TextStyle textStyle_;
     float urlDisabledOpacity_ = URL_DISA_OPACITY;
     Color urlDisabledColor_ = Color(0x99000000);
