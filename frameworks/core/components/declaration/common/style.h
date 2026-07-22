@@ -27,7 +27,6 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
-#include "core/components/common/properties/gradient.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/tween_option.h"
@@ -124,16 +123,6 @@ struct CommonPositionStyle : Style {
     Dimension bottom;
 };
 
-struct CommonBackgroundStyle : Style {
-    Gradient gradient;
-    Gradient gradientBorderImage;
-    Color backgroundColor;
-    std::string backgroundSize;
-    RefPtr<BackgroundImage> backgroundImage;
-    RefPtr<BorderImage> borderImage;
-    ImageRepeat backgroundRepeat;
-    std::string backgroundPosition;
-};
 
 struct CommonShadowStyle : Style {
     Shadow shadow;

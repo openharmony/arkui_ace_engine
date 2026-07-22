@@ -95,7 +95,6 @@ ohos_source_set("ace_kit_mock") {
     "$ace_root/test/mock/frameworks/core/components_ng/image_provider/mock_image_loading_context.cpp",
     "$ace_root/test/mock/frameworks/core/image/mock_image_source_info.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_dialog_modifier.cpp",
-    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_tabs_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/image_provider/mock_image_utils.cpp",
     "$ace_root/test/mock/frameworks/base/display_manager/mock_display_manager.cpp",
     "$ace_root/test/mock/frameworks/core/event/package/mock_package_event_proxy.cpp",
