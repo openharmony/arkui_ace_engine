@@ -36,9 +36,9 @@ void AddLazyWaterFlowPredictTask(PipelineContext* context, std::function<void(in
     context->AddPredictTask(std::move(task));
 }
 
-void SetLazyWaterFlowCallbackNode(FrameNode* frameNode)
+void SetLazyWaterFlowCallbackNode(const WeakPtr<FrameNode>& weakNode)
 {
-    PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+    PipelineContext::SetCallBackNode(weakNode);
 }
 
 
