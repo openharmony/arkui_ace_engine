@@ -1270,12 +1270,10 @@ bool UiSessionManagerOhos::PostToCurrentTranslateManager(
 
 void UiSessionManagerOhos::GetWebViewLanguage()
 {
-#ifndef CROSS_PLATFORM
     PostToCurrentTranslateManager(
         "GetWebViewLanguage", [](const std::shared_ptr<UiTranslateManager>& translateManager) {
             translateManager->GetWebViewCurrentLanguage();
         });
-#endif
 }
 
 void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(std::function<std::string()>&& callback)
@@ -1447,12 +1445,10 @@ void UiSessionManagerOhos::SendCurrentLanguage(std::string result)
 
 void UiSessionManagerOhos::GetWebTranslateText(std::string extraData, bool isContinued)
 {
-#ifndef CROSS_PLATFORM
     PostToCurrentTranslateManager("GetWebTranslateText",
         [extraData, isContinued](const std::shared_ptr<UiTranslateManager>& translateManager) {
             translateManager->GetTranslateText(extraData, isContinued);
         });
-#endif
 }
 
 int32_t UiSessionManagerOhos::GetPageTranslateText(const std::string& request)
@@ -1645,32 +1641,26 @@ void UiSessionManagerOhos::SendWebTextToAI(int32_t nodeId, std::string res)
 void UiSessionManagerOhos::SendTranslateResult(
     int32_t nodeId, std::vector<std::string> results, std::vector<int32_t> ids)
 {
-#ifndef CROSS_PLATFORM
     PostToCurrentTranslateManager("SendTranslateResult",
         [nodeId, results, ids](const std::shared_ptr<UiTranslateManager>& translateManager) {
             translateManager->SendTranslateResult(nodeId, results, ids);
         });
-#endif
 }
 
 void UiSessionManagerOhos::SendTranslateResult(int32_t nodeId, std::string res)
 {
-#ifndef CROSS_PLATFORM
     PostToCurrentTranslateManager("SendTranslateResult",
         [nodeId, res](const std::shared_ptr<UiTranslateManager>& translateManager) {
             translateManager->SendTranslateResult(nodeId, res);
         });
-#endif
 }
 
 void UiSessionManagerOhos::ResetTranslate(int32_t nodeId)
 {
-#ifndef CROSS_PLATFORM
     PostToCurrentTranslateManager("ResetTranslate",
         [nodeId](const std::shared_ptr<UiTranslateManager>& translateManager) {
             translateManager->ResetTranslate(nodeId);
         });
-#endif
 }
 
 void UiSessionManagerOhos::GetPixelMap()
@@ -1751,7 +1741,6 @@ void UiSessionManagerOhos::SendArkWebImagesById(int32_t windowId, const std::map
 
 void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps)
 {
-#ifndef CROSS_PLATFORM
     auto currentTranslateManager = GetCurrentTranslateManager();
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     std::unique_lock<std::shared_mutex> processMapLock(processMapMutex_);
@@ -1779,7 +1768,6 @@ void UiSessionManagerOhos::SendPixelMap(const std::vector<std::pair<int32_t, std
         });
     }
     processIter->second.clear();
-#endif
 }
 
 void UiSessionManagerOhos::SendCommand(const std::string& command)

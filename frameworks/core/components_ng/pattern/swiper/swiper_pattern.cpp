@@ -32,8 +32,6 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "core/animation/scroll_motion.h"
 #include "base/perfmonitor/perf_monitor.h"
-#include "base/ressched/ressched_report.h"
-#include "base/ressched/taihang_optimizer.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/animation/curve.h"
@@ -42,6 +40,8 @@
 #include "core/common/container_scope.h"
 #include "core/common/premake_scope.h"
 #ifndef CROSS_PLATFORM
+#include "base/ressched/ressched_report.h"
+#include "base/ressched/taihang_optimizer.h"
 #include "core/common/recorder/node_data_cache.h"
 #endif
 #include "core/components/common/layout/constants.h"
@@ -1791,6 +1791,7 @@ void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
         return;
     }
 
+#ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(pipeline->GetTaihangOptimizer());
     auto curPageName = pipeline->GetCurrentPageName();
     if (pipeline->GetTaihangOptimizer()->CheckSwiperPageValid(curPageName) && !isInAutoPlay_) {
@@ -1801,10 +1802,9 @@ void SwiperPattern::ReportSwiperChangeContent(int32_t currentIndex) const
         payload["path"] = path;
         payload["currentIndex"] = std::to_string(currentIndex);
         payload["componentType"] = std::to_string(COMPONENT_SWIPER);
-#ifndef CROSS_PLATFORM
         ResSchedReport::GetInstance().HandleSwiperChange(payload);
-#endif
     }
+#endif
 }
 
 void SwiperPattern::FireAnimationStartEvent(

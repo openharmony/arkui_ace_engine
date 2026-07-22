@@ -15,7 +15,6 @@
 
 #include "base/ressched/ressched_report.h"
 
-#ifndef CROSS_PLATFORM
 #include <dlfcn.h>
 #include <unistd.h>
 #include <sys/syscall.h>
@@ -68,4 +67,3 @@ pthread_t ResSchedReport::GetPthreadSelf()
     return pthread_self();
 }
 } // namespace OHOS::Ace
-#endif

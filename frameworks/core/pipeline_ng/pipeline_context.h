@@ -59,9 +59,11 @@ namespace OHOS::Ace::NG {
 namespace OHOS::Ace {
 class AIWriteAdapter;
 class RRect;
+#ifndef CROSS_PLATFORM
 class ResSchedClickOptimizer;
 class ResSchedTouchOptimizer;
 class TaihangOptimizer;
+#endif
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -1195,9 +1197,11 @@ public:
     void OnDumpBindAICaller(const std::vector<std::string>& params) const;
     bool GetIsRequestFrame() const;
 
+#ifndef CROSS_PLATFORM
     const std::unique_ptr<ResSchedTouchOptimizer>& GetTouchOptimizer() const;
     const std::shared_ptr<ResSchedClickOptimizer>& GetClickOptimizer() const;
     const std::shared_ptr<TaihangOptimizer>& GetTaihangOptimizer() const;
+#endif
 
     void SetMagnifierController(const RefPtr<MagnifierController>& magnifierController);
     RefPtr<MagnifierController> GetMagnifierController() const;
@@ -1661,9 +1665,11 @@ private:
     bool needReloadResource_ = false;
     std::list<WeakPtr<UINode>> needReloadNodes_;
     RefPtr<MagnifierController> magnifierController_;
+#ifndef CROSS_PLATFORM
     std::unique_ptr<ResSchedTouchOptimizer> touchOptimizer_;
     std::shared_ptr<ResSchedClickOptimizer> clickOptimizer_;
     std::shared_ptr<TaihangOptimizer> taihangOptimizer_;
+#endif
     RefPtr<ContentChangeManager> contentChangeMgr_;
     std::set<WeakPtr<FrameNode>> needRenderNodeByUniqueId_;
     std::set<WeakPtr<NG::UINode>> needRenderForLayoutChildrenNodes_;

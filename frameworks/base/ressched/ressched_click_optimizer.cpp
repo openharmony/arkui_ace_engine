@@ -70,9 +70,7 @@ void ResSchedClickOptimizer::Init()
 
         std::unordered_map<std::string, std::string> payload;
         std::unordered_map<std::string, std::string> reply;
-#ifndef CROSS_PLATFORM
         optimizerRef->SetClickExtEnabled(ResSchedReport::GetInstance().AppClickExtEnableCheck(payload, reply));
-#endif
         TAG_LOGD(AceLogTag::ACE_UIEVENT, "CLICK_EXT_ENABLE_CHECK Result: %{public}d",
             static_cast<int32_t>(optimizerRef->clickExtEnabled_));
 
@@ -94,14 +92,10 @@ void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, 
 
     std::unordered_map<std::string, std::string> payload;
     if (!BuildComponentPayload(weakNode, payload, GetDepth())) {
-#ifndef CROSS_PLATFORM
         ResSchedReport::GetInstance().ResSchedDataReport("click");
-#endif
         return;
     }
-#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("click", payload);
-#endif
 }
 
 void ResSchedClickOptimizer::HandleTouchClickableFrameNodeReport(const WeakPtr<NG::FrameNode>& frameNode)
@@ -110,9 +104,7 @@ void ResSchedClickOptimizer::HandleTouchClickableFrameNodeReport(const WeakPtr<N
     bool ret = BuildComponentPayload(frameNode, payload, MAX_TOUCH_DOWN_RECURSIVE_DEPTH,
         MAX_TOUCH_DOWN_RECURSIVE_NODES);
     CHECK_EQUAL_VOID(ret, false);
-#ifndef CROSS_PLATFORM
     ResSchedReport::GetInstance().ResSchedDataReport("touch clickable frameNode", payload);
-#endif
 }
 
 bool ResSchedClickOptimizer::BuildComponentPayload(const WeakPtr<NG::FrameNode>& weakNode,
