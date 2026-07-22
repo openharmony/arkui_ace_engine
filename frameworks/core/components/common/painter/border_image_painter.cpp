@@ -17,7 +17,6 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/components/common/properties/border_image.h"
-#include "core/components/common/properties/decoration.h"
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkImage.h"

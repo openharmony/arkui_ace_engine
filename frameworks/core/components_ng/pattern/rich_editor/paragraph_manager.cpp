@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "base/log/ace_trace.h"
-#include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
 namespace OHOS::Ace::NG {

@@ -15,7 +15,6 @@
 
 #include "core/components/dialog/alert_dialog_component.h"
 
-#include "core/components/common/properties/decoration.h"
 #include "core/components/scroll/scroll_component.h"
 
 namespace OHOS::Ace {

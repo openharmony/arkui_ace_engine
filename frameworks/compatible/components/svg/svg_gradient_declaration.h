@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SVG_SVG_GRADIENT_DECLARATION_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SVG_SVG_GRADIENT_DECLARATION_H
 
-#include "core/components/common/properties/gradient.h"
 #include "core/components/declaration/common/declaration.h"
 
 namespace OHOS::Ace {

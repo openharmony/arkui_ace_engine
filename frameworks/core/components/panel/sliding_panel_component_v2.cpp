@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/components/common/properties/decoration.h"
 #include "core/components/panel/sliding_panel_component_v2.h"
 #include "core/components/drag_bar/drag_bar_component.h"
 #include "core/components/flex/flex_component.h"

@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_PROPERTIES_INVERT_H
 
 #include <variant>
-#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 struct InvertOption final {
