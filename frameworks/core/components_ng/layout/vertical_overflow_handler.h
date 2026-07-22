@@ -111,6 +111,12 @@ public:
         return contentRect_;
     }
 
+    std::string GetCachedPathHash() const;
+    void SetCachedPathHash(const std::string& pathHash)
+    {
+        cachedPathHash_ = pathHash;
+    }
+
 private:
     float offsetToChildFrameBottom_ = 0.0f;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -121,6 +127,7 @@ private:
     bool preVerticalReverse_ = false;
     bool hasParentAdjust_ = false;
     WeakPtr<FrameNode> frameNode_;
+    std::string cachedPathHash_;
 
 };
 } // namespace OHOS::Ace::NG

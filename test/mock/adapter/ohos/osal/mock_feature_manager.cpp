@@ -13,9 +13,24 @@
  * limitations under the License.
  */
 
+#include <unordered_map>
+
 #include "base/utils/feature_manager.h"
 
 namespace OHOS::Ace {
+namespace {
+struct MockFeatureParamEntry {
+    int32_t code = FeatureManager::SUCCESS;
+    std::string value;
+};
+
+std::unordered_map<std::string, MockFeatureParamEntry>& GetMockFeatureParamMap()
+{
+    static std::unordered_map<std::string, MockFeatureParamEntry> map;
+    return map;
+}
+} // namespace
+
 FeatureManager& FeatureManager::GetInstance()
 {
     static FeatureManager instance;
@@ -35,6 +50,12 @@ void FeatureManager::Init()
 int32_t FeatureManager::GetFeatureParam(const std::string& key, std::string& value)
 {
     value.clear();
+    auto& mockMap = GetMockFeatureParamMap();
+    auto it = mockMap.find(key);
+    if (it != mockMap.end()) {
+        value = it->second.value;
+        return it->second.code;
+    }
     if (key.empty()) {
         return KEY_NOT_FOUND;
     }
@@ -46,6 +67,16 @@ int32_t FeatureManager::GetFeatureParam(const std::string& key, std::string& val
 void FeatureManager::ResetForTest()
 {
     Init();
+}
+
+void FeatureManager::SetFeatureParamForTest(const std::string& key, const std::string& value, int32_t code)
+{
+    GetMockFeatureParamMap()[key] = { code, value };
+}
+
+void FeatureManager::ClearFeatureParamForTest()
+{
+    GetMockFeatureParamMap().clear();
 }
 #endif
 } // namespace OHOS::Ace

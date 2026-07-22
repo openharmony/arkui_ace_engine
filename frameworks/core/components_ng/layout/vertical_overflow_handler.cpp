@@ -19,7 +19,7 @@
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/event/overflow_scroll_event_hub.h"
- 
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double MAX_FLING_VELOCITY = 9000;
@@ -237,6 +237,12 @@ void VerticalOverflowHandler::HandleContentOverflow()
     } else {
         UnRegisterScrollableEvent();
     }
+}
+
+std::string VerticalOverflowHandler::GetCachedPathHash() const
+{
+    // pathHash is computed once per node and never changes for the same node
+    return cachedPathHash_;
 }
 
 } // namespace OHOS::Ace::NG
