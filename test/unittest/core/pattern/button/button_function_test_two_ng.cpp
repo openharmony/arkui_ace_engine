@@ -23,6 +23,7 @@
 
 #define protected public
 #define private public
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "core/accessibility/accessibility_manager.h"
@@ -2337,6 +2338,8 @@ HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     /**
      * @tc.steps: step3. Call OnThemeScopeUpdate.
@@ -2344,6 +2347,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate001, TestSize.Level1)
      */
     auto result = pattern->OnThemeScopeUpdate(0);
     EXPECT_TRUE(result);
+    MockContainer::TearDown();
 }
 
 /**
@@ -2365,6 +2369,8 @@ HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate002, TestSize.Level1)
     auto pattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     /**
      * @tc.steps: step2. Get layout property and verify FontColorFlagByUser is true.
@@ -2380,6 +2386,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate002, TestSize.Level1)
      */
     auto result = pattern->OnThemeScopeUpdate(0);
     EXPECT_TRUE(result);
+    MockContainer::TearDown();
 }
 
 /**
@@ -2400,6 +2407,8 @@ HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate003, TestSize.Level1)
     auto pattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     /**
      * @tc.steps: step2. Get text node and its properties.
@@ -2418,6 +2427,7 @@ HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate003, TestSize.Level1)
      */
     auto result = pattern->OnThemeScopeUpdate(0);
     EXPECT_TRUE(result);
+    MockContainer::TearDown();
 }
 
 /**
@@ -2440,6 +2450,8 @@ HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate004, TestSize.Level1)
     auto pattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->OnModifyDone();
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
 
     /**
      * @tc.steps: step2. Get text node and its render context.
@@ -2470,5 +2482,6 @@ HWTEST_F(ButtonFunctionTestTwoNg, OnThemeScopeUpdate004, TestSize.Level1)
      */
     auto foregroundColorAfter = textRenderContext->GetForegroundColor();
     EXPECT_EQ(foregroundColorAfter, userColor);
+    MockContainer::TearDown();
 }
 } // namespace OHOS::Ace::NG

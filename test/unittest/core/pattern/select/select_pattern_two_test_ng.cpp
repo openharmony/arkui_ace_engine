@@ -24,6 +24,7 @@
 #define private public
 
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
@@ -682,6 +683,8 @@ HWTEST_F(SelectPatternTwoTestNg, SelectTextProperty001, TestSize.Level1)
 {
     auto backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
+    MockContainer::SetUp(MockPipelineContext::GetCurrent());
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX));
     SelectModelNG selectModelInstance;
     std::vector<SelectParam> params = { { OPTION_TEXT, "" } };
     selectModelInstance.Create(params);
@@ -701,6 +704,7 @@ HWTEST_F(SelectPatternTwoTestNg, SelectTextProperty001, TestSize.Level1)
     ASSERT_NE(textProps, nullptr);
     EXPECT_TRUE(textProps->GetEnableSmallLanguageTruncationValue(false));
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 
 /**
