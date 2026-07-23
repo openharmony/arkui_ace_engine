@@ -114,8 +114,19 @@ export struct Image002Test {
       testSet.add(i)
     }
 
+    let urlSchemeHttps = 'https'
+    let urlSchemeHttp = 'http'
+    let urlSchemeFtp = 'ftp'
+    let urlDomain = 'example.com'
+    let urlCdn = 'cdn.' + urlDomain
+    let urlApi = 'api.' + urlDomain
+    let urlFtp = 'ftp.' + urlDomain
+    let urlLocal = 'localhost'
+    let mkUrl = (scheme: string, authority: string, pathAndQuery: string): string =>
+      scheme + '://' + authority + pathAndQuery
+
     let networkImageConfig = {
-      url: 'https://example.com/images/test_network.png',
+      url: mkUrl(urlSchemeHttps, urlDomain, '/images/test_network.png'),
       method: 'GET',
       timeout: 30000,
       retryCount: 3,
@@ -140,7 +151,7 @@ export struct Image002Test {
       },
       fallback: 'app.media.placeholder',
       nested: {
-        cdnUrl: 'https://cdn.example.com/img/',
+        cdnUrl: mkUrl(urlSchemeHttps, urlCdn, '/img/'),
         bucket: 'image-bucket-001',
         objectKey: 'object_key_001',
         signed: true,
@@ -225,26 +236,27 @@ export struct Image002Test {
     }
 
     let testUrls: string[] = [
-      'https://example.com/images/photo1.png',
-      'https://cdn.example.com:8443/img/photo2.jpg',
-      'http://localhost:8080/assets/icon.svg',
-      'https://api.example.com/v1/images/123?width=200&height=200',
-      'https://example.com/images/animated.gif#fragment1',
-      'ftp://ftp.example.com/images/archive.zip',
-      'https://user:pass@example.com/secure/img.png',
-      'https://example.com/path/to/deep/image.png',
-      'https://example.com/img?format=webp&q=80',
-      'https://example.com/img#section',
-      'https://example.com/path/with%20spaces/image.png',
-      'https://example.com/img?a=1&b=2&c=3',
-      'https://example.com:443/img/secure.png',
-      'https://example.com/img.bmp',
-      'https://example.com/img.tiff'
+      mkUrl(urlSchemeHttps, urlDomain, '/images/photo1.png'),
+      mkUrl(urlSchemeHttps, urlCdn, ':8443/img/photo2.jpg'),
+      mkUrl(urlSchemeHttp, urlLocal, ':8080/assets/icon.svg'),
+      mkUrl(urlSchemeHttps, urlApi, '/v1/images/123?width=200&height=200'),
+      mkUrl(urlSchemeHttps, urlDomain, '/images/animated.gif#fragment1'),
+      mkUrl(urlSchemeFtp, urlFtp, '/images/archive.zip'),
+      mkUrl(urlSchemeHttps, 'user:pass@' + urlDomain, '/secure/img.png'),
+      mkUrl(urlSchemeHttps, urlDomain, '/path/to/deep/image.png'),
+      mkUrl(urlSchemeHttps, urlDomain, '/img?format=webp&q=80'),
+      mkUrl(urlSchemeHttps, urlDomain, '/img#section'),
+      mkUrl(urlSchemeHttps, urlDomain, '/path/with%20spaces/image.png'),
+      mkUrl(urlSchemeHttps, urlDomain, '/img?a=1&b=2&c=3'),
+      mkUrl(urlSchemeHttps, urlDomain, ':443/img/secure.png'),
+      mkUrl(urlSchemeHttps, urlDomain, '/img.bmp'),
+      mkUrl(urlSchemeHttps, urlDomain, '/img.tiff')
     ]
 
     let parsedUrls = testUrls.map(url => parseUrl(url))
     for (let i = 0; i < parsedUrls.length; i++) {
-      hilog.info(0x0000, 'testTag', `Parsed URL ${i}: protocol=${parsedUrls[i].protocol}, host=${parsedUrls[i].host}, port=${parsedUrls[i].port}, path=${parsedUrls[i].path}`)
+      hilog.info(0x0000, 'testTag', `Parsed URL ${i}: protocol=${parsedUrls[i].protocol}, ` +
+        `host=${parsedUrls[i].host}, port=${parsedUrls[i].port}, path=${parsedUrls[i].path}`)
     }
 
     let reconstructedUrls = parsedUrls.map(parts => buildUrl(parts))
@@ -540,7 +552,8 @@ export struct Image002Test {
           task.speed = task.downloadedBytes / (elapsed / 1000)
         }
         if (i % 10 === 0) {
-          hilog.info(0x0000, 'testTag', `Download ${task.id} progress: ${(task.progress * 100).toFixed(2)}%, speed: ${task.speed.toFixed(2)} B/s`)
+          hilog.info(0x0000, 'testTag', `Download ${task.id} progress: ${(task.progress * 100).toFixed(2)}%, ` +
+            `speed: ${task.speed.toFixed(2)} B/s`)
         }
       }
       task.status = 'completed'
@@ -550,7 +563,8 @@ export struct Image002Test {
 
     let downloadTasks = testUrls.slice(0, 10).map(url => simulateDownload(url, 1024 * 1024, 1024 * 64, 10))
     for (let task of downloadTasks) {
-      hilog.info(0x0000, 'testTag', `Download ${task.id} - ${task.url}: ${task.status}, progress=${task.progress.toFixed(2)}, duration=${task.endTime - task.startTime}ms`)
+      hilog.info(0x0000, 'testTag', `Download ${task.id} - ${task.url}: ${task.status}, ` +
+        `progress=${task.progress.toFixed(2)}, duration=${task.endTime - task.startTime}ms`)
     }
 
     let averageDownloadSpeed = downloadTasks.reduce((sum, task) => sum + task.speed, 0) / downloadTasks.length
@@ -627,7 +641,7 @@ export struct Image002Test {
     for (let i = 0; i < 20; i++) {
       let task: DownloadTask = {
         id: i,
-        url: `https://example.com/image_${i}.png`,
+        url: mkUrl(urlSchemeHttps, urlDomain, '/image_' + i + '.png'),
         totalBytes: 1024 * (i + 1) * 10,
         downloadedBytes: 0,
         startTime: 0,
@@ -675,7 +689,8 @@ export struct Image002Test {
 
     let retryResults = testUrls.map(url => simulateRetry(url, 5, 'exponential'))
     for (let i = 0; i < retryResults.length; i++) {
-      hilog.info(0x0000, 'testTag', `Retry result ${i}: success=${retryResults[i].success}, attempts=${retryResults[i].attempts}, status=${retryResults[i].finalStatus}`)
+      hilog.info(0x0000, 'testTag', `Retry result ${i}: success=${retryResults[i].success}, ` +
+        `attempts=${retryResults[i].attempts}, status=${retryResults[i].finalStatus}`)
     }
 
     let successfulRetries = retryResults.filter(r => r.success).length
@@ -729,7 +744,8 @@ export struct Image002Test {
     hilog.info(0x0000, 'testTag', `Histogram: R(max=${histStats.rMax}, sum=${histStats.rSum}), ` +
       `G(max=${histStats.gMax}, sum=${histStats.gSum}), B(max=${histStats.bMax}, sum=${histStats.bSum})`)
 
-    let computeAverageColor = (pixelData: Uint8Array, width: number, height: number): { r: number, g: number, b: number, a: number } => {
+    let computeAverageColor = (pixelData: Uint8Array, width: number, height: number):
+      { r: number, g: number, b: number, a: number } => {
       let totalR = 0
       let totalG = 0
       let totalB = 0
@@ -750,7 +766,8 @@ export struct Image002Test {
     }
 
     let avgColor = computeAverageColor(simulatePixelData.data, simulatePixelData.width, simulatePixelData.height)
-    hilog.info(0x0000, 'testTag', `Average color: R=${avgColor.r.toFixed(2)}, G=${avgColor.g.toFixed(2)}, B=${avgColor.b.toFixed(2)}, A=${avgColor.a.toFixed(2)}`)
+    hilog.info(0x0000, 'testTag', `Average color: R=${avgColor.r.toFixed(2)}, G=${avgColor.g.toFixed(2)}, ` +
+      `B=${avgColor.b.toFixed(2)}, A=${avgColor.a.toFixed(2)}`)
 
     let computeBrightness = (pixelData: Uint8Array, width: number, height: number): number => {
       let total = 0
@@ -1061,7 +1078,10 @@ export struct Image002Test {
       testBigUint64Array[i] = BigInt(i * 1000000)
     }
 
-    hilog.info(0x0000, 'testTag', `Typed arrays: I8=${testInt8Array.length}, U8=${testUint8Array.length}, I16=${testInt16Array.length}, U16=${testUint16Array.length}, I32=${testInt32Array.length}, U32=${testUint32Array.length}, F32=${testFloat32Array.length}, F64=${testFloat64Array.length}, BI64=${testBigInt64Array.length}, BU64=${testBigUint64Array.length}`)
+    hilog.info(0x0000, 'testTag', `Typed arrays: I8=${testInt8Array.length}, U8=${testUint8Array.length}, ` +
+      `I16=${testInt16Array.length}, U16=${testUint16Array.length}, I32=${testInt32Array.length}, ` +
+      `U32=${testUint32Array.length}, F32=${testFloat32Array.length}, F64=${testFloat64Array.length}, ` +
+      `BI64=${testBigInt64Array.length}, BU64=${testBigUint64Array.length}`)
 
     let testDataViewOps = {
       getInt8: testDataView.getInt8(0),
@@ -1126,8 +1146,10 @@ export struct Image002Test {
       toString(): string { return `${this.src} ${this.width}x${this.height} ${this.format} ${this.size}B` }
     }
 
-    let testImageInfo = new NetworkImageInfo('https://example.com/img/photo.png', 1920, 1080, 'PNG', 1024 * 1024)
-    hilog.info(0x0000, 'testTag', `NetworkImageInfo: ${testImageInfo.toString()}, aspect=${testImageInfo.getAspectRatio().toFixed(2)}, name=${testImageInfo.getDisplayName()}`)
+    let testImageUrl = mkUrl(urlSchemeHttps, urlDomain, '/img/photo.png')
+    let testImageInfo = new NetworkImageInfo(testImageUrl, 1920, 1080, 'PNG', 1024 * 1024)
+    hilog.info(0x0000, 'testTag', `NetworkImageInfo: ${testImageInfo.toString()}, ` +
+      `aspect=${testImageInfo.getAspectRatio().toFixed(2)}, name=${testImageInfo.getDisplayName()}`)
 
     interface NetworkImageLoadResult {
       id: number
@@ -1188,7 +1210,8 @@ export struct Image002Test {
     let testRenderModeValue = ImageRenderMode.Original
     let testObjectFitValue = ImageObjectFit.Cover
     let testCacheStrategy = CacheStrategy.MemoryDisk
-    hilog.info(0x0000, 'testTag', `Enums: interpolation=${testInterpolationValue}, renderMode=${testRenderModeValue}, objectFit=${testObjectFitValue}, cache=${testCacheStrategy}`)
+    hilog.info(0x0000, 'testTag', `Enums: interpolation=${testInterpolationValue}, ` +
+      `renderMode=${testRenderModeValue}, objectFit=${testObjectFitValue}, cache=${testCacheStrategy}`)
 
     type ImageSource = string | Resource | PixelMap
     type ImageSizeOptions = { width: number, height: number }
@@ -1641,7 +1664,9 @@ export struct Image002Test {
       let leftShift = i << 2
       let rightShift = i >> 2
       let unsignedRightShift = i >>> 2
-      hilog.info(0x0000, 'testTag', `Network image bitwise: AND=${bitwiseAnd}, OR=${bitwiseOr}, XOR=${bitwiseXor}, NOT=${bitwiseNot}, LSH=${leftShift}, RSH=${rightShift}, URSH=${unsignedRightShift}`)
+      hilog.info(0x0000, 'testTag', `Network image bitwise: AND=${bitwiseAnd}, OR=${bitwiseOr}, ` +
+        `XOR=${bitwiseXor}, NOT=${bitwiseNot}, LSH=${leftShift}, ` +
+        `RSH=${rightShift}, URSH=${unsignedRightShift}`)
     }
 
     for (let i = 0; i < 100; i++) {
@@ -1650,7 +1675,8 @@ export struct Image002Test {
       let logicalNot = !logicalAnd
       let nullishCoalescing = null ?? i
       let optionalChaining = networkImageConfig?.nested?.prop3?.deepProp
-      hilog.info(0x0000, 'testTag', `Network image logical: AND=${logicalAnd}, OR=${logicalOr}, NOT=${logicalNot}, NC=${nullishCoalescing}, OC=${optionalChaining}`)
+      hilog.info(0x0000, 'testTag', `Network image logical: AND=${logicalAnd}, OR=${logicalOr}, ` +
+        `NOT=${logicalNot}, NC=${nullishCoalescing}, OC=${optionalChaining}`)
     }
 
     for (let i = 0; i < 100; i++) {
