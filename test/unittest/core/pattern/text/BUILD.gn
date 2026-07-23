@@ -100,6 +100,7 @@ ace_unittest("span_test_ng") {
   sources = [
     "lru_cache_test_ng.cpp",
     "span_accessibility_test_ng.cpp",
+    "span_color_mode_test_ng.cpp",
     "span_group_hash_calculator_test_ng.cpp",
     "span_node_test_ng.cpp",
     "span_string_test_ng.cpp",

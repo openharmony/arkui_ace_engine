@@ -71,6 +71,7 @@
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/rich_editor/color_mode_processor.h"
 #include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_content_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
@@ -198,7 +199,7 @@ RichEditorPattern::RichEditorPattern(bool isStyledStringMode) :
     }
     twinklingInterval_ = SystemProperties::GetDebugEnabled()
         ? RICH_EDITOR_TWINKLING_INTERVAL_MS_DEBUG : RICH_EDITOR_TWINKLING_INTERVAL_MS;
-    floatingCaretState_.UpdateOriginCaretColor();
+    floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
     undoManager_ = RichEditorUndoManager::Create(isSpanStringMode_, WeakClaim(this));
     styleManager_ = std::make_unique<StyleManager>(WeakClaim(this));
     if (!dataDetectorAdapter_) {
@@ -261,6 +262,11 @@ void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
     styledString_->AddCustomSpan();
     styledString_->SetFramNode(host);
     StyledStringRegisterResource();
+    auto colorMode = GetColorMode() ;
+    if (colorMode != ColorMode:: COLOR_MODE_UNDEFINED) {
+        COLOR_MODE_LOCK(colorMode);
+        OnColorConfigurationUpdate();
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     ForceTriggerAvoidOnCaretChange();
     undoManager_->RecordOperation(record);
@@ -6148,7 +6154,7 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     IF_PRESENT(typingStyle_, ReloadResources());
     IF_PRESENT(selectOverlay_, UpdateHandleColor());
     IF_PRESENT(magnifierController_, SetColorModeChange(true));
-    floatingCaretState_.UpdateOriginCaretColor();
+    floatingCaretState_.UpdateOriginCaretColor(GetDisplayColorMode());
     UpdateScrollBarColor(GetScrollBarColor());
 }
 
@@ -14357,6 +14363,21 @@ Color RichEditorPattern::GetScrollBarColor() const
     return scrollbarTheme->GetForegroundColor();
 }
 
+ColorMode RichEditorPattern::GetColorMode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(!host, host->GetLocalColorMode());
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, ColorMode::COLOR_MODE_UNDEFINED);
+    return context->GetLocalColorMode();
+}
+
+ColorMode RichEditorPattern::GetDisplayColorMode() const
+{
+    auto colorMode = GetColorMode();
+    return colorMode == ColorMode::COLOR_MODE_UNDEFINED ? Container::CurrentColorMode() : colorMode;
+}
+
 bool SysScale::operator==(const SysScale& rhs) const
 {
     return NearEqual(dipScale, rhs.dipScale)
@@ -14455,9 +14476,8 @@ void RichEditorPattern::FloatingCaretState::Reset()
     touchMoveOffset.reset();
 }
 
-void RichEditorPattern::FloatingCaretState::UpdateOriginCaretColor()
+void RichEditorPattern::FloatingCaretState::UpdateOriginCaretColor(ColorMode colorMode)
 {
-    auto colorMode = Container::CurrentColorMode();
     originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
 }
 
