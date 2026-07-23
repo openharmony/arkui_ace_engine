@@ -21,6 +21,7 @@ ace_unittest("selection_container_test_ng") {
     "selection_container_pattern_test_two.cpp",
     "selection_container_child_test_ng.cpp",
     "selection_container_model_ng_test.cpp",
+    "selection_container_model_static_test_ng.cpp",
     "selection_container_test_ng.cpp",
     "selection_select_overlay_test_ng.cpp",
   ]

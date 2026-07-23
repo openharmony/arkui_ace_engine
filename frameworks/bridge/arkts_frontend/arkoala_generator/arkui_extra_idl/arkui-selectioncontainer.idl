@@ -1,0 +1,45 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package arkui.component.idlize;
+import arkui.component.common.Callback as Callback;
+import arkui.component.common.CommonMethod as CommonMethod;
+import arkui.component.common.AttributeModifier as AttributeModifier;
+import arkui.component.units.ResourceColor as ResourceColor;
+import arkui.component.textCommon.TextMenuItem as TextMenuItem;
+import ohos.arkui.component.CopyOptions as CopyOptions;
+import ohos.arkui.component.TextSpanType as TextSpanType;
+import ohos.arkui.component.TextResponseType as TextResponseType;
+import ohos.arkui.component.CustomBuilder as CustomBuilder;
+import ohos.arkui.components.SelectionContainer.SelectionContainerMenuOptions as SelectionContainerMenuOptions;
+import ohos.arkui.components.SelectionContainer.SelectionContainerEditMenuOptions as SelectionContainerEditMenuOptions;
+import ohos.arkui.components.SelectionContainer.SelectionContainerTextJoinStyle as SelectionContainerTextJoinStyle;
+
+[Entity=Class]
+interface SelectionContainerExtender {
+    static pointer selectionContainerConstructor(i32 id);
+    static void setSelectionContainerOptions(pointer node);
+    static void copyOption(pointer node, optional CopyOptions value);
+    static void caretColor(pointer node, optional ResourceColor color);
+    static void selectedBackgroundColor(pointer node, optional ResourceColor color);
+    static void enableHapticFeedback(pointer node, optional boolean isEnabled);
+    static void textJoinStyle(pointer node, optional SelectionContainerTextJoinStyle style);
+    static void bindSelectionMenu(pointer node, optional TextSpanType spanType,
+        optional CustomBuilder content, optional TextResponseType responseType,
+        optional SelectionContainerMenuOptions options);
+    static void editMenuOptions(pointer node, optional SelectionContainerEditMenuOptions options);
+    static void onTextSelectionChange(pointer node, optional Callback<sequence<String>> callback);
+    static void onWillCopy(pointer node, optional Callback<String, boolean> callback);
+    static void onCopy(pointer node, optional Callback_String_Void callback);
+};
