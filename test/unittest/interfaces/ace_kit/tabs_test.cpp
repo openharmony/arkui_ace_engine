@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_layout_property.h"
+#include "core/components_ng/property/layout_constraint.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -50,6 +51,17 @@ protected:
         auto frameNodeImpl = AceType::MakeRefPtr<FrameNodeImpl>(aceNode);
         RefPtr<Kit::FrameNode> baseNode = frameNodeImpl;
         tabs_ = AceType::MakeRefPtr<Tabs>(baseNode);
+
+        auto tabsNode = GetAceTabsNode();
+        ASSERT_NE(tabsNode, nullptr);
+        auto tabBarNode = AceType::DynamicCast<NG::FrameNode>(tabsNode->GetTabBar());
+        ASSERT_NE(tabBarNode, nullptr);
+        auto tabBarLayoutProp = tabBarNode->GetLayoutProperty<NG::TabBarLayoutProperty>();
+        ASSERT_NE(tabBarLayoutProp, nullptr);
+        NG::LayoutConstraintF constraint;
+        constraint.percentReference = NG::SizeF(720.0f, 1280.0f);
+        constraint.maxSize = NG::SizeF(720.0f, 1280.0f);
+        tabBarLayoutProp->UpdateLayoutConstraint(constraint);
     }
 
     void TearDown() override
