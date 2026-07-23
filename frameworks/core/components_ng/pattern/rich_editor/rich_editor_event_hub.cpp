@@ -536,14 +536,16 @@ void RichEditorEventHub::SetOnReady(std::function<void()>&& func)
 
 void RichEditorEventHub::FireOnReady()
 {
-    if (onReady_) {
-        onReady_();
-        auto host = GetFrameNode();
-        CHECK_NULL_VOID(host);
-        auto* context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        context->AddAfterRenderTask([host]() { host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); });
+    if (!onReady_) {
+        return;
     }
+    auto callback = onReady_;
+    callback();
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto* context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterRenderTask([host]() { host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); });
 }
 
 void RichEditorEventHub::SetAboutToIMEInput(std::function<bool(const RichEditorInsertValue&)>&& func)
@@ -567,8 +569,11 @@ void RichEditorEventHub::SetOnIMEInputComplete(std::function<void(const RichEdit
 
 void RichEditorEventHub::FireOnIMEInputComplete(const RichEditorAbstractSpanResult& info)
 {
-    if (onIMEInputComplete_)
-        onIMEInputComplete_(info);
+    if (!onIMEInputComplete_) {
+        return;
+    }
+    auto callback = onIMEInputComplete_;
+    callback(info);
 }
 
 void RichEditorEventHub::SetOnDidIMEInput(std::function<void(const TextRange&)>&& func)
@@ -578,8 +583,11 @@ void RichEditorEventHub::SetOnDidIMEInput(std::function<void(const TextRange&)>&
 
 void RichEditorEventHub::FireOnDidIMEInput(const TextRange& range)
 {
-    if (onDidIMEInput_)
-        onDidIMEInput_(range);
+    if (!onDidIMEInput_) {
+        return;
+    }
+    auto callback = onDidIMEInput_;
+    callback(range);
 }
 
 void RichEditorEventHub::SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func)
@@ -602,13 +610,15 @@ void RichEditorEventHub::SetOnDeleteComplete(std::function<void()>&& func)
 }
 void RichEditorEventHub::FireOnDeleteComplete()
 {
-    if (onDeleteComplete_) {
-        onDeleteComplete_();
-#ifndef CROSS_PLATFORM
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "RichEditor.onDeleteComplete",
-            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
-#endif
+    if (!onDeleteComplete_) {
+        return;
     }
+    auto callback = onDeleteComplete_;
+    callback();
+#ifndef CROSS_PLATFORM
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "RichEditor.onDeleteComplete",
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+#endif
 }
 
 std::string RichEditorEventHub::GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType type)
@@ -636,9 +646,11 @@ void RichEditorEventHub::SetOnEditingChange(std::function<void(const bool&)>&& f
  
 void RichEditorEventHub::FireOnEditingChange(bool isEditing)
 {
-    if (onEditingChange_) {
-        onEditingChange_(isEditing);
+    if (!onEditingChange_) {
+        return;
     }
+    auto callback = onEditingChange_;
+    callback(isEditing);
 }
 
 void RichEditorEventHub::SetOnWillChange(std::function<bool(const RichEditorChangeValue&)>&& func)
@@ -667,9 +679,11 @@ void RichEditorEventHub::SetOnDidChange(std::function<void(const RichEditorChang
 
 void RichEditorEventHub::FireOnDidChange(const RichEditorChangeValue& changeValue)
 {
-    if (onDidChange_) {
-        onDidChange_(changeValue);
+    if (!onDidChange_) {
+        return;
     }
+    auto callback = onDidChange_;
+    callback(changeValue);
 }
 
 bool RichEditorEventHub::HasOnDidChange() const
@@ -689,9 +703,11 @@ void RichEditorEventHub::SetOnCut(std::function<void(NG::TextCommonEvent&)>&& fu
 
 void RichEditorEventHub::FireOnCut(NG::TextCommonEvent& value)
 {
-    if (onCut_) {
-        onCut_(value);
+    if (!onCut_) {
+        return;
     }
+    auto callback = onCut_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func)
@@ -701,9 +717,11 @@ void RichEditorEventHub::SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& f
 
 void RichEditorEventHub::FireOnCopy(NG::TextCommonEvent& value)
 {
-    if (onCopy_) {
-        onCopy_(value);
+    if (!onCopy_) {
+        return;
     }
+    auto callback = onCopy_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func)
@@ -713,9 +731,11 @@ void RichEditorEventHub::SetOnShare(std::function<void(NG::TextCommonEvent&)>&& 
 
 void RichEditorEventHub::FireOnShare(NG::TextCommonEvent& value)
 {
-    if (onShare_) {
-        onShare_(value);
+    if (!onShare_) {
+        return;
     }
+    auto callback = onShare_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)>&& func)
@@ -744,9 +764,11 @@ void RichEditorEventHub::SetOnStyledStringDidChange(std::function<void(const Sty
 
 void RichEditorEventHub::FireOnStyledStringDidChange(const StyledStringChangeValue& info)
 {
-    if (onStyledStringDidChange_) {
-        onStyledStringDidChange_(info);
+    if (!onStyledStringDidChange_) {
+        return;
     }
+    auto callback = onStyledStringDidChange_;
+    callback(info);
 }
 
 bool RichEditorEventHub::HasOnStyledStringDidChange() const
@@ -786,9 +808,11 @@ void RichEditorEventHub::SetOnSelect(std::function<void(const BaseEventInfo*)>&&
 
 void RichEditorEventHub::FireOnSelect(BaseEventInfo* value)
 {
-    if (onSelect_) {
-        onSelect_(value);
+    if (!onSelect_) {
+        return;
     }
+    auto callback = onSelect_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func)
@@ -798,9 +822,11 @@ void RichEditorEventHub::SetOnSelectionChange(std::function<void(const BaseEvent
 
 void RichEditorEventHub::FireOnSelectionChange(BaseEventInfo* value)
 {
-    if (OnSelectionChange_) {
-        OnSelectionChange_(value);
+    if (!OnSelectionChange_) {
+        return;
     }
+    auto callback = OnSelectionChange_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetTimestamp(long long timestamp)
@@ -815,9 +841,11 @@ void RichEditorEventHub::SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& 
 
 void RichEditorEventHub::FireOnPaste(NG::TextCommonEvent& value)
 {
-    if (onPaste_) {
-        onPaste_(value);
+    if (!onPaste_) {
+        return;
     }
+    auto callback = onPaste_;
+    callback(value);
 }
 
 void RichEditorEventHub::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
@@ -827,9 +855,11 @@ void RichEditorEventHub::SetOnSubmit(std::function<void(int32_t, NG::TextFieldCo
 
 void RichEditorEventHub::FireOnSubmit(int32_t value, NG::TextFieldCommonEvent& event)
 {
-    if (onSubmit_) {
-        onSubmit_(value, event);
+    if (!onSubmit_) {
+        return;
     }
+    auto callback = onSubmit_;
+    callback(value, event);
 }
 
 void RichEditorEventHub::SetOnWillAttachIME(IMEAttachCallback&& func)
@@ -839,9 +869,11 @@ void RichEditorEventHub::SetOnWillAttachIME(IMEAttachCallback&& func)
 
 void RichEditorEventHub::FireOnWillAttachIME(IMEClient& info)
 {
-    if (onWillAttachIME_) {
-        onWillAttachIME_(info);
+    if (!onWillAttachIME_) {
+        return;
     }
+    auto callback = onWillAttachIME_;
+    callback(info);
 }
 
 RefPtr<GestureEventHub> RichEditorEventHub::CreateGestureEventHub()
