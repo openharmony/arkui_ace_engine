@@ -83,6 +83,7 @@ public:
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
     void Background() override;
+    void SetBackgroundForceFlushVsync(bool enable, size_t count) override;
     void NotifyWindowAttachStateChange(bool status) override;
     void PostPreFreezeRegisterTask(bool isRegister);
     void Focus() override;
