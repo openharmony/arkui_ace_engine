@@ -68,9 +68,9 @@ public:
 
     void SetIsFullScreen(bool isFullScreen) override;
 #ifdef RENDER_EXTRACT_SUPPORTED
-    void SetSurfaceRotation(bool isLock);
+    ACE_FORCE_EXPORT void SetSurfaceRotation(bool isLock);
 
-    void SetSurfaceRect(float positionX, float positionY, float width, float height);
+    ACE_FORCE_EXPORT void SetSurfaceRect(float positionX, float positionY, float width, float height);
 
     std::shared_ptr<Media::PixelMap> SurfaceCapture() override;
 #endif
