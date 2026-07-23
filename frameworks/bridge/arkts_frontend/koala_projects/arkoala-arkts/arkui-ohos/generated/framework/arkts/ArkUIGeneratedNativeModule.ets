@@ -3554,7 +3554,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_setEnableFullscreenVideoOverlay(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-	native static _WebAttribute_setEnableMediaNetworkProxy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _WebAttribute_setEnableMediaNetworkProxy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _WebAttribute_setRegisterNativeEmbedRule(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -7405,6 +7405,8 @@ export class ArkUIGeneratedNativeModule {
     native static _WebResourceError_getErrorInfo(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _WebResourceError_getErrorCode(ptr: KPointer): KInt
+    @ani.unsafe.Direct
+    native static _WebResourceError_getCustomErrorCode(ptr: KPointer): KInt
     @ani.unsafe.Direct
     native static _WebResourceRequest_construct(): KPointer
     @ani.unsafe.Direct

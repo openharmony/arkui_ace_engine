@@ -28627,7 +28627,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setEnableFullscreenVideoOverlay)(Ark_NativePointer node,
                                             const Opt_Boolean* value);
     void (*setEnableMediaNetworkProxy)(Ark_NativePointer node,
-                                  const Opt_Boolean* value);
+                                       const Opt_Boolean* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,
                                        const Opt_String* tag,
                                        const Opt_String* type);
@@ -32808,6 +32808,7 @@ typedef struct GENERATED_ArkUIWebResourceErrorAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getErrorInfo)(Ark_WebResourceError peer);
     Ark_Int32 (*getErrorCode)(Ark_WebResourceError peer);
+    Ark_Int32 (*getCustomErrorCode)(Ark_WebResourceError peer);
 } GENERATED_ArkUIWebResourceErrorAccessor;
 
 typedef struct GENERATED_ArkUIWebResourceRequestAccessor {
