@@ -19,6 +19,8 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
+#include "core/components_ng/pattern/selection_container/selection_container_model_static.h"
+#include "core/components_ng/pattern/selection_container/selection_container_pattern.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_pattern.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
@@ -49,6 +51,12 @@ RefPtr<NG::FrameNode> NG::CircleModelNG::CreateFrameNode(int32_t nodeId)
 RefPtr<NG::FrameNode> NG::FormModelNG::CreateFrameNode(int32_t nodeId)
 {
     return nullptr;
+}
+
+RefPtr<NG::FrameNode> NG::SelectionContainerModelStatic::CreateFrameNode(int32_t nodeId)
+{
+    return FrameNode::CreateFrameNode(
+        V2::SELECTION_CONTAINER_ETS_TAG, nodeId, AceType::MakeRefPtr<NG::SelectionContainerPattern>());
 }
 
 std::optional<NG::SizeF> NG::PathLayoutAlgorithm::MeasureContent(

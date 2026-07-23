@@ -96,6 +96,8 @@ import { ArkLazyVGridLayoutComponent, LazyVGridLayoutAttribute, LazyGridLayoutAt
 import { LazyVGridLayoutModifier } from "./../../LazyVGridLayoutModifier"
 import { ArkLazyColumnLayoutComponent, LazyColumnLayoutAttribute } from "@ohos.arkui.components.ArkLazyColumnLayout"
 import { LazyColumnLayoutModifier } from "./../../LazyColumnLayoutModifier"
+import { ArkSelectionContainerComponent, SelectionContainerAttribute } from "@ohos.arkui.components.SelectionContainer"
+import { SelectionContainerModifier } from "./../../SelectionContainerModifier"
 import { ArkLazyWaterFlowLayoutAttributeComponent, ArkLazyVWaterFlowLayoutComponent, LazyWaterFlowLayoutAttribute, LazyVWaterFlowLayoutAttribute } from '@ohos.arkui.components.ArkLazyWaterFlowLayout'
 import { LazyVWaterFlowLayoutModifier } from './../../LazyVWaterFlowLayoutModifier'
 import { ArkIndicatorComponentComponent, IndicatorComponentAttribute } from "./../../component/indicatorcomponent"
@@ -2730,6 +2732,38 @@ export function hookLazyColumnLayoutAttributeModifier(component: ArkLazyColumnLa
         return componentNew
     }
     applyAttributeModifierBase(modifier as Object as AttributeModifier<LazyColumnLayoutAttribute>,
+        attributeSet, constructParam, updaterReceiver, component.getPeer())
+}
+
+export function hookSelectionContainerAttributeModifier(component: ArkSelectionContainerComponent,
+    modifier: AttributeModifier<SelectionContainerAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return
+    }
+    const isCommonModifier: boolean = modifier instanceof CommonModifier
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>)
+        return
+    }
+    const attributeSet = (): SelectionContainerModifier => {
+        const isSelectionContainerModifier: boolean = modifier instanceof SelectionContainerModifier
+        const initModifier = component.getPeer().selectionContainerAttributeSet ?
+            component.getPeer().selectionContainerAttributeSet! : new SelectionContainerModifier()
+        if (isSelectionContainerModifier) {
+            const selectionContainerModifier = modifier as object as SelectionContainerModifier
+            initModifier.mergeModifier(selectionContainerModifier)
+        }
+        component.getPeer().selectionContainerAttributeSet = initModifier
+        return initModifier
+    }
+    const constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    }
+    const updaterReceiver = (): ArkSelectionContainerComponent => {
+        const componentNew: ArkSelectionContainerComponent = new ArkSelectionContainerComponent()
+        componentNew.setPeer(component.getPeer())
+        return componentNew
+    }
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<SelectionContainerAttribute>,
         attributeSet, constructParam, updaterReceiver, component.getPeer())
 }
 
