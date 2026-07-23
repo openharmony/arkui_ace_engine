@@ -70,6 +70,7 @@ build_component_ng("web_pattern_ng") {
       "init:libbegetutil",
       "input:libmmi-client",
       "ipc:ipc_core",
+      "node:node_header_notice",
       "webview:libnweb",
       "window_manager:libpip_ndk",
       "window_manager:libwm",
