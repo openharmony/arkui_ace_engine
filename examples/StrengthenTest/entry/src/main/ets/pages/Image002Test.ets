@@ -515,7 +515,8 @@ export struct Image002Test {
       speed: number
     }
 
-    let simulateDownload = (url: string, totalBytes: number, chunkSize: number, delayPerChunk: number): DownloadTask => {
+    let simulateDownload = (url: string, totalBytes: number, chunkSize: number,
+      delayPerChunk: number): DownloadTask => {
       let task: DownloadTask = {
         id: Math.floor(Math.random() * 1000000),
         url,
@@ -653,7 +654,8 @@ export struct Image002Test {
       hilog.info(0x0000, 'testTag', `Retry strategy ${name}: total delay=${totalDelay.toFixed(2)}ms`)
     }
 
-    let simulateRetry = (url: string, maxRetries: number, strategy: string): { success: boolean, attempts: number, finalStatus: number } => {
+    let simulateRetry = (url: string, maxRetries: number, strategy: string):
+      { success: boolean, attempts: number, finalStatus: number } => {
       let attempts = 0
       let delays = retryStrategies.get(strategy) || [1000]
       let response = simulateHttpRequest(url, 'GET', 1000)
@@ -698,7 +700,8 @@ export struct Image002Test {
       return { width, height, data }
     })()
 
-    hilog.info(0x0000, 'testTag', `Pixel data: w=${simulatePixelData.width}, h=${simulatePixelData.height}, size=${simulatePixelData.data.length}`)
+    hilog.info(0x0000, 'testTag', `Pixel data: w=${simulatePixelData.width}, ` +
+      `h=${simulatePixelData.height}, size=${simulatePixelData.data.length}`)
 
     let computeHistogram = (pixelData: Uint8Array, width: number, height: number): { r: number[], g: number[], b: number[] } => {
       let r: number[] = Array.from({ length: 256 }, () => 0)
@@ -825,7 +828,9 @@ export struct Image002Test {
     for (let pixel of testPixelValues) {
       for (let [filterName, matrix] of colorFilters) {
         let result = applyColorFilter(pixel.r, pixel.g, pixel.b, pixel.a, matrix)
-        hilog.info(0x0000, 'testTag', `Pixel(${pixel.r},${pixel.g},${pixel.b},${pixel.a}) ${filterName} -> (${result.r.toFixed(0)},${result.g.toFixed(0)},${result.b.toFixed(0)},${result.a.toFixed(0)})`)
+        hilog.info(0x0000, 'testTag', `Pixel(${pixel.r},${pixel.g},${pixel.b},${pixel.a}) ` +
+          `${filterName} -> (${result.r.toFixed(0)},${result.g.toFixed(0)},` +
+          `${result.b.toFixed(0)},${result.a.toFixed(0)})`)
       }
     }
 
@@ -851,7 +856,8 @@ export struct Image002Test {
     let resizedPixelData = resizeImage(simulatePixelData.data, simulatePixelData.width, simulatePixelData.height, 10, 10)
     hilog.info(0x0000, 'testTag', `Resized image: 20x20 -> 10x10, size=${resizedPixelData.length}`)
 
-    let cropImage = (pixelData: Uint8Array, srcWidth: number, srcHeight: number, x: number, y: number, cropWidth: number, cropHeight: number): Uint8Array => {
+    let cropImage = (pixelData: Uint8Array, srcWidth: number, srcHeight: number,
+      x: number, y: number, cropWidth: number, cropHeight: number): Uint8Array => {
       let result = new Uint8Array(cropWidth * cropHeight * 4)
       for (let cy = 0; cy < cropHeight; cy++) {
         for (let cx = 0; cx < cropWidth; cx++) {
@@ -980,7 +986,8 @@ export struct Image002Test {
       return result
     }
 
-    let blurredPixelData = applyGaussianBlur(simulatePixelData.data, simulatePixelData.width, simulatePixelData.height, 2)
+    let blurredPixelData = applyGaussianBlur(simulatePixelData.data,
+      simulatePixelData.width, simulatePixelData.height, 2)
     hilog.info(0x0000, 'testTag', `Blurred image: size=${blurredPixelData.length}`)
 
     hilog.info(0x0000, 'testTag', 'loadmoreImageTest part 3 completed')
@@ -1322,8 +1329,8 @@ export struct Image002Test {
       })(),
       customError: (() => {
         class NetworkImageLoadError extends Error {
-          statusCode: number
-          url: string
+          public statusCode: number
+          public url: string
           constructor(message: string, statusCode: number, url: string) {
             super(message)
             this.name = 'NetworkImageLoadError'
