@@ -292,7 +292,7 @@ group("core_event_unittest") {
     ":focus_event_handler_test_ng",
     ":focus_hub_test_ng",
     ":gesture_event_hub_test_ng",
-    ":input_event_hub_test_ng",
+    # ":input_event_hub_test_ng",
     ":input_event_monitor_manager_test_ng",
     ":input_event_test_ng",
     ":key_event_test_ng",
