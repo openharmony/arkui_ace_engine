@@ -138,6 +138,7 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest002, TestSize.Level1)
     const std::string navigationId = "navigationId";
     navigationNode->OnInspectorIdUpdate(navigationId);
     navigationNode->SetRecoverable(true);
+    navigationManager->AddRecoverableNavigation(navigationNode->GetCurId(), navigationNode);
     /**
      * @tc.steps: step3. mock stack operation and sync stack
      */
@@ -211,6 +212,7 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest003, TestSize.Level1)
     const std::string navigationId = "navigationId";
     navigationNode->OnInspectorIdUpdate(navigationId);
     navigationNode->SetRecoverable(true);
+    navigationManager->AddRecoverableNavigation(navigationNode->GetCurId(), navigationNode);
     /**
      * @tc.steps: step3. mock stack operation and sync stack
      */
