@@ -726,7 +726,8 @@ export struct Image002Test {
       gSum: histogram.g.reduce((a, b) => a + b, 0),
       bSum: histogram.b.reduce((a, b) => a + b, 0)
     }
-    hilog.info(0x0000, 'testTag', `Histogram: R(max=${histStats.rMax}, sum=${histStats.rSum}), G(max=${histStats.gMax}, sum=${histStats.gSum}), B(max=${histStats.bMax}, sum=${histStats.bSum})`)
+    hilog.info(0x0000, 'testTag', `Histogram: R(max=${histStats.rMax}, sum=${histStats.rSum}), ` +
+      `G(max=${histStats.gMax}, sum=${histStats.gSum}), B(max=${histStats.bMax}, sum=${histStats.bSum})`)
 
     let computeAverageColor = (pixelData: Uint8Array, width: number, height: number): { r: number, g: number, b: number, a: number } => {
       let totalR = 0
@@ -862,7 +863,8 @@ export struct Image002Test {
       return result
     }
 
-    let resizedPixelData = resizeImage(simulatePixelData.data, simulatePixelData.width, simulatePixelData.height, 10, 10)
+    let resizedPixelData = resizeImage(simulatePixelData.data, simulatePixelData.width,
+      simulatePixelData.height, 10, 10)
     hilog.info(0x0000, 'testTag', `Resized image: 20x20 -> 10x10, size=${resizedPixelData.length}`)
 
     let cropImage = (pixelData: Uint8Array, srcWidth: number, srcHeight: number,
@@ -1010,28 +1012,44 @@ export struct Image002Test {
     }
 
     let testInt8Array = new Int8Array(256)
-    for (let i = 0; i < 256; i++) testInt8Array[i] = i % 128
+    for (let i = 0; i < 256; i++) {
+      testInt8Array[i] = i % 128
+    }
 
     let testUint8Array = new Uint8Array(256)
-    for (let i = 0; i < 256; i++) testUint8Array[i] = i
+    for (let i = 0; i < 256; i++) {
+      testUint8Array[i] = i
+    }
 
     let testInt16Array = new Int16Array(128)
-    for (let i = 0; i < 128; i++) testInt16Array[i] = i * 100
+    for (let i = 0; i < 128; i++) {
+      testInt16Array[i] = i * 100
+    }
 
     let testUint16Array = new Uint16Array(128)
-    for (let i = 0; i < 128; i++) testUint16Array[i] = i * 100
+    for (let i = 0; i < 128; i++) {
+      testUint16Array[i] = i * 100
+    }
 
     let testInt32Array = new Int32Array(64)
-    for (let i = 0; i < 64; i++) testInt32Array[i] = i * 10000
+    for (let i = 0; i < 64; i++) {
+      testInt32Array[i] = i * 10000
+    }
 
     let testUint32Array = new Uint32Array(64)
-    for (let i = 0; i < 64; i++) testUint32Array[i] = i * 100000
+    for (let i = 0; i < 64; i++) {
+      testUint32Array[i] = i * 100000
+    }
 
     let testFloat32Array = new Float32Array(64)
-    for (let i = 0; i < 64; i++) testFloat32Array[i] = i * 1.5
+    for (let i = 0; i < 64; i++) {
+      testFloat32Array[i] = i * 1.5
+    }
 
     let testFloat64Array = new Float64Array(32)
-    for (let i = 0; i < 32; i++) testFloat64Array[i] = i * 2.5
+    for (let i = 0; i < 32; i++) {
+      testFloat64Array[i] = i * 2.5
+    }
 
     let testBigInt64Array = new BigInt64Array(16)
     for (let i = 0; i < 16; i++) {
@@ -1126,7 +1144,7 @@ export struct Image002Test {
 
     let testLoadResult: NetworkImageLoadResult = {
       id: 1,
-      src: 'https://example.com/images/test.png',
+      src: 'placeholder_image.png',
       width: 800,
       height: 600,
       componentWidth: 400,
