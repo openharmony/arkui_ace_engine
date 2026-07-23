@@ -703,7 +703,9 @@ export struct Image002Test {
     hilog.info(0x0000, 'testTag', `Pixel data: w=${simulatePixelData.width}, ` +
       `h=${simulatePixelData.height}, size=${simulatePixelData.data.length}`)
 
-    let computeHistogram = (pixelData: Uint8Array, width: number, height: number): { r: number[], g: number[], b: number[] } => {
+    let computeHistogram = (
+      pixelData: Uint8Array, width: number, height: number
+    ): { r: number[], g: number[], b: number[] } => {
       let r: number[] = Array.from({ length: 256 }, () => 0)
       let g: number[] = Array.from({ length: 256 }, () => 0)
       let b: number[] = Array.from({ length: 256 }, () => 0)
@@ -727,7 +729,10 @@ export struct Image002Test {
     hilog.info(0x0000, 'testTag', `Histogram: R(max=${histStats.rMax}, sum=${histStats.rSum}), G(max=${histStats.gMax}, sum=${histStats.gSum}), B(max=${histStats.bMax}, sum=${histStats.bSum})`)
 
     let computeAverageColor = (pixelData: Uint8Array, width: number, height: number): { r: number, g: number, b: number, a: number } => {
-      let totalR = 0, totalG = 0, totalB = 0, totalA = 0
+      let totalR = 0
+      let totalG = 0
+      let totalB = 0
+      let totalA = 0
       let count = width * height
       for (let i = 0; i < count; i++) {
         totalR += pixelData[i * 4]
@@ -804,7 +809,9 @@ export struct Image002Test {
       0.0, 0.0, 0.0, 1.0, 0.0
     ])
 
-    let applyColorFilter = (r: number, g: number, b: number, a: number, matrix: number[]): { r: number, g: number, b: number, a: number } => {
+    let applyColorFilter = (
+      r: number, g: number, b: number, a: number, matrix: number[]
+    ): { r: number, g: number, b: number, a: number } => {
       let newR = matrix[0] * r + matrix[1] * g + matrix[2] * b + matrix[3] * a + matrix[4]
       let newG = matrix[5] * r + matrix[6] * g + matrix[7] * b + matrix[8] * a + matrix[9]
       let newB = matrix[10] * r + matrix[11] * g + matrix[12] * b + matrix[13] * a + matrix[14]
@@ -834,7 +841,9 @@ export struct Image002Test {
       }
     }
 
-    let resizeImage = (pixelData: Uint8Array, srcWidth: number, srcHeight: number, dstWidth: number, dstHeight: number): Uint8Array => {
+    let resizeImage = (
+      pixelData: Uint8Array, srcWidth: number, srcHeight: number, dstWidth: number, dstHeight: number
+    ): Uint8Array => {
       let result = new Uint8Array(dstWidth * dstHeight * 4)
       let xRatio = srcWidth / dstWidth
       let yRatio = srcHeight / dstHeight
@@ -876,7 +885,9 @@ export struct Image002Test {
       return result
     }
 
-    let croppedPixelData = cropImage(simulatePixelData.data, simulatePixelData.width, simulatePixelData.height, 5, 5, 10, 10)
+    let croppedPixelData = cropImage(
+      simulatePixelData.data, simulatePixelData.width, simulatePixelData.height, 5, 5, 10, 10
+    )
     hilog.info(0x0000, 'testTag', `Cropped image: 20x20 (5,5,10,10), size=${croppedPixelData.length}`)
 
     let rotateImage = (pixelData: Uint8Array, width: number, height: number, degrees: number): Uint8Array => {
@@ -1023,10 +1034,14 @@ export struct Image002Test {
     for (let i = 0; i < 32; i++) testFloat64Array[i] = i * 2.5
 
     let testBigInt64Array = new BigInt64Array(16)
-    for (let i = 0; i < 16; i++) testBigInt64Array[i] = BigInt(i * 1000000)
+    for (let i = 0; i < 16; i++) {
+      testBigInt64Array[i] = BigInt(i * 1000000)
+    }
 
     let testBigUint64Array = new BigUint64Array(16)
-    for (let i = 0; i < 16; i++) testBigUint64Array[i] = BigInt(i * 1000000)
+    for (let i = 0; i < 16; i++) {
+      testBigUint64Array[i] = BigInt(i * 1000000)
+    }
 
     hilog.info(0x0000, 'testTag', `Typed arrays: I8=${testInt8Array.length}, U8=${testUint8Array.length}, I16=${testInt16Array.length}, U16=${testUint16Array.length}, I32=${testInt32Array.length}, U32=${testUint32Array.length}, F32=${testFloat32Array.length}, F64=${testFloat64Array.length}, BI64=${testBigInt64Array.length}, BU64=${testBigUint64Array.length}`)
 
@@ -1167,7 +1182,7 @@ export struct Image002Test {
     let testResizable: ImageResizableOptions = { start: 0, end: 100 }
 
     let testImageSources: ImageSource[] = [
-      'https://example.com/image1.png',
+      'common/network_image.png',
       'app.media.startIcon',
       'app.media.background',
       'common/icon.png'
