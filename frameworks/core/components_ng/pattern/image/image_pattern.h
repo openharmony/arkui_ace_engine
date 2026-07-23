@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 #include "base/geometry/offset.h"
 #include "base/image/image_defines.h"
@@ -36,15 +37,14 @@
 #include "core/components_ng/pattern/pattern.h"
 
 #include "core/drawable/drawable_descriptor.h"
+#include "core/image/image_source_info.h"
 
 // Forward declarations to reduce header dependencies
 namespace OHOS::Ace {
 class Clipboard;
 class ImageAnalyzerManager;
-class ImageSourceInfo;
 class PixelMap;
 struct CanvasImage;
-struct ImageAnalyzerConfig;
 }
 
 namespace OHOS::Ace::NG {

@@ -28,11 +28,16 @@
 #include "base/log/frame_info.h"
 #include "base/log/frame_report.h"
 #include "base/memory/referenced.h"
+#include "base/utils/device_config.h"
 #include "base/view_data/view_data_wrap.h"
+#include "core/common/color_inverter.h"
 #include "core/common/display_info.h"
+#include "core/common/thp_extra_manager.h"
 #include "core/event/pointer_event.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/manager/environment/environment_types.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 
 #include "core/common/ace_translate_manager.h"
@@ -340,9 +345,23 @@ public:
 
     void HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp);
 
-    void SetAreaChangeNodeMinDepth(int32_t depth);
+    void SetAreaChangeNodeMinDepth(int32_t depth)
+    {
+        if (areaChangeNodeMinDepth_ > 0) {
+            areaChangeNodeMinDepth_ = std::min(areaChangeNodeMinDepth_, depth);
+        } else {
+            areaChangeNodeMinDepth_ = depth;
+        }
+    }
 
-    void SetIsDisappearChangeNodeMinDepth(int32_t depth);
+    void SetIsDisappearChangeNodeMinDepth(int32_t depth)
+    {
+        if (isDisappearChangeNodeMinDepth_ > 0) {
+            isDisappearChangeNodeMinDepth_ = std::min(isDisappearChangeNodeMinDepth_, depth);
+        } else {
+            isDisappearChangeNodeMinDepth_ = depth;
+        }
+    }
 
     void HandleSubwindow(bool isShow);
 
@@ -643,31 +662,85 @@ public:
     }
     // end pipeline, exit app
     void Finish(bool autoFinish) const override;
-    RectF GetRootRect();
+    RectF GetRootRect()
+    {
+        CHECK_NULL_RETURN(rootNode_, RectF());
+        auto geometryNode = rootNode_->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, RectF());
+        return geometryNode->GetFrameRect();
+    }
 
     void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) override;
-    void OnFlushReloadFinish();
+    void OnFlushReloadFinish()
+    {
+        auto tasks = std::move(afterReloadAnimationTasks_);
+        for (const auto& task : tasks) {
+            if (task) {
+                task();
+            }
+        }
+    }
     void AddAfterReloadAnimationTask(std::function<void()>&& task)
     {
         afterReloadAnimationTasks_.emplace_back(std::move(task));
     }
 
     int32_t RegisterSurfaceChangedCallback(
-        std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback);
+        std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>&& callback)
+    {
+        if (callback) {
+            surfaceChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
 
-    void UnregisterSurfaceChangedCallback(int32_t callbackId);
+    void UnregisterSurfaceChangedCallback(int32_t callbackId)
+    {
+        surfaceChangedCallbackMap_.erase(callbackId);
+    }
 
-    int32_t RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback);
+    int32_t RegisterFoldStatusChangedCallback(std::function<void(FoldStatus)>&& callback)
+    {
+        if (callback) {
+            foldStatusChangedCallbackMap_.emplace(callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
 
-    void UnRegisterFoldStatusChangedCallback(int32_t callbackId);
+    void UnRegisterFoldStatusChangedCallback(int32_t callbackId)
+    {
+        foldStatusChangedCallbackMap_.erase(callbackId);
+    }
 
-    int32_t RegisterHalfFoldHoverChangedCallback(std::function<void(bool)>&& callback);
+    int32_t RegisterHalfFoldHoverChangedCallback(std::function<void(bool)>&& callback)
+    {
+        if (callback) {
+            halfFoldHoverChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
 
-    void UnRegisterHalfFoldHoverChangedCallback(int32_t callbackId);
+    void UnRegisterHalfFoldHoverChangedCallback(int32_t callbackId)
+    {
+        halfFoldHoverChangedCallbackMap_.erase(callbackId);
+    }
 
-    int32_t RegisterRawKeyboardChangedCallback(std::function<void()>&& callback);
+    int32_t RegisterRawKeyboardChangedCallback(std::function<void()>&& callback)
+    {
+        if (callback) {
+            rawKeyboardChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
 
-    void UnRegisterRawKeyboardChangedCallback(int32_t callbackId);
+    void UnRegisterRawKeyboardChangedCallback(int32_t callbackId)
+    {
+        rawKeyboardChangedCallbackMap_.erase(callbackId);
+    }
 
     void UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t windowHeight);
 
@@ -680,17 +753,47 @@ public:
 
     void OnRawKeyboardChangedCallback() override;
 
-    int32_t RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback);
+    int32_t RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
+    {
+        if (callback) {
+            foldDisplayModeChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
 
-    void UnRegisterFoldDisplayModeChangedCallback(int32_t callbackId);
+    void UnRegisterFoldDisplayModeChangedCallback(int32_t callbackId)
+    {
+        foldDisplayModeChangedCallbackMap_.erase(callbackId);
+    }
 
-    int32_t RegisterSurfacePositionChangedCallback(std::function<void(int32_t, int32_t)>&& callback);
+    int32_t RegisterSurfacePositionChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
+    {
+        if (callback) {
+            surfacePositionChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
 
-    void UnregisterSurfacePositionChangedCallback(int32_t callbackId);
+    void UnregisterSurfacePositionChangedCallback(int32_t callbackId)
+    {
+        surfacePositionChangedCallbackMap_.erase(callbackId);
+    }
 
-    int32_t RegisterTransformHintChangeCallback(std::function<void(uint32_t)>&& callback);
+    int32_t RegisterTransformHintChangeCallback(std::function<void(uint32_t)>&& callback)
+    {
+        if (callback) {
+            transformHintChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
 
-    void UnregisterTransformHintChangedCallback(int32_t callbackId);
+    void UnregisterTransformHintChangedCallback(int32_t callbackId)
+    {
+        transformHintChangedCallbackMap_.erase(callbackId);
+    }
 
     bool SetMouseStyleHoldNode(int32_t id);
     bool FreeMouseStyleHoldNode(int32_t id);
@@ -748,7 +851,16 @@ public:
         delayedTasks_.emplace_back(task);
     }
 
-    void RemoveGestureTask(const DelayedTask& task);
+    void RemoveGestureTask(const DelayedTask& task)
+    {
+        for (auto iter = delayedTasks_.begin(); iter != delayedTasks_.end();) {
+            if (iter->recognizer == task.recognizer) {
+                iter = delayedTasks_.erase(iter);
+            } else {
+                ++iter;
+            }
+        }
+    }
 
     void SetScreenNode(const RefPtr<FrameNode>& node)
     {
@@ -1157,7 +1269,14 @@ public:
 
     ACE_FORCE_EXPORT WeakPtr<AIWriteAdapter> GetOrCreateAIWriteAdapter();
 
-    int32_t RegisterRotationEndCallback(std::function<void()>&& callback);
+    int32_t RegisterRotationEndCallback(std::function<void()>&& callback)
+    {
+        if (callback) {
+            rotationEndCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
 
     void UnregisterRotationEndCallback(int32_t callbackId)
     {

@@ -18,8 +18,6 @@
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"
-#else
-#include "core/components_ng/render/drawing_forward.h"
 #endif
 
 #include "core/components_v2/pattern_lock/render_pattern_lock.h"

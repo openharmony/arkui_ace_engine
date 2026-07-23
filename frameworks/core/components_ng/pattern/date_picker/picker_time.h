@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "base/utils/utils.h"
+
 namespace OHOS::Ace {
 
 class ACE_FORCE_EXPORT PickerTime final {

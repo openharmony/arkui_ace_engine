@@ -19,6 +19,8 @@
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/event/state_style_manager.h"
+#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
+#include "core/components_ng/pattern/button/toggle_button_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"

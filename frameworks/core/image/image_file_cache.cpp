@@ -26,7 +26,6 @@
 #include "base/thread/background_task_executor.h"
 #include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/image/image_loader.h"
-#include "core/image/image_cache.h"
 
 namespace OHOS::Ace {
 

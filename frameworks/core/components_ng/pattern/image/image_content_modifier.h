@@ -35,9 +35,23 @@ public:
 
     void onDraw(DrawingContext& drawingContext) override;
 
-    void SetSensitive(bool sensitive);
-    void SetSize(const SizeF& size);
-    void SetCanvasImageWrapper(const CanvasImageModifierWrapper& wrapper);
+    void SetSensitive(bool sensitive)
+    {
+        CHECK_NULL_VOID(sensitive_);
+        sensitive_->Set(sensitive);
+    }
+
+    void SetSize(const SizeF& size)
+    {
+        CHECK_NULL_VOID(size_);
+        size_->Set(size);
+    }
+
+    void SetCanvasImageWrapper(const CanvasImageModifierWrapper& wrapper)
+    {
+        CHECK_NULL_VOID(canvasImageWrapper_);
+        canvasImageWrapper_->Set(wrapper);
+    }
 
     ContentTransitionType GetContentTransitionParam() override;
 

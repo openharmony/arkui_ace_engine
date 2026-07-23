@@ -25,7 +25,6 @@
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
 #include "compatible/components/chart/chart_modifier_compatible.h"
-#include "frameworks/bridge/common/dom/dom_proxy.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

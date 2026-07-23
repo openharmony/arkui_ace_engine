@@ -168,9 +168,22 @@ public:
         return std::nullopt;
     }
 
-    void DetachFromFrameNode(FrameNode* frameNode);
+    void DetachFromFrameNode(FrameNode* frameNode)
+    {
+        onDetach_ = true;
+        OnDetachFromFrameNode(frameNode);
+        onDetach_ = false;
+        frameNode_.Reset();
+    }
 
-    void AttachToFrameNode(const WeakPtr<FrameNode>& frameNode);
+    void AttachToFrameNode(const WeakPtr<FrameNode>& frameNode)
+    {
+        if (frameNode_ == frameNode) {
+            return;
+        }
+        frameNode_ = frameNode;
+        OnAttachToFrameNode();
+    }
 
     virtual bool CustomizeExpandSafeArea()
     {
@@ -306,7 +319,13 @@ public:
 
     std::optional<SizeF> GetHostContentSize() const;
 
-    RefPtr<FrameNode> GetHost() const;
+    RefPtr<FrameNode> GetHost() const
+    {
+        if (onDetach_ && SystemProperties::DetectGetHostOnDetach()) {
+            LOGF_ABORT("fatal: can't GetHost at detaching period");
+        }
+        return frameNode_.Upgrade();
+    }
 
     int32_t GetHostInstanceId() const;
 

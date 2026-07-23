@@ -15,7 +15,6 @@
 
 #include "test/unittest/core/layout/layout_property_test_ng_two.h"
 
-#include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/property/position_property.h"
 
 namespace OHOS::Ace::NG {

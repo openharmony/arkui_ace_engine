@@ -17,18 +17,17 @@
 #include "test/mock/frameworks/core/animation/mock_animation_manager.h"
 #include "test/mock/frameworks/core/animation/mock_animation_proxy.h"
 #include "core/components_ng/property/particle_property.h"
+#include "core/components_ng/property/transition_property.h"
 
 #include "base/utils/utils.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/modifier.h"
 
 namespace OHOS::Ace::NG {
-RefPtr<RenderContext> RenderContext::Create()
-{
-    return MakeRefPtr<::testing::NiceMock<MockRenderContext>>();
-}
 
 void RenderContext::SetNeedCallbackNodeChange(bool needCallback) {}
+
 
 void RenderContext::SetRequestFrame(const std::function<void(bool)>& requestFrame)
 {
@@ -202,6 +201,7 @@ void RenderContext::ResetBorderImage()
     }
 }
 
+
 #ifdef ENHANCED_ANIMATION
 namespace {
 void InitProp(const RefPtr<PropertyBase>& propBase)
@@ -245,24 +245,9 @@ OffsetF MockRenderContext::GetTranslateXYProperty()
 void MockRenderContext::UpdateTranslateInXY(const OffsetF& offset) {}
 #endif
 
-bool RenderContext::HasTransitionOutAnimation() const { return false; }
-bool RenderContext::HasDisappearTransition() const { return false; }
-bool RenderContext::IsSynced() const { return false; }
-RectF RenderContext::GetPaintRectWithTransform() { return {}; }
-std::pair<RectF, bool> RenderContext::GetPaintRectWithTranslate() { return {}; }
-Matrix4 RenderContext::GetLocalTransformMatrix() { return Matrix4::CreateIdentity(); }
-Matrix4 RenderContext::GetMatrixWithTransformRotate() { return Matrix4::CreateIdentity(); }
-RectF RenderContext::GetPaintRectWithoutTransform() { return {}; }
-RectF RenderContext::GetPaintRectWithTransformWithoutDegree() { return {}; }
-RectF RenderContext::GetPropertyOfPosition() { return {}; }
-OffsetF RenderContext::GetShowingTranslateProperty() { return {}; }
-OffsetF RenderContext::GetTranslateXYProperty() { return {}; }
-int32_t RenderContext::CalcExpectedFrameRate(const std::string&, float) { return 0; }
-bool RenderContext::IsUniRenderEnabled() { return false; }
-bool RenderContext::DoTextureExport(uint64_t) { return false; }
-std::optional<Dimension> RenderContext::GetBackBlurRadius() const { return std::nullopt; }
-std::optional<BlurStyleOption> RenderContext::GetBackBlurStyle() const { return std::nullopt; }
-std::optional<EffectOption> RenderContext::GetBackgroundEffect() const { return std::nullopt; }
-void RenderContext::SetIsFree(bool) {}
+RefPtr<RenderContext> RenderContext::Create()
+{
+    return MakeRefPtr<::testing::NiceMock<MockRenderContext>>();
+}
 
 } // namespace OHOS::Ace::NG

@@ -19,6 +19,7 @@
 #include <list>
 
 #include "base/memory/ace_type.h"
+#include "core/animation/animation_pub.h"
 #include "core/components/page/page_element.h"
 #include "core/pipeline/pipeline_context.h"
 

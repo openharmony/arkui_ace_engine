@@ -22,9 +22,11 @@
 #include "core/animation/animation_pub.h"
 #include "core/animation/shared_transition_effect.h"
 #include "core/components/common/properties/border.h"
+#include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/tween_option.h"
@@ -120,6 +122,7 @@ struct CommonPositionStyle : Style {
     Dimension right;
     Dimension bottom;
 };
+
 
 struct CommonShadowStyle : Style {
     Shadow shadow;

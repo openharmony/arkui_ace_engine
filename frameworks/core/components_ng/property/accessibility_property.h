@@ -261,7 +261,10 @@ public:
         return AccessibilityValue();
     }
 
-    void SetHost(const WeakPtr<FrameNode>& host);
+    void SetHost(const WeakPtr<FrameNode>& host)
+    {
+        host_ = host;
+    }
 
     virtual std::string GetHintText() const
     {
@@ -315,49 +318,157 @@ public:
 
     virtual float GetScrollOffSet() const;
 
-    void AddSupportAction(AceAction action);
+    void AddSupportAction(AceAction action)
+    {
+        supportActions_ |= (1UL << static_cast<uint32_t>(action));
+    }
 
     std::unordered_set<AceAction> GetSupportAction() const;
 
     void ResetSupportAction();
 
-    void SetActionSetText(const ActionSetTextImpl& actionSetTextImpl);
+    void SetActionSetText(const ActionSetTextImpl& actionSetTextImpl)
+    {
+        actionSetTextImpl_ = actionSetTextImpl;
+    }
 
-    bool ActActionSetText(const std::string& text);
+    bool ActActionSetText(const std::string& text)
+    {
+        if (actionSetTextImpl_) {
+            actionSetTextImpl_(text);
+            return true;
+        }
+        return false;
+    }
 
-    void SetActionSetSelection(const ActionSetSelectionImpl& actionSetSelection);
+    void SetActionSetSelection(const ActionSetSelectionImpl& actionSetSelection)
+    {
+        actionSetSelectionImpl_ = actionSetSelection;
+    }
 
-    bool ActActionSetSelection(int32_t start, int32_t end, bool isForward = false);
+    bool ActActionSetSelection(int32_t start, int32_t end, bool isForward = false)
+    {
+        if (actionSetSelectionImpl_) {
+            actionSetSelectionImpl_(start, end, isForward);
+            return true;
+        }
+        return false;
+    }
 
-    void SetActionSetIndex(const ActionSetCursorIndexImpl& actionSetCursorIndexImpl);
+    void SetActionSetIndex(const ActionSetCursorIndexImpl& actionSetCursorIndexImpl)
+    {
+        actionSetCursorIndexImpl_ = actionSetCursorIndexImpl;
+    }
 
-    bool ActActionSetIndex(int32_t index);
+    bool ActActionSetIndex(int32_t index)
+    {
+        if (actionSetCursorIndexImpl_) {
+            actionSetCursorIndexImpl_(index);
+            return true;
+        }
+        return false;
+    }
 
-    void SetActionExecSubComponent(const ActionExecSubComponentImpl& actionExecSubComponentImpl);
+    void SetActionExecSubComponent(const ActionExecSubComponentImpl& actionExecSubComponentImpl)
+    {
+        actionExecSubComponentImpl_ = actionExecSubComponentImpl;
+    }
 
-    bool ActActionExecSubComponent(int32_t spanId);
+    bool ActActionExecSubComponent(int32_t spanId)
+    {
+        if (actionExecSubComponentImpl_) {
+            return actionExecSubComponentImpl_(spanId);
+        }
+        return false;
+    }
 
-    void SetActionGetIndex(const ActionGetCursorIndexImpl& actionGetCursorIndexImpl);
+    void SetActionGetIndex(const ActionGetCursorIndexImpl& actionGetCursorIndexImpl)
+    {
+        actionGetCursorIndexImpl_ = actionGetCursorIndexImpl;
+    }
 
-    int32_t ActActionGetIndex();
+    int32_t ActActionGetIndex()
+    {
+        if (actionGetCursorIndexImpl_) {
+            return actionGetCursorIndexImpl_();
+        }
+        return -1;
+    }
 
-    void SetActionMoveText(const ActionMoveTextImpl& actionMoveText);
+    void SetActionMoveText(const ActionMoveTextImpl& actionMoveText)
+    {
+        actionMoveTextImpl_ = actionMoveText;
+    }
 
-    bool ActActionMoveText(int32_t moveUnit, bool forward);
+    bool ActActionMoveText(int32_t moveUnit, bool forward)
+    {
+        if (actionMoveTextImpl_) {
+            actionMoveTextImpl_(moveUnit, forward);
+            return true;
+        }
+        return false;
+    }
 
-    void SetActionScrollForward(const ActionScrollForwardImpl& actionScrollForwardImpl);
+    void SetActionScrollForward(const ActionScrollForwardImpl& actionScrollForwardImpl)
+    {
+        actionScrollForwardImpl_ = actionScrollForwardImpl;
+    }
 
-    void SetActionScrollForward(const ActionScrollForwardWithParamImpl& actionScrollForwardImpl);
+    void SetActionScrollForward(const ActionScrollForwardWithParamImpl& actionScrollForwardImpl)
+    {
+        actionScrollForwardWithParamImpl_ = actionScrollForwardImpl;
+    }
 
-    bool ActActionScrollForward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT);
+    bool ActActionScrollForward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT)
+    {
+        if (actionScrollForwardWithParamImpl_ == nullptr) {
+            scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
+        }
 
-    void SetActionScrollBackward(const ActionScrollBackwardImpl& actionScrollBackwardImpl);
+        if ((scrollType == AccessibilityScrollType::SCROLL_DEFAULT) && (actionScrollForwardImpl_)) {
+            actionScrollForwardImpl_();
+            return true;
+        }
 
-    void SetActionScrollBackward(const ActionScrollBackwardWithParamImpl& actionScrollBackwardImpl);
+        if (actionScrollForwardWithParamImpl_) {
+            actionScrollForwardWithParamImpl_(scrollType);
+            return true;
+        }
+        return false;
+    }
 
-    bool ActActionScrollBackward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT);
+    void SetActionScrollBackward(const ActionScrollBackwardImpl& actionScrollBackwardImpl)
+    {
+        actionScrollBackwardImpl_ = actionScrollBackwardImpl;
+    }
 
-    void SetActionCopy(const ActionCopyImpl& actionCopyImpl);
+    void SetActionScrollBackward(const ActionScrollBackwardWithParamImpl& actionScrollBackwardImpl)
+    {
+        actionScrollBackwardWithParamImpl_ = actionScrollBackwardImpl;
+    }
+
+    bool ActActionScrollBackward(AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_DEFAULT)
+    {
+        if (actionScrollBackwardWithParamImpl_ == nullptr) {
+            scrollType = AccessibilityScrollType::SCROLL_DEFAULT;
+        }
+
+        if ((scrollType == AccessibilityScrollType::SCROLL_DEFAULT) && (actionScrollBackwardImpl_)) {
+            actionScrollBackwardImpl_();
+            return true;
+        }
+
+        if (actionScrollBackwardWithParamImpl_) {
+            actionScrollBackwardWithParamImpl_(scrollType);
+            return true;
+        }
+        return false;
+    }
+
+    void SetActionCopy(const ActionCopyImpl& actionCopyImpl)
+    {
+        actionCopyImpl_ = actionCopyImpl;
+    }
 
     bool ActActionCopy();
 
@@ -472,9 +583,19 @@ public:
 
     // true means self and descendants will consume hover, do not search brothers
     // false means self and descendants no need to be hovered, should search brothers
-    void SetAccessibilityHoverConsume(const OnAccessibilityHoverConsumeCheckImpl& accessibilityHoverConsumeCheckImpl);
+    void SetAccessibilityHoverConsume(const OnAccessibilityHoverConsumeCheckImpl& accessibilityHoverConsumeCheckImpl)
+    {
+        accessibilityHoverConsumeCheckImpl_ = accessibilityHoverConsumeCheckImpl;
+    }
 
-    bool IsAccessibilityHoverConsume(const NG::PointF& point) const;
+    bool IsAccessibilityHoverConsume(const NG::PointF& point) const
+    {
+        if (!accessibilityHoverConsumeCheckImpl_) {
+            return true;
+        }
+
+        return accessibilityHoverConsumeCheckImpl_(point);
+    }
 
     class Level {
     public:

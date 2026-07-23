@@ -30,20 +30,31 @@
 
 #include "interfaces/inner_api/ace/serialized_gesture.h"
 
+#include "base/geometry/dimension.h"
+#include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
+#include "core/common/display_info.h"
+#include "core/common/draw_delegate.h"
 #include "core/common/platform_bridge.h"
+#include "core/common/platform_res_register.h"
+#include "core/common/statistic_event_reporter.h"
+#include "core/common/thp_extra_manager.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "ui/resource/resource_configuration.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
+#include "core/image/image_cache.h"
+#include "core/components/theme/theme_constants.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -64,7 +75,6 @@ enum class FoldStatus : uint32_t;
 enum class FoldDisplayMode : uint32_t;
 namespace NG {
 class FrameNode;
-class THPExtraManager;
 struct UIExtCallbackEvent;
 enum class UIExtCallbackEventId : uint32_t;
 } // namespace NG
@@ -95,7 +105,6 @@ struct FontConfigJsonInfo;
 struct FrameMetrics;
 class Clipboard;
 class Frontend;
-class ImageCache;
 class OffscreenCanvas;
 class Window;
 class WindowManager;
@@ -103,8 +112,6 @@ class FontManager;
 class ManagerInterface;
 class NavigationController;
 class StatisticEventReporter;
-class DrawDelegate;
-class ResourceAdapter;
 class EventManager;
 class AccessibilityManager;
 class UIDisplaySyncManager;
@@ -286,7 +293,17 @@ public:
 
     virtual void OnSurfacePositionChanged(int32_t posX, int32_t posY) = 0;
 
-    virtual void OnSurfaceDensityChanged(double density);
+    virtual void OnSurfaceDensityChanged(double density)
+    {
+        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+        // thread.
+        std::lock_guard lock(densityChangeMutex_);
+        for (auto&& [id, callback] : densityChangedCallbacks_) {
+            if (callback) {
+                callback(density);
+            }
+        }
+    }
 
     void SendUpdateVirtualNodeFocusEvent();
 
@@ -303,9 +320,25 @@ public:
         return 1.0;
     }
 
-    int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback);
+    int32_t RegisterDensityChangedCallback(std::function<void(double)>&& callback)
+    {
+        if (callback) {
+            // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+            // thread.
+            std::lock_guard lock(densityChangeMutex_);
+            densityChangedCallbacks_.emplace(++densityChangeCallbackId_, std::move(callback));
+            return densityChangeCallbackId_;
+        }
+        return 0;
+    }
 
-    void UnregisterDensityChangedCallback(int32_t callbackId);
+    void UnregisterDensityChangedCallback(int32_t callbackId)
+    {
+        // To avoid the race condition caused by the offscreen canvas get density from the pipeline in the worker
+        // thread.
+        std::lock_guard lock(densityChangeMutex_);
+        densityChangedCallbacks_.erase(callbackId);
+    }
 
     virtual void OnTransformHintChanged(uint32_t transform) = 0;
 
@@ -613,7 +646,15 @@ public:
 
     const RefPtr<SharedImageManager>& GetOrCreateSharedImageManager();
 
-    const RefPtr<UIDisplaySyncManager>& GetOrCreateUIDisplaySyncManager();
+    const RefPtr<UIDisplaySyncManager>& GetOrCreateUIDisplaySyncManager()
+    {
+        std::call_once(displaySyncFlag_, [this]() {
+            if (!uiDisplaySyncManager_) {
+                uiDisplaySyncManager_ = MakeRefPtr<UIDisplaySyncManager>();
+            }
+        });
+        return uiDisplaySyncManager_;
+    }
 
     Window* GetWindow()
     {
@@ -672,7 +713,14 @@ public:
         themeManager_ = std::move(theme);
     }
 
-    void UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter);
+    void UpdateThemeManager(const RefPtr<ResourceAdapter>& adapter)
+    {
+        std::unique_lock<std::shared_mutex> lock(themeMtx_);
+        CHECK_NULL_VOID(themeManager_);
+        auto themeConstants = themeManager_->GetThemeConstants();
+        CHECK_NULL_VOID(themeConstants);
+        themeConstants->UpdateResourceAdapter(adapter);
+    }
 
     template<typename T>
     RefPtr<T> GetTheme() const
@@ -748,7 +796,10 @@ public:
         isJsPlugin_ = isJsPlugin;
     }
 
-    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate);
+    void SetDrawDelegate(std::unique_ptr<DrawDelegate> delegate)
+    {
+        drawDelegate_ = std::move(delegate);
+    }
 
     bool IsJsCard() const
     {
@@ -1017,7 +1068,16 @@ public:
     {
         virtualKeyBoardCallback_.erase(nodeId);
     }
-    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) const;
+    bool NotifyVirtualKeyBoard(int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) const
+    {
+        bool isConsume = false;
+        for (const auto& [nodeId, iterVirtualKeyBoardCallback] : virtualKeyBoardCallback_) {
+            if (iterVirtualKeyBoardCallback && iterVirtualKeyBoardCallback(width, height, keyboard, isCustomKeyboard)) {
+                isConsume = true;
+            }
+        }
+        return isConsume;
+    }
 
     using configChangedCallback = std::function<void()>;
     void SetConfigChangedCallback(int32_t nodeId, configChangedCallback&& listener)
@@ -1029,7 +1089,14 @@ public:
         configChangedCallback_.erase(nodeId);
     }
 
-    void NotifyConfigurationChange();
+    void NotifyConfigurationChange()
+    {
+        for (const auto& [nodeId, callback] : configChangedCallback_) {
+            if (callback) {
+                callback();
+            }
+        }
+    }
 
     virtual void NotifyColorModeChange(uint32_t colorMode) {}
 
@@ -1039,7 +1106,12 @@ public:
         postRTTaskCallback_ = std::move(callback);
     }
 
-    void PostTaskToRT(std::function<void()>&& task);
+    void PostTaskToRT(std::function<void()>&& task)
+    {
+        if (postRTTaskCallback_) {
+            postRTTaskCallback_(std::move(task));
+        }
+    }
 
     void SetGetWindowRectImpl(std::function<Rect()>&& callback);
 
@@ -1441,8 +1513,15 @@ public:
         return thpNotifyState_;
     }
 
-    void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr);
-    const RefPtr<NG::THPExtraManager>& GetTHPExtraManager() const;
+    void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr)
+    {
+        thpExtraMgr_ = thpExtraMgr;
+    }
+
+    const RefPtr<NG::THPExtraManager>& GetTHPExtraManager() const
+    {
+        return thpExtraMgr_;
+    }
 
     void SetUiDvsyncSwitch(bool on);
     virtual bool GetOnShow() const = 0;

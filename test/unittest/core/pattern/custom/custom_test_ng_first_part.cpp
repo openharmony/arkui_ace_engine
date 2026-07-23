@@ -15,8 +15,6 @@
 
 #include "test/unittest/core/pattern/custom/custom_test_ng.h"
 
-#include "core/components_ng/animation/geometry_transition.h"
-
 namespace OHOS::Ace::NG {
 
 /**

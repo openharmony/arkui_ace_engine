@@ -19,19 +19,16 @@
 #include <mutex>
 
 #include "base/geometry/dimension.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_enums.h"
 #include "core/components/tab_bar/tab_theme.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
-
-namespace OHOS::Ace::NG {
-class UINode;
-}
-
+#include "core/components_ng/pattern/image/image_model.h"
+#include "core/components_ng/property/measure_property.h"
+#include "core/event/ace_events.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 enum class SelectedMode {
@@ -59,7 +56,7 @@ struct IndicatorStyle final {
     Dimension marginTop = 0.0_vp;
     IndicatorStyle()
     {
-        auto pipelineContext = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (!pipelineContext) {
             return;
         }
@@ -83,7 +80,7 @@ struct BoardStyle final {
     Dimension borderRadius = 0.0_vp;
     BoardStyle()
     {
-        auto pipelineContext = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (!pipelineContext) {
             return;
         }
@@ -117,8 +114,6 @@ struct IconStyle {
     std::optional<Color> unselectedColor;
     std::optional<Color> selectedColor;
 };
-
-struct ImageInfoConfig;
 
 struct TabBarSymbol {
     std::function<void(WeakPtr<NG::FrameNode>, std::string)> onApply = nullptr;

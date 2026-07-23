@@ -14,7 +14,6 @@
  */
 
 #include "base/utils/multi_thread.h"
-#include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 
 #include "base/log/dump_log.h"

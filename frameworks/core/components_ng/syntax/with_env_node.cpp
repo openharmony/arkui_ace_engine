@@ -17,7 +17,6 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components_ng/animation/geometry_transition.h"
 
 namespace OHOS::Ace::NG {
 

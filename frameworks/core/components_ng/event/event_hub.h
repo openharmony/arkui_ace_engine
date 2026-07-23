@@ -62,7 +62,10 @@ struct KeyboardShortcut {
     std::string value;
     uint8_t keys = 0;
     std::function<void()> onKeyboardShortcutAction = nullptr;
-    bool IsEqualTrigger(const KeyboardShortcut& other);
+    bool IsEqualTrigger(const KeyboardShortcut& other)
+    {
+        return (keys == other.keys) && (value == other.value);
+    }
 };
 
 enum class VisibleAreaChangeTriggerReason : int32_t {
@@ -318,13 +321,28 @@ public:
         const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin);
     void FireDrawCompletedNDKCallback(PipelineContext* pipeline);
     void FireLayoutNDKCallback(const PipelineContext* pipeline);
-    void SetNDKDrawCompletedCallback(std::function<void()>&& callback);
-    void SetNDKLayoutCallback(std::function<void()>&& callback);
-    bool HasNDKDrawCompletedCallback();
+    void SetNDKDrawCompletedCallback(std::function<void()>&& callback)
+    {
+        ndkDrawCompletedCallback_ = std::move(callback);
+    }
+    void SetNDKLayoutCallback(std::function<void()>&& callback)
+    {
+        ndkLayoutCallback_ = std::move(callback);
+    }
+    bool HasNDKDrawCompletedCallback()
+    {
+        return !!ndkDrawCompletedCallback_;
+    }
 
-    void SetCompensateOnSizeChangeEvent(bool compensateOnSizeChangeEvent);
+    void SetCompensateOnSizeChangeEvent(bool compensateOnSizeChangeEvent)
+    {
+        compensateOnSizeChangeEvent_ = compensateOnSizeChangeEvent;
+    }
 
-    bool IsCompensateOnSizeChangeEvent() const;
+    bool IsCompensateOnSizeChangeEvent() const
+    {
+        return compensateOnSizeChangeEvent_;
+    }
 
 protected:
     virtual void OnModifyDone() {}

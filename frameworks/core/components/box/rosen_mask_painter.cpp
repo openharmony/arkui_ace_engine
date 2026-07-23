@@ -20,7 +20,6 @@
 
 #include "core/components/box/rosen_mask_painter.h"
 #include "core/components/common/painter/rosen_decoration_painter.h"
-#include "core/components/declaration/common/common_background_style.h"
 #include "core/components/declaration/common/declaration.h"
 
 namespace OHOS::Ace {

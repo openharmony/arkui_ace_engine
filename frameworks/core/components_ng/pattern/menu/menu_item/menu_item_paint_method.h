@@ -23,6 +23,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
+#include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_wrapper.h"
 

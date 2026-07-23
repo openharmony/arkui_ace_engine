@@ -30,6 +30,8 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
+#include "base/thread/cancelable_callback.h"
+#include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
@@ -438,7 +440,14 @@ public:
 
     void OnFreezeStateChange() override;
 
-    void ProcessPropertyDiff();
+    void ProcessPropertyDiff()
+    {
+        if (isPropertyDiffMarked_) {
+            MarkModifyDone();
+            MarkDirtyNode();
+            isPropertyDiffMarked_ = false;
+        }
+    }
 
     void FlushUpdateAndMarkDirty() override;
 
@@ -487,12 +496,23 @@ public:
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
-    void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback);
+    void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
+    {
+        CreateEventHubInner();
+        CHECK_NULL_VOID(eventHub_);
+        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
+    }
 
     void CleanVisibleAreaUserCallback(bool isApproximate = false);
 
     void SetVisibleAreaInnerCallback(
-        const std::vector<double>& ratios, const VisibleCallbackInfo& callback, bool isCalculateInnerClip = false);
+        const std::vector<double>& ratios, const VisibleCallbackInfo& callback, bool isCalculateInnerClip = false)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+        CreateEventHubInner();
+        CHECK_NULL_VOID(eventHub_);
+        eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
+    }
 
     void SetIsCalculateInnerVisibleRectClip(bool isCalculateInnerClip = true)
     {
@@ -504,7 +524,11 @@ public:
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
     }
 
-    void CleanVisibleAreaInnerCallback();
+    void CleanVisibleAreaInnerCallback()
+    {
+        CHECK_NULL_VOID(eventHub_);
+        eventHub_->CleanVisibleAreaCallback(false);
+    }
 
     void TriggerVisibleAreaChangeCallback(
         uint64_t timestamp, bool forceDisappear = false, int32_t isVisibleChangeMinDepth = -1);
@@ -848,7 +872,10 @@ public:
     }
 
     void SetConfigurationModeUpdateCallback(
-        const std::function<void(const ConfigurationChange& configurationChange)>&& callback);
+        const std::function<void(const ConfigurationChange& configurationChange)>&& callback)
+    {
+        configurationUpdateCallback_ = callback;
+    }
 
     void SetColorModeUpdateCallback(const std::function<void()>&& callback)
     {
@@ -857,7 +884,11 @@ public:
 
     void SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback);
 
-    void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback);
+    void SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
+    {
+        std::unique_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
+        ndkFontUpdateCallback_ = callback;
+    }
 
     void FireColorNDKCallback();
     void FireFontNDKCallback(const ConfigurationChange& configurationChange);
@@ -898,9 +929,19 @@ public:
         exclusiveEventForChild_ = exclusiveEventForChild;
     }
 
-    void SetDraggable(bool draggable);
+    void SetDraggable(bool draggable)
+    {
+        draggable_ = draggable;
+        userSet_ = true;
+        customerSet_ = false;
+    }
 
-    void SetCustomerDraggable(bool draggable);
+    void SetCustomerDraggable(bool draggable)
+    {
+        draggable_ = draggable;
+        userSet_ = true;
+        customerSet_ = true;
+    }
 
     void SetDragPreviewOptions(const DragPreviewOption& previewOption, bool isResetOptions = true);
 
@@ -908,7 +949,12 @@ public:
 
     const DragPreviewOption& GetDragPreviewOption();
 
-    void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc);
+    void SetBackgroundFunction(std::function<RefPtr<UINode>()>&& buildFunc)
+    {
+        isNeedRefreshBackgroundBuilder_ = true;
+        builderFunc_ = std::move(buildFunc);
+        backgroundNode_ = nullptr;
+    }
 
     void SetIsNeedRefreshBackgroundBuilder(bool isNeedRefreshBackgroundBuilder)
     {
@@ -1071,7 +1117,12 @@ public:
     bool PostponedTaskForIgnore(LayoutSafeAreaBundleType type);
     void PostponedTaskForIgnoreDefault();
 
-    void AddDelayLayoutChild(const RefPtr<FrameNode>& child);
+    void AddDelayLayoutChild(const RefPtr<FrameNode>& child)
+    {
+        if (child) {
+            delayLayoutChildren_.emplace_back(child);
+        }
+    }
 
     const std::vector<RefPtr<FrameNode>>& GetDelayLayoutChildren() const
     {
@@ -1102,7 +1153,11 @@ public:
         return geometryNode_;
     }
 
-    void SetLayoutProperty(const RefPtr<LayoutProperty>& layoutProperty);
+    void SetLayoutProperty(const RefPtr<LayoutProperty>& layoutProperty)
+    {
+        layoutProperty_ = layoutProperty;
+        layoutProperty_->SetHost(WeakClaim(this));
+    }
 
     const RefPtr<LayoutProperty>& GetLayoutProperty() const override
     {
@@ -1268,7 +1323,12 @@ public:
     RectF GetRectWithRender();
     bool CheckAncestorPageShow();
 
-    void SetRemoveCustomProperties(std::function<void()> func);
+    void SetRemoveCustomProperties(std::function<void()> func)
+    {
+        if (!removeCustomProperties_) {
+            removeCustomProperties_ = func;
+        }
+    }
     void SetCustomPropertyCallback(std::function<void()>&& func,
         std::function<std::string(const std::string&)>&& getFunc,
         std::function<std::string()>&& getAllCustomPropertiesFunc);
@@ -1291,7 +1351,11 @@ public:
         isGeometryTransitionIn_ = isGeometryTransitionIn;
     }
 
-    void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override;
+    void SetGeometryTransitionInRecursive(bool isGeometryTransitionIn) override
+    {
+        SetIsGeometryTransitionIn(isGeometryTransitionIn);
+        UINode::SetGeometryTransitionInRecursive(isGeometryTransitionIn);
+    }
     static std::pair<float, float> ContextPositionConvertToPX(
         const RefPtr<RenderContext>& context, const SizeF& percentReference);
 
@@ -1321,7 +1385,18 @@ public:
 
     void UpdateAccessibilityNodeRect();
 
-    RectF GetVirtualNodeTransformRectRelativeToWindow();
+    RectF GetVirtualNodeTransformRectRelativeToWindow()
+    {
+        auto parentUinode = GetVirtualNodeParent().Upgrade();
+        CHECK_NULL_RETURN(parentUinode, RectF {});
+        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUinode);
+        CHECK_NULL_RETURN(parentFrame, RectF {});
+        auto parentRect = parentFrame->GetTransformRectRelativeToWindow();
+        auto currentRect = GetTransformRectRelativeToWindow();
+        currentRect.SetTop(currentRect.Top() + parentRect.Top());
+        currentRect.SetLeft(currentRect.Left() + parentRect.Left());
+        return currentRect;
+    }
 
     void SetIsUseTransitionAnimator(bool isUseTransitionAnimator)
     {
@@ -1480,7 +1555,12 @@ public:
     void SetKitNode(const RefPtr<Kit::FrameNode>& node);
     const RefPtr<Kit::FrameNode>& GetKitNode() const;
 
-    void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason);
+    void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
+    {
+        if (visibleAreaChangeTriggerReason_ != triggerReason) {
+            visibleAreaChangeTriggerReason_ = triggerReason;
+        }
+    }
 
     void OnThemeScopeUpdate(int32_t themeScopeId) override;
 
@@ -1583,7 +1663,12 @@ public:
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs);
     void ReportSelectedText(bool isRegister);
 
-    void ResetLastFrameNodeRect();
+    void ResetLastFrameNodeRect()
+    {
+        if (lastFrameNodeRect_) {
+            lastFrameNodeRect_.reset();
+        }
+    }
 
     bool HasMultipleChild();
     bool IsAncestorScrollable() const

@@ -29,12 +29,17 @@
 #include "core/animation/property_animation.h"
 #include "core/components/box/box_component.h"
 #include "core/components/common/properties/shadow.h"
-#include "core/components/declaration/common/common_background_style.h"
+#include "core/components/declaration/common/declaration_creator_manager.h"
 #include "core/components/display/display_component.h"
 #include "core/components/flex/flex_component.h"
+#include "core/components/flex/flex_item_component.h"
 #include "core/components/focusable/focusable_component.h"
 #include "core/components/gesture_listener/gesture_listener_component.h"
+#include "core/components/mouse_listener/mouse_listener_component.h"
 #include "core/components/page_transition/page_transition_component.h"
+#include "core/components/positioned/positioned_component.h"
+#include "core/components/shared_transition/shared_transition_component.h"
+#include "core/components/stack/stack_component.h"
 #include "core/components/theme/theme_utils.h"
 #include "core/components/touch_listener/touch_listener_component.h"
 #include "core/components/transform/transform_component.h"
@@ -45,13 +50,9 @@
 #include "frameworks/bridge/common/utils/transform_convertor.h"
 #include "frameworks/core/animation/animatable_data.h"
 
-namespace OHOS::Ace {
-class FlexItemComponent;
-class MouseListenerComponent;
-class MultimodalComponent;
-class PositionedComponent;
-class SharedTransitionComponent;
-}
+#ifndef WEARABLE_PRODUCT
+#include "core/components/multimodal/multimodal_component.h"
+#endif
 
 namespace OHOS::Ace::Framework {
 
@@ -650,7 +651,13 @@ protected:
 
     void PrepareScrollComponent();
 
-    RefPtr<SingleChild> GetLastCommonParent();
+    RefPtr<SingleChild> GetLastCommonParent()
+    {
+        if (sharedTransitionComponent_) {
+            return sharedTransitionComponent_;
+        }
+        return boxComponent_;
+    }
 
     void SetAlignment(const Alignment& align)
     {

@@ -16,7 +16,6 @@
 #include "compatible/components/grid_column/dom_grid_column.h"
 
 #include "compatible/components/grid_container/grid_container_type.h"
-#include "core/components/flex/flex_item_component.h"
 
 namespace OHOS::Ace::Framework {
 

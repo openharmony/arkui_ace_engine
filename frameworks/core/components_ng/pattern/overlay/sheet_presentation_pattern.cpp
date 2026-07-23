@@ -76,8 +76,6 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/render/adapter/sheet_render_edge_light_modifier.h"
 #include "core/components/common/properties/placement.h"
-#include "core/components_ng/pattern/sheet/content_cover/sheet_content_cover_object.h"
-#include "core/components_ng/pattern/sheet/side/sheet_side_object.h"
 
 namespace OHOS::Ace::NG {
 namespace {

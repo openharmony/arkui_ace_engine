@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_UNIVERSAL_PAINTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PAINTER_ROSEN_UNIVERSAL_PAINTER_H
 
-#include "core/components_ng/render/drawing_forward.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
