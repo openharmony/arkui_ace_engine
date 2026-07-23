@@ -760,6 +760,8 @@ void PipelineContext::UpdateDrawLayoutChildObserver(
 void PipelineContext::UpdateDrawLayoutChildObserver(
     const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver)
 {}
+void PipelineContext::UpdateDrawObserverFlag(int32_t uniqueId, bool isDrawObserver) {}
+void PipelineContext::UpdateLayoutObserverFlag(int32_t uniqueId, bool isLayoutObserver) {}
 
 void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node) {}
 

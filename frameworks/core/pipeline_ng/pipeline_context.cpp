@@ -1376,6 +1376,20 @@ void PipelineContext::UpdateDrawLayoutChildObserver(
     frameNode->UpdateDrawLayoutChildObserver(isClearLayoutObserver, isClearDrawObserver);
 }
 
+void PipelineContext::UpdateDrawObserverFlag(int32_t uniqueId, bool isDrawObserver)
+{
+    auto uiNode = ElementRegister::GetInstance()->GetUINodeById(uniqueId);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->UpdateDrawObserverUniqueIdFlag(isDrawObserver);
+}
+
+void PipelineContext::UpdateLayoutObserverFlag(int32_t uniqueId, bool isLayoutObserver)
+{
+    auto uiNode = ElementRegister::GetInstance()->GetUINodeById(uniqueId);
+    CHECK_NULL_VOID(uiNode);
+    uiNode->UpdateLayoutObserverUniqueIdFlag(isLayoutObserver);
+}
+
 void PipelineContext::FlushMouseEventVoluntarily()
 {
     if (!lastMouseEvent_ || lastMouseEvent_->action == MouseAction::WINDOW_LEAVE ||

@@ -16,6 +16,7 @@
 #include "base/log/log_wrapper.h"
 #include "core/common/ace_engine.h"
 #include "js_native_api_types.h"
+#include "ui/base/utils/utils.h"
 namespace OHOS::Ace::Napi {
 namespace {
 constexpr size_t STR_BUFFER_SIZE = 1024;
@@ -125,6 +126,7 @@ static size_t ParseArgs(
 
 void ComponentObserver::callUserFunction(napi_env env, std::list<napi_ref>& cbList)
 {
+    CHECK_NULL_VOID(env);
     napi_handle_scope scope = nullptr;
     napi_open_handle_scope(env, &scope);
     if (scope == nullptr) {
@@ -132,7 +134,8 @@ void ComponentObserver::callUserFunction(napi_env env, std::list<napi_ref>& cbLi
     }
 
     std::list<napi_value> cbs;
-    for (auto& cbRef : cbList) {
+    std::list<napi_ref> cbListTemp = cbList;
+    for (auto& cbRef : cbListTemp) {
         napi_value cb = nullptr;
         if (napi_get_reference_value(env, cbRef, &cb) != napi_ok || cb == nullptr) {
             continue;
@@ -230,20 +233,42 @@ std::list<napi_ref>::iterator ComponentObserver::FindCbList(napi_env env, napi_v
         });
     }
 }
-
-void ComponentObserver::UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver)
+RefPtr<PipelineBase> ComponentObserver::GetPipeline()
 {
     auto container = AceEngine::Get().GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
+    CHECK_NULL_RETURN(container, nullptr);
     auto context = container->GetPipelineContext();
     if (context == nullptr) {
         LOGE("js_inspector can not get context by %{public}d", instanceId_);
-        return;
+        return nullptr;
     }
-    if (uniqueId_ > 0) {
+    return context;
+}
+void ComponentObserver::UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver)
+{
+    auto context = GetPipeline();
+    CHECK_NULL_VOID(context);
+    if (uniqueId_ > -1) {
         context->UpdateDrawLayoutChildObserver(uniqueId_, isClearLayoutObserver, isClearDrawObserver);
     } else {
         context->UpdateDrawLayoutChildObserver(componentId_, isClearLayoutObserver, isClearDrawObserver);
+    }
+}
+
+void ComponentObserver::UpdateDrawObserverFlag(bool isDrawObserver)
+{
+    auto context = GetPipeline();
+    CHECK_NULL_VOID(context);
+    if (uniqueId_ > -1) {
+        context->UpdateDrawObserverFlag(uniqueId_, isDrawObserver);
+    }
+}
+void ComponentObserver::UpdateLayoutObserverFlag(bool isLayoutObserver)
+{
+    auto context = GetPipeline();
+    CHECK_NULL_VOID(context);
+    if (uniqueId_ > -1) {
+        context->UpdateLayoutObserverFlag(uniqueId_, isLayoutObserver);
     }
 }
 
@@ -319,7 +344,6 @@ void ComponentObserver::FunctionOnLayoutChildren(napi_env& env, napi_value resul
 {
     const char* funName = "onLayoutChildren";
     napi_value funcValue = nullptr;
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FunctionOnLayoutChildren 1");
     auto On = [](napi_env env, napi_callback_info info) -> napi_value {
         auto jsEngine = EngineHelper::GetCurrentEngineSafely();
         if (!jsEngine) {
@@ -333,13 +357,11 @@ void ComponentObserver::FunctionOnLayoutChildren(napi_env& env, napi_value resul
         napi_value cb = nullptr;
         size_t argc = ParseLayoutChildrenArgs(env, info, thisVar, cb);
         NAPI_ASSERT(env, (argc == 1 && thisVar != nullptr && cb != nullptr), "Invalid arguments");
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FunctionOnLayoutChildren 2");
         ComponentObserver* observer = GetObserver(env, thisVar);
         if (!observer) {
             napi_close_handle_scope(env, scope);
             return nullptr;
         }
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FunctionOnLayoutChildren 3");
         observer->AddCallbackToList(
             cb, observer->cbLayoutChildrenList_, CalloutType::LAYOUTCHILDRENCALLOUT, env, scope);
         observer->UpdateDrawLayoutChildObserver(false, false);
@@ -465,8 +487,10 @@ void ComponentObserver::FunctionOn(napi_env& env, napi_value result, const char*
 
         if (calloutType == CalloutType::LAYOUTCALLOUT) {
             observer->AddCallbackToList(cb, observer->cbLayoutList_, calloutType, env, scope);
+            observer->UpdateLayoutObserverFlag(true);
         } else if (calloutType == CalloutType::DRAWCALLOUT) {
             observer->AddCallbackToList(cb, observer->cbDrawList_, calloutType, env, scope);
+            observer->UpdateDrawObserverFlag(true);
         } else if (calloutType == CalloutType::DRAWCHILDRENCALLOUT) {
             observer->AddCallbackToList(cb, observer->cbDrawChildrenList_, calloutType, env, scope);
             observer->UpdateDrawLayoutChildObserver(false, false);
@@ -495,8 +519,14 @@ void ComponentObserver::FunctionOff(napi_env& env, napi_value result, const char
         }
         if (calloutType == CalloutType::LAYOUTCALLOUT) {
             observer->DeleteCallbackFromList(argc, observer->cbLayoutList_, calloutType, cb, env);
+            if (observer->cbLayoutList_.empty()) {
+                observer->UpdateLayoutObserverFlag(false);
+            }
         } else if (calloutType == CalloutType::DRAWCALLOUT) {
             observer->DeleteCallbackFromList(argc, observer->cbDrawList_, calloutType, cb, env);
+            if (observer->cbDrawList_.empty()) {
+                observer->UpdateDrawObserverFlag(false);
+            }
         } else if (calloutType == CalloutType::DRAWCHILDRENCALLOUT) {
             observer->DeleteCallbackFromList(argc, observer->cbDrawChildrenList_, calloutType, cb, env);
             if (observer->cbDrawChildrenList_.empty()) {

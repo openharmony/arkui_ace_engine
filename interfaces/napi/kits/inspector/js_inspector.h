@@ -56,6 +56,8 @@ public:
         size_t argc, std::list<napi_ref>& cbList, CalloutType calloutType, napi_value cb, napi_env env);
     void Destroy(napi_env env);
     void UpdateDrawLayoutChildObserver(bool isClearLayoutObserver, bool isClearDrawObserver);
+    void UpdateDrawObserverFlag(bool isDrawObserver);
+    void UpdateLayoutObserverFlag(bool isLayoutObserver);
 
     RefPtr<InspectorEvent> layoutEvent_;
     RefPtr<InspectorEvent> drawEvent_;
@@ -82,6 +84,7 @@ private:
     void FunctionOffDrawChildren(napi_env& env, napi_value result);
     void FunctionOn(napi_env& env, napi_value result, const char* funName);
     void FunctionOff(napi_env& env, napi_value result, const char* funName);
+    RefPtr<PipelineBase> GetPipeline();
     WeakPtr<Framework::JsEngine> weakEngine_;
 };
 } // namespace OHOS::Ace::Napi

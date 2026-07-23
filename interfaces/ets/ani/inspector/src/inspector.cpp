@@ -144,6 +144,12 @@ public:
             } else if (DRAW_CHILDREN_TYPE == eventType || DRAW_CHILDREN_WITH_PARAMETER_TYPE == eventType) {
                 UpdateDrawLayoutChildrenObserver(false, true);
             }
+            if (LAYOUT_TYPE == eventType) {
+                UpdateLayoutObserverFlag(false);
+            }
+            if (DRAW_TYPE == eventType) {
+                UpdateDrawObserverFlag(false);
+            }
             if (!isDelete) {
                 return;
             }
@@ -294,12 +300,29 @@ public:
 
     void UpdateDrawLayoutChildrenObserver(bool isClearLayoutObserver, bool isClearDrawObserver)
     {
-        auto context = NG::PipelineContext::GetCurrentContext();
+        auto context = NG::PipelineContext::GetContextByContainerId(instanceId_);
         CHECK_NULL_VOID(context);
         if (uniqueId_ >= 0) {
             context->UpdateDrawLayoutChildObserver(uniqueId_, isClearLayoutObserver, isClearDrawObserver);
         } else {
             context->UpdateDrawLayoutChildObserver(id_, isClearLayoutObserver, isClearDrawObserver);
+        }
+    }
+
+    void UpdateDrawObserverFlag(bool isDrawObserver)
+    {
+        auto context = NG::PipelineContext::GetContextByContainerId(instanceId_);
+        CHECK_NULL_VOID(context);
+        if (uniqueId_ > -1) {
+            context->UpdateDrawObserverFlag(uniqueId_, isDrawObserver);
+        }
+    }
+    void UpdateLayoutObserverFlag(bool isLayoutObserver)
+    {
+        auto context = NG::PipelineContext::GetContextByContainerId(instanceId_);
+        CHECK_NULL_VOID(context);
+        if (uniqueId_ > -1) {
+            context->UpdateLayoutObserverFlag(uniqueId_, isLayoutObserver);
         }
     }
 
@@ -317,6 +340,11 @@ public:
     {
         return observerType_;
     }
+
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
 private:
     std::string id_;
     int32_t uniqueId_ = -1;
@@ -331,6 +359,7 @@ private:
     RefPtr<InspectorEvent> drawChildrenEvent_;
     RefPtr<InspectorEvent> drawChildrenEventWithParameter_;
     RefPtr<InspectorEvent> layoutChildrenEvent_;
+    int32_t instanceId_ = -1;
 };
 
 static ComponentObserver* Unwrapp(ani_env *env, ani_object object)
@@ -384,7 +413,15 @@ static void On(ani_env *env, ani_object object, ani_string type, ani_fn_object f
     ani_ref fnObjGlobalRef = nullptr;
     env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
     observer->AddCallbackToList(observer->GetCbListByType(typeStr), fnObjGlobalRef, typeStr, env);
-    observer->UpdateDrawLayoutChildrenObserver(false, false);
+    if (DRAW_CHILDREN_TYPE == typeStr || LAYOUT_CHILDREN_TYPE == typeStr) {
+        observer->UpdateDrawLayoutChildrenObserver(false, false);
+    }
+    if (LAYOUT_TYPE == typeStr) {
+        observer->UpdateLayoutObserverFlag(true);
+    }
+    if (DRAW_TYPE == typeStr) {
+        observer->UpdateDrawObserverFlag(true);
+    }
 }
 
 static void Off(ani_env *env, ani_object object, ani_string type, ani_fn_object fnObj)
@@ -457,7 +494,7 @@ static ani_string AniGetFilteredInspectorTree(ani_env *env, ani_array filters)
     bool needThrow = false;
     auto nodeInfos = NG::Inspector::GetInspector(isLayoutInspector, inspectorFilter, needThrow);
     if (needThrow) {
-        AniThrow(env, "Unable to obtain current ui context", ERROR_CODE_PARAM_ERROR);
+        AniThrow(env, "Unable to obtain current ui context", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
         return nullptr;
     }
     ani_string result;
@@ -488,7 +525,7 @@ static ani_string AniGetFilteredInspectorTreeById(ani_env *env, ani_string id, a
     bool needThrow = false;
     auto nodeInfos = NG::Inspector::GetInspector(false, inspectorFilter, needThrow);
     if (needThrow) {
-        AniThrow(env, "Unable to obtain current UI context", ERROR_CODE_PARAM_ERROR);
+        AniThrow(env, "Unable to obtain current UI context", ERROR_CODE_INSPECTOR_GET_UI_CONTEXT_FAILED);
         return nullptr;
     }
     ani_string result;
@@ -509,6 +546,10 @@ static ani_string AniGetInspectorByKey(ani_env *env, ani_string key)
     }
     ContainerScope scope{Container::CurrentIdSafelyWithCheck()};
     std::string resultStr = NG::Inspector::GetInspectorNodeByKey(keyStr);
+    if (resultStr.empty()) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "inspector-ani node %{public}s is empty.", keyStr.c_str());
+        return nullptr;
+    }
     ani_string ani_str;
     ani_status status = env->String_NewUTF8(resultStr.c_str(), resultStr.size(), &ani_str);
     if (ANI_OK != status) {
@@ -555,7 +596,7 @@ ComponentObserver* GetObserver(ani_env* env, ani_object id)
         TAG_LOGI(AceLogTag::ACE_LAYOUT_INSPECTOR,
             "inspector-ani start to CreateComponentObserver unique id is %{public}d", value);
         if (value < 0) {
-            AniThrow(env, "unique id can not less than 0", ERROR_CODE_PARAM_ERROR);
+            AniThrow(env, "inspector-ani unique id can not less than 0", ERROR_CODE_PARAM_ERROR);
             return nullptr;
         }
         return new ComponentObserver(value);
@@ -584,6 +625,9 @@ static ani_ref CreateComponentObserver(ani_env* env, ani_object id, const char* 
         return undefinedRef;
     }
     auto* observer = GetObserver(env, id);
+    if (observer == nullptr) {
+        return undefinedRef;
+    }
     
     ani_object context_object;
     if (ANI_OK != env->Object_New(cls, ctor, &context_object, reinterpret_cast<ani_long>(observer))) {
@@ -591,7 +635,7 @@ static ani_ref CreateComponentObserver(ani_env* env, ani_object id, const char* 
         delete observer;
         return undefinedRef;
     }
-    
+    observer->SetInstanceId(ContainerScope::CurrentId());
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     if (vm == nullptr) {
@@ -601,27 +645,40 @@ static ani_ref CreateComponentObserver(ani_env* env, ani_object id, const char* 
     }
 
     auto layoutCallback = [observer, vm]() -> void {
+        if (!observer) {
+            return;
+        }
         observer->CallUserFunction(vm, observer->GetCbListByType(LAYOUT_TYPE));
     };
 
-    auto layoutCallbackCounter = [observer]() -> bool { return observer->GetCbListByType(LAYOUT_TYPE).empty(); };
+    auto layoutCallbackCounter = [observer]() -> bool {
+        return !observer || observer->GetCbListByType(LAYOUT_TYPE).empty();
+    };
 
     observer->SetInspectorFuncByType(
         LAYOUT_TYPE, AceType::MakeRefPtr<InspectorEvent>(std::move(layoutCallback), std::move(layoutCallbackCounter)));
 
-    auto drawCallbackCounter = [observer]() -> bool { return observer->GetCbListByType(DRAW_TYPE).empty(); };
+    auto drawCallbackCounter = [observer]() -> bool {
+        return !observer || observer->GetCbListByType(DRAW_TYPE).empty();
+    };
 
     auto drawCallback = [observer, vm]() -> void {
+        if (!observer) {
+            return;
+        }
         observer->CallUserFunction(vm, observer->GetCbListByType(DRAW_TYPE));
     };
     observer->SetInspectorFuncByType(
         DRAW_TYPE, AceType::MakeRefPtr<InspectorEvent>(std::move(drawCallback), std::move(drawCallbackCounter)));
 
     auto drawChildrenCallback = [observer, vm]() -> void {
+        if (!observer) {
+            return;
+        }
         observer->CallUserFunction(vm, observer->GetCbListByType(DRAW_CHILDREN_TYPE));
     };
     auto drawChildrenCallbackCounter = [observer]() -> bool {
-        return observer->GetCbListByType(DRAW_CHILDREN_TYPE).empty();
+        return !observer || observer->GetCbListByType(DRAW_CHILDREN_TYPE).empty();
     };
     observer->SetInspectorFuncByType(DRAW_CHILDREN_TYPE,
         AceType::MakeRefPtr<InspectorEvent>(std::move(drawChildrenCallback), std::move(drawChildrenCallbackCounter)));
@@ -638,10 +695,13 @@ static ani_ref CreateComponentObserver(ani_env* env, ani_object id, const char* 
             std::move(drawChildrenCallbackWithParams), std::move(drawChildrenCallbackCounterWithParams)));
 
     auto layoutChildrenCallback = [observer, vm]() -> void {
+        if (!observer) {
+            return;
+        }
         observer->CallUserFunction(vm, observer->GetCbListByType(LAYOUT_CHILDREN_TYPE));
     };
     auto layoutChildrenCallbackCounter = [observer]() -> bool {
-        return observer->GetCbListByType(LAYOUT_CHILDREN_TYPE).empty();
+        return !observer || observer->GetCbListByType(LAYOUT_CHILDREN_TYPE).empty();
     };
     observer->SetInspectorFuncByType(
         LAYOUT_CHILDREN_TYPE, AceType::MakeRefPtr<InspectorEvent>(

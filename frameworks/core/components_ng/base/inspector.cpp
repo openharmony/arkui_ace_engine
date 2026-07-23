@@ -20,7 +20,6 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/common/container.h"
-#include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -51,6 +50,9 @@ const char INSPECTOR_INTERNAL_IDS[] = "$INTERNAL_IDS";
 const char INSPECTOR_STATE_VAR[] = "state";
 #endif
 
+const char KEY_METHOD[] = "method";
+const char KEY_PARAMS[] = "params";
+const char KEY_PARAM_NEED_FREE_NODES[] = "isNeedFreeNodes";
 const std::vector SUPPORT_METHOD = {"ArkUI.tree", "ArkUI.tree.3D", "ArkUI.queryAbilities"};
 
 const uint32_t LONG_PRESS_DELAY = 1000;
@@ -713,10 +715,10 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     }
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
     ACE_SCOPED_TRACE("Inspector::GetRectangleById_Tag=%s", frameNode->GetTag().c_str());
-    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetRectangleById Id:%{private}d key:%{private}s "
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "GetRectangleById Id:%{private}d key:%{private}s tag:%{public}s"
          "localOffset:%{public}s"
          "screenRect:%{public}s",
-        frameNode->GetId(), key.c_str(), rectangle.localOffset.ToString().c_str(),
+        frameNode->GetId(), key.c_str(), frameNode->GetTag().c_str(), rectangle.localOffset.ToString().c_str(),
         rectangle.screenRect.ToString().c_str());
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

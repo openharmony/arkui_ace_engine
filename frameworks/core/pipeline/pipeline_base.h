@@ -1610,6 +1610,8 @@ public:
         int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver) {};
     virtual void UpdateDrawLayoutChildObserver(
         const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver) {};
+    virtual void UpdateDrawObserverFlag(int32_t uniqueId, bool isDrawObserver) {};
+    virtual void UpdateLayoutObserverFlag(int32_t uniqueId, bool isLayoutObserver) {};
     virtual void SetXComponentDisplayConstraintEnabled(bool isEnable) {}
 
     virtual bool GetXComponentDisplayConstraintEnabled()
