@@ -50,6 +50,7 @@ const RESOURCE_TYPE_INTEGER = 10007;
 const ACCESSIBILITY_SELECTED_DESCRIPTION = ' ';
 const ACCESSIBILITY_DEFAULT_DESCRIPTION = '';
 const CAPSULE_FOCUS_SELECTED_OFFSET = 4;
+const SDK_API_VERSION_TWENTY_SIX = 26;
 const segmentButtonTheme = {
   FONT_COLOR: {
     id: 125834608,
@@ -2334,6 +2335,7 @@ export class SegmentButton extends ViewPU {
     this.addProvidedVar('selectedItemScale', this.__selectedItemScale, false);
     this.__useAdaptiveLineHeight = new ObservedPropertySimplePU(false, this, 'useAdaptiveLineHeight');
     this.addProvidedVar('useAdaptiveLineHeight', this.__useAdaptiveLineHeight, false);
+    this.isFirstOptionsChange = true;
     this.environmentCallbackID = undefined;
     this.environmentCallback = {
       onConfigurationUpdated: configuration => {
@@ -2674,7 +2676,9 @@ export class SegmentButton extends ViewPU {
     this.layoutAlgorithm.multiply = this.options.type === 'capsule' && (this.options.multiply ?? false);
     this.layoutAlgorithm.shouldMirror = this.shouldMirror;
     this.updateAnimatedProperty(null);
-    if (this.environmentCallbackID === undefined && deviceInfo.sdkApiVersion >= 26) {
+    if (this.isFirstOptionsChange) {
+      this.isFirstOptionsChange = false;
+    } else if (this.environmentCallbackID === undefined && deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX) {
       let abilityContext = this.getUIContext().getHostContext();
       if (abilityContext) {
         this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
@@ -2715,17 +2719,17 @@ export class SegmentButton extends ViewPU {
     this.updateSelectedIndexes();
     this.setItemsSelected();
     this.updateAnimatedProperty(null);
-    if (deviceInfo.sdkApiVersion >= 26) {
+    if (deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX) {
       this.updateLanguageLineHeight();
-      let abilityContext = this.getUIContext().getHostContext();
+      let abilityContext = this.getUIContext()?.getHostContext();
       if (abilityContext) {
         this.environmentCallbackID = abilityContext.getApplicationContext().on('environment', this.environmentCallback);
       }
     }
   }
   aboutToDisappear() {
-    if (deviceInfo.sdkApiVersion >= 26 && this.environmentCallbackID) {
-      let abilityContext = this.getUIContext().getHostContext();
+    if (deviceInfo.sdkApiVersion >= SDK_API_VERSION_TWENTY_SIX && this.environmentCallbackID !== undefined) {
+      let abilityContext = this.getUIContext()?.getHostContext();
       if (abilityContext) {
         abilityContext.getApplicationContext().off('environment', this.environmentCallbackID);
       }
