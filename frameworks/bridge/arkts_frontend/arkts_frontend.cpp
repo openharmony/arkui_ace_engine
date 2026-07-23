@@ -409,6 +409,11 @@ bool ArktsFrontend::LoadNavDestinationPage(const std::string bundleName, const s
         LOGW("AceNavigation no RuntimeLinker found.");
         return false;
     }
+    ani_boolean isUndefined = ANI_FALSE;
+    if (env->Reference_IsUndefined(linkerRef_, &isUndefined) != ANI_OK || isUndefined) {
+        LOGW("AceNavigation RuntimeLinker is undefined!");
+        return false;
+    }
     ani_status status;
     ani_string classNameStr;
     if ((status = env->String_NewUTF8(className.c_str(), className.length(), &classNameStr)) != ANI_OK) {
@@ -470,6 +475,15 @@ bool ArktsFrontend::GetNearestNonBootRuntimeLinker()
     }
     if (!linkerRef_) {
         LOGW("get invalid RuntimeLinker!");
+        return false;
+    }
+    ani_boolean isUndefined = ANI_FALSE;
+    if ((status = env->Reference_IsUndefined(linkerRef_, &isUndefined)) != ANI_OK) {
+        LOGW("check RuntimeLinker undefined failed, %{public}d", status);
+        return false;
+    }
+    if (isUndefined) {
+        LOGW("RuntimeLinker is undefined!");
         return false;
     }
     return true;

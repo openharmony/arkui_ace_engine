@@ -437,6 +437,10 @@ public:
 
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
     void SetSystemBarStyleMultiThread(const RefPtr<SystemBarStyle>& style);
+    void SetBackupStyle(const std::optional<RefPtr<SystemBarStyle>>& style)
+    {
+        backupStyle_ = style;
+    }
 
     void OnAttachToMainTree() override;
     void OnAttachToMainTreeMultiThread();
