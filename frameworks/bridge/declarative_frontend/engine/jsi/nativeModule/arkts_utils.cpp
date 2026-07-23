@@ -5396,7 +5396,7 @@ void ArkTSUtils::ParseEffectOption(const EcmaVM* vm, const Local<JSValueRef>& js
 
     double brightness = 1.0f;
     if (GetProperty(vm, jsOption, "brightness")->IsNumber()) {
-        brightness = GetProperty(vm, jsOption, "brightness")->ToNumber(vm)->Int32Value(vm);
+        brightness = GetProperty(vm, jsOption, "brightness")->ToNumber(vm)->Value();
         brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
     }
     effectOption.brightness = brightness;

@@ -243,6 +243,16 @@ void SetBarBackgroundBlurStyleImpl(ArkUINodeHandle node, ArkUITabBarBackgroundBl
     tabsModelImpl->SetBarBackgroundBlurStyle(bgBlurStyle);
 }
 
+void SetBarBackgroundBlurStyleWithStyleOptionImpl(ArkUINodeHandle node, void* styleOption)
+{
+    (void)node;
+    auto tabsModelImpl = GetTabsModelImpl();
+    CHECK_NULL_VOID(tabsModelImpl);
+    CHECK_NULL_VOID(styleOption);
+    auto* option = static_cast<BlurStyleOption*>(styleOption);
+    tabsModelImpl->SetBarBackgroundBlurStyle(*option);
+}
+
 void CreateBarBackgroundBlurStyleWithResourceObjImpl(ArkUINodeHandle node, void* inactiveColorRawPtr)
 {
     (void)node;
@@ -619,6 +629,16 @@ void SetBarBackgroundEffectImpl(ArkUINodeHandle node, ArkUITabBarBackgroundEffec
     option.inactiveColor = Color(effectOption->inactiveColor);
     option.isValidColor = effectOption->isValidColor;
     tabsModelImpl->SetBarBackgroundEffect(option);
+}
+
+void SetBarBackgroundEffectWithEffectOptionImpl(ArkUINodeHandle node, void* effectOption)
+{
+    (void)node;
+    auto tabsModelImpl = GetTabsModelImpl();
+    CHECK_NULL_VOID(tabsModelImpl);
+    CHECK_NULL_VOID(effectOption);
+    auto* option = static_cast<EffectOption*>(effectOption);
+    tabsModelImpl->SetBarBackgroundEffect(*option);
 }
 
 void ResetBarBackgroundEffectImpl(ArkUINodeHandle node)
@@ -1062,6 +1082,15 @@ void SetBarBackgroundBlurStyle(ArkUINodeHandle node, ArkUITabBarBackgroundBlurSt
     TabsModelNG::SetBarBackgroundBlurStyle(frameNode, bgBlurStyle);
 }
 
+void SetBarBackgroundBlurStyleWithStyleOption(ArkUINodeHandle node, void* styleOption)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(styleOption);
+    auto* option = static_cast<BlurStyleOption*>(styleOption);
+    TabsModelNG::SetBarBackgroundBlurStyle(frameNode, *option);
+}
+
 void CreateBarBackgroundBlurStyleWithResourceObj(ArkUINodeHandle node, void* inactiveColorRawPtr)
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
@@ -1491,6 +1520,15 @@ void SetBarBackgroundEffect(ArkUINodeHandle node, ArkUITabBarBackgroundEffect* e
     TabsModelNG::SetBarBackgroundEffect(frameNode, option);
 }
 
+void SetBarBackgroundEffectWithEffectOption(ArkUINodeHandle node, void* effectOption)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(effectOption);
+    auto* option = static_cast<EffectOption*>(effectOption);
+    TabsModelNG::SetBarBackgroundEffect(frameNode, *option);
+}
+
 void CreateBarBackgroundEffectWithResourceObj(ArkUINodeHandle node, void* colorRawPtr, void* inactiveColorRawPtr)
 {
     CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
@@ -1745,6 +1783,7 @@ const ArkUITabsModifier* GetTabsModifier()
             .setBarBackgroundColor = SetBarBackgroundColor,
             .setBarBackgroundColorByUser = SetBarBackgroundColorByUser,
             .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyle,
+            .setBarBackgroundBlurStyleWithStyleOption = SetBarBackgroundBlurStyleWithStyleOption,
             .setBarOverlap = SetBarOverlap,
             .setIsVertical = SetIsVertical,
             .setTabBarPosition = SetTabBarPosition,
@@ -1794,6 +1833,7 @@ const ArkUITabsModifier* GetTabsModifier()
             .setAnimateMode = SetAnimateMode,
             .resetAnimateMode = ResetAnimateMode,
             .setBarBackgroundEffect = SetBarBackgroundEffect,
+            .setBarBackgroundEffectWithEffectOption = SetBarBackgroundEffectWithEffectOption,
             .resetBarBackgroundEffect = ResetBarBackgroundEffect,
             .setTabsOnSelected = SetTabsOnSelected,
             .resetTabsOnSelected = ResetTabsOnSelected,
@@ -1845,6 +1885,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setBarBackgroundColor = SetBarBackgroundColorImpl,
         .setBarBackgroundColorByUser = SetBarBackgroundColorByUserImpl,
         .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyleImpl,
+        .setBarBackgroundBlurStyleWithStyleOption = SetBarBackgroundBlurStyleWithStyleOptionImpl,
         .setBarOverlap = SetBarOverlapImpl,
         .setIsVertical = SetIsVerticalImpl,
         .setTabBarPosition = SetTabBarPositionImpl,
@@ -1894,6 +1935,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .setAnimateMode = SetAnimateModeImpl,
         .resetAnimateMode = ResetAnimateModeImpl,
         .setBarBackgroundEffect = SetBarBackgroundEffectImpl,
+        .setBarBackgroundEffectWithEffectOption = SetBarBackgroundEffectWithEffectOptionImpl,
         .resetBarBackgroundEffect = ResetBarBackgroundEffectImpl,
         .setTabsOnSelected = SetTabsOnSelectedImpl,
         .resetTabsOnSelected = ResetTabsOnSelectedImpl,

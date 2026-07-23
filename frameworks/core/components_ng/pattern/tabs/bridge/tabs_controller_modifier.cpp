@@ -55,10 +55,11 @@ void PreloadItemsImpl(const RefPtr<AceType>& controller, const int32_t* indices,
 {
     auto* tabsController = ToController(controller);
     CHECK_NULL_VOID(tabsController);
-    CHECK_NULL_VOID(indices);
     std::set<int32_t> indexSet;
-    for (int32_t i = 0; i < count; ++i) {
-        indexSet.emplace(indices[i]);
+    if (indices) {
+        for (int32_t i = 0; i < count; ++i) {
+            indexSet.emplace(indices[i]);
+        }
     }
     tabsController->PreloadItems(indexSet);
 }
