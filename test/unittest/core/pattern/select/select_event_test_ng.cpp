@@ -768,6 +768,7 @@ HWTEST_F(SelectBindMenuTouchTestNg, RegisterOnHover004, TestSize.Level1)
 
     auto inputHub = select->GetOrCreateInputEventHub();
     ASSERT_NE(inputHub, nullptr);
+    inputHub->CreateHoverEventActuator();
     EXPECT_TRUE(inputHub->hoverEventActuator_);
 }
 

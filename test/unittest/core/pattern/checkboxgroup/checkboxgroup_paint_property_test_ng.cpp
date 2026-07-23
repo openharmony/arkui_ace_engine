@@ -21,6 +21,7 @@
 // Add the following two macro definitions to test the private and protected method.
 #define private public
 #define protected public
+#include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
@@ -209,6 +210,8 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintPropertyTest003, Te
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
      * @tc.steps: step1. Init CheckBoxGroup model
@@ -242,6 +245,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintPropertyTest003, Te
     paintProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("checkboxShape"), "1");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 
 /**
@@ -253,6 +257,8 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintPropertyTest004, Te
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
      * @tc.steps: step1. Init CheckBoxGroup model
@@ -286,6 +292,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintPropertyTest004, Te
     paintProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("checkboxShape"), "1");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 
 /**
@@ -297,6 +304,8 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintMethodTest005, Test
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
      * @tc.steps: step1. Init CheckBoxGroup model.
@@ -345,6 +354,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintMethodTest005, Test
     ASSERT_NE(json, nullptr);
     EXPECT_EQ(json->GetString("checkboxShape"), "1");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 
 /**
@@ -356,6 +366,8 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintMethodTest006, Test
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
      * @tc.steps: step1.  Init CheckBoxGroup model.
@@ -414,6 +426,7 @@ HWTEST_F(CheckBoxGroupPaintPropertyTestNG, CheckBoxGroupPaintMethodTest006, Test
     ASSERT_NE(json, nullptr);
     EXPECT_EQ(json->GetString("checkboxShape"), "0");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 
 /**

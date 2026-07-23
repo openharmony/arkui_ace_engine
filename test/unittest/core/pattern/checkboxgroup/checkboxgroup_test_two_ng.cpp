@@ -646,6 +646,8 @@ HWTEST_F(CheckBoxGroupTwoTestNG, CheckBoxGroupPaintPropertyTest029, TestSize.Lev
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(VERSION_TWELVE);
     /**
      * @tc.steps: step1. Init CheckBoxGroup node
      */
@@ -668,6 +670,7 @@ HWTEST_F(CheckBoxGroupTwoTestNG, CheckBoxGroupPaintPropertyTest029, TestSize.Lev
     checkBoxPaintProperty->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("checkboxShape"), "1");
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 
 /**

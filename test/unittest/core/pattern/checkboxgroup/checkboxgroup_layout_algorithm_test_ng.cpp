@@ -155,6 +155,8 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest003
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    MockContainer::SetUp();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
      * @tc.steps: step1. Create mock theme manager and some parameters.
@@ -182,6 +184,7 @@ HWTEST_F(CheckBoxGroupLayoutAlgorithmTestNG, CheckBoxGroupLayoutAlgorithmTest003
     EXPECT_EQ(layoutAlgorithm.horizontalPadding_, DEFAULT_PADDING_SIZE.ConvertToPx());
     EXPECT_EQ(layoutAlgorithm.verticalPadding_, DEFAULT_PADDING_SIZE.ConvertToPx());
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
+    MockContainer::TearDown();
 }
 
 /**

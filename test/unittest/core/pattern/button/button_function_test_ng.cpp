@@ -1562,6 +1562,7 @@ HWTEST_F(ButtonFunctionTestNg, IsDefaultResponseRegionExpandingNeeded002, TestSi
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
     AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
+    frameNode->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_TWENTY_SIX);
 
     auto layoutProperty = frameNode->GetLayoutProperty();
     ASSERT_NE(layoutProperty, nullptr);
