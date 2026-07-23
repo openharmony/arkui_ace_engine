@@ -107,6 +107,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_stack_processor.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_sections_binding.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_with_env.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
@@ -179,7 +180,6 @@
 #ifndef CROSS_PLATFORM
 #include "frameworks/bridge/declarative_frontend/jsview/js_depth_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_distortion_component.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_with_env.h"
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -467,10 +467,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
 #endif
     // add missing binds to ng build
     JSContextMenu::JSBind(globalObj);
+    JSWithEnv::JSBind(globalObj);
 #ifndef CROSS_PLATFORM
     JSTextMenu::JSBind(globalObj);
     JSDepthComponent::JSBind(globalObj);
-    JSWithEnv::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
     JSEffectComponent::JSBind(globalObj);
 #endif
