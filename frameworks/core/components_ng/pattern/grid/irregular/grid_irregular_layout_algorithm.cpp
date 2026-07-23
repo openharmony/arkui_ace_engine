@@ -411,8 +411,25 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     // FindStartingRow which accounts for startFixOffset_).
     if (!reevaluated &&
         (GreatNotEqual(info_.startFixOffset_, 0.0f) || GreatNotEqual(info_.endFixOffset_, 0.0f))) {
+        MeasureBackwardForStartExtension();
         info_.prevOffset_ = info_.currentOffset_;
         MeasureOnOffset(mainSize);
+    }
+}
+
+void GridIrregularLayoutAlgorithm::MeasureBackwardForStartExtension()
+{
+    if (GreatNotEqual(info_.startFixOffset_, 0.0f) && info_.startMainLineIndex_ > 0) {
+        GridIrregularFiller filler(&info_, wrapper_);
+        // filler.MeasureBackward starts by measuring startingLine itself, so add the
+        // start line's height to ensure enough items above are measured for SolveBackward.
+        float targetLen = info_.startFixOffset_;
+        auto lineHeightIt = info_.lineHeightMap_.find(info_.startMainLineIndex_);
+        if (lineHeightIt != info_.lineHeightMap_.end()) {
+            targetLen += lineHeightIt->second + mainGap_;
+        }
+        filler.MeasureBackward(
+            { crossLens_, crossGap_, mainGap_ }, targetLen, info_.startMainLineIndex_);
     }
 }
 

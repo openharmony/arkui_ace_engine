@@ -495,6 +495,131 @@ HWTEST_F(GridContentClipTest, GridClipIrregularScrollToIndexEndExtension001, Tes
     EXPECT_TRUE(GetItem(info.endIndex_, false)->IsActive());
 }
 
+// Irregular layout: scrollToIndex with START align must fill the start extension area.
+// Items above the jump target that fit in startFixOffset_ must remain laid out (active).
+// Without the fix, FindStartingRow NearZero case returns the current start without extending
+// upward, and PrepareLineHeight for START only fills forward, so items in the top padding
+// region are neither measured nor included in the visible range.
+HWTEST_F(GridContentClipTest, GridClipIrregularScrollToIndexStartExtension001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(0));
+    model.SetColumnsGap(Dimension(0));
+    ConfigureLayout(model, LayoutKind::IRREGULAR);
+    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
+    CreateDone();
+
+    const auto& info0 = pattern_->GetGridLayoutInfo();
+    EXPECT_EQ(info0.startFixOffset_, 200.0f);
+
+    // scrollToIndex to a middle item with START align: the jump target lands at the content
+    // top (currentOffset_ == 0). Items above that fit in startFixOffset_ (200px = 2 rows of
+    // 100px) must be measured and included in the visible range.
+    pattern_->ScrollToIndex(6, false, ScrollAlign::START);
+    FlushUITasks();
+    const auto& info = pattern_->GetGridLayoutInfo();
+    // The start must extend above the jump target into the padding extension area,
+    // producing a negative currentOffset_ and a startMainLineIndex_ below the jump line.
+    EXPECT_LT(info.currentOffset_, 0.0f);
+    // Items in the start extension area must be active.
+    ASSERT_TRUE(GetItem(info.startIndex_, false));
+    EXPECT_TRUE(GetItem(info.startIndex_, false)->IsActive());
+}
+
+// Irregular layout: scrollToIndex with START align after scrolling down must also fill
+// the start extension area. This verifies the fix works when the jump originates from a
+// scrolled state (matrix is pre-filled, then a jump resets the range).
+HWTEST_F(GridContentClipTest, GridClipIrregularScrollToIndexStartExtensionAfterScroll001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(0));
+    model.SetColumnsGap(Dimension(0));
+    ConfigureLayout(model, LayoutKind::IRREGULAR);
+    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 200.0f, 0.0f, 0.0f));
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().startFixOffset_, 200.0f);
+
+    // Scroll down first, then jump to a middle item. The start extension must still be filled.
+    UpdateCurrentOffset(ITEM_HEIGHT * 6);
+    pattern_->ScrollToIndex(8, false, ScrollAlign::START);
+    FlushUITasks();
+    const auto& info = pattern_->GetGridLayoutInfo();
+    // The start must extend above the jump target, producing a negative offset.
+    // The offset can exceed -startFixOffset_ when a multi-row irregular item forces
+    // the start line further up to include the full item.
+    EXPECT_LT(info.currentOffset_, 0.0f);
+    EXPECT_LT(info.startMainLineIndex_, info.endMainLineIndex_);
+    ASSERT_TRUE(GetItem(info.startIndex_, false));
+    EXPECT_TRUE(GetItem(info.startIndex_, false)->IsActive());
+}
+
+// ===================== onScrollIndex non-negative (irregular items) =====================
+// Multi-row irregular items store -itemIdx in continuation rows of gridMatrix_. Without
+// abs(), SyncReportRange would report negative indices via onScrollIndex when a continuation
+// row is the first or last visible row in the content area.
+
+// Irregular layout: reportStartIndex_ must be non-negative when a continuation row is at
+// the content start. Item 3 (2x1) starts at row 2; row 3 is its continuation (matrix value
+// -3). Scrolling 3 rows puts row 3 at content start. Without abs(), reportStartIndex_ = -3.
+HWTEST_F(GridContentClipTest, GridClipIrregularReportStartNonNegative001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(0));
+    model.SetColumnsGap(Dimension(0));
+    model.SetOnScrollIndex([this](int32_t s, int32_t e) {
+        cbStart_ = s;
+        cbEnd_ = e;
+    });
+    ConfigureLayout(model, LayoutKind::IRREGULAR);
+    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
+    CreateDone();
+
+    // Scroll 3 rows: row 3 (continuation of item 3) lands at content start.
+    UpdateCurrentOffset(ITEM_HEIGHT * 3);
+    const auto& info = pattern_->GetGridLayoutInfo();
+    EXPECT_GE(info.reportStartIndex_, 0);
+    EXPECT_GE(info.reportEndIndex_, 0);
+    EXPECT_GE(cbStart_, 0);
+    EXPECT_GE(cbEnd_, 0);
+}
+
+// Irregular layout: reportEndIndex_ must be non-negative when a continuation row is the
+// last visible row in the content area. Item 1 (2x1) starts at row 0; row 1 is its
+// continuation (matrix value -1 at col 1). With bottom padding 300 (content height = 100),
+// scrolling 1 row makes row 1 the only visible row. Without abs(), reportEndIndex_ = -1.
+HWTEST_F(GridContentClipTest, GridClipIrregularReportEndNonNegative001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetRowsGap(Dimension(0));
+    model.SetColumnsGap(Dimension(0));
+    model.SetOnScrollIndex([this](int32_t s, int32_t e) {
+        cbStart_ = s;
+        cbEnd_ = e;
+    });
+    ConfigureLayout(model, LayoutKind::IRREGULAR);
+    layoutProperty_->UpdatePadding(CreatePadding(0.0f, 0.0f, 0.0f, 300.0f));
+    ScrollableModelNG::SetContentClip(AceType::RawPtr(frameNode_), ContentClipMode::BOUNDARY, nullptr);
+    CreateGridItems(ITEM_COUNT, 180, ITEM_HEIGHT);
+    CreateDone();
+
+    // Scroll 1 row: row 1 (continuation of item 1 at col 1) is the only visible row.
+    UpdateCurrentOffset(ITEM_HEIGHT);
+    const auto& info = pattern_->GetGridLayoutInfo();
+    EXPECT_GE(info.reportStartIndex_, 0);
+    EXPECT_GE(info.reportEndIndex_, 0);
+    EXPECT_GE(cbStart_, 0);
+    EXPECT_GE(cbEnd_, 0);
+}
+
 // Scroll layout: reachStart_ clamp must allow items in the clip extension area to remain
 // active after scrolling. The clamp only triggers when currentOffset_ exceeds the clip start
 // bound (contentStartOffset_ - startFixOffset_), not for any negative offset.

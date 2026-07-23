@@ -132,6 +132,15 @@ private:
      * @param jumpLineIdx The line index to jump to, can be adjusted during the function call.
      */
     void PrepareLineHeight(float mainSize, int32_t& jumpLineIdx);
+
+    /**
+     * @brief Measure items above the jump line to fill the start contentClip extension area.
+     *
+     * PrepareLineHeight for START only fills forward, so the line heights of items above
+     * the jump line are unknown. This measures them so FindStartingRow can include items
+     * that fit in the startFixOffset_ extension.
+     */
+    void MeasureBackwardForStartExtension();
     // ========================================== MeasureOnJump ends ===========================================
 
     /**
