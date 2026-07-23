@@ -364,7 +364,7 @@ function loadComponent(): ComponentObj | undefined {
   return loadComponent.componentObj;
 }
 
-class JSImageAnimator extends JSViewAbstract {
+class JSImageAnimator extends JSContainerBase {
     static create(): void {
         getUINativeModule().imageAnimator.create();
     }
