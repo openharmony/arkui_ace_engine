@@ -91,16 +91,23 @@ struct ACE_EXPORT DepthColorRGB {
     }
 };
 
+enum class ACE_EXPORT SpatialPositionMode {
+    WORLD_XYZ = 0,       // X, Y, and Z components are all in world coordinates.
+    NDC_XY_WORLD_Z = 1,  // X and Y use NDC (Normalized Device Coordinates); Z is in world coordinates.
+};
+
 struct ACE_EXPORT DepthPosition {
     DepthVector3 leftTop;
     DepthVector3 rightTop;
     DepthVector3 leftBottom;
     DepthVector3 rightBottom;
+    SpatialPositionMode positionMode = SpatialPositionMode::WORLD_XYZ;
 
     bool operator==(const DepthPosition& other) const
     {
         return leftTop == other.leftTop && rightTop == other.rightTop &&
-               leftBottom == other.leftBottom && rightBottom == other.rightBottom;
+               leftBottom == other.leftBottom && rightBottom == other.rightBottom &&
+               positionMode == other.positionMode;
     }
 
     bool operator!=(const DepthPosition& other) const

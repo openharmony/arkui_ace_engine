@@ -5166,6 +5166,10 @@ void SetSpatialEffectImpl(Ark_NativePointer node,
                 .leftBottom = toVec3(pos.leftBottom),
                 .rightBottom = toVec3(pos.rightBottom),
             };
+            if (pos.positionMode.tag != INTEROP_TAG_UNDEFINED) {
+                effectParams.position->positionMode =
+                    static_cast<SpatialPositionMode>(pos.positionMode.value);
+            }
         },
         [&effectParams](const Ark_Float64& depth) {
             effectParams.depth = static_cast<float>(depth);

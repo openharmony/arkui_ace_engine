@@ -4111,6 +4111,10 @@ void JSViewAbstract::JsSpatialEffect(const JSCallbackInfo& info)
         if (rightBottomValue->IsObject()) {
             position.rightBottom = ParseDepthVector3(rightBottomValue);
         }
+        auto positionModeValue = positionObject->GetProperty("positionMode");
+        if (positionModeValue->IsNumber()) {
+            position.positionMode = static_cast<SpatialPositionMode>(positionModeValue->ToNumber<int32_t>());
+        }
         params.position = position;
     }
     if (positionValue->IsNumber()) {

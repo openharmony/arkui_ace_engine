@@ -7183,6 +7183,14 @@ typedef struct Opt_SourceType {
     Ark_Tag tag;
     Ark_SourceType value;
 } Opt_SourceType;
+typedef enum Ark_SpatialPositionMode {
+    ARK_SPATIAL_POSITION_MODE_WORLD_XYZ = 0,
+    ARK_SPATIAL_POSITION_MODE_NDC_XY_WORLD_Z = 1,
+} Ark_SpatialPositionMode;
+typedef struct Opt_SpatialPositionMode {
+    Ark_Tag tag;
+    Ark_SpatialPositionMode value;
+} Opt_SpatialPositionMode;
 typedef enum Ark_SslError {
     ARK_SSL_ERROR_INVALID = 0,
     ARK_SSL_ERROR_HOST_MISMATCH = 1,
@@ -17889,6 +17897,7 @@ typedef struct Ark_SpatialPosition {
     Ark_DepthVector3 rightTop;
     Ark_DepthVector3 leftBottom;
     Ark_DepthVector3 rightBottom;
+    Opt_SpatialPositionMode positionMode;
 } Ark_SpatialPosition;
 typedef struct Opt_SpatialPosition {
     Ark_Tag tag;

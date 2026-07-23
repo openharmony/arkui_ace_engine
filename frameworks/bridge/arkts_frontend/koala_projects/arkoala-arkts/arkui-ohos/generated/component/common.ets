@@ -8905,11 +8905,16 @@ export interface DepthColorRGB {
     green: int32;
     blue: int32;
 }
+export enum SpatialPositionMode {
+    WORLD_XYZ = 0,
+    NDC_XY_WORLD_Z = 1
+}
 export interface SpatialPosition {
     leftTop: DepthVector3;
     rightTop: DepthVector3;
     leftBottom: DepthVector3;
     rightBottom: DepthVector3;
+    positionMode?: SpatialPositionMode;
 }
 export interface SpatialEffectParams {
     position: SpatialPosition;
@@ -16925,6 +16930,14 @@ export class SpatialPosition_serializer {
         DepthVector3_serializer.write(valueSerializer, valueHolderForLeftBottom)
         const valueHolderForRightBottom = value.rightBottom
         DepthVector3_serializer.write(valueSerializer, valueHolderForRightBottom)
+        const valueHolderForPositionMode = value.positionMode
+        if (valueHolderForPositionMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPositionModeTmpValue = (valueHolderForPositionMode as SpatialPositionMode)
+            valueSerializer.writeInt32(valueHolderForPositionModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): SpatialPosition {
         let valueDeserializer: DeserializerBase = buffer
@@ -16932,7 +16945,13 @@ export class SpatialPosition_serializer {
         const rightTopTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
         const leftBottomTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
         const rightBottomTmpResult: DepthVector3 = DepthVector3_serializer.read(valueDeserializer)
-        let value: SpatialPosition = ({leftTop: leftTopTmpResult, rightTop: rightTopTmpResult, leftBottom: leftBottomTmpResult, rightBottom: rightBottomTmpResult} as SpatialPosition)
+        const positionModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let positionModeTmpBuf: SpatialPositionMode | undefined = undefined
+        if ((positionModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            positionModeTmpBuf = SpatialPositionMode.fromValue(valueDeserializer.readInt32())
+        }
+        const positionModeTmpResult: SpatialPositionMode | undefined = positionModeTmpBuf
+        let value: SpatialPosition = ({leftTop: leftTopTmpResult, rightTop: rightTopTmpResult, leftBottom: leftBottomTmpResult, rightBottom: rightBottomTmpResult, positionMode: positionModeTmpResult} as SpatialPosition)
         return value
     }
 }

@@ -1756,6 +1756,9 @@ void RosenRenderContext::OnSpatialEffectUpdate(const SpatialEffectParams& params
         corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] = transformCorner(position.leftBottom);
         corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] = transformCorner(position.rightBottom);
         variantPara->position = corners;
+        variantPara->spatialEffectMode = (position.positionMode == SpatialPositionMode::NDC_XY_WORLD_Z)
+            ? Rosen::SpatialEffectMode::NDC_XY_WORLD_Z_MODE
+            : Rosen::SpatialEffectMode::WORLD_XYZ_MODE;
     } else if (params.depth.has_value()) {
         variantPara->position = params.depth.value();
     }
