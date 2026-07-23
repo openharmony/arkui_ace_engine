@@ -201,7 +201,9 @@ export struct Image002Test {
 
     let parseQueryString = (query: string): Map<string, string> => {
       let result: Map<string, string> = new Map()
-      if (!query) return result
+      if (!query) {
+        return result
+      }
       let pairs = query.split('&')
       for (let pair of pairs) {
         let parts = pair.split('=')
@@ -281,7 +283,9 @@ export struct Image002Test {
       let queryIndex = lowerUrl.indexOf('?')
       let cleanUrl = queryIndex >= 0 ? lowerUrl.substring(0, queryIndex) : lowerUrl
       let fragmentIndex = cleanUrl.indexOf('#')
-      if (fragmentIndex >= 0) cleanUrl = cleanUrl.substring(0, fragmentIndex)
+      if (fragmentIndex >= 0) {
+        cleanUrl = cleanUrl.substring(0, fragmentIndex)
+      }
       for (let ext of imageFormatExtensions) {
         if (cleanUrl.endsWith(ext)) {
           return imageMimeTypes.get(ext) || 'unknown'
@@ -389,7 +393,7 @@ export struct Image002Test {
     }
 
     for (let method of httpMethods) {
-      let resp = simulateHttpRequest('https://example.com/img.png', method, 1000)
+      let resp = simulateHttpRequest('', method, 1000)
       hilog.info(0x0000, 'testTag', `Method ${method}: ${resp.status} ${resp.statusText}`)
     }
 
@@ -406,7 +410,9 @@ export struct Image002Test {
 
       set(key: string, body: ArrayBuffer, ttl: number): boolean {
         let size = body.byteLength
-        if (size > this.maxSize) return false
+        if (size > this.maxSize) {
+         return false
+        }
         while (this.currentSize + size > this.maxSize && this.store.size > 0) {
           let oldestKey: string | null = null
           let oldestTime = Date.now()
@@ -431,7 +437,9 @@ export struct Image002Test {
 
       get(key: string): ArrayBuffer | null {
         let entry = this.store.get(key)
-        if (!entry) return null
+        if (!entry) {
+          return null
+        }
         if (Date.now() - entry.timestamp > entry.ttl) {
           this.currentSize -= entry.body.byteLength
           this.store.delete(key)
@@ -945,7 +953,10 @@ export struct Image002Test {
       }
       for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
-          let r = 0, g = 0, b = 0, a = 0
+          let r = 0
+          let g = 0
+          let b = 0
+          let a = 0
           for (let ky = -radius; ky <= radius; ky++) {
             for (let kx = -radius; kx <= radius; kx++) {
               let px = Math.min(width - 1, Math.max(0, x + kx))
@@ -1433,7 +1444,7 @@ export struct Image002Test {
 
     let testProxy = (() => {
       let target = {
-        url: 'https://example.com/img.png',
+        url: '',
         width: 100,
         height: 100
       }
@@ -1693,12 +1704,17 @@ export struct Image002Test {
 
     for (let i = 0; i < 100; i++) {
       let binarySearch = ((arr: number[], target: number): number => {
-        let left = 0, right = arr.length - 1
+        let left = 0
+        let right = arr.length - 1
         while (left <= right) {
           let mid = Math.floor((left + right) / 2)
           if (arr[mid] === target) return mid
-          if (arr[mid] < target) left = mid + 1
-          else right = mid - 1
+          if (arr[mid] < target) {
+           left = mid + 1
+          }
+          else {
+            right = mid - 1
+          }
         }
         return -1
       })([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], i % 10 + 1)
