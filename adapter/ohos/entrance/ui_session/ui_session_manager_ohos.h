@@ -219,7 +219,6 @@ private:
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
     std::shared_mutex reportObjectMutex_;
     std::mutex pageSceneMutex_;
-    std::atomic<int32_t> pageSceneInputNodeCount_ = 0;
     std::unordered_map<int32_t, PageSceneRuleSetInfo> pageSceneRuleSets_;
     std::set<int32_t> pendingPageSceneGets_;
     std::set<std::pair<int32_t, std::string>> pendingPageSceneDetectRules_;

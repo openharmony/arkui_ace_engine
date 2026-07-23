@@ -26,6 +26,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
 
 namespace OHOS::Ace {
@@ -92,8 +93,13 @@ struct PageSceneMatchResult {
     int32_t matchedCount = 0;
     int32_t minReportIntervalMs = 500;
     bool deduplicate = true;
-    std::string signature;
+    std::vector<int32_t> nodeIds;
     std::string sceneJson;
+};
+
+struct PageSceneReportState {
+    std::vector<int32_t> lastReportedNodeIds;
+    std::chrono::steady_clock::time_point lastReportTime;
 };
 
 class PageSceneInputCountTracker {
@@ -108,6 +114,7 @@ private:
         const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const RefPtr<FrameNode>& node) const;
 
     std::vector<PageSceneNodeInfo> visibleInputNodes_;
+    RectF pageViewportRect_;
 };
 
 class PageSceneRuleManager {
@@ -131,14 +138,11 @@ private:
     std::string BuildSceneJson(const PageSceneRuleSet& ruleSet, const PageSceneRule& rule,
         const std::string& pageName, const std::vector<PageSceneNodeInfo>& nodes, bool matched,
         const std::string& eventName) const;
-    std::string BuildSignature(
-        const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const std::string& pageName,
-        const std::vector<PageSceneNodeInfo>& nodes) const;
 
     mutable std::mutex mutex_;
     std::unordered_map<int32_t, PageSceneRuleSet> registeredRuleSets_;
     std::set<int32_t> pendingGetProcesses_;
-    std::unordered_map<std::string, std::pair<std::string, std::chrono::steady_clock::time_point>> reportStates_;
+    std::unordered_map<std::string, PageSceneReportState> reportStates_;
 };
 } // namespace OHOS::Ace::NG
 

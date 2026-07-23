@@ -436,7 +436,6 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
                 ErasePendingPageSceneRulesLocked(processId);
                 auto previousCount = pageSceneRuleRegisterProcesses_.fetch_sub(1);
                 if (previousCount <= 1 || !HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE)) {
-                    pageSceneInputNodeCount_.store(0);
                     pendingPageSceneDetectRules_.clear();
                 }
             }
@@ -469,17 +468,12 @@ int32_t UiSessionManagerOhos::RegisterPageSceneRules(int32_t processId, const st
     }
     {
         std::lock_guard<std::mutex> lock(pageSceneMutex_);
-        bool hadTextEditorRule = HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE);
         if (pageSceneRuleSets_.find(processId) != pageSceneRuleSets_.end()) {
             LOGW("RegisterPageSceneRules duplicated, process id:%{public}d", processId);
             return LAST_UNFINISH;
         }
         pageSceneRuleSets_[processId] = ruleSetInfo;
-        auto previousCount = pageSceneRuleRegisterProcesses_.fetch_add(1);
-        if (previousCount == 0 ||
-            (!hadTextEditorRule && HasPageSceneRule(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, false, ""))) {
-            pageSceneInputNodeCount_.store(0);
-        }
+        pageSceneRuleRegisterProcesses_.fetch_add(1);
     }
     SaveProcessId("pageScene", processId);
     auto registerRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, true, "");
@@ -504,7 +498,6 @@ int32_t UiSessionManagerOhos::UnregisterPageSceneRules(int32_t processId, const 
         ErasePendingPageSceneRulesLocked(processId);
         auto previousCount = pageSceneRuleRegisterProcesses_.fetch_sub(1);
         if (previousCount <= 1 || !HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE)) {
-            pageSceneInputNodeCount_.store(0);
             pendingPageSceneDetectRules_.clear();
         }
         pendingPageSceneGets_.erase(processId);
@@ -588,16 +581,6 @@ void UiSessionManagerOhos::NotifyPageSceneNodeChanged(const std::string& nodeTag
     auto ruleJsons = GetPageSceneRuleJsonsForNodeChange(nodeTag, PAGE_SCENE_TEXT_EDITOR_SCENE);
     if (ruleJsons.empty()) {
         return;
-    }
-    if (isAttach) {
-        pageSceneInputNodeCount_.fetch_add(1);
-    } else {
-        auto inputNodeCount = pageSceneInputNodeCount_.load();
-        while (inputNodeCount > 0) {
-            if (pageSceneInputNodeCount_.compare_exchange_weak(inputNodeCount, inputNodeCount - 1)) {
-                break;
-            }
-        }
     }
     {
         std::lock_guard<std::mutex> lock(pageSceneMutex_);

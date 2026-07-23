@@ -21,6 +21,7 @@
 #include <cstring>
 #include <iomanip>
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <sys/time.h>
 
@@ -64,6 +65,43 @@ constexpr size_t PAGE_SCENE_RULE_SET_ID_PARAM_INDEX = 1;
 constexpr double PERCENT_VALUE = 100.0;
 const char PAGE_SCENE_RULE_FILE[] = "page_scene_rules.json";
 const char DEFAULT_PAGE_SCENE_RULE_SET_ID[] = "default_scene_rules";
+const char NULL_CALLBACK_DUMP_OPTION[] = "-nullcb";
+const char EMPTY_ID_DUMP_OPTION[] = "-emptyid";
+const std::string REPEAT_DUMP_OPTION_PREFIX = "-repeat:";
+
+struct DumpOption {
+    bool useNullCallback = false;
+    bool useEmptyId = false;
+    int32_t repeatCount = 1;
+};
+
+DumpOption ParseDumpOption(std::vector<std::string>& params)
+{
+    DumpOption option;
+    params.erase(std::remove_if(params.begin(), params.end(), [&option](const std::string& param) {
+        if (param == NULL_CALLBACK_DUMP_OPTION) {
+            option.useNullCallback = true;
+            return true;
+        }
+        if (param == EMPTY_ID_DUMP_OPTION) {
+            option.useEmptyId = true;
+            return true;
+        }
+        if (param.rfind(REPEAT_DUMP_OPTION_PREFIX, 0) != 0) {
+            return false;
+        }
+        auto repeatValue = param.substr(REPEAT_DUMP_OPTION_PREFIX.length());
+        errno = 0;
+        char* parseEnd = nullptr;
+        long repeatCount = std::strtol(repeatValue.c_str(), &parseEnd, 10);
+        if (parseEnd != repeatValue.c_str() && *parseEnd == '\0' && errno != ERANGE && repeatCount > 0 &&
+            repeatCount <= std::numeric_limits<int32_t>::max()) {
+            option.repeatCount = static_cast<int32_t>(repeatCount);
+        }
+        return true;
+        }), params.end());
+    return option;
+}
 
 std::string GetCurrentTimestampStr()
 {
@@ -595,34 +633,46 @@ void UiSaService::HandleRegisterPageSceneRules(sptr<IUiContentService> service, 
         LOGW("[PageScene] RegisterPageSceneRules connect failed");
         return;
     }
+    auto dumpOption = ParseDumpOption(params);
     bool toFile = HasToFileParam(params);
     RemoveToFileParam(params);
-    std::string ruleJson = params.size() > PAGE_SCENE_RULE_PARAM_INDEX ? params[PAGE_SCENE_RULE_PARAM_INDEX]
-                                                                       : ReadPageSceneRuleJson();
-    if (ruleJson.empty()) {
-        LOGW("[PageScene] RegisterPageSceneRules rule json is empty");
-        return;
+    std::string ruleJson = dumpOption.useEmptyId
+                               ? ""
+                               : (params.size() > PAGE_SCENE_RULE_PARAM_INDEX ? params[PAGE_SCENE_RULE_PARAM_INDEX]
+                                                                              : ReadPageSceneRuleJson());
+    PageSceneEventCallback eventCallback = nullptr;
+    if (!dumpOption.useNullCallback) {
+        eventCallback = [toFile](const std::string& data) {
+            LOGI("[PageScene] event length=%{public}zu", data.length());
+            if (toFile && !data.empty()) {
+                WriteTextFile("[PageSceneEvent]", "page_scene_event", data);
+            }
+        };
     }
-    auto eventCallback = [toFile](const std::string& data) {
-        LOGI("[PageScene] event length=%{public}zu", data.length());
-        if (toFile && !data.empty()) {
-            WriteTextFile("[PageSceneEvent]", "page_scene_event", data);
-        }
-    };
-    int32_t result = service->RegisterPageSceneRules(ruleJson, eventCallback);
-    LOGI("[PageScene] call RegisterPageSceneRules result=%{public}d", result);
+    for (int32_t index = 0; index < dumpOption.repeatCount; index++) {
+        int32_t result = service->RegisterPageSceneRules(ruleJson, eventCallback);
+        LOGI("[PageScene] call RegisterPageSceneRules repeat=%{public}d/%{public}d, result=%{public}d", index + 1,
+            dumpOption.repeatCount, result);
+    }
 }
 
 void UiSaService::HandleUnregisterPageSceneRules(sptr<IUiContentService> service, std::vector<std::string> params)
 {
+    auto dumpOption = ParseDumpOption(params);
     bool toFile = HasToFileParam(params);
     RemoveToFileParam(params);
-    std::string ruleSetId = params.size() > PAGE_SCENE_RULE_SET_ID_PARAM_INDEX
-                                ? params[PAGE_SCENE_RULE_SET_ID_PARAM_INDEX]
-                                : DEFAULT_PAGE_SCENE_RULE_SET_ID;
-    int32_t result = service->UnregisterPageSceneRules(ruleSetId);
-    LOGI("[PageScene] call UnregisterPageSceneRules ruleSetId=%{public}s, result=%{public}d", ruleSetId.c_str(),
-        result);
+    std::string ruleSetId = dumpOption.useEmptyId
+                                ? ""
+                                : (params.size() > PAGE_SCENE_RULE_SET_ID_PARAM_INDEX
+                                          ? params[PAGE_SCENE_RULE_SET_ID_PARAM_INDEX]
+                                          : DEFAULT_PAGE_SCENE_RULE_SET_ID);
+    int32_t result = FAILED;
+    for (int32_t index = 0; index < dumpOption.repeatCount; index++) {
+        result = service->UnregisterPageSceneRules(ruleSetId);
+        LOGI("[PageScene] call UnregisterPageSceneRules repeat=%{public}d/%{public}d, ruleSetId=%{public}s, "
+             "result=%{public}d",
+            index + 1, dumpOption.repeatCount, ruleSetId.c_str(), result);
+    }
     if (toFile) {
         std::ostringstream resultJson;
         resultJson << "{\"command\":\"UnregisterPageSceneRules\",\"ruleSetId\":\"" << ruleSetId
@@ -637,23 +687,28 @@ void UiSaService::HandleGetPageScene(sptr<IUiContentService> service, std::vecto
         LOGW("[PageScene] GetPageScene connect failed");
         return;
     }
+    auto dumpOption = ParseDumpOption(params);
     bool toFile = HasToFileParam(params);
     RemoveToFileParam(params);
-    std::string ruleJsonOrRuleSetId = params.size() > PAGE_SCENE_RULE_PARAM_INDEX
-                                           ? params[PAGE_SCENE_RULE_PARAM_INDEX]
-                                           : ReadPageSceneRuleJson();
-    if (ruleJsonOrRuleSetId.empty()) {
-        LOGW("[PageScene] GetPageScene rule json or ruleSetId is empty");
-        return;
+    std::string ruleJsonOrRuleSetId =
+        dumpOption.useEmptyId
+            ? ""
+            : (params.size() > PAGE_SCENE_RULE_PARAM_INDEX ? params[PAGE_SCENE_RULE_PARAM_INDEX]
+                                                            : ReadPageSceneRuleJson());
+    PageSceneEventCallback eventCallback = nullptr;
+    if (!dumpOption.useNullCallback) {
+        eventCallback = [toFile](const std::string& data) {
+            LOGI("[PageScene] get result length=%{public}zu", data.length());
+            if (toFile && !data.empty()) {
+                WriteTextFile("[PageSceneGet]", "page_scene_get", data);
+            }
+        };
     }
-    auto eventCallback = [toFile](const std::string& data) {
-        LOGI("[PageScene] get result length=%{public}zu", data.length());
-        if (toFile && !data.empty()) {
-            WriteTextFile("[PageSceneGet]", "page_scene_get", data);
-        }
-    };
-    int32_t result = service->GetPageScene(ruleJsonOrRuleSetId, eventCallback);
-    LOGI("[PageScene] call GetPageScene result=%{public}d", result);
+    for (int32_t index = 0; index < dumpOption.repeatCount; index++) {
+        int32_t result = service->GetPageScene(ruleJsonOrRuleSetId, eventCallback);
+        LOGI("[PageScene] call GetPageScene repeat=%{public}d/%{public}d, result=%{public}d", index + 1,
+            dumpOption.repeatCount, result);
+    }
 }
 
 void UiSaService::HandleExeAppAIFunction(sptr<IUiContentService> service, std::vector<std::string> params)
