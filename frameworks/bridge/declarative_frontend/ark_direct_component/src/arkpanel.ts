@@ -222,7 +222,7 @@ function loadComponent(): ComponentObj | undefined {
   return loadComponent.componentObj;
 }
 
-class JSPanel extends JSViewAbstract {
+class JSPanel extends JSContainerBase {
   static create(params: any): void {
     getUINativeModule().panel.create(params);
   }
