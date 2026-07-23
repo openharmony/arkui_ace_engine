@@ -880,7 +880,8 @@ export struct Image002Test {
         for (let y = 0; y < height; y++) {
           for (let x = 0; x < width; x++) {
             let srcOffset = (y * width + x) * 4
-            let newX: number, newY: number
+            let newX: number
+            let newY: number
             if (degrees === 90) {
               newX = height - 1 - y
               newY = x
@@ -1659,7 +1660,8 @@ export struct Image002Test {
 
     for (let i = 0; i < 100; i++) {
       let fibonacci = (() => {
-        let a = 0, b = 1
+        let a = 0
+        let b = 1
         for (let j = 0; j < i; j++) {
           [a, b] = [b, a + b]
         }
@@ -1681,11 +1683,19 @@ export struct Image002Test {
 
     for (let i = 0; i < 100; i++) {
       let isPrime = (() => {
-        if (i <= 1) return false
-        if (i <= 3) return true
-        if (i % 2 === 0 || i % 3 === 0) return false
+        if (i <= 1) {
+         return false
+        }
+        if (i <= 3) {
+          return true
+        }
+        if (i % 2 === 0 || i % 3 === 0) {
+         return false
+        }
         for (let j = 5; j * j <= i; j += 6) {
-          if (i % j === 0 || i % (j + 2) === 0) return false
+          if (i % j === 0 || i % (j + 2) === 0) {
+           return false
+          }
         }
         return true
       })()
@@ -1708,7 +1718,9 @@ export struct Image002Test {
         let right = arr.length - 1
         while (left <= right) {
           let mid = Math.floor((left + right) / 2)
-          if (arr[mid] === target) return mid
+          if (arr[mid] === target) {
+           return mid
+          }
           if (arr[mid] < target) {
            left = mid + 1
           }
