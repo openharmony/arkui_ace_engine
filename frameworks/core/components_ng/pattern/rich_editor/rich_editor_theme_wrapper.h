@@ -46,7 +46,7 @@ public:
 
     void ApplyTokenTheme(const TokenTheme& theme) override
     {
-        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
         if (const auto& colors = theme.Colors(); colors) {
             textStyle_.SetTextColor(colors->FontPrimary());
             textStyle_.SetTextDecorationColor(colors->FontPrimary());
