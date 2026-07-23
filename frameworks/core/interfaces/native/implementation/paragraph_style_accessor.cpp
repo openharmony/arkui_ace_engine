@@ -48,6 +48,46 @@ void ParseShaderStyle(const Opt_ShaderStyleProxy& proxy, OHOS::Ace::SpanParagrap
         paragraphStyle.SetOptGradient(gradient);
     }
 }
+
+void ParseTailIndents(const Opt_Union_LengthMetrics_Array_LengthMetrics& tailIndentsOpt,
+    OHOS::Ace::SpanParagraphStyle& paragraphStyle)
+{
+    if (tailIndentsOpt.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    NG::TailIndents tailIndents;
+    NG::TailIndentsArray indentsArray;
+    auto convertDimensionWithPrecision = [](const Ark_LengthMetrics& metrics) -> Dimension {
+        double doubleValue = static_cast<double>(metrics.value);
+        auto unit = Converter::OptConvert<DimensionUnit>(metrics.unit)
+            .value_or(DimensionUnit::VP);
+        return Dimension(doubleValue, unit);
+    };
+    
+    if (tailIndentsOpt.value.selector == 0) {
+        auto dim = convertDimensionWithPrecision(tailIndentsOpt.value.value0);
+        if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
+            dim.Reset();
+        }
+        indentsArray.push_back(dim);
+    } else if (tailIndentsOpt.value.selector == 1) {
+        auto& arrayValue = tailIndentsOpt.value.value1;
+        CHECK_NULL_VOID(arrayValue.array);
+        for (int i = 0; i < arrayValue.length; i++) {
+            auto dim = convertDimensionWithPrecision(*(arrayValue.array + i));
+            if (dim.IsNegative() || dim.Unit() == DimensionUnit::PERCENT) {
+                dim.Reset();
+            }
+            indentsArray.push_back(dim);
+        }
+    }
+    
+    if (!indentsArray.empty()) {
+        tailIndents.indentsArray = indentsArray;
+        paragraphStyle.tailIndents = tailIndents;
+    }
+}
+
 template<>
 OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
 {
@@ -87,25 +127,7 @@ OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
         },
         []() {});
     ParseShaderStyle(src.shaderStyle, ret);
-
-    if (src.tailIndents.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        NG::TailIndents tailIndents;
-        NG::TailIndentsArray indentsArray;
-        if (src.tailIndents.value.selector == 0) {
-            auto singleValue = Converter::Convert<Dimension>(src.tailIndents.value.value0);
-            indentsArray.push_back(singleValue);
-        } else if (src.tailIndents.value.selector == 1) {
-            auto& arrayValue = src.tailIndents.value.value1;
-            for (int i = 0; i < arrayValue.length; i++) {
-                auto dim = Converter::Convert<Dimension>(*(arrayValue.array + i));
-                indentsArray.push_back(dim);
-            }
-        }
-        if (!indentsArray.empty()) {
-            tailIndents.indentsArray = indentsArray;
-            ret.tailIndents = tailIndents;
-        }
-    }
+    ParseTailIndents(src.tailIndents, ret);
 
     return ret;
 }
@@ -283,7 +305,7 @@ Opt_Array_F64 GetTailIndentsImpl(Ark_ParagraphStyle peer)
     }
 
     auto& indentsArray = style.tailIndents->indentsArray.value();
-    std::vector<float> vpValues;
+    std::vector<double> vpValues;
     for (const auto& dim : indentsArray) {
         vpValues.push_back(dim.ConvertToVp());
     }
