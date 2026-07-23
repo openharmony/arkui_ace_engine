@@ -374,6 +374,7 @@ public:
 
     void DumpSimplifyTreeWithParamConfig(
         std::shared_ptr<JsonValue>& root, ParamConfig config, bool isInSubWindow) override;
+
     void TriggerGarbageCollection() override;
 
     void DumpHeapSnapshot(bool isPrivate) override;

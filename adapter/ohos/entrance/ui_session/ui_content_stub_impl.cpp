@@ -78,6 +78,7 @@ int32_t UIContentServiceStubImpl::RegisterLifeCycleEventCallback(const EventCall
 int32_t UIContentServiceStubImpl::RegisterSelectTextEventCallback(const EventCallback& eventCallback)
 {
     UiSessionManager::GetInstance()->SetSelectTextEventRegistered(true);
+    // first register
     UiSessionManager::GetInstance()->ReportSelectText();
     return NO_ERROR;
 }

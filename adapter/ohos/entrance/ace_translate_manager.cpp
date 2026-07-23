@@ -36,6 +36,7 @@ void UiTranslateManagerImpl::RemoveTranslateListener(int32_t nodeId)
     listenerMap_.erase(nodeId);
     LOGI("RemoveTranslateListener WebView nodeId:%{public}d", nodeId);
 }
+
 void UiTranslateManagerImpl::GetWebViewCurrentLanguage()
 {
     for (auto listener : listenerMap_) {
@@ -79,6 +80,7 @@ void UiTranslateManagerImpl::GetWebInfoByRequest(uint32_t windowId, int32_t webI
     LOGW("GetWebInfoByRequest not supportted on this platform.");
 #endif
 }
+
 void UiTranslateManagerImpl::GetTranslateText(std::string extraData, bool isContinued)
 {
     if (listenerMap_.empty()) {
@@ -409,6 +411,7 @@ void UiTranslateManagerImpl::SendArkUIImagesById()
     arkUIComponentImages_.clear();
     arkUIQueryErrorCode_ = MultiImageQueryErrorCode::OK;
 }
+
 void UiTranslateManagerImpl::DoSendArkWebImagesById(bool triggerFromArkWebCallback)
 {
     if (hasSendArkWebQueryResult_) {
