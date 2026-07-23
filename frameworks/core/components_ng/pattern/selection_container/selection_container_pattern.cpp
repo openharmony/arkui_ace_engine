@@ -131,6 +131,25 @@ void SelectionContainerPattern::CloseSelectOverlay(bool animation, CloseReason r
     overlay->CloseOverlay(animation, reason);
 }
 
+int32_t SelectionContainerPattern::ClaimSelectionContainerEpoch()
+{
+    static int32_t counter = 0;
+    return counter++;
+}
+
+void SelectionContainerPattern::CloseSelectionMenu()
+{
+    OnChildResponseTypeChanged(TextResponseType::NONE);
+    CloseSelectOverlay(true);
+}
+
+void SelectionContainerPattern::ClearTextSelection()
+{
+    OnChildResponseTypeChanged(TextResponseType::NONE);
+    ResetAllSelection();
+    CloseSelectOverlay(true);
+}
+
 void SelectionContainerPattern::ProcessOverlay(const OverlayRequest& request)
 {
     auto overlay = GetOrCreateSelectionSelectOverlay();
@@ -383,6 +402,15 @@ void SelectionContainerPattern::RefreshMouseLeftSelectionOnFrameNodeChanged()
     HandleSelectionUpdate(OffsetF(localPoint.GetX(), localPoint.GetY()));
 }
 
+void SelectionContainerPattern::DismissMenuAfterCopy()
+{
+    if (IsUsingMouse()) {
+        CloseSelectOverlay();
+        return;
+    }
+    HideMenu(true);
+}
+
 void SelectionContainerPattern::UpdateMovingChildForHandle(bool isFirstHandle)
 {
     auto movingChild = isFirstHandle ? GetSelectionStartChild() : GetSelectionEndChild();
@@ -465,19 +493,19 @@ void SelectionContainerPattern::HandleOnCopy()
         static_cast<int32_t>(copyOption), data.allowedChildren.size(), data.clipboardText.length());
 
     if (data.clipboardText.empty()) {
-        overlay->HideMenu(true);
+        DismissMenuAfterCopy();
         return;
     }
 
     bool containerAllowed = FireOnWillCopy(data.clipboardText);
     if (!containerAllowed) {
         TAG_LOGI(AceLogTag::ACE_TEXT, "HandleOnCopy blocked by container onWillCopy");
-        overlay->HideMenu(true);
+        DismissMenuAfterCopy();
         return;
     }
 
     WriteClipboard(data.clipboardText, data.mergedSpanString, data.hasSpanString, copyOption);
-    overlay->HideMenu(true);
+    DismissMenuAfterCopy();
 
     for (const auto& item : data.allowedChildren) {
         item.child->FireOnCopy(item.payload.plainText);

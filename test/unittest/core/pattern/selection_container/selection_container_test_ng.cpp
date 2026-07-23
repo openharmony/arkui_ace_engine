@@ -20,6 +20,7 @@
 #define protected public
 
 #include "test/mock/frameworks/core/common/mock_container.h"
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 
@@ -32,8 +33,10 @@
 #include "core/components_ng/pattern/selection_container/selection_container_layout_property.h"
 #include "core/components_ng/pattern/selection_container/selection_container_event_hub.h"
 #include "core/components_ng/manager/select_content_overlay/selection_container_child.h"
+#include "core/components_ng/pattern/selection_container/selection_container_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_selection_child.h"
 #include "base/json/json_util.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -63,12 +66,12 @@ const Color TEST_CARET_COLOR = Color(0xFF0000FF);
 const Color TEST_SELECTED_BG_COLOR = Color(0xFFFF0000);
 } // namespace
 
-class MockSelectionContainerChild : public SelectionContainerChild {
-    DECLARE_ACE_TYPE(MockSelectionContainerChild, SelectionContainerChild);
+class LegacyMockSelectionContainerChild : public SelectionContainerChild {
+    DECLARE_ACE_TYPE(LegacyMockSelectionContainerChild, SelectionContainerChild);
 
 public:
-    MockSelectionContainerChild() = default;
-    ~MockSelectionContainerChild() override = default;
+    LegacyMockSelectionContainerChild() = default;
+    ~LegacyMockSelectionContainerChild() override = default;
 
     void SetHostNode(const RefPtr<FrameNode>& node)
     {
@@ -340,9 +343,9 @@ public:
 
     RefPtr<SelectionContainerPattern> pattern_;
     RefPtr<FrameNode> containerNode_;
-    RefPtr<MockSelectionContainerChild> child1_;
+    RefPtr<LegacyMockSelectionContainerChild> child1_;
     RefPtr<FrameNode> childNode1_;
-    RefPtr<MockSelectionContainerChild> child2_;
+    RefPtr<LegacyMockSelectionContainerChild> child2_;
     RefPtr<FrameNode> childNode2_;
 };
 
@@ -354,6 +357,7 @@ void SelectionContainerPatternTest::SetUpTestSuite()
 
 void SelectionContainerPatternTest::TearDownTestSuite()
 {
+    MockParagraph::TearDown();
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
@@ -369,7 +373,7 @@ void SelectionContainerPatternTest::SetUp()
         containerNode_->layoutProperty_ = layoutProperty;
     }
 
-    child1_ = AceType::MakeRefPtr<MockSelectionContainerChild>();
+    child1_ = AceType::MakeRefPtr<LegacyMockSelectionContainerChild>();
     childNode1_ = FrameNode::CreateFrameNode("Child1", TEST_NODE_ID_CHILD1, AceType::MakeRefPtr<Pattern>());
     child1_->SetHostNode(childNode1_);
     auto geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
@@ -377,7 +381,7 @@ void SelectionContainerPatternTest::SetUp()
     childNode1_->geometryNode_ = geometryNode1;
     childNode1_->SetParent(containerNode_);
 
-    child2_ = AceType::MakeRefPtr<MockSelectionContainerChild>();
+    child2_ = AceType::MakeRefPtr<LegacyMockSelectionContainerChild>();
     childNode2_ = FrameNode::CreateFrameNode("Child2", TEST_NODE_ID_CHILD2, AceType::MakeRefPtr<Pattern>());
     child2_->SetHostNode(childNode2_);
     auto geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
@@ -645,6 +649,7 @@ HWTEST_F(SelectionContainerPatternTest, ResetAllSelectionTest001, TestSize.Level
     EXPECT_TRUE(pattern_->selectionStartChild_.Upgrade() == nullptr);
     EXPECT_TRUE(pattern_->selectionEndChild_.Upgrade() == nullptr);
 }
+
 
 /**
  * @tc.name: IsSelectAllTest001
@@ -1754,5 +1759,53 @@ HWTEST_F(SelectionContainerPatternTest, SelectionContainerToJsonValueTest001, Te
     EXPECT_TRUE(json->Contains("caretColor"));
     EXPECT_TRUE(json->Contains("bindSelectionMenu"));
     EXPECT_TRUE(json->Contains("content"));
+}
+
+/**
+ * @tc.name: CloseSelectionMenuTest001
+ * @tc.desc: Test SelectionContainerPattern::CloseSelectionMenu is idempotent and crash-safe
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, CloseSelectionMenuTest001, TestSize.Level1)
+{
+    ASSERT_NE(pattern_, nullptr);
+    // step1: close when no menu is shown (no-op, must not crash)
+    pattern_->CloseSelectionMenu();
+    // step2: idempotent
+    pattern_->CloseSelectionMenu();
+}
+
+/**
+ * @tc.name: CloseSelectionMenuModelTest001
+ * @tc.desc: Test SelectionContainerModelNG::CloseSelectionMenu by frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, CloseSelectionMenuModelTest001, TestSize.Level1)
+{
+    ASSERT_NE(containerNode_, nullptr);
+    SelectionContainerModelNG::CloseSelectionMenu(AceType::RawPtr(containerNode_));
+}
+
+/**
+ * @tc.name: ClearTextSelectionTest001
+ * @tc.desc: Test SelectionContainerPattern::ClearTextSelection is idempotent and crash-safe
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, ClearTextSelectionTest001, TestSize.Level1)
+{
+    ASSERT_NE(pattern_, nullptr);
+    pattern_->ClearTextSelection();
+    pattern_->ClearTextSelection();
+}
+
+/**
+ * @tc.name: ClearTextSelectionModelTest001
+ * @tc.desc: Test SelectionContainerModelNG::ClearTextSelection by frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, ClearTextSelectionModelTest001, TestSize.Level1)
+{
+    ASSERT_NE(containerNode_, nullptr);
+    SelectionContainerModelNG::ClearTextSelection(AceType::RawPtr(containerNode_));
 }
 } // namespace OHOS::Ace::NG
