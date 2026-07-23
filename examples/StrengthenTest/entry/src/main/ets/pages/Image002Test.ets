@@ -1332,7 +1332,7 @@ export struct Image002Test {
           }
         }
         try {
-          throw new NetworkImageLoadError('Failed to download network image', 404, 'https://example.com/missing.png')
+          throw new NetworkImageLoadError('Failed to download network image', 404, '')
         } catch (error) {
           let e = error as NetworkImageLoadError
           return `${e.message} (status=${e.statusCode}, url=${e.url})`
@@ -1723,8 +1723,7 @@ export struct Image002Test {
           }
           if (arr[mid] < target) {
            left = mid + 1
-          }
-          else {
+          } else {
             right = mid - 1
           }
         }
