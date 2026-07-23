@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-24
-> 主题数：42
+> 更新时间：2026-07-23
+> 主题数：57
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -81,6 +81,14 @@ docs/kb/
 | StateMgmtV2Core | V2 状态管理核心逻辑 | `docs/kb/architecture/state_management/v2_core.md` | 已注册 |
 | StateMgmtV1Decorators | V1 状态管理装饰器 | `docs/kb/architecture/state_management/v1_decorators.md` | 已注册 |
 | StateMgmtV2Decorators | V2 状态管理装饰器 | `docs/kb/architecture/state_management/v2_decorators.md` | 已注册 |
+| Menu | 菜单组件 | `docs/kb/components/overlay/menu.md` | 已迁移，旧 KB 已移除；补齐 Spec 路由 |
+| Dialog | 弹窗组件 | `docs/kb/components/overlay/dialog.md` | 新建；补齐 Spec 路由 |
+| Toast | 提示组件 | `docs/kb/components/overlay/toast.md` | 新建；补齐 Spec 路由 |
+| Select | 选择器组件 | `docs/kb/components/overlay/select.md` | 新建；补齐 Spec 路由 |
+| bindPopup | 气泡弹窗属性 | `docs/kb/components/overlay/bind_popup.md` | 新建；补齐 Spec 路由 |
+| PopupAdvanced | Popup 高级组件 | `docs/kb/components/overlay/popup_advanced.md` | 新建；补齐 Spec 路由 |
+| Sheet | 半模态弹窗组件 | `docs/kb/components/overlay/sheet.md` | 已迁移，旧 KB 已移除 |
+| bindTips | 提示气泡属性 | `docs/kb/components/overlay/bind_tips.md` | 新建 |
 
 ## 检索
 

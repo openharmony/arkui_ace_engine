@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-24",
+  "last_updated": "2026-07-23",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -2824,6 +2824,371 @@
       ],
       "status": "active",
       "last_verified": "2026-07-13"
+    },
+    {
+      "id": "Menu",
+      "name": "Menu",
+      "name_cn": "菜单组件",
+      "kind": "component",
+      "category": "overlay",
+      "keywords": [
+        "Menu",
+        "菜单",
+        "dropdown",
+        "context menu",
+        "子菜单",
+        "submenu",
+        "下拉菜单",
+        "右键菜单",
+        "弹出菜单",
+        "bindMenu",
+        "bindContextMenu",
+        "MenuItem",
+        "MenuItemGroup"
+      ],
+      "aliases": [
+        "Menu组件",
+        "下拉菜单",
+        "上下文菜单",
+        "MenuItem",
+        "MenuItemGroup"
+      ],
+      "kb": "docs/kb/components/overlay/menu.md",
+      "spec_domain": "specs/05-ui-components/06-popup-components/01-menu-menu-item-menu-item-group",
+      "func_id": "05-06-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/menu/menu_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/menu/menu_layout_algorithm.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/menu/bridge/menu/arkts_native_menu_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/menu/bridge/menu/menu_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/menu_modifier.cpp",
+        "native_enums": "interfaces/native/native_node.h",
+        "jsview_popups": "frameworks/bridge/declarative_frontend/jsview/js_popups.cpp",
+        "view_abstract_model_ng": "frameworks/core/components_ng/base/view_abstract_model_ng.cpp",
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/menu.d.ts",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/MenuModifier.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/menu/",
+        "test/unittest/capi/modifiers/menu_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "Dialog",
+      "name": "Dialog",
+      "name_cn": "弹窗组件",
+      "kind": "component",
+      "category": "overlay",
+      "keywords": [
+        "Dialog",
+        "弹窗",
+        "CustomDialog",
+        "AlertDialog",
+        "ActionSheet",
+        "对话框",
+        "自定义弹窗",
+        "警告弹窗",
+        "CustomDialogController",
+        "模态"
+      ],
+      "aliases": [
+        "Dialog组件",
+        "弹窗",
+        "CustomDialog",
+        "AlertDialog",
+        "ActionSheet"
+      ],
+      "kb": "docs/kb/components/overlay/dialog.md",
+      "spec_domain": "specs/05-ui-components/06-popup-components/04-custom-dialog",
+      "func_id": "05-06-04",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/dialog/dialog_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/dialog/dialog_layout_algorithm.cpp",
+        "overlay_manager": "frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/dialog/bridge/dialog_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/dialog_modifier.cpp",
+        "native_dialog": "interfaces/native/native_dialog.h",
+        "napi_promptaction": "interfaces/napi/kits/promptaction/prompt_action.cpp",
+        "napi_dialog": "interfaces/napi/kits/dialog/js_dialog.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/custom_dialog.d.ts",
+        "capi": "interfaces/native/native_dialog.h",
+        "promptaction": "<OH_ROOT>/interface/sdk-js/api/@ohos.promptAction.d.ts",
+        "arkui_dialog": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.dialog.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/dialog/",
+        "test/unittest/capi/accessors/dialog_extender_accessor_test.cpp",
+        "test/unittest/capi/accessors/alert_dialog_accessor_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "Toast",
+      "name": "Toast",
+      "name_cn": "提示组件",
+      "kind": "component",
+      "category": "overlay",
+      "keywords": [
+        "Toast",
+        "提示",
+        "showToast",
+        "promptAction",
+        "消息提示",
+        "toast"
+      ],
+      "aliases": [
+        "Toast组件",
+        "提示",
+        "showToast"
+      ],
+      "kb": "docs/kb/components/overlay/toast.md",
+      "spec_domain": "specs/05-ui-components/06-popup-components/10-prompt-action",
+      "func_id": "05-06-10",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/toast/toast_pattern.cpp",
+        "overlay_manager": "frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
+        "napi": "interfaces/napi/kits/promptaction/prompt_action.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.promptAction.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/overlay/overlay_manager_toast_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "Select",
+      "name": "Select",
+      "name_cn": "选择器组件",
+      "kind": "component",
+      "category": "overlay",
+      "keywords": [
+        "Select",
+        "选择器",
+        "下拉选择",
+        "dropdown",
+        "选项",
+        "option",
+        "selected"
+      ],
+      "aliases": [
+        "Select组件",
+        "下拉选择器",
+        "选择器"
+      ],
+      "kb": "docs/kb/components/overlay/select.md",
+      "spec_domain": "specs/05-ui-components/05-picker-components/05-select",
+      "func_id": "05-05-05",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/select/select_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/select/select_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/select/select_layout_algorithm.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/select/bridge/arkts_native_select_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/select/bridge/select_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/select_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/select.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/select.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/SelectModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/SelectModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/select/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "bindPopup",
+      "name": "bindPopup",
+      "name_cn": "气泡弹窗属性",
+      "kind": "component",
+      "category": "overlay",
+      "keywords": [
+        "bindPopup",
+        "气泡",
+        "popup",
+        "Bubble",
+        "气泡弹窗",
+        "PopupOptions",
+        "CustomPopupOptions",
+        "openPopup"
+      ],
+      "aliases": [
+        "bindPopup",
+        "气泡弹窗",
+        "Popup",
+        "Bubble"
+      ],
+      "kb": "docs/kb/components/overlay/bind_popup.md",
+      "spec_domain": "specs/05-ui-components/06-popup-components/11-popup",
+      "func_id": "05-06-11",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/bubble/bubble_pattern.cpp",
+        "layout": "frameworks/core/components_ng/pattern/bubble/bubble_layout_algorithm.cpp",
+        "paint": "frameworks/core/components_ng/pattern/bubble/bubble_paint_method.cpp",
+        "overlay_manager": "frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
+        "popup_base": "frameworks/core/components_ng/pattern/overlay/popup_base_pattern.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/bubble/bridge/bubble_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/bubble_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/bubble/",
+        "test/unittest/core/pattern/overlay/overlay_manager_popup_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "PopupAdvanced",
+      "name": "PopupAdvanced",
+      "name_cn": "Popup高级组件",
+      "kind": "component",
+      "category": "overlay",
+      "keywords": [
+        "Popup",
+        "高级Popup",
+        "PopupV2",
+        "advanced",
+        "气泡",
+        "高级组件"
+      ],
+      "aliases": [
+        "Popup高级组件",
+        "PopupV2",
+        "@ohos.arkui.advanced.Popup"
+      ],
+      "kb": "docs/kb/components/overlay/popup_advanced.md",
+      "spec_domain": "specs/07-frontend/01-arkts-advanced-components/16-popup",
+      "func_id": "07-01-16",
+      "spec_status": "active",
+      "source_paths": {
+        "popup_v1": "advanced_ui_component/popup/source/popup.ets",
+        "popup_v2": "advanced_ui_component/popupv2/source/popupv2.ets",
+        "static_popup": "advanced_ui_component_static/assembled_advanced_ui_component/@ohos.arkui.advanced.Popup.ets"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.advanced.Popup.d.ets",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.advanced.Popup.static.d.ets"
+      },
+      "test_paths": [],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "Sheet",
+      "name": "Sheet",
+      "name_cn": "半模态弹窗组件",
+      "kind": "component",
+      "category": "overlay",
+      "keywords": [
+        "Sheet",
+        "半模态",
+        "bindSheet",
+        "sheet",
+        "半模态面板",
+        "底部面板",
+        "侧边面板",
+        "拖拽",
+        "drag",
+        "SheetOptions",
+        "SheetType"
+      ],
+      "aliases": [
+        "Sheet组件",
+        "半模态",
+        "BindSheet",
+        "半模态弹窗"
+      ],
+      "kb": "docs/kb/components/overlay/sheet.md",
+      "spec_domain": "specs/05-ui-components/07-modal-components/01-sheet-modal",
+      "func_id": "05-07-01",
+      "spec_status": "pending",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/sheet/sheet_presentation_pattern.cpp",
+        "wrapper": "frameworks/core/components_ng/pattern/sheet/sheet_wrapper_pattern.cpp",
+        "manager": "frameworks/core/components_ng/pattern/sheet/sheet_manager.cpp",
+        "object": "frameworks/core/components_ng/pattern/sheet/sheet_object.cpp",
+        "style": "frameworks/core/components_ng/pattern/sheet/sheet_style.h",
+        "overlay_manager": "frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/sheet/bridge/sheet_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/sheet_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/overlay/sheet_presentation_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "bindTips",
+      "name": "bindTips",
+      "name_cn": "提示气泡属性",
+      "kind": "component",
+      "category": "overlay",
+      "keywords": [
+        "bindTips",
+        "Tips",
+        "提示气泡",
+        "tips",
+        "hover",
+        "长按提示",
+        "TipsAnchorType",
+        "TipsOptions",
+        "TipsMessageType",
+        "BubblePattern"
+      ],
+      "aliases": [
+        "bindTips",
+        "提示气泡",
+        "Tips",
+        "气泡提示"
+      ],
+      "kb": "docs/kb/components/overlay/bind_tips.md",
+      "spec_domain": "specs/04-common-capability/03-common-attributes/05-popup-attributes",
+      "func_id": "04-03-05",
+      "spec_status": "pending",
+      "source_paths": {
+        "bubble_pattern": "frameworks/core/components_ng/pattern/bubble/bubble_pattern.cpp",
+        "bubble_layout": "frameworks/core/components_ng/pattern/bubble/bubble_layout_algorithm.cpp",
+        "bubble_paint": "frameworks/core/components_ng/pattern/bubble/bubble_paint_method.cpp",
+        "overlay_manager": "frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_popups.cpp",
+        "tips_anchor_type": "frameworks/core/components/common/properties/tips_anchor_type.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/bubble/bubble_tips_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-23"
     }
   ]
 }

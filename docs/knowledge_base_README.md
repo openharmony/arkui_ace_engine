@@ -2,7 +2,7 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-07-24
+> 更新时间：2026-07-23
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
@@ -46,9 +46,9 @@ rg -n "<关键字>" docs
 
 ### 2.2 索引统计
 
-- `context_registry.json` 新版条目数：42
-- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：48
-- 旧 KB 索引路径有效性：48/48（全部存在）
+- `context_registry.json` 新版条目数：57
+- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：46
+- 旧 KB 索引路径有效性：46/46（全部存在）
 
 - 类型分布：
   - `component`: 27
@@ -178,3 +178,5 @@ PY
 - 2026-07-18：基于当前源码、SDK、测试和基础渲染管线 Spec 重建 Layout Framework 新版 KB，旧 KB 与旧索引入口已移除（旧索引 52 条）。
 - 2026-07-18：新增 Layout Attributes、Blank、Divider、Column、GridCol、GridRow、Row、Stack、FolderStack；重建 Flex（含 Wrap）并合并 Safe Area 两个旧主题。新版 registry 增至 34 条，旧 Flex/Safe Area 文件及索引入口移除，旧索引减至 49 条。
 - 2026-07-24：新增 ImageLoading、BackgroundImage、ImageAnalyzer 和四个 PickerDialog 新版 KB；迁移 SVG 到 `docs/kb/capabilities/svg.md` 并移除旧文件及旧索引入口。新版 registry 增至 42 条，旧索引减至 48 条。
+
+- 2026-07-23：新增 8 个 overlay 类组件 KB（Menu/Dialog/Toast/Select/bindPopup/PopupAdvanced/Sheet/bindTips），补齐弹窗类组件 Spec 路由；迁移 Menu 和 Sheet 旧 KB 到新版路径。
