@@ -155,37 +155,50 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 }
 
 static OffsetF GetTextDataOffset(const RefPtr<BadgeLayoutProperty> layoutProperty, float badgeCircleDiameter,
-                                 float badgeCircleRadius, const RefPtr<GeometryNode>& geometryNode, bool textIsSpace)
+    const RefPtr<GeometryNode>& textGeometryNode, const RefPtr<GeometryNode>& geometryNode, bool textIsSpace)
 {
+    OffsetF textOffset;
+    CHECK_NULL_RETURN(layoutProperty, textOffset);
+    CHECK_NULL_RETURN(textGeometryNode, textOffset);
+    CHECK_NULL_RETURN(geometryNode, textOffset);
     auto offset = geometryNode->GetFrameOffset();
     auto parentSize = geometryNode->GetFrameSize();
     auto width = parentSize.Width();
     auto height = parentSize.Height();
+    auto textSize = textGeometryNode->GetFrameSize();
+    auto textWidth = textSize.Width();
+    auto textHeight = textSize.Height();
     auto badgePosition = layoutProperty->GetBadgePosition();
     auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
-    OffsetF textOffset;
     if (badgePosition == BadgePosition::RIGHT_TOP) {
         if (layoutDirection == TextDirection::RTL) {
-            textOffset = OffsetF(offset.GetX(), offset.GetY());
+            textOffset = OffsetF(offset.GetX() + badgeCircleDiameter - textWidth, offset.GetY());
         } else {
             textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter, offset.GetY());
         }
         if (!textIsSpace) {
-            textOffset += OffsetF(Dimension(2.0_vp).ConvertToPx(), -Dimension(2.0_vp).ConvertToPx());
+            float adjustOffset = Dimension(2.0_vp).ConvertToPx();
+            if (layoutDirection == TextDirection::RTL) {
+                textOffset += OffsetF(-adjustOffset, -adjustOffset);
+            } else {
+                textOffset += OffsetF(adjustOffset, -adjustOffset);
+            }
         }
     } else if (badgePosition == BadgePosition::RIGHT) {
         if (layoutDirection == TextDirection::RTL) {
-            textOffset = OffsetF(offset.GetX(), offset.GetY() + height * PERCENT_HALF - badgeCircleRadius);
+            textOffset = OffsetF(offset.GetX() + badgeCircleDiameter - textWidth,
+                offset.GetY() + height * PERCENT_HALF - textHeight * PERCENT_HALF);
         } else {
-            textOffset = OffsetF(
-                offset.GetX() + width - badgeCircleDiameter, offset.GetY() + height * PERCENT_HALF - badgeCircleRadius);
+            textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter,
+                offset.GetY() + height * PERCENT_HALF - textHeight * PERCENT_HALF);
         }
     } else if (badgePosition == BadgePosition::LEFT) {
         if (layoutDirection == TextDirection::RTL) {
-            textOffset = OffsetF(
-                offset.GetX() + width - badgeCircleDiameter, offset.GetY() + height * PERCENT_HALF - badgeCircleRadius);
+            textOffset = OffsetF(offset.GetX() + width - badgeCircleDiameter,
+                offset.GetY() + height * PERCENT_HALF - textHeight * PERCENT_HALF);
         } else {
-            textOffset = OffsetF(offset.GetX(), offset.GetY() + height * PERCENT_HALF - badgeCircleRadius);
+            textOffset = OffsetF(offset.GetX() + badgeCircleDiameter - textWidth,
+                offset.GetY() + height * PERCENT_HALF - textHeight * PERCENT_HALF);
         }
     } else {
         textOffset = OffsetF(offset.GetX(), offset.GetY());
@@ -221,10 +234,16 @@ static void AdjustTextOffsetForBadge(const RefPtr<BadgeLayoutProperty>& layoutPr
         (badgePosition == BadgePosition::RIGHT && !isRtl) ||
         (badgePosition == BadgePosition::LEFT && isRtl)) {
         offsetX = badgeCircleDiameter - textWidth;
+    } else {
+        offsetX = textWidth - badgeCircleDiameter;
     }
 
     if (badgePosition == BadgePosition::RIGHT_TOP && !textIsSpace) {
-        offsetX -= Dimension(2.0_vp).ConvertToPx();
+        if (isRtl) {
+            offsetX += Dimension(2.0_vp).ConvertToPx();
+        } else {
+            offsetX -= Dimension(2.0_vp).ConvertToPx();
+        }
         offsetY = Dimension(2.0_vp).ConvertToPx();
     }
     textOffset.AddX(offsetX);
@@ -315,7 +334,6 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     BorderRadiusProperty radius;
     auto borderWidth = layoutProperty->GetBadgeBorderWidthValue(badgeTheme->GetBadgeBorderWidth());
-    OffsetF borderOffset(borderWidth.ConvertToPx(), borderWidth.ConvertToPx());
     radius.SetRadius(Dimension(badgeCircleRadius + borderWidth.ConvertToPx()));
     auto textFrameNode = textWrapper->GetHostNode();
     CHECK_NULL_VOID(textFrameNode);
@@ -331,7 +349,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     OffsetF textOffset;
     if (layoutProperty->GetIsPositionXy().has_value() && !layoutProperty->GetIsPositionXy().value()) {
-        textOffset = GetTextDataOffset(layoutProperty, badgeCircleDiameter, badgeCircleRadius,
+        textOffset = GetTextDataOffset(layoutProperty, badgeCircleDiameter, textGeometryNode,
             geometryNode, textData == u" ");
         AdjustTextOffsetForBadge(layoutProperty, textGeometryNode, badgeCircleDiameter, textData == u" ", textOffset);
     } else {
@@ -340,6 +358,7 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset());
     } else {
+        OffsetF borderOffset(borderWidth.ConvertToPx(), borderWidth.ConvertToPx());
         textGeometryNode->SetMarginFrameOffset(textOffset - geometryNode->GetFrameOffset() - borderOffset);
     }
     auto textFrameSize = textGeometryNode->GetFrameSize();
