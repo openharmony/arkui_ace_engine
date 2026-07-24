@@ -32,6 +32,8 @@ struct Index {
     { title: 'DatePickerComponent Date Range', pagePath: 'pages/advanced_datepickercomponent/DatePickerComponentExample006', description: 'Dynamic date range configuration' },
     { title: 'DatePickerComponent Locale', pagePath: 'pages/advanced_datepickercomponent/DatePickerComponentExample007', description: 'Multi-language and localization support' },
     { title: 'DatePickerComponent Interactive Demo', pagePath: 'pages/advanced_datepickercomponent/DatePickerComponentExample008', description: 'Full-featured interactive control panel' },
+    { title: 'DatePickerComponent Style Customization', pagePath: 'pages/advanced_datepickercomponent/DatePickerComponentExample009', description: 'Comprehensive style and visual effects testing' },
+    { title: 'DatePickerComponent Advanced Testing', pagePath: 'pages/advanced_datepickercomponent/DatePickerComponentExample010', description: 'Functionality and performance testing suite' },
   ];
 
   build() {
