@@ -1275,26 +1275,6 @@
       "last_updated": "2026-05-23"
     },
     {
-      "name": "SVG",
-      "name_cn": "SVG组件",
-      "category": "shape",
-      "type": "component",
-      "keywords": [
-        "SVG",
-        "矢量图",
-        "图形绘制",
-        "路径",
-        "图标"
-      ],
-      "aliases": [
-        "SVG组件",
-        "矢量图组件",
-        "Scalable Vector Graphics"
-      ],
-      "file_path": "svg/SVG_Knowledge_Base_CN.md",
-      "last_updated": "2026-05-23"
-    },
-    {
       "name": "ForEach",
       "name_cn": "ForEach语法组件",
       "category": "system",
