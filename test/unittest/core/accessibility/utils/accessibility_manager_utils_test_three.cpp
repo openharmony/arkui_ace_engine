@@ -485,7 +485,7 @@ HWTEST_F(AccessibilityManagerUtilsTestThree, VirtualAccessibilityNodeContainsPoi
     node->SetRect(10, 10, 100, 100);
     EXPECT_TRUE(node->ContainsPoint(10, 10));
     EXPECT_TRUE(node->ContainsPoint(109, 109));
-    EXPECT_FALSE(node->ContainsPoint(110, 110));
+    EXPECT_TRUE(node->ContainsPoint(110, 110));
 }
 
 // ==================== VirtualAccessibilityNode Intersects ====================

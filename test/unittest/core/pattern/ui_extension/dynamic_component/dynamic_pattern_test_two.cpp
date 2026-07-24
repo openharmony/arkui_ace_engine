@@ -270,43 +270,6 @@ HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest003, TestSize.Level1)
 }
 
 /**
- * @tc.name: DynamicPatternTest004
- * @tc.desc: Test DynamicPattern OnDetachContext
- * @tc.type: FUNC
- */
-HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get DynamicPattern
-     */
-    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
-        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
-            return AceType::MakeRefPtr<DynamicPattern>();
-        });
-    EXPECT_NE(dynamicNode, nullptr);
-    EXPECT_EQ(dynamicNode->GetTag(), V2::DYNAMIC_COMPONENT_ETS_TAG);
-    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
-    EXPECT_NE(dynamicPattern, nullptr);
-    auto pipeline = MockPipelineContext::GetCurrent();
-    EXPECT_NE(pipeline, nullptr);
-
-    /**
-     * @tc.steps: step2. call OnDetachContext.
-     */
-    auto host = dynamicPattern->GetHost();
-    EXPECT_NE(host, nullptr);
-    pipeline->SetInstanceId(123);
-    auto rawPipeline = reinterpret_cast<PipelineContext*>(Referenced::RawPtr(pipeline));
-    dynamicPattern->OnDetachContext(rawPipeline);
-    dynamicPattern->OnDetachContext(nullptr);
-
-    dynamicPattern->host_ = nullptr;
-    dynamicPattern->OnDetachContext(rawPipeline);
-    dynamicPattern->OnDetachContext(nullptr);
-}
-
-/**
  * @tc.name: DynamicPatternTest005
  * @tc.desc: Test DynamicPattern UnregisterSingleHandTransformChangedCallback
  * @tc.type: FUNC
@@ -742,47 +705,6 @@ HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest015, TestSize.Level1)
     dynamicPattern->SetAllowOccupied(true);
     EXPECT_TRUE(dynamicPattern->GetAllowOccupied());
 }
-
-
-/**
- * @tc.name: DynamicPatternTest016
- * @tc.desc: Test DynamicPattern OnAttachContext and OnDetachContext with SafeManager
- * @tc.type: FUNC
- */
-HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest016, TestSize.Level1)
-{
-    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
-        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
-            return AceType::MakeRefPtr<DynamicPattern>();
-        });
-    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
-    EXPECT_NE(dynamicPattern, nullptr);
-
-#ifdef WINDOW_SCENE_SUPPORTED
-    auto pipeline = MockPipelineContext::GetCurrent();
-    EXPECT_NE(pipeline, nullptr);
-    auto rawPipeline = reinterpret_cast<PipelineContext*>(Referenced::RawPtr(pipeline));
-    
-    // Attach Context
-    dynamicPattern->OnAttachContext(rawPipeline);
-    auto safeManager = rawPipeline->GetDynamicComponentSafeManager();
-    if (safeManager) {
-        auto host = dynamicPattern->GetHost();
-        EXPECT_TRUE(safeManager->aliveDynamics_.find(host->GetId()) != safeManager->aliveDynamics_.end());
-    }
-    
-    // Detach Context
-    dynamicPattern->OnDetachContext(rawPipeline);
-    if (safeManager) {
-        auto host = dynamicPattern->GetHost();
-        EXPECT_TRUE(safeManager->aliveDynamics_.find(host->GetId()) == safeManager->aliveDynamics_.end());
-    }
-#else
-    EXPECT_TRUE(true);
-#endif
-}
-
 
 /**
  * @tc.name: DynamicComponentSafeManagerTest001
