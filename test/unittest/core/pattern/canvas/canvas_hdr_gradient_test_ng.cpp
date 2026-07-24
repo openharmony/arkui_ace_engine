@@ -93,7 +93,7 @@ HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternNotifyGradientHDRColorHeadRoom001
 
 /**
  * @tc.name: CanvasPatternNotifyGradientHDRColorHeadRoom002
- * @tc.desc: Verify non-HDR gradient resets headroom to SDR default.
+ * @tc.desc: Verify non-HDR gradient does not trigger headroom update when no HDR was previously set.
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternNotifyGradientHDRColorHeadRoom002, TestSize.Level0)
@@ -111,8 +111,7 @@ HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternNotifyGradientHDRColorHeadRoom002
     gradient->AddColor(normalStop);
 
     pattern->NotifyGradientHDRColorHeadRoom(gradient);
-    EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 1);
-    EXPECT_FLOAT_EQ(testRenderContext->lastHdrHeadRoom_, 1.0f);
+    EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 0);
 }
 
 /**
@@ -213,7 +212,7 @@ HWTEST_F(CanvasHdrGradientTestNg, CanvasPatternSetGradientHDRColorHeadRoom001, T
     ASSERT_EQ(pattern->paintMethod_, nullptr);
     pattern->SetFillGradient(gradient);
     pattern->SetStrokeGradient(gradient);
-    EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 2);
+    EXPECT_EQ(testRenderContext->hdrHeadRoomCallCount_, 1);
     EXPECT_FLOAT_EQ(testRenderContext->lastHdrHeadRoom_, 2.2f);
 }
 

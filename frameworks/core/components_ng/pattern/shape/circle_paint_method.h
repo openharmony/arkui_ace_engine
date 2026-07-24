@@ -32,8 +32,11 @@ public:
     CirclePaintMethod() = default;
     CirclePaintMethod(
         const RefPtr<ShapePaintProperty>& shapePaintProperty,
-        const RefPtr<ShapeOverlayModifier>& shapeOverlayModifier)
-        : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier)
+        const RefPtr<ShapeOverlayModifier>& shapeOverlayModifier,
+        std::optional<float>* lastFillHdrHeadRoom = nullptr,
+        std::optional<float>* lastStrokeHdrHeadRoom = nullptr)
+        : ShapePaintMethod(shapePaintProperty, shapeOverlayModifier),
+          lastFillHdrHeadRoom_(lastFillHdrHeadRoom), lastStrokeHdrHeadRoom_(lastStrokeHdrHeadRoom)
     {}
     ~CirclePaintMethod() override = default;
 
@@ -97,7 +100,7 @@ public:
     }
 
 private:
-    void UpdateFillHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const
+    void UpdateFillHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty)
     {
         CHECK_NULL_VOID(paintWrapper);
         constexpr float DEFAULT_SDR_HEADROOM = 1.0f;
@@ -105,11 +108,26 @@ private:
         CHECK_NULL_VOID(renderContext);
         auto fillColor = shapePaintProperty.HasFill() ? shapePaintProperty.GetFillValue() : Color::BLACK;
         auto headRoomColor = fillColor.GetHeadRoomColor();
-        renderContext->SetHDRColorHeadRoom(
-            headRoomColor.has_value() ? headRoomColor.value().headRoom : DEFAULT_SDR_HEADROOM);
+        if (!headRoomColor.has_value()) {
+            if (lastFillHdrHeadRoom_ && lastFillHdrHeadRoom_->has_value() &&
+                !NearEqual(lastFillHdrHeadRoom_->value(), DEFAULT_SDR_HEADROOM)) {
+                *lastFillHdrHeadRoom_ = DEFAULT_SDR_HEADROOM;
+                renderContext->SetHDRColorHeadRoom(DEFAULT_SDR_HEADROOM);
+            }
+            return;
+        }
+        float headRoom = headRoomColor.value().headRoom;
+        if (lastFillHdrHeadRoom_ && lastFillHdrHeadRoom_->has_value() &&
+            NearEqual(lastFillHdrHeadRoom_->value(), headRoom)) {
+            return;
+        }
+        if (lastFillHdrHeadRoom_) {
+            *lastFillHdrHeadRoom_ = headRoom;
+        }
+        renderContext->SetHDRColorHeadRoom(headRoom);
     }
 
-    void UpdateStrokeHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty) const
+    void UpdateStrokeHDRColorHeadRoom(PaintWrapper* paintWrapper, const ShapePaintProperty& shapePaintProperty)
     {
         CHECK_NULL_VOID(paintWrapper);
         if (!shapePaintProperty.HasStroke()) {
@@ -121,9 +139,19 @@ private:
         }
         auto renderContext = paintWrapper->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->SetHDRColorHeadRoom(headRoomColor.value().headRoom);
+        float headRoom = headRoomColor.value().headRoom;
+        if (lastStrokeHdrHeadRoom_ && lastStrokeHdrHeadRoom_->has_value() &&
+            NearEqual(lastStrokeHdrHeadRoom_->value(), headRoom)) {
+            return;
+        }
+        if (lastStrokeHdrHeadRoom_) {
+            *lastStrokeHdrHeadRoom_ = headRoom;
+        }
+        renderContext->SetHDRColorHeadRoom(headRoom);
     }
 
+    std::optional<float>* lastFillHdrHeadRoom_ = nullptr;
+    std::optional<float>* lastStrokeHdrHeadRoom_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(CirclePaintMethod);
 };
 

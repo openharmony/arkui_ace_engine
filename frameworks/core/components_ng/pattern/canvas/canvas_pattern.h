@@ -272,6 +272,7 @@ private:
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     std::optional<bool> immediateRender_ = std::nullopt;
     bool hasRegisteredVisibleAreaChange_ = false;
+    std::optional<float> lastHdrColorHeadRoom_;
 
     ACE_DISALLOW_COPY_AND_MOVE(CanvasPattern);
 };

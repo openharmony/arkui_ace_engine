@@ -531,8 +531,20 @@ void CanvasPattern::NotifyColorHDRColorHeadRoom(const Color& color)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto headRoomColor = color.GetHeadRoomColor();
-    renderContext->SetHDRColorHeadRoom(
-        headRoomColor.has_value() ? headRoomColor.value().headRoom : DEFAULT_SDR_HEADROOM);
+    if (!headRoomColor.has_value()) {
+        if (lastHdrColorHeadRoom_.has_value() &&
+            !NearEqual(lastHdrColorHeadRoom_.value(), DEFAULT_SDR_HEADROOM)) {
+            lastHdrColorHeadRoom_ = DEFAULT_SDR_HEADROOM;
+            renderContext->SetHDRColorHeadRoom(DEFAULT_SDR_HEADROOM);
+        }
+        return;
+    }
+    float headRoom = headRoomColor.value().headRoom;
+    if (lastHdrColorHeadRoom_.has_value() && NearEqual(lastHdrColorHeadRoom_.value(), headRoom)) {
+        return;
+    }
+    lastHdrColorHeadRoom_ = headRoom;
+    renderContext->SetHDRColorHeadRoom(headRoom);
 }
 
 void CanvasPattern::UpdateStrokeColor(const Color& color)
@@ -558,11 +570,19 @@ void CanvasPattern::NotifyGradientHDRColorHeadRoom(const std::shared_ptr<Ace::Gr
             maxHeadRoom = std::max(maxHeadRoom, headRoomColor.value().headRoom);
         }
     }
-    if (hasHdrColor) {
-        renderContext->SetHDRColorHeadRoom(maxHeadRoom);
+    if (!hasHdrColor) {
+        if (lastHdrColorHeadRoom_.has_value() &&
+            !NearEqual(lastHdrColorHeadRoom_.value(), DEFAULT_SDR_HEADROOM)) {
+            lastHdrColorHeadRoom_ = DEFAULT_SDR_HEADROOM;
+            renderContext->SetHDRColorHeadRoom(DEFAULT_SDR_HEADROOM);
+        }
         return;
     }
-    renderContext->SetHDRColorHeadRoom(DEFAULT_SDR_HEADROOM);
+    if (lastHdrColorHeadRoom_.has_value() && NearEqual(lastHdrColorHeadRoom_.value(), maxHeadRoom)) {
+        return;
+    }
+    lastHdrColorHeadRoom_ = maxHeadRoom;
+    renderContext->SetHDRColorHeadRoom(maxHeadRoom);
 }
 
 void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
