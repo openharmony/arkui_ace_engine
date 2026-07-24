@@ -27,20 +27,32 @@ namespace OHOS::Ace {
 
 void RosenRenderQrcode::Paint(RenderContext& context, const Offset& offset)
 {
-    auto qrCode = qrcodegen::QrCode::encodeText(value_.c_str(), qrcodegen::QrCode::Ecc::LOW);
-    if (!qrCode.getFlag() || qrCode.getSize() == 0 || width_ <= 0 || width_ < qrCode.getSize()) {
-        LOGE("RosenRenderQrcode::DrawQRCode qrcode create error");
+    QrcodeImage* qrCode = QrcodeImageEncodeString(value_.c_str(), QRCODE_ECC::QRCODE_ECC_MEDIUM);
+    if (qrCode == nullptr) {
+        LOGE("RosenRenderQrcode::DrawQRCode qrcode is null");
         return;
     }
-    int32_t blockWidth = width_ / qrCode.getSize();
-    int32_t sizeInPixel = blockWidth * qrCode.getSize();
+    if ((qrCode->width == 0) || (qrCode->data == nullptr)) {
+        LOGE("RosenRenderQrcode::DrawQRCode qrcode width is 0 or data is null");
+        QrcodeImageFree(qrCode);
+        return;
+    }
+    uint32_t qrWidth = qrCode->width;
+    if ((width_ <= 0) || (width_ < qrWidth)) {
+        LOGE("RosenRenderQrcode::DrawQRCode qrcode create error");
+        QrcodeImageFree(qrCode);
+        return;
+    }
+    int32_t blockWidth = width_ / qrWidth;
+    int32_t sizeInPixel = blockWidth * qrWidth;
     auto qrOffset =
         Alignment::GetAlignPosition(Size(width_, height_), Size(sizeInPixel, sizeInPixel), Alignment::CENTER);
-    DrawQRCode(context, offset + qrOffset, sizeInPixel, qrCode);
+    DrawQRCode(context, offset + qrOffset, sizeInPixel, *qrCode);
+    QrcodeImageFree(qrCode);
 }
 
 void RosenRenderQrcode::DrawQRCode(
-    RenderContext& context, const Offset& topLeft, int32_t size, const qrcodegen::QrCode& qrCode)
+    RenderContext& context, const Offset& topLeft, int32_t size, const QrcodeImage& qrCode)
 {
     auto canvas = static_cast<RosenRenderContext*>(&context)->GetCanvas();
     if (!canvas) {
@@ -96,7 +108,7 @@ uint32_t RosenRenderQrcode::ConvertColorFromHighToLow(const Color& color)
 }
 
 #ifndef USE_ROSEN_DRAWING
-SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::QrCode& qrCode)
+SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& qrCode)
 {
     // each block width may smaller the width / qrCode.getSize(), because of precision loss.
     auto imageInfo =
@@ -109,10 +121,10 @@ SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::Qr
     void* rawData = skBitmap.getPixels();
     CHECK_NULL_RETURN(rawData, skBitmap);
     uint32_t* data = reinterpret_cast<uint32_t*>(rawData);
-    int32_t blockWidth = width / qrCode.getSize();
+    int32_t blockWidth = width / qrCode.width;
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
-            data[i * width + j] = qrCode.getModule(i / blockWidth, j / blockWidth)
+            data[i * width + j] = QrcodeGetModule(&qrCode, j / blockWidth, i / blockWidth)
                                       ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())
                                       : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());
         }
@@ -120,7 +132,7 @@ SkBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::Qr
     return skBitmap;
 }
 #else
-RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::QrCode& qrCode)
+RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const QrcodeImage& qrCode)
 {
     // each block width may smaller the width / qrCode.getSize(), because of precision loss.
     RSBitmapFormat format {RSColorType::COLORTYPE_RGBA_8888,
@@ -133,10 +145,10 @@ RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::Qr
     void* rawData = bitmap.GetPixels();
     CHECK_NULL_RETURN(rawData, bitmap);
     uint32_t* data = reinterpret_cast<uint32_t*>(rawData);
-    int32_t blockWidth = width / qrCode.getSize();
+    int32_t blockWidth = width / qrCode.width;
     for (int32_t i = 0; i < width; i++) {
         for (int32_t j = 0; j < width; j++) {
-            data[i * width + j] = qrCode.getModule(i / blockWidth, j / blockWidth)
+            data[i * width + j] = QrcodeGetModule(&qrCode, j / blockWidth, i / blockWidth)
                                       ? ConvertColorFromHighToLow(qrcode_->GetQrcodeColor())
                                       : ConvertColorFromHighToLow(qrcode_->GetBackgroundColor());
         }
@@ -144,5 +156,4 @@ RSBitmap RosenRenderQrcode::ProcessQrcodeData(int32_t width, const qrcodegen::Qr
     return bitmap;
 }
 #endif
-
 } // namespace OHOS::Ace
