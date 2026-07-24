@@ -39,12 +39,37 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 #include "test/unittest/core/base/ui_node_test_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
+class UINodeTestExitCleanup : public testing::Environment {
+public:
+    void TearDown() override
+    {
+        auto* storage = TokenThemeStorage::GetInstance();
+        if (storage) {
+            storage->defaultLightTheme_ = nullptr;
+            storage->defaultDarkTheme_ = nullptr;
+            storage->CacheClear();
+        }
+        TEN0->context_ = nullptr;
+        ZERO->context_ = nullptr;
+        ONE->context_ = nullptr;
+        TWO->context_ = nullptr;
+        THREE->context_ = nullptr;
+        FOUR->context_ = nullptr;
+        FIVE->context_ = nullptr;
+        F_ONE->context_ = nullptr;
+    }
+};
+
+static auto* g_exitCleanup = testing::AddGlobalTestEnvironment(new UINodeTestExitCleanup());
+
 class UINodeTestNgTwo : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -1194,6 +1219,10 @@ HWTEST_F(UINodeTestNgTwo, CollectCleanedChildren, TestSize.Level1)
      */
     int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    if (pipeline) {
+        pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    }
 
     /**
      * @tc.steps: step2. create FrameNode with child
@@ -1232,6 +1261,9 @@ HWTEST_F(UINodeTestNgTwo, CollectCleanedChildren, TestSize.Level1)
      * @tc.steps: step5. revert to the origin API.
      */
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+    if (pipeline) {
+        pipeline->SetApiTargetVersion(0);
+    }
 }
 
 /**
@@ -1297,6 +1329,10 @@ HWTEST_F(UINodeTestNgTwo, CollectRemovedChildren002, TestSize.Level1)
      */
     int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    if (pipeline) {
+        pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    }
 
     /**
      * @tc.steps: step2. create FrameNode with child
@@ -1334,6 +1370,9 @@ HWTEST_F(UINodeTestNgTwo, CollectRemovedChildren002, TestSize.Level1)
      * @tc.steps: step5. revert to the origin API.
      */
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+    if (pipeline) {
+        pipeline->SetApiTargetVersion(0);
+    }
 }
 
 /**
@@ -1501,6 +1540,7 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo075, TestSize.Level1)
      * @tc.steps: step2. verify nodeId string matching and invalid input branch
      * @tc.expected: node id string finds target frame node; empty id returns nullptr
      */
+    targetFrameNode->UpdateInspectorId(std::to_string(targetFrameNode->GetId()));
     auto byNodeId = root->GetFrameNodeByIdInSubTree(std::to_string(targetFrameNode->GetId()));
     ASSERT_NE(byNodeId, nullptr);
     EXPECT_EQ(byNodeId->GetId(), targetFrameNode->GetId());
