@@ -62,8 +62,8 @@ void FormRenderer::PreInitUIContent(const OHOS::AAFwk::Want& want, const OHOS::A
     SetAllowUpdate(allowUpdate_);
     float uiWidth = width_ - borderWidth_ * DOUBLE;
     float uiHeight = height_ - borderWidth_ * DOUBLE;
-    uiContent_->SetFormWidth(uiWidth? uiWidth : 0.0f);
-    uiContent_->SetFormHeight(uiHeight? uiHeight : 0.0f);
+    uiContent_->SetFormWidth(uiWidth > 0.0f ? uiWidth : 0.0f);
+    uiContent_->SetFormHeight(uiHeight > 0.0f ? uiHeight : 0.0f);
     lastBorderWidth_ = borderWidth_;
     uiContent_->SetFontScaleFollowSystem(fontScaleFollowSystem_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
@@ -164,7 +164,7 @@ void FormRenderer::ParseWant(const OHOS::AAFwk::Want &want)
     allowUpdate_ = want.GetBoolParam(FORM_RENDERER_ALLOW_UPDATE, true);
     width_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_WIDTH_KEY, 0.0f);
     if (width_ < 0.0f) {
-        HILOG_ERROR("invalid param, width: %f", width_);
+        HILOG_ERROR("invalid param, width_: %f", width_);
         width_ = 0.0f;
     }
     height_ = want.GetDoubleParam(OHOS::AppExecFwk::Constants::PARAM_FORM_HEIGHT_KEY, 0.0f);
@@ -337,16 +337,16 @@ void FormRenderer::Destroy()
 
 void FormRenderer::UpdateFormSize(float width, float height, float borderWidth, float formViewScale)
 {
-    if (!uiContent_) {
-        HILOG_ERROR("uiContent_ is null");
-        return;
-    }
     float resizedWidth = width - borderWidth * DOUBLE;
     float resizedHeight = height - borderWidth * DOUBLE;
     if (width <= 0 || height <= 0 || borderWidth < 0 || formViewScale < 0 || resizedWidth <= 0 || resizedHeight <= 0) {
         HILOG_ERROR("invalid param: width: %.2f, height: %.2f, borderWidth: %.2f, formViewScale: %.2f, "
             "resizedWidth: %.2f, resizedHeight: %.2f.", width, height, borderWidth, formViewScale, resizedWidth,
             resizedHeight);
+        return;
+    }
+    if (!uiContent_) {
+        HILOG_ERROR("uiContent_ is null");
         return;
     }
     if (!NearEqual(width, width_) || !NearEqual(height, height_) || !NearEqual(borderWidth, lastBorderWidth_) ||

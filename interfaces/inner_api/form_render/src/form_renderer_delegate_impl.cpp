@@ -72,8 +72,8 @@ int32_t FormRendererDelegateImpl::OnSurfaceChange(float width, float height, flo
         return ERR_INVALID_DATA;
     }
 
-    if (width <= 0 || height <= 0 || borderWidth < 0) {
-        HILOG_ERROR("invalid param: width=%{public}f, height=%{public}f, borderWidth=%{public}f",
+    if (width <= 0.0f || height <= 0.0f || borderWidth < 0.0f) {
+        HILOG_ERROR("invalid param: width: %.2f, height: %.2f, borderWidth: %.2f",
             width, height, borderWidth);
         return ERR_INVALID_DATA;
     }
