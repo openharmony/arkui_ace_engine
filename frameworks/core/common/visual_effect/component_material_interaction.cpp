@@ -191,6 +191,18 @@ Offset ConvertToOffset(
     }
     return Offset(outerUnitOffset_X.ConvertToPx(), outerUnitOffset_Y.ConvertToPx());
 }
+
+std::shared_ptr<LightEffectOptions> GetLightEffectOptions(RefPtr<FrameNode>& targetNode)
+{
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto renderContext = targetNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto config = renderContext->GetImmersiveMaterialConfig();
+    if (config.has_value() && config->lightEffectOptions) {
+        return config->lightEffectOptions;
+    }
+    return nullptr;
+}
 } // namespace
 
 void ControlInteractionBase::InitInteractionOffset(RefPtr<FrameNode> targetNode, ControlInteractionInfo& info)
@@ -335,7 +347,7 @@ void ControlInteractionBase::HandleTouchMove(
 }
 
 void ControlInteractionBase::RegisterMaterialInteractionEvent(
-    RefPtr<FrameNode> targetNode, const std::shared_ptr<ImmersiveOptions>& options)
+    RefPtr<FrameNode> targetNode, const std::shared_ptr<ImmersiveOptions>& options, bool enableLightEffect)
 {
     CHECK_NULL_VOID(targetNode);
 
@@ -348,21 +360,9 @@ void ControlInteractionBase::RegisterMaterialInteractionEvent(
     CHECK_NULL_VOID(gestureHub);
     auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddMaterialInteractionEvent(touchEvent);
-    if (options && options->lightEffectOptions) {
+    if (enableLightEffect && options && options->HasLightEffect()) {
         InitLightEffect(targetNode);
     }
-}
-
-std::optional<LightEffectOptions> ControlInteractionBase::GetLightEffectOptions(RefPtr<FrameNode>& targetNode)
-{
-    CHECK_NULL_RETURN(targetNode, std::nullopt);
-    auto renderContext = targetNode->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, std::nullopt);
-    auto config = renderContext->GetImmersiveMaterialConfig();
-    if (config.has_value() && config->lightEffectOptions) {
-        return config->lightEffectOptions;
-    }
-    return std::nullopt;
 }
 
 bool ControlInteractionBase::IsInteractiveEnabled(RefPtr<FrameNode>& targetNode)
@@ -376,7 +376,7 @@ bool ControlInteractionBase::IsInteractiveEnabled(RefPtr<FrameNode>& targetNode)
 
 bool ControlInteractionBase::IsLightEffectEnabled(RefPtr<FrameNode>& targetNode)
 {
-    return GetLightEffectOptions(targetNode).has_value();
+    return GetLightEffectOptions(targetNode) != nullptr;
 }
 
 void ControlInteractionBase::InitLightEffect(RefPtr<FrameNode>& targetNode)
@@ -404,6 +404,7 @@ void ControlInteractionBase::UninitLightEffect(FrameNode* targetNode)
         renderContext->ResetLightIlluminated();
     }
     if (renderContext->GetLightIntensity().has_value()) {
+        renderContext->UpdateLightIntensity(0.0f);
         renderContext->ResetLightIntensity();
     }
     if (renderContext->GetLightPosition().has_value()) {

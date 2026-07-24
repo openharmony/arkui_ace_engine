@@ -6896,10 +6896,10 @@ void ViewAbstract::SetSystemMaterialWithScale(FrameNode* frameNode, const UiMate
 }
 
 void ViewAbstract::RegisterMaterialInteractionEvent(
-    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr)
+    const RefPtr<FrameNode>& frameNode, const std::shared_ptr<ImmersiveOptions>& optionsPtr, bool enableLightEffect)
 {
     CHECK_NULL_VOID(frameNode);
-    ControlInteractionBase::RegisterMaterialInteractionEvent(frameNode, optionsPtr);
+    ControlInteractionBase::RegisterMaterialInteractionEvent(frameNode, optionsPtr, enableLightEffect);
 }
 
 void ViewAbstract::UnRegisterMaterialInteractionEvent(FrameNode* frameNode)
@@ -6936,14 +6936,20 @@ void ViewAbstract::SetImmersiveOptions(
     if (!optionsPtr) {
         return;
     }
-    if (optionsPtr->interactive || optionsPtr->lightEffectOptions) {
-        RegisterMaterialInteractionEvent(frameNode, optionsPtr);
-    } else {
-        UnRegisterMaterialInteractionEvent(AceType::RawPtr(frameNode));
-    }
     auto materialConfig = MaterialUtils::GetImmersiveMaterialConfig(optionsPtr, frameNode);
     if (!materialConfig) {
         return;
+    }
+    bool needInteraction = materialConfig->interactive || materialConfig->HasLightEffect();
+    bool enableLightEffect = materialConfig->HasLightEffect();
+    if (needInteraction) {
+        RegisterMaterialInteractionEvent(frameNode, optionsPtr, enableLightEffect);
+        auto preConfig = renderContext->GetImmersiveMaterialConfig();
+        if (preConfig && preConfig->HasLightEffect() && !enableLightEffect) {
+            ControlInteractionBase::UninitLightEffect(AceType::RawPtr(frameNode));
+        }
+    } else {
+        UnRegisterMaterialInteractionEvent(AceType::RawPtr(frameNode));
     }
     HistogramImmersiveOptions(*materialConfig);
     if (materialConfig->key.level != UiMaterialLevel::SMOOTH) {

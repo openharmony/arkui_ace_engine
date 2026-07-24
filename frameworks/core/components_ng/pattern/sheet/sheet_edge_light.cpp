@@ -24,8 +24,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t UI_MATERIAL_LEVEL_LOW = 2;
-
 constexpr float NUM_NOT_ZERO = 1.0f;
 constexpr int EDGE_LIGHT_SHOW_ANIMATE_DURATION = 166;
 #ifndef PREVIEW
@@ -110,15 +108,14 @@ bool SheetEdgeLightBase::CheckIfNeedShowEdgeLight(EdgeLightMode mode, SheetType 
     if (sheetType != SHEET_BOTTOM) {
         return false;
     }
-    int32_t currentLevel = static_cast<int32_t>(SystemProperties::GetUiMaterialLevel());
     if (mode == EdgeLightMode::EDGELIGHT_DISABLED) {
         return false;
     }
     if (mode == EdgeLightMode::EDGELIGHT_ENABLED) {
         return true;
     }
-    if (mode == EdgeLightMode::EDGELIGHT_AUTO && currentLevel != UI_MATERIAL_LEVEL_LOW) {
-        return true;
+    if (mode == EdgeLightMode::EDGELIGHT_AUTO) {
+        return false;
     }
     return false;
 }
