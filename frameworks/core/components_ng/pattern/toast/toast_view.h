@@ -45,14 +45,6 @@ private:
         const RefPtr<FrameNode>& toastNode,
         const ToastInfo& toastInfo,
         const RefPtr<RenderContext>& renderContext);
-    static void SetLowEndImmersiveBackground(
-        const RefPtr<RenderContext>& renderContext,
-        const RefPtr<ThemeConstants>& themeConstants);
-    static void SetLowEndImmersiveShadow(
-        const RefPtr<FrameNode>& toastNode,
-        const ToastInfo& toastInfo,
-        const RefPtr<RenderContext>& renderContext,
-        const RefPtr<PipelineContext>& pipelineContext);
     static bool HandleUserSetMaterial(
         const RefPtr<FrameNode>& toastNode,
         const ToastInfo& toastInfo,
