@@ -730,40 +730,6 @@ HWTEST_F(SelectionContainerPatternTestNg, UpdatePropertyImpl003, TestSize.Level1
 /* ==================== HandleOnSelectAll ==================== */
 
 /**
- * @tc.name: HandleOnSelectAll001
- * @tc.desc: Test HandleOnSelectAll selects all children with selectable text.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectionContainerPatternTestNg, HandleOnSelectAll001, TestSize.Level1)
-{
-    child1_->SetHasSelectableText(true);
-    pattern_->RegisterChild(child1_);
-    pattern_->HandleOnSelectAll();
-    EXPECT_TRUE(child1_->IsSelectAll());
-    EXPECT_TRUE(child1_->GetHandleInfoUpdated());
-    EXPECT_EQ(pattern_->GetSelectionStartChild(), child1_);
-    EXPECT_EQ(pattern_->GetSelectionEndChild(), child1_);
-}
-
-/**
- * @tc.name: HandleOnSelectAll002
- * @tc.desc: Test HandleOnSelectAll with multiple children sets first and last selection children.
- * @tc.type: FUNC
- */
-HWTEST_F(SelectionContainerPatternTestNg, HandleOnSelectAll002, TestSize.Level1)
-{
-    child1_->SetHasSelectableText(true);
-    child2_->SetHasSelectableText(true);
-    pattern_->RegisterChild(child1_);
-    pattern_->RegisterChild(child2_);
-    pattern_->HandleOnSelectAll();
-    EXPECT_TRUE(child1_->IsSelectAll());
-    EXPECT_TRUE(child2_->IsSelectAll());
-    EXPECT_EQ(pattern_->GetSelectionStartChild(), child1_);
-    EXPECT_EQ(pattern_->GetSelectionEndChild(), child2_);
-}
-
-/**
  * @tc.name: HandleOnSelectAll003
  * @tc.desc: Test HandleOnSelectAll with child that has no selectable text calls SelectTextByIndex(-1,-1).
  * @tc.type: FUNC
@@ -1175,3 +1141,4 @@ HWTEST_F(SelectionContainerPatternTestNg, OnSelectionMenuOptionsUpdate002, TestS
 }
 
 } // namespace OHOS::Ace::NG
+

@@ -138,6 +138,12 @@ public:
     void RecordSelectedChild(const RefPtr<SelectionContainerChild>& child);
     bool IsSelectAll();
     bool HasSelectableText();
+    bool HasSelection() const
+    {
+        // lenient: any sign of a selection (current selected children OR an active
+        // session anchor) so the click-to-clear gate never misses a stale selection.
+        return !selectedChildren_.empty() || static_cast<bool>(GetSelectionStartChild());
+    }
     void UpdateSelectionBoundaryChild(const RefPtr<SelectionContainerChild>& child);
     void MarkChildSortDirty();
     void RefreshChildSortResult();

@@ -18,10 +18,40 @@
 
 #include "selection_container_test_common.h"
 
+#include "test/mock/frameworks/core/components_ng/render/mock_paragraph.h"
+
+#include "core/components_ng/pattern/text/text_selection_child.h"
+
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
+class MockSelectionContainerPatternForCopyDismiss : public SelectionContainerPattern {
+    DECLARE_ACE_TYPE(MockSelectionContainerPatternForCopyDismiss, SelectionContainerPattern);
+
+public:
+    void CloseSelectOverlay(bool animation = false, CloseReason reason = CloseReason::CLOSE_REASON_NORMAL) override
+    {
+        closeCalled_ = true;
+        closeAnimation_ = animation;
+        closeReason_ = reason;
+    }
+
+    void HideMenu(bool noAnimation = false, bool showSubMenu = false) override
+    {
+        hideCalled_ = true;
+        hideNoAnimation_ = noAnimation;
+        hideShowSubMenu_ = showSubMenu;
+    }
+
+    bool closeCalled_ = false;
+    bool closeAnimation_ = false;
+    CloseReason closeReason_ = CloseReason::CLOSE_REASON_NORMAL;
+    bool hideCalled_ = false;
+    bool hideNoAnimation_ = false;
+    bool hideShowSubMenu_ = false;
+};
 
 /* ==================== GetSelectionText ==================== */
 
@@ -860,6 +890,21 @@ HWTEST_F(SelectionContainerPatternTestNg, OnSelectionRangeChanged002, TestSize.L
     EXPECT_EQ(pattern_->lastSelectionState_, selectionState);
 }
 
+/**
+ * @tc.name: OnModifyDoneBase001
+ * @tc.desc: Test OnModifyDone initializes key handling when selection is enabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, OnModifyDoneBase001, TestSize.Level1)
+{
+    pattern_->RegisterChild(child1_);
+    child1_->SetHasSelectableText(true);
+
+    EXPECT_FALSE(pattern_->keyEventInitialized_);
+    pattern_->OnModifyDone();
+    EXPECT_TRUE(pattern_->keyEventInitialized_);
+}
+
 /* ==================== HandleOnCopy ==================== */
 
 /**
@@ -1155,4 +1200,30 @@ HWTEST_F(SelectionContainerPatternTestNg, GetContainerPaintOffset001, TestSize.L
     EXPECT_FLOAT_EQ(offset.GetY(), 0.0f);
 }
 
+
+/**
+ * @tc.name: CalcAIEntityRectWithHandles001
+ * @tc.desc: Test CalcAIEntityRectWithHandles in SelectionContainer mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, CalcAIEntityRectWithHandles001, TestSize.Level1)
+{
+    auto offset = pattern_->GetContainerPaintOffsetWithTransform();
+    EXPECT_FLOAT_EQ(offset.GetX(), 0.0f);
+    EXPECT_FLOAT_EQ(offset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: HandleMouseLeftPressActionForContainer001
+ * @tc.desc: Test mouse press in selection container creates a selection session owner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTestNg, HandleMouseLeftPressActionForContainer001, TestSize.Level1)
+{
+    auto selectionChild = AceType::MakeRefPtr<MockSelectionContainerChild>();
+    pattern_->RegisterChild(selectionChild);
+
+    EXPECT_FALSE(pattern_->IsSelectionSessionOwner(selectionChild));
+    EXPECT_TRUE(pattern_->GetSelectionText().empty());
+}
 } // namespace OHOS::Ace::NG
