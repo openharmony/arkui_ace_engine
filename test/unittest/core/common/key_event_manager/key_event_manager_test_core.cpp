@@ -22,9 +22,3 @@ using namespace testing::ext;
 // Test cases will be added here for TDD development
 
 class KeyEventManagerTest : public KeyEventManagerTestBase {};
-
-// Placeholder test to ensure compilation
-HWTEST_F(KeyEventManagerTest, KeyEventManagerTestPlaceholder, TestSize.Level1)
-{
-    EXPECT_TRUE(true);
-}

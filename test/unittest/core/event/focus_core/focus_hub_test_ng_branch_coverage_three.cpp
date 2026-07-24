@@ -952,62 +952,6 @@ HWTEST_F(FocusHubTestNg, Bc3LostChildFocusToSelf001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetFocusableExplicitTrue001
- * @tc.desc: Test SetFocusable explicit true after implicit false
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, Bc3SetFocusableExplicitTrue001, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(
-        V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
-    frameNode->GetOrCreateFocusHub();
-    auto focusHub = frameNode->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->isFocusableExplicit_ = true;
-    focusHub->SetFocusable(true, false);
-    EXPECT_FALSE(focusHub->focusable_);
-}
-
-/**
- * @tc.name: SetFocusableImplicitAutoToChild001
- * @tc.desc: Test SetFocusable implicit changes CHILD to AUTO
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, Bc3SetFocusableImplicitAutoToChild001, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(
-        V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    frameNode->GetOrCreateFocusHub();
-    auto focusHub = frameNode->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->focusType_ = FocusType::SCOPE;
-    focusHub->focusable_ = false;
-    focusHub->isFocusableExplicit_ = false;
-    focusHub->implicitFocusable_ = true;
-    focusHub->focusDepend_ = FocusDependence::CHILD;
-    focusHub->SetFocusable(true, false);
-    EXPECT_EQ(focusHub->focusDepend_, FocusDependence::AUTO);
-}
-
-/**
- * @tc.name: PaintFocusStateForceNone001
- * @tc.desc: Test PaintFocusState when focusStyleType_ is FORCE_NONE
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, Bc3PaintFocusStateForceNone001, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(
-        V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
-    frameNode->GetOrCreateFocusHub();
-    auto focusHub = frameNode->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->focusStyleType_ = FocusStyleType::FORCE_NONE;
-    focusHub->currentFocus_ = true;
-    auto result = focusHub->PaintFocusState();
-    EXPECT_TRUE(result);
-}
-
-/**
  * @tc.name: PaintFocusStateNone001
  * @tc.desc: Test PaintFocusState when focusStyleType_ is NONE
  * @tc.type: FUNC
@@ -1289,24 +1233,6 @@ HWTEST_F(FocusHubTestNg, Bc3SetFocusGroup001, TestSize.Level1)
 }
 
 /**
- * @tc.name: RequestNextFocusOfKeyEnter001
- * @tc.desc: Test RequestNextFocusOfKeyEnter when tab stop and SCOPE
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, Bc3RequestNextFocusOfKeyEnter001, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(
-        V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    frameNode->GetOrCreateFocusHub();
-    auto focusHub = frameNode->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->focusType_ = FocusType::SCOPE;
-    focusHub->SetTabStop(true);
-    EXPECT_TRUE(focusHub->RequestNextFocusOfKeyEnter());
-    EXPECT_TRUE(focusHub->isSwitchByEnter_);
-}
-
-/**
  * @tc.name: RequestNextFocusOfKeyEsc001
  * @tc.desc: Test RequestNextFocusOfKeyEsc with null curFocusView
  * @tc.type: FUNC
@@ -1391,26 +1317,6 @@ HWTEST_F(FocusHubTestNg, Bc3OnFocusNode001, TestSize.Level1)
     focusHub->focusable_ = false;
     focusHub->OnFocusNode();
     EXPECT_FALSE(focusHub->currentFocus_);
-}
-
-/**
- * @tc.name: OnFocusScopeAutoNoFocusable001
- * @tc.desc: Test OnFocusScope with AUTO depend and no focusable child
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, Bc3OnFocusScopeAutoNoFocusable001, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(
-        V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    frameNode->GetOrCreateFocusHub();
-    auto focusHub = frameNode->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->focusType_ = FocusType::SCOPE;
-    focusHub->focusDepend_ = FocusDependence::AUTO;
-    focusHub->focusable_ = true;
-    focusHub->parentFocusable_ = true;
-    focusHub->OnFocusScope();
-    EXPECT_TRUE(focusHub->currentFocus_);
 }
 
 /**

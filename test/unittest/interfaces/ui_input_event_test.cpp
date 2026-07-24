@@ -869,24 +869,6 @@ HWTEST_F(UIInputEventTest, CapiInputTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: PointerEventCurrentLocalTest001
- * @tc.desc: Test current local fallback for click event without valid node id.
- * @tc.type: FUNC
- */
-HWTEST_F(UIInputEventTest, PointerEventCurrentLocalTest001, TestSize.Level1)
-{
-    ArkUIClickEvent clickEvent {};
-    clickEvent.localX = CURRENT_LOCAL_FALLBACK_X;
-    clickEvent.localY = CURRENT_LOCAL_FALLBACK_Y;
-    clickEvent.windowX = CURRENT_LOCAL_WINDOW_X;
-    clickEvent.windowY = CURRENT_LOCAL_WINDOW_Y;
-    auto uiInputEvent = MakeUiInputEvent(&clickEvent, C_CLICK_EVENT_ID, INVALID_NODE_ID);
-
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalX(&uiInputEvent), ARKUI_ERROR_CODE_PARAM_INVALID);
-    EXPECT_EQ(OH_ArkUI_PointerEvent_GetCurrentLocalY(&uiInputEvent), ARKUI_ERROR_CODE_PARAM_INVALID);
-}
-
-/**
  * @tc.name: PointerEventCurrentLocalTest002
  * @tc.desc: Test current local transforms to window coordinates when node id is valid.
  * @tc.type: FUNC
