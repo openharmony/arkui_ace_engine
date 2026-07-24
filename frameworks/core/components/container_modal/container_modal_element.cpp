@@ -276,7 +276,7 @@ void ContainerModalElement::FlushReload()
         containerRenderBox->SetBackDecoration(containerDecoration);
     }
     if (windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN || windowMode_ == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        windowMode_ == WindowMode::WINDOW_MODE_SPLIT_SECONDARY || windowMode_ == WindowMode::WINDOW_MODE_SPLIT) {
         ChangeFloatingTitleIcon(windowFocus_);
         return;
     }
@@ -396,7 +396,7 @@ bool ContainerModalElement::CanShowFloatingTitle()
         return false;
     }
     if (windowMode_ != WindowMode::WINDOW_MODE_FULLSCREEN && windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
-        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY && windowMode_ != WindowMode::WINDOW_MODE_SPLIT) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "Window is not full screen or split screen, can not show floating title.");
         return false;
     }

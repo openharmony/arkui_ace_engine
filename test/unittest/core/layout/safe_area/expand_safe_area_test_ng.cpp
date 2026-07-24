@@ -47,19 +47,32 @@ constexpr float SAFE_AREA_LENGTH_RIGHT = 20.0f;
 constexpr float SAFE_AREA_KEYBOARD = 500.0f;
 } // namespace
 
+/**
+ * @brief Initialize test suite before all test cases.
+ */
 void ExpandSafeAreaTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
     MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
 }
 
+/**
+ * @brief Clean up test suite after all test cases.
+ */
 void ExpandSafeAreaTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
 }
 
+/**
+ * @brief Initialize test environment before each test case.
+ */
 void ExpandSafeAreaTestNg::SetUp() {}
 
+/**
+ * @brief Initialize SafeAreaManager with given config.
+ * @param config AvoidConfig containing isFullScreen, isNeedAvoidWindow, ignoreSafeArea flags.
+ */
 void ExpandSafeAreaTestNg::InitSafeAreaManager(AvoidConfig config)
 {
     auto pipeline = MockPipelineContext::GetCurrent();
@@ -72,12 +85,18 @@ void ExpandSafeAreaTestNg::InitSafeAreaManager(AvoidConfig config)
     safeAreaManager->SetKeyBoardAvoidMode(KeyBoardAvoidMode::OFFSET);
 }
 
+/**
+ * @brief Clean up test environment after each test case.
+ */
 void ExpandSafeAreaTestNg::TearDown()
 {
     frameNode_ = nullptr;
     pagePattern_ = nullptr;
 }
 
+/**
+ * @brief Get the FrameNode instance from ViewStackProcessor and set constraintNotChanged flag.
+ */
 void ExpandSafeAreaTestNg::GetInstance()
 {
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
@@ -86,6 +105,11 @@ void ExpandSafeAreaTestNg::GetInstance()
     pagePattern_ = frameNode_->GetPattern();
 }
 
+/**
+ * @brief Create a test page with given callback and optionally flush layout.
+ * @param callback The callback function to build UI components.
+ * @param flushLayout Whether to flush UI tasks after creation.
+ */
 void ExpandSafeAreaTestNg::Create(const std::function<void()>& callback, bool flushLayout)
 {
     auto pageNode = FrameNode::CreateFrameNode(
@@ -102,6 +126,10 @@ void ExpandSafeAreaTestNg::Create(const std::function<void()>& callback, bool fl
     }
 }
 
+/**
+ * @brief Create a test page with one child item and execute callback.
+ * @param callback The callback function to build UI components.
+ */
 void ExpandSafeAreaTestNg::CreateWithItem(const std::function<void()>& callback)
 {
     Create([callback]() {
@@ -112,6 +140,11 @@ void ExpandSafeAreaTestNg::CreateWithItem(const std::function<void()>& callback)
     });
 }
 
+/**
+ * @brief Create multiple RelativeContainer items.
+ * @param number The number of items to create.
+ * @param defineSize Whether to set FILL_LENGTH height for each item.
+ */
 void ExpandSafeAreaTestNg::CreateItem(int32_t number, bool defineSize)
 {
     for (int32_t i = 0; i < number; i++) {
@@ -124,6 +157,10 @@ void ExpandSafeAreaTestNg::CreateItem(int32_t number, bool defineSize)
     }
 }
 
+/**
+ * @brief Add multiple Stack children to frameNode_ with alternating heights (100/50).
+ * @param number The number of children to add.
+ */
 void ExpandSafeAreaTestNg::AddItems(int32_t number)
 {
     for (int i = 0; i < number; ++i) {
@@ -140,6 +177,10 @@ void ExpandSafeAreaTestNg::AddItems(int32_t number)
     }
 }
 
+/**
+ * @brief Create a RelativeContainer item with specified height.
+ * @param height The height of the item.
+ */
 void ExpandSafeAreaTestNg::CreateItemWithHeight(float height)
 {
     RelativeContainerModelNG relativeContainerModelNG;
@@ -149,6 +190,10 @@ void ExpandSafeAreaTestNg::CreateItemWithHeight(float height)
     ViewStackProcessor::GetInstance()->Pop();
 }
 
+/**
+ * @brief Initialize SafeAreaInsets based on given expand options.
+ * @param opts SafeAreaExpandOpts specifying type and edges to expand.
+ */
 void ExpandSafeAreaTestNg::InitSafeArea(SafeAreaExpandOpts opts)
 {
     auto pipeline = MockPipelineContext::GetCurrent();
@@ -184,6 +229,10 @@ void ExpandSafeAreaTestNg::InitSafeArea(SafeAreaExpandOpts opts)
     }
 }
 
+/**
+ * @brief Get current SafeAreaInsets from SafeAreaManager.
+ * @return SafeAreaInsets containing top, bottom, left, right insets.
+ */
 SafeAreaInsets ExpandSafeAreaTestNg::GetSafeAreaInsets()
 {
     SafeAreaInsets insets;
@@ -202,10 +251,15 @@ SafeAreaInsets ExpandSafeAreaTestNg::GetSafeAreaInsets()
  */
 HWTEST_F(ExpandSafeAreaTestNg, Manager001, TestSize.Level0)
 {
+    /**@tc.steps: step1 Initialize SafeAreaManager with isFullScreen=true.*/
     AvoidConfig config { .isFullScreen = true };
     InitSafeAreaManager(config);
+    
+    /**@tc.steps: step2 Set system safeArea for top and bottom edges.*/
     SafeAreaExpandOpts opts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP | SAFE_AREA_EDGE_BOTTOM };
     InitSafeArea(opts);
+    
+    /**@tc.steps: step3 Get safeAreaInsets and verify top/bottom values, left/right should be zero.*/
     auto safeAreaInsets = GetSafeAreaInsets();
     EXPECT_TRUE(safeAreaInsets.left_.Length() == 0);
     EXPECT_FALSE(safeAreaInsets.top_.Length() == 0);

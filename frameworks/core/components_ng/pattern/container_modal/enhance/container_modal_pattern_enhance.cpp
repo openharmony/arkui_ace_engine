@@ -501,7 +501,7 @@ void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& contain
         TAG_LOGI(AceLogTag::ACE_APPBAR, "container window double click. maximizeMode =  %{public}d", maximizeMode);
         if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
             windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY || windowMode == WindowMode::WINDOW_MODE_SPLIT) {
             EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_RECOVER);
             windowManager->WindowRecover();
         } else if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
@@ -532,7 +532,8 @@ void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button click event triggerd, mode = %{public}d", mode);
     auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
-        mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+        mode == WindowMode::WINDOW_MODE_SPLIT) {
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_RECOVER);
         windowManager->WindowRecover();
     } else {
@@ -787,7 +788,8 @@ void ContainerModalPatternEnhance::OnMaxButtonClick()
     auto mode = windowManager->GetWindowMode();
     auto currentMode = windowManager->GetCurrentWindowMaximizeMode();
     if (mode == WindowMode::WINDOW_MODE_FULLSCREEN || currentMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR ||
-        mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        mode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || mode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+        mode == WindowMode::WINDOW_MODE_SPLIT) {
         EventReport::ReportClickTitleMaximizeMenu(MAX_MENU_ITEM_MAXIMIZE, MAX_BUTTON_CLICK_TO_RECOVER);
         windowManager->WindowRecover();
     } else {
@@ -837,7 +839,8 @@ void ContainerModalPatternEnhance::SetMaximizeIconIsRecover()
     auto windowMode = windowManager->GetWindowMode();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
     if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
-        windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY ||
+        windowMode == WindowMode::WINDOW_MODE_SPLIT) {
         customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, true);
     } else {
         customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, false);
