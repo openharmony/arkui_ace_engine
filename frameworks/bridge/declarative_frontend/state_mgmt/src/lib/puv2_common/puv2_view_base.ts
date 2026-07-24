@@ -29,6 +29,7 @@
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
 type CustomEnvValue = any;
+type CustomEnvQueryResult = { found: boolean; value?: CustomEnvValue; };
 type SystemEnvUpdateValue = string | number | undefined;
 type CustomEnvMeta = {
   varToKey: Record<string, number>;
@@ -62,7 +63,7 @@ declare class MutableBuilder<Args extends Object[]> {
 // implemented in C++  for release
 abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
-  protected __notifyDecoratedWatch__Internal(_varName: string): void {}
+  public __notifyDecoratedWatch__Internal(_varName: string): void {}
   // List of inactive components used for Dfx
   protected static readonly inactiveComponents_: Set<string> = new Set<string>();
   protected get isReusable_(): boolean {
@@ -502,7 +503,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.allowReusableV2Descendant();
   }
 
-  public findCustomValueByKey(key: number): CustomEnvValue {
+  public findCustomValueByKey(key: number): CustomEnvQueryResult {
     stateMgmtConsole.debug(`${this.debugInfo__()}: instanceId changed, clearing dirtDescendantElementIds_`);
     return this.nativeViewPartialUpdate.findCustomValueByKey(key);
   }
@@ -527,9 +528,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           return;
         }
         const storeProp = ObserveV2.OB_PREFIX + varName;
-        if (updatedEnvValue === undefined) {
-          return;
-        }
         this[storeProp] = updatedEnvValue;
         ObserveV2.getObserve().fireChange(this, varName);
         this.__notifyDecoratedWatch__Internal(varName);

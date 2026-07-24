@@ -457,9 +457,14 @@ const CustomEnv = (envKey: CustomEnvKey): PropertyDecorator => {
         ObserveV2.getObserve().addRef(this, varName);
         if (!this[storeProp]) {
           const envValue = this.findCustomValueByKey(envKeyId);
-          this[storeProp] = envValue !== undefined ? envValue : this[localValueProp];
+          if (envValue?.found) {
+            this[storeProp] = envValue.value;
+          } else {
+            return this[localValueProp];
+          }
         }
-        return ObserveV2.autoProxyObject(this, storeProp);
+        const proxiedValue = ObserveV2.autoProxyObject(this, storeProp);
+        return ObserveV2.registerCustomEnvOwner(this as ViewPU, proxiedValue, varName);
       },
       set(value) {
         if (!this[isCustomEnvInit]) {

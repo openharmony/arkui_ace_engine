@@ -87,9 +87,9 @@ abstract class NativeViewPartialUpdate {
     console.warn("NativeViewPU(Mock).sendStateInfo() -  unimplemented!");
   }
 
-  findCustomValueByKey(key: number): CustomEnvValue {
+  findCustomValueByKey(key: number): CustomEnvQueryResult {
     console.warn(`NativeViewPU(Mock).findCustomValueByKey(${key}) - unimplemented!`);
-    return undefined;
+    return { found: false };
   }
 
   findEnvValueByKey(key: string): CustomEnvValue {
