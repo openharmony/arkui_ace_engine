@@ -24,8 +24,6 @@
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/node_loading_progress_modifier.h"
-#include "core/interfaces/native/node/grid_item_modifier.h"
-#include "core/interfaces/native/node/grid_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_date_picker_modifier.h"
@@ -34,7 +32,6 @@
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/qrcode_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
-#include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/progress_modifier.h"
 #include "core/interfaces/native/node/text_timer_modifier.h"
 
@@ -84,10 +81,13 @@
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid_col/grid_col_model_ng.h"
 #include "core/components_ng/pattern/grid_row/grid_row_model_ng.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
@@ -321,13 +321,10 @@ void* createArcScrollBarNode(ArkUI_Int32 nodeId)
 
 void* createRefreshNode(ArkUI_Int32 nodeId)
 {
-    auto arkUIRefreshModifier = NG::NodeModifier::GetRefreshModifier();
-    CHECK_NULL_RETURN(arkUIRefreshModifier, nullptr);
-    auto arkUINodeHandle = arkUIRefreshModifier->createRefreshFrameNode(nodeId);
-    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
-    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
+    auto frameNode = RefreshModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    return frameNode;
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createRootNode(ArkUI_Int32 nodeId)
@@ -505,9 +502,10 @@ void* createRelativeContainerNode(ArkUI_Int32 nodeId)
 }
 void* createGridNode(ArkUI_Int32 nodeId)
 {
-    auto* modifier = NG::NodeModifier::GetGridModifier();
-    CHECK_NULL_RETURN(modifier, nullptr);
-    return modifier->createFrameNode(nodeId);
+    auto frameNode = GridModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createTabsNode(ArkUI_Int32 nodeId)
@@ -519,9 +517,10 @@ void* createTabsNode(ArkUI_Int32 nodeId)
 
 void* createGridItemNode(ArkUI_Int32 nodeId)
 {
-    auto* modifier = NG::NodeModifier::GetGridItemModifier();
-    CHECK_NULL_RETURN(modifier, nullptr);
-    return modifier->createFrameNode(nodeId);
+    auto frameNode = GridItemModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
 }
 
 void* createBlankNode(ArkUI_Int32 nodeId)

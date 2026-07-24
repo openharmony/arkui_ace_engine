@@ -28,9 +28,8 @@ class Pattern;
 using PatternCreator = std::function<RefPtr<Pattern>(void)>;
 class ScrollableItemPool {
 public:
-    ACE_FORCE_EXPORT static ScrollableItemPool& GetInstance();
-    ACE_FORCE_EXPORT RefPtr<ScrollableItem> Allocate(
-        const std::string& tag, int32_t nodeId, const PatternCreator& patternCreator);
+    static ScrollableItemPool& GetInstance();
+    RefPtr<ScrollableItem> Allocate(const std::string& tag, int32_t nodeId, const PatternCreator& patternCreator);
 
     void Deallocate(ScrollableItem* obj);
 

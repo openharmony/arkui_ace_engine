@@ -336,7 +336,7 @@ ACE_FORCE_EXPORT void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, 
     dst.fill = Converter::ArkValue<Opt_Boolean>(src.GetIsFilled());
 }
 
-ACE_FORCE_EXPORT void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
+void AssignArkValue(Ark_ItemDragInfo& dst, const ItemDragInfo& src)
 {
     dst.x = ArkValue<Ark_Float64>(static_cast<float>(src.GetX()));
     dst.y = ArkValue<Ark_Float64>(static_cast<float>(src.GetY()));

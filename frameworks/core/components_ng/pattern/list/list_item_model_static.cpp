@@ -14,26 +14,14 @@
  */
 
 #include "core/components_ng/pattern/list/list_item_model_static.h"
-#include "core/components_ng/pattern/list/list_item_pattern.h"
-#include "core/components_ng/pattern/list/list_item_layout_property.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
-#include "core/interfaces/native/node/node_arc_list_item_modifier.h"
+#include "core/components_ng/pattern/arc_list/arc_list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {
-RefPtr<Pattern> CreateArcListItemPattern(void* b = nullptr, int32_t s = 0)
-{
-    auto* mod = NodeModifier::GetArcListItemCustomModifier();
-    CHECK_NULL_RETURN(mod, nullptr);
-    CHECK_NULL_RETURN(mod->createArcListItemPattern, nullptr);
-    return mod->createArcListItemPattern(b, s);
-}
-} // namespace
 void ListItemModelStatic::SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder)
 {
     CHECK_NULL_VOID(frameNode);
@@ -61,7 +49,7 @@ RefPtr<FrameNode> ListItemModelStatic::CreateFrameNode(int32_t nodeId, bool isCr
                 []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
         } else {
             frameNode = ScrollableItemPool::GetInstance().Allocate(tag, nodeId,
-                []() { return CreateArcListItemPattern(); });
+                []() { return AceType::MakeRefPtr<ArcListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
         }
     } else {
         frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
@@ -202,14 +190,10 @@ void ListItemModelStatic::SetSwiperAction(FrameNode* frameNode, std::function<vo
 void ListItemModelStatic::SetAutoScale(FrameNode* frameNode, const std::optional<bool>& autoScale)
 {
     CHECK_NULL_VOID(frameNode);
-    auto* mod = NodeModifier::GetArcListItemCustomModifier();
-    CHECK_NULL_VOID(mod);
     if (autoScale.has_value()) {
-        CHECK_NULL_VOID(mod->setAutoScale);
-        mod->setAutoScale(frameNode, autoScale.value());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, autoScale.value(), frameNode);
     } else {
-        CHECK_NULL_VOID(mod->resetAutoScale);
-        mod->resetAutoScale(frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, frameNode);
     }
 }
 

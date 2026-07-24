@@ -1400,6 +1400,842 @@ class ArkScrollable extends ArkComponent {
     return this;
   }
 }
+
+/// <reference path='./import.ts' />
+class ArkGridComponent extends ArkScrollable {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  allowChildTypes() {
+    return ['GridItem'];
+  }
+  initialize(value) {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, value[0]);
+      modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, undefined);
+    }
+    else if (value.length === 2 && isObject(value[0]) && isObject(value[1])) {
+      modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, value[0]);
+      modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, value[1]);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, GridScrollerModifier.identity, GridScrollerModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, GridLayoutOptionsModifier.identity, GridLayoutOptionsModifier, undefined);
+    }
+    return this;
+  }
+  columnsTemplate(value) {
+    modifierWithKey(this._modifiersWithKeys, GridColumnsTemplateModifier.identity, GridColumnsTemplateModifier, value);
+    return this;
+  }
+  rowsTemplate(value) {
+    modifierWithKey(this._modifiersWithKeys, GridRowsTemplateModifier.identity, GridRowsTemplateModifier, value);
+    return this;
+  }
+  columnsGap(value) {
+    modifierWithKey(this._modifiersWithKeys, GridColumnsGapModifier.identity, GridColumnsGapModifier, value);
+    return this;
+  }
+  rowsGap(value) {
+    modifierWithKey(this._modifiersWithKeys, GridRowsGapModifier.identity, GridRowsGapModifier, value);
+    return this;
+  }
+  scrollBarWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, GridScrollBarWidthModifier.identity, GridScrollBarWidthModifier, value);
+    return this;
+  }
+  scrollBarColor(value) {
+    modifierWithKey(this._modifiersWithKeys, GridScrollBarColorModifier.identity, GridScrollBarColorModifier, value);
+    return this;
+  }
+  scrollBar(value) {
+    modifierWithKey(this._modifiersWithKeys, GridScrollBarModifier.identity, GridScrollBarModifier, value);
+    return this;
+  }
+  onScrollBarUpdate(event) {
+    modifierWithKey(this._modifiersWithKeys, GridOnScrollBarUpdateModifier.identity, GridOnScrollBarUpdateModifier, event);
+    return this;
+  }
+  onScrollIndex(event) {
+    modifierWithKey(this._modifiersWithKeys, GridOnScrollIndexModifier.identity, GridOnScrollIndexModifier, event);
+    return this;
+  }
+  cachedCount(count, show) {
+    let opt = new ArkScrollableCacheOptions(count, show ? show : false);
+    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
+    return this;
+  }
+  editMode(value) {
+    modifierWithKey(this._modifiersWithKeys, GridEditModeModifier.identity, GridEditModeModifier, value);
+    return this;
+  }
+  multiSelectable(value) {
+    modifierWithKey(this._modifiersWithKeys, GridMultiSelectableModifier.identity, GridMultiSelectableModifier, value);
+    return this;
+  }
+  maxCount(value) {
+    modifierWithKey(this._modifiersWithKeys, GridMaxCountModifier.identity, GridMaxCountModifier, value);
+    return this;
+  }
+  minCount(value) {
+    modifierWithKey(this._modifiersWithKeys, GridMinCountModifier.identity, GridMinCountModifier, value);
+    return this;
+  }
+  cellLength(value) {
+    modifierWithKey(this._modifiersWithKeys, GridCellLengthModifier.identity, GridCellLengthModifier, value);
+    return this;
+  }
+  layoutDirection(value) {
+    modifierWithKey(this._modifiersWithKeys, GridLayoutDirectionModifier.identity, GridLayoutDirectionModifier, value);
+    return this;
+  }
+  supportAnimation(value) {
+    modifierWithKey(this._modifiersWithKeys, GridSupportAnimationModifier.identity, GridSupportAnimationModifier, value);
+    return this;
+  }
+  onItemDragStart(event) {
+    modifierWithKey(this._modifiersWithKeys, GridOnItemDragStartModifier.identity, GridOnItemDragStartModifier, event);
+    return this;
+  }
+  onItemDragEnter(event) {
+    modifierWithKey(this._modifiersWithKeys, GridOnItemDragEnterModifier.identity, GridOnItemDragEnterModifier, event);
+    return this;
+  }
+  onItemDragMove(event) {
+    modifierWithKey(this._modifiersWithKeys, GridOnItemDragMoveModifier.identity, GridOnItemDragMoveModifier, event);
+    return this;
+  }
+  onItemDragLeave(event) {
+    modifierWithKey(this._modifiersWithKeys, GridOnItemDragLeaveModifier.identity, GridOnItemDragLeaveModifier, event);
+    return this;
+  }
+  onItemDrop(event) {
+    modifierWithKey(this._modifiersWithKeys, GridOnItemDropModifier.identity, GridOnItemDropModifier, event);
+    return this;
+  }
+  nestedScroll(value) {
+    modifierWithKey(this._modifiersWithKeys, GridNestedScrollModifier.identity, GridNestedScrollModifier, value);
+    return this;
+  }
+  enableScrollInteraction(value) {
+    modifierWithKey(this._modifiersWithKeys, GridEnableScrollModifier.identity, GridEnableScrollModifier, value);
+    return this;
+  }
+  friction(value) {
+    modifierWithKey(this._modifiersWithKeys, GridFrictionModifier.identity, GridFrictionModifier, value);
+    return this;
+  }
+  focusWrapMode(value) {
+    modifierWithKey(this._modifiersWithKeys, GridFocusWrapModeModifier.identity, GridFocusWrapModeModifier, value);
+    return this;
+  }
+  onScroll(event) {
+    throw new BusinessError(100201, 'onScroll not supported in attributeModifier scenario.');
+  }
+  onReachStart(event) {
+    modifierWithKey(this._modifiersWithKeys, GridOnReachStartModifier.identity, GridOnReachStartModifier, event);
+    return this;
+  }
+  onReachEnd(event) {
+    modifierWithKey(this._modifiersWithKeys, GridOnReachEndModifier.identity, GridOnReachEndModifier, event);
+    return this;
+  }
+  onScrollStart(event) {
+    modifierWithKey(this._modifiersWithKeys, GridOnScrollStartModifier.identity, GridOnScrollStartModifier, event);
+    return this;
+  }
+  onScrollStop(event) {
+    modifierWithKey(this._modifiersWithKeys, GridOnScrollStopModifier.identity, GridOnScrollStopModifier, event);
+    return this;
+  }
+  onScrollFrameBegin(callback) {
+    modifierWithKey(this._modifiersWithKeys, GridOnScrollFrameBeginModifier.identity, GridOnScrollFrameBeginModifier, callback);
+    return this;
+  }
+  clip(value) {
+    modifierWithKey(this._modifiersWithKeys, GridClipModifier.identity, GridClipModifier, value);
+    return this;
+  }
+  alignItems(value) {
+    modifierWithKey(this._modifiersWithKeys, GridAlignItemsModifier.identity, GridAlignItemsModifier, value);
+    return this;
+  }
+  syncLoad(value) {
+    modifierWithKey(this._modifiersWithKeys, GridSyncLoadModifier.identity, GridSyncLoadModifier, value);
+    return this;
+  }
+  editModeOptions(options) {
+    modifierWithKey(this._modifiersWithKeys, GridEditModeOptionsModifier.identity, GridEditModeOptionsModifier, options);
+    return this;
+  }
+  onEditModeChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, GridOnEditModeChangeModifier.identity, GridOnEditModeChangeModifier, callback);
+    return this;
+  }
+  enableEditMode(value) {
+    modifierWithKey(this._modifiersWithKeys, GridEnableEditModeModifier.identity, GridEnableEditModeModifier, value);
+    return this;
+  }
+  onWillScroll(callback) {
+    modifierWithKey(this._modifiersWithKeys, GridOnWillScrollModifier.identity, GridOnWillScrollModifier, callback);
+    return this;
+  }
+  onDidScroll(callback) {
+    modifierWithKey(this._modifiersWithKeys, GridOnDidScrollModifier.identity, GridOnDidScrollModifier, callback);
+    return this;
+  }
+  supportEmptyBranchInLazyLoading(value) {
+    modifierWithKey(this._modifiersWithKeys, GridSupportLazyLoadingEmptyBranchModifier.identity, GridSupportLazyLoadingEmptyBranchModifier, value);
+    return this;
+  }
+}
+class GridScrollerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.setGridScroller(node, undefined);
+    }
+    else {
+      getUINativeModule().grid.setGridScroller(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+GridScrollerModifier.identity = Symbol('gridScroller');
+class GridLayoutOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    let _a, _b, _c, _d, _e, _f;
+    if (reset) {
+      getUINativeModule().grid.setGridLayoutOptions(node, undefined, undefined, undefined, undefined, undefined, undefined, undefined);
+    }
+    else {
+      getUINativeModule().grid.setGridLayoutOptions(node, isArray(this.value.regularSize) ? this.value.regularSize : undefined,
+        isArray((_a = this.value) === null || _a === void 0 ? void 0 : _a.irregularIndexes) ? this.value.irregularIndexes : undefined,
+        isArray((_b = this.value) === null || _b === void 0 ? void 0 : _b.irregularIndexes) ? this.value.irregularIndexes.length : undefined,
+        isFunction((_c = this.value) === null || _c === void 0 ? void 0 : _c.onGetIrregularSizeByIndex) ? this.value.onGetIrregularSizeByIndex : undefined,
+        isFunction((_d = this.value) === null || _d === void 0 ? void 0 : _d.onGetRectByIndex) ? this.value.onGetRectByIndex : undefined,
+        isFunction((_e = this.value) === null || _e === void 0 ? void 0 : _e.onGetStartIndexByOffset) ? this.value.onGetStartIndexByOffset : undefined,
+        isFunction((_f = this.value) === null || _f === void 0 ? void 0 : _f.onGetStartIndexByIndex) ? this.value.onGetStartIndexByIndex : undefined);
+    }
+  }
+  checkObjectDiff() {
+    let _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l;
+    return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.regularSize,
+      (_b = this.value) === null || _b === void 0 ? void 0 : _b.regularSize) ||
+      !isBaseOrResourceEqual((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.irregularIndexes,
+        (_d = this.value) === null || _d === void 0 ? void 0 : _d.irregularIndexes) ||
+      !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.onGetIrregularSizeByIndex,
+        (_f = this.value) === null || _f === void 0 ? void 0 : _f.onGetIrregularSizeByIndex) ||
+      !isBaseOrResourceEqual((_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.onGetRectByIndex,
+        (_h = this.value) === null || _h === void 0 ? void 0 : _h.onGetRectByIndex) ||
+      !isBaseOrResourceEqual((_i = this.stageValue) === null || _i === void 0 ? void 0 : _i.onGetStartIndexByOffset,
+        (_j = this.value) === null || _j === void 0 ? void 0 : _j.onGetStartIndexByOffset) ||
+      !isBaseOrResourceEqual((_k = this.stageValue) === null || _k === void 0 ? void 0 : _k.onGetStartIndexByIndex,
+        (_l = this.value) === null || _l === void 0 ? void 0 : _l.onGetStartIndexByIndex);
+  }
+}
+GridLayoutOptionsModifier.identity = Symbol('gridLayoutOptions');
+class GridColumnsTemplateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetColumnsTemplate(node);
+    }
+    else {
+      getUINativeModule().grid.setColumnsTemplate(node, this.value);
+    }
+  }
+}
+GridColumnsTemplateModifier.identity = Symbol('gridColumnsTemplate');
+class GridRowsTemplateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetRowsTemplate(node);
+    }
+    else {
+      getUINativeModule().grid.setRowsTemplate(node, this.value);
+    }
+  }
+}
+GridRowsTemplateModifier.identity = Symbol('gridRowsTemplate');
+class GridColumnsGapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetColumnsGap(node);
+    }
+    else {
+      getUINativeModule().grid.setColumnsGap(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+GridColumnsGapModifier.identity = Symbol('gridColumnsGap');
+class GridRowsGapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetRowsGap(node);
+    }
+    else {
+      getUINativeModule().grid.setRowsGap(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+GridRowsGapModifier.identity = Symbol('gridRowsGap');
+class GridScrollBarWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetScrollBarWidth(node);
+    }
+    else {
+      getUINativeModule().grid.setScrollBarWidth(node, this.value);
+    }
+  }
+}
+GridScrollBarWidthModifier.identity = Symbol('gridScrollBarWidth');
+class GridScrollBarModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetScrollBar(node);
+    }
+    else {
+      getUINativeModule().grid.setScrollBar(node, this.value);
+    }
+  }
+}
+GridScrollBarModifier.identity = Symbol('gridScrollBar');
+class GridScrollBarColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetScrollBarColor(node);
+    }
+    else {
+      getUINativeModule().grid.setScrollBarColor(node, this.value);
+    }
+  }
+}
+GridScrollBarColorModifier.identity = Symbol('gridScrollBarColor');
+class GridEditModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetEditMode(node);
+    }
+    else {
+      getUINativeModule().grid.setEditMode(node, this.value);
+    }
+  }
+}
+GridEditModeModifier.identity = Symbol('gridEditMode');
+class GridCachedCountModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetCachedCount(node);
+    }
+    else {
+      getUINativeModule().grid.setCachedCount(node, this.value.count, this.value.show);
+    }
+  }
+}
+GridCachedCountModifier.identity = Symbol('gridCachedCount');
+class GridMultiSelectableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetMultiSelectable(node);
+    }
+    else {
+      getUINativeModule().grid.setMultiSelectable(node, this.value);
+    }
+  }
+}
+GridMultiSelectableModifier.identity = Symbol('gridMultiSelectable');
+class GridNestedScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    let _a, _b;
+    if (reset) {
+      getUINativeModule().grid.resetNestedScroll(node);
+    }
+    else {
+      getUINativeModule().grid.setNestedScroll(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.scrollForward, (_b = this.value) === null ||
+      _b === void 0 ? void 0 : _b.scrollBackward);
+    }
+  }
+  checkObjectDiff() {
+    return !((this.stageValue.scrollForward === this.value.scrollForward) &&
+      (this.stageValue.scrollBackward === this.value.scrollBackward));
+  }
+}
+GridNestedScrollModifier.identity = Symbol('gridNestedScroll');
+class GridEnableScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetEnableScroll(node);
+    }
+    else {
+      getUINativeModule().grid.setEnableScroll(node, this.value);
+    }
+  }
+}
+GridEnableScrollModifier.identity = Symbol('gridEnableScroll');
+class GridFrictionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetFriction(node);
+    }
+    else {
+      getUINativeModule().grid.setFriction(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+GridFrictionModifier.identity = Symbol('gridFriction');
+class GridFocusWrapModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetFocusWrapMode(node);
+    }
+    else {
+      getUINativeModule().grid.setFocusWrapMode(node, this.value);
+    }
+  }
+}
+GridFocusWrapModeModifier.identity = Symbol('gridFocusWrapMode');
+class GridOnScrollFrameBeginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnScrollFrameBegin(node);
+    } else {
+      getUINativeModule().grid.setOnScrollFrameBegin(node, this.value);
+    }
+  }
+}
+GridOnScrollFrameBeginModifier.identity = Symbol('gridOnScrollFrameBegin');
+class GridOnWillScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnWillScroll(node);
+    } else {
+      getUINativeModule().grid.setOnWillScroll(node, this.value);
+    }
+  }
+}
+GridOnWillScrollModifier.identity = Symbol('gridOnWillScroll');
+class GridOnDidScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnDidScroll(node);
+    } else {
+      getUINativeModule().grid.setOnDidScroll(node, this.value);
+    }
+  }
+}
+GridOnDidScrollModifier.identity = Symbol('gridOnDidScroll');
+class GridSupportLazyLoadingEmptyBranchModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.setSupportLazyLoadingEmptyBranch(node, false);
+    } else {
+      getUINativeModule().grid.setSupportLazyLoadingEmptyBranch(node, this.value);
+    }
+  }
+}
+GridSupportLazyLoadingEmptyBranchModifier.identity = Symbol('gridSupportEmptyBranchInLazyLoading');
+class GridOnReachStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnReachStart(node);
+    } else {
+      getUINativeModule().grid.setOnReachStart(node, this.value);
+    }
+  }
+}
+GridOnReachStartModifier.identity = Symbol('gridOnReachStart');
+class GridOnReachEndModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnReachEnd(node);
+    } else {
+      getUINativeModule().grid.setOnReachEnd(node, this.value);
+    }
+  }
+}
+GridOnReachEndModifier.identity = Symbol('gridOnReachEnd');
+class GridOnScrollStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnScrollStart(node);
+    } else {
+      getUINativeModule().grid.setOnScrollStart(node, this.value);
+    }
+  }
+}
+GridOnScrollStartModifier.identity = Symbol('gridOnScrollStart');
+class GridOnScrollStopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnScrollStop(node);
+    } else {
+      getUINativeModule().grid.setOnScrollStop(node, this.value);
+    }
+  }
+}
+GridOnScrollStopModifier.identity = Symbol('gridOnScrollStop');
+class GridOnScrollIndexModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnScrollIndex(node);
+    } else {
+      getUINativeModule().grid.setOnScrollIndex(node, this.value);
+    }
+  }
+}
+GridOnScrollIndexModifier.identity = Symbol('gridOnScrollIndex');
+class GridOnScrollBarUpdateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnScrollBarUpdate(node);
+    } else {
+      getUINativeModule().grid.setOnScrollBarUpdate(node, this.value);
+    }
+  }
+}
+GridOnScrollBarUpdateModifier.identity = Symbol('gridOnScrollBarUpdate');
+class GridOnItemDragStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnItemDragStart(node);
+    } else {
+      getUINativeModule().grid.setOnItemDragStart(node, this.value);
+    }
+  }
+}
+GridOnItemDragStartModifier.identity = Symbol('gridOnItemDragStart');
+class GridOnItemDragEnterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnItemDragEnter(node);
+    } else {
+      getUINativeModule().grid.setOnItemDragEnter(node, this.value);
+    }
+  }
+}
+GridOnItemDragEnterModifier.identity = Symbol('gridOnItemDragEnter');
+class GridOnItemDragMoveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnItemDragMove(node);
+    } else {
+      getUINativeModule().grid.setOnItemDragMove(node, this.value);
+    }
+  }
+}
+GridOnItemDragMoveModifier.identity = Symbol('gridOnItemDragMove');
+class GridOnItemDragLeaveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnItemDragLeave(node);
+    } else {
+      getUINativeModule().grid.setOnItemDragLeave(node, this.value);
+    }
+  }
+}
+GridOnItemDragLeaveModifier.identity = Symbol('gridOnItemDragLeave');
+class GridOnItemDropModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnItemDrop(node);
+    } else {
+      getUINativeModule().grid.setOnItemDrop(node, this.value);
+    }
+  }
+}
+GridOnItemDropModifier.identity = Symbol('gridOnItemDrop');
+class GridMaxCountModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetMaxCount(node);
+    }
+    else {
+      getUINativeModule().grid.setMaxCount(node, this.value);
+    }
+  }
+}
+GridMaxCountModifier.identity = Symbol('gridMaxCount');
+class GridMinCountModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetMinCount(node);
+    }
+    else {
+      getUINativeModule().grid.setMinCount(node, this.value);
+    }
+  }
+}
+GridMinCountModifier.identity = Symbol('gridMinCount');
+class GridCellLengthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetCellLength(node);
+    }
+    else {
+      getUINativeModule().grid.setCellLength(node, this.value);
+    }
+  }
+}
+GridCellLengthModifier.identity = Symbol('gridCellLength');
+class GridLayoutDirectionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetLayoutDirection(node);
+    }
+    else {
+      getUINativeModule().grid.setLayoutDirection(node, this.value);
+    }
+  }
+}
+GridLayoutDirectionModifier.identity = Symbol('gridLayoutDirection');
+class GridSupportAnimationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetSupportAnimation(node);
+    }
+    else {
+      getUINativeModule().grid.setSupportAnimation(node, this.value);
+    }
+  }
+}
+GridSupportAnimationModifier.identity = Symbol('gridSupportAnimation');
+class GridClipModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    }
+    else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+GridClipModifier.identity = Symbol('gridClip');
+class GridAlignItemsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetAlignItems(node);
+    }
+    else {
+      getUINativeModule().grid.setAlignItems(node, this.value);
+    }
+  }
+}
+GridAlignItemsModifier.identity = Symbol('gridAlignItems');
+class GridSyncLoadModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetSyncLoad(node);
+    }
+    else {
+      getUINativeModule().grid.setSyncLoad(node, this.value);
+    }
+  }
+}
+GridSyncLoadModifier.identity = Symbol('gridSyncLoad');
+class GridEditModeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetEditModeOptions(node);
+    }
+    else {
+      getUINativeModule().grid.setEditModeOptions(node, this.value);
+    }
+  }
+}
+GridEditModeOptionsModifier.identity = Symbol('gridEditModeOptions');
+class GridOnEditModeChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnEditModeChange(node);
+    }
+    else {
+      getUINativeModule().grid.setOnEditModeChange(node, this.value);
+    }
+  }
+}
+GridOnEditModeChangeModifier.identity = Symbol('gridOnEditModeChange');
+class GridEnableEditModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetGridEnableEditMode(node);
+    }
+    else {
+      getUINativeModule().grid.setGridEnableEditMode(node, this.value);
+    }
+  }
+}
+GridEnableEditModeModifier.identity = Symbol('gridEnableEditMode');
+// @ts-ignore
+if (globalThis.Grid !== undefined) {
+  globalThis.Grid.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkGridComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.GridModifier(nativePtr, classType);
+    });
+  };
+  globalThis.Grid.onWillStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStopDragging(nodePtr, value);
+  };
+  globalThis.Grid.onWillStartDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartDragging(nodePtr, value);
+  };
+  globalThis.Grid.onDidStopDragging = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopDragging(nodePtr, value);
+  };
+  globalThis.Grid.onWillStartFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnWillStartFling(nodePtr, value);
+  };
+  globalThis.Grid.onDidStopFling = function (value) {
+    let nodePtr = getUINativeModule().frameNode.getStackTopNode();
+    getUINativeModule().scrollable.setOnDidStopFling(nodePtr, value);
+  };
+}
 /// <reference path='./import.ts' />
 class GridColSpanModifier extends ModifierWithKey {
   constructor(value) {
@@ -7396,6 +8232,169 @@ if (globalThis.__Common__ !== undefined) {
   };
 }
 
+/// <reference path='./import.ts' />
+class ArkRefreshComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  onStateChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, RefreshOnStateChangeModifier.identity, RefreshOnStateChangeModifier, callback);
+    return this;
+  }
+  onRefreshing(callback) {
+    modifierWithKey(this._modifiersWithKeys, RefreshOnRefreshingModifier.identity, RefreshOnRefreshingModifier, callback);
+    return this;
+  }
+  refreshOffset(value) {
+    modifierWithKey(this._modifiersWithKeys, RefreshOffsetModifier.identity, RefreshOffsetModifier, value);
+    return this;
+  }
+  pullToRefresh(value) {
+    modifierWithKey(this._modifiersWithKeys, PullToRefreshModifier.identity, PullToRefreshModifier, value);
+    return this;
+  }
+  pullUpToCancelRefresh(value) {
+    modifierWithKey(this._modifiersWithKeys, PullUpToCancelRefreshModifier.identity, PullUpToCancelRefreshModifier, value);
+    return this;
+  }
+  pullDownRatio(value) {
+    modifierWithKey(this._modifiersWithKeys, PullDownRatioModifier.identity, PullDownRatioModifier, value);
+    return this;
+  }
+  onOffsetChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, RefreshOnOffsetChangeModifier.identity, RefreshOnOffsetChangeModifier, callback);
+    return this;
+  }
+  maxPullDownDistance(value) {
+    modifierWithKey(this._modifiersWithKeys, MaxPullDownDistanceModifier.identity, MaxPullDownDistanceModifier, value);
+    return this;
+  }
+}
+class RefreshOnOffsetChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetOnOffsetChange(node);
+    } else {
+      getUINativeModule().refresh.setOnOffsetChange(node, this.value);
+    }
+  }
+}
+RefreshOnOffsetChangeModifier.identity = Symbol('onOffsetChange');
+class RefreshOnStateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetOnStateChange(node);
+    } else {
+      getUINativeModule().refresh.setOnStateChange(node, this.value);
+    }
+  }
+}
+RefreshOnStateChangeModifier.identity = Symbol('onStateChange');
+class RefreshOnRefreshingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetOnRefreshing(node);
+    } else {
+      getUINativeModule().refresh.setOnRefreshing(node, this.value);
+    }
+  }
+}
+RefreshOnRefreshingModifier.identity = Symbol('onRefreshing');
+class RefreshOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetRefreshOffset(node);
+    }
+    else {
+      getUINativeModule().refresh.setRefreshOffset(node, this.value);
+    }
+  }
+}
+RefreshOffsetModifier.identity = Symbol('refreshOffset');
+class PullToRefreshModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetPullToRefresh(node);
+    }
+    else {
+      getUINativeModule().refresh.setPullToRefresh(node, this.value);
+    }
+  }
+}
+PullToRefreshModifier.identity = Symbol('pullToRefresh');
+class PullUpToCancelRefreshModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetPullUpToCancelRefresh(node);
+    }
+    else {
+      getUINativeModule().refresh.setPullUpToCancelRefresh(node, this.value);
+    }
+  }
+}
+PullUpToCancelRefreshModifier.identity = Symbol('pullUpToCancelRefresh');
+class PullDownRatioModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetPullDownRatio(node);
+    }
+    else {
+      getUINativeModule().refresh.setPullDownRatio(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+PullDownRatioModifier.identity = Symbol('pullDownRatio');
+class MaxPullDownDistanceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().refresh.resetMaxPullDownDistance(node);
+    }
+    else {
+      getUINativeModule().refresh.setMaxPullDownDistance(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MaxPullDownDistanceModifier.identity = Symbol('maxPullDownDistance');
+// @ts-ignore
+if (globalThis.Refresh !== undefined) {
+  globalThis.Refresh.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkRefreshComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.RefreshModifier(nativePtr, classType);
+    });
+  };
+}
 
 /// <reference path='./import.ts' />
 class ScrollNestedScrollModifier extends ModifierWithKey {
@@ -13319,6 +14318,164 @@ if (globalThis.FormLink !== undefined) {
 }
 
 /// <reference path='./import.ts' />
+class GridItemSelectableModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridItem.resetGridItemSelectable(node);
+    }
+    else {
+      getUINativeModule().gridItem.setGridItemSelectable(node, this.value);
+    }
+  }
+}
+GridItemSelectableModifier.identity = Symbol('gridItemSelectable');
+class GridItemSelectedModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridItem.resetGridItemSelected(node);
+    }
+    else {
+      getUINativeModule().gridItem.setGridItemSelected(node, this.value);
+    }
+  }
+}
+GridItemSelectedModifier.identity = Symbol('gridItemSelected');
+class GridItemRowStartModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridItem.resetGridItemRowStart(node);
+    }
+    else {
+      getUINativeModule().gridItem.setGridItemRowStart(node, this.value);
+    }
+  }
+}
+GridItemRowStartModifier.identity = Symbol('gridItemRowStart');
+class GridItemRowEndModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridItem.resetGridItemRowEnd(node);
+    }
+    else {
+      getUINativeModule().gridItem.setGridItemRowEnd(node, this.value);
+    }
+  }
+}
+GridItemRowEndModifier.identity = Symbol('gridItemRowEnd');
+class GridItemColumnStartModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridItem.resetGridItemColumnStart(node);
+    }
+    else {
+      getUINativeModule().gridItem.setGridItemColumnStart(node, this.value);
+    }
+  }
+}
+GridItemColumnStartModifier.identity = Symbol('gridItemColumnStart');
+class GridItemColumnEndModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridItem.resetGridItemColumnEnd(node);
+    }
+    else {
+      getUINativeModule().gridItem.setGridItemColumnEnd(node, this.value);
+    }
+  }
+}
+GridItemColumnEndModifier.identity = Symbol('gridItemColumnEnd');
+class GridItemOptionsModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    let _a;
+    if (reset) {
+      getUINativeModule().gridItem.setGridItemOptions(node, undefined);
+    }
+    else {
+      if (((_a = this.value) === null || _a === void 0 ? void 0 : _a.style) === undefined) {
+        getUINativeModule().gridItem.setGridItemOptions(node, undefined);
+      }
+      else {
+        getUINativeModule().gridItem.setGridItemOptions(node, this.value.style);
+      }
+    }
+  }
+  checkObjectDiff() {
+    let _a, _b;
+    return !isBaseOrResourceEqual((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.style,
+      (_b = this.value) === null || _b === void 0 ? void 0 : _b.style);
+  }
+}
+GridItemOptionsModifier.identity = Symbol('gridItemOptions');
+class GridItemOnSelectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().gridItem.resetGridItemOnSelected(node);
+    } else {
+      getUINativeModule().gridItem.setGridItemOnSelected(node, this.value);
+    }
+  }
+}
+GridItemOnSelectedModifier.identity = Symbol('gridItemOnSelected');
+class ArkGridItemComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  allowChildCount() {
+    return 1;
+  }
+  initialize(value) {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, GridItemOptionsModifier.identity, GridItemOptionsModifier, value[0]);
+    }
+    return this;
+  }
+  rowStart(value) {
+    modifierWithKey(this._modifiersWithKeys, GridItemRowStartModifier.identity, GridItemRowStartModifier, value);
+    return this;
+  }
+  rowEnd(value) {
+    modifierWithKey(this._modifiersWithKeys, GridItemRowEndModifier.identity, GridItemRowEndModifier, value);
+    return this;
+  }
+  columnStart(value) {
+    modifierWithKey(this._modifiersWithKeys, GridItemColumnStartModifier.identity, GridItemColumnStartModifier, value);
+    return this;
+  }
+  columnEnd(value) {
+    modifierWithKey(this._modifiersWithKeys, GridItemColumnEndModifier.identity, GridItemColumnEndModifier, value);
+    return this;
+  }
+  forceRebuild(value) {
+    throw new BusinessError(100201, 'forceRebuild not supported in attributeModifier scenario.');
+  }
+  selectable(value) {
+    modifierWithKey(this._modifiersWithKeys, GridItemSelectableModifier.identity, GridItemSelectableModifier, value);
+    return this;
+  }
+  selected(value) {
+    modifierWithKey(this._modifiersWithKeys, GridItemSelectedModifier.identity, GridItemSelectedModifier, value);
+    return this;
+  }
+  onSelect(event) {
+    modifierWithKey(this._modifiersWithKeys, GridItemOnSelectedModifier.identity, GridItemOnSelectedModifier, event);
+    return this;
+  }
+}
+// @ts-ignore
+if (globalThis.GridItem !== undefined) {
+  globalThis.GridItem.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkGridItemComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.GridItemModifier(nativePtr, classType);
+    });
+  };
+}
+
+/// <reference path='./import.ts' />
 class ListEditModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -18292,6 +19449,160 @@ if (globalThis.ContainerSpan !== undefined) {
       return new modifierJS.ContainerSpanModifier(nativePtr, classType);
     });
   };
+}
+/// <reference path='./import.ts' />
+class ArkLazyGridLayout extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  columnsGap(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridColumnsGapModifier.identity, LazyGridColumnsGapModifier, value);
+    return this;
+  }
+  rowsGap(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridRowsGapModifier.identity, LazyGridRowsGapModifier, value);
+    return this;
+  }
+}
+class ArkLazyVGridLayoutComponent extends ArkLazyGridLayout {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  columnsTemplate(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridColumnsTemplateModifier.identity, LazyGridColumnsTemplateModifier, value);
+    return this;
+  }
+  sticky(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridStickyModifier.identity, LazyGridStickyModifier, value);
+    return this;
+  }
+  header(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridHeaderModifier.identity, LazyGridHeaderModifier, value);
+    return this;
+  }
+  footer(value) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridFooterModifier.identity, LazyGridFooterModifier, value);
+    return this;
+  }
+  onVisibleIndexesChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, LazyGridOnVisibleIndexesChangeModifier.identity,
+      LazyGridOnVisibleIndexesChangeModifier, callback);
+    return this;
+  }
+}
+class LazyGridColumnsTemplateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().lazyVGridLayout.resetColumnsTemplate(node);
+    }
+    else {
+      getUINativeModule().lazyVGridLayout.setColumnsTemplate(node, this.value);
+    }
+  }
+}
+LazyGridColumnsTemplateModifier.identity = Symbol('lazyGridColumnsTemplate');
+class LazyGridColumnsGapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().lazyGridLayout.resetColumnsGap(node);
+    }
+    else {
+      getUINativeModule().lazyGridLayout.setColumnsGap(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+LazyGridColumnsGapModifier.identity = Symbol('lazyGridColumnsGap');
+class LazyGridRowsGapModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isObject(this.value)) {
+      getUINativeModule().lazyGridLayout.resetRowsGap(node);
+    }
+    else {
+      getUINativeModule().lazyGridLayout.setRowsGap(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+LazyGridRowsGapModifier.identity = Symbol('lazyGridRowsGap');
+class LazyGridStickyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isNumber(this.value)) {
+      getUINativeModule().lazyVGridLayout.resetSticky(node);
+    }
+    else {
+      getUINativeModule().lazyVGridLayout.setSticky(node, this.value);
+    }
+  }
+}
+LazyGridStickyModifier.identity = Symbol('lazyVGridSticky');
+class LazyGridHeaderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyVGridLayout.resetHeader(node);
+    }
+    else {
+      getUINativeModule().lazyVGridLayout.setHeader(node, this.value);
+    }
+  }
+}
+LazyGridHeaderModifier.identity = Symbol('lazyVGridHeader');
+class LazyGridFooterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || (!isObject(this.value) && !isFunction(this.value))) {
+      getUINativeModule().lazyVGridLayout.resetFooter(node);
+    }
+    else {
+      getUINativeModule().lazyVGridLayout.setFooter(node, this.value);
+    }
+  }
+}
+LazyGridFooterModifier.identity = Symbol('lazyVGridFooter');
+class LazyGridOnVisibleIndexesChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset || !isFunction(this.value)) {
+      getUINativeModule().lazyVGridLayout.resetOnVisibleIndexesChange(node);
+    }
+    else {
+      getUINativeModule().lazyVGridLayout.setOnVisibleIndexesChange(node, this.value);
+    }
+  }
+}
+LazyGridOnVisibleIndexesChangeModifier.identity = Symbol('lazyVGridOnVisibleIndexesChange');
+// @ts-ignore
+if (globalThis.LazyVGridLayout !== undefined) {
+globalThis.LazyVGridLayout.attributeModifier = function (modifier) {
+  attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    return new ArkLazyVGridLayoutComponent(nativePtr);
+  }, (nativePtr, classType, modifierJS) => {
+    return new modifierJS.LazyVGridLayoutModifier(nativePtr, classType);
+  });
+};
 }
 
 class ArkLazyColumnLayoutComponent extends ArkComponent {

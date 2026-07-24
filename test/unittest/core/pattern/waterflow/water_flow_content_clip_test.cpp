@@ -22,14 +22,14 @@
 #define protected public
 #define private public
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_pattern.h"
-#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_info.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_pattern.h"
 #undef private
 #undef protected
 
 #include "core/components_ng/pattern/lazy_column_layout/lazy_column_layout_model.h"
-#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/lazy_waterflow_layout/lazy_water_flow_layout_model.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"

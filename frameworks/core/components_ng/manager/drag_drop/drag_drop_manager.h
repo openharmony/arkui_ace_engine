@@ -76,13 +76,13 @@ public:
     DragDropManager();
     ~DragDropManager();
 
-    ACE_FORCE_EXPORT RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
+    RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
         const RefPtr<PixelMap>& pixelMap, const GestureEvent& info, const RefPtr<EventHub>& eventHub);
-    ACE_FORCE_EXPORT RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
+    RefPtr<DragDropProxy> CreateAndShowItemDragOverlay(
         const RefPtr<UINode>& customNode, const GestureEvent& info, const RefPtr<EventHub>& eventHub);
     RefPtr<DragDropProxy> CreateTextDragDropProxy();
 
-    ACE_FORCE_EXPORT void RemoveDragFrameNode(int32_t id);
+    void RemoveDragFrameNode(int32_t id);
 
     void AddGridDragFrameNode(int32_t id, const WeakPtr<FrameNode>& dragFrameNode)
     {
@@ -372,7 +372,7 @@ public:
         draggingPressedState_ = pointerPressed;
     }
 
-    ACE_FORCE_EXPORT bool IsDraggingPressed(int32_t currentPointerId) const;
+    bool IsDraggingPressed(int32_t currentPointerId) const;
 
     bool IsSameDraggingPointer(int32_t currentPointerId) const
     {

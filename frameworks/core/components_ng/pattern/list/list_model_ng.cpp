@@ -26,7 +26,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/interfaces/native/node/node_arc_list_modifier.h"
+#include "core/components_ng/pattern/arc_list/arc_list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
@@ -36,26 +36,6 @@ namespace OHOS::Ace::NG {
 #define SCROLLABLE_LIST_ATTRIBUTE "Scrollable.ListAttribute."
 
 const std::vector<DisplayMode> DISPLAY_MODE = { DisplayMode::OFF, DisplayMode::AUTO, DisplayMode::ON };
-
-namespace {
-RefPtr<Pattern> CreateArcListPattern()
-{
-    auto* mod = NodeModifier::GetArcListCustomModifier();
-    if (!mod) {
-        LOGE("CreateArcListPattern: mod is null");
-        return nullptr;
-    }
-    if (!mod->createArcListPattern) {
-        LOGE("CreateArcListPattern: createArcListPattern func ptr is null");
-        return nullptr;
-    }
-    auto pattern = mod->createArcListPattern();
-    if (!pattern) {
-        LOGE("CreateArcListPattern: createArcListPattern() returned null");
-    }
-    return pattern;
-}
-} // namespace
 
 void ListModelNG::Create(bool isCreateArc)
 {
@@ -68,7 +48,7 @@ void ListModelNG::Create(bool isCreateArc)
         frameNode = FrameNode::GetOrCreateFrameNode(tag, nodeId, []() { return AceType::MakeRefPtr<ListPattern>(); });
     } else {
         frameNode = FrameNode::GetOrCreateFrameNode(
-            tag, nodeId, []() { return CreateArcListPattern(); });
+            tag, nodeId, []() { return AceType::MakeRefPtr<ArcListPattern>(); });
     }
     stack->Push(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
@@ -95,7 +75,7 @@ RefPtr<FrameNode> ListModelNG::CreateFrameNode(int32_t nodeId, bool isCreateArc)
     if (!isCreateArc) {
         frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, nodeId, AceType::MakeRefPtr<ListPattern>());
     } else {
-        frameNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, nodeId, CreateArcListPattern());
+        frameNode = FrameNode::CreateFrameNode(V2::ARC_LIST_ETS_TAG, nodeId, AceType::MakeRefPtr<ArcListPattern>());
     }
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
@@ -1323,17 +1303,10 @@ DisplayMode ListModelNG::GetDisplayMode() const
 void ListModelNG::SetHeader(const RefPtr<FrameNode>& headerNode)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ListModelNG::SetHeader(frameNode, headerNode.GetRawPtr());
-}
-
-void ListModelNG::SetHeader(FrameNode* frameNode, FrameNode* headerNode)
-{
-    CHECK_NULL_VOID(headerNode);
     CHECK_NULL_VOID(frameNode);
-    auto* mod = NodeModifier::GetArcListCustomModifier();
-    CHECK_NULL_VOID(mod);
-    CHECK_NULL_VOID(mod->addHeader);
-    mod->addHeader(frameNode, headerNode);
+    auto pattern = frameNode->GetPattern<ArcListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddHeader(headerNode);
 }
 
 void ListModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
@@ -1445,6 +1418,15 @@ int32_t ListModelNG::GetInitialIndex(FrameNode* frameNode)
     return value;
 }
 
+void ListModelNG::SetHeader(FrameNode* frameNode, FrameNode* headerNode)
+{
+    CHECK_NULL_VOID(headerNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ArcListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddHeader(AceType::Claim<FrameNode>(headerNode));
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 void ListModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
 {
@@ -1455,20 +1437,18 @@ void ListModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
 void ListModelNG::SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity)
 {
     CHECK_NULL_VOID(frameNode);
-    auto* mod = NodeModifier::GetArcListCustomModifier();
-    CHECK_NULL_VOID(mod);
-    CHECK_NULL_VOID(mod->setDigitalCrownSensitivity);
-    mod->setDigitalCrownSensitivity(frameNode, sensitivity);
+    auto pattern = frameNode->GetPattern<ArcListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDigitalCrownSensitivity(sensitivity);
 }
 
 CrownSensitivity ListModelNG::GetDigitalCrownSensitivity(FrameNode* frameNode)
 {
     CrownSensitivity sensitivity = CrownSensitivity::MEDIUM;
     CHECK_NULL_RETURN(frameNode, sensitivity);
-    auto* mod = NodeModifier::GetArcListCustomModifier();
-    CHECK_NULL_RETURN(mod, sensitivity);
-    CHECK_NULL_RETURN(mod->getDigitalCrownSensitivity, sensitivity);
-    return mod->getDigitalCrownSensitivity(frameNode);
+    auto pattern = frameNode->GetPattern<ArcListPattern>();
+    CHECK_NULL_RETURN(pattern, sensitivity);
+    return pattern->GetDigitalCrownSensitivity();
 }
 #endif
 

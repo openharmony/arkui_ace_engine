@@ -66,14 +66,6 @@ declare enum StickyStyle {
   Both = 3,
 }
 
-declare enum FocusWrapMode {}
-
-declare enum GridItemAlignment
-{
-    DEFAULT = 0,
-    STRETCH = 1,
-}
-
 interface CommonAttribute {}
 interface BlankAttribute extends CommonAttribute {}
 interface ColumnAttribute extends CommonAttribute {}
@@ -185,9 +177,6 @@ interface LazyColumnLayoutAttribute extends CommonAttribute {}
 interface LazyVWaterFlowLayoutAttribute extends CommonAttribute {}
 interface DividerOptions extends CommonAttribute {}
 interface PickerBackgroundStyle extends CommonAttribute {}
-interface ItemFillPolicy {}
-interface EditModeOptions {}
-interface OffsetResult {}
 
 type ResourceColor = Resource | string | number | Color;
 type ResourceStr = string | Resource;

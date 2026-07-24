@@ -8949,8 +8949,7 @@ FrameNode::GetAccessibilityProperty<DatePickerColumnAccessibilityProperty>() con
 template ACE_FORCE_EXPORT RefPtr<DialogAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<DialogAccessibilityProperty>() const;
 template RefPtr<GaugeAccessibilityProperty> FrameNode::GetAccessibilityProperty<GaugeAccessibilityProperty>() const;
-template ACE_FORCE_EXPORT RefPtr<GridAccessibilityProperty>
-FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
+template RefPtr<GridAccessibilityProperty> FrameNode::GetAccessibilityProperty<GridAccessibilityProperty>() const;
 template RefPtr<GridItemAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<GridItemAccessibilityProperty>() const;
 template RefPtr<IndexerAccessibilityProperty> FrameNode::GetAccessibilityProperty<IndexerAccessibilityProperty>() const;
@@ -8969,8 +8968,7 @@ template RefPtr<ProgressAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<ProgressAccessibilityProperty>() const;
 template RefPtr<RadioAccessibilityProperty> FrameNode::GetAccessibilityProperty<RadioAccessibilityProperty>() const;
 template RefPtr<RatingAccessibilityProperty> FrameNode::GetAccessibilityProperty<RatingAccessibilityProperty>() const;
-template ACE_FORCE_EXPORT RefPtr<RefreshAccessibilityProperty>
-FrameNode::GetAccessibilityProperty<RefreshAccessibilityProperty>() const;
+template RefPtr<RefreshAccessibilityProperty> FrameNode::GetAccessibilityProperty<RefreshAccessibilityProperty>() const;
 template RefPtr<RichEditorAccessibilityProperty>
 FrameNode::GetAccessibilityProperty<RichEditorAccessibilityProperty>() const;
 template RefPtr<ScrollAccessibilityProperty> FrameNode::GetAccessibilityProperty<ScrollAccessibilityProperty>() const;

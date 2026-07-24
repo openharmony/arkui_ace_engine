@@ -18,11 +18,8 @@
 #include "core/components_ng/pattern/dynamiclayout/dynamic_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.h"
-#include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_property.h"
-#include "core/interfaces/native/node/lazy_grid_layout_modifier.h"
-#include "core/components_ng/pattern/lazy_grid_layout/bridge/lazy_grid_layout_custom_modifier.h"
-#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
 
 namespace OHOS::Ace::NG {
 void DynamicLayoutModelNG::UpdatePropertyFromLinearParam(
@@ -131,11 +128,7 @@ void DynamicLayoutModelNG::SetParams(
                 return AceType::MakeRefPtr<DynamicLayoutPattern>(params);
             }
             case DynamicLayoutType::GRID_LAYOUT: {
-                auto lazyGridLayoutModifier = NodeModifier::GetLazyGridLayoutCustomModifier();
-                CHECK_NULL_RETURN(lazyGridLayoutModifier, nullptr);
-                auto rawPattern = lazyGridLayoutModifier->getLazyGridLayoutPattern();
-                CHECK_NULL_RETURN(rawPattern, nullptr);
-                auto pattern = Referenced::Claim(reinterpret_cast<LazyGridLayoutPattern*>(rawPattern));
+                auto pattern = AceType::MakeRefPtr<LazyGridLayoutPattern>();
                 // Set DynamicLayout flag
                 pattern->SetDynamicLayoutOptions(true);
                 return pattern;
@@ -173,11 +166,7 @@ void DynamicLayoutModelNG::Create(
                 return AceType::MakeRefPtr<DynamicLayoutPattern>(params);
             }
             case DynamicLayoutType::GRID_LAYOUT: {
-                auto lazyGridLayoutModifier = NodeModifier::GetLazyGridLayoutCustomModifier();
-                CHECK_NULL_RETURN(lazyGridLayoutModifier, nullptr);
-                auto rawPattern = lazyGridLayoutModifier->getLazyGridLayoutPattern();
-                CHECK_NULL_RETURN(rawPattern, nullptr);
-                auto pattern = Referenced::Claim(reinterpret_cast<LazyGridLayoutPattern*>(rawPattern));
+                auto pattern = AceType::MakeRefPtr<LazyGridLayoutPattern>();
                 // Set DynamicLayout flag
                 pattern->SetDynamicLayoutOptions(true);
                 return pattern;

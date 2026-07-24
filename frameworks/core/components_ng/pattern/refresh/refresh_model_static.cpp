@@ -23,9 +23,9 @@ namespace OHOS::Ace::NG {
 
 RefPtr<FrameNode> RefreshModelStatic::CreateFrameNode(int32_t nodeId)
 {
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", REFRESH_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::REFRESH_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
+        V2::REFRESH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RefreshPattern>(); });
     CHECK_NULL_RETURN(frameNode, frameNode);
     auto pattern = frameNode->GetPattern<RefreshPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);

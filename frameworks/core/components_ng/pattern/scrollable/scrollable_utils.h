@@ -56,8 +56,7 @@ struct ScrollableUtils {
      * @param end last item index
      * @param wrapper layout wrapper
      */
-    ACE_FORCE_EXPORT static void RecycleItemsOutOfBoundary(
-        Axis axis, float offset, int32_t start, int32_t end, LayoutWrapper* wrapper);
+    static void RecycleItemsOutOfBoundary(Axis axis, float offset, int32_t start, int32_t end, LayoutWrapper* wrapper);
 
     /**
      * @brief get moveoffset from parentFrameNode when curFrameNode focused.

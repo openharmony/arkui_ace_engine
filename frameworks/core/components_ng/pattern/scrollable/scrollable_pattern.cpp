@@ -44,7 +44,9 @@
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_scroll_notifier.h"
-#include "core/interfaces/native/node/node_arc_scroll_bar_modifier.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -1675,10 +1677,7 @@ void ScrollablePattern::SetInBarRectRegionCallback()
 RefPtr<ScrollBar> ScrollablePattern::CreateScrollBar()
 {
     if (isRoundScroll_) {
-        auto* mod = NodeModifier::GetArcScrollBarCustomModifier();
-        CHECK_NULL_RETURN(mod, AceType::MakeRefPtr<ScrollBar>());
-        CHECK_NULL_RETURN(mod->createArcScrollBar, AceType::MakeRefPtr<ScrollBar>());
-        return mod->createArcScrollBar();
+        return AceType::MakeRefPtr<ArcScrollBar>();
     }
     return AceType::MakeRefPtr<ScrollBar>();
 }
@@ -1967,10 +1966,14 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
 RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
 {
     if (isRoundScroll_ && scrollBar_) {
-        auto* mod = NodeModifier::GetArcScrollBarCustomModifier();
-        CHECK_NULL_RETURN(mod, AceType::MakeRefPtr<ScrollBarOverlayModifier>());
-        CHECK_NULL_RETURN(mod->createArcScrollBarOverlayModifier, AceType::MakeRefPtr<ScrollBarOverlayModifier>());
-        return mod->createArcScrollBarOverlayModifier(AceType::RawPtr(scrollBar_));
+        auto arcScrollBarOverlayModifier = AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
+        auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar_);
+        if (arcScrollBar) {
+            arcScrollBarOverlayModifier->SetPositionMode(arcScrollBar->GetPositionMode());
+            arcScrollBarOverlayModifier->SetArcRect(arcScrollBar->GetArcActiveRect());
+            arcScrollBarOverlayModifier->SetBackgroundArcRect(arcScrollBar->GetArcBarRect());
+        }
+        return arcScrollBarOverlayModifier;
     }
     return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
 }

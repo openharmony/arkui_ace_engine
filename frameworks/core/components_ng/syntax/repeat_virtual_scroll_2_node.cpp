@@ -19,12 +19,12 @@
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
 #include "core/components_ng/syntax/lazy_for_each_utils.h"
-#include "core/interfaces/native/node/grid_item_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -928,9 +928,9 @@ void RepeatVirtualScroll2Node::InitDragManager(const RefPtr<FrameNode>& child)
         CHECK_NULL_VOID(pattern);
         pattern->InitDragManager(AceType::Claim(this));
     } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-        auto pattern = NodeModifier::GetGridItemCustomModifier();
+        auto pattern = child->GetPattern<GridItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->initDragManager(child, AceType::Claim(this));
+        pattern->InitDragManager(AceType::Claim(this));
     }
 }
 
@@ -963,14 +963,14 @@ void RepeatVirtualScroll2Node::InitAllChildrenDragManager(bool init)
                 pattern->DeInitDragManager();
             }
         } else if (parentNode->GetTag() == V2::GRID_ETS_TAG) {
-            auto pattern = NodeModifier::GetGridItemCustomModifier();
+            auto pattern = item->GetPattern<GridItemPattern>();
             if (!pattern) {
                 continue;
             }
             if (init) {
-                pattern->initDragManager(item, AceType::Claim(this));
+                pattern->InitDragManager(AceType::Claim(this));
             } else {
-                pattern->deInitDragManager(item);
+                pattern->DeInitDragManager();
             }
         }
     }

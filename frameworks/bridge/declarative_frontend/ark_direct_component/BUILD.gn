@@ -32,18 +32,36 @@ ohos_abc("arkimagespan") {
   part_name = ace_engine_part
 }
 
-ohos_abc("arkgrid") {
-  sources = [ "./src/arkgrid.ts" ]
-  output_name = "arkgrid"
+ohos_abc("arktabs") {
+  sources = [ "./src/arktabs.ts" ]
+  output_name = "arktabs"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
 
-ohos_abc("arkgriditem") {
-  sources = [ "./src/arkgriditem.ts" ]
-  output_name = "arkgriditem"
+ohos_abc("arktabcontent") {
+  sources = [ "./src/arktabcontent.ts" ]
+  output_name = "arktabcontent"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkswiper") {
+  sources = [ "./src/arkswiper.ts" ]
+  output_name = "arkswiper"
+  install_images = [ "system" ]
+  module_install_dir = "etc/abc/arkui/components"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}
+
+ohos_abc("arkswiperindicator") {
+  sources = [ "./src/arkswiperindicator.ts" ]
+  output_name = "arkswiperindicator"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem
@@ -175,18 +193,18 @@ ohos_abc("arkdatepicker") {
   part_name = ace_engine_part
 }
 
-ohos_abc("arklazygridlayout") {
-  sources = [ "./src/arklazygridlayout.ts" ]
-  output_name = "arklazygridlayout"
+ohos_abc("arkpanel") {
+  sources = [ "./src/arkpanel.ts" ]
+  output_name = "arkpanel"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
 }
 
-ohos_abc("arkrefresh") {
-  sources = [ "./src/arkrefresh.ts" ]
-  output_name = "arkrefresh"
+ohos_abc("arknavigator") {
+  sources = [ "./src/arknavigator.ts" ]
+  output_name = "arknavigator"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem

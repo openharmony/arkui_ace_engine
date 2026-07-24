@@ -80,8 +80,6 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"DynamicLayout", "dynamiclayout"},
         { "LazyDynamicLayout", "dynamiclayout"},
         { "Gauge", "gauge" },
-        { "Grid", "grid" },
-        { "GridItem", "grid" },
         { "Hyperlink", "hyperlink" },
         { "Indexer", "indexer" },
         { "Badge", "badge" },
@@ -116,17 +114,10 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "ImageAnimator", "imageanimator" },
         { "DatePicker", "datepicker" },
         { "DatePickerDialog", "datepicker" },
-        { "LazyVGridLayout", "lazygridlayout" },
-        { "Refresh", "refresh" },
         { "TextPicker", "textpicker" },
         { "TextPickerDialog", "textpicker" },
         { "Select", "select" },
         { "Bubble", "bubble" },
-#if defined(CROSS_PLATFORM)
-        { "ArcScrollBar", "arcscrollbar" },
-        { "ArcList", "arclist" },
-        { "ArcListItem", "arclist" },
-#endif
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {
