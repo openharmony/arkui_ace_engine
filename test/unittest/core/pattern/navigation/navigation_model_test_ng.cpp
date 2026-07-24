@@ -43,7 +43,6 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 
-#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/toolbar/toolbar_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_model_static.h"
 

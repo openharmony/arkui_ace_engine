@@ -71,9 +71,6 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 
 #include "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
-#include "core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace {
 
@@ -261,12 +258,6 @@ RefPtr<MockPipelineContext> MockPipelineContext::GetCurrent()
 {
     return pipeline_;
 }
-
-const RefPtr<NG::PageInfo> MockPipelineContext::GetLastPageInfo()
-{
-    return nullptr;
-}
-
 
 void MockPipelineContext::SetRootSize(double rootWidth, double rootHeight)
 {
@@ -801,11 +792,6 @@ const RefPtr<FocusManager>& PipelineContext::GetOrCreateFocusManager()
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
 {
     return stageManager_;
-}
-
-const RefPtr<NavigationManager>& PipelineContext::GetNavigationManager() const
-{
-    return navigationMgr_;
 }
 
 const RefPtr<FullScreenManager>& PipelineContext::GetFullScreenManager()
@@ -1438,7 +1424,6 @@ void PipelineContext::InitManagers()
     memoryMgr_ = MakeRefPtr<MemoryManager>();
     avoidInfoMgr_ = MakeRefPtr<AvoidInfoManager>();
     toolbarManager_ = MakeRefPtr<ToolbarManager>();
-    navigationMgr_ = MakeRefPtr<NavigationManager>();
     forceSplitMgr_ = MakeRefPtr<ForceSplitManager>();
     recoverableMgr_ = MakeRefPtr<RecoverableManager>();
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();

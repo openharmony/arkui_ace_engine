@@ -25,7 +25,6 @@
 #include "core/common/ace_engine.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
 #include "core/components_ng/render/render_context.h"

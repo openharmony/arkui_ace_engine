@@ -34,8 +34,6 @@
 #include "test/mock/frameworks/base/image/mock_pixel_map.h"
 
 #include "core/common/container.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

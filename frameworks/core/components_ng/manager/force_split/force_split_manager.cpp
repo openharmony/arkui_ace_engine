@@ -23,10 +23,8 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/force_split/force_split_constants.h"
 #include "core/common/force_split/force_split_utils.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {

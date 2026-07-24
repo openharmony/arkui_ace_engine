@@ -39,7 +39,6 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"

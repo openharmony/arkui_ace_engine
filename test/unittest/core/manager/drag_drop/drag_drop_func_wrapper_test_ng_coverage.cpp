@@ -51,7 +51,6 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
-#include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/syntax/shallow_builder.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/pipeline/base/element_register.h"
