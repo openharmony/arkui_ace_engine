@@ -24,7 +24,7 @@
 #include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 #include "core/common/clipboard/clipboard_proxy.h"
-#include "core/components/common/layout/layout_constants_string_utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"

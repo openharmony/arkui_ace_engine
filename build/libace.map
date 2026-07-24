@@ -862,8 +862,8 @@
       "OHOS::Ace::NG::AccessibilityProperty::SetOnAccessibilityFocusCallback(std::__h::function<void (bool)> const&)";
       "OHOS::Ace::NG::AccessibilityProperty::SetRelatedElementInfoCallback(std::__h::function<void (OHOS::Accessibility::ExtraElementInfo&)> const&)";
       "OHOS::Ace::NG::AccessibilityProperty::ToJsonValue(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&, OHOS::Ace::NG::InspectorFilter const&) const";
-      "OHOS::Ace::NG::AddPaddingToSize(OHOS::Ace::NG::PaddingPropertyF const&, OHOS::Ace::NG::OptionalSize<float>&)";
-      "OHOS::Ace::NG::AddPaddingToSize(OHOS::Ace::NG::PaddingPropertyF const&, OHOS::Ace::NG::SizeT<float>&)";
+      "OHOS::Ace::NG::AddPaddingToSize(OHOS::Ace::NG::PaddingPropertyT<float> const&, OHOS::Ace::NG::OptionalSize<float>&)";
+      "OHOS::Ace::NG::AddPaddingToSize(OHOS::Ace::NG::PaddingPropertyT<float> const&, OHOS::Ace::NG::SizeT<float>&)";
       "OHOS::Ace::NG::AgingAdapationDialogUtil::GetDialogBigFontSizeScale()";
       "OHOS::Ace::NG::AgingAdapationDialogUtil::ShowLongPressDialog(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::ImageSourceInfo&, int)";
       "OHOS::Ace::NG::ApplyMainAxisExtentByLayoutPolicy(OHOS::Ace::NG::OptionalSize<float>&, OHOS::Ace::NG::LayoutConstraintT<float> const&, std::__h::optional<OHOS::Ace::NG::LayoutPolicyProperty> const&, OHOS::Ace::Axis, float)";
@@ -1504,7 +1504,7 @@
       "OHOS::Ace::NG::GeometryNode::Reset()";
       "OHOS::Ace::NG::GeometryNode::SetContentSize(OHOS::Ace::NG::SizeT<float> const&)";
       "OHOS::Ace::NG::GeometryNode::SetMarginFrameOffset(OHOS::Ace::NG::OffsetT<float> const&)";
-      "OHOS::Ace::NG::GeometryNode::UpdatePaddingWithBorder(OHOS::Ace::NG::PaddingPropertyF const&)";
+      "OHOS::Ace::NG::GeometryNode::UpdatePaddingWithBorder(OHOS::Ace::NG::PaddingPropertyT<float> const&)";
       "OHOS::Ace::NG::GestureEventHub::~GestureEventHub()";
       "OHOS::Ace::NG::GestureEventHub::ActClick(std::__h::shared_ptr<OHOS::Ace::JsonValue>)";
       "OHOS::Ace::NG::GestureEventHub::AddClickAfterEvent(OHOS::Ace::RefPtr<OHOS::Ace::NG::ClickEvent> const&)";
@@ -1698,9 +1698,9 @@
       "OHOS::Ace::NG::MenuWrapperPattern::SetAniamtinOption(OHOS::Ace::AnimationOption const&)";
       "OHOS::Ace::NG::MenuWrapperPattern::UpdateFilterMaskType()";
       "OHOS::Ace::NG::MenuWrapperPattern::UpdateMenuAnimation(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)";
-      "OHOS::Ace::NG::MinusPaddingToNonNegativeSize(OHOS::Ace::NG::PaddingPropertyF const&, OHOS::Ace::NG::SizeT<float>&)";
-      "OHOS::Ace::NG::MinusPaddingToSize(OHOS::Ace::NG::PaddingPropertyF const&, OHOS::Ace::NG::OptionalSize<float>&)";
-      "OHOS::Ace::NG::MinusPaddingToSize(OHOS::Ace::NG::PaddingPropertyF const&, OHOS::Ace::NG::SizeT<float>&)";
+      "OHOS::Ace::NG::MinusPaddingToNonNegativeSize(OHOS::Ace::NG::PaddingPropertyT<float> const&, OHOS::Ace::NG::SizeT<float>&)";
+      "OHOS::Ace::NG::MinusPaddingToSize(OHOS::Ace::NG::PaddingPropertyT<float> const&, OHOS::Ace::NG::OptionalSize<float>&)";
+      "OHOS::Ace::NG::MinusPaddingToSize(OHOS::Ace::NG::PaddingPropertyT<float> const&, OHOS::Ace::NG::SizeT<float>&)";
       "OHOS::Ace::NG::Modifier::Modifier()";
       "OHOS::Ace::NG::ModifierAdapter::RemoveModifier(int)";
       "OHOS::Ace::NG::MultipleClickRecognizer::IsDoubleClick() const";
@@ -1824,9 +1824,9 @@
       "OHOS::Ace::NG::OverlayManager::UpdateTipsInfo(int, OHOS::Ace::NG::PopupInfo const&)";
       "OHOS::Ace::NG::OverlayManager::UpdateTipsStatus(int, bool)";
       "OHOS::Ace::NG::OverlayManager::ShowTimeDialog(OHOS::Ace::DialogProperties const&, OHOS::Ace::NG::TimePickerSettingData const&, std::__h::map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, OHOS::Ace::PickerTime, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, OHOS::Ace::PickerTime>>>, std::__h::map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::function<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)>, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, std::__h::function<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)>>>>, std::__h::map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::function<void (OHOS::Ace::GestureEvent const&)>, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, std::__h::function<void (OHOS::Ace::GestureEvent const&)>>>>, std::__h::map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::function<void ()>, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, std::__h::function<void ()>>>>, std::__h::vector<OHOS::Ace::ButtonInfo, std::__h::allocator<OHOS::Ace::ButtonInfo>> const&)";
-      "OHOS::Ace::NG::PaddingPropertyF::Height() const";
-      "OHOS::Ace::NG::PaddingPropertyF::Offset() const";
-      "OHOS::Ace::NG::PaddingPropertyF::Width() const";
+      "OHOS::Ace::NG::PaddingPropertyT<float>::Height() const";
+      "OHOS::Ace::NG::PaddingPropertyT<float>::Offset() const";
+      "OHOS::Ace::NG::PaddingPropertyT<float>::Width() const";
       "OHOS::Ace::NG::ContentRootPattern::BeforeCreateLayoutWrapper()";
       "virtual?thunk?to?OHOS::Ace::NG::ContentRootPattern::BeforeCreateLayoutWrapper*";
       "OHOS::Ace::NG::PaddingPropertyT<OHOS::Ace::NG::CalcLength> OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::PaddingPropertyT<OHOS::Ace::NG::CalcLength>, Ark_Padding>(Ark_Padding const&)";
@@ -2036,7 +2036,7 @@
       "OHOS::Ace::NG::ScrollablePaintProperty::GetBarColor() const";
       "OHOS::Ace::NG::ScrollablePaintProperty::GetBarWidth() const";
       "OHOS::Ace::NG::ScrollablePattern::~ScrollablePattern()";
-      "OHOS::Ace::NG::ScrollablePattern::AccumulatingTerminateHelper(OHOS::Ace::NG::RectT<float>&, OHOS::Ace::NG::PaddingPropertyF&, bool, unsigned int)";
+      "OHOS::Ace::NG::ScrollablePattern::AccumulatingTerminateHelper(OHOS::Ace::NG::RectT<float>&, OHOS::Ace::NG::PaddingPropertyT<float>&, bool, unsigned int)";
       "OHOS::Ace::NG::ScrollablePattern::AddEventsFiredInfo(OHOS::Ace::ScrollableEventType)";
       "OHOS::Ace::NG::ScrollablePattern::AddScrollableFrameInfo(int)";
       "OHOS::Ace::NG::ScrollablePattern::AddScrollEvent()";
@@ -2051,7 +2051,7 @@
       "OHOS::Ace::NG::ScrollablePattern::CreateOverlayModifier()";
       "OHOS::Ace::NG::ScrollablePattern::CreatePaintProperty()";
       "OHOS::Ace::NG::ScrollablePattern::CreateScrollBar()";
-      "OHOS::Ace::NG::ScrollablePattern::CustomizeSafeAreaPadding(OHOS::Ace::NG::PaddingPropertyF, bool)";
+      "OHOS::Ace::NG::ScrollablePattern::CustomizeSafeAreaPadding(OHOS::Ace::NG::PaddingPropertyT<float>, bool)";
       "OHOS::Ace::NG::ScrollablePattern::DumpAdvanceInfo()";
       "OHOS::Ace::NG::ScrollablePattern::DumpAdvanceInfo(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&)";
       "OHOS::Ace::NG::ScrollablePattern::FillReportOnItemStopParams(std::__h::unique_ptr<OHOS::Ace::JsonValue, std::__h::default_delete<OHOS::Ace::JsonValue>>&)";
@@ -4184,7 +4184,6 @@
       OHOS::Ace::NG::ImageSpanView::*;
       OHOS::Ace::NG::Inspector::*;
       OHOS::Ace::NG::InspectorFilter::*;
-      OHOS::Ace::NG::LayoutConstraintT*;
       OHOS::Ace::NG::LayoutProperty::*;
       OHOS::Ace::NG::LayoutWrapper::*;
       OHOS::Ace::NG::ListItemModelNG::*;
@@ -4205,8 +4204,6 @@
       OHOS::Ace::NG::NodeRenderStatusMonitor::*;
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::NG::OverlayManager::*;
-      OHOS::Ace::NG::PaddingPropertyF::*;
-      OHOS::Ace::NG::PaddingPropertyT*;
       OHOS::Ace::NG::PagePattern::*;
       OHOS::Ace::NG::PageRouterManager::*;
       OHOS::Ace::NG::PageRouterManagerFactory::*;
