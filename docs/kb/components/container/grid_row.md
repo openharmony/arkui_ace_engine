@@ -6,7 +6,7 @@
 
 ## 定位
 
-GridRow 是 ArkUI 的响应式栅格容器，与 GridCol 配合使用；公开接口覆盖列系统、水平/垂直间距、断点、排列方向、子项对齐和断点变化事件。GridRow 与 GridCol 一同完成组件化改造，由 gridlayout 聚合模块承载。
+GridRow 是 ArkUI 的响应式栅格容器，其直接子组件应为 GridCol；公开接口覆盖列系统、水平/垂直间距、断点、排列方向、子项对齐和断点变化事件。当前布局算法会跳过非 GridCol 的直接子节点。GridRow 与 GridCol 一同完成组件化改造，由 gridlayout 聚合模块承载。
 
 GridRow 不等同于滚动型 Grid 的行模板。本文档只提供 GridRow 源码、SDK、解析链路、外部依赖、测试和 Spec 的稳定入口。
 
@@ -24,7 +24,7 @@ GridRow 不等同于滚动型 Grid 的行模板。本文档只提供 GridRow 源
 | 多线程布局 | `frameworks/core/components_ng/pattern/grid_row/grid_row_layout_pattern_multi_thread.cpp` | GridRow 多线程布局数据准备入口 |
 | 栅格公共工具 | `frameworks/core/components_ng/pattern/gridlayout/grid_container_utils.cpp`、`frameworks/core/components_ng/pattern/gridlayout/grid_container_utils.h` | GridRow/GridCol 共享的断点、列数、间距和列宽计算入口 |
 | 组件化 Bridge | `frameworks/core/components_ng/pattern/grid_row/bridge/` | 统一 Bridge、Dynamic/Static Modifier 和 Dynamic Module |
-| gridlayout 聚合模块 | `frameworks/core/components_ng/pattern/gridlayout/BUILD.gn`、`adapter/ohos/build/BUILD.gn` | GridRow、GridCol 和公共栅格工具的聚合及共享 SO 构建入口 |
+| gridlayout 聚合模块 | `frameworks/core/components_ng/pattern/gridlayout/BUILD.gn`、`adapter/ohos/build/BUILD.gn` | GridRow、GridCol、GridContainer 和公共栅格工具的聚合及共享 SO 构建入口 |
 | node modifier 委托 | `frameworks/core/interfaces/native/node/grid_row_modifier.cpp`、`frameworks/core/interfaces/native/node/grid_row_modifier.h` | 通过 `DynamicModuleHelper` 获取 GridRow 动态模块的内部委托层 |
 
 ### API 入口
@@ -56,7 +56,7 @@ GridRow **已完成组件化改造**，前端组件定义和属性解析统一�
 | Dynamic Module | `frameworks/core/components_ng/pattern/grid_row/bridge/grid_row_dynamic_module.cpp` | `GridRowDynamicModule` 注册属性并提供动态、静态和 CJ modifier |
 | node modifier 委托层 | `frameworks/core/interfaces/native/node/grid_row_modifier.cpp` | 通过 `DynamicModuleHelper` 转发到 gridlayout 模块中的 GridRow 实现 |
 
-组件化产物：`libarkui_gridlayout.z.so`。该共享库同时承载 GridRow、GridCol 和栅格公共工具，不能据组件名推断为 `libarkui_gridrow.z.so`。
+组件化产物：`libarkui_gridlayout.z.so`。该共享库同时承载 GridRow、GridCol、GridContainer 和栅格公共工具，不能据组件名推断为 `libarkui_gridrow.z.so`。
 
 ### 外部依赖入口
 
@@ -94,6 +94,7 @@ GridRow 功能域：`specs/05-ui-components/01-layout-components/07-grid-row/`�
 | 列数或 gutter 计算异常 | SDK `GridRowOptions`、`grid_row_layout_property.*`、`grid_container_utils.*` 和 Feat-01 |
 | 断点选择或变化事件异常 | SDK `BreakPoints` / `onBreakpointChange`、布局算法、EventHub 和 Feat-02 |
 | GridCol 换行、顺序或位置异常 | `grid_row_layout_algorithm.*`、对应 GridCol LayoutProperty 和 Feat-03 |
+| 普通组件作为 GridRow 直接子节点后未参与布局 | 这是当前实现的父子约束；布局算法会跳过非 GridCol 子节点，应改为由 GridCol 承载内容 |
 | direction、alignItems 或 RTL 表现异常 | SDK 属性声明、Dynamic/Static Modifier、布局算法和 Feat-03 |
 | 动态与静态范式结果不一致 | `grid_row_dynamic_modifier.cpp`、`grid_row_static_modifier.cpp` 和 Feat-04 |
 | 将 GridRow 与 Grid 行模板混淆 | GridRow 进入 `pattern/grid_row/`；`NODE_GRID_ROW_TEMPLATE` 和滚动布局进入 `pattern/grid/` |
@@ -103,7 +104,7 @@ GridRow 功能域：`specs/05-ui-components/01-layout-components/07-grid-row/`�
 
 - 创建链路：从前端 GridRow 定义进入统一 Bridge，再核对 Dynamic/Static Modifier 与 Model。
 - 响应式链路：同时记录布局可用尺寸、窗口模式、breakpoints 配置和最终 GridSizeType。
-- 栅格链路：核对 columns、gutter、当前断点以及各 GridCol 的 span、offset、order。
+- 栅格链路：先确认直接子节点均为 GridCol，再核对 columns、gutter、当前断点以及各 GridCol 的 span、offset、order。
 - 事件链路：从 Bridge/Static callback 进入 Model 和 `GridRowEventHub`，再确认布局后事件任务。
 - 组件化链路：确认 GridRow 映射到 gridlayout 模块，且 `libarkui_gridlayout.z.so` 已随目标产物安装。
 - 回归验证：优先运行 GridRow feature、layout 和 measure 子目录中的定向用例。

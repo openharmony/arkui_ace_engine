@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-18
-> 主题数：34
+> 更新时间：2026-07-24
+> 主题数：41
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -38,12 +38,19 @@ docs/kb/
 | Blank | 空白填充组件 | `docs/kb/components/basic/blank.md` | 新建 |
 | Divider | 分隔线组件 | `docs/kb/components/basic/divider.md` | 新建 |
 | Column | 纵向布局组件 | `docs/kb/components/container/column.md` | 新建 |
+| ColumnSplit | 纵向分割布局组件 | `docs/kb/components/container/column_split.md` | 新建（Spec 待补） |
 | Flex | 弹性布局组件（含 Wrap） | `docs/kb/components/container/flex.md` | 已重建，旧 KB 已移除 |
 | GridCol | 响应式栅格列组件 | `docs/kb/components/container/grid_col.md` | 新建 |
 | GridRow | 响应式栅格行组件 | `docs/kb/components/container/grid_row.md` | 新建 |
+| RelativeContainer | 相对布局容器组件 | `docs/kb/components/container/relative_container.md` | 新建 |
 | Row | 横向布局组件 | `docs/kb/components/container/row.md` | 新建 |
+| RowSplit | 横向分割布局组件 | `docs/kb/components/container/row_split.md` | 新建（Spec 待补） |
 | Stack | 层叠布局组件 | `docs/kb/components/container/stack.md` | 新建 |
 | FolderStack | 折叠屏层叠布局组件 | `docs/kb/components/container/folder_stack.md` | 新建 |
+| DynamicLayout | 动态布局组件 | `docs/kb/components/container/dynamic_layout.md` | 新建 |
+| Shape | Shape 类绘制组件 | `docs/kb/components/shape/shape.md` | 新建（Spec 待补） |
+| Canvas | 画布组件 | `docs/kb/components/shape/canvas.md` | 新建（Spec 待补） |
+| OffscreenCanvas | 离屏画布对象 | `docs/kb/components/shape/offscreen_canvas.md` | 新建（Spec 待补） |
 | Text | 文本组件 | `docs/kb/components/basic/text.md` | 已迁移，旧 KB 已移除 |
 | Image | 图片组件 | `docs/kb/components/media/image.md` | 已迁移，旧 KB 已移除 |
 | ImageAnimator | 图片动画组件 | `docs/kb/components/media/image_animator.md` | 已迁移，旧 KB 已移除 |
