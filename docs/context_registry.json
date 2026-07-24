@@ -1308,6 +1308,233 @@
       "last_verified": "2026-07-10"
     },
     {
+      "id": "ImageLoading",
+      "name": "Image Loading",
+      "name_cn": "图片加载机制",
+      "kind": "common_capability",
+      "category": "media",
+      "keywords": [
+        "Image Loading",
+        "图片加载机制",
+        "ImageLoadingContext",
+        "ImageProvider",
+        "ImageLoader",
+        "ImageStateManager",
+        "ImageObject",
+        "ImageDecoder",
+        "ImageCache",
+        "ImageFileCache",
+        "ImageSourceInfo",
+        "图片缓存"
+      ],
+      "aliases": [
+        "图片加载",
+        "Image Loader",
+        "Image Provider",
+        "图片解码链路"
+      ],
+      "kb": "docs/kb/capabilities/image-loading.md",
+      "spec_domain": "specs/04-common-capability/01-image-loading/01-image-loading-mechanism",
+      "func_id": "04-01-01",
+      "spec_status": "active",
+      "source_paths": {
+        "provider": "frameworks/core/components_ng/image_provider/image_provider.cpp",
+        "loading_context": "frameworks/core/components_ng/image_provider/image_loading_context.cpp",
+        "state_manager": "frameworks/core/components_ng/image_provider/image_state_manager.cpp",
+        "image_object": "frameworks/core/components_ng/image_provider/image_object.cpp",
+        "decoder": "frameworks/core/components_ng/image_provider/image_decoder.cpp",
+        "loader": "frameworks/core/image/image_loader.cpp",
+        "source_info": "frameworks/core/image/image_source_info.cpp",
+        "memory_cache": "frameworks/core/image/image_cache.cpp",
+        "file_cache": "frameworks/core/image/image_file_cache.cpp",
+        "image_pattern": "frameworks/core/components_ng/pattern/image/image_pattern.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/image.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/image.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageModifier.static.d.ets",
+        "drawable_descriptor": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.drawableDescriptor.d.ts",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/image/",
+        "test/unittest/core/pattern/image/",
+        "test/unittest/interfaces/napi/image_loader_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-24"
+    },
+    {
+      "id": "SVG",
+      "name": "SVG",
+      "name_cn": "SVG解析能力",
+      "kind": "common_capability",
+      "category": "media",
+      "keywords": [
+        "SVG",
+        "SvgDom",
+        "SvgContext",
+        "SvgNode",
+        "矢量图",
+        "SVG解析",
+        "SVG绘制",
+        "gradient",
+        "filter",
+        "mask",
+        "animation",
+        "supportSvg2"
+      ],
+      "aliases": [
+        "SVG能力",
+        "SVG解析",
+        "矢量图解析",
+        "Scalable Vector Graphics"
+      ],
+      "kb": "docs/kb/capabilities/svg.md",
+      "spec_domain": "specs/04-common-capability/01-image-loading/02-svg-parsing",
+      "func_id": "04-01-02",
+      "spec_status": "active",
+      "source_paths": {
+        "svg_root": "frameworks/core/components_ng/svg/",
+        "dom": "frameworks/core/components_ng/svg/svg_dom.cpp",
+        "context": "frameworks/core/components_ng/svg/svg_context.cpp",
+        "parser": "frameworks/core/components_ng/svg/parse/",
+        "image_object": "frameworks/core/components_ng/image_provider/svg_image_object.cpp",
+        "canvas_image": "frameworks/core/components_ng/render/adapter/svg_canvas_image.cpp",
+        "compatible": "frameworks/compatible/components/svg/"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/image.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/image.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/svg/",
+        "test/unittest/core/image/svg_dom_test_ng.cpp",
+        "test/unittest/core/image/svg_manager_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-24"
+    },
+    {
+      "id": "BackgroundImage",
+      "name": "Background Image",
+      "name_cn": "背景图片通用属性",
+      "kind": "common_capability",
+      "category": "media",
+      "keywords": [
+        "Background Image",
+        "背景图片",
+        "backgroundImage",
+        "backgroundImageSize",
+        "backgroundImagePosition",
+        "backgroundImageResizable",
+        "ImageRepeat",
+        "BackgroundImageSize",
+        "BackgroundImagePosition",
+        "ImageResizableSlice",
+        "RenderContext"
+      ],
+      "aliases": [
+        "背景图属性",
+        "图片相关属性",
+        "BackgroundImage",
+        "Common背景图"
+      ],
+      "kb": "docs/kb/capabilities/background-image.md",
+      "spec_domain": "specs/04-common-capability/03-common-attributes/10-image-related-attributes",
+      "func_id": "04-03-10",
+      "spec_status": "active",
+      "source_paths": {
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp",
+        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp",
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "render_context": "frameworks/core/components_ng/render/render_context.cpp",
+        "rosen_render_context": "frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_common_modifier.cpp",
+        "style_modifier": "interfaces/native/node/style_modifier.cpp",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/base/view_abstract_test_ng.cpp",
+        "test/unittest/core/base/view_abstract_test_five_ng.cpp",
+        "test/unittest/core/base/view_abstract_model_static_test_two_ng.cpp",
+        "test/unittest/core/render/render_property_test_ng.cpp",
+        "test/unittest/core/rosen/rosen_render_context_test.cpp",
+        "test/unittest/capi/modifiers/common_method_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-24"
+    },
+    {
+      "id": "ImageAnalyzer",
+      "name": "Image Analyzer",
+      "name_cn": "Image分析能力",
+      "kind": "common_capability",
+      "category": "media",
+      "keywords": [
+        "Image Analyzer",
+        "Image分析能力",
+        "enableAnalyzer",
+        "analyzerConfig",
+        "ImageAnalyzerConfig",
+        "ImageAnalyzerController",
+        "ImageAnalyzerManager",
+        "ImageAnalyzerState",
+        "AI image",
+        "分析覆盖层",
+        "overlay lifecycle"
+      ],
+      "aliases": [
+        "ImageAnalyzer",
+        "图片分析",
+        "AI图片分析",
+        "图像分析能力"
+      ],
+      "kb": "docs/kb/capabilities/image-analyzer.md",
+      "spec_domain": "specs/04-common-capability/23-ai-capability/01-image-analysis",
+      "func_id": "04-23-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/image/image_model_ng.cpp",
+        "bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_image.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_image_modifier.cpp",
+        "static_modifier": "frameworks/core/interfaces/native/implementation/image_modifier.cpp",
+        "manager": "adapter/ohos/osal/image_analyzer_manager.cpp",
+        "engine_manager": "adapter/ohos/osal/image_analyzer_mgr.cpp",
+        "loader": "adapter/ohos/osal/image_analyzer_loader.cpp",
+        "interface": "interfaces/inner_api/ace/ai/image_analyzer_interface.h",
+        "controller_accessor": "frameworks/core/interfaces/native/implementation/image_analyzer_controller_accessor.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/image.d.ts",
+        "dynamic_types": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/image_common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/image.static.d.ets",
+        "static_types": "<OH_ROOT>/interface/sdk-js/api/arkui/component/imageCommon.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/image/",
+        "test/unittest/capi/accessors/image_analyzer_controller_accessor_test.cpp",
+        "test/unittest/capi/modifiers/generated/image_modifier_test.cpp",
+        "test/component_test/test_cases/components/image_video_and_media/entry/src/main/ets/pages/image/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-24"
+    },
+    {
       "id": "Toggle",
       "name": "Toggle",
       "name_cn": "开关组件",
@@ -2002,6 +2229,226 @@
       ],
       "status": "active",
       "last_verified": "2026-07-11"
+    },
+    {
+      "id": "CalendarPickerDialog",
+      "name": "CalendarPickerDialog",
+      "name_cn": "日历选择弹窗组件",
+      "kind": "component",
+      "category": "selector",
+      "keywords": [
+        "CalendarPickerDialog",
+        "日历选择弹窗",
+        "CalendarDialogOptions",
+        "CalendarDialogView",
+        "CalendarDialogPattern",
+        "日期选择",
+        "disabledDateRange",
+        "onAccept",
+        "onCancel",
+        "onChange",
+        "calendarpicker"
+      ],
+      "aliases": [
+        "Calendar Picker Dialog",
+        "日历弹窗",
+        "日历选择器弹窗",
+        "CalendarDialog"
+      ],
+      "kb": "docs/kb/components/selector/calendar_picker_dialog.md",
+      "spec_domain": "specs/05-ui-components/06-popup-components/05-calendar-picker-dialog",
+      "func_id": "05-06-05",
+      "spec_status": "active",
+      "source_paths": {
+        "dialog_view": "frameworks/core/components_ng/pattern/calendar_picker/calendar_dialog_view.cpp",
+        "dialog_pattern": "frameworks/core/components_ng/pattern/calendar_picker/calendar_dialog_pattern.cpp",
+        "layout": "frameworks/core/components_ng/pattern/calendar_picker/calendar_dialog_layout_algorithm.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/calendar_picker/bridge/arkts_native_calendar_picker_dialog_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/calendar_picker/bridge/calendar_picker_dialog_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/calendar_picker/bridge/calendar_picker_dialog_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/calendar_picker/bridge/calendar_picker_dialog_dynamic_module.cpp",
+        "static_accessor": "frameworks/core/interfaces/native/implementation/calendar_picker_dialog_accessor.cpp",
+        "module_map": "adapter/ohos/osal/dynamic_module_helper.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/calendar_picker.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/calendarPicker.static.d.ets",
+        "static_internal": "frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/calendar_picker/calendar_dialog_pattern_test_ng.cpp",
+        "test/unittest/core/pattern/calendar_picker/calendar_dialog_view_test_ng.cpp",
+        "test/unittest/capi/accessors/calendar_picker_dialog_accessor_test.cpp",
+        "test/component_test/test_cases/components/popup_window/entry/src/main/ets/pages/calendar_picker_dialog/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-24"
+    },
+    {
+      "id": "DatePickerDialog",
+      "name": "DatePickerDialog",
+      "name_cn": "日期选择弹窗组件",
+      "kind": "component",
+      "category": "selector",
+      "keywords": [
+        "DatePickerDialog",
+        "日期选择弹窗",
+        "DatePickerDialogOptions",
+        "showDatePickerDialog",
+        "DatePickerDialogView",
+        "日期范围",
+        "农历",
+        "showTime",
+        "onDateAccept",
+        "onDateChange",
+        "datepicker"
+      ],
+      "aliases": [
+        "Date Picker Dialog",
+        "日期弹窗",
+        "日期选择器弹窗",
+        "DateDialog"
+      ],
+      "kb": "docs/kb/components/selector/date_picker_dialog.md",
+      "spec_domain": "specs/05-ui-components/06-popup-components/06-date-picker-dialog",
+      "func_id": "05-06-06",
+      "spec_status": "active",
+      "source_paths": {
+        "dialog_view": "frameworks/core/components_ng/pattern/date_picker/datepicker_dialog_view.cpp",
+        "model": "frameworks/core/components_ng/pattern/date_picker/datepicker_model_ng.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/date_picker/bridge/arkts_native_datepickerdialog_bridge.cpp",
+        "extender": "frameworks/core/components_ng/pattern/date_picker/bridge/date_picker_dialog_extender.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/date_picker/bridge/datepickerdialog_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/date_picker/bridge/datepickerdialog_dynamic_module.cpp",
+        "jsview_loader": "frameworks/bridge/declarative_frontend/jsview/js_datepicker.cpp",
+        "ui_context_dynamic": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "ui_context_static": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/UIContextImpl.ets",
+        "dialog_accessor": "frameworks/core/interfaces/native/implementation/dialog_extender_accessor.cpp",
+        "module_map": "adapter/ohos/osal/dynamic_module_helper.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/date_picker.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/datePicker.static.d.ets",
+        "ui_context": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "ui_context_static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/picker/",
+        "test/unittest/capi/accessors/date_picker_dialog_accessor_test.cpp",
+        "test/component_test/test_cases/components/popup_window/entry/src/main/ets/pages/date_picker_dialog/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-24"
+    },
+    {
+      "id": "TimePickerDialog",
+      "name": "TimePickerDialog",
+      "name_cn": "时间选择弹窗组件",
+      "kind": "component",
+      "category": "selector",
+      "keywords": [
+        "TimePickerDialog",
+        "时间选择弹窗",
+        "TimePickerDialogOptions",
+        "showTimePickerDialog",
+        "TimePickerDialogView",
+        "时间范围",
+        "useMilitaryTime",
+        "onAccept",
+        "onChange",
+        "timepicker"
+      ],
+      "aliases": [
+        "Time Picker Dialog",
+        "时间弹窗",
+        "时间选择器弹窗",
+        "TimeDialog"
+      ],
+      "kb": "docs/kb/components/selector/time_picker_dialog.md",
+      "spec_domain": "specs/05-ui-components/06-popup-components/07-time-picker-dialog",
+      "func_id": "05-06-07",
+      "spec_status": "active",
+      "source_paths": {
+        "dialog_view": "frameworks/core/components_ng/pattern/time_picker/timepicker_dialog_view.cpp",
+        "model": "frameworks/core/components_ng/pattern/time_picker/timepicker_model_ng.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/time_picker/bridge/arkts_native_timepickerdialog_bridge.cpp",
+        "extender": "frameworks/core/components_ng/pattern/time_picker/bridge/time_picker_dialog_extender.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/time_picker/bridge/timepickerdialog_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/time_picker/bridge/timepickerdialog_dynamic_module.cpp",
+        "jsview_loader": "frameworks/bridge/declarative_frontend/jsview/js_datepicker.cpp",
+        "ui_context_dynamic": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "ui_context_static": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/UIContextImpl.ets",
+        "dialog_accessor": "frameworks/core/interfaces/native/implementation/dialog_extender_accessor.cpp",
+        "module_map": "adapter/ohos/osal/dynamic_module_helper.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/time_picker.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/timePicker.static.d.ets",
+        "ui_context": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "ui_context_static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/time_picker/",
+        "test/unittest/capi/accessors/time_picker_dialog_accessor_test.cpp",
+        "test/component_test/test_cases/components/popup_window/entry/src/main/ets/pages/time_picker_dialog/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-24"
+    },
+    {
+      "id": "TextPickerDialog",
+      "name": "TextPickerDialog",
+      "name_cn": "文本选择弹窗组件",
+      "kind": "component",
+      "category": "selector",
+      "keywords": [
+        "TextPickerDialog",
+        "文本选择弹窗",
+        "TextPickerDialogOptions",
+        "TextPickerDialogOptionsExt",
+        "showTextPickerDialog",
+        "TextPickerDialogView",
+        "级联选择",
+        "canLoop",
+        "onAccept",
+        "onChange",
+        "textpicker"
+      ],
+      "aliases": [
+        "Text Picker Dialog",
+        "文本选择弹窗",
+        "文本选择器弹窗",
+        "TextDialog"
+      ],
+      "kb": "docs/kb/components/selector/text_picker_dialog.md",
+      "spec_domain": "specs/05-ui-components/06-popup-components/08-text-picker-dialog",
+      "func_id": "05-06-08",
+      "spec_status": "active",
+      "source_paths": {
+        "dialog_view": "frameworks/core/components_ng/pattern/text_picker/textpicker_dialog_view.cpp",
+        "model": "frameworks/core/components_ng/pattern/text_picker/textpicker_model_ng.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/text_picker/bridge/arkts_native_textpickerdialog_bridge.cpp",
+        "extender": "frameworks/core/components_ng/pattern/text_picker/bridge/text_picker_dialog_extender.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/text_picker/bridge/textpickerdialog_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/text_picker/bridge/textpickerdialog_dynamic_module.cpp",
+        "ui_context_dynamic": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "ui_context_static": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/UIContextImpl.ets",
+        "dialog_accessor": "frameworks/core/interfaces/native/implementation/dialog_extender_accessor.cpp",
+        "module_map": "adapter/ohos/osal/dynamic_module_helper.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_picker.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textPicker.static.d.ets",
+        "ui_context": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "ui_context_static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/text_picker/",
+        "test/unittest/capi/accessors/text_picker_dialog_accessor_test.cpp",
+        "test/component_test/test_cases/components/popup_window/entry/src/main/ets/pages/text_picker_dialog/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-24"
     },
     {
       "id": "UIPickerComponent",

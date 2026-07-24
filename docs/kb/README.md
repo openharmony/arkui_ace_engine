@@ -1,7 +1,7 @@
 # ArkUI KB
 
 > 更新时间：2026-07-24
-> 主题数：41
+> 主题数：42
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -56,6 +56,10 @@ docs/kb/
 | ImageAnimator | 图片动画组件 | `docs/kb/components/media/image_animator.md` | 已迁移，旧 KB 已移除 |
 | Video | 视频组件 | `docs/kb/components/media/video.md` | 新建（无旧 KB） |
 | DrawableDescriptor | 图片资源描述能力 | `docs/kb/capabilities/drawable_descriptor.md` | 新增 |
+| ImageLoading | 图片加载机制 | `docs/kb/capabilities/image-loading.md` | 新建 |
+| SVG | SVG 解析能力 | `docs/kb/capabilities/svg.md` | 已迁移，旧 KB 已移除 |
+| BackgroundImage | 背景图片通用属性 | `docs/kb/capabilities/background-image.md` | 新建 |
+| ImageAnalyzer | Image 分析能力 | `docs/kb/capabilities/image-analyzer.md` | 新建 |
 | Toggle | 开关组件 | `docs/kb/components/selector/toggle.md` | 已迁移，旧 KB 已移除 |
 | Navigation | 导航容器组件 | `docs/kb/components/container/navigation.md` | 新建 |
 | Tabs | 标签页容器组件 | `docs/kb/components/container/tabs.md` | 新建 |
@@ -66,6 +70,10 @@ docs/kb/
 | TextPicker | 文本选择器组件 | `docs/kb/components/selector/text_picker.md` | 已迁移，旧 KB 已移除 |
 | DatePicker | 日期选择器组件 | `docs/kb/components/selector/date_picker.md` | 已迁移，旧 KB 已移除 |
 | TimePicker | 时间选择器组件 | `docs/kb/components/selector/time_picker.md` | 已迁移，旧 KB 已移除 |
+| CalendarPickerDialog | 日历选择弹窗组件 | `docs/kb/components/selector/calendar_picker_dialog.md` | 新建 |
+| DatePickerDialog | 日期选择弹窗组件 | `docs/kb/components/selector/date_picker_dialog.md` | 新建 |
+| TimePickerDialog | 时间选择弹窗组件 | `docs/kb/components/selector/time_picker_dialog.md` | 新建 |
+| TextPickerDialog | 文本选择弹窗组件 | `docs/kb/components/selector/text_picker_dialog.md` | 新建 |
 | UIPickerComponent | UI选择器容器组件 | `docs/kb/components/selector/ui_picker_component.md` | 已迁移，旧 KB 已移除 |
 | AlphabetIndexer | 字母索引组件 | `docs/kb/components/data_display/alphabet_indexer.md` | 新建 |
 | Router | 路由管理 | `docs/kb/api/router.md` | 新建（不推荐，推荐 Navigation） |
