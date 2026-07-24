@@ -340,7 +340,7 @@ class JSTimePicker extends JSViewAbstract {
   }
 }
 
-class JSTimePickerDialog extends JSViewAbstract {
+class JSTimePickerDialog {
   static show(value) {
     getUINativeModule().timePickerDialog.show(value);
   }
