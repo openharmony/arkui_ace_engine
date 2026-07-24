@@ -992,7 +992,6 @@ HWTEST_F(OverlayManagerTestThreeNg, ShowFilterAnimationCheckMenuManagerFalse001,
     auto menuWrapperNode = FrameNode::CreateFrameNode(
         V2::MENU_WRAPPER_ETS_TAG, 3, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     overlayManager->ShowFilterAnimation(columnNode, menuWrapperNode);
-
 }
 
 /**
