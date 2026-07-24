@@ -42,7 +42,6 @@
 #include "core/components_ng/render/render_context.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace testing;
 using namespace testing::ext;

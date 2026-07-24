@@ -31,8 +31,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/common/force_split/force_split_utils.h"
 
-#include "core/components_ng/manager/navigation/navigation_manager.h"
-
 using namespace testing;
 using namespace testing::ext;
 

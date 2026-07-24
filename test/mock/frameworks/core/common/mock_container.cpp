@@ -24,7 +24,6 @@
 #include "base/view_data/ace_auto_fill_error.h"
 #include "base/view_data/hint_to_type_wrap.h"
 #include "core/components_ng/pattern/app_bar/app_bar_view.h"
-#include "core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace {
 namespace {

@@ -27,7 +27,6 @@
 #include "base/mousestyle/mouse_style.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_inner_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"

@@ -14,7 +14,6 @@
  */
 
 #include "navigation_test_min.h"
-#include "mock_navigation_route.h"
 
 void NavigationTestBase::SetUpTestCase() {}
 

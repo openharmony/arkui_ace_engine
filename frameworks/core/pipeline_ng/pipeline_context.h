@@ -45,6 +45,8 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/compatible_manager.h"
+#include "core/components_ng/manager/navigation/navigation_manager.h"
+#include "core/components_ng/pattern/stage/stage_manager.h"
 namespace OHOS::Ace::Kit {
 class UIContext;
 class UIContextImpl;
@@ -89,8 +91,6 @@ class PrivacySensitiveManager;
 class SafeAreaManager;
 class SelectOverlayManager;
 class SharedOverlayManager;
-class NavigationManager;
-class StageManager;
 class ToolbarManager;
 class UIExtensionManager;
 class AccessibilityManagerNG;
@@ -965,7 +965,10 @@ public:
         return memoryMgr_;
     }
 
-    const RefPtr<NavigationManager>& GetNavigationManager() const;
+    const RefPtr<NavigationManager>& GetNavigationManager() const
+    {
+        return navigationMgr_;
+    }
 
     const RefPtr<ForceSplitManager>& GetForceSplitManager() const;
 
@@ -1733,7 +1736,7 @@ private:
 
     RefPtr<AvoidInfoManager> avoidInfoMgr_;
     RefPtr<MemoryManager> memoryMgr_;
-    RefPtr<NavigationManager> navigationMgr_;
+    RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<ForceSplitManager> forceSplitMgr_;
     RefPtr<RecoverableManager> recoverableMgr_;
     RefPtr<FormVisibleManager> formVisibleMgr_;

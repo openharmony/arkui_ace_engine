@@ -25,7 +25,6 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"

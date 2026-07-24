@@ -38,7 +38,6 @@
 #include "frameworks/core/components_ng/pattern/overlay/accessibility_focus_paint_node_pattern.h"
 #include "frameworks/core/components_ng/pattern/web/transitional_node_info.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
 
 using namespace OHOS::Accessibility;
 using namespace OHOS::AccessibilityConfig;

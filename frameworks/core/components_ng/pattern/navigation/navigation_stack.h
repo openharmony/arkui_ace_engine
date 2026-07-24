@@ -28,7 +28,6 @@
 namespace OHOS::Ace::NG {
 using NavPathList = std::vector<std::pair<std::string, RefPtr<UINode>>>;
 class NavDestinationContext;
-struct NavdestinationRecoveryInfo;
 class RouteInfo : public virtual AceType {
     DECLARE_ACE_TYPE(NG::RouteInfo, AceType);
 public:

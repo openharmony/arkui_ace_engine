@@ -56,8 +56,6 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "base/log/ace_checker.h"
 #include "interfaces/inner_api/ace/ui_content_config.h"
-#include "core/components_ng/manager/navigation/navigation_manager.h"
-#include "core/components_ng/pattern/stage/stage_manager.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"

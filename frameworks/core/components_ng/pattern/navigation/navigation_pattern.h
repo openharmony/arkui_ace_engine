@@ -38,7 +38,6 @@
 
 namespace OHOS::Ace {
 class WindowManager;
-struct NavigateChangeInfo;
 }
 
 namespace OHOS::Ace::NG {
