@@ -1199,8 +1199,14 @@ HWTEST_F(SvgManagerTestNg, SvgDefs002, TestSize.Level1)
 {
     auto defs = SvgDefs::Create();
     EXPECT_NE(defs, nullptr);
-    SvgLengthScaleRule rule;
-    auto path = defs->AsPath(rule);
+    auto rect = SvgRect::Create();
+    rect->SetAttr("x", "10");
+    rect->SetAttr("y", "10");
+    rect->SetAttr("width", "50");
+    rect->SetAttr("height", "50");
+    defs->AppendChild(rect);
+    Size viewPort(200.0, 200.0);
+    auto path = defs->AsPath(viewPort);
     EXPECT_TRUE(path.IsValid());
 }
 
@@ -1241,6 +1247,12 @@ HWTEST_F(SvgManagerTestNg, SvgG003, TestSize.Level1)
 {
     auto g = SvgG::Create();
     EXPECT_NE(g, nullptr);
+    auto rect = SvgRect::Create();
+    rect->SetAttr("x", "10");
+    rect->SetAttr("y", "10");
+    rect->SetAttr("width", "50");
+    rect->SetAttr("height", "50");
+    g->AppendChild(rect);
     Size viewPort(200.0, 200.0);
     auto path = g->AsPath(viewPort);
     EXPECT_TRUE(path.IsValid());
@@ -1793,10 +1805,10 @@ HWTEST_F(SvgManagerTestNg, SvgAttributesParser009, TestSize.Level1)
  */
 HWTEST_F(SvgManagerTestNg, SvgAttributesParser010, TestSize.Level1)
 {
-    auto color = SvgAttributesParser::GetColorFromHexString("#FF0000");
+    auto color = SvgAttributesParser::GetColorFromHexString("FF0000FF");
     EXPECT_TRUE(color.GetValue() != Color::TRANSPARENT.GetValue());
 
-    color = SvgAttributesParser::GetColorFrom4HexString("#F00");
+    color = SvgAttributesParser::GetColorFrom4HexString("F00F");
     EXPECT_TRUE(color.GetValue() != Color::TRANSPARENT.GetValue());
 }
 
@@ -2111,7 +2123,7 @@ HWTEST_F(SvgManagerTestNg, SvgNode010, TestSize.Level1)
     rect->SetAttr("width", "100");
     rect->SetAttr("height", "50");
     Size viewPort(200.0, 200.0);
-    auto rsPath = rect->AsRSPath(viewPort);
+    auto rsPath = rect->AsPath(viewPort);
     EXPECT_TRUE(rsPath.IsValid());
 }
 

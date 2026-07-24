@@ -1449,7 +1449,7 @@ HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest002, TestSize.Level1)
     svgPolygon->polyAttr_.points = "abc";
     Size viewPort(100, 100);
     auto rsPath = svgPolygon->AsPath(viewPort);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_TRUE(rsPath.IsValid());
 }
 
 /**
@@ -1464,7 +1464,7 @@ HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest003, TestSize.Level1)
     svgPolygon->polyAttr_.points = "200 210";
     Size viewPort(100, 100);
     auto rsPath = svgPolygon->AsPath(viewPort);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_TRUE(rsPath.IsValid());
 }
 
 /**
@@ -1501,7 +1501,7 @@ HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest005, TestSize.Level1)
     SvgLengthScaleRule clipPathRule =
         svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     auto rsPath = svgPolygon->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_TRUE(rsPath.IsValid());
 }
 
 /**
@@ -1520,7 +1520,7 @@ HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest006, TestSize.Level1)
     SvgLengthScaleRule clipPathRule =
         svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     auto rsPath = svgPolygon->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_TRUE(rsPath.IsValid());
 }
 
 /**
@@ -1542,7 +1542,7 @@ HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest007, TestSize.Level1)
     SvgLengthScaleRule clipPathRule =
         svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     auto rsPath = svgPolygon->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_TRUE(rsPath.IsValid());
 }
 
 /**
@@ -1567,7 +1567,7 @@ HWTEST_F(SvgNodeTestNg, SvgPolygonPathTest008, TestSize.Level1)
     svgPolygon->path_ = rsPath;
     svgPolygon->lengthRule_ = clipPathRule;
     rsPath = svgPolygon->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_TRUE(rsPath.IsValid());
 }
 
 /**
@@ -1588,7 +1588,7 @@ HWTEST_F(SvgNodeTestNg, SvgCirclePathTest001, TestSize.Level1)
     svgCircle->path_ = rsPath;
     svgCircle->lengthRule_ = clipPathRule;
     rsPath = svgCircle->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_TRUE(rsPath.IsValid());
 }
 
 /**
@@ -1681,7 +1681,7 @@ HWTEST_F(SvgNodeTestNg, SvgLinePathTest001, TestSize.Level1)
     SvgLengthScaleRule clipPathRule =
         svgCoordinateSystemContext.BuildScaleRule(OHOS::Ace::NG::SvgLengthScaleUnit::USER_SPACE_ON_USE);
     auto rsPath = svgLine->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_TRUE(rsPath.IsValid());
 }
 
 /**
@@ -1705,7 +1705,7 @@ HWTEST_F(SvgNodeTestNg, SvgPathPathTest001, TestSize.Level1)
     auto rsPath = svgPath->AsPath(clipPathRule);
     svgPath->path_ = rsPath;
     rsPath = svgPath->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_TRUE(rsPath.IsValid());
 }
 
 /**
@@ -1726,7 +1726,7 @@ HWTEST_F(SvgNodeTestNg, SvgRectPathTest001, TestSize.Level1)
     svgRect->path_ = rsPath;
     svgRect->lengthRule_ = clipPathRule;
     rsPath = svgRect->AsPath(clipPathRule);
-    EXPECT_EQ(rsPath.IsValid(), false);
+    EXPECT_TRUE(rsPath.IsValid());
 }
 
 /**
