@@ -20,7 +20,6 @@
 #include "core/components/common/painter/rosen_svg_painter.h"
 
 namespace OHOS::Ace {
-constexpr int32_t DEFAULT_LENGTH = 50;
 void RosenSvgPainter::SetMask(RSCanvas* canvas) {}
 RSMatrix RosenSvgPainter::ToDrawingMatrix(const Matrix4& matrix4)
 {
@@ -30,7 +29,7 @@ RSMatrix RosenSvgPainter::ToDrawingMatrix(const Matrix4& matrix4)
 
 void RosenSvgPainter::StringToPoints(const char str[], std::vector<Testing::TestingPoint>& points)
 {
-    if (strlen(str) > 0 && strlen(str) == DEFAULT_LENGTH) {
+    if (strlen(str) > 0) {
         Testing::TestingPoint point;
         Testing::TestingPoint point1;
         Testing::TestingPoint point2;

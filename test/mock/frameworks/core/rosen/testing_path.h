@@ -65,16 +65,16 @@ public:
     {}
 
     virtual void AddRoundRect(const TestingRoundRect& roundRect,
-        TestingPathDirection dir = TestingPathDirection::CW_DIRECTION) {}
+        TestingPathDirection dir = TestingPathDirection::CW_DIRECTION) { isValid_ = true; }
 
     virtual void AddPath(const TestingPath& src) {}
 
-    virtual void MoveTo(float xs, float ys) {}
-    virtual void LineTo(float xs, float ys) {}
+    virtual void MoveTo(float xs, float ys) { isValid_ = true; }
+    virtual void LineTo(float xs, float ys) { isValid_ = true; }
     virtual void AddCircle(
         float dx, float dy, float radius, TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
-    {}
-    virtual void Reset() {}
+    { isValid_ = true; }
+    virtual void Reset() { isValid_ = false; }
     virtual void Close() {}
     virtual void QuadTo(float ctrlPtX, float ctrlPtY, float endPtX, float endPtY) {}
     virtual void ArcTo(float x1, float y1, float x2, float y2, float radius) {}
@@ -85,15 +85,17 @@ public:
     virtual void CubicTo(float ctrlPt1X, float ctrlPt1Y, float ctrlPt2X, float ctrlPt2Y, float endPtX, float endPtY) {}
 
     virtual void Offset(float dx, float dy) {}
-    virtual void AddPoly(const std::vector<TestingPoint>& points, int count, bool close) {}
+    virtual void AddPoly(const std::vector<TestingPoint>& points, int count, bool close) { isValid_ = true; }
     virtual bool Op(const TestingPath& path1, TestingPath& path2, TestingPathOp op)
     {
+        isValid_ = true;
         return true;
     }
-    virtual void AddOval(const TestingRect& oval, PathDirection dir = PathDirection::CW_DIRECTION) {}
+    virtual void AddOval(const TestingRect& oval, PathDirection dir = PathDirection::CW_DIRECTION) { isValid_ = true; }
 
     virtual bool BuildFromSVGString(const std::string& str)
     {
+        isValid_ = true;
         return true;
     }
 
@@ -105,7 +107,7 @@ public:
 
     virtual bool IsValid() const
     {
-        return false;
+        return isValid_;
     }
 
     virtual float GetLength(bool forceClosed) const
@@ -133,6 +135,9 @@ public:
     {
         return;
     }
+
+private:
+    bool isValid_ = false;
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_PATH_H

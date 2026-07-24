@@ -429,8 +429,8 @@ HWTEST_F(ParseTestThreeNg, SvgPatternTest002, TestSize.Level1)
     EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
     EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
-    EXPECT_CALL(rSCanvas, Save()).Times(3);
-    EXPECT_CALL(rSCanvas, Restore());
+    EXPECT_CALL(rSCanvas, Save()).Times(4);
+    EXPECT_CALL(rSCanvas, Restore()).Times(2);
     EXPECT_CALL(rSCanvas, ClipRect(_, _, _)).Times(2);
     svgDom->DrawImage(rSCanvas, ImageFit::CONTAIN, size);
 }
