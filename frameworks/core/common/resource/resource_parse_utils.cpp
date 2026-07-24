@@ -318,7 +318,7 @@ void ResourceParseUtilsBase::InvertColorWithResource(const RefPtr<ResourceObject
 }
 
 bool ResourceParseUtilsBase::ParseResColorWithName(const RefPtr<ResourceObject>& resObj, Color& result,
-    RefPtr<ResourceAdapter>& resourceAdapter, const ColorMode& colorMode)
+    RefPtr<ResourceAdapter>& resourceAdapter, const ColorMode& colorMode, bool adaptMaterial)
 {
     CHECK_NULL_RETURN(resourceAdapter, false);
     auto params = resObj->GetParams();
@@ -326,6 +326,9 @@ bool ResourceParseUtilsBase::ParseResColorWithName(const RefPtr<ResourceObject>&
         return false;
     }
     result = resourceAdapter->GetColorByName(params[0].value.value());
+    if (adaptMaterial) {
+        result.FillColorPlaceholderIfNeed(params[0].value.value());
+    }
     InvertColorWithResource(resObj, result, colorMode);
     return true;
 }
@@ -355,7 +358,7 @@ bool ResourceParseUtilsBase::ParseResColor(const RefPtr<ResourceObject>& resObj,
     CHECK_NULL_RETURN(resourceAdapter, false);
     auto resId = resObj->GetId();
     if (resId == -1) {
-        return ParseResColorWithName(resObj, result, resourceAdapter, colorMode);
+        return ParseResColorWithName(resObj, result, resourceAdapter, colorMode, adaptMaterial);
     }
 
     auto type = resObj->GetType();
