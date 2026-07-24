@@ -7467,6 +7467,9 @@ void RosenRenderContext::OnTransitionOutFinish()
     }
     if (breakPointChild->RemoveImmediately()) {
         breakPointChild->OnRemoveFromParent(false);
+        if (breakPointParent->NeedClearDisappearingChildrenRecursively()) {
+            breakPointChild->ClearDisappearingChildren();
+        }
         // remove breakPoint
         if (breakPointParent->RemoveDisappearingChild(breakPointChild)) {
             // keep mixed list in sync for delayed-remove path

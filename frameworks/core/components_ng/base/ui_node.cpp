@@ -189,6 +189,25 @@ void UINode::OnDelete()
     children_.clear();
 }
 
+// Recurively clean up child nodes in scenariors where Repeat is combined with animations
+void UINode::ClearDisappearingChildren()
+{
+    // Recursively clean up child nodes
+    for (const auto& child : GetChildren(true)) {
+        CHECK_NULL_CONTINUE(child);
+        child->ClearDisappearingChildren();
+    }
+    // Recursively clean up disappearingChildren
+    for (const auto& item : disappearingChildren_) {
+        const auto& child = std::get<0>(item);
+        CHECK_NULL_CONTINUE(child);
+        child->ClearDisappearingChildren();
+        child->SetActive(false);
+        child->isDisappearing_ = false;
+    }
+    disappearingChildren_.clear();
+}
+
 void UINode::AttachContext(PipelineContext* context, bool recursive)
 {
     CHECK_NULL_VOID(context);
