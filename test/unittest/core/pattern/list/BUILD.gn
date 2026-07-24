@@ -13,53 +13,64 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("list_test_ng") {
-  module_name = "ScrollingSet-ListAndListItemAndListItemGroup"
-  type = "new"
+test_sources = [
+  "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+  "$ace_root/frameworks/bridge/common/utils/utils.cpp",
+  "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
+  "$ace_root/frameworks/core/components_ng/syntax/repeat_model_ng.cpp",
+  "$ace_root/frameworks/core/components_ng/syntax/repeat_node.cpp",
+  "list_accessibility_test_ng.cpp",
+  "list_algorithm_test_ng.cpp",
+  "list_attr_test_ng.cpp",
+  "list_common_test_ng.cpp",
+  "list_controller_test_ng.cpp",
+  "list_event_test_ng.cpp",
+  "list_generated_test_ng.cpp",
+  "list_group_algorithm_test_ng.cpp",
+  "list_group_layout_test_ng.cpp",
+  "list_height_test_ng.cpp",
+  "list_item_accessibility_test_ng.cpp",
+  "list_item_group_model_test_ng.cpp",
+  "list_item_group_pattern_test_ng.cpp",
+  "list_item_manager_test_ng.cpp",
+  "list_item_model_test_ng.cpp",
+  "list_item_pattern_test_ng.cpp",
+  "list_lanes_layout_test_ng.cpp",
+  "list_layout_test_ng.cpp",
+  "list_model_test_ng.cpp",
+  "list_pattern_test_ng.cpp",
+  "list_pattern_test_ng_two.cpp",
+  "list_position_map_test_ng.cpp",
+  "list_scroller_event_test_ng.cpp",
+  "list_scroller_test_ng.cpp",
+  "list_scroller_visible_content_change_test_ng.cpp",
+  "list_scroller_visible_content_test_ng.cpp",
+  "list_static_test_ng.cpp",
+  "list_swipe_test_ng.cpp",
+  "list_sync_load_test_ng.cpp",
+  "list_content_clip_test.cpp",
+  "list_test_ng.cpp",
+]
 
-  sources = [
-    "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
-    "$ace_root/frameworks/bridge/common/utils/utils.cpp",
-    "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
-    "$ace_root/frameworks/core/components_ng/syntax/repeat_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/syntax/repeat_node.cpp",
-    "list_accessibility_test_ng.cpp",
-    "list_algorithm_test_ng.cpp",
-    "list_attr_test_ng.cpp",
-    "list_common_test_ng.cpp",
-    "list_controller_test_ng.cpp",
-    "list_event_test_ng.cpp",
-    "list_generated_test_ng.cpp",
-    "list_group_algorithm_test_ng.cpp",
-    "list_group_layout_test_ng.cpp",
-    "list_height_test_ng.cpp",
-    "list_item_accessibility_test_ng.cpp",
-    "list_item_group_model_test_ng.cpp",
-    "list_item_group_pattern_test_ng.cpp",
-    "list_item_manager_test_ng.cpp",
-    "list_item_model_test_ng.cpp",
-    "list_item_pattern_test_ng.cpp",
-    "list_lanes_layout_test_ng.cpp",
-    "list_layout_test_ng.cpp",
-    "list_model_test_ng.cpp",
-    "list_pattern_test_ng.cpp",
-    "list_pattern_test_ng_two.cpp",
-    "list_position_map_test_ng.cpp",
-    "list_scroller_event_test_ng.cpp",
-    "list_scroller_test_ng.cpp",
-    "list_scroller_visible_content_change_test_ng.cpp",
-    "list_scroller_visible_content_test_ng.cpp",
-    "list_static_test_ng.cpp",
-    "list_swipe_test_ng.cpp",
-    "list_sync_load_test_ng.cpp",
-    "list_content_clip_test.cpp",
-    "list_test_ng.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "list_test_core.cpp" ]
-  } else {
+if (is_host_product) {
+  ace_unittest("list_test_ng") {
+    type = "host_components"
+    module_name = "ScrollingSet-ListAndListItemAndListItemGroup"
+    sources = test_sources
     sources += [ "list_test_core.cpp" ]
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("list_test_ng") {
+    module_name = "ScrollingSet-ListAndListItemAndListItemGroup"
+    type = "new"
+    sources = test_sources
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [ "list_test_core.cpp" ]
+    } else {
+      sources += [ "list_test_core.cpp" ]
+    }
   }
 }
