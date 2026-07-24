@@ -103,6 +103,10 @@ constexpr uint32_t TWINKLING_INTERVAL_MS = 500;
 constexpr uint32_t RECORD_MAX_LENGTH = 20;
 constexpr uint32_t OBSCURE_SHOW_TICKS = 1;
 constexpr int32_t FIND_TEXT_ZERO_INDEX = 1;
+constexpr char SEARCH_FIELD_ETS_TAG[] = "SearchField";
+constexpr char SELECT_ETS_TAG[] = "Select";
+constexpr char TEXTAREA_ETS_TAG[] = "TextArea";
+constexpr char TEXTINPUT_ETS_TAG[] = "TextInput";
 constexpr char16_t OBSCURING_CHARACTER = u'•';
 constexpr char16_t OBSCURING_CHARACTER_FOR_AR = u'*';
 constexpr std::string_view NEWLINE = "\n";
@@ -565,15 +569,15 @@ void TextFieldPattern::ReportRequestKeyboardEvent(const RefPtr<FrameNode>& frame
 #ifndef CROSS_PLATFORM
     auto value = JsonUtil::CreateSharedPtrJson();
     CHECK_NULL_VOID(value);
-    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+    if (frameNode->GetTag() == TEXTINPUT_ETS_TAG) {
         value->Put("event", "TextInput.requestKeyboard");
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(),
             "event", value->ToString(), ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
-    } else if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+    } else if (frameNode->GetTag() == TEXTAREA_ETS_TAG) {
         value->Put("event", "TextArea.requestKeyboard");
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(),
             "event", value->ToString(), ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
-    } else if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+    } else if (frameNode->GetTag() == SEARCH_FIELD_ETS_TAG) {
         value->Put("event", "Search.requestKeyboard");
         UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameNode->GetId(),
             "event", value->ToString(), ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
@@ -707,20 +711,20 @@ void TextFieldPattern::HandleCopyOrCutCommand(const std::string& cmd, const RefP
 {
     if (cmd == "copy") {
         HandleOnCopy();
-        if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+        if (frameNode->GetTag() == TEXTINPUT_ETS_TAG) {
             ReportCommandResult(frameNode->GetId(), "TextInput.onCopyComplete");
-        } else if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+        } else if (frameNode->GetTag() == SEARCH_FIELD_ETS_TAG) {
             ReportCommandResult(frameNode->GetId(), "Search.onCopyComplete");
-        } else if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        } else if (frameNode->GetTag() == TEXTAREA_ETS_TAG) {
             ReportCommandResult(frameNode->GetId(), "TextArea.onCopyComplete");
         }
     } else if (cmd == "cut") {
         HandleOnCut();
-        if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+        if (frameNode->GetTag() == TEXTINPUT_ETS_TAG) {
             ReportCommandResult(frameNode->GetId(), "TextInput.onCutComplete");
-        } else if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+        } else if (frameNode->GetTag() == SEARCH_FIELD_ETS_TAG) {
             ReportCommandResult(frameNode->GetId(), "Search.onCutComplete");
-        } else if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        } else if (frameNode->GetTag() == TEXTAREA_ETS_TAG) {
             ReportCommandResult(frameNode->GetId(), "TextArea.onCutComplete");
         }
     }
@@ -6419,7 +6423,7 @@ void TextFieldPattern::reportOnDidInsertEvent()
     CHECK_NULL_VOID(pipeline);
     auto statisticEventReporter = pipeline->GetStatisticEventReporter();
     CHECK_NULL_VOID(statisticEventReporter);
-    if (eventHub->HasOnDidInsertValueEvent() && host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
+    if (eventHub->HasOnDidInsertValueEvent() && host->GetHostTag() == SEARCH_FIELD_ETS_TAG){
             statisticEventReporter->SendEvent(StatisticEventType::SEARCH_ONDIDINSERT);
     }
 }
@@ -7989,7 +7993,7 @@ void TextFieldPattern::reportOnWillDeleteEvent()
     CHECK_NULL_VOID(pipeline);
     auto statisticEventReporter = pipeline->GetStatisticEventReporter();
     CHECK_NULL_VOID(statisticEventReporter);
-    if (eventHub->HasOnWillDeleteValueEvent() && host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
+    if (eventHub->HasOnWillDeleteValueEvent() && host->GetHostTag() == SEARCH_FIELD_ETS_TAG){
             statisticEventReporter->SendEvent(StatisticEventType::SEARCH_ONWILLDELETE);
     }
 }
@@ -8019,7 +8023,7 @@ void TextFieldPattern::reportOnDidDeleteEvent()
     CHECK_NULL_VOID(pipeline);
     auto statisticEventReporter = pipeline->GetStatisticEventReporter();
     CHECK_NULL_VOID(statisticEventReporter);
-    if (eventHub->HasOnDidDeleteValueEvent() && host->GetHostTag() == V2::SEARCH_Field_ETS_TAG){
+    if (eventHub->HasOnDidDeleteValueEvent() && host->GetHostTag() == SEARCH_FIELD_ETS_TAG){
             statisticEventReporter->SendEvent(StatisticEventType::SEARCH_ONDIDDELETE);
     }
 }
@@ -11055,7 +11059,7 @@ void TextFieldPattern::UnitResponseKeyEvent()
     CHECK_NULL_VOID(unitArea);
     auto frameNode = unitArea->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == V2::SELECT_ETS_TAG) {
+    if (frameNode->GetTag() == SELECT_ETS_TAG) {
         auto customModifier = NG::NodeModifier::GetSelectCustomModifier();
         CHECK_NULL_VOID(customModifier);
         customModifier->showSelectMenu(frameNode);
@@ -13327,12 +13331,12 @@ void TextFieldPattern::OnReportPasteEvent(const RefPtr<FrameNode>& frameNode)
 {
 #ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+    if (frameNode->GetTag() == TEXTINPUT_ETS_TAG) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "TextInput.onPasteComplete",
             ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextInput reportComponentChangeEvent onPasteComplete",
             frameNode->GetId());
-    } else if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
+    } else if (frameNode->GetTag() == SEARCH_FIELD_ETS_TAG) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onPasteComplete",
             ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] Search reportComponentChangeEvent onPasteComplete",
@@ -13345,7 +13349,7 @@ void TextFieldPattern::OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode)
 {
 #ifndef CROSS_PLATFORM
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+    if (frameNode->GetTag() == TEXTINPUT_ETS_TAG) {
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "TextInput.onSubmitComplete",
             ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextInput reportComponentChangeEvent onSubmitComplete",

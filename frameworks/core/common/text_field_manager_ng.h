@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_MANAGER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_MANAGER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_TEXT_FIELD_MANAGER_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_TEXT_FIELD_MANAGER_NG_H
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -50,7 +50,7 @@ enum class CustomKeyboardContinueFeature {
 
 using FillContentMap = std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>;
 
-class ACE_EXPORT TextFieldManagerNG : public ManagerInterface {
+class ACE_FORCE_EXPORT TextFieldManagerNG : public ManagerInterface {
     DECLARE_ACE_TYPE(TextFieldManagerNG, ManagerInterface);
 
 public:
@@ -73,9 +73,9 @@ public:
         optionalPosition_ = std::nullopt;
     }
 
-    ACE_FORCE_EXPORT RectF GetFocusedNodeCaretRect();
+    RectF GetFocusedNodeCaretRect();
     
-    ACE_FORCE_EXPORT void TriggerAvoidOnCaretChange();
+    void TriggerAvoidOnCaretChange();
 
     void AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField);
 
@@ -92,7 +92,7 @@ public:
         return onFocusTextField_;
     }
 
-    ACE_FORCE_EXPORT void SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField);
+    void SetOnFocusTextField(const WeakPtr<Pattern>& onFocusTextField);
 
     void GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField);
 
@@ -101,16 +101,16 @@ public:
         return isScrollableChild_;
     }
 
-    ACE_FORCE_EXPORT bool ScrollTextFieldToSafeArea();
+    bool ScrollTextFieldToSafeArea();
 
     void ClearOnFocusTextField();
 
-    ACE_FORCE_EXPORT void ClearOnFocusTextField(int32_t id);
+    void ClearOnFocusTextField(int32_t id);
 
     bool ResetSlidingPanelParentHeight();
 
     bool UpdatePanelForVirtualKeyboard(double offsetY, double fullHeight);
-    ACE_FORCE_EXPORT void SetHeight(float height);
+    void SetHeight(float height);
 
     float GetHeight() const
     {
@@ -258,7 +258,8 @@ public:
         return clickPositionOffset_;
     }
     
-    void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard, const std::function<void()>&& callback);
+    void AddAvoidKeyboardCallback(int32_t id, bool isCustomKeyboard,
+        const std::function<void()>&& callback);
 
     void RemoveAvoidKeyboardCallback(int32_t id)
     {
@@ -272,9 +273,10 @@ public:
     void AddTextFieldInfo(const TextFieldInfo& textFieldInfo);
     void RemoveTextFieldInfo(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
     void UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo);
-    bool HasAutoFillPasswordNodeInContainer(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
-    ACE_FORCE_EXPORT bool NeedCloseKeyboard();
-    ACE_FORCE_EXPORT void ProcessCustomKeyboard(bool matched, int32_t nodeId);
+    bool HasAutoFillPasswordNodeInContainer(const int32_t& autoFillContainerNodeId,
+        const int32_t& nodeId);
+    bool NeedCloseKeyboard();
+    void ProcessCustomKeyboard(bool matched, int32_t nodeId);
     void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension);
 
     int32_t GetFocusFieldOrientation() const
@@ -428,4 +430,4 @@ private:
 
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_MANAGER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_TEXT_FIELD_MANAGER_NG_H

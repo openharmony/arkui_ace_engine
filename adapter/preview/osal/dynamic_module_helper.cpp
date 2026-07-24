@@ -114,7 +114,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Radio", "radio"},
         { "Slider", "slider" },
         { "FolderStack", "folderstack" },
-        { "Search", "search" },
+        { "Search", "textfield" },
         { "Sheet", "sheet" },
         { "TimePicker", "timepicker" },
         { "ImageSpan", "span" },

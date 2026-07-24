@@ -22,7 +22,7 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 
 namespace OHOS::Ace::NG {

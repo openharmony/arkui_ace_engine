@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 
 #include <algorithm>
@@ -24,19 +24,34 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/common/ime/text_input_type.h"
+#include "core/common/container.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/text/text_base.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/sheet_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension RESERVE_BOTTOM_HEIGHT = 24.0_vp;
 constexpr int32_t MAX_FILL_CONTENT_SIZE = 5;
-const char SEARCH_ETS_TAG[] = "Search";
+constexpr char NAVBAR_ETS_TAG[] = "NavBar";
+constexpr char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
+constexpr char NAVIGATION_VIEW_ETS_TAG[] = "Navigation";
+constexpr char PANEL_ETS_TAG[] = "Panel";
+constexpr char SEARCH_FIELD_ETS_TAG[] = "SearchField";
+constexpr char SHEET_PAGE_TAG[] = "SheetPage";
+constexpr char SHEET_WRAPPER_TAG[] = "SheetWrapper";
+constexpr char TEXTAREA_ETS_TAG[] = "TextArea";
+constexpr char TEXTINPUT_ETS_TAG[] = "TextInput";
+
+bool IsTextCategoryComponent(const std::string& frameTag)
+{
+    return frameTag == TEXTAREA_ETS_TAG || frameTag == TEXTINPUT_ETS_TAG ||
+        frameTag == V2::SEARCH_ETS_TAG || frameTag == SEARCH_FIELD_ETS_TAG;
+}
 } // namespace
 
 void TextFieldManagerNG::ClearOnFocusTextField()
@@ -102,17 +117,10 @@ bool TextFieldManagerNG::OnBackPressed()
 int32_t TextFieldManagerNG::GetSessionId(const RefPtr<NG::FrameNode>& host)
 {
     CHECK_NULL_RETURN(host, -1);
-    auto textFieldPattern = host->GetPattern<TextFieldPattern>();
-    if (textFieldPattern) {
-        return textFieldPattern->GetSessionId();
-    }
-    if (host->GetTag() == SEARCH_ETS_TAG) {
-        auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-        CHECK_NULL_RETURN(textFieldFrameNode, -1);
-        auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-        if (textFieldPattern) {
-            return textFieldPattern->GetSessionId();
-        }
+    if (IsTextCategoryComponent(host->GetTag())) {
+        auto textInputCustomModifier = NodeModifier::GetTextInputCustomModifier();
+        CHECK_NULL_RETURN(textInputCustomModifier, -1);
+        return textInputCustomModifier->getSessionId(host);
     }
     return -1;
 }
@@ -130,7 +138,7 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
         auto parent = host->GetAncestorNodeOfFrame(true);
         while (parent) {
             // when Panel and SheetPage is out of screen, no need to update position_ for keyboard avoidance
-            if (parent->GetTag() == V2::PANEL_ETS_TAG || parent->GetTag() == V2::SHEET_PAGE_TAG) {
+            if (parent->GetTag() == PANEL_ETS_TAG || parent->GetTag() == SHEET_PAGE_TAG) {
                 return;
             }
             parent = parent->GetAncestorNodeOfFrame(true);
@@ -164,9 +172,13 @@ void TextFieldManagerNG::TriggerCaretInfoUpdateOnScaleChange()
 {
     auto pattern = onFocusTextField_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_VOID(textFieldPattern);
-    textFieldPattern->UpdateCaretInfoToController(true);
+    auto frameNode = pattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    if (IsTextCategoryComponent(frameNode->GetTag())) {
+        auto textInputCustomModifier = NodeModifier::GetTextInputCustomModifier();
+        CHECK_NULL_VOID(textInputCustomModifier);
+        textInputCustomModifier->updateCaretInfoToController(pattern, true);
+    }
 }
 
 RectF TextFieldManagerNG::GetFocusedNodeCaretRect()
@@ -186,23 +198,13 @@ void TextFieldManagerNG::TriggerCustomKeyboardAvoid()
     CHECK_NULL_VOID(UsingCustomKeyboardAvoid());
     auto pattern = onFocusTextField_.Upgrade();
     CHECK_NULL_VOID(pattern);
-    auto curPattern = DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_VOID(curPattern);
-    if (!curPattern->GetIsCustomKeyboardAttached()) {
-        return;
+    auto frameNode = pattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    if (IsTextCategoryComponent(frameNode->GetTag())) {
+        auto textInputCustomModifier = NodeModifier::GetTextInputCustomModifier();
+        CHECK_NULL_VOID(textInputCustomModifier);
+        textInputCustomModifier->triggerCustomKeyboardAvoid(pattern);
     }
-    auto caretRectWithScale = curPattern->GetCaretRect(false);
-    auto caretHeight = caretRectWithScale.Height();
-    auto safeHeight = caretHeight + caretRectWithScale.GetY();
-    if (caretRectWithScale.GetY() > caretHeight) {
-        safeHeight = caretHeight;
-    }
-    auto keyboardOverLay = curPattern->GetKeyboardOverLay();
-    CHECK_NULL_VOID(keyboardOverLay);
-    auto host = curPattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto nodeId = host->GetId();
-    keyboardOverLay->TriggerCustomKeyboardAvoid(nodeId, safeHeight);
 }
 
 void TextFieldManagerNG::TriggerAvoidOnCaretChange()
@@ -421,7 +423,7 @@ void TextFieldManagerNG::AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField
     CHECK_NULL_VOID(textField);
     auto parent = textField->GetAncestorNodeOfFrame(true);
     while (parent) {
-        if (parent->GetHostTag() == V2::SHEET_PAGE_TAG) {
+        if (parent->GetHostTag() == SHEET_PAGE_TAG) {
             break;
         }
         parent = parent->GetAncestorNodeOfFrame(true);
@@ -440,7 +442,7 @@ RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textF
     RefPtr<FrameNode> ret = nullptr;
     while (parent) {
         // when the sheet showed in navdestination, sheet replaced navdestination to do avoid keyboard.
-        if (parent->GetHostTag() == V2::SHEET_WRAPPER_TAG) {
+        if (parent->GetHostTag() == SHEET_WRAPPER_TAG) {
             auto sheetNode = parent->GetChildAtIndex(0);
             CHECK_NULL_RETURN(sheetNode, nullptr);
             return AceType::DynamicCast<FrameNode>(sheetNode);
@@ -448,8 +450,8 @@ RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textF
         if (parent->GetHostTag() == V2::DIALOG_ETS_TAG) {
             return AceType::DynamicCast<FrameNode>(parent);
         }
-        if (parent->GetHostTag() == V2::NAVDESTINATION_VIEW_ETS_TAG ||
-            parent->GetHostTag() == V2::NAVBAR_ETS_TAG) {
+        if (parent->GetHostTag() == NAVDESTINATION_VIEW_ETS_TAG ||
+            parent->GetHostTag() == NAVBAR_ETS_TAG) {
                 ret = parent;
                 break;
             }
@@ -461,7 +463,7 @@ RefPtr<FrameNode> TextFieldManagerNG::FindNavNode(const RefPtr<FrameNode>& textF
     // if can't, recursively find the ancestor navigation can expandKeyboard.
     auto navigationNode = ret->GetAncestorNodeOfFrame(true);
     while (navigationNode) {
-        if (navigationNode->GetHostTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+        if (navigationNode->GetHostTag() == NAVIGATION_VIEW_ETS_TAG) {
             break;
         }
         navigationNode = navigationNode->GetAncestorNodeOfFrame(true);

@@ -86,6 +86,8 @@ constexpr Dimension MOUSE_WIDTH = 16.0_vp;
 constexpr Dimension MOUSE_HEIGHT = 24.0_vp;
 constexpr Dimension TIPS_MOUSE_SPACE = 8.0_vp;
 constexpr Dimension MAX_TIP_WIDTH = 480.0_vp;
+constexpr char TEXTAREA_ETS_TAG[] = "TextArea";
+constexpr char TEXTINPUT_ETS_TAG[] = "TextInput";
 
 #if defined(ENABLE_ROSEN_BACKEND)
 constexpr float SHAPE_SPACING = 0.1f;
@@ -2351,7 +2353,7 @@ void BubbleLayoutAlgorithm::UpdateTouchRegion()
 
 void BubbleLayoutAlgorithm::InitCaretTargetSizeAndPosition()
 {
-    static std::vector<std::string> TEXT_STATES = { V2::TEXTAREA_ETS_TAG, V2::TEXTINPUT_ETS_TAG,
+    static std::vector<std::string> TEXT_STATES = { TEXTAREA_ETS_TAG, TEXTINPUT_ETS_TAG,
         V2::RICH_EDITOR_ETS_TAG, V2::SEARCH_ETS_TAG };
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);

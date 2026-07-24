@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
+#include "core/components_ng/pattern/text/one_step_drag_controller.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace::NG {

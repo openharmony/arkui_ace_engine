@@ -53,7 +53,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/property/accessibility_property_helper.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"

@@ -76,7 +76,8 @@ public:
     std::vector<RectF> GetPlaceholderRects() const;
     OffsetF ComputeCursorOffset(int32_t index, float& selectLineHeight, bool downStreamFirst = false,
             bool needLineHighest = true) const;
-    OffsetF ComputeCursorInfoByClick(int32_t index, float& selectLineHeight, const OffsetF& lastTouchOffset) const;
+    OffsetF ComputeCursorInfoByClick(
+        int32_t index, float& selectLineHeight, const OffsetF& lastTouchOffset) const;
     bool IsSelectLineHeadAndUseLeadingMargin(int32_t start) const;
     void LayoutParagraphs(float maxWidth);
 
@@ -93,7 +94,8 @@ public:
     // add for text
     int32_t GetGlyphIndexByCoordinate(Offset offset, bool isSelectionPos = false) const;
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) const;
-    bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) const;
+    bool CalcCaretMetricsByPosition(
+        int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) const;
     float GetMaxIntrinsicWidth() const;
     bool DidExceedMaxLines() const;
     float GetLongestLine() const;
@@ -106,8 +108,8 @@ public:
     void GetPaintRegion(RectF& boundsRect, float x, float y) const;
     void PaintAllLeadingMarginSpan(DrawingContext& drawingContext,
         const OffsetT<float>& offset);
-    void PaintLeadingMarginSpan(const ParagraphManager::ParagraphInfo& paragraphInfo, const OffsetT<float>& offset,
-        DrawingContext& drawingContext);
+    void PaintLeadingMarginSpan(const ParagraphManager::ParagraphInfo& paragraphInfo,
+        const OffsetT<float>& offset, DrawingContext& drawingContext);
     std::vector<TextBox> GetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle);
     std::pair<size_t, size_t> GetEllipsisTextRange();

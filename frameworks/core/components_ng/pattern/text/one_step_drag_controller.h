@@ -27,7 +27,7 @@ const TagFilter IMAGE_TAG_FILTER = [](const std::string& tag) { return tag == V2
 const TagFilter PLACEHOLDER_TAG_FILTER = [](const std::string& tag) { return tag == V2::PLACEHOLDER_SPAN_ETS_TAG; };
 }
 
-class OneStepDragParam {
+class ACE_FORCE_EXPORT OneStepDragParam {
 public:
     OneStepDragParam(const Builder& builder, const SelectMenuParam& selectMenuParam,
         TextSpanType spanType, TagFilter tagFilter);
@@ -54,7 +54,7 @@ protected:
     std::queue<WeakPtr<FrameNode>> dirtyFrameNodes;
 };
 
-class ImageOneStepDragParam : public OneStepDragParam {
+class ACE_FORCE_EXPORT ImageOneStepDragParam : public OneStepDragParam {
 public:
     ImageOneStepDragParam(const Builder& builder, const SelectMenuParam& selectMenuParam)
         : OneStepDragParam(builder, selectMenuParam, TextSpanType::IMAGE, IMAGE_TAG_FILTER) {}
@@ -65,7 +65,7 @@ private:
     float CalcImageScale(const RefPtr<ImageSpanNode>& imageNode) const;
 };
 
-class PlaceholderOneStepDragParam : public OneStepDragParam {
+class ACE_FORCE_EXPORT PlaceholderOneStepDragParam : public OneStepDragParam {
 public:
     PlaceholderOneStepDragParam(const Builder& builder, const SelectMenuParam& selectMenuParam)
         : OneStepDragParam(builder, selectMenuParam, TextSpanType::BUILDER, PLACEHOLDER_TAG_FILTER) {}
@@ -74,7 +74,7 @@ public:
     void EnableOneStepDrag(const RefPtr<FrameNode>& frameNode) override;
 };
 
-class OneStepDragController {
+class ACE_FORCE_EXPORT OneStepDragController {
 public:
     OneStepDragController(const WeakPtr<TextPattern>& pattern) : pattern_(pattern) {}
     static std::string GetJsonRange(TextSpanType spanType, const RefPtr<FrameNode>& frameNode);

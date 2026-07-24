@@ -55,7 +55,7 @@
 #include "core/components_ng/pattern/text/span/span_group_hash_calculator.h"
 #include "core/components_ng/pattern/text/text_selection_child.h"
 #include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/text/html_utils.h"
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/text/text_emoji_processor.h"
@@ -65,7 +65,7 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-#include "core/components_ng/pattern/rich_editor/one_step_drag_controller.h"
+#include "core/components_ng/pattern/text/one_step_drag_controller.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 
 namespace OHOS::Ace::NG {

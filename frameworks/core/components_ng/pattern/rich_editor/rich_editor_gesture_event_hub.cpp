@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_gesture_event_hub.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.h"
 

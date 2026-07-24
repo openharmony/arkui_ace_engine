@@ -25,7 +25,7 @@
 #include "core/common/ime/text_input_action.h"
 #include "core/common/ime/text_input_client.h"
 #include "core/common/ime/text_input_connection.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_accessibility_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_controller.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
@@ -33,7 +33,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_select_overlay.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text/selection_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -319,7 +319,7 @@ public:
     bool NotUpdateCaretInPreview(int32_t caret, const PreviewTextRecord& record);
     int32_t SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range) override;
     bool SetPreviewTextForDelete(int32_t oriLength, bool isBackward, bool isByIME);
-    const PreviewTextInfo GetPreviewTextInfo() const;
+    const Ace::PreviewTextInfo GetPreviewTextInfo() const;
     void FinishTextPreview() override;
     void ReceivePreviewTextStyle(const std::string& style) override;
     int32_t CheckPreviewTextValidate(const std::string& previewTextValue, const PreviewRange range) override;

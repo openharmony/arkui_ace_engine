@@ -24,7 +24,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "test/mock/frameworks/core/common/mock_data_detector_mgr.h"
 #include "test/mock/frameworks/core/rosen/mock_canvas.h"
