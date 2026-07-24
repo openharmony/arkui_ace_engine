@@ -29,6 +29,7 @@ using namespace testing::ext;
 namespace {
 std::string g_info = "info";
 int32_t g_code = 5;
+int32_t g_customCode = 10;
 } // namespace
 
 class WebResourceErrorAccessorTest : public AccessorTestBase<GENERATED_ArkUIWebResourceErrorAccessor,
@@ -37,7 +38,7 @@ public:
     void SetUp() override
     {
         AccessorTestBase::SetUp();
-        peer_->handler = Referenced::MakeRefPtr<WebError>(g_info, g_code);
+        peer_->handler = Referenced::MakeRefPtr<WebError>(g_info, g_code, g_customCode);
         ASSERT_NE(peer_->handler, nullptr);
     }
 };
@@ -65,6 +66,17 @@ HWTEST_F(WebResourceErrorAccessorTest, getErrorInfoTest, TestSize.Level1)
     EXPECT_EQ(Converter::Convert<std::string>(info), g_info);
     info = accessor_->getErrorInfo(nullptr);
     EXPECT_EQ(Converter::Convert<std::string>(info), "");
+}
+
+/**
+ * @tc.name: getCustomErrorCodeTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebResourceErrorAccessorTest, getCustomErrorCodeTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getCustomErrorCode, nullptr);
+    EXPECT_EQ(g_customCode, Converter::Convert<int32_t>(accessor_->getCustomErrorCode(peer_)));
 }
 
 } // namespace OHOS::Ace::NG

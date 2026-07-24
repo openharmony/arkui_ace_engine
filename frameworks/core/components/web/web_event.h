@@ -166,6 +166,8 @@ class ACE_EXPORT WebError : public AceType {
 
 public:
     WebError(const std::string& info, int32_t code) : info_(info), code_(code) {}
+    WebError(const std::string& info, int32_t code, int32_t customCode)
+        : info_(info), code_(code), customCode_(customCode) {}
     ~WebError() = default;
 
     const std::string& GetInfo() const
@@ -178,9 +180,15 @@ public:
         return code_;
     }
 
+    int32_t GetCustomCode() const
+    {
+        return customCode_;
+    }
+
 private:
     std::string info_;
     int32_t code_;
+    int32_t customCode_ = 0;
 };
 
 enum class WebResponseDataType : int32_t {
@@ -1478,6 +1486,9 @@ class ACE_EXPORT ReceivedErrorEvent : public BaseEventInfo {
 public:
     ReceivedErrorEvent(const RefPtr<WebRequest>& request, const RefPtr<WebError>& error)
         : BaseEventInfo("ReceivedErrorEvent"), request_(request), error_(error) {}
+
+    ReceivedErrorEvent(const RefPtr<WebRequest>& request, const RefPtr<WebError>& error, int32_t customCode)
+        : BaseEventInfo("ReceivedErrorEvent"), request_(request), error_(error), customCode_(customCode) {}
     ~ReceivedErrorEvent() = default;
 
     const RefPtr<WebRequest>& GetRequest() const
@@ -1490,9 +1501,15 @@ public:
         return error_;
     }
 
+    int32_t GetCustomCode() const
+    {
+        return customCode_;
+    }
+
 private:
     RefPtr<WebRequest> request_;
     RefPtr<WebError> error_;
+    int32_t customCode_ = 0;
 };
 
 class ACE_EXPORT ReceivedHttpErrorEvent : public BaseEventInfo {
@@ -1541,6 +1558,11 @@ class ACE_EXPORT OnOverrideErrorPageEvent : public BaseEventInfo {
 public:
     OnOverrideErrorPageEvent(const RefPtr<WebRequest>& webResourceRequest, const RefPtr<WebError>& error)
         : BaseEventInfo("OnOverrideErrorPageEvent"), webResourceRequest_(webResourceRequest), error_(error) {}
+
+    OnOverrideErrorPageEvent(const RefPtr<WebRequest>& webResourceRequest, const RefPtr<WebError>& error,
+        int32_t customCode)
+        : BaseEventInfo("OnOverrideErrorPageEvent"), webResourceRequest_(webResourceRequest), error_(error),
+          customCode_(customCode) {}
     ~OnOverrideErrorPageEvent() = default;
 
     const RefPtr<WebRequest>& GetWebResourceRequest() const
@@ -1553,9 +1575,15 @@ public:
         return error_;
     }
 
+    int32_t GetCustomCode() const
+    {
+        return customCode_;
+    }
+
 private:
     RefPtr<WebRequest> webResourceRequest_;
     RefPtr<WebError> error_;
+    int32_t customCode_ = 0;
 };
 
 class ACE_EXPORT LoadWebRequestFocusEvent : public BaseEventInfo {
