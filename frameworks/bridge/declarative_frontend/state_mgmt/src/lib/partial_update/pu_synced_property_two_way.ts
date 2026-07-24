@@ -43,6 +43,11 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     }
     if (this.source_) {
       // register to the parent property
+      if (typeof this.source_.addSubscriber !== 'function') {
+        throw new BusinessError(LINK_SOURCE_NOT_STATE_VARIABLE,
+          `The data source of the @Link-decorated variable '${this.info()}' ` +
+          `in custom component '${this.debugInfoOwningView()}' is not a state variable.`);
+      }
       this.source_.addSubscriber(this);
       this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.source_.getUnmonitored());
     } else {
