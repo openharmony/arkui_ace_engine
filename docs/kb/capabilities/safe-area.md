@@ -6,7 +6,7 @@
 
 ## 定位
 
-Safe Area 是 ArkUI NG 中处理系统安全区域、键盘避让和组件级安全区 padding 的通用布局能力。应用侧主要通过 `expandSafeArea`、`ignoreLayoutSafeArea` 和 `safeAreaPadding` 接入；三者共享安全区数据与布局设施，但进入渲染扩展、布局调度或 padding 约束的路径不同。
+Safe Area 是 ArkUI NG 中处理系统安全区域、键盘避让和组件级安全区 padding 的通用布局能力。组件侧主要通过 `expandSafeArea`、`ignoreLayoutSafeArea` 和 `safeAreaPadding` 接入；页面级键盘避让策略通过 `UIContext.setKeyboardAvoidMode` / `getKeyboardAvoidMode` 配置，该模式不作用于 Dialog、Popup、Menu 等弹窗类组件。它们共享安全区数据与管线设施，但进入渲染扩展、布局调度、padding 约束或键盘避让策略的路径不同。
 
 本文档合并原 Safe Area Mechanism 与 Ignore Layout Safe Area 两个旧主题，作为唯一的新 KB 路由入口。具体行为、优先级、默认值、API 版本和设备差异应以当前 SDK、源码和测试为准。
 
@@ -27,6 +27,8 @@ Safe Area 是 ArkUI NG 中处理系统安全区域、键盘避让和组件级安
 | ArkTS Common Bridge | `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp` | AttributeModifier 和 FrameNode 动态属性解析入口 |
 | Common node modifier | `frameworks/core/interfaces/native/node/node_common_modifier.cpp` | Common Bridge 的 native 设置、重置和查询入口 |
 | Static Common modifier | `frameworks/core/interfaces/native/implementation/common_method_modifier.cpp` | Static ArkTS 的 safeAreaPadding、expandSafeArea 和 ignoreLayoutSafeArea 类型转换与属性写入入口 |
+| Dynamic 键盘避让模式 | `frameworks/bridge/declarative_frontend/engine/jsUIContext.js`、`frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.cpp` | `UIContext` 方法转发、参数解析及 Pipeline 写入入口 |
+| Static 键盘避让模式 | `frameworks/core/interfaces/native/ani/keyboard_avoid_mode_ani_modifier.cpp` | Static ArkTS `UIContext` 键盘避让模式的 ANI 接入入口 |
 | Native 公共接口 | `interfaces/native/node/style_modifier.cpp`、`interfaces/native/native_node.h` | 已公开 Node 属性的枚举与分发入口 |
 | OHOS 窗口接入 | `adapter/ohos/entrance/ui_content_impl.cpp`、`adapter/ohos/osal/page_viewport_config_ohos.h`、`adapter/ohos/osal/page_viewport_config_ohos.cpp` | 窗口避让区、键盘区域和 viewport 配置进入 ArkUI 的平台入口 |
 
@@ -37,6 +39,7 @@ Safe Area 是 ArkUI NG 中处理系统安全区域、键盘避让和组件级安
 | 渲染安全区扩展 | `expandSafeArea`、`SafeAreaExpandOpts`、`ExpandSafeArea` |
 | 忽略布局安全区 | `ignoreLayoutSafeArea`、`IgnoreLayoutSafeAreaOpts`、`PreMeasure`、`TraverseForIgnore`、`PostponedTaskForIgnore` |
 | 组件安全区 padding | `safeAreaPadding`、`SafeAreaPadding`、`safeAreaPadding_` |
+| 页面级键盘避让模式 | `setKeyboardAvoidMode`、`getKeyboardAvoidMode`、`KeyboardAvoidMode`、`KeyboardAvoidModeAniModifier` |
 
 ### API 入口
 
@@ -46,7 +49,9 @@ Safe Area 是 ArkUI NG 中处理系统安全区域、键盘避让和组件级安
 | Static Common API | `<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets` | 静态 ArkTS 对应属性和枚举声明 |
 | Dynamic Common Modifier | `<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts` | Dynamic Common Modifier 类型入口；具体方法回到 CommonAttribute 核实 |
 | Static Common Modifier | `<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets` | Static Common Modifier 类型入口；具体方法回到静态 Common API 核实 |
-| Node C API | `interfaces/native/native_node.h`、`interfaces/native/node/style_modifier.cpp` | 已核实公开 `NODE_EXPAND_SAFE_AREA` 与 `NODE_IGNORE_LAYOUT_SAFE_AREA`；未核实 `safeAreaPadding` 的同等公开枚举 |
+| Dynamic UIContext API | `<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts` | `setKeyboardAvoidMode`、`getKeyboardAvoidMode` 与 `KeyboardAvoidMode` 声明；仅限 Stage 模型 |
+| Static UIContext API | `<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets` | Static ArkTS 对应键盘避让模式声明；仅限 Stage 模型 |
+| Node C API | `interfaces/native/native_node.h`、`interfaces/native/node/style_modifier.cpp` | 当前公开 `NODE_EXPAND_SAFE_AREA` 与 `NODE_IGNORE_LAYOUT_SAFE_AREA`；未提供 `safeAreaPadding` 的同等公开枚举 |
 
 ### 外部依赖入口
 
@@ -72,6 +77,7 @@ Safe Area 是 ArkUI NG 中处理系统安全区域、键盘避让和组件级安
 | 问题 | 优先查看 |
 |------|----------|
 | 系统栏或键盘安全区没有更新 | OHOS 窗口接入、`PipelineContext`、`SafeAreaManager` 和 manager 测试 |
+| `setKeyboardAvoidMode` 未改变页面避让策略 | Dynamic/Static UIContext 声明、`js_keyboard_avoid.cpp` 或 ANI modifier、`PipelineContext` |
 | expandSafeArea 未扩展显示区域 | SDK 声明、JSView/Common Bridge、LayoutProperty、LayoutWrapper 与 expand 测试 |
 | ignoreLayoutSafeArea 未改变布局范围 | `IgnoreLayoutSafeAreaOpts`、FrameNode PreMeasure、UITaskScheduler ignore 调度与 ignore 测试 |
 | safeAreaPadding 未进入约束 | Common API、Dynamic Common Bridge 或 Static Common modifier、LayoutProperty 和通用布局测试 |
@@ -81,7 +87,7 @@ Safe Area 是 ArkUI NG 中处理系统安全区域、键盘避让和组件级安
 
 ## 调试入口
 
-- 先确认窗口侧 AvoidArea、键盘矩形和 viewport 配置是否进入 `PipelineContext`。
+- 先确认窗口侧 AvoidArea、键盘矩形和 viewport 配置是否进入 `PipelineContext`；若问题来自页面级策略，再核对 `UIContext` 的键盘避让模式写入链路。
 - 在 `SafeAreaManager` 检查当前安全区数据，再进入节点 `LayoutProperty` 确认具体选项是否写入。
 - ignoreLayoutSafeArea 问题沿 FrameNode PreMeasure 和 UITaskScheduler 的 ignore 调度关键字定位。
 - 布局现场同时观察父约束、safe area insets、safeAreaPadding 与 GeometryNode 结果。

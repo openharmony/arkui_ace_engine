@@ -40,6 +40,7 @@ API 检索建议：
 
 - 构造与换行参数：在 Flex SDK 声明中搜索 `FlexOptions`、`FlexWrap`、`space`。
 - Flex 子项属性：在 Common SDK 声明和 Layout Attributes KB 中搜索 `layoutWeight`、`flexGrow`、`flexShrink`、`flexBasis`、`alignSelf`。
+- PointLight：搜索 `pointLight` 并核对 `@systemapi` 与 Stage 模型约束；它不是普通应用可直接使用的公开属性。
 - Native Node：在 `interfaces/native/native_node.h` 中搜索 `ARKUI_NODE_FLEX` 和 `NODE_FLEX_`。
 
 ### API 解析实现路径
@@ -57,11 +58,11 @@ Flex **尚未完成组件化改造**：`pattern/flex/` 下没有 `bridge/` 子�
 | Static generated modifier | `frameworks/core/interfaces/native/implementation/flex_modifier.cpp` | Static 类型转换、节点构造和属性委托，落到 `FlexModelNG` / `FlexModelNGStatic` |
 | C API（通用 Native Node） | `interfaces/native/node/style_modifier.cpp`、`interfaces/native/native_node.h` | Flex 没有专属 `flex_native_impl.cpp`；公共属性由通用 style modifier 分发到 Flex node modifier |
 
-组件化改造参考：`./组件化重构通用方案.md`。改造后 JSView 和 Bridge 双路径将统一到 `pattern/flex/bridge/`，并输出独立 so。
+组件化方案可参考仓根目录 `组件化重构通用方案.md`。本页只记录当前已验证路径；实际改造后的目录组织和 SO 归属应以届时源码、BUILD 配置及 `DynamicModuleHelper` 映射为准。
 
 ### 外部依赖入口
 
-Flex 的核心 Model、Pattern 和布局算法未发现组件特有的跨仓依赖，因此不建立组件专属外部依赖表。公共布局调度和渲染同步应转到 Layout Framework；`pointLight` 走 `JSViewAbstract` / `ViewAbstractModelStatic` 的公共渲染属性路径，不属于 Flex 布局算法本身。
+Flex 的核心 Model、Pattern 和布局算法未发现组件特有的跨仓依赖，因此不建立组件专属外部依赖表。公共布局调度和渲染同步应转到 Layout Framework；系统 API `pointLight` 走 `JSViewAbstract` / `ViewAbstractModelStatic` 的公共渲染属性路径，不属于 Flex 布局算法本身。
 
 ### 测试入口
 
@@ -83,7 +84,7 @@ Flex 功能域：`specs/05-ui-components/01-layout-components/05-flex/`（功能
 | Feat-02 | Flex 多行换行与内容对齐 | `Feat-02-flex-wrap-content-alignment-spec.md` |
 | Feat-03 | Flex 主轴与交叉轴间距 | `Feat-03-flex-main-cross-space-spec.md` |
 | Feat-04 | Flex 多范式接口与版本兼容 | `Feat-04-flex-multi-paradigm-version-spec.md` |
-| Feat-05 | Flex PointLight 系统光效 | `Feat-05-flex-point-light-spec.md` |
+| Feat-05 | Flex PointLight（系统 API）光效 | `Feat-05-flex-point-light-spec.md` |
 
 架构决策和模块边界见同目录 `design.md`。行为结论以对应 Feat、当前 SDK、源码和测试的交叉证据为准。
 
@@ -98,7 +99,7 @@ Flex 功能域：`specs/05-ui-components/01-layout-components/05-flex/`（功能
 | 主轴或交叉轴间距异常 | SDK `FlexSpaceOptions`、Flex node modifier、布局属性、Feat-03 |
 | 子项 grow/shrink/weight 表现异常 | Layout Attributes KB、`flex_property.h`、`FlexLayoutAlgorithm` |
 | Dynamic `FlexModifier.d.ts` 无法定位 | 该公共 SDK 文件当前不存在；核对 `flex.d.ts`，并区分引擎内部 `flex_modifier.ts` |
-| PointLight 表现异常 | Dynamic 公共属性入口或 Static generated modifier、ViewAbstract 公共渲染属性、Feat-05 |
+| PointLight（系统 API）表现异常 | 先确认 Stage 模型与系统 API 使用条件，再检查 Dynamic 通用属性入口或 Static generated modifier、ViewAbstract 公共渲染属性、Feat-05 |
 
 ## 调试入口
 

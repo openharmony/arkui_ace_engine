@@ -6,7 +6,7 @@
 
 ## 定位
 
-Stack 是 ArkUI 的基础叠放布局容器，用于让多个子组件共享同一内容区域，并通过容器对齐或子项布局属性确定各自位置。当前接口还包含子节点加载策略和 PointLight 系统光效入口。
+Stack 是 ArkUI 的基础叠放布局容器，用于让多个子组件共享同一内容区域，并通过容器对齐或子项布局属性确定各自位置。当前公开接口还包含子节点加载策略 `syncLoad`；PointLight 则是仅面向 Stage 模型的系统 API 光效入口。
 
 本文档用于快速定位 Stack 的源码、Dynamic/Static SDK、属性解析、Native C API、测试和 Spec。具体行为、默认值、边界条件及版本兼容性以当前 SDK 声明、源码、测试和 Spec 为准。
 
@@ -44,7 +44,7 @@ API 检索建议：
 
 - 构造与属性：在 Dynamic/Static SDK 中搜索 `StackInterface`、`StackOptions`、`StackAttribute`。
 - 子项加载：搜索 `syncLoad`，再转到 `StackLayoutProperty`、`StackLayoutAlgorithm` 和 `StackPattern`。
-- PointLight：搜索 `pointLight`、`PointLightStyle`，并检查 ArkTS 前端组件和 Static native 实现。
+- PointLight：搜索 `pointLight`、`PointLightStyle`，核对 `@systemapi` 与 Stage 模型约束，并检查 ArkTS 前端组件和 Static native 实现。
 - Native C API：在 `native_node.h` 中搜索 `ARKUI_NODE_STACK` 和 `NODE_STACK_`。
 
 ### API 解析实现路径
@@ -55,7 +55,7 @@ Stack **尚未完成组件化改造**：`pattern/stack/` 下没有组件化 `bri
 |------|----------|------|
 | JSView（声明式组件） | `frameworks/bridge/declarative_frontend/jsview/js_stack.cpp` | 创建和声明式属性入口，经 `StackModel` 写入 NG Model |
 | ArkTS Bridge（动态属性） | `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.cpp` | Stack 专属动态属性经 node modifier 写入 `StackModelNG` |
-| 通用 PointLight 路径 | `frameworks/bridge/declarative_frontend/ark_component/src/ArkStack.ts` | PointLight 经通用 native module 写入 RenderContext 相关状态 |
+| 通用 PointLight（系统 API）路径 | `frameworks/bridge/declarative_frontend/ark_component/src/ArkStack.ts` | PointLight 经通用 native module 写入 RenderContext 相关状态 |
 | node_modifier 层 | `frameworks/core/interfaces/native/node/node_stack_modifier.cpp` | 对齐和子节点加载属性的 Set/Reset/Get 实现 |
 | Static 前端节点 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkStackNode.ets` | Static Stack 构造参数和属性下发入口 |
 | Static native 路径 | `frameworks/core/interfaces/native/implementation/stack_modifier.cpp` | Static 构造、Stack options、属性和 PointLight 实现 |
@@ -67,7 +67,7 @@ Stack **尚未完成组件化改造**：`pattern/stack/` 下没有组件化 `bri
 | 类型 | 稳定路径 | 用途 |
 |------|----------|------|
 | Pattern / Layout 单元测试 | `test/unittest/core/pattern/stack/` | 节点创建、测量、对齐、布局方向、加载和 Pattern 生命周期回归 |
-| Static modifier 测试 | `test/unittest/capi/modifiers/stack_modifier_test.cpp` | 生成式 Static modifier 与 PointLight 属性转换回归 |
+| Static modifier 测试 | `test/unittest/capi/modifiers/stack_modifier_test.cpp` | 生成式 Static modifier 与 PointLight 系统 API 属性转换回归 |
 | Native 节点接口测试 | `test/unittest/interfaces/node_style_modifier_test.cpp`、`test/unittest/interfaces/native_node_test.cpp` | `ARKUI_NODE_STACK` 创建及 Native 属性路径回归 |
 | 组件测试样例 | `test/component_test/test_cases/components/common_container/entry/src/main/ets/pages/stack/` | 应用侧 Stack 对齐场景入口 |
 
@@ -79,7 +79,7 @@ Stack 功能域：`specs/05-ui-components/01-layout-components/11-stack/`
 |------|------|------|------|
 | Feat-01 | Stack 叠放布局、尺寸与对齐 | `Feat-01-stack-overlay-layout-alignment-spec.md` | Baselined |
 | Feat-02 | Stack 子节点分帧加载与多范式接口 | `Feat-02-stack-sync-load-multi-paradigm-spec.md` | Baselined |
-| Feat-03 | Stack PointLight 系统光效 | `Feat-03-stack-point-light-spec.md` | Baselined |
+| Feat-03 | Stack PointLight（系统 API）光效 | `Feat-03-stack-point-light-spec.md` | Baselined |
 
 设计入口：`specs/05-ui-components/01-layout-components/11-stack/design.md`。
 
@@ -91,7 +91,7 @@ Stack 功能域：`specs/05-ui-components/01-layout-components/11-stack/`
 | 单个子项的对齐覆盖不符合预期 | 子项 `PositionProperty` / layout gravity、`StackLayoutAlgorithm`、Feat-01 |
 | 容器尺寸或子项测量异常 | `BoxLayoutAlgorithm`、Stack 布局算法、Pattern 单元测试、Feat-01 |
 | `syncLoad` 设置后布局续帧异常 | Dynamic/Static SDK、Stack Bridge、node modifier、`StackPattern`、Feat-02 |
-| PointLight 不生效 | SDK `PointLightStyle`、`ArkStack.ts`、Static native modifier、Feat-03 |
+| PointLight（系统 API）不生效 | 先确认 Stage 模型与系统 API 使用条件，再检查 SDK `PointLightStyle`、`ArkStack.ts`、Static native modifier、Feat-03 |
 | Native 创建或 `alignContent` 属性异常 | `native_node.h`、`node_model.cpp`、`style_modifier.cpp`、Native 接口测试 |
 | Dynamic 与 Static 表现需要对照 | 两套 SDK 声明、Dynamic Bridge、Static native modifier、对应 Feat |
 
@@ -105,6 +105,7 @@ Stack 功能域：`specs/05-ui-components/01-layout-components/11-stack/`
 
 ## 相关主题
 
+- DynamicLayout：`docs/kb/components/container/dynamic_layout.md`
 - FolderStack：`docs/kb/components/container/folder_stack.md`
 - Layout Framework：`docs/kb/architecture/layout-framework.md`
 - Layout Attributes：`docs/kb/capabilities/layout-attributes.md`

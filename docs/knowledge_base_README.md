@@ -2,7 +2,7 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-07-18
+> 更新时间：2026-07-24
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
@@ -38,7 +38,7 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：101
+- `docs/` 下 Markdown 文档总数：108
 - 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：48
 - `docs/syntax/` 下语法专题文档：7
   - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
@@ -46,7 +46,7 @@ rg -n "<关键字>" docs
 
 ### 2.2 索引统计
 
-- `context_registry.json` 新版条目数：34
+- `context_registry.json` 新版条目数：41
 - `knowledge_base_INDEX.json` 旧 KB 索引条目总数：49
 - 旧 KB 索引路径有效性：49/49（全部存在）
 
@@ -80,7 +80,7 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-├── kb/ (35 MD，34 个新版 KB 主题 + README)
+├── kb/ (42 MD，41 个新版 KB 主题 + README)
 ├── accessibility/ (1 KB)
 ├── api/ (2 KB)
 ├── architecture/ (2 KB + 3 非 `*_Knowledge_Base*` 命名架构文档)
@@ -178,3 +178,4 @@ PY
 - 2026-07-11：TextPicker、DatePicker、TimePicker、UIPickerComponent 迁移到 `docs/kb/components/selector/`，旧 KB 已移除，旧索引已更新（53 条）。
 - 2026-07-18：基于当前源码、SDK、测试和基础渲染管线 Spec 重建 Layout Framework 新版 KB，旧 KB 与旧索引入口已移除（旧索引 52 条）。
 - 2026-07-18：新增 Layout Attributes、Blank、Divider、Column、GridCol、GridRow、Row、Stack、FolderStack；重建 Flex（含 Wrap）并合并 Safe Area 两个旧主题。新版 registry 增至 34 条，旧 Flex/Safe Area 文件及索引入口移除，旧索引减至 49 条。
+- 2026-07-24：新增 ColumnSplit、RelativeContainer、RowSplit、DynamicLayout、Shape、Canvas、OffscreenCanvas 七个新版 KB；新版 registry 增至 41 条。上述主题没有专属旧 KB，旧索引仍为 49 条。
