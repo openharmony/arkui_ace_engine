@@ -518,12 +518,24 @@ float GridLayoutInfo::GetIrregularHeight(float mainGap) const
         return 0.0f;
     }
     auto childrenCount = childrenCount_ + repeatDifference_;
+    if (childrenCount <= 0) {
+        TAG_LOGW(ACE_GRID, "GetIrregularHeight: non-positive childrenCount %{public}d", childrenCount);
+        return 0.0f;
+    }
     int32_t lastKnownLine = lineHeightMap_.rbegin()->first;
-    float itemRatio = static_cast<float>(FindEndIdx(lastKnownLine).itemIdx + 1) / static_cast<float>(childrenCount);
-    float estTotalLines = std::round(static_cast<float>(lastKnownLine + 1) / itemRatio);
-
     auto knownLineCnt = static_cast<float>(lineHeightMap_.size());
     float knownHeight = synced_ ? avgLineHeight_ * knownLineCnt : GetTotalLineHeight(0.0f);
+    int32_t endIdx = FindEndIdx(lastKnownLine).itemIdx;
+    // lastKnownLine comes from lineHeightMap_ but FindEndIdx looks up gridMatrix_. When the line
+    // is missing, FindEndIdx returns itemIdx = -1, making (endIdx + 1) == 0 and itemRatio == 0,
+    // which divides by zero on estTotalLines. Fall back to the measured lines' height plus the
+    // gaps between them (equivalent to the fully-known result of the normal formula).
+    if (endIdx < 0) {
+        TAG_LOGW(ACE_GRID, "GetIrregularHeight: invalid endIdx %{public}d at line %{public}d", endIdx, lastKnownLine);
+        return knownHeight + (knownLineCnt - 1) * mainGap;
+    }
+    float itemRatio = static_cast<float>(endIdx + 1) / static_cast<float>(childrenCount);
+    float estTotalLines = std::round(static_cast<float>(lastKnownLine + 1) / itemRatio);
     float avgHeight = synced_ ? avgLineHeight_ : knownHeight / knownLineCnt;
     return knownHeight + (estTotalLines - knownLineCnt) * avgHeight + (estTotalLines - 1) * mainGap;
 }
