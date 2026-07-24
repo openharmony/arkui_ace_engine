@@ -459,7 +459,7 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     auto sheetTheme = host->GetTheme<SheetTheme>(true);
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
-    scale_ = targetNodeContext->GetFontScale();
+    scale_ = targetNodeContext->GetFontScaleFromEnv(targetNode);
     lineSpacingOptimizeFlag_ = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(targetNodeContext);
     OnAreaChangedFunc onAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
@@ -1548,7 +1548,7 @@ void SheetPresentationPattern::UpdateTitleColumnSize()
     bool needSpacingOptimize = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(pipeline);
     // layout constraints can be added only in non-senior-friendly and non-minority language scenarios.
     if (operationColumn && sheetStyle.sheetTitle.has_value() &&
-        NearEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale()) && !needSpacingOptimize) {
+        NearEqual(pipeline->GetFontScaleFromEnv(host), sheetTheme->GetSheetNormalScale()) && !needSpacingOptimize) {
         auto layoutProps = operationColumn->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_VOID(layoutProps);
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(
@@ -1695,7 +1695,7 @@ void SheetPresentationPattern::UpdateSheetTitle()
         auto titleProp = titleNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(titleProp);
         titleProp->UpdateContent(sheetStyle.sheetTitle.value());
-        if (pipeline->GetFontScale() != scale_) {
+        if (pipeline->GetFontScaleFromEnv(host) != scale_) {
             titleNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         titleNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -1764,7 +1764,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     bool needSpacingOptimize = SheetView::GetFallbackLineSpacingStyleOptimizeFlag(AceType::RawPtr(pipeline));
-    if (pipeline->GetFontScale() != scale_ || needSpacingOptimize != lineSpacingOptimizeFlag_) {
+    if (pipeline->GetFontScaleFromEnv(host) != scale_ || needSpacingOptimize != lineSpacingOptimizeFlag_) {
         auto operationNode = GetTitleBuilderNode();
         CHECK_NULL_VOID(operationNode);
         auto titleColumnNode = DynamicCast<FrameNode>(operationNode->GetChildAtIndex(0));
@@ -1779,7 +1779,8 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
         // the value is true when the title is a character string and in age-friendly or minority language scenario.
         bool isFontScaledOrOptimizeInSystemTitle =
             sheetStyle.isTitleBuilder.has_value() && !sheetStyle.isTitleBuilder.value() &&
-            (GreatNotEqual(pipeline->GetFontScale(), sheetTheme->GetSheetNormalScale()) || needSpacingOptimize);
+            (GreatNotEqual(pipeline->GetFontScaleFromEnv(host), sheetTheme->GetSheetNormalScale()) ||
+            needSpacingOptimize);
         if (isSheetHasNoTitle || isFontScaledOrOptimizeInSystemTitle) {
             layoutProps->ClearUserDefinedIdealSize(false, true);
             titleLayoutProps->ClearUserDefinedIdealSize(false, true);
@@ -1801,7 +1802,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
         }
         UpdateSheetTitle();
         UpdateSheetTitleLineOptimize(needSpacingOptimize);
-        scale_ = pipeline->GetFontScale();
+        scale_ = pipeline->GetFontScaleFromEnv(host);
         lineSpacingOptimizeFlag_ = needSpacingOptimize;
         auto sheetWrapper = SheetPresentationPattern::GetParentSkipEffectComponent(host);
         CHECK_NULL_VOID(sheetWrapper);

@@ -7034,6 +7034,10 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(res);
             res.clear();
         }
+        auto material = GetSystemMaterial();
+        if (material) {
+            DumpLog::GetInstance().AddDesc(material->ToString());
+        }
         if (!NearZero(rsNode_->GetStagingProperties().GetSpherizeDegree())) {
             DumpLog::GetInstance().AddDesc(
                 std::string("SpherizeDegree:")
