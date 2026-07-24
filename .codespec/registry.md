@@ -3,6 +3,7 @@
 | ID | Type | Title | Release | Profile | Lineage | Status | Related | Path |
 |----|------|-------|---------|---------|---------|--------|---------|------|
 | issue-76571-dark-mode-innerapi | feature | DarkMode Inner API extend | OpenHarmony-7.0-Release | arkui | new-on-legacy | implementing | - | changes/issue-76571-dark-mode-innerapi |
+| drawable-descriptor-release-state | feature | DrawableDescriptor release/isReleased binding-state API | API-26.0.0 | arkui/sdk-api | new-on-legacy | approved | - | changes/drawable-descriptor-release-state |
 | issue-85818-ui-session-arkui-text-translate | feature | Uisession ArkUI text translate | TBD | arkui/component | new-on-legacy | implementing | - | changes/issue-85818-ui-session-arkui-text-translate |
 | issue-77225-static-component-cross-ability | feature | Static component cross ability | Done | arkui/component | new-on-legacy | Release | - | changes/issue-77225-static-component-cross-ability |
 | issue-76660-withenv-direction | feature | WithEnv Direction & Framework Refactoring | TBD | arkui | new-on-legacy | implementing | https://gitcode.com/openharmony/arkui_ace_engine/issues/76660 | changes/issue-76660-withenv-direction |
