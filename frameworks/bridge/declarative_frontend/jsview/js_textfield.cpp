@@ -1793,7 +1793,8 @@ void JSTextField::SetEnableKeyboardOnFocus(const JSCallbackInfo& info)
     }
     auto jsValue = info[0];
     if (jsValue->IsUndefined() || !jsValue->IsBoolean()) {
-        TextFieldModel::GetInstance()->RequestKeyboardOnFocus(true);
+        auto theme = GetTheme<TextFieldTheme>();
+        TextFieldModel::GetInstance()->RequestKeyboardOnFocus(theme ? !theme->GetIndependentControlKeyboard(): true);
         return;
     }
     TextFieldModel::GetInstance()->RequestKeyboardOnFocus(jsValue->ToBoolean());
