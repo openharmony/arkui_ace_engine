@@ -1,7 +1,7 @@
 # DFX Logging Context
 
-> 文档版本：v1.0
-> 更新时间：2026-07-23
+> 文档版本：v1.1
+> 更新时间：2026-07-25
 > 来源：`docs/context_registry.json` 主题 `DFXLogging`
 
 ## 定位
@@ -32,10 +32,13 @@ DFX Logging 是引擎内部能力，没有独立 SDK API。应用侧通过 `cons
 
 ### 外部依赖入口
 
-| 依赖方向 | 本仓入口 | 外部仓路径 | 说明 |
-|----------|----------|------------|------|
-| HiLog | `adapter/ohos/osal/log_wrapper.cpp` | `base/hiviewdfx/hilog` | Ace 日志级别 → HiLog 优先级映射 |
-| HiSysEvent | `adapter/ohos/osal/event_report.cpp` | `base/hiviewdfx/hisysevent` | 事件上报 |
+| 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
+|----------|----------|------------|----------------------------|------|
+| HiLog | `adapter/ohos/osal/log_wrapper.cpp` | `base/hiviewdfx/hilog` | `hilog/log.h` | Ace 日志级别 → HiLog 优先级映射，`HILOG_IMPL()` 宏 |
+| HiSysEvent | `adapter/ohos/osal/event_report.cpp` | `base/hiviewdfx/hisysevent` | `hisysevent.h` | `HiSysEventWrite` 事件上报，Domain=ACE |
+| HiCollie (XCollie) | `adapter/ohos/osal/event_report.cpp` | `base/hiviewdfx/hicollie` | `xcollie/xcollie.h`, `xcollie/xcollie_define.h` | Form 修改超时定时器 SetTimer/CancelTimer |
+| DFX Crash SDK | `adapter/ohos/osal/log_wrapper.cpp` (dlsym) | `base/hiviewdfx` (DFX 核心) | 动态加载符号 `DFX_SetCrashObj`/`DFX_ResetCrashObj`/`GetTrace` | Crash 回调上下文捕获，通过 `dlsym(RTLD_DEFAULT)` 动态加载 |
+| ResSched 资源调度 | `adapter/ohos/osal/event_report.cpp` | `foundation/resourceschedule/resource_schedule_service` | `res_sched_client.h`, `res_type.h` | 资源调度事件上报（条件编译 `RESOURCE_SCHEDULE_SERVICE_ENABLE`） |
 
 ### 测试入口
 

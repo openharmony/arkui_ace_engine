@@ -1,7 +1,7 @@
 # DFX Dump Mechanism Context
 
-> 文档版本：v1.0
-> 更新时间：2026-07-23
+> 文档版本：v1.1
+> 更新时间：2026-07-25
 > 来源：`docs/context_registry.json` 主题 `DFXDumpMechanism`
 
 ## 定位
@@ -25,6 +25,15 @@ DFX Dump Mechanism 是 ArkUI 引擎的 Dump 诊断基础设施，涵盖 DumpLog 
 ### API 入口
 
 DFX Dump Mechanism 是引擎内部能力，没有独立 SDK API。Inspector 功能通过 DevEco IDE 和 hidumper 命令间接使用。
+
+### 外部依赖入口
+
+| 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
+|----------|----------|------------|----------------------------|------|
+| zlib 压缩 | `frameworks/base/log/dump_log.cpp` | third_party/zlib | `zlib.h` | deflateInit/deflate/deflateEnd dump 输出压缩（条件编译 OHOS_PLATFORM） |
+| RenderService RSUIDirector | `frameworks/core/pipeline_ng/pipeline_context.cpp` | `foundation/graphic/graphic_2d` | `render_service_client/core/ui/rs_ui_context.h` | Dump 时 GetRSUIDirector → GetIndex 写入 transactionFlags |
+| Accessibility 框架 | `adapter/ohos/osal/js_accessibility_manager.cpp` | `foundation/accessibility` | `accessibility/accessibility_hidumper_osal.h` | 可访问性 hidumper 适配层 |
+| hidumper 系统命令 | `adapter/ohos/entrance/ace_container.cpp` | 系统 hidumper 工具 | 命令行 → AceContainer::Dump binder 入口 | 外部 hidumper 命令通过 binder 线程调入引擎 |
 
 ### 测试入口
 

@@ -1,7 +1,7 @@
 # DFX Memory Management Context
 
-> 文档版本：v1.0
-> 更新时间：2026-07-23
+> 文档版本：v1.1
+> 更新时间：2026-07-25
 > 来源：`docs/context_registry.json` 主题 `DFXMemoryManagement`
 
 ## 定位
@@ -28,6 +28,14 @@ DFX Memory Management 是 ArkUI 引擎的内存管理基础设施，涵盖引用
 ### API 入口
 
 DFX Memory Management 是引擎内部能力，没有独立 SDK API。AceType/RefPtr/WeakPtr 是所有组件 Pattern/Model 的基类，但被应用侧间接使用。
+
+### 外部依赖入口
+
+| 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
+|----------|----------|------------|----------------------------|------|
+| ui_lite 基础类型 | `frameworks/base/memory/ace_type.h`, `referenced.h`, `memory_monitor.h` | `foundation/arkui/ui_lite` (推测) | `ui/base/ace_type.h`, `ui/base/referenced.h`, `ui/base/memory_monitor.h` | thin wrapper 重定向到 ui_lite 头文件 |
+| Bionic mallopt | `frameworks/base/memory/memory_monitor.cpp` | OHOS Bionic libc | `<malloc.h>` → `mallopt(M_PURGE, 0)` | malloc cache purge（仅 `__BIONIC__` 平台） |
+| 系统内存压力回调 | `adapter/ohos/entrance/ui_content_impl.cpp` | 系统内核/资源调度 | `UIContentImpl::NotifyMemoryLevel(level)` | 系统回调入口，OS 调入 ace_engine 通知内存压力级别 |
 
 ### 测试入口
 

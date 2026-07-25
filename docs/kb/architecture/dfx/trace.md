@@ -1,7 +1,7 @@
 # DFX Trace Context
 
-> 文档版本：v1.0
-> 更新时间：2026-07-23
+> 文档版本：v1.1
+> 更新时间：2026-07-25
 > 来源：`docs/context_registry.json` 主题 `DFXTrace`
 
 ## 定位
@@ -25,6 +25,19 @@ DFX Trace 是 ArkUI 引擎的 Trace 打点基础设施，涵盖 ACE Trace 核心
 ### API 入口
 
 DFX Trace 是引擎内部能力，没有独立 SDK API。PerfMonitor 通过 C API accessor 对外暴露部分帧级性能数据。
+
+### 外部依赖入口
+
+| 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
+|----------|----------|------------|----------------------------|------|
+| HiTraceMeter | `adapter/ohos/osal/ace_trace.cpp` | `base/hiviewdfx/hitrace` | `hitrace_meter.h` | StartTrace/FinishTrace/StartAsyncTrace/CountTrace/StartTraceEx/FinishTraceEx，HITRACE_TAG_ACE |
+| HiTraceChain | `adapter/ohos/osal/trace_id_impl.cpp` | `base/hiviewdfx/hitrace` | `hitrace/trace.h` | HiTraceChain::GetId/SetId/ClearId 跨线程 trace ID 传播 |
+| FFRT 帧感知调度 | `adapter/ohos/osal/frame_trace_adapter_impl.cpp` | `foundation/resourceschedule/frame_aware_sched` | `frame_trace.h` | FRAME_TRACE::TraceAndExecute/FrameAwareTraceEnable/IsEnabled |
+| HiCollie Watchdog | `adapter/ohos/osal/perf_interfaces.cpp` | `base/hiviewdfx/hicollie` | `xcollie/watchdog.h` | Watchdog::GetInstance().SetScrollState() 滚动状态监控 |
+| Hiview PerfMonitorAdapter | `adapter/ohos/osal/perf_interfaces.cpp` | `base/hiviewdfx/hiview` | `perf_monitor_adapter.h` (隐含) | PerfMonitorAdapter::GetInstance() 全套性能监控 API |
+| ResSched 资源调度 | `adapter/ohos/osal/ressched_report.cpp` | `foundation/resourceschedule/resource_schedule_service` | `libressched_client.z.so` (dlopen) | dlopen 动态加载 ReportData/ReportSyncEvent（条件编译 RESOURCE_SCHEDULE_SERVICE_ENABLE） |
+| 系统参数 | `adapter/ohos/osal/frame_trace_adapter_impl.cpp` | `base/startup/init` | `parameters.h` | GetBoolParameter/SetParameter 帧 trace 限流控制 |
+| c_utils securec | `frameworks/base/log/ace_trace.cpp` | `commonlibrary/c_utils` | `securec.h` | vsnprintf_s 安全字符串格式化 |
 
 ### 测试入口
 

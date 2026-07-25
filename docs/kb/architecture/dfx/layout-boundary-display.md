@@ -1,7 +1,7 @@
 # DFX Layout Boundary Display Context
 
-> 文档版本：v1.0
-> 更新时间：2026-07-23
+> 文档版本：v1.1
+> 更新时间：2026-07-25
 > 来源：`docs/context_registry.json` 主题 `DFXLayoutBoundaryDisplay`
 
 ## 定位
@@ -25,6 +25,14 @@ DFX Layout Boundary Display 是 ArkUI 引擎的布局边界调试显示能力，
 ### API 入口
 
 DFX Layout Boundary Display 是引擎内部调试能力，没有独立 SDK API，仅在 Debug 版本中通过系统属性开关启用。
+
+### 外部依赖入口
+
+| 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
+|----------|----------|------------|----------------------------|------|
+| Rosen RenderService | `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp` | `foundation/graphic/graphic_2d` | `render_service_client/core/modifier_ng/`, `render_service_client/core/ui/` | RSForegroundStyleModifier 继承、RSProperty、RSCanvasNode、DebugBoundaryModifier/GestureDebugBoundaryModifier 创建与绘制 |
+| Rosen Drawing API | `frameworks/core/components_ng/render/drawing.h` | `foundation/graphic/graphic_2d` | `2d_graphics: draw/canvas.h`, `draw/clip.h`, `image/image.h`, `utils/` | RSCanvas/RSPen/RSBrush/RSRect/RSPoint 全部 Drawing 类型别名 |
+| 系统参数服务 | `adapter/ohos/osal/system_properties.cpp` | `base/startup/init` | `parameters.h` → GetParameter/WatchParameter | 读取和监听 `persist.ace.debug.boundary.enabled` 调试开关 |
 
 ### 测试入口
 

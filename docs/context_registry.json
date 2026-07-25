@@ -2959,7 +2959,7 @@
         "test/unittest/capi/accessors/global_scope_ohos_arkui_performance_monitor_accessor_test.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-23"
+      "last_verified": "2026-07-25"
     },
     {
       "id": "DFXMemoryManagement",
@@ -3007,7 +3007,7 @@
         "test/unittest/core/base/node_render_status_monitor_test_ng.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-23"
+      "last_verified": "2026-07-25"
     },
     {
       "id": "DFXTrace",
@@ -3049,7 +3049,7 @@
         "test/unittest/capi/accessors/global_scope_ohos_arkui_performance_monitor_accessor_test.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-23"
+      "last_verified": "2026-07-25"
     },
     {
       "id": "DFXDumpMechanism",
@@ -3099,7 +3099,7 @@
         "test/unittest/adapter/ohos/entrance/layout_inspector_test.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-23"
+      "last_verified": "2026-07-25"
     },
     {
       "id": "DFXLayoutBoundaryDisplay",
@@ -3145,7 +3145,7 @@
         "test/unittest/core/base/ui_node_test_ng_two.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-23"
+      "last_verified": "2026-07-25"
     },
     {
       "id": "UIContext",
@@ -3157,18 +3157,13 @@
         "UIContext",
         "UIContextImpl",
         "ArkUI_ContextHandle",
-        "OH_ArkUI_GetContextFromNapiValue",
-        "OH_ArkUI_GetContextByNode",
-        "IUIContextAccessor",
-        "UIContextHelper",
         "getUIContext",
-        "AbilityContext",
-        "FrameCallback",
-        "OH_ArkUI_PostFrameCallback",
-        "OH_ArkUI_RunTaskInScope",
-        "RunScopeUITask",
+        "IUIContextAccessor",
         "UI上下文",
-        "上下文入口"
+        "上下文入口",
+        "FrameCallback",
+        "InstanceId",
+        "UIContextHelper"
       ],
       "aliases": [
         "UI上下文",
@@ -3183,17 +3178,25 @@
       "source_paths": {
         "uicontext_abstract": "interfaces/inner_api/ace_kit/include/ui/view/ui_context.h",
         "uicontext_impl": "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h",
-        "uicontext_impl_cpp": "interfaces/inner_api/ace_kit/src/view/ui_context_impl.cpp",
         "pipeline_context": "frameworks/core/pipeline_ng/pipeline_context.h",
+        "container_scope": "frameworks/core/common/container_scope.h",
+        "container_scope_cpp": "frameworks/core/common/container_scope.cpp",
         "capi_handle_type": "interfaces/native/native_type.h",
-        "capi_node": "interfaces/native/native_node.h",
+        "capi_functions": "interfaces/native/native_node.h",
         "capi_napi_bridge": "interfaces/native/native_node_napi.h",
         "capi_ani_bridge": "interfaces/native/native_node_ani.h",
-        "iui_context_accessor": "frameworks/core/interfaces/native/implementation/iui_context_accessor.cpp",
         "uicontext_helper": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.h",
         "idl": "frameworks/bridge/arkts_frontend/arkoala_generator/arkui_extra_idl/arkui-iuicontext.idl",
         "ace_container": "adapter/ohos/entrance/ace_container.h",
-        "ui_content_impl": "adapter/ohos/entrance/ui_content_impl.h"
+        "ui_content_impl": "adapter/ohos/entrance/ui_content_impl.h",
+        "js_uicontext_dynamic": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "ui_context_helper_cpp": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/ui_context_helper.cpp",
+        "ts_uicontext_static": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.UIContext.ts",
+        "uicontext_impl_ets": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/UIContextImpl.ets",
+        "uicontext_util_ets": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/UIContextUtil.ets",
+        "uicontext_transfer_ets": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/transfer/UIContextTransfer.ets",
+        "ark_common_js": "frameworks/bridge/declarative_frontend/engine/arkCommon.js",
+        "inner_api_uicontext_util": "frameworks/bridge/arkts_frontend/koala_projects/inner_api/arkui/base/UIContextUtil.d.ets"
       },
       "api_paths": {
         "kit": "interfaces/inner_api/ace_kit/include/ui/view/ui_context.h",
@@ -3201,7 +3204,9 @@
         "capi_functions": "interfaces/native/native_node.h",
         "napi_bridge": "interfaces/native/native_node_napi.h",
         "ani_bridge": "interfaces/native/native_node_ani.h",
-        "idl": "frameworks/bridge/arkts_frontend/arkoala_generator/arkui_extra_idl/arkui-iuicontext.idl"
+        "idl": "frameworks/bridge/arkts_frontend/arkoala_generator/arkui_extra_idl/arkui-iuicontext.idl",
+        "dynamic_uicontext_dts": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "static_uicontext_dets": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets"
       },
       "test_paths": [
         "test/unittest/interfaces/ace_kit/ui_context_impl_test.cpp",
@@ -3213,7 +3218,7 @@
         "test/unittest/interfaces/drag_and_drop_test.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-24"
+      "last_verified": "2026-07-25"
     },
     {
       "id": "Menu",
