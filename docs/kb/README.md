@@ -89,6 +89,21 @@ docs/kb/
 | PopupAdvanced | Popup 高级组件 | `docs/kb/components/overlay/popup_advanced.md` | 新建；补齐 Spec 路由 |
 | Sheet | 半模态弹窗组件 | `docs/kb/components/overlay/sheet.md` | 已迁移，旧 KB 已移除 |
 | bindTips | 提示气泡属性 | `docs/kb/components/overlay/bind_tips.md` | 新建 |
+| Button | 按钮组件 | `docs/kb/components/selector/button.md` | 新建；补齐 Spec 路由 |
+| Radio | 单选组件 | `docs/kb/components/selector/radio.md` | 新建；补齐 Spec 路由 |
+| Checkbox | 多选组件 | `docs/kb/components/selector/checkbox.md` | 新建；补齐 Spec 路由 |
+| ArcSlider | 圆弧滑动选择器组件 | `docs/kb/components/selector/arc_slider.md` | 新建；补齐 Spec 路由 |
+| ArcButton | 圆弧按钮组件 | `docs/kb/components/selector/arc_button.md` | 新建；补齐 Spec 路由 |
+| AnimationFramework | 动效框架 | `docs/kb/capabilities/animation_framework.md` | 新建 |
+| PropertyAnimation | 属性动画 | `docs/kb/capabilities/property_animation.md` | 新建 |
+| ExplicitAnimation | 显式动画 | `docs/kb/capabilities/explicit_animation.md` | 新建 |
+| KeyframeAnimation | 关键帧动画 | `docs/kb/capabilities/keyframe_animation.md` | 新建 |
+| TransitionAnimation | 转场动画 | `docs/kb/capabilities/transition_animation.md` | 新建 |
+| SharedTransition | 共享元素动画 | `docs/kb/capabilities/shared_transition.md` | 新建 |
+| GeometryTransition | 组件共享元素动画 | `docs/kb/capabilities/geometry_transition.md` | 新建 |
+| MotionPath | 路径动画 | `docs/kb/capabilities/motion_path.md` | 新建 |
+| PhysicsAnimation | 物理动画 | `docs/kb/capabilities/physics_animation.md` | 新建 |
+| AnimationInterface | 动画接口 | `docs/kb/capabilities/animation_interface.md` | 新建 |
 
 ## 检索
 
