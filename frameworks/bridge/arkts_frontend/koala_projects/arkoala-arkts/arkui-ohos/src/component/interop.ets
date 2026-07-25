@@ -558,7 +558,7 @@ export function transferCompatibleBuilder<T extends Function>(
         
         /** @memo */
         const func = () => {
-            builder.unsafeCall(...[__context(), __id(), ...params]);
+            builder.unsafeCall(__context(), __id(), ...params);
         };
 
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
