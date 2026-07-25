@@ -267,7 +267,8 @@ bool RepeatNode::IsAllowAnimation()
             "RepeatNode::IsAllowAnimation[id:%{public}d] - Parent FrameNode is nullptr", GetId());
         return false;
     }
-    return LazyForEachUtils::GetEnableRepeatAnimation() && parent->GetTag() == V2::LIST_ETS_TAG;
+    return parent->GetTag() == V2::LIST_ETS_TAG &&
+        !LazyForEachUtils::IsIdInRepeatAnimationAllowReuseSet(parent->GetInspectorIdValue(""));
 }
 
 bool RepeatNode::IsChildInAnimation(uint32_t fromIndex)

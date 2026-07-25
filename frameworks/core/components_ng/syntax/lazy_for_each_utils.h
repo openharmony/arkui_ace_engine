@@ -27,14 +27,14 @@ public:
 
     static bool GetEnableCustomComponentFreeze();
 
-    static void SetEnableRepeatAnimation(bool enableRepeatAnimation);
+    static void SetIdsForRepeatAnimationAllowReuse(const std::string& ids);
 
-    static bool GetEnableRepeatAnimation();
+    static bool IsIdInRepeatAnimationAllowReuseSet(const std::string& id);
 
 private:
     static bool enableCustomComponentFreeze_;
 
-    static bool enableRepeatAnimation_;
+    static std::vector<std::string> idsForRepeatAnimationAllowReuse_;
 };
 
 } // namespace OHOS::Ace::NG

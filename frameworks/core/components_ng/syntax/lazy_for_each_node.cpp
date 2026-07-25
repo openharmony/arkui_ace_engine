@@ -527,6 +527,10 @@ void LazyForEachNode::DoSetActiveChildRange(
         end += cacheEnd;
         builder_->SetShowCached(cacheStart, cacheEnd);
     }
+    // if measured in any GetChildren call, need an additional measure
+    if (childrenDepth_ > 0) {
+        hasSetActiveChildRangeInGetChildren_ = true;
+    }
     ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d], cacheStart[%d], cacheEnd[%d], showCache[%d]",
         start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
     bool needRender = builder_->SetActiveChildRange(start, end);
@@ -553,17 +557,39 @@ bool LazyForEachNode::IsCachedCountReduced(int32_t cacheStart, int32_t cacheEnd)
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) const
 {
+    ++childrenDepth_;
     if (children_.empty()) {
         LoadChildren(notDetach);
 
         // if measure not done, return previous children
         if (notDetach && children_.empty()) {
+            // if measured in any GetChildren call, triggle measure again
+            const_cast<LazyForEachNode*>(this)->TryTriggleAdditionalLayout();
+            --childrenDepth_;
             return tempChildren_;
         }
 
         tempChildren_.clear();
     }
+    // if measured in any GetChildren call, triggle measure again
+    const_cast<LazyForEachNode*>(this)->TryTriggleAdditionalLayout();
+    --childrenDepth_;
     return children_;
+}
+
+void LazyForEachNode::TryTriggleAdditionalLayout()
+{
+    CHECK_EQUAL_VOID(hasSetActiveChildRangeInGetChildren_ && childrenDepth_ == 1, false);
+    TAG_LOGI(AceLogTag::ACE_LAZY_FOREACH, "LazyForEach.TryTriggleAdditionalLayout id[%{public}d]", GetId());
+    ACE_SCOPED_TRACE("LazyForEach.TryTriggleAdditionalLayout id[%d]", GetId());
+    hasSetActiveChildRangeInGetChildren_ = false;
+    NotifyChangeWithCount(0, 0, NotificationType::START_CHANGE_POSITION);
+    if (builder_) {
+        int32_t endChangePos = std::max(builder_->GetHistoryTotalCount(), FrameCount());
+        NotifyChangeWithCount(endChangePos, 0, NotificationType::END_CHANGE_POSITION);
+    }
+    MarkNeedSyncRenderTree(true);
+    MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void LazyForEachNode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)
