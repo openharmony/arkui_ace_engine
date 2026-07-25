@@ -85,7 +85,7 @@ int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel& data, Message
         std::lock_guard<std::mutex> lock(g_surfaceNodeMutex_);
         if (g_surfaceNodeMap_.size() >= MAX_SURFACE_NODE_MAP_SIZE) {
             HILOG_ERROR("surfaceNode map reached maximum capacity: %{public}zu", MAX_SURFACE_NODE_MAP_SIZE);
-            return ERR_APPEXECFWK_PARCEL_ERROR;
+            return ERR_APPEXECFWK_FORM_COMMON_CODE;
         }
     }
     auto surfaceNode = Rosen::RSSurfaceNode::Unmarshalling(data);
