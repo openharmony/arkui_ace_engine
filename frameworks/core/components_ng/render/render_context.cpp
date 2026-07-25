@@ -18,7 +18,6 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/property/particle_property.h"
 #include "base/utils/multi_thread.h"
-#include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/pipeline_ng/pipeline_context.h"

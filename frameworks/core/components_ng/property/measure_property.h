@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_PROPERTIES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_PROPERTIES_H
 
-#include <memory>
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <utility>
@@ -24,12 +24,7 @@
 #include "ui/properties/ng/measure_property.h"
 #include "core/components_ng/property/measure_type.h"
 
-namespace OHOS::Ace {
-class JsonValue;
-}
-
 namespace OHOS::Ace::NG {
-class InspectorFilter;
 
 class ACE_FORCE_EXPORT CalcSize {
 public:
@@ -44,11 +39,20 @@ public:
 
     bool IsValid() const;
 
-    bool IsDimensionUnitAuto() const;
+    bool IsDimensionUnitAuto() const
+    {
+        return IsWidthDimensionUnitAuto() || IsHeightDimensionUnitAuto();
+    }
 
-    bool IsWidthDimensionUnitAuto() const;
+    bool IsWidthDimensionUnitAuto() const
+    {
+        return width_ && width_->GetDimension().Unit() == DimensionUnit::AUTO;
+    }
 
-    bool IsHeightDimensionUnitAuto() const;
+    bool IsHeightDimensionUnitAuto() const
+    {
+        return height_ && height_->GetDimension().Unit() == DimensionUnit::AUTO;
+    }
 
     const std::optional<CalcLength>& Width() const
     {
