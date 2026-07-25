@@ -19,6 +19,7 @@ group("core_unittest") {
   if (is_host_product) {
     deps += [
       "manager:full_screen_manager_test_ng",
+      "base:core_base_unittest",
       "manager:page_scene_rule_manager_test_ng",
       "pattern:core_pattern_unittest",
       "syntax:core_syntax_unittest",

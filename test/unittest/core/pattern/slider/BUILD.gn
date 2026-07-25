@@ -13,32 +13,41 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("slider_test_ng") {
-  module_name = "DialogSet-Tips"
-  type = "new"
+test_sources = [
+  "slider_Extend_one_test_ng.cpp",
+  "slider_Extend_test_ng.cpp",
+  "slider_builder_one_test_ng.cpp",
+  "slider_builder_test_ng.cpp",
+  "slider_content_modifier_test_ng.cpp",
+  "slider_model_static_test_ng.cpp",
+  "slider_modifier_one_test_ng.cpp",
+  "slider_modifier_test_ng.cpp",
+  "slider_modifier_two_test_ng.cpp",
+  "slider_one_test_ng.cpp",
+  "slider_pattern_material_test_ng.cpp",
+  "slider_pattern_one_test_ng.cpp",
+  "slider_pattern_test_ng.cpp",
+  "slider_pattern_two_test_ng.cpp",
+  "slider_test_ng.cpp",
+  "slider_test_core.cpp",
+]
 
-  sources = [
-    "slider_Extend_one_test_ng.cpp",
-    "slider_Extend_test_ng.cpp",
-    "slider_builder_one_test_ng.cpp",
-    "slider_builder_test_ng.cpp",
-    "slider_content_modifier_test_ng.cpp",
-    "slider_model_static_test_ng.cpp",
-    "slider_modifier_one_test_ng.cpp",
-    "slider_modifier_test_ng.cpp",
-    "slider_modifier_two_test_ng.cpp",
-    "slider_one_test_ng.cpp",
-    "slider_pattern_material_test_ng.cpp",
-    "slider_pattern_one_test_ng.cpp",
-    "slider_pattern_test_ng.cpp",
-    "slider_pattern_two_test_ng.cpp",
-    "slider_test_ng.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("slider_test_ng") {
+    type = "host_components"
+    module_name = "DialogSet-Tips"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("slider_test_ng") {
+    module_name = "DialogSet-Tips"
+    type = "new"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "slider_test_core.cpp" ]
-  } else {
-    sources += [ "slider_test_core.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources -= [ "slider_test_core.cpp" ]
+    }
   }
 }
