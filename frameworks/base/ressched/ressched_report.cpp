@@ -196,7 +196,7 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
     }
     int64_t pid = GetPid();
     if (pid != tid) {
-        payload["scrTid"] = std::to_string(longTid);
+        payload["scrTid"] = std::to_string(tid);
     }
 #endif
     if (!reportDataFunc_) {
