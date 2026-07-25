@@ -13,58 +13,67 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("menu_test_ng") {
-  module_name = "CommonProperties-LayoutAndBorder"
-  type = "new"
+test_sources = [
+  "custommenuitem_pattern_test_ng.cpp",
+  "menu_accessibility_property_test_ng.cpp",
+  "menu_animation_test_ng.cpp",
+  "menu_divider_test_ng.cpp",
+  "menu_expand_test_ng.cpp",
+  "menu_expand_test_two_ng.cpp",
+  "menu_item_model_static_test_ng.cpp",
+  "menu_layoutFst_test_ng.cpp",
+  "menu_layoutFst_test_two_ng.cpp",
+  "menu_layoutScd_test_ng.cpp",
+  "menu_layoutScd_test_two_ng.cpp",
+  "menu_layoutThi_test_ng.cpp",
+  "menu_layoutThi_test_two_ng.cpp",
+  "menu_layout_avoidFst_test_ng.cpp",
+  "menu_layout_avoidFst_test_two_ng.cpp",
+  "menu_layout_property_test_ng.cpp",
+  "menu_model_static_test_ng.cpp",
+  "menu_origin_test_ng.cpp",
+  "menu_origin_test_two_ng.cpp",
+  "menu_paint_test_ng.cpp",
+  "menu_patternEx_test_ng.cpp",
+  "menu_patternEx_test_two_ng.cpp",
+  "menu_patternMore_test_ng.cpp",
+  "menu_patternMore_test_two_ng.cpp",
+  "menu_patternMore_test_three_ng.cpp",
+  "menu_pattern_test_ng.cpp",
+  "menu_pattern_test_two_ng.cpp",
+  "menu_view_test_ng.cpp",
+  "menu_view_test_two_ng.cpp",
+  "menuitem_layout_property_test_ng.cpp",
+  "menuitem_pattern_basic_test_ng.cpp",
+  "menuitem_pattern_option_test_ng.cpp",
+  "menuitem_pattern_testone_ng.cpp",
+  "menuitem_test_ng.cpp",
+  "menuitem_testone_ng.cpp",
+  "menuitemgroup_accessibility_property_test_ng.cpp",
+  "menuitemgroup_test_ng.cpp",
+  "menuitemgroup_test_two_ng.cpp",
+  "menuwrapper_test_ng.cpp",
+  "menuwrapper_test_two_ng.cpp",
+  "submenu_test_ng.cpp",
+  "menu_test_core.cpp",
+]
 
-  sources = [
-    "custommenuitem_pattern_test_ng.cpp",
-    "menu_accessibility_property_test_ng.cpp",
-    "menu_animation_test_ng.cpp",
-    "menu_divider_test_ng.cpp",
-    "menu_expand_test_ng.cpp",
-    "menu_expand_test_two_ng.cpp",
-    "menu_item_model_static_test_ng.cpp",
-    "menu_layoutFst_test_ng.cpp",
-    "menu_layoutFst_test_two_ng.cpp",
-    "menu_layoutScd_test_ng.cpp",
-    "menu_layoutScd_test_two_ng.cpp",
-    "menu_layoutThi_test_ng.cpp",
-    "menu_layoutThi_test_two_ng.cpp",
-    "menu_layout_avoidFst_test_ng.cpp",
-    "menu_layout_avoidFst_test_two_ng.cpp",
-    "menu_layout_property_test_ng.cpp",
-    "menu_model_static_test_ng.cpp",
-    "menu_origin_test_ng.cpp",
-    "menu_origin_test_two_ng.cpp",
-    "menu_paint_test_ng.cpp",
-    "menu_patternEx_test_ng.cpp",
-    "menu_patternEx_test_two_ng.cpp",
-    "menu_patternMore_test_ng.cpp",
-    "menu_patternMore_test_two_ng.cpp",
-    "menu_patternMore_test_three_ng.cpp",
-    "menu_pattern_test_ng.cpp",
-    "menu_pattern_test_two_ng.cpp",
-    "menu_view_test_ng.cpp",
-    "menu_view_test_two_ng.cpp",
-    "menuitem_layout_property_test_ng.cpp",
-    "menuitem_pattern_basic_test_ng.cpp",
-    "menuitem_pattern_option_test_ng.cpp",
-    "menuitem_pattern_testone_ng.cpp",
-    "menuitem_test_ng.cpp",
-    "menuitem_testone_ng.cpp",
-    "menuitemgroup_accessibility_property_test_ng.cpp",
-    "menuitemgroup_test_ng.cpp",
-    "menuitemgroup_test_two_ng.cpp",
-    "menuwrapper_test_ng.cpp",
-    "menuwrapper_test_two_ng.cpp",
-    "submenu_test_ng.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("menu_test_ng") {
+    type = "host_components"
+    module_name = "CommonProperties-LayoutAndBorder"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("menu_test_ng") {
+    module_name = "CommonProperties-LayoutAndBorder"
+    type = "new"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "menu_test_core.cpp" ]
-  } else {
-    sources += [ "menu_test_core.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources -= [ "menu_test_core.cpp" ]
+    }
   }
 }
