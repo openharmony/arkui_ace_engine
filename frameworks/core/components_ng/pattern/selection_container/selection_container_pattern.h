@@ -193,6 +193,7 @@ private:
     std::string GetSelectedBackgroundColorStr() const;
     void InitKeyEvent();
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    void UpdateShiftFlag(const KeyEvent& keyEvent);
     void WriteClipboard(const std::u16string& clipboardText,
         const RefPtr<MutableSpanString>& mergedSpanString, bool hasSpanString, CopyOptions copyOption);
     void HandleOnCopySpanString(const RefPtr<SpanString>& spanString, CopyOptions copyOption);

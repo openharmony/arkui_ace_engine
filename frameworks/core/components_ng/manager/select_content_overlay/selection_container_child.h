@@ -180,6 +180,9 @@ public:
         return selectionContainer_.Upgrade();
     }
 
+    void SyncShiftFlagToContainer(bool flag);
+    bool IsContainerShiftFlagSet();
+
     std::optional<CopyOptions> GetContainerCopyOption() const;
     std::optional<bool> GetContainerEnableHapticFeedback() const;
     std::optional<Color> GetContainerSelectedBackgroundColor() const;
