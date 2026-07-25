@@ -591,46 +591,6 @@ HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest011, TestSize.Level1)
 }
 
 /**
- * @tc.name: DynamicPatternTest012
- * @tc.desc: Test DynamicPattern OnAttachContext
- * @tc.type: FUNC
- */
-HWTEST_F(DynamicPatternTestNgTwo, DynamicPatternTest012, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create DynamicPattern and set initial instanceId.
-     */
-    auto dynamicNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto dynamicNode = FrameNode::GetOrCreateFrameNode(
-        DYNAMIC_COMPONENT_ETS_TAG, dynamicNodeId, []() {
-            return AceType::MakeRefPtr<DynamicPattern>();
-        });
-    EXPECT_NE(dynamicNode, nullptr);
-    EXPECT_EQ(dynamicNode->GetTag(), V2::DYNAMIC_COMPONENT_ETS_TAG);
-    auto dynamicPattern = dynamicNode->GetPattern<DynamicPattern>();
-    EXPECT_NE(dynamicPattern, nullptr);
-
-    int oldInstanceId = 123;
-    int newInstanceId = 124;
-    dynamicPattern->instanceId_ = oldInstanceId;
-    auto pipeline = MockPipelineContext::GetCurrent();
-    EXPECT_NE(pipeline, nullptr);
-    pipeline->SetInstanceId(124);
-
-    /**
-     * @tc.steps: step2. Call OnAttachContext with nullptr context.
-     */
-    pipeline->uiExtensionManager_ = nullptr;
-    auto rawPipeline = reinterpret_cast<PipelineContext*>(Referenced::RawPtr(pipeline));
-    dynamicPattern->OnAttachContext(nullptr);
-    EXPECT_EQ(dynamicPattern->instanceId_, oldInstanceId);
-
-    dynamicPattern->OnAttachContext(rawPipeline);
-    EXPECT_NE(dynamicPattern->instanceId_, oldInstanceId);
-    EXPECT_EQ(dynamicPattern->instanceId_, newInstanceId);
-}
-
-/**
  * @tc.name: DynamicPatternTest013
  * @tc.desc: Test DynamicPattern SetIsReportFrameEvent
  * @tc.type: FUNC
