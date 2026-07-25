@@ -6973,6 +6973,17 @@ OHOS::Rosen::Window* UIContentImpl::GetUIContentWindow()
     return window_;
 }
 
+void UIContentImpl::ForceRequestFrame()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_VOID(window);
+    window->SetForceVsyncRequests(true);
+}
+
 void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor)
 {
 #ifndef CROSS_PLATFORM
