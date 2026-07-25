@@ -125,6 +125,7 @@ panda::Local<panda::ObjectRef> JSScroller::CreateRectangle(const Rect& info)
         return panda::Local<panda::ObjectRef>();
     }
     auto* vm = runtime->GetEcmaVm();
+    CHECK_NULL_RETURN(vm, panda::Local<panda::ObjectRef>());
     Local<JSValueRef> keys[] = {
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::X)),
         panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(ArkUIIndex::Y)),
