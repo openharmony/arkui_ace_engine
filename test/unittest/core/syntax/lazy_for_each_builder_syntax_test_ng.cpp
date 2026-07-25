@@ -955,6 +955,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder03, TestSize.Level1)
     layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
     layoutConstraint.selfIdealSize = OptionalSizeF(480, 960);
     lazyForEachBuilder->startIndex_ = 3;
+    lazyForEachBuilder->activeRangeStart_ = 3;
     auto step2 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
     EXPECT_TRUE(step2);
 
@@ -962,6 +963,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder03, TestSize.Level1)
      * @tc.steps: step3. startIndex_ != -1 && endIndex_ != -1;
      */
     lazyForEachBuilder->endIndex_ = 1;
+    lazyForEachBuilder->activeRangeEnd_ = 1;
     auto step3 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
     EXPECT_TRUE(step3);
 
@@ -975,6 +977,8 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder03, TestSize.Level1)
      * @tc.steps: step5. Set cacheCount_ is 7 and check PreBuild fuction;
      */
     lazyForEachBuilder->SetCacheCount(7);
+    lazyForEachBuilder->cachedCountStart_ = 7;
+    lazyForEachBuilder->cachedCountEnd_ = 7;
     auto step5 = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
     EXPECT_FALSE(step5);
 
@@ -1653,6 +1657,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ReduceCacheCountTest001, TestSize.Level1)
     auto lazyForEachBuilder = CreateLazyForEachBuilder();
     ASSERT_NE(lazyForEachBuilder, nullptr);
 
+    lazyForEachBuilder->reduceCache_ = true;
     lazyForEachBuilder->startShowCached_ = 0;
     lazyForEachBuilder->endShowCached_ = 0;
     EXPECT_EQ(lazyForEachBuilder->ReduceCacheCount(1), 1);
