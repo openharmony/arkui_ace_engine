@@ -282,6 +282,12 @@ void UIExtensionPattern::OnAttachContext(PipelineContext *context)
         hasAttachContext_ = true;
     }
     /* only for 1.2 end */
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId_);
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
 void UIExtensionPattern::UpdateSessionInstanceId(int32_t instanceId)
