@@ -233,6 +233,16 @@ void RenderContext::ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const Ins
                     immersiveOptions->materialColor.value_or(Color::TRANSPARENT).ColorToString().c_str());
                 immersiveOptionsValue->Put("colorInvert", immersiveOptions->colorInvert ? "true" : "false");
                 immersiveOptionsValue->Put("applyShadow", immersiveOptions->applyShadow ? "true" : "false");
+                immersiveOptionsValue->Put("disableLightEffect",
+                    immersiveOptions->disableLightEffect ? "true" : "false");
+                if (immersiveOptions->lightEffectOptions.has_value()) {
+                    immersiveOptionsValue->Put("lightEffectColor",
+                        immersiveOptions->lightEffectOptions->color.ColorToString().c_str());
+                }
+                if (immersiveOptions->interactive.has_value()) {
+                    immersiveOptionsValue->Put("interactive",
+                        immersiveOptions->interactive.value() ? "true" : "false");
+                }
                 optJsonValue->Put("immersiveOptions", immersiveOptionsValue);
             }
         }

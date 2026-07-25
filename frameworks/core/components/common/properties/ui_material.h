@@ -54,6 +54,31 @@ enum class EdgeLightMode: int32_t {
     EDGELIGHT_DISABLED = 2,
 };
 
+// Convert DistortionMode / EdgeLightMode values to inspector-friendly strings.
+inline std::string DistortionModeToString(DistortionMode mode)
+{
+    static const std::string modes[] = { "DistortionMode.AUTO", "DistortionMode.ENABLED",
+        "DistortionMode.DISABLED" };
+    auto index = static_cast<int32_t>(mode);
+    if (index >= static_cast<int32_t>(DistortionMode::DISTORTION_AUTO) &&
+        index <= static_cast<int32_t>(DistortionMode::DISTORTION_DISABLED)) {
+        return modes[index];
+    }
+    return modes[static_cast<int32_t>(DistortionMode::DISTORTION_AUTO)];
+}
+
+inline std::string EdgeLightModeToString(EdgeLightMode mode)
+{
+    static const std::string modes[] = { "EdgeLightMode.AUTO", "EdgeLightMode.ENABLED",
+        "EdgeLightMode.DISABLED" };
+    auto index = static_cast<int32_t>(mode);
+    if (index >= static_cast<int32_t>(EdgeLightMode::EDGELIGHT_AUTO) &&
+        index <= static_cast<int32_t>(EdgeLightMode::EDGELIGHT_DISABLED)) {
+        return modes[index];
+    }
+    return modes[static_cast<int32_t>(EdgeLightMode::EDGELIGHT_AUTO)];
+}
+
 struct UiMaterialParam {
     Shadow shadow;
     Color backgroundColor;

@@ -432,6 +432,7 @@ public:
     void DumpInfo() override;
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void SetFirstShow()
     {
         isFirstShow_ = true;
