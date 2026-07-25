@@ -13,24 +13,28 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+test_sources = [
+  "recycle_manager_test.cpp",
+  "recycle_node_test_ng.cpp",
+]
+
+core_sources = [
+  "recycle_node_test_min.cpp",
+  "recycle_node_test_core.cpp",
+]
+
 ace_unittest("recycle_node_test_ng") {
   module_name = "StateManagement-CustomCoponent"
   type = "new"
-  sources = [
-    "recycle_manager_test.cpp",
-    "recycle_node_test_ng.cpp",
-  ]
+  sources = test_sources
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "recycle_node_test_min.cpp",
-      "recycle_node_test_core.cpp",
-    ]
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+    sources += core_sources
+  } else if (!ace_enable_full_test_suite) {
+    sources = core_sources
   } else {
-    sources += [
-      "recycle_node_test_min.cpp",
-      "recycle_node_test_core.cpp",
-    ]
+    sources += core_sources
   }
 }
