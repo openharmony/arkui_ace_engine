@@ -17,6 +17,7 @@
 #include "event/ui_input_event_impl.h"
 #include "node/node_model.h"
 
+#include "interfaces/native/native_interface.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
 
 using namespace testing;
@@ -1056,6 +1057,35 @@ HWTEST_F(UIInputEventTest, PostClonedEventWithStrategy_UnsupportedType, TestSize
     EXPECT_EQ(OH_ArkUI_PointerEvent_PostClonedEventWithStrategy(
                   node, &event, ArkUI_CompetitionStrategy::ARKUI_COMPETITION_STRATEGY_COMPETITION),
         ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: PostClonedEventWithStrategy_MousePressedButtonsNull
+ * @tc.desc: Test mouse cloned event path when pressedButtons is null and pressedButtonsLength > 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, PostClonedEventWithStrategy_MousePressedButtonsNull, TestSize.Level0)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(node, nullptr);
+
+    ArkUIMouseEvent mouseEvent {};
+    mouseEvent.action = static_cast<int32_t>(MouseAction::MOVE);
+    mouseEvent.subKind = ON_MOUSE;
+    mouseEvent.sourceType = static_cast<int32_t>(SourceType::MOUSE);
+    mouseEvent.pressedButtons = nullptr;
+    mouseEvent.pressedButtonsLength = 1;
+
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_MOUSE, C_MOUSE_EVENT_ID, &mouseEvent, true };
+    auto result = OH_ArkUI_PointerEvent_PostClonedEventWithStrategy(
+        node, &event, ArkUI_CompetitionStrategy::ARKUI_COMPETITION_STRATEGY_COMPETITION);
+    EXPECT_EQ(result, 180004);
+
+    nodeAPI->disposeNode(node);
 }
 
 } // namespace OHOS::Ace
