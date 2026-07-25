@@ -817,6 +817,67 @@ HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegionHeight002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetRectTrickRegionHeightMargin001
+ * @tc.desc: Test horizontal scrollbar track size remains valid with percentage height and reserved margins.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegionHeightMargin001, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    const Offset offsetView(0.0, 0.0);
+    const Size sizeView(200.0, 100.0);
+    ScrollBarMargin margin;
+    margin.start_ = Dimension(20.0);
+    margin.end_ = Dimension(30.0);
+    scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar_->SetScrollBarHeight(Dimension(0.5, DimensionUnit::PERCENT));
+    scrollBar_->SetScrollBarMargin(margin);
+    scrollBar_->SetStartReservedHeight(Dimension(10.0));
+    scrollBar_->SetEndReservedHeight(Dimension(10.0));
+
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, 2000.0, SCROLL_FROM_NONE);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+
+    EXPECT_EQ(scrollBar_->barRegionSize_, 65.0);
+    EXPECT_EQ(scrollBar_->trackRect_.Width(), 65.0);
+    EXPECT_GE(scrollBar_->activeRect_.Width(), 8.0);
+    EXPECT_GE(scrollBar_->barRect_.Width(), 0.0);
+    EXPECT_GE(scrollBar_->trackRect_.Width(), 0.0);
+}
+
+/**
+ * @tc.name: SetRectTrickRegionHeightMargin002
+ * @tc.desc: Test oversized scrollbar margins produce an empty and non-interactive track.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerLayoutTestNg, SetRectTrickRegionHeightMargin002, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    const Offset offsetView(0.0, 0.0);
+    const Size sizeView(100.0, 100.0);
+    ScrollBarMargin margin;
+    margin.start_ = Dimension(60.0);
+    margin.end_ = Dimension(60.0);
+    scrollBar_->SetPositionMode(PositionMode::BOTTOM);
+    scrollBar_->SetScrollBarHeight(Dimension(1.0, DimensionUnit::PERCENT));
+    scrollBar_->SetScrollBarMargin(margin);
+
+    scrollBar_->SetRectTrickRegion(offsetView, sizeView, offsetView, 1000.0, SCROLL_FROM_NONE);
+    scrollBar_->SetBarRegion(offsetView, sizeView);
+
+    EXPECT_EQ(scrollBar_->barRegionSize_, 0.0);
+    EXPECT_EQ(scrollBar_->activeRect_.Width(), 0.0);
+    EXPECT_EQ(scrollBar_->trackRect_.Width(), 0.0);
+    EXPECT_FALSE(scrollBar_->InBarTouchRegion(Point(50.0, 95.0)));
+}
+
+/**
  * @tc.name: SetRectTrickRegionHeight004
  * @tc.desc: Test scrollbar hides when scrollBarHeight changes from non-zero to zero
  * @tc.type: FUNC

@@ -2236,4 +2236,80 @@ HWTEST_F(ScrollablePatternTestNg, OnAttachToMainTree001, TestSize.Level1)
     EXPECT_TRUE(scrollablePattern->refreshCoordination_->IsValid());
     EXPECT_NE(scrollablePattern->refreshCoordination_->coordinationEvent_, nullptr);
 }
+
+/**
+ * @tc.name: OnAttachToMainTree002
+ * @tc.desc: Test refresh coordination is cleared after removal and rebound to a replacement refresh node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnAttachToMainTree002, TestSize.Level1)
+{
+    RefPtr<ScrollPattern> scrollablePattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 3, scrollablePattern);
+    auto firstRefreshNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, 4, AceType::MakeRefPtr<RefreshPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    ASSERT_NE(firstRefreshNode, nullptr);
+    scrollNode->MountToParent(firstRefreshNode);
+    scrollablePattern->CreateRefreshCoordination();
+
+    ASSERT_NE(scrollablePattern->refreshCoordination_, nullptr);
+    ASSERT_TRUE(scrollablePattern->refreshCoordination_->IsValid());
+    auto firstEvent = scrollablePattern->refreshCoordination_->coordinationEvent_;
+    ASSERT_NE(firstEvent, nullptr);
+
+    firstRefreshNode->RemoveChild(scrollNode);
+    scrollablePattern->OnAttachToMainTree();
+    EXPECT_FALSE(scrollablePattern->refreshCoordination_->IsValid());
+    EXPECT_EQ(scrollablePattern->refreshCoordination_->coordinationEvent_, nullptr);
+
+    auto secondRefreshNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, 5, AceType::MakeRefPtr<RefreshPattern>());
+    ASSERT_NE(secondRefreshNode, nullptr);
+    scrollNode->MountToParent(secondRefreshNode);
+    scrollablePattern->OnAttachToMainTree();
+    EXPECT_TRUE(scrollablePattern->refreshCoordination_->IsValid());
+    EXPECT_NE(scrollablePattern->refreshCoordination_->coordinationEvent_, nullptr);
+    EXPECT_NE(scrollablePattern->refreshCoordination_->coordinationEvent_, firstEvent);
+
+    auto secondEvent = scrollablePattern->refreshCoordination_->coordinationEvent_;
+    scrollablePattern->OnAttachToMainTree();
+    EXPECT_EQ(scrollablePattern->refreshCoordination_->coordinationEvent_, secondEvent);
+}
+
+/**
+ * @tc.name: RefreshCoordinationNestedScroll001
+ * @tc.desc: Test nested scroll resumes normal overscroll handling after refresh coordination ends.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, RefreshCoordinationNestedScroll001, TestSize.Level1)
+{
+    auto refreshNode = FrameNode::CreateFrameNode(V2::REFRESH_ETS_TAG, 6, AceType::MakeRefPtr<RefreshPattern>());
+    RefPtr<ScrollPattern> outerPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto outerScrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 7, outerPattern);
+    RefPtr<ScrollPattern> innerPattern = AceType::MakeRefPtr<ScrollPattern>();
+    auto innerScrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 8, innerPattern);
+    ASSERT_NE(refreshNode, nullptr);
+    ASSERT_NE(outerScrollNode, nullptr);
+    ASSERT_NE(innerScrollNode, nullptr);
+    outerScrollNode->MountToParent(refreshNode);
+    innerScrollNode->MountToParent(outerScrollNode);
+
+    innerPattern->CreateRefreshCoordination();
+    ASSERT_NE(innerPattern->refreshCoordination_, nullptr);
+    ASSERT_TRUE(innerPattern->refreshCoordination_->InCoordination());
+    auto scrollable = AceType::MakeRefPtr<Scrollable>([](double, int32_t) { return true; }, Axis::VERTICAL);
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->canOverScroll_ = true;
+    NestableScrollCallback callback = [](float, int32_t, NestedState) { return ScrollResult { 0.0, false }; };
+    scrollable->SetHandleScrollCallback(std::move(callback));
+    innerPattern->SetIsRefreshScrollCallback(scrollable);
+
+    innerPattern->isRefreshInReactive_ = true;
+    scrollable->ProcessScrollMotion(10.0f, SCROLL_FROM_ANIMATION);
+    EXPECT_FALSE(scrollable->scrollPause_);
+
+    innerPattern->isRefreshInReactive_ = false;
+    scrollable->state_ = Scrollable::AnimationState::FRICTION;
+    scrollable->ProcessScrollMotion(20.0f, SCROLL_FROM_ANIMATION);
+    EXPECT_TRUE(scrollable->scrollPause_);
+}
 } // namespace OHOS::Ace::NG

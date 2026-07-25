@@ -991,6 +991,29 @@ HWTEST_F(ScrollInnerEventTestNg, MouseEventScrollBar001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBarInteractive001
+ * @tc.desc: Test a non-interactive rectangular scrollbar is excluded from touch and mouse hit testing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, ScrollBarInteractive001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    auto scrollableEvent = pattern_->GetScrollableEvent();
+    ASSERT_NE(scrollableEvent, nullptr);
+    const PointF activePoint(IN_ACTIVE_BAR_POINT.GetX(), IN_ACTIVE_BAR_POINT.GetY());
+    EXPECT_TRUE(scrollableEvent->InBarRegion(activePoint, SourceType::TOUCH));
+    EXPECT_TRUE(scrollableEvent->InBarRegion(activePoint, SourceType::MOUSE));
+
+    scrollBar_->SetScrollBarInteractive(false);
+    EXPECT_FALSE(scrollableEvent->InBarRegion(activePoint, SourceType::TOUCH));
+    EXPECT_FALSE(scrollableEvent->InBarRegion(activePoint, SourceType::MOUSE));
+    EXPECT_FALSE(scrollableEvent->InBarRectRegion(activePoint, SourceType::TOUCH));
+}
+
+/**
  * @tc.name: ScrollBarSetOpacity001
  * @tc.desc: Test scrollBar SetOpacity
  * @tc.type: FUNC
