@@ -1128,11 +1128,13 @@ void SliderContentModifier::CreateShapePathBlockBrush(RSBrush& brush, const Size
 
 void SliderContentModifier::DrawBlockShapePath(DrawingContext& context, RefPtr<Path>& path)
 {
+    auto* pathCustomModifier = GetPathCustomModifier();
+    CHECK_NULL_VOID(pathCustomModifier);
     auto blockSize = blockSize_->Get();
     auto blockBorderWidth = blockBorderWidth_->Get();
 
     auto blockCenter = GetBlockCenter();
-    SizeF shapeSize = GetPathCustomModifier()->getPathSize(path->GetValue());
+    SizeF shapeSize = pathCustomModifier->getPathSize(path->GetValue());
     if (NearZero(shapeSize.Width()) || NearZero(shapeSize.Height())) {
         return;
     }
@@ -1158,7 +1160,7 @@ void SliderContentModifier::DrawBlockShapePath(DrawingContext& context, RefPtr<P
     CreateShapePathBlockBrush(brush, shapeSize, blockCenter);
     canvas.AttachBrush(brush);
     OffsetF offset(blockCenter.GetX() - shapeSize.Width() * HALF, blockCenter.GetY() - shapeSize.Height() * HALF);
-    GetPathCustomModifier()->drawPath(canvas, path->GetValue(), offset);
+    pathCustomModifier->drawPath(canvas, path->GetValue(), offset);
     canvas.DetachBrush();
     canvas.DetachPen();
     canvas.Restore();

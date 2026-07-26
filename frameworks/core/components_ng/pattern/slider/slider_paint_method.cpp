@@ -150,7 +150,7 @@ void SliderPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
             std::min(blockSize.Height(), parameters_.trackThickness));
     }
     sliderTipModifier_->SetBlockSize(blockSize);
-    sliderTipModifier_->SetTipFlag(tipParameters_.isDrawTip_, host);
+    sliderTipModifier_->SetTipFlag(tipParameters_.isDrawTip_);
     sliderTipModifier_->SetContentOffset(paintWrapper->GetContentOffset());
     sliderTipModifier_->SetContentSize(paintWrapper->GetContentSize());
     sliderTipModifier_->SetBubbleVertex(tipParameters_.bubbleVertex_);

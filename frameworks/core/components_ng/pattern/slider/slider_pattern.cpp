@@ -357,7 +357,7 @@ RefPtr<NodePaintMethod> SliderPattern::CreateNodePaintMethod()
     std::pair<OffsetF, float> BubbleVertex = GetBubbleVertexPosition(circleCenter_, trackThickness_, blockSize_);
     SliderPaintMethod::TipParameters tipParameters { bubbleFlag_, BubbleVertex.first, overlayGlobalOffset };
     if (!sliderTipModifier_ && bubbleFlag_) {
-        sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>([weak = WeakClaim(this)]() {
+        sliderTipModifier_ = AceType::MakeRefPtr<SliderTipModifier>(GetHost(), [weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             if (!pattern) {
                 return std::pair<OffsetF, float>();
