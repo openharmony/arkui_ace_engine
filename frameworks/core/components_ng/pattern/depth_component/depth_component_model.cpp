@@ -63,6 +63,21 @@ void DepthComponentModel::SetDepthSpace(FrameNode* frameNode, OHOS::Ace::DepthSp
     depthPattern->SetDepthSpace(depthSpace);
 }
 
+void DepthComponentModel::SetColorSpace(int32_t colorSpace)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetColorSpace(frameNode, colorSpace);
+}
+
+void DepthComponentModel::SetColorSpace(FrameNode* frameNode, int32_t colorSpace)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto depthPattern = frameNode->GetPattern<DepthComponentPattern>();
+    CHECK_NULL_VOID(depthPattern);
+    depthPattern->SetColorSpace(colorSpace);
+}
+
 void DepthComponentModel::SetRender3DScale(float render3DScale)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

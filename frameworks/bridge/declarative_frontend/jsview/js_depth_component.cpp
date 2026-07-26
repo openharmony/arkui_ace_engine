@@ -358,6 +358,12 @@ void JSDepthComponent::ParseAndSetOptions(const JSRef<JSVal>& optionsValue)
         NG::DepthComponentModel::SetDepthSpace(depthSpaceEnum);
     }
 
+    auto colorSpaceValue = jsObject->GetProperty("colorSpace");
+    if (colorSpaceValue->IsNumber()) {
+        int32_t colorSpace = colorSpaceValue->ToNumber<int32_t>();
+        NG::DepthComponentModel::SetColorSpace(colorSpace);
+    }
+
     auto render3DScaleValue = jsObject->GetProperty("render3DScale");
     if (render3DScaleValue->IsNumber()) {
         float render3DScale = render3DScaleValue->ToNumber<float>();
