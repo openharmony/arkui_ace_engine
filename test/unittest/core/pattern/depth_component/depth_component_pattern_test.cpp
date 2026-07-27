@@ -46,6 +46,7 @@ HWTEST_F(DepthComponentPatternTestNg, Construct001, TestSize.Level1)
     EXPECT_NE(pattern->CreateNodePaintMethod(), nullptr);
     EXPECT_EQ(pattern->GetDepthSpace(), OHOS::Ace::DepthSpaceType::INSTANCE);
     EXPECT_EQ(pattern->GetRender3DScale(), 1.0f);
+    EXPECT_EQ(pattern->colorSpace_, 0);
 }
 
 /**
@@ -74,6 +75,21 @@ HWTEST_F(DepthComponentPatternTestNg, Render3DScale001, TestSize.Level1)
     EXPECT_EQ(pattern->GetRender3DScale(), 2.5f);
     pattern->SetRender3DScale(0.0f);
     EXPECT_EQ(pattern->GetRender3DScale(), 0.0f);
+}
+
+/**
+ * @tc.name: ColorSpace001
+ * @tc.desc: SetColorSpace round-trip on colorSpace_; default is unset (no SRGB default).
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, ColorSpace001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<DepthComponentPattern>();
+    EXPECT_EQ(pattern->colorSpace_, 0);
+    pattern->SetColorSpace(3); // DISPLAY_P3
+    EXPECT_EQ(pattern->colorSpace_, 3);
+    pattern->SetColorSpace(9); // BT2020_HLG
+    EXPECT_EQ(pattern->colorSpace_, 9);
 }
 
 /**

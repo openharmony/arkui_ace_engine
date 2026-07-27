@@ -136,6 +136,10 @@ void SetDepthComponentOptionsImpl(Ark_NativePointer node,
         if (render3DScale && GreatNotEqual(*render3DScale, 0.0f) && LessOrEqual(*render3DScale, 1.0f)) {
             DepthComponentModel::SetRender3DScale(frameNode, *render3DScale);
         }
+        auto colorSpace = Converter::GetOpt(options->value.colorSpace);
+        if (colorSpace) {
+            DepthComponentModel::SetColorSpace(frameNode, static_cast<int32_t>(*colorSpace));
+        }
     }
 }
 } // DepthComponentInterfaceModifier
