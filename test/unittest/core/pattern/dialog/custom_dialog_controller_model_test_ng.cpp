@@ -999,7 +999,8 @@ HWTEST_F(CustomDialogControllerModelTestNg, SetCloseDialog008, TestSize.Level1)
 
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     auto dialogNode =
-        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, TEST_DIALOG_NODE_ID, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, TEST_DIALOG_NODE_ID,
+            AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
     ASSERT_NE(dialogNode, nullptr);
 
     CustomDialogControllerModelNG controllerModel;
