@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
@@ -30,7 +31,6 @@ struct SpanItem;
 
 namespace OHOS::Ace {
 class ResourceObject;
-class PixelMap;
 namespace {
 Color DEFAULT_SYMBOL_COLOR = Color::BLACK;
 }
@@ -80,7 +80,7 @@ struct SymbolSpanStyle {
     int32_t effectStrategy = 0;
 
     SymbolSpanStyle() {}
-    SymbolSpanStyle(const TextStyle& style);
+    ACE_FORCE_EXPORT SymbolSpanStyle(const TextStyle& style);
     bool operator==(const SymbolSpanStyle& rhs) const;
     bool operator!=(const SymbolSpanStyle& rhs) const;
 };
@@ -159,7 +159,7 @@ public:
 
     ~SelectionInfo() = default;
     ACE_FORCE_EXPORT Selection GetSelection() const;
-    Selection& GetSelectionRef();
+    ACE_FORCE_EXPORT Selection& GetSelectionRef();
     ACE_FORCE_EXPORT void SetSelectionStart(int32_t start);
     ACE_FORCE_EXPORT void SetSelectionEnd(int32_t end);
     ACE_FORCE_EXPORT void SetResultObjectList(const std::list<ResultObject>& resultObjectList);
@@ -168,7 +168,7 @@ private:
     Selection selection_;
 };
 
-class SelectionRangeInfo : public BaseEventInfo {
+class ACE_FORCE_EXPORT SelectionRangeInfo : public BaseEventInfo {
     DECLARE_RELATIONSHIP_OF_CLASSES(SelectionRangeInfo, BaseEventInfo);
 
 public:
@@ -176,7 +176,7 @@ public:
     ~SelectionRangeInfo() = default;
     int32_t start_;
     int32_t end_;
-    void reset();
+    ACE_FORCE_EXPORT void reset();
     bool operator==(const SelectionRangeInfo& rhs) const;
 };
 

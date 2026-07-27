@@ -1330,9 +1330,22 @@ ArkUINativeModuleValue TextAreaBridge::SetEnableKeyboardOnFocus(ArkUIRuntimeCall
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
     uint32_t keyboardOnFocusValue = KEY_BOARD_FOCUS_DEFAULT;
     if (secondArg->IsBoolean()) {
         keyboardOnFocusValue = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+    } else {
+        if (isJsView) {
+            auto container = Container::Current();
+            CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+            auto themeManager = pipelineContext->GetThemeManager();
+            CHECK_NULL_RETURN(themeManager, panda::JSValueRef::Undefined(vm));
+            auto theme = themeManager->GetTheme<TextFieldTheme>();
+            CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
+            keyboardOnFocusValue = theme ? !theme->GetIndependentControlKeyboard() : true;
+        }
     }
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaEnableKeyboardOnFocus(nativeNode, keyboardOnFocusValue);
     return panda::JSValueRef::Undefined(vm);

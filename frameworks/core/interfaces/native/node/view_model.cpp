@@ -44,6 +44,9 @@
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/progress_modifier.h"
 #include "core/interfaces/native/node/text_timer_modifier.h"
+#include "core/interfaces/native/node/node_text_area_modifier.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
@@ -175,15 +178,16 @@ void* createLoadingProgress(ArkUI_Int32 nodeId)
 
 void* createTextInputNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextFieldModelNG::CreateTextInputNode(nodeId, u"", u"");
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto* modifier = NG::NodeModifier::GetTextInputCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createTextInputNode(nodeId);
 }
 
 void* createRichEditorNode(ArkUI_Int32 nodeId)
 {
-    RefPtr<FrameNode> frameNode = RichEditorModelNG::CreateRichEditorStyledStringNode(nodeId);
+    auto* modifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    RefPtr<FrameNode> frameNode = modifier->createRichEditorStyledStringNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -237,7 +241,9 @@ void* createArcSwiperNode(ArkUI_Int32 nodeId)
 
 void* createTextAreaNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextFieldModelNG::CreateTextAreaNode(nodeId, u"", u"");
+    auto* modifier = NG::NodeModifier::GetTextAreaCustomModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = modifier->createTextAreaNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

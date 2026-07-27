@@ -25,9 +25,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/focus_hub.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -42,6 +42,12 @@ const char EXIT_EVENT_SUFFIX[] = "_EXIT";
 const char COUNT_GTE_OPERATOR[] = "COUNT_GTE";
 const char SOURCE_ARKUI[] = "ARKUI";
 const char SEARCH_FIELD_TAG[] = "SearchField";
+
+bool IsTextCategoryComponent(const std::string& frameTag)
+{
+    return frameTag == V2::TEXTAREA_ETS_TAG || frameTag == V2::TEXTINPUT_ETS_TAG ||
+        frameTag == V2::SEARCH_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG;
+}
 
 bool IsValidId(const std::string& id)
 {
@@ -101,13 +107,12 @@ std::unique_ptr<JsonValue> BuildRectJson(const PageSceneRectInfo& rect)
 std::string ExtractTextFieldText(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, "");
-    auto textFieldPattern = node->GetPattern<TextFieldPattern>();
-    CHECK_NULL_RETURN(textFieldPattern, "");
-    auto text = textFieldPattern->GetTextValue();
-    if (!text.empty()) {
-        return text;
+    if (IsTextCategoryComponent(node->GetTag())) {
+        auto textInputCustomModifier = NodeModifier::GetTextInputCustomModifier();
+        CHECK_NULL_RETURN(textInputCustomModifier, "");
+        return textInputCustomModifier->extractTextFieldText(node);
     }
-    return UtfUtils::Str16DebugToStr8(textFieldPattern->GetPlaceHolder());
+    return "";
 }
 
 std::string ExtractSearchText(const RefPtr<FrameNode>& node)
@@ -125,14 +130,12 @@ std::string ExtractSearchText(const RefPtr<FrameNode>& node)
 std::string ExtractRichEditorText(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, "");
-    auto richEditorPattern = node->GetPattern<RichEditorPattern>();
-    CHECK_NULL_RETURN(richEditorPattern, "");
-    std::u16string text;
-    richEditorPattern->GetContentBySpans(text);
-    if (text.empty()) {
-        return richEditorPattern->GetPlaceHolder();
+    if (node->GetTag() == V2::RICH_EDITOR_ETS_TAG) {
+        auto* customModifier = NodeModifier::GetRichEditorCustomModifier();
+        CHECK_NULL_RETURN(customModifier, "");
+        return customModifier->extractRichEditorText(node);
     }
-    return UtfUtils::Str16DebugToStr8(text);
+    return "";
 }
 
 std::string ExtractInputText(const RefPtr<FrameNode>& node)

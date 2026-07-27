@@ -103,7 +103,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "RelativeContainer", "relativecontainer" },
         { "Richeditor", "richeditor" },
         { "RowSplit", "linearsplit" },
-        { "Search", "search" },
+        { "Search", "textfield" },
         { "Sheet", "sheet" },
         { "Sidebar", "sidebar" },
         { "Slider", "slider" },

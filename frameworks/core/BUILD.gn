@@ -183,6 +183,7 @@ template("ace_core_source_set") {
       "common/task_runner_adapter_impl.cpp",
       "common/task_runners.cpp",
       "common/text_field_manager.cpp",
+      "common/text_field_manager_ng.cpp",
       "common/thread_checker.cpp",
       "common/thread_container.cpp",
       "common/thread_model_impl.cpp",
@@ -516,9 +517,7 @@ template("ace_core_source_set") {
     }
 
     deps += [
-      "$ace_root/frameworks/core/components_ng/pattern/rich_editor:ace_core_components_rich_editor_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/security_component:ace_core_components_security_component_pattern_ng_$platform",
-      "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
     ]
 
     deps += [ "$ace_root/frameworks/core/accessibility:ace_core_accessibility_ng_$platform" ]
@@ -1102,8 +1101,6 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/layout:ace_core_components_layout_ng_$platform",
       "$ace_root/frameworks/core/components_ng/manager:ace_core_components_manager_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern:ace_core_components_pattern_ng_$platform",
-      "$ace_root/frameworks/core/components_ng/pattern/rich_editor:ace_core_components_rich_editor_pattern_ng_$platform",
-      "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/property:ace_core_components_property_ng_$platform",
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",

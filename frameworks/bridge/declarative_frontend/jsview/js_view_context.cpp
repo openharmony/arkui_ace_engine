@@ -45,7 +45,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/image/image_cache.h"
 

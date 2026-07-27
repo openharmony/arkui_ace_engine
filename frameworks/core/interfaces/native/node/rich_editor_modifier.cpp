@@ -39,5 +39,17 @@ const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
     }
     return cachedModifier;
 }
+
+const ArkUIRichEditorCustomModifier* GetRichEditorCustomModifier()
+{
+    static const ArkUIRichEditorCustomModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Richeditor");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier =
+            reinterpret_cast<const ArkUIRichEditorCustomModifier*>(module->GetCustomModifier());
+    }
+    return cachedModifier;
+}
 }
 }

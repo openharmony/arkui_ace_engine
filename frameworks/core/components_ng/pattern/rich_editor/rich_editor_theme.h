@@ -35,6 +35,8 @@ constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
 constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 constexpr Dimension DEFAULT_PADDING_HORIZONTAL = 16.0_vp;
 constexpr Dimension DEFAULT_PADDING_VERTICAL = 8.0_vp;
+constexpr char RICH_EDITOR_THEME_PATTERN_NAME[] = "rich_editor_pattern";
+constexpr char RICH_EDITOR_THEME_BG_COLOR[] = "bg_color";
 } // namespace
 
 class RichEditorTheme : public virtual Theme {
@@ -66,7 +68,7 @@ public:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<RichEditorTheme>& theme) const
         {
             CHECK_NULL_VOID(theme);
-            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_RICH_EDITOR);
+            RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(RICH_EDITOR_THEME_PATTERN_NAME);
             CHECK_NULL_VOID(pattern);
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);

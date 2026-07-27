@@ -1518,7 +1518,17 @@ ArkUINativeModuleValue TextInputBridge::SetEnableKeyboardOnFocus(ArkUIRuntimeCal
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputEnableKeyboardOnFocus(nativeNode, value);
     } else {
         if (isJsView) {
-            GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputEnableKeyboardOnFocus(nativeNode);
+            auto container = Container::Current();
+            CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
+            auto themeManager = pipelineContext->GetThemeManager();
+            CHECK_NULL_RETURN(themeManager, panda::JSValueRef::Undefined(vm));
+            auto theme = themeManager->GetTheme<TextFieldTheme>();
+            CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
+            auto keyboardOnFocusValue = theme ? !theme->GetIndependentControlKeyboard() : true;
+            GetArkUINodeModifiers()->getTextInputModifier()->setTextInputEnableKeyboardOnFocus(
+                nativeNode, keyboardOnFocusValue);
         } else {
             GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputShowPasswordIcon(nativeNode);
         }
