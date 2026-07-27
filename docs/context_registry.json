@@ -3584,6 +3584,69 @@
       ],
       "status": "active",
       "last_verified": "2026-07-23"
+    },
+    {
+      "id": "UIObserver",
+      "name": "UIObserver",
+      "name_cn": "无感监听",
+      "kind": "common_capability",
+      "category": "api",
+      "keywords": [
+        "UIObserver",
+        "UIObserverHandler",
+        "observer",
+        "NavDestinationInfo",
+        "无感监听",
+        "NavDestinationState",
+        "ScrollEventInfo",
+        "RouterPageInfoNG",
+        "NodeRenderStatusMonitor",
+        "GlobalGestureListener"
+      ],
+      "aliases": [
+        "无感监听",
+        "UI Observer",
+        "Observer API",
+        "uiObserver"
+      ],
+      "kb": "docs/kb/capabilities/ui-observer.md",
+      "spec_domain": "specs/04-common-capability/11-component-info/02-observer",
+      "func_id": "04-11-02",
+      "spec_status": "active",
+      "source_paths": {
+        "observer_handler": "frameworks/core/components_ng/base/observer_handler.h",
+        "observer_handler_cpp": "frameworks/core/components_ng/base/observer_handler.cpp",
+        "node_render_status_monitor": "frameworks/core/components_ng/base/node_render_status_monitor.h",
+        "scroller_observer_manager": "frameworks/core/components_ng/pattern/scrollable/scroller_observer_manager.h",
+        "napi_ui_observer": "interfaces/napi/kits/observer/ui_observer.h",
+        "napi_ui_observer_listener": "interfaces/napi/kits/observer/ui_observer_listener.h",
+        "napi_js_ui_observer": "interfaces/napi/kits/observer/js_ui_observer.h",
+        "napi_gesture_observer": "interfaces/napi/kits/observer/gesture/gesture_observer.h",
+        "ani_observer": "interfaces/ets/ani/observer/src/observer.cpp",
+        "ani_observer_ets": "interfaces/ets/ani/observer/ets/@ohos.arkui.observer.ets",
+        "idl": "frameworks/bridge/arkts_frontend/arkoala_generator/arkui_extra_idl/arkui-uicontext-uiobserver.idl",
+        "inner_api_ui_event_observer": "interfaces/inner_api/ace/ui_event_observer.h",
+        "inner_api_ui_event_func": "interfaces/inner_api/ace/ui_event_func.cpp",
+        "adapter_ui_event_impl": "adapter/ohos/entrance/ui_event_impl.cpp",
+        "nav_destination_modifier": "frameworks/core/interfaces/native/node/nav_destination_modifier.h"
+      },
+      "api_paths": {
+        "dynamic_dts": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.observer.d.ts",
+        "static_dets": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.observer.static.d.ets",
+        "ani_ets": "interfaces/ets/ani/observer/ets/@ohos.arkui.observer.ets",
+        "capi": "interfaces/native/native_node.h",
+        "idl": "frameworks/bridge/arkts_frontend/arkoala_generator/arkui_extra_idl/arkui-uicontext-uiobserver.idl"
+      },
+      "test_paths": [
+        "test/unittest/core/base/observer_test_ng.cpp",
+        "test/mock/frameworks/core/components_ng/base/mock_observer_handler.cpp",
+        "test/unittest/core/pattern/swiper/swiper_ui_observer_test_ng.cpp",
+        "test/unittest/capi/modifiers/nav_destination_modifier_test.cpp",
+        "test/unittest/interfaces/ui_event_test.cpp",
+        "test/unittest/core/base/node_render_status_monitor_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27"
     }
   ]
 }
