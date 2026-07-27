@@ -172,8 +172,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return PUV2ViewBase.__preRenderingPool__Internal;
   }
 
-  protected __reusableMemOptStrategy__Internal: number = 0;
-
   protected __hasStartMemOpt__Internal: boolean = false;
 
   protected __enableReleaseExpiringNodesFlag__Internal: boolean = false;
@@ -430,16 +428,13 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   }
 
   public __setReusableMemOptStrategy__Internal(reusableMemOptStrategy: ReusableMemOptStrategy): void {
-    let val: number = 0;
-    if (reusableMemOptStrategy === ReusableMemOptStrategy.ENABLE_AUTO_CACHE_OPTIMIZATION) {
-      val = 1;
+    if (reusableMemOptStrategy === undefined || reusableMemOptStrategy === null) {
+      return this.nativeViewPartialUpdate.setReusableMemOptStrategy(-1);
     }
-    this.__reusableMemOptStrategy__Internal = val;
-    return this.nativeViewPartialUpdate.setReusableMemOptStrategy(val);
-  }
-
-  public __getReusableMemOptStrategy__Internal(): number {
-    return this.__reusableMemOptStrategy__Internal;
+    if (reusableMemOptStrategy === ReusableMemOptStrategy.ENABLE_AUTO_CACHE_OPTIMIZATION) {
+      return this.nativeViewPartialUpdate.setReusableMemOptStrategy(1);
+    }
+    return this.nativeViewPartialUpdate.setReusableMemOptStrategy(0);
   }
 
   public __setHasStartMemOpt__Internal(hasStartMemOpt: boolean): void {

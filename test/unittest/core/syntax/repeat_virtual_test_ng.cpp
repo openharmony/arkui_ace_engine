@@ -62,13 +62,11 @@ public:
     void SetUp() override
     {
         MockPipelineContext::SetUp();
-        LazyForEachUtils::SetEnableRepeatAnimation(true);
     }
 
     void TearDown() override
     {
         MockPipelineContext::TearDown();
-        LazyForEachUtils::SetEnableRepeatAnimation(false);
     }
 
     RefPtr<RepeatVirtualScrollNode> GetOrCreateRepeatNode(bool createItems);
@@ -1533,15 +1531,13 @@ HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimation003, TestSize.Level1)
  */
 HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimationTest004, TestSize.Level1)
 {
-    LazyForEachUtils::SetEnableRepeatAnimation(false);
     auto listNode = CreateNode(V2::LIST_ETS_TAG, 100);
     RepeatModelNG repeatModel;
     repeatModel.StartRender();
     auto repeatNode = AceType::DynamicCast<RepeatNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(repeatNode, nullptr);
     listNode->AddChild(repeatNode);
-    EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
-    LazyForEachUtils::SetEnableRepeatAnimation(true);
+    EXPECT_EQ(repeatNode->IsAllowAnimation(), true);
 }
 
 /**
@@ -1551,7 +1547,6 @@ HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimationTest004, TestSize.Level1
  */
 HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimationTest005, TestSize.Level1)
 {
-    LazyForEachUtils::SetEnableRepeatAnimation(false);
     auto gridNode = CreateNode(V2::GRID_ETS_TAG, 100);
     RepeatModelNG repeatModel;
     repeatModel.StartRender();
@@ -1559,7 +1554,6 @@ HWTEST_F(RepeatVirtualTestNg, RepeatNodeIsAllowAnimationTest005, TestSize.Level1
     ASSERT_NE(repeatNode, nullptr);
     gridNode->AddChild(repeatNode);
     EXPECT_EQ(repeatNode->IsAllowAnimation(), false);
-    LazyForEachUtils::SetEnableRepeatAnimation(true);
 }
 
 /**
