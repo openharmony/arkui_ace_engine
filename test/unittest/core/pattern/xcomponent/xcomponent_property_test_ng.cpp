@@ -1047,8 +1047,8 @@ HWTEST_F(XComponentPropertyTestNg, XComponentModelNGTest024, TestSize.Level1)
     XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_TEXTURE_TYPE_VALUE);
     auto resultType = XComponentModelNG::GetXComponentType(Referenced::RawPtr(frameNode));
     EXPECT_EQ(resultType, XCOMPONENT_TEXTURE_TYPE_VALUE);
-    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
-    EXPECT_EQ(reporter->totalEventCount_, 1);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 2);
+    EXPECT_EQ(reporter->totalEventCount_, 2);
     frameNode->onMainTree_ = false;
     XComponentModelNG::SetXComponentType(Referenced::RawPtr(frameNode), XCOMPONENT_TEXTURE_TYPE_VALUE);
     auto pattern = frameNode->GetPattern<XComponentPattern>();

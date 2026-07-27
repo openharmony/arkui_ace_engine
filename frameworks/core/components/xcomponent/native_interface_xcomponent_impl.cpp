@@ -312,25 +312,6 @@ int32_t OH_NativeXComponent::DetachNativeRootNode(void* root)
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 
-int32_t OH_NativeXComponent::RegisterUIAxisEventCallback(
-    void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type))
-{
-    if (xcomponentImpl_ == nullptr) {
-        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
-    }
-    xcomponentImpl_->SetUIAxisEventCallback(callback);
-    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
-}
-
-int32_t OH_NativeXComponent::SetNeedSoftKeyboard(bool needSoftKeyboard)
-{
-    if (xcomponentImpl_ == nullptr) {
-        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
-    }
-    xcomponentImpl_->SetNeedSoftKeyboard(needSoftKeyboard);
-    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
-}
-
 int32_t OH_NativeXComponent::RegisterSurfaceShowCallback(NativeXComponent_Surface_Callback callback)
 {
     if (xcomponentImpl_ == nullptr) {
@@ -349,6 +330,16 @@ int32_t OH_NativeXComponent::RegisterSurfaceHideCallback(NativeXComponent_Surfac
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 
+int32_t OH_NativeXComponent::RegisterUIAxisEventCallback(
+    void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type))
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    xcomponentImpl_->SetUIAxisEventCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
 int32_t OH_NativeXComponent::RegisterOnTouchInterceptCallback(
     HitTestMode (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event))
 {
@@ -356,6 +347,15 @@ int32_t OH_NativeXComponent::RegisterOnTouchInterceptCallback(
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     xcomponentImpl_->SetOnTouchInterceptCallback(callback);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::SetNeedSoftKeyboard(bool needSoftKeyboard)
+{
+    if (xcomponentImpl_ == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->SetNeedSoftKeyboard(needSoftKeyboard);
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
 

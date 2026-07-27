@@ -53,7 +53,7 @@ export class XComponentOpsHandWritten {
                 onSurfaceChanged: value_casted.controller.onSurfaceChanged as ((surfaceId: string, surfaceRect: SurfaceRect) => void),
                 onSurfaceDestroyed: value_casted.controller.onSurfaceDestroyed as ((surfaceId: string) => void)
             } as XComponentOptionsInternal;
-            ArkUIAniModule._XComponent_SetXComponentControllerCallback(toPeerPtr(value_casted.controller), options);
+            ArkUIAniModule._XComponent_SetXComponentControllerCallback(toPeerPtr(value_casted.controller.nativeObj), options);
 
             // wrap imageAIOptions
             const optImageAIOptions = value_casted.imageAIOptions;

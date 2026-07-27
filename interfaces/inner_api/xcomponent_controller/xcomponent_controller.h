@@ -62,9 +62,9 @@ public:
         napi_env env, napi_value napiValue);
 
     /**
-    * @brief Get xcomponentController from aniValue converted by jsXComponentController
-    *
-    */
+     * @brief Get xcomponentController from aniValue converted by jsXComponentController
+     *
+     */
     static std::shared_ptr<XComponentController> GetXComponentControllerFromAniValue(
         ani_env* env, ani_object aniValue);
 
@@ -76,7 +76,7 @@ public:
         napi_env env, napi_value node, SurfaceCallbackMode mode);
 
     /**
-     * @brief set typeNode.XComponent's SurfaceCallbackMode
+     * @brief set typedNode.XComponent's SurfaceCallbackMode
      *
      */
     static XComponentControllerErrorCode SetSurfaceCallbackModeFromAniValue(

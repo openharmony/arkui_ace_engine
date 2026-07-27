@@ -33,6 +33,16 @@ void SendStatisticEvent(FrameNode* frameNode, StatisticEventType type)
     CHECK_NULL_VOID(statisticEventReporter);
     statisticEventReporter->SendEvent(type);
 }
+
+void ReportTypeChangedEvent(FrameNode* frameNode, XComponentType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasXComponentType() && layoutProperty->GetXComponentTypeValue() != type) {
+        SendStatisticEvent(frameNode, StatisticEventType::XCOMPONENT_TYPE_CHANGED);
+    }
+}
 } // namespace
 void XComponentModelNG::Create(XComponentType type)
 {
@@ -43,6 +53,7 @@ void XComponentModelNG::Create(XComponentType type)
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId,
         [type]() { return AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::DECLARATIVE_NODE); });
     stack->Push(frameNode);
+    ReportTypeChangedEvent(Referenced::RawPtr(frameNode), type);
     ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type);
 }
 
@@ -59,6 +70,7 @@ void XComponentModelNG::Create(const std::optional<std::string>& id, XComponentT
             return AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, xcomponentController);
         });
     stack->Push(frameNode);
+    ReportTypeChangedEvent(Referenced::RawPtr(frameNode), type);
     ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type);
 }
 
@@ -377,6 +389,7 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
     }
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     if (layoutProperty) {
+        ReportTypeChangedEvent(Referenced::RawPtr(frameNode), type);
         layoutProperty->UpdateXComponentType(type);
     }
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
@@ -421,6 +434,7 @@ void XComponentModelNG::SetXComponentType(FrameNode* frameNode, XComponentType t
         xcPattern->PushType(StatisticEventType::XCOMPONENT_SET_ATTRIBUTE_NODE_TYPE);
     }
     xcPattern->SetType(type);
+    ReportTypeChangedEvent(frameNode, type);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type, frameNode);
 }
 

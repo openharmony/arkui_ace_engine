@@ -296,6 +296,18 @@ export function XComponentImpl(
     })
 }
 
+export class XComponentController_serializer {
+    public static write(buffer: SerializerBase, value: XComponentController): void {
+        let valueSerializer: SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): XComponentController {
+        let valueDeserializer: DeserializerBase = buffer
+        let ptr: KPointer = valueDeserializer.readPointer()
+        return XComponentControllerInternal.fromPtr(ptr)
+    }
+}
+
 @memo
 export function XComponent(
     @memo @memo_skip
