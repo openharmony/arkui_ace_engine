@@ -335,7 +335,7 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
         TAG_LOGI(ACE_KEYBOARD, "caret > scroll area, skip");
         return false;
     }
-     // USER: keyboard show/hide caused by user focusing/blurring the TextField
+    // USER: keyboard show/hide caused by user focusing/blurring the TextField
     scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
     return true;

@@ -489,6 +489,7 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     ChangeAnimateOverScroll();
     ChangeCanStayOverScroll();
+    ResetAccessibilityScrollSourceIfIdle();
     return NeedRender();
 }
 
