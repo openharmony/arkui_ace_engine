@@ -79,7 +79,11 @@ DatePickerModel* DatePickerModel::GetInstance()
 #endif
     });
 
-    return datePickerInstance_.get();
+    auto instance = datePickerInstance_.get();
+    if (!instance) {
+        LOGF_ABORT("DatePickerModel::GetInstance() returns nullptr");
+    }
+    return instance;
 }
 
 DatePickerDialogModel* DatePickerDialogModel::GetInstance()
@@ -110,7 +114,11 @@ DatePickerDialogModel* DatePickerDialogModel::GetInstance()
 #endif
     });
 
-    return datePickerDialogInstance_.get();
+    auto instance = datePickerDialogInstance_.get();
+    if (!instance) {
+        LOGF_ABORT("DatePickerDialogModel::GetInstance() returns nullptr");
+    }
+    return instance;
 }
 
 TimePickerModel* TimePickerModel::GetInstance()
