@@ -3854,6 +3854,7 @@ void OverlayManager::UpdateSheetRender(
     sheetNodePattern->UpdateMaskBackgroundColor();
 
     sheetNodePattern->SetSheetRenderMaterial();
+    SetSheetBlurSnapshotFreeze(sheetPageNode, sheetNodePattern, sheetStyle, isPartialUpdate);
 }
 void OverlayManager::UpdateSheetRenderProperty(const RefPtr<FrameNode>& sheetNode,
     const NG::SheetStyle& currentStyle, bool isPartialUpdate)
@@ -4134,20 +4135,22 @@ RefPtr<FrameNode> OverlayManager::MountSheetEffectComponent(
     CHECK_NULL_RETURN(sheetWrapperPattern, nullptr);
     sheetWrapperPattern->SetSheetECNode(sheetECNode);
 
+    bool enableFreeze =
+        sheetStyle.blurSnapshotOptions.has_value() && sheetStyle.blurSnapshotOptions->enableFreeze.value_or(false);
+
+    auto ecRSContext = sheetECNode->GetRenderContext();
+    CHECK_NULL_RETURN(ecRSContext, nullptr);
     if (sheetStyle.systemMaterial) {
-        auto ecRSContext = sheetECNode->GetRenderContext();
-        CHECK_NULL_RETURN(ecRSContext, nullptr);
         sheetStyle.systemMaterialEC = ViewAbstract::ConvertToImmersiveEC(sheetStyle.systemMaterial);
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(sheetECNode), AceType::RawPtr(sheetStyle.systemMaterialEC));
     }
     if (sheetStyle.backgroundBlurStyle.has_value()) {
-        auto ecRSContext = sheetECNode->GetRenderContext();
-        CHECK_NULL_RETURN(ecRSContext, nullptr);
         SetSheetBackgroundBlurStyle(sheetECNode, sheetStyle.backgroundBlurStyle.value());
         auto sheetNodeRSContext = sheetPageNode->GetRenderContext();
         CHECK_NULL_RETURN(sheetNodeRSContext, nullptr);
         sheetNodeRSContext->UpdateUseEffect(true);
     }
+    ecRSContext->UpdateFreeze(enableFreeze);
     return sheetECNode;
 #else
     return nullptr;
@@ -4453,6 +4456,27 @@ void OverlayManager::SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode,
         } else if (sheetStyle.systemMaterial && SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::EXQUISITE) {
             sheetNode->GetRenderContext()->UpdateBackgroundColor(sheetTheme->GetSheetBackgoundColor());
         }
+    }
+}
+
+void OverlayManager::SetSheetBlurSnapshotFreeze(const RefPtr<FrameNode>& sheetPageNode,
+    const RefPtr<SheetPresentationPattern>& sheetNodePattern, const NG::SheetStyle& sheetStyle, bool isPartialUpdate)
+{
+    CHECK_NULL_VOID(sheetPageNode);
+    CHECK_NULL_VOID(sheetNodePattern);
+    if (!sheetNodePattern->CheckIfUseEffectComponent(sheetStyle)) {
+        return;
+    }
+    if (isPartialUpdate && !sheetStyle.blurSnapshotOptions.has_value()) {
+        return;
+    }
+    auto sheetECNode = AceType::DynamicCast<FrameNode>(sheetPageNode->GetParent());
+    CHECK_NULL_VOID(sheetECNode);
+    if (sheetECNode->GetTag() == V2::EFFECT_COMPONENT_ETS_TAG) {
+        auto ecRSContext = sheetECNode->GetRenderContext();
+        CHECK_NULL_VOID(ecRSContext);
+        ecRSContext->UpdateFreeze(
+            sheetStyle.blurSnapshotOptions.has_value() && sheetStyle.blurSnapshotOptions->enableFreeze.value_or(false));
     }
 }
 

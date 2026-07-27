@@ -179,6 +179,14 @@ enum class SheetKeyboardAvoidMode {
     POPUP_SHEET,
 };
 
+struct BlurSnapshotOptions {
+    std::optional<bool> enableFreeze;
+    bool operator==(const BlurSnapshotOptions& other) const
+    {
+        return enableFreeze == other.enableFreeze;
+    }
+};
+
 struct SheetStyle {
     SheetHeight sheetHeight;
     std::optional<bool> showDragBar;
@@ -217,7 +225,7 @@ struct SheetStyle {
     RefPtr<UiMaterial> systemMaterialEC;
     RefPtr<UiMaterial> systemMaterialECSub;
     std::optional<EdgeLightMode> sheetEdgeLightMode;
-    std::optional<bool> enableBlurSnapshot;
+    std::optional<BlurSnapshotOptions> blurSnapshotOptions;
 
     SheetStyle() = default;
     // constructor for image generator dialog
@@ -246,7 +254,7 @@ struct SheetStyle {
                 showInSubWindow == sheetStyle.showInSubWindow && modalTransition == sheetStyle.modalTransition &&
                 radiusRenderStrategy == sheetStyle.radiusRenderStrategy &&
                 systemMaterial == sheetStyle.systemMaterial && sheetEdgeLightMode == sheetStyle.sheetEdgeLightMode &&
-                enableBlurSnapshot == sheetStyle.enableBlurSnapshot);
+                blurSnapshotOptions == sheetStyle.blurSnapshotOptions);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -297,8 +305,8 @@ struct SheetStyle {
             sheetStyle.radiusRenderStrategy.has_value() ? sheetStyle.radiusRenderStrategy : radiusRenderStrategy;
         systemMaterial = sheetStyle.systemMaterial ? sheetStyle.systemMaterial : systemMaterial;
         sheetEdgeLightMode = sheetStyle.sheetEdgeLightMode ? sheetStyle.sheetEdgeLightMode : sheetEdgeLightMode;
-        enableBlurSnapshot =
-            sheetStyle.enableBlurSnapshot.has_value() ? sheetStyle.enableBlurSnapshot : enableBlurSnapshot;
+        blurSnapshotOptions =
+            sheetStyle.blurSnapshotOptions.has_value() ? sheetStyle.blurSnapshotOptions : blurSnapshotOptions;
     }
 
     // Register the set/get method of the resource.
