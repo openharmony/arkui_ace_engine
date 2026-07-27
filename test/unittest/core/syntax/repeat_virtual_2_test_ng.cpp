@@ -1224,6 +1224,23 @@ HWTEST_F(RepeatVirtual2TestNg, SetEnableSyncLoadTest001, TestSize.Level1)
 }
 
 /**
+* @tc.name: SetIsSyncLoadTest001
+* @tc.desc: Test RepeatVirtualScroll2Caches::SetIsSyncLoad with true value
+* @tc.type: FUNC
+*/
+HWTEST_F(RepeatVirtual2TestNg, SetIsSyncLoadTest001, TestSize.Level1)
+{
+    auto repeatNode = CreateRepeatVirtualNode(10, 10);
+    ASSERT_NE(repeatNode, nullptr);
+
+    repeatNode->caches_.SetIsSyncLoad(true);
+    EXPECT_EQ(repeatNode->caches_.isSyncLoad_, true);
+
+    repeatNode->caches_.SetIsSyncLoad(false);
+    EXPECT_EQ(repeatNode->caches_.isSyncLoad_, false);
+}
+
+/**
 * @tc.name: LazyForEachUtilsSetRepeatMemOptStrategy001
 * @tc.desc: Test LazyForEachUtils::SetRepeatMemOptStrategy
 * @tc.type: FUNC
