@@ -110,8 +110,8 @@ std::string GetReplaceContentStr(int pos, const std::string& type,
             return item.value();
         } else if (itemType == ResourceObjectParamType::NONE) {
             auto resObj = CompleteResourceObject(entityReson);
-            int32_t result = 0;
-            ResourceParseUtils::ParseResInteger(resObj, result);
+            int64_t result = 0;
+            ResourceParseUtils::ParseResInteger<int64_t>(resObj, result);
             return std::to_string(result);
         }
     } else if (type == "s") {
