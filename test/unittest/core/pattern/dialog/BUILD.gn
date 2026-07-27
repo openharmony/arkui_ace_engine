@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 test_sources = [
+  "custom_dialog_controller_model_test_ng.cpp",
   "dialog_layout_test_ng.cpp",
   "dialog_layout_test_two_ng.cpp",
   "dialog_model_test_ng.cpp",
