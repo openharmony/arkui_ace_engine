@@ -6,7 +6,7 @@
 
 ## 定位
 
-Button 是 ArkUI 表单选择类组件，提供按钮交互能力，支持多种按钮类型（Capsule、Circle、Normal）、点击事件、状态样式（pressed/normal/disabled）等。Button 已完成组件化改造，输出独立 SO `libarkui_button.z.so`，无遗留 JSView 文件。Button 同时作为 ToggleButton 的基类。C API 暴露为 `ARKUI_NODE_BUTTON` 节点类型。
+Button 是 ArkUI 基础组件，提供按钮交互能力，支持多种按钮类型（Capsule、Circle、Normal）、点击事件、状态样式（pressed/normal/disabled）等。Button 已完成组件化改造，输出独立 SO `libarkui_button.z.so`，无遗留 JSView 文件。Button 同时作为 ToggleButton 的基类。C API 暴露为 `ARKUI_NODE_BUTTON` 节点类型。
 
 本文档用于快速定位 Button 相关源码、SDK 声明、测试和规格文档。具体行为、默认值、边界条件和兼容性说明以对应 SDK 声明、源码实现、测试用例和 Spec 为准。
 

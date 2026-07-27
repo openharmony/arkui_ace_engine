@@ -51,6 +51,8 @@ ArcSlider 是 ArkTS 应用层高级组件，不涉及底层 Pattern/Bridge/Modif
 |------|----------|------|
 | Context registry | `docs/context_registry.json` | ArcSlider 的 KB、源码、API 统一路由 |
 
+> 注：ArcSlider 当前暂无独立单元测试，后续 PR 计划补齐。
+
 ### 相关 Spec
 
 | Spec | 路径 | 说明 |

@@ -51,13 +51,15 @@ ArcButton 是 ArkTS 应用层高级组件，不涉及底层 Pattern/Bridge/Modif
 |------|----------|------|
 | Context registry | `docs/context_registry.json` | ArcButton 的 KB、源码、API 统一路由 |
 
+> 注：ArcButton 当前暂无独立单元测试，后续 PR 计划补齐。
+
 ### 相关 Spec
 
 | Spec | 路径 | 说明 |
 |------|------|------|
-| 弧形组件功能域 | `specs/10-product-customization/01-wearable/01-arc-component/` | ArcSlider/ArcButton 共享规格目录 |
-| Feat-02 | `specs/10-product-customization/01-wearable/01-arc-component/Feat-02-arc-button-full-spec.md` | ArcButton 全量规格 |
-| 架构设计 | `specs/10-product-customization/01-wearable/01-arc-component/design.md` | 弧形组件架构设计文档（ArcSlider/ArcButton 共享） |
+| ArcButton 功能域 | `specs/10-product-customization/01-wearable/02-arc-button/` | ArcButton 独立规格目录（spec_status: pending，待 arkui-specs 仓库创建） |
+| Feat-01 | `specs/10-product-customization/01-wearable/02-arc-button/Feat-01-arc-button-full-spec.md` | ArcButton 全量规格（待迁移） |
+| 架构设计 | `specs/10-product-customization/01-wearable/02-arc-button/design.md` | ArcButton 架构设计文档（待创建） |
 
 ## 常见问题定位
 

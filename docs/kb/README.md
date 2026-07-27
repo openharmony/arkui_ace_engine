@@ -89,7 +89,7 @@ docs/kb/
 | PopupAdvanced | Popup 高级组件 | `docs/kb/components/overlay/popup_advanced.md` | 新建；补齐 Spec 路由 |
 | Sheet | 半模态弹窗组件 | `docs/kb/components/overlay/sheet.md` | 已迁移，旧 KB 已移除 |
 | bindTips | 提示气泡属性 | `docs/kb/components/overlay/bind_tips.md` | 新建 |
-| Button | 按钮组件 | `docs/kb/components/selector/button.md` | 新建；补齐 Spec 路由 |
+| Button | 按钮组件 | `docs/kb/components/basic/button.md` | 新建；补齐 Spec 路由 |
 | Radio | 单选组件 | `docs/kb/components/selector/radio.md` | 新建；补齐 Spec 路由 |
 | Checkbox | 多选组件 | `docs/kb/components/selector/checkbox.md` | 新建；补齐 Spec 路由 |
 | ArcSlider | 圆弧滑动选择器组件 | `docs/kb/components/selector/arc_slider.md` | 新建；补齐 Spec 路由 |
