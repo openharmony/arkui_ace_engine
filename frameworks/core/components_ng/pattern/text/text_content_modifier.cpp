@@ -458,7 +458,6 @@ void TextContentModifier::DrawContent(DrawingContext& drawingContext, const Fade
         host->GetId(), paintOffset_.GetX(), paintOffset_.GetY(), contentRect.ToString().c_str(), paragraphs.size(),
         lastParagraphLength);
 
-    SetHybridRenderTypeIfNeeded(drawingContext, textPattern, pManager, host);
     PropertyChangeFlag flag = 0;
     if (NeedMeasureUpdate(flag)) {
         host->MarkDirtyNode(flag);
@@ -505,35 +504,6 @@ void TextContentModifier::DrawActualText(DrawingContext& drawingContext, const R
         DrawTextRacing(drawingContext, fadeoutInfo, pManager);
     }
     canvas.Restore();
-}
-
-void TextContentModifier::SetHybridRenderTypeIfNeeded(DrawingContext& drawingContext,
-    const RefPtr<TextPattern>& textPattern, const RefPtr<ParagraphManager>& pManager, RefPtr<FrameNode>& host)
-{
-#ifdef ENABLE_ROSEN_BACKEND
-    RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&drawingContext.canvas);
-    if (recordingCanvas != nullptr && recordingCanvas->GetDrawCmdList() != nullptr) {
-        if (host->IsAtomicNode()) {
-            if (Rosen::RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::HMSYMBOL)) {
-                recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::HMSYMBOL);
-            }
-        } else {
-            if (Rosen::RSUIDirector::GetHybridRenderSwitch(Rosen::ComponentEnableSwitch::TEXTBLOB) &&
-                static_cast<uint32_t>(pManager->GetLineCount()) >=
-                Rosen::RSUIDirector::GetHybridRenderTextBlobLenCount()) {
-                recordingCanvas->GetDrawCmdList()->SetHybridRenderType(RSHybridRenderType::TEXT);
-                auto baselineOffset = LessOrEqual(textPattern->GetBaselineOffset(), 0.0) ?
-                    std::fabs(textPattern->GetBaselineOffset()) : 0.0;
-                const RectF& contentRect = textPattern->GetTextRect();
-                RectF boundsRect;
-                pManager->GetPaintRegion(boundsRect, contentRect.GetX(), contentRect.GetY() + baselineOffset);
-                recordingCanvas->ResetHybridRenderSize(
-                    std::max(boundsRect.Width(), pManager->GetLongestLineWithIndent()),
-                    std::max(boundsRect.Height(), pManager->GetHeight()));
-            }
-        }
-    }
-#endif
 }
 
 float TextContentModifier::AdjustParagraphX(const ParagraphManager::ParagraphInfo& info, const RectF& contentRect)

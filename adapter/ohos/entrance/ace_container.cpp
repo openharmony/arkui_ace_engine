@@ -44,7 +44,6 @@
 #include "adapter/ohos/entrance/data_share_observer_helper.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
-#include "adapter/ohos/entrance/high_contrast_observer.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/ui_event_tracker.h"
@@ -458,7 +457,6 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_pt
     if (ability) {
         abilityInfo_ = ability->GetAbilityInfo();
     }
-    SubscribeHighContrastChange();
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type,
@@ -483,7 +481,6 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
-    SubscribeHighContrastChange();
 }
 
 // for DynamicComponent
@@ -509,7 +506,6 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     }
     platformEventCallback_ = std::move(callback);
     useStageModel_ = true;
-    SubscribeHighContrastChange();
 }
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type) : instanceId_(instanceId), type_(type)
@@ -524,7 +520,6 @@ AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
     LOGI("Container Destroyed");
-    UnsubscribeHighContrastChange();
 }
 
 void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
@@ -1724,8 +1719,6 @@ void AceContainer::SetUIWindow(int32_t instanceId, sptr<OHOS::Rosen::Window> uiW
     container->SetUIWindowInner(uiWindow);
     if (!container->IsSceneBoardWindow()) {
         ResourceManager::GetInstance().SetResourceCacheSize(RESOURCE_CACHE_DEFAULT_SIZE);
-    } else {
-        OHOS::Rosen::RSUIDirector::SetTypicalResidentProcess(true);
     }
 }
 
@@ -2752,7 +2745,6 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
 
 void AceContainer::SetIsFormRender(bool isFormRender)
 {
-    OHOS::Rosen::RSUIDirector::SetTypicalResidentProcess(isFormRender);
     isFormRender_ = isFormRender;
 }
 
@@ -5167,35 +5159,6 @@ bool AceContainer::SetSystemBarEnabled(const sptr<OHOS::Rosen::Window>& window, 
         return false;
     }
     return true;
-}
-
-void AceContainer::SubscribeHighContrastChange()
-{
-    if (!Rosen::RSUIDirector::IsHybridRenderEnabled()) {
-        return;
-    }
-    if (highContrastObserver_ != nullptr) {
-        return;
-    }
-    auto& config = AccessibilityConfig::AccessibilityConfig::GetInstance();
-    if (!config.InitializeContext()) {
-        return;
-    }
-    highContrastObserver_ = std::make_shared<HighContrastObserver>(WeakClaim(this));
-    config.SubscribeConfigObserver(AccessibilityConfig::CONFIG_ID::CONFIG_HIGH_CONTRAST_TEXT, highContrastObserver_);
-}
-
-void AceContainer::UnsubscribeHighContrastChange()
-{
-    if (highContrastObserver_ == nullptr) {
-        return;
-    }
-    auto& config = AccessibilityConfig::AccessibilityConfig::GetInstance();
-    if (config.InitializeContext()) {
-        config.UnsubscribeConfigObserver(
-            AccessibilityConfig::CONFIG_ID::CONFIG_HIGH_CONTRAST_TEXT, highContrastObserver_);
-    }
-    highContrastObserver_ = nullptr;
 }
 
 void AceContainer::DistributeIntentInfo(const std::string& intentInfoSerialized, bool isColdStart,
