@@ -75,7 +75,7 @@ HWTEST_F(PipelineContextIsolatedThreadTest, PipelineContextIsolatedThreadTest_Fl
 
 /**
  * @tc.name: PipelineContextIsolatedThreadTest_AddDirtyNodesMismatch001
- * @tc.desc: Test all AddDirty*Node methods log warning on mismatch but still process nodes
+ * @tc.desc: Test all AddDirty*Node methods log debug on mismatch but still process nodes
  * @tc.type: FUNC
  */
 HWTEST_F(PipelineContextIsolatedThreadTest, PipelineContextIsolatedThreadTest_AddDirtyNodesMismatch001, TestSize.Level1)
