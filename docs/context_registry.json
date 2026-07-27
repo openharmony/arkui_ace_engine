@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-25",
+  "last_updated": "2026-07-27",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -185,6 +185,65 @@
       ],
       "status": "active",
       "last_verified": "2026-07-18"
+    },
+    {
+      "id": "PixelRounding",
+      "name": "Pixel Rounding",
+      "name_cn": "像素取整能力",
+      "kind": "common_capability",
+      "category": "layout",
+      "keywords": [
+        "Pixel Rounding",
+        "像素取整",
+        "pixelRound",
+        "PixelRoundPolicy",
+        "PixelRoundMode",
+        "PixelRoundCalcPolicy",
+        "NODE_PIXEL_ROUND",
+        "RosenRenderContext"
+      ],
+      "aliases": [
+        "PixelRound",
+        "像素对齐",
+        "像素舍入",
+        "像素圆整"
+      ],
+      "kb": "docs/kb/capabilities/pixel-rounding.md",
+      "spec_domain": "specs/04-common-capability/24-layout-common-capability/01-pixel-rounding",
+      "func_id": "04-24-01",
+      "spec_status": "pending",
+      "source_paths": {
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "layout_property": "frameworks/core/components_ng/layout/layout_property.cpp",
+        "dynamic_modifier": "frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts",
+        "dynamic_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_common_modifier.cpp",
+        "static_modifier": "frameworks/core/interfaces/native/implementation/common_method_modifier.cpp",
+        "ui_context": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "pipeline": "frameworks/core/pipeline/pipeline_base.h",
+        "layout_wrapper": "frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "render_context": "frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+        "native_style": "interfaces/native/node/style_modifier.cpp",
+        "native_policy": "interfaces/native/node/native_node_extented.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "ui_context": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "ui_context_static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets",
+        "capi": "interfaces/native/node_attributes/layout.h"
+      },
+      "test_paths": [
+        "test/unittest/core/layout/pixel_round_test_ng.cpp",
+        "test/unittest/capi/modifiers/common_method_modifier_test2.cpp",
+        "test/component_test/test_cases/components/common/entry/src/main/ets/pages/common/PixelRoundSample.ets",
+        "test/component_test/test_cases/components/common/entry/src/main/ets/pages/MyTest/PixelRoundTest.ets"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27"
     },
     {
       "id": "Blank",
@@ -2571,6 +2630,62 @@
       "last_verified": "2026-07-13"
     },
     {
+      "id": "MediaQuery",
+      "name": "MediaQuery",
+      "name_cn": "媒体查询能力",
+      "kind": "sdk",
+      "category": "api",
+      "keywords": [
+        "MediaQuery",
+        "mediaquery",
+        "媒体查询",
+        "matchMediaSync",
+        "MediaQueryListener",
+        "MediaQueryResult",
+        "MediaQueryer",
+        "MediaQueryInfo",
+        "@ohos.mediaquery",
+        "getMediaQuery"
+      ],
+      "aliases": [
+        "媒体查询",
+        "@ohos.mediaquery",
+        "@system.mediaquery",
+        "Media Query"
+      ],
+      "kb": "docs/kb/api/mediaquery.md",
+      "spec_domain": "specs/04-common-capability/20-media-query/01-media-query",
+      "func_id": "04-20-01",
+      "spec_status": "pending",
+      "source_paths": {
+        "query_engine": "frameworks/bridge/common/media_query/media_queryer.cpp",
+        "media_info": "frameworks/bridge/common/media_query/media_query_info.cpp",
+        "napi": "interfaces/napi/kits/mediaquery/js_media_query.cpp",
+        "ani": "interfaces/ets/ani/mediaquery/src/mediaquery.cpp",
+        "static_arkts": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.mediaquery.ts",
+        "dynamic_uicontext": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "frontend_delegate": "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.cpp",
+        "napi_build": "interfaces/napi/kits/mediaquery/BUILD.gn",
+        "ani_build": "interfaces/ets/ani/mediaquery/BUILD.gn"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.mediaquery.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.mediaquery.static.d.ets",
+        "ui_context": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "ui_context_static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets",
+        "legacy_system": "<OH_ROOT>/interface/sdk-js/api/@system.mediaquery.d.ts",
+        "legacy_system_static": "<OH_ROOT>/interface/sdk-js/api/@system.mediaquery.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/bridge/common/media_query/media_query_test.cpp",
+        "test/unittest/bridge/common/media_query/BUILD.gn",
+        "test/unittest/bridge/common/media_query/media_query_test_core.cpp",
+        "test/unittest/bridge/common/media_query/media_query_test_min.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27"
+    },
+    {
       "id": "Router",
       "name": "Router",
       "name_cn": "路由管理",
@@ -2911,6 +3026,58 @@
       ],
       "status": "active",
       "last_verified": "2026-07-23"
+    },
+    {
+      "id": "PreviewPlatformAdaptation",
+      "name": "Preview Platform Adaptation",
+      "name_cn": "预览器平台适配",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "Preview Platform Adaptation",
+        "预览器平台适配",
+        "Previewer",
+        "adapter/preview",
+        "AceViewPreview",
+        "UIContentImpl",
+        "preview_entrance_source",
+        "preview_osal_source",
+        "preview_external_source",
+        "InspectorClient"
+      ],
+      "aliases": [
+        "Preview适配",
+        "预览平台",
+        "Previewer适配",
+        "预览器"
+      ],
+      "kb": "docs/kb/architecture/preview-platform-adaptation.md",
+      "spec_domain": "specs/02-cross-platform/01-platform-adapter/04-previewer-platform-adapter",
+      "func_id": "02-01-04",
+      "spec_status": "active",
+      "source_paths": {
+        "platform_config": "adapter/preview/build/platform.gni",
+        "preview_config": "adapter/preview/build/preview_common.gni",
+        "entrance_build": "adapter/preview/entrance/BUILD.gn",
+        "ui_content": "adapter/preview/entrance/ui_content_impl.cpp",
+        "container": "adapter/preview/entrance/ace_container.cpp",
+        "view": "adapter/preview/entrance/ace_view_preview.cpp",
+        "osal_build": "adapter/preview/osal/BUILD.gn",
+        "external_build": "adapter/preview/external/BUILD.gn",
+        "inspector": "adapter/preview/inspector/js_inspector_manager.cpp",
+        "sdk_build": "adapter/preview/sdk/BUILD.gn"
+      },
+      "api_paths": {
+        "ui_content": "interfaces/inner_api/ace/ui_content.h",
+        "preview_ui_content": "adapter/preview/entrance/ui_content_impl.h"
+      },
+      "test_paths": [
+        "test/component_test/tools/previewer_host/",
+        "adapter/preview/entrance/samples/BUILD.gn",
+        "spec/spec-test/tools/host_preview/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27"
     },
     {
       "id": "DFXLogging",

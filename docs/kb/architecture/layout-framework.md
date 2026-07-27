@@ -106,6 +106,7 @@ Layout Framework 本身是引擎内部机制，没有独立 SDK API。应用侧�
 
 - 基础渲染管线 Spec：`specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/`
 - 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
+- 像素取整：`docs/kb/capabilities/pixel-rounding.md`
 - 安全区域机制：`docs/kb/capabilities/safe-area.md`
 - 分割布局：`docs/kb/components/container/column_split.md`、`docs/kb/components/container/row_split.md`
 - 相对布局：`docs/kb/components/container/relative_container.md`

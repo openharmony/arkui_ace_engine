@@ -35,6 +35,7 @@ docs/kb/
 | LayoutFramework | 布局框架 | `docs/kb/architecture/layout-framework.md` | 已重建，旧 KB 已移除 |
 | LayoutAttributes | 基础布局属性 | `docs/kb/capabilities/layout-attributes.md` | 新建 |
 | SafeArea | 安全区域机制 | `docs/kb/capabilities/safe-area.md` | 已合并重建，两份旧 KB 已移除 |
+| PixelRounding | 像素取整能力 | `docs/kb/capabilities/pixel-rounding.md` | 新建（Spec 待补） |
 | Blank | 空白填充组件 | `docs/kb/components/basic/blank.md` | 新建 |
 | Divider | 分隔线组件 | `docs/kb/components/basic/divider.md` | 新建 |
 | Column | 纵向布局组件 | `docs/kb/components/container/column.md` | 新建 |
@@ -76,12 +77,14 @@ docs/kb/
 | TextPickerDialog | 文本选择弹窗组件 | `docs/kb/components/selector/text_picker_dialog.md` | 新建 |
 | UIPickerComponent | UI选择器容器组件 | `docs/kb/components/selector/ui_picker_component.md` | 已迁移，旧 KB 已移除 |
 | AlphabetIndexer | 字母索引组件 | `docs/kb/components/data_display/alphabet_indexer.md` | 新建 |
+| MediaQuery | 媒体查询能力 | `docs/kb/api/mediaquery.md` | 新建（Spec 待补） |
 | Router | 路由管理 | `docs/kb/api/router.md` | 新建（不推荐，推荐 Navigation） |
 | StateMgmtV1Core | V1 状态管理核心逻辑 | `docs/kb/architecture/state_management/v1_core.md` | 已注册 |
 | StateMgmtV2Core | V2 状态管理核心逻辑 | `docs/kb/architecture/state_management/v2_core.md` | 已注册 |
 | StateMgmtV1Decorators | V1 状态管理装饰器 | `docs/kb/architecture/state_management/v1_decorators.md` | 已注册 |
 | StateMgmtV2Decorators | V2 状态管理装饰器 | `docs/kb/architecture/state_management/v2_decorators.md` | 已注册 |
 | WindowMechanism | 窗口机制 | `docs/kb/architecture/window-mechanism.md` | 新建 |
+| PreviewPlatformAdaptation | 预览器平台适配 | `docs/kb/architecture/preview-platform-adaptation.md` | 新建 |
 | DFXLogging | DFX 日志 | `docs/kb/architecture/dfx/logging.md` | 新建 |
 | DFXMemoryManagement | DFX 内存管理 | `docs/kb/architecture/dfx/memory-management.md` | 新建 |
 | DFXTrace | DFX Trace 打点 | `docs/kb/architecture/dfx/trace.md` | 新建 |
