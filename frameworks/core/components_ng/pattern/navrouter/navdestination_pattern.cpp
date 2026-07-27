@@ -471,7 +471,6 @@ void NavDestinationPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
-    NavDestinationPatternBase::InitOnTouchEvent(host);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
             .edges = SAFE_AREA_EDGE_ALL };
@@ -503,7 +502,6 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     if (memoryManager) {
         memoryManager->RemoveRecyclePageNode(id);
     }
-    NavDestinationPatternBase::RemoveOnTouchEvent(frameNode);
 }
 
 void NavDestinationPattern::DumpInfo()
@@ -607,6 +605,7 @@ void NavDestinationPattern::OnAttachToMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+    NavDestinationPatternBase::InitOnTouchEvent(host);
 }
 
 void NavDestinationPattern::OnDetachFromMainTree()
@@ -614,6 +613,7 @@ void NavDestinationPattern::OnDetachFromMainTree()
     auto host = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    NavDestinationPatternBase::RemoveOnTouchEvent(host);
     backupStyle_.reset();
     currStyle_.reset();
     if (!host->IsHomeDestination() && host->GetNavDestinationType() != NavDestinationType::RELATED) {

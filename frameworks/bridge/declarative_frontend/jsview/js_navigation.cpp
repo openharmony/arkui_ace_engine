@@ -83,6 +83,7 @@ constexpr char MORE_BUTTON_OPTIONS_PROPERTY[] = "moreButtonOptions";
 constexpr char HOME_DESTINATION_INFO_NAME[] = "name";
 constexpr char HOME_DESTINATION_INFO_PARAM[] = "param";
 constexpr char STACK_SIZE_LIMIT_PROPERTY[] = "stackSizeLimit";
+constexpr char CLEAR_CONTENT_STACK_PROPERTY[] = "clearContentStackOnPrimaryNavigation";
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
@@ -469,6 +470,10 @@ void JSNavigation::SetNavigationConfiguration(const JSCallbackInfo& info)
     auto stackSizeLimit = configObj->GetProperty(STACK_SIZE_LIMIT_PROPERTY);
     if (stackSizeLimit->IsNumber()) {
         config.stackSizeLimit = stackSizeLimit->ToNumber<int32_t>();
+    }
+    auto clearContent = configObj->GetProperty(CLEAR_CONTENT_STACK_PROPERTY);
+    if (clearContent->IsBoolean()) {
+        config.needClearContentStack = clearContent->ToBoolean();
     }
     NavigationModel::GetInstance()->SetNavigationConfiguration(config);
 }

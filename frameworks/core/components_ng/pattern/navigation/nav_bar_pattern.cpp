@@ -395,7 +395,6 @@ void NavBarPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode); // call OnAttachToFrameNodeMultiThread
-    NavDestinationPatternBase::InitOnTouchEvent(host);
     auto pipelineContext = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
@@ -417,6 +416,7 @@ void NavBarPattern::OnAttachToMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree); // call OnAttachToMainTreeMultiThread() by multi thread
+    NavDestinationPatternBase::InitOnTouchEvent(host);
 }
 
 void NavBarPattern::OnCoordScrollStart()
@@ -543,7 +543,6 @@ void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
-    NavDestinationPatternBase::RemoveOnTouchEvent(frameNode);
 }
 
 void NavBarPattern::OnDetachFromMainTree()
@@ -551,6 +550,7 @@ void NavBarPattern::OnDetachFromMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
+    NavDestinationPatternBase::RemoveOnTouchEvent(host);
 }
 
 bool NavBarPattern::CanCoordScrollUp(float offset) const

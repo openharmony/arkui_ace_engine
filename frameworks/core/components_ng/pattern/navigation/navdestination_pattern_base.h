@@ -351,7 +351,9 @@ protected:
         bool needRunTitleBarAnimation, bool needRunToolBarAnimation, bool hideTitleBar, bool hideToolBar);
     bool CustomizeExpandSafeArea() override;
     void InitOnTouchEvent(const RefPtr<FrameNode>& host);
-    void RemoveOnTouchEvent(FrameNode* frameNode);
+    void RemoveOnTouchEvent(const RefPtr<FrameNode>& host);
+    bool IsTouchListenerNeeded(const RefPtr<FrameNode>& host);
+    void OnTouchEvent();
 
     bool isHideToolbar_ = false;
     bool isHideTitlebar_ = false;
