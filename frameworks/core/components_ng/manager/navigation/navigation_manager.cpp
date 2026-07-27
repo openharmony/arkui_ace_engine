@@ -347,10 +347,11 @@ bool NavigationManager::CheckNodeNeedCache(const RefPtr<FrameNode>& node)
     }
     std::stack<RefPtr<FrameNode>> nodeStack;
     nodeStack.push(node);
+    std::vector<RefPtr<FrameNode>> children;
     while (!nodeStack.empty()) {
         auto curNode = nodeStack.top();
         nodeStack.pop();
-        std::list<RefPtr<FrameNode>> children;
+        children.clear();
         curNode->GenerateOneDepthVisibleFrameWithTransition(children);
         for (auto& child : children) {
             if (!child) {

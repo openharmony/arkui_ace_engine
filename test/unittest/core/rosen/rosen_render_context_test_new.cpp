@@ -715,10 +715,10 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew022, TestSize.Level1)
     auto nodeOne = FrameNode::GetOrCreateFrameNode("nodeOne", 0, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto nodeTwo = FrameNode::GetOrCreateFrameNode("nodeTwo", 1, []() { return AceType::MakeRefPtr<Pattern>(); });
     auto nodeThree = FrameNode::GetOrCreateFrameNode("nodeThree", 0, []() { return AceType::MakeRefPtr<Pattern>(); });
-    std::list<RefPtr<FrameNode>> childrenOne;
+    std::vector<RefPtr<FrameNode>> childrenOne;
     childrenOne.emplace_back(nodeOne);
     childrenOne.emplace_back(nodeTwo);
-    std::list<RefPtr<FrameNode>> childrenTwo;
+    std::vector<RefPtr<FrameNode>> childrenTwo;
     childrenTwo.emplace_back(nodeTwo);
     childrenTwo.emplace_back(nodeThree);
     rosenRenderContext->AddFrameChildren(nullptr, childrenOne);
