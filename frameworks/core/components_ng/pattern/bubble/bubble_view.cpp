@@ -438,9 +438,6 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
         // Set SystemMaterial first, before updating background color, blur style and shadow
         bool isUserSetMaterial = BubbleView::SetBubbleSystemMaterial(child, param);
         bubblePattern->SetIsUserSetMaterial(isUserSetMaterial);
-        if (isUserSetMaterial) {
-            renderContext->SetClipToBounds(true);
-        }
 
         // Update background color and blur style only if SystemMaterial is not set
         UpdateBubbleBackgroundAndBlur(
@@ -560,9 +557,6 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
         // Set SystemMaterial first, before updating background color, blur style and shadow
         bool isUserSetMaterial = BubbleView::SetBubbleSystemMaterial(columnNode, param);
         popupPattern->SetIsUserSetMaterial(isUserSetMaterial);
-        if (isUserSetMaterial) {
-            columnRenderContext->SetClipToBounds(true);
-        }
 
         // Update background color and blur style only if SystemMaterial is not set
         UpdateBubbleBackgroundAndBlur(
@@ -899,9 +893,6 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     bool isUserSetMaterial = BubbleView::SetBubbleSystemMaterial(childNode, param);
     bubblePattern->SetIsUserSetMaterial(isUserSetMaterial);
-    if (isUserSetMaterial) {
-        renderContext->SetClipToBounds(true);
-    }
     // Clear SystemMaterial when transitioning from having material to no material
     if (wasUserSetMaterial && !isUserSetMaterial) {
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(childNode), nullptr);
