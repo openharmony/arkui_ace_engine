@@ -84,10 +84,10 @@ function loadComponent(): ComponentObj | undefined {
         modifierWithKey(this._modifiersWithKeys, SwiperDisplayModeModifier.identity, SwiperDisplayModeModifier, value);
         return this;
       }
-      cachedCount(value: number, isShown?: boolean): this {
+      cachedCount(value: number, options?: boolean | object): this {
         let arkCachedCount = new ArkSwiperCachedCount();
         arkCachedCount.value = value;
-        arkCachedCount.isShown = isShown;
+        arkCachedCount.options = options;
         modifierWithKey(
           this._modifiersWithKeys,
           SwiperCachedCountModifier.identity,
@@ -130,7 +130,7 @@ function loadComponent(): ComponentObj | undefined {
         return this;
       }
       indicatorStyle(value?: IndicatorStyle | undefined): this {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(100201, 'indicatorStyle function not supported in ArkSwiper class');
       }
       prevMargin(value: Length): this {
         modifierWithKey(this._modifiersWithKeys, SwiperPrevMarginModifier.identity, SwiperPrevMarginModifier, value);
@@ -261,7 +261,7 @@ function loadComponent(): ComponentObj | undefined {
                 getUINativeModule().swiper.setSwiperDisplayCount(node, fillType, 'fillType');
               }
             } else {
-              getUINativeModule().swiper.setSwiperDisplayCount(node, this.value.value, typeof this.value.value);
+              getUINativeModule().swiper.setSwiperDisplayCount(node, this.value.value, typeof this.value.value, swipeByGroup);
             }
           } else {
             getUINativeModule().swiper.resetSwiperSwipeByGroup(node);
@@ -279,7 +279,7 @@ function loadComponent(): ComponentObj | undefined {
           typeof this.stageValue.value === 'object' &&
           typeof this.value.value === 'object'
         ) {
-          return (this.stageValue.value as SwiperAutoFill).minSize !== (this.value.value as SwiperAutoFill).minSize;
+          return this.stageValue.value !== this.value.value;
         } else {
           return !isBaseOrResourceEqual(this.stageValue.value, this.value.value);
         }
@@ -638,6 +638,9 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().swiper.setSwiperOnChange(node, this.value);
         }
       }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     }
     
     class SwiperOnSelectedModifier extends ModifierWithKey<Callback<number>> {
@@ -651,6 +654,9 @@ function loadComponent(): ComponentObj | undefined {
         } else {
           getUINativeModule().swiper.setSwiperOnSelected(node, this.value);
         }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
     
@@ -686,14 +692,24 @@ function loadComponent(): ComponentObj | undefined {
         if (reset) {
           getUINativeModule().swiper.resetSwiperCachedCount(node);
           getUINativeModule().swiper.resetSwiperIsShown(node);
+          getUINativeModule().swiper.resetSwiperCachedIndependent(node);
         } else {
           getUINativeModule().swiper.setSwiperCachedCount(node, this.value.value);
-          getUINativeModule().swiper.setSwiperIsShown(node, this.value.isShown);
+          if (typeof this.value.options === 'boolean') {
+            getUINativeModule().swiper.setSwiperIsShown(node, this.value.options);
+          } else if (typeof this.value.options === 'object') {
+            if ('isShown' in this.value.options) {
+              getUINativeModule().swiper.setSwiperIsShown(node, this.value.options.isShown);
+            }
+            if ('independent' in this.value.options) {
+              getUINativeModule().swiper.setSwiperCachedIndependent(node, this.value.options.independent);
+            }
+          }
         }
       }
       checkObjectDiff(): boolean {
         return (!isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
-          !isBaseOrResourceEqual(this.stageValue.isShown, this.value.isShown));
+          !isBaseOrResourceEqual(this.stageValue.options, this.value.options));
       }
     }
     class SwiperDisplayModeModifier extends ModifierWithKey<number> {
@@ -846,6 +862,9 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().swiper.setSwiperOnAnimationStart(node, this.value);
         }
       }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     }
     class SwiperOnAnimationEndModifier extends ModifierWithKey<Callback<number, SwiperAnimationEvent>> {
       constructor(value: Callback<number, SwiperAnimationEvent>) {
@@ -858,6 +877,9 @@ function loadComponent(): ComponentObj | undefined {
         } else {
           getUINativeModule().swiper.setSwiperOnAnimationEnd(node, this.value);
         }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
     class SwiperOnGestureSwipeModifier extends ModifierWithKey<Callback<number, SwiperAnimationEvent>> {
@@ -872,6 +894,9 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().swiper.setSwiperOnGestureSwipe(node, this.value);
         }
       }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     }
     class SwiperOnUnselectedModifier extends ModifierWithKey<Callback<number>> {
       constructor(value: Callback<number>) {
@@ -884,6 +909,9 @@ function loadComponent(): ComponentObj | undefined {
         } else {
           getUINativeModule().swiper.setSwiperOnUnselected(node, this.value);
         }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
     class SwiperIndicatorInteractiveModifier extends ModifierWithKey<boolean> {

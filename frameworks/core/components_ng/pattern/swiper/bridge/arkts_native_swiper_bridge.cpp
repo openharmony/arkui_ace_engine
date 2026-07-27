@@ -269,14 +269,12 @@ void GetFontContent(EcmaVM* vm, ArkUINodeHandle nativeNode, const Local<JSValueR
     auto size = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "size"));
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     CalcDimension fontSize;
     RefPtr<ResourceObject> resObj;
     if (!size->IsUndefined() && !size->IsNull() &&
-        ArkTSUtils::ParseJsDimensionFp(vm, size, fontSize, resObj)) {
+        ArkTSUtils::ParseJsDimensionFp(vm, size, fontSize, resObj, true, false)) {
         if (LessOrEqual(fontSize.Value(), 0.0) ||
             LessOrEqual(size->ToNumber(vm)->Value(), 0.0) ||
             fontSize.Unit() == DimensionUnit::PERCENT) {
@@ -327,7 +325,7 @@ std::optional<Dimension> ParseIndicatorDimension(
         return indicatorDimension;
     }
     CalcDimension dimPosition;
-    auto parseOk = ArkTSUtils::ParseJsDimensionVpNG(vm, value, dimPosition, resObj);
+    auto parseOk = ArkTSUtils::ParseJsDimensionVp(vm, value, dimPosition, resObj, false);
     indicatorDimension = parseOk && dimPosition.ConvertToPx() >= 0.0f ? dimPosition : 0.0_vp;
     return indicatorDimension;
 }
@@ -359,9 +357,7 @@ void SetJsViewDotIndicatorInfo(EcmaVM* vm, const Local<ObjectRef>& obj, SwiperPa
 {
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
     CHECK_NULL_VOID(frameNode);
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_VOID(swiperIndicatorTheme);
     auto maskValue = obj->Get(vm, "maskValue");
     auto colorValue = obj->Get(vm, "colorValue");
@@ -411,9 +407,7 @@ SwiperParameters GetDotIndicatorInfo(EcmaVM* vm, const Local<ObjectRef>& obj, Ar
 
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, SwiperParameters());
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, SwiperParameters());
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
     SwiperParameters swiperParameters;
     RefPtr<ResourceObject> resLeftObj;
@@ -450,7 +444,7 @@ SwiperParameters GetDotIndicatorInfo(EcmaVM* vm, const Local<ObjectRef>& obj, Ar
             ? dimEnd
             : indicatorDimension;
 
-    auto parseSpaceOk = !spaceValue.IsNull() && !spaceValue->IsUndefined() &&
+    auto parseSpaceOk = !spaceValue.IsNull() && !spaceValue->IsUndefined() && !spaceValue->IsNull() &&
                         ParseLengthMetricsToDimensionForSwiper(vm, spaceValue, dimSpace) &&
                         (dimSpace.Unit() != DimensionUnit::PERCENT);
     auto defaultSpace = swiperIndicatorTheme->GetIndicatorDotItemSpace();
@@ -466,7 +460,7 @@ SwiperParameters GetDotIndicatorInfo(EcmaVM* vm, const Local<ObjectRef>& obj, Ar
     RefPtr<ResourceObject> resSelectedItemWidthObj;
     RefPtr<ResourceObject> resSelectedItemHeightObj;
     bool parseItemWOk = !itemWidthValue.IsNull() && !itemWidthValue->IsUndefined() &&
-                        ArkTSUtils::ParseJsDimensionVpNG(vm, itemWidthValue, dimPosition, resItemWidthObj) &&
+                        ArkTSUtils::ParseJsDimensionVp(vm, itemWidthValue, dimPosition, resItemWidthObj, false) &&
                         (dimPosition.Unit() != DimensionUnit::PERCENT);
     auto defaultSize = swiperIndicatorTheme->GetSize();
     if (parseItemWOk && dimPosition > 0.0_vp) {
@@ -476,7 +470,7 @@ SwiperParameters GetDotIndicatorInfo(EcmaVM* vm, const Local<ObjectRef>& obj, Ar
         swiperParameters.itemWidth = defaultSize;
     }
     bool parseItemHOk = !itemHeightValue.IsNull() && !itemHeightValue->IsUndefined() &&
-                        ArkTSUtils::ParseJsDimensionVpNG(vm, itemHeightValue, dimPosition, resItemHeightObj) &&
+                        ArkTSUtils::ParseJsDimensionVp(vm, itemHeightValue, dimPosition, resItemHeightObj, false) &&
                         (dimPosition.Unit() != DimensionUnit::PERCENT);
     if (parseItemHOk && dimPosition > 0.0_vp) {
         swiperParameters.parametersByUser.insert("itemHeight");
@@ -486,7 +480,7 @@ SwiperParameters GetDotIndicatorInfo(EcmaVM* vm, const Local<ObjectRef>& obj, Ar
     }
     bool parseSelectedItemWOk =
         !selectedItemWidthValue.IsNull() && !selectedItemWidthValue->IsUndefined() &&
-        ArkTSUtils::ParseJsDimensionVpNG(vm, selectedItemWidthValue, dimPosition, resSelectedItemWidthObj) &&
+        ArkTSUtils::ParseJsDimensionVp(vm, selectedItemWidthValue, dimPosition, resSelectedItemWidthObj, false) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
     if (parseSelectedItemWOk && dimPosition > 0.0_vp) {
         swiperParameters.parametersByUser.insert("selectedItemWidth");
@@ -496,7 +490,7 @@ SwiperParameters GetDotIndicatorInfo(EcmaVM* vm, const Local<ObjectRef>& obj, Ar
     }
     bool parseSelectedItemHOk =
         !selectedItemHeightValue.IsNull() && !selectedItemHeightValue->IsUndefined() &&
-        ArkTSUtils::ParseJsDimensionVpNG(vm, selectedItemHeightValue, dimPosition, resSelectedItemHeightObj) &&
+        ArkTSUtils::ParseJsDimensionVp(vm, selectedItemHeightValue, dimPosition, resSelectedItemHeightObj, false) &&
         (dimPosition.Unit() != DimensionUnit::PERCENT);
     if (parseSelectedItemHOk && dimPosition > 0.0_vp) {
         swiperParameters.parametersByUser.insert("selectedItemHeight");
@@ -536,9 +530,7 @@ SwiperDigitalParameters GetDigitIndicatorInfo(EcmaVM* vm, const Local<ObjectRef>
     auto setIgnoreSizeValue = obj->Get(vm, "setIgnoreSizeValue");
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, SwiperDigitalParameters());
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, SwiperDigitalParameters());
-    auto swiperIndicatorTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperDigitalParameters());
     SwiperDigitalParameters digitalParameters;
     RefPtr<ResourceObject> resLeftObj;
@@ -632,7 +624,7 @@ bool GetArrowInfo(
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     if (swiperArrowParameters.isSidebarMiddle.value()) {
         parseOk = !backgroundSizeValue.IsNull() && !backgroundSizeValue->IsUndefined() &&
-                  ArkTSUtils::ParseJsDimensionVp(vm, backgroundSizeValue, dimension, resBackgroundSizeObj);
+                  ArkTSUtils::ParseJsDimensionVp(vm, backgroundSizeValue, dimension, resBackgroundSizeObj, false);
         swiperArrowParameters.backgroundSize =
             parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
                 ? dimension
@@ -646,7 +638,7 @@ bool GetArrowInfo(
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
             parseOk = !arrowSizeValue.IsNull() && !arrowSizeValue->IsUndefined() &&
-                      ArkTSUtils::ParseJsDimensionVpNG(vm, arrowSizeValue, dimension, resArrowSizeObj);
+                      ArkTSUtils::ParseJsDimensionVp(vm, arrowSizeValue, dimension, resArrowSizeObj, false);
             swiperArrowParameters.arrowSize =
                 parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
                     ? dimension
@@ -660,7 +652,7 @@ bool GetArrowInfo(
                                                : swiperIndicatorTheme->GetBigArrowColor();
     } else {
         parseOk = !backgroundSizeValue.IsNull() && !backgroundSizeValue->IsUndefined() &&
-                  ArkTSUtils::ParseJsDimensionVp(vm, backgroundSizeValue, dimension, resBackgroundSizeObj);
+                  ArkTSUtils::ParseJsDimensionVp(vm, backgroundSizeValue, dimension, resBackgroundSizeObj, false);
         swiperArrowParameters.backgroundSize =
             parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
                 ? dimension
@@ -674,7 +666,7 @@ bool GetArrowInfo(
             swiperArrowParameters.arrowSize = swiperArrowParameters.backgroundSize.value() * ARROW_SIZE_COEFFICIENT;
         } else {
             parseOk = !arrowSizeValue.IsNull() && !arrowSizeValue->IsUndefined() &&
-                      ArkTSUtils::ParseJsDimensionVpNG(vm, arrowSizeValue, dimension, resArrowSizeObj);
+                      ArkTSUtils::ParseJsDimensionVp(vm, arrowSizeValue, dimension, resArrowSizeObj, false);
             swiperArrowParameters.arrowSize =
                 parseOk && GreatNotEqual(dimension.ConvertToVp(), 0.0) && !(dimension.Unit() == DimensionUnit::PERCENT)
                     ? dimension
@@ -800,7 +792,16 @@ bool ParseMediaIndicatorIcon(EcmaVM* vm, const Local<JSValueRef>& iconValue, OHO
 void ParseIndicatorIconList(EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo,
     std::map<int32_t, OHOS::Ace::IndicatorIconParam>& indicatorIconMap)
 {
-    auto iconListArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_INDICATOR_ICON);
+    Local<JSValueRef> iconListArg;
+    if (ArkTSUtils::IsJsView(runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX), vm)) {
+        auto secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+        if (secondArg->IsObject(vm)) {
+            auto obj = secondArg->ToObject(vm);
+            iconListArg = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "indicatorIconValue"));
+        }
+    } else {
+        iconListArg = runtimeCallInfo->GetCallArgRef(DOT_INDICATOR_INDICATOR_ICON);
+    }
     if (iconListArg.IsEmpty() || iconListArg->IsNull() || iconListArg->IsUndefined() || !iconListArg->IsArray(vm)) {
         return;
     }
@@ -1021,30 +1022,46 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperNextMargin(ArkUIRuntimeCallInfo* r
         if (argc < NUM_2) {
             return panda::JSValueRef::Undefined(vm);
         }
+        Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+        Ace::CalcDimension nextMargin;
+        RefPtr<ResourceObject> nextMarginResObj;
+        if (valueArg->IsUndefined() || valueArg->IsNull() ||
+            !ArkTSUtils::ParseJsDimension(vm, valueArg, nextMargin, DimensionUnit::VP, nextMarginResObj, true, false) ||
+            LessNotEqual(nextMargin.Value(), 0.0)) {
+            nextMargin.SetValue(0.0);
+        }
+        int32_t nextMarginUnit = static_cast<int32_t>(nextMargin.Unit());
+        bool ignoreBlank = false;
+        Local<JSValueRef> ignoreBlankArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_TYPE_INDEX);
+        if (!ignoreBlankArg.IsNull() && !ignoreBlankArg->IsUndefined() && ignoreBlankArg->IsBoolean()) {
+            ignoreBlank = ignoreBlankArg->ToBoolean(vm)->Value();
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            auto nextMarginRawPtr = AceType::RawPtr(nextMarginResObj);
+            GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMarginRaw(
+                nativeNode, nextMargin.Value(), nextMarginUnit, ignoreBlank, nextMarginRawPtr);
+        } else {
+            GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMargin(
+                nativeNode, nextMargin.Value(), nextMarginUnit, ignoreBlank);
+        }
+        return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
     Ace::CalcDimension nextMargin;
     RefPtr<ResourceObject> nextMarginResObj;
-    if (valueArg->IsUndefined() || valueArg->IsNull() ||
+    if (valueArg->IsNull() || valueArg->IsUndefined() ||
         !ArkTSUtils::ParseJsDimension(vm, valueArg, nextMargin, DimensionUnit::VP, nextMarginResObj) ||
         LessNotEqual(nextMargin.Value(), 0.0)) {
         nextMargin.SetValue(0.0);
     }
     int32_t nextMarginUnit = static_cast<int32_t>(nextMargin.Unit());
-    bool ignoreBlank = false;
-    if (isJsView) {
-        Local<JSValueRef> ignoreBlankArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_TYPE_INDEX);
-        if (!ignoreBlankArg.IsNull() && !ignoreBlankArg->IsUndefined() && ignoreBlankArg->IsBoolean()) {
-            ignoreBlank = ignoreBlankArg->ToBoolean(vm)->Value();
-        }
-    }
     if (SystemProperties::ConfigChangePerform()) {
         auto nextMarginRawPtr = AceType::RawPtr(nextMarginResObj);
         GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMarginRaw(
-            nativeNode, nextMargin.Value(), nextMarginUnit, ignoreBlank, nextMarginRawPtr);
+            nativeNode, nextMargin.Value(), nextMarginUnit, false, nextMarginRawPtr);
     } else {
         GetArkUINodeModifiers()->getSwiperModifier()->setSwiperNextMargin(
-            nativeNode, nextMargin.Value(), nextMarginUnit, ignoreBlank);
+            nativeNode, nextMargin.Value(), nextMarginUnit, false);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1071,30 +1088,46 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperPrevMargin(ArkUIRuntimeCallInfo* r
         if (argc < NUM_2) {
             return panda::JSValueRef::Undefined(vm);
         }
+        Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+        Ace::CalcDimension prevMargin;
+        RefPtr<ResourceObject> preMarginResObj;
+        if (valueArg->IsUndefined() || valueArg->IsNull() ||
+            !ArkTSUtils::ParseJsDimension(vm, valueArg, prevMargin, DimensionUnit::VP, preMarginResObj, true, false) ||
+            LessNotEqual(prevMargin.Value(), 0.0)) {
+            prevMargin.SetValue(0.0);
+        }
+        int32_t prevMarginUnit = static_cast<int32_t>(prevMargin.Unit());
+        bool ignoreBlank = false;
+        Local<JSValueRef> ignoreBlankArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_TYPE_INDEX);
+        if (!ignoreBlankArg.IsNull() && !ignoreBlankArg->IsUndefined() && ignoreBlankArg->IsBoolean()) {
+            ignoreBlank = ignoreBlankArg->ToBoolean(vm)->Value();
+        }
+        if (SystemProperties::ConfigChangePerform()) {
+            auto preMarginRawPtr = AceType::RawPtr(preMarginResObj);
+            GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMarginRaw(
+                nativeNode, prevMargin.Value(), prevMarginUnit, ignoreBlank, preMarginRawPtr);
+        } else {
+            GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(
+                nativeNode, prevMargin.Value(), prevMarginUnit, ignoreBlank);
+        }
+        return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
     Ace::CalcDimension prevMargin;
     RefPtr<ResourceObject> preMarginResObj;
-    if (valueArg->IsUndefined() || valueArg->IsNull() ||
+    if (valueArg->IsNull() || valueArg->IsUndefined() ||
         !ArkTSUtils::ParseJsDimension(vm, valueArg, prevMargin, DimensionUnit::VP, preMarginResObj) ||
         LessNotEqual(prevMargin.Value(), 0.0)) {
         prevMargin.SetValue(0.0);
     }
     int32_t prevMarginUnit = static_cast<int32_t>(prevMargin.Unit());
-    bool ignoreBlank = false;
-    if (isJsView) {
-        Local<JSValueRef> ignoreBlankArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_TYPE_INDEX);
-        if (!ignoreBlankArg.IsNull() && !ignoreBlankArg->IsUndefined() && ignoreBlankArg->IsBoolean()) {
-            ignoreBlank = ignoreBlankArg->ToBoolean(vm)->Value();
-        }
-    }
     if (SystemProperties::ConfigChangePerform()) {
         auto preMarginRawPtr = AceType::RawPtr(preMarginResObj);
         GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMarginRaw(
-            nativeNode, prevMargin.Value(), prevMarginUnit, ignoreBlank, preMarginRawPtr);
+            nativeNode, prevMargin.Value(), prevMarginUnit, false, preMarginRawPtr);
     } else {
         GetArkUINodeModifiers()->getSwiperModifier()->setSwiperPrevMargin(
-            nativeNode, prevMargin.Value(), prevMarginUnit, ignoreBlank);
+            nativeNode, prevMargin.Value(), prevMarginUnit, false);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1667,6 +1700,15 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperItemSpace(ArkUIRuntimeCallInfo* ru
         if (argc < NUM_2) {
         return panda::JSValueRef::Undefined(vm);
         }
+        Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+        Ace::CalcDimension itemSpace;
+        if (valueArg.IsNull() || valueArg->IsUndefined() ||
+            !ArkTSUtils::ParseJsDimensionVp(vm, valueArg, itemSpace, false) || LessNotEqual(itemSpace.Value(), 0.0)) {
+            itemSpace.SetValue(0.0);
+        }
+        int32_t itemSpaceUnit = static_cast<int32_t>(itemSpace.Unit());
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperItemSpace(nativeNode, itemSpace.Value(), itemSpaceUnit);
+        return panda::JSValueRef::Undefined(vm);
     }
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
     Ace::CalcDimension itemSpace;
@@ -1982,9 +2024,7 @@ SwiperParameters ParseJsViewIndicatorStyle(
     }
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, swiperParameters);
-    auto pipelineContext = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipelineContext, swiperParameters);
-    auto swiperIndicatorTheme = ArkTSUtils::GetTheme<SwiperIndicatorTheme>();
+    auto swiperIndicatorTheme = frameNode->GetTheme<SwiperIndicatorTheme>(true);
     CHECK_NULL_RETURN(swiperIndicatorTheme, swiperParameters);
 
     RefPtr<ResourceObject> resLeftObj;

@@ -214,10 +214,6 @@ function loadComponent(): ComponentObj | undefined {
             (this.value as ArkDotIndicator).maxDisplayCountValue
             ) ||
             !isBaseOrResourceEqual(
-            (this.stageValue as ArkDotIndicator).indicatorIconValue,
-            (this.value as ArkDotIndicator).indicatorIconValue
-            ) ||
-            !isBaseOrResourceEqual(
             (this.stageValue as ArkDotIndicator).spaceValue,
             (this.value as ArkDotIndicator).spaceValue
             )
