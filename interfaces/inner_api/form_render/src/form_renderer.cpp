@@ -339,7 +339,8 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth, 
 {
     float resizedWidth = width - borderWidth * DOUBLE;
     float resizedHeight = height - borderWidth * DOUBLE;
-    if (width <= 0 || height <= 0 || borderWidth < 0 || formViewScale < 0 || resizedWidth <= 0 || resizedHeight <= 0) {
+    if (width <= 0.0f || height <= 0.0f || borderWidth < 0.0f || formViewScale <= 0.0f ||
+        resizedWidth <= 0.0f || resizedHeight <= 0.0f) {
         HILOG_ERROR("invalid param: width: %.2f, height: %.2f, borderWidth: %.2f, formViewScale: %.2f, "
             "resizedWidth: %.2f, resizedHeight: %.2f.", width, height, borderWidth, formViewScale, resizedWidth,
             resizedHeight);
