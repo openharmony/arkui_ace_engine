@@ -19,6 +19,7 @@
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_resource_adapter.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 
 #include "ui/resource/resource_object.h"
 
@@ -34,6 +35,10 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 class ResourceParseUtilsTestNg : public testing::Test {};
+
+namespace {
+constexpr uint32_t FONT_PRIMARY_RES_ID = 125830982;
+} // namespace
 
 /**
  * @tc.name: ResourceParseUtilsTestNg_ParseResColor_NullResourceObject
@@ -240,6 +245,104 @@ HWTEST_F(ResourceParseUtilsTestNg, ResourceParseUtilsTestNg_ParseResResource_Nul
     RefPtr<ResourceObject> resObj = nullptr;
     CalcDimension result;
     EXPECT_FALSE(ResourceParseUtils::ParseResResource(resObj, result));
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTestNg_ParseResColor_AdaptMaterialTrue_NameBased
+ * @tc.desc: Test ParseResColor with adaptMaterial=true and name-based resource sets placeholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTestNg, ResourceParseUtilsTestNg_ParseResColor_AdaptMaterialTrue_NameBased, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams param { .value = "sys.color.font_primary", .type = ResourceObjectParamType::STRING };
+    params.push_back(param);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(-1, -1, params, "", "", Container::CurrentIdSafely());
+
+    Color result;
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, result, true));
+    EXPECT_EQ(result.GetPlaceholder(), ColorPlaceholder::FONT_PRIMARY);
+
+    ResourceManager::GetInstance().Reset();
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTestNg_ParseResColor_AdaptMaterialFalse_NameBased
+ * @tc.desc: Test ParseResColor with adaptMaterial=false and name-based resource does not set placeholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceParseUtilsTestNg, ResourceParseUtilsTestNg_ParseResColor_AdaptMaterialFalse_NameBased, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+
+    std::vector<ResourceObjectParams> params;
+    ResourceObjectParams param { .value = "sys.color.font_primary", .type = ResourceObjectParamType::STRING };
+    params.push_back(param);
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(-1, -1, params, "", "", Container::CurrentIdSafely());
+
+    Color result;
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, result, false));
+    EXPECT_EQ(result.GetPlaceholder(), ColorPlaceholder::NONE);
+
+    ResourceManager::GetInstance().Reset();
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTestNg_ParseResColor_AdaptMaterialTrue_IdBasedColor
+ * @tc.desc: Test ParseResColor with adaptMaterial=true and ID-based COLOR resource sets placeholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    ResourceParseUtilsTestNg, ResourceParseUtilsTestNg_ParseResColor_AdaptMaterialTrue_IdBasedColor, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+
+    AddMockResourceData(FONT_PRIMARY_RES_ID, Color::BLACK);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(FONT_PRIMARY_RES_ID,
+        static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+
+    Color result;
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, result, true));
+    EXPECT_EQ(result.GetPlaceholder(), ColorPlaceholder::FONT_PRIMARY);
+
+    ResetMockResourceData();
+    ResourceManager::GetInstance().Reset();
+    MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: ResourceParseUtilsTestNg_ParseResColor_AdaptMaterialFalse_IdBasedColor
+ * @tc.desc: Test ParseResColor with adaptMaterial=false and ID-based COLOR resource does not set placeholder
+ * @tc.type: FUNC
+ */
+HWTEST_F(
+    ResourceParseUtilsTestNg, ResourceParseUtilsTestNg_ParseResColor_AdaptMaterialFalse_IdBasedColor, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    MockContainer::SetMockColorMode(ColorMode::LIGHT);
+
+    AddMockResourceData(FONT_PRIMARY_RES_ID, Color::BLACK);
+
+    std::vector<ResourceObjectParams> params;
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(FONT_PRIMARY_RES_ID,
+        static_cast<int32_t>(ResourceType::COLOR), params, "", "", Container::CurrentIdSafely());
+
+    Color result;
+    EXPECT_TRUE(ResourceParseUtils::ParseResColor(resObj, result, false));
+    EXPECT_EQ(result.GetPlaceholder(), ColorPlaceholder::NONE);
+
+    ResetMockResourceData();
+    ResourceManager::GetInstance().Reset();
+    MockContainer::TearDown();
 }
 
 } // namespace OHOS::Ace

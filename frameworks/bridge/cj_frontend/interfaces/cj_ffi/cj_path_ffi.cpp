@@ -85,4 +85,17 @@ void FfiOHOSAceFrameworkPathSetCommands(const char* commands)
 {
     GetPathModel()->SetCommands(commands);
 }
+
+void FfiOHOSAceFrameworkPathCreateWithSizeEx(
+    NativeOptionLength width, NativeOptionLength height, const char* commands)
+{
+    GetPathModel()->Create();
+    if (width.hasValue) {
+        FfiOHOSAceFrameworkShapeSetWidth(width.value.value, width.value.unitType);
+    }
+    if (height.hasValue) {
+        FfiOHOSAceFrameworkShapeSetHeight(height.value.value, height.value.unitType);
+    }
+    GetPathModel()->SetCommands(commands);
+}
 }

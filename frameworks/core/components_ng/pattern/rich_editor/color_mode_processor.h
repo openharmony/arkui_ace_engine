@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@ public:
     ColorModeProcessor();
     ColorModeProcessor(const ColorMode colorMode)
     {
-        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
+        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX));
         if (colorMode != ColorMode::COLOR_MODE_UNDEFINED) {
             adapter_ = ResourceManager::GetInstance().GetResourceAdapter(Container::CurrentIdSafely());
             CHECK_NULL_VOID(adapter_);
@@ -40,7 +40,7 @@ public:
     }
     ~ColorModeProcessor()
     {
-        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY) && adapter_);
+        CHECK_NULL_VOID(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX) && adapter_);
         if (colorMode_ != ColorMode::COLOR_MODE_UNDEFINED) {
             adapter_->UpdateColorMode(colorMode_);
         }

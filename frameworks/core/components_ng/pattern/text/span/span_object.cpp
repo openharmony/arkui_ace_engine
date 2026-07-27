@@ -1101,8 +1101,9 @@ void ParagraphStyleSpan::AddParagraphStylePart2(const RefPtr<NG::SpanItem>& span
                                     const RefPtr<ResourceObject>& resObj, const RefPtr<NG::FrameNode>& frameNode) {
             CHECK_NULL_VOID(spanItem);
             CHECK_NULL_VOID(spanItem->textLineStyle);
+            CHECK_NULL_VOID(frameNode);
             Color color;
-            ResourceParseUtils::ParseResColor(resObj, color);
+            ParseColorWithVersion(resObj, color, frameNode);
             spanItem->textLineStyle->UpdateColorShaderStyle(color);
         };
         resourceUpdater.updateFunc = updateFunc;

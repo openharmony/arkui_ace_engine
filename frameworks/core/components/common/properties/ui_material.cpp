@@ -293,8 +293,7 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
     auto materialLevel = SystemProperties::GetUiMaterialLevel();
     LowerGearLevel(materialLevel, node);
     ImmersiveMaterialConfig result {
-        .applyShadow = options->applyShadow, .dipScale = dipScale, .interactive = options->interactive.value_or(false),
-        .lightEffectOptions = options->lightEffectOptions
+        .applyShadow = options->applyShadow, .dipScale = dipScale, .interactive = options->interactive.value_or(false)
     };
     if (materialLevel == UiMaterialLevel::SMOOTH) {
         result.key = UiMaterialMapKey {
@@ -308,6 +307,9 @@ std::optional<ImmersiveMaterialConfig> MaterialUtils::GetImmersiveMaterialConfig
             result.materialColor = materialColor;
         }
         return result;
+    }
+    if (options->HasLightEffect()) {
+        result.lightEffectOptions = std::make_shared<LightEffectOptions>(options->lightEffectOptions.value());
     }
     int32_t transparency = TransparencyUtils::GetTransparencyLevel(static_cast<int32_t>(materialLevel));
     bool finalInvertColor = ValidColorInvert(options, materialLevel, static_cast<UiMaterialTransparency>(transparency));

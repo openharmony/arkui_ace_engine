@@ -37,6 +37,7 @@ ace_unittest("tabs_test_ng") {
     "tabs_floating_bar_layout_test_ng.cpp",
     "tabs_floating_bar_test_ng.cpp",
     "tabs_layout_test_ng.cpp",
+    "tabs_model_lazy_child_nodes_test_ng.cpp",
     "tabs_model_test_ng.cpp",
     "tabs_model_static_test_ng.cpp",
     "tabs_pattern_test_ng.cpp",

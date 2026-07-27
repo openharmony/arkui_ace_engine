@@ -619,6 +619,21 @@ std::shared_ptr<Rosen::RSUIContext> RosenRenderContext::GetRSUIContext(PipelineC
     return rsUIDirector->GetRSUIContext();
 }
 
+std::shared_ptr<Rosen::RSUIContext> RosenRenderContext::GetOrCreateRSUIContext(PipelineContext* pipeline)
+{
+    auto rsContext = GetRSUIContext(pipeline);
+    if (rsContext != nullptr) {
+        return rsContext;
+    }
+    if (rsUIDirector_ != nullptr) {
+        return rsUIDirector_->GetRSUIContext();
+    }
+    TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
+    rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create(nullptr);
+    CHECK_NULL_RETURN(rsUIDirector_, nullptr);
+    return rsUIDirector_->GetRSUIContext();
+}
+
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode,
     FrameNode* host)
 {
@@ -641,12 +656,7 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         return;
     }
     auto pipeline = GetPipelineContext();
-    std::shared_ptr<Rosen::RSUIContext> rsContext = GetRSUIContext(pipeline);
-    if (rsContext == nullptr) {
-        TAG_LOGW(AceLogTag::ACE_DEFAULT_DOMAIN, "rsnode create before rosenwindow");
-        rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create(nullptr);
-        rsContext = rsUIDirector_->GetRSUIContext();
-    }
+    std::shared_ptr<Rosen::RSUIContext> rsContext = GetOrCreateRSUIContext(pipeline);
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
 
     if (isRoot) {
@@ -727,7 +737,7 @@ void RosenRenderContext::SetEffectLayer(const ContextParam& param)
     std::shared_ptr<Rosen::RSUIContext> rsContext;
     if (SystemProperties::GetMultiInstanceEnabled()) {
         auto pipeline = GetPipelineContext();
-        rsContext = GetRSUIContext(pipeline);
+        rsContext = GetOrCreateRSUIContext(pipeline);
     }
     Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param.surfaceName.value_or("") };
     rsNode_ = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, true, rsContext);
@@ -1746,6 +1756,9 @@ void RosenRenderContext::OnSpatialEffectUpdate(const SpatialEffectParams& params
         corners[Rosen::SpatialEffectPara::LEFT_BOTTOM_INDEX] = transformCorner(position.leftBottom);
         corners[Rosen::SpatialEffectPara::RIGHT_BOTTOM_INDEX] = transformCorner(position.rightBottom);
         variantPara->position = corners;
+        variantPara->spatialEffectMode = (position.positionMode == SpatialPositionMode::NDC_XY_WORLD_Z)
+            ? Rosen::SpatialEffectMode::NDC_XY_WORLD_Z_MODE
+            : Rosen::SpatialEffectMode::WORLD_XYZ_MODE;
     } else if (params.depth.has_value()) {
         variantPara->position = params.depth.value();
     }
@@ -7345,7 +7358,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 // for window surfaceNode, remove surfaceNode explicitly
                 frameParent->GetRenderContext()->RemoveChild(Claim(this));
             }
-            if (transitionUserCallback_ && !disappearingTransitionCount_) {
+            if (transitionUserCallback_ && *transitionUserCallback_ && !disappearingTransitionCount_) {
                 PostTransitionUserOutCallback();
             }
             return;
@@ -7408,8 +7421,8 @@ void RosenRenderContext::OnTransitionInFinish()
     CHECK_NULL_VOID(parent);
     if (host->IsVisible()) {
         // trigger transition through visibility
-        if (transitionInCallback_) {
-            transitionInCallback_();
+        if (transitionInCallback_ && *transitionInCallback_) {
+            (*transitionInCallback_)();
         }
     }
 }
@@ -7434,8 +7447,8 @@ void RosenRenderContext::OnTransitionOutFinish()
     if (!host->IsVisible()) {
         // trigger transition through visibility
         if (host->IsOnMainTree()) {
-            if (transitionOutCallback_) {
-                transitionOutCallback_();
+            if (transitionOutCallback_ && *transitionOutCallback_) {
+                (*transitionOutCallback_)();
             }
             parent->MarkNeedSyncRenderTree();
             parent->RebuildRenderContextTree();
@@ -7501,8 +7514,8 @@ RefPtr<UINode> RosenRenderContext::GetModalNode(const RefPtr<UINode>& breakPoint
 
 void RosenRenderContext::FireTransitionUserCallback(bool isTransitionIn)
 {
-    if (transitionUserCallback_) {
-        auto callback = transitionUserCallback_;
+    if (transitionUserCallback_ && *transitionUserCallback_) {
+        auto callback = *transitionUserCallback_;
         callback(isTransitionIn);
     }
 }
@@ -7513,7 +7526,7 @@ void RosenRenderContext::PostTransitionUserOutCallback()
     CHECK_NULL_VOID(taskExecutor);
     // post the callback to let it run on isolate environment
     taskExecutor->PostTask(
-        [callback = transitionUserCallback_]() {
+        [callback = (transitionUserCallback_ ? *transitionUserCallback_ : TransitionFinishCallback())]() {
             if (callback) {
                 callback(false);
             }
@@ -7986,19 +7999,28 @@ void RosenRenderContext::SetTranslate(float translateX, float translateY, float 
 void RosenRenderContext::SetTransitionInCallback(std::function<void()>&& callback)
 {
     FREE_RS_CONTEXT_CHECK_MOVE(SetTransitionInCallback, callback);
-    transitionInCallback_ = std::move(callback);
+    if (!transitionInCallback_) {
+        transitionInCallback_ = std::make_unique<std::function<void()>>();
+    }
+    *transitionInCallback_ = std::move(callback);
 }
 
 void RosenRenderContext::SetTransitionOutCallback(std::function<void()>&& callback)
 {
     FREE_RS_CONTEXT_CHECK_MOVE(SetTransitionOutCallback, callback);
-    transitionOutCallback_ = std::move(callback);
+    if (!transitionOutCallback_) {
+        transitionOutCallback_ = std::make_unique<std::function<void()>>();
+    }
+    *transitionOutCallback_ = std::move(callback);
 }
 
 void RosenRenderContext::SetTransitionUserCallback(TransitionFinishCallback&& callback)
 {
     FREE_RS_CONTEXT_CHECK_MOVE(SetTransitionUserCallback, callback);
-    transitionUserCallback_ = std::move(callback);
+    if (!transitionUserCallback_) {
+        transitionUserCallback_ = std::make_unique<TransitionFinishCallback>();
+    }
+    *transitionUserCallback_ = std::move(callback);
 }
 
 OffsetF RosenRenderContext::GetBaseTransalteInXY() const
@@ -8720,13 +8742,13 @@ bool RosenRenderContext::SetKeyFrameNodeOpacityAnimation(int32_t duration, int32
             if (isDragEnd) {
                 RemoveKeyFrameNode();
             }
-            if (callbackAnimateEnd_) {
-                callbackAnimateEnd_();
+            if (callbackAnimateEnd_ && *callbackAnimateEnd_) {
+                (*callbackAnimateEnd_)();
             }
             FlushImplicitTransaction();
             animationFlag = false;
-            if (callbackCachedAnimateAction_) {
-                callbackCachedAnimateAction_();
+            if (callbackCachedAnimateAction_ && *callbackCachedAnimateAction_) {
+                (*callbackCachedAnimateAction_)();
             }
         });
     return true;

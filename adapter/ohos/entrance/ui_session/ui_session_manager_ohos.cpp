@@ -303,11 +303,13 @@ void UiSessionManagerOhos::ReportRouterChangeEvent(const std::string& data)
 void UiSessionManagerOhos::ReportComponentChangeEvent(
     const std::string& key, const std::string& value, uint32_t eventType)
 {
+    if (!GetComponentChangeEventRegistered() || !NeedComponentChangeTypeReporting(eventType)) {
+        return;
+    }
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetComponentChangeEventRegistered() &&
-            NeedComponentChangeTypeReporting(eventType)) {
+        if (reportService != nullptr) {
             auto data = InspectorJsonUtil::Create();
             data->Put(key.data(), value.data());
             reportService->ReportComponentChangeEvent(data->ToString());
@@ -320,11 +322,13 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
 void UiSessionManagerOhos::ReportComponentChangeEvent(
     int32_t nodeId, const std::string& key, const std::string& value, uint32_t eventType)
 {
+    if (!GetComponentChangeEventRegistered() || !NeedComponentChangeTypeReporting(eventType)) {
+        return;
+    }
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetComponentChangeEventRegistered() &&
-            NeedComponentChangeTypeReporting(eventType)) {
+        if (reportService != nullptr) {
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
             data->Put(key.data(), value.data());
@@ -356,10 +360,13 @@ void UiSessionManagerOhos::ReportWebInputEvent(
 
 void UiSessionManagerOhos::ReportScrollEvent(const std::string& data)
 {
+    if (!GetScrollEventRegistered()) {
+        return;
+    }
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetScrollEventRegistered()) {
+        if (reportService != nullptr) {
             reportService->ReportScrollEvent(data);
         } else {
             LOGW("report scroll event failed, process id:%{public}d", pair.first);
@@ -369,10 +376,13 @@ void UiSessionManagerOhos::ReportScrollEvent(const std::string& data)
 
 void UiSessionManagerOhos::ReportLifeCycleEvent(const std::string& data)
 {
+    if (!GetLifeCycleEventRegistered()) {
+        return;
+    }
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetLifeCycleEventRegistered()) {
+        if (reportService != nullptr) {
             reportService->ReportLifeCycleEvent(data);
         } else {
             LOGW("report life cycle event failed, process id:%{public}d", pair.first);
@@ -382,10 +392,13 @@ void UiSessionManagerOhos::ReportLifeCycleEvent(const std::string& data)
 
 void UiSessionManagerOhos::ReportSelectTextEvent(const std::string& data)
 {
+    if (!GetSelectTextEventRegistered()) {
+        return;
+    }
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetSelectTextEventRegistered()) {
+        if (reportService != nullptr) {
             reportService->ReportSelectTextEvent(data);
         } else {
             LOGW("report select text event failed, process id:%{public}d", pair.first);
@@ -436,7 +449,6 @@ void UiSessionManagerOhos::SaveReportStub(sptr<IRemoteObject> reportStub, int32_
                 ErasePendingPageSceneRulesLocked(processId);
                 auto previousCount = pageSceneRuleRegisterProcesses_.fetch_sub(1);
                 if (previousCount <= 1 || !HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE)) {
-                    pageSceneInputNodeCount_.store(0);
                     pendingPageSceneDetectRules_.clear();
                 }
             }
@@ -469,17 +481,12 @@ int32_t UiSessionManagerOhos::RegisterPageSceneRules(int32_t processId, const st
     }
     {
         std::lock_guard<std::mutex> lock(pageSceneMutex_);
-        bool hadTextEditorRule = HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE);
         if (pageSceneRuleSets_.find(processId) != pageSceneRuleSets_.end()) {
             LOGW("RegisterPageSceneRules duplicated, process id:%{public}d", processId);
             return LAST_UNFINISH;
         }
         pageSceneRuleSets_[processId] = ruleSetInfo;
-        auto previousCount = pageSceneRuleRegisterProcesses_.fetch_add(1);
-        if (previousCount == 0 ||
-            (!hadTextEditorRule && HasPageSceneRule(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, false, ""))) {
-            pageSceneInputNodeCount_.store(0);
-        }
+        pageSceneRuleRegisterProcesses_.fetch_add(1);
     }
     SaveProcessId("pageScene", processId);
     auto registerRuleJsons = GetPageSceneRuleJsons(ruleSetInfo, PAGE_SCENE_TEXT_EDITOR_SCENE, true, "");
@@ -504,7 +511,6 @@ int32_t UiSessionManagerOhos::UnregisterPageSceneRules(int32_t processId, const 
         ErasePendingPageSceneRulesLocked(processId);
         auto previousCount = pageSceneRuleRegisterProcesses_.fetch_sub(1);
         if (previousCount <= 1 || !HasRegisteredPageSceneRuleLocked(PAGE_SCENE_TEXT_EDITOR_SCENE)) {
-            pageSceneInputNodeCount_.store(0);
             pendingPageSceneDetectRules_.clear();
         }
         pendingPageSceneGets_.erase(processId);
@@ -588,16 +594,6 @@ void UiSessionManagerOhos::NotifyPageSceneNodeChanged(const std::string& nodeTag
     auto ruleJsons = GetPageSceneRuleJsonsForNodeChange(nodeTag, PAGE_SCENE_TEXT_EDITOR_SCENE);
     if (ruleJsons.empty()) {
         return;
-    }
-    if (isAttach) {
-        pageSceneInputNodeCount_.fetch_add(1);
-    } else {
-        auto inputNodeCount = pageSceneInputNodeCount_.load();
-        while (inputNodeCount > 0) {
-            if (pageSceneInputNodeCount_.compare_exchange_weak(inputNodeCount, inputNodeCount - 1)) {
-                break;
-            }
-        }
     }
     {
         std::lock_guard<std::mutex> lock(pageSceneMutex_);

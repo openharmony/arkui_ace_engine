@@ -33,6 +33,9 @@
 #include "core/components_ng/pattern/selection_container/selection_container_pattern.h"
 #include "core/components_ng/pattern/selection_container/selection_container_layout_property.h"
 #include "core/components_ng/pattern/selection_container/selection_select_overlay.h"
+#include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
 
 using namespace testing;
@@ -1043,5 +1046,84 @@ HWTEST_F(SelectionSelectOverlayTest, GetSelectAreaFromRectsTest002, TestSize.Lev
     EXPECT_EQ(result.Height(), TEST_RECT_HEIGHT);
 }
 
+
+/**
+ * @tc.name: UpdateSelectMenuBgTest001
+ * @tc.desc: Test UpdateSelectMenuBg skips when menu is custom select overlay menu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionSelectOverlayTest, UpdateSelectMenuBgTest001, TestSize.Level1)
+{
+    // Create a SelectOverlayNode with a selectMenu_ that has SELECT_OVERLAY_CUSTOM_MENU type
+    auto overlayPattern = AceType::MakeRefPtr<SelectOverlayPattern>(std::make_shared<SelectOverlayInfo>(),
+        SelectOverlayMode::ALL);
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(std::make_shared<SelectOverlayInfo>());
+    ASSERT_NE(overlayNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(overlayNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    // Create a menu with SELECT_OVERLAY_CUSTOM_MENU type
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(0, "Menu", MenuType::SELECT_OVERLAY_CUSTOM_MENU);
+    auto menuNode = FrameNode::CreateFrameNode("Menu", 201, menuPattern);
+    ASSERT_NE(menuNode, nullptr);
+    selectOverlayNode->selectMenu_ = menuNode;
+
+    // Verify that IsSelectOverlayCustomMenu returns true
+    EXPECT_TRUE(menuPattern->IsSelectOverlayCustomMenu());
+
+    // Call UpdateSelectMenuBg - should return early without crash
+    selectOverlayNode->UpdateSelectMenuBg(nullptr);
+}
+
+/**
+ * @tc.name: UpdateSelectMenuBgTest002
+ * @tc.desc: Test UpdateSelectMenuBg proceeds when menu is not custom select overlay menu
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionSelectOverlayTest, UpdateSelectMenuBgTest002, TestSize.Level1)
+{
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(std::make_shared<SelectOverlayInfo>());
+    ASSERT_NE(overlayNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(overlayNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    // Create a menu with normal MENU type (not SELECT_OVERLAY_CUSTOM_MENU)
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(0, "Menu", MenuType::MENU);
+    auto menuNode = FrameNode::CreateFrameNode("Menu", 202, menuPattern);
+    ASSERT_NE(menuNode, nullptr);
+    selectOverlayNode->selectMenu_ = menuNode;
+
+    // Verify that IsSelectOverlayCustomMenu returns false
+    EXPECT_FALSE(menuPattern->IsSelectOverlayCustomMenu());
+
+    // Call UpdateSelectMenuBg - should not return early, may update render context
+    selectOverlayNode->UpdateSelectMenuBg(nullptr);
+}
+
+/**
+ * @tc.name: UpdateSelectMenuBgTest003
+ * @tc.desc: Test UpdateSelectMenuBg with null caller uses pipeline color mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionSelectOverlayTest, UpdateSelectMenuBgTest003, TestSize.Level1)
+{
+    auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(std::make_shared<SelectOverlayInfo>());
+    ASSERT_NE(overlayNode, nullptr);
+    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(overlayNode);
+    ASSERT_NE(selectOverlayNode, nullptr);
+
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(0, "Menu", MenuType::MENU);
+    auto menuNode = FrameNode::CreateFrameNode("Menu", 203, menuPattern);
+    ASSERT_NE(menuNode, nullptr);
+    selectOverlayNode->selectMenu_ = menuNode;
+
+    // Call with null caller - should use pipeline context color mode
+    selectOverlayNode->UpdateSelectMenuBg(nullptr);
+
+    // Verify function completed without crash; render context may or may not have
+    // background color set depending on UseNewMaterial path.
+    auto renderContext = menuNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+}
 
 } // namespace OHOS::Ace::NG

@@ -173,6 +173,18 @@ struct GridLayoutInfo {
     EndIndexInfo FindEndIdx(int32_t endLine) const;
 
     /**
+     * @brief Resolve the first item index at [startLine], handling multi-row continuation markers.
+     *
+     * Mirrors GridLayoutRangeSolver::CheckMultiRow: resolves -itemIdx continuation values
+     * back to the original item index and picks the item with the earliest start row.
+     * Ensures reportStartIndex_ is never negative.
+     *
+     * @param startLine index of the line to resolve.
+     * @return first item index at startLine and the position it resides in.
+     */
+    EndIndexInfo FindStartIdx(int32_t startLine) const;
+
+    /**
      * REQUIRES: Item is between startIndex_ and endIndex_. Otherwise, the result is undefined.
      *
      * @param line starting line of the item.
@@ -478,6 +490,19 @@ private:
     float GetContentHeightOfRegularGrid(float mainGap) const;
     int32_t GetItemIndexByPosition(int32_t position);
     int32_t GetPositionByItemIndex(int32_t itemIndex);
+
+    /**
+     * @brief Walk backward through gridMatrix_ to find the first row of a multi-row item.
+     *
+     * Mirrors the free function FindItemStartRow in grid_layout_range_solver.cpp.
+     * Starting from [startRow], decrements while the value at (row, colIdx) is negative
+     * (continuation marker). Stops at the first row with a non-negative value (item start).
+     *
+     * @param startRow The continuation row to start walking back from.
+     * @param colIdx The column index of the item.
+     * @return The first row of the multi-row item.
+     */
+    int32_t FindItemStartRow(int32_t startRow, int32_t colIdx) const;
     void MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex);
     void MoveItemsForward(int32_t from, int32_t to, int32_t itemIndex);
     void GetLineHeights(

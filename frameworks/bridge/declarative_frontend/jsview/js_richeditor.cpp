@@ -501,7 +501,6 @@ bool JSRichEditor::ParseJsSymbolColorWithResource(const JSRef<JSVal>& jsValue, s
     std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr)
 {
     CHECK_NULL_RETURN(jsValue->IsArray(), false);
-
     JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
     for (size_t i = 0; i < array->Length(); i++) {
         JSRef<JSVal> value = array->GetValueAt(i);
@@ -600,10 +599,18 @@ void JSRichEditorController::ParseJsCustomSymbolStyle(const JSRef<JSVal>& jsValu
     }
 }
 
+ColorMode JSRichEditorBaseController::GetColorMode() const
+{
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_RETURN(controller, ColorMode::COLOR_MODE_UNDEFINED);
+    return controller->GetColorMode();
+}
+
 void JSRichEditorController::ParseJsSymbolSpanStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    COLOR_MODE_LOCK(GetColorMode());
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     std::vector<Color> symbolColor;
     std::vector<std::pair<int32_t, RefPtr<ResourceObject>>> resObjArr;
@@ -1171,6 +1178,7 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
             placeholderSpan.offset = placeholderOffset;
         }
     }
+    COLOR_MODE_LOCK(GetColorMode());
     JSRef<JSVal> colorMetrics = placeholderOptionObject->GetProperty("dragBackgroundColor");
     RefPtr<ResourceObject> resourceObject;
     if (Color dragBackgroundColor; !colorMetrics->IsNull() &&
@@ -1403,6 +1411,7 @@ bool JSRichEditorBaseControllerBinding::ParseParagraphStyle(
     const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style)
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    COLOR_MODE_LOCK(GetColorMode());
     if (styleObject->IsUndefined()) {
         return false;
     }
@@ -1728,6 +1737,7 @@ void JSRichEditorBaseControllerBinding::ParseJsTextStyle(
 {
     ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
+    COLOR_MODE_LOCK(GetColorMode());
     Color textColor;
     RefPtr<ResourceObject> colorResObj;
     if (!fontColor->IsNull() && JSRichEditor::ParseJsColorWithResource(fontColor, textColor, colorResObj)) {

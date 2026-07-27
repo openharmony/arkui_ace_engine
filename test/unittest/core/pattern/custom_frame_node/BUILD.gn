@@ -13,27 +13,31 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+test_sources = [
+  "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_child_tree_callback.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_provider.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_session_adapter.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_pattern.cpp",
+  "custom_frame_node_test.cpp",
+]
+
+core_sources = [
+  "custom_frame_node_test_min.cpp",
+  "custom_frame_node_test_core.cpp",
+]
+
 ace_unittest("custom_frame_node_test") {
   module_name = "ImperativeFramework-NodeController"
   type = "new"
-  sources = [
-    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_child_tree_callback.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_provider.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_pattern.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/custom_frame_node/custom_accessibility_session_adapter.cpp",
-    "custom_frame_node_test.cpp"
-  ]
+  sources = test_sources
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "custom_frame_node_test_min.cpp",
-      "custom_frame_node_test_core.cpp",
-    ]
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+    sources += core_sources
+  } else if (!ace_enable_full_test_suite) {
+    sources = core_sources
   } else {
-    sources += [
-      "custom_frame_node_test_min.cpp",
-      "custom_frame_node_test_core.cpp",
-    ]
+    sources += core_sources
   }
 }

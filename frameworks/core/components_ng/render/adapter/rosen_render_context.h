@@ -581,12 +581,18 @@ public:
 
     void AddKeyFrameAnimateEndCallback(const std::function<void()>& callback)
     {
-        callbackAnimateEnd_ =  callback;
+        if (!callbackAnimateEnd_) {
+            callbackAnimateEnd_ = std::make_unique<std::function<void()>>();
+        }
+        *callbackAnimateEnd_ = callback;
     }
 
     void AddKeyFrameCachedAnimateActionCallback(const std::function<void()>& callback)
     {
-        callbackCachedAnimateAction_ = callback;
+        if (!callbackCachedAnimateAction_) {
+            callbackCachedAnimateAction_ = std::make_unique<std::function<void()>>();
+        }
+        *callbackCachedAnimateAction_ = callback;
     }
 
     bool GetIsDraggingFlag() const
@@ -661,7 +667,7 @@ public:
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     // cross-platform only: used by XComponent to register a surface capture callback for component snapshot.
-    void SetSurfaceCaptureCallback(std::function<std::shared_ptr<Media::PixelMap>()> callback);
+    ACE_FORCE_EXPORT void SetSurfaceCaptureCallback(std::function<std::shared_ptr<Media::PixelMap>()> callback);
 #endif
 
     void FlushContentModifierImmediately(const RefPtr<ContentModifier>& modifier) override;
@@ -786,6 +792,7 @@ protected:
     void SetPositionToRSNode();
     void SetPositionToRSNodeMultiThread();
     std::shared_ptr<Rosen::RSUIContext> GetRSUIContext(PipelineContext* pipeline);
+    std::shared_ptr<Rosen::RSUIContext> GetOrCreateRSUIContext(PipelineContext* pipeline);
 
     // Convert BorderRadiusProperty to Rosen::Vector4f
     static inline void ConvertRadius(const BorderRadiusProperty& value, Rosen::Vector4f& cornerRadius);
@@ -948,9 +955,9 @@ protected:
     Color hoveredColor_ = Color::TRANSPARENT;
 
     RefPtr<RosenTransitionEffect> transitionEffect_;
-    std::function<void()> transitionOutCallback_;
-    std::function<void()> transitionInCallback_;
-    TransitionFinishCallback transitionUserCallback_;
+    std::unique_ptr<std::function<void()>> transitionOutCallback_;
+    std::unique_ptr<std::function<void()>> transitionInCallback_;
+    std::unique_ptr<TransitionFinishCallback> transitionUserCallback_;
 
     std::optional<OffsetF> frameOffset_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
@@ -1027,8 +1034,8 @@ protected:
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 
     std::shared_ptr<Rosen::RSWindowKeyFrameNode> keyFrameNode_;
-    std::function<void()> callbackAnimateEnd_ = nullptr;
-    std::function<void()> callbackCachedAnimateAction_ = nullptr;
+    std::unique_ptr<std::function<void()>> callbackAnimateEnd_;
+    std::unique_ptr<std::function<void()>> callbackCachedAnimateAction_;
     bool isDraggingFlag_ = false;
     bool hasKeyFrameCache_ = false;
 

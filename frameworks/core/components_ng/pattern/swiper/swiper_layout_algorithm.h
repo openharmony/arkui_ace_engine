@@ -462,7 +462,6 @@ private:
     float ignoreBlankOffset_ = 0.0f;
     float currentIgnoreBlankOffset_ = 0.0f;
     bool prevMarginIgnoreBlank_ = false;
-    std::set<int32_t> measuredItems_;
     std::set<int32_t> activeItems_;
     std::set<int32_t> cachedItems_;
     // only be used in AutoLinear mode

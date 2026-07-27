@@ -3008,6 +3008,22 @@ void UIContentImpl::Background()
     Recorder::EventRecorder::Get().SetContainerInfo(windowName, instanceId_, false);
 }
 
+// Should be called on UI thread. Atomic variables ensure safety if called from non-UI thread.
+void UIContentImpl::SetBackgroundForceFlushVsync(bool enable, size_t count)
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: SetBackgroundForceFlushVsync enable:%{public}d count:%{public}zu",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, enable, count);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto window = pipelineContext->GetWindow();
+    CHECK_NULL_VOID(window);
+    window->SetBackgroundForceFlushVsync(enable, count);
+}
+
 void UIContentImpl::NotifyWindowAttachStateChange(bool status)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);

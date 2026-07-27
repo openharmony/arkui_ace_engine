@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/tabs/tab_content_event_hub.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/symbol/constants.h"
@@ -165,6 +166,12 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
 
     auto tabsNode = FindTabsNode(tabContent);
     CHECK_NULL_VOID(tabsNode);
+
+    // Lazy create TabBar internal child nodes when first TabContent is added
+    if (!tabsNode->HasTabBarChildNodes()) {
+        TabsModelNG::InitTabBarChildNodes(tabsNode);
+    }
+
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();

@@ -474,7 +474,7 @@ class JSCalendarPicker extends JSViewAbstract {
   }
 }
 
-class JSCalendarPickerDialog extends JSViewAbstract {
+class JSCalendarPickerDialog {
   static show(options) {
     getUINativeModule().calendarPickerDialog.show(options);
   }

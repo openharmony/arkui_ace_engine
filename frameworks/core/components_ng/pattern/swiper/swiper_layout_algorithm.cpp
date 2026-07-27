@@ -312,7 +312,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     // set swiper cache info.
-    auto measuredItemCount = static_cast<int32_t>(measuredItems_.size());
+    auto measuredItemCount = static_cast<int32_t>(itemPosition_.size());
     auto maxCachedCount =
         isLoop_ ? static_cast<int32_t>(std::ceil(static_cast<float>(realTotalCount_ - measuredItemCount) / 2))
                 : realTotalCount_;
@@ -491,20 +491,12 @@ void SwiperLayoutAlgorithm::AdjustItemPositionOnCachedShow()
     auto startIndex = GetStartIndex();
     while (startIndex < cachedStartIndex_) {
         itemPosition_.erase(startIndex);
-        auto item = measuredItems_.find(startIndex);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
         startIndex++;
     }
 
     auto endIndex = GetEndIndex();
     while (endIndex > cachedEndIndex_) {
         itemPosition_.erase(endIndex);
-        auto item = measuredItems_.find(endIndex);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
         endIndex--;
     }
 }
@@ -795,7 +787,6 @@ bool SwiperLayoutAlgorithm::LayoutForwardItem(LayoutWrapper* layoutWrapper, cons
     }
     ++currentIndex;
     wrapper->Measure(layoutConstraint);
-    measuredItems_.insert(measureIndex);
 
     auto swiperLayoutProperty = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(swiperLayoutProperty, false);
@@ -840,7 +831,6 @@ bool SwiperLayoutAlgorithm::LayoutBackwardItem(LayoutWrapper* layoutWrapper, con
     }
     --currentIndex;
     wrapper->Measure(layoutConstraint);
-    measuredItems_.insert(measureIndex);
 
     float mainAxisSize = GetChildMainAxisSize(wrapper, swiperLayoutProperty);
     startPos = endPos - mainAxisSize;
@@ -873,10 +863,6 @@ void SwiperLayoutAlgorithm::SetInactiveOnForward(LayoutWrapper* layoutWrapper)
 
         ResetOffscreenItemPosition(layoutWrapper, GetLoopIndex(pos->first), true);
         pos = itemPosition_.erase(pos);
-        auto item = measuredItems_.find(index);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
     }
 }
 
@@ -1054,10 +1040,6 @@ void SwiperLayoutAlgorithm::SetInactive(
     }
     for (const auto& index : removeIndexes) {
         itemPosition_.erase(index);
-        auto item = measuredItems_.find(index);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
     }
 }
 
@@ -1087,10 +1069,6 @@ void SwiperLayoutAlgorithm::SetInactiveOnBackward(LayoutWrapper* layoutWrapper)
 
     for (const auto& index : removeIndexes) {
         itemPosition_.erase(index);
-        auto item = measuredItems_.find(index);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
     }
 }
 
@@ -1823,10 +1801,6 @@ void SwiperLayoutAlgorithm::MeasureSwiperInFakeDrag(
     }
     for (const auto& index : removeIndexes) {
         itemPosition_.erase(index);
-        auto item = measuredItems_.find(index);
-        if (item != measuredItems_.end()) {
-            measuredItems_.erase(item);
-        }
     }
 }
 

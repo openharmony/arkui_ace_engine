@@ -923,11 +923,11 @@ HWTEST_F(OverlayMaterialECTestNg, ImmersiveMaterialConfig002, TestSize.Level1)
 HWTEST_F(OverlayMaterialECTestNg, ImmersiveMaterialConfig003, TestSize.Level1)
 {
     ImmersiveMaterialConfig config;
-    LightEffectOptions options;
+    std::shared_ptr<LightEffectOptions> options = std::make_shared<LightEffectOptions>();
     config.lightEffectOptions = options;
     EXPECT_TRUE(config.HasLightEffect());
 
-    config.lightEffectOptions.reset();
+    config.lightEffectOptions = nullptr;
     EXPECT_FALSE(config.HasLightEffect());
 }
 

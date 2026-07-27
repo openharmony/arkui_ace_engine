@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-18
-> 主题数：34
+> 更新时间：2026-07-25
+> 主题数：64
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -38,17 +38,28 @@ docs/kb/
 | Blank | 空白填充组件 | `docs/kb/components/basic/blank.md` | 新建 |
 | Divider | 分隔线组件 | `docs/kb/components/basic/divider.md` | 新建 |
 | Column | 纵向布局组件 | `docs/kb/components/container/column.md` | 新建 |
+| ColumnSplit | 纵向分割布局组件 | `docs/kb/components/container/column_split.md` | 新建（Spec 待补） |
 | Flex | 弹性布局组件（含 Wrap） | `docs/kb/components/container/flex.md` | 已重建，旧 KB 已移除 |
 | GridCol | 响应式栅格列组件 | `docs/kb/components/container/grid_col.md` | 新建 |
 | GridRow | 响应式栅格行组件 | `docs/kb/components/container/grid_row.md` | 新建 |
+| RelativeContainer | 相对布局容器组件 | `docs/kb/components/container/relative_container.md` | 新建 |
 | Row | 横向布局组件 | `docs/kb/components/container/row.md` | 新建 |
+| RowSplit | 横向分割布局组件 | `docs/kb/components/container/row_split.md` | 新建（Spec 待补） |
 | Stack | 层叠布局组件 | `docs/kb/components/container/stack.md` | 新建 |
 | FolderStack | 折叠屏层叠布局组件 | `docs/kb/components/container/folder_stack.md` | 新建 |
+| DynamicLayout | 动态布局组件 | `docs/kb/components/container/dynamic_layout.md` | 新建 |
+| Shape | Shape 类绘制组件 | `docs/kb/components/shape/shape.md` | 新建（Spec 待补） |
+| Canvas | 画布组件 | `docs/kb/components/shape/canvas.md` | 新建（Spec 待补） |
+| OffscreenCanvas | 离屏画布对象 | `docs/kb/components/shape/offscreen_canvas.md` | 新建（Spec 待补） |
 | Text | 文本组件 | `docs/kb/components/basic/text.md` | 已迁移，旧 KB 已移除 |
 | Image | 图片组件 | `docs/kb/components/media/image.md` | 已迁移，旧 KB 已移除 |
 | ImageAnimator | 图片动画组件 | `docs/kb/components/media/image_animator.md` | 已迁移，旧 KB 已移除 |
 | Video | 视频组件 | `docs/kb/components/media/video.md` | 新建（无旧 KB） |
 | DrawableDescriptor | 图片资源描述能力 | `docs/kb/capabilities/drawable_descriptor.md` | 新增 |
+| ImageLoading | 图片加载机制 | `docs/kb/capabilities/image-loading.md` | 新建 |
+| SVG | SVG 解析能力 | `docs/kb/capabilities/svg.md` | 已迁移，旧 KB 已移除 |
+| BackgroundImage | 背景图片通用属性 | `docs/kb/capabilities/background-image.md` | 新建 |
+| ImageAnalyzer | Image 分析能力 | `docs/kb/capabilities/image-analyzer.md` | 新建 |
 | Toggle | 开关组件 | `docs/kb/components/selector/toggle.md` | 已迁移，旧 KB 已移除 |
 | Navigation | 导航容器组件 | `docs/kb/components/container/navigation.md` | 新建 |
 | Tabs | 标签页容器组件 | `docs/kb/components/container/tabs.md` | 新建 |
@@ -59,6 +70,10 @@ docs/kb/
 | TextPicker | 文本选择器组件 | `docs/kb/components/selector/text_picker.md` | 已迁移，旧 KB 已移除 |
 | DatePicker | 日期选择器组件 | `docs/kb/components/selector/date_picker.md` | 已迁移，旧 KB 已移除 |
 | TimePicker | 时间选择器组件 | `docs/kb/components/selector/time_picker.md` | 已迁移，旧 KB 已移除 |
+| CalendarPickerDialog | 日历选择弹窗组件 | `docs/kb/components/selector/calendar_picker_dialog.md` | 新建 |
+| DatePickerDialog | 日期选择弹窗组件 | `docs/kb/components/selector/date_picker_dialog.md` | 新建 |
+| TimePickerDialog | 时间选择弹窗组件 | `docs/kb/components/selector/time_picker_dialog.md` | 新建 |
+| TextPickerDialog | 文本选择弹窗组件 | `docs/kb/components/selector/text_picker_dialog.md` | 新建 |
 | UIPickerComponent | UI选择器容器组件 | `docs/kb/components/selector/ui_picker_component.md` | 已迁移，旧 KB 已移除 |
 | AlphabetIndexer | 字母索引组件 | `docs/kb/components/data_display/alphabet_indexer.md` | 新建 |
 | Router | 路由管理 | `docs/kb/api/router.md` | 新建（不推荐，推荐 Navigation） |
@@ -66,6 +81,21 @@ docs/kb/
 | StateMgmtV2Core | V2 状态管理核心逻辑 | `docs/kb/architecture/state_management/v2_core.md` | 已注册 |
 | StateMgmtV1Decorators | V1 状态管理装饰器 | `docs/kb/architecture/state_management/v1_decorators.md` | 已注册 |
 | StateMgmtV2Decorators | V2 状态管理装饰器 | `docs/kb/architecture/state_management/v2_decorators.md` | 已注册 |
+| WindowMechanism | 窗口机制 | `docs/kb/architecture/window-mechanism.md` | 新建 |
+| DFXLogging | DFX 日志 | `docs/kb/architecture/dfx/logging.md` | 新建 |
+| DFXMemoryManagement | DFX 内存管理 | `docs/kb/architecture/dfx/memory-management.md` | 新建 |
+| DFXTrace | DFX Trace 打点 | `docs/kb/architecture/dfx/trace.md` | 新建 |
+| DFXDumpMechanism | DFX Dump 机制 | `docs/kb/architecture/dfx/dump-mechanism.md` | 新建 |
+| DFXLayoutBoundaryDisplay | DFX 布局边界显示 | `docs/kb/architecture/dfx/layout-boundary-display.md` | 新建 |
+| UIContext | UI 上下文 | `docs/kb/capabilities/ui-context.md` | 新建 |
+| Menu | 菜单组件 | `docs/kb/components/overlay/menu.md` | 已迁移，旧 KB 已移除；补齐 Spec 路由 |
+| Dialog | 弹窗组件 | `docs/kb/components/overlay/dialog.md` | 新建；补齐 Spec 路由 |
+| Toast | 提示组件 | `docs/kb/components/overlay/toast.md` | 新建；补齐 Spec 路由 |
+| Select | 选择器组件 | `docs/kb/components/overlay/select.md` | 新建；补齐 Spec 路由 |
+| bindPopup | 气泡弹窗属性 | `docs/kb/components/overlay/bind_popup.md` | 新建；补齐 Spec 路由 |
+| PopupAdvanced | Popup 高级组件 | `docs/kb/components/overlay/popup_advanced.md` | 新建；补齐 Spec 路由 |
+| Sheet | 半模态弹窗组件 | `docs/kb/components/overlay/sheet.md` | 已迁移，旧 KB 已移除 |
+| bindTips | 提示气泡属性 | `docs/kb/components/overlay/bind_tips.md` | 新建 |
 
 ## 检索
 

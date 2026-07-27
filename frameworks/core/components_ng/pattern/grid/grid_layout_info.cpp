@@ -518,12 +518,24 @@ float GridLayoutInfo::GetIrregularHeight(float mainGap) const
         return 0.0f;
     }
     auto childrenCount = childrenCount_ + repeatDifference_;
+    if (childrenCount <= 0) {
+        TAG_LOGW(ACE_GRID, "GetIrregularHeight: non-positive childrenCount %{public}d", childrenCount);
+        return 0.0f;
+    }
     int32_t lastKnownLine = lineHeightMap_.rbegin()->first;
-    float itemRatio = static_cast<float>(FindEndIdx(lastKnownLine).itemIdx + 1) / static_cast<float>(childrenCount);
-    float estTotalLines = std::round(static_cast<float>(lastKnownLine + 1) / itemRatio);
-
     auto knownLineCnt = static_cast<float>(lineHeightMap_.size());
     float knownHeight = synced_ ? avgLineHeight_ * knownLineCnt : GetTotalLineHeight(0.0f);
+    int32_t endIdx = FindEndIdx(lastKnownLine).itemIdx;
+    // lastKnownLine comes from lineHeightMap_ but FindEndIdx looks up gridMatrix_. When the line
+    // is missing, FindEndIdx returns itemIdx = -1, making (endIdx + 1) == 0 and itemRatio == 0,
+    // which divides by zero on estTotalLines. Fall back to the measured lines' height plus the
+    // gaps between them (equivalent to the fully-known result of the normal formula).
+    if (endIdx < 0) {
+        TAG_LOGW(ACE_GRID, "GetIrregularHeight: invalid endIdx %{public}d at line %{public}d", endIdx, lastKnownLine);
+        return knownHeight + (knownLineCnt - 1) * mainGap;
+    }
+    float itemRatio = static_cast<float>(endIdx + 1) / static_cast<float>(childrenCount);
+    float estTotalLines = std::round(static_cast<float>(lastKnownLine + 1) / itemRatio);
     float avgHeight = synced_ ? avgLineHeight_ : knownHeight / knownLineCnt;
     return knownHeight + (estTotalLines - knownLineCnt) * avgHeight + (estTotalLines - 1) * mainGap;
 }
@@ -914,6 +926,63 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
     return { .itemIdx = 0, .y = 0, .x = 0 };
 }
 
+int32_t GridLayoutInfo::FindItemStartRow(int32_t startRow, int32_t colIdx) const
+{
+    int32_t r = startRow;
+    while (r > 0) {
+        auto rowIt = gridMatrix_.find(r);
+        if (rowIt == gridMatrix_.end() || rowIt->second.empty()) {
+            break;
+        }
+        auto colIt = rowIt->second.find(colIdx);
+        if (colIt == rowIt->second.end() || colIt->second >= 0) {
+            break;
+        }
+        --r;
+    }
+    return r;
+}
+
+GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindStartIdx(int32_t startLine) const
+{
+    auto it = gridMatrix_.find(startLine);
+    if (it == gridMatrix_.end() || it->second.empty()) {
+        return {};
+    }
+
+    const auto& row = it->second;
+    int32_t bestItem = -1;
+    int32_t bestStartRow = startLine + 1; // larger than any valid start row
+
+    for (const auto& [col, val] : row) {
+        if (val == 0) {
+            return {
+                .itemIdx = 0,
+                .y = 0,
+                .x = col
+            };
+        }
+        int32_t itemIdx;
+        int32_t itemStartRow;
+        if (val > 0) {
+            itemIdx = val;
+            itemStartRow = startLine;
+        } else {
+            itemIdx = -val;
+            itemStartRow = FindItemStartRow(startLine, col);
+        }
+        if (itemStartRow < bestStartRow) {
+            bestStartRow = itemStartRow;
+            bestItem = itemIdx;
+        }
+    }
+
+    if (bestItem < 0) {
+        return { .itemIdx = 0, .y = 0, .x = 0 };
+    }
+    return { .itemIdx = bestItem, .y = bestStartRow, .x = 0 };
+}
+
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
 {
     auto gridIt = gridMatrix_.lower_bound(idx);
@@ -1291,7 +1360,7 @@ void GridLayoutInfo::SyncReportRange(float mainSize, float mainGap)
     }
     auto startLineIt = gridMatrix_.find(reportStartLine);
     if (startLineIt != gridMatrix_.end() && !startLineIt->second.empty()) {
-        reportStartIndex_ = startLineIt->second.begin()->second;
+        reportStartIndex_ = FindStartIdx(reportStartLine).itemIdx;
     } else {
         reportStartIndex_ = startIndex_;
     }
@@ -1317,7 +1386,7 @@ void GridLayoutInfo::SyncReportRange(float mainSize, float mainGap)
     }
     auto endLineIt = gridMatrix_.find(reportEndLine);
     if (endLineIt != gridMatrix_.end() && !endLineIt->second.empty()) {
-        reportEndIndex_ = endLineIt->second.rbegin()->second;
+        reportEndIndex_ = FindEndIdx(reportEndLine).itemIdx;
     } else {
         reportEndIndex_ = endIndex_;
     }

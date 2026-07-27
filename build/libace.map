@@ -1136,7 +1136,7 @@
       "OHOS::Ace::NG::BaseTextSelectOverlay::IsTouchAtHandle(OHOS::Ace::TouchEventInfo const&)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::MarkOverlayDirty()";
       "OHOS::Ace::NG::BaseTextSelectOverlay::MergeSelectedBoxes(std::__h::vector<OHOS::Ace::NG::RectT<float>, std::__h::allocator<OHOS::Ace::NG::RectT<float>>> const&, OHOS::Ace::NG::RectT<float> const&, OHOS::Ace::NG::RectT<float> const&, OHOS::Ace::NG::OffsetT<float> const&)";
-      "OHOS::Ace::NG::BaseTextSelectOverlay::OnAncestorNodeChanged(unsigned int)";
+      "OHOS::Ace::NG::BaseTextSelectOverlay::OnAncestorNodeChanged(unsigned int, bool, bool)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::OnCloseOverlay(OHOS::Ace::NG::OptionMenuType, OHOS::Ace::NG::CloseReason, OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayInfo>)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::OnHandleGlobalTouchEvent(OHOS::Ace::SourceType, OHOS::Ace::TouchType, bool)";
       "OHOS::Ace::NG::BaseTextSelectOverlay::OnHandleMarkInfoChange(std::__h::shared_ptr<OHOS::Ace::NG::SelectOverlayInfo>, unsigned int)";
@@ -2744,7 +2744,7 @@
       "OHOS::Ace::NG::TextSelectOverlay::GetSelectAreaFromRects(OHOS::Ace::NG::SelectRectsType)";
       "OHOS::Ace::NG::TextSelectOverlay::GetSelectedText()";
       "OHOS::Ace::NG::TextSelectOverlay::IsAIMenuOptionChanged(OHOS::Ace::NG::SelectMenuInfo&)";
-      "OHOS::Ace::NG::TextSelectOverlay::OnAncestorNodeChanged(unsigned int)";
+      "OHOS::Ace::NG::TextSelectOverlay::OnAncestorNodeChanged(unsigned int, bool, bool)";
       "OHOS::Ace::NG::TextSelectOverlay::OnCloseOverlay(OHOS::Ace::NG::OptionMenuType, OHOS::Ace::NG::CloseReason, OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayInfo>)";
       "OHOS::Ace::NG::TextSelectOverlay::OnHandleGlobalTouchEvent(OHOS::Ace::SourceType, OHOS::Ace::TouchType, bool)";
       "OHOS::Ace::NG::TextSelectOverlay::OnHandleLevelModeChanged(OHOS::Ace::NG::HandleLevelMode)";

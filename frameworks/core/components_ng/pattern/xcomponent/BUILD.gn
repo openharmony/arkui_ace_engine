@@ -44,18 +44,22 @@ build_component_ng("xcomponent_pattern_ng") {
   ark_sources = [
     "bridge/arkts_native_xcomponent_bridge.cpp",
     "bridge/arkts_native_xcomponent_node_bridge.cpp",
-    "bridge/xcomponent_ani_modifier.cpp",
-    "bridge/xcomponent_controller_accessor.cpp",
-    "bridge/xcomponent_controller_extender_accessor.cpp",
-    "bridge/xcomponent_controller_peer_impl.cpp",
     "bridge/xcomponent_dynamic_modifier.cpp",
     "bridge/xcomponent_dynamic_module.cpp",
-    "bridge/xcomponent_model_impl.cpp",
     "bridge/xcomponent_node.cpp",
   ]
 
-  if (!ace_engine_feature_wearable) {
-    ark_sources += [ "bridge/xcomponent_static_modifier.cpp" ]
+  if (!is_arkui_x) {
+    if (!ace_engine_feature_wearable) {
+      ark_sources += [
+        "bridge/xcomponent_ani_modifier.cpp",
+        "bridge/xcomponent_controller_accessor.cpp",
+        "bridge/xcomponent_controller_extender_accessor.cpp",
+        "bridge/xcomponent_controller_peer_impl.cpp",
+        "bridge/xcomponent_static_modifier.cpp",
+      ]
+    }
+    ark_sources += [ "bridge/xcomponent_model_impl.cpp" ]
   }
 
   deps = []

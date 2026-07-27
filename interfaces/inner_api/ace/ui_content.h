@@ -593,6 +593,16 @@ public:
 
     virtual void EnableContainerModalCustomGesture(bool enable) {};
 
+    /**
+     * @description: Enable background force flush vsync.
+     * @param enable True to enable, false to disable. Default is false, reset to false on foreground.
+     * @param count Max number of vsync frames to flush (0-10, clamped to 10).
+     * When enabled and app is in background, RequestFrame will succeed for up to count vsync cycles.
+     * After count reaches 0, the feature auto-disables.
+     * Should be called on the UI thread. Variables are atomic for safety if called from other threads.
+     */
+    virtual void SetBackgroundForceFlushVsync(bool enable, size_t count) {};
+
     virtual void AddKeyFrameAnimateEndCallback(const std::function<void()> &callback) {};
     virtual void AddKeyFrameNodeCallback(const std::function<
         void(std::shared_ptr<Rosen::RSWindowKeyFrameNode>& keyFrameNode,

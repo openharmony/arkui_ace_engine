@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_WINDOW_H
 
+#include <atomic>
 #include <memory>
 #include <mutex>
 #include <set>
@@ -115,6 +116,8 @@ public:
     virtual void OnShow()
     {
         onShow_ = true;
+        backgroundForceFlushEnabled_.store(false, std::memory_order_relaxed);
+        backgroundForceFlushCount_.store(0, std::memory_order_relaxed);
     }
 
     virtual void OnHide()
@@ -297,9 +300,22 @@ public:
 
     virtual void GoBackgroundForNodeRelease() {}
     virtual void NotifyWindowAttachStateChange(bool status) {}
+
+    // Thread-safe via std::atomic. Should be called on UI thread.
+    void SetBackgroundForceFlushVsync(bool enable, size_t count)
+    {
+        static constexpr uint32_t MAX_FORCE_FLUSH_COUNT = 10;
+        backgroundForceFlushEnabled_.store(enable, std::memory_order_relaxed);
+        backgroundForceFlushCount_.store(
+            enable ? std::min(static_cast<uint32_t>(count), MAX_FORCE_FLUSH_COUNT) : 0,
+            std::memory_order_relaxed);
+    }
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
+    std::atomic<bool> backgroundForceFlushEnabled_{false};
+    std::atomic<uint32_t> backgroundForceFlushCount_{0};
     double density_ = 1.0;
     MouseFormat cursor_ = MouseFormat::DEFAULT;
     bool isUserSetCursor_ = false;

@@ -17,7 +17,6 @@
 
 #include <algorithm>
 #include <cctype>
-#include <sstream>
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/json/json_util.h"
@@ -165,6 +164,9 @@ void PageSceneInputCountTracker::Initialize(
     const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const RefPtr<FrameNode>& pageRoot)
 {
     Reset();
+    if (pageRoot) {
+        pageViewportRect_ = pageRoot->GetTransformRectRelativeToWindowOnlyVisible(true);
+    }
     CollectInputNodes(ruleSet, rule, pageRoot);
     std::sort(visibleInputNodes_.begin(), visibleInputNodes_.end(), [](const auto& left, const auto& right) {
         return left.nodeId < right.nodeId;
@@ -174,6 +176,7 @@ void PageSceneInputCountTracker::Initialize(
 void PageSceneInputCountTracker::Reset()
 {
     visibleInputNodes_.clear();
+    pageViewportRect_ = RectF();
 }
 
 const std::vector<PageSceneNodeInfo>& PageSceneInputCountTracker::GetVisibleInputNodes() const
@@ -215,7 +218,8 @@ std::optional<PageSceneNodeInfo> PageSceneInputCountTracker::BuildNodeInfo(
 
     RectF rect = rule.onlyVisible ? node->GetTransformRectRelativeToWindowOnlyVisible(true)
                                   : node->GetTransformRectRelativeToWindow(true);
-    bool visible = !rule.onlyVisible || (node->IsVisibleAndActive() && rect.Width() > 0.0f && rect.Height() > 0.0f);
+    bool visible = !rule.onlyVisible || (node->IsVisibleAndActive() && rect.Width() > 0.0f && rect.Height() > 0.0f &&
+        pageViewportRect_.IsInnerIntersectWith(rect));
     if (!visible) {
         return std::nullopt;
     }
@@ -357,7 +361,10 @@ std::optional<PageSceneMatchResult> PageSceneRuleManager::MatchPageScene(
         result.matchedCount = static_cast<int32_t>(nodes.size());
         result.minReportIntervalMs = rule.minReportIntervalMs;
         result.deduplicate = rule.deduplicate;
-        result.signature = BuildSignature(ruleSet.value(), rule, pageName, nodes);
+        result.nodeIds.reserve(nodes.size());
+        for (const auto& node : nodes) {
+            result.nodeIds.emplace_back(node.nodeId);
+        }
         result.sceneJson = BuildSceneJson(ruleSet.value(), rule, pageName, nodes, matched, result.eventName);
         if (matched || forceReportUnmatched) {
             return result;
@@ -386,15 +393,16 @@ bool PageSceneRuleManager::ShouldReport(int32_t processId, const PageSceneMatchR
     }
     auto now = std::chrono::steady_clock::now();
     if (iter != reportStates_.end()) {
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.second).count();
-        if (result.deduplicate && iter->second.first == result.signature) {
+        auto elapsed =
+            std::chrono::duration_cast<std::chrono::milliseconds>(now - iter->second.lastReportTime).count();
+        if (result.deduplicate && iter->second.lastReportedNodeIds == result.nodeIds) {
             return false;
         }
         if (elapsed < result.minReportIntervalMs) {
             return false;
         }
     }
-    reportStates_[key] = { result.signature, now };
+    reportStates_[key] = { result.nodeIds, now };
     return true;
 }
 
@@ -563,16 +571,4 @@ std::string PageSceneRuleManager::BuildSceneJson(const PageSceneRuleSet& ruleSet
     return root->ToString();
 }
 
-std::string PageSceneRuleManager::BuildSignature(
-    const PageSceneRuleSet& ruleSet, const PageSceneRule& rule, const std::string& pageName,
-    const std::vector<PageSceneNodeInfo>& nodes) const
-{
-    std::ostringstream builder;
-    builder << SOURCE_ARKUI << ':' << pageName << ':' << ruleSet.ruleSetId << ':' << rule.ruleId;
-    for (const auto& node : nodes) {
-        builder << ':' << node.nodeId << '/' << node.nodeType << '/' << node.rect.x << ',' << node.rect.y
-                << ',' << node.rect.width << ',' << node.rect.height;
-    }
-    return builder.str();
-}
 } // namespace OHOS::Ace::NG

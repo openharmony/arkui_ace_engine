@@ -1,0 +1,7 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/EventDecoratorTest1",
+    "pages/EventDecoratorTest2"
+  ]
+}

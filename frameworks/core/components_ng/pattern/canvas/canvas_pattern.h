@@ -239,7 +239,8 @@ private:
     void FireOnContext2DAttach();
     void FireOnContext2DDetach();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-    void OnSizeChanged(const DirtySwapConfig& config, bool needReset);
+    void OnSizeChanged(bool needReset);
+    void ResetSurfaceAndFireReady(const SizeF& canvasSize);
     void CreateAnalyzerOverlay();
     void DestroyAnalyzerOverlay();
     void UpdateAnalyzerOverlay();
@@ -263,8 +264,12 @@ private:
     ReadyEventNew readyEventNew_;
     std::optional<SizeF> canvasSize_;
     SizeF dirtyPixelGridRoundSize_ = { -1, -1 };
-    SizeF lastDirtyPixelGridRoundSize_ = { -1, -1 };
-    DirtySwapConfig recordConfig_;
+    SizeF dirtyFrameSize_ = { -1, -1 };
+    SizeF dirtyContentSize_ = { -1, -1 };
+    OffsetF dirtyFrameOffset_ = { -1, -1 };
+    OffsetF dirtyContentOffset_ = { -1, -1 };
+    uint32_t onSizeChangedGen_ = 0;
+    bool recordNeedReset_ = false;
     std::shared_ptr<ImageAnalyzerManager> imageAnalyzerManager_;
     bool isEnableAnalyzer_ = false;
     RefPtr<CanvasModifier> contentModifier_;

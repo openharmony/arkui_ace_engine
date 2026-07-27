@@ -20,6 +20,9 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 
+namespace OHOS::Ace {
+    enum class ColorMode;
+}
 namespace OHOS::Ace::NG {
 class RichEditorPattern;
 
@@ -48,6 +51,7 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     WeakPtr<LayoutInfoInterface> GetLayoutInfoInterface() override;
     const PreviewTextInfo GetPreviewTextInfo() const override;
+    ColorMode GetColorMode() const override;
 
 protected:
     WeakPtr<RichEditorPattern> pattern_;

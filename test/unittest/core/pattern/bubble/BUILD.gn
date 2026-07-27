@@ -13,24 +13,34 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("bubble_test_ng") {
-  module_name = "DialogSet-Popup"
-  type = "new"
-  sources = [
-    "bubble_test_One_ng.cpp",
-    "bubble_test_five_ng.cpp",
-    "bubble_test_four_ng.cpp",
-    "bubble_test_ng.cpp",
-    "bubble_test_six_ng.cpp",
-    "bubble_test_three_ng.cpp",
-    "bubble_test_two_ng.cpp",
-    "bubble_tips_test_ng.cpp",
-  ]
+test_sources = [
+  "bubble_test_One_ng.cpp",
+  "bubble_test_five_ng.cpp",
+  "bubble_test_four_ng.cpp",
+  "bubble_test_ng.cpp",
+  "bubble_test_six_ng.cpp",
+  "bubble_test_three_ng.cpp",
+  "bubble_test_two_ng.cpp",
+  "bubble_tips_test_ng.cpp",
+  "bubble_test_core.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "bubble_test_core.cpp" ]
-  } else {
-    sources += [ "bubble_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("bubble_test_ng") {
+    type = "host_components"
+    module_name = "DialogSet-Popup"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("bubble_test_ng") {
+    module_name = "DialogSet-Popup"
+    type = "new"
+    sources = test_sources
+    cflags = [ "-fno-access-control" ]
+
+    if (!ace_enable_full_test_suite) {
+      sources -= [ "bubble_test_core.cpp" ]
+    }
   }
 }

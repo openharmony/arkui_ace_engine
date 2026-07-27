@@ -696,7 +696,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     onCleanup(): void {
-        scheduleCallback(() => {
+        ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
             this.aboutToDisappear(); // aboutToDisappear can change variable
         });
     }

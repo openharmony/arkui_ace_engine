@@ -20,8 +20,10 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #ifdef XCOMPONENT_SUPPORTED
+#ifndef CROSS_PLATFORM
 #include "bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "core/components_ng/pattern/xcomponent/bridge/xcomponent_model_impl.h"
+#endif
 #endif
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 
@@ -31,8 +33,10 @@ XComponentModel* GetModel()
     static bool isCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
     if (!isCurrentUseNewPipeline) {
 #ifdef XCOMPONENT_SUPPORTED
+#ifndef CROSS_PLATFORM
         static Framework::XComponentModelImpl model;
         return &model;
+#endif
 #endif
     }
     static NG::XComponentModelNG model;
@@ -111,11 +115,13 @@ void XComponentNode::RegisterOnCreate(NG::ArkUIRuntimeCallInfo* runtimeCallInfo,
         ACE_SCORING_EVENT("XComponentNode.onCreate");
         PipelineContext::SetCallBackNode(node);
 #ifdef XCOMPONENT_SUPPORTED
+#ifndef CROSS_PLATFORM
         std::vector<Local<JSValueRef>> argv;
         Local<JSValueRef> jsVal;
         if (Framework::XComponentClient::GetInstance().GetJSVal(const_cast<EcmaVM*>(vm), xcomponentId, jsVal)) {
             argv.emplace_back(jsVal);
         }
+#endif
 #endif
         auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
         NG::ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);

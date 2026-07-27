@@ -382,6 +382,48 @@ HWTEST_F(GridLayoutInfoGeneratedTest, GetIrregularHeight002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridLayoutInfo::GetIrregularHeight003
+ * @tc.desc: Test GetIrregularHeight when childrenCount_ + repeatDifference_ is non-positive, should return 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoGeneratedTest, GetIrregularHeight003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 100.0f }, { 1, 100.0f } };
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 1 } } },
+        { 1, { { 0, 2 }, { 1, 3 } } },
+    };
+    info.crossCount_ = 2;
+
+    info.childrenCount_ = 5;
+    info.repeatDifference_ = -5;
+    EXPECT_EQ(info.GetIrregularHeight(5.0f), 0.0f);
+
+    info.childrenCount_ = 1;
+    info.repeatDifference_ = -5;
+    EXPECT_EQ(info.GetIrregularHeight(5.0f), 0.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetIrregularHeight004
+ * @tc.desc: Test GetIrregularHeight when FindEndIdx returns -1, should fall back to known height plus gaps
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoGeneratedTest, GetIrregularHeight004, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 100.0f }, { 1, 100.0f } };
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 1 } } },
+    };
+    info.crossCount_ = 2;
+    info.childrenCount_ = 12;
+
+    EXPECT_FLOAT_EQ(info.GetIrregularHeight(5.0f), 205.0f);
+}
+
+/**
  * @tc.name: GridLayoutInfo::SkipRegularLines001
  * @tc.desc: Test SkipRegularLines with non-positive lineHeight
  * @tc.type: FUNC

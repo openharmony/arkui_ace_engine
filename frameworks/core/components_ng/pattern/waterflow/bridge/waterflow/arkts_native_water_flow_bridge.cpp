@@ -1350,11 +1350,12 @@ ArkUINativeModuleValue WaterFlowBridge::SetOnWaterFlowScrollIndex(ArkUIRuntimeCa
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(int32_t, int32_t)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+    std::function<void(int32_t, int32_t)> callback = [vm, weakNode = AceType::WeakClaim(frameNode),
+                                                     func = panda::CopyableGlobal(vm, func)](
                                                          const int32_t first, const int32_t last) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         panda::Local<panda::NumberRef> firstParam = panda::NumberRef::New(vm, first);
         panda::Local<panda::NumberRef> lastParam = panda::NumberRef::New(vm, last);

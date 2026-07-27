@@ -313,7 +313,7 @@ class JSDatePicker extends JSViewAbstract {
   }
 }
 
-class JSDatePickerDialog extends JSViewAbstract {
+class JSDatePickerDialog {
   static show(value: any): void {
     getUINativeModule().datePickerDialog.show(value);
   }

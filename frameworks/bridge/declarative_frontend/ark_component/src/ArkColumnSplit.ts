@@ -32,7 +32,7 @@ class ColumnSplitDividerModifier extends ModifierWithKey<ColumnSplitDividerStyle
   }
 }
 class ColumnSplitResizeableModifier extends ModifierWithKey<boolean> {
-  constructor(value: boolean) {
+  constructor(value: ColumnSplitDividerStyle | null) {
     super(value);
   }
   static identity: Symbol = Symbol('columnSplitResizeable');

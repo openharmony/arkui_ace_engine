@@ -122,7 +122,8 @@ void ButtonModelNG::SetButtonStyleOnly(FrameNode* frameNode, const std::optional
 void ButtonModelNG::ParseButtonResColor(const RefPtr<FrameNode>& frameNode,
     const RefPtr<ResourceObject>& resObj, Color& result, const ButtonColorType buttonColorType)
 {
-    auto parseFlag = ResourceParseUtils::ParseResColor(resObj, result);
+    bool adaptMaterial = buttonColorType == ButtonColorType::FONT_COLOR;
+    auto parseFlag = ResourceParseUtils::ParseResColor(resObj, result, adaptMaterial);
     CHECK_EQUAL_VOID(parseFlag, true);
     CHECK_NULL_VOID(frameNode);
     auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);

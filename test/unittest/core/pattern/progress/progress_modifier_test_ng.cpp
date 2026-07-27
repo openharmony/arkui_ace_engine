@@ -2273,4 +2273,260 @@ HWTEST_F(ProgressModifierTestNg, ProgressFrameRateRangeTest001, TestSize.Level1)
     EXPECT_EQ(modifier->isSweeping_, true);
     EXPECT_EQ(modifier->dateUpdated_, false);
 }
+
+/**
+ * @tc.name: ProgressBgColor001
+ * @tc.desc: Test SetProgressBgColor with HDR color.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressBgColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier with HDR background color.
+     * @tc.expected: step1. ProgressModifier created successfully.
+     */
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    progressModifier->SetProgressType(PROGRESS_TYPE_LINEAR);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    SizeF contentSize(200.0f, 100.0f);
+    progressModifier->SetContentSize(contentSize);
+
+    ColorWithHeadRoom hdrColorData = { 1.0f, 0.5f, 0.3f, 1.0f, 2.0f };
+    Color hdrColor(hdrColorData);
+    LinearColor linearHdrColor(hdrColor);
+    progressModifier->SetBackgroundColor(linearHdrColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearHdrColor);
+
+    /**
+     * @tc.steps: step2. Call onDraw to verify HDR color rendering.
+     * @tc.expected: step2. Drawing completed without error.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_LINEAR));
+}
+
+/**
+ * @tc.name: ProgressBgColor002
+ * @tc.desc: Test SetProgressBgColor with ColorSpace DISPLAY_P3.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressBgColor002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier with DISPLAY_P3 color space.
+     * @tc.expected: step1. ProgressModifier created successfully.
+     */
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    progressModifier->SetProgressType(PROGRESS_TYPE_RING);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
+    SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier->SetContentSize(contentSize);
+
+    Color color(Color::RED.GetValue(), ColorSpace::DISPLAY_P3);
+    LinearColor linearColor(color);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+
+    /**
+     * @tc.steps: step2. Call onDraw to verify ColorSpace rendering.
+     * @tc.expected: step2. Drawing completed without error.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+}
+
+/**
+ * @tc.name: ProgressBgColor003
+ * @tc.desc: Test SetProgressBgColor with ColorSpace BT2020.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressBgColor003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier with BT2020 color space.
+     * @tc.expected: step1. ProgressModifier created successfully.
+     */
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    progressModifier->SetProgressType(PROGRESS_TYPE_MOON);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier->SetContentSize(contentSize);
+
+    Color color(Color::BLUE.GetValue(), ColorSpace::BT2020);
+    LinearColor linearColor(color);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+
+    /**
+     * @tc.steps: step2. Call onDraw to verify ColorSpace rendering.
+     * @tc.expected: step2. Drawing completed without error.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_MOON));
+}
+
+/**
+ * @tc.name: ProgressBgColor004
+ * @tc.desc: Test SetProgressBgColor with normal SRGB color.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressBgColor004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier with normal SRGB color.
+     * @tc.expected: step1. ProgressModifier created successfully.
+     */
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    progressModifier->SetProgressType(PROGRESS_TYPE_CAPSULE);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    SizeF contentSize(200.0f, 100.0f);
+    progressModifier->SetContentSize(contentSize);
+
+    LinearColor linearColor(Color::GREEN);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+
+    /**
+     * @tc.steps: step2. Call onDraw to verify normal color rendering.
+     * @tc.expected: step2. Drawing completed without error.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_CAPSULE));
+}
+
+/**
+ * @tc.name: ProgressBgColor005
+ * @tc.desc: Test SetProgressBgColor with HDR color in RING type using Pen.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressBgColor005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier with HDR color for RING background.
+     * @tc.expected: step1. ProgressModifier created successfully.
+     */
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    progressModifier->SetProgressType(PROGRESS_TYPE_RING);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
+    SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier->SetContentSize(contentSize);
+
+    ColorWithHeadRoom hdrColorData = { 0.8f, 0.6f, 0.4f, 1.0f, 1.5f };
+    Color hdrColor(hdrColorData);
+    LinearColor linearHdrColor(hdrColor);
+    progressModifier->SetBackgroundColor(linearHdrColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearHdrColor);
+
+    /**
+     * @tc.steps: step2. Call onDraw to verify HDR color rendering with Pen.
+     * @tc.expected: step2. Drawing completed without error.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_RING));
+}
+
+/**
+ * @tc.name: ProgressBgColor006
+ * @tc.desc: Test SetProgressBgColor with ColorSpace in SCALE type.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierTestNg, ProgressBgColor006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ProgressModifier with DISPLAY_P3 color for SCALE type.
+     * @tc.expected: step1. ProgressModifier created successfully.
+     */
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    progressModifier->SetProgressType(PROGRESS_TYPE_SCALE);
+    progressModifier->SetMaxValue(PROGRESS_MODIFIER_VALUE);
+    progressModifier->SetValue(50.0f);
+    progressModifier->SetStrokeWidth(PROGRESS_STROKE_WIDTH);
+    progressModifier->SetScaleWidth(SCALE_WIDTH.ConvertToPx());
+    progressModifier->SetScaleCount(SCALE_COUNT);
+    SizeF contentSize(CONTEXT_WIDTH, CONTEXT_HEIGHT);
+    progressModifier->SetContentSize(contentSize);
+
+    Color color(Color::RED.GetValue(), ColorSpace::DISPLAY_P3);
+    LinearColor linearColor(color);
+    progressModifier->SetBackgroundColor(linearColor);
+    EXPECT_EQ(progressModifier->bgColor_->Get(), linearColor);
+
+    /**
+     * @tc.steps: step2. Call onDraw to verify ColorSpace rendering with Pen.
+     * @tc.expected: step2. Drawing completed without error.
+     */
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_SCALE));
+}
 } // namespace OHOS::Ace::NG

@@ -2,7 +2,7 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-07-18
+> 更新时间：2026-07-23
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
@@ -38,20 +38,20 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：101
-- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：48
+- `docs/` 下 Markdown 文档总数：107
+- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：47
 - `docs/syntax/` 下语法专题文档：7
   - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计
 
-- `context_registry.json` 新版条目数：34
-- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：49
-- 旧 KB 索引路径有效性：49/49（全部存在）
+- `context_registry.json` 新版条目数：57
+- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：46
+- 旧 KB 索引路径有效性：46/46（全部存在）
 
 - 类型分布：
-  - `component`: 28
+  - `component`: 27
   - `sdk`: 4
   - `feature`: 17
 - 分类分布：
@@ -62,10 +62,9 @@ rg -n "<关键字>" docs
   - `rich_text`: 3
   - `sdk`: 6
   - `selector`: 3
-  - `shape`: 1
   - `system`: 13
-- 关键词总数（索引内）：458
-- 别名总数（索引内）：159
+- 关键词总数（索引内）：453
+- 别名总数（索引内）：156
 
 ### 2.3 覆盖现状
 
@@ -80,7 +79,7 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-├── kb/ (35 MD，34 个新版 KB 主题 + README)
+├── kb/ (43 MD，42 个新版 KB 主题 + README)
 ├── accessibility/ (1 KB)
 ├── api/ (2 KB)
 ├── architecture/ (2 KB + 3 非 `*_Knowledge_Base*` 命名架构文档)
@@ -91,7 +90,7 @@ docs/
 ├── layout/ (0 KB)
 ├── pattern/ (30 KB + 7 非 `*_Knowledge_Base*` 命名文档)
 ├── sdk/ (3 KB)
-├── svg/ (1 KB)
+├── svg/ (0 KB，SVG 已迁移)
 └── syntax/ (7 MD, 其中 4 KB)
 ```
 
@@ -178,3 +177,6 @@ PY
 - 2026-07-11：TextPicker、DatePicker、TimePicker、UIPickerComponent 迁移到 `docs/kb/components/selector/`，旧 KB 已移除，旧索引已更新（53 条）。
 - 2026-07-18：基于当前源码、SDK、测试和基础渲染管线 Spec 重建 Layout Framework 新版 KB，旧 KB 与旧索引入口已移除（旧索引 52 条）。
 - 2026-07-18：新增 Layout Attributes、Blank、Divider、Column、GridCol、GridRow、Row、Stack、FolderStack；重建 Flex（含 Wrap）并合并 Safe Area 两个旧主题。新版 registry 增至 34 条，旧 Flex/Safe Area 文件及索引入口移除，旧索引减至 49 条。
+- 2026-07-24：新增 ImageLoading、BackgroundImage、ImageAnalyzer 和四个 PickerDialog 新版 KB；迁移 SVG 到 `docs/kb/capabilities/svg.md` 并移除旧文件及旧索引入口。新版 registry 增至 42 条，旧索引减至 48 条。
+
+- 2026-07-23：新增 8 个 overlay 类组件 KB（Menu/Dialog/Toast/Select/bindPopup/PopupAdvanced/Sheet/bindTips），补齐弹窗类组件 Spec 路由；迁移 Menu 和 Sheet 旧 KB 到新版路径。

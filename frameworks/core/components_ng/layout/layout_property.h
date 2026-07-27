@@ -88,11 +88,6 @@ public:
 
     TextDirection GetLayoutDirection() const;
 
-    virtual bool NeedReadFontScaleFromEnv() const
-    {
-        return false;
-    }
-
     std::optional<float> GetEnvFontScale() const;
 
     TextDirection GetNonAutoLayoutDirection() const;

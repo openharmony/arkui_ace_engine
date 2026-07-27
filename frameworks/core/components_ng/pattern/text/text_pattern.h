@@ -575,6 +575,7 @@ protected:
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void InitKeyEvent();
     void UpdateShiftFlag(const KeyEvent& keyEvent);
+    bool IsShiftFlag() const;
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool HandleOnSelect(KeyCode code);
     void HandleSelectionUp();

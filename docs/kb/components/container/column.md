@@ -6,7 +6,7 @@
 
 ## 定位
 
-Column 是 ArkUI 的纵向线性布局容器，应用侧可配置子项间距、主轴分布、交叉轴对齐和反向排列。NG 实现与 Row 共享 `linear_layout/` 下的 Pattern、Property 和工具，并通过 `LinearLayoutAlgorithm` 复用 Flex 布局算法。
+Column 是 ArkUI 的纵向线性布局容器，应用侧可配置子项间距、主轴分布、交叉轴对齐和反向排列。NG 实现与 Row 共享 `linear_layout/` 下的 Pattern 和 Property，并通过 `LinearLayoutAlgorithm` 复用 Flex 布局算法。
 
 本文档用于快速定位 Column 的源码、SDK、API 解析、测试和 Spec。具体属性语义、版本约束、默认值和边界条件应回到当前 SDK 声明、源码、测试与 Spec 核实。
 
@@ -23,7 +23,6 @@ Column 是 ArkUI 的纵向线性布局容器，应用侧可配置子项间距、
 | 共享布局属性 | `frameworks/core/components_ng/pattern/linear_layout/linear_layout_property.h` | 基于 `FlexLayoutProperty` 保存线性布局方向、间距、对齐和反向属性 |
 | 共享布局算法 | `frameworks/core/components_ng/pattern/linear_layout/linear_layout_algorithm.h` | `LinearLayoutAlgorithm` 在 Flex 布局算法上启用线性布局路径 |
 | Flex 算法实现 | `frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.cpp`、`frameworks/core/components_ng/pattern/flex/flex_layout_algorithm.h` | Column/Row 实际复用的 Measure/Layout 算法实现 |
-| 线性布局工具 | `frameworks/core/components_ng/pattern/linear_layout/linear_layout_utils.cpp`、`frameworks/core/components_ng/pattern/linear_layout/linear_layout_utils.h` | 线性布局属性、约束和轴向处理的共享工具入口 |
 
 ### API 入口
 
@@ -39,6 +38,7 @@ API 检索建议：
 
 - 构造与间距：搜索 `ColumnInterface`、`ColumnOptions`、`ColumnOptionsV2`、`space`。
 - 对齐和反向：搜索 `alignItems`、`justifyContent`、`reverse`。
+- PointLight：搜索 `pointLight` 并核对 `@systemapi` 与 Stage 模型约束；它不是普通应用可直接使用的公开属性。
 - Native Node：搜索 `ARKUI_NODE_COLUMN`、`NODE_COLUMN_`、`NODE_LINEAR_LAYOUT_SPACE`、`NODE_LINEAR_LAYOUT_REVERSE`。
 
 ### API 解析实现路径
@@ -56,11 +56,11 @@ Column **尚未完成组件化改造**：`pattern/linear_layout/` 下没有 `bri
 | Static generated modifier | `frameworks/core/interfaces/native/implementation/column_modifier.cpp` | Static 类型转换、节点构造和属性委托，落到 `ColumnModelNG` / `ColumnModelNGStatic` |
 | C API（通用 Native Node） | `interfaces/native/node/style_modifier.cpp`、`interfaces/native/native_node.h` | Column 没有专属 `column_native_impl.cpp`；公共属性由通用 style modifier 分发到 Column node modifier |
 
-组件化改造参考：`./组件化重构通用方案.md`。改造后 JSView 和 Bridge 双路径将统一到 `pattern/linear_layout/bridge/`，并输出独立 so。
+组件化方案可参考仓根目录 `组件化重构通用方案.md`。本页只记录当前已验证路径；实际改造后的目录组织和 SO 归属应以届时源码、BUILD 配置及 `DynamicModuleHelper` 映射为准。
 
 ### 外部依赖入口
 
-Column 的核心 Model、Pattern 和布局算法未发现组件特有的跨仓依赖，因此不建立组件专属外部依赖表。公共布局调度和渲染同步应转到 Layout Framework；`pointLight` 走 `JSViewAbstract` / `ViewAbstractModelStatic` 的公共渲染属性路径，不属于 Column 线性布局算法本身。
+Column 的核心 Model、Pattern 和布局算法未发现组件特有的跨仓依赖，因此不建立组件专属外部依赖表。公共布局调度和渲染同步应转到 Layout Framework；系统 API `pointLight` 走 `JSViewAbstract` / `ViewAbstractModelStatic` 的公共渲染属性路径，不属于 Column 线性布局算法本身。
 
 ### 测试入口
 
@@ -81,7 +81,7 @@ Column 功能域：`specs/05-ui-components/01-layout-components/03-column/`（�
 | Feat-01 | Column 创建、尺寸与子项间距 | `Feat-01-column-creation-size-space-spec.md` |
 | Feat-02 | Column 对齐与反向排列 | `Feat-02-column-alignment-reverse-spec.md` |
 | Feat-03 | Column 多范式接口与版本兼容 | `Feat-03-column-multi-paradigm-version-spec.md` |
-| Feat-04 | Column PointLight 系统光效 | `Feat-04-column-point-light-spec.md` |
+| Feat-04 | Column PointLight（系统 API）光效 | `Feat-04-column-point-light-spec.md` |
 
 架构决策和模块边界见同目录 `design.md`。行为结论以对应 Feat、当前 SDK、源码和测试的交叉证据为准。
 
@@ -95,7 +95,7 @@ Column 功能域：`specs/05-ui-components/01-layout-components/03-column/`（�
 | 反向排列异常 | SDK `reverse`、Column modifier、ModelNG、Feat-02 |
 | Dynamic 与 Static 表现不一致 | 分别核对 ArkTS Bridge/node modifier 与 typed node/generated modifier，再看 Feat-03 |
 | Native Node 属性未生效 | `native_node.h` 的 Column/Linear Layout 属性、`style_modifier.cpp`、`column_modifier.cpp` |
-| PointLight 表现异常 | Dynamic 公共属性入口或 Static generated modifier、ViewAbstract 公共渲染属性、Feat-04 |
+| PointLight（系统 API）表现异常 | 先确认 Stage 模型与系统 API 使用条件，再检查 Dynamic 通用属性入口或 Static generated modifier、ViewAbstract 公共渲染属性、Feat-04 |
 
 ## 调试入口
 
@@ -107,6 +107,7 @@ Column 功能域：`specs/05-ui-components/01-layout-components/03-column/`（�
 
 ## 相关主题
 
+- ColumnSplit 纵向分割布局：`docs/kb/components/container/column_split.md`
 - Row 横向线性布局：`docs/kb/components/container/row.md`
 - Flex 弹性布局与 Wrap：`docs/kb/components/container/flex.md`
 - 基础布局属性：`docs/kb/capabilities/layout-attributes.md`

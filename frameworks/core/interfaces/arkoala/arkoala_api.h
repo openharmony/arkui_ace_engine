@@ -3870,6 +3870,8 @@ struct ArkUICommonModifier {
         const ArkUIOffsetType& localOffset, ArkUI_Bool usePXUnit);
     void (*setDoubleSided)(ArkUINodeHandle node, bool doubleSided);
     void (*resetDoubleSided)(ArkUINodeHandle node);
+    ArkUINodeHandle (*getNextFocus)(ArkUINodeHandle node, FocusMove idx);
+    ArkUI_Bool (*getFocusBoxStyle)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Uint32* color);
 };
 
 struct ArkUICommonShapeModifier {

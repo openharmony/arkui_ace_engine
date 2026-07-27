@@ -83,7 +83,7 @@ UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通
 
 - AC-4: WHEN 规则 `policy.reportOnRegister=true` THEN 宿主在注册后扫描当前页面顶部控件树。
 - AC-5: WHEN 当前页面文本输入类控件数量大于等于 `condition.threshold` THEN 宿主通过 UISession 上报 `TEXT_EDITOR`。
-- AC-6: WHEN `scope.onlyVisible=true` THEN 不可见或屏幕范围外控件不参与计数。
+- AC-6: WHEN `scope.onlyVisible=true` THEN 不可见或与当前页面窗口范围无交集的控件不参与计数；本阶段不逐层计算滚动容器裁剪。
 - AC-7: WHEN `globalConfig.includeUnfocusableTextInput=false` THEN 不可获焦文本输入类控件不参与计数。
 
 #### US-3: 文本输入类控件上下树后稳定检测
@@ -92,8 +92,8 @@ UISession 需要新增独立的页面场景规则化感知能力。系统 SA 通
 
 验收标准：
 
-- AC-8: WHEN 文本输入类控件上树 THEN 维护输入控件计数并在页面稳定点触发 `TEXT_EDITOR` 匹配。
-- AC-9: WHEN 同一页面、同一规则、同一命中节点集合已上报且 `policy.deduplicate=true` THEN 不重复上报。
+- AC-8: WHEN 文本输入类控件上树或下树 THEN 挂起待检测规则，并在页面稳定点全量扫描当前页面树执行 `TEXT_EDITOR` 匹配。
+- AC-9: WHEN 同一规则的命中节点 ID 列表已上报且 `policy.deduplicate=true` THEN 单纯坐标变化不重复上报；上下树或移出屏幕导致节点 ID 列表变化时视为新状态。
 
 #### US-6: SA 反注册页面场景规则
 

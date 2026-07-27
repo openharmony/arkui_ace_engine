@@ -16,8 +16,10 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #ifdef XCOMPONENT_SUPPORTED
+#ifndef CROSS_PLATFORM
 #include "core/components_ng/pattern/xcomponent/bridge/xcomponent_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#endif
 #endif
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/common/container.h"
@@ -66,6 +68,7 @@ FrameNode* GetFrameNode(ArkUINodeHandle node)
 }
 
 #ifdef XCOMPONENT_SUPPORTED
+#ifndef CROSS_PLATFORM
 Framework::XComponentModelImpl* GetModelImpl()
 {
     static Framework::XComponentModelImpl impl;
@@ -615,7 +618,8 @@ void SetXComponentBlendApplyTypeImpl(ArkUINodeHandle /*node*/, ArkUI_Int32 blend
 }
 
 void CreateWithOpacityResourceObjImpl(ArkUINodeHandle node, void* opacityResObj) {}
-#endif // XCOMPONENT_SUPPORTED
+#endif
+#endif
 
 void SetXComponentEnableAnalyzer(ArkUINodeHandle node, ArkUI_Bool enable)
 {
@@ -1961,6 +1965,7 @@ void CreateController(std::shared_ptr<OHOS::Ace::InnerXComponentController>* con
 
 void LegacyNativeXComponentInit(void* taskPool, void* nativeXComponent, void* nativeXComponentImpl)
 {
+#ifndef CROSS_PLATFORM
 #ifdef XCOMPONENT_SUPPORTED
     auto* pool = reinterpret_cast<XComponentTaskPool*>(taskPool);
     CHECK_NULL_VOID(pool);
@@ -1969,6 +1974,7 @@ void LegacyNativeXComponentInit(void* taskPool, void* nativeXComponent, void* na
     CHECK_NULL_VOID(component);
     CHECK_NULL_VOID(componentImpl);
     pool->NativeXComponentInit(component, AceType::WeakClaim(componentImpl));
+#endif
 #endif
 }
 
@@ -1992,6 +1998,7 @@ const ArkUIXComponentModifier* GetXComponentDynamicModifier()
     static bool isCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
     if (!isCurrentUseNewPipeline) {
 #ifdef XCOMPONENT_SUPPORTED
+#ifndef CROSS_PLATFORM
         CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         static const ArkUIXComponentModifier modifier = {
             .setXComponentEnableAnalyzer = SetXComponentEnableAnalyzerImpl,
@@ -2105,7 +2112,8 @@ const ArkUIXComponentModifier* GetXComponentDynamicModifier()
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
-#endif // XCOMPONENT_SUPPORTED
+#endif
+#endif
     }
 
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
