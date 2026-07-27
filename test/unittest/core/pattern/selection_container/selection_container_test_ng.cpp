@@ -1104,6 +1104,52 @@ HWTEST_F(SelectionContainerPatternTest, HandleOnSelectAllTest002, TestSize.Level
 }
 
 /**
+ * @tc.name: HandleOnSelectAllTest003
+ * @tc.desc: Test HandleOnSelectAll keeps selectedChildren_ in sync with selected children
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, HandleOnSelectAllTest003, TestSize.Level1)
+{
+    child1_->SetHasSelectableText(true);
+    child2_->SetHasSelectableText(true);
+    pattern_->RegisterChild(child1_);
+    pattern_->RegisterChild(child2_);
+
+    pattern_->HandleOnSelectAll();
+
+    ASSERT_EQ(pattern_->selectedChildren_.size(), 2);
+    EXPECT_EQ(pattern_->selectedChildren_.front().Upgrade(), child1_);
+    EXPECT_EQ(pattern_->selectedChildren_.back().Upgrade(), child2_);
+}
+
+/**
+ * @tc.name: HandleOnSelectAllTest004
+ * @tc.desc: Test RecordSelectedChild after HandleOnSelectAll clears sibling selections
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionContainerPatternTest, HandleOnSelectAllTest004, TestSize.Level1)
+{
+    child1_->SetHasSelectableText(true);
+    child2_->SetHasSelectableText(true);
+    pattern_->RegisterChild(child1_);
+    pattern_->RegisterChild(child2_);
+
+    pattern_->HandleOnSelectAll();
+    ASSERT_EQ(pattern_->selectedChildren_.size(), 2);
+
+    // Long-press / double-tap reselect on child1 must clear the sibling (child2) selection;
+    // this only works when HandleOnSelectAll keeps selectedChildren_ in sync.
+    pattern_->RecordSelectedChild(child1_);
+
+    EXPECT_EQ(child2_->GetSelectionText(), u"");
+    auto indexes = child2_->GetSelectionIndexes();
+    EXPECT_EQ(indexes.startIndex, -1);
+    EXPECT_EQ(indexes.endIndex, -1);
+    ASSERT_EQ(pattern_->selectedChildren_.size(), 1);
+    EXPECT_EQ(pattern_->selectedChildren_.front().Upgrade(), child1_);
+}
+
+/**
  * @tc.name: MarkContainerPropertyUpdateTest001
  * @tc.desc: Test MarkContainerPropertyUpdate sets pending flags
  * @tc.type: FUNC

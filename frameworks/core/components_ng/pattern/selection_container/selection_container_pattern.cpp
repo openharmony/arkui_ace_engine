@@ -978,10 +978,35 @@ void SelectionContainerPattern::UpdatePropertyImpl(
 void SelectionContainerPattern::HandleOnSelectAll()
 {
     auto childList = GetChildList();
+    SelectAllChildren(childList);
+    CloseSelectOverlay(true);
+    auto overlay = GetOrCreateSelectionSelectOverlay();
+    if (IsUsingMouse()) {
+        if (overlay && !GetSelectionText().empty()) {
+            overlay->SetSelectionHoldCallback();
+        }
+    } else {
+        ProcessOverlay({ .animation = true });
+    }
+    ReportSelectionText();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    for (const auto& weakChild : childList) {
+        auto child = weakChild.Upgrade();
+        CHECK_NULL_CONTINUE(child);
+        child->ResetOriginCaretPosition();
+    }
+}
+
+void SelectionContainerPattern::SelectAllChildren(
+    const std::vector<WeakPtr<SelectionContainerChild>>& childList)
+{
     RefPtr<SelectionContainerChild> firstSelectedChild;
     RefPtr<SelectionContainerChild> lastSelectedChild;
     std::vector<std::u16string> selectedTexts;
     std::vector<ChildSelectionInfo> selectionState;
+    selectedChildren_.clear();
     for (const auto& weakChild : childList) {
         auto child = weakChild.Upgrade();
         CHECK_NULL_CONTINUE(child);
@@ -995,6 +1020,7 @@ void SelectionContainerPattern::HandleOnSelectAll()
             continue;
         }
         selectedTexts.push_back(std::move(childSelectionText));
+        selectedChildren_.emplace_back(child);
         auto childHostNode = child->GetHostNode();
         if (childHostNode) {
             auto indexes = child->GetSelectionIndexes();
@@ -1014,24 +1040,6 @@ void SelectionContainerPattern::HandleOnSelectAll()
     }
     if (lastSelectedChild && lastSelectedChild != firstSelectedChild) {
         lastSelectedChild->UpdateSelectionHandleInfo();
-    }
-    CloseSelectOverlay(true);
-    auto overlay = GetOrCreateSelectionSelectOverlay();
-    if (IsUsingMouse()) {
-        if (overlay && !GetSelectionText().empty()) {
-            overlay->SetSelectionHoldCallback();
-        }
-    } else {
-        ProcessOverlay({ .animation = true });
-    }
-    ReportSelectionText();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    for (const auto& weakChild : childList) {
-        auto child = weakChild.Upgrade();
-        CHECK_NULL_CONTINUE(child);
-        child->ResetOriginCaretPosition();
     }
 }
 
