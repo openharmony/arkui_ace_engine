@@ -533,7 +533,7 @@ void LazyForEachNode::DoSetActiveChildRange(
     }
     ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d], cacheStart[%d], cacheEnd[%d], showCache[%d]",
         start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
-    bool needRender = builder_->SetActiveChildRange(start, end);
+    bool needRender = builder_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
     if (GetMemOptStrategy() == LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION) {
         setActiveRangeTime_ = GetSysTimestamp();
         needRender |= IsCachedCountReduced(cacheStart, cacheEnd);
