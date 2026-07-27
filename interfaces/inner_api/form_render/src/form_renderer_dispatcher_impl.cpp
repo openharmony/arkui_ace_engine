@@ -143,7 +143,7 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(const OHOS::AppExecF
                 HILOG_ERROR("uiContent is nullptr");
                 return;
             }
-
+            uiContent->ForceRequestFrame();
             HandleSurfaceChangeEvent(uiContent, formSurfaceInfo, reason, rsTransaction);
         }, "HandleSurfaceChangeEvent");
 
@@ -220,6 +220,7 @@ void FormRendererDispatcherImpl::SetObscured(bool isObscured)
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
+        uiContent->ForceRequestFrame();
         HILOG_INFO("Update ChangeSensitiveNodes: %{public}s", isObscured ? "true" : "false");
         uiContent->ChangeSensitiveNodes(isObscured);
     });
@@ -238,6 +239,7 @@ void FormRendererDispatcherImpl::SetColorMode(int32_t colorMode)
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
+        uiContent->ForceRequestFrame();
         std::string colorModeStr = OHOS::AppExecFwk::GetColorModeStr(colorMode);
         HILOG_INFO("Update colorMode: %{public}s", colorModeStr.c_str());
         std::shared_ptr<OHOS::AppExecFwk::Configuration> config = std::make_shared<AppExecFwk::Configuration>();

@@ -141,6 +141,7 @@ public:
     static bool SetUICorrectionConfig(const std::string& configStr);
     virtual ~UIContent() = default;
     virtual OHOS::Rosen::Window* GetUIContentWindow() { return nullptr; };
+    virtual void ForceRequestFrame() {};
 
     // UI content life-cycles
     virtual UIContentErrorCode Initialize(OHOS::Rosen::Window* window, const std::string& url, napi_value storage) = 0;

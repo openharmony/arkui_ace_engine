@@ -97,7 +97,7 @@ void FormRenderer::SetUIContentProperty(const OHOS::AAFwk::Want &want)
     if (enableBlurBackground_ || deleteBackgroundImage_) {
         uiContent_->SetFormEnableBlurBackground(true);
     }
- 
+
     backgroundColor_ = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
     if (renderingMode_ == AppExecFwk::Constants::RenderingMode::SINGLE_COLOR || enableBlurBackground_ ||
         deleteBackgroundImage_) {
@@ -106,7 +106,7 @@ void FormRenderer::SetUIContentProperty(const OHOS::AAFwk::Want &want)
     } else if (!backgroundColor_.empty()) {
         uiContent_->SetFormBackgroundColor(backgroundColor_);
     }
- 
+
     HILOG_INFO("InitUIContent renderingMode_:%{public}d, enableBlurBackground_:%{public}d, formLocation_:%{public}d, "
         "deleteBackgroundImage_:%{public}d, backgroundColor_:%{public}s",
         static_cast<int32_t>(renderingMode_),
@@ -228,6 +228,7 @@ void FormRenderer::ReloadForm(const std::string& url)
         HILOG_ERROR("uiContent_ is null");
         return;
     }
+    uiContent_->ForceRequestFrame();
     uiContent_->ReloadForm(url);
 }
 
@@ -262,6 +263,7 @@ void FormRenderer::UpdateForm(const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
         HILOG_ERROR("uiContent_ is null");
         return;
     }
+    uiContent_->ForceRequestFrame();
     uiContent_->SetFontScaleFollowSystem(fontScaleFollowSystem_);
     uiContent_->UpdateFormSharedImage(formJsInfo.imageDataMap);
     uiContent_->UpdateFormData(formJsInfo.formData);
@@ -341,6 +343,7 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth, 
                 HILOG_ERROR("uiContent is null");
                 return;
             }
+            uiContent->ForceRequestFrame();
             uiContent->OnFormSurfaceChange(resizedWidth, resizedHeight);
         });
     }
@@ -566,6 +569,7 @@ void FormRenderer::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::C
         HILOG_ERROR("config is null");
         return;
     }
+    uiContent_->ForceRequestFrame();
 
     std::string colorModeValue = config->GetItem(AAFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
     if (!colorModeValue.empty() && formLocation_ == AppExecFwk::Constants::FormLocation::STANDBY) {
@@ -607,6 +611,7 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
     HILOG_WARN("AttachUIContent width = %{public}f , height = %{public}f, borderWidth_ = %{public}f,"
         " formViewScale_ = %{public}f, formId: %{public}" PRId64, width_, height_, borderWidth_, formViewScale_,
         formJsInfo.formId);
+    uiContent_->ForceRequestFrame();
     SetAllowUpdate(allowUpdate_);
     float width = width_ - borderWidth_ * DOUBLE;
     float height = height_ - borderWidth_ * DOUBLE;
@@ -650,6 +655,7 @@ void FormRenderer::RecycleForm(std::string& statusData)
         HILOG_ERROR("RecycleForm, uiContent_ is null!");
         return;
     }
+    uiContent_->ForceRequestFrame();
     statusData = uiContent_->RecycleForm();
 }
 
@@ -659,6 +665,7 @@ void FormRenderer::RecoverForm(const std::string& statusData)
         HILOG_ERROR("RecoverForm, uiContent_ is null!");
         return;
     }
+    uiContent_->ForceRequestFrame();
     uiContent_->RecoverForm(statusData);
 }
 
@@ -677,7 +684,7 @@ void FormRenderer::SetRenderGroupEnableFlag(bool isEnable)
     }
     rsSurfaceNode->SetUIFirstSwitch(OHOS::Rosen::RSUIFirstSwitch::NONE);
 }
- 
+
 void FormRenderer::SetVisibleChange(bool isVisible)
 {
     if (formRendererDispatcherImpl_ != nullptr) {
@@ -722,6 +729,7 @@ void FormRenderer::SetUiContentParams(const OHOS::AAFwk::Want& want)
         HILOG_ERROR("SetUiContentParams error, uiContent_ is null!");
         return;
     }
+    uiContent_->ForceRequestFrame();
     if (want.HasParameter(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY)) {
         std::string backgroundColor = want.GetStringParam(OHOS::AppExecFwk::Constants::PARAM_FORM_TRANSPARENCY_KEY);
         uiContent_->SetFormBackgroundColor(backgroundColor);
