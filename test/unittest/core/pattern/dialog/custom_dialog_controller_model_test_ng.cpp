@@ -850,7 +850,8 @@ HWTEST_F(CustomDialogControllerModelTestNg, SetCloseDialog003, TestSize.Level1)
 
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     auto dialogNode =
-        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, TEST_DIALOG_NODE_ID, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, TEST_DIALOG_NODE_ID,
+            AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
     ASSERT_NE(dialogNode, nullptr);
 
     CustomDialogControllerModelNG controllerModel;
@@ -881,7 +882,8 @@ HWTEST_F(CustomDialogControllerModelTestNg, SetCloseDialog004, TestSize.Level1)
 
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     auto dialogNode =
-        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, TEST_DIALOG_NODE_ID, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, TEST_DIALOG_NODE_ID,
+            AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
     ASSERT_NE(dialogNode, nullptr);
 
     CustomDialogControllerModelNG controllerModel;
@@ -937,7 +939,8 @@ HWTEST_F(CustomDialogControllerModelTestNg, SetCloseDialog006, TestSize.Level1)
 
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     auto dialogNode =
-        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, TEST_DIALOG_NODE_ID, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, TEST_DIALOG_NODE_ID,
+            AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
     ASSERT_NE(dialogNode, nullptr);
     dialogNode->isRemoving_ = true;
 
@@ -968,7 +971,8 @@ HWTEST_F(CustomDialogControllerModelTestNg, SetCloseDialog007, TestSize.Level1)
 
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     auto dialogNode =
-        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, TEST_DIALOG_NODE_ID, AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
+        FrameNode::CreateFrameNode(V2::DIALOG_ETS_TAG, TEST_DIALOG_NODE_ID,
+            AceType::MakeRefPtr<DialogPattern>(dialogTheme, nullptr));
     ASSERT_NE(dialogNode, nullptr);
 
     CustomDialogControllerModelNG controllerModel;
