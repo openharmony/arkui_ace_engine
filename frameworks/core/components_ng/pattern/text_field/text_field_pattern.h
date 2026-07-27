@@ -84,6 +84,7 @@
 namespace OHOS::MiscServices {
 class InspectorFilter;
 class OnTextChangedListener;
+class InputMethodController;
 
 struct TextConfig;
 } // namespace OHOS::MiscServices
@@ -2247,6 +2248,8 @@ private:
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
+    void SendAttachPrivateCommand(const sptr<MiscServices::InputMethodController>& inputMethod,
+        const RefPtr<TextFieldManagerNG>& textFieldManager);
 #endif
     void NotifyOnEditChanged(bool isChanged);
     void ProcessCancelButton();

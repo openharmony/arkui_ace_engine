@@ -5900,6 +5900,24 @@ int32_t TextFieldPattern::GetRequestKeyboardId()
     return host->GetId();
 }
 
+#if defined(ENABLE_STANDARD_INPUT)
+void TextFieldPattern::SendAttachPrivateCommand(const sptr<MiscServices::InputMethodController>& inputMethod,
+    const RefPtr<TextFieldManagerNG>& textFieldManager)
+{
+    std::unordered_map<std::string, MiscServices::PrivateDataValue> privateCommand;
+    privateCommand.insert(std::make_pair("isEditorConsumeAlphaKey", true));
+    inputMethod->SendPrivateCommand(privateCommand);
+    if (keyboard_ == TextInputType::NUMBER_DECIMAL) {
+        std::unordered_map<std::string, MiscServices::PrivateDataValue> actualTypeCommand;
+        actualTypeCommand.insert(
+            std::make_pair("actualTypeOfTheTextBox", static_cast<int32_t>(TextInputType::NUMBER_DECIMAL)));
+        inputMethod->SendPrivateCommand(actualTypeCommand);
+    }
+    textFieldManager->SetIsImeAttached(true);
+    textFieldManager->SetAttachInputId(GetRequestKeyboardId());
+}
+#endif
+
 bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
     SourceType sourceType)
 {
@@ -5973,11 +5991,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_RETURN(textFieldManager, false);
     if (ret == MiscServices::ErrorCode::NO_ERROR) {
-        std::unordered_map<std::string, MiscServices::PrivateDataValue> privateCommand;
-        privateCommand.insert(std::make_pair("isEditorConsumeAlphaKey", true));
-        inputMethod->SendPrivateCommand(privateCommand);
-        textFieldManager->SetIsImeAttached(true);
-        textFieldManager->SetAttachInputId(GetRequestKeyboardId());
+        SendAttachPrivateCommand(inputMethod, textFieldManager);
     }
     UpdateCaretInfoToController(true);
     auto fillContentMap = textFieldManager->GetFillContentMap(tmpHost->GetId());
