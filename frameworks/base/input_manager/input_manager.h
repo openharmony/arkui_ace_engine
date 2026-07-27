@@ -51,7 +51,7 @@ public:
 
     static KeyboardType GetKeyboardType(int32_t deviceId);
 
-    ACE_FORCE_EXPORT static bool IsKeyboardConnected();
+    static bool IsKeyboardConnected();
 
     static bool GetSystemHotkeys(std::vector<HotKey>& hotkeys);
 };

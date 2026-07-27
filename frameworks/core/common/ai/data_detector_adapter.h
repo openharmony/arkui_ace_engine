@@ -72,7 +72,7 @@ struct AISpan {
         return ss.str();
     }
 };
-class ACE_FORCE_EXPORT DataDetectorAdapter : public AceType {
+class DataDetectorAdapter : public AceType {
     DECLARE_ACE_TYPE(DataDetectorAdapter, AceType);
 
 public:

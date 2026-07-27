@@ -38,7 +38,7 @@ enum class NodeType {
     HANDLE, TOUCH_MENU, HANDLE_WITH_MENU, RIGHT_CLICK_MENU
 };
 
-class ACE_FORCE_EXPORT SelectContentOverlayManager : public virtual AceType {
+class ACE_EXPORT SelectContentOverlayManager : public virtual AceType {
     DECLARE_ACE_TYPE(SelectContentOverlayManager, AceType);
 
 public:
@@ -52,7 +52,7 @@ public:
     void Close(int32_t id, bool animation, CloseReason reason);
     bool CloseCurrent(bool animation, CloseReason reason);
     void CloseWithOverlayId(int32_t overlayId, CloseReason reason, bool animation);
-    ACE_FORCE_EXPORT void ShowOptionMenu(bool useNewAnimation = false);
+    void ShowOptionMenu(bool useNewAnimation = false);
     void HideOptionMenu(bool noAnimation = false, bool showSubMenu = false);
     void ToggleOptionMenu();
     void DisableMenu();
@@ -71,7 +71,7 @@ public:
     void RestartHiddenHandleTask(bool isDelay);
     void CancelHiddenHandleTask();
     const RefPtr<FrameNode> GetSelectOverlayRoot();
-    ACE_FORCE_EXPORT RefPtr<SelectOverlayNode> GetSelectOverlayNode();
+    RefPtr<SelectOverlayNode> GetSelectOverlayNode();
     OptionMenuType GetShowMenuType();
 
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo()

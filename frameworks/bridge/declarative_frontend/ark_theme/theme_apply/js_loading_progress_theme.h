@@ -32,11 +32,8 @@ public:
             // no need to apply custom theme colors
             return;
         }
-        auto* stack = NG::ViewStackProcessor::GetInstance();
-        CHECK_NULL_VOID(stack);
-        auto frameNode = AceType::DynamicCast<NG::FrameNode>(stack->GetMainFrameNode());
-        CHECK_NULL_VOID(frameNode);
-        NG::LoadingProgressModelNG::SetColor(frameNode, themeColors->IconSecondary());
+
+        LoadingProgressModel::GetInstance()->SetColor(themeColors->IconSecondary());
     }
 };
 } // namespace OHOS::Ace::Framework

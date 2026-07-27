@@ -227,7 +227,7 @@ public:
 
     void OnLanguageConfigurationUpdate() override;
 
-    ACE_FORCE_EXPORT bool NeedIgnoreKeyboard();
+    bool NeedIgnoreKeyboard();
 
     void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style);
     void SetSystemBarStyleMultiThread(const RefPtr<SystemBarStyle>& style);

@@ -16,15 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_SCREEN_LOCK_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_SCREEN_LOCK_MANAGER_H
 
-#include "base/utils/macros.h"
-
 namespace OHOS::Ace {
 
 class ScreenLockManager {
 public:
     ScreenLockManager() = default;
     ~ScreenLockManager() = default;
-    ACE_FORCE_EXPORT static bool IsScreenLocked();
+    static bool IsScreenLocked();
 };
 
 } // namespace OHOS::Ace

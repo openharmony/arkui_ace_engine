@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,6 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/dynamic_module_helper.h"
 #include "core/components/badge/badge_theme.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
@@ -151,29 +150,13 @@ BadgeParameters CreateBaseV3(CJBadgeStyleV3 style, int32_t position)
 }
 } // namespace
 
-namespace OHOS::Ace {
-// Should use CJUIModifier API later
-NG::BadgeModelNG* GetBadgeModel()
-{
-    static NG::BadgeModelNG* model = nullptr;
-    if (model == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Badge");
-        if (module == nullptr) {
-            LOGF_ABORT("Can't find badge dynamic module");
-        }
-        model = reinterpret_cast<NG::BadgeModelNG*>(module->GetModel());
-    }
-    return model;
-}
-} // namespace OHOS::Ace
-
 extern "C" {
 void FfiOHOSAceFrameworkBadgeCreate(int32_t count, CJBadgeStyle style, int32_t position, int32_t maxCount)
 {
     BadgeParameters badgeParameters = CreateBase(style, position);
     badgeParameters.badgeCount = count;
     badgeParameters.badgeMaxCount = maxCount;
-    GetBadgeModel()->Create(badgeParameters);
+    BadgeModel::GetInstance()->Create(badgeParameters);
 }
 
 void FfiOHOSAceFrameworkBadgeCreateV2(int32_t count, CJBadgeStyleV2 style, int32_t position, int32_t maxCount)
@@ -182,11 +165,11 @@ void FfiOHOSAceFrameworkBadgeCreateV2(int32_t count, CJBadgeStyleV2 style, int32
     badgeParameters.badgeCount = count;
     badgeParameters.badgeMaxCount = maxCount;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
-        auto frameNode = GetBadgeModel()->CreateBadgeFrameNode();
-        GetBadgeModel()->SetIsDefault(false, false);
-        GetBadgeModel()->CreateByFrameNode(frameNode, badgeParameters);
+        auto frameNode = BadgeModel::GetInstance()->CreateBadgeFrameNode();
+        BadgeModel::GetInstance()->SetIsDefault(false, false);
+        BadgeModel::GetInstance()->CreateByFrameNode(frameNode, badgeParameters);
     } else {
-        GetBadgeModel()->Create(badgeParameters);
+        BadgeModel::GetInstance()->Create(badgeParameters);
     }
 }
 
@@ -196,16 +179,16 @@ void FfiOHOSAceFrameworkBadgeCreateV3(int32_t count, CJBadgeStyleV3 style, int32
     badgeParameters.badgeCount = count;
     badgeParameters.badgeMaxCount = maxCount;
     
-    auto frameNode = GetBadgeModel()->CreateBadgeFrameNode();
-    GetBadgeModel()->SetIsDefault(false, false);
-    GetBadgeModel()->CreateByFrameNode(frameNode, badgeParameters);
+    auto frameNode = BadgeModel::GetInstance()->CreateBadgeFrameNode();
+    BadgeModel::GetInstance()->SetIsDefault(false, false);
+    BadgeModel::GetInstance()->CreateByFrameNode(frameNode, badgeParameters);
 }
 
 void FfiOHOSAceFrameworkBadgeCreateText(const char* value, CJBadgeStyle style, int32_t position)
 {
     BadgeParameters badgeParameters = CreateBase(style, position);
     badgeParameters.badgeValue = value;
-    GetBadgeModel()->Create(badgeParameters);
+    BadgeModel::GetInstance()->Create(badgeParameters);
 }
 
 void FfiOHOSAceFrameworkBadgeCreateTextV2(const char* value, CJBadgeStyleV2 style, int32_t position)
@@ -213,11 +196,11 @@ void FfiOHOSAceFrameworkBadgeCreateTextV2(const char* value, CJBadgeStyleV2 styl
     BadgeParameters badgeParameters = CreateBaseV2(style, position);
     badgeParameters.badgeValue = value;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
-        auto frameNode = GetBadgeModel()->CreateBadgeFrameNode();
-        GetBadgeModel()->SetIsDefault(false, false);
-        GetBadgeModel()->CreateByFrameNode(frameNode, badgeParameters);
+        auto frameNode = BadgeModel::GetInstance()->CreateBadgeFrameNode();
+        BadgeModel::GetInstance()->SetIsDefault(false, false);
+        BadgeModel::GetInstance()->CreateByFrameNode(frameNode, badgeParameters);
     } else {
-        GetBadgeModel()->Create(badgeParameters);
+        BadgeModel::GetInstance()->Create(badgeParameters);
     }
 }
 
@@ -226,8 +209,8 @@ void FfiOHOSAceFrameworkBadgeCreateTextV3(const char* value, CJBadgeStyleV3 styl
     BadgeParameters badgeParameters = CreateBaseV3(style, position);
     badgeParameters.badgeValue = value;
 
-    auto frameNode = GetBadgeModel()->CreateBadgeFrameNode();
-    GetBadgeModel()->SetIsDefault(false, false);
-    GetBadgeModel()->CreateByFrameNode(frameNode, badgeParameters);
+    auto frameNode = BadgeModel::GetInstance()->CreateBadgeFrameNode();
+    BadgeModel::GetInstance()->SetIsDefault(false, false);
+    BadgeModel::GetInstance()->CreateByFrameNode(frameNode, badgeParameters);
 }
 }

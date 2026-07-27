@@ -24,9 +24,9 @@
 namespace OHOS::Ace::NG {
 
 namespace GradientJsonUtils {
-    ACE_FORCE_EXPORT std::unique_ptr<JsonValue> LinearGradientToJson(const Gradient& data);
+    std::unique_ptr<JsonValue> LinearGradientToJson(const Gradient& data);
     std::unique_ptr<JsonValue> SweepGradientToJson(const Gradient& data);
-    ACE_FORCE_EXPORT std::unique_ptr<JsonValue> RadialGradientToJson(const Gradient& data);
+    std::unique_ptr<JsonValue> RadialGradientToJson(const Gradient& data);
 } // namespace GradientJsonUtils
 
 } // namespace OHOS::Ace::NG

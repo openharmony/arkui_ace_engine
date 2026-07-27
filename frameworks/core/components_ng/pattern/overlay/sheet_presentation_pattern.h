@@ -319,7 +319,7 @@ public:
     void AvoidAiBar();
 
     void BeforeCreateLayoutWrapper() override;
-    ACE_FORCE_EXPORT void AvoidSafeArea(bool forceAvoid = false);
+    void AvoidSafeArea(bool forceAvoid = false);
     void AvoidKeyboard(bool forceAvoid);
     void CheckBuilderChange();
     float GetSheetHeightChange();

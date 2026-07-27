@@ -1191,6 +1191,7 @@ void TextFieldModelNG::SetBackBorderRadius()
     CHECK_NULL_VOID(renderContext);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(renderContext->GetBorderRadius());
 
     bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto optRadius = renderContext->GetBorderRadius();
@@ -1207,31 +1208,6 @@ void TextFieldModelNG::SetBackBorderRadius()
         (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
 
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BorderRadiusFlagByUser, radius);
-}
-
-void TextFieldModelNG::SetBackBorderRadius(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-
-    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    auto optRadius = renderContext->GetBorderRadius();
-    CHECK_NULL_VOID(optRadius);
-    auto radius = optRadius.value();
-
-    radius.radiusTopLeft = radius.radiusTopLeft.has_value() ? radius.radiusTopLeft :
-        (isRTL ? radius.radiusTopEnd : radius.radiusTopStart);
-    radius.radiusTopRight = radius.radiusTopRight.has_value() ? radius.radiusTopRight :
-        (isRTL ? radius.radiusTopStart : radius.radiusTopEnd);
-    radius.radiusBottomLeft = radius.radiusBottomLeft.has_value() ? radius.radiusBottomLeft :
-        (isRTL ? radius.radiusBottomEnd : radius.radiusBottomStart);
-    radius.radiusBottomRight = radius.radiusBottomRight.has_value() ? radius.radiusBottomRight :
-        (isRTL ? radius.radiusBottomStart : radius.radiusBottomEnd);
-
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BorderRadiusFlagByUser, radius, frameNode);
 }
 
 void TextFieldModelNG::SetBackBorder()
@@ -1254,28 +1230,6 @@ void TextFieldModelNG::SetBackBorder()
     if (renderContext->HasBorderStyle()) {
         ACE_UPDATE_PAINT_PROPERTY(
             TextFieldPaintProperty, BorderStyleFlagByUser, renderContext->GetBorderStyle().value());
-    }
-}
-
-void TextFieldModelNG::SetBackBorder(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (renderContext->HasBorderRadius()) {
-        SetBackBorderRadius(frameNode);
-    }
-    if (renderContext->HasBorderColor()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(
-            TextFieldPaintProperty, BorderColorFlagByUser, renderContext->GetBorderColor().value(), frameNode);
-    }
-    if (renderContext->HasBorderWidth()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(
-            TextFieldPaintProperty, BorderWidthFlagByUser, renderContext->GetBorderWidth().value(), frameNode);
-    }
-    if (renderContext->HasBorderStyle()) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(
-            TextFieldPaintProperty, BorderStyleFlagByUser, renderContext->GetBorderStyle().value(), frameNode);
     }
 }
 
@@ -1353,26 +1307,6 @@ void TextFieldModelNG::SetInputStyle(FrameNode* frameNode, InputStyle value)
         textFieldLayoutProperty->UpdateMaxLines(1);
         textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
     }
-}
-
-void TextFieldModelNG::SetOnChangeEvent(
-    FrameNode* frameNode, std::function<void(const std::u16string&)>&& onChangeEvent)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
-}
-
-void TextFieldModelNG::SetWidthAuto(FrameNode* frameNode, bool isAuto)
-{
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, WidthAuto, isAuto, frameNode);
-}
-
-void TextFieldModelNG::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect)
-{
-    NG::ViewAbstract::SetHoverEffect(frameNode, hoverEffect);
 }
 
 void TextFieldModelNG::RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest)
@@ -1821,26 +1755,6 @@ void TextFieldModelNG::ResetCounterTextOverflowColor(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, CounterTextOverflowColor, frameNode);
-}
-
-void TextFieldModelNG::SetForegroundColor(FrameNode* frameNode, const Color& value)
-{
-    CHECK_NULL_VOID(frameNode);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, value, frameNode);
-}
-
-void TextFieldModelNG::SetShowUnit(FrameNode* frameNode, std::function<void()>&& unitFunction)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    RefPtr<NG::UINode> unitNode;
-    if (unitFunction) {
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        unitFunction();
-        unitNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    }
-    pattern->SetUnitNode(unitNode);
 }
 
 void TextFieldModelNG::SetShowError(FrameNode* frameNode, const std::u16string& errorText, bool visible)
@@ -2627,17 +2541,6 @@ void TextFieldModelNG::SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& 
         std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
 }
 
-void TextFieldModelNG::SetSelectionMenuOptions(FrameNode* frameNode,
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick,
-    const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(textFieldPattern);
-    textFieldPattern->OnSelectionMenuOptionsUpdate(
-        std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
-}
-
 void TextFieldModelNG::SetEnablePreviewText(bool enablePreviewText)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
@@ -2708,31 +2611,6 @@ void TextFieldModelNG::SetPadding(FrameNode* frameNode, NG::PaddingProperty& new
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetPadding(frameNode, newPadding);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
-}
-
-void TextFieldModelNG::SetPaddingJs(
-    FrameNode* frameNode, const NG::PaddingProperty& newPadding, bool tmp, bool hasRegist)
-{
-    CHECK_NULL_VOID(frameNode);
-    if (tmp) {
-        auto pattern = frameNode->GetPattern<TextFieldPattern>();
-        CHECK_NULL_VOID(pattern);
-        auto theme = pattern->GetTheme();
-        CHECK_NULL_VOID(theme);
-        auto themePadding = theme->GetPadding();
-        PaddingProperty paddings;
-        paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
-        paddings.bottom = NG::CalcLength(themePadding.Bottom().ConvertToPx());
-        paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
-        paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
-        NG::ViewAbstract::SetPadding(frameNode, paddings);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, paddings, frameNode);
-        return;
-    }
-    if (!hasRegist) {
-        NG::ViewAbstract::SetPadding(frameNode, newPadding);
-        ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PaddingByUser, newPadding, frameNode);
-    }
 }
 
 RefPtr<UINode> TextFieldModelNG::GetCustomKeyboard(FrameNode* frameNode)
@@ -2825,25 +2703,6 @@ void TextFieldModelNG::SetMargin(FrameNode* frameNode, NG::PaddingProperty& marg
     userMargin.bottom = margin.bottom;
     userMargin.left = margin.left;
     userMargin.right = margin.right;
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin, frameNode);
-}
-
-void TextFieldModelNG::SetMargin(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    const auto& margin = layoutProperty->GetMarginProperty();
-    CHECK_NULL_VOID(margin);
-    bool isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-
-    MarginProperty userMargin;
-    userMargin.top = margin->top;
-    userMargin.bottom = margin->bottom;
-    userMargin.left = margin->left.has_value() ? margin->left :
-        (isRTL ? margin->end : margin->start);
-    userMargin.right = margin->right.has_value() ? margin->right :
-        (isRTL ? margin->start : margin->end);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, MarginByUser, userMargin, frameNode);
 }
 
@@ -3357,14 +3216,6 @@ void TextFieldModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
 void TextFieldModelNG::SetUserAccessibilityText()
 {
     auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetHasUserAccessibilityText();
-}
-
-void TextFieldModelNG::SetUserAccessibilityText(FrameNode* frameNode)
-{
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);

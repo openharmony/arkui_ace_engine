@@ -67,10 +67,6 @@ interface AlphabetIndexerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
-interface BadgeComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
 interface CalendarPickerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -117,10 +113,6 @@ interface ImageAnimatorComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
-interface LoadingProgressComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
 interface MarqueeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -141,10 +133,6 @@ interface PatternLockComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
-interface ProgressComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
 interface QRCodeComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -161,10 +149,6 @@ interface RichEditorComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
-interface ImageSpanComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
 interface RowSplitComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
@@ -174,13 +158,6 @@ interface SearchComponentModule {
 }
 
 interface SelectComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-interface TextAreaComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
-interface TextInputComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
@@ -204,15 +181,7 @@ interface SymbolGlyphComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
-interface SymbolSpanComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
 interface TextClockComponentModule {
-    createComponent(nativePtr: KNode, classType: ModifierType): any;
-}
-
-interface TextTimerComponentModule {
     createComponent(nativePtr: KNode, classType: ModifierType): any;
 }
 
