@@ -1410,6 +1410,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         auto scrollable = pattern->GetScrollable();
         CHECK_NULL_RETURN(scrollable, pattern->OnScrollCallback(static_cast<float>(offset), source));
         if (source == SCROLL_FROM_START) {
+            pattern->StopScrollableAndAnimate();
             scrollable->SetIsScrollBarDragging(true);
             if (scrollable->GetOnWillStartDraggingCallback()) {
                 scrollable->GetOnWillStartDraggingCallback()();
@@ -3635,7 +3636,7 @@ void ScrollablePattern::MarkUserScrollSource(int32_t source)
 void ScrollablePattern::FireAccessibilityScrollEndEvent()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(host && host->IsOnMainTree());
     std::string accessibilityScrollSource = GetAccessibilityScrollSource();
     std::map<std::string, std::string> extraEventInfo;
     extraEventInfo.insert({ "scrollSource", accessibilityScrollSource });
