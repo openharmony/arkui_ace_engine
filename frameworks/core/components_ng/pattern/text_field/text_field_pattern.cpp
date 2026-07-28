@@ -9417,8 +9417,10 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
         jsonValue->Put("offIconSrc", GetHideResultImageSrc().c_str());
     }
     json->PutExtAttr("passwordIcon", jsonValue->ToString().c_str(), filter);
-    json->PutExtAttr("showError", GetErrorTextState() ? UtfUtils::Str16DebugToStr8(GetErrorTextString()).c_str() :
-        "undefined", filter);
+    if (GetTextInputFlag()) {
+        json->PutExtAttr("showError", GetErrorTextState() ? UtfUtils::Str16DebugToStr8(GetErrorTextString()).c_str() :
+            "undefined", filter);
+    }
     json->PutExtAttr("maxLines", GreatOrEqual(GetMaxLines(),
         Infinity<uint32_t>()) ? "INF" : std::to_string(GetMaxLines()).c_str(), filter);
     json->PutExtAttr("minLines", std::to_string(GetMinLines()).c_str(), filter);
