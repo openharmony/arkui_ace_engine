@@ -55,10 +55,12 @@ MenuItemModel* MenuItemModel::GetInstance()
 MenuModel* MenuModel::GetInstance()
 {
 #ifdef NG_BUILD
-    return NG::NodeModifier::GetMenuModel();
+    static NG::NodeModifier::GetMenuModel() instance;
+    return &instance;
 #else
     if (Container::IsCurrentUseNewPipeline()) {
-        return NG::NodeModifier::GetMenuModel();
+        static NG::NodeModifier::GetMenuModel instance;
+        return &instance;
     } else {
         static Framework::MenuModelImpl instance;
         return &instance;
