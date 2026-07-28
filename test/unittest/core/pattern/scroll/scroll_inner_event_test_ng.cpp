@@ -1176,4 +1176,94 @@ HWTEST_F(ScrollInnerEventTestNg, ScrollSnap003, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     EXPECT_EQ(pattern_->currentOffset_, 0);
 }
+
+/**
+ * @tc.name: HandleDragScrollBarOverDragRatioDiscontinuity001
+ * @tc.desc: Normal scroll uses scaled offset (ratio 1/VERTICAL_RATIO) but over-scroll uses 1:1 raw delta,
+ *           causing the scrollbar thumb to drift from the finger at every boundary transition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBarOverDragRatioDiscontinuity001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent();
+    CreateScrollDone();
+
+    float dragDelta = 10.0f;
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBar_->HandleDragStart(info);
+
+    // Step 1: normal scroll down — offset is scaled by 1/VERTICAL_RATIO
+    info.SetMainDelta(dragDelta);
+    scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    float normalPos = -dragDelta / VERTICAL_RATIO; // scaled, e.g. -25
+    EXPECT_TRUE(Position(normalPos));
+
+    // Step 2: drag back to top
+    info.SetMainDelta(-dragDelta);
+    scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(Position(0));
+
+    // Step 3: over-scroll up — offset is 1:1, NOT scaled
+    info.SetMainDelta(-dragDelta);
+    scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    // Over-scroll gives position = dragDelta (1:1), not -dragDelta/VERTICAL_RATIO (scaled).
+    EXPECT_TRUE(Position(dragDelta));
+
+    // Same |delta| (10) produced |normalPos| = dragDelta / VERTICAL_RATIO
+    // but |overPos| = dragDelta. The ratio differs, proving the discontinuity.
+    float normalMagnitude = std::abs(normalPos);
+    float overMagnitude = std::abs(static_cast<float>(dragDelta));
+    EXPECT_NE(normalMagnitude, overMagnitude);
+    EXPECT_NEAR(normalMagnitude / overMagnitude, 1.0f / VERTICAL_RATIO, 0.001f);
+
+    scrollBar_->HandleDragEnd(info);
+}
+
+/**
+ * @tc.name: HandleDragScrollBarOverDragBoundaryNoSplit001
+ * @tc.desc: When a single drag-update delta straddles the boundary (part over-scroll, part normal),
+ *           the entire delta uses the 1:1 over-scroll path instead of being split. The content
+ *           scrolls less than it should for the in-bounds portion, causing the thumb to lag the finger.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBarOverDragBoundaryNoSplit001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent();
+    CreateScrollDone();
+
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBar_->HandleDragStart(info);
+
+    // Step 1: over-scroll up by 5 — pushes position into over-scroll (1:1 path).
+    info.SetMainDelta(-5.0f);
+    scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    float overScrollPos = pattern_->GetCurrentPosition();
+    EXPECT_GT(overScrollPos, 0.0f); // positive = past top boundary
+
+    // Step 2: drag down by 20 — this delta CROSSES the boundary:
+    //   ~5px is still in the over-scroll zone, ~15px is in the normal scroll zone.
+    // With the fix: 5px at 1:1 (returns to boundary) + 15px scaled by 1/VERTICAL_RATIO
+    //   => position ≈ 0 + (-15 / VERTICAL_RATIO) = -15 / 0.4 = -37.5
+    info.SetMainDelta(20.0f);
+    scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    float afterCrossPos = pattern_->GetCurrentPosition();
+
+    // The fix splits the delta: the 15px normal portion is scaled, so the content
+    // scrolls to the correct position instead of the under-scrolled -15 (1:1 bug).
+    float correctSplitExpected = -15.0f / VERTICAL_RATIO;
+    EXPECT_NEAR(afterCrossPos, correctSplitExpected, 1.0f);
+
+    scrollBar_->HandleDragEnd(info);
+}
 } // namespace OHOS::Ace::NG
