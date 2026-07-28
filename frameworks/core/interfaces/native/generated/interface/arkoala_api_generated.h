@@ -7838,14 +7838,6 @@ typedef struct Opt_TransitionType {
     Ark_Tag tag;
     Ark_TransitionType value;
 } Opt_TransitionType;
-typedef enum Ark_UIMaterialAnimationMode {
-    ARK_UIMATERIAL_ANIMATION_MODE_IMMERSIVE = 0,
-    ARK_UIMATERIAL_ANIMATION_MODE_NONE = 1,
-} Ark_UIMaterialAnimationMode;
-typedef struct Opt_UIMaterialAnimationMode {
-    Ark_Tag tag;
-    Ark_UIMaterialAnimationMode value;
-} Opt_UIMaterialAnimationMode;
 typedef enum Ark_UndoStyle {
     ARK_UNDO_STYLE_CLEAR_STYLE = 0,
     ARK_UNDO_STYLE_KEEP_STYLE = 1,
