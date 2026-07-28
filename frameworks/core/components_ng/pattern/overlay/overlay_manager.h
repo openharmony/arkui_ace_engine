@@ -57,6 +57,7 @@ struct ContentCoverParam;
 struct DatePickerSettingData;
 struct TextPickerSettingData;
 struct TimePickerSettingData;
+class SheetPresentationPattern;
 struct SheetStyle;
 struct ToastInfo;
 enum class ToastShowMode;
@@ -848,6 +849,9 @@ private:
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
     void SetSheetBackgroundColor(const RefPtr<FrameNode>& sheetNode, const RefPtr<SheetTheme>& sheetTheme,
         const NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
+    void SetSheetBlurSnapshotFreeze(const RefPtr<FrameNode>& sheetPageNode,
+        const RefPtr<SheetPresentationPattern>& sheetNodePattern, const NG::SheetStyle& sheetStyle,
+        bool isPartialUpdate);
 
     bool ModalExitProcess(const RefPtr<FrameNode>& topModalNode);
     bool ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode);
