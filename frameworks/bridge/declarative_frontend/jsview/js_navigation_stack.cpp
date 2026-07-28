@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
+#include "bridge/declarative_frontend/jsview/nav_param_flat_serializer.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -1520,7 +1521,13 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
         JSRef<JSObject> navPathInfo = JSRef<JSObject>::New();
         navPathInfo->SetProperty<std::string>("name", infoName);
         if (!infoParam.empty() && infoParam != JS_STRINGIFIED_UNDEFINED) {
-            navPathInfo->SetPropertyObject("param", JSRef<JSObject>::New()->ToJsonObject(infoParam.c_str()));
+            auto deserializedParam = NavParamFlatSerializer::Deserialize(infoParam);
+            if (!deserializedParam.IsEmpty()) {
+                navPathInfo->SetPropertyObject("param", deserializedParam);
+            } else {
+                TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+                    "navDestination(index: %{public}d)'s param can't be deserialized, skip param!", index);
+            }
         }
         navPathInfo->SetProperty<bool>("fromRecovery", true);
         navPathInfo->SetProperty<int32_t>("mode", infoMode);
