@@ -121,6 +121,10 @@ public:
     }
 
     void SetNavigationConfiguration(const NavigationConfiguration& config);
+    bool IsClearContentStackNeeded() const
+    {
+        return config_.needClearContentStack;
+    }
 
     bool JudgeFoldStateChangeAndUpdateState();
 
@@ -944,6 +948,7 @@ private:
     void AdjustNodeForDestForceSplit(bool needTriggerLifecycle);
     void AdjustNodeForNonDestForceSplit(bool needTriggerLifecycle);
     void ClearSecondaryNodesIfNeeded(NavPathList&& preList);
+    void ClearContentStackIfNeeded(NavPathList&& preList);
 
     bool IsTopPrimaryNode(const RefPtr<NavDestinationGroupNode>& node);
     
