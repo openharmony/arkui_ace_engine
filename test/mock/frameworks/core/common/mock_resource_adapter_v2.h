@@ -32,16 +32,34 @@ public:
         return GetMockResourceData(resId, data) ? data : Color();
     }
 
+    Color GetColorByName(const std::string& resName) override
+    {
+        Color data;
+        return GetMockResourceDataByName(resName, data) ? data : Color();
+    }
+
     Dimension GetDimension(uint32_t resId) override
     {
         Dimension data;
         return GetMockResourceData(resId, data) ? data : Dimension();
     }
 
+    Dimension GetDimensionByName(const std::string& resName) override
+    {
+        Dimension data;
+        return GetMockResourceDataByName(resName, data) ? data : Dimension();
+    }
+
     std::string GetString(uint32_t resId) override
     {
         std::string data;
         return GetMockResourceData(resId, data) ? data : "";
+    }
+
+    std::string GetStringByName(const std::string& resName) override
+    {
+        std::string data;
+        return GetMockResourceDataByName(resName, data) ? data : "";
     }
 
     std::vector<std::string> GetStringArray(uint32_t resId) const override
@@ -56,10 +74,22 @@ public:
         return GetMockResourceData(resId, data) ? data : 0.0;
     }
 
+    double GetDoubleByName(const std::string& resName) override
+    {
+        double data = 0.0;
+        return GetMockResourceDataByName(resName, data) ? data : 0.0;
+    }
+
     int32_t GetInt(uint32_t resId) override
     {
         int32_t data = 0;
         return GetMockResourceData(resId, data) ? data : 0;
+    }
+
+    int32_t GetIntByName(const std::string& resName) override
+    {
+        int32_t data = 0;
+        return GetMockResourceDataByName(resName, data) ? data : 0;
     }
 
 private:
@@ -69,6 +99,11 @@ private:
     static bool GetMockResourceData(uint32_t id, std::vector<std::string>& data);
     static bool GetMockResourceData(uint32_t id, double& data);
     static bool GetMockResourceData(uint32_t id, int32_t& data);
+    static bool GetMockResourceDataByName(const std::string& name, Color& data);
+    static bool GetMockResourceDataByName(const std::string& name, Dimension& data);
+    static bool GetMockResourceDataByName(const std::string& name, std::string& data);
+    static bool GetMockResourceDataByName(const std::string& name, double& data);
+    static bool GetMockResourceDataByName(const std::string& name, int32_t& data);
 };
 
 void ResetMockResourceData();
@@ -78,6 +113,11 @@ void AddMockResourceData(uint32_t id, const std::string& data);
 void AddMockResourceData(uint32_t id, const std::vector<std::string>& data);
 void AddMockResourceData(uint32_t id, const double& data);
 void AddMockResourceData(uint32_t id, const int32_t& data);
+void AddMockResourceData(const std::string& name, const Color& data);
+void AddMockResourceData(const std::string& name, const Dimension& data);
+void AddMockResourceData(const std::string& name, const std::string& data);
+void AddMockResourceData(const std::string& name, const double& data);
+void AddMockResourceData(const std::string& name, const int32_t& data);
 
 } // namespace OHOS::Ace
 

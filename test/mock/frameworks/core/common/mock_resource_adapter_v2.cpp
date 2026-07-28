@@ -26,6 +26,11 @@ std::map<uint32_t, std::string> g_strMap;
 std::map<uint32_t, std::vector<std::string>> g_strsMap;
 std::map<uint32_t, double> g_doubleMap;
 std::map<uint32_t, int32_t> g_int32Map;
+std::map<std::string, Color> g_colorNameMap;
+std::map<std::string, Dimension> g_dimensionNameMap;
+std::map<std::string, std::string> g_strNameMap;
+std::map<std::string, double> g_doubleNameMap;
+std::map<std::string, int32_t> g_int32NameMap;
 std::mutex g_mapMutex;
 int32_t g_resourceAdapterInstanceId = -1;
 } // namespace
@@ -102,39 +107,124 @@ bool MockResourceAdapterV2::GetMockResourceData(uint32_t id, int32_t& data)
     return true;
 }
 
+bool MockResourceAdapterV2::GetMockResourceDataByName(const std::string& name, Color& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    auto it = g_colorNameMap.find(name);
+    if (it == g_colorNameMap.end()) {
+        return false;
+    }
+    data = it->second;
+    return true;
+}
+
+bool MockResourceAdapterV2::GetMockResourceDataByName(const std::string& name, Dimension& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    auto it = g_dimensionNameMap.find(name);
+    if (it == g_dimensionNameMap.end()) {
+        return false;
+    }
+    data = it->second;
+    return true;
+}
+
+bool MockResourceAdapterV2::GetMockResourceDataByName(const std::string& name, std::string& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    auto it = g_strNameMap.find(name);
+    if (it == g_strNameMap.end()) {
+        return false;
+    }
+    data = it->second;
+    return true;
+}
+
+bool MockResourceAdapterV2::GetMockResourceDataByName(const std::string& name, double& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    auto it = g_doubleNameMap.find(name);
+    if (it == g_doubleNameMap.end()) {
+        return false;
+    }
+    data = it->second;
+    return true;
+}
+
+bool MockResourceAdapterV2::GetMockResourceDataByName(const std::string& name, int32_t& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    auto it = g_int32NameMap.find(name);
+    if (it == g_int32NameMap.end()) {
+        return false;
+    }
+    data = it->second;
+    return true;
+}
+
 void AddMockResourceData(uint32_t id, const Color& data)
 {
     std::lock_guard<std::mutex> lock(g_mapMutex);
-    g_colorMap.insert(std::make_pair(id, data));
+    g_colorMap.insert_or_assign(id, data);
 }
 
 void AddMockResourceData(uint32_t id, const Dimension& data)
 {
     std::lock_guard<std::mutex> lock(g_mapMutex);
-    g_dimensionMap.insert(std::make_pair(id, data));
+    g_dimensionMap.insert_or_assign(id, data);
 }
 
 void AddMockResourceData(uint32_t id, const std::string& data)
 {
     std::lock_guard<std::mutex> lock(g_mapMutex);
-    g_strMap.insert(std::make_pair(id, data));
+    g_strMap.insert_or_assign(id, data);
 }
 void AddMockResourceData(uint32_t id, const std::vector<std::string>& data)
 {
     std::lock_guard<std::mutex> lock(g_mapMutex);
-    g_strsMap.insert(std::make_pair(id, data));
+    g_strsMap.insert_or_assign(id, data);
 }
 
 void AddMockResourceData(uint32_t id, const double& data)
 {
     std::lock_guard<std::mutex> lock(g_mapMutex);
-    g_doubleMap.insert(std::make_pair(id, data));
+    g_doubleMap.insert_or_assign(id, data);
 }
 
 void AddMockResourceData(uint32_t id, const int32_t& data)
 {
     std::lock_guard<std::mutex> lock(g_mapMutex);
-    g_int32Map.insert(std::make_pair(id, data));
+    g_int32Map.insert_or_assign(id, data);
+}
+
+void AddMockResourceData(const std::string& name, const Color& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    g_colorNameMap.insert_or_assign(name, data);
+}
+
+void AddMockResourceData(const std::string& name, const Dimension& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    g_dimensionNameMap.insert_or_assign(name, data);
+}
+
+void AddMockResourceData(const std::string& name, const std::string& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    g_strNameMap.insert_or_assign(name, data);
+}
+
+void AddMockResourceData(const std::string& name, const double& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    g_doubleNameMap.insert_or_assign(name, data);
+}
+
+void AddMockResourceData(const std::string& name, const int32_t& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    g_int32NameMap.insert_or_assign(name, data);
 }
 
 void ResetMockResourceData()
@@ -146,6 +236,11 @@ void ResetMockResourceData()
     g_strsMap.clear();
     g_doubleMap.clear();
     g_int32Map.clear();
+    g_colorNameMap.clear();
+    g_dimensionNameMap.clear();
+    g_strNameMap.clear();
+    g_doubleNameMap.clear();
+    g_int32NameMap.clear();
     g_resourceAdapterInstanceId = -1;
 }
 
