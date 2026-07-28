@@ -22,7 +22,7 @@ class LazyArkCommonShapeComponent extends ArkComponent {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }
 
-  viewPort(value: any): this {
+  viewPort(value: ViewportRect): this {
     throw new Error('Method not implemented.');
   }
 
@@ -81,7 +81,7 @@ class LazyArkCommonShapeComponent extends ArkComponent {
     return this;
   }
 
-  mesh(value: any, column: any, row: any): this {
+  mesh(value: Array<any>, column: number, row: number): this {
     throw new Error('Method not implemented.');
   }
 
