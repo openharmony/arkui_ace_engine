@@ -23,6 +23,7 @@
 #define protected public
 #define private public
 #include "base/log/log.h"
+#include "core/common/container_consts.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #undef private
@@ -47,6 +48,7 @@ public:
         ResetMockResourceData();
         ResourceManager::GetInstance().Reset();
         ResourceManager::GetInstance().resourceAdapters_.clear();
+        ResourceManager::GetInstance().undefinedIdRefCount_.clear();
     }
 };
 
@@ -324,5 +326,140 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest007, TestSize.Level1)
         ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, resourceObjectInstanceId), nullptr);
     EXPECT_EQ(
         ResourceManager::GetInstance().GetResourceAdapter(bundleName, moduleName, actualInstanceId), resourceAdapter);
+}
+
+/**
+ * @tc.name: ResourceManagerTest008
+ * @tc.desc: Test RemoveResourceAdapter with INSTANCE_ID_UNDEFINED ref counting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceManagerTest, ResourceManagerTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Register adapter with INSTANCE_ID_UNDEFINED.
+     * @tc.expect: undefinedIdRefCount_ has 1 entry, resourceAdapters_ has 1 entry.
+     */
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    auto adapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().RegisterMainResourceAdapter(
+        bundleName, moduleName, INSTANCE_ID_UNDEFINED, adapter);
+    auto key = MakeCacheKey(bundleName, moduleName, INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ResourceManager::GetInstance().undefinedIdRefCount_[key], 1);
+    EXPECT_NE(ResourceManager::GetInstance().resourceAdapters_.find(key),
+        ResourceManager::GetInstance().resourceAdapters_.end());
+
+    /**
+     * @tc.steps: step2. Remove once, refCount drops to 0.
+     * @tc.expect: entry is erased from both resourceAdapters_ and undefinedIdRefCount_.
+     */
+    ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ResourceManager::GetInstance().undefinedIdRefCount_.find(key),
+        ResourceManager::GetInstance().undefinedIdRefCount_.end());
+    EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.find(key),
+        ResourceManager::GetInstance().resourceAdapters_.end());
+}
+
+/**
+ * @tc.name: ResourceManagerTest009
+ * @tc.desc: Test multiple RegisterMainResourceAdapter with INSTANCE_ID_UNDEFINED.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceManagerTest, ResourceManagerTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Register same key twice with INSTANCE_ID_UNDEFINED.
+     * @tc.expect: undefinedIdRefCount_[key] == 2.
+     */
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    auto adapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().RegisterMainResourceAdapter(
+        bundleName, moduleName, INSTANCE_ID_UNDEFINED, adapter);
+    ResourceManager::GetInstance().RegisterMainResourceAdapter(
+        bundleName, moduleName, INSTANCE_ID_UNDEFINED, adapter);
+    auto key = MakeCacheKey(bundleName, moduleName, INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ResourceManager::GetInstance().undefinedIdRefCount_[key], 2);
+
+    /**
+     * @tc.steps: step2. Remove once, refCount drops to 1.
+     * @tc.expect: entry still exists.
+     */
+    ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ResourceManager::GetInstance().undefinedIdRefCount_[key], 1);
+    EXPECT_NE(ResourceManager::GetInstance().resourceAdapters_.find(key),
+        ResourceManager::GetInstance().resourceAdapters_.end());
+
+    /**
+     * @tc.steps: step3. Remove again, refCount drops to 0.
+     * @tc.expect: entry is erased.
+     */
+    ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ResourceManager::GetInstance().undefinedIdRefCount_.find(key),
+        ResourceManager::GetInstance().undefinedIdRefCount_.end());
+    EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.find(key),
+        ResourceManager::GetInstance().resourceAdapters_.end());
+}
+
+/**
+ * @tc.name: ResourceManagerTest010
+ * @tc.desc: Test removing normal instanceId does not affect INSTANCE_ID_UNDEFINED entry.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceManagerTest, ResourceManagerTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Register adapter with normal instanceId and INSTANCE_ID_UNDEFINED.
+     * @tc.expect: both entries exist.
+     */
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    auto adapter = ResourceAdapter::Create();
+    ResourceManager::GetInstance().RegisterMainResourceAdapter(
+        bundleName, moduleName, DEFAULT_INSTANCE_ID, adapter);
+    ResourceManager::GetInstance().RegisterMainResourceAdapter(
+        bundleName, moduleName, INSTANCE_ID_UNDEFINED, adapter);
+    auto normalKey = MakeCacheKey(bundleName, moduleName, DEFAULT_INSTANCE_ID);
+    auto undefinedKey = MakeCacheKey(bundleName, moduleName, INSTANCE_ID_UNDEFINED);
+
+    /**
+     * @tc.steps: step2. Remove normal instanceId.
+     * @tc.expect: normal entry removed, INSTANCE_ID_UNDEFINED entry unaffected.
+     */
+    ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, DEFAULT_INSTANCE_ID);
+    EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.find(normalKey),
+        ResourceManager::GetInstance().resourceAdapters_.end());
+    EXPECT_NE(ResourceManager::GetInstance().resourceAdapters_.find(undefinedKey),
+        ResourceManager::GetInstance().resourceAdapters_.end());
+    EXPECT_EQ(ResourceManager::GetInstance().undefinedIdRefCount_[undefinedKey], 1);
+
+    /**
+     * @tc.steps: step3. Remove INSTANCE_ID_UNDEFINED.
+     * @tc.expect: both entries gone.
+     */
+    ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.find(undefinedKey),
+        ResourceManager::GetInstance().resourceAdapters_.end());
+}
+
+/**
+ * @tc.name: ResourceManagerTest011
+ * @tc.desc: Test RemoveResourceAdapter with INSTANCE_ID_UNDEFINED when not registered.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ResourceManagerTest, ResourceManagerTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Remove with INSTANCE_ID_UNDEFINED without prior registration.
+     * @tc.expect: No crash, no entry created.
+     */
+    std::string bundleName = "com.example.test";
+    std::string moduleName = "entry";
+    ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, INSTANCE_ID_UNDEFINED);
+    auto key = MakeCacheKey(bundleName, moduleName, INSTANCE_ID_UNDEFINED);
+    EXPECT_EQ(ResourceManager::GetInstance().resourceAdapters_.find(key),
+        ResourceManager::GetInstance().resourceAdapters_.end());
+    EXPECT_EQ(ResourceManager::GetInstance().undefinedIdRefCount_.find(key),
+        ResourceManager::GetInstance().undefinedIdRefCount_.end());
 }
 } // namespace OHOS::Ace

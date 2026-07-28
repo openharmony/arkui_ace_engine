@@ -3568,6 +3568,8 @@ void AceContainer::ReleaseResourceAdapter()
             auto bundleName = runtimeContext->GetBundleName();
             auto moduleName = runtimeContext->GetHapModuleInfo()->name;
             ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, instanceId_);
+            ResourceManager::GetInstance().RemoveResourceAdapter(
+                GetBundleName(), GetModuleName(), INSTANCE_ID_UNDEFINED);
         }
     } else {
         ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId_);
