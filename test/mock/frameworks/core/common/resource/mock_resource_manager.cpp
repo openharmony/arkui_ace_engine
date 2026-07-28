@@ -15,6 +15,8 @@
 
 #include "core/common/resource/resource_manager.h"
 #include "core/components/theme/resource_adapter.h"
+#include "core/common/resource/resource_object.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 ResourceManager::ResourceManager() = default;
@@ -28,8 +30,12 @@ ResourceManager& ResourceManager::GetInstance()
 
 RefPtr<ResourceAdapter> ResourceManager::GetOrCreateResourceAdapter(const RefPtr<ResourceObject>& resourceObject)
 {
-    (void)resourceObject;
-    return nullptr;
+    CHECK_NULL_RETURN(resourceObject, nullptr);
+    int32_t actualInstanceId = resourceObject->GetInstanceId();
+    std::string bundleName = resourceObject->GetBundleName();
+    std::string moduleName = resourceObject->GetModuleName();
+    auto resourceAdapter = ResourceAdapter::CreateNewResourceAdapter(bundleName, moduleName, actualInstanceId);
+    return resourceAdapter;
 }
 
 void ResourceManager::UpdateResourceConfig(const std::string& bundleName, const std::string& moduleName,
