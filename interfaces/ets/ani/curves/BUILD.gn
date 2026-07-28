@@ -31,7 +31,10 @@ ohos_shared_library("curves_ani") {
   ]
   external_deps = [
     #"runtime_core:libarkruntime",
+    "ets_runtime:libark_jsruntime",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
     "runtime_core:ani",
   ]
   configs = [ "$ace_root:ace_config" ]

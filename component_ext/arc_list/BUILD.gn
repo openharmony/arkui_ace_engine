@@ -63,7 +63,9 @@ ohos_shared_library("arclist") {
     "bounds_checking_function:libsec_static",
     "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   if (!use_mac) {

@@ -66,6 +66,8 @@ template("napi_dragcontroller_static") {
       external_deps += [
         "ets_runtime:libark_jsruntime",
         "napi:ace_napi",
+        "node:node_header_notice",
+        "libuv:uv",
       ]
     }
     if (use_hilog) {

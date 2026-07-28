@@ -68,7 +68,9 @@ template("declarative_frontend") {
     }
     external_deps = [
       "ets_runtime:libark_jsruntime",
+      "libuv:uv",
       "napi:ace_napi",
+      "node:node_header_notice",
     ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
@@ -652,7 +654,9 @@ template("declarative_js_engine") {
       external_deps += [
         "ets_runtime:libark_jsruntime",
         "graphic_2d:librender_service_client",
+        "libuv:uv",
         "napi:ace_napi",
+        "node:node_header_notice",
       ]
     }
 
@@ -1099,7 +1103,9 @@ template("declarative_js_engine_ng") {
       external_deps += [
         "ets_runtime:libark_jsruntime",
         "graphic_2d:librender_service_client",
+        "libuv:uv",
         "napi:ace_napi",
+        "node:node_header_notice",
       ]
     }
 

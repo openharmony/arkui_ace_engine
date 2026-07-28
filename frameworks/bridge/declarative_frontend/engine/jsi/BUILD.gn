@@ -430,7 +430,9 @@ template("declarative_js_engine_ark") {
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
+        "libuv:uv",
         "napi:ace_napi",
+        "node:node_header_notice",
       ]
     }
 

@@ -226,7 +226,9 @@ template("build_component_ng") {
         } else {
           external_deps += [
             "ets_runtime:libark_jsruntime",
+            "libuv:uv",
             "napi:ace_napi",
+            "node:node_header_notice",
           ]
           if (!ace_engine_feature_wearable) {
             defines += [ "INCLUDE_GENERATED_SOURCES" ]
