@@ -3407,6 +3407,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(innerWebNativeMessageManagerFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
                 auto* eventInfo = TypeInfoHelper::DynamicCast<WebNativeMessageEvent>(info.get());
+                if (!eventInfo) {
+                    TAG_LOGE(AceLogTag::ACE_WEB,
+                        "innerWebNativeMessageManager received null or unexpected event type");
+                    return;
+                }
                 JSRef<JSObject> obj = JSRef<JSObject>::New();
                 JSRef<JSObject> callbackObj = JSClass<JSWebNativeMessageCallback>::NewInstance();
                 auto callbackEvent = Referenced::Claim(callbackObj->Unwrap<JSWebNativeMessageCallback>());
@@ -3434,6 +3439,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(innerWebNativeMessageDisconnectFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
             auto* eventInfo = TypeInfoHelper::DynamicCast<WebNativeMessageEvent>(info.get());
+            if (!eventInfo) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "innerWebNativeMessageManager received null or unexpected event type");
+                return;
+            }
             JSRef<JSVal> connectId = JSRef<JSVal>::Make(ToJSValue(eventInfo->GetConnectId()));
             JSRef<JSObject> obj = JSRef<JSObject>::New();
             obj->SetPropertyObject("connectId", connectId);
@@ -3450,6 +3460,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(onFullScreenVideoOverlayEnterFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
             auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenVideoOverlayEnterEvent>(info.get());
+            if (!eventInfo) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "innerWebNativeMessageManager received null or unexpected event type");
+                return;
+            }
             JSRef<JSObject> obj = JSRef<JSObject>::New();
             JSRef<JSObject> handlerObj = JSClass<JSFullScreenVideoOverlayHandler>::NewInstance();
             auto callbackEvent = Referenced::Claim(handlerObj->Unwrap<JSFullScreenVideoOverlayHandler>());
