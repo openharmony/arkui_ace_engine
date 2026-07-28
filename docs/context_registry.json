@@ -3586,6 +3586,634 @@
       "last_verified": "2026-07-23"
     },
     {
+      "id": "Button",
+      "name": "Button",
+      "name_cn": "按钮组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "Button",
+        "按钮",
+        "click",
+        "onClick",
+        "Capsule",
+        "Circle",
+        "ButtonType",
+        "ToggleButton",
+        "按钮类型"
+      ],
+      "aliases": [
+        "Button组件",
+        "按钮",
+        "ToggleButton"
+      ],
+      "kb": "docs/kb/components/basic/button.md",
+      "spec_domain": "specs/05-ui-components/04-input-form-components/01-button",
+      "func_id": "05-04-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/button/button_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/button/button_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/button/button_layout_algorithm.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/button/bridge/arkts_native_button_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/button/bridge/button_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_button_modifier.cpp",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/button.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/button.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ButtonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ButtonModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/button/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "Radio",
+      "name": "Radio",
+      "name_cn": "单选组件",
+      "kind": "component",
+      "category": "selector",
+      "keywords": [
+        "Radio",
+        "单选",
+        "RadioGroup",
+        "radio",
+        "checked",
+        "单选按钮",
+        "RadioStyle"
+      ],
+      "aliases": [
+        "Radio组件",
+        "单选按钮",
+        "RadioButton",
+        "RadioGroup"
+      ],
+      "kb": "docs/kb/components/selector/radio.md",
+      "spec_domain": "specs/05-ui-components/04-input-form-components/04-radio",
+      "func_id": "05-04-04",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/radio/radio_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/radio/radio_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/radio/radio_layout_algorithm.cpp",
+        "paint": "frameworks/core/components_ng/pattern/radio/radio_paint_method.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/radio/bridge/arkts_native_radio_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/radio/bridge/radio_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/radio_modifier.cpp",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/radio.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/radio.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/RadioModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RadioModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/radio/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "Checkbox",
+      "name": "Checkbox",
+      "name_cn": "多选组件",
+      "kind": "component",
+      "category": "selector",
+      "keywords": [
+        "Checkbox",
+        "CheckboxGroup",
+        "多选",
+        "checkbox",
+        "checked",
+        "select",
+        "CheckBoxPattern",
+        "多选框",
+        "多选分组"
+      ],
+      "aliases": [
+        "Checkbox组件",
+        "多选框",
+        "CheckboxGroup",
+        "多选分组"
+      ],
+      "kb": "docs/kb/components/selector/checkbox.md",
+      "spec_domain": "specs/05-ui-components/04-input-form-components/02-checkbox-checkbox-group",
+      "func_id": "05-04-02",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/checkbox/checkbox_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/checkbox/checkbox_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/checkbox/checkbox_layout_algorithm.cpp",
+        "paint": "frameworks/core/components_ng/pattern/checkbox/checkbox_paint_method.cpp",
+        "group_pattern": "frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.cpp",
+        "group_model": "frameworks/core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/checkbox/bridge/arkts_native_checkbox_bridge.cpp",
+        "group_bridge": "frameworks/core/components_ng/pattern/checkboxgroup/bridge/arkts_native_checkboxgroup_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/checkbox/bridge/checkbox_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_checkbox_modifier.cpp",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/checkbox.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/checkbox.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CheckboxModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CheckboxModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/checkbox/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "ArcSlider",
+      "name": "ArcSlider",
+      "name_cn": "圆弧滑动选择器组件",
+      "kind": "component",
+      "category": "selector",
+      "keywords": [
+        "ArcSlider",
+        "圆弧滑动",
+        "弧形",
+        "arc",
+        "slider",
+        "高级组件"
+      ],
+      "aliases": [
+        "ArcSlider组件",
+        "圆弧滑动选择器",
+        "@ohos.arkui.advanced.ArcSlider"
+      ],
+      "kb": "docs/kb/components/selector/arc_slider.md",
+      "spec_domain": "specs/10-product-customization/01-wearable/01-arc-component",
+      "func_id": "10-01-01",
+      "spec_status": "active",
+      "source_paths": {
+        "source": "advanced_ui_component/arcslider/source/arcslider.ets",
+        "interface": "advanced_ui_component/arcslider/interfaces/arcslider.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.advanced.ArcSlider.d.ets",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.advanced.ArcSlider.static.d.ets"
+      },
+      "test_paths": [],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "ArcButton",
+      "name": "ArcButton",
+      "name_cn": "圆弧按钮组件",
+      "kind": "component",
+      "category": "selector",
+      "keywords": [
+        "ArcButton",
+        "圆弧按钮",
+        "arc",
+        "button",
+        "高级组件"
+      ],
+      "aliases": [
+        "ArcButton组件",
+        "圆弧按钮",
+        "@ohos.arkui.advanced.ArcButton"
+      ],
+      "kb": "docs/kb/components/selector/arc_button.md",
+      "spec_domain": "specs/10-product-customization/01-wearable/01-arc-component",
+      "func_id": "10-01-01",
+      "spec_status": "active",
+      "source_paths": {
+        "source": "advanced_ui_component/arcbutton/source/arcbutton.ets",
+        "interface": "advanced_ui_component/arcbutton/interfaces/arcbutton.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.advanced.ArcButton.d.ets",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.advanced.ArcButton.static.d.ets"
+      },
+      "test_paths": [],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "AnimationFramework",
+      "name": "Animation Framework",
+      "name_cn": "动效框架",
+      "kind": "common_capability",
+      "category": "animation",
+      "keywords": [
+        "animation",
+        "animator",
+        "动效",
+        "插值",
+        "VSync",
+        "scheduler",
+        "动画框架",
+        "AnimatorGroup",
+        "ChainAnimation"
+      ],
+      "aliases": [
+        "动效框架",
+        "动画框架",
+        "Animator"
+      ],
+      "kb": "docs/kb/capabilities/animation_framework.md",
+      "spec_domain": "specs/03-engine-framework/02-animation-capability/01-animation-framework",
+      "func_id": "03-02-01",
+      "spec_status": "active",
+      "source_paths": {
+        "animator": "frameworks/core/animation/animator.cpp",
+        "scheduler": "frameworks/core/animation/scheduler.cpp",
+        "animator_group": "frameworks/core/animation/animator_group.cpp",
+        "chain_animation": "frameworks/core/animation/chain_animation.cpp",
+        "animation_pub": "frameworks/core/animation/animation_pub.cpp",
+        "napi": "interfaces/napi/kits/animator/js_animator.cpp",
+        "capi": "interfaces/native/native_animate.h",
+        "capi_impl": "interfaces/native/node/animate_impl.cpp"
+      },
+      "api_paths": {
+        "napi": "<OH_ROOT>/interface/sdk-js/api/@ohos.animator.d.ts",
+        "capi": "interfaces/native/native_animate.h"
+      },
+      "test_paths": [
+        "test/unittest/core/animation/",
+        "test/unittest/core/pattern/animator/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-25"
+    },
+    {
+      "id": "PropertyAnimation",
+      "name": "Property Animation",
+      "name_cn": "属性动画",
+      "kind": "common_capability",
+      "category": "animation",
+      "keywords": [
+        "PropertyAnimation",
+        "属性动画",
+        "Animatable",
+        "Evaluator",
+        "插值",
+        "animateTo",
+        "animation"
+      ],
+      "aliases": [
+        "属性动画",
+        "PropertyAnimation"
+      ],
+      "kb": "docs/kb/capabilities/property_animation.md",
+      "spec_domain": "specs/03-engine-framework/02-animation-capability/02-property-animation",
+      "func_id": "03-02-02",
+      "spec_status": "active",
+      "source_paths": {
+        "property_animation": "frameworks/core/animation/property_animation.cpp",
+        "animatable": "frameworks/core/animation/animatable.h",
+        "animatable_data": "frameworks/core/animation/animatable_data.cpp",
+        "evaluator": "frameworks/core/animation/evaluator.h",
+        "animation_util": "frameworks/core/animation/animation_util.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "capi": "interfaces/native/native_animate.h"
+      },
+      "test_paths": [
+        "test/unittest/core/animation/animation_test_core.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-25"
+    },
+    {
+      "id": "ExplicitAnimation",
+      "name": "Explicit Animation",
+      "name_cn": "显式动画",
+      "kind": "common_capability",
+      "category": "animation",
+      "keywords": [
+        "ExplicitAnimation",
+        "显式动画",
+        "animateTo",
+        "AnimationOption",
+        "闭包动画"
+      ],
+      "aliases": [
+        "显式动画",
+        "animateTo"
+      ],
+      "kb": "docs/kb/capabilities/explicit_animation.md",
+      "spec_domain": "specs/03-engine-framework/02-animation-capability/03-explicit-animation",
+      "func_id": "03-02-03",
+      "spec_status": "active",
+      "source_paths": {
+        "animation_option": "interfaces/inner_api/ace_kit/include/ui/animation/animation_option.h",
+        "pipeline_context": "frameworks/core/pipeline/pipeline_context.h",
+        "js_view_context": "frameworks/bridge/declarative_frontend/jsview/js_view_context.cpp",
+        "capi_impl": "interfaces/native/node/animate_impl.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "capi": "interfaces/native/native_animate.h"
+      },
+      "test_paths": [
+        "test/unittest/core/animation/animation_test_core.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-25"
+    },
+    {
+      "id": "KeyframeAnimation",
+      "name": "Keyframe Animation",
+      "name_cn": "关键帧动画",
+      "kind": "common_capability",
+      "category": "animation",
+      "keywords": [
+        "KeyframeAnimation",
+        "关键帧动画",
+        "keyframeAnimateTo",
+        "Keyframe",
+        "分段曲线"
+      ],
+      "aliases": [
+        "关键帧动画",
+        "keyframeAnimateTo"
+      ],
+      "kb": "docs/kb/capabilities/keyframe_animation.md",
+      "spec_domain": "specs/03-engine-framework/02-animation-capability/04-keyframe-animation",
+      "func_id": "03-02-04",
+      "spec_status": "active",
+      "source_paths": {
+        "keyframe_animation": "frameworks/core/animation/keyframe_animation.h",
+        "keyframe": "frameworks/core/animation/keyframe.h",
+        "js_view_context": "frameworks/bridge/declarative_frontend/jsview/js_view_context.cpp",
+        "capi_impl": "interfaces/native/node/animate_impl.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "capi": "interfaces/native/native_animate.h"
+      },
+      "test_paths": [
+        "test/unittest/core/animation/animation_test_core.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-25"
+    },
+    {
+      "id": "TransitionAnimation",
+      "name": "Transition Animation",
+      "name_cn": "转场动画",
+      "kind": "common_capability",
+      "category": "animation",
+      "keywords": [
+        "TransitionAnimation",
+        "转场动画",
+        "TransitionEffect",
+        "ChainedTransitionEffect",
+        "页面转场",
+        "卡片转场",
+        "enter",
+        "exit"
+      ],
+      "aliases": [
+        "转场动画",
+        "TransitionEffect"
+      ],
+      "kb": "docs/kb/capabilities/transition_animation.md",
+      "spec_domain": "specs/03-engine-framework/02-animation-capability/05-transition-animation",
+      "func_id": "03-02-05",
+      "spec_status": "active",
+      "source_paths": {
+        "transition_property": "frameworks/core/components_ng/property/transition_property.h",
+        "transition_modifier": "frameworks/core/components_ng/render/adapter/transition_modifier.h",
+        "page_transition": "frameworks/core/animation/page_transition_common.h",
+        "card_transition": "frameworks/core/animation/card_transition_controller.cpp",
+        "js_page_transition": "frameworks/bridge/declarative_frontend/jsview/js_page_transition.cpp",
+        "capi_node": "interfaces/native/node/node_transition.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "capi": "interfaces/native/native_animate.h"
+      },
+      "test_paths": [
+        "test/unittest/capi/accessors/transition_effect_accessor_test.cpp",
+        "test/unittest/interfaces/node_transition_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-25"
+    },
+    {
+      "id": "SharedTransition",
+      "name": "Shared Transition",
+      "name_cn": "共享元素动画",
+      "kind": "common_capability",
+      "category": "animation",
+      "keywords": [
+        "SharedTransition",
+        "共享元素动画",
+        "sharedTransition",
+        "EXCHANGE",
+        "STATIC",
+        "SharedOverlayManager"
+      ],
+      "aliases": [
+        "共享元素动画",
+        "sharedTransition"
+      ],
+      "kb": "docs/kb/capabilities/shared_transition.md",
+      "spec_domain": "specs/03-engine-framework/02-animation-capability/06-shared-transition",
+      "func_id": "03-02-06",
+      "spec_status": "active",
+      "source_paths": {
+        "shared_transition": "frameworks/core/animation/shared_transition.h",
+        "controller": "frameworks/core/animation/shared_transition_controller.cpp",
+        "effect": "frameworks/core/animation/shared_transition_effect.cpp",
+        "ng_manager": "frameworks/core/components_ng/manager/shared_overlay/shared_overlay_manager.cpp",
+        "ng_effect": "frameworks/core/components_ng/manager/shared_overlay/shared_transition_effect.cpp",
+        "option": "frameworks/core/components/common/properties/shared_transition_option.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/animation/animation_test_core.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-25"
+    },
+    {
+      "id": "GeometryTransition",
+      "name": "Geometry Transition",
+      "name_cn": "组件共享元素动画",
+      "kind": "common_capability",
+      "category": "animation",
+      "keywords": [
+        "GeometryTransition",
+        "组件共享元素动画",
+        "geometryTransition",
+        "AnimatableArithmetic",
+        "FrameNode"
+      ],
+      "aliases": [
+        "组件共享元素动画",
+        "geometryTransition"
+      ],
+      "kb": "docs/kb/capabilities/geometry_transition.md",
+      "spec_domain": "specs/03-engine-framework/02-animation-capability/07-geometry-transition",
+      "func_id": "03-02-07",
+      "spec_status": "active",
+      "source_paths": {
+        "geometry_transition": "frameworks/core/components_ng/animation/geometry_transition.cpp",
+        "animatable_arithmetic": "frameworks/core/components_ng/animation/animatable_arithmetic.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/animation/geometry_transition_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-25"
+    },
+    {
+      "id": "MotionPath",
+      "name": "Motion Path",
+      "name_cn": "路径动画",
+      "kind": "common_capability",
+      "category": "animation",
+      "keywords": [
+        "MotionPath",
+        "路径动画",
+        "motionPath",
+        "SVG path",
+        "MotionPathEvaluator",
+        "rotatable"
+      ],
+      "aliases": [
+        "路径动画",
+        "motionPath"
+      ],
+      "kb": "docs/kb/capabilities/motion_path.md",
+      "spec_domain": "specs/03-engine-framework/02-animation-capability/08-motion-path",
+      "func_id": "03-02-08",
+      "spec_status": "active",
+      "source_paths": {
+        "motion_path_option": "frameworks/core/components/common/properties/motion_path_option.h",
+        "motion_path_evaluator": "frameworks/core/components/common/properties/motion_path_evaluator.cpp",
+        "native_curve_helper": "frameworks/core/animation/native_curve_helper.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/animation/animation_test_core.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-25"
+    },
+    {
+      "id": "PhysicsAnimation",
+      "name": "Physics Animation",
+      "name_cn": "物理动画",
+      "kind": "common_capability",
+      "category": "animation",
+      "keywords": [
+        "PhysicsAnimation",
+        "物理动画",
+        "SpringMotion",
+        "FrictionMotion",
+        "ScrollMotion",
+        "SpringModel",
+        "SpringCurve",
+        "ChainAnimation",
+        "弹簧"
+      ],
+      "aliases": [
+        "物理动画",
+        "SpringMotion",
+        "弹簧动画"
+      ],
+      "kb": "docs/kb/capabilities/physics_animation.md",
+      "spec_domain": "specs/03-engine-framework/02-animation-capability/09-physics-animation",
+      "func_id": "03-02-09",
+      "spec_status": "active",
+      "source_paths": {
+        "motion": "frameworks/core/animation/motion.h",
+        "spring_motion": "frameworks/core/animation/spring_motion.cpp",
+        "friction_motion": "frameworks/core/animation/friction_motion.cpp",
+        "spring_model": "frameworks/core/animation/spring_model.cpp",
+        "spring_animation": "frameworks/core/animation/spring_animation.cpp",
+        "spring_curve": "frameworks/core/animation/spring_curve.cpp",
+        "simple_spring_chain": "frameworks/core/animation/simple_spring_chain.cpp",
+        "capi_impl": "interfaces/native/node/animate_impl.cpp"
+      },
+      "api_paths": {
+        "capi": "interfaces/native/native_animate.h"
+      },
+      "test_paths": [
+        "test/unittest/core/animation/animation_test_core.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-25"
+    },
+    {
+      "id": "AnimationInterface",
+      "name": "Animation Interface",
+      "name_cn": "动画接口",
+      "kind": "common_capability",
+      "category": "animation",
+      "keywords": [
+        "AnimationInterface",
+        "动画接口",
+        "AnimationOption",
+        "Curve",
+        "Curves",
+        "CubicCurve",
+        "SpringCurve",
+        "AnticipateCurve",
+        "NativeCurveHelper"
+      ],
+      "aliases": [
+        "动画接口",
+        "AnimationInterface",
+        "Curve"
+      ],
+      "kb": "docs/kb/capabilities/animation_interface.md",
+      "spec_domain": "specs/03-engine-framework/02-animation-capability/10-animation-interface",
+      "func_id": "03-02-10",
+      "spec_status": "active",
+      "source_paths": {
+        "animation_constants": "interfaces/inner_api/ace_kit/include/ui/animation/animation_constants.h",
+        "animation_option": "interfaces/inner_api/ace_kit/include/ui/animation/animation_option.h",
+        "animation_pub": "frameworks/core/animation/animation_pub.cpp",
+        "curves": "frameworks/core/animation/curves.cpp",
+        "cubic_curve": "frameworks/core/animation/cubic_curve.cpp",
+        "spring_curve": "frameworks/core/animation/spring_curve.cpp",
+        "anticipate_curve": "frameworks/core/animation/anticipate_curve.cpp",
+        "native_curve_helper": "frameworks/core/animation/native_curve_helper.cpp",
+        "napi": "interfaces/napi/kits/animator/js_animator.cpp"
+      },
+      "api_paths": {
+        "napi": "<OH_ROOT>/interface/sdk-js/api/@ohos.animator.d.ts",
+        "capi": "interfaces/native/native_animate.h"
+      },
+      "test_paths": [
+        "test/unittest/core/animation/animation_pub_test.cpp",
+        "test/unittest/core/animation/animation_test_core.cpp",
+        "test/unittest/core/pattern/animator/animator_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-25"
+    },
+    {
       "id": "UIObserver",
       "name": "UIObserver",
       "name_cn": "无感监听",
