@@ -60,14 +60,22 @@ bool ParseAniDimensionVp(ani_env* env, ani_object obj, CalcDimension& result)
 ani_object SetConstraintNG(ani_env* env, double minWidth, double minHeight, double maxWidth, double maxHeight)
 {
     ani_object constraint_obj;
-    ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.ConstraintSizeOptionsInner";
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
+    static ani_class cls = nullptr;
+    if (!cls) {
+        ani_class localCls = nullptr;
+        if (ANI_OK != env->FindClass(className, &localCls)) {
+            return nullptr;
+        }
+        ani_ref clsRef = nullptr;
+        if (ANI_OK != env->GlobalReference_Create(localCls, &clsRef)) {
+            return nullptr;
+        }
+        cls = static_cast<ani_class>(clsRef);
     }
 
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>",
+    static ani_method ctor = nullptr;
+    if (!ctor && ANI_OK != env->Class_FindMethod(cls, "<ctor>",
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
@@ -165,13 +173,21 @@ ani_object GenPadding(ani_env* env,  const std::unique_ptr<NG::PaddingProperty>&
 {
     ani_object padding_obj;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.PaddingInner";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
+    static ani_class cls = nullptr;
+    if (!cls) {
+        ani_class localCls = nullptr;
+        if (ANI_OK != env->FindClass(className, &localCls)) {
+            return nullptr;
+        }
+        ani_ref clsRef = nullptr;
+        if (ANI_OK != env->GlobalReference_Create(localCls, &clsRef)) {
+            return nullptr;
+        }
+        cls = static_cast<ani_class>(clsRef);
     }
 
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>",
+    static ani_method ctor = nullptr;
+    if (!ctor && ANI_OK != env->Class_FindMethod(cls, "<ctor>",
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
@@ -197,14 +213,22 @@ ani_object GenPadding(ani_env* env,  const std::unique_ptr<NG::PaddingProperty>&
 ani_object GenMargin(ani_env* env,  const std::unique_ptr<NG::MarginProperty>& marginNative)
 {
     ani_object margin_obj;
-    ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.MarginInner";
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
+    static ani_class cls = nullptr;
+    if (!cls) {
+        ani_class localCls = nullptr;
+        if (ANI_OK != env->FindClass(className, &localCls)) {
+            return nullptr;
+        }
+        ani_ref clsRef = nullptr;
+        if (ANI_OK != env->GlobalReference_Create(localCls, &clsRef)) {
+            return nullptr;
+        }
+        cls = static_cast<ani_class>(clsRef);
     }
 
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>",
+    static ani_method ctor = nullptr;
+    if (!ctor && ANI_OK != env->Class_FindMethod(cls, "<ctor>",
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
@@ -231,14 +255,22 @@ ani_object GenMargin(ani_env* env,  const std::unique_ptr<NG::MarginProperty>& m
 ani_object GenEdgeWidths(ani_env* env,  const std::unique_ptr<NG::BorderWidthProperty>& edgeWidthsNative)
 {
     ani_object edgeWidths_obj;
-    ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.EdgeWidthsInner";
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
+    static ani_class cls = nullptr;
+    if (!cls) {
+        ani_class localCls = nullptr;
+        if (ANI_OK != env->FindClass(className, &localCls)) {
+            return nullptr;
+        }
+        ani_ref clsRef = nullptr;
+        if (ANI_OK != env->GlobalReference_Create(localCls, &clsRef)) {
+            return nullptr;
+        }
+        cls = static_cast<ani_class>(clsRef);
     }
 
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>",
+    static ani_method ctor = nullptr;
+    if (!ctor && ANI_OK != env->Class_FindMethod(cls, "<ctor>",
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
         "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
@@ -265,14 +297,22 @@ ani_object GenEdgeWidths(ani_env* env,  const std::unique_ptr<NG::BorderWidthPro
 ani_object GenEdgesGlobalized(ani_env* env, const NG::PaddingPropertyF& edgeNative, TextDirection direction)
 {
     ani_object edges_obj;
-    ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.DirectionalEdgesTInner";
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return AniUtils::GetUndefined(env);
+    static ani_class cls = nullptr;
+    if (!cls) {
+        ani_class localCls = nullptr;
+        if (ANI_OK != env->FindClass(className, &localCls)) {
+            return AniUtils::GetUndefined(env);
+        }
+        ani_ref clsRef = nullptr;
+        if (ANI_OK != env->GlobalReference_Create(localCls, &clsRef)) {
+            return AniUtils::GetUndefined(env);
+        }
+        cls = static_cast<ani_class>(clsRef);
     }
 
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dddd:", &ctor)) {
+    static ani_method ctor = nullptr;
+    if (!ctor && ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dddd:", &ctor)) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in GenEdgesGlobalized.");
         return AniUtils::GetUndefined(env);
     }
@@ -306,14 +346,22 @@ ani_object GenBorderWidthGlobalized(ani_env* env, const NG::BorderWidthPropertyT
     TextDirection direction)
 {
     ani_object edges_obj;
-    ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.DirectionalEdgesTInner";
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return AniUtils::GetUndefined(env);
+    static ani_class cls = nullptr;
+    if (!cls) {
+        ani_class localCls = nullptr;
+        if (ANI_OK != env->FindClass(className, &localCls)) {
+            return AniUtils::GetUndefined(env);
+        }
+        ani_ref clsRef = nullptr;
+        if (ANI_OK != env->GlobalReference_Create(localCls, &clsRef)) {
+            return AniUtils::GetUndefined(env);
+        }
+        cls = static_cast<ani_class>(clsRef);
     }
 
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dddd:", &ctor)) {
+    static ani_method ctor = nullptr;
+    if (!ctor && ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dddd:", &ctor)) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in GenBorderWidthGlobalized.");
         return AniUtils::GetUndefined(env);
     }
@@ -346,15 +394,23 @@ ani_object GenBorderWidthGlobalized(ani_env* env, const NG::BorderWidthPropertyT
 ani_object GenSelfLayoutInfo(ani_env* env, RefPtr<NG::LayoutProperty> layoutProperty)
 {
     ani_object selfLayoutInfo_obj;
-    ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.GeometryInfoInner";
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        TAG_LOGW(AceLogTag::ACE_LAYOUT, "FindClass failed in GenSelfLayoutInfo.");
-        return nullptr;
+    static ani_class cls = nullptr;
+    if (!cls) {
+        ani_class localCls = nullptr;
+        if (ANI_OK != env->FindClass(className, &localCls)) {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "FindClass failed in GenSelfLayoutInfo.");
+            return nullptr;
+        }
+        ani_ref clsRef = nullptr;
+        if (ANI_OK != env->GlobalReference_Create(localCls, &clsRef)) {
+            return nullptr;
+        }
+        cls = static_cast<ani_class>(clsRef);
     }
 
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "ddC{arkui.component.units.EdgeWidths}"\
+    static ani_method ctor = nullptr;
+    if (!ctor && ANI_OK != env->Class_FindMethod(cls, "<ctor>", "ddC{arkui.component.units.EdgeWidths}"\
         "C{arkui.component.units.Padding}C{arkui.component.units.Padding}:", &ctor)) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenSelfLayoutInfo failed.");
         return nullptr;
@@ -416,14 +472,22 @@ ani_object GenSelfLayoutInfo(ani_env* env, RefPtr<NG::LayoutProperty> layoutProp
 void FillPlaceSizeProperty(ani_env* env, ani_object info, const NG::SizeF& size)
 {
     ani_object measureResult_obj;
-    ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.MeasureResultInner";
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return;
+    static ani_class cls = nullptr;
+    if (!cls) {
+        ani_class localCls = nullptr;
+        if (ANI_OK != env->FindClass(className, &localCls)) {
+            return;
+        }
+        ani_ref clsRef = nullptr;
+        if (ANI_OK != env->GlobalReference_Create(localCls, &clsRef)) {
+            return;
+        }
+        cls = static_cast<ani_class>(clsRef);
     }
 
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dd:", &ctor)) {
+    static ani_method ctor = nullptr;
+    if (!ctor && ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dd:", &ctor)) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in FillPlaceSizeProperty.");
         return;
     }
@@ -443,14 +507,22 @@ void FillPlaceSizeProperty(ani_env* env, ani_object info, const NG::SizeF& size)
 ani_object AniMeasureLayoutParamNG::GenMeasureResult(ani_env* env, const NG::SizeF& size)
 {
     ani_object measureResult_obj;
-    ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.MeasureResultInner";
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return AniUtils::GetUndefined(env);
+    static ani_class cls = nullptr;
+    if (!cls) {
+        ani_class localCls = nullptr;
+        if (ANI_OK != env->FindClass(className, &localCls)) {
+            return AniUtils::GetUndefined(env);
+        }
+        ani_ref clsRef = nullptr;
+        if (ANI_OK != env->GlobalReference_Create(localCls, &clsRef)) {
+            return AniUtils::GetUndefined(env);
+        }
+        cls = static_cast<ani_class>(clsRef);
     }
 
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dd:", &ctor)) {
+    static ani_method ctor = nullptr;
+    if (!ctor && ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dd:", &ctor)) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in GenMeasureResult.");
         return AniUtils::GetUndefined(env);
     }
@@ -509,14 +581,22 @@ void AniMeasureLayoutParamNG::Init(ani_env* env)
 
 ani_object GenMeasurable(ani_env* env,  NG::MeasureLayoutChild* child)
 {
-        ani_class cls ;
         static const char *className =
             "arkui.ani.arkts.ArkUIAniCustomNodeModule.MeasurableLayoutableInner";
-        if (ANI_OK != env->FindClass(className, &cls)) {
-            return nullptr;
+        static ani_class cls = nullptr;
+        if (!cls) {
+            ani_class localCls = nullptr;
+            if (ANI_OK != env->FindClass(className, &localCls)) {
+                return nullptr;
+            }
+            ani_ref clsRef = nullptr;
+            if (ANI_OK != env->GlobalReference_Create(localCls, &clsRef)) {
+                return nullptr;
+            }
+            cls = static_cast<ani_class>(clsRef);
         }
-        ani_method ctor;
-        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+        static ani_method ctor = nullptr;
+        if (!ctor && ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
             return nullptr;
         }
 
@@ -829,6 +909,10 @@ ani_object ANIPlaceChildren(ani_env* env, ani_object aniClass, ani_object positi
 
 ani_status BindMeasurable(ani_env* env)
 {
+    static bool bound = false;
+    if (bound) {
+        return ANI_OK;
+    }
     static const char* className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.MeasurableLayoutableInner";
     ani_class cls;
     if (ANI_OK != env->FindClass(className, &cls)) {
@@ -846,6 +930,7 @@ ani_status BindMeasurable(ani_env* env)
     if (ANI_OK != tmp) {
         return ANI_ERROR;
     };
+    bound = true;
     return ANI_OK;
 }
 
