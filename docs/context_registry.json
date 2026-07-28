@@ -2618,6 +2618,495 @@
       "last_verified": "2026-07-14"
     },
     {
+      "id": "PlaceholderComponent",
+      "name": "Placeholder Component",
+      "name_cn": "占位组件",
+      "kind": "common_capability",
+      "category": "custom-node",
+      "keywords": [
+        "Placeholder",
+        "占位组件",
+        "自定义节点",
+        "NodeContainer",
+        "ContentSlot",
+        "占位"
+      ],
+      "aliases": [
+        "占位组件",
+        "Placeholder Component",
+        "占位"
+      ],
+      "kb": "docs/kb/capabilities/placeholder_component.md",
+      "spec_domain": "specs/04-common-capability/06-custom-node/01-placeholder-component",
+      "func_id": "04-06-01",
+      "spec_status": "active",
+      "source_paths": {
+        "node_container": "frameworks/core/components_ng/pattern/node_container/",
+        "content_slot": "frameworks/core/components_ng/syntax/content_slot_node.h"
+      },
+      "api_paths": {
+        "node_container_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/node_container.d.ts",
+        "content_slot_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/content_slot.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/node_container/",
+        "test/unittest/core/syntax/content_slot_syntax_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "NodeAdapter",
+      "name": "NodeAdapter",
+      "name_cn": "NodeAdapter 命令式懒渲染适配器",
+      "kind": "common_capability",
+      "category": "custom-node",
+      "keywords": [
+        "NodeAdapter",
+        "命令式",
+        "懒渲染",
+        "attachNodeAdapter",
+        "UINodeAdapter",
+        "FrameNode"
+      ],
+      "aliases": [
+        "NodeAdapter",
+        "NodeAdapter适配器",
+        "命令式适配器"
+      ],
+      "kb": "docs/kb/capabilities/node_adapter.md",
+      "spec_domain": "specs/04-common-capability/06-custom-node/06-node-adapter",
+      "func_id": "04-06-06",
+      "spec_status": "active",
+      "source_paths": {
+        "ts_runtime": "frameworks/bridge/declarative_frontend/ark_node/src/node_adapter.ts",
+        "jsi_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_adapter_bridge.cpp",
+        "native_impl": "frameworks/core/interfaces/native/node/node_adapter_impl.cpp",
+        "native_impl_header": "frameworks/core/interfaces/native/node/node_adapter_impl.h",
+        "vtable": "frameworks/core/interfaces/arkoala/arkoala_api.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/node_container/ui_node_adapter_test.cpp",
+        "test/unittest/core/interfaces/native/node/node_adapter_impl_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "ComponentReuseFramework",
+      "name": "Component Reuse Framework",
+      "name_cn": "组件复用框架",
+      "kind": "architecture",
+      "category": "reuse",
+      "keywords": [
+        "组件复用",
+        "Reuse",
+        "Recycle",
+        "OnRecycle",
+        "OnReuse",
+        "RecycleManager",
+        "RecycleDummyNode",
+        "reuseId",
+        "ReusePoolOwnership",
+        "preRender"
+      ],
+      "aliases": [
+        "组件复用框架",
+        "UINode 复用",
+        "Recycle Framework"
+      ],
+      "kb": "docs/kb/architecture/component_reuse_framework.md",
+      "spec_domain": "specs/04-common-capability/19-component-reuse/01-component-reuse-framework",
+      "func_id": "04-19-01",
+      "spec_status": "active",
+      "source_paths": {
+        "ui_node": "frameworks/core/components_ng/base/ui_node.h",
+        "ui_node_cpp": "frameworks/core/components_ng/base/ui_node.cpp",
+        "custom_node_base": "frameworks/core/components_ng/pattern/custom/custom_node_base.h",
+        "recycle_manager": "frameworks/core/components_ng/pattern/recycle_view/recycle_manager.h",
+        "recycle_dummy_node": "frameworks/core/components_ng/pattern/recycle_view/recycle_dummy_node.h",
+        "lazy_for_each_builder": "frameworks/core/components_ng/syntax/lazy_for_each_builder.h",
+        "for_each_base_node": "frameworks/core/components_ng/syntax/for_each_base_node.h",
+        "view_partial_update_model_ng": "frameworks/core/components_ng/base/view_partial_update_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/customComponent.static.d.ets",
+        "state_mgmt": "<OH_ROOT>/interface/sdk-js/api/arkui/component/StateManagement.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/custom/",
+        "test/unittest/core/pattern/custom_node_ext/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "AbilityComponent",
+      "name": "AbilityComponent",
+      "name_cn": "AbilityComponent 跨进程嵌入组件",
+      "kind": "component",
+      "category": "embedded",
+      "keywords": [
+        "AbilityComponent",
+        "WindowExtension",
+        "跨进程",
+        "嵌入",
+        "onConnect",
+        "onDisconnect",
+        "deprecated",
+        "SceneBoard"
+      ],
+      "aliases": [
+        "AbilityComponent",
+        "能力组件",
+        "跨进程嵌入组件"
+      ],
+      "kb": "docs/kb/components/embedded/ability_component.md",
+      "spec_domain": "specs/05-ui-components/12-embedded-display-components/02-ability-component",
+      "func_id": "05-12-02",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/ability_component/ability_component_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/ability_component/ability_component_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/ability_component/ability_component_model_ng.cpp",
+        "event_hub": "frameworks/core/components_ng/pattern/ability_component/ability_component_event_hub.h",
+        "layout": "frameworks/core/components_ng/pattern/ability_component/ability_component_layout_algorithm.cpp",
+        "render_property": "frameworks/core/components_ng/pattern/ability_component/ability_component_render_property.h",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_ability_component.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/ability_component.d.ts"
+      },
+      "test_paths": [],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "NodeContainer",
+      "name": "NodeContainer",
+      "name_cn": "NodeContainer 自定义占位组件",
+      "kind": "component",
+      "category": "custom-node",
+      "keywords": [
+        "NodeContainer",
+        "NodeController",
+        "makeNode",
+        "rebuild",
+        "命令式节点",
+        "FrameNode",
+        "nodePtr",
+        "占位组件",
+        "纹理导出"
+      ],
+      "aliases": [
+        "NodeContainer",
+        "节点容器",
+        "占位容器组件"
+      ],
+      "kb": "docs/kb/components/custom-node/node_container.md",
+      "spec_domain": "specs/05-ui-components/16-custom-placeholder-components/01-node-container",
+      "func_id": "05-16-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/node_container/node_container_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/node_container/node_container_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/node_container/node_container_model_ng.cpp",
+        "model_header": "frameworks/core/components_ng/pattern/node_container/node_container_model.h",
+        "event_hub": "frameworks/core/components_ng/pattern/node_container/node_container_event_hub.h",
+        "layout": "frameworks/core/components_ng/pattern/node_container/node_container_layout_algorithm.cpp",
+        "layout_header": "frameworks/core/components_ng/pattern/node_container/node_container_layout_algorithm.h",
+        "node": "frameworks/core/components_ng/pattern/node_container/node_container_node.cpp",
+        "node_header": "frameworks/core/components_ng/pattern/node_container/node_container_node.h",
+        "ts_controller": "frameworks/bridge/declarative_frontend/ark_node/src/node_controller.ts",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_node_container.cpp",
+        "native_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.cpp",
+        "modifier": "frameworks/core/interfaces/native/node/node_container_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/node_container.d.ts",
+        "controller_dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/NodeController.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/nodeContainer.static.d.ets",
+        "capi": "interfaces/native/node/node_container_modifier.cpp"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/node_container/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "ContentSlot",
+      "name": "ContentSlot",
+      "name_cn": "ContentSlot 自定义占位组件",
+      "kind": "component",
+      "category": "custom-node",
+      "keywords": [
+        "ContentSlot",
+        "NodeContent",
+        "addFrameNode",
+        "removeFrameNode",
+        "IsAdopted",
+        "UINode 语法节点",
+        "占位组件",
+        "XComponentType.NODE"
+      ],
+      "aliases": [
+        "ContentSlot",
+        "内容插槽",
+        "占位插槽组件"
+      ],
+      "kb": "docs/kb/components/custom-node/content_slot.md",
+      "spec_domain": "specs/05-ui-components/16-custom-placeholder-components/02-content-slot",
+      "func_id": "05-16-02",
+      "spec_status": "active",
+      "source_paths": {
+        "syntax_node": "frameworks/core/components_ng/syntax/content_slot_node.cpp",
+        "syntax_node_header": "frameworks/core/components_ng/syntax/content_slot_node.h",
+        "node_content": "frameworks/core/components_ng/syntax/node_content.cpp",
+        "node_content_header": "frameworks/core/components_ng/syntax/node_content.h",
+        "model": "frameworks/core/components_ng/syntax/content_slot_model_ng.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_content_slot.cpp",
+        "modifier": "frameworks/core/interfaces/native/node/node_content_modifier.cpp",
+        "extender_accessor": "frameworks/core/interfaces/native/implementation/node_content_extender_accessor.cpp",
+        "ani_modifier": "frameworks/core/interfaces/native/ani/content_slot_ani_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/content_slot.d.ts",
+        "nodecontent_dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/NodeContent.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/contentSlot.static.d.ets",
+        "capi": "interfaces/native/node/node_content_modifier.cpp"
+      },
+      "test_paths": [
+        "test/unittest/core/syntax/content_slot_syntax_test_ng.cpp",
+        "test/unittest/interfaces/extension_custom_node_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "RenderControl",
+      "name": "Render Control Syntax",
+      "name_cn": "渲染控制语法",
+      "kind": "feature",
+      "category": "syntax",
+      "keywords": [
+        "渲染控制",
+        "if else",
+        "ForEach",
+        "条件渲染",
+        "循环渲染",
+        "ForEachBaseNode",
+        "IfElseNode",
+        "branchId",
+        "id-based diff",
+        "语法节点"
+      ],
+      "aliases": [
+        "渲染控制语法",
+        "if/else",
+        "ForEach 语法",
+        "Render Control"
+      ],
+      "kb": "docs/kb/syntax/render_control.md",
+      "spec_domain": "specs/07-frontend/05-render-control/01-render-control-syntax",
+      "func_id": "07-05-01",
+      "spec_status": "active",
+      "source_paths": {
+        "if_else_node": "frameworks/core/components_ng/syntax/if_else_node.cpp",
+        "if_else_node_header": "frameworks/core/components_ng/syntax/if_else_node.h",
+        "for_each_node": "frameworks/core/components_ng/syntax/for_each_node.cpp",
+        "for_each_base_node": "frameworks/core/components_ng/syntax/for_each_base_node.h",
+        "if_else_model": "frameworks/core/components_ng/syntax/if_else_model_ng.cpp",
+        "for_each_model": "frameworks/core/components_ng/syntax/for_each_model_ng.cpp",
+        "js_if_else": "frameworks/bridge/declarative_frontend/jsview/js_if_else.cpp",
+        "js_foreach": "frameworks/bridge/declarative_frontend/jsview/js_foreach.cpp",
+        "arkoala_condition_scope": "frameworks/core/components_ng/syntax/arkoala_condition_scope.cpp",
+        "arkoala_for_each_node": "frameworks/core/components_ng/syntax/arkoala_for_each_node.h"
+      },
+      "api_paths": {
+        "if_static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/if.static.d.ets",
+        "foreach_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/for_each.d.ts",
+        "foreach_static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/forEach.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/syntax/for_each_syntax_test_ng.cpp",
+        "test/unittest/core/syntax/arkoala_for_each_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "LazyForEach",
+      "name": "LazyForEach",
+      "name_cn": "LazyForEach 懒加载循环渲染",
+      "kind": "feature",
+      "category": "syntax",
+      "keywords": [
+        "LazyForEach",
+        "懒加载",
+        "按需渲染",
+        "IDataSource",
+        "DataChangeListener",
+        "onDatasetChange",
+        "cachedCount",
+        "三级缓存",
+        "虚拟滚动",
+        "keyGenerator",
+        "LazyForEachOptions"
+      ],
+      "aliases": [
+        "LazyForEach",
+        "懒循环",
+        "懒加载循环",
+        "LazyForEach 语法"
+      ],
+      "kb": "docs/kb/syntax/lazy_for_each.md",
+      "spec_domain": "specs/07-frontend/05-render-control/02-lazy-foreach",
+      "func_id": "07-05-02",
+      "spec_status": "active",
+      "source_paths": {
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.cpp",
+        "node": "frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
+        "node_header": "frameworks/core/components_ng/syntax/lazy_for_each_node.h",
+        "builder": "frameworks/core/components_ng/syntax/lazy_for_each_builder.cpp",
+        "builder_header": "frameworks/core/components_ng/syntax/lazy_for_each_builder.h",
+        "model": "frameworks/core/components_ng/syntax/lazy_for_each_model_ng.h",
+        "layout_wrapper": "frameworks/core/components_ng/syntax/lazy_layout_wrapper_builder.cpp",
+        "data_source_contract": "frameworks/core/components_v2/foreach/lazy_foreach_component.h",
+        "ani_modifier": "frameworks/core/interfaces/native/ani/lazy_for_each_node_ani_modifier.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/lazy_for_each.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/lazyForEach.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/syntax/lazy_for_each_model_test_ng.cpp",
+        "test/unittest/core/syntax/lazy_for_each_builder_syntax_test_ng.cpp",
+        "test/unittest/core/syntax/lazy_for_each_syntax_test_ng.cpp",
+        "test/unittest/core/syntax/arkoala_lazy_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "Repeat",
+      "name": "Repeat",
+      "name_cn": "Repeat 循环渲染与虚拟滚动",
+      "kind": "feature",
+      "category": "syntax",
+      "keywords": [
+        "Repeat",
+        "virtualScroll",
+        "template",
+        "templateId",
+        "RepeatVirtualScroll",
+        "RID 缓存",
+        "funcWithIndex",
+        "onMove",
+        "RepeatMemOptStrategy",
+        "虚拟滚动"
+      ],
+      "aliases": [
+        "Repeat",
+        "重复渲染",
+        "Repeat 语法",
+        "RepeatVirtualScroll"
+      ],
+      "kb": "docs/kb/syntax/repeat.md",
+      "spec_domain": "specs/07-frontend/05-render-control/03-repeat",
+      "func_id": "07-05-03",
+      "spec_status": "active",
+      "source_paths": {
+        "repeat_node": "frameworks/core/components_ng/syntax/repeat_node.cpp",
+        "repeat_node_header": "frameworks/core/components_ng/syntax/repeat_node.h",
+        "model": "frameworks/core/components_ng/syntax/repeat_model_ng.cpp",
+        "model_header": "frameworks/core/components_ng/syntax/repeat_model.h",
+        "vs2_node": "frameworks/core/components_ng/syntax/repeat_virtual_scroll_2_node.cpp",
+        "vs2_node_header": "frameworks/core/components_ng/syntax/repeat_virtual_scroll_2_node.h",
+        "vs2_caches": "frameworks/core/components_ng/syntax/repeat_virtual_scroll_2_caches.cpp",
+        "vs2_caches_header": "frameworks/core/components_ng/syntax/repeat_virtual_scroll_2_caches.h",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_repeat.cpp",
+        "ts_driver": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_repeat.ts",
+        "utils": "frameworks/core/components_ng/syntax/lazy_for_each_utils.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/repeat.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/repeat.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/syntax/repeat_test_ng.cpp",
+        "test/unittest/core/syntax/repeat_virtual_2_test_ng.cpp",
+        "test/unittest/core/syntax/repeat_virtual_2_caches_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "SameLayerRendering",
+      "name": "Same-Layer Rendering (Texture Export Producer)",
+      "name_cn": "同层渲染（纹理导出生产者）",
+      "kind": "common_capability",
+      "category": "rendering",
+      "keywords": [
+        "同层渲染",
+        "SameLayerRendering",
+        "纹理导出",
+        "TextureExport",
+        "BuilderNode",
+        "NodeRenderType",
+        "RENDER_TYPE_TEXTURE",
+        "RenderOptions",
+        "surfaceId",
+        "ExportTextureInfo",
+        "NodeContainer",
+        "RSTextureExport",
+        "DoTextureExport",
+        "子树纹理导出",
+        "buffer 生产者"
+      ],
+      "aliases": [
+        "同层渲染",
+        "纹理导出生产者",
+        "ArkUI 子树纹理导出",
+        "Same-Layer Rendering"
+      ],
+      "kb": "docs/kb/capabilities/same-layer-rendering.md",
+      "spec_domain": "specs/04-common-capability/18-on-device-rendering/01-same-layer-rendering",
+      "func_id": "04-18-01",
+      "spec_status": "active",
+      "source_paths": {
+        "trigger_arkts": "frameworks/bridge/declarative_frontend/jsview/js_base_node.cpp",
+        "trigger_capi": "frameworks/core/interfaces/native/implementation/builder_node_ops_accessor.cpp",
+        "native_enum": "frameworks/core/components/common/layout/constants.h",
+        "view_stack_processor": "frameworks/core/components_ng/base/view_stack_processor.cpp",
+        "export_texture_info": "frameworks/core/components_ng/export_texture_info/export_texture_info.h",
+        "ui_node": "frameworks/core/components_ng/base/ui_node.cpp",
+        "node_container_pattern": "frameworks/core/components_ng/pattern/node_container/node_container_pattern.cpp",
+        "node_container_layout_algorithm": "frameworks/core/components_ng/pattern/node_container/node_container_layout_algorithm.cpp",
+        "rosen_render_context": "frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+        "render_context_base": "frameworks/core/components_ng/render/render_context.cpp",
+        "string_utils": "frameworks/base/utils/string_utils.cpp",
+        "element_register": "frameworks/core/pipeline/base/element_register.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "pattern": "frameworks/core/components_ng/pattern/pattern.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/BuilderNode.d.ts",
+        "reexport": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.node.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/node_container/",
+        "test/unittest/core/rosen/rosen_render_context_test.cpp",
+        "test/unittest/core/rosen/rosen_render_context_test_new.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
       "id": "StateMgmtV1Core",
       "name": "State Management V1 Core",
       "name_cn": "V1 状态管理核心逻辑",
