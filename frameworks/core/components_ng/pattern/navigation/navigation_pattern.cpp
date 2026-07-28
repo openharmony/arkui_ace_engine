@@ -5376,6 +5376,8 @@ void NavigationPattern::RestoreJsStackIfNeeded()
             SetPendingHomeRestoreInfo(homeInfo);
         }
     }
+    auto restoreState = recoverableMgr->TakeNavigationHomeState(hostNode->GetCurId());
+    SetHomeRestoreState(restoreState);
     auto navigationManager = pipeline->GetNavigationManager();
     CHECK_NULL_VOID(navigationManager);
     auto navdestinationsInfo = navigationManager->GetNavigationRecoveryInfo(hostNode->GetCurId());

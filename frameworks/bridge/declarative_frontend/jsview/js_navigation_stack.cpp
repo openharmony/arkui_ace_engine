@@ -485,6 +485,18 @@ bool JSNavigationStack::CreateHomeDestination(const WeakPtr<NG::UINode>& customN
     return true;
 }
 
+void JSNavigationStack::SaveHomeDestinationState(const std::string& state)
+{
+    if (homePathInfo_.has_value()) {
+        homePathInfo_->autoCleanedState = state;
+    }
+}
+
+std::string JSNavigationStack::GetHomeDestinationState() const
+{
+    return homePathInfo_.has_value() ? homePathInfo_->autoCleanedState : "";
+}
+
 bool JSNavigationStack::CreateEmptyRelatedPage(
     RefPtr<NG::UINode>& targetNode, RefPtr<NG::NavDestinationGroupNode>& destNode)
 {

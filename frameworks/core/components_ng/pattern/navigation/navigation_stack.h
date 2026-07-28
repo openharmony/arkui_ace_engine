@@ -242,6 +242,8 @@ public:
         int32_t index, const std::string& name, uint64_t navDestinationId, const std::string& state)
     {}
     virtual void MarkAutoCleanedFlag(uint64_t navDestinationId, bool canRecovery = true) {}
+    virtual void SaveHomeDestinationState(const std::string& state) {}
+    virtual std::string GetHomeDestinationState() const { return ""; }
     virtual uint64_t GetNavDestinationIdInt(int32_t index) { return -1; }
     virtual bool GetIsForceSet(int32_t index) { return false; }
     virtual void ResetIsForceSetFlag(int32_t index) {}

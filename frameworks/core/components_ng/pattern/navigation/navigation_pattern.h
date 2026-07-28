@@ -763,6 +763,15 @@ public:
     void SetPendingHomeRestoreInfo(const std::string& info);
     void ApplyHomeRestoreInfo();
 
+    void SetHomeRestoreState(const std::string& restoreState)
+    {
+        pendingHomeRestoreState_ = restoreState;
+    }
+    std::string GetHomeRestoreState() const
+    {
+        return pendingHomeRestoreState_;
+    }
+
 private:
     void UpdateCanForceSplitLayout();
     void NotifyDialogLifecycle(NavDestinationLifecycle lifecycle, bool isFromStandard,
@@ -1178,6 +1187,7 @@ private:
     float secondaryPartitionWidth_ = 0.0f;
     //-------for force split------- end  ------
     std::string pendingHomeRestoreInfo_;
+    std::string pendingHomeRestoreState_;
 };
 
 } // namespace OHOS::Ace::NG
