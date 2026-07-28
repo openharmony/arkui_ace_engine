@@ -699,7 +699,8 @@ UiSessionManagerOhos::PageSceneRuleSetInfo UiSessionManagerOhos::ExtractPageScen
     }
 
     auto rules = cJSON_GetObjectItem(root, PAGE_SCENE_RULES);
-    if (!cJSON_IsArray(rules)) {
+    if (!cJSON_IsArray(rules) || cJSON_GetArraySize(rules) <= 0) {
+        ruleSetInfo.ruleSetId.clear();
         cJSON_Delete(root);
         return ruleSetInfo;
     }
