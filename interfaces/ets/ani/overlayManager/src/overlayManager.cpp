@@ -111,6 +111,33 @@ static bool GetOverlayManagerInfo(ani_env* env, ani_object options, NG::OverlayM
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Get property enableBackPressedEvent failed.");
         return false;
     }
+
+    ani_ref onBackPressRef = nullptr;
+    ani_status status = env->Object_GetPropertyByName_Ref(options, "onBackPress", &onBackPressRef);
+    if (status == ANI_OK && !IsUndefinedObject(env, onBackPressRef)) {
+        ani_ref globalRef = nullptr;
+        if (env->GlobalReference_Create(onBackPressRef, &globalRef) == ANI_OK) {
+            overlayInfo.onBackPress = [env, globalRef]() -> bool {
+                ani_fn_object fnObj = reinterpret_cast<ani_fn_object>(globalRef);
+                ani_ref fnReturnVal = nullptr;
+                ani_status callStatus = env->FunctionalObject_Call(fnObj, 0, nullptr, &fnReturnVal);
+                if (callStatus != ANI_OK) {
+                    TAG_LOGW(AceLogTag::ACE_OVERLAY, "onBackPress callback call failed");
+                    return false;
+                }
+                if (IsUndefinedObject(env, fnReturnVal)) {
+                    return false;
+                }
+                ani_boolean resultValue = ANI_FALSE;
+                callStatus = env->Object_CallMethodByName_Boolean(
+                    static_cast<ani_object>(fnReturnVal), "toBoolean", ":z", &resultValue);
+                if (callStatus != ANI_OK) {
+                    return false;
+                }
+                return static_cast<bool>(resultValue);
+            };
+        }
+    }
     return true;
 }
 
