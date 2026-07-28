@@ -611,4 +611,336 @@ HWTEST_F(NavigationPatternTestTenNg, MockNavigationStackCreateNodeFromRecovery00
     EXPECT_EQ(result, true);
     EXPECT_NE(node, nullptr);
 }
+
+/**
+ * @tc.name: ClearContentStackIfNeeded001
+ * @tc.desc: Branch: curList is empty => early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTenNg, ClearContentStackIfNeeded001, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    stack->navPathList_.clear();
+    NavPathList preList;
+    pattern->needSyncWithJsStack_ = true;
+    pattern->ClearContentStackIfNeeded(std::move(preList));
+    // curList is empty, early return, needSyncWithJsStack_ not cleared
+    ASSERT_TRUE(pattern->needSyncWithJsStack_);
+}
+
+/**
+ * @tc.name: ClearContentStackIfNeeded002
+ * @tc.desc: Branch: forceSplitSuccess_ is true => early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTenNg, ClearContentStackIfNeeded002, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair{"one", dest};
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair);
+    NavPathList preList;
+    pattern->needSyncWithJsStack_ = true;
+    pattern->forceSplitSuccess_ = true;
+    pattern->homeNodeTouched_ = true;
+    pattern->ClearContentStackIfNeeded(std::move(preList));
+    // forceSplitSuccess_ is true, early return, needSyncWithJsStack_ not cleared
+    ASSERT_TRUE(pattern->needSyncWithJsStack_);
+}
+
+/**
+ * @tc.name: ClearContentStackIfNeeded003
+ * @tc.desc: Branch: IsRealStackDisplay() is true (STACK mode) => early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTenNg, ClearContentStackIfNeeded003, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::STACK);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair{"one", dest};
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair);
+    NavPathList preList;
+    pattern->needSyncWithJsStack_ = true;
+    pattern->forceSplitSuccess_ = false;
+    pattern->homeNodeTouched_ = true;
+    pattern->ClearContentStackIfNeeded(std::move(preList));
+    // IsRealStackDisplay() returns true in STACK mode, early return
+    ASSERT_TRUE(pattern->needSyncWithJsStack_);
+}
+
+/**
+ * @tc.name: ClearContentStackIfNeeded004
+ * @tc.desc: Branch: !topDest (curTopNode is not a NavDestinationGroupNode) => early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTenNg, ClearContentStackIfNeeded004, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    // Use a CustomNode (not NavDestinationGroupNode) as curTopNode
+    // GetNavDestinationNode won't find NAVDESTINATION_VIEW_ETS_TAG tag, so topDest will be nullptr
+    auto plainNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), "testKey");
+    ASSERT_NE(plainNode, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair{"one", plainNode};
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair);
+    NavPathList preList;
+    pattern->needSyncWithJsStack_ = true;
+    pattern->forceSplitSuccess_ = false;
+    pattern->homeNodeTouched_ = true;
+    pattern->ClearContentStackIfNeeded(std::move(preList));
+    // !topDest, early return, needSyncWithJsStack_ not cleared
+    ASSERT_TRUE(pattern->needSyncWithJsStack_);
+}
+
+/**
+ * @tc.name: ClearContentStackIfNeeded005
+ * @tc.desc: Branch: topDest->IsFullScreenOverlay() is true => early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTenNg, ClearContentStackIfNeeded005, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    dest->SetIsFullScreenOverlay(true);
+    std::pair<std::string, RefPtr<UINode>> testPair{"one", dest};
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair);
+    NavPathList preList;
+    pattern->needSyncWithJsStack_ = true;
+    pattern->forceSplitSuccess_ = false;
+    pattern->homeNodeTouched_ = true;
+    pattern->ClearContentStackIfNeeded(std::move(preList));
+    // IsFullScreenOverlay() is true, early return
+    ASSERT_TRUE(pattern->needSyncWithJsStack_);
+}
+
+/**
+ * @tc.name: ClearContentStackIfNeeded006
+ * @tc.desc: Branch: !homeTouched (homeNodeTouched_ is nullopt or false) => early return
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTenNg, ClearContentStackIfNeeded006, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair{"one", dest};
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair);
+    NavPathList preList;
+    pattern->forceSplitSuccess_ = false;
+
+    // homeNodeTouched_ is nullopt
+    pattern->homeNodeTouched_ = std::nullopt;
+    pattern->needSyncWithJsStack_ = true;
+    pattern->ClearContentStackIfNeeded(std::move(preList));
+    ASSERT_TRUE(pattern->needSyncWithJsStack_);
+
+    // homeNodeTouched_ is false
+    pattern->homeNodeTouched_ = false;
+    pattern->needSyncWithJsStack_ = true;
+    pattern->ClearContentStackIfNeeded(std::move(preList));
+    ASSERT_TRUE(pattern->needSyncWithJsStack_);
+}
+
+/**
+ * @tc.name: ClearContentStackIfNeeded007
+ * @tc.desc: Branch: curTopNode found in preList => early return, homeNodeTouched_ reset to nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTenNg, ClearContentStackIfNeeded007, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto dest = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair{"one", dest};
+    // Both preList and curList have the same node as top
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair);
+    NavPathList preList;
+    preList.push_back(testPair);
+    pattern->needSyncWithJsStack_ = true;
+    pattern->forceSplitSuccess_ = false;
+    pattern->homeNodeTouched_ = true;
+    pattern->ClearContentStackIfNeeded(std::move(preList));
+    // curTopNode found in preList, early return, homeNodeTouched_ reset to nullopt
+    ASSERT_EQ(pattern->homeNodeTouched_, std::nullopt);
+    ASSERT_TRUE(pattern->needSyncWithJsStack_);
+}
+
+/**
+ * @tc.name: ClearContentStackIfNeeded008
+ * @tc.desc: Branch: removeIndexes empty (firstNewNodeIndex <= 0) => early return, homeNodeTouched_ reset to nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTenNg, ClearContentStackIfNeeded008, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair1{"one", dest1};
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair2{"two", dest2};
+    // preList has dest1, curList has dest1 at index 0 (old) and dest2 at index 1 (new)
+    // firstNewNodeIndex = 1, so removeIndexes = {0}
+    // To test empty removeIndexes, make firstNewNodeIndex = 0 (curList's first node is new)
+    NavPathList preList;
+    preList.push_back(testPair1);
+    stack->navPathList_.clear();
+    // curList only has the new node (dest2), firstNewNodeIndex = 0
+    // so index = 0 - 1 = -1, loop doesn't execute, removeIndexes is empty
+    stack->navPathList_.push_back(testPair2);
+    pattern->needSyncWithJsStack_ = true;
+    pattern->forceSplitSuccess_ = false;
+    pattern->homeNodeTouched_ = true;
+    pattern->ClearContentStackIfNeeded(std::move(preList));
+    // removeIndexes empty, early return, but homeNodeTouched_ was reset to nullopt
+    ASSERT_EQ(pattern->homeNodeTouched_, std::nullopt);
+    ASSERT_TRUE(pattern->needSyncWithJsStack_);
+}
+
+/**
+ * @tc.name: ClearContentStackIfNeeded009
+ * @tc.desc: Branch: actual removal path - nodes before firstNewNodeIndex are removed,
+ *           needSyncWithJsStack_ set to false, homeNodeTouched_ reset to nullopt
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTenNg, ClearContentStackIfNeeded009, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetUsrNavigationMode(NavigationMode::SPLIT);
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto& stack = pattern->navigationStack_;
+    ASSERT_NE(stack, nullptr);
+    auto dest1 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest1, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair1{"one", dest1};
+    auto dest2 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest2, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair2{"two", dest2};
+    auto dest3 = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(dest3, nullptr);
+    std::pair<std::string, RefPtr<UINode>> testPair3{"three", dest3};
+
+    // preList: [dest1, dest2], curList: [dest1, dest2, dest3]
+    // curTopNode = dest3 (not in preList), firstNewNodeIndex = 2
+    // removeIndexes = {1, 0} (reversed to {0, 1})
+    NavPathList preList;
+    preList.push_back(testPair1);
+    preList.push_back(testPair2);
+    stack->navPathList_.clear();
+    stack->navPathList_.push_back(testPair1);
+    stack->navPathList_.push_back(testPair2);
+    stack->navPathList_.push_back(testPair3);
+    pattern->needSyncWithJsStack_ = true;
+    pattern->forceSplitSuccess_ = false;
+    pattern->homeNodeTouched_ = true;
+    pattern->ClearContentStackIfNeeded(std::move(preList));
+    // Actual removal path taken: needSyncWithJsStack_ set to false, homeNodeTouched_ reset
+    ASSERT_EQ(pattern->homeNodeTouched_, std::nullopt);
+    ASSERT_FALSE(pattern->needSyncWithJsStack_);
+}
 } // namespace OHOS::Ace::NG

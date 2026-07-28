@@ -57,6 +57,7 @@ void NavDestinationPattern::OnDetachFromMainTreeMultiThread()
 {
     auto host = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(host);
+    NavDestinationPatternBase::RemoveOnTouchEvent(host);
     backupStyle_.reset();
     currStyle_.reset();
     if (!host->IsHomeDestination() && host->GetNavDestinationType() != NavDestinationType::RELATED) {
@@ -77,7 +78,6 @@ void NavDestinationPattern::OnDetachFromMainTreeMultiThread()
     if (memoryManager) {
         memoryManager->RemoveRecyclePageNode(id);
     }
-    NavDestinationPatternBase::RemoveOnTouchEvent(AceType::RawPtr(host));
 }
 
 void NavDestinationPattern::SetSystemBarStyleMultiThread(const RefPtr<SystemBarStyle>& style)

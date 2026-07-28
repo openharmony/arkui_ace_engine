@@ -1153,6 +1153,57 @@ int32_t NavigationPattern::GetFirstNewDestinationIndex(const NavPathList& preLis
     return firstNewNodeIndex;
 }
 
+void NavigationPattern::ClearContentStackIfNeeded(NavPathList&& preList)
+{
+    /**
+     * When the following conditions are met:
+     * 1. The Navigation was display in split mode
+     * 2. The navBar or homeDestination was touched
+     * 3. The latest top NavDestination does not exist in the previous stack
+     *
+     * This will trigger the following logic:
+     * The NavDestination before the first newly added NavDestination will be removed.
+     */
+    const auto& curList = navigationStack_->GetAllNavDestinationNodes();
+    if (curList.empty()) {
+        return;
+    }
+    const auto& curTopNode = curList.back().second;
+    bool homeTouched = homeNodeTouched_.has_value() && homeNodeTouched_.value();
+    auto topDest = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(curTopNode));
+    if (forceSplitSuccess_ || IsRealStackDisplay() || !topDest || topDest->IsFullScreenOverlay() || !homeTouched) {
+        return;
+    }
+    homeNodeTouched_ = std::nullopt;
+    auto it = std::find_if(preList.begin(), preList.end(), [&curTopNode](const auto& pair) {
+            return pair.second == curTopNode;
+        });
+    if (it != preList.end()) {
+        return;
+    }
+
+    std::vector<int32_t> removeIndexes;
+    int32_t firstNewNodeIndex = GetFirstNewDestinationIndex(preList, curList);
+    for (int32_t index = firstNewNodeIndex - 1; index >= 0; --index) {
+        removeIndexes.push_back(index);
+    }
+    if (removeIndexes.empty()) {
+        return;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Remove content NavDestinationNodes, count:%{public}d",
+        static_cast<int32_t>(removeIndexes.size()));
+    std::reverse(removeIndexes.begin(), removeIndexes.end());
+    navigationStack_->RemoveByIndexes(removeIndexes);
+    /**
+     * Because calling RemoveByIndexes here will remark the need for stack synchronization for the next VSync signal,
+     * but we have already done it proactively, so we will reset the needSyncWithJsStack_ flag here.
+     */
+    needSyncWithJsStack_ = false;
+    UpdateNavPathList();
+}
+
 void NavigationPattern::ClearSecondaryNodesIfNeeded(NavPathList&& preList)
 {
     /**
@@ -1306,6 +1357,8 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     if (IsForceSplitSupported(context)) {
         preList = navigationStack_->GetPreNavPathList();
         prePrimaryNodes_ = primaryNodes_;
+    } else if (config_.needClearContentStack) {
+        preList = navigationStack_->GetPreNavPathList();
     }
     auto indexes = navigationStack_->GetAllPathIndex();
     auto toIndex = indexes.size() - 1;
@@ -1334,6 +1387,8 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     }
     if (IsForceSplitSupported(context)) {
         ClearSecondaryNodesIfNeeded(std::move(preList));
+    } else if (config_.needClearContentStack) {
+        ClearContentStackIfNeeded(std::move(preList));
     }
     RefreshNavDestination();
     FireChangeCallbackAfterLayout();
@@ -8630,6 +8685,8 @@ void NavigationPattern::OnForceSplitSnapAnimationFinish(ForceSplitMode mode, flo
 void NavigationPattern::SetNavigationConfiguration(const NavigationConfiguration& config)
 {
     if (!configInitialed_) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set navigation configuration stackSizeLimit:%{public}d, "
+            "needClearContentStack:%{public}d", config.stackSizeLimit, config.needClearContentStack);
         config_ = config;
         configInitialed_ = true;
         return;

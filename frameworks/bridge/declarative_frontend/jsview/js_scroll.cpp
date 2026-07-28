@@ -15,6 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/js_scroll.h"
 
+#include <cmath>
+
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #include "base/utils/utils.h"
@@ -125,11 +127,17 @@ struct ScrollBeginJsCallback {
         auto resObj = JSRef<JSObject>::Cast(result);
         auto dxRemainValue = resObj->GetProperty("dxRemain");
         if (dxRemainValue->IsNumber()) {
-            scrollInfo.dx = Dimension(dxRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            auto dxRemain = dxRemainValue->ToNumber<float>();
+            if (std::isfinite(dxRemain)) {
+                scrollInfo.dx = Dimension(dxRemain, DimensionUnit::VP);
+            }
         }
         auto dyRemainValue = resObj->GetProperty("dyRemain");
         if (dyRemainValue->IsNumber()) {
-            scrollInfo.dy = Dimension(dyRemainValue->ToNumber<float>(), DimensionUnit::VP);
+            auto dyRemain = dyRemainValue->ToNumber<float>();
+            if (std::isfinite(dyRemain)) {
+                scrollInfo.dy = Dimension(dyRemain, DimensionUnit::VP);
+            }
         }
         return scrollInfo;
     }
