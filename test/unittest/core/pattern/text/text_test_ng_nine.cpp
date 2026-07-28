@@ -1986,10 +1986,10 @@ HWTEST_F(TextTestNgNine, TextStyleTailIndentOptional002, TestSize.Level1)
     EXPECT_FLOAT_EQ(result2.indentsArray->at(0).ConvertToVp(), 20.0f);
 
     /**
-     * @tc.steps: step3. Call ResetTailIndent.
+     * @tc.steps: step3. Reset TailIndent via SetTailIndent(std::nullopt).
      * @tc.expected: HasTailIndent returns false after reset.
      */
-    textStyle.ResetTailIndent();
+    textStyle.SetTailIndent(std::optional<NG::TailIndents>(std::nullopt));
     EXPECT_FALSE(textStyle.HasTailIndent());
     EXPECT_FALSE(textStyle.GetTailIndent().has_value());
 }
