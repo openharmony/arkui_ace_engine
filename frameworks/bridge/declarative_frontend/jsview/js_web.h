@@ -229,6 +229,7 @@ public:
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void EnableHapticFeedback(const JSCallbackInfo& args);
     static void EnableWebAVSession(const JSCallbackInfo& args);
+    static void EnableMediaNetworkProxy(const JSCallbackInfo& args);
     static void EnableDataDetector(const JSCallbackInfo& args);
     static void DataDetectorConfig(const JSCallbackInfo& args);
     static void EnableSelectedDataDetector(const JSCallbackInfo& args);

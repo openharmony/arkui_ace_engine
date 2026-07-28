@@ -2339,6 +2339,16 @@ void SetEnableWebAVSessionImpl(Ark_NativePointer node,
     WebModelStatic::SetWebMediaAVSessionEnabled(frameNode, convValue);
 #endif // WEB_SUPPORTED
 }
+void SetEnableMediaNetworkProxyImpl(Ark_NativePointer node,
+                                    const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetWebMediaNetworkProxyEnabled(frameNode, convValue);
+#endif // WEB_SUPPORTED
+}
 void SetRunJavaScriptOnDocumentStartImpl(Ark_NativePointer node,
                                          const Opt_Array_ScriptItem* value)
 {
@@ -3338,6 +3348,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetKeyboardAppearanceImpl,
         WebAttributeModifier::SetOnInputmethodAttachedImpl,
         WebAttributeModifier::SetEnableFullscreenVideoOverlayImpl,
+        WebAttributeModifier::SetEnableMediaNetworkProxyImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,
         WebAttributeModifier::SetBindSelectionMenuImpl,
         WebAttributeModifier::SetEnableScrollDirectionalLockImpl,

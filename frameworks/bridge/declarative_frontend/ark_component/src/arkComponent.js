@@ -17029,6 +17029,10 @@ class ArkWebComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, WebEnableWebAVSessionModifier.identity, WebEnableWebAVSessionModifier, enabled);
     return this;
   }
+  enableMediaNetworkProxy(enabled) {
+    modifierWithKey(this._modifiersWithKeys, WebEnableMediaNetworkProxyModifier.identity, WebEnableMediaNetworkProxyModifier, enabled);
+    return this;
+  }
   onRenderProcessNotResponding(callback) {
     modifierWithKey(this._modifiersWithKeys, WebOnRenderProcessNotRespondingModifier.identity, WebOnRenderProcessNotRespondingModifier, callback);
     return this;
@@ -18993,6 +18997,20 @@ class WebEnableWebAVSessionModifier extends ModifierWithKey {
   }
 }
 WebEnableWebAVSessionModifier.identity = Symbol('webEnableWebAVSessionModifier');
+
+class WebEnableMediaNetworkProxyModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().web.resetEnableMediaNetworkProxy(node);
+      } else {
+          getUINativeModule().web.setEnableMediaNetworkProxy(node, this.value);
+      }
+  }
+}
+WebEnableMediaNetworkProxyModifier.identity = Symbol('webEnableMediaNetworkProxyModifier');
 
 class WebScrollbarLayoutPolicyModifier extends ModifierWithKey {
   constructor(value) {

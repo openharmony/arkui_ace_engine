@@ -2618,6 +2618,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentStart", &JSWeb::RunJavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentEnd", &JSWeb::RunJavaScriptOnDocumentEnd);
     JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
+    JSClass<JSWeb>::StaticMethod("enableMediaNetworkProxy", &JSWeb::EnableMediaNetworkProxy);
     JSClass<JSWeb>::StaticMethod("enableDataDetector", &JSWeb::EnableDataDetector);
     JSClass<JSWeb>::StaticMethod("dataDetectorConfig", &JSWeb::DataDetectorConfig);
     JSClass<JSWeb>::StaticMethod("enableSelectedDataDetector", &JSWeb::EnableSelectedDataDetector);
@@ -7635,6 +7636,15 @@ void JSWeb::EnableWebAVSession(const JSCallbackInfo& args)
     }
     bool isEnabled = args[0]->ToBoolean();
     WebModel::GetInstance()->SetWebMediaAVSessionEnabled(isEnabled);
+}
+
+void JSWeb::EnableMediaNetworkProxy(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetWebMediaNetworkProxyEnabled(isEnabled);
 }
 
 void JSWeb::EnableDataDetector(const JSCallbackInfo& args)

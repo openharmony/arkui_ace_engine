@@ -1681,6 +1681,7 @@ public:
     OHOS::NWeb::WebDestroyMode GetWebDestroyMode();
 
     void UpdateWebMediaAVSessionEnabled(bool isEnabled);
+    void UpdateWebMediaNetworkProxyEnabled(bool isEnabled);
 
     void UpdateKeyboardAppearanceMode(const WebKeyboardAppearanceMode& mode);
 

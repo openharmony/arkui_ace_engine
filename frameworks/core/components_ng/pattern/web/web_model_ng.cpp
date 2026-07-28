@@ -1546,6 +1546,21 @@ void WebModelNG::SetWebMediaAVSessionEnabled(FrameNode* frameNode, bool isEnable
     webPattern->UpdateWebMediaAVSessionEnabled(isEnabled);
 }
 
+void WebModelNG::SetWebMediaNetworkProxyEnabled(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebMediaNetworkProxyEnabled(isEnabled);
+}
+
+void WebModelNG::SetWebMediaNetworkProxyEnabled(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebMediaNetworkProxyEnabled(isEnabled);
+}
+
 void WebModelNG::SetEnableDataDetector(bool isEnabled)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
