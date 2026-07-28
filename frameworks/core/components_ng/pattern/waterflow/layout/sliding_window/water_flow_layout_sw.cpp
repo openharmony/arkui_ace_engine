@@ -44,7 +44,7 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
     GetExpandArea(props_, info_);
 
     auto [size, matchChildren, originalWidth] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
-    syncLoad_ = props_->GetSyncLoad().value_or(!FeatureParam::IsSyncLoadEnabled()) || matchChildren ||
+    syncLoad_ = props_->GetSyncLoad().value_or(true) || matchChildren ||
                 !NearZero(info_->delta_) || info_->targetIndex_.has_value();
     Init(size, originalWidth);
     CalculateContentClipFixOffset(wrapper_, info_);
