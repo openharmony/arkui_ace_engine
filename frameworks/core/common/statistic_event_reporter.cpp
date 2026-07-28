@@ -66,6 +66,8 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
             return { "XCOMPONENT", "SET_ATTRIBUTE_NODE_TYPE" };
         case StatisticEventType::XCOMPONENT_SET_ATTRIBUTE_NODE_SURFACE_SIZE:
             return { "XCOMPONENT", "SET_ATTRIBUTE_NODE_SURFACE_SIZE" };
+        case StatisticEventType::XCOMPONENT_TYPE_CHANGED:
+            return { "XCOMPONENT", "TYPE_CHANGED" };
         case StatisticEventType::CANVAS_FILL_STYLE_GETTER:
             return { "CANVAS", "FILL_STYLE_GETTER" };
         case StatisticEventType::CANVAS_LINE_WIDTH_GETTER:

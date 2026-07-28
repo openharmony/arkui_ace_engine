@@ -18,6 +18,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/render/paint_wrapper.h"
 #include "core/components_ng/render/canvas_draw_function.h"
 namespace OHOS::Ace::NG {
 class Modifier;

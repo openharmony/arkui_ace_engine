@@ -16,8 +16,6 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 
-#include <string_view>
-
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
 
@@ -57,7 +55,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr std::string_view BUFFER_USAGE_XCOMPONENT = "xcomponent";
+const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
 }
 
 void XComponentPattern::InitSurfaceMultiThread(const RefPtr<FrameNode>& host)
@@ -79,8 +77,7 @@ void XComponentPattern::InitSurfaceMultiThread(const RefPtr<FrameNode>& host)
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
-    std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
-    renderSurface_->SetBufferUsage(std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + GetId());
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext(true);
         if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -112,12 +109,13 @@ void XComponentPattern::InitSurfaceMultiThread(const RefPtr<FrameNode>& host)
 void XComponentPattern::InitControllerMultiThread()
 {
     CHECK_NULL_VOID(xcomponentController_);
+    auto* controllerNG = static_cast<XComponentControllerNG*>(xcomponentController_.get());
+    if (controllerNG) {
+        controllerNG->SetPattern(AceType::Claim(this));
+    }
     if (!isTypedNode_) {
         xcomponentController_->SetSurfaceId(surfaceId_);
     }
-    auto* controllerNG = static_cast<XComponentControllerNG*>(xcomponentController_.get());
-    CHECK_NULL_VOID(controllerNG);
-    controllerNG->SetPattern(AceType::Claim(this));
 }
 
 void XComponentPattern::RegisterContextEventMultiThread(const RefPtr<FrameNode>& host)
@@ -204,12 +202,14 @@ void XComponentPattern::OnDetachFromFrameNodeMultiThread(FrameNode* frameNode)
             auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
             CHECK_NULL_VOID(eventHub);
             {
+                ACE_SCOPED_TRACE("XComponent[%s] FireDestroyEvent", GetId().c_str());
                 eventHub->FireDestroyEvent(GetId());
             }
             if (id_.has_value()) {
                 eventHub->FireDetachEvent(id_.value());
             }
             {
+                ACE_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
                 eventHub->FireControllerDestroyedEvent(surfaceId_, GetId());
             }
 #ifdef RENDER_EXTRACT_SUPPORTED

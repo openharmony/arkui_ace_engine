@@ -387,6 +387,26 @@ int32_t OH_NativeXComponent_DetachNativeRootNode(
         component->DetachNativeRootNode(root->uiNodeHandle), OH_NATIVEXCOMPONENT_RESULT_SUCCESS, __FUNCTION__);
 }
 
+int32_t OH_NativeXComponent_RegisterSurfaceShowCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if (component == nullptr || callback == nullptr) {
+        return ReturnNativeXComponentParamError(__FUNCTION__, "component or callback is null");
+    }
+    return ReturnResultWithFunctionName(
+        component->RegisterSurfaceShowCallback(callback), OH_NATIVEXCOMPONENT_RESULT_SUCCESS, __FUNCTION__);
+}
+
+int32_t OH_NativeXComponent_RegisterSurfaceHideCallback(
+    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
+{
+    if (component == nullptr || callback == nullptr) {
+        return ReturnNativeXComponentParamError(__FUNCTION__, "component or callback is null");
+    }
+    return ReturnResultWithFunctionName(
+        component->RegisterSurfaceHideCallback(callback), OH_NATIVEXCOMPONENT_RESULT_SUCCESS, __FUNCTION__);
+}
+
 int32_t OH_NativeXComponent_RegisterUIInputEventCallback(OH_NativeXComponent* component,
     void (*callback)(OH_NativeXComponent* component, ArkUI_UIInputEvent* event, ArkUI_UIInputEvent_Type type),
     ArkUI_UIInputEvent_Type type)
@@ -408,26 +428,6 @@ int32_t OH_NativeXComponent_SetNeedSoftKeyboard(OH_NativeXComponent* component, 
     }
     return ReturnResultWithFunctionName(
         component->SetNeedSoftKeyboard(needSoftKeyboard), OH_NATIVEXCOMPONENT_RESULT_SUCCESS, __FUNCTION__);
-}
-
-int32_t OH_NativeXComponent_RegisterSurfaceShowCallback(
-    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
-{
-    if (component == nullptr || callback == nullptr) {
-        return ReturnNativeXComponentParamError(__FUNCTION__, "component or callback is null");
-    }
-    return ReturnResultWithFunctionName(
-        component->RegisterSurfaceShowCallback(callback), OH_NATIVEXCOMPONENT_RESULT_SUCCESS, __FUNCTION__);
-}
-
-int32_t OH_NativeXComponent_RegisterSurfaceHideCallback(
-    OH_NativeXComponent* component, void (*callback)(OH_NativeXComponent* component, void* window))
-{
-    if (component == nullptr || callback == nullptr) {
-        return ReturnNativeXComponentParamError(__FUNCTION__, "component or callback is null");
-    }
-    return ReturnResultWithFunctionName(
-        component->RegisterSurfaceHideCallback(callback), OH_NATIVEXCOMPONENT_RESULT_SUCCESS, __FUNCTION__);
 }
 
 int32_t OH_NativeXComponent_RegisterOnTouchInterceptCallback(

@@ -14,11 +14,11 @@
  */
 
 
-import { ArkUIAniModule } from "arkui.ani";
-import { XComponentControllerNative, XComponentControllerWrapper } from "./idlize"
-import { hookXComponentStartImageAnalyzer } from "../hooks"
-import { ImageAnalyzerConfig } from "./imageCommon"
-import { DrawingCanvas } from "./units"
+import { ArkUIAniModule } from 'arkui.ani';
+import { XComponentControllerNative, XComponentControllerWrapper } from './idlize'
+import { hookXComponentStartImageAnalyzer } from '../hooks'
+import { ImageAnalyzerConfig } from './imageCommon'
+import { DrawingCanvas } from './units'
 
 export class SurfaceRectAniInternal implements SurfaceRect {
     offsetX?: number;

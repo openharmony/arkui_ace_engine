@@ -53,6 +53,7 @@
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
 #include "core/image/image_cache.h"
+#include "core/pipeline/container_window_manager.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 

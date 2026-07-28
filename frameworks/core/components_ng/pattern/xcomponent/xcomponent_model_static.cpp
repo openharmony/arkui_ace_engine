@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_static.h"
 
-#include <any>
-
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"

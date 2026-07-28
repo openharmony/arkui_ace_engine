@@ -16,27 +16,24 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 #include "core/accessibility/accessibility_manager.h"
 
-#include <string_view>
-
 #include "base/display_manager/display_manager.h"
 #include "base/log/dump_log.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
-#include "core/common/window.h"
 #include "core/common/statistic_event_reporter.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
-#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_surface_config_client.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_utils.h"
 #ifdef ENABLE_ROSEN_BACKEND
+#include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_sync_transaction_handler.h"
 #include "transaction/rs_transaction.h"
 #include "transaction/rs_transaction_handler.h"
 #include "transaction/rs_transaction_proxy.h"
-#include "transaction/rs_sync_transaction_controller.h"
-#include "transaction/rs_sync_transaction_handler.h"
 #include "ui/rs_ui_context.h"
 #include "ui/rs_ui_director.h"
 #endif
@@ -44,7 +41,7 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr std::string_view BUFFER_USAGE_XCOMPONENT = "xcomponent";
+const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
 
 inline std::string BoolToString(bool value)
 {
@@ -321,9 +318,9 @@ void XComponentPatternV2::InitSurface()
 
     renderSurface_ = RenderSurface::Create();
     renderSurface_->SetInstanceId(GetHostInstanceId());
-    renderSurface_->SetBufferUsage(std::string(BUFFER_USAGE_XCOMPONENT));
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
     std::string xComponentType = GetType() == XComponentType::SURFACE ? "s" : "t";
-    renderSurface_->SetBufferTypeLeak(std::string(BUFFER_USAGE_XCOMPONENT) + "-" + xComponentType + "-" + GetId());
+    renderSurface_->SetBufferTypeLeak(BUFFER_USAGE_XCOMPONENT + "-" + xComponentType + "-" + GetId());
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext(host->IsThreadSafeNode());
         renderSurface_->SetRenderContext(renderContextForSurface_);
@@ -388,10 +385,10 @@ void XComponentPatternV2::DisposeSurface()
 std::shared_ptr<Rosen::RSTransactionHandler> XComponentPatternV2::GetRSTransactionHandler(
     const RefPtr<FrameNode>& frameNode)
 {
-#ifdef ENABLE_ROSEN_BACKEND
     if (!SystemProperties::GetMultiInstanceEnabled()) {
         return nullptr;
     }
+#ifdef ENABLE_ROSEN_BACKEND
     auto rsUIContext = GetRSUIContext(frameNode);
     CHECK_NULL_RETURN(rsUIContext, nullptr);
     return rsUIContext->GetRSTransaction();
@@ -418,10 +415,14 @@ std::shared_ptr<Rosen::RSUIContext> XComponentPatternV2::GetRSUIContext(const Re
 void XComponentPatternV2::FlushImplicitTransaction(const RefPtr<FrameNode>& frameNode)
 {
 #ifdef ENABLE_ROSEN_BACKEND
-    if (auto transactionHandler = GetRSTransactionHandler(frameNode)) {
+    if (!SystemProperties::GetMultiInstanceEnabled()) {
+        auto transactionProxy = Rosen::RSTransactionProxy::GetInstance();
+        if (transactionProxy != nullptr) {
+            transactionProxy->FlushImplicitTransaction();
+        }
+    }
+    else if (auto transactionHandler = GetRSTransactionHandler(frameNode)) {
         transactionHandler->FlushImplicitTransaction();
-    } else {
-        Rosen::RSTransactionProxy::GetInstance()->FlushImplicitTransaction();
     }
 #endif
 }

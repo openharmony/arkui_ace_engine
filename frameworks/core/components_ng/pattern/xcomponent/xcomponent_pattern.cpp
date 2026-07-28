@@ -2685,6 +2685,11 @@ void XComponentPattern::SetSurfaceIsOpaque(bool isOpaque)
     }
 }
 
+void XComponentPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    json->Put("$SurfaceId", surfaceId_.c_str());
+}
+
 void XComponentPattern::UpdateSdrRatioIfNeed()
 {
     if (xcomponentTouchSdrRatio_ < std::numeric_limits<float>::epsilon() &&

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,7 @@ export class ArkXComponentNode extends ArkBaseNode implements XComponentAttribut
             onSurfaceChanged: value.controller.onSurfaceChanged as ((surfaceId: string, surfaceRect: SurfaceRect) => void),
             onSurfaceDestroyed: value.controller.onSurfaceDestroyed as ((surfaceId: string) => void)
         } as XComponentOptionsInternal;
-        ArkUIAniModule._XComponent_SetXComponentControllerCallback(toPeerPtr(value.controller), options);
+        ArkUIAniModule._XComponent_SetXComponentControllerCallback(toPeerPtr(value.controller.nativeObj), options);
         peer.setXComponentOptionsAttribute(value);
         return this;
     }
