@@ -112,10 +112,12 @@ public:
     void RecordFrameTime(uint64_t timeStamp, const std::string& name) override;
 
 private:
+    bool ShouldRequestFrame();
     WeakPtr<TaskExecutor> taskExecutor_ = nullptr;
     int32_t id_ = 0;
     UIContentType uiContentType_ = UIContentType::UNDEFINED;
 #ifdef ENABLE_ROSEN_BACKEND
+    uint32_t forceVsyncFrameCount_ = 0;
     void InitOnVsyncCallback();
     static std::recursive_mutex globalMutex_;
     std::shared_ptr<Rosen::VSyncReceiver> receiver_ = nullptr;

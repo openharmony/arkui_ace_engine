@@ -34,7 +34,8 @@ public:
     bool CheckHandleVisible(const RectF& paintRect) override;
     void OnResetTextSelection() override;
     void AfterCloseOverlay() override;
-    void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed = true,
+        bool transformTriggersEmbed = true) override;
 
     // override SelectOverlayHolder
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;

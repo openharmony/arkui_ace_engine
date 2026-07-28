@@ -25,6 +25,7 @@
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_abstract_span_result.h"
 #include "cj_lambda.h"
 #include "ffi_remote_data.h"
 

@@ -39,7 +39,8 @@ public:
     bool CheckAndAdjustHandleWithContent(const RectF& contentRect, RectF& paintRect);
     void OnResetTextSelection() override;
     RectF GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex) override;
-    void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
+    void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed = true,
+        bool transformTriggersEmbed = true) override;
 
     // override SelectOverlayHolder
     std::optional<SelectHandleInfo> GetFirstHandleInfo() override;

@@ -737,12 +737,13 @@ void TextFieldSelectOverlay::ProcessOverlayAfterLayout(const OverlayRequest& req
     BaseTextSelectOverlay::ProcessOverlay(newRequest);
 }
 
-void TextFieldSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
+void TextFieldSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed,
+    bool transformTriggersEmbed)
 {
     if (IsAncestorNodeGeometryChange(flag) || IsAncestorNodeTransformChange(flag)) {
         UpdateAllHandlesOffset();
     }
-    BaseTextSelectOverlay::OnAncestorNodeChanged(flag);
+    BaseTextSelectOverlay::OnAncestorNodeChanged(flag, scrollTriggersEmbed, transformTriggersEmbed);
 }
 
 void TextFieldSelectOverlay::OnHandleLevelModeChanged(HandleLevelMode mode)

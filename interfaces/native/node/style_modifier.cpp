@@ -245,6 +245,7 @@ constexpr int32_t MAX_ATTRIBUTE_ITEM_LEN = 20;
 thread_local std::string g_stringValue;
 thread_local ArkUI_NumberValue g_numberValues[MAX_ATTRIBUTE_ITEM_LEN] = { 0 };
 thread_local ArkUI_AttributeItem g_attributeItem = { g_numberValues, MAX_ATTRIBUTE_ITEM_LEN, nullptr, nullptr };
+thread_local ArkUI_NodeHandle g_nextFocusNodes[NUM_6] = { nullptr };
 thread_local OH_ArkUI_FontWeightConfigs g_spanFontWeightConfigs = {};
 thread_local OH_ArkUI_FontConfigs g_spanFontConfigs = {};
 
@@ -395,6 +396,9 @@ void ResetAttributeItem()
 {
     for (int i = 0; i < MAX_ATTRIBUTE_ITEM_LEN; ++i) {
         g_numberValues[i].i32 = 0;
+    }
+    for (int i = 0; i < NUM_6; ++i) {
+        g_nextFocusNodes[i] = nullptr;
     }
     g_attributeItem.size = 0;
     g_attributeItem.string = nullptr;
@@ -4758,6 +4762,29 @@ void ResetNextFocus(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetNextFocus(node->uiNodeHandle);
 }
 
+const ArkUI_AttributeItem* GetNextFocus(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto* modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
+    int32_t count = 0;
+    for (auto focusMove : { ARKUI_FOCUS_MOVE_FORWARD, ARKUI_FOCUS_MOVE_BACKWARD, ARKUI_FOCUS_MOVE_UP,
+             ARKUI_FOCUS_MOVE_DOWN, ARKUI_FOCUS_MOVE_LEFT, ARKUI_FOCUS_MOVE_RIGHT }) {
+        auto nextFocus = modifier->getNextFocus(node->uiNodeHandle, static_cast<FocusMove>(focusMove));
+        if (!nextFocus) {
+            continue;
+        }
+        g_numberValues[count].i32 = focusMove;
+        g_nextFocusNodes[count] = GetArkUINode(nextFocus);
+        count++;
+    }
+    if (count == 0) {
+        return nullptr;
+    }
+    g_attributeItem.size = count;
+    g_attributeItem.object = g_nextFocusNodes;
+    return &g_attributeItem;
+}
+
 int32_t SetAccessibilityNextFocusId(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
@@ -4807,6 +4834,23 @@ void ResetFocusBox(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCommonModifier()->resetFocusBoxStyle(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetFocusBox(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto* modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
+    ArkUI_Float32 values[NUM_2];
+    ArkUI_Uint32 color = 0;
+    if (!modifier->getFocusBoxStyle(node->uiNodeHandle, values, &color)) {
+        return nullptr;
+    }
+
+    g_numberValues[NUM_0].f32 = values[NUM_0];
+    g_numberValues[NUM_1].f32 = values[NUM_1];
+    g_numberValues[NUM_2].u32 = color;
+    g_attributeItem.size = NUM_3;
+    return &g_attributeItem;
 }
 
 int32_t SetClickDistance(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -20853,12 +20897,12 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetAreaChangeRatio,
         GetTransition,
         GetUniqueID,
-        nullptr,
+        GetFocusBox,
         nullptr,
         GetTabStop,
         GetBackdropBlur,
         GetBackgroundImageResizableWithSlice,
-        nullptr,
+        GetNextFocus,
         GetAreaChangeApproximateOptions,
         GetTranslateWithPercentage,
         GetRotateAngle,

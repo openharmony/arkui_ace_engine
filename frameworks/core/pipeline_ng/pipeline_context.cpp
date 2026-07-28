@@ -110,7 +110,7 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/select_overlay/magnifier_controller.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/pipeline_ng/environment_manager.h"
 #include "core/components_ng/pattern/recycle_view/recycle_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
@@ -711,9 +711,9 @@ void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirtyNode)
     if (!CheckThreadSafe()) {
         LOGW("AddDirtyPropertyNode doesn't run on UI thread!");
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (dirtyNode && isIsolatedThread_ != dirtyNode->IsIsolatedThread()) {
-        LOGW("AddDirtyPropertyNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyPropertyNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
     }
@@ -729,9 +729,9 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
         LOGW("dirtyNode invalid");
         return;
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (isIsolatedThread_ != dirtyNode->IsIsolatedThread()) {
-        LOGW("AddDirtyCustomNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyCustomNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirtyNode->GetId(), dirtyNode->IsIsolatedThread());
     }
@@ -759,9 +759,9 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
         LOGW("Cannot add dirty layout node as the pipeline context is destroyed.");
         return;
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (isIsolatedThread_ != dirty->IsIsolatedThread()) {
-        LOGW("AddDirtyLayoutNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyLayoutNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
     }
@@ -824,9 +824,9 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
         LOGW("Cannot add dirty render node as the pipeline context is destroyed.");
         return;
     }
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (isIsolatedThread_ != dirty->IsIsolatedThread()) {
-        LOGW("AddDirtyRenderNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyRenderNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, dirty->GetId(), dirty->IsIsolatedThread());
     }
@@ -857,9 +857,9 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 
 void PipelineContext::AddDirtyFreezeNode(FrameNode* node)
 {
-    // IsolatedThread consistency validation: warn if node and pipeline belong to different thread domains.
+    // IsolatedThread consistency validation: log if node and pipeline belong to different thread domains.
     if (node && isIsolatedThread_ != node->IsIsolatedThread()) {
-        LOGW("AddDirtyFreezeNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
+        LOGD("AddDirtyFreezeNode IsolatedThread mismatch: pipeline=%{public}d isolated=%{public}d, "
             "node=%{public}d isolated=%{public}d",
             GetInstanceId(), isIsolatedThread_, node->GetId(), node->IsIsolatedThread());
     }

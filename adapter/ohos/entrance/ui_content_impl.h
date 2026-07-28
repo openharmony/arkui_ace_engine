@@ -105,6 +105,7 @@ public:
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     static int32_t GetUIContentWindowID(int32_t instanceId);
     OHOS::Rosen::Window* GetUIContentWindow() override;
+    void ForceRequestFrame() override;
     // UI content event process
     bool ProcessBackPressed() override;
     void UpdateDialogResourceConfiguration(RefPtr<Container>& container,
@@ -184,22 +185,10 @@ public:
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap) override;
     void ReloadForm(const std::string& url) override;
 
-    void SetFormWidth(float width) override
-    {
-        formWidth_ = width;
-    }
-    void SetFormHeight(float height) override
-    {
-        formHeight_ = height;
-    }
-    float GetFormWidth() override
-    {
-        return formWidth_;
-    }
-    float GetFormHeight() override
-    {
-        return formHeight_;
-    }
+    void SetFormWidth(float width) override { formWidth_ = width; }
+    void SetFormHeight(float height) override { formHeight_ = height; }
+    float GetFormWidth() override { return formWidth_; }
+    float GetFormHeight() override { return formHeight_; }
 
     void SetFormViewScale(float width, float height, float formViewScale) override;
     void SetActionEventHandler(std::function<void(const std::string& action)>&& actionCallback) override;

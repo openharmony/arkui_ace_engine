@@ -32,8 +32,8 @@
 #include "core/common/ai/data_detector_adapter.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
+#include "core/components_ng/pattern/text/selection_info.h"
 #include "core/components_ng/pattern/rich_editor_drag/preview_menu_controller.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
@@ -575,6 +575,7 @@ protected:
     void AddUdmfTxtPreProcessor(const ResultObject src, ResultObject& result, bool isAppend);
     void InitKeyEvent();
     void UpdateShiftFlag(const KeyEvent& keyEvent);
+    bool IsShiftFlag() const;
     bool HandleKeyEvent(const KeyEvent& keyEvent);
     bool HandleOnSelect(KeyCode code);
     void HandleSelectionUp();

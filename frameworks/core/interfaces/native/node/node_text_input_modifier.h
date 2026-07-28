@@ -16,11 +16,13 @@
 #ifndef FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_INPUT_MODIFIER_H
 #define FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_TEXT_INPUT_MODIFIER_H
 
+#include "core/components_ng/pattern/text_input/bridge/text_input_custom_modifier.h"
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUITextInputModifier* GetTextInputModifier();
     const CJUITextInputModifier* GetCJUITextInputModifier();
+    ACE_FORCE_EXPORT const ArkUITextInputCustomModifier* GetTextInputCustomModifier();
     void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam);
     void SetOnTextInputChangeWithPreviewText(ArkUINodeHandle node, void* extraParam);
     void SetTextInputOnSubmit(ArkUINodeHandle node, void* extraParam);

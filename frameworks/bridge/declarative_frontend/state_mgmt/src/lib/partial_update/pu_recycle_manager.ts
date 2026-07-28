@@ -34,7 +34,7 @@ class RecycleManager {
   private pendingProgressiveReleaseNodes_: Array<ViewPU> = undefined;
   // Callback to request progressive release (set by parent ViewPU)
   private requestProgressiveReleaseCallback_: () => void = undefined;
-  private defaultCacheCount: number;
+  private cachedCount: number;
   private reuseIdForOptimize: Set<string> = new Set<string>();
 
   constructor() {
@@ -43,7 +43,7 @@ class RecycleManager {
     this.pendingCacheCleanTimers_ = new Map<string, any>();
     this.maxCacheSizes_ = new Map<string, number>();
     this.pendingProgressiveReleaseNodes_ = new Array<ViewPU>();
-    this.defaultCacheCount = 8;
+    this.cachedCount = 8;
   }
 
   public updateNodeId(oldElmtId: number, newElmtId: number): void {
@@ -59,15 +59,16 @@ class RecycleManager {
     return proxy;
   }
 
-  public pushRecycleNode(name: string, node: ViewPU): void {
+  public pushRecycleNode(name: string, node: ViewPU, memOptStrategy: number = 0, cachedCount: number = 8): void {
     if (!this.cachedRecycleNodes_.get(name)) {
       this.cachedRecycleNodes_.set(name, new Array<ViewPU>());
     }
     this.cachedRecycleNodes_.get(name)?.push(node);
-    if (node.__getReusableMemOptStrategy__Internal() === 1) {
+    if (memOptStrategy === 1) {
+      this.cachedCount = cachedCount;
       this.reuseIdForOptimize.add(name);
       const cachedNodes = this.cachedRecycleNodes_.get(name);
-      if (cachedNodes && cachedNodes.length > this.defaultCacheCount) {
+      if (cachedNodes && cachedNodes.length > this.cachedCount) {
         const currentSize = cachedNodes.length;
         const maxSize = this.maxCacheSizes_.get(name) || 0;
         // Only restart timer if cache size reaches a new maximum
@@ -128,7 +129,7 @@ class RecycleManager {
 
     const timerId = setTimeout(() => {
       // Prepare nodes for progressive release
-      const pendingCount = this.prepareCleanCacheToTargetProgressive(name, this.defaultCacheCount);
+      const pendingCount = this.prepareCleanCacheToTargetProgressive(name, this.cachedCount);
 
       // If there are nodes to release and callback is available, request progressive release
       if (pendingCount > 0 && this.requestProgressiveReleaseCallback_) {

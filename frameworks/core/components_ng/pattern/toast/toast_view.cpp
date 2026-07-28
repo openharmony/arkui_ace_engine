@@ -25,6 +25,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 
 namespace OHOS::Ace::NG {
 constexpr float MAX_TOAST_SCALE = 2.0f;
@@ -165,51 +166,7 @@ bool ToastView::HandleLowEndImmersiveMaterial(
         return false;
     }
 
-    auto pipelineContext = toastNode->GetContextRefPtr();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, false);
-    auto themeConstants = themeManager->GetThemeConstants();
-    CHECK_NULL_RETURN(themeConstants, false);
-
-    SetLowEndImmersiveBackground(renderContext, themeConstants);
-    SetLowEndImmersiveShadow(toastNode, toastInfo, renderContext, pipelineContext);
-
-    return true;
-}
-
-void ToastView::SetLowEndImmersiveBackground(
-    const RefPtr<RenderContext>& renderContext,
-    const RefPtr<ThemeConstants>& themeConstants)
-{
-    auto resId = Ace::TokenColors::GetSystemColorResIdByIndex(Ace::TokenColors::COMP_BACKGROUND_PRIMARY);
-    auto backgroundColor = themeConstants->GetColor(resId);
-    renderContext->UpdateBackgroundColor(backgroundColor);
-}
-
-void ToastView::SetLowEndImmersiveShadow(
-    const RefPtr<FrameNode>& toastNode,
-    const ToastInfo& toastInfo,
-    const RefPtr<RenderContext>& renderContext,
-    const RefPtr<PipelineContext>& pipelineContext)
-{
-    // Check if shadow should be applied
-    bool applyShadow = false;
-    if (toastInfo.systemMaterial) {
-        auto immersiveOptions = toastInfo.systemMaterial->GetImmersiveOptions();
-        applyShadow = immersiveOptions && immersiveOptions->applyShadow;
-    } else {
-        // For default material case, apply shadow
-        applyShadow = true;
-    }
-
-    if (!applyShadow) {
-        return;
-    }
-
-    auto dipScale = pipelineContext->GetDipScale();
-    auto shadow = Ace::MaterialUtils::GetImmersiveShadow(dipScale);
-    renderContext->UpdateBackShadow(shadow);
+    return DialogManager::HandleSmoothImmersiveMaterial(toastNode, toastInfo.systemMaterial);
 }
 
 bool ToastView::HandleUserSetMaterial(
@@ -245,21 +202,12 @@ bool ToastView::ApplyDefaultMaterial(
         return false;
     }
 
+    auto defaultMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
     // Handle low-end devices
     if (SystemProperties::GetUiMaterialLevel() == UiMaterialLevel::SMOOTH) {
-        auto pipelineContext = toastNode->GetContextRefPtr();
-        CHECK_NULL_RETURN(pipelineContext, false);
-        auto themeManager = pipelineContext->GetThemeManager();
-        CHECK_NULL_RETURN(themeManager, false);
-        auto themeConstants = themeManager->GetThemeConstants();
-        CHECK_NULL_RETURN(themeConstants, false);
-
-        SetLowEndImmersiveBackground(renderContext, themeConstants);
-        SetLowEndImmersiveShadow(toastNode, toastInfo, renderContext, pipelineContext);
-        return true;
+        return DialogManager::HandleSmoothImmersiveMaterial(toastNode, defaultMaterial);
     }
 
-    auto defaultMaterial = MaterialUtils::GetInitMaterial(UiMaterialStyle::THICK);
     renderContext->UpdateBackBlurStyle(std::nullopt);
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
     ViewAbstract::SetSystemMaterial(AceType::RawPtr(toastNode), AceType::RawPtr(defaultMaterial));

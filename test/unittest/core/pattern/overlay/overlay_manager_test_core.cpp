@@ -25,6 +25,10 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 
+#undef private
+#undef protected
+
+
 using namespace testing;
 using namespace testing::ext;
 

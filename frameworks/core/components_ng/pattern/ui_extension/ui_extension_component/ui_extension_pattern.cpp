@@ -32,7 +32,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/ui_extension/platform_utils.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
@@ -282,6 +282,12 @@ void UIExtensionPattern::OnAttachContext(PipelineContext *context)
         hasAttachContext_ = true;
     }
     /* only for 1.2 end */
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId_);
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
 }
 
 void UIExtensionPattern::UpdateSessionInstanceId(int32_t instanceId)

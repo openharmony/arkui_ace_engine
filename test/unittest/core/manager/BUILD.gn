@@ -101,6 +101,10 @@ ace_unittest("drag_drop_proxy_test_ng") {
 ace_unittest("full_screen_manager_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [ "full_screen_manager_test_ng.cpp" ]
 }
 

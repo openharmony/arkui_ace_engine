@@ -303,11 +303,13 @@ void UiSessionManagerOhos::ReportRouterChangeEvent(const std::string& data)
 void UiSessionManagerOhos::ReportComponentChangeEvent(
     const std::string& key, const std::string& value, uint32_t eventType)
 {
+    if (!GetComponentChangeEventRegistered() || !NeedComponentChangeTypeReporting(eventType)) {
+        return;
+    }
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetComponentChangeEventRegistered() &&
-            NeedComponentChangeTypeReporting(eventType)) {
+        if (reportService != nullptr) {
             auto data = InspectorJsonUtil::Create();
             data->Put(key.data(), value.data());
             reportService->ReportComponentChangeEvent(data->ToString());
@@ -320,11 +322,13 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
 void UiSessionManagerOhos::ReportComponentChangeEvent(
     int32_t nodeId, const std::string& key, const std::string& value, uint32_t eventType)
 {
+    if (!GetComponentChangeEventRegistered() || !NeedComponentChangeTypeReporting(eventType)) {
+        return;
+    }
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetComponentChangeEventRegistered() &&
-            NeedComponentChangeTypeReporting(eventType)) {
+        if (reportService != nullptr) {
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
             data->Put(key.data(), value.data());
@@ -356,10 +360,13 @@ void UiSessionManagerOhos::ReportWebInputEvent(
 
 void UiSessionManagerOhos::ReportScrollEvent(const std::string& data)
 {
+    if (!GetScrollEventRegistered()) {
+        return;
+    }
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetScrollEventRegistered()) {
+        if (reportService != nullptr) {
             reportService->ReportScrollEvent(data);
         } else {
             LOGW("report scroll event failed, process id:%{public}d", pair.first);
@@ -369,10 +376,13 @@ void UiSessionManagerOhos::ReportScrollEvent(const std::string& data)
 
 void UiSessionManagerOhos::ReportLifeCycleEvent(const std::string& data)
 {
+    if (!GetLifeCycleEventRegistered()) {
+        return;
+    }
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetLifeCycleEventRegistered()) {
+        if (reportService != nullptr) {
             reportService->ReportLifeCycleEvent(data);
         } else {
             LOGW("report life cycle event failed, process id:%{public}d", pair.first);
@@ -382,10 +392,13 @@ void UiSessionManagerOhos::ReportLifeCycleEvent(const std::string& data)
 
 void UiSessionManagerOhos::ReportSelectTextEvent(const std::string& data)
 {
+    if (!GetSelectTextEventRegistered()) {
+        return;
+    }
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (const auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetSelectTextEventRegistered()) {
+        if (reportService != nullptr) {
             reportService->ReportSelectTextEvent(data);
         } else {
             LOGW("report select text event failed, process id:%{public}d", pair.first);

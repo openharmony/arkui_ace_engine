@@ -996,7 +996,8 @@ bool RepeatVirtualScroll2Node::IsAllowAnimation()
             "RepeatVirtualScroll2Node::IsAllowAnimation[id:%{public}d] - Parent FrameNode is nullptr", GetId());
         return false;
     }
-    return LazyForEachUtils::GetEnableRepeatAnimation() && parent->GetTag() == V2::LIST_ETS_TAG;
+    return parent->GetTag() == V2::LIST_ETS_TAG &&
+        !LazyForEachUtils::IsIdInRepeatAnimationAllowReuseSet(parent->GetInspectorIdValue(""));
 }
 
 bool RepeatVirtualScroll2Node::IsChildInAnimation(uint32_t rid)
@@ -1036,6 +1037,20 @@ bool RepeatVirtualScroll2Node::IsChildOnMainTree(uint32_t rid)
 
 RepeatMemOptStrategy RepeatVirtualScroll2Node::GetMemOptStrategy()
 {
+    if (memOptStrategy_ != RepeatMemOptStrategy::UNDEFINED) {
+        return memOptStrategy_;
+    }
+    auto applicationStrategy = LazyForEachUtils::GetRepeatMemOptStrategy();
+    if (applicationStrategy != RepeatMemOptStrategy::UNDEFINED) {
+    memOptStrategy_ = applicationStrategy;
+        return memOptStrategy_;
+    }
+    auto systemStrategy = SystemProperties::GetSyntaxMemOptStrategy();
+    if (systemStrategy >= 0) {
+        memOptStrategy_ = static_cast<RepeatMemOptStrategy>(systemStrategy);
+        return memOptStrategy_;
+    }
+    memOptStrategy_ = RepeatMemOptStrategy::DEFAULT;
     return memOptStrategy_;
 }
 

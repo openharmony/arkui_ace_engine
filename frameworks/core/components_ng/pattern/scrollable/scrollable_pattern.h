@@ -604,6 +604,8 @@ public:
         accessibilityScrollSource_ = source;
     }
 
+    void ResetAccessibilityScrollSourceIfIdle();
+
     std::string GetAccessibilityScrollSource();
 
     void MarkUserScrollSource(int32_t source);

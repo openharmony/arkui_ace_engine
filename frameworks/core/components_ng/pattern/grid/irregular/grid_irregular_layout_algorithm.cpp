@@ -336,7 +336,13 @@ void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize, bool toAdjust
     // skip adding starting lines that are outside viewport in LayoutIrregular
     auto [it, offset] = info_.SkipLinesAboveView(mainGap_);
     GridIrregularFiller filler(&info_, wrapper_);
-    filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ }, offset + it->second + mainGap_, it->first);
+    // Include startFixOffset_ in targetLen so lines in the start contentClip extension area
+    // (top padding region when contentClip = BOUNDARY) are measured. Without this, when
+    // scrolling upward, lines that become visible in the extension area have no lineHeightMap_
+    // entry and are skipped by LayoutChildren, so their items are not laid out every frame.
+    // When startFixOffset_ == 0 (CONTENT_ONLY), the addition is a no-op (original behavior).
+    float targetLen = offset + it->second + mainGap_ + info_.startFixOffset_;
+    filler.MeasureBackward({ crossLens_, crossGap_, mainGap_ }, targetLen, it->first);
 
     GridLayoutRangeSolver solver(&info_, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
@@ -366,6 +372,17 @@ bool GridIrregularLayoutAlgorithm::TrySkipping(float mainSize)
         info_.scrollAlign_ = ScrollAlign::START;
         info_.currentOffset_ = 0.0f;
         Jump(mainSize);
+        // TrySkipping calls Jump() directly (not MeasureOnJump), so the extension
+        // re-evaluation that MeasureOnJump does is skipped. Without this, the start
+        // contentClip extension area has no measured items after a large scroll skip.
+        // Mirrors the re-evaluation block in MeasureOnJump.
+        if (GreatNotEqual(info_.startFixOffset_, 0.0f) || GreatNotEqual(info_.endFixOffset_, 0.0f)) {
+            MeasureBackwardForStartExtension();
+            info_.prevOffset_ = info_.currentOffset_;
+            enableSkip_ = false;
+            MeasureOnOffset(mainSize);
+            enableSkip_ = true;
+        }
         return true;
     }
     return false;

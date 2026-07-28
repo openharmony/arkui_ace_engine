@@ -62,9 +62,6 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     pattern->SetIsWindowModeFollowHost(config.isWindowModeFollowHost);
     pattern->SetIsModalFixFocus(config.isModalFixFocus);
     pattern->UpdateWant(want);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, frameNode);
-    pipeline->AddWindowStateChangedCallback(nodeId);
     pattern->SetOnReleaseCallback(std::move(callbacks.onRelease));
     pattern->SetOnErrorCallback(std::move(callbacks.onError));
     pattern->SetOnResultCallback(std::move(callbacks.onResult));
@@ -91,9 +88,6 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
     pattern->SetIsWindowModeFollowHost(isWindowModeFollowHost);
     pattern->UpdateWant(wantWrap);
     stack->Push(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowStateChangedCallback(nodeId);
 }
 
 // for EmbeddedComponent
@@ -116,9 +110,6 @@ void UIExtensionModelNG::Create(const EmbeddedUIExtensionConfig& config)
         pattern->UpdateWant(config.wantWrap);
     }
     stack->Push(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowStateChangedCallback(nodeId);
 }
 
 void UIExtensionModelNG::Create(const UIExtensionConfig& config)

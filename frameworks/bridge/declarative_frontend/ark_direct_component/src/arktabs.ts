@@ -253,10 +253,6 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().tabs.setTabsBarFloatingStyle(node, this.value);
         }
       }
-
-      checkObjectDiff(): boolean {
-        return !isBaseOrResourceEqual(this.stageValue, this.value);
-      }
     }
     
     class BarGridAlignModifier extends ModifierWithKey<BarGridColumnOptions> {
@@ -556,7 +552,7 @@ function loadComponent(): ComponentObj | undefined {
         if (reset) {
           getUINativeModule().tabs.resetTabsOptionsController(node);
         } else {
-          getUINativeModule().tabs.setTabsOptionsController(node, (this.value as any)?.peer?.ptr ?? this.value);
+          getUINativeModule().tabs.setTabsOptionsController(node, this.value);
         }
       }
     }
@@ -686,6 +682,9 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().tabs.setTabsOnContentDidScroll(node, this.value);
         }
       }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     }
     
     class FadingEdgeModifier extends ModifierWithKey<boolean> {
@@ -742,7 +741,7 @@ function loadComponent(): ComponentObj | undefined {
       constructor(value: TabsNestedScrollMode) {
         super(value);
       }
-      static identity: Symbol = Symbol('tabsNestedScroll');
+      static identity: Symbol = Symbol('nestedScroll');
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
           getUINativeModule().tabs.resetNestedScroll(node);
@@ -754,7 +753,7 @@ function loadComponent(): ComponentObj | undefined {
         return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
-    
+        
     class TabPageFlipModeModifier extends ModifierWithKey<PageFlipMode> {
       constructor(value: PageFlipMode) {
         super(value);
@@ -780,9 +779,9 @@ function loadComponent(): ComponentObj | undefined {
     
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
-          getUINativeModule().tabs.resetTabWidth(node);
+          getUINativeModule().tabs.resetWidthAuto(node);
         } else {
-          getUINativeModule().tabs.setTabWidth(node, this.value);
+          getUINativeModule().tabs.setWidthAuto(node, this.value);
         }
       }
     }
@@ -795,9 +794,9 @@ function loadComponent(): ComponentObj | undefined {
     
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
-          getUINativeModule().tabs.resetTabHeight(node);
+          getUINativeModule().tabs.resetHeightAuto(node);
         } else {
-          getUINativeModule().tabs.setTabHeight(node, this.value);
+          getUINativeModule().tabs.setHeightAuto(node, this.value);
         }
       }
     }
@@ -813,6 +812,9 @@ function loadComponent(): ComponentObj | undefined {
         } else {
           getUINativeModule().tabs.setTabsOnSelected(node, this.value);
         }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     }
     
@@ -838,7 +840,7 @@ function loadComponent(): ComponentObj | undefined {
       constructor(value: (index: number) => void) {
         super(value);
       }
-      static identity: Symbol = Symbol('onChange');
+      static identity: Symbol = Symbol('tabsonchange');
     
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -847,13 +849,16 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().tabs.setTabsOnChange(node, this.value);
         }
       }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     }
     
     class TabsOnTabBarClick extends ModifierWithKey<(index: number) => void> {
       constructor(value: (index: number) => void) {
         super(value);
       }
-      static identity: Symbol = Symbol('onTabBarClick');
+      static identity: Symbol = Symbol('tabsontabbarclick');
     
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -862,13 +867,16 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().tabs.setTabsOnTabBarClick(node, this.value);
         }
       }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     }
     
     class TabsAnimationStartModifier extends ModifierWithKey<(index: number, targetIndex: number, event: TabsAnimationEvent) => void> {
       constructor(value: (index: number, targetIndex: number, event: TabsAnimationEvent) => void) {
         super(value);
       }
-      static identity: Symbol = Symbol('onAnimationStart');
+      static identity: Symbol = Symbol('tabsonanimationstart');
     
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -877,13 +885,16 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().tabs.setTabsOnAnimationStart(node, this.value);
         }
       }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     }    
     
     class TabsAnimationEndModifier extends ModifierWithKey<(index: number, event: TabsAnimationEvent) => void> {
       constructor(value: (index: number, event: TabsAnimationEvent) => void) {
         super(value);
       }
-      static identity: Symbol = Symbol('onAnimationEnd');
+      static identity: Symbol = Symbol('tabsonanimationend');
     
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -892,13 +903,16 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().tabs.setTabsOnAnimationEnd(node, this.value);
         }
       }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     }
     
     class TabsGestureSwipeModifier extends ModifierWithKey<(index: number, event: TabsAnimationEvent) => void> {
       constructor(value: (index: number, event: TabsAnimationEvent) => void) {
         super(value);
       }
-      static identity: Symbol = Symbol('onGestureSwipe');
+      static identity: Symbol = Symbol('tabsongestureswipe');
     
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -907,13 +921,16 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().tabs.setTabsOnGestureSwipe(node, this.value);
         }
       }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     }
     
     class TabsOnContentWillChange extends ModifierWithKey<(currentIndex: number, targetIndex: number) => void> {
       constructor(value: (currentIndex: number, targetIndex: number) => void) {
         super(value);
       }
-      static identity: Symbol = Symbol('onContentWillChange');
+      static identity: Symbol = Symbol('tabsoncontentwillchange');
     
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -922,13 +939,16 @@ function loadComponent(): ComponentObj | undefined {
           getUINativeModule().tabs.setTabsOnContentWillChange(node, this.value);
         }
       }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
+      }
     } 
     
     class TabsCustomContentTransition extends ModifierWithKey<(from: number, to: number) => void> {
       constructor(value: (from: number, to: number) => void) {
         super(value);
       }
-      static identity: Symbol = Symbol('customContentTransition');
+      static identity: Symbol = Symbol('tabscustomcontenttransition');
     
       applyPeer(node: KNode, reset: boolean): void {
         if (reset) {
@@ -936,6 +956,9 @@ function loadComponent(): ComponentObj | undefined {
         } else {
           getUINativeModule().tabs.setTabsCustomContentTransition(node, this.value);
         }
+      }
+      checkObjectDiff(): boolean {
+        return !isBaseOrResourceEqual(this.stageValue, this.value);
       }
     } 
     

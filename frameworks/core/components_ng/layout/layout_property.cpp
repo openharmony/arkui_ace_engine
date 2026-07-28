@@ -1399,9 +1399,6 @@ TextDirection LayoutProperty::GetLayoutDirection() const
 
 std::optional<float> LayoutProperty::GetEnvFontScale() const
 {
-    if (!NeedReadFontScaleFromEnv()) {
-        return std::nullopt;
-    }
     auto host = GetHost();
     auto pipeline = host ? host->GetContext() : nullptr;
     if (!host || !pipeline || !pipeline->IsEnvManagerActive()) {

@@ -35,6 +35,10 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/property/position_property.h"
 
+#undef private
+#undef protected
+
+
 using namespace testing;
 using namespace testing::ext;
 

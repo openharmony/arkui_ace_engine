@@ -45,7 +45,6 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
@@ -55,6 +54,7 @@
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/interfaces/native/node/menu_item_group_modifier.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
 #include "image_source.h"
 
 namespace OHOS::Ace::NG {
@@ -63,6 +63,12 @@ namespace {
 constexpr int32_t TOAST_DURATION = 2000;
 constexpr std::string_view END_ICON_PATH = "resource:///ohos_ic_public_cancel.svg";
 constexpr std::string_view IMAGE_PROPERTY_ORIENTATION = "Orientation";
+RefPtr<RichEditorTheme> GetRichEditorTheme(const RefPtr<PipelineContext>& pipeline)
+{
+    auto* modifier = NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_RETURN(modifier && modifier->getRichEditorTheme, nullptr);
+    return modifier->getRichEditorTheme(pipeline);
+}
 } // namespace
 
 int32_t GetScopedIdFromCaller(const std::shared_ptr<SelectOverlayInfo>& info)
@@ -269,7 +275,7 @@ uint32_t ServiceCollaborationMenuAceHelper::GetSymbolId(const std::string& abili
 {
     auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(iconPipeline, 0);
-    auto richTheme = iconPipeline->GetTheme<RichEditorTheme>();
+    auto richTheme = GetRichEditorTheme(iconPipeline);
     CHECK_NULL_RETURN(richTheme, 0);
     if (abilityType == "CAMERA") {
         return richTheme->GetCameraSymbolId();
@@ -806,9 +812,9 @@ void ServiceCollaborationAceCallback::RemovePopupNode()
     CHECK_NULL_VOID(info_->pattern.Upgrade());
     auto host = info_->pattern.Upgrade()->GetHost();
     CHECK_NULL_VOID(host);
-    auto pattern = AceType::DynamicCast<RichEditorPattern>(info_->pattern.Upgrade());
-    CHECK_NULL_VOID(pattern);
-    pattern->RegisiterCaretChangeListener(nullptr);
+    auto* modifier = NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(modifier->regisiterCaretChangeListener(info_, nullptr));
     auto targetId = host->GetId();
     auto popupInfo = overlay->GetPopupInfo(targetId);
     popupInfo.markNeedUpdate = true;
@@ -858,9 +864,10 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
     ContainerScope scope(Container::CurrentIdSafely());
     CHECK_NULL_RETURN(info_, -1);
     if (code == PROCES_PREPARE) {
-        position_ = AceType::DynamicCast<RichEditorPattern>(info_->pattern.Upgrade())->GetCaretRect().GetOffset();
         auto popupParam = GetPopupParam(true, onStateChange_);
-        auto pattern = AceType::DynamicCast<RichEditorPattern>(info_->pattern.Upgrade());
+        auto* modifier = NodeModifier::GetRichEditorCustomModifier();
+        CHECK_NULL_RETURN(modifier, -1);
+        position_ = modifier->getCaretRect(info_).GetOffset();
         std::function<void(int32_t)> func = [weak = WeakClaim(this)](int32_t num) {
             auto callback = weak.Upgrade();
             CHECK_NULL_VOID(callback);
@@ -869,7 +876,7 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
                 callback->info_ = nullptr;
             }
         };
-        pattern->RegisiterCaretChangeListener(std::move(func));
+        modifier->regisiterCaretChangeListener(info_, std::move(func));
         auto row = CreateCustomPopUpNode(category, "");
         CHECK_NULL_RETURN(row, -1);
         auto host = info_->pattern.Upgrade()->GetHost();
@@ -983,8 +990,6 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
         auto callback = weakCallback.Upgrade();
         auto helper = weakHelper.Upgrade();
         CHECK_NULL_VOID(callback && imagePix && callback->info_);
-        auto richEditorPattern = DynamicCast<RichEditorPattern>(callback->info_->pattern.Upgrade());
-        CHECK_NULL_VOID(richEditorPattern);
         ContainerScope scope(instanceId);
         ImageSpanOptions options;
         options.imagePixelMap = imagePix;
@@ -997,14 +1002,10 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
             TAG_LOGE(AceLogTag::ACE_MENU, "info_->pattern.Upgrade() is nullptr.");
             return;
         }
-        if (!richEditorPattern->GetTextSelector().SelectNothing()) {
-            richEditorPattern->DeleteBackward(1);
-        }
-        options.offset = richEditorPattern->GetCaretPosition() + helper->photoCount_;
-        richEditorPattern->AddImageSpanFromCollaboration(options, false);
-        helper->photoCount_++;
+        auto* modifier = NG::NodeModifier::GetRichEditorCustomModifier();
+        CHECK_NULL_VOID(modifier);
+        CHECK_NULL_VOID(modifier->addImageSpanFromCollaboration(options, callback, code, helper));
         if (code == SEND_PHOTO_SUCCESS) {
-            richEditorPattern->SetCaretPosition(richEditorPattern->GetCaretPosition() + helper->photoCount_);
             callback->RemovePopupNode();
             callback->isTransmit_ = false;
             callback->info_ = nullptr;

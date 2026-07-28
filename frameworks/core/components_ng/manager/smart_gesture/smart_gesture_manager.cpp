@@ -891,7 +891,16 @@ void SmartGestureManager::ExecuteBackPressProposal()
     int32_t instanceId = context->GetInstanceId();
     auto uiContent = UIContent::GetUIContent(instanceId);
     CHECK_NULL_VOID(uiContent);
-    uiContent->ProcessBackPressed();
+    auto result = uiContent->ProcessBackPressed();
+    if (!result) {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        if (container->IsUIExtensionWindow()) {
+            container->TerminateUIExtension();
+        } else {
+            context->Finish(false);
+        }
+    }
 }
 
 bool SmartGestureManager::IsPrimaryActionNodeActive(const RefPtr<FrameNode>& node) const

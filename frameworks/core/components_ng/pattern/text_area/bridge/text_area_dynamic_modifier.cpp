@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/node_text_area_modifier.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 
 #include <optional>
 
@@ -28,6 +29,12 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/native/node/node_model.h"
+#include "core/components_ng/pattern/text_area/bridge/text_area_custom_modifier.h"
+#include "core/components_ng/pattern/text_area/text_area_pattern.h"
+#include "core/components_ng/pattern/text_field/text_component_decorator.h"
+#include "core/common/text_field_manager_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text_field/text_input_response_area.h"
 
 namespace OHOS::Ace::NG {
 void SetRadialGradientValues(NG::Gradient& gradient, const ArkUIInt32orFloat32* values, ArkUI_Int32 valuesLength,
@@ -70,7 +77,6 @@ const int32_t ERROR_INT_CODE = -1;
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
-constexpr float DEFAULT_LINE_THICKNESS_SCALE = 1.0f;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 const float ERROR_FLOAT_CODE = -1.0f;
@@ -3854,6 +3860,38 @@ const ArkUITextAreaModifier* GetTextAreaDynamicModifier()
             .resetTextAreaOnCut = nullptr,
             .setTextAreaOnPaste = SetTextAreaOnPasteImpl,
             .resetTextAreaOnPaste = nullptr,
+            .setOnTextAreaEditChange = nullptr,
+            .setOnTextAreaChange = nullptr,
+            .setOnTextAreaPaste = nullptr,
+            .setOnTextAreaSelectionChange = nullptr,
+            .setTextAreaOnSubmit = nullptr,
+            .setOnTextAreaContentSizeChange = nullptr,
+            .setOnTextAreaInputFilterError = nullptr,
+            .setTextAreaOnTextContentScroll = nullptr,
+            .setTextAreaOnWillInsertValue = nullptr,
+            .setTextAreaOnDidInsertValue = nullptr,
+            .setTextAreaOnWillDeleteValue = nullptr,
+            .setTextAreaOnDidDeleteValue = nullptr,
+            .setOnTextAreaChangeWithPreviewText = nullptr,
+            .setOnTextAreaWillChange = nullptr,
+            .setOnTextAreaCopy = nullptr,
+            .setOnTextAreaWillCopy = nullptr,
+            .setOnTextAreaCut = nullptr,
+            .setOnTextAreaWillCut = nullptr,
+            .resetOnTextAreaEditChange = nullptr,
+            .resetOnTextAreaChange = nullptr,
+            .resetOnTextAreaPaste = nullptr,
+            .resetOnTextAreaSelectionChange = nullptr,
+            .resetTextAreaOnSubmit = nullptr,
+            .resetOnTextAreaContentSizeChange = nullptr,
+            .resetOnTextAreaInputFilterError = nullptr,
+            .resetTextAreaOnTextContentScroll = nullptr,
+            .resetOnTextAreaChangeWithPreviewText = nullptr,
+            .resetOnTextAreaWillChange = nullptr,
+            .resetOnTextAreaCopy = nullptr,
+            .resetOnTextAreaWillCopy = nullptr,
+            .resetOnTextAreaCut = nullptr,
+            .resetOnTextAreaWillCut = nullptr,
             .setTextAreaLineBreakStrategy = nullptr,
             .resetTextAreaLineBreakStrategy = nullptr,
             .setTextAreaOnSubmitWithEvent = SetTextAreaOnSubmitWithEventImpl,
@@ -4117,6 +4155,38 @@ const ArkUITextAreaModifier* GetTextAreaDynamicModifier()
         .resetTextAreaOnCut = ResetTextAreaOnCut,
         .setTextAreaOnPaste = SetTextAreaOnPaste,
         .resetTextAreaOnPaste = ResetTextAreaOnPaste,
+        .setOnTextAreaEditChange = SetOnTextAreaEditChange,
+        .setOnTextAreaChange = SetOnTextAreaChange,
+        .setOnTextAreaPaste = SetOnTextAreaPaste,
+        .setOnTextAreaSelectionChange = SetOnTextAreaSelectionChange,
+        .setTextAreaOnSubmit = SetTextAreaOnSubmit,
+        .setOnTextAreaContentSizeChange = SetOnTextAreaContentSizeChange,
+        .setOnTextAreaInputFilterError = SetOnTextAreaInputFilterError,
+        .setTextAreaOnTextContentScroll = SetTextAreaOnTextContentScroll,
+        .setTextAreaOnWillInsertValue = SetTextAreaOnWillInsertValue,
+        .setTextAreaOnDidInsertValue = SetTextAreaOnDidInsertValue,
+        .setTextAreaOnWillDeleteValue = SetTextAreaOnWillDeleteValue,
+        .setTextAreaOnDidDeleteValue = SetTextAreaOnDidDeleteValue,
+        .setOnTextAreaChangeWithPreviewText = SetOnTextAreaChangeWithPreviewText,
+        .setOnTextAreaWillChange = SetOnTextAreaWillChange,
+        .setOnTextAreaCopy = SetOnTextAreaCopy,
+        .setOnTextAreaWillCopy = SetOnTextAreaWillCopy,
+        .setOnTextAreaCut = SetOnTextAreaCut,
+        .setOnTextAreaWillCut = SetOnTextAreaWillCut,
+        .resetOnTextAreaEditChange = ResetTextAreaOnEditChange,
+        .resetOnTextAreaChange = ResetTextAreaOnChange,
+        .resetOnTextAreaPaste = ResetTextAreaOnPaste,
+        .resetOnTextAreaSelectionChange = ResetTextAreaOnTextSelectionChange,
+        .resetTextAreaOnSubmit = ResetTextAreaOnSubmitWithEvent,
+        .resetOnTextAreaContentSizeChange = ResetOnTextAreaContentSizeChange,
+        .resetOnTextAreaInputFilterError = ResetOnTextAreaInputFilterError,
+        .resetTextAreaOnTextContentScroll = ResetTextAreaOnContentScroll,
+        .resetOnTextAreaChangeWithPreviewText = ResetTextAreaOnChange,
+        .resetOnTextAreaWillChange = ResetTextAreaOnWillChange,
+        .resetOnTextAreaCopy = ResetTextAreaOnCopy,
+        .resetOnTextAreaWillCopy = ResetTextAreaOnWillCopy,
+        .resetOnTextAreaCut = ResetTextAreaOnCut,
+        .resetOnTextAreaWillCut = ResetTextAreaOnWillCut,
         .setTextAreaLineBreakStrategy = SetTextAreaLineBreakStrategy,
         .resetTextAreaLineBreakStrategy = ResetTextAreaLineBreakStrategy,
         .setTextAreaOnSubmitWithEvent = SetTextAreaOnSubmitWithEvent,
@@ -4543,26 +4613,6 @@ void SetTextAreaOnSubmit(ArkUINodeHandle node, void* extraParam)
     TextFieldModelNG::SetOnSubmit(frameNode, std::move(onEvent));
 }
 
-void ResetOnTextAreaChange(ArkUINodeHandle node)
-{
-    GetTextAreaDynamicModifier()->resetTextAreaOnChange(node);
-}
-
-void ResetOnTextAreaPaste(ArkUINodeHandle node)
-{
-    GetTextAreaDynamicModifier()->resetTextAreaOnPaste(node);
-}
-
-void ResetOnTextAreaSelectionChange(ArkUINodeHandle node)
-{
-    GetTextAreaDynamicModifier()->resetTextAreaOnTextSelectionChange(node);
-}
-
-void ResetOnTextAreaEditChange(ArkUINodeHandle node)
-{
-    GetTextAreaDynamicModifier()->resetTextAreaOnEditChange(node);
-}
-
 void ResetOnTextAreaContentSizeChange(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -4575,41 +4625,6 @@ void ResetOnTextAreaInputFilterError(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetInputFilterError(frameNode, nullptr);
-}
-
-void ResetTextAreaOnTextContentScroll(ArkUINodeHandle node)
-{
-    GetTextAreaDynamicModifier()->resetTextAreaOnContentScroll(node);
-}
-
-void ResetTextAreaOnSubmit(ArkUINodeHandle node)
-{
-    GetTextAreaDynamicModifier()->resetTextAreaOnSubmitWithEvent(node);
-}
-
-void ResetOnTextAreaWillChange(ArkUINodeHandle node)
-{
-    GetTextAreaDynamicModifier()->resetTextAreaOnWillChange(node);
-}
-
-void ResetOnTextAreaWillCopy(ArkUINodeHandle node)
-{
-    GetTextAreaDynamicModifier()->resetTextAreaOnWillCopy(node);
-}
-
-void ResetOnTextAreaCopy(ArkUINodeHandle node)
-{
-    GetTextAreaDynamicModifier()->resetTextAreaOnCopy(node);
-}
-
-void ResetOnTextAreaWillCut(ArkUINodeHandle node)
-{
-    GetTextAreaDynamicModifier()->resetTextAreaOnWillCut(node);
-}
-
-void ResetOnTextAreaCut(ArkUINodeHandle node)
-{
-    GetTextAreaDynamicModifier()->resetTextAreaOnCut(node);
 }
 
 void SetOnTextAreaWillChange(ArkUINodeHandle node, void* extraParam)
@@ -4780,9 +4795,20 @@ void SetTextAreaOnDidDeleteValue(ArkUINodeHandle node, void* extraParam)
     };
     TextFieldModelNG::SetOnDidDeleteEvent(frameNode, std::move(onDidDelete));
 }
-void ResetOnTextAreaChangeWithPreviewText(ArkUINodeHandle node)
+
+RefPtr<FrameNode> CreateTextAreaNode(int32_t nodeId)
 {
-    GetTextAreaDynamicModifier()->resetTextAreaOnChange(node);
+    return TextFieldModelNG::CreateTextAreaNode(nodeId, u"", u"");
+}
+
+const ArkUITextAreaCustomModifier* GetTextAreaCustomModifier()
+{
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUITextAreaCustomModifier modifier = {
+        .createTextAreaNode = CreateTextAreaNode,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+    return &modifier;
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

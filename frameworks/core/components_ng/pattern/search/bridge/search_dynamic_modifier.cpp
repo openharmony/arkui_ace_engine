@@ -318,7 +318,7 @@ void SetJsSearchCancelButton(ArkUI_Int32 style, const struct ArkUIIconOptionsStr
     NG::IconOptions cancelIconOptions;
     std::string bundleNameStr(bundleName);
     std::string moduleNameStr(moduleName);
-    if (value->color != INVALID_COLOR_VALUE) {
+    if (value->colorPlaceholder != INVALID_COLOR_VALUE) {
         FillColorValueAndPlaceholder(iconColor, value->color, value->colorPlaceholder);
         cancelIconOptions =
             NG::IconOptions(iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)),
@@ -482,11 +482,11 @@ void SetSearchSearchIcon(
         }
     }
     Color iconColor;
-    if (value->color != INVALID_COLOR_VALUE) {
+    if (value->colorPlaceholder != INVALID_COLOR_VALUE) {
         FillColorValueAndPlaceholder(iconColor, value->color, value->colorPlaceholder);
     }
     NG::IconOptions searchIconOptions;
-    if (value->color == INVALID_COLOR_VALUE &&
+    if (value->colorPlaceholder == INVALID_COLOR_VALUE &&
         frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         searchIconOptions = NG::IconOptions(Dimension(value->value, static_cast<DimensionUnit>(value->unit)),
             std::string(value->src), "", "");
@@ -518,7 +518,7 @@ void SetJsSearchSearchIcon(ArkUINodeHandle node, const struct ArkUIIconOptionsSt
     NG::IconOptions searchIconOptions;
     std::string bundleNameStr(bundleName);
     std::string moduleNameStr(moduleName);
-    if (value->color != INVALID_COLOR_VALUE) {
+    if (value->colorPlaceholder != INVALID_COLOR_VALUE) {
         FillColorValueAndPlaceholder(iconColor, value->color, value->colorPlaceholder);
         searchIconOptions =
             NG::IconOptions(iconColor, Dimension(value->value, static_cast<DimensionUnit>(value->unit)),

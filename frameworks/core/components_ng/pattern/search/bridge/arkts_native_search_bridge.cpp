@@ -992,7 +992,7 @@ ArkUINativeModuleValue SearchBridge::SetJsCancelButton(ArkUIRuntimeCallInfo* run
         CancelButtonStyle cancelButtonStyle = ConvertStrToCancelButtonStyle(styleString);
         style = static_cast<int32_t>(cancelButtonStyle);
     }
-    struct ArkUIIconOptionsStruct value = {0.0, 0, INVALID_COLOR_VALUE, 0, nullptr};
+    struct ArkUIIconOptionsStruct value = {0.0, 0, INVALID_COLOR_VALUE, INVALID_COLOR_VALUE, nullptr};
     CalcDimension iconSize;
     RefPtr<ResourceObject> sizeObject;
     if (!thirdArg->IsUndefined() && !thirdArg->IsNull() &&
@@ -1016,6 +1016,7 @@ ArkUINativeModuleValue SearchBridge::SetJsCancelButton(ArkUIRuntimeCallInfo* run
         value.colorPlaceholder = static_cast<int32_t>(color.GetPlaceholder());
     } else {
         value.color = INVALID_COLOR_VALUE;
+        value.colorPlaceholder = INVALID_COLOR_VALUE;
     }
     std::string srcStr;
     RefPtr<ResourceObject> srcObject;
@@ -1197,7 +1198,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
     auto isJsView = firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
     nativeNode = isJsView ? reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode())
                           : nativeNode;
-    struct ArkUIIconOptionsStruct value = { 0.0, 0, INVALID_COLOR_VALUE, 0, nullptr };
+    struct ArkUIIconOptionsStruct value = { 0.0, 0, INVALID_COLOR_VALUE, INVALID_COLOR_VALUE, nullptr };
 
     CalcDimension size;
     auto container = Container::Current();
@@ -1228,6 +1229,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
         value.colorPlaceholder = static_cast<int32_t>(color.GetPlaceholder());
     } else {
         value.color = INVALID_COLOR_VALUE;
+        value.colorPlaceholder = INVALID_COLOR_VALUE;
     }
 
     std::string srcStr;

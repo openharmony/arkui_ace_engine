@@ -40,7 +40,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/render/render_context.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 
@@ -1767,7 +1767,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
      * @tc.expected: depends on first param, hideSplitButton value is true.
      */
     context_->SetContainerButtonHide(true, true, false, false);
-    EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
+    EXPECT_TRUE(containerPattern->hideSplitButton_ == true);
     /**
      * @tc.steps3: call SetContainerButtonHide with params false, true, false, false.
      * @tc.expected: depends on first param, hideSplitButton value is false.

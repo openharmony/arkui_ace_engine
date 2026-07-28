@@ -666,7 +666,8 @@ bool RichEditorSelectOverlay::IsHandleShow()
     return IsBothHandlesShow() || IsSingleHandleShow();
 }
 
-void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag)
+void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed,
+    bool transformTriggersEmbed)
 {
     auto pattern = GetPattern<RichEditorPattern>();
     if (IsAncestorNodeGeometryChange(flag)) {
@@ -688,7 +689,7 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
             parent = parent->GetAncestorNodeOfFrame(true);
         }
     }
-    BaseTextSelectOverlay::OnAncestorNodeChanged(changeFlag);
+    BaseTextSelectOverlay::OnAncestorNodeChanged(changeFlag, scrollTriggersEmbed, transformTriggersEmbed);
 }
 
 void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)

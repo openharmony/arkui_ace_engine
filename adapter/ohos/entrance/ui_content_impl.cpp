@@ -146,7 +146,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h"
@@ -2261,15 +2261,10 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         EventReport::ReportReusedNodeSkipMeasureApp();
     }
     AceApplicationInfo::GetInstance().SetReusedNodeSkipMeasure(reusedNodeSkipMeasure);
-    // Read the enableCustomComponentFreeze configuration from metadata and set it in LazyForEachUtils.
-    bool enableCustomComponentFreeze = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "enableCustomComponentFreeze" && metaDataItem.value == "true";
-    });
-    NG::LazyForEachUtils::SetEnableCustomComponentFreeze(enableCustomComponentFreeze);
-    bool enableRepeatAnimation = std::any_of(metaData.begin(), metaData.end(), [](const auto& metaDataItem) {
-        return metaDataItem.name == "enableRepeatAnimation" && metaDataItem.value == "true";
-    });
-    NG::LazyForEachUtils::SetEnableRepeatAnimation(enableRepeatAnimation);
+    // Read metadata configurations and set them in LazyForEachUtils
+    for (const auto& metaDataItem : metaData) {
+        NG::LazyForEachUtils::ParseMetaData(metaDataItem.name, metaDataItem.value);
+    }
     auto useNewPipe = AceNewPipeJudgement::QueryAceNewPipeEnabledStage(
         bundleName_, apiCompatibleVersion, apiTargetVersion, apiReleaseType, closeArkTSPartialUpdate);
     AceApplicationInfo::GetInstance().SetIsUseNewPipeline(useNewPipe);
@@ -6919,6 +6914,17 @@ int32_t UIContentImpl::GetUIContentWindowID(int32_t instanceId)
 OHOS::Rosen::Window* UIContentImpl::GetUIContentWindow()
 {
     return window_;
+}
+
+void UIContentImpl::ForceRequestFrame()
+{
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto window = pipeline->GetWindow();
+    CHECK_NULL_VOID(window);
+    window->SetForceVsyncRequests(true);
 }
 
 void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor)
