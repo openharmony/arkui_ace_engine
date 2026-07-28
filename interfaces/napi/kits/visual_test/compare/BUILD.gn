@@ -1,0 +1,23 @@
+# rendertest/compare/BUILD.gn
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+ohos_shared_library("imagecompare") {
+  output_name = "compare"
+  sources = [
+    "image_compare_impl.cpp",
+    "image_compare_napi.cpp",
+  ]
+  public = [ "imagecompare.h" ]
+
+  configs = [ "$ace_root:ace_config" ]
+
+  external_deps = [
+    "napi:ace_napi",
+    "libpng:libpng",
+  ]
+
+  relative_install_dir = "module/arkui/visualtest"
+  part_name = ace_engine_part
+  subsystem_name = ace_engine_subsystem
+}
