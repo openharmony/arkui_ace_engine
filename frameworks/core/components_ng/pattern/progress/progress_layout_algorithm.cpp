@@ -191,7 +191,7 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
     CHECK_NULL_RETURN(host, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_RETURN(paintProperty, DEFALT_CAPSULE_WIDTH.ConvertToPx());
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_RETURN(pipeline, DEFALT_CAPSULE_WIDTH.ConvertToPx());
     auto progressTheme = host->GetTheme<ProgressTheme>(true);
     Dimension margin = progressTheme->GetTextMargin();
@@ -213,7 +213,7 @@ float ProgressLayoutAlgorithm::GetChildHeight(LayoutWrapper* layoutWrapper, floa
     float childHeight =
         paintProperty->GetTextSize().value_or(progressTheme->GetTextSize()).ConvertToPx() + 2 * margin.ConvertToPx();
 
-    auto fontScale = pipeline->GetFontScale();
+    auto fontScale = pipeline->GetFontScaleFromEnv(host);
     if (GreatOrEqualCustomPrecision(fontScale, progressTheme->GetFontScale()) && (GetType() == ProgressType::CAPSULE)) {
         const auto& paddingProperty = layoutProperty->GetPaddingProperty();
         if (!(paddingProperty &&
