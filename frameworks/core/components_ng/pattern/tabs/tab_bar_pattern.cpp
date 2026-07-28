@@ -1480,7 +1480,7 @@ void TabBarPattern::InitLongPressAndDragEvent()
     CHECK_NULL_VOID(gestureHub);
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
-    float scale = pipelineContext->GetFontScale();
+    float scale = pipelineContext->GetFontScaleFromEnv(host);
 
     bigScale_ = AgingAdapationDialogUtil::GetDialogBigFontSizeScale();
     largeScale_ = AgingAdapationDialogUtil::GetDialogLargeFontSizeScale();

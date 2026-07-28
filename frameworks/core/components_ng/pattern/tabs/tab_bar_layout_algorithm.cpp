@@ -343,7 +343,7 @@ bool TabBarLayoutAlgorithm::NeedAdaptForAging(RefPtr<FrameNode> host)
     auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, false);
 
-    if (GreatOrEqual(pipeline->GetFontScale(), tabTheme->GetSubTabBarBigFontSizeScale())) {
+    if (GreatOrEqual(pipeline->GetFontScaleFromEnv(host), tabTheme->GetSubTabBarBigFontSizeScale())) {
         return true;
     }
     return false;
@@ -363,7 +363,7 @@ bool TabBarLayoutAlgorithm::GetBarAdaptiveHeight(LayoutWrapper* layoutWrapper)
     auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, isBarAdaptiveHeight);
     if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE &&
-        GreatOrEqual(pipeline->GetFontScale(), tabTheme->GetsubTabBarThirdLargeFontSizeScale())) {
+        GreatOrEqual(pipeline->GetFontScaleFromEnv(host), tabTheme->GetsubTabBarThirdLargeFontSizeScale())) {
         isBarAdaptiveHeight = true;
     }
     return isBarAdaptiveHeight;
@@ -381,7 +381,7 @@ bool TabBarLayoutAlgorithm::GetNoMinHeightLimit(LayoutWrapper* layoutWrapper)
     auto tabTheme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_RETURN(tabTheme, isNoMinHeightLimit);
     if (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE &&
-        GreatOrEqual(pipeline->GetFontScale(), tabTheme->GetsubTabBarThirdLargeFontSizeScale())) {
+        GreatOrEqual(pipeline->GetFontScaleFromEnv(host), tabTheme->GetsubTabBarThirdLargeFontSizeScale())) {
         isNoMinHeightLimit = true;
     }
     return isNoMinHeightLimit;
