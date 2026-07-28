@@ -1,7 +1,7 @@
 # ArkUI KB
 
 > 更新时间：2026-07-31
-> 主题数：219
+> 主题数：225
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -30,6 +30,8 @@ docs/kb/
 - 代码级结论必须能从真实源码或 SDK 声明验证，未验证内容标注为“推测”。
 
 ## 当前主题
+
+### 知识型 KB
 
 | ID | 主题 | 新版 KB | 状态 |
 |----|------|---------|------|
@@ -243,6 +245,12 @@ docs/kb/
 | NestedScrollOffsetNoResponse | 嵌套滚动偏移量不响应 | `docs/kb/issues/interaction/nested-scroll-offset-no-response.md` | 新建 |
 | ScrollerNaNOffsetValidation | Scroller 非法数值偏移校验 | `docs/kb/issues/compatibility/scroller-nan-offset-validation.md` | 新建 |
 | CustomSpanControllerLifecycle | CustomSpan 控制器生命周期 | `docs/kb/issues/text/custom-span-controller-lifecycle.md` | 新建 |
+
+### 问题型 KB
+
+| ID | 主题 | 新版 KB | 状态 |
+|----|------|---------|------|
+| KeyboardAvoidTimingChange | 键盘避让执行顺序变化 | `docs/kb/issues/layout/keyboard-avoid-timing-change.md` | 新建 |
 
 ## 检索
 
