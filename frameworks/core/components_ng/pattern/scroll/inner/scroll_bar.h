@@ -47,6 +47,7 @@ constexpr double BAR_FRICTION = 0.9;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollBarPositionCallback = std::function<bool(double, int32_t source, bool isMouseWheelScroll)>;
+using GetOverScrollOffsetCallback = std::function<OverScrollOffset(double contentDelta)>;
 
 enum class BarDirection {
     BAR_NONE = 0,
@@ -523,6 +524,11 @@ public:
         canOverScrollWithDelta_ = std::move(func);
     }
 
+    void SetGetOverScrollOffsetFunc(GetOverScrollOffsetCallback&& func)
+    {
+        getOverScrollOffset_ = std::move(func);
+    }
+
     void SetGetAvoidScrollBarMargin(std::function<std::pair<double, double>()>&& func)
     {
         getAvoidScrollBarMargin_ = std::move(func);
@@ -841,6 +847,7 @@ private:
     // ScrollBar over drag
     std::function<void(double)> reachBarEdgeOverScroll_;
     std::function<bool(double)> canOverScrollWithDelta_;
+    GetOverScrollOffsetCallback getOverScrollOffset_;
     uint64_t lastVsyncTime_ = 0;
     float scrollBarFlingVelocity_ = 0.0f;
     bool isTouchScreen_ = false;

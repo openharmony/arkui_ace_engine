@@ -1579,6 +1579,13 @@ void ScrollablePattern::RegisterScrollBarOverDragEventTask()
         CHECK_NULL_RETURN(pattern, false);
         return pattern->CanOverScrollWithDelta(delta);
     });
+    scrollBar_->SetGetOverScrollOffsetFunc([weak = WeakClaim(this)](double contentDelta) {
+        auto pattern = weak.Upgrade();
+        if (!pattern) {
+            return OverScrollOffset { 0, 0 };
+        }
+        return pattern->GetOverScrollOffset(contentDelta);
+    });
 }
 
 void ScrollablePattern::ProcessScrollOverDrag(double velocity, bool isNestScroller)

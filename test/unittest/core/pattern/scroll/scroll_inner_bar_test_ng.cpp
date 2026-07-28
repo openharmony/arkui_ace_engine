@@ -503,4 +503,207 @@ HWTEST_F(ScrollBarTestNg, CheckMainModeNearEqual001, TestSize.Level1)
     EXPECT_EQ(modifier->lastMainModeHeight_, 12.0f);
     EXPECT_EQ(modifier->lastMainModeOffset_, 10.0f);
 }
+
+/**
+ * @tc.name: HandleDragUpdateNormalOffset001
+ * @tc.desc: In normal (non-over-scroll) mode, HandleDragUpdate scales the delta by ratio via CalcPatternOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleDragUpdateNormalOffset001, TestSize.Level1)
+{
+    RefPtr<ScrollBar> scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    scrollBar->positionMode_ = PositionMode::RIGHT;
+    scrollBar->isDriving_ = true;
+    scrollBar->barRegionSize_ = 400.0;
+    scrollBar->activeRect_ = Rect(0.0, 0.0, 10.0, 80.0);
+    scrollBar->viewPortSize_ = Size(240.0, 400.0);
+    scrollBar->estimatedHeight_ = 2000.0;
+    scrollBar->canOverScrollWithDelta_ = [](double) { return false; };
+
+    double capturedOffset = 0.0;
+    int32_t capturedSource = 0;
+    scrollBar->scrollPositionCallback_ =
+        [&capturedOffset, &capturedSource](double offset, int32_t source, bool) {
+            capturedOffset = offset;
+            capturedSource = source;
+            return true;
+        };
+
+    GestureEvent info;
+    info.SetMainDelta(10.0);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBar->HandleDragUpdate(info);
+
+    // ratio = (2000-400)/(400-80) = 5.0;  CalcPatternOffset(10) = -10 * 5 = -50
+    EXPECT_NEAR(capturedOffset, -50.0, 0.001);
+    EXPECT_EQ(capturedSource, SCROLL_FROM_BAR);
+}
+
+/**
+ * @tc.name: HandleDragUpdateOverScrollOffset001
+ * @tc.desc: In over-scroll mode, HandleDragUpdate uses raw 1:1 delta (NOT scaled by ratio)
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleDragUpdateOverScrollOffset001, TestSize.Level1)
+{
+    RefPtr<ScrollBar> scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    scrollBar->positionMode_ = PositionMode::RIGHT;
+    scrollBar->isDriving_ = true;
+    scrollBar->barRegionSize_ = 400.0;
+    scrollBar->activeRect_ = Rect(0.0, 0.0, 10.0, 80.0);
+    scrollBar->viewPortSize_ = Size(240.0, 400.0);
+    scrollBar->estimatedHeight_ = 2000.0;
+    scrollBar->canOverScrollWithDelta_ = [](double) { return true; };
+
+    double capturedOffset = 0.0;
+    int32_t capturedSource = 0;
+    scrollBar->scrollPositionCallback_ =
+        [&capturedOffset, &capturedSource](double offset, int32_t source, bool) {
+            capturedOffset = offset;
+            capturedSource = source;
+            return true;
+        };
+
+    GestureEvent info;
+    info.SetMainDelta(10.0);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBar->HandleDragUpdate(info);
+
+    // Over-scroll path: offset = -mainDelta = -10 (1:1, not scaled)
+    EXPECT_NEAR(capturedOffset, -10.0, 0.001);
+    EXPECT_EQ(capturedSource, SCROLL_FROM_BAR_OVER_DRAG);
+}
+
+/**
+ * @tc.name: HandleDragUpdateOffsetMagnitudeDiscontinuity001
+ * @tc.desc: Same gesture delta produces ratio-times different content offset depending on canOverScroll flag,
+ *           causing the scrollbar thumb to drift from the finger at every boundary transition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleDragUpdateOffsetMagnitudeDiscontinuity001, TestSize.Level1)
+{
+    RefPtr<ScrollBar> scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    scrollBar->positionMode_ = PositionMode::RIGHT;
+    scrollBar->isDriving_ = true;
+    scrollBar->barRegionSize_ = 400.0;
+    scrollBar->activeRect_ = Rect(0.0, 0.0, 10.0, 80.0);
+    scrollBar->viewPortSize_ = Size(240.0, 400.0);
+    scrollBar->estimatedHeight_ = 2000.0;
+    const float expectedRatio = 5.0f;
+
+    double normalOffset = 0.0;
+    double overOffset = 0.0;
+    scrollBar->scrollPositionCallback_ =
+        [](double offset, int32_t, bool) { return true; };
+
+    // Normal path
+    scrollBar->canOverScrollWithDelta_ = [](double) { return false; };
+    scrollBar->scrollPositionCallback_ =
+        [&normalOffset](double offset, int32_t, bool) { normalOffset = offset; return true; };
+    GestureEvent info;
+    info.SetMainDelta(10.0);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBar->HandleDragUpdate(info);
+
+    // Over-scroll path – same delta
+    scrollBar->canOverScrollWithDelta_ = [](double) { return true; };
+    scrollBar->scrollPositionCallback_ =
+        [&overOffset](double offset, int32_t, bool) { overOffset = offset; return true; };
+    scrollBar->HandleDragUpdate(info);
+
+    // |normalOffset| / |overOffset| should equal the scaling ratio,
+    // proving the two paths produce ratio-different offsets for the same gesture delta.
+    EXPECT_NEAR(std::abs(normalOffset / overOffset), expectedRatio, 0.001);
+    EXPECT_NEAR(std::abs(normalOffset), 50.0, 0.001);
+    EXPECT_NEAR(std::abs(overOffset), 10.0, 0.001);
+}
+
+/**
+ * @tc.name: HandleDragUpdateBoundaryNoDeltaSplit001
+ * @tc.desc: When a single frame delta straddles the boundary, HandleDragUpdate assigns the ENTIRE delta to one path
+ *           instead of splitting at the boundary. This documents the root cause of the accumulated thumb drift.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleDragUpdateBoundaryNoDeltaSplit001, TestSize.Level1)
+{
+    RefPtr<ScrollBar> scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    scrollBar->positionMode_ = PositionMode::RIGHT;
+    scrollBar->isDriving_ = true;
+    scrollBar->barRegionSize_ = 400.0;
+    scrollBar->activeRect_ = Rect(0.0, 0.0, 10.0, 80.0);
+    scrollBar->viewPortSize_ = Size(240.0, 400.0);
+    scrollBar->estimatedHeight_ = 2000.0;
+    const float ratio = 5.0f;
+
+    double capturedOffset = 0.0;
+    scrollBar->canOverScrollWithDelta_ = [](double) { return true; };
+    scrollBar->scrollPositionCallback_ =
+        [&capturedOffset](double offset, int32_t, bool) { capturedOffset = offset; return true; };
+
+    // Simulate a frame returning from over-scroll: canOverScroll is true because IsOutOfBoundary()
+    // is still true at the start of the frame, but the delta crosses back into normal range.
+    // If the delta were split (4px still over-boundary, 6px now in-bounds):
+    //   correct offset = -(6 * ratio) + (-4) = -30 + (-4) = -34
+    // But the code uses the raw 1:1 path for the ENTIRE delta:
+    //   actual offset = -mainDelta = -10
+    GestureEvent info;
+    info.SetMainDelta(10.0);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBar->HandleDragUpdate(info);
+
+    // The code does NOT split the delta: the entire 10px uses the 1:1 over-scroll path.
+    // Expected correct value (with split) would be -(6 * ratio + 4) = -34, but code gives -10.
+    EXPECT_NEAR(capturedOffset, -10.0, 0.001);
+    // Demonstrate the gap: correct split offset (-34) differs from actual (-10) by 24 units.
+    float correctSplitOffset = -(6.0f * ratio + 4.0f);
+    EXPECT_NEAR(correctSplitOffset, -34.0, 0.001);
+    EXPECT_NE(capturedOffset, correctSplitOffset);
+}
+
+/**
+ * @tc.name: HandleDragUpdateDeltaSplit001
+ * @tc.desc: When getOverScrollOffset_ is set, HandleDragUpdate splits the delta at the boundary:
+ *           the in-bounds portion uses CalcPatternOffset (scaled), the over-bounds portion uses 1:1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, HandleDragUpdateDeltaSplit001, TestSize.Level1)
+{
+    RefPtr<ScrollBar> scrollBar = AceType::MakeRefPtr<ScrollBar>();
+    scrollBar->positionMode_ = PositionMode::RIGHT;
+    scrollBar->isDriving_ = true;
+    scrollBar->barRegionSize_ = 400.0;
+    scrollBar->activeRect_ = Rect(0.0, 0.0, 10.0, 80.0);
+    scrollBar->viewPortSize_ = Size(240.0, 400.0);
+    scrollBar->estimatedHeight_ = 2000.0;
+
+    scrollBar->canOverScrollWithDelta_ = [](double) { return true; };
+    // Simulate returning from over-scroll: 5px still over-boundary, 15px now in-bounds.
+    // GetOverScrollOffset(-adjustedDelta) returns overContent = -5 (the 5px over portion).
+    scrollBar->getOverScrollOffset_ = [](double contentDelta) {
+        OverScrollOffset offset = { 0, 0 };
+        if (Negative(contentDelta)) {
+            offset.start = -5.0; // 5px of content still in over-scroll zone
+        }
+        return offset;
+    };
+
+    double capturedOffset = 0.0;
+    int32_t capturedSource = 0;
+    scrollBar->scrollPositionCallback_ =
+        [&capturedOffset, &capturedSource](double offset, int32_t source, bool) {
+            capturedOffset = offset;
+            capturedSource = source;
+            return true;
+        };
+
+    GestureEvent info;
+    info.SetMainDelta(20.0); // 20px drag — crosses boundary (5 over + 15 normal)
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBar->HandleDragUpdate(info);
+
+    // overContent = -5, overBar = 5, normalBar = 15
+    // offset = CalcPatternOffset(15) + (-5) = -15 * ratio + (-5) = -75 + (-5) = -80
+    EXPECT_NEAR(capturedOffset, -80.0, 0.001);
+    EXPECT_EQ(capturedSource, SCROLL_FROM_BAR_OVER_DRAG);
+}
 } // namespace OHOS::Ace::NG
