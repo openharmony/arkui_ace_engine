@@ -1929,7 +1929,8 @@ bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optio
                 imageHasData = canvasImageIter->second->HasData();
             }
             if (canvasImageIter == particleImageMap_.end() || !imageHasData) {
-                LoadParticleImage(imageParameter.GetImageSource(), imageWidth, imageHeight);
+                LoadParticleImage(imageParameter.GetImageSource(), imageWidth, imageHeight,
+                    imageParameter.GetBundleName(), imageParameter.GetModuleName());
                 flag = true;
             }
         }
@@ -2129,12 +2130,13 @@ void RosenRenderContext::ClearClipBounds()
     RequestNextFrame();
 }
 
-void RosenRenderContext::LoadParticleImage(const std::string& src, Dimension& width, Dimension& height)
+void RosenRenderContext::LoadParticleImage(const std::string& src, Dimension& width, Dimension& height,
+    const std::string& bundleName, const std::string& moduleName)
 {
     if (particleImageContextMap_.find(src) != particleImageContextMap_.end()) {
         return;
     }
-    ImageSourceInfo imageSourceInfo(src, width, height);
+    ImageSourceInfo imageSourceInfo(src, bundleName, moduleName, width, height);
     imageSourceInfo.SetNeedCache(false);
     auto preLoadCallback = [weak = WeakClaim(this), imageSrc = src](const ImageSourceInfo& sourceInfo) {
         auto renderContent = weak.Upgrade();
