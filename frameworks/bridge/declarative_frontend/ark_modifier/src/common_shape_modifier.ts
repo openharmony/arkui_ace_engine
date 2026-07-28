@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
-class LazyArkCommonShapeComponent extends ArkCommonShapeComponent {
+class LazyArkCommonShapeComponent extends ArkComponent {
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
   }
 
   setMap(): void {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  viewPort(value: any): this {
+    throw new Error('Method not implemented.');
   }
 
   stroke(value: ResourceColor): this {
@@ -75,6 +79,10 @@ class LazyArkCommonShapeComponent extends ArkCommonShapeComponent {
   strokeDashArray(value: any[]): this {
     this.lazyComponent.strokeDashArray(value);
     return this;
+  }
+
+  mesh(value: any, column: any, row: any): this {
+    throw new Error('Method not implemented.');
   }
 
   height(value: Length): this {
