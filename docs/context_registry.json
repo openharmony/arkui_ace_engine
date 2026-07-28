@@ -3754,6 +3754,8 @@
         "@ohos.arkui.advanced.ArcSlider"
       ],
       "kb": "docs/kb/components/selector/arc_slider.md",
+      "spec_domain": "specs/10-product-customization/01-wearable/01-arc-component",
+      "func_id": "10-01-01",
       "spec_status": "active",
       "source_paths": {
         "source": "advanced_ui_component/arcslider/source/arcslider.ets",
@@ -3765,9 +3767,7 @@
       },
       "test_paths": [],
       "status": "active",
-      "last_verified": "2026-07-23",
-      "spec_domain": "specs/10-product-customization/01-wearable/01-arc-component",
-      "func_id": "10-01-01"
+      "last_verified": "2026-07-23"
     },
     {
       "id": "ArcButton",
@@ -3788,7 +3788,9 @@
         "@ohos.arkui.advanced.ArcButton"
       ],
       "kb": "docs/kb/components/selector/arc_button.md",
-      "spec_status": "pending",
+      "spec_domain": "specs/10-product-customization/01-wearable/01-arc-component",
+      "func_id": "10-01-01",
+      "spec_status": "active",
       "source_paths": {
         "source": "advanced_ui_component/arcbutton/source/arcbutton.ets",
         "interface": "advanced_ui_component/arcbutton/interfaces/arcbutton.cpp"
@@ -3799,9 +3801,7 @@
       },
       "test_paths": [],
       "status": "active",
-      "last_verified": "2026-07-23",
-      "spec_domain": "specs/10-product-customization/01-wearable/02-arc-button",
-      "func_id": "10-01-02"
+      "last_verified": "2026-07-23"
     },
     {
       "id": "AnimationFramework",
