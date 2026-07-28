@@ -1169,4 +1169,804 @@ HWTEST_F(MenuItemTestOneNg, UpdateLabelIfSelectOverlayExtensionMenuNotSelectOver
     pattern->UpdateLabelIfSelectOverlayExtensionMenu(label);
     EXPECT_EQ(label, "original");
 }
+
+/**
+ * @tc.name: LayoutOption001
+ * @tc.desc: Test LayoutOption with menu item option in LTR direction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, LayoutOption001, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->isOption_ = true;
+    menuItemLayoutAlgorithm_->showDefaultSelectedIcon_ = false;
+    MockPipelineContextGetTheme();
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
+    menuItemLayoutAlgorithm_->horInterval_ = 12.0f;
+    menuItemLayoutAlgorithm_->LayoutOption(layoutWrapper.GetRawPtr(), layoutWrapper->GetLayoutProperty());
+}
+
+/**
+ * @tc.name: LayoutOption002
+ * @tc.desc: Test LayoutOption with menu item option in RTL direction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, LayoutOption002, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->isOption_ = true;
+    menuItemLayoutAlgorithm_->showDefaultSelectedIcon_ = false;
+    MockPipelineContextGetTheme();
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
+    menuItemLayoutAlgorithm_->horInterval_ = 12.0f;
+    menuItemLayoutAlgorithm_->LayoutOption(layoutWrapper.GetRawPtr(), layoutWrapper->GetLayoutProperty());
+}
+
+/**
+ * @tc.name: LayoutOption003
+ * @tc.desc: Test LayoutOption with textAlign CENTER (default path).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, LayoutOption003, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->isOption_ = true;
+    menuItemLayoutAlgorithm_->showDefaultSelectedIcon_ = false;
+    MockPipelineContextGetTheme();
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    menuItemLayoutAlgorithm_->horInterval_ = 0.0f;
+    menuItemLayoutAlgorithm_->LayoutOption(layoutWrapper.GetRawPtr(), layoutWrapper->GetLayoutProperty());
+}
+
+/**
+ * @tc.name: LayoutOption004
+ * @tc.desc: Test LayoutOption without host node (returns early).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, LayoutOption004, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    MockPipelineContextGetTheme();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(200.0f, 50.0f));
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    LayoutWrapperNode layoutWrapper(nullptr, geometryNode, layoutProp);
+    menuItemLayoutAlgorithm_->LayoutOption(&layoutWrapper, layoutProp);
+}
+
+/**
+ * @tc.name: MeasureOption001
+ * @tc.desc: Test MeasureOption with idealWidth has value and optionPaintProperty exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, MeasureOption001, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->isOption_ = true;
+    menuItemLayoutAlgorithm_->showDefaultSelectedIcon_ = false;
+    MockPipelineContextGetTheme();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(18);
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->isOptionPattern_ = true;
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(200.0f), CalcLength(50.0f)));
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.percentReference = SizeF(720.0f, 1136.0f);
+    constraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    auto optionPaintProperty = menuItemNode->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(optionPaintProperty, nullptr);
+    optionPaintProperty->SetIdealWidthForWeb(300);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    menuItemLayoutAlgorithm_->MeasureOption(layoutWrapper.GetRawPtr(), theme,
+        layoutWrapper->GetLayoutProperty(), constraint);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: MeasureOption002
+ * @tc.desc: Test MeasureOption with idealWidth has value but no optionPaintProperty idealWidthForWeb.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, MeasureOption002, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->isOption_ = true;
+    menuItemLayoutAlgorithm_->showDefaultSelectedIcon_ = false;
+    MockPipelineContextGetTheme();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(18);
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->isOptionPattern_ = true;
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(200.0f), CalcLength(50.0f)));
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.percentReference = SizeF(720.0f, 1136.0f);
+    constraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    auto optionPaintProperty = menuItemNode->GetPaintProperty<MenuItemPaintProperty>();
+    ASSERT_NE(optionPaintProperty, nullptr);
+    optionPaintProperty->SetIdealWidthForWeb(0);
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    menuItemLayoutAlgorithm_->MeasureOption(layoutWrapper.GetRawPtr(), theme,
+        layoutWrapper->GetLayoutProperty(), constraint);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: MeasureOption003
+ * @tc.desc: Test MeasureOption without idealWidth (idealWidth is nullopt).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, MeasureOption003, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->isOption_ = true;
+    menuItemLayoutAlgorithm_->showDefaultSelectedIcon_ = false;
+    MockPipelineContextGetTheme();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(18);
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->isOptionPattern_ = true;
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.percentReference = SizeF(720.0f, 1136.0f);
+    constraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    menuItemLayoutAlgorithm_->MeasureOption(layoutWrapper.GetRawPtr(), theme,
+        layoutWrapper->GetLayoutProperty(), constraint);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: MeasureOption004
+ * @tc.desc: Test MeasureOption with select option that has option width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, MeasureOption004, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->isOption_ = true;
+    menuItemLayoutAlgorithm_->showDefaultSelectedIcon_ = false;
+    MockPipelineContextGetTheme();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(18);
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->isOptionPattern_ = true;
+    menuItemPattern->isSelectOption_ = true;
+    menuItemPattern->hasOptionWidth_ = true;
+    menuItemPattern->SetHasOptionWidth(true);
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.percentReference = SizeF(720.0f, 1136.0f);
+    constraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    auto theme = AceType::MakeRefPtr<SelectTheme>();
+    menuItemLayoutAlgorithm_->MeasureOption(layoutWrapper.GetRawPtr(), theme,
+        layoutWrapper->GetLayoutProperty(), constraint);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateIconMargin001
+ * @tc.desc: Test UpdateIconMargin in LTR direction with icon child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, UpdateIconMargin001, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    MockPipelineContextGetTheme();
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "icon1", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
+    menuItemLayoutAlgorithm_->UpdateIconMargin(layoutWrapper.GetRawPtr());
+}
+
+/**
+ * @tc.name: UpdateIconMargin002
+ * @tc.desc: Test UpdateIconMargin in RTL direction with icon child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, UpdateIconMargin002, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    MockPipelineContextGetTheme();
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "icon1", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::RTL);
+    menuItemLayoutAlgorithm_->UpdateIconMargin(layoutWrapper.GetRawPtr());
+}
+
+/**
+ * @tc.name: UpdateIconMargin003
+ * @tc.desc: Test UpdateIconMargin with menu item without icon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, UpdateIconMargin003, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    MockPipelineContextGetTheme();
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutDirection(TextDirection::LTR);
+    menuItemLayoutAlgorithm_->UpdateIconMargin(layoutWrapper.GetRawPtr());
+}
+
+/**
+ * @tc.name: UpdateIconMargin004
+ * @tc.desc: Test UpdateIconMargin without host node (returns early).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, UpdateIconMargin004, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    MockPipelineContextGetTheme();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    LayoutWrapperNode layoutWrapper(nullptr, geometryNode, layoutProp);
+    menuItemLayoutAlgorithm_->UpdateIconMargin(&layoutWrapper);
+}
+
+/**
+ * @tc.name: UpdateSelfSize002
+ * @tc.desc: Test UpdateSelfSize with EMBEDDED expanding mode and not embedded, height > 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, UpdateSelfSize002, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    MockPipelineContextGetTheme();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(18);
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    layoutWrapper->GetLayoutProperty()->layoutConstraint_ = constraint;
+    layoutWrapper->GetLayoutProperty()->contentConstraint_ = constraint;
+    std::unique_ptr<MeasureProperty> calcConstraint = std::make_unique<MeasureProperty>();
+    calcConstraint->maxSize = CalcSize(CalcLength(720.0f), CalcLength(1136.0f));
+    calcConstraint->minSize = CalcSize(CalcLength(0.0f), CalcLength(0.0f));
+    layoutWrapper->GetLayoutProperty()->calcLayoutConstraint_ = std::move(calcConstraint);
+    menuItemLayoutAlgorithm_->UpdateSelfSize(layoutWrapper.GetRawPtr(), 100.0f, 50.0f, 0.0f);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateSelfSize003
+ * @tc.desc: Test UpdateSelfSize with EMBEDDED expanding mode and height <= 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, UpdateSelfSize003, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    MockPipelineContextGetTheme();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(18);
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    layoutWrapper->GetLayoutProperty()->layoutConstraint_ = constraint;
+    layoutWrapper->GetLayoutProperty()->contentConstraint_ = constraint;
+    menuItemLayoutAlgorithm_->UpdateSelfSize(layoutWrapper.GetRawPtr(), 100.0f, 0.0f, 0.0f);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateSelfSize004
+ * @tc.desc: Test UpdateSelfSize with SIDE expanding mode (not EMBEDDED condition).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, UpdateSelfSize004, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    MockPipelineContextGetTheme();
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(18);
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->expandingMode_ = SubMenuExpandingMode::SIDE;
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    layoutWrapper->GetLayoutProperty()->layoutConstraint_ = constraint;
+    layoutWrapper->GetLayoutProperty()->contentConstraint_ = constraint;
+    menuItemLayoutAlgorithm_->UpdateSelfSize(layoutWrapper.GetRawPtr(), 100.0f, 50.0f, 0.0f);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: UpdateSelfSize005
+ * @tc.desc: Test UpdateSelfSize with version >= TWELVE and clickableArea exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, UpdateSelfSize005, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    MockPipelineContextGetTheme();
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    layoutWrapper->GetLayoutProperty()->layoutConstraint_ = constraint;
+    layoutWrapper->GetLayoutProperty()->contentConstraint_ = constraint;
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = 100;
+    menuItemLayoutAlgorithm_->UpdateSelfSize(layoutWrapper.GetRawPtr(), 200.0f, 50.0f, 10.0f);
+    ASSERT_TRUE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
+}
+
+/**
+ * @tc.name: UpdateSelfSize006
+ * @tc.desc: Test UpdateSelfSize with version < TWELVE (else branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, UpdateSelfSize006, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    MockPipelineContextGetTheme();
+    std::function<void()> action = [] {};
+    std::vector<OptionParam> optionParams;
+    optionParams.emplace_back("MenuItem1", "", action);
+    MenuParam menuParam;
+    auto menuWrapperNode = MenuView::Create(std::move(optionParams), 1, "", MenuType::MENU, menuParam);
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    layoutWrapper->GetLayoutProperty()->layoutConstraint_ = constraint;
+    layoutWrapper->GetLayoutProperty()->contentConstraint_ = constraint;
+    PipelineBase::GetCurrentContext()->minPlatformVersion_ = 10;
+    menuItemLayoutAlgorithm_->UpdateSelfSize(layoutWrapper.GetRawPtr(), 200.0f, 50.0f, 0.0f);
+    ASSERT_FALSE(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
+}
+
+/**
+ * @tc.name: MeasureRightRow001
+ * @tc.desc: Test MeasureRightRow with showDefaultSelectedIcon true (enter expand path).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, MeasureRightRow001, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->isOption_ = false;
+    menuItemLayoutAlgorithm_->showDefaultSelectedIcon_ = true;
+    MockPipelineContextGetTheme();
+    auto menuWrapperNode = MenuView::Create(CREATE_VALUE, 1, "");
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF childConstraint;
+    childConstraint.maxSize = SizeF(720.0f, 1136.0f);
+    childConstraint.minSize = SizeF(0.0f, 0.0f);
+    childConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    menuItemLayoutAlgorithm_->minItemHeight_ = 48.0f;
+    auto result = menuItemLayoutAlgorithm_->MeasureRightRow(layoutWrapper.GetRawPtr(), childConstraint);
+    EXPECT_GE(result.first, 0.0f);
+    EXPECT_GE(result.second, 0.0f);
+}
+
+/**
+ * @tc.name: MeasureRightRow002
+ * @tc.desc: Test MeasureRightRow with layoutWrapper null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, MeasureRightRow002, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    LayoutConstraintF childConstraint;
+    childConstraint.maxSize = SizeF(720.0f, 1136.0f);
+    childConstraint.minSize = SizeF(0.0f, 0.0f);
+    auto result = menuItemLayoutAlgorithm_->MeasureRightRow(nullptr, childConstraint);
+    EXPECT_FLOAT_EQ(result.first, 0.0f);
+    EXPECT_FLOAT_EQ(result.second, 0.0f);
+}
+
+/**
+ * @tc.name: MeasureRightRow003
+ * @tc.desc: Test MeasureRightRow with isOption false and leftRowMinWidth > 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, MeasureRightRow003, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->isOption_ = false;
+    menuItemLayoutAlgorithm_->showDefaultSelectedIcon_ = false;
+    MockPipelineContextGetTheme();
+    auto menuWrapperNode = MenuView::Create(CREATE_VALUE, 1, "");
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(menuItemPattern, nullptr);
+    menuItemPattern->leftRowMinWidth_ = 50.0f;
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF childConstraint;
+    childConstraint.maxSize = SizeF(720.0f, 1136.0f);
+    childConstraint.minSize = SizeF(0.0f, 0.0f);
+    childConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    menuItemLayoutAlgorithm_->minItemHeight_ = 48.0f;
+    auto result = menuItemLayoutAlgorithm_->MeasureRightRow(layoutWrapper.GetRawPtr(), childConstraint);
+    EXPECT_GE(result.first, 0.0f);
+}
+
+/**
+ * @tc.name: MeasureRightRow004
+ * @tc.desc: Test MeasureRightRow with isOption false and leftRowMinWidth is 0 (no expand path).
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, MeasureRightRow004, TestSize.Level1)
+{
+    ASSERT_NE(menuItemLayoutAlgorithm_, nullptr);
+    menuItemLayoutAlgorithm_->isOption_ = false;
+    menuItemLayoutAlgorithm_->showDefaultSelectedIcon_ = false;
+    MockPipelineContextGetTheme();
+    auto menuWrapperNode = MenuView::Create(CREATE_VALUE, 1, "");
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
+    ASSERT_NE(menuNode, nullptr);
+    auto scrollNode = AceType::DynamicCast<FrameNode>(menuNode->GetChildAtIndex(0));
+    ASSERT_NE(scrollNode, nullptr);
+    auto columnNode = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
+    ASSERT_NE(columnNode, nullptr);
+    auto menuItemNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildAtIndex(0));
+    ASSERT_NE(menuItemNode, nullptr);
+    auto layoutWrapper = menuItemNode->CreateLayoutWrapper(true, true);
+    ASSERT_NE(layoutWrapper, nullptr);
+    LayoutConstraintF childConstraint;
+    childConstraint.maxSize = SizeF(720.0f, 1136.0f);
+    childConstraint.minSize = SizeF(0.0f, 0.0f);
+    childConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    auto result = menuItemLayoutAlgorithm_->MeasureRightRow(layoutWrapper.GetRawPtr(), childConstraint);
+    EXPECT_FLOAT_EQ(result.first, 0.0f);
+    EXPECT_FLOAT_EQ(result.second, 0.0f);
+}
+
+/**
+ * @tc.name: CheckUserHeight002
+ * @tc.desc: Test CheckUserHeight with calcConstraint selfIdealSize height has value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, CheckUserHeight002, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, layoutProp);
+    layoutProp->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(MENU_ITEM_SIZE_WIDTH), CalcLength(MENU_ITEM_SIZE_HEIGHT)));
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.percentReference = SizeF(720.0f, 1136.0f);
+    layoutProp->layoutConstraint_ = constraint;
+    layoutProp->contentConstraint_ = constraint;
+    menuItemLayoutAlgorithm_->userHeight_ = 0.0f;
+    menuItemLayoutAlgorithm_->CheckUserHeight(&layoutWrapper);
+    EXPECT_GT(menuItemLayoutAlgorithm_->userHeight_, 0.0f);
+}
+
+/**
+ * @tc.name: CheckUserHeight003
+ * @tc.desc: Test CheckUserHeight with calcConstraint selfIdealSize height has no value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, CheckUserHeight003, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, layoutProp);
+    layoutProp->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(MENU_ITEM_SIZE_WIDTH), std::nullopt));
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.percentReference = SizeF(720.0f, 1136.0f);
+    layoutProp->layoutConstraint_ = constraint;
+    layoutProp->contentConstraint_ = constraint;
+    menuItemLayoutAlgorithm_->userHeight_ = 0.0f;
+    menuItemLayoutAlgorithm_->CheckUserHeight(&layoutWrapper);
+    EXPECT_FLOAT_EQ(menuItemLayoutAlgorithm_->userHeight_, 0.0f);
+}
+
+/**
+ * @tc.name: CheckUserHeight004
+ * @tc.desc: Test CheckUserHeight with geometryNode having parentLayoutConstraint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemTestOneNg, CheckUserHeight004, TestSize.Level1)
+{
+    auto menuItemNode = FrameNode::CreateFrameNode(
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutConstraintF parentConstraint;
+    parentConstraint.scaleProperty = ScaleProperty::CreateScaleProperty();
+    geometryNode->parentLayoutConstraint_ = parentConstraint;
+    auto layoutProp = AceType::MakeRefPtr<LayoutProperty>();
+    LayoutWrapperNode layoutWrapper(menuItemNode, geometryNode, layoutProp);
+    layoutProp->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(MENU_ITEM_SIZE_WIDTH), CalcLength(MENU_ITEM_SIZE_HEIGHT)));
+    LayoutConstraintF constraint;
+    constraint.maxSize = SizeF(720.0f, 1136.0f);
+    constraint.minSize = SizeF(0.0f, 0.0f);
+    constraint.percentReference = SizeF(720.0f, 1136.0f);
+    layoutProp->layoutConstraint_ = constraint;
+    layoutProp->contentConstraint_ = constraint;
+    menuItemLayoutAlgorithm_->userHeight_ = 0.0f;
+    menuItemLayoutAlgorithm_->CheckUserHeight(&layoutWrapper);
+    EXPECT_GT(menuItemLayoutAlgorithm_->userHeight_, 0.0f);
+}
 } // namespace OHOS::Ace::NG
