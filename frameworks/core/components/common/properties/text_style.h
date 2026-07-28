@@ -31,26 +31,6 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 class SymbolEffectOptions;
-using TailIndentsArray = std::vector<Dimension>;
-
-struct TailIndents {
-    std::optional<TailIndentsArray> indentsArray;
-
-    bool operator==(const TailIndents& other) const
-    {
-        return indentsArray == other.indentsArray;
-    }
-
-    bool operator!=(const TailIndents& other) const
-    {
-        return !(*this == other);
-    }
-
-    bool HasValue() const
-    {
-        return indentsArray.has_value() && !indentsArray->empty();
-    }
-};
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
@@ -717,7 +697,8 @@ public:
     ACE_DEFINE_SYMBOL_STYLE_WITH_DEFAULT_VALUE(
         SymbolType, SymbolType, SymbolType::SYSTEM, SymbolStyleAttribute::RE_CREATE);
     ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE(Gradient, Gradient);
-    ACE_DEFINE_PARAGRAPH_STYLE(TailIndent, NG::TailIndents, ParagraphStyleAttribute::RE_CREATE);
+    ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE_WITH_FLAG(
+        TailIndent, NG::TailIndents, ParagraphStyleAttribute::RE_CREATE);
 
 public:
     ACE_DEFINE_ADVANCED_TEXT_STYLE_OPTIONAL_TYPE_WITH_FLAG(
