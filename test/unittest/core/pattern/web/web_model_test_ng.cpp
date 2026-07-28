@@ -5832,6 +5832,54 @@ HWTEST_F(WebModelTestNg, SetEnableDrag002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetWebMediaNetworkProxyEnabled001
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetWebMediaNetworkProxyEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetWebMediaNetworkProxyEnabled(false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckWebMediaNetworkProxyEnabled(false), true);
+    webModelNG.SetWebMediaNetworkProxyEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckWebMediaNetworkProxyEnabled(true), true);
+#endif
+}
+
+/**
+ * @tc.name: SetWebMediaNetworkProxyEnabled002
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetWebMediaNetworkProxyEnabled002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetWebMediaNetworkProxyEnabled(AccessibilityManager::RawPtr(frameNode), false);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckWebMediaNetworkProxyEnabled(false), true);
+    webModelNG.SetWebMediaNetworkProxyEnabled(AccessibilityManager::RawPtr(frameNode), true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckWebMediaNetworkProxyEnabled(true), true);
+#endif
+}
+
+/**
  * @tc.name: SetEnableDefaultContextMenu001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

@@ -1612,6 +1612,31 @@ HWTEST_F(WebPatternPartOneTest, OnEnableDragUpdate_001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnWebMediaNetworkProxyEnabledUpdate_001
+ * @tc.desc: Test OnWebMediaNetworkProxyEnabledUpdate function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, OnWebMediaNetworkProxyEnabledUpdate_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    webPattern->UpdateWebMediaNetworkProxyEnabled(false);
+    webPattern->OnWebMediaNetworkProxyEnabledUpdate(false);
+    auto isEnabled = webPattern->GetWebMediaNetworkProxyEnabled();
+    ASSERT_EQ(isEnabled, false);
+#endif
+}
+
+/**
  * @tc.name: OnDefaultTextEncodingFormatUpdate_001
  * @tc.desc: Test OnDefaultTextEncodingFormatUpdate function.
  * @tc.type: FUNC

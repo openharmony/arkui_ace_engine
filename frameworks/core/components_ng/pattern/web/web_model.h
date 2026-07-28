@@ -232,6 +232,7 @@ public:
     virtual void SetOptimizeParserBudgetEnabled(bool enable) = 0;
     virtual void SetEnableFollowSystemFontWeight(bool enableFollowSystemFontWeight) {};
     virtual void SetWebMediaAVSessionEnabled(bool isEnabled) {};
+    virtual void SetWebMediaNetworkProxyEnabled(bool isEnabled) {};
     virtual void SetOnLoadStarted(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetOnLoadFinished(std::function<void(const BaseEventInfo* info)>&& jsCallback) = 0;
     virtual void SetEnableDataDetector(bool isEnabled) {};

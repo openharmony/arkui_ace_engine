@@ -185,6 +185,7 @@ public:
     void EnableScrollDirectionalLock(bool enabled,
         ScrollDirectionalLockType type = ScrollDirectionalLockType::NESTED_SCROLL);
     void UpdateEnableDrag(bool enabled) {}
+    void UpdateWebMediaNetworkProxyEnabled(bool isEnabled) {}
     void UpdateScrollbarLayoutPolicy(ScrollbarLayoutPolicy policy) {}
 
 private:

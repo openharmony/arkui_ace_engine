@@ -332,6 +332,14 @@ void WebModelStatic::SetWebMediaAVSessionEnabled(FrameNode *frameNode, const std
     webPatternStatic->UpdateWebMediaAVSessionEnabled(enable.value_or(true));
 }
 
+void WebModelStatic::SetWebMediaNetworkProxyEnabled(FrameNode *frameNode, const std::optional<bool>& enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateWebMediaNetworkProxyEnabled(enable.value_or(false));
+}
+
 void WebModelStatic::SetEnableDataDetector(FrameNode* frameNode, bool isEnabled)
 {
     CHECK_NULL_VOID(frameNode);

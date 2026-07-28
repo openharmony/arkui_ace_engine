@@ -80,6 +80,7 @@ constexpr bool DEFAULT_ENABLE_DATA_DETECTOR = false;
 constexpr bool DEFAULT_ENABLE_SELECTED_DATA_DETECTOR = true;
 const std::vector<double> BLANK_SCREEN_DETECTION_DEFAULT_TIMING = { 1.0, 3.0, 5.0 };
 constexpr bool DEFAULT_WEB_MEDIA_AV_SESSION_ENABLED = true;
+constexpr bool DEFAULT_WEB_MEDIA_NETWORK_PROXY_ENABLED = false;
 constexpr bool DEFAULT_NATIVE_MEDIA_PLAYER_ENABLED = false;
 constexpr bool DEFAULT_NATIVE_MEDIA_PLAYER_SHOULDOVERLAY = false;
 constexpr bool DEFAULT_FULL_SCREEN_VIDEO_OVERLAY_ENABLED = false;
@@ -2579,6 +2580,20 @@ void ResetEnableWebAVSession(ArkUINodeHandle node)
     WebModelNG::SetWebMediaAVSessionEnabled(frameNode, DEFAULT_WEB_MEDIA_AV_SESSION_ENABLED);
 }
 
+void SetEnableMediaNetworkProxy(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebMediaNetworkProxyEnabled(frameNode, value);
+}
+
+void ResetEnableMediaNetworkProxy(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    WebModelNG::SetWebMediaNetworkProxyEnabled(frameNode, DEFAULT_WEB_MEDIA_NETWORK_PROXY_ENABLED);
+}
+
 void SetEnableDrag(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3022,6 +3037,8 @@ const ArkUIWebModifier* GetWebModifier()
         .resetEnableNativeMediaPlayer = ResetEnableNativeMediaPlayer,
         .setEnableWebAVSession = SetEnableWebAVSession,
         .resetEnableWebAVSession = ResetEnableWebAVSession,
+        .setEnableMediaNetworkProxy = SetEnableMediaNetworkProxy,
+        .resetEnableMediaNetworkProxy = ResetEnableMediaNetworkProxy,
         .setEnableDrag = SetEnableDrag,
         .resetEnableDrag = ResetEnableDrag,
         .setScrollbarLayoutPolicy = SetScrollbarLayoutPolicy,
@@ -3287,6 +3304,8 @@ const CJUIWebModifier* GetCJUIWebModifier()
         .resetEnableNativeMediaPlayer = ResetEnableNativeMediaPlayer,
         .setEnableWebAVSession = SetEnableWebAVSession,
         .resetEnableWebAVSession = ResetEnableWebAVSession,
+        .setEnableMediaNetworkProxy = SetEnableMediaNetworkProxy,
+        .resetEnableMediaNetworkProxy = ResetEnableMediaNetworkProxy,
         .setEnableDrag = SetEnableDrag,
         .resetEnableDrag = ResetEnableDrag,
         .setScrollbarLayoutPolicy = SetScrollbarLayoutPolicy,
