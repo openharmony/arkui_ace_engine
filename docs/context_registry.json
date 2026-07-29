@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-25",
+  "last_updated": "2026-07-29",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -4476,6 +4476,109 @@
       ],
       "status": "active",
       "last_verified": "2026-07-27"
+    },
+    {
+      "id": "DragFramework",
+      "name": "Drag Framework",
+      "name_cn": "拖拽框架",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "DragFramework",
+        "拖拽框架",
+        "DragDropManager",
+        "DragDropProxy",
+        "InteractionInterface",
+        "拖拽状态机",
+        "预拖拽",
+        "拖拽预览",
+        "拖拽路由",
+        "SpringLoading",
+        "GetDragCallback"
+      ],
+      "aliases": [
+        "拖拽系统框架",
+        "Drag Drop Framework",
+        "拖拽引擎",
+        "DragDropManager"
+      ],
+      "kb": "docs/kb/architecture/drag-framework.md",
+      "spec_domain": "specs/03-engine-framework/04-event-framework/02-drag-framework",
+      "func_id": "03-04-02",
+      "spec_status": "active",
+      "source_paths": {
+        "pipeline": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "manager": "frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp",
+        "gesture": "frameworks/core/components_ng/event/gesture_event_hub_drag.cpp",
+        "event": "frameworks/core/components_ng/event/drag_event.cpp",
+        "initiating": "frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/",
+        "spring_loading": "frameworks/core/components_ng/manager/drag_drop/drag_drop_spring_loading/",
+        "interaction": "frameworks/core/common/interaction/interaction_interface.h",
+        "ohos_adapter": "adapter/ohos/capability/interaction/"
+      },
+      "test_paths": [
+        "test/unittest/core/manager/drag_drop/",
+        "test/unittest/core/manager/drag_drop_manager_test_ng.cpp",
+        "test/unittest/core/event/drag_event/",
+        "test/unittest/core/event/drag_event_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "DragCapability",
+      "name": "Drag Capability",
+      "name_cn": "通用拖拽能力",
+      "kind": "common_capability",
+      "category": "system",
+      "keywords": [
+        "DragCapability",
+        "通用拖拽能力",
+        "draggable",
+        "allowDrop",
+        "dragPreview",
+        "onPreDrag",
+        "onDragSpringLoading",
+        "DragController",
+        "DragAction",
+        "DragEvent",
+        "drag_and_drop.h"
+      ],
+      "aliases": [
+        "拖拽 API",
+        "Drag API",
+        "拖放能力",
+        "DragController API"
+      ],
+      "kb": "docs/kb/capabilities/drag-capability.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/07-drag-capability",
+      "func_id": "04-04-07",
+      "spec_status": "active",
+      "source_paths": {
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "event_hub": "frameworks/core/components_ng/event/event_hub.cpp",
+        "dynamic_jsview": "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp",
+        "drag_controller": "interfaces/napi/kits/drag_controller/",
+        "static_ani": "frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp",
+        "c_api": "interfaces/native/event/drag_and_drop_impl.cpp",
+        "c_adapter": "frameworks/core/interfaces/native/node/drag_adapter_impl.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface_sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface_sdk-js/api/arkui/component/common.static.d.ets",
+        "dynamic_controller": "<OH_ROOT>/interface_sdk-js/api/@ohos.arkui.dragController.d.ts",
+        "static_controller": "<OH_ROOT>/interface_sdk-js/api/@ohos.arkui.dragController.static.d.ets",
+        "c_header": "<OH_ROOT>/interface_sdk_c/arkui/ace_engine/native/drag_and_drop.h"
+      },
+      "test_paths": [
+        "test/unittest/core/event/drag_event/",
+        "test/unittest/core/event/drag_event_test_ng.cpp",
+        "test/unittest/core/manager/drag_drop/",
+        "test/unittest/core/manager/drag_drop_controller_func_wrapper_test_ng.cpp",
+        "test/unittest/capi/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
     },
     {
       "id": "BasicRenderPipeline",

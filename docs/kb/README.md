@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-25
-> 主题数：64
+> 更新时间：2026-07-29
+> 主题数：66
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -33,6 +33,8 @@ docs/kb/
 | ID | 主题 | 新版 KB | 状态 |
 |----|------|---------|------|
 | LayoutFramework | 布局框架 | `docs/kb/architecture/layout-framework.md` | 已重建，旧 KB 已移除 |
+| DragFramework | 拖拽框架 | `docs/kb/architecture/drag-framework.md` | 新建（独立主题） |
+| DragCapability | 通用拖拽能力 | `docs/kb/capabilities/drag-capability.md` | 新建（独立主题） |
 | LayoutAttributes | 基础布局属性 | `docs/kb/capabilities/layout-attributes.md` | 新建 |
 | SafeArea | 安全区域机制 | `docs/kb/capabilities/safe-area.md` | 已合并重建，两份旧 KB 已移除 |
 | Blank | 空白填充组件 | `docs/kb/components/basic/blank.md` | 新建 |
