@@ -56,7 +56,8 @@ void ParseGridStartLineInfo(const EcmaVM* vm, const Local<JSValueRef>& value, Gr
         return;
     }
     auto array = Local<panda::ArrayRef>(value);
-    if (array->Length(vm) != GRID_START_LINE_INFO_RESULT_LENGTH) {
+    uint32_t length = ArkTSUtils::GetArrayLength(vm, array);
+    if (length != GRID_START_LINE_INFO_RESULT_LENGTH) {
         return;
     }
     auto startIndex = panda::ArrayRef::GetValueAt(vm, array, CALL_ARG_0);
@@ -103,7 +104,8 @@ void ParseGridItemRect(const EcmaVM* vm, const Local<JSValueRef>& value, GridIte
         return;
     }
     auto array = Local<panda::ArrayRef>(value);
-    if (array->Length(vm) != GRID_ITEM_RECT_RESULT_LENGTH) {
+    uint32_t length = ArkTSUtils::GetArrayLength(vm, array);
+    if (length != GRID_ITEM_RECT_RESULT_LENGTH) {
         return;
     }
     auto rowStart = panda::ArrayRef::GetValueAt(vm, array, GridItemRect::ROW_START);
@@ -132,10 +134,11 @@ void ParseGetGridItemSize(
     }
     Local<panda::FunctionRef> functionRef = getSizeByIndex->ToObject(vm);
     auto onGetIrregularSizeByIndex = [func = panda::CopyableGlobal(vm, functionRef), isJSView](int32_t index) {
+        GridItemSize gridItemSize;
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false, gridItemSize);
         panda::LocalScope scope(vm);
         panda::TryCatch trycatch(vm);
-        GridItemSize gridItemSize;
         auto itemIndex = ArkTSUtils::ToJsValueWithVM(vm, index);
         auto result = func->Call(vm, func.ToLocal(), &itemIndex, 1);
         if (isJSView) {
@@ -158,10 +161,11 @@ void ParseGetGridItemRect(
     }
     Local<panda::FunctionRef> functionRef = getRectByIndex->ToObject(vm);
     auto onGetRectByIndex = [func = panda::CopyableGlobal(vm, functionRef), isJSView](int32_t index) {
+        GridItemRect gridItemRect;
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false, gridItemRect);
         panda::LocalScope scope(vm);
         panda::TryCatch trycatch(vm);
-        GridItemRect gridItemRect;
         auto itemIndex = ArkTSUtils::ToJsValueWithVM(vm, index);
         auto result = func->Call(vm, func.ToLocal(), &itemIndex, 1);
         if (isJSView) {
@@ -185,10 +189,11 @@ void ParseGetStartIndexByOffset(
     if (getStartIndexByOffset->IsFunction(vm)) {
         Local<panda::FunctionRef> functionRef = getStartIndexByOffset->ToObject(vm);
         auto onGetStartIndexByOffset = [func = panda::CopyableGlobal(vm, functionRef), isJSView](float offset) {
+            GridStartLineInfo gridStartLineInfo;
             auto vm = func.GetEcmaVM();
+            CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false, gridStartLineInfo);
             panda::LocalScope scope(vm);
             panda::TryCatch trycatch(vm);
-            GridStartLineInfo gridStartLineInfo;
             auto offsetValue = ArkTSUtils::ToJsValueWithVM(vm, offset);
             auto result = func->Call(vm, func.ToLocal(), &offsetValue, 1);
             if (isJSView) {
@@ -212,10 +217,11 @@ void ParseGetStartIndexByIndex(
     }
     Local<panda::FunctionRef> functionRef = getStartIndexByIndex->ToObject(vm);
     auto onGetStartIndexByIndex = [func = panda::CopyableGlobal(vm, functionRef), isJSView](int32_t index) {
+        GridStartLineInfo gridStartLineInfo;
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false, gridStartLineInfo);
         panda::LocalScope scope(vm);
         panda::TryCatch trycatch(vm);
-        GridStartLineInfo gridStartLineInfo;
         auto itemIndex = ArkTSUtils::ToJsValueWithVM(vm, index);
         auto result = func->Call(vm, func.ToLocal(), &itemIndex, 1);
         if (isJSView) {
@@ -1449,11 +1455,12 @@ ArkUINativeModuleValue GridBridge::SetEditModeOptions(ArkUIRuntimeCallInfo* runt
             Local<panda::FunctionRef> functionRef = getPreviewBadge->ToObject(vm);
             auto onGetPreviewBadge = [func = panda::CopyableGlobal(vm, functionRef),
                                          node = AceType::WeakClaim(frameNode), isJSView]() {
+                NG::PreviewBadge badge;
                 auto vm = func.GetEcmaVM();
-                panda::LocalScope socpe(vm);
+                CHECK_EQUAL_RETURN(ArkTSUtils::CheckJavaScriptScope(vm), false, badge);
+                panda::LocalScope scope(vm);
                 panda::TryCatch trycatch(vm);
                 PipelineContext::SetCallBackNode(node);
-                NG::PreviewBadge badge;
                 auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
                 if (isJSView) {
                     ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
@@ -1526,6 +1533,7 @@ ArkUINativeModuleValue GridBridge::SetOnEditModeChange(ArkUIRuntimeCallInfo* run
     std::function<void(bool)> callback = [weakNode = AceType::WeakClaim(frameNode),
                                              func = panda::CopyableGlobal(vm, func), isJSView](bool enableEditMode) {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         auto frameNode = weakNode.Upgrade();
@@ -1669,6 +1677,7 @@ ArkUINativeModuleValue GridBridge::SetOnGridScrollIndex(ArkUIRuntimeCallInfo* ru
         ScrollToIndexFunc callback = [func = panda::CopyableGlobal(vm, func)](
                                          const BaseEventInfo* event) {
             auto vm = func.GetEcmaVM();
+            CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             const auto* eventInfo = TypeInfoHelper::DynamicCast<V2::GridEventInfo>(event);
@@ -2104,6 +2113,7 @@ ArkUINativeModuleValue GridBridge::SetOnReachStart(ArkUIRuntimeCallInfo* runtime
     Local<panda::FunctionRef> funcRef = funcArg->ToObject(vm);
     OnReachEvent onReachStart = [func = panda::CopyableGlobal(vm, funcRef)]() {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
@@ -2131,6 +2141,7 @@ ArkUINativeModuleValue GridBridge::SetOnReachEnd(ArkUIRuntimeCallInfo* runtimeCa
     Local<panda::FunctionRef> funcRef = funcArg->ToObject(vm);
     OnReachEvent onReachEnd = [func = panda::CopyableGlobal(vm, funcRef)]() {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
@@ -2158,6 +2169,7 @@ ArkUINativeModuleValue GridBridge::SetOnScrollStart(ArkUIRuntimeCallInfo* runtim
     Local<panda::FunctionRef> funcRef = funcArg->ToObject(vm);
     OnScrollStartEvent onScrollStart = [func = panda::CopyableGlobal(vm, funcRef)]() {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
@@ -2182,6 +2194,7 @@ ArkUINativeModuleValue GridBridge::SetOnScrollStop(ArkUIRuntimeCallInfo* runtime
     Local<panda::FunctionRef> funcRef = funcArg->ToObject(vm);
     OnScrollStopEvent onScrollStop = [func = panda::CopyableGlobal(vm, funcRef)]() {
         auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
