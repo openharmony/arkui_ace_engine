@@ -111,25 +111,24 @@ docs/kb/
 | MotionPath | 路径动画 | `docs/kb/capabilities/motion_path.md` | 新建 |
 | PhysicsAnimation | 物理动画 | `docs/kb/capabilities/physics_animation.md` | 新建 |
 | AnimationInterface | 动画接口 | `docs/kb/capabilities/animation_interface.md` | 新建 |
-| ResourceAccess | 资源访问 | `kb/architecture/resource-access.md` | 新建 |
-| ThemeLayeredAccess | 主题分层访问 | `kb/architecture/theme-layered-access.md` | 新建 |
-| ThemeFramework | Theme框架 | `kb/architecture/theme-framework.md` | 新建 |
-| ResourceDynamicSwitching | 资源动态切换 | `kb/architecture/resource-dynamic-switching.md` | 新建 |
-| SubwindowMechanism | 子窗机制 | `kb/architecture/subwindow-mechanism.md` | 新建 |
-| VisualEffectAttributes | 视效属性 | `kb/capabilities/visual-effect-attributes.md` | 新建 |
-| ModalAttributes | 模态属性 | `kb/capabilities/modal-attributes.md` | 新建 |
-| BasicUnits | 基础单位 | `kb/capabilities/basic-units.md` | 新建 |
-| ContentModifierForm | 表单类组件自定义内容 | `kb/capabilities/content-modifier-form.md` | 新建 |
-| ContentModifierDisplay | 信息展示类组件自定义内容 | `kb/capabilities/content-modifier-display.md` | 新建 |
-| UIAppearance | 色彩模式管理 | `kb/capabilities/ui-appearance.md` | 新建 |
-| NamedRouter | 命名路由 | `kb/api/named-router.md` | 新建 |
-| Rating | 评分组件 | `kb/components/input-form/rating.md` | 新建 |
-| AlertDialog | 警告弹窗 | `kb/components/overlay/alert_dialog.md` | 新建 |
-| ActionSheet | 列表选择弹窗 | `kb/components/overlay/action_sheet.md` | 新建 |
-| ContextMenu | 上下文菜单接口 | `kb/components/overlay/context_menu.md` | 新建 |
-| bindContentCover | 全模态弹窗属性 | `kb/components/overlay/bind_content_cover.md` | 新建 |
-| WithTheme | 主题作用域组件 | `kb/components/container/with_theme.md` | 新建 |
-| NavDestination | 导航目标页组件 | `kb/components/container/navdestination.md` | 新建 |
+| ResourceAccess | 资源访问 | `docs/kb/architecture/resource-access.md` | 新建 |
+| ThemeLayeredAccess | 主题分层访问 | `docs/kb/architecture/theme-layered-access.md` | 新建 |
+| ThemeFramework | Theme框架 | `docs/kb/architecture/theme-framework.md` | 新建 |
+| ResourceDynamicSwitching | 资源动态切换 | `docs/kb/architecture/resource-dynamic-switching.md` | 新建 |
+| SubwindowMechanism | 子窗机制 | `docs/kb/architecture/subwindow-mechanism.md` | 新建 |
+| VisualEffectAttributes | 视效属性 | `docs/kb/capabilities/visual-effect-attributes.md` | 新建 |
+| ModalAttributes | 模态属性 | `docs/kb/capabilities/modal-attributes.md` | 新建 |
+| BasicUnits | 基础单位 | `docs/kb/capabilities/basic-units.md` | 新建 |
+| ContentModifierForm | 表单类组件自定义内容 | `docs/kb/capabilities/content-modifier-form.md` | 新建 |
+| ContentModifierDisplay | 信息展示类组件自定义内容 | `docs/kb/capabilities/content-modifier-display.md` | 新建 |
+| UIAppearance | 色彩模式管理 | `docs/kb/capabilities/ui-appearance.md` | 新建 |
+| NamedRouter | 命名路由 | `docs/kb/api/named-router.md` | 新建 |
+| Rating | 评分组件 | `docs/kb/components/input-form/rating.md` | 新建 |
+| AlertDialog | 警告弹窗 | `docs/kb/components/overlay/alert_dialog.md` | 新建 |
+| ActionSheet | 列表选择弹窗 | `docs/kb/components/overlay/action_sheet.md` | 新建 |
+| ContextMenu | 上下文菜单接口 | `docs/kb/components/overlay/context_menu.md` | 新建 |
+| bindContentCover | 全模态弹窗属性 | `docs/kb/components/overlay/bind_content_cover.md` | 新建 |
+| WithTheme | 主题作用域组件 | `docs/kb/components/container/with_theme.md` | 新建 |
 
 ## 检索
 

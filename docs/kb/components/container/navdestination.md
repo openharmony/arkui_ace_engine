@@ -30,7 +30,7 @@ ArkUI NavDestination 是导航目标页组件，管理页面生命周期（onSho
 | node_base | `frameworks/core/components_ng/pattern/navigation/navdestination_node_base.cpp` | |
 | jsview | `frameworks/bridge/declarative_frontend/jsview/js_navdestination.cpp` | |
 | bridge | `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_destination_bridge.cpp` | |
-| capi_modifier | `interfaces/native/node/nav_destination_modifier.cpp` | |
+| capi_modifier | `frameworks/core/interfaces/native/implementation/nav_destination_modifier.cpp` | |
 
 ### API 入口
 
