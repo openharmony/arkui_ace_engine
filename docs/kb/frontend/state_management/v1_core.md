@@ -55,8 +55,8 @@ V1 装饰器的 SDK 声明位于 `interface/sdk-js` 仓（不在本仓），按�
 
 | 范式 | 稳定路径 | 说明 |
 |------|----------|------|
-| V1 装饰器（Dynamic） | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common/stateMgmt.d.ts` | `@State`/`@Prop`/`@Link`/`@Watch`/`@Provide`/`@Consume`/`@Observed`/`@ObjectLink`/`@Track` 声明 |
-| V1 装饰器（Static） | `<OH_ROOT>/interface/sdk-js/api/arkui/component/stateMgmt.static.d.ets` | 静态 ArkTS 侧 V1 装饰器声明 |
+| V1 装饰器（Dynamic） | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | `@State`/`@Prop`/`@Link`/`@Watch`/`@Provide`/`@Consume`/`@Observed`/`@ObjectLink`/`@Track` 声明 |
+| V1 装饰器（Static） | `<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets` | 静态 ArkTS 侧 V1 装饰器声明 |
 
 具体装饰器语义、允许的变量类型、API 版本与错误码以 SDK 声明为准，本文档不重述。
 
@@ -69,6 +69,11 @@ V1 装饰器的 SDK 声明位于 `interface/sdk-js` 仓（不在本仓），按�
 | Repeat 测试套 | `frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/repeat_tests/` | `ForEach`/`Repeat` 与 V1 状态交互 |
 | Context registry | `docs/context_registry.json` | 主题 `StateMgmtV1Core` |
 
+### 相关 Spec
+
+| FuncID | Spec 域 | 状态 |
+|--------|---------|------|
+| `07-02-01` | `specs/07-frontend/02-state-management/01-v1-component-state` | Baselined（9 Feat） |
 ## 常见问题定位
 
 | 问题 | 优先查看 |
@@ -92,9 +97,10 @@ V1 装饰器的 SDK 声明位于 `interface/sdk-js` 仓（不在本仓），按�
 
 ## 相关主题
 
-- 总览：`docs/kb/architecture/state_management.md`
-- V1 装饰器具体语义：`docs/kb/architecture/state_management/v1_decorators.md`
-- C++ 后端集成（`stateMgmt.abc` 载入、`JSStateMgmtProfiler`、`PipelineContext`）：`docs/kb/architecture/state_management/cpp_bindings.md`
-- 基础设施（`SubscriberManager`、`UINodeRegisterProxy`）：`docs/kb/architecture/state_management/infrastructure.md`
-- V2 对应核心：`docs/kb/architecture/state_management/v2_core.md`
-- 自定义组件机制（`ViewPU` 创建/复用/冻结/生命周期）：`docs/kb/architecture/state_management/custom_component.md`
+- 总览：`docs/kb/frontend/state_management.md`
+- V1 装饰器具体语义：`docs/kb/frontend/state_management/v1_decorators.md`
+- C++ 后端集成（`stateMgmt.abc` 载入、`JSStateMgmtProfiler`、`PipelineContext`）：`docs/kb/frontend/state_management/cpp_bindings.md`
+- 基础设施（`SubscriberManager`、`UINodeRegisterProxy`）：`docs/kb/frontend/state_management/infrastructure.md`
+- V2 对应核心：`docs/kb/frontend/state_management/v2_core.md`
+- 自定义组件机制（`ViewPU` 创建/复用/冻结/生命周期）：`docs/kb/frontend/state_management/custom_component.md`
+- 静态 V1 核心（arkoala 侧）：`docs/kb/frontend/state_management/static_v1_core.md`

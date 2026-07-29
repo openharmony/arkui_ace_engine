@@ -65,8 +65,8 @@ V1 装饰器是 ArkUI 声明式前端的初代状态管理 API，全部编译为
 
 | 范式 | 稳定路径 | 说明 |
 |------|----------|------|
-| V1 装饰器（Dynamic） | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common/stateMgmt.d.ts` | 全部 V1 装饰器声明，按装饰器名检索 |
-| V1 装饰器（Static） | `<OH_ROOT>/interface/sdk-js/api/arkui/component/stateMgmt.static.d.ets` | 静态 ArkTS 侧 V1 装饰器声明 |
+| V1 装饰器（Dynamic） | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | 全部 V1 装饰器声明，按装饰器名检索 |
+| V1 装饰器（Static） | `<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets` | 静态 ArkTS 侧 V1 装饰器声明 |
 
 各装饰器允许的变量类型、是否支持 `$$`、API 版本、错误码以 SDK 声明为准。本文档不重述完整语义矩阵。
 
@@ -78,6 +78,13 @@ V1 装饰器是 ArkUI 声明式前端的初代状态管理 API，全部编译为
 | Repeat 测试套 | `frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/repeat_tests/` | `ForEach`/`Repeat` 与 V1 状态交互 |
 | Context registry | `docs/context_registry.json` | 主题 `StateMgmtV1Decorators` |
 
+### 相关 Spec
+
+| FuncID | Spec 域 | 状态 |
+|--------|---------|------|
+| `07-02-01` | `specs/07-frontend/02-state-management/01-v1-component-state` | Baselined（V1 组件装饰器部分） |
+| `07-02-02` | `specs/07-frontend/02-state-management/02-v1-data-object-state` | Baselined（@Observed/@Track） |
+| `07-02-03` | `specs/07-frontend/02-state-management/03-v1-app-state` | Baselined（@StorageLink 等） |
 ## 常见问题定位
 
 | 问题 | 优先查看 |
@@ -109,8 +116,9 @@ V1 装饰器是 ArkUI 声明式前端的初代状态管理 API，全部编译为
 
 ## 相关主题
 
-- 总览：`docs/kb/architecture/state_management.md`
-- V1 核心逻辑（依赖收集、变更通知、冻结、`@Observed` Proxy 体系）：`docs/kb/architecture/state_management/v1_core.md`
-- V2 装饰器（V1 的下一代对应）：`docs/kb/architecture/state_management/v2_decorators.md`
-- 存储体系（`@StorageLink`/`@StorageProp`/`@LocalStorageLink`/`@LocalStorageProp`）：`docs/kb/architecture/state_management/storage.md`
-- 自定义组件机制（`ViewPU`、`@Provide`/`@Consume` 注册、BuildNode 复用）：`docs/kb/architecture/state_management/custom_component.md`
+- 总览：`docs/kb/frontend/state_management.md`
+- V1 核心逻辑（依赖收集、变更通知、冻结、`@Observed` Proxy 体系）：`docs/kb/frontend/state_management/v1_core.md`
+- V2 装饰器（V1 的下一代对应）：`docs/kb/frontend/state_management/v2_decorators.md`
+- 存储体系（`@StorageLink`/`@StorageProp`/`@LocalStorageLink`/`@LocalStorageProp`）：`docs/kb/frontend/state_management/storage.md`
+- 自定义组件机制（`ViewPU`、`@Provide`/`@Consume` 注册、BuildNode 复用）：`docs/kb/frontend/state_management/custom_component.md`
+- 静态 V1 装饰器与数据对象（arkoala 侧）：`docs/kb/frontend/state_management/static_v1_decorators.md`

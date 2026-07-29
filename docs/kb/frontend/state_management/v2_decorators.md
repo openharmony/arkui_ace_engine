@@ -71,9 +71,9 @@ V2 装饰器是 API 12+ 的下一代状态管理 API，全部定义在 `v2/v2_de
 
 | 范式 | 稳定路径 | 说明 |
 |------|----------|------|
-| V2 装饰器（Dynamic） | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common/stateMgmtV2.d.ts` | 全部 V2 装饰器声明，按装饰器名检索 |
-| V2 装饰器（Static） | `<OH_ROOT>/interface/sdk-js/api/arkui/component/stateMgmt.static.d.ets` | 静态 ArkTS 侧 V2 装饰器声明 |
-| StateManagement 模块 | `<OH_ROOT>/interface/sdk-js/api/arkui/@ohos.arkui.StateManagement.d.ts` | `makeObserved`、`UIUtils`、`SystemEnvKey`、`CustomEnvKey` |
+| V2 装饰器（Dynamic） | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | 全部 V2 装饰器声明，按装饰器名检索 |
+| V2 装饰器（Static） | `<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets` | 静态 ArkTS 侧 V2 装饰器声明 |
+| StateManagement 模块 | `<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.StateManagement.d.ts` | `makeObserved`、`UIUtils`、`SystemEnvKey`、`CustomEnvKey` |
 
 各装饰器允许的变量类型、是否可写、API 版本、IMonitor 返回结构、错误码以 SDK 声明为准。
 
@@ -85,6 +85,12 @@ V2 装饰器是 API 12+ 的下一代状态管理 API，全部定义在 `v2/v2_de
 | Env 测试套 | `frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/env_tests/` | `@Env`/`@CustomEnv`、`EnvV2` 注册表、UIContext 隔离 |
 | Context registry | `docs/context_registry.json` | 主题 `StateMgmtV2Decorators` |
 
+### 相关 Spec
+
+| FuncID | Spec 域 | 状态 |
+|--------|---------|------|
+| `07-02-04` | `specs/07-frontend/02-state-management/04-v2-component-state` | Baselined（V2 组件装饰器部分） |
+| `07-02-05` | `specs/07-frontend/02-state-management/05-v2-data-object-state` | Baselined（@ObservedV2/@Trace/@Computed/@Monitor） |
 ## 常见问题定位
 
 | 问题 | 优先查看 |
@@ -115,9 +121,10 @@ V2 装饰器是 API 12+ 的下一代状态管理 API，全部定义在 `v2/v2_de
 
 ## 相关主题
 
-- 总览：`docs/kb/architecture/state_management.md`
-- V2 核心逻辑（`ObserveV2`、ID 分段、惰性 Proxy、调度）：`docs/kb/architecture/state_management/v2_core.md`
-- V1 装饰器（V2 的上一代对应）：`docs/kb/architecture/state_management/v1_decorators.md`
-- 存储体系（`@Type`/PersistenceV2/AppStorageV2）：`docs/kb/architecture/state_management/storage.md`
-- 自定义组件机制（`@ComponentV2`/`ViewV2`）：`docs/kb/architecture/state_management/custom_component.md`
-- 基础设施（`UIUtils`/`WeakRefPool`）：`docs/kb/architecture/state_management/infrastructure.md`
+- 总览：`docs/kb/frontend/state_management.md`
+- V2 核心逻辑（`ObserveV2`、ID 分段、惰性 Proxy、调度）：`docs/kb/frontend/state_management/v2_core.md`
+- V1 装饰器（V2 的上一代对应）：`docs/kb/frontend/state_management/v1_decorators.md`
+- 存储体系（`@Type`/PersistenceV2/AppStorageV2）：`docs/kb/frontend/state_management/storage.md`
+- 自定义组件机制（`@ComponentV2`/`ViewV2`）：`docs/kb/frontend/state_management/custom_component.md`
+- 基础设施（`UIUtils`/`WeakRefPool`）：`docs/kb/frontend/state_management/infrastructure.md`
+- 静态 V2 装饰器与数据对象（arkoala 侧）：`docs/kb/frontend/state_management/static_v2_decorators.md`
