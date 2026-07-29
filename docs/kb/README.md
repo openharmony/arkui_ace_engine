@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-28
-> 主题数：98
+> 更新时间：2026-07-29
+> 主题数：122
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -148,6 +148,8 @@ docs/kb/
 | ContextMenu | 上下文菜单接口 | `docs/kb/components/overlay/context_menu.md` | 新建 |
 | bindContentCover | 全模态弹窗属性 | `docs/kb/components/overlay/bind_content_cover.md` | 新建 |
 | WithTheme | 主题作用域组件 | `docs/kb/components/container/with_theme.md` | 新建 |
+
+| OverlayCapability | 浮层能力 | `docs/kb/capabilities/overlay-capability.md` | 新建 |
 
 ## 检索
 
