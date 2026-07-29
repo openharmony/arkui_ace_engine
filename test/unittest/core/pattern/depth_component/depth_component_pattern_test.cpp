@@ -19,6 +19,9 @@
 
 #include "depth_component_test_base.h"
 
+#include "base/image/image_defines.h"
+#include "core/components/image/image_event.h"
+
 namespace OHOS::Ace::NG {
 
 class DepthComponentPatternTestNg : public DepthComponentTestBase {};
@@ -305,6 +308,18 @@ HWTEST_F(DepthComponentPatternTestNg, OnModifyDone003, TestSize.Level1)
     EXPECT_FALSE(pattern->HasBackgroundImageNode());
 }
 
+/**
+ * @tc.name: OnModifyDone004
+ * @tc.desc: OnModifyDone with a null host is a safe no-op (Pattern::OnModifyDone + CHECK_NULL_VOID).
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, OnModifyDone004, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<DepthComponentPattern>();
+    pattern->OnModifyDone(); // host null -> CHECK_NULL_VOID, no crash
+    EXPECT_FALSE(pattern->HasBackgroundImageNode());
+}
+
 // ===================== SetupBackgroundImageNode =====================
 
 /**
@@ -363,6 +378,18 @@ HWTEST_F(DepthComponentPatternTestNg, SetupBackgroundImageNode003, TestSize.Leve
     EXPECT_EQ(layoutProp->GetImageSourceInfo()->GetSrc(), std::string(DEPTH_IMAGE_SRC));
 }
 
+/**
+ * @tc.name: SetupBackgroundImageNode004
+ * @tc.desc: SetupBackgroundImageNode with a null host is a safe no-op (CHECK_NULL_VOID).
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, SetupBackgroundImageNode004, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<DepthComponentPattern>();
+    pattern->SetupBackgroundImageNode(); // host null -> CHECK_NULL_VOID
+    EXPECT_FALSE(pattern->HasBackgroundImageNode());
+}
+
 // ===================== RemoveBackgroundImageNode =====================
 
 /**
@@ -409,6 +436,45 @@ HWTEST_F(DepthComponentPatternTestNg, RemoveBackgroundImageNode003, TestSize.Lev
     pattern->RemoveBackgroundImageNode();
     EXPECT_FALSE(pattern->HasBackgroundImageNode());
     EXPECT_FALSE(pattern->pendingCleanupImage_);
+}
+
+/**
+ * @tc.name: RemoveBackgroundImageNode004
+ * @tc.desc: Null host leaves the id / pending flag untouched (CHECK_NULL_VOID).
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, RemoveBackgroundImageNode004, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<DepthComponentPattern>();
+    pattern->backgroundImageId_ = 12345;
+    pattern->pendingCleanupImage_ = true;
+    pattern->RemoveBackgroundImageNode(); // host null -> CHECK_NULL_VOID
+    EXPECT_TRUE(pattern->backgroundImageId_.has_value()); // unchanged
+    EXPECT_TRUE(pattern->pendingCleanupImage_);            // unchanged
+}
+
+/**
+ * @tc.name: RemoveBackgroundImageNode005
+ * @tc.desc: When the referenced node exists in the register but is not a child of the host
+ *          (GetChildIndex < 0), the id is still reset while RemoveChildAtIndex is skipped.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, RemoveBackgroundImageNode005, TestSize.Level1)
+{
+    auto host = CreateNode(MakeImageSource());
+    auto pattern = host->GetPattern<DepthComponentPattern>();
+
+    // Register an IMAGE node that is NOT attached to host.
+    auto foreignId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto foreign = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, foreignId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    ASSERT_NE(foreign, nullptr);
+    pattern->backgroundImageId_ = foreignId;
+    EXPECT_EQ(host->GetChildIndex(foreign), -1);
+
+    pattern->RemoveBackgroundImageNode(); // index < 0 -> skip RemoveChildAtIndex, reset id
+    EXPECT_FALSE(pattern->HasBackgroundImageNode());
+    EXPECT_EQ(host->GetChildIndex(foreign), -1); // foreign still not a child
 }
 
 // ===================== ApplyBackgroundImageMatrix =====================
@@ -530,6 +596,44 @@ HWTEST_F(DepthComponentPatternTestNg, ApplyOnCompleteCallback001, TestSize.Level
 }
 
 /**
+ * @tc.name: ApplyOnCompleteCallback002
+ * @tc.desc: Driving the registered image->depth bridge lambda with a LoadImageSuccessEvent
+ *          (loadingStatus == LOAD_SUCCESS) invokes FinishBackgroundSwitch and forwards the
+ *          component dimensions through the depth event hub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, ApplyOnCompleteCallback002, TestSize.Level1)
+{
+    auto host = CreateNode(MakeImageSource());
+    auto pattern = host->GetPattern<DepthComponentPattern>();
+    auto eventHub = host->GetEventHub<DepthComponentEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    double reportedWidth = 0.0;
+    double reportedHeight = 0.0;
+    eventHub->SetOnComplete([&](const DepthComponentCompleteEvent& event) {
+        reportedWidth = event.componentWidth;
+        reportedHeight = event.componentHeight;
+    });
+    auto bgNode = SetupBackgroundChild(host);
+    ASSERT_NE(bgNode, nullptr);
+    auto imageEventHub = bgNode->GetEventHub<ImageEventHub>();
+    ASSERT_NE(imageEventHub, nullptr);
+    ASSERT_TRUE(imageEventHub->completeEvent_ != nullptr);
+
+    // loadingStatus=1 (LOAD_SUCCESS) passes CHECK_NE_VOID and runs the bridge body.
+    LoadImageSuccessEvent success(64.0, 64.0, 240.0, 320.0, 1);
+    imageEventHub->completeEvent_(success);
+    EXPECT_EQ(reportedWidth, 240.0);
+    EXPECT_EQ(reportedHeight, 320.0);
+
+    // loadingStatus != 1 short-circuits (CHECK_NE_VOID) and must NOT fire the bridge.
+    LoadImageSuccessEvent layoutOnly(64.0, 64.0, 999.0, 999.0, 0);
+    imageEventHub->completeEvent_(layoutOnly);
+    EXPECT_EQ(reportedWidth, 240.0); // unchanged
+    EXPECT_EQ(reportedHeight, 320.0);
+}
+
+/**
  * @tc.name: ApplyOnErrorCallback001
  * @tc.desc: SetupBackgroundImageNode registers an image->depth error bridge; firing reports
  *          the error code/message.
@@ -559,6 +663,42 @@ HWTEST_F(DepthComponentPatternTestNg, ApplyOnErrorCallback001, TestSize.Level1)
     eventHub->FireErrorEvent(errorEvent);
     EXPECT_EQ(reportedCode, 404);
     EXPECT_EQ(reportedMsg, std::string("not found"));
+}
+
+/**
+ * @tc.name: ApplyOnErrorCallback002
+ * @tc.desc: Driving the registered image->depth error bridge lambda with a LoadImageFailEvent
+ *          resets pendingCleanupGltf_ and forwards errorCode / errorMessage derived from the
+ *          ImageErrorInfo onto the depth event hub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, ApplyOnErrorCallback002, TestSize.Level1)
+{
+    auto host = CreateNode(MakeImageSource());
+    auto pattern = host->GetPattern<DepthComponentPattern>();
+    auto eventHub = host->GetEventHub<DepthComponentEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    int32_t reportedCode = -1;
+    std::string reportedMsg;
+    eventHub->SetOnError([&](const DepthComponentErrorEvent& event) {
+        reportedCode = event.errorCode;
+        reportedMsg = event.errorMessage;
+    });
+    auto bgNode = SetupBackgroundChild(host);
+    ASSERT_NE(bgNode, nullptr);
+    auto imageEventHub = bgNode->GetEventHub<ImageEventHub>();
+    ASSERT_NE(imageEventHub, nullptr);
+    ASSERT_TRUE(imageEventHub->errorEvent_ != nullptr);
+
+    pattern->pendingCleanupGltf_ = true;
+    ImageErrorInfo info;
+    info.errorCode = ImageErrorCode::GET_IMAGE_FILE_READ_DATA_FAILED; // 102051
+    info.errorMessage = "decode boom";
+    LoadImageFailEvent fail(120.0, 80.0, "ignored outer msg", info);
+    imageEventHub->errorEvent_(fail);
+    EXPECT_EQ(reportedCode, 102051); // static_cast<int32_t>(info.errorCode)
+    EXPECT_EQ(reportedMsg, std::string("decode boom"));
+    EXPECT_FALSE(pattern->pendingCleanupGltf_); // reset by the bridge
 }
 
 // ===================== FinishBackgroundSwitch / OnPaint3D =====================
@@ -646,6 +786,21 @@ HWTEST_F(DepthComponentPatternTestNg, IsCameraChange004, TestSize.Level1)
     EXPECT_TRUE(pattern->IsCameraChange());
 }
 
+/**
+ * @tc.name: IsCameraChange005
+ * @tc.desc: When the host's layoutProperty is not DepthComponentLayoutProperty, IsCameraChange
+ *          returns false (CHECK_NULL_RETURN on depthLayoutProperty).
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, IsCameraChange005, TestSize.Level1)
+{
+    auto plainNode = CreateNodeWithTag("plain", ElementRegister::GetInstance()->MakeUniqueId());
+    auto pattern = AceType::MakeRefPtr<DepthComponentPattern>();
+    pattern->frameNode_ = plainNode;
+    EXPECT_FALSE(pattern->IsCameraChange()); // property cast fails -> CHECK_NULL_RETURN
+    EXPECT_FALSE(pattern->preCameraParams_.has_value());
+}
+
 // ===================== GetEffectiveCameraBufferCrop =====================
 
 /**
@@ -712,6 +867,20 @@ HWTEST_F(DepthComponentPatternTestNg, GetEffectiveCameraBufferCrop004, TestSize.
     EXPECT_EQ(crop->bufferWidth, 0);
 }
 
+/**
+ * @tc.name: GetEffectiveCameraBufferCrop005
+ * @tc.desc: When the host's layoutProperty is not DepthComponentLayoutProperty, returns nullopt
+ *          (CHECK_NULL_RETURN on depthLayoutProperty).
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, GetEffectiveCameraBufferCrop005, TestSize.Level1)
+{
+    auto plainNode = CreateNodeWithTag("plain", ElementRegister::GetInstance()->MakeUniqueId());
+    auto pattern = AceType::MakeRefPtr<DepthComponentPattern>();
+    pattern->frameNode_ = plainNode;
+    EXPECT_FALSE(pattern->GetEffectiveCameraBufferCrop().has_value());
+}
+
 // ===================== ComputeTiltShift =====================
 
 /**
@@ -765,6 +934,25 @@ HWTEST_F(DepthComponentPatternTestNg, ComputeTiltShift003, TestSize.Level1)
     EXPECT_FLOAT_EQ(result.xOffset, 0.0f);
 }
 
+/**
+ * @tc.name: ComputeTiltShift004
+ * @tc.desc: A crop with a non-positive buffer dimension (here bufferHeight = 0 while bufferWidth > 0)
+ *          falls back to the passthrough result (bufferWidth<=0 || bufferHeight<=0 guard).
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, ComputeTiltShift004, TestSize.Level1)
+{
+    auto host = CreateNode({});
+    auto pattern = host->GetPattern<DepthComponentPattern>();
+    auto camera = MakeCamera(1.0f, true);
+    camera.cameraBufferCrop->bufferHeight = 0; // bufferWidth=200, scale=0.5 still positive
+    DepthComponentModel::SetCamera(AceType::RawPtr(host), camera);
+    auto result = pattern->ComputeTiltShift(camera, 100.0f, 100.0f);
+    EXPECT_FLOAT_EQ(result.fov, camera.yFov);
+    EXPECT_FLOAT_EQ(result.xOffset, 0.0f);
+    EXPECT_FLOAT_EQ(result.yOffset, 0.0f);
+}
+
 // ===================== OnDirtyLayoutWrapperSwap =====================
 
 /**
@@ -810,6 +998,41 @@ HWTEST_F(DepthComponentPatternTestNg, OnDirtyLayoutWrapperSwap003, TestSize.Leve
     config.skipMeasure = false;
     config.skipLayout = false;
     EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(wrapper, config));
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap004
+ * @tc.desc: skipMeasure=true alone passes the (skipMeasure && skipLayout) guard and the final
+ *          expression collapses to false regardless of SkipMeasureContent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, OnDirtyLayoutWrapperSwap004, TestSize.Level1)
+{
+    auto [host, wrapper] = CreateMeasureableNode({});
+    ASSERT_NE(host, nullptr);
+    auto pattern = host->GetPattern<DepthComponentPattern>();
+    DirtySwapConfig config;
+    config.skipMeasure = true;
+    config.skipLayout = false;
+    EXPECT_FALSE(pattern->OnDirtyLayoutWrapperSwap(wrapper, config));
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap005
+ * @tc.desc: skipLayout=true alone passes the (skipMeasure && skipLayout) guard; the return value
+ *          is driven solely by the wrapper's SkipMeasureContent().
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, OnDirtyLayoutWrapperSwap005, TestSize.Level1)
+{
+    auto [host, wrapper] = CreateMeasureableNode({});
+    ASSERT_NE(host, nullptr);
+    auto pattern = host->GetPattern<DepthComponentPattern>();
+    DirtySwapConfig config;
+    config.skipMeasure = false;
+    config.skipLayout = true;
+    bool expected = !(config.skipMeasure || wrapper->SkipMeasureContent());
+    EXPECT_EQ(pattern->OnDirtyLayoutWrapperSwap(wrapper, config), expected);
 }
 
 // ===================== DepthComponentModel API =====================
@@ -941,6 +1164,28 @@ HWTEST_F(DepthComponentPatternTestNg, Model_SetCamera001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Model_SetCamera002
+ * @tc.desc: SetCamera overload without an explicit frameNode: no-op when the view stack is empty,
+ *          otherwise delegates to the active main frame node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, Model_SetCamera002, TestSize.Level1)
+{
+    ViewStackProcessor::GetInstance()->Finish();
+    DepthComponentModel::SetCamera(MakeCamera(1.0f, false)); // no main frame node -> CHECK
+
+    DepthComponentModel::Create({});
+    DepthComponentModel::SetCamera(MakeCamera(1.2f, true));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto prop = frameNode->GetLayoutProperty<DepthComponentLayoutProperty>();
+    ASSERT_NE(prop, nullptr);
+    ASSERT_TRUE(prop->GetCameraParams().has_value());
+    EXPECT_NEAR(prop->GetCameraParams()->yFov, 1.2f, 0.001f);
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
  * @tc.name: Model_SetLight001
  * @tc.desc: SetLight writes LightParams; null guard.
  * @tc.type: FUNC
@@ -954,6 +1199,27 @@ HWTEST_F(DepthComponentPatternTestNg, Model_SetLight001, TestSize.Level1)
     ASSERT_NE(prop, nullptr);
     ASSERT_TRUE(prop->GetLightParams().has_value());
     EXPECT_NEAR(prop->GetLightParams()->intensity, 1.0f, 0.001f);
+}
+
+/**
+ * @tc.name: Model_SetLight002
+ * @tc.desc: SetLight overload without an explicit frameNode: no-op when the view stack is empty,
+ *          otherwise delegates to the active main frame node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, Model_SetLight002, TestSize.Level1)
+{
+    ViewStackProcessor::GetInstance()->Finish();
+    DepthComponentModel::SetLight(MakeLight()); // no main frame node -> CHECK
+
+    DepthComponentModel::Create({});
+    DepthComponentModel::SetLight(MakeLight());
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto prop = frameNode->GetLayoutProperty<DepthComponentLayoutProperty>();
+    ASSERT_NE(prop, nullptr);
+    ASSERT_TRUE(prop->GetLightParams().has_value());
+    ViewStackProcessor::GetInstance()->Finish();
 }
 
 /**
@@ -976,6 +1242,31 @@ HWTEST_F(DepthComponentPatternTestNg, Model_SetOnComplete001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Model_SetOnComplete002
+ * @tc.desc: SetOnComplete overload without an explicit frameNode: no-op on an empty view stack,
+ *          otherwise registers the callback on the active main frame node's event hub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, Model_SetOnComplete002, TestSize.Level1)
+{
+    ViewStackProcessor::GetInstance()->Finish();
+    DepthComponentModel::SetOnComplete([](const DepthComponentCompleteEvent&) {}); // no main -> CHECK
+
+    DepthComponentModel::Create({});
+    bool called = false;
+    DepthComponentModel::SetOnComplete(
+        [&called](const DepthComponentCompleteEvent&) { called = true; });
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<DepthComponentEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_TRUE(eventHub->GetOnComplete() != nullptr);
+    eventHub->FireCompleteEvent(DepthComponentCompleteEvent());
+    EXPECT_TRUE(called);
+    ViewStackProcessor::GetInstance()->Finish();
+}
+
+/**
  * @tc.name: Model_SetOnError001
  * @tc.desc: SetOnError registers the callback; null guards.
  * @tc.type: FUNC
@@ -993,6 +1284,30 @@ HWTEST_F(DepthComponentPatternTestNg, Model_SetOnError001, TestSize.Level1)
     ASSERT_TRUE(eventHub->GetOnError() != nullptr);
     eventHub->FireErrorEvent(DepthComponentErrorEvent());
     EXPECT_TRUE(called);
+}
+
+/**
+ * @tc.name: Model_SetOnError002
+ * @tc.desc: SetOnError overload without an explicit frameNode: no-op on an empty view stack,
+ *          otherwise registers the callback on the active main frame node's event hub.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DepthComponentPatternTestNg, Model_SetOnError002, TestSize.Level1)
+{
+    ViewStackProcessor::GetInstance()->Finish();
+    DepthComponentModel::SetOnError([](const DepthComponentErrorEvent&) {}); // no main -> CHECK
+
+    DepthComponentModel::Create({});
+    bool called = false;
+    DepthComponentModel::SetOnError([&called](const DepthComponentErrorEvent&) { called = true; });
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<DepthComponentEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_TRUE(eventHub->GetOnError() != nullptr);
+    eventHub->FireErrorEvent(DepthComponentErrorEvent());
+    EXPECT_TRUE(called);
+    ViewStackProcessor::GetInstance()->Finish();
 }
 
 // ===================== DepthComponentLayoutProperty Clone / Reset =====================
