@@ -4472,6 +4472,45 @@ typedef struct Opt_ColorSpace {
     Ark_Tag tag;
     Ark_ColorSpace value;
 } Opt_ColorSpace;
+typedef enum Ark_colorSpaceManager_ColorSpace {
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_UNKNOWN = 0,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_ADOBE_RGB_1998 = 1,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_DCI_P3 = 2,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_DISPLAY_P3 = 3,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_SRGB = 4,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_BT709 = 6,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_BT601_EBU = 7,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_BT601_SMPTE_C = 8,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_BT2020_HLG = 9,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_BT2020_PQ = 10,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_P3_HLG = 11,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_P3_PQ = 12,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_ADOBE_RGB_1998_LIMIT = 13,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_DISPLAY_P3_LIMIT = 14,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_SRGB_LIMIT = 15,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_BT709_LIMIT = 16,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_BT601_EBU_LIMIT = 17,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_BT601_SMPTE_C_LIMIT = 18,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_BT2020_HLG_LIMIT = 19,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_BT2020_PQ_LIMIT = 20,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_P3_HLG_LIMIT = 21,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_P3_PQ_LIMIT = 22,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_LINEAR_P3 = 23,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_LINEAR_SRGB = 24,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_LINEAR_BT709 = 25,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_LINEAR_BT2020 = 25,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_DISPLAY_SRGB = 26,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_DISPLAY_P3_SRGB = 27,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_DISPLAY_P3_HLG = 28,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_DISPLAY_P3_PQ = 29,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_H_LOG = 26,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_DISPLAY_BT2020_SRGB = 27,
+    ARK_COLOR_SPACE_MANAGER_COLOR_SPACE_CUSTOM = 5,
+} Ark_colorSpaceManager_ColorSpace;
+typedef struct Opt_colorSpaceManager_ColorSpace {
+    Ark_Tag tag;
+    Ark_colorSpaceManager_ColorSpace value;
+} Opt_colorSpaceManager_ColorSpace;
 typedef enum Ark_CompetitionStrategy {
     ARK_COMPETITION_STRATEGY_DEFAULT = 0,
     ARK_COMPETITION_STRATEGY_COMPETITION = 1,
@@ -7171,6 +7210,14 @@ typedef struct Opt_SourceType {
     Ark_Tag tag;
     Ark_SourceType value;
 } Opt_SourceType;
+typedef enum Ark_SpatialPositionMode {
+    ARK_SPATIAL_POSITION_MODE_WORLD_XYZ = 0,
+    ARK_SPATIAL_POSITION_MODE_NDC_XY_WORLD_Z = 1,
+} Ark_SpatialPositionMode;
+typedef struct Opt_SpatialPositionMode {
+    Ark_Tag tag;
+    Ark_SpatialPositionMode value;
+} Opt_SpatialPositionMode;
 typedef enum Ark_SslError {
     ARK_SSL_ERROR_INVALID = 0,
     ARK_SSL_ERROR_HOST_MISMATCH = 1,
@@ -15839,6 +15886,7 @@ typedef struct Ark_DepthComponentOptions {
     /* kind: Interface */
     Opt_DepthSpaceType depthSpace;
     Opt_Float64 render3DScale;
+    Opt_colorSpaceManager_ColorSpace colorSpace;
 } Ark_DepthComponentOptions;
 typedef struct Opt_DepthComponentOptions {
     Ark_Tag tag;
@@ -17821,6 +17869,7 @@ typedef struct Ark_SpatialPosition {
     Ark_DepthVector3 rightTop;
     Ark_DepthVector3 leftBottom;
     Ark_DepthVector3 rightBottom;
+    Opt_SpatialPositionMode positionMode;
 } Ark_SpatialPosition;
 typedef struct Opt_SpatialPosition {
     Ark_Tag tag;
