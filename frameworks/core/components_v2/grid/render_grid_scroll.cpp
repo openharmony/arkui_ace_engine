@@ -17,7 +17,6 @@
 
 #include "base/log/event_report.h"
 #include "core/common/text_field_manager.h"
-#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_v2/grid/grid_scroll_controller.h"
 #include "core/event/ace_event_helper.h"
 

@@ -1971,7 +1971,7 @@ bool WindowManager::GetPageViewportConfig(
 namespace OHOS::Ace::NG {
 bool PipelineContext::GetIsFocusActive() const
 {
-    return focusManager_ ? focusManager_->GetIsFocusActive() : false;
+    return false;
 }
 
 RefPtr<PrivacySensitiveManager> PipelineContext::GetPrivacySensitiveManager() const

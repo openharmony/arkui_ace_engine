@@ -16,22 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SCROLLABLE_SCROLLABLE_PATTERN_H
 
-#include <cstdint>
-#include <functional>
-#include <list>
-#include <memory>
-#include <optional>
-#include <queue>
-#include <string>
+#include <cmath>
 #include <unordered_set>
-#include <utility>
 #include <vector>
 
 #include "base/geometry/axis.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_scene_status.h"
+#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
@@ -71,7 +65,6 @@ class ScrollBarProxy;
 class ScrollEdgeEffect;
 class SheetPresentationPattern;
 class TouchEventImpl;
-enum class DragEventType;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
@@ -634,7 +627,11 @@ public:
     static int32_t ScrollToTarget(
         RefPtr<FrameNode>& scrollable, RefPtr<FrameNode>& target, float targetOffset, ScrollAlign targetAlign);
 
-    float CalculateFriction(float gamma);
+    float CalculateFriction(float gamma)
+    {
+        gamma = std::clamp(gamma, 0.0f, 1.0f);
+        return exp(-ratio_.value_or(1.848f) * gamma);
+    }
     virtual float GetMainContentSize() const;
 
     virtual bool SupportScrollToIndex() const
@@ -1017,7 +1014,10 @@ public:
         needFullSafeArea_ = needFullSafeArea;
     }
 
-    RefPtr<ScrollBar> GetScrollBar() const;
+    RefPtr<ScrollBar> GetScrollBar() const
+    {
+        return scrollBar_;
+    }
 
     bool IsInitialized() const
     {
@@ -1029,8 +1029,7 @@ public:
 
     void SetCanOverScroll(bool val);
 
-    void ContentChangeReport(
-        const RefPtr<FrameNode>& keyNode, uint32_t type = ContentChangeManager::NONE);
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, uint32_t type = ContentChangeManager::NONE);
 
     void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
 
@@ -1075,9 +1074,15 @@ protected:
 
     float FireOnWillScroll(float offset) const;
 
-    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const;
+    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
+    {
+        return scrollBarOverlayModifier_;
+    }
 
-    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier);
+    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier)
+    {
+        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
+    }
     // just for hold ScrollableController
     RefPtr<ScrollableController> positionController_;
 

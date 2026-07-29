@@ -15,9 +15,9 @@
 
 // HANDWRITTEN, DO NOT REGENERATE
 
-import { memo } from "@koalaui/runtime/annotations"
-import { NodeAttach, remember, once } from "@koalaui/runtime"
-import { ListItemAttribute, ArkListItemComponent, ArkListItemPeer, LazyBuild } from "#generated"
+import { memo } from '@koalaui/runtime/annotations'
+import { NodeAttach, remember, once } from '@koalaui/runtime'
+import { ListItemAttribute, ArkListItemComponent, ArkListItemPeer, LazyBuild } from '#generated'
 import { LazyForEachType } from './../PeerNode';
 import { pointer } from '@koalaui/interop'
 
@@ -26,31 +26,6 @@ export function ListItemImpl(
     @memo
     style: ((attributes: ListItemAttribute) => void) | undefined,
     @memo
-    content_?: () => void,
-): void {
-    const receiver = remember<ArkListItemComponent>((): ArkListItemComponent => {
-        return new ArkListItemComponent()
-    })
-    NodeAttach<ArkListItemPeer>((): ArkListItemPeer => {
-        LazyBuild.ApplyLazyBuilder()
-        return ArkListItemPeer.create(receiver)
-    }, (peer: ArkListItemPeer): void => {
-        receiver.setPeer(peer)
-        style?.(receiver)
-        const peerPtr : pointer = receiver.getPeer().getPeerPtr()
-        const isInLazyForEach : undefined| Boolean = receiver.getPeer()?.parent?.isKind(LazyForEachType)
-        receiver.setPeer(undefined)
-        once(() => {
-            LazyBuild.SetListItemLazyBuilder(peerPtr, content_ ? content_! : @memo (): void => {})
-        })
-    })
-}
-
-@memo
-export function ListItem(
-    @memo @memo_skip
-    style: ((attributes: ListItemAttribute) => void) | undefined,
-    @memo @memo_skip
     content_?: () => void,
 ): void {
     const receiver = remember<ArkListItemComponent>((): ArkListItemComponent => {

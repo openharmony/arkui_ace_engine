@@ -20,7 +20,6 @@
 #include "base/log/dump_log.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/vibrator/vibrator_utils.h"
-#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/scrollable/scrollable_accessibility_utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"

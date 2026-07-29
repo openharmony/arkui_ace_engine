@@ -16,7 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_REFRESH_ANIMATION_STATE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_REFRESH_ANIMATION_STATE_H
 
-#include <cstdint>
+#include <string>
+
+#include "frameworks/base/geometry/dimension.h"
+#include "frameworks/base/utils/macros.h"
+#include "frameworks/core/components/common/properties/color.h"
 
 namespace OHOS::Ace::NG {
 enum class RefreshAnimationState : int32_t {

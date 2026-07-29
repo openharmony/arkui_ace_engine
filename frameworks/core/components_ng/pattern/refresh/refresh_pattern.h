@@ -19,6 +19,7 @@
 #include <string>
 
 #include "frameworks/base/geometry/dimension.h"
+#include "frameworks/base/geometry/ng/offset_t.h"
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/utils/noncopyable.h"
 #include "frameworks/core/components_ng/base/frame_scene_status.h"
@@ -26,7 +27,9 @@
 #include "frameworks/core/components_ng/pattern/refresh/refresh_accessibility_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_event_hub.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h"
+#include "frameworks/core/components_ng/pattern/refresh/refresh_theme_ng.h"
 #include "frameworks/core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
 #include "frameworks/core/components_ng/pattern/text/text_layout_property.h"
@@ -45,7 +48,7 @@ class RefreshPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(RefreshPattern, NestableScrollContainer);
 
 public:
-    RefreshPattern();
+    RefreshPattern() = default;
     ~RefreshPattern() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override

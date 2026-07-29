@@ -18,6 +18,7 @@
 
 #include <string>
 
+#include "base/utils/utils.h"
 #include "core/pipeline/base/sole_child_component.h"
 
 namespace OHOS::Ace {
