@@ -49,6 +49,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_wrapper_pattern.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 
 using namespace testing;
@@ -675,5 +676,284 @@ HWTEST_F(OverlayManagerTestFiveNg, GetPixelMapContentNodeForSubwindow005, TestSi
     auto result = overlayManager->GetPixelMapContentNodeForSubwindow();
     EXPECT_EQ(result, imageNode);
     overlayManager->rootNodeWeak_ = nullptr;
+}
+
+/**
+ * @tc.name: MarkDirty001
+ * @tc.desc: Test MarkDirty when root is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, MarkDirty001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto savedRoot = overlayManager->rootNodeWeak_;
+    overlayManager->rootNodeWeak_ = nullptr;
+    overlayManager->MarkDirty(PROPERTY_UPDATE_MEASURE);
+    overlayManager->rootNodeWeak_ = savedRoot;
+}
+
+/**
+ * @tc.name: MarkDirty002
+ * @tc.desc: Test MarkDirty when installationFree is false and rootNode == markNode (return early).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, MarkDirty002, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto savedRoot = overlayManager->rootNodeWeak_;
+    bool savedInstallationFree = pipelineContext->installationFree_;
+    pipelineContext->installationFree_ = false;
+    auto rootElement = pipelineContext->GetRootElement();
+    ASSERT_NE(rootElement, nullptr);
+    overlayManager->rootNodeWeak_ = rootElement;
+    overlayManager->MarkDirty(PROPERTY_UPDATE_MEASURE);
+    pipelineContext->installationFree_ = savedInstallationFree;
+    overlayManager->rootNodeWeak_ = savedRoot;
+}
+
+/**
+ * @tc.name: MarkDirty003
+ * @tc.desc: Test MarkDirty when installationFree is true, markNode is root's first child.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, MarkDirty003, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto savedRoot = overlayManager->rootNodeWeak_;
+    bool savedInstallationFree = pipelineContext->installationFree_;
+    bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
+    pipelineContext->installationFree_ = true;
+    pipelineContext->isSubPipeline_ = false;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto firstChild = FrameNode::CreateFrameNode(
+        V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(firstChild, nullptr);
+    auto secondChild = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(secondChild, nullptr);
+    rootNode->AddChild(firstChild);
+    rootNode->AddChild(secondChild);
+    overlayManager->rootNodeWeak_ = rootNode;
+    overlayManager->MarkDirty(PROPERTY_UPDATE_MEASURE);
+    pipelineContext->installationFree_ = savedInstallationFree;
+    pipelineContext->isSubPipeline_ = savedIsSubPipeline;
+    overlayManager->rootNodeWeak_ = savedRoot;
+}
+
+/**
+ * @tc.name: MarkDirty004
+ * @tc.desc: Test MarkDirty when child is first child and not sub pipeline (skip child in for loop).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, MarkDirty004, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto savedRoot = overlayManager->rootNodeWeak_;
+    bool savedInstallationFree = pipelineContext->installationFree_;
+    bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
+    pipelineContext->installationFree_ = false;
+    pipelineContext->isSubPipeline_ = false;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto firstChild = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(firstChild, nullptr);
+    auto secondChild = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(secondChild, nullptr);
+    rootNode->AddChild(firstChild);
+    rootNode->AddChild(secondChild);
+    overlayManager->rootNodeWeak_ = rootNode;
+    overlayManager->MarkDirty(PROPERTY_UPDATE_MEASURE);
+    pipelineContext->installationFree_ = savedInstallationFree;
+    pipelineContext->isSubPipeline_ = savedIsSubPipeline;
+    overlayManager->rootNodeWeak_ = savedRoot;
+}
+
+/**
+ * @tc.name: MarkDirty005
+ * @tc.desc: Test MarkDirty when child is sheet wrapper with sheet child.
+ *           Covers sheetParent tag == SHEET_WRAPPER_TAG and sheet non-null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, MarkDirty005, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto savedRoot = overlayManager->rootNodeWeak_;
+    bool savedInstallationFree = pipelineContext->installationFree_;
+    bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
+    pipelineContext->installationFree_ = false;
+    pipelineContext->isSubPipeline_ = true;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto sheetWrapper = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapper, nullptr);
+    auto sheetChild = FrameNode::CreateFrameNode(
+        V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(sheetChild, nullptr);
+    sheetWrapper->AddChild(sheetChild);
+    rootNode->AddChild(sheetWrapper);
+    overlayManager->rootNodeWeak_ = rootNode;
+    overlayManager->MarkDirty(PROPERTY_UPDATE_MEASURE);
+    pipelineContext->installationFree_ = savedInstallationFree;
+    pipelineContext->isSubPipeline_ = savedIsSubPipeline;
+    overlayManager->rootNodeWeak_ = savedRoot;
+}
+
+/**
+ * @tc.name: MarkDirty006
+ * @tc.desc: Test MarkDirty when child is sheet wrapper without sheet child (sheet is null).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, MarkDirty006, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto savedRoot = overlayManager->rootNodeWeak_;
+    bool savedInstallationFree = pipelineContext->installationFree_;
+    bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
+    pipelineContext->installationFree_ = false;
+    pipelineContext->isSubPipeline_ = true;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto sheetWrapper = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<SheetWrapperPattern>());
+    ASSERT_NE(sheetWrapper, nullptr);
+    rootNode->AddChild(sheetWrapper);
+    overlayManager->rootNodeWeak_ = rootNode;
+    overlayManager->MarkDirty(PROPERTY_UPDATE_MEASURE);
+    pipelineContext->installationFree_ = savedInstallationFree;
+    pipelineContext->isSubPipeline_ = savedIsSubPipeline;
+    overlayManager->rootNodeWeak_ = savedRoot;
+}
+
+/**
+ * @tc.name: MarkDirty007
+ * @tc.desc: Test MarkDirty when rootNode != markNode and toast child exists.
+ *           Covers toast loop true branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, MarkDirty007, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto savedRoot = overlayManager->rootNodeWeak_;
+    bool savedInstallationFree = pipelineContext->installationFree_;
+    bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
+    pipelineContext->installationFree_ = false;
+    pipelineContext->isSubPipeline_ = false;
+    auto customRoot = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(customRoot, nullptr);
+    auto child1 = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(child1, nullptr);
+    customRoot->AddChild(child1);
+    overlayManager->rootNodeWeak_ = customRoot;
+    auto rootElement = pipelineContext->GetRootElement();
+    ASSERT_NE(rootElement, nullptr);
+    auto toastChild = FrameNode::CreateFrameNode(
+        V2::TOAST_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ToastPattern>());
+    ASSERT_NE(toastChild, nullptr);
+    rootElement->AddChild(toastChild);
+    overlayManager->MarkDirty(PROPERTY_UPDATE_MEASURE);
+    rootElement->RemoveChild(toastChild);
+    pipelineContext->installationFree_ = savedInstallationFree;
+    pipelineContext->isSubPipeline_ = savedIsSubPipeline;
+    overlayManager->rootNodeWeak_ = savedRoot;
+}
+
+/**
+ * @tc.name: MarkDirty008
+ * @tc.desc: Test MarkDirty when rootNode != markNode and non-toast child exists.
+ *           Covers toast loop false branch (tag != TOAST_ETS_TAG).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, MarkDirty008, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto savedRoot = overlayManager->rootNodeWeak_;
+    bool savedInstallationFree = pipelineContext->installationFree_;
+    bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
+    pipelineContext->installationFree_ = false;
+    pipelineContext->isSubPipeline_ = false;
+    auto customRoot = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(customRoot, nullptr);
+    auto child1 = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(child1, nullptr);
+    customRoot->AddChild(child1);
+    overlayManager->rootNodeWeak_ = customRoot;
+    auto rootElement = pipelineContext->GetRootElement();
+    ASSERT_NE(rootElement, nullptr);
+    auto nonToastChild = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(nonToastChild, nullptr);
+    rootElement->AddChild(nonToastChild);
+    overlayManager->MarkDirty(PROPERTY_UPDATE_MEASURE);
+    rootElement->RemoveChild(nonToastChild);
+    pipelineContext->installationFree_ = savedInstallationFree;
+    pipelineContext->isSubPipeline_ = savedIsSubPipeline;
+    overlayManager->rootNodeWeak_ = savedRoot;
+}
+
+/**
+ * @tc.name: MarkDirty009
+ * @tc.desc: Test MarkDirty when isSubPipeline is true, first child is marked.
+ *           Covers the IsSubPipeline true branch in for loop condition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, MarkDirty009, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto savedRoot = overlayManager->rootNodeWeak_;
+    bool savedInstallationFree = pipelineContext->installationFree_;
+    bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
+    pipelineContext->installationFree_ = false;
+    pipelineContext->isSubPipeline_ = true;
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto firstChild = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(firstChild, nullptr);
+    rootNode->AddChild(firstChild);
+    overlayManager->rootNodeWeak_ = rootNode;
+    overlayManager->MarkDirty(PROPERTY_UPDATE_MEASURE);
+    pipelineContext->installationFree_ = savedInstallationFree;
+    pipelineContext->isSubPipeline_ = savedIsSubPipeline;
+    overlayManager->rootNodeWeak_ = savedRoot;
 }
 } // namespace OHOS::Ace::NG
