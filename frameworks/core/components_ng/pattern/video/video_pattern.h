@@ -15,6 +15,7 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_PATTERN_H
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/pattern/pattern.h"
@@ -503,6 +504,7 @@ private:
     bool isProgressInjectCmd_ = false;
     double lastProgressRate_ = 0.0;
     double lastSetProgressRate_ = 1.0;
+    RectF lastMediaPlayerBounds_;
 
     ACE_DISALLOW_COPY_AND_MOVE(VideoPattern);
 };
