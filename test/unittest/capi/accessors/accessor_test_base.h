@@ -25,6 +25,7 @@
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/frameworks/core/common/mock_theme_style.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
@@ -155,16 +156,22 @@ public:
         ThemeConstantsType type = ThemeConstantsType::ERROR;
         if (std::holds_alternative<Color>(value)) {
             type = ThemeConstantsType::COLOR;
+            AddMockResourceData(key, std::get<Color>(value));
         } else if (std::holds_alternative<Dimension>(value)) {
             type = ThemeConstantsType::DIMENSION;
+            AddMockResourceData(key, std::get<Dimension>(value));
         } else if (std::holds_alternative<int32_t>(value)) {
             type = ThemeConstantsType::INT;
+            AddMockResourceData(key, std::get<int32_t>(value));
         } else if (std::holds_alternative<uint32_t>(value)) {
             type = ThemeConstantsType::INT;
+            AddMockResourceData(key, static_cast<int32_t>(std::get<uint32_t>(value)));
         } else if (std::holds_alternative<double>(value)) {
             type = ThemeConstantsType::DOUBLE;
+            AddMockResourceData(key, std::get<double>(value));
         } else if (std::holds_alternative<std::string>(value)) {
             type = ThemeConstantsType::STRING;
+            AddMockResourceData(key, std::get<std::string>(value));
         }
         ASSERT_NE(type, ThemeConstantsType::ERROR);
         MockThemeStyle::GetInstance()->SetAttr(key, { .type = type, .value = value });
@@ -172,6 +179,20 @@ public:
 
     static void AddResource(int64_t key, const ResRawValue& value)
     {
+        uint32_t id = static_cast<uint32_t>(key);
+        if (std::holds_alternative<Color>(value)) {
+            AddMockResourceData(id, std::get<Color>(value));
+        } else if (std::holds_alternative<Dimension>(value)) {
+            AddMockResourceData(id, std::get<Dimension>(value));
+        } else if (std::holds_alternative<int32_t>(value)) {
+            AddMockResourceData(id, std::get<int32_t>(value));
+        } else if (std::holds_alternative<uint32_t>(value)) {
+            AddMockResourceData(id, static_cast<int32_t>(std::get<uint32_t>(value)));
+        } else if (std::holds_alternative<double>(value)) {
+            AddMockResourceData(id, std::get<double>(value));
+        } else if (std::holds_alternative<std::string>(value)) {
+            AddMockResourceData(id, std::get<std::string>(value));
+        }
         AddResource(std::to_string(key), value);
     }
 
