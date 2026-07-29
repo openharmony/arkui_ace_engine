@@ -180,3 +180,5 @@ PY
 - 2026-07-24：新增 ImageLoading、BackgroundImage、ImageAnalyzer 和四个 PickerDialog 新版 KB；迁移 SVG 到 `docs/kb/capabilities/svg.md` 并移除旧文件及旧索引入口。新版 registry 增至 42 条，旧索引减至 48 条。
 
 - 2026-07-23：新增 8 个 overlay 类组件 KB（Menu/Dialog/Toast/Select/bindPopup/PopupAdvanced/Sheet/bindTips），补齐弹窗类组件 Spec 路由；迁移 Menu 和 Sheet 旧 KB 到新版路径。
+
+- 2026-07-29：迁移 Grid 到 `docs/kb/components/container/grid.md`，旧 KB 已移除，旧索引入口已移除（旧索引减至 45 条）；新增 GridItem KB `docs/kb/components/container/grid_item.md`。registry 增至 67 条。
