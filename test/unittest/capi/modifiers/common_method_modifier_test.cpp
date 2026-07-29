@@ -204,6 +204,9 @@ public:
         render_ = fnode->GetRenderContext();
         ASSERT_NE(render_, nullptr);
         AddResource("bi_public_ok", "path_to_background_image");
+        // Register mock resource data for FAKE_RES_ID (1234) and FAKE_RES_ID_2 (1235)
+        AddResource(FAKE_RES_ID, Dimension(10.0, DimensionUnit::PX));
+        AddResource(FAKE_RES_ID_2, Dimension(10.0, DimensionUnit::PX));
     }
     void TearDown()
     {

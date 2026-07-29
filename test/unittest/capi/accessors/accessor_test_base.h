@@ -26,6 +26,7 @@
 #include "test/mock/frameworks/core/common/mock_container.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_theme_style.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using testing::NiceMock;
@@ -148,6 +149,7 @@ public:
         finalyzer_ = nullptr;
         themeManager_ = nullptr;
         themeConstants_ = nullptr;
+        ResetMockResourceData();
     }
 
     static void AddResource(const std::string& key, const ResRawValue& value)
@@ -172,6 +174,20 @@ public:
 
     static void AddResource(int64_t key, const ResRawValue& value)
     {
+        uint32_t id = static_cast<uint32_t>(key);
+        if (std::holds_alternative<Color>(value)) {
+            AddMockResourceData(id, std::get<Color>(value));
+        } else if (std::holds_alternative<Dimension>(value)) {
+            AddMockResourceData(id, std::get<Dimension>(value));
+        } else if (std::holds_alternative<int32_t>(value)) {
+            AddMockResourceData(id, std::get<int32_t>(value));
+        } else if (std::holds_alternative<uint32_t>(value)) {
+            AddMockResourceData(id, static_cast<int32_t>(std::get<uint32_t>(value)));
+        } else if (std::holds_alternative<double>(value)) {
+            AddMockResourceData(id, std::get<double>(value));
+        } else if (std::holds_alternative<std::string>(value)) {
+            AddMockResourceData(id, std::get<std::string>(value));
+        }
         AddResource(std::to_string(key), value);
     }
 

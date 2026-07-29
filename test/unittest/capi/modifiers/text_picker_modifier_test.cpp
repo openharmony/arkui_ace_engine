@@ -772,8 +772,8 @@ const std::vector<cascade_test_data> textPickerOptionsAsCascadeArray = {
 
 Ark_TextCascadePickerRangeContent createCascadeLevel1(std::string str)
 {
-    Ark_String itemText = Converter::ArkValue<Ark_String>(str);
-    Ark_TextCascadePickerRangeContent item;
+    Ark_String itemText = Converter::ArkValue<Ark_String>(str, Converter::FC);
+    Ark_TextCascadePickerRangeContent item = {};
     item.text = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(itemText);
     item.children = Converter::ArkValue<Opt_Array_TextCascadePickerRangeContent>(Ark_Empty());
     return item;
@@ -781,8 +781,9 @@ Ark_TextCascadePickerRangeContent createCascadeLevel1(std::string str)
 
 void InitChild(Ark_TextCascadePickerRangeContent& child, std::string name)
 {
-    Ark_String arkName = Converter::ArkValue<Ark_String>(name);
+    Ark_String arkName = Converter::ArkValue<Ark_String>(name, Converter::FC);
     child.text = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(arkName);
+    child.children.tag = INTEROP_TAG_UNDEFINED;
 }
 
 void CreateOptions(Array_TextCascadePickerRangeContent& arrayRoot,
@@ -868,7 +869,7 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsCascadeArray, TestSiz
     Converter::ArkArrayHolder<Array_TextCascadePickerRangeContent> holderSubcategoryVector(subcategoryVector);
     Opt_Array_TextCascadePickerRangeContent optArraySubcategory =
         holderSubcategoryVector.OptValue<Opt_Array_TextCascadePickerRangeContent>();
-    Ark_TextCascadePickerRangeContent child1;
+    Ark_TextCascadePickerRangeContent child1 = {};
     InitChild(child1, NAME_SUBCATEGORY_1);
     child1.children = optArraySubcategory;
 
@@ -878,7 +879,7 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsCascadeArray, TestSiz
     Converter::ArkArrayHolder<Array_TextCascadePickerRangeContent> holderItemVector(itemVector);
     Opt_Array_TextCascadePickerRangeContent optArrayItem =
         holderItemVector.OptValue<Opt_Array_TextCascadePickerRangeContent>();
-    Ark_TextCascadePickerRangeContent child2;
+    Ark_TextCascadePickerRangeContent child2 = {};
     InitChild(child2, NAME_ITEM_1);
     child2.children = optArrayItem;
 
@@ -888,10 +889,10 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsTestAsCascadeArray, TestSiz
     Converter::ArkArrayHolder<Array_TextCascadePickerRangeContent> holderChildrenVector(childrenVector);
     Opt_Array_TextCascadePickerRangeContent optArrayChildren =
         holderChildrenVector.OptValue<Opt_Array_TextCascadePickerRangeContent>();
-    Ark_TextCascadePickerRangeContent main1;
+    Ark_TextCascadePickerRangeContent main1 = {};
     InitChild(main1, NAME_CATEGORY_1);
     main1.children = optArrayChildren;
-    Ark_TextCascadePickerRangeContent main2;
+    Ark_TextCascadePickerRangeContent main2 = {};
     InitChild(main2, NAME_CATEGORY_2);
     main2.children = optArrayChildren;
 
