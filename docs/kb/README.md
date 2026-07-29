@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-25
-> 主题数：64
+> 更新时间：2026-07-28
+> 主题数：98
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -111,6 +111,24 @@ docs/kb/
 | MotionPath | 路径动画 | `docs/kb/capabilities/motion_path.md` | 新建 |
 | PhysicsAnimation | 物理动画 | `docs/kb/capabilities/physics_animation.md` | 新建 |
 | AnimationInterface | 动画接口 | `docs/kb/capabilities/animation_interface.md` | 新建 |
+| ResourceAccess | 资源访问 | `docs/kb/architecture/resource-access.md` | 新建 |
+| ThemeLayeredAccess | 主题分层访问 | `docs/kb/architecture/theme-layered-access.md` | 新建 |
+| ThemeFramework | Theme框架 | `docs/kb/architecture/theme-framework.md` | 新建 |
+| ResourceDynamicSwitching | 资源动态切换 | `docs/kb/architecture/resource-dynamic-switching.md` | 新建 |
+| SubwindowMechanism | 子窗机制 | `docs/kb/architecture/subwindow-mechanism.md` | 新建 |
+| VisualEffectAttributes | 视效属性 | `docs/kb/capabilities/visual-effect-attributes.md` | 新建 |
+| ModalAttributes | 模态属性 | `docs/kb/capabilities/modal-attributes.md` | 新建 |
+| BasicUnits | 基础单位 | `docs/kb/capabilities/basic-units.md` | 新建 |
+| ContentModifierForm | 表单类组件自定义内容 | `docs/kb/capabilities/content-modifier-form.md` | 新建 |
+| ContentModifierDisplay | 信息展示类组件自定义内容 | `docs/kb/capabilities/content-modifier-display.md` | 新建 |
+| UIAppearance | 色彩模式管理 | `docs/kb/capabilities/ui-appearance.md` | 新建 |
+| NamedRouter | 命名路由 | `docs/kb/api/named-router.md` | 新建 |
+| Rating | 评分组件 | `docs/kb/components/input-form/rating.md` | 新建 |
+| AlertDialog | 警告弹窗 | `docs/kb/components/overlay/alert_dialog.md` | 新建 |
+| ActionSheet | 列表选择弹窗 | `docs/kb/components/overlay/action_sheet.md` | 新建 |
+| ContextMenu | 上下文菜单接口 | `docs/kb/components/overlay/context_menu.md` | 新建 |
+| bindContentCover | 全模态弹窗属性 | `docs/kb/components/overlay/bind_content_cover.md` | 新建 |
+| WithTheme | 主题作用域组件 | `docs/kb/components/container/with_theme.md` | 新建 |
 
 ## 检索
 
