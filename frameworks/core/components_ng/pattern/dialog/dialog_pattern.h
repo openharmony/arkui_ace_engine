@@ -611,6 +611,7 @@ private:
     RectF hostWindowRect_;
     RectF parentWindowRect_;
     bool hasExtraNodeForDistortion_ = false;
+    bool isDialogShow_ = true;
     std::function<void()> onFinishEvent_ = nullptr;
 };
 } // namespace OHOS::Ace::NG

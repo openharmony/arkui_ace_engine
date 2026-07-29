@@ -2439,7 +2439,7 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (NeedDistortion() && isDistortAnimationExecuting_.value_or(false)) {
         renderContext->UpdateDistortionParam(TERMINAL_DISTORTION_PARAM);
     }
-    CHECK_NULL_RETURN(!isDistortAnimationExecuting_.has_value(), false);
+    CHECK_NULL_RETURN(isDialogShow_, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
@@ -2452,6 +2452,7 @@ bool DialogPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             dialogPattern->PlayFlowLight();
         }
     });
+    isDialogShow_ = false;
     return true;
 }
 
