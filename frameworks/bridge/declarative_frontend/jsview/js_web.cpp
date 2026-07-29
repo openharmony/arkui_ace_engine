@@ -3580,7 +3580,9 @@ void JSWeb::Create(const JSCallbackInfo& info)
                 return;
             }
             napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(env, &scope);
+            if (napi_open_handle_scope(env, &scope) != napi_ok || !scope){
+                return;
+            }
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
             napi_close_handle_scope(env, scope);
@@ -3603,7 +3605,9 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     return;
                 }
                 napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(env, &scope);
+                if (napi_open_handle_scope(env, &scope) != napi_ok || !scope){
+                    return;
+                }
                 JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(hapPath)) };
                 func->Call(webviewController, 1, argv);
                 napi_close_handle_scope(env, scope);
@@ -3636,7 +3640,9 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     return;
                 }
                 napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(env, &scope);
+                if (napi_open_handle_scope(env, &scope) != napi_ok || !scope){
+                    return;
+                }
                 auto newIdVal = JSRef<JSVal>::Make(ToJSValue(newId));
                 auto result = func->Call(webviewController, 1, &newIdVal);
                 napi_close_handle_scope(env, scope);
