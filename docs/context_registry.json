@@ -7030,6 +7030,72 @@
       ],
       "status": "active",
       "last_verified": "2026-07-27"
+    },
+    {
+      "id": "OverlayCapability",
+      "name": "Overlay Capability",
+      "name_cn": "浮层能力",
+      "kind": "common_capability",
+      "category": "system",
+      "keywords": [
+        "OverlayManager",
+        "浮层",
+        "overlay",
+        "addComponentContent",
+        "removeComponentContent",
+        "showComponentContent",
+        "hideComponentContent",
+        "addComponentContentWithOrder",
+        "openOrderOverlay",
+        "setOverlayManagerOptions",
+        "LevelOrder",
+        "LevelMode",
+        "OVERLAY_ETS_TAG",
+        "nodeIdOrderMap",
+        "orderNodesMap"
+      ],
+      "aliases": [
+        "浮层管理",
+        "OverlayManager",
+        "Overlay Capability"
+      ],
+      "kb": "docs/kb/capabilities/overlay-capability.md",
+      "spec_domain": "specs/04-common-capability/08-root-view/03-overlay-capability",
+      "func_id": "04-08-03",
+      "spec_status": "active",
+      "source_paths": {
+        "overlay_manager": "frameworks/core/components_ng/pattern/overlay/overlay_manager.h",
+        "overlay_manager_impl": "frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
+        "overlay_options": "frameworks/core/components_ng/pattern/overlay/overlay_options.h",
+        "level_mode": "frameworks/core/components_ng/pattern/overlay/level_mode.h",
+        "level_order": "frameworks/core/components_ng/pattern/overlay/level_order.h",
+        "overlay_container_pattern": "frameworks/core/components_ng/pattern/overlay/overlay_container_pattern.cpp",
+        "dialog_manager_static": "frameworks/core/components_ng/pattern/overlay/dialog_manager_static.cpp",
+        "dialog_manager": "frameworks/core/components_ng/pattern/overlay/dialog_manager.cpp",
+        "js_bridge": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "napi": "interfaces/napi/kits/overlay/js_overlay.cpp",
+        "inner_api": "interfaces/inner_api/ace_kit/include/ui/view/overlay/overlay_manager.h",
+        "inner_api_impl": "interfaces/inner_api/ace_kit/src/view/overlay/overlay_manager_impl.cpp",
+        "ani": "interfaces/ets/ani/overlayManager/src/overlayManager.cpp",
+        "ani_params": "interfaces/ets/ani/overlayManager/src/overlay_params.h",
+        "level_order_accessor": "frameworks/core/interfaces/native/implementation/level_order_extender_accessor.cpp",
+        "tag_constants": "frameworks/core/components_v2/inspector/inspector_constants.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets",
+        "ani": "interfaces/ets/ani/overlayManager/ets/@ohos.overlayManager.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/overlay/overlay_manager_test_ng.cpp",
+        "test/unittest/core/pattern/overlay/overlay_manager_test_core.cpp",
+        "test/unittest/core/pattern/overlay/overlay_manager_testone_ng.cpp",
+        "test/unittest/core/pattern/overlay/overlay_manager_content_test_ng.cpp",
+        "test/unittest/core/pattern/overlay/overlay_manager_extend_test_ng.cpp",
+        "test/unittest/core/pattern/overlay/overlay_manager_test_update_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
     }
   ]
 }
