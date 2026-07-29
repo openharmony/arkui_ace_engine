@@ -104,10 +104,11 @@ public:
     RefPtr<FrameNode> frameNode_;
     RefPtr<SelectPattern> selectPattern_;
     RefPtr<SelectAccessibilityProperty> selectAccessibilityProperty_;
+    std::vector<RefPtr<FrameNode>> keptNodes_;
 
 protected:
     static RefPtr<FrameNode> CreateSelect(const std::vector<SelectParam>& value, const TestProperty& test);
-    static FrameNode* CreateSelect(const std::vector<SelectParam>& value);
+    FrameNode* CreateSelect(const std::vector<SelectParam>& value);
 };
 
 void SelectPatternTwoTestNg::SetUpTestCase()
@@ -131,6 +132,7 @@ void SelectPatternTwoTestNg::TearDown()
     frameNode_ = nullptr;
     selectPattern_ = nullptr;
     selectAccessibilityProperty_ = nullptr;
+    keptNodes_.clear();
 }
 
 void SelectPatternTwoTestNg::InitSelectPatternTwoTestNg()
@@ -174,7 +176,10 @@ FrameNode* SelectPatternTwoTestNg::CreateSelect(const std::vector<SelectParam>& 
 {
     SelectModelNG selectModelInstance;
     selectModelInstance.Create(value);
-    return ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto element = ViewStackProcessor::GetInstance()->Finish();
+    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    keptNodes_.push_back(frameNode);
+    return AceType::RawPtr(frameNode);
 }
 
 /**
@@ -247,7 +252,6 @@ HWTEST_F(SelectPatternTwoTestNg, BindMenuTouch011, TestSize.Level1)
 
     auto touchCallback = touchEvents.front()->GetTouchEventCallback();
     EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
-    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 /**
@@ -294,7 +298,6 @@ HWTEST_F(SelectPatternTwoTestNg, BindMenuTouch012, TestSize.Level1)
         // Each touch type should be handled gracefully
         EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
     }
-    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 /**
@@ -335,7 +338,6 @@ HWTEST_F(SelectPatternTwoTestNg, BindMenuTouch013, TestSize.Level1)
     auto touchCallback = touchEvents.front()->GetTouchEventCallback();
     // This should not crash even if subwindow doesn't exist in test environment
     EXPECT_NO_FATAL_FAILURE(touchCallback(touchInfo));
-    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 /**
