@@ -1300,6 +1300,76 @@
       "last_verified": "2026-06-27"
     },
     {
+      "id": "RichEditor",
+      "name": "RichEditor",
+      "name_cn": "富文本编辑器组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "RichEditor",
+        "富文本",
+        "富文本编辑",
+        "rich editor",
+        "span",
+        "styled string",
+        "undo redo",
+        "caret",
+        "selection",
+        "IME",
+        "data detector",
+        "custom keyboard"
+      ],
+      "aliases": [
+        "RichEditor组件",
+        "富文本编辑器",
+        "富文本编辑",
+        "RichEditorPattern"
+      ],
+      "kb": "docs/kb/components/basic/rich_editor.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/02-rich-editor",
+      "func_id": "05-09-02",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_event_hub.cpp",
+        "gesture_event_hub": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_gesture_event_hub.cpp",
+        "base_controller": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_base_controller.cpp",
+        "controller": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_controller.cpp",
+        "styled_string_controller": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp",
+        "undo_manager": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.cpp",
+        "select_overlay": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_select_overlay.cpp",
+        "scroll_controller": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.cpp",
+        "content_modifier": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_content_modifier.cpp",
+        "overlay_modifier": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.cpp",
+        "paint_method": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_paint_method.cpp",
+        "paragraph_manager": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_paragraph_manager.h",
+        "theme": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_theme.h",
+        "bridge": "frameworks/core/components_ng/pattern/rich_editor/bridge/arkts_native_rich_editor_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/rich_editor/bridge/rich_editor_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/rich_editor/bridge/rich_editor_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/rich_editor/bridge/rich_editor_dynamic_module.cpp",
+        "native_impl": "interfaces/native/node/rich_editor_native_impl.h",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/rich_editor.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/richEditor.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/RichEditorModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RichEditorModifier.static.d.ets",
+        "capi": "interfaces/native/node/rich_editor_native_impl.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/rich_editor/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
       "id": "Image",
       "name": "Image",
       "name_cn": "图片组件",
