@@ -146,6 +146,12 @@ docs/kb/
 | ContextMenu | 上下文菜单接口 | `docs/kb/components/overlay/context_menu.md` | 新建 |
 | bindContentCover | 全模态弹窗属性 | `docs/kb/components/overlay/bind_content_cover.md` | 新建 |
 | WithTheme | 主题作用域组件 | `docs/kb/components/container/with_theme.md` | 新建 |
+| TextCommonAttributes | 文本通用属性 | `docs/kb/capabilities/text-common-attributes.md` | 新建 |
+| FontRegistration | 字体注册 | `docs/kb/capabilities/font-registration.md` | 新建 |
+| TextMeasurement | 文本测量 | `docs/kb/capabilities/text-measurement.md` | 新建 |
+| TextSelection | 文本选择 | `docs/kb/capabilities/text-selection.md` | 新建 |
+| TextInteraction | 文本交互 | `docs/kb/capabilities/text-interaction.md` | 新建 |
+| AutoFill | 自动补全能力（AutoFill） | `docs/kb/capabilities/autofill.md` | 新建 |
 
 ## 检索
 
