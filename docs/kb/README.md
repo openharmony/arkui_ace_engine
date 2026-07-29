@@ -67,6 +67,16 @@ docs/kb/
 | Navigation | 导航容器组件 | `docs/kb/components/container/navigation.md` | 新建 |
 | Tabs | 标签页容器组件 | `docs/kb/components/container/tabs.md` | 新建 |
 | Swiper | 轮播容器组件 | `docs/kb/components/container/swiper.md` | 新建 |
+| PlaceholderComponent | 占位组件（概念入口，转跳 05-16-01/02） | `docs/kb/capabilities/placeholder_component.md` | 新建 |
+| NodeAdapter | NodeAdapter 命令式懒渲染适配器 | `docs/kb/capabilities/node_adapter.md` | 新建 |
+| SameLayerRendering | 同层渲染（纹理导出生产者，FuncID 04-18-01） | `docs/kb/capabilities/same-layer-rendering.md` | 新建 |
+| ComponentReuseFramework | 组件复用框架（引擎 C++） | `docs/kb/architecture/component_reuse_framework.md` | 新建 |
+| AbilityComponent | AbilityComponent 跨进程嵌入组件（已废弃） | `docs/kb/components/embedded/ability_component.md` | 新建 |
+| NodeContainer | NodeContainer 自定义占位组件 | `docs/kb/components/custom-node/node_container.md` | 新建 |
+| ContentSlot | ContentSlot 自定义占位组件 | `docs/kb/components/custom-node/content_slot.md` | 新建 |
+| RenderControl | 渲染控制语法（if/else + ForEach + 共享框架） | `docs/kb/syntax/render_control.md` | 迁移自旧 `ForEach` KB |
+| LazyForEach | LazyForEach 懒加载循环渲染 | `docs/kb/syntax/lazy_for_each.md` | 已迁移，旧 KB 已移除 |
+| Repeat | Repeat 循环渲染与虚拟滚动（含 RepeatVirtualScroll） | `docs/kb/syntax/repeat.md` | 已迁移，旧 KB 已移除 |
 | SideBarContainer | 侧边栏容器组件 | `docs/kb/components/container/side_bar_container.md` | 新建 |
 | NavDestination | 导航目标页组件 | `docs/kb/components/container/navdestination.md` | 新建 |
 | Slider | 滑动选择器组件 | `docs/kb/components/input-form/slider.md` | 新建（无旧 KB） |

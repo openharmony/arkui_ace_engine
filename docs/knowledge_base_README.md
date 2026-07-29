@@ -172,6 +172,10 @@ PY
 - 2026-06-27：Text 迁移完成后移除旧 KB 文件和 `legacy_kb` 入口。
 - 2026-06-27：Text 迁移完成后从旧 `knowledge_base_INDEX.json` 移除，未迁移旧 KB 仍保留。
 - 2026-06-27：Image 迁移到 `docs/kb/components/media/image.md`，旧 KB 已移除，旧索引已更新（59 条）。
+- 2026-07-28：按 9 个长期规格（04-06-01、04-06-06、04-19-01、05-12-02、05-16-01、05-16-02、07-05-01、07-05-02、07-05-03）新增 9 个新版 KB，`context_registry.json` 条目更新至 27。
+- 新增能力/架构/组件 KB：`capabilities/placeholder_component.md`、`capabilities/node_adapter.md`、`architecture/component_reuse_framework.md`、`components/embedded/ability_component.md`、`components/custom-node/node_container.md`、`components/custom-node/content_slot.md`。
+- 迁移旧语法 KB 到 `docs/kb/syntax/`：`render_control.md`（合并 ForEach + if/else + 共享框架，旧 `ForEach` KB 已移除）、`lazy_for_each.md`、`repeat.md`（合并 Repeat + RepeatVirtualScroll）。
+- 旧 `ForEach/LazyForEach/Repeat/RepeatVirtualScroll_Knowledge_Base.md` 已删除，旧索引移除对应 4 条（53 → 49 条）。
 - 2026-07-10：ImageAnimator 迁移到 `docs/kb/components/media/image_animator.md`，旧 KB 已移除，旧索引已更新（57 条）。
 - 2026-07-10：新增 DrawableDescriptor 通用能力 KB：`docs/kb/capabilities/drawable_descriptor.md`。
 - 2026-07-11：TextPicker、DatePicker、TimePicker、UIPickerComponent 迁移到 `docs/kb/components/selector/`，旧 KB 已移除，旧索引已更新（53 条）。
