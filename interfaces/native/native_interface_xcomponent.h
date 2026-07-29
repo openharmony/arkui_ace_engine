@@ -1095,7 +1095,7 @@ typedef struct OH_NativeXComponent_ExtraMouseEventInfo OH_NativeXComponent_Extra
  *
  * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
  * @param extraMouseEventInfo Indicates the pointer to pointer of <b>OH_NativeXComponent_ExtraMouseEventInfo</b>
-          instance.
+ *        instance.
  * @return Returns the status code of the execution.
  *         {@link ARKUI_ERROR_CODE_NO_ERROR} the execution is successful.
  *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
