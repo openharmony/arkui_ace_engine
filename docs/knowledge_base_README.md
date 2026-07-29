@@ -2,7 +2,7 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-07-23
+> 更新时间：2026-07-27
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
@@ -38,24 +38,24 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：107
-- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：47
+- `docs/` 下 Markdown 文档总数：131
+- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：45
 - `docs/syntax/` 下语法专题文档：7
   - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计
 
-- `context_registry.json` 新版条目数：57
+- `context_registry.json` 新版条目数：68
 - `knowledge_base_INDEX.json` 旧 KB 索引条目总数：46
 - 旧 KB 索引路径有效性：46/46（全部存在）
 
 - 类型分布：
-  - `component`: 27
+  - `component`: 25
   - `sdk`: 4
   - `feature`: 17
 - 分类分布：
-  - `advanced`: 5
+  - `advanced`: 3
   - `basic`: 4
   - `container`: 6
   - `data_display`: 8
@@ -63,8 +63,8 @@ rg -n "<关键字>" docs
   - `sdk`: 6
   - `selector`: 3
   - `system`: 13
-- 关键词总数（索引内）：453
-- 别名总数（索引内）：156
+- 关键词总数（索引内）：423
+- 别名总数（索引内）：149
 
 ### 2.3 覆盖现状
 
@@ -79,7 +79,7 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-├── kb/ (43 MD，42 个新版 KB 主题 + README)
+├── kb/ (69 MD，68 个新版 KB 主题 + README)
 ├── accessibility/ (1 KB)
 ├── api/ (2 KB)
 ├── architecture/ (2 KB + 3 非 `*_Knowledge_Base*` 命名架构文档)
@@ -88,7 +88,7 @@ docs/
 ├── entrance/ (1 MD)
 ├── focus/ (2 MD)
 ├── layout/ (0 KB)
-├── pattern/ (30 KB + 7 非 `*_Knowledge_Base*` 命名文档)
+├── pattern/ (28 KB + 6 非 `*_Knowledge_Base*` 命名文档)
 ├── sdk/ (3 KB)
 ├── svg/ (0 KB，SVG 已迁移)
 └── syntax/ (7 MD, 其中 4 KB)
@@ -180,3 +180,6 @@ PY
 - 2026-07-24：新增 ImageLoading、BackgroundImage、ImageAnalyzer 和四个 PickerDialog 新版 KB；迁移 SVG 到 `docs/kb/capabilities/svg.md` 并移除旧文件及旧索引入口。新版 registry 增至 42 条，旧索引减至 48 条。
 
 - 2026-07-23：新增 8 个 overlay 类组件 KB（Menu/Dialog/Toast/Select/bindPopup/PopupAdvanced/Sheet/bindTips），补齐弹窗类组件 Spec 路由；迁移 Menu 和 Sheet 旧 KB 到新版路径。
+- 2026-07-27：新增 Pixel Rounding 与 MediaQuery 新版 KB；新版 registry 增至 66 条，旧索引保持 46 条。
+- 2026-07-27：新增 Preview Platform Adaptation 新版 KB；对应架构设计已存在，新版 registry 增至 67 条，旧索引保持 46 条。
+- 2026-07-29：新增 Custom Measure/Layout 新版 KB；补充自定义组件现行回调与已废弃 API 的兼容实现边界。新版 registry 增至 68 条，旧索引保持 46 条。
