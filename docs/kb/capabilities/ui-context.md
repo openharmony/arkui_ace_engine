@@ -241,5 +241,7 @@ UIContext 功能域：`specs/04-common-capability/12-ui-context/`
 
 - 路由管理：`docs/kb/api/router.md`
 - MediaQuery：`docs/kb/api/mediaquery.md`
+- Ability 上下文与窗口信息：`docs/kb/capabilities/ability-context.md`
+- Frame 帧回调：`docs/kb/capabilities/frame-callback.md`
 - 窗口机制：`docs/kb/architecture/window-mechanism.md`
 - 布局框架：`docs/kb/architecture/layout-framework.md`
