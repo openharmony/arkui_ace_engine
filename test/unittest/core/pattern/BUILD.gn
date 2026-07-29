@@ -25,6 +25,7 @@ group("core_pattern_unittest") {
       "button:button_test_ng",
       "checkbox:checkbox_test_ng",
       "checkboxgroup:checkboxgroup_test_ng",
+      "common_view:common_view_test_ng",
       "dialog:dialog_test_ng",
       "grid:grid_static_test_ng",
       "grid:grid_test_custom",
