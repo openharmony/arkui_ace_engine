@@ -51,12 +51,11 @@ AxisLayoutPolicy CreateAxisLayoutPolicy(const LayoutPolicyProperty& layoutPolicy
 {
     const bool isVertical = axis == Axis::VERTICAL;
     AxisLayoutPolicy axisLayoutPolicy;
-    axisLayoutPolicy.mainAxisPolicy =
-        isVertical ? layoutPolicy.heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH)
-            : layoutPolicy.widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
-    axisLayoutPolicy.crossAxisPolicy =
-        isVertical ? layoutPolicy.widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH)
-            : layoutPolicy.heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    axisLayoutPolicy.mainAxisPolicy = isVertical ? layoutPolicy.heightLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH)
+                                                 : layoutPolicy.widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH);
+    axisLayoutPolicy.crossAxisPolicy = isVertical ? layoutPolicy.widthLayoutPolicy_.value_or(LayoutCalPolicy::NO_MATCH)
+                                                  : layoutPolicy.heightLayoutPolicy_.value_or(
+                                                        LayoutCalPolicy::NO_MATCH);
     return axisLayoutPolicy;
 }
 
