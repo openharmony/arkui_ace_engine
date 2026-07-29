@@ -1212,6 +1212,8 @@ void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle, NG::T
     textLineStyle.UpdateColorShaderStyle(textStyle->GetColorShaderStyle());
     if (textStyle->HasTailIndent()) {
         textLineStyle.UpdateTailIndents(textStyle->GetTailIndent().value());
+    } else {
+        textLineStyle.ResetTailIndents();
     }
 }
 
