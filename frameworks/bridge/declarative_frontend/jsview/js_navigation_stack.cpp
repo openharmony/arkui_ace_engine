@@ -1508,6 +1508,26 @@ std::string JSNavigationStack::GetSerializedParamSafely(int32_t index) const
     return serializedParam->ToString();
 }
 
+std::string JSNavigationStack::GetSerializedParamForRecovery(int32_t index) const
+{
+    std::string serializedEmpty = "undefined";
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, serializedEmpty);
+    auto param = GetParamByIndex(index);
+    if (param.IsEmpty() || param->IsUndefined() || param->IsNull()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+            "current navDestination(index: %{public}d)'s param is undefined or null!", index);
+        return serializedEmpty;
+    }
+    auto serializedParam = NavParamFlatSerializer::Serialize(param);
+    if (serializedParam == "undefined" || serializedParam.empty()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+            "current navDestination(index: %{public}d)'s param can't be serialized or is empty!", index);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "serialize navDestination param success! its index: %{public}d", index);
+    }
+    return serializedParam;
+}
+
 void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);

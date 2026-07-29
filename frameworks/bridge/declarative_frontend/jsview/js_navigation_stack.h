@@ -137,6 +137,7 @@ public:
 
     std::string GetStringifyParamByIndex(int32_t index) const override;
     std::string GetSerializedParamSafely(int32_t index) const override;
+    std::string GetSerializedParamForRecovery(int32_t index) const override;
     void SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo) override;
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
