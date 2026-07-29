@@ -492,6 +492,11 @@ void SwiperModelStatic::SetMaintainVisibleContentPosition(FrameNode* frameNode, 
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MaintainVisibleContentPosition, value, frameNode);
 }
 
+void SwiperModelStatic::SetIgnoreHiddenItem(FrameNode* frameNode, bool value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, IgnoreHiddenItem, value, frameNode);
+}
+
 void SwiperModelStatic::SetOnScrollStateChanged(
     FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onScrollStateChanged)
 {

@@ -36,6 +36,7 @@ constexpr bool DEFAULT_CACHED_INDEPENDENT = false;
 constexpr bool DEFAULT_AUTO_PLAY = false;
 constexpr bool DEFAULT_LOOP = true;
 constexpr bool DEAFULT_DISABLE_SWIPE = false;
+constexpr bool DEFAULT_IGNORE_HIDDEN_ITEM = false;
 constexpr int32_t ARROW_IS_SHOW_BACKGROUND = 1;
 constexpr int32_t ARROW_IS_SIDE_BAR_MIDDLE = 2;
 constexpr int32_t ARROW_BACKGROUND_SIZE = 3;
@@ -2072,6 +2073,20 @@ void CallSwiperShowNext(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::CallSwiperShowNext(frameNode);
 }
+
+void SetSwiperIgnoreHiddenItem(ArkUINodeHandle node, ArkUI_Bool ignoreHiddenItem)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetIgnoreHiddenItem(frameNode, ignoreHiddenItem);
+}
+ 
+void ResetSwiperIgnoreHiddenItem(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetIgnoreHiddenItem(frameNode, DEFAULT_IGNORE_HIDDEN_ITEM);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2203,6 +2218,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setSwiperCachedIndependent = SetSwiperCachedIndependent,
         .resetSwiperCachedIndependent = ResetSwiperCachedIndependent,
         .getSwiperCachedIndependent = GetSwiperCachedIndependent,
+        .setSwiperIgnoreHiddenItem = SetSwiperIgnoreHiddenItem,
+        .resetSwiperIgnoreHiddenItem = ResetSwiperIgnoreHiddenItem,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

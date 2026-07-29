@@ -4791,6 +4791,8 @@ struct ArkUISwiperModifier {
     void (*setSwiperCachedIndependent)(ArkUINodeHandle node, ArkUI_Bool independent);
     void (*resetSwiperCachedIndependent)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperCachedIndependent)(ArkUINodeHandle node);
+    void (*setSwiperIgnoreHiddenItem)(ArkUINodeHandle node, ArkUI_Bool ignoreHiddenItem);
+    void (*resetSwiperIgnoreHiddenItem)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {

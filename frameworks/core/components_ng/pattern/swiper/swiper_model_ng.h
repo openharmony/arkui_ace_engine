@@ -100,6 +100,7 @@ public:
     void SetFillType(int32_t fillType) override;
     void ResetFillType() override;
     void ResetDisplayCountWithObject() override;
+    void SetIgnoreHiddenItem(bool ignoreHiddenItem) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<FrameNode> CreateArcSwiperFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
@@ -217,6 +218,7 @@ public:
     static int32_t GetFillType(FrameNode* frameNode);
     static void ResetFillType(FrameNode* frameNode);
     static void ResetDisplayCountWithObject(FrameNode* frameNode);
+    static void SetIgnoreHiddenItem(FrameNode* frameNode, bool ignoreHiddenItem);
     static bool CallSwiperStartFakeDrag(FrameNode* frameNode);
     static bool CallSwiperFakeDragBy(FrameNode* frameNode, float offset);
     static bool CallSwiperStopFakeDrag(FrameNode* frameNode);
