@@ -150,7 +150,7 @@
       "kb": "docs/kb/capabilities/safe-area.md",
       "spec_domain": "specs/04-common-capability/02-safe-area/01-safe-area-mechanism",
       "func_id": "04-02-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "insets": "frameworks/core/components_ng/property/safe_area_insets.cpp",
         "manager": "frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
@@ -424,7 +424,7 @@
       "kb": "docs/kb/components/container/column_split.md",
       "spec_domain": "specs/05-ui-components/01-layout-components/04-column-split",
       "func_id": "05-01-04",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/linear_split/linear_split_pattern.cpp",
         "layout": "frameworks/core/components_ng/pattern/linear_split/linear_split_layout_algorithm.cpp",
@@ -617,6 +617,130 @@
       "last_verified": "2026-07-18"
     },
     {
+      "id": "Grid",
+      "name": "Grid",
+      "name_cn": "网格布局组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "Grid",
+        "网格",
+        "网格布局",
+        "columnsTemplate",
+        "rowsTemplate",
+        "不规则布局",
+        "跨行列",
+        "自适应布局",
+        "可滚动网格",
+        "layoutOptions",
+        "虚拟滚动",
+        "GridItem",
+        "6种布局算法"
+      ],
+      "aliases": [
+        "Grid组件",
+        "网格布局",
+        "网格容器",
+        "滚动网格"
+      ],
+      "kb": "docs/kb/components/container/grid.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/04-grid-grid-item",
+      "func_id": "05-03-04",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/grid/grid_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/grid/grid_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/grid/grid_model_static.cpp",
+        "property": "frameworks/core/components_ng/pattern/grid/grid_layout_property.cpp",
+        "layout_info": "frameworks/core/components_ng/pattern/grid/grid_layout_info.cpp",
+        "layout_options": "frameworks/core/components_ng/pattern/grid/grid_layout_options.h",
+        "event_hub": "frameworks/core/components_ng/pattern/grid/grid_event_hub.h",
+        "focus": "frameworks/core/components_ng/pattern/grid/grid_focus.h",
+        "drag_manager": "frameworks/core/components_ng/pattern/grid/grid_item_drag_manager.h",
+        "adaptive": "frameworks/core/components_ng/pattern/grid/grid_adaptive/",
+        "static_layout": "frameworks/core/components_ng/pattern/grid/grid_layout/",
+        "scroll": "frameworks/core/components_ng/pattern/grid/grid_scroll/",
+        "irregular": "frameworks/core/components_ng/pattern/grid/irregular/",
+        "custom": "frameworks/core/components_ng/pattern/grid/grid_custom/",
+        "bridge": "frameworks/core/components_ng/pattern/grid/bridge/grid/arkts_native_grid_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/grid/bridge/grid/grid_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/grid/bridge/grid/grid_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/grid/bridge/grid/grid_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/grid_modifier.cpp",
+        "impl_modifier": "frameworks/core/interfaces/native/implementation/grid_modifier.cpp",
+        "capi_layout_option": "interfaces/native/node/grid_layout_option.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/grid.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/grid.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GridModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GridModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/grid/",
+        "test/unittest/core/pattern/grid/irregular/",
+        "test/unittest/core/pattern/grid/custom/",
+        "test/unittest/capi/modifiers/grid_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "GridItem",
+      "name": "GridItem",
+      "name_cn": "网格项组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "GridItem",
+        "网格项",
+        "rowStart",
+        "rowEnd",
+        "columnStart",
+        "columnEnd",
+        "selectable",
+        "selected",
+        "GridItemStyle",
+        "span",
+        "跨行列"
+      ],
+      "aliases": [
+        "GridItem组件",
+        "网格项",
+        "网格子项"
+      ],
+      "kb": "docs/kb/components/container/grid_item.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/04-grid-grid-item",
+      "func_id": "05-03-04",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/grid/grid_item_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/grid/grid_item_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/grid/grid_item_model_static.cpp",
+        "property": "frameworks/core/components_ng/pattern/grid/grid_item_layout_property.cpp",
+        "layout": "frameworks/core/components_ng/pattern/grid/grid_item_layout_algorithm.h",
+        "event_hub": "frameworks/core/components_ng/pattern/grid/grid_item_event_hub.h",
+        "bridge": "frameworks/core/components_ng/pattern/grid/bridge/griditem/arkts_native_grid_item_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/grid/bridge/griditem/grid_item_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/grid/bridge/griditem/grid_item_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/grid/bridge/griditem/grid_item_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/grid_item_modifier.cpp",
+        "impl_modifier": "frameworks/core/interfaces/native/implementation/grid_item_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/grid_item.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gridItem.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GridItemModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GridItemModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/grid/",
+        "test/unittest/capi/modifiers/grid_item_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
       "id": "RelativeContainer",
       "name": "RelativeContainer",
       "name_cn": "相对布局容器组件",
@@ -752,7 +876,7 @@
       "kb": "docs/kb/components/container/row_split.md",
       "spec_domain": "specs/05-ui-components/01-layout-components/10-row-split",
       "func_id": "05-01-10",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/linear_split/linear_split_pattern.cpp",
         "layout": "frameworks/core/components_ng/pattern/linear_split/linear_split_layout_algorithm.cpp",
@@ -973,7 +1097,7 @@
       "kb": "docs/kb/components/shape/shape.md",
       "spec_domain": "specs/05-ui-components/14-drawing-components/01-shape",
       "func_id": "05-14-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "shared_pattern": "frameworks/core/components_ng/pattern/shape/shape_pattern.cpp",
         "shared_model": "frameworks/core/components_ng/pattern/shape/shape_abstract_model_ng.cpp",
@@ -1041,7 +1165,7 @@
       "kb": "docs/kb/components/shape/canvas.md",
       "spec_domain": "specs/05-ui-components/14-drawing-components/02-canvas",
       "func_id": "05-14-02",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp",
         "model": "frameworks/core/components_ng/pattern/canvas/canvas_model_ng.cpp",
@@ -1095,7 +1219,7 @@
       "kb": "docs/kb/components/shape/offscreen_canvas.md",
       "spec_domain": "specs/05-ui-components/14-drawing-components/03-offscreen-canvas",
       "func_id": "05-14-03",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/canvas/offscreen_canvas_pattern.cpp",
         "paint": "frameworks/core/components_ng/pattern/canvas/offscreen_canvas_paint_method.cpp",
@@ -1808,7 +1932,6 @@
         "event_hub": "frameworks/core/components_ng/pattern/swiper/swiper_event_hub.cpp",
         "arc_swiper": "frameworks/core/components_ng/pattern/swiper/arc_swiper_pattern.cpp",
         "node_modifier": "frameworks/core/interfaces/native/node/node_swiper_modifier.cpp",
-        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_swiper.cpp",
         "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/swiper_modifier.ts",
         "native_enums": "interfaces/native/native_node.h"
       },
@@ -2986,7 +3109,7 @@
       "kb": "docs/kb/architecture/window-mechanism.md",
       "spec_domain": "specs/03-engine-framework/05-window-mechanism/01-window-mechanism",
       "func_id": "03-05-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "ui_content_interface": "interfaces/inner_api/ace/ui_content.h",
         "ui_content_impl": "adapter/ohos/entrance/ui_content_impl.cpp",
@@ -3361,7 +3484,7 @@
       "kb": "docs/kb/architecture/dfx/layout-boundary-display.md",
       "spec_domain": "specs/03-engine-framework/08-dfx-foundation/06-layout-boundary-display",
       "func_id": "03-08-06",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "gesture_debug_boundary_manager": "frameworks/core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h",
         "debug_boundary_painter": "frameworks/core/components_ng/render/debug_boundary_painter.h",
@@ -3751,7 +3874,7 @@
       "kb": "docs/kb/components/overlay/sheet.md",
       "spec_domain": "specs/05-ui-components/07-modal-components/01-sheet-modal",
       "func_id": "05-07-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/sheet/sheet_presentation_pattern.cpp",
         "wrapper": "frameworks/core/components_ng/pattern/sheet/sheet_wrapper_pattern.cpp",
@@ -3798,7 +3921,7 @@
       "kb": "docs/kb/components/overlay/bind_tips.md",
       "spec_domain": "specs/04-common-capability/03-common-attributes/05-popup-attributes",
       "func_id": "04-03-05",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "bubble_pattern": "frameworks/core/components_ng/pattern/bubble/bubble_pattern.cpp",
         "bubble_layout": "frameworks/core/components_ng/pattern/bubble/bubble_layout_algorithm.cpp",
