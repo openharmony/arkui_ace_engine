@@ -231,4 +231,20 @@ export function LazyVWaterFlowLayoutImpl(
     })
 }
 
+@memo
+export function LazyVWaterFlowLayout(
+    @memo @memo_skip
+    style: ((attributes: LazyVWaterFlowLayoutAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkLazyVWaterFlowLayoutComponent>((): ArkLazyVWaterFlowLayoutComponent => {
+        return new ArkLazyVWaterFlowLayoutComponent()
+    })
+    NodeAttach<ArkLazyVWaterFlowLayoutPeer>((): ArkLazyVWaterFlowLayoutPeer => ArkLazyVWaterFlowLayoutPeer.create(receiver), (_: ArkLazyVWaterFlowLayoutPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
+
 export type LazyVWaterFlowLayoutInterface = (content_?: () => void) => LazyVWaterFlowLayoutAttribute
