@@ -820,7 +820,8 @@ protected:
     Rosen::ParticleParaType<float> ConvertParticleFloatOption(const ParticleFloatPropertyOption& floatOption);
     Rosen::ParticleParaType<float> ConvertParticleDefaultFloatOption(OHOS::Rosen::Range<float>& rsInitRange);
     bool NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect);
-    void LoadParticleImage(const std::string& src, Dimension& width, Dimension& height);
+    void LoadParticleImage(const std::string& src, Dimension& width, Dimension& height,
+        const std::string& bundleName = "", const std::string& moduleName = "");
     void OnParticleImageLoaded(const std::string& src, const RefPtr<CanvasImage> canvas);
     void SetRsParticleImage(std::shared_ptr<Rosen::RSImage>& rsImagePtr, std::string& imageSource);
     void PaintRSBgImage();
