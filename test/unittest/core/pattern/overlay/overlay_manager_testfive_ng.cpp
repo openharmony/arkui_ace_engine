@@ -311,8 +311,13 @@ HWTEST_F(OverlayManagerTestFiveNg, GetDisplayAvailableRect003, TestSize.Level1)
     bool savedIsSubContainer = mockContainer->isSubContainer_;
     mockContainer->isSubContainer_ = false;
     AceEngine::Get().AddContainer(0, mockContainer);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    Rect expectedRect(0, 0, 720, 1280);
+    pipelineContext->displayAvailableRect_ = expectedRect;
     auto rect = OverlayManager::GetDisplayAvailableRect(frameNode, 0);
-    EXPECT_FALSE(rect.ToString().empty());
+    EXPECT_EQ(rect.Width(), expectedRect.Width());
+    EXPECT_EQ(rect.Height(), expectedRect.Height());
     mockContainer->isSubContainer_ = savedIsSubContainer;
     MockSystemProperties::g_isSuperFoldDisplayDevice = saved;
 }
@@ -336,9 +341,15 @@ HWTEST_F(OverlayManagerTestFiveNg, GetDisplayAvailableRect004, TestSize.Level1)
     bool savedIsSubContainer = mockContainer->isSubContainer_;
     mockContainer->isSubContainer_ = true;
     AceEngine::Get().AddContainer(0, mockContainer);
+    Rect expectedRect(10, 20, 360, 640);
+    MockContainer::mockDisplayAvailableRect_ = expectedRect;
     auto rect = OverlayManager::GetDisplayAvailableRect(frameNode, 0);
-    EXPECT_FALSE(rect.ToString().empty());
+    EXPECT_EQ(rect.Width(), expectedRect.Width());
+    EXPECT_EQ(rect.Height(), expectedRect.Height());
+    EXPECT_EQ(rect.GetOffset().GetX(), expectedRect.GetOffset().GetX());
+    EXPECT_EQ(rect.GetOffset().GetY(), expectedRect.GetOffset().GetY());
     mockContainer->isSubContainer_ = savedIsSubContainer;
+    MockContainer::mockDisplayAvailableRect_ = Rect();
     MockSystemProperties::g_isSuperFoldDisplayDevice = saved;
 }
 
@@ -352,8 +363,22 @@ HWTEST_F(OverlayManagerTestFiveNg, GetSafeAreaInsets001, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(frameNode, nullptr);
+    auto mockPipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(mockPipeline, nullptr);
+    SafeAreaInsets::Inset left{10, 50};
+    SafeAreaInsets::Inset top{0, 100};
+    SafeAreaInsets::Inset right{0, 0};
+    SafeAreaInsets::Inset bottom{0, 200};
+    SafeAreaInsets expectedInsets(left, top, right, bottom);
+    EXPECT_CALL(*mockPipeline, GetSafeAreaWithoutProcess())
+        .WillRepeatedly(testing::Return(expectedInsets));
     auto insets = OverlayManager::GetSafeAreaInsets(frameNode, false);
-    EXPECT_TRUE(insets.IsValid() || !insets.IsValid());
+    EXPECT_EQ(insets.left_.start, left.start);
+    EXPECT_EQ(insets.left_.end, left.end);
+    EXPECT_EQ(insets.top_.start, top.start);
+    EXPECT_EQ(insets.top_.end, top.end);
+    EXPECT_EQ(insets.bottom_.start, bottom.start);
+    EXPECT_EQ(insets.bottom_.end, bottom.end);
 }
 
 /**
@@ -368,8 +393,22 @@ HWTEST_F(OverlayManagerTestFiveNg, GetSafeAreaInsets002, TestSize.Level1)
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(frameNode, nullptr);
     frameNode->AttachContext(PipelineContext::GetCurrentContext().GetRawPtr());
+    auto mockPipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(mockPipeline, nullptr);
+    SafeAreaInsets::Inset left{20, 80};
+    SafeAreaInsets::Inset top{5, 120};
+    SafeAreaInsets::Inset right{0, 0};
+    SafeAreaInsets::Inset bottom{0, 300};
+    SafeAreaInsets expectedInsets(left, top, right, bottom);
+    EXPECT_CALL(*mockPipeline, GetSafeAreaWithoutProcess())
+        .WillRepeatedly(testing::Return(expectedInsets));
     auto insets = OverlayManager::GetSafeAreaInsets(frameNode, true);
-    EXPECT_TRUE(insets.IsValid() || !insets.IsValid());
+    EXPECT_EQ(insets.left_.start, left.start);
+    EXPECT_EQ(insets.left_.end, left.end);
+    EXPECT_EQ(insets.top_.start, top.start);
+    EXPECT_EQ(insets.top_.end, top.end);
+    EXPECT_EQ(insets.bottom_.start, bottom.start);
+    EXPECT_EQ(insets.bottom_.end, bottom.end);
 }
 
 /**

@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/sheet/sheet_presentation_property.h"
 #include "core/components_ng/pattern/sheet/sheet_style.h"
+#include "core/interfaces/native/node/sheet_modifier.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1152,12 +1153,15 @@ HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave003, TestSize.Level1)
     auto containerNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<AutoSaveTestPattern>());
     ASSERT_NE(containerNode, nullptr);
+    EXPECT_TRUE(containerNode->NeedRequestAutoSave());
     auto mockContainer = MockContainer::Current();
     ASSERT_NE(mockContainer, nullptr);
     bool savedIsSubContainer = mockContainer->isSubContainer_;
     mockContainer->isSubContainer_ = true;
+    EXPECT_TRUE(mockContainer->IsSubContainer());
     overlayManager->FireAutoSave(containerNode);
     mockContainer->isSubContainer_ = savedIsSubContainer;
+    EXPECT_EQ(mockContainer->isSubContainer_, savedIsSubContainer);
 }
 
 /**
@@ -1175,12 +1179,16 @@ HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave004, TestSize.Level1)
     auto containerNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<AutoSaveTestPattern>());
     ASSERT_NE(containerNode, nullptr);
+    EXPECT_TRUE(containerNode->NeedRequestAutoSave());
+    EXPECT_NE(containerNode->GetTag(), V2::SHEET_PAGE_TAG);
     auto mockContainer = MockContainer::Current();
     ASSERT_NE(mockContainer, nullptr);
     bool savedIsSubContainer = mockContainer->isSubContainer_;
     mockContainer->isSubContainer_ = false;
+    EXPECT_FALSE(mockContainer->IsSubContainer());
     overlayManager->FireAutoSave(containerNode);
     mockContainer->isSubContainer_ = savedIsSubContainer;
+    EXPECT_EQ(mockContainer->isSubContainer_, savedIsSubContainer);
 }
 
 /**
@@ -1200,12 +1208,23 @@ HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave005, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
     ASSERT_NE(sheetNode, nullptr);
+    auto autoSaveChild = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<AutoSaveTestPattern>());
+    ASSERT_NE(autoSaveChild, nullptr);
+    sheetNode->AddChild(autoSaveChild);
+    EXPECT_TRUE(sheetNode->NeedRequestAutoSave());
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
+    auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    ASSERT_NE(sheetModifier, nullptr);
+    EXPECT_FALSE(sheetModifier->sheetHasInstanceId(sheetNode));
     auto mockContainer = MockContainer::Current();
     ASSERT_NE(mockContainer, nullptr);
     bool savedIsSubContainer = mockContainer->isSubContainer_;
     mockContainer->isSubContainer_ = false;
+    EXPECT_FALSE(mockContainer->IsSubContainer());
     overlayManager->FireAutoSave(sheetNode);
     mockContainer->isSubContainer_ = savedIsSubContainer;
+    EXPECT_EQ(mockContainer->isSubContainer_, savedIsSubContainer);
 }
 
 /**
@@ -1226,17 +1245,30 @@ HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave006, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetPresentationPattern>(targetId, "NonExistentTag", std::move(callback)));
     ASSERT_NE(sheetNode, nullptr);
+    auto autoSaveChild = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<AutoSaveTestPattern>());
+    ASSERT_NE(autoSaveChild, nullptr);
+    sheetNode->AddChild(autoSaveChild);
+    EXPECT_TRUE(sheetNode->NeedRequestAutoSave());
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
     sheetStyle.instanceId = 1;
     layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    ASSERT_NE(sheetModifier, nullptr);
+    EXPECT_TRUE(sheetModifier->sheetHasInstanceId(sheetNode));
+    auto targetNode = FrameNode::GetFrameNode("NonExistentTag", targetId);
+    EXPECT_EQ(targetNode, nullptr);
     auto mockContainer = MockContainer::Current();
     ASSERT_NE(mockContainer, nullptr);
     bool savedIsSubContainer = mockContainer->isSubContainer_;
     mockContainer->isSubContainer_ = false;
+    EXPECT_FALSE(mockContainer->IsSubContainer());
     overlayManager->FireAutoSave(sheetNode);
     mockContainer->isSubContainer_ = savedIsSubContainer;
+    EXPECT_EQ(mockContainer->isSubContainer_, savedIsSubContainer);
 }
 
 /**
@@ -1261,17 +1293,30 @@ HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave007, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<SheetPresentationPattern>(targetId, targetTag, std::move(callback)));
     ASSERT_NE(sheetNode, nullptr);
+    auto autoSaveChild = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<AutoSaveTestPattern>());
+    ASSERT_NE(autoSaveChild, nullptr);
+    sheetNode->AddChild(autoSaveChild);
+    EXPECT_TRUE(sheetNode->NeedRequestAutoSave());
+    EXPECT_EQ(sheetNode->GetTag(), V2::SHEET_PAGE_TAG);
     auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
     sheetStyle.instanceId = 1;
     layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto* sheetModifier = NG::NodeModifier::GetSheetPatternInnerModifier();
+    ASSERT_NE(sheetModifier, nullptr);
+    EXPECT_TRUE(sheetModifier->sheetHasInstanceId(sheetNode));
+    auto foundTargetNode = FrameNode::GetFrameNode(targetTag, targetId);
+    EXPECT_EQ(foundTargetNode, targetNode);
     auto mockContainer = MockContainer::Current();
     ASSERT_NE(mockContainer, nullptr);
     bool savedIsSubContainer = mockContainer->isSubContainer_;
     mockContainer->isSubContainer_ = false;
+    EXPECT_FALSE(mockContainer->IsSubContainer());
     overlayManager->FireAutoSave(sheetNode);
     mockContainer->isSubContainer_ = savedIsSubContainer;
+    EXPECT_EQ(mockContainer->isSubContainer_, savedIsSubContainer);
 }
 
 /**
@@ -1582,6 +1627,10 @@ HWTEST_F(OverlayManagerTestThreeNg, CloseImageGeneratorSheet007, TestSize.Level1
         "test_mask", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(maskNode, nullptr);
     sheetNode->SetParent(AceType::WeakClaim(AceType::RawPtr(maskNode)));
+    // renderContext_ set to nullptr is safe: PlaySheetMaskTransition checks
+    // GetRenderContext() return via CHECK_NULL_VOID at line 4648, returns early.
+    // isDismissProcess_=true also makes PlaySheetTransition's SheetTransitionForOverlay
+    // return early. This covers the if(maskNode) true branch without animation side effects.
     maskNode->renderContext_ = nullptr;
     int32_t sheetId = sheetNode->GetId();
     overlayManager->imageGeneratorSheetKey_ = SheetKey(true, sheetId, 200);
