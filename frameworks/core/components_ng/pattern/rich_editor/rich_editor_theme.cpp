@@ -38,8 +38,8 @@ void RichEditorTheme::Builder::ParsePatternColor(
     theme->menuTextColor_ = pattern->GetAttr<Color>("menu_text_color", Color(0x99000000));
     theme->menuIconColor_ = pattern->GetAttr<Color>("menu_icon_color", Color(0x99000000));
     theme->urlDefaultColor_ = pattern->GetAttr<Color>("font_emphasize", Color(0xff007dff));
-    auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
-    theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(disabledOpacity);
+    theme->urlDisabledOpacity_ = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
+    theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(theme->urlDisabledOpacity_);
     theme->urlHoverColor_ = pattern->GetAttr<Color>("interactive_hover", Color(0x0C182431));
     theme->urlPressColor_ = pattern->GetAttr<Color>("interactive_pressed", Color(0x19182431));
     theme->bgColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, Color::WHITE);
