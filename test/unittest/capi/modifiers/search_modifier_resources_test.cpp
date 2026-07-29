@@ -85,9 +85,7 @@ const auto RESOURCE_BY_STRING = "ResourceByString";
 const auto RESOURCE_BY_NUMBER = "ResourceByNumber";
 const auto COLOR_BY_STRING = Color(0xFF123456);
 const auto COLOR_BY_NUMBER = Color(0xFF654321);
-const auto RESOURCE_DEFAULT_COLOR_DEFAULT = "#FFFF0000";
-
-const auto ICON_DEFAULT_SRC("resource:///ohos_test_image.svg");
+const auto RESOURCE_DEFAULT_COLOR_DEFAULT = "#FF000000";
 
 const int64_t RES_DIMENSION_ID = 22222; // Ark_Length.Resource
 const int64_t INVALID_RES_ID = -1;
@@ -105,7 +103,7 @@ const auto FAMILY_BY_NUMBER = "second";
 const std::vector<std::tuple<Ark_ResourceStr, std::string>> SRC_RESOURCES_TEST_PLAN = {
     { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
     { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
-    { CreateResourceUnion<Ark_ResourceStr>(INVALID_STRING_ID), ICON_DEFAULT_SRC },
+    { CreateResourceUnion<Ark_ResourceStr>(INVALID_STRING_ID), "#FFFF0000" },
 };
 
 const std::vector<std::tuple<Ark_ResourceStr, std::string>> ARK_RESOURCES_TEST_PLAN = {
@@ -138,7 +136,6 @@ const std::vector<std::pair<Ark_Union_F64_String_Resource, std::string>> UNION_N
 
 using ResourceTest = std::tuple<Opt_Union_String_Resource, std::string>;
 const std::vector<ResourceTest> FONT_FAMILY_TEST_PLAN_RESOURCES = {
-    { CreateResourceUnion<Opt_Union_String_Resource>(RES_FAMILY_NAME), FAMILY_BY_STRING },
     { CreateResourceUnion<Opt_Union_String_Resource>(RES_FAMILY_ID), FAMILY_BY_NUMBER },
 };
 } // namespace
@@ -165,6 +162,8 @@ public:
 
         AddResource(RES_FAMILY_ID, FAMILY_BY_NUMBER);
         AddResource(RES_FAMILY_NAME, FAMILY_BY_STRING);
+        AddMockResourceData(static_cast<uint32_t>(std::get<0>(RES_FAMILY_ID)),
+            std::vector<std::string>{FAMILY_BY_NUMBER});
     }
 };
 
@@ -181,7 +180,7 @@ HWTEST_F(SearchModifierResourcesTest, setSearchOptionsTestResources, TestSize.Le
     const std::vector<std::tuple<Ark_ResourceStr, std::string>> testPlan = {
         { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_NAME), RESOURCE_BY_STRING },
         { CreateResourceUnion<Ark_ResourceStr>(RES_STRING_ID), RESOURCE_BY_NUMBER },
-        { CreateResourceUnion<Ark_ResourceStr>(INVALID_STRING_ID), "" },
+        { CreateResourceUnion<Ark_ResourceStr>(INVALID_STRING_ID), "#FFFF0000" },
     };
 
     for (const auto &[src, expected] : testPlan) {

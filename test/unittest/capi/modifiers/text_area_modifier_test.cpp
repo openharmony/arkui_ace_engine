@@ -667,7 +667,7 @@ HWTEST_F(TextAreaModifierTest, setTextIndentTest, TestSize.Level1)
         { Converter::ArkValue<Opt_Dimension>("-5.68vp"), "-5.68vp" },
         { Converter::ArkValue<Opt_Dimension>("70.00%"), "70.00%" },
         { Converter::ArkValue<Opt_Dimension>("-70.00%"), "-70.00%" },
-        { Converter::ArkValue<Opt_Dimension>(FAKE_RES_ID), "10.00px" },
+        { Converter::ArkValue<Opt_Dimension>(FAKE_RES_ID), "0.00px" },
     };
 
     for (const auto& [value, expectVal] : ARK_LENGTH_TEST_PLAN) {

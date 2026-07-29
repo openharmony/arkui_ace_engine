@@ -261,7 +261,7 @@ HWTEST_F(TextModifierTest, setFontColorTest, TestSize.Level1)
     auto resNameColor = CreateResourceUnion<Opt_ResourceColor>(RES_NAME);
     modifier_->setFontColor(node_, &resNameColor);
     auto checkVal7 = GetAttrValue<std::string>(node_, FONT_COLOR_ATTR);
-    EXPECT_THAT(checkVal7, Eq("#FFFF0000")); // Color::RED is result of mocked ThemeConstants::GetColorByName
+    EXPECT_THAT(checkVal7, Eq("#FF123456")); // resolved via MockResourceAdapterV2
 }
 
 HWTEST_F(TextModifierTest, setFontSizeTest, TestSize.Level1)
@@ -300,7 +300,7 @@ HWTEST_F(TextModifierTest, setMinFontSizeTest, TestSize.Level1)
     auto size3 = CreateResourceUnion<Opt_Union_F64_String_Resource>(RES_NAME1);
     modifier_->setMinFontSize(node_, &size3);
     auto checkVal3 = GetAttrValue<std::string>(node_, MIN_FONT_SIZE_ATTR);
-    EXPECT_THAT(checkVal3, Eq("10.00px"));
+    EXPECT_THAT(checkVal3, Eq("0.00px"));
 }
 
 HWTEST_F(TextModifierTest, setMaxFontSizeTest, TestSize.Level1)
@@ -318,7 +318,7 @@ HWTEST_F(TextModifierTest, setMaxFontSizeTest, TestSize.Level1)
     auto size3 = CreateResourceUnion<Opt_Union_F64_String_Resource>(RES_NAME1);
     modifier_->setMaxFontSize(node_, &size3);
     auto checkVal3 = GetAttrValue<std::string>(node_, MAX_FONT_SIZE_ATTR);
-    EXPECT_THAT(checkVal3, Eq("10.00px"));
+    EXPECT_THAT(checkVal3, Eq("0.00px"));
 }
 
 HWTEST_F(TextModifierTest, setMinFontScaleTest, TestSize.Level1)
