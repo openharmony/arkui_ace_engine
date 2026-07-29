@@ -540,6 +540,7 @@ export class ChipV2 extends ViewV2 {
         this.breakPoint = BreakPointsType.SM;
         this.fontSizeScale = 1;
         this.useAdaptiveLineHeight = false;
+        this.actualChipHeight = 0;
         this.smListener = mediaquery.matchMediaSync('(0vp<width) and (width<600vp)');
         this.mdListener = mediaquery.matchMediaSync('(600vp<=width) and (width<840vp)');
         this.lgListener = mediaquery.matchMediaSync('(840vp<=width)');
@@ -568,6 +569,7 @@ export class ChipV2 extends ViewV2 {
         this.breakPoint = BreakPointsType.SM;
         this.fontSizeScale = 1;
         this.useAdaptiveLineHeight = false;
+        this.actualChipHeight = 0;
     }
     updateLanguageLineHeight() {
         if (deviceInfo.sdkApiVersion < 26) {
@@ -668,6 +670,9 @@ export class ChipV2 extends ViewV2 {
             Button.borderColor(this.getChipNodeBorderColor());
             Button.borderRadius(this.getChipBorderRadius());
             Button.responseRegion(this.getChipResponseRegion());
+            Button.onSizeChange((oldValue, newValue) => {
+                this.actualChipHeight = newValue?.height ?? 0;
+            });
             Button.scale(this.chipScale);
             Button.opacity(this.chipOpacity);
             Button.accessibilityGroup(true);
@@ -1170,7 +1175,9 @@ export class ChipV2 extends ViewV2 {
     }
     getChipResponseRegion() {
         if (deviceInfo.sdkApiVersion >= 26) {
-            const chipHeight = this.getChipHeight();
+            // Large-font scaling (e.g. care mode) can stretch the chip beyond the themed or
+            // user-specified height, so prefer the measured height once layout has happened.
+            const chipHeight = this.actualChipHeight > 0 ? this.actualChipHeight : this.getChipHeight();
             if (chipHeight < HOT_SPOT_MIN_HEIGHT) {
                 return {
                     x: 0,
@@ -1634,6 +1641,9 @@ __decorate([
 __decorate([
     Local
 ], ChipV2.prototype, "useAdaptiveLineHeight", void 0);
+__decorate([
+    Local
+], ChipV2.prototype, "actualChipHeight", void 0);
 function lengthMetricsToLength(length) {
     if (length.unit === LengthUnit.PX) {
         return `${length.value}px`;
