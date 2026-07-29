@@ -1583,6 +1583,7 @@ export struct SegmentButtonV2ItemContent {
       const context: common.Context = this.getUIContext().getHostContext() as common.Context;
       return {
         id: resourceId as int, type: COLOR_RESOURCE_TYPE,
+        params: [],
         bundleName: (context as common.UIAbilityContext)?.abilityInfo?.bundleName ?? '',
         moduleName: (context as common.UIAbilityContext)?.abilityInfo?.moduleName ?? '',
       } as Resource;
