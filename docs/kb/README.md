@@ -1,7 +1,7 @@
 # ArkUI KB
 
 > 更新时间：2026-07-29
-> 主题数：122
+> 主题数：126
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -80,6 +80,10 @@ docs/kb/
 | Repeat | Repeat 循环渲染与虚拟滚动（含 RepeatVirtualScroll） | `docs/kb/syntax/repeat.md` | 已迁移，旧 KB 已移除 |
 | SideBarContainer | 侧边栏容器组件 | `docs/kb/components/container/side_bar_container.md` | 新建 |
 | NavDestination | 导航目标页组件 | `docs/kb/components/container/navdestination.md` | 新建 |
+| Scroll | 滚动容器组件 | `docs/kb/components/container/scroll.md` | 已迁移，旧 KB 已移除 |
+| List | 列表容器组件（含 ListItem/ListItemGroup） | `docs/kb/components/container/list.md` | 已迁移，旧 KB 已移除 |
+| Refresh | 下拉刷新容器组件 | `docs/kb/components/container/refresh.md` | 已迁移，旧 KB 已移除 |
+| ScrollBar | 独立滚动条组件 | `docs/kb/components/container/scroll_bar.md` | 已迁移，旧 KB 已移除 |
 | Slider | 滑动选择器组件 | `docs/kb/components/input-form/slider.md` | 新建（无旧 KB） |
 | TextPicker | 文本选择器组件 | `docs/kb/components/selector/text_picker.md` | 已迁移，旧 KB 已移除 |
 | DatePicker | 日期选择器组件 | `docs/kb/components/selector/date_picker.md` | 已迁移，旧 KB 已移除 |

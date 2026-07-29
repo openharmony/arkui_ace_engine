@@ -2,7 +2,7 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-07-27
+> 更新时间：2026-07-29
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
@@ -38,32 +38,32 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：131
-- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：45
+- `docs/` 下 Markdown 文档总数：189
+- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：36
 - `docs/syntax/` 下语法专题文档：7
   - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计
 
-- `context_registry.json` 新版条目数：68
-- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：46
-- 旧 KB 索引路径有效性：46/46（全部存在）
+- `context_registry.json` 新版条目数：135
+- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：37
+- 旧 KB 索引路径有效性：37/37（全部存在）
 
 - 类型分布：
-  - `component`: 25
+  - `component`: 20
   - `sdk`: 4
-  - `feature`: 17
+  - `feature`: 13
 - 分类分布：
-  - `advanced`: 3
+  - `advanced`: 2
   - `basic`: 4
-  - `container`: 6
+  - `container`: 2
   - `data_display`: 8
   - `sdk`: 6
   - `selector`: 3
-  - `system`: 13
-- 关键词总数（索引内）：423
-- 别名总数（索引内）：149
+  - `system`: 9
+- 关键词总数（索引内）：355
+- 别名总数（索引内）：122
 
 ### 2.3 覆盖现状
 
@@ -188,3 +188,4 @@ PY
 - 2026-07-29：新增 Custom Measure/Layout 新版 KB；补充自定义组件现行回调与已废弃 API 的兼容实现边界。新版 registry 增至 68 条，旧索引保持 46 条。
 - 2026-07-29：迁移 RichEditor 到 `docs/kb/components/basic/rich_editor.md`，旧 KB 已移除，旧索引入口及 rich_text 分类已移除（旧索引 47 条）。新版 registry 增至 43 条，关联 Spec `05-09-02`（9 个 Feat spec + 1 个 design.md）。
 - 2026-07-29：迁移 Grid 到 `docs/kb/components/container/grid.md`，旧 KB 已移除，旧索引入口已移除（旧索引减至 45 条）；新增 GridItem KB `docs/kb/components/container/grid_item.md`。registry 增至 70 条。
+- 2026-07-29：迁移 Scroll/List/Refresh/ScrollBar 四个滚动容器旧 KB 到 `docs/kb/components/container/`，补齐 Spec 路由（func_id 05-03-03/05/06/07）。旧 KB 文件删除、旧 INDEX 条目移除（减至 37 条）、context_registry 增至 135 条；rebase 到最新 origin/master 后解决与 Grid 迁移等的冲突（grid 旧 KB 按上游删除处理）。

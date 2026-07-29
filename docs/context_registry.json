@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-27",
+  "last_updated": "2026-07-29",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -7093,6 +7093,222 @@
         "test/unittest/core/pattern/overlay/overlay_manager_content_test_ng.cpp",
         "test/unittest/core/pattern/overlay/overlay_manager_extend_test_ng.cpp",
         "test/unittest/core/pattern/overlay/overlay_manager_test_update_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "Scroll",
+      "name": "Scroll",
+      "name_cn": "滚动容器组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "滚动",
+        "scroll",
+        "滚动容器",
+        "scrollable",
+        "scroll bar",
+        "滚动条",
+        "edge effect",
+        "边缘效果",
+        "nested scroll",
+        "嵌套滚动",
+        "scroll position",
+        "滚动位置",
+        "scroll to",
+        "scrollby"
+      ],
+      "aliases": [
+        "Scroll组件",
+        "滚动组件",
+        "滚动容器"
+      ],
+      "kb": "docs/kb/components/container/scroll.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/07-scroll",
+      "func_id": "05-03-07",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/scroll/scroll_pattern.h",
+        "base_pattern": "frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/scroll/scroll_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/scroll/scroll_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/scroll/scroll_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/scroll/scroll_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/scroll/scroll_event_hub.h",
+        "zoom": "frameworks/core/components_ng/pattern/scroll/zoom_controller.cpp",
+        "free_scroll": "frameworks/core/components_ng/pattern/scroll/free_scroll_controller.cpp",
+        "controller": "frameworks/core/components/scroll/scroll_position_controller.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_scroll_modifier.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_scroll.cpp",
+        "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/scroll_modifier.ts",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scroll.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ScrollModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ScrollModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/scroll/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "List",
+      "name": "List",
+      "name_cn": "列表组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "List",
+        "列表",
+        "滚动列表",
+        "ListItem",
+        "分组列表"
+      ],
+      "aliases": [
+        "List组件",
+        "列表容器",
+        "长列表"
+      ],
+      "kb": "docs/kb/components/container/list.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/05-list-list-item-list-item-group",
+      "func_id": "05-03-05",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/list/list_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/list/list_pattern.h",
+        "list_item_pattern": "frameworks/core/components_ng/pattern/list/list_item_pattern.cpp",
+        "list_item_group_pattern": "frameworks/core/components_ng/pattern/list/list_item_group_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/list/list_model_ng.cpp",
+        "item_model": "frameworks/core/components_ng/pattern/list/list_item_model_ng.cpp",
+        "group_model": "frameworks/core/components_ng/pattern/list/list_item_group_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/list/list_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/list/list_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/list/list_event_hub.h",
+        "controller": "frameworks/core/components_ng/pattern/list/list_position_controller.cpp",
+        "drag_manager": "frameworks/core/components_ng/pattern/list/list_item_drag_manager.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_list_modifier.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_list.cpp",
+        "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/list_modifier.ts",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/list.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/list.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/list/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "Refresh",
+      "name": "Refresh",
+      "name_cn": "下拉刷新组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "下拉刷新",
+        "pull to refresh",
+        "refresh",
+        "loading",
+        "加载中",
+        "刷新状态",
+        "自定义刷新UI",
+        "nested scroll",
+        "嵌套滚动",
+        "spring animation",
+        "弹簧动画"
+      ],
+      "aliases": [
+        "Refresh组件",
+        "下拉刷新",
+        "刷新组件"
+      ],
+      "kb": "docs/kb/components/container/refresh.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/06-refresh",
+      "func_id": "05-03-06",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/refresh/refresh_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/refresh/refresh_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/refresh/refresh_event_hub.h",
+        "bridge": "frameworks/core/components_ng/pattern/refresh/bridge/arkts_native_refresh_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/refresh/bridge/refresh_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_refresh_modifier.cpp",
+        "front_end": "frameworks/bridge/declarative_frontend/ark_direct_component/src/arkrefresh.ts",
+        "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/refresh_modifier.ts",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/refresh.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/refresh.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/RefreshModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RefreshModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/refresh/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "ScrollBar",
+      "name": "ScrollBar",
+      "name_cn": "滚动条组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "ScrollBar",
+        "滚动条",
+        "scroll bar",
+        "滑块",
+        "滚动指示"
+      ],
+      "aliases": [
+        "ScrollBar组件",
+        "滚动条",
+        "Scrollbar"
+      ],
+      "kb": "docs/kb/components/container/scroll_bar.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/03-scroll-bar",
+      "func_id": "05-03-03",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h",
+        "paint_property": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_paint_property.h",
+        "proxy": "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_scroll_bar_modifier.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.cpp",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll_bar.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scrollBar.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/scroll_bar/"
       ],
       "status": "active",
       "last_verified": "2026-07-29"
