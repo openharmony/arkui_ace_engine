@@ -186,4 +186,20 @@ export function LazyColumnLayoutImpl(
     })
 }
 
+@memo
+export function LazyColumnLayout(
+    @memo @memo_skip
+    style: ((attributes: LazyColumnLayoutAttribute) => void) | undefined,
+    @memo @memo_skip
+    content_?: () => void,
+): void {
+    const receiver = remember<ArkLazyColumnLayoutComponent>((): ArkLazyColumnLayoutComponent => {
+        return new ArkLazyColumnLayoutComponent()
+    })
+    NodeAttach<ArkLazyColumnLayoutPeer>((): ArkLazyColumnLayoutPeer => ArkLazyColumnLayoutPeer.create(receiver), (_: ArkLazyColumnLayoutPeer): void => {
+        style?.(receiver)
+        content_?.()
+    })
+}
+
 export type LazyColumnLayoutInterface = (content_?: () => void) => LazyColumnLayoutAttribute
