@@ -34,6 +34,7 @@ const int32_t VALID_NUMBER = INT_MAX;
 const int32_t INVALID_NUMBER = INT_MIN;
 const int64_t FAKE_RES_ID(1234);
 const int64_t FAKE_RES_ID_2(1235);
+const double FAKE_DIMENSION_VALUE = 10.0;
 const auto OPT_VALID_NUM = Converter::ArkValue<Opt_Number>(VALID_NUMBER);
 const auto OPT_INVALID_NUM = Converter::ArkValue<Opt_Number>(INVALID_NUMBER);
 const auto OPT_UNDEF_NUM = Converter::ArkValue<Opt_Number>();
@@ -205,8 +206,8 @@ public:
         ASSERT_NE(render_, nullptr);
         AddResource("bi_public_ok", "path_to_background_image");
         // Register mock resource data for FAKE_RES_ID (1234) and FAKE_RES_ID_2 (1235)
-        AddResource(FAKE_RES_ID, Dimension(10.0, DimensionUnit::PX));
-        AddResource(FAKE_RES_ID_2, Dimension(10.0, DimensionUnit::PX));
+        AddResource(FAKE_RES_ID, Dimension(FAKE_DIMENSION_VALUE, DimensionUnit::PX));
+        AddResource(FAKE_RES_ID_2, Dimension(FAKE_DIMENSION_VALUE, DimensionUnit::PX));
     }
     void TearDown()
     {
