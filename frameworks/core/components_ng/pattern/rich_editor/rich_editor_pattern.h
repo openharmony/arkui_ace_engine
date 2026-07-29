@@ -717,6 +717,7 @@ public:
     void UpdatePropertyImpl(const std::string& key, RefPtr<PropertyValueBase> value) override;
     void OnColorModeChange(uint32_t colorMode) override;
     void OnColorConfigurationUpdate() override;
+    void HandleColorConfigurationUpdate();
     bool IsDisabled() const;
     float GetLineHeight() const override;
     size_t GetLineCount() const override;
@@ -933,18 +934,28 @@ public:
     ColorMode GetColorMode() const;
     ColorMode GetDisplayColorMode() const;
 
-protected:
-    RefPtr<TextSelectOverlay> GetOrCreateSelectOverlay() override;
-    RefPtr<TextSelectOverlay> GetSelectOverlay() const override;
-    bool CanStartAITask() const override;
-
     template<typename T>
     RefPtr<T> GetTheme() const
     {
+        if (isAPI26Plus) {
+            auto host = GetHost();
+            CHECK_NULL_RETURN(host, nullptr);
+            return host->GetTheme<T>(true);
+        }
         auto pipelineContext = GetContext();
         CHECK_NULL_RETURN(pipelineContext, {});
         return pipelineContext->GetTheme<T>();
     }
+
+    bool OnThemeScopeUpdate(int32_t themeScopeId = -1) override;
+    void UpdateStyledStringByColorMode();
+    void UpdateSpanNodeByColorMode();
+    void UpdateLayoutPropertyColor();
+
+protected:
+    RefPtr<TextSelectOverlay> GetOrCreateSelectOverlay() override;
+    RefPtr<TextSelectOverlay> GetSelectOverlay() const override;
+    bool CanStartAITask() const override;
 
     std::vector<RectF> GetSelectedRects(int32_t start, int32_t end) override;
     PointF GetTextOffset(const Offset& localLocation, const RectF& contentRect) override;
@@ -1323,6 +1334,7 @@ private:
     const bool isAPI16Plus;
     const bool isAPI18Plus;
     const bool isAPI20Plus;
+    const bool isAPI26Plus;
     bool shiftFlag_ = false;
     bool isMouseSelect_ = false;
     bool isMousePressed_ = false;

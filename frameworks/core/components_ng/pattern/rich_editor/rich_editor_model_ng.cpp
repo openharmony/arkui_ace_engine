@@ -73,11 +73,15 @@ void RichEditorModelNG::InitRichEditorModel(bool isStyledStringMode, const RefPt
     richEditorLayoutProperty->UpdateWordBreak(WordBreak::BREAK_WORD);
     richEditorLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     if (isStyledStringMode) {
-        richEditorPattern->SetRichEditorStyledStringController(AceType::MakeRefPtr<RichEditorStyledStringController>());
-        richEditorPattern->GetRichEditorStyledStringController()->SetPattern(WeakPtr(richEditorPattern));
+        auto controller = AceType::MakeRefPtr<RichEditorStyledStringController>();
+        controller->SetPattern(WeakPtr(richEditorPattern));
+        controller->SetHost(WeakPtr(frameNode));
+        richEditorPattern->SetRichEditorStyledStringController(controller);
     } else {
-        richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-        richEditorPattern->GetRichEditorController()->SetPattern(WeakPtr(richEditorPattern));
+        auto controller = AceType::MakeRefPtr<RichEditorController>();
+        controller->SetPattern(WeakPtr(richEditorPattern));
+        controller->SetHost(WeakPtr(frameNode));
+        richEditorPattern->SetRichEditorController(controller);
     }
     richEditorPattern->InitSurfaceChangedCallback();
     richEditorPattern->InitSurfacePositionChangedCallback();
