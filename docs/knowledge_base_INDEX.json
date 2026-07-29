@@ -1,83 +1,6 @@
 {
   "knowledge_bases": [
     {
-      "name": "Refresh",
-      "name_cn": "下拉刷新组件",
-      "category": "advanced",
-      "type": "component",
-      "keywords": [
-        "下拉刷新",
-        "pull to refresh",
-        "refresh",
-        "loading",
-        "加载中",
-        "刷新状态",
-        "自定义刷新UI",
-        "nested scroll",
-        "嵌套滚动",
-        "spring animation",
-        "弹簧动画"
-      ],
-      "aliases": [
-        "Refresh组件",
-        "下拉刷新",
-        "刷新组件"
-      ],
-      "file_path": "pattern/refresh/Refresh_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_model_ng.cpp",
-        "property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_property.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/refresh.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/refresh.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/RefreshModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RefreshModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "Scroll",
-      "name_cn": "滚动容器组件",
-      "category": "container",
-      "type": "component",
-      "keywords": [
-        "滚动",
-        "scroll",
-        "滚动容器",
-        "scrollable",
-        "scroll bar",
-        "滚动条",
-        "edge effect",
-        "边缘效果",
-        "nested scroll",
-        "嵌套滚动",
-        "scroll position",
-        "滚动位置",
-        "scroll to",
-        "scrollby"
-      ],
-      "aliases": [
-        "Scroll组件",
-        "滚动组件",
-        "滚动容器"
-      ],
-      "file_path": "pattern/scroll/Scroll_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_model_ng.cpp",
-        "layout": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_layout_algorithm.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scroll.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ScrollModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ScrollModifier.static.d.ets"
-      },
-      "last_updated": "2026-01-30"
-    },
-    {
       "name": "LazyGrid",
       "name_cn": "懒加载网格组件",
       "category": "container",
@@ -815,32 +738,6 @@
       }
     },
     {
-      "name": "List",
-      "name_cn": "列表组件",
-      "category": "container",
-      "type": "component",
-      "keywords": [
-        "List",
-        "列表",
-        "滚动列表",
-        "ListItem",
-        "分组列表"
-      ],
-      "aliases": [
-        "List组件",
-        "列表容器",
-        "长列表"
-      ],
-      "file_path": "pattern/list/List_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/list.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/list.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.static.d.ets"
-      }
-    },
-    {
       "name": "LoadingProgress",
       "name_cn": "加载进度组件",
       "category": "data_display",
@@ -962,30 +859,6 @@
         "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/qrcode.static.d.ets",
         "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/QRCodeModifier.d.ts",
         "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/QRCodeModifier.static.d.ets"
-      }
-    },
-    {
-      "name": "ScrollBar",
-      "name_cn": "滚动条组件",
-      "category": "container",
-      "type": "component",
-      "keywords": [
-        "ScrollBar",
-        "滚动条",
-        "scroll bar",
-        "滑块",
-        "滚动指示"
-      ],
-      "aliases": [
-        "ScrollBar组件",
-        "滚动条",
-        "Scrollbar"
-      ],
-      "file_path": "pattern/scrollBar/ScrollBar_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll_bar.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scrollBar.static.d.ets"
       }
     },
     {
@@ -1245,7 +1118,6 @@
       "name": "容器组件",
       "description": "用于组织和布局其他组件的容器",
       "components": [
-        "Scroll",
         "LazyGrid",
         "WaterFlow"
       ]
@@ -1284,7 +1156,6 @@
       "description": "提供复杂交互功能的高级组件",
       "components": [
         "Menu",
-        "Refresh",
         "Sheet"
       ]
     },
