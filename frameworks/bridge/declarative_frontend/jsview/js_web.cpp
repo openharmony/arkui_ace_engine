@@ -3580,7 +3580,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
                 return;
             }
             napi_handle_scope scope = nullptr;
-            if (napi_open_handle_scope(env, &scope) != napi_ok || !scope){
+            if ((napi_open_handle_scope(env, &scope)) != (napi_ok) || !scope) {
                 return;
             }
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
@@ -3640,7 +3640,7 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     return;
                 }
                 napi_handle_scope scope = nullptr;
-                if (napi_open_handle_scope(env, &scope) != napi_ok || !scope){
+                if ((napi_open_handle_scope(env, &scope) !) = (napi_ok) || !scope) {
                     return;
                 }
                 auto newIdVal = JSRef<JSVal>::Make(ToJSValue(newId));
