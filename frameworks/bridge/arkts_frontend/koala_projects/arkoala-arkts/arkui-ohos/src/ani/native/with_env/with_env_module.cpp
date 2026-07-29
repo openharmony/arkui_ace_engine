@@ -181,10 +181,8 @@ std::optional<ArkUIAniSystemEnvValue> ConvertSystemEnvValue(ani_env* env, const 
     if (key == NG::ENV_KEY_DIRECTION) {
         CHECK_NULL_RETURN(env, std::nullopt);
         CHECK_NULL_RETURN(value, std::nullopt);
-        ani_enum_item enumItem = static_cast<ani_enum_item>(value);
-        CHECK_NULL_RETURN(enumItem, std::nullopt);
         ani_int directionValue = 0;
-        if (env->EnumItem_GetValue_Int(enumItem, &directionValue) != ANI_OK) {
+        if (env->EnumItem_GetValue_Int(static_cast<ani_enum_item>(value), &directionValue) != ANI_OK) {
             return std::nullopt;
         }
         if (!IsValidDirection(static_cast<ArkUI_Int32>(directionValue))) {
@@ -372,8 +370,6 @@ void WithEnvRemoveSystemEnvProperty(ani_env* env, [[maybe_unused]] ani_object an
 void WithEnvSetSystemEnvProperty(
     ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_string key, ani_ref value)
 {
-    CHECK_NULL_VOID(env);
-    CHECK_NULL_VOID(key);
     const auto* withEnvModifier = GetWithEnvModifier();
     CHECK_NULL_VOID(withEnvModifier);
     CHECK_NULL_VOID(withEnvModifier->setSystemEnvProperty);
