@@ -189,3 +189,5 @@ PY
 - 2026-07-29：迁移 RichEditor 到 `docs/kb/components/basic/rich_editor.md`，旧 KB 已移除，旧索引入口及 rich_text 分类已移除（旧索引 47 条）。新版 registry 增至 43 条，关联 Spec `05-09-02`（9 个 Feat spec + 1 个 design.md）。
 - 2026-07-29：迁移 Grid 到 `docs/kb/components/container/grid.md`，旧 KB 已移除，旧索引入口已移除（旧索引减至 45 条）；新增 GridItem KB `docs/kb/components/container/grid_item.md`。registry 增至 70 条。
 - 2026-07-29：迁移 Scroll/List/Refresh/ScrollBar 四个滚动容器旧 KB 到 `docs/kb/components/container/`，补齐 Spec 路由（func_id 05-03-03/05/06/07）。旧 KB 文件删除、旧 INDEX 条目移除（减至 37 条）、context_registry 增至 135 条；rebase 到最新 origin/master 后解决与 Grid 迁移等的冲突（grid 旧 KB 按上游删除处理）。
+
+- 2026-07-29：基于已补录的长期规格与源码新增/迁移 4 个文本类主题 KB。新建 `docs/kb/components/basic/symbol-glyph.md`（SymbolGlyph，复用 TextPattern）与 `docs/kb/capabilities/styled-string.md`（属性字符串，common_capability/api，非组件）；迁移 TextInput 旧 KB 到 `docs/kb/components/basic/text-input.md`、Hyperlink 旧 KB 到 `docs/kb/components/basic/hyperlink.md`，旧文件及旧索引入口移除。新版 registry 增至 88 条，旧索引减至 44 条。
