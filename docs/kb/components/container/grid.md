@@ -100,10 +100,10 @@ Grid 功能域：`specs/05-ui-components/03-scroll-container-components/04-grid-
 | 问题 | 优先查看 |
 |------|----------|
 | 布局算法选择不正确 | `grid_pattern.h` 的 `CreateLayoutAlgorithm()`、`grid_layout_property.cpp` 的 `UpdateIrregularFlag()` |
-| 不规则项未触发 irregular_ | 仅 rowSpan>1 触发 irregular_；columnSpan>1 走 GridScrollWithOptionsLayoutAlgorithm |
+| 不规则项未触发 irregular_ | 纵向模式下仅 rowSpan>1 触发 irregular_；横向模式下 columns>1 也会触发；columnSpan>1 在纵向模式下走 GridScrollWithOptionsLayoutAlgorithm |
 | 自适应网格不可滚动 | GridAdaptiveLayoutAlgorithm 的 IsConfiguredScrollable()=false；使用单模板代替 |
 | 双模板模式无滚动条 | IsConfiguredScrollable()=false，scrollBar 自动设 OFF |
-| scrollToIndex 默认对齐 | Grid 默认 align=AUTO（不同于 List 的 CENTER） |
+| scrollToIndex 默认对齐 | Grid 默认 align=AUTO（不同于 List 的 START） |
 | columnsTemplate 与 ItemFillPolicy 互斥 | 设置一个自动 reset 另一个 |
 | layoutDirection 在滚动模式无效 | 仅自适应模式生效，滚动模式由模板决定轴向 |
 | C-API regularSize 设置无效 | C-API 硬编码 [1,1]，开发者设置被忽略 |

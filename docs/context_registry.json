@@ -1933,7 +1933,8 @@
         "arc_swiper": "frameworks/core/components_ng/pattern/swiper/arc_swiper_pattern.cpp",
         "node_modifier": "frameworks/core/interfaces/native/node/node_swiper_modifier.cpp",
         "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/swiper_modifier.ts",
-        "native_enums": "interfaces/native/native_node.h"
+        "native_enums": "interfaces/native/native_node.h",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_swiper.cpp"
       },
       "api_paths": {
         "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/swiper.d.ts",
