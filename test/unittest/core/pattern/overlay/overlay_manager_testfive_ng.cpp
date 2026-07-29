@@ -443,7 +443,8 @@ HWTEST_F(OverlayManagerTestFiveNg, SetNodeBeforeAppbar003, TestSize.Level1)
 
 /**
  * @tc.name: SetNodeBeforeAppbar004
- * @tc.desc: Test SetNodeBeforeAppbar when AtomicService child has serviceContainer and GetNextNodeWithOrder returns non-null.
+ * @tc.desc: Test SetNodeBeforeAppbar when AtomicService child has serviceContainer and GetNextNodeWithOrder
+ *  returns non-null.
  * @tc.type: FUNC
  */
 HWTEST_F(OverlayManagerTestFiveNg, SetNodeBeforeAppbar004, TestSize.Level1)
@@ -456,7 +457,8 @@ HWTEST_F(OverlayManagerTestFiveNg, SetNodeBeforeAppbar004, TestSize.Level1)
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     ASSERT_NE(rootNode, nullptr);
     auto atomicService = FrameNode::CreateFrameNode(
-        V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+        V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(atomicService, nullptr);
     auto serviceContainer = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -496,7 +498,8 @@ HWTEST_F(OverlayManagerTestFiveNg, SetNodeBeforeAppbar005, TestSize.Level1)
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     ASSERT_NE(rootNode, nullptr);
     auto atomicService = FrameNode::CreateFrameNode(
-        V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+        V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(atomicService, nullptr);
     auto serviceContainer = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -534,7 +537,8 @@ HWTEST_F(OverlayManagerTestFiveNg, SetNodeBeforeAppbar006, TestSize.Level1)
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     ASSERT_NE(rootNode, nullptr);
     auto atomicService = FrameNode::CreateFrameNode(
-        V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+        V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(atomicService, nullptr);
     auto serviceContainer = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -737,7 +741,8 @@ HWTEST_F(OverlayManagerTestFiveNg, MarkDirty003, TestSize.Level1)
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     ASSERT_NE(rootNode, nullptr);
     auto firstChild = FrameNode::CreateFrameNode(
-        V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+        V2::ATOMIC_SERVICE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ButtonPattern>());
     ASSERT_NE(firstChild, nullptr);
     auto secondChild = FrameNode::CreateFrameNode(
         V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
