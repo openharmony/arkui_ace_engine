@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef XCOMPONENT_CONTROLLER_HILOG_H
-#define XCOMPONENT_CONTROLLER_HILOG_H
+#ifndef XCOMPONENT_CONTROLLER_LOG_H
+#define XCOMPONENT_CONTROLLER_LOG_H
 
 #define CONFIG_HILOG
 #ifdef CONFIG_HILOG
@@ -72,4 +72,4 @@
 #define HILOG_DEBUG(...)
 #endif  // CONFIG_HILOG
 
-#endif  // XCOMPONENT_CONTROLLER_HILOG_H
+#endif  // XCOMPONENT_CONTROLLER_LOG_H

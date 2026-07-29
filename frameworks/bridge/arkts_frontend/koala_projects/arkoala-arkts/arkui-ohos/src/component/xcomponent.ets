@@ -14,7 +14,7 @@
  */
 
 
-import { ArkUIAniModule } from 'arkui.ani';
+import { ArkUIAniModule } from "arkui.ani";
 import { XComponentControllerNative, XComponentControllerWrapper } from './idlize'
 import { hookXComponentStartImageAnalyzer } from '../hooks'
 import { ImageAnalyzerConfig } from './imageCommon'
