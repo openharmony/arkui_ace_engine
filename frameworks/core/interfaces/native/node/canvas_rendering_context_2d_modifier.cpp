@@ -105,8 +105,7 @@ void SetCanvasLineTo(ArkUINodeHandle node, float x, float y)
 
 void SetCanvasStrokeStyle(ArkUINodeHandle node, int color)
 {
-    TAG_LOGD(
-        AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasStrokStyle: color: %{public}d", color);
+    TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasStrokStyle: color: %{public}d", color);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
@@ -198,19 +197,21 @@ ArkUI_Float32 GetCanvasGlobalAlpha(ArkUINodeHandle node)
 void SetCanvasFillRect(ArkUINodeHandle node, float x, float y, float w, float h)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasFillRect: x: %{public}f, \
-        y: %{public}f, w: %{public}f, h: %{public}f",
-        x, y, w, h);
+        y: %{public}f, w: %{public}f, h: %{public}f", x, y, w, h);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RefPtr<AceType> pattern = CanvasModelNG::GetCanvasPattern(frameNode);
     auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
-    canvasPattern->FillRect(
-        { Dimension(x, DimensionUnit::VP).ConvertToPx(), Dimension(y, DimensionUnit::VP).ConvertToPx(),
-            Dimension(w, DimensionUnit::VP).ConvertToPx(), Dimension(h, DimensionUnit::VP).ConvertToPx() });
+    canvasPattern->FillRect({
+        Dimension(x, DimensionUnit::VP).ConvertToPx(),
+        Dimension(y, DimensionUnit::VP).ConvertToPx(),
+        Dimension(w, DimensionUnit::VP).ConvertToPx(),
+        Dimension(h, DimensionUnit::VP).ConvertToPx()
+    });
 }
 
-void SetCanvasFillText(ArkUINodeHandle node, const char* value, float x, float y, float maxWidth)
+void SetCanvasFillText(ArkUINodeHandle node, const char *value, float x, float y, float maxWidth)
 {
     TAG_LOGD(AceLogTag::ACE_CANVAS_COMPONENT, "Arkoala SetCanvasFillText: value:%{public}s, \
         x: %{public}f, y: %{public}f, maxWith: %{public}f",
@@ -221,8 +222,11 @@ void SetCanvasFillText(ArkUINodeHandle node, const char* value, float x, float y
     auto canvasPattern = AceType::DynamicCast<NG::CanvasPattern>(pattern);
     CHECK_NULL_VOID(canvasPattern);
     std::string text(value);
-    canvasPattern->FillText(text, Dimension(x, DimensionUnit::VP).ConvertToPx(),
-        Dimension(y, DimensionUnit::VP).ConvertToPx(), Dimension(maxWidth, DimensionUnit::VP).ConvertToPx());
+    canvasPattern->FillText(text,
+        Dimension(x, DimensionUnit::VP).ConvertToPx(),
+        Dimension(y, DimensionUnit::VP).ConvertToPx(),
+        Dimension(maxWidth, DimensionUnit::VP).ConvertToPx()
+    );
 }
 
 namespace NodeModifier {

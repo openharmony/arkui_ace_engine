@@ -392,8 +392,8 @@ std::string LayoutAlgorithm::ComputeCurrentPathHash(FrameNode* hostNode)
 
 bool LayoutAlgorithm::IsSmartLayoutEffective(const RefPtr<FrameNode>& hostNode)
 {
-    if (!FeatureParam::IsSmartLayoutPageOverflowFixEnabled() || !hostNode || !IsComponentSupportSmartLayout(hostNode) ||
-        !hostNode->IsOnMainTree()) {
+    if (!FeatureParam::IsSmartLayoutPageOverflowFixEnabled() || !hostNode ||
+        !IsComponentSupportSmartLayout(hostNode) || !hostNode->IsOnMainTree()) {
         return false;
     }
 
