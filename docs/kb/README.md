@@ -43,6 +43,8 @@ docs/kb/
 | Flex | 弹性布局组件（含 Wrap） | `docs/kb/components/container/flex.md` | 已重建，旧 KB 已移除 |
 | GridCol | 响应式栅格列组件 | `docs/kb/components/container/grid_col.md` | 新建 |
 | GridRow | 响应式栅格行组件 | `docs/kb/components/container/grid_row.md` | 新建 |
+| Grid | 滚动型网格布局组件 | `docs/kb/components/container/grid.md` | 已迁移，旧 KB 已移除 |
+| GridItem | 网格项组件 | `docs/kb/components/container/grid_item.md` | 新建 |
 | RelativeContainer | 相对布局容器组件 | `docs/kb/components/container/relative_container.md` | 新建 |
 | Row | 横向布局组件 | `docs/kb/components/container/row.md` | 新建 |
 | RowSplit | 横向分割布局组件 | `docs/kb/components/container/row_split.md` | 新建（Spec 待补） |
