@@ -170,6 +170,12 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     // Lazy create TabBar internal child nodes when first TabContent is added
     if (!tabsNode->HasTabBarChildNodes()) {
         TabsModelNG::InitTabBarChildNodes(tabsNode);
+        // TabBar transitions from "empty shell" to "has content",
+        // trigger OnModifyDone to create GestureEventHub and initialize events
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        if (tabBarNode) {
+            tabBarNode->MarkModifyDone();
+        }
     }
 
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());

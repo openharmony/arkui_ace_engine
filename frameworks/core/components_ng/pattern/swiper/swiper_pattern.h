@@ -1503,7 +1503,6 @@ private:
     ChangeEventPtr onIndexChangeEvent_;
     ChangeEventPtr selectedEvent_;
     ChangeEventPtr unselectedEvent_;
-    ChangeEventPtr scrollStateChangedEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
