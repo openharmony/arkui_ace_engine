@@ -530,6 +530,9 @@ void SetTabBar(ArkUINodeHandle node, void* paramRawPtr, bool fromJsView)
     } else {
         TabContentModelNG::SetTabBarWithContent(frameNode, nullptr);
     }
+#if defined(IOS_PLATFORM)
+    TabContentModelNG::AddTabBarItem(AceType::Claim(frameNode), DEFAULT_NODE_SLOT, true);
+#endif
 }
 
 void SetTabContentBuilder(ArkUINodeHandle node, ArkUI_Int32 methodId)

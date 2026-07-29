@@ -856,7 +856,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "LazyVGridLayout", "arkui.components.arklazygridlayout" },
         { "LazyVWaterFlowLayout", "arkui.components.arklazywaterflowlayout" },
         { "Swiper", "arkui.components.arkswiper" },
-        { "IndicatorComponent", "arkui.components.arkswiperindicator" },
+        { "IndicatorComponent", "arkui.components.arkindicatorcomponent" },
         { "Tabs", "arkui.components.arktabs" },
         { "TabContent", "arkui.components.arktabcontent" },
         { "CommonShape", "arkui.components.arkcommonshape" },
