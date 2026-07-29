@@ -575,11 +575,11 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternHiddenChange001
 }
 
 /**
- * @tc.name: VideoStateMachinePatternOnVisibleChange001
- * @tc.desc: Test OnVisibleChange calls hiddenChangeEvent_.
+ * @tc.name: VideoStateMachinePatternOnVisibleAreaChange001
+ * @tc.desc: Test OnVisibleAreaChange calls hiddenChangeEvent_.
  * @tc.type: FUNC
  */
-HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnVisibleChange001, TestSize.Level1)
+HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnVisibleAreaChange001, TestSize.Level1)
 {
     auto frameNode = CreateVideoNode(g_testProperty);
     ASSERT_TRUE(frameNode);
@@ -593,9 +593,39 @@ HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternOnVisibleChange
         hiddenValue = hidden;
     });
 
-    pattern->OnVisibleChange(true);
+    pattern->OnVisibleAreaChange(true);
     EXPECT_TRUE(called);
     EXPECT_FALSE(hiddenValue);
+}
+
+/**
+ * @tc.name: VideoStateMachinePatternVisibleAreaChange001
+ * @tc.desc: Test visible-area registration and hidden event dispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoStateMachinePatternTestNg, VideoStateMachinePatternVisibleAreaChange001, TestSize.Level1)
+{
+    auto frameNode = CreateVideoNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<VideoStateMachinePattern>();
+    ASSERT_TRUE(pattern);
+
+    pattern->RegisterVisibleAreaChange();
+    EXPECT_TRUE(pattern->hasVisibleChangeRegistered_);
+
+    bool called = false;
+    bool hiddenValue = false;
+    pattern->SetHiddenChangeEvent([&called, &hiddenValue](bool hidden) {
+        called = true;
+        hiddenValue = hidden;
+    });
+
+    pattern->OnVisibleAreaChange(false);
+    EXPECT_TRUE(called);
+    EXPECT_TRUE(hiddenValue);
+
+    pattern->UnregisterVisibleAreaChange(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(pattern->hasVisibleChangeRegistered_);
 }
 
 /**
