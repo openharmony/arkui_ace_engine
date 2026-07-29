@@ -17003,6 +17003,7 @@ typedef struct Opt_NavDestinationModuleInfo {
 typedef struct Ark_NavigationConfiguration {
     /* kind: Interface */
     Opt_Int32 stackSizeLimit;
+    Opt_Boolean recyclePagesOnLowMemory;
 } Ark_NavigationConfiguration;
 typedef struct Opt_NavigationConfiguration {
     Ark_Tag tag;

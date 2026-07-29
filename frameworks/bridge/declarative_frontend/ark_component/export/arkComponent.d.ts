@@ -48,6 +48,7 @@ declare interface AreaChangeOptions {
 }
 declare interface NavigationConfiguration {
     stackSizeLimit?: number;
+    recyclePagesOnLowMemory?: boolean;
 }
 declare class ArkComponent implements CommonMethod<CommonAttribute> {
     _changed: boolean;

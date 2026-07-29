@@ -1417,7 +1417,7 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationAutoCleanTest002, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    const int32_t stackSize = 5;
+    const int32_t stackSize = 3;
     const int32_t cleanLimit = 2;
     for (int32_t index = 0; index < stackSize; ++index) {
         mockNavPathStack->MockPushPath(AceType::MakeRefPtr<MockNavPathInfo>("dest" + std::to_string(index)));
@@ -1593,7 +1593,8 @@ HWTEST_F(NavigationSyncStackTestNg, NavigationAutoCleanTest005, TestSize.Level1)
     auto destinationPattern = destination->GetPattern<NavDestinationPattern>();
     ASSERT_NE(destinationPattern, nullptr);
     mockNavPathStack->MarkAutoCleanedFlag(destinationPattern->GetNavDestinationId());
-    ASSERT_TRUE(navigationPattern->RestoreAutoCleanedDestination(navPathList, 0));
+    bool isStandard = false;
+    ASSERT_TRUE(navigationPattern->RestoreAutoCleanedDestination(navPathList, 0, isStandard));
     EXPECT_EQ(restoredState, savedState);
     EXPECT_FALSE(mockNavPathStack->IsAutoCleaned(0));
     EXPECT_EQ(mockNavPathStack->GetAutoCleanedState(0), "");
