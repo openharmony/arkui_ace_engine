@@ -1,118 +1,119 @@
 # 基础属性 Context
 
-> 文档版本：v2.1
-> 更新时间：2026-07-28
+> 文档版本：v4.0
+> 更新时间：2026-07-29
 > 来源：`docs/context_registry.json` 主题 `basic-attributes`
 
 ## 定位
 
-基础属性是所有 ArkUI 组件共享的通用属性集合，归属 Func-04-03-03。覆盖组件标识（id/key/restoreId/uniqueId/inspectorLabel）、显隐控制（visibility/zIndex/obscured/allowForceDark/clickDistance/enableClickSoundEffect）、背景设置（backgroundColor/backgroundImage/backgroundImageSize/backgroundImagePosition/backgroundBlurStyle/backdropBlur/backgroundEffect/backgroundBrightness/backgroundImageResizable/background(CustomBuilder)）、渲染控制（renderGroup/renderFit/freeze/useEffect/reuseId/reuse/excludeFromRenderGroup）、浮层叠加（overlay + OverlayOptions）、焦点属性（focusable/tabIndex/defaultFocus/groupDefaultFocus/focusOnTouch/tabStop/focusBox/nextFocus/focusScopeId/focusScopePriority/onFocus/onBlur/onKeyEvent）。
+基础属性是所有 ArkUI 组件共享的通用属性集合，归属 Func-04-03-03，覆盖组件标识与显隐、背景设置、渲染与复用、浮层和焦点属性。它连接应用侧 Common API、前端参数解析和 ViewAbstract 属性写入；不同属性族分别进入 UINode/ElementRegister、LayoutProperty、RenderContext、FrameNode 子节点或 FocusHub，并非全部由同一状态链路消费。backdropBlur 与 backgroundImage 系属性分别跨域出现在视效属性（Func-04-03-02）和背景图片通用属性（Func-04-03-10）；stateStyles 与 attributeModifier 归属样式属性域（Func-04-03-07）。
 
-状态效果（stateStyles/hoverEffect/clickEffect）和动态属性设置（attributeModifier）已迁移至 Func-04-03-07 样式属性域，见 [style-attributes](style-attributes.md)。
-
-行为事实来自 SDK 声明、源码实现和测试；本页仅提供路由入口，不重复 Spec 规格内容。
+本页仅提供路由入口，属性语义、API 版本、边界条件和兼容性应以当前 SDK、源码、测试及 Spec 为准。
 
 ## 快速路由
 
 ### 源码入口
 
 | 关注点 | 稳定路径 | 说明 |
-|-------|---------|------|
-| 组件标识与显隐 | `frameworks/core/components_ng/base/view_abstract.h/cpp` | id/visibility/zIndex/obscured 设置入口 |
-| id 查找 | `frameworks/core/pipeline/base/element_register.h` | ElementRegister inspectorIdMap_ 存储 id → FrameNode 映射 |
-| 背景属性 | `frameworks/core/components_ng/render/render_context.h/cpp` | backgroundColor/backgroundImage/blur/brightness/freeze/visibility/zIndex/obscured 存储与回调 |
-| 浮层挂载 | `frameworks/core/components_ng/base/frame_node.h/cpp` | overlayNode_ / background(CustomBuilder) 子节点挂载 |
-| 渲染控制 | `frameworks/core/components_ng/base/frame_node.h/cpp` | renderGroup/reuseId/id/uniqueId/restoreId 存储 |
-| RS 渲染桥接 | `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp` | 背景绘制 / visibility / zIndex / obscured / freeze / renderGroup → RSNode |
-| 焦点属性 | `frameworks/core/components_ng/event/focus_hub.h/cpp` | focusable/tabIndex/defaultFocus/groupDefaultFocus/focusOnTouch/tabStop/focusScopeId/focusScopePriority |
-| 焦点导航 | `frameworks/core/components_ng/event/focus_hub.h/cpp` | nextFocus/onFocus/onBlur/onKeyEvent 焦点事件分发 |
-| focusBox | `frameworks/core/components_ng/base/view_abstract.h/cpp` | focusBox 自定义焦点框样式 |
+|--------|----------|------|
+| NG 公共属性写入 | `frameworks/core/components_ng/base/view_abstract.cpp`、`frameworks/core/components_ng/base/view_abstract_model_ng.cpp` | id/visibility/zIndex/obscured/backgroundColor/backgroundImage/overlay/renderGroup/freeze/focusBox 等动态版写入入口 |
+| Static 公共属性写入 | `frameworks/core/components_ng/base/view_abstract_model_static.cpp` | 静态 ArkTS 基础属性写入入口 |
+| 渲染属性承载 | `frameworks/core/components_ng/render/render_context.h`、`frameworks/core/components_ng/render/render_context.cpp` | visibility/zIndex/obscured/backgroundColor/blur/brightness/freeze/renderGroup 等属性存储与回调 |
+| 布局属性（visibility） | `frameworks/core/components_ng/layout/layout_property.h`、`frameworks/core/components_ng/layout/layout_property.cpp` | visibility 进入布局约束的存储入口；不要将 visibility 误判为仅由 RenderContext 消费 |
+| id 查找与注册 | `frameworks/core/pipeline/base/element_register.h` | ElementRegister inspectorIdMap_ 存储 id → FrameNode 映射 |
+| FrameNode 属性存储 | `frameworks/core/components_ng/base/frame_node.h`、`frameworks/core/components_ng/base/frame_node.cpp` | renderGroup/reuseId/id/uniqueId/restoreId 存储；overlayNode_/background(CustomBuilder) 子节点挂载 |
+| 焦点属性 | `frameworks/core/components_ng/event/focus_hub.h`、`frameworks/core/components_ng/event/focus_hub.cpp` | FocusHub：focusable/tabIndex/defaultFocus/focusScopeId 等存储与判断；nextFocus/onFocus/onBlur/onKeyEvent 焦点导航与事件分发 |
+| reuseId 组件复用 | `frameworks/core/components_ng/base/inspector/filter_declaration.cpp` | 回收池匹配 |
+| Rosen 渲染适配 | `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp` | 基础属性到 RSNode 的适配入口 |
+| Dynamic JSView 解析 | `frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp` | Common 属性的声明式 JS/ArkTS 动态参数解析入口 |
+| ArkTS Common Bridge | `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp` | AttributeModifier 和 FrameNode 动态属性解析入口 |
+| Common node modifier | `frameworks/core/interfaces/native/node/node_common_modifier.cpp` | Common Bridge 到 ViewAbstract/ModelNG 的 native 属性入口 |
+| Static Common modifier | `frameworks/core/interfaces/native/implementation/common_method_modifier.cpp` | Static ArkTS Common 属性的类型转换及 ViewAbstract/Static Model 写入入口 |
+| Native 属性分发 | `interfaces/native/node/style_modifier.cpp`、`interfaces/native/native_node.h` | Node C API 通用属性枚举与分发入口；按具体属性枚举确认公开范围 |
+
+按属性族检索：
+
+| 属性族 | 建议检索词 |
+|--------|------------|
+| 组件标识 | `SetId`、`inspectorIdMap_`、`uniqueId`、`restoreId`、`inspectorLabel` |
+| 显隐与层级 | `Visibility`、`VisibleType`、`SetZIndex`、`ObscuredReasons` |
+| 背景设置 | `BackgroundColor`、`BackgroundImage`、`BackgroundBlurStyle`、`BackdropBlur`、`BackgroundEffect`、`BackgroundBrightness` |
+| 渲染与复用 | `RenderGroup`、`RenderFit`、`Freeze`、`UseEffect`、`ReuseId`、`ExcludeFromRenderGroup` |
+| 浮层 | `Overlay`、`OverlayOptions`、`overlayNode_` |
+| 焦点 | `Focusable`、`TabIndex`、`DefaultFocus`、`FocusScopeId`、`NextFocus`、`FocusBox`、`FocusHub` |
 
 ### API 入口
 
 | 范式 | 稳定路径 | 说明 |
-|------|---------|------|
-| ArkTS 声明式 | `frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp` | JsVisibility/JsBackgroundColor/JsOverlay/JsRenderGroup/JsFocus 等 |
-| C API 属性枚举 | `interfaces/native/native_node.h` | NODE_VISIBILITY / NODE_Z_INDEX / NODE_BACKGROUND_COLOR / NODE_OBSCURED / NODE_RENDER_GROUP / NODE_RENDER_FIT / NODE_OVERLAY / NODE_FOCUSABLE / NODE_TAB_INDEX / NODE_DEFAULT_FOCUS / NODE_GROUP_DEFAULT_FOCUS / NODE_FOCUS_ON_TOUCH / NODE_FOCUS_SCOPE_ID / NODE_FOCUS_SCOPE_PRIORITY |
-| C API 桥接 | `interfaces/native/node/style_modifier.cpp` | 通用属性 C-API → ViewAbstract 转换 |
-| SDK 类型声明 | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | CommonMethod<T> 基础属性签名 |
-
-### 接口实现路径总览
-
-| 范式 | 入口文件 | 实例路由守卫 | 说明 |
-|------|----------|--------------|------|
-| 动态版 | `frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp` | `withInstanceId(instanceId_)` | JsVisibility/JsBackgroundColor/JsOverlay/JsRenderGroup/JsFocus 等；属性 setter 通过 ViewStackProcessor 写入 ViewAbstract |
-| 静态版 | `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/` | `Sync_InstanceId(instanceId_)` + `Restore_InstanceId()` | 静态版属性通过 Arkoala 生成代码直接调用 ViewAbstract |
-| C-API | `interfaces/native/node/style_modifier.cpp` | `ArkUI_ContextHandle.id → ContainerScope` | 通用属性 C-API → ViewAbstract 转换；NODE_VISIBILITY/NODE_Z_INDEX/NODE_BACKGROUND_COLOR 等 |
-| Kit 层 | `interfaces/inner_api/ace_kit/include/ui/view/ui_context.h` | `PipelineContext::Current()` | Kit 层薄包装 PipelineContext |
-
-**关键前端差异**：
-
-- 焦点属性：动态版通过 JsFocus 系列 setter，静态版通过 Arkoala 生成代码；C-API 通过 NODE_FOCUSABLE/NODE_TAB_INDEX 等枚举
-- overlay：动态版通过 JsOverlay，静态版通过生成代码；C-API 通过 NODE_OVERLAY
-- backgroundImage：动态版通过 JsBackgroundImage，静态版通过生成代码；C-API 暂无直接 backgroundImage 枚举
+|------|----------|------|
+| Dynamic Common API | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | CommonAttribute 中的标识、显隐、背景、渲染、浮层和焦点属性声明 |
+| Static Common API | `<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets` | 静态 ArkTS Common 属性声明 |
+| Dynamic Common Modifier | `<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts` | Dynamic Modifier 类型入口；具体基础属性声明仍需回到 CommonAttribute 核实 |
+| Static Common Modifier | `<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets` | Static Modifier 类型入口 |
+| Node C API | `interfaces/native/native_node.h`、`interfaces/native/node/style_modifier.cpp` | 公开通用属性枚举及设置、重置、查询分发；逐属性确认是否公开 |
 
 ### 外部依赖入口
 
 | 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件 / 目标路径 | 说明 |
 |----------|----------|-----------|-------------------------------|------|
-| 图形渲染 | `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp` | `graphic_2d` | `render_service_client/core/ui/rs_node.h`、`render_service_base/include/property/rs_properties_def.h` | backgroundColor / visibility / zIndex / obscured / freeze / renderGroup / backgroundImage 全部通过 RSNode 下发；UIEffect (BrightnessBlender / FilterRadiusGradientBlurPara / RSMask) 用于模糊与特效 |
-| 图片框架 | `frameworks/core/components_ng/image_provider/image_loading_context.h`、`adapter/ohos/osal/pixel_map_ohos.h` | `multimedia_image_framework` | `interfaces/innerkits/include/Media::PixelMap` | backgroundImage 解码链路：ImageLoadingContext → CanvasImage → PixelMapOhos → Media::PixelMap；SurfaceCapture 回调使用 Media::PixelMap |
-| Skia（间接） | `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp` | `skia`（通过 graphic_2d 间接依赖） | `include/utils/SkParsePath.h` | SkParsePath 用于 SVG 路径解析；Skia 由 graphic_2d 统一引入 |
-| DFX 性能度量 | `frameworks/core/components_ng/base/view_abstract.cpp` | `hiviewdfx` | `base/hiviewdfx/histogram_wrapper.h` | HistogramWrapper 用于属性设置性能度量上报 |
-| 窗口管理 | `frameworks/core/components_ng/base/view_abstract.cpp`（通过 SubwindowManager）、`frameworks/core/components_ng/event/focus_hub.cpp`（通过 SubwindowManager） | `window_manager` | SubwindowManager 用于 overlay/dialog 弹窗上下文；focus 焦点管理通过 Subwindow 焦点路由 |
+| 图形渲染 | `frameworks/core/components_ng/render/adapter/rosen_render_context.cpp` | `graphic_2d` | `render_service_client/core/ui/rs_node.h`、`render_service_base/include/property/rs_properties_def.h` | 基础属性渲染通过 RSNode 下发 |
+| 图片框架 | `frameworks/core/components_ng/image_provider/image_loading_context.h`、`adapter/ohos/osal/pixel_map_ohos.h` | `multimedia_image_framework` | `interfaces/innerkits/include/Media::PixelMap` | backgroundImage 解码链路 |
+| 窗口管理 | `frameworks/core/components_ng/event/focus_hub.cpp` | `window_manager` | Subwindow 焦点路由 | 焦点管理与 UIExtension 焦点路由 |
 
 ### 测试入口
 
 | 类型 | 稳定路径 | 用途 |
 |------|---------|------|
-| 属性单测 | `test/unittest/core/pattern/` | visibility/renderGroup 等属性行为测试 |
-| C API 单测 | `test/unittest/ace_engine/C-API-Main/components/` | C-API 基础属性 modifier 测试 |
+| ViewAbstract 测试 | `test/unittest/core/base/` | 按 `ViewAbstract` 和具体属性名检索公共属性写入测试 |
+| 焦点属性测试 | `test/unittest/core/event/` | FocusHub 焦点导航与事件分发测试 |
+| Common C modifier 测试 | `test/unittest/capi/modifiers/` | 按 `common_method_modifier` 和具体属性名检索 native modifier 回归 |
+| Context registry | `docs/context_registry.json` | `basic-attributes` 的 KB、Spec、源码、API 和测试统一路由 |
 
 ### 相关 Spec
 
-| Spec | 路径 | 状态 |
+基础属性功能域：`specs/04-common-capability/03-common-attributes/03-basic-attributes/`（功能 ID `04-03-03`）。
+
+| Feat | 主题 | 文件 |
 |------|------|------|
-| Feat-01 组件标识与显隐 | `specs/04-common-capability/03-common-attributes/03-basic-attributes/Feat-01-component-id-visibility-spec.md` | Baselined |
-| Feat-02 背景设置 | `specs/04-common-capability/03-common-attributes/03-basic-attributes/Feat-02-background-setting-spec.md` | Baselined |
-| Feat-03 渲染与复用 | `specs/04-common-capability/03-common-attributes/03-basic-attributes/Feat-03-render-reuse-spec.md` | Baselined |
-| Feat-04 浮层 | `specs/04-common-capability/03-common-attributes/03-basic-attributes/Feat-04-overlay-spec.md` | Baselined |
-| Feat-05 焦点属性 | `specs/04-common-capability/03-common-attributes/03-basic-attributes/Feat-05-focus-attribute-spec.md` | Baselined |
-| 基础属性设计文档 | `specs/04-common-capability/03-common-attributes/03-basic-attributes/design.md` | Baselined |
+| Feat-01 | 组件标识与显隐 | `Feat-01-component-id-visibility-spec.md` |
+| Feat-02 | 背景设置 | `Feat-02-background-setting-spec.md` |
+| Feat-03 | 渲染与复用 | `Feat-03-render-reuse-spec.md` |
+| Feat-04 | 浮层 | `Feat-04-overlay-spec.md` |
+| Feat-05 | 焦点属性 | `Feat-05-focus-attribute-spec.md` |
 
 ## 常见问题定位
 
 | 问题 | 优先查看 |
 |------|----------|
-| id 空字符串也会注册到 inspectorIdMap_ | `element_register.cpp` — AddFrameNodeByInspectorId 无空字符串检查，空 id 会被注册但 Inspector 查询时无实际意义 |
-| id 冲突时多个节点共存于 inspectorIdMap_ list | `element_register.cpp` — 同 id 使用 push_back 添加到 list，不覆盖前注册；查询返回最后一个有效节点 |
-| visibility=None 不占空间 vs Hidden 保留空间 | `view_abstract.cpp` SetVisibility → `render_context.h` UpdateVisibility → `frame_node.cpp` visibility 布局决策 |
-| background(CustomBuilder) 与 backgroundColor 双机制 | `view_abstract.cpp` SetBackgroundStyle → 区分 RenderContext 存储 vs 子节点挂载 |
-| 三模糊互斥覆盖 | backdropBlur / backgroundBlurStyle / backgroundEffect 设置时互斥覆盖前一个 |
-| backgroundColor 不可解析资源 → TRANSPARENT | `render_context.h` OnBackgroundColorUpdate — 资源解析失败回退 TRANSPARENT |
-| backgroundBrightness rate=0 不生效 | `render_context.h` — rate 参数需 > 0 |
-| obscured 截图/录屏区域屏蔽 | `render_context.h` UpdateObscuredReasons → `rosen_render_context.cpp` OnObscuredReasonsUpdate |
-| freeze 仅设置 rsNode 属性 | `view_abstract.cpp` SetFreeze → `render_context.h` UpdateFreeze → `rosen_render_context.cpp` OnFreezeUpdate → rsNode_->SetFreeze；与 FrameNode::SetNodeFreeze 无关 |
-| renderGroup 子树脏聚合 | `frame_node.cpp` renderGroup 标记 → RS 层 MarkNodeGroup |
-| excludeFromRenderGroup 排除子树 | `view_abstract.cpp` SetExcludeFromRenderGroup → RS 层节点标记 |
-| reuseId 组件复用 | `lazy_for_each_builder.cpp` recyclableNodeSet_ 回收池匹配 |
-| overlay 多次调用覆盖前一次 | `view_abstract.cpp` SetOverlay — 后调用覆盖前调用 |
-| overlay(undefined) 重置 | `view_abstract.cpp` SetOverlay(undefined) → 移除 overlayNode_ |
-| focusable 默认值因组件类型不同 | `focus_hub.h` — 各 Pattern 的 GetDefaultFocusable() 返回值不同 |
+| id 注册与查找异常 | `element_register.h` — inspectorIdMap_；SDK id 声明 |
+| visibility 各值布局差异 | `layout_property.h` — visibility 进入 LayoutProperty 约束链路；`render_context.h` |
+| obscured 截图/录屏区域屏蔽 | `render_context.h` |
+| background(CustomBuilder) 与 backgroundColor 双机制 | `view_abstract.cpp`、`frame_node.cpp` — 区分 RenderContext 存储 vs 子节点挂载 |
+| 模糊属性互斥覆盖 | `render_context.h` — backdropBlur/backgroundBlurStyle/backgroundEffect 共享存储位 |
+| backgroundColor 资源解析 | `render_context.h` |
+| freeze 与 SetNodeFreeze 区别 | `render_context.h` — UpdateFreeze vs `frame_node.cpp` — SetNodeFreeze |
+| renderGroup 子树脏聚合 | `frame_node.cpp` |
+| excludeFromRenderGroup 排除子树 | `view_abstract.cpp` |
+| reuseId 组件复用 | `filter_declaration.cpp` |
+| overlay 多次调用或重置 | `view_abstract.cpp` — SetOverlay |
+| focusable 默认值因组件类型不同 | `focus_hub.h` — 各 Pattern 的 GetDefaultFocusable() |
+| Dynamic 与 Static 行为不一致 | 分别核对 Dynamic JSView/Common Bridge、Static Common modifier/Static Model 和对应 SDK 声明，不从另一范式推断 |
+| C API 找不到对应属性 | 在 `native_node.h` 按具体枚举检索；ArkTS Common 属性不保证均有公开 Node C API |
 
 ## 调试入口
 
-- Inspector 中 id/uniqueId/visibility/zIndex/obscured 可通过 `SimplifiedInspector` dump 查看
-- 背景属性渲染可通过 RS 层 `SetBackgroundColor/SetFilter/DrawImage` 调试日志定位
-- freeze 效果通过 RS 层 `SetFreeze` 调用确认生效状态
-- renderGroup 聚合效果通过脏标记传播链路验证
-- 焦点属性可通过 FocusHub::DumpFocusTree 查看焦点链和焦点树
+- 从具体 SDK 属性名定位 Dynamic/Static 声明，再进入对应前端解析入口。
+- 在 ViewAbstract/Model 写入点确认值进入 `LayoutProperty`（visibility）、`RenderContext`（backgroundColor/zIndex/freeze 等）还是 `FocusHub`（焦点属性）。
+- 背景属性问题同时确认是否进入 RenderContext 存储 vs FrameNode 子节点挂载（CustomBuilder）。
+- 焦点问题同时核对 FocusHub 的 supportedStates_ 与 currentState_ 位掩码。
+- 回归优先运行 `test/unittest/core/base/` 和 `test/unittest/capi/modifiers/` 中对应属性用例。
 
 ## 相关主题
 
-- [style-attributes](style-attributes.md) — 样式属性 (stateStyles/hoverEffect/clickEffect/attributeModifier)
-- [layout-attributes](layout-attributes.md) — 布局属性 (width/height/position 等)
-- [background-image](background-image.md) — 背景图片解码链路 (backgroundImage/backgroundImageSize/Position)
-- [image-loading](image-loading.md) — 图片加载 (ImageLoadingContext/CanvasImage/PixelMapOhos)
-- [drawable-descriptor](drawable_descriptor.md) — DrawableDescriptor 图片资源
-- 渲染管线：`docs/kb/architecture/basic-render-pipeline.md` — RS 层渲染下发 (visibility/zIndex/renderGroup/freeze)
+- 布局属性：`docs/kb/capabilities/layout-attributes.md`
+- 视效属性：`docs/kb/capabilities/visual-effect-attributes.md`
+- 背景图片通用属性：`docs/kb/capabilities/background-image.md`
+- 样式属性：`docs/kb/capabilities/style-attributes.md`
+- 图片加载：`docs/kb/capabilities/image-loading.md`
+- DrawableDescriptor：`docs/kb/capabilities/drawable_descriptor.md`
+- 渲染管线：`docs/kb/architecture/basic-render-pipeline.md`

@@ -7718,23 +7718,26 @@
     {
       "id": "style-attributes",
       "name": "Style Attributes",
-      "name_cn": "样式属性",
+      "name_cn": "样式属性（stateStyles + attributeModifier）",
       "kind": "common_capability",
       "category": "attributes",
       "keywords": [
         "StyleAttributes",
         "样式属性",
         "stateStyles",
-        "hoverEffect",
-        "clickEffect",
         "attributeModifier",
         "excludeInner",
         "UIState",
-        "VisualState"
+        "VisualState",
+        "StateStyleManager",
+        "INIT",
+        "UPDATE",
+        "applyNormalAttribute",
+        "applyPressedAttribute"
       ],
       "aliases": [
         "样式属性",
-        "状态效果",
+        "状态样式",
         "动态属性",
         "attributeModifier属性",
         "StateStyles属性"
