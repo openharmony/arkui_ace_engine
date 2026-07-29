@@ -738,6 +738,32 @@
       }
     },
     {
+      "name": "List",
+      "name_cn": "列表组件",
+      "category": "container",
+      "type": "component",
+      "keywords": [
+        "List",
+        "列表",
+        "滚动列表",
+        "ListItem",
+        "分组列表"
+      ],
+      "aliases": [
+        "List组件",
+        "列表容器",
+        "长列表"
+      ],
+      "file_path": "pattern/list/List_Knowledge_Base.md",
+      "last_updated": "2026-05-23",
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/list.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/list.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.static.d.ets"
+      }
+    },
+    {
       "name": "LoadingProgress",
       "name_cn": "加载进度组件",
       "category": "data_display",
@@ -926,32 +952,6 @@
       ],
       "file_path": "pattern/text_field/TextField_Knowledge_Base_CN.md",
       "last_updated": "2026-05-23"
-    },
-    {
-      "name": "TextInput",
-      "name_cn": "文本输入组件",
-      "category": "basic",
-      "type": "component",
-      "keywords": [
-        "TextInput",
-        "文本输入",
-        "输入组件",
-        "编辑控件",
-        "键盘输入"
-      ],
-      "aliases": [
-        "TextInput组件",
-        "文本输入框",
-        "输入控件"
-      ],
-      "file_path": "pattern/text_input/TextInput_Knowledge_Base_CN.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_input.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textInput.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextInputModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextInputModifier.static.d.ets"
-      }
     },
     {
       "name": "IDL",

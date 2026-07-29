@@ -56,6 +56,10 @@ docs/kb/
 | OffscreenCanvas | 离屏画布对象 | `docs/kb/components/shape/offscreen_canvas.md` | 新建（Spec 待补） |
 | Text | 文本组件 | `docs/kb/components/basic/text.md` | 已迁移，旧 KB 已移除 |
 | RichEditor | 富文本编辑器组件 | `docs/kb/components/basic/rich_editor.md` | 已迁移，旧 KB 已移除 |
+| SymbolGlyph | 符号字形组件 | `docs/kb/components/basic/symbol-glyph.md` | 新建；补齐 Spec 路由（复用 TextPattern） |
+| TextInput | 文本输入组件 | `docs/kb/components/basic/text-input.md` | 已迁移，旧 KB 已移除；共享 TextFieldPattern |
+| Hyperlink | 超链接组件 | `docs/kb/components/basic/hyperlink.md` | 已迁移，旧 KB 已移除；独立 HyperlinkPattern(继承 TextPattern) |
+| StyledString | 属性字符串 | `docs/kb/capabilities/styled-string.md` | 新建；非组件，common_capability/api |
 | Image | 图片组件 | `docs/kb/components/media/image.md` | 已迁移，旧 KB 已移除 |
 | ImageAnimator | 图片动画组件 | `docs/kb/components/media/image_animator.md` | 已迁移，旧 KB 已移除 |
 | Video | 视频组件 | `docs/kb/components/media/video.md` | 新建（无旧 KB） |
