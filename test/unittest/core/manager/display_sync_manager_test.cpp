@@ -17,7 +17,6 @@
 
 #include "core/components_ng/manager/display_sync/ui_display_sync.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
-#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,19 +27,19 @@ constexpr int32_t MEDIUM_FRAME_NUMBER = 60;
 
 class DisplaySyncManagerTestNg : public testing::Test {
 public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
+    void SetUp() override
+    {
+        displaySyncManager_ = AceType::MakeRefPtr<UIDisplaySyncManager>();
+    }
+
+    void TearDown() override
+    {
+        displaySyncManager_ = nullptr;
+    }
+
+protected:
+    RefPtr<UIDisplaySyncManager> displaySyncManager_;
 };
-
-void DisplaySyncManagerTestNg::SetUpTestCase()
-{
-    MockPipelineContext::SetUp();
-}
-
-void DisplaySyncManagerTestNg::TearDownTestCase()
-{
-    MockPipelineContext::TearDown();
-}
 
 /**
  * @tc.name: DisplaySyncManagerTest001
@@ -50,11 +49,10 @@ void DisplaySyncManagerTestNg::TearDownTestCase()
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest001, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
 
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
@@ -69,7 +67,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest001, TestSize.Level0)
     /**
      * @tc.steps: step3. Add a DisplaySync to DisplaySyncManager for management.
      */
-    displaySync->AddToPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync));
     EXPECT_FALSE(displaySyncManager->AddDisplaySync(displaySync));
 
     /**
@@ -86,7 +84,6 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest001, TestSize.Level0)
      * @tc.steps: step5. Remove DisplaySync from DisplaySyncManager.
      */
     EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync));
-    displaySync->DelFromPipelineOnContainer();
     EXPECT_FALSE(displaySyncManager->RemoveDisplaySync(displaySync));
 
     /**
@@ -111,11 +108,10 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest001, TestSize.Level0)
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
 
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
@@ -138,9 +134,9 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest002, TestSize.Level1)
     /**
      * @tc.steps: step3. Add a DisplaySync to DisplaySyncManager for management.
      */
-    displaySync1->AddToPipelineOnContainer();
-    displaySync2->AddToPipelineOnContainer();
-    displaySync3->AddToPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync1));
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync2));
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync3));
 
     /**
      * @tc.steps: step4. Check whether DisplaySync is added to the DisplaySyncManager and whether the
@@ -161,7 +157,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest002, TestSize.Level1)
     /**
      * @tc.steps: step5. Remove a DisplaySync from DisplaySyncManager.
      */
-    displaySync2->DelFromPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync2));
 
     /**
      * @tc.steps: step6. Check whether DisplaySync is added to the DisplaySyncManager and whether the
@@ -173,11 +169,11 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest002, TestSize.Level1)
     bool isExisted4 = displaySyncManager->HasDisplaySync(displaySync2);
     EXPECT_FALSE(isExisted4);
 
-        /**
+    /**
      * @tc.steps: step7. Remove two DisplaySync from DisplaySyncManager.
      */
-    displaySync1->DelFromPipelineOnContainer();
-    displaySync3->DelFromPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync1));
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync3));
 
     /**
      * @tc.steps: step8. Check whether DisplaySync is added to the DisplaySyncManager and whether the
@@ -201,11 +197,10 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest002, TestSize.Level1)
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest003, TestSize.Level0)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
 
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
@@ -221,7 +216,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest003, TestSize.Level0)
     });
     displaySync->SetExpectedFrameRateRange({0, 120, 60});
 
-    displaySync->AddToPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync));
 
     /**
      * @tc.steps: step3. DisplaySync call the callback function.
@@ -237,7 +232,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest003, TestSize.Level0)
      * @tc.expected: step4. Check whether the computed count involved in the callback function is correct.
      */
     EXPECT_EQ(countCopy + onFrameTimes, count);
-    displaySync->DelFromPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync));
 }
 
 /**
@@ -248,11 +243,10 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest003, TestSize.Level0)
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest004, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
 
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
@@ -290,11 +284,10 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest004, TestSize.Level1)
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
 
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
@@ -334,11 +327,10 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest005, TestSize.Level1)
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest006, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
 
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
@@ -377,13 +369,13 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest006, TestSize.Level1)
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest007, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
+    EXPECT_TRUE(displaySyncManager->SetVsyncPeriod(16666667));
 
     /**
      * @tc.steps: step2. Construct DisplaySync and set the callback function and different expected frame rate.
@@ -391,11 +383,11 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest007, TestSize.Level1)
     uint64_t nanoTimestamp = 0;
     RefPtr<UIDisplaySync> displaySync1 = AceType::MakeRefPtr<UIDisplaySync>();
     displaySync1->SetExpectedFrameRateRange({0, 120, 30});
-    displaySync1->AddToPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync1));
 
     RefPtr<UIDisplaySync> displaySync2 = AceType::MakeRefPtr<UIDisplaySync>();
     displaySync2->SetExpectedFrameRateRange({0, 120, 60});
-    displaySync2->AddToPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync2));
 
     /**
      * @tc.steps: step3. DisplaySyncManager do distribution and decision operations.
@@ -407,7 +399,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest007, TestSize.Level1)
     int32_t monitorSyncRate = displaySyncManager->GetMonitorVsyncRate();
     EXPECT_TRUE(monitorSyncRate == MEDIUM_FRAME_NUMBER || monitorSyncRate == LOW_FRAME_NUMBER);
 
-    displaySync2->DelFromPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync2));
     displaySyncManager->DispatchFunc(nanoTimestamp);
     int32_t displaySyncRate2 = displaySyncManager->GetDisplaySyncRate();
 
@@ -420,7 +412,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest007, TestSize.Level1)
     monitorSyncRate = displaySyncManager->GetMonitorVsyncRate();
     EXPECT_TRUE(monitorSyncRate == MEDIUM_FRAME_NUMBER || monitorSyncRate == LOW_FRAME_NUMBER);
 
-    displaySync1->DelFromPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync1));
     displaySyncManager->DispatchFunc(nanoTimestamp);
     int32_t displaySyncRate3 = displaySyncManager->GetDisplaySyncRate();
 
@@ -438,13 +430,13 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest007, TestSize.Level1)
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest008, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
+    EXPECT_TRUE(displaySyncManager->SetVsyncPeriod(16666667));
 
     /**
      * @tc.steps: step2. Construct DisplaySync and set the callback function and different expected frame rate.
@@ -452,11 +444,11 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest008, TestSize.Level1)
     uint64_t nanoTimestamp = 0;
     RefPtr<UIDisplaySync> displaySync1 = AceType::MakeRefPtr<UIDisplaySync>();
     displaySync1->SetExpectedFrameRateRange({0, 10, 30});
-    displaySync1->AddToPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync1));
 
     RefPtr<UIDisplaySync> displaySync2 = AceType::MakeRefPtr<UIDisplaySync>();
     displaySync2->SetExpectedFrameRateRange({0, 120, 60});
-    displaySync2->AddToPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync2));
 
     /**
      * @tc.steps: step3. DisplaySyncManager do distribution and decision operations.
@@ -465,7 +457,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest008, TestSize.Level1)
     int32_t displaySyncRate1 = displaySyncManager->GetDisplaySyncRate();
     EXPECT_EQ(60, displaySyncRate1);
 
-    displaySync2->DelFromPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync2));
     displaySyncManager->DispatchFunc(nanoTimestamp);
     int32_t displaySyncRate2 = displaySyncManager->GetDisplaySyncRate();
     EXPECT_EQ(nanoTimestamp, displaySync1->GetTimestampData());
@@ -477,7 +469,7 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest008, TestSize.Level1)
      */
     EXPECT_EQ(0, displaySyncRate2);
 
-    displaySync1->DelFromPipelineOnContainer();
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync1));
     displaySyncManager->DispatchFunc(nanoTimestamp);
     int32_t displaySyncRate3 = displaySyncManager->GetDisplaySyncRate();
 
@@ -492,11 +484,10 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest008, TestSize.Level1)
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest009, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
 
@@ -504,8 +495,8 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest009, TestSize.Level1)
      * @tc.steps: step2. Construct DisplaySync and add the DisplaySync to DisplaySyncManager.
      */
     RefPtr<UIDisplaySync> displaySync = AceType::MakeRefPtr<UIDisplaySync>();
-    displaySync->AddToPipelineOnContainer();
-    EXPECT_TRUE(displaySync->IsOnPipeline());
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync));
+    EXPECT_TRUE(displaySyncManager->HasDisplaySync(displaySync));
 
     /**
      * @tc.steps: step3. Register different callback functions.
@@ -534,13 +525,15 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest009, TestSize.Level1)
     EXPECT_TRUE(displaySync->IsNonAutoRefreshRateMode());
     EXPECT_FALSE(displaySync->IsAutoRefreshRateMode());
     EXPECT_TRUE(displaySyncManager->IsSupportSkip());
+    EXPECT_TRUE(displaySyncManager->SetRefreshRateMode(
+        static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO)));
     EXPECT_FALSE(displaySyncManager->IsNonAutoRefreshRateMode());
 
     /**
      * @tc.steps: step6. Remove the DisplaySync from DisplaySyncManager.
      */
-    displaySync->DelFromPipelineOnContainer();
-    EXPECT_FALSE(displaySync->IsOnPipeline());
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync));
+    EXPECT_FALSE(displaySyncManager->HasDisplaySync(displaySync));
 }
 
 /**
@@ -551,11 +544,10 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest009, TestSize.Level1)
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest010, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
 
@@ -576,8 +568,8 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest010, TestSize.Level1)
      * @tc.steps: step3. Test SearchMatchedRate function of DisplaySync.
      */
     RefPtr<UIDisplaySync> displaySync = AceType::MakeRefPtr<UIDisplaySync>();
-    displaySync->AddToPipelineOnContainer();
-    EXPECT_TRUE(displaySync->IsOnPipeline());
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync));
+    EXPECT_TRUE(displaySyncManager->HasDisplaySync(displaySync));
 
     int32_t matchedRate = displaySync->FindMatchedRefreshRate(120, 70);
     EXPECT_EQ(60, matchedRate);
@@ -593,8 +585,8 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest010, TestSize.Level1)
     /**
      * @tc.steps: step4. Remove the DisplaySync from DisplaySyncManager.
      */
-    displaySync->DelFromPipelineOnContainer();
-    EXPECT_FALSE(displaySync->IsOnPipeline());
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync));
+    EXPECT_FALSE(displaySyncManager->HasDisplaySync(displaySync));
 }
 
 /**
@@ -605,11 +597,10 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest010, TestSize.Level1)
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest011, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
 
@@ -617,8 +608,8 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest011, TestSize.Level1)
      * @tc.steps: step2. Test SearchMatchedRate function of DisplaySync.
      */
     RefPtr<UIDisplaySync> displaySync = AceType::MakeRefPtr<UIDisplaySync>();
-    displaySync->AddToPipelineOnContainer();
-    EXPECT_TRUE(displaySync->IsOnPipeline());
+    EXPECT_TRUE(displaySyncManager->AddDisplaySync(displaySync));
+    EXPECT_TRUE(displaySyncManager->HasDisplaySync(displaySync));
 
     /**
      * @tc.steps: step3. Test DisplaySync's animator status.
@@ -655,8 +646,8 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest011, TestSize.Level1)
     /**
      * @tc.steps: step4. Remove the DisplaySync from DisplaySyncManager.
      */
-    displaySync->DelFromPipelineOnContainer();
-    EXPECT_FALSE(displaySync->IsOnPipeline());
+    EXPECT_TRUE(displaySyncManager->RemoveDisplaySync(displaySync));
+    EXPECT_FALSE(displaySyncManager->HasDisplaySync(displaySync));
 }
 
 /**
@@ -667,11 +658,10 @@ HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest011, TestSize.Level1)
 HWTEST_F(DisplaySyncManagerTestNg, DisplaySyncManagerTest012, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Get DisplaySyncManager from PipelineContext.
+     * @tc.steps: step1. Create DisplaySyncManager.
      * @tc.expected: step1. Check the number of DisplaySync initially managed by the DisplaySyncManager is 0.
      */
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto displaySyncManager = pipeline->GetOrCreateUIDisplaySyncManager();
+    auto displaySyncManager = displaySyncManager_;
 
     int32_t initSize = 0;
     EXPECT_EQ(initSize, displaySyncManager->GetUIDisplaySyncMap().size());
