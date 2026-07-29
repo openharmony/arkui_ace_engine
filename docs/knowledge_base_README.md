@@ -38,7 +38,7 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：130
+- `docs/` 下 Markdown 文档总数：131
 - 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：45
 - `docs/syntax/` 下语法专题文档：7
   - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
@@ -46,7 +46,7 @@ rg -n "<关键字>" docs
 
 ### 2.2 索引统计
 
-- `context_registry.json` 新版条目数：67
+- `context_registry.json` 新版条目数：68
 - `knowledge_base_INDEX.json` 旧 KB 索引条目总数：46
 - 旧 KB 索引路径有效性：46/46（全部存在）
 
@@ -79,7 +79,7 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-├── kb/ (68 MD，67 个新版 KB 主题 + README)
+├── kb/ (69 MD，68 个新版 KB 主题 + README)
 ├── accessibility/ (1 KB)
 ├── api/ (2 KB)
 ├── architecture/ (2 KB + 3 非 `*_Knowledge_Base*` 命名架构文档)
@@ -182,3 +182,4 @@ PY
 - 2026-07-23：新增 8 个 overlay 类组件 KB（Menu/Dialog/Toast/Select/bindPopup/PopupAdvanced/Sheet/bindTips），补齐弹窗类组件 Spec 路由；迁移 Menu 和 Sheet 旧 KB 到新版路径。
 - 2026-07-27：新增 Pixel Rounding 与 MediaQuery 新版 KB；新版 registry 增至 66 条，旧索引保持 46 条。
 - 2026-07-27：新增 Preview Platform Adaptation 新版 KB；对应架构设计已存在，新版 registry 增至 67 条，旧索引保持 46 条。
+- 2026-07-29：新增 Custom Measure/Layout 新版 KB；补充自定义组件现行回调与已废弃 API 的兼容实现边界。新版 registry 增至 68 条，旧索引保持 46 条。
