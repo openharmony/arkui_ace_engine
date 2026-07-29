@@ -47,12 +47,24 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/pattern/toast/toast_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_pattern.h"
+#include "core/components_ng/pattern/sheet/sheet_presentation_property.h"
+#include "core/components_ng/pattern/sheet/sheet_style.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 const NG::BorderColorProperty BORDER_COLOR_TEST = { Color::BLUE, Color::BLUE, Color::BLUE, Color::BLUE };
+
+class AutoSaveTestPattern : public Pattern {
+    DECLARE_ACE_TYPE(AutoSaveTestPattern, Pattern);
+public:
+    bool CheckAutoSave() override
+    {
+        return true;
+    }
+};
 const NG::BorderColorProperty NEW_BORDER_COLOR_TEST = { Color::RED, Color::GREEN, Color::GRAY, Color::BLACK };
 const std::string TEXT_TAG = "text";
 const OffsetF MENU_OFFSET(10.0, 10.0);
@@ -65,6 +77,11 @@ class OverlayManagerTestThreeNg : public TestNG {
 public:
     void SetUp() override;
     void TearDown() override;
+    static void TearDownTestSuite()
+    {
+        TestNG::TearDownTestSuite();
+        ElementRegister::GetInstance()->Clear();
+    }
 
 protected:
     int32_t minPlatformVersion_ = 0;
@@ -89,6 +106,13 @@ void OverlayManagerTestThreeNg::TearDown()
     if (pipelineContext && pipelineContext->overlayManager_) {
         pipelineContext->overlayManager_->menuManager_ = savedMenuManager_;
         pipelineContext->overlayManager_->rootNodeWeak_ = savedRootNodeWeak_;
+        pipelineContext->overlayManager_->imageGeneratorSheetKey_ = std::nullopt;
+        pipelineContext->overlayManager_->modalList_.clear();
+        pipelineContext->overlayManager_->detachedProxyMap_.clear();
+    }
+    auto mockContainer = MockContainer::Current();
+    if (mockContainer) {
+        mockContainer->isSubContainer_ = false;
     }
 }
 
@@ -1081,5 +1105,493 @@ HWTEST_F(OverlayManagerTestThreeNg, CheckSkipMenuShowCheckMenuManagerFalse001, T
     overlayManager->rootNodeWeak_ = nullptr;
     bool ret = overlayManager->CheckSkipMenuShow(1);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: FireAutoSave001
+ * @tc.desc: Test FireAutoSave when containerNode is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->FireAutoSave(nullptr);
+}
+
+/**
+ * @tc.name: FireAutoSave002
+ * @tc.desc: Test FireAutoSave when NeedRequestAutoSave returns false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave002, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto containerNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(containerNode, nullptr);
+    overlayManager->FireAutoSave(containerNode);
+}
+
+/**
+ * @tc.name: FireAutoSave003
+ * @tc.desc: Test FireAutoSave when NeedRequestAutoSave returns true and IsSubContainer is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave003, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto containerNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<AutoSaveTestPattern>());
+    ASSERT_NE(containerNode, nullptr);
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    bool savedIsSubContainer = mockContainer->isSubContainer_;
+    mockContainer->isSubContainer_ = true;
+    overlayManager->FireAutoSave(containerNode);
+    mockContainer->isSubContainer_ = savedIsSubContainer;
+}
+
+/**
+ * @tc.name: FireAutoSave004
+ * @tc.desc: Test FireAutoSave when NeedRequestAutoSave returns true, IsSubContainer is false,
+ *           and nodeTag is not SHEET_PAGE_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave004, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto containerNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<AutoSaveTestPattern>());
+    ASSERT_NE(containerNode, nullptr);
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    bool savedIsSubContainer = mockContainer->isSubContainer_;
+    mockContainer->isSubContainer_ = false;
+    overlayManager->FireAutoSave(containerNode);
+    mockContainer->isSubContainer_ = savedIsSubContainer;
+}
+
+/**
+ * @tc.name: FireAutoSave005
+ * @tc.desc: Test FireAutoSave when NeedRequestAutoSave returns true, IsSubContainer is false,
+ *           nodeTag is SHEET_PAGE_TAG, and sheetHasInstanceId is false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave005, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    bool savedIsSubContainer = mockContainer->isSubContainer_;
+    mockContainer->isSubContainer_ = false;
+    overlayManager->FireAutoSave(sheetNode);
+    mockContainer->isSubContainer_ = savedIsSubContainer;
+}
+
+/**
+ * @tc.name: FireAutoSave006
+ * @tc.desc: Test FireAutoSave when NeedRequestAutoSave returns true, IsSubContainer is false,
+ *           nodeTag is SHEET_PAGE_TAG, sheetHasInstanceId is true, and targetNode is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave006, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    int32_t targetId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(targetId, "NonExistentTag", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.instanceId = 1;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    bool savedIsSubContainer = mockContainer->isSubContainer_;
+    mockContainer->isSubContainer_ = false;
+    overlayManager->FireAutoSave(sheetNode);
+    mockContainer->isSubContainer_ = savedIsSubContainer;
+}
+
+/**
+ * @tc.name: FireAutoSave007
+ * @tc.desc: Test FireAutoSave when NeedRequestAutoSave returns true, IsSubContainer is false,
+ *           nodeTag is SHEET_PAGE_TAG, sheetHasInstanceId is true, and targetNode is non-null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, FireAutoSave007, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    int32_t targetId = ElementRegister::GetInstance()->MakeUniqueId();
+    const std::string targetTag = "TargetTag";
+    auto targetNode = FrameNode::CreateFrameNode(
+        targetTag, targetId, AceType::MakeRefPtr<AutoSaveTestPattern>());
+    ASSERT_NE(targetNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(targetId, targetTag, std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SheetStyle sheetStyle;
+    sheetStyle.instanceId = 1;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto mockContainer = MockContainer::Current();
+    ASSERT_NE(mockContainer, nullptr);
+    bool savedIsSubContainer = mockContainer->isSubContainer_;
+    mockContainer->isSubContainer_ = false;
+    overlayManager->FireAutoSave(sheetNode);
+    mockContainer->isSubContainer_ = savedIsSubContainer;
+}
+
+/**
+ * @tc.name: IsDescendantOfOverlay001
+ * @tc.desc: Test IsDescendantOfOverlay when node has no parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, IsDescendantOfOverlay001, TestSize.Level1)
+{
+    auto node = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(node, nullptr);
+    EXPECT_FALSE(OverlayManager::IsDescendantOfOverlay(node));
+}
+
+/**
+ * @tc.name: IsDescendantOfOverlay002
+ * @tc.desc: Test IsDescendantOfOverlay when parent tag is OVERLAY_ETS_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, IsDescendantOfOverlay002, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode(
+        V2::OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(parent, nullptr);
+    auto child = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(child, nullptr);
+    parent->AddChild(child);
+    EXPECT_TRUE(OverlayManager::IsDescendantOfOverlay(child));
+}
+
+/**
+ * @tc.name: IsDescendantOfOverlay003
+ * @tc.desc: Test IsDescendantOfOverlay when parent tag is ORDER_OVERLAY_ETS_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, IsDescendantOfOverlay003, TestSize.Level1)
+{
+    auto parent = FrameNode::CreateFrameNode(V2::ORDER_OVERLAY_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(parent, nullptr);
+    auto child = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(child, nullptr);
+    parent->AddChild(child);
+    EXPECT_TRUE(OverlayManager::IsDescendantOfOverlay(child));
+}
+
+/**
+ * @tc.name: IsDescendantOfOverlay004
+ * @tc.desc: Test IsDescendantOfOverlay when grandparent tag is OVERLAY_ETS_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, IsDescendantOfOverlay004, TestSize.Level1)
+{
+    auto grandparent = FrameNode::CreateFrameNode(
+        V2::OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(grandparent, nullptr);
+    auto parent = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(parent, nullptr);
+    auto child = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(child, nullptr);
+    grandparent->AddChild(parent);
+    parent->AddChild(child);
+    EXPECT_TRUE(OverlayManager::IsDescendantOfOverlay(child));
+}
+
+/**
+ * @tc.name: IsDescendantOfOverlay005
+ * @tc.desc: Test IsDescendantOfOverlay when no ancestor has overlay tag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, IsDescendantOfOverlay005, TestSize.Level1)
+{
+    auto grandparent = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(grandparent, nullptr);
+    auto parent = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(parent, nullptr);
+    auto child = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(child, nullptr);
+    grandparent->AddChild(parent);
+    parent->AddChild(child);
+    EXPECT_FALSE(OverlayManager::IsDescendantOfOverlay(child));
+}
+
+/**
+ * @tc.name: ResetDetachedFreeRootProxy001
+ * @tc.desc: Test ResetDetachedFreeRootProxy when detachedProxyMap_ is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, ResetDetachedFreeRootProxy001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->detachedProxyMap_.clear();
+    overlayManager->ResetDetachedFreeRootProxy(1);
+    EXPECT_TRUE(overlayManager->detachedProxyMap_.empty());
+}
+
+/**
+ * @tc.name: ResetDetachedFreeRootProxy002
+ * @tc.desc: Test ResetDetachedFreeRootProxy when targetId is found in non-empty map.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, ResetDetachedFreeRootProxy002, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    int32_t targetId = 100;
+    auto node = FrameNode::CreateFrameNode(
+        "DetachedFreeRootProxy", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(node, nullptr);
+    overlayManager->detachedProxyMap_[targetId] = node;
+    EXPECT_EQ(overlayManager->detachedProxyMap_.size(), 1);
+    overlayManager->ResetDetachedFreeRootProxy(targetId);
+    EXPECT_EQ(overlayManager->detachedProxyMap_.count(targetId), 0);
+    overlayManager->detachedProxyMap_.clear();
+}
+
+/**
+ * @tc.name: ResetDetachedFreeRootProxy003
+ * @tc.desc: Test ResetDetachedFreeRootProxy when targetId is not found in non-empty map.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, ResetDetachedFreeRootProxy003, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    int32_t existingId = 100;
+    int32_t nonExistingId = 200;
+    auto node = FrameNode::CreateFrameNode(
+        "DetachedFreeRootProxy", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(node, nullptr);
+    overlayManager->detachedProxyMap_[existingId] = node;
+    EXPECT_EQ(overlayManager->detachedProxyMap_.size(), 1);
+    overlayManager->ResetDetachedFreeRootProxy(nonExistingId);
+    EXPECT_EQ(overlayManager->detachedProxyMap_.count(existingId), 1);
+    EXPECT_EQ(overlayManager->detachedProxyMap_.count(nonExistingId), 0);
+    overlayManager->detachedProxyMap_.clear();
+}
+
+/**
+ * @tc.name: CloseImageGeneratorSheet001
+ * @tc.desc: Test CloseImageGeneratorSheet when imageGeneratorSheetKey_ has no value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, CloseImageGeneratorSheet001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->imageGeneratorSheetKey_ = std::nullopt;
+    overlayManager->modalList_.clear();
+    bool ret = overlayManager->CloseImageGeneratorSheet();
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: CloseImageGeneratorSheet002
+ * @tc.desc: Test CloseImageGeneratorSheet when modalList_ is empty (sheetNode stays null).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, CloseImageGeneratorSheet002, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->imageGeneratorSheetKey_ = SheetKey(true, 100, 200);
+    overlayManager->modalList_.clear();
+    bool ret = overlayManager->CloseImageGeneratorSheet();
+    EXPECT_FALSE(ret);
+    overlayManager->imageGeneratorSheetKey_ = std::nullopt;
+}
+
+/**
+ * @tc.name: CloseImageGeneratorSheet003
+ * @tc.desc: Test CloseImageGeneratorSheet when modalList_ has a null weak pointer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, CloseImageGeneratorSheet003, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->imageGeneratorSheetKey_ = SheetKey(true, 100, 200);
+    overlayManager->modalList_.clear();
+    WeakPtr<FrameNode> nullWeak;
+    overlayManager->modalList_.emplace_back(nullWeak);
+    bool ret = overlayManager->CloseImageGeneratorSheet();
+    EXPECT_FALSE(ret);
+    overlayManager->imageGeneratorSheetKey_ = std::nullopt;
+    overlayManager->modalList_.clear();
+}
+
+/**
+ * @tc.name: CloseImageGeneratorSheet004
+ * @tc.desc: Test CloseImageGeneratorSheet when modalList_ has a non-sheet-tag modal node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, CloseImageGeneratorSheet004, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->imageGeneratorSheetKey_ = SheetKey(true, 100, 200);
+    overlayManager->modalList_.clear();
+    auto nonSheetNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(nonSheetNode, nullptr);
+    overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(nonSheetNode)));
+    bool ret = overlayManager->CloseImageGeneratorSheet();
+    EXPECT_FALSE(ret);
+    overlayManager->imageGeneratorSheetKey_ = std::nullopt;
+    overlayManager->modalList_.clear();
+}
+
+/**
+ * @tc.name: CloseImageGeneratorSheet005
+ * @tc.desc: Test CloseImageGeneratorSheet when modalList_ has a sheet node with mismatched id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, CloseImageGeneratorSheet005, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->imageGeneratorSheetKey_ = SheetKey(true, 999, 200);
+    overlayManager->modalList_.clear();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(sheetNode)));
+    bool ret = overlayManager->CloseImageGeneratorSheet();
+    EXPECT_FALSE(ret);
+    overlayManager->imageGeneratorSheetKey_ = std::nullopt;
+    overlayManager->modalList_.clear();
+}
+
+/**
+ * @tc.name: CloseImageGeneratorSheet006
+ * @tc.desc: Test CloseImageGeneratorSheet when matching sheet node found without mask parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, CloseImageGeneratorSheet006, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->isDismissProcess_ = true;
+    int32_t sheetId = sheetNode->GetId();
+    overlayManager->imageGeneratorSheetKey_ = SheetKey(true, sheetId, 200);
+    overlayManager->modalList_.clear();
+    overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(sheetNode)));
+    bool ret = overlayManager->CloseImageGeneratorSheet();
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(overlayManager->imageGeneratorSheetKey_.has_value());
+    overlayManager->imageGeneratorSheetKey_ = std::nullopt;
+    overlayManager->modalList_.clear();
+}
+
+/**
+ * @tc.name: CloseImageGeneratorSheet007
+ * @tc.desc: Test CloseImageGeneratorSheet when matching sheet node found with mask parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestThreeNg, CloseImageGeneratorSheet007, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->isDismissProcess_ = true;
+    auto maskNode = FrameNode::CreateFrameNode(
+        "test_mask", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(maskNode, nullptr);
+    sheetNode->SetParent(AceType::WeakClaim(AceType::RawPtr(maskNode)));
+    maskNode->renderContext_ = nullptr;
+    int32_t sheetId = sheetNode->GetId();
+    overlayManager->imageGeneratorSheetKey_ = SheetKey(true, sheetId, 200);
+    overlayManager->modalList_.clear();
+    overlayManager->modalList_.emplace_back(AceType::WeakClaim(AceType::RawPtr(sheetNode)));
+    bool ret = overlayManager->CloseImageGeneratorSheet();
+    EXPECT_TRUE(ret);
+    EXPECT_FALSE(overlayManager->imageGeneratorSheetKey_.has_value());
+    overlayManager->imageGeneratorSheetKey_ = std::nullopt;
+    overlayManager->modalList_.clear();
+    sheetNode->SetParent(WeakPtr<UINode>(), false);
 }
 } // namespace OHOS::Ace::NG
