@@ -14,9 +14,6 @@
  */
 
 class ColumnAlignItemsModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('columnAlignItems');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -31,9 +28,6 @@ class ColumnAlignItemsModifier extends ModifierWithKey<number> {
 }
 
 class ColumnJustifyContentModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
-    super(value);
-  }
   static identity: Symbol = Symbol('columnJustifyContent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

@@ -1038,4 +1038,37 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollLayoutAlgorithmWrapperInitTest, TestS
     GridScrollLayoutAlgorithm algorithm(info);
     EXPECT_EQ(algorithm.wrapper_, nullptr);
 }
+
+/**
+ * @tc.name: GridScrollLayoutStartLineNonNegative001
+ * @tc.desc: After scroll-to-end then reload-to-start sequences, startMainLineIndex_
+ *           must stay non-negative and gridMatrix_ must never contain a -1 row key,
+ *           and CheckGridMatrix must pass. Regression guard for the
+ *           "check grid matrix failed ... row -1" failure caused by ReloadToStartIndex
+ *           decrementing startMainLineIndex_ below 0.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GridScrollLayoutStartLineNonNegative001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateFixedItems(60);
+    CreateDone();
+
+    ScrollToIndex(50, true, ScrollAlign::END);
+    FlushUITasks();
+    ScrollToIndex(0, true, ScrollAlign::START);
+    FlushUITasks();
+    ScrollToIndex(40, true, ScrollAlign::END);
+    FlushUITasks();
+    ScrollToIndex(0, true, ScrollAlign::START);
+    FlushUITasks();
+    UpdateCurrentOffset(-80.0f);
+    FlushUITasks();
+
+    auto& info = pattern_->info_;
+    EXPECT_GE(info.startMainLineIndex_, 0);
+    EXPECT_EQ(info.gridMatrix_.find(-1), info.gridMatrix_.end());
+    EXPECT_TRUE(info.CheckGridMatrix(5));
+}
 } // namespace OHOS::Ace::NG

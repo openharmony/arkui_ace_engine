@@ -1,7 +1,7 @@
 # ArkUI KB
 
 > 更新时间：2026-07-29
-> 主题数：126
+> 主题数：137
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -173,6 +173,11 @@ docs/kb/
 | TextSelection | 文本选择 | `docs/kb/capabilities/text-selection.md` | 新建 |
 | TextInteraction | 文本交互 | `docs/kb/capabilities/text-interaction.md` | 新建 |
 | AutoFill | 自动补全能力（AutoFill） | `docs/kb/capabilities/autofill.md` | 新建 |
+| AbilityContext | Ability上下文 | `docs/kb/capabilities/ability-context.md` | 新建 |
+| FrameCallback | Frame回调接口 | `docs/kb/capabilities/frame-callback.md` | 新建 |
+| basic-attributes | 基础属性 | `docs/kb/capabilities/basic-attributes.md` | 新建 |
+| style-attributes | 样式属性（stateStyles + attributeModifier） | `docs/kb/capabilities/style-attributes.md` | 新建 |
+| multi-instance-management | 多实例管理 | `docs/kb/architecture/multi-instance-management.md` | 新建 |
 
 | OverlayCapability | 浮层能力 | `docs/kb/capabilities/overlay-capability.md` | 新建 |
 
