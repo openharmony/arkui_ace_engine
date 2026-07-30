@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class ArkLazyColumnLayoutComponent extends ArkComponent implements LazyColumnLayoutAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {

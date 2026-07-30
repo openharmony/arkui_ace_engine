@@ -13,7 +13,6 @@
  * limitations under the License.
  */
  
-/// <reference path='./import.ts' />
  
 class MeidaCachedImageImageSrcModifier extends ModifierWithKey<PixelMap | ResourceStr | DrawableDescriptor | ASTCResource> {
   constructor(value: PixelMap | ResourceStr | DrawableDescriptor | ASTCResource) {

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
@@ -72,8 +71,8 @@ class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
   }
 }
 
-class MarqueeInitializeModifier extends ModifierWithKey<Object> {
-  constructor(value: Object) {
+class MarqueeInitializeModifier extends ModifierWithKey<MarqueeOptions> {
+  constructor(value: MarqueeOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('marqueeInitialize');

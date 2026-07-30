@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ScrollBarEnableNestedScrollModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('enableNestedScroll');
   applyPeer(node: KNode, reset: boolean): void {
