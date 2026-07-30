@@ -36,101 +36,6 @@
       "last_updated": "2026-02-03"
     },
     {
-      "name": "Badge",
-      "name_cn": "徽标组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "徽标",
-        "badge",
-        "标记",
-        "数字标记",
-        "红点",
-        "角标",
-        "notification",
-        "通知标记"
-      ],
-      "aliases": [
-        "Badge组件",
-        "徽标",
-        "标记组件"
-      ],
-      "file_path": "pattern/badge/Badge_Knowledge_Base_CN.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/badge/badge_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/badge/badge_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/badge.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/badge.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "TextClock",
-      "name_cn": "文本时钟组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "时钟",
-        "text clock",
-        "时间显示",
-        "数字时钟",
-        "timezone",
-        "时区",
-        "时间格式"
-      ],
-      "aliases": [
-        "TextClock组件",
-        "时钟",
-        "文本时钟"
-      ],
-      "file_path": "pattern/text_clock/TextClock_Knowledge_Base_CN.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_clock/text_clock_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_clock/text_clock_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_clock.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textClock.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextClockModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextClockModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "TextTimer",
-      "name_cn": "文本计时器组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "计时器",
-        "text timer",
-        "倒计时",
-        "定时器",
-        "stopwatch",
-        "计时",
-        "elapsed time"
-      ],
-      "aliases": [
-        "TextTimer组件",
-        "计时器",
-        "文本计时器"
-      ],
-      "file_path": "pattern/texttimer/TextTimer_Knowledge_Base_CN.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/texttimer/text_timer_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/texttimer/text_timer_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_timer.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textTimer.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextTimerModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextTimerModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
       "name": "CalendarPicker",
       "name_cn": "日历选择器组件",
       "category": "selector",
@@ -687,58 +592,6 @@
       "last_updated": "2026-05-23"
     },
     {
-      "name": "Progress",
-      "name_cn": "进度条组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "Progress",
-        "进度条",
-        "progress bar",
-        "进度显示",
-        "加载进度"
-      ],
-      "aliases": [
-        "Progress组件",
-        "进度组件",
-        "进度条"
-      ],
-      "file_path": "pattern/progress/Progress_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/progress.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/progress.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ProgressModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ProgressModifier.static.d.ets"
-      }
-    },
-    {
-      "name": "QRCode",
-      "name_cn": "二维码组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "QRCode",
-        "二维码",
-        "qrcode",
-        "编码",
-        "扫码"
-      ],
-      "aliases": [
-        "QRCode组件",
-        "二维码",
-        "扫码码"
-      ],
-      "file_path": "pattern/qrcode/QRCode_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/qrcode.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/qrcode.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/QRCodeModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/QRCodeModifier.static.d.ets"
-      }
-    },
-    {
       "name": "TextArea",
       "name_cn": "多行文本输入组件",
       "category": "rich_text",
@@ -1016,10 +869,7 @@
       "name": "数据展示组件",
       "description": "用于数据展示的组件",
       "components": [
-        "Badge",
-        "Gauge",
-        "TextClock",
-        "TextTimer"
+        "Gauge"
       ]
     },
     "advanced": {
