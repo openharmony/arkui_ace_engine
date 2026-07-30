@@ -1370,6 +1370,63 @@
       "last_verified": "2026-07-29"
     },
     {
+      "id": "Marquee",
+      "name": "Marquee",
+      "name_cn": "跑马灯组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "Marquee",
+        "跑马灯",
+        "滚动文本",
+        "marquee",
+        "scrolling text",
+        "font",
+        "spacing",
+        "delay"
+      ],
+      "aliases": [
+        "Marquee组件",
+        "跑马灯",
+        "滚动文本",
+        "MarqueePattern"
+      ],
+      "kb": "docs/kb/components/basic/marquee.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/01-marquee",
+      "func_id": "05-09-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/marquee/marquee_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/marquee/marquee_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/marquee/marquee_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/marquee/marquee_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/marquee/marquee_layout_algorithm.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/marquee/marquee_layout_property.h",
+        "paint_property": "frameworks/core/components_ng/pattern/marquee/marquee_paint_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/marquee/marquee_event_hub.h",
+        "accessibility": "frameworks/core/components_ng/pattern/marquee/marquee_accessibility_property.cpp",
+        "theme": "frameworks/core/components/marquee/marquee_theme.h",
+        "bridge": "frameworks/core/components_ng/pattern/marquee/bridge/arkts_native_marquee_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/marquee/bridge/marquee_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/marquee/bridge/marquee_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/marquee/bridge/marquee_dynamic_module.cpp",
+        "native_enums": "frameworks/core/components/common/layout/constants.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/marquee.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/marquee.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/MarqueeModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/MarqueeModifier.static.d.ets",
+        "cangjie_ffi": "frameworks/bridge/cj_frontend/interfaces/cj_ffi/cj_marquee_ffi.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/marquee/",
+        "test/component_test/test_cases/components/information_display/entry/src/main/ets/pages/marquee/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
       "id": "Image",
       "name": "Image",
       "name_cn": "图片组件",
@@ -7298,6 +7355,66 @@
       "last_verified": "2026-07-29"
     },
     {
+      "id": "TextArea",
+      "name": "TextArea",
+      "name_cn": "多行文本输入组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "TextArea",
+        "多行输入",
+        "文本域",
+        "输入框",
+        "编辑",
+        "光标",
+        "选区",
+        "IME",
+        "placeholder",
+        "counter"
+      ],
+      "aliases": [
+        "TextArea组件",
+        "文本域",
+        "多行文本",
+        "TextFieldPattern"
+      ],
+      "kb": "docs/kb/components/basic/text_area.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/05-text-area",
+      "func_id": "05-09-05",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/text_field/text_field_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/text_field/text_field_pattern.h",
+        "controller": "frameworks/core/components_ng/pattern/text_field/text_field_controller.cpp",
+        "controller_base": "frameworks/core/components_ng/pattern/text_field/text_field_model.h",
+        "model": "frameworks/core/components_ng/pattern/text_field/text_field_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/text_field/text_field_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/text_field/text_field_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/text_field/text_field_layout_property.h",
+        "paint_property": "frameworks/core/components_ng/pattern/text_field/text_field_paint_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h",
+        "content_controller": "frameworks/core/components_ng/pattern/text_field/content_controller.cpp",
+        "select_overlay": "frameworks/core/components_ng/pattern/text_field/text_field_select_overlay.cpp",
+        "bridge_static": "frameworks/core/components_ng/pattern/text_area/bridge/text_area_static_modifier.cpp",
+        "bridge_dynamic": "frameworks/core/components_ng/pattern/text_area/bridge/text_area_dynamic_modifier.cpp",
+        "bridge_arkts": "frameworks/core/components_ng/pattern/text_area/bridge/arkts_native_text_area_bridge.cpp",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_area.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textArea.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextAreaModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextAreaModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/component_test/test_cases/components/text_and_input/entry/src/main/ets/pages/text_area",
+        "test/unittest/core/pattern/text_input/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
       "id": "List",
       "name": "List",
       "name_cn": "列表组件",
@@ -7346,6 +7463,64 @@
       },
       "test_paths": [
         "test/unittest/core/pattern/list/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "Span",
+      "name": "Span",
+      "name_cn": "文本片段组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "Span",
+        "文本片段",
+        "span",
+        "font",
+        "decoration",
+        "letterSpacing",
+        "textCase",
+        "lineHeight",
+        "textShadow",
+        "textBackgroundStyle",
+        "baselineOffset",
+        "fontVariations",
+        "onClick",
+        "onHover"
+      ],
+      "aliases": [
+        "Span组件",
+        "文本片段",
+        "SpanNode",
+        "SpanItem"
+      ],
+      "kb": "docs/kb/components/basic/span.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/06-span-components",
+      "func_id": "05-09-06",
+      "spec_status": "active",
+      "source_paths": {
+        "span_node": "frameworks/core/components_ng/pattern/text/span_node.h",
+        "span_model": "frameworks/core/components_ng/pattern/text/span_model.h",
+        "span_model_ng": "frameworks/core/components_ng/pattern/text/span_model_ng.h",
+        "span_model_static": "frameworks/core/components_ng/pattern/text/span_model_static.h",
+        "text_styles": "frameworks/core/components_ng/pattern/text/text_styles.h",
+        "layout": "frameworks/core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h",
+        "paragraph": "frameworks/core/components_ng/render/paragraph.h",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_span.cpp",
+        "capi_impl": "frameworks/core/interfaces/native/implementation/span_modifier.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_span_modifier.cpp",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/span.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/span.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/SpanModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/SpanModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/text/"
       ],
       "status": "active",
       "last_verified": "2026-07-29"
@@ -7402,6 +7577,65 @@
       },
       "test_paths": [
         "test/unittest/core/pattern/refresh/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "ImageSpan",
+      "name": "ImageSpan",
+      "name_cn": "图片片段组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "ImageSpan",
+        "图片片段",
+        "image span",
+        "verticalAlign",
+        "objectFit",
+        "colorFilter",
+        "alt",
+        "supportSvg2",
+        "textBackgroundStyle",
+        "baselineOffset",
+        "onComplete",
+        "onError"
+      ],
+      "aliases": [
+        "ImageSpan组件",
+        "图片片段",
+        "ImageSpanNode",
+        "ImageSpanItem",
+        "ImageSpanView"
+      ],
+      "kb": "docs/kb/components/basic/image_span.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/06-span-components",
+      "func_id": "05-09-06",
+      "spec_status": "active",
+      "source_paths": {
+        "span_node": "frameworks/core/components_ng/pattern/text/span_node.h",
+        "image_span_view": "frameworks/core/components_ng/pattern/text/span/image_span_view.h",
+        "image_span_view_static": "frameworks/core/components_ng/pattern/text/span/image_span_view_static.h",
+        "text_styles": "frameworks/core/components_ng/pattern/text/text_styles.h",
+        "image_layout": "frameworks/core/components_ng/pattern/image/image_layout_algorithm.h",
+        "image_paint": "frameworks/core/components_ng/pattern/image/image_paint_method.h",
+        "paragraph": "frameworks/core/components_ng/render/paragraph.h",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_image.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/text/span/bridge/image_span/arkts_native_image_span_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/text/span/bridge/image_span/image_span_dynamic_module.cpp",
+        "capi_impl": "frameworks/core/interfaces/native/implementation/image_span_modifier.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_image_span_modifier.cpp",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/image_span.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/imageSpan.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageSpanModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ImageSpanModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/text/"
       ],
       "status": "active",
       "last_verified": "2026-07-29"
@@ -7981,6 +8215,165 @@
       ],
       "status": "active",
       "last_verified": "2026-07-28"
+    },
+    {
+      "id": "SymbolSpan",
+      "name": "SymbolSpan",
+      "name_cn": "符号片段组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "SymbolSpan",
+        "符号片段",
+        "symbol span",
+        "fontSize",
+        "fontColor",
+        "fontWeight",
+        "effectStrategy",
+        "renderingStrategy",
+        "symbol glyph"
+      ],
+      "aliases": [
+        "SymbolSpan组件",
+        "符号片段",
+        "SymbolSpanModel",
+        "SymbolSpanModelNG",
+        "SymbolSpanBridge"
+      ],
+      "kb": "docs/kb/components/basic/symbol_span.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/06-span-components",
+      "func_id": "05-09-06",
+      "spec_status": "active",
+      "source_paths": {
+        "span_node": "frameworks/core/components_ng/pattern/text/span_node.h",
+        "symbol_span_model": "frameworks/core/components_ng/pattern/text/span/symbol_span_model.h",
+        "symbol_span_model_ng": "frameworks/core/components_ng/pattern/text/span/symbol_span_model_ng.h",
+        "symbol_span_model_static": "frameworks/core/components_ng/pattern/text/span/symbol_span_model_static.h",
+        "text_styles": "frameworks/core/components_ng/pattern/text/text_styles.h",
+        "symbol_pattern": "frameworks/core/components_ng/pattern/symbol/",
+        "frontend_ts": "frameworks/bridge/declarative_frontend/ark_direct_component/src/arksymbolspan.ts",
+        "bridge": "frameworks/core/components_ng/pattern/text/span/bridge/symbol_span/arkts_native_symbol_span_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/text/span/bridge/symbol_span/symbol_span_dynamic_module.cpp",
+        "capi_impl": "frameworks/core/interfaces/native/implementation/symbol_span_modifier.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_symbol_span_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/symbol_span.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/symbolSpan.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/SymbolSpanModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/SymbolSpanModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/text/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "ContainerSpan",
+      "name": "ContainerSpan",
+      "name_cn": "容器片段组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "ContainerSpan",
+        "容器片段",
+        "container span",
+        "textBackgroundStyle",
+        "span grouping",
+        "非原子节点"
+      ],
+      "aliases": [
+        "ContainerSpan组件",
+        "容器片段",
+        "ContainerSpanNode",
+        "JSContainerSpan"
+      ],
+      "kb": "docs/kb/components/basic/container_span.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/06-span-components",
+      "func_id": "05-09-06",
+      "spec_status": "active",
+      "source_paths": {
+        "span_node": "frameworks/core/components_ng/pattern/text/span_node.h",
+        "span_model": "frameworks/core/components_ng/pattern/text/span_model.h",
+        "span_model_ng": "frameworks/core/components_ng/pattern/text/span_model_ng.h",
+        "span_model_static": "frameworks/core/components_ng/pattern/text/span_model_static.h",
+        "layout": "frameworks/core/components_ng/pattern/text/multiple_paragraph_layout_algorithm.h",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_container_span.cpp",
+        "capi_impl": "frameworks/core/interfaces/native/implementation/container_span_modifier.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_container_span_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/container_span.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/containerSpan.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ContainerSpanModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ContainerSpanModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/text/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "Search",
+      "name": "Search",
+      "name_cn": "搜索框组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "Search",
+        "搜索",
+        "搜索框",
+        "输入框",
+        "search box",
+        "search icon",
+        "清除按钮",
+        "cancel button",
+        "font",
+        "selection",
+        "caret",
+        "keyboard"
+      ],
+      "aliases": [
+        "Search组件",
+        "搜索框",
+        "搜索组件",
+        "SearchPattern"
+      ],
+      "kb": "docs/kb/components/basic/search.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/03-search",
+      "func_id": "05-09-03",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/search/search_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/search/search_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/search/search_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/search/search_model_static.cpp",
+        "node": "frameworks/core/components_ng/pattern/search/search_node.cpp",
+        "node_header": "frameworks/core/components_ng/pattern/search/search_node.h",
+        "layout": "frameworks/core/components_ng/pattern/search/search_layout_algorithm.cpp",
+        "layout_header": "frameworks/core/components_ng/pattern/search/search_layout_algorithm.h",
+        "property": "frameworks/core/components_ng/pattern/search/search_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/search/search_event_hub.h",
+        "text_field": "frameworks/core/components_ng/pattern/search/search_text_field.cpp",
+        "theme": "frameworks/core/components/search/search_theme.h",
+        "native_enums": "interfaces/native/native_node.h",
+        "theme_wrapper": "frameworks/core/components_ng/pattern/search/search_theme_wrapper.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/search.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/search.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/SearchModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/SearchModifier.static.d.ets",
+        "capi": "frameworks/core/interfaces/native/node/search_modifier.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/search/",
+        "test/unittest/capi/modifiers/search_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
     },
     {
       "id": "TextCommonAttributes",

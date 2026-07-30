@@ -55,6 +55,13 @@ docs/kb/
 | Canvas | 画布组件 | `docs/kb/components/shape/canvas.md` | 新建（Spec 待补） |
 | OffscreenCanvas | 离屏画布对象 | `docs/kb/components/shape/offscreen_canvas.md` | 新建（Spec 待补） |
 | Text | 文本组件 | `docs/kb/components/basic/text.md` | 已迁移，旧 KB 已移除 |
+| TextArea | 多行文本输入组件 | `docs/kb/components/basic/text_area.md` | 已迁移，旧 KB 已移除 |
+| Marquee | 跑马灯组件 | `docs/kb/components/basic/marquee.md` | 已迁移，旧 KB 已移除 |
+| Search | 搜索框组件 | `docs/kb/components/basic/search.md` | 已迁移，旧 KB 已移除 |
+| Span | 文本片段组件 | `docs/kb/components/basic/span.md` | 新建（无旧 KB） |
+| ImageSpan | 图片片段组件 | `docs/kb/components/basic/image_span.md` | 新建（无旧 KB） |
+| SymbolSpan | 符号片段组件 | `docs/kb/components/basic/symbol_span.md` | 新建（无旧 KB） |
+| ContainerSpan | 容器片段组件 | `docs/kb/components/basic/container_span.md` | 新建（无旧 KB） |
 | RichEditor | 富文本编辑器组件 | `docs/kb/components/basic/rich_editor.md` | 已迁移，旧 KB 已移除 |
 | SymbolGlyph | 符号字形组件 | `docs/kb/components/basic/symbol-glyph.md` | 新建；补齐 Spec 路由（复用 TextPattern） |
 | TextInput | 文本输入组件 | `docs/kb/components/basic/text-input.md` | 已迁移，旧 KB 已移除；共享 TextFieldPattern |
