@@ -8424,6 +8424,515 @@
       ],
       "status": "active",
       "last_verified": "2026-07-29"
+    },
+    {
+      "id": "DrawModifier",
+      "name": "DrawModifier",
+      "name_cn": "动态绘制属性",
+      "kind": "common_capability",
+      "category": "custom-extension",
+      "keywords": [
+        "DrawModifier",
+        "drawModifier",
+        "动态绘制属性",
+        "drawBehind",
+        "drawContent",
+        "drawFront",
+        "drawForeground",
+        "drawOverlay",
+        "invalidate",
+        "DrawContext",
+        "ExtensionHandler",
+        "五层绘制",
+        "自定义绘制"
+      ],
+      "aliases": [
+        "绘制修饰器",
+        "Draw Modifier",
+        "自定义绘制扩展"
+      ],
+      "kb": "docs/kb/capabilities/draw_modifier.md",
+      "spec_domain": "specs/04-common-capability/05-custom-extension/01-draw-modifier",
+      "func_id": "04-05-01",
+      "spec_status": "active",
+      "source_paths": {
+        "modifier_h": "frameworks/core/components_ng/base/modifier.h",
+        "extension_handler_h": "frameworks/core/components_ng/base/extension_handler.h",
+        "extension_handler_cpp": "frameworks/core/components_ng/base/extension_handler.cpp",
+        "frame_node_cpp": "frameworks/core/components_ng/base/frame_node.cpp",
+        "paint_wrapper_cpp": "frameworks/core/components_ng/render/paint_wrapper.cpp",
+        "pattern_h": "frameworks/core/components_ng/pattern/pattern.h",
+        "js_view_abstract_cpp": "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp",
+        "draw_modifier_accessor": "frameworks/core/interfaces/native/implementation/draw_modifier_accessor.cpp",
+        "common_ani_modifier": "frameworks/core/interfaces/native/ani/common_ani_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "draw_context": "<OH_ROOT>/interface/sdk-js/api/arkui/Graphics.d.ts",
+        "draw_context_static": "<OH_ROOT>/interface/sdk-js/api/arkui/Graphics.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/base/",
+        "test/unittest/capi/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "AttributeModifier",
+      "name": "AttributeModifier",
+      "name_cn": "动态属性",
+      "kind": "common_capability",
+      "category": "custom-extension",
+      "keywords": [
+        "AttributeModifier",
+        "attributeModifier",
+        "动态属性",
+        "applyNormalAttribute",
+        "applyPressedAttribute",
+        "applyFocusedAttribute",
+        "applyDisabledAttribute",
+        "applySelectedAttribute",
+        "applyHoveredAttribute",
+        "AttributeModifierState",
+        "monitoredStates",
+        "setSupportedUIState",
+        "getUIState",
+        "状态分发"
+      ],
+      "aliases": [
+        "属性修饰器",
+        "Attribute Modifier",
+        "动态属性通路"
+      ],
+      "kb": "docs/kb/capabilities/attribute_modifier.md",
+      "spec_domain": "specs/04-common-capability/05-custom-extension/02-dynamic-attributes",
+      "func_id": "04-05-02",
+      "spec_status": "active",
+      "source_paths": {
+        "ark_component_ts": "frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts",
+        "ark_common_modifier_ets": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-preprocessed/arkui/hooks/modifiers/ArkCommonModifier.ets",
+        "ark_modifier_dir": "frameworks/bridge/declarative_frontend/ark_modifier/src/",
+        "arkoala_api_generated_h": "frameworks/core/interfaces/native/generated/interface/arkoala_api_generated.h",
+        "modifier_impl_dir": "frameworks/core/interfaces/native/implementation/"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "enums_static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/enums.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/",
+        "test/unittest/capi/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "CustomProperty",
+      "name": "CustomProperty",
+      "name_cn": "自定义属性",
+      "kind": "common_capability",
+      "category": "custom-extension",
+      "keywords": [
+        "customProperty",
+        "getCustomProperty",
+        "自定义属性",
+        "customPropertyMap",
+        "extraCustomPropertyMap",
+        "SetJSCustomProperty",
+        "GetJSCustomProperty",
+        "GetCapiCustomProperty",
+        "AddCustomProperty",
+        "__elementIdToCustomProperties__",
+        "懒物化",
+        "双存储",
+        "ArkUI_CustomProperty",
+        "transferDynamic"
+      ],
+      "aliases": [
+        "自定义属性",
+        "Custom Property",
+        "节点自定义属性"
+      ],
+      "kb": "docs/kb/capabilities/custom_property.md",
+      "spec_domain": "specs/04-common-capability/05-custom-extension/05-custom-property",
+      "func_id": "04-05-05",
+      "spec_status": "active",
+      "source_paths": {
+        "frame_node_h": "frameworks/core/components_ng/base/frame_node.h",
+        "frame_node_cpp": "frameworks/core/components_ng/base/frame_node.cpp",
+        "js_view_abstract_cpp": "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp",
+        "ark_component_ts": "frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts",
+        "frame_node_ts": "frameworks/bridge/declarative_frontend/ark_node/src/frame_node.ts",
+        "trans_frame_node_ts": "frameworks/bridge/declarative_frontend/ark_node/src/trans_frame_node.ts",
+        "native_node_h": "interfaces/native/native_node.h",
+        "node_utils_cpp": "interfaces/native/node/node_utils.cpp",
+        "frame_node_modifier_cpp": "frameworks/core/interfaces/native/node/frame_node_modifier.cpp",
+        "common_ani_modifier": "frameworks/core/interfaces/native/ani/common_ani_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "frame_node_dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.d.ts",
+        "frame_node_static": "<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/base/frame_node_test_ng*.cpp",
+        "test/unittest/capi/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "FrameNode",
+      "name": "FrameNode",
+      "name_cn": "FrameNode 节点",
+      "kind": "common_capability",
+      "category": "custom-node",
+      "keywords": [
+        "FrameNode",
+        "NG::FrameNode",
+        "UINode",
+        "LayoutWrapper",
+        "CustomFrameNode",
+        "CustomFrameNodePattern",
+        "FrameNodeImpl",
+        "ArkUI_NativeNodeAPI_1",
+        "ArkUIFrameNodeModifier",
+        "ElementRegister",
+        "createFrameNode",
+        "createFrameNodes",
+        "getFrameNodeById",
+        "getFrameNodeByUniqueId",
+        "isModifiable",
+        "isDisposed",
+        "isOnMainTree",
+        "dispose",
+        "disposeTree",
+        "adoptChild",
+        "moveTo",
+        "measure",
+        "layout",
+        "getMeasuredSize",
+        "getLayoutPosition",
+        "getPositionToWindow",
+        "convertPosition",
+        "getRenderNode",
+        "onDraw",
+        "getInspectorInfo",
+        "getCustomProperty",
+        "createAnimation",
+        "UIState",
+        "CrossLanguageOptions",
+        "节点创建",
+        "自定义节点",
+        "树结构",
+        "布局度量",
+        "坐标转换",
+        "节点动画"
+      ],
+      "aliases": [
+        "FrameNode节点",
+        "NG节点",
+        "自定义节点",
+        "frame_node",
+        "ArkUI节点"
+      ],
+      "kb": "docs/kb/capabilities/frame_node.md",
+      "spec_domain": "specs/04-common-capability/06-custom-node/02-frame-node",
+      "func_id": "04-06-02",
+      "spec_status": "active",
+      "source_paths": {
+        "arkts_frame_node_ts": "frameworks/bridge/declarative_frontend/ark_node/src/frame_node.ts",
+        "ark_node_src_dir": "frameworks/bridge/declarative_frontend/ark_node/src",
+        "static_frame_node_ets": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-preprocessed/arkui/FrameNode.ets",
+        "jsi_bridge_cpp": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.cpp",
+        "frame_node_modifier_cpp": "frameworks/core/interfaces/native/node/frame_node_modifier.cpp",
+        "node_api_cpp": "frameworks/core/interfaces/native/node/node_api.cpp",
+        "view_model_cpp": "frameworks/core/interfaces/native/node/view_model.cpp",
+        "node_render_node_modifier_cpp": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp",
+        "ng_frame_node_cpp": "frameworks/core/components_ng/base/frame_node.cpp",
+        "ui_node_cpp": "frameworks/core/components_ng/base/ui_node.cpp",
+        "element_register_h": "frameworks/core/pipeline/base/element_register.h"
+      },
+      "api_paths": {
+        "sdk_dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.d.ts",
+        "sdk_static": "<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.static.d.ets",
+        "module_dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.node.d.ts",
+        "module_static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.node.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/base/frame_node_test_ng.cpp",
+        "test/unittest/core/base/frame_node_test_ng_new.cpp",
+        "test/unittest/core/base/frame_node_test_ng_v3.cpp",
+        "test/unittest/core/base/frame_node_test_ng_dump.cpp",
+        "test/unittest/core/base/geometry_node_test_ng.cpp",
+        "test/unittest/capi/accessors/frame_node_extended_accessor_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "RenderNode",
+      "name": "RenderNode",
+      "name_cn": "RenderNode 绘制节点",
+      "kind": "common_capability",
+      "category": "custom-node",
+      "keywords": [
+        "RenderNode",
+        "draw",
+        "invalidate",
+        "backgroundColor",
+        "shadow",
+        "border",
+        "shapeMask",
+        "shapeClip",
+        "clipToFrame",
+        "pivot",
+        "scale",
+        "rotation",
+        "transform",
+        "opacity",
+        "markNodeGroup",
+        "appendChild",
+        "backgroundBlur",
+        "DrawContext",
+        "绘制节点",
+        "自定义绘制"
+      ],
+      "aliases": [
+        "RenderNode节点",
+        "绘制节点",
+        "render_node",
+        "自定义绘制节点"
+      ],
+      "kb": "docs/kb/capabilities/render_node.md",
+      "spec_domain": "specs/04-common-capability/06-custom-node/03-render-node",
+      "func_id": "04-06-03",
+      "spec_status": "active",
+      "source_paths": {
+        "arkts_render_node_ts": "frameworks/bridge/declarative_frontend/ark_node/src/render_node.ts",
+        "base_node_ts": "frameworks/bridge/declarative_frontend/ark_node/src/base_node.ts",
+        "jsi_bridge_cpp": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.cpp",
+        "ndk_modifier_cpp": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp",
+        "ng_pattern_h": "frameworks/core/components_ng/pattern/render_node/render_node_pattern.h"
+      },
+      "api_paths": {
+        "sdk_dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/RenderNode.d.ts",
+        "sdk_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RenderNode.static.d.ets",
+        "graphics": "<OH_ROOT>/interface/sdk-js/api/arkui/Graphics.d.ts",
+        "module_dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.node.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/interfaces/native_render_node_test.cpp",
+        "test/unittest/interfaces/native_render_node_property_test.cpp",
+        "test/unittest/core/pattern/render_node/render_node_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "BuilderNode",
+      "name": "BuilderNode",
+      "name_cn": "BuilderNode 构建节点",
+      "kind": "common_capability",
+      "category": "custom-node",
+      "keywords": [
+        "BuilderNode",
+        "build",
+        "update",
+        "getFrameNode",
+        "BuilderRootFrameNode",
+        "RenderOptions",
+        "NodeRenderType",
+        "BuildOptions",
+        "reuse",
+        "recycle",
+        "postTouchEvent",
+        "postInputEvent",
+        "inheritFreezeOptions",
+        "ReactiveBuilderNode",
+        "flushState",
+        "构建节点",
+        "自定义叶子节点"
+      ],
+      "aliases": [
+        "BuilderNode节点",
+        "构建节点",
+        "builder_node",
+        "自定义叶子节点"
+      ],
+      "kb": "docs/kb/capabilities/builder_node.md",
+      "spec_domain": "specs/04-common-capability/06-custom-node/04-builder-node",
+      "func_id": "04-06-04",
+      "spec_status": "active",
+      "source_paths": {
+        "arkts_builder_node_ts": "frameworks/bridge/declarative_frontend/ark_node/src/builder_node.ts",
+        "frame_node_ts": "frameworks/bridge/declarative_frontend/ark_node/src/frame_node.ts",
+        "base_node_ts": "frameworks/bridge/declarative_frontend/ark_node/src/base_node.ts",
+        "node_finalization_ts": "frameworks/bridge/declarative_frontend/ark_node/src/node_finalization_register_proxy.ts",
+        "jsi_bridge_cpp": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.cpp",
+        "ndk_accessor_cpp": "frameworks/core/interfaces/native/implementation/builder_node_ops_accessor.cpp",
+        "builder_util_h": "frameworks/core/common/builder_util.h"
+      },
+      "api_paths": {
+        "sdk_dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/BuilderNode.d.ts",
+        "sdk_static": "<OH_ROOT>/interface/sdk-js/api/arkui/BuilderNode.static.d.ets",
+        "module_dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.node.d.ts",
+        "module_static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.node.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/common/builder_util/builder_util_test.cpp",
+        "test/unittest/core/pattern/node_container/node_container_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "ComponentContent",
+      "name": "ComponentContent",
+      "name_cn": "ComponentContent 组件内容",
+      "kind": "common_capability",
+      "category": "custom-node",
+      "keywords": [
+        "ComponentContent",
+        "ReactiveComponentContent",
+        "Content",
+        "TransComponentContent",
+        "update",
+        "reuse",
+        "recycle",
+        "dispose",
+        "isDisposed",
+        "isTransferred",
+        "flushState",
+        "inheritFreezeOptions",
+        "组件内容",
+        "transferDynamic"
+      ],
+      "aliases": [
+        "ComponentContent组件内容",
+        "组件内容",
+        "component_content"
+      ],
+      "kb": "docs/kb/capabilities/component_content.md",
+      "spec_domain": "specs/04-common-capability/06-custom-node/05-component-content",
+      "func_id": "04-06-05",
+      "spec_status": "active",
+      "source_paths": {
+        "arkts_component_content_ts": "frameworks/bridge/declarative_frontend/ark_node/src/component_content.ts",
+        "content_ts": "frameworks/bridge/declarative_frontend/ark_node/src/content.ts",
+        "trans_component_content_ts": "frameworks/bridge/declarative_frontend/ark_node/src/trans_component_content.ts"
+      },
+      "api_paths": {
+        "sdk_dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/ComponentContent.d.ts",
+        "sdk_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ComponentContent.static.d.ets",
+        "content_dts": "<OH_ROOT>/interface/sdk-js/api/arkui/Content.d.ts",
+        "module_dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.node.d.ts"
+      },
+      "test_paths": [],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "TypedFrameNode",
+      "name": "TypedFrameNode",
+      "name_cn": "TypedFrameNode 类型化节点",
+      "kind": "common_capability",
+      "category": "custom-node",
+      "keywords": [
+        "TypedFrameNode",
+        "typeNode",
+        "createNode",
+        "createXxxNode",
+        "getAttribute",
+        "getEvent",
+        "bindController",
+        "initialize",
+        "attribute",
+        "XxxFrameNode",
+        "类型化节点",
+        "typeNode工厂"
+      ],
+      "aliases": [
+        "TypedFrameNode类型化节点",
+        "类型化节点",
+        "typed_frame_node",
+        "typeNode"
+      ],
+      "kb": "docs/kb/capabilities/typed_frame_node.md",
+      "spec_domain": "specs/04-common-capability/06-custom-node/07-typed-frame-node",
+      "func_id": "04-06-07",
+      "spec_status": "active",
+      "source_paths": {
+        "arkts_frame_node_ts": "frameworks/bridge/declarative_frontend/ark_node/src/frame_node.ts",
+        "jsi_bridge_cpp": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.cpp"
+      },
+      "api_paths": {
+        "sdk_dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.d.ts",
+        "sdk_static": "<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.static.d.ets",
+        "module_dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.node.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/capi/accessors/frame_node_extended_accessor_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "ComponentModifier",
+      "name": "ComponentModifier",
+      "name_cn": "组件Modifier",
+      "kind": "common_capability",
+      "category": "custom-extension",
+      "keywords": [
+        "ComponentModifier",
+        "CommonModifier",
+        "ButtonModifier",
+        "TextModifier",
+        "命令式Modifier",
+        "ModifierUtils",
+        "ModifierWithKey",
+        "applyAndMergeModifier",
+        "applyPeer",
+        "applySetOnChange",
+        "putDirtyModifier",
+        "isInstanceOf",
+        "EXPOSE_MODIFIER",
+        "_modifiersWithKeys",
+        "@ohos.arkui.modifier"
+      ],
+      "aliases": [
+        "组件修饰器",
+        "命令式Modifier类",
+        "Command Modifier"
+      ],
+      "kb": "docs/kb/capabilities/component_modifier.md",
+      "spec_domain": "specs/04-common-capability/05-custom-extension/06-component-modifier",
+      "func_id": "04-05-06",
+      "spec_status": "active",
+      "source_paths": {
+        "common_modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/common_modifier.ts",
+        "modifier_utilities_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/modifier_utilities.ts",
+        "modifier_dir": "frameworks/bridge/declarative_frontend/ark_modifier/src/",
+        "static_modifier_ets": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-preprocessed/arkui/",
+        "static_modifier_bridge": "frameworks/core/components_ng/pattern/",
+        "modifier_impl_dir": "frameworks/core/interfaces/native/implementation/"
+      },
+      "api_paths": {
+        "common_modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "common_modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "modifier_barrel": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.modifier.d.ts",
+        "modifier_utils": "<OH_ROOT>/interface/sdk-js/api/arkui/ModifierUtils.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/",
+        "test/unittest/capi/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
     }
   ]
 }
