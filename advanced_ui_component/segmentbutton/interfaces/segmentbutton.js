@@ -3618,7 +3618,7 @@ function resourceToNumber(context, resource, defaultValue) {
     case RESOURCE_TYPE_INTEGER:
       try {
         if (resource.id !== -1) {
-          return resourceManager.getNumber(resource);
+          return resourceManager.getNumber(resource.id);
         }
         return resourceManager.getNumberByName(resource.params[0].split('.')[2]);
       } catch (error) {
