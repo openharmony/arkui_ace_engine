@@ -7536,6 +7536,312 @@
       ],
       "status": "active",
       "last_verified": "2026-07-28"
+    },
+    {
+"id": "AbilityContext",
+      "name": "Ability Context",
+      "name_cn": "Ability上下文",
+      "kind": "common_capability",
+      "category": "api",
+      "keywords": [
+        "AbilityContext",
+        "getHostContext",
+        "getSharedLocalStorage",
+        "getAtomicServiceBar",
+        "WidthBreakpoint",
+        "HeightBreakpoint",
+        "enableSwipeBack",
+        "getWindowName",
+        "getWindowId",
+        "isEasySplit",
+        "AtomicServiceBarController",
+        "Ability上下文",
+        "AbilityContextInfo",
+        "bundleType门控",
+        "窗口断点",
+        "宽高比断点"
+      ],
+      "aliases": [
+        "Ability上下文",
+        "Ability Context",
+        "UIAbilityContext",
+        "宿主上下文",
+        "窗口信息"
+      ],
+      "kb": "docs/kb/capabilities/ability-context.md",
+      "spec_domain": "specs/04-common-capability/12-ui-context/02-ability-context",
+      "func_id": "04-12-02",
+      "spec_status": "active",
+      "source_paths": {
+        "ace_container": "adapter/ohos/entrance/ace_container.h",
+        "ui_content_impl": "adapter/ohos/entrance/ui_content_impl.cpp",
+        "js_uicontext_dynamic": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "ts_uicontext_static": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.UIContext.ts",
+        "ani_modifier": "frameworks/core/interfaces/native/ani/common_ani_modifier.cpp",
+        "view_abstract_breakpoint": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "pipeline_context": "frameworks/core/pipeline_ng/pipeline_context.h",
+        "pipeline_context_cpp": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "ui_context_get_info_accessor": "frameworks/core/interfaces/native/implementation/ui_context_get_info_accessor.cpp",
+        "atomic_service_bar_accessor": "frameworks/core/interfaces/native/implementation/ui_context_atomic_service_bar_accessor.cpp",
+        "observer_handler": "frameworks/core/components_ng/base/observer_handler.h",
+        "ui_observer": "interfaces/napi/kits/observer/ui_observer.h",
+        "js_view_context": "frameworks/bridge/declarative_frontend/jsview/js_view_context.cpp",
+        "uicontext_impl": "interfaces/inner_api/ace_kit/src/view/ui_context_impl.h",
+        "preview_container": "adapter/preview/entrance/ace_container.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets",
+        "kit": "interfaces/inner_api/ace_kit/include/ui/view/ui_context.h",
+        "capi": "interfaces/native/native_type.h"
+      },
+      "test_paths": [
+        "test/unittest/interfaces/ace_kit/ui_context_impl_test.cpp",
+        "test/unittest/capi/accessors/ui_context_atomic_service_bar_accessor_test.cpp",
+        "test/mock/interfaces/inner_api/ace_kit/view/mock_ui_context_impl.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "FrameCallback",
+      "name": "Frame Callback",
+      "name_cn": "Frame回调接口",
+      "kind": "common_capability",
+      "category": "api",
+      "keywords": [
+        "FrameCallback",
+        "postFrameCallback",
+        "postDelayedFrameCallback",
+        "OH_ArkUI_PostFrameCallback",
+        "OH_ArkUI_PostIdleCallback",
+        "onFrame",
+        "onIdle",
+        "帧回调",
+        "一次性回调",
+        "VSync",
+        "FlushFrameCallback",
+        "TriggerIdleCallback",
+        "MIN_IDLE_TIME",
+        "frameCallbackFuncs_",
+        "frameCallbackFuncsFromCAPI_",
+        "idleCallbackFuncs_"
+      ],
+      "aliases": [
+        "帧回调",
+        "Frame回调",
+        "Frame Callback",
+        "帧回调接口",
+        "one-shot帧回调"
+      ],
+      "kb": "docs/kb/capabilities/frame-callback.md",
+      "spec_domain": "specs/04-common-capability/12-ui-context/03-frame-callback",
+      "func_id": "04-12-03",
+      "spec_status": "active",
+      "source_paths": {
+        "pipeline_context_h": "frameworks/core/pipeline_ng/pipeline_context.h",
+        "pipeline_context_cpp": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "js_uicontext_dynamic": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "ts_uicontext_static": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/@ohos.arkui.UIContext.ts",
+        "jsi_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp",
+        "capi_napi_impl": "interfaces/native/node/native_node_napi.cpp",
+        "capi_node_api": "frameworks/core/interfaces/native/node/node_api.cpp",
+        "capi_napi_header": "interfaces/native/native_node_napi.h",
+        "kit_uicontext_h": "interfaces/inner_api/ace_kit/include/ui/view/ui_context.h",
+        "kit_uicontext_impl": "interfaces/inner_api/ace_kit/src/view/ui_context_impl.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets",
+        "capi": "interfaces/native/native_node_napi.h",
+        "kit": "interfaces/inner_api/ace_kit/include/ui/view/ui_context.h"
+      },
+      "test_paths": [
+        "test/unittest/interfaces/native_node_napi_test.cpp",
+        "test/unittest/interfaces/native_node_test.cpp",
+        "test/unittest/interfaces/ace_kit/ui_context_impl_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "basic-attributes",
+      "name": "Basic Attributes",
+      "name_cn": "基础属性",
+      "kind": "common_capability",
+      "category": "attributes",
+      "keywords": [
+        "BasicAttributes",
+        "基础属性",
+        "id",
+        "visibility",
+        "zIndex",
+        "obscured",
+        "background",
+        "overlay",
+        "renderGroup",
+        "freeze",
+        "reuseId",
+        "allowForceDark"
+      ],
+      "aliases": [
+        "基础属性",
+        "通用基础属性",
+        "Common基础属性"
+      ],
+      "kb": "docs/kb/capabilities/basic-attributes.md",
+      "spec_domain": "specs/04-common-capability/03-common-attributes/03-basic-attributes",
+      "func_id": "04-03-03",
+      "spec_status": "active",
+      "source_paths": {
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "element_register": "frameworks/core/pipeline/base/element_register.h",
+        "render_context": "frameworks/core/components_ng/render/render_context.h",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.h",
+        "view_stack_processor": "frameworks/core/components_ng/base/view_stack_processor.cpp",
+        "rosen_render_context": "frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp",
+        "style_modifier": "interfaces/native/node/style_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/",
+        "test/unittest/core/event/",
+        "test/unittest/capi/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "style-attributes",
+      "name": "Style Attributes",
+      "name_cn": "样式属性（stateStyles + attributeModifier）",
+      "kind": "common_capability",
+      "category": "attributes",
+      "keywords": [
+        "StyleAttributes",
+        "样式属性",
+        "stateStyles",
+        "attributeModifier",
+        "excludeInner",
+        "UIState",
+        "VisualState",
+        "StateStyleManager",
+        "INIT",
+        "UPDATE",
+        "applyNormalAttribute",
+        "applyPressedAttribute"
+      ],
+      "aliases": [
+        "样式属性",
+        "状态样式",
+        "动态属性",
+        "attributeModifier属性",
+        "StateStyles属性"
+      ],
+      "kb": "docs/kb/capabilities/style-attributes.md",
+      "spec_domain": "specs/04-common-capability/03-common-attributes/07-style-attributes",
+      "func_id": "04-03-07",
+      "spec_status": "active",
+      "source_paths": {
+        "state_style_manager": "frameworks/core/components_ng/event/state_style_manager.h",
+        "input_event_hub": "frameworks/core/components_ng/event/input_event_hub.h",
+        "render_context": "frameworks/core/components_ng/render/render_context.h",
+        "view_stack_processor": "frameworks/core/components_ng/base/view_stack_processor.cpp",
+        "focus_hub": "frameworks/core/components_ng/event/focus_hub.h",
+        "ark_component": "frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts",
+        "modifier_utilities": "frameworks/bridge/declarative_frontend/ark_modifier/src/modifier_utilities.ts",
+        "node_api": "frameworks/core/interfaces/native/node/node_api.cpp",
+        "frame_node_modifier": "frameworks/core/interfaces/native/node/frame_node_modifier.cpp",
+        "style_modifier": "interfaces/native/node/style_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/",
+        "test/unittest/core/event/",
+        "test/unittest/capi/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "multi-instance-management",
+      "name": "Multi-Instance Management",
+      "name_cn": "多实例管理",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "Multi-Instance Management",
+        "多实例管理",
+        "Container",
+        "AceContainer",
+        "DialogContainer",
+        "PaContainer",
+        "ContainerScope",
+        "AceEngine",
+        "InstanceId",
+        "PipelineContext",
+        "SubContainer",
+        "SubwindowManager",
+        "MultiThreadBuildManager",
+        "UIContent",
+        "thread_local"
+      ],
+      "aliases": [
+        "多实例",
+        "实例管理",
+        "Container管理",
+        "多容器管理",
+        "多窗口实例"
+      ],
+      "kb": "docs/kb/architecture/multi-instance-management.md",
+      "spec_domain": "specs/03-engine-framework/06-multi-instance-management/01-multi-instance-management",
+      "func_id": "03-06-01",
+      "spec_status": "active",
+      "source_paths": {
+        "container_base": "frameworks/core/common/container.h",
+        "container_consts": "frameworks/core/common/container_consts.h",
+        "container_impl": "frameworks/core/common/container.cpp",
+        "ace_container": "adapter/ohos/entrance/ace_container.h",
+        "dialog_container": "adapter/ohos/entrance/dialog_container.h",
+        "pa_container": "adapter/ohos/entrance/pa_container.h",
+        "ace_engine": "frameworks/core/common/ace_engine.h",
+        "container_scope": "frameworks/core/common/container_scope.h",
+        "pipeline_context_ng": "frameworks/core/pipeline_ng/pipeline_context.h",
+        "global_pipeline": "adapter/ohos/entrance/global_pipeline_context_manager.h",
+        "sub_container": "frameworks/core/components/form/sub_container.h",
+        "subwindow_manager": "frameworks/base/subwindow/subwindow_manager.h",
+        "multi_thread_build_manager": "frameworks/core/common/multi_thread_build_manager.h",
+        "task_executor": "frameworks/base/thread/task_executor.h",
+        "ui_content_impl": "adapter/ohos/entrance/ui_content_impl.h",
+        "ace_ability": "adapter/ohos/entrance/ace_ability.h"
+      },
+      "api_paths": {
+        "capi_context": "interfaces/native/native_type.h",
+        "capi_node": "interfaces/native/native_node.h",
+        "capi_napi": "interfaces/native/native_node_napi.h",
+        "capi_ani": "interfaces/native/native_node_ani.h",
+        "capi_multi_thread": "frameworks/core/interfaces/native/node/node_api_multi_thread.h",
+        "capi_accessibility": "interfaces/native/native_interface_accessibility.h",
+        "capi_focus": "interfaces/native/native_interface_focus.h",
+        "ui_content": "interfaces/inner_api/ace/ui_content.h"
+      },
+      "test_paths": [
+        "test/unittest/frameworks/core/common/container_scope_test.cpp",
+        "test/unittest/frameworks/core/common/ace_engine_test.cpp",
+        "test/unittest/adapter/ohos/entrance/container_test.cpp",
+        "test/unittest/core/pipeline/pipeline_context_isolated_thread_test.cpp",
+        "test/unittest/core/common/multi_thread_build_manager/multi_thread_build_manager_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
     }
   ]
 }
