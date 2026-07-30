@@ -5218,6 +5218,7 @@ void AceContainer::TerminateUIExtensionInner(int32_t code)
 void AceContainer::GetOriginalEventInfo(const EventPositionInfo& eventPositionInfo,
     EventPositionInfo& originalPos)
 {
+    CHECK_NULL_VOID(uiWindow_);
     Rosen::EventPositionInfo winEventPositionInfo {eventPositionInfo.displayX, eventPositionInfo.displayY};
     Rosen::EventPositionInfo winOriginalPos {eventPositionInfo.displayX, eventPositionInfo.displayY};
     uiWindow_->GetEventOriginalPosition(winEventPositionInfo, winOriginalPos);

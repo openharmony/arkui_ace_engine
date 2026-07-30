@@ -1108,6 +1108,10 @@ bool CreatePreparedInfoForDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
         NG::DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
         CHECK_NULL_RETURN(imageNode, false);
         data.imageNode = imageNode;
+        auto imageContext = data.imageNode->GetRenderContext();
+        if (imageContext) {
+            imageContext->MarkUiFirstNode(false);
+        }
         if (!subWindow) {
             subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
         }
