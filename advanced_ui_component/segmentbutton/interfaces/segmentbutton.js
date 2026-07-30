@@ -3587,7 +3587,7 @@ export class SegmentButton extends ViewPU {
     } else {
       setAnimatedPropertyFunc();
     }
-        this.updateButtonFont();
+    this.updateButtonFont();
   }
   updateButtonFont() {
     this.buttonItemsSelected.forEach((selected, index) => {
