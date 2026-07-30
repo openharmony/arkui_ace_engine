@@ -710,6 +710,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
             return;
         }
         jsView->needsUpdate_ = false;
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         {
             ACE_SCOPED_TRACE("JSView: ExecuteRerender");
             jsView->jsViewFunction_->ExecuteRerender();
@@ -864,6 +865,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
     auto clearAllRecycleFunc = [weak = AceType::WeakClaim(this)]() -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteClearAllRecycle();
     };
