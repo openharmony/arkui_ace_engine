@@ -1472,6 +1472,7 @@ void LayoutProperty::UpdateLocalizedAlignment(std::string value)
     if (!positionProperty_) {
         positionProperty_ = std::make_unique<PositionProperty>();
     }
+    positionProperty_->UpdateLocalizedAlignmentRaw(value);
     if (positionProperty_->UpdateLocalizedAlignment(value)) {
         propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_LAYOUT;
     }
@@ -2604,7 +2605,7 @@ void LayoutProperty::CheckLocalizedAlignment(const TextDirection& direction)
 {
     CHECK_NULL_VOID(GetPositionProperty());
     if (GetPositionProperty()->GetIsMirrorable().value_or(false)) {
-        auto localizedAlignment = GetPositionProperty()->GetLocalizedAlignment().value_or("center");
+        auto localizedAlignment = GetPositionProperty()->GetLocalizedAlignmentRaw().value_or("center");
         auto alignment = GetAlignmentStringFromLocalized(direction, localizedAlignment);
         GetPositionProperty()->UpdateLocalizedAlignment(alignment);
     }
