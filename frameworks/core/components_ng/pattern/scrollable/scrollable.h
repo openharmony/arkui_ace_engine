@@ -799,10 +799,7 @@ private:
     bool isDragUpdateStop_ = false;
     bool isFadingAway_ = false;
     bool isCrownDragging_ = false;
-    bool isWillFling_ = false;
-    bool isNeedFireDidStopFling_ = false;
     bool isTouchStopAnimation_ = false;
-    bool isDragOuterScrollBarStopAnimation_ = false;
     bool isUserFling_ = false;
     // The accessibilityId of UINode
     int32_t nodeId_ = 0;
@@ -882,6 +879,7 @@ private:
     float axisSnapDistance_ = 0.f;
     SnapDirection snapDirection_ = SnapDirection::NONE;
     bool isSlow_ = false;
+    bool isDragOuterScrollBarStopAnimation_ = false;
     std::optional<float> nextStep_;
     ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
 
