@@ -127,6 +127,7 @@ public:
         // set test values to Theme Pattern as data for the Theme building
         AddResource(RES_NAME, RESOURCE_OPACITY_BY_STRING);
         AddResource(RES_ID, RESOURCE_OPACITY_BY_NUMBER);
+        AddResource(FAKE_RES_ID, std::string("10px"));
     }
 
     void OnModifyDone()

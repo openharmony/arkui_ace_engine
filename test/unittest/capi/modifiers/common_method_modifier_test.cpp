@@ -204,6 +204,10 @@ public:
         render_ = fnode->GetRenderContext();
         ASSERT_NE(render_, nullptr);
         AddResource("bi_public_ok", "path_to_background_image");
+        AddResource(FAKE_RES_ID, std::string("10px"));
+        AddResource(FAKE_RES_ID_2, std::string("10px"));
+        AddResource(static_cast<int64_t>(11111), Color::RED);
+        AddResource(std::string("aa.bb.cc"), Color::RED);
     }
     void TearDown()
     {
