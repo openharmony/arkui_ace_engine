@@ -286,11 +286,6 @@ const char* FrameNode::GetPatternTypeName() const
     return "";
 }
 
-bool FrameNode::ShouldDetectAceObjTypeConvertion()
-{
-    return false;
-}
-
 void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
 {
     isLayoutDirtyMarked_ = true;
