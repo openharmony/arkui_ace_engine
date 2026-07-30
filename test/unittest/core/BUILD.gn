@@ -18,10 +18,15 @@ group("core_unittest") {
   deps = []
   if (is_host_product) {
     deps += [
+      "manager:content_change_manager_test_ng",
+      "manager:display_sync_manager_test_ng",
       "manager:full_screen_manager_test_ng",
       "base:core_base_unittest",
+      "common/others:thread_checker_test",
       "manager:page_scene_rule_manager_test_ng",
       "pattern:core_pattern_unittest",
+      "render:render_context_test_ng",
+      "render:render_property_test_ng",
       "syntax:core_syntax_unittest",
     ]
   } else {
