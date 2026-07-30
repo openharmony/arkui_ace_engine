@@ -178,8 +178,16 @@ docs/kb/
 | basic-attributes | 基础属性 | `docs/kb/capabilities/basic-attributes.md` | 新建 |
 | style-attributes | 样式属性（stateStyles + attributeModifier） | `docs/kb/capabilities/style-attributes.md` | 新建 |
 | multi-instance-management | 多实例管理 | `docs/kb/architecture/multi-instance-management.md` | 新建 |
-
 | OverlayCapability | 浮层能力 | `docs/kb/capabilities/overlay-capability.md` | 新建 |
+| FrameNode | FrameNode 节点 | `docs/kb/capabilities/frame_node.md` | 新建 |
+| RenderNode | RenderNode 绘制节点 | `docs/kb/capabilities/render_node.md` | 新建 |
+| BuilderNode | BuilderNode 构建节点 | `docs/kb/capabilities/builder_node.md` | 新建 |
+| ComponentContent | ComponentContent 组件内容 | `docs/kb/capabilities/component_content.md` | 新建 |
+| TypedFrameNode | TypedFrameNode 类型化节点 | `docs/kb/capabilities/typed_frame_node.md` | 新建 |
+| ComponentModifier | 组件 Modifier 类体系 | `docs/kb/capabilities/component_modifier.md` | 新建 |
+| DrawModifier | 自定义绘制回调 Modifier | `docs/kb/capabilities/draw_modifier.md` | 新建 |
+| AttributeModifier | 动态属性 Modifier 通路 | `docs/kb/capabilities/attribute_modifier.md` | 新建 |
+| CustomProperty | 自定义属性 | `docs/kb/capabilities/custom_property.md` | 新建 |
 
 ## 检索
 
