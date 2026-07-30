@@ -121,9 +121,10 @@ public:
     virtual void ResetListChildrenMainSize() {}
     virtual void SetScrollSnapAnimationSpeed(ScrollSnapAnimationSpeed speed) {}
     virtual void SetSupportEmptyBranchInLazyLoading(bool supportEmptyBranch) {}
-    virtual void SetBackPressCloseSwipeAction(bool closeSwipeAction) {}
     virtual void CreateWithResourceObjSpace(const RefPtr<ResourceObject>& resObj) {}
     virtual void CreateWithResourceObjScrollBarWidth(const RefPtr<ResourceObject>& resObj) {}
+
+    virtual void SetBackPressCloseSwipeAction(bool closeSwipeAction) {}
 private:
     static std::unique_ptr<ListModel> instance_;
     static std::mutex mutex_;
