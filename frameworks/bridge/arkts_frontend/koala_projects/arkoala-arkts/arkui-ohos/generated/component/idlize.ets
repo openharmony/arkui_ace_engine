@@ -22,14 +22,14 @@ import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from './alertDialog'
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, Bindable_WidthBreakpoint_serializer, Bindable_HeightBreakpoint_serializer, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, OnVisibleIndexesChangeCallback, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, LinearGradientOptions, RadialGradientOptions, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, LinearGradientOptions_serializer, RadialGradientOptions_serializer, EventTarget_serializer, TouchObject_serializer } from './common'
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, Bindable_WidthBreakpoint_serializer, Bindable_HeightBreakpoint_serializer, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, OnVisibleIndexesChangeCallback, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, Callback as arkui_component_common_Callback, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, LinearGradientOptions, RadialGradientOptions, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, LinearGradientOptions_serializer, RadialGradientOptions_serializer, EventTarget_serializer, TouchObject_serializer } from './common'
 import { extractors, TouchEvent, ContentModifier, XComponentController, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
 import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ItemFillPolicy_serializer, ItemFillPolicy, DrawingCanvas, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
 import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
 import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
-import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, CompetitionStrategy, Color as arkui_component_enums_Color, WidthBreakpoint, HeightBreakpoint, AnimationPropertyType, EventQueryType, RawInputEventType, HorizontalAlign, Curve, DialogDisplayMode, BorderStyle, TouchType, ColorSpace } from './enums'
+import { CrownSensitivity, BarState, ScrollSource, EdgeEffect, CompetitionStrategy, Color as arkui_component_enums_Color, WidthBreakpoint, HeightBreakpoint, AnimationPropertyType, EventQueryType, RawInputEventType, HorizontalAlign, CopyOptions, Curve, DialogDisplayMode, BorderStyle, TouchType, ColorSpace } from './enums'
 import { ScrollState, StickyStyle, UIListEvent, UIListEventInternal } from './list'
 import { SwipeActionOptions_serializer, SwipeActionOptions } from './listItem'
 import { ArcScrollBarOptions_serializer } from './../framework/ohos.arkui.ArcScrollBar'
@@ -81,6 +81,9 @@ import { TargetInfo_serializer } from './../framework/ohos.arkui.UIContext'
 import { common2D_Rect_serializer } from './../framework/ohos.graphics.common2D'
 import { RenderNode } from 'arkui.RenderNode'
 import { default as common2D } from '@ohos.graphics.common2D'
+import { SelectionContainerMenuOptions_serializer, SelectionContainerEditMenuOptions_serializer } from './../framework/ohos.arkui.components.SelectionContainer'
+import { SelectionContainerTextJoinStyle, SelectionContainerMenuOptions, SelectionContainerEditMenuOptions } from '@ohos.arkui.components.SelectionContainer'
+import { TextSpanType, TextResponseType } from './text'
 import { uiObserver_NavigationInfo_serializer } from './../framework/ohos.arkui.observer'
 import { default as uiObserver } from '@ohos.arkui.observer'
 import { UIGridEvent, UIGridEventInternal } from './grid'
@@ -6502,6 +6505,260 @@ export class SelectExtender {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._SelectExtender_setDivider(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export class SelectionContainerExtender {
+    public static selectionContainerConstructor(id: int32): KPointer {
+        const id_casted = id as (int32)
+        return SelectionContainerExtender.selectionContainerConstructor_serialize(id_casted)
+    }
+    public static setSelectionContainerOptions(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        SelectionContainerExtender.setSelectionContainerOptions_serialize(node_casted)
+        return
+    }
+    public static copyOption(node: KPointer, value?: CopyOptions): void {
+        const node_casted = node as (KPointer)
+        const value_casted = value as (CopyOptions | undefined)
+        SelectionContainerExtender.copyOption_serialize(node_casted, value_casted)
+        return
+    }
+    public static caretColor(node: KPointer, color?: ResourceColor): void {
+        const node_casted = node as (KPointer)
+        const color_casted = color as (ResourceColor | undefined)
+        SelectionContainerExtender.caretColor_serialize(node_casted, color_casted)
+        return
+    }
+    public static selectedBackgroundColor(node: KPointer, color?: ResourceColor): void {
+        const node_casted = node as (KPointer)
+        const color_casted = color as (ResourceColor | undefined)
+        SelectionContainerExtender.selectedBackgroundColor_serialize(node_casted, color_casted)
+        return
+    }
+    public static enableHapticFeedback(node: KPointer, isEnabled?: boolean): void {
+        const node_casted = node as (KPointer)
+        const isEnabled_casted = isEnabled as (boolean | undefined)
+        SelectionContainerExtender.enableHapticFeedback_serialize(node_casted, isEnabled_casted)
+        return
+    }
+    public static textJoinStyle(node: KPointer, style?: SelectionContainerTextJoinStyle): void {
+        const node_casted = node as (KPointer)
+        const style_casted = style as (SelectionContainerTextJoinStyle | undefined)
+        SelectionContainerExtender.textJoinStyle_serialize(node_casted, style_casted)
+        return
+    }
+    public static bindSelectionMenu(node: KPointer, spanType?: TextSpanType, content?: CustomBuilder, responseType?: TextResponseType, options?: SelectionContainerMenuOptions): void {
+        const node_casted = node as (KPointer)
+        const spanType_casted = spanType as (TextSpanType | undefined)
+        const content_casted = content as (CustomBuilder | undefined)
+        const responseType_casted = responseType as (TextResponseType | undefined)
+        const options_casted = options as (SelectionContainerMenuOptions | undefined)
+        SelectionContainerExtender.bindSelectionMenu_serialize(node_casted, spanType_casted, content_casted, responseType_casted, options_casted)
+        return
+    }
+    public static editMenuOptions(node: KPointer, options?: SelectionContainerEditMenuOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (SelectionContainerEditMenuOptions | undefined)
+        SelectionContainerExtender.editMenuOptions_serialize(node_casted, options_casted)
+        return
+    }
+    public static onTextSelectionChange(node: KPointer, callback?: arkui_component_common_Callback<Array<string>, void>): void {
+        const node_casted = node as (KPointer)
+        const callback_casted = callback as (arkui_component_common_Callback<Array<string>, void> | undefined)
+        SelectionContainerExtender.onTextSelectionChange_serialize(node_casted, callback_casted)
+        return
+    }
+    public static onWillCopy(node: KPointer, callback?: arkui_component_common_Callback<string, boolean>): void {
+        const node_casted = node as (KPointer)
+        const callback_casted = callback as (arkui_component_common_Callback<string, boolean> | undefined)
+        SelectionContainerExtender.onWillCopy_serialize(node_casted, callback_casted)
+        return
+    }
+    public static onCopy(node: KPointer, callback?: ((breakpoints: string) => void)): void {
+        const node_casted = node as (KPointer)
+        const callback_casted = callback as (((breakpoints: string) => void) | undefined)
+        SelectionContainerExtender.onCopy_serialize(node_casted, callback_casted)
+        return
+    }
+    private static selectionContainerConstructor_serialize(id: int32): KPointer {
+        const retval = ArkUIGeneratedNativeModule._SelectionContainerExtender_selectionContainerConstructor(id)
+        return retval
+    }
+    private static setSelectionContainerOptions_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._SelectionContainerExtender_setSelectionContainerOptions(node)
+    }
+    private static copyOption_serialize(node: KPointer, value?: CopyOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = (value as CopyOptions)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectionContainerExtender_copyOption(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static caretColor_serialize(node: KPointer, color?: ResourceColor): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (color !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const colorTmpValue = color!
+            if (colorTmpValue instanceof arkui_component_enums_Color) {
+                thisSerializer.writeInt8((0).toByte())
+                const colorTmpValueForIdx0 = colorTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((colorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (colorTmpValue instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const colorTmpValueForIdx1 = colorTmpValue as int32
+                thisSerializer.writeInt32(colorTmpValueForIdx1)
+            } else if (colorTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const colorTmpValueForIdx2 = colorTmpValue as string
+                thisSerializer.writeString(colorTmpValueForIdx2)
+            } else if (colorTmpValue instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const colorTmpValueForIdx3 = colorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, colorTmpValueForIdx3)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectionContainerExtender_caretColor(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static selectedBackgroundColor_serialize(node: KPointer, color?: ResourceColor): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (color !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const colorTmpValue = color!
+            if (colorTmpValue instanceof arkui_component_enums_Color) {
+                thisSerializer.writeInt8((0).toByte())
+                const colorTmpValueForIdx0 = colorTmpValue as arkui_component_enums_Color
+                thisSerializer.writeInt32((colorTmpValueForIdx0.getOrdinal()) % (12))
+            } else if (colorTmpValue instanceof int32) {
+                thisSerializer.writeInt8((1).toByte())
+                const colorTmpValueForIdx1 = colorTmpValue as int32
+                thisSerializer.writeInt32(colorTmpValueForIdx1)
+            } else if (colorTmpValue instanceof string) {
+                thisSerializer.writeInt8((2).toByte())
+                const colorTmpValueForIdx2 = colorTmpValue as string
+                thisSerializer.writeString(colorTmpValueForIdx2)
+            } else if (colorTmpValue instanceof arkui_component_units_Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const colorTmpValueForIdx3 = colorTmpValue as arkui_component_units_Resource
+                global_resource_Resource_serializer.write(thisSerializer, colorTmpValueForIdx3)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectionContainerExtender_selectedBackgroundColor(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static enableHapticFeedback_serialize(node: KPointer, isEnabled?: boolean): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (isEnabled !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isEnabledTmpValue = isEnabled!
+            thisSerializer.writeBoolean(isEnabledTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectionContainerExtender_enableHapticFeedback(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static textJoinStyle_serialize(node: KPointer, style?: SelectionContainerTextJoinStyle): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (style !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const styleTmpValue = (style as SelectionContainerTextJoinStyle)
+            thisSerializer.writeInt32(styleTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectionContainerExtender_textJoinStyle(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static bindSelectionMenu_serialize(node: KPointer, spanType?: TextSpanType, content?: CustomBuilder, responseType?: TextResponseType, options?: SelectionContainerMenuOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (spanType !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const spanTypeTmpValue = (spanType as TextSpanType)
+            thisSerializer.writeInt32(spanTypeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (content !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const contentTmpValue = content!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (responseType !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const responseTypeTmpValue = (responseType as TextResponseType)
+            thisSerializer.writeInt32(responseTypeTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            SelectionContainerMenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectionContainerExtender_bindSelectionMenu(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static editMenuOptions_serialize(node: KPointer, options?: SelectionContainerEditMenuOptions): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue = options!
+            SelectionContainerEditMenuOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectionContainerExtender_editMenuOptions(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static onTextSelectionChange_serialize(node: KPointer, callback?: arkui_component_common_Callback<Array<string>, void>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (callback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callbackTmpValue = callback!
+            thisSerializer.holdAndWriteCallback(callbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectionContainerExtender_onTextSelectionChange(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static onWillCopy_serialize(node: KPointer, callback?: arkui_component_common_Callback<string, boolean>): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (callback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callbackTmpValue = callback!
+            thisSerializer.holdAndWriteCallback(callbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectionContainerExtender_onWillCopy(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private static onCopy_serialize(node: KPointer, callback?: ((breakpoints: string) => void)): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        if (callback !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callbackTmpValue = callback!
+            thisSerializer.holdAndWriteCallback(callbackTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._SelectionContainerExtender_onCopy(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
