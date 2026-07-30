@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -314,6 +315,38 @@ ViewPosReference WaterFlowLayoutBase::CreateLazyChildViewPosReference(const RefP
         .axis = axis,
         .deadline = deadline,
     };
+}
+
+bool WaterFlowLayoutBase::ShouldReanchorLazyChildToStart(
+    double previousPos, double currentPos, float startBoundary, bool isCacheLayout) const
+{
+    return !isCacheLayout && !canOverScrollStart_ && LessOrEqual(previousPos, startBoundary) &&
+           GreatNotEqual(currentPos, startBoundary);
+}
+
+bool WaterFlowLayoutBase::AdjustLazyChildOffset(double& currentOffset, float contentStartOffset, float adjustStart,
+    float adjustEnd, bool includeEndOffset, bool isCacheLayout) const
+{
+    const double previousOffset = currentOffset;
+    currentOffset -= adjustStart;
+    currentOffset -= includeEndOffset ? adjustEnd : 0.0f;
+    const bool shouldReanchor =
+        ShouldReanchorLazyChildToStart(previousOffset, currentOffset, contentStartOffset, isCacheLayout);
+    if (shouldReanchor) {
+        currentOffset = contentStartOffset;
+    }
+    return shouldReanchor;
+}
+
+void WaterFlowLayoutBase::ConsumeLazyChildReanchorOffset(const RefPtr<LayoutWrapper>& child, int32_t index) const
+{
+    auto adjustOffset = WaterFlowLayoutUtils::GetAdjustOffset(child);
+    if (NearZero(adjustOffset.start) && NearZero(adjustOffset.end)) {
+        return;
+    }
+    TAG_LOGW(AceLogTag::ACE_WATERFLOW,
+        "Lazy child re-anchor did not converge. index:%{public}d, start:%{public}f, end:%{public}f", index,
+        adjustOffset.start, adjustOffset.end);
 }
 
 void WaterFlowLayoutBase::InitUnlayoutedItems()

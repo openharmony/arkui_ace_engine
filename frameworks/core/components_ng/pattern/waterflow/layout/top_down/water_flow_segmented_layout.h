@@ -151,6 +151,8 @@ private:
      */
     RefPtr<LayoutWrapper> MeasureItem(
         int32_t idx, std::pair<int32_t, float> position, float userDefMainSize, std::optional<int64_t> deadline) const;
+    void MeasureLazyLayoutItem(const RefPtr<LayoutWrapper>& item, int32_t segment, int32_t crossIndex,
+        float startMainPos, float userDefMainSize, std::optional<int64_t> deadline) const;
 
     /**
      * @brief Layout a FlowItem at [idx].
