@@ -4581,6 +4581,112 @@
       "last_verified": "2026-07-29"
     },
     {
+      "id": "InteractionAttributes",
+      "name": "Interaction Attributes",
+      "name_cn": "交互属性",
+      "kind": "common_capability",
+      "category": "interaction",
+      "keywords": [
+        "InteractionAttributes",
+        "交互属性",
+        "onClick",
+        "onTouch",
+        "onHover",
+        "onKeyEvent",
+        "onAxisEvent",
+        "enabled",
+        "clickEffect",
+        "AccessibilityHover"
+      ],
+      "aliases": [
+        "通用交互属性",
+        "CommonMethod 交互",
+        "输入事件属性",
+        "Interaction API"
+      ],
+      "kb": "docs/kb/capabilities/interaction-attributes.md",
+      "spec_domain": "specs/04-common-capability/03-common-attributes/04-interaction-attributes",
+      "func_id": "04-03-04",
+      "spec_status": "pending",
+      "source_paths": {
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "gesture_event_hub": "frameworks/core/components_ng/event/gesture_event_hub.cpp",
+        "event_hub": "frameworks/core/components_ng/event/event_hub.cpp",
+        "focus_hub": "frameworks/core/components_ng/event/focus_hub.cpp",
+        "dynamic_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier_dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/base/",
+        "test/unittest/core/event/gesture_event_hub_test_ng.cpp",
+        "test/unittest/core/event/event_hub_test_ng.cpp",
+        "test/unittest/core/event/focus_core/",
+        "test/unittest/capi/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
+      "id": "ComponentScreenshot",
+      "name": "Component Screenshot",
+      "name_cn": "组件截图",
+      "kind": "common_capability",
+      "category": "render",
+      "keywords": [
+        "ComponentScreenshot",
+        "组件截图",
+        "ComponentSnapshot",
+        "componentSnapshot",
+        "createFromBuilder",
+        "createFromComponent",
+        "getComponentSnapshot",
+        "SnapshotOptions",
+        "OH_ArkUI_GetNodeSnapshot",
+        "PixelMap"
+      ],
+      "aliases": [
+        "离屏截图",
+        "Offscreen Screenshot",
+        "节点截图",
+        "ComponentSnapshot API"
+      ],
+      "kb": "docs/kb/capabilities/component-screenshot.md",
+      "spec_domain": "specs/04-common-capability/10-component-screenshot/01-offscreen-screenshot",
+      "func_id": "04-10-01",
+      "spec_status": "pending",
+      "source_paths": {
+        "component_snapshot": "frameworks/core/components_ng/render/adapter/component_snapshot.cpp",
+        "snapshot_param": "frameworks/core/components_ng/render/snapshot_param.h",
+        "frontend_delegate": "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.cpp",
+        "napi": "interfaces/napi/kits/component_snapshot/",
+        "static_ani": "frameworks/core/interfaces/native/ani/component_snapshot_ani_modifier.cpp",
+        "capi": "interfaces/native/node/node_component_snapshot.cpp"
+      },
+      "api_paths": {
+        "dynamic_module": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.componentSnapshot.d.ts",
+        "dynamic_uicontext": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "static_uicontext": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets",
+        "static_module": "interfaces/ets/ani/componentSnapshot/ets/@ohos.arkui.componentSnapshot.ets",
+        "capi_node": "interfaces/native/native_node.h",
+        "capi_types": "interfaces/native/native_type.h"
+      },
+      "test_paths": [
+        "test/unittest/interfaces/node_component_snapshot_test.cpp",
+        "test/unittest/capi/accessors/component_snapshot_accessor_test.cpp",
+        "test/unittest/capi/stubs/mock_component_snapshot.cpp",
+        "test/unittest/core/rosen/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
       "id": "BasicRenderPipeline",
       "name": "Basic Render Pipeline",
       "name_cn": "基础渲染管线",

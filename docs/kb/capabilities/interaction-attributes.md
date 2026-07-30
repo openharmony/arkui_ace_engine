@@ -1,0 +1,74 @@
+# Interaction Attributes Context
+
+> 文档版本：v1.0
+> 更新时间：2026-07-30
+> 来源：`docs/context_registry.json` 主题 `InteractionAttributes`
+
+## 定位
+
+交互属性是 ArkUI 通用属性层中面向组件输入与反馈的能力集合。本主题聚焦指针/悬停与无障碍悬停、键盘/外设输入，以及组件可用性和点击反馈。
+
+命中测试、手势仲裁、焦点属性、拖拽以及弹窗/模态分别由独立主题维护。行为事实应以 SDK 声明、当前源码和测试为准。
+
+## 快速路由
+
+### 源码入口
+
+| 关注点 | 稳定路径 | 说明 |
+|--------|----------|------|
+| 通用属性分派 | `frameworks/core/components_ng/base/view_abstract.*` | 输入回调、enabled、点击反馈及声音反馈进入 NG 通用 View 的入口。 |
+| 手势与指针事件 | `frameworks/core/components_ng/event/gesture_event_hub.*` | 触摸、鼠标、悬停等通用事件配置的保存和分发入口。 |
+| 事件可用性 | `frameworks/core/components_ng/event/event_hub.*` | 组件事件可用状态入口。 |
+| 焦点与键盘输入 | `frameworks/core/components_ng/event/focus_hub.*` | 键盘、预输入法、dispatch 和焦点相关输入回调入口。 |
+| 动态 ArkTS NativeModule | `frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp` | CommonMethod 动态属性和事件桥接。 |
+| 兼容 JS 入口 | `frameworks/bridge/declarative_frontend/jsview/js_interactable_view.cpp` | 兼容 JS 交互回调解析入口。 |
+
+### API 入口
+
+| 范式 | 稳定路径 | 说明 |
+|------|----------|------|
+| 动态 ArkTS CommonMethod | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | 检索 `onClick`、`onTouch`、`onHover`、`onKeyEvent`、`enabled`、`clickEffect` 等。 |
+| 静态 ArkTS CommonMethod | `<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets` | 静态前端对应声明；需单独核对签名、可空性和 API 版本。 |
+| Dynamic Modifier | `<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts` | 通用属性 Modifier 声明入口。 |
+| Static Modifier | `<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets` | 静态 Modifier 声明入口。 |
+| C API | `interfaces/native/native_node.h` | 通用节点属性和事件的 NDK 入口。 |
+
+### 测试入口
+
+| 类型 | 稳定路径 | 用途 |
+|------|----------|------|
+| 通用 View 单测 | `test/unittest/core/base/view_abstract*_test*.cpp` | 定位通用属性、事件注册与可用性行为。 |
+| 手势事件单测 | `test/unittest/core/event/gesture_event_hub*_test*.cpp` | 定位触摸、悬停和手势事件 Hub 行为。 |
+| 事件 Hub 单测 | `test/unittest/core/event/event_hub_test_ng.cpp` | 定位 enabled 等 EventHub 行为。 |
+| 焦点单测 | `test/unittest/core/event/focus_core/` | 定位键盘与焦点输入分发。 |
+| C API 测试 | `test/unittest/capi/` | 检索通用节点和 Modifier 场景。 |
+
+### 相关 Spec
+
+| 功能域 | Spec 路径 | 说明 |
+|--------|-----------|------|
+| 交互属性 | `specs/04-common-capability/03-common-attributes/04-interaction-attributes/` | 指针/悬停、键盘/外设、enabled/点击反馈规格。 |
+| 手势能力 | `specs/04-common-capability/04-common-events/06-gesture-capability/` | 命中测试、手势绑定与仲裁边界。 |
+| 拖拽能力 | `specs/04-common-capability/04-common-events/07-drag-capability/` | draggable、DragEvent、预览和 Controller 路由。 |
+
+## 常见问题定位
+
+| 问题 | 优先查看 |
+|------|----------|
+| 动态与静态 ArkTS 的回调签名不一致 | 分别检查 `common.d.ts` 与 `common.static.d.ets`，不要用一侧声明替代另一侧。 |
+| 指针/悬停回调未触发 | 检查 `ViewAbstract`、`GestureEventHub`，再检查命中测试和手势能力主题。 |
+| 键盘或外设回调未触发 | 检查 FocusHub、当前焦点和目标设备输入能力。 |
+| enabled 后仍有异常输入 | 检查 EventHub 与 FocusHub 两个路径，而不是只检查视觉状态。 |
+| clickEffect 或声音反馈异常 | 检查 CommonMethod 声明、NativeModule 解析和 FrameNode/ViewAbstract 路由。 |
+
+## 调试入口
+
+- 使用 `rg -n "onClick|onHover|onKeyEvent|onAxisEvent|enabled|clickEffect" <OH_ROOT>/interface/sdk-js/api` 对照公开契约。
+- 使用 `rg -n "SetOnClick|SetOnHover|SetOnKeyEvent|SetEnabled|SetClickEffect" frameworks/core/components_ng` 回溯 NG 入口。
+- 使用 `rg -n "SetOn.*|ResetOn.*" frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp` 定位动态桥接。
+
+## 相关主题
+
+- `docs/kb/capabilities/drag-capability.md`
+- `docs/kb/capabilities/ui-context.md`
+- `docs/kb/architecture/drag-framework.md`
