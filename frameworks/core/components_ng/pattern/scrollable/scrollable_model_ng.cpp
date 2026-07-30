@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 
 #define SCROLLABLE_SCROLLABLE_ATTRIBUTE "Scrollable.ScrollableAttribute."
- 
+
 void ScrollableModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
     ACE_ENGINE_HISTOGRAM_ENUMERATION(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetEdgeEffect",
@@ -154,7 +154,6 @@ void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optio
 
 void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)
 {
-    ACE_ENGINE_HISTOGRAM_BOOLEAN(SCROLLABLE_SCROLLABLE_ATTRIBUTE "SetOnScroll", onScroll ? 1 : 0);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
