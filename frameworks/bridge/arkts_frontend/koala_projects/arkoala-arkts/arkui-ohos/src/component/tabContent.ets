@@ -40,24 +40,3 @@ export function TabContentImpl(
         }
     })
 }
-
-@memo
-export function TabContent(
-    @memo
-    style: ((attributes: TabContentAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
-): void {
-    const receiver = remember<ArkTabContentComponent>((): ArkTabContentComponent => {
-        return new ArkTabContentComponent()
-    })
-    NodeAttach<ArkTabContentPeer>((): ArkTabContentPeer => ArkTabContentPeer.create(receiver), (peer: ArkTabContentPeer): void => {
-        receiver.setPeer(peer)
-        style?.(receiver)
-        const peerPtr : pointer = receiver.getPeer().getPeerPtr()
-        receiver.setPeer(undefined)
-        if (content_) {
-            LazyBuild.SetTabContentLazyBuilder(peerPtr, content_!)
-        }
-    })
-}

@@ -1,0 +1,28 @@
+--- a/api/arkui/component/navigation.d.ets
++++ b/api/arkui/component/navigation.d.ets
+@@ -1572,6 +1572,14 @@
+   backgroundEffect?: BackgroundEffectOptions;
+ }
+ 
++// instructive change start
++export declare interface NavigationModuleInfo {
++    moduleName: string;
++    pagePath: string;
++    isUserCreateStack?: boolean;
++}
++// instructive change end
++
+ /**
+  * Navigation configuration options.
+  *
+@@ -1608,6 +1616,10 @@
+  * @since 23
+  */
+ export declare interface NavigationAttribute extends CommonMethod {
++  // instructive change start
++  setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this;
++  setNavigationOptions(pathInfos?: NavPathStack, homeDestination?: HomePathInfo, moduleInfo?: NavigationModuleInfo): this;
++  // instructive change end  
+   /**
+    * Sets the width of navigation bar.
+    *

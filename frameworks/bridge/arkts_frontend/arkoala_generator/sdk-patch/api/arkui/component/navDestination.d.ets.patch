@@ -1,0 +1,26 @@
+--- a/api/arkui/component/navDestination.d.ets
++++ b/api/arkui/component/navDestination.d.ets
+@@ -482,6 +482,13 @@
+   event: VoidCallback;
+ }
+ 
++// instructive change start
++export declare interface NavDestinationModuleInfo {
++    moduleName: string;
++    pagePath: string;
++}
++// instructive change end
++
+ /**
+  * Custom page state save callback.
+  *
+@@ -510,6 +517,9 @@
+  * @since 23
+  */
+ export declare interface NavDestinationAttribute extends CommonMethod {
++  // instructive change start
++  setNavDestinationOptions(moduleInfo?: NavDestinationModuleInfo | undefined): this;
++  // instructive change end  
+   /**
+    * NavDestination title bar
+    *
