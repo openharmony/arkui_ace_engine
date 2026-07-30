@@ -162,7 +162,7 @@ void ConfigureScrollBar(const std::unique_ptr<ScrollBarProperty>& property, Scro
     }
     const auto& barColor = property->GetScrollBarColor();
     if (barColor) {
-        bar.SetForegroundColor(*barColor, false);
+        bar.SetForegroundColor(*barColor);
     }
     const auto margin = property->GetScrollBarMargin().value_or(ScrollBar2D::DEFAULT_MARGIN);
     if (bar.GetScrollBarMargin() != margin) {
