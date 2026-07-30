@@ -22,8 +22,10 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_algorithm.h"
+#include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_property.h"
 #include "core/components_ng/pattern/lazy_layout/grid_layout/lazy_grid_layout_info.h"
+#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,11 +38,11 @@ class ACE_FORCE_EXPORT LazyGridLayoutPattern : public LazyLayoutPattern {
     DECLARE_ACE_TYPE(LazyGridLayoutPattern, LazyLayoutPattern);
 
 public:
-    LazyGridLayoutPattern()
+    explicit LazyGridLayoutPattern()
     {
         layoutInfo_ = AceType::MakeRefPtr<LazyGridLayoutInfo>();
     }
-    ~LazyGridLayoutPattern() override;
+    ~LazyGridLayoutPattern() override = default;
 
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
@@ -49,7 +51,10 @@ public:
         return false;
     }
 
-    RefPtr<LayoutProperty> CreateLayoutProperty() override;
+    RefPtr<LayoutProperty> CreateLayoutProperty() override
+    {
+        return MakeRefPtr<LazyGridLayoutProperty>();
+    }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
@@ -64,8 +69,10 @@ public:
     void BeforeCreateLayoutWrapper() override;
     void NotifyDataChange(int32_t index, int32_t count) override;
 
+    // 判断当前组件是否为 DynamicLayout
     bool IsDynamicLayout() const;
 
+    // DynamicLayout 支持：设置动态布局标志
     void SetDynamicLayoutOptions(bool isDynamic)
     {
         isDynamicLayout_ = isDynamic;
@@ -106,8 +113,17 @@ public:
     // Resolve the active sticky style (NONE / HEADER / FOOTER / BOTH); defaults to NONE.
     StickyStyle GetStickyStyle() const;
 
-    AdjustOffset GetAdjustOffset() const override;
-    AdjustOffset GetAndResetAdjustOffset() override;
+    AdjustOffset GetAdjustOffset() const override
+    {
+        return layoutInfo_->adjustOffset_;
+    }
+
+    AdjustOffset GetAndResetAdjustOffset() override
+    {
+        AdjustOffset ret = layoutInfo_->adjustOffset_;
+        layoutInfo_->adjustOffset_ = AdjustOffset();
+        return ret;
+    }
 
     void SetOnVisibleIndexesChange(std::function<void(int32_t, int32_t)>&& onVisibleIndexesChange)
     {
@@ -136,6 +152,7 @@ private:
     WeakPtr<UINode> header_;
     WeakPtr<UINode> footer_;
 
+    // DynamicLayout 标识
     bool isDynamicLayout_ = false;
     bool hasVisibleIndexesChangeFired_ = false;
     std::function<void(int32_t, int32_t)> onVisibleIndexesChange_;

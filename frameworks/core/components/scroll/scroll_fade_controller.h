@@ -18,6 +18,7 @@
 
 #include <functional>
 
+#include "base/geometry/axis.h"
 #include "base/thread/cancelable_callback.h"
 #include "core/animation/animation.h"
 #include "core/animation/animator.h"

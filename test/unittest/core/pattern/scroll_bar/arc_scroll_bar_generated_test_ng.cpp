@@ -14,7 +14,6 @@
  */
 
 #include "gtest/gtest.h"
-#include "core/components_ng/render/paint_wrapper.h"
 #define protected public
 #define private public
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"

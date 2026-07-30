@@ -14,7 +14,6 @@
  */
 
 #include "arc_list_test_ng.h"
-#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 
 namespace OHOS::Ace::NG {
 

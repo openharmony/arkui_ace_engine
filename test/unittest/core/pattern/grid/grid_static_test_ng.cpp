@@ -14,6 +14,7 @@
  */
 #include "grid_test_ng.h"
 
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_model_static.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
 

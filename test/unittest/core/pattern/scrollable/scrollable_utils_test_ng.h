@@ -19,8 +19,6 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "core/accessibility/accessibility_manager.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"

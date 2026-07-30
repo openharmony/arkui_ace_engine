@@ -69,7 +69,6 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     bool matchChildren = ShouldMatchChildrenByLayoutPolicy(mainSize, layoutPolicy, info_.axis_);
     Init(props);
-    CalculateContentClipFixOffset(wrapper_, mainSize, mainGap_);
 
     if (info_.targetIndex_) {
         MeasureToTarget();
@@ -81,7 +80,6 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     } else {
         MeasureOnOffset(mainSize);
     }
-    info_.SyncReportRange(mainSize, mainGap_);
 
     if (props->GetAlignItems().value_or(GridItemAlignment::DEFAULT) == GridItemAlignment::STRETCH) {
         GridLayoutBaseAlgorithm::AdjustChildrenHeight(layoutWrapper);
@@ -297,7 +295,7 @@ inline float GetPrevHeight(const GridLayoutInfo& info, float mainGap)
 
 void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
 {
-    float heightToFill = info_.GetViewEndBound(mainSize) - info_.currentOffset_ - GetPrevHeight(info_, mainGap_);
+    float heightToFill = mainSize - info_.currentOffset_ - GetPrevHeight(info_, mainGap_);
     if (Positive(heightToFill)) {
         GridIrregularFiller filler(&info_, wrapper_);
         filler.Fill({ crossLens_, crossGap_, mainGap_ }, heightToFill, info_.endMainLineIndex_);
@@ -306,8 +304,7 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
     GridLayoutRangeSolver solver(&info_, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
     UpdateStartInfo(info_, res);
-    auto [endMainLineIdx, endIdx] =
-        solver.SolveForwardForEndIdx(mainGap_, info_.GetViewEndBound(mainSize) - res.pos, res.row);
+    auto [endMainLineIdx, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - res.pos, res.row);
     info_.endMainLineIndex_ = endMainLineIdx;
     info_.endIndex_ = endIdx;
 
@@ -345,7 +342,7 @@ void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize, bool toAdjust
     }
     UpdateStartInfo(info_, res);
 
-    auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, info_.GetViewEndBound(mainSize) - res.pos, res.row);
+    auto [endLine, endIdx] = solver.SolveForwardForEndIdx(mainGap_, mainSize - res.pos, res.row);
     info_.endMainLineIndex_ = endLine;
     info_.endIndex_ = endIdx;
 }

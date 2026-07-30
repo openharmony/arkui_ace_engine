@@ -189,7 +189,10 @@ public:
     void NotifyDataChange(int32_t index, int32_t count) override;
 
     // ------------------------ Focus adapter --------------------------------
-    FocusPattern GetFocusPattern() const override;
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
     ScrollOffsetAbility GetScrollOffsetAbility(bool isAccessibility = false) override;
     std::function<bool(int32_t)> GetScrollIndexAbility() override;

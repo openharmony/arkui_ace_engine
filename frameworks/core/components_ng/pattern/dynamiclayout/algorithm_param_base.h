@@ -23,7 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/lazy_layout/lazy_layout_offset.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "ui/base/geometry/axis.h"
 #include "ui/properties/flex.h"
 
