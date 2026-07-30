@@ -63,6 +63,23 @@ const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Ace::FontWeight FONT_WEIGHT_VALUE = Ace::FontWeight::W100;
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
+
+class MarqueeTranslateSpyRenderContext final : public RenderContext {
+    DECLARE_ACE_TYPE(MarqueeTranslateSpyRenderContext, RenderContext);
+public:
+    OffsetF recordedTranslate { -1.0f, 0.0f };
+    int32_t updateCallCount = 0;
+    void UpdateTranslateInXY(const OffsetF& offset) override
+    {
+        recordedTranslate = offset;
+        updateCallCount++;
+    }
+    OffsetF GetTranslateXYProperty() override
+    {
+        return recordedTranslate;
+    }
+    void CancelTranslateXYAnimation() override {}
+};
 } // namespace
 
 struct TestProperty {
@@ -1665,6 +1682,62 @@ HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy023, TestSize.Lev
     pattern->StartMarqueeAnimation();
     offset = pattern->GetTextOffset(true);
     EXPECT_EQ(offset, 0.0f);
+}
+
+/**
+ * @tc.name: MarqueeTestUpdateStrategy024
+ * @tc.desc: Test short (non-scrollable) text is reset to start position when stop path runs without restart.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestUpdateStrategyNg, MarqueeTestUpdateStrategy024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create marquee frameNode with a text child and short-text geometry (text < marquee).
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto textChild =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 2, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    textChild->SetLayoutProperty(textLayoutProperty);
+    RefPtr<GeometryNode> marqueeGeo = AceType::MakeRefPtr<GeometryNode>();
+    marqueeGeo->SetFrameSize(SizeF(MARQUEE_WIDTH_500, MARQUEE_HEIGHT_100));
+    frameNode->SetGeometryNode(marqueeGeo);
+    RefPtr<GeometryNode> textGeo = AceType::MakeRefPtr<GeometryNode>();
+    textGeo->SetFrameSize(SizeF(CHILD_WIDTH_200, CHILD_HEIGHT_50));
+    textChild->SetGeometryNode(textGeo);
+    frameNode->AddChild(textChild);
+
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
+    frameNode->SetLayoutProperty(marqueeLayoutProperty);
+    RefPtr<MarqueePaintProperty> marqueePaintProperty = AceType::MakeRefPtr<MarqueePaintProperty>();
+    frameNode->paintProperty_ = marqueePaintProperty;
+    marqueePaintProperty->UpdatePlayerStatus(false);
+
+    /**
+     * @tc.steps: step2. Install a translate spy on the text child and prime a non-zero leftover scroll offset.
+     */
+    auto spy = AceType::MakeRefPtr<MarqueeTranslateSpyRenderContext>();
+    textChild->renderContext_ = spy;
+    spy->recordedTranslate = OffsetF(123.0f, 0.0f);
+    spy->updateCallCount = 0;
+
+    /**
+     * @tc.steps: step3. Short text => IsRunMarquee() false; trigger measure-changed stop path (user switch-text entry).
+     */
+    ASSERT_FALSE(pattern->IsRunMarquee());
+    pattern->measureChanged_ = true;
+    DirtySwapConfig config;
+    pattern->OnDirtyLayoutWrapperSwap(nullptr, config);
+
+    /**
+     * @tc.steps: step4. After stop without restart, non-scrollable text must be at start position (translate X == 0).
+     * @tc.expected: step4. recorded translate X == 0 and UpdateTranslateInXY was invoked.
+     */
+    EXPECT_EQ(spy->recordedTranslate.GetX(), 0.0f);
+    EXPECT_GE(spy->updateCallCount, 1);
 }
 
 /**
