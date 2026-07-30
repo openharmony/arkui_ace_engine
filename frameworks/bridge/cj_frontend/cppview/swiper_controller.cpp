@@ -14,9 +14,6 @@
  */
 
 #include "bridge/cj_frontend/cppview/swiper_controller.h"
-
-#include <inttypes.h>
-
 #include "core/components_v2/foreach/lazy_foreach_component.h"
 
 namespace OHOS::Ace::Framework {

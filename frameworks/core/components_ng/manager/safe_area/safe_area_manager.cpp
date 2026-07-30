@@ -14,7 +14,6 @@
  */
 #include "safe_area_manager.h"
 #include "core/common/container.h"
-#include "core/pipeline/container_window_manager.h"
 
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"

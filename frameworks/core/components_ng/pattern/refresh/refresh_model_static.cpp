@@ -16,7 +16,6 @@
 
 #include <string>
 
-#include "core/components_ng/base/modifier.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h"
 
 namespace OHOS::Ace::NG {

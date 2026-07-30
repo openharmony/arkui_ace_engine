@@ -24,7 +24,6 @@
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"

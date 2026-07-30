@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
 #include "offscreen_canvas_peer.h"
 #include "core/common/container_scope.h"
 #include "image_bitmap_peer_impl.h"

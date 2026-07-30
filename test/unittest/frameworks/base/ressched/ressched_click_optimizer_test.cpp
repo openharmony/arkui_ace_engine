@@ -20,7 +20,6 @@
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/property/accessibility_property.h"
-#include "core/pipeline/base/element_register.h"
 #undef private
 #undef protected
 

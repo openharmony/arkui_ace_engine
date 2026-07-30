@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/dialog/custom_dialog/bridge/custom_dialog_controller_static_peer_impl.h"
 
-#include "core/common/container.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model_static.h"
 #include "core/components_ng/pattern/overlay/level_order.h"

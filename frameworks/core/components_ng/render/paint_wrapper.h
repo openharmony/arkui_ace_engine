@@ -26,6 +26,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/render/paint_property.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::Kit {
@@ -34,8 +35,6 @@ class NodePaintMethod;
 
 namespace OHOS::Ace::NG {
 class NodePaintMethod;
-class ExtensionHandler;
-class RenderContext;
 
 // PaintWrapper are used to flush dirty render task.
 class ACE_FORCE_EXPORT PaintWrapper : public virtual AceType {
@@ -79,7 +78,10 @@ public:
         return geometryNode_;
     }
 
-    ACE_FORCE_EXPORT RefPtr<RenderContext> GetRenderContext() const;
+    RefPtr<RenderContext> GetRenderContext() const
+    {
+        return renderContext_.Upgrade();
+    }
 
     SizeF GetContentSize() const
     {
@@ -91,11 +93,26 @@ public:
         return geometryNode_->GetContentOffset();
     }
 
-    bool HasForegroundColor() const;
+    bool HasForegroundColor() const
+    {
+        auto renderContext = renderContext_.Upgrade();
+        CHECK_NULL_RETURN(renderContext, false);
+        return renderContext->HasForegroundColor();
+    }
 
-    bool HasForegroundColorStrategy() const;
+    bool HasForegroundColorStrategy() const
+    {
+        auto renderContext = renderContext_.Upgrade();
+        CHECK_NULL_RETURN(renderContext, false);
+        return renderContext->HasForegroundColorStrategy();
+    }
 
-    Color GetForegroundColor() const;
+    Color GetForegroundColor() const
+    {
+        auto renderContext = renderContext_.Upgrade();
+        CHECK_NULL_RETURN(renderContext, Color::FOREGROUND);
+        return renderContext->GetForegroundColor().value_or(Color::FOREGROUND);
+    }
 
     ACE_FORCE_EXPORT void FlushOverlayModifier();
 

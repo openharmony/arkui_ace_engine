@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/text/text_content_modifier.h"
-#include "core/common/container.h"
 #include <cstdint>
 #include <optional>
 #include "ui/common/layout/constants.h"

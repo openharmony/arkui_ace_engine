@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

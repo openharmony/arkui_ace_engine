@@ -111,26 +111,6 @@ bool FrameNode::IsAtomicNode() const
     return false;
 }
 
-bool FrameNode::HasPositionProp() const
-{
-    CHECK_NULL_RETURN(renderContext_, false);
-    return renderContext_->HasPosition() || renderContext_->HasOffset() || renderContext_->HasPositionEdges() ||
-           renderContext_->HasOffsetEdges() || renderContext_->HasAnchor();
-}
-
-bool FrameNode::IsOutOfLayout() const
-{
-    CHECK_NULL_RETURN(renderContext_, false);
-    return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
-}
-
-void FrameNode::UpdateOcclusionCullingStatus(bool enable)
-{
-    if (renderContext_) {
-        renderContext_->UpdateOcclusionCullingStatus(enable);
-    }
-}
-
 void FrameNode::AttachContext(PipelineContext* context, bool recursive)
 {
     (void)recursive;

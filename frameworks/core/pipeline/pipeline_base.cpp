@@ -42,7 +42,6 @@
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/pipeline/container_window_manager.h"
 
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"

@@ -14,7 +14,6 @@
  */
 
 #include "base/error/error_code.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"

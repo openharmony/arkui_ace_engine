@@ -19,7 +19,6 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
-#include "core/components_ng/render/render_context.h"
 
 namespace {
 constexpr unsigned int TOP_LEFT = 0;

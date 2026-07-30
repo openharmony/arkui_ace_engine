@@ -24,7 +24,6 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/radius.h"
 #include "base/memory/referenced.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
@@ -438,7 +437,6 @@ HWTEST_F(RectPatternTestNg, SetRadius001, TestSize.Level1)
     EXPECT_NE(pattern->resourceMgr_->resMap_.size(), 0);
     g_isConfigChangePerform = false;
 }
-
 /**
  * @tc.name: RectLpxAttribute001
  * @tc.desc: Test SetRadiusWidth/SetRadiusHeight with LPX unit registers LPX_RECT_RADIUS attributes.

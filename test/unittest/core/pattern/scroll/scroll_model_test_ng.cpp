@@ -19,7 +19,6 @@
 #include "ui/base/ace_type.h"
 
 #include "base/memory/ace_type.h"
-#include "core/common/container.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -1784,7 +1783,6 @@ HWTEST_F(ScrollModelNGTestNg, GetScrollSnapOptions, TestSize.Level1)
     EXPECT_EQ(snapOptions.enableSnapToStart, 1);
     EXPECT_EQ(snapOptions.enableSnapToEnd, 1);
 }
-
 /**
  * @tc.name: ScrollModelNGTestNgLpx001
  * @tc.desc: Verify intervalSize and snapPaginations keep independent LPX attributes.

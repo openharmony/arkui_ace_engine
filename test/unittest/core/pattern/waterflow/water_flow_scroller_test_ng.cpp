@@ -18,7 +18,6 @@
 
 #include "core/animation/velocity_motion.h"
 #include "core/components/common/layout/constants.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 

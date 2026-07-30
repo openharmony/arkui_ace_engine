@@ -22,10 +22,6 @@
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 namespace OHOS::Ace::NG {
 class PipelineContext;
-class AnimatablePropertyFloat;
-template<typename T, typename S>
-class NodeAnimatableProperty;
-using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 class TextPickerColumnPattern;
 
 class TextPickerTossAnimationController : public virtual AceType {
@@ -33,7 +29,7 @@ class TextPickerTossAnimationController : public virtual AceType {
 
 public:
     TextPickerTossAnimationController() = default;
-    ~TextPickerTossAnimationController();
+    ~TextPickerTossAnimationController() = default;
 
     void SetColumn(const WeakPtr<TextPickerColumnPattern>& value)
     {
@@ -51,7 +47,10 @@ public:
 
     bool Play();
 
-    RefPtr<NodeAnimatablePropertyFloat> GetTossNodeAnimation() const;
+    RefPtr<NodeAnimatablePropertyFloat> GetTossNodeAnimation() const
+    {
+        return property_;
+    }
 
     void StartSpringMotion();
 

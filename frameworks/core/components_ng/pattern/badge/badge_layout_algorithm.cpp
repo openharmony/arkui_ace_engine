@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/badge/badge_layout_algorithm.h"
-#include "core/common/container.h"
 
 #include "core/components/badge/badge_theme.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"

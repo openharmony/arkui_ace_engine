@@ -14,7 +14,6 @@
  */
 
 #include "core/common/visual_effect/transparency_utils.h"
-#include "core/common/container.h"
 
 #include "errors.h"
 #include "ui/properties/ui_material_enums.h"

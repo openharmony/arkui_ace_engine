@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/flex/flex_layout_algorithm.h"
-#include "core/common/container.h"
 
 #include "core/components_ng/pattern/blank/blank_layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"

@@ -14,9 +14,7 @@
  */
 
 #include "core/components_ng/pattern/list/list_pattern.h"
-
 #include <limits>
-#include "core/common/container.h"
 
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"

@@ -14,7 +14,6 @@
  */
 
 #include "core/interfaces/native/node/hyperlink_modifier.h"
-#include "core/common/container.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"

@@ -14,7 +14,6 @@
 */
 
 #include "base/utils/utf_helper.h"
-#include "core/common/container.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components/common/properties/text_style_gradient.h"
@@ -575,7 +574,6 @@ NG::LeadingMargin TLVUtil::ReadLeadingMargin(std::vector<uint8_t>& buff, int32_t
     }
     return l;
 }
-
 void TLVUtil::WriteGradientColors(std::vector<uint8_t>& buff, NG::Gradient& value)
 {
     WriteUint8(buff, TLV_SPAN_TEXT_LINE_STYLE_GRADIENT_COLORS);

@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "core/components_ng/base/modifier.h"
 
 #include <string_view>
 
@@ -65,8 +64,6 @@ double NormalizeToPx(const Dimension& dimension, PipelineContext* context)
     return context ? context->NormalizeToPx(dimension) : dimension.ConvertToPx();
 }
 } // namespace
-
-RefreshPattern::~RefreshPattern() = default;
 
 Dimension RefreshPattern::GetTriggerRefreshDisTance()
 {

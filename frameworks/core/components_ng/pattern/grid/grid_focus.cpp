@@ -111,9 +111,8 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusSimplified(FocusStep step, const RefPtr
             ctx->FlushUITaskWithSingleDirtyNode(host);
         }
         auto next = host->GetChildByIndex(idx);
-        if (!next || !(next->GetHostNode())) {
-            break;
-        }
+        CHECK_NULL_BREAK(next);
+        CHECK_NULL_BREAK(next->GetHostNode());
         auto nextFocus = next->GetHostNode()->GetFocusHub();
         if (nextFocus && nextFocus->IsFocusable()) {
             return nextFocus;
@@ -434,13 +433,9 @@ WeakPtr<FocusHub> GridFocus::SearchBigItemFocusableChildInCross(
         auto cross = main->second.find(tarCrossIndex);
         while (cross != main->second.end()) {
             auto next = host->GetChildByIndex(cross->second);
-            if (!next) {
-                break;
-            }
+            CHECK_NULL_BREAK(next);
             auto nextNode = next->GetHostNode();
-            if (!nextNode) {
-                break;
-            }
+            CHECK_NULL_BREAK(nextNode);
             auto nextFocus = nextNode->GetFocusHub();
             if (nextFocus && nextFocus->IsFocusable()) {
                 return nextFocus;

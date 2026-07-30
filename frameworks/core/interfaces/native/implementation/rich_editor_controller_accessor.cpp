@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_gradient.h"
 #include "core/components/common/properties/text_style_parser.h"

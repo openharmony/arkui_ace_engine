@@ -15,8 +15,6 @@
 
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
 
-#include "core/components_ng/render/paint_wrapper.h"
-
 namespace OHOS::Ace::NG {
 void ListItemGroupPaintMethod::PaintDivider(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {

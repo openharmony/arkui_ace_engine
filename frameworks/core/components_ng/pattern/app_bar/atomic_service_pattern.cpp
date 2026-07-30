@@ -14,7 +14,6 @@
  */
 #include "core/components_ng/pattern/app_bar/atomic_service_pattern.h"
 #include "core/common/container.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include <string>
 

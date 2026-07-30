@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "core/common/recorder/node_data_cache.h"
-#include "core/common/container.h"
 
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/common/recorder/event_recorder.h"
