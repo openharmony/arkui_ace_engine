@@ -18,6 +18,8 @@
 
 #include <string>
 
+#include "base/utils/macros.h"
+
 namespace OHOS::Ace {
 
 // theme attributes
