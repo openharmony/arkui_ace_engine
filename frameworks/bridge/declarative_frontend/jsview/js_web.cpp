@@ -2675,11 +2675,11 @@ void JSWeb::JSBind(BindingTarget globalObj)
 
 napi_value WrapNapiValue(napi_env env, const JSRef<JSVal>& obj, void* nativeValue)
 {
+    ArkNativeEngine* nativeEngine = reinterpret_cast<ArkNativeEngine*>(env);
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     CHECK_NULL_RETURN(obj->IsObject(), undefined);
-    ArkNativeEngine* nativeEngine = reinterpret_cast<ArkNativeEngine*>(env);
-    CHECK_NULL_RETURN(nativeEngine, undefined);
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
     ScopeRAII scope(env);
@@ -4558,8 +4558,14 @@ void WrapAISessionCallback(const JSRef<JSObject>& option, const std::string& fun
             return false;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
         auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+        if (!runtime) {
+            return false;
+        }
+        auto napi_status = napi_open_handle_scope(env, &scope);
+        if (napi_status != napi_ok) {
+            return false;
+        }
         auto adapter = runtime->NewFunction(
             [callback = std::move(callback)](shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
                     const std::vector<shared_ptr<JsValue>>& args, int32_t argc) -> shared_ptr<JsValue> {
@@ -4699,6 +4705,42 @@ std::function<void()> ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
     return nullptr;
 }
 
+void UpdateHapticFeedbackMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto previewMenuOptions = menuOptions->GetProperty("previewMenuOptions");
+    if (!previewMenuOptions->IsObject()) {
+        return;
+    }
+    auto previewMenuOptionsObj = JSRef<JSObject>::Cast(previewMenuOptions);
+    auto hapticFeedbackMode = previewMenuOptionsObj->GetProperty("hapticFeedbackMode");
+    if (hapticFeedbackMode->IsNumber()) {
+        auto mode = HapticFeedbackMode(hapticFeedbackMode->ToNumber<int32_t>());
+        if (mode >= HapticFeedbackMode::DISABLED && mode <= HapticFeedbackMode::AUTO) {
+            menuParam.hapticFeedbackMode = mode;
+        }
+    }
+}
+
+void ProcessPreviewMenu(const JSRef<JSObject>& menuOptions,
+    std::shared_ptr<WebPreviewSelectionMenuParam>& selectMenuParam,
+    const WeakPtr<NG::FrameNode>& frameNode, const JSCallbackInfo& info)
+{
+    NG::MenuParam& menuParam = selectMenuParam->menuParam;
+    auto menuType = menuOptions->GetProperty("menuType");
+    bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::DISABLED;
+    if (isPreviewMenu) {
+        menuParam.previewMode = MenuPreviewMode::CUSTOM;
+        UpdateHapticFeedbackMode(menuOptions, menuParam);
+
+        RefPtr<JsFunction> previewBuilderFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(menuOptions->GetProperty("preview")));
+        CHECK_NULL_VOID(previewBuilderFunc);
+        selectMenuParam->previewBuilder = JsWebNoArgNodeCallback(info.GetExecutionContext(),
+            std::move(previewBuilderFunc), frameNode, "BindSelectionMenuPreviwer");
+    }
+}
+
 void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args,
     std::shared_ptr<WebPreviewSelectionMenuParam>& selectMenuParam)
 {
@@ -4710,27 +4752,8 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     selectMenuParam->onMenuHide = ParseMenuCallback(frameNode, menuOptions, info, "onMenuHide");
 
     auto preview = menuOptions->GetProperty("preview");
-    if (!preview->IsFunction()) {
-        return;
-    }
-    NG::MenuParam& menuParam = selectMenuParam->menuParam;
-    auto menuType = menuOptions->GetProperty("menuType");
-    bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
-    menuParam.hapticFeedbackMode = HapticFeedbackMode::DISABLED;
-    if (isPreviewMenu) {
-        menuParam.previewMode = MenuPreviewMode::CUSTOM;
-        auto previewMenuOptions = menuOptions->GetProperty("previewMenuOptions");
-        if (previewMenuOptions->IsObject()) {
-            auto previewMenuOptionsObj = JSRef<JSObject>::Cast(previewMenuOptions);
-            auto hapticFeedbackMode = previewMenuOptionsObj->GetProperty("hapticFeedbackMode");
-            if (hapticFeedbackMode->IsNumber()) {
-                menuParam.hapticFeedbackMode = HapticFeedbackMode(hapticFeedbackMode->ToNumber<int32_t>());
-            }
-        }
-        RefPtr<JsFunction> previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
-        CHECK_NULL_VOID(previewBuilderFunc);
-        selectMenuParam->previewBuilder = JsWebNoArgNodeCallback(info.GetExecutionContext(),
-            std::move(previewBuilderFunc), frameNode, "BindSelectionMenuPreviwer");
+    if (preview->IsFunction()) {
+        ProcessPreviewMenu(menuOptions, selectMenuParam, frameNode, info);
     }
 }
 
@@ -8170,6 +8193,12 @@ void JSWeb::ScrollbarLayoutPolicy(const JSCallbackInfo& args)
 {
     RETURN_IF_CALLING_FROM_M132();
     if (args.Length() < 1 || !(args[0]->IsNumber())) {
+        return;
+    }
+    auto value = args[0]->ToNumber<int32_t>();
+    constexpr int32_t POLICY_MIN = static_cast<int32_t>(ScrollbarLayoutPolicy::CONTENT);
+    constexpr int32_t POLICY_MAX = static_cast<int32_t>(ScrollbarLayoutPolicy::CONTENT);
+    if (value < POLICY_MIN || value > POLICY_MAX) {
         return;
     }
     auto layoutPolicy = static_cast<enum ScrollbarLayoutPolicy>(args[0]->ToNumber<int32_t>());
