@@ -620,4 +620,40 @@ HWTEST_F(ScrollAccessibilityTestNg, ScrollA11ySourceBarFling001, TestSize.Level1
     EXPECT_EQ(pattern_->GetAccessibilityScrollSource(), "user");
 }
 
+/**
+ * @tc.name: ScrollA11yNoEventWhenNotOnMainTree001
+ * @tc.desc: Verify FireAccessibilityScrollEndEvent does NOT fire SCROLL_END
+ *           when the host node is not on the main tree (e.g., during page exit).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollAccessibilityTestNg, ScrollA11yNoEventWhenNotOnMainTree001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. While on main tree, FireAccessibilityScrollEndEvent
+     *           should fire SCROLL_END with the current source.
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    pattern_->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
+    pattern_->FireAccessibilityScrollEndEvent();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "user");
+
+    /**
+     * @tc.steps: step2. Remove from stage tree (simulate page exit).
+     * @tc.expected: IsOnMainTree() returns false; FireAccessibilityScrollEndEvent
+     *               does NOT fire SCROLL_END (event type stays UNKNOWN).
+     */
+    auto captured2 = CaptureSendAccessibilityEventInfo(pipeline);
+    RemoveFromStageNode();
+    EXPECT_FALSE(frameNode_->IsOnMainTree());
+    pattern_->FireAccessibilityScrollEndEvent();
+    EXPECT_NE(captured2->type, AccessibilityEventType::SCROLL_END);
+}
+
 } // namespace OHOS::Ace::NG

@@ -533,7 +533,7 @@ class ButtonModifier extends ButtonAttribute
 | List | `pattern/list/list_pattern.cpp` | - | 列表 |
 | ListItem | `pattern/list/list_item_pattern.cpp` | - | 列表项 |
 | ListItemGroup | `pattern/list/list_item_group_pattern.cpp` | - | 列表分组 |
-| Scroll | `pattern/scroll/scroll_pattern.cpp` | [Scroll](../pattern/scroll/Scroll_Knowledge_Base.md) | 滚动容器 |
+| Scroll | `pattern/scroll/scroll_pattern.cpp` | [Scroll](../kb/components/container/scroll.md) | 滚动容器 |
 | Swiper | `pattern/swiper/swiper_pattern.cpp` | - | 轮播 |
 | Tabs | `pattern/tabs/tabs_pattern.cpp` | - | 标签页 |
 | TabContent | `pattern/tabs/tab_content_pattern.cpp` | - | 标签页内容 |
@@ -542,7 +542,7 @@ class ButtonModifier extends ButtonAttribute
 | Navigation | `pattern/navigation/navigation_pattern.cpp` | - | 导航栏 |
 | NavDestination | `pattern/navigation/nav_destination_pattern.cpp` | - | 导航目标页 |
 | SideBarContainer | `pattern/side_bar/side_bar_container_pattern.cpp` | - | 侧边栏 |
-| Refresh | `pattern/refresh/refresh_pattern.cpp` | [Refresh](../pattern/refresh/Refresh_Knowledge_Base.md) | 下拉刷新 |
+| Refresh | `pattern/refresh/refresh_pattern.cpp` | [Refresh](../kb/components/container/refresh.md) | 下拉刷新 |
 | WaterFlow | `pattern/waterflow/water_flow_pattern.cpp` | [WaterFlow](../pattern/waterflow/WaterFlow_Knowledge_Base.md) | 瀑布流 |
 | FlowItem | `pattern/waterflow/water_flow_item_pattern.cpp` | - | 瀑布流子项 |
 | RelativeContainer | `pattern/relative_container/relative_container_pattern.cpp` | - | 相对布局 |

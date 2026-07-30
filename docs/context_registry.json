@@ -150,7 +150,7 @@
       "kb": "docs/kb/capabilities/safe-area.md",
       "spec_domain": "specs/04-common-capability/02-safe-area/01-safe-area-mechanism",
       "func_id": "04-02-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "insets": "frameworks/core/components_ng/property/safe_area_insets.cpp",
         "manager": "frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
@@ -424,7 +424,7 @@
       "kb": "docs/kb/components/container/column_split.md",
       "spec_domain": "specs/05-ui-components/01-layout-components/04-column-split",
       "func_id": "05-01-04",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/linear_split/linear_split_pattern.cpp",
         "layout": "frameworks/core/components_ng/pattern/linear_split/linear_split_layout_algorithm.cpp",
@@ -617,6 +617,130 @@
       "last_verified": "2026-07-18"
     },
     {
+      "id": "Grid",
+      "name": "Grid",
+      "name_cn": "网格布局组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "Grid",
+        "网格",
+        "网格布局",
+        "columnsTemplate",
+        "rowsTemplate",
+        "不规则布局",
+        "跨行列",
+        "自适应布局",
+        "可滚动网格",
+        "layoutOptions",
+        "虚拟滚动",
+        "GridItem",
+        "6种布局算法"
+      ],
+      "aliases": [
+        "Grid组件",
+        "网格布局",
+        "网格容器",
+        "滚动网格"
+      ],
+      "kb": "docs/kb/components/container/grid.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/04-grid-grid-item",
+      "func_id": "05-03-04",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/grid/grid_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/grid/grid_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/grid/grid_model_static.cpp",
+        "property": "frameworks/core/components_ng/pattern/grid/grid_layout_property.cpp",
+        "layout_info": "frameworks/core/components_ng/pattern/grid/grid_layout_info.cpp",
+        "layout_options": "frameworks/core/components_ng/pattern/grid/grid_layout_options.h",
+        "event_hub": "frameworks/core/components_ng/pattern/grid/grid_event_hub.h",
+        "focus": "frameworks/core/components_ng/pattern/grid/grid_focus.h",
+        "drag_manager": "frameworks/core/components_ng/pattern/grid/grid_item_drag_manager.h",
+        "adaptive": "frameworks/core/components_ng/pattern/grid/grid_adaptive/",
+        "static_layout": "frameworks/core/components_ng/pattern/grid/grid_layout/",
+        "scroll": "frameworks/core/components_ng/pattern/grid/grid_scroll/",
+        "irregular": "frameworks/core/components_ng/pattern/grid/irregular/",
+        "custom": "frameworks/core/components_ng/pattern/grid/grid_custom/",
+        "bridge": "frameworks/core/components_ng/pattern/grid/bridge/grid/arkts_native_grid_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/grid/bridge/grid/grid_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/grid/bridge/grid/grid_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/grid/bridge/grid/grid_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/grid_modifier.cpp",
+        "impl_modifier": "frameworks/core/interfaces/native/implementation/grid_modifier.cpp",
+        "capi_layout_option": "interfaces/native/node/grid_layout_option.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/grid.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/grid.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GridModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GridModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/grid/",
+        "test/unittest/core/pattern/grid/irregular/",
+        "test/unittest/core/pattern/grid/custom/",
+        "test/unittest/capi/modifiers/grid_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "GridItem",
+      "name": "GridItem",
+      "name_cn": "网格项组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "GridItem",
+        "网格项",
+        "rowStart",
+        "rowEnd",
+        "columnStart",
+        "columnEnd",
+        "selectable",
+        "selected",
+        "GridItemStyle",
+        "span",
+        "跨行列"
+      ],
+      "aliases": [
+        "GridItem组件",
+        "网格项",
+        "网格子项"
+      ],
+      "kb": "docs/kb/components/container/grid_item.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/04-grid-grid-item",
+      "func_id": "05-03-04",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/grid/grid_item_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/grid/grid_item_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/grid/grid_item_model_static.cpp",
+        "property": "frameworks/core/components_ng/pattern/grid/grid_item_layout_property.cpp",
+        "layout": "frameworks/core/components_ng/pattern/grid/grid_item_layout_algorithm.h",
+        "event_hub": "frameworks/core/components_ng/pattern/grid/grid_item_event_hub.h",
+        "bridge": "frameworks/core/components_ng/pattern/grid/bridge/griditem/arkts_native_grid_item_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/grid/bridge/griditem/grid_item_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/grid/bridge/griditem/grid_item_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/grid/bridge/griditem/grid_item_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/grid_item_modifier.cpp",
+        "impl_modifier": "frameworks/core/interfaces/native/implementation/grid_item_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/grid_item.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gridItem.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GridItemModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GridItemModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/grid/",
+        "test/unittest/capi/modifiers/grid_item_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
       "id": "RelativeContainer",
       "name": "RelativeContainer",
       "name_cn": "相对布局容器组件",
@@ -752,7 +876,7 @@
       "kb": "docs/kb/components/container/row_split.md",
       "spec_domain": "specs/05-ui-components/01-layout-components/10-row-split",
       "func_id": "05-01-10",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/linear_split/linear_split_pattern.cpp",
         "layout": "frameworks/core/components_ng/pattern/linear_split/linear_split_layout_algorithm.cpp",
@@ -973,7 +1097,7 @@
       "kb": "docs/kb/components/shape/shape.md",
       "spec_domain": "specs/05-ui-components/14-drawing-components/01-shape",
       "func_id": "05-14-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "shared_pattern": "frameworks/core/components_ng/pattern/shape/shape_pattern.cpp",
         "shared_model": "frameworks/core/components_ng/pattern/shape/shape_abstract_model_ng.cpp",
@@ -1041,7 +1165,7 @@
       "kb": "docs/kb/components/shape/canvas.md",
       "spec_domain": "specs/05-ui-components/14-drawing-components/02-canvas",
       "func_id": "05-14-02",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/canvas/canvas_pattern.cpp",
         "model": "frameworks/core/components_ng/pattern/canvas/canvas_model_ng.cpp",
@@ -1095,7 +1219,7 @@
       "kb": "docs/kb/components/shape/offscreen_canvas.md",
       "spec_domain": "specs/05-ui-components/14-drawing-components/03-offscreen-canvas",
       "func_id": "05-14-03",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/canvas/offscreen_canvas_pattern.cpp",
         "paint": "frameworks/core/components_ng/pattern/canvas/offscreen_canvas_paint_method.cpp",
@@ -1174,6 +1298,76 @@
       ],
       "status": "active",
       "last_verified": "2026-06-27"
+    },
+    {
+      "id": "RichEditor",
+      "name": "RichEditor",
+      "name_cn": "富文本编辑器组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "RichEditor",
+        "富文本",
+        "富文本编辑",
+        "rich editor",
+        "span",
+        "styled string",
+        "undo redo",
+        "caret",
+        "selection",
+        "IME",
+        "data detector",
+        "custom keyboard"
+      ],
+      "aliases": [
+        "RichEditor组件",
+        "富文本编辑器",
+        "富文本编辑",
+        "RichEditorPattern"
+      ],
+      "kb": "docs/kb/components/basic/rich_editor.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/02-rich-editor",
+      "func_id": "05-09-02",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_event_hub.cpp",
+        "gesture_event_hub": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_gesture_event_hub.cpp",
+        "base_controller": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_base_controller.cpp",
+        "controller": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_controller.cpp",
+        "styled_string_controller": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp",
+        "undo_manager": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.cpp",
+        "select_overlay": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_select_overlay.cpp",
+        "scroll_controller": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_scroll_controller.cpp",
+        "content_modifier": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_content_modifier.cpp",
+        "overlay_modifier": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.cpp",
+        "paint_method": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_paint_method.cpp",
+        "paragraph_manager": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_paragraph_manager.h",
+        "theme": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_theme.h",
+        "bridge": "frameworks/core/components_ng/pattern/rich_editor/bridge/arkts_native_rich_editor_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/rich_editor/bridge/rich_editor_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/rich_editor/bridge/rich_editor_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/rich_editor/bridge/rich_editor_dynamic_module.cpp",
+        "native_impl": "interfaces/native/node/rich_editor_native_impl.h",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/rich_editor.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/richEditor.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/RichEditorModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RichEditorModifier.static.d.ets",
+        "capi": "interfaces/native/node/rich_editor_native_impl.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/rich_editor/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
     },
     {
       "id": "Image",
@@ -1808,9 +2002,9 @@
         "event_hub": "frameworks/core/components_ng/pattern/swiper/swiper_event_hub.cpp",
         "arc_swiper": "frameworks/core/components_ng/pattern/swiper/arc_swiper_pattern.cpp",
         "node_modifier": "frameworks/core/interfaces/native/node/node_swiper_modifier.cpp",
-        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_swiper.cpp",
         "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/swiper_modifier.ts",
-        "native_enums": "interfaces/native/native_node.h"
+        "native_enums": "interfaces/native/native_node.h",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_swiper.cpp"
       },
       "api_paths": {
         "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/swiper.d.ts",
@@ -2733,6 +2927,495 @@
       "last_verified": "2026-07-14"
     },
     {
+      "id": "PlaceholderComponent",
+      "name": "Placeholder Component",
+      "name_cn": "占位组件",
+      "kind": "common_capability",
+      "category": "custom-node",
+      "keywords": [
+        "Placeholder",
+        "占位组件",
+        "自定义节点",
+        "NodeContainer",
+        "ContentSlot",
+        "占位"
+      ],
+      "aliases": [
+        "占位组件",
+        "Placeholder Component",
+        "占位"
+      ],
+      "kb": "docs/kb/capabilities/placeholder_component.md",
+      "spec_domain": "specs/04-common-capability/06-custom-node/01-placeholder-component",
+      "func_id": "04-06-01",
+      "spec_status": "active",
+      "source_paths": {
+        "node_container": "frameworks/core/components_ng/pattern/node_container/",
+        "content_slot": "frameworks/core/components_ng/syntax/content_slot_node.h"
+      },
+      "api_paths": {
+        "node_container_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/node_container.d.ts",
+        "content_slot_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/content_slot.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/node_container/",
+        "test/unittest/core/syntax/content_slot_syntax_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "NodeAdapter",
+      "name": "NodeAdapter",
+      "name_cn": "NodeAdapter 命令式懒渲染适配器",
+      "kind": "common_capability",
+      "category": "custom-node",
+      "keywords": [
+        "NodeAdapter",
+        "命令式",
+        "懒渲染",
+        "attachNodeAdapter",
+        "UINodeAdapter",
+        "FrameNode"
+      ],
+      "aliases": [
+        "NodeAdapter",
+        "NodeAdapter适配器",
+        "命令式适配器"
+      ],
+      "kb": "docs/kb/capabilities/node_adapter.md",
+      "spec_domain": "specs/04-common-capability/06-custom-node/06-node-adapter",
+      "func_id": "04-06-06",
+      "spec_status": "active",
+      "source_paths": {
+        "ts_runtime": "frameworks/bridge/declarative_frontend/ark_node/src/node_adapter.ts",
+        "jsi_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_adapter_bridge.cpp",
+        "native_impl": "frameworks/core/interfaces/native/node/node_adapter_impl.cpp",
+        "native_impl_header": "frameworks/core/interfaces/native/node/node_adapter_impl.h",
+        "vtable": "frameworks/core/interfaces/arkoala/arkoala_api.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/FrameNode.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/node_container/ui_node_adapter_test.cpp",
+        "test/unittest/core/interfaces/native/node/node_adapter_impl_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "ComponentReuseFramework",
+      "name": "Component Reuse Framework",
+      "name_cn": "组件复用框架",
+      "kind": "architecture",
+      "category": "reuse",
+      "keywords": [
+        "组件复用",
+        "Reuse",
+        "Recycle",
+        "OnRecycle",
+        "OnReuse",
+        "RecycleManager",
+        "RecycleDummyNode",
+        "reuseId",
+        "ReusePoolOwnership",
+        "preRender"
+      ],
+      "aliases": [
+        "组件复用框架",
+        "UINode 复用",
+        "Recycle Framework"
+      ],
+      "kb": "docs/kb/architecture/component_reuse_framework.md",
+      "spec_domain": "specs/04-common-capability/19-component-reuse/01-component-reuse-framework",
+      "func_id": "04-19-01",
+      "spec_status": "active",
+      "source_paths": {
+        "ui_node": "frameworks/core/components_ng/base/ui_node.h",
+        "ui_node_cpp": "frameworks/core/components_ng/base/ui_node.cpp",
+        "custom_node_base": "frameworks/core/components_ng/pattern/custom/custom_node_base.h",
+        "recycle_manager": "frameworks/core/components_ng/pattern/recycle_view/recycle_manager.h",
+        "recycle_dummy_node": "frameworks/core/components_ng/pattern/recycle_view/recycle_dummy_node.h",
+        "lazy_for_each_builder": "frameworks/core/components_ng/syntax/lazy_for_each_builder.h",
+        "for_each_base_node": "frameworks/core/components_ng/syntax/for_each_base_node.h",
+        "view_partial_update_model_ng": "frameworks/core/components_ng/base/view_partial_update_model_ng.cpp"
+      },
+      "api_paths": {
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/customComponent.static.d.ets",
+        "state_mgmt": "<OH_ROOT>/interface/sdk-js/api/arkui/component/StateManagement.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/custom/",
+        "test/unittest/core/pattern/custom_node_ext/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "AbilityComponent",
+      "name": "AbilityComponent",
+      "name_cn": "AbilityComponent 跨进程嵌入组件",
+      "kind": "component",
+      "category": "embedded",
+      "keywords": [
+        "AbilityComponent",
+        "WindowExtension",
+        "跨进程",
+        "嵌入",
+        "onConnect",
+        "onDisconnect",
+        "deprecated",
+        "SceneBoard"
+      ],
+      "aliases": [
+        "AbilityComponent",
+        "能力组件",
+        "跨进程嵌入组件"
+      ],
+      "kb": "docs/kb/components/embedded/ability_component.md",
+      "spec_domain": "specs/05-ui-components/12-embedded-display-components/02-ability-component",
+      "func_id": "05-12-02",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/ability_component/ability_component_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/ability_component/ability_component_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/ability_component/ability_component_model_ng.cpp",
+        "event_hub": "frameworks/core/components_ng/pattern/ability_component/ability_component_event_hub.h",
+        "layout": "frameworks/core/components_ng/pattern/ability_component/ability_component_layout_algorithm.cpp",
+        "render_property": "frameworks/core/components_ng/pattern/ability_component/ability_component_render_property.h",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_ability_component.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/ability_component.d.ts"
+      },
+      "test_paths": [],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "NodeContainer",
+      "name": "NodeContainer",
+      "name_cn": "NodeContainer 自定义占位组件",
+      "kind": "component",
+      "category": "custom-node",
+      "keywords": [
+        "NodeContainer",
+        "NodeController",
+        "makeNode",
+        "rebuild",
+        "命令式节点",
+        "FrameNode",
+        "nodePtr",
+        "占位组件",
+        "纹理导出"
+      ],
+      "aliases": [
+        "NodeContainer",
+        "节点容器",
+        "占位容器组件"
+      ],
+      "kb": "docs/kb/components/custom-node/node_container.md",
+      "spec_domain": "specs/05-ui-components/16-custom-placeholder-components/01-node-container",
+      "func_id": "05-16-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/node_container/node_container_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/node_container/node_container_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/node_container/node_container_model_ng.cpp",
+        "model_header": "frameworks/core/components_ng/pattern/node_container/node_container_model.h",
+        "event_hub": "frameworks/core/components_ng/pattern/node_container/node_container_event_hub.h",
+        "layout": "frameworks/core/components_ng/pattern/node_container/node_container_layout_algorithm.cpp",
+        "layout_header": "frameworks/core/components_ng/pattern/node_container/node_container_layout_algorithm.h",
+        "node": "frameworks/core/components_ng/pattern/node_container/node_container_node.cpp",
+        "node_header": "frameworks/core/components_ng/pattern/node_container/node_container_node.h",
+        "ts_controller": "frameworks/bridge/declarative_frontend/ark_node/src/node_controller.ts",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_node_container.cpp",
+        "native_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.cpp",
+        "modifier": "frameworks/core/interfaces/native/node/node_container_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/node_container.d.ts",
+        "controller_dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/NodeController.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/nodeContainer.static.d.ets",
+        "capi": "interfaces/native/node/node_container_modifier.cpp"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/node_container/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "ContentSlot",
+      "name": "ContentSlot",
+      "name_cn": "ContentSlot 自定义占位组件",
+      "kind": "component",
+      "category": "custom-node",
+      "keywords": [
+        "ContentSlot",
+        "NodeContent",
+        "addFrameNode",
+        "removeFrameNode",
+        "IsAdopted",
+        "UINode 语法节点",
+        "占位组件",
+        "XComponentType.NODE"
+      ],
+      "aliases": [
+        "ContentSlot",
+        "内容插槽",
+        "占位插槽组件"
+      ],
+      "kb": "docs/kb/components/custom-node/content_slot.md",
+      "spec_domain": "specs/05-ui-components/16-custom-placeholder-components/02-content-slot",
+      "func_id": "05-16-02",
+      "spec_status": "active",
+      "source_paths": {
+        "syntax_node": "frameworks/core/components_ng/syntax/content_slot_node.cpp",
+        "syntax_node_header": "frameworks/core/components_ng/syntax/content_slot_node.h",
+        "node_content": "frameworks/core/components_ng/syntax/node_content.cpp",
+        "node_content_header": "frameworks/core/components_ng/syntax/node_content.h",
+        "model": "frameworks/core/components_ng/syntax/content_slot_model_ng.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_content_slot.cpp",
+        "modifier": "frameworks/core/interfaces/native/node/node_content_modifier.cpp",
+        "extender_accessor": "frameworks/core/interfaces/native/implementation/node_content_extender_accessor.cpp",
+        "ani_modifier": "frameworks/core/interfaces/native/ani/content_slot_ani_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/content_slot.d.ts",
+        "nodecontent_dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/NodeContent.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/contentSlot.static.d.ets",
+        "capi": "interfaces/native/node/node_content_modifier.cpp"
+      },
+      "test_paths": [
+        "test/unittest/core/syntax/content_slot_syntax_test_ng.cpp",
+        "test/unittest/interfaces/extension_custom_node_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "RenderControl",
+      "name": "Render Control Syntax",
+      "name_cn": "渲染控制语法",
+      "kind": "feature",
+      "category": "syntax",
+      "keywords": [
+        "渲染控制",
+        "if else",
+        "ForEach",
+        "条件渲染",
+        "循环渲染",
+        "ForEachBaseNode",
+        "IfElseNode",
+        "branchId",
+        "id-based diff",
+        "语法节点"
+      ],
+      "aliases": [
+        "渲染控制语法",
+        "if/else",
+        "ForEach 语法",
+        "Render Control"
+      ],
+      "kb": "docs/kb/syntax/render_control.md",
+      "spec_domain": "specs/07-frontend/05-render-control/01-render-control-syntax",
+      "func_id": "07-05-01",
+      "spec_status": "active",
+      "source_paths": {
+        "if_else_node": "frameworks/core/components_ng/syntax/if_else_node.cpp",
+        "if_else_node_header": "frameworks/core/components_ng/syntax/if_else_node.h",
+        "for_each_node": "frameworks/core/components_ng/syntax/for_each_node.cpp",
+        "for_each_base_node": "frameworks/core/components_ng/syntax/for_each_base_node.h",
+        "if_else_model": "frameworks/core/components_ng/syntax/if_else_model_ng.cpp",
+        "for_each_model": "frameworks/core/components_ng/syntax/for_each_model_ng.cpp",
+        "js_if_else": "frameworks/bridge/declarative_frontend/jsview/js_if_else.cpp",
+        "js_foreach": "frameworks/bridge/declarative_frontend/jsview/js_foreach.cpp",
+        "arkoala_condition_scope": "frameworks/core/components_ng/syntax/arkoala_condition_scope.cpp",
+        "arkoala_for_each_node": "frameworks/core/components_ng/syntax/arkoala_for_each_node.h"
+      },
+      "api_paths": {
+        "if_static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/if.static.d.ets",
+        "foreach_dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/for_each.d.ts",
+        "foreach_static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/forEach.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/syntax/for_each_syntax_test_ng.cpp",
+        "test/unittest/core/syntax/arkoala_for_each_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "LazyForEach",
+      "name": "LazyForEach",
+      "name_cn": "LazyForEach 懒加载循环渲染",
+      "kind": "feature",
+      "category": "syntax",
+      "keywords": [
+        "LazyForEach",
+        "懒加载",
+        "按需渲染",
+        "IDataSource",
+        "DataChangeListener",
+        "onDatasetChange",
+        "cachedCount",
+        "三级缓存",
+        "虚拟滚动",
+        "keyGenerator",
+        "LazyForEachOptions"
+      ],
+      "aliases": [
+        "LazyForEach",
+        "懒循环",
+        "懒加载循环",
+        "LazyForEach 语法"
+      ],
+      "kb": "docs/kb/syntax/lazy_for_each.md",
+      "spec_domain": "specs/07-frontend/05-render-control/02-lazy-foreach",
+      "func_id": "07-05-02",
+      "spec_status": "active",
+      "source_paths": {
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.cpp",
+        "node": "frameworks/core/components_ng/syntax/lazy_for_each_node.cpp",
+        "node_header": "frameworks/core/components_ng/syntax/lazy_for_each_node.h",
+        "builder": "frameworks/core/components_ng/syntax/lazy_for_each_builder.cpp",
+        "builder_header": "frameworks/core/components_ng/syntax/lazy_for_each_builder.h",
+        "model": "frameworks/core/components_ng/syntax/lazy_for_each_model_ng.h",
+        "layout_wrapper": "frameworks/core/components_ng/syntax/lazy_layout_wrapper_builder.cpp",
+        "data_source_contract": "frameworks/core/components_v2/foreach/lazy_foreach_component.h",
+        "ani_modifier": "frameworks/core/interfaces/native/ani/lazy_for_each_node_ani_modifier.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/lazy_for_each.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/lazyForEach.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/syntax/lazy_for_each_model_test_ng.cpp",
+        "test/unittest/core/syntax/lazy_for_each_builder_syntax_test_ng.cpp",
+        "test/unittest/core/syntax/lazy_for_each_syntax_test_ng.cpp",
+        "test/unittest/core/syntax/arkoala_lazy_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "Repeat",
+      "name": "Repeat",
+      "name_cn": "Repeat 循环渲染与虚拟滚动",
+      "kind": "feature",
+      "category": "syntax",
+      "keywords": [
+        "Repeat",
+        "virtualScroll",
+        "template",
+        "templateId",
+        "RepeatVirtualScroll",
+        "RID 缓存",
+        "funcWithIndex",
+        "onMove",
+        "RepeatMemOptStrategy",
+        "虚拟滚动"
+      ],
+      "aliases": [
+        "Repeat",
+        "重复渲染",
+        "Repeat 语法",
+        "RepeatVirtualScroll"
+      ],
+      "kb": "docs/kb/syntax/repeat.md",
+      "spec_domain": "specs/07-frontend/05-render-control/03-repeat",
+      "func_id": "07-05-03",
+      "spec_status": "active",
+      "source_paths": {
+        "repeat_node": "frameworks/core/components_ng/syntax/repeat_node.cpp",
+        "repeat_node_header": "frameworks/core/components_ng/syntax/repeat_node.h",
+        "model": "frameworks/core/components_ng/syntax/repeat_model_ng.cpp",
+        "model_header": "frameworks/core/components_ng/syntax/repeat_model.h",
+        "vs2_node": "frameworks/core/components_ng/syntax/repeat_virtual_scroll_2_node.cpp",
+        "vs2_node_header": "frameworks/core/components_ng/syntax/repeat_virtual_scroll_2_node.h",
+        "vs2_caches": "frameworks/core/components_ng/syntax/repeat_virtual_scroll_2_caches.cpp",
+        "vs2_caches_header": "frameworks/core/components_ng/syntax/repeat_virtual_scroll_2_caches.h",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_repeat.cpp",
+        "ts_driver": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_repeat.ts",
+        "utils": "frameworks/core/components_ng/syntax/lazy_for_each_utils.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/repeat.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/repeat.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/syntax/repeat_test_ng.cpp",
+        "test/unittest/core/syntax/repeat_virtual_2_test_ng.cpp",
+        "test/unittest/core/syntax/repeat_virtual_2_caches_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "SameLayerRendering",
+      "name": "Same-Layer Rendering (Texture Export Producer)",
+      "name_cn": "同层渲染（纹理导出生产者）",
+      "kind": "common_capability",
+      "category": "rendering",
+      "keywords": [
+        "同层渲染",
+        "SameLayerRendering",
+        "纹理导出",
+        "TextureExport",
+        "BuilderNode",
+        "NodeRenderType",
+        "RENDER_TYPE_TEXTURE",
+        "RenderOptions",
+        "surfaceId",
+        "ExportTextureInfo",
+        "NodeContainer",
+        "RSTextureExport",
+        "DoTextureExport",
+        "子树纹理导出",
+        "buffer 生产者"
+      ],
+      "aliases": [
+        "同层渲染",
+        "纹理导出生产者",
+        "ArkUI 子树纹理导出",
+        "Same-Layer Rendering"
+      ],
+      "kb": "docs/kb/capabilities/same-layer-rendering.md",
+      "spec_domain": "specs/04-common-capability/18-on-device-rendering/01-same-layer-rendering",
+      "func_id": "04-18-01",
+      "spec_status": "active",
+      "source_paths": {
+        "trigger_arkts": "frameworks/bridge/declarative_frontend/jsview/js_base_node.cpp",
+        "trigger_capi": "frameworks/core/interfaces/native/implementation/builder_node_ops_accessor.cpp",
+        "native_enum": "frameworks/core/components/common/layout/constants.h",
+        "view_stack_processor": "frameworks/core/components_ng/base/view_stack_processor.cpp",
+        "export_texture_info": "frameworks/core/components_ng/export_texture_info/export_texture_info.h",
+        "ui_node": "frameworks/core/components_ng/base/ui_node.cpp",
+        "node_container_pattern": "frameworks/core/components_ng/pattern/node_container/node_container_pattern.cpp",
+        "node_container_layout_algorithm": "frameworks/core/components_ng/pattern/node_container/node_container_layout_algorithm.cpp",
+        "rosen_render_context": "frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+        "render_context_base": "frameworks/core/components_ng/render/render_context.cpp",
+        "string_utils": "frameworks/base/utils/string_utils.cpp",
+        "element_register": "frameworks/core/pipeline/base/element_register.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "pattern": "frameworks/core/components_ng/pattern/pattern.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/arkui/BuilderNode.d.ts",
+        "reexport": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.node.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/node_container/",
+        "test/unittest/core/rosen/rosen_render_context_test.cpp",
+        "test/unittest/core/rosen/rosen_render_context_test_new.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
       "id": "StateMgmtV1Core",
       "name": "State Management V1 Core",
       "name_cn": "V1 状态管理核心逻辑",
@@ -2986,7 +3669,7 @@
       "kb": "docs/kb/architecture/window-mechanism.md",
       "spec_domain": "specs/03-engine-framework/05-window-mechanism/01-window-mechanism",
       "func_id": "03-05-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "ui_content_interface": "interfaces/inner_api/ace/ui_content.h",
         "ui_content_impl": "adapter/ohos/entrance/ui_content_impl.cpp",
@@ -3361,7 +4044,7 @@
       "kb": "docs/kb/architecture/dfx/layout-boundary-display.md",
       "spec_domain": "specs/03-engine-framework/08-dfx-foundation/06-layout-boundary-display",
       "func_id": "03-08-06",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "gesture_debug_boundary_manager": "frameworks/core/components_ng/manager/gesture_debug/gesture_debug_boundary_manager.h",
         "debug_boundary_painter": "frameworks/core/components_ng/render/debug_boundary_painter.h",
@@ -3751,7 +4434,7 @@
       "kb": "docs/kb/components/overlay/sheet.md",
       "spec_domain": "specs/05-ui-components/07-modal-components/01-sheet-modal",
       "func_id": "05-07-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/sheet/sheet_presentation_pattern.cpp",
         "wrapper": "frameworks/core/components_ng/pattern/sheet/sheet_wrapper_pattern.cpp",
@@ -3798,7 +4481,7 @@
       "kb": "docs/kb/components/overlay/bind_tips.md",
       "spec_domain": "specs/04-common-capability/03-common-attributes/05-popup-attributes",
       "func_id": "04-03-05",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "bubble_pattern": "frameworks/core/components_ng/pattern/bubble/bubble_pattern.cpp",
         "bubble_layout": "frameworks/core/components_ng/pattern/bubble/bubble_layout_algorithm.cpp",
@@ -6347,6 +7030,512 @@
       ],
       "status": "active",
       "last_verified": "2026-07-27"
+    },
+    {
+      "id": "OverlayCapability",
+      "name": "Overlay Capability",
+      "name_cn": "浮层能力",
+      "kind": "common_capability",
+      "category": "system",
+      "keywords": [
+        "OverlayManager",
+        "浮层",
+        "overlay",
+        "addComponentContent",
+        "removeComponentContent",
+        "showComponentContent",
+        "hideComponentContent",
+        "addComponentContentWithOrder",
+        "openOrderOverlay",
+        "setOverlayManagerOptions",
+        "LevelOrder",
+        "LevelMode",
+        "OVERLAY_ETS_TAG",
+        "nodeIdOrderMap",
+        "orderNodesMap"
+      ],
+      "aliases": [
+        "浮层管理",
+        "OverlayManager",
+        "Overlay Capability"
+      ],
+      "kb": "docs/kb/capabilities/overlay-capability.md",
+      "spec_domain": "specs/04-common-capability/08-root-view/03-overlay-capability",
+      "func_id": "04-08-03",
+      "spec_status": "active",
+      "source_paths": {
+        "overlay_manager": "frameworks/core/components_ng/pattern/overlay/overlay_manager.h",
+        "overlay_manager_impl": "frameworks/core/components_ng/pattern/overlay/overlay_manager.cpp",
+        "overlay_options": "frameworks/core/components_ng/pattern/overlay/overlay_options.h",
+        "level_mode": "frameworks/core/components_ng/pattern/overlay/level_mode.h",
+        "level_order": "frameworks/core/components_ng/pattern/overlay/level_order.h",
+        "overlay_container_pattern": "frameworks/core/components_ng/pattern/overlay/overlay_container_pattern.cpp",
+        "dialog_manager_static": "frameworks/core/components_ng/pattern/overlay/dialog_manager_static.cpp",
+        "dialog_manager": "frameworks/core/components_ng/pattern/overlay/dialog_manager.cpp",
+        "js_bridge": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "napi": "interfaces/napi/kits/overlay/js_overlay.cpp",
+        "inner_api": "interfaces/inner_api/ace_kit/include/ui/view/overlay/overlay_manager.h",
+        "inner_api_impl": "interfaces/inner_api/ace_kit/src/view/overlay/overlay_manager_impl.cpp",
+        "ani": "interfaces/ets/ani/overlayManager/src/overlayManager.cpp",
+        "ani_params": "interfaces/ets/ani/overlayManager/src/overlay_params.h",
+        "level_order_accessor": "frameworks/core/interfaces/native/implementation/level_order_extender_accessor.cpp",
+        "tag_constants": "frameworks/core/components_v2/inspector/inspector_constants.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets",
+        "ani": "interfaces/ets/ani/overlayManager/ets/@ohos.overlayManager.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/overlay/overlay_manager_test_ng.cpp",
+        "test/unittest/core/pattern/overlay/overlay_manager_test_core.cpp",
+        "test/unittest/core/pattern/overlay/overlay_manager_testone_ng.cpp",
+        "test/unittest/core/pattern/overlay/overlay_manager_content_test_ng.cpp",
+        "test/unittest/core/pattern/overlay/overlay_manager_extend_test_ng.cpp",
+        "test/unittest/core/pattern/overlay/overlay_manager_test_update_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "Scroll",
+      "name": "Scroll",
+      "name_cn": "滚动容器组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "滚动",
+        "scroll",
+        "滚动容器",
+        "scrollable",
+        "scroll bar",
+        "滚动条",
+        "edge effect",
+        "边缘效果",
+        "nested scroll",
+        "嵌套滚动",
+        "scroll position",
+        "滚动位置",
+        "scroll to",
+        "scrollby"
+      ],
+      "aliases": [
+        "Scroll组件",
+        "滚动组件",
+        "滚动容器"
+      ],
+      "kb": "docs/kb/components/container/scroll.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/07-scroll",
+      "func_id": "05-03-07",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/scroll/scroll_pattern.h",
+        "base_pattern": "frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/scroll/scroll_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/scroll/scroll_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/scroll/scroll_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/scroll/scroll_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/scroll/scroll_event_hub.h",
+        "zoom": "frameworks/core/components_ng/pattern/scroll/zoom_controller.cpp",
+        "free_scroll": "frameworks/core/components_ng/pattern/scroll/free_scroll_controller.cpp",
+        "controller": "frameworks/core/components/scroll/scroll_position_controller.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_scroll_modifier.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_scroll.cpp",
+        "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/scroll_modifier.ts",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scroll.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ScrollModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ScrollModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/scroll/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "List",
+      "name": "List",
+      "name_cn": "列表组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "List",
+        "列表",
+        "滚动列表",
+        "ListItem",
+        "分组列表"
+      ],
+      "aliases": [
+        "List组件",
+        "列表容器",
+        "长列表"
+      ],
+      "kb": "docs/kb/components/container/list.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/05-list-list-item-list-item-group",
+      "func_id": "05-03-05",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/list/list_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/list/list_pattern.h",
+        "list_item_pattern": "frameworks/core/components_ng/pattern/list/list_item_pattern.cpp",
+        "list_item_group_pattern": "frameworks/core/components_ng/pattern/list/list_item_group_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/list/list_model_ng.cpp",
+        "item_model": "frameworks/core/components_ng/pattern/list/list_item_model_ng.cpp",
+        "group_model": "frameworks/core/components_ng/pattern/list/list_item_group_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/list/list_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/list/list_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/list/list_event_hub.h",
+        "controller": "frameworks/core/components_ng/pattern/list/list_position_controller.cpp",
+        "drag_manager": "frameworks/core/components_ng/pattern/list/list_item_drag_manager.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_list_modifier.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_list.cpp",
+        "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/list_modifier.ts",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/list.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/list.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/list/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "Refresh",
+      "name": "Refresh",
+      "name_cn": "下拉刷新组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "下拉刷新",
+        "pull to refresh",
+        "refresh",
+        "loading",
+        "加载中",
+        "刷新状态",
+        "自定义刷新UI",
+        "nested scroll",
+        "嵌套滚动",
+        "spring animation",
+        "弹簧动画"
+      ],
+      "aliases": [
+        "Refresh组件",
+        "下拉刷新",
+        "刷新组件"
+      ],
+      "kb": "docs/kb/components/container/refresh.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/06-refresh",
+      "func_id": "05-03-06",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/refresh/refresh_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/refresh/refresh_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/refresh/refresh_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/refresh/refresh_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/refresh/refresh_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/refresh/refresh_event_hub.h",
+        "bridge": "frameworks/core/components_ng/pattern/refresh/bridge/arkts_native_refresh_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/refresh/bridge/refresh_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_refresh_modifier.cpp",
+        "front_end": "frameworks/bridge/declarative_frontend/ark_direct_component/src/arkrefresh.ts",
+        "modifier_ts": "frameworks/bridge/declarative_frontend/ark_modifier/src/refresh_modifier.ts",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/refresh.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/refresh.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/RefreshModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RefreshModifier.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/refresh/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "ScrollBar",
+      "name": "ScrollBar",
+      "name_cn": "滚动条组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "ScrollBar",
+        "滚动条",
+        "scroll bar",
+        "滑块",
+        "滚动指示"
+      ],
+      "aliases": [
+        "ScrollBar组件",
+        "滚动条",
+        "Scrollbar"
+      ],
+      "kb": "docs/kb/components/container/scroll_bar.md",
+      "spec_domain": "specs/05-ui-components/03-scroll-container-components/03-scroll-bar",
+      "func_id": "05-03-03",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_layout_algorithm.cpp",
+        "property": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_layout_property.h",
+        "paint_property": "frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_paint_property.h",
+        "proxy": "frameworks/core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_scroll_bar_modifier.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.cpp",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll_bar.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scrollBar.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/scroll_bar/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "SymbolGlyph",
+      "name": "SymbolGlyph",
+      "name_cn": "符号字形组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "SymbolGlyph",
+        "符号字形",
+        "symbol",
+        "HMSymbol",
+        "矢量符号",
+        "SymbolEffect",
+        "renderingStrategy",
+        "fontColor",
+        "shaderStyle"
+      ],
+      "aliases": [
+        "SymbolGlyph组件",
+        "符号字体",
+        "符号图标"
+      ],
+      "kb": "docs/kb/components/basic/symbol-glyph.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/07-symbol-glyph",
+      "func_id": "05-09-07",
+      "spec_status": "active",
+      "source_paths": {
+        "model": "frameworks/core/components_ng/pattern/symbol/symbol_model_ng.cpp",
+        "model_header": "frameworks/core/components_ng/pattern/symbol/symbol_model_ng.h",
+        "static_model": "frameworks/core/components_ng/pattern/symbol/symbol_model_static.cpp",
+        "constants": "frameworks/core/components_ng/pattern/symbol/constants.h",
+        "source_info": "frameworks/core/components_ng/pattern/symbol/symbol_source_info.h",
+        "effect_options": "frameworks/core/components_ng/pattern/symbol/symbol_effect_options.h",
+        "shared_pattern": "frameworks/core/components_ng/pattern/text/text_pattern.cpp",
+        "shared_property": "frameworks/core/components_ng/pattern/text/text_layout_property.h",
+        "bridge_dir": "frameworks/core/components_ng/pattern/symbol/bridge/",
+        "capi_accessor": "frameworks/core/interfaces/native/node/node_symbol_glyph_modifier.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/symbolglyph.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/SymbolGlyph.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/SymbolGlyphModifier.d.ts",
+        "capi": "frameworks/core/interfaces/arkoala/arkoala_api.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/symbol/",
+        "test/unittest/capi/modifiers/symbol_glyph_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "TextInput",
+      "name": "TextInput",
+      "name_cn": "文本输入组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "TextInput",
+        "文本输入",
+        "单行输入",
+        "输入框",
+        "caret",
+        "selection",
+        "IME",
+        "键盘",
+        "autofill",
+        "inputFilter",
+        "maxLength",
+        "password"
+      ],
+      "aliases": [
+        "TextInput组件",
+        "文本输入框",
+        "输入控件",
+        "TextField"
+      ],
+      "kb": "docs/kb/components/basic/text-input.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/08-text-input",
+      "func_id": "05-09-08",
+      "spec_status": "active",
+      "source_paths": {
+        "shared_model": "frameworks/core/components_ng/pattern/text_field/text_field_model_ng.cpp",
+        "shared_model_header": "frameworks/core/components_ng/pattern/text_field/text_field_model_ng.h",
+        "static_model": "frameworks/core/components_ng/pattern/text_field/text_field_model_static.cpp",
+        "shared_pattern": "frameworks/core/components_ng/pattern/text_field/text_field_pattern.cpp",
+        "single_line_layout": "frameworks/core/components_ng/pattern/text_input/text_input_layout_algorithm.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/text_field/text_field_layout_property.h",
+        "paint_property": "frameworks/core/components_ng/pattern/text_field/text_field_paint_property.h",
+        "content_type": "frameworks/core/components_ng/pattern/text_field/text_content_type.h",
+        "event_hub": "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h",
+        "controller": "frameworks/core/components_ng/pattern/text_field/text_field_controller.h",
+        "accessibility": "frameworks/core/components_ng/pattern/text_field/text_field_accessibility_property.h",
+        "bridge_dir": "frameworks/core/components_ng/pattern/text_input/bridge/",
+        "capi_enums": "interfaces/native/node_attributes/text_input.h",
+        "native_node": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_input.d.ts",
+        "static": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/typedNode/ArkTextInputNode.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextInputModifier.d.ts",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/text_input/",
+        "test/unittest/capi/modifiers/text_input_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "Hyperlink",
+      "name": "Hyperlink",
+      "name_cn": "超链接组件",
+      "kind": "component",
+      "category": "basic",
+      "keywords": [
+        "Hyperlink",
+        "超链接",
+        "link",
+        "点击跳转",
+        "LinkToAddress",
+        "draggable",
+        "responseRegion",
+        "Udmf",
+        "address"
+      ],
+      "aliases": [
+        "Hyperlink组件",
+        "链接组件",
+        "超链接",
+        "HyperLink"
+      ],
+      "kb": "docs/kb/components/basic/hyperlink.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/09-hyperlink",
+      "func_id": "05-09-09",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/hyperlink/hyperlink_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/hyperlink/hyperlink_pattern.h",
+        "model": "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model_ng.cpp",
+        "model_header": "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model_ng.h",
+        "static_model": "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model_static.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/hyperlink/hyperlink_layout_property.h",
+        "theme": "frameworks/core/components/hyperlink/hyperlink_theme.h",
+        "bridge_dir": "frameworks/core/components_ng/pattern/hyperlink/bridge/",
+        "capi_accessor": "frameworks/core/interfaces/native/node/hyperlink_modifier.h",
+        "legacy_component": "frameworks/core/components/hyperlink/hyperlink_component.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/hyperlink.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/hyperlink.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/HyperlinkModifier.d.ts",
+        "capi": "frameworks/core/interfaces/arkoala/arkoala_api.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/hyperlink/",
+        "test/unittest/capi/modifiers/hyperlink_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "StyledString",
+      "name": "StyledString",
+      "name_cn": "属性字符串",
+      "kind": "common_capability",
+      "category": "api",
+      "keywords": [
+        "StyledString",
+        "MutableStyledString",
+        "属性字符串",
+        "SpanString",
+        "Span",
+        "TextStyle",
+        "DecorationStyle",
+        "ParagraphStyle",
+        "ImageAttachment",
+        "CustomSpan",
+        "UserDataSpan",
+        "TLV",
+        "LayoutManager"
+      ],
+      "aliases": [
+        "属性字符串",
+        "StyledString",
+        "Attributed String",
+        "SpanString",
+        "MutableStyledString"
+      ],
+      "kb": "docs/kb/capabilities/styled-string.md",
+      "spec_domain": "specs/05-ui-components/09-text-components/10-attributed-string",
+      "func_id": "05-09-10",
+      "spec_status": "active",
+      "source_paths": {
+        "span_string": "frameworks/core/components_ng/pattern/text/span/span_string.cpp",
+        "mutable_span_string": "frameworks/core/components_ng/pattern/text/span/mutable_span_string.cpp",
+        "span_object": "frameworks/core/components_ng/pattern/text/span/span_object.cpp",
+        "tlv_util": "frameworks/core/components_ng/pattern/text/span/tlv_util.cpp",
+        "hash_calculator": "frameworks/core/components_ng/pattern/text/span/span_group_hash_calculator.cpp",
+        "change_value": "frameworks/core/components_ng/pattern/text/styled_string_change_value.h",
+        "rich_editor_pattern": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
+        "rich_editor_controller": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h",
+        "undo_manager": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h",
+        "js_bridge_dir": "frameworks/bridge/declarative_frontend/style_string/",
+        "capi_accessor": "frameworks/core/interfaces/native/implementation/styled_string_accessor.cpp",
+        "ani_modifier": "frameworks/core/interfaces/native/ani/styled_string_ani_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/styled_string.d.ts",
+        "consumer_text_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_common.d.ts",
+        "consumer_text": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text.d.ts",
+        "consumer_rich_editor": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/rich_editor.d.ts",
+        "capi": "interfaces/native/native_styled_string.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/text/",
+        "test/unittest/core/pattern/rich_editor/",
+        "test/unittest/interfaces/native_styled_string_test.cpp",
+        "test/unittest/capi/accessors/styled_string_accessor_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
     },
     {
       "id": "TextCommonAttributes",
