@@ -9326,6 +9326,255 @@
       ],
       "status": "active",
       "last_verified": "2026-07-29"
+    },
+    {
+      "id": "Progress",
+      "name": "Progress",
+      "name_cn": "进度条组件",
+      "kind": "component",
+      "category": "data_display",
+      "keywords": [
+        "Progress",
+        "进度条",
+        "progress bar",
+        "进度显示",
+        "加载进度"
+      ],
+      "aliases": [
+        "Progress组件",
+        "进度组件",
+        "进度条"
+      ],
+      "kb": "docs/kb/components/data_display/progress.md",
+      "func_id": "05-10-05",
+      "spec_domain": "specs/05-ui-components/10-information-display-components/05-progress",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/progress/progress_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/progress/progress_model_ng.cpp",
+        "layout": "frameworks/core/components_ng/pattern/progress/progress_layout_algorithm.cpp",
+        "paint_method": "frameworks/core/components_ng/pattern/progress/progress_paint_method.cpp",
+        "paint_property": "frameworks/core/components_ng/pattern/progress/progress_paint_property.h",
+        "bridge": "frameworks/core/components_ng/pattern/progress/bridge/arkts_native_progress_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/progress/bridge/progress_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/progress/bridge/progress_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/progress/bridge/progress_dynamic_module.cpp",
+        "custom_modifier": "frameworks/core/components_ng/pattern/progress/bridge/progress_custom_modifier.h",
+        "c_api_option": "interfaces/native/node/progress_option.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/progress.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/progress.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ProgressModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ProgressModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/progress/",
+        "test/unittest/capi/modifiers/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "QRCode",
+      "name": "QRCode",
+      "name_cn": "二维码组件",
+      "kind": "component",
+      "category": "data_display",
+      "keywords": [
+        "QRCode",
+        "二维码",
+        "qrcode",
+        "编码",
+        "扫码"
+      ],
+      "aliases": [
+        "QRCode组件",
+        "二维码",
+        "扫码"
+      ],
+      "kb": "docs/kb/components/data_display/qrcode.md",
+      "func_id": "05-10-06",
+      "spec_domain": "specs/05-ui-components/10-information-display-components/06-qrcode",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/qrcode/qrcode_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/qrcode/qrcode_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/qrcode/qrcode_model_static.cpp",
+        "layout": "frameworks/core/components_ng/pattern/qrcode/qrcode_layout_algorithm.cpp",
+        "paint": "frameworks/core/components_ng/pattern/qrcode/qrcode_paint_method.cpp",
+        "modifier": "frameworks/core/components_ng/pattern/qrcode/qrcode_modifier.cpp",
+        "paint_property": "frameworks/core/components_ng/pattern/qrcode/qrcode_paint_property.h",
+        "theme_wrapper": "frameworks/core/components_ng/pattern/qrcode/qrcode_theme_wrapper.h",
+        "bridge": "frameworks/core/components_ng/pattern/qrcode/bridge/arkts_native_qrcode_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/qrcode/bridge/qrcode_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/qrcode/bridge/qrcode_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/qrcode/bridge/qrcode_dynamic_module.cpp",
+        "napi": "frameworks/core/components_ng/pattern/qrcode/qrcode_napi.cpp",
+        "ark_component": "frameworks/core/components_ng/pattern/qrcode/arkui_qrcode.js",
+        "node_modifier": "frameworks/core/interfaces/native/node/qrcode_modifier.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/qrcode.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/qrcode.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/QRCodeModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/QRCodeModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/qrcode/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "TextClock",
+      "name": "TextClock",
+      "name_cn": "文本时钟组件",
+      "kind": "component",
+      "category": "data_display",
+      "keywords": [
+        "时钟",
+        "text clock",
+        "时间显示",
+        "数字时钟",
+        "timezone",
+        "时区",
+        "时间格式"
+      ],
+      "aliases": [
+        "TextClock组件",
+        "时钟",
+        "文本时钟"
+      ],
+      "kb": "docs/kb/components/data_display/text-clock.md",
+      "func_id": "05-10-07",
+      "spec_domain": "specs/05-ui-components/10-information-display-components/07-text-clock",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/text_clock/text_clock_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/text_clock/text_clock_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/text_clock/text_clock_model_static.cpp",
+        "impl_model": "frameworks/core/components_ng/pattern/text_clock/text_clock_model_impl.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/text_clock/text_clock_layout_property.h",
+        "layout_algorithm": "frameworks/core/components_ng/pattern/text_clock/text_clock_layout_algorithm.cpp",
+        "event_hub": "frameworks/core/components_ng/pattern/text_clock/text_clock_event_hub.h",
+        "accessibility": "frameworks/core/components_ng/pattern/text_clock/text_clock_accessibility_property.cpp",
+        "multithread": "frameworks/core/components_ng/pattern/text_clock/text_clock_pattern_multi_thread.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/text_clock/bridge/arkts_native_text_clock_bridge.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/text_clock/bridge/text_clock_dynamic_module.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/text_clock_modifier.cpp",
+        "controller": "frameworks/core/components/text_clock/text_clock_controller.h",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_clock.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textClock.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextClockModifier.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/text_clock/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "TextTimer",
+      "name": "TextTimer",
+      "name_cn": "文本计时器组件",
+      "kind": "component",
+      "category": "data_display",
+      "keywords": [
+        "计时器",
+        "text timer",
+        "倒计时",
+        "定时器",
+        "stopwatch",
+        "计时",
+        "elapsed time"
+      ],
+      "aliases": [
+        "TextTimer组件",
+        "计时器",
+        "文本计时器"
+      ],
+      "kb": "docs/kb/components/data_display/text-timer.md",
+      "func_id": "05-10-08",
+      "spec_domain": "specs/05-ui-components/10-information-display-components/08-text-timer",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/texttimer/text_timer_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/texttimer/text_timer_model_ng.cpp",
+        "static_model": "frameworks/core/components_ng/pattern/texttimer/text_timer_model_static.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/texttimer/text_timer_layout_property.h",
+        "layout_algorithm": "frameworks/core/components_ng/pattern/texttimer/text_timer_layout_algorithm.cpp",
+        "event_hub": "frameworks/core/components_ng/pattern/texttimer/text_timer_event_hub.h",
+        "accessibility": "frameworks/core/components_ng/pattern/texttimer/text_timer_accessibility_property.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/texttimer/bridge/arkts_native_text_timer_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/texttimer/bridge/text_timer_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/texttimer/bridge/text_timer_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/texttimer/bridge/text_timer_dynamic_module.cpp",
+        "content_modifier_helper": "frameworks/core/components_ng/pattern/texttimer/bridge/text_timer_content_modifier_helper.h",
+        "controller": "frameworks/core/components/texttimer/texttimer_controller.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_timer.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textTimer.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextTimerModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextTimerModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/text_timer/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
+    },
+    {
+      "id": "Badge",
+      "name": "Badge",
+      "name_cn": "徽标组件",
+      "kind": "component",
+      "category": "data_display",
+      "keywords": [
+        "徽标",
+        "badge",
+        "标记",
+        "数字标记",
+        "红点",
+        "角标",
+        "notification",
+        "通知标记"
+      ],
+      "aliases": [
+        "Badge组件",
+        "徽标",
+        "标记组件"
+      ],
+      "kb": "docs/kb/components/data_display/badge.md",
+      "func_id": "05-10-09",
+      "spec_domain": "specs/05-ui-components/10-information-display-components/09-badge",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/badge/badge_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/badge/badge_model_ng.cpp",
+        "layout_algorithm": "frameworks/core/components_ng/pattern/badge/badge_layout_algorithm.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/badge/badge_layout_property.h",
+        "accessibility": "frameworks/core/components_ng/pattern/badge/badge_accessibility_property.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/badge/bridge/arkts_native_badge_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/badge/bridge/badge_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/badge/bridge/badge_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/badge/bridge/badge_dynamic_module.cpp",
+        "theme": "frameworks/core/components/badge/badge_theme.h",
+        "theme_wrapper": "frameworks/core/components_ng/pattern/badge/badge_theme_wrapper.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/badge.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/badge.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/badge/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-29"
     }
   ]
 }
