@@ -2268,7 +2268,6 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     if (this.isBackgroundSystemMaterialEnabled() && !this.tempDisableAnimation) {
       if (this.isTapGesture) {
         this.openSelectedItemSystemMaterial = false;
-        this.isTapGesture = false;
       } else {
         this.getUIContext().animateTo(
           {
@@ -2281,6 +2280,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
         );
       }
     }
+    this.isTapGesture = false;
   }
   updateItemScale(scale) {
     if (this.itemScale === scale) {

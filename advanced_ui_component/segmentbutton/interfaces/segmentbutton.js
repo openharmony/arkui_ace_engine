@@ -3553,41 +3553,43 @@ export class SegmentButton extends ViewPU {
           : (this.options.fontColor ?? segmentButtonTheme.FONT_COLOR);
       });
     };
-    if (curve) {
-      if (this.options.backgroundSystemMaterial) {
-        if (this.isTapGesture) {
-          this.openSelectedItemSystemMaterial = true;
-          this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
-          this.openSelectedItemSystemMaterial = false;
-          this.isTapGesture = false;
-        } else {
-          this.getUIContext().animateTo(
-            {
-              curve: curves.interpolatingSpring(0, 1, 195, 14),
-            },
-            () => {
-              this.selectedItemScale = { x: 1.01, y: 0.99 };
-              this.openSelectedItemSystemMaterial = true;
-            }
-          );
-          this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
-          this.getUIContext().animateTo(
-            {
-              curve: curves.interpolatingSpring(0, 1, 195, 14),
-              delay: 200,
-            },
-            () => {
-              this.openSelectedItemSystemMaterial = false;
-            }
-          );
-        }
-      } else {
+    if (!curve) {
+      setAnimatedPropertyFunc();
+      this.updateButtonFont();
+      this.isTapGesture = false;
+      return;
+    }
+    if (this.options.backgroundSystemMaterial) {
+      if (this.isTapGesture) {
+        this.openSelectedItemSystemMaterial = true;
         this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
+        this.openSelectedItemSystemMaterial = false;
+      } else {
+        this.getUIContext().animateTo(
+          {
+            curve: curves.interpolatingSpring(0, 1, 195, 14),
+          },
+          () => {
+            this.selectedItemScale = { x: 1.01, y: 0.99 };
+            this.openSelectedItemSystemMaterial = true;
+          }
+        );
+        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
+        this.getUIContext().animateTo(
+          {
+            curve: curves.interpolatingSpring(0, 1, 195, 14),
+            delay: 200,
+          },
+          () => {
+            this.openSelectedItemSystemMaterial = false;
+          }
+        );
       }
     } else {
-      setAnimatedPropertyFunc();
+      this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
     }
     this.updateButtonFont();
+    this.isTapGesture = false;
   }
   updateButtonFont() {
     this.buttonItemsSelected.forEach((selected, index) => {

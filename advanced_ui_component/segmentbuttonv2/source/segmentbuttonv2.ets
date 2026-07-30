@@ -1221,7 +1221,6 @@ struct SimpleSegmentButtonV2 {
     if (this.isBackgroundSystemMaterialEnabled() && !this.tempDisableAnimation) {
       if (this.isTapGesture) {
         this.openSelectedItemSystemMaterial = false;
-        this.isTapGesture = false;
       } else {
         this.getUIContext().animateTo({
           curve: curves.interpolatingSpring(0, 1, 195, 14),
@@ -1231,6 +1230,7 @@ struct SimpleSegmentButtonV2 {
         });
       }
     }
+    this.isTapGesture = false;
   }
 
   private updateItemScale(scale: number) {
@@ -1434,7 +1434,7 @@ export struct MultiCapsuleSegmentButtonV2 {
           .layoutWeight(1)
           .padding(0)
           .onClick(() => {
-            this.onItemClicked?.(repeatItem.index);
+                        this.onItemClicked?.(repeatItem.index);
             let selection: number[];
             const items = this.getItems();
             const selectedIndexes = this.selectedIndexes ?? [];
