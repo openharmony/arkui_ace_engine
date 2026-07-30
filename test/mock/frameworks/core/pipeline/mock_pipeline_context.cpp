@@ -1976,12 +1976,6 @@ void PipelineContext::ChangeSensitiveNodes(bool flag)
 {
 }
 
-bool PipelineContext::GetIsRequestVsync()
-{
-    CHECK_NULL_RETURN(window_, false);
-    return window_->GetIsRequestVsync();
-}
-
 } // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace {
