@@ -1626,4 +1626,30 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperOnScrollStateChanged(ArkUIRuntim
     GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperOnScrollStateChanged(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+ArkUINativeModuleValue SwiperBridge::SetSwiperIgnoreHiddenItem(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
+    if (valueArg->IsBoolean()) {
+        bool ignoreHiddenItem = valueArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperIgnoreHiddenItem(nativeNode, ignoreHiddenItem);
+    } else {
+        GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperIgnoreHiddenItem(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue SwiperBridge::ResetSwiperIgnoreHiddenItem(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_NODE_INDEX);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperIgnoreHiddenItem(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

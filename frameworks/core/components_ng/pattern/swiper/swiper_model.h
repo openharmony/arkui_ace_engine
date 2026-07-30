@@ -245,6 +245,7 @@ public:
     virtual void SetFillType(int32_t fillType) {}
     virtual void ResetFillType() {}
     virtual void ResetDisplayCountWithObject() {}
+    virtual void SetIgnoreHiddenItem(bool ignoreHiddenItem) {}
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

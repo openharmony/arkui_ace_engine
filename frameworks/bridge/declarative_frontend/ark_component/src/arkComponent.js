@@ -21522,6 +21522,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperOnScrollStateChangedModifier.identity, SwiperOnScrollStateChangedModifier, value);
     return this;
   }
+  ignoreHiddenItem(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperIgnoreHiddenItemModifier.identity, SwiperIgnoreHiddenItemModifier, value);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -22234,6 +22238,22 @@ class SwiperOnScrollStateChangedModifier extends ModifierWithKey {
   }
 }
 SwiperOnScrollStateChangedModifier.identity = Symbol('swiperOnScrollStateChanged');
+class SwiperIgnoreHiddenItemModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperIgnoreHiddenItem(node);
+    } else {
+      getUINativeModule().swiper.setSwiperIgnoreHiddenItem(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperIgnoreHiddenItemModifier.identity = Symbol('swiperIgnoreHiddenItem');
 // @ts-ignore
 if (globalThis.Swiper !== undefined) {
   globalThis.Swiper.attributeModifier = function (modifier) {
