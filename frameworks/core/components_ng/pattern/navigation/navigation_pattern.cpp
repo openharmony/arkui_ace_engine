@@ -1559,6 +1559,16 @@ void NavigationPattern::UpdateNavPathList()
             }
             continue;
         }
+        // Check preload item: match by name and paramString
+        auto paramString = navigationStack_->GetStringifyParamByIndex(arrayIndex);
+        uiNode = navigationStack_->GetFromPreloadItem(pathName, paramString);
+        if (uiNode) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find in preload item, navigation stack use preloaded node, "
+                "index: %{public}d, removeSize: %{public}d, name: %{public}s.", index, removeSize, pathName.c_str());
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            InitPreloadNodeInfo(index, uiNode);
+            continue;
+        }
         if (isPageForceSet) {
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
             continue;
@@ -5172,6 +5182,33 @@ void NavigationPattern::ProcessAutoSave(const RefPtr<FrameNode>& node)
     container->RequestAutoSave(node);
 }
 
+void NavigationPattern::InitPreloadNodeInfo(int32_t index, const RefPtr<UINode>& uiNode)
+{
+    CHECK_NULL_VOID(uiNode);
+    CHECK_NULL_VOID(navigationStack_);
+    navigationStack_->InitPreloadInfoByIndex(index, uiNode);
+    uiNode->SetFreeze(true, true);
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(uiNode));
+    CHECK_NULL_VOID(navDestinationNode);
+    auto onStart = [weakPattern = WeakClaim(this)]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnStartOneTransitionAnimation();
+    };
+    navDestinationNode->SetOnStartTransitionAnimationCallback(std::move(onStart));
+    // set navigation id
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestinationNode->GetPattern());
+    if (navigationNode && navDestinationPattern) {
+        navDestinationPattern->SetNavigationNode(navigationNode);
+        navDestinationPattern->SetNavigationId(navigationNode->GetInspectorId().value_or(""));
+    }
+    auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnWillAppear();
+}
+
 void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
     NavDestinationLifecycle lifecycle, NavDestLifecycleReason reason)
 {
@@ -5578,6 +5615,9 @@ void NavigationPattern::OnWindowHide()
     auto navigationPattern = hostNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
     navigationPattern->SyncWithJsStackIfNeeded();
+    CHECK_NULL_VOID(navigationStack_);
+    navigationStack_->PreloadItemOnDestroy();
+    navigationStack_->RemovePreloadItem();
 }
 
 void NavigationPattern::NotifyPerfMonitorPageMsg(const std::string& pageName)
