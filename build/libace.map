@@ -28,8 +28,6 @@
       "OHOS::Ace::NG::AvoidInfoManager::NeedAvoidContainerModal()";
       "OHOS::Ace::NG::AvoidInfoManager::RemoveAvoidInfoListener(OHOS::Ace::WeakPtr<OHOS::Ace::NG::IAvoidInfoListener>)";
       "OHOS::Ace::NG::ContentChangeManager::OnDialogChangeEnd(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, bool)";
-      "OHOS::Ace::NG::ContentRootPattern::BeforeCreateLayoutWrapper()";
-      "virtual thunk to OHOS::Ace::NG::ContentRootPattern::BeforeCreateLayoutWrapper()";
       "OHOS::Ace::NG::NavDestinationPattern::GetTitlebarZIndex() const";
       "OHOS::Ace::NG::NavigationManager::FireOverlayLifecycle(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, int, int)";
       "OHOS::Ace::NG::NodeAnimatableProperty<float, OHOS::Ace::NG::AnimatablePropertyFloat>::SetPropertyUnit(OHOS::Ace::PropertyUnit)";
@@ -1943,8 +1941,6 @@
       "OHOS::Ace::NG::PaddingPropertyF::Height() const";
       "OHOS::Ace::NG::PaddingPropertyF::Offset() const";
       "OHOS::Ace::NG::PaddingPropertyF::Width() const";
-      "OHOS::Ace::NG::ContentRootPattern::BeforeCreateLayoutWrapper()";
-      "virtual?thunk?to?OHOS::Ace::NG::ContentRootPattern::BeforeCreateLayoutWrapper*";
       "OHOS::Ace::NG::PaddingPropertyT<OHOS::Ace::NG::CalcLength> OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::PaddingPropertyT<OHOS::Ace::NG::CalcLength>, Ark_Padding>(Ark_Padding const&)";
       "OHOS::Ace::NG::PaddingPropertyT<OHOS::Ace::NG::CalcLength> OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::PaddingPropertyT<OHOS::Ace::NG::CalcLength>, Ark_Resource>(Ark_Resource const&)";
       "OHOS::Ace::NG::PaddingPropertyT<OHOS::Ace::NG::CalcLength> OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::PaddingPropertyT<OHOS::Ace::NG::CalcLength>, InteropNumber>(InteropNumber const&)";
@@ -3874,7 +3870,6 @@
       "OHOS::Ace::V2::ARC_INDEXER_ETS_TAG";
       "OHOS::Ace::V2::SYMBOL_ETS_TAG";
       "OHOS::Ace::V2::SYMBOL_SPAN_ETS_TAG";
-      "OHOS::Ace::V2::TOGGLE_ETS_TAG";
       "OHOS::Ace::V2::TEXT_ETS_TAG";
       "OHOS::Ace::V2::VIDEO_ETS_TAG";
       "OHOS::Ace::V2::WaterFlowComponent::SetColumnsArgs(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
@@ -4536,8 +4531,6 @@
       OHOS::Ace::NG::SmartGestureProposal::GetTargetNode*;
       OHOS::Ace::EventManager::GetOrCreateSmartGestureManager*;
       OHOS::Ace::NG::StageManager::*;
-      OHOS::Ace::NG::ToggleButtonPattern::*;
-      OHOS::Ace::NG::ToggleButtonModelNG::*;
       OHOS::Ace::NG::UIExtensionAdapter::*;
       OHOS::Ace::NG::UIExtensionStatic::*;
       OHOS::Ace::NG::UINode::*;
@@ -4803,7 +4796,6 @@
       virtual?thunk?to?OHOS::Ace::RenderElement::~RenderElement*;
       virtual?thunk?to?OHOS::Ace::SpanString::~SpanString*;
       virtual?thunk?to?OHOS::Ace::V2::InspectorComposedElement::~InspectorComposedElement*;
-      virtual?thunk?to?OHOS::Ace::NG::ContentRootPattern::BeforeCreateLayoutWrapper*;
       void?OHOS::Ace::StringUtils::StringSplitter*;
       void?OHOS::Ace::StringUtils::TransformStrCase*;
       void?OHOS??Ace??NG??Converter??AssignCast?OHOS??Ace??Alignment??Ark?Alignment??std????h??optional?OHOS??Ace??Alignment????Ark?Alignment?const??;

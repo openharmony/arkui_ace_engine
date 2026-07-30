@@ -1276,8 +1276,8 @@ async loadMoreData() {
 ### 相关组件文档
 
 - [WaterFlow 组件知识库](../../kb/components/container/waterflow.md)
-- [List 组件知识库](../list/List_Knowledge_Base.md)（待创建）
-- [Grid 组件知识库](../grid/Grid_Knowledge_Base.md)（待创建）
+- [List Context](../../kb/components/container/list.md)
+- [Grid Context](../../kb/components/container/grid.md)
 
 ### 版本历史
 

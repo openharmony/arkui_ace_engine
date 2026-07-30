@@ -1946,14 +1946,19 @@ export struct SegmentButton {
         .onActionEnd((event: GestureEvent) => {
           this.isGestureInProgress = false;
           if (this.options === void 0 || this.options.buttons === void 0) {
+            this.isPanGestureMoved = false
+            this.swipeHandled = false
             return
           }
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-            // Non drag gesture in multi-select mode
+            this.isPanGestureMoved = false
+            this.swipeHandled = false
             return
           }
           let fingerInfo = event.fingerList.find(Boolean)
           if (fingerInfo === void 0) {
+            this.isPanGestureMoved = false
+            this.swipeHandled = false
             return
           }
           if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(fingerInfo.globalX,
@@ -1969,6 +1974,8 @@ export struct SegmentButton {
                 this.zoomScaleArray[this.selectedIndexes[0]] = 1
               })
               this.isCurrentPositionSelected = false;
+              this.isPanGestureMoved = false
+              this.swipeHandled = false
               return;
             }
             this.swipeHandled = true; // 标记已处理，SwipeGesture 将跳过
@@ -2006,6 +2013,8 @@ export struct SegmentButton {
               this.zoomScaleArray[this.selectedIndexes[0]] = 1
             })
             this.isCurrentPositionSelected = false;
+            this.isPanGestureMoved = false
+            this.swipeHandled = false
             return;
           }
 
@@ -2053,19 +2062,27 @@ export struct SegmentButton {
             })
           }
           this.isCurrentPositionSelected = false
+          this.isPanGestureMoved = false
+          this.swipeHandled = false
         })
         .onActionCancel(() => {
           this.isGestureInProgress = false;
           if (this.options === void 0 || this.options.buttons === void 0) {
+            this.isPanGestureMoved = false
+            this.swipeHandled = false
             return
           }
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+            this.isPanGestureMoved = false
+            this.swipeHandled = false
             return
           }
           animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
             this.zoomScaleArray[this.selectedIndexes[0]] = 1
           })
           this.isCurrentPositionSelected = false
+          this.isPanGestureMoved = false
+          this.swipeHandled = false
           if (this.isBackgroundSystemMaterialEnabled()) {
             this.finishSelectMaterialAnimation();
           }

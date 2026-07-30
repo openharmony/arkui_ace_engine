@@ -36,8 +36,8 @@ const curves = requireNativeModule('ohos.curves');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const i18n = requireNapi('i18n');
-const util = requireNapi('util');
 const uiMaterial = requireNapi('arkui.uiMaterial');
+const util = requireNapi('util');
 const deviceInfo = requireNapi('deviceInfo');
 const SMALLEST_MAX_FONT_SCALE = 1;
 const LARGEST_MAX_FONT_SCALE = 2;
@@ -3375,6 +3375,7 @@ class SegmentButtonV2ItemContent extends ViewV2 {
       return {
         id: resourceId,
         type: COLOR_RESOURCE_TYPE,
+        params: [],
         bundleName: context?.abilityInfo?.bundleName ?? '',
         moduleName: context?.abilityInfo?.moduleName ?? '',
       };

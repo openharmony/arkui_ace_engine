@@ -29,6 +29,7 @@ ace_unittest("xcomponent_test_ng") {
     "xcomponent_testtwo_ng.cpp",
     "xcomponent_utils_test_ng.cpp",
     "xcomponent_v2_test_ng.cpp",
+    "xcomponent_pattern_branch_test.cpp",
   ]
 
   if (!ace_enable_full_test_suite) {

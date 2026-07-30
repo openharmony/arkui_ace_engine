@@ -88,6 +88,7 @@ Layout Attributes 是 ArkUI 组件共享的基础布局属性能力，覆盖尺�
 ## 相关主题
 
 - 布局框架：`docs/kb/architecture/layout-framework.md`
+- Pixel Rounding：`docs/kb/capabilities/pixel-rounding.md`
 - Safe Area：`docs/kb/capabilities/safe-area.md`
 - Flex：`docs/kb/components/container/flex.md`
 - Column：`docs/kb/components/container/column.md`

@@ -26,6 +26,7 @@
 #include "adapter/preview/external/ability/stage/stage_context.h"
 #include "frameworks/core/common/window_animation_config.h"
 
+
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT UIContentImpl : public UIContent {
 public:
