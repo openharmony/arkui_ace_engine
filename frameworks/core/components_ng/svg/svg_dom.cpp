@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,7 +165,7 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
     return root;
 }
 
-static RefPtr<SvgNode> FindAndCreateNode(const char* element, bool featureEnable)
+static RefPtr<SvgNode> FindAndCreateNode(const char *element, bool featureEnable)
 {
     int64_t elementIter = -1;
     if (featureEnable) {
@@ -234,7 +234,7 @@ void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::strin
             stream << std::hex << fillColor.GetValue();
             newValue = stream.str();
         } else {
-            //convert color to #rgba format.
+            // convert color to #rgba format.
             newValue = IntToHexString(fillColor.GetRed()) + IntToHexString(fillColor.GetGreen()) +
                        IntToHexString(fillColor.GetBlue()) + IntToHexString(fillColor.GetAlpha());
         }
@@ -428,6 +428,7 @@ void SvgDom::SetSmoothEdge(float value)
     smoothEdge_ = value;
 }
 
+
 void SvgDom::SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
 {
     colorFilter_ = colorFilter;
@@ -440,4 +441,12 @@ std::string SvgDom::IntToHexString(const uint8_t number)
     return stringStream.str();
 }
 
+void SvgDom::SetSupportSvg2(bool value)
+{
+    uint32_t version = SVG_FEATURE_SUPPORT_UNDEFINE;
+    if (value) {
+        version = SVG_FEATURE_SUPPORT_TWO;
+    }
+    svgContext_->SetUsrConfigVersion(version);
+}
 } // namespace OHOS::Ace::NG

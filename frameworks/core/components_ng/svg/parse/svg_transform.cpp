@@ -147,8 +147,7 @@ bool CreateFromSkewy(const std::vector<std::string>& paramVec, Matrix4& matrix,
 }
 
 bool CreateFromMatrix(const std::vector<std::string>& paramVec, Matrix4& matrix,
-    const SvgLengthScaleRule& lengthRule)
-{
+    const SvgLengthScaleRule& lengthRule){
     if (paramVec.size() != TRANSFORM_MATRIX_PARA_AMOUNT) {
         return false;
     }

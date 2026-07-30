@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
-#include "frameworks/core/components_ng/svg/parse/svg_svg.h"
-
+#include "frameworks/core/common/container.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/components_ng/svg/parse/svg_svg.h"
 #include "frameworks/core/components_ng/svg/svg_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -58,6 +57,7 @@ RSRecordingPath SvgSvg::AsPath(const Size& viewPort) const
     }
     return path;
 }
+
 
 SvgPreserveAspectRatio SvgSvg::GetPreserveAspectRatio() const
 {
@@ -105,7 +105,6 @@ void SvgSvg::AdjustContentAreaSvgSizeValid(RSCanvas& canvas, const Size& viewPor
     float translateY = 0.0f;
     RSRect clipRect(0.0f, 0.0f, svgSize.Width(), svgSize.Height());
     canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
-
     if (!SvgUtils::IsFeatureEnable(SVG_FEATURE_SUPPORT_TWO, GetUsrConfigVersion())) {
         scaleX = std::min(svgSize.Width() / viewBox.Width(), svgSize.Height() / viewBox.Height());
         scaleY = scaleX;
@@ -139,38 +138,6 @@ void SvgSvg::AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort)
     } else {
         AdjustContentAreaSvgSizeInvalid(canvas, viewPort, svgSize, viewBox);
     }
-}
-
-void SvgSvg::OnImageColorFilter(RSCanvas& canvas, const ImageColorFilter& imageColorFilter)
-{
-    auto rsColorFilterPtr = SvgColorFilterEffect::GetRsColorFilter(imageColorFilter);
-    CHECK_NULL_VOID(rsColorFilterPtr);
-    RSBrush brush;
-    auto filter = brush.GetFilter();
-    auto imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*rsColorFilterPtr, nullptr);
-    filter.SetImageFilter(imageFilter);
-    brush.SetFilter(filter);
-    RSSaveLayerOps slo(nullptr, &brush);
-    canvas.SaveLayer(slo);
-}
-
-void SvgSvg::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
-{
-    auto imageColorFilterOpt = GetColorFilter();
-    if (isRootNode_ && imageColorFilterOpt.has_value()) {
-        OnImageColorFilter(canvas, imageColorFilterOpt.value());
-    }
-    SvgNode::OnDraw(canvas, lengthRule);
-}
-
-Size SvgSvg::GetSize() const
-{
-    return Size(svgAttr_.width.Value(), svgAttr_.height.Value());
-}
-
-Rect SvgSvg::GetViewBox() const
-{
-    return svgAttr_.viewBox;
 }
 
 void ParsePreserveAspectRatio(const std::string& val, SvgAttributes& attr)
@@ -207,6 +174,38 @@ void ParseViewBox(const std::string& val, SvgAttributes& attr)
     }
     attr.viewBox = Rect(viewBox[INDEX_VIEWBOX_X], viewBox[INDEX_VIEWBOX_Y], viewBox[INDEX_VIEWBOX_WIDTH],
         viewBox[INDEX_VIEWBOX_HEIGHT]);
+}
+
+void SvgSvg::OnImageColorFilter(RSCanvas& canvas, const ImageColorFilter& imageColorFilter)
+{
+    auto rsColorFilterPtr = SvgColorFilterEffect::GetRsColorFilter(imageColorFilter);
+    CHECK_NULL_VOID(rsColorFilterPtr);
+    RSBrush brush;
+    auto filter = brush.GetFilter();
+    auto imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*rsColorFilterPtr, nullptr);
+    filter.SetImageFilter(imageFilter);
+    brush.SetFilter(filter);
+    RSSaveLayerOps slo(nullptr, &brush);
+    canvas.SaveLayer(slo);
+}
+
+void SvgSvg::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
+{
+    auto imageColorFilterOpt = GetColorFilter();
+    if (isRootNode_ && imageColorFilterOpt.has_value()) {
+        OnImageColorFilter(canvas, imageColorFilterOpt.value());
+    }
+    SvgNode::OnDraw(canvas, lengthRule);
+}
+
+Size SvgSvg::GetSize() const
+{
+    return Size(svgAttr_.width.Value(), svgAttr_.height.Value());
+}
+
+Rect SvgSvg::GetViewBox() const
+{
+    return svgAttr_.viewBox;
 }
 
 bool SvgSvg::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
