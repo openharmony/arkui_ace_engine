@@ -2582,6 +2582,7 @@ frameworks/core/components_ng/pattern/select_content_overlay/ @huawei_g_five
 frameworks/core/components_ng/pattern/select_overlay/ @huawei_g_five
 frameworks/core/components_ng/pattern/select/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/shape/ @arkuilayout1
+frameworks/core/components_ng/pattern/shapes/ @arkuilayout1
 frameworks/core/components_ng/pattern/sheet/ @arkuicodepulse
 frameworks/core/components_ng/pattern/side_bar/ @arkui_navigation
 frameworks/core/components_ng/pattern/slider/ @arkuipopupwindow_all
