@@ -27,6 +27,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/frameworks/core/common/mock_theme_style.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using testing::NiceMock;
@@ -149,6 +150,7 @@ public:
         finalyzer_ = nullptr;
         themeManager_ = nullptr;
         themeConstants_ = nullptr;
+        ResetMockResourceData();
     }
 
     static void AddResource(const std::string& key, const ResRawValue& value)

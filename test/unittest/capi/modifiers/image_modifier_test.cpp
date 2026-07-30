@@ -390,6 +390,8 @@ HWTEST_F(ImageModifierTest, setImageOptionsTestSetUndefinedResourceUrl, testing:
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
+    // Register mock resource for undefined ID (-1) to return empty string
+    AddResource(-1, std::string(""));
     // try unknown resource id
     const auto emptyRes = IntResourceId{-1, ResourceType::STRING};
     auto resUnion = CreateResourceUnion<Ark_ResourceStr>(emptyRes);
