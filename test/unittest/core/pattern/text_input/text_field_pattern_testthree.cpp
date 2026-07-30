@@ -36,6 +36,42 @@ public:
 };
 
 void CustomKeyboardBuilder() {}
+
+/**
+ * @tc.name: CleanNodeResponseAreaCreateIconRect001
+ * @tc.desc: The press rect follows the cancel icon when its margin changes the frame offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestThree, CleanNodeResponseAreaCreateIconRect001, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+        model.SetIsShowCancelButton(true);
+        model.SetCancelIconSize(Dimension(ICON_SIZE, DimensionUnit::PX));
+        model.SetCancelButtonSymbol(false);
+    });
+    ASSERT_NE(pattern_->cleanNodeResponseArea_, nullptr);
+    auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(pattern_->cleanNodeResponseArea_);
+    ASSERT_NE(cleanNodeResponseArea, nullptr);
+    auto stackNode = cleanNodeResponseArea->cleanNode_;
+    ASSERT_NE(stackNode, nullptr);
+    auto iconNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    ASSERT_NE(iconNode, nullptr);
+
+    frameNode_->GetGeometryNode()->SetFrameSize(SizeF(200.0f, 40.0f));
+    stackNode->GetGeometryNode()->SetFrameOffset(OffsetF(100.0f, 10.0f));
+    stackNode->GetGeometryNode()->SetFrameSize(SizeF(30.0f, 20.0f));
+    iconNode->GetGeometryNode()->SetFrameOffset(OffsetF(6.0f, 8.0f));
+    iconNode->GetGeometryNode()->SetFrameSize(SizeF(10.0f, 10.0f));
+
+    RoundRect paintRect;
+    cleanNodeResponseArea->CreateIconRect(paintRect, false);
+    auto iconRect = iconNode->GetGeometryNode()->GetFrameRect();
+    auto stackRect = stackNode->GetGeometryNode()->GetFrameRect();
+    EXPECT_FLOAT_EQ(paintRect.GetRect().Center().GetX(), stackRect.GetX() + iconRect.Center().GetX());
+    EXPECT_FLOAT_EQ(paintRect.GetRect().Center().GetY(), stackRect.GetY() + iconRect.Center().GetY());
+}
+
 /**
  * @tc.name: UpdateFocusForward001
  * @tc.desc: test testInput text UpdateFocusForward
