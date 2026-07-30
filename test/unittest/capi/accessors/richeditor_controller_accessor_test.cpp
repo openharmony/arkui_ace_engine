@@ -159,6 +159,7 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& st
     dst.textBackgroundStyle = Converter::ArkValue<Opt_TextBackgroundStyle>();
     dst.strokeWidth = Converter::ArkUnion<Opt_Union_LengthMetrics_F64, Ark_LengthMetrics>(style.GetStrokeWidth(), ctx);
     dst.strokeColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(style.GetStrokeColor(), ctx);
+    dst.strokeJoinStyle = Converter::ArkValue<Opt_StrokeJoinStyle>();
 }
 
 void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const UpdateParagraphStyle& style)
