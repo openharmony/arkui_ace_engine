@@ -1078,7 +1078,7 @@ Refresh() {
 
 ### 相关组件文档
 
-- [Scroll 组件知识库](../scroll/Scroll_Knowledge_Base.md)
+- [滚动公共能力知识库](../../kb/capabilities/scroll-common-capability.md)
 - [List 组件文档](https://developer.openharmony.cn/cn/docs/documentation/doc-references-V3/ts-container-list)
 
 ### 版本历史

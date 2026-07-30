@@ -1016,5 +1016,5 @@ layoutOptions: {
 ### 相关知识库
 
 - [Flex Context](../../kb/components/container/flex.md) - 弹性布局组件
-- [Scroll_Knowledge_Base.md](../scroll/Scroll_Knowledge_Base.md) - 滚动容器组件
+- [滚动公共能力](../../kb/capabilities/scroll-common-capability.md) - List/Grid/Scroll/WaterFlow 共享滚动能力
 - [LazyGrid_Knowledge_Base.md](../lazy_layout/LazyGrid_Knowledge_Base.md) - 懒加载网格组件
