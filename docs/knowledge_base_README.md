@@ -182,6 +182,7 @@ PY
 - 2026-07-18：基于当前源码、SDK、测试和基础渲染管线 Spec 重建 Layout Framework 新版 KB，旧 KB 与旧索引入口已移除（旧索引 52 条）。
 - 2026-07-18：新增 Layout Attributes、Blank、Divider、Column、GridCol、GridRow、Row、Stack、FolderStack；重建 Flex（含 Wrap）并合并 Safe Area 两个旧主题。新版 registry 增至 34 条，旧 Flex/Safe Area 文件及索引入口移除，旧索引减至 49 条。
 - 2026-07-24：新增 ImageLoading、BackgroundImage、ImageAnalyzer 和四个 PickerDialog 新版 KB；迁移 SVG 到 `docs/kb/capabilities/svg.md` 并移除旧文件及旧索引入口。新版 registry 增至 42 条，旧索引减至 48 条。
+- 2026-07-29：基于 05-09-06 Span 类长期规格与源码新增 Span、ImageSpan、SymbolSpan、ContainerSpan 四个新版 KB（`docs/kb/components/basic/`）。新版 registry 增至 90 条；无旧 KB 迁移。
 - 2026-07-30：依据 05-03-01 与 05-03-10 Spec 重建滚动公共能力、迁移 WaterFlow/FlowItem；移除旧 WaterFlow KB 与索引入口，并与上游 Scroll/List/Refresh/ScrollBar 等迁移结果合并。新版 registry 共 143 条，旧索引减至 33 条；同步修复 Swiper 组件化路由。
 
 - 2026-07-23：新增 8 个 overlay 类组件 KB（Menu/Dialog/Toast/Select/bindPopup/PopupAdvanced/Sheet/bindTips），补齐弹窗类组件 Spec 路由；迁移 Menu 和 Sheet 旧 KB 到新版路径。

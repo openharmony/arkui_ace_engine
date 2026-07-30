@@ -837,7 +837,7 @@ class ButtonModifier extends ButtonAttribute
 | SecurityComponent | `pattern/security_component/security_component_pattern.cpp` | - | 安全组件 |
 | SymbolGlyph | `pattern/symbol/symbol_pattern.cpp` | - | 符号图标 |
 | SymbolSpan | `pattern/text/span_node.cpp` | - | 符号片段 |
-| Marquee | `pattern/marquee/marquee_pattern.cpp` | [Marquee](../pattern/marquee/Marquee_Knowledge_Base.md) | 跑马灯 |
+| Marquee | `pattern/marquee/marquee_pattern.cpp` | [Marquee](../kb/components/basic/marquee.md) | 跑马灯 |
 | LazyGridLayout | `pattern/grid/grid_pattern.cpp` | [LazyGrid](../pattern/lazy_layout/LazyGrid_Knowledge_Base.md) | 懒加载网格 |
 | Particle | `pattern/particle/particle_pattern.cpp` | - | 粒子效果 |
 | PluginComponent | `pattern/plugin/plugin_pattern.cpp` | - | 插件组件 |
