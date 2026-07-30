@@ -93,9 +93,9 @@ std::vector<std::tuple<std::string, Ark_Int32>> testFixtureMaxLinesInvalidValues
 };
 
 std::vector<std::tuple<std::string, Ark_Float64, std::string>> testFixtureFloat64NonNegValidValues = {
-    { "123", Converter::ArkValue<Ark_Float64>(123), "123.00vp" },
-    { "0", Converter::ArkValue<Ark_Float64>(0), "0.00vp" },
-    { "1.23", Converter::ArkValue<Ark_Float64>(1.23), "1.23vp" },
+    { "123", Converter::ArkValue<Ark_Float64>(123), "123.00fp" },
+    { "0", Converter::ArkValue<Ark_Float64>(0), "0.00fp" },
+    { "1.23", Converter::ArkValue<Ark_Float64>(1.23), "1.23fp" },
 };
 
 std::vector<std::tuple<std::string, Ark_Float64>> testFixtureFloat64NonNegInvalidValues = {

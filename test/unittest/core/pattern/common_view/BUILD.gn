@@ -16,6 +16,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("common_view_test_ng") {
   module_name = "CommonVisualEffects"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "common_view_test_ng.cpp" ]
 
   if (!ace_enable_full_test_suite) {
