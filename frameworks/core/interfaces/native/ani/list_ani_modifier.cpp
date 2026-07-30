@@ -26,7 +26,7 @@ bool UpdateDefaultSizeAndGetNeedSync(ArkUINodeHandle node, double defaultSize)
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
     const auto& nodeTag = frameNode->GetHostTag();
-    auto listChildrenMainSize = V2::LIST_ETS_TAG == nodeTag ?
+    auto listChildrenMainSize = (V2::LIST_ETS_TAG == nodeTag || V2::ARC_LIST_ETS_TAG == nodeTag) ?
         NG::ListModelStatic::GetOrCreateListChildrenMainSize(frameNode) :
         NG::ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(frameNode);
     CHECK_NULL_RETURN(listChildrenMainSize, false);
@@ -39,7 +39,7 @@ void SyncChildrenSize(ArkUINodeHandle node, double size)
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     const auto& nodeTag = frameNode->GetHostTag();
-    auto listChildrenMainSize = V2::LIST_ETS_TAG == nodeTag ?
+    auto listChildrenMainSize = (V2::LIST_ETS_TAG == nodeTag || V2::ARC_LIST_ETS_TAG == nodeTag) ?
         NG::ListModelStatic::GetOrCreateListChildrenMainSize(frameNode) :
         NG::ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(frameNode);
     CHECK_NULL_VOID(listChildrenMainSize);
@@ -53,7 +53,7 @@ void NotifyChange(ArkUINodeHandle node, ArkUI_Int32 start,
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     const auto& nodeTag = frameNode->GetHostTag();
-    auto listChildrenMainSize = V2::LIST_ETS_TAG == nodeTag ?
+    auto listChildrenMainSize = (V2::LIST_ETS_TAG == nodeTag || V2::ARC_LIST_ETS_TAG == nodeTag) ?
         NG::ListModelStatic::GetOrCreateListChildrenMainSize(frameNode) :
         NG::ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(frameNode);
     CHECK_NULL_VOID(listChildrenMainSize);
@@ -72,7 +72,7 @@ void ResizeChildrenSize(ArkUINodeHandle node, ArkUI_Int32 size)
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     const auto& nodeTag = frameNode->GetHostTag();
-    auto listChildrenMainSize = V2::LIST_ETS_TAG == nodeTag ?
+    auto listChildrenMainSize = (V2::LIST_ETS_TAG == nodeTag || V2::ARC_LIST_ETS_TAG == nodeTag) ?
         NG::ListModelStatic::GetOrCreateListChildrenMainSize(frameNode) :
         NG::ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(frameNode);
     CHECK_NULL_VOID(listChildrenMainSize);
@@ -84,7 +84,7 @@ void SyncChildrenSizeOver(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     const auto& nodeTag = frameNode->GetHostTag();
-    auto listChildrenMainSize = V2::LIST_ETS_TAG == nodeTag ?
+    auto listChildrenMainSize = (V2::LIST_ETS_TAG == nodeTag || V2::ARC_LIST_ETS_TAG == nodeTag) ?
         NG::ListModelStatic::GetOrCreateListChildrenMainSize(frameNode) :
         NG::ListItemGroupModelStatic::GetOrCreateListChildrenMainSize(frameNode);
     CHECK_NULL_VOID(listChildrenMainSize);
@@ -96,7 +96,7 @@ void ResetListChildrenMainSize(ArkUINodeHandle node)
     auto *frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     const auto& nodeTag = frameNode->GetHostTag();
-    V2::LIST_ETS_TAG == nodeTag ? NG::ListModelStatic::ResetListChildrenMainSize(frameNode)
+    (V2::LIST_ETS_TAG == nodeTag || V2::ARC_LIST_ETS_TAG == nodeTag) ? NG::ListModelStatic::ResetListChildrenMainSize(frameNode)
                                 : NG::ListItemGroupModelStatic::ResetListChildrenMainSize(frameNode);
 }
 

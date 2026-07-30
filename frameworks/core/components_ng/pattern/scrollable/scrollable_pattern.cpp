@@ -87,7 +87,6 @@ constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
 constexpr uint32_t DVSYNC_OFFSET_SIZE = 10;
 constexpr uint32_t DVSYNC_OFFSET_TIME = 18666667;
 constexpr uint32_t DVSYNC_DELAY_TIME_BASE = 27000000;
-constexpr double ARC_INITWIDTH_VAL = 4.0;
 constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
 constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 constexpr std::string_view SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
@@ -1784,8 +1783,8 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
             scrollBar_->SetActiveWidth(barWidth.value());
             scrollBar_->SetTouchWidth(barWidth.value());
             if (isRoundScroll_) {
-                scrollBar_->SetNormalWidth(Dimension(ARC_INITWIDTH_VAL));
-                scrollBar_->SetInactiveWidth(Dimension(ARC_INITWIDTH_VAL));
+                scrollBar_->SetNormalWidth(barWidth.value());
+                scrollBar_->SetInactiveWidth(barWidth.value());
                 scrollBar_->SetArcActiveBackgroundWidth(barWidth.value());
                 scrollBar_->SetArcActiveScrollBarWidth(barWidth.value() - Dimension(ARC_INITWIDTH_HALF_VAL));
             } else {
