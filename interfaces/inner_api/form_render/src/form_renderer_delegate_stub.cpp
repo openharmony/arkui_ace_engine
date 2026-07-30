@@ -81,6 +81,12 @@ int FormRendererDelegateStub::OnRemoteRequest(
 
 int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel& data, MessageParcel& reply)
 {
+    auto surfaceNode = Rosen::RSSurfaceNode::Unmarshalling(data);
+    if (surfaceNode == nullptr) {
+        HILOG_ERROR("surfaceNode is nullptr");
+        return ERR_APPEXECFWK_PARCEL_ERROR;
+    }
+
     std::unique_ptr<AppExecFwk::FormJsInfo> formJsInfo(data.ReadParcelable<AppExecFwk::FormJsInfo>());
     if (formJsInfo == nullptr) {
         HILOG_ERROR("formJsInfo is nullptr");
@@ -90,12 +96,6 @@ int FormRendererDelegateStub::HandleOnSurfaceCreate(MessageParcel& data, Message
     std::shared_ptr<AAFwk::Want> want(data.ReadParcelable<AAFwk::Want>());
     if (want == nullptr) {
         HILOG_ERROR("want is nullptr");
-        return ERR_APPEXECFWK_PARCEL_ERROR;
-    }
-
-    auto surfaceNode = Rosen::RSSurfaceNode::Unmarshalling(data);
-    if (surfaceNode == nullptr) {
-        HILOG_ERROR("surfaceNode is nullptr");
         return ERR_APPEXECFWK_PARCEL_ERROR;
     }
     
