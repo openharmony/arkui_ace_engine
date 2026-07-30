@@ -606,7 +606,7 @@ void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSi
     info_.startMainLineIndex_ = currentMainLineIndex_;
     info_.UpdateStartIndexByStartLine();
     // FillNewLineBackward sometimes make startIndex_ > currentItemIndex
-    while (info_.startIndex_ > currentItemIndex &&
+    while (info_.startIndex_ > currentItemIndex && info_.startMainLineIndex_ > 0 &&
            info_.gridMatrix_.find(info_.startMainLineIndex_) != info_.gridMatrix_.end()) {
         info_.startMainLineIndex_--;
         info_.UpdateStartIndexByStartLine();
@@ -639,7 +639,7 @@ void GridScrollLayoutAlgorithm::ReloadFromUpdateIdxToStartIndex(
     info_.startMainLineIndex_ = currentMainLineIndex_;
     info_.UpdateStartIndexByStartLine();
     // FillNewLineBackward sometimes make startIndex_ > currentItemIndex
-    while (info_.startIndex_ > currentItemIndex &&
+    while (info_.startIndex_ > currentItemIndex && info_.startMainLineIndex_ > 0 &&
            info_.gridMatrix_.find(info_.startMainLineIndex_) != info_.gridMatrix_.end()) {
         info_.startMainLineIndex_--;
         info_.UpdateStartIndexByStartLine();
@@ -1510,6 +1510,10 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
     // Other params are also named according to this principle.
     cellAveLength_ = -1.0f;
     auto currentIndex = info_.startIndex_;
+    if (info_.startMainLineIndex_ < 0) {
+        info_.reachStart_ = true;
+        return cellAveLength_;
+    }
     if (info_.startMainLineIndex_ - 1 < 0) {
         if (currentIndex == 0) {
             return cellAveLength_;
