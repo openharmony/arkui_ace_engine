@@ -1,83 +1,6 @@
 {
   "knowledge_bases": [
     {
-      "name": "Refresh",
-      "name_cn": "下拉刷新组件",
-      "category": "advanced",
-      "type": "component",
-      "keywords": [
-        "下拉刷新",
-        "pull to refresh",
-        "refresh",
-        "loading",
-        "加载中",
-        "刷新状态",
-        "自定义刷新UI",
-        "nested scroll",
-        "嵌套滚动",
-        "spring animation",
-        "弹簧动画"
-      ],
-      "aliases": [
-        "Refresh组件",
-        "下拉刷新",
-        "刷新组件"
-      ],
-      "file_path": "pattern/refresh/Refresh_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_model_ng.cpp",
-        "property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/refresh/refresh_property.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/refresh.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/refresh.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/RefreshModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RefreshModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "Scroll",
-      "name_cn": "滚动容器组件",
-      "category": "container",
-      "type": "component",
-      "keywords": [
-        "滚动",
-        "scroll",
-        "滚动容器",
-        "scrollable",
-        "scroll bar",
-        "滚动条",
-        "edge effect",
-        "边缘效果",
-        "nested scroll",
-        "嵌套滚动",
-        "scroll position",
-        "滚动位置",
-        "scroll to",
-        "scrollby"
-      ],
-      "aliases": [
-        "Scroll组件",
-        "滚动组件",
-        "滚动容器"
-      ],
-      "file_path": "pattern/scroll/Scroll_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_model_ng.cpp",
-        "layout": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/scroll/scroll_layout_algorithm.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scroll.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ScrollModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ScrollModifier.static.d.ets"
-      },
-      "last_updated": "2026-01-30"
-    },
-    {
       "name": "LazyGrid",
       "name_cn": "懒加载网格组件",
       "category": "container",
@@ -111,46 +34,6 @@
         "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/lazyGridLayout.static.d.ets"
       },
       "last_updated": "2026-02-03"
-    },
-    {
-      "name": "Grid",
-      "name_cn": "网格布局组件",
-      "category": "container",
-      "type": "component",
-      "keywords": [
-        "网格",
-        "grid",
-        "网格布局",
-        "行列布局",
-        "columnsTemplate",
-        "rowsTemplate",
-        "不规则布局",
-        "跨行列",
-        "自适应布局",
-        "可滚动网格",
-        "layoutOptions",
-        "虚拟滚动",
-        "GridItem"
-      ],
-      "aliases": [
-        "Grid组件",
-        "网格布局",
-        "网格容器"
-      ],
-      "file_path": "pattern/grid/Grid_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_model_ng.cpp",
-        "layout_info": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_layout_info.cpp",
-        "property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_layout_property.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/grid.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/grid.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GridModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GridModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-07"
     },
     {
       "name": "Badge",
@@ -308,39 +191,6 @@
         "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textTimer.static.d.ets",
         "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextTimerModifier.d.ts",
         "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextTimerModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "WaterFlow",
-      "name_cn": "瀑布流组件",
-      "category": "container",
-      "type": "component",
-      "keywords": [
-        "瀑布流",
-        "waterflow",
-        "不规则网格",
-        "pinterest grid",
-        "columns",
-        "列布局",
-        "lazy load"
-      ],
-      "aliases": [
-        "WaterFlow组件",
-        "瀑布流",
-        "不规则网格"
-      ],
-      "file_path": "pattern/waterflow/WaterFlow_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_model_ng.cpp",
-        "layout": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/waterflow/water_flow_layout_algorithm.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/water_flow.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/waterFlow.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/WaterFlowModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/WaterFlowModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -689,59 +539,6 @@
       ]
     },
     {
-      "name": "RichEditor",
-      "name_cn": "富文本编辑器组件",
-      "category": "rich_text",
-      "type": "component",
-      "keywords": [
-        "富文本编辑",
-        "rich editor",
-        "文本编辑",
-        "样式文本",
-        "span",
-        "撤销重做",
-        "undo redo",
-        "文本选择",
-        "拖拽编辑",
-        "styled string",
-        "光标管理",
-        "IME输入",
-        "段落管理",
-        "paragraph",
-        "内容管理",
-        "回调函数",
-        "布局系统",
-        "TextPattern",
-        "TextilePattern",
-        "MutableSpanString",
-        "RichEditorController",
-        "RichEditorStyledStringController"
-      ],
-      "aliases": [
-        "RichEditor组件",
-        "富文本编辑器",
-        "富文本编辑",
-        "RichEditorPattern"
-      ],
-      "file_path": "pattern/rich_editor/RichEditor_Knowledge_Base_CN.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_model_ng.cpp",
-        "layout": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_layout_algorithm.cpp",
-        "controller": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_controller.cpp",
-        "undo_manager": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.cpp",
-        "styled_string_controller": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/rich_editor.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/richEditor.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/RichEditorModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/RichEditorModifier.static.d.ets",
-        "capi": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/native/node/rich_editor_native_impl.h"
-      },
-      "last_updated": "2026-04-18"
-    },
-    {
       "name": "ArkUI Native API",
       "name_cn": "ArkUI Native API",
       "category": "sdk",
@@ -882,58 +679,6 @@
       "last_updated": "2026-05-23"
     },
     {
-      "name": "Hyperlink",
-      "name_cn": "超链接组件",
-      "category": "basic",
-      "type": "component",
-      "keywords": [
-        "Hyperlink",
-        "超链接",
-        "link",
-        "点击跳转",
-        "文本链接"
-      ],
-      "aliases": [
-        "Hyperlink组件",
-        "链接组件",
-        "超链接"
-      ],
-      "file_path": "pattern/hyperlink/Hyperlink_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/hyperlink.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/hyperlink.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/HyperlinkModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/HyperlinkModifier.static.d.ets"
-      }
-    },
-    {
-      "name": "List",
-      "name_cn": "列表组件",
-      "category": "container",
-      "type": "component",
-      "keywords": [
-        "List",
-        "列表",
-        "滚动列表",
-        "ListItem",
-        "分组列表"
-      ],
-      "aliases": [
-        "List组件",
-        "列表容器",
-        "长列表"
-      ],
-      "file_path": "pattern/list/List_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/list.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/list.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ListModifier.static.d.ets"
-      }
-    },
-    {
       "name": "LoadingProgress",
       "name_cn": "加载进度组件",
       "category": "data_display",
@@ -1058,30 +803,6 @@
       }
     },
     {
-      "name": "ScrollBar",
-      "name_cn": "滚动条组件",
-      "category": "container",
-      "type": "component",
-      "keywords": [
-        "ScrollBar",
-        "滚动条",
-        "scroll bar",
-        "滑块",
-        "滚动指示"
-      ],
-      "aliases": [
-        "ScrollBar组件",
-        "滚动条",
-        "Scrollbar"
-      ],
-      "file_path": "pattern/scrollBar/ScrollBar_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll_bar.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scrollBar.static.d.ets"
-      }
-    },
-    {
       "name": "TextArea",
       "name_cn": "多行文本输入组件",
       "category": "rich_text",
@@ -1148,32 +869,6 @@
       "last_updated": "2026-05-23"
     },
     {
-      "name": "TextInput",
-      "name_cn": "文本输入组件",
-      "category": "basic",
-      "type": "component",
-      "keywords": [
-        "TextInput",
-        "文本输入",
-        "输入组件",
-        "编辑控件",
-        "键盘输入"
-      ],
-      "aliases": [
-        "TextInput组件",
-        "文本输入框",
-        "输入控件"
-      ],
-      "file_path": "pattern/text_input/TextInput_Knowledge_Base_CN.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_input.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textInput.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextInputModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextInputModifier.static.d.ets"
-      }
-    },
-    {
       "name": "IDL",
       "name_cn": "接口定义语言",
       "category": "sdk",
@@ -1191,86 +886,6 @@
         "IDL知识库"
       ],
       "file_path": "sdk/IDL_Knowledge_Base_CN.md",
-      "last_updated": "2026-05-23"
-    },
-    {
-      "name": "ForEach",
-      "name_cn": "ForEach语法组件",
-      "category": "system",
-      "type": "feature",
-      "keywords": [
-        "ForEach",
-        "循环渲染",
-        "语法组件",
-        "列表构建",
-        "迭代"
-      ],
-      "aliases": [
-        "ForEach语法",
-        "循环组件",
-        "ForEach节点"
-      ],
-      "file_path": "syntax/ForEach_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
-    },
-    {
-      "name": "LazyForEach",
-      "name_cn": "LazyForEach语法组件",
-      "category": "system",
-      "type": "feature",
-      "keywords": [
-        "LazyForEach",
-        "懒加载循环",
-        "语法组件",
-        "按需构建",
-        "列表优化"
-      ],
-      "aliases": [
-        "LazyForEach语法",
-        "懒循环组件",
-        "LazyForEach节点"
-      ],
-      "file_path": "syntax/LazyForEach_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
-    },
-    {
-      "name": "RepeatVirtualScroll",
-      "name_cn": "RepeatVirtualScroll语法组件",
-      "category": "system",
-      "type": "feature",
-      "keywords": [
-        "RepeatVirtualScroll",
-        "虚拟滚动",
-        "语法组件",
-        "复用渲染",
-        "性能优化"
-      ],
-      "aliases": [
-        "RepeatVirtualScroll语法",
-        "虚拟滚动语法",
-        "RepeatVirtualScroll节点"
-      ],
-      "file_path": "syntax/RepeatVirtualScroll_Knowledge_Base.md",
-      "last_updated": "2026-05-23"
-    },
-    {
-      "name": "Repeat",
-      "name_cn": "Repeat语法组件",
-      "category": "system",
-      "type": "feature",
-      "keywords": [
-        "Repeat",
-        "循环语法",
-        "语法组件",
-        "重复渲染",
-        "渲染优化"
-      ],
-      "aliases": [
-        "Repeat语法",
-        "重复组件",
-        "Repeat节点"
-      ],
-      "file_path": "syntax/Repeat_Knowledge_Base.md",
       "last_updated": "2026-05-23"
     },
     {
@@ -1418,10 +1033,7 @@
       "name": "容器组件",
       "description": "用于组织和布局其他组件的容器",
       "components": [
-        "Grid",
-        "Scroll",
-        "LazyGrid",
-        "WaterFlow"
+        "LazyGrid"
       ]
     },
     "selector": {
@@ -1453,19 +1065,11 @@
         "TextTimer"
       ]
     },
-    "rich_text": {
-      "name": "富文本组件",
-      "description": "用于富文本展示的组件",
-      "components": [
-        "RichEditor"
-      ]
-    },
     "advanced": {
       "name": "高级组件",
       "description": "提供复杂交互功能的高级组件",
       "components": [
         "Menu",
-        "Refresh",
         "Sheet"
       ]
     },

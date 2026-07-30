@@ -1413,6 +1413,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         auto scrollable = pattern->GetScrollable();
         CHECK_NULL_RETURN(scrollable, pattern->OnScrollCallback(static_cast<float>(offset), source));
         if (source == SCROLL_FROM_START) {
+            pattern->StopScrollableAndAnimate();
             scrollable->SetIsScrollBarDragging(true);
             if (scrollable->GetOnWillStartDraggingCallback()) {
                 scrollable->GetOnWillStartDraggingCallback()();
@@ -3657,7 +3658,7 @@ void ScrollablePattern::MarkUserScrollSource(int32_t source)
 void ScrollablePattern::FireAccessibilityScrollEndEvent()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(host && host->IsOnMainTree());
     std::string accessibilityScrollSource = GetAccessibilityScrollSource();
     std::map<std::string, std::string> extraEventInfo;
     extraEventInfo.insert({ "scrollSource", accessibilityScrollSource });
@@ -4884,10 +4885,8 @@ void ScrollablePattern::OnAttachToMainTree()
     // call OnAttachToMainTreeMultiThread by multi thread
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
     CHECK_NULL_VOID(host);
-    if (refreshCoordination_) {
-        if (!refreshCoordination_->IsValid()) {
-            refreshCoordination_->UpdateRefreshNode();
-        }
+    if (refreshCoordination_ && !refreshCoordination_->IsValid()) {
+        refreshCoordination_->UpdateRefreshNode();
     }
     auto scrollBarProxy = scrollBarProxy_;
     CHECK_NULL_VOID(scrollBarProxy);

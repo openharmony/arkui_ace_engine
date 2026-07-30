@@ -108,6 +108,11 @@ public:
         return false;
     }
 
+    bool NeedClearDisappearingChildrenRecursively() const override
+    {
+        return true;
+    }
+
     int32_t FrameCount() const final
     {
         return totalCount_;

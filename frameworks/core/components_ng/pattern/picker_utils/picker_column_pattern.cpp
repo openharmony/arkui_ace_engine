@@ -1161,11 +1161,7 @@ void PickerColumnPattern::AddAnimationTextProperties(
             }
         }
 
-        if (textLayoutProperty->GetFontSize().value().Unit() == DimensionUnit::LPX) {
-            properties.fontSize = textLayoutProperty->GetFontSize().value();
-        } else {
-            properties.fontSize = Dimension(textLayoutProperty->GetFontSize().value().ConvertToPx());
-        }
+        properties.fontSize = textLayoutProperty->GetFontSize().value();
     }
     if (textLayoutProperty->HasTextColor()) {
         properties.currentColor = textLayoutProperty->GetTextColor().value();

@@ -219,6 +219,7 @@ private:
     bool IsWindowConditionMatched();
     bool HasForceSplitTargetNavigation();
     void FlushArkUIHook();
+    void NotifyMediaQueryUpdate();
     float CalcCurrentSplitRatio();
     void OnForceSplitRatioUpdate(float ratio);
     void NotifyWindowFirstTimeDraggableRatioIfNeeded(float ratio);

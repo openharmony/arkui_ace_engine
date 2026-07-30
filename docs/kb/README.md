@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-29
-> 主题数：68
+> 更新时间：2026-07-30
+> 主题数：167
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -33,10 +33,9 @@ docs/kb/
 | ID | 主题 | 新版 KB | 状态 |
 |----|------|---------|------|
 | LayoutFramework | 布局框架 | `docs/kb/architecture/layout-framework.md` | 已重建，旧 KB 已移除 |
-| DragFramework | 拖拽框架 | `docs/kb/architecture/drag-framework.md` | 新建（独立主题） |
-| DragCapability | 通用拖拽能力 | `docs/kb/capabilities/drag-capability.md` | 新建（独立主题） |
 | LayoutAttributes | 基础布局属性 | `docs/kb/capabilities/layout-attributes.md` | 新建 |
 | SafeArea | 安全区域机制 | `docs/kb/capabilities/safe-area.md` | 已合并重建，两份旧 KB 已移除 |
+| PixelRounding | 像素取整能力 | `docs/kb/capabilities/pixel-rounding.md` | 新建（Spec 待补） |
 | Blank | 空白填充组件 | `docs/kb/components/basic/blank.md` | 新建 |
 | Divider | 分隔线组件 | `docs/kb/components/basic/divider.md` | 新建 |
 | Column | 纵向布局组件 | `docs/kb/components/container/column.md` | 新建 |
@@ -44,6 +43,8 @@ docs/kb/
 | Flex | 弹性布局组件（含 Wrap） | `docs/kb/components/container/flex.md` | 已重建，旧 KB 已移除 |
 | GridCol | 响应式栅格列组件 | `docs/kb/components/container/grid_col.md` | 新建 |
 | GridRow | 响应式栅格行组件 | `docs/kb/components/container/grid_row.md` | 新建 |
+| Grid | 滚动型网格布局组件 | `docs/kb/components/container/grid.md` | 已迁移，旧 KB 已移除 |
+| GridItem | 网格项组件 | `docs/kb/components/container/grid_item.md` | 新建 |
 | RelativeContainer | 相对布局容器组件 | `docs/kb/components/container/relative_container.md` | 新建 |
 | Row | 横向布局组件 | `docs/kb/components/container/row.md` | 新建 |
 | RowSplit | 横向分割布局组件 | `docs/kb/components/container/row_split.md` | 新建（Spec 待补） |
@@ -54,6 +55,11 @@ docs/kb/
 | Canvas | 画布组件 | `docs/kb/components/shape/canvas.md` | 新建（Spec 待补） |
 | OffscreenCanvas | 离屏画布对象 | `docs/kb/components/shape/offscreen_canvas.md` | 新建（Spec 待补） |
 | Text | 文本组件 | `docs/kb/components/basic/text.md` | 已迁移，旧 KB 已移除 |
+| RichEditor | 富文本编辑器组件 | `docs/kb/components/basic/rich_editor.md` | 已迁移，旧 KB 已移除 |
+| SymbolGlyph | 符号字形组件 | `docs/kb/components/basic/symbol-glyph.md` | 新建；补齐 Spec 路由（复用 TextPattern） |
+| TextInput | 文本输入组件 | `docs/kb/components/basic/text-input.md` | 已迁移，旧 KB 已移除；共享 TextFieldPattern |
+| Hyperlink | 超链接组件 | `docs/kb/components/basic/hyperlink.md` | 已迁移，旧 KB 已移除；独立 HyperlinkPattern(继承 TextPattern) |
+| StyledString | 属性字符串 | `docs/kb/capabilities/styled-string.md` | 新建；非组件，common_capability/api |
 | Image | 图片组件 | `docs/kb/components/media/image.md` | 已迁移，旧 KB 已移除 |
 | ImageAnimator | 图片动画组件 | `docs/kb/components/media/image_animator.md` | 已迁移，旧 KB 已移除 |
 | Video | 视频组件 | `docs/kb/components/media/video.md` | 新建（无旧 KB） |
@@ -66,8 +72,23 @@ docs/kb/
 | Navigation | 导航容器组件 | `docs/kb/components/container/navigation.md` | 新建 |
 | Tabs | 标签页容器组件 | `docs/kb/components/container/tabs.md` | 新建 |
 | Swiper | 轮播容器组件 | `docs/kb/components/container/swiper.md` | 新建 |
+| WaterFlow | 瀑布流组件 | `docs/kb/components/container/waterflow.md` | 已迁移，旧 KB 已移除；补齐 05-03-10 Spec 路由 |
+| PlaceholderComponent | 占位组件（概念入口，转跳 05-16-01/02） | `docs/kb/capabilities/placeholder_component.md` | 新建 |
+| NodeAdapter | NodeAdapter 命令式懒渲染适配器 | `docs/kb/capabilities/node_adapter.md` | 新建 |
+| SameLayerRendering | 同层渲染（纹理导出生产者，FuncID 04-18-01） | `docs/kb/capabilities/same-layer-rendering.md` | 新建 |
+| ComponentReuseFramework | 组件复用框架（引擎 C++） | `docs/kb/architecture/component_reuse_framework.md` | 新建 |
+| AbilityComponent | AbilityComponent 跨进程嵌入组件（已废弃） | `docs/kb/components/embedded/ability_component.md` | 新建 |
+| NodeContainer | NodeContainer 自定义占位组件 | `docs/kb/components/custom-node/node_container.md` | 新建 |
+| ContentSlot | ContentSlot 自定义占位组件 | `docs/kb/components/custom-node/content_slot.md` | 新建 |
+| RenderControl | 渲染控制语法（if/else + ForEach + 共享框架） | `docs/kb/syntax/render_control.md` | 迁移自旧 `ForEach` KB |
+| LazyForEach | LazyForEach 懒加载循环渲染 | `docs/kb/syntax/lazy_for_each.md` | 已迁移，旧 KB 已移除 |
+| Repeat | Repeat 循环渲染与虚拟滚动（含 RepeatVirtualScroll） | `docs/kb/syntax/repeat.md` | 已迁移，旧 KB 已移除 |
 | SideBarContainer | 侧边栏容器组件 | `docs/kb/components/container/side_bar_container.md` | 新建 |
 | NavDestination | 导航目标页组件 | `docs/kb/components/container/navdestination.md` | 新建 |
+| Scroll | 滚动容器组件 | `docs/kb/components/container/scroll.md` | 已迁移，旧 KB 已移除 |
+| List | 列表容器组件（含 ListItem/ListItemGroup） | `docs/kb/components/container/list.md` | 已迁移，旧 KB 已移除 |
+| Refresh | 下拉刷新容器组件 | `docs/kb/components/container/refresh.md` | 已迁移，旧 KB 已移除 |
+| ScrollBar | 独立滚动条组件 | `docs/kb/components/container/scroll_bar.md` | 已迁移，旧 KB 已移除 |
 | Slider | 滑动选择器组件 | `docs/kb/components/input-form/slider.md` | 新建（无旧 KB） |
 | TextPicker | 文本选择器组件 | `docs/kb/components/selector/text_picker.md` | 已迁移，旧 KB 已移除 |
 | DatePicker | 日期选择器组件 | `docs/kb/components/selector/date_picker.md` | 已迁移，旧 KB 已移除 |
@@ -78,18 +99,35 @@ docs/kb/
 | TextPickerDialog | 文本选择弹窗组件 | `docs/kb/components/selector/text_picker_dialog.md` | 新建 |
 | UIPickerComponent | UI选择器容器组件 | `docs/kb/components/selector/ui_picker_component.md` | 已迁移，旧 KB 已移除 |
 | AlphabetIndexer | 字母索引组件 | `docs/kb/components/data_display/alphabet_indexer.md` | 新建 |
+| MediaQuery | 媒体查询能力 | `docs/kb/api/mediaquery.md` | 新建（Spec 待补） |
 | Router | 路由管理 | `docs/kb/api/router.md` | 新建（不推荐，推荐 Navigation） |
-| StateMgmtV1Core | V1 状态管理核心逻辑 | `docs/kb/architecture/state_management/v1_core.md` | 已注册 |
-| StateMgmtV2Core | V2 状态管理核心逻辑 | `docs/kb/architecture/state_management/v2_core.md` | 已注册 |
-| StateMgmtV1Decorators | V1 状态管理装饰器 | `docs/kb/architecture/state_management/v1_decorators.md` | 已注册 |
-| StateMgmtV2Decorators | V2 状态管理装饰器 | `docs/kb/architecture/state_management/v2_decorators.md` | 已注册 |
+| StateMgmtV1Core | V1 状态管理核心逻辑 | `docs/kb/frontend/state_management/v1_core.md` | 已注册 |
+| StateMgmtV2Core | V2 状态管理核心逻辑 | `docs/kb/frontend/state_management/v2_core.md` | 已注册 |
+| StateMgmtV1Decorators | V1 状态管理装饰器 | `docs/kb/frontend/state_management/v1_decorators.md` | 已注册 |
+| StateMgmtV2Decorators | V2 状态管理装饰器 | `docs/kb/frontend/state_management/v2_decorators.md` | 已注册 |
+| StateMgmt | 状态管理总览 | `docs/kb/frontend/state_management.md` | 已注册 |
+| StateMgmtStorage | 状态管理存储体系 | `docs/kb/frontend/state_management/storage.md` | 已注册 |
+| StateMgmtInfrastructure | 状态管理基础设施 | `docs/kb/frontend/state_management/infrastructure.md` | 已注册 |
+| StateMgmtCppBindings | 状态管理 C++ 绑定 | `docs/kb/frontend/state_management/cpp_bindings.md` | 已注册 |
+| StateMgmtCustomComponent | 状态管理自定义组件机制 | `docs/kb/frontend/state_management/custom_component.md` | 已注册 |
+| StateMgmtInterop | 状态管理 Interop 桥接 | `docs/kb/frontend/state_management/interop_bridge.md` | 已注册 |
+| StateMgmtStaticV1Core | 静态 V1 状态管理核心逻辑 | `docs/kb/frontend/state_management/static_v1_core.md` | 新建 |
+| StateMgmtStaticV1Decorators | 静态 V1 装饰器与数据对象 | `docs/kb/frontend/state_management/static_v1_decorators.md` | 新建 |
+| StateMgmtStaticV2Core | 静态 V2 状态管理核心逻辑 | `docs/kb/frontend/state_management/static_v2_core.md` | 新建 |
+| StateMgmtStaticV2Decorators | 静态 V2 装饰器与数据对象 | `docs/kb/frontend/state_management/static_v2_decorators.md` | 新建 |
+| StateMgmtStaticStorage | 静态存储体系 | `docs/kb/frontend/state_management/static_storage.md` | 新建 |
+| StateMgmtStaticInterop | 静态 Interop 桥接 | `docs/kb/frontend/state_management/static_interop_bridge.md` | 新建 |
+| StateMgmtStaticCustomComponent | 静态自定义组件状态相关 | `docs/kb/frontend/state_management/static_custom_component.md` | 新建 |
 | WindowMechanism | 窗口机制 | `docs/kb/architecture/window-mechanism.md` | 新建 |
+| PreviewPlatformAdaptation | 预览器平台适配 | `docs/kb/architecture/preview-platform-adaptation.md` | 新建 |
+| CustomMeasureLayout | 自定义测量/布局 | `docs/kb/capabilities/custom-measure-layout.md` | 新建（Spec 待补） |
 | DFXLogging | DFX 日志 | `docs/kb/architecture/dfx/logging.md` | 新建 |
 | DFXMemoryManagement | DFX 内存管理 | `docs/kb/architecture/dfx/memory-management.md` | 新建 |
 | DFXTrace | DFX Trace 打点 | `docs/kb/architecture/dfx/trace.md` | 新建 |
 | DFXDumpMechanism | DFX Dump 机制 | `docs/kb/architecture/dfx/dump-mechanism.md` | 新建 |
 | DFXLayoutBoundaryDisplay | DFX 布局边界显示 | `docs/kb/architecture/dfx/layout-boundary-display.md` | 新建 |
 | UIContext | UI 上下文 | `docs/kb/capabilities/ui-context.md` | 新建 |
+| ScrollCommonCapability | 滚动公共能力 | `docs/kb/capabilities/scroll-common-capability.md` | 已重建，旧 Scroll KB 已移除；补齐 05-03-01 Spec 路由 |
 | Menu | 菜单组件 | `docs/kb/components/overlay/menu.md` | 已迁移，旧 KB 已移除；补齐 Spec 路由 |
 | Dialog | 弹窗组件 | `docs/kb/components/overlay/dialog.md` | 新建；补齐 Spec 路由 |
 | Toast | 提示组件 | `docs/kb/components/overlay/toast.md` | 新建；补齐 Spec 路由 |
@@ -113,8 +151,49 @@ docs/kb/
 | MotionPath | 路径动画 | `docs/kb/capabilities/motion_path.md` | 新建 |
 | PhysicsAnimation | 物理动画 | `docs/kb/capabilities/physics_animation.md` | 新建 |
 | AnimationInterface | 动画接口 | `docs/kb/capabilities/animation_interface.md` | 新建 |
+| DragFramework | 拖拽框架 | `docs/kb/architecture/drag-framework.md` | 新建（独立主题） |
+| DragCapability | 通用拖拽能力 | `docs/kb/capabilities/drag-capability.md` | 新建（独立主题） |
+| ResourceAccess | 资源访问 | `docs/kb/architecture/resource-access.md` | 新建 |
+| ThemeLayeredAccess | 主题分层访问 | `docs/kb/architecture/theme-layered-access.md` | 新建 |
+| ThemeFramework | Theme框架 | `docs/kb/architecture/theme-framework.md` | 新建 |
+| ResourceDynamicSwitching | 资源动态切换 | `docs/kb/architecture/resource-dynamic-switching.md` | 新建 |
+| SubwindowMechanism | 子窗机制 | `docs/kb/architecture/subwindow-mechanism.md` | 新建 |
+| VisualEffectAttributes | 视效属性 | `docs/kb/capabilities/visual-effect-attributes.md` | 新建 |
+| ModalAttributes | 模态属性 | `docs/kb/capabilities/modal-attributes.md` | 新建 |
+| BasicUnits | 基础单位 | `docs/kb/capabilities/basic-units.md` | 新建 |
+| ContentModifierForm | 表单类组件自定义内容 | `docs/kb/capabilities/content-modifier-form.md` | 新建 |
+| ContentModifierDisplay | 信息展示类组件自定义内容 | `docs/kb/capabilities/content-modifier-display.md` | 新建 |
+| UIAppearance | 色彩模式管理 | `docs/kb/capabilities/ui-appearance.md` | 新建 |
+| NamedRouter | 命名路由 | `docs/kb/api/named-router.md` | 新建 |
+| Rating | 评分组件 | `docs/kb/components/input-form/rating.md` | 新建 |
+| AlertDialog | 警告弹窗 | `docs/kb/components/overlay/alert_dialog.md` | 新建 |
+| ActionSheet | 列表选择弹窗 | `docs/kb/components/overlay/action_sheet.md` | 新建 |
+| ContextMenu | 上下文菜单接口 | `docs/kb/components/overlay/context_menu.md` | 新建 |
+| bindContentCover | 全模态弹窗属性 | `docs/kb/components/overlay/bind_content_cover.md` | 新建 |
+| WithTheme | 主题作用域组件 | `docs/kb/components/container/with_theme.md` | 新建 |
+| TextCommonAttributes | 文本通用属性 | `docs/kb/capabilities/text-common-attributes.md` | 新建 |
+| FontRegistration | 字体注册 | `docs/kb/capabilities/font-registration.md` | 新建 |
+| TextMeasurement | 文本测量 | `docs/kb/capabilities/text-measurement.md` | 新建 |
+| TextSelection | 文本选择 | `docs/kb/capabilities/text-selection.md` | 新建 |
+| TextInteraction | 文本交互 | `docs/kb/capabilities/text-interaction.md` | 新建 |
+| AutoFill | 自动补全能力（AutoFill） | `docs/kb/capabilities/autofill.md` | 新建 |
+| AbilityContext | Ability上下文 | `docs/kb/capabilities/ability-context.md` | 新建 |
+| FrameCallback | Frame回调接口 | `docs/kb/capabilities/frame-callback.md` | 新建 |
+| basic-attributes | 基础属性 | `docs/kb/capabilities/basic-attributes.md` | 新建 |
+| style-attributes | 样式属性（stateStyles + attributeModifier） | `docs/kb/capabilities/style-attributes.md` | 新建 |
+| multi-instance-management | 多实例管理 | `docs/kb/architecture/multi-instance-management.md` | 新建 |
+| OverlayCapability | 浮层能力 | `docs/kb/capabilities/overlay-capability.md` | 新建 |
 | InteractionAttributes | 交互属性 | `docs/kb/capabilities/interaction-attributes.md` | 新建 |
 | ComponentScreenshot | 组件截图 | `docs/kb/capabilities/component-screenshot.md` | 新建 |
+| FrameNode | FrameNode 节点 | `docs/kb/capabilities/frame_node.md` | 新建 |
+| RenderNode | RenderNode 绘制节点 | `docs/kb/capabilities/render_node.md` | 新建 |
+| BuilderNode | BuilderNode 构建节点 | `docs/kb/capabilities/builder_node.md` | 新建 |
+| ComponentContent | ComponentContent 组件内容 | `docs/kb/capabilities/component_content.md` | 新建 |
+| TypedFrameNode | TypedFrameNode 类型化节点 | `docs/kb/capabilities/typed_frame_node.md` | 新建 |
+| ComponentModifier | 组件 Modifier 类体系 | `docs/kb/capabilities/component_modifier.md` | 新建 |
+| DrawModifier | 自定义绘制回调 Modifier | `docs/kb/capabilities/draw_modifier.md` | 新建 |
+| AttributeModifier | 动态属性 Modifier 通路 | `docs/kb/capabilities/attribute_modifier.md` | 新建 |
+| CustomProperty | 自定义属性 | `docs/kb/capabilities/custom_property.md` | 新建 |
 
 ## 检索
 

@@ -112,6 +112,7 @@ public:
     void BeginUpdate()
     {
         synced_ = false;
+        contentSizeDiminished_ = false;
     }
     /**
      * @brief synchronize data after update is completed.
@@ -283,8 +284,9 @@ public:
 
     std::vector<float> mainGap_; // update this at the end of a layout
 
-    // maximum content height encountered so far
+    // Exact for a sole lazy child; otherwise a historical maximum.
     float maxHeight_ = 0.0f;
+    bool contentSizeDiminished_ = false;
 
     // record the new startIndex_ after changing the datasource, corresponding to the old startIndex_.
     int32_t newStartIndex_ = EMPTY_NEW_START_INDEX;

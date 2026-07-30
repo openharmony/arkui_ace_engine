@@ -153,7 +153,7 @@ void JSContainerPicker::SetItemHeight(const JSCallbackInfo& info)
     }
     CalcDimension dim;
     RefPtr<ResourceObject> resObj;
-    if (!ParseLengthMetricsToDimension(info[0], dim, resObj)) {
+    if (!JSViewAbstract::ParseLengthMetricsToPositiveDimension(info[0], dim, resObj)) {
         return;
     }
     Dimension pickerDim = dim;

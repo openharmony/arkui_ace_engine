@@ -2091,7 +2091,7 @@ void PipelineBase::OnSurfaceDensityChanged(double density) {}
 
 const RefPtr<UIDisplaySyncManager>& PipelineBase::GetOrCreateUIDisplaySyncManager()
 {
-    static RefPtr<UIDisplaySyncManager> manager;
+    static RefPtr<UIDisplaySyncManager> manager = MakeRefPtr<UIDisplaySyncManager>();
     return manager;
 }
 

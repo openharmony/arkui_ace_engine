@@ -158,6 +158,10 @@ ace_unittest("smart_gesture_manager_test_ng") {
 ace_unittest("display_sync_manager_test_ng") {
   module_name = "DrawingSet-Line"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    module_name = "Graphic_2d_LTPO_DisplaySync"
+  }
   sources = [ "display_sync_manager_test.cpp" ]
 }
 
@@ -250,6 +254,10 @@ ace_unittest("drag_drop_spring_loading_test_ng") {
 ace_unittest("content_change_manager_test_ng") {
   module_name = "TextSet-Text"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+    cflags = [ "-fno-access-control" ]
+  }
   sources = [ "content_change_manager_test_ng.cpp" ]
 }
 

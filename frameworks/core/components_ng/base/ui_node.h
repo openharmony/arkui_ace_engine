@@ -699,6 +699,13 @@ public:
     // return value: true if the node can be removed immediately.
     virtual bool OnRemoveFromParent(bool allowTransition);
 
+    virtual bool NeedClearDisappearingChildrenRecursively() const
+    {
+        return false;
+    }
+
+    void ClearDisappearingChildren();
+
     void MarkForceMeasure();
 
     std::string GetCurrentCustomNodeInfo();

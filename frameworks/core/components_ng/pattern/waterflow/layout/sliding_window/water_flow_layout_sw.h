@@ -218,6 +218,12 @@ private:
 
     void MeasureRemainingLazyChild(int32_t startIdx, int32_t endIdx, bool forward = true) override;
     void MeasureLazyChild(const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane, bool forward) const;
+    void MeasureLazyLayoutItem(const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane, float referencePos,
+        ReferenceEdge referenceEdge, std::optional<int64_t> deadline) const;
+    void UpdateSoleLazyChild(const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane, float adjustStart,
+        float cacheHeight, float measureHeight) const;
+    float ReanchorSoleLazyChildToStart(const RefPtr<LayoutWrapper>& child, int32_t idx, size_t lane, int32_t segment,
+        float previousStart, float measureHeight) const;
 
     RefPtr<WaterFlowLayoutInfoSW> info_;
     RefPtr<WaterFlowSections> sections_;

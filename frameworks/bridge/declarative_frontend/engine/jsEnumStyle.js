@@ -38,7 +38,7 @@ let ColoringStrategy;
   ColoringStrategy.CONTRAST = 'contrast';
 })(ColoringStrategy || (ColoringStrategy = {}));
 
-var CompetitionStrategy;
+let CompetitionStrategy;
 (function (CompetitionStrategy) {
     CompetitionStrategy[CompetitionStrategy["DEFAULT"] = 0] = "DEFAULT";
     CompetitionStrategy[CompetitionStrategy["COMPETITION"] = 1] = "COMPETITION";

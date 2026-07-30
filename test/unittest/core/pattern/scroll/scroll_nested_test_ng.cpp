@@ -1005,4 +1005,47 @@ HWTEST_F(ScrollNestedTestNg, NestTest015, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(nestPattern_->GetCanOverScroll());
 }
+
+/**
+ * @tc.name: NestA11ySourcePropagation001
+ * @tc.desc: Verify accessibilityScrollSource_ is propagated from child to parent
+ *           in OnScrollEndRecursiveInner during nested scroll.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollNestedTestNg, NestA11ySourcePropagation001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::PARENT_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    };
+    CreateScroll();
+    {
+        CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
+        {
+            CreateContent(TOP_CONTENT_MAIN_SIZE);
+            ViewStackProcessor::GetInstance()->Pop();
+            ScrollModelNG nestModel = CreateNestScroll();
+            nestModel.SetNestedScroll(nestedOpt);
+            {
+                CreateContent();
+            }
+        }
+    }
+    CreateScrollDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Drag child scroll to trigger user scroll, then release with velocity.
+     * @tc.expected: Parent receives SCROLL_END with scrollSource="user"
+     *               (propagated from child in OnScrollEndRecursiveInner).
+     */
+    auto captured = CaptureSendAccessibilityEventInfo(pipeline);
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    DragAction(nestNode_, Offset(0, HEIGHT / 2), -ITEM_MAIN_SIZE, -ITEM_MAIN_SIZE);
+    TickToFinish();
+    EXPECT_EQ(captured->type, AccessibilityEventType::SCROLL_END);
+    EXPECT_EQ(captured->extraEventInfo["scrollSource"], "user");
+}
+
 } // namespace OHOS::Ace::NG

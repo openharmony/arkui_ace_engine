@@ -1207,7 +1207,11 @@ void TextPattern::GetSpanItemAttributeUseForHtml(NG::FontStyle& fontStyle, NG::T
     textLineStyle.UpdateParagraphSpacing(textStyle->GetParagraphSpacing());
     textLineStyle.SetOptGradient(GradientConvert::ToNGGradient(textStyle->GetGradient()));
     textLineStyle.UpdateColorShaderStyle(textStyle->GetColorShaderStyle());
-    textLineStyle.UpdateTailIndents(textStyle->GetTailIndent());
+    if (textStyle->HasTailIndent()) {
+        textLineStyle.UpdateTailIndents(textStyle->GetTailIndent().value());
+    } else {
+        textLineStyle.ResetTailIndents();
+    }
 }
 
 RefPtr<TaskExecutor> TextPattern::GetTaskExecutorItem()

@@ -102,7 +102,7 @@ DynamicLayout 功能域：`specs/05-ui-components/01-layout-components/13-dynami
 
 - Layout Framework：`docs/kb/architecture/layout-framework.md`
 - Layout Attributes：`docs/kb/capabilities/layout-attributes.md`
+- 自定义测量/布局：`docs/kb/capabilities/custom-measure-layout.md`
 - Row：`docs/kb/components/container/row.md`
 - Column：`docs/kb/components/container/column.md`
 - Stack：`docs/kb/components/container/stack.md`
-
