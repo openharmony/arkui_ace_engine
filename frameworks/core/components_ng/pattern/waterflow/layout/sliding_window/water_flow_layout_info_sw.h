@@ -121,7 +121,6 @@ public:
      * @param mainGap main-axis gap between items.
      */
     void Sync(int32_t itemCnt, float mainSize, const std::vector<float>& mainGap);
-    void SyncReportRange(float mainSize);
 
     /**
      * @brief Mark beginning of cache item layout and save current lanes_ state.
@@ -330,22 +329,9 @@ private:
      */
     void SyncOnEmptyLanes(float mainSize);
 
-    struct ReportRangeContext {
-        ReportRangeContext(float viewStartBound, float viewEndBound)
-            : startBound(viewStartBound), endBound(viewEndBound)
-        {}
-
-        float startBound = 0.0f;
-        float endBound = 0.0f;
-        int32_t startIndex = Infinity<int32_t>();
-        int32_t endIndex = -1;
-    };
-
-    void UpdateReportRangeWithLane(const Lane& lane, float mainGap, ReportRangeContext& reportRange) const;
-
-    /**
-     * @brief Handle end-of-content detection and adjust endIndex for zero-height trailing items
-     */
+	/**
+	 * @brief Handle end-of-content detection and adjust endIndex for zero-height trailing items
+	 */
     void HandleItemEnd(int32_t itemCnt, float mainSize);
 
     /**
