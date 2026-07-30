@@ -15,8 +15,6 @@
       "float OHOS::Ace::NG::Converter::Convert<float, double>(double const&)";
       "int OHOS::Ace::NG::Converter::Convert<int, double>(double const&)";
       "void OHOS::Ace::NG::Converter::AssignCast<OHOS::Ace::ImageFit, Ark_ImageFit>(std::__h::optional<OHOS::Ace::ImageFit>&, Ark_ImageFit const&)";
-      OHOS::Ace::NG::ArkUINativeModule::PreviewMockComponent*;
-      OHOS::Ace::NG::CreatePreviewPlaceholder*;
       "OHOS::Ace::BackgroundTaskHelper::GetInstance()";
       "OHOS::Ace::NG::Converter::FontWeightInt OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontWeightInt, Ark_Resource>(Ark_Resource const&)";
       "OHOS::Ace::NG::Converter::FontWeightInt OHOS::Ace::NG::Converter::Convert<OHOS::Ace::NG::Converter::FontWeightInt, Ark_FontWeight>(Ark_FontWeight const&)";
@@ -4490,7 +4488,7 @@
       OHOS::Ace::NG::NGGestureRecognizer::IsInResponseLinkRecognizers*;
       OHOS::Ace::NG::NGGestureRecognizer::GetGestureInfo*;
       OHOS::Ace::NG::NodeRenderStatusMonitor::*;
-      OHOS::Ace::NG::NodeModifier::GetDividerModifier*;
+      "OHOS::Ace::NG::NodeModifier::GetDividerModifier()";
       OHOS::Ace::NG::OverlayManager::*;
       OHOS::Ace::NG::PaddingPropertyF::*;
       OHOS::Ace::NG::PaddingPropertyT*;
@@ -4510,7 +4508,7 @@
       OHOS::Ace::NG::RichEditorChangeValue::*;
       OHOS::Ace::NG::RichEditorDeleteValue::*;
       OHOS::Ace::NG::RichEditorInsertValue::*;
-      OHOS::Ace::NG::RosenRenderContext::GetRSNode*;
+      "OHOS::Ace::NG::RosenRenderContext::GetRSNode()";
       OHOS::Ace::NG::RotationGesture::*;
       OHOS::Ace::NG::SaveButtonModelNG::*;
       OHOS::Ace::NG::ScaleProperty::*;
@@ -4597,13 +4595,13 @@
       OHOS::Ace::RefreshModel::*;
       OHOS::Ace::RegistAppBarNodeBuilder*;
       OHOS::Ace::RegisterBeforeCreateLayoutBuilder*;
-      OHOS::Ace::NG::RelativeContainerModelNG::CreateFrameNode*;
-      OHOS::Ace::NG::CalcSize::IsWidthDimensionUnitAuto*;
-      OHOS::Ace::NG::CalcSize::IsHeightDimensionUnitAuto*;
-      OHOS::Ace::NG::CalcSize::IsDimensionUnitAuto*;
-      OHOS::Ace::NG::GeneratedModifier::GetRelativeContainerModifier*;
-      OHOS::Ace::NG::GetCJUIRelativeContainerDynamicModifier*;
-      OHOS::Ace::RenderRelativeContainer::Create*;
+      "OHOS::Ace::NG::RelativeContainerModelNG::CreateFrameNode()";
+      "OHOS::Ace::NG::CalcSize::IsWidthDimensionUnitAuto() const";
+      "OHOS::Ace::NG::CalcSize::IsHeightDimensionUnitAuto() const";
+      "OHOS::Ace::NG::CalcSize::IsDimensionUnitAuto() const";
+      "OHOS::Ace::NG::GeneratedModifier::GetRelativeContainerModifier()";
+      "OHOS::Ace::NG::GetCJUIRelativeContainerDynamicModifier()";
+      "OHOS::Ace::RenderRelativeContainer::Create()";
       OHOS::Ace::RenderElement::*;
       OHOS::Ace::RenderStack::*;
       OHOS::Ace::RenderBox::Create;
