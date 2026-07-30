@@ -581,6 +581,7 @@ struct SimpleSegmentButtonV2 {
   @Local openSelectedItemSystemMaterial?: boolean = false;
   @Local selectedItemScale?: ScaleOptions;
   @Local tempDisableAnimation?: boolean = false;
+  @Local isTapGesture?: boolean = false;
   @Local backplatePosition: Position = {x: 0, y: 0};
 
   @Computed
@@ -657,6 +658,7 @@ struct SimpleSegmentButtonV2 {
           })
           .gesture(
             TapGesture().onAction(() => {
+              this.isTapGesture = true;
               this.onItemClicked?.(repeatItem.index);
               this.backplatePosition = {
                 x: this.selectedItemRect?.position.x,
@@ -1191,16 +1193,21 @@ struct SimpleSegmentButtonV2 {
   private updateSelectedIndex(selectedIndex: number) {
     if (!this.isItemEnabled(selectedIndex) || selectedIndex === this.selectedIndex
     ) {
+      this.isTapGesture = false;
       return;
     }
 
     if (this.isBackgroundSystemMaterialEnabled() && !this.tempDisableAnimation) {
-      this.getUIContext().animateTo({
-        curve: curves.interpolatingSpring(0, 1, 195, 14),
-      }, () => {
-        this.selectedItemScale = { x: 1.01, y: 0.99 }
+      if (this.isTapGesture) {
         this.openSelectedItemSystemMaterial = true;
-      })
+      } else {
+        this.getUIContext().animateTo({
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+        }, () => {
+          this.selectedItemScale = { x: 1.01, y: 0.99 }
+          this.openSelectedItemSystemMaterial = true;
+        })
+      }
     }
 
     this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
@@ -1212,12 +1219,17 @@ struct SimpleSegmentButtonV2 {
     });
 
     if (this.isBackgroundSystemMaterialEnabled() && !this.tempDisableAnimation) {
-      this.getUIContext().animateTo({
-        curve: curves.interpolatingSpring(0, 1, 195, 14),
-        delay: 250
-      }, () => {
+      if (this.isTapGesture) {
         this.openSelectedItemSystemMaterial = false;
-      });
+        this.isTapGesture = false;
+      } else {
+        this.getUIContext().animateTo({
+          curve: curves.interpolatingSpring(0, 1, 195, 14),
+          delay: 250
+        }, () => {
+          this.openSelectedItemSystemMaterial = false;
+        });
+      }
     }
   }
 

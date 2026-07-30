@@ -2321,6 +2321,7 @@ export class SegmentButton extends ViewPU {
       'hoverColorArray'
     );
     this.doSelectedChangeAnimate = false;
+    this.isTapGesture = false;
     this.isCurrentPositionSelected = false;
     this.isCurrentPositionPressed = false;
     this.panGestureStartPoint = { x: 0, y: 0 };
@@ -2865,6 +2866,7 @@ export class SegmentButton extends ViewPU {
           }
           this.doSelectedChangeAnimate =
             this.selectedIndexes[0] > Math.min(this.options.buttons.length, this.buttonItemsSize.length) ? false : true;
+          this.isTapGesture = true;
           let realClickIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
           if (this.onItemClicked) {
             this.onItemClicked(realClickIndex);
@@ -3553,32 +3555,39 @@ export class SegmentButton extends ViewPU {
     };
     if (curve) {
       if (this.options.backgroundSystemMaterial) {
-        this.getUIContext().animateTo(
-          {
-            curve: curves.interpolatingSpring(0, 1, 195, 14),
-          },
-          () => {
-            this.selectedItemScale = { x: 1.01, y: 0.99 };
-            this.openSelectedItemSystemMaterial = true;
-          }
-        );
-        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
-        this.getUIContext().animateTo(
-          {
-            curve: curves.interpolatingSpring(0, 1, 195, 14),
-            delay: 200,
-          },
-          () => {
-            this.openSelectedItemSystemMaterial = false;
-          }
-        );
+        if (this.isTapGesture) {
+          this.openSelectedItemSystemMaterial = true;
+          this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
+          this.openSelectedItemSystemMaterial = false;
+          this.isTapGesture = false;
+        } else {
+          this.getUIContext().animateTo(
+            {
+              curve: curves.interpolatingSpring(0, 1, 195, 14),
+            },
+            () => {
+              this.selectedItemScale = { x: 1.01, y: 0.99 };
+              this.openSelectedItemSystemMaterial = true;
+            }
+          );
+          this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
+          this.getUIContext().animateTo(
+            {
+              curve: curves.interpolatingSpring(0, 1, 195, 14),
+              delay: 200,
+            },
+            () => {
+              this.openSelectedItemSystemMaterial = false;
+            }
+          );
+        }
       } else {
         this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
       }
     } else {
       setAnimatedPropertyFunc();
     }
-    this.updateButtonFont();
+        this.updateButtonFont();
   }
   updateButtonFont() {
     this.buttonItemsSelected.forEach((selected, index) => {

@@ -1346,6 +1346,7 @@ export struct SegmentButton {
   @State hoverColorArray: HoverColorProperty[] = Array.from({
     length: MAX_ITEM_COUNT
   }, (_: Object, index) => new HoverColorProperty())
+  private isTapGesture: boolean = false
   private doSelectedChangeAnimate: boolean = false
   private isCurrentPositionSelected: boolean = false
   private isCurrentPositionPressed: boolean = false
@@ -1719,6 +1720,7 @@ export struct SegmentButton {
             this.doSelectedChangeAnimate =
               this.selectedIndexes[0] > Math.min(this.options.buttons.length,
                 this.buttonItemsSize.length) ? false : true
+            this.isTapGesture = true
 
             let realClickIndex: number = this.isShouldMirror() ? buttonLength - 1 - i : i
             if (this.onItemClicked) {
@@ -2159,19 +2161,26 @@ export struct SegmentButton {
     }
     if (curve) {
       if (this.options.backgroundSystemMaterial) {
-        this.getUIContext().animateTo({
-          curve: curves.interpolatingSpring(0, 1, 195, 14),
-        }, () => {
-          this.selectedItemScale = { x: 1.01, y: 0.99 }
+        if (this.isTapGesture) {
           this.openSelectedItemSystemMaterial = true;
-        })
-        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc)
-        this.getUIContext().animateTo({
-          curve: curves.interpolatingSpring(0, 1, 195, 14),
-          delay: 200
-        }, () => {
+          this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
           this.openSelectedItemSystemMaterial = false;
-        })
+          this.isTapGesture = false;
+        } else {
+          this.getUIContext().animateTo({
+            curve: curves.interpolatingSpring(0, 1, 195, 14),
+          }, () => {
+            this.selectedItemScale = { x: 1.01, y: 0.99 }
+            this.openSelectedItemSystemMaterial = true;
+          });
+          this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
+          this.getUIContext().animateTo({
+            curve: curves.interpolatingSpring(0, 1, 195, 14),
+            delay: 200
+          }, () => {
+            this.openSelectedItemSystemMaterial = false;
+          });
+        }
       } else {
         this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
       }
