@@ -39,16 +39,16 @@ export class ArkRelativeContainerNode extends ArkBaseNode implements RelativeCon
     }
 
     guideLine(value: Array<GuideLineStyle> | undefined): this {
-        const value_casted = value as (Array<GuideLineStyle> | undefined);
-        this.getPeer()?.setGuideLineAttribute(value_casted);
+        const valueCasted = value as (Array<GuideLineStyle> | undefined);
+        this.getPeer()?.setGuideLineAttribute(valueCasted);
         return this;
     }
 
-    barrier(value: Array<BarrierStyle> | undefined): this {
-        const value_type = runtimeType(value);
-        if ((RuntimeType.OBJECT == value_type && (value instanceof Array)) || (RuntimeType.UNDEFINED == value_type)) {
-            const value_casted = value as (Array<BarrierStyle> | undefined);
-            this.getPeer()?.setBarrierAttribute(value_casted);
+    barrier(value: Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined): this {
+        const valueType = runtimeType(value);
+        if ((RuntimeType.OBJECT == valueType && (value instanceof Array)) || (RuntimeType.UNDEFINED == valueType)) {
+            const valueCasted = value as (Array<BarrierStyle> | Array<LocalizedBarrierStyle> | undefined);
+            this.getPeer()?.setBarrierAttribute(valueCasted);
             return this;
         }
         throw new Error("Can not select appropriate overload");
