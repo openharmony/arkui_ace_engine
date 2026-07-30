@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,8 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/svg/parse/svg_path.h"
-
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
-
+#include "frameworks/core/components_ng/svg/parse/svg_path.h"
 
 namespace OHOS::Ace::NG {
 
@@ -48,7 +46,7 @@ RSRecordingPath SvgPath::GetPath(const SvgLengthScaleRule& lengthRule)
         auto obb = lengthRule.GetContainerRect();
         if (GreatNotEqual(obb.Width(), 0.0) && GreatNotEqual(obb.Height(), 0.0)) {
             RSMatrix matrix;
-            /* Setup matrix  for converting the points in path */
+            /* Setup matrix for converting the points in path */
             matrix.SetScaleTranslate(obb.Width(), obb.Height(), obb.Left(), obb.Top());
             RSRecordingPath tmp;
             tmp.BuildFromSVGString(d_);
@@ -71,6 +69,7 @@ RSRecordingPath SvgPath::AsPath(const SvgLengthScaleRule& lengthRule)
     }
     /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
     out = GetPath(lengthRule);
+
     if (attributes_.fillState.IsEvenodd()) {
         out.SetFillStyle(RSPathFillType::EVENTODD);
     }

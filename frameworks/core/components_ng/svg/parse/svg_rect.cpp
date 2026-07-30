@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/svg/parse/svg_rect.h"
-
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/components_ng/svg/parse/svg_rect.h"
 
 namespace OHOS::Ace::NG {
 
@@ -58,7 +57,7 @@ RSRecordingPath SvgRect::AsPath(const SvgLengthScaleRule& lengthRule)
 {
     RSRecordingPath path;
     /* re-generate the Path for pathTransform(true). AsPath come from clip-path */
-    if (path_.has_value() && lengthRule_ == lengthRule) {
+    if (path_.has_value() && lengthRule_ == lengthRule && !lengthRule.GetPathTransform()) {
         path = path_.value();
     } else {
         auto rx = GreatNotEqual(rectAttr_.rx.Value(), 0.0) ?
@@ -67,14 +66,14 @@ RSRecordingPath SvgRect::AsPath(const SvgLengthScaleRule& lengthRule)
                 GetMeasuredLength(rectAttr_.ry, lengthRule, SvgLengthType::VERTICAL) : 0.0;
         rx = GreatNotEqual(rx, 0.0) ? rx : ry;
         ry = GreatNotEqual(ry, 0.0) ? ry : rx;
-        RSScalar left, top;
+        RSScalar left;
+        RSScalar top;
         left = GetMeasuredPosition(rectAttr_.x, lengthRule, SvgLengthType::HORIZONTAL) ;
         top = GetMeasuredPosition(rectAttr_.y, lengthRule, SvgLengthType::VERTICAL) ;
         RSScalar width = GetMeasuredLength(rectAttr_.width, lengthRule, SvgLengthType::HORIZONTAL);
         RSScalar height = GetMeasuredLength(rectAttr_.height, lengthRule, SvgLengthType::VERTICAL);
         RSRoundRect roundRect = RSRoundRect(RSRect(left, top, width + left, height + top), rx, ry);
         path.AddRoundRect(roundRect);
-        lengthRule_ = lengthRule;
         path_ = path;
     }
     /* Apply path transform for clip-path only */

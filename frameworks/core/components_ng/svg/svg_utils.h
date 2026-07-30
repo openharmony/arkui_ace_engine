@@ -20,6 +20,10 @@
 
 namespace OHOS::Ace::NG {
 
+enum SVG_FEATURE_SDK_VERSION {
+    SVG_FEATURE_VERSION_INITIAL = 21,
+};
+
 class SvgUtils {
 private:
     SvgUtils() = default;

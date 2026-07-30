@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,8 @@
  * limitations under the License.
  */
 
-#include "frameworks/core/components_ng/svg/parse/svg_use.h"
-
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
+#include "frameworks/core/components_ng/svg/parse/svg_use.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -122,9 +121,9 @@ void SvgUse::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
     // Create New coordinate system
     SvgCoordinateSystemContext useContext(lengthRule.GetContainerRect(), lengthRule.GetViewPort());
     auto useRule = useContext.BuildScaleRule(SvgLengthScaleUnit::USER_SPACE_ON_USE);
-    useRule.SetUseFillColor(lengthRule.UseFillColor());
     auto refSvgNode = svgContext->GetSvgNodeById(attributes_.href);
     CHECK_NULL_VOID(refSvgNode);
+    useRule.SetUseFillColor(lengthRule.UseFillColor());
     auto useX = GetRegionPosition(useAttr_.x, useRule, SvgLengthType::HORIZONTAL);
     auto useY = GetRegionPosition(useAttr_.y, useRule, SvgLengthType::VERTICAL);
     if (!NearEqual(useX, 0.0) || !NearEqual(useY, 0.0)) {

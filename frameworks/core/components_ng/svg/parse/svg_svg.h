@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,12 +38,12 @@ public:
     Rect GetViewBox() const;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
     void AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort) override;
+    void OnImageColorFilter(RSCanvas& canvas, const ImageColorFilter& imageColorFilter);
     void AdjustContentAreaSvgSizeValid(RSCanvas& canvas, const Size& viewPort, const Size& svgSize,
         const Rect& viewBox);
     void AdjustContentAreaSvgSizeInvalid(RSCanvas& canvas, const Size& viewPort, const Size& svgSize,
         const Rect& viewBox);
     SvgPreserveAspectRatio GetPreserveAspectRatio() const;
-    void OnImageColorFilter(RSCanvas& canvas, const ImageColorFilter& imageColorFilter);
 
 private:
     SvgAttributes svgAttr_;
