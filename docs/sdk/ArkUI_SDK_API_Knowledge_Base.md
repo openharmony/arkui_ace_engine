@@ -543,7 +543,7 @@ class ButtonModifier extends ButtonAttribute
 | NavDestination | `pattern/navigation/nav_destination_pattern.cpp` | - | 导航目标页 |
 | SideBarContainer | `pattern/side_bar/side_bar_container_pattern.cpp` | - | 侧边栏 |
 | Refresh | `pattern/refresh/refresh_pattern.cpp` | [Refresh](../kb/components/container/refresh.md) | 下拉刷新 |
-| WaterFlow | `pattern/waterflow/water_flow_pattern.cpp` | [WaterFlow](../pattern/waterflow/WaterFlow_Knowledge_Base.md) | 瀑布流 |
+| WaterFlow | `pattern/waterflow/water_flow_pattern.cpp` | [WaterFlow](../kb/components/container/waterflow.md) | 瀑布流 |
 | FlowItem | `pattern/waterflow/water_flow_item_pattern.cpp` | - | 瀑布流子项 |
 | RelativeContainer | `pattern/relative_container/relative_container_pattern.cpp` | - | 相对布局 |
 | ColumnSplit | `pattern/linear_split/linear_split_pattern.cpp` | - | 纵向分割 |

@@ -2,7 +2,7 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-07-29
+> 更新时间：2026-07-30
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
@@ -38,32 +38,33 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：189
-- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：36
-- `docs/syntax/` 下语法专题文档：7
-  - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
+- `docs/` 下 Markdown 文档总数：193
+- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：32
+- `docs/syntax/` 下语法专题文档：3
+  - 知识库命名文档：0 个（ForEach/LazyForEach/Repeat/RepeatVirtualScroll 已迁移到 `docs/kb/syntax/`）
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计
 
-- `context_registry.json` 新版条目数：135
-- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：37
-- 旧 KB 索引路径有效性：37/37（全部存在）
+- `context_registry.json` 新版条目数：143
+- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：33
+- 旧 KB 索引路径有效性：33/33（全部存在）
 
 - 类型分布：
-  - `component`: 20
+  - `component`: 16
   - `sdk`: 4
   - `feature`: 13
 - 分类分布：
   - `advanced`: 2
-  - `basic`: 4
-  - `container`: 2
+  - `basic`: 2
+  - `container`: 1
   - `data_display`: 8
+  - `rich_text`: 2
   - `sdk`: 6
   - `selector`: 3
   - `system`: 9
-- 关键词总数（索引内）：355
-- 别名总数（索引内）：122
+- 关键词总数（索引内）：316
+- 别名总数（索引内）：109
 
 ### 2.3 覆盖现状
 
@@ -78,7 +79,7 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-├── kb/ (69 MD，68 个新版 KB 主题 + README)
+├── kb/ (144 MD，143 个新版 KB 主题 + README)
 ├── accessibility/ (1 KB)
 ├── api/ (2 KB)
 ├── architecture/ (2 KB + 3 非 `*_Knowledge_Base*` 命名架构文档)
@@ -87,10 +88,10 @@ docs/
 ├── entrance/ (1 MD)
 ├── focus/ (2 MD)
 ├── layout/ (0 KB)
-├── pattern/ (28 KB + 6 非 `*_Knowledge_Base*` 命名文档)
+├── pattern/ (19 KB + 6 非 `*_Knowledge_Base*` 命名文档)
 ├── sdk/ (3 KB)
 ├── svg/ (0 KB，SVG 已迁移)
-└── syntax/ (7 MD, 其中 4 KB)
+└── syntax/ (3 MD，旧语法 KB 已迁移到 `docs/kb/syntax/`)
 ```
 
 说明：
@@ -181,6 +182,7 @@ PY
 - 2026-07-18：基于当前源码、SDK、测试和基础渲染管线 Spec 重建 Layout Framework 新版 KB，旧 KB 与旧索引入口已移除（旧索引 52 条）。
 - 2026-07-18：新增 Layout Attributes、Blank、Divider、Column、GridCol、GridRow、Row、Stack、FolderStack；重建 Flex（含 Wrap）并合并 Safe Area 两个旧主题。新版 registry 增至 34 条，旧 Flex/Safe Area 文件及索引入口移除，旧索引减至 49 条。
 - 2026-07-24：新增 ImageLoading、BackgroundImage、ImageAnalyzer 和四个 PickerDialog 新版 KB；迁移 SVG 到 `docs/kb/capabilities/svg.md` 并移除旧文件及旧索引入口。新版 registry 增至 42 条，旧索引减至 48 条。
+- 2026-07-30：依据 05-03-01 与 05-03-10 Spec 重建滚动公共能力、迁移 WaterFlow/FlowItem；移除旧 WaterFlow KB 与索引入口，并与上游 Scroll/List/Refresh/ScrollBar 等迁移结果合并。新版 registry 共 143 条，旧索引减至 33 条；同步修复 Swiper 组件化路由。
 
 - 2026-07-23：新增 8 个 overlay 类组件 KB（Menu/Dialog/Toast/Select/bindPopup/PopupAdvanced/Sheet/bindTips），补齐弹窗类组件 Spec 路由；迁移 Menu 和 Sheet 旧 KB 到新版路径。
 - 2026-07-27：新增 Pixel Rounding 与 MediaQuery 新版 KB；新版 registry 增至 66 条，旧索引保持 46 条。

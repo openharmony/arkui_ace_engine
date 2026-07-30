@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-29
-> 主题数：137
+> 更新时间：2026-07-30
+> 主题数：148
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -72,6 +72,7 @@ docs/kb/
 | Navigation | 导航容器组件 | `docs/kb/components/container/navigation.md` | 新建 |
 | Tabs | 标签页容器组件 | `docs/kb/components/container/tabs.md` | 新建 |
 | Swiper | 轮播容器组件 | `docs/kb/components/container/swiper.md` | 新建 |
+| WaterFlow | 瀑布流组件 | `docs/kb/components/container/waterflow.md` | 已迁移，旧 KB 已移除；补齐 05-03-10 Spec 路由 |
 | PlaceholderComponent | 占位组件（概念入口，转跳 05-16-01/02） | `docs/kb/capabilities/placeholder_component.md` | 新建 |
 | NodeAdapter | NodeAdapter 命令式懒渲染适配器 | `docs/kb/capabilities/node_adapter.md` | 新建 |
 | SameLayerRendering | 同层渲染（纹理导出生产者，FuncID 04-18-01） | `docs/kb/capabilities/same-layer-rendering.md` | 新建 |
@@ -126,6 +127,7 @@ docs/kb/
 | DFXDumpMechanism | DFX Dump 机制 | `docs/kb/architecture/dfx/dump-mechanism.md` | 新建 |
 | DFXLayoutBoundaryDisplay | DFX 布局边界显示 | `docs/kb/architecture/dfx/layout-boundary-display.md` | 新建 |
 | UIContext | UI 上下文 | `docs/kb/capabilities/ui-context.md` | 新建 |
+| ScrollCommonCapability | 滚动公共能力 | `docs/kb/capabilities/scroll-common-capability.md` | 已重建，旧 Scroll KB 已移除；补齐 05-03-01 Spec 路由 |
 | Menu | 菜单组件 | `docs/kb/components/overlay/menu.md` | 已迁移，旧 KB 已移除；补齐 Spec 路由 |
 | Dialog | 弹窗组件 | `docs/kb/components/overlay/dialog.md` | 新建；补齐 Spec 路由 |
 | Toast | 提示组件 | `docs/kb/components/overlay/toast.md` | 新建；补齐 Spec 路由 |
