@@ -1774,7 +1774,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest030, TestSize.Level1)
         auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
         ASSERT_NE(toastTheme, nullptr);
         expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
-        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps, false);
     }
 
     const auto& safeArea = toastProps->GetSafeAreaInsets();
@@ -1906,7 +1906,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest032, TestSize.Level1)
         auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
         ASSERT_NE(toastTheme, nullptr);
         expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
-        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps, false);
     }
 
     EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
@@ -1976,7 +1976,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest033, TestSize.Level1)
         auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
         ASSERT_NE(toastTheme, nullptr);
         expectedSafeAreaTop += toastTheme->GetTop().ConvertToPx();
-        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps);
+        pattern->CalculateTitleBarHeightForTopAlignment(expectedSafeAreaTop, pipelineContext, toastProps, false);
     }
 
     EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
