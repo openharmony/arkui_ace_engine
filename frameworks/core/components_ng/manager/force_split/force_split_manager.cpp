@@ -78,8 +78,11 @@ void ForceSplitManager::SetForceSplitEnable(bool isForceSplit, ForceSplitMode mo
         return;
     }
     // only mode change
+    ForceSplitMode preMode = mode_;
     ChangeForceSplitModeTo(mode);
-    NotifyMediaQueryUpdate();
+    if (preMode != mode) {
+        NotifyMediaQueryUpdate();
+    }
 }
 
 bool ForceSplitManager::IsDraggable(ForceSplitMode mode)
