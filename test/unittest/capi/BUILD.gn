@@ -54,6 +54,7 @@ form_component_support_for_test = true
 component3d_component_support_for_test = true
 plugin_components_support_for_test = true
 pixel_map_supported_for_test = true
+video_components_support_for_test = true
 window_scene_support_for_test = false
 
 config("capi_unittest_config") {
@@ -89,6 +90,11 @@ config("capi_unittest_config") {
 
   if (defined(pixel_map_supported_for_test) && pixel_map_supported_for_test) {
     defines += [ "PIXEL_MAP_TEST_SUPPORTED" ]
+  }
+
+  if (defined(video_components_support_for_test) &&
+      video_components_support_for_test) {
+    defines += [ "VIDEO_SUPPORTED" ]
   }
   include_dirs = [ "mock_include" ]
 }

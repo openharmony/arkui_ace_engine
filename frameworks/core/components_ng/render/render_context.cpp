@@ -193,8 +193,10 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     pixelJsonValue->Put("top", pixStretchEffectOption.top.ToString().c_str());
     pixelJsonValue->Put("bottom", pixStretchEffectOption.bottom.ToString().c_str());
     json->PutExtAttr("pixelStretchEffect", pixelJsonValue, filter);
-    json->PutExtAttr("foregroundColor",
-        propForegroundColor_.value_or(Color::FOREGROUND).ColorToString().c_str(), filter);
+    if (propForegroundColor_.has_value()) {
+        json->PutExtAttr("foregroundColor",
+            propForegroundColor_->ColorToString().c_str(), filter);
+    }
     if (propClickEffectLevel_.has_value()) {
         auto clickEffectJsonValue = JsonUtil::Create(true);
         clickEffectJsonValue->Put("level", std::to_string((int)propClickEffectLevel_.value().level).c_str());
