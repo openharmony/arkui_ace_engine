@@ -36,12 +36,8 @@ public:                                                                         
     static constexpr TypeInfoBase::IdType TypeId()                                                         \
     {                                                                                                      \
         auto fnv1a_hash = [](const char* str) constexpr -> TypeInfoBase::IdType {                          \
-            const std::size_t offset_basis = (sizeof(std::size_t) == 4)                                  \
-                ? static_cast<std::size_t>(0x811C9DC5U)                                                  \
-                : static_cast<std::size_t>(0xCBF29CE484222325ULL);                                       \
-            const std::size_t fnv_prime = (sizeof(std::size_t) == 4)                                    \
-                ? static_cast<std::size_t>(0x01000193U)                                                  \
-                : static_cast<std::size_t>(0x100000001B3ULL);                                            \
+            const std::size_t offset_basis = (sizeof(std::size_t) == 4) ? 0x811C9DC5 : 0xCBF29CE484222325; \
+            const std::size_t fnv_prime = (sizeof(std::size_t) == 4) ? 0x01000193 : 0x100000001B3;         \
             TypeInfoBase::IdType hash = offset_basis;                                                      \
             while (*str) {                                                                                 \
                 hash = (hash ^ (*str++)) * fnv_prime;                                                      \
