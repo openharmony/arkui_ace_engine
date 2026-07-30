@@ -19,6 +19,7 @@
 #include "compatible/components/picker/picker_animation.h"
 #include "base/memory/ace_type.h"
 
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
 namespace OHOS::Ace::NG {
 class PipelineContext;
