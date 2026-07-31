@@ -1984,7 +1984,7 @@ void ParseParams(void* runtimeCallInfo, ArkUI_Params& params)
     XComponentBridge::ParseParams(runtimeCallInfoPtr, params);
 }
 
-void SetControllerCallback(void* runtimeCallInfo, ArkUINodeHandle* node)
+void SetControllerCallback(void* runtimeCallInfo, ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     auto* runtimeCallInfoPtr = reinterpret_cast<ArkUIRuntimeCallInfo*>(runtimeCallInfo);
