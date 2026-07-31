@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_NAV_PARAM_FLAT_SERIALIZER_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_NAV_PARAM_FLAT_SERIALIZER_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAV_PARAM_FLAT_SERIALIZER_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAV_PARAM_FLAT_SERIALIZER_H
 
 #include <string>
 
@@ -22,7 +22,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 
 namespace OHOS::Ace::Framework {
-class NavParamFlatSerializer {
+class JsNavParamFlatSerializer {
 public:
     static std::string Serialize(const JSRef<JSVal>& param);
     static JSRef<JSVal> Deserialize(const std::string& param);
@@ -30,4 +30,4 @@ public:
 };
 } // namespace OHOS::Ace::Framework
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_NAV_PARAM_FLAT_SERIALIZER_H
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAV_PARAM_FLAT_SERIALIZER_H

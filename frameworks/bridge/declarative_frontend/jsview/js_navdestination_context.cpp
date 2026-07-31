@@ -25,7 +25,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "bridge/declarative_frontend/jsview/nav_param_flat_serializer.h"
+#include "bridge/declarative_frontend/jsview/js_nav_param_flat_serializer.h"
 #include "frameworks/core/components_ng/pattern/navigation/navigation_route.h"
 
 namespace OHOS::Ace::Framework {
@@ -198,6 +198,6 @@ void JSNavPathInfo::UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info)
 
 std::string JSNavPathInfo::GetInitParamString() const
 {
-    return NavParamFlatSerializer::Serialize(initParam_);
+    return JsNavParamFlatSerializer::Serialize(initParam_);
 }
 } // namespace OHOS::Ace::Framework

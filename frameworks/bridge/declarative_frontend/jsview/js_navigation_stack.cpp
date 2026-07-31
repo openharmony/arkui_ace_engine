@@ -21,7 +21,7 @@
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
-#include "bridge/declarative_frontend/jsview/nav_param_flat_serializer.h"
+#include "bridge/declarative_frontend/jsview/js_nav_param_flat_serializer.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -1518,7 +1518,7 @@ std::string JSNavigationStack::GetSerializedParamForRecovery(int32_t index) cons
             "current navDestination(index: %{public}d)'s param is undefined or null!", index);
         return serializedEmpty;
     }
-    auto serializedParam = NavParamFlatSerializer::Serialize(param);
+    auto serializedParam = JsNavParamFlatSerializer::Serialize(param);
     if (serializedParam == "undefined" || serializedParam.empty()) {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION,
             "current navDestination(index: %{public}d)'s param can't be serialized or is empty!", index);
@@ -1541,7 +1541,7 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
         JSRef<JSObject> navPathInfo = JSRef<JSObject>::New();
         navPathInfo->SetProperty<std::string>("name", infoName);
         if (!infoParam.empty() && infoParam != JS_STRINGIFIED_UNDEFINED) {
-            auto deserializedParam = NavParamFlatSerializer::Deserialize(infoParam);
+            auto deserializedParam = JsNavParamFlatSerializer::Deserialize(infoParam);
             if (!deserializedParam.IsEmpty()) {
                 navPathInfo->SetPropertyObject("param", deserializedParam);
             } else {
