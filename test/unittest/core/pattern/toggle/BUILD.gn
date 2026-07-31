@@ -25,6 +25,9 @@ test_sources = [
   "toggle_test_ng.cpp",
   "toggle_test_min.cpp",
   "toggle_test_core.cpp",
+  "toggle_switch_pattern_test_ng.cpp",
+  "toggle_button_pattern_test_ng.cpp",
+  "toggle_checkbox_pattern_test_ng.cpp",
 ]
 
 if (is_host_product) {
