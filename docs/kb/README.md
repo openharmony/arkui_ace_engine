@@ -1,7 +1,7 @@
 # ArkUI KB
 
 > 更新时间：2026-07-31
-> 主题数：161
+> 主题数：162
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -15,7 +15,7 @@ docs/kb/
 ├── architecture/    # 引擎架构和框架机制
 ├── api/             # SDK、C API、NAPI、API 范式
 ├── syntax/          # ArkTS 声明式语法专题
-├── issues/          # 历史典型问题（问题型 KB）
+├── issues/          # 历史典型问题与排查经验
 └── _generated/      # 可再生成索引页
 ```
 
@@ -222,6 +222,7 @@ docs/kb/
 | ID | 主题 | 新版 KB | 状态 |
 |----|------|---------|------|
 | NestedScrollOffsetNoResponse | 嵌套滚动偏移量不响应 | `docs/kb/issues/interaction/nested-scroll-offset-no-response.md` | 新建 |
+| CustomSpanControllerLifecycle | CustomSpan 控制器生命周期 | `docs/kb/issues/text/custom-span-controller-lifecycle.md` | 新建 |
 
 ## 检索
 
