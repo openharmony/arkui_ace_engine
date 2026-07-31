@@ -10672,6 +10672,36 @@
       ],
       "status": "active",
       "last_verified": "2026-07-30"
+    },
+    {
+      "id": "ScrollerNaNOffsetValidation",
+      "name": "Scroller NaN Offset Validation",
+      "name_cn": "Scroller 非法数值偏移校验",
+      "kind": "common_capability",
+      "category": "compatibility",
+      "keywords": [
+        "ScrollerNaNOffsetValidation",
+        "Scroller",
+        "scrollTo",
+        "NaN",
+        "xOffset",
+        "yOffset",
+        "DIMENSION_REGEX",
+        "ConvertFromJSValue",
+        "动态前端",
+        "非法数值",
+        "页面不显示"
+      ],
+      "aliases": [
+        "Scroller NaN",
+        "scrollTo NaN",
+        "滚动偏移 NaN"
+      ],
+      "kb": "docs/kb/issues/compatibility/scroller-nan-offset-validation.md",
+      "func_id": "05-03-01",
+      "spec_status": "pending",
+      "status": "active",
+      "last_verified": "2026-07-31"
     }
   ]
 }
