@@ -587,45 +587,6 @@
       "last_updated": "2026-05-23"
     },
     {
-      "name": "Accessibility",
-      "name_cn": "无障碍",
-      "category": "system",
-      "type": "feature",
-      "keywords": [
-        "accessibility",
-        "无障碍",
-        "屏幕阅读器",
-        "TalkBack",
-        "AccessibilityProvider",
-        "AccessibilityProperty",
-        "JsAccessibilityManager",
-        "AccessibilityManagerNG",
-        "AccessibilityFocusStrategy",
-        "ArkUI_AccessibilityElementInfo",
-        "hover",
-        "focus move"
-      ],
-      "aliases": [
-        "无障碍框架",
-        "Accessibility 桥接",
-        "辅助功能",
-        "读屏"
-      ],
-      "file_path": "accessibility/Accessibility_Knowledge_Base_CN.md",
-      "source_paths": {
-        "provider": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_provider.h",
-        "session_adapter": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_session_adapter.h",
-        "manager_ng": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_manager_ng.h",
-        "ng_property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/property/accessibility_property.h",
-        "js_manager": "<OH_ROOT>/foundation/arkui/ace_engine/adapter/ohos/osal/js_accessibility_manager.h",
-        "focus_strategy": "<OH_ROOT>/foundation/arkui/ace_engine/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
-      },
-      "api_paths": {
-        "ndk": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/native/native_interface_accessibility.h"
-      },
-      "last_updated": "2026-05-25"
-    },
-    {
       "name": "ArkUI_API_Paradigm",
       "name_cn": "ArkUI API 范式",
       "category": "system",

@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-30
-> 主题数：148
+> 更新时间：2026-07-31
+> 主题数：160
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -199,6 +199,18 @@ docs/kb/
 | DrawModifier | 自定义绘制回调 Modifier | `docs/kb/capabilities/draw_modifier.md` | 新建 |
 | AttributeModifier | 动态属性 Modifier 通路 | `docs/kb/capabilities/attribute_modifier.md` | 新建 |
 | CustomProperty | 自定义属性 | `docs/kb/capabilities/custom_property.md` | 新建 |
+| Accessibility | 无障碍能力 | `docs/kb/architecture/accessibility.md` | 已迁移，旧 KB 已移除 |
+| PluginComponent | 插件嵌入组件 | `docs/kb/components/container/plugin_component.md` | 新建 |
+| UIExtensionComponent | UIExtension嵌入组件 | `docs/kb/components/container/ui_extension_component.md` | 新建 |
+| EmbeddedComponent | 嵌入式组件 | `docs/kb/components/container/embedded_component.md` | 新建 |
+| IsolatedComponent | 隔离式组件 | `docs/kb/components/container/isolated_component.md` | 新建 |
+| SecurityUIExtensionComponent | 安全UIExtension组件 | `docs/kb/components/container/security_ui_extension_component.md` | 新建 |
+| DynamicComponent | 动态组件 | `docs/kb/components/container/dynamic_component.md` | 新建 |
+| XComponent | XComponent组件 | `docs/kb/components/platform/x_component.md` | 新建（无旧 KB） |
+| Inspector | 组件树 Inspector | `docs/kb/capabilities/inspector.md` | 新建（Spec 待补） |
+| InspectorLayoutCallback | 布局回调(inspector) | `docs/kb/capabilities/inspector-layout-callback.md` | 新建（Spec 待补） |
+| WindowToolbar | 窗口工具栏 | `docs/kb/capabilities/window-toolbar.md` | 新建（Spec 待补） |
+| AtomicServiceAppBar | 元服务 AppBar | `docs/kb/capabilities/atomic-service-appbar.md` | 新建（Spec 待补） |
 
 ## 检索
 

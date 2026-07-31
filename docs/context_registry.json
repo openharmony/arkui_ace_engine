@@ -9972,6 +9972,672 @@
       ],
       "status": "active",
       "last_verified": "2026-07-31"
+    },
+    {
+      "id": "Accessibility",
+      "name": "Accessibility",
+      "name_cn": "无障碍能力",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "Accessibility",
+        "无障碍",
+        "屏幕阅读器",
+        "AccessibilityProvider",
+        "AccessibilityProperty",
+        "JsAccessibilityManager",
+        "AccessibilityManagerNG",
+        "AccessibilityFocusStrategy",
+        "AccessibilitySessionAdapter",
+        "ArkUI_AccessibilityElementInfo",
+        "hover",
+        "读屏"
+      ],
+      "aliases": [
+        "无障碍框架",
+        "Accessibility 桥接",
+        "辅助功能",
+        "读屏",
+        "无障碍能力"
+      ],
+      "kb": "docs/kb/architecture/accessibility.md",
+      "spec_domain": "specs/03-engine-framework/07-accessibility-mechanism/01-accessibility-capability",
+      "func_id": "03-07-01",
+      "spec_status": "pending",
+      "source_paths": {
+        "provider": "frameworks/core/accessibility/accessibility_provider.h",
+        "session_adapter": "frameworks/core/accessibility/accessibility_session_adapter.h",
+        "manager_ng": "frameworks/core/accessibility/accessibility_manager_ng.h",
+        "accessibility_node": "frameworks/core/accessibility/accessibility_node.h",
+        "core_manager": "frameworks/core/accessibility/accessibility_manager.h",
+        "third_manager": "frameworks/core/accessibility/third_accessibility_manager.h",
+        "core_utils": "frameworks/core/accessibility/accessibility_utils.h",
+        "core_constants": "frameworks/core/accessibility/accessibility_constants.h",
+        "js_inspector": "frameworks/core/accessibility/js_inspector/",
+        "native_impl": "frameworks/core/accessibility/native_interface_accessibility_impl.h",
+        "native_provider": "frameworks/core/accessibility/native_interface_accessibility_provider.h",
+        "ng_property": "frameworks/core/components_ng/property/accessibility_property.h",
+        "js_manager": "adapter/ohos/osal/js_accessibility_manager.h",
+        "third_hover_ng": "adapter/ohos/osal/js_third_accessibility_hover_ng.h",
+        "third_provider_op": "adapter/ohos/osal/js_third_provider_interaction_operation.h",
+        "focus_strategy": "adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h",
+        "osal_hidumper": "adapter/ohos/osal/accessibility/accessibility_hidumper_osal.h",
+        "bridge_node_manager": "frameworks/bridge/common/accessibility/accessibility_node_manager.h",
+        "js_accessibility": "frameworks/bridge/declarative_frontend/jsview/js_accessibility.cpp",
+        "view_abstract_model_ng": "frameworks/core/components_ng/base/view_abstract_model_ng.cpp",
+        "common_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp"
+      },
+      "api_paths": {
+        "ndk": "interfaces/native/native_interface_accessibility.h",
+        "node_native": "interfaces/native/native_node.h",
+        "inner_api": "interfaces/inner_api/ace_kit/include/ui/accessibility/accessibility_constants.h",
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/accessibility/",
+        "test/unittest/core/accessibility/osal/",
+        "test/unittest/core/accessibility/focus_move/",
+        "test/unittest/core/accessibility/utils/",
+        "test/mock/frameworks/core/accessibility/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-23"
+    },
+    {
+      "id": "PluginComponent",
+      "name": "PluginComponent",
+      "name_cn": "插件嵌入组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "PluginComponent",
+        "插件组件",
+        "Plugin",
+        "PluginManager",
+        "PluginSubContainer",
+        "Want",
+        "onComplete",
+        "onError",
+        "onDestroy",
+        "PluginComponentInterface"
+      ],
+      "aliases": [
+        "PluginComponent组件",
+        "插件嵌入组件",
+        "插件组件",
+        "PluginComponentPattern"
+      ],
+      "kb": "docs/kb/components/container/plugin_component.md",
+      "spec_domain": "specs/05-ui-components/12-embedded-display-components/01-plugin-component",
+      "func_id": "05-12-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/plugin/plugin_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/plugin/plugin_pattern.h",
+        "model_ng": "frameworks/core/components_ng/pattern/plugin/plugin_model_ng.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/plugin/plugin_model_static.cpp",
+        "model": "frameworks/core/components_ng/pattern/plugin/plugin_model.h",
+        "node": "frameworks/core/components_ng/pattern/plugin/plugin_node.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/plugin/plugin_layout_property.h",
+        "event_hub": "frameworks/core/components_ng/pattern/plugin/plugin_event_hub.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/plugin_component.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/plugin_component.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/PluginComponentModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/PluginComponentModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/plugin/",
+        "test/unittest/capi/modifiers/plugin_component_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-20"
+    },
+    {
+      "id": "UIExtensionComponent",
+      "name": "UIExtensionComponent",
+      "name_cn": "UIExtension嵌入组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "UIExtensionComponent",
+        "UIExtension",
+        "UIExtensionAbility",
+        "SessionType",
+        "UIExtensionPattern",
+        "UIExtensionNode",
+        "UIExtensionProxy",
+        "UIExtensionManager",
+        "Want",
+        "onRemoteReady",
+        "onDestroy",
+        "onError",
+        "onResult"
+      ],
+      "aliases": [
+        "UIExtensionComponent组件",
+        "UIExtension嵌入组件",
+        "UIExtension组件",
+        "UIExtensionPattern"
+      ],
+      "kb": "docs/kb/components/container/ui_extension_component.md",
+      "spec_domain": "specs/05-ui-components/12-embedded-display-components/03-ui-extension-component",
+      "func_id": "05-12-03",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h",
+        "model_ng": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_model_ng.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_static.cpp",
+        "model": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_model.h",
+        "adapter": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.cpp",
+        "proxy": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_proxy.cpp",
+        "manager": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.cpp",
+        "node": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_node.cpp",
+        "session_wrapper_factory": "frameworks/core/components_ng/pattern/ui_extension/session_wrapper_factory.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/ui_extension_component.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/ui_extension_component.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/UIExtensionComponentModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/UIExtensionComponentModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/ui_extension/ui_extension_component/",
+        "test/unittest/core/pattern/ui_extension/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-20"
+    },
+    {
+      "id": "EmbeddedComponent",
+      "name": "EmbeddedComponent",
+      "name_cn": "嵌入式组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "EmbeddedComponent",
+        "嵌入式组件",
+        "Embedded",
+        "EmbeddedUIExtensionConfig",
+        "SessionType",
+        "EMBEDDED_UI_EXTENSION",
+        "UIExtensionAdapter",
+        "Want",
+        "onError",
+        "onTerminated",
+        "ARKUI_NODE_EMBEDDED_COMPONENT"
+      ],
+      "aliases": [
+        "EmbeddedComponent组件",
+        "嵌入式组件",
+        "Embedded组件",
+        "EmbeddedUIExtension"
+      ],
+      "kb": "docs/kb/components/container/embedded_component.md",
+      "spec_domain": "specs/05-ui-components/12-embedded-display-components/04-embedded-component",
+      "func_id": "05-12-04",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h",
+        "adapter": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.cpp",
+        "model_ng": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_model_ng.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_model_static.cpp",
+        "model": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_model.h",
+        "node_modifier": "frameworks/core/interfaces/native/node/embeddedComponent_modifier.cpp",
+        "capi_option": "interfaces/native/node/embeddedComponent_option.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/embedded_component.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/embedded_component.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/EmbeddedComponentModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/EmbeddedComponentModifier.static.d.ets",
+        "capi_node": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/ui_extension/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-20"
+    },
+    {
+      "id": "IsolatedComponent",
+      "name": "IsolatedComponent",
+      "name_cn": "隔离式组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "IsolatedComponent",
+        "隔离组件",
+        "Isolated",
+        "IsolatedPattern",
+        "SessionType",
+        "ISOLATED_COMPONENT",
+        "Want",
+        "onRemoteReady",
+        "onDestroy",
+        "onError",
+        "onResult",
+        "隔离进程"
+      ],
+      "aliases": [
+        "IsolatedComponent组件",
+        "隔离式组件",
+        "隔离组件",
+        "IsolatedPattern"
+      ],
+      "kb": "docs/kb/components/container/isolated_component.md",
+      "spec_domain": "specs/05-ui-components/12-embedded-display-components/05-isolated-component",
+      "func_id": "05-12-05",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h",
+        "accessibility_adapter": "frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.h",
+        "model_ng": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_model_ng.cpp",
+        "model": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_model.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/isolated_component.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/isolated_component.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/IsolatedComponentModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/IsolatedComponentModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/ui_extension/isolated_pattern_test_ng.cpp",
+        "test/unittest/core/pattern/ui_extension/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-20"
+    },
+    {
+      "id": "SecurityUIExtensionComponent",
+      "name": "SecurityUIExtensionComponent",
+      "name_cn": "安全UIExtension组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "SecurityUIExtensionComponent",
+        "安全UIExtension",
+        "SecurityUIExtensionPattern",
+        "SecurityUIExtensionProxy",
+        "SecuritySessionWrapper",
+        "SessionType",
+        "Want",
+        "onRemoteReady",
+        "onDestroy",
+        "onError",
+        "onResult",
+        "安全场景"
+      ],
+      "aliases": [
+        "SecurityUIExtensionComponent组件",
+        "安全UIExtension组件",
+        "安全嵌入组件",
+        "SecurityUIExtensionPattern"
+      ],
+      "kb": "docs/kb/components/container/security_ui_extension_component.md",
+      "spec_domain": "specs/05-ui-components/12-embedded-display-components/06-security-ui-extension-component",
+      "func_id": "05-12-06",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_pattern.h",
+        "proxy": "frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_proxy.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_component/security_ui_extension_model_static.cpp",
+        "session_wrapper": "frameworks/core/components_ng/pattern/ui_extension/security_ui_extension_component/security_session_wrapper_impl.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/security_ui_extension_component.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/security_ui_extension_component.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/SecurityUIExtensionComponentModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/SecurityUIExtensionComponentModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/ui_extension/security_ui_extension_component_test.cpp",
+        "test/unittest/core/pattern/ui_extension/security_session_wrapper_impl_test_ng.cpp",
+        "test/unittest/core/pattern/ui_extension/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-20"
+    },
+    {
+      "id": "DynamicComponent",
+      "name": "DynamicComponent",
+      "name_cn": "动态组件",
+      "kind": "component",
+      "category": "container",
+      "keywords": [
+        "DynamicComponent",
+        "动态组件",
+        "DynamicPattern",
+        "ArktsDynamicPattern",
+        "DynamicComponentManager",
+        "DynamicNode",
+        "DynamicModel",
+        "DynamicTouchDelegate",
+        "Want",
+        "动态加载"
+      ],
+      "aliases": [
+        "DynamicComponent组件",
+        "动态组件",
+        "DynamicPattern",
+        "ArktsDynamicPattern"
+      ],
+      "kb": "docs/kb/components/container/dynamic_component.md",
+      "spec_domain": "specs/05-ui-components/12-embedded-display-components/07-dynamic-component",
+      "func_id": "05-12-07",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.cpp",
+        "pattern_header": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h",
+        "arkts_pattern": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/arkts_dynamic_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model_static.cpp",
+        "node": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_node.cpp",
+        "manager": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.cpp",
+        "layout_modifier": "frameworks/core/interfaces/native/node/dynamic_layout_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/dynamic_component.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/dynamic_component.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/DynamicComponentModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/DynamicComponentModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/ui_extension/dynamic_component/",
+        "test/unittest/core/pattern/ui_extension/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-20"
+    },
+    {
+      "id": "XComponent",
+      "name": "XComponent",
+      "name_cn": "XComponent组件",
+      "kind": "component",
+      "category": "platform",
+      "keywords": [
+        "XComponent",
+        "XComponent组件",
+        "XComponentPattern",
+        "XComponentController",
+        "OH_NativeXComponent",
+        "NativeXComponent",
+        "EGL",
+        "surface",
+        "texture",
+        "SurfaceHolder",
+        "XComponentSurface",
+        "ARKUI_NODE_XCOMPONENT",
+        "NODE_XCOMPONENT"
+      ],
+      "aliases": [
+        "XComponent组件",
+        "XComponent绘制承载组件",
+        "NativeXComponent",
+        "XComponentPattern"
+      ],
+      "kb": "docs/kb/components/platform/x_component.md",
+      "spec_domain": "specs/05-ui-components/13-platform-components/01-xcomponent",
+      "func_id": "05-13-01",
+      "spec_status": "pending",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp",
+        "pattern_v2": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.cpp",
+        "pattern_multithread": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern_multithread.cpp",
+        "model_ng": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_model_ng.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_model_static.cpp",
+        "controller_ng": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_controller_ng.cpp",
+        "inner_surface_controller": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_inner_surface_controller.cpp",
+        "surface_holder": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_surface_holder.h",
+        "layout_property": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_layout_property.h",
+        "layout_algorithm": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_layout_algorithm.cpp",
+        "paint_method": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_paint_method.cpp",
+        "event_hub": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_event_hub.h",
+        "accessibility_provider": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_accessibility_provider.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/xcomponent/bridge/arkts_native_xcomponent_bridge.cpp",
+        "node_bridge": "frameworks/core/components_ng/pattern/xcomponent/bridge/arkts_native_xcomponent_node_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/xcomponent/bridge/xcomponent_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/xcomponent/bridge/xcomponent_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/xcomponent/bridge/xcomponent_dynamic_module.cpp",
+        "xcomponent_node": "frameworks/core/components_ng/pattern/xcomponent/bridge/xcomponent_node.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_xcomponent.cpp",
+        "jsview_controller": "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_xcomponent_modifier.cpp",
+        "arkts_modifier": "frameworks/bridge/declarative_frontend/ark_modifier/src/xcomponent_modifier.ts",
+        "ndk_classic": "interfaces/native/native_interface_xcomponent.h",
+        "native_enums": "interfaces/native/native_node.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/x_component.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/xComponent.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/XComponentModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/XComponentModifier.static.d.ets",
+        "ndk_classic": "interfaces/native/native_interface_xcomponent.h",
+        "capi_node": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/xcomponent/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-22"
+    },
+    {
+      "id": "Inspector",
+      "name": "Inspector",
+      "name_cn": "组件树 Inspector",
+      "kind": "common_capability",
+      "category": "api",
+      "keywords": [
+        "Inspector",
+        "InspectorFilter",
+        "SimplifiedInspector",
+        "LayoutInspector",
+        "getInspectorTree",
+        "getInspectorByKey",
+        "sendEventByKey",
+        "getFilteredInspectorTree",
+        "createComponentObserver",
+        "组件树",
+        "Inspector JSON",
+        "DevEco Inspector",
+        "TreeKey",
+        "InspectorConfig"
+      ],
+      "aliases": [
+        "组件树 Inspector",
+        "ArkUI Inspector",
+        "inspector tree dump",
+        "@ohos.arkui.inspector"
+      ],
+      "kb": "docs/kb/capabilities/inspector.md",
+      "spec_domain": "specs/03-engine-framework/07-accessibility-mechanism/02-inspector",
+      "func_id": "03-07-02",
+      "spec_status": "active",
+      "source_paths": {
+        "inspector_ng": "frameworks/core/components_ng/base/inspector.h",
+        "inspector_ng_cpp": "frameworks/core/components_ng/base/inspector.cpp",
+        "simplified_inspector": "frameworks/core/components_ng/base/simplified_inspector.h",
+        "inspector_filter": "interfaces/inner_api/ace_kit/include/ui/base/inspector_filter.h",
+        "layout_inspector_adapter": "adapter/ohos/osal/layout_inspector.cpp",
+        "layout_inspector_header": "frameworks/core/common/layout_inspector.h",
+        "pipeline_context": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "napi_inspector": "interfaces/napi/kits/inspector/js_inspector.cpp",
+        "ani_inspector": "interfaces/ets/ani/inspector/src/inspector.cpp",
+        "ani_inspector_ets": "interfaces/ets/ani/inspector/ets/@ohos.arkui.inspector.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/base/inspector_test_ng.cpp",
+        "test/unittest/core/base/simplified_inspector_test_ng.cpp",
+        "test/unittest/adapter/ohos/entrance/layout_inspector_test.cpp",
+        "test/mock/frameworks/core/common/mock_layout_inspector.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "InspectorLayoutCallback",
+      "name": "Inspector Layout Callback",
+      "name_cn": "布局回调(inspector)",
+      "kind": "common_capability",
+      "category": "api",
+      "keywords": [
+        "ComponentObserver",
+        "createComponentObserver",
+        "LayoutInspectorCallback",
+        "RegisterLayoutInspectorCallback",
+        "onLayout",
+        "onDraw",
+        "onDrawChildren",
+        "onLayoutChildren",
+        "CalloutType",
+        "inspector layout",
+        "布局回调",
+        "layoutDraw",
+        "逐组件回调"
+      ],
+      "aliases": [
+        "inspector 布局回调",
+        "ComponentObserver layout",
+        "createComponentObserver 回调"
+      ],
+      "kb": "docs/kb/capabilities/inspector-layout-callback.md",
+      "spec_domain": "specs/04-common-capability/11-component-info/03-inspector-layout-callback",
+      "func_id": "04-11-03",
+      "spec_status": "active",
+      "source_paths": {
+        "napi_inspector": "interfaces/napi/kits/inspector/js_inspector.cpp",
+        "napi_inspector_h": "interfaces/napi/kits/inspector/js_inspector.h",
+        "js_engine_h": "frameworks/bridge/js_frontend/engine/common/js_engine.h",
+        "js_engine_cpp": "frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
+        "declarative_ng": "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.cpp",
+        "delegate_ng": "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.cpp",
+        "arkts_frontend": "frameworks/bridge/arkts_frontend/arkts_frontend.cpp",
+        "ani_inspector": "interfaces/ets/ani/inspector/src/inspector.cpp",
+        "ani_inspector_ets": "interfaces/ets/ani/inspector/ets/@ohos.arkui.inspector.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/base/inspector_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
+    },
+    {
+      "id": "WindowToolbar",
+      "name": "Window Toolbar",
+      "name_cn": "窗口工具栏",
+      "kind": "common_capability",
+      "category": "system",
+      "keywords": [
+        "ContainerModal",
+        "ContainerModalToolBar",
+        "ToolBarItem",
+        "ToolbarManager",
+        "ContainerModalPattern",
+        "ContainerModalViewEnhance",
+        "titlebar",
+        "SetContainerModalTitleVisible",
+        "OnContainerModalEvent",
+        "TOP_BAR_LEADING",
+        "TOP_BAR_TRAILING",
+        "window titlebar",
+        "窗口工具栏",
+        "标题栏"
+      ],
+      "aliases": [
+        "窗口工具栏",
+        "ContainerModal toolbar",
+        "@ohos.window.titlebar.component",
+        "TitleBar/ButtonBar"
+      ],
+      "kb": "docs/kb/capabilities/window-toolbar.md",
+      "spec_domain": "specs/04-common-capability/08-root-view/01-window-toolbar",
+      "func_id": "04-08-01",
+      "spec_status": "active",
+      "source_paths": {
+        "toolbar_cpp": "frameworks/core/components_ng/pattern/container_modal/container_modal_toolbar.cpp",
+        "toolbar_h": "frameworks/core/components_ng/pattern/container_modal/container_modal_toolbar.h",
+        "pattern_cpp": "frameworks/core/components_ng/pattern/container_modal/container_modal_pattern.cpp",
+        "view_h": "frameworks/core/components_ng/pattern/container_modal/container_modal_view.h",
+        "view_enhance_h": "frameworks/core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h",
+        "static_pattern_cpp": "frameworks/core/components_ng/pattern/container_modal/static/container_modal_static_pattern.cpp",
+        "toolbaritem_pattern_h": "frameworks/core/components_ng/pattern/toolbaritem/toolbaritem_pattern.h",
+        "toolbar_manager_h": "frameworks/core/components_ng/manager/toolbar/toolbar_manager.h",
+        "titlebar_ets": "frameworks/core/components_ng/pattern/container_modal/static/source/@ohos.window.titlebar.component.defalut.ets",
+        "dynamic_module_helper": "adapter/ohos/osal/dynamic_module_helper.cpp",
+        "ui_content_impl": "adapter/ohos/entrance/ui_content_impl.cpp"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/container_modal/container_modal_toolbar_test_ng.cpp",
+        "test/unittest/core/pattern/container_modal/container_modal_test_ng.cpp",
+        "test/unittest/core/pattern/container_modal/container_modal_pattern_enhance_test_ng.cpp",
+        "test/unittest/core/pattern/container_modal/container_modal_static_pattern_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
+      "id": "AtomicServiceAppBar",
+      "name": "Atomic Service AppBar",
+      "name_cn": "元服务 AppBar",
+      "kind": "common_capability",
+      "category": "system",
+      "keywords": [
+        "AppBarView",
+        "AtomicServicePattern",
+        "AtomicServiceLayoutAlgorithm",
+        "AtomicServiceBar",
+        "atomicservicebar",
+        "getAtomicServiceBar",
+        "AtomicServiceMenuBarSetVisible",
+        "InstallationFree",
+        "atomic_service_modifier",
+        "CustomAppBarNode",
+        "MenuBar",
+        "menuButton",
+        "closeButton",
+        "元服务",
+        "免安装",
+        "AppBar"
+      ],
+      "aliases": [
+        "元服务 AppBar",
+        "AtomicServiceBar",
+        "atomicservicebar",
+        "Atomic Service AppBar"
+      ],
+      "kb": "docs/kb/capabilities/atomic-service-appbar.md",
+      "spec_domain": "specs/04-common-capability/08-root-view/02-atomic-service-appbar",
+      "func_id": "04-08-02",
+      "spec_status": "active",
+      "source_paths": {
+        "app_bar_view_cpp": "frameworks/core/components_ng/pattern/app_bar/app_bar_view.cpp",
+        "app_bar_view_h": "frameworks/core/components_ng/pattern/app_bar/app_bar_view.h",
+        "atomic_service_pattern_cpp": "frameworks/core/components_ng/pattern/app_bar/atomic_service_pattern.cpp",
+        "atomic_service_pattern_h": "frameworks/core/components_ng/pattern/app_bar/atomic_service_pattern.h",
+        "layout_algorithm_cpp": "frameworks/core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.cpp",
+        "app_bar_theme_h": "frameworks/core/components_ng/pattern/app_bar/app_bar_theme.h",
+        "custom_app_bar_node_h": "frameworks/core/components_ng/pattern/custom/custom_app_bar_node.h",
+        "app_bar_helper_h": "frameworks/core/common/app_bar_helper.h",
+        "napi_atomic_service_bar": "interfaces/napi/kits/atomic_service_bar/js_atomic_service_bar.cpp",
+        "atomic_service_modifier_h": "frameworks/core/interfaces/native/node/atomic_service_modifier.h",
+        "accessor_impl": "frameworks/core/interfaces/native/implementation/ui_context_atomic_service_bar_accessor.cpp",
+        "js_app_bar_view": "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.cpp",
+        "app_bar_helper_impl": "adapter/ohos/osal/app_bar_helper_impl.cpp"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/app_bar/app_bar_test_ng.cpp",
+        "test/unittest/core/pattern/app_bar/app_bar_layout_algorithm_test.cpp",
+        "test/unittest/core/pattern/app_bar/atomic_service_pattern_update_test.cpp",
+        "test/unittest/capi/accessors/ui_context_atomic_service_bar_accessor_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
     }
   ]
 }
