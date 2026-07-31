@@ -748,6 +748,8 @@ void JSList::ReachStartCallback(const JSCallbackInfo& args)
     if (args.Length() <= 0) {
         return;
     }
+    auto* model = ListModel::GetInstance();
+    CHECK_NULL_VOID(model);
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
@@ -757,9 +759,9 @@ void JSList::ReachStartCallback(const JSCallbackInfo& args)
 #endif
             return;
         };
-        ListModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
+        model->SetOnReachStart(std::move(onReachStart));
     } else {
-        ListModel::GetInstance()->SetOnReachStart(nullptr);
+        model->SetOnReachStart(nullptr);
     }
     args.ReturnSelf();
 }
@@ -769,6 +771,8 @@ void JSList::ReachEndCallback(const JSCallbackInfo& args)
     if (args.Length() <= 0) {
         return;
     }
+    auto* model = ListModel::GetInstance();
+    CHECK_NULL_VOID(model);
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
@@ -778,9 +782,9 @@ void JSList::ReachEndCallback(const JSCallbackInfo& args)
 #endif
             return;
         };
-        ListModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
+        model->SetOnReachEnd(std::move(onReachEnd));
     } else {
-        ListModel::GetInstance()->SetOnReachEnd(nullptr);
+        model->SetOnReachEnd(nullptr);
     }
     args.ReturnSelf();
 }
@@ -790,14 +794,16 @@ void JSList::ScrollStartCallback(const JSCallbackInfo& args)
     if (args.Length() <= 0) {
         return;
     }
+    auto* model = ListModel::GetInstance();
+    CHECK_NULL_VOID(model);
     if (args[0]->IsFunction()) {
         auto onScrollStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
             return;
         };
-        ListModel::GetInstance()->SetOnScrollStart(std::move(onScrollStart));
+        model->SetOnScrollStart(std::move(onScrollStart));
     } else {
-        ListModel::GetInstance()->SetOnScrollStart(nullptr);
+        model->SetOnScrollStart(nullptr);
     }
     args.ReturnSelf();
 }
@@ -807,6 +813,8 @@ void JSList::ScrollStopCallback(const JSCallbackInfo& args)
     if (args.Length() <= 0) {
         return;
     }
+    auto* model = ListModel::GetInstance();
+    CHECK_NULL_VOID(model);
     if (args[0]->IsFunction()) {
         auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
@@ -816,9 +824,9 @@ void JSList::ScrollStopCallback(const JSCallbackInfo& args)
 #endif
             return;
         };
-        ListModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
+        model->SetOnScrollStop(std::move(onScrollStop));
     } else {
-        ListModel::GetInstance()->SetOnScrollStop(nullptr);
+        model->SetOnScrollStop(nullptr);
     }
     args.ReturnSelf();
 }
@@ -1000,6 +1008,8 @@ void JSList::ItemDropCallback(const JSCallbackInfo& info)
     if (!info[0]->IsFunction()) {
         return;
     }
+    auto* model = ListModel::GetInstance();
+    CHECK_NULL_VOID(model);
 
     RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(info[0]));
     auto onItemDrop = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
@@ -1012,7 +1022,7 @@ void JSList::ItemDropCallback(const JSCallbackInfo& info)
             ComponentEventType::COMPONENT_EVENT_SCROLL);
 #endif
     };
-    ListModel::GetInstance()->SetOnItemDrop(onItemDrop);
+    model->SetOnItemDrop(onItemDrop);
 }
 
 void JSList::SetMultiSelectable(bool multiSelectable)
