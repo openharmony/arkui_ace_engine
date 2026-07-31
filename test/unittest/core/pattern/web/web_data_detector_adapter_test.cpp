@@ -343,6 +343,12 @@ HWTEST_F(WebDataDetectorAdapterTest, SendRequestToAI_001, TestSize.Level0)
     DataDetectorRequestData req { requestId, { data1 } };
     adapter->SetRequestContext(requestId, std::move(req));
 
+    auto originTaskExecutor = MockContainer::Current()->taskExecutor_;
+    auto originPipelineTaskExecutor = MockContainer::Current()->pipelineContext_->taskExecutor_;
+    auto delayTaskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
+    MockContainer::Current()->taskExecutor_ = delayTaskExecutor;
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = delayTaskExecutor;
+
     adapter->SendRequestToAI(requestId);
     auto requestContext = adapter->GetRequestContext(requestId);
     EXPECT_NE(requestContext, nullptr);
@@ -353,6 +359,9 @@ HWTEST_F(WebDataDetectorAdapterTest, SendRequestToAI_001, TestSize.Level0)
 
     EXPECT_EQ(requestContext->detectIds, (std::vector<size_t> { 0 }));
     EXPECT_EQ(requestContext->detectOffsets, (std::vector<std::pair<size_t, size_t>> { { 0, 14 } }));
+
+    MockContainer::Current()->taskExecutor_ = originTaskExecutor;
+    MockContainer::Current()->pipelineContext_->taskExecutor_ = originPipelineTaskExecutor;
 #endif
 }
 

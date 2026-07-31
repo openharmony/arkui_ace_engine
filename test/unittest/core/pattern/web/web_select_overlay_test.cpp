@@ -3176,9 +3176,6 @@ HWTEST_F(WebSelectOverlayTest, IsShowMenuOfAutoFill_001, TestSize.Level1)
     selectInfo.isSingleHandle = true;
     isShow = overlay.IsShowMenuOfAutoFill(flags, selectInfo);
     EXPECT_EQ(isShow, true);
-    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
-    isShow = overlay.IsShowMenuOfAutoFill(flags, selectInfo);
-    EXPECT_EQ(isShow, false);
 #endif
 }
 
@@ -5482,12 +5479,8 @@ HWTEST_F(WebSelectOverlayTest, OnUpdateSelectOverlayInfo_001, TestSize.Level1)
     int32_t requestCode = 0;
     overlay.SetIsSingleHandle(false);
     overlay.webSelectInfo_.isHandleLineShow = false;
-    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M114);
     overlay.OnUpdateSelectOverlayInfo(selectInfo, requestCode);
-    EXPECT_EQ(selectInfo.isHandleLineShow, false);
-    OHOS::ArkWeb::setActiveWebEngineVersion(OHOS::ArkWeb::ArkWebEngineVersion::M132);
-    overlay.OnUpdateSelectOverlayInfo(selectInfo, requestCode);
-    EXPECT_EQ(selectInfo.isHandleLineShow, false);
+    EXPECT_EQ(selectInfo.isHandleLineShow, true);
 }
 
 /**

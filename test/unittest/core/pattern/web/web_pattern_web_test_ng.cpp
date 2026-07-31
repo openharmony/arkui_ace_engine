@@ -1296,7 +1296,7 @@ HWTEST_F(WebPatternWebTest, HandleTouchUp_002, TestSize.Level1)
     TouchLocationInfo touchInfo2(0);
     info2.changedTouches_.push_back(touchInfo2);
     webPattern->isNeedInterceptedTouchEvent_ = false;
-    webPattern->HandleTouchUp(info, true);
+    webPattern->HandleTouchUp(info2, true);
     EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
 #endif
 }
@@ -1428,7 +1428,7 @@ HWTEST_F(WebPatternWebTest, HandleTouchCancel_002, TestSize.Level1)
     TouchLocationInfo touchInfo2(0);
     info2.changedTouches_.push_back(touchInfo2);
     webPattern->isNeedInterceptedTouchEvent_ = false;
-    webPattern->HandleTouchCancel(info);
+    webPattern->HandleTouchCancel(info2);
     EXPECT_EQ(webPattern->showMagnifierFingerId_, -1);
 #endif
 }
