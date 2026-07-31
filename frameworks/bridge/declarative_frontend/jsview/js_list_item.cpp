@@ -347,7 +347,10 @@ void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutio
     auto edgeEffect = obj->GetProperty("edgeEffect");
     V2::SwipeEdgeEffect swipeEdgeEffect = V2::SwipeEdgeEffect::Spring;
     if (edgeEffect->IsNumber()) {
-        swipeEdgeEffect = static_cast<V2::SwipeEdgeEffect>(edgeEffect->ToNumber<int32_t>());
+        int32_t effectVal = edgeEffect->ToNumber<int32_t>();
+        if (effectVal >= 0 && effectVal <= static_cast<int32_t>(V2::SwipeEdgeEffect::None)) {
+            swipeEdgeEffect = static_cast<V2::SwipeEdgeEffect>(effectVal);
+        }
     }
 
     auto onOffsetChangeFunc = obj->GetProperty("onOffsetChange");
@@ -486,7 +489,9 @@ void JSListItem::ParseBuilderComponentContent(const JSRef<JSVal>& contentParam, 
     }
     auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
+    if (!frameNode || !AceType::InstanceOf<NG::FrameNode>(frameNode)) {
+        return;
+    }
     refPtrFrameNode = AceType::Claim(frameNode);
 }
 
