@@ -14,7 +14,6 @@
  */
 
 #include "core/components/plugin/plugin_sub_container.h"
-#include "core/common/draw_delegate.h"
 #include "core/common/event_manager.h"
 
 #include "ability_info.h"

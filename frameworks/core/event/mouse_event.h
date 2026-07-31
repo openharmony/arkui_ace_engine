@@ -29,8 +29,6 @@ class PointerEvent;
 
 namespace OHOS::Ace {
 
-enum class KeyCode : int32_t;
-
 class MouseInfo;
 constexpr int32_t MOUSE_PRESS_LEFT = 1;
 static const int32_t MOUSE_BASE_ID = 1000;

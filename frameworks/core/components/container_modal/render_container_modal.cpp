@@ -17,7 +17,6 @@
 
 #include "base/log/event_report.h"
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
 

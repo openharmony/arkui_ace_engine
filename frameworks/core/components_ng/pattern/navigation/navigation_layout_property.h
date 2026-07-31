@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
@@ -26,7 +27,6 @@
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
-class InspectorFilter;
 
 constexpr Dimension DEFAULT_NAV_BAR_WIDTH = 240.0_vp;
 struct NavigationDividerStyle {

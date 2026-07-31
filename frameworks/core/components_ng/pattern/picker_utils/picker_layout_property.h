@@ -20,6 +20,7 @@
 #include "base/json/json_util.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
@@ -29,8 +30,6 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
-class InspectorFilter;
-
 class ACE_EXPORT PickerLayoutProperty : public LinearLayoutProperty {
     DECLARE_ACE_TYPE(PickerLayoutProperty, LinearLayoutProperty);
 

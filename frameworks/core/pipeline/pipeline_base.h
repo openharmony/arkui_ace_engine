@@ -31,10 +31,8 @@
 
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
-#include "base/log/ace_trace.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
-#include "base/utils/system_properties.h"
 #include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
 #include "core/common/platform_bridge.h"
@@ -47,13 +45,13 @@
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/theme_manager.h"
 #include "ui/resource/resource_configuration.h"
+#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/components/theme/theme_constants.h"
-#include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -112,7 +110,6 @@ class NavigationController;
 class StatisticEventReporter;
 class EventManager;
 class AccessibilityManager;
-class UIDisplaySyncManager;
 enum class FrontendType;
 enum class PlatformVersion;
 enum class AccessibilityCallbackEventId : uint32_t;

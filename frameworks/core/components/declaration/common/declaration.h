@@ -33,7 +33,6 @@
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/core/components/transform/click_spring_effect.h"
 #include "base/geometry/calc_dimension.h"
-#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
 
