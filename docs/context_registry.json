@@ -3826,7 +3826,7 @@
       "test_paths": [
         "test/component_test/tools/previewer_host/",
         "adapter/preview/entrance/samples/BUILD.gn",
-        "spec/spec-test/tools/host_preview/"
+        "specs/spec-test/tools/host_preview/"
       ],
       "status": "active",
       "last_verified": "2026-07-27"
@@ -9575,6 +9575,125 @@
       ],
       "status": "active",
       "last_verified": "2026-07-29"
+    },
+    {
+      "id": "TextShortcuts",
+      "name": "Text Shortcuts",
+      "name_cn": "文本快捷键",
+      "kind": "common_capability",
+      "category": "system",
+      "keywords": [
+        "Text Shortcuts",
+        "文本快捷键",
+        "shortcut",
+        "keyboard",
+        "Ctrl+C",
+        "Ctrl+V",
+        "Ctrl+X",
+        "Ctrl+Z",
+        "Ctrl+A",
+        "undo",
+        "redo",
+        "TextInputClient",
+        "accelerator",
+        "CaretMoveIntent"
+      ],
+      "aliases": [
+        "文本快捷键",
+        "快捷键",
+        "TextShortcuts",
+        "键盘快捷键"
+      ],
+      "kb": "docs/kb/capabilities/text-shortcuts.md",
+      "spec_domain": "specs/04-common-capability/14-input-interaction/02-text-shortcuts",
+      "func_id": "04-14-02",
+      "spec_status": "active",
+      "source_paths": {
+        "dispatcher": "frameworks/core/common/ime/text_input_client.cpp",
+        "dispatcher_header": "frameworks/core/common/ime/text_input_client.h",
+        "key_event": "frameworks/core/event/key_event.cpp",
+        "key_code": "frameworks/core/event/key_code.h",
+        "text_field_pattern": "frameworks/core/components_ng/pattern/text_field/text_field_pattern.cpp",
+        "rich_editor_pattern": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
+        "rich_editor_undo_manager": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h",
+        "text_pattern": "frameworks/core/components_ng/pattern/text/text_pattern.cpp",
+        "search_pattern": "frameworks/core/components_ng/pattern/search/search_pattern.cpp",
+        "on_text_changed_listener": "frameworks/core/components_ng/pattern/text_field/on_text_changed_listener_impl.cpp"
+      },
+      "api_paths": {},
+      "test_paths": [
+        "test/unittest/core/pattern/text_input/",
+        "test/unittest/core/pattern/rich_editor/",
+        "test/unittest/core/pattern/text/",
+        "test/unittest/core/event/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
+      "id": "InputMethodInteraction",
+      "name": "Input Method Interaction",
+      "name_cn": "输入法交互",
+      "kind": "common_capability",
+      "category": "system",
+      "keywords": [
+        "Input Method Interaction",
+        "输入法交互",
+        "输入框键盘交互",
+        "IME",
+        "InputMethodManager",
+        "RequestKeyboard",
+        "onWillAttachIME",
+        "keyboardAppearance",
+        "customKeyboard",
+        "enableKeyboardOnFocus",
+        "KeyboardAvoidMode",
+        "TriggerAvoidOnCaretChange",
+        "OnTextChangedListenerImpl",
+        "TextInputClient",
+        "keyboard avoidance"
+      ],
+      "aliases": [
+        "输入法交互",
+        "输入框输入法交互",
+        "InputMethodInteraction",
+        "键盘交互",
+        "IME 交互"
+      ],
+      "kb": "docs/kb/capabilities/input-method-interaction.md",
+      "spec_domain": "specs/04-common-capability/14-input-interaction/04-input-method-interaction",
+      "func_id": "04-14-04",
+      "spec_status": "active",
+      "source_paths": {
+        "input_method_manager": "frameworks/core/common/ime/input_method_manager.h",
+        "input_method_manager_ohos": "adapter/ohos/osal/input_method_manager_ohos.cpp",
+        "input_method_manager_preview": "adapter/preview/osal/input_method_manager_preview.cpp",
+        "text_input_client": "frameworks/core/common/ime/text_input_client.cpp",
+        "text_editing_value": "frameworks/core/common/ime/text_editing_value.cpp",
+        "text_field_pattern": "frameworks/core/components_ng/pattern/text_field/text_field_pattern.cpp",
+        "text_field_event_hub": "frameworks/core/components_ng/pattern/text_field/text_field_event_hub.h",
+        "rich_editor_pattern": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
+        "rich_editor_event_hub": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_event_hub.h",
+        "search_pattern": "frameworks/core/components_ng/pattern/search/search_pattern.cpp",
+        "on_text_changed_listener": "frameworks/core/components_ng/pattern/text_field/on_text_changed_listener_impl.cpp",
+        "safe_area_manager": "frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
+        "layout_constants": "frameworks/core/components/common/layout/constants.h",
+        "text_input_modifier": "frameworks/bridge/declarative_frontend/ark_modifier/src/text_input_modifier.ts",
+        "rich_editor_modifier": "frameworks/bridge/declarative_frontend/ark_modifier/src/rich_editor_modifier.ts"
+      },
+      "api_paths": {
+        "uicontext_setKeyboardAvoidMode": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "text_input_modifier": "frameworks/bridge/declarative_frontend/ark_modifier/src/text_input_modifier.ts",
+        "capi": "frameworks/core/interfaces/arkoala/arkoala_api.h"
+      },
+      "test_paths": [
+        "test/mock/frameworks/core/common/ime/mock_input_method_manager.cpp",
+        "test/unittest/core/pipeline/mock_input_method_manager.cpp",
+        "test/unittest/core/pattern/text_input/",
+        "test/unittest/core/pattern/rich_editor/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
     }
   ]
 }

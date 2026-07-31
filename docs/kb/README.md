@@ -67,6 +67,8 @@ docs/kb/
 | TextInput | 文本输入组件 | `docs/kb/components/basic/text-input.md` | 已迁移，旧 KB 已移除；共享 TextFieldPattern |
 | Hyperlink | 超链接组件 | `docs/kb/components/basic/hyperlink.md` | 已迁移，旧 KB 已移除；独立 HyperlinkPattern(继承 TextPattern) |
 | StyledString | 属性字符串 | `docs/kb/capabilities/styled-string.md` | 新建；非组件，common_capability/api |
+| TextShortcuts | 文本快捷键能力 | `docs/kb/capabilities/text-shortcuts.md` | 新建；框架内部能力(无公共 API)，补齐 Spec 路由 |
+| InputMethodInteraction | 输入法交互能力 | `docs/kb/capabilities/input-method-interaction.md` | 新建；框架内部能力，输入框↔键盘交互(IME 弹出收起/避让/输入处理契约/公共 API)；特性名由键盘控制改 |
 | Image | 图片组件 | `docs/kb/components/media/image.md` | 已迁移，旧 KB 已移除 |
 | ImageAnimator | 图片动画组件 | `docs/kb/components/media/image_animator.md` | 已迁移，旧 KB 已移除 |
 | Video | 视频组件 | `docs/kb/components/media/video.md` | 新建（无旧 KB） |
