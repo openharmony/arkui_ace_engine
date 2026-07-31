@@ -28,6 +28,7 @@ namespace OHOS::Ace::Framework {
 struct HomePathInfo {
     std::string name;
     JSRef<JSVal> param;
+    std::string autoCleanedState;
 };
 
 struct NavPathInfoUINode {
@@ -137,6 +138,7 @@ public:
 
     std::string GetStringifyParamByIndex(int32_t index) const override;
     std::string GetSerializedParamSafely(int32_t index) const override;
+    std::string GetSerializedParamForRecovery(int32_t index) const override;
     void SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo) override;
     bool IsFromRecovery(int32_t index) override;
     void SetFromRecovery(int32_t index, bool fromRecovery) override;
@@ -168,6 +170,8 @@ public:
         homePathInfo_ = std::move(pathInfo);
     }
     bool CreateHomeDestination(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
+    void SaveHomeDestinationState(const std::string& state) override;
+    std::string GetHomeDestinationState() const override;
 
     bool CreateRelatedDestination(
         const std::string& name, const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;

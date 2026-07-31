@@ -1114,22 +1114,23 @@ public:
 
     static bool ExistController(JSRef<JSObject>& controller, int32_t& parentWebId)
     {
-        auto getThisVarFunction = controller->GetProperty("innerGetThisVar");
-        if (!getThisVarFunction->IsFunction()) {
+        auto getControllerIdFunction = controller->GetProperty("innerGetControllerId");
+        if (!getControllerIdFunction->IsFunction()) {
             parentWebId = -1;
             return false;
         }
-        auto func = JSRef<JSFunc>::Cast(getThisVarFunction);
-        auto thisVar = func->Call(controller, 0, {});
-        int64_t thisPtr = 0;
-        if (thisVar->IsNumber()) {
-            thisPtr = thisVar->ToNumber<int64_t>();
+        auto func = JSRef<JSFunc>::Cast(getControllerIdFunction);
+        auto controllerId = func->Call(controller, 0, {});
+        int64_t controllerIdValue = 0;
+        if (controllerId->IsNumber()) {
+            controllerIdValue = controllerId->ToNumber<int64_t>();
         }
         for (auto iter = controller_map_.begin(); iter != controller_map_.end(); iter++) {
-            auto getThisVarFunction1 = iter->second.controller_->GetProperty("innerGetThisVar");
-            if (getThisVarFunction1->IsFunction()) {
-                auto thisVar1 = JSRef<JSFunc>::Cast(getThisVarFunction1)->Call(iter->second.controller_, 0, {});
-                if (thisVar1->IsNumber() && thisPtr == thisVar1->ToNumber<int64_t>()) {
+            auto getControllerIdFunction1 = iter->second.controller_->GetProperty("innerGetControllerId");
+            if (getControllerIdFunction1->IsFunction()) {
+                auto getControllerIdFunc = JSRef<JSFunc>::Cast(getControllerIdFunction1);
+                auto controllerId1 = getControllerIdFunc->Call(iter->second.controller_, 0, {});
+                if (controllerId1->IsNumber() && controllerIdValue == controllerId1->ToNumber<int64_t>()) {
                     parentWebId = iter->second.parentWebId_;
                     return true;
                 }
@@ -3407,6 +3408,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(innerWebNativeMessageManagerFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
                 auto* eventInfo = TypeInfoHelper::DynamicCast<WebNativeMessageEvent>(info.get());
+                if (!eventInfo) {
+                    TAG_LOGE(AceLogTag::ACE_WEB,
+                        "innerWebNativeMessageManager received null or unexpected event type");
+                    return;
+                }
                 JSRef<JSObject> obj = JSRef<JSObject>::New();
                 JSRef<JSObject> callbackObj = JSClass<JSWebNativeMessageCallback>::NewInstance();
                 auto callbackEvent = Referenced::Claim(callbackObj->Unwrap<JSWebNativeMessageCallback>());
@@ -3434,6 +3440,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(innerWebNativeMessageDisconnectFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
             auto* eventInfo = TypeInfoHelper::DynamicCast<WebNativeMessageEvent>(info.get());
+            if (!eventInfo) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "innerWebNativeMessageManager received null or unexpected event type");
+                return;
+            }
             JSRef<JSVal> connectId = JSRef<JSVal>::Make(ToJSValue(eventInfo->GetConnectId()));
             JSRef<JSObject> obj = JSRef<JSObject>::New();
             obj->SetPropertyObject("connectId", connectId);
@@ -3450,6 +3461,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(onFullScreenVideoOverlayEnterFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
             auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenVideoOverlayEnterEvent>(info.get());
+            if (!eventInfo) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "innerWebNativeMessageManager received null or unexpected event type");
+                return;
+            }
             JSRef<JSObject> obj = JSRef<JSObject>::New();
             JSRef<JSObject> handlerObj = JSClass<JSFullScreenVideoOverlayHandler>::NewInstance();
             auto callbackEvent = Referenced::Claim(handlerObj->Unwrap<JSFullScreenVideoOverlayHandler>());
@@ -3565,7 +3581,10 @@ void JSWeb::Create(const JSCallbackInfo& info)
                 return;
             }
             napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(env, &scope);
+            auto status = napi_open_handle_scope(env, &scope);
+            if (status != napi_ok || scope == nullptr) {
+                return;
+            }
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
             napi_close_handle_scope(env, scope);
@@ -3588,7 +3607,10 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     return;
                 }
                 napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(env, &scope);
+                auto status = napi_open_handle_scope(env, &scope);
+                if (status != napi_ok || scope == nullptr) {
+                    return;
+                }
                 JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(hapPath)) };
                 func->Call(webviewController, 1, argv);
                 napi_close_handle_scope(env, scope);
@@ -3621,7 +3643,10 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     return;
                 }
                 napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(env, &scope);
+                auto status = napi_open_handle_scope(env, &scope);
+                if (status != napi_ok || scope == nullptr) {
+                    return;
+                }
                 auto newIdVal = JSRef<JSVal>::Make(ToJSValue(newId));
                 auto result = func->Call(webviewController, 1, &newIdVal);
                 napi_close_handle_scope(env, scope);

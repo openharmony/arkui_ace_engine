@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-30
-> 主题数：167
+> 更新时间：2026-07-31
+> 主题数：160
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -55,11 +55,20 @@ docs/kb/
 | Canvas | 画布组件 | `docs/kb/components/shape/canvas.md` | 新建（Spec 待补） |
 | OffscreenCanvas | 离屏画布对象 | `docs/kb/components/shape/offscreen_canvas.md` | 新建（Spec 待补） |
 | Text | 文本组件 | `docs/kb/components/basic/text.md` | 已迁移，旧 KB 已移除 |
+| TextArea | 多行文本输入组件 | `docs/kb/components/basic/text_area.md` | 已迁移，旧 KB 已移除 |
+| Marquee | 跑马灯组件 | `docs/kb/components/basic/marquee.md` | 已迁移，旧 KB 已移除 |
+| Search | 搜索框组件 | `docs/kb/components/basic/search.md` | 已迁移，旧 KB 已移除 |
+| Span | 文本片段组件 | `docs/kb/components/basic/span.md` | 新建（无旧 KB） |
+| ImageSpan | 图片片段组件 | `docs/kb/components/basic/image_span.md` | 新建（无旧 KB） |
+| SymbolSpan | 符号片段组件 | `docs/kb/components/basic/symbol_span.md` | 新建（无旧 KB） |
+| ContainerSpan | 容器片段组件 | `docs/kb/components/basic/container_span.md` | 新建（无旧 KB） |
 | RichEditor | 富文本编辑器组件 | `docs/kb/components/basic/rich_editor.md` | 已迁移，旧 KB 已移除 |
 | SymbolGlyph | 符号字形组件 | `docs/kb/components/basic/symbol-glyph.md` | 新建；补齐 Spec 路由（复用 TextPattern） |
 | TextInput | 文本输入组件 | `docs/kb/components/basic/text-input.md` | 已迁移，旧 KB 已移除；共享 TextFieldPattern |
 | Hyperlink | 超链接组件 | `docs/kb/components/basic/hyperlink.md` | 已迁移，旧 KB 已移除；独立 HyperlinkPattern(继承 TextPattern) |
 | StyledString | 属性字符串 | `docs/kb/capabilities/styled-string.md` | 新建；非组件，common_capability/api |
+| TextShortcuts | 文本快捷键能力 | `docs/kb/capabilities/text-shortcuts.md` | 新建；框架内部能力(无公共 API)，补齐 Spec 路由 |
+| InputMethodInteraction | 输入法交互能力 | `docs/kb/capabilities/input-method-interaction.md` | 新建；框架内部能力，输入框↔键盘交互(IME 弹出收起/避让/输入处理契约/公共 API)；特性名由键盘控制改 |
 | Image | 图片组件 | `docs/kb/components/media/image.md` | 已迁移，旧 KB 已移除 |
 | ImageAnimator | 图片动画组件 | `docs/kb/components/media/image_animator.md` | 已迁移，旧 KB 已移除 |
 | Video | 视频组件 | `docs/kb/components/media/video.md` | 新建（无旧 KB） |
@@ -194,6 +203,18 @@ docs/kb/
 | DrawModifier | 自定义绘制回调 Modifier | `docs/kb/capabilities/draw_modifier.md` | 新建 |
 | AttributeModifier | 动态属性 Modifier 通路 | `docs/kb/capabilities/attribute_modifier.md` | 新建 |
 | CustomProperty | 自定义属性 | `docs/kb/capabilities/custom_property.md` | 新建 |
+| Accessibility | 无障碍能力 | `docs/kb/architecture/accessibility.md` | 已迁移，旧 KB 已移除 |
+| PluginComponent | 插件嵌入组件 | `docs/kb/components/container/plugin_component.md` | 新建 |
+| UIExtensionComponent | UIExtension嵌入组件 | `docs/kb/components/container/ui_extension_component.md` | 新建 |
+| EmbeddedComponent | 嵌入式组件 | `docs/kb/components/container/embedded_component.md` | 新建 |
+| IsolatedComponent | 隔离式组件 | `docs/kb/components/container/isolated_component.md` | 新建 |
+| SecurityUIExtensionComponent | 安全UIExtension组件 | `docs/kb/components/container/security_ui_extension_component.md` | 新建 |
+| DynamicComponent | 动态组件 | `docs/kb/components/container/dynamic_component.md` | 新建 |
+| XComponent | XComponent组件 | `docs/kb/components/platform/x_component.md` | 新建（无旧 KB） |
+| Inspector | 组件树 Inspector | `docs/kb/capabilities/inspector.md` | 新建（Spec 待补） |
+| InspectorLayoutCallback | 布局回调(inspector) | `docs/kb/capabilities/inspector-layout-callback.md` | 新建（Spec 待补） |
+| WindowToolbar | 窗口工具栏 | `docs/kb/capabilities/window-toolbar.md` | 新建（Spec 待补） |
+| AtomicServiceAppBar | 元服务 AppBar | `docs/kb/capabilities/atomic-service-appbar.md` | 新建（Spec 待补） |
 
 ## 检索
 

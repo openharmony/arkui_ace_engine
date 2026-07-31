@@ -102,6 +102,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     isHovered_ = AceType::MakeRefPtr<PropertyBool>(false);
     isPressed_ = AceType::MakeRefPtr<PropertyBool>(false);
     isFocused_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isShowMaterialNode_ = AceType::MakeRefPtr<PropertyBool>(false);
     // others
     UpdateData(parameters);
     UpdateThemeColor();
@@ -136,6 +137,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(isHovered_);
     AttachProperty(isPressed_);
     AttachProperty(isFocused_);
+    AttachProperty(isShowMaterialNode_);
 
     InitializeShapeProperty();
 }
@@ -618,6 +620,10 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
     auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
     if (static_cast<SliderModelNG::BlockStyleType>(blockType_->Get()) != SliderModelNG::BlockStyleType::DEFAULT ||
         sliderMode == SliderModelNG::SliderMode::NONE) {
+        return;
+    }
+
+    if (isShowMaterialNode_->Get()) {
         return;
     }
 

@@ -37,8 +37,8 @@
 #include "core/interfaces/cjui/cjui_api.h"
 #include "core/interfaces/native/node/node_api.h"
 
-#ifndef CROSS_PLATFORM
 namespace OHOS::Ace {
+#ifndef CROSS_PLATFORM
 namespace {
 Framework::ViewAbstractModelImpl* GetViewAbstractModelImpl()
 {
@@ -46,7 +46,7 @@ Framework::ViewAbstractModelImpl* GetViewAbstractModelImpl()
     return &instance;
 }
 }
-
+#endif
 RichEditorModel* RichEditorModel::GetInstance()
 {
     if (!instance_) {
@@ -58,7 +58,6 @@ RichEditorModel* RichEditorModel::GetInstance()
     return instance_.get();
 }
 } // namespace
-#endif
 namespace OHOS::Ace::NG {
 namespace {
     constexpr uint32_t NORMAL_VALUE_ARRAY_STEP = 2;

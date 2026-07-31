@@ -1542,20 +1542,22 @@ void JSViewPartialUpdate::JSGetDialogController(const JSCallbackInfo& info)
 
 void JSViewPartialUpdate::JSFindCustomValueByKey(const JSCallbackInfo& info)
 {
+    auto result = JSRef<JSObject>::New();
+    result->SetProperty<bool>("found", false);
     if (info.Length() < 1 || !info[0]->IsNumber()) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
 
     ContainerScope scope(GetInstanceId());
     auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
     if (!node) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
     auto environmentManager = GetEnvironmentManager(node);
     if (!environmentManager) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
 
@@ -1563,10 +1565,14 @@ void JSViewPartialUpdate::JSFindCustomValueByKey(const JSCallbackInfo& info)
     auto stringKey = std::to_string(key);
     std::any customValue;
     if (!environmentManager->FindCustomEnvValueByKey(node, stringKey, customValue)) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
-    info.SetReturnValue(std::any_cast<JSRef<JSVal>>(customValue));
+    result->SetProperty<bool>("found", true);
+    if (auto* jsValue = std::any_cast<JSRef<JSVal>>(&customValue)) {
+        result->SetPropertyObject("value", *jsValue);
+    }
+    info.SetReturnValue(result);
 }
 
 void JSViewPartialUpdate::JSFindSystemEnvValueByKey(const JSCallbackInfo& info)

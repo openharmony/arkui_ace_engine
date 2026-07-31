@@ -96,6 +96,8 @@
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
 extern const char _binary_jsMockSystemPlugin_abc_end[];
+extern const char _binary_arkComponentMock_abc_start[];
+extern const char _binary_arkComponentMock_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
 extern const char _binary_arkCommon_abc_start[];
@@ -287,6 +289,15 @@ inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
 {
     return EvaluateAbcFile(runtime, NG::GetSystemPath("arkComponent.abc"));
 }
+
+#if defined(PREVIEW)
+inline bool PreloadArkComponentMock(const shared_ptr<JsRuntime>& runtime)
+{
+    std::string str("arkui_binary_arkComponentMock_abc_loadFile");
+    return runtime->EvaluateJsCode((uint8_t*)_binary_arkComponentMock_abc_start,
+        _binary_arkComponentMock_abc_end - _binary_arkComponentMock_abc_start, str);
+}
+#endif
 
 bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
 {
@@ -625,6 +636,9 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadJsEnums(runtime_);
         PreloadArkCommon(runtime_);
         PreloadArkComponent(runtime_);
+#ifdef PREVIEW
+        PreloadArkComponentMock(runtime_);
+#endif
         PreloadArkDynamicComponent(runtime_);
         PreloadUIContent(runtime_);
     }
@@ -782,6 +796,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
         return;
     }
 
+#ifdef PREVIEW
+    PreloadArkComponentMock(arkRuntime);
+#endif
+
     // preload ark declarative component
     bool arkDeclarativeComponentResult = PreloadArkDynamicComponent(arkRuntime);
     if (!arkDeclarativeComponentResult) {
@@ -846,9 +864,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "TextInput", "arkui.components.arktextinput" },
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
-#ifndef PREVIEW
         { "Video", "arkui.components.arkvideo" },
-#endif
         { "Toggle", "arkui.components.arktoggle" },
         { "ToolBarItem", "arkui.components.arktoolbaritem" },
         { "WaterFlow", "arkui.components.arkwaterflow" },

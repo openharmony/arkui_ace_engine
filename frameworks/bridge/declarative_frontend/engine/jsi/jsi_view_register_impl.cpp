@@ -586,9 +586,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Matrix2D", JSMatrix2d::JSBind },
     { "CanvasPattern", JSCanvasPattern::JSBind },
     { "DrawingRenderingContext", JSDrawingRenderingContext::JSBind },
-#ifdef PREVIEW
-    { "Video", JSVideo::JSBind },
-#endif
 #if !defined(WEARABLE_PRODUCT) && defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
     { "VideoControllerAsync", JSVideoControllerAsyncBinding::JSBind },
     { "VideoController", JSVideoControllerBinding::JSBind },
@@ -617,10 +614,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },
     { "WebController", JSWebController::JSBind },
-#if !defined(WEARABLE_PRODUCT) && defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
-    { "VideoControllerAsync", JSVideoControllerAsyncBinding::JSBind },
-    { "VideoController", JSVideoControllerBinding::JSBind },
-#endif
     { "PluginComponent", JSPlugin::JSBind },
     { "SecurityUIExtensionComponent", JSSecurityUIExtension::JSBind },
     { "PreviewUIExtensionComponent", JSPreviewUIExtension::JSBind },
@@ -802,9 +795,6 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
     }
 #if !defined(WEARABLE_PRODUCT) && defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
     if (module == "Video") {
-#ifdef PREVIEW
-        JSVideo::JSBind(globalObj);
-#endif
         JSVideoControllerAsyncBinding::JSBind(globalObj);
         JSVideoControllerBinding::JSBind(globalObj);
         return;
@@ -830,9 +820,28 @@ void RegisterFormModuleByName(BindingTarget globalObj, const std::string& module
     (*func).second(globalObj);
 }
 
-void RegisterControllerByModuleName(
-    BindingTarget globalObj, std::unordered_map<std::string, std::function<void(BindingTarget)>>::const_iterator func)
+void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
 {
+#if !defined(WEARABLE_PRODUCT) && defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
+    if (moduleName == "Video") {
+        JSVideoControllerAsyncBinding::JSBind(globalObj);
+        JSVideoControllerBinding::JSBind(globalObj);
+        return;
+    }
+#endif
+    auto func = bindFuncs.find(moduleName);
+    if (func == bindFuncs.end()) {
+        RegisterExtraViewByName(globalObj, moduleName);
+        return;
+    }
+    if (moduleName == "TextClock") {
+        JSTextClockControllerBinding::JSBind(globalObj);
+        return;
+    }
+    if (moduleName == "TextTimer") {
+        JSTextTimerController::JSBind(globalObj);
+        return;
+    }
     if ((*func).first == "Swiper") {
         JSSwiperControllerBinding::JSBind(globalObj);
     } else if ((*func).first == "Tabs") {
@@ -862,34 +871,6 @@ void RegisterControllerByModuleName(
     } else if ((*func).first == V2::TEXT_ETS_TAG) {
         JSTextController::JSBind(globalObj);
     }
-}
-
-void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
-{
-#if !defined(WEARABLE_PRODUCT) && defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
-    if (moduleName == "Video") {
-#ifdef PREVIEW
-        JSVideo::JSBind(globalObj);
-#endif
-        JSVideoControllerAsyncBinding::JSBind(globalObj);
-        JSVideoControllerBinding::JSBind(globalObj);
-        return;
-    }
-#endif
-    auto func = bindFuncs.find(moduleName);
-    if (func == bindFuncs.end()) {
-        RegisterExtraViewByName(globalObj, moduleName);
-        return;
-    }
-    if (moduleName == "TextClock") {
-        JSTextClockControllerBinding::JSBind(globalObj);
-        return;
-    }
-    if (moduleName == "TextTimer") {
-        JSTextTimerController::JSBind(globalObj);
-        return;
-    }
-    RegisterControllerByModuleName(globalObj, func);
     (*func).second(globalObj);
 }
 

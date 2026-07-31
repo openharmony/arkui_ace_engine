@@ -36,165 +36,6 @@
       "last_updated": "2026-02-03"
     },
     {
-      "name": "Badge",
-      "name_cn": "徽标组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "徽标",
-        "badge",
-        "标记",
-        "数字标记",
-        "红点",
-        "角标",
-        "notification",
-        "通知标记"
-      ],
-      "aliases": [
-        "Badge组件",
-        "徽标",
-        "标记组件"
-      ],
-      "file_path": "pattern/badge/Badge_Knowledge_Base_CN.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/badge/badge_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/badge/badge_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/badge.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/badge.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "Marquee",
-      "name_cn": "跑马灯组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "跑马灯",
-        "marquee",
-        "滚动文本",
-        "文本滚动",
-        "跑马灯动画",
-        "scrolling text"
-      ],
-      "aliases": [
-        "Marquee组件",
-        "跑马灯",
-        "滚动文本"
-      ],
-      "file_path": "pattern/marquee/Marquee_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/marquee/marquee_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/marquee/marquee_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/marquee.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/marquee.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/MarqueeModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/MarqueeModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "Search",
-      "name_cn": "搜索框组件",
-      "category": "basic",
-      "type": "component",
-      "keywords": [
-        "搜索框",
-        "search",
-        "搜索",
-        "输入框",
-        "search box",
-        "filter",
-        "search icon",
-        "清除按钮"
-      ],
-      "aliases": [
-        "Search组件",
-        "搜索框",
-        "搜索组件"
-      ],
-      "file_path": "pattern/search/Search_Knowledge_Base_CN.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/search/search_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/search/search_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/search.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/search.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/SearchModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/SearchModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "TextClock",
-      "name_cn": "文本时钟组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "时钟",
-        "text clock",
-        "时间显示",
-        "数字时钟",
-        "timezone",
-        "时区",
-        "时间格式"
-      ],
-      "aliases": [
-        "TextClock组件",
-        "时钟",
-        "文本时钟"
-      ],
-      "file_path": "pattern/text_clock/TextClock_Knowledge_Base_CN.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_clock/text_clock_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/text_clock/text_clock_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_clock.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textClock.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextClockModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextClockModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "TextTimer",
-      "name_cn": "文本计时器组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "计时器",
-        "text timer",
-        "倒计时",
-        "定时器",
-        "stopwatch",
-        "计时",
-        "elapsed time"
-      ],
-      "aliases": [
-        "TextTimer组件",
-        "计时器",
-        "文本计时器"
-      ],
-      "file_path": "pattern/texttimer/TextTimer_Knowledge_Base_CN.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/texttimer/text_timer_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/texttimer/text_timer_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/text_timer.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textTimer.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextTimerModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextTimerModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
       "name": "CalendarPicker",
       "name_cn": "日历选择器组件",
       "category": "selector",
@@ -222,69 +63,6 @@
         "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/calendarPicker.static.d.ets",
         "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CalendarPickerModifier.d.ts",
         "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CalendarPickerModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "Counter",
-      "name_cn": "计数器组件",
-      "category": "selector",
-      "type": "component",
-      "keywords": [
-        "计数器",
-        "counter",
-        "加减",
-        "数字选择",
-        "步进器",
-        "stepper"
-      ],
-      "aliases": [
-        "Counter组件",
-        "计数器",
-        "步进器"
-      ],
-      "file_path": "pattern/counter/Counter_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/counter/counter_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/counter/counter_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/counter.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/counter.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CounterModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CounterModifier.static.d.ets"
-      },
-      "last_updated": "2026-02-03"
-    },
-    {
-      "name": "Gauge",
-      "name_cn": "仪表盘组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "仪表盘",
-        "gauge",
-        "数据可视化",
-        "进度环",
-        "value gauge",
-        "gradient gauge",
-        "data gauge"
-      ],
-      "aliases": [
-        "Gauge组件",
-        "仪表盘",
-        "仪表盘组件"
-      ],
-      "file_path": "pattern/gauge/Gauge_Knowledge_Base.md",
-      "source_paths": {
-        "pattern": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/gauge/gauge_pattern.cpp",
-        "model": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/gauge/gauge_model_ng.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/gauge.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gauge.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GaugeModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GaugeModifier.static.d.ets"
       },
       "last_updated": "2026-02-03"
     },
@@ -679,58 +457,6 @@
       "last_updated": "2026-05-23"
     },
     {
-      "name": "LoadingProgress",
-      "name_cn": "加载进度组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "LoadingProgress",
-        "加载进度",
-        "loading",
-        "转圈",
-        "进度反馈"
-      ],
-      "aliases": [
-        "LoadingProgress组件",
-        "加载组件",
-        "加载进度"
-      ],
-      "file_path": "pattern/loading_progress/LoadingProgress_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/loading_progress.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/loadingProgress.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/LoadingProgressModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/LoadingProgressModifier.static.d.ets"
-      }
-    },
-    {
-      "name": "PatternLock",
-      "name_cn": "图案锁组件",
-      "category": "selector",
-      "type": "component",
-      "keywords": [
-        "PatternLock",
-        "图案锁",
-        "手势密码",
-        "解锁",
-        "安全输入"
-      ],
-      "aliases": [
-        "PatternLock组件",
-        "图案密码",
-        "手势锁"
-      ],
-      "file_path": "pattern/patternlock/PatternLock_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/pattern_lock.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/patternLock.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/PatternLockModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/PatternLockModifier.static.d.ets"
-      }
-    },
-    {
       "name": "Pipeline",
       "name_cn": "渲染管线模块",
       "category": "system",
@@ -749,58 +475,6 @@
       ],
       "file_path": "pattern/pipeline/Pipeline_Knowledge_Base.md",
       "last_updated": "2026-05-23"
-    },
-    {
-      "name": "Progress",
-      "name_cn": "进度条组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "Progress",
-        "进度条",
-        "progress bar",
-        "进度显示",
-        "加载进度"
-      ],
-      "aliases": [
-        "Progress组件",
-        "进度组件",
-        "进度条"
-      ],
-      "file_path": "pattern/progress/Progress_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/progress.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/progress.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/ProgressModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/ProgressModifier.static.d.ets"
-      }
-    },
-    {
-      "name": "QRCode",
-      "name_cn": "二维码组件",
-      "category": "data_display",
-      "type": "component",
-      "keywords": [
-        "QRCode",
-        "二维码",
-        "qrcode",
-        "编码",
-        "扫码"
-      ],
-      "aliases": [
-        "QRCode组件",
-        "二维码",
-        "扫码码"
-      ],
-      "file_path": "pattern/qrcode/QRCode_Knowledge_Base.md",
-      "last_updated": "2026-05-23",
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/qrcode.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/qrcode.static.d.ets",
-        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/QRCodeModifier.d.ts",
-        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/QRCodeModifier.static.d.ets"
-      }
     },
     {
       "name": "TextArea",
@@ -826,6 +500,30 @@
         "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/textArea.static.d.ets",
         "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/TextAreaModifier.d.ts",
         "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/TextAreaModifier.static.d.ets"
+      }
+    },
+    {
+      "name": "ScrollBar",
+      "name_cn": "滚动条组件",
+      "category": "container",
+      "type": "component",
+      "keywords": [
+        "ScrollBar",
+        "滚动条",
+        "scroll bar",
+        "滑块",
+        "滚动指示"
+      ],
+      "aliases": [
+        "ScrollBar组件",
+        "滚动条",
+        "Scrollbar"
+      ],
+      "file_path": "pattern/scrollBar/ScrollBar_Knowledge_Base.md",
+      "last_updated": "2026-05-23",
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/scroll_bar.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/scrollBar.static.d.ets"
       }
     },
     {
@@ -887,45 +585,6 @@
       ],
       "file_path": "sdk/IDL_Knowledge_Base_CN.md",
       "last_updated": "2026-05-23"
-    },
-    {
-      "name": "Accessibility",
-      "name_cn": "无障碍",
-      "category": "system",
-      "type": "feature",
-      "keywords": [
-        "accessibility",
-        "无障碍",
-        "屏幕阅读器",
-        "TalkBack",
-        "AccessibilityProvider",
-        "AccessibilityProperty",
-        "JsAccessibilityManager",
-        "AccessibilityManagerNG",
-        "AccessibilityFocusStrategy",
-        "ArkUI_AccessibilityElementInfo",
-        "hover",
-        "focus move"
-      ],
-      "aliases": [
-        "无障碍框架",
-        "Accessibility 桥接",
-        "辅助功能",
-        "读屏"
-      ],
-      "file_path": "accessibility/Accessibility_Knowledge_Base_CN.md",
-      "source_paths": {
-        "provider": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_provider.h",
-        "session_adapter": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_session_adapter.h",
-        "manager_ng": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/accessibility/accessibility_manager_ng.h",
-        "ng_property": "<OH_ROOT>/foundation/arkui/ace_engine/frameworks/core/components_ng/property/accessibility_property.h",
-        "js_manager": "<OH_ROOT>/foundation/arkui/ace_engine/adapter/ohos/osal/js_accessibility_manager.h",
-        "focus_strategy": "<OH_ROOT>/foundation/arkui/ace_engine/adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h"
-      },
-      "api_paths": {
-        "ndk": "<OH_ROOT>/foundation/arkui/ace_engine/interfaces/native/native_interface_accessibility.h"
-      },
-      "last_updated": "2026-05-25"
     },
     {
       "name": "ArkUI_API_Paradigm",
@@ -1025,9 +684,7 @@
     "basic": {
       "name": "基础组件",
       "description": "常用的基础UI组件",
-      "components": [
-        "Search"
-      ]
+      "components": []
     },
     "container": {
       "name": "容器组件",
@@ -1040,8 +697,7 @@
       "name": "选择器组件",
       "description": "用于数据选择的组件",
       "components": [
-        "CalendarPicker",
-        "Counter"
+        "CalendarPicker"
       ]
     },
     "shape": {
@@ -1053,17 +709,6 @@
       "name": "媒体组件",
       "description": "用于媒体内容展示的组件",
       "components": []
-    },
-    "data_display": {
-      "name": "数据展示组件",
-      "description": "用于数据展示的组件",
-      "components": [
-        "Badge",
-        "Gauge",
-        "Marquee",
-        "TextClock",
-        "TextTimer"
-      ]
     },
     "advanced": {
       "name": "高级组件",

@@ -38,17 +38,17 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：193
-- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：32
+- `docs/` 下 Markdown 文档总数：235
+- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：20
 - `docs/syntax/` 下语法专题文档：3
   - 知识库命名文档：0 个（ForEach/LazyForEach/Repeat/RepeatVirtualScroll 已迁移到 `docs/kb/syntax/`）
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计
 
-- `context_registry.json` 新版条目数：143
-- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：33
-- 旧 KB 索引路径有效性：33/33（全部存在）
+- `context_registry.json` 新版条目数：198
+- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：22
+- 旧 KB 索引路径有效性：以 `python3 docs/validate_context.py` 输出为准
 
 - 类型分布：
   - `component`: 16
@@ -79,7 +79,7 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-├── kb/ (144 MD，143 个新版 KB 主题 + README)
+├── kb/ (199 MD，198 个新版 KB 主题 + README)
 ├── accessibility/ (1 KB)
 ├── api/ (2 KB)
 ├── architecture/ (2 KB + 3 非 `*_Knowledge_Base*` 命名架构文档)
@@ -182,6 +182,7 @@ PY
 - 2026-07-18：基于当前源码、SDK、测试和基础渲染管线 Spec 重建 Layout Framework 新版 KB，旧 KB 与旧索引入口已移除（旧索引 52 条）。
 - 2026-07-18：新增 Layout Attributes、Blank、Divider、Column、GridCol、GridRow、Row、Stack、FolderStack；重建 Flex（含 Wrap）并合并 Safe Area 两个旧主题。新版 registry 增至 34 条，旧 Flex/Safe Area 文件及索引入口移除，旧索引减至 49 条。
 - 2026-07-24：新增 ImageLoading、BackgroundImage、ImageAnalyzer 和四个 PickerDialog 新版 KB；迁移 SVG 到 `docs/kb/capabilities/svg.md` 并移除旧文件及旧索引入口。新版 registry 增至 42 条，旧索引减至 48 条。
+- 2026-07-29：基于 05-09-06 Span 类长期规格与源码新增 Span、ImageSpan、SymbolSpan、ContainerSpan 四个新版 KB（`docs/kb/components/basic/`）。新版 registry 增至 90 条；无旧 KB 迁移。
 - 2026-07-30：依据 05-03-01 与 05-03-10 Spec 重建滚动公共能力、迁移 WaterFlow/FlowItem；移除旧 WaterFlow KB 与索引入口，并与上游 Scroll/List/Refresh/ScrollBar 等迁移结果合并。新版 registry 共 143 条，旧索引减至 33 条；同步修复 Swiper 组件化路由。
 
 - 2026-07-23：新增 8 个 overlay 类组件 KB（Menu/Dialog/Toast/Select/bindPopup/PopupAdvanced/Sheet/bindTips），补齐弹窗类组件 Spec 路由；迁移 Menu 和 Sheet 旧 KB 到新版路径。
@@ -193,3 +194,7 @@ PY
 - 2026-07-29：迁移 Scroll/List/Refresh/ScrollBar 四个滚动容器旧 KB 到 `docs/kb/components/container/`，补齐 Spec 路由（func_id 05-03-03/05/06/07）。旧 KB 文件删除、旧 INDEX 条目移除（减至 37 条）、context_registry 增至 135 条；rebase 到最新 origin/master 后解决与 Grid 迁移等的冲突（grid 旧 KB 按上游删除处理）。
 
 - 2026-07-29：基于已补录的长期规格与源码新增/迁移 4 个文本类主题 KB。新建 `docs/kb/components/basic/symbol-glyph.md`（SymbolGlyph，复用 TextPattern）与 `docs/kb/capabilities/styled-string.md`（属性字符串，common_capability/api，非组件）；迁移 TextInput 旧 KB 到 `docs/kb/components/basic/text-input.md`、Hyperlink 旧 KB 到 `docs/kb/components/basic/hyperlink.md`，旧文件及旧索引入口移除。新版 registry 增至 88 条，旧索引减至 44 条。
+
+- 2026-07-30：基于已补录的长期规格与源码新增 2 个输入交互框架内部能力 KB。新建 `docs/kb/capabilities/text-shortcuts.md`（文本快捷键，common_capability/system，TextInputClient 加速表）与 `docs/kb/capabilities/keyboard-control.md`（键盘控制，common_capability/system，**重定范围为输入框↔键盘交互**：IME 弹出收起/避让/输入处理契约/公共 API，非焦点导航）。两域均补齐 Spec 路由。顺带修复若干遗留 registry/index 失效（Swiper jsview→controller_binding、PreviewPlatformAdaptation host_preview test_path 拼写、移除 List/Hyperlink 旧 INDEX 失效条目）。
+
+- 2026-07-30：04-14-04 特性整体更名 zh「键盘控制」→「输入法交互」、目录 `04-keyboard-control/`→`04-input-method-interaction/`。同步更新 functions.yaml/functions.yaml 路径与标题、5 个 Feat spec 路径、design.md 与 Feat 内部引用、KB 文件 `keyboard-control.md`→`input-method-interaction.md`、context_registry 条目（id/name/name_cn/spec_domain/kb）及 text-shortcuts 交叉链接。

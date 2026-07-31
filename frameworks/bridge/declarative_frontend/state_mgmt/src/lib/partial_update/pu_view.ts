@@ -331,6 +331,8 @@ abstract class ViewPU extends PUV2ViewBase
       delete ObserveV2.getObserve().id2cmp_[this.id_];
     }
 
+    ObserveV2.removeCustomEnvOwner(this);
+
     if (this.hasRecycleManager()) {
       this.getRecycleManager().purgeAllCachedRecycleNode();
     }
@@ -845,7 +847,7 @@ abstract class ViewPU extends PUV2ViewBase
     this.watchedProps.set(propStr, callback);
   }
 
-  protected override __notifyDecoratedWatch__Internal(varName: string): void {
+  public override __notifyDecoratedWatch__Internal(varName: string): void {
     if (this.isCompFreezeAllowed() && !this.isViewActive()) {
       stateMgmtConsole.debug(`${this.debugInfo__()} state var ${varName} delays @Watch function while component is frozen`);
       this.__getOrCreateDelayedWatchedProps__Internal().add(varName);

@@ -35,6 +35,7 @@ template("cj_frontend") {
       "ability_runtime:cj_environment",
       "napi:cj_bind_ffi",
       "napi:cj_bind_native",
+      "bounds_checking_function:libsec_shared",
     ]
 
     sources = [

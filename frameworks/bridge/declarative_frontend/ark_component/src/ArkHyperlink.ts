@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class ArkHyperlinkComponent extends ArkComponent implements HyperlinkAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {

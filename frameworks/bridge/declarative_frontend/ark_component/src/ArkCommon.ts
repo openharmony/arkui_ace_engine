@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 /// <reference path="./ArkComponent.ts" />
 
 class ArkCommonComponent extends ArkComponent implements CommonAttribute {
