@@ -90,7 +90,6 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
 
     mainSize_ = GetMainAxisSize(idealSize, axis_);
     CalcContentOffset(wrapper, info_, mainSize_);
-    CalculateContentClipFixOffset(wrapper, info_);
     if (!pattern->IsInitialized()) {
         info_->currentOffset_ += info_->contentStartOffset_;
     }
@@ -216,9 +215,6 @@ int32_t WaterFlowSegmentedLayout::CheckDirtyItem() const
             { info_->itemInfos_[i].crossIdx, info_->itemInfos_[i].mainOffset }, userDefHeight, std::nullopt);
         CHECK_NULL_BREAK(child);
         if (!NearEqual(GetMeasuredHeight(child, axis_), info_->itemInfos_[i].mainSize)) {
-            TAG_LOGI(AceLogTag::ACE_WATERFLOW,
-                "item size change. currentIdx:%{public}d,cacheHeight:%{public}f,itemHeight:%{public}f",
-                i, info_->itemInfos_[i].mainSize, GetMeasuredHeight(child, axis_));
             return i;
         }
     }
@@ -391,9 +387,6 @@ void WaterFlowSegmentedLayout::MeasureOnOffset()
                 WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i), std::nullopt);
             CHECK_NULL_BREAK(item);
             if (!NearEqual(GetMeasuredHeight(item, axis_), info_->itemInfos_[i].mainSize)) {
-                TAG_LOGI(AceLogTag::ACE_WATERFLOW,
-                    "item size change. currentIdx:%{public}d,cacheHeight:%{public}f,itemHeight:%{public}f",
-                    i, info_->itemInfos_[i].mainSize, GetMeasuredHeight(item, axis_));
                 // refill from [i] if height doesn't match record
                 info_->ClearCacheAfterIndex(i - 1);
                 Fill(i);
@@ -528,10 +521,10 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx, std::optional<
 
 void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
 {
-    const float viewEndBound = info_->GetViewEndBound(mainSize_);
+    const float expandMainSize = mainSize_ + info_->expandHeight_;
     for (int32_t i = startIdx; i < info_->GetChildrenCount(); ++i) {
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[info_->GetSegment(i)]);
-        if (GreatOrEqual(position.startMainPos + info_->currentOffset_, viewEndBound)) {
+        if (GreatOrEqual(position.startMainPos + info_->currentOffset_, expandMainSize)) {
             break;
         }
         float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i);
@@ -548,9 +541,6 @@ void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
             break;
         }
         if (!NearEqual(GetMeasuredHeight(item, axis_), info_->itemInfos_[i].mainSize)) {
-            TAG_LOGI(AceLogTag::ACE_WATERFLOW,
-                "item size change. currentIdx:%{public}d,cacheHeight:%{public}f,itemHeight:%{public}f",
-                i, info_->itemInfos_[i].mainSize, GetMeasuredHeight(item, axis_));
             // refill from [i] if height doesn't match record
             info_->ClearCacheAfterIndex(i - 1);
             Fill(i);
@@ -574,8 +564,14 @@ RefPtr<LayoutWrapper> WaterFlowSegmentedLayout::MeasureItem(
     }
     auto seg = info_->GetSegment(idx);
     if (itemsCrossSize_[seg].size() == 1 && item->GetLayoutProperty()->GetNeedLazyLayout()) {
-        auto ref = CreateLazyChildViewPosReference(info_, mainSize_, position.second + info_->currentOffset_,
-            ReferenceEdge::START, axis_, deadline, true);
+        ViewPosReference ref {
+            .viewPosStart = 0,
+            .viewPosEnd = info_->duringPositionCalc_ ? LayoutInfinity<float>() : mainSize_ + info_->expandHeight_,
+            .referencePos = position.second + info_->currentOffset_,
+            .referenceEdge = ReferenceEdge::START,
+            .axis = axis_,
+            .deadline = deadline,
+        };
         auto itemConstraint = WaterFlowLayoutUtils::CreateChildConstraint(
             { itemsCrossSize_[seg][position.first], mainSize_, axis_, NonNegative(userDefMainSize) }, ref, props_,
             item);
@@ -670,9 +666,6 @@ void WaterFlowSegmentedLayout::MeasureRemainingLazyChild(int32_t startIdx, int32
             MeasureItem(idx, { info_->itemInfos_[idx].crossIdx, info_->itemInfos_[idx].mainOffset },
                 WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, idx), std::nullopt);
             if (!NearEqual(GetMeasuredHeight(item, axis_), info_->itemInfos_[idx].mainSize)) {
-                TAG_LOGI(AceLogTag::ACE_WATERFLOW,
-                    "item size change. currentIdx:%{public}d,cacheHeight:%{public}f,itemHeight:%{public}f",
-                    idx, info_->itemInfos_[idx].mainSize, GetMeasuredHeight(item, axis_));
                 // refill from [idx] if height doesn't match record
                 info_->ClearCacheAfterIndex(idx - 1);
                 Fill(idx);
