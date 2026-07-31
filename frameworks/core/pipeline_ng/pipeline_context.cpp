@@ -1246,7 +1246,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     if (frameCount != UINT64_MAX) {
         DispatchDisplaySync(nanoTimestamp);
     }
-    FlushZindexUpdate();
+    FlushRebuildRenderTree();
     FlushAnimation(nanoTimestamp);
     FlushFrameCallback(nanoTimestamp, frameCount);
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
@@ -1921,28 +1921,28 @@ void PipelineContext::FlushFocusScroll()
     }
 }
 
-void PipelineContext::SetAfterRenderZindexRebuild(int32_t nodeId)
+bool PipelineContext::ThrottleRenderTreeRebuild(int32_t nodeId, const RefPtr<RenderContext>& renderContext)
 {
-    // need to create vector with frameNode update order.
-    idUpdateZOrder_[nodeId] = idUpdateZOrderIndex_++;
+    // Per-parent throttle. Allow up to MAX eager synchronous rebuilds per vsync for this parent;
+    // beyond that, record it (dedup by id, monotonic order) and coalesce into one rebuild flushed
+    // by FlushRebuildRenderTree(). The count map is cleared every vsync. RequestNextFrame is kept on
+    // the node's RenderContext to preserve its FREE_NODE_CHECK / requestFrame_ behavior.
+    if (++rebuildRenderTreeCount_[nodeId] > MAX_RENDER_TREE_REBUILD_PER_VSYNC) {
+        deferredRebuildRenderTree_[nodeId] = rebuildRenderTreeOrder_++;
+        if (renderContext) {
+            renderContext->RequestNextFrame();
+        }
+        return true;
+    }
+    return false;
 }
 
-void PipelineContext::UpdateIdUpdateZOrderIndex()
-{
-    idUpdateZOrderIndex_++;
-}
-
-size_t PipelineContext::GetIdUpdateZOrderIndex() const
-{
-    return idUpdateZOrderIndex_;
-}
-
-void PipelineContext::FlushZindexUpdate()
+void PipelineContext::FlushRebuildRenderTree()
 {
     std::vector<std::pair<int32_t, size_t>> pairs;
-    pairs.reserve(idUpdateZOrder_.size());
+    pairs.reserve(deferredRebuildRenderTree_.size());
     // create with [nodeA, 1], [nodeA, 2], [nodeB, 3], [nodeC, 4], [nodeA, 5], then update with order B C A.
-    for (const auto& pair : idUpdateZOrder_) {
+    for (const auto& pair : deferredRebuildRenderTree_) {
         pairs.push_back(pair);
     }
     std::sort(pairs.begin(), pairs.end(), [](const auto& a, const auto& b) {
@@ -1959,8 +1959,9 @@ void PipelineContext::FlushZindexUpdate()
             }
         }
     }
-    idUpdateZOrderIndex_ = 0;
-    idUpdateZOrder_.clear();
+    rebuildRenderTreeOrder_ = 0;
+    rebuildRenderTreeCount_.clear();
+    deferredRebuildRenderTree_.clear();
 }
 
 void PipelineContext::FlushPipelineImmediately()
