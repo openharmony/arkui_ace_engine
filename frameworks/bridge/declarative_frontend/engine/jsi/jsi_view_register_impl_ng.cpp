@@ -422,6 +422,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSIsolatedComponent::JSBind(globalObj);
 #endif
 #endif
+    JSGrid::JSBind(globalObj);
+    JSGridItem::JSBind(globalObj);
     JSSwiper::JSBind(globalObj);
     JSImageSpan::JSBind(globalObj);
     JSScrollerBinding::JSBind(globalObj);
