@@ -338,6 +338,7 @@ HWTEST_F(NavigationPatternTestTenNg, OnAttachToMainTree001, TestSize.Level1)
     ASSERT_NE(navigationManager, nullptr);
     navigationManager->navigationIntentInfo_ = std::nullopt;
     context.navNode->curId_ = "";
+    context.navNode->recoverable_ = true;
     context.pattern->OnAttachToMainTree();
     EXPECT_FALSE(context.navNode->GetCurId().empty());
 }

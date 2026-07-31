@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 
 #include <list>
 
+#include "core/components_ng/base/distributed_ui.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_checker.h"
 #include "core/pipeline_ng/pipeline_context.h"

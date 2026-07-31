@@ -13,10 +13,20 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("container_modal_test_ng") {
-  module_name = "ScrollingSet-ArcAlphabetIndexer"
-  type = "new"
-  sources = [ "container_modal_test_ng.cpp" ]
+if (is_host_product) {
+  ace_unittest("container_modal_test_ng") {
+    type = "host_components"
+    module_name = "ScrollingSet-ArcAlphabetIndexer"
+    sources = [
+      "container_modal_test_ng.cpp"
+    ]
+  }
+} else {
+  ace_unittest("container_modal_test_ng") {
+    module_name = "ScrollingSet-ArcAlphabetIndexer"
+    type = "new"
+    sources = [ "container_modal_test_ng.cpp" ]
+  }
 }
 
 ace_unittest("container_modal_pattern_enhance_test_ng") {
@@ -37,8 +47,18 @@ ace_unittest("container_modal_static_pattern_test") {
   sources = [ "container_modal_static_pattern_test.cpp" ]
 }
 
-ace_unittest("container_modal_static_view_test") {
-  module_name = "ScrollingSet-AlphabetIndexer"
-  type = "new"
-  sources = [ "container_modal_static_view_test.cpp" ]
+if (is_host_product) {
+  ace_unittest("container_modal_static_view_test") {
+    type = "host_components"
+    module_name = "ScrollingSet-AlphabetIndexer"
+    sources = [
+      "container_modal_static_view_test.cpp"
+    ]
+  }
+} else {
+  ace_unittest("container_modal_static_view_test") {
+    module_name = "ScrollingSet-AlphabetIndexer"
+    type = "new"
+    sources = [ "container_modal_static_view_test.cpp" ]
+  }
 }
