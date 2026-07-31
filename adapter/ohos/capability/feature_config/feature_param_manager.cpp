@@ -75,6 +75,9 @@ FeatureParamManager::SmartLayoutFeatureConfig ParseSmartLayoutFeature(
     }
     return config;
 }
+
+thread_local std::string g_parsingFormBundle;
+thread_local bool g_pendingSmartLayoutEnabled = false;
 } // namespace
 
 #define ADD_PARSER_MODEL(cls)         \
@@ -96,6 +99,7 @@ const std::unordered_map<std::string, std::string> FeatureParamManager::metaData
 
 std::mutex FeatureParamManager::arkui_cloud_config_mutex_;
 std::mutex FeatureParamManager::arkweb_cloud_config_mutex_;
+std::mutex FeatureParamManager::formConfigMutex_;
 
 FeatureParamManager::FeatureParamManager() = default;
 FeatureParamManager::~FeatureParamManager() = default;
@@ -172,6 +176,31 @@ void FeatureParamManager::UICorrectionParamParseEntry(const std::string& bundleN
     }
 }
 
+void FeatureParamManager::UICorrectionParamParseEntryForForm(const std::string& bundleName)
+{
+    {
+        std::lock_guard<std::mutex> lock(formConfigMutex_);
+        if (!parsedFormBundles_.insert(bundleName).second) {
+            return;
+        }
+    }
+    ConfigParserBase parser;
+    if (parser.LoadUICorrectionConfigXML() != PARSE_EXEC_SUCCESS) {
+        LOGW("UICorrectionParamParseEntryForForm failed to load config, bundle:%{public}s", bundleName.c_str());
+        return;
+    }
+    g_parsingFormBundle = bundleName;
+    g_pendingSmartLayoutEnabled = false;
+    auto ret = parser.ParseUICorrectionConfigXMLWithBundleName(bundleName);
+    g_parsingFormBundle.clear();
+    if (ret != PARSE_EXEC_SUCCESS) {
+        LOGW("UICorrectionParamParseEntryForForm failed to parse config, bundle:%{public}s", bundleName.c_str());
+        return;
+    }
+    std::lock_guard<std::mutex> lock(formConfigMutex_);
+    smartLayoutEnabledMap_[bundleName] = g_pendingSmartLayoutEnabled;
+}
+
 void FeatureParamManager::FeatureParamParseEntry(const std::string& bundleName)
 {
     if (featureParser_ != nullptr) {
@@ -224,12 +253,18 @@ bool FeatureParamManager::IsRnOverflowEnable()
 
 void FeatureParamManager::SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled)
 {
+    if (!g_parsingFormBundle.empty()) {
+        return;
+    }
     pageOverflowEnabled_ = pageOverflowEnabled;
     dialogCorrectionEnabled_ = dialogCorrectionEnabled;
 }
 
 void FeatureParamManager::SetUiCorrectionRnEnableParam(bool rnOverflowEnabled)
 {
+    if (!g_parsingFormBundle.empty()) {
+        return;
+    }
     rnOverflowEnabled_ = rnOverflowEnabled;
 }
 
@@ -238,8 +273,19 @@ bool FeatureParamManager::IsSmartLayoutEnabled() const
     return smartlayoutEnabled_;
 }
 
+bool FeatureParamManager::IsSmartLayoutEnabledForBundle(const std::string& bundleName) const
+{
+    std::lock_guard<std::mutex> lock(formConfigMutex_);
+    auto it = smartLayoutEnabledMap_.find(bundleName);
+    return it != smartLayoutEnabledMap_.end() ? it->second : false;
+}
+
 void FeatureParamManager::SetSmartLayoutEnabled(bool enabled)
 {
+    if (!g_parsingFormBundle.empty()) {
+        g_pendingSmartLayoutEnabled = enabled;
+        return;
+    }
     smartlayoutEnabled_ = enabled;
 }
 

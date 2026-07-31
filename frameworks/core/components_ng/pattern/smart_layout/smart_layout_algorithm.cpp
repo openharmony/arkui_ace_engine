@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/core/components_ng/pattern/smart_layout/smart_layout_algorithm.h"
+#include "base/utils/string_utils.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/flex/flex_layout_pattern.h"
@@ -21,11 +22,18 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/smart_layout/smart_layout_engine_loader.h"
+#include "core/components_ng/render/render_context.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 constexpr double SMART_LAYOUT_TEXT_ADAPT_MIN_FONT_SIZE_LIMIT_RATIO = 0.6;
+
+/**
+ * @brief Fixed inspector id marking smart layout enabled containers
+ */
+constexpr char GENUI_RENDER_COMPONENT_ID_NAME[] = "__genui_render_component__";
 
 /**
  * @brief Convert FlexAlign to SmartLayoutAlign for decoupling
@@ -45,6 +53,19 @@ SmartLayoutAlign ConvertFlexAlignToSmartLayoutAlign(FlexAlign flexAlign)
 }
 
 } // namespace
+
+RefPtr<FrameNode> SmartLayoutAlgorithm::IsA2UIFormComponent(const RefPtr<FrameNode>& hostNode)
+{
+    auto node = hostNode;
+    while (node) {
+        const auto& idName = node->GetInspectorId();
+        if (idName.has_value() && StringUtils::StartWith(idName.value(), GENUI_RENDER_COMPONENT_ID_NAME)) {
+            return node;
+        }
+        node = node->GetAncestorNodeOfFrame(false);
+    }
+    return nullptr;
+}
 
 SmartLayoutType SmartLayoutAlgorithm::GetLayoutTypeFromWrapper(LayoutWrapper* layoutWrapper)
 {
@@ -194,17 +215,32 @@ OffsetF SmartLayoutAlgorithm::CalculateOffsetWithMargin(
     const ISmartLayoutNode& layoutNode,
     const RefPtr<GeometryNode> geoNode,
     double boundingBoxOffsetX,
-    double boundingBoxOffsetY)
+    double boundingBoxOffsetY,
+    bool isFormRender)
 {
     double offsetX = layoutNode.GetPosition().offsetX.value;
     double offsetY = layoutNode.GetPosition().offsetY.value;
 
-    if (rootNode_->GetLayoutType() == SmartLayoutType::ROW) {
-        return OffsetF(static_cast<float>(offsetX), static_cast<float>(offsetY + boundingBoxOffsetY));
-    } else if (rootNode_->GetLayoutType() == SmartLayoutType::COLUMN) {
-        return OffsetF(static_cast<float>(offsetX + boundingBoxOffsetX), static_cast<float>(offsetY));
+    if (isFormRender) {
+        return OffsetF(static_cast<float>(offsetX + boundingBoxOffsetX),
+            static_cast<float>(offsetY + boundingBoxOffsetY));
     }
-    return OffsetF(static_cast<float>(offsetX), static_cast<float>(offsetY));
+
+    auto layoutType = rootNode_->GetLayoutType();
+    if (layoutType != SmartLayoutType::ROW && layoutType != SmartLayoutType::COLUMN) {
+        return OffsetF(static_cast<float>(offsetX), static_cast<float>(offsetY));
+    }
+
+    auto& context = rootNode_->GetContext();
+    bool centerX = (layoutType == SmartLayoutType::ROW)
+        ? (context.mainAxisAlign == SmartLayoutAlign::CENTER)
+        : (context.crossAxisAlign == SmartLayoutAlign::CENTER);
+    bool centerY = (layoutType == SmartLayoutType::ROW)
+        ? (context.crossAxisAlign == SmartLayoutAlign::CENTER)
+        : (context.mainAxisAlign == SmartLayoutAlign::CENTER);
+
+    return OffsetF(static_cast<float>(centerX ? offsetX + boundingBoxOffsetX : offsetX),
+        static_cast<float>(centerY ? offsetY + boundingBoxOffsetY : offsetY));
 }
 
 void SmartLayoutAlgorithm::ApplyChildLayout(
@@ -236,7 +272,22 @@ void SmartLayoutAlgorithm::ApplyChildLayout(
 
     auto geoNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geoNode);
-    OffsetF offset = CalculateOffsetWithMargin(*layoutNode, geoNode, boundingBoxOffsetX, boundingBoxOffsetY);
+    auto* context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto rootRect = context->GetRootRect();
+    auto parentFrame = hostNode->GetAncestorNodeOfFrame(false);
+    CHECK_NULL_VOID(parentFrame);
+    auto parentGeo = parentFrame->GetGeometryNode();
+    CHECK_NULL_VOID(parentGeo);
+    auto parentSize = parentGeo->GetFrameSize();
+    bool isFormRender = false;
+    if (context->IsFormRender() &&
+        NearEqual(rootRect.Width(), parentSize.Width(), 1.0) &&
+        NearEqual(rootRect.Height(), parentSize.Height(), 1.0)) {
+        isFormRender = true;
+    }
+    OffsetF offset =
+        CalculateOffsetWithMargin(*layoutNode, geoNode, boundingBoxOffsetX, boundingBoxOffsetY, isFormRender);
     geoNode->SetFrameOffset(offset);
     renderContext->SetRenderPivot(0.0f, 0.0f);
     hostNode->ForceSyncGeometryNode();
@@ -304,6 +355,12 @@ bool SmartLayoutAlgorithm::InitializeLayoutContext(LayoutWrapper* layoutWrapper)
 
     auto layoutProp = layoutWrapper->GetLayoutProperty();
     if (layoutProp) {
+        auto padding = layoutProp->CreatePaddingWithoutBorder();
+        context.padding.left = static_cast<double>(padding.left.value_or(0));
+        context.padding.right = static_cast<double>(padding.right.value_or(0));
+        context.padding.top = static_cast<double>(padding.top.value_or(0));
+        context.padding.bottom = static_cast<double>(padding.bottom.value_or(0));
+
         auto flexProp = AceType::DynamicCast<FlexLayoutProperty>(layoutProp);
         if (flexProp) {
             auto mainAlign = flexProp->GetMainAxisAlign().value_or(FlexAlign::FLEX_START);
@@ -404,6 +461,43 @@ bool SmartLayoutAlgorithm::RemeasureText(LayoutWrapper* layoutWrapper)
     }
     layoutAlgorithm->Layout(layoutWrapper);
     return true;
+}
+
+bool SmartLayoutAlgorithm::PerformSmartLayoutScaleUp(LayoutWrapper* layoutWrapper)
+{
+    ACE_SCOPED_TRACE("PerformSmartLayoutScaleUp");
+    auto layoutType = GetLayoutTypeFromWrapper(layoutWrapper);
+    CHECK_EQUAL_RETURN(layoutType, SmartLayoutType::UNKNOWN, false);
+    LOGD("SmartLayout: Detected layout %{public}s content underutilized, scaling up",
+        layoutWrapper->GetHostTag().c_str());
+
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto* engine = SmartLayoutEngineLoader::GetInstance().GetEngine();
+    CHECK_NULL_RETURN(engine, false);
+
+    rootNode_ = engine->CreateRootNode();
+    CHECK_NULL_RETURN(rootNode_, false);
+    rootNode_->SetLayoutType(layoutType);
+
+    if (!InitializeLayoutContext(layoutWrapper)) {
+        return false;
+    }
+    ProcessLayoutChildren(layoutWrapper);
+
+    // Calculate bounding box
+    auto boundingBox = rootNode_->GetChildrenBoundingBox();
+    if (!boundingBox.IsValid()) {
+        return false;
+    }
+    rootNode_->SetBoundingBox(boundingBox);
+
+    // Apply scale-up constraints
+    rootNode_->ApplyScaleUpConstraints();
+
+    if (!rootNode_->SolveLayout()) {
+        return false;
+    }
+    return ApplyLayoutResults(layoutWrapper);
 }
 
 } // namespace OHOS::Ace::NG
