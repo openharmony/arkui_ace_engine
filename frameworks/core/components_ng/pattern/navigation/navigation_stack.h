@@ -229,6 +229,7 @@ public:
 
     virtual std::string GetStringifyParamByIndex(int32_t index) const { return ""; }
     virtual std::string GetSerializedParamSafely(int32_t index) const { return ""; }
+    virtual std::string GetSerializedParamForRecovery(int32_t index) const { return ""; }
     virtual void SetPathArray(const std::vector<NavdestinationRecoveryInfo>& navdestinationsInfo) {}
     virtual void SetFromRecovery(int32_t index, bool fromRecovery) {}
     virtual bool IsFromRecovery(int32_t index) { return false; }

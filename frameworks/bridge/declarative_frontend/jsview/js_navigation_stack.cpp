@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
+#include "bridge/declarative_frontend/jsview/js_nav_param_flat_serializer.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -1507,6 +1508,26 @@ std::string JSNavigationStack::GetSerializedParamSafely(int32_t index) const
     return serializedParam->ToString();
 }
 
+std::string JSNavigationStack::GetSerializedParamForRecovery(int32_t index) const
+{
+    std::string serializedEmpty = "undefined";
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, serializedEmpty);
+    auto param = GetParamByIndex(index);
+    if (param.IsEmpty() || param->IsUndefined() || param->IsNull()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+            "current navDestination(index: %{public}d)'s param is undefined or null!", index);
+        return serializedEmpty;
+    }
+    auto serializedParam = JsNavParamFlatSerializer::Serialize(param);
+    if (serializedParam == "undefined" || serializedParam.empty()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+            "current navDestination(index: %{public}d)'s param can't be serialized or is empty!", index);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "serialize navDestination param success! its index: %{public}d", index);
+    }
+    return serializedParam;
+}
+
 void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
@@ -1520,7 +1541,13 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
         JSRef<JSObject> navPathInfo = JSRef<JSObject>::New();
         navPathInfo->SetProperty<std::string>("name", infoName);
         if (!infoParam.empty() && infoParam != JS_STRINGIFIED_UNDEFINED) {
-            navPathInfo->SetPropertyObject("param", JSRef<JSObject>::New()->ToJsonObject(infoParam.c_str()));
+            auto deserializedParam = JsNavParamFlatSerializer::Deserialize(infoParam);
+            if (!deserializedParam.IsEmpty()) {
+                navPathInfo->SetPropertyObject("param", deserializedParam);
+            } else {
+                TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+                    "navDestination(index: %{public}d)'s param can't be deserialized, skip param!", index);
+            }
         }
         navPathInfo->SetProperty<bool>("fromRecovery", true);
         navPathInfo->SetProperty<int32_t>("mode", infoMode);

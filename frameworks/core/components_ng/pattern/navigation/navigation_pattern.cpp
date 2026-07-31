@@ -5289,7 +5289,7 @@ std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
             auto mode = index > lastStandardIndex ? static_cast<int32_t>(NavDestinationMode::DIALOG) :
                 static_cast<int32_t>(NavDestinationMode::STANDARD);
             navdestinationInfo->Put("name", iter.first.c_str());
-            navdestinationInfo->Put("param", navigationStack_->GetSerializedParamSafely(index).c_str());
+            navdestinationInfo->Put("param", navigationStack_->GetSerializedParamForRecovery(index).c_str());
             navdestinationInfo->Put("mode", mode);
             navdestinationInfo->Put("state", navigationStack_->GetAutoCleanedState(index).c_str());
             allNavdestinationInfo->Put(navdestinationInfo);
