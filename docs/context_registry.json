@@ -8205,6 +8205,7 @@
       "keywords": [
         "StyleAttributes",
         "样式属性",
+        "多态样式",
         "stateStyles",
         "attributeModifier",
         "excludeInner",
@@ -8218,6 +8219,7 @@
       ],
       "aliases": [
         "样式属性",
+        "多态样式",
         "状态样式",
         "动态属性",
         "attributeModifier属性",
@@ -8228,11 +8230,12 @@
       "func_id": "04-03-07",
       "spec_status": "active",
       "source_paths": {
-        "state_style_manager": "frameworks/core/components_ng/event/state_style_manager.h",
-        "input_event_hub": "frameworks/core/components_ng/event/input_event_hub.h",
-        "render_context": "frameworks/core/components_ng/render/render_context.h",
+        "pattern": "frameworks/core/components_ng/pattern/pattern.cpp",
+        "state_style_manager": "frameworks/core/components_ng/event/state_style_manager.cpp",
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
         "view_stack_processor": "frameworks/core/components_ng/base/view_stack_processor.cpp",
         "focus_hub": "frameworks/core/components_ng/event/focus_hub.h",
+        "dynamic_js_bridge": "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp",
         "ark_component": "frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts",
         "modifier_utilities": "frameworks/bridge/declarative_frontend/ark_modifier/src/modifier_utilities.ts",
         "node_api": "frameworks/core/interfaces/native/node/node_api.cpp",
@@ -8241,16 +8244,19 @@
       },
       "api_paths": {
         "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
         "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
         "capi": "interfaces/native/native_node.h"
       },
       "test_paths": [
-        "test/unittest/core/pattern/",
-        "test/unittest/core/event/",
-        "test/unittest/capi/"
+        "test/unittest/core/event/state_style_manager_test_ng.cpp",
+        "test/unittest/core/base/view_stack_processor_test_ng.cpp",
+        "test/unittest/core/base/view_abstract_test_ng.cpp",
+        "test/unittest/interfaces/native_node_test.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-28"
+      "last_verified": "2026-07-31"
     },
     {
       "id": "multi-instance-management",
@@ -10166,6 +10172,375 @@
       "last_verified": "2026-07-31"
     },
     {
+      "id": "InteractionNormalization",
+      "name": "Interaction Normalization",
+      "name_cn": "交互归一化",
+      "kind": "common_capability",
+      "category": "event",
+      "keywords": [
+        "Interaction Normalization",
+        "交互归一化",
+        "多源点击",
+        "多源滑动",
+        "多源平移",
+        "多源缩放",
+        "多源旋转",
+        "ClickRecognizer",
+        "PanRecognizer",
+        "SwipeRecognizer",
+        "PinchRecognizer",
+        "RotationRecognizer",
+        "AxisEvent",
+        "GestureEvent",
+        "TouchPad",
+        "Mouse Wheel"
+      ],
+      "aliases": [
+        "多源交互归一化",
+        "输入源归一化",
+        "InteractionNormalization",
+        "多模态手势归一化"
+      ],
+      "kb": "docs/kb/capabilities/interaction-normalization.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/11-interaction-normalization",
+      "func_id": "04-04-11",
+      "spec_status": "active",
+      "source_paths": {
+        "platform_input": "adapter/ohos/entrance/ace_view_ohos.cpp",
+        "mmi_convertor": "adapter/ohos/entrance/mmi_event_convertor.cpp",
+        "touch_event": "frameworks/core/event/touch_event.h",
+        "axis_event": "frameworks/core/event/axis_event.h",
+        "gesture_event": "frameworks/core/gestures/gesture_event.h",
+        "click_event": "frameworks/core/components_ng/event/click_event.cpp",
+        "gesture_event_hub": "frameworks/core/components_ng/event/gesture_event_hub.cpp",
+        "focus_event_handler": "frameworks/core/components_ng/event/focus_event_handler.cpp",
+        "gesture_recognizer": "frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.cpp",
+        "click_recognizer": "frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp",
+        "pan_recognizer": "frameworks/core/components_ng/gestures/recognizers/pan_recognizer.cpp",
+        "swipe_recognizer": "frameworks/core/components_ng/gestures/recognizers/swipe_recognizer.cpp",
+        "pinch_recognizer": "frameworks/core/components_ng/gestures/recognizers/pinch_recognizer.cpp",
+        "rotation_recognizer": "frameworks/core/components_ng/gestures/recognizers/rotation_recognizer.cpp",
+        "native_gesture_impl": "interfaces/native/node/gesture_impl.cpp",
+        "native_input_event_impl": "interfaces/native/event/ui_input_event.cpp",
+        "native_node_event": "frameworks/core/interfaces/native/node/node_common_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "dynamic_gesture": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/gesture.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "static_gesture": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gesture.static.d.ets",
+        "native_node": "interfaces/native/native_node.h",
+        "native_gesture": "interfaces/native/native_gesture.h",
+        "native_input_event": "interfaces/native/ui_input_event.h"
+      },
+      "test_paths": [
+        "test/unittest/core/gestures/click_recognizer_test_ng.cpp",
+        "test/unittest/core/gestures/pan_recognizer_test_ng.cpp",
+        "test/unittest/core/gestures/pan_recognizer_axis_base_test_ng.cpp",
+        "test/unittest/core/gestures/swipe_recognizer_test_ng.cpp",
+        "test/unittest/core/gestures/pinch_recognizer_test_ng.cpp",
+        "test/unittest/core/gestures/rotation_recognizer_test_ng.cpp",
+        "test/unittest/core/gestures/gesture_recognizer_test_ng.cpp",
+        "test/unittest/core/event/gesture_event_hub_test_ng.cpp",
+        "test/unittest/core/event/focus_event_handler_test_ng.cpp",
+        "test/unittest/interfaces/ace_gesture/",
+        "test/unittest/interfaces/ace_ui_input_event/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "StylusCapability",
+      "name": "Stylus Capability",
+      "name_cn": "手写笔能力",
+      "kind": "common_capability",
+      "category": "event",
+      "keywords": [
+        "Stylus Capability",
+        "手写笔能力",
+        "Pen",
+        "SourceTool",
+        "pressure",
+        "tiltX",
+        "tiltY",
+        "rollAngle",
+        "Pen Hover",
+        "StylusDetectorMgr",
+        "handwriting"
+      ],
+      "aliases": [
+        "手写笔",
+        "Pen输入",
+        "Stylus",
+        "手写服务"
+      ],
+      "kb": "docs/kb/capabilities/stylus-capability.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/08-stylus-capability",
+      "func_id": "04-04-08",
+      "spec_status": "active",
+      "source_paths": {
+        "mmi_convertor": "adapter/ohos/entrance/mmi_event_convertor.cpp",
+        "touch_event": "frameworks/core/event/touch_event.cpp",
+        "ng_touch_event": "frameworks/core/components_ng/event/touch_event.cpp",
+        "mouse_event": "frameworks/core/event/mouse_event.cpp",
+        "pipeline": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "pen_event_manager": "frameworks/core/common/event_manager_pen.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "input_event_hub": "frameworks/core/components_ng/event/input_event_hub.cpp",
+        "stylus_loader": "adapter/ohos/osal/stylus_detector_loader.cpp",
+        "stylus_manager": "adapter/ohos/osal/stylus_detector_mgr.cpp",
+        "stylus_callback": "adapter/ohos/osal/stylus_detector_callback.cpp",
+        "stylus_inner_api": "interfaces/inner_api/ace/stylus/stylus_detector_interface.h",
+        "native_input_event": "interfaces/native/event/ui_input_event.cpp",
+        "text_input_modifier": "frameworks/core/components_ng/pattern/text_input/bridge/text_input_dynamic_modifier.cpp",
+        "rich_editor": "frameworks/core/components_ng/pattern/rich_editor/rich_editor_pattern.cpp",
+        "web": "frameworks/core/components_ng/pattern/web/web_pattern.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "native_input_event": "interfaces/native/ui_input_event.h",
+        "stylus_inner_api": "interfaces/inner_api/ace/stylus/stylus_detector_interface.h"
+      },
+      "test_paths": [
+        "test/unittest/core/event/event_manager_pen_test_ng.cpp",
+        "test/unittest/interfaces/ace_ui_input_event/",
+        "test/unittest/core/pipeline/",
+        "test/unittest/core/pattern/text_input/",
+        "test/unittest/core/pattern/rich_editor/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "ComponentRelatedEvents",
+      "name": "Component Related Events",
+      "name_cn": "组件相关事件",
+      "kind": "common_capability",
+      "category": "event",
+      "keywords": [
+        "Component Related Events",
+        "组件相关事件",
+        "onAppear",
+        "onDisAppear",
+        "onAttach",
+        "onDetach",
+        "onAreaChange",
+        "onSizeChange",
+        "AreaChangeOptions",
+        "EventHub"
+      ],
+      "aliases": [
+        "组件生命周期事件",
+        "组件区域变化事件",
+        "组件尺寸变化事件",
+        "ComponentEvents"
+      ],
+      "kb": "docs/kb/capabilities/component-related-events.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/09-component-related-events",
+      "func_id": "04-04-09",
+      "spec_status": "active",
+      "source_paths": {
+        "dynamic_lifecycle": "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.cpp",
+        "dynamic_common_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp",
+        "ark_component": "frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts",
+        "static_common": "frameworks/core/interfaces/native/implementation/common_method_modifier.cpp",
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "event_hub": "frameworks/core/components_ng/event/event_hub.cpp",
+        "ui_node": "frameworks/core/components_ng/base/ui_node.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "layout_wrapper": "frameworks/core/components_ng/layout/layout_wrapper.cpp",
+        "pipeline": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "native_modifier": "frameworks/core/interfaces/native/node/node_common_modifier.cpp",
+        "native_event_converter": "interfaces/native/node/event_converter.cpp",
+        "native_node_utils": "interfaces/native/node/node_utils.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "native_node": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/event/event_hub_test_ng.cpp",
+        "test/unittest/core/base/frame_node_test_ng.cpp",
+        "test/unittest/core/base/ui_node_test_ng.cpp",
+        "test/unittest/core/base/view_abstract_test_ng.cpp",
+        "test/unittest/capi/accessors/ui_common_event_accessor_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "VisibleAreaMechanism",
+      "name": "Visible Area Mechanism",
+      "name_cn": "可见区域机制",
+      "kind": "common_capability",
+      "category": "event",
+      "keywords": [
+        "Visible Area Mechanism",
+        "可见区域机制",
+        "onVisibleAreaChange",
+        "onVisibleAreaApproximateChange",
+        "VisibleAreaEventOptions",
+        "VisibleRatio",
+        "expectedUpdateInterval",
+        "measureFromViewport"
+      ],
+      "aliases": [
+        "可见区域监听",
+        "可见比例监听",
+        "VisibleArea",
+        "VisibleAreaChange"
+      ],
+      "kb": "docs/kb/capabilities/visible-area-mechanism.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/10-visible-area-mechanism",
+      "func_id": "04-04-10",
+      "spec_status": "active",
+      "source_paths": {
+        "dynamic_js": "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp",
+        "ark_component": "frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts",
+        "dynamic_common_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp",
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "event_hub": "frameworks/core/components_ng/event/event_hub.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "pipeline": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "static_common": "frameworks/core/interfaces/native/implementation/common_method_modifier.cpp",
+        "ui_common_event": "frameworks/core/interfaces/native/implementation/ui_common_event_accessor.cpp",
+        "native_modifier": "frameworks/core/interfaces/native/node/node_common_modifier.cpp",
+        "native_node_api": "frameworks/core/interfaces/native/node/node_api.cpp",
+        "native_style": "interfaces/native/node/style_modifier.cpp",
+        "native_model": "interfaces/native/node/node_model.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "native_node": "interfaces/native/native_node.h",
+        "native_type": "interfaces/native/native_type.h"
+      },
+      "test_paths": [
+        "test/unittest/core/base/frame_node_test_ng.cpp",
+        "test/unittest/core/base/view_abstract_test_ng.cpp",
+        "test/unittest/core/event/event_hub_test_ng.cpp",
+        "test/unittest/core/pipeline/",
+        "test/unittest/capi/accessors/ui_common_event_accessor_test.cpp",
+        "test/unittest/interfaces/native_node_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "FocusMechanism",
+      "name": "Focus Mechanism",
+      "name_cn": "焦点机制",
+      "kind": "common_capability",
+      "category": "event",
+      "keywords": [
+        "Focus Mechanism",
+        "焦点机制",
+        "FocusHub",
+        "FocusManager",
+        "FocusView",
+        "FocusGuard",
+        "focusScopeId",
+        "focusScopePriority",
+        "nextFocus",
+        "tabIndex",
+        "FocusBox"
+      ],
+      "aliases": [
+        "焦点框架",
+        "焦点导航",
+        "焦点恢复",
+        "FocusFramework"
+      ],
+      "kb": "docs/kb/capabilities/focus-mechanism.md",
+      "spec_domain": "specs/04-common-capability/09-focus-framework/01-focus-mechanism",
+      "func_id": "04-09-01",
+      "spec_status": "active",
+      "source_paths": {
+        "focus_type": "frameworks/core/components_ng/event/focus_type.h",
+        "focus_state": "frameworks/core/components_ng/event/focus_state.h",
+        "focus_hub": "frameworks/core/components_ng/event/focus_hub.cpp",
+        "focus_event_handler": "frameworks/core/components_ng/event/focus_event_handler.cpp",
+        "focus_manager": "frameworks/core/components_ng/manager/focus/focus_manager.cpp",
+        "focus_view": "frameworks/core/components_ng/manager/focus/focus_view.cpp",
+        "focus_box": "frameworks/core/components_ng/event/focus_box.cpp",
+        "pipeline": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "key_event_manager": "frameworks/core/common/key_event_manager.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "native_focus": "interfaces/native/node/native_interface_focus.cpp",
+        "napi_focus_controller": "interfaces/napi/kits/focus_controller/js_focus_controller.cpp",
+        "ani_focus_controller": "interfaces/ets/ani/focuscontroller/src/focusController.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "native_focus": "interfaces/native/native_interface_focus.h",
+        "native_node": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/event/focus_core/",
+        "test/unittest/core/manager/focus_manager_test_ng.cpp",
+        "test/unittest/core/manager/focus_view_test_ng.cpp",
+        "test/unittest/core/common/key_event_manager/",
+        "test/unittest/core/event/focus_event_handler_test_ng.cpp",
+        "test/unittest/core/event/focus_box_test_ng.cpp",
+        "test/unittest/capi/accessors/focus_controller_accessor_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "ComponentUtils",
+      "name": "ComponentUtils",
+      "name_cn": "ComponentUtils 组件信息获取",
+      "kind": "common_capability",
+      "category": "api",
+      "keywords": [
+        "ComponentUtils",
+        "组件信息获取",
+        "getComponentUtils",
+        "getRectangleById",
+        "ComponentInfo",
+        "getItemsInShapePath",
+        "Inspector",
+        "ImageItem"
+      ],
+      "aliases": [
+        "组件几何信息查询",
+        "组件矩形查询",
+        "Component Utils",
+        "形状区域图像筛选"
+      ],
+      "kb": "docs/kb/capabilities/component-utils.md",
+      "spec_domain": "specs/04-common-capability/11-component-info/01-component-utils",
+      "func_id": "04-11-01",
+      "spec_status": "active",
+      "source_paths": {
+        "dynamic_uicontext": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "static_uicontext": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/base/UIContextImpl.ets",
+        "napi": "interfaces/napi/kits/componentutils/js_component_utils.cpp",
+        "ani": "interfaces/ets/ani/componentUtils/src/componentUtils.cpp",
+        "cj": "frameworks/bridge/cj_frontend/interfaces/cj_ffi/cj_component_utils_ffi.cpp",
+        "frontend_delegate": "frameworks/bridge/js_frontend/frontend_delegate.cpp",
+        "inspector": "frameworks/core/components_ng/base/inspector.cpp",
+        "default_shape_filter": "interfaces/napi/kits/componentutils/js_mistouch_prevention.cpp",
+        "build": "interfaces/napi/kits/componentutils/BUILD.gn",
+        "extension_config": "build/ace_ext.gni"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.componentUtils.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.componentUtils.static.d.ets",
+        "uicontext": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/base/inspector_test_ng.cpp",
+        "interfaces/napi/kits/componentutils/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
       "id": "Accessibility",
       "name": "Accessibility",
       "name_cn": "无障碍能力",
@@ -10860,6 +11235,455 @@
       "spec_status": "pending",
       "status": "active",
       "last_verified": "2026-07-31"
+    },
+    {
+      "id": "TouchEvents",
+      "name": "Touch Events",
+      "name_cn": "触摸事件",
+      "kind": "common_capability",
+      "category": "event",
+      "keywords": [
+        "Touch Events",
+        "触摸事件",
+        "TouchEvent",
+        "TouchEventInfo",
+        "TouchLocationInfo",
+        "多点触摸",
+        "历史采样",
+        "onTouch",
+        "PointerEvent",
+        "UIInputEvent"
+      ],
+      "aliases": [
+        "触控事件",
+        "Touch Input",
+        "多指触摸",
+        "触摸回调"
+      ],
+      "kb": "docs/kb/capabilities/touch-events.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/01-touch-events",
+      "func_id": "04-04-01",
+      "spec_status": "active",
+      "source_paths": {
+        "event_model": "frameworks/core/event/touch_event.h",
+        "ng_touch_event": "frameworks/core/components_ng/event/touch_event.h",
+        "dynamic_callback": "frameworks/bridge/declarative_frontend/engine/functions/js_touch_function.cpp",
+        "ohos_entry": "adapter/ohos/entrance/ace_view_ohos.cpp",
+        "ohos_converter": "adapter/ohos/entrance/touch_event_convertor.cpp",
+        "native_input_api": "interfaces/native/ui_input_event.h",
+        "native_input_impl": "interfaces/native/event/ui_input_event.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "native": "interfaces/native/ui_input_event.h"
+      },
+      "test_paths": [
+        "test/unittest/core/event/touch_event_test_ng.cpp",
+        "test/unittest/interfaces/ace_ui_input_event/",
+        "test/unittest/capi/accessors/touch_event_accessor_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
+      "id": "KeyEvents",
+      "name": "Key Events",
+      "name_cn": "按键事件",
+      "kind": "common_capability",
+      "category": "event",
+      "keywords": [
+        "Key Events",
+        "按键事件",
+        "KeyEvent",
+        "KeyEventManager",
+        "onKeyEvent",
+        "Pre-IME",
+        "按键码",
+        "修饰键",
+        "焦点分发",
+        "native key event"
+      ],
+      "aliases": [
+        "键盘事件",
+        "Key Input",
+        "键事件",
+        "按键回调"
+      ],
+      "kb": "docs/kb/capabilities/key-events.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/02-key-events",
+      "func_id": "04-04-02",
+      "spec_status": "active",
+      "source_paths": {
+        "event_model": "frameworks/core/event/key_event.h",
+        "manager": "frameworks/core/common/key_event_manager.cpp",
+        "manager_header": "frameworks/core/common/key_event_manager.h",
+        "dynamic_callback": "frameworks/bridge/declarative_frontend/engine/functions/js_key_function.cpp",
+        "ohos_entry": "adapter/ohos/entrance/ace_view_ohos.cpp",
+        "native_api": "interfaces/native/native_key_event.h",
+        "native_impl": "interfaces/native/event/key_event_impl.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "native": "interfaces/native/native_key_event.h"
+      },
+      "test_paths": [
+        "test/unittest/core/event/key_event_test_ng.cpp",
+        "test/unittest/core/common/key_event_manager/",
+        "test/unittest/interfaces/ace_key_event/",
+        "test/unittest/capi/accessors/key_event_accessor_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
+      "id": "EventDispatchIntercept",
+      "name": "Event Dispatch and Intercept",
+      "name_cn": "事件分发和拦截",
+      "kind": "common_capability",
+      "category": "event",
+      "keywords": [
+        "Event Dispatch",
+        "事件分发",
+        "事件拦截",
+        "EventManager",
+        "HitTestMode",
+        "TouchTest",
+        "响应链",
+        "跨容器分发",
+        "PostEvent",
+        "InputEventMonitor"
+      ],
+      "aliases": [
+        "事件传播",
+        "输入事件分发",
+        "命中测试与拦截",
+        "Event Interception"
+      ],
+      "kb": "docs/kb/capabilities/event-dispatch-intercept.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/03-event-dispatch-intercept",
+      "func_id": "04-04-03",
+      "spec_status": "active",
+      "source_paths": {
+        "event_manager": "frameworks/core/common/event_manager.cpp",
+        "event_manager_header": "frameworks/core/common/event_manager.h",
+        "input_monitor": "frameworks/core/common/input_event_monitor_manager.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "gesture_event_hub": "frameworks/core/components_ng/event/gesture_event_hub.cpp",
+        "post_event_manager": "frameworks/core/components_ng/manager/post_event/post_event_manager.cpp",
+        "event_constants": "frameworks/core/components_ng/event/event_constants.h",
+        "native_input_api": "interfaces/native/ui_input_event.h"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "native_input": "interfaces/native/ui_input_event.h",
+        "native_node": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/event/event_manager_test_ng.cpp",
+        "test/unittest/core/event/input_event_monitor_manager_test_ng.cpp",
+        "test/unittest/core/manager/post_event_manager_test_ng.cpp",
+        "test/unittest/interfaces/ace_ui_input_event/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
+      "id": "ComponentShortcuts",
+      "name": "Component Shortcuts",
+      "name_cn": "组件组合键",
+      "kind": "common_capability",
+      "category": "event",
+      "keywords": [
+        "Component Shortcuts",
+        "组件组合键",
+        "keyboardShortcut",
+        "KeyboardShortcut",
+        "快捷键",
+        "组合键",
+        "modifier keys",
+        "KeyEventManager",
+        "快捷键注册",
+        "快捷键触发"
+      ],
+      "aliases": [
+        "组件快捷键",
+        "Keyboard Shortcut",
+        "键盘快捷键",
+        "组合快捷键"
+      ],
+      "kb": "docs/kb/capabilities/component-shortcuts.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/04-component-shortcuts",
+      "func_id": "04-04-04",
+      "spec_status": "active",
+      "source_paths": {
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp",
+        "dynamic_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp",
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "event_hub": "frameworks/core/components_ng/event/event_hub.cpp",
+        "key_event_manager": "frameworks/core/common/key_event_manager.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_common_modifier.cpp",
+        "static_modifier": "frameworks/core/interfaces/native/implementation/common_method_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "native_node": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/component_test/test_cases/components/common/",
+        "test/unittest/core/common/key_event_manager/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
+      "id": "MouseEvents",
+      "name": "Mouse Events",
+      "name_cn": "鼠标事件",
+      "kind": "common_capability",
+      "category": "event",
+      "keywords": [
+        "Mouse Events",
+        "鼠标事件",
+        "MouseEvent",
+        "onMouse",
+        "onHover",
+        "InputEventHub",
+        "鼠标指针",
+        "cursor",
+        "MouseStyle",
+        "自定义光标"
+      ],
+      "aliases": [
+        "鼠标输入",
+        "Mouse Input",
+        "悬停事件",
+        "鼠标光标"
+      ],
+      "kb": "docs/kb/capabilities/mouse-events.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/05-mouse-events",
+      "func_id": "04-04-05",
+      "spec_status": "active",
+      "source_paths": {
+        "event_model": "frameworks/core/event/mouse_event.h",
+        "input_event_hub": "frameworks/core/components_ng/event/input_event_hub.cpp",
+        "dynamic_callback": "frameworks/bridge/declarative_frontend/engine/functions/js_mouse_function.cpp",
+        "ohos_entry": "adapter/ohos/entrance/ace_view_ohos.cpp",
+        "native_input_api": "interfaces/native/ui_input_event.h",
+        "native_input_impl": "interfaces/native/event/ui_input_event.cpp",
+        "mouse_style": "frameworks/base/mousestyle/",
+        "ohos_mouse_style": "adapter/ohos/osal/mouse_style_ohos.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "native": "interfaces/native/ui_input_event.h"
+      },
+      "test_paths": [
+        "test/unittest/core/event/input_event_hub_test_ng.cpp",
+        "test/unittest/core/event/event_manager_dispatch_mouse_hover_event_ng.cpp",
+        "test/unittest/core/event/mouse_style_manager_test_ng.cpp",
+        "test/unittest/capi/accessors/mouse_event_accessor_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
+      "id": "GestureCapability",
+      "name": "Gesture Capability",
+      "name_cn": "手势能力",
+      "kind": "common_capability",
+      "category": "event",
+      "keywords": [
+        "Gesture Capability",
+        "手势能力",
+        "GestureEventHub",
+        "GestureRecognizer",
+        "GestureReferee",
+        "手势组合",
+        "手势裁决",
+        "手势拦截",
+        "recognizer recovery",
+        "native gesture"
+      ],
+      "aliases": [
+        "手势系统",
+        "Gesture",
+        "手势识别",
+        "手势框架"
+      ],
+      "kb": "docs/kb/capabilities/gesture-capability.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/06-gesture-capability",
+      "func_id": "04-04-06",
+      "spec_status": "active",
+      "source_paths": {
+        "gestures": "frameworks/core/components_ng/gestures/",
+        "recognizers": "frameworks/core/components_ng/gestures/recognizers/",
+        "gesture_event_hub": "frameworks/core/components_ng/event/gesture_event_hub.cpp",
+        "gesture_referee": "frameworks/core/components_ng/gestures/gesture_referee.cpp",
+        "response_ctrl": "frameworks/core/components_ng/event/response_ctrl.cpp",
+        "dynamic_frontend": "frameworks/bridge/declarative_frontend/jsview/js_gesture.cpp",
+        "native_api": "interfaces/native/native_gesture.h",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_gesture_modifier.cpp"
+      },
+      "api_paths": {
+        "dynamic_gesture": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/gesture.d.ts",
+        "static_gesture": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gesture.static.d.ets",
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "native_gesture": "interfaces/native/native_gesture.h",
+        "native_node": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/gestures/",
+        "test/unittest/core/event/",
+        "test/unittest/interfaces/ace_gesture/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
+      "id": "GestureModifier",
+      "name": "gestureModifier",
+      "name_cn": "手势 Modifier",
+      "kind": "common_capability",
+      "category": "api",
+      "keywords": [
+        "Gesture Modifier",
+        "gestureModifier",
+        "GestureModifier",
+        "UIGestureEvent",
+        "GestureHandler",
+        "GestureGroupHandler",
+        "动态手势配置",
+        "手势扩展",
+        "removeGestureByTag",
+        "clearGestures",
+        "addParallelGesture",
+        "modifierGestures"
+      ],
+      "aliases": [
+        "手势Modifier",
+        "手势修改器",
+        "动态手势Modifier",
+        "Gesture Modifier能力"
+      ],
+      "kb": "docs/kb/capabilities/gesture-modifier.md",
+      "spec_domain": "specs/04-common-capability/05-custom-extension/07-gesture-modifier",
+      "func_id": "04-05-07",
+      "spec_status": "active",
+      "source_paths": {
+        "dynamic_entry": "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.cpp",
+        "dynamic_frontend": "frameworks/bridge/declarative_frontend/ark_component/src/ArkComponent.ts",
+        "dynamic_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp",
+        "static_hooks": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/hooks/index.ets",
+        "static_common": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/common.ets",
+        "static_gesture": "frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/gesture.ets",
+        "static_accessor": "frameworks/core/interfaces/native/implementation/gesture_ops_accessor.cpp",
+        "node_modifier": "frameworks/core/interfaces/native/node/node_gesture_modifier.cpp",
+        "gesture_event_hub": "frameworks/core/components_ng/event/gesture_event_hub.cpp",
+        "gesture_group": "frameworks/core/components_ng/gestures/gesture_group.cpp",
+        "recognizer": "frameworks/core/components_ng/gestures/recognizers/gesture_recognizer.cpp",
+        "internal_api": "frameworks/core/interfaces/arkoala/arkoala_api.h"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "dynamic_gesture": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/gesture.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "static_gesture": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gesture.static.d.ets",
+        "common_modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.d.ts",
+        "common_modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CommonModifier.static.d.ets",
+        "native_gesture": "interfaces/native/native_gesture.h"
+      },
+      "test_paths": [
+        "test/unittest/core/event/gesture_event_hub_test_ng_property_config.cpp",
+        "test/unittest/core/event/gesture_event_hub_test_two_ng.cpp",
+        "test/unittest/core/event/gesture_event_hub_test_ng_two_property_config.cpp",
+        "test/unittest/core/gestures/gesture_recognizer_test_ng.cpp",
+        "test/unittest/interfaces/ace_gesture/",
+        "test/unittest/capi/accessors/gesture_event_accessor_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "EventBaseFramework",
+      "name": "Event Base Framework",
+      "name_cn": "事件基础框架",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "Event Base Framework",
+        "事件基础框架",
+        "EventManager",
+        "EventHub",
+        "InputEventHub",
+        "GestureEventHub",
+        "事件模型",
+        "命中测试",
+        "事件目标链",
+        "输入分发",
+        "GestureReferee",
+        "EventDump"
+      ],
+      "aliases": [
+        "事件框架",
+        "ArkUI Event Framework",
+        "输入事件框架",
+        "事件系统"
+      ],
+      "kb": "docs/kb/architecture/event-base-framework.md",
+      "spec_domain": "specs/03-engine-framework/04-event-framework/01-event-base-framework",
+      "func_id": "03-04-01",
+      "spec_status": "active",
+      "source_paths": {
+        "event_manager": "frameworks/core/common/event_manager.cpp",
+        "key_event_manager": "frameworks/core/common/key_event_manager.cpp",
+        "input_monitor": "frameworks/core/common/input_event_monitor_manager.cpp",
+        "event_dump": "frameworks/core/common/event_dump.cpp",
+        "event_hub": "frameworks/core/components_ng/event/event_hub.cpp",
+        "input_event_hub": "frameworks/core/components_ng/event/input_event_hub.cpp",
+        "gesture_event_hub": "frameworks/core/components_ng/event/gesture_event_hub.cpp",
+        "gesture_referee": "frameworks/core/components_ng/gestures/gesture_referee.cpp",
+        "touch_event": "frameworks/core/event/touch_event.h",
+        "mouse_event": "frameworks/core/event/mouse_event.h",
+        "axis_event": "frameworks/core/event/axis_event.h",
+        "key_event": "frameworks/core/event/key_event.h",
+        "ohos_entry": "adapter/ohos/entrance/ace_view_ohos.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "dynamic_gesture": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/gesture.d.ts",
+        "static_gesture": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gesture.static.d.ets",
+        "native_input": "interfaces/native/ui_input_event.h",
+        "native_key": "interfaces/native/native_key_event.h",
+        "native_gesture": "interfaces/native/native_gesture.h",
+        "native_node": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/event/",
+        "test/unittest/core/gestures/",
+        "test/unittest/core/common/key_event_manager/",
+        "test/unittest/interfaces/ace_ui_input_event/",
+        "test/unittest/interfaces/ace_key_event/",
+        "test/unittest/interfaces/ace_gesture/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30"
     }
   ]
 }

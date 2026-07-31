@@ -1,7 +1,7 @@
 # ArkUI KB
 
 > 更新时间：2026-07-31
-> 主题数：162
+> 主题数：215
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -204,6 +204,12 @@ docs/kb/
 | DrawModifier | 自定义绘制回调 Modifier | `docs/kb/capabilities/draw_modifier.md` | 新建 |
 | AttributeModifier | 动态属性 Modifier 通路 | `docs/kb/capabilities/attribute_modifier.md` | 新建 |
 | CustomProperty | 自定义属性 | `docs/kb/capabilities/custom_property.md` | 新建 |
+| InteractionNormalization | 交互归一化 | `docs/kb/capabilities/interaction-normalization.md` | 新建；覆盖 04-04-11 多源点击、滑动/平移、缩放/旋转归一化 |
+| StylusCapability | 手写笔能力 | `docs/kb/capabilities/stylus-capability.md` | 新建；覆盖 04-04-08 的 4 个 Feat |
+| ComponentRelatedEvents | 组件相关事件 | `docs/kb/capabilities/component-related-events.md` | 新建；覆盖 04-04-09 的 2 个 Feat |
+| VisibleAreaMechanism | 可见区域机制 | `docs/kb/capabilities/visible-area-mechanism.md` | 新建；覆盖 04-04-10 的 2 个 Feat |
+| FocusMechanism | 焦点机制 | `docs/kb/capabilities/focus-mechanism.md` | 新建；覆盖 04-09-01 的 6 个 Feat |
+| ComponentUtils | ComponentUtils | `docs/kb/capabilities/component-utils.md` | 新建；覆盖 04-11-01 的 2 个 Feat |
 | Accessibility | 无障碍能力 | `docs/kb/architecture/accessibility.md` | 已迁移，旧 KB 已移除 |
 | PluginComponent | 插件嵌入组件 | `docs/kb/components/container/plugin_component.md` | 新建 |
 | UIExtensionComponent | UIExtension嵌入组件 | `docs/kb/components/container/ui_extension_component.md` | 新建 |
@@ -216,6 +222,15 @@ docs/kb/
 | InspectorLayoutCallback | 布局回调(inspector) | `docs/kb/capabilities/inspector-layout-callback.md` | 新建（Spec 待补） |
 | WindowToolbar | 窗口工具栏 | `docs/kb/capabilities/window-toolbar.md` | 新建（Spec 待补） |
 | AtomicServiceAppBar | 元服务 AppBar | `docs/kb/capabilities/atomic-service-appbar.md` | 新建（Spec 待补） |
+
+| TouchEvents | 触摸事件 | `docs/kb/capabilities/touch-events.md` | 新建 |
+| KeyEvents | 按键事件 | `docs/kb/capabilities/key-events.md` | 新建 |
+| EventDispatchIntercept | 事件分发和拦截 | `docs/kb/capabilities/event-dispatch-intercept.md` | 新建 |
+| ComponentShortcuts | 组件组合键 | `docs/kb/capabilities/component-shortcuts.md` | 新建（独立功能 ID） |
+| MouseEvents | 鼠标事件（含鼠标指针） | `docs/kb/capabilities/mouse-events.md` | 新建 |
+| GestureCapability | 手势能力 | `docs/kb/capabilities/gesture-capability.md` | 新建 |
+| GestureModifier | 手势 Modifier | `docs/kb/capabilities/gesture-modifier.md` | 新建（独立功能 ID） |
+| EventBaseFramework | 事件基础框架 | `docs/kb/architecture/event-base-framework.md` | 新建 |
 
 ### 问题型 KB
 
