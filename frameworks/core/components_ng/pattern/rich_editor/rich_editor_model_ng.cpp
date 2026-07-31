@@ -385,7 +385,6 @@ void RichEditorModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(NG::
 
 void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
 {
-    ACE_RESET_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontStyle);
     if (options.value.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, Placeholder, options.value.value());
     }
@@ -400,13 +399,14 @@ void RichEditorModelNG::SetPlaceholder(PlaceholderOptions& options)
     }
     if (options.fontColor.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderTextColor, options.fontColor.value());
+    } else {
+        ACE_RESET_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderTextColor);
     }
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontFamily, options.fontFamilies);
 }
 
 void RichEditorModelNG::SetPlaceholder(FrameNode* frameNode, PlaceholderOptions& options)
 {
-    ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontStyle, frameNode);
     if (options.value.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, Placeholder, options.value.value(), frameNode);
     }
@@ -425,6 +425,8 @@ void RichEditorModelNG::SetPlaceholder(FrameNode* frameNode, PlaceholderOptions&
     if (options.fontColor.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(
             RichEditorLayoutProperty, PlaceholderTextColor, options.fontColor.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderTextColor, frameNode);
     }
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, PlaceholderFontFamily, options.fontFamilies, frameNode);
 }

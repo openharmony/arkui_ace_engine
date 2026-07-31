@@ -9245,7 +9245,7 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorOnDidChange)(ArkUINodeHandle node);
     void (*setRichEditorPlaceholder)(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters,
         const ArkUI_Uint32 stringParametersCount, const ArkUI_Float64* valuesArray, const ArkUI_Uint32 valuesCount,
-        void* resRawPtr);
+        void* resRawPtr, bool isJsView);
     void (*setRichEditorNapiPlaceholder)(ArkUINodeHandle node,
         const struct ArkUIRichEditorPlaceholderOptionsStruct* placeholderOptions);
     void (*resetRichEditorPlaceholder)(ArkUINodeHandle node);
