@@ -414,7 +414,6 @@ void GridPattern::FireOnScrollStart(bool withPerfMonitor)
         scrollStop_ = false;
         return;
     }
-    SetIsScrolling(true);
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         scrollBar->PlayScrollBarAppearAnimation();
@@ -579,7 +578,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return false;
     }
     SetScrollSource(source);
-    MarkUserScrollSource(source);
     FireAndCleanScrollingListener();
     if (info_.synced_) {
         info_.prevOffset_ = info_.currentOffset_;
@@ -706,10 +704,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     UpdateScrollBarOffset();
     ChangeAnimateOverScroll();
     SetScrollSource(SCROLL_FROM_NONE);
-    if (!IsScrolling()) {
-        // Reset accessibilityScrollSource_ when scrolling is not in progress
-        SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
-    }
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
             GetScrollBar()->ScheduleDisappearDelayTask();
@@ -825,7 +819,6 @@ int32_t GridPattern::GetFocusNodeIndex(const RefPtr<FocusHub>& focusNode)
 void GridPattern::ScrollToFocusNodeIndex(int32_t index)
 {
     StopAnimate();
-    SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
     UpdateStartIndex(index);
     auto pipeline = GetContext();
     if (pipeline) {
@@ -848,7 +841,6 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
         return false;
     }
     StopAnimate();
-    SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
     auto ret = UpdateStartIndex(scrollToIndex);
     auto* pipeline = GetContext();
     if (pipeline) {
@@ -859,14 +851,10 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 
 ScrollOffsetAbility GridPattern::GetScrollOffsetAbility(bool isAccessibility)
 {
-    return { [wp = WeakClaim(this), isAccessibility](float moveOffset) -> bool {
+    (void)isAccessibility;
+    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
                 CHECK_NULL_RETURN(pattern, false);
-                if (isAccessibility) {
-                    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::ACCESSIBILITY);
-                } else {
-                    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
-                }
                 pattern->ScrollBy(-moveOffset);
                 return true;
             },
@@ -878,7 +866,6 @@ std::function<bool(int32_t)> GridPattern::GetScrollIndexAbility()
     return [wp = WeakClaim(this)](int32_t index) -> bool {
         auto pattern = wp.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         if (index == FocusHub::SCROLL_TO_HEAD) {
             pattern->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
         } else if (index == FocusHub::SCROLL_TO_TAIL) {
@@ -927,7 +914,6 @@ bool GridPattern::OnKeyEvent(const KeyEvent& event)
         return false;
     }
     if ((event.code == KeyCode::KEY_PAGE_DOWN) || (event.code == KeyCode::KEY_PAGE_UP)) {
-        SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         ScrollPage(event.code == KeyCode::KEY_PAGE_UP);
     }
 
