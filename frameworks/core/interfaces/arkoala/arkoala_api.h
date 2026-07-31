@@ -6266,6 +6266,8 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*setTextAreaBackgroundColorWithColorSpace)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* resRawPtr);
+    void (*setTextAreaBackgroundColorForHDR)(
+        ArkUINodeHandle node, const ArkUI_Float32* hdrValues, ArkUI_Int32 colorSpace, void* resRawPtr);
     void (*resetTextAreaBackgroundColor)(ArkUINodeHandle node);
     void (*setTextAreaType)(ArkUINodeHandle node, ArkUI_Int32 type);
     void (*resetTextAreaType)(ArkUINodeHandle node);
@@ -6604,6 +6606,8 @@ struct ArkUITextInputModifier {
     void (*setTextInputBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*setTextInputBackgroundColorWithColorSpace)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* resRawPtr);
+    void (*setTextInputBackgroundColorForHDR)(
+        ArkUINodeHandle node, const ArkUI_Float32* hdrValues, ArkUI_Int32 colorSpace, void* resRawPtr);
     void (*resetTextInputBackgroundColor)(ArkUINodeHandle node);
     void (*setTextInputNormalUnderlineColor)(ArkUINodeHandle node, ArkUI_Uint32 typingColor, void* resRawPtr);
     void (*setTextInputUserUnderlineColor)(ArkUINodeHandle node, const ArkUI_Uint32* values,
@@ -6838,6 +6842,12 @@ struct ArkUITextInputModifier {
     void (*setTextInputColorShaderColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorShaderColorRawPtr);
     void (*resetTextInputColorShaderColor)(ArkUINodeHandle node);
     void (*setUserAccessibilityText)(ArkUINodeHandle node);
+    void (*setTextInputSetCancelButtonStyle)(ArkUINodeHandle node, ArkUI_Int32 style);
+    void (*setTextInputSetCancelDefaultIcon)(ArkUINodeHandle node);
+    void (*setTextInputSetCancelSymbolIconJs)(ArkUINodeHandle node, void* symbolFunction);
+    void (*setTextInputCancelImageIconSize)(ArkUINodeHandle node, const struct ArkUISizeType* size, void* resRawPtr);
+    void (*setTextInputCancelImageIconSrcAndColor)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName,
+        ArkUI_CharPtr moduleName, void* srcRawPtr, ArkUI_Uint32 color, void* colorRawPtr, bool isColorInvalid);
 };
 
 struct ArkUIWebModifier {
