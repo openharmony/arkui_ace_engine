@@ -506,7 +506,11 @@ void JSRichEditor::SetRichEditorKeyboardAppearanceConfig(const JSCallbackInfo& i
     EcmaVM* vm = info.GetVm();
     CHECK_NULL_VOID(vm && info.Length() > 1);
     auto jsTargetNode = info[0];
-    auto* targetNodePtr = jsTargetNode->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto localHandle = jsTargetNode->GetLocalHandle();
+    if (!localHandle->IsNativePointer(vm)) {
+        return;
+    }
+    auto* targetNodePtr = localHandle->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(targetNodePtr);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(info[1]->IsObject());
@@ -1668,7 +1672,7 @@ void JSRichEditorBaseControllerBinding::SetTypingStyle(const JSCallbackInfo& inf
         isUndefined = richEditorTextStyle->IsUndefined();
         typingStyle_.ResetStyle();
         if (isBelowApi12) {
-            typingStyle_.updateTextColor = theme->GetTextStyle().GetTextColor();
+            typingStyle_.updateTextColor = textStyle.GetTextColor();
         }
         if (!richEditorTextStyle->IsUndefined()) {
             ParseJsTextStyle(richEditorTextStyle, textStyle, typingStyle_);
