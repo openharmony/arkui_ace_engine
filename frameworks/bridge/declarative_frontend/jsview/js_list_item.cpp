@@ -92,6 +92,20 @@ private:
     RefPtr<JsFunction> func_;
 };
 
+std::function<void(int32_t)> ParseOnOffsetChange(const JSRef<JSObject>& obj, const JsiExecutionContext& context)
+{
+    auto onOffsetChangeFunc = obj->GetProperty("onOffsetChange");
+    if (onOffsetChangeFunc->IsFunction()) {
+        return [execCtx = context, func = JSRef<JSFunc>::Cast(onOffsetChangeFunc)](int32_t offset) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(offset);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+    }
+    return nullptr;
+}
+
 } // namespace
 
 void JSListItem::Create(const JSCallbackInfo& args)
@@ -353,17 +367,7 @@ void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutio
         }
     }
 
-    auto onOffsetChangeFunc = obj->GetProperty("onOffsetChange");
-    std::function<void(int32_t offset)> onOffsetChangeCallback;
-    if (onOffsetChangeFunc->IsFunction()) {
-        onOffsetChangeCallback = [execCtx = context,
-                                     func = JSRef<JSFunc>::Cast(onOffsetChangeFunc)](int32_t offset) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(offset);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-            return;
-        };
-    }
+    auto onOffsetChangeCallback = ParseOnOffsetChange(obj, context);
 
     // use SetDeleteArea to update builder function
     ListItemModel::GetInstance()->SetSwiperAction(
