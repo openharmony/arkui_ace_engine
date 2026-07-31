@@ -57,7 +57,6 @@ void ListPositionController::JumpToItemInGroup(int32_t index, int32_t indexInGro
     if (align == ScrollAlign::NONE) {
         align = ScrollAlign::START;
     }
-    listPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
     listPattern->ScrollToItemInGroup(index, indexInGroup, smooth, align);
 }
 

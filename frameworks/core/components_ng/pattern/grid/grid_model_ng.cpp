@@ -1272,7 +1272,6 @@ void GridModelNG::SetScrollToIndex(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
     pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment), extraOffset);
 }
 

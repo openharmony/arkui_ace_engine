@@ -106,7 +106,6 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusSimplified(FocusStep step, const RefPtr
     int32_t idx = host->GetChildTrueIndex(current->GetFrameNode()) + diff;
     while (idx >= 0 && idx < info_.GetChildrenCount()) {
         if (idx < info_.startIndex_ || idx > info_.endIndex_) {
-            grid_.SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
             grid_.ScrollToIndex(idx);
             ctx->FlushUITaskWithSingleDirtyNode(host);
         }
@@ -372,7 +371,6 @@ std::pair<int32_t, int32_t> GridFocus::GetNextIndexByStep(
     }
     if (curChildStartIndex != 0 && curMainIndex == curMainStart && nextMainIndex < curMainIndex) {
         // Scroll item up.
-        grid_.SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         grid_.UpdateStartIndex(curChildStartIndex - 1);
         auto* pipeline = grid_.GetContext();
         if (pipeline) {
@@ -380,7 +378,6 @@ std::pair<int32_t, int32_t> GridFocus::GetNextIndexByStep(
         }
     } else if (curChildEndIndex != childrenCount - 1 && curMainIndex == curMainEnd && nextMainIndex > curMainIndex) {
         // Scroll item down.
-        grid_.SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         grid_.UpdateStartIndex(curChildEndIndex + 1);
         auto* pipeline = grid_.GetContext();
         if (pipeline) {
@@ -940,7 +937,6 @@ bool GridFocus::ScrollToLastFocusIndex(KeyCode keyCode)
     auto focusIndex = focusIndex_.value();
     if (!IsInViewport(focusIndex, false)) {
         grid_.StopAnimate();
-        grid_.SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
         needTriggerFocus_ = true;
         
         // If focused item is above viewport and the current keyCode type is UP, scroll forward one more line
@@ -963,7 +959,6 @@ void GridFocus::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
     grid_.StopAnimate();
     auto nextFocus = focusNode.Upgrade();
     CHECK_NULL_VOID(nextFocus);
-    grid_.SetAccessibilityScrollSource(AccessibilityScrollSource::FOCUS);
     grid_.UpdateStartIndex(GetFocusNodeIndex(nextFocus));
 }
 

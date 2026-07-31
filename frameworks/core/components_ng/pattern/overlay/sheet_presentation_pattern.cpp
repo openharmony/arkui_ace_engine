@@ -2853,8 +2853,6 @@ void SheetPresentationPattern::ScrollTo(float height)
         layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
             CalcLength(GetScrollHeight() - maxScrollDecreaseHeight)));
         auto curScrollOffset = (useCaretAvoidMode && Positive(height)) ? scrollPattern->GetTotalOffset() : 0.f;
-        // ScrollTo is only invoked from keyboard-avoid / rotation paths (user-triggered), classify as USER
-        scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
         scrollPattern->UpdateCurrentOffset(-height + curScrollOffset, SCROLL_FROM_JUMP);
     }
     scroll->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2895,8 +2893,6 @@ bool SheetPresentationPattern::AdditionalScrollTo(const RefPtr<FrameNode>& scrol
         CalcSize(std::nullopt, CalcLength(GetScrollHeight() - (scrollHeight - childHeight + height))));
     // And then scroll move the content with '-height' offset
     auto curScrollOffset = (useCaretAvoidMode && Positive(height)) ? scrollPattern->GetTotalOffset() : 0.f;
-    // Same passive keyboard-avoid pan as ScrollTo — only reached from internal ScrollTo call, classify as USER
-    scrollPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::USER);
     scrollPattern->UpdateCurrentOffset(-height + curScrollOffset, SCROLL_FROM_JUMP);
     return true;
 }

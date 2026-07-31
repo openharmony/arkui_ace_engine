@@ -103,7 +103,6 @@ void ListModelNG::ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeTy
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetAxis() != Axis::NONE) {
-        pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
         pattern->ScrollToEdge(scrollEdgeType, smooth);
     }
 }
@@ -1350,7 +1349,6 @@ void ListModelNG::SetScrollToIndex(
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
     pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment), extraOffset);
 }
 
@@ -1364,7 +1362,6 @@ void ListModelNG::SetScrollBy(FrameNode* frameNode, double x, double y)
     if (NearZero(offset)) {
         return;
     }
-    pattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
     pattern->UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
 }
 
@@ -1577,7 +1574,6 @@ void ListModelNG::ScrollToItemInGroup(
     if (align == ScrollAlign::NONE) {
         align = ScrollAlign::START;
     }
-    listPattern->SetAccessibilityScrollSource(AccessibilityScrollSource::API);
     listPattern->ScrollToItemInGroup(index, indexInGroup, smooth, align);
 }
 
