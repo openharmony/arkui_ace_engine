@@ -132,4 +132,21 @@ void RecoverableManager::SetNavigationHomeInfo(const std::string& navigationId, 
 {
     homeNavigationInfo_[navigationId] = homeInfo;
 }
+
+std::string RecoverableManager::TakeNavigationHomeState(const std::string& navigationId)
+{
+    std::string result;
+    auto homeIter = homeOnSaveState_.find(navigationId);
+    if (homeIter == homeOnSaveState_.end()) {
+        return "";
+    }
+    result = homeIter->second;
+    homeOnSaveState_.erase(homeIter);
+    return result;
+}
+
+void RecoverableManager::SetNavigationHomeState(const std::string& navigationId, const std::string& homeState)
+{
+    homeOnSaveState_[navigationId] = homeState;
+}
 } // namespace OHOS::Ace::NG

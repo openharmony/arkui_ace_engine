@@ -28,6 +28,7 @@ namespace OHOS::Ace::Framework {
 struct HomePathInfo {
     std::string name;
     JSRef<JSVal> param;
+    std::string autoCleanedState;
 };
 
 struct NavPathInfoUINode {
@@ -169,6 +170,8 @@ public:
         homePathInfo_ = std::move(pathInfo);
     }
     bool CreateHomeDestination(const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;
+    void SaveHomeDestinationState(const std::string& state) override;
+    std::string GetHomeDestinationState() const override;
 
     bool CreateRelatedDestination(
         const std::string& name, const WeakPtr<NG::UINode>& customNode, RefPtr<NG::UINode>& node) override;

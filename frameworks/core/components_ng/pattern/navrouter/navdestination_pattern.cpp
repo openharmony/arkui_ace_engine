@@ -1197,6 +1197,10 @@ void NavDestinationPattern::CallSavedStateToJS(const std::string& savedState)
     auto stack = navigationPattern->GetNavigationStack();
     CHECK_NULL_VOID(stack);
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    if (hostNode && hostNode->IsHomeDestination()) {
+        stack->SaveHomeDestinationState(savedState);
+        return;
+    }
     stack->SaveStateToJsCallback(hostNode->GetIndex(), GetName(), GetNavDestinationId(), savedState);
 }
 
