@@ -161,6 +161,8 @@ docs/kb/
 | MotionPath | 路径动画 | `docs/kb/capabilities/motion_path.md` | 新建 |
 | PhysicsAnimation | 物理动画 | `docs/kb/capabilities/physics_animation.md` | 新建 |
 | AnimationInterface | 动画接口 | `docs/kb/capabilities/animation_interface.md` | 新建 |
+| DragFramework | 拖拽框架 | `docs/kb/architecture/drag-framework.md` | 新建（独立主题） |
+| DragCapability | 通用拖拽能力 | `docs/kb/capabilities/drag-capability.md` | 新建（独立主题） |
 | ResourceAccess | 资源访问 | `docs/kb/architecture/resource-access.md` | 新建 |
 | ThemeLayeredAccess | 主题分层访问 | `docs/kb/architecture/theme-layered-access.md` | 新建 |
 | ThemeFramework | Theme框架 | `docs/kb/architecture/theme-framework.md` | 新建 |
@@ -191,6 +193,8 @@ docs/kb/
 | style-attributes | 样式属性（stateStyles + attributeModifier） | `docs/kb/capabilities/style-attributes.md` | 新建 |
 | multi-instance-management | 多实例管理 | `docs/kb/architecture/multi-instance-management.md` | 新建 |
 | OverlayCapability | 浮层能力 | `docs/kb/capabilities/overlay-capability.md` | 新建 |
+| InteractionAttributes | 交互属性 | `docs/kb/capabilities/interaction-attributes.md` | 新建 |
+| ComponentScreenshot | 组件截图 | `docs/kb/capabilities/component-screenshot.md` | 新建 |
 | FrameNode | FrameNode 节点 | `docs/kb/capabilities/frame_node.md` | 新建 |
 | RenderNode | RenderNode 绘制节点 | `docs/kb/capabilities/render_node.md` | 新建 |
 | BuilderNode | BuilderNode 构建节点 | `docs/kb/capabilities/builder_node.md` | 新建 |

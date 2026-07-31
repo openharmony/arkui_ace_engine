@@ -38,30 +38,17 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-<<<<<<< Updated upstream
-- `docs/` 下 Markdown 文档总数：193
-- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：32
+- `docs/` 下 Markdown 文档总数：235
+- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：20
 - `docs/syntax/` 下语法专题文档：3
   - 知识库命名文档：0 个（ForEach/LazyForEach/Repeat/RepeatVirtualScroll 已迁移到 `docs/kb/syntax/`）
-=======
-- `docs/` 下 Markdown 文档总数：205
-- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：33
-- `docs/syntax/` 下语法专题文档：7
-  - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
->>>>>>> Stashed changes
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计
 
-<<<<<<< Updated upstream
-- `context_registry.json` 新版条目数：143
-- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：33
-- 旧 KB 索引路径有效性：33/33（全部存在）
-=======
-- `context_registry.json` 新版条目数：154
-- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：34
-- 旧 KB 索引路径有效性：34/34（全部存在）
->>>>>>> Stashed changes
+- `context_registry.json` 新版条目数：198
+- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：22
+- 旧 KB 索引路径有效性：以 `python3 docs/validate_context.py` 输出为准
 
 - 类型分布：
   - `component`: 16
@@ -92,11 +79,7 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-<<<<<<< Updated upstream
-├── kb/ (144 MD，143 个新版 KB 主题 + README)
-=======
-├── kb/ (155 MD，154 个新版 KB 主题 + README)
->>>>>>> Stashed changes
+├── kb/ (199 MD，198 个新版 KB 主题 + README)
 ├── accessibility/ (1 KB)
 ├── api/ (2 KB)
 ├── architecture/ (2 KB + 3 非 `*_Knowledge_Base*` 命名架构文档)

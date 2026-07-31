@@ -6959,6 +6959,114 @@
       "last_verified": "2026-07-27"
     },
     {
+      "id": "DragFramework",
+      "name": "Drag Framework",
+      "name_cn": "拖拽框架",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": ["DragFramework", "拖拽框架", "DragDropManager", "DragDropProxy", "InteractionInterface", "预拖拽", "SpringLoading", "GetDragCallback"],
+      "aliases": ["拖拽系统框架", "Drag Drop Framework", "拖拽引擎"],
+      "kb": "docs/kb/architecture/drag-framework.md",
+      "spec_domain": "specs/03-engine-framework/04-event-framework/02-drag-framework",
+      "func_id": "03-04-02",
+      "spec_status": "active",
+      "source_paths": {
+        "pipeline": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "manager": "frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp",
+        "event": "frameworks/core/components_ng/event/drag_event.cpp",
+        "initiating": "frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/",
+        "interaction": "frameworks/core/common/interaction/interaction_interface.h"
+      },
+      "test_paths": ["test/unittest/core/manager/drag_drop/", "test/unittest/core/event/drag_event/"],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "DragCapability",
+      "name": "Drag Capability",
+      "name_cn": "通用拖拽能力",
+      "kind": "common_capability",
+      "category": "system",
+      "keywords": ["DragCapability", "通用拖拽能力", "draggable", "allowDrop", "dragPreview", "onPreDrag", "onDragSpringLoading", "DragController", "DragAction", "DragEvent"],
+      "aliases": ["拖拽 API", "Drag API", "拖放能力", "DragController API"],
+      "kb": "docs/kb/capabilities/drag-capability.md",
+      "spec_domain": "specs/04-common-capability/04-common-events/07-drag-capability",
+      "func_id": "04-04-07",
+      "spec_status": "active",
+      "source_paths": {
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "event_hub": "frameworks/core/components_ng/event/event_hub.cpp",
+        "drag_controller": "interfaces/napi/kits/drag_controller/",
+        "c_api": "interfaces/native/event/drag_and_drop_impl.cpp"
+      },
+      "api_paths": {
+        "dynamic_common": "<OH_ROOT>/interface_sdk-js/api/@internal/component/ets/common.d.ts",
+        "static_common": "<OH_ROOT>/interface_sdk-js/api/arkui/component/common.static.d.ets",
+        "c_header": "<OH_ROOT>/interface_sdk_c/arkui/ace_engine/native/drag_and_drop.h"
+      },
+      "test_paths": ["test/unittest/core/event/drag_event/", "test/unittest/core/manager/drag_drop/", "test/unittest/capi/"],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "InteractionAttributes",
+      "name": "Interaction Attributes",
+      "name_cn": "交互属性",
+      "kind": "common_capability",
+      "category": "interaction",
+      "keywords": ["InteractionAttributes", "交互属性", "cursorControl", "onHover", "hoverEffect", "responseRegion", "responseRegionList", "touchable", "monopolizeEvents", "enabled", "clickEffect", "AccessibilityHover"],
+      "aliases": ["通用交互属性", "CommonMethod 交互", "输入事件属性", "Interaction API"],
+      "kb": "docs/kb/capabilities/interaction-attributes.md",
+      "spec_domain": "specs/04-common-capability/03-common-attributes/04-interaction-attributes",
+      "func_id": "04-03-04",
+      "spec_status": "pending",
+      "source_paths": {
+        "view_abstract": "frameworks/core/components_ng/base/view_abstract.cpp",
+        "gesture_event_hub": "frameworks/core/components_ng/event/gesture_event_hub.cpp",
+        "event_hub": "frameworks/core/components_ng/event/event_hub.cpp",
+        "focus_hub": "frameworks/core/components_ng/event/focus_hub.cpp",
+        "dynamic_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "capi": "interfaces/native/native_node.h"
+      },
+      "test_paths": ["test/unittest/core/base/", "test/unittest/core/event/focus_core/", "test/unittest/capi/"],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "ComponentScreenshot",
+      "name": "Component Screenshot",
+      "name_cn": "组件截图",
+      "kind": "common_capability",
+      "category": "render",
+      "keywords": ["ComponentScreenshot", "组件截图", "ComponentSnapshot", "componentSnapshot", "createFromBuilder", "createFromComponent", "getComponentSnapshot", "SnapshotOptions", "OH_ArkUI_GetNodeSnapshot", "PixelMap"],
+      "aliases": ["离屏截图", "Offscreen Screenshot", "节点截图", "ComponentSnapshot API"],
+      "kb": "docs/kb/capabilities/component-screenshot.md",
+      "spec_domain": "specs/04-common-capability/10-component-screenshot/01-offscreen-screenshot",
+      "func_id": "04-10-01",
+      "spec_status": "pending",
+      "source_paths": {
+        "component_snapshot": "frameworks/core/components_ng/render/adapter/component_snapshot.cpp",
+        "snapshot_param": "frameworks/core/components_ng/render/snapshot_param.h",
+        "frontend_delegate": "frameworks/bridge/declarative_frontend/ng/frontend_delegate_declarative_ng.cpp",
+        "napi": "interfaces/napi/kits/component_snapshot/",
+        "capi": "interfaces/native/node/node_component_snapshot.cpp"
+      },
+      "api_paths": {
+        "dynamic_module": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.componentSnapshot.d.ts",
+        "dynamic_uicontext": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.d.ts",
+        "static_uicontext": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.UIContext.static.d.ets",
+        "capi_node": "interfaces/native/native_node.h",
+        "capi_types": "interfaces/native/native_type.h"
+      },
+      "test_paths": ["test/unittest/interfaces/node_component_snapshot_test.cpp", "test/unittest/capi/accessors/component_snapshot_accessor_test.cpp", "test/unittest/core/rosen/"],
+      "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
       "id": "BasicRenderPipeline",
       "name": "Basic Render Pipeline",
       "name_cn": "基础渲染管线",
