@@ -3583,7 +3583,7 @@ void SliderPattern::UpdateDragPointNode()
         CalcDimension(blockRadius, DimensionUnit::PX), CalcDimension(blockRadius, DimensionUnit::PX),
         CalcDimension(blockRadius, DimensionUnit::PX));
     ViewAbstract::SetLightColor(AceType::RawPtr(dragPointNode_), blockColor);
-    ViewAbstract::SetLightIntensity(AceType::RawPtr(dragPointNode_), 6.0f);
+    ViewAbstract::SetLightIntensity(AceType::RawPtr(dragPointNode_), 4.0f);
     ViewAbstract::SetLightIlluminated(AceType::RawPtr(dragPointNode_), 2u);
 }
 
@@ -3986,6 +3986,8 @@ void SliderPattern::ShowMaterialNode()
     if (!IsNeedShowMaterial()) {
         return;
     }
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetIsShowMaterialNode(true);
     if (!IsHighGradeMaterial() && !IsMiddleGradeMaterial()) {
         return;
     }
@@ -4038,7 +4040,6 @@ void SliderPattern::HideMaterialNode()
     if (!IsNeedShowMaterial()) {
         return;
     }
-    
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!IsHighGradeMaterial() && !IsMiddleGradeMaterial()) {
@@ -4095,6 +4096,8 @@ void SliderPattern::HideMaterialNodes()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetAlphaOffscreen(true);
+    CHECK_NULL_VOID(sliderContentModifier_);
+    sliderContentModifier_->SetIsShowMaterialNode(false);
 }
 
 void SliderPattern::AnimateHighGradeHide(
