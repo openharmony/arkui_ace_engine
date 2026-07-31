@@ -3407,6 +3407,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(innerWebNativeMessageManagerFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
                 auto* eventInfo = TypeInfoHelper::DynamicCast<WebNativeMessageEvent>(info.get());
+                if (!eventInfo) {
+                    TAG_LOGE(AceLogTag::ACE_WEB,
+                        "innerWebNativeMessageManager received null or unexpected event type");
+                    return;
+                }
                 JSRef<JSObject> obj = JSRef<JSObject>::New();
                 JSRef<JSObject> callbackObj = JSClass<JSWebNativeMessageCallback>::NewInstance();
                 auto callbackEvent = Referenced::Claim(callbackObj->Unwrap<JSWebNativeMessageCallback>());
@@ -3434,6 +3439,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(innerWebNativeMessageDisconnectFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
             auto* eventInfo = TypeInfoHelper::DynamicCast<WebNativeMessageEvent>(info.get());
+            if (!eventInfo) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "innerWebNativeMessageManager received null or unexpected event type");
+                return;
+            }
             JSRef<JSVal> connectId = JSRef<JSVal>::Make(ToJSValue(eventInfo->GetConnectId()));
             JSRef<JSObject> obj = JSRef<JSObject>::New();
             obj->SetPropertyObject("connectId", connectId);
@@ -3450,6 +3460,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(onFullScreenVideoOverlayEnterFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
             auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenVideoOverlayEnterEvent>(info.get());
+            if (!eventInfo) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "innerWebNativeMessageManager received null or unexpected event type");
+                return;
+            }
             JSRef<JSObject> obj = JSRef<JSObject>::New();
             JSRef<JSObject> handlerObj = JSClass<JSFullScreenVideoOverlayHandler>::NewInstance();
             auto callbackEvent = Referenced::Claim(handlerObj->Unwrap<JSFullScreenVideoOverlayHandler>());
@@ -3565,7 +3580,10 @@ void JSWeb::Create(const JSCallbackInfo& info)
                 return;
             }
             napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(env, &scope);
+            auto status = napi_open_handle_scope(env, &scope);
+            if (status != napi_ok || scope == nullptr) {
+                return;
+            }
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
             napi_close_handle_scope(env, scope);
@@ -3588,7 +3606,10 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     return;
                 }
                 napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(env, &scope);
+                auto status = napi_open_handle_scope(env, &scope);
+                if (status != napi_ok || scope == nullptr) {
+                    return;
+                }
                 JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(hapPath)) };
                 func->Call(webviewController, 1, argv);
                 napi_close_handle_scope(env, scope);
@@ -3621,7 +3642,10 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     return;
                 }
                 napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(env, &scope);
+                auto status = napi_open_handle_scope(env, &scope);
+                if (status != napi_ok || scope == nullptr) {
+                    return;
+                }
                 auto newIdVal = JSRef<JSVal>::Make(ToJSValue(newId));
                 auto result = func->Call(webviewController, 1, &newIdVal);
                 napi_close_handle_scope(env, scope);
