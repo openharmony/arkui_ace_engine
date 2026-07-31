@@ -237,6 +237,11 @@ public:
         applyGeneralCount_++;
     }
 
+    void ApplyScaleUpConstraints(double emptyRatioThreshold) override
+    {
+        applyScaleUpCount_++;
+    }
+
     int64_t GetNodeId() const override
     {
         return nodeId_;
@@ -330,6 +335,7 @@ public:
     int32_t applyColumnCount_ = 0;
     int32_t applyRowCount_ = 0;
     int32_t applyGeneralCount_ = 0;
+    int32_t applyScaleUpCount_ = 0;
     bool forceInvalidBoundingBox_ = false;
     std::vector<ChildLayoutInfo> createdInfos_;
 
@@ -589,7 +595,8 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest007, TestSize.Level1)
 
 /**
  * @tc.name: SmartLayoutAlgorithmTest008
- * @tc.desc: Test CalculateOffsetWithMargin in row, column and unknown modes
+ * @tc.desc: Test CalculateOffsetWithMargin in row, column, unknown and form-render modes,
+ *           including non-center alignment gating
  * @tc.type: FUNC
  */
 HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest008, TestSize.Level1)
@@ -603,20 +610,44 @@ HWTEST_F(SmartLayoutAlgorithmTest, SmartLayoutAlgorithmTest008, TestSize.Level1)
     SmartLayoutAlgorithmFakeNode child(1, "child");
     child.SetPosition(5.0, 7.0);
 
+    // ROW: mainAxis=FLEX_START, crossAxis=CENTER(default) -> only Y offset applied
     root->SetLayoutType(SmartLayoutType::ROW);
-    auto offsetRow = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0);
+    auto offsetRow = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0, false);
     EXPECT_FLOAT_EQ(offsetRow.GetX(), 5.0f);
     EXPECT_FLOAT_EQ(offsetRow.GetY(), 17.0f);
 
+    // COLUMN: crossAxis=CENTER(default), mainAxis=FLEX_START -> only X offset applied
     root->SetLayoutType(SmartLayoutType::COLUMN);
-    auto offsetColumn = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0);
+    auto offsetColumn = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0, false);
     EXPECT_FLOAT_EQ(offsetColumn.GetX(), 55.0f);
     EXPECT_FLOAT_EQ(offsetColumn.GetY(), 7.0f);
 
+    // UNKNOWN: no bounding box offset applied (legacy behavior)
     root->SetLayoutType(SmartLayoutType::UNKNOWN);
-    auto offsetUnknown = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0);
+    auto offsetUnknown = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0, false);
     EXPECT_FLOAT_EQ(offsetUnknown.GetX(), 5.0f);
     EXPECT_FLOAT_EQ(offsetUnknown.GetY(), 7.0f);
+
+    // Form render: both X and Y offsets applied regardless of layout type
+    root->SetLayoutType(SmartLayoutType::ROW);
+    auto offsetForm = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0, true);
+    EXPECT_FLOAT_EQ(offsetForm.GetX(), 55.0f);
+    EXPECT_FLOAT_EQ(offsetForm.GetY(), 17.0f);
+
+    // ROW with non-center cross axis -> no Y offset
+    root->GetContext().crossAxisAlign = SmartLayoutAlign::FLEX_START;
+    auto offsetRowNonCenter = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0, false);
+    EXPECT_FLOAT_EQ(offsetRowNonCenter.GetX(), 5.0f);
+    EXPECT_FLOAT_EQ(offsetRowNonCenter.GetY(), 7.0f);
+    root->GetContext().crossAxisAlign = SmartLayoutAlign::CENTER;
+
+    // COLUMN with non-center cross axis -> no X offset
+    root->SetLayoutType(SmartLayoutType::COLUMN);
+    root->GetContext().crossAxisAlign = SmartLayoutAlign::FLEX_START;
+    auto offsetColumnNonCenter = algorithm.CalculateOffsetWithMargin(child, nullptr, 50.0, 10.0, false);
+    EXPECT_FLOAT_EQ(offsetColumnNonCenter.GetX(), 5.0f);
+    EXPECT_FLOAT_EQ(offsetColumnNonCenter.GetY(), 7.0f);
+    root->GetContext().crossAxisAlign = SmartLayoutAlign::CENTER;
 }
 
 /**

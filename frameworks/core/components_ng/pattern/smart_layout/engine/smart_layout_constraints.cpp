@@ -29,15 +29,17 @@ void SmartLayoutConstraints::AddSizeScaleConstraint(SmartLayoutNode& parent,
     double sizeScale = 1.0;
     double heightWithoutSafeArea = context.avoidSafeArea ?
         context.size.Height() - parent.GetChildren()[0]->GetSpace().top : context.size.Height();
-    bool heightOverflow = GreatNotEqual(sumOfAllChildHeight, heightWithoutSafeArea);
-    bool widthOverflow = GreatNotEqual(maxChildWidth, context.size.Width());
+    double usableWidth = context.size.Width() - context.padding.right;
+    double usableHeight = heightWithoutSafeArea - context.padding.bottom;
+    bool heightOverflow = GreatNotEqual(sumOfAllChildHeight, usableHeight);
+    bool widthOverflow = GreatNotEqual(maxChildWidth, usableWidth);
     if (heightOverflow && !widthOverflow) {
-        sizeScale = heightWithoutSafeArea / sumOfAllChildHeight;
+        sizeScale = usableHeight / sumOfAllChildHeight;
     } else if (!heightOverflow && widthOverflow) {
-        sizeScale = context.size.Width() / maxChildWidth;
+        sizeScale = usableWidth / maxChildWidth;
     } else if (heightOverflow && widthOverflow) {
-        double heightScale = heightWithoutSafeArea / sumOfAllChildHeight;
-        double widthScale = context.size.Width() / maxChildWidth;
+        double heightScale = usableHeight / sumOfAllChildHeight;
+        double widthScale = usableWidth / maxChildWidth;
         sizeScale = std::min(heightScale, widthScale);
     }
 
@@ -53,16 +55,18 @@ void SmartLayoutConstraints::AddRowSizeScaleConstraint(SmartLayoutNode& parent,
     }
     const auto& context = parent.GetContext();
 
+    double usableWidth = context.size.Width() - context.padding.right;
+    double usableHeight = context.size.Height() - context.padding.bottom;
     double sizeScale = 1.0;
-    bool widthOverflow = GreatNotEqual(sumOfAllChildWidth, context.size.Width());
-    bool heightOverflow = GreatNotEqual(maxChildHeight, context.size.Height());
+    bool widthOverflow = GreatNotEqual(sumOfAllChildWidth, usableWidth);
+    bool heightOverflow = GreatNotEqual(maxChildHeight, usableHeight);
     if (widthOverflow && !heightOverflow) {
-        sizeScale = context.size.Width() / sumOfAllChildWidth;
+        sizeScale = usableWidth / sumOfAllChildWidth;
     } else if (!widthOverflow && heightOverflow) {
-        sizeScale = context.size.Height() / maxChildHeight;
+        sizeScale = usableHeight / maxChildHeight;
     } else if (widthOverflow && heightOverflow) {
-        double widthScale = context.size.Width() / sumOfAllChildWidth;
-        double heightScale = context.size.Height() / maxChildHeight;
+        double widthScale = usableWidth / sumOfAllChildWidth;
+        double heightScale = usableHeight / maxChildHeight;
         sizeScale = std::min(widthScale, heightScale);
     }
 
@@ -214,6 +218,7 @@ void SmartLayoutConstraints::AddDefaultConstraints(SmartLayoutNode& parent)
     if (engine == nullptr) {
         return;
     }
+    const auto& context = parent.GetContext();
 
     engine->Add(parent.GetPosition().offsetX.expr == 0.0);
     engine->Add(parent.GetPosition().offsetY.expr == 0.0);
@@ -225,9 +230,9 @@ void SmartLayoutConstraints::AddDefaultConstraints(SmartLayoutNode& parent)
 
         // child end (offset + size) must not exceed parent end (parent offset + parent size)
         engine->Add(child->GetPosition().offsetX.expr + child->GetSize().width.expr <=
-                           parent.GetPosition().offsetX.expr + parent.GetSize().width.expr);
+            parent.GetPosition().offsetX.expr + parent.GetSize().width.expr - context.padding.right);
         engine->Add(child->GetPosition().offsetY.expr + child->GetSize().height.expr <=
-                           parent.GetPosition().offsetY.expr + parent.GetSize().height.expr);
+            parent.GetPosition().offsetY.expr + parent.GetSize().height.expr - context.padding.bottom);
     }
 }
 
@@ -310,6 +315,68 @@ void SmartLayoutConstraints::AddGeneralConstraints(SmartLayoutNode& parent)
         double relY = child->GetPosition().offsetY.value - boundingBox.offsetY;
         engine->Add(child->GetPosition().offsetX.expr == relX * sizeScale + boxPos.offsetX.expr);
         engine->Add(child->GetPosition().offsetY.expr == relY * sizeScale + boxPos.offsetY.expr);
+    }
+}
+
+void SmartLayoutConstraints::AddScaleUpConstraints(SmartLayoutNode& parent, double emptyRatioThreshold)
+{
+    auto* engine = parent.GetEngine();
+    if (engine == nullptr || parent.GetChildren().empty()) {
+        return;
+    }
+
+    const auto& boundingBox = parent.GetBoundingBox();
+    if (!boundingBox.IsValid()) {
+        return;
+    }
+
+    double containerWidth = parent.GetContext().size.Width();
+    double containerHeight = parent.GetContext().size.Height();
+    double containerArea = containerWidth * containerHeight;
+    double bbArea = boundingBox.width * boundingBox.height;
+
+    if (containerArea <= 0 || bbArea <= 0) {
+        return;
+    }
+
+    double emptyRatio = 1.0 - (bbArea / containerArea);
+    if (LessOrEqual(emptyRatio, emptyRatioThreshold)) {
+        return;
+    }
+
+    // Compute maximum safe scale-up factor, reserving blank margin per axis
+    // so the scaled content does not fill the container edge-to-edge
+    constexpr double SCALE_UP_MARGIN_RATIO = 0.1;
+    double maxScaleX = containerWidth * (1.0 - SCALE_UP_MARGIN_RATIO) / boundingBox.width;
+    double maxScaleY = containerHeight * (1.0 - SCALE_UP_MARGIN_RATIO) / boundingBox.height;
+    double upScale = std::min(maxScaleX, maxScaleY);
+    if (LessOrEqual(upScale, 1.0)) {
+        return;
+    }
+
+    // Set sizeScale constraint
+    engine->Add(parent.GetScaleInfo().sizeScale.expr == upScale);
+
+    // Center offset after scaling
+    double newBBWidth = boundingBox.width * upScale;
+    double newBBHeight = boundingBox.height * upScale;
+    double centerOffsetX = (containerWidth - newBBWidth) / 2.0;
+    double centerOffsetY = (containerHeight - newBBHeight) / 2.0;
+
+    // Constrain each child node
+    for (const auto& child : parent.GetChildren()) {
+        if (child == nullptr) {
+            continue;
+        }
+        // Size = original size * upScale
+        engine->Add(child->GetSize().width.expr == child->GetSize().width.value * upScale);
+        engine->Add(child->GetSize().height.expr == child->GetSize().height.value * upScale);
+
+        // Position = relative offset within bounding box * upScale + center offset
+        double relX = child->GetPosition().offsetX.value - boundingBox.offsetX;
+        double relY = child->GetPosition().offsetY.value - boundingBox.offsetY;
+        engine->Add(child->GetPosition().offsetX.expr == relX * upScale + centerOffsetX);
+        engine->Add(child->GetPosition().offsetY.expr == relY * upScale + centerOffsetY);
     }
 }
 
