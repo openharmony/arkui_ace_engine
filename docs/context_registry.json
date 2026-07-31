@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-30",
+  "last_updated": "2026-07-31",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -6922,7 +6922,7 @@
       },
       "test_paths": ["test/unittest/core/manager/drag_drop/", "test/unittest/core/event/drag_event/"],
       "status": "active",
-      "last_verified": "2026-07-29"
+      "last_verified": "2026-07-31"
     },
     {
       "id": "DragCapability",
@@ -6949,7 +6949,7 @@
       },
       "test_paths": ["test/unittest/core/event/drag_event/", "test/unittest/core/manager/drag_drop/", "test/unittest/capi/"],
       "status": "active",
-      "last_verified": "2026-07-29"
+      "last_verified": "2026-07-31"
     },
     {
       "id": "InteractionAttributes",
@@ -6957,7 +6957,7 @@
       "name_cn": "交互属性",
       "kind": "common_capability",
       "category": "interaction",
-      "keywords": ["InteractionAttributes", "交互属性", "onClick", "onTouch", "onHover", "onKeyEvent", "onAxisEvent", "enabled", "clickEffect", "AccessibilityHover"],
+      "keywords": ["InteractionAttributes", "交互属性", "cursorControl", "onHover", "hoverEffect", "responseRegion", "responseRegionList", "touchable", "monopolizeEvents", "enabled", "clickEffect", "AccessibilityHover"],
       "aliases": ["通用交互属性", "CommonMethod 交互", "输入事件属性", "Interaction API"],
       "kb": "docs/kb/capabilities/interaction-attributes.md",
       "spec_domain": "specs/04-common-capability/03-common-attributes/04-interaction-attributes",
@@ -6977,7 +6977,7 @@
       },
       "test_paths": ["test/unittest/core/base/", "test/unittest/core/event/focus_core/", "test/unittest/capi/"],
       "status": "active",
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-07-31"
     },
     {
       "id": "ComponentScreenshot",

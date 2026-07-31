@@ -1,7 +1,7 @@
 # Drag Framework Context
 
 > 文档版本：v1.0
-> 更新时间：2026-07-29
+> 更新时间：2026-07-31
 > 来源：`docs/context_registry.json` 主题 `DragFramework`
 
 ## 定位
@@ -19,7 +19,7 @@
 | 起拖手势与真实结束回调 | `frameworks/core/components_ng/event/gesture_event_hub_drag.cpp` | 手势侧构建 DragData、调用 `InteractionInterface`，并通过 `GetDragCallback` 回收系统结束结果。 |
 | 起拖事件执行器 | `frameworks/core/components_ng/event/drag_event.h`、`frameworks/core/components_ng/event/drag_event.cpp`、`frameworks/core/components_ng/event/drag_drop_event.cpp` | 起拖准备、预览与拖拽事件执行器。 |
 | 预拖拽状态机 | `frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/` | 长按、准备、抬升、移动和取消的内部状态机。 |
-| 弹簧加载状态机 | `frameworks/core/components_ng/manager/drag_drop/drag_drop_spring_loading/` | 悬停检测、计时和 BEGIN/UPDATE/END/CANCEL 状态处理。 |
+| SpringLoading 状态机 | `frameworks/core/components_ng/manager/drag_drop/drag_drop_spring_loading/` | 拖拽停留检测、计时和 BEGIN/UPDATE/END/CANCEL 状态处理；这是延迟/周期回调状态机，不是物理弹簧动画。 |
 | 预览动画与内部 Action | `frameworks/core/components_ng/manager/drag_drop/utils/` | 预览动画和内部 DragAction 数据模型。 |
 | 全局/系统动作桥接 | `frameworks/core/components_ng/manager/drag_drop/drag_drop_global_controller.*`、`drag_drop_func_wrapper.*`、`drag_drop_controller_func_wrapper.*` | 延迟结束、全局会话状态和程序化起拖的内部桥接。 |
 
@@ -43,7 +43,7 @@
 
 | 类型 | 稳定路径 | 用途 |
 |---|---|---|
-| 管理器与状态机 Host 单测 | `test/unittest/core/manager/drag_drop/` | 路由、起拖状态机、弹簧加载、报告与 wrapper 覆盖。 |
+| 管理器与状态机 Host 单测 | `test/unittest/core/manager/drag_drop/` | 路由、起拖状态机、SpringLoading、报告与 wrapper 覆盖。 |
 | 管理器综合单测 | `test/unittest/core/manager/drag_drop_manager_test_ng.cpp` 及同名前缀文件 | 管理器的通用行为和回归场景。 |
 | 事件与手势 Host 单测 | `test/unittest/core/event/drag_event/`、`test/unittest/core/event/drag_event_test_ng.cpp` | 事件执行器、预拖拽及手势路径。 |
 

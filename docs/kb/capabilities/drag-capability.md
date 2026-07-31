@@ -1,12 +1,12 @@
 # Drag Capability Context
 
 > 文档版本：v1.0
-> 更新时间：2026-07-29
+> 更新时间：2026-07-31
 > 来源：`docs/context_registry.json` 主题 `DragCapability`
 
 ## 定位
 
-通用拖拽能力是组件面向应用的公开接口集合：包含源/目标配置、生命周期事件、数据与结果、预览、程序化起拖、延迟落放完成及弹簧加载。动态 ArkTS、静态 ArkTS 与 C API 的签名、可空性和版本分别以各自 canonical SDK 或 C header 为准；不要用某一前端的声明代替另一前端。
+通用拖拽能力是组件面向应用的公开接口集合：包含源/目标配置、生命周期事件、数据与结果、预览、程序化起拖、延迟落放完成及 SpringLoading。这里的 SpringLoading 指拖拽停留目标后的延迟/周期回调状态机，不是物理弹簧动画。动态 ArkTS、静态 ArkTS 与 C API 的签名、可空性和版本分别以各自 canonical SDK 或 C header 为准；不要用某一前端的声明代替另一前端。
 
 ## 快速路由
 
