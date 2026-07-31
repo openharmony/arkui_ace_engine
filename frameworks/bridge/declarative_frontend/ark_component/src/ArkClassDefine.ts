@@ -1065,7 +1065,7 @@ class ArkShadowInfoToArray {
 }
 
 class ArkSearchButton {
-  value: string | undefined;
+  value: string | Resource | undefined;
   fontSize: Length | undefined;
   fontColor: ResourceColor | undefined;
   autoDisable: boolean | undefined;
@@ -1336,6 +1336,7 @@ class ArkDotIndicator extends DotIndicator {
   spaceValue: LengthMetrics | undefined;
   indicatorIconValue: Array<IndicatorIconInfo> | undefined;
   ignoreSizeValue: boolean | undefined;
+  setIgnoreSizeValue: boolean | undefined;
 
   constructor() {
     super();
@@ -1390,6 +1391,7 @@ class ArkDigitIndicator extends DigitIndicator {
   digitFontValue: ArkDigitFont | undefined;
   selectedDigitFontValue: ArkDigitFont | undefined;
   ignoreSizeValue: boolean | undefined;
+  setIgnoreSizeValue: boolean | undefined;
 
   constructor() {
     super();
@@ -1483,6 +1485,7 @@ class ArkDisplayCount {
 class ArkSwiperCachedCount {
   value: number;
   options: boolean | object;
+  isShown: boolean | undefined;
 
   constructor() {
     this.value = undefined;

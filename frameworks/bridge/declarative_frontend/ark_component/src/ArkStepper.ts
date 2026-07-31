@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ArkStepperComponent extends ArkComponent implements StepperAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);

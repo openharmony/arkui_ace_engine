@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ContainerSpanTextBackgroundStyleModifier extends ModifierWithKey<TextBackgroundStyle> {
   constructor(value: TextBackgroundStyle) {
     super(value);

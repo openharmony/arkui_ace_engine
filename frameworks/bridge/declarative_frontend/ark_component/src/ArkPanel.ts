@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent implements PanelAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);

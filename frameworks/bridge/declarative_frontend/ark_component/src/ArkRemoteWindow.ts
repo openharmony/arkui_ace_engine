@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ArkRemoteWindowComponent extends ArkComponent implements RemoteWindowAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);

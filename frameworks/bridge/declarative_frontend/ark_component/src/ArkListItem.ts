@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ListItemSelectedModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('listItemSelected');
   applyPeer(node: KNode, reset: boolean): void {
