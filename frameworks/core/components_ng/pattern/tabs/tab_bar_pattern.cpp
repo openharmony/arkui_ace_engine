@@ -1121,20 +1121,29 @@ void TabBarPattern::OnModifyDone()
     ACE_UINODE_TRACE(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
+    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
 
-    AddMaskItemClickEvent();
-    InitTurnPageRateEvent();
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    // Only create GestureEventHub and init events when TabBar has content (TabContent exists).
+    // Without TabContent, TabBar doesn't need to handle any gesture/input events.
+    // When the first TabContent is added, MarkModifyDone() is called to trigger this path.
+    if (tabsNode && tabsNode->HasTabBarChildNodes()) {
+        auto gestureHub = hub->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        InitTurnPageRateEvent();
+        InitScrollableEvent(layoutProperty, gestureHub);
+        InitHoverEvent();
+        InitMouseEvent();
+        AddMaskItemClickEvent();
+        RemoveTabBarEventCallback();
+        AddTabBarEventCallback();
+    }
+
     auto theme = host->GetTheme<TabTheme>(true);
     CHECK_NULL_VOID(theme);
     InitTabBarProperties(theme);
     UpdateBackBlurStyle(theme);
-    auto layoutProperty = host->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    InitScrollableEvent(layoutProperty, gestureHub);
-    InitHoverEvent();
-    InitMouseEvent();
     SetSurfaceChangeCallback();
     InitFocusEvent();
     SetAccessibilityAction();
@@ -1143,13 +1152,9 @@ void TabBarPattern::OnModifyDone()
     StopTranslateAnimation();
     StartShowTabBar();
     jumpIndex_ = layoutProperty->GetIndicatorValue(0);
-
-    RemoveTabBarEventCallback();
-    AddTabBarEventCallback();
     UpdateChildrenClipEdge();
 
     axis_ = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
     auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabsLayoutProperty);
@@ -1483,8 +1488,6 @@ void TabBarPattern::InitLongPressAndDragEvent()
     float scale = pipelineContext->GetFontScale();
 
     bigScale_ = AgingAdapationDialogUtil::GetDialogBigFontSizeScale();
-    largeScale_ = AgingAdapationDialogUtil::GetDialogLargeFontSizeScale();
-    maxScale_ = AgingAdapationDialogUtil::GetDialogMaxFontSizeScale();
 
     if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE) {
         if (scale >= bigScale_) {
