@@ -20,7 +20,6 @@ build_component("text") {
     "render_text_creator.cpp",
     "text_component.cpp",
     "text_component_v2.cpp",
-    "text_theme.cpp",
   ]
 
   rosen_sources = [ "rosen_render_text.cpp" ]

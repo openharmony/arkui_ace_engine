@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
-#include "core/common/container.h"
 
 #include "core/components/theme/corner_mark_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"

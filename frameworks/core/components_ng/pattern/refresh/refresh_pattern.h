@@ -36,20 +36,15 @@
 #include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-class AnimatablePropertyFloat;
-template<typename T, typename S>
-class NodeAnimatableProperty;
-using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 const char LOADING_PROGRESS_ETS_TAG[] = "LoadingProgress";
 const char REFRESH_ETS_TAG[] = "Refresh";
-
 
 class RefreshPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(RefreshPattern, NestableScrollContainer);
 
 public:
     RefreshPattern() = default;
-    ~RefreshPattern() override;
+    ~RefreshPattern() override = default;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {

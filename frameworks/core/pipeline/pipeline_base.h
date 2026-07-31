@@ -25,7 +25,6 @@
 #include <stack>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 
 #include "interfaces/inner_api/ace/serialized_gesture.h"
@@ -33,7 +32,6 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_trace.h"
-#include "base/mousestyle/mouse_style.h"
 #include "base/resource/asset_manager.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
@@ -108,7 +106,6 @@ class Clipboard;
 class Frontend;
 class OffscreenCanvas;
 class Window;
-class WindowManager;
 class FontManager;
 class ManagerInterface;
 class NavigationController;

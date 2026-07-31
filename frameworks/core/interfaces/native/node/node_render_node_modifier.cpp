@@ -26,7 +26,6 @@
 
 #include "base/error/error_code.h"
 #include "base/memory/ace_type.h"
-#include "core/common/container.h"
 #include "core/components_ng/base/mixed_mount_registry.h"
 #include "core/components_ng/base/mount_policy.h"
 #include "core/components_ng/base/view_abstract.h"

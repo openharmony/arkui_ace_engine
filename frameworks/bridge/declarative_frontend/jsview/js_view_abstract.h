@@ -44,9 +44,6 @@ class CalcDimensionRect;
 struct TextDetectConfig;
 struct TabBarSymbol;
 struct ImageInfoConfig;
-namespace NG {
-struct DrawingContext;
-} // namespace NG
 }
 
 namespace OHOS::Ace::Framework {

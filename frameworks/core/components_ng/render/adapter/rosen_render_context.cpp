@@ -15,7 +15,6 @@
 
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/particle_property.h"
 
@@ -7521,7 +7520,7 @@ void RosenRenderContext::SetActualForegroundColor(const Color& value)
     RequestNextFrame();
 }
 
-void RosenRenderContext::AttachNodeAnimatableProperty(const RefPtr<NodeAnimatablePropertyBase>& property)
+void RosenRenderContext::AttachNodeAnimatableProperty(RefPtr<NodeAnimatablePropertyBase> property)
 {
     FREE_RS_CONTEXT_CHECK(AttachNodeAnimatableProperty, property);
     CHECK_NULL_VOID(rsNode_);

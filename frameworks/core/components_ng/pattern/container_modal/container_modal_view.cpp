@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
-#include "core/pipeline/container_window_manager.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/image/pixel_map.h"

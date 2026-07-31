@@ -17,7 +17,6 @@
 #include <cstdint>
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
-#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/date_picker/datepicker_layout_property.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern_utils.h"
@@ -80,8 +79,13 @@ class ACE_FORCE_EXPORT PickerColumnPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(PickerColumnPattern, LinearLayoutPattern);
 
 public:
-    PickerColumnPattern(bool isVertical = false);
-    virtual ~PickerColumnPattern();
+    PickerColumnPattern(bool isVertical = false) : LinearLayoutPattern(isVertical) {};
+    virtual ~PickerColumnPattern()
+    {
+        if (circleUtils_) {
+            delete circleUtils_;
+        }
+    }
 
     virtual void FlushCurrentOptions(bool isDown = false, bool isUpateTextContentOnly = false,
         bool isUpdateAnimationProperties = false, bool isTossPlaying = false) = 0;

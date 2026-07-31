@@ -14,9 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-
 #include "base/log/ace_performance_check.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 
 #include <algorithm>

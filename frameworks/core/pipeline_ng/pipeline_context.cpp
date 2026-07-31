@@ -74,7 +74,6 @@
 #include "core/common/back_press_handler_manager.h"
 #include "core/common/font_change_observer.h"
 #include "core/common/font_manager.h"
-#include "core/common/frontend.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
 #include "core/common/resource/resource_configuration.h"
@@ -118,7 +117,6 @@
 #include "core/components_ng/pattern/window_scene/scene/window_scene_layout_manager.h"
 #endif
 #include "core/image/image_file_cache.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline/pipeline_context.h"
 #ifdef COMPONENT_TEST_ENABLED
 #include "component_test/pipeline_status.h"
@@ -501,18 +499,6 @@ PipelineContext::PipelineContext()
     taihangOptimizer_->Init();
     // Snapshot the thread's isolated state at pipeline creation time.
     isIsolatedThread_ = ContainerScope::IsIsolatedThread();
-}
-
-bool PipelineContext::GetIsRequestVsync()
-{
-    CHECK_NULL_RETURN(window_, false);
-    return window_->GetIsRequestVsync();
-}
-
-bool PipelineContext::GetIsRequestFrame() const
-{
-    CHECK_NULL_RETURN(window_, false);
-    return window_->GetIsRequestFrame();
 }
 
 std::string PipelineContext::GetCurrentPageNameCallback()

@@ -21,7 +21,6 @@
 
 #include "modifier.h"
 
-#include "base/image/image_resizable_slice.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
 #include "base/geometry/ng/offset_t.h"
@@ -34,11 +33,8 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/blend_mode.h"
-#include "core/components/common/properties/brightness_option.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
-#include "core/components/common/properties/depth_option.h"
-#include "core/components/common/properties/effect_option.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components/common/properties/popup_param.h"
@@ -51,7 +47,6 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/edgelight_property.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/measure_property.h"
@@ -60,7 +55,6 @@
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/property/progress_mask_property.h"
 #include "core/components_ng/property/transition_property.h"
-#include "core/components_ng/property/union_effect_container_options.h"
 #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Rosen {

@@ -62,7 +62,6 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
-#include "core/pipeline/container_window_manager.h"
 #include "base/resource/data_provider_manager.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -231,12 +230,6 @@ const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimize
 const std::shared_ptr<TaihangOptimizer>& PipelineContext::GetTaihangOptimizer() const
 {
     return taihangOptimizer_;
-}
-
-bool PipelineContext::GetIsRequestFrame() const
-{
-    CHECK_NULL_RETURN(window_, false);
-    return window_->GetIsRequestFrame();
 }
 
 std::string PipelineContext::GetBundleName() const
@@ -1981,12 +1974,6 @@ RefPtr<PrivacySensitiveManager> PipelineContext::GetPrivacySensitiveManager() co
 
 void PipelineContext::ChangeSensitiveNodes(bool flag)
 {
-}
-
-bool PipelineContext::GetIsRequestVsync()
-{
-    CHECK_NULL_RETURN(window_, false);
-    return window_->GetIsRequestVsync();
 }
 
 } // namespace OHOS::Ace::NG

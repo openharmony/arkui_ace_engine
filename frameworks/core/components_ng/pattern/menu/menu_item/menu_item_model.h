@@ -21,7 +21,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/properties/text_enums.h"
-#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace {
 enum class MenuItemFontColorType {

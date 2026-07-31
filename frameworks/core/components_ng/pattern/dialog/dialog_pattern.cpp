@@ -77,7 +77,6 @@
 #include "core/event/touch_event.h"
 #include "core/interfaces/native/node/node_button_modifier.h"
 #include "core/pipeline/base/element_register.h"
-#include "core/pipeline/container_window_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {

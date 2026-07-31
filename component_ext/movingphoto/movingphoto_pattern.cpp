@@ -16,7 +16,6 @@
 #include <unistd.h>
 
 #include "movingphoto_pattern.h"
-#include "core/common/container.h"
 #include "movingphoto_node.h"
 #include "movingphoto_utils.h"
 

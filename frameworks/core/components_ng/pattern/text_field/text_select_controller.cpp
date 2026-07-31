@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
-#include "core/common/container.h"
 
 #include <string_view>
 
