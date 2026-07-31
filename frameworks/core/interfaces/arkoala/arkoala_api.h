@@ -9623,7 +9623,7 @@ struct ArkUIXComponentModifier {
     void (*setXComponentBlendApplyType)(ArkUINodeHandle node, ArkUI_Int32 blendApplyTypeValue);
     void (*createWithOpacityResourceObj)(ArkUINodeHandle node, void* opacityResObj);
     void (*parseParams)(void* runtimeCallInfo, ArkUI_Params& params);
-    void (*setControllerCallback)(void* runtimeCallInfo, ArkUINodeHandle* node);
+    void (*setControllerCallback)(void* runtimeCallInfo, ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {
