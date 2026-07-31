@@ -808,6 +808,7 @@ template("ace_core_ng_source_set") {
       "common/task_runner_adapter_impl.cpp",
       "common/task_runners.cpp",
       "common/text_field_manager.cpp",
+      "common/text_field_manager_ng.cpp",
       "common/thread_checker.cpp",
       "common/thread_container.cpp",
       "common/thread_model_impl.cpp",
