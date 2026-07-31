@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-30",
+  "last_updated": "2026-07-31",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -9694,6 +9694,284 @@
       ],
       "status": "active",
       "last_verified": "2026-07-30"
+    },
+    {
+      "id": "DataPanel",
+      "name": "DataPanel",
+      "name_cn": "数据面板组件",
+      "kind": "component",
+      "category": "data_display",
+      "keywords": [
+        "DataPanel",
+        "数据面板",
+        "数据占比",
+        "环形进度",
+        "线性进度",
+        "CIRCLE",
+        "LINE",
+        "values",
+        "max",
+        "type",
+        "valueColors",
+        "strokeWidth",
+        "trackShadow"
+      ],
+      "aliases": [
+        "DataPanel组件",
+        "数据面板",
+        "占比图"
+      ],
+      "kb": "docs/kb/components/data_display/data_panel.md",
+      "spec_domain": "specs/05-ui-components/10-information-display-components/01-data-panel",
+      "func_id": "05-10-01",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/data_panel/data_panel_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/data_panel/data_panel_model_ng.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/data_panel/data_panel_model_static.cpp",
+        "paint_property": "frameworks/core/components_ng/pattern/data_panel/data_panel_paint_property.h",
+        "paint_method": "frameworks/core/components_ng/pattern/data_panel/data_panel_paint_method.cpp",
+        "modifier": "frameworks/core/components_ng/pattern/data_panel/data_panel_modifier.cpp",
+        "layout_algorithm": "frameworks/core/components_ng/pattern/data_panel/data_panel_layout_algorithm.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/data_panel/bridge/arkts_native_data_panel_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/data_panel/bridge/data_panel_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/data_panel/bridge/data_panel_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/data_panel/bridge/data_panel_dynamic_module.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/data_panel.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/dataPanel.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/DataPanelModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/DataPanelModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/data_panel/",
+        "test/unittest/capi/modifiers/data_panel_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "Gauge",
+      "name": "Gauge",
+      "name_cn": "仪表盘组件",
+      "kind": "component",
+      "category": "data_display",
+      "keywords": [
+        "Gauge",
+        "仪表盘",
+        "数据占比",
+        "环形展示",
+        "value",
+        "min",
+        "max",
+        "startAngle",
+        "endAngle",
+        "colors",
+        "strokeWidth",
+        "Monochrome",
+        "Gradient",
+        "MultiSegment"
+      ],
+      "aliases": [
+        "Gauge组件",
+        "仪表盘",
+        "圆形进度"
+      ],
+      "kb": "docs/kb/components/data_display/gauge.md",
+      "spec_domain": "specs/05-ui-components/10-information-display-components/02-gauge",
+      "func_id": "05-10-02",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/gauge/gauge_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/gauge/gauge_model_ng.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/gauge/gauge_model_static.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/gauge/gauge_layout_property.h",
+        "paint_property": "frameworks/core/components_ng/pattern/gauge/gauge_paint_property.h",
+        "paint_method": "frameworks/core/components_ng/pattern/gauge/gauge_paint_method.cpp",
+        "modifier": "frameworks/core/components_ng/pattern/gauge/gauge_modifier.cpp",
+        "layout_algorithm": "frameworks/core/components_ng/pattern/gauge/gauge_layout_algorithm.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/gauge/bridge/arkts_native_gauge_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/gauge/bridge/gauge_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/gauge/bridge/gauge_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/gauge/bridge/gauge_dynamic_module.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/gauge.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/gauge.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/GaugeModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/GaugeModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/gauge/",
+        "test/unittest/capi/modifiers/gauge_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "LoadingProgress",
+      "name": "LoadingProgress",
+      "name_cn": "加载进度组件",
+      "kind": "component",
+      "category": "data_display",
+      "keywords": [
+        "LoadingProgress",
+        "加载进度",
+        "彗星动画",
+        "环形动画",
+        "color",
+        "enableLoading",
+        "foregroundColor",
+        "contentModifier",
+        "5阶段动画"
+      ],
+      "aliases": [
+        "LoadingProgress组件",
+        "加载进度",
+        "Loading组件"
+      ],
+      "kb": "docs/kb/components/data_display/loading_progress.md",
+      "spec_domain": "specs/05-ui-components/10-information-display-components/03-loading-progress",
+      "func_id": "05-10-03",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/loading_progress/loading_progress_model_ng.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/loading_progress/loading_progress_model_static.cpp",
+        "paint_property": "frameworks/core/components_ng/pattern/loading_progress/loading_progress_paint_property.h",
+        "modifier": "frameworks/core/components_ng/pattern/loading_progress/loading_progress_modifier.cpp",
+        "layout_algorithm": "frameworks/core/components_ng/pattern/loading_progress/loading_progress_layout_algorithm.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/loading_progress/bridge/arkts_native_loading_progress_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/loading_progress/bridge/loading_progress_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/loading_progress/bridge/loading_progress_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/loading_progress/bridge/loading_progress_dynamic_module.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/loading_progress.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/loadingProgress.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/LoadingProgressModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/LoadingProgressModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/loading_progress/",
+        "test/unittest/capi/modifiers/loading_progress_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "PatternLock",
+      "name": "PatternLock",
+      "name_cn": "图案锁组件",
+      "kind": "component",
+      "category": "data_display",
+      "keywords": [
+        "PatternLock",
+        "图案锁",
+        "九宫格",
+        "安全解锁",
+        "sideLength",
+        "circleRadius",
+        "regularColor",
+        "selectedColor",
+        "pathColor",
+        "autoReset",
+        "patternComplete",
+        "dotConnect",
+        "enableWaveEffect"
+      ],
+      "aliases": [
+        "PatternLock组件",
+        "图案锁",
+        "手势锁"
+      ],
+      "kb": "docs/kb/components/data_display/pattern_lock.md",
+      "spec_domain": "specs/05-ui-components/10-information-display-components/04-pattern-lock",
+      "func_id": "05-10-04",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/patternlock/patternlock_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/patternlock/patternlock_model_ng.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/patternlock/patternlock_model_static.cpp",
+        "layout_property": "frameworks/core/components_ng/pattern/patternlock/patternlock_layout_property.h",
+        "paint_property": "frameworks/core/components_ng/pattern/patternlock/patternlock_paint_property.h",
+        "paint_method": "frameworks/core/components_ng/pattern/patternlock/patternlock_paint_method.cpp",
+        "modifier": "frameworks/core/components_ng/pattern/patternlock/patternlock_modifier.cpp",
+        "layout_algorithm": "frameworks/core/components_ng/pattern/patternlock/patternlock_layout_algorithm.cpp",
+        "controller": "frameworks/core/components_ng/pattern/patternlock/pattern_lock_controller.cpp",
+        "bridge": "frameworks/core/components_ng/pattern/patternlock/arkts_native_pattern_lock_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/patternlock/patternlock_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/patternlock/patternlock_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/patternlock/patternlock_dynamic_module.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/pattern_lock.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/patternLock.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/PatternLockModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/PatternLockModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/patternlock/",
+        "test/unittest/capi/modifiers/pattern_lock_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "Counter",
+      "name": "Counter",
+      "name_cn": "计数器组件",
+      "kind": "component",
+      "category": "data_display",
+      "keywords": [
+        "Counter",
+        "计数器",
+        "三节点",
+        "数量选择",
+        "减号按钮",
+        "加号按钮",
+        "height",
+        "width",
+        "backgroundColor",
+        "enableInc",
+        "enableDec",
+        "onInc",
+        "onDec"
+      ],
+      "aliases": [
+        "Counter组件",
+        "计数器",
+        "数量选择器"
+      ],
+      "kb": "docs/kb/components/data_display/counter.md",
+      "spec_domain": "specs/05-ui-components/10-information-display-components/10-counter",
+      "func_id": "05-10-10",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/counter/counter_pattern.cpp",
+        "model": "frameworks/core/components_ng/pattern/counter/counter_model_ng.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/counter/counter_model_static.cpp",
+        "layout_algorithm": "frameworks/core/components_ng/pattern/counter/counter_layout_algorithm.cpp",
+        "counter_node": "frameworks/core/components_ng/pattern/counter/counter_node.cpp",
+        "theme": "frameworks/core/components_ng/pattern/counter/counter_theme_wrapper.h",
+        "bridge": "frameworks/core/components_ng/pattern/counter/bridge/arkts_native_counter_bridge.cpp",
+        "dynamic_modifier": "frameworks/core/components_ng/pattern/counter/bridge/counter_dynamic_modifier.cpp",
+        "static_modifier": "frameworks/core/components_ng/pattern/counter/bridge/counter_static_modifier.cpp",
+        "dynamic_module": "frameworks/core/components_ng/pattern/counter/bridge/counter_dynamic_module.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/counter.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/counter.static.d.ets",
+        "modifier": "<OH_ROOT>/interface/sdk-js/api/arkui/CounterModifier.d.ts",
+        "modifier_static": "<OH_ROOT>/interface/sdk-js/api/arkui/CounterModifier.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/counter/",
+        "test/unittest/capi/modifiers/counter_modifier_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
     }
   ]
 }
