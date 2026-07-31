@@ -54,7 +54,7 @@ declare class NativeViewPartialUpdate {
   getUniqueId(): number;
   getDialogController(): object;
   tryReleaseExpiringNode(reuseId: string): boolean;
-  findCustomValueByKey(key: number): CustomEnvValue;
   findEnvValueByKey(key: string): CustomEnvValue;
   setCreatorId(id: number): void;
+  findCustomValueByKey(key: number): CustomEnvQueryResult;
 }
