@@ -4233,19 +4233,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[225] != 0) {
-            switch (flagArray[225]) {
+        if (flagArray[226] != 0) {
+            switch (flagArray[226]) {
                 case 1: {
                     peer.setSmartGestureShortcutAttribute((this._smartGestureShortcut_0_0value as SmartGestureShortcutOptions));
-                    flagArray[225] = 2;
+                    flagArray[226] = 2;
                     break;
                 }
                 case 3: {
-                    flagArray[225] = 2;
+                    flagArray[226] = 2;
                     break;
                 }
                 default: {
-                    flagArray[225] = 0;
+                    flagArray[226] = 0;
                 }
             }
         }
@@ -7009,8 +7009,8 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[225] != 0) {
-            switch (flagArray[225]) {
+        if (flagArray[226] != 0) {
+            switch (flagArray[226]) {
                 case 1:
                 case 3: {
                     this.smartGestureShortcut((modifier._smartGestureShortcut_0_0value as SmartGestureShortcutOptions));
@@ -9368,12 +9368,12 @@ export class CommonMethodModifier implements CommonMethod {
         throw new Error('Not implemented')
     }
     smartGestureShortcut(value: SmartGestureShortcutOptions): this {
-        if (((this._flagArray[225]) == (0)) || (true)) {
-            this._flagArray[225] = 1
+        if (((this._flagArray[226]) == (0)) || (true)) {
+            this._flagArray[226] = 1
             this._smartGestureShortcut_0_0value = value
             this._state.fireChange()
         } else {
-            this._flagArray[225] = 3
+            this._flagArray[226] = 3
         }
         return this
     }
