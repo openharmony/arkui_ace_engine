@@ -9971,6 +9971,40 @@
         "test/unittest/capi/modifiers/counter_modifier_test.cpp"
       ],
       "status": "active",
+      "last_verified": "2026-07-30"
+    },
+    {
+      "id": "NestedScrollOffsetNoResponse",
+      "name": "Nested Scroll Offset No Response",
+      "name_cn": "嵌套滚动偏移量不响应",
+      "kind": "common_capability",
+      "category": "interaction",
+      "keywords": [
+        "NestedScrollOffsetNoResponse",
+        "嵌套滚动偏移量不响应",
+        "IsAtBottom",
+        "posMap cache",
+        "endIndex inconsistency",
+        "布局状态内部不一致",
+        "height zero child",
+        "尾部零高子节点",
+        "offset not distributed",
+        "偏移量不处理",
+        "上滑不响应",
+        "List WaterFlow nested",
+        "05-03-07",
+        "fromController",
+        "LayoutReachEnd"
+      ],
+      "aliases": [
+        "嵌套滚动不响应",
+        "List上滑不响应",
+        "偏移量分发断裂"
+      ],
+      "kb": "docs/kb/issues/interaction/nested-scroll-offset-no-response.md",
+      "func_id": "05-03-05",
+      "spec_status": "pending",
+      "status": "active",
       "last_verified": "2026-07-31"
     },
     {
