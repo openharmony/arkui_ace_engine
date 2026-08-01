@@ -24,7 +24,7 @@ import { NodeAttach } from './node'
 
 /** @internal */
 export class TestNode extends IncrementalNode {
-    content: string
+    content: string = '<UNDEFINED>'
 
     constructor(kind: uint32 = 1, content: string = '<UNDEFINED>') {
         super(kind)
