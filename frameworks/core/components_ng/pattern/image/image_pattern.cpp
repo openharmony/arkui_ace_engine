@@ -52,6 +52,7 @@
 #include "core/drawable/picture_drawable_descriptor.h"
 #include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1683,6 +1684,37 @@ bool ImagePattern::RecycleImageData()
     return true;
 }
 
+bool ImagePattern::RecycleImageDataForNav()
+{
+    auto frameNode = GetHost();
+    if (!frameNode) {
+        return false;
+    }
+    // For network images, only recycle image data when cache is available to avoid re-download.
+    if (loadingCtx_ && !loadingCtx_->IsNetworkImageSafeToRecycle()) {
+        return false;
+    }
+    loadingCtx_ = nullptr;
+    auto rsRenderContext = frameNode->GetRenderContext();
+    if (!rsRenderContext) {
+        return false;
+    }
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "%{public}s, %{private}s recycleImageData for Nav.",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
+    imagePaintMethod_ = nullptr;
+    imagePaintMethod_ = nullptr;
+    image_ = nullptr;
+    altLoadingCtx_ = nullptr;
+    altImage_ = nullptr;
+    altErrorCtx_ = nullptr;
+    altErrorImage_ = nullptr;
+    isRecycledImage_ = true;
+    ACE_SCOPED_TRACE("OnRecycleImageDataForNav imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
+    return true;
+}
+
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
     // Intentionally left blank: no handling for memory level in current version.
@@ -1856,6 +1888,7 @@ void ImagePattern::OnAttachToMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
+    RegisterNavDestinationHiddenChange();
 }
 
 void ImagePattern::OnDetachFromMainTree()
@@ -1866,11 +1899,108 @@ void ImagePattern::OnDetachFromMainTree()
     if (pipeline) {
         ImagePerf::GetPerfMonitor()->DeleteLoadComponent(host->GetId());
     }
-    THREAD_SAFE_NODE_CHECK(host, OnAttachToFrameNode);
+    CancelNavDestRecycleTask();
+    UnregisterNavDestinationHiddenChange();
+    THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
     if (isNeedReset_) {
         ResetImageAndAlt();
         isNeedReset_ = false;
     }
+}
+
+void ImagePattern::RegisterNavDestinationHiddenChange()
+{
+    if (!SystemProperties::GetNavigationImageRecycleEnabled()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto memoryManager = pipeline->GetMemoryManager();
+    CHECK_NULL_VOID(memoryManager);
+    auto weakPattern = WeakPtr<ImagePattern>(Claim(this));
+    auto callback = [weakPattern](bool isShown) {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnNavDestinationHiddenChange(isShown);
+    };
+    memoryManager->RegisterNavDestinationHiddenChange(host, std::move(callback));
+}
+
+void ImagePattern::UnregisterNavDestinationHiddenChange()
+{
+    if (!SystemProperties::GetNavigationImageRecycleEnabled()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto memoryManager = pipeline->GetMemoryManager();
+    CHECK_NULL_VOID(memoryManager);
+    memoryManager->UnregisterNavDestinationHiddenChange(host->GetId());
+}
+
+void ImagePattern::OnNavDestinationHiddenChange(bool isShown)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    if (isShown) {
+        CancelNavDestRecycleTask();
+        if (isRecycledImage_) {
+            TAG_LOGD(AceLogTag::ACE_IMAGE,
+                "OnNavDestinationHiddenChange shown, reload ImageData. imageNodeId:%{public}d %{public}s", nodeId,
+                imageDfxConfig_.ToStringWithoutSrc().c_str());
+            LoadImageDataIfNeed();
+        }
+    } else {
+        if (isRecycledImage_) {
+            TAG_LOGD(AceLogTag::ACE_IMAGE, "already recycled, skip. imageNodeId:%{public}d", nodeId);
+            return;
+        }
+        PostNavDestRecycleTask();
+    }
+}
+
+void ImagePattern::PostNavDestRecycleTask()
+{
+    CancelNavDestRecycleTask();
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    auto weakPattern = WeakPtr<ImagePattern>(Claim(this));
+    auto callback = [weakPattern]() {
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ExecuteNavDestRecycle();
+    };
+
+    navDestRecycleCallback_ = std::make_shared<CancelableCallback<void()>>(std::move(callback));
+    auto scheduledTask = navDestRecycleCallback_;
+    taskExecutor->PostDelayedTask(
+        [scheduledTask]() { (*scheduledTask)(); },
+        TaskExecutor::TaskType::UI, NAV_DEST_RECYCLE_DELAY_MS, "NavDestImageRecycle");
+}
+
+void ImagePattern::CancelNavDestRecycleTask()
+{
+    if (navDestRecycleCallback_) {
+        navDestRecycleCallback_->Cancel();
+        navDestRecycleCallback_.reset();
+    }
+}
+
+void ImagePattern::ExecuteNavDestRecycle()
+{
+    navDestRecycleCallback_.reset();
+    RecycleImageDataForNav();
 }
 
 void ImagePattern::EnableDrag()
