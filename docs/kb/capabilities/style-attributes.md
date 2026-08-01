@@ -1,12 +1,12 @@
 # 样式属性 Context
 
-> 文档版本：v3.0
-> 更新时间：2026-07-29
+> 文档版本：v3.1
+> 更新时间：2026-07-31
 > 来源：`docs/context_registry.json` 主题 `style-attributes`
 
 ## 定位
 
-样式属性是所有 ArkUI 组件共享的交互状态样式与动态属性修改能力，归属 Func-04-03-07。它连接应用侧 Common API、前端参数解析和 ViewAbstract 属性写入；stateStyles 通过 ViewStackProcessor 双阶段 VisualState 机制实现（先设置状态上下文，属性 setter 通过 IsCurrentVisualStateProcess 判断生效范围），其状态消费进入 StateStyleManager（UIState 位掩码、三级优先级链 inner→frontend→user）和 FocusHub（焦点状态桥接）；attributeModifier 通过 AttributeModifier<T> 接口按状态回调修改属性，与 stateStyles 在 ArkTS 层互斥。按 Spec 拆分为状态效果（Feat-01）和动态属性修改器（Feat-02）两个 Feat 域。
+样式属性是所有 ArkUI 组件共享的多态样式与动态属性设置能力，归属 Func-04-03-07。它连接 Common API、前端参数解析、ViewAbstract 属性写入和 StateStyleManager 状态消费。按 Spec 拆分为多态样式（Feat-01）和动态属性设置（Feat-02）两个 Feat 域；hoverEffect 与 clickEffect 由 `04-03-04` 交互属性承接。
 
 本页仅提供路由入口，属性语义、API 版本、边界条件和兼容性应以当前 SDK、源码、测试及 Spec 为准。
 
@@ -68,7 +68,7 @@
 
 | Feat | 主题 | 文件 |
 |------|------|------|
-| Feat-01 | 状态效果 | `Feat-01-state-effect-spec.md` |
+| Feat-01 | 多态样式 | `Feat-01-state-effect-spec.md` |
 | Feat-02 | 动态属性设置 | `Feat-02-attribute-modifier-spec.md` |
 
 ## 常见问题定位

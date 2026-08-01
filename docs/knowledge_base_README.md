@@ -2,7 +2,7 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-07-30
+> 更新时间：2026-07-31
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
@@ -38,33 +38,32 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：235
-- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：20
+- `docs/` 下 Markdown 文档总数：252
+- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：19
 - `docs/syntax/` 下语法专题文档：3
   - 知识库命名文档：0 个（ForEach/LazyForEach/Repeat/RepeatVirtualScroll 已迁移到 `docs/kb/syntax/`）
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计
 
-- `context_registry.json` 新版条目数：198
+- `context_registry.json` 新版条目数：215
 - `knowledge_base_INDEX.json` 旧 KB 索引条目总数：22
-- 旧 KB 索引路径有效性：以 `python3 docs/validate_context.py` 输出为准
+- 旧 KB 索引路径有效性：20/22（2 个上游遗留路径待修复）
 
 - 类型分布：
-  - `component`: 16
+  - `component`: 6
   - `sdk`: 4
-  - `feature`: 13
+  - `feature`: 12
 - 分类分布：
   - `advanced`: 2
-  - `basic`: 2
-  - `container`: 1
-  - `data_display`: 8
+  - `basic`: 1
+  - `container`: 2
   - `rich_text`: 2
   - `sdk`: 6
-  - `selector`: 3
-  - `system`: 9
-- 关键词总数（索引内）：316
-- 别名总数（索引内）：109
+  - `selector`: 1
+  - `system`: 8
+- 关键词总数（索引内）：240
+- 别名总数（索引内）：75
 
 ### 2.3 覆盖现状
 
@@ -79,8 +78,8 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-├── kb/ (199 MD，198 个新版 KB 主题 + README)
-├── accessibility/ (1 KB)
+├── kb/ (216 MD，215 个新版 KB 主题 + README)
+├── accessibility/ (0 KB)
 ├── api/ (2 KB)
 ├── architecture/ (2 KB + 3 非 `*_Knowledge_Base*` 命名架构文档)
 ├── cj_frontend/ (1 KB)
@@ -88,7 +87,7 @@ docs/
 ├── entrance/ (1 MD)
 ├── focus/ (2 MD)
 ├── layout/ (0 KB)
-├── pattern/ (19 KB + 6 非 `*_Knowledge_Base*` 命名文档)
+├── pattern/ (7 KB + 6 非 `*_Knowledge_Base*` 命名文档)
 ├── sdk/ (3 KB)
 ├── svg/ (0 KB，SVG 已迁移)
 └── syntax/ (3 MD，旧语法 KB 已迁移到 `docs/kb/syntax/`)
@@ -198,3 +197,6 @@ PY
 - 2026-07-30：基于已补录的长期规格与源码新增 2 个输入交互框架内部能力 KB。新建 `docs/kb/capabilities/text-shortcuts.md`（文本快捷键，common_capability/system，TextInputClient 加速表）与 `docs/kb/capabilities/keyboard-control.md`（键盘控制，common_capability/system，**重定范围为输入框↔键盘交互**：IME 弹出收起/避让/输入处理契约/公共 API，非焦点导航）。两域均补齐 Spec 路由。顺带修复若干遗留 registry/index 失效（Swiper jsview→controller_binding、PreviewPlatformAdaptation host_preview test_path 拼写、移除 List/Hyperlink 旧 INDEX 失效条目）。
 
 - 2026-07-30：04-14-04 特性整体更名 zh「键盘控制」→「输入法交互」、目录 `04-keyboard-control/`→`04-input-method-interaction/`。同步更新 functions.yaml/functions.yaml 路径与标题、5 个 Feat spec 路径、design.md 与 Feat 内部引用、KB 文件 `keyboard-control.md`→`input-method-interaction.md`、context_registry 条目（id/name/name_cn/spec_domain/kb）及 text-shortcuts 交叉链接。
+
+- 2026-07-30：新增触摸事件、按键事件、事件分发和拦截、组件组合键、鼠标事件、手势能力、事件基础框架 7 个新版 KB 主题；新版 registry 增至 213 条，旧索引保持 22 条。
+- 2026-07-31：新增 Gesture Modifier 通用能力 KB，关联 Func-04-05-07；新版 registry 增至 214 条，旧索引保持 22 条。
