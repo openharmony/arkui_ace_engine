@@ -1226,7 +1226,12 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
                 pattern->OnTouchDown(info);
                 break;
             case TouchType::UP:
-                scrollable->HandleTouchUp();
+                if (!pattern->ShouldIgnoreTouchUpWithActiveFingers() ||
+                    std::none_of(info.GetTouches().begin(), info.GetTouches().end(), [](const auto& touch) {
+                        return touch.GetTouchType() != TouchType::UP && touch.GetTouchType() != TouchType::CANCEL;
+                    })) {
+                    scrollable->HandleTouchUp();
+                }
                 break;
             case TouchType::CANCEL:
                 scrollable->HandleTouchCancel();

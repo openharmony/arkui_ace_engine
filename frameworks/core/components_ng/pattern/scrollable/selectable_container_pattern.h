@@ -95,6 +95,10 @@ public:
 
     ACE_FORCE_EXPORT void SetEnableEditMode(bool enable);
     ACE_FORCE_EXPORT bool GetEnableEditMode() const;
+    bool ShouldIgnoreTouchUpWithActiveFingers() const override
+    {
+        return GetEnableEditMode();
+    }
     void SetEnableEditModeChangeEvent(std::function<void(bool)>&& event)
     {
         enableEditModeChangeEvent_ = std::move(event);
