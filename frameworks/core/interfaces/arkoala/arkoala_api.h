@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <string>
 #include <utility>
+#include <memory>
 #include "core/common/resource/resource_object.h"
 #include "ui/base/lifecycle_observable.h"
 
