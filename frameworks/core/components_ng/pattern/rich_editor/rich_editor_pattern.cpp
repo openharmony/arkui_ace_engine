@@ -797,6 +797,7 @@ void RichEditorPattern::BeforeCreateLayoutWrapper()
     if (needInitSpanItem) {
         TextPattern::PreCreateLayoutWrapper();
         hasUrlSpan_ = std::any_of(spans_.begin(), spans_.end(), URL_SPAN_FILTER);
+        ClearTextForDisplayIfEmpty();
     } else if (contentMod_) {
         contentMod_->ContentChange();
     }
