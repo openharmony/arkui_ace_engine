@@ -6964,8 +6964,21 @@
       "name_cn": "拖拽框架",
       "kind": "architecture",
       "category": "system",
-      "keywords": ["DragFramework", "拖拽框架", "DragDropManager", "DragDropProxy", "InteractionInterface", "预拖拽", "SpringLoading", "GetDragCallback"],
-      "aliases": ["拖拽系统框架", "Drag Drop Framework", "拖拽引擎"],
+      "keywords": [
+        "DragFramework",
+        "拖拽框架",
+        "DragDropManager",
+        "DragDropProxy",
+        "InteractionInterface",
+        "预拖拽",
+        "SpringLoading",
+        "GetDragCallback"
+      ],
+      "aliases": [
+        "拖拽系统框架",
+        "Drag Drop Framework",
+        "拖拽引擎"
+      ],
       "kb": "docs/kb/architecture/drag-framework.md",
       "spec_domain": "specs/03-engine-framework/04-event-framework/02-drag-framework",
       "func_id": "03-04-02",
@@ -6977,7 +6990,10 @@
         "initiating": "frameworks/core/components_ng/manager/drag_drop/drag_drop_initiating/",
         "interaction": "frameworks/core/common/interaction/interaction_interface.h"
       },
-      "test_paths": ["test/unittest/core/manager/drag_drop/", "test/unittest/core/event/drag_event/"],
+      "test_paths": [
+        "test/unittest/core/manager/drag_drop/",
+        "test/unittest/core/event/drag_event/"
+      ],
       "status": "active",
       "last_verified": "2026-07-31"
     },
@@ -6987,8 +7003,24 @@
       "name_cn": "通用拖拽能力",
       "kind": "common_capability",
       "category": "system",
-      "keywords": ["DragCapability", "通用拖拽能力", "draggable", "allowDrop", "dragPreview", "onPreDrag", "onDragSpringLoading", "DragController", "DragAction", "DragEvent"],
-      "aliases": ["拖拽 API", "Drag API", "拖放能力", "DragController API"],
+      "keywords": [
+        "DragCapability",
+        "通用拖拽能力",
+        "draggable",
+        "allowDrop",
+        "dragPreview",
+        "onPreDrag",
+        "onDragSpringLoading",
+        "DragController",
+        "DragAction",
+        "DragEvent"
+      ],
+      "aliases": [
+        "拖拽 API",
+        "Drag API",
+        "拖放能力",
+        "DragController API"
+      ],
       "kb": "docs/kb/capabilities/drag-capability.md",
       "spec_domain": "specs/04-common-capability/04-common-events/07-drag-capability",
       "func_id": "04-04-07",
@@ -7004,7 +7036,11 @@
         "static_common": "<OH_ROOT>/interface_sdk-js/api/arkui/component/common.static.d.ets",
         "c_header": "<OH_ROOT>/interface_sdk_c/arkui/ace_engine/native/drag_and_drop.h"
       },
-      "test_paths": ["test/unittest/core/event/drag_event/", "test/unittest/core/manager/drag_drop/", "test/unittest/capi/"],
+      "test_paths": [
+        "test/unittest/core/event/drag_event/",
+        "test/unittest/core/manager/drag_drop/",
+        "test/unittest/capi/"
+      ],
       "status": "active",
       "last_verified": "2026-07-31"
     },
@@ -7014,8 +7050,26 @@
       "name_cn": "交互属性",
       "kind": "common_capability",
       "category": "interaction",
-      "keywords": ["InteractionAttributes", "交互属性", "cursorControl", "onHover", "hoverEffect", "responseRegion", "responseRegionList", "touchable", "monopolizeEvents", "enabled", "clickEffect", "AccessibilityHover"],
-      "aliases": ["通用交互属性", "CommonMethod 交互", "输入事件属性", "Interaction API"],
+      "keywords": [
+        "InteractionAttributes",
+        "交互属性",
+        "cursorControl",
+        "onHover",
+        "hoverEffect",
+        "responseRegion",
+        "responseRegionList",
+        "touchable",
+        "monopolizeEvents",
+        "enabled",
+        "clickEffect",
+        "AccessibilityHover"
+      ],
+      "aliases": [
+        "通用交互属性",
+        "CommonMethod 交互",
+        "输入事件属性",
+        "Interaction API"
+      ],
       "kb": "docs/kb/capabilities/interaction-attributes.md",
       "spec_domain": "specs/04-common-capability/03-common-attributes/04-interaction-attributes",
       "func_id": "04-03-04",
@@ -7032,7 +7086,11 @@
         "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
         "capi": "interfaces/native/native_node.h"
       },
-      "test_paths": ["test/unittest/core/base/", "test/unittest/core/event/focus_core/", "test/unittest/capi/"],
+      "test_paths": [
+        "test/unittest/core/base/",
+        "test/unittest/core/event/focus_core/",
+        "test/unittest/capi/"
+      ],
       "status": "active",
       "last_verified": "2026-07-31"
     },
@@ -7042,8 +7100,24 @@
       "name_cn": "组件截图",
       "kind": "common_capability",
       "category": "render",
-      "keywords": ["ComponentScreenshot", "组件截图", "ComponentSnapshot", "componentSnapshot", "createFromBuilder", "createFromComponent", "getComponentSnapshot", "SnapshotOptions", "OH_ArkUI_GetNodeSnapshot", "PixelMap"],
-      "aliases": ["离屏截图", "Offscreen Screenshot", "节点截图", "ComponentSnapshot API"],
+      "keywords": [
+        "ComponentScreenshot",
+        "组件截图",
+        "ComponentSnapshot",
+        "componentSnapshot",
+        "createFromBuilder",
+        "createFromComponent",
+        "getComponentSnapshot",
+        "SnapshotOptions",
+        "OH_ArkUI_GetNodeSnapshot",
+        "PixelMap"
+      ],
+      "aliases": [
+        "离屏截图",
+        "Offscreen Screenshot",
+        "节点截图",
+        "ComponentSnapshot API"
+      ],
       "kb": "docs/kb/capabilities/component-screenshot.md",
       "spec_domain": "specs/04-common-capability/10-component-screenshot/01-offscreen-screenshot",
       "func_id": "04-10-01",
@@ -7062,7 +7136,11 @@
         "capi_node": "interfaces/native/native_node.h",
         "capi_types": "interfaces/native/native_type.h"
       },
-      "test_paths": ["test/unittest/interfaces/node_component_snapshot_test.cpp", "test/unittest/capi/accessors/component_snapshot_accessor_test.cpp", "test/unittest/core/rosen/"],
+      "test_paths": [
+        "test/unittest/interfaces/node_component_snapshot_test.cpp",
+        "test/unittest/capi/accessors/component_snapshot_accessor_test.cpp",
+        "test/unittest/core/rosen/"
+      ],
       "status": "active",
       "last_verified": "2026-07-30"
     },
@@ -10570,7 +10648,7 @@
       "kb": "docs/kb/architecture/accessibility.md",
       "spec_domain": "specs/03-engine-framework/07-accessibility-mechanism/01-accessibility-capability",
       "func_id": "03-07-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "provider": "frameworks/core/accessibility/accessibility_provider.h",
         "session_adapter": "frameworks/core/accessibility/accessibility_session_adapter.h",
@@ -10609,7 +10687,7 @@
         "test/mock/frameworks/core/accessibility/"
       ],
       "status": "active",
-      "last_verified": "2026-07-23"
+      "last_verified": "2026-07-31"
     },
     {
       "id": "PluginComponent",
@@ -10952,7 +11030,7 @@
       "kb": "docs/kb/components/platform/x_component.md",
       "spec_domain": "specs/05-ui-components/13-platform-components/01-xcomponent",
       "func_id": "05-13-01",
-      "spec_status": "pending",
+      "spec_status": "active",
       "source_paths": {
         "pattern": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp",
         "pattern_v2": "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.cpp",
@@ -10992,7 +11070,7 @@
         "test/unittest/core/pattern/xcomponent/"
       ],
       "status": "active",
-      "last_verified": "2026-07-22"
+      "last_verified": "2026-07-31"
     },
     {
       "id": "Inspector",
@@ -11025,7 +11103,7 @@
       "kb": "docs/kb/capabilities/inspector.md",
       "spec_domain": "specs/03-engine-framework/07-accessibility-mechanism/02-inspector",
       "func_id": "03-07-02",
-      "spec_status": "active",
+      "spec_status": "pending",
       "source_paths": {
         "inspector_ng": "frameworks/core/components_ng/base/inspector.h",
         "inspector_ng_cpp": "frameworks/core/components_ng/base/inspector.cpp",
@@ -11045,7 +11123,7 @@
         "test/mock/frameworks/core/common/mock_layout_inspector.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-28"
+      "last_verified": "2026-07-31"
     },
     {
       "id": "InspectorLayoutCallback",
@@ -11076,7 +11154,7 @@
       "kb": "docs/kb/capabilities/inspector-layout-callback.md",
       "spec_domain": "specs/04-common-capability/11-component-info/03-inspector-layout-callback",
       "func_id": "04-11-03",
-      "spec_status": "active",
+      "spec_status": "pending",
       "source_paths": {
         "napi_inspector": "interfaces/napi/kits/inspector/js_inspector.cpp",
         "napi_inspector_h": "interfaces/napi/kits/inspector/js_inspector.h",
@@ -11092,7 +11170,7 @@
         "test/unittest/core/base/inspector_test_ng.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-28"
+      "last_verified": "2026-07-31"
     },
     {
       "id": "WindowToolbar",
@@ -11125,7 +11203,7 @@
       "kb": "docs/kb/capabilities/window-toolbar.md",
       "spec_domain": "specs/04-common-capability/08-root-view/01-window-toolbar",
       "func_id": "04-08-01",
-      "spec_status": "active",
+      "spec_status": "pending",
       "source_paths": {
         "toolbar_cpp": "frameworks/core/components_ng/pattern/container_modal/container_modal_toolbar.cpp",
         "toolbar_h": "frameworks/core/components_ng/pattern/container_modal/container_modal_toolbar.h",
@@ -11146,7 +11224,7 @@
         "test/unittest/core/pattern/container_modal/container_modal_static_pattern_test.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-07-31"
     },
     {
       "id": "AtomicServiceAppBar",
@@ -11181,7 +11259,7 @@
       "kb": "docs/kb/capabilities/atomic-service-appbar.md",
       "spec_domain": "specs/04-common-capability/08-root-view/02-atomic-service-appbar",
       "func_id": "04-08-02",
-      "spec_status": "active",
+      "spec_status": "pending",
       "source_paths": {
         "app_bar_view_cpp": "frameworks/core/components_ng/pattern/app_bar/app_bar_view.cpp",
         "app_bar_view_h": "frameworks/core/components_ng/pattern/app_bar/app_bar_view.h",
@@ -11204,7 +11282,159 @@
         "test/unittest/capi/accessors/ui_context_atomic_service_bar_accessor_test.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "AccessibilityAttributes",
+      "name": "Accessibility Attributes",
+      "name_cn": "通用无障碍属性",
+      "kind": "common_capability",
+      "category": "common_attributes",
+      "keywords": [
+        "accessibilityText",
+        "accessibilityLevel",
+        "accessibilityDescription",
+        "accessibilityChecked",
+        "accessibilityGroup",
+        "accessibilityValue",
+        "AccessibilityProperty",
+        "accessibility_property",
+        "无障碍属性",
+        "SetAccessibilityText",
+        "ViewAbstract",
+        "AccessibilityRoleType"
+      ],
+      "aliases": [
+        "通用无障碍属性",
+        "accessibility 通用属性",
+        "AccessibilityProperty 基类",
+        "a11y attributes"
+      ],
+      "kb": "docs/kb/capabilities/accessibility-attributes.md",
+      "spec_domain": "specs/04-common-capability/03-common-attributes/09-accessibility-attributes",
+      "func_id": "04-03-09",
+      "spec_status": "active",
+      "source_paths": {
+        "property_base": "frameworks/core/components_ng/property/accessibility_property.h",
+        "property_utils": "frameworks/core/accessibility/utils/accessibility_property_utils.h",
+        "view_abstract_model": "frameworks/core/components_ng/base/view_abstract_model_ng.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_accessibility.cpp",
+        "dynamic_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
+        "c_api": "interfaces/native/native_node.h"
+      },
+      "test_paths": [
+        "test/unittest/core/property/accessibility_property_test_ng.cpp",
+        "test/unittest/core/property/accessibility_property_testtwo_ng.cpp",
+        "test/unittest/core/accessibility/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "UIExtension",
+      "name": "UIExtension Mechanism",
+      "name_cn": "UIExtension机制",
+      "kind": "common_capability",
+      "category": "embedded_display",
+      "keywords": [
+        "UIExtension",
+        "UIExtensionManager",
+        "SessionWrapper",
+        "SessionWrapperFactory",
+        "UIExtensionSurfacePattern",
+        "PlatformPattern",
+        "PlatformEventProxy",
+        "SurfaceProxyNode",
+        "UIExtensionContainerHandler",
+        "UIExtensionHub",
+        "嵌入显示",
+        "跨进程组件"
+      ],
+      "aliases": [
+        "UIExtension 机制",
+        "嵌入显示机制",
+        "UIExtension infrastructure",
+        "跨进程嵌入框架"
+      ],
+      "kb": "docs/kb/capabilities/ui-extension.md",
+      "spec_domain": "specs/04-common-capability/17-embedded-display/01-ui-extension",
+      "func_id": "04-17-01",
+      "spec_status": "active",
+      "source_paths": {
+        "manager": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h",
+        "model": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_model.h",
+        "model_ng": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_model_ng.cpp",
+        "surface_pattern": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_surface_pattern.h",
+        "hub": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_hub.h",
+        "session_wrapper": "frameworks/core/components_ng/pattern/ui_extension/session_wrapper.h",
+        "session_wrapper_factory": "frameworks/core/components_ng/pattern/ui_extension/session_wrapper_factory.cpp",
+        "platform_pattern": "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h",
+        "platform_event_proxy": "frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.cpp",
+        "surface_proxy_node": "frameworks/core/components_ng/pattern/ui_extension/surface_proxy_node.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_ui_extension.cpp"
+      },
+      "api_paths": {
+        "dynamic_uiext": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/ui_extension_component.d.ts",
+        "dynamic_isolated": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/isolated_component.d.ts"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/ui_extension/ui_extension_component/",
+        "test/unittest/core/pattern/ui_extension/accessibility_session_adapter_ui_extension_test_ng.cpp",
+        "test/unittest/core/pattern/ui_extension/platform_pattern_test_ng.cpp",
+        "test/unittest/core/pattern/ui_extension/platform_event_proxy_test.cpp",
+        "test/unittest/core/pattern/ui_extension/surface_proxy_node_test_ng.cpp",
+        "test/unittest/core/pattern/ui_extension/session_wrapper_impl_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
+      "id": "IsolatedComponentMechanism",
+      "name": "IsolateComponent Mechanism",
+      "name_cn": "IsolateComponent机制",
+      "kind": "common_capability",
+      "category": "embedded_display",
+      "keywords": [
+        "IsolatedComponent",
+        "IsolatedPattern",
+        "isolate",
+        "隔离式组件",
+        "InitializeIsolatedComponent",
+        "AccessibilitySessionAdapterIsolatedComponent",
+        "PlatformAccessibilityChildTreeCallback",
+        "FireOnErrorCallbackOnUI"
+      ],
+      "aliases": [
+        "IsolateComponent 机制",
+        "隔离式组件机制",
+        "Isolated 框架层",
+        "隔离组件运行框架"
+      ],
+      "kb": "docs/kb/capabilities/isolate-component.md",
+      "spec_domain": "specs/04-common-capability/17-embedded-display/02-isolate-component",
+      "func_id": "04-17-02",
+      "spec_status": "active",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h",
+        "pattern_cpp": "frameworks/core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.cpp",
+        "accessibility_adapter": "frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_isolated_component.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/isolated_component.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/isolated_component.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/ui_extension/isolated_pattern_test_ng.cpp",
+        "test/unittest/core/pattern/ui_extension/accessibility_session_adapter_isolated_component_test_ng.cpp",
+        "test/unittest/core/pattern/ui_extension/isolated_component/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
     },
     {
       "id": "ScrollerNaNOffsetValidation",
@@ -11684,6 +11914,54 @@
       ],
       "status": "active",
       "last_verified": "2026-07-30"
+    },
+    {
+      "id": "DynamicComponentMechanism",
+      "name": "DynamicComponent Mechanism",
+      "name_cn": "DynamicComponent机制",
+      "kind": "common_capability",
+      "category": "embedded_display",
+      "keywords": [
+        "DynamicComponent",
+        "DynamicPattern",
+        "ArkTSDynamicPattern",
+        "DynamicComponentManager",
+        "DynamicModel",
+        "DynamicNode",
+        "DynamicTouchDelegate",
+        "dynamic_component",
+        "动态组件机制",
+        "InitializeDynamicComponent"
+      ],
+      "aliases": [
+        "DynamicComponent 机制",
+        "动态组件机制",
+        "DynamicComponent infrastructure"
+      ],
+      "kb": "docs/kb/capabilities/dynamic-component.md",
+      "spec_domain": "specs/04-common-capability/17-embedded-display/05-dynamic-component",
+      "func_id": "04-17-05",
+      "spec_status": "pending",
+      "source_paths": {
+        "pattern": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h",
+        "arkts_pattern": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/arkts_dynamic_pattern.h",
+        "manager": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.cpp",
+        "model": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model.cpp",
+        "model_static": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model_static.cpp",
+        "node": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_node.cpp",
+        "touch_delegate": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_touch_delegate.cpp",
+        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_dynamic_component.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/dynamic_component.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/dynamic_component.static.d.ets"
+      },
+      "test_paths": [
+        "test/unittest/core/pattern/ui_extension/dynamic_component/dynamic_component_manager_test_ng.cpp",
+        "test/unittest/core/pattern/ui_extension/dynamic_component/dynamic_component_manager_tdd_test.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-02"
     }
   ]
 }

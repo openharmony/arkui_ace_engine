@@ -67,6 +67,15 @@ XComponent **尚未完成组件化改造**：无 `pattern/xcomponent/bridge/` �
 
 组件化改造参考：`./组件化重构通用方案.md`。改造后上述 JSView 和 Modifier 路径将统一到 `pattern/xcomponent/bridge/arkts_native_xcomponent_bridge.cpp`，并输出独立 so。
 
+### 外部依赖入口
+
+| 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
+|----------|----------|------------|----------------------------|------|
+| 图形渲染（Surface/纹理） | `frameworks/core/components_ng/pattern/xcomponent/xcomponent_controller_ng.*`、`xcomponent_ext_surface_callback_client.*` | `<OH_ROOT>/foundation/graphic/graphic_2d` | `render_service_client/`（`Rosen::RSNode`/`RSSurfaceNode`）、`rosen/modules/render_service_client/core/` | XComponent 独立 Surface 和纹理渲染绑定 |
+| 基础工具库 | BUILD `external_deps = ["c_utils:utils"]` | `<OH_ROOT>/foundation/systemabilitymgr/samgr` | `c_utils` 工具库 | XComponent 通用工具 |
+| 平台日志 | BUILD `external_deps = ["hilog:libhilog"]` | `<OH_ROOT>/base/hiviewdfx/hilog` | `hilog:libhilog` | OHOS 平台侧日志输出 |
+| NDK C API | `interfaces/native/native_xcomponent_key_event.h` | `<OH_ROOT>/interface/sdk-c/native_xcomponent` | `OH_NativeXComponent` C API 头文件 | NDK 侧事件、生命周期、Surface 控制接口 |
+
 ### 测试入口
 
 | 类型 | 稳定路径 | 用途 |
@@ -77,11 +86,11 @@ XComponent **尚未完成组件化改造**：无 `pattern/xcomponent/bridge/` �
 
 ### 相关 Spec
 
-XComponent 功能域：`specs/05-ui-components/13-platform-components/01-xcomponent/`（功能 ID `05-13-01`，当前 spec_status `pending`：已在 registry 注册，但目录与 Feat 规格尚未创建）。
+XComponent 功能域：`specs/05-ui-components/13-platform-components/01-xcomponent/`（功能 ID `05-13-01`）。
 
 NDK 侧独立功能域：`specs/08-ndk/02-xcomponent-c-api/01-native-xcomponent/`（功能 ID `08-02-01`，spec_status `pending`）。
 
-功能域尚未落地任何 `design.md` 或 `Feat-NN-*-spec.md`。行为结论在 Spec 补齐前应以源码、SDK 声明和测试为事实源。
+功能域包含 `design.md` 与多个 Feat 规格。行为结论以 Spec、源码、SDK 声明和测试为事实源。
 
 ## 常见问题定位
 

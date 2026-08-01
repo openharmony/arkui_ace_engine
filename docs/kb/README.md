@@ -1,7 +1,7 @@
 # ArkUI KB
 
 > 更新时间：2026-07-31
-> 主题数：215
+> 主题数：219
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -222,6 +222,10 @@ docs/kb/
 | InspectorLayoutCallback | 布局回调(inspector) | `docs/kb/capabilities/inspector-layout-callback.md` | 新建（Spec 待补） |
 | WindowToolbar | 窗口工具栏 | `docs/kb/capabilities/window-toolbar.md` | 新建（Spec 待补） |
 | AtomicServiceAppBar | 元服务 AppBar | `docs/kb/capabilities/atomic-service-appbar.md` | 新建（Spec 待补） |
+| AccessibilityAttributes | 通用无障碍属性 | `docs/kb/capabilities/accessibility-attributes.md` | 新建（Spec 待补） |
+| UIExtension | UIExtension机制 | `docs/kb/capabilities/ui-extension.md` | 新建（Spec 待补） |
+| IsolatedComponentMechanism | IsolateComponent机制 | `docs/kb/capabilities/isolate-component.md` | 新建（Spec 待补） |
+| DynamicComponentMechanism | DynamicComponent机制 | `docs/kb/capabilities/dynamic-component.md` | 新建（Spec active） |
 
 | TouchEvents | 触摸事件 | `docs/kb/capabilities/touch-events.md` | 新建 |
 | KeyEvents | 按键事件 | `docs/kb/capabilities/key-events.md` | 新建 |
@@ -237,6 +241,7 @@ docs/kb/
 | ID | 主题 | 新版 KB | 状态 |
 |----|------|---------|------|
 | NestedScrollOffsetNoResponse | 嵌套滚动偏移量不响应 | `docs/kb/issues/interaction/nested-scroll-offset-no-response.md` | 新建 |
+| ScrollerNaNOffsetValidation | Scroller 非法数值偏移校验 | `docs/kb/issues/compatibility/scroller-nan-offset-validation.md` | 新建 |
 | CustomSpanControllerLifecycle | CustomSpan 控制器生命周期 | `docs/kb/issues/text/custom-span-controller-lifecycle.md` | 新建 |
 
 ## 检索

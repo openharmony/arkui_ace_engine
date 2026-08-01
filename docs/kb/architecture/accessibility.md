@@ -69,6 +69,14 @@ Accessibility 是 ACE Engine 中的**无障碍桥接层**，负责把 ArkUI 组�
 
 无障碍属性从前端到 `AccessibilityProperty` 的解析属于“通用无障碍属性”主题（`04-03-09`），本页不重复。多数 NG 组件在各自 pattern 目录下提供 `*_accessibility_property.h` 特化实现。
 
+### 外部依赖入口
+
+| 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
+|----------|----------|------------|----------------------------|------|
+| 系统无障碍服务 | `adapter/ohos/osal/accessibility/focus_move/accessibility_focus_strategy.h`、`adapter/ohos/osal/accessibility/accessibility_hidumper_osal.cpp`、`adapter/ohos/osal/js_third_provider_interaction_operation.cpp` | `<OH_ROOT>/foundation/barrierfree/accessibility` | `services/accessibility/src/accessibility_system_ability_client.h` | `AccessibilitySystemAbilityClient` 焦点移动、HiDumper、第三方 Provider 交互等；运行时通过 `ServiceProxy` 跨进程调用 |
+| 窗口管理 | `adapter/ohos/entrance/ace_container.h`、跨进程 `AccessibilitySessionAdapter` 子类 | `<OH_ROOT>/foundation/window/window_manager` | `interfaces/innerkits/wm/` | 窗口句柄和 Session 通道，用于跨进程组件无障碍适配 |
+| SDK 通用无障碍属性 | 应用侧 `accessibilityText` 等通用属性 | `<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts` | 应用侧属性声明入口 | 属 `04-03-09` 主题（通用无障碍属性） |
+
 ### 测试入口
 
 | 类型 | 稳定路径 | 用途 |
@@ -83,8 +91,6 @@ Accessibility 是 ACE Engine 中的**无障碍桥接层**，负责把 ArkUI 组�
 ### 相关 Spec
 
 无障碍能力功能域：`specs/03-engine-framework/07-accessibility-mechanism/01-accessibility-capability/`（功能 ID `03-07-01`）。
-
-> 该功能域已在 `specs/registry/functions.yaml` 注册，但 Spec 目录尚未创建。Spec 就绪前以源码、NDK 头文件和测试为事实源；相关验收契约补齐后再引用行为结论。
 
 相关但独立的主题：
 

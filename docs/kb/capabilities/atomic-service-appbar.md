@@ -53,8 +53,8 @@
 
 | 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
 |----------|----------|------------|----------------------------|------|
-| 元服务包信息查询 | `adapter/ohos/osal/app_bar_helper_impl.cpp`（`AppBarHelper::QueryAppGalleryBundleName`） | `bundlemanager/bundle_framework` | `interfaces/inner_api/appexecfwk_core/bundlemgr/bundle_mgr_interface.h` | 经 `SystemAbilityManager` 取 `BUNDLE_MGR_SERVICE_SYS_ABILITY_ID`，`iface_cast<IBundleMgr>` 后调用 `QueryAppGalleryBundleName` 查询 AppGallery 包名（IPC） |
-| 系统服务寻址 | `adapter/ohos/osal/app_bar_helper_impl.cpp` | `systemabilitymgr/samgr`（推测） | `iservice_registry.h`、`system_ability_definition.h` | `SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager()` 获取系统能力管理器 |
+| 元服务包信息查询 | `adapter/ohos/osal/app_bar_helper_impl.cpp`（`AppBarHelper::QueryAppGalleryBundleName`） | `<OH_ROOT>/foundation/arkui/appexecfwk_standard` | `interfaces/inner_api/appexecfwk_core/bundlemgr/bundle_mgr_interface.h` | 经 `SystemAbilityManager` 取 `BUNDLE_MGR_SERVICE_SYS_ABILITY_ID`，`iface_cast<IBundleMgr>` 后调用 `QueryAppGalleryBundleName` 查询 AppGallery 包名（IPC） |
+| 系统服务寻址 | `adapter/ohos/osal/app_bar_helper_impl.cpp` | `<OH_ROOT>/foundation/systemabilitymgr/samgr` | `iservice_registry.h`、`system_ability_definition.h` | `SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager()` 获取系统能力管理器 |
 
 > 外部仓路径以 OpenHarmony 实际仓名为准；ace_engine 仓内仅持有调用点，头文件通过 `bundle_mgr_interface.h` 等 include 引入。
 
@@ -70,7 +70,7 @@
 
 ### 相关 Spec
 
-元服务 AppBar 功能域：`specs/04-common-capability/08-root-view/02-atomic-service-appbar/`（功能 ID `04-08-02`，design.md + Feat-01/02 已在 arkui-specs 配套 PR Baselined）。
+元服务 AppBar 功能域：`specs/04-common-capability/08-root-view/02-atomic-service-appbar/`（功能 ID `04-08-02`，当前 spec_status `pending`：已在 registry 注册，但目录与 Feat 规格尚未创建）。
 
 ## 常见问题定位
 
