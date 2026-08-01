@@ -1,7 +1,7 @@
 # Drag Framework Context
 
 > 文档版本：v1.0
-> 更新时间：2026-07-31
+> 更新时间：2026-08-01
 > 来源：`docs/context_registry.json` 主题 `DragFramework`
 
 ## 定位
@@ -35,9 +35,10 @@
 
 | 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件 / 目标路径 | 说明 |
 |---|---|---|---|---|
-| 系统拖拽服务 | `frameworks/core/common/interaction/interaction_interface.h`、`adapter/ohos/capability/interaction/` | MSDP DeviceStatus | Interaction 服务接口 | ArkUI 通过适配层启动/停止拖拽、控制拖拽窗口并接收结束回调。 |
-| 统一数据 | `frameworks/core/common/udmf/`、`frameworks/core/components_ng/manager/drag_drop/` | UDMF | UnifiedData 相关接口 | 数据摘要、加载和权限协作入口；具体数据会话不在本页定义。 |
-| 平台窗口/渲染 | `adapter/ohos/`、`frameworks/core/components_ng/render/` | Window / Graphic 子系统 | 平台适配与 RenderService 接口 | 用于拖拽预览窗口、Overlay 与同步渲染协作。 |
+| 系统拖拽服务 | `frameworks/core/common/interaction/interaction_interface.h`、`adapter/ohos/capability/interaction/interaction_impl.cpp`、`interfaces/napi/kits/drag_controller/BUILD.gn` | `base/msdp/device_status` | `interfaces/innerkits/interaction/include/interaction_manager.h`、`i_start_drag_listener.h`、`i_stop_drag_listener.h`、`drag_data.h`；GN 目标 `device_status:devicestatus_client` | ArkUI 通过适配层启动/停止拖拽、控制拖拽窗口并接收结束回调。 |
+| 统一数据 | `frameworks/core/common/udmf/`、`frameworks/core/components_ng/manager/drag_drop/`、`adapter/ohos/capability/udmf/udmf_impl.h`、`interfaces/napi/kits/drag_controller/BUILD.gn` | `foundation/distributeddatamgr/udmf` | `interfaces/innerkits/client/udmf_client.h`、`interfaces/innerkits/data/unified_data.h`、`interfaces/innerkits/common/unified_types.h`；GN 目标 `udmf:udmf_client`、`udmf:udmf_data_napi` | 数据摘要、加载和权限协作入口；具体数据会话不在本页定义。 |
+| 平台窗口 | `adapter/ohos/capability/BUILD.gn`、`frameworks/core/components_ng/manager/drag_drop/drag_drop_func_wrapper.cpp` | `foundation/window/window_manager` | `interfaces/innerkits/wm/window.h`、`interfaces/innerkits/wm/window_scene.h`、`window_scene/session_manager/include/scene_session_manager.h`；GN 目标 `window_manager:libwindow_extension_client`、`window_manager:scene_session` | 用于拖拽预览子窗口、窗口场景和跨窗口路由。 |
+| 图形渲染 | `frameworks/core/components_ng/manager/drag_drop/drag_drop_manager.cpp`、`interfaces/napi/kits/drag_controller/BUILD.gn` | `foundation/graphic/graphic_2d` | `rosen/modules/render_service_client/core/transaction/rs_sync_transaction_controller.h`、`rosen/modules/render_service_client/core/ui/rs_ui_context.h`、`rosen/modules/render_service_client/core/ui/rs_ui_director.h`；GN 目标 `graphic_2d:librender_service_base`、`graphic_2d:librender_service_client` | 用于拖拽预览、Overlay 与 RenderService 同步协作。 |
 
 ### 测试入口
 

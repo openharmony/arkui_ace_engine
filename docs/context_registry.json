@@ -6995,7 +6995,7 @@
         "test/unittest/core/event/drag_event/"
       ],
       "status": "active",
-      "last_verified": "2026-07-31"
+      "last_verified": "2026-08-01"
     },
     {
       "id": "DragCapability",
@@ -7142,7 +7142,7 @@
         "test/unittest/core/rosen/"
       ],
       "status": "active",
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-01"
     },
     {
       "id": "BasicRenderPipeline",

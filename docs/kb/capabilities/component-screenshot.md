@@ -1,7 +1,7 @@
 # Component Screenshot Context
 
 > 文档版本：v1.0
-> 更新时间：2026-07-30
+> 更新时间：2026-08-01
 > 来源：`docs/context_registry.json` 主题 `ComponentScreenshot`
 
 ## 定位
@@ -36,10 +36,10 @@
 
 ### 外部依赖入口
 
-| 依赖方向 | 本仓入口 | 外部系统 | 说明 |
-|----------|----------|----------|------|
-| 图形捕获 | `frameworks/core/components_ng/render/adapter/component_snapshot.cpp` | Rosen 渲染服务 | 核心截图服务通过 Rosen Surface Capture 获得 PixelMap。 |
-| 图像对象 | 截图 SDK 与 C API 返回 PixelMap | Image framework | PixelMap 的后续消费、释放和编解码由图像接口负责。 |
+| 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件 / 目标路径 | 说明 |
+|----------|----------|----------|----------|------|
+| 图形捕获 | `frameworks/core/components_ng/render/adapter/component_snapshot.cpp` | `foundation/graphic/graphic_2d` | `rosen/modules/render_service_client/core/transaction/rs_interfaces.h`、`rosen/modules/render_service_client/core/ui/rs_ui_context.h`；GN 目标 `graphic_2d:librender_service_base`、`graphic_2d:librender_service_client` | 核心截图服务通过 Rosen Surface Capture 获得 PixelMap。 |
+| 图像对象 | `interfaces/napi/kits/component_snapshot/js_component_snapshot.cpp`、`interfaces/native/node/node_component_snapshot.cpp` | `foundation/multimedia/image_framework` | `interfaces/innerkits/include/pixel_map.h`、`interfaces/kits/js/common/include/pixel_map_napi.h`、`frameworks/kits/js/common/ndk/include/pixelmap_native_impl.h`；GN 目标 `image_framework:image`、`image_framework:image_native` | PixelMap 的创建、封装、返回和后续消费由图像接口负责。 |
 
 ### 测试入口
 
