@@ -451,7 +451,7 @@ HWTEST_F(SliderExOneTestNg, PaintHorizontalBubbleSuitableAgingTest001, TestSize.
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
     /**
      * @tc.steps: step2. set sliderTipModifier attribute and call PaintHorizontalBubbleSuitableAging function.
      * @tc.cases: sliderGlobalOffset_ = SLIDER_GLOBAL_OFFSET, suitable aging level = 1.
@@ -504,7 +504,7 @@ HWTEST_F(SliderExOneTestNg, PaintHorizontalBubbleSuitableAgingTest002, TestSize.
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
     /**
      * @tc.steps: step2. set sliderTipModifier attribute and call PaintHorizontalBubbleSuitableAging function.
      * @tc.cases: sliderGlobalOffset_ = SLIDER_GLOBAL_OFFSET, suitable aging level = 2.
@@ -554,7 +554,7 @@ HWTEST_F(SliderExOneTestNg, SliderPaintMethodTest004, TestSize.Level1)
     SliderContentModifier::Parameters parameters;
     parameters.trackThickness = static_cast<float>(SLIDER_NONE_TRACK_THICKNRESS.ConvertToPx());
     auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr);
-    auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
+    auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(frameNode, nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
         sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters, TextDirection::AUTO);
@@ -605,7 +605,7 @@ HWTEST_F(SliderExOneTestNg, sliderTipModifierTestUpdateBubbleSize001, TestSize.L
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
 
     /**
      * @tc.steps: step2. set theme.
