@@ -35,75 +35,120 @@ public:
 };
 
 /**
- * @tc.name: BackgroundForceFlushVsync001
+ * @tc.name: SetBackgroundForceFlushVsync001
  * @tc.desc: Test SetBackgroundForceFlushVsync state management:
  *           default values, enable/count, clamp to 10, disable, re-enable, edge cases.
  * @tc.type: FUNC
  */
-HWTEST_F(BackgroundForceFlushVsyncTest, BackgroundForceFlushVsync001, TestSize.Level1)
+HWTEST_F(BackgroundForceFlushVsyncTest, SetBackgroundForceFlushVsync001, TestSize.Level1)
 {
-    // Default values
     EXPECT_FALSE(window_->backgroundForceFlushEnabled_.load());
     EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 0);
 
-    // Enable with count=5
     window_->SetBackgroundForceFlushVsync(true, 5);
     EXPECT_TRUE(window_->backgroundForceFlushEnabled_.load());
     EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 5);
 
-    // Clamp count=15 to max 10
     window_->SetBackgroundForceFlushVsync(true, 15);
     EXPECT_TRUE(window_->backgroundForceFlushEnabled_.load());
     EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 10);
 
-    // Disable: enabled=false, count=0
     window_->SetBackgroundForceFlushVsync(false, 3);
     EXPECT_FALSE(window_->backgroundForceFlushEnabled_.load());
     EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 0);
 
-    // Re-enable after disable with count=3
     window_->SetBackgroundForceFlushVsync(true, 3);
     EXPECT_TRUE(window_->backgroundForceFlushEnabled_.load());
     EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 3);
 
-    // Edge: enable=true with count=0
     window_->SetBackgroundForceFlushVsync(true, 0);
     EXPECT_TRUE(window_->backgroundForceFlushEnabled_.load());
     EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 0);
 
-    // Edge: count=1 is minimum non-zero valid
     window_->SetBackgroundForceFlushVsync(true, 1);
     EXPECT_TRUE(window_->backgroundForceFlushEnabled_.load());
     EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 1);
 }
 
 /**
- * @tc.name: BackgroundForceFlushVsync002
- * @tc.desc: Test OnShow/OnHide lifecycle interaction with background force flush state.
+ * @tc.name: OnShowOnHideLifecycle001
+ * @tc.desc: Test OnShow/OnHide lifecycle: OnHide preserves state, OnShow resets it,
+ *           including after partial consumption.
  * @tc.type: FUNC
  */
-HWTEST_F(BackgroundForceFlushVsyncTest, BackgroundForceFlushVsync002, TestSize.Level1)
+HWTEST_F(BackgroundForceFlushVsyncTest, OnShowOnHideLifecycle001, TestSize.Level1)
 {
-    // OnHide does not affect enabled state
     window_->SetBackgroundForceFlushVsync(true, 5);
     window_->Window::OnHide();
     EXPECT_TRUE(window_->backgroundForceFlushEnabled_.load());
     EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 5);
     EXPECT_TRUE(window_->IsHide());
 
-    // OnShow resets state to disabled
     window_->Window::OnShow();
     EXPECT_FALSE(window_->backgroundForceFlushEnabled_.load());
     EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 0);
 
-    // OnShow reset after multiple enable/disable cycles
     window_->SetBackgroundForceFlushVsync(true, 10);
     window_->SetBackgroundForceFlushVsync(false, 0);
     window_->SetBackgroundForceFlushVsync(true, 3);
-    EXPECT_TRUE(window_->backgroundForceFlushEnabled_.load());
+    window_->Window::OnShow();
+    EXPECT_FALSE(window_->backgroundForceFlushEnabled_.load());
+    EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 0);
+
+    window_->SetBackgroundForceFlushVsync(true, 5);
+    window_->ConsumeBackgroundForceFlushCount();
+    window_->ConsumeBackgroundForceFlushCount();
     EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 3);
+    EXPECT_TRUE(window_->backgroundForceFlushEnabled_.load());
 
     window_->Window::OnShow();
     EXPECT_FALSE(window_->backgroundForceFlushEnabled_.load());
     EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 0);
+    EXPECT_FALSE(window_->HasBackgroundForceFlushQuota());
+}
+
+/**
+ * @tc.name: QuotaAndConsume001
+ * @tc.desc: Test HasBackgroundForceFlushQuota and ConsumeBackgroundForceFlushCount:
+ *           quota requires enabled+count>0; consume decrements count-1 and disables
+ *           when count reaches 0; re-enable after full consumption restores quota.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BackgroundForceFlushVsyncTest, QuotaAndConsume001, TestSize.Level1)
+{
+    EXPECT_FALSE(window_->HasBackgroundForceFlushQuota());
+    EXPECT_FALSE(window_->ConsumeBackgroundForceFlushCount());
+
+    window_->SetBackgroundForceFlushVsync(true, 0);
+    EXPECT_FALSE(window_->HasBackgroundForceFlushQuota());
+
+    window_->SetBackgroundForceFlushVsync(false, 5);
+    EXPECT_FALSE(window_->HasBackgroundForceFlushQuota());
+    EXPECT_FALSE(window_->ConsumeBackgroundForceFlushCount());
+
+    window_->SetBackgroundForceFlushVsync(true, 3);
+    EXPECT_TRUE(window_->HasBackgroundForceFlushQuota());
+    EXPECT_TRUE(window_->ConsumeBackgroundForceFlushCount());
+    EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 2);
+    EXPECT_TRUE(window_->HasBackgroundForceFlushQuota());
+
+    EXPECT_TRUE(window_->ConsumeBackgroundForceFlushCount());
+    EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 1);
+    EXPECT_TRUE(window_->backgroundForceFlushEnabled_.load());
+
+    EXPECT_TRUE(window_->ConsumeBackgroundForceFlushCount());
+    EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 0);
+    EXPECT_FALSE(window_->backgroundForceFlushEnabled_.load());
+    EXPECT_FALSE(window_->HasBackgroundForceFlushQuota());
+    EXPECT_FALSE(window_->ConsumeBackgroundForceFlushCount());
+
+    window_->SetBackgroundForceFlushVsync(true, 1);
+    EXPECT_TRUE(window_->ConsumeBackgroundForceFlushCount());
+    EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 0);
+    EXPECT_FALSE(window_->backgroundForceFlushEnabled_.load());
+    EXPECT_FALSE(window_->HasBackgroundForceFlushQuota());
+
+    window_->SetBackgroundForceFlushVsync(true, 3);
+    EXPECT_TRUE(window_->HasBackgroundForceFlushQuota());
+    EXPECT_EQ(window_->backgroundForceFlushCount_.load(), 3);
 }
