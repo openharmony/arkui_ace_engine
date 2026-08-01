@@ -930,7 +930,7 @@ bool SetRichEditorPlaceholderDimension(const ArkUI_Float64* dimensionArray, ArkU
 
 void SetRichEditorPlaceholder(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters,
     const ArkUI_Uint32 stringParametersCount, const ArkUI_Float64* valuesArray, const ArkUI_Uint32 valuesCount,
-    void* resRawPtr)
+    void* resRawPtr, bool isJsView)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -939,6 +939,9 @@ void SetRichEditorPlaceholder(ArkUINodeHandle node, ArkUI_CharPtr* stringParamet
     CHECK_NULL_VOID(stringParameters);
     if (0 < stringParametersCount && stringParameters[0] != nullptr) { // 0: value
         std::string value = stringParameters[0];
+        options.value = UtfUtils::Str8ToStr16(value);
+    } else if (isJsView) {
+        std::string value;
         options.value = UtfUtils::Str8ToStr16(value);
     }
     for (ArkUI_Uint32 index = 1; index < stringParametersCount; index++) { // 1: value
@@ -957,9 +960,6 @@ void SetRichEditorPlaceholder(ArkUINodeHandle node, ArkUI_CharPtr* stringParamet
         Color fontColor;
         if (SetRichEditorPlaceholderValue(valuesArray, 3, valuesCount, colorResourceId) && // 3: colorResourceId
             GreatOrEqual(colorResourceId, 0.0)) {
-            fontColor.SetValue(static_cast<ArkUI_Uint32>(result));
-            options.fontColor = fontColor;
-        } else {
             fontColor.SetValue(static_cast<ArkUI_Uint32>(result));
             options.fontColor = fontColor;
         }
