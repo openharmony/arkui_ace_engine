@@ -33,11 +33,13 @@
 
 namespace OHOS::Ace::NG {
 enum class MenuStatus {
-    INIT,              // Neither exists in the menuMap_ nor on the tree
-    ON_SHOW_ANIMATION, // Exists in the menuMap_ also exists on the tree
-    SHOW,              // Exists in the menuMap_ also exists on the tree
-    ON_HIDE_ANIMATION, // Exists in the menuMap_ also exists on the tree
-    HIDE               // Exists in the menuMap_ but not on the tree
+    INIT,                // Neither exists in the menuMap_ nor on the tree
+    ON_HOVER_SCALE,      // Hover scale animation is running, no lifecycle callback
+    ON_SHOW_ANIMATION,   // Menu is about to show, call aboutToAppear
+    ON_START_ANIMATION,  // Animation is starting, call onWillAppear
+    SHOW,                // Exists in the menuMap_ also exists on the tree, fully shown
+    ON_HIDE_ANIMATION,   // Exists in the menuMap_ also exists on the tree, hiding animation
+    HIDE                 // Exists in the menuMap_ but not on the tree
 };
 
 // has full screen size
@@ -323,12 +325,18 @@ public:
 
     bool IsShow() const
     {
-        return menuStatus_ == MenuStatus::ON_SHOW_ANIMATION || menuStatus_ == MenuStatus::SHOW;
+        return menuStatus_ == MenuStatus::ON_HOVER_SCALE ||
+               menuStatus_ == MenuStatus::ON_SHOW_ANIMATION ||
+               menuStatus_ == MenuStatus::ON_START_ANIMATION ||
+               menuStatus_ == MenuStatus::SHOW;
     }
 
-    void SetMenuStatus(MenuStatus value)
+    void ACE_FORCE_EXPORT SetMenuStatus(MenuStatus newStatus, bool onlyNewLifeCycle = false);
+
+    void ForceSetMenuStatus(MenuStatus newStatus)
     {
-        menuStatus_ = value;
+        previewMenuStatus_ = menuStatus_;
+        menuStatus_ = newStatus;
         RequestPathRender();
     }
 
@@ -336,6 +344,13 @@ public:
     {
         return menuStatus_;
     }
+
+    MenuStatus GetPreviewMenuStatus() const
+    {
+        return previewMenuStatus_;
+    }
+
+    void ACE_FORCE_EXPORT ResetMenuStatus();
 
     bool HasTransitionEffect() const
     {
@@ -690,6 +705,7 @@ private:
         CHECK_NULL_VOID(menuLifeCycleCallback);
         menuLifeCycleCallback(menuLifeCycleEvent);
     }
+    void CallLifeCycleCallbacksForTransition(MenuStatus fromStatus, MenuStatus toStatus, bool onlyNewLifeCycle = false);
     std::function<void()> onAppearCallback_ = nullptr;
     std::function<void()> onDisappearCallback_ = nullptr;
     std::function<void()> aboutToAppearCallback_ = nullptr;
@@ -720,6 +736,7 @@ private:
     bool onMenuDisappear_ = false;
     bool onPreviewDisappear_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
+    MenuStatus previewMenuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
     bool hasFoldModeChangeTransition_ = false;

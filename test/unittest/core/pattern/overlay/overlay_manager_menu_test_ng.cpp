@@ -1264,7 +1264,7 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallback_InvalidMainPipeli
 
     /**
      * @tc.steps: step2. Simulate an invalid mainPipeline context and call HandleMenuDisappearCallback
-     * @tc.expected: The function executes correctly, updates menu status, and calls the callback
+     * @tc.expected: The function executes correctly, state machine triggers callback regardless of pipeline validity
      */
     MockPipelineContext::TearDown();
     overlayManager->CheckMenuManager();
@@ -1274,11 +1274,12 @@ HWTEST_F(OverlayManagerMenuTestNg, HandleMenuDisappearCallback_InvalidMainPipeli
     MockPipelineContext::SetUp();
 
     /**
-     * @tc.steps: step3. Verify the menu status and that the callback was NOT executed
-     * @tc.expected: Menu status is HIDE and callback was not called
+     * @tc.steps: step3. Verify the menu status and callback execution
+     * @tc.expected: Menu status is HIDE and callback was executed by state machine (pipeline validity only affects
+     * FlushPipelineImmediately)
      */
     EXPECT_EQ(menuWrapperPattern->GetMenuStatus(), MenuStatus::HIDE);
-    EXPECT_FALSE(callbackExecuted);
+    EXPECT_TRUE(callbackExecuted);
 }
 
 /**

@@ -1079,6 +1079,9 @@ void MenuWrapperPattern::StartShowAnimation()
     CHECK_NULL_VOID(pipeline);
     auto theme = host->GetTheme<SelectTheme>(true);
     CHECK_NULL_VOID(theme);
+
+    SetMenuStatus(MenuStatus::ON_START_ANIMATION);
+
     if (GetPreviewMode() == MenuPreviewMode::NONE) {
         context->UpdateOffset(GetAnimationOffset());
         context->UpdateOpacity(0.0);
@@ -1094,7 +1097,6 @@ void MenuWrapperPattern::StartShowAnimation()
         context->UpdateTransformScale(VectorF(theme->GetMenuAnimationScale(), theme->GetMenuAnimationScale()));
         context->UpdateOpacity(MENU_ANIMATION_MIN_OPACITY);
     }
-    CallMenuOnWillAppearCallback();
     AnimationUtils::Animate(
         animationOption_,
         [context, weak = WeakClaim(this), theme]() {
@@ -1421,5 +1423,79 @@ bool MenuWrapperPattern::IsSelectMenu() const
     const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
     CHECK_NULL_RETURN(menuModifier, false);
     return menuModifier->isSelectMenu(menu);
+}
+
+void MenuWrapperPattern::ResetMenuStatus()
+{
+    previewMenuStatus_ = MenuStatus::INIT;
+    menuStatus_ = MenuStatus::INIT;
+    RequestPathRender();
+}
+
+void MenuWrapperPattern::SetMenuStatus(MenuStatus newStatus, bool onlyNewLifeCycle)
+{
+    if (menuStatus_ >= newStatus) {
+        return;
+    }
+
+    MenuStatus currentStatus = menuStatus_;
+    CallLifeCycleCallbacksForTransition(currentStatus, newStatus, onlyNewLifeCycle);
+
+    if (menuStatus_ < newStatus) {
+        previewMenuStatus_ = menuStatus_;
+        menuStatus_ = newStatus;
+    }
+
+    RequestPathRender();
+}
+
+void MenuWrapperPattern::CallLifeCycleCallbacksForTransition(MenuStatus fromStatus, MenuStatus toStatus,
+    bool onlyNewLifeCycle)
+{
+    MenuStatus stepStatus = fromStatus;
+    while (stepStatus < toStatus) {
+        MenuStatus nextStepStatus = static_cast<MenuStatus>(static_cast<int>(stepStatus) + 1);
+
+        previewMenuStatus_ = stepStatus;
+        menuStatus_ = nextStepStatus;
+
+        switch (nextStepStatus) {
+            case MenuStatus::ON_HOVER_SCALE:
+                break;
+            case MenuStatus::ON_SHOW_ANIMATION:
+                if (!onlyNewLifeCycle) {
+                    CallMenuAboutToAppearCallback();
+                }
+                break;
+            case MenuStatus::ON_START_ANIMATION:
+                CallMenuOnWillAppearCallback();
+                break;
+            case MenuStatus::SHOW:
+                if (!onlyNewLifeCycle) {
+                    CallMenuAppearCallback();
+                }
+                CallMenuOnDidAppearCallback();
+                break;
+            case MenuStatus::ON_HIDE_ANIMATION:
+                if (!onlyNewLifeCycle) {
+                    CallMenuAboutToDisappearCallback();
+                }
+                CallMenuOnWillDisappearCallback();
+                break;
+            case MenuStatus::HIDE:
+                if (!onlyNewLifeCycle) {
+                    CallMenuDisappearCallback();
+                }
+                CallMenuOnDidDisappearCallback();
+                break;
+            default:
+                break;
+        }
+
+        if (menuStatus_ != nextStepStatus) {
+            break;
+        }
+        stepStatus = nextStepStatus;
+    }
 }
 } // namespace OHOS::Ace::NG
