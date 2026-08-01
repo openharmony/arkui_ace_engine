@@ -3709,6 +3709,7 @@
       "OHOS::Ace::TouchEventTarget::SetTouchRestrict(OHOS::Ace::TouchRestrict const&)";
       "OHOS::Ace::TouchLocationInfo::SetGlobalLocation(OHOS::Ace::Offset const&)";
       "OHOS::Ace::TransformComponent::Scale(float, float, OHOS::Ace::AnimationOption const&)";
+      "OHOS::Ace::TransparencyUtils::InitTransparencyLevelOnce()";
       "OHOS::Ace::UdmfClient::GetInstance()";
       "OHOS::Ace::UIDisplaySync::UIDisplaySync(OHOS::Ace::UIObjectType)";
       "OHOS::Ace::UINodeTracer::UINodeTracer(char const*, OHOS::Ace::NG::UINode const*)";
