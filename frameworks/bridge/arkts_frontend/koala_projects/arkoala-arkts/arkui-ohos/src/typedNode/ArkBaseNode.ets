@@ -447,7 +447,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         this.getPeer().setAspectRatioAttribute(value);
         return this
     }
-    public clickEffect(value: ClickEffect | undefined): this {
+    public clickEffect(value: ClickEffect | null | undefined): this {
         return this
     }
     public enableClickSoundEffect(value: boolean | undefined): this {
