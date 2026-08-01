@@ -25,6 +25,8 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
@@ -188,7 +190,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             std::min(childLayoutConstraint.percentReference.Height(), maxHeightWithoutFloatButton));
     }
 
-    if (isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+    if (NeedAdaptToAgingWidth(hostNode)) {
         float widthRatio = needAdaptForceSplitMode_ ?
             (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() * forceSplitRatio_) :
             (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
@@ -531,14 +533,12 @@ bool DialogLayoutAlgorithm::ComputeInnerLayoutSizeParam(LayoutConstraintF& inner
         innerLayout.minSize = SizeF(width, 0.0);
         innerLayout.maxSize = SizeF(width, height);
     }
-    if (isSuitableForElderly_) {
-        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-            innerLayout.minSize = SizeF(width, 0.0);
-            float widthRatio = needAdaptForceSplitMode_ ?
-                (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() / HALF) :
-                (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
-            innerLayout.maxSize.SetWidth(widthRatio);
-        }
+    if (NeedAdaptToAgingWidth(dialogProp->GetHost())) {
+        innerLayout.minSize = SizeF(width, 0.0);
+        float widthRatio = needAdaptForceSplitMode_ ?
+            (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth() / HALF) :
+            (LANDSCAPE_DIALOG_WIDTH_RATIO * pipeline->GetRootWidth());
+        innerLayout.maxSize.SetWidth(widthRatio);
     }
     // update percentRef
     innerLayout.percentReference = innerLayout.maxSize;
@@ -612,11 +612,9 @@ void DialogLayoutAlgorithm::ComputeInnerLayoutParam(LayoutConstraintF& innerLayo
         innerLayout.minSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), 0.0);
         innerLayout.maxSize = SizeF(SUBWINDOW_DIALOG_DEFAULT_WIDTH.ConvertToPx(), maxHeight);
     }
-    if (isSuitableForElderly_) {
-        if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
-            innerLayout.minSize = SizeF(width, 0.0);
-            innerLayout.maxSize.SetWidth(pipelineContext->GetRootWidth() * LANDSCAPE_DIALOG_WIDTH_RATIO);
-        }
+    if (NeedAdaptToAgingWidth(dialogProp->GetHost())) {
+        innerLayout.minSize = SizeF(width, 0.0);
+        innerLayout.maxSize.SetWidth(pipelineContext->GetRootWidth() * LANDSCAPE_DIALOG_WIDTH_RATIO);
     }
     // update percentRef
     innerLayout.percentReference = innerLayout.maxSize;
@@ -1335,6 +1333,23 @@ void DialogLayoutAlgorithm::UpdateIsScrollHeightNegative(LayoutWrapper* layoutWr
     }
 }
 
+bool DialogLayoutAlgorithm::IsSplitModeEmbeddedDialog(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto parent = AceType::DynamicCast<FrameNode>(frameNode->GetParent());
+    CHECK_NULL_RETURN(parent, false);
+    if (parent->GetTag() == NAVDESTINATION_VIEW_ETS_TAG) {
+        auto navDestinationPattern = parent->GetPattern<NavDestinationPatternBase>();
+        CHECK_NULL_RETURN(navDestinationPattern, false);
+        auto navigation = AceType::DynamicCast<FrameNode>(navDestinationPattern->GetNavigationNode());
+        CHECK_NULL_RETURN(navigation, false);
+        auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+        CHECK_NULL_RETURN(navigationPattern, false);
+        return navigationPattern->GetNavigationMode() == NavigationMode::SPLIT;
+    }
+    return false;
+}
+
 bool DialogLayoutAlgorithm::IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode)
 {
     auto parent = frameNode->GetParent();
@@ -1372,5 +1387,12 @@ RefPtr<PipelineContext> DialogLayoutAlgorithm::GetPipelineContext() const
     auto context = context_.Upgrade();
     CHECK_NULL_RETURN(context, PipelineContext::GetCurrentContextSafelyWithCheck());
     return context;
+}
+
+bool DialogLayoutAlgorithm::NeedAdaptToAgingWidth(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return isSuitableForElderly_ && SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE &&
+           !IsSplitModeEmbeddedDialog(frameNode);
 }
 } // namespace OHOS::Ace::NG

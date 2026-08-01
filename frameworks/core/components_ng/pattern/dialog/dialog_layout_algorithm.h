@@ -106,7 +106,7 @@ private:
     void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
 
     void ResizeDialogSubwindow(bool expandDisplay, bool isShowInSubWindow, bool isShowInFloatingWindow);
-
+    bool IsSplitModeEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
     bool IsEmbeddedDialog(const RefPtr<FrameNode>& frameNode);
     float GetEmbeddedDialogOffsetY(const RefPtr<FrameNode>& frameNode);
     float GetStackRootDialogOffsetY(const RefPtr<FrameNode>& frameNode);
@@ -115,6 +115,7 @@ private:
     void AvoidTitlebarInSubwindow(OffsetF& topLeftPoint, const RefPtr<DialogLayoutProperty>& dialogProp);
     void UpdateDistortionNodeSize(
         const RefPtr<FrameNode>& hostNode, const Dimension& dialogWidth, const Dimension& dialogHeight);
+    bool NeedAdaptToAgingWidth(const RefPtr<FrameNode>& frameNode);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;
