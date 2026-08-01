@@ -3137,8 +3137,8 @@ ArkUINativeModuleValue TextInputBridge::SetOnSubmitJs(ArkUIRuntimeCallInfo* runt
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnSubmitWithEvent(
             nativeNode, reinterpret_cast<void*>(&callback));
     }
-    return panda::JSValueRef::Undefined(vm);
 #endif
+    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue TextInputBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtimeCallInfo)
