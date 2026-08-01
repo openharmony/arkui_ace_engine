@@ -4359,23 +4359,30 @@ void WebPattern::OnEnabledHapticFeedbackUpdate(bool enable)
     isEnabledHapticFeedback_ = enable;
 }
 
-bool WebPattern::IsRootNeedExportTexture()
+RefPtr<FrameNode> WebPattern::FindFirstExportTextureAncestor()
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    bool isNeedExportTexture = false;
+    CHECK_NULL_RETURN(host, nullptr);
     for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
         RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
-        if (!frameNode) {
-            continue;
-        }
-        isNeedExportTexture = frameNode->IsNeedExportTexture();
-        if (isNeedExportTexture) {
-            auto textureInfo = frameNode->GetExportTextureInfo();
-            return SameLayerSurface::HasSurfaceId(textureInfo->GetSurfaceId());
+        if (frameNode && frameNode->IsNeedExportTexture()) {
+            return frameNode;
         }
     }
-    return isNeedExportTexture;
+    return nullptr;
+}
+
+bool WebPattern::IsRootNeedExportTexture()
+{
+    auto frameNode = FindFirstExportTextureAncestor();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto textureInfo = frameNode->GetExportTextureInfo();
+    return SameLayerSurface::HasSurfaceId(textureInfo->GetSurfaceId());
+}
+
+bool WebPattern::IsRootInnerWeb()
+{
+    return FindFirstExportTextureAncestor() != nullptr;
 }
 
 void WebPattern::OnAttachContext(PipelineContext *context)
@@ -4804,6 +4811,8 @@ void WebPattern::OnModifyDone()
         CHECK_NULL_VOID(webPattern);
         if (webPattern->IsRootNeedExportTexture() && webPattern->delegate_) {
             webPattern->delegate_->UpdateNativeEmbedModeEnabled(false);
+        }
+        if (webPattern->IsRootInnerWeb() && webPattern->delegate_) {
             webPattern->delegate_->SetNativeInnerWeb(true);
         }
     };
