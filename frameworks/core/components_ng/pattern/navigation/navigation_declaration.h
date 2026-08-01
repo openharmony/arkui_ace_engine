@@ -340,6 +340,7 @@ struct NavigationOptions {
 struct NavigationConfiguration {
     int32_t stackSizeLimit = 0;
     bool needClearContentStack = false;
+    bool recyclePagesOnLowMemory = false;
 };
 
 using NavDestinationTransitionDelegate = std::function<std::optional<std::vector<NavDestinationTransition>>(

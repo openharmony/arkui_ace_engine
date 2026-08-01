@@ -1885,6 +1885,7 @@ export interface NavigationModuleInfo {
 }
 export interface NavigationConfiguration {
     stackSizeLimit?: int32;
+    recyclePagesOnLowMemory?: boolean;
 }
 export interface NavigationAttribute extends CommonMethod {
     setNavigationOptions(pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): this {
@@ -2410,6 +2411,14 @@ export class NavigationConfiguration_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForRecyclePagesOnLowMemory = value.recyclePagesOnLowMemory
+        if (valueHolderForRecyclePagesOnLowMemory !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRecyclePagesOnLowMemoryTmpValue = valueHolderForRecyclePagesOnLowMemory!
+            valueSerializer.writeBoolean(valueHolderForRecyclePagesOnLowMemoryTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): NavigationConfiguration {
         let valueDeserializer: DeserializerBase = buffer
@@ -2419,7 +2428,13 @@ export class NavigationConfiguration_serializer {
             stackSizeLimitTmpBuf = valueDeserializer.readInt32()
         }
         const stackSizeLimitTmpResult: int32 | undefined = stackSizeLimitTmpBuf
-        let value: NavigationConfiguration = ({stackSizeLimit: stackSizeLimitTmpResult} as NavigationConfiguration)
+        const recyclePagesOnLowMemoryTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let recyclePagesOnLowMemoryTmpBuf: boolean | undefined = undefined
+        if ((recyclePagesOnLowMemoryTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            recyclePagesOnLowMemoryTmpBuf = valueDeserializer.readBoolean()
+        }
+        const recyclePagesOnLowMemoryTmpResult: boolean | undefined = recyclePagesOnLowMemoryTmpBuf
+        let value: NavigationConfiguration = ({stackSizeLimit: stackSizeLimitTmpResult, recyclePagesOnLowMemory: recyclePagesOnLowMemoryTmpResult} as NavigationConfiguration)
         return value
     }
 }

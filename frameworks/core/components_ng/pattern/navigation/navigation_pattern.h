@@ -125,6 +125,10 @@ public:
     {
         return config_.needClearContentStack;
     }
+    void OnNotifyMemoryLevel(int32_t level) override;
+    void RecyclePagesOnLowMemory();
+    void RegisterMemoryLevelNotification();
+    void UnregisterMemoryLevelNotification();
 
     bool JudgeFoldStateChangeAndUpdateState();
 
@@ -867,7 +871,8 @@ private:
     void UpdateNavPathList();
     int32_t GetAutoCleanRestoreMinIndex(int32_t lastStandardIndex, int32_t stackSize) const;
     bool NeedRestoreOrAutoClean(const NavPathList& navPathList, int32_t restoreStartIndex, int32_t cleanMinIndex) const;
-    bool RestoreAutoCleanedDestination(NavPathList& navPathList, int32_t index, int32_t stackIndex = -1);
+    bool RestoreAutoCleanedDestination(
+        NavPathList& navPathList, int32_t index, bool& isStandard, int32_t stackIndex = -1);
     void RefreshNavDestination();
     void DealTransitionVisibility(const RefPtr<FrameNode>& node, bool isVisible, bool isNavBarOrHomeDestination);
     void NotifyNavDestinationSwitch(RefPtr<NavDestinationContext> from,

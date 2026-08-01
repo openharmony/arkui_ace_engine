@@ -84,6 +84,7 @@ constexpr char HOME_DESTINATION_INFO_NAME[] = "name";
 constexpr char HOME_DESTINATION_INFO_PARAM[] = "param";
 constexpr char STACK_SIZE_LIMIT_PROPERTY[] = "stackSizeLimit";
 constexpr char CLEAR_CONTENT_STACK_PROPERTY[] = "clearContentStackOnPrimaryNavigation";
+constexpr char RECYCLE_PAGES_ON_LOW_MEMORY_PROPERTY[] = "recyclePagesOnLowMemory";
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
@@ -474,6 +475,10 @@ void JSNavigation::SetNavigationConfiguration(const JSCallbackInfo& info)
     auto clearContent = configObj->GetProperty(CLEAR_CONTENT_STACK_PROPERTY);
     if (clearContent->IsBoolean()) {
         config.needClearContentStack = clearContent->ToBoolean();
+    }
+    auto recyclePagesOnLowMemory = configObj->GetProperty(RECYCLE_PAGES_ON_LOW_MEMORY_PROPERTY);
+    if (recyclePagesOnLowMemory->IsBoolean()) {
+        config.recyclePagesOnLowMemory = recyclePagesOnLowMemory->ToBoolean();
     }
     NavigationModel::GetInstance()->SetNavigationConfiguration(config);
 }
