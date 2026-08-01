@@ -62,5 +62,7 @@ const REUSABLE_V1_OLD_TOOLCHAIN: number = 140120;
 // @Env
 const REQUIRE_INTERNAL_ERROR: number = 140121;
 const UNSUPPORTED_KEY_IN_ENV: number = 140000;
+// @Link
+const LINK_SOURCE_NOT_STATE_VARIABLE: number = 140123;
 // unimplemented
 const NOT_IMPLEMENT: number = 100201;
