@@ -1034,7 +1034,10 @@ ArkUI_GestureRecognizer* CreateGroupGesture(ArkUI_GroupGestureMode gestureMode)
 {
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createGestureGroup(gestureMode);
-    return new ArkUI_GestureRecognizer { GROUP_GESTURE, gesture, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer();
+    ndkGesture->type = GROUP_GESTURE;
+    ndkGesture->gesture = gesture;
+    return ndkGesture;
 }
 
 int32_t AddChildGesture(ArkUI_GestureRecognizer* group, ArkUI_GestureRecognizer* child)
