@@ -3243,8 +3243,8 @@ ArkUINativeModuleValue TextAreaBridge::SetOnSubmitJs(ArkUIRuntimeCallInfo* runti
         GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaOnSubmitWithEvent(
             nativeNode, reinterpret_cast<void*>(&callback));
     }
-    return panda::JSValueRef::Undefined(vm);
 #endif
+    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue TextAreaBridge::SetPaddingJs(ArkUIRuntimeCallInfo *runtimeCallInfo)
