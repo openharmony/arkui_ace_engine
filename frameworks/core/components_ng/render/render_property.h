@@ -33,6 +33,7 @@
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/shadow.h"
 #include "base/image/pixel_map.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/gradient_property.h"
 #include "core/components_ng/property/overlay_property.h"
@@ -48,7 +49,6 @@ class BorderImage;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
-class InspectorFilter;
 
 // backdropBlur backgroundBlurStyle backgroundEffect
 struct BackgroundProperty {

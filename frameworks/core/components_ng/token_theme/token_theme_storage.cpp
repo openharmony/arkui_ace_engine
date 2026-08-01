@@ -21,7 +21,6 @@
 #include "base/utils/system_properties.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace::NG {
 

@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "base/memory/referenced.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/model/model_adapter_wrapper.h"
@@ -29,8 +30,6 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-class InspectorFilter;
-
 class ACE_EXPORT ModelPattern : public Pattern {
     DECLARE_ACE_TYPE(ModelPattern, Pattern);
 

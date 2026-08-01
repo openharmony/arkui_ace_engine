@@ -16,8 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_HIDUMPER_ACCESSIBILITY_HIDUMPER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_HIDUMPER_ACCESSIBILITY_HIDUMPER_H
 
-#include <map>
-
 #include "base/memory/ace_type.h"
 #include "core/components_ng/base/ui_node.h"
 

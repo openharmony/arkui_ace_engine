@@ -18,7 +18,6 @@
 
 #include "gmock/gmock.h"
 
-#include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager.h"
 
 namespace OHOS::Ace {

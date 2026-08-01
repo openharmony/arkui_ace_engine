@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/property/property.h"
@@ -28,8 +29,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class InspectorFilter;
-
 struct MenuItemLabelFontStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelFontSize, Dimension);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(LabelFontColor, Color);

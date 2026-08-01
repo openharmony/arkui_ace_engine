@@ -23,7 +23,6 @@
 #include "core/common/color_inverter.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/components/theme/resource_adapter.h"
-#include "core/components/theme/theme_constants.h"
 
 namespace OHOS::Ace {
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;

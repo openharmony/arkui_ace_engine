@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/pattern.h"
 
-#include "core/common/container_consts.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"

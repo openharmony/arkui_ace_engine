@@ -18,12 +18,12 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
-class InspectorFilter;
 class ImagePattern;
 class PipelineContext;
 struct ImageSizeStyle {

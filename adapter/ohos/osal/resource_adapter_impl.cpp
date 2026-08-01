@@ -22,7 +22,6 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
 #include "adapter/ohos/osal/resource_theme_style.h"
-#include "core/components/theme/theme_constants.h"
 namespace OHOS::Ace {
 namespace {
 

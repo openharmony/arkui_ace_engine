@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_H
 
-#include "core/event/key_code.h"
 #include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace::V2 {

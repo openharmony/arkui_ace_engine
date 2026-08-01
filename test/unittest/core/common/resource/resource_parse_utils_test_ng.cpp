@@ -26,7 +26,6 @@
 #include "core/common/container.h"
 #include "core/common/resource/resource_object.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/frame_node.h"
 
 using namespace testing;
