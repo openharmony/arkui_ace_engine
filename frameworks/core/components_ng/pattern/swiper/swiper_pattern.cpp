@@ -4575,6 +4575,13 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
             }
         }
         if (InstanceOf<InterpolatingSpring>(curve)) {
+            auto trailOptInterSpring = DynamicCast<TrailOptimizedInterpolatingSpring>(curve);
+            if (trailOptInterSpring && trailOptInterSpring->GetVelocity() < 0) {
+                return AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(motionVelocity_,
+                    trailOptInterSpring->GetMass(), trailOptInterSpring->GetStiffness(),
+                    trailOptInterSpring->GetDamping(), trailOptInterSpring->GetTrail());
+            }
+
             auto interpolatingSpring = DynamicCast<InterpolatingSpring>(curve);
             // check velocity to judge if this current velocity.
             if (interpolatingSpring->GetVelocity() < 0) {
@@ -4616,6 +4623,13 @@ RefPtr<Curve> SwiperPattern::GetIndicatorHeadCurve()
     }
 
     if (InstanceOf<InterpolatingSpring>(curve)) {
+        auto trailOptInterSpring = DynamicCast<TrailOptimizedInterpolatingSpring>(curve);
+        if (trailOptInterSpring && trailOptInterSpring->GetVelocity() < 0) {
+            return AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(motionVelocity,
+                trailOptInterSpring->GetMass(), trailOptInterSpring->GetStiffness(), trailOptInterSpring->GetDamping(),
+                trailOptInterSpring->GetTrail());
+        }
+
         auto interpolatingSpring = DynamicCast<InterpolatingSpring>(curve);
         if (interpolatingSpring->GetVelocity() < 0) {
             return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity, interpolatingSpring->GetMass(),

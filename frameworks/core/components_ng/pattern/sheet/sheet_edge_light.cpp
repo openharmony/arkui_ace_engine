@@ -85,7 +85,7 @@ std::function<void()> SheetEdgeLightBase::GetSheetEdgeLightAnimateFinishEvent(Re
         SheetEdgeLightBase::SetSheetEdgeLightTransitionEnd(sheetNode);
     };
     const std::function<void()> edgeLightFinishEvent = [sheetWK = AceType::WeakClaim(AceType::RawPtr(sheetNode))]() {
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::BINDSHEET_LIGHT_SENSE_ANIMATION, true);
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::BINDSHEET_LIGHT_SENSE_ANIMATION, false);
         auto sheetNode = sheetWK.Upgrade();
         CHECK_NULL_VOID(sheetNode);
         auto renderContext = sheetNode->GetRenderContext();

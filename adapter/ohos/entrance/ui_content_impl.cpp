@@ -129,6 +129,7 @@
 #include "bridge/arkts_frontend/arkts_frontend_loader.h"
 #include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/ace_engine.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
@@ -2274,11 +2275,13 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             return metaDataItem.name == "enableCustomComponentCrossAbility" && metaDataItem.value == "true";
         });
     AceApplicationInfo::GetInstance().SetEnableCustomComponentCrossAbility(enableCustomComponentCrossAbility);
+    bool needInitTransparency = false;
     // Read UIMaterial metadata from entry module only
     if (hapModuleInfo && hapModuleInfo->moduleType == OHOS::AppExecFwk::ModuleType::ENTRY) {
         for (const auto& metaDataItem : metaData) {
             if (metaDataItem.name == "ohos.arkui.UIMaterial.state") {
                 AceApplicationInfo::GetInstance().SetUIMaterialState(metaDataItem.value);
+                needInitTransparency = metaDataItem.value != "disable";
             } else if (metaDataItem.name == "ohos.arkui.UIMaterial.type") {
                 AceApplicationInfo::GetInstance().SetUIMaterialType(metaDataItem.value);
             }
@@ -2508,6 +2511,11 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     container->SetPageProfile(pageProfile);
     container->Initialize();
     ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    if (needInitTransparency && taskExecutor) {
+        taskExecutor->PostTask([]() { TransparencyUtils::InitTransparencyLevelOnce(); },
+            TaskExecutor::TaskType::BACKGROUND, "InitUIMaterialTransparency", PriorityType::VIP);
+    }
     auto front = container->GetFrontend();
     if (front) {
         front->UpdateState(Frontend::State::ON_CREATE);
