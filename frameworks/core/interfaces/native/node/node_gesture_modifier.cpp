@@ -962,7 +962,7 @@ void setGestureInterrupterToNodeWithUserData(
         interruptInfo.event = &gestureEvent;
         interruptInfo.customUserData = userData;
         ArkUIGestureRecognizer* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
-        interruptInfo.userData = reinterpret_cast<void*>(currentArkUIGestureRecognizer);
+        interruptInfo.userData = std::make_unique<LifeCycleObserver>(currentArkUIGestureRecognizer);
         std::vector<ArkUIGestureRecognizer*> othersRecognizers;
         for (const auto& item : others) {
             if (item.Invalid()) {

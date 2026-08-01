@@ -189,7 +189,7 @@ ArkUI_GestureRecognizer* OH_ArkUI_GestureInterruptInfo_GetRecognizer(const ArkUI
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         return nullptr;
     }
-    return reinterpret_cast<ArkUI_GestureRecognizer *>(event->interruptData.userData);
+    return event->interruptData.userData ? event->interruptData.userData->Get<ArkUI_GestureRecognizer>() : nullptr;
 }
 
 ArkUI_GestureEvent* OH_ArkUI_GestureInterruptInfo_GetGestureEvent(const ArkUI_GestureInterruptInfo* event)
@@ -201,7 +201,7 @@ ArkUI_GestureEvent* OH_ArkUI_GestureInterruptInfo_GetGestureEvent(const ArkUI_Ge
     ArkUI_UIInputEvent* uiEvent = reinterpret_cast<ArkUI_UIInputEvent*>(event->interruptData.inputEvent);
     gestureEvent->eventData.rawPointerEvent = uiEvent;
 
-    auto* gestureRecognizer = reinterpret_cast<ArkUI_GestureRecognizer*>(event->interruptData.userData);
+    auto* gestureRecognizer = OH_ArkUI_GestureInterruptInfo_GetRecognizer(event);
     CHECK_NULL_RETURN(gestureRecognizer, nullptr);
     gestureEvent->attachNode = gestureRecognizer->attachNode;
     return gestureEvent;

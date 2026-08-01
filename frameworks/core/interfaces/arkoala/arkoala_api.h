@@ -23,6 +23,7 @@
 #include <string>
 #include <utility>
 #include "core/common/resource/resource_object.h"
+#include "ui/base/lifecycle_observable.h"
 
 #ifdef __cplusplus
 namespace OHOS::Ace {
@@ -5801,7 +5802,7 @@ struct ArkUIGestureEventTargetInfo {
     void* uiNode = nullptr;
 };
 
-struct ArkUIGestureRecognizer {
+struct ArkUIGestureRecognizer : public OHOS::Ace::LifeCycleObservable {
     ArkUI_Int32 type = -1;
     ArkUIGesture* gesture = nullptr;
     void* extraData = nullptr;
@@ -5822,7 +5823,7 @@ struct ArkUIGestureInterruptInfo {
     ArkUI_Int32 systemRecognizerType;
     ArkUIAPIEventGestureAsyncEvent* event = nullptr;
     void* customUserData = nullptr;
-    void* userData = nullptr;
+    std::unique_ptr<OHOS::Ace::LifeCycleObserver> userData = nullptr;
     void* inputEvent = nullptr;
     void* gestureEvent = nullptr;
     ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
