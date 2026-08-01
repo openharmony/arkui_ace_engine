@@ -212,7 +212,7 @@ void NavDestinationPattern::OnModifyDone()
     HandleTitleBarAndToolBarAnimation(hostNode, needRunTitleBarAnimation, needRunToolBarAnimation);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+    if (GreatOrEqual(pipeline->GetFontScaleFromEnv(hostNode), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
         auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
         CHECK_NULL_VOID(titleBarPattern);
         auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
@@ -540,7 +540,7 @@ void NavDestinationPattern::OnFontScaleConfigurationUpdate()
     CHECK_NULL_VOID(titleBarNode);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    if (LessNotEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+    if (LessNotEqual(pipeline->GetFontScaleFromEnv(hostNode), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
         auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetLongPressEvent(nullptr);
