@@ -6979,7 +6979,7 @@
       },
       "test_paths": ["test/unittest/core/manager/drag_drop/", "test/unittest/core/event/drag_event/"],
       "status": "active",
-      "last_verified": "2026-07-31"
+      "last_verified": "2026-08-01"
     },
     {
       "id": "DragCapability",
@@ -7064,7 +7064,7 @@
       },
       "test_paths": ["test/unittest/interfaces/node_component_snapshot_test.cpp", "test/unittest/capi/accessors/component_snapshot_accessor_test.cpp", "test/unittest/core/rosen/"],
       "status": "active",
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-01"
     },
     {
       "id": "BasicRenderPipeline",
