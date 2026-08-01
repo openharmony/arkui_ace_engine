@@ -103,6 +103,8 @@ public:
     virtual bool IsForceShadow() const;
     // return whether enabled interactive.
     virtual std::optional<bool> IsInteractived() const;
+    // return string representation of material info for dump.
+    std::string ToString() const;
     // Get material state from application configuration.
     static MaterialState GetConfiguredMaterialState();
     // Check if material is disabled (state == DISABLE).
