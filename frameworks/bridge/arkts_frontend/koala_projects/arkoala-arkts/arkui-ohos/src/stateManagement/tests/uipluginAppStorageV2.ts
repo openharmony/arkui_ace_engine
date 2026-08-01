@@ -64,9 +64,7 @@ export class ClassA implements IObservedObject, IWatchSubscriberRegister {
     // do not inline, will not work for
     // inherited classes.
     protected conditionalAddRef(meta: IMutableStateMeta): void {
-        //if (Observe.shouldAddRef(this.____V1RenderId)) {
-            meta.addRef();
-        //}
+        meta.addRef();
     }
 
     // @Track classB : ClassB
