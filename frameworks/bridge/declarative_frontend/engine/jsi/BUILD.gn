@@ -78,7 +78,13 @@ es2abc_gen_abc("gen_jsUIContext_abc") {
 }
 
 es2abc_gen_abc("gen_jsPreload_abc") {
-  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  extra_visibility = [
+    ":*",
+    "//foundation/arkui/ace_engine/adapter/preview/sdk:*",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_windows",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_linux",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_darwin"
+  ]
   src_js = rebase_path(
           "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/jsPreload.js")
   dst_file = rebase_path(base_output_path + "/jsPreload.abc")
@@ -87,8 +93,27 @@ es2abc_gen_abc("gen_jsPreload_abc") {
   out_puts = [ base_output_path + "/jsPreload.abc" ]
 }
 
+if (!is_arkui_x) {
+  generate_module_info("jsPreload_module_info") {
+    module_name = "gen_jsPreload_abc"
+    module_type = "abc"
+    module_source_dir = base_output_path
+    module_install_name = "jsPreload.abc"
+    module_install_images = [ "system" ]
+    module_install_dir = "etc/abc/framework"
+    install_enable = true
+    notice = "$target_out_dir/jsPreload.notice.txt"
+  }
+}
+
 es2abc_gen_abc("gen_arkCommon_abc") {
-  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  extra_visibility = [
+    ":*",
+    "//foundation/arkui/ace_engine/adapter/preview/sdk:*",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_windows",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_linux",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_darwin"
+  ]
   src_js = rebase_path(
           "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkCommon.js")
   dst_file = rebase_path(base_output_path + "/arkCommon.abc")
@@ -97,8 +122,27 @@ es2abc_gen_abc("gen_arkCommon_abc") {
   out_puts = [ base_output_path + "/arkCommon.abc" ]
 }
 
+if (!is_arkui_x) {
+  generate_module_info("arkCommon_module_info") {
+    module_name = "gen_arkCommon_abc"
+    module_type = "abc"
+    module_source_dir = base_output_path
+    module_install_name = "arkCommon.abc"
+    module_install_images = [ "system" ]
+    module_install_dir = "etc/abc/framework"
+    install_enable = true
+    notice = "$target_out_dir/arkCommon.notice.txt"
+  }
+}
+
 es2abc_gen_abc("gen_arkDynamicComponent_abc") {
-  extra_visibility = [ ":*" ]  # Only targets in this file can depend on this.
+  extra_visibility = [
+    ":*",
+    "//foundation/arkui/ace_engine/adapter/preview/sdk:*",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_windows",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_linux",
+    "//out/arkui-x/gen/build/ohos/sdk:arkui_x_darwin"
+  ]
   src_js = rebase_path(
           "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkDynamicComponent.js")
   dst_file = rebase_path(base_output_path + "/arkDynamicComponent.abc")
@@ -116,6 +160,19 @@ if (!is_arkui_x && (use_mac || use_mingw_win || use_linux)) {
 
     in_puts = [ "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/engine/arkComponentMock.js" ]
     out_puts = [ base_output_path + "/arkComponentMock.abc" ]
+  }
+}
+
+if (!is_arkui_x) {
+  generate_module_info("arkDynamicComponent_module_info") {
+    module_name = "gen_arkDynamicComponent_abc"
+    module_type = "abc"
+    module_source_dir = base_output_path
+    module_install_name = "arkDynamicComponent.abc"
+    module_install_images = [ "system" ]
+    module_install_dir = "etc/abc/framework"
+    install_enable = true
+    notice = "$target_out_dir/arkDynamicComponent.notice.txt"
   }
 }
 
@@ -179,31 +236,33 @@ gen_obj("abc_uicontext") {
   snapshot_dep = [ ":gen_jsUIContext_abc" ]
 }
 
-gen_obj("abc_preload") {
-  input = base_output_path + "/jsPreload.abc"
-  if (use_mac || use_mingw_win || use_linux || use_ios) {
-    abcpreload_obj_path = base_output_path + "/jsPreload.c"
+if (is_arkui_x) {
+  gen_obj("abc_preload") {
+    input = base_output_path + "/jsPreload.abc"
+    if (use_mac || use_mingw_win || use_linux || use_ios) {
+      abcpreload_obj_path = base_output_path + "/jsPreload.c"
+    }
+    output = abcpreload_obj_path
+    snapshot_dep = [ ":gen_jsPreload_abc" ]
   }
-  output = abcpreload_obj_path
-  snapshot_dep = [ ":gen_jsPreload_abc" ]
-}
 
-gen_obj("abc_ark_common") {
-  input = base_output_path + "/arkCommon.abc"
-  if (use_mac || use_mingw_win || use_linux || use_ios) {
-    arkcommon_obj_path = base_output_path + "/arkCommon.c"
+  gen_obj("abc_ark_common") {
+    input = base_output_path + "/arkCommon.abc"
+    if (use_mac || use_mingw_win || use_linux || use_ios) {
+      arkcommon_obj_path = base_output_path + "/arkCommon.c"
+    }
+    output = arkcommon_obj_path
+    snapshot_dep = [ ":gen_arkCommon_abc" ]
   }
-  output = arkcommon_obj_path
-  snapshot_dep = [ ":gen_arkCommon_abc" ]
-}
 
-gen_obj("abc_ark_dynamiccomponent") {
-  input = base_output_path + "/arkDynamicComponent.abc"
-  if (use_mac || use_mingw_win || use_linux || use_ios) {
-    arkdynamiccomponent_obj_path = base_output_path + "/arkDynamicComponent.c"
+  gen_obj("abc_ark_dynamiccomponent") {
+    input = base_output_path + "/arkDynamicComponent.abc"
+    if (use_mac || use_mingw_win || use_linux || use_ios) {
+      arkdynamiccomponent_obj_path = base_output_path + "/arkDynamicComponent.c"
+    }
+    output = arkdynamiccomponent_obj_path
+    snapshot_dep = [ ":gen_arkDynamicComponent_abc" ]
   }
-  output = arkdynamiccomponent_obj_path
-  snapshot_dep = [ ":gen_arkDynamicComponent_abc" ]
 }
 
 if (!is_arkui_x && (use_mac || use_mingw_win || use_linux)) {
@@ -231,7 +290,10 @@ if (!is_arkui_x) {
   abc_sources = [
     "stateMgmt",
     "jsEnumStyle",
-    "arkComponent"
+    "arkComponent",
+    "arkCommon",
+    "arkDynamicComponent",
+    "jsPreload",
   ]
 } else {
   abc_sources = []
@@ -480,13 +542,24 @@ template("declarative_js_engine_ark") {
     }
 
     deps += [
-      ":gen_obj_src_abc_ark_common",
-      ":gen_obj_src_abc_ark_dynamiccomponent",
       ":gen_obj_src_abc_proxyclass",
       ":arkComponent_module_info",
       ":jsEnumStyle_module_info",
-      ":gen_obj_src_abc_preload"
     ]
+
+    if (is_arkui_x) {
+      deps += [
+        ":gen_obj_src_abc_ark_common",
+        ":gen_obj_src_abc_ark_dynamiccomponent",
+        ":gen_obj_src_abc_preload",
+      ]
+    } else {
+      deps += [
+        ":arkCommon_module_info",
+        ":arkDynamicComponent_module_info",
+        ":jsPreload_module_info",
+      ]
+    }
 
     foreach(item, abc_sources) {
       deps += [ ":copy_" + item + "_abc" ]
