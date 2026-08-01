@@ -43,8 +43,8 @@ function createCompatibleNodeWithFuncVoid(fn: (() => void) | Object, elmtId: num
     let buildFunc = function (): void {
         if (fn && typeof fn === 'function') {
             fn.bind(this)();
-        } else if (fn && typeof fn === 'object' && 'builder' in fn && typeof (fn as any).builder === 'function') {
-            (fn as any).builder.bind(this)();
+        } else if (fn && typeof fn === 'object' && 'builder' in fn && typeof fn.builder === 'function') {
+            fn.builder.bind(this)();
         }
     }
     builderViewV2.initialRender = buildFunc.bind(builderViewV2);
