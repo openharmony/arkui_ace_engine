@@ -268,28 +268,9 @@ void RosenWindow::PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecut
 #endif
 }
 
-bool RosenWindow::ConsumeBackgroundForceFlushCount()
-{
-    if (!backgroundForceFlushEnabled_.load(std::memory_order_relaxed)) {
-        return false;
-    }
-    uint32_t current = backgroundForceFlushCount_.load(std::memory_order_relaxed);
-    while (current > 0) {
-        if (backgroundForceFlushCount_.compare_exchange_weak(current, current - 1,
-                std::memory_order_relaxed)) {
-            if (current == 1) {
-                backgroundForceFlushEnabled_.store(false, std::memory_order_relaxed);
-            }
-            return true;
-        }
-    }
-    return false;
-}
-
 void RosenWindow::RequestFrame()
 {
-    // Hidden window skips vsync; forceVsync_ overrides for animations.
-    if (!forceVsync_ && !onShow_ && !ConsumeBackgroundForceFlushCount()) {
+    if (!(forceVsync_ || onShow_ || HasBackgroundForceFlushQuota())) {
         return;
     }
     SetForceVsyncRequests(false);
@@ -305,6 +286,9 @@ void RosenWindow::RequestFrame()
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
         PostVsyncTimeoutDFXTask(taskExecutor);
+        if (!forceVsync_ && !onShow_) {
+            ConsumeBackgroundForceFlushCount();
+        }
     }
     if (taskExecutor) {
         taskExecutor->PostDelayedTask(
