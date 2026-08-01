@@ -60,9 +60,9 @@ UIExtensionComponent 暂无独立的 ArkTS Bridge 文件和 node_modifier 文件
 
 | 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件 / 目标路径 | 说明 |
 |----------|----------|-----------|-------------------------------|------|
-| Session / Window | `session_wrapper.h`、`session_wrapper_factory.cpp` | `window_manager` | `interfaces/innerkits/include/` | Session 通道创建和窗口渲染表面绑定 |
-| Ability Manager | `ui_extension_pattern.cpp` 通过 Want 拉起 UIExtension Ability | `appexecfwk_standard` | `interfaces/innerkits/include/` | UIExtension Ability 连接与生命周期 |
-| Accessibility | `accessibility_session_adapter_ui_extension.h` | `accessibility` | `interfaces/innerkits/include/` | UIExtension 组件的无障碍桥接 |
+| Session / Window | `session_wrapper.h`、`session_wrapper_factory.cpp` | `<OH_ROOT>/foundation/window/window_manager` | `interfaces/innerkits/include/` | Session 通道创建和窗口渲染表面绑定 |
+| Ability Manager | `ui_extension_pattern.cpp` 通过 Want 拉起 UIExtension Ability | `<OH_ROOT>/foundation/arkui/appexecfwk_standard` | `interfaces/innerkits/include/` | UIExtension Ability 连接与生命周期 |
+| Accessibility | `accessibility_session_adapter_ui_extension.h` | `<OH_ROOT>/foundation/barrierfree/accessibility` | `interfaces/innerkits/include/` | UIExtension 组件的无障碍桥接 |
 
 ### 测试入口
 

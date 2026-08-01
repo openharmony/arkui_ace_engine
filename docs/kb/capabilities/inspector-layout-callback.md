@@ -38,6 +38,12 @@ Inspector 布局回调是 ArkUI 通过 `@ohos.arkui.inspector` 模块的 `create
 | ANI 模块 | `interfaces/ets/ani/inspector/src/inspector.cpp` | 静态 `ComponentObserver` 原生绑定 |
 | C API / NDK | 无 | 无独立 C-API；NDK 节点布局回调是另一套（`OH_ArkUI_RegisterLayoutCallbackOnNodeHandle`，见下） |
 
+### 外部依赖入口
+
+| 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
+|----------|----------|------------|----------------------------|------|
+| NAPI 模块 | `interfaces/napi/kits/inspector/BUILD.gn`（`deps += ["napi_$platform"]`） | `<OH_ROOT>/foundation/arkui/napi` | `napi:ace_napi` | `createComponentObserver` 注册入口，NAPI 绑定层 |
+
 ### 测试入口
 
 | 类型 | 稳定路径 | 用途 |
@@ -50,7 +56,7 @@ Inspector 布局回调是 ArkUI 通过 `@ohos.arkui.inspector` 模块的 `create
 
 ### 相关 Spec
 
-布局回调（inspector）功能域：`specs/04-common-capability/11-component-info/03-inspector-layout-callback/`（功能 ID `04-11-03`，design.md + Feat-01 已在 arkui-specs 配套 PR Baselined）。
+布局回调（inspector）功能域：`specs/04-common-capability/11-component-info/03-inspector-layout-callback/`（功能 ID `04-11-03`，当前 spec_status `pending`：已在 registry 注册，但目录与 Feat 规格尚未创建）。
 
 ## 常见问题定位
 

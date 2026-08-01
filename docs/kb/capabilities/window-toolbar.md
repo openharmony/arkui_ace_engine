@@ -45,6 +45,13 @@
 | Inner API / UIContent | `adapter/ohos/entrance/ui_content_impl.h` | `SetContainerModalTitleVisible/Height`、`SubscribeContainerModalButtonsRectChange` 等 |
 | C API / NDK | 无 | 不作为应用级 Node 组件暴露；为窗口框架注入的系统 chrome |
 
+### 外部依赖入口
+
+| 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
+|----------|----------|------------|----------------------------|------|
+| 窗口管理器 | `adapter/ohos/entrance/ui_content_impl.cpp`（`SetContainerModalTitleVisible`、`OnContainerModalEvent`）、`adapter/ohos/osal/app_bar_helper_impl.cpp` | `<OH_ROOT>/foundation/window/window_manager` | `interfaces/innerkits/wm/`、`window_manager:libwm` | `ContainerModal` 标题栏可见性回调与事件派发 |
+| 基础工具库 | `container_modal_toolbar.cpp`、`toolbaritem_pattern.cpp` | `<OH_ROOT>/foundation/systemabilitymgr/samgr` | `c_utils:utils` | 工具函数 |
+
 ### 测试入口
 
 | 类型 | 稳定路径 | 用途 |
@@ -57,7 +64,7 @@
 
 ### 相关 Spec
 
-窗口工具栏功能域：`specs/04-common-capability/08-root-view/01-window-toolbar/`（功能 ID `04-08-01`，design.md + Feat-01/02 已在 arkui-specs 配套 PR Baselined）。
+窗口工具栏功能域：`specs/04-common-capability/08-root-view/01-window-toolbar/`（功能 ID `04-08-01`，当前 spec_status `pending`：已在 registry 注册，但目录与 Feat 规格尚未创建）。
 
 ## 常见问题定位
 

@@ -46,8 +46,8 @@ Inspector 是 ArkUI 引擎的组件树序列化与诊断能力，把运行时 `F
 
 | 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
 |----------|----------|------------|----------------------------|------|
-| DevEco Inspector 桥接 | `adapter/ohos/osal/layout_inspector.cpp`（`dlopen` + `ConnectServerManager`） | `libark_connect_inspector.z.so`（connect-server/DevEco 调试桥 SO） | dlsym 符号 `SetArkUICallback` | 运行时 `dlopen("libark_connect_inspector.z.so")` 取 `SetArkUICallback`，经 `ConnectServerManager::SendInspector` 把树 JSON 推给 DevEco Inspector |
-| 图形渲染/窗口 | `adapter/ohos/osal/layout_inspector.cpp`（`GetWindow`） | `graphic_2d`（Rosen render service） | `render_service_client/core/pipeline/rs_node_map.h` | `OHOS::Rosen::Window::Find/GetTopWindowWithId` 按 containerId 取窗口用于 layout 信息采集与快照 |
+| DevEco Inspector 桥接 | `adapter/ohos/osal/layout_inspector.cpp`（`dlopen` + `ConnectServerManager`） | `<OH_ROOT>/foundation/communication/connect_server` | `libark_connect_inspector.z.so`（dlsym 符号 `SetArkUICallback`） | 运行时 `dlopen("libark_connect_inspector.z.so")` 取 `SetArkUICallback`，经 `ConnectServerManager::SendInspector` 把树 JSON 推给 DevEco Inspector |
+| 图形渲染/窗口 | `adapter/ohos/osal/layout_inspector.cpp`（`GetWindow`） | `<OH_ROOT>/foundation/graphic/graphic_2d` | `render_service_client/core/pipeline/rs_node_map.h` | `OHOS::Rosen::Window::Find/GetTopWindowWithId` 按 containerId 取窗口用于 layout 信息采集与快照 |
 
 > 本仓 `frameworks/core/common/connect_server_manager.h` 是对 connect-server SO 的内部封装；外部依赖点为该 SO 本身与 Rosen 渲染服务。
 
@@ -63,7 +63,7 @@ Inspector 是 ArkUI 引擎的组件树序列化与诊断能力，把运行时 `F
 
 ### 相关 Spec
 
-Inspector 功能域：`specs/03-engine-framework/07-accessibility-mechanism/02-inspector/`（功能 ID `03-07-02`，design.md + Feat-01/02 已在 arkui-specs 配套 PR Baselined）。
+Inspector 功能域：`specs/03-engine-framework/07-accessibility-mechanism/02-inspector/`（功能 ID `03-07-02`，当前 spec_status `pending`：已在 registry 注册，但目录与 Feat 规格尚未创建）。
 
 ## 常见问题定位
 
