@@ -121,7 +121,7 @@ struct ArkUI_TextCascadePickerRangeContentArray;
 struct ArkUI_EmbeddedComponentOption;
 struct AbilityBase_Want;
 struct ArkUIGestureEvent;
-struct ArkUIGestureRecognizer;
+typedef struct ArkUI_GestureRecognizer ArkUIGestureRecognizer;
 struct _ArkUIRenderNode;
 struct _ArkUIRenderModifier;
 struct _ArkUIRSProperty;
@@ -5802,7 +5802,7 @@ struct ArkUIGestureEventTargetInfo {
     void* uiNode = nullptr;
 };
 
-struct ArkUIGestureRecognizer : public OHOS::Ace::LifeCycleObservable {
+struct ArkUI_GestureRecognizer : public OHOS::Ace::LifeCycleObservable {
     ArkUI_Int32 type = -1;
     ArkUIGesture* gesture = nullptr;
     void* extraData = nullptr;

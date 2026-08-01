@@ -22,22 +22,10 @@
 #include "native_type.h"
 
 #include "frameworks/core/interfaces/arkoala/arkoala_api.h"
-#include "ui/base/lifecycle_observable.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-struct ArkUI_GestureRecognizer : public OHOS::Ace::LifeCycleObservable {
-    int32_t type = -1;
-    ArkUIGesture* gesture = nullptr;
-    void* extraData = nullptr;
-    void* attachNode = nullptr;
-    bool capi = true;
-    void* recognizer = nullptr;
-    ArkUIGestureEventTargetInfo targetInfo = {};
-    int32_t attachNodeId = -1;
-};
 
 struct ArkUI_GestureEventTargetInfo {
     void* uiNode = nullptr;
