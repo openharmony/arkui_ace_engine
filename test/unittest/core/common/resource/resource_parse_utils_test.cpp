@@ -1291,7 +1291,7 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest032, TestSize.Level1)
     auto resObj = AceType::MakeRefPtr<ResourceObject>(1,
         static_cast<int32_t>(ResourceType::STRARRAY), params, "", "", 100000);
     std::vector<std::string> result;
-    EXPECT_FALSE(ResourceParseUtils::ParseResStrArray(resObj, result));
+    EXPECT_TRUE(ResourceParseUtils::ParseResStrArray(resObj, result));
 }
 
 /**

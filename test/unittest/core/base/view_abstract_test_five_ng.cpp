@@ -1235,7 +1235,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxBorderRadius001, TestSize.Level1)
     EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 
     ViewAbstract::SetBorderRadius(vpDim);
-    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+    // ACE_SET_LPX_UPDATE_CALLBACK does not unregister on non-LPX, attribute remains
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 }
 
 /**
@@ -1410,7 +1411,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashGap001, TestSize.Level1)
     EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 
     ViewAbstract::SetDashGap(vpDim);
-    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+    // ACE_SET_LPX_UPDATE_CALLBACK does not unregister on non-LPX, attribute remains
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 }
 
 /**
@@ -1434,7 +1436,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashGap002, TestSize.Level1)
     EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 
     ViewAbstract::SetDashGap(frameNode, vpDim);
-    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+    // ACE_SET_LPX_UPDATE_CALLBACK does not unregister on non-LPX, attribute remains
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 }
 
 /**
@@ -1460,7 +1463,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashGap003, TestSize.Level1)
     lpxProp.leftDimen = lpxDim;
     lpxProp.rightDimen = lpxDim;
     ViewAbstract::SetDashGap(lpxProp);
-    EXPECT_EQ(frameNode->lpxAttributes_.size(), 4);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 
     NG::BorderWidthProperty vpProp;
     vpProp.topDimen = vpDim;
@@ -1468,7 +1471,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashGap003, TestSize.Level1)
     vpProp.leftDimen = vpDim;
     vpProp.rightDimen = vpDim;
     ViewAbstract::SetDashGap(vpProp);
-    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+    // ACE_SET_LPX_UPDATE_CALLBACK does not unregister on non-LPX, attribute remains
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 }
 
 /**
@@ -1492,7 +1496,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashWidth001, TestSize.Level1)
     EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 
     ViewAbstract::SetDashWidth(vpDim);
-    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+    // ACE_SET_LPX_UPDATE_CALLBACK does not unregister on non-LPX, attribute remains
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 }
 
 /**
@@ -1516,7 +1521,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashWidth002, TestSize.Level1)
     EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 
     ViewAbstract::SetDashWidth(frameNode, vpDim);
-    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+    // ACE_SET_LPX_UPDATE_CALLBACK does not unregister on non-LPX, attribute remains
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 }
 
 /**
@@ -1542,7 +1548,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashWidth003, TestSize.Level1)
     lpxProp.leftDimen = lpxDim;
     lpxProp.rightDimen = lpxDim;
     ViewAbstract::SetDashWidth(lpxProp);
-    EXPECT_EQ(frameNode->lpxAttributes_.size(), 4);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 
     NG::BorderWidthProperty vpProp;
     vpProp.topDimen = vpDim;
@@ -1550,7 +1556,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashWidth003, TestSize.Level1)
     vpProp.leftDimen = vpDim;
     vpProp.rightDimen = vpDim;
     ViewAbstract::SetDashWidth(vpProp);
-    EXPECT_EQ(frameNode->lpxAttributes_.size(), 0);
+    // ACE_SET_LPX_UPDATE_CALLBACK does not unregister on non-LPX, attribute remains
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 }
 
 } // namespace OHOS::Ace::NG

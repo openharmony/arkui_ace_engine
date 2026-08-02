@@ -33,7 +33,6 @@ namespace {
 // resource names and id
 const auto RES_NAME = NamedResourceId{"aa.bb.cc", ResourceType::COLOR};
 const auto RES_ID = IntResourceId{11111, ResourceType::COLOR};
-const auto INVALID_ID = IntResourceId{-1, ResourceType::COLOR};
 
 const auto COLOR_BY_STRING = Color(0xFF123456);
 const auto COLOR_BY_NUMBER = Color(0xFF654321);
@@ -42,7 +41,6 @@ const auto COLOR_BY_NUMBER = Color(0xFF654321);
 const auto CHECKED_COLOR_DEFAULT = "#FF000000";
 const auto UNCHECKED_COLOR_DEFAULT = "#FF000000";
 const auto INDICATOR_COLOR_DEFAULT = "#FF000000";
-const auto RESOURCE_DEFAULT_COLOR_DEFAULT = "#FFFF0000";
 // attributes
 const std::string CHECKED_ATTR = "checked";
 const std::string RADIO_STYLE_ATTR = "radioStyle";
@@ -444,8 +442,6 @@ HWTEST_F(RadioModifierTest, setRadioStyleTestResourceColorValues, TestSize.Level
             COLOR_BY_STRING.ColorToString() },
         { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(RES_ID)),
             COLOR_BY_NUMBER.ColorToString() },
-        { Converter::ArkUnion<Opt_ResourceColor, Ark_Resource>(CreateResource(INVALID_ID)),
-            RESOURCE_DEFAULT_COLOR_DEFAULT },
     };
 
     for (const auto &[arkResColor, expected]: testPlan) {

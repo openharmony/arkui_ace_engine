@@ -68,6 +68,12 @@ public:
         return GetMockResourceData(resId, data) ? data : std::vector<std::string>();
     }
 
+    std::vector<std::string> GetStringArrayByName(const std::string& resName) const override
+    {
+        std::vector<std::string> data;
+        return GetMockResourceDataByName(resName, data) ? data : std::vector<std::string>();
+    }
+
     double GetDouble(uint32_t resId) override
     {
         double data = 0.0;
@@ -104,6 +110,7 @@ private:
     static bool GetMockResourceDataByName(const std::string& name, std::string& data);
     static bool GetMockResourceDataByName(const std::string& name, double& data);
     static bool GetMockResourceDataByName(const std::string& name, int32_t& data);
+    static bool GetMockResourceDataByName(const std::string& name, std::vector<std::string>& data);
 };
 
 void ResetMockResourceData();
@@ -118,6 +125,7 @@ void AddMockResourceData(const std::string& name, const Dimension& data);
 void AddMockResourceData(const std::string& name, const std::string& data);
 void AddMockResourceData(const std::string& name, const double& data);
 void AddMockResourceData(const std::string& name, const int32_t& data);
+void AddMockResourceData(const std::string& name, const std::vector<std::string>& data);
 
 } // namespace OHOS::Ace
 

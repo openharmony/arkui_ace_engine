@@ -159,6 +159,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "$ace_root/test/mock/frameworks/core/event/mock_touch_event.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/image_provider/mock_image_decoder.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/image_provider/mock_image_loading_context.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/base/mock_ui_node_gc.cpp",
     "$ace_root/test/mock/frameworks/core/image/mock_image_source_info.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/image_provider/mock_image_utils.cpp",
     "$ace_root/test/mock/frameworks/core/pipeline/mock_element_register.cpp",

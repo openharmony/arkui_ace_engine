@@ -131,6 +131,7 @@ const std::vector<BoolStrTestStep> BOOL_STR_TEST_PLAN = {
     { false, "false" }
 };
 const int64_t FAKE_RES_ID(1234);
+const double FAKE_DIMENSION_PX_VALUE = 10.0;
 const std::vector<std::pair<Opt_ScrollableBarModeOptions, std::string>> SCROLLABLE_BAR_MODE_TEST_PLAN = {
     { CreateScrollableMode(Converter::ArkValue<Opt_Dimension>("70px"), ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT),
         "BarMode.Scrollable,"
@@ -184,6 +185,9 @@ public:
         themeStyle->SetAttr("tab_content_animation_duration", { .value = ANIMATION_DURATION_DEFAULT });
         SetupTheme<TabTheme>();
         AddResource(RES_STRING_REGISTERED_ID, "#FF00FF00");
+        AddResource(FAKE_RES_ID, Dimension(FAKE_DIMENSION_PX_VALUE, DimensionUnit::PX));
+        AddResource(RES_NAME, Color(0xFFFF0000));
+        AddResource(static_cast<int64_t>(std::get<0>(RES_ID)), Color(0xFFFF0000));
     }
 };
 

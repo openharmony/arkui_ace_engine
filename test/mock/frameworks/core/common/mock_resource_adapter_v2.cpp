@@ -15,6 +15,7 @@
 #include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 
 #include "core/components/theme/resource_adapter.h"
+#include "base/log/log.h"
 #include <map>
 #include <mutex>
 
@@ -31,6 +32,7 @@ std::map<std::string, Dimension> g_dimensionNameMap;
 std::map<std::string, std::string> g_strNameMap;
 std::map<std::string, double> g_doubleNameMap;
 std::map<std::string, int32_t> g_int32NameMap;
+std::map<std::string, std::vector<std::string>> g_strsNameMap;
 std::mutex g_mapMutex;
 int32_t g_resourceAdapterInstanceId = -1;
 } // namespace
@@ -162,6 +164,17 @@ bool MockResourceAdapterV2::GetMockResourceDataByName(const std::string& name, i
     return true;
 }
 
+bool MockResourceAdapterV2::GetMockResourceDataByName(const std::string& name, std::vector<std::string>& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    auto it = g_strsNameMap.find(name);
+    if (it == g_strsNameMap.end()) {
+        return false;
+    }
+    data = it->second;
+    return true;
+}
+
 void AddMockResourceData(uint32_t id, const Color& data)
 {
     std::lock_guard<std::mutex> lock(g_mapMutex);
@@ -227,6 +240,12 @@ void AddMockResourceData(const std::string& name, const int32_t& data)
     g_int32NameMap.insert_or_assign(name, data);
 }
 
+void AddMockResourceData(const std::string& name, const std::vector<std::string>& data)
+{
+    std::lock_guard<std::mutex> lock(g_mapMutex);
+    g_strsNameMap.insert_or_assign(name, data);
+}
+
 void ResetMockResourceData()
 {
     std::lock_guard<std::mutex> lock(g_mapMutex);
@@ -241,6 +260,7 @@ void ResetMockResourceData()
     g_strNameMap.clear();
     g_doubleNameMap.clear();
     g_int32NameMap.clear();
+    g_strsNameMap.clear();
     g_resourceAdapterInstanceId = -1;
 }
 
