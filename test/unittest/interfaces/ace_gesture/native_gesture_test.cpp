@@ -77,13 +77,9 @@ HWTEST_F(NativeGestureTest, NativeGestureIssueTest001, TestSize.Level1)
      */
     ArkUI_GestureInterruptInfo interruptInfo;
     ArkUI_GestureEvent gestureEvent;
-    ArkUIGestureInterruptInfo interruptData;
-    auto* nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto* gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
-    interruptData.userData = reinterpret_cast<void*>(gestureNode);
-    interruptData.gestureEvent = &gestureEvent;
-    interruptInfo.interruptData = interruptData;
+    ArkUI_GestureRecognizer* recognizer = new ArkUI_GestureRecognizer();
+    interruptInfo.interruptData.userData = std::make_unique<OHOS::Ace::LifeCycleObserver>(recognizer);
+    interruptInfo.interruptData.gestureEvent = &gestureEvent;
 
     auto* event = OH_ArkUI_GestureInterruptInfo_GetGestureEvent(&interruptInfo);
     /**
@@ -706,7 +702,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest004, TestSize.Level1)
     EXPECT_TRUE(result);
 
     ArkUI_GestureRecognizer *recognizer = new ArkUI_GestureRecognizer();
-    interruptInfo.interruptData.userData = recognizer;
+    interruptInfo.interruptData.userData = std::make_unique<OHOS::Ace::LifeCycleObserver>(recognizer);
     auto* re1 = OH_ArkUI_GestureInterruptInfo_GetRecognizer(&interruptInfo);
     EXPECT_NE(re1, nullptr);
 }
@@ -737,10 +733,8 @@ HWTEST_F(NativeGestureTest, GestureImplTest005, TestSize.Level1)
     auto* re3 = OH_ArkUI_GestureInterruptInfo_GetGestureEvent(&interruptInfo);
     EXPECT_EQ(re3, nullptr);
 
-    auto* nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
-        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
-    auto* gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
-    interruptInfo.interruptData.userData = reinterpret_cast<void*>(gestureNode);
+    ArkUI_GestureRecognizer* recognizer = new ArkUI_GestureRecognizer();
+    interruptInfo.interruptData.userData = std::make_unique<OHOS::Ace::LifeCycleObserver>(recognizer);
     auto* re4 = OH_ArkUI_GestureInterruptInfo_GetGestureEvent(&interruptInfo);
     EXPECT_NE(re4, nullptr);
 }
@@ -1635,7 +1629,7 @@ HWTEST_F(NativeGestureTest, GestureImplTest0047, TestSize.Level1)
     ASSERT_NE(nodeAPI, nullptr);
     auto gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
     ASSERT_NE(gestureNode, nullptr);
-    ArkUI_GestureRecognizer attachRecognizer {};
+    ArkUI_GestureRecognizer attachRecognizer;
     attachRecognizer.attachNode = gestureNode;
     constexpr int32_t INVALID_EVENT_NODE_ID = std::numeric_limits<int32_t>::min();
     event3.nodeId = INVALID_EVENT_NODE_ID;
