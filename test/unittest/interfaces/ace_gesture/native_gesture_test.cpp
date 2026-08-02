@@ -125,7 +125,8 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer002, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer003, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew = { 5, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer recognizerNew;
+    recognizerNew.type = 5;
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     ArkUI_GestureDirectionMask directMaskNew = 1;
     ArkUI_GestureDirectionMask* directMask = &directMaskNew;
@@ -179,7 +180,8 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer005, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer006, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew = { 0, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer recognizerNew;
+    recognizerNew.type = 0;
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     int fingerNew = 2;
     int* finger = &fingerNew;
@@ -255,7 +257,8 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer008, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer009, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew = { 0, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer recognizerNew;
+    recognizerNew.type = 0;
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     bool isLimitedNew = false;
     bool* isLimited = &isLimitedNew;
@@ -331,7 +334,8 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer011, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer012, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew = { 1, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer recognizerNew;
+    recognizerNew.type = 1;
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     bool isRepeatNew = true;
     bool* isRepeat = &isRepeatNew;
@@ -378,7 +382,8 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer014, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer015, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew = { 3, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer recognizerNew;
+    recognizerNew.type = 3;
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     double distanceNew = 5;
     double* distance = &distanceNew;
@@ -431,7 +436,8 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer017, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer018, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew = { 5, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer recognizerNew;
+    recognizerNew.type = 5;
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     double speedNew = 100;
     double* speed = &speedNew;
@@ -479,7 +485,8 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer020, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer021, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew = { 1, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer recognizerNew;
+    recognizerNew.type = 1;
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     int durationNew = 500;
     int* duration = &durationNew;
@@ -526,7 +533,8 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer023, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer024, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew = { 4, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer recognizerNew;
+    recognizerNew.type = 4;
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     double angleNew = 1;
     double* angle = &angleNew;
@@ -572,7 +580,8 @@ HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer026, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, NativeNodeGestureRecognizer027, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew = { 0, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer recognizerNew;
+    recognizerNew.type = 0;
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     double distanceThresholdNew = std::numeric_limits<double>::infinity();
     double* distanceThreshold = &distanceThresholdNew;
@@ -1435,7 +1444,8 @@ HWTEST_F(NativeGestureTest, GestureImplTest0044, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew = { 0, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer recognizerNew;
+    recognizerNew.type = 0;
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     /**
      * @tc.steps: step1. set abnormal param.
@@ -1533,7 +1543,8 @@ HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, GestureImplTest0046, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew = { 0, nullptr, nullptr, nullptr };
+    ArkUI_GestureRecognizer recognizerNew;
+    recognizerNew.type = 0;
     ArkUI_GestureRecognizer* recognizer = &recognizerNew;
     /**
      * @tc.steps: step1. set abnormal param.
