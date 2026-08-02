@@ -66,7 +66,7 @@ private:
     LifeCycleObservable* observable_;
 };
 
-LifeCycleObservable::~LifeCycleObservable()
+inline LifeCycleObservable::~LifeCycleObservable()
 {
     // notify all observers
     for (auto& observer : observers_) {
