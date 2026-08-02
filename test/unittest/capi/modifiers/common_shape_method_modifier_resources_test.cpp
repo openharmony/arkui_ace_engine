@@ -32,6 +32,7 @@ const auto ATTRIBUTE_FILL_OPACITY_NAME = "fillOpacity";
 
 // global variables
 const int64_t FAKE_RES_ID(1234);
+const double FAKE_DIMENSION_PX_VALUE = 10.0;
 
 // resource names and id
 const auto RES_NAME = "aa.bb.cc";
@@ -72,7 +73,7 @@ public:
         // set test values to Theme Pattern as data for the Theme building
         AddResource(RES_NAME, RESOURCE_OPACITY_BY_STRING);
         AddResource(RES_ID, RESOURCE_OPACITY_BY_NUMBER);
-        AddResource(FAKE_RES_ID, Dimension(10.0, DimensionUnit::PX));
+        AddResource(FAKE_RES_ID, Dimension(FAKE_DIMENSION_PX_VALUE, DimensionUnit::PX));
     }
 };
 

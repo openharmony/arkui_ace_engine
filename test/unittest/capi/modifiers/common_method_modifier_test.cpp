@@ -34,6 +34,7 @@ const int32_t VALID_NUMBER = INT_MAX;
 const int32_t INVALID_NUMBER = INT_MIN;
 const int64_t FAKE_RES_ID(1234);
 const int64_t FAKE_RES_ID_2(1235);
+const int64_t FAKE_COLOR_RES_ID(11111);
 const double FAKE_DIMENSION_VALUE = 10.0;
 const auto OPT_VALID_NUM = Converter::ArkValue<Opt_Number>(VALID_NUMBER);
 const auto OPT_INVALID_NUM = Converter::ArkValue<Opt_Number>(INVALID_NUMBER);
@@ -210,7 +211,7 @@ public:
         AddResource(FAKE_RES_ID_2, Dimension(FAKE_DIMENSION_VALUE, DimensionUnit::PX));
         // Add color resources for radialGradient test
         AddResource("aa.bb.cc", Color(0xFFFF0000));
-        AddResource(static_cast<int64_t>(11111), Color(0xFFFF0000));
+        AddResource(FAKE_COLOR_RES_ID, Color(0xFFFF0000));
     }
     void TearDown()
     {

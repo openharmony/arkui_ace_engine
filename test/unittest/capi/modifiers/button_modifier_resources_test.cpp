@@ -102,8 +102,12 @@ public:
 
         AddResource(RES_DIMENSION_ID, DIMENSION_BY_NUMBER);
 
-        AddMockResourceData(static_cast<uint32_t>(std::get<0>(RES_FAMILY_ID)), std::vector<std::string>{FAMILY_BY_NUMBER});
-        AddMockResourceData(std::get<0>(RES_FAMILY_NAME), std::vector<std::string>{FAMILY_BY_STRING});
+        AddMockResourceData(
+            static_cast<uint32_t>(std::get<0>(RES_FAMILY_ID)),
+            std::vector<std::string>{FAMILY_BY_NUMBER});
+        AddMockResourceData(
+            std::get<0>(RES_FAMILY_NAME),
+            std::vector<std::string>{FAMILY_BY_STRING});
     }
 };
 

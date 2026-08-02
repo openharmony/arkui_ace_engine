@@ -156,7 +156,8 @@ public:
         RefPtr<ResourceAdapter> adapter = mockResourceAdapter_;
         // Register with a wide range of instanceIds to cover all possible lookups
         // Include negative, zero, and positive values
-        for (int32_t id = -10; id <= 100; ++id) {
+        constexpr int32_t MAX_REGISTER_INSTANCE_ID = 100;
+        for (int32_t id = -10; id <= MAX_REGISTER_INSTANCE_ID; ++id) {
             ResourceManager::GetInstance().AddResourceAdapter("", "", id, adapter, true);
         }
         // Also register with current instanceId
