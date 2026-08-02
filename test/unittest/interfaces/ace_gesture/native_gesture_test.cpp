@@ -1444,9 +1444,8 @@ HWTEST_F(NativeGestureTest, GestureImplTest0044, TestSize.Level1)
  */
 HWTEST_F(NativeGestureTest, GestureImplTest0045, TestSize.Level1)
 {
-    ArkUI_GestureRecognizer recognizerNew;
-    recognizerNew.type = 0;
-    ArkUI_GestureRecognizer* recognizer = &recognizerNew;
+    ArkUI_GestureRecognizer* recognizer = new ArkUI_GestureRecognizer();
+    recognizer->type = 0;
     /**
      * @tc.steps: step1. set abnormal param.
      * @tc.expected: return ARKUI_ERROR_CODE_PARAM_INVALID.
