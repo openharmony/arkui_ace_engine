@@ -24,8 +24,12 @@
 #include "arkoala_api_generated.h"
 #include "../capi_gen140_compat.h"
 
+#include "core/common/container.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/components/theme/theme_constants.h"
 #include "core/components_ng/property/flex_property.h"
 #include "core/interfaces/native/utility/peer_utils.h"
+#include "base/log/log.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
@@ -146,6 +150,19 @@ public:
         auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
         MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutor);
 
+        // Register MockResourceAdapterV2 to ResourceManager for resource lookup
+        // Register with multiple instanceIds to ensure it's found
+        mockResourceAdapter_ = AceType::MakeRefPtr<MockResourceAdapterV2>();
+        RefPtr<ResourceAdapter> adapter = mockResourceAdapter_;
+        // Register with a wide range of instanceIds to cover all possible lookups
+        // Include negative, zero, and positive values
+        for (int32_t id = -10; id <= 100; ++id) {
+            ResourceManager::GetInstance().AddResourceAdapter("", "", id, adapter, true);
+        }
+        // Also register with current instanceId
+        int32_t instanceId = Container::CurrentIdSafely();
+        ResourceManager::GetInstance().AddResourceAdapter("", "", instanceId, adapter, true);
+
 #ifdef CAPI_BACKTRACE
         ResetThemes();
 #endif
@@ -153,6 +170,11 @@ public:
 
     static void TearDownTestCase()
     {
+        // Remove MockResourceAdapterV2 from ResourceManager
+        int32_t instanceId = Container::CurrentIdSafely();
+        ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId);
+        ResetMockResourceData();
+
         MockPipelineContext::GetCurrent()->SetTaskExecutor(nullptr);
         MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
         MockPipelineContext::TearDown();
@@ -233,6 +255,14 @@ public:
         ASSERT_NE(modifier_, nullptr);
         node_ = CreateNode();
         ASSERT_NE(node_, nullptr);
+        
+        // Re-register the SAME MockResourceAdapterV2 instance that was used in SetUpTestCase
+        // This ensures the adapter has access to all the mock data added via AddResource()
+        if (mockResourceAdapter_) {
+            RefPtr<ResourceAdapter> adapter = mockResourceAdapter_;
+            int32_t instanceId = Container::CurrentIdSafely();
+            ResourceManager::GetInstance().AddResourceAdapter("", "", instanceId, adapter, true);
+        }
     }
 
     virtual void TearDown(void)
@@ -245,6 +275,7 @@ public:
 protected:
     inline static RefPtr<::testing::NiceMock<MockThemeManager>> themeManager_;
     inline static RefPtr<ThemeConstants> themeConstants_;
+    inline static RefPtr<MockResourceAdapterV2> mockResourceAdapter_;
 
     inline static const GENERATED_ArkUIBasicNodeAPI *basicAPI_
         = reinterpret_cast<const GENERATED_ArkUIBasicNodeAPI *>(

@@ -208,6 +208,9 @@ public:
         // Register mock resource data for FAKE_RES_ID (1234) and FAKE_RES_ID_2 (1235)
         AddResource(FAKE_RES_ID, Dimension(FAKE_DIMENSION_VALUE, DimensionUnit::PX));
         AddResource(FAKE_RES_ID_2, Dimension(FAKE_DIMENSION_VALUE, DimensionUnit::PX));
+        // Add color resources for radialGradient test
+        AddResource("aa.bb.cc", Color(0xFFFF0000));
+        AddResource(static_cast<int64_t>(11111), Color(0xFFFF0000));
     }
     void TearDown()
     {

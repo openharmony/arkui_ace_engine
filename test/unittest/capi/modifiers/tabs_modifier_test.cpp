@@ -184,6 +184,9 @@ public:
         themeStyle->SetAttr("tab_content_animation_duration", { .value = ANIMATION_DURATION_DEFAULT });
         SetupTheme<TabTheme>();
         AddResource(RES_STRING_REGISTERED_ID, "#FF00FF00");
+        AddResource(FAKE_RES_ID, Dimension(10.0, DimensionUnit::PX));
+        AddResource(RES_NAME, Color(0xFFFF0000));
+        AddResource(static_cast<int64_t>(std::get<0>(RES_ID)), Color(0xFFFF0000));
     }
 };
 

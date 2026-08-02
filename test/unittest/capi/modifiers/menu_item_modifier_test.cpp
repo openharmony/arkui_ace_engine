@@ -198,7 +198,7 @@ public:
         themeStyle->SetAttr(PATTERN_TEXT_COLOR, { .value = Color::FromString(COLOR_THEME_FONT)});
         SetupTheme<SelectTheme>();
         AddResource(ICON_OK_STR, "path_to_select_icon");
-        AddResource(FAMILY_RES_ID, "aa.bb.cc");
+        AddMockResourceData(static_cast<uint32_t>(FAMILY_RES_ID), std::vector<std::string>{"aa.bb.cc"});
         AddResource(START_ICON_RES, START_ICON_PATH);
         AddResource(END_ICON_RES, END_ICON_PATH);
         AddResource(CONTENT_RES, CONTENT);

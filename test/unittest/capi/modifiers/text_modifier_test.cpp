@@ -142,6 +142,7 @@ public:
         AddResource(FLOAT_RES_0_ID, FLOAT_RES_0_VALUE);
         AddResource(FLOAT_RES_1_ID, FLOAT_RES_1_VALUE);
         AddResource(FLOAT_RES_2_ID, FLOAT_RES_2_STORED_VALUE);
+        AddResource(RES_NAME, Color(0xFF123456));
     }
     Opt_CustomNodeBuilder getBuilderCb()
     {
