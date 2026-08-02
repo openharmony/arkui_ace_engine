@@ -38,10 +38,6 @@ void FocusHub::LostFocus(BlurReason reason)
 {
     (void)reason;
 }
-bool FocusHub::PaintFocusState(bool)
-{
-    return false;
-}
 void FocusHub::SetFocusable(bool focusable, bool isExplicit)
 {
     (void)focusable;

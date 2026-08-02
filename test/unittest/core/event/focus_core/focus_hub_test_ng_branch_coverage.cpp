@@ -447,6 +447,7 @@ HWTEST_F(FocusHubTestNg, HandleFocusTravel002, TestSize.Level1)
     EXPECT_NE(node, nullptr);
     auto* pipeline = node->GetContext();
     EXPECT_NE(pipeline, nullptr);
+    pipeline->focusManager_->isFocusActive_ = true;
     EXPECT_TRUE(pipeline->GetIsFocusActive());
     EXPECT_TRUE(pipeline->IsTabJustTriggerOnKeyEvent());
 

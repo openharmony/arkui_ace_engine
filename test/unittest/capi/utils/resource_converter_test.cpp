@@ -72,7 +72,7 @@ public:
  */
 HWTEST_F(ResourceConvertorTest, resourceConverterTest001, TestSize.Level1)
 {
-    auto registerResource = [](const std::string& id, const std::string& value) -> Ark_Resource {
+    auto registerResource = [](std::string id, const std::string& value) -> Ark_Resource {
         // Register a resource
         AddResource(id, value);
         // Create Ark resource

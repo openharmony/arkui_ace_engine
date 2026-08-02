@@ -1765,13 +1765,13 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
      * @tc.expected: depends on first param, hideSplitButton value is true.
      */
     context_->SetContainerButtonHide(true, true, false, false);
-    EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
+    EXPECT_TRUE(containerPattern->hideSplitButton_);
     /**
      * @tc.steps3: call SetContainerButtonHide with params false, true, false, false.
      * @tc.expected: depends on first param, hideSplitButton value is false.
      */
     context_->SetContainerButtonHide(false, true, false, false);
-    EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
+    EXPECT_FALSE(containerPattern->hideSplitButton_);
 
     /**
      * @tc.steps4: call SetContainerButtonHide with params false, true, false, false.

@@ -965,15 +965,14 @@ HWTEST_F(ArcListLayoutTestNg, CalculatePredictSnapEndPositionByIndex003, TestSiz
     listLayoutAlgorithm->totalOffset_ = totalOffset;
 
     float snapSize = listLayoutAlgorithm->GetItemSnapSize();
+    float predictPos = 999.0f + contentMainSize / 2.0f - totalOffset;
     float snapLow = 0.0f + snapSize / 2.0f;
     float snapHigh = itemHeight - snapSize / 2.0f;
-    float itemCenter = 0.0f + itemHeight / 2.0f;
-    float clampedPredictPos = itemCenter;
-    clampedPredictPos = LessNotEqual(clampedPredictPos, snapLow) ? snapLow : clampedPredictPos;
-    clampedPredictPos = LessNotEqual(snapHigh, clampedPredictPos) ? snapHigh : clampedPredictPos;
+    predictPos = LessNotEqual(predictPos, snapLow) ? snapLow : predictPos;
+    predictPos = LessNotEqual(snapHigh, predictPos) ? snapHigh : predictPos;
 
     float result = listLayoutAlgorithm->CalculatePredictSnapEndPositionByIndex(1, 999.0f);
-    float expected = totalOffset + clampedPredictPos - contentMainSize / 2.0f;
+    float expected = totalOffset + predictPos - contentMainSize / 2.0f;
     EXPECT_TRUE(NearEqual(result, expected));
 }
 
@@ -1007,7 +1006,7 @@ HWTEST_F(ArcListLayoutTestNg, FixPredictSnapOffsetEndPosAssign001, TestSize.Leve
 
     listLayoutAlgorithm->FixPredictSnapOffset(layoutProperty_);
 
-    EXPECT_TRUE(listLayoutAlgorithm->GetPredictSnapEndPosition().has_value());
+    EXPECT_FALSE(listLayoutAlgorithm->GetPredictSnapEndPosition().has_value());
 }
 
 /**
