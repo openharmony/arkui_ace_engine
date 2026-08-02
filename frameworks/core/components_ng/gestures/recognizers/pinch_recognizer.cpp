@@ -122,7 +122,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     activeFingers_.emplace_back(event.id);
     lastTouchEvent_ = event;
 
-    if (static_cast<int32_t>(activeFingers_.size()) >= fingers_ && refereeState_ != RefereeState::FAIL) {
+    if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
         initialDev_ = ComputeAverageDeviation();
         pinchCenter_ = ComputePinchCenter();
         LogStateChange(refereeState_, RefereeState::DETECTING, StateChangeReason::DETECTING_STARTED);
