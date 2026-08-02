@@ -17,9 +17,12 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_theme_style.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "core/common/container.h"
+#include "core/common/resource/resource_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,6 +37,11 @@ public:
         themeManager_ = AceType::MakeRefPtr<::testing::NiceMock<MockThemeManager>>();
         MockPipelineContext::GetCurrent()->SetThemeManager(themeManager_);
 
+        mockResourceAdapter_ = AceType::MakeRefPtr<MockResourceAdapterV2>();
+        RefPtr<ResourceAdapter> adapter = mockResourceAdapter_;
+        int32_t instanceId = Container::CurrentIdSafely();
+        ResourceManager::GetInstance().AddResourceAdapter("", "", instanceId, adapter, true);
+
         // assume using of test/mock/frameworks/core/common/mock_theme_constants.cpp in build
         themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(nullptr);
         EXPECT_CALL(*themeManager_, GetThemeConstants(testing::_, testing::_))
@@ -45,10 +53,14 @@ public:
 
     static void TearDownTestCase()
     {
+        int32_t instanceId = Container::CurrentIdSafely();
+        ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId);
+        ResetMockResourceData();
         MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
         MockPipelineContext::TearDown();
         themeManager_ = nullptr;
         themeConstants_ = nullptr;
+        mockResourceAdapter_ = nullptr;
     }
 
     static void AddResource(std::string key, const ResRawValue& value)
@@ -59,10 +71,14 @@ public:
         }
         ASSERT_NE(type, ThemeConstantsType::ERROR);
         MockThemeStyle::GetInstance()->SetAttr(key, { .type = type, .value = value });
+        if (auto str = std::get_if<std::string>(&value)) {
+            AddMockResourceData(key, *str);
+        }
     }
 
     inline static RefPtr<::testing::NiceMock<MockThemeManager>> themeManager_;
     inline static RefPtr<ThemeConstants> themeConstants_;
+    inline static RefPtr<MockResourceAdapterV2> mockResourceAdapter_;
 };
 
 /**

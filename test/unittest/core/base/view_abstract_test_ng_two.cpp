@@ -49,6 +49,7 @@ HWTEST_F(ViewAbstractTestNg, OpenMenuTest001, TestSize.Level1)
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, "Text", MenuType::MENU));
     ASSERT_NE(menuNode, nullptr);
     menuNode->MountToParent(selectNode);
+    ElementRegister::GetInstance()->AddUINode(menuNode);
     selectNode->MountToParent(rootNode);
     rootNode->MarkDirtyNode();
     ViewStackProcessor::GetInstance()->Push(menuNode);
