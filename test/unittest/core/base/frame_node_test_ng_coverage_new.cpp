@@ -1498,7 +1498,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback04, TestSize.Level
 {
     NG::RectF testLastFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
     NG::RectF testCurrFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
-    FrameNode::onSizeChangeDumpInfo dumpInfoOne { 1, testLastFrameRect, testCurrFrameRect };
+    NG::onSizeChangeDumpInfo dumpInfoOne { 1, testLastFrameRect, testCurrFrameRect };
     /**
      * @tc.steps: step1. create frameNode.
      */
@@ -1513,7 +1513,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback04, TestSize.Level
     // auto
     frameNode->lastFrameNodeRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
-    frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back(dumpInfoOne);
     OnSizeChangedFunc onJsFrameNodeSizeChanged = [node = frameNode](const RectF& oldRect, const RectF& rect) {
         node->lastFrameNodeRect_ = nullptr;
     };
@@ -1534,7 +1534,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback05, TestSize.Level
 {
     NG::RectF testLastFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
     NG::RectF testCurrFrameRect = { 10.0f, 10.0f, 10.0f, 10.0f }; // 10.0f is the x, y, width and height of rect
-    FrameNode::onSizeChangeDumpInfo dumpInfoOne { 1, testLastFrameRect, testCurrFrameRect };
+    NG::onSizeChangeDumpInfo dumpInfoOne { 1, testLastFrameRect, testCurrFrameRect };
     /**
      * @tc.steps: step1. create frameNode.
      */
@@ -1550,7 +1550,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback05, TestSize.Level
     // auto
     frameNode->lastFrameNodeRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
-    frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back(dumpInfoOne);
     OnSizeChangedFunc onJsFrameNodeSizeChanged = [node = frameNode](const RectF& oldRect, const RectF& rect) {
         node->lastFrameNodeRect_ = nullptr;
     };

@@ -1988,10 +1988,10 @@ HWTEST_F(FrameNodeTestNg, FrameDumpOnSizeChangeInfo, TestSize.Level1)
      * @tc.steps: step2. onSizeChangeDumpInfos push_back.
      * @tc.expected: expect is not nullptr.
      */
-    frameNode->onSizeChangeDumpInfos.clear();
-    frameNode->onSizeChangeDumpInfos.push_back({1625491200, RectF{}, RectF{}});
-    frameNode->onSizeChangeDumpInfos.push_back({1625494800, RectF{}, RectF{}});
-    EXPECT_EQ(frameNode->onSizeChangeDumpInfos.size(), 2);
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.clear();
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back({1625491200, RectF{}, RectF{}});
+    frameNode->GetExtensionData().onSizeChangeDumpInfos.push_back({1625494800, RectF{}, RectF{}});
+    EXPECT_EQ(frameNode->GetExtensionData().onSizeChangeDumpInfos.size(), 2);
 
     /**
      * @tc.steps: step3. create json.
@@ -3633,7 +3633,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetCustomPropertyMapFlagByKey001, TestSize.Le
     frameNode->SetCustomPropertyMapFlagByKey("key");
     std::string value;
     bool result = frameNode->GetCapiCustomProperty("key", value);
-    std::string flagValue = frameNode->customPropertyMap_["key"][1];
+    std::string flagValue = frameNode->GetExtensionData().customPropertyMap["key"][1];
     EXPECT_TRUE(result);
     EXPECT_EQ(value, "");
     EXPECT_EQ(flagValue, "0");
@@ -3645,13 +3645,13 @@ HWTEST_F(FrameNodeTestNg, FrameNodeSetCustomPropertyMapFlagByKey001, TestSize.Le
     frameNode->AddCustomProperty("key1", "value1");
     std::string value1;
     bool result1 = frameNode->GetCapiCustomProperty("key1", value1);
-    std::string flagValue1 = frameNode->customPropertyMap_["key1"][1];
+    std::string flagValue1 = frameNode->GetExtensionData().customPropertyMap["key1"][1];
     EXPECT_TRUE(result1);
     EXPECT_EQ(value1, "value1");
     EXPECT_EQ(flagValue1, "1");
     frameNode->SetCustomPropertyMapFlagByKey("key1");
     result1 = frameNode->GetCapiCustomProperty("key1", value1);
-    flagValue1 = frameNode->customPropertyMap_["key1"][1];
+    flagValue1 = frameNode->GetExtensionData().customPropertyMap["key1"][1];
     EXPECT_TRUE(result1);
     EXPECT_EQ(value1, "value1");
     EXPECT_EQ(flagValue1, "0");

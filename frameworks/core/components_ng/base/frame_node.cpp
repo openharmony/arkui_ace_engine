@@ -792,9 +792,10 @@ FrameNode::~FrameNode()
             destroyCallback.second();
         }
     }
-    if (removeCustomProperties_) {
-        removeCustomProperties_();
-        removeCustomProperties_ = nullptr;
+    auto* ext = GetMutableExtensionData();
+    if (ext && ext->removeCustomProperties) {
+        ext->removeCustomProperties();
+        ext->removeCustomProperties = nullptr;
     }
     CleanRenderTreeLifeCycle();
     pattern_->DetachFromFrameNode(this);
@@ -1318,7 +1319,7 @@ void FrameNode::DumpDragInfo()
                                        .append(userSet_ ? "true" : "false")
                                        .append(" CustomerSet: ")
                                        .append(customerSet_ ? "true" : "false"));
-    auto dragPreviewStr =
+auto dragPreviewStr =
         std::string("DragPreview: Has customNode: ").append(dragPreviewInfo_.customNode ? "YES" : "NO");
     dragPreviewStr.append(" Has pixelMap: ").append(dragPreviewInfo_.pixelMap ? "YES" : "NO");
     dragPreviewStr.append(" extraInfo: ").append(dragPreviewInfo_.extraInfo.c_str());
@@ -1355,7 +1356,9 @@ void FrameNode::DumpDragInfo()
 
 void FrameNode::DumpOnSizeChangeInfo()
 {
-    for (auto it = onSizeChangeDumpInfos.rbegin(); it != onSizeChangeDumpInfos.rend(); ++it) {
+    auto* ext = GetMutableExtensionData();
+    CHECK_NULL_VOID(ext);
+    for (auto it = ext->onSizeChangeDumpInfos.rbegin(); it != ext->onSizeChangeDumpInfos.rend(); ++it) {
         DumpLog::GetInstance().AddDesc(std::string("onSizeChange Time: ")
                                            .append(ConvertTimestampToStr(it->onSizeChangeTimeStamp))
                                            .append(" lastFrameRect: ")
@@ -1723,10 +1726,11 @@ void FrameNode::GeometryNodeToJsonValue(std::unique_ptr<JsonValue>& json, const 
 // if return true, can not get property from customPropertyMap_
 bool FrameNode::IsJsCustomPropertyUpdated() const
 {
-    if (customPropertyMap_.empty()) {
+    const auto* ext = GetConstExtensionData();
+    if (!ext || ext->customPropertyMap.empty()) {
         return true;
     }
-    for (const auto& iter : customPropertyMap_) {
+    for (const auto& iter : ext->customPropertyMap) {
         if (iter.second.size() > 1 && iter.second[1] == "0") {
             return true;
         }
@@ -1768,16 +1772,17 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
         json->Put("inspectorLabel", GetInspectorLabel().c_str());
     }
     ExtraCustomPropertyToJsonValue(json, filter);
-    if (IsCNode() || !IsJsCustomPropertyUpdated()) {
+    const auto* extPtr = GetConstExtensionData();
+    if (extPtr && (IsCNode() || !IsJsCustomPropertyUpdated())) {
         auto jsonNode = JsonUtil::Create(true);
-        for (const auto& iter : customPropertyMap_) {
+        for (const auto& iter : extPtr->customPropertyMap) {
             jsonNode->Put(iter.first.c_str(), iter.second[0].c_str());
         }
-        if (!customPropertyMap_.empty()) {
+        if (!extPtr->customPropertyMap.empty()) {
             json->Put("customProperty", jsonNode->ToString().c_str());
         }
-    } else if (getCustomPropertyMapFunc_) {
-        json->Put("customProperty", getCustomPropertyMapFunc_().c_str());
+    } else if (extPtr && extPtr->getCustomPropertyMapFunc) {
+        json->Put("customProperty", extPtr->getCustomPropertyMapFunc().c_str());
     }
     json->Put("enableClickSoundEffect", enableClickSoundEffect_);
 }
@@ -2081,8 +2086,8 @@ void FrameNode::MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag)
 void FrameNode::FireColorNDKCallback()
 {
     std::shared_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
-    if (ndkColorModeUpdateCallback_) {
-        auto colorModeChange = ndkColorModeUpdateCallback_;
+    if (ndkColorModeUpdateCallback_ && *ndkColorModeUpdateCallback_) {
+        auto colorModeChange = *ndkColorModeUpdateCallback_;
         auto context = GetContext();
         CHECK_NULL_VOID(context);
         colorModeChange(context->GetColorMode() == ColorMode::DARK);
@@ -2092,7 +2097,10 @@ void FrameNode::FireColorNDKCallback()
 void FrameNode::SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>&& callback)
 {
     std::unique_lock<std::shared_mutex> lock(colorModeCallbackMutex_);
-    ndkColorModeUpdateCallback_ = callback;
+    if (!ndkColorModeUpdateCallback_) {
+        ndkColorModeUpdateCallback_ = std::make_unique<std::function<void(int32_t)>>();
+    }
+    *ndkColorModeUpdateCallback_ = callback;
     auto context = GetContext();
     CHECK_NULL_VOID(context);
     colorMode_ = context->GetColorMode();
@@ -2101,8 +2109,8 @@ void FrameNode::SetNDKColorModeUpdateCallback(const std::function<void(int32_t)>
 void FrameNode::FireFontNDKCallback(const ConfigurationChange& configurationChange)
 {
     std::shared_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
-    if ((configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) && ndkFontUpdateCallback_) {
-        auto fontChangeCallback = ndkFontUpdateCallback_;
+    if ((configurationChange.fontScaleUpdate || configurationChange.fontWeightScaleUpdate) && ndkFontUpdateCallback_ && *ndkFontUpdateCallback_) {
+        auto fontChangeCallback = *ndkFontUpdateCallback_;
         auto pipeline = GetContextWithCheck();
         CHECK_NULL_VOID(pipeline);
         fontChangeCallback(pipeline->GetFontScale(), pipeline->GetFontWeightScale());
@@ -2312,7 +2320,10 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
 
 void FrameNode::SetMeasureCallback(const std::function<void(RefPtr<Kit::FrameNode>)>& measureCallback)
 {
-    measureCallback_ = std::move(measureCallback);
+    if (!measureCallback_) {
+        measureCallback_ = std::make_unique<std::function<void(RefPtr<Kit::FrameNode>&)>>();
+    }
+    *measureCallback_ = std::move(measureCallback);
 }
 
 void FrameNode::SetBackgroundLayoutConstraint(const RefPtr<FrameNode>& customNode)
@@ -2554,10 +2565,11 @@ void FrameNode::TriggerOnSizeChangeCallback()
         auto currFrameRect = GetRectWithRender();
         if (currFrameRect.GetSize() != (*lastFrameNodeRect_).GetSize()) {
             onSizeChangeDumpInfo dumpInfo { GetCurrentTimestamp(), *lastFrameNodeRect_, currFrameRect };
-            if (onSizeChangeDumpInfos.size() >= SIZE_CHANGE_DUMP_SIZE) {
-                onSizeChangeDumpInfos.erase(onSizeChangeDumpInfos.begin());
+            auto& dumpInfos = GetExtensionData().onSizeChangeDumpInfos;
+            if (dumpInfos.size() >= SIZE_CHANGE_DUMP_SIZE) {
+                dumpInfos.erase(dumpInfos.begin());
             }
-            onSizeChangeDumpInfos.emplace_back(dumpInfo);
+            dumpInfos.emplace_back(dumpInfo);
             if (eventHub_->HasOnSizeChanged()) {
                 eventHub_->FireOnSizeChanged(*lastFrameNodeRect_, currFrameRect);
             }
@@ -6227,7 +6239,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
 
     if (measureCallback_) {
-        measureCallback_(kitNode_);
+        (*measureCallback_)(kitNode_);
     }
 
     PostTaskForIgnore();
@@ -7519,14 +7531,15 @@ RectF FrameNode::ApplyFrameNodeTranformToRect(const RectF& rect, const RefPtr<Fr
 void FrameNode::SetCustomPropertyCallback(std::function<void()>&& func,
     std::function<std::string(const std::string&)>&& getFunc, std::function<std::string()>&& getAllCustomPropertiesFunc)
 {
-    if (!removeCustomProperties_) {
-        removeCustomProperties_ = std::move(func);
+    auto& extensionData = GetExtensionData();
+    if (!extensionData.removeCustomProperties) {
+        extensionData.removeCustomProperties = std::move(func);
     }
-    if (!getCustomProperty_) {
-        getCustomProperty_ = std::move(getFunc);
+    if (!extensionData.getCustomProperty) {
+        extensionData.getCustomProperty = std::move(getFunc);
     }
-    if (!getCustomPropertyMapFunc_) {
-        getCustomPropertyMapFunc_ = std::move(getAllCustomPropertiesFunc);
+    if (!extensionData.getCustomPropertyMapFunc) {
+        extensionData.getCustomPropertyMapFunc = std::move(getAllCustomPropertiesFunc);
     }
 }
 
@@ -8139,12 +8152,15 @@ void FrameNode::OnThemeScopeUpdate(int32_t themeScopeId)
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)
 {
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
-    for (auto it = onSizeChangeDumpInfos.rbegin(); it != onSizeChangeDumpInfos.rend(); ++it) {
-        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
-        child->Put("onSizeChange Time", it->onSizeChangeTimeStamp);
-        child->Put("lastFrameRect", it->lastFrameRect.ToString().c_str());
-        child->Put("currFrameRect", it->currFrameRect.ToString().c_str());
-        children->Put(child);
+    auto* ext = GetMutableExtensionData();
+    if (ext) {
+        for (auto it = ext->onSizeChangeDumpInfos.rbegin(); it != ext->onSizeChangeDumpInfos.rend(); ++it) {
+            std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+            child->Put("onSizeChange Time", it->onSizeChangeTimeStamp);
+            child->Put("lastFrameRect", it->lastFrameRect.ToString().c_str());
+            child->Put("currFrameRect", it->currFrameRect.ToString().c_str());
+            children->Put(child);
+        }
     }
     children->Put("SizeChangeInfo", children);
 }
@@ -8375,23 +8391,27 @@ void FrameNode::SetJSCustomProperty(std::function<bool()> func, std::function<st
     if (IsCNode()) {
         return;
     }
-    if (!getCustomProperty_) {
-        getCustomProperty_ = getFunc;
+    auto& extensionData = GetExtensionData();
+    if (!extensionData.getCustomProperty) {
+        extensionData.getCustomProperty = getFunc;
     }
-    if (getCustomPropertyMapFunc && (!getCustomPropertyMapFunc_)) {
-        getCustomPropertyMapFunc_ = std::move(getCustomPropertyMapFunc);
+    if (getCustomPropertyMapFunc && (!extensionData.getCustomPropertyMapFunc)) {
+        extensionData.getCustomPropertyMapFunc = std::move(getCustomPropertyMapFunc);
     }
 }
 
 bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
 {
-    auto iter = customPropertyMap_.find(key);
-    if (iter != customPropertyMap_.end() && !iter->second.empty()) {
+    FrameNodeExtension& frameNodeExtension = GetExtensionData();
+    auto& customPropertyMap = frameNodeExtension.customPropertyMap;
+    auto& getCustomProperty = frameNodeExtension.getCustomProperty;
+    auto iter = customPropertyMap.find(key);
+    if (iter != customPropertyMap.end() && !iter->second.empty()) {
         if (iter->second[1] == "1") {
             value = iter->second[0];
             return true;
-        } else if (getCustomProperty_) {
-            value = getCustomProperty_(key);
+        } else if (getCustomProperty) {
+            value = getCustomProperty(key);
             iter->second[0] = value;
             iter->second[1] = "1";
             return true;
@@ -8402,8 +8422,9 @@ bool FrameNode::GetJSCustomProperty(const std::string& key, std::string& value)
 
 bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value)
 {
-    auto iter = customPropertyMap_.find(key);
-    if (iter != customPropertyMap_.end()) {
+    FrameNodeExtension& frameNodeExtension = GetExtensionData();
+    auto iter = frameNodeExtension.customPropertyMap.find(key);
+    if (iter != frameNodeExtension.customPropertyMap.end()) {
         value = iter->second[0];
         return true;
     }
@@ -8412,20 +8433,21 @@ bool FrameNode::GetCapiCustomProperty(const std::string& key, std::string& value
 
 void FrameNode::AddCustomProperty(const std::string& key, const std::string& value)
 {
-    customPropertyMap_[key] = { value, "1" };
+    GetExtensionData().customPropertyMap[key] = { value, "1" };
 }
 
 void FrameNode::RemoveCustomProperty(const std::string& key)
 {
-    auto iter = customPropertyMap_.find(key);
-    if (iter != customPropertyMap_.end()) {
-        customPropertyMap_.erase(iter);
+    FrameNodeExtension& frameNodeExtension = GetExtensionData();
+    auto iter = frameNodeExtension.customPropertyMap.find(key);
+    if (iter != frameNodeExtension.customPropertyMap.end()) {
+        frameNodeExtension.customPropertyMap.erase(iter);
     }
 }
 
 void FrameNode::SetCustomPropertyMapFlagByKey(const std::string& key)
 {
-    auto& valueVector = customPropertyMap_[key];
+    auto& valueVector = GetExtensionData().customPropertyMap[key];
     if (valueVector.empty()) {
         valueVector = { "", "0" };
     } else {
@@ -8534,8 +8556,9 @@ void FrameNode::SetKitNode(const RefPtr<Kit::FrameNode>& node)
 
 bool FrameNode::GetCustomPropertyByKey(const std::string& key, std::string& value)
 {
-    auto iter = customPropertyMap_.find(key);
-    if (iter != customPropertyMap_.end() && !iter->second.empty()) {
+    FrameNodeExtension& frameNodeExtension = GetExtensionData();
+    auto iter = frameNodeExtension.customPropertyMap.find(key);
+    if (iter != frameNodeExtension.customPropertyMap.end() && !iter->second.empty()) {
         value = iter->second[0];
         return true;
     }
@@ -8547,20 +8570,23 @@ void FrameNode::AddNodeDestroyCallback(const std::string& callbackKey, std::func
     if (!callback) {
         return;
     }
-    destroyCallbacks_[callbackKey] = std::move(callback);
+    GetExtensionData().destroyCallbacks[callbackKey] = std::move(callback);
 }
 
 void FrameNode::RemoveNodeDestroyCallback(const std::string& callbackKey)
 {
-    auto iter = destroyCallbacks_.find(callbackKey);
-    if (iter != destroyCallbacks_.end()) {
-        destroyCallbacks_.erase(iter);
+    auto& destroyCallbacks = GetExtensionData().destroyCallbacks;
+    auto iter = destroyCallbacks.find(callbackKey);
+    if (iter != destroyCallbacks.end()) {
+        destroyCallbacks.erase(iter);
     }
 }
 
 void FrameNode::FireOnExtraNodeDestroyCallback()
 {
-    for (const auto& callback : destroyCallbacks_) {
+    auto* ext = GetMutableExtensionData();
+    CHECK_NULL_VOID(ext);
+    for (const auto& callback : ext->destroyCallbacks) {
         callback.second();
     }
 }
@@ -9152,7 +9178,10 @@ void FrameNode::SetConfigurationModeUpdateCallback(
 void FrameNode::SetNDKFontUpdateCallback(const std::function<void(float, float)>&& callback)
 {
     std::unique_lock<std::shared_mutex> lock(fontSizeCallbackMutex_);
-    ndkFontUpdateCallback_ = callback;
+    if (!ndkFontUpdateCallback_) {
+        ndkFontUpdateCallback_ = std::make_unique<std::function<void(float, float)>>();
+    }
+    *ndkFontUpdateCallback_ = callback;
 }
 
 void FrameNode::SetLayoutProperty(const RefPtr<LayoutProperty>& layoutProperty)
@@ -9170,8 +9199,8 @@ void FrameNode::AddDelayLayoutChild(const RefPtr<FrameNode>& child)
 
 void FrameNode::SetRemoveCustomProperties(std::function<void()> func)
 {
-    if (!removeCustomProperties_) {
-        removeCustomProperties_ = func;
+    if (!GetExtensionData().removeCustomProperties) {
+        GetExtensionData().removeCustomProperties = func;
     }
 }
 
