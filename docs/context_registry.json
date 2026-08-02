@@ -3639,6 +3639,46 @@
       "spec_domain": "specs/07-frontend/02-state-management/01-v1-component-state"
     },
     {
+      "id": "StateMgmtV1DataObject",
+      "name": "State Management V1 Data Object",
+      "name_cn": "V1 数据对象状态管理",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "V1 数据对象",
+        "状态管理",
+        "@Observed",
+        "@Track",
+        "ObservedObject",
+        "TrackedObject",
+        "SubscribableHandler",
+        "对象属性观测"
+      ],
+      "aliases": [
+        "V1 数据对象",
+        "V1 Data Object State",
+        "@Observed/@Track"
+      ],
+      "kb": "docs/kb/frontend/state_management/v1_decorators.md",
+      "spec_status": "active",
+      "source_paths": {
+        "observed_object": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/observed_object.ts",
+        "tracked_object": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_tracked_object.ts",
+        "observed_property": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_observed_property.ts"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v1_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27",
+      "func_id": "07-02-02",
+      "spec_domain": "specs/07-frontend/02-state-management/02-v1-data-object-state"
+    },
+    {
       "id": "StateMgmtV2Decorators",
       "name": "State Management V2 Decorators",
       "name_cn": "V2 状态管理装饰器",
@@ -6433,6 +6473,47 @@
       "spec_domain": "specs/07-frontend/02-state-management/03-v1-app-state"
     },
     {
+      "id": "StateMgmtV2AppState",
+      "name": "State Management V2 App State",
+      "name_cn": "V2 应用内状态管理",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "V2 应用内状态",
+        "状态管理",
+        "AppStorageV2",
+        "PersistenceV2",
+        "StorageHelper",
+        "DataCoder",
+        "持久化",
+        "应用级存储"
+      ],
+      "aliases": [
+        "V2 应用状态",
+        "V2 App State",
+        "AppStorageV2/PersistenceV2"
+      ],
+      "kb": "docs/kb/frontend/state_management/storage.md",
+      "spec_status": "active",
+      "source_paths": {
+        "v2_persistence": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/sdk/v2_persistence.ts",
+        "v2_data_coder": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_data_coder/",
+        "storage_backend": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/common/i_storage.ts"
+      },
+      "api_paths": {
+        "statemanagement_module": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.StateManagement.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/@ohos.arkui.stateManagement.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v2_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/env_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27",
+      "func_id": "07-02-06",
+      "spec_domain": "specs/07-frontend/02-state-management/06-v2-app-state"
+    },
+    {
       "id": "StateMgmtCustomComponent",
       "name": "State Management Custom Component",
       "name_cn": "自定义组件机制",
@@ -6456,7 +6537,8 @@
         "自定义组件机制",
         "Custom Component",
         "ViewPU/ViewV2",
-        "组件复用与生命周期"
+        "组件复用与生命周期",
+        "状态管理自定义组件"
       ],
       "kb": "docs/kb/frontend/state_management/custom_component.md",
       "spec_status": "active",
@@ -6487,6 +6569,134 @@
       "last_verified": "2026-07-27",
       "func_id": "07-03-01",
       "spec_domain": "specs/07-frontend/03-custom-components/01-componentization"
+    },
+    {
+      "id": "CustomComponentLifecycle",
+      "name": "Custom Component Lifecycle",
+      "name_cn": "自定义组件生命周期",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "自定义组件生命周期",
+        "CustomComponentLifecycle",
+        "aboutToAppear",
+        "aboutToDisappear",
+        "ComponentInit",
+        "ComponentAppear",
+        "ComponentDisappear",
+        "生命周期状态机"
+      ],
+      "aliases": [
+        "组件生命周期",
+        "Component Lifecycle",
+        "自定义组件生命周期状态机"
+      ],
+      "kb": "docs/kb/frontend/state_management/custom_component.md",
+      "spec_status": "active",
+      "source_paths": {
+        "lifecycle": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/pu_lifecycle.ts",
+        "view_base": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_view_base.ts",
+        "js_callbacks": "frameworks/bridge/declarative_frontend/jsview/js_view_functions.cpp",
+        "native_host": "frameworks/core/components_ng/pattern/custom/custom_node_base.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/customComponent.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/common_tests/",
+        "test/unittest/core/pattern/custom/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27",
+      "func_id": "07-03-02",
+      "spec_domain": "specs/07-frontend/03-custom-components/02-component-lifecycle"
+    },
+    {
+      "id": "CustomComponentReuse",
+      "name": "Custom Component Reuse",
+      "name_cn": "自定义组件复用",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "自定义组件复用",
+        "@Reusable",
+        "@ReusableV2",
+        "RecycleManager",
+        "RecyclePoolV2",
+        "GlobalReusePool",
+        "aboutToReuse",
+        "aboutToRecycle"
+      ],
+      "aliases": [
+        "组件复用",
+        "Component Reuse",
+        "状态管理组件复用"
+      ],
+      "kb": "docs/kb/frontend/state_management/custom_component.md",
+      "spec_status": "active",
+      "source_paths": {
+        "v1_recycle_manager": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_recycle_manager.ts",
+        "v2_recycle_pool": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_recycle_pool.ts",
+        "global_reuse_pool": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_globalreuse.ts",
+        "view_base": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_view_base.ts"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/stateManagement/decorator.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v1_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v2_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/repeat_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27",
+      "func_id": "07-03-03",
+      "spec_domain": "specs/07-frontend/03-custom-components/03-component-reuse"
+    },
+    {
+      "id": "CustomComponentFreeze",
+      "name": "Custom Component Freeze",
+      "name_cn": "自定义组件冻结",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "自定义组件冻结",
+        "freezeWhenInactive",
+        "组件冻结",
+        "inactive",
+        "active",
+        "delayedNotification",
+        "performDelayedUpdate",
+        "状态管理"
+      ],
+      "aliases": [
+        "组件冻结",
+        "Component Freeze",
+        "freezeWhenInactive"
+      ],
+      "kb": "docs/kb/frontend/state_management/custom_component.md",
+      "spec_status": "active",
+      "source_paths": {
+        "view_base": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/puv2_common/puv2_view_base.ts",
+        "v1_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/partial_update/pu_view.ts",
+        "v2_view": "frameworks/bridge/declarative_frontend/state_mgmt/src/lib/v2/v2_view.ts",
+        "native_host": "frameworks/core/components_ng/pattern/custom/custom_node_base.cpp"
+      },
+      "api_paths": {
+        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
+        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/customComponent.static.d.ets"
+      },
+      "test_paths": [
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v1_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/v2_tests/",
+        "frameworks/bridge/declarative_frontend/state_mgmt/test/unittest/entry/src/main/common_tests/"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-27",
+      "func_id": "07-03-04",
+      "spec_domain": "specs/07-frontend/03-custom-components/04-component-freeze"
     },
     {
       "id": "StateMgmtInterop",
@@ -6664,7 +6874,8 @@
       "aliases": [
         "静态 V1 装饰器",
         "Static V1 Decorators",
-        "arkoala V1 装饰器"
+        "arkoala V1 装饰器",
+        "静态 V1 状态管理装饰器"
       ],
       "kb": "docs/kb/frontend/state_management/static_v1_decorators.md",
       "func_id": "07-02-08",
@@ -7234,7 +7445,8 @@
         "静态 V2 装饰器",
         "Static V2 Decorators",
         "arkoala V2 装饰器",
-        "UIPlugin 转换"
+        "UIPlugin 转换",
+        "静态 V2 状态管理装饰器"
       ],
       "kb": "docs/kb/frontend/state_management/static_v2_decorators.md",
       "func_id": "07-02-11",
@@ -7287,7 +7499,8 @@
       "aliases": [
         "静态存储体系",
         "Static Storage",
-        "arkoala 存储"
+        "arkoala 存储",
+        "静态状态管理存储"
       ],
       "kb": "docs/kb/frontend/state_management/static_storage.md",
       "func_id": "07-02-10",
@@ -7389,7 +7602,8 @@
       "aliases": [
         "静态自定义组件状态",
         "Static Custom Component",
-        "arkoala 自定义组件"
+        "arkoala 自定义组件",
+        "静态状态管理自定义组件"
       ],
       "kb": "docs/kb/frontend/state_management/static_custom_component.md",
       "func_id": "07-03-07",
@@ -11962,6 +12176,51 @@
       ],
       "status": "active",
       "last_verified": "2026-08-02"
+    },
+    {
+      "id": "KeyboardAvoidTimingChange",
+      "name": "Keyboard Avoid Timing Change",
+      "name_cn": "键盘避让执行顺序变化",
+      "kind": "architecture",
+      "category": "layout",
+      "keywords": [
+        "KeyboardAvoidTimingChange",
+        "KeyboardAvoid",
+        "键盘避让",
+        "执行顺序",
+        "UI任务",
+        "键盘高度重复计算",
+        "显示点击错位",
+        "OCCUPIED_AREA_CHANGE",
+        "UpdateViewportConfigWithAnimation",
+        "OnVirtualKeyboardAreaChange"
+      ],
+      "aliases": [
+        "键盘避让时序",
+        "键盘避让重复位移",
+        "键盘状态下点击错位"
+      ],
+      "kb": "docs/kb/issues/layout/keyboard-avoid-timing-change.md",
+      "func_ids": [
+        "04-02-01",
+        "03-05-01"
+      ],
+      "spec_status": "pending",
+      "source_paths": {
+        "window_adapter": "adapter/ohos/entrance/ui_content_impl.cpp",
+        "task_executor": "frameworks/base/thread/task_executor.cpp",
+        "pipeline_base": "frameworks/core/pipeline/pipeline_base.cpp",
+        "pipeline_ng": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "safe_area_manager": "frameworks/core/components_ng/manager/safe_area/"
+      },
+      "test_paths": [
+        "test/unittest/core/pipeline/pipeline_context_test_ng_two.cpp",
+        "test/unittest/core/pipeline/pipeline_context_test_ng_five.cpp",
+        "test/unittest/core/manager/safe_area_manager_test_ng.cpp",
+        "test/unittest/core/manager/safe_area_manager_test_ng_part_two.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-28"
     }
   ]
 }
