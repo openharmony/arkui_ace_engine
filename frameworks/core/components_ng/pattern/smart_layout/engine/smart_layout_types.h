@@ -21,14 +21,15 @@
 namespace OHOS::Ace::NG {
 
 /**
- * @brief Layout direction type for smart layout
+ * @brief Layout handling type for smart layout
  */
 enum class SmartLayoutType {
     UNKNOWN,
     GENERAL,
     COLUMN,
     ROW,
-    FLEX
+    FLEX,
+    TEXT
 };
 
 /**
