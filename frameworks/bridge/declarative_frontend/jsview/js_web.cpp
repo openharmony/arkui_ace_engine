@@ -1422,6 +1422,11 @@ public:
             JsiRef<JsiArrayBuffer> arrayBuffer = JsiRef<JsiArrayBuffer>::Cast(args[0]);
             int32_t bufferSize = arrayBuffer->ByteLength();
             void* buffer = arrayBuffer->GetBuffer();
+            if ((buffer == nullptr) || (bufferSize <= 0)) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "SetResponseData: invalid arrayBuffer, bufferSize=%{public}d", bufferSize);
+                return;
+            }
             const char* charPtr = static_cast<const char*>(buffer);
             std::string data(charPtr, bufferSize);
             response_->SetData(data);
