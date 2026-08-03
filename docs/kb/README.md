@@ -132,7 +132,7 @@ docs/kb/
 | StateMgmtStaticCustomComponent | 静态自定义组件状态相关 | `docs/kb/frontend/state_management/static_custom_component.md` | 新建 |
 | WindowMechanism | 窗口机制 | `docs/kb/architecture/window-mechanism.md` | 新建 |
 | PreviewPlatformAdaptation | 预览器平台适配 | `docs/kb/architecture/preview-platform-adaptation.md` | 新建 |
-| CustomMeasureLayout | 自定义测量/布局 | `docs/kb/capabilities/custom-measure-layout.md` | 新建（Spec 待补） |
+| CustomMeasureLayout | 自定义测量/布局 | `docs/kb/capabilities/custom-measure-layout.md` | 新建；关联 Spec `07-03-05` |
 | DFXLogging | DFX 日志 | `docs/kb/architecture/dfx/logging.md` | 新建 |
 | DFXMemoryManagement | DFX 内存管理 | `docs/kb/architecture/dfx/memory-management.md` | 新建 |
 | DFXTrace | DFX Trace 打点 | `docs/kb/architecture/dfx/trace.md` | 新建 |

@@ -1,7 +1,7 @@
 # Custom Measure/Layout Context
 
 > 文档版本：v1.0
-> 更新时间：2026-07-29
+> 更新时间：2026-08-03
 > 来源：`docs/context_registry.json` 主题 `CustomMeasureLayout`
 
 ## 定位
@@ -48,7 +48,7 @@ Custom Measure/Layout 是 ArkUI 自定义组件的布局扩展能力。应用侧
 
 ### 相关 Spec
 
-自定义测量/布局功能域：`spec/07-frontend/03-custom-components/06-custom-measure-layout/`（功能 ID `07-03-06`）。该功能域已在 functions registry 登记，但当前目录尚未建立 Feature 或 design 文档，因此 registry 标记为 `spec_status: pending`。
+自定义测量/布局功能域：`specs/07-frontend/03-custom-components/05-custom-measure-layout/`（功能 ID `07-03-05`）。该功能域已在 functions registry 登记，目录中包含 Feature 规格与 design 文档，因此 registry 标记为 `spec_status: active`。
 
 ## 历史演变与保留代码
 
@@ -89,4 +89,4 @@ Custom Measure/Layout 是 ArkUI 自定义组件的布局扩展能力。应用侧
 - DynamicLayout：`docs/kb/components/container/dynamic_layout.md`
 - 布局框架：`docs/kb/architecture/layout-framework.md`
 - 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
-- 自定义测量/布局 Spec：`spec/07-frontend/03-custom-components/06-custom-measure-layout/`
+- 自定义测量/布局 Spec：`specs/07-frontend/03-custom-components/05-custom-measure-layout/`
