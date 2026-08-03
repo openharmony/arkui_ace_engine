@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/base/modifier.h"
 
@@ -1295,11 +1296,14 @@ void ScrollablePattern::OnDetachFromMainTree()
     auto host = GetHost();
     // call OnDetachFromMainTreeMultiThread() by multi thread
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
-    if (!scrollStop_) {
-        auto parent = GetNestedScrollParent();
-        if (parent) {
-            parent->OnScrollEndRecursive(GetVelocity());
-        }
+    // Only notify the parent of scroll end when a scroll session is actually in progress,
+    // and only when the parent is a scrollable component or a Refresh component.
+    if (!isScrolling_ || scrollStop_) {
+        return;
+    }
+    auto parent = GetNestedScrollParent();
+    if (parent && (AceType::InstanceOf<ScrollablePattern>(parent) || AceType::InstanceOf<RefreshPattern>(parent))) {
+        parent->OnScrollEndRecursive(GetVelocity());
     }
 }
 

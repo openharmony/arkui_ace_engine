@@ -49,6 +49,7 @@ group("core_pattern_unittest") {
       "render_node:render_node_test_ng",
       "scroll:scroll_test_ng",
       "scroll_bar:scroll_bar_test_ng",
+      "scrollable:scrollable_test_ng",
       "select:select_test_ng",
       "slider:slider_test_ng",
       "text:text_test_ng",

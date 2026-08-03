@@ -2191,22 +2191,132 @@ HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree002, TestSize.Level1)
 
 /**
  * @tc.name: OnDetachFromMainTree003
- * @tc.desc: Test ScrollablePattern OnDetachFromMainTree when parent exists and scrollStop_ is false
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree only notifies scrollable/Refresh parents
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree003, TestSize.Level1)
 {
     RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
     scrollablePattern->scrollStop_ = false;
+    scrollablePattern->isScrolling_ = true;
     RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
     scrollable->currentVelocity_ = 5.0f;
     RefPtr<ScrollableEvent> scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
     scrollableEvent->scrollable_ = scrollable;
     scrollablePattern->scrollableEvent_ = scrollableEvent;
     RefPtr<MockNestableScrollContainer> parent = AceType::MakeRefPtr<MockNestableScrollContainer>();
-    EXPECT_CALL(*parent, OnScrollEndRecursive(testing::_)).Times(1);
+    EXPECT_CALL(*parent, OnScrollEndRecursive(testing::_)).Times(0);
     scrollablePattern->parent_ = parent;
     scrollablePattern->OnDetachFromMainTree();
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree004
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree when never scrolled does not notify Scroll parent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree004, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = false;
+    scrollablePattern->isScrolling_ = false;
+    RefPtr<ScrollPattern> parent = AceType::MakeRefPtr<ScrollPattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, parent);
+    auto eventHub = parentNode->GetEventHub<ScrollEventHub>();
+    bool scrollEndFired = false;
+    eventHub->SetOnScrollEnd([&scrollEndFired]() { scrollEndFired = true; });
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
+    EXPECT_FALSE(scrollEndFired);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree005
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree notifies Scroll parent while scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree005, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = false;
+    scrollablePattern->isScrolling_ = true;
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollable->currentVelocity_ = 5.0f;
+    RefPtr<ScrollableEvent> scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollableEvent->scrollable_ = scrollable;
+    scrollablePattern->scrollableEvent_ = scrollableEvent;
+    RefPtr<ScrollPattern> parent = AceType::MakeRefPtr<ScrollPattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, parent);
+    auto eventHub = parentNode->GetEventHub<ScrollEventHub>();
+    bool scrollEndFired = false;
+    eventHub->SetOnScrollEnd([&scrollEndFired]() { scrollEndFired = true; });
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
+    EXPECT_TRUE(scrollEndFired);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree006
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree does not notify Scroll parent when scroll has ended
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree006, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = true;
+    scrollablePattern->isScrolling_ = true;
+    RefPtr<ScrollPattern> parent = AceType::MakeRefPtr<ScrollPattern>();
+    auto parentNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, parent);
+    auto eventHub = parentNode->GetEventHub<ScrollEventHub>();
+    bool scrollEndFired = false;
+    eventHub->SetOnScrollEnd([&scrollEndFired]() { scrollEndFired = true; });
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
+    EXPECT_FALSE(scrollEndFired);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree007
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree notifies Refresh parent while scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree007, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = false;
+    scrollablePattern->isScrolling_ = true;
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollable->currentVelocity_ = 5.0f;
+    RefPtr<ScrollableEvent> scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollableEvent->scrollable_ = scrollable;
+    scrollablePattern->scrollableEvent_ = scrollableEvent;
+    RefPtr<RefreshPattern> parent = AceType::MakeRefPtr<RefreshPattern>();
+    parent->isHigherVersion_ = false;
+    parent->refreshStatus_ = RefreshStatus::DRAG;
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
+    EXPECT_EQ(parent->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: OnDetachFromMainTree008
+ * @tc.desc: Test ScrollablePattern OnDetachFromMainTree notifies any scrollable parent while scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollablePatternTestNg, OnDetachFromMainTree008, TestSize.Level1)
+{
+    RefPtr<ListPattern> scrollablePattern = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->scrollStop_ = false;
+    scrollablePattern->isScrolling_ = true;
+    RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollable->currentVelocity_ = 5.0f;
+    RefPtr<ScrollableEvent> scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollableEvent->scrollable_ = scrollable;
+    scrollablePattern->scrollableEvent_ = scrollableEvent;
+    RefPtr<ListPattern> parent = AceType::MakeRefPtr<ListPattern>();
+    scrollablePattern->parent_ = parent;
+    scrollablePattern->OnDetachFromMainTree();
+    EXPECT_TRUE(parent->scrollStop_);
 }
 
 /**
