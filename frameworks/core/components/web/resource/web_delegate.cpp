@@ -5812,8 +5812,8 @@ void WebDelegate::OnScreenCaptureRequest(const std::shared_ptr<OHOS::NWeb::NWebS
 
 bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> message)
 {
-    CHECK_NULL_RETURN(taskExecutor_, false);
-    bool result = false;
+    CHECK_NULL_RETURN(taskExecutor_, true);
+    bool result = true;
     auto jsTaskExecutor = SingleTaskExecutor::Make(taskExecutor_, TaskExecutor::TaskType::JS);
     jsTaskExecutor.PostSyncTask([weak = WeakClaim(this), message, &result]() {
         auto delegate = weak.Upgrade();
@@ -5824,6 +5824,7 @@ bool WebDelegate::OnConsoleLog(std::shared_ptr<OHOS::NWeb::NWebConsoleLog> messa
             CHECK_NULL_VOID(webPattern);
             auto webEventHub = webPattern->GetWebEventHub();
             CHECK_NULL_VOID(webEventHub);
+            result = false;
             auto propOnConsoleEvent = webEventHub->GetOnConsoleEvent();
             CHECK_NULL_VOID(propOnConsoleEvent);
             result = propOnConsoleEvent(param);
