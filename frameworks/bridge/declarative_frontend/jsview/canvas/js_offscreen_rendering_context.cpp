@@ -15,6 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 
+#include "napi/native_node_api.h"
+
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -285,8 +287,8 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
         return;
     }
     void* nativeObj = nullptr;
-    NAPI_CALL_RETURN_VOID(env, napi_unwrap(env, renderImage, &nativeObj));
-    auto jsImage = (JSRenderImage*)nativeObj;
+    NAPI_CALL_RETURN_VOID(env, napi_unwrap_s(env, renderImage, &JS_RENDER_IMAGE_TYPE_TAG, &nativeObj));
+    auto jsImage = static_cast<JSRenderImage*>(nativeObj);
     CHECK_NULL_VOID(jsImage);
 #ifndef PIXEL_MAP_SUPPORTED
     auto imageData = GetImageData(offscreenCanvasPattern, 0, 0, width_, height_);

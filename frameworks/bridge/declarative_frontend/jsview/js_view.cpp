@@ -911,6 +911,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
     auto measureFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteMeasure(layoutWrapper);
     };
@@ -921,6 +922,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
     auto layoutFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteLayout(layoutWrapper);
     };
@@ -932,6 +934,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         auto measureSizeFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
             auto jsView = weak.Upgrade();
             CHECK_NULL_VOID(jsView);
+            CHECK_NULL_VOID(jsView->jsViewFunction_);
             ContainerScope scope(jsView->GetInstanceId());
             jsView->jsViewFunction_->ExecuteMeasureSize(layoutWrapper);
         };
@@ -942,6 +945,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         auto placeChildren = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
             auto jsView = weak.Upgrade();
             CHECK_NULL_VOID(jsView);
+            CHECK_NULL_VOID(jsView->jsViewFunction_);
             ContainerScope scope(jsView->GetInstanceId());
             jsView->jsViewFunction_->ExecutePlaceChildren(layoutWrapper);
         };
@@ -972,6 +976,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         auto updateParamFunc = [weak = AceType::WeakClaim(this)](NG::LayoutWrapper* layoutWrapper) -> void {
             auto jsView = weak.Upgrade();
             CHECK_NULL_VOID(jsView);
+            CHECK_NULL_VOID(jsView->jsViewFunction_);
             ContainerScope scope(jsView->GetInstanceId());
             jsView->jsViewFunction_->InitJsParam(layoutWrapper);
         };
