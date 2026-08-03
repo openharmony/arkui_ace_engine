@@ -551,6 +551,7 @@ RangeOptions Convert(const Ark_RichEditorRange& src)
     ret.end = Converter::OptConvert<int32_t>(src.end);
     return ret;
 }
+
 void ProcessShaderStyle(Ark_RichEditorParagraphStyle& dst, const std::optional<NG::Gradient>& gradientOpt,
     const std::optional<Color>& color, ConvContext *ctx)
 {
@@ -614,7 +615,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
         dst.textDirection = Converter::ArkValue<Opt_TextDirection>(
             static_cast<TextDirection>(src.textDirection.value()));
     } else {
-        dst.textDirection =Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
+        dst.textDirection = Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
     }
     ProcessShaderStyle(dst, GradientConvert::ToNGGradient(src.GetGradient()), src.colorShaderStyle, ctx);
 }
@@ -640,7 +641,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& sr
         dst.textDirection = Converter::ArkValue<Opt_TextDirection>(
             static_cast<TextDirection>(src.textDirection.value()));
     } else {
-        dst.textDirection =Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
+        dst.textDirection = Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
     }
     ProcessShaderStyle(dst, GradientConvert::ToNGGradient(src.GetGradient()), src.colorShaderStyle, ctx);
 }
