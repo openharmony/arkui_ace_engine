@@ -1224,18 +1224,35 @@ void TitleBarLayoutAlgorithm::LayoutEffectComponent(LayoutWrapper* layoutWrapper
     auto effectGeometry = effectWrapper->GetGeometryNode();
     CHECK_NULL_VOID(effectGeometry);
     // The EffectComponent wraps the menu: place it at the menu's titleBar-relative offset
-    // (already computed by LayoutMenu) so its bounds cover the menu, and let the menu sit
-    // at (0,0) within it (BoxLayout centers the same-sized menu child at the origin).
+    // (already computed by LayoutMenu) so its bounds cover the menu, and keep the menu at
+    // the wrapper-local origin.
     auto menuNode = titleBarNode->GetMenu();
     auto menuWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, menuNode);
+    RefPtr<GeometryNode> menuGeometry;
     if (menuWrapper) {
-        auto menuGeometry = menuWrapper->GetGeometryNode();
+        menuGeometry = menuWrapper->GetGeometryNode();
         CHECK_NULL_VOID(menuGeometry);
         effectGeometry->SetMarginFrameOffset(menuGeometry->GetMarginFrameOffset());
+        // The offset calculated by LayoutMenu is relative to the titleBar. Once the menu is
+        // wrapped by the EffectComponent, that offset belongs to the wrapper and the menu
+        // itself must use the wrapper-local origin. Do this explicitly instead of relying on
+        // BoxLayout to reset the child offset, because the child layout may be skipped.
+        menuGeometry->SetMarginFrameOffset(OffsetF(0.0f, 0.0f));
     } else {
         effectGeometry->SetMarginFrameOffset(OffsetF(0.0f, 0.0f));
     }
     effectWrapper->Layout();
+    if (menuGeometry) {
+        // A skipped child layout does not run FrameNode::OnLayoutFinish(), so its RenderContext
+        // can retain the titleBar-relative paint rect even though the wrapper geometry is local.
+        auto menuHost = menuWrapper->GetHostNode();
+        auto menuRenderContext = menuHost ? menuHost->GetRenderContext() : nullptr;
+        if (menuRenderContext) {
+            auto paintRect = menuRenderContext->GetPaintRectWithoutTransform();
+            paintRect.SetOffset(menuGeometry->GetFrameOffset());
+            menuRenderContext->UpdatePaintRect(paintRect);
+        }
+    }
 }
 
 void TitleBarLayoutAlgorithm::ResizeEffectComponentToMenu(LayoutWrapper* layoutWrapper,

@@ -2451,6 +2451,7 @@ void TitleBarPattern::ReconcileEffectComponent()
     auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(host);
     bool materialEnabled = IsMaterialEnabled();
+    bool structureChanged = false;
     if (materialEnabled && !titleBarEffectNode_) {
         // Material became enabled: create the EffectComponent and move the menu (mounted
         // directly under the titleBar before material was known) under it so the structure
@@ -2458,6 +2459,7 @@ void TitleBarPattern::ReconcileEffectComponent()
         EnsureTitleBarEffectComponent();
         if (titleBarEffectNode_) {
             MoveTitleBarMenu(host, titleBarEffectNode_);
+            structureChanged = true;
         }
     } else if (!materialEnabled && titleBarEffectNode_) {
         // Material became disabled: move the menu back to the titleBar and drop the
@@ -2466,6 +2468,12 @@ void TitleBarPattern::ReconcileEffectComponent()
         MoveTitleBarMenu(titleBarEffectNode_, host);
         RemoveTitleBarEffectNodeFromParent(titleBarEffectNode_);
         titleBarEffectNode_ = nullptr;
+        structureChanged = true;
+    }
+    if (structureChanged) {
+        // Reparenting changes the coordinate space of the menu. Rebuild the titleBar wrapper
+        // tree and remeasure its children so no geometry from the previous parent is reused.
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     }
 }
 
