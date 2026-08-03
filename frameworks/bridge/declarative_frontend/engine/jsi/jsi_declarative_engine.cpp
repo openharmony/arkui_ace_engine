@@ -227,9 +227,6 @@ bool EvaluateAbcFile(const shared_ptr<JsRuntime>& runtime, const std::string& fi
 {
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     CHECK_NULL_RETURN(arkRuntime, false);
-#ifdef STATE_MGMT_USE_AOT
-    return arkRuntime->ExecuteJsBinForAOT(filePath);
-#else
     FILE* file = fopen(filePath.c_str(), "rb");
     if (!file) {
         LOGF("Failed to open the file!");
@@ -251,7 +248,6 @@ bool EvaluateAbcFile(const shared_ptr<JsRuntime>& runtime, const std::string& fi
     }
     fclose(file);
     return arkRuntime->EvaluateJsCode(content.data(), static_cast<int32_t>(content.size()), filePath);
-#endif
 }
 
 inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
