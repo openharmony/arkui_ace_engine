@@ -41,7 +41,7 @@ from pathlib import Path
 from typing import Any, Iterable
 
 
-ALLOWED_CONTEXT_KINDS = {"component", "feature", "sdk", "architecture", "common_capability"}
+ALLOWED_CONTEXT_KINDS = {"component", "feature", "sdk", "architecture", "common_capability", "issue"}
 ALLOWED_CONTEXT_STATUS = {"active", "draft", "deprecated"}
 ALLOWED_SPEC_STATUS = {"Draft", "Baselined", "Deprecated"}
 ALLOWED_REGISTRY_SPEC_STATUS = {"active", "pending"}
@@ -156,7 +156,11 @@ class Validator:
                 self.error(entry_path, "context entry must be an object")
                 continue
 
-            missing = sorted(REQUIRED_CONTEXT_FIELDS - set(entry.keys()))
+            missing_fields = REQUIRED_CONTEXT_FIELDS - set(entry.keys())
+            kind = entry.get("kind")
+            if kind == "issue":
+                missing_fields = missing_fields - {"spec_status"}
+            missing = sorted(missing_fields)
             if missing:
                 self.error(entry_path, f"missing required fields: {', '.join(missing)}")
 
@@ -444,6 +448,8 @@ class Validator:
         return result
 
     def validate_kb_sections(self, rel_path: Path, text: str, kind: str | None) -> None:
+        if kind == "issue":
+            return
         for section in REQUIRED_KB_SECTIONS:
             if section not in text:
                 self.warn(rel_path, f"missing required section `{section}`")

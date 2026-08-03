@@ -12221,6 +12221,122 @@
       ],
       "status": "active",
       "last_verified": "2026-07-28"
+    },
+    {
+      "id": "ResourceAdapterInstanceIdMismatch",
+      "name": "Resource Adapter Instance ID Mismatch",
+      "name_cn": "资源适配器实例ID缓存不匹配",
+      "kind": "issue",
+      "category": "rendering",
+      "keywords": [
+        "ResourceAdapterInstanceIdMismatch",
+        "资源适配器实例ID",
+        "dark mode black color",
+        "深色模式黑色",
+        "HSP resource",
+        "系统级Toast弹窗",
+        "CreateNewResourceAdapter",
+        "actualInstanceId",
+        "resource cache mismatch",
+        "资源缓存不匹配",
+        "GetOrCreateResourceAdapter",
+        "color mode switch"
+      ],
+      "aliases": [
+        "资源缓存实例不匹配",
+        "HSP资源获取失败",
+        "深色模式卡片变黑"
+      ],
+      "kb": "docs/kb/issues/rendering/resource-adapter-instance-id-mismatch.md",
+      "func_ids": [
+        "03-03-01",
+        "03-03-04",
+        "04-16-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30",
+      "source_paths": {
+        "resource_manager": "frameworks/core/common/resource/resource_manager.cpp",
+        "resource_adapter_impl_v2": "adapter/ohos/osal/resource_adapter_impl_v2.cpp",
+        "ace_container": "adapter/ohos/entrance/ace_container.cpp",
+        "resource_adapter_h": "frameworks/core/components/theme/resource_adapter.h"
+      }
+    },
+    {
+      "id": "AboutToDisappearUnmountBlockedOnReuse",
+      "name": "AboutToDisappear Unmount Blocked On Reuse",
+      "name_cn": "aboutToDisappear下树屏蔽与组件复用冲突",
+      "kind": "issue",
+      "category": "lifecycle",
+      "keywords": [
+        "AboutToDisappearUnmountBlockedOnReuse",
+        "aboutToDisappear",
+        "组件下树屏蔽",
+        "HasTransitionOutAnimation",
+        "AddDisappearingChild",
+        "component reuse overlap",
+        "组件复用重叠",
+        "BuilderNode",
+        "onDisAppear",
+        "生命周期时序变更",
+        "RecycleManager",
+        "disappearingChildren",
+        "RemoveImmediately"
+      ],
+      "aliases": [
+        "aboutToDisappear下树失败",
+        "组件复用重叠",
+        "动画期间下树屏蔽"
+      ],
+      "kb": "docs/kb/issues/lifecycle/about-to-disappear-unmount-blocked-on-reuse.md",
+      "func_ids": [
+        "07-03-01",
+        "04-19-01",
+        "03-02-05"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-30",
+      "source_paths": {
+        "jsi_view_register_impl_ng": "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register_impl_ng.cpp",
+        "frame_node": "frameworks/core/components_ng/base/frame_node.cpp",
+        "ui_node": "frameworks/core/components_ng/base/ui_node.cpp",
+        "custom_node_base": "frameworks/core/components_ng/pattern/custom/custom_node_base.cpp"
+      }
+    },
+    {
+      "id": "MenuSwipeMisrecognizedAsClick",
+      "name": "Menu Swipe Misrecognized As Click",
+      "name_cn": "Menu滑动误判为点击关闭",
+      "kind": "issue",
+      "category": "interaction",
+      "keywords": [
+        "MenuSwipeMisrecognizedAsClick",
+        "Menu滑动关闭",
+        "menu swipe close",
+        "bindMenu",
+        "movedOutOfRegion",
+        "IsOffsetInNodeBounds",
+        "DEFAULT_CLICK_DISTANCE",
+        "onClick误触发",
+        "菜单滑动关闭",
+        "menu touch up dismiss"
+      ],
+      "aliases": [
+        "菜单滑动异常关闭",
+        "Menu滑动误判点击",
+        "bindMenu滑动关闭"
+      ],
+      "kb": "docs/kb/issues/interaction/menu-swipe-misrecognized-as-click.md",
+      "func_ids": [
+        "05-06-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31",
+      "source_paths": {
+        "menu_pattern": "frameworks/core/components_ng/pattern/menu/menu_pattern.cpp",
+        "menu_item_pattern": "frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp",
+        "click_recognizer": "frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp"
+      }
     }
   ]
 }

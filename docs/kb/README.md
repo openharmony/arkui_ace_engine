@@ -1,7 +1,7 @@
 # ArkUI KB
 
 > 更新时间：2026-07-31
-> 主题数：225
+> 主题数：228
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -245,12 +245,10 @@ docs/kb/
 | NestedScrollOffsetNoResponse | 嵌套滚动偏移量不响应 | `docs/kb/issues/interaction/nested-scroll-offset-no-response.md` | 新建 |
 | ScrollerNaNOffsetValidation | Scroller 非法数值偏移校验 | `docs/kb/issues/compatibility/scroller-nan-offset-validation.md` | 新建 |
 | CustomSpanControllerLifecycle | CustomSpan 控制器生命周期 | `docs/kb/issues/text/custom-span-controller-lifecycle.md` | 新建 |
-
-### 问题型 KB
-
-| ID | 主题 | 新版 KB | 状态 |
-|----|------|---------|------|
 | KeyboardAvoidTimingChange | 键盘避让执行顺序变化 | `docs/kb/issues/layout/keyboard-avoid-timing-change.md` | 新建 |
+| ResourceAdapterInstanceIdMismatch | 资源适配器实例ID缓存不匹配 | `docs/kb/issues/rendering/resource-adapter-instance-id-mismatch.md` | 新建 |
+| AboutToDisappearUnmountBlockedOnReuse | aboutToDisappear下树屏蔽与组件复用冲突 | `docs/kb/issues/lifecycle/about-to-disappear-unmount-blocked-on-reuse.md` | 新建 |
+| MenuSwipeMisrecognizedAsClick | Menu滑动误判为点击关闭 | `docs/kb/issues/interaction/menu-swipe-misrecognized-as-click.md` | 新建 |
 
 ## 检索
 
