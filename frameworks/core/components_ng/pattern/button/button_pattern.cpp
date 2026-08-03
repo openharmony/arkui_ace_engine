@@ -1183,6 +1183,7 @@ bool ButtonPattern::IsDynamicSwitchButtonStyle(const BorderWidthProperty& width,
 void ButtonPattern::DumpInfo()
 {
     auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    auto host = GetHost();
     CHECK_NULL_VOID(layoutProperty);
 
     if (layoutProperty->HasType()) {
@@ -1200,6 +1201,23 @@ void ButtonPattern::DumpInfo()
     if (layoutProperty->HasCreateWithLabel()) {
         DumpLog::GetInstance().AddDesc(
             "CreateWithLabel: " + std::string(layoutProperty->GetCreateWithLabelValue() ? "true" : "false"));
+    }
+    if (host) {
+        DumpLog::GetInstance().AddDesc("BackgroundColor: " + backgroundColor_.ToString());
+        auto renderContext = host->GetRenderContext();
+        DumpLog::GetInstance().AddDesc("RenderContext BgColor: " + renderContext->GetBackgroundColorValue().ToString());
+        auto buttonTheme = host->GetTheme<ButtonTheme>(true);
+        ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+        ButtonStyleMode buttonStyleMode = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+        if (buttonTheme) {
+            DumpLog::GetInstance().AddDesc("Theme BgColor : " +
+                buttonTheme->GetBgColor(buttonStyleMode, buttonRole).ToString());
+        }
+    }
+    if (layoutProperty->GetIsUserSetBackgroundColor()) {
+        DumpLog::GetInstance().AddDesc("IsUserSetBackgroundColor: true");
+    } else {
+        DumpLog::GetInstance().AddDesc("IsUserSetBackgroundColor: false");
     }
     if (layoutProperty->HasLabel()) {
         DumpLog::GetInstance().AddDesc("Label: " + layoutProperty->GetLabelValue());
