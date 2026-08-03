@@ -44,18 +44,26 @@ TokenThemeStorage::TokenThemeStorage() = default;
 
 void TokenThemeStorage::StoreThemeScope(TokenThemeScopeId themeScopeId, int32_t themeId)
 {
+    std::lock_guard<std::mutex> lock(themeScopeMutex_);
     themeScopeMap_[themeScopeId] = themeId;
 }
 
 void TokenThemeStorage::RemoveThemeScope(TokenThemeScopeId themeScopeId, bool removeToken /* = false */)
 {
-    if (removeToken) {
+    int32_t themeId = 0;
+    bool hasTheme = false;
+    {
+        std::lock_guard<std::mutex> lock(themeScopeMutex_);
         auto iter = themeScopeMap_.find(themeScopeId);
         if (iter != themeScopeMap_.end()) {
-            CacheRemove(iter->second);
+            themeId = iter->second;
+            hasTheme = true;
+            themeScopeMap_.erase(iter);
         }
     }
-    themeScopeMap_.erase(themeScopeId);
+    if (removeToken && hasTheme) {
+        CacheRemove(themeId);
+    }
 }
 
 const RefPtr<TokenTheme>& TokenThemeStorage::GetTheme(TokenThemeScopeId themeScopeId)
@@ -63,11 +71,16 @@ const RefPtr<TokenTheme>& TokenThemeStorage::GetTheme(TokenThemeScopeId themeSco
     if (themeScopeId == 0) {
         return GetDefaultTheme();
     }
-    auto iter = themeScopeMap_.find(themeScopeId);
-    if (iter == themeScopeMap_.end()) {
-        return GetEmptyTokenTheme();
+    int32_t themeId = 0;
+    {
+        std::lock_guard<std::mutex> lock(themeScopeMutex_);
+        auto iter = themeScopeMap_.find(themeScopeId);
+        if (iter == themeScopeMap_.end()) {
+            return GetEmptyTokenTheme();
+        }
+        themeId = iter->second;
     }
-    return CacheGet(iter->second);
+    return CacheGet(themeId);
 }
 
 void TokenThemeStorage::SetDefaultTheme(const RefPtr<TokenTheme>& theme, ColorMode colorMode)

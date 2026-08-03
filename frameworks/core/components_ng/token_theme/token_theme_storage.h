@@ -70,6 +70,7 @@ private:
 
     // key: scope id, value: theme id
     std::unordered_map<TokenThemeScopeId, int32_t> themeScopeMap_;
+    std::mutex themeScopeMutex_;
 
     // key: theme id, value: theme instance
     std::map<int32_t, RefPtr<TokenTheme>> themeCache_;
