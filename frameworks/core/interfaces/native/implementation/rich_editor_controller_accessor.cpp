@@ -614,7 +614,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const ParagraphInfo& src,
         dst.textDirection = Converter::ArkValue<Opt_TextDirection>(
             static_cast<TextDirection>(src.textDirection.value()));
     } else {
-        dst.textDirection =Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
+        dst.textDirection = Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
     }
     ProcessShaderStyle(dst, GradientConvert::ToNGGradient(src.GetGradient()), src.colorShaderStyle, ctx);
 }
@@ -640,7 +640,7 @@ void AssignArkValue(Ark_RichEditorParagraphStyle& dst, const TextStyleResult& sr
         dst.textDirection = Converter::ArkValue<Opt_TextDirection>(
             static_cast<TextDirection>(src.textDirection.value()));
     } else {
-        dst.textDirection =Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
+        dst.textDirection = Converter::ArkValue<Opt_TextDirection>(TextDirection::INHERIT);
     }
     ProcessShaderStyle(dst, GradientConvert::ToNGGradient(src.GetGradient()), src.colorShaderStyle, ctx);
 }
