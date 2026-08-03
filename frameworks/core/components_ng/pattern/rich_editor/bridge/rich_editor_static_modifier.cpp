@@ -274,13 +274,22 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
     RichEditorModelStatic::SetStyledStringMode(frameNode, true);
-    CHECK_NULL_VOID(options->controller);
+    Ark_RichEditorStyledStringController styledStringControllerPeer = options->controller;
+    CHECK_NULL_VOID(styledStringControllerPeer);
+
     // obtain the internal Styled String RichEditorController
     RefPtr<RichEditorBaseControllerBase> controller =
         RichEditorModelStatic::GetRichEditorStyledStringController(frameNode);
     CHECK_NULL_VOID(controller);
+    styledStringControllerPeer->AddTargetController(controller);
 
-    options->controller->AddTargetController(controller);
+    // apply styledString cache
+    auto styledStringCache = styledStringControllerPeer->GetStyledStringCache();
+    CHECK_NULL_VOID(styledStringCache);
+    auto styledStringController = AceType::DynamicCast<RichEditorStyledStringControllerBase>(controller);
+    CHECK_NULL_VOID(styledStringController);
+    styledStringController->SetStyledString(styledStringCache);
+    styledStringControllerPeer->SetStyledStringCache(nullptr);
 }
 void SetRichEditorOptionsImpl(Ark_NativePointer node,
                               const Ark_Union_RichEditorOptions_RichEditorStyledStringOptions* options)
@@ -801,6 +810,14 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<KeyboardAppearance>(value);
     RichEditorModelNG::SetKeyboardAppearance(frameNode, convValue.value_or(KeyboardAppearance::NONE_IMMERSIVE));
 }
+void SetStopBackPressImpl(Ark_NativePointer node,
+                          const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    RichEditorModelNG::SetStopBackPress(frameNode, convValue.value_or(true));
+}
 void SetUndoStyleImpl(Ark_NativePointer node,
                       const Opt_UndoStyle* value)
 {
@@ -819,13 +836,13 @@ void SetScrollBarColorImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<Color>(value);
     RichEditorModelNG::SetScrollBarColor(frameNode, convValue.value_or(Color::GRAY));
 }
-void SetStopBackPressImpl(Ark_NativePointer node,
-                          const Opt_Boolean* value)
+void SetSingleLineImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    RichEditorModelNG::SetStopBackPress(frameNode, convValue.value_or(true));
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    RichEditorModelNG::SetSingleLine(frameNode, convValue.value_or(false));
 }
 void SetIncludeFontPaddingImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
@@ -843,14 +860,6 @@ void SetFallbackLineSpacingImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     RichEditorModelStatic::SetFallbackLineSpacing(frameNode, convValue);
 }
-void SetSingleLineImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
-    RichEditorModelNG::SetSingleLine(frameNode, convValue.value_or(false));
-}
 void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
                                        const Opt_Boolean* value)
 {
@@ -858,14 +867,6 @@ void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     RichEditorModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
-}
-void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
-                                     const Opt_SelectedDragPreviewStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
-    RichEditorModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
 }
 void SetBindSelectionMenuImpl(Ark_NativePointer node,
                               const Opt_RichEditorSpanType* spanType,
@@ -893,6 +894,14 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
         };
         RichEditorModelStatic::BindSelectionMenu(frameNode, span, response, builder, convMenuParam);
         }, node);
+}
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
+    RichEditorModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
 }
 void SetCustomKeyboardImpl(Ark_NativePointer node,
                            const Opt_Union_CustomNodeBuilder_ComponentContentBase* value,
