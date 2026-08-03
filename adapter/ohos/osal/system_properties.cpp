@@ -705,6 +705,16 @@ std::string InitSysSdkApiVersion()
     return std::to_string(::GetSdkApiVersion());
 }
 
+std::string InitSysSdkPatchApiVersion()
+{
+    return std::to_string(::GetSdkPatchApiVersion());
+}
+
+std::string InitSysSdkMinorApiVersion()
+{
+    return std::to_string(::GetSdkMinorApiVersion());
+}
+
 std::string InitSysOsReleaseType()
 {
     const char* res = ::GetOsReleaseType();
@@ -759,6 +769,8 @@ std::string SystemProperties::manufacturer_ = InitSysManufacture();
 std::string SystemProperties::model_ = InitSysProductModel();
 std::string SystemProperties::product_ = InitSysMarketName();
 std::string SystemProperties::apiVersion_ = InitSysSdkApiVersion();
+std::string SystemProperties::sdkPatchApiVersion_ = InitSysSdkPatchApiVersion();
+std::string SystemProperties::sdkMinorApiVersion_ = InitSysSdkMinorApiVersion();
 std::string SystemProperties::releaseType_ = InitSysOsReleaseType();
 std::string SystemProperties::paramDeviceType_ = InitSysDeviceType();
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
