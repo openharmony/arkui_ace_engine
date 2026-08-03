@@ -22,7 +22,9 @@
 #include <unordered_map>
 #include <string>
 #include <utility>
+#include <memory>
 #include "core/common/resource/resource_object.h"
+#include "ui/base/lifecycle_observable.h"
 
 #ifdef __cplusplus
 namespace OHOS::Ace {
@@ -120,7 +122,7 @@ struct ArkUI_TextCascadePickerRangeContentArray;
 struct ArkUI_EmbeddedComponentOption;
 struct AbilityBase_Want;
 struct ArkUIGestureEvent;
-struct ArkUIGestureRecognizer;
+typedef struct ArkUI_GestureRecognizer ArkUIGestureRecognizer;
 struct _ArkUIRenderNode;
 struct _ArkUIRenderModifier;
 struct _ArkUIRSProperty;
@@ -5801,7 +5803,7 @@ struct ArkUIGestureEventTargetInfo {
     void* uiNode = nullptr;
 };
 
-struct ArkUIGestureRecognizer {
+struct ArkUI_GestureRecognizer : public OHOS::Ace::LifeCycleObservable {
     ArkUI_Int32 type = -1;
     ArkUIGesture* gesture = nullptr;
     void* extraData = nullptr;
@@ -5822,7 +5824,7 @@ struct ArkUIGestureInterruptInfo {
     ArkUI_Int32 systemRecognizerType;
     ArkUIAPIEventGestureAsyncEvent* event = nullptr;
     void* customUserData = nullptr;
-    void* userData = nullptr;
+    std::unique_ptr<OHOS::Ace::LifeCycleObserver> userData = nullptr;
     void* inputEvent = nullptr;
     void* gestureEvent = nullptr;
     ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
