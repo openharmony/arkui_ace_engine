@@ -360,7 +360,7 @@ bool SmartLayoutAlgorithm::HandleTextContentOverflow(LayoutWrapper* layoutWrappe
     }
     if (!layoutProperty->HasHeightAdaptivePolicy() ||
         layoutProperty->GetHeightAdaptivePolicy() != TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST) {
-        layoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST
+        layoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
         propertyChanged = true;
     }
     if (!propertyChanged) {
@@ -386,7 +386,10 @@ bool SmartLayoutAlgorithm::RemeasureText(LayoutWrapper* layoutWrapper)
 
     auto parentNode = hostNode->GetParentFrameNode();
     bool isButtonLabel = hostNode->IsInternal() && parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG;
-    auto previousCenter = geometryNode->GetMarginFrameRect().Center();
+    OffsetF previousCenter;
+    if (isButtonLabel) {
+        previousCenter = geometryNode->GetMarginFrameRect().Center();
+    }
 
     // Rebuild and lay out the adapted paragraph before the current FrameNode layout is committed.
     auto contentSize = layoutAlgorithm->MeasureContent(layoutProperty->CreateContentConstraint(), layoutWrapper);

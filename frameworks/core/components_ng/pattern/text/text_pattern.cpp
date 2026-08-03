@@ -43,6 +43,7 @@
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/common/properties/text_style_gradient.h"
+#include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
@@ -9299,6 +9300,38 @@ std::vector<ParagraphManager::ParagraphInfo> TextPattern::GetParagraphs() const
 const RefPtr<ParagraphManager>& TextPattern::GetParagraphManager() const
 {
     return pManager_;
+}
+
+bool TextPattern::IsContentOverflowForSmartLayout(const SizeF& allocatedSize)
+{
+    auto hostNode = GetHost();
+    CHECK_NULL_RETURN(hostNode, false);
+    auto textLayoutProperty = hostNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    CHECK_NULL_RETURN(pManager_, false);
+
+    auto content = textLayoutProperty->GetContent().value_or(u"");
+    const auto& displayContent = GetTextForDisplay();
+    auto spanCount = GetSpanItemChildren().size();
+    if (content.empty() && displayContent.empty() && spanCount == 0) {
+        return false;
+    }
+
+    auto actualLayoutWidth = pManager_->GetLongestLineWithIndent();
+    auto actualTextHeight = pManager_->GetHeight();
+    bool widthOverflow = GreatNotEqual(actualLayoutWidth, allocatedSize.Width());
+    bool heightOverflow = GreatNotEqual(actualTextHeight, allocatedSize.Height());
+    bool contentClipped = pManager_->DidExceedMaxLinesInner();
+    auto ellipsisRange = pManager_->GetEllipsisTextRange();
+    bool ellipsisApplied = ellipsisRange.first < ellipsisRange.second;
+    const auto& textStyle = GetTextStyle();
+    auto maxLines = textLayoutProperty->GetMaxLinesValue(textStyle.GetMaxLines());
+    auto parentNode = hostNode->GetParentFrameNode();
+    bool singleLineContentNeedsRepair =
+        textLayoutProperty->HasMaxLines() && maxLines == 1 && contentClipped && !ellipsisApplied;
+    bool isButtonLabel = hostNode->IsInternal() && parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG;
+    bool buttonTextNeedsRepair = isButtonLabel && (widthOverflow || heightOverflow || contentClipped);
+    return heightOverflow || singleLineContentNeedsRepair || buttonTextNeedsRepair;
 }
 
 void TextPattern::MarkContentChange()

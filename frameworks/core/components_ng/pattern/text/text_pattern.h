@@ -287,6 +287,7 @@ public:
     ACE_FORCE_EXPORT void OnHandleMove(const RectF& handleRect, bool isFirstHandle) override;
     virtual std::vector<ParagraphManager::ParagraphInfo> GetParagraphs() const;
     const RefPtr<ParagraphManager>& GetParagraphManager() const;
+    bool IsContentOverflowForSmartLayout(const SizeF& allocatedSize);
     void MarkContentChange();
     void ResetContChange();
     bool GetContChange() const;

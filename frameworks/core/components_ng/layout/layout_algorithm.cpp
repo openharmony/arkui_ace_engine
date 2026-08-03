@@ -277,7 +277,11 @@ bool LayoutAlgorithm::IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapp
     CHECK_NULL_RETURN(hostNode, false);
 
     if (hostNode->GetTag() == V2::TEXT_ETS_TAG) {
-        return IsTextContentOverflowForSmartLayout(layoutWrapper);
+        auto textPattern = hostNode->GetPattern<TextPattern>();
+        CHECK_NULL_RETURN(textPattern, false);
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        return textPattern->IsContentOverflowForSmartLayout(geometryNode->GetContentSize());
     }
 
     // 收集子节点包围盒
@@ -299,33 +303,6 @@ bool LayoutAlgorithm::IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapp
         GreatNotEqual(childRect.Bottom(), parentRect.Bottom() + MAX_GAP) ||
         LessNotEqual(childRect.Left(), parentRect.Left() - MAX_GAP) ||
         GreatNotEqual(childRect.Right(), parentRect.Right() + MAX_GAP);
-}
-
-bool LayoutAlgorithm::IsTextContentOverflowForSmartLayout(LayoutWrapper* layoutWrapper)
-{
-    CHECK_NULL_RETURN(layoutWrapper, false);
-    auto hostNode = layoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(hostNode, false);
-    auto textPattern = hostNode->GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(textPattern, false);
-    auto textLayoutProperty = hostNode->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, false);
-    auto geometryNode = layoutWrapper->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
-    auto paragraphManager = textPattern->GetParagraphManager();
-    CHECK_NULL_RETURN(paragraphManager, false);
-
-    auto allocatedSize = geometryNode->GetContentSize();
-    auto intrinsicTextWidth = paragraphManager->GetTextWidth();
-    auto actualTextHeight = paragraphManager->GetHeight();
-    bool widthOverflow = GreatNotEqual(intrinsicTextWidth, allocatedSize.Width());
-    bool heightOverflow = GreatNotEqual(actualTextHeight, allocatedSize.Height());
-    bool contentClipped = paragraphManager->DidExceedMaxLinesInner();
-    auto ellipsisRange = paragraphManager->GetEllipsisTextRange();
-    bool singleLineEllipsisApplied = textLayoutProperty->GetMaxLinesValue(UINT32_MAX) == 1 &&
-        textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::ELLIPSIS &&
-        ellipsisRange.first < ellipsisRange.second;
-    return widthOverflow || heightOverflow || contentClipped || singleLineEllipsisApplied;
 }
 
 void LayoutAlgorithm::TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper)
