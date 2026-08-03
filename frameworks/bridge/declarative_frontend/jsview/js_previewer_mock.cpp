@@ -387,49 +387,6 @@ void JSWebController::JSBind(BindingTarget globalObj)
     JSHitTestValue::JSBind(globalObj);
 }
 
-void JSXComponent::Create(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1 || !info[0]->IsObject()) {
-        return;
-    }
-    CreateMockComponent("XComponent");
-}
-
-void JSXComponent::Mock(const JSCallbackInfo& info) {}
-
-void JSXComponent::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSXComponent>::Declare("XComponent");
-    JSClass<JSXComponent>::StaticMethod("create", &JSXComponent::Create);
-    JSClass<JSXComponent>::StaticMethod("onLoad", &JSXComponent::Mock);
-    JSClass<JSXComponent>::StaticMethod("onDestroy", &JSXComponent::Mock);
-    JSClass<JSXComponent>::InheritAndBind<JSViewAbstract>(globalObj);
-}
-
-void JSXComponentController::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSXComponentController>::Declare("XComponentController");
-    JSClass<JSXComponentController>::StaticMethod("getXComponentSurfaceId", &JSXComponentController::Mock);
-    JSClass<JSXComponentController>::StaticMethod("getXComponentContext", &JSXComponentController::Mock);
-    JSClass<JSXComponentController>::StaticMethod("setXComponentSurfaceSize", &JSXComponentController::Mock);
-    JSClass<JSXComponentController>::Bind(globalObj);
-}
-
-void JSXComponentController::Mock(const JSCallbackInfo& info) {}
-
-void JSXComponentControllerBinding::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSXComponentControllerBinding>::Declare("XComponentController");
-    JSClass<JSXComponentControllerBinding>::StaticMethod(
-        "getXComponentSurfaceId", &JSXComponentControllerBinding::Mock);
-    JSClass<JSXComponentControllerBinding>::StaticMethod("getXComponentContext", &JSXComponentControllerBinding::Mock);
-    JSClass<JSXComponentControllerBinding>::StaticMethod(
-        "setXComponentSurfaceSize", &JSXComponentControllerBinding::Mock);
-    JSClass<JSXComponentControllerBinding>::Bind(globalObj);
-}
-
-void JSXComponentControllerBinding::Mock(const JSCallbackInfo& info) {}
-
 void JSPlugin::Create(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0 || !info[0]->IsObject()) {

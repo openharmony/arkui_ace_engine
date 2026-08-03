@@ -609,7 +609,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "EmbeddedComponent", JSEmbeddedComponent::JSBind },
     { "FormComponent", JSForm::JSBind },
     { "IsolatedComponent", JSIsolatedComponent::JSBind },
-    { "XComponentController", JSXComponentControllerBinding::JSBind },
     { "RemoteWindow", JSRemoteWindow::JSBind },
     { "RichText", JSRichText::JSBind },
     { "Web", JSWeb::JSBind },

@@ -154,3 +154,48 @@ if (globalThis.Video === undefined) {
 if (globalThis.VideoController === undefined) {
   globalThis.VideoController = JSVideoController;
 }
+
+class ArkPreviewXComponentComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  applyNormalAttribute(instance) {
+    return this;
+  }
+  onLoad(value) {
+    return this;
+  }
+  onDestroy(value) {
+    return this;
+  }
+}
+
+class JSXComponentController {
+    getXComponentSurfaceId() {}
+    getXComponentContext() {}
+    setXComponentSurfaceSize() {}
+}
+
+class JSXComponent extends JSViewAbstract {
+  static create(params) {
+    getUINativeModule().previewMock.create('XComponent');
+  }
+  static onLoad(value) {}
+  static onDestroy(value) {}
+  static attributeModifier(modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkPreviewXComponentComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new ArkPreviewXComponentComponent(nativePtr, classType);
+    });
+  }
+}
+
+// @ts-ignore
+if (globalThis.XComponent === undefined) {
+  globalThis.XComponent = JSXComponent;
+}
+// @ts-ignore
+if (globalThis.XComponentController === undefined) {
+  globalThis.XComponentController = JSXComponentController;
+}
