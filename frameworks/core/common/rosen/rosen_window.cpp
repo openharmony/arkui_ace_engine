@@ -57,7 +57,7 @@ void RSWindow::SetRootRenderNode(const RefPtr<RenderNode>& root)
 {
 }
 
-void RSWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
+void RSWindow::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom)
 {
 }
 

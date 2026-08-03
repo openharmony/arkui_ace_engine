@@ -210,7 +210,7 @@ void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate
     rsWindow_->FlushFrameRate(rate, animatorExpectedFrameRate, rateType);
 }
 
-void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
+void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom)
 {
     if (!rsWindow_) {
         return;
@@ -219,12 +219,14 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
         dvsyncOn_ = dvsyncSwitch;
         lastDVsyncInbihitPredictTs_ = 0;
     }
-    if (dvsyncSwitch) {
-        ACE_SCOPED_TRACE("enable dvsync");
-    } else {
-        ACE_SCOPED_TRACE("disable dvsync");
-    }
+    ACE_SCOPED_TRACE("SetUiDvsyncSwitch switch:%d fromWhom:%s", dvsyncSwitch,
+        fromWhom == FromWhom::API ? "API" : "INNER");
+#ifdef VIRTUAL_RS_WINDOW
     rsWindow_->SetUiDvsyncSwitch(dvsyncSwitch);
+#else
+    auto externalFromWhom = fromWhom == FromWhom::API ? OHOS::FromWhom::API : OHOS::FromWhom::INNER;
+    rsWindow_->SetUiDvsyncSwitch(dvsyncSwitch, externalFromWhom);
+#endif
 }
 
 bool RosenWindow::GetIsRequestFrame()

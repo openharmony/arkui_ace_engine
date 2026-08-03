@@ -28,5 +28,5 @@ void Window::SetRootRenderNode(const RefPtr<RenderNode>& root) {}
 
 void Window::SetVsyncCallback(AceVsyncCallback&& callback) {}
 
-void Window::SetUiDvsyncSwitch(bool dvsyncSwitch) {}
+void Window::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom) {}
 } // namespace OHOS::Ace

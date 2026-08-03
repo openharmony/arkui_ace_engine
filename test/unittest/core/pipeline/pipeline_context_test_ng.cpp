@@ -3501,5 +3501,24 @@ HWTEST_F(PipelineContextTestNg, ZindexWorkflow001, TestSize.Level1)
     context_->FlushZindexUpdate();
     EXPECT_EQ(context_->idUpdateZOrder_.size(), 0);
 }
+
+/**
+ * @tc.name: SetUiDvsyncSwitch001
+ * @tc.desc: Test SetUiDvsyncSwitch forwards the default INNER caller and the explicit API caller.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, SetUiDvsyncSwitch001, TestSize.Level1)
+{
+    ASSERT_NE(context_, nullptr);
+    ASSERT_NE(context_->window_, nullptr);
+    auto mockWindow = static_cast<MockWindow*>(context_->window_.get());
+
+    context_->lastUiDvsyncStatus_ = false;
+    EXPECT_CALL(*mockWindow, SetUiDvsyncSwitch(true, FromWhom::INNER)).Times(1);
+    context_->SetUiDvsyncSwitch(true);
+
+    EXPECT_CALL(*mockWindow, SetUiDvsyncSwitch(false, FromWhom::API)).Times(1);
+    context_->SetUiDvsyncSwitch(false, FromWhom::API);
+}
 } // namespace NG
 } // namespace OHOS::Ace

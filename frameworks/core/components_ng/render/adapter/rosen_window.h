@@ -139,7 +139,7 @@ public:
 
     void OnVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
 
-    void SetUiDvsyncSwitch(bool vsyncSwitch) override;
+    void SetUiDvsyncSwitch(bool vsyncSwitch, FromWhom fromWhom = FromWhom::INNER) override;
 
     uint32_t GetStatusBarHeight() const override;
 

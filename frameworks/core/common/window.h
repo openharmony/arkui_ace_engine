@@ -240,7 +240,7 @@ public:
 
     virtual void Unlock() {}
 
-    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch);
+    virtual void SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom = FromWhom::INNER);
 
     virtual uint32_t GetStatusBarHeight() const
     {

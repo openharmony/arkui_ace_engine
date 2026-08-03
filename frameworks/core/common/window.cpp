@@ -70,13 +70,13 @@ void Window::SetForceVsyncRequests(bool forceVsyncRequests)
     forceVsync_ = forceVsyncRequests;
 }
 
-void Window::SetUiDvsyncSwitch(bool dvsyncSwitch)
+void Window::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom)
 {
     if (!onShow_) {
         return;
     }
     if (platformWindow_ != nullptr) {
-        platformWindow_->SetUiDvsyncSwitch(dvsyncSwitch);
+        platformWindow_->SetUiDvsyncSwitch(dvsyncSwitch, fromWhom);
     }
 }
 
