@@ -551,6 +551,7 @@ RangeOptions Convert(const Ark_RichEditorRange& src)
     ret.end = Converter::OptConvert<int32_t>(src.end);
     return ret;
 }
+
 void ProcessShaderStyle(Ark_RichEditorParagraphStyle& dst, const std::optional<NG::Gradient>& gradientOpt,
     const std::optional<Color>& color, ConvContext *ctx)
 {
