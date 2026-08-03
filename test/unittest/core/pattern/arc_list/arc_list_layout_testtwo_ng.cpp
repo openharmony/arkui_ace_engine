@@ -567,7 +567,7 @@ HWTEST_F(ArcListLayoutTestTwoNg, CheckNeedUpdateHeaderOffset002, TestSize.Level1
      */
     arcListPattern->scrollableEvent_->scrollable_->state_ = Scrollable::AnimationState::IDLE;
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
-    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 2.0f, itemGroupInfo };
     std::map<int32_t, ListItemInfo> itemPosition = { { 0, info } };
     arcListPattern->itemPosition_ = itemPosition;
     arcListPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
@@ -640,7 +640,7 @@ HWTEST_F(ArcListLayoutTestTwoNg, CheckNeedUpdateHeaderOffset004, TestSize.Level1
      * set itemPosition_.count(0) equal to 0
      */
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
-    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 2.0f, itemGroupInfo };
     std::map<int32_t, ListItemInfo> itemPosition = { { 1, info } };
     arcAlgorithm->itemPosition_ = itemPosition;
     arcListPattern->startIndex_ = 1;
@@ -678,7 +678,7 @@ HWTEST_F(ArcListLayoutTestTwoNg, CheckNeedUpdateHeaderOffset005, TestSize.Level1
      * set itemPosition_.count(0) equal to 0
      */
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
-    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    ListItemInfo info = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 2.0f, itemGroupInfo };
     std::map<int32_t, ListItemInfo> itemPosition = { { 1, info } };
     arcAlgorithm->itemPosition_ = itemPosition;
     arcListPattern->startIndex_ = 1;
@@ -716,7 +716,7 @@ HWTEST_F(ArcListLayoutTestTwoNg, CheckNeedUpdateHeaderOffset006, TestSize.Level1
      */
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
     arcAlgorithm->itemPosition_.clear();
-    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 2.0f, itemGroupInfo };
     arcListPattern->startIndex_ = 1;
     arcListPattern->endIndex_ = 2;
     arcAlgorithm->headerStayNear_ = false;
@@ -761,7 +761,7 @@ HWTEST_F(ArcListLayoutTestTwoNg, CheckNeedUpdateHeaderOffset007, TestSize.Level1
      */
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
     arcAlgorithm->itemPosition_.clear();
-    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 2.0f, itemGroupInfo };
     arcListPattern->startIndex_ = 1;
     arcListPattern->endIndex_ = 2;
     arcAlgorithm->headerStayNear_ = false;
@@ -806,7 +806,7 @@ HWTEST_F(ArcListLayoutTestTwoNg, CheckNeedUpdateHeaderOffset008, TestSize.Level1
      */
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
     arcAlgorithm->itemPosition_.clear();
-    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 2.0f, itemGroupInfo };
     arcListPattern->startIndex_ = 1;
     arcListPattern->endIndex_ = 2;
     arcAlgorithm->headerStayNear_ = false;
@@ -851,7 +851,7 @@ HWTEST_F(ArcListLayoutTestTwoNg, CheckNeedUpdateHeaderOffset009, TestSize.Level1
      */
     ListItemGroupLayoutInfo itemGroupInfo = { true, true };
     arcAlgorithm->itemPosition_.clear();
-    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, 1.0f, 2.0f, itemGroupInfo };
+    arcAlgorithm->itemPosition_[0] = { 2, 2.0f, 4.0f, true, false, false, 1.0f, 2.0f, itemGroupInfo };
     arcListPattern->startIndex_ = 1;
     arcListPattern->endIndex_ = 2;
     arcAlgorithm->headerStayNear_ = false;

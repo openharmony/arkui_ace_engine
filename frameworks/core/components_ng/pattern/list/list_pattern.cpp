@@ -2985,12 +2985,13 @@ void ListPattern::UpdatePosMap(const ListLayoutAlgorithm::PositionMap& itemPos)
         if (pos.groupInfo) {
             bool groupAtStart = pos.groupInfo.value().atStart;
             if (groupAtStart) {
-                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
+                posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup, pos.isLazyChild });
             } else {
-                posMap_->UpdatePosWithCheck(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
+                posMap_->UpdatePosWithCheck(
+                    index, { currentOffset_ + pos.startPos, height, pos.isGroup, pos.isLazyChild });
             }
         } else {
-            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup });
+            posMap_->UpdatePos(index, { currentOffset_ + pos.startPos, height, pos.isGroup, pos.isLazyChild });
         }
     }
     auto& endGroupInfo = itemPos.rbegin()->second.groupInfo;
@@ -3007,7 +3008,8 @@ void ListPattern::UpdateChildPosInfo(int32_t index, float delta, float sizeChang
     auto prevPosInfo = posMap_->GetPositionInfo(index - 1);
     delta = isStackFromEnd_ ? -(delta + sizeChange) : delta;
     if (Negative(prevPosInfo.mainPos)) {
-        posMap_->UpdatePos(index, {posInfo.mainPos + delta, posInfo.mainSize + sizeChange, posInfo.isGroup});
+        posMap_->UpdatePos(index,
+            { posInfo.mainPos + delta, posInfo.mainSize + sizeChange, posInfo.isGroup, posInfo.isLazyChild });
     }
     if (index == GetStartIndex()) {
         sizeChange += delta;
@@ -3738,6 +3740,7 @@ void ListPattern::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("startPos:" + std::to_string(item.second.startPos));
         DumpLog::GetInstance().AddDesc("endPos:" + std::to_string(item.second.endPos));
         DumpLog::GetInstance().AddDesc("isGroup:" + std::to_string(item.second.isGroup));
+        DumpLog::GetInstance().AddDesc("isLazyChild:" + std::to_string(item.second.isLazyChild));
     }
     DumpLog::GetInstance().AddDesc("------------------------------------------");
     scrollStop_ ? DumpLog::GetInstance().AddDesc("scrollStop:true")
@@ -4359,6 +4362,7 @@ void ListPattern::CreatePositionInfo(std::unique_ptr<JsonValue>& json)
         child->Put("startPos", std::to_string(item.second.startPos).c_str());
         child->Put("endPos", std::to_string(item.second.endPos).c_str());
         child->Put("isGroup", std::to_string(item.second.isGroup).c_str());
+        child->Put("isLazyChild", std::to_string(item.second.isLazyChild).c_str());
         children->Put(child);
     }
     json->Put("itemPosition", children);
