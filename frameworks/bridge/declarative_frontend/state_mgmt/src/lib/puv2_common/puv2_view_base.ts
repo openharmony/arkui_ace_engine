@@ -177,7 +177,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   protected __enableReleaseExpiringNodesFlag__Internal: boolean = false;
 
-  protected __reuseIdForReleaseExpiringNodes__Internal: Set<string> = new Set<string>();
+  protected __reuseIdForReleaseExpiringNodes__Internal: Set<string> | undefined = undefined;
 
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super(true);
@@ -360,7 +360,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public tryReleaseExpiringNode(reuseId: string): boolean {
     const result = this.nativeViewPartialUpdate.tryReleaseExpiringNode(reuseId);
     if (!result) {
-      this.__reuseIdForReleaseExpiringNodes__Internal.delete(reuseId);
+      this.__reuseIdForReleaseExpiringNodes__Internal?.delete(reuseId);
     }
     return result;
   }
@@ -461,11 +461,14 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public __enableReleaseExpiringNodes__Internal(enable: boolean, reuseIds: string[]): void {
     this.__enableReleaseExpiringNodesFlag__Internal = enable;
     if (enable) {
-      reuseIds.forEach(reuseId => this.__reuseIdForReleaseExpiringNodes__Internal.add(reuseId));
+      if (!this.__reuseIdForReleaseExpiringNodes__Internal) {
+        this.__reuseIdForReleaseExpiringNodes__Internal = new Set<string>();
+      }
+      reuseIds.forEach(reuseId => this.__reuseIdForReleaseExpiringNodes__Internal!.add(reuseId));
     } else {
-      this.__reuseIdForReleaseExpiringNodes__Internal = new Set();
+      this.__reuseIdForReleaseExpiringNodes__Internal = undefined;
     }
-    
+
   }
 
   /**
@@ -477,7 +480,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
    */
   public __isReleaseExpiringNodesEnabled__Internal(reuseId: string): boolean {
     return this.__enableReleaseExpiringNodesFlag__Internal &&
-           this.__reuseIdForReleaseExpiringNodes__Internal.has(reuseId);
+           !!this.__reuseIdForReleaseExpiringNodes__Internal?.has(reuseId);
   }
 
   /**
