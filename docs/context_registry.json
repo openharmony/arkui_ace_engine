@@ -3896,9 +3896,9 @@
         "onLayout"
       ],
       "kb": "docs/kb/capabilities/custom-measure-layout.md",
-      "spec_domain": "specs/07-frontend/03-custom-components/06-custom-measure-layout",
-      "func_id": "07-03-06",
-      "spec_status": "pending",
+      "spec_domain": "specs/07-frontend/03-custom-components/05-custom-measure-layout",
+      "func_id": "07-03-05",
+      "spec_status": "active",
       "source_paths": {
         "node": "frameworks/core/components_ng/pattern/custom/custom_measure_layout_node.cpp",
         "algorithm": "frameworks/core/components_ng/pattern/custom/custom_node_layout_algorithm.cpp",
