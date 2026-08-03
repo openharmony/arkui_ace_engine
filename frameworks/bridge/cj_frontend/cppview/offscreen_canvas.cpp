@@ -95,7 +95,7 @@ void NativeOffscreenCanvas::NativeSetWidth(double width)
     width *= density;
     if (width_ != width) {
         width_ = width;
-        UpdateOffscreenSize(offscreenCanvasPattern_, static_cast<int32_t>(width_), static_cast<int32_t>(height_));
+        UpdateOffscreenSize(offscreenCanvasPattern_, static_cast<int32_t>(width_), static_cast<int32_t>(width_));
         if (offscreenCanvasContext_ != nullptr) {
             offscreenCanvasContext_->SetWidth(width_);
         }

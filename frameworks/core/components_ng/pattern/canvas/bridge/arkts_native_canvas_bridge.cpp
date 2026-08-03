@@ -223,7 +223,6 @@ ArkUINativeModuleValue CanvasBridge::CreateCanvas(ArkUIRuntimeCallInfo* runtimeC
                 ThrowBusinessErrorInline(vm,
                     "The context created in system cannot be bound to other canvas component.",
                     ERROR_CODE_CANVAS_ERROR_CONTEXT);
-                return panda::JSValueRef::Undefined(vm);
             }
             jsContext->SetInstanceId(Container::CurrentId());
             jsContext->SetCanvasPattern(pattern);
