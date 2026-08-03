@@ -1422,4 +1422,51 @@ HWTEST_F(RichEditorDeleteTestNg, RichEditorDeleteBackwardEmoji, TestSize.Level0)
     ASSERT_EQ(richEditorPattern->caretPosition_, 0);
 }
 
+/**
+ * @tc.name: DeleteSpansAndClearTextForDisplay001
+ * @tc.desc: test BeforeCreateLayoutWrapper clears textForDisplay_ when spans are deleted to empty,
+ *           verifying the fix for stale textForDisplay_ causing IME auto-completion failure.
+ *           Covers: DeleteSpans -> BeforeCreateLayoutWrapper -> ClearTextForDisplayIfEmpty,
+ *           and the normal path where textForDisplay_ is preserved when content exists.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDeleteTestNg, DeleteSpansAndClearTextForDisplay001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. Add text span and trigger layout to populate textForDisplay_
+     * @tc.expected: textForDisplay_ contains the added content
+     */
+    richEditorController->AddTextSpan(TextSpanOptions{ .value = INIT_VALUE_1 });
+    richEditorPattern->BeforeCreateLayoutWrapper();
+    EXPECT_NE(richEditorPattern->textForDisplay_.length(), 0);
+
+    /**
+     * @tc.steps: step2. Delete all spans, simulating memo switching
+     */
+    RangeOptions options;
+    options.start = 0;
+    options.end = static_cast<int32_t>(INIT_VALUE_1.length());
+    richEditorController->DeleteSpans(options);
+
+    /**
+     * @tc.steps: step3. Call BeforeCreateLayoutWrapper to trigger layout cycle
+     * @tc.expected: textForDisplay_ is cleared, no stale content remains
+     */
+    richEditorPattern->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(richEditorPattern->textForDisplay_.length(), 0);
+
+    /**
+     * @tc.steps: step4. Verify GetRightTextOfCursor returns empty for IME queries
+     * @tc.expected: returns empty string, not stale content from deleted spans
+     */
+    richEditorPattern->SetCaretPosition(0);
+    auto rightText = richEditorPattern->GetRightTextOfCursor(1);
+    EXPECT_EQ(rightText.length(), 0);
+}
 }

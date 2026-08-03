@@ -214,6 +214,11 @@ public:
         return false;
     }
 
+    bool NeedClearDisappearingChildrenRecursively() const override
+    {
+        return true;
+    }
+
     // used for drag move operation.
     void SetOnMove(std::function<void(int32_t, int32_t)>&& onMove);
     void SetItemDragHandler(std::function<void(int32_t)>&& onLongPress, std::function<void(int32_t)>&& onDragStart,

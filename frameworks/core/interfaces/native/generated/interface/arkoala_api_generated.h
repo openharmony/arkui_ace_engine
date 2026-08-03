@@ -1185,6 +1185,8 @@ typedef struct arkui_component_common_Callback_I32_Void arkui_component_common_C
 typedef struct Opt_arkui_component_common_Callback_I32_Void Opt_arkui_component_common_Callback_I32_Void;
 typedef struct arkui_component_common_Callback_I64_Void arkui_component_common_Callback_I64_Void;
 typedef struct Opt_arkui_component_common_Callback_I64_Void Opt_arkui_component_common_Callback_I64_Void;
+typedef struct arkui_component_common_Callback_Void_Void arkui_component_common_Callback_Void_Void;
+typedef struct Opt_arkui_component_common_Callback_Void_Void Opt_arkui_component_common_Callback_Void_Void;
 typedef struct arkui_component_idlize_Callback_I32_Void arkui_component_idlize_Callback_I32_Void;
 typedef struct Opt_arkui_component_idlize_Callback_I32_Void Opt_arkui_component_idlize_Callback_I32_Void;
 typedef struct Array_AcceptableFileType Array_AcceptableFileType;
@@ -1953,6 +1955,8 @@ typedef struct OnListScrollIndexCallback OnListScrollIndexCallback;
 typedef struct Opt_OnListScrollIndexCallback Opt_OnListScrollIndexCallback;
 typedef struct OnMenuItemClickCallback OnMenuItemClickCallback;
 typedef struct Opt_OnMenuItemClickCallback Opt_OnMenuItemClickCallback;
+typedef struct OnMenuItemClickWithTextCallback OnMenuItemClickWithTextCallback;
+typedef struct Opt_OnMenuItemClickWithTextCallback Opt_OnMenuItemClickWithTextCallback;
 typedef struct OnMicrophoneCaptureStateChangeCallback OnMicrophoneCaptureStateChangeCallback;
 typedef struct Opt_OnMicrophoneCaptureStateChangeCallback Opt_OnMicrophoneCaptureStateChangeCallback;
 typedef struct OnMoveHandler OnMoveHandler;
@@ -2703,6 +2707,10 @@ typedef struct Ark_ScrollEdgeOptions Ark_ScrollEdgeOptions;
 typedef struct Opt_ScrollEdgeOptions Opt_ScrollEdgeOptions;
 typedef struct Ark_ScrollPageOptions Ark_ScrollPageOptions;
 typedef struct Opt_ScrollPageOptions Opt_ScrollPageOptions;
+typedef struct Ark_SelectionContainerEditMenuOptions Ark_SelectionContainerEditMenuOptions;
+typedef struct Opt_SelectionContainerEditMenuOptions Opt_SelectionContainerEditMenuOptions;
+typedef struct Ark_SelectionContainerMenuOptions Ark_SelectionContainerMenuOptions;
+typedef struct Opt_SelectionContainerMenuOptions Opt_SelectionContainerMenuOptions;
 typedef struct Ark_SelectionOptions Ark_SelectionOptions;
 typedef struct Opt_SelectionOptions Opt_SelectionOptions;
 typedef struct Ark_SizeTLengthMetrics Ark_SizeTLengthMetrics;
@@ -7044,6 +7052,14 @@ typedef struct Opt_SelectedMode {
     Ark_Tag tag;
     Ark_SelectedMode value;
 } Opt_SelectedMode;
+typedef enum Ark_SelectionContainerTextJoinStyle {
+    ARK_SELECTION_CONTAINER_TEXT_JOIN_STYLE_NEWLINE = 0,
+    ARK_SELECTION_CONTAINER_TEXT_JOIN_STYLE_DIRECT = 1,
+} Ark_SelectionContainerTextJoinStyle;
+typedef struct Opt_SelectionContainerTextJoinStyle {
+    Ark_Tag tag;
+    Ark_SelectionContainerTextJoinStyle value;
+} Opt_SelectionContainerTextJoinStyle;
 typedef enum Ark_SelectStatus {
     ARK_SELECT_STATUS_ALL = 0,
     ARK_SELECT_STATUS_PART = 1,
@@ -10353,6 +10369,16 @@ typedef struct Opt_arkui_component_common_Callback_I64_Void {
     Ark_Tag tag;
     arkui_component_common_Callback_I64_Void value;
 } Opt_arkui_component_common_Callback_I64_Void;
+typedef struct arkui_component_common_Callback_Void_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId);
+} arkui_component_common_Callback_Void_Void;
+typedef struct Opt_arkui_component_common_Callback_Void_Void {
+    Ark_Tag tag;
+    arkui_component_common_Callback_Void_Void value;
+} Opt_arkui_component_common_Callback_Void_Void;
 typedef struct arkui_component_idlize_Callback_I32_Void {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14081,6 +14107,16 @@ typedef struct Opt_OnMenuItemClickCallback {
     Ark_Tag tag;
     OnMenuItemClickCallback value;
 } Opt_OnMenuItemClickCallback;
+typedef struct OnMenuItemClickWithTextCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_TextMenuItem menuItem, const Ark_String value, const synthetic_Callback_Boolean_Void continuation);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_TextMenuItem menuItem, const Ark_String value, const synthetic_Callback_Boolean_Void continuation);
+} OnMenuItemClickWithTextCallback;
+typedef struct Opt_OnMenuItemClickWithTextCallback {
+    Ark_Tag tag;
+    OnMenuItemClickWithTextCallback value;
+} Opt_OnMenuItemClickWithTextCallback;
 typedef struct OnMicrophoneCaptureStateChangeCallback {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -17003,6 +17039,7 @@ typedef struct Opt_NavDestinationModuleInfo {
 typedef struct Ark_NavigationConfiguration {
     /* kind: Interface */
     Opt_Int32 stackSizeLimit;
+    Opt_Boolean recyclePagesOnLowMemory;
 } Ark_NavigationConfiguration;
 typedef struct Opt_NavigationConfiguration {
     Ark_Tag tag;
@@ -17851,6 +17888,27 @@ typedef struct Opt_ScrollPageOptions {
     Ark_Tag tag;
     Ark_ScrollPageOptions value;
 } Opt_ScrollPageOptions;
+typedef struct Ark_SelectionContainerEditMenuOptions {
+    /* kind: Interface */
+    Opt_OnCreateMenuCallback onCreateMenu;
+    Opt_OnMenuItemClickWithTextCallback onMenuItemClick;
+    Opt_OnPrepareMenuCallback onPrepareMenu;
+} Ark_SelectionContainerEditMenuOptions;
+typedef struct Opt_SelectionContainerEditMenuOptions {
+    Ark_Tag tag;
+    Ark_SelectionContainerEditMenuOptions value;
+} Opt_SelectionContainerEditMenuOptions;
+typedef struct Ark_SelectionContainerMenuOptions {
+    /* kind: Interface */
+    Opt_Callback_String_Void onAppear;
+    Opt_arkui_component_common_Callback_Void_Void onDisappear;
+    Opt_Callback_String_Void onMenuShow;
+    Opt_Callback_String_Void onMenuHide;
+} Ark_SelectionContainerMenuOptions;
+typedef struct Opt_SelectionContainerMenuOptions {
+    Ark_Tag tag;
+    Ark_SelectionContainerMenuOptions value;
+} Opt_SelectionContainerMenuOptions;
 typedef struct Ark_SelectionOptions {
     /* kind: Interface */
     Opt_MenuPolicy menuPolicy;
@@ -28678,7 +28736,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setEnableFullscreenVideoOverlay)(Ark_NativePointer node,
                                             const Opt_Boolean* value);
     void (*setEnableMediaNetworkProxy)(Ark_NativePointer node,
-                                  const Opt_Boolean* value);
+                                       const Opt_Boolean* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,
                                        const Opt_String* tag,
                                        const Opt_String* type);
@@ -32020,6 +32078,34 @@ typedef struct GENERATED_ArkUISelectExtenderAccessor {
                        const Opt_DividerOptions* options);
 } GENERATED_ArkUISelectExtenderAccessor;
 
+typedef struct GENERATED_ArkUISelectionContainerExtenderAccessor {
+    Ark_NativePointer (*selectionContainerConstructor)(Ark_Int32 id);
+    void (*setSelectionContainerOptions)(Ark_NativePointer node);
+    void (*copyOption)(Ark_NativePointer node,
+                       const Opt_CopyOptions* value);
+    void (*caretColor)(Ark_NativePointer node,
+                       const Opt_ResourceColor* color);
+    void (*selectedBackgroundColor)(Ark_NativePointer node,
+                                    const Opt_ResourceColor* color);
+    void (*enableHapticFeedback)(Ark_NativePointer node,
+                                 const Opt_Boolean* isEnabled);
+    void (*textJoinStyle)(Ark_NativePointer node,
+                          const Opt_SelectionContainerTextJoinStyle* style);
+    void (*bindSelectionMenu)(Ark_NativePointer node,
+                              const Opt_TextSpanType* spanType,
+                              const Opt_CustomNodeBuilder* content,
+                              const Opt_TextResponseType* responseType,
+                              const Opt_SelectionContainerMenuOptions* options);
+    void (*editMenuOptions)(Ark_NativePointer node,
+                            const Opt_SelectionContainerEditMenuOptions* options);
+    void (*onTextSelectionChange)(Ark_NativePointer node,
+                                  const Opt_Callback_Array_String_Void* callback);
+    void (*onWillCopy)(Ark_NativePointer node,
+                       const Opt_Callback_String_Boolean* callback);
+    void (*onCopy)(Ark_NativePointer node,
+                   const Opt_synthetic_Callback_String_Void* callback);
+} GENERATED_ArkUISelectionContainerExtenderAccessor;
+
 typedef struct GENERATED_ArkUISheetDismissAccessor {
     void (*destroyPeer)(Ark_SheetDismiss peer);
     Ark_SheetDismiss (*construct)();
@@ -32859,6 +32945,7 @@ typedef struct GENERATED_ArkUIWebResourceErrorAccessor {
     Ark_NativePointer (*getFinalizer)();
     Ark_String (*getErrorInfo)(Ark_WebResourceError peer);
     Ark_Int32 (*getErrorCode)(Ark_WebResourceError peer);
+    Ark_Int32 (*getCustomErrorCode)(Ark_WebResourceError peer);
 } GENERATED_ArkUIWebResourceErrorAccessor;
 
 typedef struct GENERATED_ArkUIWebResourceRequestAccessor {
@@ -33238,6 +33325,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUISearchControllerAccessor* (*getSearchControllerAccessor)();
     const GENERATED_ArkUISearchOpsAccessor* (*getSearchOpsAccessor)();
     const GENERATED_ArkUISelectExtenderAccessor* (*getSelectExtenderAccessor)();
+    const GENERATED_ArkUISelectionContainerExtenderAccessor* (*getSelectionContainerExtenderAccessor)();
     const GENERATED_ArkUISheetDismissAccessor* (*getSheetDismissAccessor)();
     const GENERATED_ArkUISliderExtenderAccessor* (*getSliderExtenderAccessor)();
     const GENERATED_ArkUISpringBackActionAccessor* (*getSpringBackActionAccessor)();

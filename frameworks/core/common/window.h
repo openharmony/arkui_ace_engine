@@ -302,14 +302,11 @@ public:
     virtual void NotifyWindowAttachStateChange(bool status) {}
 
     // Thread-safe via std::atomic. Should be called on UI thread.
-    void SetBackgroundForceFlushVsync(bool enable, size_t count)
-    {
-        static constexpr uint32_t MAX_FORCE_FLUSH_COUNT = 10;
-        backgroundForceFlushEnabled_.store(enable, std::memory_order_relaxed);
-        backgroundForceFlushCount_.store(
-            enable ? std::min(static_cast<uint32_t>(count), MAX_FORCE_FLUSH_COUNT) : 0,
-            std::memory_order_relaxed);
-    }
+    void SetBackgroundForceFlushVsync(bool enable, size_t count);
+
+    bool HasBackgroundForceFlushQuota() const;
+
+    bool ConsumeBackgroundForceFlushCount();
 
 protected:
     bool isRequestVsync_ = false;

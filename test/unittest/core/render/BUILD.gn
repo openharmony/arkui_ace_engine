@@ -55,6 +55,9 @@ ace_unittest("drawing_prop_convertor_test_ng") {
 ace_unittest("render_context_test_ng") {
   module_name = "UIEngine-UIContext"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
 
   sources = [ "render_context_test_ng.cpp" ]
 }
@@ -62,6 +65,9 @@ ace_unittest("render_context_test_ng") {
 ace_unittest("render_property_test_ng") {
   module_name = "CommonProperties-Background"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
 
   sources = [ "render_property_test_ng.cpp" ]
 }

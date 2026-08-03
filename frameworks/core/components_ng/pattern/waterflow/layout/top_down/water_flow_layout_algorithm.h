@@ -41,6 +41,8 @@ private:
     FlowItemPosition GetItemPosition(int32_t index);
     bool MeasureToTarget(LayoutWrapper* layoutWrapper, int32_t startFrom, std::optional<int64_t> cacheDeadline);
     void FillViewport(float mainSize, LayoutWrapper* layoutWrapper);
+    void MeasureLazyLayoutItem(const RefPtr<LayoutWrapper>& item, float crossSize, float startMainPos, float mainSize,
+        const RefPtr<WaterFlowLayoutProperty>& layoutProperty) const;
     void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
     float ComputeCrossPosition(int32_t crossIndex) const;
     bool GetCrossOffset(int32_t crossIndex, float crossSize, bool isRtl, float& crossOffset) const;

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class ArkSliderComponent extends ArkComponent implements SliderAttribute {
   builder: WrappedBuilder<Object[]> | null = null;
   sliderNode: BuilderNode<[SliderConfiguration]> | null = null;

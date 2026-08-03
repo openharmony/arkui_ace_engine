@@ -497,7 +497,7 @@ void DialogInnerManager::OpenDialogAnimationInner(const RefPtr<OverlayManager>& 
             auto dialogPattern = node->GetPattern<DialogPattern>();
             dialogPattern->CallDialogDidAppearCallback();
             overlayManager->ContentChangeReport(node, true);
-            PerfMonitor::GetPerfMonitor()->End(PerfConstants::DIALOG_LIGHT_SENSE_ANIMATION, true);
+            PerfMonitor::GetPerfMonitor()->End(PerfConstants::DIALOG_LIGHT_SENSE_ANIMATION, false);
         };
         dialogPattern->RegisterOnFinishEvent(onFinishEvent);
         if (isTopOrder && isReadFirstNode) {

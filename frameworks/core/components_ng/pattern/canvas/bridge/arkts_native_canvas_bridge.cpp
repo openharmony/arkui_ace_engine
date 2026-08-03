@@ -135,30 +135,26 @@ void ParseCanvasParams(EcmaVM* vm, const Local<panda::ObjectRef>& paramsObj, Fra
     }
 }
 
-struct OnReadyContext {
-    EcmaVM* vm;
-    FrameNode* frameNode;
-    panda::CopyableGlobal<panda::FunctionRef> func;
-    bool isJsView;
-};
-
-void InvokeOnReadyCallback(const OnReadyContext& ctx,
+void InvokeOnReadyCallback(
+    const panda::CopyableGlobal<panda::FunctionRef>& func,
+    const WeakPtr<FrameNode>& weakNode, bool isJsView,
     bool needDrawingContext, CanvasUnit unit)
 {
-    panda::LocalScope pandaScope(ctx.vm);
-    panda::TryCatch trycatch(ctx.vm);
-    PipelineContext::SetCallBackNode(AceType::WeakClaim(ctx.frameNode));
+    auto vm = func.GetEcmaVM();
+    CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
+    panda::LocalScope pandaScope(vm);
+    panda::TryCatch trycatch(vm);
+    PipelineContext::SetCallBackNode(weakNode);
     if (!needDrawingContext) {
-        auto result = ctx.func->Call(ctx.vm, ctx.func.ToLocal(), nullptr, 0);
-        if (ctx.isJsView) {
-            ArkTSUtils::HandleCallbackJobs(ctx.vm, trycatch, result);
+        auto result = func->Call(vm, func.ToLocal(), nullptr, 0);
+        if (isJsView) {
+            ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         }
         return;
     }
-    if (!ctx.frameNode) {
-        return;
-    }
-    auto pattern = ctx.frameNode->GetPattern<NG::CanvasPattern>();
+    auto frameNode = weakNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NG::CanvasPattern>();
     if (!pattern) {
         return;
     }
@@ -183,7 +179,10 @@ void InvokeOnReadyCallback(const OnReadyContext& ctx,
     }
     std::vector<Local<JSValueRef>> argv;
     argv.emplace_back(jsDrawingContext);
-    ctx.func->Call(ctx.vm, ctx.func.ToLocal(), argv.data(), argv.size());
+    auto result = func->Call(vm, func.ToLocal(), argv.data(), argv.size());
+    if (isJsView) {
+        ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+    }
 }
 } // namespace
 
@@ -267,11 +266,10 @@ ArkUINativeModuleValue CanvasBridge::SetCanvasOnReady(ArkUIRuntimeCallInfo* runt
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> funcLocal = callbackArg->ToObject(vm);
-    panda::CopyableGlobal<panda::FunctionRef> func(vm, funcLocal);
-    OnReadyContext ctx { vm, frameNode, std::move(func), isJsView };
-    std::function<void(bool, CanvasUnit)> callback = [ctx](
-        bool needDrawingContext, CanvasUnit unit) {
-        InvokeOnReadyCallback(ctx, needDrawingContext, unit);
+    std::function<void(bool, CanvasUnit)> callback =
+        [func = panda::CopyableGlobal(vm, funcLocal), node = AceType::WeakClaim(frameNode), isJsView](
+            bool needDrawingContext, CanvasUnit unit) {
+        InvokeOnReadyCallback(func, node, isJsView, needDrawingContext, unit);
     };
     GetArkUINodeModifiers()->getCanvasModifier()->setCanvasOnReady(
         nativeNode, reinterpret_cast<void*>(&callback));

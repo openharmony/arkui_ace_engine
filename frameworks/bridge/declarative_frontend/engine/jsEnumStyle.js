@@ -38,7 +38,7 @@ let ColoringStrategy;
   ColoringStrategy.CONTRAST = 'contrast';
 })(ColoringStrategy || (ColoringStrategy = {}));
 
-var CompetitionStrategy;
+let CompetitionStrategy;
 (function (CompetitionStrategy) {
     CompetitionStrategy[CompetitionStrategy["DEFAULT"] = 0] = "DEFAULT";
     CompetitionStrategy[CompetitionStrategy["COMPETITION"] = 1] = "COMPETITION";
@@ -2743,6 +2743,8 @@ class NavPathStack {
     this.popArray = [];
     this.interception = undefined;
     this.hasSingletonMoved = false;
+    // preload item (only 1 at a time)
+    this.preloadItem = undefined;
   }
   getPathStack() {
     return this.nativeStack?.getPathStack(this);
@@ -2965,6 +2967,63 @@ class NavPathStack {
     this.isReplace = 0;
     this.animated = animated;
     this.nativeStack?.onStateChanged();
+  }
+  preloadPath(info, options) {
+    if (!this.checkPathValid(info)) {
+      let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+      return new Promise((resolve, reject) => {
+        reject({ code: 401, message: paramErrMsg });
+      });
+    }
+    // Destroy existing preload item if any
+    if (this.preloadItem !== undefined) {
+      if (this.preloadItem.onDestroy !== undefined) {
+        this.preloadItem.onDestroy();
+      }
+      if (this.nativeStack) {
+        this.nativeStack.destroyPreloadNode();
+      }
+      this.preloadItem = undefined;
+    }
+    // Store the preload item
+    let paramString = JSON.stringify(info.param);
+    this.preloadItem = {
+      info: info,
+      paramString: paramString,
+      onDestroy: options !== undefined ? options.onDestroy : undefined
+    };
+    
+    // Create the preloaded node via native stack
+    if (!this.nativeStack) {
+      return new Promise((resolve, reject) => {
+        this.preloadItem.promise = (errorCode, errorMessage) => {
+          if (errorCode === 0) {
+            resolve(0);
+            return;
+          }
+          reject({code: errorCode, message: errorMessage});
+        };
+      });
+    }
+    let promise = new Promise((resolve, reject) => {
+      this.preloadItem.promise = (errorCode, errorMessage) => {
+        if (errorCode === 0) {
+          resolve(0);
+          return;
+        }
+        reject({code: errorCode, message: errorMessage});
+      };
+    });
+    let result = this.nativeStack?.preloadPath(info.name, info.param, paramString);
+    if (result === false) {
+      this.preloadItem = undefined;
+      return new Promise((resolve, reject) => {
+        reject({ code: 100001, message: 'Internal error.' });
+      });
+    }
+    return promise;
   }
   pushDestination(info, optionParam) {
     if (!this.checkPathValid(info)) {

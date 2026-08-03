@@ -17,6 +17,9 @@
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
 
+#include "base/thread/task_executor.h"
+#include "core/common/container.h"
+#include "core/common/visual_effect/transparency_utils.h"
 #include "core/components/common/properties/ui_material.h"
 
 namespace OHOS::Ace::Napi {
@@ -604,5 +607,10 @@ napi_value UiMaterialNapi::Init(napi_env env, napi_value exports)
 extern "C" __attribute__((constructor)) void UiMaterialRegister()
 {
     napi_module_register(&ui_material_module);
+    auto taskExecutor = Container::CurrentTaskExecutorSafelyWithCheck();
+    if (taskExecutor) {
+        taskExecutor->PostTask([]() { TransparencyUtils::InitTransparencyLevelOnce(); },
+            TaskExecutor::TaskType::BACKGROUND, "InitUIMaterialTransparency", PriorityType::VIP);
+    }
 }
 } // namespace OHOS::Ace::Napi

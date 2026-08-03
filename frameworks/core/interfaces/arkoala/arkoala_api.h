@@ -22,7 +22,9 @@
 #include <unordered_map>
 #include <string>
 #include <utility>
+#include <memory>
 #include "core/common/resource/resource_object.h"
+#include "ui/base/lifecycle_observable.h"
 
 #ifdef __cplusplus
 namespace OHOS::Ace {
@@ -120,7 +122,7 @@ struct ArkUI_TextCascadePickerRangeContentArray;
 struct ArkUI_EmbeddedComponentOption;
 struct AbilityBase_Want;
 struct ArkUIGestureEvent;
-struct ArkUIGestureRecognizer;
+typedef struct ArkUI_GestureRecognizer ArkUIGestureRecognizer;
 struct _ArkUIRenderNode;
 struct _ArkUIRenderModifier;
 struct _ArkUIRSProperty;
@@ -5801,7 +5803,7 @@ struct ArkUIGestureEventTargetInfo {
     void* uiNode = nullptr;
 };
 
-struct ArkUIGestureRecognizer {
+struct ArkUI_GestureRecognizer : public OHOS::Ace::LifeCycleObservable {
     ArkUI_Int32 type = -1;
     ArkUIGesture* gesture = nullptr;
     void* extraData = nullptr;
@@ -5822,7 +5824,7 @@ struct ArkUIGestureInterruptInfo {
     ArkUI_Int32 systemRecognizerType;
     ArkUIAPIEventGestureAsyncEvent* event = nullptr;
     void* customUserData = nullptr;
-    void* userData = nullptr;
+    std::unique_ptr<OHOS::Ace::LifeCycleObserver> userData = nullptr;
     void* inputEvent = nullptr;
     void* gestureEvent = nullptr;
     ArkUIGestureRecognizer** responseLinkRecognizer = nullptr;
@@ -6266,6 +6268,8 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*setTextAreaBackgroundColorWithColorSpace)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* resRawPtr);
+    void (*setTextAreaBackgroundColorForHDR)(
+        ArkUINodeHandle node, const ArkUI_Float32* hdrValues, ArkUI_Int32 colorSpace, void* resRawPtr);
     void (*resetTextAreaBackgroundColor)(ArkUINodeHandle node);
     void (*setTextAreaType)(ArkUINodeHandle node, ArkUI_Int32 type);
     void (*resetTextAreaType)(ArkUINodeHandle node);
@@ -6604,6 +6608,8 @@ struct ArkUITextInputModifier {
     void (*setTextInputBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*setTextInputBackgroundColorWithColorSpace)(
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* resRawPtr);
+    void (*setTextInputBackgroundColorForHDR)(
+        ArkUINodeHandle node, const ArkUI_Float32* hdrValues, ArkUI_Int32 colorSpace, void* resRawPtr);
     void (*resetTextInputBackgroundColor)(ArkUINodeHandle node);
     void (*setTextInputNormalUnderlineColor)(ArkUINodeHandle node, ArkUI_Uint32 typingColor, void* resRawPtr);
     void (*setTextInputUserUnderlineColor)(ArkUINodeHandle node, const ArkUI_Uint32* values,
@@ -6838,6 +6844,12 @@ struct ArkUITextInputModifier {
     void (*setTextInputColorShaderColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorShaderColorRawPtr);
     void (*resetTextInputColorShaderColor)(ArkUINodeHandle node);
     void (*setUserAccessibilityText)(ArkUINodeHandle node);
+    void (*setTextInputSetCancelButtonStyle)(ArkUINodeHandle node, ArkUI_Int32 style);
+    void (*setTextInputSetCancelDefaultIcon)(ArkUINodeHandle node);
+    void (*setTextInputSetCancelSymbolIconJs)(ArkUINodeHandle node, void* symbolFunction);
+    void (*setTextInputCancelImageIconSize)(ArkUINodeHandle node, const struct ArkUISizeType* size, void* resRawPtr);
+    void (*setTextInputCancelImageIconSrcAndColor)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName,
+        ArkUI_CharPtr moduleName, void* srcRawPtr, ArkUI_Uint32 color, void* colorRawPtr, bool isColorInvalid);
 };
 
 struct ArkUIWebModifier {
@@ -7620,7 +7632,7 @@ struct ArkUINavigationModifier {
     void (*setDividerStartMargin)(ArkUINodeHandle node, ArkUI_CharPtr start, ArkUI_VoidPtr startRes);
     void (*setDividerEndMargin)(ArkUINodeHandle node, ArkUI_CharPtr end, ArkUI_VoidPtr endRes);
     void (*resetDividerStyle)(ArkUINodeHandle node);
-    void (*setNavigationConfiguration)(ArkUINodeHandle node, ArkUI_Int32 stackSizeLimit);
+    void (*setNavigationConfiguration)(ArkUINodeHandle node, ArkUI_Int32 stackSizeLimit, ArkUI_Bool recyclePagesOnLowMemory);
     void (*resetNavigationConfiguration)(ArkUINodeHandle node);
 };
 
@@ -9235,7 +9247,7 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorOnDidChange)(ArkUINodeHandle node);
     void (*setRichEditorPlaceholder)(ArkUINodeHandle node, ArkUI_CharPtr* stringParameters,
         const ArkUI_Uint32 stringParametersCount, const ArkUI_Float64* valuesArray, const ArkUI_Uint32 valuesCount,
-        void* resRawPtr);
+        void* resRawPtr, bool isJsView);
     void (*setRichEditorNapiPlaceholder)(ArkUINodeHandle node,
         const struct ArkUIRichEditorPlaceholderOptionsStruct* placeholderOptions);
     void (*resetRichEditorPlaceholder)(ArkUINodeHandle node);
@@ -9623,7 +9635,7 @@ struct ArkUIXComponentModifier {
     void (*setXComponentBlendApplyType)(ArkUINodeHandle node, ArkUI_Int32 blendApplyTypeValue);
     void (*createWithOpacityResourceObj)(ArkUINodeHandle node, void* opacityResObj);
     void (*parseParams)(void* runtimeCallInfo, ArkUI_Params& params);
-    void (*setControllerCallback)(void* runtimeCallInfo, ArkUINodeHandle* node);
+    void (*setControllerCallback)(void* runtimeCallInfo, ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {

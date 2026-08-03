@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
-class ArkRichTextComponent extends ArkComponent implements CommonMethod<RichTextAttribute> {
+class ArkRichTextComponent extends ArkComponent implements RichTextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }

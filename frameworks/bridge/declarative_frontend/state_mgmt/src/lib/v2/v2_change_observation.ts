@@ -67,6 +67,10 @@ class ObserveV2 {
 
   public static readonly SYMBOL_MAKE_OBSERVED = Symbol('___make_observed__');
 
+  public static readonly SYMBOL_CUSTOM_ENV_OWNER = Symbol('___custom_env_owner__');
+
+  public static customEnvInUse_ = false;
+
   public static readonly OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
   public static readonly ENV_PREFIX = '__env_'; // ENV_PREFIX + attrName => backing store attribute name
   public static readonly IS_CUSTOM_ENV_INIT = '_isCustomEnvConstructionFinalized__Internal';
@@ -1443,7 +1447,7 @@ class ObserveV2 {
   }
   public static autoProxyObject(target: Object, key: string | symbol): any {
     let val = target[key];
-
+    ObserveV2.propagateCustomEnvOwner(target, val);
     if (InteropConfigureStateMgmt.needsInterop()) {
       const interopVal = tryGetInteropObservedValue(target, key, val);
       if (interopVal !== undefined) {
@@ -1485,6 +1489,68 @@ class ObserveV2 {
       }
     }
     return val;
+  }
+
+  public static propagateCustomEnvOwner(target: object, val: CustomEnvValue): void {
+    if (!ObserveV2.customEnvInUse_) {
+      return;
+    }
+    if (!val || typeof val !== 'object') {
+      return;
+    }
+    const customEnvOwner = (target as CustomEnvValue)[ObserveV2.SYMBOL_CUSTOM_ENV_OWNER];
+    if (customEnvOwner) {
+      (val as CustomEnvValue)[ObserveV2.SYMBOL_CUSTOM_ENV_OWNER] = customEnvOwner;
+    }
+  }
+
+  public static notifyCustomEnvOwner(target: ViewPU): void {
+    const owners = (target as CustomEnvValue)[ObserveV2.SYMBOL_CUSTOM_ENV_OWNER] as Map<number, Set<string>> | undefined;
+    if (!owners) {
+      return;
+    }
+    for (const [viewId, varNames] of owners) {
+      const view = SubscriberManager.Find(viewId) as ViewPU;
+      if (!view) {
+        owners.delete(viewId);
+        continue;
+      }
+      for (const varName of varNames) {
+        view.__notifyDecoratedWatch__Internal(varName);
+      }
+    }
+  }
+
+  public static registerCustomEnvOwner(view: ViewPU, proxiedValue: object, varName: string): object {
+    if (!proxiedValue || !(Array.isArray(proxiedValue) || proxiedValue instanceof Set ||
+      proxiedValue instanceof Map || proxiedValue instanceof Date)) {
+      return proxiedValue;
+    }
+    ObserveV2.customEnvInUse_ = true;
+    let owners = (proxiedValue as CustomEnvValue)[ObserveV2.SYMBOL_CUSTOM_ENV_OWNER] as Map<number, Set<string>> | undefined;
+    if (!owners) {
+      owners = new Map<number, Set<string>>();
+      (proxiedValue as CustomEnvValue)[ObserveV2.SYMBOL_CUSTOM_ENV_OWNER] = owners;
+    }
+    let varNames = owners.get(view.id__());
+    if (!varNames) {
+      varNames = new Set<string>();
+      owners.set(view.id__(), varNames);
+    }
+    varNames.add(varName);
+    return proxiedValue;
+  }
+
+  public static removeCustomEnvOwner(view: ViewPU): void {
+    view.__getCustomEnvPropertyNameToKey__Internal();
+    if (!view[CUSTOM_ENV_DECO_META]) {
+      return;
+    }
+    const viewId = view.id__();
+    for (const [varName] of view.__getCustomEnvPropertyNameToKey__Internal()) {
+      const coll = (view as CustomEnvValue)[ObserveV2.OB_PREFIX + varName];
+      coll?.[ObserveV2.SYMBOL_CUSTOM_ENV_OWNER]?.delete(viewId);
+    }
   }
 
   /**

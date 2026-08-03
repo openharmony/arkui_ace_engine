@@ -3556,7 +3556,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _WebAttribute_setEnableFullscreenVideoOverlay(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
-	native static _WebAttribute_setEnableMediaNetworkProxy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    native static _WebAttribute_setEnableMediaNetworkProxy(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _WebAttribute_setRegisterNativeEmbedRule(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
@@ -6581,6 +6581,30 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SelectExtender_setDivider(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
+    native static _SelectionContainerExtender_selectionContainerConstructor(id: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_setSelectionContainerOptions(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_copyOption(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_caretColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_selectedBackgroundColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_enableHapticFeedback(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_textJoinStyle(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_bindSelectionMenu(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_editMenuOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_onTextSelectionChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_onWillCopy(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
+    native static _SelectionContainerExtender_onCopy(node: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
+    @ani.unsafe.Direct
     native static _SheetDismiss_construct(): KPointer
     @ani.unsafe.Direct
     native static _SheetDismiss_getFinalizer(): KPointer
@@ -7407,6 +7431,8 @@ export class ArkUIGeneratedNativeModule {
     native static _WebResourceError_getErrorInfo(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _WebResourceError_getErrorCode(ptr: KPointer): KInt
+    @ani.unsafe.Direct
+    native static _WebResourceError_getCustomErrorCode(ptr: KPointer): KInt
     @ani.unsafe.Direct
     native static _WebResourceRequest_construct(): KPointer
     @ani.unsafe.Direct

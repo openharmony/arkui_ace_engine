@@ -987,12 +987,13 @@ void ResetDividerStyle(ArkUINodeHandle node)
     NavigationModelNG::ResetDividerStyle(frameNode);
 }
 
-void SetNavigationConfiguration(ArkUINodeHandle node, ArkUI_Int32 stackSizeLimit)
+void SetNavigationConfiguration(ArkUINodeHandle node, ArkUI_Int32 stackSizeLimit, ArkUI_Bool recyclePagesOnLowMemory)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::NavigationConfiguration config;
     config.stackSizeLimit = stackSizeLimit;
+    config.recyclePagesOnLowMemory = recyclePagesOnLowMemory;
     NavigationModelNG::SetNavigationConfiguration(frameNode, config);
 }
 

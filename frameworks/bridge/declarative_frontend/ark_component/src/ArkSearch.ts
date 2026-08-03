@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 
 class SearchSelectDetectorEnableModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
@@ -219,7 +218,7 @@ class SearchPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
 }
 
 class SearchCancelButtonModifier extends ModifierWithKey<{ style?: CancelButtonStyle, icon?: IconOptions }> {
-  constructor(value: { style?: CancelButtonStyle, icon?: IconOptions }) {
+  constructor(value: any) {
     super(value);
   }
   static identity = Symbol('searchCancelButton');
@@ -1058,15 +1057,7 @@ class SearchStrokeJoinStyleModifier extends ModifierWithKey<JoinStyle>{
   }
 }
  
-class SearchShaderStyleModifier extends ModifierWithKey<{
-  center: Array<any>;
-  radius: number | string;
-  angle?: number | string;
-  direction?: GradientDirection;
-  colors: Array<[ ResourceColor, number ]>;
-  repeating?: boolean;
-  color: ResourceColor;
-}> {
+class SearchShaderStyleModifier extends ModifierWithKey<any> {
   constructor(value: {
     center: Array<any>;
     radius: number | string;
@@ -1098,7 +1089,7 @@ class SearchShaderStyleModifier extends ModifierWithKey<{
   }
 }
 
-class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
+class ArkSearchComponent extends ArkComponent implements SearchAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }

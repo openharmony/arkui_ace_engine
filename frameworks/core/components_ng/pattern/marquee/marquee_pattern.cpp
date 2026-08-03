@@ -357,6 +357,9 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
     if (stopAndStart) {
         StartMarqueeAnimation();
     }
+    if (!stopAndStart && !IsRunMarquee()) {
+        UpdateNodeInitialPos();
+    }
 }
 
 void MarqueePattern::ChangeSecondChildVisibility(bool stopAndStart)

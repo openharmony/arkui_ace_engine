@@ -16,6 +16,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("thread_checker_test") {
   module_name = "FormAndSelection-Select"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "thread_checker_test.cpp" ]
 
   if (!ace_enable_full_test_suite) {

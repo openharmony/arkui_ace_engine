@@ -1264,7 +1264,7 @@ private:
     void OnScrollDragEndRecursive() override;
 
     inline bool ChildFirst(NestedState state);
-    RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex) const;
+    RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex, bool needForceCreate = false) const;
     bool FadeOverScroll(float offset);
     int32_t ComputeSwipePageNextIndex(float velocity, bool onlyDistance = false) const;
     int32_t ComputeNextIndexInSinglePage(float velocity, bool onlyDistance) const;
@@ -1275,6 +1275,7 @@ private:
     bool IsContentFocused();
 
     int32_t CheckTargetIndex(int32_t targetIndex, bool isForceBackward = false);
+    int32_t GetLastVisibleItemIndex() const;
 
     void HandleTouchBottomLoop();
     void HandleTouchBottomLoopOnRTL();
@@ -1503,7 +1504,6 @@ private:
     ChangeEventPtr onIndexChangeEvent_;
     ChangeEventPtr selectedEvent_;
     ChangeEventPtr unselectedEvent_;
-    ChangeEventPtr scrollStateChangedEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 
@@ -1629,6 +1629,8 @@ private:
     std::optional<float> lastDragByOffset_;
 
     bool lastSetRenderGroup_ = false;
+
+    bool isIgnoreHiddenItem_ = false;
 };
 } // namespace OHOS::Ace::NG
 

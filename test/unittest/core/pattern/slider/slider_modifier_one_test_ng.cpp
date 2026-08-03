@@ -355,7 +355,7 @@ HWTEST_F(SliderModifierOneTestNg, SliderTipModifierTest002, TestSize.Level1)
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
     /**
      * @tc.steps: step2. set sliderTipModifier's axis is HORIZONTAL and call PaintText function.
      * @tc.expected: text's offsetX is equal to half of vertex_'s width.
@@ -402,18 +402,18 @@ HWTEST_F(SliderModifierOneTestNg, SliderTipModifierTest003, TestSize.Level1)
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
     /**
      * @tc.steps: step2. set sliderTipModifier's axis is HORIZONTAL and call PaintText function.
      * @tc.expected: text's offsetX is equal to half of vertex_'s width.
      */
     sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
     sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
-    sliderTipModifier.SetTipFlag(false, frameNode);
+    sliderTipModifier.SetTipFlag(false);
     EXPECT_EQ(sliderTipModifier.tipFlag_, true);
 
     sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(false);
-    sliderTipModifier.SetTipFlag(true, frameNode);
+    sliderTipModifier.SetTipFlag(true);
     EXPECT_EQ(sliderTipModifier.tipFlag_, true);
 }
 
@@ -434,7 +434,7 @@ HWTEST_F(SliderModifierOneTestNg, SliderTipModifierTest00, TestSize.Level1)
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
     /**
      * @tc.steps: step2. set sliderTipModifier's axis is HORIZONTAL and call PaintText function.
      * @tc.expected: text's offsetX is equal to half of vertex_'s width.
@@ -469,7 +469,7 @@ HWTEST_F(SliderModifierOneTestNg, SliderTipModifierTest005, TestSize.Level1)
     auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
     ASSERT_NE(sliderLayoutProperty, nullptr);
     SliderTipModifier sliderTipModifier(
-        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+        frameNode, [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
     /**
      * @tc.steps: step2. set sliderTipModifier's axis is HORIZONTAL and call PaintText function.
      * @tc.expected: text's offsetX is equal to half of vertex_'s width.

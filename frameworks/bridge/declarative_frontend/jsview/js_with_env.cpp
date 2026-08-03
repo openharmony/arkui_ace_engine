@@ -142,10 +142,6 @@ void JSWithEnv::SetCustomEnvProperty(const JSCallbackInfo& info)
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "JSWithEnv::SetCustomEnvProperty invalid key");
         return;
     }
-    if (info[1]->IsUndefined()) {
-        WithEnvModel::GetInstance()->RemoveCustomEnvProperty(key);
-        return;
-    }
     WithEnvModel::GetInstance()->SetCustomEnvProperty(key, std::any(info[1]));
 }
 

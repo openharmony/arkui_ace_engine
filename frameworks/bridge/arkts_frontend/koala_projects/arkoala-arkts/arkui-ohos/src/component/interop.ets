@@ -403,7 +403,8 @@ type ESValueOrUndefined  = ESValue | undefined;
 /** @memo */
 export function compatibleWrappedBuilder(builder: Any, ...args: FixedArray<ESValue>): void {
     StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace('compatibleWrappedBuilder');
-    compatibleWrappedBuilderInternal(builder, ...args);
+    const _args = args;
+    compatibleWrappedBuilderInternal(builder, ..._args);
 }
 
 /** @memo */

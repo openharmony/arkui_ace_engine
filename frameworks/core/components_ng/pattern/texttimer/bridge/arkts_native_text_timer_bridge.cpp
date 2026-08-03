@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "frameworks/core/components_ng/pattern/texttimer/bridge/arkts_native_text_timer_bridge.h"
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "frameworks/base/geometry/calc_dimension.h"
@@ -556,12 +557,14 @@ ArkUINativeModuleValue TextTimerBridge::SetTextTimerOnTimer(ArkUIRuntimeCallInfo
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
 
-    std::function<void(int64_t, int64_t)> callback = [vm, frameNode, isJsView, func = panda::CopyableGlobal(vm, func)](
-                                                         const int64_t first, const int64_t last) {
+    std::function<void(int64_t, int64_t)> callback =
+        [frameNode = AceType::WeakClaim(frameNode), isJsView, func = panda::CopyableGlobal(vm, func)](
+            const int64_t first, const int64_t last) {
         auto vm = func.GetEcmaVM();
+        ACE_SCORING_EVENT("TextTimer.onTimer");
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameNode);
 
         panda::Local<panda::NumberRef> firstParam = panda::NumberRef::New(vm, first);
         panda::Local<panda::NumberRef> lastParam = panda::NumberRef::New(vm, last);

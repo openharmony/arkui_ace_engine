@@ -102,6 +102,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     isHovered_ = AceType::MakeRefPtr<PropertyBool>(false);
     isPressed_ = AceType::MakeRefPtr<PropertyBool>(false);
     isFocused_ = AceType::MakeRefPtr<PropertyBool>(false);
+    isShowMaterialNode_ = AceType::MakeRefPtr<PropertyBool>(false);
     // others
     UpdateData(parameters);
     UpdateThemeColor();
@@ -136,6 +137,7 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(isHovered_);
     AttachProperty(isPressed_);
     AttachProperty(isFocused_);
+    AttachProperty(isShowMaterialNode_);
 
     InitializeShapeProperty();
 }
@@ -618,6 +620,10 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
     auto sliderMode = static_cast<SliderModelNG::SliderMode>(sliderMode_->Get());
     if (static_cast<SliderModelNG::BlockStyleType>(blockType_->Get()) != SliderModelNG::BlockStyleType::DEFAULT ||
         sliderMode == SliderModelNG::SliderMode::NONE) {
+        return;
+    }
+
+    if (isShowMaterialNode_->Get()) {
         return;
     }
 
@@ -1128,11 +1134,13 @@ void SliderContentModifier::CreateShapePathBlockBrush(RSBrush& brush, const Size
 
 void SliderContentModifier::DrawBlockShapePath(DrawingContext& context, RefPtr<Path>& path)
 {
+    auto* pathCustomModifier = GetPathCustomModifier();
+    CHECK_NULL_VOID(pathCustomModifier);
     auto blockSize = blockSize_->Get();
     auto blockBorderWidth = blockBorderWidth_->Get();
 
     auto blockCenter = GetBlockCenter();
-    SizeF shapeSize = GetPathCustomModifier()->getPathSize(path->GetValue());
+    SizeF shapeSize = pathCustomModifier->getPathSize(path->GetValue());
     if (NearZero(shapeSize.Width()) || NearZero(shapeSize.Height())) {
         return;
     }
@@ -1158,7 +1166,7 @@ void SliderContentModifier::DrawBlockShapePath(DrawingContext& context, RefPtr<P
     CreateShapePathBlockBrush(brush, shapeSize, blockCenter);
     canvas.AttachBrush(brush);
     OffsetF offset(blockCenter.GetX() - shapeSize.Width() * HALF, blockCenter.GetY() - shapeSize.Height() * HALF);
-    GetPathCustomModifier()->drawPath(canvas, path->GetValue(), offset);
+    pathCustomModifier->drawPath(canvas, path->GetValue(), offset);
     canvas.DetachBrush();
     canvas.DetachPen();
     canvas.Restore();

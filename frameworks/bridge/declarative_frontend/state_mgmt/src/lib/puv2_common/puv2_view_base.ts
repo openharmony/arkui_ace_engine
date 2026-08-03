@@ -29,6 +29,7 @@
 type ExtraInfo = { page: string, line: number, col: number };
 type ProfileRecursionCounter = { total: number };
 type CustomEnvValue = any;
+type CustomEnvQueryResult = { found: boolean; value?: CustomEnvValue; };
 type SystemEnvUpdateValue = string | number | undefined;
 type CustomEnvMeta = {
   varToKey: Record<string, number>;
@@ -62,7 +63,7 @@ declare class MutableBuilder<Args extends Object[]> {
 // implemented in C++  for release
 abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
-  protected __notifyDecoratedWatch__Internal(_varName: string): void {}
+  public __notifyDecoratedWatch__Internal(_varName: string): void {}
   // List of inactive components used for Dfx
   protected static readonly inactiveComponents_: Set<string> = new Set<string>();
   protected get isReusable_(): boolean {
@@ -176,7 +177,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   protected __enableReleaseExpiringNodesFlag__Internal: boolean = false;
 
-  protected __reuseIdForReleaseExpiringNodes__Internal: Set<string> = new Set<string>();
+  protected __reuseIdForReleaseExpiringNodes__Internal: Set<string> | undefined = undefined;
 
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super(true);
@@ -359,7 +360,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public tryReleaseExpiringNode(reuseId: string): boolean {
     const result = this.nativeViewPartialUpdate.tryReleaseExpiringNode(reuseId);
     if (!result) {
-      this.__reuseIdForReleaseExpiringNodes__Internal.delete(reuseId);
+      this.__reuseIdForReleaseExpiringNodes__Internal?.delete(reuseId);
     }
     return result;
   }
@@ -460,11 +461,14 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   public __enableReleaseExpiringNodes__Internal(enable: boolean, reuseIds: string[]): void {
     this.__enableReleaseExpiringNodesFlag__Internal = enable;
     if (enable) {
-      reuseIds.forEach(reuseId => this.__reuseIdForReleaseExpiringNodes__Internal.add(reuseId));
+      if (!this.__reuseIdForReleaseExpiringNodes__Internal) {
+        this.__reuseIdForReleaseExpiringNodes__Internal = new Set<string>();
+      }
+      reuseIds.forEach(reuseId => this.__reuseIdForReleaseExpiringNodes__Internal!.add(reuseId));
     } else {
-      this.__reuseIdForReleaseExpiringNodes__Internal = new Set();
+      this.__reuseIdForReleaseExpiringNodes__Internal = undefined;
     }
-    
+
   }
 
   /**
@@ -476,7 +480,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
    */
   public __isReleaseExpiringNodesEnabled__Internal(reuseId: string): boolean {
     return this.__enableReleaseExpiringNodesFlag__Internal &&
-           this.__reuseIdForReleaseExpiringNodes__Internal.has(reuseId);
+           !!this.__reuseIdForReleaseExpiringNodes__Internal?.has(reuseId);
   }
 
   /**
@@ -497,7 +501,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.nativeViewPartialUpdate.allowReusableV2Descendant();
   }
 
-  public findCustomValueByKey(key: number): CustomEnvValue {
+  public findCustomValueByKey(key: number): CustomEnvQueryResult {
     stateMgmtConsole.debug(`${this.debugInfo__()}: instanceId changed, clearing dirtDescendantElementIds_`);
     return this.nativeViewPartialUpdate.findCustomValueByKey(key);
   }
@@ -522,9 +526,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           return;
         }
         const storeProp = ObserveV2.OB_PREFIX + varName;
-        if (updatedEnvValue === undefined) {
-          return;
-        }
         this[storeProp] = updatedEnvValue;
         ObserveV2.getObserve().fireChange(this, varName);
         this.__notifyDecoratedWatch__Internal(varName);

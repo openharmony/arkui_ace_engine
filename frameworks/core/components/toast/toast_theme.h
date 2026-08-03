@@ -56,7 +56,6 @@ public:
             if (!toastPattern) {
                 return;
             }
-
             theme->minWidth_ = toastPattern->GetAttr<Dimension>("toast_content_min_width", 0.0_vp);
             theme->minHeight_ = toastPattern->GetAttr<Dimension>("toast_content_min_height", 0.0_vp);
             theme->top_ = toastPattern->GetAttr<Dimension>("toast_top", 0.0_vp);
@@ -214,16 +213,6 @@ public:
         return toastInnerBorderColor_;
     }
 
-    ShadowStyle GetToastShadowStyle() const
-    {
-        return toastShadowStyle_;
-    }
-    
-    int GetToastBackgroundBlurStyle() const
-    {
-        return toastBackgroundBlurStyle_;
-    }
-
     uint32_t GetBgThemeColorMode() const
     {
         return bgThemeColorMode_;
@@ -242,6 +231,16 @@ public:
     double GetToastLimitHeightRatio() const
     {
         return toastLimitHeightRatio_;
+    }
+    
+    ShadowStyle GetToastShadowStyle() const
+    {
+        return toastShadowStyle_;
+    }
+    
+    int GetToastBackgroundBlurStyle() const
+    {
+        return toastBackgroundBlurStyle_;
     }
 
     Color GetDefaultBGColor() const
@@ -264,6 +263,7 @@ private:
     Dimension bottom_;
     Dimension minFontSize_;
     uint32_t textMaxLines_ = 1;
+    uint32_t bgThemeColorMode_ = 0;
     Edge marging_;
     Color blurStyleTextColor_;
     int32_t toastDoubleBorderEnable_ = 0;
@@ -271,11 +271,10 @@ private:
     Color toastOuterBorderColor_ = Color::TRANSPARENT;
     double toastInnerBorderWidth_ = 0.0f;
     Color toastInnerBorderColor_ = Color::TRANSPARENT;
-    ShadowStyle toastShadowStyle_ = ShadowStyle::OuterDefaultMD;
-    uint32_t bgThemeColorMode_ = 0;
     TextAlign multiLineTextAlign_ = TextAlign::START;
     int32_t toastAlign_ = 0;
     double toastLimitHeightRatio_ = 0.65;
+    ShadowStyle toastShadowStyle_ = ShadowStyle::OuterDefaultMD;
     int toastBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
     Color defaultBGColor_ = Color::TRANSPARENT;
 };

@@ -495,13 +495,18 @@ const RefPtr<InspectorOffscreenNodesMgr>& PipelineContext::GetInspectorOffscreen
     return inspectorOffscreenNodesMgr_;
 }
 
-void PipelineContext::SetAfterRenderZindexRebuild(int32_t nodeId) {}
-
-void PipelineContext::UpdateIdUpdateZOrderIndex() {}
-
-size_t PipelineContext::GetIdUpdateZOrderIndex() const
+bool PipelineContext::ThrottleRenderTreeRebuild(int32_t nodeId, const RefPtr<RenderContext>& renderContext)
 {
-    return 0;
+    // Never throttle in tests: callers keep the eager synchronous rebuild path, matching the
+    // pre-throttle behavior component tests were written against.
+    return false;
+}
+
+void PipelineContext::FlushRebuildRenderTree()
+{
+    rebuildRenderTreeOrder_ = 0;
+    rebuildRenderTreeCount_.clear();
+    deferredRebuildRenderTree_.clear();
 }
 
 void PipelineContext::Destroy()
@@ -2091,7 +2096,7 @@ void PipelineBase::OnSurfaceDensityChanged(double density) {}
 
 const RefPtr<UIDisplaySyncManager>& PipelineBase::GetOrCreateUIDisplaySyncManager()
 {
-    static RefPtr<UIDisplaySyncManager> manager;
+    static RefPtr<UIDisplaySyncManager> manager = MakeRefPtr<UIDisplaySyncManager>();
     return manager;
 }
 

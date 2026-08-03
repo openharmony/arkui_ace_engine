@@ -44,6 +44,9 @@ constexpr char JS_NAV_PATH_ONPOP_NAME[] = "onPop";
 constexpr char JS_NAV_PATH_ISENTRY_NAME[] = "isEntry";
 constexpr char JS_NAV_PATH_NAVDESTINATIONID_NAME[] = "navDestinationId";
 constexpr int32_t ARGC_COUNT_THREE = 3;
+constexpr int32_t ARGC_ZERO = 0;
+constexpr int32_t ARGC_ONE = 1;
+constexpr int32_t ARGC_TWO = 2;
 
 constexpr char JS_NAV_PATH_STACK_EXTENT_CLASS_NAME[] = "NavPathStackExtent";
 }
@@ -52,12 +55,14 @@ void JSNavPathStack::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNavPathStack>::Declare("NativeNavPathStack");
     JSClass<JSNavPathStack>::Method("onStateChanged", &JSNavPathStack::OnStateChanged);
+    JSClass<JSNavPathStack>::CustomMethod("destroyPreloadNode", &JSNavPathStack::DestroyPreloadNode);
     JSClass<JSNavPathStack>::CustomMethod("onPopCallback", &JSNavPathStack::OnPopCallback);
     JSClass<JSNavPathStack>::CustomMethod("getPathStack", &JSNavPathStack::GetPathStack);
     JSClass<JSNavPathStack>::CustomMethod("setPathStack", &JSNavPathStack::SetPathStack);
     JSClass<JSNavPathStack>::CustomMethod("isHomeName", &JSNavPathStack::IsHomeName);
     JSClass<JSNavPathStack>::CustomProperty(
         "preTopInfo", &JSNavPathStack::GetPreTopInfo, &JSNavPathStack::SetPreTopInfo);
+    JSClass<JSNavPathStack>::CustomMethod("preloadPath", &JSNavPathStack::PreloadPath);
     JSClass<JSNavPathStack>::Bind(globalObj, &JSNavPathStack::Constructor, &JSNavPathStack::Destructor);
 }
 
@@ -402,5 +407,27 @@ void JSNavPathStack::OnPopCallback(const JSCallbackInfo& info)
     if (onPopCallback_) {
         onPopCallback_(info[0]);
     }
+}
+
+void JSNavPathStack::PreloadPath(const JSCallbackInfo& info)
+{
+    if (info.Length() < ARGC_COUNT_THREE || !info[0]->IsString()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "preloadPath: invalid parameters");
+        info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(false)));
+        return;
+    }
+    std::string name = info[ARGC_ZERO]->ToString();
+    JSRef<JSVal> param;
+    if (!info[ARGC_ONE]->IsUndefined()) {
+        param = info[ARGC_ONE];
+    }
+    std::string paramString;
+    if (info[ARGC_TWO]->IsString()) {
+        paramString = info[ARGC_TWO]->ToString();
+    }
+    if (preloadCallback_) {
+        preloadCallback_(name, param, paramString);
+    }
+    info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(true)));
 }
 } // namespace OHOS::Ace::Framework

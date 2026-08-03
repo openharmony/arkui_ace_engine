@@ -1387,6 +1387,7 @@ bool MenuView::CheckHoverImageFinishForInterruption(const RefPtr<MenuWrapperPatt
         CHECK_NULL_RETURN(menuRenderContext, false);
         menuRenderContext->UpdateOpacity(0.0);
         MenuView::SetMenuHoverScaleStatus(targetId, MenuHoverScaleStatus::INTERRUPT);
+        wrapperPattern->ForceSetMenuStatus(MenuStatus::HIDE);
         SubwindowManager::GetInstance()->HideMenuNG(wrapperPattern->GetHost(), targetId);
         return false;
     }
@@ -1396,7 +1397,7 @@ bool MenuView::CheckHoverImageFinishForInterruption(const RefPtr<MenuWrapperPatt
     CHECK_NULL_RETURN(stackContext, false);
     stackContext->UpdateOpacity(1.0);
 
-    wrapperPattern->CallMenuAboutToAppearCallback();
+    wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
     wrapperPattern->CheckAndShowAnimation();
     return true;
 }

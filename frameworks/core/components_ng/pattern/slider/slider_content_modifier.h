@@ -398,6 +398,16 @@ public:
         return blockScale_ ? blockScale_->Get() : 1.0f;
     }
 
+    void SetIsShowMaterialNode(bool isShowMaterialNode)
+    {
+        isShowMaterialNode_->Set(isShowMaterialNode);
+    }
+
+    bool GetIsShowMaterialNode() const
+    {
+        return isShowMaterialNode_->Get();
+    }
+
 private:
     void InitializeShapeProperty();
     RSRect GetBlockRect(float radius);
@@ -479,6 +489,7 @@ private:
     RefPtr<PropertyBool> isHovered_;
     RefPtr<PropertyBool> isPressed_;
     RefPtr<PropertyBool> isFocused_;
+    RefPtr<PropertyBool> isShowMaterialNode_;
 
     // others
     struct MarkerPenAndPath {

@@ -193,7 +193,6 @@ constexpr uint16_t NO_FORCE_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_F
                                     static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 const int FACTOR_TWO = 2;
 constexpr uint64_t MAX_WAITING_TIME_FOR_TASKS = 1000; // 1000ms
-constexpr size_t MAX_ZINDEX_UPDATE_COUNT_IN_EACH_VSYNC = 200;
 constexpr float HOT_ZONE = 150.0f;
 constexpr float EXTRA_LENGTH = 0.1f;
 constexpr float EDGELIGHT_POSITIONX_DEFAULT = 0.0f;
@@ -4649,16 +4648,9 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
     CHECK_NULL_VOID(parent);
     auto pipeline = parent->GetContext();
     CHECK_NULL_VOID(pipeline);
-    int32_t idUpdateZOrderIndex = pipeline->GetIdUpdateZOrderIndex();
-    if (idUpdateZOrderIndex >= MAX_ZINDEX_UPDATE_COUNT_IN_EACH_VSYNC) {
-        if (idUpdateZOrderIndex == MAX_ZINDEX_UPDATE_COUNT_IN_EACH_VSYNC) {
-            TAG_LOGI(AceLogTag::ACE_UIEVENT, "OnZIndexUpdate in one vsync over MAX_ZINDEX_UPDATE_COUNT_IN_EACH_VSYNC");
-        }
-        pipeline->SetAfterRenderZindexRebuild(parent->GetId());
-        RequestNextFrame();
+    if (pipeline->ThrottleRenderTreeRebuild(parent->GetId(), AceType::Claim(this))) {
         return;
     }
-    pipeline->UpdateIdUpdateZOrderIndex();
     parent->MarkNeedSyncRenderTree();
     FREE_NODE_CHECK(uiNode, OnZIndexUpdate, parent);
     auto task = [weak = WeakClaim(AceType::RawPtr(parent))]() {
@@ -7036,6 +7028,10 @@ void RosenRenderContext::DumpInfo()
             DumpLog::GetInstance().AddDesc(res);
             res.clear();
         }
+        auto material = GetSystemMaterial();
+        if (material) {
+            DumpLog::GetInstance().AddDesc(material->ToString());
+        }
         if (!NearZero(rsNode_->GetStagingProperties().GetSpherizeDegree())) {
             DumpLog::GetInstance().AddDesc(
                 std::string("SpherizeDegree:")
@@ -7472,6 +7468,9 @@ void RosenRenderContext::OnTransitionOutFinish()
     }
     if (breakPointChild->RemoveImmediately()) {
         breakPointChild->OnRemoveFromParent(false);
+        if (breakPointParent->NeedClearDisappearingChildrenRecursively()) {
+            breakPointChild->ClearDisappearingChildren();
+        }
         // remove breakPoint
         if (breakPointParent->RemoveDisappearingChild(breakPointChild)) {
             // keep mixed list in sync for delayed-remove path

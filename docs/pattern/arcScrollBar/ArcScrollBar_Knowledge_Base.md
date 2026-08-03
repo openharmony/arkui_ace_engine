@@ -1993,8 +1993,9 @@ ArcScrollBar({ scroller: this.scroller })
 
 ### C. 相关文档
 
-- [ScrollBar 组件知识库](../scrollBar/ScrollBar_Knowledge_Base.md)
-- [Scroll 组件知识库](../scroll/Scroll_Knowledge_Base.md)
+- [ScrollBar Context](../../kb/components/container/scroll_bar.md)
+- [Scroll Context](../../kb/components/container/scroll.md)
+- [滚动公共能力知识库](../../kb/capabilities/scroll-common-capability.md)
 - [ArcRound 几何类](../../../base/geometry/arc_round.h)
 
 ### D. 版本历史

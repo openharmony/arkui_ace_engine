@@ -96,20 +96,27 @@
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
 extern const char _binary_jsMockSystemPlugin_abc_end[];
+extern const char _binary_arkComponentMock_abc_start[];
+extern const char _binary_arkComponentMock_abc_end[];
 #endif
 extern const char _binary_stateMgmt_abc_start[];
+#if !defined(IOS_PLATFORM)
+extern const char _binary_stateMgmt_abc_end[];
+#else
+extern const char* _binary_stateMgmt_abc_end;
+#endif
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 extern const char _binary_arkCommon_abc_start[];
 extern const char _binary_arkDynamicComponent_abc_start[];
 extern const char _binary_jsPreload_abc_start[];
 extern const char _binary_jsPreload_abc_end[];
 #if !defined(IOS_PLATFORM)
-extern const char _binary_stateMgmt_abc_end[];
 extern const char _binary_arkCommon_abc_end[];
 extern const char _binary_arkDynamicComponent_abc_end[];
 #else
-extern const char* _binary_stateMgmt_abc_end;
 extern const char* _binary_arkCommon_abc_end;
 extern const char* _binary_arkDynamicComponent_abc_end;
+#endif
 #endif
 
 namespace OHOS::Ace::Framework {
@@ -220,6 +227,9 @@ bool EvaluateAbcFile(const shared_ptr<JsRuntime>& runtime, const std::string& fi
 {
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     CHECK_NULL_RETURN(arkRuntime, false);
+#ifdef STATE_MGMT_USE_AOT
+    return arkRuntime->ExecuteJsBinForAOT(filePath);
+#else
     FILE* file = fopen(filePath.c_str(), "rb");
     if (!file) {
         LOGF("Failed to open the file!");
@@ -241,6 +251,7 @@ bool EvaluateAbcFile(const shared_ptr<JsRuntime>& runtime, const std::string& fi
     }
     fclose(file);
     return arkRuntime->EvaluateJsCode(content.data(), static_cast<int32_t>(content.size()), filePath);
+#endif
 }
 
 inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
@@ -264,29 +275,50 @@ inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
 
 inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
 {
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+    return EvaluateAbcFile(runtime, NG::GetSystemPath("jsPreload.abc"));
+#else
     uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsPreload_abc_start));
     int32_t codeLength = _binary_jsPreload_abc_end - _binary_jsPreload_abc_start;
     return runtime->EvaluateJsCode(codeStart, codeLength);
+#endif
 }
 
 inline bool PreloadArkCommon(const shared_ptr<JsRuntime>& runtime)
 {
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+    return EvaluateAbcFile(runtime, NG::GetSystemPath("arkCommon.abc"));
+#else
     std::string str("arkui_binary_arkCommon_abc_loadFile");
     return runtime->EvaluateJsCode(
         (uint8_t*)_binary_arkCommon_abc_start, _binary_arkCommon_abc_end - _binary_arkCommon_abc_start, str);
+#endif
 }
 
 inline bool PreloadArkDynamicComponent(const shared_ptr<JsRuntime>& runtime)
 {
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+    return EvaluateAbcFile(runtime, NG::GetSystemPath("arkDynamicComponent.abc"));
+#else
     std::string str("arkui_binary_arkDynamicComponent_abc_loadFile");
     return runtime->EvaluateJsCode((uint8_t*)_binary_arkDynamicComponent_abc_start,
         _binary_arkDynamicComponent_abc_end - _binary_arkDynamicComponent_abc_start, str);
+#endif
 }
 
 inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
 {
     return EvaluateAbcFile(runtime, NG::GetSystemPath("arkComponent.abc"));
 }
+
+#if defined(PREVIEW)
+inline bool PreloadArkComponentMock(const shared_ptr<JsRuntime>& runtime)
+{
+    std::string str("arkui_binary_arkComponentMock_abc_loadFile");
+    return runtime->EvaluateJsCode((uint8_t*)_binary_arkComponentMock_abc_start,
+        _binary_arkComponentMock_abc_end - _binary_arkComponentMock_abc_start, str);
+}
+#endif
 
 bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
 {
@@ -625,6 +657,9 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadJsEnums(runtime_);
         PreloadArkCommon(runtime_);
         PreloadArkComponent(runtime_);
+#ifdef PREVIEW
+        PreloadArkComponentMock(runtime_);
+#endif
         PreloadArkDynamicComponent(runtime_);
         PreloadUIContent(runtime_);
     }
@@ -782,6 +817,10 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
         return;
     }
 
+#ifdef PREVIEW
+    PreloadArkComponentMock(arkRuntime);
+#endif
+
     // preload ark declarative component
     bool arkDeclarativeComponentResult = PreloadArkDynamicComponent(arkRuntime);
     if (!arkDeclarativeComponentResult) {
@@ -846,9 +885,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "TextInput", "arkui.components.arktextinput" },
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
-#ifndef PREVIEW
         { "Video", "arkui.components.arkvideo" },
-#endif
         { "Toggle", "arkui.components.arktoggle" },
         { "ToolBarItem", "arkui.components.arktoolbaritem" },
         { "WaterFlow", "arkui.components.arkwaterflow" },

@@ -189,7 +189,7 @@ ArkUI_GestureRecognizer* OH_ArkUI_GestureInterruptInfo_GetRecognizer(const ArkUI
         SET_ERROR_MESSAGE(ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "event is null");
         return nullptr;
     }
-    return reinterpret_cast<ArkUI_GestureRecognizer *>(event->interruptData.userData);
+    return event->interruptData.userData ? event->interruptData.userData->Get<ArkUI_GestureRecognizer>() : nullptr;
 }
 
 ArkUI_GestureEvent* OH_ArkUI_GestureInterruptInfo_GetGestureEvent(const ArkUI_GestureInterruptInfo* event)
@@ -201,7 +201,7 @@ ArkUI_GestureEvent* OH_ArkUI_GestureInterruptInfo_GetGestureEvent(const ArkUI_Ge
     ArkUI_UIInputEvent* uiEvent = reinterpret_cast<ArkUI_UIInputEvent*>(event->interruptData.inputEvent);
     gestureEvent->eventData.rawPointerEvent = uiEvent;
 
-    auto* gestureRecognizer = reinterpret_cast<ArkUI_GestureRecognizer*>(event->interruptData.userData);
+    auto* gestureRecognizer = OH_ArkUI_GestureInterruptInfo_GetRecognizer(event);
     CHECK_NULL_RETURN(gestureRecognizer, nullptr);
     gestureEvent->attachNode = gestureRecognizer->attachNode;
     return gestureEvent;
@@ -882,7 +882,8 @@ ArkUI_GestureRecognizer* CreatePanGesture(int32_t fingersNum, ArkUI_GestureDirec
     } else {
         fingers = fingersNum;
     }
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ PAN_GESTURE, nullptr, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer();
+    ndkGesture->type = PAN_GESTURE;
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPanGesture(
         fingers, mask, distanceNum, false, ndkGesture);
     ndkGesture->gesture = gesture;
@@ -893,7 +894,8 @@ ArkUI_GestureRecognizer* CreateTapGesture(int32_t count, int32_t fingers)
 {
     count = std::max(count, DEFAULT_TAP_COUNT);
     fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer();
+    ndkGesture->type = TAP_GESTURE;
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createTapGesture(
         count, fingers, false, ndkGesture);
     ndkGesture->gesture = gesture;
@@ -904,7 +906,8 @@ ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(int32_t count, in
 {
     count = std::max(count, DEFAULT_TAP_COUNT);
     fingers = std::clamp(fingers, DEFAULT_TAP_FINGERS, MAX_TAP_FINGERS);
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ TAP_GESTURE, nullptr, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer();
+    ndkGesture->type = TAP_GESTURE;
     auto* gesture = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->
         createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, false, ndkGesture);
     ndkGesture->gesture = gesture;
@@ -913,7 +916,8 @@ ArkUI_GestureRecognizer* CreateTapGestureWithDistanceThreshold(int32_t count, in
 
 ArkUI_GestureRecognizer* CreateLongPressGesture(int32_t fingers, bool repeatResult, int32_t duration)
 {
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ LONG_PRESS_GESTURE, nullptr, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer();
+    ndkGesture->type = LONG_PRESS_GESTURE;
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createLongPressGesture(fingers,
         repeatResult, duration, false, ndkGesture);
@@ -928,7 +932,8 @@ ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingers, double distance)
     }
     double distanceNum = OHOS::Ace::NodeModel::GetFullImpl()->getBasicAPI()->convertLengthMetricsUnit(
         distance, static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_PX), static_cast<int32_t>(ARKUI_LENGTH_METRIC_UNIT_VP));
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ PINCH_GESTURE, nullptr, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer();
+    ndkGesture->type = PINCH_GESTURE;
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createPinchGesture(fingers,
         distanceNum, false, ndkGesture);
@@ -938,7 +943,8 @@ ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingers, double distance)
 
 ArkUI_GestureRecognizer* CreateRotationGesture(int32_t fingers, double angle)
 {
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ ROTATION_GESTURE, nullptr, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer();
+    ndkGesture->type = ROTATION_GESTURE;
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createRotationGesture(fingers,
         angle, false, ndkGesture);
@@ -951,7 +957,8 @@ ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingers, ArkUI_GestureDirect
     if (LessOrEqual(speed, 0.0f)) {
         speed = DEFAULT_SWIPE_SPEED;
     }
-    auto* ndkGesture = new ArkUI_GestureRecognizer{ SWIPE_GESTURE, nullptr, nullptr, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer();
+    ndkGesture->type = SWIPE_GESTURE;
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createSwipeGesture(fingers,
         directions, speed, false, ndkGesture);
@@ -1027,7 +1034,10 @@ ArkUI_GestureRecognizer* CreateGroupGesture(ArkUI_GroupGestureMode gestureMode)
 {
     auto* gesture =
         OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers()->getGestureModifier()->createGestureGroup(gestureMode);
-    return new ArkUI_GestureRecognizer { GROUP_GESTURE, gesture, nullptr };
+    auto* ndkGesture = new ArkUI_GestureRecognizer();
+    ndkGesture->type = GROUP_GESTURE;
+    ndkGesture->gesture = gesture;
+    return ndkGesture;
 }
 
 int32_t AddChildGesture(ArkUI_GestureRecognizer* group, ArkUI_GestureRecognizer* child)

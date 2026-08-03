@@ -28,6 +28,7 @@
 #include "parameters.h"
 
 #include "adapter/ohos/osal/window_utils.h"
+#include "base/thread/background_task_executor.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/common/properties/ui_material.h"
 
@@ -995,7 +996,7 @@ void SystemProperties::InitDeviceInfo(
 
 void SystemProperties::ReadSystemParametersCallOnce()
 {
-    std::call_once(getSysPropertiesFlag_, [] () {
+    std::call_once(getSysPropertiesFlag_, []() {
         developerModeOn_ = IsDeveloperModeOn();
         debugEnabled_ = IsDebugEnabled();
         eventBenchMarkEnabled_ = IsEventBenchMarkEnabled();
@@ -1062,6 +1063,10 @@ void SystemProperties::ReadSystemParametersCallOnce()
             "const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
 
         InitDeviceTypeBySystemProperty();
+        BackgroundTaskExecutor::GetInstance().PostTask([]() {
+            [[maybe_unused]] auto supported = SystemProperties::IsDeviceSystemMaterialSupported();
+            [[maybe_unused]] auto level = SystemProperties::GetUiMaterialLevel();
+        });
     });
 }
 

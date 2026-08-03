@@ -584,11 +584,11 @@ std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray
     JSRef<JSVal> item = params->GetValueAt(static_cast<size_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
-            std::string numStr = std::to_string(item->ToNumber<int32_t>());
+            std::string numStr = std::to_string(item->ToNumber<int64_t>());
             return TryLocalizeNumberStr(numStr, 0);
         } else if (item->IsObject()) {
-            int32_t result = 0;
-            JSViewAbstract::ParseJsInteger(item, result);
+            int64_t result = 0;
+            JSViewAbstract::ParseJsInteger<int64_t>(item, result);
             std::string numStr = std::to_string(result);
             return TryLocalizeNumberStr(numStr, 0);
         }

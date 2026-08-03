@@ -74,6 +74,9 @@ class ObjectProxyHandler {
                     // execute original function with given arguments
                     let result = ret.call(this, ...args);
                     ObserveV2.getObserve().fireChange(conditionalTarget, ObjectProxyHandler.OB_DATE);
+                    if (ObserveV2.customEnvInUse_) {
+                        ObserveV2.notifyCustomEnvOwner(conditionalTarget);
+                    }
                     return result;
                     // bind 'this' to target inside the function
                 }.bind(target);
@@ -100,6 +103,9 @@ class ObjectProxyHandler {
         }
         target[key] = value;
         ObserveV2.getObserve().fireChange(this.getTarget(target), key.toString());
+        if (ObserveV2.customEnvInUse_) {
+            ObserveV2.notifyCustomEnvOwner(this.getTarget(target));
+        }
         return true;
     }
 };
@@ -185,6 +191,9 @@ class ArrayProxyHandler {
             return function (...args): any {
                 ret.call(target, ...args);
                 ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
+                if (ObserveV2.customEnvInUse_) {
+                    ObserveV2.notifyCustomEnvOwner(conditionalTarget);
+                }
                 // returning the 'receiver(proxied object)' ensures that when chain calls also 2nd function call
                 // operates on the proxied object.
                 return receiver;
@@ -200,6 +209,9 @@ class ArrayProxyHandler {
                 const excludeSet: Set<number> | undefined = ArrayProxyHandler.tryFastRelayout(conditionalTarget,
                     key, repeatArgs);
                 ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH, excludeSet);
+                if (ObserveV2.customEnvInUse_) {
+                    ObserveV2.notifyCustomEnvOwner(conditionalTarget);
+                }
                 return result;
             };
         } else if (!SendableType.isArray(target)) {
@@ -242,6 +254,9 @@ class ArrayProxyHandler {
         let excludeSet: Set<number> | undefined = ArrayProxyHandler.tryFastRelayout(target, 'set', [key]);
         ObserveV2.getObserve().fireChange(this.getTarget(target), 
                 arrayLenChanged ? ObserveV2.OB_LENGTH : key.toString(), excludeSet);
+        if (ObserveV2.customEnvInUse_) {
+            ObserveV2.notifyCustomEnvOwner(this.getTarget(target));
+        }
         return true;
     }
 };
@@ -324,6 +339,9 @@ class SetMapProxyHandler {
                     const res: boolean = target.delete(prop);
                     ObserveV2.getObserve().fireChange(conditionalTarget, prop);
                     ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
+                    if (ObserveV2.customEnvInUse_) {
+                        ObserveV2.notifyCustomEnvOwner(conditionalTarget);
+                    }
                     return res;
                 } else {
                     return false;
@@ -339,6 +357,9 @@ class SetMapProxyHandler {
                     target.clear();
                     ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
                     ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
+                    if (ObserveV2.customEnvInUse_) {
+                        ObserveV2.notifyCustomEnvOwner(conditionalTarget);
+                    }
                 }
             };
         }
@@ -360,6 +381,9 @@ class SetMapProxyHandler {
                     ObserveV2.getObserve().fireChange(conditionalTarget, val);
                     ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
                     ObserveV2.getObserve().fireChange(conditionalTarget, ObserveV2.OB_LENGTH);
+                    if (ObserveV2.customEnvInUse_) {
+                        ObserveV2.notifyCustomEnvOwner(conditionalTarget);
+                    }
                     return receiver;
                 };
             }
@@ -401,6 +425,9 @@ class SetMapProxyHandler {
                         ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_MONITOR_ANY_PROPERTY);
                     }
                     ObserveV2.getObserve().fireChange(conditionalTarget, SetMapProxyHandler.OB_MAP_SET_ANY_PROPERTY);
+                    if (ObserveV2.customEnvInUse_) {
+                        ObserveV2.notifyCustomEnvOwner(conditionalTarget);
+                    }
                     return receiver;
                 };
             }

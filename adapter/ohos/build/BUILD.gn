@@ -46,7 +46,7 @@ component_modules = [
   "sheet",
   "stepper",
   "radio",
-  "shape",
+  "shapes",
   "slider",
   "time_picker",
   "calendar_picker",

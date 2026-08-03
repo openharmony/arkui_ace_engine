@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 const TITLE_MODE_RANGE = 2;
 const NAV_BAR_POSITION_RANGE = 1;
 const NAVIGATION_MODE_RANGE = 2;
@@ -131,7 +130,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     return this;
   }
   toolBar(value: object | undefined): NavigationAttribute {
-    modifierWithKey(this._modifiersWithKeys, ToolBarModifier.identity, ToolBarModifier, callback);
+    modifierWithKey(this._modifiersWithKeys, ToolBarModifier.identity, ToolBarModifier, value);
     return this;
   }
   toolbarConfiguration(value: Array<ToolbarItem> | undefined, options?: NavigationToolbarOptions | undefined): NavigationAttribute {

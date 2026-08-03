@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/base/modifier.h"
 
@@ -1226,7 +1227,12 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
                 pattern->OnTouchDown(info);
                 break;
             case TouchType::UP:
-                scrollable->HandleTouchUp();
+                if (!pattern->ShouldIgnoreTouchUpWithActiveFingers() ||
+                    std::none_of(info.GetTouches().begin(), info.GetTouches().end(), [](const auto& touch) {
+                        return touch.GetTouchType() != TouchType::UP && touch.GetTouchType() != TouchType::CANCEL;
+                    })) {
+                    scrollable->HandleTouchUp();
+                }
                 break;
             case TouchType::CANCEL:
                 scrollable->HandleTouchCancel();
@@ -1290,11 +1296,14 @@ void ScrollablePattern::OnDetachFromMainTree()
     auto host = GetHost();
     // call OnDetachFromMainTreeMultiThread() by multi thread
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
-    if (!scrollStop_) {
-        auto parent = GetNestedScrollParent();
-        if (parent) {
-            parent->OnScrollEndRecursive(GetVelocity());
-        }
+    // Only notify the parent of scroll end when a scroll session is actually in progress,
+    // and only when the parent is a scrollable component or a Refresh component.
+    if (!isScrolling_ || scrollStop_) {
+        return;
+    }
+    auto parent = GetNestedScrollParent();
+    if (parent && (AceType::InstanceOf<ScrollablePattern>(parent) || AceType::InstanceOf<RefreshPattern>(parent))) {
+        parent->OnScrollEndRecursive(GetVelocity());
     }
 }
 
@@ -1413,6 +1422,7 @@ void ScrollablePattern::RegisterScrollBarEventTask()
         auto scrollable = pattern->GetScrollable();
         CHECK_NULL_RETURN(scrollable, pattern->OnScrollCallback(static_cast<float>(offset), source));
         if (source == SCROLL_FROM_START) {
+            pattern->StopScrollableAndAnimate();
             scrollable->SetIsScrollBarDragging(true);
             if (scrollable->GetOnWillStartDraggingCallback()) {
                 scrollable->GetOnWillStartDraggingCallback()();
@@ -3657,7 +3667,7 @@ void ScrollablePattern::MarkUserScrollSource(int32_t source)
 void ScrollablePattern::FireAccessibilityScrollEndEvent()
 {
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
+    CHECK_NULL_VOID(host && host->IsOnMainTree());
     std::string accessibilityScrollSource = GetAccessibilityScrollSource();
     std::map<std::string, std::string> extraEventInfo;
     extraEventInfo.insert({ "scrollSource", accessibilityScrollSource });
@@ -4884,10 +4894,8 @@ void ScrollablePattern::OnAttachToMainTree()
     // call OnAttachToMainTreeMultiThread by multi thread
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
     CHECK_NULL_VOID(host);
-    if (refreshCoordination_) {
-        if (!refreshCoordination_->IsValid()) {
-            refreshCoordination_->UpdateRefreshNode();
-        }
+    if (refreshCoordination_ && !refreshCoordination_->IsValid()) {
+        refreshCoordination_->UpdateRefreshNode();
     }
     auto scrollBarProxy = scrollBarProxy_;
     CHECK_NULL_VOID(scrollBarProxy);

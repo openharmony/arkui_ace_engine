@@ -77,8 +77,7 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
         StringUtils::StringToDimensionWithThemeValue(toastInfo.bottom, true, toastTheme->GetBottom()));
     toastProperty->UpdateShowMode(toastInfo.showMode);
     toastProperty->UpdateHoverModeArea(toastInfo.hoverModeArea);
-    toastNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()
-        ->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    toastNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
     toastNode->MarkModifyDone();
     return toastNode;
 }
@@ -362,7 +361,6 @@ void ToastView::UpdateToastShadow(
     if (ShouldSkipShadowUpdate(toastInfo, isUserSetMaterial)) {
         return;
     }
-
     auto shadow = GetToastShadow(toastInfo, toastTheme, pipelineContext);
     renderContext->UpdateBackShadow(shadow);
 }

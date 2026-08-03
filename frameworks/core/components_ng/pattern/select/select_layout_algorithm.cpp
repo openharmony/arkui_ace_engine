@@ -169,7 +169,7 @@ void SelectLayoutAlgorithm::NeedAgingUpdateParams(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    if (fontScale_ == context->GetFontScale()) {
+    if (fontScale_ == context->GetFontScaleFromEnv(host)) {
         return;
     }
     fontScale_ = context->GetFontScale();

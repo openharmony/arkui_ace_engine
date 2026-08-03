@@ -606,7 +606,7 @@ void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSi
     info_.startMainLineIndex_ = currentMainLineIndex_;
     info_.UpdateStartIndexByStartLine();
     // FillNewLineBackward sometimes make startIndex_ > currentItemIndex
-    while (info_.startIndex_ > currentItemIndex &&
+    while (info_.startIndex_ > currentItemIndex && info_.startMainLineIndex_ > 0 &&
            info_.gridMatrix_.find(info_.startMainLineIndex_) != info_.gridMatrix_.end()) {
         info_.startMainLineIndex_--;
         info_.UpdateStartIndexByStartLine();
@@ -639,7 +639,7 @@ void GridScrollLayoutAlgorithm::ReloadFromUpdateIdxToStartIndex(
     info_.startMainLineIndex_ = currentMainLineIndex_;
     info_.UpdateStartIndexByStartLine();
     // FillNewLineBackward sometimes make startIndex_ > currentItemIndex
-    while (info_.startIndex_ > currentItemIndex &&
+    while (info_.startIndex_ > currentItemIndex && info_.startMainLineIndex_ > 0 &&
            info_.gridMatrix_.find(info_.startMainLineIndex_) != info_.gridMatrix_.end()) {
         info_.startMainLineIndex_--;
         info_.UpdateStartIndexByStartLine();
@@ -1336,8 +1336,13 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(
         // Accumulate mainLength offset: current line height + main axis gap
         mainLength += cellAveLength_ + mainGap_;
     }
-    // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_]
-    if (OneLineMovesOffViewportFromAbove(mainLength, cellAveLength_, info_.startFixOffset_)) {
+    // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_].
+    // Only advance when a next line actually exists: when the grid has a single line (the current line is
+    // both the first and the last), advancing to a non-existent line would leave [startIndex_] unchanged
+    // while resetting [currentOffset_] to 0, corrupting the reported scroll offset during end-edge over scroll.
+    const bool isLastLine = info_.endIndex_ >= info_.childrenCount_ + info_.repeatDifference_ - 1;
+    if (OneLineMovesOffViewportFromAbove(mainLength, cellAveLength_, info_.startFixOffset_) &&
+        !(line == 0 && isLastLine)) {
         info_.currentOffset_ = mainLength;
         info_.prevOffset_ = info_.currentOffset_;
         info_.startMainLineIndex_ = line + 1;
@@ -1510,6 +1515,10 @@ float GridScrollLayoutAlgorithm::FillNewLineForward(float crossSize, float mainS
     // Other params are also named according to this principle.
     cellAveLength_ = -1.0f;
     auto currentIndex = info_.startIndex_;
+    if (info_.startMainLineIndex_ < 0) {
+        info_.reachStart_ = true;
+        return cellAveLength_;
+    }
     if (info_.startMainLineIndex_ - 1 < 0) {
         if (currentIndex == 0) {
             return cellAveLength_;

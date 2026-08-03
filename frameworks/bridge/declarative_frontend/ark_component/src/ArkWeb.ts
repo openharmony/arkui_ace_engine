@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path='./import.ts' />
 class WebJavaScriptAccessModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -656,8 +655,8 @@ class WebOnNativeEmbedObjectParamChangeModifier extends ModifierWithKey<(DataInf
   }
 }
 
-class WebOnFirstContentfulPaintModifier extends ModifierWithKey<(navigationStartTick: number, firstContentfulPaintMs: number) => void> {
-  constructor(value: (navigationStartTick: number, firstContentfulPaintMs: number) => void) {
+class WebOnFirstContentfulPaintModifier extends ModifierWithKey<(event?: { navigationStartTick: number; firstContentfulPaintMs: number; } | undefined) => void> {
+  constructor(value: (event?: { navigationStartTick: number; firstContentfulPaintMs: number; } | undefined) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnFirstContentfulPaintModifier');
@@ -670,8 +669,8 @@ class WebOnFirstContentfulPaintModifier extends ModifierWithKey<(navigationStart
   }
 }
 
-class WebOnAudioStateChangedModifier extends ModifierWithKey<(playing: boolean) => void> {
-  constructor (value: (playing: boolean) => void) {
+class WebOnAudioStateChangedModifier extends ModifierWithKey<(event: { playing: boolean; }) => void> {
+  constructor (value: (event: { playing: boolean; }) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnAudioStateChangedModifier');
@@ -754,8 +753,8 @@ class WebMediaOptionsModifier extends ModifierWithKey<WebMediaOptions> {
   }
 }
 
-class WebOnPageEndModifier extends ModifierWithKey<(url: string) => void> {
-  constructor(value: (url: string) => void) {
+class WebOnPageEndModifier extends ModifierWithKey<(event?: { url: string; } | undefined) => void> {
+  constructor(value: (event?: { url: string; } | undefined) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnPageEndModifier');
@@ -768,8 +767,8 @@ class WebOnPageEndModifier extends ModifierWithKey<(url: string) => void> {
   }
 }
 
-class WebOnPageBeginModifier extends ModifierWithKey<(url: string) => void> {
-  constructor(value: (url: string) => void) {
+class WebOnPageBeginModifier extends ModifierWithKey<(event?: { url: string; } | undefined) => void> {
+  constructor(value: (event?: { url: string; } | undefined) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnPageBeginModifier');
@@ -782,8 +781,8 @@ class WebOnPageBeginModifier extends ModifierWithKey<(url: string) => void> {
   }
 }
 
-class WebOnProgressChangeModifier extends ModifierWithKey<(newProgress: number) => void> {
-  constructor(value: (newProgress: number) => void) {
+class WebOnProgressChangeModifier extends ModifierWithKey<(event?: { newProgress: number; } | undefined) => void> {
+  constructor(value: (event?: { newProgress: number; } | undefined) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnProgressChangeModifier');
@@ -796,8 +795,8 @@ class WebOnProgressChangeModifier extends ModifierWithKey<(newProgress: number) 
   }
 }
 
-class WebOnTitleReceiveModifier extends ModifierWithKey<(title: string) => void> {
-  constructor(value: (title: string) => void) {
+class WebOnTitleReceiveModifier extends ModifierWithKey<(event?: { title: string; } | undefined) => void> {
+  constructor(value: (event?: { title: string; } | undefined) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnTitleReceiveModifier');
@@ -810,10 +809,16 @@ class WebOnTitleReceiveModifier extends ModifierWithKey<(title: string) => void>
   }
 }
 
-class WebOnDownloadStartModifier extends ModifierWithKey<(url: string, userAgent: string, contentDisposition: string,
-                                                      mimetype: string, contentLength: number) => void> {
-  constructor(value: (url: string, userAgent: string, contentDisposition: string,
-              mimetype: string, contentLength: number) => void) {
+class WebOnDownloadStartModifier extends ModifierWithKey<(event?: {
+    url: string;
+    userAgent: string; contentDisposition: string;
+    mimetype: string; contentLength: number;
+  } | undefined) => void> {
+  constructor(value: (event?: {
+    url: string;
+    userAgent: string; contentDisposition: string;
+    mimetype: string; contentLength: number;
+  } | undefined) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnDownloadStartModifier');
@@ -1024,8 +1029,8 @@ class WebOnTouchIconUrlReceivedModifier extends ModifierWithKey<(event: { url: s
   }
 }
 
-class WebOnWindowNewModifier extends ModifierWithKey<(isAlert: boolean, isUserTrigger: boolean, targetUrl: string, handler: ControllerHandler) => void> {
-  constructor(value: (isAlert: boolean, isUserTrigger: boolean, targetUrl: string, handler: ControllerHandler) => void) {
+class WebOnWindowNewModifier extends ModifierWithKey<(event: { isAlert: boolean; isUserTrigger: boolean; targetUrl: string; handler: ControllerHandler; }) => void> {
+  constructor(value: (event: { isAlert: boolean; isUserTrigger: boolean; targetUrl: string; handler: ControllerHandler; }) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnWindowNewModifier');
@@ -1038,10 +1043,10 @@ class WebOnWindowNewModifier extends ModifierWithKey<(isAlert: boolean, isUserTr
   }
 }
 
-class WebOnWindowNewExtModifier extends ModifierWithKey<(isAlert: boolean, isUserTrigger: boolean, targetUrl: string,
-    handler: ControllerHandler, windowFeatures: WindowFeatures, navigationPolicy: NavigationPolicy) => void> {
-  constructor(value: (isAlert: boolean, isUserTrigger: boolean, targetUrl: string, handler: ControllerHandler,
-    windowFeatures: WindowFeatures, navigationPolicy: NavigationPolicy) => void) {
+class WebOnWindowNewExtModifier extends ModifierWithKey<(event: { isAlert: boolean; isUserTrigger: boolean; targetUrl: string; handler: ControllerHandler;
+      windowFeatures: WindowFeatures; navigationPolicy: NavigationPolicy; }) => void> {
+  constructor(value: (event: { isAlert: boolean; isUserTrigger: boolean; targetUrl: string; handler: ControllerHandler;
+      windowFeatures: WindowFeatures; navigationPolicy: NavigationPolicy; }) => void) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnWindowNewExtModifier');
@@ -1054,8 +1059,8 @@ class WebOnWindowNewExtModifier extends ModifierWithKey<(isAlert: boolean, isUse
   }
 }
 
-class WebOnGeolocationShowModifier extends ModifierWithKey<(origin: string, geolocation: JsGeolocation) => void>{
-  constructor (value: (origin: string, geolocation: JsGeolocation) => void) {
+class WebOnGeolocationShowModifier extends ModifierWithKey<any> {
+  constructor (value: any) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnGeolocationShowModifier');
@@ -1124,8 +1129,8 @@ class WebOnWindowExitModifier extends ModifierWithKey<() => void> {
   }
 }
 
-class WebOnAlertModifier extends ModifierWithKey<(url: string, message: string, result: JsResult) => boolean> {
-  constructor (value: (url: string, message: string, result: JsResult) => boolean) {
+class WebOnAlertModifier extends ModifierWithKey<(event?: { url: string; message: string; result: JsResult; } | undefined) => boolean> {
+  constructor (value: (event?: { url: string; message: string; result: JsResult; } | undefined) => boolean) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnAlertModifier')
@@ -1138,8 +1143,8 @@ class WebOnAlertModifier extends ModifierWithKey<(url: string, message: string, 
   }
 }
 
-class WebOnConfirmModifier extends ModifierWithKey<(url: string, message: string, result: JsResult) => boolean> {
-  constructor (value: (url: string, message: string, result: JsResult) => boolean) {
+class WebOnConfirmModifier extends ModifierWithKey<(event?: { url: string; message: string; result: JsResult; } | undefined) => boolean> {
+  constructor (value: (event?: { url: string; message: string; result: JsResult; } | undefined) => boolean) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnConfirmModifier')
@@ -1152,8 +1157,8 @@ class WebOnConfirmModifier extends ModifierWithKey<(url: string, message: string
   }
 }
 
-class WebOnPromptModifier extends ModifierWithKey<(url: string, message: string, value: string, result: JsResult) => boolean> {
-  constructor (value: (url: string, message: string, value: string, result: JsResult) => boolean) {
+class WebOnPromptModifier extends ModifierWithKey<(event?: { url: string; message: string; value: string; result: JsResult; } | undefined) => boolean> {
+  constructor (value: (event?: { url: string; message: string; value: string; result: JsResult; } | undefined) => boolean) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnPromptModifier')
@@ -1283,8 +1288,8 @@ class WebNestedScrollModifier extends ModifierWithKey<ArkNestedScrollOptionsExt>
   }
 }
 
-class WebOnInterceptKeyEventModifier extends ModifierWithKey<(result: { event: KeyEvent }) => boolean> {
-  constructor (value: (handler: KeyEvent) => boolean) {
+class WebOnInterceptKeyEventModifier extends ModifierWithKey<(event: KeyEvent) => boolean> {
+  constructor (value: (event: KeyEvent) => boolean) {
     super(value);
   }
   static identity: Symbol = Symbol('webOnInterceptKeyEventModifier')
@@ -1978,10 +1983,6 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
     modifierWithKey(this._modifiersWithKeys, WebOnRenderExitedModifier.identity, WebOnRenderExitedModifier, callback);
     return this;
   }
-  onRenderExited(callback: (event?: { detail: object; } | undefined) => boolean): this;
-  onRenderExited(callback: unknown): this {
-    throw new Error('Method not implemented.');
-  }
   onShowFileSelector(callback: (event?: { result: FileSelectorResult; fileSelector: FileSelectorParam; } | undefined) => boolean): this {
     modifierWithKey(this._modifiersWithKeys, WebOnShowFileSelectorModifier.identity, WebOnShowFileSelectorModifier, callback);
     return this;
@@ -2290,9 +2291,6 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   onOverrideUrlLoading(callback: OnOverrideUrlLoadingCallback): this {
     modifierWithKey(this._modifiersWithKeys, WebOnOverrideUrlLoadingModifier.identity, WebOnOverrideUrlLoadingModifier, callback);
     return this;
-  }
-  enableNativeMediaPlayer(config: NativeMediaPlayerConfig): this {
-    throw new Error('Method not implemented.');
   }
   onRenderProcessNotResponding(callback: OnRenderProcessNotRespondingCallback): this {
     modifierWithKey(this._modifiersWithKeys, WebOnRenderProcessNotRespondingModifier.identity, WebOnRenderProcessNotRespondingModifier, callback);

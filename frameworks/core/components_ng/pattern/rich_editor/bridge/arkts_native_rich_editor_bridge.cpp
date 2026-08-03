@@ -1716,7 +1716,7 @@ ArkUINativeModuleValue RichEditorBridge::SetPlaceholder(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->setRichEditorPlaceholder(
         nativeNode, stringParameters.data(), stringParameters.size(), valuesVector.data(), valuesVector.size(),
-        AceType::RawPtr(resourceObject));
+        AceType::RawPtr(resourceObject), isJsView);
     return panda::JSValueRef::Undefined(vm);
 }
 

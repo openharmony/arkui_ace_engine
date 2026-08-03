@@ -1114,22 +1114,23 @@ public:
 
     static bool ExistController(JSRef<JSObject>& controller, int32_t& parentWebId)
     {
-        auto getThisVarFunction = controller->GetProperty("innerGetThisVar");
-        if (!getThisVarFunction->IsFunction()) {
+        auto getControllerIdFunction = controller->GetProperty("innerGetControllerId");
+        if (!getControllerIdFunction->IsFunction()) {
             parentWebId = -1;
             return false;
         }
-        auto func = JSRef<JSFunc>::Cast(getThisVarFunction);
-        auto thisVar = func->Call(controller, 0, {});
-        int64_t thisPtr = 0;
-        if (thisVar->IsNumber()) {
-            thisPtr = thisVar->ToNumber<int64_t>();
+        auto func = JSRef<JSFunc>::Cast(getControllerIdFunction);
+        auto controllerId = func->Call(controller, 0, {});
+        int64_t controllerIdValue = 0;
+        if (controllerId->IsNumber()) {
+            controllerIdValue = controllerId->ToNumber<int64_t>();
         }
         for (auto iter = controller_map_.begin(); iter != controller_map_.end(); iter++) {
-            auto getThisVarFunction1 = iter->second.controller_->GetProperty("innerGetThisVar");
-            if (getThisVarFunction1->IsFunction()) {
-                auto thisVar1 = JSRef<JSFunc>::Cast(getThisVarFunction1)->Call(iter->second.controller_, 0, {});
-                if (thisVar1->IsNumber() && thisPtr == thisVar1->ToNumber<int64_t>()) {
+            auto getControllerIdFunction1 = iter->second.controller_->GetProperty("innerGetControllerId");
+            if (getControllerIdFunction1->IsFunction()) {
+                auto getControllerIdFunc = JSRef<JSFunc>::Cast(getControllerIdFunction1);
+                auto controllerId1 = getControllerIdFunc->Call(iter->second.controller_, 0, {});
+                if (controllerId1->IsNumber() && controllerIdValue == controllerId1->ToNumber<int64_t>()) {
                     parentWebId = iter->second.parentWebId_;
                     return true;
                 }
@@ -1421,6 +1422,11 @@ public:
             JsiRef<JsiArrayBuffer> arrayBuffer = JsiRef<JsiArrayBuffer>::Cast(args[0]);
             int32_t bufferSize = arrayBuffer->ByteLength();
             void* buffer = arrayBuffer->GetBuffer();
+            if ((buffer == nullptr) || (bufferSize <= 0)) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "SetResponseData: invalid arrayBuffer, bufferSize=%{public}d", bufferSize);
+                return;
+            }
             const char* charPtr = static_cast<const char*>(buffer);
             std::string data(charPtr, bufferSize);
             response_->SetData(data);
@@ -2675,11 +2681,11 @@ void JSWeb::JSBind(BindingTarget globalObj)
 
 napi_value WrapNapiValue(napi_env env, const JSRef<JSVal>& obj, void* nativeValue)
 {
+    ArkNativeEngine* nativeEngine = reinterpret_cast<ArkNativeEngine*>(env);
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
     napi_value undefined;
     napi_get_undefined(env, &undefined);
     CHECK_NULL_RETURN(obj->IsObject(), undefined);
-    ArkNativeEngine* nativeEngine = reinterpret_cast<ArkNativeEngine*>(env);
-    CHECK_NULL_RETURN(nativeEngine, undefined);
     panda::Local<JsiValue> value = obj.Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
     ScopeRAII scope(env);
@@ -3407,6 +3413,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(innerWebNativeMessageManagerFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
                 auto* eventInfo = TypeInfoHelper::DynamicCast<WebNativeMessageEvent>(info.get());
+                if (!eventInfo) {
+                    TAG_LOGE(AceLogTag::ACE_WEB,
+                        "innerWebNativeMessageManager received null or unexpected event type");
+                    return;
+                }
                 JSRef<JSObject> obj = JSRef<JSObject>::New();
                 JSRef<JSObject> callbackObj = JSClass<JSWebNativeMessageCallback>::NewInstance();
                 auto callbackEvent = Referenced::Claim(callbackObj->Unwrap<JSWebNativeMessageCallback>());
@@ -3434,6 +3445,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(innerWebNativeMessageDisconnectFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
             auto* eventInfo = TypeInfoHelper::DynamicCast<WebNativeMessageEvent>(info.get());
+            if (!eventInfo) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "innerWebNativeMessageManager received null or unexpected event type");
+                return;
+            }
             JSRef<JSVal> connectId = JSRef<JSVal>::Make(ToJSValue(eventInfo->GetConnectId()));
             JSRef<JSObject> obj = JSRef<JSObject>::New();
             obj->SetPropertyObject("connectId", connectId);
@@ -3450,6 +3466,11 @@ void JSWeb::SetCallbackFromController(const JSRef<JSObject> controller)
             func = JSRef<JSFunc>::Cast(onFullScreenVideoOverlayEnterFunction)]
             (const std::shared_ptr<BaseEventInfo>& info) {
             auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenVideoOverlayEnterEvent>(info.get());
+            if (!eventInfo) {
+                TAG_LOGE(AceLogTag::ACE_WEB,
+                    "innerWebNativeMessageManager received null or unexpected event type");
+                return;
+            }
             JSRef<JSObject> obj = JSRef<JSObject>::New();
             JSRef<JSObject> handlerObj = JSClass<JSFullScreenVideoOverlayHandler>::NewInstance();
             auto callbackEvent = Referenced::Claim(handlerObj->Unwrap<JSFullScreenVideoOverlayHandler>());
@@ -3565,7 +3586,10 @@ void JSWeb::Create(const JSCallbackInfo& info)
                 return;
             }
             napi_handle_scope scope = nullptr;
-            napi_open_handle_scope(env, &scope);
+            auto status = napi_open_handle_scope(env, &scope);
+            if (status != napi_ok || scope == nullptr) {
+                return;
+            }
             JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(webId)) };
             func->Call(webviewController, 1, argv);
             napi_close_handle_scope(env, scope);
@@ -3588,7 +3612,10 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     return;
                 }
                 napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(env, &scope);
+                auto status = napi_open_handle_scope(env, &scope);
+                if (status != napi_ok || scope == nullptr) {
+                    return;
+                }
                 JSRef<JSVal> argv[] = { JSRef<JSVal>::Make(ToJSValue(hapPath)) };
                 func->Call(webviewController, 1, argv);
                 napi_close_handle_scope(env, scope);
@@ -3621,7 +3648,10 @@ void JSWeb::Create(const JSCallbackInfo& info)
                     return;
                 }
                 napi_handle_scope scope = nullptr;
-                napi_open_handle_scope(env, &scope);
+                auto status = napi_open_handle_scope(env, &scope);
+                if (status != napi_ok || scope == nullptr) {
+                    return;
+                }
                 auto newIdVal = JSRef<JSVal>::Make(ToJSValue(newId));
                 auto result = func->Call(webviewController, 1, &newIdVal);
                 napi_close_handle_scope(env, scope);
@@ -4558,8 +4588,14 @@ void WrapAISessionCallback(const JSRef<JSObject>& option, const std::string& fun
             return false;
         }
         napi_handle_scope scope = nullptr;
-        napi_open_handle_scope(env, &scope);
         auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+        if (!runtime) {
+            return false;
+        }
+        auto napi_status = napi_open_handle_scope(env, &scope);
+        if (napi_status != napi_ok) {
+            return false;
+        }
         auto adapter = runtime->NewFunction(
             [callback = std::move(callback)](shared_ptr<JsRuntime> runtime, shared_ptr<JsValue> thisObj,
                     const std::vector<shared_ptr<JsValue>>& args, int32_t argc) -> shared_ptr<JsValue> {
@@ -4699,6 +4735,42 @@ std::function<void()> ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
     return nullptr;
 }
 
+void UpdateHapticFeedbackMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto previewMenuOptions = menuOptions->GetProperty("previewMenuOptions");
+    if (!previewMenuOptions->IsObject()) {
+        return;
+    }
+    auto previewMenuOptionsObj = JSRef<JSObject>::Cast(previewMenuOptions);
+    auto hapticFeedbackMode = previewMenuOptionsObj->GetProperty("hapticFeedbackMode");
+    if (hapticFeedbackMode->IsNumber()) {
+        auto mode = HapticFeedbackMode(hapticFeedbackMode->ToNumber<int32_t>());
+        if (mode >= HapticFeedbackMode::DISABLED && mode <= HapticFeedbackMode::AUTO) {
+            menuParam.hapticFeedbackMode = mode;
+        }
+    }
+}
+
+void ProcessPreviewMenu(const JSRef<JSObject>& menuOptions,
+    std::shared_ptr<WebPreviewSelectionMenuParam>& selectMenuParam,
+    const WeakPtr<NG::FrameNode>& frameNode, const JSCallbackInfo& info)
+{
+    NG::MenuParam& menuParam = selectMenuParam->menuParam;
+    auto menuType = menuOptions->GetProperty("menuType");
+    bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
+    menuParam.hapticFeedbackMode = HapticFeedbackMode::DISABLED;
+    if (isPreviewMenu) {
+        menuParam.previewMode = MenuPreviewMode::CUSTOM;
+        UpdateHapticFeedbackMode(menuOptions, menuParam);
+
+        RefPtr<JsFunction> previewBuilderFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(menuOptions->GetProperty("preview")));
+        CHECK_NULL_VOID(previewBuilderFunc);
+        selectMenuParam->previewBuilder = JsWebNoArgNodeCallback(info.GetExecutionContext(),
+            std::move(previewBuilderFunc), frameNode, "BindSelectionMenuPreviwer");
+    }
+}
+
 void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<JSVal>& args,
     std::shared_ptr<WebPreviewSelectionMenuParam>& selectMenuParam)
 {
@@ -4710,27 +4782,8 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     selectMenuParam->onMenuHide = ParseMenuCallback(frameNode, menuOptions, info, "onMenuHide");
 
     auto preview = menuOptions->GetProperty("preview");
-    if (!preview->IsFunction()) {
-        return;
-    }
-    NG::MenuParam& menuParam = selectMenuParam->menuParam;
-    auto menuType = menuOptions->GetProperty("menuType");
-    bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
-    menuParam.hapticFeedbackMode = HapticFeedbackMode::DISABLED;
-    if (isPreviewMenu) {
-        menuParam.previewMode = MenuPreviewMode::CUSTOM;
-        auto previewMenuOptions = menuOptions->GetProperty("previewMenuOptions");
-        if (previewMenuOptions->IsObject()) {
-            auto previewMenuOptionsObj = JSRef<JSObject>::Cast(previewMenuOptions);
-            auto hapticFeedbackMode = previewMenuOptionsObj->GetProperty("hapticFeedbackMode");
-            if (hapticFeedbackMode->IsNumber()) {
-                menuParam.hapticFeedbackMode = HapticFeedbackMode(hapticFeedbackMode->ToNumber<int32_t>());
-            }
-        }
-        RefPtr<JsFunction> previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
-        CHECK_NULL_VOID(previewBuilderFunc);
-        selectMenuParam->previewBuilder = JsWebNoArgNodeCallback(info.GetExecutionContext(),
-            std::move(previewBuilderFunc), frameNode, "BindSelectionMenuPreviwer");
+    if (preview->IsFunction()) {
+        ProcessPreviewMenu(menuOptions, selectMenuParam, frameNode, info);
     }
 }
 
@@ -8170,6 +8223,12 @@ void JSWeb::ScrollbarLayoutPolicy(const JSCallbackInfo& args)
 {
     RETURN_IF_CALLING_FROM_M132();
     if (args.Length() < 1 || !(args[0]->IsNumber())) {
+        return;
+    }
+    auto value = args[0]->ToNumber<int32_t>();
+    constexpr int32_t POLICY_MIN = static_cast<int32_t>(ScrollbarLayoutPolicy::CONTENT);
+    constexpr int32_t POLICY_MAX = static_cast<int32_t>(ScrollbarLayoutPolicy::CONTENT);
+    if (value < POLICY_MIN || value > POLICY_MAX) {
         return;
     }
     auto layoutPolicy = static_cast<enum ScrollbarLayoutPolicy>(args[0]->ToNumber<int32_t>());

@@ -1215,4 +1215,122 @@ HWTEST_F(NavigationModifierTest, setNavDestinationTest, TestSize.Level1)
     navigationPattern = nullptr;
     navigationNode = nullptr;
 }
+
+/*
+ * @tc.name: setNavigationConfigurationTest001
+ * @tc.desc: Verify setNavigationConfiguration function pointer is not null.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, setNavigationConfigurationTest001, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setNavigationConfiguration, nullptr);
+}
+
+/*
+ * @tc.name: setNavigationConfigurationTest002
+ * @tc.desc: Verify setNavigationConfiguration with recyclePagesOnLowMemory=true does not crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, setNavigationConfigurationTest002, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setNavigationConfiguration, nullptr);
+    ArkUI_Int32 stackSizeLimit = 5;
+    ArkUI_Bool recyclePagesOnLowMemory = 1;
+    modifier_->setNavigationConfiguration(node_, stackSizeLimit, recyclePagesOnLowMemory);
+}
+
+/*
+ * @tc.name: setNavigationConfigurationTest003
+ * @tc.desc: Verify setNavigationConfiguration with recyclePagesOnLowMemory=false does not crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, setNavigationConfigurationTest003, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setNavigationConfiguration, nullptr);
+    ArkUI_Int32 stackSizeLimit = 5;
+    ArkUI_Bool recyclePagesOnLowMemory = 0;
+    modifier_->setNavigationConfiguration(node_, stackSizeLimit, recyclePagesOnLowMemory);
+}
+
+/*
+ * @tc.name: setNavigationConfigurationTest004
+ * @tc.desc: Verify resetNavigationConfiguration function pointer is not null and does not crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, setNavigationConfigurationTest004, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->resetNavigationConfiguration, nullptr);
+    ArkUI_Int32 stackSizeLimit = 5;
+    ArkUI_Bool recyclePagesOnLowMemory = 1;
+    modifier_->setNavigationConfiguration(node_, stackSizeLimit, recyclePagesOnLowMemory);
+    modifier_->resetNavigationConfiguration(node_);
+}
+
+/*
+ * @tc.name: setNavigationConfigurationTest005
+ * @tc.desc: Verify setNavigationConfiguration with null node does not crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, setNavigationConfigurationTest005, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setNavigationConfiguration, nullptr);
+    modifier_->setNavigationConfiguration(nullptr, 5, 1);
+}
+
+/*
+ * @tc.name: setNavigationConfigurationTest006
+ * @tc.desc: Verify resetNavigationConfiguration with null node does not crash.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, setNavigationConfigurationTest006, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->resetNavigationConfiguration, nullptr);
+    modifier_->resetNavigationConfiguration(nullptr);
+}
+
+/*
+ * @tc.name: setNavigationConfigurationTest007
+ * @tc.desc: Verify setNavigationConfiguration with stackSizeLimit=0 and recyclePagesOnLowMemory=true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, setNavigationConfigurationTest007, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setNavigationConfiguration, nullptr);
+    ArkUI_Int32 stackSizeLimit = 0;
+    ArkUI_Bool recyclePagesOnLowMemory = 1;
+    modifier_->setNavigationConfiguration(node_, stackSizeLimit, recyclePagesOnLowMemory);
+}
+
+/*
+ * @tc.name: setNavigationConfigurationTest008
+ * @tc.desc: Verify setNavigationConfiguration with negative stackSizeLimit.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, setNavigationConfigurationTest008, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setNavigationConfiguration, nullptr);
+    ArkUI_Int32 stackSizeLimit = -1;
+    ArkUI_Bool recyclePagesOnLowMemory = 0;
+    modifier_->setNavigationConfiguration(node_, stackSizeLimit, recyclePagesOnLowMemory);
+}
+
+/*
+ * @tc.name: setNavigationConfigurationTest009
+ * @tc.desc: Verify set then reset then set again with recyclePagesOnLowMemory.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModifierTest, setNavigationConfigurationTest009, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setNavigationConfiguration, nullptr);
+    ASSERT_NE(modifier_->resetNavigationConfiguration, nullptr);
+
+    ArkUI_Int32 stackSizeLimit = 5;
+    ArkUI_Bool recyclePagesOnLowMemory = 1;
+    modifier_->setNavigationConfiguration(node_, stackSizeLimit, recyclePagesOnLowMemory);
+
+    modifier_->resetNavigationConfiguration(node_);
+
+    ArkUI_Bool recyclePagesOnLowMemoryFalse = 0;
+    modifier_->setNavigationConfiguration(node_, stackSizeLimit, recyclePagesOnLowMemoryFalse);
+}
 } // namespace OHOS::Ace::NG

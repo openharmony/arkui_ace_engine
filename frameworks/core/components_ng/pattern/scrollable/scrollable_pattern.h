@@ -231,6 +231,11 @@ public:
 
     virtual void OnTouchDown(const TouchEventInfo& info);
 
+    virtual bool ShouldIgnoreTouchUpWithActiveFingers() const
+    {
+        return false;
+    }
+
     void OnTouchpadInteraction(PointF point);
 
     virtual void ProcessFreeScrollOverDrag(const OffsetF velocity) {};

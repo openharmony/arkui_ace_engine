@@ -215,8 +215,6 @@ private:
     void RemoveVsyncTimeoutDFXTask(uint64_t frameCount);
     void PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecutor);
 
-    bool ConsumeBackgroundForceFlushCount();
-
     bool IsWindowDetached() const
     {
         return windowAttachedStatus_.has_value() && !windowAttachedStatus_.value();

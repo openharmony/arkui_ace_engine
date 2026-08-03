@@ -182,8 +182,8 @@ public:
     {
         dialogProperties_ = param;
         InitHostWindowRect();
-        InitParentWindowRect();
         InitDefaultSystemMaterial();
+        InitParentWindowRect();
     }
 
     bool GetWindowButtonRect(NG::RectF& floatButtons);
@@ -320,8 +320,8 @@ public:
 
     void UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation);
     void InitHostWindowRect();
-    void InitParentWindowRect();
     void InitDefaultSystemMaterial();
+    void InitParentWindowRect();
     void UpdateHostWindowRect();
     void UpdateFontScale();
 
@@ -611,6 +611,7 @@ private:
     RectF hostWindowRect_;
     RectF parentWindowRect_;
     bool hasExtraNodeForDistortion_ = false;
+    bool isDialogShow_ = true;
     std::function<void()> onFinishEvent_ = nullptr;
 };
 } // namespace OHOS::Ace::NG

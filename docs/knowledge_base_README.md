@@ -2,7 +2,7 @@
 
 此目录用于存放 ArkUI ACE Engine 的知识库文档，并通过索引文件支持快速检索。
 
-> 更新时间：2026-07-27
+> 更新时间：2026-07-31
 > 适用仓库：`OpenHarmony/foundation/arkui/ace_engine/docs`
 
 ## 1. 检索入口
@@ -38,33 +38,32 @@ rg -n "<关键字>" docs
 
 ### 2.1 文件系统统计
 
-- `docs/` 下 Markdown 文档总数：131
-- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：45
-- `docs/syntax/` 下语法专题文档：7
-  - 其中知识库命名文档 4 个：`ForEach/LazyForEach/Repeat/RepeatVirtualScroll`
+- `docs/` 下 Markdown 文档总数：252
+- 命名符合 `*_Knowledge_Base*.md` 的旧版知识库文档：19
+- `docs/syntax/` 下语法专题文档：3
+  - 知识库命名文档：0 个（ForEach/LazyForEach/Repeat/RepeatVirtualScroll 已迁移到 `docs/kb/syntax/`）
   - 其他专题文档 3 个：`Syntax_Architecture_Overview/Conditional_Rendering_Guide/Special_Syntax_Components`
 
 ### 2.2 索引统计
 
-- `context_registry.json` 新版条目数：68
-- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：46
-- 旧 KB 索引路径有效性：46/46（全部存在）
+- `context_registry.json` 新版条目数：215
+- `knowledge_base_INDEX.json` 旧 KB 索引条目总数：22
+- 旧 KB 索引路径有效性：20/22（2 个上游遗留路径待修复）
 
 - 类型分布：
-  - `component`: 25
+  - `component`: 6
   - `sdk`: 4
-  - `feature`: 17
+  - `feature`: 12
 - 分类分布：
-  - `advanced`: 3
-  - `basic`: 4
-  - `container`: 6
-  - `data_display`: 8
-  - `rich_text`: 3
+  - `advanced`: 2
+  - `basic`: 1
+  - `container`: 2
+  - `rich_text`: 2
   - `sdk`: 6
-  - `selector`: 3
-  - `system`: 13
-- 关键词总数（索引内）：423
-- 别名总数（索引内）：149
+  - `selector`: 1
+  - `system`: 8
+- 关键词总数（索引内）：240
+- 别名总数（索引内）：75
 
 ### 2.3 覆盖现状
 
@@ -79,8 +78,8 @@ docs/
 ├── knowledge_base_README.md
 ├── knowledge_base_INDEX.json
 ├── kb_search.py
-├── kb/ (69 MD，68 个新版 KB 主题 + README)
-├── accessibility/ (1 KB)
+├── kb/ (216 MD，215 个新版 KB 主题 + README)
+├── accessibility/ (0 KB)
 ├── api/ (2 KB)
 ├── architecture/ (2 KB + 3 非 `*_Knowledge_Base*` 命名架构文档)
 ├── cj_frontend/ (1 KB)
@@ -88,10 +87,10 @@ docs/
 ├── entrance/ (1 MD)
 ├── focus/ (2 MD)
 ├── layout/ (0 KB)
-├── pattern/ (28 KB + 6 非 `*_Knowledge_Base*` 命名文档)
+├── pattern/ (7 KB + 6 非 `*_Knowledge_Base*` 命名文档)
 ├── sdk/ (3 KB)
 ├── svg/ (0 KB，SVG 已迁移)
-└── syntax/ (7 MD, 其中 4 KB)
+└── syntax/ (3 MD，旧语法 KB 已迁移到 `docs/kb/syntax/`)
 ```
 
 说明：
@@ -182,9 +181,22 @@ PY
 - 2026-07-18：基于当前源码、SDK、测试和基础渲染管线 Spec 重建 Layout Framework 新版 KB，旧 KB 与旧索引入口已移除（旧索引 52 条）。
 - 2026-07-18：新增 Layout Attributes、Blank、Divider、Column、GridCol、GridRow、Row、Stack、FolderStack；重建 Flex（含 Wrap）并合并 Safe Area 两个旧主题。新版 registry 增至 34 条，旧 Flex/Safe Area 文件及索引入口移除，旧索引减至 49 条。
 - 2026-07-24：新增 ImageLoading、BackgroundImage、ImageAnalyzer 和四个 PickerDialog 新版 KB；迁移 SVG 到 `docs/kb/capabilities/svg.md` 并移除旧文件及旧索引入口。新版 registry 增至 42 条，旧索引减至 48 条。
+- 2026-07-29：基于 05-09-06 Span 类长期规格与源码新增 Span、ImageSpan、SymbolSpan、ContainerSpan 四个新版 KB（`docs/kb/components/basic/`）。新版 registry 增至 90 条；无旧 KB 迁移。
+- 2026-07-30：依据 05-03-01 与 05-03-10 Spec 重建滚动公共能力、迁移 WaterFlow/FlowItem；移除旧 WaterFlow KB 与索引入口，并与上游 Scroll/List/Refresh/ScrollBar 等迁移结果合并。新版 registry 共 143 条，旧索引减至 33 条；同步修复 Swiper 组件化路由。
 
 - 2026-07-23：新增 8 个 overlay 类组件 KB（Menu/Dialog/Toast/Select/bindPopup/PopupAdvanced/Sheet/bindTips），补齐弹窗类组件 Spec 路由；迁移 Menu 和 Sheet 旧 KB 到新版路径。
 - 2026-07-27：新增 Pixel Rounding 与 MediaQuery 新版 KB；新版 registry 增至 66 条，旧索引保持 46 条。
 - 2026-07-27：新增 Preview Platform Adaptation 新版 KB；对应架构设计已存在，新版 registry 增至 67 条，旧索引保持 46 条。
 - 2026-07-29：新增 Custom Measure/Layout 新版 KB；补充自定义组件现行回调与已废弃 API 的兼容实现边界。新版 registry 增至 68 条，旧索引保持 46 条。
+- 2026-07-29：迁移 RichEditor 到 `docs/kb/components/basic/rich_editor.md`，旧 KB 已移除，旧索引入口及 rich_text 分类已移除（旧索引 47 条）。新版 registry 增至 43 条，关联 Spec `05-09-02`（9 个 Feat spec + 1 个 design.md）。
 - 2026-07-29：迁移 Grid 到 `docs/kb/components/container/grid.md`，旧 KB 已移除，旧索引入口已移除（旧索引减至 45 条）；新增 GridItem KB `docs/kb/components/container/grid_item.md`。registry 增至 70 条。
+- 2026-07-29：迁移 Scroll/List/Refresh/ScrollBar 四个滚动容器旧 KB 到 `docs/kb/components/container/`，补齐 Spec 路由（func_id 05-03-03/05/06/07）。旧 KB 文件删除、旧 INDEX 条目移除（减至 37 条）、context_registry 增至 135 条；rebase 到最新 origin/master 后解决与 Grid 迁移等的冲突（grid 旧 KB 按上游删除处理）。
+
+- 2026-07-29：基于已补录的长期规格与源码新增/迁移 4 个文本类主题 KB。新建 `docs/kb/components/basic/symbol-glyph.md`（SymbolGlyph，复用 TextPattern）与 `docs/kb/capabilities/styled-string.md`（属性字符串，common_capability/api，非组件）；迁移 TextInput 旧 KB 到 `docs/kb/components/basic/text-input.md`、Hyperlink 旧 KB 到 `docs/kb/components/basic/hyperlink.md`，旧文件及旧索引入口移除。新版 registry 增至 88 条，旧索引减至 44 条。
+
+- 2026-07-30：基于已补录的长期规格与源码新增 2 个输入交互框架内部能力 KB。新建 `docs/kb/capabilities/text-shortcuts.md`（文本快捷键，common_capability/system，TextInputClient 加速表）与 `docs/kb/capabilities/keyboard-control.md`（键盘控制，common_capability/system，**重定范围为输入框↔键盘交互**：IME 弹出收起/避让/输入处理契约/公共 API，非焦点导航）。两域均补齐 Spec 路由。顺带修复若干遗留 registry/index 失效（Swiper jsview→controller_binding、PreviewPlatformAdaptation host_preview test_path 拼写、移除 List/Hyperlink 旧 INDEX 失效条目）。
+
+- 2026-07-30：04-14-04 特性整体更名 zh「键盘控制」→「输入法交互」、目录 `04-keyboard-control/`→`04-input-method-interaction/`。同步更新 functions.yaml/functions.yaml 路径与标题、5 个 Feat spec 路径、design.md 与 Feat 内部引用、KB 文件 `keyboard-control.md`→`input-method-interaction.md`、context_registry 条目（id/name/name_cn/spec_domain/kb）及 text-shortcuts 交叉链接。
+
+- 2026-07-30：新增触摸事件、按键事件、事件分发和拦截、组件组合键、鼠标事件、手势能力、事件基础框架 7 个新版 KB 主题；新版 registry 增至 213 条，旧索引保持 22 条。
+- 2026-07-31：新增 Gesture Modifier 通用能力 KB，关联 Func-04-05-07；新版 registry 增至 214 条，旧索引保持 22 条。

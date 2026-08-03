@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/smart_layout/smart_layout_algorithm.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -40,6 +41,7 @@ const std::unordered_set<std::string> SMART_LAYOUT_ENABLED_COMPONENTS = {
     OHOS::Ace::V2::FLEX_ETS_TAG,
     OHOS::Ace::V2::STACK_ETS_TAG,
     OHOS::Ace::V2::RELATIVE_CONTAINER_ETS_TAG,
+    OHOS::Ace::V2::TEXT_ETS_TAG,
 };
 
 bool IsComponentSupportSmartLayout(const RefPtr<FrameNode>& hostNode)
@@ -260,7 +262,6 @@ bool LayoutAlgorithm::HandleContentOverflowWithSmartLayout(LayoutWrapper* layout
     if (!IsSmartLayoutEffective(hostNode)) {
         return false;
     }
-
     TryRestoreSmartLayoutForHost(layoutWrapper);
     if (!IsContentOverflowForSmartLayout(layoutWrapper)) {
         return false;
@@ -274,6 +275,14 @@ bool LayoutAlgorithm::IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapp
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(hostNode, false);
+
+    if (hostNode->GetTag() == V2::TEXT_ETS_TAG) {
+        auto textPattern = hostNode->GetPattern<TextPattern>();
+        CHECK_NULL_RETURN(textPattern, false);
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        return textPattern->IsContentOverflowForSmartLayout(geometryNode->GetContentSize());
+    }
 
     // 收集子节点包围盒
     auto collectResult = CollectOverflowFromFrameNode(AceType::RawPtr(hostNode), true, true);
@@ -299,6 +308,11 @@ bool LayoutAlgorithm::IsContentOverflowForSmartLayout(LayoutWrapper* layoutWrapp
 void LayoutAlgorithm::TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
+    auto parentHost = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(parentHost);
+    if (parentHost->GetTag() == V2::TEXT_ETS_TAG) {
+        return;
+    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild(false);
     for (const auto& child : children) {
         CHECK_NULL_CONTINUE(child);

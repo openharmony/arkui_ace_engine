@@ -2337,7 +2337,7 @@ void MenuPattern::PlayDistortAnimation(const OffsetF& menuPosition, int32_t dela
             menuChildRenderContext->UpdateForegroundFilterDistortionParam(param5);
         }
     }, []() {
-        PerfMonitor::GetPerfMonitor()->End(PerfConstants::MENU_LIGHT_SENSE_ANIMATION, true);
+        PerfMonitor::GetPerfMonitor()->End(PerfConstants::MENU_LIGHT_SENSE_ANIMATION, false);
     }, nullptr, host->GetContextRefPtr());
     // for menu disappear animation
     renderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter()));

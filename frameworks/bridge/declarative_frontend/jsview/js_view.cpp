@@ -710,6 +710,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
             return;
         }
         jsView->needsUpdate_ = false;
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         {
             ACE_SCOPED_TRACE("JSView: ExecuteRerender");
             jsView->jsViewFunction_->ExecuteRerender();
@@ -864,6 +865,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
     auto clearAllRecycleFunc = [weak = AceType::WeakClaim(this)]() -> void {
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
+        CHECK_NULL_VOID(jsView->jsViewFunction_);
         ContainerScope scope(jsView->GetInstanceId());
         jsView->jsViewFunction_->ExecuteClearAllRecycle();
     };
@@ -1540,20 +1542,22 @@ void JSViewPartialUpdate::JSGetDialogController(const JSCallbackInfo& info)
 
 void JSViewPartialUpdate::JSFindCustomValueByKey(const JSCallbackInfo& info)
 {
+    auto result = JSRef<JSObject>::New();
+    result->SetProperty<bool>("found", false);
     if (info.Length() < 1 || !info[0]->IsNumber()) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
 
     ContainerScope scope(GetInstanceId());
     auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
     if (!node) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
     auto environmentManager = GetEnvironmentManager(node);
     if (!environmentManager) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
 
@@ -1561,10 +1565,14 @@ void JSViewPartialUpdate::JSFindCustomValueByKey(const JSCallbackInfo& info)
     auto stringKey = std::to_string(key);
     std::any customValue;
     if (!environmentManager->FindCustomEnvValueByKey(node, stringKey, customValue)) {
-        info.SetReturnValue(JSVal::Undefined());
+        info.SetReturnValue(result);
         return;
     }
-    info.SetReturnValue(std::any_cast<JSRef<JSVal>>(customValue));
+    result->SetProperty<bool>("found", true);
+    if (auto* jsValue = std::any_cast<JSRef<JSVal>>(&customValue)) {
+        result->SetPropertyObject("value", *jsValue);
+    }
+    info.SetReturnValue(result);
 }
 
 void JSViewPartialUpdate::JSFindSystemEnvValueByKey(const JSCallbackInfo& info)

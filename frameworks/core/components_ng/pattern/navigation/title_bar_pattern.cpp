@@ -1260,7 +1260,7 @@ void TitleBarPattern::OnModifyDone()
     ApplyTitleModifierIfNeeded(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (GreatOrEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+    if (GreatOrEqual(pipeline->GetFontScaleFromEnv(hostNode), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
         auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
         CHECK_NULL_VOID(backButtonNode);
         InitBackButtonLongPressEvent(backButtonNode);
@@ -2826,7 +2826,7 @@ void TitleBarPattern::OnFontScaleConfigurationUpdate()
     CHECK_NULL_VOID(pipeline);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    if (LessNotEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+    if (LessNotEqual(pipeline->GetFontScaleFromEnv(hostNode), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
         auto gestureHub = backButtonNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetLongPressEvent(nullptr);
@@ -2847,7 +2847,7 @@ void TitleBarPattern::InitMenuDragAndLongPressEvent(
     CHECK_NULL_VOID(hostNode);
     auto pipeline = hostNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (LessNotEqual(pipeline->GetFontScale(), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
+    if (LessNotEqual(pipeline->GetFontScaleFromEnv(hostNode), AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
         return;
     }
 
@@ -2941,7 +2941,7 @@ void TitleBarPattern::HandleMenuLongPress(
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<AgingAdapationDialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    float scale = pipeline->GetFontScale();
+    float scale = pipeline->GetFontScaleFromEnv(hostNode);
     if (LessNotEqual(scale, dialogTheme->GetBigFontSizeScale())) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION,
             "The current system font scale is %{public}f; dialogTheme font scale is %{public}f", scale,

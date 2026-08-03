@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
+#include "bridge/declarative_frontend/jsview/js_nav_param_flat_serializer.h"
 #include "core/common/force_split/force_split_utils.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -485,6 +486,18 @@ bool JSNavigationStack::CreateHomeDestination(const WeakPtr<NG::UINode>& customN
     return true;
 }
 
+void JSNavigationStack::SaveHomeDestinationState(const std::string& state)
+{
+    if (homePathInfo_.has_value()) {
+        homePathInfo_->autoCleanedState = state;
+    }
+}
+
+std::string JSNavigationStack::GetHomeDestinationState() const
+{
+    return homePathInfo_.has_value() ? homePathInfo_->autoCleanedState : "";
+}
+
 bool JSNavigationStack::CreateEmptyRelatedPage(
     RefPtr<NG::UINode>& targetNode, RefPtr<NG::NavDestinationGroupNode>& destNode)
 {
@@ -598,6 +611,82 @@ bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINod
         pattern->SetNavigationStack(WeakClaim(this));
     }
     return true;
+}
+
+bool JSNavigationStack::CreateNodeByPreloadItem(const WeakPtr<NG::UINode>& customNode,
+    RefPtr<NG::UINode>& node)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return false;
+    }
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto preloadPathItemVal = dataSourceObj_->GetProperty("preloadItem");
+    if (!preloadPathItemVal->IsObject() || preloadPathItemVal->IsEmpty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "create preload node failed, preload item is invalid");
+        return false;
+    }
+    auto preloadItem = JSRef<JSObject>::Cast(preloadPathItemVal);
+    auto preloadInfoVal = preloadItem->GetProperty("info");
+    if (!preloadInfoVal->IsObject() || preloadInfoVal->IsEmpty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "create preload node failed, preload info is invalid");
+        return false;
+    }
+    auto preloadInfo = JSRef<JSObject>::Cast(preloadInfoVal);
+    auto name = preloadInfo->GetPropertyValue<std::string>("name", "");
+    auto param = preloadInfo->GetProperty("param");
+    RefPtr<NG::UINode> targetNode;
+    RefPtr<NG::NavDestinationGroupNode> desNode;
+    NG::ScopedViewStackProcessor scopedViewStackProcessor;
+    int32_t errorCode = LoadDestination(name, param, customNode, targetNode, desNode);
+    if (errorCode == ERROR_CODE_NO_ERROR && desNode) {
+        node = targetNode;
+        auto navDestinationPattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+        if (navDestinationPattern) {
+            preloadInfo->SetProperty<std::string>("navDestinationId",
+                std::to_string(navDestinationPattern->GetNavDestinationId()));
+            navDestinationPattern->SetName(name);
+            auto onPop = preloadInfo->GetProperty("onPop");
+            auto isEntry = preloadInfo->GetPropertyValue<bool>("isEntry", false);
+            auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
+            if (navDestinationPattern->GetIsStatic()) {
+                navDestinationPattern->UpdateSerializedParam(ConvertParamToString(param, true));
+            }
+            pathInfo->SetInitParam(param);
+            navDestinationPattern->SetNavPathInfo(pathInfo);
+            navDestinationPattern->SetNavigationStack(WeakClaim(this));
+        }
+        ProcessPreloadPromise(preloadItem, errorCode);
+        return true;
+    }
+    ProcessPreloadPromise(preloadItem, errorCode);
+    return false;
+}
+
+void JSNavigationStack::ProcessPreloadPromise(const JSRef<JSObject>& pathInfo, int32_t errorCode)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    if (!pathInfo->HasProperty("promise")) {
+        return;
+    }
+    auto promise = pathInfo->GetProperty("promise");
+    if (!promise->IsFunction()) {
+        return;
+    }
+    auto promiseFunc = JSRef<JSFunc>::Cast(promise);
+    if (errorCode == ERROR_CODE_NO_ERROR) {
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Make(ToJSValue(errorCode));
+        promiseFunc->Call(dataSourceObj_, 1, params);
+        return;
+    }
+    const int32_t argc = 2;
+    JSRef<JSVal> params[argc];
+    JSRef<JSObject> errorInfo = JSRef<JSObject>::New();
+    params[0] = JSRef<JSVal>::Make(ToJSValue(errorCode));
+    params[1] = JSRef<JSVal>::Make(ToJSValue(ErrorToMessage(errorCode)));
+    promiseFunc->Call(dataSourceObj_, argc, params);
+    JSRef<JSVal> undefinedVal = JSVal::Undefined();
+    dataSourceObj_->SetProperty("preloadItem", undefinedVal);
 }
 
 RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo,
@@ -945,6 +1034,72 @@ void JSNavigationStack::UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::f
         }
         return navigationStack->homePathInfo_.value().name == name;
     });
+    stack->SetPreloadCallback([weakStack = AceType::WeakClaim(this)](
+        const std::string& name, const JSRef<JSVal>& param, const std::string& paramString) {
+        auto navigationStack = weakStack.Upgrade();
+        CHECK_NULL_VOID(navigationStack);
+        auto navigationNode =
+            AceType::DynamicCast<NG::NavigationGroupNode>(navigationStack->GetNavigationNode().Upgrade());
+        CHECK_NULL_VOID(navigationNode);
+        auto navigationPattern = AceType::DynamicCast<NG::NavigationPattern>(navigationNode->GetPattern());
+        CHECK_NULL_VOID(navigationPattern);
+        auto customNode = navigationPattern->GetParentCustomNode();
+        RefPtr<NG::UINode> uiNode;
+        auto result = navigationStack->CreateNodeByPreloadItem(customNode, uiNode);
+        if (!uiNode || !result) {
+            TAG_LOGE(AceLogTag::ACE_NAVIGATION, "preloadPath: failed to create node");
+            return;
+        }
+        navigationStack->AddPreloadItem(name, paramString, uiNode);
+    });
+    stack->SetOnDestroyPreloadItemCallback([weakStack = AceType::WeakClaim(this)]() {
+        auto navigationStack = weakStack.Upgrade();
+        CHECK_NULL_VOID(navigationStack);
+        navigationStack->RemovePreloadItem();
+    });
+    // preload node after navigation is build finish
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddBuildFinishCallBack([weakStack = AceType::WeakClaim(this)]() {
+        auto stack = weakStack.Upgrade();
+        CHECK_NULL_VOID(stack);
+        stack->PreloadNodeBefore();
+    });
+}
+
+void JSNavigationStack::PreloadNodeBefore()
+{
+    if (preloadItem_.has_value()) {
+        return;
+    }
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto preloadItem = dataSourceObj_->GetProperty("preloadItem");
+    if (!preloadItem->IsObject() || preloadItem->IsEmpty()) {
+        return;
+    }
+    auto navigationNode = AceType::DynamicCast<NG::NavigationGroupNode>(GetNavigationNode().Upgrade());
+    CHECK_NULL_VOID(navigationNode);
+    auto navigationPattern = AceType::DynamicCast<NG::NavigationPattern>(navigationNode->GetPattern());
+    CHECK_NULL_VOID(navigationPattern);
+    auto customNode = navigationPattern->GetParentCustomNode();
+    RefPtr<NG::UINode> uiNode;
+    auto result = CreateNodeByPreloadItem(customNode, uiNode);
+    if (!uiNode || !result) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "preloadPath: failed to create node");
+        return;
+    }
+    auto preloadPathItem = JSRef<JSObject>::Cast(preloadItem);
+    auto preloadInfoVal = preloadPathItem->GetProperty("info");
+    if (!preloadInfoVal->IsObject() || preloadInfoVal->IsEmpty()) {
+        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "create preload node failed, preload info is invalid");
+        return;
+    }
+    auto preloadInfo = JSRef<JSObject>::Cast(preloadInfoVal);
+    auto name = preloadInfo->GetPropertyValue<std::string>("name", "");
+    auto paramString = preloadPathItem->GetPropertyValue<std::string>("paramString", "");
+    AddPreloadItem(name, paramString, uiNode);
 }
 
 bool JSNavigationStack::ExecutePopCallbackInStack(const JSRef<JSVal>& param)
@@ -982,6 +1137,101 @@ void JSNavigationStack::ExecutePopCallbackForHomeNavDestination(const JSRef<JSVa
     auto destPattern = homeDest->GetPattern<NG::NavDestinationPattern>();
     CHECK_NULL_VOID(destPattern);
     ExecutePopCallback(homeDest, destPattern->GetNavDestinationId(), param);
+}
+
+void JSNavigationStack::AddPreloadItem(const std::string& name, const std::string& paramString,
+    const RefPtr<NG::UINode>& uiNode)
+{
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "create preloadItem %{public}s success", name.c_str());
+    if (preloadItem_.has_value()) {
+        RemovePreloadItem();
+    }
+    auto navDestination = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+        NG::NavigationGroupNode::GetNavDestinationNode(uiNode));
+    if (navDestination) {
+        navDestination->SetIsCacheNode(true);
+    }
+    preloadItem_ = NG::PreloadItem { name, paramString, uiNode };
+}
+
+RefPtr<NG::UINode> JSNavigationStack::GetFromPreloadItem(const std::string& name, const std::string& paramString)
+{
+    if (!preloadItem_.has_value()) {
+        return nullptr;
+    }
+    if (preloadItem_->name != name || preloadItem_->paramString != paramString) {
+        return nullptr;
+    }
+    auto uiNode = preloadItem_->uiNode;
+    auto navDestination = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+        NG::NavigationGroupNode::GetNavDestinationNode(uiNode));
+    if (navDestination) {
+        navDestination->SetIsCacheNode(false);
+    }
+    preloadItem_.reset();
+    if (!dataSourceObj_->IsEmpty()) {
+        JSRef<JSVal> undefinedVal = JSVal::Undefined();
+        dataSourceObj_->SetProperty("preloadItem", undefinedVal);
+    }
+    return uiNode;
+}
+
+void JSNavigationStack::RemovePreloadItem()
+{
+    if (!preloadItem_.has_value()) {
+        return;
+    }
+    auto navDestination = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+        NG::NavigationGroupNode::GetNavDestinationNode(preloadItem_->uiNode));
+    if (navDestination) {
+        navDestination->SetIsCacheNode(false);
+    }
+    preloadItem_.reset();
+}
+
+void JSNavigationStack::PreloadItemOnDestroy()
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+    auto preloadPathItemVal = dataSourceObj_->GetProperty("preloadItem");
+    if (!preloadPathItemVal->IsObject() || preloadPathItemVal->IsEmpty()) {
+        return;
+    }
+    auto preloadItem = JSRef<JSObject>::Cast(preloadPathItemVal);
+    auto onDestroy = preloadItem->GetProperty("onDestroy");
+    if (onDestroy->IsFunction()) {
+        auto onDestroyFunc = JSRef<JSFunc>::Cast(onDestroy);
+        onDestroyFunc->Call(dataSourceObj_);
+    }
+    JSRef<JSVal> undefinedVal = JSVal::Undefined();
+    dataSourceObj_->SetProperty("preloadItem", undefinedVal);
+}
+
+void JSNavigationStack::InitPreloadInfoByIndex(int32_t index, const RefPtr<NG::UINode>& node)
+{
+    auto navDestinationNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+        NG::NavigationGroupNode::GetNavDestinationNode(node));
+    CHECK_NULL_VOID(navDestinationNode);
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    auto navDestinationPattern = AceType::DynamicCast<NG::NavDestinationPattern>(navDestinationNode->GetPattern());
+    CHECK_NULL_VOID(navDestinationPattern);
+    SetDestinationIdToJsStack(index, std::to_string(navDestinationPattern->GetNavDestinationId()));
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return;
+    }
+    navDestinationPattern->SetIndex(index);
+    auto name = pathInfo->GetPropertyValue<std::string>("name", "");
+    auto param = pathInfo->GetProperty("param");
+    auto onPop = GetOnPopByIndex(index);
+    auto isEntry = GetIsEntryByIndex(index);
+    auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop, isEntry);
+    if (navDestinationPattern->GetIsStatic()) {
+        navDestinationPattern->UpdateSerializedParam(ConvertParamToString(param, true));
+    }
+    navPathInfo->SetInitParam(param);
+    navDestinationPattern->SetNavPathInfo(navPathInfo);
 }
 
 void JSNavigationStack::OnAttachToParent(RefPtr<NG::NavigationStack> parent)
@@ -1507,6 +1757,26 @@ std::string JSNavigationStack::GetSerializedParamSafely(int32_t index) const
     return serializedParam->ToString();
 }
 
+std::string JSNavigationStack::GetSerializedParamForRecovery(int32_t index) const
+{
+    std::string serializedEmpty = "undefined";
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, serializedEmpty);
+    auto param = GetParamByIndex(index);
+    if (param.IsEmpty() || param->IsUndefined() || param->IsNull()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+            "current navDestination(index: %{public}d)'s param is undefined or null!", index);
+        return serializedEmpty;
+    }
+    auto serializedParam = JsNavParamFlatSerializer::Serialize(param);
+    if (serializedParam == "undefined" || serializedParam.empty()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+            "current navDestination(index: %{public}d)'s param can't be serialized or is empty!", index);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "serialize navDestination param success! its index: %{public}d", index);
+    }
+    return serializedParam;
+}
+
 void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
@@ -1520,7 +1790,13 @@ void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecover
         JSRef<JSObject> navPathInfo = JSRef<JSObject>::New();
         navPathInfo->SetProperty<std::string>("name", infoName);
         if (!infoParam.empty() && infoParam != JS_STRINGIFIED_UNDEFINED) {
-            navPathInfo->SetPropertyObject("param", JSRef<JSObject>::New()->ToJsonObject(infoParam.c_str()));
+            auto deserializedParam = JsNavParamFlatSerializer::Deserialize(infoParam);
+            if (!deserializedParam.IsEmpty()) {
+                navPathInfo->SetPropertyObject("param", deserializedParam);
+            } else {
+                TAG_LOGW(AceLogTag::ACE_NAVIGATION,
+                    "navDestination(index: %{public}d)'s param can't be deserialized, skip param!", index);
+            }
         }
         navPathInfo->SetProperty<bool>("fromRecovery", true);
         navPathInfo->SetProperty<int32_t>("mode", infoMode);
