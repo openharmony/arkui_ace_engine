@@ -793,6 +793,7 @@
       "OHOS::Ace::InputManager::IsKeyboardConnected()";
       "OHOS::Ace::ThemeUtils::ParseThemeIdReference(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::RefPtr<OHOS::Ace::ThemeConstants> const&)";
       "OHOS::Ace::InputMethodManager::GetInstance()";
+      "OHOS::Ace::InputMethodManager::CloseKeyboardInProcess()";
       "OHOS::Ace::InspectorJsonUtil::Create(bool)";
       "OHOS::Ace::InspectorJsonValue::Put(char const*, char const*)";
       "OHOS::Ace::InspectorJsonValue::Put(char const*, int)";

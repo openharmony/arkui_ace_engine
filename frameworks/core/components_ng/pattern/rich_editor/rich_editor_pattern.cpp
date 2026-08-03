@@ -108,9 +108,7 @@
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #endif
 
-#ifdef CROSS_PLATFORM
 #include "core/common/ime/input_method_manager.h"
-#endif
 #include "core/components/common/properties/text_style_gradient.h"
 
 namespace OHOS::Ace::NG {
@@ -5819,13 +5817,15 @@ void RichEditorPattern::ChangeMouseStyle(MouseFormat format, bool freeMouseHoldN
 bool RichEditorPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
     SourceType sourceType)
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "request keyboard, opts=%{public}d, %{public}d, %{public}d",
-        isFocusViewChanged, needStartTwinkling, needShowSoftKeyboard);
+    auto needSoftKeyboard = NeedSoftKeyboard();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "request keyboard, opts=%{public}d, %{public}d, %{public}d, %{public}d",
+        isFocusViewChanged, needStartTwinkling, needShowSoftKeyboard, needSoftKeyboard);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
     CHECK_NULL_RETURN(context, false);
-    if (!NeedSoftKeyboard()) {
+    if (!needSoftKeyboard) {
+        InputMethodManager::GetInstance()->CloseKeyboardInProcess();
         return false;
     }
     if (customKeyboardNode_ || customKeyboardBuilder_) {
