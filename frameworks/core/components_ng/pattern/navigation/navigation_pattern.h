@@ -883,6 +883,7 @@ private:
     const RefPtr<NavDestinationGroupNode>& topDestination,
     bool isAnimated, bool isPopPage, bool isNeedVisible = false);
     void ProcessAutoSave(const RefPtr<FrameNode>& node);
+    void InitPreloadNodeInfo(int32_t index, const RefPtr<UINode>& uiNode);
 
     void FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,
         const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated);

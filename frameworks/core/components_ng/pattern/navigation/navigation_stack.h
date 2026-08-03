@@ -58,6 +58,12 @@ public:
     }
 };
 
+struct PreloadItem {
+    std::string name;
+    std::string paramString;
+    RefPtr<UINode> uiNode;
+};
+
 class ACE_FORCE_EXPORT NavigationStack : public virtual AceType {
     DECLARE_ACE_TYPE(NG::NavigationStack, AceType);
 public:
@@ -167,6 +173,17 @@ public:
     int32_t RemoveInNavPathList(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     int32_t RemoveInPreNavPathList(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void RemoveAll();
+
+    // Preload methods - virtual for override in derived classes
+    virtual void AddPreloadItem(const std::string& name, const std::string& paramString,
+        const RefPtr<UINode>& uiNode) {}
+    virtual RefPtr<UINode> GetFromPreloadItem(const std::string& name, const std::string& paramString)
+    {
+        return nullptr;
+    }
+    virtual void RemovePreloadItem() {}
+    virtual void PreloadItemOnDestroy() {}
+    virtual void InitPreloadInfoByIndex(int32_t index, const RefPtr<NG::UINode>& node) {}
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode,
         const RefPtr<RouteInfo>& routeInfo = nullptr);
     void Add(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
