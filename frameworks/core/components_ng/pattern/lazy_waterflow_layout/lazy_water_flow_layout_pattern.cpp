@@ -170,7 +170,8 @@ void LazyWaterFlowLayoutPattern::FireOnVisibleIndexesChange(const std::pair<int3
     if (hasVisibleIndexesChangeFired_ && range == lastVisibleIndexesRange_) {
         return;
     }
-    onVisibleIndexesChange_(range.first, range.second);
+    auto onVisibleIndexesChange = onVisibleIndexesChange_;
+    onVisibleIndexesChange(range.first, range.second);
     lastVisibleIndexesRange_ = range;
     hasVisibleIndexesChangeFired_ = true;
 }

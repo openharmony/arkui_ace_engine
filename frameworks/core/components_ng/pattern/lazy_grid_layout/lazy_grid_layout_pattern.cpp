@@ -291,7 +291,8 @@ void LazyGridLayoutPattern::FireOnVisibleIndexesChange(const std::pair<int32_t, 
     if (hasVisibleIndexesChangeFired_ && currentRange == lastVisibleIndexesRange_) {
         return;
     }
-    onVisibleIndexesChange_(currentRange.first, currentRange.second);
+    auto onVisibleIndexesChange = onVisibleIndexesChange_;
+    onVisibleIndexesChange(currentRange.first, currentRange.second);
     lastVisibleIndexesRange_ = currentRange;
     hasVisibleIndexesChangeFired_ = true;
 }
