@@ -4592,7 +4592,6 @@
       OHOS::Ace::PluginFrontend*;
       OHOS::Ace::PluginManager::*;
       OHOS::Ace::PolygonModel::*;
-      OHOS::Ace::ProgressModel::*;
       OHOS::Ace::RadioModel::*;
       OHOS::Ace::Recorder::*;
       OHOS::Ace::Recorder::EventParamsBuilder::*;
