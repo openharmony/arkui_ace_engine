@@ -96,6 +96,8 @@ void SmartLayoutConstraints::AddCrossAxisAlignmentConstraint(SmartLayoutNode& pa
     auto& parentOffset = isRow ? parent.GetPosition().offsetY : parent.GetPosition().offsetX;
     auto& parentSize = isRow ? parent.GetSize().height : parent.GetSize().width;
 
+    engine->Add(parent.GetScaleInfo().crossAxisSpaceScale.expr >= 0.0);
+    engine->Add(parent.GetScaleInfo().crossAxisSpaceScale.expr <= 1.0);
     if (context.crossAxisAlign == SmartLayoutAlign::FLEX_START) {
         engine->Add(childOffset.expr == parentOffset.expr +
             childOffset.value * parent.GetScaleInfo().crossAxisSpaceScale.expr);
