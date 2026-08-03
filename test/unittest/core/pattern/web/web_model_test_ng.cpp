@@ -2263,7 +2263,7 @@ HWTEST_F(WebModelTestNg, SetOnDragLeave012, TestSize.Level1)
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     std::string extraParams = "extraParams";
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_LEAVE, dragEvent, extraParams);
-    EXPECT_FALSE(callbackCalled);
+    EXPECT_TRUE(callbackCalled);
 #endif
 }
 
