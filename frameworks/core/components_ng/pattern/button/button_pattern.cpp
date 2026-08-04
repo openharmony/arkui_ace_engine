@@ -940,6 +940,13 @@ void ButtonPattern::InitHoverEvent()
     inputHub->AddOnHoverEvent(hoverListener_);
 }
 
+bool ButtonPattern::IsSystemMaterialLightEffectActive(const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_RETURN(renderContext, false);
+    auto config = renderContext->GetImmersiveMaterialConfig();
+    return config.has_value() && config->HasLightEffect();
+}
+
 void ButtonPattern::HandlePressedStyle()
 {
     isPress_ = true;
@@ -955,16 +962,18 @@ void ButtonPattern::HandlePressedStyle()
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        backgroundColor_ = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
-        if (clickedColor_.has_value()) {
-            // for user self-defined
-            renderContext->UpdateBackgroundColor(clickedColor_.value());
-            return;
+        if (!IsSystemMaterialLightEffectActive(renderContext)) {
+            backgroundColor_ = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            if (clickedColor_.has_value()) {
+                // for user self-defined
+                renderContext->UpdateBackgroundColor(clickedColor_.value());
+                return;
+            }
+            // for system default
+            auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
+            AnimateTouchAndHover(renderContext, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL, TYPE_TOUCH,
+                TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
         }
-        // for system default
-        auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
-        AnimateTouchAndHover(renderContext, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL, TYPE_TOUCH,
-            TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
     }
     if (scaleModify_ && isPress_) {
         auto renderContext = host->GetRenderContext();
@@ -991,16 +1000,18 @@ void ButtonPattern::HandleNormalStyle()
     }
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
-        if (clickedColor_.has_value()) {
-            renderContext->UpdateBackgroundColor(backgroundColor_);
-            return;
-        }
-        if (buttonEventHub->IsEnabled()) {
-            auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
-            AnimateTouchAndHover(renderContext, TYPE_TOUCH, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL,
-                TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
-        } else {
-            AnimateTouchAndHover(renderContext, TYPE_TOUCH, TYPE_CANCEL, TOUCH_DURATION, Curves::FRICTION);
+        if (!IsSystemMaterialLightEffectActive(renderContext)) {
+            if (clickedColor_.has_value()) {
+                renderContext->UpdateBackgroundColor(backgroundColor_);
+                return;
+            }
+            if (buttonEventHub->IsEnabled()) {
+                auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
+                AnimateTouchAndHover(renderContext, TYPE_TOUCH, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL,
+                    TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
+            } else {
+                AnimateTouchAndHover(renderContext, TYPE_TOUCH, TYPE_CANCEL, TOUCH_DURATION, Curves::FRICTION);
+            }
         }
     }
     if (scaleModify_ && isHover_) {
