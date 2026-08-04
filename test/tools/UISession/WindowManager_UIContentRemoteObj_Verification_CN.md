@@ -7,7 +7,7 @@
 补丁文件：
 
 ```text
-foundation/arkui/ace_engine/docs/architecture/UISession/window_manager_get_ui_content_remote_obj.patch
+<OH_ROOT>/foundation/arkui/ace_engine/test/tools/UISession/window_manager_get_ui_content_remote_obj.patch
 ```
 
 ## 适用场景
@@ -51,9 +51,9 @@ ui_sa
 在 OpenHarmony 根目录或 window_manager 仓中执行：
 
 ```bash
-cd /home/l00441630/OpenHarmony/foundation/window/window_manager
-git apply --check /home/l00441630/OpenHarmony/foundation/arkui/ace_engine/docs/architecture/UISession/window_manager_get_ui_content_remote_obj.patch
-git apply /home/l00441630/OpenHarmony/foundation/arkui/ace_engine/docs/architecture/UISession/window_manager_get_ui_content_remote_obj.patch
+cd <OH_ROOT>/foundation/window/window_manager
+git apply --check <OH_ROOT>/foundation/arkui/ace_engine/test/tools/UISession/window_manager_get_ui_content_remote_obj.patch
+git apply <OH_ROOT>/foundation/arkui/ace_engine/test/tools/UISession/window_manager_get_ui_content_remote_obj.patch
 ```
 
 如 `git apply --check` 失败，先检查 window_manager 当前分支是否已包含同名接口或补丁是否已应用，不要直接回退用户本地改动。
@@ -63,7 +63,7 @@ git apply /home/l00441630/OpenHarmony/foundation/arkui/ace_engine/docs/architect
 当前 32 位 RK3568 验证板需要编译并推送 32 位库：
 
 ```bash
-cd /home/l00441630/OpenHarmony
+cd <OH_ROOT>
 ./build.sh --product-name rk3568 \
   --build-target //foundation/window/window_manager/wm:libwm \
   --build-target //foundation/window/window_manager/wmserver:libwms \

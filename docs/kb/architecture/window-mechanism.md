@@ -164,5 +164,5 @@ Spec 仓库不在本仓工作区；需要单独克隆到 `./specs` 后验证目�
 - 布局框架：`docs/kb/architecture/layout-framework.md`
 - 预览器平台适配：`docs/kb/architecture/preview-platform-adaptation.md`
 - 基础布局属性：`docs/kb/capabilities/layout-attributes.md`
-- UISession（UI 会话通道）：`docs/architecture/UISession_Knowledge_Base_CN.md`
+- UISession（UI 会话通道）：`docs/kb/architecture/uisession-service.md`
 - Pipeline：`docs/knowledge_base_INDEX.json` → Pipeline 旧 KB
