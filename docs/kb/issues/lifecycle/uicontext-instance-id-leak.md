@@ -1,15 +1,15 @@
 # UIContext 实例 ID 泄漏 Issue Context
 
-> 文档版本：v1.1
-> 更新时间：2026-07-30
+> 文档版本：v1.2
+> 更新时间：2026-08-04
 > 来源：`docs/context_registry.json` 主题 `UIContextInstanceIdLeak`
 > 关联功能域：04-12-01
 
 ## 问题概述
 
-UIContext 动态前端（jsUIContext.js）中 `syncInstanceId`/`restoreInstanceId` 配对不安全，在提前返回、异常抛出或栈错位场景下，线程的当前实例 ID 被永久切换到错误值，导致后续所有操作作用在错误的 UI 实例上，表现为：弹窗/组件操作错乱、跨实例状态污染、多实例场景下功能异常。
+UIContext 动态前端（jsUIContext.js）曾使用手动 `syncInstanceId`/`restoreInstanceId` 配对。修复前，提前返回、异常抛出或未配对的 restore 会使线程当前实例 ID 切换到错误值，导致后续操作作用在错误的 UI 实例上。JS 前端问题已由变更 `c13dbf04e84aa04b7803fa043b323df5aaacb0d7` 通过 `withInstanceId` 的 `try/finally` 包装修复；ANI 和 C API 路径仍需分别核对调用方的配对保护。
 
-典型表现：
+修复前的典型表现：
 - 多实例场景下调用 UIContext 方法后，后续操作作用在错误的实例上
 - 参数校验失败后，后续 UIContext 方法调用全部指向错误实例
 - UIContext 方法抛出异常后，实例 ID 栈永久错位，整个线程实例管理失效
@@ -71,7 +71,7 @@ UIContext 动态前端（jsUIContext.js）中 `syncInstanceId`/`restoreInstanceI
 |----------|----------|---------------|---------------|----------|
 | 提前返回路径漏调 | 引入 `withInstanceId` 工具函数，用 `try/finally` 保证 `restoreInstanceId` 必定执行 | `jsUIContext.js` 所有 UIContext 方法替换为 `withInstanceId` 包装 | c13dbf04e84aa04b7803fa043b323df5aaacb0d7 (fixed) | commit diff: 所有手动 sync/restore 替换为 withInstanceId 闭包 |
 | 异常路径漏调 | 同上，`try/finally` 天然覆盖异常路径 | 同上 | c13dbf04e84aa04b7803fa043b323df5aaacb0d7 (fixed) | commit diff: `createDragAction` 的手动 try/catch 被移除，由 withInstanceId 统一处理 |
-| 栈错位 | 同上，`withInstanceId` 闭包内不存在"未 sync 就 restore"的可能 | `createFromComponent` 等方法的参数校验移入闭包内 | c13dbf04e84aa04b7803fa043b323df5aaacb0d7 (fixed) | commit diff: `createFromComponent` 参数校验的 `return new Promise.reject` 移入闭包，不再在 sync 之前调 restore |
+| 栈错位 | 删除未经 sync 就执行的 restore；需要切换实例的业务调用统一放入 `withInstanceId` | `createFromComponent` 的参数校验仍在闭包外，但校验失败分支不再调用 `restoreInstanceId` | c13dbf04e84aa04b7803fa043b323df5aaacb0d7 (fixed) | commit diff: 删除参数校验失败分支中未配对的 `restoreInstanceId()`，并用 `withInstanceId` 包装后续业务调用 |
 
 **注意：同类问题也存在于 ANI 接口和 C API 接口**，但当前修复仅覆盖了 JS 前端（`jsUIContext.js`）：
 - `frameworks/core/interfaces/native/ani/common_ani_modifier.cpp:179-209`：ANI 接口的 `SyncInstanceId`/`RestoreInstanceId` 仍为手动调用模式，若调用方存在提前返回或异常路径，同样可能泄漏
@@ -83,11 +83,11 @@ ANI 路径中 DragController 的 `createDragAction` 有两个特有风险点：
 
 1. **UIContextImpl.ets 手动 Sync/Restore 无 try/finally 保护**：`DragControllerImpl.createDragAction()`（`UIContextImpl.ets:494-541`）使用 `_Common_Sync_InstanceId`/`_Common_Restore_InstanceId`，中间代码抛异常时 `Restore_InstanceId` 不会执行，导致实例 ID 栈永久错位。与 JS 前端修复前的问题完全一致。
 
-2. **ANI 路径 instanceId 重捕获不一致**：`ANIHandleDragAction()` 在 createDragAction 时设置 `dragAsyncContext->instanceId = Container::CurrentIdSafely()`（`drag_controller_module.cpp:1073`），但 `ANIHandleDragActionStartDrag()` 在 startDrag 时又用 `Container::CurrentIdSafely()` 重写 instanceId（`drag_controller_module.cpp:1095`）。如果 startDrag 在不同上下文被调用，新值可能覆盖原始值，导致拖拽操作执行在错误的 UI 实例上。NAPI 路径不存在此重捕获行为。
+2. **ANI 路径 instanceId 重捕获不一致**：`ANIHandleDragAction()` 在 createDragAction 时设置 `dragAsyncContext->instanceId = Container::CurrentIdSafely()`，但 `ANIHandleDragActionStartDrag()` 在 startDrag 时又用 `Container::CurrentIdSafely()` 重写 instanceId。两个函数均实现于 `frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp`。如果 startDrag 在不同上下文被调用，新值可能覆盖原始值，导致拖拽操作执行在错误的 UI 实例上。NAPI 路径不存在此重捕获行为。
 
 关键代码定位：
-- `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.cpp:1073,1095`：ANI DragController instanceId 捕获与重捕获
-- `frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp`：DragController ANI Modifier 实现
+- `frameworks/core/interfaces/native/ani/drag_controller_ani_modifier.cpp`：`ANIHandleDragAction`/`ANIHandleDragActionStartDrag` 中的 instanceId 捕获与重捕获
+- `frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/dragController/drag_controller_module.cpp`：ANI 参数解析与 DragController Modifier 调用入口
 - `frameworks/core/components_ng/manager/drag_drop/drag_drop_func_wrapper.cpp`：三条路径拖拽核心功能汇聚层
 
 核心修复代码（`withInstanceId` 函数定义）：

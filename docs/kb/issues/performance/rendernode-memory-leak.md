@@ -1,19 +1,19 @@
 # RenderNode 内存泄漏 Issue Context
 
-> 文档版本：v1.1
-> 更新时间：2026-07-30
+> 文档版本：v1.2
+> 更新时间：2026-08-04
 > 来源：`docs/context_registry.json` 主题 `RenderNodeMemoryLeak`
 > 关联功能域：C API RenderNode
 
 ## 问题概述
 
-C API RenderNode 采用双层内存模型（外层 `ArkUI_RenderNode` + 内层 `RenderNodeStruct`），`OH_ArkUI_RenderNodeUtils_DisposeNode` 只释放了外层结构体，未释放内层 `RenderNodeStruct`，导致每次创建-销毁 RenderNode 都会泄漏一个 `RenderNodeStruct` 对象（含 `shared_ptr<RSNode>` 及相关字段）。长期运行或频繁创建/销毁 RenderNode 的场景下，内存持续增长。
+C API RenderNode 采用双层内存模型（外层 `ArkUI_RenderNode` + 内层 `RenderNodeStruct`）。修复前，`OH_ArkUI_RenderNodeUtils_DisposeNode` 只释放外层结构体，未释放内层 `RenderNodeStruct`，导致每次创建-销毁 RenderNode 都泄漏一个 `RenderNodeStruct` 对象（含 `shared_ptr<RSNode>` 及相关字段）。该问题已由变更 `d452e978454bc8838c5d7e5b09eb2793877d0057` 修复；当前代码会在释放外层对象前调用 `deleteInnerRenderNodeStruct`。
 
 双层内存模型说明：
-- 外层 `ArkUI_RenderNode`（`render_node.h:27-29`）：仅含 `ArkUIRenderNodeHandle renderNodeHandle` 字段，`ArkUIRenderNodeHandle` 即 `RenderNodeStruct*` 的类型别名
+- 外层 `ArkUI_RenderNode`（`render_node.h:27-29`）：仅含 `ArkUIRenderNodeHandle renderNodeHandle` 字段。`ArkUIRenderNodeHandle` 是 `_ArkUIRenderNode*` 不透明句柄，当前内部实现将其解释为 `RenderNodeStruct*`
 - 内层 `RenderNodeStruct`（`node_render_node_modifier.cpp:65-70`）：含 `shared_ptr<RSNode> rsNode`、`int32_t nodeId`、`bool getFromAdoptedFrameNode`、`bool getFromNativeFrameNode`，通过 `new RenderNodeStruct` 创建
 
-典型表现：
+修复前的典型表现：
 - 频繁调用 `OH_ArkUI_RenderNodeUtils_CreateNode` / `DisposeNode` 后内存持续增长
 - 通过 `GetChild`/`GetFirstChild`/`GetNextSibling` 等方法获取子节点后调用 `DisposeNode`，内存不回收
 - 长时间运行的 C API 应用中，RenderNode 相关内存占用量单调递增

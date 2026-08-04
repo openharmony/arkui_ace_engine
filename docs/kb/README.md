@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-31
-> 主题数：233
+> 更新时间：2026-08-04
+> 主题数：232
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。

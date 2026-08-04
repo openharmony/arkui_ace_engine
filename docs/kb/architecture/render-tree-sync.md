@@ -1,7 +1,7 @@
 # Render Tree Sync Context
 
-> 文档版本：v1.1
-> 更新时间：2026-07-30
+> 文档版本：v1.2
+> 更新时间：2026-08-04
 > 来源：`docs/context_registry.json` 主题 `RenderTreeSync`
 
 ## 定位
@@ -77,7 +77,7 @@
 
 | 文档 | 稳定路径 | 与渲染树同步的关系 |
 |------|----------|------------------|
-| 渲染主流程规格 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/Feat-01-render-main-flow-spec.md` | 覆盖 FlushVsync 编排，RebuildRenderContextTree 在 FlushTask 阶段执行 |
+| 渲染主流程规格 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/Feat-01-render-main-flow-spec.md` | 覆盖 FlushVsync 编排；延迟合并的渲染树重建由 `FlushRebuildRenderTree` 在 FlushVsync 前段执行 |
 | 渲染树同步规格 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/Feat-02-render-tree-sync-spec.md` | 覆盖 MarkNeedSyncRenderTree→RebuildRenderContextTree→ProcessRenderTreeDiff 全链路，isPendingState_ 生命周期约束 |
 | 设计文档 | `specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline/design.md` | 记录基础渲染管线的模块边界和架构决策 |
 
@@ -103,7 +103,7 @@
 
 ## 相关主题
 
-- [基础渲染管线](basic-render-pipeline.md) — FlushVsync 编排，RebuildRenderContextTree 在 FlushTask 阶段执行
+- [基础渲染管线](basic-render-pipeline.md) — FlushVsync 编排与渲染树延迟合并重建时序
 - [布局框架](layout-framework.md) — FrameNode Measure/Layout，与渲染树同步在帧编排中的位置
 - [FrameNode](../capabilities/frame_node.md) — ArkTS FrameNode API，C++ 底层能力提供者
 - [RenderNode](../capabilities/render_node.md) — RenderNode 绘制节点，与 FrameNode 共享 RS 节点树重建机制（MountPolicy::MIXED 路径）

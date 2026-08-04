@@ -7416,7 +7416,7 @@
         "test/unittest/adapter/ohos/entrance/rs_adapter_test.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-27"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "StateMgmtStaticV2Decorators",
@@ -12366,15 +12366,16 @@
         "同帧上下树"
       ],
       "kb": "docs/kb/issues/lifecycle/ispending-state-render-tree-diff.md",
-      "func_id": "03-01-01",
-      "spec_status": "pending",
+      "func_ids": [
+        "03-01-01"
+      ],
       "source_paths": {
         "frame_node_cpp": "frameworks/core/components_ng/base/frame_node.cpp",
         "frame_node_h": "frameworks/core/components_ng/base/frame_node.h",
         "image_pattern_cpp": "frameworks/core/components_ng/pattern/image/image_pattern.cpp"
       },
       "status": "active",
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "RenderNodeMemoryLeak",
@@ -12400,20 +12401,18 @@
         "RenderNodeStruct泄漏"
       ],
       "kb": "docs/kb/issues/performance/rendernode-memory-leak.md",
-      "func_id": "",
-      "spec_status": "pending",
       "source_paths": {
         "render_node_cpp": "interfaces/native/node/render_node.cpp",
         "render_node_h": "interfaces/native/node/render_node.h",
         "node_modifier_cpp": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp",
-        "dispose_node": "interfaces/native/node/render_node.cpp:148",
-        "create_node": "interfaces/native/node/render_node.cpp:134",
-        "render_node_struct": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp:65",
-        "create_render_node_struct": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp:242",
-        "delete_inner": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp:2462"
+        "dispose_node": "interfaces/native/node/render_node.cpp",
+        "create_node": "interfaces/native/node/render_node.cpp",
+        "render_node_struct": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp",
+        "create_render_node_struct": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp",
+        "delete_inner": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp"
       },
       "status": "active",
-      "last_verified": "2026-07-29"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "RenderTreeSync",
@@ -12462,7 +12461,7 @@
         "test/unittest/core/pattern/image/image_pattern_test_ng.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-30"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "UIContextInstanceIdLeak",
@@ -12488,18 +12487,19 @@
         "实例ID不配对"
       ],
       "kb": "docs/kb/issues/lifecycle/uicontext-instance-id-leak.md",
-      "func_id": "04-12-01",
-      "spec_status": "pending",
+      "func_ids": [
+        "04-12-01"
+      ],
       "source_paths": {
         "js_uicontext": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
-        "with_instance_id": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js:2036",
+        "with_instance_id": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
         "scope_util_cpp": "frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp",
         "scope_util_h": "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h",
         "ani_modifier": "frameworks/core/interfaces/native/ani/common_ani_modifier.cpp",
         "system_ops_accessor": "frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp"
       },
       "status": "active",
-      "last_verified": "2026-07-29"
+      "last_verified": "2026-08-04"
     }
   ]
 }

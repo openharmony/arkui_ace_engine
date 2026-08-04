@@ -82,5 +82,8 @@ ArkTS `RenderNode` API 解析自上而下：ArkTS 类 → JSI bridge → NDK mod
 ## 相关主题
 
 - [FrameNode](./frame_node.md) — `getRenderNode()` 返回的节点类型；RenderNode 可挂载到 FrameNode
+- [渲染树同步](../architecture/render-tree-sync.md) — RenderNode 与 FrameNode 共享 RS 节点树重建机制（MountPolicy::MIXED 路径）
+- [RenderNode 内存泄漏](../issues/performance/rendernode-memory-leak.md) — C API DisposeNode 历史内存泄漏（已修复）及双层内存模型
+- [同帧下树重新上树 isPendingState_ 状态错乱](../issues/lifecycle/ispending-state-render-tree-diff.md) — isPendingState_ 同帧下树重新上树问题型 KB
 - BuilderNode（`04-06-04`）— 可将 RenderNode 嵌入；嵌入时 selfIdealSize 须显式
 - Shape/Mask 类型（Graphics.d.ts）— ShapeMask/ShapeClip 形状定义
