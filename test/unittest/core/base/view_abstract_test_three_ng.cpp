@@ -55,6 +55,7 @@ HWTEST_F(ViewAbstractTestThreeNg, ViewAbstractTest028, TestSize.Level1)
     /**
      * @tc.steps: step1.push FrameNode is not null, callback Pop function.
      */
+    ViewStackProcessor::GetInstance()->ClearStack();
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_ROOT);
     ViewStackProcessor::GetInstance()->Push(FRAME_NODE_CHILD);
     ViewAbstract::Pop();

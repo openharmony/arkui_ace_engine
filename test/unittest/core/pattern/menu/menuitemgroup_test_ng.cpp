@@ -1170,11 +1170,8 @@ HWTEST_F(MenuItemGroupTestNg, UpdateMenuBackgroundStyle005, TestSize.Level1)
  
     MenuParam menuParam;
     BlurStyleOption blurStyleOption;
-    EffectOption effectOption;
     blurStyleOption.colorMode = ThemeColorMode::SYSTEM;
-    effectOption.saturation = 6.0f;
     menuParam.blurStyleOption = blurStyleOption;
-    menuParam.effectOption = effectOption;
     
     auto menuWrapperNode = GetPreviewMenuWrapper();
     ASSERT_NE(menuWrapperNode, nullptr);
