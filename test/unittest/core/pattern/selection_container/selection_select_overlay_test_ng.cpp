@@ -46,6 +46,8 @@ namespace {
 constexpr int32_t TEST_NODE_ID = 100;
 constexpr int32_t TEST_NODE_ID_CHILD1 = 200;
 constexpr int32_t TEST_NODE_ID_CHILD2 = 300;
+constexpr int32_t TEST_NODE_ID_INNER_SCROLL = 400;
+constexpr int32_t TEST_NODE_ID_OUTER_SCROLL = 500;
 constexpr int32_t TEST_START_INDEX = 10;
 constexpr int32_t TEST_END_INDEX = 20;
 constexpr int32_t TEST_SELECT_ALL_END_INDEX = 100;
@@ -168,6 +170,16 @@ public:
     std::optional<RectF> GetAncestorNodeViewPortForChild() override
     {
         return RectF(0.0f, 0.0f, TEST_WIDTH, TEST_HEIGHT);
+    }
+
+    std::vector<AncestorNodeViewPortInfo> GetAncestorNodeViewPortInfos() override
+    {
+        return ancestorNodeViewPortInfos_;
+    }
+
+    void SetAncestorNodeViewPortInfos(const std::vector<AncestorNodeViewPortInfo>& infos)
+    {
+        ancestorNodeViewPortInfos_ = infos;
     }
 
     void SetHasSecondHandle(bool has)
@@ -343,6 +355,7 @@ private:
     bool vibratorStarted_ = false;
     bool propertyUpdated_ = false;
     RectF selectionArea_ = RectF(TEST_RECT_X, TEST_RECT_Y, TEST_RECT_WIDTH, TEST_RECT_HEIGHT);
+    std::vector<AncestorNodeViewPortInfo> ancestorNodeViewPortInfos_;
 };
 
 class SelectionSelectOverlayTest : public testing::Test {
@@ -538,6 +551,50 @@ HWTEST_F(SelectionSelectOverlayTest, GetSecondHandleInfoTest002, TestSize.Level1
     
     auto result = overlay_->GetSecondHandleInfo();
     EXPECT_TRUE(result.has_value());
+}
+
+/**
+ * @tc.name: GetAncestorNodeViewPortTest001
+ * @tc.desc: Constrain all common ancestor viewports for cross-node selection in nested scrolls
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectionSelectOverlayTest, GetAncestorNodeViewPortTest001, TestSize.Level1)
+{
+    auto innerScrollNode = FrameNode::CreateFrameNode(
+        "InnerScroll", TEST_NODE_ID_INNER_SCROLL, AceType::MakeRefPtr<Pattern>());
+    auto outerScrollNode = FrameNode::CreateFrameNode(
+        "OuterScroll", TEST_NODE_ID_OUTER_SCROLL, AceType::MakeRefPtr<Pattern>());
+    const RectF innerViewPort(0.0f, 0.0f, 200.0f, 200.0f);
+    const RectF innerClipViewPort(10.0f, 10.0f, 60.0f, 70.0f);
+    const RectF outerViewPort(20.0f, 30.0f, 100.0f, 80.0f);
+    std::vector<AncestorNodeViewPortInfo> viewPortInfos = {
+        { innerScrollNode, innerViewPort }, { innerScrollNode, innerClipViewPort },
+        { outerScrollNode, outerViewPort }
+    };
+    child1_->SetAncestorNodeViewPortInfos(viewPortInfos);
+    child2_->SetAncestorNodeViewPortInfos(viewPortInfos);
+    pattern_->selectionStartChild_ = child1_;
+    pattern_->selectionEndChild_ = child2_;
+
+    auto result = overlay_->GetAncestorNodeViewPort();
+
+    ASSERT_TRUE(result.has_value());
+    auto expectedViewPort = innerViewPort.Constrain(innerClipViewPort);
+    expectedViewPort = expectedViewPort.Constrain(outerViewPort);
+    EXPECT_EQ(result.value(), expectedViewPort);
+
+    const RectF disjointOuterViewPort(300.0f, 300.0f, 50.0f, 50.0f);
+    viewPortInfos.back().viewPort = disjointOuterViewPort;
+    child1_->SetAncestorNodeViewPortInfos(viewPortInfos);
+    child2_->SetAncestorNodeViewPortInfos(viewPortInfos);
+    result = overlay_->GetAncestorNodeViewPort();
+
+    ASSERT_TRUE(result.has_value());
+    expectedViewPort = innerViewPort.Constrain(innerClipViewPort);
+    expectedViewPort = expectedViewPort.Constrain(disjointOuterViewPort);
+    EXPECT_EQ(result.value(), expectedViewPort);
+    EXPECT_TRUE(result->IsValid());
+    EXPECT_TRUE(result->IsEmpty());
 }
 
 /**

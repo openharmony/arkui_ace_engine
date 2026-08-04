@@ -1240,7 +1240,7 @@ void SelectionContainerPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
 {
     if (selectionSelectOverlay_ && selectionSelectOverlay_->SelectOverlayIsOn()) {
         selectionSelectOverlay_->OnAncestorNodeChanged(flag, false /*scrollTriggersEmbed*/,
-            false /*transformTriggersEmbed*/);
+            true /*transformTriggersEmbed*/);
     }
     RefreshMouseLeftSelectionOnFrameNodeChanged();
 }

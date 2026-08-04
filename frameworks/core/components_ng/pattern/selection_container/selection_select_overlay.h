@@ -53,7 +53,6 @@ public:
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo) override;
     void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed = true,
         bool transformTriggersEmbed = true) override;
-    bool ShouldShowMenuAfterKeyboardAvoid() override { return false; }
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;

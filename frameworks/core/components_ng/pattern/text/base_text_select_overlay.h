@@ -237,10 +237,6 @@ public:
     }
     virtual void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag, bool scrollTriggersEmbed = true,
         bool transformTriggersEmbed = true);
-    // Whether to pop the selection menu after keyboard-avoid ends. Default true (single
-    // Text/TextField/RichEditor). Cross-node overrides to false: the menu stays closed after
-    // avoid, matching the Text component.
-    virtual bool ShouldShowMenuAfterKeyboardAvoid() { return true; }
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info) override;
     void OnHandleMoveStart(const GestureEvent& event, bool isFirst) override
     {
