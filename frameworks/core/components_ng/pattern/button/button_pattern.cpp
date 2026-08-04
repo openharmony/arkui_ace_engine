@@ -1498,7 +1498,9 @@ void ButtonPattern::OnColorConfigurationUpdate()
     if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
         renderContext->UpdateBackgroundColor(backgroundColor);
     }
-    OnColorConfigurationUpdateTextColor(node, buttonStyle, buttonRole, textColor);
+    if (buttonLayoutProperty->GetCreateWithLabelValue(true)) {
+        OnColorConfigurationUpdateTextColor(node, buttonStyle, buttonRole, textColor);
+    }
     if (SystemProperties::ConfigChangePerform()) {
         if (renderContext->HasForegroundColor() && renderContext->GetForegroundColorValue() == themeTextColor_) {
             renderContext->UpdateForegroundColor(textColor);
