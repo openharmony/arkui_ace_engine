@@ -249,7 +249,12 @@ void ControlInteractionBase::HandleTouchCancel(RefPtr<FrameNode> targetNode)
         return;
     }
     AnimationOption option;
-    const RefPtr<InterpolatingSpring> curve = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 228, 16);
+    TrailOptimization trailOptimization = {
+        .progressThreshold = 0.9f,
+        .responseDecayFactor = 0.8f
+    };
+    const RefPtr<TrailOptimizedInterpolatingSpring> curve =
+        AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0, 1, 228, 16, trailOptimization);
     option.SetCurve(curve);
     option.SetDuration(TOUCH_CURVE_DURATION);
     AnimationUtils::Animate(
@@ -297,7 +302,12 @@ void ControlInteractionBase::HandleTouchDown(
     float scaleY = scaleXY.GetY();
 
     AnimationOption option;
-    const RefPtr<InterpolatingSpring> curve = AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 228, 16);
+    TrailOptimization trailOptimization = {
+        .progressThreshold = 0.9f,
+        .responseDecayFactor = 0.8f
+    };
+    const RefPtr<TrailOptimizedInterpolatingSpring> curve =
+        AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0, 1, 228, 16, trailOptimization);
     option.SetCurve(curve);
     option.SetDuration(TOUCH_CURVE_DURATION);
     AnimationUtils::Animate(
