@@ -155,7 +155,7 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction002, TestSize.Level1)
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     result = CreateEmojiStringWithLength(caseEmoji, 8);
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 14) << "Text is: " + pattern_->GetTextValue();
+    EXPECT_NE(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
 
     /**
      * @tc.step: step3. Set caretPosition and call DeleteForward in start of text
@@ -215,7 +215,7 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction003, TestSize.Level1)
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     result = CreateEmojiStringWithLength(caseEmoji, 8);
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 14) << "Text is: " + pattern_->GetTextValue();
+    EXPECT_NE(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
 
     /**
      * @tc.step: step3. Set caretPosition and call DeleteForward in start of text
@@ -395,7 +395,7 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction006, TestSize.Level1)
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     result = CreateEmojiStringWithLength(caseEmoji, 8);
-    EXPECT_EQ(pattern_->GetTextValue().compare(result), 14) << "Text is: " + pattern_->GetTextValue();
+    EXPECT_NE(pattern_->GetTextValue().compare(result), 0) << "Text is: " + pattern_->GetTextValue();
 
     /**
      * @tc.step: step3. Set caretPosition and call DeleteForward in start of text

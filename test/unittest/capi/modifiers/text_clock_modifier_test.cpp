@@ -14,6 +14,9 @@
  */
 
 #include <gtest/gtest.h>
+#include <sys/time.h>
+#include <sstream>
+#include <iomanip>
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
@@ -39,7 +42,18 @@ using namespace TypeHelper;
 
 namespace  {
     const auto ATTRIBUTE_TIME_ZONE_OFFSET_NAME = "timeZoneOffset";
-    const auto ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE = "0.000000";
+    constexpr int32_t TIME_ZONE_OFFSET_PRECISION = 6;
+    inline std::string GetDefaultTimeZoneOffset()
+    {
+        struct timeval currentTime {};
+        struct timezone timeZone {};
+        gettimeofday(&currentTime, &timeZone);
+        double hoursWest = static_cast<double>(timeZone.tz_minuteswest) / 60.0;
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(TIME_ZONE_OFFSET_PRECISION) << hoursWest;
+        return oss.str();
+    }
+    const auto ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE = GetDefaultTimeZoneOffset();
     const auto ATTRIBUTE_TEXT_SHADOW_I_RADIUS_DEFAULT_VALUE = "0.000000";
     const auto ATTRIBUTE_TEXT_SHADOW_I_TYPE_DEFAULT_VALUE = "0";
     const auto ATTRIBUTE_TEXT_SHADOW_I_COLOR_DEFAULT_VALUE = "#FF000000";
@@ -151,7 +165,7 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestDefaultValues, TestSize.L
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TIME_ZONE_OFFSET_NAME);
-    EXPECT_THAT(resultStr, Eq(ATTRIBUTE_TIME_ZONE_OFFSET_DEFAULT_VALUE)) <<
+    EXPECT_THAT(resultStr, Eq(std::string("0.000000"))) <<
         "Default value for attribute 'options.timeZoneOffset'";
 }
 
