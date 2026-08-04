@@ -14,7 +14,6 @@
  */
 
 #include "core/components/web/resource/web_resource.h"
-#include "core/common/platform_res_register.h"
 
 namespace OHOS::Ace {
 

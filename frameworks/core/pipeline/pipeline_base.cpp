@@ -17,12 +17,10 @@
 
 #include "interfaces/inner_api/ace/ui_content_config.h"
 
-#include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/log/ace_tracker.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
-#include "base/resource/data_provider_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/feature_param.h"
@@ -30,10 +28,8 @@
 #include "core/common/ace_engine.h"
 #include "core/common/clipboard/clipboard.h"
 #include "core/common/event_manager.h"
-#include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/manager_interface.h"
-#include "core/common/platform_res_register.h"
 #include "core/common/statistic_event_reporter.h"
 #include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
@@ -373,11 +369,6 @@ void PipelineBase::UpdateFontWeightScale()
 void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
 {
     textFieldManager_ = manager;
-}
-
-void PipelineBase::SetDataProviderManager(const RefPtr<DataProviderManagerInterface>& dataProviderManager)
-{
-    dataProviderManager_ = dataProviderManager;
 }
 
 void PipelineBase::RegisterFont(const std::string& familyName, const std::string& familySrc,
@@ -1253,11 +1244,6 @@ void PipelineBase::SetEventManager(const RefPtr<EventManager>& eventManager)
 RefPtr<EventManager> PipelineBase::GetEventManager() const
 {
     return eventManager_;
-}
-
-RefPtr<PlatformResRegister> PipelineBase::GetPlatformResRegister() const
-{
-    return platformResRegister_;
 }
 
 } // namespace OHOS::Ace
