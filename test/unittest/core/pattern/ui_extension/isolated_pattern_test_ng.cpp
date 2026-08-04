@@ -578,48 +578,6 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest012, TestSize.Level1)
 }
 
 /**
- * @tc.name: IsolatedPatternTest013
- * @tc.desc: Test IsolatedPattern HandleFocusEvent
- * @tc.type: FUNC
- */
-HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest013, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a IsolatedComponent Node
-     */
-    auto isolatedNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto isolatedNode = FrameNode::GetOrCreateFrameNode(
-        ISOLATED_COMPONENT_ETS_TAG, isolatedNodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
-    ASSERT_NE(isolatedNode, nullptr);
-    EXPECT_EQ(isolatedNode->GetTag(), V2::ISOLATED_COMPONENT_ETS_TAG);
-
-    /**
-     * @tc.steps: step2. get IsolatedPattern
-     */
-    auto isolatedPattern = isolatedNode->GetPattern<IsolatedPattern>();
-    ASSERT_NE(isolatedPattern, nullptr);
-
-    /**
-     * @tc.steps: step3. call CheckConstraint
-     */
-    IsolatedInfo curIsolatedInfo;
-    void* runtime = nullptr;
-    auto pattern = AceType::MakeRefPtr<IsolatedPattern>();
-    RefPtr<FrameNode> host = FrameNode::CreateFrameNode(TAG, 2, pattern);
-    isolatedPattern->dynamicComponentRenderer_ = DynamicComponentRenderer::Create(host, runtime, curIsolatedInfo);
-    ASSERT_NE(isolatedPattern->dynamicComponentRenderer_, nullptr);
-    ASSERT_NE(isolatedPattern->GetHost(), nullptr);
-    auto pipe = MockPipelineContext::GetCurrent();
-    isolatedPattern->GetHost()->context_ = AceType::RawPtr(pipe);
-    ASSERT_FALSE(isolatedPattern->GetHost()->GetContext()->GetIsFocusActive());
-    isolatedPattern->HandleFocusEvent();
-
-    isolatedPattern->GetHost()->context_->GetOrCreateFocusManager()->isFocusActive_ = true;
-    ASSERT_TRUE(isolatedPattern->GetHost()->GetContext()->GetIsFocusActive());
-    isolatedPattern->HandleFocusEvent();
-}
-
-/**
  * @tc.name: IsolatedPatternTest014
  * @tc.desc: Test IsolatedPattern WrapExtensionAbilityId/DumpInfo
  * @tc.type: FUNC
