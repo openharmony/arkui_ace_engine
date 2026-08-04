@@ -1483,4 +1483,32 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest036, TestSize.Level1)
     EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Height(), 100);
     EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Width(), 100);
 }
+
+/**
+ * @tc.name: MovingPhotoPatternTest037
+ * @tc.desc: Test OnResolutionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MovingPhoto
+     * @tc.expected: step1. Create MovingPhoto successfully
+     */
+    auto node = CreateMovingPhotoNode(g_testProperty);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::MOVING_PHOTO_ETS_TAG);
+    auto pattern = node->GetPattern<MovingPhotoPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnResolutionChange
+     * @tc.expected: step2. related functions will be called
+     */
+    pattern->OnResolutionChange();
+
+    auto property = node->GetLayoutProperty<MovingPhotoLayoutProperty>();
+    ASSERT_TRUE(property->HasVideoSize());
+    EXPECT_EQ(property->GetVideoSizeValue(SizeF(0, 0)).Height(), 100);
+}
 } //namespace OHOS::Ace::NG
