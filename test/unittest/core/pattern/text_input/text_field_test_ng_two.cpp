@@ -108,6 +108,7 @@ HWTEST_F(TextFieldTestNgTwo, testShowPasswordSymbol001, TestSize.Level1)
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: Create Text filed node
@@ -130,6 +131,7 @@ HWTEST_F(TextFieldTestNgTwo, testShowPasswordSymbol001, TestSize.Level1)
     EXPECT_EQ(iconFrameNode->GetTag(), V2::SYMBOL_ETS_TAG);
 
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(backupApiVersion));
 }
 
 /**
