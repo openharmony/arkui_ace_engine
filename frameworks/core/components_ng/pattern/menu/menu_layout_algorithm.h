@@ -323,7 +323,11 @@ private:
     void BuildTopArrowPath(float arrowX, float arrowY, std::string& path);
     void BuildRightArrowPath(float arrowX, float arrowY, std::string& path);
     void BuildLeftArrowPath(float arrowX, float arrowY, std::string& path);
-    void CalculateSafeAreaIntersection(const SafeAreaInsets& safeAreaInsets);
+    void CalculateSafeAreaIntersection(const SafeAreaInsets& safeAreaInsets,
+        const RefPtr<SafeAreaManager>& safeAreaManager, const RefPtr<MenuLayoutProperty>& props,
+        const RefPtr<MenuPattern>& menuPattern);
+    double GetKeyboardHeightInUec(const RefPtr<SafeAreaManager>& safeAreaManager,
+        const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
 #if defined(ENABLE_ROSEN_BACKEND)
     std::shared_ptr<OHOS::Rosen::RSNGShapeBase> GetMenuSDFShape(bool didNeedArrow);
 
