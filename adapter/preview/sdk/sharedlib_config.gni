@@ -838,6 +838,12 @@ napi_modules = [
         lib_names = [ "swiperefresher" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/swiperefresherv2/interfaces:swiperefresherv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "swiperefresherv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/tabtitlebar/interfaces:tabtitlebar"
         subsystem_name = "arkui"
         part_name = "ace_engine"
