@@ -6740,8 +6740,14 @@ void PipelineContext::FlushAnimationDirtysWhenExist(const AnimationOption& optio
     int32_t flushCount = 0;
     bool isDirtyLayoutNodesEmpty = IsDirtyLayoutNodesEmpty();
     while (!isDirtyLayoutNodesEmpty && !IsLayouting() && !isReloading_) {
-        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
+        if (option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+            TAG_LOGD(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
+                option.ToString().c_str(), isDirtyLayoutNodesEmpty);
+            break;
+        }
+        if (flushCount >= MAX_FLUSH_COUNT) {
+            infiniteAnimationFlushExceeded_ = true;
+            TAG_LOGE(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
                 option.ToString().c_str(), isDirtyLayoutNodesEmpty);
             break;
         }
@@ -6769,6 +6775,7 @@ void PipelineContext::OpenFrontendAnimation(
         }
     }
     FlushAnimationDirtysWhenExist(option);
+    PushInfiniteAnimationFlushExceeded();
     AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback, Claim(this));
 }
 
@@ -6778,6 +6785,7 @@ void PipelineContext::CloseFrontendAnimation(bool forceClose)
         if (forceClose) {
             TAG_LOGW(AceLogTag::ACE_ANIMATION, "force close animation");
             AnimationUtils::CloseImplicitAnimation();
+            PopInfiniteAnimationFlushExceeded();
         }
         return;
     }
@@ -6794,6 +6802,7 @@ void PipelineContext::CloseFrontendAnimation(bool forceClose)
         pendingFrontendAnimation_.pop();
     }
     AnimationUtils::CloseImplicitAnimation(Claim(this));
+    PopInfiniteAnimationFlushExceeded();
 }
 
 bool PipelineContext::IsDragging() const

@@ -1973,6 +1973,7 @@ frameworks/core/common/transform/input_compatible_manager.h @ArkUI_Event
 frameworks/core/common/udmf/ @ArkUI_Event
 frameworks/core/common/update_config_manager.h @arkui_framework_xnode
 frameworks/core/common/vibrator/ @arkuiscroll
+frameworks/core/common/visual_effect/ @arkuicodepulse
 frameworks/core/common/watch_dog.cpp @arkui_framework_xnode
 frameworks/core/common/watch_dog.h @arkui_framework_xnode
 frameworks/core/common/watch_dog_mingw.cpp @arkui_framework_xnode

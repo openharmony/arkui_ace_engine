@@ -36,7 +36,19 @@ ace_unittest("interfaces_test") {
   }
 }
 
+ace_unittest("visual_effect_ani_modifier_test") {
+  module_name = "CommonVisualEffects"
+  type = "new"
+  sources = [
+    "$ace_root/frameworks/core/interfaces/native/ani/visual_effect_ani_modifier.cpp",
+    "native/ani/visual_effect_ani_modifier_test.cpp",
+  ]
+}
+
 group("core_interfaces_unittest") {
   testonly = true
-  deps = [ ":interfaces_test" ]
+  deps = [
+    ":interfaces_test",
+    ":visual_effect_ani_modifier_test",
+  ]
 }

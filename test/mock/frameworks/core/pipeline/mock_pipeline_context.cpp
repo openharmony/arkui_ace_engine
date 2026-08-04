@@ -1706,6 +1706,32 @@ RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
     return nullptr;
 }
 
+void PipelineBase::SetInfiniteAnimationFlushExceeded(bool exceeded)
+{
+    infiniteAnimationFlushExceeded_ = exceeded;
+}
+
+bool PipelineBase::IsInfiniteAnimationFlushExceeded() const
+{
+    return infiniteAnimationFlushExceeded_;
+}
+
+void PipelineBase::PushInfiniteAnimationFlushExceeded()
+{
+    infiniteAnimationFlushExceededStack_.push(infiniteAnimationFlushExceeded_);
+}
+
+void PipelineBase::PopInfiniteAnimationFlushExceeded()
+{
+    if (!infiniteAnimationFlushExceededStack_.empty()) {
+        infiniteAnimationFlushExceededStack_.pop();
+        infiniteAnimationFlushExceeded_ = infiniteAnimationFlushExceededStack_.empty()
+            ? false : infiniteAnimationFlushExceededStack_.top();
+    } else {
+        infiniteAnimationFlushExceeded_ = false;
+    }
+}
+
 bool NG::PipelineContext::CheckThreadSafe()
 {
     return false;
