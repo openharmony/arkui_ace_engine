@@ -802,6 +802,12 @@ napi_modules = [
         lib_names = [ "popup" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/popupv2/interfaces:popupv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "popupv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/gridobjectsortcomponent/interfaces:gridobjectsortcomponent"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -812,6 +818,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "exceptionprompt" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/exceptionpromptv2/interfaces:exceptionpromptv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "exceptionpromptv2" ]
       },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent"
