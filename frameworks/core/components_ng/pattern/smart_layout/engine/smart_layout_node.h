@@ -139,6 +139,12 @@ public:
      */
     void ApplyGeneralConstraints();
 
+    /**
+     * @brief Apply scale-up constraints for underutilized containers
+     * @param emptyRatioThreshold Empty ratio threshold (default 0.3)
+     */
+    void ApplyScaleUpConstraints(double emptyRatioThreshold = 0.3);
+
     // Getters for context
     LayoutContext& GetContext() { return context_; }
     const LayoutContext& GetContext() const { return context_; }
