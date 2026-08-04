@@ -95,7 +95,7 @@ public:
         OnExpandChildrenOnInitialInNG();
     }
 
-    void OnDataReloaded(bool reuseImmediately = false);
+    void OnDataReloaded();
 
     bool OnDataAdded(size_t index);
 
@@ -145,7 +145,7 @@ public:
     void OperateExchange(V2::Operation& operation, int32_t& initialIndex,
         std::map<int32_t, LazyForEachChild>& cachedTemp, std::map<int32_t, LazyForEachChild>& expiringTemp);
 
-    void OperateReload(std::map<int32_t, LazyForEachChild>& expiringTemp, bool reuseImmediately = false);
+    void OperateReload(std::map<int32_t, LazyForEachChild>& expiringTemp);
 
     void ThrowRepeatOperationError(int32_t index);
 
@@ -309,9 +309,6 @@ public:
     void SetEnableSyncLoad(bool value);
     void SetIsSyncLoad(bool value);
     void ProcessSyncLoadTempChildren(std::list<RefPtr<UINode>>& children);
-    bool ReleaseExpiringNode(std::string reuseId);
-    void RecordRecyclableNode(std::string reuseId, std::string key, WeakPtr<UINode> recycleNode);
-    void TryRecordRecyclableNodeRecursively(std::string key, RefPtr<UINode> node);
     void SetLazyForEachNode(const WeakPtr<LazyForEachNode>& node);
     RefPtr<LazyForEachNode> GetLazyForEachNode() const;
 
