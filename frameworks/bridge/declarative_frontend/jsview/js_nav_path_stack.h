@@ -67,12 +67,29 @@ public:
         isHomeNameCallback_ = std::move(callback);
     }
 
+    void SetPreloadCallback(
+        std::function<void(const std::string&, const JSRef<JSVal>&, const std::string&)>&& callback)
+    {
+        preloadCallback_ = std::move(callback);
+    }
+    void SetOnDestroyPreloadItemCallback(std::function<void()>&& callback)
+    {
+        onDestroyCallback_ = std::move(callback);
+    }
+
     void OnPopCallback(const JSCallbackInfo& info);
     void GetPathStack(const JSCallbackInfo& info);
     void SetPathStack(const JSCallbackInfo& info);
     void IsHomeName(const JSCallbackInfo& info);
     void GetPreTopInfo(const JSCallbackInfo& info);
     void SetPreTopInfo(const JSCallbackInfo& info);
+    void PreloadPath(const JSCallbackInfo& info);
+    void DestroyPreloadNode(const JSCallbackInfo& info)
+    {
+        if (onDestroyCallback_) {
+            onDestroyCallback_();
+        }
+    }
 
 private:
     static void Constructor(const JSCallbackInfo& info);
@@ -88,6 +105,9 @@ private:
     std::function<void(const JSRef<JSVal>)> onPopCallback_;
     JSRef<JSVal> preTopInfo_;
     std::function<bool(const std::string&)> isHomeNameCallback_;
+    std::function<void(const std::string& name, const JSRef<JSVal>& param,
+        const std::string& paramString)> preloadCallback_;
+    std::function<void()> onDestroyCallback_;
     int32_t containerCurrentId_;
 };
 } // namespace OHOS::Ace::Framework
