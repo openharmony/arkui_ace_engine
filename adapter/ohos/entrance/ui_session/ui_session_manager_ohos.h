@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License") override;
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -168,6 +168,8 @@ public:
     void NotifyPageSceneContentChanged() override;
     void FlushPageSceneNodeChanged() override;
     void SavePageSceneDetectFunction(PageSceneDetectFunction&& function) override;
+    void SaveWebPageSceneFunction(WebPageSceneFunction&& function) override;
+    bool IsWebSourceEnabled(const std::string& ruleJson);
 
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
 
@@ -193,6 +195,7 @@ private:
         std::string ruleSetId;
         std::string ruleJson;
         bool arkuiEnabled = true;
+        bool webEnabled = false;
         std::vector<PageSceneRuleInfo> rules;
     };
 
@@ -211,6 +214,8 @@ private:
         const std::string& nodeTag, const std::string& sceneType);
     void ErasePendingPageSceneRulesLocked(int32_t processId);
     void TriggerPageSceneDetect(int32_t processId, const std::string& ruleJson, bool isGetResult);
+    int32_t ExtractRuleJsonAndWebEnabled(int32_t processId,
+        const std::string& ruleJsonOrRuleSetId, std::string& ruleJson, bool& webEnabled);
 
     int32_t pageTranslateScope_ = 0;
     int32_t pageTranslateOwnerPid_ = -1;

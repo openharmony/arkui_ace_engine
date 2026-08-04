@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 #include <cctype>
 #include <cfloat>
 #include <iomanip>
+#include <mutex>
 #include <optional>
 #include <sstream>
 #include <queue>
@@ -45,6 +46,8 @@
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
+#include "core/components/web/resource/web_page_scene_manager.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -80,6 +83,7 @@ namespace OHOS::Ace {
 namespace {
 
 constexpr char WEB_METHOD_ROUTER_BACK[] = "routerBack";
+constexpr size_t SELECTOR_JSON_ESCAPE_RESERVE = 16;
 constexpr char WEB_METHOD_UPDATEURL[] = "updateUrl";
 constexpr char WEB_METHOD_CHANGE_PAGE_URL[] = "changePageUrl";
 constexpr char WEB_METHOD_PAGE_PATH_INVALID[] = "pagePathInvalid";
@@ -2098,6 +2102,18 @@ int WebDelegate::GetWebId()
 {
     if (nweb_) {
         return nweb_->GetWebId();
+    }
+    return -1;
+}
+
+int32_t WebDelegate::GetHostNodeId()
+{
+    auto webPattern = webPattern_.Upgrade();
+    if (webPattern) {
+        auto host = webPattern->GetHost();
+        if (host) {
+            return host->GetId();
+        }
     }
     return -1;
 }
@@ -5058,6 +5074,10 @@ void WebDelegate::OnInactive()
     if (!context) {
         return;
     }
+    int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
+    if (processId > 0) {
+        WebPageSceneManager::GetInstance().FlushExitOnNavigate(processId, GetWebId());
+    }
     context->GetTaskExecutor()->PostTask(
         [weak = WeakClaim(this)]() {
             auto delegate = weak.Upgrade();
@@ -5091,6 +5111,14 @@ void WebDelegate::OnActive()
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebOnActive");
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ExecuteAllRuleSetMatch();
+                }
+            },
+            TaskExecutor::TaskType::UI, "PageSceneNavMatch");
 }
 
 void WebDelegate::GestureBackBlur()
@@ -5556,6 +5584,7 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
 
 void WebDelegate::OnPageStarted(const std::string& param)
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnPageStarted:Start. webId:%{public}d", GetWebId());
     CHECK_NULL_VOID(taskExecutor_);
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), param]() {
@@ -5571,6 +5600,25 @@ void WebDelegate::OnPageStarted(const std::string& param)
             webPattern->InitDataDetector();
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageStarted");
+    taskExecutor_->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
+                if (processId > 0) {
+                    WebPageSceneManager::GetInstance().FlushExitOnNavigate(processId, delegate->GetWebId());
+                }
+                // Clear per-rule observer map from previous page so new page's
+                // query script won't find stale observers
+                delegate->ExecuteTypeScript(
+                    "if(window.__pageSceneObservers){"
+                    "for(var k in window.__pageSceneObservers){"
+                    "window.__pageSceneObservers[k].disconnect();}"
+                    "window.__pageSceneObservers=null;}",
+                    [](std::string) {});
+            }
+        },
+        TaskExecutor::TaskType::UI, "PageSceneResetObserver");
     auto pattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     pattern->DestroyAnalyzerOverlay();
@@ -5599,7 +5647,17 @@ void WebDelegate::OnPageFinished(const std::string& param)
             delegate->RunDataDetectorJS();
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPageFinished");
-    
+    auto context = context_.Upgrade();
+    if (context) {
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ExecuteAllRuleSetMatch();
+                }
+            },
+            TaskExecutor::TaskType::UI, "PageSceneNavMatch");
+    }
     AccessibilitySendPageChange();
 }
 
@@ -5646,6 +5704,18 @@ void WebDelegate::OnLoadFinished(const std::string& param)
             delegate->RecordWebEvent(Recorder::EventType::LOAD_FINISHED, param);
         },
         TaskExecutor::TaskType::JS, "ArkUIWebLoadFinished");
+    // Trigger page scene rule matching after navigation
+    auto context = context_.Upgrade();
+    if (context) {
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakClaim(this)]() {
+                auto delegate = weak.Upgrade();
+                if (delegate) {
+                    delegate->ExecuteAllRuleSetMatch();
+                }
+            },
+            TaskExecutor::TaskType::UI, "PageSceneNavMatch");
+    }
 }
 
 void WebDelegate::OnProgressChanged(int param)
@@ -10681,5 +10751,303 @@ void WebDelegate::UpdateTouchEventFeatureDetectionEnabled()
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateTouchEventFeatureDetectionEnabled");
+}
+
+// ===== PageScene Rule-Based Perception Methods =====
+
+std::string WebDelegate::EscapeSelectorJson(const std::string& selectorJson)
+{
+    std::string escaped;
+    escaped.reserve(selectorJson.size() + SELECTOR_JSON_ESCAPE_RESERVE);
+    for (size_t i = 0; i < selectorJson.size(); ++i) {
+        char c = selectorJson[i];
+        switch (c) {
+            case '\\': escaped += "\\\\"; break;
+            case '\'': escaped += "\\'"; break;
+            case '\n': escaped += "\\n"; break;
+            case '\r': escaped += "\\r"; break;
+            default:   escaped.push_back(c); break;
+        }
+    }
+    return escaped;
+}
+ 
+std::string WebDelegate::BuildPageSceneQueryJs()
+{
+    return "var __psQuery=function(selectorConfigStr){"
+        "var selectorConfig=JSON.parse(selectorConfigStr);"
+        "var results=[];selectorConfig.nodeTypes.forEach(function(nodeType){"
+        "var elements=document.querySelectorAll(nodeType);"
+        "elements.forEach(function(el){"
+        "var attrRules=selectorConfig.typeAttrRules[nodeType];"
+        "if(attrRules&&attrRules.length>0){"
+        "var ruleMatched=false;"
+        "for(var r=0;r<attrRules.length;r++){"
+        "var rule=attrRules[r];"
+        "var attrVal=el.getAttribute(rule.attr);"
+        "if(rule.attr==='type'&&nodeType==='input'&&!attrVal){attrVal='text';}"
+        "if(attrVal&&rule.value.indexOf(attrVal)!==-1){ruleMatched=true;break;}}"
+        "if(!ruleMatched){return;}}"
+        "if(selectorConfig.onlyVisible){"
+        "var rect=el.getBoundingClientRect();"
+        "if(rect.width===0&&rect.height===0){return;}"
+        "var style=window.getComputedStyle(el);"
+        "if(style.display==='none'||style.visibility==='hidden'||style.opacity==='0'){return;}}"
+        "if(!selectorConfig.includeUnfocusableTextInput){"
+        "if(nodeType==='input'||nodeType==='textarea'){"
+        "if(el.disabled||el.tabIndex<0){return;}}}"
+        "var control={};"
+        "control.nodeId=typeof el.getArkWebDomNodeId==='function'"
+        "?el.getArkWebDomNodeId(el):0;"
+        "control.nodeType=nodeType;"
+        "control.focusable=!el.disabled&&el.tabIndex>=0;"
+        "control.editable=(nodeType==='input'||nodeType==='textarea'||el.contentEditable==='true');"
+        "var rect=el.getBoundingClientRect();"
+        "control.rect={x:rect.left*(window.devicePixelRatio||0),"
+        "y:rect.top*(window.devicePixelRatio||0),"
+        "width:rect.width*(window.devicePixelRatio||0),"
+        "height:rect.height*(window.devicePixelRatio||0)};"
+        "control.text=el.value||el.textContent||'';"
+        "if(selectorConfig.includeAutocomplete){"
+        "var __isInputNP=(nodeType==='input'&&el.type!=='password')||nodeType==='textarea';"
+        "control.autocomplete=__isInputNP?(el.getAttribute('autocomplete')||''):'';}"
+        "if(selectorConfig.includeXpath){" + BuildXpathJsFragment() + "}"
+        "results.push(control);});});"
+        "return JSON.stringify({errorCode:" + std::to_string(PAGE_SCENE_QUERY_SUCCESS) +
+        ",controls:results});};";
+}
+
+std::string WebDelegate::BuildXpathJsFragment()
+{
+    return "control.xpath=(function(el){"
+        "if(!el||el.nodeType!==1)return '';"
+        "var parts=[];while(el&&el.nodeType===1){"
+        "var idx=0;var sib=el.previousSibling;"
+        "while(sib){if(sib.nodeType===1&&sib.tagName===el.tagName)idx++;sib=sib.previousSibling;}"
+        "var tag=el.tagName.toLowerCase();"
+        "parts.unshift(tag+(idx>0?'['+(idx+1)+']':''));"
+        "el=el.parentNode;}return '/'+parts.join('/');})(el);";
+}
+
+std::string WebDelegate::BuildPerRuleObserverJs(const std::string& ruleId,
+    const std::vector<std::string>& nodeTypes)
+{
+    std::string nodeTypesJs = "[";
+    for (size_t i = 0; i < nodeTypes.size(); ++i) {
+        if (i > 0) nodeTypesJs += ",";
+        nodeTypesJs += "\"" + nodeTypes[i] + "\"";
+    }
+    nodeTypesJs += "]";
+    std::string debounceMs = std::to_string(PAGE_SCENE_OBSERVER_DEBOUNCE_MS);
+    std::string timeoutMs = std::to_string(PAGE_SCENE_OBSERVER_TIMEOUT_MS);
+    std::string rid = "'" + ruleId + "'";
+    return
+        "if(!window.__pageSceneObservers)window.__pageSceneObservers={};"
+        "if(window.__pageSceneObservers[" + rid + "]){"
+        "window.__pageSceneObservers[" + rid + "].disconnect();"
+        "delete window.__pageSceneObservers[" + rid + "];}"
+        "var __psDebounceTimer=null;var __psTimeoutId=null;"
+        "var __psObserverNodeTypes=" + nodeTypesJs + ";"
+        "var __psObserverNodeTypesStr=__psObserverNodeTypes.join(',');"
+        "var __psObserver=new MutationObserver(function(mutations){"
+        "var found=false;"
+        "for(var i=0;i<mutations.length;i++){var added=mutations[i].addedNodes;"
+        "for(var j=0;j<added.length;j++){var node=added[j];"
+        "if(node.nodeType===1){"
+        "if(node.querySelector(__psObserverNodeTypesStr)||"
+        "__psObserverNodeTypes.indexOf(node.tagName.toLowerCase())!==-1){"
+        "found=true;break;}}}}"
+        "if(found){if(__psDebounceTimer)clearTimeout(__psDebounceTimer);"
+        "__psDebounceTimer=setTimeout(function(){"
+        "__psDebounceTimer=null;"
+        "if(!window.__pageSceneObservers){return;}"
+        "if(window.__pageSceneObservers[" + rid + "]){"
+        "window.__pageSceneObservers[" + rid + "].disconnect();"
+        "delete window.__pageSceneObservers[" + rid + "];}"
+        "if(__psTimeoutId){clearTimeout(__psTimeoutId);__psTimeoutId=null;}"
+        "if(typeof window.ArkWebPageSceneReady!=='undefined'){"
+        "var __r=__psQuery(__psSelectorConfig);"
+        "window.ArkWebPageSceneReady.onDomReady(__r,__psSelectorJson);}"
+        "}," + debounceMs + ");}});"
+        "window.__pageSceneObservers[" + rid + "]=__psObserver;"
+        "__psObserver.observe(document.documentElement,{childList:true,subtree:true});"
+        "__psTimeoutId=setTimeout(function(){__psTimeoutId=null;"
+        "if(!window.__pageSceneObservers){return;}"
+        "if(window.__pageSceneObservers[" + rid + "]){"
+        "window.__pageSceneObservers[" + rid + "].disconnect();"
+        "delete window.__pageSceneObservers[" + rid + "];}"
+        "}," + timeoutMs + ");";
+}
+
+std::string WebDelegate::BuildQueryControlsScript(const std::string& selectorJson,
+    const std::string& ruleId, const std::vector<std::string>& nodeTypes)
+{
+    std::string escapedSelector = EscapeSelectorJson(selectorJson);
+    std::string escapedSelectorForRouting = EscapeSelectorJson(selectorJson);
+    std::string domPendingCode = std::to_string(PAGE_SCENE_QUERY_DOM_PENDING);
+    std::string domReadyDelay = std::to_string(PAGE_SCENE_DOM_READY_DELAY_MS);
+    std::string script = "(function(){try{";
+    script += BuildPageSceneQueryJs();
+    script += "var __psSelectorConfig='" + escapedSelector + "';";
+    script += "var __psSelectorJson='" + escapedSelectorForRouting + "';";
+    script += "if(document.readyState==='loading'){"
+        "document.addEventListener('DOMContentLoaded',function(){"
+        "setTimeout(function(){"
+        "if(typeof window.ArkWebPageSceneReady!=='undefined'){"
+        "var __r=__psQuery(__psSelectorConfig);"
+        "window.ArkWebPageSceneReady.onDomReady(__r,__psSelectorJson);}"
+        "}," + domReadyDelay + ");});"
+        "return JSON.stringify({errorCode:" + domPendingCode + ",controls:[]});}";
+    script += "var __psResult=__psQuery(__psSelectorConfig);"
+        "var __psParsed=JSON.parse(__psResult);"
+        "if(__psParsed.controls.length>0){return __psResult;}";
+    if (!nodeTypes.empty()) {
+        script += BuildPerRuleObserverJs(ruleId, nodeTypes);
+    }
+    script += "return JSON.stringify({errorCode:" + std::to_string(PAGE_SCENE_QUERY_SUCCESS) +
+        ",controls:[]});"
+        "}catch(e){return JSON.stringify({errorCode:" + std::to_string(PAGE_SCENE_QUERY_EXCEPTION) +
+        ",controls:[]});}})()";
+    return script;
+}
+
+void WebDelegate::QueryPageControls(const std::string& selectorJson,
+    const std::string& ruleId, const std::vector<std::string>& nodeTypes,
+    std::function<void(const std::string& resultJson)>&& callback)
+{
+    std::string jsScript = BuildQueryControlsScript(selectorJson, ruleId, nodeTypes);
+    if (jsScript.empty()) {
+        if (callback) {
+            callback("{\"errorCode\":" + std::to_string(PAGE_SCENE_QUERY_EMPTY_SCRIPT) +
+                ",\"controls\":[]}");
+        }
+        return;
+    }
+
+    ExecuteTypeScript(jsScript, [cb = std::move(callback)](std::string result) {
+        TAG_LOGI(AceLogTag::ACE_WEB,
+            "WebDelegate::QueryPageControls callback: result len=%{public}zu result=%{public}s",
+            result.length(), result.c_str());
+        if (cb) {
+            cb(result);
+        }
+    });
+}
+
+void WebDelegate::RegisterPageSceneRulesForWeb(int32_t processId)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebDelegate::RegisterPageSceneRulesForWeb: webId=%{public}d processId=%{public}d",
+        GetWebId(), processId);
+    // Rules are registered in WebPageSceneManager singleton by UiSessionManagerOhos directly.
+    // This method handles Observer setup and reportOnRegister initial match for the first Web component.
+    auto ruleSetsOpt = WebPageSceneManager::GetInstance().GetPageSceneRules(processId);
+    if (!ruleSetsOpt) {
+        return;
+    }
+    // Check if any rules have reportOnRegister - if so, trigger initial match
+    int32_t reportOnRegisterCount = 0;
+    for (const auto& rule : ruleSetsOpt->rules) {
+        if (rule.enabled && rule.policy.reportOnRegister) {
+            reportOnRegisterCount++;
+        }
+    }
+    if (reportOnRegisterCount == 0) {
+        return;
+    }
+    // Trigger match for each enabled rule with reportOnRegister, report per-rule
+    for (const auto& rule : ruleSetsOpt->rules) {
+        if (!rule.enabled || !rule.policy.reportOnRegister) continue;
+        std::string selectorJson = WebPageSceneManager::GetInstance().BuildSelectorJson(
+            rule, ruleSetsOpt->globalConfig);
+        QueryPageControls(selectorJson, rule.ruleId, {},
+            [processId, webId = GetWebId(), selectorJson](const std::string& resultJson) {
+                WebPageSceneManager::GetInstance().ProcessQueryResult(
+                    processId, webId, selectorJson, resultJson, false);
+            });
+    }
+}
+
+void WebDelegate::ExecuteGetPageSceneMatch(int32_t processId, bool isTemporary)
+{
+    auto ruleSet = WebPageSceneManager::GetInstance().GetPageSceneRules(processId);
+    if (!ruleSet) {
+        WebPageSceneManager::GetInstance().OnMatchResult(processId, "", true);
+        return;
+    }
+    int32_t enabledCount = 0;
+    for (const auto& rule : ruleSet->rules) {
+        if (rule.enabled) enabledCount++;
+    }
+    if (enabledCount == 0) {
+        WebPageSceneManager::GetInstance().OnMatchResult(processId, "", true);
+        if (isTemporary) {
+            WebPageSceneManager::GetInstance().UnregisterPageSceneRules(processId);
+        }
+        return;
+    }
+    auto remaining = std::make_shared<std::atomic<int32_t>>(enabledCount);
+    for (const auto& rule : ruleSet->rules) {
+        if (!rule.enabled) continue;
+        std::string selectorJson = WebPageSceneManager::GetInstance().BuildSelectorJson(
+            rule, ruleSet->globalConfig);
+        QueryPageControls(selectorJson, rule.ruleId, {},
+            [processId, webId = GetWebId(), isTemporary, remaining, selectorJson](
+                const std::string& resultJson) {
+                WebPageSceneManager::GetInstance().ProcessQueryResult(
+                    processId, webId, selectorJson, resultJson, true);
+                int32_t rem = remaining->fetch_sub(1, std::memory_order_acq_rel) - 1;
+                if (rem == 0 && isTemporary) {
+                    WebPageSceneManager::GetInstance().UnregisterPageSceneRules(processId);
+                }
+            });
+    }
+}
+
+void WebDelegate::GetPageSceneForWeb(int32_t processId, const std::string& ruleJsonOrRuleSetId)
+{
+    auto rules = WebPageSceneManager::GetInstance().GetPageSceneRules(processId);
+    if (rules.has_value()) {
+        ExecuteGetPageSceneMatch(processId, false);
+        return;
+    }
+    // No rules yet - register temporarily then match
+    WebPageSceneManager::GetInstance().RegisterPageSceneRules(processId, ruleJsonOrRuleSetId);
+    ExecuteGetPageSceneMatch(processId, true);
+}
+
+void WebDelegate::ProcessPageSceneDomReadyResult(const std::string& resultJson,
+    const std::string& selectorJson)
+{
+    int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
+    if (processId > 0) {
+        WebPageSceneManager::GetInstance().ProcessQueryResult(
+            processId, GetWebId(), selectorJson, resultJson, false);
+    }
+}
+
+void WebDelegate::ExecuteAllRuleSetMatch()
+{
+    int32_t processId = WebPageSceneManager::GetInstance().GetRegisteredProcessId();
+    if (processId <= 0) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ExecuteAllRuleSetMatch: no registered processId");
+        return;
+    }
+    auto ruleSet = WebPageSceneManager::GetInstance().GetPageSceneRules(processId);
+    if (!ruleSet) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ExecuteAllRuleSetMatch: no ruleSet for processId=%{public}d",
+            processId);
+        return;
+    }
+    for (const auto& rule : ruleSet->rules) {
+        if (!rule.enabled) continue;
+        std::string selectorJson = WebPageSceneManager::GetInstance().BuildSelectorJson(
+            rule, ruleSet->globalConfig);
+        QueryPageControls(selectorJson, rule.ruleId, rule.selector.nodeTypes,
+            [processId, webId = GetWebId(), selectorJson](const std::string& resultJson) {
+                WebPageSceneManager::GetInstance().ProcessQueryResult(
+                    processId, webId, selectorJson, resultJson, false);
+            });
+    }
 }
 } // namespace OHOS::Ace

@@ -88,6 +88,9 @@
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 
+#ifdef WEB_SUPPORTED
+#include "core/components/web/resource/web_page_scene_manager.h"
+#endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "interfaces/napi/kits/observer/ui_observer.h"
 
@@ -6282,6 +6285,7 @@ void UIContentImpl::InitUISessionManagerCallbacks(const WeakPtr<TaskExecutor>& t
     SaveGetStateMgmtInfoFunction(taskExecutor);
     SaveGetWebInfoByRequestFunction(taskExecutor);
     SaveArkUIPageTranslateFunctions(taskExecutor);
+    SaveTraverseWebForPageSceneCallback(taskExecutor);
     auto pageSceneMatcher = std::make_shared<NG::PageSceneRuleManager>();
     auto pageSceneDetectCallback = [weakTaskExecutor = taskExecutor, pageSceneMatcher](
         int32_t processId, const std::string& ruleJson, bool isGetResult) {
@@ -6418,6 +6422,7 @@ void UIContentImpl::SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>&
                 auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
                 CHECK_NULL_VOID(pipeline);
                 auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                CHECK_NULL_VOID(uiTranslateManager);
                 uint32_t windowId = pipeline->GetWindowId();
                 uiTranslateManager->GetWebInfoByRequest(windowId, webId, request);
             },
@@ -6984,6 +6989,54 @@ void UIContentImpl::SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& 
             },
             TaskExecutor::TaskType::UI, "UiSessionContentChangeDetectStop");
     });
+}
+
+void UIContentImpl::PostTraverseWebTask(const WeakPtr<TaskExecutor>& weakTaskExecutor,
+    std::function<void()>&& task)
+{
+    auto taskExecutor = weakTaskExecutor.Upgrade();
+    if (!taskExecutor) {
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+        CHECK_NULL_VOID(pipeline);
+        taskExecutor = pipeline->GetTaskExecutor();
+    }
+    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "TraverseWebForPageScene");
+}
+
+void UIContentImpl::SaveTraverseWebForPageSceneCallback(const WeakPtr<TaskExecutor>& taskExecutor)
+{
+#ifdef WEB_SUPPORTED
+    auto&& webPageSceneFunc = [weakTaskExecutor = taskExecutor](
+        UiSessionManager::WebPageSceneOp op, int32_t processId, const std::string& ruleJson, bool isGetResult) {
+        switch (op) {
+            case UiSessionManager::WebPageSceneOp::RegisterRules:
+                WebPageSceneManager::GetInstance().RegisterPageSceneRules(processId, ruleJson);
+                PostTraverseWebTask(weakTaskExecutor, [processId]() {
+                    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                    CHECK_NULL_VOID(pipeline);
+                    auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                    CHECK_NULL_VOID(uiTranslateManager);
+                    uiTranslateManager->TraverseAndMatchAllWeb(processId, "", false);
+                });
+                break;
+            case UiSessionManager::WebPageSceneOp::UnregisterRules:
+                WebPageSceneManager::GetInstance().UnregisterPageSceneRules(processId);
+                break;
+            case UiSessionManager::WebPageSceneOp::Traverse:
+                PostTraverseWebTask(weakTaskExecutor, [processId, ruleJson, isGetResult]() {
+                    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+                    CHECK_NULL_VOID(pipeline);
+                    auto uiTranslateManager = pipeline->GetUiTranslateManagerImpl();
+                    CHECK_NULL_VOID(uiTranslateManager);
+                    uiTranslateManager->TraverseAndMatchAllWeb(processId, ruleJson, isGetResult);
+                });
+                break;
+            default:
+                break;
+        }
+    };
+    UiSessionManager::GetInstance()->SaveWebPageSceneFunction(std::move(webPageSceneFunc));
+#endif
 }
 
 void UIContentImpl::SetXComponentDisplayConstraintEnabled(bool isEnable)

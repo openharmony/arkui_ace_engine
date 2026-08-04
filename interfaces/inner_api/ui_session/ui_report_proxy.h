@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,7 +104,7 @@ public:
     void SendExeAppAIFunctionResult(uint32_t result, const std::string& data) override;
     void SendContentChange(ChangeType type, const std::string& simpleTree) override;
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
-    void ReportPageSceneEvent(const std::string& sceneJson) override;
+    void ReportPageSceneEvent(const std::string& sceneJson, bool isGetResult = false) override;
     void SendWebInfoRequestResult(
         uint32_t windowId,
         int32_t webId,

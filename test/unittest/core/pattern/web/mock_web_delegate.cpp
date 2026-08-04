@@ -38,6 +38,7 @@ std::map<std::string, std::string> surfaceToHtmlElementMap = { { "existSurfaceId
 std::map<std::string, int64_t> surfaceToWebAccessibilityMap = { { "existSurfaceId", 123 },
     { "existSurfaceIdOther", 456 }, { "emptyHtmlElementSurfaceId", 789 } };
 constexpr double WEB_SNAPSHOT_SIZE_TOLERANCE = 0.85;
+constexpr size_t SELECTOR_JSON_ESCAPE_RESERVE = 16;
 class MockNWebAccessibilityNodeInfoOnlyForReturn : public NWeb::NWebAccessibilityNodeInfo {
 public:
     std::string GetHint() override
@@ -1560,6 +1561,173 @@ std::shared_ptr<OHOS::NWeb::NWebCommandActionManager> WebDelegate::GetNWebComman
 }
 
 void WebDelegate::UpdateTouchEventFeatureDetectionEnabled() {}
+
+// PageScene Rule-Based Perception stubs
+void WebDelegate::QueryPageControls(const std::string&,
+    const std::string&, const std::vector<std::string>&,
+    std::function<void(const std::string&)>&&) {}
+
+std::string WebDelegate::EscapeSelectorJson(const std::string& selectorJson)
+{
+    std::string escaped;
+    escaped.reserve(selectorJson.size() + SELECTOR_JSON_ESCAPE_RESERVE);
+    for (size_t i = 0; i < selectorJson.size(); ++i) {
+        char c = selectorJson[i];
+        switch (c) {
+            case '\\': escaped += "\\\\"; break;
+            case '\'': escaped += "\\'"; break;
+            case '\n': escaped += "\\n"; break;
+            case '\r': escaped += "\\r"; break;
+            default:   escaped.push_back(c); break;
+        }
+    }
+    return escaped;
+}
+
+std::string WebDelegate::BuildPageSceneQueryJs()
+{
+    return "var __psQuery=function(selectorConfigStr){"
+        "var selectorConfig=JSON.parse(selectorConfigStr);"
+        "var results=[];selectorConfig.nodeTypes.forEach(function(nodeType){"
+        "var elements=document.querySelectorAll(nodeType);"
+        "elements.forEach(function(el){"
+        "var attrRules=selectorConfig.typeAttrRules[nodeType];"
+        "if(attrRules&&attrRules.length>0){"
+        "var ruleMatched=false;"
+        "for(var r=0;r<attrRules.length;r++){"
+        "var rule=attrRules[r];"
+        "var attrVal=el.getAttribute(rule.attr);"
+        "if(rule.attr==='type'&&nodeType==='input'&&!attrVal){attrVal='text';}"
+        "if(attrVal&&rule.value.indexOf(attrVal)!==-1){ruleMatched=true;break;}}"
+        "if(!ruleMatched){return;}}"
+        "if(selectorConfig.onlyVisible){"
+        "var rect=el.getBoundingClientRect();"
+        "if(rect.width===0&&rect.height===0){return;}"
+        "var style=window.getComputedStyle(el);"
+        "if(style.display==='none'||style.visibility==='hidden'||style.opacity==='0'){return;}}"
+        "if(!selectorConfig.includeUnfocusableTextInput){"
+        "if(nodeType==='input'||nodeType==='textarea'){"
+        "if(el.disabled||el.tabIndex<0){return;}}}"
+        "var control={};"
+        "control.nodeId=typeof el.getArkWebDomNodeId==='function'"
+        "?el.getArkWebDomNodeId(el):0;"
+        "control.nodeType=nodeType;"
+        "control.focusable=!el.disabled&&el.tabIndex>=0;"
+        "control.editable=(nodeType==='input'||nodeType==='textarea'||el.contentEditable==='true');"
+        "var rect=el.getBoundingClientRect();"
+        "control.rect={x:rect.left*(window.devicePixelRatio||0),"
+        "y:rect.top*(window.devicePixelRatio||0),"
+        "width:rect.width*(window.devicePixelRatio||0),"
+        "height:rect.height*(window.devicePixelRatio||0)};"
+        "control.text=el.value||el.textContent||'';"
+        "if(selectorConfig.includeAutocomplete){"
+        "var __isInputNP=(nodeType==='input'&&el.type!=='password')||nodeType==='textarea';"
+        "control.autocomplete=__isInputNP?(el.getAttribute('autocomplete')||''):'';}"
+        "if(selectorConfig.includeXpath){" + BuildXpathJsFragment() + "}"
+        "results.push(control);});});"
+        "return JSON.stringify({errorCode:" + std::to_string(PAGE_SCENE_QUERY_SUCCESS) +
+        ",controls:results});};";
+}
+
+std::string WebDelegate::BuildXpathJsFragment()
+{
+    return "control.xpath=(function(el){"
+        "if(!el||el.nodeType!==1)return '';"
+        "var parts=[];while(el&&el.nodeType===1){"
+        "var idx=0;var sib=el.previousSibling;"
+        "while(sib){if(sib.nodeType===1&&sib.tagName===el.tagName)idx++;sib=sib.previousSibling;}"
+        "var tag=el.tagName.toLowerCase();"
+        "parts.unshift(tag+(idx>0?'['+(idx+1)+']':''));"
+        "el=el.parentNode;}return '/'+parts.join('/');})(el);";
+}
+
+std::string WebDelegate::BuildPerRuleObserverJs(const std::string& ruleId,
+    const std::vector<std::string>& nodeTypes)
+{
+    std::string nodeTypesJs = "[";
+    for (size_t i = 0; i < nodeTypes.size(); ++i) {
+        if (i > 0) nodeTypesJs += ",";
+        nodeTypesJs += "\"" + nodeTypes[i] + "\"";
+    }
+    nodeTypesJs += "]";
+    std::string debounceMs = std::to_string(PAGE_SCENE_OBSERVER_DEBOUNCE_MS);
+    std::string timeoutMs = std::to_string(PAGE_SCENE_OBSERVER_TIMEOUT_MS);
+    std::string rid = "'" + ruleId + "'";
+    return
+        "if(!window.__pageSceneObservers)window.__pageSceneObservers={};"
+        "if(window.__pageSceneObservers[" + rid + "]){"
+        "window.__pageSceneObservers[" + rid + "].disconnect();"
+        "delete window.__pageSceneObservers[" + rid + "];}"
+        "var __psDebounceTimer=null;var __psTimeoutId=null;"
+        "var __psObserverNodeTypes=" + nodeTypesJs + ";"
+        "var __psObserverNodeTypesStr=__psObserverNodeTypes.join(',');"
+        "var __psObserver=new MutationObserver(function(mutations){"
+        "var found=false;"
+        "for(var i=0;i<mutations.length;i++){var added=mutations[i].addedNodes;"
+        "for(var j=0;j<added.length;j++){var node=added[j];"
+        "if(node.nodeType===1){"
+        "if(node.querySelector(__psObserverNodeTypesStr)||"
+        "__psObserverNodeTypes.indexOf(node.tagName.toLowerCase())!==-1){"
+        "found=true;break;}}}}"
+        "if(found){if(__psDebounceTimer)clearTimeout(__psDebounceTimer);"
+        "__psDebounceTimer=setTimeout(function(){"
+        "__psDebounceTimer=null;"
+        "if(!window.__pageSceneObservers){return;}"
+        "if(window.__pageSceneObservers[" + rid + "]){"
+        "window.__pageSceneObservers[" + rid + "].disconnect();"
+        "delete window.__pageSceneObservers[" + rid + "];}"
+        "if(__psTimeoutId){clearTimeout(__psTimeoutId);__psTimeoutId=null;}"
+        "if(typeof window.ArkWebPageSceneReady!=='undefined'){"
+        "var __r=__psQuery(__psSelectorConfig);"
+        "window.ArkWebPageSceneReady.onDomReady(__r,__psSelectorJson);}"
+        "}," + debounceMs + ");}});"
+        "window.__pageSceneObservers[" + rid + "]=__psObserver;"
+        "__psObserver.observe(document.documentElement,{childList:true,subtree:true});"
+        "__psTimeoutId=setTimeout(function(){__psTimeoutId=null;"
+        "if(!window.__pageSceneObservers){return;}"
+        "if(window.__pageSceneObservers[" + rid + "]){"
+        "window.__pageSceneObservers[" + rid + "].disconnect();"
+        "delete window.__pageSceneObservers[" + rid + "];}"
+        "}," + timeoutMs + ");";
+}
+
+std::string WebDelegate::BuildQueryControlsScript(const std::string& selectorJson,
+    const std::string& ruleId, const std::vector<std::string>& nodeTypes)
+{
+    std::string escapedSelector = EscapeSelectorJson(selectorJson);
+    std::string escapedSelectorForRouting = EscapeSelectorJson(selectorJson);
+    std::string domPendingCode = std::to_string(PAGE_SCENE_QUERY_DOM_PENDING);
+    std::string domReadyDelay = std::to_string(PAGE_SCENE_DOM_READY_DELAY_MS);
+    std::string script = "(function(){try{";
+    script += BuildPageSceneQueryJs();
+    script += "var __psSelectorConfig='" + escapedSelector + "';";
+    script += "var __psSelectorJson='" + escapedSelectorForRouting + "';";
+    script += "if(document.readyState==='loading'){"
+        "document.addEventListener('DOMContentLoaded',function(){"
+        "setTimeout(function(){"
+        "if(typeof window.ArkWebPageSceneReady!=='undefined'){"
+        "var __r=__psQuery(__psSelectorConfig);"
+        "window.ArkWebPageSceneReady.onDomReady(__r,__psSelectorJson);}"
+        "}," + domReadyDelay + ");});"
+        "return JSON.stringify({errorCode:" + domPendingCode + ",controls:[]});}";
+    script += "var __psResult=__psQuery(__psSelectorConfig);"
+        "var __psParsed=JSON.parse(__psResult);"
+        "if(__psParsed.controls.length>0){return __psResult;}";
+    if (!nodeTypes.empty()) {
+        script += BuildPerRuleObserverJs(ruleId, nodeTypes);
+    }
+    script += "return JSON.stringify({errorCode:" + std::to_string(PAGE_SCENE_QUERY_SUCCESS) +
+        ",controls:[]});"
+        "}catch(e){return JSON.stringify({errorCode:" + std::to_string(PAGE_SCENE_QUERY_EXCEPTION) +
+        ",controls:[]});}})()";
+    return script;
+}
+void WebDelegate::ExecuteGetPageSceneMatch(int32_t, bool) {}
+void WebDelegate::ExecuteAllRuleSetMatch() {}
+void WebDelegate::ProcessPageSceneDomReadyResult(const std::string&, const std::string&) {}
+void WebDelegate::RegisterPageSceneRulesForWeb(int32_t) {}
+void WebDelegate::GetPageSceneForWeb(int32_t, const std::string&) {}
+int32_t WebDelegate::GetHostNodeId() { return -1; }
 
 void FullScreenVideoOverlayHandlerOhos::SetVideoSurface(std::string surfaceId) {}
 

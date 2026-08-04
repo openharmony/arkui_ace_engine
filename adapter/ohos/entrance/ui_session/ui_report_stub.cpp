@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -277,7 +277,11 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
         }
         case REPORT_PAGE_SCENE_EVENT: {
             std::string result = data.ReadString();
-            ReportPageSceneEvent(result);
+            bool isGetResult = false;
+            if (data.GetReadableBytes() >= sizeof(bool)) {
+                isGetResult = data.ReadBool();
+            }
+            ReportPageSceneEvent(result, isGetResult);
             break;
         }
 
@@ -907,9 +911,6 @@ void UiReportStub::UnregisterPageSceneEventCallback()
 bool UiReportStub::RegisterGetPageSceneCallback(const PageSceneEventCallback& eventCallback)
 {
     std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
-    if (getPageSceneCallback_ != nullptr) {
-        return false;
-    }
     getPageSceneCallback_ = eventCallback;
     return true;
 }
@@ -920,7 +921,7 @@ void UiReportStub::UnregisterGetPageSceneCallback()
     getPageSceneCallback_ = nullptr;
 }
 
-void UiReportStub::ReportPageSceneEvent(const std::string& sceneJson)
+void UiReportStub::ReportPageSceneEvent(const std::string& sceneJson, bool isGetResult)
 {
     PageSceneEventCallback pageSceneEventCallback;
     PageSceneEventCallback getPageSceneCallback;
@@ -928,10 +929,11 @@ void UiReportStub::ReportPageSceneEvent(const std::string& sceneJson)
         std::lock_guard<std::mutex> lock(pageSceneCallbackMutex_);
         pageSceneEventCallback = pageSceneEventCallback_;
         getPageSceneCallback = getPageSceneCallback_;
-        getPageSceneCallback_ = nullptr;
     }
-    if (getPageSceneCallback) {
-        getPageSceneCallback(sceneJson);
+    if (isGetResult) {
+        if (getPageSceneCallback) {
+            getPageSceneCallback(sceneJson);
+        }
         return;
     }
     if (pageSceneEventCallback) {

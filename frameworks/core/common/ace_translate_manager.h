@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@ public:
     void RemoveTranslateListener(int32_t nodeId);
     void GetWebViewCurrentLanguage() override;
     void GetTranslateText(std::string extraData, bool isContinued) override;
+    void TraverseAndMatchAllWeb(int32_t processId, const std::string& ruleJson, bool isGetResult);
     void GetPageTranslateText(int32_t scope, const std::string& extraData) override;
     void StartPageTranslate(int32_t scope, const std::string& extraData) override;
     void EndPageTranslate(int32_t scope) override;
