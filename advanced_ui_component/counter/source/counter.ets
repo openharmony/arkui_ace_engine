@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -283,6 +283,11 @@ export struct CounterComponent {
     return px2vp(widthPx);
   }
 
+  private getTimezone(): string {
+    const tz = systemDateTime.getTimezoneSync();
+    return tz ? tz : 'Asia/Shanghai';
+  }
+
   getDate(value: string | undefined): string {
     return `[n2] ${value} [n0]`
   }
@@ -296,7 +301,7 @@ export struct CounterComponent {
     try {
       dateFormatYear = new Intl.DateTimeFormat(localeID, {
         year: 'numeric',
-        timeZone: systemDateTime.getTimezoneSync(),
+        timeZone: this.getTimezone(),
       });
     } catch (error) {
       console.log(`Accessility getDateYear fail. message: ${error.message}, code: ${error.code}`);
@@ -316,7 +321,7 @@ export struct CounterComponent {
     let dateFormatMonth: Intl.DateTimeFormat | undefined;
     try {
       dateFormatMonth = new Intl.DateTimeFormat(localeID, { month: 'long',
-        timeZone: systemDateTime.getTimezoneSync()});
+        timeZone: this.getTimezone()});
     } catch(error) {
       console.log(`Accessility getDateMonth fail. message: ${error.message}, code: ${error.code}`);
     }
