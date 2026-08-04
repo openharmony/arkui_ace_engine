@@ -272,19 +272,17 @@ void SmartLayoutAlgorithm::ApplyChildLayout(
 
     auto geoNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geoNode);
-    auto* context = hostNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto rootRect = context->GetRootRect();
-    auto parentFrame = hostNode->GetAncestorNodeOfFrame(false);
-    CHECK_NULL_VOID(parentFrame);
-    auto parentGeo = parentFrame->GetGeometryNode();
-    CHECK_NULL_VOID(parentGeo);
-    auto parentSize = parentGeo->GetFrameSize();
     bool isFormRender = false;
-    if (context->IsFormRender() &&
-        NearEqual(rootRect.Width(), parentSize.Width(), 1.0) &&
-        NearEqual(rootRect.Height(), parentSize.Height(), 1.0)) {
-        isFormRender = true;
+    auto formNode = IsA2UIFormComponent(hostNode);
+    if (formNode != nullptr) {
+        auto formGeo = formNode->GetGeometryNode();
+        CHECK_NULL_VOID(formGeo);
+        auto formSize = formGeo->GetFrameSize();
+        constexpr float FORM_SIZE_EPSILON = 1.0f;
+        if (NearEqual(formSize.Width(), rootNode_->GetContext().size.Width(), FORM_SIZE_EPSILON) &&
+            NearEqual(formSize.Height(), rootNode_->GetContext().size.Height(), FORM_SIZE_EPSILON)) {
+            isFormRender = true;
+        }
     }
     OffsetF offset =
         CalculateOffsetWithMargin(*layoutNode, geoNode, boundingBoxOffsetX, boundingBoxOffsetY, isFormRender);
