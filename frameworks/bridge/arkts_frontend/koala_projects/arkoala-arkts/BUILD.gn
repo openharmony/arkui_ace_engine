@@ -148,24 +148,28 @@ group("arkoala") {
 
 # Use build system to build arkoala
 action("arkoala_annotate") {
-  outputs = [ "$target_out_dir/arkui-preprocessed" ]
+  outputs = [ "$target_out_dir/arkoala_annotate.stamp" ] # Stamp file for GN incremental build tracking
 
   script = "../tools/annotate.py"
 
   args = [
     rebase_path("."),
     rebase_path("annotate-config.json"),
+    rebase_path("$target_out_dir/arkoala_annotate.stamp", root_build_dir),
   ]
 
   deps = [ "../../arkoala_generator:idlize_gen" ]
 }
 
 action("arkoala_process") {
-  outputs = [ "$target_out_dir/ets-arkui-preprocessed" ]
+  outputs = [ "$target_out_dir/arkoala_process.stamp" ] # Stamp file for GN incremental build tracking
 
   script = "../../arkoala/process_arkoala.py"
 
-  args = [ rebase_path(".") ]
+  args = [
+    rebase_path("."),
+    rebase_path("$target_out_dir/arkoala_process.stamp", root_build_dir),
+  ]
 
   deps = [
     ":arkoala_annotate",
