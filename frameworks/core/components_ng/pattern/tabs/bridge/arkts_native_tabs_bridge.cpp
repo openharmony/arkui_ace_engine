@@ -2702,39 +2702,41 @@ void TabsBridge::ParseCustomContentTransition(
     panda::Local<panda::FunctionRef> funcRef = transitionFunc->ToObject(vm);
     TabsCustomAnimationEvent onCustomAnimation = [vm, func = panda::CopyableGlobal(vm, funcRef), isJsView](
                                                      int32_t from, int32_t to) -> TabContentAnimatedTransition {
+        auto vmTmp = vm;
         TabContentAnimatedTransition transitionInfo;
-        panda::LocalScope pandaScope(vm);
-        panda::TryCatch trycatch(vm);
-        Local<JSValueRef> params[2] = { panda::NumberRef::New(vm, from), panda::NumberRef::New(vm, to) };
-        auto ret = func->Call(vm, func.ToLocal(), params, 2);
+        panda::LocalScope pandaScope(vmTmp);
+        panda::TryCatch trycatch(vmTmp);
+        Local<JSValueRef> params[2] = { panda::NumberRef::New(vmTmp, from), panda::NumberRef::New(vmTmp, to) };
+        auto ret = func->Call(vmTmp, func.ToLocal(), params, 2);
         if (isJsView) {
-            ArkTSUtils::HandleCallbackJobs(vm, trycatch, ret);
+            ArkTSUtils::HandleCallbackJobs(vmTmp, trycatch, ret);
         }
-        if (ret->IsNull() || ret->IsUndefined() || !ret->IsObject(vm)) {
+        if (ret->IsNull() || ret->IsUndefined() || !ret->IsObject(vmTmp)) {
             return transitionInfo;
         }
 
-        auto transitionObj = ret->ToObject(vm);
-        auto timeoutProperty = ArkTSUtils::GetProperty(vm, transitionObj, "timeout");
+        auto transitionObj = ret->ToObject(vmTmp);
+        auto timeoutProperty = ArkTSUtils::GetProperty(vmTmp, transitionObj, "timeout");
         transitionInfo.timeout = DEFAULT_CUSTOM_ANIMATION_TIMEOUT;
         if (!timeoutProperty->IsNull() && !timeoutProperty->IsUndefined() && timeoutProperty->IsNumber()) {
-            auto timeout = timeoutProperty->Int32Value(vm);
+            auto timeout = timeoutProperty->Int32Value(vmTmp);
             transitionInfo.timeout = timeout < 0 ? DEFAULT_CUSTOM_ANIMATION_TIMEOUT : timeout;
         }
 
-        auto transition = ArkTSUtils::GetProperty(vm, transitionObj, "transition");
-        if (!transition->IsNull() && !transition->IsUndefined() && transition->IsFunction(vm)) {
-            panda::Local<panda::FunctionRef> transitionFuncRef = transition->ToObject(vm);
-            auto onTransition = [vm, func = panda::CopyableGlobal(vm, transitionFuncRef), isJsView](
+        auto transition = ArkTSUtils::GetProperty(vmTmp, transitionObj, "transition");
+        if (!transition->IsNull() && !transition->IsUndefined() && transition->IsFunction(vmTmp)) {
+            panda::Local<panda::FunctionRef> transitionFuncRef = transition->ToObject(vmTmp);
+            auto onTransition = [vm, func = panda::CopyableGlobal(vmTmp, transitionFuncRef), isJsView](
                                     const RefPtr<TabContentTransitionProxy>& proxy) {
+                auto vmTransitionTmp = vm;
                 ACE_SCORING_EVENT("onTransition");
-                panda::LocalScope pandaScope(vm);
-                panda::TryCatch trycatch(vm);
-                auto proxyObj = CreateTabContentTransitionProxyObject(vm, proxy);
+                panda::LocalScope pandaScope(vmTransitionTmp);
+                panda::TryCatch trycatch(vmTransitionTmp);
+                auto proxyObj = CreateTabContentTransitionProxyObject(vmTransitionTmp, proxy);
                 Local<JSValueRef> params[1] = { proxyObj };
-                auto result = func->Call(vm, func.ToLocal(), params, 1);
+                auto result = func->Call(vmTransitionTmp, func.ToLocal(), params, 1);
                 if (isJsView) {
-                    ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+                    ArkTSUtils::HandleCallbackJobs(vmTransitionTmp, trycatch, result);
                 }
             };
 
