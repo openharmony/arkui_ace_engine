@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { IncrementalNode, Disposable, scheduleCallback, callScheduledCallbacks } from '@koalaui/runtime'
+import { IncrementalNode, Disposable, scheduleCallback, callScheduledCallbacks, GetReusableScopeNode } from '@koalaui/runtime'
 import { int32, KoalaCallsiteKey } from '@koalaui/common'
 import { nullptr, pointer, KPointer } from '@koalaui/interop'
 import { PeerNode, LazyItemNodeType, PeerNodeType, findPeerNode } from '../PeerNode'
@@ -49,6 +49,11 @@ export class SyntaxItemPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
+
+    getRid(): int32 {
+        // Repeat rid reuses the existing peer/node id so frontend and backend stay naturally aligned.
+        return this.getId()
+    }
 }
 
 export class ForEachNodePeer extends PeerNode {
@@ -58,16 +63,20 @@ export class ForEachNodePeer extends PeerNode {
         if (!_peerPtr) {
             throw new Error(`Failed to create ForEachNodePeer with id: ${peerId}`)
         }
-        return new ForEachNodePeer(_peerPtr, peerId, isRepeat ? 'Repeat' : 'ForEach')
+        return new ForEachNodePeer(_peerPtr, peerId, isRepeat ? 'Repeat' : 'ForEach', 0, isRepeat)
     }
 
-    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
-        super(peerPtr, id, name, flags)
+    protected constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0,
+        allowSiblingReorder: boolean = false) {
+        super(peerPtr, id, name, flags, PeerNodeType, allowSiblingReorder)
     }
 }
 
 export class LazyNodePeer extends PeerNode {
     private _reusePool?: Map<string, ReusablePool> = undefined
+    private _repeatTemplatePoolSize?: Map<string, int32> = undefined
+    private _repeatReusePlan?: Map<string, Array<string | undefined>> = undefined
+    private _repeatActiveRangeReuseKeys?: Map<int32, string> = undefined
 
     public static create(isRepeat: boolean = false): LazyNodePeer {
         const peerId = PeerNode.nextId()
@@ -83,13 +92,24 @@ export class LazyNodePeer extends PeerNode {
     }
 
     override reuse(reuseKey: string, id: KoalaCallsiteKey): Disposable | undefined {
+        const plannedReuseKeys = this._repeatReusePlan?.get(reuseKey)
+        if (plannedReuseKeys) {
+            while (plannedReuseKeys.length > 0) {
+                const plannedReuseKey = plannedReuseKeys.shift()
+                const candidate = plannedReuseKey ? this.tryReuseFromPool(plannedReuseKey, reuseKey) : undefined
+                if (candidate) {
+                    if (plannedReuseKeys.length === 0) {
+                        this._repeatReusePlan?.delete(reuseKey)
+                    }
+                    return candidate
+                }
+            }
+            this._repeatReusePlan?.delete(reuseKey)
+        }
         if (!this._reusePool) {
             return undefined
         }
-        if (this._reusePool!.has(reuseKey)) {
-            return this._reusePool!.get(reuseKey)!.get()
-        }
-        return undefined
+        return this.tryReuseFromPool(reuseKey, reuseKey)
     }
 
     override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
@@ -102,6 +122,21 @@ export class LazyNodePeer extends PeerNode {
                 return this.parent!.recycle(reuseKey, child, id);
             }
             return false
+        }
+        const templateKey = this.extractRepeatTemplateKey(reuseKey)
+        if (templateKey && this._repeatTemplatePoolSize) {
+            const maxSize = this._repeatTemplatePoolSize!.get(templateKey)
+            if (maxSize !== undefined) {
+                let templateSize = 0
+                this._reusePool?.forEach((pool, candidateReuseKey) => {
+                    if (this.extractRepeatTemplateKey(candidateReuseKey) === templateKey) {
+                        templateSize += pool.size
+                    }
+                })
+                if (templateSize >= maxSize) {
+                    return false
+                }
+            }
         }
         if (!this._reusePool) {
             this._reusePool = new Map<string, ReusablePool>()
@@ -126,6 +161,183 @@ export class LazyNodePeer extends PeerNode {
         this._reusePool!.clear()
         this._reusePool = undefined
         callScheduledCallbacks()
+    }
+
+    setRepeatTemplatePoolSize(size: int32, templateKey: string): void {
+        if (size < 0) {
+            return
+        }
+        if (!this._repeatTemplatePoolSize) {
+            this._repeatTemplatePoolSize = new Map<string, int32>()
+        }
+        this._repeatTemplatePoolSize!.set(templateKey, size)
+    }
+
+    setRepeatActiveRangeReuseKeys(activeRangeReuseKeys: Map<int32, string>): void {
+        this._repeatActiveRangeReuseKeys = new Map<int32, string>(activeRangeReuseKeys)
+    }
+
+    getRepeatActiveRangeReuseKeys(): Map<int32, string> {
+        return this._repeatActiveRangeReuseKeys ? new Map<int32, string>(this._repeatActiveRangeReuseKeys) :
+            new Map<int32, string>()
+    }
+
+    isRepeatNodeChildInAnimation(rid: int32): boolean {
+        return ArkUIAniModule._Repeat_IsChildInAnimation(this.getPeerPtr(), rid) !== 0
+    }
+
+    isRepeatNodeChildOnMainTree(rid: int32): boolean {
+        return ArkUIAniModule._Repeat_IsChildOnMainTree(this.getPeerPtr(), rid) !== 0
+    }
+
+    isRepeatNodeAllowAnimation(): boolean {
+        return ArkUIAniModule._Repeat_IsAllowAnimation(this.getPeerPtr()) !== 0
+    }
+
+    isRepeatNodeImplicitAnimationOpen(): boolean {
+        return ArkUIAniModule._Repeat_IsImplicitAnimationOpen(this.getPeerPtr()) !== 0
+    }
+
+    prepareRepeatReusePlan(targetReuseKeys: string[]): void {
+        // Record how many reusable nodes are currently available for each reuseKey.
+        // Only pools with at least one node are considered for reuse planning.
+        const available = new Map<string, int32>()
+        this._reusePool?.forEach((pool, reuseKey) => {
+            if (pool.size > 0) {
+                available.set(reuseKey, pool.size)
+            }
+        })
+        // The final plan maps each target reuseKey to the source reuseKey(s) it should take from.
+        const plan = new Map<string, Array<string | undefined>>()
+        // Keep target keys that cannot be satisfied by exact-key matching for the fallback pass.
+        const unmatchedTargets: string[] = []
+
+        // First pass: consume exact-key matches first so the best reuse is always used before fallback.
+        targetReuseKeys.forEach((targetReuseKey) => {
+            const count = available.get(targetReuseKey) ?? 0
+            if (count > 0) {
+                if (!plan.has(targetReuseKey)) {
+                    plan.set(targetReuseKey, [])
+                }
+                plan.get(targetReuseKey)!.push(targetReuseKey)
+                available.set(targetReuseKey, count - 1)
+            } else {
+                unmatchedTargets.push(targetReuseKey)
+            }
+        })
+
+        // Second pass: if no exact match exists, try to reuse any node from the same Repeat template.
+        unmatchedTargets.forEach((targetReuseKey) => {
+            const templateKey = this.extractRepeatTemplateKey(targetReuseKey)
+            if (!templateKey) {
+                // No template key means this target cannot be reused from another key.
+                if (!plan.has(targetReuseKey)) {
+                    plan.set(targetReuseKey, [])
+                }
+                plan.get(targetReuseKey)!.push(undefined)
+                return
+            }
+            let matchedReuseKey: string | undefined = undefined
+            for (const entry of available) {
+                const candidateReuseKey = entry[0]
+                const count = entry[1]
+                if (count <= 0 || candidateReuseKey === targetReuseKey) {
+                    continue
+                }
+                if (this.extractRepeatTemplateKey(candidateReuseKey) === templateKey) {
+                    // Found a compatible source key in the same template; consume one slot from it.
+                    matchedReuseKey = candidateReuseKey
+                    available.set(candidateReuseKey, count - 1)
+                    break
+                }
+            }
+            if (!plan.has(targetReuseKey)) {
+                plan.set(targetReuseKey, [])
+            }
+            // undefined means this target still has no reusable source after fallback search.
+            plan.get(targetReuseKey)!.push(matchedReuseKey)
+        })
+
+        this._repeatReusePlan = plan
+    }
+
+    private extractRepeatTemplateKey(reuseKey: string): string | undefined {
+        const marker = '@Repeat@'
+        const markerIndex = reuseKey.indexOf(marker)
+        if (markerIndex < 0) {
+            return undefined
+        }
+        return reuseKey.substring(0, markerIndex)
+    }
+
+    private tryReuseFromPool(sourceReuseKey: string, targetReuseKey: string): Disposable | undefined {
+        const pool = this._reusePool?.get(sourceReuseKey)
+        if (!pool) {
+            return undefined
+        }
+        const skipped: Disposable[] = []
+        while (pool.size > 0) {
+            const candidate = pool.getLastNode()
+            if (!candidate) {
+                skipped.forEach((item) => pool.put(item))
+                return undefined
+            }
+            if (this.canReuseCandidate(candidate, sourceReuseKey, targetReuseKey)) {
+                skipped.forEach((item) => pool.put(item))
+                return candidate
+            }
+            skipped.push(candidate)
+        }
+        skipped.forEach((item) => pool.put(item))
+        return undefined
+    }
+
+    private canReuseCandidate(candidate: Disposable, sourceReuseKey: string, targetReuseKey: string): boolean {
+        const candidateNode = GetReusableScopeNode(candidate)
+        if (!(candidateNode instanceof SyntaxItemPeer)) {
+            return false
+        }
+        const rid = candidateNode.getRid()
+        const sameKey = sourceReuseKey === targetReuseKey
+        const isOnMainTree = this.isRepeatNodeChildOnMainTree(rid)
+        const isInAnimation = this.isRepeatNodeChildInAnimation(rid)
+        if (this.isRepeatNodeImplicitAnimationOpen()) {
+            return sameKey ? isOnMainTree : false;
+        }
+        if (sameKey) {
+            return !(!isOnMainTree && isInAnimation)
+        }
+        return !isInAnimation
+    }
+
+    hasReusableCandidate(key: string): boolean {
+        const plannedReuseKeys = this._repeatReusePlan?.get(key)
+        if (!plannedReuseKeys || plannedReuseKeys.length === 0 || plannedReuseKeys[0] !== key) {
+            return false
+        }
+        const pool = this._reusePool?.get(key)
+        if (!pool || pool.size === 0) {
+            return false
+        }
+        const candidate = pool.getLastNode()
+        if (!candidate) {
+            return false
+        }
+        const candidateNode = GetReusableScopeNode(candidate)
+        if (!(candidateNode instanceof SyntaxItemPeer)) {
+            return false
+        }
+        const rid = candidateNode.getRid()
+        const isOnMainTree = this.isRepeatNodeChildOnMainTree(rid)
+        pool.put(candidate)
+        return isOnMainTree
+    }
+
+    override dispose(): void {
+        this._repeatTemplatePoolSize = undefined
+        this._repeatReusePlan = undefined
+        this._repeatActiveRangeReuseKeys = undefined
+        super.dispose()
     }
 }
 

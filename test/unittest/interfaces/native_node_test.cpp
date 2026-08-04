@@ -34,6 +34,7 @@
 #include "interfaces/native/node/styled_string.h"
 #include "interfaces/native/node/node_component_snapshot.h"
 #include "interfaces/native/node/gesture_impl.h"
+#include "core/components_ng/syntax/arkoala_for_each_node.h"
 #include "test/mock/adapter/ohos/osal/mock_system_properties.h"
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_container.h"
@@ -14731,6 +14732,85 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_CrossLanguageTreeOperating_InsertChildBefore00
 
     nodeAPI->removeChild(parentNode, child1);
     nodeAPI->removeChild(parentNode, child2);
+    nodeAPI->disposeNode(child1);
+    nodeAPI->disposeNode(child2);
+}
+
+/**
+ * @tc.name: OH_ArkUI_CrossLanguageTreeOperating_InsertChildBefore_ReorderArkoalaForEach
+ * @tc.desc: Reorder an existing child before a sibling under ArkoalaForEach parent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_CrossLanguageTreeOperating_InsertChildBefore_ReorderArkoalaForEach, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+
+    auto parentNode = AceType::MakeRefPtr<NG::ArkoalaForEachNode>(200101, true);
+    ASSERT_NE(parentNode, nullptr);
+    parentNode->SetTreeOperatingStatus(NG::TreeOperatingStatus::ENABLE);
+    auto parentHandle =
+        OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(parentNode)));
+    ASSERT_NE(parentHandle, nullptr);
+
+    auto child1 = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto child2 = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(child1, nullptr);
+    ASSERT_NE(child2, nullptr);
+
+    ASSERT_EQ(nodeAPI->addChild(parentHandle, child1), OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(nodeAPI->addChild(parentHandle, child2), OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(nodeAPI->insertChildBefore(parentHandle, child2, child1), OHOS::Ace::ERROR_CODE_NO_ERROR);
+
+    auto child1Node = reinterpret_cast<NG::UINode*>(child1);
+    auto child2Node = reinterpret_cast<NG::UINode*>(child2);
+    EXPECT_EQ(parentNode->GetChildAtIndex(0), AceType::Claim(child2Node));
+    EXPECT_EQ(parentNode->GetChildAtIndex(1), AceType::Claim(child1Node));
+
+    nodeAPI->removeChild(parentHandle, child1);
+    nodeAPI->removeChild(parentHandle, child2);
+    nodeAPI->disposeNode(child1);
+    nodeAPI->disposeNode(child2);
+}
+
+/**
+ * @tc.name: OH_ArkUI_CrossLanguageTreeOperating_InsertChildBefore_ReorderRegularParentNoop
+ * @tc.desc: Existing child reorder remains a no-op under regular parent node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, OH_ArkUI_CrossLanguageTreeOperating_InsertChildBefore_ReorderRegularParentNoop, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+
+    auto parentFrameNode =
+        NG::FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 200102, AceType::MakeRefPtr<NG::Pattern>(), true);
+    ASSERT_NE(parentFrameNode, nullptr);
+    parentFrameNode->SetTreeOperatingStatus(NG::TreeOperatingStatus::ENABLE);
+    auto parentHandle =
+        OHOS::Ace::NodeModel::GetArkUINode(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(parentFrameNode)));
+    ASSERT_NE(parentHandle, nullptr);
+
+    auto child1 = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto child2 = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(child1, nullptr);
+    ASSERT_NE(child2, nullptr);
+
+    ASSERT_EQ(nodeAPI->addChild(parentHandle, child1), OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(nodeAPI->addChild(parentHandle, child2), OHOS::Ace::ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(nodeAPI->insertChildBefore(parentHandle, child2, child1), OHOS::Ace::ERROR_CODE_NO_ERROR);
+
+    auto child1Node = reinterpret_cast<NG::UINode*>(child1);
+    auto child2Node = reinterpret_cast<NG::UINode*>(child2);
+    EXPECT_EQ(parentFrameNode->GetChildAtIndex(0), AceType::Claim(child1Node));
+    EXPECT_EQ(parentFrameNode->GetChildAtIndex(1), AceType::Claim(child2Node));
+
+    nodeAPI->removeChild(parentHandle, child1);
+    nodeAPI->removeChild(parentHandle, child2);
     nodeAPI->disposeNode(child1);
     nodeAPI->disposeNode(child2);
 }

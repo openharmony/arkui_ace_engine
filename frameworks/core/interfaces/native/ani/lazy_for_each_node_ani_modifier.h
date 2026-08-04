@@ -18,6 +18,7 @@
 
 #include "core/interfaces/ani/ani_api.h"
 #include "core/components_ng/syntax/arkoala_lazy_node.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -30,9 +31,47 @@ ani_long ConstructLazyForEachNode(ani_int id, ani_boolean isRepeat)
     return reinterpret_cast<ani_long>(AceType::RawPtr(node));
 }
 
+ani_boolean IsChildInAnimation(ani_long lazyNodePtr, ani_int rid)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(lazyNodePtr);
+    CHECK_NULL_RETURN(uiNode, ANI_FALSE);
+    auto lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
+    CHECK_NULL_RETURN(lazyNode, ANI_FALSE);
+    return lazyNode->IsChildInAnimation(rid) ? ANI_TRUE : ANI_FALSE;
+}
+
+ani_boolean IsChildOnMainTree(ani_long lazyNodePtr, ani_int rid)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(lazyNodePtr);
+    CHECK_NULL_RETURN(uiNode, ANI_FALSE);
+    auto lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
+    CHECK_NULL_RETURN(lazyNode, ANI_FALSE);
+    return lazyNode->IsChildOnMainTree(rid) ? ANI_TRUE : ANI_FALSE;
+}
+
+ani_boolean IsAllowAnimation(ani_long lazyNodePtr)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(lazyNodePtr);
+    CHECK_NULL_RETURN(uiNode, ANI_FALSE);
+    auto lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
+    CHECK_NULL_RETURN(lazyNode, ANI_FALSE);
+    return lazyNode->IsAllowAnimation() ? ANI_TRUE : ANI_FALSE;
+}
+
+ani_boolean IsImplicitAnimationOpen(ani_long lazyNodePtr)
+{
+    return AnimationUtils::IsImplicitAnimationOpen() ? ANI_TRUE : ANI_FALSE;
+}
+
 const ArkUIAniLazyForEachNodeModifier* GetLazyForEachNodeAniModifier()
 {
-    static const ArkUIAniLazyForEachNodeModifier impl = { .constructLazyForEachNode = ConstructLazyForEachNode };
+    static const ArkUIAniLazyForEachNodeModifier impl = {
+        .constructLazyForEachNode = ConstructLazyForEachNode,
+        .isChildInAnimation = IsChildInAnimation,
+        .isChildOnMainTree = IsChildOnMainTree,
+        .isAllowAnimation = IsAllowAnimation,
+        .isImplicitAnimationOpen = IsImplicitAnimationOpen
+    };
     return &impl;
 }
 

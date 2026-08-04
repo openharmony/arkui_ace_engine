@@ -150,7 +150,7 @@ RefPtr<ArkoalaLazyNode> CreateArkoalaContent(int32_t totalCount, int32_t* update
     auto arkoalaNode = AceType::MakeRefPtr<ArkoalaLazyNode>(ElementRegister::GetInstance()->MakeUniqueId());
     arkoalaNode->SetTotalCount(totalCount);
     arkoalaNode->SetCallbacks(
-        [](int32_t idx) -> RefPtr<UINode> {
+        [](int32_t idx, bool skipCreate) -> RefPtr<UINode> {
             auto item = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG,
                 ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
             item->GetLayoutProperty()->UpdateUserDefinedIdealSize(

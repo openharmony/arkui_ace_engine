@@ -17,6 +17,8 @@
 #define KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_LAZY_FOR_EACH_MODULE_H
 
 #include "load.h"
+#include <memory>
+#include "core/components_ng/syntax/arkoala_lazy_node.h"
  
 namespace OHOS::Ace::Ani {
  
@@ -30,6 +32,50 @@ ani_long ConstructLazyForEachNode(ani_env* env, [[maybe_unused]] ani_object aniC
 
     ani_long node = modifier->getLazyForEachNodeAniModifier()->constructLazyForEachNode(id, isRepeat);
     return node;
+}
+
+ani_boolean RepeatIsChildInAnimation([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_long lazyNodePtr, ani_int rid)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return ANI_FALSE;
+    }
+
+    return modifier->getLazyForEachNodeAniModifier()->isChildInAnimation(lazyNodePtr, rid);
+}
+
+ani_boolean RepeatIsChildOnMainTree([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_long lazyNodePtr, ani_int rid)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return ANI_FALSE;
+    }
+
+    return modifier->getLazyForEachNodeAniModifier()->isChildOnMainTree(lazyNodePtr, rid);
+}
+
+ani_boolean RepeatIsAllowAnimation([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_long lazyNodePtr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return ANI_FALSE;
+    }
+
+    return modifier->getLazyForEachNodeAniModifier()->isAllowAnimation(lazyNodePtr);
+}
+
+ani_boolean RepeatIsImplicitAnimationOpen([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_long lazyNodePtr)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier) {
+        return ANI_FALSE;
+    }
+
+    return modifier->getLazyForEachNodeAniModifier()->isImplicitAnimationOpen(lazyNodePtr);
 }
  
 } // namespace OHOS::Ace::Ani

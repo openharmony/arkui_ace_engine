@@ -190,6 +190,26 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructLazyForEachNode)
         },
         ani_native_function {
+            "_Repeat_IsChildInAnimation",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RepeatIsChildInAnimation)
+        },
+        ani_native_function {
+            "_Repeat_IsChildOnMainTree",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RepeatIsChildOnMainTree)
+        },
+        ani_native_function {
+            "_Repeat_IsAllowAnimation",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RepeatIsAllowAnimation)
+        },
+        ani_native_function {
+            "_Repeat_IsImplicitAnimationOpen",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RepeatIsImplicitAnimationOpen)
+        },
+        ani_native_function {
             "_BuilderProxyNode_Construct",
             "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::BuilderProxyNodeConstruct)
@@ -468,6 +488,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_ForEachNode_Construct",
             "i:l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::ConstructForEachNode)
+        },
+        ani_native_function {
+            "_ForEach_IsImplicitAnimationOpen",
+            ":z",
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ForEachIsImplicitAnimationOpen)
         },
         ani_native_function {
             "_Extractors_ToScenePtr",

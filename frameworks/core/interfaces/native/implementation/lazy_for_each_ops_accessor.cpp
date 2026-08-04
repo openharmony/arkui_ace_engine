@@ -146,8 +146,8 @@ void SyncImpl(Ark_NativePointer node,
     lazyNode->SetTotalCount(totalCount);
     lazyNode->SetRepeatMemoryOptimizationStrategy(repeatMemOptStrategy);
     lazyNode->SetCallbacks(
-        [callback = CallbackHelper(*creator)](int32_t index) {
-            return AceType::DynamicCast<UINode>(callback.BuildSync(index));
+        [callback = CallbackHelper(*creator)](int32_t index, bool skipCreate) {
+            return AceType::DynamicCast<UINode>(callback.BuildSync(index, skipCreate));
         },
         [cb = CallbackHelper(*updater)](
             int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {

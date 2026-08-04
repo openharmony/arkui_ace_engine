@@ -281,6 +281,10 @@ interface ManagedScope extends IncrementalScopeEx, Disposable, Dependent, Depend
     getCascadeParent(): ManagedScope | undefined
 }
 
+export function GetReusableScopeNode(candidate: Disposable): IncrementalNode | undefined {
+    return candidate instanceof ScopeImpl ? candidate.node : undefined
+}
+
 class StateImpl<Value> implements Observable, ManagedState, MutableState<Value> {
     protected manager: StateManagerImpl | undefined = undefined
     private dependencies: StateToScopes | undefined = undefined
@@ -1240,9 +1244,16 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         manager.checkForStateCreating()
         const inc = this.incremental
         const next = inc ? inc.next : this.child
-        for (let child = next; child; child = child!.next) {
+        let previous = inc
+        for (let child = next; child; previous = child, child = child!.next) {
             if (child!.id === id) {
-                this.detachChildScopes(child)
+                if (child === next) {
+                    // already in the expected incremental position
+                } else if (this.nodeRef?.allowSiblingReorder) {
+                    this.moveMatchedChildScope(previous!, child!)
+                } else {
+                    this.detachChildScopes(child)
+                }
                 this.incremental = child
                 return child as ScopeImpl<Value>
             }
@@ -1255,6 +1266,7 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         scope.manager = manager
         if (reused) {
             scope._id = id // children scope IDs are independent from Reusable parent
+            scope._reuseKey = reuseKey
             scope.invalidateRecursively(noIncrementalNode)
         } else if (create) {
             // create node within a scope
@@ -1277,6 +1289,59 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         }
         this.incremental = scope
         return scope
+    }
+
+    private moveMatchedChildScope(previous: ManagedScope | undefined, child: ManagedScope): void {
+        const inc = this.incremental
+        const next = inc ? inc.next : this.child
+        if (child === next) {
+            return
+        }
+        if (previous === undefined) {
+            throw new Error('unexpected')
+        }
+        this.moveMatchedChildNodeBeforeNext(child, next)
+        this.invalidateReorderedChildScopes(next, child)
+        previous.next = child.next
+        child.next = next
+        if (inc) {
+            inc.next = child
+        } else {
+            this.child = child
+        }
+    }
+
+    private invalidateReorderedChildScopes(first: ManagedScope | undefined, last: ManagedScope): void {
+        for (let scope = first; scope; scope = scope!.next) {
+            scope!.invalidateRecursively()
+            if (scope! === last) {
+                return
+            }
+        }
+        throw new Error('unexpected')
+    }
+
+    private moveMatchedChildNodeBeforeNext(child: ManagedScope, next: ManagedScope | undefined): void {
+        const childNode = this.findFirstChildNode(child)
+        const nextNode = next ? this.findFirstChildNode(next) : undefined
+        if (!childNode || !nextNode || childNode === nextNode) {
+            return
+        }
+        childNode.moveBeforeSibling(nextNode)
+    }
+
+    private findFirstChildNode(scope: ReadonlyTreeNode): IncrementalNode | undefined {
+        const managed = scope as ManagedScope
+        if (managed.node) {
+            return managed.node
+        }
+        for (let child = scope.firstChild; child; child = child!.nextSibling) {
+            const node = this.findFirstChildNode(child!)
+            if (node) {
+                return node
+            }
+        }
+        return undefined
     }
 
     private detachChildScopes(last?: ManagedScope): void {

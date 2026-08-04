@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_SYNTAX_ARKOALA_LAZY_NODE_H
 #include <cstdint>
 #include <functional>
+#include <unordered_map>
 
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
@@ -59,6 +60,12 @@ struct ActiveRangeParam {
     }
 };
 
+struct RepeatRidNodeInfo {
+    WeakPtr<UINode> rootNode;
+    WeakPtr<UINode> syntaxNode;
+    bool isActive;
+};
+
 /**
  * @brief Backend node representation to access and manage lazy items in Arkoala frontend
  *
@@ -71,7 +78,7 @@ public:
     ~ArkoalaLazyNode() override;
     void RegisterArkoalaLazyNode();
 
-    using CreateItemCb = std::function<RefPtr<UINode>(int32_t)>;
+    using CreateItemCb = std::function<RefPtr<UINode>(int32_t, bool)>;
     using UpdateRangeCb = std::function<void(int32_t, int32_t, int32_t, int32_t, bool)>;
     using ClearCacheCb = std::function<void()>;
     using releaseItemByIndexCb = std::function<void(int32_t)>;
@@ -94,6 +101,11 @@ public:
     RefPtr<FrameNode> GetFrameNode(int32_t index) final;
 
     RefPtr<UINode> GetChildByIndex(int32_t index);
+    RefPtr<UINode> GetRepeatNodeByRid(int32_t rid);
+    bool IsChildInAnimation(int32_t rid);
+    bool IsChildOnMainTree(int32_t rid);
+    bool IsAllowAnimation();
+    bool IsImplicitAnimationOpen();
 
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache, bool addToRenderTree) override;
 
@@ -227,6 +239,12 @@ private:
 
     void RemovingExpiringItem(int64_t deadline);
 
+    void ProcessRepeatNodeCleanup(bool isRepeat);
+
+    void ProcessAfterDataChange();
+
+    void ProcessOldNode(RefPtr<UINode> child, RefPtr<UINode> syntaxNode);
+
     std::list<RefPtr<UINode>> removingNodeList_;
 
     // false if in LazyForEach, true if in Repeat
@@ -240,6 +258,10 @@ private:
     bool needBuildAll_ = true;
 
     UniqueValuedMap<int32_t, RefPtr<UINode>, WeakPtr<UINode>::Hash> node4Index_;
+    std::set<int32_t> tempL1Node;
+    bool afterDataChange = false;
+    // rid -> concrete Repeat child instance, used by frontend rid-based reuse checks.
+    std::unordered_map<int32_t, RepeatRidNodeInfo> repeatNode4Rid_;
     CreateItemCb createItem_;
     UpdateRangeCb updateRange_;
     ClearCacheCb clearCache_;

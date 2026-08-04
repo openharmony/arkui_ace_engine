@@ -733,6 +733,10 @@ struct ArkUIAniContentSlotModifier {
 };
 struct ArkUIAniLazyForEachNodeModifier {
     ani_long (*constructLazyForEachNode)(ani_int, ani_boolean);
+    ani_boolean (*isChildInAnimation)(ani_long, ani_int);
+    ani_boolean (*isChildOnMainTree)(ani_long, ani_int);
+    ani_boolean (*isAllowAnimation)(ani_long);
+    ani_boolean (*isImplicitAnimationOpen)(ani_long);
 };
 struct ArkUIAniWaterFlowModifier {
     void (*setWaterFlowSection)(
@@ -997,6 +1001,7 @@ struct ArkUIAniSyntaxItemModifier {
 struct ArkUIAniForEachNodeModifier {
     ani_long (*construct)(ani_int, ani_boolean);
     void (*finishRender)(ani_long);
+    ani_boolean (*isImplicitAnimationOpen)();
 };
 
 struct ArkUIAniComponent3DModifier {

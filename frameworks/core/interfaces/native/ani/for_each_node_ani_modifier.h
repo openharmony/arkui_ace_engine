@@ -18,6 +18,7 @@
 
 #include "core/interfaces/ani/ani_api.h"
 #include "core/components_ng/syntax/arkoala_for_each_node.h"
+#include "core/components_ng/render/animation_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -36,11 +37,17 @@ void FinishRender(ani_long node)
     forEachNode->FinishRender();
 }
 
+ani_boolean IsImplicitAnimationOpen()
+{
+    return static_cast<ani_boolean>(AnimationUtils::IsImplicitAnimationOpen());
+}
+
 const ArkUIAniForEachNodeModifier* GetForEachNodeAniModifier()
 {
     static const ArkUIAniForEachNodeModifier impl = {
         .construct = Construct,
-        .finishRender = FinishRender
+        .finishRender = FinishRender,
+        .isImplicitAnimationOpen = IsImplicitAnimationOpen
     };
     return &impl;
 }
