@@ -19,7 +19,6 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include "base/image/file_uri_helper.h"
-#include "base/resource/data_provider_manager.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_object.h"
 #include "core/components/theme/resource_adapter.h"

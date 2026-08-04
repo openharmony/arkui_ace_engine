@@ -32,6 +32,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/ace_performance_monitor.h"
 #include "base/resource/asset_manager.h"
+#include "base/resource/data_provider_manager.h"
 #include "base/thread/task_executor.h"
 #include "core/common/display_info.h"
 #include "core/common/draw_delegate.h"
@@ -49,6 +50,10 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
+#include "core/event/non_pointer_event.h"
+#include "core/event/pointer_event.h"
+#include "core/event/touch_event.h"
+#include "core/gestures/gesture_info.h"
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/components/theme/theme_constants.h"
@@ -61,15 +66,9 @@ enum class AvoidAreaType : uint32_t;
 
 namespace OHOS::Ace {
 class ArkUIPerfMonitor;
-class DataProviderManagerInterface;
 class ScheduleTask;
 class SharedImageManager;
-class PlatformResRegister;
 struct RotationEvent;
-struct NonPointerEvent;
-struct DragPointerEvent;
-enum class FoldStatus : uint32_t;
-enum class FoldDisplayMode : uint32_t;
 namespace NG {
 class FrameNode;
 struct UIExtCallbackEvent;
@@ -113,7 +112,6 @@ class AccessibilityManager;
 enum class FrontendType;
 enum class PlatformVersion;
 enum class AccessibilityCallbackEventId : uint32_t;
-enum class DragEventAction : int;
 struct AccessibilityEvent;
 using NodeId = int32_t;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
@@ -770,7 +768,10 @@ public:
     {
         return dataProviderManager_;
     }
-    void SetDataProviderManager(const RefPtr<DataProviderManagerInterface>& dataProviderManager);
+    void SetDataProviderManager(const RefPtr<DataProviderManagerInterface>& dataProviderManager)
+    {
+        dataProviderManager_ = dataProviderManager;
+    }
 
     const RefPtr<PlatformBridge>& GetMessageBridge() const
     {
@@ -1027,7 +1028,10 @@ public:
         return density_;
     }
 
-    RefPtr<PlatformResRegister> GetPlatformResRegister() const;
+    RefPtr<PlatformResRegister> GetPlatformResRegister() const
+    {
+        return platformResRegister_;
+    }
 
     void SetTouchPipeline(const WeakPtr<PipelineBase>& context);
     void RemoveTouchPipeline(const WeakPtr<PipelineBase>& context);
