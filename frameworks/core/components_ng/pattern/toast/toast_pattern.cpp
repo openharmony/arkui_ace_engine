@@ -39,6 +39,143 @@ constexpr Dimension LIMIT_SPACING = 8.0_vp;
 
 } // namespace
 
+int32_t ToastPattern::GetToastParentContainerId(const RefPtr<FrameNode>& host)
+{
+    int32_t currentId = Container::CurrentId();
+    if (host) {
+        auto pipeline = host->GetContextRefPtr();
+        if (pipeline) {
+            currentId = pipeline->GetInstanceId();
+        }
+    }
+    if (currentId < 0) {
+        auto activeContainer = Container::GetActive();
+        if (activeContainer) {
+            currentId = activeContainer->GetInstanceId();
+        }
+    }
+    if (currentId < 0) {
+        return -1;
+    }
+
+    auto container = AceEngine::Get().GetContainer(currentId);
+    if (container && container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+    }
+    return currentId;
+}
+
+bool ToastPattern::IsToastInUIExtensionWindow(const RefPtr<FrameNode>& host)
+{
+    auto parentContainerId = GetToastParentContainerId(host);
+    if (parentContainerId < 0) {
+        return false;
+    }
+    auto container = AceEngine::Get().GetContainer(parentContainerId);
+    return container && container->IsUIExtensionWindow();
+}
+
+float ToastPattern::GetTitleBarHeightFromContext(const RefPtr<PipelineContext>& pipelineContext)
+{
+    CHECK_NULL_RETURN(pipelineContext, 0.0f);
+    auto titleBarHeightPx = static_cast<float>(pipelineContext->GetContainerModalTitleHeight());
+    auto customTitleHeightPx = pipelineContext->GetCustomTitleHeight().ConvertToPx();
+    if (LessOrEqual(titleBarHeightPx, 0.0f)) {
+        titleBarHeightPx = customTitleHeightPx;
+    }
+    return GreatNotEqual(titleBarHeightPx, 0.0f) ? titleBarHeightPx : 0.0f;
+}
+
+float ToastPattern::GetUIExtensionTitleBarHeight(const RefPtr<FrameNode>& host, int32_t parentContainerId)
+{
+    if (parentContainerId >= 0) {
+        auto toastSubwindow = SubwindowManager::GetInstance()->GetToastSubwindow(parentContainerId);
+        if (toastSubwindow) {
+            auto hostRect = toastSubwindow->GetUIExtensionHostWindowRect();
+            auto parentRect = toastSubwindow->GetParentWindowRect();
+            auto titleBarHeight = static_cast<float>(hostRect.Top() - parentRect.Top());
+            if (LessOrEqual(titleBarHeight, 0.0f)) {
+                titleBarHeight = -titleBarHeight;
+            }
+            if (GreatNotEqual(titleBarHeight, 0.0f)) {
+                return titleBarHeight;
+            }
+        }
+    }
+
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto hostContext = host->GetContextRefPtr();
+    auto hostContextTitleBarHeight = GetTitleBarHeightFromContext(hostContext);
+    if (GreatNotEqual(hostContextTitleBarHeight, 0.0f)) {
+        return hostContextTitleBarHeight;
+    }
+
+    auto mainPipelineContext = DialogManager::GetMainPipelineContext(host);
+    return GetTitleBarHeightFromContext(mainPipelineContext);
+}
+
+float ToastPattern::GetTopMostTitleBarHeightInUEC(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto parentContainerId = GetToastParentContainerId(host);
+    float result = 0.0f;
+    auto titleBarHeight = GetUIExtensionTitleBarHeight(host, parentContainerId);
+    if (GreatNotEqual(titleBarHeight, 0.0f)) {
+        result = titleBarHeight;
+    }
+    return result;
+}
+
+bool ToastPattern::NeedAvoidTitleBarForSystemTopMostInUEC(int32_t parentContainerId)
+{
+    if (parentContainerId < 0) {
+        return false;
+    }
+
+    auto toastSubwindow = SubwindowManager::GetInstance()->GetSystemToastWindow(parentContainerId);
+    CHECK_NULL_RETURN(toastSubwindow, false);
+
+    auto parentRect = toastSubwindow->GetParentWindowRect();
+    auto toastRect = toastSubwindow->GetWindowRect();
+    auto sameLeft = NearEqual(toastRect.Left(), parentRect.Left());
+    auto sameTop = NearEqual(toastRect.Top(), parentRect.Top());
+    auto coverTitleBar = sameLeft && LessOrEqual(toastRect.Top(), parentRect.Top());
+    auto needAvoid = sameLeft && (sameTop || coverTitleBar);
+    return needAvoid;
+}
+
+float ToastPattern::GetSystemTopMostTitleBarHeightInUEC(int32_t parentContainerId)
+{
+    if (parentContainerId < 0) {
+        return 0.0f;
+    }
+    auto toastSubwindow = SubwindowManager::GetInstance()->GetSystemToastWindow(parentContainerId);
+    CHECK_NULL_RETURN(toastSubwindow, 0.0f);
+
+    auto parentRect = toastSubwindow->GetParentWindowRect();
+    auto toastRect = toastSubwindow->GetWindowRect();
+    auto height = parentRect.Top() - toastRect.Top();
+    return GreatNotEqual(height, 0.0f) ? height : 0.0f;
+}
+
+float ToastPattern::GetUECTitleBarHeightForTopAlignment(
+    const RefPtr<FrameNode>& host, const RefPtr<ToastLayoutProperty>& toastProp)
+{
+    CHECK_NULL_RETURN(host, 0.0f);
+    CHECK_NULL_RETURN(toastProp, 0.0f);
+
+    auto parentContainerId = GetToastParentContainerId(host);
+    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
+    if (parentContainerId < 0 || showMode != ToastShowMode::SYSTEM_TOP_MOST) {
+        return 0.0f;
+    }
+
+    if (!NeedAvoidTitleBarForSystemTopMostInUEC(parentContainerId)) {
+        return 0.0f;
+    }
+    return GetSystemTopMostTitleBarHeightInUEC(parentContainerId);
+}
+
 void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<ToastLayoutProperty>& toastProps)
 {
     InitUIExtensionHostWindowRect();
@@ -58,8 +195,9 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     if (alignment == Alignment::TOP_LEFT || alignment == Alignment::TOP_CENTER || alignment == Alignment::TOP_RIGHT) {
         auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
         CHECK_NULL_VOID(toastTheme);
-        safeAreaTop += toastTheme->GetTop().ConvertToPx();
-        CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp);
+        auto toastThemeTop = toastTheme->GetTop().ConvertToPx();
+        safeAreaTop += toastThemeTop;
+        CalculateSafeAreaTopForTopAlignment(safeAreaTop, pipelineContext, toastProp, host);
     }
     const auto& safeArea = toastProps->GetSafeAreaInsets();
     limitPos_ = Dimension(GreatNotEqual(safeAreaTop, 0) ? safeAreaTop : LIMIT_SPACING.ConvertToPx());
@@ -90,41 +228,59 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     }
 }
 
-void ToastPattern::CalculateTitleBarHeightForTopAlignment(float& safeAreaTop,
-    const RefPtr<PipelineContext>& pipelineContext, const RefPtr<ToastLayoutProperty>& toastProp)
+void ToastPattern::CalculateSafeAreaTopForTopAlignment(float& safeAreaTop,
+    const RefPtr<PipelineContext>& pipelineContext, const RefPtr<ToastLayoutProperty>& toastProp,
+    const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(pipelineContext);
     CHECK_NULL_VOID(toastProp);
-    float titleBarHeightPx = 0.0f;
-    bool needAvoidTitleBar = false;
+    CHECK_NULL_VOID(host);
     auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
-    if (showMode == ToastShowMode::DEFAULT || showMode == ToastShowMode::TOP_MOST) {
-        needAvoidTitleBar = true;
+    auto isToastInUEC = IsToastInUIExtensionWindow(host);
+    if (isToastInUEC && showMode == ToastShowMode::TOP_MOST) {
+        auto uecTitleBarHeight = GetTopMostTitleBarHeightInUEC(host);
+        safeAreaTop += uecTitleBarHeight;
+        CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp, isToastInUEC);
     } else if (showMode == ToastShowMode::SYSTEM_TOP_MOST) {
-        auto currentId = Container::CurrentId();
-        if (currentId < 0) {
-            auto container = Container::GetActive();
-            if (container) {
-                currentId = container->GetInstanceId();
+        auto parentContainerId = GetToastParentContainerId(host);
+        bool needAvoidTitleBar = NeedAvoidTitleBarForSystemTopMostInUEC(parentContainerId);
+        if (needAvoidTitleBar) {
+            if (isToastInUEC) {
+                auto uecTitleBarHeight = GetUECTitleBarHeightForTopAlignment(host, toastProp);
+                safeAreaTop += uecTitleBarHeight;
+            } else {
+                safeAreaTop += GetTitleBarHeightFromContext(pipelineContext);
             }
+            CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp, isToastInUEC);
         }
-        auto parentContainerId = currentId >= MIN_SUBCONTAINER_ID ?
-            SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId;
-        auto toastSubwindow = SubwindowManager::GetInstance()->GetSystemToastWindow(parentContainerId);
-        if (toastSubwindow) {
-            auto parentRect = toastSubwindow->GetParentWindowRect();
-            auto toastRect = toastSubwindow->GetWindowRect();
-            if (NearEqual(toastRect.Left(), parentRect.Left()) && NearEqual(toastRect.Top(), parentRect.Top())) {
-                needAvoidTitleBar = true;
-            }
-        }
+    } else {
+        CalculateTitleBarHeightForTopAlignment(safeAreaTop, pipelineContext, toastProp, isToastInUEC);
     }
-    if (needAvoidTitleBar && pipelineContext) {
-        titleBarHeightPx = static_cast<float>(pipelineContext->GetContainerModalTitleHeight());
-        if (LessOrEqual(titleBarHeightPx, 0.0f)) {
-            titleBarHeightPx = pipelineContext->GetCustomTitleHeight().ConvertToPx();
+}
+
+void ToastPattern::CalculateTitleBarHeightForTopAlignment(float& safeAreaTop,
+    const RefPtr<PipelineContext>& pipelineContext, const RefPtr<ToastLayoutProperty>& toastProp,
+    bool isToastInUEC)
+{
+    CHECK_NULL_VOID(pipelineContext);
+    CHECK_NULL_VOID(toastProp);
+    auto showMode = toastProp->GetShowModeValue(ToastShowMode::DEFAULT);
+    if (!isToastInUEC && showMode != ToastShowMode::SYSTEM_TOP_MOST) {
+        safeAreaTop += GetTitleBarHeightFromContext(pipelineContext);
+    }
+
+    if (isToastInUEC) {
+        auto avoidInfoManager = pipelineContext->GetAvoidInfoManager();
+        auto instanceId = pipelineContext->GetInstanceId();
+        if (avoidInfoManager) {
+            ContainerScope scope(instanceId);
+            avoidInfoManager->AddAvoidInfoListener(WeakClaim(this));
+            RectF containerModal;
+            RectF buttonsRect;
+            if (avoidInfoManager->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
+                safeAreaTop += GreatNotEqual(buttonsRect.Height(), 0.0f) ? buttonsRect.Height() : 0.0f;
+            }
         }
-        safeAreaTop += titleBarHeightPx;
     }
 }
 
@@ -528,6 +684,7 @@ void ToastPattern::OnAttachToFrameNodeImpl()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     ACE_UINODE_TRACE(host);
+    RegisterAvoidInfoChangeListener(host);
     auto containerId = Container::CurrentId();
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
     auto pipeline = parentContainerId < 0 || parentContainerId >= MIN_PA_SERVICE_ID
@@ -561,6 +718,33 @@ void ToastPattern::OnAttachToFrameNodeImpl()
     InitUIExtensionHostWindowRect();
 }
 
+void ToastPattern::OnAvoidInfoChange(const ContainerModalAvoidInfo& info)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ToastPattern::RegisterAvoidInfoChangeListener(const RefPtr<FrameNode>& hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->AddAvoidInfoListener(WeakClaim(this));
+}
+
+void ToastPattern::UnRegisterAvoidInfoChangeListener(FrameNode* hostNode)
+{
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetAvoidInfoManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->RemoveAvoidInfoListener(WeakClaim(this));
+}
+
 void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
 {
     CHECK_NULL_VOID(node);
@@ -570,6 +754,8 @@ void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
 
 void ToastPattern::OnDetachFromFrameNodeImpl(FrameNode* node)
 {
+    CHECK_NULL_VOID(node);
+    UnRegisterAvoidInfoChangeListener(node);
     auto containerId = Container::CurrentId();
     auto parentContainerId = SubwindowManager::GetInstance()->GetParentContainerId(containerId);
     auto current_context = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -584,7 +770,6 @@ void ToastPattern::OnDetachFromFrameNodeImpl(FrameNode* node)
         pipeline->UnRegisterHalfFoldHoverChangedCallback(halfFoldHoverChangedCallbackId_.value_or(-1));
     }
     pipeline->UnRegisterRawKeyboardChangedCallback(rowKeyboardCallbackId_);
-    CHECK_NULL_VOID(node);
     pipeline->RemoveWindowSizeChangeCallback(node->GetId());
 }
 

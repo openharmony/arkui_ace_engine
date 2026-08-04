@@ -54,7 +54,7 @@ constexpr Dimension SCROLL_MIN_HEIGHT_SUITOLD = 100.0_vp;
 constexpr int32_t TEXT_ALIGN_CONTENT_CENTER = 1;
 constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
 constexpr int32_t ROW_CHILD_INDEX = 0;
-constexpr int32_t ONE_PX = 1;
+constexpr double ONE_PX = 1.0;
 constexpr char LIST_ETS_TAG[] = "List";
 constexpr char NAVDESTINATION_VIEW_ETS_TAG[] = "NavDestination";
 } // namespace
