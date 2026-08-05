@@ -1736,7 +1736,7 @@ bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>
     return false;
 }
 
-void PipelineBase::SetUiDvsyncSwitch(bool on) {}
+void PipelineBase::SetUiDvsyncSwitch(bool on, FromWhom fromWhom) {}
 
 RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
 {

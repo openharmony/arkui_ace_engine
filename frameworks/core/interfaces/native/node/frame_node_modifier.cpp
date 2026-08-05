@@ -1323,7 +1323,7 @@ ArkUI_Int32 SetUiDvsyncSwitch(ArkUIContext* context, bool enable)
             "SetUiDvsyncSwitch is not running on UI thread.");
         return ERROR_CODE_PARAM_INVALID;
     }
-    pipelineContext->SetUiDvsyncSwitch(enable);
+    pipelineContext->SetUiDvsyncSwitch(enable, FromWhom::API);
     return ERROR_CODE_NO_ERROR;
 }
 

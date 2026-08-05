@@ -36,6 +36,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
 #include "core/common/platform_bridge.h"
+#include "core/common/platform_window.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
@@ -1446,7 +1447,7 @@ public:
     void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr);
     const RefPtr<NG::THPExtraManager>& GetTHPExtraManager() const;
 
-    void SetUiDvsyncSwitch(bool on);
+    void SetUiDvsyncSwitch(bool on, FromWhom fromWhom = FromWhom::INNER);
     virtual bool GetOnShow() const = 0;
     bool IsDestroyed();
 
