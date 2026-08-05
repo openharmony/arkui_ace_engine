@@ -437,9 +437,27 @@ export function ParticleImpl(
     const receiver = remember<ArkParticleComponent>((): ArkParticleComponent => {
         return new ArkParticleComponent()
     })
-    NodeAttach<ArkParticlePeer>((): ArkParticlePeer => ArkParticlePeer.create(receiver), (peer: ArkParticlePeer): void => {
-        receiver.setPeer(peer)
-        style?.(receiver)
-        receiver.setPeer(undefined)
+    NodeAttach<ArkParticlePeer>(
+        (): ArkParticlePeer => ArkParticlePeer.create(receiver), 
+        (peer: ArkParticlePeer): void => {
+            receiver.setPeer(peer)
+            style?.(receiver)
+            receiver.setPeer(undefined)
+    })
+}
+@memo
+export function Particle(
+    @memo
+    style: ((attributes: ParticleAttribute) => void) | undefined
+) {
+    const receiver = remember<ArkParticleComponent>((): ArkParticleComponent => {
+        return new ArkParticleComponent()
+    })
+    NodeAttach<ArkParticlePeer>(
+        (): ArkParticlePeer => ArkParticlePeer.create(receiver), 
+        (peer: ArkParticlePeer): void => {
+            receiver.setPeer(peer)
+            style?.(receiver)
+            receiver.setPeer(undefined)
     })
 }
