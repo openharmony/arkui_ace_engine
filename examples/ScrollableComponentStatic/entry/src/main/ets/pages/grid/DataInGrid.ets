@@ -17,6 +17,7 @@
 
 import { ComponentCard } from '../../common/Card';
 import { common } from '@kit.AbilityKit';
+import hilog from '@ohos.hilog';
 import {
   Entry,
   Component,
@@ -44,13 +45,33 @@ export struct DataInGrid {
   // [StartExclude build_a_office_services_grid_of_foreach]
   aboutToAppear(): void {
     // app.string.Meeting资源文件中的value值为'会议'
-    this.services.push(this.context.resourceManager.getStringSync($r('app.string.Meeting').id));
+    try {
+      this.services.push(this.context.resourceManager.getStringSync($r('app.string.Meeting').id));
+    } catch (e) {
+      hilog.error(0x0000, 'DataInGrid',
+        `getStringSync('app.string.Meeting') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
     // app.string.Check_in资源文件中的value值为'签到'
-    this.services.push(this.context.resourceManager.getStringSync($r('app.string.Check_in').id));
+    try {
+      this.services.push(this.context.resourceManager.getStringSync($r('app.string.Check_in').id));
+    } catch (e) {
+      hilog.error(0x0000, 'DataInGrid',
+        `getStringSync('app.string.Check_in') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
     // app.string.Voting资源文件中的value值为'投票'
-    this.services.push(this.context.resourceManager.getStringSync($r('app.string.Voting').id));
+    try {
+      this.services.push(this.context.resourceManager.getStringSync($r('app.string.Voting').id));
+    } catch (e) {
+      hilog.error(0x0000, 'DataInGrid',
+        `getStringSync('app.string.Voting') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
     // app.string.Printing资源文件中的value值为'打印'
-    this.services.push(this.context.resourceManager.getStringSync($r('app.string.Printing').id));
+    try {
+      this.services.push(this.context.resourceManager.getStringSync($r('app.string.Printing').id));
+    } catch (e) {
+      hilog.error(0x0000, 'DataInGrid',
+        `getStringSync('app.string.Printing') failed. error code: ${e.code}, error message: ${e.message}`);
+    }
   }
   // [EndExclude build_a_office_services_grid_of_foreach]
 
