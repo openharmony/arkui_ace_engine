@@ -1,7 +1,7 @@
 # Basic Render Pipeline Context
 
-> 文档版本：v1.1
-> 更新时间：2026-07-27
+> 文档版本：v1.2
+> 更新时间：2026-08-04
 > 来源：`docs/context_registry.json` 主题 `BasicRenderPipeline`
 > 旧 KB 迁移来源：`docs/pattern/pipeline/Pipeline_Knowledge_Base.md`（旧 KB 位置，已迁移）
 
@@ -147,3 +147,5 @@ FlushVsync(nano, frameCount):
 - OH 平台适配层：`docs/kb/architecture/oh-platform-adapter.md`（Container/AceContainer/RosenWindow）
 - 编译构建：`docs/kb/architecture/build-system.md`（旧管线 vs NG 管线构建选择）
 - 窗口机制：`docs/kb/architecture/window-mechanism.md`（Rosen Window 窗口管理）
+- [渲染树同步](render-tree-sync.md) — RebuildRenderContextTree 的同步触发与 FlushVsync 内延迟合并执行路径
+- [同帧下树重新上树 isPendingState_ 状态错乱](../issues/lifecycle/ispending-state-render-tree-diff.md) — isPendingState_ 同帧下树重新上树问题型 KB
