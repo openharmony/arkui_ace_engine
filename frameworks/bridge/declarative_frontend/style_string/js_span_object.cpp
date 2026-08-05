@@ -283,7 +283,7 @@ void JSFontSpan::ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font)
                 variableFontWeight = GetFontWeightNumericValue(fontWeightEnum);
             } else {
                 variableFontWeight = StringUtils::IsNumber(weight) ?
-                    StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
+ 	                StringUtils::StringToInt(weight, DEFAULT_VARIABLE_FONT_WEIGHT) : DEFAULT_VARIABLE_FONT_WEIGHT;
             }
         }
     }
@@ -644,9 +644,9 @@ void JSFontSpan::GetFontConfigs(const JSCallbackInfo& info)
 }
 
 void JSFontSpan::SetFontConfigs(const JSCallbackInfo& info) {}
- 
+
 void JSFontSpan::SetStrokeJoinStyle(const JSCallbackInfo& info) {}
- 
+
 void JSFontSpan::GetStrokeJoinStyle(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(fontSpan_);
@@ -1656,8 +1656,8 @@ RefPtr<SpanBase> JSCustomSpan::GetSubSpan(int32_t start, int32_t end)
     }
     auto jsCustomSpanObject = customSpanObj_.Lock();
     CHECK_NULL_RETURN(!jsCustomSpanObject->IsEmpty(), nullptr);
-    RefPtr<SpanBase> spanBase =
-        MakeRefPtr<JSCustomSpan>(jsCustomSpanObject, GetOnMeasure(), GetOnDraw(), start, end);
+    RefPtr<SpanBase> spanBase = MakeRefPtr<JSCustomSpan>(jsCustomSpanObject,
+        GetOnMeasure(), GetOnDraw(), start, end);
     return spanBase;
 }
 
@@ -1672,7 +1672,8 @@ bool JSCustomSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     if (customSpanObj->IsEmpty() || otherSpanObj->IsEmpty()) {
         return false;
     }
-    return otherSpanObj->GetLocalHandle()->IsStrictEquals(customSpanObj->GetEcmaVM(), customSpanObj->GetLocalHandle());
+    return otherSpanObj->GetLocalHandle()
+        ->IsStrictEquals(customSpanObj->GetEcmaVM(), customSpanObj->GetLocalHandle());
 }
 
 std::function<CustomSpanMetrics(CustomSpanMeasureInfo)> JSCustomSpan::ParseOnMeasureFunc(
@@ -2077,6 +2078,7 @@ SpanParagraphStyle JSParagraphStyleSpan::ParseJsParagraphStyleSpan(
     ParseJsTailIndents(obj, paragraphStyle);
     return paragraphStyle;
 }
+
 void JSParagraphStyleSpan::ParseJsTextAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
 {
     if (!obj->HasProperty("textAlign")) {
@@ -2330,7 +2332,7 @@ std::function<void(NG::DrawingContext&, NG::LeadingMarginSpanOptions)> JSParagra
             nullptr);
         JSRef<JSVal> leadingMarginSpanVal = SetLeadingMarginSpanObj(objectTemplate, leadingMarginOptions);
         JSRef<JSVal> params[] = { jsVal, leadingMarginSpanVal };
-        func->ExecuteJS(2, params);
+        func->ExecuteJSWithObjCheck(2, params);
         if (unwrapCanvas) {
             unwrapCanvas->RestoreCanvas();
             unwrapCanvas->ResetCanvas();
@@ -2636,7 +2638,7 @@ void JSParagraphStyleSpan::GetTextDirection(const JSCallbackInfo& info)
 }
 
 void JSParagraphStyleSpan::SetTextDirection(const JSCallbackInfo& info) {}
- 
+
 void JSParagraphStyleSpan::GetShaderStyle(const JSCallbackInfo& info)
 {
     auto finalObj = JSRef<JSObject>::New();
@@ -2644,7 +2646,7 @@ void JSParagraphStyleSpan::GetShaderStyle(const JSCallbackInfo& info)
         GetParagraphStyle().colorShaderStyle, finalObj);
     info.SetReturnValue(finalObj);
 }
- 
+
 void JSParagraphStyleSpan::SetShaderStyle(const JSCallbackInfo& info) {}
 
 void JSParagraphStyleSpan::GetTailIndents(const JSCallbackInfo& info)
@@ -2694,7 +2696,6 @@ bool JSExtSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
         ->GetLocalHandle()
         ->IsStrictEquals(extSpanObj_->GetEcmaVM(), extSpanObj_->GetLocalHandle());
 }
-
 void JSExtSpan::SetJsExtSpanObject(const JSRef<JSObject>& extSpanObj)
 {
     extSpanObj_ = extSpanObj;

@@ -24,7 +24,7 @@
 namespace OHOS::Ace {
 enum class AroundSpecialNode { AFTER = 0, BEFORE, BETWEEN, NONE };
 
-class ACE_EXPORT MutableSpanString : public SpanString {
+class ACE_FORCE_EXPORT MutableSpanString : public SpanString {
     DECLARE_ACE_TYPE(MutableSpanString, SpanString);
 
 public:
@@ -42,7 +42,7 @@ public:
     ACE_FORCE_EXPORT void AppendSpanString(const RefPtr<SpanString>& spanString);
     bool IsSpeicalNode(int32_t location, SpanType speicalType);
     ACE_FORCE_EXPORT void SetSpanWatcher(const WeakPtr<SpanWatcher>& watcher);
-    ACE_FORCE_EXPORT void SplitSpansByNewLine();
+    void SplitSpansByNewLine();
     ACE_FORCE_EXPORT void NotifySpanWatcher();
 
 private:

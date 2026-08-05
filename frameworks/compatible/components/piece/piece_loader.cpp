@@ -50,7 +50,7 @@ RefPtr<Declaration> PieceLoader::CreateDeclaration()
     return AceType::MakeRefPtr<PieceDeclaration>();
 }
 
-const void* PieceLoader::GetModifier()
+const void* PieceLoader::GetCustomModifier(const std::string& tag)
 {
     return PieceModifier::GetPieceModifier();
 }

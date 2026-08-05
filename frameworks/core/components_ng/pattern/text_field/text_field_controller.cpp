@@ -119,7 +119,9 @@ int32_t TextFieldController::GetTextContentLinesNum()
         lines = static_cast<int32_t>(textFieldPattern->GetLineCount());
         return lines;
     }
-    lines = getTextContentLinesNum_();
+    if (getTextContentLinesNum_) {
+        lines = getTextContentLinesNum_();
+    }
     return lines;
 }
 
@@ -232,9 +234,7 @@ void TextFieldController::SetPlaceholderStyledString(const RefPtr<SpanStringBase
     auto textField = DynamicCast<TextFieldPattern>(textFieldPattern);
     CHECK_NULL_VOID(textField);
     auto host = textField->GetHost();
-    if (host) {
-        ACE_UINODE_TRACE(host);
-    }
+    ACE_UINODE_TRACE(host);
     auto spanString = AceType::DynamicCast<SpanString>(value);
     if (spanString) {
         textFieldPattern->SetPlaceholderStyledString(spanString);

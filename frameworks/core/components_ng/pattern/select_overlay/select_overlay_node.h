@@ -20,8 +20,8 @@
 #include <memory>
 
 #include "base/memory/referenced.h"
-#include "base/utils/noncopyable.h"
 #include "core/components/common/properties/placement.h"
+#include "base/utils/noncopyable.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 
@@ -260,10 +260,10 @@ private:
     void ShowAskCelia(
         float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info, const std::string& label);
     std::optional<float> GetParentWidth();
-
-    using ExecuteStateFunc = void (SelectOverlayNode::*)(FrameNodeType type, FrameNodeTrigger trigger);
     void NewMaterialMoreAnimation(bool noAnimation);
     void NewMaterialBackAnimation(bool noAnimation);
+
+    using ExecuteStateFunc = void (SelectOverlayNode::*)(FrameNodeType type, FrameNodeTrigger trigger);
 
     /* Text selection menu node structure.
         -rootNode

@@ -33,8 +33,6 @@ const char UNMARK_TEXT[] = "unmarkText";
 const char DISCARDED_MARKED_TEXT[] = "discardedMarkedText";
 #endif
 #if defined(ANDROID_PLATFORM)
-const char COMPOSING_START[] = "composingStart";
-const char COMPOSING_END[] = "composingEnd";
 const char STOP_BACK_PRESS[] = "stopBackPress";
 #endif
 
@@ -49,9 +47,6 @@ void TextEditingValue::ParseFromJson(const JsonValue& json)
 #if defined(IOS_PLATFORM)
     unmarkText = json.GetBool(UNMARK_TEXT);
     discardedMarkedText = json.GetBool(DISCARDED_MARKED_TEXT);
-#endif
-#if defined(ANDROID_PLATFORM)
-    compose.Update(json.GetInt(COMPOSING_START, -1), json.GetInt(COMPOSING_END, -1));
 #endif
     selection.baseOffset = json.GetInt(SELECTION_START, -1);
     selection.extentOffset = json.GetInt(SELECTION_END, -1);

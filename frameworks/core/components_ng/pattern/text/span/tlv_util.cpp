@@ -15,8 +15,8 @@
 
 #include "base/utils/utf_helper.h"
 #include "core/components_ng/pattern/text/span/tlv_util.h"
-#include "core/components_ng/render/paragraph.h"
 #include "core/components/common/properties/text_style_gradient.h"
+
 
 namespace OHOS::Ace {
 void TLVUtil::WriteString(std::vector<uint8_t>& buff, const std::string& value)
@@ -589,7 +589,7 @@ void TLVUtil::WriteGradientColors(std::vector<uint8_t>& buff, NG::Gradient& valu
         WriteDimension(buff, color.GetDimension());
     }
 }
- 
+
 std::optional<NG::Gradient> TLVUtil::ReadGradientColors(std::vector<uint8_t>& buff, int32_t& cursor)
 {
     std::optional<NG::Gradient> gradient;
@@ -613,7 +613,7 @@ std::optional<NG::Gradient> TLVUtil::ReadGradientColors(std::vector<uint8_t>& bu
     }
     return value;
 }
- 
+
 void TLVUtil::WriteRadialGradient(std::vector<uint8_t>& buff, NG::Gradient& value)
 {
     auto radialGradient = value.GetRadialGradient();
@@ -639,7 +639,7 @@ void TLVUtil::WriteRadialGradient(std::vector<uint8_t>& buff, NG::Gradient& valu
     WriteGradientColors(buff, value);
     WriteBool(buff, value.GetRepeat());
 }
- 
+
 std::optional<NG::Gradient> TLVUtil::ReadRadialGradient(std::vector<uint8_t>& buff, int32_t& cursor)
 {
     if (ReadUint8(buff, cursor) != TLV_SPAN_TEXT_LINE_STYLE_RADIALGRADIENT_BEGIN_TAG) {
@@ -691,7 +691,7 @@ std::optional<NG::Gradient> TLVUtil::ReadRadialGradient(std::vector<uint8_t>& bu
     }
     return value;
 }
- 
+
 void TLVUtil::WriteLinearGradient(std::vector<uint8_t>& buff, NG::Gradient& value)
 {
     auto linearGradient = value.GetLinearGradient();
@@ -714,7 +714,7 @@ void TLVUtil::WriteLinearGradient(std::vector<uint8_t>& buff, NG::Gradient& valu
     WriteGradientColors(buff, value);
     WriteBool(buff, value.GetRepeat());
 }
- 
+
 std::optional<NG::Gradient> TLVUtil::ReadLinearGradient(std::vector<uint8_t>& buff, int32_t& cursor)
 {
     std::optional<NG::Gradient> gradient;

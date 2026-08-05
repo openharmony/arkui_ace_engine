@@ -29,7 +29,7 @@ public:
     void* CreateModel() override;
     RefPtr<V2::InspectorComposedElement> CreateInspectorElement(const std::string& id) override;
     RefPtr<Declaration> CreateDeclaration() override;
-    const void* GetModifier() override;
+    const void* GetCustomModifier(const std::string& tag = "") override;
 };
 
 } // namespace OHOS::Ace

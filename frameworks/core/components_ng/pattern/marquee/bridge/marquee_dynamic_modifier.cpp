@@ -37,7 +37,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr bool DEFAULT_ALLOW_SCALE = true;
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
-constexpr std::string_view DEFAULT_FONT_FAMILY = "cursive";
+const std::string DEFAULT_FONT_FAMILY = "cursive";
 constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
 constexpr double DEFAULT_STEP = 6.0;
 
@@ -165,7 +165,7 @@ void ResetMarqueeFontFamily(ArkUINodeHandle node, ArkUI_Bool isJsView)
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     if (!isJsView) {
-        std::string familiesStr = std::string(DEFAULT_FONT_FAMILY);
+        std::string familiesStr = DEFAULT_FONT_FAMILY;
         std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
         MarqueeModelNG::SetFontFamily(frameNode, fontFamilyResult);
     } else {
@@ -357,7 +357,7 @@ void SetMarqueeSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 u
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-
+    
     auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(unit);
     CalcDimension spacing(number, unitEnum);
     if (number < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX || unitEnum > OHOS::Ace::DimensionUnit::CALC ||
@@ -367,7 +367,6 @@ void SetMarqueeSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 u
     } else {
         MarqueeModelNG::SetMarqueeSpacing(frameNode, spacing);
     }
-
     if (SystemProperties::ConfigChangePerform() && spacingRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(spacingRawPtr));
         CHECK_NULL_VOID(resObj);
@@ -403,6 +402,7 @@ void ResetMarqueeDelay(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     MarqueeModelNG::ResetMarqueeDelay(frameNode);
 }
+
 
 #ifndef CROSS_PLATFORM
 void SetMarqueeFontSizeImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* fontSizeRawPtr)
@@ -477,7 +477,7 @@ void SetMarqueeFontFamilyImpl(ArkUINodeHandle node, const char* fontFamily)
 void ResetMarqueeFontFamilyImpl(ArkUINodeHandle node, ArkUI_Bool isJsView)
 {
     if (!isJsView) {
-        std::string familiesStr = std::string(DEFAULT_FONT_FAMILY);
+        std::string familiesStr = DEFAULT_FONT_FAMILY;
         std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
         GetMarqueeModelImpl()->SetFontFamily(fontFamilyResult);
     } else {

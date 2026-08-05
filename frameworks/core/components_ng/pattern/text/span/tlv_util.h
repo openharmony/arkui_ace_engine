@@ -26,6 +26,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components/common/properties/text_enums.h"
+#include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 
 namespace OHOS::Ace {
@@ -143,11 +144,16 @@ constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_PARAGRAPH_SPACING = 0x98;
 constexpr uint8_t TLV_SPAN_STRING_MODE_FLAG = 0x99;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_LineThicknessScale = 0x9A;
 constexpr uint8_t TLV_FLOAT_TAG = 0x9B;
+
 constexpr uint8_t TLV_SPAN_URL_CONTENT = 0X9C;
+
 constexpr uint8_t TLV_SPAN_FONT_STYLE_SUPERSCRIPT = 0x9D;
+
 constexpr uint8_t TLV_SPAN_FONT_STYLE_STROKEWIDTH = 0x9E;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_STROKECOLOR = 0x9F;
+
 constexpr uint8_t TLV_SUPERSCRIPT_TAG = 0xA0;
+
 constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_TEXTVERTICALALIGN = 0xA1;
 constexpr uint8_t TLV_TEXTVERTICALALIGN_TAG = 0xA2;
 
@@ -160,6 +166,7 @@ constexpr uint8_t TLV_SPAN_FONT_STYLE_VARIABLEFONTWEIGHT = 0xA6;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT = 0xA7;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY = 0xA8;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_FONTSIZESCALE = 0xA9;
+
 constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_ISONLYBETWEENLINES = 0xAA;
 constexpr uint8_t TLV_SPAN_TEXT_LINE_STYLE_LINEHEIGHTMULTIPLY = 0xAB;
 constexpr uint8_t TLV_SPAN_FONT_STYLE_STROKEJOINSTYLE = 0xAC;

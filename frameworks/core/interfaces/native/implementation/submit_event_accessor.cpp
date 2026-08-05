@@ -51,6 +51,7 @@ void SetTextImpl(Ark_SubmitEvent peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(peer->GetEventInfo());
+    CHECK_NULL_VOID(text);
     auto string = Converter::Convert<std::u16string>(*text);
     peer->GetEventInfo()->SetText(string);
 }

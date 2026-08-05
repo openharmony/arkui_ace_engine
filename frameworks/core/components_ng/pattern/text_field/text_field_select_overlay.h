@@ -57,11 +57,10 @@ public:
     std::string GetSelectedText() override;
     bool IsStopBackPress() const override;
 
-    void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo) override;
-    void UpdateAISelectMenu();
-
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
+    void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type, const std::string& labelInfo) override;
+    void UpdateAISelectMenu();
     void OnHandleMove(const RectF& rect, bool isFirst) override;
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnAfterSelectOverlayShow(bool isCreate) override;
@@ -106,9 +105,6 @@ public:
     void IsAIMenuOptionChanged(SelectMenuInfo& menuInfo) override;
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     bool OnHandleBeforeMenuVisibiltyChanged(bool isVisible) override;
-    enum class RequestCode: uint32_t {
-        RIGHT_CLICK = 1 << 3
-    };
 
 protected:
     bool AllowTranslate() override;

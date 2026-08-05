@@ -17,10 +17,8 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_LINE_SPACING_STYLE_PEER_IMPL_H
 
 #include "base/memory/ace_type.h"
-
-namespace OHOS::Ace {
-class LineSpacingSpan;
-}
+#include "core/components_ng/pattern/text/span/span_object.h"
+#include "core/interfaces/native/utility/peer_utils.h"
 
 struct LineSpacingStylePeer final {
     OHOS::Ace::RefPtr<OHOS::Ace::LineSpacingSpan> span;

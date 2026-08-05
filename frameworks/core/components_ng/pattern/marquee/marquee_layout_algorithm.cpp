@@ -84,6 +84,7 @@ LayoutConstraintF MarqueeLayoutAlgorithm::CreateTextLayoutConstraint(LayoutWrapp
     LayoutConstraintF textLayoutConstraint;
     textLayoutConstraint.UpdateMaxSizeWithCheck(SizeF(Infinity<float>(), maxSize.Height()));
     auto heightLayoutPolicy = TextBase::GetLayoutCalPolicy(layoutWrapper, false);
+    CHECK_NULL_RETURN(layoutWrapper, textLayoutConstraint);
     auto layoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, textLayoutConstraint);
     const auto& layoutConstraint = layoutProperty->GetLayoutConstraint();

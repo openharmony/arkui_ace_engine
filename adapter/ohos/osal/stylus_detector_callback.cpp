@@ -17,7 +17,6 @@
 
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
-#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
 

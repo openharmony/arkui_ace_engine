@@ -1057,7 +1057,7 @@ class SearchStrokeJoinStyleModifier extends ModifierWithKey<JoinStyle>{
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
- 
+
 class SearchShaderStyleModifier extends ModifierWithKey<{
   center: Array<any>;
   radius: number | string;
@@ -1206,7 +1206,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     modifierWithKey(this._modifiersWithKeys, SearchSearchButtonModifier.identity, SearchSearchButtonModifier, searchButton);
     return this;
   }
-  enableSelectedDataDetector(value) {
+  enableSelectedDataDetector(value): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchSelectDetectorEnableModifier.identity, SearchSelectDetectorEnableModifier, value);
     return this;
   }

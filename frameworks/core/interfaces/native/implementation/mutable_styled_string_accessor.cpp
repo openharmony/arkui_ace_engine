@@ -69,11 +69,8 @@ Ark_MutableStyledString ConstructImpl(const Ark_Union_String_ImageAttachment_Cus
                 peer->spanString->BindWithSpans(spans.value());
             },
             [&peer](const Ark_ImageAttachment& arkImageAtt) {
-                auto span = Convert<RefPtr<SpanBase>>(arkImageAtt);
-                CHECK_NULL_VOID(span);
-                peer->spanString = AceType::MakeRefPtr<MutableSpanString>(std::u16string());
-                std::vector<RefPtr<SpanBase>> spans = { span };
-                peer->spanString->BindWithSpans(spans);
+                CHECK_NULL_VOID(arkImageAtt && arkImageAtt->span);
+                peer->spanString = AceType::MakeRefPtr<MutableSpanString>(arkImageAtt->span->GetImageSpanOptions());
             },
             [&peer](const Ark_CustomSpanWrapper& arkCustomSpan) {
                 auto span = Convert<RefPtr<SpanBase>>(arkCustomSpan);

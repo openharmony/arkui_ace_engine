@@ -19,8 +19,8 @@
 #include <vector>
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/pattern/search/search_model.h"
 
 namespace OHOS::Ace {

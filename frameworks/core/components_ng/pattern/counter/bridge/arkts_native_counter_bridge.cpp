@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/counter/bridge/arkts_native_counter_bridge.h"
+
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_counter_theme.h"
-#include "ui/base/ace_type.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/counter/counter_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
-#include "core/interfaces/native/node/node_api.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -191,6 +190,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterHeight(ArkUIRuntimeCallInfo* run
             ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, false);
         }
     }
+
     auto heightRawPtr = AceType::RawPtr(heightResObj);
     if (isJsView) {
         if (LessNotEqual(jsHeight.Value(), 0.0)) {
@@ -231,7 +231,6 @@ void CounterBridge::UpdateLayoutPolicy(ArkUIRuntimeCallInfo* runtimeCallInfo, bo
     CHECK_NULL_VOID(vm);
     Local<JSValueRef> value = runtimeCallInfo->GetCallArgRef(1);
     LayoutCalPolicy policy = LayoutCalPolicy::NO_MATCH;
-
     if (value->IsObject(vm)) {
         auto obj = value->ToObject(vm);
         CHECK_NULL_VOID(!obj.IsEmpty());
@@ -279,6 +278,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterWidth(ArkUIRuntimeCallInfo* runt
             ViewAbstractModel::GetInstance()->UpdateLayoutPolicyProperty(LayoutCalPolicy::NO_MATCH, true);
         }
     }
+
     auto widthRawPtr = AceType::RawPtr(widthResObj);
     if (isJsView) {
         if (LessNotEqual(jsWidth.Value(), 0.0)) {
@@ -289,7 +289,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterWidth(ArkUIRuntimeCallInfo* runt
             nativeNode, jsWidth.Value(), static_cast<int>(jsWidth.Unit()), widthRawPtr);
         return panda::JSValueRef::Undefined(vm);
     }
-
+    
     if (LessNotEqual(width.Value(), 0.0)) {
         ResetCounterWidth(runtimeCallInfo);
         return panda::JSValueRef::Undefined(vm);
@@ -410,7 +410,7 @@ ArkUINativeModuleValue CounterBridge::SetCounterSize(ArkUIRuntimeCallInfo* runti
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
 
-    Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1);  // 1: width Value
+    Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1); // 1: width Value
     Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(2); // 2: height Value
     CalcDimension width;
     CalcDimension jsWidth;
@@ -425,13 +425,13 @@ ArkUINativeModuleValue CounterBridge::SetCounterSize(ArkUIRuntimeCallInfo* runti
 
     bool isJsView = IsJsView(firstArg, vm);
     if (isJsView) {
-        if (widthState && jsWidth.IsValid() && GreatNotEqual(jsWidth.Value(), 0.0)) {
+        if (widthState && jsWidth.IsValid() && GreatOrEqual(jsWidth.Value(), 0.0)) {
             GetArkUINodeModifiers()->getCounterModifier()->setCounterWidthRes(
                 nativeNode, jsWidth.Value(), static_cast<int>(jsWidth.Unit()), AceType::RawPtr(widthResObj));
         } else {
             ResetCounterWidth(runtimeCallInfo);
         }
-        if (heightState && jsHeight.IsValid() && GreatNotEqual(jsHeight.Value(), 0.0)) {
+        if (heightState && jsHeight.IsValid() && GreatOrEqual(jsHeight.Value(), 0.0)) {
             GetArkUINodeModifiers()->getCounterModifier()->setCounterHeightRes(
                 nativeNode, jsHeight.Value(), static_cast<int>(jsHeight.Unit()), AceType::RawPtr(heightResObj));
         } else {
