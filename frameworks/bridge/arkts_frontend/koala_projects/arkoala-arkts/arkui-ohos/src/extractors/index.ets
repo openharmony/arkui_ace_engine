@@ -16,7 +16,7 @@
 import { int32 } from "@koalaui/common";
 import { KPointer, nullptr, MaterializedBaseTag } from '@koalaui/interop';
 import { default as image } from "@ohos.multimedia.image";
-import { ColorMetrics, DrawContext, LengthMetrics, Size } from "arkui.Graphics";
+import { ColorMetrics, DrawContext, LengthMetrics, LengthUnit, LengthMetricsUnit, Size } from "arkui.Graphics";
 import { ColorMetricsExt, TouchEventProxy, TouchEventHandwritten } from '#generated'
 import { TouchEvent, LayoutPolicy, LayoutPolicyInternal } from '../component/common'
 import { NodeController } from "arkui.NodeController";
@@ -120,6 +120,7 @@ import { ShaderStyle, LinearGradientStyle, RadialGradientStyle, ColorShaderStyle
 import { GestureControl, GestureRecognizer, TapRecognizerInternal, LongPressRecognizerInternal, PanRecognizerInternal, PinchRecognizerInternal, SwipeRecognizerInternal, RotationRecognizerInternal, TapGestureEventInternal, LongPressGestureEventInternal, PanGestureEventInternal, PinchGestureEventInternal, SwipeGestureEventInternal, RotationGestureEventInternal, BaseGestureEventInternal, EventTargetInfo, ScrollableTargetInfo } from '../component/gesture'
 import { XComponentController } from '../component/xcomponent'
 import { XComponentControllerWrapper } from '../component/idlize'
+import { LengthMetricsProxy } from '../component/idlize'
 
 export namespace extractors {
   export function toImagePixelMapPtr(value: image.PixelMap): KPointer {
@@ -989,5 +990,18 @@ export namespace extractors {
         return scrollableTargetInfoObj
     }
     return new EventTargetInfo(MaterializedBaseTag.NOP, ptr)
+  }
+
+  export function transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(lengthMetrics: LengthMetrics): LengthMetricsProxy {
+    lengthMetrics.refresh()
+    const proxy = new LengthMetricsProxy()
+    proxy.value = lengthMetrics.value
+    proxy.unit = lengthMetrics.unit
+    return proxy
+  }
+
+  export function transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(proxy: LengthMetricsProxy): LengthMetrics {
+    const unit = proxy.unit === LengthMetricsUnit.PX ? LengthUnit.PX : LengthUnit.VP
+    return new LengthMetrics(proxy.value, unit)
   }
 }

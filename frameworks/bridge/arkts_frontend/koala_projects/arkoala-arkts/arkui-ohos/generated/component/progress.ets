@@ -28,16 +28,15 @@ import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, ArkCommonMethod
 import { ResourceColor, Resource as arkui_component_units_Resource, Length, PX, VP, LPX, Font as arkui_component_units_Font, arkui_component_units_Font_serializer } from './units'
 import { Color as arkui_component_enums_Color } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { ContentModifier, AttributeModifier, hookProgressContentModifier, hookProgressAttributeModifier, AttributeUpdater } from '#handwritten'
+import { ContentModifier, AttributeModifier, hookProgressContentModifier, LengthMetrics as arkui_Graphics_LengthMetrics, hookProgressAttributeModifier, AttributeUpdater, extractors } from '#handwritten'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { ProgressModifier } from './../ProgressModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
 export class ArkProgressPeer extends ArkCommonMethodPeer {
     progressAttributeSet?: ProgressModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
@@ -812,7 +811,8 @@ export class CapsuleStyleOptions_serializer {
         if (valueHolderForBorderRadius !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBorderRadiusTmpValue = valueHolderForBorderRadius!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValue)
+            const valueHolderForBorderRadiusTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForBorderRadiusTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -907,7 +907,8 @@ export class CapsuleStyleOptions_serializer {
         const borderRadiusTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let borderRadiusTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((borderRadiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            borderRadiusTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const borderRadiusTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            borderRadiusTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(borderRadiusTmpBufOptDeserialized)
         }
         const borderRadiusTmpResult: arkui_Graphics_LengthMetrics | undefined = borderRadiusTmpBuf
         let value: CapsuleStyleOptions = ({enableScanEffect: enableScanEffectTmpResult, enableSmoothEffect: enableSmoothEffectTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, content: contentTmpResult, font: fontTmpResult, fontColor: fontColorTmpResult, showDefaultPercentage: showDefaultPercentageTmpResult, borderRadius: borderRadiusTmpResult} as CapsuleStyleOptions)

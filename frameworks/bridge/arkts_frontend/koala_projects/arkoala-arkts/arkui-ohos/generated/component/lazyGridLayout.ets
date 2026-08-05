@@ -17,7 +17,7 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer } from '@koalaui/interop'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
 import { int32, int64, float32 } from '@koalaui/common'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
@@ -27,7 +27,7 @@ import { LengthMetrics as arkui_Graphics_LengthMetrics, LengthUnit } from 'arkui
 import { CustomBuilder } from './builder'
 import { StickyStyle } from './list'
 import { Resource as global_resource_Resource } from 'global.resource'
-import { initializers, AttributeModifier, hookLazyGridLayoutAttributeAttributeModifier, AttributeUpdater, hookLazyVGridLayoutAttributeModifier } from '#handwritten'
+import { extractors, initializers, AttributeModifier, hookLazyGridLayoutAttributeAttributeModifier, AttributeUpdater, hookLazyVGridLayoutAttributeModifier } from '#handwritten'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { ArkThemeScopeManager } from '#arktheme'
@@ -58,7 +58,8 @@ export class ArkLazyGridLayoutAttributePeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -70,7 +71,8 @@ export class ArkLazyGridLayoutAttributePeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }

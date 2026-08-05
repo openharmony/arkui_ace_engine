@@ -51,11 +51,10 @@ import { NavDestinationContext, NavDestinationMode, NavDestinationContext_serial
 import { NavigationModifier } from './../NavigationModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 import { TextModifier_serializer } from './../framework/TextModifier'
 import { uiMaterial_Material_serializer } from './../framework/ohos.arkui.uiMaterial'
 // instructive change begin
-import { NavExtender } from './idlize'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer, NavExtender } from './idlize'
 // instructive change end
 export interface NavigationTransitionProxy {
     from: NavContentInfo
@@ -2972,7 +2971,8 @@ export class ScrollEffectOptions_serializer {
         if (valueHolderForBlurEffectiveStartOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBlurEffectiveStartOffsetTmpValue = valueHolderForBlurEffectiveStartOffset!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBlurEffectiveStartOffsetTmpValue)
+            const valueHolderForBlurEffectiveStartOffsetTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForBlurEffectiveStartOffsetTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForBlurEffectiveStartOffsetTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2980,7 +2980,8 @@ export class ScrollEffectOptions_serializer {
         if (valueHolderForBlurEffectiveEndOffset !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBlurEffectiveEndOffsetTmpValue = valueHolderForBlurEffectiveEndOffset!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBlurEffectiveEndOffsetTmpValue)
+            const valueHolderForBlurEffectiveEndOffsetTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForBlurEffectiveEndOffsetTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForBlurEffectiveEndOffsetTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2996,13 +2997,15 @@ export class ScrollEffectOptions_serializer {
         const blurEffectiveStartOffsetTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let blurEffectiveStartOffsetTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((blurEffectiveStartOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            blurEffectiveStartOffsetTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const blurEffectiveStartOffsetTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            blurEffectiveStartOffsetTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(blurEffectiveStartOffsetTmpBufOptDeserialized)
         }
         const blurEffectiveStartOffsetTmpResult: arkui_Graphics_LengthMetrics | undefined = blurEffectiveStartOffsetTmpBuf
         const blurEffectiveEndOffsetTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let blurEffectiveEndOffsetTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((blurEffectiveEndOffsetTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            blurEffectiveEndOffsetTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const blurEffectiveEndOffsetTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            blurEffectiveEndOffsetTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(blurEffectiveEndOffsetTmpBufOptDeserialized)
         }
         const blurEffectiveEndOffsetTmpResult: arkui_Graphics_LengthMetrics | undefined = blurEffectiveEndOffsetTmpBuf
         let value: ScrollEffectOptions = ({scrollEffectType: scrollEffectTypeTmpResult, blurEffectiveStartOffset: blurEffectiveStartOffsetTmpResult, blurEffectiveEndOffset: blurEffectiveEndOffsetTmpResult} as ScrollEffectOptions)
@@ -3492,7 +3495,8 @@ export class NavigationTitleOptions_serializer {
         if (valueHolderForPaddingStart !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPaddingStartTmpValue = valueHolderForPaddingStart!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForPaddingStartTmpValue)
+            const valueHolderForPaddingStartTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForPaddingStartTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForPaddingStartTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -3500,7 +3504,8 @@ export class NavigationTitleOptions_serializer {
         if (valueHolderForPaddingEnd !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForPaddingEndTmpValue = valueHolderForPaddingEnd!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForPaddingEndTmpValue)
+            const valueHolderForPaddingEndTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForPaddingEndTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForPaddingEndTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -3593,13 +3598,15 @@ export class NavigationTitleOptions_serializer {
         const paddingStartTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let paddingStartTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((paddingStartTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            paddingStartTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const paddingStartTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            paddingStartTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(paddingStartTmpBufOptDeserialized)
         }
         const paddingStartTmpResult: arkui_Graphics_LengthMetrics | undefined = paddingStartTmpBuf
         const paddingEndTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let paddingEndTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((paddingEndTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            paddingEndTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const paddingEndTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            paddingEndTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(paddingEndTmpBufOptDeserialized)
         }
         const paddingEndTmpResult: arkui_Graphics_LengthMetrics | undefined = paddingEndTmpBuf
         const mainTitleModifierTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()

@@ -25,7 +25,7 @@ import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_ser
 import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, Bindable_I32_serializer, Bindable, BlurStyle, OnWillScrollCallback, OnScrollCallback, MouseEvent_serializer, AxisEvent_serializer, MouseEvent, MouseEventInternal, AxisEvent, AxisEventInternal, Bindable_WidthBreakpoint_serializer, Bindable_HeightBreakpoint_serializer, ClickEvent, ClickEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, UICommonEvent, UICommonEventInternal, SourceTool, SheetOptions_serializer, InputEventMonitor_serializer, KeyEvent, KeyEventInternal, SheetOptions, InputEventListener, RawInputEventWrapper, RawInputEventWrapperInternal, InputEventMonitor, OnVisibleIndexesChangeCallback, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, Callback as arkui_component_common_Callback, ThemeColorMode, HistoricalPoint_serializer, HistoricalPoint, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, ICurve, Rectangle, ShadowOptions, ShadowStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode as arkui_component_common_KeyboardAvoidMode, HoverModeAreaType, SystemUiMaterial, DistortionMode, EdgeLightMode, EventTarget, SourceType, ModifierKeyStateGetter, TouchObject, SizeResult, LinearGradientOptions, RadialGradientOptions, CommonMethod, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, LinearGradientOptions_serializer, RadialGradientOptions_serializer, EventTarget_serializer, TouchObject_serializer } from './common'
 import { extractors, TouchEvent, ContentModifier, XComponentController, CustomDialogController, initializers, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from '#handwritten'
 import { arkui_component_units_Font_serializer, Font as arkui_component_units_Font, VoidCallback, SizeOptions_serializer, Length, Resource as arkui_component_units_Resource, SizeOptions, Position_serializer, Position, ResourceColor, ItemFillPolicy_serializer, ItemFillPolicy, DrawingCanvas, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from './units'
-import { arkui_Graphics_LengthMetrics_serializer, Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
+import { Vector2_serializer, Size_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer, Frame_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
 import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, Vector2, Size, NodePosition, Vector3, Matrix4, Rect, Circle, RoundRect, CommandPath, Frame, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { ArkListOptions_serializer } from './../framework/ohos.arkui.ArcList'
 import { ArkListOptions, ArcScrollIndexHandler } from '@ohos.arkui.ArcList'
@@ -498,7 +498,8 @@ export class ArcAlphabetIndexerExtender {
         if (size !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const sizeTmpValue = size!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, sizeTmpValue)
+            const sizeTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(sizeTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, sizeTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -714,7 +715,8 @@ export class ArcListExtender {
         if (space !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const spaceTmpValue = space!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, spaceTmpValue)
+            const spaceTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(spaceTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, spaceTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -751,7 +753,8 @@ export class ArcListExtender {
         if (width !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const widthTmpValue = width!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, widthTmpValue)
+            const widthTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(widthTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, widthTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -4094,7 +4097,8 @@ export class LazyColumnLayoutExtender {
         if (space !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const spaceTmpValue = space!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, spaceTmpValue)
+            const spaceTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(spaceTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, spaceTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -4299,7 +4303,8 @@ export class LazyWaterFlowLayoutExtender {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -4311,7 +4316,8 @@ export class LazyWaterFlowLayoutExtender {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+            const valueTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueTmpValue)
+            LengthMetricsProxy_serializer.write(thisSerializer, valueTmpValueTransformed)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -9267,6 +9273,28 @@ export class InnerGestureObserverConfigs_serializer {
         return value
     }
 }
+export class LengthMetricsProxy {
+    value: double = initializers.arkui.component.idlize.LengthMetricsProxyNS.value;
+    unit: number = initializers.arkui.component.idlize.LengthMetricsProxyNS.unit;
+}
+
+export class LengthMetricsProxy_serializer {
+    public static write(buffer: SerializerBase, value: LengthMetricsProxy): void {
+        let valueSerializer: SerializerBase = buffer
+        const valueHolderForValue = value.value
+        valueSerializer.writeFloat64(valueHolderForValue)
+        const valueHolderForUnit = value.unit
+        valueSerializer.writeNumber(valueHolderForUnit)
+    }
+    public static read(buffer: DeserializerBase): LengthMetricsProxy {
+        let valueDeserializer: DeserializerBase = buffer
+        const valueTmpResult: double = valueDeserializer.readFloat64()
+        const unitTmpResult: number = (valueDeserializer.readNumber() as number)
+        let value: LengthMetricsProxy = ({value: valueTmpResult, unit: unitTmpResult} as LengthMetricsProxy)
+        return value
+    }
+}
+
 export class LengthMetricsCustom_serializer {
     public static write(buffer: SerializerBase, value: LengthMetricsCustom): void {
         let valueSerializer: SerializerBase = buffer
@@ -9380,14 +9408,18 @@ export class PositionLengthMetricsInner_serializer {
     public static write(buffer: SerializerBase, value: PositionLengthMetricsInner): void {
         let valueSerializer: SerializerBase = buffer
         const valueHolderForX = value.x
-        arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForX)
+        const valueHolderForXTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForX)
+        LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForXTransformed)
         const valueHolderForY = value.y
-        arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForY)
+        const valueHolderForYTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForY)
+        LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForYTransformed)
     }
     public static read(buffer: DeserializerBase): PositionLengthMetricsInner {
         let valueDeserializer: DeserializerBase = buffer
-        const xTmpResult: arkui_Graphics_LengthMetrics = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
-        const yTmpResult: arkui_Graphics_LengthMetrics = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+        const xTmpBufDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+        const xTmpResult: arkui_Graphics_LengthMetrics = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(xTmpBufDeserialized)
+        const yTmpBufDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+        const yTmpResult: arkui_Graphics_LengthMetrics = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(yTmpBufDeserialized)
         let value: PositionLengthMetricsInner = ({x: xTmpResult, y: yTmpResult} as PositionLengthMetricsInner)
         return value
     }
@@ -9491,14 +9523,18 @@ export class SizeTLengthMetrics_serializer {
     public static write(buffer: SerializerBase, value: SizeTLengthMetrics): void {
         let valueSerializer: SerializerBase = buffer
         const valueHolderForWidth = value.width
-        arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForWidth)
+        const valueHolderForWidthTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForWidth)
+        LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForWidthTransformed)
         const valueHolderForHeight = value.height
-        arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForHeight)
+        const valueHolderForHeightTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForHeight)
+        LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForHeightTransformed)
     }
     public static read(buffer: DeserializerBase): SizeTLengthMetrics {
         let valueDeserializer: DeserializerBase = buffer
-        const widthTmpResult: arkui_Graphics_LengthMetrics = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
-        const heightTmpResult: arkui_Graphics_LengthMetrics = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+        const widthTmpBufDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+        const widthTmpResult: arkui_Graphics_LengthMetrics = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(widthTmpBufDeserialized)
+        const heightTmpBufDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+        const heightTmpResult: arkui_Graphics_LengthMetrics = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(heightTmpBufDeserialized)
         let value: SizeTLengthMetrics = ({width: widthTmpResult, height: heightTmpResult} as SizeTLengthMetrics)
         return value
     }
@@ -9969,7 +10005,8 @@ export class NodeEdgesLengthMetrics_serializer {
         if (valueHolderForTop !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTopTmpValue = valueHolderForTop!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForTopTmpValue)
+            const valueHolderForTopTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForTopTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForTopTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -9977,7 +10014,8 @@ export class NodeEdgesLengthMetrics_serializer {
         if (valueHolderForLeft !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForLeftTmpValue = valueHolderForLeft!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForLeftTmpValue)
+            const valueHolderForLeftTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForLeftTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForLeftTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -9985,7 +10023,8 @@ export class NodeEdgesLengthMetrics_serializer {
         if (valueHolderForBottom !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBottomTmpValue = valueHolderForBottom!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBottomTmpValue)
+            const valueHolderForBottomTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForBottomTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForBottomTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -9993,7 +10032,8 @@ export class NodeEdgesLengthMetrics_serializer {
         if (valueHolderForRight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForRightTmpValue = valueHolderForRight!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForRightTmpValue)
+            const valueHolderForRightTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForRightTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForRightTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -10003,25 +10043,29 @@ export class NodeEdgesLengthMetrics_serializer {
         const topTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let topTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((topTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            topTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const topTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            topTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(topTmpBufOptDeserialized)
         }
         const topTmpResult: arkui_Graphics_LengthMetrics | undefined = topTmpBuf
         const leftTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let leftTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((leftTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            leftTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const leftTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            leftTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(leftTmpBufOptDeserialized)
         }
         const leftTmpResult: arkui_Graphics_LengthMetrics | undefined = leftTmpBuf
         const bottomTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let bottomTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((bottomTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            bottomTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const bottomTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            bottomTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(bottomTmpBufOptDeserialized)
         }
         const bottomTmpResult: arkui_Graphics_LengthMetrics | undefined = bottomTmpBuf
         const rightTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let rightTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((rightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            rightTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const rightTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            rightTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(rightTmpBufOptDeserialized)
         }
         const rightTmpResult: arkui_Graphics_LengthMetrics | undefined = rightTmpBuf
         let value: NodeEdgesLengthMetrics = ({top: topTmpResult, left: leftTmpResult, bottom: bottomTmpResult, right: rightTmpResult} as NodeEdgesLengthMetrics)
@@ -10067,9 +10111,11 @@ export class ParticleAnnulusRegionInner_serializer {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForOuterRadius = value.outerRadius
-        arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForOuterRadius)
+        const valueHolderForOuterRadiusTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForOuterRadius)
+        LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForOuterRadiusTransformed)
         const valueHolderForInnerRadius = value.innerRadius
-        arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForInnerRadius)
+        const valueHolderForInnerRadiusTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForInnerRadius)
+        LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForInnerRadiusTransformed)
         const valueHolderForStartAngle = value.startAngle
         if (valueHolderForStartAngle !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -10095,8 +10141,10 @@ export class ParticleAnnulusRegionInner_serializer {
             centerTmpBuf = PositionLengthMetricsInner_serializer.read(valueDeserializer)
         }
         const centerTmpResult: PositionLengthMetricsInner | undefined = centerTmpBuf
-        const outerRadiusTmpResult: arkui_Graphics_LengthMetrics = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
-        const innerRadiusTmpResult: arkui_Graphics_LengthMetrics = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+        const outerRadiusTmpBufDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+        const outerRadiusTmpResult: arkui_Graphics_LengthMetrics = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(outerRadiusTmpBufDeserialized)
+        const innerRadiusTmpBufDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+        const innerRadiusTmpResult: arkui_Graphics_LengthMetrics = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(innerRadiusTmpBufDeserialized)
         const startAngleTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let startAngleTmpBuf: double | undefined = undefined
         if ((startAngleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -11248,7 +11296,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
         if (valueHolderForKeyboardAvoidDistance !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForKeyboardAvoidDistanceTmpValue = valueHolderForKeyboardAvoidDistance!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForKeyboardAvoidDistanceTmpValue)
+            const valueHolderForKeyboardAvoidDistanceTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForKeyboardAvoidDistanceTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForKeyboardAvoidDistanceTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -11735,7 +11784,8 @@ export class CustomDialogControllerOptionsExtender_serializer {
         const keyboardAvoidDistanceTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let keyboardAvoidDistanceTmpBuf: arkui_Graphics_LengthMetrics | undefined = undefined
         if ((keyboardAvoidDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            keyboardAvoidDistanceTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const keyboardAvoidDistanceTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            keyboardAvoidDistanceTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(keyboardAvoidDistanceTmpBufOptDeserialized)
         }
         const keyboardAvoidDistanceTmpResult: arkui_Graphics_LengthMetrics | undefined = keyboardAvoidDistanceTmpBuf
         const levelModeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
