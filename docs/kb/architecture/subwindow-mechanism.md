@@ -61,3 +61,4 @@ ArkUI 子窗机制通过 SubwindowManager 单例管理七种子窗类型（基�
 - 弹窗类组件
 - 半模态弹窗
 - 布局框架
+- UISession：`docs/kb/architecture/uisession-service.md`（跨进程 UI 会话通道）
