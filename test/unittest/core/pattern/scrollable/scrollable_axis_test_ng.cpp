@@ -293,22 +293,26 @@ HWTEST_F(ScrollableAxisTestNg, DragEnd001, TestSize.Level1)
     FlushUITasks(listNode);
     auto scrollable = GetScrollable(listNode);
     ASSERT_NE(scrollable, nullptr);
+    auto context = scrollable->context_.Upgrade();
+    ASSERT_NE(context, nullptr);
     EXPECT_EQ(scrollable->lastMainDelta_, 0.0);
 
     /**
      * @tc.steps: step2. Trigger the drag update event.
      * @tc.expected: The lastMainDelta_ of scrollable is correct.
      */
+    context->SetVsyncTime(1);
     DragUpdate(scrollable, 100.0);
     EXPECT_EQ(scrollable->lastMainDelta_, 100.0);
     auto lastMainDelta = scrollable->lastMainDelta_;
 
     /**
      * @tc.steps: step3. Trigger the drag end event.
-     * @tc.expected: The lastMainDelta_ of scrollable has not changed.
+     * @tc.expected: The lastMainDelta_ of scrollable is reset after layout.
      */
+    context->SetVsyncTime(2);
     DragEnd(scrollable, 50.0);
-    EXPECT_EQ(scrollable->lastMainDelta_, lastMainDelta);
+    EXPECT_EQ(scrollable->lastMainDelta_, 0.0);
     lastMainDelta = scrollable->lastMainDelta_;
 
     /**
