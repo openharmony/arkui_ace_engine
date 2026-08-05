@@ -2249,7 +2249,10 @@ bool JSNavigationStack::GetOhmUrl(const RefPtr<NG::UINode>& customNode, std::str
     }
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     CHECK_NULL_RETURN(runtime, false);
-    bool res = runtime->GetOhmUrlByObject(JSRef<JSObject>::Cast(constructor)->GetLocalHandle(), moduleName, fileName);
+    bool res = false;
+    if (constructor->IsObject()) {
+        res = runtime->GetOhmUrlByObject(JSRef<JSObject>::Cast(constructor)->GetLocalHandle(), moduleName, fileName);
+    }
     return res;
 }
 
