@@ -176,7 +176,7 @@ const GENERATED_ArkUIImageSpanModifier* GetImageSpanStaticModifier()
 
 }
 namespace OHOS::Ace::NG::NodeModifier {
-void SetStaticBaselineOffset(Ark_NativePointer node, const Opt_LengthMetrics* value)
+void SetStaticBaselineOffset(Ark_NativePointer node, const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

@@ -276,7 +276,7 @@ void AssignArkValue(Ark_Coordinate2D& dst, const Offset& src)
     dst.y = Converter::ArkValue<Ark_Float64>(src.GetY());
 }
 
-void AssignArkValue(Ark_LengthMetrics& dst, const Dimension& src)
+void AssignArkValue(Ark_LengthMetricsProxy& dst, const Dimension& src)
 {
     auto value = static_cast<float>(src.Value());
     auto unit = static_cast<int32_t>(src.Unit());
@@ -595,7 +595,7 @@ void AssignArkValue(Ark_KeyboardOptions& dst, const KeyboardOptions& src, ConvCo
 }
 
 template<>
-Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value)
+Ark_LengthMetricsProxy ArkCreate(Ark_LengthUnit unit, float value)
 {
     DimensionUnit du = OptConvert<DimensionUnit>(unit).value_or(DimensionUnit::INVALID);
     auto duUnit = static_cast<int32_t>(du);

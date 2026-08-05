@@ -2578,14 +2578,6 @@ void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src)
 }
 
 template<>
-Dimension Convert(const Ark_LengthMetrics& src)
-{
-    auto value = Converter::Convert<float>(src.value);
-    auto dimensionUnit = Converter::OptConvert<DimensionUnit>(src.unit).value_or(ConverterState::defDimensionUnit);
-    return Dimension(value, dimensionUnit);
-}
-
-template<>
 DimensionRect Convert(const Ark_Rectangle &src)
 {
     DimensionRect dst;
@@ -2899,7 +2891,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<LabelStyle>& dst, const Ark_TabBa
 }
 
 template<>
-PaddingProperty Convert(const Ark_LengthMetrics& src)
+PaddingProperty Convert(const Ark_LengthMetricsProxy& src)
 {
     return PaddingPropertyFromCalcLength(OptConvert<CalcLength>(src));
 }
@@ -3151,7 +3143,7 @@ static BorderRadiusProperty BorderRadiusPropertyFromDimension(std::optional<Dime
 }
 
 template<>
-BorderRadiusProperty Convert(const Ark_LengthMetrics& src)
+BorderRadiusProperty Convert(const Ark_LengthMetricsProxy& src)
 {
     return BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
 }
@@ -3181,7 +3173,7 @@ ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_Resource& src)
 }
 
 template<>
-BorderRadiusPropertyOpt Convert(const Ark_LengthMetrics& src)
+BorderRadiusPropertyOpt Convert(const Ark_LengthMetricsProxy& src)
 {
     BorderRadiusPropertyOpt opt;
     opt.value = BorderRadiusPropertyFromDimension(OptConvert<Dimension>(src));
@@ -3259,7 +3251,7 @@ static BorderWidthProperty BorderWidthPropertyFromDimension(std::optional<Dimens
 }
 
 template<>
-ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LengthMetrics& src)
+ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LengthMetricsProxy& src)
 {
     return BorderWidthPropertyFromDimension(OptConvert<Dimension>(src));
 }
@@ -3333,13 +3325,7 @@ BorderStyleProperty Convert(const Ark_NodeEdgeStyles& src)
 }
 
 template<>
-CalcDimension Convert(const Ark_LengthMetrics& src)
-{
-    return CalcDimension(Convert<Dimension>(src));
-}
-
-template<>
-CalcLength Convert(const Ark_LengthMetrics& src)
+CalcLength Convert(const Ark_LengthMetricsProxy& src)
 {
     return CalcLength(Convert<Dimension>(src));
 }
@@ -3690,10 +3676,10 @@ PickerBackgroundStyle Convert(const Ark_PickerBackgroundStyle& src)
 
 template<>
 void AssignCast(
-    std::optional<BorderRadiusProperty>& dst, const Ark_Union_LengthMetrics_BorderRadiuses_LocalizedBorderRadiuses& src)
+    std::optional<BorderRadiusProperty>& dst, const Ark_Union_LengthMetricsProxy_BorderRadiuses_LocalizedBorderRadiuses& src)
 {
     Converter::VisitUnion(src,
-        [&dst](const Ark_LengthMetrics& value) {
+        [&dst](const Ark_LengthMetricsProxy& value) {
             dst = Converter::OptConvert<BorderRadiusProperty>(value);
         },
         [&dst](const Ark_BorderRadiuses& value) {

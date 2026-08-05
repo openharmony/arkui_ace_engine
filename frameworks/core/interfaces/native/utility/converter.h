@@ -638,14 +638,14 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT BorderColorProperty Convert(const Ark_ResourceColor& src);
     template<> ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusProperty Convert(const Ark_Float64& src);
-    template<> BorderRadiusProperty Convert(const Ark_LengthMetrics& src);
+    template<> BorderRadiusProperty Convert(const Ark_LengthMetricsProxy& src);
     template<> ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src);
     template<> ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_Resource& src);
     template<> ACE_FORCE_EXPORT BorderRadiusProperty Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT BorderRadiusPropertyOpt Convert(const Ark_BorderRadiuses& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_Float64& src);
-    template<> BorderRadiusPropertyOpt Convert(const Ark_LengthMetrics& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_LengthMetricsProxy& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_LocalizedBorderRadiuses& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_Number& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_Resource& src);
@@ -656,7 +656,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_EdgeOutlineWidths& src);
     template<> ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_EdgeWidths& src);
     template<> ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Float64& src);
-    template<> ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LengthMetrics& src);
+    template<> ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LengthMetricsProxy& src);
     template<> ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src);
     template<> ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT BorderWidthProperty Convert(const Ark_Resource& src);
@@ -665,11 +665,11 @@ namespace Converter {
     template<> ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src);
     template<> ACE_FORCE_EXPORT ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
     template<> ACE_FORCE_EXPORT CalcDimension Convert(const Ark_Float64& src);
-    template<> ACE_FORCE_EXPORT CalcDimension Convert(const Ark_LengthMetrics& src);
+    template<> ACE_FORCE_EXPORT CalcDimension Convert(const Ark_LengthMetricsProxy& src);
     template<> ACE_FORCE_EXPORT CalcDimension Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT CalcDimension Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT CalcLength Convert(const Ark_Float64& src);
-    template<> CalcLength Convert(const Ark_LengthMetrics& src);
+    template<> CalcLength Convert(const Ark_LengthMetricsProxy& src);
     template<> CalcLength Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT CalcLength Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT CaretStyle Convert(const Ark_CaretStyle& src);
@@ -681,7 +681,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT Color Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_Int32& src);
-    template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_LengthMetrics& src);
+    template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_LengthMetricsProxy& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT DimensionOffset Convert(const Ark_Offset& src);
@@ -740,7 +740,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT OverflowMode Convert(const Ark_MaxLinesOptions& src);
     template<> OverlayOptions Convert(const Ark_OverlayOptions& src);
     template<> PaddingProperty Convert(const Ark_Float64& src);
-    template<> PaddingProperty Convert(const Ark_LengthMetrics& src);
+    template<> PaddingProperty Convert(const Ark_LengthMetricsProxy& src);
     template<> PaddingProperty Convert(const Ark_LocalizedPadding& src);
     template<> ACE_FORCE_EXPORT PaddingProperty Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT PaddingProperty Convert(const Ark_Padding& src);
@@ -1180,6 +1180,18 @@ namespace Converter {
         inline static DimensionUnit defDimensionUnit = DimensionUnit::VP;
         inline static double defShadowBlurRadius = -1.0;
     };
+
+    template<> inline Dimension Convert(const Ark_LengthMetricsProxy& src)
+    {
+        auto value = Converter::Convert<float>(src.value);
+        auto dimensionUnit = static_cast<DimensionUnit>(src.unit);
+        return Dimension(value, dimensionUnit);
+    }
+
+    template<> inline CalcDimension Convert(const Ark_LengthMetricsProxy& src)
+    {
+        return CalcDimension(Convert<Dimension>(src));
+    }
 
     class DefaultDimensionUnit {
     public:

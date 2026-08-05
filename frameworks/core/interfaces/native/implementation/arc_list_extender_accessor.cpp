@@ -89,7 +89,7 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node, const Opt_CrownSensitiv
     ScrollableModelStatic::SetDigitalCrownSensitivity(frameNode, convValue);
 #endif
 }
-void SpaceImpl(Ark_NativePointer node, const Opt_LengthMetrics* space)
+void SpaceImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* space)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -111,7 +111,7 @@ void ScrollBarColorImpl(Ark_NativePointer node,
     std::optional<Color> barColor = color ? Converter::OptConvert<Color>(*color) : std::nullopt;
     ScrollableModelStatic::SetScrollBarColor(frameNode, barColor);
 }
-void ScrollBarWidthImpl(Ark_NativePointer node, const Opt_LengthMetrics* width)
+void ScrollBarWidthImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* width)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -57,7 +57,7 @@ void SetLazyVWaterFlowLayoutOptionsImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(frameNode);
 }
 
-void RowsGapImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+void RowsGapImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -66,7 +66,7 @@ void RowsGapImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
     LazyWaterFlowLayoutModelStatic::SetRowGap(frameNode, convValue);
 }
 
-void ColumnsGapImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+void ColumnsGapImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

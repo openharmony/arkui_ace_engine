@@ -381,7 +381,7 @@ void SetBackToTopImpl(Ark_NativePointer node,
     }
     ScrollableModelStatic::SetBackToTop(frameNode, *convValue);
 }
-void SetScrollBarHeightImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+void SetScrollBarHeightImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

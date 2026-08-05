@@ -550,7 +550,7 @@ void CustomDialogControllerPeerImpl::SetOnWillDisappearExtender(
     dialogProperties_.onWillDisappear = callback;
 }
 
-void CustomDialogControllerPeerImpl::SetKeyboardAvoidDistance(Opt_LengthMetrics keyboardAvoidDistance)
+void CustomDialogControllerPeerImpl::SetKeyboardAvoidDistance(Opt_LengthMetricsProxy keyboardAvoidDistance)
 {
     auto result = Converter::OptConvert<Dimension>(keyboardAvoidDistance);
     if (result.has_value()) {

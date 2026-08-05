@@ -122,7 +122,7 @@ Ark_RichEditorTextStyle CreateEmptyArkTextStyle()
     dst.fontFeature = Converter::ArkValue<Opt_String>(Ark_Empty());
     dst.halfLeading = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(Ark_Empty());
-    dst.strokeWidth = Converter::ArkUnion<Opt_Union_LengthMetrics_F64>(Ark_Empty());
+    dst.strokeWidth = Converter::ArkUnion<Opt_Union_LengthMetricsProxy_F64>(Ark_Empty());
     dst.strokeColor = Converter::ArkUnion<Opt_ResourceColor>(Ark_Empty());
     dst.strokeJoinStyle = Converter::ArkUnion<Opt_StrokeJoinStyle>(Ark_Empty());
     return dst;
@@ -158,8 +158,8 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const UpdateSpanStyle& src, Co
     dst.halfLeading = Converter::ArkValue<Opt_Boolean>(src.updateHalfLeading);
     dst.textBackgroundStyle = ArkValue<Opt_TextBackgroundStyle>(src.updateTextBackgroundStyle, ctx);
     dst.strokeWidth = src.updateStrokeWidth.has_value()
-        ? Converter::ArkUnion<Opt_Union_LengthMetrics_F64, Ark_LengthMetrics>(src.updateStrokeWidth, ctx)
-        : Converter::ArkUnion<Opt_Union_LengthMetrics_F64>(Ark_Empty());
+        ? Converter::ArkUnion<Opt_Union_LengthMetricsProxy_F64, Ark_LengthMetricsProxy>(src.updateStrokeWidth, ctx)
+        : Converter::ArkUnion<Opt_Union_LengthMetricsProxy_F64>(Ark_Empty());
     dst.strokeColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(src.updateStrokeColor, ctx);
     dst.strokeJoinStyle = Converter::ArkValue<Opt_StrokeJoinStyle>(src.updateStrokeJoinStyle);
 }
