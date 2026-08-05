@@ -105,7 +105,7 @@ protected:
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
     ACE_FORCE_EXPORT virtual void AddTextSpanToParagraph(const RefPtr<SpanItem>& child, int32_t& spanTextLength,
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
-    ACE_FORCE_EXPORT void MeasureChildren(
+    ACE_FORCE_EXPORT bool MeasureChildren(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, const TextStyle& textStyle);
     void CalcHeightWithMinLines(TextStyle& textStyle, LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& contentConstraint);
