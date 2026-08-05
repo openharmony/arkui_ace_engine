@@ -89,3 +89,4 @@ LazyForEach 功能域：
 - 渲染控制语法（ForEach / if-else / 共享基类）：`docs/kb/syntax/render_control.md`
 - NodeAdapter（复用 LazyForEach 管线）：`docs/kb/capabilities/node_adapter.md`
 - 组件复用框架：`docs/kb/architecture/component_reuse_framework.md`
+- [渲染树同步](../architecture/render-tree-sync.md) — LazyForEach 数据变更后 MarkNeedSyncRenderTree 触发渲染树同步

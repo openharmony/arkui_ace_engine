@@ -117,11 +117,16 @@ HWTEST_F(ScrollPatternTestNg, ScrollPatternTestNg005, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto layoutWrapper = frameNode->CreateLayoutWrapper(true, true);
     ASSERT_NE(layoutWrapper, nullptr);
+    scrollPattern->AddScrollEvent();
+    auto scrollable = scrollPattern->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->dragUpdateDelta_ = 10.0;
     DirtySwapConfig dirtySwapConfig;
     dirtySwapConfig.skipLayout = false;
     dirtySwapConfig.skipMeasure = false;
     auto result = scrollPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, dirtySwapConfig);
     EXPECT_EQ(result, false);
+    EXPECT_FALSE(scrollable->dragUpdateDelta_.has_value());
     auto paintProperty = scrollPattern->GetPaintProperty<ScrollablePaintProperty>();
     EXPECT_NE(paintProperty, nullptr);
     paintProperty->UpdateFadingEdge(true);

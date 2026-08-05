@@ -107,3 +107,5 @@ ArkTS `FrameNode` API 的解析自上而下：ArkTS 类 → JSI bridge → NDK m
 - [Safe Area](./safe-area.md) — 底层 `ProcessSafeAreaPadding`/`OffsetNodeToSafeArea`
 - [Layout Attributes](./layout-attributes.md) — `getUserConfig*` 读取的 `LayoutProperty`
 - [RenderNode](./render_node.md)、[BuilderNode](./builder_node.md)、[ComponentContent](./component_content.md)、[TypedFrameNode](./typed_frame_node.md) — 同属自定义节点能力簇（已建）
+- [渲染树同步](../architecture/render-tree-sync.md) — FrameNode 中渲染树同步机制（RebuildRenderContextTree/ProcessRenderTreeDiff/isPendingState_）
+- [同帧下树重新上树 isPendingState_ 状态错乱](../issues/lifecycle/ispending-state-render-tree-diff.md) — isPendingState_ 同帧下树重新上树问题型 KB

@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <map>
+#include <set>
 #include <string>
 #include <unordered_map>
 
@@ -160,7 +161,47 @@ public:
     {
         return usrConfigVersion_;
     }
+
+    bool PushHrefResolving(const std::string& href)
+    {
+        return hrefResolving_.insert(href).second;
+    }
+
+    void PopHrefResolving(const std::string& href)
+    {
+        hrefResolving_.erase(href);
+    }
+
+    bool IncrementHrefResolveCount()
+    {
+        return ++hrefResolveCount_ <= MAX_HREF_RESOLVE_COUNT;
+    }
+
+    void ResetHrefResolveCount()
+    {
+        hrefResolveCount_ = 0;
+    }
+
+    bool IncrementDrawDepth()
+    {
+        return ++drawDepth_ <= MAX_DRAW_DEPTH;
+    }
+
+    void DecrementDrawDepth()
+    {
+        if (drawDepth_ > 0) {
+            --drawDepth_;
+        }
+    }
+
+    void ResetDrawDepth()
+    {
+        drawDepth_ = 0;
+    }
+
 private:
+    static constexpr int32_t MAX_HREF_RESOLVE_COUNT = 10000;
+    static constexpr int32_t MAX_DRAW_DEPTH = 5000;
     std::unordered_map<std::string, WeakPtr<SvgNode>> idMapper_;
     // weak references to animators in svgDom
     std::unordered_map<int32_t, WeakPtr<Animator>> animators_;
@@ -176,6 +217,9 @@ private:
     SvgDumpInfo dumpInfo_;
     std::optional<Color> fillColor_;
     uint32_t usrConfigVersion_ = SVG_FEATURE_SUPPORT_UNDEFINE;
+    std::set<std::string> hrefResolving_;
+    int32_t hrefResolveCount_ = 0;
+    int32_t drawDepth_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(SvgContext);
 };
 } // namespace OHOS::Ace::NG

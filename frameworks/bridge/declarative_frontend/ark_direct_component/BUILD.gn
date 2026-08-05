@@ -86,9 +86,9 @@ ohos_abc("arkswiper") {
   part_name = ace_engine_part
 }
 
-ohos_abc("arkswiperindicator") {
-  sources = [ "./src/arkswiperindicator.ts" ]
-  output_name = "arkswiperindicator"
+ohos_abc("arkindicatorcomponent") {
+  sources = [ "./src/arkindicatorcomponent.ts" ]
+  output_name = "arkindicatorcomponent"
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui/components"
   subsystem_name = ace_engine_subsystem

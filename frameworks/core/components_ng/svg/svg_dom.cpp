@@ -53,6 +53,7 @@ namespace {
 const char DOM_SVG_STYLE[] = "style";
 const char DOM_SVG_CLASS[] = "class";
 constexpr int32_t ONE_BYTE_TO_HEX_LEN = 2;
+constexpr int32_t MAX_PARSE_DEPTH = 5000;
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
@@ -148,15 +149,21 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
     auto root = CreateSvgNodeFromDom(dom, xmlNode, parent);
     CHECK_NULL_RETURN(root, nullptr);
     std::stack<SvgTranslateProcessInfo> translateTaskSt;
-    translateTaskSt.emplace(root, dom.getFirstChild(xmlNode, nullptr));
+    translateTaskSt.emplace(root, dom.getFirstChild(xmlNode, nullptr), 0);
     while (!translateTaskSt.empty()) {
-        auto& [currentNode, curXmlNode] = translateTaskSt.top();
+        auto& [currentNode, curXmlNode, depth] = translateTaskSt.top();
         if (!curXmlNode) {
             translateTaskSt.pop();
         } else {
             const auto& childNode = CreateSvgNodeFromDom(dom, curXmlNode, currentNode);
             if (childNode) {
-                translateTaskSt.emplace(childNode, dom.getFirstChild(curXmlNode, nullptr));
+                if (depth >= MAX_PARSE_DEPTH) {
+                    TAG_LOGW(AceLogTag::ACE_IMAGE,
+                        "SvgDom::TranslateSvgNode depth exceeded limit at depth=%{public}d", depth);
+                    curXmlNode = dom.getNextSibling(curXmlNode);
+                    continue;
+                }
+                translateTaskSt.emplace(childNode, dom.getFirstChild(curXmlNode, nullptr), depth + 1);
                 currentNode->AppendChild(childNode);
             }
             curXmlNode = dom.getNextSibling(curXmlNode);
@@ -355,6 +362,8 @@ void SvgDom::DrawImage(
     }
     root_->SetIsRootNode(true);
     InitStyles();
+    svgContext_->ResetHrefResolveCount();
+    svgContext_->ResetDrawDepth();
     canvas.Save();
     // viewBox scale and imageFit scale
     FitImage(canvas, imageFit, layout);

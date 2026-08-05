@@ -227,9 +227,6 @@ bool EvaluateAbcFile(const shared_ptr<JsRuntime>& runtime, const std::string& fi
 {
     auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(runtime);
     CHECK_NULL_RETURN(arkRuntime, false);
-#ifdef STATE_MGMT_USE_AOT
-    return arkRuntime->ExecuteJsBinForAOT(filePath);
-#else
     FILE* file = fopen(filePath.c_str(), "rb");
     if (!file) {
         LOGF("Failed to open the file!");
@@ -251,7 +248,6 @@ bool EvaluateAbcFile(const shared_ptr<JsRuntime>& runtime, const std::string& fi
     }
     fclose(file);
     return arkRuntime->EvaluateJsCode(content.data(), static_cast<int32_t>(content.size()), filePath);
-#endif
 }
 
 inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
@@ -893,7 +889,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "LazyVGridLayout", "arkui.components.arklazygridlayout" },
         { "LazyVWaterFlowLayout", "arkui.components.arklazywaterflowlayout" },
         { "Swiper", "arkui.components.arkswiper" },
-        { "IndicatorComponent", "arkui.components.arkswiperindicator" },
+        { "IndicatorComponent", "arkui.components.arkindicatorcomponent" },
         { "Tabs", "arkui.components.arktabs" },
         { "TabContent", "arkui.components.arktabcontent" },
         { "CommonShape", "arkui.components.arkcommonshape" },
@@ -3927,7 +3923,10 @@ bool JsiDeclarativeEngine::UpdatePageUrl(void* customNode, const std::string& pa
     }
     std::string moduleName;
     std::string fileName;
-    bool res = runtime->GetOhmUrlByObject(JSRef<JSObject>::Cast(constructor)->GetLocalHandle(), moduleName, fileName);
+    bool res = false;
+    if (constructor->IsObject()) {
+        res = runtime->GetOhmUrlByObject(JSRef<JSObject>::Cast(constructor)->GetLocalHandle(), moduleName, fileName);
+    }
     if (!res) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "get ohmurl form jsObject failed");
         return false;

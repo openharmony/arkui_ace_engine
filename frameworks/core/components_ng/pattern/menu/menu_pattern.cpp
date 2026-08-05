@@ -60,6 +60,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const TrailOptimization trailOptimization = {
+    .progressThreshold = 0.98f,
+    .responseDecayFactor = 0.9f,
+};
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
 constexpr Dimension MIN_SELECT_MENU_WIDTH = 64.0_vp;
 constexpr int32_t COLUMN_NUM = 2;
@@ -77,14 +81,16 @@ const RefPtr<InterpolatingSpring> MAIN_MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 528.0f, 35.0f);
 const RefPtr<InterpolatingSpring> STACK_SUB_MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 26.0f);
-const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_1 =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 322.0f, 28.0f);
-const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_2 =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 273.0f, 26.0f);
-const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_3 =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 363.0f, 29.0f);
-const RefPtr<InterpolatingSpring> DISTORT_ANIMATION_CURVE_FINISH =
-    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 158.0f, 17.0f);
+const RefPtr<TrailOptimizedInterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_1 =
+    AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0.0f, 1.0f, 322.0f, 28.0f, trailOptimization);
+const RefPtr<TrailOptimizedInterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_2 =
+    AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0.0f, 1.0f, 273.0f, 26.0f, trailOptimization);
+const RefPtr<TrailOptimizedInterpolatingSpring> DISTORT_ANIMATION_CURVE_STAGE_3 =
+    AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0.0f, 1.0f, 363.0f, 29.0f, trailOptimization);
+const RefPtr<TrailOptimizedInterpolatingSpring> DISTORT_ANIMATION_CURVE_FINISH =
+    AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0.0f, 1.0f, 158.0f, 17.0f, trailOptimization);
+const RefPtr<TrailOptimizedInterpolatingSpring> TRANSLATE_ANIMATION_CURVE =
+    AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0.0f, 1.0f, 128.0f, 18.0f, trailOptimization);
 const float MINIMUM_AMPLITUDE_RATION = 0.08f;
 const float EDGELIGHT_LENGTH_RATIO = 0.4f;
 const float EDGELIGHT_INTENSITY = 0.2f;
@@ -2393,7 +2399,7 @@ void MenuPattern::PlayTranslateAnimation(
         option.SetDelay(delay);
     }
     renderContext->UpdateTranslateInXY(OffsetF());
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 18));
+    option.SetCurve(TRANSLATE_ANIMATION_CURVE);
     AnimationUtils::Animate(option, [renderContext, offset]() {
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateTranslateInXY(offset);
@@ -2403,7 +2409,7 @@ void MenuPattern::PlayTranslateAnimation(
         finishDelay += delay;
     }
     option.SetDelay(finishDelay);
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 128, 18));
+    option.SetCurve(TRANSLATE_ANIMATION_CURVE);
     AnimationUtils::Animate(option, [renderContext]() {
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateTranslateInXY(OffsetF());

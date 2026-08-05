@@ -195,7 +195,7 @@ class ParticleToParticleInnerHelper {
         if (input === undefined) {
             return input;
         }
-        if (input instanceof ParticleColorOptions) {
+        if ((input as Object).hasOwnProperty('r')) {
             return (input as ParticleColorOptions);
         }
         return ParticleToParticleInnerHelper.ConvertParticlePropertyAnimationColor(input as Array<ParticlePropertyAnimation<ResourceColor>>);

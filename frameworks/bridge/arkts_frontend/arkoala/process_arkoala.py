@@ -29,6 +29,7 @@ import time
 import shutil
 import subprocess
 from typing import Dict, List
+from pathlib import Path
 
 from preprocess import merge_component, merge_generated_files
 
@@ -47,6 +48,7 @@ def parse_argv(argv) -> Paths:
 
     path = Paths()
     path.project_path = os.path.abspath(argv[1])
+    path.stamp_path = os.path.abspath(argv[2]) if len(argv) >= 3 else None
 
     return path
 
@@ -91,6 +93,9 @@ def main(argv):
     os.chdir(path.project_path)
     pre_processing(path)
 
+    if path.stamp_path:
+        Path(path.stamp_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(path.stamp_path).touch()
 
 if __name__ == '__main__':
     main(sys.argv)

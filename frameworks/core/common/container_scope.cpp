@@ -672,7 +672,9 @@ void ContainerScope::RemoveAndCheck(int32_t id)
 
 ContainerScope::ContainerScope(int32_t id)
 {
-    UpdateCurrent(id);
+    auto& idRef = currentId_;
+    restoreId_ = idRef;
+    idRef = id;
 }
 
 ContainerScope::ContainerScope(int32_t id, bool enable)
@@ -682,20 +684,27 @@ ContainerScope::ContainerScope(int32_t id, bool enable)
         CheckIdChange(id);
 #endif
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
+        restoreId_ = currentId_;
         pushedUid_ = PushCurrent(id, nullptr, DEFAULT_ID, static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE));
         pushed_ = true;
 #else
-        UpdateCurrent(id);
+        auto& idRef = currentId_;
+        restoreId_ = idRef;
+        idRef = id;
 #endif
+    } else {
+        restoreId_ = currentId_;
     }
 }
 
 #ifdef ENABLE_CONTAINER_SCOPE_TRACKING
 ContainerScope::ContainerScope(int32_t id, const char* fileId, int32_t line)
-    : pushedUid_(PushCurrent(id, fileId, line, static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE))), pushed_(true)
+    : restoreId_(currentId_),
+    pushedUid_(PushCurrent(id, fileId, line, static_cast<int32_t>(CurrentIdSourceType::RAII_SCOPE))), pushed_(true)
 {}
 
-ContainerScope::ContainerScope(int32_t id, bool enable, const char* fileId, int32_t line) : pushed_(false)
+ContainerScope::ContainerScope(int32_t id, bool enable, const char* fileId, int32_t line)
+    : restoreId_(currentId_), pushed_(false)
 {
     if (enable) {
 #if defined(NAPI_SCOPE_ERROR_HIVEW_REPORT)

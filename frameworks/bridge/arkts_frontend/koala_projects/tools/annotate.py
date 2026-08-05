@@ -16,6 +16,7 @@
 import os
 import glob
 import shutil
+from pathlib import Path
 
 class Config:
     def __init__(self):
@@ -127,7 +128,9 @@ if __name__ == "__main__":
     import sys
     import json
 
-    if len(sys.argv) == 3:
+    stamp_path = sys.argv[3] if len(sys.argv) >= 4 else None
+
+    if len(sys.argv) >= 3:
         base_url_path = os.path.abspath(sys.argv[1])
         config_path = os.path.abspath(sys.argv[2])
         with open(config_path, "r", encoding="utf-8") as f:
@@ -144,3 +147,9 @@ if __name__ == "__main__":
         main(config)
     else:
         main(Config())
+
+    # Create the stamp file so GN sees the declared output exists.
+    # Only reached if main() completed without raising.
+    if stamp_path:
+        Path(stamp_path).parent.mkdir(parents=True, exist_ok=True)
+        Path(stamp_path).touch()

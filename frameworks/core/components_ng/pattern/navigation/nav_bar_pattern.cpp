@@ -255,8 +255,11 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
 
 void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>& titleBarNode)
 {
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     if (navBarNode->GetMenuNodeOperationValue(ChildNodeOperation::NONE) == ChildNodeOperation::REPLACE) {
-        titleBarNode->RemoveChild(titleBarNode->GetMenu());
+        if (titleBarPattern) {
+            titleBarPattern->UnmountTitleBarMenu(titleBarNode->GetMenu());
+        }
         titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (navBarNode->GetPrevMenuIsCustomValue(false)) {
@@ -264,7 +267,9 @@ void BuildMenu(const RefPtr<NavBarNode>& navBarNode, const RefPtr<TitleBarNode>&
             return;
         }
         titleBarNode->SetMenu(navBarNode->GetMenu());
-        titleBarNode->AddChild(titleBarNode->GetMenu());
+        if (titleBarPattern) {
+            titleBarPattern->MountTitleBarMenu(titleBarNode->GetMenu());
+        }
         navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);
     } else {
         navBarNode->UpdateMenuNodeOperation(ChildNodeOperation::NONE);

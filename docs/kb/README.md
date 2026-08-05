@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-31
-> 主题数：224
+> 更新时间：2026-08-04
+> 主题数：228
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -224,6 +224,7 @@ docs/kb/
 | InspectorLayoutCallback | 布局回调(inspector) | `docs/kb/capabilities/inspector-layout-callback.md` | 新建（Spec 待补） |
 | WindowToolbar | 窗口工具栏 | `docs/kb/capabilities/window-toolbar.md` | 新建（Spec 待补） |
 | AtomicServiceAppBar | 元服务 AppBar | `docs/kb/capabilities/atomic-service-appbar.md` | 新建（Spec 待补） |
+| RenderTreeSync | 渲染树同步 | `docs/kb/architecture/render-tree-sync.md` | 新建 |
 
 | TouchEvents | 触摸事件 | `docs/kb/capabilities/touch-events.md` | 新建 |
 | KeyEvents | 按键事件 | `docs/kb/capabilities/key-events.md` | 新建 |
@@ -245,6 +246,9 @@ docs/kb/
 | ResourceAdapterInstanceIdMismatch | 资源适配器实例ID缓存不匹配 | `docs/kb/issues/rendering/resource-adapter-instance-id-mismatch.md` | 新建 |
 | AboutToDisappearUnmountBlockedOnReuse | aboutToDisappear下树屏蔽与组件复用冲突 | `docs/kb/issues/lifecycle/about-to-disappear-unmount-blocked-on-reuse.md` | 新建 |
 | MenuSwipeMisrecognizedAsClick | Menu滑动误判为点击关闭 | `docs/kb/issues/interaction/menu-swipe-misrecognized-as-click.md` | 新建 |
+| UIContextInstanceIdLeak | UIContext 实例 ID 泄漏 | `docs/kb/issues/lifecycle/uicontext-instance-id-leak.md` | 新建 |
+| RenderNodeMemoryLeak | RenderNode 内存泄漏 | `docs/kb/issues/performance/rendernode-memory-leak.md` | 新建 |
+| IsPendingStateRenderTreeDiff | 同帧下树重新上树 isPendingState_ 状态错乱 | `docs/kb/issues/lifecycle/ispending-state-render-tree-diff.md` | 新建 |
 
 ## 检索
 

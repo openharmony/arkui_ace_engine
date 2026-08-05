@@ -323,7 +323,8 @@ public:
         return scrollableNode_;
     }
 
-    virtual void OnContentScrollUpdate(double offset, double currentOffset);
+    virtual void OnContentScrollUpdate(double offset, double currentOffset, bool isFling);
+    virtual void OnContentFlingStop();
 
     void UpdateTitleBarOptions(float currentOffset);
     void UpdateTitleBarGradientOptions(

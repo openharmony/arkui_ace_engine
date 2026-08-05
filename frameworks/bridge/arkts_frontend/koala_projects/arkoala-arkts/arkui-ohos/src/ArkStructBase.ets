@@ -14,15 +14,15 @@
  */
 
 import { NodeAttach, remember, once } from '@koalaui/runtime';
-import { ArkCustomComponent } from "./ArkCustomComponent"
+import { ArkCustomComponent } from './ArkCustomComponent'
 import { SyntaxItemPeer } from './base/SyntaxNodeBase'
-import { ArkComponentRoot } from "./ArkComponentRoot"
+import { ArkComponentRoot } from './ArkComponentRoot'
 import { ArkColumnPeer } from "#generated";
-import { ObserveSingleton } from "./stateManagement/base/observeSingleton";
-import { IReusePool } from "./stateManagement/utils";
-import { OBSERVE } from "./stateManagement";
-import { PeerNode } from "./PeerNode"
-import { RecordData } from "@ohos.base"
+import { ObserveSingleton } from './stateManagement/base/observeSingleton';
+import { IReusePool } from './stateManagement/utils';
+import { OBSERVE } from './stateManagement';
+import { PeerNode } from './PeerNode'
+import { RecordData } from '@ohos.base'
 import { ArkCommonMethodComponent, ArkCommonPeer, CommonMethod } from 'arkui/component/common';
 import { memo_skip } from '@koalaui/runtime/annotations';
 import { int32 } from '@koalaui/common';
@@ -268,7 +268,9 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
             });
 
             node.setOnReuse((param?: RecordData) => {
-                if (component.__getReuseInFlight_Internal()) return;
+                if (component.__getReuseInFlight_Internal()) {
+                    return;
+                }
                 component.__setReuseInFlight_Internal(true);
                 component.switchHasBeenRecycle(false);
                 component.__aboutToReuse_Internal(param);

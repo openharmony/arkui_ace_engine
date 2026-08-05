@@ -56,7 +56,6 @@ class NonObservedPerson //implements JsonSerializable, JsonDeserializable
         return se;
     }
     public fromJson(json: jsonx.JsonElement): void {
-        //this.username = json.getElement("username").asString();
         this.personname = json.asString();
     }
 }

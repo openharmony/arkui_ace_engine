@@ -56,7 +56,7 @@ private:
 
 class ACE_EXPORT AceScopedPerformanceCheck final {
 public:
-    explicit AceScopedPerformanceCheck(const std::string& name);
+    explicit AceScopedPerformanceCheck(const char* name);
     ~AceScopedPerformanceCheck();
 
     static CodeInfo GetCodeInfo(int32_t row, int32_t col);
