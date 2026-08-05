@@ -148,7 +148,7 @@ export class UIUtilsImpl {
         if (!(value && typeof value === 'object') || !(value instanceof Object)) {
             return value;
         }
-        const isProxy = StateMgmtTool.isObjectLiteral(value);
+        const isProxy = StateMgmtTool.isObjectLiteral(value as Object);
         if (this.checkIfObservedBuintIn(value) || !(UIUtilsImpl.checkIsBuitInType(value) || isProxy)) {
             return value as T;
         }
@@ -215,7 +215,7 @@ export class UIUtilsImpl {
             return source;
         }
         if (UIUtilsImpl.isProxied(source! as Object)) {
-            const handler = StateMgmtTool.tryGetHandler(source);
+            const handler = StateMgmtTool.tryGetHandler(source as Object);
             return (handler as InterfaceProxyHandler).target as T;
         }
         if (
