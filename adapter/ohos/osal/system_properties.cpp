@@ -55,6 +55,7 @@ constexpr char ENABLE_GESTURE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.gesture.
 #endif
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
+constexpr char ENABLE_NAVIGATION_IMAGE_KEY[] = "const.arkui.recycle.navigation.image.enable";
 constexpr char ENABLE_IMAGE_RELEASE_MANAGE_OBJECT_KEY[] = "persist.ace.image.releasemanageobject.enabled";
 constexpr char ENABLE_IMAGE_AUTO_RESIZE_KEY[] = "persist.ace.image.autoresize.enabled";
 constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
@@ -133,6 +134,11 @@ bool IsDownloadByNetworkDisabled()
 bool IsRecycleImageEnabled()
 {
     return system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "false") == "true";
+}
+
+bool IsNavigationImageRecycleEnabled()
+{
+    return system::GetBoolParameter(ENABLE_NAVIGATION_IMAGE_KEY, false);
 }
 
 bool IsImageReleaseManageObjectEnabled()
@@ -795,6 +801,7 @@ bool SystemProperties::gestureDebugBoundaryEnabled_ = IsGestureDebugBoundaryEnab
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
+bool SystemProperties::navigationImageRecycleEnabled_ = IsNavigationImageRecycleEnabled();
 bool SystemProperties::imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
@@ -1021,6 +1028,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
         debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
         downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
         recycleImageEnabled_ = IsRecycleImageEnabled();
+        navigationImageRecycleEnabled_ = IsNavigationImageRecycleEnabled();
         imageReleaseManageObjectEnabled_ = IsImageReleaseManageObjectEnabled();
         pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
         forcibleLandscapeEnabled_ = system::GetBoolParameter("const.settings.forcible_landscape_enable", false);
