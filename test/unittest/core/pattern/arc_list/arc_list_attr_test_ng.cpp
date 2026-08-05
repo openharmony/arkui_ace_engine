@@ -547,6 +547,25 @@ HWTEST_F(ArcListAttrTestNg, AttrScrollBar002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: AttrScrollBarWidth001
+ * @tc.desc: Test scrollBarWidth is applied to the round (arc) scroll bar's normal width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcListAttrTestNg, AttrScrollBarWidth001, TestSize.Level1)
+{
+    const std::string scrollBarWidth = "20vp";
+    ListModelNG model = CreateList();
+    model.SetScrollBar(DisplayMode::ON);
+    model.SetScrollBarWidth(scrollBarWidth);
+    CreateListItems(1);
+    CreateDone();
+    auto scrollBar = pattern_->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    double expectedPx = Dimension(20, DimensionUnit::VP).ConvertToPx();
+    EXPECT_DOUBLE_EQ(scrollBar->GetNormalWidthToPx(), expectedPx);
+}
+
+/**
  * @tc.name: AttrScrollSnapAlign001
  * @tc.desc: Test LayoutProperty about ScrollSnapAlign
  * @tc.type: FUNC
