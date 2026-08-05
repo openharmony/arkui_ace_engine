@@ -4109,7 +4109,7 @@ RectF RosenRenderContext::AdjustPaintRectInner(RefPtr<FrameNode>& frameNode)
     if (HasOffset()) {
         auto offset = GetOffsetValue({});
         auto pipeline = PipelineBase::GetCurrentContext();
-        if (pipeline && pipeline ->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        if (pipeline && pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
             offset += OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
         }
         auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
