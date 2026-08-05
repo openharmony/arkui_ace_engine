@@ -374,23 +374,11 @@ public:
         materialNodePositionCallback_ = std::move(callback);
     }
     
-    void SetBlockAlpha(float alpha)
-    {
-        if (blockAlpha_) {
-            blockAlpha_->Set(alpha);
-        }
-    }
-    
     void SetBlockScale(float scale)
     {
         if (blockScale_) {
             blockScale_->Set(scale);
         }
-    }
-    
-    float GetBlockAlpha() const
-    {
-        return blockAlpha_ ? blockAlpha_->Get() : 1.0f;
     }
     
     float GetBlockScale() const
@@ -474,7 +462,6 @@ private:
     RefPtr<AnimatablePropertyFloat> rectBottomRightRadiusX_;
     RefPtr<AnimatablePropertyFloat> rectBottomRightRadiusY_;
     
-    RefPtr<AnimatablePropertyFloat> blockAlpha_;
     RefPtr<AnimatablePropertyFloat> blockScale_;
     
     // non-animatable property

@@ -86,7 +86,6 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
         AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(parameters.blockColor.value_or(Color())));
     blockSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(parameters.blockSize);
     
-    blockAlpha_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
     blockScale_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(1.0f);
     
     // non-animatable property
@@ -125,7 +124,6 @@ SliderContentModifier::SliderContentModifier(const Parameters& parameters,
     AttachProperty(stepColor_);
     AttachProperty(blockBorderColor_);
     AttachProperty(blockSize_);
-    AttachProperty(blockAlpha_);
     AttachProperty(blockScale_);
     AttachProperty(stepRatio_);
     AttachProperty(sliderMode_);
@@ -558,14 +556,14 @@ void SliderContentModifier::CreateDefaultBlockBrush(RSBrush& brush, float& radiu
     auto blockSize = blockSize_->Get();
     auto borderWidth = blockBorderWidth_->Get();
     if (GreatOrEqual(borderWidth * HALF, radius)) {
-        brush.SetColor(ToRSColor(blockBorderColor_->Get().BlendOpacity(blockAlpha_->Get())));
+        brush.SetColor(ToRSColor(blockBorderColor_->Get()));
         return;
     }
     std::vector<GradientColor> gradientColors = GetBlockColor();
     std::vector<RSColorQuad> colors;
     std::vector<float> pos;
     for (size_t i = 0; i < gradientColors.size(); i++) {
-        colors.emplace_back(gradientColors[i].GetLinearColor().BlendOpacity(blockAlpha_->Get()).GetValue());
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
     radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
@@ -599,7 +597,7 @@ void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
     if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
         pen.SetAntiAlias(true);
         pen.SetWidth(borderWidth);
-        pen.SetColor(ToRSColor(blockBorderColor_->Get().BlendOpacity(blockAlpha_->Get())));
+        pen.SetColor(ToRSColor(blockBorderColor_->Get()));
         canvas.AttachPen(pen);
     }
     canvas.DrawCircle(
@@ -635,7 +633,7 @@ void SliderContentModifier::DrawHoverOrPress(DrawingContext& context)
     RSPen circleStatePen;
     circleStatePen.SetAntiAlias(true);
     // add animate color
-    circleStatePen.SetColor(ToRSColor(boardColor_->Get().BlendOpacity(blockAlpha_->Get())));
+    circleStatePen.SetColor(ToRSColor(boardColor_->Get()));
     circleStatePen.SetWidth(isEnlarge_ ? hotCircleShadowWidth_ * scaleValue_ : hotCircleShadowWidth_);
     canvas.AttachPen(circleStatePen);
     auto blockSize = blockSize_->Get();

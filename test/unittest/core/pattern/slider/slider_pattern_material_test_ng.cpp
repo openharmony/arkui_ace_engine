@@ -2047,6 +2047,8 @@ HWTEST_F(SliderPatternMaterialTestNg, SliderPattern_UpdateMaterialNodePosition_A
     pattern->CreateDragFrameNode();
     pattern->CreateDragPointNode();
     pattern->CreateBlurCoverNode();
+    pattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(
+        SliderContentModifier::Parameters {}, [](const PointF&) {});
     
     ASSERT_NE(pattern->dragFrameNode_, nullptr);
     ASSERT_NE(pattern->blurCoverNode_, nullptr);
