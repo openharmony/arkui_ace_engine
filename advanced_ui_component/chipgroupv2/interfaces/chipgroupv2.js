@@ -53,7 +53,17 @@ const defaultTheme = {
     chipGroupSpace: { itemSpace: 8, startSpace: 16, endSpace: 16 },
     chipGroupPadding: { top: 14, bottom: 14 },
     itemFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
-    itemSelectedFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+    itemSelectedFillColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
+    chipBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+    }),
+    chipSelectedBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.ULTRA_THIN,
+        materialColor: { "id": -1, "type": 10001, params: ['sys.color.comp_background_emphasize'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
+    }),
+    iconBackgroundSystemMaterial: new uiMaterial.ImmersiveMaterial({
+        style: uiMaterial.ImmersiveStyle.ULTRA_THIN
+    })
 };
 const iconGroupSuffixTheme = {
     backgroundColor: { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_button_normal'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
@@ -331,15 +341,15 @@ export class ChipGroupV2IconGroupSuffix extends ViewV2 {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     EffectComponent.create();
-                                    EffectComponent.systemMaterial(createECMaterial(this.iconBackgroundSystemMaterial));
+                                    EffectComponent.systemMaterial(createECMaterial(withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial)));
                                 }, EffectComponent);
-                                this.IconButtonsBuilder.bind(this)(createSubECMaterial(this.iconBackgroundSystemMaterial));
+                                this.IconButtonsBuilder.bind(this)(createSubECMaterial(withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial)));
                                 EffectComponent.pop();
                             });
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.IconButtonsBuilder.bind(this)(this.iconBackgroundSystemMaterial);
+                                this.IconButtonsBuilder.bind(this)(withDefaultMaterial(this.iconBackgroundSystemMaterial, defaultTheme.iconBackgroundSystemMaterial));
                             });
                         }
                     }, If);
@@ -582,7 +592,7 @@ export class ChipGroupV2 extends ViewV2 {
             return ChipGroupHeight.NORMAL;
         }
     }
-    ChipItemsBuilder(material, parent = null) {
+    ChipItemsBuilder(options, parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create({ space: this.getChipGroupItemSpace() });
         }, Row);
@@ -606,13 +616,13 @@ export class ChipGroupV2 extends ViewV2 {
                                                 enabled: true,
                                                 activated: this.isSelected(index),
                                                 backgroundColor: this.getBackgroundColor(),
+                                                backgroundSystemMaterial: options.backgroundSystemMaterial,
+                                                activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
                                                 size: this.getChipSize(),
                                                 activatedBackgroundColor: this.getSelectedBackgroundColor(),
                                                 accessibilitySelectedType: this.multiple ? ChipV2AccessibilitySelectedType.CHECKED : ChipV2AccessibilitySelectedType.SELECTED,
                                                 accessibilityDescription: chipItem.accessibilityDescription,
                                                 accessibilityLevel: chipItem.accessibilityLevel,
-                                                backgroundSystemMaterial: createSubECMaterial(material),
-                                                activatedBackgroundSystemMaterial: resolveSystemMaterial(this.itemStyle?.selectedBackgroundSystemMaterial),
                                                 onClicked: () => {
                                                     if (this.isSelected(index)) {
                                                         if (!(!this.isMultiple())) {
@@ -646,7 +656,7 @@ export class ChipGroupV2 extends ViewV2 {
                                                         return element !== chipItem;
                                                     }));
                                                 }
-                                            }) }, undefined, elmtId, () => { }, { page: "components/src/main/ets/components/ChipGroupV2.ets", line: 587, col: 11 });
+                                            }) }, undefined, elmtId, () => { }, { page: "components/src/main/ets/components/ChipGroupV2.ets", line: 615, col: 11 });
                                         ViewV2.create(componentCall);
                                         let paramsLambda = () => {
                                             return {
@@ -659,13 +669,13 @@ export class ChipGroupV2 extends ViewV2 {
                                                     enabled: true,
                                                     activated: this.isSelected(index),
                                                     backgroundColor: this.getBackgroundColor(),
+                                                    backgroundSystemMaterial: options.backgroundSystemMaterial,
+                                                    activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
                                                     size: this.getChipSize(),
                                                     activatedBackgroundColor: this.getSelectedBackgroundColor(),
                                                     accessibilitySelectedType: this.multiple ? ChipV2AccessibilitySelectedType.CHECKED : ChipV2AccessibilitySelectedType.SELECTED,
                                                     accessibilityDescription: chipItem.accessibilityDescription,
                                                     accessibilityLevel: chipItem.accessibilityLevel,
-                                                    backgroundSystemMaterial: createSubECMaterial(material),
-                                                    activatedBackgroundSystemMaterial: resolveSystemMaterial(this.itemStyle?.selectedBackgroundSystemMaterial),
                                                     onClicked: () => {
                                                         if (this.isSelected(index)) {
                                                             if (!(!this.isMultiple())) {
@@ -715,13 +725,13 @@ export class ChipGroupV2 extends ViewV2 {
                                                 enabled: true,
                                                 activated: this.isSelected(index),
                                                 backgroundColor: this.getBackgroundColor(),
+                                                backgroundSystemMaterial: options.backgroundSystemMaterial,
+                                                activatedBackgroundSystemMaterial: options.activatedBackgroundSystemMaterial,
                                                 size: this.getChipSize(),
                                                 activatedBackgroundColor: this.getSelectedBackgroundColor(),
                                                 accessibilitySelectedType: this.multiple ? ChipV2AccessibilitySelectedType.CHECKED : ChipV2AccessibilitySelectedType.SELECTED,
                                                 accessibilityDescription: chipItem.accessibilityDescription,
                                                 accessibilityLevel: chipItem.accessibilityLevel,
-                                                backgroundSystemMaterial: createSubECMaterial(material),
-                                                activatedBackgroundSystemMaterial: resolveSystemMaterial(this.itemStyle?.selectedBackgroundSystemMaterial),
                                                 onClicked: () => {
                                                     if (this.isSelected(index)) {
                                                         if (!(!this.isMultiple())) {
@@ -786,7 +796,7 @@ export class ChipGroupV2 extends ViewV2 {
             Stack.create();
             Stack.padding({ top: this.getPaddingTop(), bottom: this.getPaddingBottom() });
             Stack.layoutWeight(1);
-            Stack.blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN);
+            Stack.blendMode(this.getOutsideBlendMode(), this.getOutsideBlendType());
             Stack.alignContent(Alignment.End);
         }, Stack);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -815,19 +825,19 @@ export class ChipGroupV2 extends ViewV2 {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     EffectComponent.create();
-                                    EffectComponent.systemMaterial(createECMaterial(this.itemStyle?.backgroundSystemMaterial));
+                                    EffectComponent.systemMaterial(createECMaterial(this.getBackgroundSystemMaterial()));
                                 }, EffectComponent);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create({ space: this.getChipGroupItemSpace() });
                                 }, Row);
-                                this.ChipItemsBuilder.bind(this)(createSubECMaterial(this.itemStyle?.backgroundSystemMaterial));
+                                this.ChipItemsBuilder.bind(this)(makeBuilderParameterProxy("ChipItemsBuilder", { backgroundSystemMaterial: () => createSubECMaterial(this.getBackgroundSystemMaterial()), activatedBackgroundSystemMaterial: () => this.getSelectedBackgroundSystemMaterial() }));
                                 Row.pop();
                                 EffectComponent.pop();
                             });
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.ChipItemsBuilder.bind(this)(this.itemStyle?.backgroundSystemMaterial);
+                                this.ChipItemsBuilder.bind(this)(makeBuilderParameterProxy("ChipItemsBuilder", { backgroundSystemMaterial: () => this.getBackgroundSystemMaterial(), activatedBackgroundSystemMaterial: () => this.getSelectedBackgroundSystemMaterial() }));
                             });
                         }
                     }, If);
@@ -836,7 +846,7 @@ export class ChipGroupV2 extends ViewV2 {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.ChipItemsBuilder.bind(this)(undefined);
+                    this.ChipItemsBuilder.bind(this)(makeBuilderParameterProxy("ChipItemsBuilder", {}));
                 });
             }
         }, If);
@@ -887,27 +897,49 @@ export class ChipGroupV2 extends ViewV2 {
         If.pop();
         Row.pop();
     }
+    getSelectedBackgroundSystemMaterial() {
+        return withDefaultMaterial(this.itemStyle?.selectedBackgroundSystemMaterial, defaultTheme.chipSelectedBackgroundSystemMaterial);
+    }
+    getBackgroundSystemMaterial() {
+        return withDefaultMaterial(this.itemStyle?.backgroundSystemMaterial, defaultTheme.chipBackgroundSystemMaterial);
+    }
+    getOutsideBlendType() {
+        if (!this.suffix && (!!this.getBackgroundSystemMaterial() || !!this.getSelectedBackgroundSystemMaterial())) {
+            return undefined;
+        }
+        return BlendApplyType.OFFSCREEN;
+    }
+    getOutsideBlendMode() {
+        if (!this.suffix && (!!this.getBackgroundSystemMaterial() || !!this.getSelectedBackgroundSystemMaterial())) {
+            return undefined;
+        }
+        return BlendMode.SRC_OVER;
+    }
     getLabel(label) {
-        if (!label.fontColor) {
-            label.fontColor = this.getFontColor();
-        }
-        if (!label.activatedFontColor) {
-            label.activatedFontColor = this.getSelectedFontColor();
-        }
-        return label;
+        const result = new ChipV2Label({
+            text: label.text,
+            fontSize: label.fontSize,
+            fontColor: label.fontColor || this.getFontColor(),
+            activatedFontColor: label.activatedFontColor || this.getSelectedFontColor(),
+            fontFamily: label.fontFamily,
+            labelMargin: label.labelMargin,
+            localizedLabelMargin: label.localizedLabelMargin,
+            modifier: label.modifier
+        });
+        return result;
     }
     getPrefixIcon(chipItem) {
         if (chipItem.prefixSymbolIcon) {
             return chipItem.prefixSymbolIcon;
         }
         if (chipItem.prefixIcon) {
-            if (!chipItem.prefixIcon.fillColor) {
-                chipItem.prefixIcon.fillColor = this.getFillColor();
-            }
-            if (!chipItem.prefixIcon.activatedFillColor) {
-                chipItem.prefixIcon.activatedFillColor = this.getSelectedFillColor();
-            }
-            return chipItem.prefixIcon;
+            return new ChipV2PrefixImageIcon({
+                src: chipItem.prefixIcon.src,
+                size: chipItem.prefixIcon.size,
+                fillColor: chipItem.prefixIcon.fillColor || this.getFillColor(),
+                activatedFillColor: chipItem.prefixIcon.activatedFillColor || this.getSelectedFillColor(),
+                modifier: chipItem.prefixIcon.modifier
+            });
         }
         return undefined;
     }
@@ -916,13 +948,18 @@ export class ChipGroupV2 extends ViewV2 {
             return chipItem.suffixSymbolIcon;
         }
         if (chipItem.suffixIcon) {
-            if (!chipItem.suffixIcon.fillColor) {
-                chipItem.suffixIcon.fillColor = this.getFillColor();
-            }
-            if (!chipItem.suffixIcon.activatedFillColor) {
-                chipItem.suffixIcon.activatedFillColor = this.getSelectedFillColor();
-            }
-            return chipItem.suffixIcon;
+            const suffixIcon = new ChipV2SuffixImageIcon({
+                src: chipItem.suffixIcon.src,
+                size: chipItem.suffixIcon.size,
+                fillColor: chipItem.suffixIcon.fillColor || this.getFillColor(),
+                activatedFillColor: chipItem.suffixIcon.activatedFillColor || this.getSelectedFillColor(),
+                modifier: chipItem.suffixIcon.modifier,
+                accessibilityLevel: chipItem.suffixIcon.accessibilityLevel,
+                accessibilityText: chipItem.suffixIcon.accessibilityText,
+                accessibilityDescription: chipItem.suffixIcon.accessibilityDescription,
+                action: chipItem.suffixIcon.action
+            });
+            return suffixIcon;
         }
         return undefined;
     }
@@ -1057,22 +1094,39 @@ function isValidDimensionString(dimension) {
 function isValidDimensionNoPercentageString(dimension) {
     return isValidString(dimension, new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx)?$', 'i'));
 }
-function resolveSystemMaterial(material) {
-    let info = uiMaterial.getMaterialInfo();
+function withDefaultMaterial(material, defaultMaterial) {
+    const info = uiMaterial.getMaterialInfo();
     if (info.state === uiMaterial.MaterialState.DISABLE) {
         return undefined;
     }
-    return info.state === uiMaterial.MaterialState.ENABLE && !material ?
-        new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.ULTRA_THIN }) : material;
+    if (info.state === uiMaterial.MaterialState.ENABLE && !material) {
+        return defaultMaterial;
+    }
+    return material;
 }
 function enableEffectComponent(material) {
+    if (material) {
+        return material instanceof uiMaterial.ImmersiveMaterial;
+    }
     return false;
 }
 function createECMaterial(material) {
-    return undefined;
+    if (!material) {
+        return undefined;
+    }
+    if (material instanceof uiMaterial.ImmersiveMaterial) {
+        return uiMaterial.convertToECMaterial(material);
+    }
+    return material;
 }
 function createSubECMaterial(material) {
-    return resolveSystemMaterial(material);
+    if (!material) {
+        return undefined;
+    }
+    if (material instanceof uiMaterial.ImmersiveMaterial) {
+        return uiMaterial.convertToECSubMaterial(material);
+    }
+    return material;
 }
 function lengthMetricsToLength(length) {
     if (length.unit === LengthUnit.PX) {
