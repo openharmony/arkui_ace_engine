@@ -208,7 +208,6 @@ void CustomNodeBase::Reset()
     onReuseFunc_ = nullptr;
     releaseRecyclePoolFunc_ = nullptr;
     getMemOptFunc_ = nullptr;
-    enableReleaseExpiringNodesFunc_ = nullptr;
 }
 
 void CustomNodeBase::SetJSViewName(std::string&& name)
@@ -249,12 +248,6 @@ void CustomNodeBase::SetReusableMemOptStrategy(int32_t reusableMemOptStrategy)
 void CustomNodeBase::SetReleaseRecyclePoolFunction(std::function<bool(int32_t, bool, bool)>&& callback)
 {
     releaseRecyclePoolFunc_ = std::move(callback);
-}
-
-void CustomNodeBase::SetEnableReleaseExpiringNodesFunction(
-    std::function<void(bool, const std::vector<std::string>&)>&& callback)
-{
-    enableReleaseExpiringNodesFunc_ = std::move(callback);
 }
 
 void CustomNodeBase::TryEnableParentCustomNodeMemOpt()

@@ -690,7 +690,7 @@ public:
         }
     }
 
-    void OnDataReloaded(bool reuseImmediately = false) override
+    void OnDataReloaded() override
     {
         LOGI("OnDataReloaded()");
         ACE_SCOPED_TRACE("OnDataReloaded");

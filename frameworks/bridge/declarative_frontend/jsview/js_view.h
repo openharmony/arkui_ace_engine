@@ -325,8 +325,6 @@ public:
      */
     void JsFinishUpdateFunc(int32_t elmtId);
 
-    void TryReleaseExpiringNode(const JSCallbackInfo& info);
-
     /**
     JS exposed function to check from ElementRegister if given elmtId is (still) in use
     */

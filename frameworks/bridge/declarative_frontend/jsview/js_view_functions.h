@@ -70,7 +70,6 @@ public:
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
     void ExecuteRecycle(const std::string& viewName);
     bool ExecuteReleaseRecyclePool(int32_t remainingTimeMs, bool isProgressive, bool shouldCollect);
-    void ExecuteEnableReleaseExpiringNodes(bool enable, const std::vector<std::string>& reuseIds);
     void ExecuteAboutToRecycle();
     void ExecuteAboutToReuse(void* params);
     bool ExecuteTriggerLifecycle(int32_t eventId);
@@ -133,7 +132,6 @@ private:
     JSWeak<JSFunc> jsSetInitiallyProvidedValueFunc_;
     JSWeak<JSFunc> jsRecycleFunc_;
     JSWeak<JSFunc> jsReleaseRecyclePoolFunc_;
-    JSWeak<JSFunc> jsEnableReleaseExpiringNodesFunc_;
     JSWeak<JSFunc> jsAboutToRecycleFunc_;
     JSWeak<JSFunc> jsAboutToReuseFunc_;
     JSWeak<JSFunc> jsSetActive_;
