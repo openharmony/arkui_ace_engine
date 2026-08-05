@@ -96,6 +96,10 @@ bool FormRenderWindow::ShouldRequestFrame()
     if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
         return true;
     }
+    if (isSystemApp_) {
+        return true;
+    }
+
     if (forceVsync_) {
         SetForceVsyncRequests(false);
         forceVsyncFrameCount_ = FORCE_VSYNC_FRAME_THRESHOLD;
