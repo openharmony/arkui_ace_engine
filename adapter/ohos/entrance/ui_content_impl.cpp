@@ -1426,6 +1426,7 @@ void UIContentImpl::InitializeByName(OHOS::Rosen::Window *window,
 napi_value UIContentImpl::GetUINapiContext()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, nullptr);
     ContainerScope scope(instanceId_);
     napi_value result = nullptr;
     auto frontend = container->GetFrontend();
