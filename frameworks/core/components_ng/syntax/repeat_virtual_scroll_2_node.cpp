@@ -1036,6 +1036,21 @@ bool RepeatVirtualScroll2Node::IsChildOnMainTree(uint32_t rid)
 
 RepeatMemOptStrategy RepeatVirtualScroll2Node::GetMemOptStrategy()
 {
+    if (memOptStrategy_ != RepeatMemOptStrategy::UNDEFINED) {
+        return memOptStrategy_;
+    }
+    auto applicationStrategy = LazyForEachUtils::GetRepeatMemOptStrategy();
+    if (applicationStrategy != RepeatMemOptStrategy::UNDEFINED) {
+    memOptStrategy_ = applicationStrategy;
+        return memOptStrategy_;
+    }
+    auto systemStrategy = SystemProperties::GetSyntaxMemOptStrategy();
+    if (systemStrategy >= 0) {
+        memOptStrategy_ = systemStrategy == 1 ?
+            RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION : RepeatMemOptStrategy::DEFAULT;
+        return memOptStrategy_;
+    }
+    memOptStrategy_ = RepeatMemOptStrategy::DEFAULT;
     return memOptStrategy_;
 }
 

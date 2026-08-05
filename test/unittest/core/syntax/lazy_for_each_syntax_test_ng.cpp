@@ -30,9 +30,13 @@
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/syntax/lazy_for_each_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/lazy_for_each_utils.h"
 #include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
+#include "base/utils/system_properties.h"
 #undef private
 #undef protected
 
@@ -1572,6 +1576,252 @@ HWTEST_F(LazyForEachSyntaxTestNg, GetFrameChildByIndexWithAddToRenderTreeTest001
     lazyForEachNode->needPredict_ = true;
     lazyForEachNode->GetFrameChildByIndex(0, false, false, true);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
+}
+
+/**
+ * @tc.name: LazyForEachNodeGetMemOptStrategy001
+ * @tc.desc: Test LazyForEachNode::GetMemOptStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeGetMemOptStrategy001, TestSize.Level1)
+{
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    lazyForEachNode->memOptStrategy_ = LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+    auto strategy = lazyForEachNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    lazyForEachNode->memOptStrategy_ = LazyForEachMemOptStrategy::UNDEFINED;
+    AceType::DynamicCast<OHOS::Ace::Framework::MockLazyForEachBuilder>(mockLazyForEachActuator)->
+        SetLazyForEachMemOptStrategy(LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+    strategy = lazyForEachNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    lazyForEachNode->memOptStrategy_ = LazyForEachMemOptStrategy::UNDEFINED;
+    AceType::DynamicCast<OHOS::Ace::Framework::MockLazyForEachBuilder>(mockLazyForEachActuator)->
+        SetLazyForEachMemOptStrategy(LazyForEachMemOptStrategy::UNDEFINED);
+    LazyForEachUtils::lazyForEachMemOptStrategy_ = LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION;
+    strategy = lazyForEachNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    lazyForEachNode->memOptStrategy_ = LazyForEachMemOptStrategy::UNDEFINED;
+    LazyForEachUtils::lazyForEachMemOptStrategy_ = LazyForEachMemOptStrategy::UNDEFINED;
+    SystemProperties::syntaxMemOptStrategy_ = 1;
+    strategy = lazyForEachNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    lazyForEachNode->memOptStrategy_ = LazyForEachMemOptStrategy::UNDEFINED;
+    SystemProperties::syntaxMemOptStrategy_ = -1;
+    strategy = lazyForEachNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, LazyForEachMemOptStrategy::DEFAULT);
+
+    lazyForEachNode->memOptStrategy_ = LazyForEachMemOptStrategy::UNDEFINED;
+    lazyForEachNode->builder_ = nullptr;
+    strategy = lazyForEachNode->GetMemOptStrategy();
+    EXPECT_EQ(strategy, LazyForEachMemOptStrategy::DEFAULT);
+}
+
+/**
+ * @tc.name: LazyForEachUtilsParseMetaData001
+ * @tc.desc: Test LazyForEachUtils::ParseMetaData for enableCustomComponentFreeze
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachUtilsParseMetaData001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test enableCustomComponentFreeze with value "true"
+     * @tc.expected: Should enable custom component freeze
+     */
+    LazyForEachUtils::SetEnableCustomComponentFreeze(false);
+    LazyForEachUtils::ParseMetaData("enableCustomComponentFreeze", "true");
+    EXPECT_TRUE(LazyForEachUtils::GetEnableCustomComponentFreeze());
+
+    /**
+     * @tc.steps: step2. Test enableCustomComponentFreeze with value "false"
+     * @tc.expected: Should not change (only "true" enables it)
+     */
+    LazyForEachUtils::SetEnableCustomComponentFreeze(false);
+    LazyForEachUtils::ParseMetaData("enableCustomComponentFreeze", "false");
+    EXPECT_FALSE(LazyForEachUtils::GetEnableCustomComponentFreeze());
+
+    /**
+     * @tc.steps: step3. Test enableCustomComponentFreeze with empty value
+     * @tc.expected: Should not enable
+     */
+    LazyForEachUtils::SetEnableCustomComponentFreeze(false);
+    LazyForEachUtils::ParseMetaData("enableCustomComponentFreeze", "");
+    EXPECT_FALSE(LazyForEachUtils::GetEnableCustomComponentFreeze());
+
+    /**
+     * @tc.steps: step4. Reset state
+     */
+    LazyForEachUtils::SetEnableCustomComponentFreeze(false);
+}
+
+/**
+ * @tc.name: LazyForEachUtilsParseMetaData002
+ * @tc.desc: Test LazyForEachUtils::ParseMetaData for idsForRepeatAnimationAllowReuse
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachUtilsParseMetaData002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test idsForRepeatAnimationAllowReuse with single id
+     * @tc.expected: Should find the id in the set
+     */
+    LazyForEachUtils::ParseMetaData("idsForRepeatAnimationAllowReuse", "id1");
+    EXPECT_TRUE(LazyForEachUtils::IsIdInRepeatAnimationAllowReuseSet("id1"));
+    EXPECT_FALSE(LazyForEachUtils::IsIdInRepeatAnimationAllowReuseSet("id2"));
+
+    /**
+     * @tc.steps: step2. Test idsForRepeatAnimationAllowReuse with comma-separated ids
+     * @tc.expected: Should find all ids
+     */
+    LazyForEachUtils::ParseMetaData("idsForRepeatAnimationAllowReuse", "id3,id4,id5");
+    EXPECT_TRUE(LazyForEachUtils::IsIdInRepeatAnimationAllowReuseSet("id3"));
+    EXPECT_TRUE(LazyForEachUtils::IsIdInRepeatAnimationAllowReuseSet("id4"));
+    EXPECT_TRUE(LazyForEachUtils::IsIdInRepeatAnimationAllowReuseSet("id5"));
+
+    /**
+     * @tc.steps: step3. Test idsForRepeatAnimationAllowReuse with empty value
+     * @tc.expected: Should not crash
+     */
+    LazyForEachUtils::ParseMetaData("idsForRepeatAnimationAllowReuse", "");
+}
+
+/**
+ * @tc.name: LazyForEachUtilsParseMetaData003
+ * @tc.desc: Test LazyForEachUtils::ParseMetaData for repeatMemoryOptimizationStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachUtilsParseMetaData003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test repeatMemoryOptimizationStrategy with ENABLE_AUTO_CACHE_OPTIMIZATION
+     * @tc.expected: Should set RepeatMemOptStrategy to ENABLE_AUTO_CACHE_OPTIMIZATION
+     */
+    LazyForEachUtils::ParseMetaData("repeatMemoryOptimizationStrategy", "ENABLE_AUTO_CACHE_OPTIMIZATION");
+    EXPECT_EQ(LazyForEachUtils::GetRepeatMemOptStrategy(), RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    /**
+     * @tc.steps: step2. Test repeatMemoryOptimizationStrategy with DEFAULT
+     * @tc.expected: Should set RepeatMemOptStrategy to DEFAULT
+     */
+    LazyForEachUtils::ParseMetaData("repeatMemoryOptimizationStrategy", "DEFAULT");
+    EXPECT_EQ(LazyForEachUtils::GetRepeatMemOptStrategy(), RepeatMemOptStrategy::DEFAULT);
+
+    /**
+     * @tc.steps: step3. Test repeatMemoryOptimizationStrategy with invalid value
+     * @tc.expected: Should set RepeatMemOptStrategy to DEFAULT
+     */
+    LazyForEachUtils::ParseMetaData("repeatMemoryOptimizationStrategy", "INVALID");
+    EXPECT_EQ(LazyForEachUtils::GetRepeatMemOptStrategy(), RepeatMemOptStrategy::DEFAULT);
+}
+
+/**
+ * @tc.name: LazyForEachUtilsParseMetaData004
+ * @tc.desc: Test LazyForEachUtils::ParseMetaData for lazyForEachMemoryOptimizationStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachUtilsParseMetaData004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test lazyForEachMemoryOptimizationStrategy with ENABLE_AUTO_CACHE_OPTIMIZATION
+     * @tc.expected: Should set LazyForEachMemOptStrategy to ENABLE_AUTO_CACHE_OPTIMIZATION
+     */
+    LazyForEachUtils::ParseMetaData("lazyForEachMemoryOptimizationStrategy", "ENABLE_AUTO_CACHE_OPTIMIZATION");
+    EXPECT_EQ(LazyForEachUtils::GetLazyForEachMemOptStrategy(),
+              LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    /**
+     * @tc.steps: step2. Test lazyForEachMemoryOptimizationStrategy with DEFAULT
+     * @tc.expected: Should set LazyForEachMemOptStrategy to DEFAULT
+     */
+    LazyForEachUtils::ParseMetaData("lazyForEachMemoryOptimizationStrategy", "DEFAULT");
+    EXPECT_EQ(LazyForEachUtils::GetLazyForEachMemOptStrategy(), LazyForEachMemOptStrategy::DEFAULT);
+
+    /**
+     * @tc.steps: step3. Test lazyForEachMemoryOptimizationStrategy with invalid value
+     * @tc.expected: Should set LazyForEachMemOptStrategy to DEFAULT
+     */
+    LazyForEachUtils::ParseMetaData("lazyForEachMemoryOptimizationStrategy", "INVALID");
+    EXPECT_EQ(LazyForEachUtils::GetLazyForEachMemOptStrategy(), LazyForEachMemOptStrategy::DEFAULT);
+
+    /**
+     * @tc.steps: step4. Reset application strategy
+     */
+    LazyForEachUtils::SetLazyForEachMemOptStrategy("UNDEFINED");
+}
+
+/**
+ * @tc.name: LazyForEachUtilsParseMetaData005
+ * @tc.desc: Test LazyForEachUtils::ParseMetaData for reusableMemoryOptimizationStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachUtilsParseMetaData005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test reusableMemoryOptimizationStrategy with ENABLE_AUTO_CACHE_OPTIMIZATION
+     * @tc.expected: Should set ReusableMemOptStrategy to ENABLE_AUTO_CACHE_OPTIMIZATION
+     */
+    LazyForEachUtils::ParseMetaData("reusableMemoryOptimizationStrategy", "ENABLE_AUTO_CACHE_OPTIMIZATION");
+    EXPECT_EQ(LazyForEachUtils::GetReusableMemOptStrategy(),
+              ReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    /**
+     * @tc.steps: step2. Test reusableMemoryOptimizationStrategy with DEFAULT
+     * @tc.expected: Should set ReusableMemOptStrategy to DEFAULT
+     */
+    LazyForEachUtils::ParseMetaData("reusableMemoryOptimizationStrategy", "DEFAULT");
+    EXPECT_EQ(LazyForEachUtils::GetReusableMemOptStrategy(), ReusableMemOptStrategy::DEFAULT);
+
+    /**
+     * @tc.steps: step3. Test reusableMemoryOptimizationStrategy with invalid value
+     * @tc.expected: Should set ReusableMemOptStrategy to DEFAULT
+     */
+    LazyForEachUtils::ParseMetaData("reusableMemoryOptimizationStrategy", "INVALID");
+    EXPECT_EQ(LazyForEachUtils::GetReusableMemOptStrategy(), ReusableMemOptStrategy::DEFAULT);
+}
+
+/**
+ * @tc.name: LazyForEachUtilsParseMetaData006
+ * @tc.desc: Test LazyForEachUtils::ParseMetaData with unknown name
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachUtilsParseMetaData006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set known state
+     */
+    LazyForEachUtils::SetEnableCustomComponentFreeze(true);
+    LazyForEachUtils::SetLazyForEachMemOptStrategy("ENABLE_AUTO_CACHE_OPTIMIZATION");
+
+    /**
+     * @tc.steps: step2. Test with unknown name
+     * @tc.expected: Should not change any existing state
+     */
+    LazyForEachUtils::ParseMetaData("unknownKey", "someValue");
+    EXPECT_TRUE(LazyForEachUtils::GetEnableCustomComponentFreeze());
+    EXPECT_EQ(LazyForEachUtils::GetLazyForEachMemOptStrategy(),
+              LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION);
+
+    /**
+     * @tc.steps: step3. Test with empty name
+     * @tc.expected: Should not change any existing state
+     */
+    LazyForEachUtils::ParseMetaData("", "someValue");
+    EXPECT_TRUE(LazyForEachUtils::GetEnableCustomComponentFreeze());
+
+    /**
+     * @tc.steps: step4. Reset state
+     */
+    LazyForEachUtils::SetEnableCustomComponentFreeze(false);
+    LazyForEachUtils::SetLazyForEachMemOptStrategy("UNDEFINED");
 }
 
 } // namespace OHOS::Ace::NG

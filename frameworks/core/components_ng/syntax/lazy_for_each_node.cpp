@@ -88,6 +88,7 @@ RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
         node->RegisterBuilderListener();
     }
+    node->SetMemOptStrategy(LazyForEachMemOptStrategy::DEFAULT);
     return node;
 }
 
@@ -840,7 +841,32 @@ void LazyForEachNode::EnablePreBuild(bool enable)
 
 LazyForEachMemOptStrategy LazyForEachNode::GetMemOptStrategy()
 {
-    return builder_? builder_->GetLazyForEachMemOptStrategy() : LazyForEachMemOptStrategy::DEFAULT;
+    if (memOptStrategy_ != LazyForEachMemOptStrategy::UNDEFINED) {
+        return memOptStrategy_;
+    }
+    auto memOptStrategy = builder_ ? builder_->GetLazyForEachMemOptStrategy() : LazyForEachMemOptStrategy::DEFAULT;
+    if (memOptStrategy != LazyForEachMemOptStrategy::UNDEFINED) {
+        memOptStrategy_ = memOptStrategy;
+        return memOptStrategy_;
+    }
+    auto applicationStrategy = LazyForEachUtils::GetLazyForEachMemOptStrategy();
+    if (applicationStrategy != LazyForEachMemOptStrategy::UNDEFINED) {
+        memOptStrategy_ = applicationStrategy;
+        return memOptStrategy_;
+    }
+    auto systemStrategy = SystemProperties::GetSyntaxMemOptStrategy();
+    if (systemStrategy >= 0) {
+        memOptStrategy_ = systemStrategy == 1 ?
+            LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION : LazyForEachMemOptStrategy::DEFAULT;
+        return memOptStrategy_;
+    }
+    memOptStrategy_ = LazyForEachMemOptStrategy::DEFAULT;
+    return memOptStrategy_;
+}
+
+void LazyForEachNode::SetMemOptStrategy(LazyForEachMemOptStrategy strategy)
+{
+    memOptStrategy_ = strategy;
 }
 
 void LazyForEachNode::OnWindowShow()

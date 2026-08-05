@@ -1457,15 +1457,17 @@ abstract class ViewPU extends PUV2ViewBase
    * - If the JSView object is managed by the RecycleManager, the CustomNode is reused.
    *
    * @param {string} reuseId - The ID used for recycling the component.
+   * @param {number} memOptStrategy - The memory optimization strategy (-1 = UNDEFINED, 0 = DEFAULT, 1 = ENABLE_AUTO_CACHE_OPTIMIZATION).
+   * @param {number} cachedCount - The size of reuse pool.
   */
-  public recycleSelf(name: string): void {
+  public recycleSelf(name: string, memOptStrategy: number = 0, cachedCount: number = 8): void {
     const parent = this.getParent() as ViewPU;
     const ctor = this.constructor as new (...args: ViewPU[]) => ViewPU;
     const globalPool = this.__myReusePool__Internal;
     // Check if Legacy Reuse Pool exists
     if (!globalPool && parent && !(parent as ViewPU).isDeleting_) {
-      parent.getOrCreateRecycleManager().pushRecycleNode(name, this);
-      if (this.__getReusableMemOptStrategy__Internal() === 1) {
+      parent.getOrCreateRecycleManager().pushRecycleNode(name, this, memOptStrategy, cachedCount);
+      if (memOptStrategy === 1) {
         parent.__startMemOpt__Internal();
       }
       this.hasBeenRecycled_ = true;

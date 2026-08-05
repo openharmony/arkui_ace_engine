@@ -477,7 +477,7 @@ private:
 
     bool isRecycleRerender_ = false;
     bool isV2_ = false;
-    int32_t reusableMemOptStrategy_ = 0;
+    int32_t reusableMemOptStrategy_ = -1;
     bool executedAboutToRender_ = false;
     bool executedOnRenderDone_ = false;
     bool executedRender_ = false;

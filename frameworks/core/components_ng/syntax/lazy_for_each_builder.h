@@ -50,6 +50,7 @@ enum class LazyForEachCustomComponentFreezeMode {
 };
 
 enum class LazyForEachMemOptStrategy {
+    UNDEFINED = -1,
     DEFAULT = 0,
     ENABLE_AUTO_CACHE_OPTIMIZATION = 1
 };

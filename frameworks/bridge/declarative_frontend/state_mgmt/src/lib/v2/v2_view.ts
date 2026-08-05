@@ -178,8 +178,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
      * - If the JSView object is managed by the RecycleManager, the CustomNode is reused.
      *
      * @param {string} reuseId - The ID used for recycling the component.
+     * @param {number} memOptStrategy - The memory optimization strategy (-1 = UNDEFINED, 0 = DEFAULT, 1 = ENABLE_AUTO_CACHE_OPTIMIZATION).
+     * @param {number} cachedCount - The size of reuse pool.
     */
-    public recycleSelf(reuseId: string): void {
+    public recycleSelf(reuseId: string, memOptStrategy: number = 0, cachedCount: number = 8): void {
         stateMgmtConsole.debug(`${this.debugInfo__()}:  reuseId: ${reuseId}`);
         const parent = this.getParent() as ViewV2;
         const ctor = this.constructor as new (...args: ViewV2[]) => ViewV2;
@@ -187,8 +189,8 @@ abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber
 
         // Legacy Reuse — push to parent's local recycle pool
         if (!globalPool && parent && !(parent as ViewV2).isDeleting_) {
-            parent.getOrCreateRecyclePool().pushRecycleV2Component(reuseId, this);
-            if (this.__getReusableMemOptStrategy__Internal() === 1) {
+            parent.getOrCreateRecyclePool().pushRecycleV2Component(reuseId, this, memOptStrategy, cachedCount);
+            if (memOptStrategy === 1) {
                 parent.__startMemOpt__Internal();
             }
             this.hasBeenRecycled_ = true;

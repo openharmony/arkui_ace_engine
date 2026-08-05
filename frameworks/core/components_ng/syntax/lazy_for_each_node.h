@@ -224,6 +224,7 @@ public:
 
     bool hasRegisterLazyForEachToCustomNode = false;
     LazyForEachMemOptStrategy GetMemOptStrategy();
+    void SetMemOptStrategy(LazyForEachMemOptStrategy strategy);
     void OnWindowShow() override;
     void OnWindowHide() override;
     void OnNotifyMemoryLevel(int32_t level) override;
@@ -311,6 +312,7 @@ private:
     bool requestLongPredict_ = true;
     bool isRegisterListener_ = false;
     bool isLoop_ = false;
+    LazyForEachMemOptStrategy memOptStrategy_ = LazyForEachMemOptStrategy::UNDEFINED;
 
     mutable std::list<RefPtr<UINode>> tempChildren_;
     mutable std::list<RefPtr<UINode>> children_;
