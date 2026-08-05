@@ -524,7 +524,7 @@ private:
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
     // Check if buttons should be laid out vertically based on available width
     bool IsVerticalAlignButtonNeeded(const std::vector<ButtonInfo>& buttons,
-        const LayoutConstraintF layoutConstraint);
+        const LayoutConstraintF& layoutConstraint);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
     void OnFontConfigurationUpdate() override;
     void UpdateTextFontScale();

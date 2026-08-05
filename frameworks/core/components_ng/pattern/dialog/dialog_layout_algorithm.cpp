@@ -1496,6 +1496,7 @@ void DialogLayoutAlgorithm::ResetConstraint(const RefPtr<FrameNode>& frameNode)
     contentLayoutProp->ResetCalcMaxSize();
     // Reset max size constraint for scroll and list children
     for (const auto& child : frameNode->GetAllChildrenWithBuild()) {
+        CHECK_NULL_CONTINUE(child);
         if (child->GetHostTag() == SCROLL_ETS_TAG || child->GetHostTag() == LIST_ETS_TAG) {
             auto childLayoutProperty = child->GetLayoutProperty();
             CHECK_NULL_CONTINUE(childLayoutProperty);
