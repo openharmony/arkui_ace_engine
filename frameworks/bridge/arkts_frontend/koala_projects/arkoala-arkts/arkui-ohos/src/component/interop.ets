@@ -23,7 +23,7 @@ import { ExtendableComponent } from './extendableComponent';
 import { 
     StateDecoratedVariable, 
     ProvideDecoratedVariable, 
-    PropDecoratedVariable, 
+    PropDecoratedVariable,
     PropRefDecoratedVariable,
     LinkDecoratedVariable, 
     ConsumeDecoratedVariable, 
@@ -59,8 +59,6 @@ import { ArkThemeNativeHelper } from "arkui/theme/ArkThemeNativeHelper";
 import { ArkThemeScopeManager } from "arkui/theme/ArkThemeScopeManager";
 import { NavPathInfo, NavPathStackInternal, NavigationOptions, NavigationInterception } from "../component/navigation";
 import { InteropTransferMutableBinding, InteropTransferBinding } from '../stateManagement/interop/interopBinding';
-
-import { BuilderLiteralInterfaceProxyHandler } from "./builder";
 
 export class CompatiblePeerNode extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, view: ESValue, name: string = '', flags: int32 = 0) {
@@ -520,21 +518,21 @@ export function compatibleWrappedBuilderInternal(builder: Any, ...args: FixedArr
                         break;
                     }
                     stateParam.setProperty(result.value as ESValue, param.getProperty(result.value as ESValue));
+                    }
                 }
-            }
         } else {
-            if (!reflect.Proxy.isProxyClass(Class.of(rawValue as Object))) {
+            if (!Object.keys(rawValue as Object).includes('handler')) {
                 return;
+            } else {
+                const handler = (reflect.Value.of(rawValue) as ClassValue).getFieldByName('handler').getData() as Object;
+                const target = (reflect.Value.of(handler) as ClassValue).getFieldByName('_target').getData() as Object;
+                const keys = Object.keys(target);
+                keys.forEach((key) => {
+                    const value = (reflect.Value.of(target) as ClassValue).getFieldByName(key).getData() as Object;
+                    stateParam.setProperty(ESValue.wrap(key), ESValue.wrap(value));
+                    invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key));
+                })
             }
-            const handler = (rawValue as reflect.Proxy).getHandler();
-            const target = (handler as BuilderLiteralInterfaceProxyHandler).target;
-            const targetInstanceFields = reflect.getInstanceFieldsRecursive(Class.of(target));
-            targetInstanceFields.forEach((field) => {
-                const key = field.getName();
-                const value = field.getValue(target) as Object;
-                stateParam.setProperty(ESValue.wrap(key), ESValue.wrap(value));
-                invokeObserveFireChange.invoke(stateParam, ESValue.wrap(key));
-            })
         }
         const runPendingJobs = global.getProperty('runPendingJobs');
         runPendingJobs.invoke();
@@ -1343,19 +1341,9 @@ function createDynamicCompatibleStateMeta(): [()=> void,()=> void] {
 }
 
 function addCompatibleWatchFuncForDynamic(value: IObservedObject): void {
-    let getters = reflect.getInstanceGettersRecursive(Class.of(value));
-    for (let i = 0; i < getters.length; i++){
-        let attr = getters[i].invoke(value);
-        if (attr instanceof MutableStateMeta) {
-            let result = createDynamicCompatibleStateMeta();
-            (attr as MutableStateMeta).registerDynamicHookFunc(result[0], result[1]);
-        } else if (attr instanceof IObservedObject) {
-            addCompatibleWatchFuncForDynamic(attr as IObservedObject);
-        }
-    }
-    let fields = reflect.getInstanceFieldsRecursive(Class.of(value));
-    for (let i = 0; i < fields.length; i++){
-        let attr = fields[i].getValue(value);
+    let values = Object.values(value);
+    for(let i =0; i < values.length; i++){
+        let attr = values[i];
         if (attr instanceof MutableStateMeta) {
             let result = createDynamicCompatibleStateMeta();
             (attr as MutableStateMeta).registerDynamicHookFunc(result[0], result[1]);
