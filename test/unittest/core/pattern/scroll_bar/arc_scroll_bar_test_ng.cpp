@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
 #include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -196,5 +197,31 @@ HWTEST_F(ArcScrollBarTestNg, BarStatus001, TestSize.Level1)
     EXPECT_NE(pattern_->scrollBar_, nullptr);
     pattern_->SetScrollBar(DisplayMode::OFF);
     EXPECT_EQ(pattern_->scrollBar_, nullptr);
+}
+
+/**
+ * @tc.name: CreateOnSupportedDevices001
+ * @tc.desc: Test ArcScrollBar creation on all supported device types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArcScrollBarTestNg, CreateOnSupportedDevices001, TestSize.Level1)
+{
+    CreateStack();
+    CreateScroll();
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    ScrollBarModelNG scrollBarModel;
+    int32_t directionValue = static_cast<int>(Axis::VERTICAL);
+    const DeviceType supportedDeviceTypes[] = { DeviceType::PHONE, DeviceType::TWO_IN_ONE, DeviceType::TABLET,
+        DeviceType::TV, DeviceType::WATCH, DeviceType::WEARABLE };
+
+    for (auto deviceType : supportedDeviceTypes) {
+        SystemProperties::SetDeviceType(deviceType);
+        scrollBarModel.Create(scrollBarProxy, true, true, directionValue, static_cast<int>(DisplayMode::ON), true);
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        ASSERT_NE(frameNode, nullptr);
+        EXPECT_NE(AceType::DynamicCast<ArcScrollBarPattern>(frameNode->GetPattern()), nullptr);
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    CreateDone();
 }
 } // namespace OHOS::Ace::NG
