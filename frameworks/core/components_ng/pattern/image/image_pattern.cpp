@@ -608,14 +608,12 @@ std::string ImagePattern::MaskUrl(std::string url)
     // 2. middle: replace with stars
     const size_t middleLength = urlLength - URL_KEEP_TOTAL_LENGTH;
     result.append(middleLength, '*');
-    // 3. suffix: apply masked pattern on the last URL_SAVE_LENGTH chars
+    // 3. suffix: bulk-append then overwrite masked positions
     size_t suffixStart = urlLength - URL_SAVE_LENGTH;
-    for (size_t i = 0; i < URL_SAVE_LENGTH; ++i) {
-        if (i % NEED_MASK_INDEX == NEED_MASK_START_OFFSET) {
-            result += '*';
-        } else {
-            result += url[suffixStart + i];
-        }
+    size_t suffixPos = result.size();
+    result.append(url, suffixStart, URL_SAVE_LENGTH);
+    for (size_t i = NEED_MASK_START_OFFSET; i < URL_SAVE_LENGTH; i += NEED_MASK_INDEX) {
+        result[suffixPos + i] = '*';
     }
     return result;
 }

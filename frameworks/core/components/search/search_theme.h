@@ -276,7 +276,7 @@ public:
         return cancelButtonStyle_;
     }
 
-    TextStyle GetTextStyle() const
+    const TextStyle& GetTextStyle() const
     {
         return textStyle_;
     }

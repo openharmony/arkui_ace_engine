@@ -119,7 +119,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOneDepthVisibleFrame01, TestSize.Level1)
     /**
      * @tc.steps: step2. add childnode to the childnode list
      */
-    std::list<RefPtr<FrameNode>> children;
+    std::vector<RefPtr<FrameNode>> children;
     children.push_back(childNode);
     node->frameChildren_ = { children.begin(), children.end() };
 
@@ -149,7 +149,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetOneDepthVisibleFrame02, TestSize.Level1)
     /**
      * @tc.steps: step2. add childnode to the childnode list
      */
-    std::list<RefPtr<FrameNode>> children;
+    std::vector<RefPtr<FrameNode>> children;
     children.push_back(childNode);
     node->frameChildren_ = { children.begin(), children.end() };
 
@@ -2774,7 +2774,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnGenerateOneDepthVisibleFrameWithTransition0
     /**
      * @tc.steps: step2. call the function OnGenerateOneDepthVisibleFrameWithTransition.
      */
-    std::list<RefPtr<FrameNode>> children;
+    std::vector<RefPtr<FrameNode>> children;
     children.push_back(childNode);
     frameNode->OnGenerateOneDepthVisibleFrameWithTransition(children);
     frameNode->overlayNode_ = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());

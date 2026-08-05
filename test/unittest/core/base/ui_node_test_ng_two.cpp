@@ -1023,12 +1023,13 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo069, TestSize.Level1)
     testNode1->AddChild(testNode4, 1, false);
     OffsetT<float> offset;
     std::list<RefPtr<FrameNode>> visibleList;
+    std::vector<RefPtr<FrameNode>> visibleVector;
     testNode1->GenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
     testNode1->AddDisappearingChild(testNode2, 1);
     testNode1->AddDisappearingChild(testNode3, 2);
     testNode1->AddDisappearingChild(testNode4, 3);
     testNode1->AddDisappearingChild(testNode5, 4);
-    testNode1->GenerateOneDepthVisibleFrameWithTransition(visibleList);
+    testNode1->GenerateOneDepthVisibleFrameWithTransition(visibleVector);
     testNode1->GenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
     EXPECT_EQ(testNode1->GetChildren().size(), 3);
 }

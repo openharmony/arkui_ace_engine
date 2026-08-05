@@ -85,7 +85,7 @@ void AcePerformanceCheck::Stop()
 
 // ============================== specific implementation ======================================================
 
-AceScopedPerformanceCheck::AceScopedPerformanceCheck(const std::string& name)
+AceScopedPerformanceCheck::AceScopedPerformanceCheck(const char* name)
 {
     // micro time.
     markTime_ = GetSysTimestamp();
