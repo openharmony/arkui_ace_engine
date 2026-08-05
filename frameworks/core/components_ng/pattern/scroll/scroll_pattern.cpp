@@ -1146,7 +1146,9 @@ std::optional<float> ScrollPattern::CalcPredictSnapOffset(
     }
     float head = 0.0f;
     float tail = -scrollableDistance_;
-    if (GreatOrEqual(finalPosition, head) || LessOrEqual(finalPosition, tail)) {
+    // 0.1f : tail is difference between content size and scroll mainsize, if ULP of the two float values is different,
+    // this difference might be bigger than the epsilon of LessOrEqual function.
+    if (GreatOrEqual(finalPosition, head) || LessOrEqualCustomPrecision(finalPosition, tail, 0.1f)) {
         predictSnapOffset = finalPosition;
     } else if (LessNotEqual(finalPosition, head) && GreatOrEqual(finalPosition, *(snapOffsets_.begin()))) {
         predictSnapOffset = *(snapOffsets_.begin());
