@@ -41,7 +41,6 @@ generate_static_abc("assembled_advanced_ets_abc") {
       "./@ohos.arkui.advanced.SelectTitleBar.ets",
       "./@ohos.arkui.advanced.SelectTitleBarV2.ets",
       "./@ohos.arkui.advanced.SplitLayout.ets",
-      "./@ohos.arkui.advanced.SplitLayoutV2.ets",
       "./@ohos.arkui.advanced.SubHeader.ets",
       "./@ohos.arkui.advanced.SubHeaderV2.ets",
       "./@ohos.arkui.advanced.SwipeRefresher.ets",
