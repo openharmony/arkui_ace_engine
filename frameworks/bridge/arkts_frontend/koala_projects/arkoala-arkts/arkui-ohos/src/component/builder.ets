@@ -35,7 +35,7 @@ export function makeBuilderParameterProxy<T extends Object>(
     return instance;
 }
 
-class BuilderLiteralInterfaceProxyHandler implements reflect.InvocationHandler {
+export class BuilderLiteralInterfaceProxyHandler implements reflect.InvocationHandler {
     private _target: Object;
     private source: Map<string, () => Any>;
     constructor(target: Object, source: Map<string, () => Any>) {
@@ -56,5 +56,8 @@ class BuilderLiteralInterfaceProxyHandler implements reflect.InvocationHandler {
     }
     invoke(target: Object, method: reflect.InstanceMethod, args: FixedArray<Any>): Any {
         return method.invoke(this._target, args);
+    }
+    get target(): Object { 
+        return this._target;
     }
 }
