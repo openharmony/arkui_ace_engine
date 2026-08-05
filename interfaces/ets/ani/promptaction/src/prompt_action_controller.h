@@ -20,9 +20,9 @@
 #include <cstddef>
 #include <string>
 
+#include "core/components/dialog/dialog_properties.h"
 #include "frameworks/core/common/container_consts.h"
 #include "frameworks/core/components_ng/base/frame_node.h"
-#include "frameworks/core/components_ng/pattern/dialog/dialog_pattern.h"
 
 namespace OHOS::Ace::Ani {
 
@@ -31,26 +31,9 @@ public:
     PromptActionController() = default;
     virtual ~PromptActionController() = default;
 
-    void SetNode(const WeakPtr<NG::FrameNode> node)
-    {
-        node_ = node;
-        auto dialogNode = node_.Upgrade();
-        CHECK_NULL_VOID(dialogNode);
-        ACE_UINODE_TRACE(dialogNode);
-        auto pattern = dialogNode->GetPattern<NG::DialogPattern>();
-        CHECK_NULL_VOID(pattern);
-        if (PromptActionCommonState::UNINITIALIZED == pattern->GetState()) {
-            pattern->SetState(PromptActionCommonState::INITIALIZED);
-            TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is INITIALIZED.");
-        }
-        hasBind_ = true;
-    }
-    virtual void Close() {};
-
-    virtual PromptActionCommonState GetState()
-    {
-        return PromptActionCommonState::UNINITIALIZED;
-    }
+    void SetNode(const WeakPtr<NG::FrameNode> node);
+    virtual void Close();
+    virtual PromptActionCommonState GetState();
 protected:
     WeakPtr<NG::FrameNode> node_;
     bool hasBind_ = false;

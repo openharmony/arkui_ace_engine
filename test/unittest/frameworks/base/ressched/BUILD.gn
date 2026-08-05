@@ -116,6 +116,7 @@ ace_unittest("ressched_report_test") {
     "$ace_root/test/mock/frameworks/core/components_ng/render/adapter/mock_pixmap_image.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_render_surface_creator.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/render/mock_texteffect.cpp",
+    "$ace_root/test/mock/frameworks/core/interfaces/native/node/mock_dialog_modifier.cpp",
     "$ace_root/test/mock/frameworks/core/rosen/testing_typography_style.cpp",
     "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
     "$ace_root/test/mock/interfaces/mock_content_modifier.cpp",

@@ -24,7 +24,7 @@
 #include "core/components/dialog/dialog_properties.h"
 
 namespace OHOS::Ace {
-class ACE_FORCE_EXPORT AlertDialogModel {
+class AlertDialogModel {
 public:
     static AlertDialogModel* GetInstance();
     virtual ~AlertDialogModel() = default;

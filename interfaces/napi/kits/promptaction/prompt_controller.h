@@ -18,7 +18,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/dialog/dialog_properties.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/interfaces/native/node/dialog_modifier.h"
 
 namespace OHOS::Ace::Napi {
 
@@ -33,20 +33,13 @@ public:
         auto dialogNode = node_.Upgrade();
         CHECK_NULL_VOID(dialogNode);
         ACE_UINODE_TRACE(dialogNode);
-        auto pattern = dialogNode->GetPattern<NG::DialogPattern>();
-        CHECK_NULL_VOID(pattern);
-        if (PromptActionCommonState::UNINITIALIZED == pattern->GetState()) {
-            pattern->SetState(PromptActionCommonState::INITIALIZED);
-            TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is INITIALIZED.");
-        }
+        const auto* dialogInnerModifier = NG::NodeModifier::GetDialogInnerModifier();
+        CHECK_NULL_VOID(dialogInnerModifier);
+        dialogInnerModifier->setState(dialogNode);
         hasBind_ = true;
     }
-    virtual void Close() {};
-
-    virtual PromptActionCommonState GetState()
-    {
-        return PromptActionCommonState::UNINITIALIZED;
-    }
+    virtual void Close();
+    virtual PromptActionCommonState GetState();
 protected:
     WeakPtr<NG::FrameNode> node_;
     bool hasBind_ = false;

@@ -20,10 +20,29 @@
 #include "prompt_action_controller.h"
 #include "prompt_action_params.h"
 
+#include "core/interfaces/native/node/dialog_modifier.h"
 #include "frameworks/core/components_ng/pattern/overlay/dialog_manager_static.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Ani {
+
+void PromptActionController::SetNode(const WeakPtr<NG::FrameNode> node)
+{
+    node_ = node;
+    auto dialogNode = node_.Upgrade();
+    CHECK_NULL_VOID(dialogNode);
+    ACE_UINODE_TRACE(dialogNode);
+    const auto* dialogInnerModifier = NG::NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_VOID(dialogInnerModifier);
+    dialogInnerModifier->setState(dialogNode);
+    hasBind_ = true;
+}
+void PromptActionController::Close() {}
+
+PromptActionCommonState PromptActionController::GetState()
+{
+    return PromptActionCommonState::UNINITIALIZED;
+}
 
 void PromptActionDialogController::Close()
 {
@@ -52,9 +71,9 @@ PromptActionCommonState PromptActionDialogController::GetState()
     auto dialogNode = node_.Upgrade();
     CHECK_NULL_RETURN(dialogNode, state);
     ACE_UINODE_TRACE(dialogNode);
-    auto pattern = dialogNode->GetPattern<NG::DialogPattern>();
-    CHECK_NULL_RETURN(pattern, state);
-    state = pattern->GetState();
+    const auto* dialogInnerModifier = NG::NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(dialogInnerModifier, state);
+    state = dialogInnerModifier->getState(dialogNode, state);
     return state;
 }
 

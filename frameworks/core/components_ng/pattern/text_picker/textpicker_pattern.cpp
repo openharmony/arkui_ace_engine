@@ -29,7 +29,6 @@
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/date_picker/picker_theme.h"
-#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_column_pattern.h"

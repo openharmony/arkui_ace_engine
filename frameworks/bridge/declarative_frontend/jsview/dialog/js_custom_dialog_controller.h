@@ -19,7 +19,6 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_view.h"
 #include "core/components/dialog/dialog_component.h"
-#include "core/components_ng/pattern/dialog/custom_dialog/custom_dialog_controller_model.h"
 
 namespace OHOS::Ace::Framework {
 

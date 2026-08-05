@@ -299,8 +299,6 @@ public:
     void RegisterOnHideDialog(std::function<void()> callback);
     void SetBackPressEvent(std::function<bool()> event);
 
-    bool FireBackPressEvent() const;
-
     bool GetHasPixelMap();
 
     void SetHasPixelMap(bool hasPixelMap);
@@ -747,7 +745,6 @@ private:
 
     int32_t ExceptComponent(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
         bool isBackPressed, bool isPageRouter);
-    void OverlayDoDismiss(RefPtr<NG::FrameNode>& overlay, RefPtr<Pattern>& pattern);
     int32_t RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
         RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter);
     int32_t WebBackward(RefPtr<NG::FrameNode>& overlay);

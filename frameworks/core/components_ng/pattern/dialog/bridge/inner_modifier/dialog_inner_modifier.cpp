@@ -50,6 +50,80 @@ RefPtr<FrameNode> CreateDialogNodeWithThemeNode(
     return DialogView::CreateDialogNode(param, customNode, themeNode);
 }
 
+void SetIsPickerDialog(const RefPtr<FrameNode>& dialogNode, bool value)
+{
+    CHECK_NULL_VOID(dialogNode);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    dialogPattern->SetIsPickerDialog(value);
+}
+
+void SetState(const RefPtr<FrameNode>& dialogNode)
+{
+    CHECK_NULL_VOID(dialogNode);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    if (dialogPattern->GetState() == PromptActionCommonState::UNINITIALIZED) {
+        dialogPattern->SetState(PromptActionCommonState::INITIALIZED);
+        TAG_LOGI(AceLogTag::ACE_DIALOG, "The current state of the dialog is INITIALIZED.");
+    }
+}
+
+PromptActionCommonState GetState(const RefPtr<FrameNode>& dialogNode, PromptActionCommonState defaultState)
+{
+    CHECK_NULL_RETURN(dialogNode, defaultState);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, defaultState);
+    return dialogPattern->GetState();
+}
+
+bool IsCustomDialogValid(const RefPtr<UINode>& node)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    // if lower layer is dialog, don't need to trigger lifecycle
+    auto pattern = frameNode->GetPattern();
+    CHECK_EQUAL_RETURN(AceType::InstanceOf<DialogPattern>(pattern), false, false);
+    auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
+    CHECK_NULL_RETURN(dialogPattern, false);
+    auto dialogProperty = dialogPattern->GetDialogProperties();
+    // if dialog is custom dialog, don't need to trigger active lifecycle, it triggers when dialog closed
+    return dialogProperty.isUserCreatedDialog;
+}
+
+void OnThemeScopeUpdate(const WeakPtr<FrameNode>& weakDialogNode, int32_t themeScopeId)
+{
+    auto dialogNode = weakDialogNode.Upgrade();
+    CHECK_NULL_VOID(dialogNode);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_VOID(dialogPattern);
+    dialogPattern->OnThemeScopeUpdate(themeScopeId);
+}
+
+void UpdateDialogOffset(const RefPtr<FrameNode>& dialogNode, const DimensionOffset& value)
+{
+    CHECK_NULL_VOID(dialogNode);
+    auto dialogLayoutProp = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_VOID(dialogLayoutProp);
+    dialogLayoutProp->UpdateDialogOffset(value);
+}
+
+bool GetSubwindowShouldUseNodeId(const RefPtr<FrameNode>& dialogNode)
+{
+    CHECK_NULL_RETURN(dialogNode, false);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, false);
+    auto dialogProps = dialogNode->GetLayoutProperty<DialogLayoutProperty>();
+    CHECK_NULL_RETURN(dialogProps, false);
+    return dialogPattern->IsUIExtensionSubWindow() && dialogProps->GetIsModal().value_or(true);
+}
+
+bool IsDialogNode(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return frameNode->GetPattern<DialogPattern>() != nullptr;
+}
+
 RefPtr<AceType> GetDialogInnerManager(const RefPtr<UINode>& rootNode)
 {
     CHECK_NULL_RETURN(rootNode, nullptr);
@@ -231,6 +305,17 @@ bool RemoveDialogWithContent(const RefPtr<AceType>& dialogInnerManager, const Re
     return manager->RemoveDialogWithContent(overlayManager, overlay, props, isBackPressed, isPageRouter, subWindowId);
 }
 
+bool RemoveDialogWithPressBack(const RefPtr<AceType>& dialogInnerManager, const RefPtr<OverlayManager>& overlayManager,
+    const RefPtr<FrameNode>& overlay, const RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter,
+    int32_t subWindowId)
+{
+    CHECK_NULL_RETURN(dialogInnerManager && overlayManager, false);
+    auto manager = AceType::DynamicCast<DialogInnerManager>(dialogInnerManager);
+    CHECK_NULL_RETURN(manager, false);
+    return manager->RemoveDialogWithPressBack(
+        overlayManager, overlay, pattern, isBackPressed, isPageRouter, subWindowId);
+}
+
 std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap(const RefPtr<AceType>& dialogInnerManager)
 {
     CHECK_NULL_RETURN(dialogInnerManager, {});
@@ -351,6 +436,19 @@ void SetBackPressEvent(const RefPtr<AceType>& dialogInnerManager, std::function<
     CHECK_NULL_VOID(manager);
     manager->SetBackPressEvent(std::move(event));
 }
+
+bool GetDialogFocusable(const RefPtr<FrameNode>& dialogNode)
+{
+    CHECK_NULL_RETURN(dialogNode, true);
+    auto dialogPattern = dialogNode->GetPattern<DialogPattern>();
+    CHECK_NULL_RETURN(dialogPattern, true);
+    return dialogPattern->GetDialogProperties().focusable;
+}
+
+bool IsDialogPattern(const RefPtr<Pattern>& pattern)
+{
+    return AceType::InstanceOf<DialogPattern>(pattern);
+}
 } // namespace
 namespace InnerModifier {
 
@@ -364,6 +462,14 @@ const ArkUIDialogInnerModifier* GetDialogInnerModifier()
         .isSupportBlurStyle = DialogView::IsSupportBlurStyle,
         .createDialogNode = CreateDialogNode,
         .createDialogNodeWithThemeNode = CreateDialogNodeWithThemeNode,
+        .setIsPickerDialog = SetIsPickerDialog,
+        .setState = SetState,
+        .getState = GetState,
+        .isCustomDialogValid = IsCustomDialogValid,
+        .onThemeScopeUpdate = OnThemeScopeUpdate,
+        .updateDialogOffset = UpdateDialogOffset,
+        .getSubwindowShouldUseNodeId = GetSubwindowShouldUseNodeId,
+        .isDialogNode = IsDialogNode,
         .getDialogInnerManager = GetDialogInnerManager,
         .showDialog = ShowDialog,
         .showDialogWithErrorCallback = ShowDialogWithErrorCallback,
@@ -382,6 +488,7 @@ const ArkUIDialogInnerModifier* GetDialogInnerModifier()
         .closeDialog = CloseDialog,
         .removeDialog = RemoveDialog,
         .removeDialogWithContent = RemoveDialogWithContent,
+        .removeDialogWithPressBack = RemoveDialogWithPressBack,
         .getDialogMap = GetDialogMap,
         .getDialogNodeWithExistContent = GetDialogNodeWithExistContent,
         .reloadBuilderNodeConfig = ReloadBuilderNodeConfig,
@@ -397,6 +504,8 @@ const ArkUIDialogInnerModifier* GetDialogInnerModifier()
         .registerOnHideDialog = RegisterOnHideDialog,
         .fireNavigationLifecycle = FireNavigationLifecycle,
         .setBackPressEvent = SetBackPressEvent,
+        .getDialogFocusable = GetDialogFocusable,
+        .isDialogPattern = IsDialogPattern,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

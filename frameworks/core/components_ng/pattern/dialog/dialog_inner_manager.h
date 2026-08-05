@@ -33,6 +33,7 @@ enum class AccessibilityEventType : size_t;
 
 namespace OHOS::Ace::NG {
 class FrameNode;
+class Pattern;
 class PipelineContext;
 class OverlayManager;
 class UINode;
@@ -96,6 +97,8 @@ public:
         bool isBackPressed, bool isPageRouter);
     bool RemoveDialogWithContent(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& overlay,
         const DialogProperties& props, bool isBackPressed, bool isPageRouter, int32_t subWindowId);
+    bool RemoveDialogWithPressBack(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& overlay,
+        const RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter, int32_t subWindowId);
 
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap();
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);

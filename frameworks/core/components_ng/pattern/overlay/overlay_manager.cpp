@@ -70,8 +70,6 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/date_picker/datepicker_dialog_view.h"
 #include "core/components_ng/pattern/date_picker/picker_setting_data.h"
-#include "core/components_ng/pattern/dialog/dialog_pattern.h"
-#include "core/components_ng/pattern/dialog/dialog_view.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
 #endif
@@ -465,7 +463,7 @@ bool OverlayManager::CheckDialogInnerManager()
     if (dialogInnerManager_) {
         return true;
     }
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, false);
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, false);
@@ -477,7 +475,7 @@ bool OverlayManager::CheckDialogInnerManager()
 std::unordered_map<int32_t, RefPtr<FrameNode>> OverlayManager::GetDialogMap()
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, {});
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, {});
     return modifier->getDialogMap(dialogInnerManager_);
 }
@@ -485,7 +483,7 @@ std::unordered_map<int32_t, RefPtr<FrameNode>> OverlayManager::GetDialogMap()
 void OverlayManager::SetMaskNodeId(int32_t dialogId, int32_t maskId)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->setMaskNodeId(dialogInnerManager_, dialogId, maskId);
 }
@@ -493,7 +491,7 @@ void OverlayManager::SetMaskNodeId(int32_t dialogId, int32_t maskId)
 void OverlayManager::RegisterOnHideDialog(std::function<void()> callback)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->registerOnHideDialog(dialogInnerManager_, std::move(callback));
 }
@@ -501,7 +499,7 @@ void OverlayManager::RegisterOnHideDialog(std::function<void()> callback)
 void OverlayManager::SetBackPressEvent(std::function<bool()> event)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->setBackPressEvent(dialogInnerManager_, std::move(event));
 }
@@ -1822,7 +1820,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialog(
     const DialogProperties& dialogProps, std::function<void()>&& buildFunc, bool isRightToLeft)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, nullptr);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->showDialog(
         dialogInnerManager_, AceType::Claim(this), dialogProps, std::move(buildFunc), isRightToLeft);
@@ -1832,7 +1830,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialogWithErrorCallback(const DialogProper
     std::function<void()>&& buildFunc, bool isRightToLeft, std::function<void(int32_t, int32_t)> callback)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, nullptr);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->showDialogWithErrorCallback(dialogInnerManager_, AceType::Claim(this), dialogProps,
         std::move(buildFunc), isRightToLeft, std::move(callback));
@@ -1842,7 +1840,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialogWithNode(
     const DialogProperties& dialogProps, const RefPtr<UINode>& customNode, bool isRightToLeft)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, nullptr);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->showDialogWithNode(
         dialogInnerManager_, AceType::Claim(this), dialogProps, customNode, isRightToLeft);
@@ -1852,7 +1850,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialogWithNodeAndErrorCallback(const Dialo
     const RefPtr<UINode>& customNode, bool isRightToLeft, std::function<void(int32_t, int32_t)> callback)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, nullptr);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->showDialogWithNodeAndErrorCallback(
         dialogInnerManager_, AceType::Claim(this), dialogProps, customNode, isRightToLeft, std::move(callback));
@@ -1861,7 +1859,7 @@ RefPtr<FrameNode> OverlayManager::ShowDialogWithNodeAndErrorCallback(const Dialo
 RefPtr<FrameNode> OverlayManager::GetDialogNodeWithExistContent(const RefPtr<UINode>& node)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, nullptr);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->getDialogNodeWithExistContent(dialogInnerManager_, node);
 }
@@ -1893,7 +1891,7 @@ void OverlayManager::ReloadBuilderNodeConfig()
     UpdatePopupCustomNode();
     CHECK_EQUAL_VOID(DynamicModuleHelper::GetInstance().IsDynamicModuleLoaded("Dialog"), false);
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->reloadBuilderNodeConfig(dialogInnerManager_);
 }
@@ -1912,7 +1910,7 @@ RefPtr<FrameNode> OverlayManager::OpenCustomDialog(
     const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, nullptr);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->openCustomDialog(dialogInnerManager_, AceType::Claim(this), dialogProps, std::move(callback));
 }
@@ -1921,7 +1919,7 @@ RefPtr<FrameNode> OverlayManager::OpenCustomDialogWithErrorCallback(
     const DialogProperties& dialogProps, std::function<void(int32_t errorCode, int32_t dialogId)>&& callback)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, nullptr);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->openCustomDialogWithErrorCallback(
         dialogInnerManager_, AceType::Claim(this), dialogProps, std::move(callback));
@@ -1930,7 +1928,7 @@ RefPtr<FrameNode> OverlayManager::OpenCustomDialogWithErrorCallback(
 void OverlayManager::CloseCustomDialog(const int32_t dialogId, std::function<void(int32_t)>&& callback)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->closeCustomDialogWithId(dialogInnerManager_, AceType::Claim(this), dialogId, std::move(callback));
 }
@@ -1938,7 +1936,7 @@ void OverlayManager::CloseCustomDialog(const int32_t dialogId, std::function<voi
 void OverlayManager::CloseCustomDialog(const WeakPtr<NG::UINode>& node, std::function<void(int32_t)>&& callback)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->closeCustomDialogWithNode(dialogInnerManager_, AceType::Claim(this), node, std::move(callback));
 }
@@ -1947,7 +1945,7 @@ void OverlayManager::UpdateCustomDialog(
     const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->updateCustomDialog(dialogInnerManager_, node, dialogProps, std::move(callback));
 }
@@ -1956,7 +1954,7 @@ void OverlayManager::UpdateCustomDialogWithNode(
     const WeakPtr<NG::UINode>& node, const DialogProperties& dialogProps, std::function<void(int32_t)>&& callback)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->updateCustomDialogWithNode(dialogInnerManager_, node, dialogProps, std::move(callback));
 }
@@ -2061,11 +2059,11 @@ bool OverlayManager::GetNodeFocusable(const RefPtr<FrameNode>& node)
     CHECK_NULL_RETURN(node, true);
     auto pattern = node->GetPattern();
     CHECK_NULL_RETURN(pattern, true);
-    if (InstanceOf<DialogPattern>(pattern)) {
-        auto dialogPattern = DynamicCast<DialogPattern>(pattern);
-        CHECK_NULL_RETURN(dialogPattern, true);
-        auto dialogProperties = dialogPattern->GetDialogProperties();
-        return dialogProperties.focusable;
+    if (DynamicModuleHelper::GetInstance().IsDynamicModuleLoaded("Dialog")) {
+        const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+        if (dialogInnerModifier && dialogInnerModifier->isDialogPattern(pattern)) {
+            return dialogInnerModifier->getDialogFocusable(node);
+        }
     }
 
     if (InstanceOf<BubblePattern>(pattern)) {
@@ -2169,7 +2167,7 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->showDateDialog(dialogInnerManager_, AceType::Claim(this), dialogProps, settingData,
         std::move(dialogEvent), std::move(dialogCancelEvent), std::move(dialogLifeCycleEvent), buttonInfos);
@@ -2181,7 +2179,7 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const T
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->showTimeDialog(dialogInnerManager_, AceType::Claim(this), dialogProps, settingData,
         std::move(timePickerProperty), std::move(dialogEvent), std::move(dialogCancelEvent),
@@ -2194,7 +2192,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->showTextDialog(dialogInnerManager_, AceType::Claim(this), dialogProps, settingData,
         std::move(dialogEvent), std::move(dialogCancelEvent), std::move(dialogLifeCycleEvent), buttonInfos);
@@ -2205,7 +2203,7 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->showCalendarDialog(dialogInnerManager_, AceType::Claim(this), dialogProps, settingData,
         std::move(dialogEvent), std::move(dialogCancelEvent), std::move(dialogLifeCycleEvent), buttonInfos);
@@ -2214,7 +2212,7 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
 void OverlayManager::PopModalDialog(int32_t maskId)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->popModalDialog(dialogInnerManager_, maskId, subWindowId_);
 }
@@ -2222,7 +2220,7 @@ void OverlayManager::PopModalDialog(int32_t maskId)
 void OverlayManager::RemoveDialogFromMapForcefully(const RefPtr<FrameNode>& node)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->removeDialogFromMapForcefully(dialogInnerManager_, node);
 }
@@ -2230,7 +2228,7 @@ void OverlayManager::RemoveDialogFromMapForcefully(const RefPtr<FrameNode>& node
 void OverlayManager::RemoveMaskFromMap(const RefPtr<FrameNode>& dialogNode)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->removeMaskFromMap(dialogInnerManager_, dialogNode);
 }
@@ -2251,7 +2249,7 @@ bool OverlayManager::HasModalPage()
 RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, nullptr);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, nullptr);
     return modifier->getDialog(dialogInnerManager_, dialogId);
 }
@@ -2259,7 +2257,7 @@ RefPtr<FrameNode> OverlayManager::GetDialog(int32_t dialogId)
 void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->closeDialog(dialogInnerManager_, AceType::Claim(this), dialogNode);
 }
@@ -2292,7 +2290,7 @@ RefPtr<PipelineContext> OverlayManager::GetMainPipelineContext(const RefPtr<Fram
 bool OverlayManager::RemoveDialog(const RefPtr<FrameNode>& overlay, bool isBackPressed, bool isPageRouter)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, false);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, false);
     return modifier->removeDialog(dialogInnerManager_, AceType::Claim(this), overlay, isBackPressed, isPageRouter);
 }
@@ -2301,7 +2299,7 @@ bool OverlayManager::RemoveDialogWithContent(
     const RefPtr<FrameNode>& overlay, const DialogProperties& props, bool isBackPressed, bool isPageRouter)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, false);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, false);
     return modifier->removeDialogWithContent(
         dialogInnerManager_, AceType::Claim(this), overlay, props, isBackPressed, isPageRouter, subWindowId_);
@@ -2413,17 +2411,6 @@ int32_t OverlayManager::GetPopupIdByNode(const RefPtr<FrameNode>& overlay)
     return targetId;
 }
 
-void OverlayManager::OverlayDoDismiss(RefPtr<NG::FrameNode>& overlay, RefPtr<Pattern>& pattern)
-{
-    SetDismissDialogId(overlay->GetId());
-    DialogManager::GetInstance().SetDismissDialogInfo(overlay->GetId(), overlay->GetTag());
-    auto dialogPattern = DynamicCast<DialogPattern>(pattern);
-    CHECK_NULL_VOID(dialogPattern);
-    auto currentId = Container::CurrentId();
-    dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK), currentId);
-    TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss, currentId: %{public}d", currentId);
-}
-
 int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, RefPtr<NG::FrameNode>& overlay,
     RefPtr<Pattern>& pattern, bool isBackPressed, bool isPageRouter)
 {
@@ -2450,21 +2437,14 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
         return RemoveOverlayManagerNode();
     }
     // close dialog with animation
-    if (InstanceOf<DialogPattern>(pattern)) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && isPageRouter) {
-            return OVERLAY_EXISTS;
+    if (DynamicModuleHelper::GetInstance().IsDynamicModuleLoaded("Dialog")) {
+        const auto* dialogInnerModifier = NodeModifier::GetDialogInnerModifier();
+        if (dialogInnerModifier && dialogInnerModifier->isDialogPattern(pattern)) {
+            CHECK_NE_RETURN(CheckDialogInnerManager(), true, OVERLAY_EXISTS);
+            bool result = dialogInnerModifier->removeDialogWithPressBack(
+                dialogInnerManager_, AceType::Claim(this), overlay, pattern, isBackPressed, isPageRouter, subWindowId_);
+            return result ? OVERLAY_REMOVE : OVERLAY_EXISTS;
         }
-        auto dialogPattern = DynamicCast<DialogPattern>(pattern);
-        CHECK_NULL_RETURN(dialogPattern, OVERLAY_EXISTS);
-        if (dialogPattern->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK))) {
-            return OVERLAY_REMOVE;
-        } else if (dialogPattern->ShouldDismiss()) {
-            OverlayDoDismiss(overlay, pattern);
-            return OVERLAY_REMOVE;
-        }
-        return RemoveDialogWithContent(overlay, dialogPattern->GetDialogProperties(), isBackPressed, isPageRouter)
-                   ? OVERLAY_REMOVE
-                   : OVERLAY_EXISTS;
     }
     if (InstanceOf<BubblePattern>(pattern)) {
         return RemoveBubble(overlay) ? OVERLAY_REMOVE : OVERLAY_EXISTS;
@@ -6458,7 +6438,7 @@ float OverlayManager::GetRootHeight() const
 bool OverlayManager::IsMaskNode(int32_t maskId)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, false);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, false);
     return modifier->isMaskNode(dialogInnerManager_, maskId);
 }
@@ -6466,7 +6446,7 @@ bool OverlayManager::IsMaskNode(int32_t maskId)
 int32_t OverlayManager::GetMaskNodeIdWithDialogId(int32_t dialogId)
 {
     CHECK_NE_RETURN(CheckDialogInnerManager(), true, -1);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_RETURN(modifier, -1);
     return modifier->getMaskNodeIdWithDialogId(dialogInnerManager_, dialogId);
 }
@@ -6889,7 +6869,7 @@ void OverlayManager::DumpSheetMapInfo(
 void OverlayManager::DumpMaskNodeIdMapInfo() const
 {
     CHECK_NE_VOID(const_cast<OverlayManager*>(this)->CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->dumpMaskNodeIdMapInfo(dialogInnerManager_);
 }
@@ -6930,7 +6910,7 @@ std::string OverlayManager::GetMapNodeLog(const RefPtr<FrameNode>& node, bool ha
 void OverlayManager::OnUIExtensionWindowSizeChange()
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->onUIExtensionWindowSizeChange(dialogInnerManager_);
 }
@@ -7149,7 +7129,7 @@ void OverlayManager::FireNavigationLifecycle(
     const RefPtr<UINode>& node, int32_t lifecycle, bool isLowerOnly, int32_t reason)
 {
     CHECK_NE_VOID(CheckDialogInnerManager(), true);
-    const auto* modifier = NG::NodeModifier::GetDialogInnerModifier();
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
     CHECK_NULL_VOID(modifier);
     modifier->fireNavigationLifecycle(dialogInnerManager_, node, lifecycle, isLowerOnly, reason);
 }
@@ -7204,11 +7184,9 @@ int32_t OverlayManager::GetSubwindowKeyNodeId(const RefPtr<FrameNode>& frameNode
 {
     int32_t defaultNodeId = -1;
     CHECK_NULL_RETURN(frameNode, defaultNodeId);
-    auto dialogPattern = frameNode->GetPattern<DialogPattern>();
-    CHECK_NULL_RETURN(dialogPattern, defaultNodeId);
-    auto dialogProps = AceType::DynamicCast<DialogLayoutProperty>(frameNode->GetLayoutProperty());
-    CHECK_NULL_RETURN(dialogProps, defaultNodeId);
-    if (dialogPattern->IsUIExtensionSubWindow() && dialogProps->GetIsModal().value_or(true)) {
+    const auto* modifier = NodeModifier::GetDialogInnerModifier();
+    CHECK_NULL_RETURN(modifier, defaultNodeId);
+    if (modifier->getSubwindowShouldUseNodeId(frameNode)) {
         return frameNode->GetId();
     }
     return defaultNodeId;
