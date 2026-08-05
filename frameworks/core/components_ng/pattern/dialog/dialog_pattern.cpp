@@ -3687,7 +3687,12 @@ void DialogPattern::PlayDistortion()
 
     AnimationOption option;
     option.SetDuration(1000);
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 322, 27)); // Spring curve
+    TrailOptimization trailOptimization = {
+        .progressThreshold = 0.98f,
+        .responseDecayFactor = 0.9f
+    };
+    option.SetCurve(
+        AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0, 1, 322, 27, trailOptimization)); // Spring curve
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::DIALOG_LIGHT_SENSE_ANIMATION, PerfActionType::LAST_UP, "");
     renderContext->ScaleAnimation(option, INITIAL_ZOOM_FACTOR, 1);
     renderContext->UpdateTranslateInXY(
@@ -3710,7 +3715,8 @@ void DialogPattern::PlayDistortion()
         .rbCorner = { 1, 1 },   // Right-bottom corner stays in place
         .barrelDistortion = {  0, 0, 0, 0 },  // Add barrel distortion Left-Right-Top-Bottom
     };
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 235, 23));
+    option.SetCurve(
+        AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0, 1, 235, 23, trailOptimization));
     AnimationUtils::Animate(option, [renderContext, param2, childContexts]() {
         renderContext->UpdateDistortionParam(param2);
         for (const auto& childContext : childContexts) {
@@ -3730,7 +3736,8 @@ void DialogPattern::PlayDistortion()
         .rbCorner = { 1, 1 },   // Right-bottom corner stays in place
         .barrelDistortion = { 0.1, 0.1, -0.1, 0 },  // Add barrel distortion Left-Right-Top-Bottom
     };
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 158, 17));
+    option.SetCurve(
+        AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0, 1, 158, 17, trailOptimization));
     AnimationUtils::Animate(option, [renderContext, param3, childContexts]() {
         renderContext->UpdateDistortionParam(param3);
         for (const auto& childContext : childContexts) {
