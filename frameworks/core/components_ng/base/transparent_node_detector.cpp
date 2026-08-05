@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "core/common/container.h"
 #include "core/components_ng/base/transparent_node_detector.h"
 
 #include "base/error/error_code.h"

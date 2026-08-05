@@ -16,7 +16,6 @@
 #include "core/components/font/rosen_font_loader.h"
 
 #include "base/network/download_manager.h"
-#include "core/components/theme/resource_adapter.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/components_ng/base/ui_node.h"
