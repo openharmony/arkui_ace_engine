@@ -37,8 +37,8 @@ class RecyclePoolV2 {
     private pendingProgressiveReleaseNodes_: Array<ViewV2> = undefined;
     // Callback to request progressive release (set by parent ViewV2)
     private requestProgressiveReleaseCallback_: () => void = undefined;
-    private cachedCount: number;
-    private reuseIdForOptimize: Set<string> = new Set<string>();
+    private cachedCount_: number;
+    private reuseIdForOptimize_: Set<string> = new Set<string>();
 
     constructor() {
       this.cachedRecycleComponents_ = new Map<string, Array<ViewV2>>();
@@ -46,7 +46,7 @@ class RecyclePoolV2 {
       this.pendingCacheCleanTimers_ = new Map<string, any>();
       this.maxCacheSizes_ = new Map<string, number>();
       this.pendingProgressiveReleaseNodes_ = new Array<ViewV2>();
-      this.cachedCount = 8;
+      this.cachedCount_ = 8;
     }
   
     /**
@@ -67,10 +67,10 @@ class RecyclePoolV2 {
       }
       this.cachedRecycleComponents_.get(reuseId)?.push(reuseComp);
       if (memOptStrategy === 1) {
-        this.cachedCount = cachedCount;
-        this.reuseIdForOptimize.add(reuseId);
+        this.cachedCount_ = cachedCount;
+        this.reuseIdForOptimize_.add(reuseId);
         const cachedComponents = this.cachedRecycleComponents_.get(reuseId);
-        if (cachedComponents && cachedComponents.length > this.cachedCount) {
+        if (cachedComponents && cachedComponents.length > this.cachedCount_) {
           const currentSize = cachedComponents.length;
           const maxSize = this.maxCacheSizes_.get(reuseId) || 0;
           // Only restart timer if cache size reaches a new maximum
@@ -174,7 +174,7 @@ class RecyclePoolV2 {
 
       const timerId = setTimeout(() => {
         // Prepare nodes for progressive release
-        const pendingCount = this.prepareCleanCacheToTargetProgressive(reuseId, this.cachedCount);
+        const pendingCount = this.prepareCleanCacheToTargetProgressive(reuseId, this.cachedCount_);
 
         // If there are nodes to release and callback is available, request progressive release
         if (pendingCount > 0 && this.requestProgressiveReleaseCallback_) {
@@ -225,17 +225,17 @@ class RecyclePoolV2 {
       this.maxCacheSizes_.clear();
 
       this.cachedRecycleComponents_.forEach((components_, reuseId) => {
-        if (!this.reuseIdForOptimize.has(reuseId)) {
+        if (!this.reuseIdForOptimize_.has(reuseId)) {
           return;
         }
         components_.forEach((node) => {
           node.resetRecycleCustomNode();
         });
       });
-      this.reuseIdForOptimize.forEach((reuseId) => {
+      this.reuseIdForOptimize_.forEach((reuseId) => {
         this.cachedRecycleComponents_.delete(reuseId);
       });
-      this.reuseIdForOptimize.clear();
+      this.reuseIdForOptimize_.clear();
 
       this.pendingProgressiveReleaseNodes_.forEach((node) => {
         node.resetRecycleCustomNode();
@@ -260,7 +260,7 @@ class RecyclePoolV2 {
 
       let count = 0;
       this.cachedRecycleComponents_.forEach((components_, reuseId) => {
-        if (!this.reuseIdForOptimize.has(reuseId)) {
+        if (!this.reuseIdForOptimize_.has(reuseId)) {
           return;
         }
         components_.forEach((node) => {
@@ -268,10 +268,10 @@ class RecyclePoolV2 {
           count++;
         });
       });
-      this.reuseIdForOptimize.forEach((reuseId) => {
+      this.reuseIdForOptimize_.forEach((reuseId) => {
         this.cachedRecycleComponents_.delete(reuseId);
       });
-      this.reuseIdForOptimize.clear();
+      this.reuseIdForOptimize_.clear();
       return count;
     }
 
