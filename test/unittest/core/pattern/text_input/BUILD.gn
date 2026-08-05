@@ -13,154 +13,182 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("text_input_test") {
-  module_name = "TextSet-TextInput"
-  type = "new"
-  sources = [
-    "text_area_base.cpp",
-    "text_area_decoration_test.cpp",
-    "text_area_menu_test.cpp",
-    "text_area_test.cpp",
-    "text_area_test_two.cpp",
-    "text_field_algorithm_test.cpp",
-    "text_field_auto_fill_controller_test.cpp",
-    "text_field_content_modifier_test.cpp",
-    "text_field_free_scroller_test.cpp",
-    "text_field_keyevent_test.cpp",
-    "text_field_manager_test_ng.cpp",
-    "text_field_manager_test_ng_two.cpp",
-    "text_field_model_static_test.cpp",
-    "text_field_model_static_test_two.cpp",
-    "text_field_overlay_modifier_test.cpp",
-    "text_field_pattern_func_test.cpp",
-    "text_field_pattern_onwill.cpp",
-    "text_free_scroll_controller_test.cpp",
-    "text_input_area_model_test.cpp",
-    "text_input_base.cpp",
-    "text_input_check_test.cpp",
-    "text_input_cursor_test.cpp",
-    "text_input_decoration_test.cpp",
-    "text_input_decorator_test.cpp",
-    "text_input_menu_test.cpp",
-    "text_input_modify_test.cpp",
-    "text_input_preview_test.cpp",
-    "text_input_sub_1_test.cpp",
-    "text_input_sub_2_test.cpp",
-    "text_input_test.cpp",
-    "text_input_update_test.cpp",
-    "text_input_wordbreak_test.cpp",
-    "text_select_controller_test.cpp",
-  ]
+text_input_test_sources = [
+  "text_area_base.cpp",
+  "text_area_decoration_test.cpp",
+  "text_area_menu_test.cpp",
+  "text_area_test.cpp",
+  "text_area_test_two.cpp",
+  "text_field_algorithm_test.cpp",
+  "text_field_auto_fill_controller_test.cpp",
+  "text_field_content_modifier_test.cpp",
+  "text_field_free_scroller_test.cpp",
+  "text_field_keyevent_test.cpp",
+  "text_field_manager_test_ng.cpp",
+  "text_field_manager_test_ng_two.cpp",
+  "text_field_model_static_test.cpp",
+  "text_field_model_static_test_two.cpp",
+  "text_field_overlay_modifier_test.cpp",
+  "text_field_pattern_func_test.cpp",
+  "text_field_pattern_onwill.cpp",
+  "text_free_scroll_controller_test.cpp",
+  "text_input_area_model_test.cpp",
+  "text_input_base.cpp",
+  "text_input_check_test.cpp",
+  "text_input_cursor_test.cpp",
+  "text_input_decoration_test.cpp",
+  "text_input_decorator_test.cpp",
+  "text_input_menu_test.cpp",
+  "text_input_modify_test.cpp",
+  "text_input_preview_test.cpp",
+  "text_input_sub_1_test.cpp",
+  "text_input_sub_2_test.cpp",
+  "text_input_test.cpp",
+  "text_input_test_core.cpp",
+  "text_input_test_min.cpp",
+  "text_input_update_test.cpp",
+  "text_input_wordbreak_test.cpp",
+  "text_select_controller_test.cpp",
+]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
+if (is_host_product) {
+  ace_unittest("text_input_test") {
+    type = "host_components"
+    module_name = "TextSet-TextInput"
+    sources = text_input_test_sources
+    cflags = [ "-fno-access-control" ]
+    external_deps = []
+  }
+} else {
+  ace_unittest("text_input_test") {
+    module_name = "TextSet-TextInput"
+    type = "new"
+    sources = text_input_test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [
+        "text_input_test_min.cpp",
+        "text_input_test_core.cpp",
+      ]
+    }
+    cflags = [ "-fno-access-control" ]
+    external_deps = []
+  }
+}
+
+text_field_test_ng_sources = [
+  "text_field_layout_algorithm_test.cpp",
+  "text_field_layout_algorithm_test_two.cpp",
+  "text_field_pattern_func_test_two.cpp",
+  "text_field_pattern_func_test_three.cpp",
+  "text_field_test_ng_five.cpp",
+  "text_field_test_ng_four.cpp",
+  "text_field_test_ng_one.cpp",
+  "text_field_test_ng_three.cpp",
+  "text_field_test_ng_two.cpp",
+  "text_input_base.cpp",
+]
+
+if (is_host_product) {
+  ace_unittest("text_field_test_ng") {
+    type = "host_components"
+    module_name = "TextSet-TextInput"
+    sources = text_field_test_ng_sources
+    cflags = [ "-fno-access-control" ]
+    external_deps = []
+  }
+} else {
+  ace_unittest("text_field_test_ng") {
+    module_name = "TextSet-TextInput"
+    type = "new"
+    sources = text_field_test_ng_sources
+    cflags = [ "-fno-access-control" ]
+    external_deps = []
+  }
+}
+
+text_input_pattern_test_sources = [
+  "text_area_base.cpp",
+  "text_field_pattern_test.cpp",
+  "text_field_pattern_testeight.cpp",
+  "text_field_pattern_testeleven.cpp",
+  "text_field_pattern_testfive.cpp",
+  "text_field_pattern_testfour.cpp",
+  "text_field_pattern_testnine.cpp",
+  "text_field_pattern_testseven.cpp",
+  "text_field_pattern_testsix.cpp",
+  "text_field_pattern_testten.cpp",
+  "text_field_pattern_testthree.cpp",
+  "text_field_pattern_testtwelve.cpp",
+  "text_field_pattern_testtwo.cpp",
+  "text_field_pattern_for_tv.cpp",
+  "text_field_pattern_ai_menu_option_test.cpp",
+  "text_input_base.cpp",
+  "text_input_test_core.cpp",
+  "text_input_test_min.cpp",
+]
+
+if (is_host_product) {
+  ace_unittest("text_input_pattern_test") {
+    type = "host_components"
+    module_name = "TextSet-TextInput"
+    sources = text_input_pattern_test_sources
+    cflags = [ "-fno-access-control" ]
+    external_deps = []
+  }
+} else {
+  ace_unittest("text_input_pattern_test") {
+    module_name = "TextSet-TextInput"
+    type = "new"
+    sources = text_input_pattern_test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [
+        "text_input_test_min.cpp",
+        "text_input_test_core.cpp",
+      ]
+    }
+    cflags = [ "-fno-access-control" ]
+    external_deps = []
+  }
+}
+
+if (!is_host_product) {
+  ace_unittest("text_emoji_test") {
+    module_name = "TextSet-TextArea"
+    type = "new"
     sources = [
-      "text_input_test_min.cpp",
-      "text_input_test_core.cpp",
+      "text_field_controller_test.cpp",
+      "text_input_base.cpp",
+      "text_input_emoji_test.cpp",
     ]
-  } else {
-    sources += [
-      "text_input_test_min.cpp",
-      "text_input_test_core.cpp",
+
+    cflags = [ "-fno-access-control" ]
+
+    external_deps = [
+      "icu:shared_icui18n",
+      "icu:shared_icuuc",
     ]
   }
-  cflags = [ "-fno-access-control" ]
-  external_deps = []
 }
 
-ace_unittest("text_field_test_ng") {
-  module_name = "TextSet-TextInput"
-  type = "new"
-  sources = [
-    "text_field_layout_algorithm_test.cpp",
-    "text_field_layout_algorithm_test_two.cpp",
-    "text_field_pattern_func_test_two.cpp",
-    "text_field_pattern_func_test_three.cpp",
-    "text_field_test_ng_five.cpp",
-    "text_field_test_ng_four.cpp",
-    "text_field_test_ng_one.cpp",
-    "text_field_test_ng_three.cpp",
-    "text_field_test_ng_two.cpp",
-    "text_input_base.cpp",
-  ]
-
-  cflags = [ "-fno-access-control" ]
-
-  external_deps = []
-}
-
-ace_unittest("text_input_pattern_test") {
-  module_name = "TextSet-TextInput"
-  type = "new"
-  sources = [
-    "text_area_base.cpp",
-    "text_field_pattern_test.cpp",
-    "text_field_pattern_testeight.cpp",
-    "text_field_pattern_testeleven.cpp",
-    "text_field_pattern_testfive.cpp",
-    "text_field_pattern_testfour.cpp",
-    "text_field_pattern_testnine.cpp",
-    "text_field_pattern_testseven.cpp",
-    "text_field_pattern_testsix.cpp",
-    "text_field_pattern_testten.cpp",
-    "text_field_pattern_testthree.cpp",
-    "text_field_pattern_testtwelve.cpp",
-    "text_field_pattern_testtwo.cpp",
-    "text_input_base.cpp",
-    "text_field_pattern_for_tv.cpp",
-    "text_field_pattern_ai_menu_option_test.cpp",
-  ]
-  if (!ace_enable_full_test_suite) {
-    sources = []
+if (!is_host_product) {
+  ace_unittest("text_input_listener_test") {
+    module_name = "TextSet-TextInput"
+    type = "new"
     sources = [
-      "text_input_test_min.cpp",
-      "text_input_test_core.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/text_field/on_text_changed_listener_impl.cpp",
+      "on_text_changed_listener_impl_test.cpp",
+      "text_field_pattern_multi_thread_test.cpp",
+      "text_input_base.cpp",
     ]
-  } else {
-    sources += [
-      "text_input_test_min.cpp",
-      "text_input_test_core.cpp",
+    cflags = [ "-fno-access-control" ]
+
+    external_deps = [
+      "input:libmmi-client",
+      "ipc:ipc_single",
+      "hilog:libhilog",
     ]
-  }
-  cflags = [ "-fno-access-control" ]
-
-  external_deps = []
-}
-
-ace_unittest("text_emoji_test") {
-  module_name = "TextSet-TextArea"
-  type = "new"
-  sources = [
-    "text_field_controller_test.cpp",
-    "text_input_base.cpp",
-    "text_input_emoji_test.cpp",
-  ]
-
-  cflags = [ "-fno-access-control" ]
-
-  external_deps = [
-    "icu:shared_icui18n",
-    "icu:shared_icuuc",
-  ]
-}
-
-ace_unittest("text_input_listener_test") {
-  module_name = "TextSet-TextInput"
-  type = "new"
-  sources = [
-    "$ace_root/frameworks/core/components_ng/pattern/text_field/on_text_changed_listener_impl.cpp",
-    "on_text_changed_listener_impl_test.cpp",
-    "text_field_pattern_multi_thread_test.cpp",
-    "text_input_base.cpp",
-  ]
-  cflags = [ "-fno-access-control" ]
-
-  external_deps = [
-    "input:libmmi-client",
-    "ipc:ipc_single",
-    "hilog:libhilog",
-  ]
-  if (defined(global_parts_info.inputmethod_imf)) {
-    external_deps += [ "imf:inputmethod_client", "ability_base:want" ]
+    if (defined(global_parts_info.inputmethod_imf)) {
+      external_deps += [ "imf:inputmethod_client", "ability_base:want" ]
+    }
   }
 }

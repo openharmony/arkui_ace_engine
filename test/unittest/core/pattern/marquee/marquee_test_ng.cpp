@@ -35,6 +35,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_algorithm.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
@@ -44,6 +45,7 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "marquee_test_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -82,15 +84,6 @@ struct TestProperty {
     std::optional<Ace::MarqueeUpdateStrategy> marqueeUpdateStrategy = std::nullopt;
 };
 
-class MarqueeTestNg : public testing::Test {
-public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
-
-protected:
-    static RefPtr<FrameNode> CreateMarqueeParagraph(const TestProperty& testProperty);
-};
-
 void MarqueeTestNg::SetUpTestSuite()
 {
     MockContainer::SetUp();
@@ -102,7 +95,7 @@ void MarqueeTestNg::TearDownTestSuite()
     MockPipelineContext::TearDown();
 }
 
-RefPtr<FrameNode> MarqueeTestNg::CreateMarqueeParagraph(const TestProperty& testProperty)
+RefPtr<FrameNode> CreateMarqueeParagraph(const TestProperty& testProperty)
 {
     MarqueeModelNG marqueeModel;
     marqueeModel.Create();

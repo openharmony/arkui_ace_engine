@@ -13,21 +13,27 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("text_clock_test_ng") {
-  type = "new"
-  module_name = "InfoShowSet-TextClock"
+test_sources = [
+  "text_clock_content_modifier_add_test_ng.cpp",
+  "text_clock_content_modifier_test_ng.cpp",
+  "text_clock_pattern_test_ng.cpp",
+  "text_clock_test_core.cpp",
+  "text_clock_test_ng.cpp",
+]
 
-  sources = [
-    "text_clock_content_modifier_add_test_ng.cpp",
-    "text_clock_content_modifier_test_ng.cpp",
-    "text_clock_pattern_test_ng.cpp",
-    "text_clock_test_ng.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "text_clock_test_core.cpp" ]
-  } else {
-    sources += [ "text_clock_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("text_clock_test_ng") {
+    type = "host_components"
+    module_name = "InfoShowSet-TextClock"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("text_clock_test_ng") {
+    type = "new"
+    module_name = "InfoShowSet-TextClock"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [ "text_clock_test_core.cpp" ]
+    }
   }
 }

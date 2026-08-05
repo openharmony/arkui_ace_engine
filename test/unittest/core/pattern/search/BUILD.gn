@@ -13,25 +13,31 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("search_test_ng") {
-  module_name = "TextSet-Search"
-  type = "new"
+test_sources = [
+  "search_base.cpp",
+  "search_decoration_test_ng.cpp",
+  "search_model_static_test_ng.cpp",
+  "search_test_core.cpp",
+  "search_test_ng.cpp",
+  "search_test_update_ng.cpp",
+  "search_testfour_ng.cpp",
+  "search_testthree_ng.cpp",
+  "search_testtwo_ng.cpp",
+]
 
-  sources = [
-    "search_base.cpp",
-    "search_decoration_test_ng.cpp",
-    "search_model_static_test_ng.cpp",
-    "search_test_ng.cpp",
-    "search_test_update_ng.cpp",
-    "search_testfour_ng.cpp",
-    "search_testthree_ng.cpp",
-    "search_testtwo_ng.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "search_test_core.cpp" ]
-  } else {
-    sources += [ "search_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("search_test_ng") {
+    type = "host_components"
+    module_name = "TextSet-Search"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("search_test_ng") {
+    module_name = "TextSet-Search"
+    type = "new"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [ "search_test_core.cpp" ]
+    }
   }
 }
