@@ -99,7 +99,7 @@ public:
     void ScheduleDisappearDelayTask();
     void ScheduleDisappearDelayTask(Axis axis);
     void StopScrolling();
-    void OnDrawScrollBar(DrawingContext& context);
+    void OnDrawScrollBar(DrawingContext& context, const RefPtr<OverlayModifier>& modifier);
     void UpdateScrollBarColor(const Color& foregroundColor, const Color& backgroundColor);
     void UpdateScrollBarColor(std::optional<Color> color, bool isUpdateProperty = false);
     bool IsMouseOverScrollBar(const MouseInfo& info);
