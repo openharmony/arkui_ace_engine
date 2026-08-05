@@ -1184,7 +1184,15 @@ namespace Converter {
     template<> inline Dimension Convert(const Ark_LengthMetricsProxy& src)
     {
         auto value = Converter::Convert<float>(src.value);
-        auto dimensionUnit = static_cast<DimensionUnit>(src.unit);
+        DimensionUnit dimensionUnit = ConverterState::defDimensionUnit;
+        switch (src.unit) {
+            case ARK_LENGTH_UNIT_PX: dimensionUnit = DimensionUnit::PX; break;
+            case ARK_LENGTH_UNIT_VP: dimensionUnit = DimensionUnit::VP; break;
+            case ARK_LENGTH_UNIT_FP: dimensionUnit = DimensionUnit::FP; break;
+            case ARK_LENGTH_UNIT_PERCENT: dimensionUnit = DimensionUnit::PERCENT; break;
+            case ARK_LENGTH_UNIT_LPX: dimensionUnit = DimensionUnit::LPX; break;
+            default: break;
+        }
         return Dimension(value, dimensionUnit);
     }
 

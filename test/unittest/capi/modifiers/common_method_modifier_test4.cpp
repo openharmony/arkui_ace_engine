@@ -1012,10 +1012,11 @@ std::vector<lengthOneTestStep> testLengthValues = {
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestLeftArkPaddingValues, TestSize.Level1)
 {
     auto initVal = Converter::ArkValue<Opt_Length>(Ark_Empty());
-    Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
-    for (const auto &[arkPadding, expected]: testLengthValues) {
+    Ark_Padding inputValue = { .left = initVal, .top = initVal, .right = initVal, .bottom = initVal };
+    for (const auto& [arkPadding, expected] : testLengthValues) {
         inputValue.left = Converter::ArkValue<Opt_Length>(arkPadding);
-        auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetricsProxy_LocalizedPadding, Ark_Padding>(inputValue);
+        auto value =
+            Converter::ArkUnion<Opt_Union_Padding_LengthMetricsProxy_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setSafeAreaPadding(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto padding = GetAttrObject(jsonValue, ATTRIBUTE_SAFE_AREA_PADDING_NAME);

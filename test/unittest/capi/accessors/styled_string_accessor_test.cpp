@@ -87,7 +87,8 @@ const std::string TEST_LENGTHMETRICS_BR_STR =
 const Ark_ImageAttachmentLayoutStyle TEST_IMAGELAYOUTSTYLE {
     .margin = Converter::ArkUnion<Opt_Union_LengthMetricsProxy_Margin, Ark_LengthMetricsProxy>(TEST_LENGTHMETRICS),
     .padding = Converter::ArkUnion<Opt_Union_LengthMetricsProxy_Padding, Ark_LengthMetricsProxy>(TEST_LENGTHMETRICS),
-    .borderRadius = Converter::ArkUnion<Opt_Union_LengthMetricsProxy_BorderRadiuses, Ark_LengthMetricsProxy>(TEST_LENGTHMETRICS)
+    .borderRadius =
+        Converter::ArkUnion<Opt_Union_LengthMetricsProxy_BorderRadiuses, Ark_LengthMetricsProxy>(TEST_LENGTHMETRICS)
 };
 
 const Ark_ImageAttachmentInterface IMAGEATTACHMENT_TEST_VALUE {
@@ -349,8 +350,9 @@ private:
     void FillParagraphStylePM(Ark_StyledStringValue& styledValue)
     {
         auto textIndentPMPeer = CreateLengthMetricsPeer(std::get<1>(TEST_PSST_TEXT_INDEN));
-        auto leadingMargin = Converter::ArkUnion<
-            Opt_Union_LengthMetricsProxy_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(TEST_PSPM_LEADING_MARGIN);
+        auto leadingMargin =
+            Converter::ArkUnion<Opt_Union_LengthMetricsProxy_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(
+                TEST_PSPM_LEADING_MARGIN);
         Ark_ParagraphStyleInterface paragraphStyle = {
             .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
             .textIndent = Converter::ArkValue<Opt_LengthMetricsProxy>(textIndentPMPeer),

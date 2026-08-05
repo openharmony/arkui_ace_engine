@@ -115,7 +115,8 @@ Opt_ImageAttachmentLayoutStyle getImageLayoutStyleFilled()
 }
 Opt_ImageAttachmentLayoutStyle getImageLayoutStyleLengthMetrics()
 {
-    const Ark_LengthMetricsProxy lengthMetrics = ArkValue<Ark_LengthMetricsProxy>(Dimension::FromString(TEST_DIMENSION));
+    const Ark_LengthMetricsProxy lengthMetrics =
+        ArkValue<Ark_LengthMetricsProxy>(Dimension::FromString(TEST_DIMENSION));
     const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
         .margin = ArkUnion<Opt_Union_LengthMetricsProxy_Margin, Ark_LengthMetricsProxy>(lengthMetrics),
         .padding = ArkUnion<Opt_Union_LengthMetricsProxy_Padding, Ark_LengthMetricsProxy>(lengthMetrics),

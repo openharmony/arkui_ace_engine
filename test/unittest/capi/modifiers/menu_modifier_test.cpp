@@ -474,7 +474,8 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestStartMargin, TestSize.Level1)
 
     // set valid startMargin value
     auto arkStartMargin = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
-    Ark_DividerStyleOptions dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(arkStartMargin)};
+    Ark_DividerStyleOptions dividerOptions = { .startMargin =
+                                                   Converter::ArkValue<Opt_LengthMetricsProxy>(arkStartMargin) };
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);

@@ -157,7 +157,8 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& st
     dst.halfLeading = Converter::ArkValue<Opt_Boolean>();
     dst.fontFeature = Converter::ArkValue<Opt_String>();
     dst.textBackgroundStyle = Converter::ArkValue<Opt_TextBackgroundStyle>();
-    dst.strokeWidth = Converter::ArkUnion<Opt_Union_LengthMetricsProxy_F64, Ark_LengthMetricsProxy>(style.GetStrokeWidth(), ctx);
+    dst.strokeWidth =
+        Converter::ArkUnion<Opt_Union_LengthMetricsProxy_F64, Ark_LengthMetricsProxy>(style.GetStrokeWidth(), ctx);
     dst.strokeColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(style.GetStrokeColor(), ctx);
 }
 

@@ -132,9 +132,8 @@ Callback_LengthMetrics GetGetLeadingMargin_callbackImpl(Ark_LeadingMarginSpan pe
                 CallbackHelper<VoidCallback>::GetVMContext(), continuation.resource.resourceId, result);
         }
     };
-    auto callback =
-        CallbackKeeper::ReturnReverseCallback<Callback_LengthMetrics, std::function<void(Callback_LengthMetricsProxy_Void)>>(
-            handler);
+    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_LengthMetrics,
+        std::function<void(Callback_LengthMetricsProxy_Void)>>(handler);
     return callback;
 }
 

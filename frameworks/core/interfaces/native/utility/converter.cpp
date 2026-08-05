@@ -3675,8 +3675,8 @@ PickerBackgroundStyle Convert(const Ark_PickerBackgroundStyle& src)
 }
 
 template<>
-void AssignCast(
-    std::optional<BorderRadiusProperty>& dst, const Ark_Union_LengthMetricsProxy_BorderRadiuses_LocalizedBorderRadiuses& src)
+void AssignCast(std::optional<BorderRadiusProperty>& dst,
+    const Ark_Union_LengthMetricsProxy_BorderRadiuses_LocalizedBorderRadiuses& src)
 {
     Converter::VisitUnion(src,
         [&dst](const Ark_LengthMetricsProxy& value) {
