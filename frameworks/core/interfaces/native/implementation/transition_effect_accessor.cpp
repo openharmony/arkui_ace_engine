@@ -74,15 +74,18 @@ Ark_TransitionEffect Construct4Impl(const Ark_RotateOptions* effect)
     CHECK_NULL_RETURN(effect, nullptr);
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     auto defaultDimension = Dimension(0.5f, DimensionUnit::PERCENT);
-    auto x = Converter::OptConvert<float>(effect->x.value).value_or(0);
-    auto y = Converter::OptConvert<float>(effect->y.value).value_or(0);
-    auto z = Converter::OptConvert<float>(effect->z.value).value_or(0);
+    auto x = Converter::OptConvert<float>(effect->x);
+    auto y = Converter::OptConvert<float>(effect->y);
+    auto z = Converter::OptConvert<float>(effect->z);
+    float xVal = x.value_or(0);
+    float yVal = y.value_or(0);
+    float zVal = (!x.has_value() && !y.has_value() && !z.has_value()) ? 1.0f : z.value_or(0);
     auto centerX = Converter::OptConvert<CalcDimension>(effect->centerX).value_or(defaultDimension);
     auto centerY = Converter::OptConvert<CalcDimension>(effect->centerY).value_or(defaultDimension);
     auto centerZ = Converter::OptConvert<CalcDimension>(effect->centerZ).value_or(defaultDimension);
     auto perspective = Converter::OptConvert<float>(effect->perspective).value_or(0);
     auto angle = Converter::OptConvert<float>(effect->angle).value_or(0);
-    RotateOptions rotateOpts(x, y, z, angle, centerX, centerY, centerZ, perspective);
+    RotateOptions rotateOpts(xVal, yVal, zVal, angle, centerX, centerY, centerZ, perspective);
     peer->handler = AceType::MakeRefPtr<ChainedRotateEffect>(rotateOpts);
     return peer;
 }
@@ -159,12 +162,11 @@ Ark_TransitionEffect CombineImpl(Ark_TransitionEffect peer,
 {
     CHECK_NULL_RETURN(peer, nullptr);
     CHECK_NULL_RETURN(transitionEffect, peer);
-    auto lastEffect = peer;
-    while (lastEffect->handler->GetNext() != nullptr) {
-        lastEffect->handler = lastEffect->handler->GetNext();
+    auto lastEffect = peer->handler;
+    while (lastEffect->GetNext() != nullptr) {
+        lastEffect = lastEffect->GetNext();
     }
-    const auto nextPeer = transitionEffect;
-    lastEffect->handler->SetNext(nextPeer->handler);
+    lastEffect->SetNext(transitionEffect->handler);
     return peer;
 }
 Ark_TransitionEffect GetIDENTITYImpl()
