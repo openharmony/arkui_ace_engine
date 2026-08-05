@@ -275,6 +275,8 @@ public:
     void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
     void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
     void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override;
+    bool HasMaterialFilter() const;
+    bool IsSelfDrawingNode() const override;
     void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
     void ResetBlender() override;
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;

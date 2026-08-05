@@ -1203,11 +1203,14 @@ void FrameNode::DumpCommonInfo()
     if (geometryNode_->GetParentLayoutConstraint().has_value())
         DumpLog::GetInstance().AddDesc(std::string("ParentLayoutConstraint: ")
                                            .append(geometryNode_->GetParentLayoutConstraint().value().ToString()));
-    if (!(NearZero(GetOffsetRelativeToWindow().GetY()) && NearZero(GetOffsetRelativeToWindow().GetX()))) {
+    OffsetF windowOffsetWithTranslate = GetPaintRectGlobalOffsetWithTranslate(false, true).first;
+    DumpLog::GetInstance().AddDesc(std::string("windowOffset: ").append(windowOffsetWithTranslate.ToString()));
+    OffsetF windowOffset = GetOffsetRelativeToWindow();
+    if (!(NearZero(windowOffset.GetY()) && NearZero(windowOffset.GetX()))) {
         DumpLog::GetInstance().AddDesc(std::string("top: ")
-                                           .append(std::to_string(GetOffsetRelativeToWindow().GetY()))
-                                           .append(" left: ")
-                                           .append(std::to_string(GetOffsetRelativeToWindow().GetX())));
+                .append(std::to_string(windowOffset.GetY()))
+                .append(" left: ")
+                .append(std::to_string(windowOffset.GetX())));
     }
     if (static_cast<int32_t>(IsActive()) != 1) {
         DumpLog::GetInstance().AddDesc(

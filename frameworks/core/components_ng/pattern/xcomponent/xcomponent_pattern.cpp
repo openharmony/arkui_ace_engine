@@ -1030,6 +1030,10 @@ void XComponentPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("libraryName: ").append(libraryname_.value_or("no library name")));
     DumpLog::GetInstance().AddDesc(std::string("surfaceId: ").append(surfaceId_));
     DumpLog::GetInstance().AddDesc(std::string("surfaceRect: ").append(paintRect_.ToString()));
+    if (renderContextForSurface_) {
+        DumpLog::GetInstance().AddDesc(std::string("isSelfDrawingNode: ")
+                .append(renderContextForSurface_->IsSelfDrawingNode() ? "true" : "false"));
+    }
 }
 
 void XComponentPattern::DumpAdvanceInfo()

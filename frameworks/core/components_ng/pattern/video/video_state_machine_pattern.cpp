@@ -3398,6 +3398,10 @@ void VideoStateMachinePattern::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& j
 void VideoStateMachinePattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(GetDumpInfo());
+    if (renderContextForMediaPlayer_) {
+        DumpLog::GetInstance().AddDesc(std::string("isSelfDrawingNode: ")
+                .append(renderContextForMediaPlayer_->IsSelfDrawingNode() ? "true" : "false"));
+    }
 }
 
 void VideoStateMachinePattern::DumpInfo(std::unique_ptr<JsonValue>& json)

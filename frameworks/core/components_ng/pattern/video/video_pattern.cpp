@@ -2942,6 +2942,10 @@ void VideoPattern::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json)
 void VideoPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc(GetDumpInfo());
+    if (renderContextForMediaPlayer_) {
+        DumpLog::GetInstance().AddDesc(std::string("isSelfDrawingNode: ")
+                .append(renderContextForMediaPlayer_->IsSelfDrawingNode() ? "true" : "false"));
+    }
 }
 
 void VideoPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
