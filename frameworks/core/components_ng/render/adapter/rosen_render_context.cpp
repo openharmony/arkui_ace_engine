@@ -1908,15 +1908,51 @@ void RosenRenderContext::ResetShadowPath()
     rsNode_->SetShadowPath(nullptr);
 }
 
-void RosenRenderContext::SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter)
+void RosenRenderContext::SetOverlayNGShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter)
 {
-    FREE_RS_CONTEXT_CHECK(SetForegroundShader, edgeLightFilter);
+    FREE_RS_CONTEXT_CHECK(SetOverlayNGShader, edgeLightFilter);
     CHECK_NULL_VOID(rsNode_);
-    if (!edgeLightFilter) {
-        rsNode_->SetForegroundShader(nullptr);
+    if (edgeLightFilter) {
+        auto edgeLightECShader = edgeLightFilter->GetEdgeLightEffect();
+        appendOverlayShader_[APPEND_OVERLAY_SHADER_INDEX_ONE] = edgeLightECShader;
+    } else if (appendOverlayShader_[APPEND_OVERLAY_SHADER_INDEX_ONE]) {
+        appendOverlayShader_[APPEND_OVERLAY_SHADER_INDEX_ONE] = nullptr;
+    } else {
         return;
     }
-    rsNode_->SetForegroundShader(edgeLightFilter->GetEdgeLightEffect());
+    UpdateAppendOverlayShader();
+}
+
+void RosenRenderContext::SetMaterialShaderECSubOverlay(
+    const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilterOverlay)
+{
+    FREE_RS_CONTEXT_CHECK(SetMaterialShaderECSubOverlay, materialFilterOverlay);
+    CHECK_NULL_VOID(rsNode_);
+    if (!materialFilterOverlay && !appendOverlayShader_[0]) {
+        return;
+    }
+    appendOverlayShader_[0] = materialFilterOverlay;
+    UpdateAppendOverlayShader();
+    RequestNextFrame();
+}
+
+void RosenRenderContext::UpdateAppendOverlayShader()
+{
+    std::shared_ptr<Rosen::RSNGShaderBase> head;
+    std::shared_ptr<Rosen::RSNGShaderBase> cur;
+    for (size_t idx = 0; idx < APPEND_OVERLAY_SHADER_COUNT; ++idx) {
+        if (appendOverlayShader_[idx]) {
+            auto newMaterial = appendOverlayShader_[idx]->CopyAsSingleEffect();
+            if (cur) {
+                cur->Append(newMaterial);
+            } else {
+                head = newMaterial;
+            }
+            cur = newMaterial;
+            appendOverlayShader_[idx] = newMaterial;
+        }
+    }
+    rsNode_->SetOverlayNGShader(head);
 }
 
 bool RosenRenderContext::NeedPreloadImage(const std::list<ParticleOption>& optionList, RectF& rect)

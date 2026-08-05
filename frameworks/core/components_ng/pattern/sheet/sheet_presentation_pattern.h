@@ -359,6 +359,7 @@ public:
 
     void ClearSheetRenderMaterial();
     void SetSheetRenderMaterial();
+    void SetMaterialNeedSplitOverlayShader(const RefPtr<UiMaterial>& material);
 
     void SetCurrentOffset(float currentOffset)
     {

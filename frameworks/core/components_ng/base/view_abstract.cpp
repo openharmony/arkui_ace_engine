@@ -6718,6 +6718,7 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
             if (preStyle >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
                 preStyle <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
                 renderContext->SetMaterialShaderECSub(nullptr);
+                renderContext->SetMaterialShaderECSubOverlay(nullptr);
             } else if (preStyle >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
                        preStyle <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
                 renderContext->SetBackgroundNGFilterEC(nullptr);
@@ -7049,7 +7050,9 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
     } else if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC_SUB) &&
                style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC_SUB)) {
         auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialECSubShader(*config);
+        auto materialFilterOverlay = UiMaterialFilterCreator::ConvertToUiMaterialECSubShaderOverlay(*config);
         renderContext->SetMaterialShaderECSub(materialFilter);
+        renderContext->SetMaterialShaderECSubOverlay(materialFilterOverlay);
     } else {
         auto materialFilter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(*config);
         if (preConfig && preConfig->colorInvert && !config->colorInvert) {

@@ -282,7 +282,7 @@ public:
     void ResetShadowPath() override;
     void ClearClipBounds() override;
 
-    void SetForegroundShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) override;
+    void SetOverlayNGShader(const std::shared_ptr<OHOS::Ace::RenderEdgeLightModifier>& edgeLightFilter) override;
 
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
@@ -647,6 +647,7 @@ public:
 
     void SetBackgroundNGFilterEC(const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter) override;
     void SetMaterialShaderECSub(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilter) override;
+    void SetMaterialShaderECSubOverlay(const std::shared_ptr<Rosen::RSNGShaderBase>& materialFilterOverlay) override;
 
     void SetMaterialWithQualityLevel(
         const std::shared_ptr<Rosen::RSNGFilterBase>& materialFilter, UiMaterialFilterQuality quality) override;
@@ -902,6 +903,7 @@ protected:
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
+    void UpdateAppendOverlayShader();
     void NotifyHostTransformUpdated(bool changed = true);
     void NotifyHostTransformUpdatedMultiThread(bool changed = true);
     void SetFrontBlurFilterMultiThread();
@@ -951,6 +953,8 @@ protected:
     uint32_t colorGamut_ = 0;
     static constexpr int32_t INVALID_PARENT_ID = -2100000;
     static constexpr uint32_t DRAW_REGION_RECT_COUNT = 8;
+    static constexpr uint32_t APPEND_OVERLAY_SHADER_COUNT = 2;
+    static constexpr uint32_t APPEND_OVERLAY_SHADER_INDEX_ONE = 1;
     std::map<std::string, RefPtr<ImageLoadingContext>> particleImageContextMap_;
     std::map<std::string, RefPtr<CanvasImage>> particleImageMap_;
     Color blendColor_ = Color::TRANSPARENT;
@@ -1065,6 +1069,7 @@ private:
     CancelableCallback<void()> pendingDecodeTask_;
     CancelableCallback<void()> pendingUITask_;
     std::shared_ptr<OHOS::Rosen::RSNGShapeBase> sdfShape_;
+    std::shared_ptr<Rosen::RSNGShaderBase> appendOverlayShader_[APPEND_OVERLAY_SHADER_COUNT] = { nullptr };
 };
 } // namespace OHOS::Ace::NG
 

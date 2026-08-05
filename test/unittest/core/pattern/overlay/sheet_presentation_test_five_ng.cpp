@@ -2058,4 +2058,40 @@ HWTEST_F(SheetPresentationTestFiveNg, ClearSheetCloseIconMaterial002_StateEffect
     g_uiMaterialLevel = isUiMaterialLevel;
     SheetPresentationTestFiveNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: SetMaterialNeedSplitOverlayShader001
+ * @tc.desc: Test SetMaterialNeedSplitOverlayShader with valid material and immersive options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFiveNg, SetMaterialNeedSplitOverlayShader001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node and pattern.
+     */
+    SheetPresentationTestFiveNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step2. create UiMaterial with ImmersiveOptions.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    auto options = std::make_shared<ImmersiveOptions>();
+    EXPECT_FALSE(options->needSplitOverlayShader);
+    material->SetImmersiveOptions(*options);
+
+    /**
+     * @tc.steps: step3. call SetMaterialNeedSplitOverlayShader.
+     * @tc.expected: needSplitOverlayShader is set to true.
+     */
+    sheetPattern->SetMaterialNeedSplitOverlayShader(material);
+    const auto& updatedOptions = material->GetImmersiveOptions();
+    ASSERT_NE(updatedOptions, nullptr);
+    EXPECT_TRUE(updatedOptions->needSplitOverlayShader);
+
+    SheetPresentationTestFiveNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

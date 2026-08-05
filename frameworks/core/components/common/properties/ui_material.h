@@ -72,6 +72,8 @@ struct ImmersiveMaterialConfig {
     bool interactive = false;
     // Store the lightEffectOptions (color and colorResObj). nullptr means no lightEffect.
     std::shared_ptr<LightEffectOptions> lightEffectOptions;
+    // when needSplitOverlayShader is true, split material shader into base and overlay layers
+    bool needSplitOverlayShader = false;
 
     // return true if same, return false if different.
     bool CompareLightEffectOptions(const ImmersiveMaterialConfig& other) const
@@ -84,7 +86,8 @@ struct ImmersiveMaterialConfig {
     {
         return key == other.key && materialColor == other.materialColor && colorInvert == other.colorInvert &&
                applyShadow == other.applyShadow && interactive == other.interactive &&
-               NearEqual(dipScale, other.dipScale) && CompareLightEffectOptions(other);
+               NearEqual(dipScale, other.dipScale) && CompareLightEffectOptions(other) &&
+               needSplitOverlayShader == other.needSplitOverlayShader;
     }
 
     bool HasLightEffect() const
@@ -124,6 +127,8 @@ public:
     static bool GetUiMaterialFilterEC(
         const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGFilterBase>& filter);
     static bool GetUiMaterialShaderECSub(
+        const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGShaderBase>& shader);
+    static bool GetUiMaterialECSubShaderOverlay(
         const ImmersiveMaterialConfig& params, std::shared_ptr<Rosen::RSNGShaderBase>& shader);
     static Shadow GetImmersiveShadow(float dipScale);
     static Shadow GetImmersiveEmptyShadow();
