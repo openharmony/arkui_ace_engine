@@ -2078,7 +2078,7 @@ void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& butt
 }
 
 bool DialogPattern::IsVerticalAlignButtonNeeded(
-    const std::vector<ButtonInfo>& buttons, const LayoutConstraintF layoutConstraint)
+    const std::vector<ButtonInfo>& buttons, const LayoutConstraintF& layoutConstraint)
 {
     if (buttons.size() != TWO_BUTTON_MODE) {
         return false;
