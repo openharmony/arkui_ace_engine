@@ -139,8 +139,8 @@ using Ark_Union_PixelMap_ResourceStr = Ark_Union_image_PixelMap_ResourceStr;
 
 // Union types - LengthMetrics_Margin renamed to LengthMetrics_LeadingMarginPlaceholder
 // LengthMetrics/Margin unions - OLD had Margin, NEW split into LeadingMarginPlaceholder and Padding
-using Opt_Union_LengthMetrics_Margin = Opt_Union_LengthMetrics_Padding;
-using Ark_Union_LengthMetrics_Margin = Ark_Union_LengthMetrics_Padding;
+using Opt_Union_LengthMetricsProxy_Margin = Opt_Union_LengthMetricsProxy_Padding;
+using Ark_Union_LengthMetricsProxy_Margin = Ark_Union_LengthMetricsProxy_Padding;
 
 // Dimension/Margin unions - same pattern as LengthMetrics
 using Opt_Union_Dimension_Margin = Opt_Union_Dimension_Padding;

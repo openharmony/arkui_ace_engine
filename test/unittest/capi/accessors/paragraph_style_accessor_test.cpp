@@ -54,7 +54,7 @@ public:
     {
         auto& interface = TypeHelper::WriteTo(param_);
         interface.textAlign = Converter::ArkValue<Opt_TextAlign>(TEST_TEXT_ALIGN);
-        interface.textIndent.value = Converter::ArkValue<Ark_LengthMetrics>(Dimension(TEST_MARGIN));
+        interface.textIndent.value = Converter::ArkValue<Ark_LengthMetricsProxy>(Dimension(TEST_MARGIN));
         interface.maxLines = Converter::ArkValue<Opt_Int32>(TEST_LINES_NUM);
         interface.overflow = Converter::ArkValue<Opt_TextOverflow>(TEST_TEXT_OVERFLOW);
         interface.wordBreak = Converter::ArkValue<Opt_WordBreak>(TEST_WORD_BREAK);
@@ -63,7 +63,7 @@ public:
         NG::LeadingMargin margin {.size = LeadingMarginSize(Dimension(TEST_MARGIN), Dimension(TEST_MARGIN_2))};
         margin.pixmap = AceType::MakeRefPtr<MockPixelMap>();
 
-        auto leadingMargin = Converter::ArkUnion<Ark_Union_LengthMetrics_LeadingMarginPlaceholder,
+        auto leadingMargin = Converter::ArkUnion<Ark_Union_LengthMetricsProxy_LeadingMarginPlaceholder,
             Ark_LeadingMarginPlaceholder>(margin, &ctx_);
         auto& holder = TypeHelper::WriteTo(interface.leadingMargin);
         holder = leadingMargin;
@@ -83,12 +83,12 @@ public:
         auto& tailIndentUnion = TypeHelper::WriteTo(interface.tailIndents);
         if (indentValues.size() == 1) {
             tailIndentUnion.selector = 0;
-            tailIndentUnion.value0 = Converter::ArkValue<Ark_LengthMetrics>(Dimension(indentValues[0], unit));
+            tailIndentUnion.value0 = Converter::ArkValue<Ark_LengthMetricsProxy>(Dimension(indentValues[0], unit));
         } else {
             tailIndentUnion.selector = 1;
-            auto arrayData = ctx.AllocateArray<Array_LengthMetrics>(indentValues.size());
+            auto arrayData = ctx.AllocateArray<Array_LengthMetricsProxy>(indentValues.size());
             for (size_t i = 0; i < indentValues.size(); i++) {
-                arrayData.array[i] = Converter::ArkValue<Ark_LengthMetrics>(Dimension(indentValues[i], unit));
+                arrayData.array[i] = Converter::ArkValue<Ark_LengthMetricsProxy>(Dimension(indentValues[i], unit));
             }
             tailIndentUnion.value1 = arrayData;
         }

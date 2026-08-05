@@ -107,19 +107,19 @@ Opt_ImageAttachmentLayoutStyle getImageLayoutStyleFilled()
         .topRight = ArkValue<Opt_Length>(TEST_DIMENSION)
     };
     const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(arkPadding),
-        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(arkPadding),
-        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(arkBorderRadiuses),
+        .margin = ArkUnion<Opt_Union_LengthMetricsProxy_Margin, Ark_Padding>(arkPadding),
+        .padding = ArkUnion<Opt_Union_LengthMetricsProxy_Padding, Ark_Padding>(arkPadding),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetricsProxy_BorderRadiuses, Ark_BorderRadiuses>(arkBorderRadiuses),
     };
     return ArkValue<Opt_ImageAttachmentLayoutStyle>(imageLayoutStyle);
 }
 Opt_ImageAttachmentLayoutStyle getImageLayoutStyleLengthMetrics()
 {
-    const Ark_LengthMetrics lengthMetrics = ArkValue<Ark_LengthMetrics>(Dimension::FromString(TEST_DIMENSION));
+    const Ark_LengthMetricsProxy lengthMetrics = ArkValue<Ark_LengthMetricsProxy>(Dimension::FromString(TEST_DIMENSION));
     const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_LengthMetrics>(lengthMetrics),
-        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_LengthMetrics>(lengthMetrics),
-        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_LengthMetrics>(lengthMetrics),
+        .margin = ArkUnion<Opt_Union_LengthMetricsProxy_Margin, Ark_LengthMetricsProxy>(lengthMetrics),
+        .padding = ArkUnion<Opt_Union_LengthMetricsProxy_Padding, Ark_LengthMetricsProxy>(lengthMetrics),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetricsProxy_BorderRadiuses, Ark_LengthMetricsProxy>(lengthMetrics),
     };
     return ArkValue<Opt_ImageAttachmentLayoutStyle>(imageLayoutStyle);
 };
@@ -127,9 +127,9 @@ Opt_ImageAttachmentLayoutStyle getImageLayoutStyleLengthMetrics()
 Opt_ImageAttachmentLayoutStyle getImageLayoutStyleOptional()
 {
     Ark_ImageAttachmentLayoutStyle imageLayoutStyle = {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin>(Ark_Empty()),
-        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty()),
-        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty()),
+        .margin = ArkUnion<Opt_Union_LengthMetricsProxy_Margin>(Ark_Empty()),
+        .padding = ArkUnion<Opt_Union_LengthMetricsProxy_Padding>(Ark_Empty()),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetricsProxy_BorderRadiuses>(Ark_Empty()),
     };
     return ArkValue<Opt_ImageAttachmentLayoutStyle>(imageLayoutStyle);
 };
@@ -647,9 +647,9 @@ HWTEST_F(ImageAttachmentAccessorTest, getLayoutStyleTestPaddingConversion, TestS
         .left = ArkValue<Opt_Length>("40vp"),
     };
     const Ark_ImageAttachmentLayoutStyle imageLayoutStyle {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(arkPadding),
-        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(arkPadding),
-        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty()),
+        .margin = ArkUnion<Opt_Union_LengthMetricsProxy_Margin, Ark_Padding>(arkPadding),
+        .padding = ArkUnion<Opt_Union_LengthMetricsProxy_Padding, Ark_Padding>(arkPadding),
+        .borderRadius = ArkUnion<Opt_Union_LengthMetricsProxy_BorderRadiuses>(Ark_Empty()),
     };
 
     const Ark_ImageAttachmentInterface content {
