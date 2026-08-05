@@ -1365,4 +1365,75 @@ HWTEST_F(TitleBarPatternTestTwoNg, OnColorConfigurationUpdate_ScrollScaleBoundar
         EXPECT_EQ(maskRenderContext->GetBackBlendApplyType().value(), BlendApplyType::FAST);
     }
 }
+
+/**
+ * @tc.name: SetIsFlinging_True_HidesMaskBlur
+ * @tc.desc: Verify isFling hides the maskBlur mask layer via render context visibility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, SetIsFlinging_True_HidesMaskBlur, TestSize.Level1)
+{
+    ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    auto context = CreateScrollEffectTestContext(ScrollEffectType::GRADUAL_BLUR);
+    ASSERT_NE(context.titleBarNode, nullptr);
+    ScopedTitleBarTokenTheme scopedTheme(context.titleBarNode);
+    scopedTheme.SetColorMode(ColorMode::DARK);
+    InitScrollEffectForContext(context);
+
+    context.titleBarPattern->SetScrollScale(1.0);
+    context.titleBarPattern->ApplyTitleBarBgStyle(context.titleBarPattern->GetScrollEffectTitleBarBgStyle());
+
+    context.titleBarPattern->SetIsFlinging(true);
+    EXPECT_TRUE(context.titleBarPattern->IsFlinging());
+    EXPECT_NE(context.titleBarPattern->GetTitleBarMaskBlurNode(), nullptr);
+}
+
+/**
+ * @tc.name: SetIsFlinging_False_RestoresMaskBlur
+ * @tc.desc: Verify clearing isFling restores the maskBlur mask layer and re-applies the blur.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, SetIsFlinging_False_RestoresMaskBlur, TestSize.Level1)
+{
+    ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    auto context = CreateScrollEffectTestContext(ScrollEffectType::GRADUAL_BLUR);
+    ASSERT_NE(context.titleBarNode, nullptr);
+    ScopedTitleBarTokenTheme scopedTheme(context.titleBarNode);
+    scopedTheme.SetColorMode(ColorMode::DARK);
+    InitScrollEffectForContext(context);
+
+    context.titleBarPattern->SetScrollScale(1.0);
+    context.titleBarPattern->ApplyTitleBarBgStyle(context.titleBarPattern->GetScrollEffectTitleBarBgStyle());
+
+    context.titleBarPattern->SetIsFlinging(true);
+    ASSERT_TRUE(context.titleBarPattern->IsFlinging());
+
+    context.titleBarPattern->SetIsFlinging(false);
+    EXPECT_FALSE(context.titleBarPattern->IsFlinging());
+    EXPECT_NE(context.titleBarPattern->GetTitleBarMaskBlurNode(), nullptr);
+}
+
+/**
+ * @tc.name: SetIsFlinging_Disabled_NoMaskBlurMutation
+ * @tc.desc: Verify isFlinging does not touch the maskBlur layer when the scroll effect is disabled.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarPatternTestTwoNg, SetIsFlinging_Disabled_NoMaskBlurMutation, TestSize.Level1)
+{
+    ScopeUiMaterialLevel level(UiMaterialLevel::EXQUISITE);
+    auto context = CreateScrollEffectTestContext(ScrollEffectType::GRADUAL_BLUR);
+    ASSERT_NE(context.titleBarNode, nullptr);
+    ScopedTitleBarTokenTheme scopedTheme(context.titleBarNode);
+    scopedTheme.SetColorMode(ColorMode::DARK);
+    InitScrollEffectForContext(context);
+
+    auto maskBlurNode = context.titleBarPattern->GetTitleBarMaskBlurNode();
+    ASSERT_NE(maskBlurNode, nullptr);
+    context.titleBarPattern->isScrollEffectEnabled_ = false;
+
+    context.titleBarPattern->SetIsFlinging(true);
+
+    EXPECT_TRUE(context.titleBarPattern->IsFlinging());
+    EXPECT_EQ(context.titleBarPattern->GetTitleBarMaskBlurNode(), maskBlurNode);
+}
 } // namespace OHOS::Ace::NG

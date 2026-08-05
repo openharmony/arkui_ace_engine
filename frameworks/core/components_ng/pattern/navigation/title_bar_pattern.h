@@ -339,6 +339,13 @@ public:
         return isScrollEffectEnabled_;
     }
 
+    void SetIsFlinging(bool isFlinging);
+
+    bool IsFlinging() const
+    {
+        return isFlinging_;
+    }
+
     RefPtr<FrameNode> GetTitleBarMaskNode() const
     {
         return titleBarMaskNode_;
@@ -348,6 +355,29 @@ public:
     {
         return titleBarMaskBlurNode_;
     }
+
+    // EffectComponent node that wraps only the titleBar menu (when material is enabled).
+    // Transparent, non-clipping, passes events through. Only created when material is on.
+    static RefPtr<FrameNode> CreateTitleBarEffectComponent();
+    const RefPtr<FrameNode>& GetTitleBarEffectNode() const
+    {
+        return titleBarEffectNode_;
+    }
+    void SetTitleBarEffectNode(const RefPtr<FrameNode>& node)
+    {
+        titleBarEffectNode_ = node;
+    }
+    // True when material is active for this titleBar (explicit material set, or material
+    // enabled with a GRADUAL_BLUR scroll effect). Pure query, no lazy creation.
+    bool IsMaterialEnabled() const;
+    void EnsureTitleBarEffectComponent();
+    // Mount/unmount the titleBar menu. When material is enabled the menu is parented under
+    // the EffectComponent; otherwise it is parented directly under the titleBar.
+    void MountTitleBarMenu(const RefPtr<UINode>& menu);
+    void UnmountTitleBarMenu(const RefPtr<UINode>& menu);
+    // Re-parent the titleBar menu between the titleBar and the EffectComponent
+    // to match the current material state. Called when material options change.
+    void ReconcileEffectComponent();
 
     void SetParseStartOffset(const std::optional<Dimension>& parseStartOffset)
     {
@@ -513,6 +543,7 @@ private:
     void UpdateTitleBarMaskBlendEffect(ScrollEffectType scrollEffectType);
     void ResetTitleBarMaskNodes();
     void EnsureTitleBarEffectNode(const RefPtr<FrameNode>& node, int32_t zIndex);
+    void MoveTitleBarMenu(const RefPtr<UINode>& from, const RefPtr<UINode>& to);
     RefPtr<NavDestinationNodeBase> GetHostParentNode() const;
 
     struct IconColorParam {
@@ -627,7 +658,9 @@ private:
     NavigationTitleBarStyle currentBgStyle_;
     RefPtr<FrameNode> titleBarMaskNode_;
     RefPtr<FrameNode> titleBarMaskBlurNode_;
+    RefPtr<FrameNode> titleBarEffectNode_;
     bool isScrollEffectEnabled_ = false;
+    bool isFlinging_ = false;
 #ifdef ENABLE_ROSEN_BACKEND
     std::shared_ptr<Rosen::BrightnessBlender> titleBarMaskBlender_;
 #endif

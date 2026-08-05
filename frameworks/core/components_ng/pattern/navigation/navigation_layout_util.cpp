@@ -151,11 +151,11 @@ void NavigationLayoutUtil::UpdateTitleBarMenuNode(
     if (nodeBasePattern->GetToolBarStyle().value_or(BarStyle::STANDARD) == BarStyle::SAFE_AREA_PADDING) {
         nodeBasePattern->UpdateSafeAreaPaddingChanged(true);
     }
-    titleBarNode->RemoveChild(preMenuNode);
-    titleBarNode->SetMenu(newMenuNode);
-    titleBarNode->AddChild(newMenuNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->UnmountTitleBarMenu(preMenuNode);
+    titleBarNode->SetMenu(newMenuNode);
+    titleBarPattern->MountTitleBarMenu(newMenuNode);
     auto options = titleBarPattern->GetTitleBarOptions();
     auto material = titleBarPattern->GetCurrentMaterial();
     bool forceUpdate = options.bgOptions.scrollEffectOptions.has_value() || material != nullptr;

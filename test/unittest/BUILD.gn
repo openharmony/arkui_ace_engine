@@ -1303,6 +1303,7 @@ ohos_static_library("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/nav_bar_pattern_multi_thread.cpp",
+    "$ace_root/test/unittest/capi/stubs/mock_effect_component_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navdestination_node_base.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navdestination_pattern_base.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/navigation/navigation_content_layout_algorithm.cpp",

@@ -567,7 +567,8 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         return false;
     }
     if (navBarPattern_ && navBarPattern_->IsScrollEffectEnabled()) {
-        navBarPattern_->OnContentScrollUpdate(offset, GetTotalOffset());
+        bool isFling = GetScrollState(source) == ScrollState::FLING;
+        navBarPattern_->OnContentScrollUpdate(offset, GetTotalOffset(), isFling);
     }
 
     CHECK_NULL_RETURN(navBarPattern_ && navBarPattern_->NeedCoordWithScroll(), false);
@@ -1057,6 +1058,9 @@ void ScrollablePattern::SetOnDidStopFlingCallback(const RefPtr<Scrollable>& scro
     scrollable->SetOnDidStopFlingCallback([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->navBarPattern_ && pattern->navBarPattern_->IsScrollEffectEnabled()) {
+            pattern->navBarPattern_->OnContentFlingStop();
+        }
         auto eventHub = pattern->GetEventHub<ScrollableEventHub>();
         CHECK_NULL_VOID(eventHub);
         OnDidStopFlingEvent callback = eventHub->GetOnDidStopFling();

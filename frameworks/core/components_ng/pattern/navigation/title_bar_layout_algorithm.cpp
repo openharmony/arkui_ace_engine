@@ -109,8 +109,7 @@ void TitleBarLayoutAlgorithm::MeasureBackButton(LayoutWrapper* layoutWrapper, co
 {
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    auto index = titleBarNode->GetChildIndexById(backButtonNode->GetId());
-    auto backButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto backButtonWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, backButtonNode);
     CHECK_NULL_VOID(backButtonWrapper);
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
 
@@ -362,8 +361,7 @@ void TitleBarLayoutAlgorithm::MeasureSubtitle(LayoutWrapper* layoutWrapper, cons
 {
     auto subtitleNode = titleBarNode->GetSubtitle();
     CHECK_NULL_VOID(subtitleNode);
-    auto index = titleBarNode->GetChildIndexById(subtitleNode->GetId());
-    auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto subtitleWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, subtitleNode);
     CHECK_NULL_VOID(subtitleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -381,8 +379,7 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
 {
     auto titleNode = titleBarNode->GetTitle();
     CHECK_NULL_VOID(titleNode);
-    auto index = titleBarNode->GetChildIndexById(titleNode->GetId());
-    auto titleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto titleWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, titleNode);
     CHECK_NULL_VOID(titleWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
     constraint.maxSize.SetHeight(titleBarSize.Height());
@@ -433,8 +430,7 @@ void TitleBarLayoutAlgorithm::MeasureTitle(LayoutWrapper* layoutWrapper, const R
     }
     if (subTitle) {
         // common title
-        auto index = titleBarNode->GetChildIndexById(subTitle->GetId());
-        auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto subtitleWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, subTitle);
         CHECK_NULL_VOID(subtitleWrapper);
         auto subtitleHeight = subtitleWrapper->GetGeometryNode()->GetFrameSize().Height();
         // mini mode double title height is 56vp, free/full mode is 82vp
@@ -491,8 +487,7 @@ void TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const Re
 {
     auto menuNode = titleBarNode->GetMenu();
     CHECK_NULL_VOID(menuNode);
-    auto index = titleBarNode->GetChildIndexById(menuNode->GetId());
-    auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto menuWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, menuNode);
     CHECK_NULL_VOID(menuWrapper);
     auto constraint = titleBarLayoutProperty->CreateChildConstraint();
 
@@ -559,11 +554,7 @@ void TitleBarLayoutAlgorithm::MeasureMask(
         if (!maskNode) {
             continue;
         }
-        auto maskIndex = titleBarNode->GetChildIndexById(maskNode->GetId());
-        if (maskIndex < 0) {
-            continue;
-        }
-        auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(maskIndex);
+        auto maskWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, maskNode);
         if (!maskWrapper) {
             continue;
         }
@@ -597,8 +588,7 @@ void TitleBarLayoutAlgorithm::LayoutBackButton(LayoutWrapper* layoutWrapper, con
     auto titleBarHeight = titleBarGeometryNode->GetFrameSize().Height();
     auto backButtonNode = titleBarNode->GetBackButton();
     CHECK_NULL_VOID(backButtonNode);
-    auto index = titleBarNode->GetChildIndexById(backButtonNode->GetId());
-    auto backButtonWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto backButtonWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, backButtonNode);
     CHECK_NULL_VOID(backButtonWrapper);
     auto geometryNode = backButtonWrapper->GetGeometryNode();
 
@@ -663,11 +653,7 @@ void TitleBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper, const Ref
         if (!maskNode) {
             continue;
         }
-        auto maskIndex = titleBarNode->GetChildIndexById(maskNode->GetId());
-        if (maskIndex < 0) {
-            continue;
-        }
-        auto maskWrapper = layoutWrapper->GetOrCreateChildByIndex(maskIndex);
+        auto maskWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, maskNode);
         if (!maskWrapper) {
             continue;
         }
@@ -708,8 +694,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
 {
     auto titleNode = titleBarNode->GetTitle();
     CHECK_NULL_VOID(titleNode);
-    auto index = titleBarNode->GetChildIndexById(titleNode->GetId());
-    auto titleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto titleWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, titleNode);
     CHECK_NULL_VOID(titleWrapper);
     auto geometryNode = titleWrapper->GetGeometryNode();
     auto titleBarGeometryNode = titleBarNode->GetGeometryNode();
@@ -925,8 +910,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
 {
     auto subtitleNode = titleBarNode->GetSubtitle();
     CHECK_NULL_VOID(subtitleNode);
-    auto index = titleBarNode->GetChildIndexById(subtitleNode->GetId());
-    auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto subtitleWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, subtitleNode);
     CHECK_NULL_VOID(subtitleWrapper);
     auto geometryNode = subtitleWrapper->GetGeometryNode();
     auto titleBarGeometryNode = titleBarNode->GetGeometryNode();
@@ -1052,8 +1036,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     bool useContainerModalTitleHeight = titleBarNode->UseContainerModalTitleHeight();
     auto menuNode = titleBarNode->GetMenu();
     CHECK_NULL_VOID(menuNode);
-    auto index = titleBarNode->GetChildIndexById(menuNode->GetId());
-    auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto menuWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, menuNode);
     CHECK_NULL_VOID(menuWrapper);
     auto geometryNode = menuWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -1201,6 +1184,144 @@ void TitleBarLayoutAlgorithm::InitializeTheme(const RefPtr<TitleBarNode>& titleB
     }
 }
 
+void TitleBarLayoutAlgorithm::MeasureEffectComponent(LayoutWrapper* layoutWrapper,
+    const RefPtr<TitleBarNode>& titleBarNode, const SizeF& titleBarSize)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto effectNode = titleBarPattern->GetTitleBarEffectNode();
+    CHECK_NULL_VOID(effectNode);
+    auto effectIdx = titleBarNode->GetChildIndexById(effectNode->GetId());
+    if (effectIdx < 0) {
+        return;
+    }
+    auto effectWrapper = layoutWrapper->GetOrCreateChildByIndex(effectIdx);
+    CHECK_NULL_VOID(effectWrapper);
+    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto constraint = layoutProperty->CreateChildConstraint();
+    constraint.selfIdealSize = OptionalSizeF(titleBarSize.Width(), titleBarSize.Height());
+    effectWrapper->Measure(constraint);
+}
+
+void TitleBarLayoutAlgorithm::LayoutEffectComponent(LayoutWrapper* layoutWrapper,
+    const RefPtr<TitleBarNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto effectNode = titleBarPattern->GetTitleBarEffectNode();
+    CHECK_NULL_VOID(effectNode);
+    auto effectIdx = titleBarNode->GetChildIndexById(effectNode->GetId());
+    if (effectIdx < 0) {
+        return;
+    }
+    auto effectWrapper = layoutWrapper->GetOrCreateChildByIndex(effectIdx);
+    CHECK_NULL_VOID(effectWrapper);
+    auto effectGeometry = effectWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(effectGeometry);
+    // The EffectComponent wraps the menu: place it at the menu's titleBar-relative offset
+    // (already computed by LayoutMenu) so its bounds cover the menu, and keep the menu at
+    // the wrapper-local origin.
+    auto menuNode = titleBarNode->GetMenu();
+    auto menuWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, menuNode);
+    RefPtr<GeometryNode> menuGeometry;
+    if (menuWrapper) {
+        menuGeometry = menuWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(menuGeometry);
+        effectGeometry->SetMarginFrameOffset(menuGeometry->GetMarginFrameOffset());
+        // The offset calculated by LayoutMenu is relative to the titleBar. Once the menu is
+        // wrapped by the EffectComponent, that offset belongs to the wrapper and the menu
+        // itself must use the wrapper-local origin. Do this explicitly instead of relying on
+        // BoxLayout to reset the child offset, because the child layout may be skipped.
+        menuGeometry->SetMarginFrameOffset(OffsetF(0.0f, 0.0f));
+    } else {
+        effectGeometry->SetMarginFrameOffset(OffsetF(0.0f, 0.0f));
+    }
+    effectWrapper->Layout();
+    if (menuGeometry) {
+        // A skipped child layout does not run FrameNode::OnLayoutFinish(), so its RenderContext
+        // can retain the titleBar-relative paint rect even though the wrapper geometry is local.
+        auto menuHost = menuWrapper->GetHostNode();
+        auto menuRenderContext = menuHost ? menuHost->GetRenderContext() : nullptr;
+        if (menuRenderContext) {
+            auto paintRect = menuRenderContext->GetPaintRectWithoutTransform();
+            paintRect.SetOffset(menuGeometry->GetFrameOffset());
+            menuRenderContext->UpdatePaintRect(paintRect);
+        }
+    }
+}
+
+void TitleBarLayoutAlgorithm::ResizeEffectComponentToMenu(LayoutWrapper* layoutWrapper,
+    const RefPtr<TitleBarNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto effectNode = titleBarPattern->GetTitleBarEffectNode();
+    CHECK_NULL_VOID(effectNode);
+    auto effectIdx = titleBarNode->GetChildIndexById(effectNode->GetId());
+    if (effectIdx < 0) {
+        return;
+    }
+    auto effectWrapper = layoutWrapper->GetOrCreateChildByIndex(effectIdx);
+    CHECK_NULL_VOID(effectWrapper);
+    auto menuNode = titleBarNode->GetMenu();
+    auto menuWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, menuNode);
+    CHECK_NULL_VOID(menuWrapper);
+    auto effectGeometry = effectWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(effectGeometry);
+    auto menuGeometry = menuWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(menuGeometry);
+    // The EffectComponent tightly wraps the menu: match its frame size to the menu's.
+    effectGeometry->SetFrameSize(menuGeometry->GetFrameSize());
+}
+
+RefPtr<LayoutWrapper> TitleBarLayoutAlgorithm::GetTitleBarChildWrapper(LayoutWrapper* layoutWrapper,
+    const RefPtr<TitleBarNode>& titleBarNode, const RefPtr<UINode>& child)
+{
+    CHECK_NULL_RETURN(layoutWrapper, nullptr);
+    CHECK_NULL_RETURN(titleBarNode, nullptr);
+    CHECK_NULL_RETURN(child, nullptr);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    auto effectNode = titleBarPattern ? titleBarPattern->GetTitleBarEffectNode() : nullptr;
+    // Resolve the content child through the EffectComponent wrapper when the effect node
+    // is present (the production structure: titleBar -> effect -> content children).
+    auto resolveViaEffect = [&]() -> RefPtr<LayoutWrapper> {
+        if (!effectNode) {
+            return nullptr;
+        }
+        auto effectIdx = titleBarNode->GetChildIndexById(effectNode->GetId());
+        if (effectIdx < 0) {
+            return nullptr;
+        }
+        auto effectWrapper = layoutWrapper->GetOrCreateChildByIndex(effectIdx);
+        if (!effectWrapper) {
+            return nullptr;
+        }
+        auto childIdx = effectNode->GetChildIndexById(child->GetId());
+        if (childIdx < 0) {
+            return nullptr;
+        }
+        return effectWrapper->GetOrCreateChildByIndex(childIdx);
+    };
+    if (auto resolved = resolveViaEffect()) {
+        return resolved;
+    }
+    // Fallback: resolve as a direct child of the titleBar. In production the EffectComponent
+    // is always created (OnAttachToFrameNode), so this only serves legacy/test setups that
+    // mount content children directly under the titleBar without an EffectComponent.
+    auto childIdx = titleBarNode->GetChildIndexById(child->GetId());
+    if (childIdx < 0) {
+        return nullptr;
+    }
+    return layoutWrapper->GetOrCreateChildByIndex(childIdx);
+}
+
 void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(layoutWrapper->GetHostNode());
@@ -1225,8 +1346,14 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_BREAK(navDestinationPattern);
         showBackButton_ = navDestinationPattern->GetBackButtonState();
     } while (false);
+    // Measure the EffectComponent (direct child) first so its wrapper is active and the
+    // content children become resolvable through it below.
+    MeasureEffectComponent(layoutWrapper, titleBarNode, size);
     MeasureBackButton(layoutWrapper, titleBarNode, layoutProperty);
     MeasureMenu(layoutWrapper, titleBarNode, layoutProperty);
+    // The EffectComponent wraps only the menu; resize it to the measured menu so it does
+    // not cover the whole titleBar.
+    ResizeEffectComponentToMenu(layoutWrapper, titleBarNode);
     auto titleMaxWidth = GetTitleWidth(titleBarNode, layoutProperty, size);
     titleMaxWidth = WidthAfterAvoidMenuBarAndContainerModal(titleBarNode, titleMaxWidth);
     MeasureSubtitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
@@ -1255,8 +1382,7 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float subtitleHeight = 0.0f;
     auto subtitleNode = titleBarNode->GetSubtitle();
     if (subtitleNode) {
-        auto index = titleBarNode->GetChildIndexById(subtitleNode->GetId());
-        auto subtitleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto subtitleWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, subtitleNode);
         CHECK_NULL_VOID(subtitleWrapper);
         auto geometryNode = subtitleWrapper->GetGeometryNode();
         subtitleHeight = geometryNode->GetFrameSize().Height();
@@ -1266,8 +1392,7 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float titleHeight = 0.0f;
     auto titleNode = titleBarNode->GetTitle();
     if (titleNode) {
-        auto index = titleBarNode->GetChildIndexById(titleNode->GetId());
-        auto titleWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+        auto titleWrapper = GetTitleBarChildWrapper(layoutWrapper, titleBarNode, titleNode);
         CHECK_NULL_VOID(titleWrapper);
         auto geometryNode = titleWrapper->GetGeometryNode();
         titleHeight = geometryNode->GetFrameSize().Height();
@@ -1275,6 +1400,9 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     LayoutSubtitle(layoutWrapper, titleBarNode, layoutProperty, titleHeight);
 
     LayoutMenu(layoutWrapper, titleBarNode, layoutProperty, subtitleHeight);
+    // Layout the EffectComponent after the menu offset is known: it wraps the menu, so it
+    // is placed at the menu's offset and the menu sits at (0,0) within it.
+    LayoutEffectComponent(layoutWrapper, titleBarNode);
 }
 
 float TitleBarLayoutAlgorithm::ChangeOffsetByDirection(LayoutWrapper* layoutWrapper,

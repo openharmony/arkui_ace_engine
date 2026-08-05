@@ -32,6 +32,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -1196,14 +1197,27 @@ void TitleBarPattern::UpdateMenuMaterialInner(const RefPtr<UINode>& menuNode, co
     UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(material));
     InitColorPickerIfNeeded();
     InitTransparencyListenerIfNeeded();
+    // Split the material: the EC variant goes on the EffectComponent (the menu's parent,
+    // background layer), the Sub variant goes on each menu item (foreground content).
+    if (material) {
+        EnsureTitleBarEffectComponent();
+        auto effectNode = titleBarEffectNode_;
+        if (effectNode) {
+            auto matForEC = material; // ConvertToImmersiveEC takes a non-const RefPtr&
+            auto ecMaterial = ViewAbstract::ConvertToImmersiveEC(matForEC);
+            ViewAbstract::SetSystemMaterial(AceType::RawPtr(effectNode), AceType::RawPtr(ecMaterial));
+        }
+    }
     auto children = menuNode->GetChildren();
+    auto matForSub = material; // ConvertToImmersiveECSub takes a non-const RefPtr&
+    auto subMaterial = ViewAbstract::ConvertToImmersiveECSub(matForSub);
     for (auto& child : children) {
         auto menuItemNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_CONTINUE(menuItemNode);
         if (menuItemNode->GetTag() != V2::MENU_ITEM_ETS_TAG) {
             continue;
         }
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuItemNode), AceType::RawPtr(material));
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuItemNode), AceType::RawPtr(subMaterial));
     }
 }
 
@@ -1723,6 +1737,8 @@ void TitleBarPattern::OnAttachToFrameNode()
             .edges = SAFE_AREA_EDGE_TOP };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
+    // The EffectComponent that wraps the titleBar menu is created lazily
+    // (by MountTitleBarMenu / EnsureTitleBarEffectNode) so an empty titleBar stays empty.
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
 
@@ -2396,12 +2412,137 @@ void TitleBarPattern::ResetTitleBarMaskNodes()
     }
 }
 
+void TitleBarPattern::EnsureTitleBarEffectComponent()
+{
+    // The EffectComponent is only created when material is enabled for this titleBar.
+    if (!IsMaterialEnabled()) {
+        return;
+    }
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    if (!titleBarEffectNode_) {
+        titleBarEffectNode_ = CreateTitleBarEffectComponent();
+    }
+    CHECK_NULL_VOID(titleBarEffectNode_);
+    if (titleBarEffectNode_->GetParent() != host) {
+        RemoveTitleBarEffectNodeFromParent(titleBarEffectNode_);
+        host->AddChild(titleBarEffectNode_);
+    }
+}
+
+bool TitleBarPattern::IsMaterialEnabled() const
+{
+    // Mirror GetCurrentMaterial()'s decision logic as a pure query (no lazy creation).
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return false;
+    }
+    if (options_.material) {
+        return true;
+    }
+    if (!MaterialUtils::IsMaterialEnabled()) {
+        return false;
+    }
+    const auto& options = options_.bgOptions.scrollEffectOptions;
+    return options.has_value() && options->scrollEffectType == ScrollEffectType::GRADUAL_BLUR;
+}
+
+void TitleBarPattern::ReconcileEffectComponent()
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    bool materialEnabled = IsMaterialEnabled();
+    bool structureChanged = false;
+    if (materialEnabled && !titleBarEffectNode_) {
+        // Material became enabled: create the EffectComponent and move the menu (mounted
+        // directly under the titleBar before material was known) under it so the structure
+        // becomes titleBar -> EffectComponent -> menu.
+        EnsureTitleBarEffectComponent();
+        if (titleBarEffectNode_) {
+            MoveTitleBarMenu(host, titleBarEffectNode_);
+            structureChanged = true;
+        }
+    } else if (!materialEnabled && titleBarEffectNode_) {
+        // Material became disabled: move the menu back to the titleBar and drop the
+        // EffectComponent so the structure reverts to titleBar -> menu.
+        ResetTitleBarMaskNodes();
+        MoveTitleBarMenu(titleBarEffectNode_, host);
+        RemoveTitleBarEffectNodeFromParent(titleBarEffectNode_);
+        titleBarEffectNode_ = nullptr;
+        structureChanged = true;
+    }
+    if (structureChanged) {
+        // Reparenting changes the coordinate space of the menu. Rebuild the titleBar wrapper
+        // tree and remeasure its children so no geometry from the previous parent is reused.
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    }
+}
+
+void TitleBarPattern::MoveTitleBarMenu(const RefPtr<UINode>& from, const RefPtr<UINode>& to)
+{
+    CHECK_NULL_VOID(from);
+    CHECK_NULL_VOID(to);
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    // Only the menu is wrapped under the EffectComponent; move it between `from` and `to`.
+    auto menu = host->GetMenu();
+    if (menu && menu->GetParent() == from) {
+        from->RemoveChild(menu);
+        to->AddChild(menu);
+    }
+}
+
+void TitleBarPattern::MountTitleBarMenu(const RefPtr<UINode>& menu)
+{
+    CHECK_NULL_VOID(menu);
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    // The EffectComponent only wraps the menu, and only when material is enabled.
+    if (IsMaterialEnabled()) {
+        EnsureTitleBarEffectComponent();
+        auto effectNode = titleBarEffectNode_;
+        if (effectNode) {
+            effectNode->AddChild(menu);
+            return;
+        }
+    }
+    host->AddChild(menu);
+}
+
+void TitleBarPattern::UnmountTitleBarMenu(const RefPtr<UINode>& menu)
+{
+    CHECK_NULL_VOID(menu);
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    // The menu lives under the EffectComponent when material is enabled, otherwise directly
+    // under the titleBar; remove it from whichever is its current parent.
+    auto effectNode = titleBarEffectNode_;
+    if (effectNode && menu->GetParent() == effectNode) {
+        effectNode->RemoveChild(menu);
+    } else {
+        host->RemoveChild(menu);
+    }
+}
+
+RefPtr<FrameNode> TitleBarPattern::CreateTitleBarEffectComponent()
+{
+    auto node = FrameNode::GetOrCreateFrameNode(V2::EFFECT_COMPONENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<EffectComponentPattern>(); });
+    CHECK_NULL_RETURN(node, nullptr);
+    // Transparent by default (no background effect applied) and never intercepts
+    // touch/gesture events so they pass through to the titleBar content below.
+    ViewAbstract::SetHitTestMode(AceType::RawPtr(node), HitTestMode::HTMNONE);
+    // Clip stays disabled (FrameNode default) so the effect content is not clipped.
+    return node;
+}
+
 void TitleBarPattern::EnsureTitleBarEffectNode(const RefPtr<FrameNode>& node, int32_t zIndex)
 {
     CHECK_NULL_VOID(node);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(zIndex);
+    // Mask nodes are direct children of the titleBar (the EffectComponent only wraps the menu).
     auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(host);
     if (node->GetParent() != host) {
@@ -2520,6 +2661,30 @@ void TitleBarPattern::PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrol
     SetScrollEffectTitleBarBgStyle(scrollEffectBgStyle);
 }
 
+void TitleBarPattern::SetIsFlinging(bool isFlinging)
+{
+    if (isFlinging_ == isFlinging) {
+        return;
+    }
+    isFlinging_ = isFlinging;
+    if (!isScrollEffectEnabled_) {
+        return;
+    }
+    // Fling only closes the blur for GRADUAL_BLUR; COMMON_BLUR is left unaffected.
+    auto scrollEffectOptions = options_.bgOptions.scrollEffectOptions;
+    if (!scrollEffectOptions.has_value() ||
+        scrollEffectOptions->scrollEffectType != ScrollEffectType::GRADUAL_BLUR) {
+        return;
+    }
+    CHECK_NULL_VOID(titleBarMaskBlurNode_);
+    auto renderContext = titleBarMaskBlurNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetVisible(!isFlinging);
+    if (!isFlinging) {
+        UpdateBackgroundBlurStyle();
+    }
+}
+
 void TitleBarPattern::UpdateBackgroundBlurStyle()
 {
     if (!isScrollEffectEnabled_) {
@@ -2599,11 +2764,13 @@ void TitleBarPattern::InitScrollEffectOptions()
             hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         isScrollEffectEnabled_ = false;
+        isFlinging_ = false;
         return;
     }
 
     auto scrollEffectType = scrollEffectOptionsOpt->scrollEffectType;
     isScrollEffectEnabled_ = true;
+    isFlinging_ = false;
     SetIsTitleBarStyleStartUpdate(false);
     SetIsTitleBarStyleEndUpdate(false);
     UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(GetCurrentMaterial()));
@@ -2655,6 +2822,9 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions& opt)
         }
     }
     options_ = opt;
+    // Material state may have changed (options_.material / scrollEffectOptions); reconcile
+    // the EffectComponent and the placement of content children to match the new state.
+    ReconcileEffectComponent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (opt.brOptions.paddingStart.has_value()) {
