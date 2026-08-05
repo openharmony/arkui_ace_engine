@@ -100,6 +100,10 @@ public:
         CHECK_NULL_RETURN(rsUIDirector_, 0);
         return rsUIDirector_->GetAnimateExpectedRate();
     }
+    inline void SetIsSystemApp(bool isSystemApp)
+    {
+        isSystemApp_ = isSystemApp;
+    }
 #endif
 
     void OnShow() override;
@@ -118,6 +122,7 @@ private:
     UIContentType uiContentType_ = UIContentType::UNDEFINED;
 #ifdef ENABLE_ROSEN_BACKEND
     uint32_t forceVsyncFrameCount_ = 0;
+    bool isSystemApp_ = false;
     void InitOnVsyncCallback();
     static std::recursive_mutex globalMutex_;
     std::shared_ptr<Rosen::VSyncReceiver> receiver_ = nullptr;
