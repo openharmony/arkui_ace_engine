@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_VIDEO_VIDEO_STATE_MACHINE_PATTERN_H
 #include <mutex>
 #include <queue>
-
 #include "base/geometry/dimension.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
@@ -183,6 +183,7 @@ public:
     }
 
     void OnVisibleChange(bool isVisible) override;
+    void OnVisibleAreaChange(bool isVisible);
 
     void OnAreaChangedInner() override;
 
@@ -402,6 +403,8 @@ private:
 
     void RegisterRenderContextCallBack();
     void ChangePlayerStatus(const PlaybackStatus& status);
+    void RegisterVisibleAreaChange();
+    void UnregisterVisibleAreaChange(FrameNode* frameNode = nullptr);
 
     bool IsSupportImageAnalyzer();
     bool ShouldUpdateImageAnalyzer();
@@ -495,6 +498,8 @@ private:
     bool isProgressInjectCmd_ = false;
     double lastProgressRate_ = 0.0;
     double lastSetProgressRate_ = 1.0;
+    bool hasVisibleChangeRegistered_ = false;
+    RectF lastMediaPlayerBounds_;
 
     // Error info for OnErrorStateEntered callback
     int32_t lastErrorCode_ = 0;
