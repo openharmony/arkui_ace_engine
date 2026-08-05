@@ -360,6 +360,10 @@ public:
     virtual void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) {}
     virtual void UpdateBlender(const OHOS::Rosen::Blender* blender) {}
     virtual void ResetBlender() {}
+    virtual bool IsSelfDrawingNode() const
+    {
+        return false;
+    }
     virtual void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) {}
     virtual void SetShadowPath(const std::string path) {}
     virtual void ResetShadowPath() {}

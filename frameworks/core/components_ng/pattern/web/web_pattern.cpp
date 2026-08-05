@@ -9967,6 +9967,9 @@ void WebPattern::DumpInfo()
 {
     DumpSurfaceInfo();
     DumpGpuInfo();
+    bool isSelfDrawing = (renderContextForSurface_ && renderContextForSurface_->IsSelfDrawingNode()) ||
+                         (renderContextForPopupSurface_ && renderContextForPopupSurface_->IsSelfDrawingNode());
+    DumpLog::GetInstance().AddDesc(std::string("isSelfDrawingNode: ").append(isSelfDrawing ? "true" : "false"));
 }
 
 void WebPattern::DumpGpuInfo()
