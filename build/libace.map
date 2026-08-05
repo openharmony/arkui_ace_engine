@@ -2503,7 +2503,7 @@
       "OHOS::Ace::NG::TextFreeScrollController::StopScrollAnimation(bool)";
       "OHOS::Ace::NG::TextScrollBar2D::TextScrollBar2D(OHOS::Ace::WeakPtr<OHOS::Ace::NG::ScrollablePattern> const&)";
       "OHOS::Ace::NG::TextScrollBar2D::AddScrollableEvent()";
-      "OHOS::Ace::NG::TextScrollBar2D::OnDraw(OHOS::Ace::NG::DrawingContext&) const";
+      "OHOS::Ace::NG::TextScrollBar2D::OnDraw(OHOS::Ace::NG::DrawingContext&, OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayModifier> const&) const";
       "OHOS::Ace::NG::TextScrollBar2D::UpdateBorderRadius(bool)";
       "OHOS::Ace::NG::TextScrollBar2D::UpdateVerticalBar(float, float, OHOS::Ace::Size const&, OHOS::Ace::Offset)";
       "OHOS::Ace::NG::TextScrollBar2D::UpdateHorizontalBar(float, float, OHOS::Ace::Size const&, OHOS::Ace::Offset)";
