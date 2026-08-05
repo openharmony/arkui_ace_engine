@@ -1114,6 +1114,11 @@ std::u16string TxtParagraph::GetParagraphText()
     return text_;
 }
 
+size_t TxtParagraph::GetParagraphTextLength() const
+{
+    return text_.length();
+}
+
 const ParagraphStyle& TxtParagraph::GetParagraphStyle() const
 {
     return paraStyle_;
