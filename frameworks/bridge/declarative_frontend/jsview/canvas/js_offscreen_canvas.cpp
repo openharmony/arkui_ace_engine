@@ -15,6 +15,10 @@
 
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_canvas.h"
 
+#include <cmath>
+#include <limits>
+#include <memory>
+
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
@@ -29,6 +33,7 @@
 namespace OHOS::Ace::Framework {
 constexpr int32_t ARGS_COUNT_ONE = 1;
 constexpr int32_t ARGS_COUNT_TWO = 2;
+constexpr int32_t ARG_INDEX_UNIT = 2;
 
 namespace {
 
@@ -37,8 +42,31 @@ const ArkUICanvasRuntimeBridge* GetCanvasBridge()
     return NG::GetCanvasRuntimeBridgeFromModule();
 }
 
+// Safe double to int32_t conversion. Returns false if value is out of int32_t range, NaN, or Inf.
+bool SafeDoubleToInt32(double value, int32_t& out)
+{
+    if (!std::isfinite(value)) {
+        return false;
+    }
+    if (value < static_cast<double>(std::numeric_limits<int32_t>::min()) ||
+        value > static_cast<double>(std::numeric_limits<int32_t>::max())) {
+        return false;
+    }
+    out = static_cast<int32_t>(value);
+    return true;
+}
+
 RefPtr<AceType> CreateOffscreenPattern(int32_t width, int32_t height)
 {
+    if (width <= 0 || height <= 0) {
+        LOGW("Invalid offscreen canvas dimensions: width=%{public}d, height=%{public}d", width, height);
+        return nullptr;
+    }
+    constexpr int32_t maxCanvasDimension = 65536;
+    if (width > maxCanvasDimension || height > maxCanvasDimension) {
+        LOGW("Offscreen canvas dimensions too large: width=%{public}d, height=%{public}d", width, height);
+        return nullptr;
+    }
     auto* bridge = GetCanvasBridge();
     CHECK_NULL_RETURN(bridge, nullptr);
     CHECK_NULL_RETURN(bridge->createOffscreenPattern, nullptr);
@@ -55,6 +83,10 @@ size_t GetOffscreenBitmapSize(const RefPtr<AceType>& offscreenPattern)
 
 void UpdateOffscreenSize(const RefPtr<AceType>& offscreenPattern, int32_t width, int32_t height)
 {
+    if (width <= 0 || height <= 0) {
+        LOGW("Invalid offscreen canvas update dimensions: width=%{public}d, height=%{public}d", width, height);
+        return;
+    }
     auto* bridge = GetCanvasBridge();
     CHECK_NULL_VOID(bridge);
     CHECK_NULL_VOID(bridge->updateOffscreenSize);
@@ -79,6 +111,49 @@ std::unique_ptr<ImageData> GetImageData(
     return bridge->getOffscreenImageData(offscreenPattern, left, top, width, height);
 }
 #endif
+
+void FinalizeOffscreenCanvas(napi_env env, void* data, void* hint)
+{
+    LOGD("Finalizer for offscreen canvas is called");
+    auto wrapper = reinterpret_cast<JSOffscreenCanvas*>(data);
+    delete wrapper;
+    wrapper = nullptr;
+}
+
+JSOffscreenCanvas* CreateAndInitOffscreenCanvas(napi_env env, napi_value argv[])
+{
+    auto workCanvasHolder = std::make_unique<JSOffscreenCanvas>();
+    auto* workCanvas = workCanvasHolder.get();
+    if (argv[ARG_INDEX_UNIT] != nullptr) {
+        int32_t unit = 0;
+        napi_get_value_int32(env, argv[ARG_INDEX_UNIT], &unit);
+        if (static_cast<CanvasUnit>(unit) == CanvasUnit::PX) {
+            workCanvas->SetUnit(CanvasUnit::PX);
+        }
+    }
+    double fWidth = 0.0;
+    double fHeight = 0.0;
+    double density = workCanvas->GetDensity();
+    if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
+        fWidth *= density;
+        workCanvas->SetWidth(fWidth);
+    }
+    if (napi_get_value_double(env, argv[1], &fHeight) == napi_ok) {
+        fHeight *= density;
+        workCanvas->SetHeight(fHeight);
+    }
+    int32_t canvasWidth = 0;
+    int32_t canvasHeight = 0;
+    if (!SafeDoubleToInt32(fWidth, canvasWidth) || !SafeDoubleToInt32(fHeight, canvasHeight)) {
+        LOGW("Invalid offscreen canvas dimensions in Constructor");
+        return nullptr;
+    }
+    workCanvas->SetOffscreenPattern(CreateOffscreenPattern(canvasWidth, canvasHeight));
+    if (workCanvas->GetOffscreenPattern() == nullptr) {
+        return nullptr;
+    }
+    return workCanvasHolder.release();
+}
 
 } // namespace
 
@@ -119,15 +194,23 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         LOGW("Invalid context.");
         return nullptr;
     }
-    auto offscreenCanvasPattern =
-        CreateOffscreenPattern(static_cast<int32_t>(workCanvas->GetWidth()),
-            static_cast<int32_t>(workCanvas->GetHeight()));
+    int32_t canvasWidth = 0;
+    int32_t canvasHeight = 0;
+    if (!SafeDoubleToInt32(workCanvas->GetWidth(), canvasWidth) ||
+        !SafeDoubleToInt32(workCanvas->GetHeight(), canvasHeight)) {
+        LOGW("Invalid offscreen canvas dimensions in AttachOffscreenCanvas");
+        return nullptr;
+    }
+    auto offscreenCanvasPattern = CreateOffscreenPattern(canvasWidth, canvasHeight);
     CHECK_NULL_RETURN(offscreenCanvasPattern, nullptr);
     workCanvas->SetOffscreenPattern(offscreenCanvasPattern);
     auto bitmapSize = GetOffscreenBitmapSize(offscreenCanvasPattern);
 
     napi_value offscreenCanvas = nullptr;
-    napi_create_object(env, &offscreenCanvas);
+    if (napi_create_object(env, &offscreenCanvas) != napi_ok || offscreenCanvas == nullptr) {
+        LOGW("Failed to create offscreen canvas object");
+        return nullptr;
+    }
 
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_GETTER_SETTER("width", JSOffscreenCanvas::JsGetWidth, JSOffscreenCanvas::JsSetWidth),
@@ -139,7 +222,7 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
 
     napi_coerce_to_native_binding_object(
         env, offscreenCanvas, DetachOffscreenCanvas, AttachOffscreenCanvas, value, nullptr);
-    napi_wrap_with_size(
+    if (napi_wrap_with_size(
         env, offscreenCanvas, value,
         [](napi_env env, void* data, void* hint) {
             LOGD("Finalizer for offscreen canvas is called");
@@ -147,7 +230,10 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
             delete wrapper;
             wrapper = nullptr;
         },
-        nullptr, nullptr, bitmapSize);
+        nullptr, nullptr, bitmapSize) != napi_ok) {
+        LOGW("Failed to wrap offscreen canvas object");
+        return nullptr;
+    }
     return offscreenCanvas;
 }
 
@@ -196,40 +282,12 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
         LOGW("Invalid args.");
         return nullptr;
     }
-    double fWidth = 0.0;
-    double fHeight = 0.0;
-    auto workCanvas = new JSOffscreenCanvas();
-    if (argv[2] != nullptr) {
-        int32_t unit = 0;
-        napi_get_value_int32(env, argv[2], &unit);
-        if (static_cast<CanvasUnit>(unit) == CanvasUnit::PX) {
-            workCanvas->SetUnit(CanvasUnit::PX);
-        }
-    }
-    double density = workCanvas->GetDensity();
-    if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
-        fWidth *= density;
-        workCanvas->SetWidth(fWidth);
-    }
-    if (napi_get_value_double(env, argv[1], &fHeight) == napi_ok) {
-        fHeight *= density;
-        workCanvas->SetHeight(fHeight);
-    }
-    workCanvas->offscreenCanvasPattern_ =
-        CreateOffscreenPattern(static_cast<int32_t>(fWidth), static_cast<int32_t>(fHeight));
-    CHECK_NULL_RETURN(workCanvas->offscreenCanvasPattern_, nullptr);
-    auto bitmapSize = GetOffscreenBitmapSize(workCanvas->offscreenCanvasPattern_);
+    auto* workCanvas = CreateAndInitOffscreenCanvas(env, argv);
+    CHECK_NULL_RETURN(workCanvas, nullptr);
+    auto bitmapSize = GetOffscreenBitmapSize(workCanvas->GetOffscreenPattern());
     napi_coerce_to_native_binding_object(
         env, thisVar, DetachOffscreenCanvas, AttachOffscreenCanvas, workCanvas, nullptr);
-    napi_wrap_with_size(
-        env, thisVar, workCanvas,
-        [](napi_env env, void* data, void* hint) {
-            LOGD("Finalizer for offscreen canvas is called");
-            auto workCanvas = reinterpret_cast<JSOffscreenCanvas*>(data);
-            delete workCanvas;
-            workCanvas = nullptr;
-        },
-        nullptr, nullptr, bitmapSize);
+    napi_wrap_with_size(env, thisVar, workCanvas, FinalizeOffscreenCanvas, nullptr, nullptr, bitmapSize);
     return thisVar;
 }
 
@@ -338,9 +396,13 @@ napi_value JSOffscreenCanvas::OnSetWidth(napi_env env, napi_callback_info info)
     double density = GetDensity();
     width *= density;
 
-    if (width_ != width) {
+    if (std::isfinite(width) && width > 0.0 && width_ != width) {
         width_ = width;
-        UpdateOffscreenSize(offscreenCanvasPattern_, static_cast<int32_t>(width_), static_cast<int32_t>(height_));
+        int32_t iWidth = 0;
+        int32_t iHeight = 0;
+        if (SafeDoubleToInt32(width_, iWidth) && SafeDoubleToInt32(height_, iHeight)) {
+            UpdateOffscreenSize(offscreenCanvasPattern_, iWidth, iHeight);
+        }
         if (offscreenCanvasContext_ != nullptr) {
             offscreenCanvasContext_->SetWidth(width_);
         }
@@ -363,9 +425,13 @@ napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
     double density = GetDensity();
     height *= density;
 
-    if (height_ != height) {
+    if (std::isfinite(height) && height > 0.0 && height_ != height) {
         height_ = height;
-        UpdateOffscreenSize(offscreenCanvasPattern_, static_cast<int32_t>(width_), static_cast<int32_t>(height_));
+        int32_t iWidth = 0;
+        int32_t iHeight = 0;
+        if (SafeDoubleToInt32(width_, iWidth) && SafeDoubleToInt32(height_, iHeight)) {
+            UpdateOffscreenSize(offscreenCanvasPattern_, iWidth, iHeight);
+        }
         if (offscreenCanvasContext_ != nullptr) {
             offscreenCanvasContext_->SetHeight(height_);
         }

@@ -83,6 +83,7 @@ RefPtr<AceType> GetCanvasPattern(NG::FrameNode* frameNode)
 void SetCanvasRenderingContext2DCallbacks(
     const RefPtr<RenderingContext2DModel>& context, std::function<void()> onAttach, std::function<void()> onDetach)
 {
+    CHECK_NULL_VOID(context);
     auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
     CHECK_NULL_VOID(bridge);
     CHECK_NULL_VOID(bridge->setCanvasRenderingContext2DCallbacks);
@@ -144,6 +145,7 @@ void TransferCanvasRenderingContext2DFromImageBitmap(
 void StartCanvasImageAnalyzer(
     const RefPtr<RenderingContext2DModel>& context, void* config, OnAnalyzedCallback& onAnalyzed)
 {
+    CHECK_NULL_VOID(context);
     auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
     CHECK_NULL_VOID(bridge);
     CHECK_NULL_VOID(bridge->startCanvasImageAnalyzer);
@@ -152,6 +154,7 @@ void StartCanvasImageAnalyzer(
 
 void StopCanvasImageAnalyzer(const RefPtr<RenderingContext2DModel>& context)
 {
+    CHECK_NULL_VOID(context);
     auto* bridge = NG::GetCanvasRuntimeBridgeFromModule();
     CHECK_NULL_VOID(bridge);
     CHECK_NULL_VOID(bridge->stopCanvasImageAnalyzer);
@@ -166,6 +169,7 @@ JSRenderingContext::JSRenderingContext()
 #else
     if (Container::IsCurrentUseNewPipeline()) {
         renderingContext2DModel_ = CreateCanvasRenderingContextModel();
+        CHECK_NULL_VOID(renderingContext2DModel_);
         auto onAttach = [weakCtx = WeakClaim(this)]() {
             auto ctx = weakCtx.Upgrade();
             CHECK_NULL_VOID(ctx);
@@ -570,6 +574,7 @@ void JSRenderingContext::JsStartImageAnalyzer(const JSCallbackInfo& info)
 void JSRenderingContext::JsStopImageAnalyzer(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(renderingContext2DModel_);
     StopCanvasImageAnalyzer(renderingContext2DModel_);
 }
 
