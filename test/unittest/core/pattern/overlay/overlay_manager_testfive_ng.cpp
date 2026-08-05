@@ -1112,7 +1112,8 @@ HWTEST_F(OverlayManagerTestFiveNg, ContentChangeReport001, TestSize.Level1)
     bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
     pipelineContext->isSubPipeline_ = false;
     auto keyNode = FrameNode::CreateFrameNode(
-        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
     ASSERT_NE(keyNode, nullptr);
     overlayManager->ContentChangeReport(keyNode, true);
     pipelineContext->isSubPipeline_ = savedIsSubPipeline;
@@ -1134,7 +1135,8 @@ HWTEST_F(OverlayManagerTestFiveNg, ContentChangeReport002, TestSize.Level1)
     bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
     pipelineContext->isSubPipeline_ = true;
     auto keyNode = FrameNode::CreateFrameNode(
-        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
     ASSERT_NE(keyNode, nullptr);
     overlayManager->ContentChangeReport(keyNode, false);
     pipelineContext->isSubPipeline_ = savedIsSubPipeline;
@@ -1157,7 +1159,8 @@ HWTEST_F(OverlayManagerTestFiveNg, ContentChangeReport003, TestSize.Level1)
     auto savedMgr = pipelineContext->contentChangeMgr_;
     pipelineContext->contentChangeMgr_ = nullptr;
     auto keyNode = FrameNode::CreateFrameNode(
-        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
     ASSERT_NE(keyNode, nullptr);
     overlayManager->ContentChangeReport(keyNode, true);
     pipelineContext->contentChangeMgr_ = savedMgr;
@@ -1267,7 +1270,8 @@ HWTEST_F(OverlayManagerTestFiveNg, RemoveOverlayManagerNode005, TestSize.Level1)
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     ASSERT_NE(overlayNode, nullptr);
     auto childNode = FrameNode::CreateFrameNode(
-        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
     ASSERT_NE(childNode, nullptr);
     overlayNode->AddChild(childNode);
     overlayManager->overlayNode_ = overlayNode;
@@ -1291,7 +1295,8 @@ HWTEST_F(OverlayManagerTestFiveNg, IsCurrentNodeProcessRemoveOverlay001, TestSiz
         V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
     ASSERT_NE(currentNode, nullptr);
     auto childNode = FrameNode::CreateFrameNode(
-        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
     ASSERT_NE(childNode, nullptr);
     currentNode->AddChild(childNode);
     bool result = overlayManager->IsCurrentNodeProcessRemoveOverlay(currentNode, true);
