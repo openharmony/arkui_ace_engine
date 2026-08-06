@@ -132,8 +132,8 @@ void OnCopyImpl(Ark_NativePointer node, const Opt_synthetic_Callback_String_Void
         return;
     }
     auto onCopy = [arkCallback = CallbackHelper(*optValue)](const std::u16string& value) {
-        std::string narrow(value.begin(), value.end());
-        auto arkStringValue = Converter::ArkValue<Ark_String>(narrow);
+        Converter::ConvContext ctx;
+        auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
         arkCallback.Invoke(arkStringValue);
     };
     SelectionContainerModelNG::SetOnCopy(frameNode, std::move(onCopy));
