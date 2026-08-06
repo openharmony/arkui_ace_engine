@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG {
 
+
 namespace NodeModifier {
 const ArkUICounterModifier* GetCounterModifier()
 {

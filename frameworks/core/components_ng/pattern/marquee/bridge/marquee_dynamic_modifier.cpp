@@ -368,7 +368,6 @@ void SetMarqueeSpacing(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 u
     } else {
         MarqueeModelNG::SetMarqueeSpacing(frameNode, spacing);
     }
-
     if (SystemProperties::ConfigChangePerform() && spacingRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(spacingRawPtr));
         CHECK_NULL_VOID(resObj);
@@ -404,6 +403,7 @@ void ResetMarqueeDelay(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     MarqueeModelNG::ResetMarqueeDelay(frameNode);
 }
+
 
 #ifndef CROSS_PLATFORM
 void SetMarqueeFontSizeImpl(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* fontSizeRawPtr)
