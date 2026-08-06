@@ -14,6 +14,8 @@
  */
 
 #include "gtest/gtest.h"
+#include <cmath>
+#include <limits>
 
 #define private public
 #define protected public
@@ -1434,5 +1436,168 @@ HWTEST_F(SliderStaticTestNg, SetSelectedBorderRadiusLpx002, TestSize.Level1)
 
     SliderModelStatic::SetSelectedBorderRadius(frameNode, std::nullopt);
     EXPECT_EQ(frameNode->lpxAttributes_.count(LpxAttribute::LPX_SELECTED_BORDER_RADIUS), 0);
+}
+
+/**
+ * @tc.name: SetThicknessNonPositive001
+ * @tc.desc: Test SetThickness with non-positive value in OUTSET mode (theme branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetThicknessNonPositive001, TestSize.Level1)
+{
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SliderModelStatic::SetSliderMode(frameNode, SliderModel::SliderMode::OUTSET);
+    // value=0 triggers IsNonPositive true -> theme outsetTrackThickness branch
+    SliderModelStatic::SetThickness(frameNode, Dimension(0.0));
+    ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
+    auto theme = frameNode->GetContext()->GetTheme<SliderTheme>();
+    ASSERT_NE(theme, nullptr);
+    EXPECT_EQ(layoutProperty->GetThickness().value(), theme->GetOutsetTrackThickness());
+}
+
+/**
+ * @tc.name: SetThicknessNonPositive002
+ * @tc.desc: Test SetThickness with non-positive value in INSET mode (theme branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetThicknessNonPositive002, TestSize.Level1)
+{
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SliderModelStatic::SetSliderMode(frameNode, SliderModel::SliderMode::INSET);
+    SliderModelStatic::SetThickness(frameNode, Dimension(-1.0));
+    ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
+    auto theme = frameNode->GetContext()->GetTheme<SliderTheme>();
+    ASSERT_NE(theme, nullptr);
+    EXPECT_EQ(layoutProperty->GetThickness().value(), theme->GetInsetTrackThickness());
+}
+
+/**
+ * @tc.name: SetThicknessNonPositive003
+ * @tc.desc: Test SetThickness with non-positive value in NONE mode (theme branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetThicknessNonPositive003, TestSize.Level1)
+{
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    SliderModelStatic::SetSliderMode(frameNode, SliderModel::SliderMode::NONE);
+    SliderModelStatic::SetThickness(frameNode, Dimension(0.0));
+    ASSERT_NE(layoutProperty->GetThickness(), std::nullopt);
+    auto theme = frameNode->GetContext()->GetTheme<SliderTheme>();
+    ASSERT_NE(theme, nullptr);
+    EXPECT_EQ(layoutProperty->GetThickness().value(), theme->GetNoneTrackThickness());
+}
+
+/**
+ * @tc.name: SetBlockSizeNonPositive001
+ * @tc.desc: Test SetBlockSize with non-positive width (reset branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetBlockSizeNonPositive001, TestSize.Level1)
+{
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    // set positive first, then non-positive to trigger reset
+    SliderModelStatic::SetBlockSize(frameNode, Dimension(10.0), Dimension(10.0));
+    ASSERT_NE(layoutProperty->GetBlockSize(), std::nullopt);
+    SliderModelStatic::SetBlockSize(frameNode, Dimension(0.0), Dimension(10.0));
+    EXPECT_EQ(layoutProperty->GetBlockSize(), std::nullopt);
+}
+
+/**
+ * @tc.name: SetMinResponsiveDistanceOutOfRange001
+ * @tc.desc: Test SetMinResponsiveDistance when value exceeds diff (condition false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetMinResponsiveDistanceOutOfRange001, TestSize.Level1)
+{
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    std::optional<float> distance = 200.0f;
+    SliderModelStatic::SetMinResponsiveDistance(frameNode, distance);
+    ASSERT_NE(paintProperty->GetMinResponsiveDistance(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetMinResponsiveDistance().value(), 0.0f);
+}
+
+/**
+ * @tc.name: SetValidSlideRangeNan001
+ * @tc.desc: Test SetValidSlideRange with NaN value (reset branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetValidSlideRangeNan001, TestSize.Level1)
+{
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    std::optional<float> from = std::numeric_limits<float>::quiet_NaN();
+    std::optional<float> to = 50.0f;
+    SliderModelStatic::SetValidSlideRange(frameNode, from, to);
+    EXPECT_EQ(paintProperty->GetValidSlideRange(), std::nullopt);
+}
+
+/**
+ * @tc.name: SetValidSlideRangeInvalidOrder001
+ * @tc.desc: Test SetValidSlideRange when from > to (condition false, reset branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetValidSlideRangeInvalidOrder001, TestSize.Level1)
+{
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    // from=80 > to=20 -> LessOrEqual(fromValue, toValue) false -> reset
+    std::optional<float> from = 80.0f;
+    std::optional<float> to = 20.0f;
+    SliderModelStatic::SetValidSlideRange(frameNode, from, to);
+    EXPECT_EQ(paintProperty->GetValidSlideRange(), std::nullopt);
+}
+
+/**
+ * @tc.name: SetValidSlideRangeZeroStep001
+ * @tc.desc: Test SetValidSlideRange when step <= 0 (condition false, reset branch).
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SetValidSlideRangeZeroStep001, TestSize.Level1)
+{
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    // set step=0 -> GreatNotEqual(step, 0) false -> reset
+    SliderModelStatic::SetStep(frameNode, std::optional<float>(0.0f));
+    std::optional<float> from = MIN_RANGE;
+    std::optional<float> to = MAX_RANGE;
+    SliderModelStatic::SetValidSlideRange(frameNode, from, to);
+    EXPECT_EQ(paintProperty->GetValidSlideRange(), std::nullopt);
 }
 } // namespace OHOS::Ace::NG
