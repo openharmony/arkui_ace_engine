@@ -1468,16 +1468,15 @@ bool FormPattern::ShouldLoadFormSkeleton(bool isTransparencyEnabled, const Reque
 
 int32_t FormPattern::GetFormDimensionHeight(int32_t dimension)
 {
-    auto iter = OHOS::AppExecFwk::Constants::DIMENSION_MAP.
-        find(static_cast<OHOS::AppExecFwk::Constants::Dimension>(dimension));
-    if (iter == OHOS::AppExecFwk::Constants::DIMENSION_MAP.end()) {
+    const char* formDimension = OHOS::AppExecFwk::Constants::GetDimensionString(
+        static_cast<OHOS::AppExecFwk::Constants::Dimension>(dimension));
+    if (formDimension == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "GetFormDimensionHeight failed, invalid dimension: %{public}d",
             dimension);
         return 0;
     }
 
-    std::string formDimensionStr = iter->second;
-    std::stringstream streamDimension(formDimensionStr);
+    std::stringstream streamDimension(formDimension);
     std::string dimensionHeightStr;
     if (!std::getline(streamDimension, dimensionHeightStr, FORM_DIMENSION_SPLITTER)) {
         TAG_LOGE(AceLogTag::ACE_FORM, "GetFormDimensionHeight failed!");
