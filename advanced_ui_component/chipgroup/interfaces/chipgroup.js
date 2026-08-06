@@ -755,7 +755,7 @@ export class ChipGroup extends ViewPU {
   isMultiple() {
     return this.multiple ?? false;
   }
-isRTL() {
+  isRTL() {
     return i18n.isRTL(i18n.System.getAppPreferredLanguage());
   }
   getChipGroupItemSpace() {
