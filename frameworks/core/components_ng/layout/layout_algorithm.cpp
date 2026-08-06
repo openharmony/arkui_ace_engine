@@ -264,15 +264,14 @@ bool LayoutAlgorithm::HandleContentOverflowWithSmartLayout(LayoutWrapper* layout
     }
     TryRestoreSmartLayoutForHost(layoutWrapper);
 
-    auto collectResult = CollectOverflowFromFrameNode(AceType::RawPtr(hostNode), true, true);
-    if (hostNode->GetTag() != V2::TEXT_ETS_TAG && collectResult.overflowDisabled) {
-        return false;
+    RectF childRect;
+    if (hostNode->GetTag() != V2::TEXT_ETS_TAG) {
+        auto collectResult = CollectOverflowFromFrameNode(AceType::RawPtr(hostNode), true, true);
+        if (collectResult.overflowDisabled || !collectResult.totalChildFrameRect.has_value()) {
+            return false;
+        }
+        childRect = collectResult.totalChildFrameRect.value();
     }
-    if (!collectResult.totalChildFrameRect.has_value()) {
-        return false;
-    }
-
-    const auto& childRect = collectResult.totalChildFrameRect.value();
 
     if (IsContentOverflowForSmartLayout(layoutWrapper, childRect)) {
         SmartLayoutAlgorithm smartLayoutAlgorithm;
