@@ -301,7 +301,7 @@ private:
     friend class NativeCurveHelper;
 };
 
-class ResponsiveSpringMotion final : public Curve {
+class ResponsiveSpringMotion : public Curve {
     DECLARE_ACE_TYPE(ResponsiveSpringMotion, Curve);
 
 public:
@@ -369,14 +369,14 @@ public:
     static constexpr float DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION = 0.25f;
     static constexpr float DEFAULT_RESPONSIVE_SPRING_AMPLITUDE_RATIO = 0.001f;
 
-private:
+protected:
     float response_;
     float dampingRatio_;
     float blendDuration_;
     float minimumAmplitudeRatio_ = DEFAULT_RESPONSIVE_SPRING_AMPLITUDE_RATIO;
 };
 
-class InterpolatingSpring final : public Curve {
+class InterpolatingSpring : public Curve {
     DECLARE_ACE_TYPE(InterpolatingSpring, Curve);
 
 public:
@@ -457,12 +457,132 @@ public:
     static constexpr float DEFAULT_INTERPOLATING_SPRING_VELOCITY = 0.0f;
     static constexpr float DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO = 0.00025f;
 
-private:
+protected:
     float velocity_ = 0.0f;
     float mass_ = 0.0f;
     float stiffness_ = 0.0f;
     float damping_ = 0.0f;
     float minimumAmplitudeRatio_ = DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO;
+};
+
+struct TrailOptimization {
+    float progressThreshold = 1.0f;
+    float responseDecayFactor = 1.0f;
+    static constexpr int32_t PARAMS_COUNT = 2;
+    static constexpr float FLOAT_ZERO = 0.0f;
+    static constexpr float MAX_PROGRESS_THRESHOLD = 1.0f;
+    static constexpr float MIN_RESPONSE_DECAY_FACTOR = 1e-8f;
+    static constexpr float MAX_RESPONSE_DECAY_FACTOR = 1.0f;
+
+    void validate()
+    {
+        if (progressThreshold < FLOAT_ZERO) {
+            progressThreshold = FLOAT_ZERO;
+        }
+        if (progressThreshold > MAX_PROGRESS_THRESHOLD) {
+            progressThreshold = MAX_PROGRESS_THRESHOLD;
+        }
+        if (responseDecayFactor < MIN_RESPONSE_DECAY_FACTOR) {
+            responseDecayFactor = MIN_RESPONSE_DECAY_FACTOR;
+        }
+        if (responseDecayFactor > MAX_RESPONSE_DECAY_FACTOR) {
+            responseDecayFactor = MAX_RESPONSE_DECAY_FACTOR;
+        }
+    }
+};
+
+class TrailOptimizedResponsiveSpringMotion final : public ResponsiveSpringMotion {
+    DECLARE_ACE_TYPE(TrailOptimizedResponsiveSpringMotion, ResponsiveSpringMotion);
+
+public:
+    TrailOptimizedResponsiveSpringMotion(
+        float response, float dampingRatio, float blendDuration, TrailOptimization trail)
+        : ResponsiveSpringMotion(response, dampingRatio, blendDuration), trail_(trail)
+    {}
+    ~TrailOptimizedResponsiveSpringMotion() override = default;
+    const std::string ToString() override
+    {
+        std::string curveString("trail-optimized-responsive-spring-motion");
+        std::string comma(",");
+        curveString.append(std::string("(") + std::to_string(response_) + comma + std::to_string(dampingRatio_) +
+                           comma + std::to_string(blendDuration_) + comma + std::to_string(trail_.progressThreshold) +
+                           comma + std::to_string(trail_.responseDecayFactor) + std::string(")"));
+        return curveString;
+    }
+    const std::string ToSimpleString() override
+    {
+        const int32_t precision = 3;
+        std::stringstream ss;
+        std::string comma(",");
+        ss << "trailOptRespSpring(" << std::fixed << std::setprecision(precision) << response_ << comma << dampingRatio_
+           << comma << blendDuration_ << comma << trail_.progressThreshold << comma << trail_.responseDecayFactor
+           << ")";
+        return ss.str();
+    }
+    bool IsEqual(const RefPtr<Curve>& curve) const override
+    {
+        auto other = AceType::DynamicCast<TrailOptimizedResponsiveSpringMotion>(curve);
+        if (!other) {
+            return false;
+        }
+        return ResponsiveSpringMotion::IsEqual(curve) &&
+               NearEqual(other->GetTrail().progressThreshold, trail_.progressThreshold) &&
+               NearEqual(other->GetTrail().responseDecayFactor, trail_.responseDecayFactor);
+    }
+    const TrailOptimization& GetTrail() const
+    {
+        return trail_;
+    }
+
+private:
+    TrailOptimization trail_;
+};
+
+class TrailOptimizedInterpolatingSpring final : public InterpolatingSpring {
+    DECLARE_ACE_TYPE(TrailOptimizedInterpolatingSpring, InterpolatingSpring);
+
+public:
+    TrailOptimizedInterpolatingSpring(
+        float velocity, float mass, float stiffness, float damping, TrailOptimization trail)
+        : InterpolatingSpring(velocity, mass, stiffness, damping), trail_(trail)
+    {}
+    ~TrailOptimizedInterpolatingSpring() override = default;
+    const std::string ToString() override
+    {
+        std::string curveString("trail-optimized-interpolating-spring");
+        std::string comma(",");
+        curveString.append(std::string("(") + std::to_string(velocity_) + comma + std::to_string(mass_) + comma +
+                           std::to_string(stiffness_) + comma + std::to_string(damping_) + comma +
+                           std::to_string(trail_.progressThreshold) + comma +
+                           std::to_string(trail_.responseDecayFactor) + std::string(")"));
+        return curveString;
+    }
+    const std::string ToSimpleString() override
+    {
+        std::stringstream ss;
+        std::string comma(",");
+        ss << "trailOptInterSpring(" << std::fixed << std::setprecision(PRECISION) << velocity_ << comma << mass_
+           << comma << stiffness_ << comma << damping_ << comma << trail_.progressThreshold << comma
+           << trail_.responseDecayFactor << ")";
+        return ss.str();
+    }
+    bool IsEqual(const RefPtr<Curve>& curve) const override
+    {
+        auto other = AceType::DynamicCast<TrailOptimizedInterpolatingSpring>(curve);
+        if (!other) {
+            return false;
+        }
+        return InterpolatingSpring::IsEqual(curve) &&
+               NearEqual(other->GetTrail().progressThreshold, trail_.progressThreshold) &&
+               NearEqual(other->GetTrail().responseDecayFactor, trail_.responseDecayFactor);
+    }
+    const TrailOptimization& GetTrail() const
+    {
+        return trail_;
+    }
+
+private:
+    TrailOptimization trail_;
 };
 } // namespace OHOS::Ace
 
