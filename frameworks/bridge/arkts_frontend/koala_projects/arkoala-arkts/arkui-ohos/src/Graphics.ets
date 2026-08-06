@@ -105,13 +105,15 @@ export class LengthMetrics {
         return new LengthMetrics(value, LengthUnit.LPX);
     }
     static resource(res: Resource) {
-        let returnResult = SystemOps.resourceToLengthMetrics(res);
-        let unit = returnResult.unit.toInt();
+        const returnResult = SystemOps.resourceToLengthMetrics(res);
+        const unit = returnResult.unit.toInt();
         let lengthUnit: LengthUnit = LengthUnit.PX;
-        if (unit >= LengthUnit.PX || unit <= LengthUnit.LPX) {
+        if (unit >= LengthUnit.PX && unit <= LengthUnit.LPX) {
             lengthUnit = LengthUnit.fromValue(unit);
         }
-        return new LengthMetrics((returnResult.value as number), lengthUnit);
+        const result = new LengthMetrics((returnResult.value as number), lengthUnit);
+        result.res = res;
+        return result;
     }
     public autoRefresh(value: boolean): LengthMetrics {
         if (this.autoRefresh_ === value) {
@@ -119,6 +121,19 @@ export class LengthMetrics {
         }
         this.autoRefresh_ = value;
         return this;
+    }
+    public refresh(): void {
+        const res = this.res;
+        if (this.autoRefresh_ === true && res !== undefined) {
+            const returnResult = SystemOps.resourceToLengthMetrics(res);
+            const unit = returnResult.unit.toInt();
+            let lengthUnit: LengthUnit = LengthUnit.VP;
+            if (unit >= LengthUnit.PX && unit <= LengthUnit.LPX) {
+                lengthUnit = LengthUnit.fromValue(unit);
+            }
+            this.unit = lengthUnit;
+            this.value = returnResult.value as number;
+        }
     }
   }
 

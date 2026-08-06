@@ -17,15 +17,15 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { SerializerBase, DeserializerBase, Finalizable, RuntimeType, toPeerPtr, KPointer, MaterializedBase, MaterializedBaseTag, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from '@koalaui/interop'
-import { ColorMetricsExt, ColorMetricsExt_serializer } from './idlize'
-import { extractors, AttributeModifier, hookSetCanvasOptions, hookCanvasAttributeModifier, AttributeUpdater, hookCreateImageData, hookGetImageData, hookPutImageData, ImageData, ImageDataInternal, hookCanvasStartImageAnalyzer, registerAttach, unregisterAttach, registerDetach, unregisterDetach, hookGetCanvas } from '#handwritten'
-import { ColorMetrics as arkui_component_units_ColorMetrics, DrawingCanvas, LengthMetricsUnit as arkui_component_units_LengthMetricsUnit, LengthMetrics as arkui_component_units_LengthMetrics, VoidCallback } from './units'
-import { ColorMetrics as arkui_Graphics_ColorMetrics, Size, LengthMetricsUnit as arkui_Graphics_LengthMetricsUnit, LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
+import { ColorMetricsExt, ColorMetricsExt_serializer, LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
+import { extractors, AttributeModifier, hookSetCanvasOptions, hookCanvasAttributeModifier, AttributeUpdater, hookCreateImageData, hookGetImageData, hookPutImageData, LengthMetrics as arkui_component_units_LengthMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, ImageData, ImageDataInternal, hookCanvasStartImageAnalyzer, registerAttach, unregisterAttach, registerDetach, unregisterDetach, hookGetCanvas } from '#handwritten'
+import { ColorMetrics as arkui_component_units_ColorMetrics, DrawingCanvas, LengthMetricsUnit as arkui_component_units_LengthMetricsUnit, VoidCallback } from './units'
+import { ColorMetrics as arkui_Graphics_ColorMetrics, Size, LengthMetricsUnit as arkui_Graphics_LengthMetricsUnit } from 'arkui.Graphics'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { Matrix2D_serializer, Matrix2D, Matrix2DInternal } from './matrix2d'
-import { Size_serializer, arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { Size_serializer } from './../framework/Graphics'
 import { drawing_Canvas_serializer } from './../framework/ohos.graphics.drawing'
 import { default as drawing } from '@ohos.graphics.drawing'
 import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
@@ -1941,7 +1941,8 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         const bufferUnionSelector: int32 = retvalDeserializer.readInt8()
         let buffer: arkui_component_units_LengthMetrics | string | undefined
         if (bufferUnionSelector == (0).toByte()) {
-            buffer = arkui_Graphics_LengthMetrics_serializer.read(retvalDeserializer)
+            const bufferBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(retvalDeserializer)
+            buffer = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(bufferBufUDeserialized)
         } else if (bufferUnionSelector == (1).toByte()) {
             buffer = (retvalDeserializer.readString() as string)
         } else {
@@ -1956,7 +1957,8 @@ export class CanvasRenderer extends CanvasPath implements MaterializedBase {
         if (letterSpacing instanceof arkui_component_units_LengthMetrics) {
             thisSerializer.writeInt8((0).toByte())
             const letterSpacingForIdx0 = letterSpacing as arkui_component_units_LengthMetrics
-            arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, letterSpacingForIdx0)
+            const letterSpacingForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(letterSpacingForIdx0)
+            LengthMetricsProxy_serializer.write(thisSerializer, letterSpacingForIdx0Transformed)
         } else if (letterSpacing instanceof string) {
             thisSerializer.writeInt8((1).toByte())
             const letterSpacingForIdx1 = letterSpacing as string

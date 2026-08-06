@@ -957,19 +957,19 @@ HWTEST_F(CommonMethodModifierTest4, setSafeAreaPaddingTestDefaultValues, TestSiz
     EXPECT_THAT(strResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
 }
 
-typedef std::pair<Ark_LengthMetrics, std::string> LengthMetricsOneTestStep;
+typedef std::pair<Ark_LengthMetricsProxy, std::string> LengthMetricsOneTestStep;
 std::vector<LengthMetricsOneTestStep> testLengthMetricsValues = {
-    { Converter::ArkValue<Ark_LengthMetrics>(123.0_vp), "123.00vp" },
-    { Converter::ArkValue<Ark_LengthMetrics>(0.0_vp), "0.00vp" },
-    { Converter::ArkValue<Ark_LengthMetrics>(1.23_vp), "1.23vp" },
-    { Converter::ArkValue<Ark_LengthMetrics>(123.0_fp), "123.00fp" },
-    { Converter::ArkValue<Ark_LengthMetrics>(0.0_fp), "0.00fp" },
-    { Converter::ArkValue<Ark_LengthMetrics>(1.23_fp), "1.23fp" },
-    { Converter::ArkValue<Ark_LengthMetrics>(123.0_px), "123.00px" },
-    { Converter::ArkValue<Ark_LengthMetrics>(0.0_px), "0.00px" },
-    { Converter::ArkValue<Ark_LengthMetrics>(1.23_px), "1.23px" },
-    { Converter::ArkValue<Ark_LengthMetrics>(0.5_pct), "50.00%" },
-    { Converter::ArkValue<Ark_LengthMetrics>(0.0_pct), "0.00%" },
+    { Converter::ArkValue<Ark_LengthMetricsProxy>(123.0_vp), "123.00vp" },
+    { Converter::ArkValue<Ark_LengthMetricsProxy>(0.0_vp), "0.00vp" },
+    { Converter::ArkValue<Ark_LengthMetricsProxy>(1.23_vp), "1.23vp" },
+    { Converter::ArkValue<Ark_LengthMetricsProxy>(123.0_fp), "123.00fp" },
+    { Converter::ArkValue<Ark_LengthMetricsProxy>(0.0_fp), "0.00fp" },
+    { Converter::ArkValue<Ark_LengthMetricsProxy>(1.23_fp), "1.23fp" },
+    { Converter::ArkValue<Ark_LengthMetricsProxy>(123.0_px), "123.00px" },
+    { Converter::ArkValue<Ark_LengthMetricsProxy>(0.0_px), "0.00px" },
+    { Converter::ArkValue<Ark_LengthMetricsProxy>(1.23_px), "1.23px" },
+    { Converter::ArkValue<Ark_LengthMetricsProxy>(0.5_pct), "50.00%" },
+    { Converter::ArkValue<Ark_LengthMetricsProxy>(0.0_pct), "0.00%" },
 };
 /*
  * @tc.name: setSafeAreaPaddingTestLengthMetricsValues
@@ -982,8 +982,8 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestLengthMetrics
     EXPECT_THAT(strResult, Eq(ATTRIBUTE_SAFE_AREA_PADDING_DEFAULT_VALUE));
 
     for (const auto &[arkPadding, expected]: testLengthMetricsValues) {
-        auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetrics_LocalizedPadding,
-            Ark_LengthMetrics>(arkPadding);
+        auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetricsProxy_LocalizedPadding,
+            Ark_LengthMetricsProxy>(arkPadding);
         modifier_->setSafeAreaPadding(node_, &value);
         auto strResult = GetAttrValue<std::string>(node_, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
         EXPECT_THAT(strResult, Eq(expected));
@@ -1012,10 +1012,11 @@ std::vector<lengthOneTestStep> testLengthValues = {
 HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestLeftArkPaddingValues, TestSize.Level1)
 {
     auto initVal = Converter::ArkValue<Opt_Length>(Ark_Empty());
-    Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
-    for (const auto &[arkPadding, expected]: testLengthValues) {
+    Ark_Padding inputValue = { .left = initVal, .top = initVal, .right = initVal, .bottom = initVal };
+    for (const auto& [arkPadding, expected] : testLengthValues) {
         inputValue.left = Converter::ArkValue<Opt_Length>(arkPadding);
-        auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetrics_LocalizedPadding, Ark_Padding>(inputValue);
+        auto value =
+            Converter::ArkUnion<Opt_Union_Padding_LengthMetricsProxy_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setSafeAreaPadding(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto padding = GetAttrObject(jsonValue, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
@@ -1041,7 +1042,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestTopArkPadding
     Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
     for (const auto &[arkPadding, expected]: testLengthValues) {
         inputValue.top = Converter::ArkValue<Opt_Length>(arkPadding);
-        auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetrics_LocalizedPadding, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetricsProxy_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setSafeAreaPadding(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto padding = GetAttrObject(jsonValue, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
@@ -1067,7 +1068,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestRightArkPaddi
     Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
     for (const auto &[arkPadding, expected]: testLengthValues) {
         inputValue.right = Converter::ArkValue<Opt_Length>(arkPadding);
-        auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetrics_LocalizedPadding, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetricsProxy_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setSafeAreaPadding(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto padding = GetAttrObject(jsonValue, ATTRIBUTE_SAFE_AREA_PADDING_NAME);
@@ -1093,7 +1094,7 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSafeAreaPaddingTestBottomArkPadd
     Ark_Padding inputValue = {.left = initVal, .top = initVal, .right = initVal, .bottom= initVal };
     for (const auto &[arkPadding, expected]: testLengthValues) {
         inputValue.bottom = Converter::ArkValue<Opt_Length>(arkPadding);
-        auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetrics_LocalizedPadding, Ark_Padding>(inputValue);
+        auto value = Converter::ArkUnion<Opt_Union_Padding_LengthMetricsProxy_LocalizedPadding, Ark_Padding>(inputValue);
         modifier_->setSafeAreaPadding(node_, &value);
         auto jsonValue = GetJsonValue(node_);
         auto padding = GetAttrObject(jsonValue, ATTRIBUTE_SAFE_AREA_PADDING_NAME);

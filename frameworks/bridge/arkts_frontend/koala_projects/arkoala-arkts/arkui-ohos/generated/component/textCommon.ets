@@ -20,20 +20,19 @@ import { Finalizable, RuntimeType, SerializerBase, DeserializerBase, toPeerPtr, 
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
-import { extractors, ShaderStyle } from '#handwritten'
+import { extractors, LengthMetrics as arkui_component_units_LengthMetrics, LengthMetrics as arkui_Graphics_LengthMetrics, ShaderStyle } from '#handwritten'
 import { InputMethodExtraConfig } from '@ohos.inputMethod.ExtraConfig'
 import { text_LineMetrics_serializer, text_TextBox_serializer } from './../framework/ohos.graphics.text'
 import { default as text } from '@ohos.graphics.text'
 import { MutableStyledString_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from './styledString'
 import { SelectionOptions_serializer, SelectionOptions, Callback as arkui_component_common_Callback, LinearGradientOptions_serializer, LinearGradientOptions, RadialGradientOptions_serializer, RadialGradientOptions } from './common'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { ResourceStr, Resource as arkui_component_units_Resource, LengthMetrics as arkui_component_units_LengthMetrics, ResourceColor, Length } from './units'
+import { ResourceStr, Resource as arkui_component_units_Resource, ResourceColor, Length } from './units'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { memo, memo_stable } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { Color as arkui_component_enums_Color, TextDecorationType, TextDecorationStyle } from './enums'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
 export class ContentTransitionInternal {
     public static fromPtr(ptr: KPointer): ContentTransition {
         return new ContentTransition(MaterializedBaseTag.NOP, ptr)
@@ -1733,7 +1732,8 @@ export class TextLayoutOptions_serializer {
         if (valueHolderForConstraintWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForConstraintWidthTmpValue = valueHolderForConstraintWidth!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForConstraintWidthTmpValue)
+            const valueHolderForConstraintWidthTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForConstraintWidthTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForConstraintWidthTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1743,7 +1743,8 @@ export class TextLayoutOptions_serializer {
         const constraintWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let constraintWidthTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
         if ((constraintWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            constraintWidthTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const constraintWidthTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            constraintWidthTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(constraintWidthTmpBufOptDeserialized)
         }
         const constraintWidthTmpResult: arkui_component_units_LengthMetrics | undefined = constraintWidthTmpBuf
         let value: TextLayoutOptions = ({constraintWidth: constraintWidthTmpResult} as TextLayoutOptions)

@@ -184,22 +184,22 @@ Ark_Padding ArkValueFromOptPadding(const OHOS::Ace::NG::PaddingProperty& src)
 void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src, ConvContext *ctx)
 {
     if (src.marginProp) {
-        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(
+        dst.margin = ArkUnion<Opt_Union_LengthMetricsProxy_Padding, Ark_Padding>(
             ArkValueFromOptPadding(src.marginProp.value()));
     } else {
-        dst.margin = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty());
+        dst.margin = ArkUnion<Opt_Union_LengthMetricsProxy_Padding>(Ark_Empty());
     }
     if (src.paddingProp) {
-        dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(
+        dst.padding = ArkUnion<Opt_Union_LengthMetricsProxy_Padding, Ark_Padding>(
             ArkValueFromOptPadding(src.paddingProp.value()));
     } else {
-        dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding>(Ark_Empty());
+        dst.padding = ArkUnion<Opt_Union_LengthMetricsProxy_Padding>(Ark_Empty());
     }
     if (src.borderRadius) {
-        dst.borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(
+        dst.borderRadius = ArkUnion<Opt_Union_LengthMetricsProxy_BorderRadiuses, Ark_BorderRadiuses>(
             ArkValueFromOptBorderRadius(src.borderRadius.value()));
     } else {
-        dst.borderRadius =  ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty());
+        dst.borderRadius =  ArkUnion<Opt_Union_LengthMetricsProxy_BorderRadiuses>(Ark_Empty());
     }
 }
 } // namespace Converter

@@ -27,18 +27,17 @@ import { ArkUIGeneratedNativeModule } from '#components'
 import { Dimension, Resource as arkui_component_units_Resource, ResourceStr, ResourceColor, BorderRadiuses, LocalizedBorderRadiuses, Offset, VoidCallback, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, arkui_component_units_Font_serializer, Font as arkui_component_units_Font, Offset_serializer } from './units'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { CrownSensitivity, Color as arkui_component_enums_Color, TextOverflow } from './enums'
-import { AttributeModifier, hookTextPickerDivider, extractors, hookTextPickerAttributeModifier, AttributeUpdater } from '#handwritten'
+import { AttributeModifier, hookTextPickerDivider, LengthMetrics as arkui_Graphics_LengthMetrics, extractors, hookTextPickerAttributeModifier, AttributeUpdater } from '#handwritten'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
 import { DialogAlignment } from './alertDialog'
 import { default as uiMaterial } from '@ohos.arkui.uiMaterial'
 import { TextPickerModifier } from './../TextPickerModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer } from './idlize'
 import { uiMaterial_Material_serializer } from './../framework/ohos.arkui.uiMaterial'
 export class ArkTextPickerPeer extends ArkCommonMethodPeer {
     textPickerAttributeSet?: TextPickerModifier;
@@ -1151,7 +1150,8 @@ export class TextPickerOptions_serializer {
             valueSerializer.writeInt32((valueHolderForColumnWidthsTmpValue.length).toInt())
             for (let valueHolderForColumnWidthsTmpValueCounterI = 0; valueHolderForColumnWidthsTmpValueCounterI < valueHolderForColumnWidthsTmpValue.length; valueHolderForColumnWidthsTmpValueCounterI++) {
                 const valueHolderForColumnWidthsTmpValueTmpElement: arkui_Graphics_LengthMetrics = valueHolderForColumnWidthsTmpValue[valueHolderForColumnWidthsTmpValueCounterI]
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForColumnWidthsTmpValueTmpElement)
+                const valueHolderForColumnWidthsTmpValueTmpElementTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForColumnWidthsTmpValueTmpElement)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForColumnWidthsTmpValueTmpElementTransformed)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1286,7 +1286,8 @@ export class TextPickerOptions_serializer {
         if ((columnWidthsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const columnWidthsTmpBufOptLength: int32 = valueDeserializer.readInt32()
             const columnWidthsTmpBufOpt: Array<arkui_Graphics_LengthMetrics> = new Array<arkui_Graphics_LengthMetrics>(columnWidthsTmpBufOptLength, (arg0: int32):arkui_Graphics_LengthMetrics => {
-            return arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer);
+            const columnWidthsTmpBufOptTempBufDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer);
+            return extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(columnWidthsTmpBufOptTempBufDeserialized);
         })
             columnWidthsTmpBuf = columnWidthsTmpBufOpt
         }
@@ -1329,7 +1330,8 @@ export class PickerBackgroundStyle_serializer {
             if (valueHolderForBorderRadiusTmpValue instanceof arkui_Graphics_LengthMetrics) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0 = valueHolderForBorderRadiusTmpValue as arkui_Graphics_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0)
+                const valueHolderForBorderRadiusTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForBorderRadiusTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0Transformed)
             } else if (valueHolderForBorderRadiusTmpValue instanceof BorderRadiuses) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1 = valueHolderForBorderRadiusTmpValue as BorderRadiuses
@@ -1370,7 +1372,8 @@ export class PickerBackgroundStyle_serializer {
             const borderRadiusTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
             let borderRadiusTmpBufOpt: arkui_Graphics_LengthMetrics | BorderRadiuses | LocalizedBorderRadiuses | undefined
             if (borderRadiusTmpBufOptUnionSelector == (0).toByte()) {
-                borderRadiusTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+                const borderRadiusTmpBufOptBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+                borderRadiusTmpBufOpt = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(borderRadiusTmpBufOptBufUDeserialized)
             } else if (borderRadiusTmpBufOptUnionSelector == (1).toByte()) {
                 borderRadiusTmpBufOpt = BorderRadiuses_serializer.read(valueDeserializer)
             } else if (borderRadiusTmpBufOptUnionSelector == (2).toByte()) {
@@ -1720,7 +1723,8 @@ export class TextPickerDialogOptions_serializer {
             valueSerializer.writeInt32((valueHolderForColumnWidthsTmpValue.length).toInt())
             for (let valueHolderForColumnWidthsTmpValueCounterI = 0; valueHolderForColumnWidthsTmpValueCounterI < valueHolderForColumnWidthsTmpValue.length; valueHolderForColumnWidthsTmpValueCounterI++) {
                 const valueHolderForColumnWidthsTmpValueTmpElement: arkui_Graphics_LengthMetrics = valueHolderForColumnWidthsTmpValue[valueHolderForColumnWidthsTmpValueCounterI]
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForColumnWidthsTmpValueTmpElement)
+                const valueHolderForColumnWidthsTmpValueTmpElementTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForColumnWidthsTmpValueTmpElement)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForColumnWidthsTmpValueTmpElementTransformed)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -2119,7 +2123,8 @@ export class TextPickerDialogOptions_serializer {
         if ((columnWidthsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const columnWidthsTmpBufOptLength: int32 = valueDeserializer.readInt32()
             const columnWidthsTmpBufOpt: Array<arkui_Graphics_LengthMetrics> = new Array<arkui_Graphics_LengthMetrics>(columnWidthsTmpBufOptLength, (arg0: int32):arkui_Graphics_LengthMetrics => {
-            return arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer);
+            const columnWidthsTmpBufOptTempBufDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer);
+            return extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(columnWidthsTmpBufOptTempBufDeserialized);
         })
             columnWidthsTmpBuf = columnWidthsTmpBufOpt
         }
@@ -2634,7 +2639,8 @@ export class TextPickerDialogOptionsExt_serializer {
             valueSerializer.writeInt32((valueHolderForColumnWidthsTmpValue.length).toInt())
             for (let valueHolderForColumnWidthsTmpValueCounterI = 0; valueHolderForColumnWidthsTmpValueCounterI < valueHolderForColumnWidthsTmpValue.length; valueHolderForColumnWidthsTmpValueCounterI++) {
                 const valueHolderForColumnWidthsTmpValueTmpElement: arkui_Graphics_LengthMetrics = valueHolderForColumnWidthsTmpValue[valueHolderForColumnWidthsTmpValueCounterI]
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForColumnWidthsTmpValueTmpElement)
+                const valueHolderForColumnWidthsTmpValueTmpElementTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForColumnWidthsTmpValueTmpElement)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForColumnWidthsTmpValueTmpElementTransformed)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -3065,7 +3071,8 @@ export class TextPickerDialogOptionsExt_serializer {
         if ((columnWidthsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const columnWidthsTmpBufOptLength: int32 = valueDeserializer.readInt32()
             const columnWidthsTmpBufOpt: Array<arkui_Graphics_LengthMetrics> = new Array<arkui_Graphics_LengthMetrics>(columnWidthsTmpBufOptLength, (arg0: int32):arkui_Graphics_LengthMetrics => {
-            return arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer);
+            const columnWidthsTmpBufOptTempBufDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer);
+            return extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(columnWidthsTmpBufOptTempBufDeserialized);
         })
             columnWidthsTmpBuf = columnWidthsTmpBufOpt
         }
