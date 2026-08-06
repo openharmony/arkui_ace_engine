@@ -13,10 +13,21 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("grid_property_test_ng") {
-  module_name = "ScrollingSet-Scroll"
-  type = "new"
-  sources = [ "grid_property_test_ng.cpp" ]
+grid_property_sources = [ "grid_property_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("grid_property_test_ng") {
+    type = "host_components"
+    module_name = "ScrollingSet-Scroll"
+    sources = grid_property_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("grid_property_test_ng") {
+    module_name = "ScrollingSet-Scroll"
+    type = "new"
+    sources = grid_property_sources
+  }
 }
 
 ace_unittest("accessibility_property_test_ng") {
@@ -37,16 +48,38 @@ ace_unittest("accessibility_property_test_three_ng") {
   sources = [ "accessibility_property_test_three_ng.cpp" ]
 }
 
-ace_unittest("border_property_test_ng") {
-  type = "new"
-  module_name = "CommonProperties-CustomProperty"
-  sources = [ "border_property_test_ng.cpp" ]
+border_property_sources = [ "border_property_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("border_property_test_ng") {
+    type = "host_components"
+    module_name = "CommonProperties-CustomProperty"
+    sources = border_property_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("border_property_test_ng") {
+    type = "new"
+    module_name = "CommonProperties-CustomProperty"
+    sources = border_property_sources
+  }
 }
 
-ace_unittest("calc_length_test_ng") {
-  type = "new"
-  module_name = "ScrollingSet-Refresh"
-  sources = [ "calc_length_test_ng.cpp" ]
+calc_length_sources = [ "calc_length_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("calc_length_test_ng") {
+    type = "host_components"
+    module_name = "ScrollingSet-Refresh"
+    sources = calc_length_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("calc_length_test_ng") {
+    type = "new"
+    module_name = "ScrollingSet-Refresh"
+    sources = calc_length_sources
+  }
 }
 
 ace_unittest("gradient_property_test_ng") {
@@ -79,10 +112,21 @@ ace_unittest("property_test_ng") {
    }
 }
 
-ace_unittest("layout_constraint_test_ng") {
-  type = "new"
-  module_name = "Layout-ColumnSplit"
-  sources = [ "layout_constraint_test_ng.cpp" ]
+layout_constraint_sources = [ "layout_constraint_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("layout_constraint_test_ng") {
+    type = "host_components"
+    module_name = "Layout-ColumnSplit"
+    sources = layout_constraint_sources
+    cflags = [ "-fno-access-control" ]
+  }
+} else {
+  ace_unittest("layout_constraint_test_ng") {
+    type = "new"
+    module_name = "Layout-ColumnSplit"
+    sources = layout_constraint_sources
+  }
 }
 
 ace_unittest("templates_parser_test_ng") {

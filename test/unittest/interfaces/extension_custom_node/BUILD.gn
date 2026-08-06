@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,33 +13,16 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-test_sources = [
-  "linear_layout_base_test_ng.cpp",
-  "linear_layout_new_test_ng.cpp",
-  "old_cases/linear_layout_test_ng.cpp",
-  "linear_layout_test_min.cpp",
-  "linear_layout_test_core.cpp",
-]
-
 if (is_host_product) {
-  ace_unittest("linear_layout_test_ng") {
+  ace_unittest("extension_custom_node_test_ng") {
     type = "host_components"
-    module_name = "Layout-Column"
-    sources = test_sources
+    module_name = "StateManagement-CustomCoponent"
+    sources = [
+      "$ace_root/frameworks/core/interfaces/native/node/extension_custom_node.cpp",
+      "$ace_root/test/unittest/interfaces/extension_custom_node_test_ng.cpp",
+      "$ace_root/test/unittest/interfaces/interfaces_test_min.cpp",
+      "$ace_root/test/unittest/interfaces/interfaces_test_core.cpp",
+    ]
     cflags = [ "-fno-access-control" ]
-  }
-} else {
-  ace_unittest("linear_layout_test_ng") {
-    module_name = "Layout-Column"
-    type = "new"
-    sources = test_sources
-
-    if (!ace_enable_full_test_suite) {
-      sources = []
-      sources = [
-        "linear_layout_test_min.cpp",
-        "linear_layout_test_core.cpp",
-      ]
-    }
   }
 }

@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -400,8 +401,8 @@ RefPtr<FrameNode> CreateTestFrameNode(const std::string& tag, int32_t id)
 
 class SmartLayoutAlgorithmTest : public testing::Test {
 public:
-    static void SetUpTestSuite() {}
-    static void TearDownTestSuite() {}
+    static void SetUpTestSuite() { MockPipelineContext::SetUp(); }
+    static void TearDownTestSuite() { MockPipelineContext::TearDown(); }
     void SetUp() override {}
     void TearDown() override {}
 };

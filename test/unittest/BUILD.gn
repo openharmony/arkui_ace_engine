@@ -24,8 +24,10 @@ group("unittest") {
     if (is_host_product) {
       deps += [
         "base:base_unittest",
+        "bridge/common/media_query:media_query_test_ng",
         "core:core_unittest",
         "frameworks:frameworks_unittest",
+        "interfaces/extension_custom_node:extension_custom_node_test_ng",
       ]
     } else {
       deps += [

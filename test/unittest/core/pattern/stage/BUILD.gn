@@ -13,8 +13,6 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_root = "//foundation/arkui/ace_engine"
-
 if (is_host_product) {
   ace_unittest("stage_test_ng") {
     type = "host_components"
