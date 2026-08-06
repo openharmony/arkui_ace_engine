@@ -19,6 +19,7 @@
 #include "core/accessibility/accessibility_manager_ng.h"
 
 #include <cmath>
+#include <unistd.h>
 #include "base/resource/data_provider_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/draw_delegate.h"
@@ -3878,7 +3879,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         config.isReportTid = container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
     }
     if (config.isReportTid) {
-        config.tid = static_cast<uint64_t>(pthread_self());
+        config.tid = static_cast<uint64_t>(gettid());
     }
 #endif
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
