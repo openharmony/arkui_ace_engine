@@ -27,13 +27,17 @@ node_version = "v18.20.1"
 host_arch = "${host_os}-${host_cpu}"
 
 action("ui2abc_annotate") {
-  outputs = [ "$target_out_dir/arkui-ui2abc-processed" ]
+  outputs = [
+    "$target_out_dir/arkui-ui2abc-processed",
+    "$target_out_dir/ui2abc_annotate.stamp",
+  ]
 
   script = "../tools/annotate.py"
 
   args = [
     rebase_path("."),
     rebase_path("annotate-ui2abc-config.json"),
+    rebase_path("$target_out_dir/ui2abc_annotate.stamp", root_build_dir),
   ]
 }
 action("ui2abc_process") {
