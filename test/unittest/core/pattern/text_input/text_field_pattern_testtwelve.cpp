@@ -1544,7 +1544,7 @@ HWTEST_F(TextFieldPatternTesttwelve, HandleCountStyleUnderlineWithShowCounter001
     layoutProperty_->UpdateShowUnderline(true);
     pattern_->showCountBorderStyle_ = true;
     pattern_->HandleCountStyle();
-    EXPECT_NE(pattern_->GetUnderlineColor(), pattern_->GetTheme()->GetErrorUnderlineColor());
+    EXPECT_EQ(pattern_->GetUnderlineColor(), pattern_->GetTheme()->GetErrorUnderlineColor());
 }
 
 } // namespace OHOS::Ace::NG

@@ -4429,6 +4429,8 @@
       OHOS::Ace::NG::ContainerModalView::*;
       OHOS::Ace::NG::ConvertToCalcPaddingProperty*;
       OHOS::Ace::NG::ConvertToPx*;
+      OHOS::Ace::NG::CounterDecorator::*;
+      OHOS::Ace::NG::CounterForegroundModifier::*;
       OHOS::Ace::NG::CustomNode::*;
       OHOS::Ace::NG::CustomNodeBase::*;
       OHOS::Ace::NG::CustomNodeStatic::*;
@@ -4460,6 +4462,7 @@
       OHOS::Ace::NG::GetCommonHeightBreakpoint*;
       OHOS::Ace::NG::GetCalcHeightBreakpoint*;
       OHOS::Ace::NG::Gradient::*;
+      OHOS::Ace::NG::ICounterHost::*;
       OHOS::Ace::NG::ImageLoadingContext::*;
       OHOS::Ace::NG::ImagePattern::*;
       OHOS::Ace::NG::ImageSpanView::*;
@@ -4528,6 +4531,7 @@
       OHOS::Ace::NG::SmartGestureProposal::GetTargetNode*;
       OHOS::Ace::EventManager::GetOrCreateSmartGestureManager*;
       OHOS::Ace::NG::StageManager::*;
+      OHOS::Ace::NG::TextComponentDecorator::*;
       OHOS::Ace::NG::UIExtensionAdapter::*;
       OHOS::Ace::NG::UIExtensionStatic::*;
       OHOS::Ace::NG::UINode::*;
@@ -4920,6 +4924,8 @@
       vtable?for?OHOS::Ace::NG::CalendarPattern;
       vtable?for?OHOS::Ace::NG::ClickRecognizer;
       vtable?for?OHOS::Ace::NG::ContainerModalView;
+      vtable?for?OHOS::Ace::NG::CounterDecorator;
+      vtable?for?OHOS::Ace::NG::CounterForegroundModifier;
       vtable?for?OHOS::Ace::NG::CustomNode;
       vtable?for?OHOS::Ace::NG::DatePickerDialogModelNG;
       vtable?for?OHOS::Ace::NG::EventHub;
@@ -4977,6 +4983,7 @@
       vtable?for?OHOS::Ace::NG::TapGesture;
       vtable?for?OHOS::Ace::NG::TextAccessibilityProperty;
       vtable?for?OHOS::Ace::NG::TextAreaLayoutAlgorithm;
+      vtable?for?OHOS::Ace::NG::TextComponentDecorator;
       vtable?for?OHOS::Ace::NG::TextFieldController;
       vtable?for?OHOS::Ace::NG::TextLayoutProperty;
       vtable?for?OHOS::Ace::NG::TextInputLayoutAlgorithm;
@@ -5082,6 +5089,8 @@
       VTT?for?OHOS::Ace::NG::CalendarPattern;
       VTT?for?OHOS::Ace::NG::ClickRecognizer;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
+      VTT?for?OHOS::Ace::NG::CounterDecorator;
+      VTT?for?OHOS::Ace::NG::CounterForegroundModifier;
       VTT?for?OHOS::Ace::NG::EventHub;
       VTT?for?OHOS::Ace::NG::ExtensionHandler;
       VTT?for?OHOS::Ace::NG::FlexLayoutAlgorithm;
@@ -5123,6 +5132,7 @@
       VTT?for?OHOS::Ace::NG::TapGesture;
       VTT?for?OHOS::Ace::NG::TextAccessibilityProperty;
       VTT?for?OHOS::Ace::NG::TextAreaLayoutAlgorithm;
+      VTT?for?OHOS::Ace::NG::TextComponentDecorator;
       VTT?for?OHOS::Ace::NG::TextContentModifier;
       VTT?for?OHOS::Ace::NG::TextFieldController;
       VTT?for?OHOS::Ace::NG::TextLayoutProperty;

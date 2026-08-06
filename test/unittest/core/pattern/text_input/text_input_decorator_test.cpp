@@ -14,7 +14,8 @@
  */
 
 #include "text_input_base.h"
-#include "core/components_ng/pattern/text_field/text_component_decorator.h"
+#include "core/components_ng/pattern/common_text/counter_decorator.h"
+#include "core/components_ng/pattern/text_field/error_decorator.h"
 #include "frameworks/core/pipeline/base/element_register.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
 
