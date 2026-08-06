@@ -180,7 +180,7 @@ class RecyclePoolV2 {
         if (pendingCount > 0 && this.requestProgressiveReleaseCallback_) {
           this.requestProgressiveReleaseCallback_();
         }
-      }, 300000); // 5 minutes
+      }, 5000); // 5 seconds
 
       this.pendingCacheCleanTimers_.set(reuseId, timerId);
     }
