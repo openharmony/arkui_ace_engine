@@ -2365,8 +2365,13 @@ int32_t GridScrollLayoutAlgorithm::MeasureCachedChild(const SizeF& frameSize, in
 void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
     LayoutWrapper* layoutWrapper, const std::map<int32_t, int32_t>& items)
 {
-    for (auto&& item : items) {
+    for (const auto& item : items) {
         auto currentIndex = item.second;
+        auto [positionIter, inserted] = itemsCrossPosition_.try_emplace(currentIndex);
+        if (!inserted) {
+            continue;
+        }
+        positionIter->second = ComputeItemCrossPosition(item.first);
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper) {
             if (predictBuildList_.back().idx < currentIndex) {
@@ -2375,7 +2380,6 @@ void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
                 predictBuildList_.emplace_back(currentIndex);
             }
         }
-        itemsCrossPosition_.try_emplace(currentIndex, ComputeItemCrossPosition(item.first));
     }
 }
 
