@@ -199,6 +199,8 @@ class CounterConstant {
   public static readonly AUSPICIOUS_FOUR = 4;
   public static readonly AUSPICIOUS_HUNDRED = 100;
   public static readonly AUSPICIOUS_FOUR_HUNDRED = 400;
+  public static readonly COUNTER_DEFAULT_TIMEZONE = 'Asia/Shanghai';
+  public static readonly COUNTER_DEFAULT_LOCALE = 'zh-Hans-CN';
 }
 
 @ComponentV2
@@ -287,7 +289,12 @@ export struct CounterV2Component {
 
   private getTimezone(): string {
     const tz = systemDateTime.getTimezoneSync();
-    return tz ? tz : 'Asia/Shanghai';
+    return tz ? tz : CounterConstant.COUNTER_DEFAULT_TIMEZONE;
+  }
+
+  private getLocaleID(): string {
+    const localeID = new intl.Locale().toString();
+    return localeID ? localeID : CounterConstant.COUNTER_DEFAULT_LOCALE;
   }
 
   getDate(value: string | undefined): string {
@@ -295,8 +302,7 @@ export struct CounterV2Component {
   }
 
   getDateYear(value: number): string {
-    let locale = new intl.Locale();
-    let localeID = locale.toString();
+    let localeID = this.getLocaleID();
     let date = new Date(this.year, this.month - 1, this.day);
     date.setFullYear(this.year);
     let dateFormatYear: Intl.DateTimeFormat | undefined;
@@ -316,8 +322,7 @@ export struct CounterV2Component {
   }
 
   getDateMonth(value: number): string {
-    let locale = new intl.Locale();
-    let localeID = locale.toString();
+    let localeID = this.getLocaleID();
     let date = new Date(this.year, this.month - 1, this.day);
     date.setFullYear(this.year);
     let dateFormatMonth: Intl.DateTimeFormat | undefined;
