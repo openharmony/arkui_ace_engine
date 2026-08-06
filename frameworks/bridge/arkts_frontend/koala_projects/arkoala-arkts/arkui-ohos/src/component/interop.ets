@@ -38,6 +38,7 @@ import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { IDecoratedV1Variable, WatchFuncType, WatchIdType, IMutableStateMeta, STATE_MGMT_FACTORY, WatchFuncType } from '../stateManagement/decorator';
 import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { DetachedRootEntryImpl } from 'arkui/base/UIContextImpl';
+import { destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
 import { UIContext } from "@ohos/arkui/UIContext"
 import { CustomComponent, CustomDelegate, BaseCustomComponent } from './customComponent';
 import { setNeedCreate } from '../ArkComponentRoot';
@@ -170,7 +171,12 @@ export function compatibleStaticComponent<T extends BaseCustomComponent<T_Option
         return [() => {}, 0];
     }
     const staticComponent = (peerNode as ArkCustomComponentRootPeer).getComponent();
-    uiContext.getDetachedRootEntryManager().detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node));
+    const detachedPtr = peerNode.peer.ptr;
+    const detachedInstanceId = uiContext.getInstanceId();
+    uiContext.getDetachedRootEntryManager().detachedRoots_.set(detachedPtr, new DetachedRootEntryImpl<IncrementalNode>(node));
+    ArkUIAniModule._SetOnNodeDestroyEvent(detachedPtr, (_nodeId: int) => {
+        destroyUiDetachedRoot(detachedPtr, detachedInstanceId);
+    });
     ArkThemeScopeManager.getInstance().restoreColorMode()
     return [
         () => {
