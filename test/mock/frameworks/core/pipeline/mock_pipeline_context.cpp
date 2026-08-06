@@ -2063,10 +2063,17 @@ void PipelineContext::UnRegisterFoldStatusChangedCallback(int32_t callbackId) {}
 
 int32_t PipelineContext::RegisterHalfFoldHoverChangedCallback(std::function<void(bool)>&& callback)
 {
+    if (callback) {
+        halfFoldHoverChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
     return 0;
 }
 
-void PipelineContext::UnRegisterHalfFoldHoverChangedCallback(int32_t callbackId) {}
+void PipelineContext::UnRegisterHalfFoldHoverChangedCallback(int32_t callbackId)
+{
+    halfFoldHoverChangedCallbackMap_.erase(callbackId);
+}
 
 int32_t PipelineContext::RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
 {

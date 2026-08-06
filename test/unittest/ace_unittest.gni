@@ -181,6 +181,9 @@ template("ace_unittest") {
 
       if (defined(invoker.defines)) {
         defines = invoker.defines
+        defines += [ "ACE_HOST_PRODUCT" ]
+      } else {
+        defines = [ "ACE_HOST_PRODUCT" ]
       }
 
       external_deps = []

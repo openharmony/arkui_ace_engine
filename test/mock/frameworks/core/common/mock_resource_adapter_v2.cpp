@@ -38,6 +38,9 @@ RefPtr<ResourceAdapter> ResourceAdapter::Create()
 RefPtr<ResourceAdapter> ResourceAdapter::CreateNewResourceAdapter(
     const std::string& bundleName, const std::string& moduleName, int32_t& actualInstanceId)
 {
+    if (bundleName.empty() && moduleName.empty()) {
+        return nullptr;
+    }
     std::lock_guard<std::mutex> lock(g_mapMutex);
     if (g_resourceAdapterInstanceId != -1) {
         actualInstanceId = g_resourceAdapterInstanceId;

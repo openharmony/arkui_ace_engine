@@ -32,20 +32,33 @@ ace_unittest("geometry_transition_test_ng") {
   }
 }
 
-ace_unittest("callback_thread_wrapper_test") {
-  module_name = "ScrollingSet-Refresh"
-  type = "new"
-  sources = [
-    "$ace_root/frameworks/core/animation/animation_pub.cpp",
-    "animation_pub_test.cpp",
-    "callback_thread_wrapper_test.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("callback_thread_wrapper_test") {
+    type = "host_components"
+    module_name = "ScrollingSet-Refresh"
+    sources = [
+      "$ace_root/frameworks/core/animation/animation_pub.cpp",
+      "animation_pub_test.cpp",
+      "callback_thread_wrapper_test.cpp",
+      "animation_test_min.cpp",
+    ]
+  }
+} else {
+  ace_unittest("callback_thread_wrapper_test") {
+    module_name = "ScrollingSet-Refresh"
+    type = "new"
+    sources = [
+      "$ace_root/frameworks/core/animation/animation_pub.cpp",
+      "animation_pub_test.cpp",
+      "callback_thread_wrapper_test.cpp",
+    ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "animation_test_min.cpp" ]
-  } else {
-    sources += [ "animation_test_min.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [ "animation_test_min.cpp" ]
+    } else {
+      sources += [ "animation_test_min.cpp" ]
+    }
   }
 }
 

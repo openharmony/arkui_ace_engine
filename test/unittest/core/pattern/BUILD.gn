@@ -81,6 +81,21 @@ group("core_pattern_unittest") {
       "waterflow:water_flow_test_original",
       "waterflow:water_flow_test_segmented",
       "waterflow:water_flow_test_sw",
+      "swiper:swiper_test_ng",
+      "container_modal:container_modal_static_view_test",
+      "container_modal:container_modal_test_ng",
+      "indexer:indexer_test_ng",
+      "linear_indicator:linear_indicator_test_ng",
+      "navigation:navigation_test_ng",
+      "navigator:navigator_test_ng",
+      "navrouter:navdestination_test_ng",
+      "navrouter:navrouter_test_ng",
+      "side_bar:side_bar_test_ng",
+      "stage:stage_test_ng",
+      "stepper:stepper_test_ng",
+      "tabs:tabs_test_ng",
+      "view_context:view_context_test_ng",
+      "withtheme:withtheme_test_ng",
     ]
   } else {
     deps += [
