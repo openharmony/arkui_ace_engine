@@ -88,6 +88,18 @@ private:
 
     void UpdateIconSize(const RefPtr<FrameNode>& backButtonNode);
 
+    // The EffectComponent wraps only the titleBar menu (when material is enabled). These
+    // helpers measure/layout the EffectComponent and resolve a content child wrapper by
+    // drilling through the EffectComponent wrapper, so the existing per-child measure/layout
+    // logic keeps working after the reparenting.
+    void MeasureEffectComponent(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
+        const SizeF& titleBarSize);
+    // Resize the EffectComponent to match the measured menu so it tightly wraps the menu.
+    void ResizeEffectComponentToMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode);
+    void LayoutEffectComponent(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode);
+    RefPtr<LayoutWrapper> GetTitleBarChildWrapper(LayoutWrapper* layoutWrapper,
+        const RefPtr<TitleBarNode>& titleBarNode, const RefPtr<UINode>& child);
+
     void MeasureBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
 

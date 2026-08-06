@@ -496,6 +496,10 @@ class JSBuilderNode extends BaseNode {
       return;
     }
 
+    if (typeof itemArray.forEach !== 'function') {
+      throw new BusinessError(103806, `ForEach id ${elmtId}: the data source dose not have forEach function. Application Error!`);
+    }
+
     if (idGenFunc === undefined) {
       idGenFuncUsesIndex = true;
       // catch possible error caused by Stringify and re-throw an Error with a meaningful (!) error message

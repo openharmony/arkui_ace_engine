@@ -1072,6 +1072,7 @@ void NavigationModelStatic::SetSplitPlaceholder(FrameNode* frameNode, const RefP
         }
         auto renderContext = placeholderContentNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateClipEdge(true);
         renderContext->SetClipToBounds(true);
         renderContext->UpdateZIndex(-1);
         navigationGroupNode->AddChild(placeholderContentNode);

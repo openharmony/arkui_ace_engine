@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_SMART_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_SMART_LAYOUT_ALGORITHM_H
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/smart_layout/engine/smart_layout_types.h"
 #include "core/components_ng/pattern/smart_layout/engine/smart_layout_engine_interface.h"
@@ -40,6 +41,22 @@ public:
      * @return true if smart layout executed, solved and applied successfully
      */
     bool PerformSmartLayout(LayoutWrapper* layoutWrapper);
+
+    /**
+     * @brief Perform smart layout scale-up for underutilized containers
+     * @param layoutWrapper Layout wrapper containing children
+     * @return true if scale-up was applied successfully
+     */
+    bool PerformSmartLayoutScaleUp(LayoutWrapper* layoutWrapper);
+
+    /**
+     * @brief Find the A2UI form component on the node chain
+     *        (marked by the fixed smart layout inspector id)
+     * @param hostNode Start node of the ancestor lookup
+     * @return The node whose inspector id starts with the A2UI smart layout marker,
+     *         or an empty RefPtr if no such node is found within the lookup depth
+     */
+    static RefPtr<FrameNode> IsA2UIFormComponent(const RefPtr<FrameNode>& hostNode);
 
 private:
     bool HandleTextContentOverflow(LayoutWrapper* layoutWrapper);
@@ -105,13 +122,15 @@ private:
      * @param geoNode Geometry node (for getting margin)
      * @param boundingBoxOffsetX Pre-calculated bounding box X offset
      * @param boundingBoxOffsetY Pre-calculated bounding box Y offset
+     * @param isFormRender Whether the host node is in form render
      * @return Calculated offset
      */
     OffsetF CalculateOffsetWithMargin(
         const ISmartLayoutNode& layoutNode,
         const RefPtr<GeometryNode> geoNode,
         double boundingBoxOffsetX,
-        double boundingBoxOffsetY);
+        double boundingBoxOffsetY,
+        bool isFormRender);
 
     /**
      * @brief Apply layout result to a single child

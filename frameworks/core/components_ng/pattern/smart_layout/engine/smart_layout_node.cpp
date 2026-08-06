@@ -274,4 +274,10 @@ void SmartLayoutNode::ApplyGeneralConstraints()
     constraintsBuilder.AddGeneralConstraints(*this);
 }
 
+void SmartLayoutNode::ApplyScaleUpConstraints(double emptyRatioThreshold)
+{
+    SmartLayoutConstraints constraintsBuilder;
+    constraintsBuilder.AddScaleUpConstraints(*this, emptyRatioThreshold);
+}
+
 } // namespace OHOS::Ace::NG

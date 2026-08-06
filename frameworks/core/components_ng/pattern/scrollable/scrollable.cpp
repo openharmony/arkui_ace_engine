@@ -740,6 +740,7 @@ ScrollResult Scrollable::HandleScroll(double offset, int32_t source, NestedState
 
 void Scrollable::HandleDragUpdate(const GestureEvent& info)
 {
+    dragUpdateDelta_ = dragUpdateDelta_.value_or(0.0) + info.GetMainDelta();
     currentVelocity_ = info.GetMainVelocity();
     ReportToDragFRCScene(currentVelocity_, NG::SceneStatus::RUNNING);
     if (!NearZero(info.GetMainVelocity()) && dragCount_ >= FIRST_THRESHOLD) {
@@ -899,7 +900,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info, bool isFromPanEnd)
     }
     // avoid no render frame when drag end
     if (!isFromPanEnd) {
-        if (NearZero(info.GetMainDelta())) {
+        if (!dragUpdateDelta_.has_value() && NearZero(info.GetMainDelta())) {
             auto tempInfo = info;
             tempInfo.SetMainDelta(lastMainDelta_);
             HandleDragUpdate(tempInfo);

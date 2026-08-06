@@ -122,7 +122,7 @@ special_components = [
   "arknavigator",
   "arktabs",
   "arkswiper",
-  "arkswiperindicator",
+  "arkindicatorcomponent",
   "arktabcontent",
   "arkcommonshape",
   "arkrect",

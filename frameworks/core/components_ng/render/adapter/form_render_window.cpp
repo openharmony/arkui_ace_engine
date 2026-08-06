@@ -96,6 +96,10 @@ bool FormRenderWindow::ShouldRequestFrame()
     if (uiContentType_ == UIContentType::DYNAMIC_COMPONENT) {
         return true;
     }
+    if (isSystemApp_) {
+        return true;
+    }
+
     if (forceVsync_) {
         SetForceVsyncRequests(false);
         forceVsyncFrameCount_ = FORCE_VSYNC_FRAME_THRESHOLD;
@@ -296,11 +300,14 @@ void FormRenderWindow::InitOnVsyncCallback()
 #endif
 }
 
-void FormRenderWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
+void FormRenderWindow::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom)
 {
 #if defined(__OHOS__) && defined(ENABLE_ROSEN_BACKEND)
     if (receiver_ && (uiContentType_ == UIContentType::DYNAMIC_COMPONENT)) {
-        receiver_->SetUiDvsyncSwitch(dvsyncSwitch);
+        ACE_SCOPED_TRACE("SetUiDvsyncSwitch switch:%d fromWhom:%s", dvsyncSwitch,
+            fromWhom == FromWhom::API ? "API" : "INNER");
+        auto receiverFromWhom = fromWhom == FromWhom::API ? OHOS::FromWhom::API : OHOS::FromWhom::INNER;
+        receiver_->SetUiDvsyncSwitch(dvsyncSwitch, receiverFromWhom);
     }
 #endif
 }

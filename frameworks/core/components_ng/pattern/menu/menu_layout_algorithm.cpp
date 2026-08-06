@@ -632,35 +632,78 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     auto parentOffset = host->GetPaintRectOffset(true, true);
     width_ -= parentOffset.GetX();
     height_ -= parentOffset.GetY();
-    CalculateSafeAreaIntersection(safeAreaInsets);
+    CalculateSafeAreaIntersection(safeAreaInsets, safeAreaManager, props, menuPattern);
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
     TAG_LOGI(AceLogTag::ACE_MENU, "InitWrapperRect with safeAreaInsets : %{public}s offset: %{public}s",
         wrapperRect_.ToString().c_str(), parentOffset.ToString().c_str());
 }
 
-void MenuLayoutAlgorithm::CalculateSafeAreaIntersection(const SafeAreaInsets& safeAreaInsets)
+void MenuLayoutAlgorithm::CalculateSafeAreaIntersection(const SafeAreaInsets& safeAreaInsets,
+    const RefPtr<SafeAreaManager>& safeAreaManager, const RefPtr<MenuLayoutProperty>& props,
+    const RefPtr<MenuPattern>& menuPattern)
 {
-    if (targetInUIExtension_) {
-        auto rectOffset = Offset(0.0, 0.0);
-        auto rectSize = Size(param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
-        auto topSafeAreaRect = Rect(param_.menuWindowRect.Left(), safeAreaInsets.top_.start,
-            param_.menuWindowRect.Width(), safeAreaInsets.top_.Length());
-        auto topIntersectRect = topSafeAreaRect.IntersectRect(param_.menuWindowRect);
-        if (GreatNotEqual(topIntersectRect.Height(), 0.0)) {
-            rectOffset.SetY(topIntersectRect.Height());
-            rectSize.MinusHeight(topIntersectRect.Height());
-        }
+    if (!targetInUIExtension_) {
+        wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
+        return;
+    }
+    auto rectOffset = Offset(0.0, 0.0);
+    auto rectSize = Size(param_.menuWindowRect.Width(), param_.menuWindowRect.Height());
+    auto topSafeAreaRect = Rect(param_.menuWindowRect.Left(), safeAreaInsets.top_.start,
+        param_.menuWindowRect.Width(), safeAreaInsets.top_.Length());
+    auto topIntersectRect = topSafeAreaRect.IntersectRect(param_.menuWindowRect);
+    if (GreatNotEqual(topIntersectRect.Height(), 0.0)) {
+        rectOffset.SetY(topIntersectRect.Height());
+        rectSize.MinusHeight(topIntersectRect.Height());
+    }
+    // In UEC scenario, check the soft keyboard first: if the keyboard exists and
+    // intersects with the bottom of the display area, subtract the keyboard height
+    // instead of the bottom safe area height; otherwise fall back to the bottom
+    // safe area intersection logic.
+    bool keyboardHandled = false;
+    auto keyboardHeight = GetKeyboardHeightInUec(safeAreaManager, props, menuPattern);
+    if (GreatNotEqual(keyboardHeight, 0.0)) {
+        rectSize.MinusHeight(keyboardHeight);
+        keyboardHandled = true;
+    }
+    if (!keyboardHandled) {
         auto bottomSafeAreaRect = Rect(param_.menuWindowRect.Left(), safeAreaInsets.bottom_.start,
             param_.menuWindowRect.Width(), safeAreaInsets.bottom_.Length());
         auto bottomIntersectRect = bottomSafeAreaRect.IntersectRect(param_.menuWindowRect);
         if (GreatNotEqual(bottomIntersectRect.Height(), 0.0)) {
             rectSize.MinusHeight(bottomIntersectRect.Height());
         }
-        wrapperRect_.SetRect(rectOffset, rectSize);
-    } else {
-        wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
     }
+    wrapperRect_.SetRect(rectOffset, rectSize);
+}
+
+double MenuLayoutAlgorithm::GetKeyboardHeightInUec(const RefPtr<SafeAreaManager>& safeAreaManager,
+    const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
+{
+    if (!safeAreaManager) {
+        return 0.0;
+    }
+    // Prefer the keyboard inset from GetKeyboardInsetImpl, which carries the
+    // real position so the intersection with the display area can be checked.
+    auto keyboardInset = safeAreaManager->GetKeyboardInsetImpl();
+    if (GreatNotEqual(keyboardInset.Length(), 0)) {
+        auto keyboardRect = Rect(param_.menuWindowRect.Left(), keyboardInset.start,
+            param_.menuWindowRect.Width(), keyboardInset.Length());
+        auto keyboardIntersectRect = keyboardRect.IntersectRect(param_.menuWindowRect);
+        if (GreatNotEqual(keyboardIntersectRect.Height(), 0.0)) {
+            return static_cast<double>(keyboardInset.Length());
+        }
+        return 0.0;
+    }
+    CHECK_NULL_RETURN(menuPattern, 0.0);
+    CHECK_NULL_RETURN(props, 0.0);
+    if (props->GetIsRectInTargetValue(false)) {
+        auto keyboardHeightExt = safeAreaManager->GetkeyboardHeightConsideringUIExtension();
+        if (GreatNotEqual(keyboardHeightExt, 0)) {
+            return static_cast<double>(keyboardHeightExt);
+        }
+    }
+    return 0.0;
 }
 
 void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(const RefPtr<MenuLayoutProperty>& props,
@@ -723,20 +766,11 @@ uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaMa
     auto bottom = safeAreaInsets.bottom_.Length();
     CHECK_NULL_RETURN(safeAreaManager, 0);
     auto keyboardHeight = safeAreaManager->GetKeyboardInsetImpl().Length();
-    if (menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSelectOverlayRightClickMenu()) {
+    CHECK_NULL_RETURN(props, 0);
+    if (menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSelectOverlayRightClickMenu() ||
+        props->GetIsRectInTargetValue(false)) {
         if (NearEqual(keyboardHeight, 0.0f)) {
             keyboardHeight = safeAreaManager->GetRawKeyboardHeight();
-        }
-        if (GreatNotEqual(keyboardHeight, 0)) {
-            bottom = keyboardHeight;
-        }
-    }
-
-    CHECK_NULL_RETURN(props, 0);
-    // Determine whether the menu is an AI menu
-    if (props->GetIsRectInTargetValue(false)) {
-        if (LessOrEqual(keyboardHeight, 0)) {
-            keyboardHeight = safeAreaManager->GetkeyboardHeightConsideringUIExtension();
         }
         if (GreatNotEqual(keyboardHeight, 0)) {
             bottom = keyboardHeight;

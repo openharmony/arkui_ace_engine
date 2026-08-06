@@ -153,11 +153,11 @@ public:
 
     void SetFrameWithoutAnimation(const RectF& paintRect) override;
 
-    void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
+    void RebuildFrame(FrameNode* self, const std::vector<RefPtr<FrameNode>>& children) override;
 
-    void AddFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
+    void AddFrameChildren(FrameNode* self, const std::vector<RefPtr<FrameNode>>& children) override;
 
-    void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) override;
+    void RemoveFrameChildren(FrameNode* self, const std::vector<RefPtr<FrameNode>>& children) override;
 
     void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) override;
 
@@ -275,6 +275,8 @@ public:
     void UpdateForegroundFilter(const OHOS::Rosen::Filter* foregroundFilter) override;
     void UpdateCompositingFilter(const OHOS::Rosen::Filter* compositingFilter) override;
     void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) override;
+    bool HasMaterialFilter() const;
+    bool IsSelfDrawingNode() const override;
     void UpdateBlender(const OHOS::Rosen::Blender* blender) override;
     void ResetBlender() override;
     void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) override;
@@ -327,7 +329,8 @@ public:
     void ResetSharedTranslate() override;
 
     static std::vector<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
-        const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::RSNode::SharedPtr, bool>& nodeMap);
+        const std::vector<RefPtr<FrameNode>>& frameChildren,
+        std::unordered_map<Rosen::RSNode::SharedPtr, bool>& nodeMap);
 
     bool IsMixedFrameRenderChild(const std::shared_ptr<Rosen::RSNode>& rsNode);
     void RemoveMixedRenderChild(const std::shared_ptr<Rosen::RSNode>& childRSNode);
@@ -565,8 +568,8 @@ public:
     static std::shared_ptr<Rosen::RSNode> GetRsNodeByFrame(const RefPtr<FrameNode>& frameNode);
     RefPtr<FrameNode> GetFrameNodeById(int32_t frameNodeId);
     bool CanNodeBeDeleted(const RefPtr<FrameNode>& node) const;
-    void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
-    void AddCornerMarkNodeToChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
+    void GetLiveChildren(const RefPtr<FrameNode>& node, std::vector<RefPtr<FrameNode>>& childNodes);
+    void AddCornerMarkNodeToChildren(const RefPtr<FrameNode>& node, std::vector<RefPtr<FrameNode>>& childNodes);
     void AddRsNodeForCapture();
     static bool initDrawNodeChangeCallback_;
     static bool initPropertyNodeChangeCallback_;
@@ -764,8 +767,8 @@ protected:
     void OnRenderFitUpdate(RenderFit renderFit) override;
     void OnNodeNameUpdate(const std::string& id) override;
     void OnAttractionEffectUpdate(const AttractionEffect& effect) override;
-    void ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
-    void ReCreateMixedRsNodeTree(const std::list<RefPtr<FrameNode>>& children);
+    void ReCreateRsNodeTree(const std::vector<RefPtr<FrameNode>>& children);
+    void ReCreateMixedRsNodeTree(const std::vector<RefPtr<FrameNode>>& children);
 
     void SyncAdditionalGeometryProperties(const RectF& paintRect);
     void SetChildBounds(const RectF& paintRect) const;

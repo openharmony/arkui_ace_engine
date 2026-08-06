@@ -1163,6 +1163,9 @@ class ObserveV2 {
           view.scheduleDelayedUpdate(elmtId);
         }
       } // if ViewV2 or ViewPU
+      else if (view instanceof ViewBuildNodeBase && view?.__isReactiveBuilderNode__ViewBuildNodeBase__Internal()) {
+        view.UpdateElement(elmtId);
+      }
     });
     aceDebugTrace.end();
   }

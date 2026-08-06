@@ -34,7 +34,7 @@ public:
 
     bool IsRunOnMainThread()
     {
-        // taskExecutor_ alaways posts task to main thread.
+        // taskExecutor_ always posts task to main thread.
         return taskExecutor_->RunsTasksOnCurrentThread();
     }
 

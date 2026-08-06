@@ -215,7 +215,7 @@ export class CustomTextDecoder {
 function fromCodePoint(data: Int32Array): string {
     const result: int[] = [];
     for (let i: int32 = 0; i < data.length; i++) {
-        result[i] = data.at(i)!.toInt()
+        result[i] = data.at(i)!.toInt();
     }
     return String.fromCodePoint(...result);
 }

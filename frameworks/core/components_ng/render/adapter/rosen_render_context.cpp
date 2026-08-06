@@ -91,6 +91,7 @@
 #include "render_service_client/core/pipeline/rs_render_thread.h"
 #endif
 #include "render_service_client/core/ui_effect/property/include/rs_ui_filter_base.h"
+#include "modifier_ng/appearance/rs_material_filter_modifier.h"
 #include "render_service_client/core/ui_effect/property/include/rs_ui_shader_base.h"
 #include "render_service_client/core/ui_effect/property/include/rs_ui_mask_base.h"
 #include "core/components_ng/render/adapter/drawing_decoration_painter.h"
@@ -384,6 +385,53 @@ void SetBoundsAndFrameToRSNode(
     CHECK_NULL_VOID(rsNode);
     rsNode->SetBoundsAndFrame({boundsRect.GetX(), boundsRect.GetY(), boundsRect.Width(), boundsRect.Height()},
         {frameRect.GetX(), frameRect.GetY(), frameRect.Width(), frameRect.Height()});
+}
+
+OHOS::Rosen::RectF CalcMaterialSnapshotRect(
+    const std::shared_ptr<ModifierNG::RSMaterialFilterModifier>& modifier,
+    const OHOS::Rosen::RectF& bound)
+{
+    auto filter = modifier->GetMaterialNGFilter();
+    if (!filter) {
+        return bound;
+    }
+    auto filterType = filter->GetType();
+    switch (filterType) {
+        case RSNGEffectType::FROSTED_GLASS: {
+            auto frostedGlass = std::static_pointer_cast<RSNGFrostedGlassFilter>(filter);
+            auto blurRadius = frostedGlass->Getter<FrostedGlassBlurParamsTag>()->Get();
+            auto envLightParams = frostedGlass->Getter<FrostedGlassEnvLightParamsTag>()->Get();
+            auto samplingScale = frostedGlass->Getter<FrostedGlassSamplingScaleTag>()->Get();
+            auto weightsEmboss = frostedGlass->Getter<FrostedGlassWeightsEmbossTag>()->Get();
+            if (weightsEmboss[1] <= 0.0f) {
+                return bound;
+            }
+            float outStep = std::max(blurRadius[0] +
+                std::max(std::min(envLightParams[0], 500.0f), 0.0f), 0.0f) * samplingScale;
+            return OHOS::Rosen::RectF(bound.GetLeft() - outStep, bound.GetTop() - outStep,
+                bound.GetWidth() + outStep * 2, bound.GetHeight() + outStep * 2); // 2: two outStep
+        }
+        case RSNGEffectType::FROSTED_GLASS_BLUR: {
+            auto frostedGlassBlur = std::static_pointer_cast<RSNGFrostedGlassBlurFilter>(filter);
+            auto blurRadius = frostedGlassBlur->Getter<FrostedGlassBlurRadiusTag>()->Get();
+            auto refractOutPx = frostedGlassBlur->Getter<FrostedGlassBlurRefractOutPxTag>()->Get();
+            if (refractOutPx <= 0.0f) {
+                return bound;
+            }
+            float outStep = std::max(blurRadius + std::max(std::min(refractOutPx, 500.0f), 0.0f), 0.0f);
+            return OHOS::Rosen::RectF(bound.GetLeft() - outStep, bound.GetTop() - outStep,
+                bound.GetWidth() + outStep * 2, bound.GetHeight() + outStep * 2); // 2: two outStep
+        }
+        case RSNGEffectType::MAGNIFIER: {
+            auto magnifier = std::static_pointer_cast<RSNGMagnifierFilter>(filter);
+            auto offsetX = magnifier->Getter<MagnifierOffsetXTag>()->Get();
+            auto offsetY = magnifier->Getter<MagnifierOffsetYTag>()->Get();
+            return OHOS::Rosen::RectF(bound.GetLeft() + offsetX, bound.GetTop() + offsetY,
+                bound.GetWidth(), bound.GetHeight());
+        }
+        default:
+            return bound;
+    }
 }
 } // namespace
 
@@ -1881,6 +1929,20 @@ void RosenRenderContext::UpdateUiMaterialFilter(const OHOS::Rosen::Filter* mater
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetUIMaterialFilter(materialFilter);
     RequestNextFrame();
+}
+
+bool RosenRenderContext::HasMaterialFilter() const
+{
+    CHECK_NULL_RETURN(rsNode_, false);
+    return rsNode_->GetModifierByType(OHOS::Rosen::ModifierNG::RSModifierType::MATERIAL_FILTER) != nullptr;
+}
+
+bool RosenRenderContext::IsSelfDrawingNode() const
+{
+    CHECK_NULL_RETURN(rsNode_, false);
+    auto surfaceNode = Rosen::RSNode::ReinterpretCast<Rosen::RSSurfaceNode>(rsNode_);
+    CHECK_NULL_RETURN(surfaceNode, false);
+    return surfaceNode->IsSelfDrawingNode();
 }
 
 void RosenRenderContext::SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape)
@@ -4109,8 +4171,8 @@ RectF RosenRenderContext::AdjustPaintRectInner(RefPtr<FrameNode>& frameNode)
     }
     if (HasOffset()) {
         auto offset = GetOffsetValue({});
-        if (PipelineBase::GetCurrentContext() &&
-            PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        if (pipeline && pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
             offset += OffsetT<Dimension>(parentPaddingLeft, parentPaddingTop);
         }
         auto offsetX = ConvertToPx(offset.GetX(), ScaleProperty::CreateScaleProperty(), widthPercentReference);
@@ -5000,7 +5062,7 @@ const std::shared_ptr<Rosen::RSNode>& RosenRenderContext::GetRSNode()
     return rsNode_;
 }
 
-void RosenRenderContext::RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::RebuildFrame(FrameNode* self, const std::vector<RefPtr<FrameNode>>& children)
 {
     if (self && self->GetMountPolicy() == MountPolicy::MIXED) {
         ReCreateMixedRsNodeTree(children);
@@ -5011,7 +5073,7 @@ void RosenRenderContext::RebuildFrame(FrameNode* self, const std::list<RefPtr<Fr
 }
 
 std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNodes(
-    const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::RSNode::SharedPtr, bool>& nodeMap)
+    const std::vector<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::RSNode::SharedPtr, bool>& nodeMap)
 {
     std::vector<std::shared_ptr<Rosen::RSNode>> rsNodes;
     for (const auto& child : frameChildren) {
@@ -5090,7 +5152,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::ResolveMixedFrameChildRSNode(
     if (frameNode) {
         return GetRsNodeByFrame(frameNode);
     }
-    std::list<RefPtr<FrameNode>> frameNodes;
+    std::vector<RefPtr<FrameNode>> frameNodes;
     child->GenerateSelfVisibleFrameWithTransition(frameNodes);
     if (frameNodes.empty()) {
         return nullptr;
@@ -5212,7 +5274,7 @@ bool RosenRenderContext::AddNodeToRsTree()
     if (node->GetRenderContext()) {
         node->GetRenderContext()->SetRSUIContext(node->GetContext());
     }
-    std::list<RefPtr<FrameNode>> childNodes;
+    std::vector<RefPtr<FrameNode>> childNodes;
     // get not be deleted children of node
     GetLiveChildren(node, childNodes);
 
@@ -5252,7 +5314,7 @@ bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
     CHECK_NULL_RETURN(node, false);
     auto rsNode = GetRsNodeByFrame(node);
     CHECK_NULL_RETURN(rsNode, false);
-    std::list <RefPtr<FrameNode>> childChildrenList;
+    std::vector <RefPtr<FrameNode>> childChildrenList;
     node->GenerateOneDepthVisibleFrameWithTransition(childChildrenList);
     // A NodeContainer node exist mounted to multiple parent nodes.
     // If NodeContainers are deleted in this scenario, compatibility issues may occur.
@@ -5265,7 +5327,7 @@ bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
 }
 
 void RosenRenderContext::AddCornerMarkNodeToChildren(
-    const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes)
+    const RefPtr<FrameNode>& node, std::vector<RefPtr<FrameNode>>& childNodes)
 {
     auto cornerMarkNode = node->GetCornerMarkNode();
     CHECK_NULL_VOID(cornerMarkNode);
@@ -5289,10 +5351,10 @@ void RosenRenderContext::AddCornerMarkNodeToChildren(
     }
 }
 
-void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes)
+void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::vector<RefPtr<FrameNode>>& childNodes)
 {
     CHECK_NULL_VOID(node);
-    std::list<RefPtr<FrameNode>> childrenList;
+    std::vector<RefPtr<FrameNode>> childrenList;
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
     node->GenerateOneDepthVisibleFrameWithTransition(childrenList);
@@ -5352,7 +5414,7 @@ void RosenRenderContext::RemoveFromTree()
     rsNode_->RemoveFromTree();
 }
 
-void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::ReCreateRsNodeTree(const std::vector<RefPtr<FrameNode>>& children)
 {
     if (!rsNode_ || !isNeedRebuildRSTree_) {
         return;
@@ -5372,7 +5434,7 @@ void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& 
     ReCreateRsNodeTreeByTargetList(nowRSNodes, childNodeMap);
 }
 
-void RosenRenderContext::ReCreateMixedRsNodeTree(const std::list<RefPtr<FrameNode>>& /*children*/)
+void RosenRenderContext::ReCreateMixedRsNodeTree(const std::vector<RefPtr<FrameNode>>& /*children*/)
 {
     if (!rsNode_ || !isNeedRebuildRSTree_) {
         return;
@@ -5447,7 +5509,7 @@ void RosenRenderContext::ReCreateRsNodeTreeByTargetList(
     }
 }
 
-void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::vector<RefPtr<FrameNode>>& children)
 {
     CHECK_NULL_VOID(rsNode_);
     for (const auto& child : children) {
@@ -5465,7 +5527,7 @@ void RosenRenderContext::AddFrameChildren(FrameNode* /*self*/, const std::list<R
     }
 }
 
-void RosenRenderContext::RemoveFrameChildren(FrameNode* /*self*/, const std::list<RefPtr<FrameNode>>& children)
+void RosenRenderContext::RemoveFrameChildren(FrameNode* /*self*/, const std::vector<RefPtr<FrameNode>>& children)
 {
     CHECK_NULL_VOID(rsNode_);
     for (const auto& child : children) {
@@ -7031,6 +7093,22 @@ void RosenRenderContext::DumpInfo()
         auto material = GetSystemMaterial();
         if (material) {
             DumpLog::GetInstance().AddDesc(material->ToString());
+        }
+        if (HasMaterialFilter()) {
+            auto materialModifier = rsNode_->GetModifierByType(
+                OHOS::Rosen::ModifierNG::RSModifierType::MATERIAL_FILTER);
+            if (materialModifier) {
+                auto paintRect = GetPaintRectWithoutTransform();
+                OHOS::Rosen::RectF bound(paintRect.GetX(), paintRect.GetY(),
+                    paintRect.Width(), paintRect.Height());
+                auto snapshotRect = CalcMaterialSnapshotRect(
+                    std::static_pointer_cast<OHOS::Rosen::ModifierNG::RSMaterialFilterModifier>(
+                        materialModifier),
+                    bound);
+                DumpLog::GetInstance().AddDesc(std::string("materialSnapshotSize: [")
+                    .append(std::to_string(snapshotRect.GetWidth())).append(" x ")
+                    .append(std::to_string(snapshotRect.GetHeight())).append("]"));
+            }
         }
         if (!NearZero(rsNode_->GetStagingProperties().GetSpherizeDegree())) {
             DumpLog::GetInstance().AddDesc(

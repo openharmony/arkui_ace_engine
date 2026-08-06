@@ -1068,6 +1068,10 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       return;
     }
 
+    if (typeof itemArray.forEach !== 'function') {
+      throw new BusinessError(103806, `${this.debugInfo__()}: ForEach id ${elmtId}: the data source dose not have forEach function. Application Error!`);
+    }
+
     if (idGenFunc === undefined) {
       stateMgmtConsole.debug(`${this.debugInfo__()}: forEachUpdateFunction: providing default id gen function `);
       idGenFuncUsesIndex = true;

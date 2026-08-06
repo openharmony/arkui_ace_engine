@@ -1709,6 +1709,10 @@ UIContentErrorCode AceContainer::SetViewNew(const RefPtr<AceView>& view, double 
             window->Destroy();
             window = std::make_shared<FormRenderWindow>(taskExecutor, view->GetInstanceId());
         }
+        auto runtimeContext = container->runtimeContext_.lock();
+        if (runtimeContext && runtimeContext->GetApplicationInfo()) {
+            window->SetIsSystemApp(runtimeContext->GetApplicationInfo()->isSystemApp);
+        }
         container->AttachView(window, view, density, width, height, view->GetInstanceId(), nullptr);
     } else {
         auto window = std::make_shared<NG::RosenWindow>(rsWindow, taskExecutor, view->GetInstanceId());
@@ -3572,6 +3576,8 @@ void AceContainer::ReleaseResourceAdapter()
             auto bundleName = runtimeContext->GetBundleName();
             auto moduleName = runtimeContext->GetHapModuleInfo()->name;
             ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, instanceId_);
+            ResourceManager::GetInstance().RemoveResourceAdapter(
+                GetBundleName(), GetModuleName(), INSTANCE_ID_UNDEFINED);
         }
     } else {
         ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId_);

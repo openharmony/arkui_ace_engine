@@ -511,8 +511,7 @@ private:
     void UpdateMenuNode(
         const RefPtr<FrameNode> menuWrapperNode, PreparedInfoForDrag& data, const RefPtr<FrameNode> frameNode);
     void StartVibratorByDrag(const RefPtr<FrameNode>& frameNode);
-    void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson, float scale,
-        const PreparedInfoForDrag& dragInfoData);
+    void UpdateExtraInfo(std::unique_ptr<JsonValue>& arkExtraInfoJson, const DragStartContext& ctx);
     void ProcessMenuPreviewScale(const RefPtr<FrameNode> imageNode, float& scale, float previewScale,
         float windowScale, float defaultMenuPreviewScale);
 

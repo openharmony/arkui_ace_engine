@@ -153,6 +153,7 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
         return;
     }
     auto onPurge = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onPurgeFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), 0, nullptr);
     };
 
@@ -161,6 +162,7 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
         return;
     }
     auto onPurgeAll = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onPurgeAllFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), 0, nullptr);
     };
 
@@ -169,6 +171,7 @@ void JSRepeatVirtualScroll2::Create(const JSCallbackInfo& info)
         return;
     }
     auto onUpdateDirty = [execCtx = info.GetExecutionContext(), func = JSRef<JSFunc>::Cast(onUpdateDirtyFunc)]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         JSRef<JSVal> jsVal = func->Call(JSRef<JSObject>(), 0, nullptr);
     };
 

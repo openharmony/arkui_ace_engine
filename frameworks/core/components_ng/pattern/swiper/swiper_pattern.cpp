@@ -4527,10 +4527,19 @@ void SwiperPattern::StopPropertyTranslateAnimation(
         swiper->UpdateTranslateForSwiperItem(swiper->itemPositionInAnimation_, OffsetF(), true);
         swiper->UpdateTranslateForCaptureNode(OffsetF(), true);
     };
+    auto cancelFinishCallback = [weak = WeakClaim(this), isFinishAnimation,
+        isBeforeCreateLayoutWrapper, isInterrupt]() {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
+        if (swiper->propertyAnimationIsRunning_) {
+            swiper->PropertyCancelAnimationFinish(isFinishAnimation, isBeforeCreateLayoutWrapper, isInterrupt);
+            swiper->propertyAnimationIsRunning_ = false;
+        }
+    };
     AnimationUtils::OpenImplicitAnimation(option, Curves::LINEAR, nullptr);
     propertyUpdateCallback();
     auto status = AnimationUtils::CloseImplicitCancelAnimationReturnStatus(nullptr, true);
-    if (status == CancelAnimationStatus::TASK_EXECUTION_FAILURE) {
+    if (status != CancelAnimationStatus::NODE_EXCEPTION && status != CancelAnimationStatus::SUCCESS) {
         EventReport::ReportScrollableErrorEvent(
             "Swiper", ScrollableErrorType::STOP_ANIMATION_TIMEOUT, "Swiper stop propertyAni sync failed");
         ACE_SCOPED_TRACE("Swiper stop propertyAni sync failed");
@@ -4540,7 +4549,8 @@ void SwiperPattern::StopPropertyTranslateAnimation(
         propertyAnimationIsRunning_ = true;
         return;
     } else if (status == CancelAnimationStatus::NODE_EXCEPTION) {
-        AnimationUtils::Animate(option, propertyUpdateCallback);
+        propertyAnimationIsRunning_ = true;
+        AnimationUtils::Animate(option, propertyUpdateCallback, cancelFinishCallback);
         return;
     }
     PropertyCancelAnimationFinish(isFinishAnimation, isBeforeCreateLayoutWrapper, isInterrupt);

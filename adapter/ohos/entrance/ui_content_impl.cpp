@@ -1426,6 +1426,7 @@ void UIContentImpl::InitializeByName(OHOS::Rosen::Window *window,
 napi_value UIContentImpl::GetUINapiContext()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, nullptr);
     ContainerScope scope(instanceId_);
     napi_value result = nullptr;
     auto frontend = container->GetFrontend();
@@ -1883,6 +1884,7 @@ UIContentErrorCode UIContentImpl::CommonInitializeForm(OHOS::Rosen::Window* wind
         frontend->SetIsBundle(false);
         container->SetBundleName(bundleName_);
         container->SetModuleName(moduleName_);
+        FeatureParamManager::GetInstance().UICorrectionParamParseEntryForForm(bundleName_);
     } else {
         errorCode = Platform::AceContainer::SetViewNew(aceView, density, 0, 0, window_);
         CHECK_ERROR_CODE_RETURN(errorCode);

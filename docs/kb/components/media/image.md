@@ -163,4 +163,6 @@ Image 功能域：`specs/05-ui-components/08-image-components/01-image/`
 - `SVG`：`docs/kb/capabilities/svg.md`
 - `ImageAnalyzer`：`docs/kb/capabilities/image-analyzer.md`
 - `BackgroundImage`：`docs/kb/capabilities/background-image.md`
+- [渲染树同步](../../architecture/render-tree-sync.md) — ImagePattern::OnAttachToMainRenderTree 和 OnWindowHide 依赖 isPendingState_
+- [同帧下树重新上树 isPendingState_ 状态错乱](../../issues/lifecycle/ispending-state-render-tree-diff.md) — Image 节点同帧下树重新上树后 RecycleImageData 误触
 - API 范式：`docs/api/ArkUI_API_Paradigm_Knowledge_Base_CN.md`

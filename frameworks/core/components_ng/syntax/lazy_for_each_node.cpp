@@ -267,7 +267,7 @@ void LazyForEachNode::OnDataBulkDeleted(size_t index, size_t count)
     auto deletedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
-        const auto& nodeList = builder_->OnDataBulkDeleted(index, count);
+        const auto nodeList = builder_->OnDataBulkDeleted(index, count);
         for (const auto& node : nodeList) {
             if (node.second == nullptr) {
                 continue;
@@ -313,7 +313,7 @@ void LazyForEachNode::OnDataBulkChanged(size_t index, size_t count)
     auto changedIndex = static_cast<int32_t>(index);
     if (builder_) {
         builder_->SetUseNewInterface(false);
-        const auto& nodeList = builder_->OnDataBulkChanged(index, count);
+        const auto nodeList = builder_->OnDataBulkChanged(index, count);
         for (const auto& node : nodeList) {
             if (node.second == nullptr) {
                 continue;

@@ -21,6 +21,7 @@
 
 #include "base/geometry/offset.h"
 #include "base/image/image_defines.h"
+#include "base/thread/cancelable_callback.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -93,6 +94,7 @@ public:
     void CreateObscuredImage();
     void LoadImageDataIfNeed();
     bool RecycleImageData();
+    bool RecycleImageDataForNav();
     void OnNotifyMemoryLevel(int32_t level) override;
     void OnWindowHide() override;
     void OnVisibleChange(bool isVisible) override;
@@ -372,6 +374,13 @@ private:
     void ReportCompleteLoadEvent(const RefPtr<FrameNode>& host);
     void ReportImageSuccessInfo(const RefPtr<FrameNode>& host);
 
+    void RegisterNavDestinationHiddenChange();
+    void UnregisterNavDestinationHiddenChange();
+    void OnNavDestinationHiddenChange(bool isShown);
+    void PostNavDestRecycleTask();
+    void CancelNavDestRecycleTask();
+    void ExecuteNavDestRecycle();
+
 private:
     RefPtr<DrawableDescriptor> drawable_;
     SizeF imageSize_;
@@ -444,6 +453,8 @@ private:
     bool isLoadAlt_ = false;
     ImageType imageType_ = ImageType::BASE;
     ContentTransitionType contentTransitionType_ = ContentTransitionType::IDENTITY;
+    std::shared_ptr<CancelableCallback<void()>> navDestRecycleCallback_;
+    static constexpr uint32_t NAV_DEST_RECYCLE_DELAY_MS = 500;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };

@@ -135,11 +135,11 @@ public:
     virtual void FlushOverlayModifier(const RefPtr<Modifier>& modifier) {}
     virtual void FlushContentModifierImmediately(const RefPtr<ContentModifier>& modifier) {}
 
-    virtual void RebuildFrame(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
+    virtual void RebuildFrame(FrameNode* self, const std::vector<RefPtr<FrameNode>>& children) {};
 
-    virtual void AddFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
+    virtual void AddFrameChildren(FrameNode* self, const std::vector<RefPtr<FrameNode>>& children) {};
 
-    virtual void RemoveFrameChildren(FrameNode* self, const std::list<RefPtr<FrameNode>>& children) {};
+    virtual void RemoveFrameChildren(FrameNode* self, const std::vector<RefPtr<FrameNode>>& children) {};
 
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
 
@@ -360,6 +360,10 @@ public:
     virtual void UpdateUiMaterialFilter(const OHOS::Rosen::Filter* materialFilter) {}
     virtual void UpdateBlender(const OHOS::Rosen::Blender* blender) {}
     virtual void ResetBlender() {}
+    virtual bool IsSelfDrawingNode() const
+    {
+        return false;
+    }
     virtual void SetSDFShape(const std::shared_ptr<OHOS::Rosen::RSNGShapeBase>& shape) {}
     virtual void SetShadowPath(const std::string path) {}
     virtual void ResetShadowPath() {}

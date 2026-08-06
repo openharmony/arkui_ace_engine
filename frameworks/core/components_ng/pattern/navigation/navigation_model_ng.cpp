@@ -990,6 +990,7 @@ void NavigationModelNG::SetSplitPlaceholder(const RefPtr<NG::UINode>& splitPlace
         }
         auto renderContext = placeholderContentNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateClipEdge(true);
         renderContext->SetClipToBounds(true);
         renderContext->UpdateZIndex(-1);
         navigationGroupNode->AddChild(placeholderContentNode);
@@ -2429,6 +2430,7 @@ void NavigationModelNG::SetSplitPlaceholder(FrameNode* frameNode, FrameNode* spl
         }
         auto renderContext = placeholderContentNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateClipEdge(true);
         renderContext->SetClipToBounds(true);
         renderContext->UpdateZIndex(-1);
         navigationGroupNode->AddChild(placeholderContentNode);

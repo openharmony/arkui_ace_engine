@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-08-03",
+  "last_updated": "2026-07-31",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -4164,6 +4164,75 @@
       "last_verified": "2026-07-25"
     },
     {
+      "id": "UISessionService",
+      "name": "UISession Service",
+      "name_cn": "UISession 服务",
+      "kind": "architecture",
+      "category": "dfx",
+      "keywords": [
+        "UISession",
+        "UI Session",
+        "ui_session",
+        "UiSessionManager",
+        "IUiContentService",
+        "InspectorTree",
+        "ReportService",
+        "组件事件上报",
+        "内容变化检测",
+        "ContentChangeManager",
+        "页面翻译",
+        "Web翻译",
+        "PageScene",
+        "页面场景感知",
+        "ui_sa",
+        "GetUIContentRemoteObj",
+        "SyncRequestGuard",
+        "ui_content_stub",
+        "ui_content_proxy",
+        "ui_report_stub"
+      ],
+      "aliases": [
+        "UiSession",
+        "UI会话",
+        "ui_session内部接口",
+        "UISession通道"
+      ],
+      "kb": "docs/kb/architecture/uisession-service.md",
+      "spec_domain": "specs/03-engine-framework/09-uisession/01-uisession-service",
+      "func_id": "03-09-01",
+      "spec_status": "active",
+      "source_paths": {
+        "ipc_interface": "interfaces/inner_api/ui_session/ui_content_service_interface.h",
+        "manager_interface": "interfaces/inner_api/ui_session/ui_session_manager.h",
+        "param_config": "interfaces/inner_api/ui_session/param_config.h",
+        "manager_ohos": "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp",
+        "content_stub": "adapter/ohos/entrance/ui_session/ui_content_stub.cpp",
+        "content_stub_impl": "adapter/ohos/entrance/ui_session/ui_content_stub_impl.cpp",
+        "content_proxy": "adapter/ohos/entrance/ui_session/ui_content_proxy.cpp",
+        "report_stub": "adapter/ohos/entrance/ui_session/ui_report_stub.cpp",
+        "report_proxy": "adapter/ohos/entrance/ui_session/ui_report_proxy.cpp",
+        "json_util": "interfaces/inner_api/ui_session/ui_session_json_util.h",
+        "translate_manager": "interfaces/inner_api/ui_session/ui_translate_manager.h",
+        "translate_type": "interfaces/inner_api/ui_session/ui_translate_type.h",
+        "translate_impl": "adapter/ohos/entrance/ace_translate_manager.cpp",
+        "request_guard": "interfaces/inner_api/ui_session/ui_session_request_guard.h",
+        "ipc_util": "interfaces/inner_api/ui_session/ui_session_ipc_util.h",
+        "ui_content_impl": "adapter/ohos/entrance/ui_content_impl.cpp",
+        "content_change_manager": "frameworks/core/components_ng/manager/content_change_manager/",
+        "sample": "interfaces/inner_api/ui_session/ui_session_sample/",
+        "sample_service": "interfaces/inner_api/ui_session/ui_session_sample/ui_sa_service.cpp",
+        "sample_config": "interfaces/inner_api/ui_session/ui_session_sample/16666.json",
+        "verification_guide": "test/tools/UISession/UISession_Verification_Guide.md"
+      },
+      "api_paths": {},
+      "test_paths": [
+        "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h",
+        "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
       "id": "UIContext",
       "name": "UIContext",
       "name_cn": "UI 上下文",
@@ -7416,7 +7485,7 @@
         "test/unittest/adapter/ohos/entrance/rs_adapter_test.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-27"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "StateMgmtStaticV2Decorators",
@@ -12337,6 +12406,169 @@
         "menu_item_pattern": "frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp",
         "click_recognizer": "frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp"
       }
+    },
+    {
+      "id": "IsPendingStateRenderTreeDiff",
+      "name": "IsPendingState RenderTree Diff Error",
+      "name_cn": "同帧下树重新上树 isPendingState_ 状态错乱",
+      "kind": "issue",
+      "category": "lifecycle",
+      "keywords": [
+        "IsPendingState",
+        "isPendingState_",
+        "ProcessRenderTreeDiff",
+        "AttachToRenderTree",
+        "DetachFromRenderTree",
+        "同帧下树重新上树",
+        "RenderTree",
+        "ImageRecycle",
+        "CleanRenderTreeLifeCycle",
+        "状态错乱",
+        "生命周期回调",
+        "OnAttachToMainRenderTree",
+        "OnDetachFromMainRenderTree",
+        "renderContext"
+      ],
+      "aliases": [
+        "isPendingState错乱",
+        "渲染树状态不一致",
+        "同帧上下树"
+      ],
+      "kb": "docs/kb/issues/lifecycle/ispending-state-render-tree-diff.md",
+      "func_ids": [
+        "03-01-01"
+      ],
+      "source_paths": {
+        "frame_node_cpp": "frameworks/core/components_ng/base/frame_node.cpp",
+        "frame_node_h": "frameworks/core/components_ng/base/frame_node.h",
+        "image_pattern_cpp": "frameworks/core/components_ng/pattern/image/image_pattern.cpp"
+      },
+      "status": "active",
+      "last_verified": "2026-08-04"
+    },
+    {
+      "id": "RenderNodeMemoryLeak",
+      "name": "RenderNode Memory Leak",
+      "name_cn": "RenderNode 内存泄漏",
+      "kind": "issue",
+      "category": "performance",
+      "keywords": [
+        "RenderNodeMemoryLeak",
+        "RenderNode内存泄漏",
+        "DisposeNode",
+        "RenderNodeStruct",
+        "ArkUI_RenderNode",
+        "deleteInnerRenderNodeStruct",
+        "C API内存泄漏",
+        "RenderNode泄漏",
+        "createNode",
+        "双层内存模型"
+      ],
+      "aliases": [
+        "RenderNode泄漏",
+        "C API RenderNode内存泄漏",
+        "RenderNodeStruct泄漏"
+      ],
+      "kb": "docs/kb/issues/performance/rendernode-memory-leak.md",
+      "source_paths": {
+        "render_node_cpp": "interfaces/native/node/render_node.cpp",
+        "render_node_h": "interfaces/native/node/render_node.h",
+        "node_modifier_cpp": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp",
+        "dispose_node": "interfaces/native/node/render_node.cpp",
+        "create_node": "interfaces/native/node/render_node.cpp",
+        "render_node_struct": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp",
+        "create_render_node_struct": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp",
+        "delete_inner": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp"
+      },
+      "status": "active",
+      "last_verified": "2026-08-04"
+    },
+    {
+      "id": "RenderTreeSync",
+      "name": "Render Tree Sync",
+      "name_cn": "渲染树同步",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "RenderTreeSync",
+        "渲染树同步",
+        "RebuildRenderContextTree",
+        "ProcessRenderTreeDiff",
+        "AttachToRenderTree",
+        "DetachFromRenderTree",
+        "isPendingState_",
+        "MarkNeedSyncRenderTree",
+        "frameChildren_",
+        "ZIndexComparator",
+        "CleanRenderTreeLifeCycle",
+        "OnAttachToMainRenderTree",
+        "OnDetachFromMainRenderTree"
+      ],
+      "aliases": [
+        "渲染树同步机制",
+        "RenderContext同步",
+        "RS节点树重建"
+      ],
+      "kb": "docs/kb/architecture/render-tree-sync.md",
+      "spec_domain": "specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline",
+      "func_id": "03-01-01",
+      "spec_status": "active",
+      "source_paths": {
+        "frame_node_cpp": "frameworks/core/components_ng/base/frame_node.cpp",
+        "frame_node_h": "frameworks/core/components_ng/base/frame_node.h",
+        "ui_node_cpp": "frameworks/core/components_ng/base/ui_node.cpp",
+        "rosen_render_context_cpp": "frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+        "pattern_h": "frameworks/core/components_ng/pattern/pattern.h",
+        "image_pattern_cpp": "frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+        "node_render_status_monitor_cpp": "frameworks/core/components_ng/base/node_render_status_monitor.cpp",
+        "frame_node_multi_thread_cpp": "frameworks/core/components_ng/base/frame_node_multi_thread.cpp"
+      },
+      "test_paths": [
+        "test/unittest/core/base/frame_node_test_ng_coverage.cpp",
+        "test/unittest/core/base/frame_node_test_ng.cpp",
+        "test/unittest/core/base/node_render_status_monitor_test_ng.cpp",
+        "test/unittest/core/pattern/image/image_pattern_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-04"
+    },
+    {
+      "id": "UIContextInstanceIdLeak",
+      "name": "UIContext Instance ID Leak",
+      "name_cn": "UIContext 实例 ID 泄漏",
+      "kind": "issue",
+      "category": "lifecycle",
+      "keywords": [
+        "UIContextInstanceIdLeak",
+        "实例ID泄漏",
+        "syncInstanceId",
+        "restoreInstanceId",
+        "withInstanceId",
+        "jsUIContext",
+        "实例管理异常",
+        "多实例错乱",
+        "ContainerScope",
+        "restoreInstanceIds"
+      ],
+      "aliases": [
+        "实例ID栈错位",
+        "UIContext实例泄漏",
+        "实例ID不配对"
+      ],
+      "kb": "docs/kb/issues/lifecycle/uicontext-instance-id-leak.md",
+      "func_ids": [
+        "04-12-01"
+      ],
+      "source_paths": {
+        "js_uicontext": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "with_instance_id": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "scope_util_cpp": "frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp",
+        "scope_util_h": "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h",
+        "ani_modifier": "frameworks/core/interfaces/native/ani/common_ani_modifier.cpp",
+        "system_ops_accessor": "frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp"
+      },
+      "status": "active",
+      "last_verified": "2026-08-04"
     },
     {
       "id": "ScrollEndNotifyOnDetach",

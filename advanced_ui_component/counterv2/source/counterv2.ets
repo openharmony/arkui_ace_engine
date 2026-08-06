@@ -285,6 +285,11 @@ export struct CounterV2Component {
     return px2vp(widthPx);
   }
 
+  private getTimezone(): string {
+    const tz = systemDateTime.getTimezoneSync();
+    return tz ? tz : 'Asia/Shanghai';
+  }
+
   getDate(value: string | undefined): string {
     return `[n2] ${value} [n0]`
   }
@@ -298,7 +303,7 @@ export struct CounterV2Component {
     try {
       dateFormatYear = new Intl.DateTimeFormat(localeID, {
         year: 'numeric',
-        timeZone: systemDateTime.getTimezoneSync(),
+        timeZone: this.getTimezone(),
       });
     } catch (error) {
       console.log(`Accessility getDateYear fail. message: ${error.message}, code: ${error.code}`);
@@ -319,7 +324,7 @@ export struct CounterV2Component {
     try {
       dateFormatMonth = new Intl.DateTimeFormat(localeID, {
         month: 'long',
-        timeZone: systemDateTime.getTimezoneSync()
+        timeZone: this.getTimezone()
       });
     } catch (error) {
       console.log(`Accessility getDateMonth fail. message: ${error.message}, code: ${error.code}`);

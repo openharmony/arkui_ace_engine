@@ -894,4 +894,155 @@ HWTEST_F(ScrollPatternThreeTestNg, CalcPredictSnapOffsetWithContentOffset, TestS
     auto offset = pattern_->CalcPredictSnapOffset(0, 0, 0, SnapDirection::NONE);
     EXPECT_EQ(offset, 0);
 }
+
+/**
+ * @tc.name: CalcPredictSnapOffsetTailPrecision001
+ * @tc.desc: Test CalcPredictSnapOffset when finalPosition is slightly above tail within 0.1f precision
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, CalcPredictSnapOffsetTailPrecision001, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 1, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+
+    scrollPattern->scrollableDistance_ = 600.0f;
+    scrollPattern->currentOffset_ = -600.0f;
+    scrollPattern->snapOffsets_ = { 0.0f, -100.0f, -200.0f, -300.0f, -400.0f, -500.0f, -600.0f };
+
+    float delta = 0.05f;
+    auto result = scrollPattern->CalcPredictSnapOffset(delta, 0.f, 0.f, SnapDirection::NONE);
+    EXPECT_TRUE(result.has_value());
+    EXPECT_NEAR(result.value(), delta, 0.01f);
+}
+
+/**
+ * @tc.name: CalcPredictSnapOffsetTailPrecision002
+ * @tc.desc: Test CalcPredictSnapOffset when finalPosition exactly equals tail
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, CalcPredictSnapOffsetTailPrecision002, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+
+    scrollPattern->scrollableDistance_ = 600.0f;
+    scrollPattern->currentOffset_ = -600.0f;
+    scrollPattern->snapOffsets_ = { 0.0f, -100.0f, -200.0f, -300.0f, -400.0f, -500.0f, -600.0f };
+
+    float delta = 0.0f;
+    auto result = scrollPattern->CalcPredictSnapOffset(delta, 0.f, 0.f, SnapDirection::NONE);
+    EXPECT_TRUE(result.has_value());
+    EXPECT_NEAR(result.value(), 0.0f, 0.01f);
+}
+
+/**
+ * @tc.name: CalcPredictSnapOffsetTailPrecision003
+ * @tc.desc: Test CalcPredictSnapOffset when finalPosition is above tail by more than 0.1f
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, CalcPredictSnapOffsetTailPrecision003, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 3, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+
+    scrollPattern->scrollableDistance_ = 600.0f;
+    scrollPattern->currentOffset_ = -600.0f;
+    scrollPattern->snapOffsets_ = { 0.0f, -100.0f, -200.0f, -300.0f, -400.0f, -500.0f, -600.0f };
+
+    float delta = 0.2f;
+    auto result = scrollPattern->CalcPredictSnapOffset(delta, 0.f, 0.f, SnapDirection::NONE);
+    EXPECT_TRUE(result.has_value());
+    EXPECT_NEAR(result.value(), 0.0f, 0.01f);
+}
+
+/**
+ * @tc.name: CalcPredictSnapOffsetTailPrecision004
+ * @tc.desc: Test CalcPredictSnapOffset when finalPosition is near tail boundary with 0.09f precision
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, CalcPredictSnapOffsetTailPrecision004, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 4, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+
+    scrollPattern->scrollableDistance_ = 600.0f;
+    scrollPattern->currentOffset_ = -600.0f;
+    scrollPattern->snapOffsets_ = { 0.0f, -100.0f, -200.0f, -300.0f, -400.0f, -500.0f, -600.0f };
+
+    float delta = 0.09f;
+    auto result = scrollPattern->CalcPredictSnapOffset(delta, 0.f, 0.f, SnapDirection::NONE);
+    EXPECT_TRUE(result.has_value());
+    EXPECT_NEAR(result.value(), delta, 0.01f);
+}
+
+/**
+ * @tc.name: CalcPredictSnapOffsetTailPrecision005
+ * @tc.desc: Test CalcPredictSnapOffset when finalPosition is slightly above tail with large scrollableDistance
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, CalcPredictSnapOffsetTailPrecision005, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 5, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+
+    float scrollableDistance = 10000.0f;
+    scrollPattern->scrollableDistance_ = scrollableDistance;
+    scrollPattern->currentOffset_ = -scrollableDistance;
+    scrollPattern->snapOffsets_ = { 0.0f, -100.0f, -5000.0f, -scrollableDistance };
+
+    float delta = 0.06f;
+    auto result = scrollPattern->CalcPredictSnapOffset(delta, 0.f, 0.f, SnapDirection::NONE);
+    EXPECT_TRUE(result.has_value());
+    EXPECT_NEAR(result.value(), delta, 0.01f);
+}
+
+/**
+ * @tc.name: CalcPredictSnapOffsetTailPrecision006
+ * @tc.desc: Test CalcPredictSnapOffset when finalPosition at head boundary
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, CalcPredictSnapOffsetTailPrecision006, TestSize.Level1)
+{
+    auto scrollPattern = AceType::MakeRefPtr<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 6, scrollPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto layoutProperty = AceType::MakeRefPtr<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollSnapAlign(ScrollSnapAlign::START);
+    frameNode->layoutProperty_ = layoutProperty;
+
+    scrollPattern->scrollableDistance_ = 600.0f;
+    scrollPattern->currentOffset_ = 0.0f;
+    scrollPattern->snapOffsets_ = { 0.0f, -100.0f, -200.0f, -300.0f, -400.0f, -500.0f, -600.0f };
+
+    float delta = 0.05f;
+    auto result = scrollPattern->CalcPredictSnapOffset(delta, 0.f, 0.f, SnapDirection::NONE);
+    EXPECT_TRUE(result.has_value());
+    EXPECT_NEAR(result.value(), delta, 0.01f);
+}
 } // namespace OHOS::Ace::NG

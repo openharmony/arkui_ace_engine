@@ -47,6 +47,8 @@ enum class MonitorStatus {
 
 typedef std::chrono::steady_clock::time_point TimePoint;
 
+class ArkUIPerfMonitor;
+
 class ScopedMonitor {
 public:
     explicit ScopedMonitor(MonitorTag tag);
@@ -56,6 +58,7 @@ private:
     MonitorTag tag_;
     TimePoint begin_;
     TimePoint end_;
+    ArkUIPerfMonitor* monitor_ = nullptr;
 };
 
 class ArkUIPerfMonitor {

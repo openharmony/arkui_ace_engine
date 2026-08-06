@@ -1188,10 +1188,10 @@ void PipelineBase::OnFormRecover(const std::string& statusData)
     LOGE("onFormRecover_ is null.");
 }
 
-void PipelineBase::SetUiDvsyncSwitch(bool on)
+void PipelineBase::SetUiDvsyncSwitch(bool on, FromWhom fromWhom)
 {
     if (window_ && lastUiDvsyncStatus_ != on) {
-        window_->SetUiDvsyncSwitch(on);
+        window_->SetUiDvsyncSwitch(on, fromWhom);
     }
     lastUiDvsyncStatus_ = on;
 }

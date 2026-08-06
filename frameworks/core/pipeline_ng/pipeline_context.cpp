@@ -1648,6 +1648,7 @@ void PipelineContext::HandleSpecialContainerNode()
         parentToChildrenMap[parentId].push_back(positionZNodeId);
     }
     // Process each unique parent node only once
+    std::vector<RefPtr<FrameNode>> childrenList;
     for (const auto& [parentId, childIds] : parentToChildrenMap) {
         auto parentNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(parentId));
         if (!parentNode) {
@@ -1656,7 +1657,7 @@ void PipelineContext::HandleSpecialContainerNode()
         if (parentNode->GetRenderContext()) {
             parentNode->GetRenderContext()->SetDrawNode();
         }
-        std::list<RefPtr<FrameNode>> childrenList;
+        childrenList.clear();
         parentNode->GenerateOneDepthVisibleFrameWithTransition(childrenList);
         for (auto& node : childrenList) {
             if (node && node->GetRenderContext()) {

@@ -26,7 +26,7 @@ void RosenWindow::InitArkUI_X() {}
 
 void RosenWindow::FlushFrameRate(int32_t rate, int32_t animatorExpectedFrameRate, int32_t rateType) {}
 
-void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch) {}
+void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom) {}
 
 void RosenWindow::RequestFrame() {}
 

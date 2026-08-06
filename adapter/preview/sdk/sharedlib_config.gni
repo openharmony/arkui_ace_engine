@@ -778,6 +778,12 @@ napi_modules = [
         lib_names = [ "composetitlebar" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/composetitlebarv2/interfaces:composetitlebarv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "composetitlebarv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component:dialog"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -794,6 +800,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "editabletitlebar" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/editabletitlebarv2/interfaces:editabletitlebarv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "editabletitlebarv2" ]
       },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/filter/interfaces:filter"
@@ -868,6 +880,12 @@ napi_modules = [
         lib_names = [ "treeview" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/treeviewv2/interfaces:treeviewv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "treeviewv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/selectionmenu/interfaces:selectionmenu"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -880,6 +898,12 @@ napi_modules = [
         lib_names = [ "popup" ]
       },
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/popupv2/interfaces:popupv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "popupv2" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/gridobjectsortcomponent/interfaces:gridobjectsortcomponent"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -890,6 +914,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "exceptionprompt" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/exceptionpromptv2/interfaces:exceptionpromptv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "exceptionpromptv2" ]
       },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent"
