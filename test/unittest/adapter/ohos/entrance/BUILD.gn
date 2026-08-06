@@ -353,7 +353,9 @@ ohos_unittest("mmi_event_converter_test") {
 ohos_unittest("background_force_flush_vsync_test") {
   module_out_path = adapter_test_output_path
   sources = [
-    "$ace_root/test/mock/frameworks/core/common/mock_window.cpp",
+    "$ace_root/frameworks/core/common/window.cpp",
+    "$ace_root/frameworks/core/components_ng/render/adapter/rosen_window.cpp",
+    "$ace_root/test/unittest/core/pattern/form/mock/mock_rosen_render_context.cpp",
     "background_force_flush_vsync_test.cpp",
   ]
 
@@ -367,12 +369,16 @@ ohos_unittest("background_force_flush_vsync_test") {
   deps = [
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_core_extra",
     "$ace_root/test/unittest:ace_unittest_log",
   ]
 
   external_deps = [
     "googletest:gmock_main",
     "googletest:gtest_main",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "window_manager:libwm",
   ]
 }
 
