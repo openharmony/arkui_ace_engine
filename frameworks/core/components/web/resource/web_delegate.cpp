@@ -1182,7 +1182,17 @@ WebDelegate::~WebDelegate()
     }
     UnRegisterDisplayInfoChange();
     if (nweb_) {
-        nweb_->OnDestroy();
+        auto context = context_.Upgrade();
+        if (!context) {
+            return;
+        }
+        context->GetTaskExecutor()->PostSyncTask(
+            [nweb = nweb_]() {
+                if (nweb) {
+                    nweb->OnDestroy();
+                }
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIWebDelegateDestructor");
     }
     UnregisterSurfacePositionChangedCallback();
     UnregisterAvoidAreaChangeListener(instanceId_);
