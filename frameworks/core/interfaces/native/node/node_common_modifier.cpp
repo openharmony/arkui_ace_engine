@@ -9321,13 +9321,23 @@ ArkUI_Bool GetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_U
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     auto style = focusHub->GetFocusBox().GetStyle();
-    if (!style || !style->margin || !style->strokeWidth || !style->strokeColor) {
-        return false;
-    }
 
-    values[NUM_0] = static_cast<ArkUI_Float32>(style->margin.value().Value());
-    values[NUM_1] = static_cast<ArkUI_Float32>(style->strokeWidth.value().Value());
-    *color = style->strokeColor.value().GetValue();
+    Color paintColor;
+    focusHub->GetPaintColorFromBox(paintColor);
+    Dimension paintWidth;
+    focusHub->GetPaintWidthFromBox(paintWidth);
+    Dimension focusPaddingVp;
+    focusHub->GetPaintPaddingVp(focusPaddingVp);
+
+    values[NUM_0] = (style && style->margin)
+        ? static_cast<ArkUI_Float32>(style->margin.value().Value())
+        : static_cast<ArkUI_Float32>(focusPaddingVp.Value());
+    values[NUM_1] = (style && style->strokeWidth)
+        ? static_cast<ArkUI_Float32>(style->strokeWidth.value().Value())
+        : static_cast<ArkUI_Float32>(paintWidth.Value());
+    *color = (style && style->strokeColor)
+        ? style->strokeColor.value().GetValue()
+        : paintColor.GetValue();
     return true;
 }
 
