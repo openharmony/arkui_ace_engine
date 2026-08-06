@@ -172,7 +172,7 @@ void SelectLayoutAlgorithm::NeedAgingUpdateParams(LayoutWrapper* layoutWrapper)
     if (fontScale_ == context->GetFontScaleFromEnv(host)) {
         return;
     }
-    fontScale_ = context->GetFontScale();
+    fontScale_ = context->GetFontScaleFromEnv(host);
     auto menuTheme = context->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     auto pattern = host->GetPattern<SelectPattern>();
