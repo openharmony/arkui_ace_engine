@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_pattern.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/render/render_context.h"
@@ -116,7 +117,7 @@ float HeaderFooterUtils::MeasureEdgeMainSize(LayoutWrapper* layoutWrapper, const
 }
 
 void HeaderFooterUtils::LayoutEdge(LayoutWrapper* layoutWrapper, int32_t rawIndex, const OffsetF& offset,
-    bool isSticky, bool isRtl, float crossSize)
+    bool isSticky, bool isRtl, float crossSize, int32_t stickyZIndex)
 {
     if (rawIndex < 0) {
         return;
@@ -128,11 +129,8 @@ void HeaderFooterUtils::LayoutEdge(LayoutWrapper* layoutWrapper, int32_t rawInde
     }
     CHECK_NULL_VOID(child);
     auto hostNode = child->GetHostNode();
-    // Once promoted by sticky the zIndex stays at 1 even after sticky toggles off; for a header/footer with no
-    // overlapping sibling the value is visually neutral, and not restoring sidesteps the ambiguity between
-    // framework-set 1 and user-set 1.
     if (isSticky) {
-        EnsureStickyDefaultZIndex(hostNode);
+        EnsureStickyDefaultZIndex(hostNode, stickyZIndex);
     }
     auto geometryNode = child->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -141,26 +139,32 @@ void HeaderFooterUtils::LayoutEdge(LayoutWrapper* layoutWrapper, int32_t rawInde
         finalOffset.SetX(offset.GetX() + crossSize - geometryNode->GetMarginFrameSize().Width());
     }
     geometryNode->SetMarginFrameOffset(finalOffset);
-    // Header / footer must always be in the render tree on every layout pass. GetChildByIndex() above does not
-    // activate the child, so a stale inactive state from a prior frame would otherwise suppress
-    // SyncGeometryProperties() and freeze the edge at its previous rendered position.
+    // Always active + laid out: a stale inactive edge would skip geometry sync and freeze at its old position.
     child->SetActive(true);
     child->Layout();
 }
 
-void HeaderFooterUtils::EnsureStickyDefaultZIndex(const RefPtr<FrameNode>& edgeNode)
+void HeaderFooterUtils::EnsureStickyDefaultZIndex(const RefPtr<FrameNode>& edgeNode, int32_t stickyZIndex)
 {
     CHECK_NULL_VOID(edgeNode);
     auto renderContext = edgeNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto zIndex = renderContext->GetZIndex();
-    // Only promote nodes whose zIndex is default (unset or 0). Once promoted to 1 the value is left in place even
-    // after sticky toggles off — on a header/footer with no overlapping sibling, zIndex 1 vs 0 is visually
-    // indistinguishable, and not restoring avoids the unresolvable ambiguity between framework-set 1 and
-    // user-set 1 (the latter would otherwise be silently overwritten).
+    // Promote only default (unset/0) nodes; explicit user zIndex wins. The value is not restored when sticky
+    // toggles off — framework-assigned and identical user-assigned values are indistinguishable.
     if (!zIndex.has_value() || zIndex.value() == 0) {
-        renderContext->UpdateZIndex(1);
+        renderContext->UpdateZIndex(stickyZIndex);
     }
+}
+
+std::optional<float> HeaderFooterUtils::GetNextStickyHeaderGap(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_RETURN(layoutWrapper, std::nullopt);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    auto pattern = host->GetPattern<LazyLayoutPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
+    return pattern->GetNextStickyHeaderGap();
 }
 
 } // namespace OHOS::Ace::NG

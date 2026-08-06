@@ -668,6 +668,39 @@ HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, CalcStickyEdgePosHonorsInsets_001
 }
 
 /**
+ * @tc.name: StickyHeaderSiblingHandoffKeepsFooter_001
+ * @tc.desc: A lazy section followed by another sticky header keeps its own header until the sibling handoff
+ *           boundary without changing its footer position. The higher sticky-header zIndex naturally occludes
+ *           only the overlapping part of the still-rendered footer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyVWaterFlowLayoutHeaderFooterTest, StickyHeaderSiblingHandoffKeepsFooter_001, TestSize.Level1)
+{
+    HeaderFooterStickyMetrics metrics {
+        .viewStart = 460.0f,
+        .viewEnd = 700.0f,
+        .totalMainSize = 500.0f,
+        .headerMainSize = 80.0f,
+        .footerMainSize = 60.0f,
+        .nextStickyHeaderGap = 12.0f,
+    };
+
+    const auto handoffHeaderPos = HeaderFooterUtils::CalcStickyHeaderPos(metrics);
+    const auto stickyFooterPos = HeaderFooterUtils::CalcStickyFooterPos(metrics);
+    EXPECT_FLOAT_EQ(
+        handoffHeaderPos, metrics.totalMainSize + metrics.nextStickyHeaderGap.value() - metrics.headerMainSize);
+    EXPECT_FLOAT_EQ(stickyFooterPos, metrics.totalMainSize - metrics.footerMainSize);
+    EXPECT_GT(handoffHeaderPos + metrics.headerMainSize, stickyFooterPos);
+    EXPECT_GT(HeaderFooterUtils::STICKY_HEADER_Z_INDEX, HeaderFooterUtils::STICKY_FOOTER_Z_INDEX);
+
+    // Without a following sticky header, preserve the standalone boundary: header stops before its own footer.
+    metrics.nextStickyHeaderGap.reset();
+    const auto standaloneHeaderPos = HeaderFooterUtils::CalcStickyHeaderPos(metrics);
+    EXPECT_FLOAT_EQ(standaloneHeaderPos, metrics.totalMainSize - metrics.footerMainSize - metrics.headerMainSize);
+    EXPECT_FLOAT_EQ(standaloneHeaderPos + metrics.headerMainSize, stickyFooterPos);
+}
+
+/**
  * @tc.name: ScrollStickyBothFooterBeforeContent_001
  * @tc.desc: Verify footer is normalized to the trailing child slot even when it is mounted before lazy content.
  * @tc.type: FUNC
