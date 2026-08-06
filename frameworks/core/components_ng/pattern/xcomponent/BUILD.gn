@@ -22,6 +22,7 @@ config("xcomponent_bridge_config") {
 }
 
 build_component_ng("xcomponent_pattern_ng") {
+  is_component_model = true
   configs = [ ":xcomponent_bridge_config" ]
   sources = [
     "xcomponent_accessibility_child_tree_callback.cpp",
