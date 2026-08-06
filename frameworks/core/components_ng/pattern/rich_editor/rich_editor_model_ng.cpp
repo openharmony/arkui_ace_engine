@@ -617,30 +617,31 @@ PositionWithAffinity RichEditorModelNG::GetGlyphPositionAtCoordinate(FrameNode* 
     return pattern->GetGlyphPositionAtCoordinate(x, y);
 }
 
-PositionWithAffinity RichEditorModelNG::GetCharacterPositionAtCoordinate(FrameNode* frameNode, int32_t x, int32_t y)
+PositionWithAffinity RichEditorModelNG::GetCharacterPositionAtCoordinate(
+    FrameNode* frameNode, int32_t x, int32_t y, TextEncoding encoding)
 {
     CHECK_NULL_RETURN(frameNode, PositionWithAffinity(0, TextAffinity::UPSTREAM));
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, PositionWithAffinity(0, TextAffinity::UPSTREAM));
-    return pattern->GetCharacterPositionAtCoordinate(x, y);
+    return pattern->GetCharacterPositionAtCoordinate(x, y, encoding);
 }
 
 std::pair<TextRange, TextRange> RichEditorModelNG::GetGlyphRangeForCharacterRange(
-    FrameNode* frameNode, int32_t start, int32_t end)
+    FrameNode* frameNode, int32_t start, int32_t end, TextEncoding encoding)
 {
     CHECK_NULL_RETURN(frameNode, {});
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, {});
-    return pattern->GetGlyphRangeForCharacterRange(start, end);
+    return pattern->GetGlyphRangeForCharacterRange(start, end, encoding);
 }
 
 std::pair<TextRange, TextRange> RichEditorModelNG::GetCharacterRangeForGlyphRange(
-    FrameNode* frameNode, int32_t start, int32_t end)
+    FrameNode* frameNode, int32_t start, int32_t end, TextEncoding encoding)
 {
     CHECK_NULL_RETURN(frameNode, {});
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, {});
-    return pattern->GetCharacterRangeForGlyphRange(start, end);
+    return pattern->GetCharacterRangeForGlyphRange(start, end, encoding);
 }
 
 void RichEditorModelNG::SetTypingParagraphStyle(FrameNode* frameNode,

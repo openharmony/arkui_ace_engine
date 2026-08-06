@@ -91,6 +91,12 @@ let TextDataDetectorType;
   TextDataDetectorType[TextDataDetectorType.DATE_TIME = 4] = 'DATE_TIME';
 })(TextDataDetectorType || (TextDataDetectorType = {}));
 
+let TextEncoding;
+(function (TextEncoding) {
+  TextEncoding[TextEncoding.TEXT_ENCODING_UTF8 = 0] = 'TEXT_ENCODING_UTF8';
+  TextEncoding[TextEncoding.TEXT_ENCODING_UTF16 = 1] = 'TEXT_ENCODING_UTF16';
+})(TextEncoding || (TextEncoding = {}));
+
 let DataPanelType;
 (function (DataPanelType) {
   DataPanelType[DataPanelType.Line = 0] = 'Line';

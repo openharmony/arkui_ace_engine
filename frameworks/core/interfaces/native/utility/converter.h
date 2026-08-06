@@ -1083,6 +1083,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<TextDeleteDirection>& dst, const Ark_TextDeleteDirection& src);
     template<> void AssignCast(std::optional<TextDirection>& dst, const Ark_Direction& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TextDirection>& dst, const Ark_TextDirection& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<TextEncoding>& dst, const Ark_TextEncoding& src);
     template<> void AssignCast(std::optional<TextFlipDirection>& dst, const Ark_FlipDirection& src);
     template<>
     ACE_FORCE_EXPORT void AssignCast(
