@@ -1059,8 +1059,7 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
         convMenuParam = NG::SelectMenuParam();
     }
     std::optional<SelectionMenuType> menuType;
-    CHECK_NULL_VOID(options);
-    if (!options) {
+    if (options) {
         Converter::AssignCast(menuType, options->value.menuType.value);
     }
     CallbackHelper(*optContent).BuildAsync([frameNode, spanType = optSpanType.value(), convResponseType,
@@ -1068,7 +1067,9 @@ void SetBindSelectionMenuImpl(Ark_NativePointer node,
         auto builder = [uiNode]() {
             NG::ViewStackProcessor::GetInstance()->Push(uiNode);
         };
-        if (menuType.has_value() && menuType.value() == SelectionMenuType::PREVIEW_MENU) {
+        bool isPreviewMenu = menuType.has_value() && menuType.value() == SelectionMenuType::PREVIEW_MENU;
+        bool bindImagePreviewMenu = isPreviewMenu && convResponseType == NG::TextResponseType::LONG_PRESS;
+        if (bindImagePreviewMenu && spanType == NG::TextSpanType::IMAGE) {
             TextModelStatic::BindPreviewMenu(frameNode, spanType, std::move(builder), menuParam);
         } else {
             TextModelStatic::UnBindPreviewMenu(frameNode);

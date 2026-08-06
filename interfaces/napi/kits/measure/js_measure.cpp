@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "interfaces/napi/kits/utils/napi_utils.h"
 #include "base/hiviewdfx/histogram_wrapper.h"
 #include "bridge/common/utils/engine_helper.h"
@@ -421,7 +420,7 @@ static napi_module_with_js measureModule = {
     .nm_filename = "libmeasure.z.so/measure.js",
     .nm_register_func = MeasureExport,
     .nm_modname = "measure",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .nm_get_abc_code = NAPI_measure_GetABCCode,
     .nm_get_js_code = NAPI_measure_GetJSCode,
 };

@@ -20,7 +20,6 @@
 #include <map>
 #include <optional>
 
-#include "core/components/common/properties/color.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
@@ -36,12 +35,11 @@ public:
     std::optional<SizeF> MeasureContent(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
-    void Measure(LayoutWrapper* layoutWrapper) override;
-
     float GetQRCodeSize() const
     {
         return qrCodeSize_;
     }
+    void Measure(LayoutWrapper* layoutWrapper) override;
 
 private:
     Color color_ = Color::BLACK;

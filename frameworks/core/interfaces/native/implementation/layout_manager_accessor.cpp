@@ -281,13 +281,14 @@ Opt_Array_TextRange GetCharacterRangeForGlyphRangeImpl(Ark_LayoutManager peer, c
     values.push_back(second);
     return Converter::ArkValue<Opt_Array_TextRange>(values, Converter::FC);
 }
+
 Opt_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
                                         Ark_Int32 lineNumber)
 {
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_text_LineMetrics>(Ark_Empty()));
     auto handler = peer->handler.Upgrade();
     CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_text_LineMetrics>(Ark_Empty()));
-    int32_t lineCount = handler->GetLineCount();
+    int32_t lineCount = static_cast<int32_t>(handler->GetLineCount());
     bool isValid = (lineNumber >= 0 && lineNumber < lineCount);
     CHECK_NULL_RETURN(isValid, Converter::ArkValue<Opt_text_LineMetrics>(Ark_Empty()));
     TextLineMetrics lineMetrics = handler->GetLineMetrics(Converter::Convert<int>(lineNumber));

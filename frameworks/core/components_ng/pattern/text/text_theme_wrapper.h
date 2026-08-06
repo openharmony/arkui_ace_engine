@@ -56,10 +56,10 @@ public:
     {
         if (const auto& colors = theme.Colors(); colors) {
             textStyle_.SetTextColor(colors->FontPrimary());
-            textClockFontColor_ = colors->FontSecondary();
             if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
                 dragBackgroundColor_ = colors->CompBackgroundPrimary();
             }
+            textClockFontColor_ = colors->FontSecondary();
         }
     }
 

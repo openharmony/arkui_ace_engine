@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/text/span/span_object.h"
+#include "arkoala_api_generated.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
-
 #include "core/interfaces/native/implementation/line_spacing_style_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -83,4 +83,8 @@ const GENERATED_ArkUILineSpacingStyleAccessor* GetLineSpacingStyleAccessor()
     };
     return &LineSpacingStyleAccessorImpl;
 }
+
+struct LineSpacingStylePeer {
+    virtual ~LineSpacingStylePeer() = default;
+};
 }

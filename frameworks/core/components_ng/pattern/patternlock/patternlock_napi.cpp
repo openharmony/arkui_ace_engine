@@ -348,7 +348,7 @@ static napi_module_with_js modules = {
     .nm_flags = 0,
     .nm_register_func = OHOS::Ace::Init,
     .nm_modname = "arkui.patternlock",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .nm_get_abc_code = NAPI_arkui_patternlock_GetABCCode,
     .nm_get_js_code = NAPI_arkui_patternlock_GetJSCode,
 };
@@ -359,7 +359,7 @@ static napi_module patternLockControllerModule = {
     .nm_filename = nullptr,
     .nm_register_func = OHOS::Ace::InitController,
     .nm_modname = "arkui.patternlockcontroller",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .reserved = { 0 },
 };
 

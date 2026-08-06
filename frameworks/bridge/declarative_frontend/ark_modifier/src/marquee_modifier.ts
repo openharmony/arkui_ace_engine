@@ -66,6 +66,11 @@ class LazyArkMarqueeComponent extends ArkComponent {
    return this;
   }
 
+  onStop(event: () => void): LazyArkMarqueeComponent {
+    this.lazyComponent.onStop(event);
+    return this;
+  }
+
   marqueeUpdateStrategy(value: MarqueeUpdateStrategy): LazyArkMarqueeComponent {
    this.lazyComponent.marqueeUpdateStrategy(value);
    return this;

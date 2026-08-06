@@ -7517,7 +7517,7 @@ typedef enum Ark_text_TextDecorationType {
     ARK_TEXT_TEXT_DECORATION_TYPE_NONE = 0,
     ARK_TEXT_TEXT_DECORATION_TYPE_UNDERLINE = 1,
     ARK_TEXT_TEXT_DECORATION_TYPE_OVERLINE = 2,
-    ARK_TEXT_TEXT_DECORATION_TYPE_LINE_THROUGH = 3,
+    ARK_TEXT_TEXT_DECORATION_TYPE_LINE_THROUGH = 4,
 } Ark_text_TextDecorationType;
 typedef struct Opt_text_TextDecorationType {
     Ark_Tag tag;
@@ -23314,8 +23314,8 @@ typedef struct Ark_ContextMenuOptions {
     Opt_LengthMetrics minKeyboardAvoidDistance;
     Opt_LengthMetrics targetSpace;
     Opt_uiMaterial_Material systemMaterial;
-    Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;
+    Opt_BarState scrollBar;
     Opt_DistortionMode distortionMode;
     Opt_EdgeLightMode edgeLightMode;
     Opt_MenuGridStyleOptions gridStyle;
@@ -23368,7 +23368,6 @@ typedef struct Ark_CustomDialogControllerOptions {
     Opt_uiMaterial_Material systemMaterial;
     Opt_DistortionMode distortionMode;
     Opt_EdgeLightMode edgeLightMode;
-    Opt_ExtendableComponent baseComponent;
 } Ark_CustomDialogControllerOptions;
 typedef struct Opt_CustomDialogControllerOptions {
     Ark_Tag tag;
@@ -23456,9 +23455,9 @@ typedef struct Ark_CustomPopupOptions {
     Opt_PopupBorderLinearGradient borderLinearGradient;
     Opt_AnchoredColorMode colorMode;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_LevelMode levelMode;
     Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
     Opt_BackgroundEffectOptions backgroundEffect;
-    Opt_LevelMode levelMode;
     Opt_VoidCallback onDidAppear;
     Opt_VoidCallback onWillDisappear;
     Opt_VoidCallback onDidDisappear;
@@ -23572,8 +23571,8 @@ typedef struct Ark_MenuOptions {
     Opt_LengthMetrics minKeyboardAvoidDistance;
     Opt_LengthMetrics targetSpace;
     Opt_uiMaterial_Material systemMaterial;
-    Opt_BarState scrollBar;
     Opt_LengthMetrics maxHeight;
+    Opt_BarState scrollBar;
     Opt_DistortionMode distortionMode;
     Opt_EdgeLightMode edgeLightMode;
     Opt_MenuGridStyleOptions gridStyle;
@@ -23732,9 +23731,9 @@ typedef struct Ark_PopupCommonOptions {
     Opt_PopupBorderLinearGradient borderLinearGradient;
     Opt_AnchoredColorMode colorMode;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_LevelMode levelMode;
     Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
     Opt_BackgroundEffectOptions backgroundEffect;
-    Opt_LevelMode levelMode;
     Opt_VoidCallback onDidDisappear;
     Opt_VoidCallback onWillDisappear;
     Opt_VoidCallback onWillAppear;
@@ -24216,9 +24215,9 @@ typedef struct Ark_PopupOptions {
     Opt_PopupBorderLinearGradient borderLinearGradient;
     Opt_AnchoredColorMode colorMode;
     Opt_uiMaterial_Material systemMaterial;
+    Opt_LevelMode levelMode;
     Opt_BackgroundBlurStyleOptions backgroundBlurStyleOptions;
     Opt_BackgroundEffectOptions backgroundEffect;
-    Opt_LevelMode levelMode;
     Opt_VoidCallback onWillDisappear;
     Opt_VoidCallback onDidAppear;
     Opt_VoidCallback onWillAppear;
@@ -24390,9 +24389,6 @@ typedef struct Ark_TextPickerDialogOptions {
     Opt_Boolean enableHoverMode;
     Opt_HoverModeAreaType hoverModeArea;
     Opt_Boolean enableHapticFeedback;
-    Opt_uiMaterial_Material systemMaterial;
-    Opt_DistortionMode distortionMode;
-    Opt_EdgeLightMode edgeLightMode;
 } Ark_TextPickerDialogOptions;
 typedef struct Opt_TextPickerDialogOptions {
     Ark_Tag tag;
@@ -24635,7 +24631,7 @@ typedef struct GENERATED_ArkUIAlphabetIndexerModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setAlphabetIndexerOptions)(Ark_NativePointer node,
-                                      const Ark_AlphabetIndexerOptions* info);
+                                      const Ark_AlphabetIndexerOptions* options);
     void (*setColor)(Ark_NativePointer node,
                      const Opt_ResourceColor* value);
     void (*setSelectedColor)(Ark_NativePointer node,
@@ -25749,7 +25745,7 @@ typedef struct GENERATED_ArkUIGridColModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setGridColOptions)(Ark_NativePointer node,
-                              const Opt_GridColOptions* options);
+                              const Opt_GridColOptions* option);
     void (*setSpan)(Ark_NativePointer node,
                     const Opt_Union_I32_GridColColumnOption* value);
     void (*setGridColOffset)(Ark_NativePointer node,
@@ -25783,7 +25779,7 @@ typedef struct GENERATED_ArkUIGridRowModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setGridRowOptions)(Ark_NativePointer node,
-                              const Opt_GridRowOptions* options);
+                              const Opt_GridRowOptions* option);
     void (*setOnBreakpointChange)(Ark_NativePointer node,
                                   const Opt_synthetic_Callback_String_Void* value);
     void (*setAlignItems)(Ark_NativePointer node,
@@ -26508,7 +26504,7 @@ typedef struct GENERATED_ArkUIRefreshModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setRefreshOptions)(Ark_NativePointer node,
-                              const Ark_RefreshOptions* options);
+                              const Ark_RefreshOptions* value);
     void (*setOnStateChange)(Ark_NativePointer node,
                              const Opt_Callback_RefreshStatus_Void* value);
     void (*setOnRefreshing)(Ark_NativePointer node,
@@ -27088,7 +27084,7 @@ typedef struct GENERATED_ArkUISelectModifier {
     Ark_NativePointer (*construct)(Ark_Int32 id,
                                    Ark_Int32 flags);
     void (*setSelectOptions)(Ark_NativePointer node,
-                             const Array_SelectOption* optionArray);
+                             const Array_SelectOption* options);
     void (*setSelected)(Ark_NativePointer node,
                         const Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource* value);
     void (*setValue)(Ark_NativePointer node,
@@ -28672,7 +28668,7 @@ typedef struct GENERATED_ArkUIWebModifier {
     void (*setEnableFullscreenVideoOverlay)(Ark_NativePointer node,
                                             const Opt_Boolean* value);
     void (*setEnableMediaNetworkProxy)(Ark_NativePointer node,
-                                  const Opt_Boolean* value);
+                                       const Opt_Boolean* value);
     void (*setRegisterNativeEmbedRule)(Ark_NativePointer node,
                                        const Opt_String* tag,
                                        const Opt_String* type);

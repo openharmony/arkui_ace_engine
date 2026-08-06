@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/text/text_content_modifier.h"
 #include "core/components_ng/pattern/text/text_overlay_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT  TextPaintMethod : public NodePaintMethod {
@@ -35,11 +36,11 @@ public:
 
     ~TextPaintMethod() override = default;
 
-    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
-    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+    ACE_FORCE_EXPORT RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override;
+    ACE_FORCE_EXPORT void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
-    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
-    void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
+    ACE_FORCE_EXPORT RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
+    ACE_FORCE_EXPORT void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 protected:
     WeakPtr<Pattern> GetPattern() const

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -143,8 +143,9 @@ void SymbolModelNG::SetClipEdge()
 
 void SymbolModelNG::SetClipEdge(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(frameNode);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto getFrameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(getFrameNode);
+    getFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SymbolModelNG::SetSymbolEffectOptions(SymbolEffectOptions& symbolEffectOptions)
@@ -200,7 +201,7 @@ void SymbolModelNG::RegisterSymbolFontColorResource(FrameNode* frameNode, const 
             auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             Color fontColor;
-            ResourceParseUtils::ParseResColor(resObj, fontColor, true);
+            ResourceParseUtils::ParseResColor(resObj, fontColor);
             auto colorVec = layoutProperty->GetSymbolColorList();
             if (colorVec.has_value() && GreatNotEqual(colorVec.value().size(), resObjIndex)) {
                 auto colorVecArr = colorVec.value();

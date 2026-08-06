@@ -747,7 +747,7 @@ ArkUINativeModuleValue TextBridge::SetMaxFontSize(ArkUIRuntimeCallInfo* runtimeC
     } else {
         GetArkUINodeModifiers()->getTextModifier()->resetTextMaxFontSize(nativeNode);
     }
-
+    
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -976,7 +976,7 @@ ArkUINativeModuleValue TextBridge::SetContent(ArkUIRuntimeCallInfo* runtimeCallI
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
-
+ 
     Framework::JSRef<Framework::JSVal> args = info[1];
     if (args->IsObject() && Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSSpanString>()) {
         auto* spanString = Framework::JSRef<Framework::JSObject>::Cast(args)->Unwrap<Framework::JSSpanString>();
@@ -1065,7 +1065,7 @@ ArkUINativeModuleValue TextBridge::SetTextIndent(ArkUIRuntimeCallInfo* runtimeCa
     if (!ArkTSUtils::ParseJsDimensionFpNG(vm, secondArg, indent, resourceObject) || indent.IsNegative()) {
         indent.Reset();
     }
-
+    
     GetArkUINodeModifiers()->getTextModifier()->setTextIndent(
         nativeNode, indent.Value(), static_cast<int8_t>(indent.Unit()), AceType::RawPtr(resourceObject));
     return panda::JSValueRef::Undefined(vm);
@@ -1308,7 +1308,7 @@ ArkUINativeModuleValue TextBridge::SetEllipsisMode(ArkUIRuntimeCallInfo* runtime
     GetArkUINodeModifiers()->getTextModifier()->setEllipsisMode(nativeNode, ellipsisMode);
     return panda::JSValueRef::Undefined(vm);
 }
-
+ 
 ArkUINativeModuleValue TextBridge::ResetEllipsisMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1535,7 +1535,7 @@ ArkUINativeModuleValue TextBridge::SetPunctuationOverflow(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    uint32_t punctuationOverflow = false;
+    uint32_t punctuationOverflow = 0;
     if (secondArg->IsBoolean()) {
         punctuationOverflow = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
     }

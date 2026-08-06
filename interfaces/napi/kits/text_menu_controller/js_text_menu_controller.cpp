@@ -204,7 +204,7 @@ static napi_module textMenuControllerModule = {
     .nm_filename = nullptr,
     .nm_register_func = textMenuControllerExport,
     .nm_modname = "arkui.textMenuController",
-    .nm_priv = ((void*)0),
+    .nm_priv = nullptr,
     .reserved = { 0 },
 };
 

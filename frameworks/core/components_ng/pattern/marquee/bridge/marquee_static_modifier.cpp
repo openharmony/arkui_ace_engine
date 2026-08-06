@@ -60,7 +60,7 @@ MarqueeOptions Convert(const Ark_MarqueeOptions& src)
         options.spacing = optSpacing;
     }
     options.delay = OptConvert<int32_t>(src.delay);
-    if (options.delay < 0) {
+    if (options.delay && options.delay.value() < 0) {
         options.delay = 0;
     }
     return options;
@@ -112,6 +112,12 @@ void SetMarqueeOptionsImpl(Ark_NativePointer node,
     MarqueeModelNG::SetPlayerStatus(frameNode, marqueeOptions.start.value_or(false));
     if (marqueeOptions.direction) {
         MarqueeModelNG::SetDirection(frameNode, marqueeOptions.direction);
+    }
+    if (marqueeOptions.spacing) {
+        MarqueeModelNG::SetMarqueeSpacing(frameNode, marqueeOptions.spacing);
+    }
+    if (marqueeOptions.delay) {
+        MarqueeModelNG::SetMarqueeDelay(frameNode, marqueeOptions.delay);
     }
 }
 } // MarqueeInterfaceModifier

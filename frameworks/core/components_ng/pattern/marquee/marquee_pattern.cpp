@@ -139,6 +139,7 @@ void MarqueePattern::OnModifyDone()
     auto firstChild = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(firstChild);
     UpdateTextNodeAttr(firstChild);
+
     if (NeedSecondChild()) {
         if (host->GetChildren().size() == 1) {
             CreateSecondChild();
@@ -290,7 +291,7 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                 onFinish();
                 return;
             }
-            TAG_LOGI(AceLogTag::ACE_MARQUEE, "%{public}d animation oosttask onfinish", animationId);
+            TAG_LOGI(AceLogTag::ACE_MARQUEE, "%{public}d animation posttask onfinish", animationId);
             taskExecutor->PostTask([onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI,
                 "ArkUIMarqueePlayAnimation", PriorityType::VIP);
         },

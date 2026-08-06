@@ -72,8 +72,7 @@ public:
     static RefPtr<SearchTheme> GetTheme(const FrameNode *frameNode);
     static void SetSearchDefaultIcon(FrameNode *frameNode);
     static void SetCancelDefaultIcon(FrameNode* frameNode);
-    static void SetOnChangeEvent(
-        FrameNode* frameNode, std::function<void(const std::u16string&)>&& onChangeEvent);
+    static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const std::u16string&)>&& onChangeEvent);
     static void SetSearchSymbolIcon(FrameNode *frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
     static void SetCancelSymbolIcon(FrameNode *frameNode, std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
     static void SetIncludeFontPadding(FrameNode* frameNode, std::optional<bool>& optValue);
@@ -87,6 +86,7 @@ public:
     static void SetCustomKeyboardWithNode(
  	    FrameNode* frameNode, FrameNode* customKeyboard, const std::optional<bool>& supportAvoidance);
 private:
+
 };
 
 } // namespace OHOS::Ace::NG

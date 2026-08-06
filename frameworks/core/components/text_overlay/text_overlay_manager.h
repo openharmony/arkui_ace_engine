@@ -175,7 +175,10 @@ public:
 
     void SetTextOverlayBase(const WeakPtr<TextOverlayBase>& textOverlayBase);
     const RefPtr<TextOverlayBase> GetTextOverlayBase() const;
-    const std::vector<Rect>& GetTextOverlayRect() const;
+    const std::vector<Rect>& GetTextOverlayRect() const
+    {
+        return textOverlayRect_;
+    }
     void AddTextOverlayRect(const Rect& textOverlayRect);
     void ClearTextOverlayRect();
     // Coordinate offset is used to calculate the local location of the touch point in the event manager.

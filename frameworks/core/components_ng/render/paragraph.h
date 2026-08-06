@@ -29,6 +29,7 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/font_collection.h"
+#include "core/components_v2/inspector/utils.h"
 
 #ifndef USE_ROSEN_DRAWING
 class SkCanvas;

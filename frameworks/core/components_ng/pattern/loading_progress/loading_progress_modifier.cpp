@@ -145,9 +145,9 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
     CHECK_NULL_VOID(pattern);
     auto frameNode = pattern->GetHost();
     CHECK_NULL_VOID(frameNode);
-    if (frameNode->GetLocalColorMode() == ColorMode::DARK ||
-        (frameNode->GetLocalColorMode() == ColorMode::COLOR_MODE_UNDEFINED &&
-            Container::CurrentColorMode() == ColorMode::DARK)) {
+    if ((Container::CurrentColorMode() == ColorMode::DARK &&
+            frameNode->GetLocalColorMode() == ColorMode::COLOR_MODE_UNDEFINED) ||
+            frameNode->GetLocalColorMode() == ColorMode::DARK) {
         if (ringColor.GetValue() == DEFAULT_COLOR_DARK.GetValue()) {
             ringColor = LinearColor::WHITE;
         }
@@ -164,7 +164,7 @@ void LoadingProgressModifier::DrawRing(DrawingContext& context, const RingParam&
         filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
             ringParam.darkRingRadius, ringParam.darkRingRadius, RSTileMode::DECAL, nullptr));
 #endif
-        pen.SetFilter(filter);
+     pen.SetFilter(filter);
     }
     if (loadingProgressOwner_ == LoadingProgressOwner::REFRESH && Container::CurrentColorMode() == ColorMode::DARK) {
         filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(

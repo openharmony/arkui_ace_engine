@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SELECT_OVERLAY_SELECT_OVERLAY_ANIMATION_UTILS_H
 
 #include "base/utils/system_properties.h"
-#include "core/common/container.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/base/frame_node.h"
 

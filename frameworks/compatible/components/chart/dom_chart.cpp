@@ -40,6 +40,7 @@ const char DOM_START_DEGREE[] = "startAngle";
 const char DOM_PROGRESS_STROKE_WIDTH[] = "strokeWidth";
 const char DOM_SWEEP_DEGREE[] = "totalAngle";
 
+const char DOM_METHOD_APPEND[] = "append";
 namespace {
 
 const char LIGHT_RED_COLOR[] = "#EB4034";
