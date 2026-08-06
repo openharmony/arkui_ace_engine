@@ -14,6 +14,20 @@ Accessibility 是 ACE Engine 中的**无障碍桥接层**，负责把 ArkUI 组�
 
 ## 快速路由
 
+### 通用无障碍属性
+
+通用无障碍属性（功能 ID `04-03-09`）提供组件树侧的无障碍语义声明层，所有 ArkUI 组件均可通过通用属性接口设置无障碍文本、角色、状态、值等。
+
+| 关注点 | 稳定路径 | 说明 |
+|--------|----------|------|
+| AccessibilityProperty 基类 | `frameworks/core/components_ng/property/accessibility_property.h`、`accessibility_property.cpp` | 无障碍属性存储基类；`GetText/GetSupportAction` 等 |
+| AccessibilityProperty 多线程 | `frameworks/core/components_ng/property/accessibility_property_mutilthread.cpp` | 多线程并发访问 |
+| AccessibilityProperty 辅助 | `frameworks/core/components_ng/property/accessibility_property_function.h`、`accessibility_property_helper.h` | 属性函数封装 |
+| 属性工具 | `frameworks/core/accessibility/utils/accessibility_property_utils.h` | `GetContent/GetAccessibilityText` 优先级 |
+| 通用属性写入（NG Model） | `frameworks/core/components_ng/base/view_abstract_model_ng.cpp`、`view_abstract.h`/`view_abstract.cpp` | `SetAccessibilityGroup/Text/Level/...` 系列方法 |
+| JSView 通用属性入口 | `frameworks/bridge/declarative_frontend/jsview/js_accessibility.cpp`、`js_view_abstract.cpp` | JSView 侧解析与写入 |
+| 组件特化子类 | `frameworks/core/components_ng/pattern/<component>/*_accessibility_property.h` | 各组件特化实现（Text、Slider、Checkbox、Grid 等） |
+
 ### 源码入口
 
 | 关注点 | 稳定路径 | 说明 |
@@ -86,6 +100,9 @@ Accessibility 是 ACE Engine 中的**无障碍桥接层**，负责把 ArkUI 组�
 | 焦点移动单测 | `test/unittest/core/accessibility/focus_move/`、`test/unittest/core/accessibility/osal/focus_move/` | 焦点策略与边界判定回归 |
 | 工具/调试单测 | `test/unittest/core/accessibility/utils/`、`test/unittest/core/accessibility/node_uitls/`、`test/unittest/core/accessibility/hidumper/` | 工具函数、节点工具与 dump 回归 |
 | 测试 Mock | `test/mock/frameworks/core/accessibility/` | 依赖无障碍内部类型的测试替身 |
+| AccessibilityProperty 基类单测 | `test/unittest/core/property/accessibility_property_test_ng.cpp`、`accessibility_property_testtwo_ng.cpp`、`accessibility_property_test_three_ng.cpp` | 通用无障碍属性（`04-03-09`）基类属性写入/读取回归 |
+| 组件无障碍属性特化单测 | `test/unittest/core/pattern/<component>/*_accessibility_property_test*.cpp` | 各组件特化无障碍属性回归 |
+| Property Mock | `test/mock/frameworks/core/components_ng/property/mock_accessibility_property.cpp` | AccessibilityProperty 测试替身 |
 | Context registry | `docs/context_registry.json` | `Accessibility` 的 KB、Spec、源码、API 和测试统一路由 |
 
 ### 相关 Spec
