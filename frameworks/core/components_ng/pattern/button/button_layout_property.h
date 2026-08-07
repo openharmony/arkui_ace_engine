@@ -46,6 +46,7 @@ public:
         value->propFontColor_ = CloneFontColor();
         value->propFontColorFlagByUser_ = CloneFontColorFlagByUser();
         value->propFontColorSetByUser_ = CloneFontColorSetByUser();
+        value->propButtonStyleSetByUser_ = CloneButtonStyleSetByUser();
         value->propFontFamily_ = CloneFontFamily();
         value->propFontStyle_ = CloneFontStyle();
         value->propLabel_ = CloneLabel();
@@ -68,6 +69,7 @@ public:
         ResetFontColor();
         ResetFontColorFlagByUser();
         ResetFontColorSetByUser();
+        ResetButtonStyleSetByUser();
         ResetFontFamily();
         ResetFontStyle();
         ResetLabel();
@@ -105,6 +107,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(MaxFontSize, Dimension, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HeightAdaptivePolicy, Ace::TextHeightAdaptivePolicy, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ButtonStyle, ButtonStyleMode, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ButtonStyleSetByUser, bool, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ControlSize, ControlSize, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ButtonRole, ButtonRole, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CreateWithLabel, bool, PROPERTY_UPDATE_NORMAL);

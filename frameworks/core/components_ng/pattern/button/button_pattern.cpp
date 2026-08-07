@@ -18,7 +18,9 @@
 #include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -744,6 +746,58 @@ void ButtonPattern::OnModifyDone()
     HandleFocusActiveStyle();
 }
 
+void ButtonPattern::ReapplyImmersiveMaterial()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    if (!material || material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        return;
+    }
+    auto immersiveOptionsPtr = material->CopyImmersiveOptions();
+    CHECK_NULL_VOID(immersiveOptionsPtr);
+    ProcessImmersiveOptions(immersiveOptionsPtr);
+    material->SetImmersiveOptions(*immersiveOptionsPtr);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(material));
+}
+
+void ButtonPattern::ProcessImmersiveOptions(const std::shared_ptr<ImmersiveOptions>& options)
+{
+    CHECK_NULL_VOID(options);
+    if (options->materialColor.has_value()) {
+        return;
+    }
+    if (UseContentModifier()) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    if (layoutProperty && layoutProperty->GetIsUserSetBackgroundColor()) {
+        return;
+    }
+    if (layoutProperty && layoutProperty->GetButtonStyleSetByUser().value_or(false)) {
+        return;
+    }
+    auto injectColor = GetDefaultThemeBgColor();
+    if (injectColor.GetAlpha() > 0) {
+        options->materialColor = injectColor;
+    }
+}
+
+Color ButtonPattern::GetDefaultThemeBgColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Color::TRANSPARENT);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Color::TRANSPARENT);
+    auto buttonTheme = host->GetTheme<ButtonTheme>(true);
+    CHECK_NULL_RETURN(buttonTheme, Color::TRANSPARENT);
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    return buttonTheme->GetBgColor(buttonStyle, buttonRole);
+}
+
 void ButtonPattern::InitButtonAlphaOffscreen()
 {
     if (isInitButtonAlphaOffscreen_) {
@@ -1063,6 +1117,9 @@ void ButtonPattern::HandleBackgroundColor()
 
     if (!renderContext->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
+    }
+    if (renderContext->GetSystemMaterial() && !layoutProperty->GetIsUserSetBackgroundColor()) {
+        ReapplyImmersiveMaterial();
     }
     themeBgColor_ = buttonTheme->GetBgColor(buttonStyle, buttonRole);
     themeTextColor_ = buttonTheme->GetTextColor(buttonStyle, buttonRole);
