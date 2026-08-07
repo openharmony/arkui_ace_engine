@@ -148,7 +148,21 @@ Before editing any file, the agent MUST state:
 | Subwindow, Popup, Menu, bindSheet | `docs/kb/architecture/subwindow-mechanism.md` |
 | ResourceAdapter, instanceId, dark mode switching | `docs/kb/architecture/resource-dynamic-switching.md` |
 
-### 3.4 Authoring Standard (Minimal)
+### 3.4 Path-based KB Routing
+
+When editing files under a specific path, read the corresponding KB first:
+
+| Path pattern | Read KB |
+|---|---|
+| `frameworks/core/components_ng/pattern/<comp>/` | `docs/kb/components/<category>/` |
+| `frameworks/core/pipeline_ng/` | `docs/kb/architecture/layout-framework.md`, `docs/kb/architecture/basic-render-pipeline.md` |
+| `interfaces/native/node/` | `docs/kb/api/` |
+| `frameworks/bridge/declarative_frontend/` | `docs/kb/syntax/` |
+| `frameworks/bridge/arkts_frontend/` | `docs/kb/syntax/` |
+| `frameworks/core/accessibility/` | `docs/kb/architecture/accessibility.md` |
+| `frameworks/core/components_ng/pattern/<comp>/*drag*` | `docs/kb/architecture/drag-framework.md` |
+
+### 3.5 Authoring Standard (Minimal)
 
 - Naming/location: use `XXX_Knowledge_Base.md` or `XXX_Knowledge_Base_CN.md`; place under `docs/pattern/<component>/`, `docs/sdk/`, `docs/architecture/`, `docs/common/`, `docs/layout/`, `docs/api/`, `docs/accessibility/` (choose by topic).
 - Index metadata (`docs/knowledge_base_INDEX.json`) must include: `name`, `name_cn`, `category`, `type`, `file_path`, `last_updated`, `keywords` (5-15), `aliases` (2-5); recommend `source_paths` and `api_paths`.
@@ -274,11 +288,12 @@ A task is done when:
 3. No lint or static analysis regressions introduced.
 4. All constraints from Section 8 are respected.
 5. Final response includes: files modified, build result, test result, constraints respected.
+6. If public API files (`interfaces/native/`, `interfaces/napi/`) were changed, verify no signature/ABI breakage (e.g., diff headers against base branch).
 
 ### Lint / Static Analysis
 
-- Run `clang-tidy` on modified C++ files if available.
-- Verify no new warnings in build output.
+- This repository does not configure `clang-tidy` — agent may skip this step.
+- Verify no new warnings in build output instead.
 
 ## 8. Hard Boundaries (Do not / Ask before)
 
@@ -291,6 +306,7 @@ Do not (without explicit user confirmation):
 - Change permission checks or trust boundaries without security review.
 - Modify logging, DFX instrumentation, or fault attribution behavior without DFX owner review.
 - Change persistent data formats, serialization, or cross-version protocol behavior without compatibility review.
+- Introduce third-party dependencies without license review (including copying source code snippets from third-party projects).
 
 Ask before:
 
@@ -307,3 +323,4 @@ Ask before:
 - Editing generated files under `**/generated/` directly instead of modifying the source generator.
 - Confusing `declarative_frontend` (dynamic) and `arkts_frontend` (static) — they have different pipelines and APIs.
 - Ignoring `OnModifyDone` — property changes that require follow-up logic must be handled in this callback.
+- Accessing UI objects from a non-UI thread — must post tasks to the UI thread via `PipelineContext::PostTask` or similar mechanism.
