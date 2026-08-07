@@ -269,6 +269,25 @@ void WindowPattern::OnAttachToFrameNode()
         return;
     }
 
+    if (state == Rosen::SessionState::STATE_CONNECT && session_->GetSessionInfo().isPrelaunch_) {
+        if (!session_->GetShowRecent()) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode prelaunch add appWindow");
+            AddChild(host, appWindow_, appWindowName_, 0);
+            attachToFrameNodeFlag_ = true;
+            auto surfaceNode = session_->GetSurfaceNode();
+            CHECK_NULL_VOID(surfaceNode);
+            surfaceNode->SetBufferAvailableCallback(callback_);
+        } else if (session_->GetShowRecent() && session_->HasPersistentSnapshot()) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode prelaunch add snapshot");
+            CreateSnapshotWindow();
+            AddChild(host, snapshotWindow_, snapshotWindowName_);
+            attachToFrameNodeFlag_ = true;
+        } else {
+            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnAttachToFrameNode prelaunch, has no persistent snapshot");
+        }
+        return;
+    }
+
     if (session_->GetShowRecent()) {
         CreateStartingWindow();
         AddChild(host, startingWindow_, startingWindowName_);
