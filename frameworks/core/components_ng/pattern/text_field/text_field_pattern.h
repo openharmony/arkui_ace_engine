@@ -75,6 +75,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
+#include "core/text/text_emoji_processor.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 
 #ifndef ACE_UNITTEST
@@ -443,6 +444,7 @@ public:
     void CreateHandles() override;
     void OnUiMaterialParamUpdate(const UiMaterialParam& params) override;
     void GetEmojiSubStringRange(int32_t& start, int32_t& end);
+    EmojiRelation GetEmojiRelation(int index);
 
     int32_t SetPreviewText(const std::u16string& previewValue, const PreviewRange range) override;
     int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
