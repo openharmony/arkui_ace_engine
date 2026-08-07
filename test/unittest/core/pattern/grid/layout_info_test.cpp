@@ -1097,6 +1097,29 @@ HWTEST_F(GridLayoutInfoTest, CheckGridMatrix005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckGridMatrix006
+ * @tc.desc: test CheckGridMatrix returns false with childrenCount_ set, exercising the
+ *           diagnostic logging path that includes GetChildrenCount().
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, CheckGridMatrix006, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.childrenCount_ = 12;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 3 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+    };
+    info.startMainLineIndex_ = 0;
+    info.endMainLineIndex_ = 1;
+    info.startIndex_ = 0;
+    info.endIndex_ = 3;
+    EXPECT_FALSE(info.CheckGridMatrix(2));
+    EXPECT_EQ(info.GetChildrenCount(), 12);
+}
+
+/**
  * @tc.name: GridLayoutInfo::UpdateStartIndexByStartLineTest001
  * @tc.desc: test UpdateStartIndexByStartLine with empty GridMatrix
  * @tc.type: FUNC

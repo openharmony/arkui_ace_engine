@@ -417,8 +417,20 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheStart, cacheEnd, showCached);
         info_.times_ = (info_.times_ + 1) % GRID_CHECK_INTERVAL;
-        if (info_.times_ == 0) {
-            info_.CheckGridMatrix(cacheCount);
+        if (info_.times_ == 0 && !info_.CheckGridMatrix(cacheCount)) {
+            // TODO: this is a fallback workaround. When CheckGridMatrix detects matrix inconsistency,
+            // the current solution triggers a full data reload on the next frame to recover.
+            // The root cause of the inconsistency should be investigated and fixed at the source.
+            // The ideal solution is to pinpoint the exact scenario that corrupts the matrix and prevent it,
+            // rather than relying on a periodic self-check + full reload to recover.
+            TAG_LOGW(AceLogTag::ACE_GRID, "CheckGridMatrix failed, trigger data reload");
+            auto host = layoutWrapper->GetHostNode();
+            CHECK_NULL_VOID(host);
+            UpdateOverlay(layoutWrapper);
+            isLayouted_ = true;
+            host->ChildrenUpdatedFrom(0);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            return;
         }
     }
     UpdateOverlay(layoutWrapper);
