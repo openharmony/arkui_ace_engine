@@ -87,8 +87,6 @@ void RotationRecognizer::OnRejected()
 
 void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
-    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::DOWN)
-        : static_cast<int32_t>(MouseAction::PRESS);
     extraInfo_ = "";
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -119,7 +117,6 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
-    lastAction_ = static_cast<int32_t>(AxisAction::BEGIN);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -139,8 +136,6 @@ void RotationRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 
 void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
-    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::UP)
-        : static_cast<int32_t>(MouseAction::RELEASE);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
     }
@@ -188,7 +183,6 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 {
-    lastAction_ = static_cast<int32_t>(AxisAction::END);
     // if rotation recognizer received another axisEvent, no need to active.
     if (!event.isRotationEvent) {
         return;
@@ -216,8 +210,6 @@ void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
 
 void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::MOVE)
-        : static_cast<int32_t>(MouseAction::MOVE);
     if (!IsActiveFinger(event.id)) {
         touchPoints_[event.id] = event;
         return;
@@ -269,7 +261,6 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 {
-    lastAction_ = static_cast<int32_t>(AxisAction::UPDATE);
     if (!event.isRotationEvent) {
         return;
     }
@@ -299,8 +290,6 @@ void RotationRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
-    lastAction_ = inputEventType_ == InputEventType::TOUCH_SCREEN ? static_cast<int32_t>(TouchType::CANCEL)
-        : static_cast<int32_t>(MouseAction::CANCEL);
     extraInfo_ += "cancel received.";
     if (!IsActiveFinger(event.id)) {
         return;
@@ -325,7 +314,6 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void RotationRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    lastAction_ = static_cast<int32_t>(AxisAction::CANCEL);
     extraInfo_ += "cancel received.";
     UpdateTouchPointWithAxisEvent(event);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
@@ -443,9 +431,6 @@ void RotationRecognizer::GetGestureEventInfo(GestureEvent& info)
         info.SetTargetDisplayId(touchPoint.targetDisplayId);
     }
     info.SetPointerEvent(lastPointEvent_);
-    if (!lastPointEvent_) {
-        info.SetLastAction(lastAction_);
-    }
     info.SetInputEventType(inputEventType_);
 }
 

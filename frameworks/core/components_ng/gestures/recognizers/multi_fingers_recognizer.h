@@ -85,7 +85,6 @@ public:
         lastPointEvent_.reset();
         backupTouchPointsForSucceedBlock_.reset();
         preventBegin_ = false;
-        lastAction_ = 0;
     }
 
     void CleanRecognizerState() override;
@@ -146,7 +145,6 @@ protected:
         disposal_ = GestureDisposal::NONE;
         backupTouchPointsForSucceedBlock_.reset();
         preventBegin_ = false;
-        lastAction_ = 0;
     }
 
     bool IsNeedResetStatus();
@@ -167,7 +165,6 @@ protected:
     std::shared_ptr<MMI::PointerEvent> lastPointEvent_;
     int32_t fingers_ = 1;
     bool isLimitFingerCount_ = false;
-    int32_t lastAction_ = 0;
     std::optional<std::map<int32_t, TouchEvent>> backupTouchPointsForSucceedBlock_;
     // Used only for log throttling.
     int32_t logLimit_ = -1;
