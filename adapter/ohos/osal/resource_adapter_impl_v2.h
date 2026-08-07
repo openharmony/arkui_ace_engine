@@ -37,6 +37,8 @@ public:
     ResourceAdapterImplV2(
         std::shared_ptr<Global::Resource::ResourceManager> resourceManager, const ResourceInfo& resourceInfo);
     ~ResourceAdapterImplV2() override = default;
+    static RefPtr<ResourceAdapterImplV2> CreateOverrideResourceAdapter(
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceManager, const ResourceInfo& resourceInfo);
 
     void Init(const ResourceInfo& resourceInfo) override;
     void UpdateConfig(const ResourceConfiguration& config, bool themeFlag = false) override;
@@ -109,6 +111,7 @@ private:
     std::string packagePathStr_;
     std::shared_ptr<Global::Resource::ResConfig> resConfig_;
     bool appHasDarkRes_ = false;
+    bool isOverrideResourceAdapter_ = false;
     std::mutex updateResConfigMutex_;
     ACE_DISALLOW_COPY_AND_MOVE(ResourceAdapterImplV2);
     void PreloadTheme(int32_t themeId, RefPtr<ResourceThemeStyle> theme);
