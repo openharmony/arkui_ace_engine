@@ -116,6 +116,11 @@ Use the KB as the first-stop context before any deep code analysis, and follow t
 - If KB hits are weak or ambiguous, refine query (`--field`, second keyword) and fallback to `rg -n "<keyword>" docs`.
 - After KB routing, verify only in real source code and tests (typically `frameworks/`, `interfaces/`, `test/`) before concluding.
 
+Before editing any file, the agent MUST state:
+1. Task category (from the routing table above)
+2. KB documents read (or explicitly state "no KB hit")
+3. Constraints found that apply to this change
+
 ### 3.2 Task Routing Table
 
 | Task | Read this KB category / doc first |
@@ -220,6 +225,15 @@ Detailed templates/rules: `docs/knowledge_base_README.md`.
 | Add/modify event / gesture | `frameworks/core/components_ng/pattern/` + `*_event_hub.*` |
 | Fix accessibility | `frameworks/core/accessibility/` |
 
+### Nested Agent Guidance
+
+| Path | Purpose |
+|---|---|
+| `.claude/agents/openharmony-build-fix.md` | Build error diagnosis and fix loop |
+| `.claude/skills/arkui-api-design/` | ArkUI API design conventions and review rules |
+| `.claude/skills/capi-test-fixer/` | C API test failure diagnosis and fix |
+| `.claude/skills/capi-test-naming-verifier/` | C API test naming convention verification |
+
 ## 6. Component Development Guidance
 
 - Prefer `components_ng` over legacy `components`.
@@ -252,6 +266,20 @@ When reporting completion, include:
 - Test command run, gtest filter, and actual passed/failed counts
 - Any constraints identified and respected (especially API/ABI/compatibility)
 
+### Done Definition
+
+A task is done when:
+1. All modified files compile without errors.
+2. Targeted unit tests pass (with gtest filter if applicable).
+3. No lint or static analysis regressions introduced.
+4. All constraints from Section 8 are respected.
+5. Final response includes: files modified, build result, test result, constraints respected.
+
+### Lint / Static Analysis
+
+- Run `clang-tidy` on modified C++ files if available.
+- Verify no new warnings in build output.
+
 ## 8. Hard Boundaries (Do not / Ask before)
 
 Do not (without explicit user confirmation):
@@ -260,6 +288,9 @@ Do not (without explicit user confirmation):
 - Manually edit generated files under `**/generated/`.
 - Add dependencies on other OpenHarmony system modules outside `adapter/` (including `BUILD.gn` `deps/public_deps/data_deps` dependency entries).
 - Run destructive or hard-to-recover commands (for example `rm -rf`, `git reset --hard`).
+- Change permission checks or trust boundaries without security review.
+- Modify logging, DFX instrumentation, or fault attribution behavior without DFX owner review.
+- Change persistent data formats, serialization, or cross-version protocol behavior without compatibility review.
 
 Ask before:
 
