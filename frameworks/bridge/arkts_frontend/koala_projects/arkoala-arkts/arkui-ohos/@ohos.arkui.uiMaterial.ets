@@ -23,6 +23,15 @@ namespace uiMaterial {
         SEMI_TRANSPARENT = 1,
         IMMERSIVE = 2,
     }
+    export enum MaterialState {
+        DEFAULT = 0,
+        ENABLE = 1,
+        DISABLE = 2,
+    }
+    export interface MaterialInfo {
+        state: MaterialState,
+        type: MaterialType,
+    }
     export interface MaterialOptions {
         type?: MaterialType,
     }
@@ -97,6 +106,13 @@ namespace uiMaterial {
         setNativeObject(ptr: long): void {
             this.materialObj_ = ptr;
         }
+        static get empty(): Material {
+            let nativePtr = ArkUIAniModule._UiMaterial_GetEmpty();    
+            let result = new Material();
+            result.setNativeObject(nativePtr);
+            result.registerCleaner(nativePtr);
+            return result;
+        }
     }
     export class ImmersiveMaterial extends Material {
         constructor(options?: ImmersiveOptions) {
@@ -148,6 +164,15 @@ namespace uiMaterial {
     }
     export function isImmersiveMaterialSupported(): boolean {
         return ArkUIAniModule._UiMaterial_IsImmersiveMaterialSupported();
+    }
+    export function getMaterialInfo(): MaterialInfo {
+        let materialState = ArkUIAniModule._UiMaterial_GetMaterialState();
+        let materialType = ArkUIAniModule._UiMaterial_GetMaterialType();
+        const info: MaterialInfo = {
+            state: MaterialState.fromValue(materialState),
+            type: MaterialType.fromValue(materialType),
+        };
+        return info;
     }
 }
 

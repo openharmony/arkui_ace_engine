@@ -956,6 +956,21 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialIsImmersiveMaterialSupported)
         },
         ani_native_function {
+            "_UiMaterial_GetMaterialState",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialGetMaterialState)
+        },
+        ani_native_function {
+            "_UiMaterial_GetMaterialType",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialGetMaterialType)
+        },
+        ani_native_function {
+            "_UiMaterial_GetEmpty",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::UiMaterialGetEmpty)
+        },
+        ani_native_function {
             "_CreateViewStackProcessor",
             ":l",
             reinterpret_cast<void*>(OHOS::Ace::Ani::CreateViewStackProcessor)
