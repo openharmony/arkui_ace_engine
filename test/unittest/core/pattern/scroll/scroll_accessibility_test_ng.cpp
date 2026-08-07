@@ -656,4 +656,70 @@ HWTEST_F(ScrollAccessibilityTestNg, ScrollA11yNoEventWhenNotOnMainTree001, TestS
     EXPECT_NE(captured2->type, AccessibilityEventType::SCROLL_END);
 }
 
+/**
+ * @tc.name: ScrollA11yScrollBarDragBounceBack001
+ * @tc.desc: Drag inner scrollbar past boundary to trigger spring bounce-back,
+ *           then release with velocity. Verify accessibility scrollSource is
+ *           reported correctly (not empty) even when double animation
+ *           (spring + snap) may occur.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollAccessibilityTestNg, ScrollA11yScrollBarDragBounceBack001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetScrollSnap(ScrollSnapAlign::START, Dimension(ITEM_MAIN_SIZE), {}, { true, true });
+    CreateContent();
+    CreateScrollDone();
+    auto pipeline = MockPipelineContext::GetCurrent();
+
+    /**
+     * @tc.steps: step1. Capture all SCROLL_END accessibility events.
+     */
+    std::vector<std::string> scrollEndSources;
+    EXPECT_CALL(*pipeline, SendEventToAccessibility(_))
+        .WillRepeatedly(testing::Invoke([&](const AccessibilityEvent& event) {
+            if (event.type == AccessibilityEventType::SCROLL_END) {
+                auto it = event.extraEventInfo.find("scrollSource");
+                if (it != event.extraEventInfo.end()) {
+                    scrollEndSources.push_back(it->second);
+                } else {
+                    scrollEndSources.push_back("");
+                }
+            }
+        }));
+
+    /**
+     * @tc.steps: step2. Drag inner scrollbar past top boundary (over-scroll),
+     *           then release with velocity to trigger bounce-back spring.
+     */
+    GestureEvent gesture;
+    gesture.SetSourceTool(SourceTool::FINGER);
+    gesture.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    gesture.SetGlobalPoint(Point(238.f, 80.f));
+    gesture.SetGlobalLocation({ 238.f, 80.f });
+    gesture.SetLocalLocation({ 238.f, 80.f });
+    ASSERT_NE(scrollBar_, nullptr);
+    scrollBar_->HandleDragStart(gesture);
+    FlushUITasks();
+
+    gesture.SetMainDelta(-50.f);
+    scrollBar_->HandleDragUpdate(gesture);
+    FlushUITasks();
+
+    gesture.SetMainVelocity(-1000.f);
+    scrollBar_->HandleDragEnd(gesture);
+
+    /**
+     * @tc.steps: step3. Tick all animations to finish.
+     * @tc.expected: All SCROLL_END events have non-empty scrollSource.
+     */
+    TickToFinish();
+
+    ASSERT_FALSE(scrollEndSources.empty());
+    for (const auto& source : scrollEndSources) {
+        EXPECT_FALSE(source.empty()) << "scrollSource should not be empty";
+    }
+}
 } // namespace OHOS::Ace::NG

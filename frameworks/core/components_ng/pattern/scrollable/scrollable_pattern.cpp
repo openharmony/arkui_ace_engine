@@ -3588,9 +3588,16 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
     host->SetSuggestOpIncActivatedOnce();
 }
 
+bool ScrollablePattern::InnerScrollBarIdle()
+{
+    return !scrollBar_ || !scrollBar_->IsDriving();
+}
+
 void ScrollablePattern::ResetAccessibilityScrollSourceIfIdle()
 {
-    if (!IsScrolling() && ScrollableIdle()) {
+    auto scrollable = GetScrollable();
+    if (!IsScrolling() && (!scrollable || scrollable->IsAllAnimationStopped())
+        && !AnimateRunning() && ScrollBarIdle() && InnerScrollBarIdle()) {
         SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
     }
 }

@@ -266,6 +266,7 @@ public:
     {
         return !scrollBarProxy_ || scrollBarProxy_->Idle();
     }
+    bool InnerScrollBarIdle();
     void SetScrollEnabled(bool enabled)
     {
         CHECK_NULL_VOID(scrollableEvent_);

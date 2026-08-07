@@ -551,6 +551,8 @@ public:
         return axisAnimator_ && axisAnimator_->IsRunning();
     }
 
+    bool IsAllAnimationStopped() const;
+
     double GetCurrentPos() const
     {
         return currentPos_;

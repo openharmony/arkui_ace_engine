@@ -610,6 +610,12 @@ bool Scrollable::IsStopped() const
     return state_ == AnimationState::IDLE;
 }
 
+bool Scrollable::IsAllAnimationStopped() const
+{
+    return !isTouching_ && state_ == AnimationState::IDLE && !nestedScrolling_
+        && !isCrownDragging_ && springAnimationCount_ == 0 && updateSnapAnimationCount_ == 0;
+}
+
 bool Scrollable::IsSpringStopped() const
 {
     return state_ != AnimationState::SPRING;
