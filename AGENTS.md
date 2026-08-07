@@ -116,7 +116,34 @@ Use the KB as the first-stop context before any deep code analysis, and follow t
 - If KB hits are weak or ambiguous, refine query (`--field`, second keyword) and fallback to `rg -n "<keyword>" docs`.
 - After KB routing, verify only in real source code and tests (typically `frameworks/`, `interfaces/`, `test/`) before concluding.
 
-### 3.2 Authoring Standard (Minimal)
+### 3.2 Task Routing Table
+
+| Task | Read this KB category / doc first |
+|---|---|
+| UI component behavior / Pattern / Model | `docs/kb/components/<category>/` |
+| Layout algorithm / render pipeline / scheduling | `docs/kb/architecture/layout-framework.md`, `docs/kb/architecture/basic-render-pipeline.md` |
+| C API / NAPI / NDK Modifier | `docs/kb/api/` |
+| ArkTS declarative syntax / compiler / frontend | `docs/kb/syntax/` |
+| Drag / gesture / event / accessibility | `docs/kb/architecture/drag-framework.md`, `docs/kb/architecture/event-base-framework.md`, `docs/kb/architecture/accessibility.md` |
+| Resource / theme / multi-instance | `docs/kb/architecture/resource-access.md`, `docs/kb/architecture/theme-framework.md`, `docs/kb/architecture/multi-instance-management.md` |
+| Bug / stability / regression issue | `docs/kb/issues/` |
+| Cross-cutting capability | `docs/kb/capabilities/` |
+
+### 3.3 Vocabulary Routing
+
+| Term | KB lookup |
+|---|---|
+| FrameNode, Pattern, LayoutProperty, PaintProperty | `docs/kb/architecture/basic-render-pipeline.md` |
+| PipelineContext, FlushTask, UITaskScheduler | `docs/kb/architecture/layout-framework.md` |
+| Modifier, node_modifier, ArkUIModifier | `docs/kb/api/` or `docs/kb/components/<category>/` |
+| CustomNode, CustomSpan, FrameNodeAdapter | `docs/kb/components/custom-node/` |
+| LazyForEach, Repeat, Swiper+LazyForEach | `docs/kb/syntax/lazy_for_each.md`, `docs/kb/syntax/repeat.md` |
+| DragFrameSuite, DragDropManager | `docs/kb/architecture/drag-framework.md` |
+| ComponentReuse, RecycleNode | `docs/kb/architecture/component_reuse_framework.md` |
+| Subwindow, Popup, Menu, bindSheet | `docs/kb/architecture/subwindow-mechanism.md` |
+| ResourceAdapter, instanceId, dark mode switching | `docs/kb/architecture/resource-dynamic-switching.md` |
+
+### 3.4 Authoring Standard (Minimal)
 
 - Naming/location: use `XXX_Knowledge_Base.md` or `XXX_Knowledge_Base_CN.md`; place under `docs/pattern/<component>/`, `docs/sdk/`, `docs/architecture/`, `docs/common/`, `docs/layout/`, `docs/api/`, `docs/accessibility/` (choose by topic).
 - Index metadata (`docs/knowledge_base_INDEX.json`) must include: `name`, `name_cn`, `category`, `type`, `file_path`, `last_updated`, `keywords` (5-15), `aliases` (2-5); recommend `source_paths` and `api_paths`.
@@ -170,6 +197,29 @@ Detailed templates/rules: `docs/knowledge_base_README.md`.
 - `interfaces/napi/kits/`: NAPI implementations for `@ohos.*` modules such as `router`, `promptAction`, `mediaquery`, `animator`, `font`, `measure`, `curves`, `matrix4` (31 subdirectories).
 - `test/unittest`, `test/benchmark`: tests
 
+### Frequently Changed Paths
+
+- `frameworks/core/components_ng/pattern/` — most frequent change target (component behavior)
+- `frameworks/core/pipeline_ng/` — rendering pipeline changes (high impact)
+- `frameworks/bridge/declarative_frontend/` — dynamic API surface changes
+- `interfaces/native/node/` — C API / Modifier bridge changes
+
+### Task-to-Path Quick Reference
+
+| Task | Start here |
+|---|---|
+| Add/modify a UI component | `frameworks/core/components_ng/pattern/<component>/` |
+| Change layout algorithm | `frameworks/core/components_ng/pattern/<component>/` + `*_layout_algorithm.*` |
+| Fix rendering pipeline | `frameworks/core/pipeline_ng/` |
+| Add/modify C API / Modifier | `interfaces/native/node/` → `frameworks/core/components_ng/` modifier bridge |
+| Add/modify NAPI | `interfaces/napi/kits/<module>/` |
+| Fix dynamic frontend bridge | `frameworks/bridge/declarative_frontend/` |
+| Fix static frontend bridge | `frameworks/bridge/arkts_frontend/` |
+| Platform adaptation | `adapter/ohos/` |
+| Add/modify advanced component | `advanced_ui_component/` or `advanced_ui_component_static/` |
+| Add/modify event / gesture | `frameworks/core/components_ng/pattern/` + `*_event_hub.*` |
+| Fix accessibility | `frameworks/core/accessibility/` |
+
 ## 6. Component Development Guidance
 
 - Prefer `components_ng` over legacy `components`.
@@ -187,6 +237,21 @@ Detailed templates/rules: `docs/knowledge_base_README.md`.
   - Run relevant `capi_*` test executables
   - Ensure host binaries are correct architecture (`file <test_binary>`)
 
+### Validation Fallback
+
+If no build/test environment is available:
+1. State explicitly that build/test validation was not performed.
+2. Provide the exact build and test commands that should be run.
+3. Describe expected pass criteria based on code analysis.
+
+### Final Response Expectations
+
+When reporting completion, include:
+- Files modified (with line counts)
+- Build command run and result
+- Test command run, gtest filter, and actual passed/failed counts
+- Any constraints identified and respected (especially API/ABI/compatibility)
+
 ## 8. Hard Boundaries (Do not / Ask before)
 
 Do not (without explicit user confirmation):
@@ -201,3 +266,13 @@ Ask before:
 - Any API/ABI compatibility-impacting change or default behavior change.
 - Any new/updated/replaced dependency: `bundle.json` dependency changes; new `deps/public_deps/data_deps` in any `BUILD.gn`.
 - Regenerating static ArkTS generated files (must edit `frameworks/bridge/arkts_frontend/arkoala_generator/` first).
+
+### Common Agent Pitfalls
+
+- Forgetting `MarkDirty` / `MarkMeasureDirty` after property changes — layout will not update without explicit dirty marking.
+- Mixing `components/` (legacy) and `components_ng/` (new) APIs in the same feature — always use `components_ng/` for new code.
+- Holding `RefPtr<Parent>` from child without `WeakPtr` — creates reference cycles that leak memory.
+- Assuming `DynamicCast` always succeeds — always null-check the result before dereferencing.
+- Editing generated files under `**/generated/` directly instead of modifying the source generator.
+- Confusing `declarative_frontend` (dynamic) and `arkts_frontend` (static) — they have different pipelines and APIs.
+- Ignoring `OnModifyDone` — property changes that require follow-up logic must be handled in this callback.
