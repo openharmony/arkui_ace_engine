@@ -12369,6 +12369,43 @@
       },
       "status": "active",
       "last_verified": "2026-08-04"
+    },
+    {
+      "id": "ScrollEndNotifyOnDetach",
+      "name": "Scroll End Notify On Detach",
+      "name_cn": "滚动组件下树误触发父组件onScrollEnd",
+      "kind": "issue",
+      "category": "interaction",
+      "keywords": [
+        "ScrollEndNotifyOnDetach",
+        "滚动组件下树误触发父组件onScrollEnd",
+        "OnDetachFromMainTree",
+        "OnScrollEndRecursive",
+        "scrollStop_",
+        "isScrolling_",
+        "嵌套滚动",
+        "onScrollEnd",
+        "下树通知",
+        "RefreshPattern",
+        "05-03-01",
+        "05-03-06"
+      ],
+      "aliases": [
+        "下树误通知滚动结束",
+        "滚动结束通知误触发",
+        "onScrollEnd误触发"
+      ],
+      "kb": "docs/kb/issues/interaction/scroll-end-notify-on-detach.md",
+      "func_ids": [
+        "05-03-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-03",
+      "source_paths": {
+        "on_detach_from_main_tree": "frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp",
+        "scrollable_pattern_header": "frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.h",
+        "ut": "test/unittest/core/pattern/scrollable/scrollable_pattern_test_ng.cpp"
+      }
     }
   ]
 }

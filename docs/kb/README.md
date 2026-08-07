@@ -1,7 +1,7 @@
 # ArkUI KB
 
 > 更新时间：2026-08-04
-> 主题数：228
+> 主题数：229
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -246,6 +246,7 @@ docs/kb/
 | ResourceAdapterInstanceIdMismatch | 资源适配器实例ID缓存不匹配 | `docs/kb/issues/rendering/resource-adapter-instance-id-mismatch.md` | 新建 |
 | AboutToDisappearUnmountBlockedOnReuse | aboutToDisappear下树屏蔽与组件复用冲突 | `docs/kb/issues/lifecycle/about-to-disappear-unmount-blocked-on-reuse.md` | 新建 |
 | MenuSwipeMisrecognizedAsClick | Menu滑动误判为点击关闭 | `docs/kb/issues/interaction/menu-swipe-misrecognized-as-click.md` | 新建 |
+| ScrollEndNotifyOnDetach | 滚动组件下树误触发父组件onScrollEnd | `docs/kb/issues/interaction/scroll-end-notify-on-detach.md` | 新建 |
 | UIContextInstanceIdLeak | UIContext 实例 ID 泄漏 | `docs/kb/issues/lifecycle/uicontext-instance-id-leak.md` | 新建 |
 | RenderNodeMemoryLeak | RenderNode 内存泄漏 | `docs/kb/issues/performance/rendernode-memory-leak.md` | 新建 |
 | IsPendingStateRenderTreeDiff | 同帧下树重新上树 isPendingState_ 状态错乱 | `docs/kb/issues/lifecycle/ispending-state-render-tree-diff.md` | 新建 |
