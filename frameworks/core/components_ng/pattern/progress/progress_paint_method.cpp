@@ -156,4 +156,5 @@ void ProgressPaintMethod::SetCapsuleBorderRadius(PaintWrapper* paintWrapper)
         paintProperty->GetBorderRadiusValue(Dimension(contentMinHalf, DimensionUnit::PX)).ConvertToPx());
     progressModifier_->SetCapsuleBorderRadius(std::min(contentMinHalf, borderRadius));
 }
+
 } // namespace OHOS::Ace::NG

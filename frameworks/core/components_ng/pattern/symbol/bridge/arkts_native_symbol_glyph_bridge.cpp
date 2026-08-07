@@ -491,6 +491,7 @@ ArkUINativeModuleValue SetFontColorCommon(
         static_cast<ArkUI_Int32>(resObjects.size()));
     return panda::JSValueRef::Undefined(vm);
 }
+
 bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& jsVal, panda::ecmascript::EcmaVM* vm)
 {
     if (jsVal->IsNativePointer(vm)) {
