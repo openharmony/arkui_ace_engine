@@ -63,7 +63,7 @@ This file defines working rules for agents in `ace_engine`.
 | **ArkTS Frontend** | ArkTS static version | Incremental engine-based frontend |
 | **JavaScript Frontend** | JavaScript | Legacy web-style development |
 
-- Frontend architecture details: `docs/kb/syntax/frontend-overview.md`
+- Frontend architecture details: `docs/kb/frontend/frontend-overview.md`
 
 ## 3. Knowledge Base
 
@@ -108,7 +108,7 @@ Before editing any file, the agent MUST state:
 | **Path: `components_ng/pattern/<comp>/`** | `docs/kb/components/<category>/` |
 | **Path: `pipeline_ng/`** | `docs/kb/architecture/layout-framework.md`, `docs/kb/architecture/basic-render-pipeline.md` |
 | **Path: `interfaces/native/node/`** | `docs/kb/api/` |
-| **Path: `bridge/declarative_frontend/` or `bridge/arkts_frontend/`** | `docs/kb/syntax/` |
+| **Path: `bridge/declarative_frontend/` or `bridge/arkts_frontend/`** | `docs/kb/frontend/` |
 | **Path: `core/accessibility/`** | `docs/kb/architecture/accessibility.md` |
 
 ### 3.3 KB Authoring
