@@ -50,13 +50,14 @@ public:
     bool PerformSmartLayoutScaleUp(LayoutWrapper* layoutWrapper);
 
     /**
-     * @brief Find the A2UI form component on the node chain
-     *        (marked by the fixed smart layout inspector id)
-     * @param hostNode Start node of the ancestor lookup
-     * @return The node whose inspector id starts with the A2UI smart layout marker,
-     *         or an empty RefPtr if no such node is found within the lookup depth
+     * @brief Check whether the node's inspector id carries the A2UI smart layout marker prefix.
      */
-    static RefPtr<FrameNode> IsA2UIFormComponent(const RefPtr<FrameNode>& hostNode);
+    static bool HasSmartLayoutIdName(const RefPtr<FrameNode>& node);
+
+    /**
+     * @brief Find the marked smart layout root on the ancestor chain (inspector id prefix match).
+     */
+    static RefPtr<FrameNode> FindGenUIRenderComp(const RefPtr<FrameNode>& hostNode);
 
 private:
     bool HandleTextContentOverflow(LayoutWrapper* layoutWrapper);
