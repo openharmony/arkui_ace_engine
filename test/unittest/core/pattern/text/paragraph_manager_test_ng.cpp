@@ -26,6 +26,26 @@ namespace {
 constexpr int32_t POSITION_WITH_AFFINITY = 2;
 constexpr int32_t PARAM_NUMBER_FOUR = 4;
 constexpr int32_t PARAM_NUMBER_FIVE = 5;
+
+void SetUpEncodingMock(const RefPtr<MockParagraph>& paragraph)
+{
+    EXPECT_CALL(*paragraph, GetCharacterRangeForGlyphRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t, int32_t, TextEncoding enc)
+            -> std::pair<TextRange, TextRange> {
+            if (enc == TextEncoding::UTF16) {
+                return std::make_pair(TextRange { 0, 20 }, TextRange { 0, 15 });
+            }
+            return std::make_pair(TextRange { 0, 20 }, TextRange { 0, 30 });
+        }));
+    EXPECT_CALL(*paragraph, GetGlyphRangeForCharacterRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t, int32_t, TextEncoding enc)
+            -> std::pair<TextRange, TextRange> {
+            if (enc == TextEncoding::UTF16) {
+                return std::make_pair(TextRange { 100, 200 }, TextRange { 300, 400 });
+            }
+            return std::make_pair(TextRange { 1, 2 }, TextRange { 3, 4 });
+        }));
+}
 } // namespace
 class ParagraphManagerTestNg : public testing::Test {
 public:
@@ -59,10 +79,10 @@ void ParagraphManagerTestNg::ConstructParagraphs(RefPtr<ParagraphManager>& pMana
     EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(4));
     PositionWithAffinity positionWithAffinity(POSITION_WITH_AFFINITY, TextAffinity::UPSTREAM);
     EXPECT_CALL(*paragraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
-    EXPECT_CALL(*paragraph, GetCharacterPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
+    EXPECT_CALL(*paragraph, GetCharacterPositionAtCoordinate(_, _)).WillRepeatedly(Return(positionWithAffinity));
     std::pair<TextRange, TextRange> testRangePair { TextRange { 10, 20 }, TextRange { 5, 25 } };
-    EXPECT_CALL(*paragraph, GetGlyphRangeForCharacterRange(_, _)).WillRepeatedly(Return(testRangePair));
-    EXPECT_CALL(*paragraph, GetCharacterRangeForGlyphRange(_, _)).WillRepeatedly(Return(testRangePair));
+    EXPECT_CALL(*paragraph, GetGlyphRangeForCharacterRange(_, _, _)).WillRepeatedly(Return(testRangePair));
+    EXPECT_CALL(*paragraph, GetCharacterRangeForGlyphRange(_, _, _)).WillRepeatedly(Return(testRangePair));
 
     TextLineMetrics textLineMetrics;
     textLineMetrics.lineNumber = 0;
@@ -487,17 +507,17 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterPositionAtCoordinate001, TestSize.L
 
     /**
      * @tc.steps: step3. call GetGlyphPositionAtCoordinate.
-     * @tc.expected: the position of the paragraphs is 22.
+     * @tc.expected: the position of the paragraphs is 23 (charLength accumulates actualCharEnd + strippedNewLineCount).
      */
     result = pManager->GetCharacterPositionAtCoordinate(Offset(10.0, 150.0)).position_;
-    EXPECT_EQ(result, 22);
+    EXPECT_EQ(result, 23);
 
     /**
      * @tc.steps: step4. call GetCharacterPositionAtCoordinate.
-     * @tc.expected: the position of the paragraphs is 37.
+     * @tc.expected: the position of the paragraphs is 44 (charLength accumulates 2 non-last paragraphs).
      */
     result = pManager->GetCharacterPositionAtCoordinate(Offset(10.0, 250.0)).position_;
-    EXPECT_EQ(result, 37);
+    EXPECT_EQ(result, 44);
 }
 
 /**
@@ -513,9 +533,9 @@ HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRange001, TestSize.Lev
     auto charStart1 = result1.second.start;
     auto charEnd1 = result1.second.end;
     EXPECT_EQ(glyphStart1, 10);
-    EXPECT_EQ(glyphEnd1, 45);
+    EXPECT_EQ(glyphEnd1, 46);
     EXPECT_EQ(charStart1, 5);
-    EXPECT_EQ(charEnd1, 45);
+    EXPECT_EQ(charEnd1, 46);
 
     auto result2 = pManager->GetGlyphRangeForCharacterRange(0, 20);
     auto glyphStart2 = result2.first.start;
@@ -551,9 +571,9 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRange001, TestSize.Lev
     auto charStart1 = result1.second.start;
     auto charEnd1 = result1.second.end;
     EXPECT_EQ(glyphStart1, 10);
-    EXPECT_EQ(glyphEnd1, 40);
+    EXPECT_EQ(glyphEnd1, 41);
     EXPECT_EQ(charStart1, 5);
-    EXPECT_EQ(charEnd1, 50);
+    EXPECT_EQ(charEnd1, 51);
 
     auto result2 = pManager->GetCharacterRangeForGlyphRange(0, 20);
     auto glyphStart2 = result2.first.start;
@@ -609,7 +629,7 @@ HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeWithEmptyParagrap
     EXPECT_CALL(*normalParagraph, GetHeight()).WillRepeatedly(Return(100.f));
     EXPECT_CALL(*normalParagraph, GetParagraphText()).WillRepeatedly(Return(u"abc"));
     std::pair<TextRange, TextRange> normalRange { TextRange { 0, 3 }, TextRange { 0, 3 } };
-    EXPECT_CALL(*normalParagraph, GetGlyphRangeForCharacterRange(_, _))
+    EXPECT_CALL(*normalParagraph, GetGlyphRangeForCharacterRange(_, _, _))
         .WillRepeatedly(Return(normalRange));
     auto emptyParagraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*emptyParagraph, GetHeight()).WillRepeatedly(Return(20.f));
@@ -648,7 +668,7 @@ HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeWithEmptyParagrap
     EXPECT_CALL(*normalParagraph, GetHeight()).WillRepeatedly(Return(100.f));
     EXPECT_CALL(*normalParagraph, GetParagraphText()).WillRepeatedly(Return(u"abc"));
     std::pair<TextRange, TextRange> normalRange { TextRange { 0, 3 }, TextRange { 0, 3 } };
-    EXPECT_CALL(*normalParagraph, GetGlyphRangeForCharacterRange(_, _))
+    EXPECT_CALL(*normalParagraph, GetGlyphRangeForCharacterRange(_, _, _))
         .WillRepeatedly(Return(normalRange));
     manager->AddParagraph({ .paragraph = emptyParagraph, .start = 0, .end = 1 });
     manager->AddParagraph({ .paragraph = normalParagraph, .start = 1, .end = 4 });
@@ -679,7 +699,7 @@ HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeWithAllEmptyParag
     EXPECT_CALL(*emptyParagraph, GetHeight()).WillRepeatedly(Return(20.f));
     EXPECT_CALL(*emptyParagraph, GetParagraphText()).WillRepeatedly(Return(u""));
     std::pair<TextRange, TextRange> emptyRange { TextRange { 0, 0 }, TextRange { 0, 0 } };
-    EXPECT_CALL(*emptyParagraph, GetGlyphRangeForCharacterRange(_, _))
+    EXPECT_CALL(*emptyParagraph, GetGlyphRangeForCharacterRange(_, _, _))
         .WillRepeatedly(Return(emptyRange));
     manager->AddParagraph({ .paragraph = emptyParagraph, .start = 0, .end = 1 });
     manager->AddParagraph({ .paragraph = emptyParagraph, .start = 1, .end = 2 });
@@ -711,7 +731,7 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeWithEmptyParagrap
     EXPECT_CALL(*normalParagraph, GetHeight()).WillRepeatedly(Return(100.f));
     EXPECT_CALL(*normalParagraph, GetParagraphText()).WillRepeatedly(Return(u"abc"));
     std::pair<TextRange, TextRange> normalRange { TextRange { 0, 3 }, TextRange { 0, 3 } };
-    EXPECT_CALL(*normalParagraph, GetCharacterRangeForGlyphRange(_, _))
+    EXPECT_CALL(*normalParagraph, GetCharacterRangeForGlyphRange(_, _, _))
         .WillRepeatedly(Return(normalRange));
     auto emptyParagraph = MockParagraph::GetOrCreateMockParagraph();
     EXPECT_CALL(*emptyParagraph, GetHeight()).WillRepeatedly(Return(20.f));
@@ -750,7 +770,7 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeWithEmptyParagrap
     EXPECT_CALL(*normalParagraph, GetHeight()).WillRepeatedly(Return(100.f));
     EXPECT_CALL(*normalParagraph, GetParagraphText()).WillRepeatedly(Return(u"456"));
     std::pair<TextRange, TextRange> normalRange { TextRange { 0, 3 }, TextRange { 0, 3 } };
-    EXPECT_CALL(*normalParagraph, GetCharacterRangeForGlyphRange(_, _))
+    EXPECT_CALL(*normalParagraph, GetCharacterRangeForGlyphRange(_, _, _))
         .WillRepeatedly(Return(normalRange));
     manager->AddParagraph({ .paragraph = emptyParagraph, .start = 0, .end = 1 });
     manager->AddParagraph({ .paragraph = normalParagraph, .start = 1, .end = 4 });
@@ -784,7 +804,7 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeWithConsecutiveEm
     EXPECT_CALL(*normalParagraph, GetHeight()).WillRepeatedly(Return(100.f));
     EXPECT_CALL(*normalParagraph, GetParagraphText()).WillRepeatedly(Return(u"test"));
     std::pair<TextRange, TextRange> normalRange { TextRange { 0, 4 }, TextRange { 0, 4 } };
-    EXPECT_CALL(*normalParagraph, GetCharacterRangeForGlyphRange(_, _))
+    EXPECT_CALL(*normalParagraph, GetCharacterRangeForGlyphRange(_, _, _))
         .WillRepeatedly(Return(normalRange));
     manager->AddParagraph({ .paragraph = emptyParagraph, .start = 0, .end = 1 });
     manager->AddParagraph({ .paragraph = emptyParagraph, .start = 1, .end = 2 });
@@ -800,5 +820,203 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeWithConsecutiveEm
      * @tc.expected: Should return valid result from normal paragraph
      */
     EXPECT_NE(result.first.start, -1);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRangeUtf8002
+ * @tc.desc: Test GetGlyphRangeForCharacterRange with UTF-8 encoding (single paragraph).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeUtf8002, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    SetUpEncodingMock(paragraph);
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+
+    auto result = manager->GetGlyphRangeForCharacterRange(2, 8, TextEncoding::UTF8);
+    EXPECT_EQ(result.first.start, 1);
+    EXPECT_EQ(result.first.end, 2);
+    EXPECT_EQ(result.second.start, 3);
+    EXPECT_EQ(result.second.end, 4);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRangeUtf16001
+ * @tc.desc: Test GetGlyphRangeForCharacterRange with UTF-16 encoding (single paragraph).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeUtf16001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    SetUpEncodingMock(paragraph);
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+
+    auto result = manager->GetGlyphRangeForCharacterRange(2, 8, TextEncoding::UTF16);
+    EXPECT_EQ(result.first.start, 100);
+    EXPECT_EQ(result.first.end, 200);
+    EXPECT_EQ(result.second.start, 300);
+    EXPECT_EQ(result.second.end, 400);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRangeMultiParagraphUtf8001
+ * @tc.desc: Test GetGlyphRangeForCharacterRange with UTF-8 across two paragraphs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeMultiParagraphUtf8001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    SetUpEncodingMock(paragraph);
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 20, .end = 40 });
+
+    auto result = manager->GetGlyphRangeForCharacterRange(10, 30, TextEncoding::UTF8);
+    EXPECT_EQ(result.first.start, 1);
+    EXPECT_EQ(result.first.end, 33);
+    EXPECT_EQ(result.second.start, 3);
+    EXPECT_EQ(result.second.end, 25);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRangeMultiParagraphUtf16001
+ * @tc.desc: Test GetGlyphRangeForCharacterRange with UTF-16 across two paragraphs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeMultiParagraphUtf16001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    SetUpEncodingMock(paragraph);
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 20, .end = 40 });
+
+    auto result = manager->GetGlyphRangeForCharacterRange(10, 30, TextEncoding::UTF16);
+    EXPECT_EQ(result.first.start, 100);
+    EXPECT_EQ(result.first.end, 216);
+    EXPECT_EQ(result.second.start, 300);
+    EXPECT_EQ(result.second.end, 421);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRangeThreeParagraphsUtf8001
+ * @tc.desc: Test GetGlyphRangeForCharacterRange with UTF-8 across three paragraphs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeThreeParagraphsUtf8001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    SetUpEncodingMock(paragraph);
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 20, .end = 40 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 40, .end = 60 });
+
+    auto result = manager->GetGlyphRangeForCharacterRange(10, 50, TextEncoding::UTF8);
+    EXPECT_EQ(result.first.start, 1);
+    EXPECT_EQ(result.first.end, 64);
+    EXPECT_EQ(result.second.start, 3);
+    EXPECT_EQ(result.second.end, 46);
+}
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRangeUtf8001
+ * @tc.desc: Test GetCharacterRangeForGlyphRange with UTF-8 encoding (single paragraph).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeUtf8001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    SetUpEncodingMock(paragraph);
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+
+    auto result = manager->GetCharacterRangeForGlyphRange(5, 25, TextEncoding::UTF8);
+    EXPECT_EQ(result.first.start, 0);
+    EXPECT_EQ(result.first.end, 20);
+    EXPECT_EQ(result.second.start, 0);
+    EXPECT_EQ(result.second.end, 30);
+}
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRangeUtf16001
+ * @tc.desc: Test GetCharacterRangeForGlyphRange with UTF-16 encoding (single paragraph).
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeUtf16001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    SetUpEncodingMock(paragraph);
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+
+    auto result = manager->GetCharacterRangeForGlyphRange(5, 10, TextEncoding::UTF16);
+    EXPECT_EQ(result.first.start, 0);
+    EXPECT_EQ(result.first.end, 20);
+    EXPECT_EQ(result.second.start, 0);
+    EXPECT_EQ(result.second.end, 15);
+}
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRangeMultiParagraphUtf8001
+ * @tc.desc: Test GetCharacterRangeForGlyphRange with UTF-8 across two paragraphs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeMultiParagraphUtf8001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    SetUpEncodingMock(paragraph);
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 20, .end = 40 });
+
+    auto result = manager->GetCharacterRangeForGlyphRange(10, 40, TextEncoding::UTF8);
+    EXPECT_EQ(result.first.start, 0);
+    EXPECT_EQ(result.first.end, 41);
+    EXPECT_EQ(result.second.start, 0);
+    EXPECT_EQ(result.second.end, 61);
+}
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRangeMultiParagraphUtf16001
+ * @tc.desc: Test GetCharacterRangeForGlyphRange with UTF-16 across two paragraphs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeMultiParagraphUtf16001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    SetUpEncodingMock(paragraph);
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 20, .end = 40 });
+
+    auto result = manager->GetCharacterRangeForGlyphRange(10, 40, TextEncoding::UTF16);
+    EXPECT_EQ(result.first.start, 0);
+    EXPECT_EQ(result.first.end, 41);
+    EXPECT_EQ(result.second.start, 0);
+    EXPECT_EQ(result.second.end, 31);
+}
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRangeThreeParagraphsUtf16001
+ * @tc.desc: Test GetCharacterRangeForGlyphRange with UTF-16 across three paragraphs.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeThreeParagraphsUtf16001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    SetUpEncodingMock(paragraph);
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 20, .end = 40 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 40, .end = 60 });
+
+    auto result = manager->GetCharacterRangeForGlyphRange(10, 50, TextEncoding::UTF16);
+    EXPECT_EQ(result.first.start, 0);
+    EXPECT_EQ(result.first.end, 62);
+    EXPECT_EQ(result.second.start, 0);
+    EXPECT_EQ(result.second.end, 47);
 }
 } // namespace OHOS::Ace::NG

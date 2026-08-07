@@ -147,11 +147,12 @@ public:
     static std::vector<ParagraphManager::TextBox> GetRectsForRange(FrameNode* frameNode, int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle);
     static PositionWithAffinity GetGlyphPositionAtCoordinate(FrameNode* frameNode, int32_t x, int32_t y);
-    static PositionWithAffinity GetCharacterPositionAtCoordinate(FrameNode* frameNode, int32_t x, int32_t y);
+    static PositionWithAffinity GetCharacterPositionAtCoordinate(
+        FrameNode* frameNode, int32_t x, int32_t y, TextEncoding encoding = TextEncoding::UTF8);
     static std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
-        FrameNode* frameNode, int32_t start, int32_t end);
+        FrameNode* frameNode, int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8);
     static std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
-        FrameNode* frameNode, int32_t start, int32_t end);
+        FrameNode* frameNode, int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8);
     static void SetTypingParagraphStyle(FrameNode* frameNode,
         std::optional<struct UpdateParagraphStyle> typingParagraphStyle);
     static void SetTypingStyle(FrameNode* frameNode, std::optional<struct UpdateSpanStyle> typingStyle,

@@ -6745,6 +6745,18 @@
     },
     {
         "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding"
+    },
+    {
+        "first_introduced": "26.0.0",
+        "name": "OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding"
+    },
+    {
+        "first_introduced": "26.0.0",
         "name": "OH_ArkUI_NodeEvent_GetGestureCollectInterceptInfo"
     },
     {
