@@ -111,6 +111,9 @@ template("build_component_ng") {
       if (ace_engine_feature_enable_upgrade_skia) {
         defines += [ "USE_NEW_SKIA" ]
       }
+      if (ace_engine_feature_enable_material_customized) {
+        defines += [ "ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED" ]
+      }
       if (is_arkui_x) {
         include_dirs += [
           "//foundation/appframework/arkui",

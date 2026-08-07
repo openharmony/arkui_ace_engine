@@ -749,6 +749,7 @@ void PipelineBase::OpenImplicitAnimation(
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const std::optional<int32_t>& count)
 {
+    PushInfiniteAnimationFlushExceeded();
 #ifdef ENABLE_ROSEN_BACKEND
     auto wrapFinishCallback = GetWrappedAnimationCallback(option, finishCallback, count);
     if (IsFormRenderExceptDynamicComponent()) {
@@ -765,10 +766,39 @@ bool PipelineBase::CloseImplicitAnimation()
 {
 #ifdef ENABLE_ROSEN_BACKEND
     PrepareCloseImplicitAnimation();
-    return AnimationUtils::CloseImplicitAnimation();
+    auto result = AnimationUtils::CloseImplicitAnimation();
+    PopInfiniteAnimationFlushExceeded();
+    return result;
 #else
+    PopInfiniteAnimationFlushExceeded();
     return false;
 #endif
+}
+
+void PipelineBase::SetInfiniteAnimationFlushExceeded(bool exceeded)
+{
+    infiniteAnimationFlushExceeded_ = exceeded;
+}
+
+bool PipelineBase::IsInfiniteAnimationFlushExceeded() const
+{
+    return infiniteAnimationFlushExceeded_;
+}
+
+void PipelineBase::PushInfiniteAnimationFlushExceeded()
+{
+    infiniteAnimationFlushExceededStack_.push(infiniteAnimationFlushExceeded_);
+}
+
+void PipelineBase::PopInfiniteAnimationFlushExceeded()
+{
+    if (!infiniteAnimationFlushExceededStack_.empty()) {
+        infiniteAnimationFlushExceededStack_.pop();
+        infiniteAnimationFlushExceeded_ = infiniteAnimationFlushExceededStack_.empty()
+            ? false : infiniteAnimationFlushExceededStack_.top();
+    } else {
+        infiniteAnimationFlushExceeded_ = false;
+    }
 }
 
 void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
