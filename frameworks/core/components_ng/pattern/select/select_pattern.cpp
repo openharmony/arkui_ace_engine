@@ -1757,8 +1757,8 @@ void SelectPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         json->PutExtAttr("optionFontColor", "", filter);
     } else {
         CHECK_NULL_VOID(menuItemModifier);
-        auto bgColor = selected_ == 0 ? selectedBgColor_ : menuItemModifier->getBgColor(options_[0]);
-        json->PutExtAttr("optionBgColor", bgColor->ColorToString().c_str(), filter);
+        auto bgColor = menuItemModifier->getBgColor(options_[0]);
+        json->PutExtAttr("optionBgColor", bgColor.ColorToString().c_str(), filter);
         json->PutExtAttr("optionFont", menuItemModifier->inspectorGetFont(options_[0]).c_str(), filter);
         auto fontColor = selected_ == 0 ? selectedFont_.FontColor.value_or(Color::BLACK)
                                         : menuItemModifier->getFontColor(options_[0]);
