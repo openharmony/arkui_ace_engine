@@ -364,7 +364,7 @@ HWTEST_F(NodeStyleModifierTest, GetFocusBoxTest001, TestSize.Level1)
 
 /**
  * @tc.name: GetFocusBoxTest002
- * @tc.desc: Test GetFocusBox when focus box style is not set.
+ * @tc.desc: Test GetFocusBox when focus box style is not set, should return default values.
  * @tc.type: FUNC
  */
 HWTEST_F(NodeStyleModifierTest, GetFocusBoxTest002, TestSize.Level1)
@@ -377,7 +377,41 @@ HWTEST_F(NodeStyleModifierTest, GetFocusBoxTest002, TestSize.Level1)
     ASSERT_NE(rootNode, nullptr);
 
     auto getItem = nodeAPI->getAttribute(rootNode, NODE_FOCUS_BOX);
-    EXPECT_EQ(getItem, nullptr);
+    ASSERT_NE(getItem, nullptr);
+    ASSERT_NE(getItem->value, nullptr);
+    ASSERT_EQ(getItem->size, 3);
+
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: GetFocusBoxTest003
+ * @tc.desc: Test GetFocusBox when only partial fields are set, should return set values for set fields
+ *           and default values for unset fields.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeStyleModifierTest, GetFocusBoxTest003, TestSize.Level1)
+{
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    constexpr float margin = 5.0f;
+    constexpr uint32_t color = 0xff445566;
+    ArkUI_NumberValue value[] = { { .f32 = margin }, { .f32 = FLT_MAX }, { .u32 = color } };
+    ArkUI_AttributeItem item = { value, 3 };
+    int32_t result = nodeAPI->setAttribute(rootNode, NODE_FOCUS_BOX, &item);
+    ASSERT_EQ(result, ERROR_CODE_NO_ERROR);
+
+    auto getItem = nodeAPI->getAttribute(rootNode, NODE_FOCUS_BOX);
+    ASSERT_NE(getItem, nullptr);
+    ASSERT_NE(getItem->value, nullptr);
+    ASSERT_EQ(getItem->size, 3);
+    EXPECT_FLOAT_EQ(getItem->value[0].f32, margin);
+    EXPECT_EQ(getItem->value[2].u32, color);
 
     nodeAPI->disposeNode(rootNode);
 }
