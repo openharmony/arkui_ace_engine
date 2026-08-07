@@ -111,6 +111,8 @@ Before editing any file, the agent MUST state:
 | **Path: `bridge/declarative_frontend/` or `bridge/arkts_frontend/`** | `docs/kb/frontend/` |
 | **Path: `core/accessibility/`** | `docs/kb/architecture/accessibility.md` |
 
+> List component categories: `ls docs/kb/components/` or check `docs/knowledge_base_INDEX.json`
+
 ### 3.3 KB Authoring
 
 - Detailed templates/rules: `docs/knowledge_base_README.md`
