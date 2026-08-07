@@ -17,6 +17,7 @@
 #include "core/accessibility/accessibility_manager.h"
 
 #include "form_constants.h"
+#include "form_constants_util.h"
 #include "form_info_base.h"
 #include "form_surface_info.h"
 #include "locale_config.h"
@@ -1468,7 +1469,7 @@ bool FormPattern::ShouldLoadFormSkeleton(bool isTransparencyEnabled, const Reque
 
 int32_t FormPattern::GetFormDimensionHeight(int32_t dimension)
 {
-    const char* formDimension = OHOS::AppExecFwk::Constants::GetDimensionString(
+    const char* formDimension = OHOS::AppExecFwk::FormConstantsUtil::GetDimensionString(
         static_cast<OHOS::AppExecFwk::Constants::Dimension>(dimension));
     if (formDimension == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "GetFormDimensionHeight failed, invalid dimension: %{public}d",
