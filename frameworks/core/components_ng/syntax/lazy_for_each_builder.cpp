@@ -20,6 +20,11 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/core/components_ng/animation/geometry_transition.h"
+#include <random>
+
+namespace {
+constexpr int32_t MAX_RANDOM_KEY = 10000;
+}
 
 namespace OHOS::Ace::NG {
     std::pair<std::string, RefPtr<UINode>> LazyForEachBuilder::GetChildByIndex(
@@ -81,16 +86,20 @@ namespace OHOS::Ace::NG {
         CHECK_EQUAL_VOID(reuseImmediately, false);
         auto lazyForEachNode = GetLazyForEachNode();
         CHECK_NULL_VOID(lazyForEachNode);
+        // Add random suffix to all keys in expiringItem_ to avoid reused by LazyForEach
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<int32_t> dist(0, MAX_RANDOM_KEY);
+        std::string randomKey = "__MarkedByReuseImmediately__Internal__" + std::to_string(dist(gen));
         for (const auto& [key, node] : expiringItem_) {
             if (node.second) {
-                TryRecordRecyclableNodeRecursively(key + "__MarkedByReuseImmediately__Internal", node.second);
+                TryRecordRecyclableNodeRecursively(key + randomKey, node.second);
             }
         }
         CHECK_EQUAL_VOID(recyclableNodeSet_.empty(), true);
-        // Add suffix to all keys in expiringItem_ to avoid reused by LazyForEach
         std::unordered_map<std::string, LazyForEachCacheChild> newExpiringItem;
         for (const auto& [key, node] : expiringItem_) {
-            newExpiringItem[key + "__MarkedByReuseImmediately__Internal"] = node;
+            newExpiringItem[key + randomKey] = node;
         }
         expiringItem_ = std::move(newExpiringItem);
         auto reuseIds = GetReuseIdsCanBeRecycled();

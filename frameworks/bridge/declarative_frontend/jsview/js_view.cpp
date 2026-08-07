@@ -798,7 +798,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCus
         int32_t cachedCount = 2; // if deviceMemory <= 6G, cachedCount = 2
         int32_t deviceMemory = SystemProperties::GetBootVendorDdrSize();
         if (deviceMemory > 8) {
-            cachedCount = 8; // if deviceMemory > 8G, cachedCount = 8
+            cachedCount = 48; // if deviceMemory > 8G, cachedCount = 48
         } else if (deviceMemory > 6) {
             cachedCount = 4; // if 6G < deviceMemory <= 8G, cachedCount = 4
         }

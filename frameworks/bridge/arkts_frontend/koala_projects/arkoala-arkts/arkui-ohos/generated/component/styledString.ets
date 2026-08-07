@@ -21,21 +21,21 @@ import { TextBackgroundStyle_serializer, TextBackgroundStyle } from './span'
 import { unsafeCast, int32, int64, float32 } from '@koalaui/common'
 import { ArkUIGeneratedNativeModule } from '#components'
 import { CallbackTransformer } from './../CallbackTransformer'
-import { arkui_Graphics_LengthMetrics_serializer, arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
-import { LengthMetrics as arkui_component_units_LengthMetrics, ResourceColor, Resource as arkui_component_units_Resource, SizeOptions_serializer, ColorFilter_serializer, SizeOptions, ColorFilter, ColorFilterInternal, ResourceStr, Margin, Padding, BorderRadiuses, Padding_serializer, BorderRadiuses_serializer } from './units'
+import { arkui_Graphics_DrawContext_serializer } from './../framework/Graphics'
+import { ResourceColor, Resource as arkui_component_units_Resource, SizeOptions_serializer, ColorFilter_serializer, SizeOptions, ColorFilter, ColorFilterInternal, ResourceStr, Margin, Padding, BorderRadiuses, Padding_serializer, BorderRadiuses_serializer } from './units'
 import { LengthMetrics as arkui_Graphics_LengthMetrics, DrawContext as arkui_Graphics_DrawContext } from 'arkui.Graphics'
 import { global_resource_Resource_serializer } from './../framework/resource'
 import { TextDecorationType, Color as arkui_component_enums_Color, TextDecorationStyle, ImageSpanAlignment, ImageFit, TextAlign, TextOverflow, WordBreak, FontStyle, FontWeight } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { drawing_ColorFilter_serializer } from './../framework/ohos.graphics.drawing'
 import { PixelMap, ShadowOptions_serializer, ShadowOptions, ClickEvent, Callback as arkui_component_common_Callback, LayoutPolicy, ClickEvent_serializer } from './common'
-import { extractors, ShaderStyle, CustomSpan, TouchEvent } from '#handwritten'
+import { extractors, LengthMetrics as arkui_component_units_LengthMetrics, ShaderStyle, CustomSpan, TouchEvent } from '#handwritten'
 import { default as image } from '@ohos.multimedia.image'
 import { DrawingColorFilter } from './image'
 import { default as drawing } from '@ohos.graphics.drawing'
 import { LineSpacingOptions_serializer, LineSpacingOptions, TextVerticalAlign, TextDirection, FontConfigs_serializer, FontConfigs, SuperscriptStyle, FontVariation, StrokeJoinStyle } from './textCommon'
 import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from './richEditor'
-import { ShaderStyleProxy, ShaderStyleProxy_serializer, CustomSpanWrapper, CustomSpanWrapper_serializer, TouchEventProxy, TouchEventProxy_serializer } from './idlize'
+import { LengthMetricsProxy, LengthMetricsProxy_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer, CustomSpanWrapper, CustomSpanWrapper_serializer, TouchEventProxy, TouchEventProxy_serializer } from './idlize'
 import { text_FontVariation_serializer } from './../framework/ohos.graphics.text'
 import { default as text } from '@ohos.graphics.text'
 import { memo, memo_stable } from 'arkui.stateManagement.runtime'
@@ -103,7 +103,8 @@ export class BaselineOffsetStyle implements MaterializedBase {
     }
     static construct(value: arkui_component_units_LengthMetrics): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, value)
+        const valueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(value)
+        LengthMetricsProxy_serializer.write(thisSerializer, valueTransformed)
         const retval = ArkUIGeneratedNativeModule._BaselineOffsetStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
@@ -643,7 +644,8 @@ export class LetterSpacingStyle implements MaterializedBase {
     }
     static construct(value: arkui_component_units_LengthMetrics): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, value)
+        const valueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(value)
+        LengthMetricsProxy_serializer.write(thisSerializer, valueTransformed)
         const retval = ArkUIGeneratedNativeModule._LetterSpacingStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
@@ -688,14 +690,16 @@ export class LineHeightStyle implements MaterializedBase {
     }
     static construct0(lineHeight: arkui_component_units_LengthMetrics): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, lineHeight)
+        const lineHeightTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(lineHeight)
+        LengthMetricsProxy_serializer.write(thisSerializer, lineHeightTransformed)
         const retval = ArkUIGeneratedNativeModule._LineHeightStyle_construct0(thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         return retval
     }
     static construct1(lineHeight: arkui_component_units_LengthMetrics, lineHeightMultiple: double): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, lineHeight)
+        const lineHeightTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(lineHeight)
+        LengthMetricsProxy_serializer.write(thisSerializer, lineHeightTransformed)
         const retval = ArkUIGeneratedNativeModule._LineHeightStyle_construct1(thisSerializer.asBuffer(), thisSerializer.length(), lineHeightMultiple)
         thisSerializer.release()
         return retval
@@ -750,7 +754,8 @@ export class LineSpacingStyle implements MaterializedBase {
     }
     static construct(lineSpacing: arkui_component_units_LengthMetrics, options?: LineSpacingOptions): KPointer {
         const thisSerializer: SerializerBase = SerializerBase.hold()
-        arkui_Graphics_LengthMetrics_serializer.write(thisSerializer, lineSpacing)
+        const lineSpacingTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(lineSpacing)
+        LengthMetricsProxy_serializer.write(thisSerializer, lineSpacingTransformed)
         if (options !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const optionsTmpValue = options!
@@ -2515,7 +2520,8 @@ export class TextStyleInterface_serializer {
         if (valueHolderForFontSize !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForFontSizeTmpValue = valueHolderForFontSize!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForFontSizeTmpValue)
+            const valueHolderForFontSizeTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForFontSizeTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForFontSizeTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2567,7 +2573,8 @@ export class TextStyleInterface_serializer {
         if (valueHolderForStrokeWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForStrokeWidthTmpValue = valueHolderForStrokeWidth!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValue)
+            const valueHolderForStrokeWidthTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForStrokeWidthTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2655,7 +2662,8 @@ export class TextStyleInterface_serializer {
         const fontSizeTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let fontSizeTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
         if ((fontSizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            fontSizeTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const fontSizeTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            fontSizeTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(fontSizeTmpBufOptDeserialized)
         }
         const fontSizeTmpResult: arkui_component_units_LengthMetrics | undefined = fontSizeTmpBuf
         const fontWeightTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -2696,7 +2704,8 @@ export class TextStyleInterface_serializer {
         const strokeWidthTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let strokeWidthTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
         if ((strokeWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            strokeWidthTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const strokeWidthTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            strokeWidthTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(strokeWidthTmpBufOptDeserialized)
         }
         const strokeWidthTmpResult: arkui_component_units_LengthMetrics | undefined = strokeWidthTmpBuf
         const strokeColorTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -2748,7 +2757,8 @@ export class ImageAttachmentLayoutStyle_serializer {
             if (valueHolderForMarginTmpValue instanceof arkui_component_units_LengthMetrics) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForMarginTmpValueForIdx0 = valueHolderForMarginTmpValue as arkui_component_units_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx0)
+                const valueHolderForMarginTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForMarginTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForMarginTmpValueForIdx0Transformed)
             } else if (valueHolderForMarginTmpValue instanceof Margin) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForMarginTmpValueForIdx1 = valueHolderForMarginTmpValue as Margin
@@ -2764,7 +2774,8 @@ export class ImageAttachmentLayoutStyle_serializer {
             if (valueHolderForPaddingTmpValue instanceof arkui_component_units_LengthMetrics) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForPaddingTmpValueForIdx0 = valueHolderForPaddingTmpValue as arkui_component_units_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForPaddingTmpValueForIdx0)
+                const valueHolderForPaddingTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForPaddingTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForPaddingTmpValueForIdx0Transformed)
             } else if (valueHolderForPaddingTmpValue instanceof Padding) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForPaddingTmpValueForIdx1 = valueHolderForPaddingTmpValue as Padding
@@ -2780,7 +2791,8 @@ export class ImageAttachmentLayoutStyle_serializer {
             if (valueHolderForBorderRadiusTmpValue instanceof arkui_component_units_LengthMetrics) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx0 = valueHolderForBorderRadiusTmpValue as arkui_component_units_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0)
+                const valueHolderForBorderRadiusTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForBorderRadiusTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForBorderRadiusTmpValueForIdx0Transformed)
             } else if (valueHolderForBorderRadiusTmpValue instanceof BorderRadiuses) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForBorderRadiusTmpValueForIdx1 = valueHolderForBorderRadiusTmpValue as BorderRadiuses
@@ -2798,7 +2810,8 @@ export class ImageAttachmentLayoutStyle_serializer {
             const marginTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
             let marginTmpBufOpt: arkui_component_units_LengthMetrics | Margin | undefined
             if (marginTmpBufOptUnionSelector == (0).toByte()) {
-                marginTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+                const marginTmpBufOptBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+                marginTmpBufOpt = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(marginTmpBufOptBufUDeserialized)
             } else if (marginTmpBufOptUnionSelector == (1).toByte()) {
                 marginTmpBufOpt = Padding_serializer.read(valueDeserializer)
             } else {
@@ -2813,7 +2826,8 @@ export class ImageAttachmentLayoutStyle_serializer {
             const paddingTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
             let paddingTmpBufOpt: arkui_component_units_LengthMetrics | Padding | undefined
             if (paddingTmpBufOptUnionSelector == (0).toByte()) {
-                paddingTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+                const paddingTmpBufOptBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+                paddingTmpBufOpt = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(paddingTmpBufOptBufUDeserialized)
             } else if (paddingTmpBufOptUnionSelector == (1).toByte()) {
                 paddingTmpBufOpt = Padding_serializer.read(valueDeserializer)
             } else {
@@ -2828,7 +2842,8 @@ export class ImageAttachmentLayoutStyle_serializer {
             const borderRadiusTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
             let borderRadiusTmpBufOpt: arkui_component_units_LengthMetrics | BorderRadiuses | undefined
             if (borderRadiusTmpBufOptUnionSelector == (0).toByte()) {
-                borderRadiusTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+                const borderRadiusTmpBufOptBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+                borderRadiusTmpBufOpt = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(borderRadiusTmpBufOptBufUDeserialized)
             } else if (borderRadiusTmpBufOptUnionSelector == (1).toByte()) {
                 borderRadiusTmpBufOpt = BorderRadiuses_serializer.read(valueDeserializer)
             } else {
@@ -2864,7 +2879,8 @@ export class ParagraphStyleInterface_serializer {
         if (valueHolderForTextIndent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForTextIndentTmpValue = valueHolderForTextIndent!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForTextIndentTmpValue)
+            const valueHolderForTextIndentTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForTextIndentTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForTextIndentTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2899,7 +2915,8 @@ export class ParagraphStyleInterface_serializer {
             if (valueHolderForLeadingMarginTmpValue instanceof arkui_component_units_LengthMetrics) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForLeadingMarginTmpValueForIdx0 = valueHolderForLeadingMarginTmpValue as arkui_component_units_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx0)
+                const valueHolderForLeadingMarginTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForLeadingMarginTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForLeadingMarginTmpValueForIdx0Transformed)
             } else if (valueHolderForLeadingMarginTmpValue instanceof LeadingMarginPlaceholder) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForLeadingMarginTmpValueForIdx1 = valueHolderForLeadingMarginTmpValue as LeadingMarginPlaceholder
@@ -2912,7 +2929,8 @@ export class ParagraphStyleInterface_serializer {
         if (valueHolderForParagraphSpacing !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForParagraphSpacingTmpValue = valueHolderForParagraphSpacing!
-            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForParagraphSpacingTmpValue)
+            const valueHolderForParagraphSpacingTmpValueTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForParagraphSpacingTmpValue)
+            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForParagraphSpacingTmpValueTransformed)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -2948,7 +2966,8 @@ export class ParagraphStyleInterface_serializer {
             if (valueHolderForTailIndentsTmpValue instanceof arkui_component_units_LengthMetrics) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTailIndentsTmpValueForIdx0 = valueHolderForTailIndentsTmpValue as arkui_component_units_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForTailIndentsTmpValueForIdx0)
+                const valueHolderForTailIndentsTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForTailIndentsTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForTailIndentsTmpValueForIdx0Transformed)
             } else if (valueHolderForTailIndentsTmpValue instanceof Array) {
                 if (valueHolderForTailIndentsTmpValue.length == 0) {
                     valueSerializer.writeInt8((1).toByte())
@@ -2961,7 +2980,8 @@ export class ParagraphStyleInterface_serializer {
                         valueSerializer.writeInt32((valueHolderForTailIndentsTmpValueForIdx1.length).toInt())
                         for (let valueHolderForTailIndentsTmpValueForIdx1CounterI = 0; valueHolderForTailIndentsTmpValueForIdx1CounterI < valueHolderForTailIndentsTmpValueForIdx1.length; valueHolderForTailIndentsTmpValueForIdx1CounterI++) {
                             const valueHolderForTailIndentsTmpValueForIdx1TmpElement: arkui_component_units_LengthMetrics = valueHolderForTailIndentsTmpValueForIdx1[valueHolderForTailIndentsTmpValueForIdx1CounterI]
-                            arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForTailIndentsTmpValueForIdx1TmpElement)
+                            const valueHolderForTailIndentsTmpValueForIdx1TmpElementTransformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForTailIndentsTmpValueForIdx1TmpElement)
+                            LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForTailIndentsTmpValueForIdx1TmpElementTransformed)
                         }
                     }
                 }
@@ -2987,7 +3007,8 @@ export class ParagraphStyleInterface_serializer {
         const textIndentTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let textIndentTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
         if ((textIndentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            textIndentTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const textIndentTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            textIndentTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(textIndentTmpBufOptDeserialized)
         }
         const textIndentTmpResult: arkui_component_units_LengthMetrics | undefined = textIndentTmpBuf
         const maxLinesTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -3014,7 +3035,8 @@ export class ParagraphStyleInterface_serializer {
             const leadingMarginTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
             let leadingMarginTmpBufOpt: arkui_component_units_LengthMetrics | LeadingMarginPlaceholder | undefined
             if (leadingMarginTmpBufOptUnionSelector == (0).toByte()) {
-                leadingMarginTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+                const leadingMarginTmpBufOptBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+                leadingMarginTmpBufOpt = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(leadingMarginTmpBufOptBufUDeserialized)
             } else if (leadingMarginTmpBufOptUnionSelector == (1).toByte()) {
                 leadingMarginTmpBufOpt = LeadingMarginPlaceholder_serializer.read(valueDeserializer)
             } else {
@@ -3026,7 +3048,8 @@ export class ParagraphStyleInterface_serializer {
         const paragraphSpacingTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let paragraphSpacingTmpBuf: arkui_component_units_LengthMetrics | undefined = undefined
         if ((paragraphSpacingTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            paragraphSpacingTmpBuf = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+            const paragraphSpacingTmpBufOptDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+            paragraphSpacingTmpBuf = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(paragraphSpacingTmpBufOptDeserialized)
         }
         const paragraphSpacingTmpResult: arkui_component_units_LengthMetrics | undefined = paragraphSpacingTmpBuf
         const textDirectionTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
@@ -3054,11 +3077,13 @@ export class ParagraphStyleInterface_serializer {
             const tailIndentsTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
             let tailIndentsTmpBufOpt: arkui_component_units_LengthMetrics | Array<arkui_component_units_LengthMetrics> | undefined
             if (tailIndentsTmpBufOptUnionSelector == (0).toByte()) {
-                tailIndentsTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+                const tailIndentsTmpBufOptBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+                tailIndentsTmpBufOpt = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(tailIndentsTmpBufOptBufUDeserialized)
             } else if (tailIndentsTmpBufOptUnionSelector == (1).toByte()) {
                 const tailIndentsTmpBufOptBufULength: int32 = valueDeserializer.readInt32()
                 const tailIndentsTmpBufOptBufU: Array<arkui_component_units_LengthMetrics> = new Array<arkui_component_units_LengthMetrics>(tailIndentsTmpBufOptBufULength, (arg0: int32):arkui_component_units_LengthMetrics => {
-            return arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer);
+            const tailIndentsTmpBufOptBufUTempBufDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer);
+            return extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(tailIndentsTmpBufOptBufUTempBufDeserialized);
         })
                 tailIndentsTmpBufOpt = tailIndentsTmpBufOptBufU
             } else {

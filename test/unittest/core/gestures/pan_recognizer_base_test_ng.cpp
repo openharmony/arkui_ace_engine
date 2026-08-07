@@ -18,9 +18,11 @@
 #include "test/unittest/core/gestures/recognizer_test_utils.h"
 
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/pan_recognizer.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/gesture_info.h"
 #include "core/pipeline/base/constants.h"
+#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -767,91 +769,6 @@ HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerSetEscapeModeForPanTest002, TestS
 }
 
 /**
- * @tc.name: PanRecognizerFilterCoexistingGestureFingers001
- * @tc.desc: FilterCoexistingGestureFingers is a no-op when referee_ is null and no pipeline context
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerFilterCoexistingGestureFingers001, TestSize.Level1)
-{
-    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
-    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
-    pan->SetCanCoexistWithScroll(true);
-
-    TouchEvent touch;
-    touch.id = ESCAPE_FINGER_ID_0;
-    pan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
-    pan->fingersId_.insert(ESCAPE_FINGER_ID_0);
-
-    // With no referee_ and no pipeline, should not crash.
-    pan->FilterCoexistingGestureFingers();
-
-    EXPECT_FALSE(pan->escapeRequested_);
-}
-
-/**
- * @tc.name: PanRecognizerFilterCoexistingGestureFingers002
- * @tc.desc: FilterCoexistingGestureFingers is a no-op when escape was already requested
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerFilterCoexistingGestureFingers002, TestSize.Level1)
-{
-    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
-    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
-    pan->SetCanCoexistWithScroll(true);
-    pan->escapeRequested_ = true;
-
-    // Should return early without touching anything.
-    pan->FilterCoexistingGestureFingers();
-
-    EXPECT_TRUE(pan->escapeRequested_);
-}
-
-/**
- * @tc.name: PanRecognizerFilterCoexistingGestureFingers003
- * @tc.desc: FilterCoexistingGestureFingers calls SetEscapeModeForPan on peer with opposite coexist flag
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerFilterCoexistingGestureFingers003, TestSize.Level1)
-{
-    // coexist Pan (multi-select) ─── peer inside scope
-    RefPtr<PanGestureOption> optCoexist = AceType::MakeRefPtr<PanGestureOption>();
-    auto coexistPan = AceType::MakeRefPtr<PanRecognizer>(optCoexist);
-    coexistPan->SetCanCoexistWithScroll(true);
-
-    // peer Pan (e.g. system scroll pan, canCoexistWithScroll=false)
-    RefPtr<PanGestureOption> optPeer = AceType::MakeRefPtr<PanGestureOption>();
-    auto peerPan = AceType::MakeRefPtr<PanRecognizer>(optPeer);
-    // canCoexistWithScroll stays false by default
-
-    // Set up a GestureScope with both recognizers and wire it to the referee.
-    RefPtr<GestureReferee> gestureReferee = AceType::MakeRefPtr<GestureReferee>();
-    RefPtr<GestureScope> scope = AceType::MakeRefPtr<GestureScope>(0);
-    scope->recognizers_.push_back(coexistPan);
-    scope->recognizers_.push_back(peerPan);
-    gestureReferee->gestureScopes_[0] = scope;
-
-    // Give coexistPan a tracked finger so GetCurrentFingerIds() is non-empty.
-    TouchEvent touch;
-    touch.id = ESCAPE_FINGER_ID_2;
-    coexistPan->touchPoints_[ESCAPE_FINGER_ID_2] = touch;
-    coexistPan->fingersId_.insert(ESCAPE_FINGER_ID_2);
-    coexistPan->currentFingers_ = 1;
-
-    // Also give peerPan the same finger so SetEscapeModeForPan cleans it up.
-    peerPan->touchPoints_[ESCAPE_FINGER_ID_2] = touch;
-    peerPan->fingersId_.insert(ESCAPE_FINGER_ID_2);
-    peerPan->currentFingers_ = 1;
-    peerPan->refereeState_ = RefereeState::DETECTING;
-
-    coexistPan->referee_ = gestureReferee;
-
-    coexistPan->FilterCoexistingGestureFingers();
-
-    EXPECT_TRUE(peerPan->IsFingerEscaped(ESCAPE_FINGER_ID_2));
-    EXPECT_TRUE(coexistPan->escapeRequested_);
-}
-
-/**
  * @tc.name: GestureRecognizerEscapeAPITest001
  * @tc.desc: SetEscapeMode / IsFingerEscaped / ResetEscapeMode basic round-trip
  * @tc.type: FUNC
@@ -1053,5 +970,341 @@ HWTEST_F(PanRecognizerBaseTestNg, GetRawGlobalLocation_BoxSelectEmptyHistory, Te
 
     EXPECT_EQ(result.GetX(), 100.0f);
     EXPECT_EQ(result.GetY(), 200.0f);
+}
+
+/**
+ * @tc.name: PanRecognizerSetScrollEscapeForPanTest001
+ * @tc.desc: SetScrollEscapeForPan returns early when GetCurrentFingerIds is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerSetScrollEscapeForPanTest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    pan->touchPoints_.clear();
+    pan->SetScrollEscapeForPan();
+
+    EXPECT_FALSE(pan->isLocked_);
+    EXPECT_TRUE(pan->triggeredFingerIds_.empty());
+}
+
+/**
+ * @tc.name: PanRecognizerSetScrollEscapeForPanTest002
+ * @tc.desc: SetScrollEscapeForPan with canCoexistWithScroll_==false finds matching PanRecognizer and calls
+ *           SetEscapeModeForPan on it
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerSetScrollEscapeForPanTest002, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> selectPan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    RefPtr<PanRecognizer> scrollPan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    selectPan->canCoexistWithScroll_ = false;
+    scrollPan->canCoexistWithScroll_ = true;
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_0;
+    selectPan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+    selectPan->responseLinkRecognizer_.push_back(scrollPan);
+
+    scrollPan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+    scrollPan->currentFingers_ = 1;
+    scrollPan->refereeState_ = RefereeState::DETECTING;
+
+    selectPan->SetScrollEscapeForPan();
+
+    EXPECT_TRUE(scrollPan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+    EXPECT_FALSE(selectPan->isLocked_);
+}
+
+/**
+ * @tc.name: PanRecognizerSetScrollEscapeForPanTest003
+ * @tc.desc: SetScrollEscapeForPan with canCoexistWithScroll_==false skips invalid and non-PanRecognizer items
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerSetScrollEscapeForPanTest003, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> selectPan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(1, 1);
+    RefPtr<PanRecognizer> scrollPan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    selectPan->canCoexistWithScroll_ = false;
+    scrollPan->canCoexistWithScroll_ = true;
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_0;
+    selectPan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+
+    WeakPtr<NGGestureRecognizer> invalidWeak;
+    selectPan->responseLinkRecognizer_.push_back(invalidWeak);
+    selectPan->responseLinkRecognizer_.push_back(clickRecognizer);
+    selectPan->responseLinkRecognizer_.push_back(scrollPan);
+
+    scrollPan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+    scrollPan->currentFingers_ = 1;
+    scrollPan->refereeState_ = RefereeState::DETECTING;
+
+    selectPan->SetScrollEscapeForPan();
+
+    EXPECT_TRUE(scrollPan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+    EXPECT_FALSE(selectPan->isLocked_);
+}
+
+/**
+ * @tc.name: PanRecognizerSetScrollEscapeForPanTest004
+ * @tc.desc: SetScrollEscapeForPan with canCoexistWithScroll_==false and no CanCoexistWithScroll recognizer in
+ *           responseLinkRecognizer_ does nothing
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerSetScrollEscapeForPanTest004, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> selectPan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    RefPtr<PanRecognizer> otherPan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    selectPan->canCoexistWithScroll_ = false;
+    otherPan->canCoexistWithScroll_ = false;
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_0;
+    selectPan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+    selectPan->responseLinkRecognizer_.push_back(otherPan);
+
+    selectPan->SetScrollEscapeForPan();
+
+    EXPECT_FALSE(otherPan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+    EXPECT_FALSE(selectPan->isLocked_);
+}
+
+/**
+ * @tc.name: PanRecognizerSetScrollEscapeForPanTest005
+ * @tc.desc: SetScrollEscapeForPan with canCoexistWithScroll_==true sets triggeredIds, isLocked, but null frameNode
+ *           causes CHECK_NULL_VOID
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerSetScrollEscapeForPanTest005, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    pan->canCoexistWithScroll_ = true;
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_0;
+    pan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+    touch.id = ESCAPE_FINGER_ID_1;
+    pan->touchPoints_[ESCAPE_FINGER_ID_1] = touch;
+
+    pan->SetScrollEscapeForPan();
+
+    EXPECT_TRUE(pan->isLocked_);
+    EXPECT_TRUE(pan->IsTriggeredIds(ESCAPE_FINGER_ID_0));
+    EXPECT_TRUE(pan->IsTriggeredIds(ESCAPE_FINGER_ID_1));
+}
+
+/**
+ * @tc.name: PanRecognizerSetScrollEscapeForPanTest006
+ * @tc.desc: SetScrollEscapeForPan with canCoexistWithScroll_==true and frameNode but no ScrollablePattern
+ *           causes CHECK_NULL_VOID on scrollablePattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerSetScrollEscapeForPanTest006, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    pan->canCoexistWithScroll_ = true;
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    pan->AttachFrameNode(frameNode);
+
+    TouchEvent touch;
+    touch.id = ESCAPE_FINGER_ID_0;
+    pan->touchPoints_[ESCAPE_FINGER_ID_0] = touch;
+
+    pan->SetScrollEscapeForPan();
+
+    EXPECT_TRUE(pan->isLocked_);
+    EXPECT_TRUE(pan->IsTriggeredIds(ESCAPE_FINGER_ID_0));
+}
+
+/**
+ * @tc.name: PanRecognizerIsFingerEscapedIsLockedTest001
+ * @tc.desc: IsFingerEscaped when isLocked_==true returns !IsTriggeredIds(fingerId)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerIsFingerEscapedIsLockedTest001, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    std::unordered_set<int32_t> triggered = { ESCAPE_FINGER_ID_0, ESCAPE_FINGER_ID_1 };
+    pan->SetTriggeredIds(triggered);
+    pan->isLocked_ = true;
+
+    EXPECT_FALSE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+    EXPECT_FALSE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_1));
+    EXPECT_TRUE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_2));
+}
+
+/**
+ * @tc.name: PanRecognizerIsFingerEscapedIsLockedTest002
+ * @tc.desc: IsFingerEscaped when isLocked_==false delegates to NGGestureRecognizer::IsFingerEscaped
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerIsFingerEscapedIsLockedTest002, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+
+    pan->isLocked_ = false;
+    std::unordered_set<int32_t> escaped = { ESCAPE_FINGER_ID_0 };
+    pan->SetEscapeMode(escaped);
+
+    EXPECT_TRUE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_0));
+    EXPECT_FALSE(pan->IsFingerEscaped(ESCAPE_FINGER_ID_1));
+}
+
+/**
+ * @tc.name: PanRecognizerGetDistanceConfigForTest001
+ * @tc.desc: GetDistanceConfigFor returns distance_ when distanceMap_ is empty (return distance_ branch)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerGetDistanceConfigForTest001, TestSize.Level1)
+{
+    PanDirection panDirection;
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(FINGER_NUMBER, panDirection, 42.0);
+
+    PanDistanceMapDimension emptyMap;
+    pan->SetDistanceMap(emptyMap);
+
+    auto result = pan->GetDistanceConfigFor(SourceTool::FINGER);
+
+    EXPECT_EQ(result, 42.0);
+}
+
+/**
+ * @tc.name: PanRecognizerGetDistanceConfigForTest002
+ * @tc.desc: GetDistanceConfigFor returns distance_ when sourceTool not in distanceMap_ and UNKNOWN also absent
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerGetDistanceConfigForTest002, TestSize.Level1)
+{
+    PanDirection panDirection;
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(FINGER_NUMBER, panDirection, 5.0);
+
+    PanDistanceMapDimension map;
+    map[SourceTool::PEN] = Dimension(10.0, DimensionUnit::PX);
+    pan->SetDistanceMap(map);
+
+    auto result = pan->GetDistanceConfigFor(SourceTool::FINGER);
+
+    EXPECT_EQ(result, 5.0);
+}
+
+/**
+ * @tc.name: PanRecognizerGetDistanceConfigForTest003
+ * @tc.desc: GetDistanceConfigFor returns matching sourceTool entry when present in distanceMap_ (PX unit)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerGetDistanceConfigForTest003, TestSize.Level1)
+{
+    PanDirection panDirection;
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(FINGER_NUMBER, panDirection, 5.0);
+
+    PanDistanceMapDimension map;
+    map[SourceTool::FINGER] = Dimension(20.0, DimensionUnit::PX);
+    pan->SetDistanceMap(map);
+
+    auto result = pan->GetDistanceConfigFor(SourceTool::FINGER);
+
+    EXPECT_EQ(result, 20.0);
+}
+
+/**
+ * @tc.name: PanRecognizerGetDistanceConfigForTest004
+ * @tc.desc: GetDistanceConfigFor falls back to UNKNOWN entry when sourceTool not present but UNKNOWN is (PX unit)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerGetDistanceConfigForTest004, TestSize.Level1)
+{
+    PanDirection panDirection;
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(FINGER_NUMBER, panDirection, 5.0);
+
+    PanDistanceMapDimension map;
+    map[SourceTool::UNKNOWN] = Dimension(15.0, DimensionUnit::PX);
+    pan->SetDistanceMap(map);
+
+    auto result = pan->GetDistanceConfigFor(SourceTool::FINGER);
+
+    EXPECT_EQ(result, 15.0);
+}
+
+/**
+ * @tc.name: PanRecognizerGetDistanceConfigForTest005
+ * @tc.desc: GetDistanceConfigFor prefers exact sourceTool match over UNKNOWN fallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerGetDistanceConfigForTest005, TestSize.Level1)
+{
+    PanDirection panDirection;
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(FINGER_NUMBER, panDirection, 5.0);
+
+    PanDistanceMapDimension map;
+    map[SourceTool::FINGER] = Dimension(20.0, DimensionUnit::PX);
+    map[SourceTool::UNKNOWN] = Dimension(15.0, DimensionUnit::PX);
+    pan->SetDistanceMap(map);
+
+    auto result = pan->GetDistanceConfigFor(SourceTool::FINGER);
+
+    EXPECT_EQ(result, 20.0);
+}
+
+/**
+ * @tc.name: PanRecognizerGetRawGlobalLocationTest_HistoryNullGestureInfo
+ * @tc.desc: GetRawGlobalLocation with history non-empty and null gestureInfo falls to globalPoint path
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerGetRawGlobalLocationTest_HistoryNullGestureInfo, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    pan->globalPoint_ = Point(50.0f, 80.0f);
+    pan->gestureInfo_ = nullptr;
+
+    TouchEvent historyEvent;
+    historyEvent.SetX(300.0f);
+    historyEvent.SetY(400.0f);
+    pan->lastTouchEvent_.history.push_back(historyEvent);
+
+    auto result = pan->GetRawGlobalLocation(0);
+
+    EXPECT_EQ(result.GetX(), 50.0f);
+    EXPECT_EQ(result.GetY(), 80.0f);
+}
+
+/**
+ * @tc.name: PanRecognizerGetRawGlobalLocationTest_HistoryNonBoxSelect
+ * @tc.desc: GetRawGlobalLocation with history non-empty and non-BOXSELECT gestureInfo falls to globalPoint path
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerBaseTestNg, PanRecognizerGetRawGlobalLocationTest_HistoryNonBoxSelect, TestSize.Level1)
+{
+    RefPtr<PanGestureOption> opt = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> pan = AceType::MakeRefPtr<PanRecognizer>(opt);
+    pan->globalPoint_ = Point(150.0f, 250.0f);
+    pan->gestureInfo_ = AceType::MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE);
+
+    TouchEvent historyEvent;
+    historyEvent.SetX(300.0f);
+    historyEvent.SetY(400.0f);
+    pan->lastTouchEvent_.history.push_back(historyEvent);
+
+    auto result = pan->GetRawGlobalLocation(0);
+
+    EXPECT_EQ(result.GetX(), 150.0f);
+    EXPECT_EQ(result.GetY(), 250.0f);
 }
 } // namespace OHOS::Ace::NG

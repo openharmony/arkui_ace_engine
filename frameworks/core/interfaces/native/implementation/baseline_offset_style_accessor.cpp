@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_BaselineOffsetStyle peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_BaselineOffsetStyle ConstructImpl(const Ark_LengthMetrics* value)
+Ark_BaselineOffsetStyle ConstructImpl(const Ark_LengthMetricsProxy* value)
 {
     auto peer = PeerUtils::CreatePeer<BaselineOffsetStylePeer>();
     std::optional<Dimension> offset;

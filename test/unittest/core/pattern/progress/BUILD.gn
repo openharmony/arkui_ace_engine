@@ -13,23 +13,29 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("progress_test_ng") {
-  type = "new"
-  module_name = "InfoShowSet-Progress"
+test_sources = [
+  "progress_builder_test_ng.cpp",
+  "progress_content_modifier_test_ng.cpp",
+  "progress_modifier_plug_test_ng.cpp",
+  "progress_modifier_test_ng.cpp",
+  "progress_test_core.cpp",
+  "progress_test_ng.cpp",
+  "progress_test_tojson.cpp",
+]
 
-  sources = [
-    "progress_builder_test_ng.cpp",
-    "progress_content_modifier_test_ng.cpp",
-    "progress_modifier_plug_test_ng.cpp",
-    "progress_modifier_test_ng.cpp",
-    "progress_test_ng.cpp",
-    "progress_test_tojson.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "progress_test_core.cpp" ]
-  } else {
-    sources += [ "progress_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("progress_test_ng") {
+    type = "host_components"
+    module_name = "InfoShowSet-Progress"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("progress_test_ng") {
+    type = "new"
+    module_name = "InfoShowSet-Progress"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [ "progress_test_core.cpp" ]
+    }
   }
 }

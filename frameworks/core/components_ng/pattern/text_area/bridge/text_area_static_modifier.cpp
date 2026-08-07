@@ -854,7 +854,7 @@ void SetEnableAutoSpacingImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetEnableAutoSpacing(frameNode, convValue);
 }
 void SetStrokeWidthImpl(Ark_NativePointer node,
-                        const Opt_LengthMetrics* value)
+                        const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1107,7 +1107,7 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
     }
 }
 void SetLineSpacingImpl(Ark_NativePointer node,
-                        const Opt_LengthMetrics* value,
+                        const Opt_LengthMetricsProxy* value,
                         const Opt_LineSpacingOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

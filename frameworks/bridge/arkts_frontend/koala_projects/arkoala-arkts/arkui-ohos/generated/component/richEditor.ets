@@ -25,8 +25,8 @@ import { LayoutManager_serializer, PreviewText_serializer, TextRange_serializer,
 import { StyledString, StyledStringInternal, DecorationStyleInterface, DecorationStyleInterface_serializer, StyledString_serializer, MutableStyledString_serializer, MutableStyledString, MutableStyledStringInternal } from './styledString'
 import { ArkThemeScopeManager } from '#arktheme'
 import { global_resource_Resource_serializer } from './../framework/resource'
-import { ColorMetricsExt, ColorMetricsExt_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer, CustomNodeBuilder } from './idlize'
-import { extractors, AttributeModifier, ShaderStyle, hookRichEditorAttributeModifier, AttributeUpdater } from '#handwritten'
+import { ColorMetricsExt, ColorMetricsExt_serializer, ShaderStyleProxy, ShaderStyleProxy_serializer, LengthMetricsProxy, LengthMetricsProxy_serializer, CustomNodeBuilder } from './idlize'
+import { extractors, AttributeModifier, LengthMetrics as arkui_Graphics_LengthMetrics, ShaderStyle, hookRichEditorAttributeModifier, AttributeUpdater } from '#handwritten'
 import { ComponentContentBase_serializer } from './../framework/ComponentContent'
 import { ComponentBase } from './../ComponentBase'
 import { PeerNode } from './../PeerNode'
@@ -34,7 +34,7 @@ import { VoidCallback, ResourceColor, Resource as arkui_component_units_Resource
 import { CopyOptions, Color as arkui_component_enums_Color, BarState, ResponseType, FontStyle, FontWeight, TextAlign, WordBreak, LineBreakStrategy, ImageSpanAlignment, ImageFit } from './enums'
 import { Resource as global_resource_Resource } from 'global.resource'
 import { EnterKeyType, SubmitEvent } from './textInput'
-import { ColorMetrics as arkui_Graphics_ColorMetrics, LengthMetrics as arkui_Graphics_LengthMetrics } from 'arkui.Graphics'
+import { ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
 import { CustomBuilder } from './builder'
 import { ComponentContentBase } from 'arkui.ComponentContent'
 import { Content } from 'arkui.Content'
@@ -49,7 +49,6 @@ import { RichEditorModifier } from './../RichEditorModifier'
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { image_PixelMap_serializer } from './../framework/ohos.multimedia.image'
-import { arkui_Graphics_LengthMetrics_serializer } from './../framework/Graphics'
 export interface CopyEvent {
     preventDefault(): void
 }
@@ -3495,7 +3494,8 @@ export class RichEditorTextStyle_serializer {
             if (valueHolderForStrokeWidthTmpValue instanceof arkui_Graphics_LengthMetrics) {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForStrokeWidthTmpValueForIdx0 = valueHolderForStrokeWidthTmpValue as arkui_Graphics_LengthMetrics
-                arkui_Graphics_LengthMetrics_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx0)
+                const valueHolderForStrokeWidthTmpValueForIdx0Transformed: LengthMetricsProxy = extractors.transform_Ark_LengthMetrics_to_Ark_LengthMetricsProxy(valueHolderForStrokeWidthTmpValueForIdx0)
+                LengthMetricsProxy_serializer.write(valueSerializer, valueHolderForStrokeWidthTmpValueForIdx0Transformed)
             } else if (valueHolderForStrokeWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForStrokeWidthTmpValueForIdx1 = valueHolderForStrokeWidthTmpValue as double
@@ -3694,7 +3694,8 @@ export class RichEditorTextStyle_serializer {
             const strokeWidthTmpBufOptUnionSelector: int32 = valueDeserializer.readInt8()
             let strokeWidthTmpBufOpt: arkui_Graphics_LengthMetrics | double | undefined
             if (strokeWidthTmpBufOptUnionSelector == (0).toByte()) {
-                strokeWidthTmpBufOpt = arkui_Graphics_LengthMetrics_serializer.read(valueDeserializer)
+                const strokeWidthTmpBufOptBufUDeserialized: LengthMetricsProxy = LengthMetricsProxy_serializer.read(valueDeserializer)
+                strokeWidthTmpBufOpt = extractors.transform_Ark_LengthMetricsProxy_to_Ark_LengthMetrics(strokeWidthTmpBufOptBufUDeserialized)
             } else if (strokeWidthTmpBufOptUnionSelector == (1).toByte()) {
                 strokeWidthTmpBufOpt = valueDeserializer.readFloat64()
             } else {

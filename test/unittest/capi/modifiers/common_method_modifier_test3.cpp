@@ -503,8 +503,8 @@ HWTEST_F(CommonMethodModifierTest3, setMask1TestPartForProgressMaskValidValues, 
 HWTEST_F(CommonMethodModifierTest3, setFocusBoxTest, TestSize.Level1)
 {
     auto style = Converter::ArkValue<Opt_FocusBoxStyle>(Ark_FocusBoxStyle {
-        .margin = Converter::ArkCreate<Opt_LengthMetrics>(ARK_LENGTH_UNIT_PX, 10.f),
-        .strokeWidth = Converter::ArkCreate<Opt_LengthMetrics>(ARK_LENGTH_UNIT_PX, 5.f),
+        .margin = Converter::ArkCreate<Opt_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, 10.f),
+        .strokeWidth = Converter::ArkCreate<Opt_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, 5.f),
     });
     modifier_->setFocusBox(node_, &style);
     const auto json = GetJsonValue(node_);

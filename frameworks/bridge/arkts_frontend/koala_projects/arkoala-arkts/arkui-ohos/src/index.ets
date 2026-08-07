@@ -67,3 +67,4 @@ export * from "./component/nodeContainer"
 export { CustomSpan } from './component/styledString'
 export { XComponentController } from './component/xcomponent'
 export { ShaderStyle } from './component/textCommon'
+export { LengthMetrics } from './Graphics'

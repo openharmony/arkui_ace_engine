@@ -95,6 +95,11 @@ void OverlayManagerTestFiveNg::TearDown()
         pipelineContext->overlayManager_->imageGeneratorSheetKey_ = std::nullopt;
         pipelineContext->overlayManager_->modalList_.clear();
         pipelineContext->overlayManager_->detachedProxyMap_.clear();
+        pipelineContext->overlayManager_->overlayInfo_ = std::nullopt;
+        pipelineContext->overlayManager_->overlayNode_ = nullptr;
+        while (!pipelineContext->overlayManager_->modalStack_.empty()) {
+            pipelineContext->overlayManager_->modalStack_.pop();
+        }
     }
     auto mockContainer = MockContainer::Current();
     if (mockContainer) {
@@ -999,5 +1004,477 @@ HWTEST_F(OverlayManagerTestFiveNg, MarkDirty009, TestSize.Level1)
     pipelineContext->installationFree_ = savedInstallationFree;
     pipelineContext->isSubPipeline_ = savedIsSubPipeline;
     overlayManager->rootNodeWeak_ = savedRoot;
+}
+
+/**
+ * @tc.name: SetDetachedFreeRootProxy001
+ * @tc.desc: Test SetDetachedFreeRootProxy when node is nullptr.
+ *           Covers the false branch of if (node && node->GetTag() == DETACHED_FREE_ROOT_PROXY).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, SetDetachedFreeRootProxy001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->detachedProxyMap_.clear();
+    int32_t targetId = 100;
+    overlayManager->SetDetachedFreeRootProxy(nullptr, targetId);
+    EXPECT_TRUE(overlayManager->detachedProxyMap_.empty());
+}
+
+/**
+ * @tc.name: SetDetachedFreeRootProxy002
+ * @tc.desc: Test SetDetachedFreeRootProxy when node tag != DETACHED_FREE_ROOT_PROXY.
+ *           Covers the false branch (tag mismatch) of the outer if.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, SetDetachedFreeRootProxy002, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->detachedProxyMap_.clear();
+    auto node = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(node, nullptr);
+    int32_t targetId = 101;
+    overlayManager->SetDetachedFreeRootProxy(node, targetId);
+    EXPECT_TRUE(overlayManager->detachedProxyMap_.empty());
+}
+
+/**
+ * @tc.name: SetDetachedFreeRootProxy003
+ * @tc.desc: Test SetDetachedFreeRootProxy when node tag == DETACHED_FREE_ROOT_PROXY and targetId not in map.
+ *           Covers the true branch of outer if and false branch of inner if (not found in map).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, SetDetachedFreeRootProxy003, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->detachedProxyMap_.clear();
+    auto node = FrameNode::CreateFrameNode(
+        "DetachedFreeRootProxy", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(node, nullptr);
+    int32_t targetId = 102;
+    overlayManager->SetDetachedFreeRootProxy(node, targetId);
+    EXPECT_EQ(overlayManager->detachedProxyMap_.size(), 1u);
+    auto it = overlayManager->detachedProxyMap_.find(targetId);
+    ASSERT_NE(it, overlayManager->detachedProxyMap_.end());
+    EXPECT_EQ(it->second, node);
+}
+
+/**
+ * @tc.name: SetDetachedFreeRootProxy004
+ * @tc.desc: Test SetDetachedFreeRootProxy when targetId already exists in map.
+ *           Covers the true branch of outer if and true branch of inner if (found in map, replace).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, SetDetachedFreeRootProxy004, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->detachedProxyMap_.clear();
+    int32_t targetId = 103;
+    auto oldNode = FrameNode::CreateFrameNode(
+        "DetachedFreeRootProxy", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(oldNode, nullptr);
+    overlayManager->detachedProxyMap_[targetId] = oldNode;
+    auto newNode = FrameNode::CreateFrameNode(
+        "DetachedFreeRootProxy", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(newNode, nullptr);
+    overlayManager->SetDetachedFreeRootProxy(newNode, targetId);
+    EXPECT_EQ(overlayManager->detachedProxyMap_.size(), 1u);
+    auto it = overlayManager->detachedProxyMap_.find(targetId);
+    ASSERT_NE(it, overlayManager->detachedProxyMap_.end());
+    EXPECT_EQ(it->second, newNode);
+}
+
+/**
+ * @tc.name: ContentChangeReport001
+ * @tc.desc: Test ContentChangeReport when isSubPipeline is false.
+ *           Covers the false branch of if (pipeline->IsSubPipeline()).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, ContentChangeReport001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
+    pipelineContext->isSubPipeline_ = false;
+    auto keyNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(keyNode, nullptr);
+    overlayManager->ContentChangeReport(keyNode, true);
+    pipelineContext->isSubPipeline_ = savedIsSubPipeline;
+}
+
+/**
+ * @tc.name: ContentChangeReport002
+ * @tc.desc: Test ContentChangeReport when isSubPipeline is true and parent pipeline is null.
+ *           Covers the true branch of if (pipeline->IsSubPipeline()) and
+ *           the true branch of CHECK_NULL_VOID(pipeline) after GetContextByContainerId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, ContentChangeReport002, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
+    pipelineContext->isSubPipeline_ = true;
+    auto keyNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(keyNode, nullptr);
+    overlayManager->ContentChangeReport(keyNode, false);
+    pipelineContext->isSubPipeline_ = savedIsSubPipeline;
+}
+
+/**
+ * @tc.name: ContentChangeReport003
+ * @tc.desc: Test ContentChangeReport when isSubPipeline is false and contentChangeMgr_ is null.
+ *           Covers the true branch of CHECK_NULL_VOID(mgr).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, ContentChangeReport003, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    bool savedIsSubPipeline = pipelineContext->isSubPipeline_;
+    pipelineContext->isSubPipeline_ = false;
+    auto savedMgr = pipelineContext->contentChangeMgr_;
+    pipelineContext->contentChangeMgr_ = nullptr;
+    auto keyNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(keyNode, nullptr);
+    overlayManager->ContentChangeReport(keyNode, true);
+    pipelineContext->contentChangeMgr_ = savedMgr;
+    pipelineContext->isSubPipeline_ = savedIsSubPipeline;
+}
+
+/**
+ * @tc.name: RemoveOverlayManagerNode001
+ * @tc.desc: Test RemoveOverlayManagerNode when overlayInfo_ has no value.
+ *           Covers the false branch of if (overlayInfo_.has_value() && ...).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, RemoveOverlayManagerNode001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->overlayInfo_ = std::nullopt;
+    overlayManager->overlayNode_ = nullptr;
+    int32_t result = overlayManager->RemoveOverlayManagerNode();
+    EXPECT_EQ(result, 0); // OVERLAY_EXISTS = 0
+}
+
+/**
+ * @tc.name: RemoveOverlayManagerNode002
+ * @tc.desc: Test RemoveOverlayManagerNode when enableBackPressedEvent is false.
+ *           Covers the false branch (enableBackPressedEvent false) of the compound if.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, RemoveOverlayManagerNode002, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    OverlayManagerInfo info;
+    info.enableBackPressedEvent = false;
+    overlayManager->overlayInfo_ = info;
+    auto overlayNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(overlayNode, nullptr);
+    overlayManager->overlayNode_ = overlayNode;
+    int32_t result = overlayManager->RemoveOverlayManagerNode();
+    EXPECT_EQ(result, 0); // OVERLAY_EXISTS = 0
+}
+
+/**
+ * @tc.name: RemoveOverlayManagerNode003
+ * @tc.desc: Test RemoveOverlayManagerNode when overlayNode_ is null.
+ *           Covers the false branch (overlayNode_ null) of the compound if.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, RemoveOverlayManagerNode003, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    OverlayManagerInfo info;
+    info.enableBackPressedEvent = true;
+    overlayManager->overlayInfo_ = info;
+    overlayManager->overlayNode_ = nullptr;
+    int32_t result = overlayManager->RemoveOverlayManagerNode();
+    EXPECT_EQ(result, 0); // OVERLAY_EXISTS = 0
+}
+
+/**
+ * @tc.name: RemoveOverlayManagerNode004
+ * @tc.desc: Test RemoveOverlayManagerNode when GetLastChildNotRemoving returns null.
+ *           Covers the true branch of CHECK_NULL_RETURN(componentNode, OVERLAY_EXISTS).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, RemoveOverlayManagerNode004, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    OverlayManagerInfo info;
+    info.enableBackPressedEvent = true;
+    overlayManager->overlayInfo_ = info;
+    auto overlayNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(overlayNode, nullptr);
+    overlayManager->overlayNode_ = overlayNode;
+    int32_t result = overlayManager->RemoveOverlayManagerNode();
+    EXPECT_EQ(result, 0); // OVERLAY_EXISTS = 0, componentNode is null
+}
+
+/**
+ * @tc.name: RemoveOverlayManagerNode005
+ * @tc.desc: Test RemoveOverlayManagerNode when overlayNode_ has children.
+ *           Covers the true branch: RemoveFrameNodeOnOverlay and return OVERLAY_REMOVE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, RemoveOverlayManagerNode005, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    OverlayManagerInfo info;
+    info.enableBackPressedEvent = true;
+    overlayManager->overlayInfo_ = info;
+    auto overlayNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(overlayNode, nullptr);
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(childNode, nullptr);
+    overlayNode->AddChild(childNode);
+    overlayManager->overlayNode_ = overlayNode;
+    int32_t result = overlayManager->RemoveOverlayManagerNode();
+    EXPECT_EQ(result, 1); // OVERLAY_REMOVE = 1
+}
+
+/**
+ * @tc.name: IsCurrentNodeProcessRemoveOverlay001
+ * @tc.desc: Test IsCurrentNodeProcessRemoveOverlay when lastNode has dialog tag.
+ *           Covers the true branch of if (lastNode && EMBEDDED_DIALOG_NODE_TAG.find(...)).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, IsCurrentNodeProcessRemoveOverlay001, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto currentNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(childNode, nullptr);
+    currentNode->AddChild(childNode);
+    bool result = overlayManager->IsCurrentNodeProcessRemoveOverlay(currentNode, true);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsCurrentNodeProcessRemoveOverlay002
+ * @tc.desc: Test IsCurrentNodeProcessRemoveOverlay when lastNode has non-dialog tag and skipModal is true.
+ *           Covers the false branch of first if (tag not in EMBEDDED_DIALOG_NODE_TAG) and
+ *           the false branch of second if (skipModal true → !skipModal false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, IsCurrentNodeProcessRemoveOverlay002, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    while (!overlayManager->modalStack_.empty()) {
+        overlayManager->modalStack_.pop();
+    }
+    auto currentNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(childNode, nullptr);
+    currentNode->AddChild(childNode);
+    bool result = overlayManager->IsCurrentNodeProcessRemoveOverlay(currentNode, true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsCurrentNodeProcessRemoveOverlay003
+ * @tc.desc: Test IsCurrentNodeProcessRemoveOverlay when currentNode has no children (lastNode null).
+ *           Covers the false branch of first if (lastNode null) and
+ *           the false branch of second if (skipModal true).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, IsCurrentNodeProcessRemoveOverlay003, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    while (!overlayManager->modalStack_.empty()) {
+        overlayManager->modalStack_.pop();
+    }
+    auto currentNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    bool result = overlayManager->IsCurrentNodeProcessRemoveOverlay(currentNode, true);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsCurrentNodeProcessRemoveOverlay004
+ * @tc.desc: Test IsCurrentNodeProcessRemoveOverlay when skipModal false and modalStack is empty.
+ *           Covers the false branch of second if (skipModal false, IsModalEmpty true → !IsModalEmpty false).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, IsCurrentNodeProcessRemoveOverlay004, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    while (!overlayManager->modalStack_.empty()) {
+        overlayManager->modalStack_.pop();
+    }
+    auto currentNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(childNode, nullptr);
+    currentNode->AddChild(childNode);
+    bool result = overlayManager->IsCurrentNodeProcessRemoveOverlay(currentNode, false);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IsCurrentNodeProcessRemoveOverlay005
+ * @tc.desc: Test IsCurrentNodeProcessRemoveOverlay when skipModal false and modalStack is not empty.
+ *           Covers the true branch of second if (!skipModal && !IsModalEmpty()).
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, IsCurrentNodeProcessRemoveOverlay005, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto currentNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+    ASSERT_NE(childNode, nullptr);
+    currentNode->AddChild(childNode);
+    auto modalNode = FrameNode::CreateFrameNode(
+        V2::MODAL_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(modalNode, nullptr);
+    overlayManager->modalStack_.push(WeakPtr<FrameNode>(modalNode));
+    bool result = overlayManager->IsCurrentNodeProcessRemoveOverlay(currentNode, false);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsCurrentNodeProcessRemoveOverlay006
+ * @tc.desc: Test IsCurrentNodeProcessRemoveOverlay with ALERT_DIALOG_ETS_TAG child.
+ *           Covers the true branch of first if with a different EMBEDDED_DIALOG_NODE_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, IsCurrentNodeProcessRemoveOverlay006, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto currentNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::ALERT_DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(childNode, nullptr);
+    currentNode->AddChild(childNode);
+    bool result = overlayManager->IsCurrentNodeProcessRemoveOverlay(currentNode, true);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsCurrentNodeProcessRemoveOverlay007
+ * @tc.desc: Test IsCurrentNodeProcessRemoveOverlay with POPUP_ETS_TAG child.
+ *           Covers the true branch of first if with POPUP_ETS_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, IsCurrentNodeProcessRemoveOverlay007, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto currentNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::POPUP_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<BubblePattern>());
+    ASSERT_NE(childNode, nullptr);
+    currentNode->AddChild(childNode);
+    bool result = overlayManager->IsCurrentNodeProcessRemoveOverlay(currentNode, true);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsCurrentNodeProcessRemoveOverlay008
+ * @tc.desc: Test IsCurrentNodeProcessRemoveOverlay with ACTION_SHEET_DIALOG_ETS_TAG child.
+ *           Covers the true branch of first if with ACTION_SHEET_DIALOG_ETS_TAG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestFiveNg, IsCurrentNodeProcessRemoveOverlay008, TestSize.Level1)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->overlayManager_;
+    ASSERT_NE(overlayManager, nullptr);
+    auto currentNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(currentNode, nullptr);
+    auto childNode = FrameNode::CreateFrameNode(
+        V2::ACTION_SHEET_DIALOG_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<DialogPattern>(nullptr, nullptr));
+    ASSERT_NE(childNode, nullptr);
+    currentNode->AddChild(childNode);
+    bool result = overlayManager->IsCurrentNodeProcessRemoveOverlay(currentNode, true);
+    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG

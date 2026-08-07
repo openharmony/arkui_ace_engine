@@ -19,10 +19,18 @@ ace_unittest("active_recognizer_manager_test_ng") {
   sources = [ "active_recognizer_manager_test_ng.cpp" ]
 }
 
-ace_unittest("avoid_info_manager_test_ng") {
-  module_name = "ScrollingSet-ListAndListItemAndListItemGroup"
-  type = "new"
-  sources = [ "avoid_info_manager_test_ng.cpp" ]
+if (is_host_product) {
+  ace_unittest("avoid_info_manager_test_ng") {
+    module_name = "ScrollingSet-ListAndListItemAndListItemGroup"
+    type = "host_components"
+    sources = [ "avoid_info_manager_test_ng.cpp" ]
+  }
+} else {
+  ace_unittest("avoid_info_manager_test_ng") {
+    module_name = "ScrollingSet-ListAndListItemAndListItemGroup"
+    type = "new"
+    sources = [ "avoid_info_manager_test_ng.cpp" ]
+  }
 }
 
 ace_unittest("drag_animation_helper_test_ng") {
@@ -120,19 +128,39 @@ ace_unittest("post_event_manager_test_ng") {
   sources = [ "post_event_manager_test_ng.cpp" ]
 }
 
-ace_unittest("select_overlay_manager_test_ng") {
-  module_name = "Animation-Shareoverlay"
-  type = "new"
-  sources = [
-    "select_overlay_manager_test_ng.cpp",
-    "select_overlay_manager_testtwo_ng.cpp",
-  ]
+manager_test_sources = [
+  "select_overlay_manager_test_ng.cpp",
+  "select_overlay_manager_testtwo_ng.cpp",
+]
+
+if (is_host_product) {
+  ace_unittest("select_overlay_manager_test_ng") {
+    type = "host_components"
+    module_name = "Animation-Shareoverlay"
+    sources = manager_test_sources
+  }
+} else {
+  ace_unittest("select_overlay_manager_test_ng") {
+    module_name = "Animation-Shareoverlay"
+    type = "new"
+    sources = manager_test_sources
+  }
 }
 
-ace_unittest("select_overlay_proxy_test_ng") {
-  module_name = "FormAndSelection-Select"
-  type = "new"
-  sources = [ "select_overlay_proxy_test_ng.cpp" ]
+proxy_test_sources = [ "select_overlay_proxy_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("select_overlay_proxy_test_ng") {
+    type = "host_components"
+    module_name = "FormAndSelection-Select"
+    sources = proxy_test_sources
+  }
+} else {
+  ace_unittest("select_overlay_proxy_test_ng") {
+    module_name = "FormAndSelection-Select"
+    type = "new"
+    sources = proxy_test_sources
+  }
 }
 
 ace_unittest("shared_overlay_manager_test_ng") {
@@ -165,10 +193,12 @@ ace_unittest("display_sync_manager_test_ng") {
   sources = [ "display_sync_manager_test.cpp" ]
 }
 
-ace_unittest("force_split_manager_test_ng") {
-  module_name = "TextSet-Text"
-  type = "new"
-  sources = [ "force_split_manager_test_ng.cpp" ]
+if (!is_host_product) {
+  ace_unittest("force_split_manager_test_ng") {
+    module_name = "TextSet-Text"
+    type = "new"
+    sources = [ "force_split_manager_test_ng.cpp" ]
+  }
 }
 
 ace_unittest("frame_rate_manager_test_ng") {
@@ -211,13 +241,24 @@ ace_unittest("safe_area_manager_test_ng") {
   ]
 }
 
-ace_unittest("navigation_manager_test_ng") {
-  module_name = "Animation-AnimationUtils"
-  type = "new"
-  sources = [
-    "$ace_root/test/unittest/core/pattern/navigation/mock_navigation_stack.cpp",
-    "navigation_manager_test_ng.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("navigation_manager_test_ng") {
+    module_name = "Animation-AnimationUtils"
+    type = "host_components"
+    sources = [
+      "$ace_root/test/unittest/core/pattern/navigation/mock_navigation_stack.cpp",
+      "navigation_manager_test_ng.cpp",
+    ]
+  }
+} else {
+  ace_unittest("navigation_manager_test_ng") {
+    module_name = "Animation-AnimationUtils"
+    type = "new"
+    sources = [
+      "$ace_root/test/unittest/core/pattern/navigation/mock_navigation_stack.cpp",
+      "navigation_manager_test_ng.cpp",
+    ]
+  }
 }
 
 ace_unittest("drag_drop_behavior_reporter_test_ng") {
@@ -226,23 +267,44 @@ ace_unittest("drag_drop_behavior_reporter_test_ng") {
   sources = [ "./drag_drop/drag_drop_behavior_reporter_test_ng.cpp" ]
 }
 
-ace_unittest("theme_manager_test_ng") {
-  module_name = "StateManagement-CustomCoponent"
-  type = "new"
-  sources = [
-    # "$ace_root/frameworks/core/components_ng/pattern/date_picker/picker_theme.cpp",
-    "$ace_root/frameworks/core/components/checkable/checkable_theme.cpp",
-    "$ace_root/frameworks/core/components/dialog/dialog_theme.cpp",
-    "$ace_root/frameworks/core/components/navigation_bar/navigation_bar_theme.cpp",
-    "$ace_root/frameworks/core/components/swiper/swiper_indicator_theme.cpp",
-    "$ace_root/frameworks/core/components/tab_bar/tab_theme.cpp",
-    "$ace_root/frameworks/core/components/theme/app_theme.cpp",
-    "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
-    "$ace_root/frameworks/core/components/theme/theme_manager_multi_thread.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_theme.cpp",
-    "theme_manager_test_ng.cpp",
-    "theme_test.cpp",
-  ]
+if (is_host_product) {
+  ace_unittest("theme_manager_test_ng") {
+    module_name = "StateManagement-CustomCoponent"
+    type = "host_components"
+    sources = [
+      # "$ace_root/frameworks/core/components_ng/pattern/date_picker/picker_theme.cpp",
+      "$ace_root/frameworks/core/components/checkable/checkable_theme.cpp",
+      "$ace_root/frameworks/core/components/dialog/dialog_theme.cpp",
+      "$ace_root/frameworks/core/components/navigation_bar/navigation_bar_theme.cpp",
+      "$ace_root/frameworks/core/components/swiper/swiper_indicator_theme.cpp",
+      "$ace_root/frameworks/core/components/tab_bar/tab_theme.cpp",
+      "$ace_root/frameworks/core/components/theme/app_theme.cpp",
+      "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
+      "$ace_root/frameworks/core/components/theme/theme_manager_multi_thread.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_theme.cpp",
+      "theme_manager_test_ng.cpp",
+      "theme_test.cpp",
+    ]
+  }
+} else {
+  ace_unittest("theme_manager_test_ng") {
+    module_name = "StateManagement-CustomCoponent"
+    type = "new"
+    sources = [
+      # "$ace_root/frameworks/core/components_ng/pattern/date_picker/picker_theme.cpp",
+      "$ace_root/frameworks/core/components/checkable/checkable_theme.cpp",
+      "$ace_root/frameworks/core/components/dialog/dialog_theme.cpp",
+      "$ace_root/frameworks/core/components/navigation_bar/navigation_bar_theme.cpp",
+      "$ace_root/frameworks/core/components/swiper/swiper_indicator_theme.cpp",
+      "$ace_root/frameworks/core/components/tab_bar/tab_theme.cpp",
+      "$ace_root/frameworks/core/components/theme/app_theme.cpp",
+      "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
+      "$ace_root/frameworks/core/components/theme/theme_manager_multi_thread.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_theme.cpp",
+      "theme_manager_test_ng.cpp",
+      "theme_test.cpp",
+    ]
+  }
 }
 
 ace_unittest("drag_drop_spring_loading_test_ng") {
@@ -356,7 +418,6 @@ group("core_manager_unittest") {
     ":drag_drop_spring_loading_test_ng",
     ":focus_manager_test_ng",
     ":focus_view_test_ng",
-    ":force_split_manager_test_ng",
     ":frame_rate_manager_test_ng",
     ":gesture_debug_boundary_manager_test_ng",
     ":full_screen_manager_test_ng",
@@ -374,4 +435,7 @@ group("core_manager_unittest") {
     ":smart_gesture_manager_test_ng",
     ":theme_manager_test_ng",
   ]
+  if (!is_host_product) {
+    deps += [ ":force_split_manager_test_ng" ]
+  }
 }

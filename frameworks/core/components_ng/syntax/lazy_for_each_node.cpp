@@ -858,11 +858,8 @@ LazyForEachMemOptStrategy LazyForEachNode::GetMemOptStrategy()
         return memOptStrategy_;
     }
     auto systemStrategy = SystemProperties::GetSyntaxMemOptStrategy();
-    if (systemStrategy >= 0) {
-        memOptStrategy_ = static_cast<LazyForEachMemOptStrategy>(systemStrategy);
-        return memOptStrategy_;
-    }
-    memOptStrategy_ = LazyForEachMemOptStrategy::DEFAULT;
+    memOptStrategy_ = systemStrategy == 1 ?
+        LazyForEachMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION : LazyForEachMemOptStrategy::DEFAULT;
     return memOptStrategy_;
 }
 

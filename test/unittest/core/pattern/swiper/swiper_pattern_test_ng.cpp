@@ -2016,6 +2016,9 @@ HWTEST_F(SwiperPatternTestNg, SetSwiperEventCallback001, TestSize.Level1)
  */
 HWTEST_F(SwiperPatternTestNg, OnFontScaleConfigurationUpdate001, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: AddAfterReloadAnimationTask not executed by mock";
+#endif
     /**
      * @tc.steps: step1. Create swiper, mainSizeIsMeasured_ is false after first layout.
      */
@@ -2028,6 +2031,7 @@ HWTEST_F(SwiperPatternTestNg, OnFontScaleConfigurationUpdate001, TestSize.Level1
      * @tc.steps: step2. mainSizeIsMeasured_ needs to be changed to false after OnFontScaleConfigurationUpdate called.
      */
     pattern_->OnFontScaleConfigurationUpdate();
+    FlushUITasks();
     auto pipelineContext = pattern_->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     EXPECT_EQ(pattern_->mainSizeIsMeasured_, false);

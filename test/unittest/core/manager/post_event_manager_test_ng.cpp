@@ -31,6 +31,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/tap_gesture.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/syntax/syntax_item.h"
@@ -43,6 +44,57 @@ namespace {
 const std::string ROOT_TAG("root");
 constexpr int32_t DEFAULT_POINTER_TIME_DIFFERENT = 1;
 constexpr int32_t PASS_THROUGH_EVENT_OFFSET = 100000;
+
+class TestPostEventUINode : public UINode {
+    DECLARE_ACE_TYPE(TestPostEventUINode, UINode);
+
+public:
+    explicit TestPostEventUINode(int32_t nodeId) : UINode("post_event_test_node", nodeId) {}
+    ~TestPostEventUINode() override = default;
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    HitTestResult TouchTest(const PointF&, const PointF&, const PointF&, TouchRestrict&, TouchTestResult& result,
+        int32_t, ResponseLinkResult&, bool = false) override
+    {
+        result.emplace_back(AceType::MakeRefPtr<ClickRecognizer>(1, 1));
+        return HitTestResult::BUBBLING;
+    }
+};
+
+class ScopedMockPipelineContextBackup final {
+public:
+    ScopedMockPipelineContextBackup() : pipeline_(MockPipelineContext::pipeline_) {}
+
+    ~ScopedMockPipelineContextBackup()
+    {
+        MockPipelineContext::pipeline_ = pipeline_;
+    }
+
+private:
+    RefPtr<MockPipelineContext> pipeline_;
+};
+
+class ScopedEventManagerBackup final {
+public:
+    explicit ScopedEventManagerBackup(const RefPtr<MockPipelineContext>& pipelineContext)
+        : pipelineContext_(pipelineContext), eventManager_(pipelineContext ? pipelineContext->eventManager_ : nullptr)
+    {}
+
+    ~ScopedEventManagerBackup()
+    {
+        if (pipelineContext_) {
+            pipelineContext_->eventManager_ = eventManager_;
+        }
+    }
+
+private:
+    RefPtr<MockPipelineContext> pipelineContext_;
+    RefPtr<EventManager> eventManager_;
+};
 } // namespace
 
 class PostEventManagerTestNg : public testing::Test {
@@ -3508,5 +3560,519 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerDefaultAndCancelBranchTest001, 
     duplicateBeginEvent.eventHandleId = beginEvent.id;
     EXPECT_TRUE(postEventManager_->CheckAxisEvent(uiNode, duplicateBeginEvent, 0));
     EXPECT_TRUE(postEventManager_->postAxisEventAction_.empty());
+}
+
+/**
+ * @tc.name: PostEventManagerPipelineContextNullBranchTest001
+ * @tc.desc: cover null PipelineContext branches in post-event entry points and cancel helpers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostEventManagerPipelineContextNullBranchTest001, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<UINode>(frameNode);
+    ASSERT_NE(uiNode, nullptr);
+    ScopedMockPipelineContextBackup pipelineBackup;
+    auto pipelineContext = MockPipelineContext::pipeline_;
+    ASSERT_NE(pipelineContext, nullptr);
+    MockPipelineContext::pipeline_.Reset();
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    EXPECT_FALSE(postEventManager_->PostTouchEvent(uiNode, std::move(touchEvent)));
+
+    TouchEvent touchEventWithStrategy;
+    touchEventWithStrategy.type = TouchType::DOWN;
+    EXPECT_FALSE(postEventManager_->PostTouchEventWithStrategy(uiNode, std::move(touchEventWithStrategy)));
+
+    MouseEvent mouseEvent;
+    mouseEvent.action = MouseAction::PRESS;
+    EXPECT_FALSE(postEventManager_->PostMouseEvent(uiNode, std::move(mouseEvent)));
+
+    MouseEvent mouseEventWithStrategy;
+    mouseEventWithStrategy.action = MouseAction::PRESS;
+    EXPECT_FALSE(postEventManager_->PostMouseEventWithStrategy(uiNode, std::move(mouseEventWithStrategy)));
+
+    AxisEvent axisEvent;
+    axisEvent.action = AxisAction::BEGIN;
+    EXPECT_FALSE(postEventManager_->PostAxisEvent(uiNode, std::move(axisEvent)));
+
+    AxisEvent axisEventWithStrategy;
+    axisEventWithStrategy.action = AxisAction::BEGIN;
+    EXPECT_FALSE(postEventManager_->PostAxisEventWithStrategy(uiNode, std::move(axisEventWithStrategy)));
+
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    EXPECT_FALSE(postEventManager_->PostDownEvent(uiNode, downEvent));
+
+    TouchEvent cancelTouchEvent;
+    postEventManager_->PostTouchCancelEvent(uiNode, cancelTouchEvent);
+    MouseEvent cancelMouseEvent;
+    postEventManager_->PostMouseCancelEvent(uiNode, cancelMouseEvent);
+    AxisEvent cancelAxisEvent;
+    postEventManager_->PostAxisCancelEvent(uiNode, cancelAxisEvent);
+
+    TouchEvent handleEvent;
+    handleEvent.type = TouchType::MOVE;
+    postEventManager_->HandlePostEvent(uiNode, handleEvent);
+    EXPECT_EQ(postEventManager_->postEventAction_.size(), 1u);
+}
+
+/**
+ * @tc.name: PostEventManagerCancelEventManagerNullBranchTest001
+ * @tc.desc: cover null EventManager branches in PostDownEvent and the three falsified cancel helpers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostEventManagerCancelEventManagerNullBranchTest001, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<UINode>(frameNode);
+    ASSERT_NE(uiNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    ScopedEventManagerBackup eventManagerBackup(pipelineContext);
+    pipelineContext->eventManager_ = nullptr;
+
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    EXPECT_FALSE(postEventManager_->PostDownEvent(uiNode, downEvent));
+
+    TouchEvent touchEvent;
+    postEventManager_->PostTouchCancelEvent(uiNode, touchEvent);
+    MouseEvent mouseEvent;
+    postEventManager_->PostMouseCancelEvent(uiNode, mouseEvent);
+    AxisEvent axisEvent;
+    postEventManager_->PostAxisCancelEvent(uiNode, axisEvent);
+}
+
+/**
+ * @tc.name: PostTouchCancelEventIterationBranchTest001
+ * @tc.desc: cover matching, non-matching, same-id, and different-id branches when falsifying touch cancellation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostTouchCancelEventIterationBranchTest001, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<UINode>(frameNode);
+    ASSERT_NE(uiNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    ScopedEventManagerBackup eventManagerBackup(pipelineContext);
+    pipelineContext->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    auto eventManager = pipelineContext->eventManager_;
+    ASSERT_NE(eventManager, nullptr);
+
+    constexpr int32_t touchId = PASS_THROUGH_EVENT_OFFSET * 2 + 5;
+    constexpr int32_t siblingTouchId = touchId + 1;
+    constexpr int32_t otherGroupTouchId = PASS_THROUGH_EVENT_OFFSET * 3 + 1;
+    eventManager->downFingerIds_[touchId] = 10;
+    eventManager->downFingerIds_[siblingTouchId] = 11;
+    eventManager->downFingerIds_[otherGroupTouchId] = 12;
+    eventManager->lastTouchEvent_.history.emplace_back(TouchEvent {});
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = touchId;
+    touchEvent.history.emplace_back(TouchEvent {});
+    PostEventAction action;
+    action.targetNode = uiNode;
+    action.touchEvent = touchEvent;
+    postEventManager_->postInputEventAction_.push_back(action);
+
+    postEventManager_->PostTouchCancelEvent(uiNode, touchEvent);
+
+    EXPECT_EQ(eventManager->downFingerIds_.size(), 1u);
+    EXPECT_NE(eventManager->downFingerIds_.find(otherGroupTouchId), eventManager->downFingerIds_.end());
+    EXPECT_TRUE(postEventManager_->postInputEventAction_.empty());
+}
+
+/**
+ * @tc.name: PostDownEventTouchTestSuccessBranchTest004
+ * @tc.desc: cover successful post-event touch testing and normal non-stylus dispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostDownEventTouchTestSuccessBranchTest004, TestSize.Level1)
+{
+    Init();
+    auto uiNode = AceType::MakeRefPtr<TestPostEventUINode>(-3);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    ScopedEventManagerBackup eventManagerBackup(pipelineContext);
+    pipelineContext->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(pipelineContext->eventManager_, nullptr);
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = 71;
+    touchEvent.sourceType = SourceType::TOUCH;
+    PostEventAction wrongIdAction;
+    wrongIdAction.targetNode = uiNode;
+    wrongIdAction.touchEvent.type = TouchType::DOWN;
+    wrongIdAction.touchEvent.id = touchEvent.id + 1;
+    postEventManager_->postEventAction_.push_back(wrongIdAction);
+
+    auto result = postEventManager_->PostDownEvent(uiNode, touchEvent);
+
+    EXPECT_TRUE(result);
+    EXPECT_EQ(postEventManager_->postEventAction_.size(), 2u);
+    EXPECT_NE(postEventManager_->lastEventMap_.find(touchEvent.id), postEventManager_->lastEventMap_.end());
+}
+
+/**
+ * @tc.name: CheckMouseEventStateBranchTest008
+ * @tc.desc: cover mismatch, cancel, duplicate window-enter, window cleanup, and window-leave state branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckMouseEventStateBranchTest008, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<UINode>(frameNode);
+    auto otherNode = AceType::MakeRefPtr<FrameNode>("other", -2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(uiNode, nullptr);
+
+    constexpr int32_t eventId = 41;
+    PostMouseEventAction wrongNodeAction;
+    wrongNodeAction.targetNode = otherNode;
+    wrongNodeAction.mouseEvent.action = MouseAction::PRESS;
+    wrongNodeAction.mouseEvent.id = eventId;
+    postEventManager_->postMouseEventAction_.push_back(wrongNodeAction);
+
+    PostMouseEventAction wrongIdAction;
+    wrongIdAction.targetNode = uiNode;
+    wrongIdAction.mouseEvent.action = MouseAction::PRESS;
+    wrongIdAction.mouseEvent.id = eventId + 1;
+    postEventManager_->postMouseEventAction_.push_back(wrongIdAction);
+
+    PostMouseEventAction cancelAction;
+    cancelAction.targetNode = uiNode;
+    cancelAction.mouseEvent.action = MouseAction::CANCEL;
+    cancelAction.mouseEvent.id = eventId;
+    postEventManager_->postMouseEventAction_.push_back(cancelAction);
+
+    PostMouseEventAction wrongWindowNodeAction;
+    wrongWindowNodeAction.targetNode = otherNode;
+    wrongWindowNodeAction.mouseEvent.action = MouseAction::WINDOW_ENTER;
+    wrongWindowNodeAction.mouseEvent.id = eventId;
+    postEventManager_->postMouseEventWindowAction_.push_back(wrongWindowNodeAction);
+
+    PostMouseEventAction wrongWindowIdAction;
+    wrongWindowIdAction.targetNode = uiNode;
+    wrongWindowIdAction.mouseEvent.action = MouseAction::WINDOW_ENTER;
+    wrongWindowIdAction.mouseEvent.id = eventId + 1;
+    postEventManager_->postMouseEventWindowAction_.push_back(wrongWindowIdAction);
+
+    PostMouseEventAction enterAction;
+    enterAction.targetNode = uiNode;
+    enterAction.mouseEvent.action = MouseAction::WINDOW_ENTER;
+    enterAction.mouseEvent.id = eventId;
+    postEventManager_->postMouseEventWindowAction_.push_back(enterAction);
+
+    MouseEvent enterEvent;
+    enterEvent.action = MouseAction::WINDOW_ENTER;
+    enterEvent.id = eventId;
+    EXPECT_TRUE(postEventManager_->CheckMouseEvent(uiNode, enterEvent, 0));
+    EXPECT_EQ(postEventManager_->postMouseEventWindowAction_.size(), 2u);
+
+    postEventManager_->postMouseEventAction_.clear();
+    postEventManager_->postMouseEventWindowAction_.clear();
+    PostMouseEventAction leaveAction;
+    leaveAction.targetNode = uiNode;
+    leaveAction.mouseEvent.action = MouseAction::WINDOW_LEAVE;
+    leaveAction.mouseEvent.id = eventId;
+    postEventManager_->postMouseEventWindowAction_.push_back(leaveAction);
+    MouseEvent leaveEvent;
+    leaveEvent.action = MouseAction::WINDOW_LEAVE;
+    leaveEvent.id = eventId;
+    EXPECT_FALSE(postEventManager_->CheckMouseEvent(uiNode, leaveEvent, 0));
+
+    postEventManager_->postMouseEventWindowAction_.clear();
+    PostMouseEventAction windowCancelAction;
+    windowCancelAction.targetNode = uiNode;
+    windowCancelAction.mouseEvent.action = MouseAction::CANCEL;
+    windowCancelAction.mouseEvent.id = eventId;
+    postEventManager_->postMouseEventWindowAction_.push_back(windowCancelAction);
+    EXPECT_FALSE(postEventManager_->CheckMouseEvent(uiNode, leaveEvent, 0));
+}
+
+/**
+ * @tc.name: CheckAxisAndReceiveHelperBranchTest008
+ * @tc.desc: cover axis mismatch/CANCEL collection and remaining receive-helper short-circuit branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckAxisAndReceiveHelperBranchTest008, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<UINode>(frameNode);
+    auto otherNode = AceType::MakeRefPtr<FrameNode>("other", -2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(uiNode, nullptr);
+
+    constexpr int32_t axisId = 51;
+    PostAxisEventAction wrongNodeAction;
+    wrongNodeAction.targetNode = otherNode;
+    wrongNodeAction.axisEvent.action = AxisAction::BEGIN;
+    wrongNodeAction.axisEvent.id = axisId;
+    postEventManager_->postAxisEventAction_.push_back(wrongNodeAction);
+
+    PostAxisEventAction wrongIdAction;
+    wrongIdAction.targetNode = uiNode;
+    wrongIdAction.axisEvent.action = AxisAction::BEGIN;
+    wrongIdAction.axisEvent.id = axisId + 1;
+    postEventManager_->postAxisEventAction_.push_back(wrongIdAction);
+
+    PostAxisEventAction cancelAction;
+    cancelAction.targetNode = uiNode;
+    cancelAction.axisEvent.action = AxisAction::CANCEL;
+    cancelAction.axisEvent.id = axisId;
+    postEventManager_->postAxisEventAction_.push_back(cancelAction);
+
+    AxisEvent beginEvent;
+    beginEvent.action = AxisAction::BEGIN;
+    beginEvent.id = axisId;
+    EXPECT_TRUE(postEventManager_->CheckAxisEvent(uiNode, beginEvent, 0));
+    EXPECT_EQ(postEventManager_->postAxisEventAction_.size(), 2u);
+
+    postEventManager_->postEventAction_.clear();
+    PostEventAction downTypeMismatch;
+    downTypeMismatch.targetNode = uiNode;
+    downTypeMismatch.touchEvent.type = TouchType::UP;
+    downTypeMismatch.touchEvent.id = 61;
+    postEventManager_->postEventAction_.push_back(downTypeMismatch);
+    EXPECT_FALSE(postEventManager_->HaveReceiveDownEvent(uiNode, 61));
+
+    postEventManager_->postEventAction_.clear();
+    PostEventAction upTypeMismatch;
+    upTypeMismatch.targetNode = uiNode;
+    upTypeMismatch.touchEvent.type = TouchType::DOWN;
+    upTypeMismatch.touchEvent.id = 62;
+    postEventManager_->postEventAction_.push_back(upTypeMismatch);
+    EXPECT_FALSE(postEventManager_->HaveReceiveUpOrCancelEvent(uiNode, 62));
+
+    PostEventAction upWrongId;
+    upWrongId.targetNode = uiNode;
+    upWrongId.touchEvent.type = TouchType::UP;
+    upWrongId.touchEvent.id = 63;
+    postEventManager_->postEventAction_.push_back(upWrongId);
+    EXPECT_FALSE(postEventManager_->HaveReceiveUpOrCancelEvent(uiNode, 62));
+
+    PostEventAction upWrongNode;
+    upWrongNode.targetNode = otherNode;
+    upWrongNode.touchEvent.type = TouchType::UP;
+    upWrongNode.touchEvent.id = 62;
+    postEventManager_->postEventAction_.push_back(upWrongNode);
+    EXPECT_FALSE(postEventManager_->HaveReceiveUpOrCancelEvent(uiNode, 64));
+}
+
+/**
+ * @tc.name: PostInputEntryRemainingBranchTest001
+ * @tc.desc: cover reachable MOVE/CANCEL and drag-cancel-pending branches after input-state validation succeeds.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostInputEntryRemainingBranchTest001, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<UINode>(frameNode);
+    ASSERT_NE(uiNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    ScopedEventManagerBackup eventManagerBackup(pipelineContext);
+    pipelineContext->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    auto eventManager = pipelineContext->eventManager_;
+    ASSERT_NE(eventManager, nullptr);
+    eventManager->isDragCancelPending_ = false;
+
+    TouchEvent postCancelEvent;
+    postCancelEvent.type = TouchType::CANCEL;
+    postCancelEvent.id = 70;
+    EXPECT_FALSE(postEventManager_->PostEvent(uiNode, postCancelEvent));
+
+    TouchEvent touchDownEvent;
+    touchDownEvent.type = TouchType::DOWN;
+    touchDownEvent.id = 71;
+    postEventManager_->PostTouchEvent(uiNode, std::move(touchDownEvent));
+    ASSERT_EQ(postEventManager_->postInputEventAction_.size(), 1u);
+
+    TouchEvent touchMoveEvent;
+    touchMoveEvent.type = TouchType::MOVE;
+    touchMoveEvent.id = 71;
+    postEventManager_->PostTouchEvent(uiNode, std::move(touchMoveEvent));
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), 1u);
+
+    TouchEvent touchCancelEvent;
+    touchCancelEvent.type = TouchType::CANCEL;
+    touchCancelEvent.id = 71;
+    postEventManager_->PostTouchEvent(uiNode, std::move(touchCancelEvent));
+    EXPECT_TRUE(postEventManager_->postInputEventAction_.empty());
+
+    TouchEvent touchDownForUpEvent;
+    touchDownForUpEvent.type = TouchType::DOWN;
+    touchDownForUpEvent.id = 78;
+    postEventManager_->PostTouchEvent(uiNode, std::move(touchDownForUpEvent));
+    ASSERT_EQ(postEventManager_->postInputEventAction_.size(), 1u);
+
+    TouchEvent touchUpEvent;
+    touchUpEvent.type = TouchType::UP;
+    touchUpEvent.id = 78;
+    postEventManager_->PostTouchEvent(uiNode, std::move(touchUpEvent));
+    EXPECT_TRUE(postEventManager_->postInputEventAction_.empty());
+
+    eventManager->isDragCancelPending_ = true;
+    TouchEvent pendingTouchDownEvent;
+    pendingTouchDownEvent.type = TouchType::DOWN;
+    pendingTouchDownEvent.id = 72;
+    postEventManager_->PostTouchEvent(uiNode, std::move(pendingTouchDownEvent));
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), 1u);
+    postEventManager_->postInputEventAction_.clear();
+
+    eventManager->isDragCancelPending_ = false;
+    TouchEvent strategyDownEvent;
+    strategyDownEvent.type = TouchType::DOWN;
+    strategyDownEvent.id = 73;
+    postEventManager_->PostTouchEventWithStrategy(uiNode, std::move(strategyDownEvent));
+    ASSERT_EQ(postEventManager_->postInputEventAction_.size(), 1u);
+
+    TouchEvent strategyCancelEvent;
+    strategyCancelEvent.type = TouchType::CANCEL;
+    strategyCancelEvent.id = 73;
+    postEventManager_->PostTouchEventWithStrategy(uiNode, std::move(strategyCancelEvent));
+    EXPECT_TRUE(postEventManager_->postInputEventAction_.empty());
+
+    eventManager->isDragCancelPending_ = true;
+    TouchEvent pendingStrategyTouchEvent;
+    pendingStrategyTouchEvent.type = TouchType::DOWN;
+    pendingStrategyTouchEvent.id = 79;
+    postEventManager_->PostTouchEventWithStrategy(uiNode, std::move(pendingStrategyTouchEvent));
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), 1u);
+    postEventManager_->postInputEventAction_.clear();
+
+    eventManager->isDragCancelPending_ = false;
+    MouseEvent mousePressEvent;
+    mousePressEvent.action = MouseAction::PRESS;
+    mousePressEvent.id = 74;
+    postEventManager_->PostMouseEvent(uiNode, std::move(mousePressEvent));
+    ASSERT_EQ(postEventManager_->postMouseEventAction_.size(), 1u);
+
+    MouseEvent mouseCancelEvent;
+    mouseCancelEvent.action = MouseAction::CANCEL;
+    mouseCancelEvent.id = 74;
+    postEventManager_->PostMouseEvent(uiNode, std::move(mouseCancelEvent));
+    EXPECT_TRUE(postEventManager_->postMouseEventAction_.empty());
+
+    MouseEvent strategyMousePressEvent;
+    strategyMousePressEvent.action = MouseAction::PRESS;
+    strategyMousePressEvent.id = 80;
+    postEventManager_->PostMouseEventWithStrategy(uiNode, std::move(strategyMousePressEvent));
+    ASSERT_EQ(postEventManager_->postMouseEventAction_.size(), 1u);
+
+    MouseEvent strategyMouseReleaseEvent;
+    strategyMouseReleaseEvent.action = MouseAction::RELEASE;
+    strategyMouseReleaseEvent.id = 80;
+    postEventManager_->PostMouseEventWithStrategy(uiNode, std::move(strategyMouseReleaseEvent));
+    EXPECT_TRUE(postEventManager_->postMouseEventAction_.empty());
+
+    eventManager->isDragCancelPending_ = true;
+    MouseEvent pendingMouseMoveEvent;
+    pendingMouseMoveEvent.action = MouseAction::MOVE;
+    pendingMouseMoveEvent.id = 75;
+    postEventManager_->PostMouseEvent(uiNode, std::move(pendingMouseMoveEvent));
+
+    AxisEvent axisBeginEvent;
+    axisBeginEvent.action = AxisAction::BEGIN;
+    axisBeginEvent.id = 76;
+    postEventManager_->PostAxisEvent(uiNode, std::move(axisBeginEvent));
+    ASSERT_EQ(postEventManager_->postAxisEventAction_.size(), 1u);
+
+    AxisEvent axisCancelEvent;
+    axisCancelEvent.action = AxisAction::CANCEL;
+    axisCancelEvent.id = 76;
+    postEventManager_->PostAxisEvent(uiNode, std::move(axisCancelEvent));
+    EXPECT_TRUE(postEventManager_->postAxisEventAction_.empty());
+
+    AxisEvent strategyAxisBeginEvent;
+    strategyAxisBeginEvent.action = AxisAction::BEGIN;
+    strategyAxisBeginEvent.id = 77;
+    postEventManager_->PostAxisEventWithStrategy(uiNode, std::move(strategyAxisBeginEvent));
+    ASSERT_EQ(postEventManager_->postAxisEventAction_.size(), 1u);
+
+    AxisEvent strategyAxisCancelEvent;
+    strategyAxisCancelEvent.action = AxisAction::CANCEL;
+    strategyAxisCancelEvent.id = 77;
+    postEventManager_->PostAxisEventWithStrategy(uiNode, std::move(strategyAxisCancelEvent));
+    EXPECT_TRUE(postEventManager_->postAxisEventAction_.empty());
+}
+
+/**
+ * @tc.name: PostEventStateAndClearRemainingBranchTest001
+ * @tc.desc: cover null state checks, completed mouse states, and post-event action cleanup short-circuit branches.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostEventStateAndClearRemainingBranchTest001, TestSize.Level1)
+{
+    Init();
+    MouseEvent mouseEvent;
+    EXPECT_FALSE(postEventManager_->CheckMouseEvent(nullptr, mouseEvent, 0));
+    AxisEvent axisEvent;
+    EXPECT_FALSE(postEventManager_->CheckAxisEvent(nullptr, axisEvent, 0));
+
+    MouseEventState releasedState;
+    releasedState.hasPress = true;
+    releasedState.hasReleaseOrCancel = true;
+    EXPECT_FALSE(postEventManager_->HandleMouseReleaseEvent(releasedState, 81));
+
+    MouseEventState leftWindowState;
+    leftWindowState.hasWindowEnter = true;
+    leftWindowState.hasWindowLeaveOrCancel = true;
+    EXPECT_TRUE(postEventManager_->HandleMouseWindowEnterEvent(leftWindowState, root_, 82, 0));
+    EXPECT_FALSE(postEventManager_->HandleMouseWindowLeaveEvent(leftWindowState, 82));
+
+    auto otherNode = AceType::MakeRefPtr<FrameNode>("other", -2, AceType::MakeRefPtr<Pattern>(), true);
+    constexpr int32_t eventId = 83;
+    PostEventAction wrongNodeAction;
+    wrongNodeAction.targetNode = otherNode;
+    wrongNodeAction.touchEvent.type = TouchType::DOWN;
+    wrongNodeAction.touchEvent.id = eventId;
+    postEventManager_->postEventAction_.push_back(wrongNodeAction);
+
+    PostEventAction wrongIdAction;
+    wrongIdAction.targetNode = root_;
+    wrongIdAction.touchEvent.type = TouchType::DOWN;
+    wrongIdAction.touchEvent.id = eventId + 1;
+    postEventManager_->postEventAction_.push_back(wrongIdAction);
+
+    PostEventAction earlyUpAction;
+    earlyUpAction.targetNode = root_;
+    earlyUpAction.touchEvent.type = TouchType::UP;
+    earlyUpAction.touchEvent.id = eventId;
+    postEventManager_->postEventAction_.push_back(earlyUpAction);
+
+    PostEventAction moveAction;
+    moveAction.targetNode = root_;
+    moveAction.touchEvent.type = TouchType::MOVE;
+    moveAction.touchEvent.id = eventId;
+    postEventManager_->postEventAction_.push_back(moveAction);
+
+    PostEventAction downAction;
+    downAction.targetNode = root_;
+    downAction.touchEvent.type = TouchType::DOWN;
+    downAction.touchEvent.id = eventId;
+    postEventManager_->postEventAction_.push_back(downAction);
+
+    PostEventAction cancelAction;
+    cancelAction.targetNode = root_;
+    cancelAction.touchEvent.type = TouchType::CANCEL;
+    cancelAction.touchEvent.id = eventId;
+    postEventManager_->postEventAction_.push_back(cancelAction);
+    postEventManager_->lastEventMap_[eventId] = cancelAction;
+
+    postEventManager_->CheckAndClearPostEventAction(root_, eventId);
+
+    EXPECT_EQ(postEventManager_->postEventAction_.size(), 2u);
+    EXPECT_EQ(postEventManager_->postEventAction_.front().targetNode, otherNode);
+    EXPECT_EQ(postEventManager_->postEventAction_.back().touchEvent.id, eventId + 1);
+    EXPECT_EQ(postEventManager_->lastEventMap_.find(eventId), postEventManager_->lastEventMap_.end());
 }
 } // namespace OHOS::Ace::NG

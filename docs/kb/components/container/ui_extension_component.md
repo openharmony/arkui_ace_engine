@@ -14,6 +14,8 @@ UIExtensionComponent 是 ArkUI 的 UIExtension 能力嵌入容器，允许宿主
 
 ### 源码入口
 
+UIExtension 机制层（功能 ID `04-17-01`）为多个嵌入显示组件提供共用的基础能力：
+
 | 关注点 | 稳定路径 | 说明 |
 |--------|----------|------|
 | Pattern（共享） | `frameworks/core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_pattern.h`、`ui_extension_pattern.cpp` | UIExtension 与 Embedded 共用的 Pattern；构造参数含 SessionType |
@@ -30,6 +32,10 @@ UIExtensionComponent 是 ArkUI 的 UIExtension 能力嵌入容器，允许宿主
 | Layout Algorithm | `frameworks/core/components_ng/pattern/ui_extension/ui_extension_layout_algorithm.h` | UIExtension 布局算法 |
 | Surface Pattern | `frameworks/core/components_ng/pattern/ui_extension/ui_extension_surface_pattern.h` | Surface 层 Pattern，管理渲染节点与 SurfaceProxyNode |
 | Surface Proxy Node | `frameworks/core/components_ng/pattern/ui_extension/surface_proxy_node.h`、`surface_proxy_node.cpp` | 渲染 Surface 代理节点 |
+| Config | `frameworks/core/components_ng/pattern/ui_extension/ui_extension_config.h` | 嵌入显示配置 |
+| 无障碍适配基类与子树回调 | `frameworks/core/components_ng/pattern/ui_extension/platform_accessibility_base.h`、`platform_accessibility_child_tree_callback.h` | Platform 层无障碍基类与子树回调接口 |
+| AccessibilitySessionAdapter (UIExtension) | `frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h`、`accessibility_session_adapter_ui_extension.cpp` | UIExtensionComponent 的无障碍会话适配 |
+| AccessibilitySessionAdapter (Isolated) | `frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.h`、`accessibility_session_adapter_isolated_component.cpp` | IsolatedComponent 的无障碍会话适配 |
 
 共享基础设施（platform_pattern、platform_container_handler、platform_event_proxy、platform_utils、accessibility_session_adapter）也位于 `ui_extension/` 根目录。
 
@@ -73,6 +79,9 @@ UIExtensionComponent 暂无独立的 ArkTS Bridge 文件和 node_modifier 文件
 | Platform 适配测试 | `test/unittest/core/pattern/ui_extension/platform_pattern_test_ng.cpp`、`platform_event_proxy_test.cpp` | 平台 Pattern 和事件代理回归 |
 | Surface Proxy 测试 | `test/unittest/core/pattern/ui_extension/surface_proxy_node_test_ng.cpp` | SurfaceProxyNode 回归 |
 | Session Wrapper 测试 | `test/unittest/core/pattern/ui_extension/session_wrapper_impl_test_ng.cpp`、`session_wrapper_impl_test_new_ng.cpp` | SessionWrapper 实现回归 |
+| Modal UIExtension Proxy 测试 | `test/unittest/core/pattern/ui_extension/modal_ui_extension_proxy_impl_test_ng.cpp` | Modal UIExtensionProxy 实现回归 |
+| Preview SessionWrapper 测试 | `test/unittest/core/pattern/ui_extension/preview_session_wrapper_impl_test_ng.cpp` | Preview 形态 SessionWrapper 回归 |
+| Isolated Pattern 测试 | `test/unittest/core/pattern/ui_extension/isolated_pattern_test_ng.cpp` | IsolatedComponent Pattern 回归 |
 | Mock 基础设施 | `test/unittest/core/pattern/ui_extension/mock/` | 多个 mock 文件支撑单元测试 |
 | Context registry | `docs/context_registry.json` | UIExtensionComponent 的 KB、Spec、源码、API 和测试统一路由 |
 

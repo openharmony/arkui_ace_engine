@@ -32,6 +32,43 @@ class GridTestThreeNg : public TestNG {
 public:
 };
 
+class GridCountingLayoutWrapper : public LayoutWrapperNode {
+public:
+    GridCountingLayoutWrapper()
+        : LayoutWrapperNode(nullptr, MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>()),
+          child_(MakeRefPtr<LayoutWrapperNode>(nullptr, MakeRefPtr<GeometryNode>(), MakeRefPtr<LayoutProperty>()))
+    {}
+
+    RefPtr<LayoutWrapper> GetChildByIndex(uint32_t index, bool isCache = false) override
+    {
+        ++requestCount_;
+        lastIndex_ = index;
+        lastIsCache_ = isCache;
+        return child_;
+    }
+
+    int32_t GetRequestCount() const
+    {
+        return requestCount_;
+    }
+
+    uint32_t GetLastIndex() const
+    {
+        return lastIndex_;
+    }
+
+    bool IsLastRequestCache() const
+    {
+        return lastIsCache_;
+    }
+
+private:
+    RefPtr<LayoutWrapperNode> child_;
+    int32_t requestCount_ = 0;
+    uint32_t lastIndex_ = 0;
+    bool lastIsCache_ = false;
+};
+
 /**
  * @tc.name: SkipRegularLines001
  * @tc.desc: Test GridScrollLayoutAlgorithm SkipRegularLines
@@ -401,6 +438,32 @@ HWTEST_F(GridTestThreeNg, ComputeItemCrossPosition001, TestSize.Level1)
     layout->crossGap_ = 2.0f;
     auto result = layout->ComputeItemCrossPosition(3);
     EXPECT_EQ(result, 11);
+}
+
+/**
+ * @tc.name: CompleteItemCrossPosition001
+ * @tc.desc: Skip cache lookup for items already processed in the current measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestThreeNg, CompleteItemCrossPosition001, TestSize.Level1)
+{
+    GridLayoutInfo gridLayoutInfo;
+    auto layout = AceType::MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo);
+    ASSERT_NE(layout, nullptr);
+    layout->itemsCrossSize_[0] = 100.0f;
+    layout->crossGap_ = 10.0f;
+    layout->itemsCrossPosition_.try_emplace(0, 0.0f);
+    const std::map<int32_t, int32_t> items = { { 0, 0 }, { 1, 1 } };
+    GridCountingLayoutWrapper layoutWrapper;
+
+    layout->CompleteItemCrossPosition(&layoutWrapper, items);
+
+    EXPECT_EQ(layoutWrapper.GetRequestCount(), 1);
+    EXPECT_EQ(layoutWrapper.GetLastIndex(), 1);
+    EXPECT_TRUE(layoutWrapper.IsLastRequestCache());
+    ASSERT_EQ(layout->itemsCrossPosition_.size(), 2);
+    EXPECT_EQ(layout->itemsCrossPosition_.at(0), 0.0f);
+    EXPECT_EQ(layout->itemsCrossPosition_.at(1), 110.0f);
 }
 
 /**
