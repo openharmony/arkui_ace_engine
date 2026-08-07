@@ -105,6 +105,8 @@ Before editing any file, the agent MUST state:
 | **Term: ComponentReuse, RecycleNode** | `docs/kb/architecture/component_reuse_framework.md` |
 | **Term: Subwindow, Popup, Menu, bindSheet** | `docs/kb/architecture/subwindow-mechanism.md` |
 | **Term: ResourceAdapter, instanceId, dark mode switching** | `docs/kb/architecture/resource-dynamic-switching.md` |
+| **Term: NodePaintMethod, RenderContext** | `docs/kb/capabilities/` |
+| **Term: JSView, ViewStackProcessor** | `docs/kb/frontend/` |
 | **Path: `components_ng/pattern/<comp>/`** | `docs/kb/components/<category>/` |
 | **Path: `pipeline_ng/`** | `docs/kb/architecture/layout-framework.md`, `docs/kb/architecture/basic-render-pipeline.md` |
 | **Path: `interfaces/native/node/`** | `docs/kb/api/` |
@@ -152,6 +154,7 @@ Before editing any file, the agent MUST state:
 - `frameworks/core/pipeline_ng/` (+ legacy `pipeline/`): rendering pipeline, frame scheduling, and task dispatch for `components_ng`.
 - `interfaces/native/node/`: C API for components — entry point of the Modifier bridge consumed by NDK scenario (covered by `linux_unittest_capi`).
 - `interfaces/napi/kits/`: NAPI implementations for `@ohos.*` modules such as `router`, `promptAction`, `mediaquery`, `animator`, `font`, `measure`, `curves`, `matrix4` (31 subdirectories).
+- `BUILD.gn`, `bundle.json`: build configuration and dependency declarations (per-directory).
 - `test/unittest`, `test/benchmark`: tests
 
 ### Frequently Changed Paths
@@ -196,7 +199,8 @@ Before editing any file, the agent MUST state:
 
 ## 7. Testing Guidance
 
-- Test path should mirror source layout.
+- Test path should mirror source layout (`test/unittest/` mirrors `frameworks/core/`).
+- Discover test binaries: `find test/unittest -name '*_test' | grep <keyword>`
 - Run targeted unit tests for changed modules first, then broader regression tests if impact is large.
 - For C API related changes: build `linux_unittest_capi`, run `capi_*` test executables, ensure correct architecture (`file <test_binary>`).
 
@@ -239,6 +243,7 @@ Do not (without explicit user confirmation):
 - Modify logging, DFX instrumentation, or fault attribution behavior without DFX owner review.
 - Change persistent data formats, serialization, or cross-version protocol behavior without compatibility review.
 - Introduce third-party dependencies without license review (including copying source code snippets from third-party projects).
+- Change syscap definitions or API version in `bundle.json` without compatibility review.
 
 Ask before:
 
