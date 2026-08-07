@@ -157,11 +157,11 @@ Use the KB as the first-stop context before any deep code analysis, and follow t
 | Task | Read this KB category / doc first |
 |---|---|
 | UI component behavior / Pattern / Model | `docs/kb/components/<category>/` |
-| Layout algorithm / render pipeline / scheduling | `docs/kb/architecture/layout-framework.md`, `docs/kb/architecture/basic-render-pipeline.md` |
+| Layout algorithm / render pipeline / scheduling | `docs/kb/architecture/` — `layout-framework.md` exists; others pending |
 | C API / NAPI / NDK Modifier | `docs/kb/api/` |
 | ArkTS declarative syntax / compiler / frontend | `docs/kb/syntax/` |
-| Drag / gesture / event / accessibility | `docs/kb/architecture/drag-framework.md`, `docs/kb/architecture/event-base-framework.md`, `docs/kb/architecture/accessibility.md` |
-| Resource / theme / multi-instance | `docs/kb/architecture/resource-access.md`, `docs/kb/architecture/theme-framework.md`, `docs/kb/architecture/multi-instance-management.md` |
+| Drag / gesture / event / accessibility | `docs/kb/architecture/` — `drag-framework.md`, `event-base-framework.md`, `accessibility.md` pending |
+| Resource / theme / multi-instance | `docs/kb/architecture/` — `resource-access.md`, `theme-framework.md`, `multi-instance-management.md` pending |
 | Bug / stability / regression issue | `docs/kb/issues/` |
 | Cross-cutting capability | `docs/kb/capabilities/` |
 
@@ -169,15 +169,15 @@ Use the KB as the first-stop context before any deep code analysis, and follow t
 
 | Term | KB lookup |
 |---|---|
-| FrameNode, Pattern, LayoutProperty, PaintProperty | `docs/kb/architecture/basic-render-pipeline.md` |
+| FrameNode, Pattern, LayoutProperty, PaintProperty | `docs/kb/architecture/` — `basic-render-pipeline.md` pending |
 | PipelineContext, FlushTask, UITaskScheduler | `docs/kb/architecture/layout-framework.md` |
 | Modifier, node_modifier, ArkUIModifier | `docs/kb/api/` or `docs/kb/components/<category>/` |
 | CustomNode, CustomSpan, FrameNodeAdapter | `docs/kb/components/custom-node/` |
-| LazyForEach, Repeat, Swiper+LazyForEach | `docs/kb/syntax/lazy_for_each.md`, `docs/kb/syntax/repeat.md` |
-| DragFrameSuite, DragDropManager | `docs/kb/architecture/drag-framework.md` |
-| ComponentReuse, RecycleNode | `docs/kb/architecture/component_reuse_framework.md` |
-| Subwindow, Popup, Menu, bindSheet | `docs/kb/architecture/subwindow-mechanism.md` |
-| ResourceAdapter, instanceId, dark mode switching | `docs/kb/architecture/resource-dynamic-switching.md` |
+| LazyForEach, Repeat, Swiper+LazyForEach | `docs/kb/syntax/` — `lazy_for_each.md`, `repeat.md` pending |
+| DragFrameSuite, DragDropManager | `docs/kb/architecture/` — `drag-framework.md` pending |
+| ComponentReuse, RecycleNode | `docs/kb/architecture/` — `component_reuse_framework.md` pending |
+| Subwindow, Popup, Menu, bindSheet | `docs/kb/architecture/` — `subwindow-mechanism.md` pending |
+| ResourceAdapter, instanceId, dark mode switching | `docs/kb/architecture/` — `resource-dynamic-switching.md` pending |
 
 ### 3.4 Authoring Standard (Minimal)
 
