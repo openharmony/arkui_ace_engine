@@ -1568,6 +1568,11 @@ public:
         return true;
     }
 
+    void SetInfiniteAnimationFlushExceeded(bool exceeded);
+    bool IsInfiniteAnimationFlushExceeded() const;
+    void PushInfiniteAnimationFlushExceeded();
+    void PopInfiniteAnimationFlushExceeded();
+
     virtual void SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates)
     {
         /* only implemented in PipelineContext for NG */
@@ -1764,6 +1769,7 @@ protected:
 
     bool isJsPlugin_ = false;
     bool isOpenInvisibleFreeze_ = false;
+    bool infiniteAnimationFlushExceeded_ = false;
     PixelRoundMode pixelRoundMode_ = PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
@@ -1800,6 +1806,7 @@ protected:
     std::stack<bool> pendingImplicitLayout_;
     std::stack<bool> pendingImplicitRender_;
     std::stack<bool> pendingFrontendAnimation_;
+    std::stack<bool> infiniteAnimationFlushExceededStack_;
     std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;

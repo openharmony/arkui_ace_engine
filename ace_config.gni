@@ -101,6 +101,9 @@ declare_args() {
 
   #Enable container_scope tracking
   ace_engine_feature_enable_container_scope_tracking = false
+
+  #Enable material param customized
+  ace_engine_feature_enable_material_customized = false
 }
 
 enable_dump_drawcmd = false

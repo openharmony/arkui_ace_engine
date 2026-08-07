@@ -3272,13 +3272,19 @@ void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTr
     // Note: this default transition effect will be removed after all transitions finished, implemented in
     // OnTransitionInFinish. and OnTransitionOutFinish.
     if (isBreakingPoint_ && !transitionEffect_ && AnimationUtils::IsImplicitAnimationOpen()) {
-        hasDefaultTransition_ = true;
-        transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
-        auto rsUIContext = rsNode_->GetRSUIContext();
-        RSNode::ExecuteWithoutAnimation([this, isTransitionIn]() {
-                // transitionIn effects should be initialized as active if is transitionIn.
-                transitionEffect_->Attach(Claim(this), isTransitionIn);
-            }, rsUIContext);
+        auto pipeline = PipelineContext::GetCurrentContextPtrSafelyWithCheck();
+        if (pipeline && pipeline->IsInfiniteAnimationFlushExceeded()) {
+            TAG_LOGE(AceLogTag::ACE_ANIMATION,
+                "NotifyTransitionInner skip default transition, infinite animation flush exceeded");
+        } else {
+            hasDefaultTransition_ = true;
+            transitionEffect_ = RosenTransitionEffect::CreateDefaultRosenTransitionEffect();
+            auto rsUIContext = rsNode_->GetRSUIContext();
+            RSNode::ExecuteWithoutAnimation([this, isTransitionIn]() {
+                    // transitionIn effects should be initialized as active if is transitionIn.
+                    transitionEffect_->Attach(Claim(this), isTransitionIn);
+                }, rsUIContext);
+        }
     }
     NotifyTransition(isTransitionIn);
 }

@@ -15,11 +15,11 @@
 
 #include "core/interfaces/native/ani/visual_effect_ani_modifier.h"
 
-#include "core/components/common/properties/ui_material.h"
-
 #include "interfaces/inner_api/ace_kit/include/ui/properties/ui_material_enums.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/system_properties.h"
+#include "core/components/common/properties/ui_material.h"
 
 namespace OHOS::Ace::NG {
 
@@ -130,6 +130,16 @@ UiMaterial* ConvertToECSubMaterial(UiMaterial* materialPtr)
     ConvertToImmersiveOptionsECSub(newOptions);
     return newMaterial.GetRawPtr();
 }
+
+int32_t GetGlobalMaterialLevel()
+{
+    return static_cast<int32_t>(SystemProperties::GetUiMaterialLevel());
+}
+
+bool IsImmersiveMaterialSupported()
+{
+    return SystemProperties::IsDeviceSystemMaterialSupported();
+}
 } // namespace
 
 const ArkUIAniVisualEffectModifier* GetVisualEffectAniModifier()
@@ -139,6 +149,8 @@ const ArkUIAniVisualEffectModifier* GetVisualEffectAniModifier()
         .destroyMaterial = OHOS::Ace::NG::DestroyMaterial,
         .convertToECMaterial = OHOS::Ace::NG::ConvertToECMaterial,
         .convertToECSubMaterial = OHOS::Ace::NG::ConvertToECSubMaterial,
+        .getGlobalMaterialLevel = OHOS::Ace::NG::GetGlobalMaterialLevel,
+        .isImmersiveMaterialSupported = OHOS::Ace::NG::IsImmersiveMaterialSupported,
     };
     return &impl;
 }

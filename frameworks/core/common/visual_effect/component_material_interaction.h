@@ -38,7 +38,7 @@ struct ControlInteractionInfo {
 class ControlInteractionBase {
 public:
     static void RegisterMaterialInteractionEvent(
-        RefPtr<FrameNode> targetNode, const std::shared_ptr<ImmersiveOptions>& options);
+        RefPtr<FrameNode> targetNode, const std::shared_ptr<ImmersiveOptions>& options, bool enableLightEffect);
     static void UninitLightEffect(FrameNode* targetNode);
     static void HandleTouchEvent(RefPtr<FrameNode> targetNode, const TouchEventInfo& info);
     static void HandleTouchDown(
@@ -49,7 +49,6 @@ public:
     static void InitInteractionOffset(RefPtr<FrameNode> targetNode, ControlInteractionInfo& info);
 
 private:
-    static std::optional<LightEffectOptions> GetLightEffectOptions(RefPtr<FrameNode>& targetNode);
     static bool IsInteractiveEnabled(RefPtr<FrameNode>& targetNode);
     static bool IsLightEffectEnabled(RefPtr<FrameNode>& targetNode);
     static void InitLightEffect(RefPtr<FrameNode>& targetNode);

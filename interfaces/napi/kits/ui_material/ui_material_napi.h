@@ -57,6 +57,7 @@ private:
     static UiMaterial* WrapMaterialObject(napi_env env, napi_value jsThis, int32_t materialType);
     static UiMaterial* WrapImmersiveMaterialObject(napi_env env, napi_value jsThis, const ImmersiveOptions& options);
     static ImmersiveOptions ParseImmersiveOptions(napi_env env, napi_value value);
+    static napi_value JSIsImmersiveMaterialSupported(napi_env env, napi_callback_info info);
 
     static void ConvertToImmersiveOptionsEC(ImmersiveOptions& options);
     static void ConvertToImmersiveOptionsECSub(ImmersiveOptions& options);

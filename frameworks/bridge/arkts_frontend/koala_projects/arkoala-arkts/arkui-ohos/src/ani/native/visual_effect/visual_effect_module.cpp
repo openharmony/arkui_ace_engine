@@ -18,6 +18,7 @@
 
 #include "load.h"
 #include "log/log.h"
+#include "ui/properties/ui_material_enums.h"
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace::Ani {
@@ -224,5 +225,19 @@ ani_long UiMaterialConvertToECSubMaterial(ani_env* env, ani_object aniClass, ani
     CHECK_NULL_RETURN(modifier, 0);
     auto* result = modifier->getVisualEffectAniModifier()->convertToECSubMaterial(pointer);
     return reinterpret_cast<ani_long>(result);
+}
+
+ani_int UiMaterialGetGlobalMaterialLevel(ani_env* env, ani_object aniClass)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, static_cast<ani_int>(UiMaterialLevel::DEFAULT));
+    return modifier->getVisualEffectAniModifier()->getGlobalMaterialLevel();
+}
+
+ani_boolean UiMaterialIsImmersiveMaterialSupported(ani_env* env, ani_object aniClass)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, false);
+    return modifier->getVisualEffectAniModifier()->isImmersiveMaterialSupported();
 }
 } // namespace OHOS::Ace::Ani

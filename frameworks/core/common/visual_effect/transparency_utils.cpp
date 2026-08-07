@@ -64,7 +64,9 @@ int32_t TransparencyUtils::GetTransparencyLevel(int32_t materialLevel)
     TAG_LOGD(AceLogTag::ACE_VISUAL_EFFECT, "TransparencyUtils::GetTransparencyLevel from settings: %{public}d",
         transparency);
 
-    AdjustTransparencyForLevel(transparency);
+    if (code == ERR_OK) {
+        AdjustTransparencyForLevel(transparency);
+    }
     if (code == ERR_OK || code == ERR_NAME_NOT_FOUND) {
         transparencyLevelGet_ = true;
     }
@@ -75,6 +77,16 @@ void TransparencyUtils::AdjustTransparencyForLevel(int32_t transparency)
 {
     std::unique_lock lock(GetLevelLock());
     auto& levelMap = GetLevelMap();
+#ifdef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
+    // only adjust the transparency level of the correct level when custom
+    if (transparency >= static_cast<int32_t>(UiMaterialTransparency::GENTLE_THIN) &&
+        transparency <= static_cast<int32_t>(UiMaterialTransparency::GENTLE_THICK)) {
+        levelMap[UiMaterialLevel::GENTLE] = static_cast<UiMaterialTransparency>(transparency);
+    } else if (transparency >= static_cast<int32_t>(UiMaterialTransparency::THIN) &&
+               transparency <= static_cast<int32_t>(UiMaterialTransparency::THICK)) {
+        levelMap[UiMaterialLevel::EXQUISITE] = static_cast<UiMaterialTransparency>(transparency);
+    }
+#else
     if (transparency >= static_cast<int32_t>(UiMaterialTransparency::GENTLE_THIN) &&
         transparency <= static_cast<int32_t>(UiMaterialTransparency::GENTLE_THICK)) {
         levelMap[UiMaterialLevel::GENTLE] = static_cast<UiMaterialTransparency>(transparency);
@@ -84,13 +96,18 @@ void TransparencyUtils::AdjustTransparencyForLevel(int32_t transparency)
         levelMap[UiMaterialLevel::EXQUISITE] = static_cast<UiMaterialTransparency>(transparency);
         levelMap[UiMaterialLevel::GENTLE] = static_cast<UiMaterialTransparency>(transparency + DIFF);
     }
+#endif
 }
 
 TransparencyLevelMap& TransparencyUtils::GetLevelMap()
 {
-    // EXQUISITE->NORMAL, GENTLE->GENTLE_NORMAL, SMOOTH->NONE
+    // EXQUISITE(custom)->THIN, EXQUISITE(others)->NORMAL, GENTLE->GENTLE_NORMAL, SMOOTH->NONE
     static TransparencyLevelMap levelMap = {
+#ifdef ACE_ENGINE_IMMERSIVE_MATERIAL_CUSTOMIZED
+        { UiMaterialLevel::EXQUISITE, UiMaterialTransparency::THIN },
+#else
         { UiMaterialLevel::EXQUISITE, UiMaterialTransparency::NORMAL },
+#endif
         { UiMaterialLevel::GENTLE, UiMaterialTransparency::GENTLE_NORMAL },
         { UiMaterialLevel::SMOOTH, UiMaterialTransparency::NONE }
     };
