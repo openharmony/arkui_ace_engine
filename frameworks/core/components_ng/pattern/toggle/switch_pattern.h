@@ -194,7 +194,6 @@ private:
     void InitClickEvent();
     void HandleLongPress();
     void StartLongPressTimer();
-    void HandleHighGradeLongPress();
     void HandleLowGradeLongPress();
     void InitTouchEvent();
     void InitMouseEvent();
@@ -216,9 +215,18 @@ private:
     void CreateDragFrameNode();
     void CreateDragPointNode();
     void CreateBlurCoverNode();
+    void UpdatePointLightIntensity(bool isOn);
     void UpdateMaterialNodePosition(float centerX, float centerY, float pointRadius);
     void RegisterMaterialNodePositionCallback();
+    void AttachMaterialNodesToHost(const RefPtr<FrameNode>& host, const RefPtr<RenderContext>& frameRC);
+    void AnimateDragFrameAppearance(const RefPtr<FrameNode>& host, const RefPtr<RenderContext>& frameRC,
+        const RefPtr<RenderContext>& pointRC, const RefPtr<RenderContext>& blurRC,
+        const RefPtr<SwitchModifier>& switchModifier);
     void ShowMaterialNode();
+    void AttachPointLightNodesToHost(const RefPtr<FrameNode>& host, const RefPtr<RenderContext>& pointRC);
+    void ResetPointLightOpacityForAnim(const RefPtr<FrameNode>& host, const RefPtr<RenderContext>& pointRC,
+        const RefPtr<RenderContext>& blurRC, bool freshShow);
+    void TriggerPointLightBrightening();
     void HideMaterialNode();
     void ResetMaterialNodeAppearance(const RefPtr<RenderContext>& pointRC,
         const RefPtr<RenderContext>& blurRC);
@@ -229,12 +237,13 @@ private:
     float GetActualGap() const;
 
     void ApplyDragFrameNodeSystemMaterial();
-    void ApplyDragFrameNodeBlendMode();
+    void ApplyBlendMode();
     std::shared_ptr<Rosen::BrightnessBlender> CreateBrightnessBlender();
     void ResetHostMaterialEffects();
 
     // Drag animation helpers
     AnimationOption CreateDragAnimationOption() const;
+    AnimationOption CreatePointLightBrightenOption() const;
     BlurStyleOption CreateDragBlurStyleOption(float scale) const;
     AnimationOption CreateLowGradeSpringOption() const;
     void HideMaterialNodes();
@@ -291,6 +300,8 @@ private:
     CancelableCallback<void()> longPressTask_;
 
     bool pendingHide_ = false;
+    bool pendingHidePointLight_ = false;
+    int64_t materialAnimToken_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);
     std::function<void(bool)> isFocusActiveUpdateEvent_;
