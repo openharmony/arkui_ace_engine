@@ -2389,19 +2389,21 @@ void UINode::GetPerformanceCheckData(PerformanceCheckNodeMap& nodeMap)
         }
     }
 
-    if (tag_ == V2::COMMON_VIEW_ETS_TAG) {
-        if (!children.empty()) {
-            auto begin = children.begin();
-            nodeInfo_->nodeTag = (*begin)->GetCustomTag();
+    if (nodeInfo_) {
+        if (tag_ == V2::COMMON_VIEW_ETS_TAG) {
+            if (!children.empty()) {
+                auto begin = children.begin();
+                nodeInfo_->nodeTag = (*begin)->GetCustomTag();
+            }
+        } else {
+            nodeInfo_->nodeTag = GetCustomTag();
         }
-    } else {
-        nodeInfo_->nodeTag = GetCustomTag();
-    }
 
-    nodeInfo_->pageDepth = depth_;
-    nodeInfo_->childrenSize = static_cast<int32_t>(children.size());
-    if (isBuildByJS_) {
-        nodeMap.insert({ nodeId_, *(nodeInfo_) });
+        nodeInfo_->pageDepth = depth_;
+        nodeInfo_->childrenSize = static_cast<int32_t>(children.size());
+        if (isBuildByJS_) {
+            nodeMap.insert({ nodeId_, *(nodeInfo_) });
+        }
     }
     for (const auto& child : children) {
         // Recursively traverse the child nodes of each node

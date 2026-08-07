@@ -1186,6 +1186,37 @@ HWTEST_F(UINodeTestNgTwo, GetPerformanceCheckData004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetPerformanceCheckData005
+ * @tc.desc: Test collecting child data when parent nodeInfo is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(UINodeTestNgTwo, GetPerformanceCheckData005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create a parent without nodeInfo and a child with nodeInfo
+     */
+    auto parentId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto parent = FrameNode::CreateFrameNode("parent", parentId, AceType::MakeRefPtr<Pattern>(), true);
+    auto child = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), true);
+    parent->nodeInfo_.reset();
+    child->nodeInfo_ = std::make_unique<PerformanceCheckNode>();
+    child->SetBuildByJs(true);
+    parent->AddChild(child);
+
+    /**
+     * @tc.steps: step2. collect performance check data from the parent
+     * @tc.expected: skip the parent and continue collecting the child
+     */
+    PerformanceCheckNodeMap nodeMap;
+    parent->UINode::GetPerformanceCheckData(nodeMap);
+
+    EXPECT_EQ(nodeMap.count(parentId), 0);
+    ASSERT_EQ(nodeMap.count(childId), 1);
+    EXPECT_EQ(nodeMap.at(childId).nodeTag, "child");
+}
+
+/**
  * @tc.name: CollectCleanedChildren
  * @tc.desc: Test ui node method CollectCleanedChildren
  * @tc.type: FUNC
