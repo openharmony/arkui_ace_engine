@@ -304,10 +304,7 @@ void FormRenderWindow::SetUiDvsyncSwitch(bool dvsyncSwitch, FromWhom fromWhom)
 {
 #if defined(__OHOS__) && defined(ENABLE_ROSEN_BACKEND)
     if (receiver_ && (uiContentType_ == UIContentType::DYNAMIC_COMPONENT)) {
-        ACE_SCOPED_TRACE("SetUiDvsyncSwitch switch:%d fromWhom:%s", dvsyncSwitch,
-            fromWhom == FromWhom::API ? "API" : "INNER");
-        auto receiverFromWhom = fromWhom == FromWhom::API ? OHOS::FromWhom::API : OHOS::FromWhom::INNER;
-        receiver_->SetUiDvsyncSwitch(dvsyncSwitch, receiverFromWhom);
+        receiver_->SetUiDvsyncSwitch(dvsyncSwitch);
     }
 #endif
 }
