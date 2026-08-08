@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-08-07",
+  "last_updated": "2026-08-08",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -12511,6 +12511,73 @@
         "scrollable_pattern_header": "frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.h",
         "ut": "test/unittest/core/pattern/scrollable/scrollable_pattern_test_ng.cpp"
       }
+    },
+    {
+      "id": "IgnoreLayoutSafeAreaDirtyStateMismatch",
+      "name": "ignoreLayoutSafeArea Layout Dirty State Mismatch",
+      "name_cn": "ignoreLayoutSafeArea 布局脏状态异常",
+      "kind": "issue",
+      "category": "layout",
+      "keywords": [
+        "IgnoreLayoutSafeAreaDirtyStateMismatch",
+        "ignoreLayoutSafeArea",
+        "布局脏状态异常",
+        "LayoutDirty",
+        "LayoutDirtyMarked",
+        "TraverseForIgnore",
+        "TRAVERSE_FOR_IGNORE",
+        "FlushPostponedLayoutTask",
+        "PreMeasure",
+        "NavigationContent",
+        "Navigation 白屏",
+        "Swiper 白屏",
+        "延迟布局任务",
+        "安全区布局"
+      ],
+      "aliases": [
+        "ignoreLayoutSafeArea 白屏",
+        "安全区延迟布局异常",
+        "布局脏位未清理",
+        "TraverseForIgnore 布局异常"
+      ],
+      "kb": "docs/kb/issues/layout/ignore-layout-safe-area-dirty-state-mismatch.md",
+      "func_ids": [
+        "04-02-01",
+        "05-02-01",
+        "05-03-08"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08"
+    },
+    {
+      "id": "CanvasDrawingTaskBacklogAppFreeze",
+      "name": "Canvas Drawing Task Backlog AppFreeze",
+      "name_cn": "Canvas 绘制任务堆积导致 AppFreeze",
+      "kind": "issue",
+      "category": "performance",
+      "keywords": [
+        "CanvasDrawingTaskBacklogAppFreeze",
+        "Canvas",
+        "CanvasRenderingContext2D",
+        "AppFreeze",
+        "FlushTask",
+        "UpdateContentModifier",
+        "绘制任务堆积",
+        "单帧绘制过多",
+        "后台持续绘制",
+        "UI_BLOCK_6S"
+      ],
+      "aliases": [
+        "Canvas绘制卡死",
+        "Canvas后台绘制堆积",
+        "Canvas FlushTask冻结"
+      ],
+      "kb": "docs/kb/issues/performance/canvas-drawing-task-backlog-appfreeze.md",
+      "func_ids": [
+        "05-14-02"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08"
     }
   ]
 }
