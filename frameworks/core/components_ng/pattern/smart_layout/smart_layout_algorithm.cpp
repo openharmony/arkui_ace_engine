@@ -323,6 +323,9 @@ bool SmartLayoutAlgorithm::ApplyLayoutResults(LayoutWrapper* layoutWrapper)
     auto [boundingBoxOffsetX, boundingBoxOffsetY] = CalculateBoundingBoxOffsets();
     auto nodeMap = BuildNodeIdMap(children);
     double sizeScale = rootNode_->GetScaleInfo().sizeScale.value;
+    if (NearZero(sizeScale)) {
+        return false;
+    }
     for (const auto& childWrapper : layoutWrapper->GetAllChildrenWithBuild(false)) {
         ApplyChildLayout(childWrapper, nodeMap, sizeScale, boundingBoxOffsetX, boundingBoxOffsetY);
     }

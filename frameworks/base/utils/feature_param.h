@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_FEATURE_PARAM_IMPL_H
 
 #include <string>
-#include <vector>
 
 #include "ui/base/macros.h"
 
