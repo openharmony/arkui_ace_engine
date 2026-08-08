@@ -101,7 +101,7 @@ class ObserveV2 {
   public id2targets_: { number: Set<WeakRef<Object>> } = {} as { number: Set<WeakRef<Object>> };
 
   // Queue of tasks to run in next idle period (used for optimization)
-  public idleTasks_: (Array<[(...any: any[]) => any, ...any[]]> & { first: number, end: number }) =
+  public idleTasks_: (Array<[(...any: any[]) => any, ...any[]] | undefined> & { first: number, end: number }) =
     Object.assign(Array(1000).fill([]), { first: 0, end: 0 });
   public static readonly idleTasksInitLength = 1000;
 
@@ -368,7 +368,7 @@ class ObserveV2 {
     while (this.idleTasks_.first < this.idleTasks_.end) {
       const [func, ...args] = this.idleTasks_[this.idleTasks_.first] || [];
       func?.apply(this, args);
-      delete this.idleTasks_[this.idleTasks_.first];
+      this.idleTasks_[this.idleTasks_.first] = undefined;
       this.idleTasks_.first++;
       // ensure that there is no accumulation in idleTask leading to oom
       if (this.idleTasks_.end - this.idleTasks_.first < ObserveV2.idleTasksInitLength &&
