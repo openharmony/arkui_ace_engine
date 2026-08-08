@@ -576,9 +576,15 @@ export class Application {
         let rootState = uiContextRouter.getStateRoot();
         rootState?.forceCompleteRerender();
         let detachedRoots = getDetachedRootsByInstanceId(this.instanceId);
+        const context = UIContextUtil.getOrCreateUIContextById(this.instanceId) as UIContext;
+        const freezedRoots = context.getDetachedRootEntryManager().freezedRoots_;
         for (const detachedRoot of detachedRoots.values()) {
             detachedRoot.compute();
             detachedRoot.forceCompleteRerender();
+        }
+        for (const freezedRoot of freezedRoots.values()) {
+            freezedRoot.compute();
+            freezedRoot.forceCompleteRerender();
         }
         this.manager!.syncChanges();
         this.manager!.updateSnapshot();

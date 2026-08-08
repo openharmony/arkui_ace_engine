@@ -48,6 +48,34 @@ public:
         std::unique_lock<std::shared_mutex> lock(themeMutex_);
         JSThemeScope::jsCurrentTheme.swap(themeOpt);
     }
+
+    static void SaveTheme(int32_t themeScopeId, const JSThemeColors& colors, const JSThemeColors& darkColors)
+    {
+        std::unique_lock<std::shared_mutex> lock(themeMutex_);
+        JSThemeScope::jsThemes[themeScopeId].SetColors(colors);
+        JSThemeScope::jsThemes[themeScopeId].SetDarkColors(darkColors);
+        if (JSThemeScope::isCurrentThemeDefault || themeScopeId > 0) {
+            JSThemeScope::jsCurrentTheme = JSThemeScope::jsThemes[themeScopeId];
+        }
+    }
+
+    static void SetCurrentThemeByScopeId(int32_t themeScopeId)
+    {
+        std::unique_lock<std::shared_mutex> lock(themeMutex_);
+        JSThemeScope::isCurrentThemeDefault = (themeScopeId == 0);
+        auto theme = JSThemeScope::jsThemes.find(themeScopeId);
+        if (theme != JSThemeScope::jsThemes.end()) {
+            JSThemeScope::jsCurrentTheme = theme->second;
+        } else {
+            JSThemeScope::jsCurrentTheme = std::nullopt;
+        }
+    }
+
+    static void RemoveTheme(int32_t themeScopeId)
+    {
+        std::unique_lock<std::shared_mutex> lock(themeMutex_);
+        JSThemeScope::jsThemes.erase(themeScopeId);
+    }
 };
 }
 #endif //FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_UTILS_H
