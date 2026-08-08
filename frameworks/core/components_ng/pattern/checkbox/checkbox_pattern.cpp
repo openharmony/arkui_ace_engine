@@ -183,14 +183,15 @@ bool CheckBoxPattern::IsArkTSStatic()
 
 void CheckBoxPattern::OnModifyDone()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox OnModifyDone called, checkboxId=%{public}d", host->GetId());
     Pattern::OnModifyDone();
     FireBuilder();
     UpdateIndicator();
     if ((!IsArkTSStatic()) || (!isFirstCreated_)) {
         UpdateState();
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>(host->GetThemeScopeId());
@@ -628,6 +629,7 @@ void CheckBoxPattern::UpdateState()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox UpdateState called, checkBoxId=%{public}d", host->GetId());
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto groupManager = GetGroupManager();
@@ -777,6 +779,8 @@ void CheckBoxPattern::StartCustomNodeAnimation(bool select)
 void CheckBoxPattern::UpdateCheckBoxGroupStatus(
     RefPtr<FrameNode> checkBoxGroupNode, const std::list<RefPtr<FrameNode>>& list)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     std::vector<std::string> vec;
     bool haveCheckBoxSelected = false;
     bool isAllCheckBoxSelected = true;
@@ -807,6 +811,19 @@ void CheckBoxPattern::ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkB
     auto pattern = checkBoxGroupNode->GetPattern<CheckBoxGroupPattern>();
     CHECK_NULL_VOID(pattern);
     auto preStatus = groupPaintProperty->GetSelectStatus();
+    CheckBoxGroupPaintProperty::SelectStatus newStatus;
+    if (haveCheckBoxSelected) {
+        if (isAllCheckBoxSelected) {
+            newStatus = CheckBoxGroupPaintProperty::SelectStatus::ALL;
+        } else {
+            newStatus = CheckBoxGroupPaintProperty::SelectStatus::PART;
+        }
+    } else {
+        newStatus = CheckBoxGroupPaintProperty::SelectStatus::NONE;
+    }
+    if (preStatus == newStatus) {
+        return;
+    }
     if (haveCheckBoxSelected) {
         if (isAllCheckBoxSelected) {
             groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
@@ -828,6 +845,9 @@ void CheckBoxPattern::ChangeGroupStatusAndNotify(const RefPtr<FrameNode>& checkB
     CheckboxGroupResult groupResult(vec, int(status));
     auto eventHub = checkBoxGroupNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
+    if (pattern->GetColorConfigSkip()) {
+        return;
+    }
     TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "update checkboxgroup result %d", groupResult.GetStatus());
     eventHub->UpdateChangeEvent(&groupResult);
 }
@@ -836,6 +856,8 @@ void CheckBoxPattern::CheckBoxGroupIsTrue()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "CheckBoxPattern CheckBoxGroupIsTrue called checkBoxId=%{public}d",
+        host->GetId());
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
     auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
@@ -1118,7 +1140,6 @@ void CheckBoxPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(checkBoxPaintProperty);
     OnThemeScopeUpdate(host->GetThemeScopeId());
     UpdatePaintPropertyBySettingData(checkBoxPaintProperty);
-    host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
