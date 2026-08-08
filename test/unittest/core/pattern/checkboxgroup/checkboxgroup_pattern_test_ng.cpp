@@ -938,4 +938,195 @@ HWTEST_F(CheckBoxGroupPatternTestNG, UpdateGroupManager001, TestSize.Level1)
     pattern->UpdateGroupManager();
     EXPECT_NE(pattern->groupManager_.Upgrade(), nullptr);
 }
+
+/**
+ * @tc.name: UpdateStateColorConfigSkipReset001
+ * @tc.desc: Test UpdateState resets colorConfigSkip_ at the start.
+ *           Covers the new branch: if (colorConfigSkip_) { colorConfigSkip_ = false; }
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, UpdateStateColorConfigSkipReset001, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), true);
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    pageNode->eventHub_ = pageEventHub;
+    pageNode->MountToParent(stageNode);
+    auto context = PipelineContext::GetCurrentContext();
+    auto stageManager = context->GetStageManager();
+    stageManager->stageNode_ = stageNode;
+
+    auto groupNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, 3,
+        AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    ASSERT_NE(groupNode, nullptr);
+    auto pattern = groupNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->SetColorConfigSkip(true);
+    EXPECT_TRUE(pattern->GetColorConfigSkip());
+
+    pattern->UpdateState();
+    EXPECT_FALSE(pattern->GetColorConfigSkip());
+}
+
+/**
+ * @tc.name: UpdateStateSkipFlagReset001
+ * @tc.desc: Test UpdateState when HasCheckBoxGroupSelect is false and skipFlag_ is true.
+ *           Covers the new branch that resets skipFlag_ on early return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, UpdateStateSkipFlagReset001, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), true);
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    pageNode->eventHub_ = pageEventHub;
+    pageNode->MountToParent(stageNode);
+    auto context = PipelineContext::GetCurrentContext();
+    auto stageManager = context->GetStageManager();
+    stageManager->stageNode_ = stageNode;
+
+    auto groupNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, 3,
+        AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    ASSERT_NE(groupNode, nullptr);
+    auto pattern = groupNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->UpdateGroupManager();
+    auto eventHub = groupNode->GetEventHub<CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetGroupName(CHECKBOXGROUP_NAME);
+    pattern->SetPreGroup(CHECKBOXGROUP_NAME);
+    pattern->SetSkipFlag(true);
+    EXPECT_TRUE(pattern->GetSkipFlag());
+
+    pattern->UpdateState();
+    EXPECT_FALSE(pattern->GetSkipFlag());
+}
+
+/**
+ * @tc.name: UpdateStateSkipFlagNoReset001
+ * @tc.desc: Test UpdateState when HasCheckBoxGroupSelect is false and skipFlag_ is false.
+ *           Covers the branch where skipFlag_ remains false on early return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, UpdateStateSkipFlagNoReset001, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), true);
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    pageNode->eventHub_ = pageEventHub;
+    pageNode->MountToParent(stageNode);
+    auto context = PipelineContext::GetCurrentContext();
+    auto stageManager = context->GetStageManager();
+    stageManager->stageNode_ = stageNode;
+
+    auto groupNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, 3,
+        AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    ASSERT_NE(groupNode, nullptr);
+    auto pattern = groupNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->UpdateGroupManager();
+    auto eventHub = groupNode->GetEventHub<CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetGroupName(CHECKBOXGROUP_NAME);
+    pattern->SetPreGroup(CHECKBOXGROUP_NAME);
+    pattern->SetSkipFlag(false);
+    EXPECT_FALSE(pattern->GetSkipFlag());
+
+    pattern->UpdateState();
+    EXPECT_FALSE(pattern->GetSkipFlag());
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdateSetsSkipFlags001
+ * @tc.desc: Test OnColorConfigurationUpdate sets skipFlag_ to true.
+ *           colorConfigSkip_ is set true then reset by UpdateState triggered by MarkModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, OnColorConfigurationUpdateSetsSkipFlags001, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), true);
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    pageNode->eventHub_ = pageEventHub;
+    pageNode->MountToParent(stageNode);
+    auto context = PipelineContext::GetCurrentContext();
+    auto stageManager = context->GetStageManager();
+    stageManager->stageNode_ = stageNode;
+
+    auto groupNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, 3,
+        AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    ASSERT_NE(groupNode, nullptr);
+    auto pattern = groupNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_FALSE(pattern->GetSkipFlag());
+
+    pattern->OnColorConfigurationUpdate();
+
+    EXPECT_TRUE(pattern->GetSkipFlag());
+}
+
+/**
+ * @tc.name: GetColorConfigSkipAndSet001
+ * @tc.desc: Test GetColorConfigSkip and SetColorConfigSkip getter/setter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, GetColorConfigSkipAndSet001, TestSize.Level1)
+{
+    auto groupNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, 1,
+        AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    ASSERT_NE(groupNode, nullptr);
+    auto pattern = groupNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_FALSE(pattern->GetColorConfigSkip());
+    pattern->SetColorConfigSkip(true);
+    EXPECT_TRUE(pattern->GetColorConfigSkip());
+    pattern->SetColorConfigSkip(false);
+    EXPECT_FALSE(pattern->GetColorConfigSkip());
+}
+
+/**
+ * @tc.name: HasChangeEventBothEvents001
+ * @tc.desc: Test HasChangeEvent returns true when changeEvent_ is set.
+ *           Covers the modified condition: changeEvent_ != nullptr || selectAllChangeEvent_ != nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, HasChangeEventBothEvents001, TestSize.Level1)
+{
+    auto groupNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, 1,
+        AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    ASSERT_NE(groupNode, nullptr);
+    auto eventHub = groupNode->GetEventHub<CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    EXPECT_FALSE(eventHub->HasChangeEvent());
+
+    std::function<void(const BaseEventInfo*)> callback = [](const BaseEventInfo* info) {};
+    eventHub->SetChangeEvent(std::move(callback));
+    EXPECT_TRUE(eventHub->HasChangeEvent());
+}
+
+/**
+ * @tc.name: GetSkipFlagAndSet001
+ * @tc.desc: Test GetSkipFlag and SetSkipFlag getter/setter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupPatternTestNG, GetSkipFlagAndSet001, TestSize.Level1)
+{
+    auto groupNode = FrameNode::CreateFrameNode(V2::CHECKBOXGROUP_ETS_TAG, 1,
+        AceType::MakeRefPtr<CheckBoxGroupPattern>());
+    ASSERT_NE(groupNode, nullptr);
+    auto pattern = groupNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    EXPECT_FALSE(pattern->GetSkipFlag());
+    pattern->SetSkipFlag(true);
+    EXPECT_TRUE(pattern->GetSkipFlag());
+    pattern->SetSkipFlag(false);
+    EXPECT_FALSE(pattern->GetSkipFlag());
+}
 } // namespace OHOS::Ace::NG

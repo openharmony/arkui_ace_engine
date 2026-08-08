@@ -1430,4 +1430,177 @@ HWTEST_F(CheckBoxPatternTestNG, CheckBoxPatternTest041, TestSize.Level1)
     eventHub->getInnerFocusRectFunc_(paintRect);
     EXPECT_EQ(paintRect.GetRect().ToString(), "RectT (10.00, 20.00) - [120.00 x 170.00]");
 }
+
+/**
+ * @tc.name: ChangeGroupStatusAndNotifySkipSameStatus001
+ * @tc.desc: Test ChangeGroupStatusAndNotify when preStatus == newStatus (skip notification).
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, ChangeGroupStatusAndNotifySkipSameStatus001, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto checkBoxNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(checkBoxNode, nullptr);
+    auto checkBoxPattern = checkBoxNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto groupNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(groupNode, nullptr);
+
+    auto groupPaintProperty = groupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(groupPaintProperty, nullptr);
+    groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+
+    std::vector<std::string> vec = { "checkbox" };
+    checkBoxPattern->ChangeGroupStatusAndNotify(groupNode, vec, true, true);
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
+}
+
+/**
+ * @tc.name: ChangeGroupStatusAndNotifyColorConfigSkip001
+ * @tc.desc: Test ChangeGroupStatusAndNotify when colorConfigSkip_ is true (skip notification).
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, ChangeGroupStatusAndNotifyColorConfigSkip001, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto checkBoxNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(checkBoxNode, nullptr);
+    auto checkBoxPattern = checkBoxNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto groupNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(groupNode, nullptr);
+
+    auto groupPattern = groupNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    groupPattern->SetColorConfigSkip(true);
+
+    auto groupPaintProperty = groupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(groupPaintProperty, nullptr);
+    groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::NONE);
+
+    std::vector<std::string> vec = { "checkbox" };
+    checkBoxPattern->ChangeGroupStatusAndNotify(groupNode, vec, true, true);
+    EXPECT_TRUE(groupPattern->GetColorConfigSkip());
+}
+
+/**
+ * @tc.name: ChangeGroupStatusAndNotifyNormal001
+ * @tc.desc: Test ChangeGroupStatusAndNotify status changes from NONE to ALL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, ChangeGroupStatusAndNotifyNormal001, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto checkBoxNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(checkBoxNode, nullptr);
+    auto checkBoxPattern = checkBoxNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto groupNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(groupNode, nullptr);
+
+    auto groupPattern = groupNode->GetPattern<CheckBoxGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    EXPECT_FALSE(groupPattern->GetColorConfigSkip());
+
+    auto groupPaintProperty = groupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(groupPaintProperty, nullptr);
+    groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::NONE);
+
+    std::vector<std::string> vec = { "checkbox" };
+    checkBoxPattern->ChangeGroupStatusAndNotify(groupNode, vec, true, true);
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
+}
+
+/**
+ * @tc.name: ChangeGroupStatusAndNotifyPartStatus001
+ * @tc.desc: Test ChangeGroupStatusAndNotify when status changes to PART.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, ChangeGroupStatusAndNotifyPartStatus001, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto checkBoxNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(checkBoxNode, nullptr);
+    auto checkBoxPattern = checkBoxNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto groupNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(groupNode, nullptr);
+
+    auto groupPaintProperty = groupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(groupPaintProperty, nullptr);
+    groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::NONE);
+
+    std::vector<std::string> vec = { "checkbox" };
+    checkBoxPattern->ChangeGroupStatusAndNotify(groupNode, vec, true, false);
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::PART);
+}
+
+/**
+ * @tc.name: ChangeGroupStatusAndNotifyNoneStatus001
+ * @tc.desc: Test ChangeGroupStatusAndNotify when haveCheckBoxSelected=false.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, ChangeGroupStatusAndNotifyNoneStatus001, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto checkBoxNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(checkBoxNode, nullptr);
+    auto checkBoxPattern = checkBoxNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(checkBoxPattern, nullptr);
+
+    CheckBoxGroupModelNG checkBoxGroupModelNG;
+    checkBoxGroupModelNG.Create(GROUP_NAME);
+    auto groupNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(groupNode, nullptr);
+
+    auto groupPaintProperty = groupNode->GetPaintProperty<CheckBoxGroupPaintProperty>();
+    ASSERT_NE(groupPaintProperty, nullptr);
+    groupPaintProperty->SetSelectStatus(CheckBoxGroupPaintProperty::SelectStatus::ALL);
+
+    std::vector<std::string> vec;
+    checkBoxPattern->ChangeGroupStatusAndNotify(groupNode, vec, false, false);
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::NONE);
+}
+
+/**
+ * @tc.name: OnColorConfigurationUpdateNoMarkModifyDone001
+ * @tc.desc: Test OnColorConfigurationUpdate does not call MarkModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxPatternTestNG, OnColorConfigurationUpdateNoMarkModifyDone001, TestSize.Level1)
+{
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->isFirstCreated_ = false;
+
+    auto paintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    paintProperty->UpdateCheckBoxSelect(true);
+
+    pattern->OnColorConfigurationUpdate();
+    auto resultPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(resultPaintProperty, nullptr);
+    EXPECT_TRUE(resultPaintProperty->GetCheckBoxSelect().value_or(false));
+}
 } // namespace OHOS::Ace::NG
