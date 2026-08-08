@@ -34,4 +34,8 @@ ace_unittest("union_effect_container_test") {
       "union_effect_container_test_core.cpp",
     ]
   }
+
+  external_deps = [
+    "hilog:libhilog",
+  ]
 }

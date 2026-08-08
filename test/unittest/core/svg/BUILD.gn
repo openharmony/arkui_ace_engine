@@ -99,6 +99,7 @@ ohos_unittest("parse_test_ng") {
     "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
   ]
 
   deps = [
@@ -188,6 +189,7 @@ ohos_unittest("svg_dom_test_ng") {
     "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
   ]
 
   deps = [
@@ -297,6 +299,7 @@ ohos_unittest("svg_context_test_ng") {
     "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
   ]
 
   deps = [
@@ -375,6 +378,7 @@ ohos_unittest("svg_node_test_ng") {
     "googletest:gtest_main",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
+    "hilog:libhilog",
   ]
 
   deps = [

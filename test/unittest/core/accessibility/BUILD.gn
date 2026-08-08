@@ -74,6 +74,7 @@ ace_unittest("accessibility_test_ng") {
       "accessibility:accessibilityclient",
       "accessibility:accessibilityconfig",
       "ability_runtime:app_manager",
+      "hilog:libhilog",
     ]
   }
 }
