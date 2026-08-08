@@ -121,8 +121,6 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/animation/animation_pub.cpp",
     "$ace_root/frameworks/core/common/input_event_monitor_manager.cpp",
     "$ace_root/frameworks/core/components/checkable/checkable_theme.cpp",
-    "$ace_root/frameworks/core/components/swiper/swiper_indicator_theme.cpp",
-    "$ace_root/frameworks/core/components/tab_bar/tab_theme.cpp",
     "$ace_root/frameworks/core/components_ng/manager/form_event/form_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_pattern.cpp",

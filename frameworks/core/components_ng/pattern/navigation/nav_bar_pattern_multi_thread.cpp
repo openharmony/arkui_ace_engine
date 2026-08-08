@@ -15,7 +15,6 @@
 
 #include "ui/base/ace_type.h"
 
-#include "core/common/container.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 
 namespace OHOS::Ace::NG {

@@ -26,7 +26,6 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/common/visual_effect/transparency_utils.h"
-#include "core/components/theme/resource_adapter.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract.h"
