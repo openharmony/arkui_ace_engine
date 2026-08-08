@@ -437,7 +437,7 @@ int32_t SystemProperties::GetWhiteBlockCacheCountValue()
 
 int32_t SystemProperties::GetPreviewStatus()
 {
-    return 0;
+    return previewStatus_;
 }
 
 bool SystemProperties::GetCompatibleInputTransEnabled()

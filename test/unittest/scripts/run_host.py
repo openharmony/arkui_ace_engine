@@ -275,8 +275,17 @@ def run_command(args_tuple):
     ]
     if extra_args:
         cmds.extend(extra_args)
+    env = os.environ.copy()
+    tests_root = get_ohos_root()
+    host_lib_dirs = [
+        os.path.join(tests_root, "out/host/host_product/thirdparty/bounds_checking_function"),
+        os.path.join(tests_root, "out/host/host_product/thirdparty/icu"),
+    ]
+    existing_ld = env.get("LD_LIBRARY_PATH", "")
+    extra_ld = ":".join(host_lib_dirs)
+    env["LD_LIBRARY_PATH"] = f"{extra_ld}:{existing_ld}" if existing_ld else extra_ld
     try:
-        subprocess.run(cmds, timeout=120, stderr=subprocess.DEVNULL)
+        subprocess.run(cmds, timeout=120, stderr=subprocess.DEVNULL, env=env)
     except subprocess.TimeoutExpired:
         print(f"  TIMEOUT: {os.path.basename(binary_path)}")
     except Exception:

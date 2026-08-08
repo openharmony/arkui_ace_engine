@@ -977,6 +977,9 @@ HWTEST_F(TextFieldPatternTestNine, InitDragDropCallBack004, TestSize.Level0)
  */
 HWTEST_F(TextFieldPatternTestNine, HandleCountStyle001, TestSize.Level0)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: UltralimitShake animation runs synchronously, translate resets before assertion";
+#endif
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetType(TextInputType::VISIBLE_PASSWORD);
     });

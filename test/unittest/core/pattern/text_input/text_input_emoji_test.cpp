@@ -125,6 +125,10 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction001, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, HandleOnDeleteAction002, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: ZWJ emoji segmentation requires ICU grapheme breaking unavailable on host";
+#endif
+
     /**
      * @tc.steps: Create Text field node
      */
@@ -185,6 +189,10 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction002, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, HandleOnDeleteAction003, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: ZWJ emoji segmentation requires ICU grapheme breaking unavailable on host";
+#endif
+
     /**
      * @tc.steps: Create Text field node
      */
@@ -365,6 +373,10 @@ HWTEST_F(TextFieldUXTest, HandleOnDeleteAction005, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, HandleOnDeleteAction006, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: ZWJ emoji segmentation requires ICU grapheme breaking unavailable on host";
+#endif
+
     /**
      * @tc.steps: Create Text field node
      */

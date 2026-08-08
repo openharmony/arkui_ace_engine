@@ -13,29 +13,46 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("qrcode_test_ng") {
-  type = "new"
-  module_name = "InfoShowSet-QRCode"
-
-  sources = [
-    "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_modifier.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_paint_method.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_pattern.cpp",
-    "qrcode_test_ng.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "qrcode_test_core.cpp" ]
-  } else {
-    sources += [ "qrcode_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("qrcode_test_ng") {
+    type = "host_components"
+    module_name = "InfoShowSet-QRCode"
+    sources = [
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_layout_algorithm.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_model_ng.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_modifier.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_paint_method.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_pattern.cpp",
+      "qrcode_test_ng.cpp",
+      "qrcode_test_core.cpp",
+    ]
+    cflags = [ "-fno-access-control" ]
+    external_deps = []
   }
+} else {
+  ace_unittest("qrcode_test_ng") {
+    type = "new"
+    module_name = "InfoShowSet-QRCode"
 
-  if (is_arkui_x) {
-    deps = [ "//commonlibrary/qrcode_generator:qrcodegen" ]
-  } else {
-    external_deps = [ "qrcode_generator:qrcodegen" ]
+    sources = [
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_layout_algorithm.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_model_ng.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_modifier.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_paint_method.cpp",
+      "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_pattern.cpp",
+      "qrcode_test_ng.cpp",
+      "qrcode_test_core.cpp",
+    ]
+
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [ "qrcode_test_core.cpp" ]
+    }
+
+    if (is_arkui_x) {
+      deps = [ "//commonlibrary/qrcode_generator:qrcodegen" ]
+    } else {
+      external_deps = [ "qrcode_generator:qrcodegen" ]
+    }
   }
 }
