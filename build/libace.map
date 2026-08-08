@@ -819,6 +819,7 @@
       "OHOS::Ace::JsonValue::PutExtAttr(char const*, double, OHOS::Ace::NG::InspectorFilter const&)";
       "OHOS::Ace::JsonValue::PutExtAttr(char const*, int, OHOS::Ace::NG::InspectorFilter const&)";
       "OHOS::Ace::JsonValue::PutExtAttr(char const*, long long, OHOS::Ace::NG::InspectorFilter const&)";
+      "OHOS::Ace::JsonValue::PutExtAttr(char const*, long, OHOS::Ace::NG::InspectorFilter const&)";
       "OHOS::Ace::JsonValue::PutFixedAttr(char const*, char const*, OHOS::Ace::NG::InspectorFilter const&, OHOS::Ace::NG::FixedAttrBit)";
       "OHOS::Ace::JsonValue::Replace(char const*, int)";
       "OHOS::Ace::KeyEvent::ConvertCodeToString() const";
@@ -1340,6 +1341,7 @@
       "OHOS::Ace::NG::EventHub::~EventHub()";
       "OHOS::Ace::NG::EventHub::AddInnerOnAreaChangedCallback(int, std::__h::function<void (OHOS::Ace::NG::RectT<float> const&, OHOS::Ace::NG::OffsetT<float> const&, OHOS::Ace::NG::RectT<float> const&, OHOS::Ace::NG::OffsetT<float> const&)>&&)";
       "OHOS::Ace::NG::EventHub::AddSupportedUIStateWithCallback(unsigned long long, std::__h::function<void (unsigned long long)>&, bool, bool)";
+      "OHOS::Ace::NG::EventHub::AddSupportedUIStateWithCallback(unsigned long, std::__h::function<void (unsigned long)>&, bool, bool)";
       "OHOS::Ace::NG::ExtensionHandler::~ExtensionHandler()";
       "OHOS::Ace::NG::ExtensionHandler::NeedRender() const";
       "OHOS::Ace::NG::ExtensionHandler::OnDraw(OHOS::Ace::NG::DrawingContext&)";
@@ -1366,7 +1368,9 @@
       "OHOS::Ace::NG::EventHub::IsEnabled() const";
       "OHOS::Ace::NG::EventHub::RemoveInnerOnAreaChangedCallback(int)";
       "OHOS::Ace::NG::EventHub::ResetCurrentUIState(unsigned long long)";
+      "OHOS::Ace::NG::EventHub::ResetCurrentUIState(unsigned long)";
       "OHOS::Ace::NG::EventHub::SetCurrentUIState(unsigned long long, bool)";
+      "OHOS::Ace::NG::EventHub::SetCurrentUIState(unsigned long, bool)";
       "OHOS::Ace::NG::EventHub::SetCustomerOnDragFunc(OHOS::Ace::NG::DragFuncType, std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::DragEvent> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)>&&)";
       "OHOS::Ace::NG::EventHub::SetCustomerOnDragFunc(OHOS::Ace::NG::DragFuncType, std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::DragEvent> const&)>&&)";
       "OHOS::Ace::NG::EventHub::SetDefaultOnDragStart(std::__h::function<OHOS::Ace::NG::DragDropInfo (OHOS::Ace::RefPtr<OHOS::Ace::DragEvent> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)>&&)";
@@ -1380,6 +1384,7 @@
       "OHOS::Ace::NG::EventHub::SetOnDragStart(std::__h::function<OHOS::Ace::NG::DragDropInfo (OHOS::Ace::RefPtr<OHOS::Ace::DragEvent> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)>&&)";
       "OHOS::Ace::NG::EventHub::SetOnDrop(std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::DragEvent> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)>&&)";
       "OHOS::Ace::NG::EventHub::UpdateCurrentUIState(unsigned long long)";
+      "OHOS::Ace::NG::EventHub::UpdateCurrentUIState(unsigned long)";
       "OHOS::Ace::NG::FlexLayoutAlgorithm::Layout(OHOS::Ace::NG::LayoutWrapper*)";
       "OHOS::Ace::NG::FlexLayoutAlgorithm::Measure(OHOS::Ace::NG::LayoutWrapper*)";
       "OHOS::Ace::NG::FloatToDouble(std::__h::optional<float> const&)";
@@ -1501,6 +1506,7 @@
       "OHOS::Ace::NG::FrameNode::MountToParent(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, int, bool, bool, bool)";
       "OHOS::Ace::NG::FrameNode::MouseTest(OHOS::Ace::NG::PointT<float> const&, OHOS::Ace::NG::PointT<float> const&, std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::MouseEventTarget>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::MouseEventTarget>>>&, std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::MouseEventTarget>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::MouseEventTarget>>>&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>&)";
       "OHOS::Ace::NG::FrameNode::NotifyChange(int, int, long long, OHOS::Ace::NG::UINode::NotificationType)";
+      "OHOS::Ace::NG::FrameNode::NotifyChange(int, int, long, OHOS::Ace::NG::UINode::NotificationType)";
       "OHOS::Ace::NG::FrameNode::NotifyColorModeChange(unsigned int, bool)";
       "OHOS::Ace::NG::FrameNode::NotifyColorModeChange(unsigned int)";
       "OHOS::Ace::NG::FrameNode::NotifyWebPattern(bool)";
@@ -1548,6 +1554,7 @@
       "OHOS::Ace::NG::FrameNode::RemoveImmediately() const";
       "OHOS::Ace::NG::FrameNode::RemoveLastHotZoneRect() const";
       "OHOS::Ace::NG::FrameNode::RenderCustomChild(long long)";
+      "OHOS::Ace::NG::FrameNode::RenderCustomChild(long)";
       "OHOS::Ace::NG::FrameNode::ReplacePattern(OHOS::Ace::RefPtr<OHOS::Ace::NG::Pattern> const&)";
       "OHOS::Ace::NG::FrameNode::RequestParentDirty()";
       "OHOS::Ace::NG::FrameNode::SetActive(bool, bool)";
@@ -2029,6 +2036,7 @@
       "OHOS::Ace::NG::PipelineContext::AddIsFocusActiveUpdateEvent(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, std::__h::function<void (bool)> const&)";
       "OHOS::Ace::NG::PipelineContext::AddOnAreaChangeNode(int)";
       "OHOS::Ace::NG::PipelineContext::AddPredictTask(std::__h::function<void (long long, bool)>&&)";
+      "OHOS::Ace::NG::PipelineContext::AddPredictTask(std::__h::function<void (long, bool)>&&)";
       "OHOS::Ace::NG::PipelineContext::AddVisibleAreaChangeNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, std::__h::vector<double, std::__h::allocator<double>> const&, std::__h::function<void (bool, double)> const&, bool, bool)";
       "OHOS::Ace::NG::PipelineContext::AddWindowFocusChangedCallback(int)";
       "OHOS::Ace::NG::PipelineContext::AddWindowSizeChangeCallback(int)";
@@ -2731,6 +2739,7 @@
       "OHOS::Ace::NG::UINode::MouseTest(OHOS::Ace::NG::PointT<float> const&, OHOS::Ace::NG::PointT<float> const&, std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::MouseEventTarget>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::MouseEventTarget>>>&, std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::MouseEventTarget>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::MouseEventTarget>>>&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>&)";
       "OHOS::Ace::NG::UINode::MovePosition(int)";
       "OHOS::Ace::NG::UINode::NotifyChange(int, int, long long, OHOS::Ace::NG::UINode::NotificationType)";
+      "OHOS::Ace::NG::UINode::NotifyChange(int, int, long, OHOS::Ace::NG::UINode::NotificationType)";
       "OHOS::Ace::NG::UINode::NotifyColorModeChange(unsigned int, bool)";
       "OHOS::Ace::NG::UINode::NotifyColorModeChange(unsigned int)";
       "OHOS::Ace::NG::UINode::NotifyWebPattern(bool)";
@@ -2752,6 +2761,7 @@
       "OHOS::Ace::NG::UINode::RemoveChildSilently(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::NG::UINode::RemoveImmediately() const";
       "OHOS::Ace::NG::UINode::RenderCustomChild(long long)";
+      "OHOS::Ace::NG::UINode::RenderCustomChild(long)";
       "OHOS::Ace::NG::UINode::ReplaceChild(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
       "OHOS::Ace::NG::UINode::SetActive(bool, bool)";
       "OHOS::Ace::NG::UINode::SetDestroying(bool, bool)";
@@ -3413,8 +3423,11 @@
       "OHOS::Ace::StringUtils::StringToDouble(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::StringUtils::StringToFloat(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::StringUtils::StringToInt(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, long long)";
+      "OHOS::Ace::StringUtils::StringToInt(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, long)";
       "OHOS::Ace::StringUtils::StringToLongInt(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, long long)";
+      "OHOS::Ace::StringUtils::StringToLongInt(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, long)";
       "OHOS::Ace::StringUtils::StringToLongUint(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned long long)";
+      "OHOS::Ace::StringUtils::StringToLongUint(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned long)";
       "OHOS::Ace::StringUtils::StringToUint(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
       "OHOS::Ace::StringUtils::ToString(OHOS::Ace::ImageFit const&)";
       "OHOS::Ace::StringUtils::ToString(OHOS::Ace::TextDecoration const&)";
@@ -3592,6 +3605,7 @@
       "OHOS::Ace::UpdateParagraphStyle::GetGradient() const";
       "OHOS::Ace::UpdateParagraphStyle::SetOptGradient(std::__h::optional<OHOS::Ace::Gradient> const&)";
       "OHOS::Ace::UtfUtils::HandleInvalidUTF16(unsigned short*, unsigned int, unsigned int)";
+      "OHOS::Ace::UtfUtils::HandleInvalidUTF16(unsigned short*, unsigned long, unsigned long)";
       "OHOS::Ace::UtfUtils::Str16DebugToStr8(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&)";
       "OHOS::Ace::UtfUtils::Str16ToStr8(std::__h::basic_string<char16_t, std::__h::char_traits<char16_t>, std::__h::allocator<char16_t>> const&)";
       "OHOS::Ace::UtfUtils::Str8DebugToStr16(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
@@ -4038,6 +4052,7 @@
       "OHOS::Ace::BoxComponent::SetColor(OHOS::Ace::Color const&, OHOS::Ace::AnimationOption const&)";
       "OHOS::Ace::BoxComponent::SetFrontDecoration(OHOS::Ace::RefPtr<OHOS::Ace::Decoration> const&)";
       "OHOS::Ace::CallbackLogger::CallbackLogger(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned int)";
+      "OHOS::Ace::CallbackLogger::CallbackLogger(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned long)";
       "OHOS::Ace::CallbackLogger::~CallbackLogger()";
       "OHOS::Ace::Color::FromFloat(double, double, double, double, double)";
       "OHOS::Ace::ColorInverter::Invert(OHOS::Ace::Color, int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
@@ -4247,6 +4262,7 @@
       "OHOS::Ace::NG::CalcSize::IsHeightDimensionUnitAuto() const";
       "OHOS::Ace::NG::CalcSize::IsWidthDimensionUnitAuto() const";
       "OHOS::Ace::NG::ColorSampler::RegisterColorSampler(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned long long, std::__h::function<void (unsigned int, int)>, unsigned int)";
+      "OHOS::Ace::NG::ColorSampler::RegisterColorSampler(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, unsigned long, std::__h::function<void (unsigned int, int)>, unsigned int)";
       "OHOS::Ace::NG::ColorSampler::UnregisterColorSampler(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::ComponentSnapshot::Create(OHOS::Ace::RefPtr<OHOS::Ace::AceType> const&, std::__h::function<void (std::__h::shared_ptr<OHOS::Media::PixelMap>, int, std::__h::function<void ()>)>&&, bool, OHOS::Ace::NG::SnapshotParam const&, bool)";
       "OHOS::Ace::NG::ComponentSnapshot::CreateSync(OHOS::Ace::RefPtr<OHOS::Ace::AceType> const&, OHOS::Ace::NG::SnapshotParam const&)";
@@ -4291,6 +4307,7 @@
       "OHOS::Ace::NG::DragControllerFuncWrapper::TryDoDragStartAnimation(OHOS::Ace::RefPtr<OHOS::Ace::Subwindow> const&, OHOS::Ace::NG::PreparedInfoForDrag&, OHOS::Ace::NG::PreparedAsyncCtxForAnimate&)";
       "OHOS::Ace::NG::DragDropFuncWrapper::GetAnonyString(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::DragDropFuncWrapper::GetSummaryString(std::__h::map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, long long, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, long long>>> const&)";
+      "OHOS::Ace::NG::DragDropFuncWrapper::GetSummaryString(std::__h::map<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, long, std::__h::less<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>, std::__h::allocator<std::__h::pair<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const, long>>> const&)";
       "OHOS::Ace::NG::DragDropFuncWrapper::ParseDragPreviewMaterialInfo(OHOS::Ace::NG::DragPreviewOption const&, OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase> const&)";
       "OHOS::Ace::NG::DragDropFuncWrapper::ResolveAutoHideTargetsByUniqueId(std::__h::vector<int, std::__h::allocator<int>> const&)";
       "OHOS::Ace::NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(int, int)";
@@ -4308,6 +4325,7 @@
       "OHOS::Ace::NG::EventHub::GetUserSetStateStyle()";
       "OHOS::Ace::NG::EventHub::HasOnAreaChanged() const";
       "OHOS::Ace::NG::EventHub::HasStateStyle(unsigned long long) const";
+      "OHOS::Ace::NG::EventHub::HasStateStyle(unsigned long) const";
       "OHOS::Ace::NG::EventHub::IsDeveloperEnabled() const";
       "OHOS::Ace::NG::EventHub::SetGestureEventHub(OHOS::Ace::RefPtr<OHOS::Ace::NG::GestureEventHub> const&)";
       "OHOS::Ace::NG::EventHub::SetScrollingFeatureForbidden(bool)";
@@ -4798,6 +4816,7 @@
       "OHOS::Ace::NG::SmartGestureProposal::SmartGestureProposal(OHOS::Ace::NG::SmartGestureProposalType, OHOS::Ace::NG::SmartGestureOperateIntention, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, OHOS::Ace::NG::ScrollingConfig const&)";
       "OHOS::Ace::NG::StageManager::FirePageShow(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, OHOS::Ace::PageTransitionType, bool)";
       "OHOS::Ace::NG::StageManager::PerformanceCheck(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, long long, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
+      "OHOS::Ace::NG::StageManager::PerformanceCheck(OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&, long, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
       "OHOS::Ace::NG::UIExtensionStatic::CreateFrameNode(int, OHOS::Ace::NG::SessionType)";
       "OHOS::Ace::NG::UIExtensionStatic::SetOnDrawReady(OHOS::Ace::NG::FrameNode*, std::__h::function<void ()>&&)";
       "OHOS::Ace::NG::UIExtensionStatic::SetOnError(OHOS::Ace::NG::FrameNode*, std::__h::function<void (int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)>&&)";
@@ -4821,6 +4840,7 @@
       "OHOS::Ace::NG::UINode::GetParentCustomNode() const";
       "OHOS::Ace::NG::UINode::GetPath()";
       "OHOS::Ace::NG::UINode::GetThemeByType(unsigned int, bool) const";
+      "OHOS::Ace::NG::UINode::GetThemeByType(unsigned long, bool) const";
       "OHOS::Ace::NG::UINode::GetThemeScopeIdForTheme(bool) const";
       "OHOS::Ace::NG::UINode::LessThanAPITargetVersion(OHOS::Ace::PlatformVersion) const";
       "OHOS::Ace::NG::UINode::RegisterReleaseFunc(bool)";
@@ -4960,8 +4980,11 @@
       "OHOS::Ace::PerfMonitor::EndCommercial(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool)";
       "OHOS::Ace::PerfMonitor::GetPerfMonitor()";
       "OHOS::Ace::PerfMonitor::RecordInputEvent(OHOS::Ace::PerfActionType, OHOS::Ace::PerfSourceType, long long)";
+      "OHOS::Ace::PerfMonitor::RecordInputEvent(OHOS::Ace::PerfActionType, OHOS::Ace::PerfSourceType, long)";
       "OHOS::Ace::PerfMonitor::ReportComponentDetach(unsigned long long const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
+      "OHOS::Ace::PerfMonitor::ReportComponentDetach(unsigned long const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
       "OHOS::Ace::PerfMonitor::ReportSurface(unsigned long long const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
+      "OHOS::Ace::PerfMonitor::ReportSurface(unsigned long const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
       "OHOS::Ace::PerfMonitor::Start(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::PerfActionType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::PerfMonitor::StartCommercial(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::PerfActionType, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::PipelineBase::GetCurrentDensity()";
@@ -5038,6 +5061,7 @@
       "OHOS::Ace::PluginFrontend::UpdateState(OHOS::Ace::FrontendState)";
       "OHOS::Ace::PluginFrontend::~PluginFrontend()";
       "OHOS::Ace::PluginManager::GetPluginParentContainerId(long long)";
+      "OHOS::Ace::PluginManager::GetPluginParentContainerId(long)";
       "OHOS::Ace::Recorder::EventParamsBuilder::SetEventCategory(OHOS::Ace::Recorder::EventCategory)";
       "OHOS::Ace::Recorder::EventParamsBuilder::SetExtra(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::Recorder::EventRecorder::IsRecordEnable(OHOS::Ace::Recorder::EventCategory) const";
