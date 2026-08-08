@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-08-04
-> 主题数：229
+> 更新时间：2026-08-07
+> 主题数：232
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -242,6 +242,9 @@ docs/kb/
 | NestedScrollOffsetNoResponse | 嵌套滚动偏移量不响应 | `docs/kb/issues/interaction/nested-scroll-offset-no-response.md` | 新建 |
 | ScrollerNaNOffsetValidation | Scroller 非法数值偏移校验 | `docs/kb/issues/compatibility/scroller-nan-offset-validation.md` | 新建 |
 | CustomSpanControllerLifecycle | CustomSpan 控制器生命周期 | `docs/kb/issues/text/custom-span-controller-lifecycle.md` | 新建 |
+| AccessibilityCustomActionsStale | 无障碍自定义 Action 动态刷新失效 | `docs/kb/issues/accessibility/accessibility-custom-actions-stale.md` | 新建 |
+| DynamicComponentAvoidanceIncorrect | DynamicComponent 弹窗避让不正确 | `docs/kb/issues/layout/dynamic-component-avoidance-incorrect.md` | 新建 |
+| UIExtensionWindowStateRegistration | UIExtension 窗口状态回调注册时机不正确 | `docs/kb/issues/lifecycle/ui-extension-window-state-registration.md` | 新建 |
 | KeyboardAvoidTimingChange | 键盘避让执行顺序变化 | `docs/kb/issues/layout/keyboard-avoid-timing-change.md` | 新建 |
 | ResourceAdapterInstanceIdMismatch | 资源适配器实例ID缓存不匹配 | `docs/kb/issues/rendering/resource-adapter-instance-id-mismatch.md` | 新建 |
 | AboutToDisappearUnmountBlockedOnReuse | aboutToDisappear下树屏蔽与组件复用冲突 | `docs/kb/issues/lifecycle/about-to-disappear-unmount-blocked-on-reuse.md` | 新建 |
