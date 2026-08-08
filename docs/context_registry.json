@@ -12788,6 +12788,80 @@
         "form_visible_manager": "frameworks/core/components_ng/manager/form_visible/form_visible_manager.cpp",
         "ut": "test/unittest/core/base/frame_node_test_ng_coverage.cpp"
       }
+    },
+    {
+      "id": "EtcAbcLoadingFailure",
+      "name": "Etc ABC Loading Failure",
+      "name_cn": "etc目录ABC文件加载失败",
+      "kind": "issue",
+      "category": "compatibility",
+      "keywords": [
+        "EtcAbcLoadingFailure",
+        "jsPreload.abc",
+        "PreloadUIContent",
+        "EvaluateAbcFile",
+        "ExecuteJsBinForAOT",
+        "EvaluateJsCode",
+        "appspawn",
+        "SharedGC",
+        "JSPandaFile",
+        "loadedJSPandaFiles_",
+        "AbcBufferCache",
+        "ModuleExecuteMode::ExecuteBufferMode",
+        "Invalid input hsp path",
+        "ModulePathHelper::ParseHapPath",
+        "/etc/abc/framework"
+      ],
+      "aliases": [
+        "etc ABC加载失败",
+        "appspawn预加载后SharedGC",
+        "系统ABC文件进入HSP路径校验",
+        "Invalid input hsp path"
+      ],
+      "kb": "docs/kb/issues/compatibility/etc-abc-loading-failure.md",
+      "func_ids": [
+        "06-01-02"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08"
+    },
+    {
+      "id": "ElementRegisterThreadLocalLeak",
+      "name": "ElementRegister Thread-Local Leak and VM Lifetime Risk",
+      "name_cn": "ElementRegister线程局部内存泄漏与VM生命周期稳定性风险",
+      "kind": "issue",
+      "category": "lifecycle",
+      "keywords": [
+        "ElementRegisterThreadLocalLeak",
+        "ElementRegister",
+        "ElementRegisterImpl",
+        "ElementRegisterHolder",
+        "thread_local",
+        "new内存泄漏",
+        "线程局部单例",
+        "GetInstance",
+        "g_instance",
+        "EcmaVM生命周期",
+        "JSRef",
+        "uiNodeCleanUpIdleTask",
+        "CallStateMgmtCleanUpIdleTaskFunc",
+        "uiNodeCleanUpIdleFunc_",
+        "ArkJSRuntime::Reset",
+        "panda::Global<panda::JSValueRef>",
+        "FreeGlobalHandleAddr"
+      ],
+      "aliases": [
+        "ElementRegister泄漏",
+        "线程局部单例泄漏",
+        "VM回调生命周期风险",
+        "ElementRegister持有JSRef超过EcmaVM生命周期"
+      ],
+      "kb": "docs/kb/issues/lifecycle/element-register-thread-local-leak.md",
+      "func_ids": [
+        "03-06-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08"
     }
   ]
 }
