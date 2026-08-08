@@ -50,7 +50,7 @@ public:
     void ApplyColumnConstraints() override { node_->ApplyColumnConstraints(); }
     void ApplyRowConstraints() override { node_->ApplyRowConstraints(); }
     void ApplyGeneralConstraints() override { node_->ApplyGeneralConstraints(); }
-    void ApplyScaleUpConstraints(double emptyRatioThreshold = 0.3) override
+    void ApplyScaleUpConstraints(double emptyRatioThreshold = SMART_LAYOUT_EMPTY_RATIO_THRESHOLD) override
     {
         node_->ApplyScaleUpConstraints(emptyRatioThreshold);
     }

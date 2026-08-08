@@ -18,9 +18,7 @@
 
 #include <mutex>
 #include <string>
-#include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 #include "base/utils/singleton.h"
 #include "base/utils/noncopyable.h"
