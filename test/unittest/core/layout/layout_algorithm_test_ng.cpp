@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
-#define private public
-#define protected public
-
 #include <sstream>
 #include <unordered_set>
+
+#include "gtest/gtest.h"
+
+#define private public
+#define protected public
 
 #include "test/unittest/core/layout/layout_algorithm_test_ng.h"
 #include "core/components_ng/layout/layout_algorithm.h"
