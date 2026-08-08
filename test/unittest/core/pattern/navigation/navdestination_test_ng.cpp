@@ -2022,7 +2022,7 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest016, TestSize.Level1)
     auto barMenuNode = MenuView::Create(
         std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
     ASSERT_NE(barMenuNode, nullptr);
-    NavigationTitleUtil::BuildMoreItemNodeAction(menuItemNode,barItemNode, barMenuNode, menuParam);
+    NavigationTitleUtil::BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, menuParam, nullptr, false);
     bool isClick = false;
     BarItem barItem;
     barItem.action = [&isClick]() { isClick = !isClick; };

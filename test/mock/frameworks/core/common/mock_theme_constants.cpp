@@ -32,6 +32,11 @@ Color ThemeConstants::GetColor(uint32_t key) const
     return Color::RED;
 }
 
+Color ThemeConstants::GetColor(uint32_t key, ColorMode colorMode) const
+{
+    return GetColor(key);
+}
+
 Color ThemeConstants::GetColorByName(const std::string& resName) const
 {
     if (currentThemeStyle_) {

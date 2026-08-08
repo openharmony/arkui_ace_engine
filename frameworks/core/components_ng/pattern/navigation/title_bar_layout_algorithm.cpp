@@ -534,6 +534,60 @@ void TitleBarLayoutAlgorithm::MeasureMenu(LayoutWrapper* layoutWrapper, const Re
     menuWrapper->Measure(constraint);
 }
 
+void TitleBarLayoutAlgorithm::MeasureMenuColorPickerIfNeeded(
+    LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto colorPickerNode = titleBarPattern->GetMenuColorPickerNode();
+    CHECK_NULL_VOID(colorPickerNode);
+    auto parentNode = AceType::DynamicCast<NavDestinationNodeBase>(titleBarNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto isCustomMenu = parentNode->GetPrevMenuIsCustomValue(false);
+    if (isCustomMenu) {
+        return;
+    }
+    auto index = titleBarNode->GetChildIndexById(colorPickerNode->GetId());
+    if (index < 0) {
+        return;
+    }
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(wrapper);
+    auto titleBarLayoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto constraint = titleBarLayoutProperty->CreateChildConstraint();
+    // menuColorPickerNode size depends on layout positions of menu's children,
+    // which are unknown in Measure phase. Use parent constraint here;
+    // the actual size and offset will be set in LayoutMenuColorPickerIfNeeded.
+    wrapper->Measure(constraint);
+}
+
+void TitleBarLayoutAlgorithm::MeasureBackBtnAndTextColorPickerIfNeeded(
+    LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto colorPickerNode = titleBarPattern->GetBackBtnAndTextColorPickerNode();
+    CHECK_NULL_VOID(colorPickerNode);
+    auto index = titleBarNode->GetChildIndexById(colorPickerNode->GetId());
+    if (index < 0) {
+        return;
+    }
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(wrapper);
+    auto titleBarLayoutProperty = AceType::DynamicCast<TitleBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    auto constraint = titleBarLayoutProperty->CreateChildConstraint();
+    // backBtnAndTextColorPickerNode size depends on layout positions of backBtn, title and subtitle,
+    // which are unknown in Measure phase. Use parent constraint here;
+    // the actual size and offset will be set in LayoutBackBtnAndTextColorPickerIfNeeded.
+    wrapper->Measure(constraint);
+}
+
 void TitleBarLayoutAlgorithm::MeasureMask(
     LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode, const SizeF& titleBarSize)
 {
@@ -1123,6 +1177,131 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     menuWrapper->Layout();
 }
 
+void TitleBarLayoutAlgorithm::LayoutMenuColorPickerIfNeeded(
+    LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto colorPickerNode = titleBarPattern->GetMenuColorPickerNode();
+    CHECK_NULL_VOID(colorPickerNode);
+    auto menuNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetMenu());
+    CHECK_NULL_VOID(menuNode);
+    auto nodeBase = AceType::DynamicCast<NavDestinationNodeBase>(titleBarNode->GetParent());
+    CHECK_NULL_VOID(nodeBase);
+    bool isCustomMenu = nodeBase->GetPrevMenuIsCustomValue(false);
+    if (isCustomMenu) {
+        return;
+    }
+    auto index = titleBarNode->GetChildIndexById(colorPickerNode->GetId());
+    if (index < 0) {
+        return;
+    }
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(wrapper);
+    float minX = std::numeric_limits<float>::max();
+    float minY = std::numeric_limits<float>::max();
+    float maxX = std::numeric_limits<float>::min();
+    float maxY = std::numeric_limits<float>::min();
+    auto expandRect = [&minX, &minY, &maxX, &maxY](const RefPtr<FrameNode>& frameNode) {
+        CHECK_NULL_VOID(frameNode);
+        auto geo = frameNode->GetGeometryNode();
+        CHECK_NULL_VOID(geo);
+        auto rect = geo->GetMarginFrameRect();
+        minX = std::min(minX, rect.GetX());
+        minY = std::min(minY, rect.GetY());
+        maxX = std::max(maxX, rect.Right());
+        maxY = std::max(maxY, rect.Bottom());
+    };
+    auto menuGeo = menuNode->GetGeometryNode();
+    CHECK_NULL_VOID(menuGeo);
+    for (const auto& child : menuNode->GetChildren()) {
+        auto menuItemNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(menuItemNode);
+        if (menuItemNode->GetTag() != V2::MENU_ITEM_ETS_TAG) {
+            continue;
+        }
+        expandRect(menuItemNode);
+    }
+    if (minX >= maxX || minY >= maxY) {
+        return;
+    }
+    auto geometryNode = wrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(SizeF(maxX - minX, maxY - minY));
+    auto offset = menuGeo->GetMarginFrameOffset();
+    offset += OffsetF(minX, minY);
+    geometryNode->SetMarginFrameOffset(offset);
+    wrapper->Layout();
+}
+
+void TitleBarLayoutAlgorithm::LayoutBackBtnAndTextColorPickerIfNeeded(
+    LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    auto colorPickerNode = titleBarPattern->GetBackBtnAndTextColorPickerNode();
+    CHECK_NULL_VOID(colorPickerNode);
+    auto index = titleBarNode->GetChildIndexById(colorPickerNode->GetId());
+    if (index < 0) {
+        return;
+    }
+    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    CHECK_NULL_VOID(wrapper);
+    auto nodeBase = AceType::DynamicCast<NavDestinationNodeBase>(titleBarNode->GetParent());
+    CHECK_NULL_VOID(nodeBase);
+    auto property = nodeBase->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_VOID(property);
+    auto titleProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleProperty);
+    // Calculate the union bounding box of backButton, main title and subtitle FrameRects
+    float minX = std::numeric_limits<float>::max();
+    float minY = std::numeric_limits<float>::max();
+    float maxX = std::numeric_limits<float>::min();
+    float maxY = std::numeric_limits<float>::min();
+    auto expandRect = [&minX, &minY, &maxX, &maxY](const RefPtr<UINode>& uiNode) {
+        CHECK_NULL_VOID(uiNode);
+        auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+        CHECK_NULL_VOID(frameNode);
+        auto geo = frameNode->GetGeometryNode();
+        CHECK_NULL_VOID(geo);
+        auto rect = geo->GetMarginFrameRect();
+        minX = std::min(minX, rect.GetX());
+        minY = std::min(minY, rect.GetY());
+        maxX = std::max(maxX, rect.Right());
+        maxY = std::max(maxY, rect.Bottom());
+    };
+    if (!nodeBase->GetPrevTitleIsCustomValue(false)) {
+        expandRect(titleBarNode->GetTitle());
+        auto subtitleOpacity = titleBarPattern->GetSubtitleOpacityDirectly();
+        if (titleProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
+            !subtitleOpacity.has_value() || !NearEqual(subtitleOpacity.value(), 0.0f)) {
+            expandRect(titleBarNode->GetSubtitle());
+        }
+    }
+    do {
+        auto backButton = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+        CHECK_NULL_BREAK(backButton);
+        auto btnProperty = backButton->GetLayoutProperty();
+        CHECK_NULL_BREAK(btnProperty);
+        if (btnProperty->GetVisibilityValue(VisibleType::INVISIBLE) != VisibleType::VISIBLE) {
+            break;
+        }
+        expandRect(backButton);
+    } while (false);
+    if (minX >= maxX || minY >= maxY) {
+        return;
+    }
+    auto geometryNode = wrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(SizeF(maxX - minX, maxY - minY));
+    geometryNode->SetMarginFrameOffset(OffsetF(minX, minY));
+    wrapper->Layout();
+}
+
 // set variables from theme
 void TitleBarLayoutAlgorithm::InitializeTheme(const RefPtr<TitleBarNode>& titleBarNode, const SizeF& titleBarSize)
 {
@@ -1358,6 +1537,8 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     titleMaxWidth = WidthAfterAvoidMenuBarAndContainerModal(titleBarNode, titleMaxWidth);
     MeasureSubtitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
     MeasureTitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
+    MeasureMenuColorPickerIfNeeded(layoutWrapper, titleBarNode);
+    MeasureBackBtnAndTextColorPickerIfNeeded(layoutWrapper, titleBarNode);
     titlePattern->SetCurrentTitleBarHeight(size.Height());
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
     MeasureMask(layoutWrapper, titleBarNode, size);
@@ -1403,6 +1584,8 @@ void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // Layout the EffectComponent after the menu offset is known: it wraps the menu, so it
     // is placed at the menu's offset and the menu sits at (0,0) within it.
     LayoutEffectComponent(layoutWrapper, titleBarNode);
+    LayoutMenuColorPickerIfNeeded(layoutWrapper, titleBarNode);
+    LayoutBackBtnAndTextColorPickerIfNeeded(layoutWrapper, titleBarNode);
 }
 
 float TitleBarLayoutAlgorithm::ChangeOffsetByDirection(LayoutWrapper* layoutWrapper,

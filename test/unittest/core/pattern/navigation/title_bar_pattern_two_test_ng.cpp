@@ -416,7 +416,7 @@ HWTEST_F(TitleBarPatternTestTwoNg, IsSymbolOrSVGIcon004, TestSize.Level1)
 
 /**
  * @tc.name: GetCurrentColorMode001
- * @tc.desc: Test GetCurrentColorMode when enableColorInvert is true and isColorPickerDark_ is true
+ * @tc.desc: Test GetCurrentColorMode when enableColorInvert is true and isColorPickerDark is true
  * @tc.type: FUNC
  */
 HWTEST_F(TitleBarPatternTestTwoNg, GetCurrentColorMode001, TestSize.Level1)
@@ -426,15 +426,15 @@ HWTEST_F(TitleBarPatternTestTwoNg, GetCurrentColorMode001, TestSize.Level1)
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
     
-    titleBarPattern->isColorPickerDark_ = true;
+    titleBarPattern->menuColorPickerCtx_.isColorPickerDark = true;
     
-    ColorMode colorMode = titleBarPattern->GetCurrentColorMode(true);
+    ColorMode colorMode = titleBarPattern->GetCurrentColorMode(true, TitleBarPattern::TitleBarAreaType::MENU);
     EXPECT_EQ(colorMode, ColorMode::DARK);
 }
 
 /**
  * @tc.name: GetCurrentColorMode002
- * @tc.desc: Test GetCurrentColorMode when enableColorInvert is true and isColorPickerDark_ is false
+ * @tc.desc: Test GetCurrentColorMode when enableColorInvert is true and isColorPickerDark is false
  * @tc.type: FUNC
  */
 HWTEST_F(TitleBarPatternTestTwoNg, GetCurrentColorMode002, TestSize.Level1)
@@ -444,9 +444,9 @@ HWTEST_F(TitleBarPatternTestTwoNg, GetCurrentColorMode002, TestSize.Level1)
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
     
-    titleBarPattern->isColorPickerDark_ = false;
+    titleBarPattern->menuColorPickerCtx_.isColorPickerDark = false;
     
-    ColorMode colorMode = titleBarPattern->GetCurrentColorMode(true);
+    ColorMode colorMode = titleBarPattern->GetCurrentColorMode(true, TitleBarPattern::TitleBarAreaType::MENU);
     EXPECT_EQ(colorMode, ColorMode::LIGHT);
 }
 
@@ -462,10 +462,10 @@ HWTEST_F(TitleBarPatternTestTwoNg, GetCurrentColorMode003, TestSize.Level1)
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
     
-    titleBarPattern->isColorPickerDark_ = std::nullopt;
-    titleBarPattern->isBackgroundDark_ = true;
+    titleBarPattern->menuColorPickerCtx_.isColorPickerDark = std::nullopt;
+    titleBarPattern->menuColorPickerCtx_.isBackgroundDark = true;
     
-    ColorMode colorMode = titleBarPattern->GetCurrentColorMode(false);
+    ColorMode colorMode = titleBarPattern->GetCurrentColorMode(false, TitleBarPattern::TitleBarAreaType::MENU);
     EXPECT_NE(colorMode, ColorMode::COLOR_MODE_UNDEFINED);
 }
 
@@ -481,11 +481,11 @@ HWTEST_F(TitleBarPatternTestTwoNg, OnLuminanceUpdate001, TestSize.Level1)
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
     
-    titleBarPattern->isColorPickerDark_ = std::nullopt;
+    titleBarPattern->menuColorPickerCtx_.isColorPickerDark = std::nullopt;
     
-    titleBarPattern->OnLuminanceUpdate(TEST_LUMINANCE_LOW);
-    EXPECT_TRUE(titleBarPattern->isColorPickerDark_.has_value());
-    EXPECT_TRUE(titleBarPattern->isColorPickerDark_.value());
+    titleBarPattern->OnLuminanceUpdate(TitleBarPattern::TitleBarAreaType::MENU, TEST_LUMINANCE_LOW);
+    EXPECT_TRUE(titleBarPattern->menuColorPickerCtx_.isColorPickerDark.has_value());
+    EXPECT_TRUE(titleBarPattern->menuColorPickerCtx_.isColorPickerDark.value());
 }
 
 /**
@@ -500,16 +500,16 @@ HWTEST_F(TitleBarPatternTestTwoNg, OnLuminanceUpdate002, TestSize.Level1)
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
     
-    titleBarPattern->isColorPickerDark_ = std::nullopt;
+    titleBarPattern->menuColorPickerCtx_.isColorPickerDark = std::nullopt;
     
-    titleBarPattern->OnLuminanceUpdate(TEST_LUMINANCE_HIGH);
-    EXPECT_TRUE(titleBarPattern->isColorPickerDark_.has_value());
-    EXPECT_FALSE(titleBarPattern->isColorPickerDark_.value());
+    titleBarPattern->OnLuminanceUpdate(TitleBarPattern::TitleBarAreaType::MENU, TEST_LUMINANCE_HIGH);
+    EXPECT_TRUE(titleBarPattern->menuColorPickerCtx_.isColorPickerDark.has_value());
+    EXPECT_FALSE(titleBarPattern->menuColorPickerCtx_.isColorPickerDark.value());
 }
 
 /**
  * @tc.name: UnregisterColorPicker001
- * @tc.desc: Test UnregisterColorPicker when hasRegisterColorPicker_ is true
+ * @tc.desc: Test UnregisterColorPicker when hasRegisterColorPicker is true
  * @tc.type: FUNC
  */
 HWTEST_F(TitleBarPatternTestTwoNg, UnregisterColorPicker001, TestSize.Level1)
@@ -519,17 +519,17 @@ HWTEST_F(TitleBarPatternTestTwoNg, UnregisterColorPicker001, TestSize.Level1)
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
     
-    titleBarPattern->hasRegisterColorPicker_ = true;
-    titleBarPattern->isColorPickerDark_ = true;
+    titleBarPattern->menuColorPickerCtx_.hasRegisterColorPicker = true;
+    titleBarPattern->menuColorPickerCtx_.isColorPickerDark = true;
     
-    titleBarPattern->UnregisterColorPicker();
-    EXPECT_FALSE(titleBarPattern->hasRegisterColorPicker_);
-    EXPECT_FALSE(titleBarPattern->isColorPickerDark_.has_value());
+    titleBarPattern->UnregisterColorPicker(TitleBarPattern::TitleBarAreaType::MENU, nullptr);
+    EXPECT_FALSE(titleBarPattern->menuColorPickerCtx_.hasRegisterColorPicker);
+    EXPECT_FALSE(titleBarPattern->menuColorPickerCtx_.isColorPickerDark.has_value());
 }
 
 /**
  * @tc.name: UnregisterColorPicker002
- * @tc.desc: Test UnregisterColorPicker when hasRegisterColorPicker_ is false
+ * @tc.desc: Test UnregisterColorPicker when hasRegisterColorPicker is false
  * @tc.type: FUNC
  */
 HWTEST_F(TitleBarPatternTestTwoNg, UnregisterColorPicker002, TestSize.Level1)
@@ -539,12 +539,12 @@ HWTEST_F(TitleBarPatternTestTwoNg, UnregisterColorPicker002, TestSize.Level1)
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     ASSERT_NE(titleBarPattern, nullptr);
     
-    titleBarPattern->hasRegisterColorPicker_ = false;
-    titleBarPattern->isColorPickerDark_ = true;
+    titleBarPattern->menuColorPickerCtx_.hasRegisterColorPicker = false;
+    titleBarPattern->menuColorPickerCtx_.isColorPickerDark = true;
     
-    titleBarPattern->UnregisterColorPicker();
-    EXPECT_FALSE(titleBarPattern->hasRegisterColorPicker_);
-    EXPECT_TRUE(titleBarPattern->isColorPickerDark_.has_value());
+    titleBarPattern->UnregisterColorPicker(TitleBarPattern::TitleBarAreaType::MENU, nullptr);
+    EXPECT_FALSE(titleBarPattern->menuColorPickerCtx_.hasRegisterColorPicker);
+    EXPECT_TRUE(titleBarPattern->menuColorPickerCtx_.isColorPickerDark.has_value());
 }
 
 /**
@@ -604,7 +604,7 @@ HWTEST_F(TitleBarPatternTestTwoNg, IsColorInvertEnabled003, TestSize.Level1)
 
     auto material = AceType::MakeRefPtr<UiMaterial>();
     ASSERT_NE(material, nullptr);
-    titleBarPattern->gradualBlurMaterial_ = material;
+    titleBarPattern->defaultMaterial_ = material;
     EXPECT_FALSE(titleBarPattern->IsColorInvertEnabled());
 }
 
@@ -631,7 +631,7 @@ HWTEST_F(TitleBarPatternTestTwoNg, IsColorInvertEnabled004, TestSize.Level1)
     ImmersiveOptions options;
     options.colorInvert = false;
     material->SetImmersiveOptions(options);
-    titleBarPattern->gradualBlurMaterial_ = material;
+    titleBarPattern->defaultMaterial_ = material;
     EXPECT_FALSE(titleBarPattern->IsColorInvertEnabled());
 }
 
@@ -658,7 +658,7 @@ HWTEST_F(TitleBarPatternTestTwoNg, IsColorInvertEnabled005, TestSize.Level1)
     ImmersiveOptions options;
     options.colorInvert = true;
     material->SetImmersiveOptions(options);
-    titleBarPattern->gradualBlurMaterial_ = material;
+    titleBarPattern->defaultMaterial_ = material;
     EXPECT_FALSE(titleBarPattern->IsColorInvertEnabled());
 }
 
@@ -842,17 +842,17 @@ HWTEST_F(TitleBarPatternTestTwoNg, IsTransparencyListenerNeeded003, TestSize.Lev
     ImmersiveOptions options;
     options.colorInvert = false;
     material->SetImmersiveOptions(options);
-    titleBarPattern->gradualBlurMaterial_ = material;
+    titleBarPattern->defaultMaterial_ = material;
     EXPECT_FALSE(titleBarPattern->IsTransparencyListenerNeeded());
 }
 
 /**
- * @tc.name: GetOrCreateGradualBlurMaterial001
- * @tc.desc: Branch: gradualBlurMaterial_ already exists => return existing material
- *           GetOrCreateGradualBlurMaterial returns cached material
+ * @tc.name: GetOrCreateDefaultMaterial001
+ * @tc.desc: Branch: defaultMaterial_ already exists => return existing material
+ *           GetOrCreateDefaultMaterial returns cached material
  * @tc.type: FUNC
  */
-HWTEST_F(TitleBarPatternTestTwoNg, GetOrCreateGradualBlurMaterial001, TestSize.Level1)
+HWTEST_F(TitleBarPatternTestTwoNg, GetOrCreateDefaultMaterial001, TestSize.Level1)
 {
     auto titleBarNode = CreateTitleBarNode();
     ASSERT_NE(titleBarNode, nullptr);
@@ -861,9 +861,9 @@ HWTEST_F(TitleBarPatternTestTwoNg, GetOrCreateGradualBlurMaterial001, TestSize.L
 
     auto existingMaterial = AceType::MakeRefPtr<UiMaterial>();
     ASSERT_NE(existingMaterial, nullptr);
-    titleBarPattern->gradualBlurMaterial_ = existingMaterial;
+    titleBarPattern->defaultMaterial_ = existingMaterial;
 
-    auto result = titleBarPattern->GetOrCreateGradualBlurMaterial();
+    auto result = titleBarPattern->GetOrCreateDefaultMaterial();
     EXPECT_EQ(result, existingMaterial);
 }
 

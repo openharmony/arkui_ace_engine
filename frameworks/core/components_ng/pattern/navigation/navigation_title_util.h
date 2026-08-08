@@ -31,7 +31,8 @@ public:
         bool isButtonEnabled, const std::string& field, const std::string& parentId,
         bool isCreateLandscapeMenu = false);
     static void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<BarItemNode>& barItemNode,
-        const RefPtr<FrameNode>& barMenuNode, const MenuParam& menuParam);
+        const RefPtr<FrameNode>& barMenuNode, const MenuParam& menuParam,
+        const RefPtr<NavDestinationNodeBase>& navDestinationNodeBase, bool isCreateLandscapeMenu);
 
     static bool BuildMoreButton(bool isButtonEnabled, const RefPtr<NavigationBarTheme>& theme,
         const RefPtr<NavDestinationNodeBase>& nodeBase, const RefPtr<FrameNode>& menuNode,
@@ -99,6 +100,7 @@ public:
                                   const std::string& key, const RefPtr<ResourceObject> ResourceObject);
     static void InitTextProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty);
     static bool CheckNeedFontPadding(const RefPtr<FrameNode>& node);
+    static void EnsureNodeThemeScopeId(const RefPtr<FrameNode>& node, ColorMode mode);
 };
 
 } // namespace OHOS::Ace::NG
