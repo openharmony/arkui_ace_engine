@@ -360,9 +360,8 @@ bool LayoutAlgorithm::IsContentUnderutilizedForSmartLayout(LayoutWrapper* layout
     }
 
     double emptyRatio = 1.0 - (bbArea / containerArea);
-    // Empty area over 30% of container is considered sparse
-    constexpr double EMPTY_RATIO_THRESHOLD = 0.3;
-    return GreatNotEqual(emptyRatio, EMPTY_RATIO_THRESHOLD);
+    // Empty area over the shared threshold of container is considered sparse
+    return GreatNotEqual(emptyRatio, SMART_LAYOUT_EMPTY_RATIO_THRESHOLD);
 }
 
 void LayoutAlgorithm::TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper)

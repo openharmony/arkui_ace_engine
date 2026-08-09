@@ -47,7 +47,7 @@ public:
     virtual void ApplyColumnConstraints() = 0;
     virtual void ApplyRowConstraints() = 0;
     virtual void ApplyGeneralConstraints() = 0;
-    virtual void ApplyScaleUpConstraints(double emptyRatioThreshold = 0.3) = 0;
+    virtual void ApplyScaleUpConstraints(double emptyRatioThreshold = SMART_LAYOUT_EMPTY_RATIO_THRESHOLD) = 0;
     virtual void SetBoundingBox(const SmartLayoutRect& box) = 0;
     virtual const SmartLayoutRect& GetBoundingBox() const = 0;
 
