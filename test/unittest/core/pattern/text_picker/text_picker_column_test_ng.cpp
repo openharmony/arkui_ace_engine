@@ -39,7 +39,6 @@
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/common/dynamic_module_helper.h"
 #undef private
 #undef protected
 
@@ -52,15 +51,9 @@ std::unique_ptr<TextPickerDialogModel> TextPickerDialogModel::textPickerDialogIn
 
 TextPickerModel* TextPickerModel::GetInstance()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextPicker");
-    if (module == nullptr) {
-        LOGF_ABORT("Can't find TextPicker dynamic module");
-    }
-    auto* model = reinterpret_cast<const NG::TextPickerModelNG*>(module->GetModel());
-    CHECK_NULL_RETURN(model, nullptr);
     if (!textPickerInstance_) {
         if (!textPickerInstance_) {
-            textPickerInstance_.reset(const_cast<NG::TextPickerModelNG*>(model));
+            textPickerInstance_.reset(new NG::TextPickerModelNG());
         }
     }
     return textPickerInstance_.get();
@@ -68,15 +61,9 @@ TextPickerModel* TextPickerModel::GetInstance()
 
 TextPickerDialogModel* TextPickerDialogModel::GetInstance()
 {
-    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextPickerDialog");
-    if (module == nullptr) {
-        LOGF_ABORT("Can't find TextPickerDialog dynamic module");
-    }
-    auto* model = reinterpret_cast<const NG::TextPickerDialogModelNG*>(module->GetModel());
-    CHECK_NULL_RETURN(model, nullptr);
     if (!textPickerDialogInstance_) {
         if (!textPickerDialogInstance_) {
-            textPickerDialogInstance_.reset(const_cast<NG::TextPickerDialogModelNG*>(model));
+            textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
         }
     }
     return textPickerDialogInstance_.get();
@@ -220,6 +207,9 @@ void TextPickerColumnTestNg::SetUpTestSuite()
 
 void TextPickerColumnTestNg::TearDownTestSuite()
 {
+    // Destroy singletons before TearDown - they reference pipeline resources.
+    TextPickerModel::textPickerInstance_.reset();
+    TextPickerDialogModel::textPickerDialogInstance_.reset();
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
@@ -238,6 +228,8 @@ void TextPickerColumnTestNg::SetUp()
 
 void TextPickerColumnTestNg::TearDown()
 {
+    DestroyTextPickerColumnTestNgObject();
+    ElementRegister::GetInstance()->Clear();
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     ViewStackProcessor::GetInstance()->ClearStack();
 }

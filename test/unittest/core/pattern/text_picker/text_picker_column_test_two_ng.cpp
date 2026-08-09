@@ -186,6 +186,8 @@ void TextPickerColumnTestTwoNg::SetUpTestSuite()
 
 void TextPickerColumnTestTwoNg::TearDownTestSuite()
 {
+    TextPickerModel::textPickerInstance_.reset();
+    TextPickerDialogModel::textPickerDialogInstance_.reset();
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
@@ -204,6 +206,8 @@ void TextPickerColumnTestTwoNg::SetUp()
 
 void TextPickerColumnTestTwoNg::TearDown()
 {
+    DestroyTextPickerColumnTestTwoNgObject();
+    ElementRegister::GetInstance()->Clear();
     MockPipelineContext::GetCurrent()->themeManager_ = nullptr;
     ViewStackProcessor::GetInstance()->ClearStack();
 }
