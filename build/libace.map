@@ -2801,6 +2801,7 @@
       "OHOS::Ace::NG::VibratorUtils::StartVibraFeedback()";
       "OHOS::Ace::NG::VibratorUtils::StartVibraFeedback(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::VibratorUtils::StartViratorDirectly(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::NG::ViewAbstract::CancelPropertyAnimations(OHOS::Ace::NG::FrameNode*, std::__h::vector<OHOS::Ace::AnimationPropertyType, std::__h::allocator<OHOS::Ace::AnimationPropertyType>> const&)";
       "OHOS::Ace::NG::ViewAbstract::ClearWidthOrHeight(OHOS::Ace::NG::FrameNode*, bool)";
       "OHOS::Ace::NG::ViewAbstract::SetBackgroundColor(OHOS::Ace::Color const&)";
       "OHOS::Ace::NG::ViewAbstract::SetBorderColor(OHOS::Ace::NG::FrameNode*, OHOS::Ace::Color const&)";
@@ -4274,6 +4275,7 @@
       "OHOS::Ace::NG::ComponentSnapshot::GetSyncByUniqueId(int, OHOS::Ace::NG::SnapshotOptions const&)";
       "OHOS::Ace::NG::ContainerModalView::RegistCustomBuilder(std::__h::function<OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> ()>&, std::__h::function<OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> (OHOS::Ace::WeakPtr<OHOS::Ace::NG::ContainerModalPatternEnhance> const&, OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode> const&)>&)";
       "OHOS::Ace::NG::ConvertToPx(std::__h::optional<OHOS::Ace::NG::CalcLength> const&, OHOS::Ace::NG::ScaleProperty const&, float, std::__h::vector<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>, std::__h::allocator<std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>>> const&)";
+      "OHOS::Ace::NG::CustomNode::Render(long)";
       "OHOS::Ace::NG::CustomNode::Render(long long)";
       "OHOS::Ace::NG::CustomNodeBase::GetJSViewName()";
       "OHOS::Ace::NG::CustomNodeBase::HasRecycleRenderFunc()";
@@ -4444,6 +4446,7 @@
       "OHOS::Ace::NG::Inspector::SendEventByKey(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::InspectorFilter::AddFilterAttr(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::NG::InspectorFilter::SetFilterDepth(unsigned int)";
+      "OHOS::Ace::NG::InspectorFilter::SetFilterDepth(unsigned long)";
       "OHOS::Ace::NG::InspectorFilter::SetFilterID(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)";
       "OHOS::Ace::NG::LayoutConstraintT<float>::UpdateIllegalSelfIdealSizeWithCheck(OHOS::Ace::NG::OptionalSize<float> const&)";
       "OHOS::Ace::NG::LayoutConstraintT<float>::UpdateIllegalSelfMarginSizeWithCheck(OHOS::Ace::NG::OptionalSize<float> const&)";
@@ -5162,6 +5165,7 @@
       "OHOS::Ace::UIXComponentDisplaySync::NotifyXComponentExpectedFrameRate(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
       "OHOS::Ace::UIXComponentDisplaySync::NotifyXComponentExpectedFrameRate(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, bool, OHOS::Ace::FrameRateRange const&)";
       "OHOS::Ace::UIXComponentDisplaySync::NotifyXComponentExpectedFrameRate(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, int)";
+      "OHOS::Ace::UiMaterial::CopyImmersiveOptions() const";
       "OHOS::Ace::UiMaterial::GetImmersiveOptions() const";
       "OHOS::Ace::UiMaterial::SetImmersiveOptions(OHOS::Ace::ImmersiveOptions const&)";
       "OHOS::Ace::V2::COMMON_VIEW_ETS_TAG";
