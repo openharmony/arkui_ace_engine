@@ -225,21 +225,23 @@ void CalendarPickerTestNg::ApplyBackBlurStyle(
     const RefPtr<FrameNode>& dialogNode, const DialogProperties& properties)
 {
     auto contentNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
-    if (contentNode) {
-        auto renderContext = contentNode->GetRenderContext();
-        if (renderContext) {
-            BlurStyleOption styleOption;
-            if (properties.backgroundBlurStyle.has_value()) {
-                styleOption.blurStyle = static_cast<BlurStyle>(properties.backgroundBlurStyle.value());
-            } else {
-                auto theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
-                if (theme) {
-                    styleOption.blurStyle = static_cast<BlurStyle>(theme->GetCalendarPickerDialogBlurStyle());
-                }
-            }
-            renderContext->UpdateBackBlurStyle(styleOption);
+    if (!contentNode) {
+        return;
+    }
+    auto renderContext = contentNode->GetRenderContext();
+    if (!renderContext) {
+        return;
+    }
+    BlurStyleOption styleOption;
+    if (properties.backgroundBlurStyle.has_value()) {
+        styleOption.blurStyle = static_cast<BlurStyle>(properties.backgroundBlurStyle.value());
+    } else {
+        auto theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
+        if (theme) {
+            styleOption.blurStyle = static_cast<BlurStyle>(theme->GetCalendarPickerDialogBlurStyle());
         }
     }
+    renderContext->UpdateBackBlurStyle(styleOption);
 }
 /**
  * @tc.name: CalendarModelNGTest001
