@@ -247,7 +247,7 @@ HWTEST_F(LayoutAlgorithmTestNg, HandleStackContentOverflowNonStackComponentTest0
 
 /**
  * @tc.name: IsContentOverflowForSmartLayoutTest001
- * @tc.desc: test overflow detection and safe-area disable for smart layout
+ * @tc.desc: test overflow detection for smart layout; childRect is supplied by caller
  * @tc.type: FUNC
  */
 HWTEST_F(LayoutAlgorithmTestNg, IsContentOverflowForSmartLayoutTest001, TestSize.Level0)
@@ -255,27 +255,20 @@ HWTEST_F(LayoutAlgorithmTestNg, IsContentOverflowForSmartLayoutTest001, TestSize
     auto algo = AceType::MakeRefPtr<LayoutAlgorithm>();
     auto host = FrameNode::CreateFrameNode("Column", 200, AceType::MakeRefPtr<Pattern>());
     host->GetGeometryNode()->SetFrameSize(SizeF(50.0f, 50.0f));
-    auto wrapper = AceType::MakeRefPtr<LayoutWrapperNode>(host, host->GetGeometryNode(), host->GetLayoutProperty());
+    auto wrapper = AceType::MakeRefPtr<LayoutWrapperNode>(host, host->GetGeometryNode(),
+        host->GetLayoutProperty());
 
-    auto overflowChild = FrameNode::CreateFrameNode("Text", 201, AceType::MakeRefPtr<Pattern>());
-    overflowChild->GetGeometryNode()->SetFrameSize(SizeF(80.0f, 80.0f));
-    overflowChild->MountToParent(host);
-    overflowChild->SetActive(true);
-    EXPECT_TRUE(algo->IsContentOverflowForSmartLayout(AceType::RawPtr(wrapper)));
+    // 80x80 包围盒位于 (10,10)，超出 50x50 父容器 -> 溢出
+    RectF overflowRect(10.0f, 10.0f, 80.0f, 80.0f);
+    EXPECT_TRUE(algo->IsContentOverflowForSmartLayout(AceType::RawPtr(wrapper), overflowRect));
 
-    auto safeHost = FrameNode::CreateFrameNode("Column", 202, AceType::MakeRefPtr<Pattern>());
-    safeHost->GetGeometryNode()->SetFrameSize(SizeF(50.0f, 50.0f));
-    auto safeWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(safeHost, safeHost->GetGeometryNode(),
-        safeHost->GetLayoutProperty());
-    auto safeChild = FrameNode::CreateFrameNode("Text", 203, AceType::MakeRefPtr<Pattern>());
-    safeChild->GetLayoutProperty()->UpdateSafeAreaExpandOpts({.type = SAFE_AREA_TYPE_ALL, .edges = SAFE_AREA_EDGE_ALL});
-    safeChild->GetGeometryNode()->SetFrameSize(SizeF(80.0f, 80.0f));
-    safeChild->MountToParent(safeHost);
-    safeChild->SetActive(true);
-    EXPECT_FALSE(algo->IsContentOverflowForSmartLayout(AceType::RawPtr(safeWrapper)));
+    // 包围盒完全位于父容器内 -> 不溢出
+    RectF insideRect(5.0f, 5.0f, 40.0f, 40.0f);
+    EXPECT_FALSE(algo->IsContentOverflowForSmartLayout(AceType::RawPtr(wrapper), insideRect));
 
+    // 父容器扩大到 100x100 后，原溢出包围盒不再超出边界 -> 不溢出
     host->GetGeometryNode()->SetFrameSize(SizeF(100.0f, 100.0f));
-    EXPECT_FALSE(algo->IsContentOverflowForSmartLayout(AceType::RawPtr(wrapper)));
+    EXPECT_FALSE(algo->IsContentOverflowForSmartLayout(AceType::RawPtr(wrapper), overflowRect));
     EXPECT_FALSE(algo->HandleContentOverflowWithSmartLayout(AceType::RawPtr(wrapper)));
 }
 

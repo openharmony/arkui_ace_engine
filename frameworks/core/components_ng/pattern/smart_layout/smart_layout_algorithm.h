@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_SMART_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SMART_LAYOUT_SMART_LAYOUT_ALGORITHM_H
 
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/smart_layout/engine/smart_layout_types.h"
 #include "core/components_ng/pattern/smart_layout/engine/smart_layout_engine_interface.h"
@@ -41,11 +42,31 @@ public:
      */
     bool PerformSmartLayout(LayoutWrapper* layoutWrapper);
 
+    /**
+     * @brief Perform smart layout scale-up for underutilized containers
+     * @param layoutWrapper Layout wrapper containing children
+     * @return true if scale-up was applied successfully
+     */
+    bool PerformSmartLayoutScaleUp(LayoutWrapper* layoutWrapper);
+
+    /**
+     * @brief Check whether the node's inspector id carries the A2UI smart layout marker prefix.
+     */
+    static bool HasSmartLayoutIdName(const RefPtr<FrameNode>& node);
+
+    /**
+     * @brief Find the marked smart layout root on the ancestor chain (inspector id prefix match).
+     */
+    static RefPtr<FrameNode> FindGenUIRenderComp(const RefPtr<FrameNode>& hostNode);
+
 private:
+    bool HandleTextContentOverflow(LayoutWrapper* layoutWrapper);
+    bool RemeasureText(LayoutWrapper* layoutWrapper);
+
     /**
      * @brief Get layout type from layout wrapper's host tag
      * @param layoutWrapper Layout wrapper
-     * @return SmartLayoutType::COLUMN for Column, SmartLayoutType::ROW for Row (default)
+     * @return Smart layout type corresponding to the host component
      */
     SmartLayoutType GetLayoutTypeFromWrapper(LayoutWrapper* layoutWrapper);
 
@@ -102,13 +123,15 @@ private:
      * @param geoNode Geometry node (for getting margin)
      * @param boundingBoxOffsetX Pre-calculated bounding box X offset
      * @param boundingBoxOffsetY Pre-calculated bounding box Y offset
+     * @param isFormRender Whether the host node is in form render
      * @return Calculated offset
      */
     OffsetF CalculateOffsetWithMargin(
         const ISmartLayoutNode& layoutNode,
         const RefPtr<GeometryNode> geoNode,
         double boundingBoxOffsetX,
-        double boundingBoxOffsetY);
+        double boundingBoxOffsetY,
+        bool isFormRender);
 
     /**
      * @brief Apply layout result to a single child
