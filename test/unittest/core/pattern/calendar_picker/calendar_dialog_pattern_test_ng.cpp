@@ -509,7 +509,6 @@ RefPtr<FrameNode> CalendarDialogPatternTestNg::CalendarDialogShow(RefPtr<FrameNo
     scrollFrameNode->MountToParent(contentColumn);
     operationsNode->MountToParent(contentColumn);
 
-
     // 使用 DialogView::CreateDialogNode 创建 Dialog 节点
     auto dialogNode = DialogView::CreateDialogNode(properties, contentColumn, entryNode);
 

@@ -16,8 +16,7 @@
 #include <cstring>
 
 #include "core/interfaces/native/node/node_api.h"
-
-extern const ArkUISwiperModifier* GetMockSwiperModifier();
+#include "mock_swiper_modifier.h"
 // Mock implementation for unit tests
 extern "C" {
 ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()

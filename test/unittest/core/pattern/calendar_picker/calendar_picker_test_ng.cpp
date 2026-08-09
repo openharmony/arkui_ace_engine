@@ -98,6 +98,7 @@ protected:
     static void CreateCalendarPicker();
     static RefPtr<FrameNode> CalendarDialogShow(RefPtr<FrameNode> entryNode);
     static RefPtr<FrameNode> CreateMockDialogNode(const DialogProperties& properties);
+    static void ApplyBackBlurStyle(const RefPtr<FrameNode>& dialogNode, const DialogProperties& properties);
 };
 
 void CalendarPickerTestNg::SetUpTestCase()
@@ -214,7 +215,15 @@ RefPtr<FrameNode> CalendarPickerTestNg::CreateMockDialogNode(const DialogPropert
 
     // 创建 Dialog 节点
     auto dialogNode = DialogView::CreateDialogNode(properties, contentColumn, nullptr);
-    // 设置 BackBlurStyle（模拟 CalendarDialogView::Show 的行为）
+    ApplyBackBlurStyle(dialogNode, properties);
+    contentColumn->MarkModifyDone();
+    calendarNode->MarkModifyDone();
+    return dialogNode;
+}
+
+void CalendarPickerTestNg::ApplyBackBlurStyle(
+    const RefPtr<FrameNode>& dialogNode, const DialogProperties& properties)
+{
     auto contentNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
     if (contentNode) {
         auto renderContext = contentNode->GetRenderContext();
@@ -231,9 +240,6 @@ RefPtr<FrameNode> CalendarPickerTestNg::CreateMockDialogNode(const DialogPropert
             renderContext->UpdateBackBlurStyle(styleOption);
         }
     }
-    contentColumn->MarkModifyDone();
-    calendarNode->MarkModifyDone();
-    return dialogNode;
 }
 /**
  * @tc.name: CalendarModelNGTest001
