@@ -6707,9 +6707,8 @@ void ViewAbstract::ResetSystemMaterialEffect(FrameNode* frameNode)
                 frameNode->GetTag().c_str());
             return;
         }
-        if (preConfig->key.level == UiMaterialLevel::SMOOTH) {
-            ResetBorderAndBackgroundEffect(frameNode, pattern, renderContext);
-        } else {
+        ResetBorderAndBackgroundEffect(frameNode, pattern, renderContext);
+        if (preConfig->key.level != UiMaterialLevel::SMOOTH) {
             // reset color picker, materialFilter, and transparency callback.
             if (preConfig->colorInvert) {
                 renderContext->BindColorPicker(ColorPlaceholder::SURFACE_CONTRAST, ColorPickStrategy::NONE, 0);
@@ -6779,6 +6778,26 @@ void ViewAbstract::ResetBorderAndBackgroundEffect(
     }
 }
 
+void ViewAbstract::RemoveBorderAndBackgroundEffect(
+    const RefPtr<FrameNode>& frameNode, const RefPtr<RenderContext>& renderContext)
+{
+    // reset the property to no effect to avoid blocking the effect of the material
+    if (renderContext->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    }
+    if (renderContext->HasBorderWidth()) {
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(Dimension(0));
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
+    }
+    if (renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(Color::BLACK);
+        renderContext->UpdateBorderColor(borderColor);
+    }
+}
+
 void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material)
 {
     if (material && !MaterialUtils::IsImmersiveMaterialSupported(material)) {
@@ -6818,9 +6837,13 @@ void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMate
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        updateFunc(nullptr);
-        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-        pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
+        if (material != nullptr) {
+            updateFunc(nullptr);
+            RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+            pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
+        } else {
+            ResetSystemMaterialEffect(frameNode);
+        }
         return;
     }
 
@@ -7032,10 +7055,11 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
         renderContext->SetImmersiveMaterialConfig(config);
         return;
     }
+    // gentle or exquisite
+    RemoveBorderAndBackgroundEffect(frameNode, renderContext);
     if (preConfig == config) {
         return;
     }
-    // gentle or exquisite
     int32_t style = static_cast<int32_t>(config->key.style);
     if (style >= static_cast<int32_t>(UiMaterialStyle::ULTRA_THIN_EC) &&
         style <= static_cast<int32_t>(UiMaterialStyle::ULTRA_THICK_EC)) {
