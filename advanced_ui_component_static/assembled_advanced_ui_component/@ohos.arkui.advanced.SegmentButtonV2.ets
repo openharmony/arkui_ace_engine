@@ -1761,22 +1761,31 @@ function normalizeInt(value: int, min: int, max: int): int {
 
 function generateUniqueKye(groupId: string) {
   return (item: SegmentButtonV2Item, index: int): string => {
-    let key: string = groupId;
+    // index must be part of the key. Otherwise items that share the same
+    // text/icon/symbol (e.g. "手机 手机 手机") produce identical Repeat keys,
+    // which breaks Repeat reconciliation and makes the buttons collapse to one
+    // point during the selected-index switch animation.
+    let key: string = `${groupId}_${index}`;
     if (item.text) {
       if (typeof item.text === 'string') {
+        key += '_';
         key += item.text;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.text as Resource);
       }
     }
     if (item.icon) {
       if (typeof item.icon === 'string') {
+        key += '_';
         key += item.icon;
       } else {
+        key += '_';
         key += getResourceUniqueId(item.icon as Resource);
       }
     }
     if (item.symbol) {
+      key += '_';
       key += getResourceUniqueId(item.symbol as Resource);
     }
     return key;
