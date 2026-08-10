@@ -12673,6 +12673,121 @@
       ],
       "status": "active",
       "last_verified": "2026-08-10"
+    },
+    {
+      "id": "CapiGestureDisposeUaf",
+      "name": "CAPI Gesture Dispose UAF",
+      "name_cn": "CAPI手势接口UAF问题",
+      "kind": "issue",
+      "category": "interaction",
+      "keywords": [
+        "CapiGestureDisposeUaf",
+        "CAPI手势UAF",
+        "手势接口UAF",
+        "dispose",
+        "SetUserData",
+        "SetDisposeTag",
+        "GetDisposeTag",
+        "TriggerGestureJudgeCallback",
+        "DecRefCount",
+        "node_gesture_modifier",
+        "被踩内存",
+        "use after free"
+      ],
+      "aliases": [
+        "CAPI手势被踩内存",
+        "手势dispose内存问题",
+        "手势接口UAF"
+      ],
+      "kb": "docs/kb/issues/interaction/capi-gesture-dispose-uaf.md",
+      "func_ids": [
+        "04-05-07",
+        "04-04-06"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08",
+      "source_paths": {
+        "gesture_info_h": "frameworks/core/components_ng/gestures/gesture_info.h",
+        "node_gesture_modifier": "frameworks/core/interfaces/native/node/node_gesture_modifier.cpp",
+        "click_recognizer": "frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp",
+        "pan_recognizer": "frameworks/core/components_ng/gestures/recognizers/pan_recognizer.cpp",
+        "long_press_recognizer": "frameworks/core/components_ng/gestures/recognizers/long_press_recognizer.cpp",
+        "pinch_recognizer": "frameworks/core/components_ng/gestures/recognizers/pinch_recognizer.cpp",
+        "rotation_recognizer": "frameworks/core/components_ng/gestures/recognizers/rotation_recognizer.cpp",
+        "swipe_recognizer": "frameworks/core/components_ng/gestures/recognizers/swipe_recognizer.cpp"
+      }
+    },
+    {
+      "id": "BackgroundPixelmapDestructionCrash",
+      "name": "Background Pixelmap Destruction Crash",
+      "name_cn": "background异常崩溃问题",
+      "kind": "issue",
+      "category": "rendering",
+      "keywords": [
+        "BackgroundPixelmapDestructionCrash",
+        "background异常崩溃",
+        "CreateBackgroundPixelMap",
+        "FrameNode析构异常",
+        "WeakPtr",
+        "Upgrade",
+        "PostTask强引用捕获",
+        "延迟Upgrade",
+        "ArkUICreateBackgroundPixelMap",
+        "背景截图崩溃"
+      ],
+      "aliases": [
+        "背景截图析构崩溃",
+        "frameNode析构异常",
+        "background pixelmap crash"
+      ],
+      "kb": "docs/kb/issues/rendering/background-pixelmap-destruction-crash.md",
+      "func_ids": [
+        "04-10-01",
+        "04-03-10"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08",
+      "source_paths": {
+        "rosen_render_context": "frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+        "rosen_render_context_h": "frameworks/core/components_ng/render/adapter/rosen_render_context.h"
+      }
+    },
+    {
+      "id": "VisibleAreaChangeNodeIdLeak",
+      "name": "Visible Area Change Node ID Leak",
+      "name_cn": "可见区域变化事件注册组件id泄漏问题",
+      "kind": "issue",
+      "category": "performance",
+      "keywords": [
+        "VisibleAreaChangeNodeIdLeak",
+        "可见区域变化事件id泄漏",
+        "GetNodesById",
+        "GetNodesByIdWithCleanup",
+        "onVisibleAreaChangeNodeIds_",
+        "onAreaChangeNodeIds_",
+        "onFormVisibleChangeNodeIds_",
+        "ElementRegister",
+        "ID集合泄漏",
+        "HandleVisibleAreaChangeEvent"
+      ],
+      "aliases": [
+        "可见区域事件ID泄漏",
+        "事件注册ID不清理",
+        "visible area node id leak"
+      ],
+      "kb": "docs/kb/issues/performance/visible-area-change-node-id-leak.md",
+      "func_ids": [
+        "04-04-10"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08",
+      "source_paths": {
+        "frame_node_cpp": "frameworks/core/components_ng/base/frame_node.cpp",
+        "frame_node_h": "frameworks/core/components_ng/base/frame_node.h",
+        "pipeline_context": "frameworks/core/pipeline_ng/pipeline_context.cpp",
+        "form_visible_manager": "frameworks/core/components_ng/manager/form_visible/form_visible_manager.cpp",
+        "ut": "test/unittest/core/base/frame_node_test_ng_coverage.cpp"
+      }
     }
   ]
 }
