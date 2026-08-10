@@ -405,6 +405,7 @@ HWTEST_F(InputEventHubTestNg, HandleMouseEvent001, TestSize.Level1)
      */
     OnMouseEventFunc onMouse2 = onMouse;
     inputEventHub->SetMouseEvent(std::move(onMouse2));
+    inputEventHub->CreateMouseEventActuator();
     EXPECT_NE(inputEventHub->mouseEventActuator_->userCallback_, nullptr);
 
     /**
@@ -413,6 +414,7 @@ HWTEST_F(InputEventHubTestNg, HandleMouseEvent001, TestSize.Level1)
     const OnHoverFunc onHover = [](bool, HoverInfo) {};
     OnHoverFunc onHover1 = onHover;
     inputEventHub->SetHoverEvent(std::move(onHover1));
+    inputEventHub->CreateHoverEventActuator();
     EXPECT_NE(inputEventHub->hoverEventActuator_->userCallback_, nullptr);
 
     /**
@@ -422,6 +424,7 @@ HWTEST_F(InputEventHubTestNg, HandleMouseEvent001, TestSize.Level1)
     auto inputEvent = AceType::MakeRefPtr<InputEvent>(std::move(onMouse3));
     inputEventHub->AddOnMouseEvent(inputEvent);
     inputEventHub->AddOnMouseEvent(nullptr);
+    inputEventHub->CreateMouseEventActuator();
     EXPECT_EQ(inputEventHub->mouseEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
 
     /**
@@ -431,6 +434,7 @@ HWTEST_F(InputEventHubTestNg, HandleMouseEvent001, TestSize.Level1)
     auto onHoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(onHover2));
     inputEventHub->AddOnHoverEvent(onHoverEvent);
     inputEventHub->AddOnHoverEvent(nullptr);
+    inputEventHub->CreateHoverEventActuator();
     EXPECT_EQ(inputEventHub->hoverEventActuator_->inputEvents_.size(), INPUT_EVENTS_SIZE_2);
 
     /**

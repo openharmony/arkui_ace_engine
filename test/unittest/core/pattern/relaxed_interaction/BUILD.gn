@@ -15,8 +15,16 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("relaxed_interaction_manager_test_ng") {
   module_name = "Gesture-BasicAndCombinationGesture"
-  type = "new"
-  cflags = [ "-fno-access-control" ]
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    type = "new"
+  }
+  cflags = [
+    "-fno-access-control",
+    "-include",
+    "vector",
+  ]
   sources = [
     "$ace_root/frameworks/core/components_ng/relaxed_interaction/executor_choreographer.cpp",
     "$ace_root/frameworks/core/components_ng/relaxed_interaction/executor_generator.cpp",

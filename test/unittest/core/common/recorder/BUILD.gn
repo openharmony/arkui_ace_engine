@@ -15,7 +15,11 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("event_recorder_test") {
   module_name = "ImperativeFramework-BuilderNode"
-  type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    type = "new"
+  }
   sources = [
     "event_config_test.cpp",
     "event_controller_test.cpp",
@@ -26,13 +30,13 @@ ace_unittest("event_recorder_test") {
   if (!ace_enable_full_test_suite) {
     sources = []
     sources = [
-      "recorder_test_min.cpp",
       "recorder_test_core.cpp",
+      "recorder_test_min.cpp",
     ]
   } else {
     sources += [
-      "recorder_test_min.cpp",
       "recorder_test_core.cpp",
+      "recorder_test_min.cpp",
     ]
   }
 }

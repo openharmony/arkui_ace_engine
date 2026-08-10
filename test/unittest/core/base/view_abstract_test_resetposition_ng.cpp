@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "gmock/gmock.h"
+
 #define protected public
 #define private public
 #include "test/mock/frameworks/core/components_ng/render/mock_render_context.h"

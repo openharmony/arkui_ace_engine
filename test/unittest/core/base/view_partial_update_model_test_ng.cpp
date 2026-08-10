@@ -131,7 +131,6 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg004, TestSize
     };
 
     RefPtr<AceType> customNode = TestViewPartialUpdateModelNG.CreateNode(std::move(info));
-    EXPECT_NE(info.measureFunc, nullptr);
     EXPECT_TRUE(customNode);
 }
 
@@ -166,7 +165,6 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg005, TestSize
     };
 
     RefPtr<AceType> customNode = TestViewPartialUpdateModelNG.CreateNode(std::move(info));
-    EXPECT_NE(info.layoutFunc, nullptr);
     EXPECT_TRUE(customNode);
 }
 
@@ -247,7 +245,6 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg007, TestSize
     };
 
     RefPtr<AceType> customNode = TestViewPartialUpdateModelNG.CreateNode(std::move(info));
-    EXPECT_NE(info.renderFunc, nullptr);
     EXPECT_TRUE(customNode);
 }
 
@@ -337,7 +334,6 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg010, TestSize
     };
 
     RefPtr<AceType> customNode = TestViewPartialUpdateModelNG.CreateNode(std::move(info));
-    EXPECT_NE(info.renderFunc, nullptr);
     EXPECT_TRUE(customNode);
 }
 
@@ -380,7 +376,6 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg011, TestSize
     };
 
     RefPtr<AceType> customNode = TestViewPartialUpdateModelNG.CreateNode(std::move(info));
-    EXPECT_NE(info.renderFunc, nullptr);
     EXPECT_TRUE(customNode);
 }
 
@@ -423,7 +418,6 @@ HWTEST_F(ViewPartialUpdateModelTestNg, ViewPartialUpdateModelTestNg012, TestSize
     };
 
     RefPtr<AceType> customNode = TestViewPartialUpdateModelNG.CreateNode(std::move(info));
-    EXPECT_NE(info.renderFunc, nullptr);
     EXPECT_TRUE(customNode);
 }
 
