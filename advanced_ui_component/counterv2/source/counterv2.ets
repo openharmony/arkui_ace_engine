@@ -199,6 +199,8 @@ class CounterConstant {
   public static readonly AUSPICIOUS_FOUR = 4;
   public static readonly AUSPICIOUS_HUNDRED = 100;
   public static readonly AUSPICIOUS_FOUR_HUNDRED = 400;
+  public static readonly COUNTER_DEFAULT_TIMEZONE = 'Asia/Shanghai';
+  public static readonly COUNTER_DEFAULT_LOCALE = 'zh-Hans-CN';
 }
 
 @ComponentV2
@@ -285,20 +287,29 @@ export struct CounterV2Component {
     return px2vp(widthPx);
   }
 
+  private getTimezone(): string {
+    const tz = systemDateTime.getTimezoneSync();
+    return tz ? tz : CounterConstant.COUNTER_DEFAULT_TIMEZONE;
+  }
+
+  private getLocaleID(): string {
+    const localeID = new intl.Locale().toString();
+    return localeID ? localeID : CounterConstant.COUNTER_DEFAULT_LOCALE;
+  }
+
   getDate(value: string | undefined): string {
     return `[n2] ${value} [n0]`
   }
 
   getDateYear(value: number): string {
-    let locale = new intl.Locale();
-    let localeID = locale.toString();
+    let localeID = this.getLocaleID();
     let date = new Date(this.year, this.month - 1, this.day);
     date.setFullYear(this.year);
     let dateFormatYear: Intl.DateTimeFormat | undefined;
     try {
       dateFormatYear = new Intl.DateTimeFormat(localeID, {
         year: 'numeric',
-        timeZone: systemDateTime.getTimezoneSync(),
+        timeZone: this.getTimezone(),
       });
     } catch (error) {
       console.log(`Accessility getDateYear fail. message: ${error.message}, code: ${error.code}`);
@@ -311,15 +322,14 @@ export struct CounterV2Component {
   }
 
   getDateMonth(value: number): string {
-    let locale = new intl.Locale();
-    let localeID = locale.toString();
+    let localeID = this.getLocaleID();
     let date = new Date(this.year, this.month - 1, this.day);
     date.setFullYear(this.year);
     let dateFormatMonth: Intl.DateTimeFormat | undefined;
     try {
       dateFormatMonth = new Intl.DateTimeFormat(localeID, {
         month: 'long',
-        timeZone: systemDateTime.getTimezoneSync()
+        timeZone: this.getTimezone()
       });
     } catch (error) {
       console.log(`Accessility getDateMonth fail. message: ${error.message}, code: ${error.code}`);
@@ -1324,11 +1334,19 @@ export struct CounterV2Component {
   }
 
   private getIncreaseStr(): string {
-    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    try {
+      return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834852) ?? '';
+    } catch (error) {
+      return '';
+    }
   }
 
   private getReduceStr(): string {
-    return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    try {
+      return this.getUIContext().getHostContext()?.resourceManager?.getStringSync(125834853) ?? '';
+    } catch (error) {
+      return '';
+    }
   }
 
   build() {
