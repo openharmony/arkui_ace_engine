@@ -63,7 +63,7 @@ public:
     virtual float GetMaxFontScale() const { return 1.0f; }
     virtual bool HasMinFontScale() const { return false; }
     virtual float GetMinFontScale() const { return 1.0f; }
-    virtual float GetFontScaleFromEnv() const { return 1.0f; }
+    virtual float GetFontScaleFromEnv(const RefPtr<FrameNode>& host) const { return 1.0f; }
 
     virtual bool IsUnderlineMode() const { return false; }
     virtual bool IsShowError() const { return false; }
@@ -71,6 +71,7 @@ public:
     virtual bool IsTextAreaOnCounter() const { return false; }
     virtual bool IsNormalInlineState() const { return false; }
     virtual bool IsShowPasswordIcon() const { return false; }
+    virtual TextDirection GetLayoutDirection() const { return TextDirection::LTR; }
     virtual TextDirection GetNonAutoLayoutDirection() const { return TextDirection::LTR; }
 
     virtual float GetPaddingLeft() const { return 0.0f; }

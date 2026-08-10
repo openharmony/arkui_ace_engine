@@ -341,30 +341,30 @@ HWTEST_F(TextFieldCounterHostTest, GetCounterTextOverflowColor002, TestSize.Leve
 }
 
 /**
- * @tc.name: GetNonAutoLayoutDirection001
- * @tc.desc: Test GetNonAutoLayoutDirection returns LTR by default
+ * @tc.name: GetLayoutDirection001
+ * @tc.desc: Test GetLayoutDirection returns LTR by default
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldCounterHostTest, GetNonAutoLayoutDirection001, TestSize.Level1)
+HWTEST_F(TextFieldCounterHostTest, GetLayoutDirection001, TestSize.Level1)
 {
     CreateTextField(HELLO_TEXT);
     auto* counterHost = static_cast<ICounterHost*>(AceType::RawPtr(pattern_));
     ASSERT_NE(counterHost, nullptr);
-    EXPECT_EQ(counterHost->GetNonAutoLayoutDirection(), TextDirection::LTR);
+    EXPECT_EQ(counterHost->GetLayoutDirection(), TextDirection::LTR);
 }
 
 /**
- * @tc.name: GetNonAutoLayoutDirection002
- * @tc.desc: Test GetNonAutoLayoutDirection returns RTL when layout direction is set to RTL
+ * @tc.name: GetLayoutDirection002
+ * @tc.desc: Test GetLayoutDirection returns RTL when layout direction is set to RTL
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldCounterHostTest, GetNonAutoLayoutDirection002, TestSize.Level1)
+HWTEST_F(TextFieldCounterHostTest, GetLayoutDirection002, TestSize.Level1)
 {
     CreateTextField(HELLO_TEXT);
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     auto* counterHost = static_cast<ICounterHost*>(AceType::RawPtr(pattern_));
     ASSERT_NE(counterHost, nullptr);
-    EXPECT_EQ(counterHost->GetNonAutoLayoutDirection(), TextDirection::RTL);
+    EXPECT_EQ(counterHost->GetLayoutDirection(), TextDirection::RTL);
 }
 
 /**
@@ -377,7 +377,7 @@ HWTEST_F(TextFieldCounterHostTest, GetFontScaleFromEnv001, TestSize.Level1)
     CreateTextField(HELLO_TEXT);
     auto* counterHost = static_cast<ICounterHost*>(AceType::RawPtr(pattern_));
     ASSERT_NE(counterHost, nullptr);
-    auto fontScale = counterHost->GetFontScaleFromEnv();
+    auto fontScale = counterHost->GetFontScaleFromEnv(frameNode_);
     EXPECT_GT(fontScale, 0.0f);
 }
 

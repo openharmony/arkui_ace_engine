@@ -129,7 +129,7 @@ void CounterDecorator::UpdateTextFieldMargin()
         auto currentMargin = host->GetMarginProperty();
 
         auto counterHeight = MeasureTextNodeHeight();
-        auto curFontScale = host->GetFontScaleFromEnv();
+        auto curFontScale = host->GetFontScaleFromEnv(decoratedNode);
         auto standardHeight = theme->GetStandardCounterTextMargin().ConvertToPx();
         auto otherHeight = theme->GetCounterTextTopMargin().ConvertToPx() +
             theme->GetCounterTextBottomMargin().ConvertToPx() + counterHeight;
@@ -296,7 +296,7 @@ TextAlign CounterDecorator::GetCounterNodeAlignment()
     CHECK_NULL_RETURN(host, TextAlign::END);
 
     bool isRTL = AceApplicationInfo::GetInstance().IsRightToLeft();
-    TextDirection layoutDirection = host->GetNonAutoLayoutDirection();
+    TextDirection layoutDirection = host->GetLayoutDirection();
     if ((layoutDirection == TextDirection::RTL && !isRTL) ||
         (layoutDirection == TextDirection::LTR && isRTL)) {
         return TextAlign::START;
@@ -438,7 +438,7 @@ void CounterDecorator::HandleNonTextArea()
                          countX + host->GetPaddingRight();
     }
     updateCountXWithArea(host->GetAllResponseArea());
-    auto curFontScale = host->GetFontScaleFromEnv();
+    auto curFontScale = host->GetFontScaleFromEnv(textNode);
     auto countY = (NearEqual(curFontScale, 1.0f)) ? (frameRect.Height() + textGeometryNode->GetFrameRect().Height()) :
         (frameRect.Bottom() - frameRect.Top() + theme->GetCounterTextMarginOffset().ConvertToPx());
     textGeometryNode->SetFrameOffset(OffsetF(countX, countY));
@@ -495,7 +495,14 @@ RefPtr<ICounterHost> CounterDecorator::GetCounterHost() const
 
 std::string CounterDecorator::GetCounterFormatString(uint32_t textLength, uint32_t maxLength) const
 {
-    return std::to_string(textLength) + "/" + std::to_string(maxLength);
+    auto defaultFormatStr = std::to_string(textLength) + "/" + std::to_string(maxLength);
+    auto decoratedNode = decoratedNode_.Upgrade();
+    CHECK_NULL_RETURN(decoratedNode, defaultFormatStr);
+    auto context = decoratedNode->GetContext();
+    CHECK_NULL_RETURN(context, defaultFormatStr);
+    auto theme = context->GetTheme<TextFieldTheme>(decoratedNode->GetThemeScopeId());
+    CHECK_NULL_RETURN(theme, defaultFormatStr);
+    return theme->GetCounterFormatString(textLength, maxLength);
 }
 
 }
