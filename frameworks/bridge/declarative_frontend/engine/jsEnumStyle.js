@@ -4211,6 +4211,13 @@ let MenuKeyboardAvoidMode;
   MenuKeyboardAvoidMode[MenuKeyboardAvoidMode.TRANSLATE_AND_RESIZE = 1] = 'TRANSLATE_AND_RESIZE';
 })(MenuKeyboardAvoidMode || (MenuKeyboardAvoidMode = {}));
 
+let DistortionMode;
+(function (DistortionMode) {
+  DistortionMode[DistortionMode.DISTORTION_AUTO = 0] = 'DISTORTION_AUTO';
+  DistortionMode[DistortionMode.DISTORTION_ENABLED = 1] = 'DISTORTION_ENABLED';
+  DistortionMode[DistortionMode.DISTORTION_DISABLED = 2] = 'DISTORTION_DISABLED';
+})(DistortionMode || (DistortionMode = {}));
+
 let MenuGridPosition;
 (function (MenuGridPosition) {
   MenuGridPosition[MenuGridPosition.TOP = 0] = 'TOP';
