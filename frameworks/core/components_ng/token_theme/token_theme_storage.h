@@ -56,6 +56,8 @@ public:
 
     void SetIsThemeColorSetByUser(int32_t themeId, bool isDark, int32_t index, bool isColorSetByUser);
     void InitDarkThemeMapWithoutUserSet(int32_t themeId, bool isDark);
+    RefPtr<TokenTheme> CreateSystemTokenTheme(
+        ColorMode colorMode, const std::optional<int32_t>& specifiedThemeId = std::nullopt);
 
 private:
     static constexpr int32_t SYSTEM_THEME_LIGHT_ID = -1;
@@ -63,7 +65,6 @@ private:
     bool systemTokenThemeCreated_[3] = {false, false, false}; // 3 means color modes: light, dark, undefined
 
     TokenThemeStorage();
-    RefPtr<TokenTheme> CreateSystemTokenTheme(ColorMode colorMode);
     ColorMode CheckLocalAndSystemColorMode();
     void ResetThemeColor(int32_t themeId, RefPtr<TokenTheme>& theme, RefPtr<TokenTheme>& defaultTheme,
         ColorMode& colorMode);

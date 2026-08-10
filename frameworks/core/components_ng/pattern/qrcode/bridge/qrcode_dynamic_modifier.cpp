@@ -38,6 +38,7 @@ QRCodeModel* GetQRCodeModelImpl()
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
+constexpr uint32_t DEFAULT_BG_COLOR = 0xffffffff;
 constexpr double DEFAULT_OPACITY = 1.0;
 
 FrameNode* GetFrameNode(ArkUINodeHandle node)
@@ -102,14 +103,18 @@ void SetQRBackgroundColorPtr(ArkUINodeHandle node, uint32_t color, void* colorRa
     }
 }
 
-void ResetQRBackgroundColor(ArkUINodeHandle node)
+void ResetQRBackgroundColor(ArkUINodeHandle node, ArkUI_Bool isJsView)
 {
     FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    auto qrCodeTheme = frameNode->GetTheme<QrcodeTheme>(true);
-    CHECK_NULL_VOID(qrCodeTheme);
-    Color qrcodeBackgroundColor = qrCodeTheme->GetBackgroundColor();
-    QRCodeModelNG::SetQRBackgroundColor(frameNode, qrcodeBackgroundColor);
+    if (isJsView) {
+        auto qrCodeTheme = frameNode->GetTheme<QrcodeTheme>(true);
+        CHECK_NULL_VOID(qrCodeTheme);
+        Color qrcodeBackgroundColor = qrCodeTheme->GetBackgroundColor();
+        QRCodeModelNG::SetQRBackgroundColor(frameNode, qrcodeBackgroundColor);
+    } else {
+        QRCodeModelNG::SetQRBackgroundColor(frameNode, Color(DEFAULT_BG_COLOR));
+    }
 
     if (SystemProperties::ConfigChangePerform()) {
         QRCodeModelNG::CreateWithResourceObj(frameNode, QRCodeResourceType::BACKGROUND_COLOR, nullptr);
@@ -174,54 +179,6 @@ ArkUINodeHandle CreateFrameNode(int32_t nodeId)
     return node;
 }
 
-void SetQRBackgroundColorWithColorSpace(
-    ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Int32 colorSpace, void* colorRawPtr)
-{
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    Color backgroundColor { color };
-    if (ColorSpace::DISPLAY_P3 == colorSpace) {
-        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
-    } else if (ColorSpace::BT2020 == colorSpace) {
-        backgroundColor.SetColorSpace(ColorSpace::BT2020);
-    } else {
-        backgroundColor.SetColorSpace(ColorSpace::SRGB);
-    }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        QRCodeModelNG::CreateWithResourceObj(frameNode, QRCodeResourceType::BACKGROUND_COLOR, colorResObj);
-    }
-
-    QRCodeModelNG::SetQRBackgroundColor(frameNode, backgroundColor);
-}
-
-void SetBackgroundColorForHDR(
-    ArkUINodeHandle node, ArkUI_Int32 colorSpace, const ArkUI_Float32 (*hdrValues)[5], void* colorRawPtr)
-{
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(hdrValues);
-    Color backgroundColor =
-        Color::FromFloat((*hdrValues)[0], (*hdrValues)[1], (*hdrValues)[2], (*hdrValues)[3], (*hdrValues)[4]);
-    if (ColorSpace::DISPLAY_P3 == colorSpace) {
-        backgroundColor.SetColorSpace(ColorSpace::DISPLAY_P3);
-    } else if (ColorSpace::BT2020 == colorSpace) {
-        backgroundColor.SetColorSpace(ColorSpace::BT2020);
-    } else {
-        backgroundColor.SetColorSpace(ColorSpace::SRGB);
-    }
-
-    if (SystemProperties::ConfigChangePerform()) {
-        auto* color = reinterpret_cast<ResourceObject*>(colorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        QRCodeModelNG::CreateWithResourceObj(frameNode, QRCodeResourceType::BACKGROUND_COLOR, colorResObj);
-    }
-
-    QRCodeModelNG::SetQRBackgroundColor(frameNode, backgroundColor);
-}
-
 #ifndef CROSS_PLATFORM
 void CreateModelImpl(ArkUI_CharPtr value)
 {
@@ -269,12 +226,16 @@ void SetQRBackgroundColorPtrImpl(ArkUINodeHandle node, uint32_t color, void* col
     }
 }
 
-void ResetQRBackgroundColorImpl(ArkUINodeHandle node)
+void ResetQRBackgroundColorImpl(ArkUINodeHandle node, ArkUI_Bool isJsView)
 {
-    RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
-    CHECK_NULL_VOID(qrcodeTheme);
-    Color qrcodeBackgroundColor = qrcodeTheme->GetBackgroundColor();
-    GetQRCodeModelImpl()->SetQRBackgroundColor(qrcodeBackgroundColor);
+    if (isJsView) {
+        RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
+        CHECK_NULL_VOID(qrcodeTheme);
+        Color qrcodeBackgroundColor = qrcodeTheme->GetBackgroundColor();
+        GetQRCodeModelImpl()->SetQRBackgroundColor(qrcodeBackgroundColor);
+    } else {
+        GetQRCodeModelImpl()->SetQRBackgroundColor(Color(DEFAULT_BG_COLOR));
+    }
 
     if (SystemProperties::ConfigChangePerform()) {
         GetQRCodeModelImpl()->CreateWithResourceObj(QRCodeResourceType::BACKGROUND_COLOR, nullptr);
@@ -301,8 +262,6 @@ const ArkUIQRCodeModifier* GetQRCodeDynamicModifier()
             .resetContentOpacity = nullptr,
             .setQRValue = nullptr,
             .createFrameNode = nullptr,
-            .setQRBackgroundColorWithColorSpace = nullptr,
-            .setBackgroundColorForHDR = nullptr,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -323,8 +282,6 @@ const ArkUIQRCodeModifier* GetQRCodeDynamicModifier()
         .resetContentOpacity = ResetContentOpacity,
         .setQRValue = SetQRValue,
         .createFrameNode = CreateFrameNode,
-        .setQRBackgroundColorWithColorSpace = SetQRBackgroundColorWithColorSpace,
-        .setBackgroundColorForHDR = SetBackgroundColorForHDR,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

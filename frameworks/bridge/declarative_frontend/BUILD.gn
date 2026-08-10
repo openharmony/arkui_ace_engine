@@ -68,7 +68,9 @@ template("declarative_frontend") {
     }
     external_deps = [
       "ets_runtime:libark_jsruntime",
+      "libuv:uv",
       "napi:ace_napi",
+      "node:node_header_notice",
     ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
@@ -566,6 +568,10 @@ template("declarative_js_engine") {
         "jsview/js_form_menu_item.cpp",
         "jsview/models/form_model_impl.cpp",
       ]
+      external_deps += [
+        "libuv:uv",
+        "node:node_header_notice",
+      ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
@@ -653,7 +659,9 @@ template("declarative_js_engine") {
       external_deps += [
         "ets_runtime:libark_jsruntime",
         "graphic_2d:librender_service_client",
+        "libuv:uv",
         "napi:ace_napi",
+        "node:node_header_notice",
       ]
     }
 
@@ -993,6 +1001,10 @@ template("declarative_js_engine_ng") {
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       sources += [ "jsview/js_form.cpp" ]
+      external_deps += [
+        "libuv:uv",
+        "node:node_header_notice",
+      ]
     }
 
     if (defined(config.plugin_components_support) &&
@@ -1101,7 +1113,9 @@ template("declarative_js_engine_ng") {
       external_deps += [
         "ets_runtime:libark_jsruntime",
         "graphic_2d:librender_service_client",
+        "libuv:uv",
         "napi:ace_napi",
+        "node:node_header_notice",
       ]
     }
 

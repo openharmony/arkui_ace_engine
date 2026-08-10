@@ -16,6 +16,7 @@
 #include "adapter/ohos/capability/feature_config/features/ui_correction_parser.h"
 
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
+#include "base/utils/string_utils.h"
 #include "base/log/log.h"
 
 namespace OHOS::Ace {

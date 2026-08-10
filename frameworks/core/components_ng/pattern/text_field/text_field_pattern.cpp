@@ -7473,6 +7473,15 @@ void TextFieldPattern::ProcessPendingCaretEvent()
     }
 }
 
+EmojiRelation TextFieldPattern::GetEmojiRelation(int index)
+{
+    int32_t emojiStartIndex;
+    int32_t emojiEndIndex;
+    return TextEmojiProcessor::GetIndexRelationToEmoji(index, GetTextUtf16Value(),
+        emojiStartIndex, emojiEndIndex);
+}
+
+
 bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<TextEditingValue>& value)
 {
 #ifdef CROSS_PLATFORM
@@ -7485,7 +7494,13 @@ bool TextFieldPattern::HandleEditingEventCrossPlatform(const std::shared_ptr<Tex
             if (value->compose.GetStart() == 0 && value->text.empty()) {
                 DeleteRange(value->compose.GetStart(), value->compose.GetEnd());
             } else {
-                DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
+                EmojiRelation relation = GetEmojiRelation(value->selection.GetEnd());
+                if (relation == EmojiRelation::IN_EMOJI || relation == EmojiRelation::MIDDLE_EMOJI ||
+                    relation == EmojiRelation::BEFORE_EMOJI || value->selection.GetEnd() != value->compose.GetStart()) {
+                    HandleOnDelete(true);
+                } else {
+                    DeleteBackward(value->compose.GetEnd() - value->compose.GetStart());
+                }
             }
             value->compose.Update(-1);
         } else {
@@ -8710,18 +8725,46 @@ std::string TextFieldPattern::GetMaxFontSize() const
     return maxFontSize.has_value() ? maxFontSize->ToString() : "";
 }
 
-std::string TextFieldPattern::GetMinFontScale() const
+std::string TextFieldPattern::GetMinFontScaleStr() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, std::to_string(MINFONTSCALE));
     return std::to_string(layoutProperty->GetMinFontScale().value_or(MINFONTSCALE));
 }
 
-std::string TextFieldPattern::GetMaxFontScale() const
+std::string TextFieldPattern::GetMaxFontScaleStr() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, std::to_string(MAXFONTSCALE));
     return std::to_string(layoutProperty->GetMaxFontScale().value_or(MAXFONTSCALE));
+}
+
+bool TextFieldPattern::HasMaxFontScale() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->HasMaxFontScale();
+}
+
+float TextFieldPattern::GetMaxFontScale() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, MAXFONTSCALE);
+    return layoutProperty->GetMaxFontScale().value_or(MAXFONTSCALE);
+}
+
+bool TextFieldPattern::HasMinFontScale() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->HasMinFontScale();
+}
+
+float TextFieldPattern::GetMinFontScale() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, MINFONTSCALE);
+    return layoutProperty->GetMinFontScale().value_or(MINFONTSCALE);
 }
 
 std::string TextFieldPattern::GetEllipsisMode() const
@@ -8800,6 +8843,180 @@ uint32_t TextFieldPattern::GetMaxLength() const
     CHECK_NULL_RETURN(layoutProperty, Infinity<uint32_t>());
     return layoutProperty->HasMaxLength() ? layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())
                                           : Infinity<uint32_t>();
+}
+
+uint32_t TextFieldPattern::GetRealMaxLength() const
+{
+    return GetMaxLength();
+}
+
+bool TextFieldPattern::HasMaxLength() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->HasMaxLength();
+}
+
+bool TextFieldPattern::GetShowCounterValue() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetShowCounterValue(false);
+}
+
+int32_t TextFieldPattern::GetCounterType() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, -1);
+    return layoutProperty->GetSetCounterValue(-1);
+}
+
+bool TextFieldPattern::GetShowHighlightBorder() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, true);
+    return layoutProperty->GetShowHighlightBorderValue(true);
+}
+
+bool TextFieldPattern::HasCounterTextColor() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->HasCounterTextColor();
+}
+
+Color TextFieldPattern::GetCounterTextColor() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Color::BLACK);
+    return layoutProperty->GetCounterTextColorValue(Color::BLACK);
+}
+
+bool TextFieldPattern::HasCounterTextOverflowColor() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->HasCounterTextOverflowColor();
+}
+
+Color TextFieldPattern::GetCounterTextOverflowColor() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Color::RED);
+    return layoutProperty->GetCounterTextOverflowColorValue(Color::RED);
+}
+
+TextDirection TextFieldPattern::GetNonAutoLayoutDirection() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
+    return layoutProperty->GetNonAutoLayoutDirection();
+}
+
+float TextFieldPattern::GetFontScaleFromEnv() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 1.0f);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, 1.0f);
+    return pipeline->GetFontScaleFromEnv(host);
+}
+
+std::optional<MarginProperty> TextFieldPattern::GetMarginProperty() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, std::nullopt);
+    const auto& margin = layoutProperty->GetMarginProperty();
+    if (!margin) {
+        return std::nullopt;
+    }
+    return *margin;
+}
+
+void TextFieldPattern::UpdateMargin(const MarginProperty& margin)
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateMargin(margin);
+}
+
+bool TextFieldPattern::HasMarginByUser() const
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->HasMarginByUser();
+}
+
+MarginProperty TextFieldPattern::GetMarginByUserValue() const
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, MarginProperty());
+    return paintProperty->GetMarginByUserValue(MarginProperty());
+}
+
+void TextFieldPattern::UpdateInnerBorderWidth(float width)
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateInnerBorderWidth(Dimension(width, DimensionUnit::PX));
+}
+
+void TextFieldPattern::UpdateInnerBorderColor(const Color& color)
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateInnerBorderColor(color);
+}
+
+bool TextFieldPattern::HasBorderWidthFlagByUser() const
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->HasBorderWidthFlagByUser();
+}
+
+BorderWidthProperty TextFieldPattern::GetBorderWidthFlagByUserValue() const
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, BorderWidthProperty());
+    return paintProperty->GetBorderWidthFlagByUserValue(BorderWidthProperty());
+}
+
+bool TextFieldPattern::HasBorderColorFlagByUser() const
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->HasBorderColorFlagByUser();
+}
+
+BorderColorProperty TextFieldPattern::GetBorderColorFlagByUserValue() const
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, BorderColorProperty());
+    return paintProperty->GetBorderColorFlagByUserValue(BorderColorProperty());
+}
+
+bool TextFieldPattern::HasBorderRadiusFlagByUser() const
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->HasBorderRadiusFlagByUser();
+}
+
+BorderRadiusProperty TextFieldPattern::GetBorderRadiusFlagByUserValue() const
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, BorderRadiusProperty());
+    return paintProperty->GetBorderRadiusFlagByUserValue(BorderRadiusProperty());
+}
+
+void TextFieldPattern::UpdateBorderColor(const BorderColorProperty& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBorderColor(color);
 }
 
 uint32_t TextFieldPattern::GetMaxLines() const
@@ -9041,6 +9258,10 @@ void TextFieldPattern::AddCounterNode()
     if (!counterDecorator_) {
         auto counterDecorator = MakeRefPtr<CounterDecorator>(host);
         counterDecorator_ = counterDecorator;
+    }
+    auto counterDec = DynamicCast<CounterDecorator>(counterDecorator_);
+    if (counterDec) {
+        counterDec->SetCounterHost(WeakClaim(static_cast<ICounterHost*>(this)));
     }
 }
 
@@ -9441,8 +9662,8 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
-    json->PutExtAttr("minFontScale", GetMinFontScale().c_str(), filter);
-    json->PutExtAttr("maxFontScale", GetMaxFontScale().c_str(), filter);
+    json->PutExtAttr("minFontScale", GetMinFontScaleStr().c_str(), filter);
+    json->PutExtAttr("maxFontScale", GetMaxFontScaleStr().c_str(), filter);
     json->PutExtAttr("ellipsisMode",GetEllipsisMode().c_str(), filter);
     json->PutExtAttr("autoCapitalizationMode", AutoCapTypeToString().c_str(), filter);
     json->PutExtAttr("enableKeyboardOnFocus", needToRequestKeyboardOnFocus_ ? "true" : "false", filter);
@@ -11215,7 +11436,7 @@ bool TextFieldPattern::IsInlineMode() const
     return HasFocus() && IsNormalInlineState();
 }
 
-bool TextFieldPattern::IsShowError()
+bool TextFieldPattern::IsShowError() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
@@ -11223,7 +11444,7 @@ bool TextFieldPattern::IsShowError()
     return layoutProperty->GetShowErrorTextValue(false) && !errorText.empty() && !IsNormalInlineState();
 }
 
-bool TextFieldPattern::IsShowCount()
+bool TextFieldPattern::IsShowCount() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);

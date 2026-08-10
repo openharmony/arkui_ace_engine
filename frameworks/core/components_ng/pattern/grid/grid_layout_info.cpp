@@ -1276,8 +1276,11 @@ bool GridLayoutInfo::CheckGridMatrix(int32_t cachedCount)
         for (const auto& cell : endRow->second) {
             if (cell.second < endIndex_) {
                 TAG_LOGW(AceLogTag::ACE_GRID,
-                    "check grid matrix failed, index %{public}d is less than endIndex %{public}d", cell.second,
-                    endIndex_);
+                    "check grid matrix failed, index %{public}d is less than endIndex %{public}d, "
+                    "cachedCount: %{public}d, startIndex: %{public}d, startMainLineIndex: %{public}d, "
+                    "endMainLineIndex: %{public}d, childrenCount: %{public}d",
+                    cell.second, endIndex_, cachedCount, startIndex_, startMainLineIndex_, endMainLineIndex_,
+                    GetChildrenCount());
                 PrintMatrix();
                 return false;
             }
@@ -1297,8 +1300,11 @@ bool GridLayoutInfo::CheckGridMatrix(int32_t cachedCount)
         for (const auto& cell : startRow->second) {
             if (cell.second > startIndex_) {
                 TAG_LOGW(AceLogTag::ACE_GRID,
-                    "check grid matrix failed, index %{public}d is greater than startIndex %{public}d", cell.second,
-                    startIndex_);
+                    "check grid matrix failed, index %{public}d is greater than startIndex %{public}d, "
+                    "cachedCount: %{public}d, startMainLineIndex: %{public}d, endMainLineIndex: %{public}d, "
+                    "endIndex: %{public}d, childrenCount: %{public}d",
+                    cell.second, startIndex_, cachedCount, startMainLineIndex_, endMainLineIndex_, endIndex_,
+                    GetChildrenCount());
                 PrintMatrix();
                 return false;
             }

@@ -92,20 +92,6 @@ private:
     RefPtr<JsFunction> func_;
 };
 
-std::function<void(int32_t)> ParseOnOffsetChange(const JSRef<JSObject>& obj, const JsiExecutionContext& context)
-{
-    auto onOffsetChangeFunc = obj->GetProperty("onOffsetChange");
-    if (onOffsetChangeFunc->IsFunction()) {
-        return [execCtx = context, func = JSRef<JSFunc>::Cast(onOffsetChangeFunc)](int32_t offset) {
-            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto params = ConvertToJSValues(offset);
-            func->Call(JSRef<JSObject>(), params.size(), params.data());
-            return;
-        };
-    }
-    return nullptr;
-}
-
 } // namespace
 
 void JSListItem::Create(const JSCallbackInfo& args)
@@ -361,13 +347,20 @@ void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutio
     auto edgeEffect = obj->GetProperty("edgeEffect");
     V2::SwipeEdgeEffect swipeEdgeEffect = V2::SwipeEdgeEffect::Spring;
     if (edgeEffect->IsNumber()) {
-        int32_t effectVal = edgeEffect->ToNumber<int32_t>();
-        if (effectVal >= 0 && effectVal <= static_cast<int32_t>(V2::SwipeEdgeEffect::None)) {
-            swipeEdgeEffect = static_cast<V2::SwipeEdgeEffect>(effectVal);
-        }
+        swipeEdgeEffect = static_cast<V2::SwipeEdgeEffect>(edgeEffect->ToNumber<int32_t>());
     }
 
-    auto onOffsetChangeCallback = ParseOnOffsetChange(obj, context);
+    auto onOffsetChangeFunc = obj->GetProperty("onOffsetChange");
+    std::function<void(int32_t offset)> onOffsetChangeCallback;
+    if (onOffsetChangeFunc->IsFunction()) {
+        onOffsetChangeCallback = [execCtx = context,
+                                     func = JSRef<JSFunc>::Cast(onOffsetChangeFunc)](int32_t offset) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto params = ConvertToJSValues(offset);
+            func->Call(JSRef<JSObject>(), params.size(), params.data());
+            return;
+        };
+    }
 
     // use SetDeleteArea to update builder function
     ListItemModel::GetInstance()->SetSwiperAction(
@@ -493,9 +486,7 @@ void JSListItem::ParseBuilderComponentContent(const JSRef<JSVal>& contentParam, 
     }
     auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
-    if (!frameNode || !AceType::InstanceOf<NG::FrameNode>(frameNode)) {
-        return;
-    }
+    CHECK_NULL_VOID(frameNode);
     refPtrFrameNode = AceType::Claim(frameNode);
 }
 

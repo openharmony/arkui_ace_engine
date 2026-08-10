@@ -482,6 +482,16 @@ Color ResourceAdapterImplV2::GetColor(uint32_t resId)
     return Color(result);
 }
 
+Color ResourceAdapterImplV2::GetColor(uint32_t resId, ColorMode colorMode)
+{
+    ResourceConfiguration resConfig;
+    resConfig.SetColorMode(colorMode);
+    ConfigurationChange configChange { .colorModeUpdate = true };
+    auto adapter = GetOverrideResourceAdapter(resConfig, configChange);
+    CHECK_NULL_RETURN(adapter, ERROR_VALUE_COLOR);
+    return adapter->GetColor(resId);
+}
+
 Color ResourceAdapterImplV2::GetColorByName(const std::string& resName)
 {
     uint32_t result = 0;

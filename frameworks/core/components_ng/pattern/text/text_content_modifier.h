@@ -121,7 +121,6 @@ public:
     {
         return paintOffset_;
     }
-
 private:
     double NormalizeToPx(const Dimension& dimension);
     void SetDefaultAnimatablePropertyValue(const TextStyle& textStyle, const RefPtr<FrameNode>& frameNode);
@@ -263,7 +262,6 @@ private:
     float lastLineHeight_ = 0.0f;
 
     WeakPtr<Pattern> pattern_;
-
     RefPtr<AnimatablePropertyFloat> racePercentFloat_;
     std::shared_ptr<AnimationUtils::Animation> raceAnimation_;
 

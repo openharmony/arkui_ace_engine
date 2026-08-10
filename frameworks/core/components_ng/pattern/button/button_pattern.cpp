@@ -18,7 +18,9 @@
 #include "core/common/container.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/layout_constants_string_utils.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components/toggle/toggle_theme.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/state_style_manager.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -744,6 +746,58 @@ void ButtonPattern::OnModifyDone()
     HandleFocusActiveStyle();
 }
 
+void ButtonPattern::ReapplyImmersiveMaterial()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto material = renderContext->GetSystemMaterial();
+    if (!material || material->GetType() != static_cast<int32_t>(MaterialType::IMMERSIVE)) {
+        return;
+    }
+    auto immersiveOptionsPtr = material->CopyImmersiveOptions();
+    CHECK_NULL_VOID(immersiveOptionsPtr);
+    ProcessImmersiveOptions(immersiveOptionsPtr);
+    material->SetImmersiveOptions(*immersiveOptionsPtr);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(host), AceType::RawPtr(material));
+}
+
+void ButtonPattern::ProcessImmersiveOptions(const std::shared_ptr<ImmersiveOptions>& options)
+{
+    CHECK_NULL_VOID(options);
+    if (options->materialColor.has_value()) {
+        return;
+    }
+    if (UseContentModifier()) {
+        return;
+    }
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    if (layoutProperty && layoutProperty->GetIsUserSetBackgroundColor()) {
+        return;
+    }
+    if (layoutProperty && layoutProperty->GetButtonStyleSetByUser().value_or(false)) {
+        return;
+    }
+    auto injectColor = GetDefaultThemeBgColor();
+    if (injectColor.GetAlpha() > 0) {
+        options->materialColor = injectColor;
+    }
+}
+
+Color ButtonPattern::GetDefaultThemeBgColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Color::TRANSPARENT);
+    auto layoutProperty = GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, Color::TRANSPARENT);
+    auto buttonTheme = host->GetTheme<ButtonTheme>(true);
+    CHECK_NULL_RETURN(buttonTheme, Color::TRANSPARENT);
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    ButtonRole buttonRole = layoutProperty->GetButtonRole().value_or(ButtonRole::NORMAL);
+    return buttonTheme->GetBgColor(buttonStyle, buttonRole);
+}
+
 void ButtonPattern::InitButtonAlphaOffscreen()
 {
     if (isInitButtonAlphaOffscreen_) {
@@ -940,6 +994,13 @@ void ButtonPattern::InitHoverEvent()
     inputHub->AddOnHoverEvent(hoverListener_);
 }
 
+bool ButtonPattern::IsSystemMaterialLightEffectActive(const RefPtr<RenderContext>& renderContext)
+{
+    CHECK_NULL_RETURN(renderContext, false);
+    auto config = renderContext->GetImmersiveMaterialConfig();
+    return config.has_value() && config->HasLightEffect();
+}
+
 void ButtonPattern::HandlePressedStyle()
 {
     isPress_ = true;
@@ -955,16 +1016,18 @@ void ButtonPattern::HandlePressedStyle()
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        backgroundColor_ = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
-        if (clickedColor_.has_value()) {
-            // for user self-defined
-            renderContext->UpdateBackgroundColor(clickedColor_.value());
-            return;
+        if (!IsSystemMaterialLightEffectActive(renderContext)) {
+            backgroundColor_ = renderContext->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            if (clickedColor_.has_value()) {
+                // for user self-defined
+                renderContext->UpdateBackgroundColor(clickedColor_.value());
+                return;
+            }
+            // for system default
+            auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
+            AnimateTouchAndHover(renderContext, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL, TYPE_TOUCH,
+                TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
         }
-        // for system default
-        auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
-        AnimateTouchAndHover(renderContext, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL, TYPE_TOUCH,
-            TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
     }
     if (scaleModify_ && isPress_) {
         auto renderContext = host->GetRenderContext();
@@ -991,16 +1054,18 @@ void ButtonPattern::HandleNormalStyle()
     }
     if (buttonEventHub->GetStateEffect()) {
         auto renderContext = host->GetRenderContext();
-        if (clickedColor_.has_value()) {
-            renderContext->UpdateBackgroundColor(backgroundColor_);
-            return;
-        }
-        if (buttonEventHub->IsEnabled()) {
-            auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
-            AnimateTouchAndHover(renderContext, TYPE_TOUCH, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL,
-                TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
-        } else {
-            AnimateTouchAndHover(renderContext, TYPE_TOUCH, TYPE_CANCEL, TOUCH_DURATION, Curves::FRICTION);
+        if (!IsSystemMaterialLightEffectActive(renderContext)) {
+            if (clickedColor_.has_value()) {
+                renderContext->UpdateBackgroundColor(backgroundColor_);
+                return;
+            }
+            if (buttonEventHub->IsEnabled()) {
+                auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
+                AnimateTouchAndHover(renderContext, TYPE_TOUCH, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL,
+                    TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
+            } else {
+                AnimateTouchAndHover(renderContext, TYPE_TOUCH, TYPE_CANCEL, TOUCH_DURATION, Curves::FRICTION);
+            }
         }
     }
     if (scaleModify_ && isHover_) {
@@ -1063,6 +1128,9 @@ void ButtonPattern::HandleBackgroundColor()
 
     if (!renderContext->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle, buttonRole));
+    }
+    if (renderContext->GetSystemMaterial() && !layoutProperty->GetIsUserSetBackgroundColor()) {
+        ReapplyImmersiveMaterial();
     }
     themeBgColor_ = buttonTheme->GetBgColor(buttonStyle, buttonRole);
     themeTextColor_ = buttonTheme->GetTextColor(buttonStyle, buttonRole);
@@ -1498,7 +1566,9 @@ void ButtonPattern::OnColorConfigurationUpdate()
     if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
         renderContext->UpdateBackgroundColor(backgroundColor);
     }
-    OnColorConfigurationUpdateTextColor(node, buttonStyle, buttonRole, textColor);
+    if (buttonLayoutProperty->GetCreateWithLabelValue(true)) {
+        OnColorConfigurationUpdateTextColor(node, buttonStyle, buttonRole, textColor);
+    }
     if (SystemProperties::ConfigChangePerform()) {
         if (renderContext->HasForegroundColor() && renderContext->GetForegroundColorValue() == themeTextColor_) {
             renderContext->UpdateForegroundColor(textColor);

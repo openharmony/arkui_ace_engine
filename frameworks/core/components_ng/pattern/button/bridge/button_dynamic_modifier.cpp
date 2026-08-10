@@ -1281,6 +1281,7 @@ void UpdateButtonStyleToLayoutPropForCustom(ArkUINodeHandle node, ButtonStyleMod
     auto layoutProperty = GetButtonLayoutProperty(node);
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateButtonStyle(buttonStyle);
+    layoutProperty->UpdateButtonStyleSetByUser(true);
 }
 
 void UpdateButtonRoleToLayoutPropForCustom(ArkUINodeHandle node, ButtonRole buttonRole)

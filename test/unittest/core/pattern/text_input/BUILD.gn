@@ -108,6 +108,7 @@ if (is_host_product) {
 
 text_input_pattern_test_sources = [
   "text_area_base.cpp",
+  "text_field_counter_host_test.cpp",
   "text_field_pattern_test.cpp",
   "text_field_pattern_testeight.cpp",
   "text_field_pattern_testeleven.cpp",

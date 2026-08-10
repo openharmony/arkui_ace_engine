@@ -28,6 +28,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+thread_local bool g_isInFormComponent = false;
 const std::unordered_set<std::string> OVERFLOW_ENABLED_COMPONENTS = {
     OHOS::Ace::V2::COLUMN_ETS_TAG,
     OHOS::Ace::V2::FLEX_ETS_TAG,
@@ -131,8 +132,12 @@ void LayoutAlgorithmWrapper::Layout(LayoutWrapper* layoutWrapper)
         }
         return;
     }
+    const bool prevInFormComponent = g_isInFormComponent;
+    g_isInFormComponent = prevInFormComponent ||
+        SmartLayoutAlgorithm::HasSmartLayoutIdName(layoutWrapper->GetHostNode());
     layoutAlgorithm_->Layout(layoutWrapper);
     HandleContentOverflowWithSmartLayout(layoutWrapper);
+    g_isInFormComponent = prevInFormComponent;
 }
 
 void LayoutAlgorithmWrapper::SetAbsLayoutAlgorithm(const RefPtr<Kit::LayoutAlgorithm>& absLayoutAlgorithm)
@@ -322,13 +327,27 @@ bool LayoutAlgorithm::IsContentUnderutilizedForSmartLayout(LayoutWrapper* layout
 
     auto* context = hostNode->GetContext();
     CHECK_NULL_RETURN(context, false);
-    auto rootRect = context->GetRootRect();
-    // 1px tolerance for matching host frame size against root size
+
+    // 1px tolerance for matching host frame size against smart layout root size
     constexpr float ROOT_SIZE_EPSILON = 1.0f;
-    if (!context->IsFormRender() ||
-        !NearEqual(rootRect.Width(), frameSize.Width(), ROOT_SIZE_EPSILON) ||
-        !NearEqual(rootRect.Height(), frameSize.Height(), ROOT_SIZE_EPSILON)) {
-        return false;
+    auto isRootSizeMatched = [&frameSize](float width, float height) {
+        return NearEqual(width, frameSize.Width(), ROOT_SIZE_EPSILON) &&
+            NearEqual(height, frameSize.Height(), ROOT_SIZE_EPSILON);
+    };
+    if (context->IsFormRender()) {
+        auto rootRect = context->GetRootRect();
+        if (!isRootSizeMatched(rootRect.Width(), rootRect.Height())) {
+            return false;
+        }
+    } else {
+        auto formNode = SmartLayoutAlgorithm::FindGenUIRenderComp(hostNode);
+        CHECK_NULL_RETURN(formNode, false);
+        auto formGeo = formNode->GetGeometryNode();
+        CHECK_NULL_RETURN(formGeo, false);
+        auto formSize = formGeo->GetFrameSize();
+        if (!isRootSizeMatched(formSize.Width(), formSize.Height())) {
+            return false;
+        }
     }
 
     double containerArea = static_cast<double>(frameSize.Width()) * static_cast<double>(frameSize.Height());
@@ -341,9 +360,8 @@ bool LayoutAlgorithm::IsContentUnderutilizedForSmartLayout(LayoutWrapper* layout
     }
 
     double emptyRatio = 1.0 - (bbArea / containerArea);
-    // Empty area over 30% of container is considered sparse
-    constexpr double EMPTY_RATIO_THRESHOLD = 0.3;
-    return GreatNotEqual(emptyRatio, EMPTY_RATIO_THRESHOLD);
+    // Empty area over the shared threshold of container is considered sparse
+    return GreatNotEqual(emptyRatio, SMART_LAYOUT_EMPTY_RATIO_THRESHOLD);
 }
 
 void LayoutAlgorithm::TryRestoreSmartLayoutForHost(LayoutWrapper* layoutWrapper)
@@ -448,7 +466,7 @@ std::string LayoutAlgorithm::ComputeCurrentPathHash(FrameNode* hostNode)
 bool LayoutAlgorithm::IsSmartLayoutEffective(const RefPtr<FrameNode>& hostNode)
 {
     CHECK_NULL_RETURN(hostNode, false);
-    if (!IsComponentSupportSmartLayout(hostNode) || !hostNode->IsOnMainTree()) {
+    if (!IsComponentSupportSmartLayout(hostNode)) {
         return false;
     }
     return IsSmartLayoutEffectiveByA2UIForm(hostNode) || IsSmartLayoutEffectiveByPathHash(hostNode);
@@ -456,15 +474,18 @@ bool LayoutAlgorithm::IsSmartLayoutEffective(const RefPtr<FrameNode>& hostNode)
 
 bool LayoutAlgorithm::IsSmartLayoutEffectiveByA2UIForm(const RefPtr<FrameNode>& hostNode)
 {
-    if (!FeatureParam::IsSmartLayoutEnabled()) {
-        return false;
-    }
-    auto* context = hostNode->GetContext();
-    if (context && context->IsFormRender()) {
+    CHECK_NULL_RETURN(hostNode, false);
+    auto pattern = hostNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, false);
+    const auto& vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(hostNode)));
+    CHECK_NULL_RETURN(vOverflowHandler, false);
+
+    if (g_isInFormComponent) {
+        vOverflowHandler->SetIsInFormComponent(true);
         return true;
     }
-
-    return SmartLayoutAlgorithm::IsA2UIFormComponent(hostNode) != nullptr;
+    return vOverflowHandler->IsInFormComponent();
 }
 
 bool LayoutAlgorithm::IsSmartLayoutEffectiveByPathHash(const RefPtr<FrameNode>& hostNode)

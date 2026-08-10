@@ -455,7 +455,26 @@ public:
     void UpdateMenuBrightnessEffect(const RefPtr<UINode>& menuNode, bool forceUpdate = false);
     void MarkMenuUIEffectNeedUpdate();
     RefPtr<UiMaterial> GetCurrentMaterial();
-    ColorMode GetCurrentColorMode(bool enableColorInvert = false);
+    enum class TitleBarAreaType {
+        ALL,
+        BACK_BUTTON_AND_TEXT,
+        MENU
+    };
+    ColorMode GetCurrentColorMode(bool enableColorInvert = false, TitleBarAreaType areaType = TitleBarAreaType::ALL);
+    RefPtr<FrameNode> GetOrCreateMenuColorPickerNode();
+    const RefPtr<FrameNode>& GetMenuColorPickerNode() const
+    {
+        return menuColorPickerNode_;
+    }
+    RefPtr<FrameNode> GetOrCreateBackBtnAndTextColorPickerNode();
+    const RefPtr<FrameNode>& GetBackBtnAndTextColorPickerNode() const
+    {
+        return backBtnAndTextColorPickerNode_;
+    }
+    const std::optional<float>& GetSubtitleOpacityDirectly() const
+    {
+        return opacity_;
+    }
 
 private:
     void TransformScale(float overDragOffset, const RefPtr<FrameNode>& frameNode);
@@ -555,33 +574,52 @@ private:
         Color pressedColor;
         double disableOpacity;
     };
-    std::optional<IconColorParam> GetCurrentIconColorParam();
-    bool GetColorParamWithColorInvertSupported(IconColorParam& param);
+    std::optional<IconColorParam> GetCurrentIconColorParam(TitleBarAreaType type);
+    bool GetColorParamWithColorInvertSupported(IconColorParam& param, TitleBarAreaType type);
+    bool GetTextTitleColor(bool isMainText, Color& color);
     void UpdateBackButtonUIEffect();
     void UpdateBackButtonIconEffect(bool forceUpdate = false);
     void UpdateBackButtonMaterial();
     void UpdateBackButtonMaterialInner(const RefPtr<UiMaterial>& material);
     void UpdateBackButtonBrightnessEffect(bool forceUpdate = false);
     void UpdateMenuMaterialInner(const RefPtr<UINode>& menuNode, const RefPtr<UiMaterial>& material);
-    RefPtr<UiMaterial> GetOrCreateGradualBlurMaterial();
+    void UpdateTitleTextUIEffect();
+    RefPtr<UiMaterial> GetOrCreateDefaultMaterial();
     void CreateBrightnessEffectIfNeeded();
     void UpdateTitleBarUIEffectForColorModeChange();
 
+    void UpdateIsBackgroundDarkByType(TitleBarAreaType type);
     void UpdateIsBackgroundDark();
-    void OnLuminanceUpdate(uint32_t luminance);
+    void OnLuminanceUpdate(TitleBarAreaType type, uint32_t luminance);
     bool IsColorInvertEnabled();
     bool IsBrightnessBlendEnabled();
     static bool IsApplyShadowEnabled(const RefPtr<UiMaterial>& material);
     void InitColorPickerIfNeeded();
-    void UnregisterColorPicker();
+    void InitMenuColorPickerIfNeeded();
+    bool NeedRegisterBackBtnAndTextColorPicker();
+    void InitBackBtnAndTextColorPickerIfNeeded();
+    void UnregisterColorPicker(TitleBarAreaType type, const RefPtr<FrameNode> colorPickerNode);
+    void UnregisterAllColorPickers();
     bool IsTransparencyListenerNeeded();
     void InitTransparencyListenerIfNeeded();
     void UnregisterTransparencyListener();
-    void StartColorInvertAnimation();
-    void HandleColorInvert();
+    void StartColorInvertAnimation(TitleBarAreaType type);
+    void HandleColorInvert(TitleBarAreaType type);
+    void UpdateBackButtonMaterialColorModeForColorInvert();
+    void UpdateMenuMaterialColorModeForColorInvert();
+    void UpdateTextColorByColorInvert();
     static void UpdateSymbolIconColor(const RefPtr<FrameNode>& iconNode, const Color& color);
     static void UpdateSvgImageColor(const RefPtr<FrameNode>& iconNode, const Color& color);
     static bool IsSymbolOrSVGIcon(const RefPtr<FrameNode>& node);
+    struct ColorPickerContext {
+        TitleBarAreaType areaType;
+        bool hasRegisterColorPicker = false;
+        std::optional<bool> isColorPickerDark;
+        bool isBackgroundDark = false;
+
+        ColorPickerContext(TitleBarAreaType type) : areaType(type) {}
+    };
+    ColorPickerContext* GetColorPickerContext(TitleBarAreaType type);
 
     RefPtr<PanEvent> panEvent_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
@@ -665,10 +703,7 @@ private:
     std::shared_ptr<Rosen::BrightnessBlender> titleBarMaskBlender_;
 #endif
 
-    RefPtr<UiMaterial> gradualBlurMaterial_ = nullptr;
-    std::optional<bool> isColorPickerDark_;
-    bool isBackgroundDark_ = false;
-    bool hasRegisterColorPicker_ = false;
+    RefPtr<UiMaterial> defaultMaterial_ = nullptr;
     bool needUpdateBackButtonEffect_ = false;
     bool needUpdateBackButtonMaterial_ = false;
     bool needUpdateBackButtonBrightness_ = false;
@@ -676,6 +711,11 @@ private:
     bool needUpdateMenuMaterial_ = false;
     bool needUpdateMenuBrightness_ = false;
     std::optional<int32_t> transparencyListenerId_;
+    RefPtr<FrameNode> backBtnAndTextColorPickerNode_;
+    RefPtr<FrameNode> menuColorPickerNode_;
+    int32_t lastBackButtonNodeId_ = -1;
+    ColorPickerContext backBtnAndTextColorPickerCtx_{TitleBarAreaType::BACK_BUTTON_AND_TEXT};
+    ColorPickerContext menuColorPickerCtx_{TitleBarAreaType::MENU};
 };
 
 } // namespace OHOS::Ace::NG

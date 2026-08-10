@@ -32,7 +32,10 @@ template("napi_colorsampler_static") {
       deps += [ config.libace_target ]
     }
 
-    external_deps += [ "napi:ace_napi" ]
+    external_deps += [
+      "napi:ace_napi",
+      "node:node_header_notice",
+    ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
     }

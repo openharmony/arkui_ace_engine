@@ -140,6 +140,7 @@ void MarqueePattern::OnModifyDone()
     auto firstChild = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(firstChild);
     UpdateTextNodeAttr(firstChild);
+
     if (NeedSecondChild()) {
         if (host->GetChildren().size() == 1) {
             CreateSecondChild();

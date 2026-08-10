@@ -55,8 +55,10 @@
 #include "core/components_ng/pattern/text/text_menu_extension.h"
 #include "core/components_ng/pattern/text_area/text_area_layout_algorithm.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
+#include "core/components_ng/pattern/common_text/counter_host.h"
 #include "core/components_ng/pattern/text_field/content_controller.h"
-#include "core/components_ng/pattern/text_field/text_component_decorator.h"
+#include "core/components_ng/pattern/common_text/counter_decorator.h"
+#include "core/components_ng/pattern/text_field/error_decorator.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
 #ifdef ENABLE_AUTO_FILL_CONTROLLER
@@ -75,6 +77,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
+#include "core/text/text_emoji_processor.h"
 #include "interfaces/inner_api/ui_session/param_config.h"
 
 #ifndef ACE_UNITTEST
@@ -313,7 +316,8 @@ class ACE_FORCE_EXPORT TextFieldPattern : public ScrollablePattern,
                          public TextBase,
                          public Magnifier,
                          public TextGestureSelector,
-                         public LayoutInfoInterface {
+                         public LayoutInfoInterface,
+                         public ICounterHost {
     DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
         Magnifier, TextGestureSelector);
 
@@ -444,6 +448,7 @@ public:
     void CreateHandles() override;
     void OnUiMaterialParamUpdate(const UiMaterialParam& params) override;
     void GetEmojiSubStringRange(int32_t& start, int32_t& end);
+    EmojiRelation GetEmojiRelation(int index);
 
     int32_t SetPreviewText(const std::u16string& previewValue, const PreviewRange range) override;
     int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range) override;
@@ -466,9 +471,14 @@ public:
         return errorDecorator_;
     }
 
-    bool GetShowCounterStyleValue() const
+    bool GetShowCounterStyleValue() const override
     {
         return showCountBorderStyle_;
+    }
+
+    void SetShowCounterStyleValue(bool value) override
+    {
+        showCountBorderStyle_ = value;
     }
 
     void SetCounterState(bool counterChange)
@@ -503,7 +513,7 @@ public:
         return sessionId_;
     }
 
-    std::string GetTextValue() const
+    std::string GetTextValue() const override
     {
         return contentController_->GetTextValue();
     }
@@ -683,9 +693,9 @@ public:
     }
 
     float GetPaddingTop() const;
-    float GetPaddingBottom() const;
-    float GetPaddingLeft() const;
-    float GetPaddingRight() const;
+    float GetPaddingBottom() const override;
+    float GetPaddingLeft() const override;
+    float GetPaddingRight() const override;
 
     float GetHorizontalPaddingAndBorderSum() const;
 
@@ -1060,8 +1070,12 @@ public:
     std::string GetFontSize() const;
     std::string GetMinFontSize() const;
     std::string GetMaxFontSize() const;
-    std::string GetMinFontScale() const;
-    std::string GetMaxFontScale() const;
+    std::string GetMinFontScaleStr() const;
+    std::string GetMaxFontScaleStr() const;
+    bool HasMaxFontScale() const override;
+    float GetMaxFontScale() const override;
+    bool HasMinFontScale() const override;
+    float GetMinFontScale() const override;
     std::string GetEllipsisMode() const;
     std::string GetTextIndent() const;
     Ace::FontStyle GetItalicFontStyle() const;
@@ -1071,6 +1085,7 @@ public:
     std::u16string GetPlaceHolder() const;
     std::u16string GetStyledPlaceHolderValue() const;
     uint32_t GetMaxLength() const;
+    uint32_t GetRealMaxLength() const override;
     uint32_t GetMaxLines() const;
     uint32_t GetMinLines() const;
     std::string GetInputFilter() const;
@@ -1209,7 +1224,7 @@ public:
 
     float GetMarginBottom() const;
 
-    void SetUnderlineColor(Color underlineColor)
+    void SetUnderlineColor(const Color& underlineColor) override
     {
         underlineColor_ = underlineColor;
     }
@@ -1267,6 +1282,11 @@ public:
     void SetUnderlineWidth(Dimension underlineWidth)
     {
         underlineWidth_ = underlineWidth;
+    }
+
+    void SetUnderlineWidth(float width) override
+    {
+        underlineWidth_ = Dimension(width, DimensionUnit::PX);
     }
 
     bool IsSelectAll()
@@ -1345,7 +1365,7 @@ public:
     }
 
     void ProcessPendingCaretEvent();
-    bool IsNormalInlineState() const;
+    bool IsNormalInlineState() const override;
     bool IsUnspecifiedOrTextType() const;
     void TextIsEmptyRect(RectF& rect);
     void UpdateRectByTextAlign(RectF& rect);
@@ -1427,14 +1447,14 @@ public:
     }
 
     // do not change the order.
-    std::vector<RefPtr<TextInputResponseArea>> GetAllResponseArea() const
+    std::vector<RefPtr<TextInputResponseArea>> GetAllResponseArea() const override
     {
         return { responseArea_, voiceResponseArea_, cleanNodeResponseArea_ };
     }
     float GetAllResponseAreaWidth() const;
 
     bool IsShowUnit() const;
-    bool IsShowPasswordIcon() const;
+    bool IsShowPasswordIcon() const override;
     std::optional<bool> IsShowPasswordText() const;
     bool IsInPasswordMode() const;
     bool IsOneTimeCodeType() const;
@@ -1463,7 +1483,7 @@ public:
     bool HandleSpaceKeyClickEvent();
 
     virtual void ApplyNormalTheme();
-    void ApplyUnderlineTheme();
+    void ApplyUnderlineTheme() override;
     void ApplyInlineTheme();
 
     int32_t GetContentWideTextLength() override
@@ -1475,7 +1495,7 @@ public:
     {
         selectOverlay_->HandleOnShowMenu();
     }
-    bool HasFocus() const;
+    bool HasFocus() const override;
     void StopTwinkling();
     void StartTwinkling();
 
@@ -1518,10 +1538,48 @@ public:
         AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void InitScrollBarClickEvent() override {}
     void ClearTextContent();
-    bool IsUnderlineMode() const;
+    bool IsUnderlineMode() const override;
     bool IsInlineMode() const;
-    bool IsShowError();
-    bool IsShowCount();
+    bool IsShowError() const override;
+    bool IsShowCount() const;
+    bool IsShowCounterEnabled() const override
+    {
+        return IsShowCount();
+    }
+
+    // ========== ICounterHost interface implementations ==========
+    bool HasMaxLength() const override;
+    uint32_t GetTextLength() const override
+    {
+        return static_cast<uint32_t>(contentController_->GetTextUtf16Value().length());
+    }
+    bool GetShowCounterValue() const override;
+    int32_t GetCounterType() const override;
+    bool GetShowHighlightBorder() const override;
+    bool HasCounterTextColor() const override;
+    Color GetCounterTextColor() const override;
+    bool HasCounterTextOverflowColor() const override;
+    Color GetCounterTextOverflowColor() const override;
+    bool IsTextAreaOnCounter() const override
+    {
+        return IsTextArea();
+    }
+    TextDirection GetNonAutoLayoutDirection() const override;
+    float GetFontScaleFromEnv() const override;
+    std::optional<MarginProperty> GetMarginProperty() const override;
+    void UpdateMargin(const MarginProperty& margin) override;
+    bool HasMarginByUser() const override;
+    MarginProperty GetMarginByUserValue() const override;
+    void UpdateInnerBorderWidth(float width) override;
+    void UpdateInnerBorderColor(const Color& color) override;
+    bool HasBorderWidthFlagByUser() const override;
+    BorderWidthProperty GetBorderWidthFlagByUserValue() const override;
+    bool HasBorderColorFlagByUser() const override;
+    BorderColorProperty GetBorderColorFlagByUserValue() const override;
+    bool HasBorderRadiusFlagByUser() const override;
+    BorderRadiusProperty GetBorderRadiusFlagByUserValue() const override;
+    void UpdateBorderColor(const BorderColorProperty& color) override;
+    // ========== ICounterHost interface implementations end ==========
     void ResetContextAttr();
     void RestoreDefaultMouseState();
 
@@ -1857,7 +1915,7 @@ public:
         return cancelButtonTouched_;
     }
 
-    bool IsUnderlineAndButtonMode() const
+    bool IsUnderlineAndButtonMode() const override
     {
         auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, false);
@@ -2287,7 +2345,7 @@ private:
     HintToTypeWrap GetAutoFillTypeAndMetaData(bool isNeedToHitType = true);
     PaddingProperty GetPaddingByUserValue();
     void SetThemeAttr();
-    void SetThemeBorderAttr();
+    void SetThemeBorderAttr() override;
     void ProcessInlinePaddingAndMargin();
     Edge GetUnderlinePadding(const RefPtr<TextFieldTheme>& theme, bool processLeftPadding,
         bool processRightPadding) const;

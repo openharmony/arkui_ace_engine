@@ -284,6 +284,7 @@ ArkUINativeModuleValue RenderNodeBridge::AppendChild(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto childNativeNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
     auto* childNativeUINode = reinterpret_cast<UINode*>(childNativeNode);
@@ -300,6 +301,7 @@ ArkUINativeModuleValue RenderNodeBridge::InsertChildAfter(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto child = nodePtr(secondArg->ToNativePointer(vm)->Value());
     auto* childNativeUINode = reinterpret_cast<UINode*>(child);
@@ -333,6 +335,7 @@ ArkUINativeModuleValue RenderNodeBridge::RemoveChild(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     auto childNativeNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getRenderNodeModifier()->removeChild(nativeNode, childNativeNode);
@@ -355,6 +358,7 @@ ArkUINativeModuleValue RenderNodeBridge::ClearChildren(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
     GetArkUINodeModifiers()->getRenderNodeModifier()->clearChildren(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

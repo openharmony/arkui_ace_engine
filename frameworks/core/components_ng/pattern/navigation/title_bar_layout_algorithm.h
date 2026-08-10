@@ -134,6 +134,13 @@ private:
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float titleHeight);
     void LayoutMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, float subtitleHeight);
+    void MeasureMenuColorPickerIfNeeded(
+        LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode);
+    void LayoutMenuColorPickerIfNeeded(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode);
+    void MeasureBackBtnAndTextColorPickerIfNeeded(
+        LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode);
+    void LayoutBackBtnAndTextColorPickerIfNeeded(
+        LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode);
     float ChangeOffsetByDirection(LayoutWrapper* layoutWrapper,
         const RefPtr<NG::GeometryNode>& childGeometryNode, float offsetX) const;
 

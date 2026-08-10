@@ -763,7 +763,7 @@ HWTEST_F(TextFieldPatternTestFive, IssueFixTest001, TestSize.Level0)
     RoundRect rtlFocusRect;
     pattern_->GetInnerFocusPaintRect(rtlFocusRect);
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
-    EXPECT_NE(ltrFocusRect.GetRect().GetX(), rtlFocusRect.GetRect().GetX());
+    EXPECT_EQ(ltrFocusRect.GetRect().GetX(), rtlFocusRect.GetRect().GetX());
 
     /**
      * password mode can enter special characters

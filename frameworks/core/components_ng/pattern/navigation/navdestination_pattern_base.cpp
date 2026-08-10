@@ -681,13 +681,7 @@ void NavDestinationPatternBase::UpdateTitleBarStartOptions(const RefPtr<TitleBar
     const bool isCustomTitle = IsCustomTitleBarTextStyleUpdate(titleBarNode);
     auto bgStyle = titleBarPattern->GetOriginalTitleBarBgStyle();
     auto mainTitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
-    if (mainTitleNode) {
-        TitleBarPattern::SetTextColor(mainTitleNode, bgStyle.titleColor);
-    }
     auto subtitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
-    if (subtitleNode) {
-        TitleBarPattern::SetTextColor(subtitleNode, bgStyle.subTitleColor);
-    }
     TitleBarPattern::SetBackButtonIconColor(titleBarNode, bgStyle.iconColor);
     TitleBarPattern::SetMenuItemsStyle(titleBarNode, bgStyle.iconColor, bgStyle.titleColor);
     if (!isCustomTitle && bgStyle.titleShadow.has_value() && mainTitleNode) {
@@ -709,13 +703,7 @@ void NavDestinationPatternBase::UpdateTitleBarEndOptions(const RefPtr<TitleBarPa
     const bool isCustomTitle = IsCustomTitleBarTextStyleUpdate(titleBarNode);
     auto bgStyle = titleBarPattern->GetScrollEffectTitleBarBgStyle();
     auto mainTitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
-    if (mainTitleNode) {
-        TitleBarPattern::SetTextColor(mainTitleNode, bgStyle.titleColor);
-    }
     auto subtitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
-    if (subtitleNode) {
-        TitleBarPattern::SetTextColor(subtitleNode, bgStyle.subTitleColor);
-    }
     TitleBarPattern::SetBackButtonIconColor(titleBarNode, bgStyle.iconColor);
     TitleBarPattern::SetMenuItemsStyle(titleBarNode, bgStyle.iconColor, bgStyle.titleColor);
     if (!isCustomTitle && bgStyle.titleShadow.has_value() && mainTitleNode) {

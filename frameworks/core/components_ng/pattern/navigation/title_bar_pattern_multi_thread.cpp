@@ -61,7 +61,7 @@ void TitleBarPattern::OnDetachFromMainTreeMultiThread()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    UnregisterColorPicker();
+    UnregisterAllColorPickers();
     UnregisterTransparencyListener();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

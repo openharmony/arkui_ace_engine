@@ -275,6 +275,7 @@ void RosenWindow::RequestFrame()
     if (!(forceVsync_ || onShow_ || HasBackgroundForceFlushQuota())) {
         return;
     }
+    bool wasForceVsync = forceVsync_;
     SetForceVsyncRequests(false);
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(!isRequestVsync_);
@@ -288,7 +289,7 @@ void RosenWindow::RequestFrame()
         rsWindow_->RequestVsync(vsyncCallback_);
         lastRequestVsyncTime_ = static_cast<uint64_t>(GetSysTimestamp());
         PostVsyncTimeoutDFXTask(taskExecutor);
-        if (!forceVsync_ && !onShow_) {
+        if (!wasForceVsync && !onShow_) {
             ConsumeBackgroundForceFlushCount();
         }
     }

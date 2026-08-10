@@ -22,6 +22,7 @@
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_constants.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #define private public
@@ -1070,5 +1071,51 @@ HWTEST_F(GridScrollLayoutTestNg, GridScrollLayoutStartLineNonNegative001, TestSi
     EXPECT_GE(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.gridMatrix_.find(-1), info.gridMatrix_.end());
     EXPECT_TRUE(info.CheckGridMatrix(5));
+}
+
+/**
+ * @tc.name: GridScrollLayoutCheckGridMatrixReload001
+ * @tc.desc: When CheckGridMatrix detects matrix inconsistency during layout, the grid
+ *           should be marked for data reload (ChildrenUpdatedFrom(0) + MarkDirtyNode).
+ *           The actual matrix clear and rebuild happens on the next frame via CheckReset.
+ *           After reload, the matrix should be rebuilt and CheckGridMatrix should pass.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, GridScrollLayoutCheckGridMatrixReload001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    CreateFixedItems(60);
+    CreateDone();
+
+    // Scroll down so startIndex_ > 0, ensuring IsResetted() returns true after matrix clear
+    UpdateCurrentOffset(-ITEM_MAIN_SIZE * 6);
+    auto& info = pattern_->info_;
+    ASSERT_GT(info.startIndex_, 0);
+    ASSERT_FALSE(info.gridMatrix_.empty());
+    ASSERT_EQ(frameNode_->GetChildrenUpdated(), -1);
+
+    // Corrupt the matrix: add a cache line beyond endMainLineIndex_ with an item index
+    // less than endIndex_, which causes CheckGridMatrix to return false.
+    const int32_t badLine = info.endMainLineIndex_ + 1;
+    info.gridMatrix_[badLine] = { { 0, 0 } };
+
+    // Set times_ so that the next layout tick triggers CheckGridMatrix
+    info.times_ = GRID_CHECK_INTERVAL - 1;
+
+    // Flush: Layout runs, CheckGridMatrix fails, ChildrenUpdatedFrom(0) + MarkDirtyNode
+    // called, then return. The matrix is NOT cleared yet (clear happens next frame).
+    FlushUITasks();
+
+    // After failed check, reload is scheduled: childrenUpdatedFrom_ set to 0
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 0);
+
+    // Flush again: CheckReset detects updateIdx == 0, clears and rebuilds matrix
+    // via ReloadToStartIndex. Normal path end calls ChildrenUpdatedFrom(-1).
+    FlushUITasks();
+
+    // After reload, matrix should be rebuilt and consistent
+    EXPECT_FALSE(info.gridMatrix_.empty());
+    EXPECT_TRUE(info.CheckGridMatrix(1));
 }
 } // namespace OHOS::Ace::NG

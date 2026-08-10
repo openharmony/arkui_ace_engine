@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-31",
+  "last_updated": "2026-08-08",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -12047,6 +12047,108 @@
       "last_verified": "2026-07-30"
     },
     {
+      "id": "AccessibilityCustomActionsStale",
+      "name": "Accessibility Custom Actions Stale",
+      "name_cn": "无障碍自定义 Action 动态刷新失效",
+      "kind": "issue",
+      "category": "accessibility",
+      "keywords": [
+        "AccessibilityCustomActionsStale",
+        "accessibilityCustomActions",
+        "AccessibilityCustomActionsModifier",
+        "SetAccessibilityCustomActions",
+        "checkObjectDiff",
+        "ELEMENT_INFO_CHANGE",
+        "无障碍自定义Action",
+        "动态刷新失效",
+        "Modifier引用别名",
+        "自定义Action不更新",
+        "78769"
+      ],
+      "aliases": [
+        "自定义Action不刷新",
+        "无障碍Action更新失效",
+        "accessibility custom actions stale"
+      ],
+      "kb": "docs/kb/issues/accessibility/accessibility-custom-actions-stale.md",
+      "func_ids": [
+        "04-03-09",
+        "03-07-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-07"
+    },
+    {
+      "id": "DynamicComponentAvoidanceIncorrect",
+      "name": "DynamicComponent Avoidance Incorrect",
+      "name_cn": "DynamicComponent 弹窗避让不正确",
+      "kind": "issue",
+      "category": "layout",
+      "keywords": [
+        "DynamicComponentAvoidanceIncorrect",
+        "DynamicComponent",
+        "DynamicComponentSafeManager",
+        "allowOccupied",
+        "UpdateDynamicKeyBoardAvoid",
+        "GetAvoidAreaIntersection",
+        "弹窗避让不正确",
+        "安全区传播",
+        "键盘避让",
+        "子UIContent",
+        "74965",
+        "80570"
+      ],
+      "aliases": [
+        "DynamicComponent弹窗避让",
+        "动态组件安全区异常",
+        "动态组件键盘避让异常"
+      ],
+      "kb": "docs/kb/issues/layout/dynamic-component-avoidance-incorrect.md",
+      "func_ids": [
+        "05-12-07",
+        "04-17-05",
+        "04-02-01",
+        "03-05-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-07"
+    },
+    {
+      "id": "UIExtensionWindowStateRegistration",
+      "name": "UIExtension Window State Registration",
+      "name_cn": "UIExtension 窗口状态回调注册时机不正确",
+      "kind": "issue",
+      "category": "lifecycle",
+      "keywords": [
+        "UIExtensionWindowStateRegistration",
+        "UIExtensionComponent",
+        "EmbeddedComponent",
+        "UIExtensionPattern",
+        "OnAttachContext",
+        "AddWindowStateChangedCallback",
+        "OnWindowHide",
+        "OnWindowShow",
+        "窗口状态回调",
+        "上树注册",
+        "前后台状态",
+        "79623"
+      ],
+      "aliases": [
+        "UEC状态变化上树注册",
+        "UIExtension窗口状态不更新",
+        "UIExtension前后台状态不同步"
+      ],
+      "kb": "docs/kb/issues/lifecycle/ui-extension-window-state-registration.md",
+      "func_ids": [
+        "05-12-03",
+        "05-12-04",
+        "04-17-01",
+        "03-05-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-07"
+    },
+    {
       "id": "KeyboardAvoidTimingChange",
       "name": "Keyboard Avoid Timing Change",
       "name_cn": "键盘避让执行顺序变化",
@@ -12270,6 +12372,9 @@
         "RenderNodeStruct泄漏"
       ],
       "kb": "docs/kb/issues/performance/rendernode-memory-leak.md",
+      "func_ids": [
+        "03-01-01"
+      ],
       "source_paths": {
         "render_node_cpp": "interfaces/native/node/render_node.cpp",
         "render_node_h": "interfaces/native/node/render_node.h",
@@ -12406,6 +12511,73 @@
         "scrollable_pattern_header": "frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.h",
         "ut": "test/unittest/core/pattern/scrollable/scrollable_pattern_test_ng.cpp"
       }
+    },
+    {
+      "id": "IgnoreLayoutSafeAreaDirtyStateMismatch",
+      "name": "ignoreLayoutSafeArea Layout Dirty State Mismatch",
+      "name_cn": "ignoreLayoutSafeArea 布局脏状态异常",
+      "kind": "issue",
+      "category": "layout",
+      "keywords": [
+        "IgnoreLayoutSafeAreaDirtyStateMismatch",
+        "ignoreLayoutSafeArea",
+        "布局脏状态异常",
+        "LayoutDirty",
+        "LayoutDirtyMarked",
+        "TraverseForIgnore",
+        "TRAVERSE_FOR_IGNORE",
+        "FlushPostponedLayoutTask",
+        "PreMeasure",
+        "NavigationContent",
+        "Navigation 白屏",
+        "Swiper 白屏",
+        "延迟布局任务",
+        "安全区布局"
+      ],
+      "aliases": [
+        "ignoreLayoutSafeArea 白屏",
+        "安全区延迟布局异常",
+        "布局脏位未清理",
+        "TraverseForIgnore 布局异常"
+      ],
+      "kb": "docs/kb/issues/layout/ignore-layout-safe-area-dirty-state-mismatch.md",
+      "func_ids": [
+        "04-02-01",
+        "05-02-01",
+        "05-03-08"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08"
+    },
+    {
+      "id": "CanvasDrawingTaskBacklogAppFreeze",
+      "name": "Canvas Drawing Task Backlog AppFreeze",
+      "name_cn": "Canvas 绘制任务堆积导致 AppFreeze",
+      "kind": "issue",
+      "category": "performance",
+      "keywords": [
+        "CanvasDrawingTaskBacklogAppFreeze",
+        "Canvas",
+        "CanvasRenderingContext2D",
+        "AppFreeze",
+        "FlushTask",
+        "UpdateContentModifier",
+        "绘制任务堆积",
+        "单帧绘制过多",
+        "后台持续绘制",
+        "UI_BLOCK_6S"
+      ],
+      "aliases": [
+        "Canvas绘制卡死",
+        "Canvas后台绘制堆积",
+        "Canvas FlushTask冻结"
+      ],
+      "kb": "docs/kb/issues/performance/canvas-drawing-task-backlog-appfreeze.md",
+      "func_ids": [
+        "05-14-02"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08"
     }
   ]
 }
