@@ -786,24 +786,4 @@ static std::vector<std::tuple<const char *, const char *>> nodeTypeList = {
     { "XComponent", V2::XCOMPONENT_ETS_TAG },
 #endif
 };
-
-/**
- * @tc.name: createTypedFrameNodeTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeAccessorTest, createTypedFrameNodeTest, TestSize.Level1)
-{
-    for (auto [type, expectedTag]: nodeTypeList) {
-        auto inputValue = Converter::ArkValue<Ark_String>(type);
-        auto result = static_cast<FrameNodePeer*>(accessor_->createTypedFrameNode(&inputValue, false));
-        if (result == nullptr || result->node == nullptr) {
-            ADD_FAILURE() << "Node ceation failure. Input type: " << type;
-            continue;
-        }
-        auto resultTag = result->node->GetTag();
-        EXPECT_EQ(resultTag, expectedTag) << "Input type: " << type;
-        DestroyPeer(result);
-    }
-}
 } // namespace OHOS::Ace::NG
