@@ -152,8 +152,9 @@ RefPtr<V2::GridContainerSize> ParseGridContainerSize(EcmaVM* vm, const Local<JSV
 RefPtr<V2::GridContainerSize> ParseSpansNG(EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     if (jsValue->IsNumber()) {
-        double spanNumber = jsValue->ToNumber(vm)->Value();
-        return spanNumber >= 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(static_cast<int32_t>(spanNumber))
+        int32_t spanNumber = NG::DEFAULT_SPAN_NUMBER;
+        ArkTSUtils::ParseJsInt32(vm, jsValue, spanNumber);
+        return spanNumber >= 0 ? AceType::MakeRefPtr<V2::GridContainerSize>(spanNumber)
                                : AceType::MakeRefPtr<V2::GridContainerSize>(NG::DEFAULT_SPAN_NUMBER);
     }
     if (jsValue->IsObject(vm)) {
