@@ -152,7 +152,22 @@ if (is_host_product) {
   }
 }
 
-if (!is_host_product) {
+if (is_host_product) {
+  ace_unittest("text_emoji_test") {
+    type = "host_components"
+    module_name = "TextSet-TextArea"
+    sources = [
+      "text_field_controller_test.cpp",
+      "text_input_base.cpp",
+      "text_input_emoji_test.cpp",
+    ]
+    cflags = [ "-fno-access-control" ]
+    external_deps = [
+      "icu:shared_icui18n",
+      "icu:shared_icuuc",
+    ]
+  }
+} else {
   ace_unittest("text_emoji_test") {
     module_name = "TextSet-TextArea"
     type = "new"
@@ -171,7 +186,18 @@ if (!is_host_product) {
   }
 }
 
-if (!is_host_product) {
+if (is_host_product) {
+  ace_unittest("text_input_listener_test") {
+    type = "host_components"
+    module_name = "TextSet-TextInput"
+    sources = [
+      "text_field_pattern_multi_thread_test.cpp",
+      "text_input_base.cpp",
+    ]
+    cflags = [ "-fno-access-control" ]
+    external_deps = []
+  }
+} else {
   ace_unittest("text_input_listener_test") {
     module_name = "TextSet-TextInput"
     type = "new"

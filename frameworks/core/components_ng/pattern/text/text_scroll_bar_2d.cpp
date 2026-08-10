@@ -249,6 +249,7 @@ void TextScrollBar2D::OnDraw(DrawingContext& context, const RefPtr<OverlayModifi
 
 void TextScrollBar2D::UpdateBoundsRect(const RefPtr<OverlayModifier>& modifier, const RectF& rect) const
 {
+    CHECK_NULL_VOID(modifier);
     auto modifierRect = modifier->GetBoundsRect();
     if (rect.IsWrappedBy(modifierRect)) {
         return;

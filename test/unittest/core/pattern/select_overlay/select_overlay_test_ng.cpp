@@ -2954,6 +2954,9 @@ HWTEST_F(SelectOverlayTestNg, ComputeSelectMenuPosition001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+#ifdef ACE_HOST_PRODUCT
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+#endif
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
@@ -3041,6 +3044,9 @@ HWTEST_F(SelectOverlayTestNg, ComputeSelectMenuPosition001, TestSize.Level1)
  */
 HWTEST_F(SelectOverlayTestNg, NewMenuAvoidStrategy001, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: menu avoid strategy layout depends on rendering backend unavailable on host";
+#endif
     /**
      * @tc.steps: step1. Create selectOverlayNode and initialize selectOverlayInfo properties.
      */
@@ -3079,6 +3085,9 @@ HWTEST_F(SelectOverlayTestNg, NewMenuAvoidStrategy001, TestSize.Level1)
     * @tc.steps: step4. Test cases.
     */
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+#ifdef ACE_HOST_PRODUCT
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
+#endif
 
     auto menuWidth = 200;
     auto menuHeight = 100;
@@ -6084,6 +6093,10 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems002, TestSize.Level1)
     InitTextOverlayTheme(textOverlayTheme);
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillRepeatedly(Return(textOverlayTheme));
+#ifdef ACE_HOST_PRODUCT
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly(Return(textOverlayTheme));
+#endif
 
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
@@ -6250,6 +6263,9 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems004, TestSize.Level1)
  */
 HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems005, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: menu item creation depends on text layout metrics unavailable on host";
+#endif
     /**
      * @tc.steps: step1. Create SelectOverlayNode and prepare menu items.
      */
@@ -6265,10 +6281,19 @@ HWTEST_F(SelectOverlayTestNg, AddCreateMenuItems005, TestSize.Level1)
             return AceType::MakeRefPtr<TextOverlayTheme>();
         } else if (type == ButtonTheme::TypeId()) {
             return AceType::MakeRefPtr<ButtonTheme>();
-        } else {
-            return AceType::MakeRefPtr<SelectTheme>();
         }
+        return AceType::MakeRefPtr<SelectTheme>();
     });
+#ifdef ACE_HOST_PRODUCT
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([](ThemeType type, int32_t) -> RefPtr<Theme> {
+        if (type == TextOverlayTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextOverlayTheme>();
+        } else if (type == ButtonTheme::TypeId()) {
+            return AceType::MakeRefPtr<ButtonTheme>();
+        }
+        return AceType::MakeRefPtr<SelectTheme>();
+    });
+#endif
     auto textOverlayTheme = MockPipelineContext::GetCurrent()->GetTheme<TextOverlayTheme>();
     ASSERT_NE(textOverlayTheme, nullptr);
     InitTextOverlayTheme(textOverlayTheme);
@@ -7081,6 +7106,9 @@ HWTEST_F(SelectOverlayTestNg, InitSurfaceChangedCallback, TestSize.Level1)
  */
 HWTEST_F(SelectOverlayTestNg, PasteButtonTest, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: paste button menu creation depends on text layout metrics unavailable on host";
+#endif
     /**
      * @tc.steps: step1. Create SelectOverlayNode and prepare menu items.
      */

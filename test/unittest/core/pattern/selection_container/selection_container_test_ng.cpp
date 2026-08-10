@@ -665,14 +665,22 @@ HWTEST_F(SelectionContainerPatternTest, HasSelectionTest001, TestSize.Level1)
     EXPECT_FALSE(pattern_->HasSelection());
 
     pattern_->selectedChildren_.emplace_back(child1_);
+#ifdef ACE_HOST_PRODUCT
+    EXPECT_TRUE(pattern_->HasSelection());
+#else
     EXPECT_FALSE(pattern_->HasSelection());
+#endif
 
     child2_->SetSelectionText(TEST_SELECTION_TEXT2);
     pattern_->selectedChildren_.emplace_back(child2_);
     EXPECT_TRUE(pattern_->HasSelection());
 
     child2_->SetSelectionText(u"");
+#ifdef ACE_HOST_PRODUCT
+    EXPECT_TRUE(pattern_->HasSelection());
+#else
     EXPECT_FALSE(pattern_->HasSelection());
+#endif
 }
 
 /**

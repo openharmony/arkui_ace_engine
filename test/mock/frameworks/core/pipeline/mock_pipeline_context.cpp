@@ -1461,6 +1461,7 @@ void PipelineContext::InitManagers()
     formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     formEventMgr_ = MakeRefPtr<FormEventManager>();
     formGestureMgr_ = MakeRefPtr<FormGestureManager>();
+    frameRateManager_ = MakeRefPtr<FrameRateManager>();
     taihangOptimizer_ = std::make_shared<TaihangOptimizer>();
 }
 } // namespace OHOS::Ace::NG
