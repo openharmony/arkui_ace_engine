@@ -1786,7 +1786,8 @@ void ImagePattern::OnWindowHide()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!isRecycledImage_ && !host->IsPendingOnMainRenderTree()) {
+    auto renderContext = host->GetRenderContext();
+    if (!isRecycledImage_ && renderContext && !renderContext->IsOnRenderTree()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "OnWindowHide recycle ImageData: %{public}s-%{private}s",
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         RecycleImageData();
