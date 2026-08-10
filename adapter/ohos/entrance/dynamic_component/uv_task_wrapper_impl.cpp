@@ -24,6 +24,7 @@
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/container_scope.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_unbind_views.h"
 
 namespace OHOS::Ace::NG {
@@ -100,6 +101,7 @@ static void WorkerOnTerminated(void* arg)
 
     std::lock_guard<std::mutex> lock(envWithStatus->mutex);
     Framework::JsUnbindViews();
+    Framework::JsiDeclarativeEngineInstance::CleanupWorkerResource();
     envWithStatus->env = nullptr;
     return;
 }
