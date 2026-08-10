@@ -35,8 +35,30 @@
 
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_ng/pattern/recycle_view/recycle_dummy_node.h"
 #undef private
 #undef protected
+
+namespace OHOS::Ace::NG {
+class MockUINode : public UINode {
+public:
+    explicit MockUINode(const std::string& tag = V2::TEXT_ETS_TAG, int32_t nodeId = -1, bool isRoot = false)
+        : UINode(tag, nodeId, isRoot) {}
+    ~MockUINode() override = default;
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
+        bool addToRenderTree = false) override
+    {
+        return nullptr;
+    }
+};
+}
 
 using namespace testing;
 using namespace testing::ext;
@@ -54,6 +76,10 @@ constexpr int32_t INDEX_3 = 3;
 constexpr int32_t INDEX_0 = 0;
 constexpr int32_t INDEX_GREATER_THAN_END_INDEX = 20;
 constexpr int32_t INDEX_EQUAL_WITH_START_INDEX = 1;
+constexpr int64_t CACHE_TASK_DELAY_TIME = 2000000000; // 2 seconds in nanoseconds
+constexpr int32_t MEMORY_LEVEL_LOW = 1;
+constexpr int32_t MEMORY_LEVEL_CRITICAL = 2;
+constexpr int32_t MEMORY_LEVEL_NORMAL = 0;
 } // namespace
 
 class LazyForEachSyntaxTestNg : public testing::Test {
@@ -1547,6 +1573,619 @@ HWTEST_F(LazyForEachSyntaxTestNg, ReorganizeOffscreenNode001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LazyForEachNodeOnWindowShow001
+ * @tc.desc: Test OnWindowShow schedules restore cache task
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeOnWindowShow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    ASSERT_FALSE(lazyForEachNode->pendingRestoreCache_);
+
+    /**
+     * @tc.steps: step2. Call OnWindowShow
+     * @tc.expected: Should schedule restore cache task
+     */
+    lazyForEachNode->OnWindowShow();
+
+    EXPECT_TRUE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeOnWindowHide001
+ * @tc.desc: Test OnWindowHide triggers synchronous cache cleanup
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeOnWindowHide001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with builder
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    auto builder = lazyForEachNode->builder_;
+    ASSERT_NE(builder, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnWindowHide
+     * @tc.expected: Should call CleanCache with syncClean=true and reset flags
+     */
+    lazyForEachNode->OnWindowHide();
+
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_FALSE(builder->reduceCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeOnNotifyMemoryLevel001
+ * @tc.desc: Test OnNotifyMemoryLevel with MEMORY_LEVEL_LOW
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeOnNotifyMemoryLevel001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    auto builder = lazyForEachNode->builder_;
+    ASSERT_NE(builder, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnNotifyMemoryLevel with MEMORY_LEVEL_LOW
+     * @tc.expected: Should call CleanCache with syncClean=false and reset flags
+     */
+    lazyForEachNode->OnNotifyMemoryLevel(MEMORY_LEVEL_LOW);
+
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_TRUE(builder->reduceCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeOnNotifyMemoryLevel002
+ * @tc.desc: Test OnNotifyMemoryLevel with MEMORY_LEVEL_CRITICAL
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeOnNotifyMemoryLevel002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    auto builder = lazyForEachNode->builder_;
+    ASSERT_NE(builder, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnNotifyMemoryLevel with MEMORY_LEVEL_CRITICAL
+     * @tc.expected: Should call CleanCache with syncClean=false and reset flags
+     */
+    lazyForEachNode->OnNotifyMemoryLevel(MEMORY_LEVEL_CRITICAL);
+
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_TRUE(builder->reduceCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeOnNotifyMemoryLevel003
+ * @tc.desc: Test OnNotifyMemoryLevel with normal level (no action)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeOnNotifyMemoryLevel003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    auto builder = lazyForEachNode->builder_;
+    ASSERT_NE(builder, nullptr);
+
+    /**
+     * @tc.steps: step2. Call OnNotifyMemoryLevel with normal level
+     * @tc.expected: Should NOT schedule clean cache task
+     */
+    lazyForEachNode->OnNotifyMemoryLevel(MEMORY_LEVEL_NORMAL);
+
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_FALSE(builder->reduceCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeScheduleCleanCacheTask001
+ * @tc.desc: Test ScheduleCleanCacheTask when pendingCleanCache_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeScheduleCleanCacheTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with pendingCleanCache_ = false
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    lazyForEachNode->pendingCleanCache_ = false;
+    lazyForEachNode->pendingRestoreCache_ = true; // Should be cleared
+
+    /**
+     * @tc.steps: step2. Call ScheduleCleanCacheTask
+     * @tc.expected: pendingCleanCache_ should be set to true, pendingRestoreCache_ cleared, timestamp recorded
+     */
+    int64_t beforeCall = GetSysTimestamp();
+    lazyForEachNode->ScheduleCleanCacheTask();
+    int64_t afterCall = GetSysTimestamp();
+
+    EXPECT_TRUE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_GE(lazyForEachNode->cacheTaskPostTime_, beforeCall);
+    EXPECT_LE(lazyForEachNode->cacheTaskPostTime_, afterCall);
+}
+
+/**
+ * @tc.name: LazyForEachNodeScheduleCleanCacheTask002
+ * @tc.desc: Test ScheduleCleanCacheTask when pendingCleanCache_ is already true
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeScheduleCleanCacheTask002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with pendingCleanCache_ = true
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    lazyForEachNode->pendingCleanCache_ = true;
+    int64_t originalTimestamp = lazyForEachNode->cacheTaskPostTime_;
+
+    /**
+     * @tc.steps: step2. Call ScheduleCleanCacheTask again
+     * @tc.expected: Should return early without modifying timestamp (CHECK_EQUAL_VOID)
+     */
+    lazyForEachNode->ScheduleCleanCacheTask();
+
+    EXPECT_TRUE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_EQ(lazyForEachNode->cacheTaskPostTime_, originalTimestamp);
+}
+
+/**
+ * @tc.name: LazyForEachNodeScheduleRestoreCacheTask001
+ * @tc.desc: Test ScheduleRestoreCacheTask when pendingRestoreCache_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeScheduleRestoreCacheTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with pendingRestoreCache_ = false
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    lazyForEachNode->pendingRestoreCache_ = false;
+    lazyForEachNode->pendingCleanCache_ = true; // Should be cleared
+
+    /**
+     * @tc.steps: step2. Call ScheduleRestoreCacheTask
+     * @tc.expected: pendingRestoreCache_ should be set to true, pendingCleanCache_ cleared, timestamp recorded
+     */
+    int64_t beforeCall = GetSysTimestamp();
+    lazyForEachNode->ScheduleRestoreCacheTask();
+    int64_t afterCall = GetSysTimestamp();
+
+    EXPECT_TRUE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_GE(lazyForEachNode->cacheTaskPostTime_, beforeCall);
+    EXPECT_LE(lazyForEachNode->cacheTaskPostTime_, afterCall);
+}
+
+/**
+ * @tc.name: LazyForEachNodeScheduleRestoreCacheTask002
+ * @tc.desc: Test ScheduleRestoreCacheTask when pendingRestoreCache_ is already true
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeScheduleRestoreCacheTask002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with pendingRestoreCache_ = true
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    lazyForEachNode->pendingRestoreCache_ = true;
+    int64_t originalTimestamp = lazyForEachNode->cacheTaskPostTime_;
+
+    /**
+     * @tc.steps: step2. Call ScheduleRestoreCacheTask again
+     * @tc.expected: Should return early without modifying timestamp (CHECK_EQUAL_VOID)
+     */
+    lazyForEachNode->ScheduleRestoreCacheTask();
+
+    EXPECT_TRUE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_EQ(lazyForEachNode->cacheTaskPostTime_, originalTimestamp);
+}
+
+/**
+ * @tc.name: LazyForEachNodeTryExecuteScheduledCacheTask001
+ * @tc.desc: Test TryExecuteScheduledCacheTask when no tasks are pending
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeTryExecuteScheduledCacheTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with no pending tasks
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    ASSERT_FALSE(lazyForEachNode->pendingCleanCache_);
+    ASSERT_FALSE(lazyForEachNode->pendingRestoreCache_);
+
+    /**
+     * @tc.steps: step2. Call TryExecuteScheduledCacheTask
+     * @tc.expected: Should return early without crashing (CHECK_EQUAL_VOID)
+     */
+    lazyForEachNode->TryExecuteScheduledCacheTask();
+
+    // No IdleTask posted
+    EXPECT_FALSE(lazyForEachNode->needPredict_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeTryExecuteScheduledCacheTask002
+ * @tc.desc: Test TryExecuteScheduledCacheTask when delay time hasn't elapsed
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeTryExecuteScheduledCacheTask002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode and schedule a clean task
+     * @tc.expected: LazyForEachNode is created with pendingCleanCache_ = true
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    lazyForEachNode->ScheduleCleanCacheTask();
+
+    /**
+     * @tc.steps: step2. Call TryExecuteScheduledCacheTask immediately (delay hasn't elapsed)
+     * @tc.expected: Should return early without executing task (CHECK_EQUAL_VOID)
+     */
+    lazyForEachNode->TryExecuteScheduledCacheTask();
+
+    EXPECT_TRUE(lazyForEachNode->pendingCleanCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeTryExecuteScheduledCacheTask003
+ * @tc.desc: Test TryExecuteScheduledCacheTask executes clean cache task
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeTryExecuteScheduledCacheTask003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode and schedule a task with old timestamp
+     * @tc.expected: LazyForEachNode is created with pendingCleanCache_ = true
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    lazyForEachNode->ScheduleCleanCacheTask();
+
+    /**
+     * @tc.steps: step2. Manually set cacheTaskPostTime_ and setActiveRangeTime_ to simulate elapsed delay
+     * @tc.expected: Timestamps are set to past
+     */
+    lazyForEachNode->cacheTaskPostTime_ = GetSysTimestamp() - CACHE_TASK_DELAY_TIME - 1000000;
+    lazyForEachNode->setActiveRangeTime_ = GetSysTimestamp() - CACHE_TASK_DELAY_TIME - 1000000;
+
+    /**
+     * @tc.steps: step3. Call TryExecuteScheduledCacheTask
+     * @tc.expected: Should execute task and clear pendingCleanCache_
+     */
+    lazyForEachNode->TryExecuteScheduledCacheTask();
+ 
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeTryExecuteScheduledCacheTask004
+ * @tc.desc: Test TryExecuteScheduledCacheTask executes restore cache task
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeTryExecuteScheduledCacheTask004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode and schedule a task with old timestamp
+     * @tc.expected: LazyForEachNode is created with pendingRestoreCache_ = true
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    lazyForEachNode->ScheduleRestoreCacheTask();
+
+    lazyForEachNode->cacheTaskPostTime_ = GetSysTimestamp() - CACHE_TASK_DELAY_TIME - 1000000;
+    lazyForEachNode->setActiveRangeTime_ = GetSysTimestamp() - CACHE_TASK_DELAY_TIME - 1000000;
+
+    /**
+     * @tc.steps: step2. Call TryExecuteScheduledCacheTask
+     * @tc.expected: Should execute task and clear pendingRestoreCache_
+     */
+    lazyForEachNode->TryExecuteScheduledCacheTask();
+
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeCleanCache001
+ * @tc.desc: Test CleanCache with syncClean=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeCleanCache001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with builder
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    auto builder = lazyForEachNode->builder_;
+    ASSERT_NE(builder, nullptr);
+
+    lazyForEachNode->pendingCleanCache_ = true;
+    lazyForEachNode->pendingRestoreCache_ = true;
+    builder->reduceCache_ = true;
+
+    /**
+     * @tc.steps: step2. Call CleanCache with syncClean=true
+     * @tc.expected: Should call builder->CleanCache with sync mode and reset flags
+     */
+    lazyForEachNode->CleanCache(true);
+
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_FALSE(builder->reduceCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeCleanCache002
+ * @tc.desc: Test CleanCache with syncClean=false (async mode)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeCleanCache002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with builder
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    auto builder = lazyForEachNode->builder_;
+    ASSERT_NE(builder, nullptr);
+
+    lazyForEachNode->pendingCleanCache_ = true;
+    lazyForEachNode->pendingRestoreCache_ = true;
+
+    /**
+     * @tc.steps: step2. Call CleanCache with syncClean=false
+     * @tc.expected: Should call builder->CleanCache with async mode and reset flags
+     */
+    lazyForEachNode->CleanCache(false);
+
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_TRUE(builder->reduceCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeCleanCache003
+ * @tc.desc: Test CleanCache with syncClean=false (async mode)
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeCleanCache003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with builder
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    lazyForEachNode->builder_ = nullptr;
+
+    lazyForEachNode->pendingCleanCache_ = true;
+    lazyForEachNode->pendingRestoreCache_ = true;
+
+    /**
+     * @tc.steps: step2. Call CleanCache with syncClean=false
+     * @tc.expected: Should call builder->CleanCache with async mode and reset flags
+     */
+    lazyForEachNode->CleanCache(false);
+
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeCleanCache004
+ * @tc.desc: Test CleanCache with syncClean=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeCleanCache004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with builder
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    auto builder = lazyForEachNode->builder_;
+    ASSERT_NE(builder, nullptr);
+
+    lazyForEachNode->pendingCleanCache_ = true;
+    lazyForEachNode->pendingRestoreCache_ = true;
+    builder->reduceCache_ = true;
+    builder->SetLazyForEachNode(nullptr);
+
+    /**
+     * @tc.steps: step2. Call CleanCache with syncClean=true
+     * @tc.expected: Should call builder->CleanCache with sync mode and reset flags
+     */
+    lazyForEachNode->CleanCache(true);
+
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_FALSE(builder->reduceCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeRestoreCache001
+ * @tc.desc: Test RestoreCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeRestoreCache001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with builder
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    auto builder = lazyForEachNode->builder_;
+    ASSERT_NE(builder, nullptr);
+
+    lazyForEachNode->pendingCleanCache_ = true;
+    lazyForEachNode->pendingRestoreCache_ = true;
+    builder->reduceCache_ = true;
+
+    /**
+     * @tc.steps: step2. Call RestoreCache
+     * @tc.expected: Should call builder->RestoreCache and reset flags
+     */
+    lazyForEachNode->RestoreCache();
+
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+    EXPECT_FALSE(builder->reduceCache_);
+}
+
+/**
+ * @tc.name: LazyForEachNodeRestoreCache002
+ * @tc.desc: Test RestoreCache
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachNodeRestoreCache002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachNode with builder
+     * @tc.expected: LazyForEachNode is created successfully
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+
+    lazyForEachNode->builder_ = nullptr;
+
+    lazyForEachNode->pendingCleanCache_ = true;
+    lazyForEachNode->pendingRestoreCache_ = true;
+
+    /**
+     * @tc.steps: step2. Call RestoreCache
+     * @tc.expected: Should call builder->RestoreCache and reset flags
+     */
+    lazyForEachNode->RestoreCache();
+
+    EXPECT_FALSE(lazyForEachNode->pendingCleanCache_);
+    EXPECT_FALSE(lazyForEachNode->pendingRestoreCache_);
+}
+
+/**
+ * @tc.name: LazyForEachBuilderReduceCacheCount001
+ * @tc.desc: Test ReduceCacheCount with count > maxCacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderReduceCacheCount001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachBuilder
+     * @tc.expected: Builder is created successfully
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ReduceCacheCount with count > maxCacheCount (2)
+     * @tc.expected: Should return maxCacheCount (2)
+     */
+    lazyForEachBuilder->reduceCache_ = true;
+    int32_t result = lazyForEachBuilder->ReduceCacheCount(10);
+
+    EXPECT_EQ(result, 2); // maxCacheCount
+}
+
+/**
+ * @tc.name: LazyForEachBuilderReduceCacheCount002
+ * @tc.desc: Test ReduceCacheCount with count < maxCacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderReduceCacheCount002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachBuilder
+     * @tc.expected: Builder is created successfully
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ReduceCacheCount with count < maxCacheCount (2)
+     * @tc.expected: Should return original count
+     */
+    int32_t result = lazyForEachBuilder->ReduceCacheCount(1);
+
+    EXPECT_EQ(result, 1); // Original count
+}
+
+/**
+ * @tc.name: LazyForEachBuilderReduceCacheCount003
+ * @tc.desc: Test ReduceCacheCount with count == maxCacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilderReduceCacheCount003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a LazyForEachBuilder
+     * @tc.expected: Builder is created successfully
+     */
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Call ReduceCacheCount with count == maxCacheCount (2)
+     * @tc.expected: Should return maxCacheCount (2)
+     */
+    int32_t result = lazyForEachBuilder->ReduceCacheCount(2);
+
+    EXPECT_EQ(result, 2); // maxCacheCount
+}
+
+/**
  * @tc.name: RemovingExpiringItemEmptyTest
  * @tc.desc: Test RemovingExpiringItem with empty removingNodeList_
  * @tc.type: FUNC
@@ -1606,6 +2245,75 @@ HWTEST_F(LazyForEachSyntaxTestNg, SetIsSyncLoadTest001, TestSize.Level1)
 
     lazyForEachBuilder->SetIsSyncLoad(false);
     EXPECT_EQ(lazyForEachBuilder->isSyncLoad_, false);
+}
+
+/**
+ * @tc.name: ProcessSyncLoadTempChildrenTest001
+ * @tc.desc: Test LazyForEachBuilder::ProcessSyncLoadTempChildren when enableSyncLoad is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ProcessSyncLoadTempChildrenTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    std::list<RefPtr<UINode>> children;
+    RefPtr<UINode> node = AceType::MakeRefPtr<FrameNode>("node", 666, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->activeRangeStart_ = 0;
+    lazyForEachBuilder->activeRangeEnd_ = 5;
+
+    lazyForEachBuilder->SetEnableSyncLoad(true);
+    lazyForEachBuilder->SetIsSyncLoad(true);
+    lazyForEachBuilder->syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    lazyForEachBuilder->ProcessSyncLoadTempChildren(children);
+    EXPECT_TRUE(children.empty());
+
+    lazyForEachBuilder->SetEnableSyncLoad(true);
+    lazyForEachBuilder->SetIsSyncLoad(false);
+    lazyForEachBuilder->syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    lazyForEachBuilder->ProcessSyncLoadTempChildren(children);
+    EXPECT_TRUE(children.empty());
+
+    lazyForEachBuilder->SetEnableSyncLoad(false);
+    lazyForEachBuilder->SetIsSyncLoad(true);
+    lazyForEachBuilder->syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    lazyForEachBuilder->ProcessSyncLoadTempChildren(children);
+    EXPECT_TRUE(children.empty());
+
+    lazyForEachBuilder->SetEnableSyncLoad(false);
+    lazyForEachBuilder->SetIsSyncLoad(false);
+    lazyForEachBuilder->syncLoadCache_.try_emplace(0, AceType::WeakClaim(AceType::RawPtr(node)));
+    lazyForEachBuilder->ProcessSyncLoadTempChildren(children);
+    EXPECT_FALSE(children.empty());
+}
+
+/**
+ * @tc.name: PreBuildSyncLoadTest001
+ * @tc.desc: Test LazyForEachBuilder::PreBuild
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, PreBuildSyncLoadTest001, TestSize.Level1)
+
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.parentIdealSize = OptionalSizeF(768, 1024);
+    layoutConstraint.selfIdealSize = OptionalSizeF(480, 960);
+
+    lazyForEachBuilder->SetEnableSyncLoad(true);
+    lazyForEachBuilder->SetIsSyncLoad(false);
+    bool result = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
+    EXPECT_TRUE(result);
+
+    lazyForEachBuilder->SetEnableSyncLoad(false);
+    lazyForEachBuilder->SetIsSyncLoad(true);
+    result = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
+    EXPECT_TRUE(result);
+
+    lazyForEachBuilder->SetEnableSyncLoad(false);
+    lazyForEachBuilder->SetIsSyncLoad(false);
+    result = lazyForEachBuilder->PreBuild(10, layoutConstraint, true);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -2065,6 +2773,978 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachTryTriggleAdditionalLayout001, Test
     lazyForEachNode->hasSetActiveChildRangeInGetChildren_ = true;
     lazyForEachNode->TryTriggleAdditionalLayout();
     EXPECT_FALSE(lazyForEachNode->hasSetActiveChildRangeInGetChildren_);
+}
+
+/**
+ * @tc.name: OnDataReloadedEnableSyncLoadTest001
+ * @tc.desc: Test OnDataReloaded with enableSyncLoad_=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, OnDataReloadedEnableSyncLoadTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items, set enableSyncLoad_=true and add cached items
+     * @tc.expected: node.second is true, enableSyncLoad_ is true
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    lazyForEachBuilder->enableSyncLoad_ = true;
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", node1);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("key2", node2);
+
+    /**
+     * @tc.steps: step3. Call OnDataReloaded
+     * @tc.expected: Should NOT add to syncLoadCache_
+     */
+    lazyForEachBuilder->OnDataReloaded(false);
+    EXPECT_TRUE(lazyForEachBuilder->syncLoadCache_.empty());
+}
+
+/**
+ * @tc.name: OnDataReloadedEnableSyncLoadTest002
+ * @tc.desc: Test OnDataReloaded with enableSyncLoad_=false
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, OnDataReloadedEnableSyncLoadTest002, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and set enableSyncLoad_=false
+     * @tc.expected: node.second is true, enableSyncLoad_ is false
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    lazyForEachBuilder->enableSyncLoad_ = false;
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", node1);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("key2", node2);
+
+    /**
+     * @tc.steps: step3. Call OnDataReloaded
+     * @tc.expected: Should add to syncLoadCache_
+     */
+    lazyForEachBuilder->OnDataReloaded(false);
+    EXPECT_EQ(lazyForEachBuilder->syncLoadCache_.size(), 2);
+}
+
+/**
+ * @tc.name: OnDataReloadedNodeNullTest001
+ * @tc.desc: Test OnDataReloaded with node.second=nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, OnDataReloadedNodeNullTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add cached items with nullptr
+     * @tc.expected: node.second is false (nullptr)
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", nullptr);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("key2", nullptr);
+
+    /**
+     * @tc.steps: step3. Call OnDataReloaded
+     * @tc.expected: Should not crash, expiringItem_ remains empty
+     */
+    lazyForEachBuilder->OnDataReloaded(false);
+    EXPECT_TRUE(lazyForEachBuilder->expiringItem_.empty());
+    EXPECT_TRUE(lazyForEachBuilder->cachedItems_.empty());
+}
+
+/**
+ * @tc.name: OnDataReloadedReuseImmediatelyTest001
+ * @tc.desc: Test OnDataReloaded with reuseImmediately=true and valid nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, OnDataReloadedReuseImmediatelyTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Create LazyForEachNode and set to builder
+     */
+    auto lazyForEachNode = CreateLazyForEachNode();
+    ASSERT_NE(lazyForEachNode, nullptr);
+    lazyForEachBuilder->SetLazyForEachNode(AceType::WeakClaim(AceType::RawPtr(lazyForEachNode)));
+
+    /**
+     * @tc.steps: step3. Add expiringItem_ with valid nodes
+     * @tc.expected: node.second is true (has valid node)
+     */
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->expiringItem_["key1"] = LazyForEachCacheChild(0, node1);
+    lazyForEachBuilder->expiringItem_["key2"] = LazyForEachCacheChild(1, node2);
+
+    /**
+     * @tc.steps: step4. Call OnDataReloaded with reuseImmediately=true
+     * @tc.expected: Should call TryRecordRecyclableNodeRecursively
+     */
+    lazyForEachBuilder->OnDataReloaded(true);
+}
+
+/**
+ * @tc.name: SetActiveChildRangeFrameNodeNullTest001
+ * @tc.desc: Test SetActiveChildRange when frameNode is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeFrameNodeNullTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add cached item with node but GetFrameChildByIndex returns nullptr
+     * @tc.expected: node.second exists (MockUINode), but frameNode will be nullptr
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto mockNode = AceType::MakeRefPtr<MockUINode>(V2::TEXT_ETS_TAG, 1001);
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", mockNode);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange with range excluding index 0
+     * @tc.expected: Still moves node to expiringItem_
+     * @tc.expected: needBuild = true
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(1, 5);
+    EXPECT_TRUE(result);  // needBuild = true
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 1);  // Node moved to expiringItem_
+}
+
+/**
+ * @tc.name: SetActiveChildRangeFrameNodeValidTest001
+ * @tc.desc: Test SetActiveChildRange when frameNode is valid and in range
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeFrameNodeValidTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add valid FrameNode to cached items
+     * @tc.expected: frameNode is valid
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto childNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    node1->children_.push_back(childNode);
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", node1);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange with range including index 0
+     * @tc.expected: Should call SetActive(true) and node stays in cachedItems_
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(0, 5);
+    EXPECT_FALSE(result);  // doesn't set needBuild, only continues
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.size(), 1);  // Node stays in cachedItems_
+    EXPECT_TRUE(lazyForEachBuilder->expiringItem_.empty());  // Nothing in expiringItem_
+}
+
+/**
+ * @tc.name: SetActiveChildRangeFrameNodeValidInTargetRangeTest001
+ * @tc.desc: Test SetActiveChildRange when frameNode is valid and in target range
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeFrameNodeValidInTargetRangeTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add valid FrameNode to cached items
+     * @tc.expected: frameNode is valid but will be out of range
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto childNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    node1->children_.push_back(childNode);
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", node1);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange with range excluding index 0
+     * @tc.expected: Should call SetActive(false) and move to expiringItem_
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(1, 5);
+    EXPECT_TRUE(result);  // needBuild = true
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_.size(), 1);  // Node moved to expiringItem_
+}
+
+/**
+ * @tc.name: SetActiveChildRangeExpiringToCachedTest001
+ * @tc.desc: Test SetActiveChildRange moving from expiringItem_ to cachedItems_
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, SetActiveChildRangeExpiringToCachedTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add item to cachedItems_ with nullptr and expiringItem_
+     * with valid node
+     * @tc.expected: node.second is nullptr in cachedItems_
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto childNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    node1->children_.push_back(childNode);
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", nullptr);
+    lazyForEachBuilder->expiringItem_["key1"] = LazyForEachCacheChild(0, node1);
+
+    /**
+     * @tc.steps: step3. Call SetActiveChildRange with range including index 0
+     * @tc.expected: Should move node from expiringItem_ to cachedItems_ and call SetActive(true)
+     */
+    bool result = lazyForEachBuilder->SetActiveChildRange(0, 5);
+    EXPECT_TRUE(result);
+    EXPECT_NE(lazyForEachBuilder->cachedItems_[0].second, nullptr);
+    EXPECT_TRUE(lazyForEachBuilder->expiringItem_.empty());
+}
+
+/**
+ * @tc.name: NotifyColorModeChangeTest001
+ * @tc.desc: Test NotifyColorModeChange with nullptr nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, NotifyColorModeChangeTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Add nullptr nodes to all collections
+     * @tc.expected: node.second.second is nullptr
+     */
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", nullptr);
+    lazyForEachBuilder->expiringItem_["key2"] = LazyForEachCacheChild(1, nullptr);
+    lazyForEachBuilder->nodeList_.emplace_back("key3", nullptr);
+
+    /**
+     * @tc.steps: step3. Call NotifyColorModeChange
+     * @tc.expected: Should not crash, skip nullptr nodes
+     */
+    lazyForEachBuilder->NotifyColorModeChange(1, true);
+}
+
+/**
+ * @tc.name: RemovingExpiringItemEmptyListTest001
+ * @tc.desc: Test RemovingExpiringItem with empty removingNodeList_
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, RemovingExpiringItemEmptyListTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Ensure removingNodeList_ is empty
+     * @tc.expected: removingNodeList_ is empty
+     */
+    EXPECT_TRUE(lazyForEachBuilder->removingNodeList_.empty());
+
+    /**
+     * @tc.steps: step3. Call RemovingExpiringItem
+     * @tc.expected: Should return immediately without processing
+     */
+    int64_t deadline = GetSysTimestamp() + 10000;
+    lazyForEachBuilder->RemovingExpiringItem(deadline);
+    EXPECT_TRUE(lazyForEachBuilder->removingNodeList_.empty());
+}
+
+/**
+ * @tc.name: InvalidIndexOfChangedDataTest001
+ * @tc.desc: Test InvalidIndexOfChangedData with matching index
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, InvalidIndexOfChangedDataTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Add expiringItem_ with specific index
+     * @tc.expected: child.first matches the target index
+     */
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->expiringItem_["key1"] = LazyForEachCacheChild(5, node1);
+
+    /**
+     * @tc.steps: step3. Call InvalidIndexOfChangedData with matching index
+     * @tc.expected: Should set child.first to -1
+     */
+    lazyForEachBuilder->InvalidIndexOfChangedData(5);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_["key1"].first, -1);
+}
+
+/**
+ * @tc.name: InvalidIndexOfChangedDataTest002
+ * @tc.desc: Test InvalidIndexOfChangedData with non-matching index
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, InvalidIndexOfChangedDataTest002, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Add expiringItem_ with specific index
+     * @tc.expected: child.first does not match target index
+     */
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->expiringItem_["key1"] = LazyForEachCacheChild(5, node1);
+
+    /**
+     * @tc.steps: step3. Call InvalidIndexOfChangedData with non-matching index
+     * @tc.expected: Should not change child.first
+     */
+    lazyForEachBuilder->InvalidIndexOfChangedData(3);
+    EXPECT_EQ(lazyForEachBuilder->expiringItem_["key1"].first, 5);
+}
+
+/**
+ * @tc.name: CleanCacheStartEndIndexTest001
+ * @tc.desc: Test CleanCache with startIndex_=-1
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, CleanCacheStartEndIndexTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Set startIndex_ to -1
+     * @tc.expected: startIndex_ is -1
+     */
+    lazyForEachBuilder->startIndex_ = -1;
+    lazyForEachBuilder->endIndex_ = 5;
+
+    /**
+     * @tc.steps: step3. Call CleanCache with syncClean=false
+     * @tc.expected: Should set reduceCache_ to true and return
+     */
+    lazyForEachBuilder->CleanCache(false);
+    EXPECT_TRUE(lazyForEachBuilder->reduceCache_);
+}
+
+/**
+ * @tc.name: CleanCacheStartEndIndexTest002
+ * @tc.desc: Test CleanCache with endIndex_=-1
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, CleanCacheStartEndIndexTest002, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Set endIndex_ to -1
+     * @tc.expected: endIndex_ is -1
+     */
+    lazyForEachBuilder->startIndex_ = 0;
+    lazyForEachBuilder->endIndex_ = -1;
+
+    /**
+     * @tc.steps: step3. Call CleanCache with syncClean=false
+     * @tc.expected: Should set reduceCache_ to true and return
+     */
+    lazyForEachBuilder->CleanCache(false);
+    EXPECT_TRUE(lazyForEachBuilder->reduceCache_);
+}
+
+/**
+ * @tc.name: CleanCacheStartEndIndexTest003
+ * @tc.desc: Test CleanCache with both startIndex_ and endIndex_ set
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, CleanCacheStartEndIndexTest003, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Set both startIndex_ and endIndex_ to valid values
+     * @tc.expected: startIndex_ != -1 && endIndex_ != -1
+     */
+    lazyForEachBuilder->startIndex_ = 0;
+    lazyForEachBuilder->endIndex_ = 5;
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->expiringItem_["key1"] = LazyForEachCacheChild(0, node1);
+
+    /**
+     * @tc.steps: step3. Call CleanCache with syncClean=true
+     * @tc.expected: Should process cache and call ProcessNodesForCleanCache
+     */
+    lazyForEachBuilder->CleanCache(true);
+    EXPECT_FALSE(lazyForEachBuilder->reduceCache_);
+}
+
+/**
+ * @tc.name: ReleaseExpiringNodeEmptyMapTest001
+ * @tc.desc: Test ReleaseExpiringNode with empty keyToNodeSetMap
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ReleaseExpiringNodeEmptyMapTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Add reuseId with empty keyToNodeSetMap
+     * @tc.expected: keyToNodeSetMap is empty
+     */
+    std::string reuseId = "test_reuse_id";
+    lazyForEachBuilder->recyclableNodeSet_[reuseId] = {};
+
+    /**
+     * @tc.steps: step3. Call ReleaseExpiringNode
+     * @tc.expected: Should return false
+     */
+    bool result = lazyForEachBuilder->ReleaseExpiringNode(reuseId);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ReleaseExpiringNodeNoValidNodesTest001
+ * @tc.desc: Test ReleaseExpiringNode when all nodes are invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ReleaseExpiringNodeNoValidNodesTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Add recyclable nodes with all weak pointers expired
+     * @tc.expected: nodeCount is 0 (no valid nodes)
+     */
+    std::string reuseId = "test_reuse_id";
+    std::string key = "test_key";
+    auto expiredNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key, AceType::WeakClaim(AceType::RawPtr(expiredNode)));
+
+    // Clear the node to make weak pointer expire
+    expiredNode = nullptr;
+
+    /**
+     * @tc.steps: step3. Call ReleaseExpiringNode
+     * @tc.expected: Should erase the key and continue
+     */
+    bool result = lazyForEachBuilder->ReleaseExpiringNode(reuseId);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: ReleaseExpiringNodeFoundInExpiringTest001
+ * @tc.desc: Test ReleaseExpiringNode when key found in expiringItem_
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ReleaseExpiringNodeFoundInExpiringTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Add recyclable nodes and corresponding expiringItem_
+     * @tc.expected: expiringIter != expiringItem_.end()
+     */
+    std::string reuseId = "test_reuse_id";
+    std::string key = "test_key";
+    auto node = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto childNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    node->children_.push_back(childNode);
+
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key, AceType::WeakClaim(AceType::RawPtr(node)));
+    lazyForEachBuilder->expiringItem_[key] = LazyForEachCacheChild(0, node);
+
+    /**
+     * @tc.steps: step3. Call ReleaseExpiringNode
+     * @tc.expected: Should process the node and erase from expiringItem_
+     */
+    lazyForEachBuilder->ReleaseExpiringNode(reuseId);
+    EXPECT_TRUE(lazyForEachBuilder->expiringItem_.empty());
+}
+
+/**
+ * @tc.name: ReleaseExpiringNodeDetachFromMainTreeTest001
+ * @tc.desc: Test ReleaseExpiringNode detaching node from main tree
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ReleaseExpiringNodeDetachFromMainTreeTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Add node to expiringItem_ with valid second pointer
+     * @tc.expected: expiringIter->second.second is valid
+     */
+    std::string reuseId = "test_reuse_id";
+    std::string key = "test_key";
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    auto node3 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1003, AceType::MakeRefPtr<Pattern>());
+    auto node4 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1004, AceType::MakeRefPtr<Pattern>());
+    auto node5 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1005, AceType::MakeRefPtr<Pattern>());
+
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key, AceType::WeakClaim(AceType::RawPtr(node1)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key + "2", AceType::WeakClaim(AceType::RawPtr(node2)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key + "3", AceType::WeakClaim(AceType::RawPtr(node3)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key + "4", AceType::WeakClaim(AceType::RawPtr(node4)));
+    lazyForEachBuilder->RecordRecyclableNode(reuseId, key + "5", AceType::WeakClaim(AceType::RawPtr(node5)));
+
+    lazyForEachBuilder->expiringItem_[key] = LazyForEachCacheChild(0, node1);
+    lazyForEachBuilder->expiringItem_[key + "2"] = LazyForEachCacheChild(1, node2);
+    lazyForEachBuilder->expiringItem_[key + "3"] = LazyForEachCacheChild(2, node3);
+    lazyForEachBuilder->expiringItem_[key + "4"] = LazyForEachCacheChild(3, node4);
+    lazyForEachBuilder->expiringItem_[key + "5"] = LazyForEachCacheChild(4, node5);
+
+    /**
+     * @tc.steps: step3. Call ReleaseExpiringNode
+     * @tc.expected: Should call DetachFromMainTree on expiringIter->second.second
+     */
+    bool result = lazyForEachBuilder->ReleaseExpiringNode(reuseId);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: TryRecordRecyclableNodeRecursivelyNonJSViewTest001
+ * @tc.desc: Test TryRecordRecyclableNodeRecursively with non-JS_VIEW tag
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, TryRecordRecyclableNodeRecursivelyNonJSViewTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Create node with non-JS_VIEW_ETS_TAG tag
+     * @tc.expected: tag != V2::JS_VIEW_ETS_TAG
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step3. Call TryRecordRecyclableNodeRecursively
+     * @tc.expected: Should return immediately without processing
+     */
+    lazyForEachBuilder->TryRecordRecyclableNodeRecursively("test_key", node);
+    EXPECT_TRUE(lazyForEachBuilder->recyclableNodeSet_.empty());
+}
+
+/**
+ * @tc.name: TryRecordRecyclableNodeRecursivelyRecycleViewTest001
+ * @tc.desc: Test TryRecordRecyclableNodeRecursively with RECYCLE_VIEW tag
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, TryRecordRecyclableNodeRecursivelyRecycleViewTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Create node with RECYCLE_VIEW_ETS_TAG tag
+     * @tc.expected: tag == V2::RECYCLE_VIEW_ETS_TAG
+     */
+    auto customNode = AceType::MakeRefPtr<CustomNode>(1001, "test_reuse_id");
+    auto recycleNode = AceType::MakeRefPtr<FrameNode>(V2::RECYCLE_VIEW_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    recycleNode->children_.push_back(customNode);
+
+    /**
+     * @tc.steps: step3. Call TryRecordRecyclableNodeRecursively
+     * @tc.expected: Should record recyclable node
+     */
+    lazyForEachBuilder->TryRecordRecyclableNodeRecursively("test_key", recycleNode);
+    EXPECT_FALSE(lazyForEachBuilder->recyclableNodeSet_.empty());
+}
+
+/**
+ * @tc.name: RecycleChildByIndexTest001
+ * @tc.desc: Test RecycleChildByIndex with non-existent index
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, RecycleChildByIndexTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Call RecycleChildByIndex with index not in cachedItems_
+     * @tc.expected: Should return without crash
+     */
+    lazyForEachBuilder->RecycleChildByIndex(999);
+}
+
+/**
+ * @tc.name: RecycleChildByIndexNullNodeTest001
+ * @tc.desc: Test RecycleChildByIndex with nullptr node
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, RecycleChildByIndexNullNodeTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add cached item with nullptr node
+     * @tc.expected: iter->second.second is nullptr
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", nullptr);
+
+    /**
+     * @tc.steps: step3. Call RecycleChildByIndex
+     * @tc.expected: Should return immediately
+     */
+    lazyForEachBuilder->RecycleChildByIndex(0);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.size(), 1);
+}
+
+/**
+ * @tc.name: RecycleChildByIndexNonDummyNodeTest001
+ * @tc.desc: Test RecycleChildByIndex with non-RecycleDummyNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, RecycleChildByIndexNonDummyNodeTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add cached item with non-RecycleDummyNode
+     * @tc.expected: dummyNode is nullptr (not RecycleDummyNode)
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto node = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", node);
+
+    /**
+     * @tc.steps: step3. Call RecycleChildByIndex
+     * @tc.expected: Should return without erasing
+     */
+    lazyForEachBuilder->RecycleChildByIndex(0);
+    EXPECT_EQ(lazyForEachBuilder->cachedItems_.size(), 1);
+}
+
+/**
+ * @tc.name: RecycleChildByIndexDummyNodeTest001
+ * @tc.desc: Test RecycleChildByIndex with RecycleDummyNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, RecycleChildByIndexDummyNodeTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add RecycleDummyNode to cached items and expiringItem_
+     * @tc.expected: dummyNode is valid and keyIter exists
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto dummyNode = AceType::MakeRefPtr<RecycleDummyNode>(1000);
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", dummyNode);
+    lazyForEachBuilder->expiringItem_["key1"] = LazyForEachCacheChild(0, dummyNode);
+
+    /**
+     * @tc.steps: step3. Call RecycleChildByIndex
+     * @tc.expected: Should erase from both cachedItems_ and expiringItem_
+     */
+    lazyForEachBuilder->RecycleChildByIndex(0);
+    EXPECT_TRUE(lazyForEachBuilder->cachedItems_.empty());
+    EXPECT_TRUE(lazyForEachBuilder->expiringItem_.empty());
+}
+
+/**
+ * @tc.name: DumpHashKeyTest001
+ * @tc.desc: Test DumpHashKey with valid nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, DumpHashKeyTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add cached items with valid nodes
+     * @tc.expected: node.second is valid
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", node1);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("key2", node2);
+
+    /**
+     * @tc.steps: step3. Call DumpHashKey
+     * @tc.expected: Should return string with cached items info
+     */
+    std::string result = lazyForEachBuilder->DumpHashKey();
+    EXPECT_FALSE(result.empty());
+    EXPECT_NE(result.find("|"), std::string::npos);
+}
+
+/**
+ * @tc.name: DumpHashKeyNullNodeTest001
+ * @tc.desc: Test DumpHashKey with nullptr nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, DumpHashKeyNullNodeTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add cached items with nullptr nodes
+     * @tc.expected: node.second is nullptr
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", nullptr);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("key2", nullptr);
+
+    /**
+     * @tc.steps: step3. Call DumpHashKey
+     * @tc.expected: Should return string with expiring items info
+     */
+    std::string result = lazyForEachBuilder->DumpHashKey();
+    EXPECT_FALSE(result.empty());
+    EXPECT_NE(result.find("|"), std::string::npos);
+}
+
+/**
+ * @tc.name: DumpHashKeyMixedTest001
+ * @tc.desc: Test DumpHashKey with mixed valid and nullptr nodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, DumpHashKeyMixedTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add cached items with mixed nodes
+     * @tc.expected: Some node.second are valid, some are nullptr
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->cachedItems_[0] = LazyForEachChild("key1", node1);
+    lazyForEachBuilder->cachedItems_[1] = LazyForEachChild("key2", nullptr);
+
+    /**
+     * @tc.steps: step3. Call DumpHashKey
+     * @tc.expected: Should return string with both cached and expiring items info
+     */
+    std::string result = lazyForEachBuilder->DumpHashKey();
+    EXPECT_FALSE(result.empty());
+    EXPECT_NE(result.find("|"), std::string::npos);
+}
+
+/**
+ * @tc.name: DumpInfoTest001
+ * @tc.desc: Test DumpInfo with empty expiringItem_
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, DumpInfoTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Ensure expiringItem_ is empty
+     * @tc.expected: expiringItem_.size() == 0
+     */
+    EXPECT_TRUE(lazyForEachBuilder->expiringItem_.empty());
+
+    /**
+     * @tc.steps: step3. Call DumpInfo
+     * @tc.expected: Should not crash, only add total count description
+     */
+    lazyForEachBuilder->DumpInfo();
+}
+
+/**
+ * @tc.name: DumpInfoWithValidNodesTest001
+ * @tc.desc: Test DumpInfo with valid nodes in expiringItem_
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, DumpInfoWithValidNodesTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add valid nodes to expiringItem_
+     * @tc.expected: item.second is valid
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->expiringItem_["key1"] = LazyForEachCacheChild(0, node1);
+    lazyForEachBuilder->expiringItem_["key2"] = LazyForEachCacheChild(1, node2);
+
+    /**
+     * @tc.steps: step3. Call DumpInfo
+     * @tc.expected: Should add CachedItems description with node info
+     */
+    lazyForEachBuilder->DumpInfo();
+}
+
+/**
+ * @tc.name: DumpInfoWithNullNodesTest001
+ * @tc.desc: Test DumpInfo with nullptr nodes in expiringItem_
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, DumpInfoWithNullNodesTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Clear existing items and add nullptr nodes to expiringItem_
+     * @tc.expected: item.second is nullptr
+     */
+    lazyForEachBuilder->cachedItems_.clear();
+    lazyForEachBuilder->expiringItem_.clear();
+    lazyForEachBuilder->expiringItem_["key1"] = LazyForEachCacheChild(0, nullptr);
+    lazyForEachBuilder->expiringItem_["key2"] = LazyForEachCacheChild(1, nullptr);
+
+    /**
+     * @tc.steps: step3. Call DumpInfo
+     * @tc.expected: Should skip nullptr nodes
+     */
+    lazyForEachBuilder->DumpInfo();
+}
+
+/**
+ * @tc.name: ProcessNodesForCleanCacheTest001
+ * @tc.desc: Test ProcessNodesForCleanCache with nodes in expiringItem_
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ProcessNodesForCleanCacheTest001, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Create cache with nodes that exist in expiringItem_
+     * @tc.expected: expiringItem_.find(key) != expiringItem_.end()
+     */
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    lazyForEachBuilder->expiringItem_["key1"] = LazyForEachCacheChild(0, node1);
+
+    std::unordered_map<std::string, LazyForEachCacheChild> cache;
+    cache["key1"] = LazyForEachCacheChild(0, node1);
+
+    /**
+     * @tc.steps: step3. Call ProcessNodesForCleanCache
+     * @tc.expected: Should skip nodes in expiringItem_
+     */
+    lazyForEachBuilder->ProcessNodesForCleanCache(cache);
+    EXPECT_TRUE(lazyForEachBuilder->removingNodeList_.empty());
+}
+
+/**
+ * @tc.name: ProcessNodesForCleanCacheTest002
+ * @tc.desc: Test ProcessNodesForCleanCache with nodes not in expiringItem_
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ProcessNodesForCleanCacheTest002, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Create cache with nodes not in expiringItem_
+     * @tc.expected: expiringItem_.find(key) == expiringItem_.end()
+     */
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+    auto node2 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1002, AceType::MakeRefPtr<Pattern>());
+
+    std::unordered_map<std::string, LazyForEachCacheChild> cache;
+    cache["key1"] = LazyForEachCacheChild(0, node1);
+    cache["key2"] = LazyForEachCacheChild(1, node2);
+
+    /**
+     * @tc.steps: step3. Call ProcessNodesForCleanCache
+     * @tc.expected: Should add nodes to removingNodeList_
+     */
+    lazyForEachBuilder->ProcessNodesForCleanCache(cache);
+    EXPECT_EQ(lazyForEachBuilder->removingNodeList_.size(), 2);
+}
+
+/**
+ * @tc.name: ProcessNodesForCleanCacheTest003
+ * @tc.desc: Test ProcessNodesForCleanCache with empty cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ProcessNodesForCleanCacheTest003, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Create empty cache
+     * @tc.expected: cache is empty
+     */
+    std::unordered_map<std::string, LazyForEachCacheChild> cache;
+
+    /**
+     * @tc.steps: step3. Call ProcessNodesForCleanCache
+     * @tc.expected: Should not add anything to removingNodeList_
+     */
+    lazyForEachBuilder->ProcessNodesForCleanCache(cache);
+    EXPECT_TRUE(lazyForEachBuilder->removingNodeList_.empty());
+}
+
+/**
+ * @tc.name: ProcessNodesForCleanCacheTest004
+ * @tc.desc: Test ProcessNodesForCleanCache with debug trace enabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ProcessNodesForCleanCacheTest004, TestSize.Level1)
+{
+    auto lazyForEachBuilder = CreateLazyForEachBuilder();
+    ASSERT_NE(lazyForEachBuilder, nullptr);
+
+    /**
+     * @tc.steps: step2. Create cache with nodes and enable debug trace
+     */
+    auto node1 = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, 1001, AceType::MakeRefPtr<Pattern>());
+
+    std::unordered_map<std::string, LazyForEachCacheChild> cache;
+    cache["key1"] = LazyForEachCacheChild(0, node1);
+
+    // Enable debug trace (this would need SystemProperties to be set in real scenario)
+    // For this test, we just verify the method doesn't crash
+
+    /**
+     * @tc.steps: step3. Call ProcessNodesForCleanCache
+     * @tc.expected: Should add nodes to removingNodeList_
+     */
+    lazyForEachBuilder->ProcessNodesForCleanCache(cache);
+    EXPECT_EQ(lazyForEachBuilder->removingNodeList_.size(), 1);
 }
 
 } // namespace OHOS::Ace::NG

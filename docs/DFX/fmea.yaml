@@ -1,0 +1,318 @@
+# ArkUI FMEA 知识库
+# 本文件覆盖领域 = ArkUI。读取方：odk-design skill 按 SKILL.md 的领域匹配规则读取对应文件。
+# 分析对象由设计技能根据业务流程中实际导致触发条件的对象填写，不在此预设。
+
+- 触发条件: UIExtension组件使用
+  故障模式: UIExtension循环嵌套
+  故障影响: IPC通信时可能导致appfreeze
+  故障原因: UIExtension循环嵌套
+  严酷度: 严重
+  恢复措施: DFX系统回收应用进程；通过FireOnErrorCallback回调ERROR_CODE_UIEXTENSION_FORBID_CASCADE拦截
+  关键日志: "Prohibit nesting uiExtensionComponent"
+  大数据打点事件: 不涉及
+
+- 触发条件: 跨线程UI任务调度
+  故障模式: UI任务多线程检查
+  故障影响: UI任务不允许在非主线程执行
+  故障原因: UI任务误用在非主线程执行
+  严酷度: 严重
+  恢复措施: 可以通过系统参数开启该检查第一时间拦截问题
+  关键日志: "CheckThread fail: expected [%{public}s]"
+  大数据打点事件: 不涉及
+
+- 触发条件: OS回调应用代码
+  故障模式: 底座回调应用代码时候，触发应用回调内部的稳定性问题
+  故障影响: 应用crash
+  故障原因: 应用内部回调逻辑异常
+  严酷度: 严重
+  恢复措施: 无
+  关键日志: "[%{public}s] crash occured on callback: %{public}"
+  大数据打点事件: 不涉及
+
+- 触发条件: 主线程消息处理
+  故障模式: FA模型应用主线程无响应
+  故障影响: APP Freeze
+  故障原因: 主线程过度繁忙，无法及时响应后续任务
+  严酷度: 严重
+  恢复措施: DFX系统回收应用进程，输出堆栈
+  关键日志: app-freeze
+  大数据打点事件: UI_BLOCK_6S
+
+- 触发条件: 节点树遍历
+  故障模式: 节点上树成环
+  故障影响: 触发遍历时成环，无限递归导致爆栈可能导致cpp_crash
+  故障原因: 递归遍历无限循环
+  严酷度: 严重
+  恢复措施: 给开发者提供开关遍历测试中检测修复；崩溃时有堆栈和Fatal日志
+  关键日志: "LoopDetected: child[%{public}.*s] vs current[%{public}.*s]"
+  大数据打点事件: 不涉及
+
+- 触发条件: 节点树挂载操作
+  故障模式: 一个子结点挂给多个父节点
+  故障影响: 可能导致cpp_crash，显示异常，事件处理异常
+  故障原因: 节点多挂
+  严酷度: 严重
+  恢复措施: 给开发者提供开关遍历测试中检测修复；崩溃时有堆栈和Fatal日志
+  关键日志: 不涉及
+  大数据打点事件: 不涉及
+
+- 触发条件: ArkUI对象生命周期管理
+  故障模式: 使用中的对象非法销毁检查
+  故障影响: 可能导致cpp_crash
+  故障原因: RefPtr智能指针在被使用时，如果被重新赋值将可能导致所管理的对象被析构失效，进而造成UAF问题
+  严酷度: 严重
+  恢复措施: 识别是不是有对象使用中被销毁的问题，避免程序带着问题继续运行进而出现难以定位的问题现场
+  关键日志: "this object is still in use"
+  大数据打点事件: 不涉及
+
+- 触发条件: ArkUI引用计数管理
+  故障模式: 死亡对象非法Claim
+  故障影响: 可能导致cpp_crash
+  故障原因: 当对象的强引用计数为0时将触发对象析构，此时对象处于即将死亡状态，不能再通过Claim操作增加对象强引用计数，否则将获得野指针导致UAF问题
+  严酷度: 严重
+  恢复措施: 通过在Claim操作时检测对象的强引用计数是否为0，让非法Claim操作在第一现场暴露
+  关键日志: "invalid claim: refCount=%{public}d, isNewOrRecycle=%{public}d"
+  大数据打点事件: 不涉及
+
+- 触发条件: ArkUI类型转换操作
+  故障模式: UI对象类型转换错误
+  故障影响: 类型转换时C++编译器不能在编译期进行检查，需要开发者在运行期使用IsXxx方法检查JS对象类型，确保类型转换的安全
+  故障原因: 类型转换错误
+  严酷度: 严重
+  恢复措施: 通过开关开启主动检查，提前拦截问题
+  关键日志: "bad type conversion"
+  大数据打点事件: 不涉及
+
+- 触发条件: ArkUI类型转换操作
+  故障模式: JsiType类型转换错误
+  故障影响: JSI层类型转换错误可能导致cpp_crash
+  故障原因: JsiType转换时目标类型与实际类型不匹配
+  严酷度: 严重
+  恢复措施: 通过开关开启主动检查，提前拦截问题
+  关键日志: "bad cast to "
+  大数据打点事件: 不涉及
+
+- 触发条件: ArkUI弱指针访问
+  故障模式: WeakPtr裸指针使用
+  故障影响: UAF问题 cppcrash
+  故障原因: 内部业务通过WeakPtr获取已销毁对象的裸指针使用，WeakPtr的Upgrade应先于裸指针访问
+  严酷度: 严重
+  恢复措施: 排查代码中直接使用WeakPtr裸指针的地方并整改为安全的Upgrade方法
+  关键日志: 不涉及
+  大数据打点事件: 不涉及
+
+- 触发条件: 命令式API调用
+  故障模式: 命令式节点相关接口使用错误
+  故障影响: 应用crash
+  故障原因: 命令式节点接口使用错误
+  严酷度: 严重
+  恢复措施: 输出LOG_FATAL并cppcrash，第一时间告知开发者使用错误
+  关键日志: "AddCustomProperty input params name or value is nullptr" / "RemoveCustomProperty input params name is nullptr"
+  大数据打点事件: 不涉及
+
+- 触发条件: 渲染树节点访问
+  故障模式: 访问已释放的渲染结点
+  故障影响: 可能导致cpp_crash
+  故障原因: 系统内部故障
+  严酷度: 严重
+  恢复措施: 通过FREE_NODE_CHECK宏在非UI线程访问free节点时自动重定向到线程安全的MultiThread变体
+  关键日志: 不涉及
+  大数据打点事件: 不涉及
+
+- 触发条件: 应用响应时延检测
+  故障模式: 应用响应完成时延超长
+  故障影响: 用户感觉卡顿
+  故障原因: 应用业务逻辑过于复杂
+  严酷度: 提示
+  恢复措施: 通过大数据上报性能雷达
+  关键日志: 性能雷达收集事件反馈在大数据网站
+  大数据打点事件: INTERACTION_COMPLETED_LATENCY
+
+- 触发条件: 应用帧率检测
+  故障模式: 应用连续丢帧达6帧
+  故障影响: 用户感觉卡顿
+  故障原因: 应用业务逻辑过于复杂
+  严酷度: 提示
+  恢复措施: 通过大数据上报性能雷达
+  关键日志: 性能雷达收集事件反馈在大数据网站
+  大数据打点事件: JANK_STATS_APP
+
+- 触发条件: VSync信号等待
+  故障模式: Vsync请求500ms/3s未被响应
+  故障影响: 卡顿无响应
+  故障原因: 图形侧未响应Vsync请求
+  严酷度: 一般
+  恢复措施: 500ms强制恢复，3s输出关键日志
+  关键日志: "ArkUI request vsync, but no vsync received in 500ms\nArkUI request vsync,but no vsync received in 3 seconds\nArkUI force flush vsync for recover pipelinecontext."
+  大数据打点事件: 是
+
+- 触发条件: 控件树构建
+  故障模式: 控件树过于复杂（节点树过3000，过深500）
+  故障影响: 页面加载切换卡顿
+  故障原因: 应用控件树过于复杂
+  严酷度: 一般
+  恢复措施: 报点+性能雷达收集
+  关键日志: "PAGE_DEPTH_OVERFLOW\nPAGE_NODE_OVERFLOW"
+  大数据打点事件: 是
+
+- 触发条件: 生命周期回调执行
+  故障模式: 生命周期函数执行超长
+  故障影响: 页面加载切换卡顿
+  故障原因: 生命周期回调函数执行超长
+  严酷度: 一般
+  恢复措施: 报点+性能雷达收集
+  关键日志: 不涉及
+  大数据打点事件: UI_LIFECIRCLE_FUNCTION_TIMEOUT
+
+- 触发条件: 页面路由加载
+  故障模式: 新页面加载完成时延过长
+  故障影响: 页面加载切换卡顿
+  故障原因: 应用问题、网络波动等因素
+  严酷度: 一般
+  恢复措施: 报点+性能雷达收集
+  关键日志: 不涉及
+  大数据打点事件: FRAMEWORK_PAGE_ROUTER_EXCEPTION
+
+- 触发条件: UIExtension透明窗口
+  故障模式: 系统弹窗拉起全屏UIExtensionAbility内部无可见结点
+  故障影响: 可能导致透明窗口霸屏无法操作
+  故障原因: 系统弹窗提供方业务故障
+  严酷度: 严重
+  恢复措施: 上报大数据，并通过onError通知大桌面处理，销毁该控件，避免霸屏
+  关键日志: "transparent node detected"
+  大数据打点事件: UIEXTENSION_TRANSPARENT_DETECTED
+
+- 触发条件: 用户交互操作
+  故障模式: 交互操作类错误
+  故障影响: 通用交互类异常，可能会导致手势响应异常或者焦点不刷新
+  故障原因: 多模输入报点异常
+  严酷度: 一般
+  恢复措施: 上报大数据
+  关键日志: 不涉及
+  大数据打点事件: GENERAL_INTERACTION_ERROR
+
+- 触发条件: 手势事件处理
+  故障模式: 交互无响应
+  故障影响: 交互事件下发后，可能点击到无法响应的控件
+  故障原因: 点击到无法响应的控件
+  严酷度: 提示
+  恢复措施: 上报性能雷达大数据
+  关键日志: 不涉及
+  大数据打点事件: INTERACTION_APP_JANK（已定义但当前未发射）
+
+- 触发条件: 文本控件操作
+  故障模式: 文本编辑类控件光标位置错误
+  故障影响: 无法正确的移动光标和深处插入字符
+  故障原因: 应用传入的参数有误
+  严酷度: 一般
+  恢复措施: 上传大数据
+  关键日志: 不涉及
+  大数据打点事件: RICH_EDITOR_ERROR
+
+- 触发条件: 剪贴板API调用
+  故障模式: 从系统剪贴板获取数据失败
+  故障影响: 无法从剪贴板获取数据
+  故障原因: 系统剪贴板有误
+  严酷度: 一般
+  恢复措施: 上传大数据
+  关键日志: 不涉及
+  大数据打点事件: CLIPBOARD_FAIL
+
+- 触发条件: 滚动容器操作
+  故障模式: 滚动控件获取子结点失败
+  故障影响: 可能导致布局异常，出现空白
+  故障原因: 调用获取子节点数据是返回错误
+  严酷度: 一般
+  恢复措施: 上传大数据
+  关键日志: 不涉及
+  大数据打点事件: SCROLLABLE_ERROR
+
+- 触发条件: 相对布局解析
+  故障模式: 相对布局依赖成环
+  故障影响: 相对布局子组件相互依赖成环，子节点都不显示，大量白块
+  故障原因: 相对布局依赖成环
+  严酷度: 提示
+  恢复措施: 输出日志
+  关键日志: "you are already in flushing layout!"
+  大数据打点事件: COMPONENT_EXCEPTION
+
+- 触发条件: Canvas绘制操作
+  故障模式: Canvas组件收到超超过十万
+  故障影响: 重负载绘制任务会导致内存占用过大应用长时间白屏
+  故障原因: 应用开发者代码未考虑性能
+  严酷度: 一般
+  恢复措施: 上报大数据
+  关键日志: 不涉及
+  大数据打点事件: CANVAS_TASKS_OVERFLOW
+
+- 触发条件: 文本绘制操作
+  故障模式: 文字绘制指令为空
+  故障影响: 文本不显示
+  故障原因: 字体引擎或开发者代码问题
+  严酷度: 一般
+  恢复措施: 上报大数据
+  关键日志: 不涉及
+  大数据打点事件: COMPONENT_EXCEPTION
+
+- 触发条件: 图片加载解析
+  故障模式: 图片数据损坏
+  故障影响: 无法正确渲染图片
+  故障原因: 文件头宽高数据和实际图源不一致
+  严酷度: 一般
+  恢复措施: 上报大数据
+  关键日志: 不涉及
+  大数据打点事件: COMPONENT_EXCEPTION
+
+- 触发条件: UIExtension进程拉起
+  故障模式: UIExtension不可见拉起
+  故障影响: 可能存在冗余的功耗开销，长时间进程保活
+  故障原因: UIExtension不可见时拉起提供方进程
+  严酷度: 一般
+  恢复措施: 上报大数据
+  关键日志: 不涉及
+  大数据打点事件: COMPONENT_EXCEPTION
+
+- 触发条件: UIExtension嵌套使用
+  故障模式: UIExtension嵌套超3层
+  故障影响: 可能影响性能，卡顿
+  故障原因: 应用开发者使用不当
+  严酷度: 提示
+  恢复措施: 上报大数据
+  关键日志: 不涉及
+  大数据打点事件: COMPONENT_EXCEPTION
+
+- 触发条件: 节点树遍历中移除子节点
+  故障模式: 遍历期间移除子节点
+  故障影响: 可能导致cpp_crash
+  故障原因: 在子节点遍历过程中执行移除操作，破坏遍历状态
+  严酷度: 严重
+  恢复措施: 输出LOGF_ABORT，第一现场崩溃
+  关键日志: "Try to remove the child([%{public}s][%{public}d]) of "
+  大数据打点事件: 不涉及
+
+- 触发条件: FrameProxy子节点重置
+  故障模式: 使用中重置子节点
+  故障影响: 可能导致UAF问题cpp_crash
+  故障原因: FrameProxy在子节点仍在使用时执行ResetChildren操作
+  严酷度: 严重
+  恢复措施: 输出LOGF_ABORT，第一现场崩溃
+  关键日志: "[%{public}d:%{public}s] reset children while in use"
+  大数据打点事件: 不涉及
+
+- 触发条件: Pattern分离期间访问Host
+  故障模式: 分离期间访问宿主FrameNode
+  故障影响: 可能导致UAF问题cpp_crash
+  故障原因: Pattern在OnDetachFromMainTree期间仍尝试通过GetHost访问宿主节点
+  严酷度: 严重
+  恢复措施: 输出LOGF_ABORT，第一现场崩溃
+  关键日志: "fatal: can't GetHost at detaching period"
+  大数据打点事件: 不涉及
+
+- 触发条件: C API回调线程安全
+  故障模式: 帧回调/空闲回调在非UI线程调用
+  故障影响: 可能导致cpp_crash
+  故障原因: OH_ArkUI_PostFrameCallback或OH_ArkUI_PostIdleCallback在非UI线程执行
+  严酷度: 严重
+  恢复措施: 输出LOGF_ABORT，第一现场崩溃
+  关键日志: "OH_ArkUI_PostFrameCallback doesn't run on UI thread!" / "OH_ArkUI_PostIdleCallback doesn't run on UI thread!"
+  大数据打点事件: 不涉及

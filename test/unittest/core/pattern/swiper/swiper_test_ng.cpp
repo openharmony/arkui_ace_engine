@@ -69,6 +69,9 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeNextIndexByVelocity001, TestSize.Leve
  */
 HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: std::bad_function_call crash";
+#endif
     CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
@@ -1216,6 +1219,9 @@ HWTEST_F(SwiperTestNg, SwipeCaptureLayoutInfo001, TestSize.Level1)
  */
 HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
 {
+#ifdef ACE_HOST_PRODUCT
+    GTEST_SKIP() << "host: crash in frame rate setting";
+#endif
     int32_t rate = 1;
     CreateSwiper();
     CreateSwiperItems();

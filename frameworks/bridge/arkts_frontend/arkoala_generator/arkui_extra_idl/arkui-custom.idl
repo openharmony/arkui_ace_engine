@@ -22,6 +22,7 @@ import ohos.arkui.observer.default as observer;
 import arkui.component.gesture.GestureEvent as GestureEvent;
 import arkui.component.lazyForEach.LazyForEachOptions as LazyForEachOptions;
 import arkui.component.enums.CompetitionStrategy as CompetitionStrategy;
+import arkui.Graphics.LengthUnit as LengthUnit;
 
 callback Callback_RangeUpdate = void (i32 start, i32 end, i32 cacheStart, i32 cacheEnd, boolean isLoop);
 callback Callback_CreateItem = pointer (i32 index);
@@ -301,3 +302,8 @@ interface ThemeOps {
     static void applyThemeScopeIdToNode(pointer ptr, i32 themeScopeId);
 };
 
+[Entity=Class]
+interface LengthMetricsProxy {
+    attribute f64 value;
+    attribute LengthUnit unit;
+};

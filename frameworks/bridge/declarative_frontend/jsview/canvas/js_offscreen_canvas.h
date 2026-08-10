@@ -180,6 +180,11 @@ public:
         offscreenCanvasPattern_ = offscreenPattern;
     }
 
+    const RefPtr<AceType>& GetOffscreenPattern() const
+    {
+        return offscreenCanvasPattern_;
+    }
+
     enum class ContextType {
         CONTEXT_2D = 0,
     };

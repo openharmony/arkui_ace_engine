@@ -1046,11 +1046,8 @@ RepeatMemOptStrategy RepeatVirtualScroll2Node::GetMemOptStrategy()
         return memOptStrategy_;
     }
     auto systemStrategy = SystemProperties::GetSyntaxMemOptStrategy();
-    if (systemStrategy >= 0) {
-        memOptStrategy_ = static_cast<RepeatMemOptStrategy>(systemStrategy);
-        return memOptStrategy_;
-    }
-    memOptStrategy_ = RepeatMemOptStrategy::DEFAULT;
+    memOptStrategy_ = systemStrategy == 1 ?
+        RepeatMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION : RepeatMemOptStrategy::DEFAULT;
     return memOptStrategy_;
 }
 

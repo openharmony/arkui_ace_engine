@@ -7011,7 +7011,7 @@ void ViewAbstract::SetImmersiveConfigs(const RefPtr<FrameNode>& frameNode, const
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
             return;
         }
-        auto params = materialTheme->GetUiMaterialParam(MaterialType::IMMERSIVE, pipeline);
+        auto params = materialTheme->GetUiMaterialParam(MaterialType::IMMERSIVE, frameNode, config->key.colorMode);
         if (!params) {
             TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "Get immersive param failed");
             return;

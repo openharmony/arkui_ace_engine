@@ -450,6 +450,11 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         return false;
     }
 
+    auto scrollable = GetScrollable();
+    if (scrollable) {
+        scrollable->ResetDragUpdateDelta();
+    }
+
     if (layoutInfo_->isDataValid_) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);

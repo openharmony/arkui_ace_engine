@@ -241,8 +241,9 @@ void DialogInnerManager::CallOnHideDialogCallback()
 
 bool DialogInnerManager::FireBackPressEvent() const
 {
-    if (backPressEvent_) {
-        return backPressEvent_();
+    auto backPressEvent = backPressEvent_;
+    if (backPressEvent) {
+        return backPressEvent();
     }
     return false;
 }

@@ -19,6 +19,7 @@
 #include "core/accessibility/accessibility_manager_ng.h"
 
 #include <cmath>
+#include <unistd.h>
 #include "base/resource/data_provider_manager.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "core/common/draw_delegate.h"
@@ -1648,6 +1649,7 @@ void PipelineContext::HandleSpecialContainerNode()
         parentToChildrenMap[parentId].push_back(positionZNodeId);
     }
     // Process each unique parent node only once
+    std::vector<RefPtr<FrameNode>> childrenList;
     for (const auto& [parentId, childIds] : parentToChildrenMap) {
         auto parentNode = DynamicCast<FrameNode>(ElementRegister::GetInstance()->GetUINodeById(parentId));
         if (!parentNode) {
@@ -1656,7 +1658,7 @@ void PipelineContext::HandleSpecialContainerNode()
         if (parentNode->GetRenderContext()) {
             parentNode->GetRenderContext()->SetDrawNode();
         }
-        std::list<RefPtr<FrameNode>> childrenList;
+        childrenList.clear();
         parentNode->GenerateOneDepthVisibleFrameWithTransition(childrenList);
         for (auto& node : childrenList) {
             if (node && node->GetRenderContext()) {
@@ -3877,7 +3879,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         config.isReportTid = container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
     }
     if (config.isReportTid) {
-        config.tid = static_cast<uint64_t>(pthread_self());
+        config.tid = static_cast<uint64_t>(gettid());
     }
 #endif
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint, config);
@@ -6849,8 +6851,14 @@ void PipelineContext::FlushAnimationDirtysWhenExist(const AnimationOption& optio
     int32_t flushCount = 0;
     bool isDirtyLayoutNodesEmpty = IsDirtyLayoutNodesEmpty();
     while (!isDirtyLayoutNodesEmpty && !IsLayouting() && !isReloading_) {
-        if (flushCount >= MAX_FLUSH_COUNT || option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
+        if (option.GetIteration() != ANIMATION_REPEAT_INFINITE) {
+            TAG_LOGD(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
+                option.ToString().c_str(), isDirtyLayoutNodesEmpty);
+            break;
+        }
+        if (flushCount >= MAX_FLUSH_COUNT) {
+            infiniteAnimationFlushExceeded_ = true;
+            TAG_LOGE(AceLogTag::ACE_ANIMATION, "animation: option:%{public}s, isDirtyLayoutNodesEmpty:%{public}d",
                 option.ToString().c_str(), isDirtyLayoutNodesEmpty);
             break;
         }
@@ -6878,6 +6886,7 @@ void PipelineContext::OpenFrontendAnimation(
         }
     }
     FlushAnimationDirtysWhenExist(option);
+    PushInfiniteAnimationFlushExceeded();
     AnimationUtils::OpenImplicitAnimation(option, curve, wrapFinishCallback, Claim(this));
 }
 
@@ -6887,6 +6896,7 @@ void PipelineContext::CloseFrontendAnimation(bool forceClose)
         if (forceClose) {
             TAG_LOGW(AceLogTag::ACE_ANIMATION, "force close animation");
             AnimationUtils::CloseImplicitAnimation();
+            PopInfiniteAnimationFlushExceeded();
         }
         return;
     }
@@ -6903,6 +6913,7 @@ void PipelineContext::CloseFrontendAnimation(bool forceClose)
         pendingFrontendAnimation_.pop();
     }
     AnimationUtils::CloseImplicitAnimation(Claim(this));
+    PopInfiniteAnimationFlushExceeded();
 }
 
 bool PipelineContext::IsDragging() const

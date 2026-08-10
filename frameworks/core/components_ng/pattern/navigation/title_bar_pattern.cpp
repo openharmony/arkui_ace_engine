@@ -32,6 +32,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
+#include "core/components_ng/pattern/effect_component/effect_component_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
@@ -63,7 +64,6 @@ constexpr int32_t TITLE_RATIO = 2;
 constexpr int32_t LUMINANCE_SAMPLER_INTERVAL = 200;
 constexpr uint32_t LUMINANCE_THRESHOLD_LOW = 150;
 constexpr uint32_t LUMINANCE_THRESHOLD_HIGH = 220;
-const Color DEFAULT_LIGHT_EFFECT_COLOR = Color::FromString("#33FFFFFF");
 const Color SMOOTH_COMMON_BLUR_LIGHT_BG_COLOR = Color::FromString("#00F1F3F5");
 const Color SMOOTH_COMMON_BLUR_DARK_BG_COLOR = Color::FromString("#00000000");
 const Color SMOOTH_GRADUAL_BLUR_LIGHT_BG_COLOR = Color::FromString("#F2F1F3F5");
@@ -79,6 +79,8 @@ constexpr char INTERACTIVE_HOVER_COLOR_NAME[] = "sys.color.interactive_hover";
 constexpr char INTERACTIVE_PRESSED_COLOR_NAME[] = "sys.color.interactive_pressed";
 constexpr char INTERACTIVE_FOCUS_COLOR_NAME[] = "sys.color.interactive_focus";
 constexpr char COMP_BACKGROUND_GRAY_COLOR_NAME[] = "sys.color.comp_background_gray";
+constexpr char FONT_PRIMARY_COLOR_NAME[] = "sys.color.font_primary";
+constexpr char FONT_SECONDARY_COLOR_NAME[] = "sys.color.font_secondary";
 
 struct TitleBarTokenColors {
     Color iconPrimary;
@@ -87,6 +89,8 @@ struct TitleBarTokenColors {
     Color interactivePressed;
     Color interactiveFocus;
     Color compBackgroundGray;
+    Color fontPrimary;
+    Color fontSecondary;
 };
 struct TitleBarDefaultColors {
     TitleBarTokenColors lightColor;
@@ -121,6 +125,8 @@ const TitleBarTokenColors* GetOrCreateTitleBarTokenColors(const RefPtr<PipelineC
         lightColor.interactivePressed = lightResourceAdapter->GetColorByName(INTERACTIVE_PRESSED_COLOR_NAME);
         lightColor.interactiveFocus = lightResourceAdapter->GetColorByName(INTERACTIVE_FOCUS_COLOR_NAME);
         lightColor.compBackgroundGray = lightResourceAdapter->GetColorByName(COMP_BACKGROUND_GRAY_COLOR_NAME);
+        lightColor.fontPrimary = lightResourceAdapter->GetColorByName(FONT_PRIMARY_COLOR_NAME);
+        lightColor.fontSecondary = lightResourceAdapter->GetColorByName(FONT_SECONDARY_COLOR_NAME);
 
         resConfig.SetColorMode(ColorMode::DARK);
         auto darkResourceAdapter = adapterInCache->GetOverrideResourceAdapter(resConfig, configChange);
@@ -132,6 +138,8 @@ const TitleBarTokenColors* GetOrCreateTitleBarTokenColors(const RefPtr<PipelineC
         darkColor.interactivePressed = darkResourceAdapter->GetColorByName(INTERACTIVE_PRESSED_COLOR_NAME);
         darkColor.interactiveFocus = darkResourceAdapter->GetColorByName(INTERACTIVE_FOCUS_COLOR_NAME);
         darkColor.compBackgroundGray = darkResourceAdapter->GetColorByName(COMP_BACKGROUND_GRAY_COLOR_NAME);
+        darkColor.fontPrimary = darkResourceAdapter->GetColorByName(FONT_PRIMARY_COLOR_NAME);
+        darkColor.fontSecondary = darkResourceAdapter->GetColorByName(FONT_SECONDARY_COLOR_NAME);
     });
     return mode == ColorMode::LIGHT ? &g_titleBarDefaultColors.lightColor : &g_titleBarDefaultColors.darkColor;
 }
@@ -221,7 +229,7 @@ struct BrightnessBlenderParam {
 };
 
 const BrightnessBlenderParam LIGHT_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM = {
-    0.0f, 0.0f, 0.35f, -0.1176f, 3.5f, { 0.7f, 1.7f, 0.5f }, { 1.0f, 1.0f, 1.0f }, 0.0f
+    0.0f, 0.0f, 0.1f, 0.0f, 9.0f, { 0.7f, 1.2f, 0.5f }, { 1.0f, 1.0f, 1.0f }, 0.0f
 };
 const BrightnessBlenderParam DARK_ICON_FOREGROUND_BRIGHTNESS_BLENDER_PARAM = {
     0.0f, 0.0f, 0.1005f, 0.898f, 1.5f, { 1.0f, 0.5f, 0.5f }, { 2.0f, 2.5f, 0.5f }, 0.0f
@@ -788,7 +796,6 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
     auto miniTitleFontSize = theme->GetTitleFontSize();
     auto miniTitleFontSizeMin = theme->GetTitleFontSizeMin();
     auto textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
-    Color color = theme->GetTitleColor();
     FontWeight mainTitleWeight = FontWeight::MEDIUM;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         titleFontSize = theme->GetMainTitleFontSizeL();
@@ -797,9 +804,10 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
         miniTitleFontSizeMin = theme->GetMainTitleFontSizeS();
         textHeightAdaptivePolicy = hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
             TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
-        color = theme->GetMainTitleFontColor();
         mainTitleWeight = FontWeight::BOLD;
     }
+    Color color;
+    GetTextTitleColor(true, color);
     TitleBarPattern::SetTextColor(textNode, color);
     titleLayoutProperty->UpdateFontWeight(mainTitleWeight);
     titleLayoutProperty->UpdateMaxFontScale(STANDARD_FONT_SCALE);
@@ -856,13 +864,13 @@ void TitleBarPattern::ResetSubTitleProperty(const RefPtr<FrameNode>& textNode,
     auto theme = NavigationGetTheme(host->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto subTitleSize = theme->GetSubTitleFontSize();
-    Color color = theme->GetSubTitleColor();
+    Color color;
     auto textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         subTitleSize = theme->GetSubTitleFontSizeS();
-        color = theme->GetSubTitleFontColor();
         textHeightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
     }
+    GetTextTitleColor(false, color);
     if (parentIsNavDest) {
         titleLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MAX_LINES_FIRST);
     } else if (titleMode == NavigationTitleMode::MINI) {
@@ -921,7 +929,7 @@ bool TitleBarPattern::IsSymbolOrSVGIcon(const RefPtr<FrameNode>& iconNode)
     return imageSourceInfo.value().IsSvg();
 }
 
-bool TitleBarPattern::GetColorParamWithColorInvertSupported(IconColorParam& param)
+bool TitleBarPattern::GetColorParamWithColorInvertSupported(IconColorParam& param, TitleBarAreaType type)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -933,7 +941,7 @@ bool TitleBarPattern::GetColorParamWithColorInvertSupported(IconColorParam& para
     bool isColorInvertEnabled = IsColorInvertEnabled();
     const auto& options = options_.bgOptions.scrollEffectOptions;
     if (isColorInvertEnabled) {
-        colorMode = GetCurrentColorMode(isColorInvertEnabled);
+        colorMode = GetCurrentColorMode(isColorInvertEnabled, type);
     } else {
         colorMode = GetCurrentColorMode(false);
     }
@@ -952,10 +960,10 @@ bool TitleBarPattern::GetColorParamWithColorInvertSupported(IconColorParam& para
     return true;
 }
 
-std::optional<TitleBarPattern::IconColorParam> TitleBarPattern::GetCurrentIconColorParam()
+std::optional<TitleBarPattern::IconColorParam> TitleBarPattern::GetCurrentIconColorParam(TitleBarAreaType type)
 {
     IconColorParam param;
-    if (!GetColorParamWithColorInvertSupported(param)) {
+    if (!GetColorParamWithColorInvertSupported(param, type)) {
         return std::nullopt;
     }
     auto host = GetHost();
@@ -999,7 +1007,7 @@ void TitleBarPattern::UpdateBackButtonIconEffect(bool forceUpdate)
     CHECK_NULL_VOID(buttonModifier);
     auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(backButtonNode));
     CHECK_NE_VOID(buttonModifier->isButtonPattern(nodeHandle), true);
-    auto param = GetCurrentIconColorParam();
+    auto param = GetCurrentIconColorParam(TitleBarAreaType::BACK_BUTTON_AND_TEXT);
     if (!param.has_value()) {
         return;
     }
@@ -1072,14 +1080,44 @@ void TitleBarPattern::UpdateBackButtonMaterial()
 
 void TitleBarPattern::UpdateBackButtonMaterialInner(const RefPtr<UiMaterial>& material)
 {
-    InitColorPickerIfNeeded();
-    InitTransparencyListenerIfNeeded();
     auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(host);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(host->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(material));
-    ViewAbstract::SetSystemMaterial(AceType::RawPtr(backButtonNode), AceType::RawPtr(material));
+    InitBackBtnAndTextColorPickerIfNeeded();
+    InitTransparencyListenerIfNeeded();
+    RefPtr<UiMaterial> innerMaterial = nullptr;
+    do {
+        CHECK_NULL_BREAK(material);
+        innerMaterial = material->Copy();
+        CHECK_NULL_BREAK(innerMaterial);
+        auto options = innerMaterial->GetImmersiveOptions();
+        CHECK_NULL_BREAK(options);
+        options->colorInvert = false;
+        if (IsColorInvertEnabled()) {
+            options->colorMode = GetCurrentColorMode(true, TitleBarAreaType::BACK_BUTTON_AND_TEXT);
+        }
+        innerMaterial->SetImmersiveOptions(*options);
+    } while (false);
+    UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(innerMaterial));
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(backButtonNode), AceType::RawPtr(innerMaterial));
+    if (innerMaterial && !innerMaterial->IsEmpty()) {
+        return;
+    }
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto renderContext = backButtonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto backButtonColor = Color::TRANSPARENT;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        backButtonColor = theme->GetCompBackgroundColor();
+    }
+    auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(backButtonNode));
+    renderContext->UpdateBackgroundColor(backButtonColor);
+    buttonModifier->updateBackgroundColorFlagByUserToLayoutProp(nodeHandle, true);
+    backButtonNode->MarkModifyDone();
 }
 
 void TitleBarPattern::UpdateBackButtonBrightnessEffect(bool forceUpdate)
@@ -1104,12 +1142,17 @@ void TitleBarPattern::UpdateBackButtonBrightnessEffect(bool forceUpdate)
     const Rosen::BrightnessBlender* blender = nullptr;
     if (options_.bgOptions.scrollEffectOptions.has_value() && IsBrightnessBlendEnabled()) {
         bool isColorInvertEnabled = IsColorInvertEnabled();
-        auto colorMode = GetCurrentColorMode(isColorInvertEnabled);
+        auto colorMode = GetCurrentColorMode(isColorInvertEnabled, TitleBarAreaType::BACK_BUTTON_AND_TEXT);
         blender = colorMode == ColorMode::LIGHT ?
             LIGHT_ICON_BRIGHTNESS_BLENDER.get() : DARK_ICON_BRIGHTNESS_BLENDER.get();
     }
     // foreground
-    ViewAbstract::SetBlender(AceType::RawPtr(iconNode), blender);
+    if (blender) {
+        ViewAbstract::SetBlender(AceType::RawPtr(iconNode), blender);
+    } else {
+        ViewAbstract::ResetBlender(AceType::RawPtr(iconNode));
+    }
+    ViewAbstract::SetBlendApplyType(AceType::RawPtr(iconNode), BlendApplyType::FAST);
 #endif
 }
 
@@ -1131,7 +1174,7 @@ void TitleBarPattern::UpdateMenuIconEffect(const RefPtr<UINode>& menuNode, bool 
     if (menuNode->GetTag() != V2::NAVIGATION_MENU_ETS_TAG) {
         return;
     }
-    auto param = GetCurrentIconColorParam();
+    auto param = GetCurrentIconColorParam(TitleBarAreaType::MENU);
     if (!param.has_value()) {
         return;
     }
@@ -1193,17 +1236,43 @@ void TitleBarPattern::UpdateMenuMaterialInner(const RefPtr<UINode>& menuNode, co
     CHECK_NULL_VOID(menuNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(material));
-    InitColorPickerIfNeeded();
+    RefPtr<UiMaterial> innerMaterial = nullptr;
+    do {
+        CHECK_NULL_BREAK(material);
+        innerMaterial = material->Copy();
+        CHECK_NULL_BREAK(innerMaterial);
+        auto options = innerMaterial->GetImmersiveOptions();
+        CHECK_NULL_BREAK(options);
+        options->colorInvert = false;
+        if (IsColorInvertEnabled()) {
+            options->colorMode = GetCurrentColorMode(true, TitleBarAreaType::MENU);
+        }
+        innerMaterial->SetImmersiveOptions(*options);
+    } while (false);
+    UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(innerMaterial));
+    InitMenuColorPickerIfNeeded();
     InitTransparencyListenerIfNeeded();
+    // Split the material: the EC variant goes on the EffectComponent (the menu's parent,
+    // background layer), the Sub variant goes on each menu item (foreground content).
+    if (innerMaterial) {
+        EnsureTitleBarEffectComponent();
+        auto effectNode = titleBarEffectNode_;
+        if (effectNode) {
+            auto matForEC = innerMaterial; // ConvertToImmersiveEC takes a non-const RefPtr&
+            auto ecMaterial = ViewAbstract::ConvertToImmersiveEC(matForEC);
+            ViewAbstract::SetSystemMaterial(AceType::RawPtr(effectNode), AceType::RawPtr(ecMaterial));
+        }
+    }
     auto children = menuNode->GetChildren();
+    auto matForSub = innerMaterial; // ConvertToImmersiveECSub takes a non-const RefPtr&
+    auto subMaterial = ViewAbstract::ConvertToImmersiveECSub(matForSub);
     for (auto& child : children) {
         auto menuItemNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_CONTINUE(menuItemNode);
         if (menuItemNode->GetTag() != V2::MENU_ITEM_ETS_TAG) {
             continue;
         }
-        ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuItemNode), AceType::RawPtr(material));
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuItemNode), AceType::RawPtr(subMaterial));
     }
 }
 
@@ -1218,7 +1287,7 @@ void TitleBarPattern::UpdateMenuBrightnessEffect(const RefPtr<UINode>& menuNode,
     const Rosen::BrightnessBlender* blender = nullptr;
     if (options_.bgOptions.scrollEffectOptions.has_value() && IsBrightnessBlendEnabled()) {
         bool isColorInvertEnabled = IsColorInvertEnabled();
-        auto colorMode = GetCurrentColorMode(isColorInvertEnabled);
+        auto colorMode = GetCurrentColorMode(isColorInvertEnabled, TitleBarAreaType::MENU);
         blender = colorMode == ColorMode::LIGHT ?
             LIGHT_ICON_BRIGHTNESS_BLENDER.get() : DARK_ICON_BRIGHTNESS_BLENDER.get();
     }
@@ -1240,7 +1309,12 @@ void TitleBarPattern::UpdateMenuBrightnessEffect(const RefPtr<UINode>& menuNode,
             continue;
         }
         // foreground
-        ViewAbstract::SetBlender(AceType::RawPtr(iconNode), blender);
+        if (blender) {
+            ViewAbstract::SetBlender(AceType::RawPtr(iconNode), blender);
+        } else {
+            ViewAbstract::ResetBlender(AceType::RawPtr(iconNode));
+        }
+        ViewAbstract::SetBlendApplyType(AceType::RawPtr(iconNode), BlendApplyType::FAST);
     }
 #endif
 }
@@ -1268,7 +1342,20 @@ void TitleBarPattern::OnModifyDone()
     if (options_.enableHoverMode && currentFoldCreaseRegion_.empty()) {
         InitFoldCreaseRegion();
     }
+    // MountBackButton may reset icon color to theme default, and backButton may be
+    // recreated when switching back to mini mode, ensure all effects are re-applied
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
+    if (backButtonNode && backButtonNode->GetId() != lastBackButtonNodeId_) {
+        lastBackButtonNodeId_ = backButtonNode->GetId();
+        auto material = GetCurrentMaterial();
+        if (material) {
+            needUpdateBackButtonMaterial_ = true;
+            needUpdateBackButtonEffect_ = true;
+            needUpdateBackButtonBrightness_ = true;
+        }
+    }
     UpdateBackButtonUIEffect();
+    UpdateTitleTextUIEffect();
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
@@ -1723,6 +1810,8 @@ void TitleBarPattern::OnAttachToFrameNode()
             .edges = SAFE_AREA_EDGE_TOP };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
+    // The EffectComponent that wraps the titleBar menu is created lazily
+    // (by MountTitleBarMenu / EnsureTitleBarEffectNode) so an empty titleBar stays empty.
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
 
@@ -1748,7 +1837,7 @@ void TitleBarPattern::OnDetachFromMainTree()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     THREAD_SAFE_NODE_CHECK(host, OnDetachFromMainTree);
-    UnregisterColorPicker();
+    UnregisterAllColorPickers();
     UnregisterTransparencyListener();
 }
 
@@ -2013,10 +2102,10 @@ float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset,
     return offset;
 }
 
-RefPtr<UiMaterial> TitleBarPattern::GetOrCreateGradualBlurMaterial()
+RefPtr<UiMaterial> TitleBarPattern::GetOrCreateDefaultMaterial()
 {
-    if (gradualBlurMaterial_) {
-        return gradualBlurMaterial_;
+    if (defaultMaterial_) {
+        return defaultMaterial_;
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
@@ -2038,14 +2127,9 @@ RefPtr<UiMaterial> TitleBarPattern::GetOrCreateGradualBlurMaterial()
         options.materialColor = tokenColors->CompBackgroundGray();
         options.materialColor = options.materialColor->ChangeOpacity(0);
     }
-    options.applyShadow = true;
-    options.interactive = true;
-    LightEffectOptions lightEffectOptions;
-    lightEffectOptions.color = DEFAULT_LIGHT_EFFECT_COLOR;
-    options.lightEffectOptions = lightEffectOptions;
     material->SetImmersiveOptions(options);
-    gradualBlurMaterial_ = material;
-    return gradualBlurMaterial_;
+    defaultMaterial_ = material;
+    return defaultMaterial_;
 }
 
 RefPtr<UiMaterial> TitleBarPattern::GetCurrentMaterial()
@@ -2062,11 +2146,7 @@ RefPtr<UiMaterial> TitleBarPattern::GetCurrentMaterial()
         return nullptr;
     }
     // enable
-    const auto& options = options_.bgOptions.scrollEffectOptions;
-    if (options.has_value() && options->scrollEffectType == ScrollEffectType::GRADUAL_BLUR) {
-        return GetOrCreateGradualBlurMaterial();
-    }
-    return nullptr;
+    return GetOrCreateDefaultMaterial();
 }
 
 void TitleBarPattern::UpdateTitleBarUIEffectForColorModeChange()
@@ -2094,14 +2174,14 @@ void TitleBarPattern::UpdateTitleBarUIEffectForColorModeChange()
     const auto tokenColors = GetOrCreateTitleBarTokenColors(context, mode);
     CHECK_NULL_VOID(tokenColors);
     do {
-        CHECK_NULL_BREAK(gradualBlurMaterial_);
-        auto options = gradualBlurMaterial_->CopyImmersiveOptions();
+        CHECK_NULL_BREAK(defaultMaterial_);
+        auto options = defaultMaterial_->CopyImmersiveOptions();
         CHECK_NULL_BREAK(options);
         if (SystemProperties::GetUiMaterialLevel() != UiMaterialLevel::SMOOTH) {
             options->materialColor = tokenColors->compBackgroundGray;
             options->materialColor = options->materialColor->ChangeOpacity(0);
         }
-        gradualBlurMaterial_->SetImmersiveOptions(*options);
+        defaultMaterial_->SetImmersiveOptions(*options);
     } while (false);
     if (options_.material || !MaterialUtils::IsMaterialEnabled()) {
         return;
@@ -2180,11 +2260,18 @@ bool TitleBarPattern::ShouldEnableTitleBarClip(const RefPtr<UiMaterial>& materia
     return !scrollEffectOptions.has_value() || scrollEffectOptions->scrollEffectType != ScrollEffectType::GRADUAL_BLUR;
 }
 
-ColorMode TitleBarPattern::GetCurrentColorMode(bool enableColorInvert)
+ColorMode TitleBarPattern::GetCurrentColorMode(bool enableColorInvert, TitleBarAreaType areaType)
 {
-    if (enableColorInvert && isColorPickerDark_.has_value()) {
-        return isColorPickerDark_.value() ? ColorMode::DARK : ColorMode::LIGHT;
-    }
+    do {
+        if (!enableColorInvert) {
+            break;
+        }
+        const auto* colorPickerCtx = GetColorPickerContext(areaType);
+        CHECK_NULL_BREAK(colorPickerCtx);
+        if (colorPickerCtx->isColorPickerDark.has_value()) {
+            return colorPickerCtx->isColorPickerDark.value() ? ColorMode::DARK : ColorMode::LIGHT;
+        }
+    } while (false);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ColorMode::COLOR_MODE_UNDEFINED);
     auto localMode = host->GetLocalColorMode();
@@ -2243,74 +2330,223 @@ void TitleBarPattern::UnregisterTransparencyListener()
     transparencyListenerId_ = std::nullopt;
 }
 
+void TitleBarPattern::UpdateTitleTextUIEffect()
+{
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return;
+    }
+    InitBackBtnAndTextColorPickerIfNeeded();
+}
+
+TitleBarPattern::ColorPickerContext* TitleBarPattern::GetColorPickerContext(TitleBarAreaType type)
+{
+    switch (type) {
+        case TitleBarAreaType::MENU:
+            return &menuColorPickerCtx_;
+        case TitleBarAreaType::BACK_BUTTON_AND_TEXT:
+            return &backBtnAndTextColorPickerCtx_;
+        default:
+            return nullptr;
+    }
+}
+
 void TitleBarPattern::InitColorPickerIfNeeded()
 {
-    auto host = AceType::DynamicCast<FrameNode>(GetHost());
+    InitMenuColorPickerIfNeeded();
+    InitBackBtnAndTextColorPickerIfNeeded();
+}
+
+void TitleBarPattern::InitMenuColorPickerIfNeeded()
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(host);
-    if (!IsColorInvertEnabled()) {
-        auto isDark = isBackgroundDark_;
-        UnregisterColorPicker();
-        if (isDark != isBackgroundDark_) {
-            StartColorInvertAnimation();
+    auto parentNode = AceType::DynamicCast<NavDestinationNodeBase>(host->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto isCustomMenu = parentNode->GetPrevMenuIsCustomValue(false);
+    auto isColorInvertEnabled = IsColorInvertEnabled();
+    auto* colorPickerCtx = GetColorPickerContext(TitleBarAreaType::MENU);
+    CHECK_NULL_VOID(colorPickerCtx);
+    if (isCustomMenu || !isColorInvertEnabled) {
+        if (!colorPickerCtx->hasRegisterColorPicker) {
+            return;
         }
+        auto menuColorPickerNode = GetMenuColorPickerNode();
+        CHECK_NULL_VOID(menuColorPickerNode);
+        auto isDark = colorPickerCtx->isBackgroundDark;
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "unregister color picker for titleBarArea[Menu]");
+        UnregisterColorPicker(TitleBarAreaType::MENU, menuColorPickerNode);
+        if (isDark != colorPickerCtx->isBackgroundDark) {
+            StartColorInvertAnimation(TitleBarAreaType::MENU);
+        }
+        host->RemoveChild(menuColorPickerNode);
+        host->MarkNeedSyncRenderTree();
         return;
     }
-    if (hasRegisterColorPicker_) {
+    if (colorPickerCtx->hasRegisterColorPicker) {
         return;
     }
-    hasRegisterColorPicker_ = true;
+    colorPickerCtx->hasRegisterColorPicker = true;
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto navMgr = context->GetNavigationManager();
     CHECK_NULL_VOID(navMgr);
-    navMgr->RegisterColorPicker(host, LUMINANCE_SAMPLER_INTERVAL, LUMINANCE_THRESHOLD_HIGH, LUMINANCE_THRESHOLD_LOW,
+    auto menuColorPickerNode = GetOrCreateMenuColorPickerNode();
+    CHECK_NULL_VOID(menuColorPickerNode);
+    host->AddChild(menuColorPickerNode);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "register color picker for titleBarArea[Menu]");
+    navMgr->RegisterColorPicker(
+        menuColorPickerNode, LUMINANCE_SAMPLER_INTERVAL, LUMINANCE_THRESHOLD_HIGH, LUMINANCE_THRESHOLD_LOW,
         [weakPattern = WeakClaim(this)](uint32_t luminance) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "titleBar luminance change to %{public}u", luminance);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "titleBar area[Menu] luminance change to %{public}u", luminance);
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnLuminanceUpdate(luminance);
+        pattern->OnLuminanceUpdate(TitleBarAreaType::MENU, luminance);
     });
+}
+
+bool TitleBarPattern::NeedRegisterBackBtnAndTextColorPicker()
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_RETURN(host, false);
+    auto titleBarLayoutProperty = host->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_RETURN(titleBarLayoutProperty, false);
+    auto parentNode = AceType::DynamicCast<NavDestinationNodeBase>(host->GetParentFrameNode());
+    CHECK_NULL_RETURN(parentNode, false);
+    auto parentProperty = parentNode->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_RETURN(parentProperty, false);
+    if (!parentNode->GetPrevTitleIsCustomValue(false)) {
+        return true;
+    }
+    if (parentNode->GetTag() == V2::NAVBAR_ETS_TAG &&
+        titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::MINI) {
+        return false;
+    }
+    /**
+     * The behavior here may not exactly match the actual display of the back button. However,
+     * even if the back button is not displayed, the color sampling task will not have significant side effects.
+     */
+    return !titleBarLayoutProperty->GetHideBackButtonValue(false);
+}
+
+void TitleBarPattern::InitBackBtnAndTextColorPickerIfNeeded()
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto parentNode = AceType::DynamicCast<NavDestinationNodeBase>(host->GetParentFrameNode());
+    CHECK_NULL_VOID(parentNode);
+    auto isColorInvertEnabled = IsColorInvertEnabled();
+    bool needRegisterColorPicker = NeedRegisterBackBtnAndTextColorPicker();
+    auto* colorPickerCtx = GetColorPickerContext(TitleBarAreaType::BACK_BUTTON_AND_TEXT);
+    CHECK_NULL_VOID(colorPickerCtx);
+    if (!needRegisterColorPicker || !isColorInvertEnabled) {
+        if (!colorPickerCtx->hasRegisterColorPicker) {
+            return;
+        }
+        auto colorPickerNode = GetBackBtnAndTextColorPickerNode();
+        CHECK_NULL_VOID(colorPickerNode);
+        auto isDark = colorPickerCtx->isBackgroundDark;
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "unregister color picker for titleBarArea[BackBtnAndText]");
+        UnregisterColorPicker(TitleBarAreaType::BACK_BUTTON_AND_TEXT, colorPickerNode);
+        if (isDark != colorPickerCtx->isBackgroundDark) {
+            StartColorInvertAnimation(TitleBarAreaType::BACK_BUTTON_AND_TEXT);
+        }
+        host->RemoveChild(colorPickerNode);
+        host->MarkNeedSyncRenderTree();
+        return;
+    }
+    if (colorPickerCtx->hasRegisterColorPicker) {
+        return;
+    }
+    colorPickerCtx->hasRegisterColorPicker = true;
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    auto colorPickerNode = GetOrCreateBackBtnAndTextColorPickerNode();
+    CHECK_NULL_VOID(colorPickerNode);
+    host->AddChild(colorPickerNode);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "register color picker for titleBarArea[BackBtnAndText]");
+    navMgr->RegisterColorPicker(
+        colorPickerNode, LUMINANCE_SAMPLER_INTERVAL, LUMINANCE_THRESHOLD_HIGH, LUMINANCE_THRESHOLD_LOW,
+        [weakPattern = WeakClaim(this)](uint32_t luminance) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "titleBar area[BackBtnAndText] luminance change to %{public}u", luminance);
+        auto pattern = weakPattern.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnLuminanceUpdate(TitleBarAreaType::BACK_BUTTON_AND_TEXT, luminance);
+    });
+}
+
+void TitleBarPattern::UpdateIsBackgroundDarkByType(TitleBarAreaType type)
+{
+    auto* context = GetColorPickerContext(type);
+    CHECK_NULL_VOID(context);
+    context->isBackgroundDark = GetCurrentColorMode(true, type) == ColorMode::DARK;
 }
 
 void TitleBarPattern::UpdateIsBackgroundDark()
 {
-    isBackgroundDark_ = GetCurrentColorMode(true) == ColorMode::DARK;
+    UpdateIsBackgroundDarkByType(TitleBarAreaType::MENU);
+    UpdateIsBackgroundDarkByType(TitleBarAreaType::BACK_BUTTON_AND_TEXT);
 }
 
-void TitleBarPattern::OnLuminanceUpdate(uint32_t luminance)
+void TitleBarPattern::OnLuminanceUpdate(TitleBarAreaType type, uint32_t luminance)
 {
+    auto* colorPickerCtx = GetColorPickerContext(type);
+    CHECK_NULL_VOID(colorPickerCtx);
     if (static_cast<int32_t>(luminance) < LUMINANCE_THRESHOLD_LOW) {
-        isColorPickerDark_ = true;
+        colorPickerCtx->isColorPickerDark = true;
     } else if (static_cast<int32_t>(luminance) > LUMINANCE_THRESHOLD_HIGH) {
-        isColorPickerDark_ = false;
+        colorPickerCtx->isColorPickerDark = false;
     }
     if (!IsColorInvertEnabled()) {
         return;
     }
-    if (!isColorPickerDark_.has_value() || isColorPickerDark_.value() == isBackgroundDark_) {
+    if (!colorPickerCtx->isColorPickerDark.has_value() ||
+        colorPickerCtx->isColorPickerDark.value() == colorPickerCtx->isBackgroundDark) {
         return;
     }
-    isBackgroundDark_ = isColorPickerDark_.value();
-    StartColorInvertAnimation();
+    colorPickerCtx->isBackgroundDark = colorPickerCtx->isColorPickerDark.value();
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TitleBarArea[%{public}d] change to %{public}s mode",
+        static_cast<int32_t>(type), (colorPickerCtx->isBackgroundDark ? "dark" : "light"));
+    StartColorInvertAnimation(type);
 }
 
-void TitleBarPattern::UnregisterColorPicker()
+void TitleBarPattern::UnregisterColorPicker(TitleBarAreaType type, const RefPtr<FrameNode> colorPickerNode)
 {
+    auto* colorPickerCtx = GetColorPickerContext(type);
+    CHECK_NULL_VOID(colorPickerCtx);
+    if (!colorPickerCtx->hasRegisterColorPicker) {
+        return;
+    }
+    colorPickerCtx->hasRegisterColorPicker = false;
     auto host = AceType::DynamicCast<FrameNode>(GetHost());
     CHECK_NULL_VOID(host);
-    if (hasRegisterColorPicker_) {
-        hasRegisterColorPicker_ = false;
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
-        auto navMgr = context->GetNavigationManager();
-        CHECK_NULL_VOID(navMgr);
-        navMgr->UnregisterColorPicker(host);
-        isColorPickerDark_ = std::nullopt;
-        UpdateIsBackgroundDark();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto navMgr = context->GetNavigationManager();
+    CHECK_NULL_VOID(navMgr);
+    navMgr->UnregisterColorPicker(colorPickerNode);
+    colorPickerCtx->isColorPickerDark = std::nullopt;
+    UpdateIsBackgroundDarkByType(type);
+}
+
+void TitleBarPattern::UnregisterAllColorPickers()
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto menuColorPickerNode = GetMenuColorPickerNode();
+    if (menuColorPickerNode) {
+        UnregisterColorPicker(TitleBarAreaType::MENU, menuColorPickerNode);
+    }
+    auto backBtnAndTextColorPickerNode = GetBackBtnAndTextColorPickerNode();
+    if (backBtnAndTextColorPickerNode) {
+        UnregisterColorPicker(TitleBarAreaType::BACK_BUTTON_AND_TEXT, backBtnAndTextColorPickerNode);
     }
 }
 
-void TitleBarPattern::StartColorInvertAnimation()
+void TitleBarPattern::StartColorInvertAnimation(TitleBarAreaType type)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2319,23 +2555,165 @@ void TitleBarPattern::StartColorInvertAnimation()
     option.SetDuration(INVERT_COLOR_ANIMATION_DURATION);
     option.SetCurve(Curves::LINEAR);
     AnimationUtils::StartAnimation(option,
-        [weakPattern = WeakClaim(this)]() {
+        [weakPattern = WeakClaim(this), type]() {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->HandleColorInvert();
+            pattern->HandleColorInvert(type);
         }, nullptr, nullptr, context);
 }
 
-void TitleBarPattern::HandleColorInvert()
+void TitleBarPattern::HandleColorInvert(TitleBarAreaType type)
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    if (type == TitleBarAreaType::MENU) {
+        auto menuNode = AceType::DynamicCast<FrameNode>(host->GetMenu());
+        CHECK_NULL_VOID(menuNode);
+        UpdateMenuMaterialColorModeForColorInvert();
+        UpdateMenuIconEffect(menuNode, true);
+        UpdateMenuBrightnessEffect(menuNode, true);
+    } else if (type == TitleBarAreaType::BACK_BUTTON_AND_TEXT) {
+        UpdateBackButtonMaterialColorModeForColorInvert();
+        UpdateBackButtonIconEffect(true);
+        UpdateBackButtonBrightnessEffect(true);
+        UpdateTextColorByColorInvert();
+    }
+}
+
+void TitleBarPattern::UpdateBackButtonMaterialColorModeForColorInvert()
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(host->GetBackButton());
+    CHECK_NULL_VOID(backButtonNode);
+    auto material = GetCurrentMaterial();
+    CHECK_NULL_VOID(material);
+    auto innerMaterial = material->Copy();
+    CHECK_NULL_VOID(innerMaterial);
+    auto options = innerMaterial->GetImmersiveOptions();
+    CHECK_NULL_VOID(options);
+    options->colorInvert = false;
+    if (IsColorInvertEnabled()) {
+        options->colorMode = GetCurrentColorMode(true, TitleBarAreaType::BACK_BUTTON_AND_TEXT);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TitleBar backBtn material change to colorMode:%{public}d",
+            static_cast<int32_t>(options->colorMode));
+    }
+    innerMaterial->SetImmersiveOptions(*options);
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(backButtonNode), AceType::RawPtr(innerMaterial));
+}
+
+void TitleBarPattern::UpdateMenuMaterialColorModeForColorInvert()
 {
     auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(host);
     auto menuNode = AceType::DynamicCast<FrameNode>(host->GetMenu());
     CHECK_NULL_VOID(menuNode);
-    UpdateMenuIconEffect(menuNode, true);
-    UpdateMenuBrightnessEffect(menuNode, true);
-    UpdateBackButtonIconEffect(true);
-    UpdateBackButtonBrightnessEffect(true);
+    if (menuNode->GetTag() != V2::NAVIGATION_MENU_ETS_TAG) {
+        return;
+    }
+    auto material = GetCurrentMaterial();
+    CHECK_NULL_VOID(material);
+    auto innerMaterial = material->Copy();
+    CHECK_NULL_VOID(innerMaterial);
+    auto options = innerMaterial->GetImmersiveOptions();
+    CHECK_NULL_VOID(options);
+    options->colorInvert = false;
+    ColorMode colorMode = ColorMode::COLOR_MODE_UNDEFINED;
+    if (IsColorInvertEnabled()) {
+        options->colorMode = GetCurrentColorMode(true, TitleBarAreaType::MENU);
+        colorMode = options->colorMode;
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "TitleBar menu material change to colorMode:%{public}d",
+            static_cast<int32_t>(colorMode));
+    }
+    innerMaterial->SetImmersiveOptions(*options);
+    // Split the material: the EC variant goes on the EffectComponent (the menu's parent,
+    // background layer), the Sub variant goes on each menu item (foreground content).
+    if (innerMaterial) {
+        EnsureTitleBarEffectComponent();
+        auto effectNode = titleBarEffectNode_;
+        if (effectNode) {
+            auto matForEC = innerMaterial; // ConvertToImmersiveEC takes a non-const RefPtr&
+            auto ecMaterial = ViewAbstract::ConvertToImmersiveEC(matForEC);
+            ViewAbstract::SetSystemMaterial(AceType::RawPtr(effectNode), AceType::RawPtr(ecMaterial));
+        }
+    }
+    auto children = menuNode->GetChildren();
+    auto matForSub = innerMaterial; // ConvertToImmersiveECSub takes a non-const RefPtr&
+    auto subMaterial = ViewAbstract::ConvertToImmersiveECSub(matForSub);
+    for (auto& child : children) {
+        auto menuItemNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_CONTINUE(menuItemNode);
+        if (menuItemNode->GetTag() != V2::MENU_ITEM_ETS_TAG) {
+            continue;
+        }
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuItemNode), AceType::RawPtr(subMaterial));
+    }
+    auto parentNode = AceType::DynamicCast<NavDestinationNodeBase>(host->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    parentNode->SetExpectMoreMenuViewColorMode(colorMode);
+}
+
+bool TitleBarPattern::GetTextTitleColor(bool isMainText, Color& color)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    bool isColorInvertEnabled = IsColorInvertEnabled();
+    if (!isColorInvertEnabled) {
+        auto theme = NavigationGetTheme(host->GetThemeScopeId());
+        CHECK_NULL_RETURN(theme, false);
+        if (isMainText) {
+            color = theme->GetTitleColor();
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                color = theme->GetMainTitleFontColor();
+            }
+        } else {
+            color = theme->GetSubTitleColor();
+            if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+                color = theme->GetSubTitleFontColor();
+            }
+        }
+        return true;
+    }
+    auto colorMode = GetCurrentColorMode(isColorInvertEnabled, TitleBarAreaType::BACK_BUTTON_AND_TEXT);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(context, false);
+    const auto colors = GetOrCreateTitleBarTokenColors(context, colorMode);
+    CHECK_NULL_RETURN(colors, false);
+    if (isMainText) {
+        color = colors->fontPrimary;
+    } else {
+        color = colors->fontSecondary;
+    }
+    return true;
+}
+
+void TitleBarPattern::UpdateTextColorByColorInvert()
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    auto parentNode = AceType::DynamicCast<NavDestinationNodeBase>(host->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    if (parentNode->GetPrevTitleIsCustomValue(false)) {
+        return;
+    }
+    auto mainText = AceType::DynamicCast<FrameNode>(host->GetTitle());
+    if (mainText) {
+        Color mainColor;
+        if (GetTextTitleColor(true, mainColor)) {
+            SetTextColor(mainText, mainColor);
+            mainText->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            mainText->MarkModifyDone();
+        }
+    }
+    auto subText = AceType::DynamicCast<FrameNode>(host->GetSubtitle());
+    if (subText) {
+        Color subColor;
+        if (GetTextTitleColor(false, subColor)) {
+            SetTextColor(subText, subColor);
+            subText->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            subText->MarkModifyDone();
+        }
+    }
 }
 
 RefPtr<NavDestinationNodeBase> TitleBarPattern::GetHostParentNode() const
@@ -2396,12 +2774,138 @@ void TitleBarPattern::ResetTitleBarMaskNodes()
     }
 }
 
+void TitleBarPattern::EnsureTitleBarEffectComponent()
+{
+    // The EffectComponent is only created when material is enabled for this titleBar.
+    if (!IsMaterialEnabled()) {
+        return;
+    }
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    if (!titleBarEffectNode_) {
+        titleBarEffectNode_ = CreateTitleBarEffectComponent();
+    }
+    CHECK_NULL_VOID(titleBarEffectNode_);
+    if (titleBarEffectNode_->GetParent() != host) {
+        RemoveTitleBarEffectNodeFromParent(titleBarEffectNode_);
+        host->AddChild(titleBarEffectNode_);
+    }
+}
+
+bool TitleBarPattern::IsMaterialEnabled() const
+{
+    // Mirror GetCurrentMaterial()'s decision logic as a pure query (no lazy creation).
+    if (MaterialUtils::IsMaterialDisabled()) {
+        return false;
+    }
+    if (options_.material) {
+        return true;
+    }
+    // default
+    if (!MaterialUtils::IsMaterialEnabled()) {
+        return false;
+    }
+    // enable
+    return true;
+}
+
+void TitleBarPattern::ReconcileEffectComponent()
+{
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    bool materialEnabled = IsMaterialEnabled();
+    bool structureChanged = false;
+    if (materialEnabled && !titleBarEffectNode_) {
+        // Material became enabled: create the EffectComponent and move the menu (mounted
+        // directly under the titleBar before material was known) under it so the structure
+        // becomes titleBar -> EffectComponent -> menu.
+        EnsureTitleBarEffectComponent();
+        if (titleBarEffectNode_) {
+            MoveTitleBarMenu(host, titleBarEffectNode_);
+            structureChanged = true;
+        }
+    } else if (!materialEnabled && titleBarEffectNode_) {
+        // Material became disabled: move the menu back to the titleBar and drop the
+        // EffectComponent so the structure reverts to titleBar -> menu.
+        ResetTitleBarMaskNodes();
+        MoveTitleBarMenu(titleBarEffectNode_, host);
+        RemoveTitleBarEffectNodeFromParent(titleBarEffectNode_);
+        titleBarEffectNode_ = nullptr;
+        structureChanged = true;
+    }
+    if (structureChanged) {
+        // Reparenting changes the coordinate space of the menu. Rebuild the titleBar wrapper
+        // tree and remeasure its children so no geometry from the previous parent is reused.
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    }
+}
+
+void TitleBarPattern::MoveTitleBarMenu(const RefPtr<UINode>& from, const RefPtr<UINode>& to)
+{
+    CHECK_NULL_VOID(from);
+    CHECK_NULL_VOID(to);
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    // Only the menu is wrapped under the EffectComponent; move it between `from` and `to`.
+    auto menu = host->GetMenu();
+    if (menu && menu->GetParent() == from) {
+        from->RemoveChild(menu);
+        to->AddChild(menu);
+    }
+}
+
+void TitleBarPattern::MountTitleBarMenu(const RefPtr<UINode>& menu)
+{
+    CHECK_NULL_VOID(menu);
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    // The EffectComponent only wraps the menu, and only when material is enabled.
+    if (IsMaterialEnabled()) {
+        EnsureTitleBarEffectComponent();
+        auto effectNode = titleBarEffectNode_;
+        if (effectNode) {
+            effectNode->AddChild(menu);
+            return;
+        }
+    }
+    host->AddChild(menu);
+}
+
+void TitleBarPattern::UnmountTitleBarMenu(const RefPtr<UINode>& menu)
+{
+    CHECK_NULL_VOID(menu);
+    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(host);
+    // The menu lives under the EffectComponent when material is enabled, otherwise directly
+    // under the titleBar; remove it from whichever is its current parent.
+    auto effectNode = titleBarEffectNode_;
+    if (effectNode && menu->GetParent() == effectNode) {
+        effectNode->RemoveChild(menu);
+    } else {
+        host->RemoveChild(menu);
+    }
+}
+
+RefPtr<FrameNode> TitleBarPattern::CreateTitleBarEffectComponent()
+{
+    auto node = FrameNode::GetOrCreateFrameNode(V2::EFFECT_COMPONENT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<EffectComponentPattern>(); });
+    CHECK_NULL_RETURN(node, nullptr);
+    // Transparent by default (no background effect applied) and never intercepts
+    // touch/gesture events so they pass through to the titleBar content below.
+    ViewAbstract::SetHitTestMode(AceType::RawPtr(node), HitTestMode::HTMNONE);
+    // Clip stays disabled (FrameNode default) so the effect content is not clipped.
+    return node;
+}
+
 void TitleBarPattern::EnsureTitleBarEffectNode(const RefPtr<FrameNode>& node, int32_t zIndex)
 {
     CHECK_NULL_VOID(node);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(zIndex);
+    // Mask nodes are direct children of the titleBar (the EffectComponent only wraps the menu).
     auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(host);
     if (node->GetParent() != host) {
@@ -2520,6 +3024,30 @@ void TitleBarPattern::PrepareScrollEffectTitleBarBgStyles(ScrollEffectType scrol
     SetScrollEffectTitleBarBgStyle(scrollEffectBgStyle);
 }
 
+void TitleBarPattern::SetIsFlinging(bool isFlinging)
+{
+    if (isFlinging_ == isFlinging) {
+        return;
+    }
+    isFlinging_ = isFlinging;
+    if (!isScrollEffectEnabled_) {
+        return;
+    }
+    // Fling only closes the blur for GRADUAL_BLUR; COMMON_BLUR is left unaffected.
+    auto scrollEffectOptions = options_.bgOptions.scrollEffectOptions;
+    if (!scrollEffectOptions.has_value() ||
+        scrollEffectOptions->scrollEffectType != ScrollEffectType::GRADUAL_BLUR) {
+        return;
+    }
+    CHECK_NULL_VOID(titleBarMaskBlurNode_);
+    auto renderContext = titleBarMaskBlurNode_->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetVisible(!isFlinging);
+    if (!isFlinging) {
+        UpdateBackgroundBlurStyle();
+    }
+}
+
 void TitleBarPattern::UpdateBackgroundBlurStyle()
 {
     if (!isScrollEffectEnabled_) {
@@ -2599,11 +3127,13 @@ void TitleBarPattern::InitScrollEffectOptions()
             hostNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         isScrollEffectEnabled_ = false;
+        isFlinging_ = false;
         return;
     }
 
     auto scrollEffectType = scrollEffectOptionsOpt->scrollEffectType;
     isScrollEffectEnabled_ = true;
+    isFlinging_ = false;
     SetIsTitleBarStyleStartUpdate(false);
     SetIsTitleBarStyleEndUpdate(false);
     UpdateTitleBarClipForMask(ShouldEnableTitleBarClip(GetCurrentMaterial()));
@@ -2648,13 +3178,18 @@ void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions& opt)
     if (!MaterialUtils::IsMaterialDisabled()) {
         // Default or Enable
         if (options_.material || opt.material) {
+            needUpdateBackButtonEffect_ = true;
             needUpdateBackButtonMaterial_ = true;
             needUpdateBackButtonBrightness_ = true;
+            needUpdateMenuEffect_ = true;
             needUpdateMenuMaterial_ = true;
             needUpdateMenuBrightness_ = true;
         }
     }
     options_ = opt;
+    // Material state may have changed (options_.material / scrollEffectOptions); reconcile
+    // the EffectComponent and the placement of content children to match the new state.
+    ReconcileEffectComponent();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (opt.brOptions.paddingStart.has_value()) {
@@ -3075,5 +3610,39 @@ void TitleBarPattern::SetDividerStyle(
         renderContext->UpdateOpacity(dividerStyle.opacity);
     }
     dividerNode->MarkModifyDone();
+}
+
+RefPtr<FrameNode> TitleBarPattern::GetOrCreateMenuColorPickerNode()
+{
+    if (menuColorPickerNode_) {
+        return menuColorPickerNode_;
+    }
+    auto node = FrameNode::CreateFrameNode(
+        "titleMenuColorPickerNode", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    CHECK_NULL_RETURN(node, nullptr);
+    auto eventHub = node->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    gestureHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+    menuColorPickerNode_ = node;
+    return menuColorPickerNode_;
+}
+
+RefPtr<FrameNode> TitleBarPattern::GetOrCreateBackBtnAndTextColorPickerNode()
+{
+    if (backBtnAndTextColorPickerNode_) {
+        return backBtnAndTextColorPickerNode_;
+    }
+    auto node = FrameNode::CreateFrameNode("backBtnAndTextColorPickerNode",
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    CHECK_NULL_RETURN(node, nullptr);
+    auto eventHub = node->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    auto gestureHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    gestureHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
+    backBtnAndTextColorPickerNode_ = node;
+    return backBtnAndTextColorPickerNode_;
 }
 } // namespace OHOS::Ace::NG

@@ -2739,7 +2739,7 @@ void SetPaddingImpl(Ark_NativePointer node,
     }
 }
 void SetSafeAreaPaddingImpl(Ark_NativePointer node,
-                            const Opt_Union_Padding_LengthMetrics_LocalizedPadding* value)
+                            const Opt_Union_Padding_LengthMetricsProxy_LocalizedPadding* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2752,7 +2752,7 @@ void SetSafeAreaPaddingImpl(Ark_NativePointer node,
             auto convValue = Converter::Convert<PaddingProperty>(value);
             ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
-        [frameNode](const Ark_LengthMetrics& value) {
+        [frameNode](const Ark_LengthMetricsProxy& value) {
             auto convValue = Converter::Convert<CalcLength>(value);
             ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },

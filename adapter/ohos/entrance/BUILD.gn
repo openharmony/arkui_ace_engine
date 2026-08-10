@@ -175,6 +175,8 @@ template("ace_ohos_standard_source_set") {
       "window_manager:scene_session",
       "window_manager:screen_session_manager_client",
       "zlib:shared_libz",
+      "node:node_header_notice",
+      "libuv:uv",
     ]
     defines += [ "INDEXER_SUPPORT_VIBRATOR" ]
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {

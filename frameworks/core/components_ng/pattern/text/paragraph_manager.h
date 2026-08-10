@@ -24,6 +24,7 @@
 #include "core/components_ng/base/distributed_ui.h"
 #include "core/components_ng/render/paragraph.h"
 namespace OHOS::Ace::NG {
+
 class ACE_FORCE_EXPORT ParagraphManager : public virtual AceType {
     DECLARE_ACE_TYPE(ParagraphManager, AceType);
 
@@ -53,9 +54,11 @@ public:
 
     int32_t GetIndex(Offset offset, bool clamp = false) const;
     PositionWithAffinity GetGlyphPositionAtCoordinate(Offset offset);
-    PositionWithAffinity GetCharacterPositionAtCoordinate(Offset offset);
-    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end);
-    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end);
+    PositionWithAffinity GetCharacterPositionAtCoordinate(Offset offset, TextEncoding encoding = TextEncoding::UTF8);
+    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8);
+    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8);
     float GetHeight() const;
 
     const std::vector<ParagraphInfo>& GetParagraphs() const

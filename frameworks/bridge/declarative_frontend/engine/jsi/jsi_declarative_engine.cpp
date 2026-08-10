@@ -889,7 +889,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "LazyVGridLayout", "arkui.components.arklazygridlayout" },
         { "LazyVWaterFlowLayout", "arkui.components.arklazywaterflowlayout" },
         { "Swiper", "arkui.components.arkswiper" },
-        { "IndicatorComponent", "arkui.components.arkswiperindicator" },
+        { "IndicatorComponent", "arkui.components.arkindicatorcomponent" },
         { "Tabs", "arkui.components.arktabs" },
         { "TabContent", "arkui.components.arktabcontent" },
         { "CommonShape", "arkui.components.arkcommonshape" },
@@ -3923,7 +3923,10 @@ bool JsiDeclarativeEngine::UpdatePageUrl(void* customNode, const std::string& pa
     }
     std::string moduleName;
     std::string fileName;
-    bool res = runtime->GetOhmUrlByObject(JSRef<JSObject>::Cast(constructor)->GetLocalHandle(), moduleName, fileName);
+    bool res = false;
+    if (constructor->IsObject()) {
+        res = runtime->GetOhmUrlByObject(JSRef<JSObject>::Cast(constructor)->GetLocalHandle(), moduleName, fileName);
+    }
     if (!res) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "get ohmurl form jsObject failed");
         return false;

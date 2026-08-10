@@ -13,42 +13,79 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("tabs_test_ng") {
-  module_name = "NavigationSet-Indicator"
-  type = "new"
+if (is_host_product) {
+  ace_unittest("tabs_test_ng") {
+    type = "host_components"
+    module_name = "NavigationSet-Indicator"
+    sources = [
+      "tab_bar_event_test_ng.cpp",
+      "tab_bar_layout_test_ng.cpp",
+      "tab_bar_modifier_test_ng.cpp",
+      "tab_bar_pattern_test_ng.cpp",
+      "tab_bar_pattern_test_three_ng.cpp",
+      "tab_bar_pattern_testtwo_ng.cpp",
+      "tab_bar_test_ng.cpp",
+      "tab_bar_two_test_ng.cpp",
+      "tab_bar_universal_attributes_test_ng.cpp",
+      "tabs_accessibility_test_ng.cpp",
+      "tabs_attr_test_ng.cpp",
+      "tabs_attr_test_two_ng.cpp",
+      "tabs_common_test_ng.cpp",
+      "tab_content_model_ng_init_tab_text_test_ng.cpp",
+      "tab_content_model_static_test_ng.cpp",
+      "tabs_event_test_ng.cpp",
+      "tabs_floating_bar_layout_test_ng.cpp",
+      "tabs_floating_bar_test_ng.cpp",
+      "tabs_layout_test_ng.cpp",
+      "tabs_model_lazy_child_nodes_test_ng.cpp",
+      "tabs_model_test_ng.cpp",
+      "tabs_model_static_test_ng.cpp",
+      "tabs_pattern_test_ng.cpp",
+      "tabs_sub_tab_bar_style_test_ng.cpp",
+      "tabs_test_ng.cpp",
+    ]
+    sources += [
+      "tabs_test_core.cpp"
+    ]
+  }
+} else {
+  ace_unittest("tabs_test_ng") {
+    module_name = "NavigationSet-Indicator"
+    type = "new"
 
-  sources = [
-    "tab_bar_event_test_ng.cpp",
-    "tab_bar_layout_test_ng.cpp",
-    "tab_bar_modifier_test_ng.cpp",
-    "tab_bar_pattern_test_ng.cpp",
-    "tab_bar_pattern_test_three_ng.cpp",
-    "tab_bar_pattern_testtwo_ng.cpp",
-    "tab_bar_test_ng.cpp",
-    "tab_bar_two_test_ng.cpp",
-    "tab_bar_universal_attributes_test_ng.cpp",
-    "tabs_accessibility_test_ng.cpp",
-    "tabs_attr_test_ng.cpp",
-    "tabs_attr_test_two_ng.cpp",
-    "tabs_common_test_ng.cpp",
-    "tab_content_model_ng_init_tab_text_test_ng.cpp",
-    "tab_content_model_static_test_ng.cpp",
-    "tabs_event_test_ng.cpp",
-    "tabs_floating_bar_layout_test_ng.cpp",
-    "tabs_floating_bar_test_ng.cpp",
-    "tabs_layout_test_ng.cpp",
-    "tabs_model_lazy_child_nodes_test_ng.cpp",
-    "tabs_model_test_ng.cpp",
-    "tabs_model_static_test_ng.cpp",
-    "tabs_pattern_test_ng.cpp",
-    "tabs_sub_tab_bar_style_test_ng.cpp",
-    "tabs_test_ng.cpp",
-  ]
+    sources = [
+      "tab_bar_event_test_ng.cpp",
+      "tab_bar_layout_test_ng.cpp",
+      "tab_bar_modifier_test_ng.cpp",
+      "tab_bar_pattern_test_ng.cpp",
+      "tab_bar_pattern_test_three_ng.cpp",
+      "tab_bar_pattern_testtwo_ng.cpp",
+      "tab_bar_test_ng.cpp",
+      "tab_bar_two_test_ng.cpp",
+      "tab_bar_universal_attributes_test_ng.cpp",
+      "tabs_accessibility_test_ng.cpp",
+      "tabs_attr_test_ng.cpp",
+      "tabs_attr_test_two_ng.cpp",
+      "tabs_common_test_ng.cpp",
+      "tab_content_model_ng_init_tab_text_test_ng.cpp",
+      "tab_content_model_static_test_ng.cpp",
+      "tabs_event_test_ng.cpp",
+      "tabs_floating_bar_layout_test_ng.cpp",
+      "tabs_floating_bar_test_ng.cpp",
+      "tabs_layout_test_ng.cpp",
+      "tabs_model_lazy_child_nodes_test_ng.cpp",
+      "tabs_model_test_ng.cpp",
+      "tabs_model_static_test_ng.cpp",
+      "tabs_pattern_test_ng.cpp",
+      "tabs_sub_tab_bar_style_test_ng.cpp",
+      "tabs_test_ng.cpp",
+    ]
 
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "tabs_test_core.cpp" ]
-  } else {
-    sources += [ "tabs_test_core.cpp" ]
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = [ "tabs_test_core.cpp" ]
+    } else {
+      sources += [ "tabs_test_core.cpp" ]
+    }
   }
 }

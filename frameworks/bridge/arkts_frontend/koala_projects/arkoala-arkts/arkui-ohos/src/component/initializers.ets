@@ -68,6 +68,10 @@ export namespace initializers {
                 export const unit = 0
                 export const value = 0
             }
+            export namespace LengthMetricsProxyNS {
+                export const unit = 0
+                export const value = 0
+            }
             export namespace ColorMetricsExtNS {
                 export const red = 0
                 export const green = 0

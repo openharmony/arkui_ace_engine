@@ -1228,12 +1228,6 @@ HWTEST_F(SvgTransformTestNg, SvgUseTest002, TestSize.Level1)
     EXPECT_TRUE(path.BuildFromSVGString(""));
 
     svgUse->attributes_.href = "href";
-    svgUse->isDrawingPath_ = false;
-    path = svgUse->AsPath(rule);
-    EXPECT_TRUE(path.BuildFromSVGString(""));
-
-    svgUse->attributes_.href = "href";
-    svgUse->isDrawingPath_ = true;
     path = svgUse->AsPath(rule);
     EXPECT_TRUE(path.BuildFromSVGString(""));
 

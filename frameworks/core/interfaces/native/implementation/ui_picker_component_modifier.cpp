@@ -116,7 +116,7 @@ void SetSelectionIndicatorImpl(Ark_NativePointer node,
     auto pickerIndicatorStyle = Converter::OptConvertPtr<PickerIndicatorStyle>(value);
     ContainerPickerModelStatic::SetIndicatorStyle(frameNode, pickerIndicatorStyle);
 }
-void SetItemHeightImpl(Ark_NativePointer node, const Opt_LengthMetrics* value)
+void SetItemHeightImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

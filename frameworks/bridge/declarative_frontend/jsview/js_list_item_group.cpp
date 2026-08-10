@@ -199,26 +199,17 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     auto styleObject = obj->GetProperty("style");
     if (styleObject->IsNumber()) {
-        int32_t styleVal = styleObject->ToNumber<int32_t>();
-        if (styleVal >= 0 && styleVal <= static_cast<int32_t>(V2::ListItemGroupStyle::CARD)) {
-            options.style = static_cast<V2::ListItemGroupStyle>(styleVal);
-        }
+        options.style = static_cast<V2::ListItemGroupStyle>(styleObject->ToNumber<int32_t>());
     }
     auto headerStyleObject = obj->GetProperty("headerStyle");
     if (headerStyleObject->IsNumber()) {
-        int32_t headerStyleVal = headerStyleObject->ToNumber<int32_t>();
-        if (headerStyleVal >= 0 &&
-            headerStyleVal <= static_cast<int32_t>(V2::ListItemGroupHeaderFooterStyle::FLOATING)) {
-            options.headerStyle = static_cast<V2::ListItemGroupHeaderFooterStyle>(headerStyleVal);
-        }
+        options.headerStyle =
+            static_cast<V2::ListItemGroupHeaderFooterStyle>(headerStyleObject->ToNumber<int32_t>());
     }
     auto footerStyleObject = obj->GetProperty("footerStyle");
     if (footerStyleObject->IsNumber()) {
-        int32_t footerStyleVal = footerStyleObject->ToNumber<int32_t>();
-        if (footerStyleVal >= 0 &&
-            footerStyleVal <= static_cast<int32_t>(V2::ListItemGroupHeaderFooterStyle::FLOATING)) {
-            options.footerStyle = static_cast<V2::ListItemGroupHeaderFooterStyle>(footerStyleVal);
-        }
+        options.footerStyle =
+            static_cast<V2::ListItemGroupHeaderFooterStyle>(footerStyleObject->ToNumber<int32_t>());
     }
 
     ListItemGroupModel::GetInstance()->Create(options);
@@ -329,9 +320,7 @@ bool JSListItemGroup::ParseHeaderAndFooterContent(const JSRef<JSVal>& contentPar
     CHECK_NULL_RETURN(nodeptr->GetLocalHandle()->IsNativePointer(vm), false);
     auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
-    if (!frameNode || !AceType::InstanceOf<NG::FrameNode>(frameNode)) {
-        return false;
-    }
+    CHECK_NULL_RETURN(frameNode, false);
     RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
     if (isHeader) {
         NG::ListItemGroupModelNG::GetInstance()->SetHeaderComponent(refPtrFrameNode);

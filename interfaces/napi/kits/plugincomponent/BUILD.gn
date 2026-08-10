@@ -57,6 +57,7 @@ ohos_shared_library("plugincomponent") {
     "hilog:libhilog",
     "ipc:ipc_core",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   relative_install_dir = "module"

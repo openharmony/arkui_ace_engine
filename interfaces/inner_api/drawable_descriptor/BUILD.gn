@@ -99,6 +99,7 @@ if (is_arkui_x) {
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
       "napi:ace_napi",
+      "node:node_header_notice",
     ]
 
     defines = [ "PICTURE_DRAWABLE_ENABLED" ]

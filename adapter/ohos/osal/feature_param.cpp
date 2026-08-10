@@ -16,7 +16,6 @@
 #include "base/utils/feature_param.h"
 
 #include "adapter/ohos/capability/feature_config/feature_param_manager.h"
-#include "core/common/container.h"
 
 namespace OHOS::Ace {
 
@@ -62,10 +61,6 @@ std::string FeatureParam::GetArkWebAutoLayoutConfig()
 
 bool FeatureParam::IsSmartLayoutEnabled()
 {
-    auto container = Container::Current();
-    if (container && container->IsFormRender()) {
-        return FeatureParamManager::GetInstance().IsSmartLayoutEnabledForBundle(container->GetBundleName());
-    }
     return FeatureParamManager::GetInstance().IsSmartLayoutEnabled();
 }
 

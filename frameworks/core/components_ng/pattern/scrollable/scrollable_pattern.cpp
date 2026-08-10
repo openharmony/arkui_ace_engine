@@ -88,7 +88,6 @@ constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
 constexpr uint32_t DVSYNC_OFFSET_SIZE = 10;
 constexpr uint32_t DVSYNC_OFFSET_TIME = 18666667;
 constexpr uint32_t DVSYNC_DELAY_TIME_BASE = 27000000;
-constexpr double ARC_INITWIDTH_VAL = 4.0;
 constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
 constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 constexpr std::string_view SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
@@ -567,7 +566,8 @@ bool ScrollablePattern::CoordinateWithNavigation(double& offset, int32_t source,
         return false;
     }
     if (navBarPattern_ && navBarPattern_->IsScrollEffectEnabled()) {
-        navBarPattern_->OnContentScrollUpdate(offset, GetTotalOffset());
+        bool isFling = GetScrollState(source) == ScrollState::FLING;
+        navBarPattern_->OnContentScrollUpdate(offset, GetTotalOffset(), isFling);
     }
 
     CHECK_NULL_RETURN(navBarPattern_ && navBarPattern_->NeedCoordWithScroll(), false);
@@ -1057,6 +1057,9 @@ void ScrollablePattern::SetOnDidStopFlingCallback(const RefPtr<Scrollable>& scro
     scrollable->SetOnDidStopFlingCallback([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->navBarPattern_ && pattern->navBarPattern_->IsScrollEffectEnabled()) {
+            pattern->navBarPattern_->OnContentFlingStop();
+        }
         auto eventHub = pattern->GetEventHub<ScrollableEventHub>();
         CHECK_NULL_VOID(eventHub);
         OnDidStopFlingEvent callback = eventHub->GetOnDidStopFling();
@@ -1793,8 +1796,8 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
             scrollBar_->SetActiveWidth(barWidth.value());
             scrollBar_->SetTouchWidth(barWidth.value());
             if (isRoundScroll_) {
-                scrollBar_->SetNormalWidth(Dimension(ARC_INITWIDTH_VAL));
-                scrollBar_->SetInactiveWidth(Dimension(ARC_INITWIDTH_VAL));
+                scrollBar_->SetNormalWidth(barWidth.value());
+                scrollBar_->SetInactiveWidth(barWidth.value());
                 scrollBar_->SetArcActiveBackgroundWidth(barWidth.value());
                 scrollBar_->SetArcActiveScrollBarWidth(barWidth.value() - Dimension(ARC_INITWIDTH_HALF_VAL));
             } else {
@@ -3619,9 +3622,16 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
     host->SetSuggestOpIncActivatedOnce();
 }
 
+bool ScrollablePattern::InnerScrollBarIdle()
+{
+    return !scrollBar_ || !scrollBar_->IsDriving();
+}
+
 void ScrollablePattern::ResetAccessibilityScrollSourceIfIdle()
 {
-    if (!IsScrolling() && ScrollableIdle()) {
+    auto scrollable = GetScrollable();
+    if (!IsScrolling() && (!scrollable || scrollable->IsAllAnimationStopped())
+        && !AnimateRunning() && ScrollBarIdle() && InnerScrollBarIdle()) {
         SetAccessibilityScrollSource(AccessibilityScrollSource::NONE);
     }
 }

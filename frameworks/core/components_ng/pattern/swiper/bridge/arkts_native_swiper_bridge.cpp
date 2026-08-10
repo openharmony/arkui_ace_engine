@@ -2868,15 +2868,16 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperCustomContentTransition(ArkUIRunti
         auto onTransition = [vm, frameWeakNode = AceType::WeakClaim(frameNode),
                                 func = panda::CopyableGlobal(vm, funcRef),
                                 isJsView](const RefPtr<SwiperContentTransitionProxy>& proxy) {
-            panda::LocalScope pandaScope(vm);
-            panda::TryCatch trycatch(vm);
+            auto vmTmp = vm;
+            panda::LocalScope pandaScope(vmTmp);
+            panda::TryCatch trycatch(vmTmp);
             PipelineContext::SetCallBackNode(frameWeakNode);
             ACE_SCORING_EVENT("Swiper.customContentTransition");
-            auto proxyObj = CreateSwiperContentTransitionProxyObject(vm, proxy);
+            auto proxyObj = CreateSwiperContentTransitionProxyObject(vmTmp, proxy);
             panda::Local<panda::JSValueRef> params[] = { proxyObj };
-            auto result = func->Call(vm, func.ToLocal(), params, 1); // 1: Array length
+            auto result = func->Call(vmTmp, func.ToLocal(), params, 1); // 1: Array length
             if (isJsView) {
-                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+                ArkTSUtils::HandleCallbackJobs(vmTmp, trycatch, result);
             }
         };
         transitionInfo.transition = std::move(onTransition);

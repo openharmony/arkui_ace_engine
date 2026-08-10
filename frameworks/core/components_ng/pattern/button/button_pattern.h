@@ -330,6 +330,9 @@ private:
         RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
     Shadow GetShadowFromTheme(ShadowStyle shadowStyle);
     bool IsSystemMaterialLightEffectActive(const RefPtr<RenderContext>& renderContext);
+    void ProcessImmersiveOptions(const std::shared_ptr<ImmersiveOptions>& options);
+    void ReapplyImmersiveMaterial();
+    Color GetDefaultThemeBgColor();
     void HandleFocusActiveStyle();
     void SetButtonScale(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
     void SetNavBarMenuFocusStyle(RefPtr<RenderContext>& renderContext, bool isFocus);

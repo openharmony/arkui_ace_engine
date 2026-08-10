@@ -27,6 +27,7 @@ DynamicComponent 是 ArkUI 的动态组件容器，用于动态加载和渲染�
 | Manager（共享） | `frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h`、`ui_extension_manager.cpp` | UIExtension 家族共享的会话管理器 |
 | Platform Pattern（共享） | `frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h`、`platform_pattern.cpp` | UIExtension 家族共享的 Platform 适配层 |
 | Layout Modifier | `frameworks/core/interfaces/native/node/dynamic_layout_modifier.h`、`dynamic_layout_modifier.cpp` | 动态布局属性 modifier |
+| Renderer 抽象 | `frameworks/core/common/dynamic_component_renderer.h` | 动态组件 Renderer 抽象（被 `DynamicPattern` 持有） |
 
 ### API 入口
 
@@ -54,7 +55,11 @@ DynamicComponent 暂无独立的 ArkTS Bridge 文件；属性解析主要通过 
 
 ### 外部依赖入口
 
-与 UIExtensionComponent 共享 Session / Window 和 Ability Manager 依赖，参见 UIExtensionComponent KB 外部依赖入口。
+| 依赖方向 | 本仓入口 | 外部仓路径 | 相对外部仓的头文件/目标路径 | 说明 |
+|----------|----------|------------|----------------------------|------|
+| Session / Window | `DynamicComponentManager`（窗口避障区回调）、`SurfaceProxyNode` | `<OH_ROOT>/foundation/window/window_manager` | `interfaces/innerkits/include/`、`OHOS::Rosen::AvoidArea` | 窗口避障区与尺寸变化回调分发到所有已注册的动态组件（机制层 `04-17-01` 共用） |
+| Ability Manager | `DynamicPattern::InitializeDynamicComponent`（Want 拉起 Dynamic Ability） | `<OH_ROOT>/foundation/arkui/appexecfwk_standard` | `interfaces/innerkits/include/` | 动态 Ability 连接与生命周期 |
+| 无障碍服务桥接 | `AccessibilitySessionAdapterIsolatedComponent`（动态组件复用） | `<OH_ROOT>/foundation/barrierfree/accessibility` | `interfaces/innerkits/include/` | 动态组件无障碍子树回调与会话传递 |
 
 ### 测试入口
 
@@ -65,6 +70,7 @@ DynamicComponent 暂无独立的 ArkTS Bridge 文件；属性解析主要通过 
 | ArkTS Dynamic Pattern TDD | `test/unittest/core/pattern/ui_extension/dynamic_component/arkts_dynamic_pattern_tdd_test.cpp` | ArkTS Dynamic TDD 回归 |
 | Dynamic Component Manager 测试 | `test/unittest/core/pattern/ui_extension/dynamic_component/dynamic_component_manager_test_ng.cpp`、`dynamic_component_manager_tdd_test.cpp` | DynamicComponentManager 回归 |
 | UIExtension 家族共享测试 | `test/unittest/core/pattern/ui_extension/` | Platform、Surface、Session 等共享基础设施回归 |
+| Mock | `test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_manager.cpp`、`mock_dynamic_component_renderer_impl.cpp` | Manager 与 Renderer 测试替身 |
 | Context registry | `docs/context_registry.json` | DynamicComponent 的 KB、Spec、源码、API 和测试统一路由 |
 
 ### 相关 Spec
@@ -86,11 +92,18 @@ DynamicComponent 功能域：`specs/05-ui-components/12-embedded-display-compone
 | 动态组件管理器异常 | `dynamic_component_manager.cpp`、多实例生命周期管理 |
 | 触摸事件异常 | `dynamic_touch_delegate.cpp`、事件委托转发 |
 | 布局属性未生效 | `dynamic_layout_modifier.cpp` |
+| 避障区/尺寸变化未响应 | `DynamicComponentManager::OnAvoidAreaChanged`、`OnWindowSizeChanged`、`Rosen::AvoidArea` |
+| 节点查找失败 | `DynamicComponentManager::GetRegisteredDynamicNode`、节点注册时机 |
+| 状态更新不生效 | `DynamicModel::SetState` / `DynamicModelStatic`（静态编译路径） |
 
 ## 调试入口
 
 - 节点创建：从 `DynamicModelNG` 确认节点以 `DynamicPattern` 或 `ArktsDynamicPattern` 创建。
 - 生命周期：从 `DynamicPattern::OnModifyDone` 追踪 DynamicComponentManager 初始化和渲染连接。
+- 节点注册断点：`DynamicComponentManager::Register` / `Unregister`。
+- 初始化断点：`DynamicPattern::InitializeDynamicComponent`、`DynamicPattern::OnAttachToFrameNode`。
+- 窗口回调断点：`DynamicComponentManager::OnAvoidAreaChanged`、`OnWindowSizeChanged`。
+- 触摸代理断点：`DynamicTouchDelegate::HandleTouchEvent`。
 - ArkTS 动态渲染：从 `arkts_dynamic_pattern.cpp` 追踪 ArkTS 动态组件的渲染通道建立。
 - 回归验证：运行 `test/unittest/core/pattern/ui_extension/dynamic_component/` 下的所有测试文件。
 

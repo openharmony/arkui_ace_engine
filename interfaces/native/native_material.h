@@ -49,15 +49,35 @@ extern "C" {
  * @since 26.0.0
  */
 typedef enum {
-    /** Ultra thin style. The material layer is ultra thin, with a very strong transparency effect. */
+    /**
+     * Ultra thin style. The material layer is ultra thin, with a very strong transparency effect.
+     *
+     * @since 26.0.0
+     */
     ARKUI_IMMERSIVE_STYLE_ULTRA_THIN = 0,
-    /** Thin style. The material layer is thin, with a strong transparency effect. */
+    /**
+     * Thin style. The material layer is thin, with a strong transparency effect.
+     *
+     * @since 26.0.0
+     */
     ARKUI_IMMERSIVE_STYLE_THIN,
-    /** Regular style. The material layer has a standard thickness with balanced visual effect. */
+    /**
+     * Regular style. The material layer has a standard thickness with balanced visual effect.
+     *
+     * @since 26.0.0
+     */
     ARKUI_IMMERSIVE_STYLE_REGULAR,
-    /** Thick style. The blur effect is strong. */
+    /**
+     * Thick style. The blur effect is strong.
+     *
+     * @since 26.0.0
+     */
     ARKUI_IMMERSIVE_STYLE_THICK,
-    /** Ultra thick style. */
+    /**
+     * Ultra thick style.
+     *
+     * @since 26.0.0
+     */
     ARKUI_IMMERSIVE_STYLE_ULTRA_THICK,
 } ArkUI_ImmersiveStyle;
 
@@ -68,11 +88,23 @@ typedef enum {
  * @since 26.0.0
  */
 typedef enum {
-    /** Exquisite level. The effect is exquisite and is suitable for high-end computing device. */
+    /**
+     * Exquisite level. The effect is exquisite and is suitable for high-end computing device.
+     *
+     * @since 26.0.0
+     */
     ARKUI_MATERIAL_LEVEL_EXQUISITE = 0,
-    /** Gentle level. The effect is gentle and is suitable for mid-range computing device. */
+    /**
+     * Gentle level. The effect is gentle and is suitable for mid-range computing device.
+     *
+     * @since 26.0.0
+     */
     ARKUI_MATERIAL_LEVEL_GENTLE,
-    /** Smooth level. The effect is smooth and is suitable for low-end computing device. */
+    /**
+     * Smooth level. The effect is smooth and is suitable for low-end computing device.
+     *
+     * @since 26.0.0
+     */
     ARKUI_MATERIAL_LEVEL_SMOOTH,
 } ArkUI_MaterialLevel;
 
@@ -138,6 +170,7 @@ ArkUI_MaterialLevel OH_ArkUI_NativeModule_GetGlobalMaterialLevel();
  * @param style The material style. The parameter type is {@link ArkUI_ImmersiveStyle}.
  * @return Returns the pointer to the created immersive material object.
  *         If creation fails or the style is invalid, returns NULL.
+ * @release native_material/OH_ArkUI_NativeModule_ImmersiveMaterial_Destroy {return}
  * @since 26.0.0
  */
 ArkUI_ImmersiveMaterialHandle OH_ArkUI_NativeModule_ImmersiveMaterial_Create(ArkUI_ImmersiveStyle style);
@@ -156,9 +189,10 @@ void OH_ArkUI_NativeModule_ImmersiveMaterial_Destroy(ArkUI_ImmersiveMaterialHand
  *
  * @param material Pointer to material object. The type is {@link ArkUI_ImmersiveMaterialHandle}.
  * @param style The material style. The type is {@link ArkUI_ImmersiveStyle}.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         </ul>
  * @since 26.0.0
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_SetStyle(
@@ -169,26 +203,30 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_SetStyle(
  *
  * @param material Pointer to material object. The type is {@link ArkUI_ImmersiveMaterialHandle}.
  * @param style Pointer to style. The type is {@link ArkUI_ImmersiveStyle}.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         </ul>
  * @since 26.0.0
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_GetStyle(
     ArkUI_ImmersiveMaterialHandle material, ArkUI_ImmersiveStyle* style);
 
 /**
- * @brief Sets the material color of an immersive material object. This parameter is only
- *        effective for exquisite and gentle materials. If not set, the default value
- *        is 0 which means transparent color.
+ * @brief Sets the material color of an immersive material object. This parameter is effective for all levels of
+ * materials. If not set, the default visual behavior varies by material level: for exquisite and gentle levels,
+ * the material color appears transparent; for smooth level, the default background color of that level is used.
+ * When set, the specified color takes effect on all levels. Calling
+ * {@link OH_ArkUI_NativeModule_ImmersiveMaterial_GetMaterialColor} on an unset value will return
+ * {@link ARKUI_ERROR_CODE_PARAM_ERROR}.
  *
  * @param material The pointer to the immersive material object. The parameter
  *        type is {@link ArkUI_ImmersiveMaterialHandle}.
- * @param color The material color in 0xARGB format. Pass 0 for
- *        transparent (default value).
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @param color The material color in 0xAARRGGBB format.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         </ul>
  * @since 26.0.0
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_SetMaterialColor(
@@ -196,12 +234,15 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_SetMaterialColor(
 
 /**
  * @brief Gets the material color of an immersive material object.
+ * If the value is never set, the function will return {@link ARKUI_ERROR_CODE_PARAM_ERROR}.
  *
  * @param material Pointer to material object. The type is {@link ArkUI_ImmersiveMaterialHandle}.
- * @param color Pointer to color in 0xARGB format.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @param color Pointer to color in 0xAARRGGBB format.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_ERROR} if the value is never set.</li>
+ *         </ul>
  * @since 26.0.0
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_GetMaterialColor(
@@ -215,9 +256,10 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_GetMaterialColor(
  *
  * @param material Pointer to material object. The type is {@link ArkUI_ImmersiveMaterialHandle}.
  * @param applyShadow Whether to add shadows of the material effect. Default value is true.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         </ul>
  * @since 26.0.0
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_SetApplyShadow(
@@ -229,9 +271,10 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_SetApplyShadow(
  * @param material The pointer to the immersive material object. The parameter type is
  *        {@link ArkUI_ImmersiveMaterialHandle}.
  * @param applyShadow Pointer to the variable that receives whether to apply shadow. Default value is true.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         </ul>
  * @since 26.0.0
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_GetApplyShadow(
@@ -245,9 +288,10 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_GetApplyShadow(
  * @param material The pointer to the immersive material object. The parameter type is
  *        {@link ArkUI_ImmersiveMaterialHandle}.
  * @param interactive Whether the material is interactive.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         </ul>
  * @since 26.0.0
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_SetInteractive(
@@ -260,10 +304,11 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_SetInteractive(
  * @param material The pointer to the immersive material object. The parameter type is
  *        {@link ArkUI_ImmersiveMaterialHandle}.
  * @param interactive Pointer to the variable that receives whether the material is interactive.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_ERROR} if the value is never set.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_ERROR} if the value is never set.</li>
+ *         </ul>
  * @since 26.0.0
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_GetInteractive(
@@ -273,6 +318,7 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_GetInteractive(
  * @brief Creates a light effect options object with default white color.
  *
  * @return Returns the pointer to the created object.
+ * @release native_material/OH_ArkUI_NativeModule_LightEffectOptions_Destroy {return}
  * @since 26.0.0
  */
 ArkUI_LightEffectOptionsHandle OH_ArkUI_NativeModule_LightEffectOptions_Create();
@@ -290,10 +336,11 @@ void OH_ArkUI_NativeModule_LightEffectOptions_Destroy(ArkUI_LightEffectOptionsHa
  * If not set, the default white color is white(0xffffffff).
  *
  * @param options The pointer to the options object. The parameter type is {@link ArkUI_LightEffectOptionsHandle}.
- * @param color The light effect color in 0xARGB format.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @param color The light effect color in 0xAARRGGBB format.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         </ul>
  * @since 26.0.0
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_LightEffectOptions_SetColor(
@@ -307,9 +354,10 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_LightEffectOptions_SetColor(
  * @param material The pointer to the immersive material object. The parameter type is
  *        {@link ArkUI_ImmersiveMaterialHandle}.
  * @param options The light effect options. Pass NULL to disable.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         </ul>
  * @since 26.0.0
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_SetLightEffect(
@@ -323,10 +371,11 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_SetLightEffect(
  * @param material The pointer to the immersive material object. The parameter type is
  *        {@link ArkUI_ImmersiveMaterialHandle}.
  * @param color Pointer to the variable that receives the light effect color.
- * @return Returns the result code.
- *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
- *         Returns {@link ARKUI_ERROR_CODE_PARAM_ERROR} if lightEffect is never set or disabled.
+ * @return <ul>
+ *         <li>{@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.</li>
+ *         <li>{@link ARKUI_ERROR_CODE_PARAM_ERROR} if lightEffect is never set or disabled.</li>
+ *         </ul>
  * @since 26.0.0
  */
 ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_GetLightEffectColor(

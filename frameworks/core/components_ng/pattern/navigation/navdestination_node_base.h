@@ -31,6 +31,10 @@
 #include "interfaces/inner_api/ace/viewport_config.h"
 
 namespace OHOS::Ace::NG {
+
+using RecreateMoreMenuViewCallback =
+    std::function<RefPtr<FrameNode>(ColorMode mode, bool isCreateLandscapeMenu)>;
+
 class NavDestinationNodeBase : public GroupNode {
     DECLARE_ACE_TYPE(NavDestinationNodeBase, GroupNode);
 public:
@@ -68,6 +72,11 @@ public:
         moreMenuNode_ = menuNode;
     }
 
+    const RefPtr<UINode>& GetMenuNode() const
+    {
+        return moreMenuNode_;
+    }
+
     void SetToolbarMenuNode(const RefPtr<UINode>& menuNode)
     {
         toolbarMoreMenuNode_ = menuNode;
@@ -76,6 +85,11 @@ public:
     void SetLandscapeMenuNode(const RefPtr<UINode>& moreLandscapeMenuNode)
     {
         moreLandscapeMenuNode_ = moreLandscapeMenuNode;
+    }
+
+    const RefPtr<UINode>& GetLandscapeMenuNode() const
+    {
+        return moreLandscapeMenuNode_;
     }
 
     void SetLandscapeMenu(const RefPtr<UINode>& menu)
@@ -360,6 +374,25 @@ public:
     void SetRestoreInfo(const std::string& info);
     bool GetComponentInfo(const std::string& componentId, std::string& result);
 
+    void SetExpectMoreMenuViewColorMode(ColorMode mode);
+    const std::optional<ColorMode>& GetExpectMoreMenuViewColorMode(bool isLandscapeMenu) const
+    {
+        if (isLandscapeMenu) {
+            return expectLandscapeMoreMenuColorMode_;
+        } else {
+            return expectMoreMenuColorMode_;
+        }
+    }
+    RefPtr<FrameNode> RecreateMoreMenuViewIfNeeded(bool isLandscapeMenu);
+    void SetRecreateMoreMenuViewCallback(RecreateMoreMenuViewCallback&& callback, bool isLandscapeMenu)
+    {
+        if (isLandscapeMenu) {
+            recreateLandscapeMoreMenuViewCallback_ = std::move(callback);
+        } else {
+            recreateMoreMenuViewCallback_ = std::move(callback);
+        }
+    }
+
 protected:
     RectF CalcFullClipRectForTransition(const SizeF& frameSize);
     RectF CalcHalfClipRectForTransition(const SizeF& frameSize);
@@ -412,6 +445,13 @@ protected:
     bool isUserSetFreeze_ = false;
     NavDestinationType destType_ = NavDestinationType::DETAIL;
     bool isOnAnimation_ = false;
+
+    ColorMode curMoreMenuColorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
+    ColorMode curLandscapeMoreMenuColorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
+    std::optional<ColorMode> expectMoreMenuColorMode_;
+    std::optional<ColorMode> expectLandscapeMoreMenuColorMode_;
+    RecreateMoreMenuViewCallback recreateMoreMenuViewCallback_;
+    RecreateMoreMenuViewCallback recreateLandscapeMoreMenuViewCallback_;
 
     //-------for force split------- begin------
     ForceSplitAdjustConstraintType adjustConstraintType_ = ForceSplitAdjustConstraintType::NONE;

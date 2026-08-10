@@ -79,15 +79,16 @@ const Ark_SizeOptions TEST_ARK_SIZEOPTIONS {
 const std::tuple<VerticalAlign, Ark_ImageSpanAlignment> TEST_VERTICALALIGN = {
     VerticalAlign::CENTER, ARK_IMAGE_SPAN_ALIGNMENT_CENTER};
 const std::tuple<ImageFit, Ark_ImageFit> TEST_IMAGEFIT = { ImageFit::FILL, ARK_IMAGE_FIT_FILL };
-const Ark_LengthMetrics TEST_LENGTHMETRICS = Converter::ArkValue<Ark_LengthMetrics>(123.0_vp);
+const Ark_LengthMetricsProxy TEST_LENGTHMETRICS = Converter::ArkValue<Ark_LengthMetricsProxy>(123.0_vp);
 const std::string TEST_LENGTHMETRICS_STR = "[123.00vp,123.00vp,123.00vp,123.00vp]";
 const std::string TEST_LENGTHMETRICS_BR_STR =
     "radiusTopLeft: [123.00vp]radiusTopRight: [123.00vp]radiusBottomLeft: [123.00vp]radiusBottomRight: [123.00vp]";
 
 const Ark_ImageAttachmentLayoutStyle TEST_IMAGELAYOUTSTYLE {
-    .margin = Converter::ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_LengthMetrics>(TEST_LENGTHMETRICS),
-    .padding = Converter::ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_LengthMetrics>(TEST_LENGTHMETRICS),
-    .borderRadius = Converter::ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_LengthMetrics>(TEST_LENGTHMETRICS)
+    .margin = Converter::ArkUnion<Opt_Union_LengthMetricsProxy_Margin, Ark_LengthMetricsProxy>(TEST_LENGTHMETRICS),
+    .padding = Converter::ArkUnion<Opt_Union_LengthMetricsProxy_Padding, Ark_LengthMetricsProxy>(TEST_LENGTHMETRICS),
+    .borderRadius =
+        Converter::ArkUnion<Opt_Union_LengthMetricsProxy_BorderRadiuses, Ark_LengthMetricsProxy>(TEST_LENGTHMETRICS)
 };
 
 const Ark_ImageAttachmentInterface IMAGEATTACHMENT_TEST_VALUE {
@@ -219,9 +220,9 @@ struct StyleOptionsKeeper {
     }
 
 private:
-    Ark_LengthMetrics CreateLengthMetricsPeer(const Dimension& dimension)
+    Ark_LengthMetricsProxy CreateLengthMetricsPeer(const Dimension& dimension)
     {
-        return Converter::ArkValue<Ark_LengthMetrics>(dimension);
+        return Converter::ArkValue<Ark_LengthMetricsProxy>(dimension);
     }
 
     // TextStyle_styled_string
@@ -232,7 +233,7 @@ private:
         const Ark_TextStyleInterface textStyle = {
             .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_FONT_COLOR)),
             .fontFamily =  Converter::ArkUnion<Opt_ResourceStr, Ark_String>(TEST_FONT_FAMILIES[0]),
-            .fontSize = Converter::ArkValue<Opt_LengthMetrics>(fontSizePeer),
+            .fontSize = Converter::ArkValue<Opt_LengthMetricsProxy>(fontSizePeer),
             .fontWeight = Converter::ArkUnion<Opt_Union_I32_FontWeight_String, Ark_Int32>(
                 std::get<1>(TEST_FONT_WEIGHT)),
             .fontStyle = Converter::ArkValue<Opt_FontStyle>(TEST_FONT_STYLE),
@@ -332,12 +333,12 @@ private:
         auto leadingMarginPeer = CreateLengthMetricsPeer(std::get<1>(TEST_PSST_LEADING_MARGIN));
         Ark_ParagraphStyleInterface paragraphStyle = {
             .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
-            .textIndent = Converter::ArkValue<Opt_LengthMetrics>(textIndentPeer),
+            .textIndent = Converter::ArkValue<Opt_LengthMetricsProxy>(textIndentPeer),
             .maxLines = Converter::ArkValue<Opt_Int32>(TEST_PSST_MAX_LINES),
             .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
             .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
             .leadingMargin = Converter::ArkUnion<
-                Opt_Union_LengthMetrics_LeadingMarginPlaceholder, Ark_LengthMetrics>(leadingMarginPeer),
+                Opt_Union_LengthMetricsProxy_LeadingMarginPlaceholder, Ark_LengthMetricsProxy>(leadingMarginPeer),
         };
         auto optParagraphStyle = Converter::ArkValue<Opt_ParagraphStyleInterface>(paragraphStyle);
         peerParagraphStyle = GeneratedModifier::GetParagraphStyleAccessor()->construct(&optParagraphStyle);
@@ -349,11 +350,12 @@ private:
     void FillParagraphStylePM(Ark_StyledStringValue& styledValue)
     {
         auto textIndentPMPeer = CreateLengthMetricsPeer(std::get<1>(TEST_PSST_TEXT_INDEN));
-        auto leadingMargin = Converter::ArkUnion<
-            Opt_Union_LengthMetrics_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(TEST_PSPM_LEADING_MARGIN);
+        auto leadingMargin =
+            Converter::ArkUnion<Opt_Union_LengthMetricsProxy_LeadingMarginPlaceholder, Ark_LeadingMarginPlaceholder>(
+                TEST_PSPM_LEADING_MARGIN);
         Ark_ParagraphStyleInterface paragraphStyle = {
             .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
-            .textIndent = Converter::ArkValue<Opt_LengthMetrics>(textIndentPMPeer),
+            .textIndent = Converter::ArkValue<Opt_LengthMetricsProxy>(textIndentPMPeer),
             .maxLines = Converter::ArkValue<Opt_Int32>(TEST_PSST_MAX_LINES),
             .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
             .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),

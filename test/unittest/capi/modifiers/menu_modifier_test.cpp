@@ -440,8 +440,8 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestStroke, TestSize.Level1)
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid strokeWidth value
-    auto arkStroke = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
-    Ark_DividerStyleOptions dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
+    auto arkStroke = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
+    Ark_DividerStyleOptions dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetricsProxy>(arkStroke)};
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -450,8 +450,8 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestStroke, TestSize.Level1)
     EXPECT_THAT(strokeWidthCheckValue, Eq(get<1>(DIVIDER_VALUES[0])));
 
     // set invalid strokeWidth value
-    arkStroke = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
-    dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
+    arkStroke = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
+    dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetricsProxy>(arkStroke)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -473,8 +473,9 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestStartMargin, TestSize.Level1)
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid startMargin value
-    auto arkStartMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
-    Ark_DividerStyleOptions dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
+    auto arkStartMargin = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
+    Ark_DividerStyleOptions dividerOptions = { .startMargin =
+                                                   Converter::ArkValue<Opt_LengthMetricsProxy>(arkStartMargin) };
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -483,8 +484,8 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestStartMargin, TestSize.Level1)
     EXPECT_THAT(startMarginCheckValue, Eq(get<1>(DIVIDER_VALUES[0])));
 
     // set invalid startMargin value
-    arkStartMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
-    dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
+    arkStartMargin = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
+    dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(arkStartMargin)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -506,8 +507,8 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestEndMargin, TestSize.Level1)
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid endMargin value
-    auto arkEndMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
-    Ark_DividerStyleOptions dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
+    auto arkEndMargin = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
+    Ark_DividerStyleOptions dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(arkEndMargin)};
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -516,8 +517,8 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestEndMargin, TestSize.Level1)
     EXPECT_THAT(endMarginCheckValue, Eq(get<1>(DIVIDER_VALUES[0])));
 
     // set invalid endMargin value
-    arkEndMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
-    dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
+    arkEndMargin = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[1]));
+    dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(arkEndMargin)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -550,9 +551,9 @@ HWTEST_F(MenuModifierTest, setMenuItemDividerTestUndefined, TestSize.Level1)
     // set undefined values
     Ark_DividerStyleOptions dividerOptions = {
         .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
-        .strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
-        .startMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
-        .endMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty())
+        .strokeWidth = Converter::ArkValue<Opt_LengthMetricsProxy>(Ark_Empty()),
+        .startMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(Ark_Empty()),
+        .endMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(Ark_Empty())
     };
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemDivider(node_, &divider);
@@ -638,8 +639,8 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTestStroke, TestSize.Level1)
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid strokeWidth value
-    auto arkStroke = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
-    Ark_DividerStyleOptions dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
+    auto arkStroke = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
+    Ark_DividerStyleOptions dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetricsProxy>(arkStroke)};
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -648,8 +649,8 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTestStroke, TestSize.Level1)
     EXPECT_THAT(strokeWidthCheckValue, Eq(get<1>(DIVIDER_VALUES[0])));
 
     // set invalid strokeWidth value
-    arkStroke = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[3]));
-    dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(arkStroke)};
+    arkStroke = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[3]));
+    dividerOptions = {.strokeWidth = Converter::ArkValue<Opt_LengthMetricsProxy>(arkStroke)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -671,8 +672,8 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTestStartMargin, TestSize.Leve
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid startMargin value
-    auto arkStartMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
-    Ark_DividerStyleOptions dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
+    auto arkStartMargin = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
+    Ark_DividerStyleOptions dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(arkStartMargin)};
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -681,8 +682,8 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTestStartMargin, TestSize.Leve
     EXPECT_THAT(startMarginCheckValue, Eq(get<1>(DIVIDER_VALUES[0])));
 
     // set invalid startMargin value
-    arkStartMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[3]));
-    dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetrics>(arkStartMargin)};
+    arkStartMargin = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[3]));
+    dividerOptions = {.startMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(arkStartMargin)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -704,8 +705,8 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTestEndMargin, TestSize.Level1
     EXPECT_EQ(dividerObject, nullptr);
 
     // set valid endMargin value
-    auto arkEndMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
-    Ark_DividerStyleOptions dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
+    auto arkEndMargin = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[0]));
+    Ark_DividerStyleOptions dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(arkEndMargin)};
     auto divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -714,8 +715,8 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTestEndMargin, TestSize.Level1
     EXPECT_THAT(endMarginCheckValue, Eq(get<1>(DIVIDER_VALUES[0])));
 
     // set invalid endMargin value
-    arkEndMargin = Converter::ArkCreate<Ark_LengthMetrics>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[3]));
-    dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetrics>(arkEndMargin)};
+    arkEndMargin = Converter::ArkCreate<Ark_LengthMetricsProxy>(ARK_LENGTH_UNIT_PX, get<0>(DIVIDER_VALUES[3]));
+    dividerOptions = {.endMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(arkEndMargin)};
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);
     fullJson = GetJsonValue(node_);
@@ -748,9 +749,9 @@ HWTEST_F(MenuModifierTest, setMenuItemGroupDividerTestUndefined, TestSize.Level1
     // set undefined values
     Ark_DividerStyleOptions dividerOptions = {
         .color = Converter::ArkValue<Opt_ResourceColor>(Ark_Empty()),
-        .strokeWidth = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
-        .startMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty()),
-        .endMargin = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty())
+        .strokeWidth = Converter::ArkValue<Opt_LengthMetricsProxy>(Ark_Empty()),
+        .startMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(Ark_Empty()),
+        .endMargin = Converter::ArkValue<Opt_LengthMetricsProxy>(Ark_Empty())
     };
     divider = Converter::ArkValue<Opt_DividerStyleOptions>(dividerOptions);
     modifier_->setMenuItemGroupDivider(node_, &divider);

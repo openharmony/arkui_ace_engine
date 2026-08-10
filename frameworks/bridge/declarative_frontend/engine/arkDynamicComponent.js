@@ -921,7 +921,7 @@ if (globalThis.IndicatorComponent === undefined) {
   globalThis.IndicatorComponent = {
     create: function(controller) {
       getUINativeModule().loadNativeModule('IndicatorComponent');
-      let module = globalThis.requireNapi('arkui.components.arkswiperindicator');
+      let module = globalThis.requireNapi('arkui.components.arkindicatorcomponent');
       module.exportView();
       module.loadComponent();
       getUINativeModule().indicatorComponent.create(controller);

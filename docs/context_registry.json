@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-07-31",
+  "last_updated": "2026-08-08",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -4164,6 +4164,75 @@
       "last_verified": "2026-07-25"
     },
     {
+      "id": "UISessionService",
+      "name": "UISession Service",
+      "name_cn": "UISession 服务",
+      "kind": "architecture",
+      "category": "dfx",
+      "keywords": [
+        "UISession",
+        "UI Session",
+        "ui_session",
+        "UiSessionManager",
+        "IUiContentService",
+        "InspectorTree",
+        "ReportService",
+        "组件事件上报",
+        "内容变化检测",
+        "ContentChangeManager",
+        "页面翻译",
+        "Web翻译",
+        "PageScene",
+        "页面场景感知",
+        "ui_sa",
+        "GetUIContentRemoteObj",
+        "SyncRequestGuard",
+        "ui_content_stub",
+        "ui_content_proxy",
+        "ui_report_stub"
+      ],
+      "aliases": [
+        "UiSession",
+        "UI会话",
+        "ui_session内部接口",
+        "UISession通道"
+      ],
+      "kb": "docs/kb/architecture/uisession-service.md",
+      "spec_domain": "specs/03-engine-framework/09-uisession/01-uisession-service",
+      "func_id": "03-09-01",
+      "spec_status": "active",
+      "source_paths": {
+        "ipc_interface": "interfaces/inner_api/ui_session/ui_content_service_interface.h",
+        "manager_interface": "interfaces/inner_api/ui_session/ui_session_manager.h",
+        "param_config": "interfaces/inner_api/ui_session/param_config.h",
+        "manager_ohos": "adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp",
+        "content_stub": "adapter/ohos/entrance/ui_session/ui_content_stub.cpp",
+        "content_stub_impl": "adapter/ohos/entrance/ui_session/ui_content_stub_impl.cpp",
+        "content_proxy": "adapter/ohos/entrance/ui_session/ui_content_proxy.cpp",
+        "report_stub": "adapter/ohos/entrance/ui_session/ui_report_stub.cpp",
+        "report_proxy": "adapter/ohos/entrance/ui_session/ui_report_proxy.cpp",
+        "json_util": "interfaces/inner_api/ui_session/ui_session_json_util.h",
+        "translate_manager": "interfaces/inner_api/ui_session/ui_translate_manager.h",
+        "translate_type": "interfaces/inner_api/ui_session/ui_translate_type.h",
+        "translate_impl": "adapter/ohos/entrance/ace_translate_manager.cpp",
+        "request_guard": "interfaces/inner_api/ui_session/ui_session_request_guard.h",
+        "ipc_util": "interfaces/inner_api/ui_session/ui_session_ipc_util.h",
+        "ui_content_impl": "adapter/ohos/entrance/ui_content_impl.cpp",
+        "content_change_manager": "frameworks/core/components_ng/manager/content_change_manager/",
+        "sample": "interfaces/inner_api/ui_session/ui_session_sample/",
+        "sample_service": "interfaces/inner_api/ui_session/ui_session_sample/ui_sa_service.cpp",
+        "sample_config": "interfaces/inner_api/ui_session/ui_session_sample/16666.json",
+        "verification_guide": "test/tools/UISession/UISession_Verification_Guide.md"
+      },
+      "api_paths": {},
+      "test_paths": [
+        "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.h",
+        "test/mock/interfaces/inner_api/ui_session/mock_ui_session_manager.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-07-31"
+    },
+    {
       "id": "UIContext",
       "name": "UIContext",
       "name_cn": "UI 上下文",
@@ -7416,7 +7485,7 @@
         "test/unittest/adapter/ohos/entrance/rs_adapter_test.cpp"
       ],
       "status": "active",
-      "last_verified": "2026-07-27"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "StateMgmtStaticV2Decorators",
@@ -11499,158 +11568,6 @@
       "last_verified": "2026-07-31"
     },
     {
-      "id": "AccessibilityAttributes",
-      "name": "Accessibility Attributes",
-      "name_cn": "通用无障碍属性",
-      "kind": "common_capability",
-      "category": "common_attributes",
-      "keywords": [
-        "accessibilityText",
-        "accessibilityLevel",
-        "accessibilityDescription",
-        "accessibilityChecked",
-        "accessibilityGroup",
-        "accessibilityValue",
-        "AccessibilityProperty",
-        "accessibility_property",
-        "无障碍属性",
-        "SetAccessibilityText",
-        "ViewAbstract",
-        "AccessibilityRoleType"
-      ],
-      "aliases": [
-        "通用无障碍属性",
-        "accessibility 通用属性",
-        "AccessibilityProperty 基类",
-        "a11y attributes"
-      ],
-      "kb": "docs/kb/capabilities/accessibility-attributes.md",
-      "spec_domain": "specs/04-common-capability/03-common-attributes/09-accessibility-attributes",
-      "func_id": "04-03-09",
-      "spec_status": "active",
-      "source_paths": {
-        "property_base": "frameworks/core/components_ng/property/accessibility_property.h",
-        "property_utils": "frameworks/core/accessibility/utils/accessibility_property_utils.h",
-        "view_abstract_model": "frameworks/core/components_ng/base/view_abstract_model_ng.cpp",
-        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_accessibility.cpp",
-        "dynamic_bridge": "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/common.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/common.static.d.ets",
-        "c_api": "interfaces/native/native_node.h"
-      },
-      "test_paths": [
-        "test/unittest/core/property/accessibility_property_test_ng.cpp",
-        "test/unittest/core/property/accessibility_property_testtwo_ng.cpp",
-        "test/unittest/core/accessibility/"
-      ],
-      "status": "active",
-      "last_verified": "2026-07-31"
-    },
-    {
-      "id": "UIExtension",
-      "name": "UIExtension Mechanism",
-      "name_cn": "UIExtension机制",
-      "kind": "common_capability",
-      "category": "embedded_display",
-      "keywords": [
-        "UIExtension",
-        "UIExtensionManager",
-        "SessionWrapper",
-        "SessionWrapperFactory",
-        "UIExtensionSurfacePattern",
-        "PlatformPattern",
-        "PlatformEventProxy",
-        "SurfaceProxyNode",
-        "UIExtensionContainerHandler",
-        "UIExtensionHub",
-        "嵌入显示",
-        "跨进程组件"
-      ],
-      "aliases": [
-        "UIExtension 机制",
-        "嵌入显示机制",
-        "UIExtension infrastructure",
-        "跨进程嵌入框架"
-      ],
-      "kb": "docs/kb/capabilities/ui-extension.md",
-      "spec_domain": "specs/04-common-capability/17-embedded-display/01-ui-extension",
-      "func_id": "04-17-01",
-      "spec_status": "active",
-      "source_paths": {
-        "manager": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_manager.h",
-        "model": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_model.h",
-        "model_ng": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_model_ng.cpp",
-        "surface_pattern": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_surface_pattern.h",
-        "hub": "frameworks/core/components_ng/pattern/ui_extension/ui_extension_hub.h",
-        "session_wrapper": "frameworks/core/components_ng/pattern/ui_extension/session_wrapper.h",
-        "session_wrapper_factory": "frameworks/core/components_ng/pattern/ui_extension/session_wrapper_factory.cpp",
-        "platform_pattern": "frameworks/core/components_ng/pattern/ui_extension/platform_pattern.h",
-        "platform_event_proxy": "frameworks/core/components_ng/pattern/ui_extension/platform_event_proxy.cpp",
-        "surface_proxy_node": "frameworks/core/components_ng/pattern/ui_extension/surface_proxy_node.cpp",
-        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_ui_extension.cpp"
-      },
-      "api_paths": {
-        "dynamic_uiext": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/ui_extension_component.d.ts",
-        "dynamic_isolated": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/isolated_component.d.ts"
-      },
-      "test_paths": [
-        "test/unittest/core/pattern/ui_extension/ui_extension_component/",
-        "test/unittest/core/pattern/ui_extension/accessibility_session_adapter_ui_extension_test_ng.cpp",
-        "test/unittest/core/pattern/ui_extension/platform_pattern_test_ng.cpp",
-        "test/unittest/core/pattern/ui_extension/platform_event_proxy_test.cpp",
-        "test/unittest/core/pattern/ui_extension/surface_proxy_node_test_ng.cpp",
-        "test/unittest/core/pattern/ui_extension/session_wrapper_impl_test_ng.cpp"
-      ],
-      "status": "active",
-      "last_verified": "2026-07-31"
-    },
-    {
-      "id": "IsolatedComponentMechanism",
-      "name": "IsolateComponent Mechanism",
-      "name_cn": "IsolateComponent机制",
-      "kind": "common_capability",
-      "category": "embedded_display",
-      "keywords": [
-        "IsolatedComponent",
-        "IsolatedPattern",
-        "isolate",
-        "隔离式组件",
-        "InitializeIsolatedComponent",
-        "AccessibilitySessionAdapterIsolatedComponent",
-        "PlatformAccessibilityChildTreeCallback",
-        "FireOnErrorCallbackOnUI"
-      ],
-      "aliases": [
-        "IsolateComponent 机制",
-        "隔离式组件机制",
-        "Isolated 框架层",
-        "隔离组件运行框架"
-      ],
-      "kb": "docs/kb/capabilities/isolate-component.md",
-      "spec_domain": "specs/04-common-capability/17-embedded-display/02-isolate-component",
-      "func_id": "04-17-02",
-      "spec_status": "active",
-      "source_paths": {
-        "pattern": "frameworks/core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h",
-        "pattern_cpp": "frameworks/core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.cpp",
-        "accessibility_adapter": "frameworks/core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.cpp",
-        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_isolated_component.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/isolated_component.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/isolated_component.static.d.ets"
-      },
-      "test_paths": [
-        "test/unittest/core/pattern/ui_extension/isolated_pattern_test_ng.cpp",
-        "test/unittest/core/pattern/ui_extension/accessibility_session_adapter_isolated_component_test_ng.cpp",
-        "test/unittest/core/pattern/ui_extension/isolated_component/"
-      ],
-      "status": "active",
-      "last_verified": "2026-07-31"
-    },
-    {
       "id": "ScrollerNaNOffsetValidation",
       "name": "Scroller NaN Offset Validation",
       "name_cn": "Scroller 非法数值偏移校验",
@@ -12130,52 +12047,106 @@
       "last_verified": "2026-07-30"
     },
     {
-      "id": "DynamicComponentMechanism",
-      "name": "DynamicComponent Mechanism",
-      "name_cn": "DynamicComponent机制",
-      "kind": "common_capability",
-      "category": "embedded_display",
+      "id": "AccessibilityCustomActionsStale",
+      "name": "Accessibility Custom Actions Stale",
+      "name_cn": "无障碍自定义 Action 动态刷新失效",
+      "kind": "issue",
+      "category": "accessibility",
       "keywords": [
-        "DynamicComponent",
-        "DynamicPattern",
-        "ArkTSDynamicPattern",
-        "DynamicComponentManager",
-        "DynamicModel",
-        "DynamicNode",
-        "DynamicTouchDelegate",
-        "dynamic_component",
-        "动态组件机制",
-        "InitializeDynamicComponent"
+        "AccessibilityCustomActionsStale",
+        "accessibilityCustomActions",
+        "AccessibilityCustomActionsModifier",
+        "SetAccessibilityCustomActions",
+        "checkObjectDiff",
+        "ELEMENT_INFO_CHANGE",
+        "无障碍自定义Action",
+        "动态刷新失效",
+        "Modifier引用别名",
+        "自定义Action不更新",
+        "78769"
       ],
       "aliases": [
-        "DynamicComponent 机制",
-        "动态组件机制",
-        "DynamicComponent infrastructure"
+        "自定义Action不刷新",
+        "无障碍Action更新失效",
+        "accessibility custom actions stale"
       ],
-      "kb": "docs/kb/capabilities/dynamic-component.md",
-      "spec_domain": "specs/04-common-capability/17-embedded-display/05-dynamic-component",
-      "func_id": "04-17-05",
-      "spec_status": "pending",
-      "source_paths": {
-        "pattern": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h",
-        "arkts_pattern": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/arkts_dynamic_pattern.h",
-        "manager": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.cpp",
-        "model": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model.cpp",
-        "model_static": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_model_static.cpp",
-        "node": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_node.cpp",
-        "touch_delegate": "frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_touch_delegate.cpp",
-        "jsview": "frameworks/bridge/declarative_frontend/jsview/js_dynamic_component.cpp"
-      },
-      "api_paths": {
-        "dynamic": "<OH_ROOT>/interface/sdk-js/api/@internal/component/ets/dynamic_component.d.ts",
-        "static": "<OH_ROOT>/interface/sdk-js/api/arkui/component/dynamic_component.static.d.ets"
-      },
-      "test_paths": [
-        "test/unittest/core/pattern/ui_extension/dynamic_component/dynamic_component_manager_test_ng.cpp",
-        "test/unittest/core/pattern/ui_extension/dynamic_component/dynamic_component_manager_tdd_test.cpp"
+      "kb": "docs/kb/issues/accessibility/accessibility-custom-actions-stale.md",
+      "func_ids": [
+        "04-03-09",
+        "03-07-01"
       ],
       "status": "active",
-      "last_verified": "2026-08-02"
+      "last_verified": "2026-08-07"
+    },
+    {
+      "id": "DynamicComponentAvoidanceIncorrect",
+      "name": "DynamicComponent Avoidance Incorrect",
+      "name_cn": "DynamicComponent 弹窗避让不正确",
+      "kind": "issue",
+      "category": "layout",
+      "keywords": [
+        "DynamicComponentAvoidanceIncorrect",
+        "DynamicComponent",
+        "DynamicComponentSafeManager",
+        "allowOccupied",
+        "UpdateDynamicKeyBoardAvoid",
+        "GetAvoidAreaIntersection",
+        "弹窗避让不正确",
+        "安全区传播",
+        "键盘避让",
+        "子UIContent",
+        "74965",
+        "80570"
+      ],
+      "aliases": [
+        "DynamicComponent弹窗避让",
+        "动态组件安全区异常",
+        "动态组件键盘避让异常"
+      ],
+      "kb": "docs/kb/issues/layout/dynamic-component-avoidance-incorrect.md",
+      "func_ids": [
+        "05-12-07",
+        "04-17-05",
+        "04-02-01",
+        "03-05-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-07"
+    },
+    {
+      "id": "UIExtensionWindowStateRegistration",
+      "name": "UIExtension Window State Registration",
+      "name_cn": "UIExtension 窗口状态回调注册时机不正确",
+      "kind": "issue",
+      "category": "lifecycle",
+      "keywords": [
+        "UIExtensionWindowStateRegistration",
+        "UIExtensionComponent",
+        "EmbeddedComponent",
+        "UIExtensionPattern",
+        "OnAttachContext",
+        "AddWindowStateChangedCallback",
+        "OnWindowHide",
+        "OnWindowShow",
+        "窗口状态回调",
+        "上树注册",
+        "前后台状态",
+        "79623"
+      ],
+      "aliases": [
+        "UEC状态变化上树注册",
+        "UIExtension窗口状态不更新",
+        "UIExtension前后台状态不同步"
+      ],
+      "kb": "docs/kb/issues/lifecycle/ui-extension-window-state-registration.md",
+      "func_ids": [
+        "05-12-03",
+        "05-12-04",
+        "04-17-01",
+        "03-05-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-07"
     },
     {
       "id": "KeyboardAvoidTimingChange",
@@ -12337,6 +12308,276 @@
         "menu_item_pattern": "frameworks/core/components_ng/pattern/menu/menu_item/menu_item_pattern.cpp",
         "click_recognizer": "frameworks/core/components_ng/gestures/recognizers/click_recognizer.cpp"
       }
+    },
+    {
+      "id": "IsPendingStateRenderTreeDiff",
+      "name": "IsPendingState RenderTree Diff Error",
+      "name_cn": "同帧下树重新上树 isPendingState_ 状态错乱",
+      "kind": "issue",
+      "category": "lifecycle",
+      "keywords": [
+        "IsPendingState",
+        "isPendingState_",
+        "ProcessRenderTreeDiff",
+        "AttachToRenderTree",
+        "DetachFromRenderTree",
+        "同帧下树重新上树",
+        "RenderTree",
+        "ImageRecycle",
+        "CleanRenderTreeLifeCycle",
+        "状态错乱",
+        "生命周期回调",
+        "OnAttachToMainRenderTree",
+        "OnDetachFromMainRenderTree",
+        "renderContext"
+      ],
+      "aliases": [
+        "isPendingState错乱",
+        "渲染树状态不一致",
+        "同帧上下树"
+      ],
+      "kb": "docs/kb/issues/lifecycle/ispending-state-render-tree-diff.md",
+      "func_ids": [
+        "03-01-01"
+      ],
+      "source_paths": {
+        "frame_node_cpp": "frameworks/core/components_ng/base/frame_node.cpp",
+        "frame_node_h": "frameworks/core/components_ng/base/frame_node.h",
+        "image_pattern_cpp": "frameworks/core/components_ng/pattern/image/image_pattern.cpp"
+      },
+      "status": "active",
+      "last_verified": "2026-08-04"
+    },
+    {
+      "id": "RenderNodeMemoryLeak",
+      "name": "RenderNode Memory Leak",
+      "name_cn": "RenderNode 内存泄漏",
+      "kind": "issue",
+      "category": "performance",
+      "keywords": [
+        "RenderNodeMemoryLeak",
+        "RenderNode内存泄漏",
+        "DisposeNode",
+        "RenderNodeStruct",
+        "ArkUI_RenderNode",
+        "deleteInnerRenderNodeStruct",
+        "C API内存泄漏",
+        "RenderNode泄漏",
+        "createNode",
+        "双层内存模型"
+      ],
+      "aliases": [
+        "RenderNode泄漏",
+        "C API RenderNode内存泄漏",
+        "RenderNodeStruct泄漏"
+      ],
+      "kb": "docs/kb/issues/performance/rendernode-memory-leak.md",
+      "func_ids": [
+        "03-01-01"
+      ],
+      "source_paths": {
+        "render_node_cpp": "interfaces/native/node/render_node.cpp",
+        "render_node_h": "interfaces/native/node/render_node.h",
+        "node_modifier_cpp": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp",
+        "dispose_node": "interfaces/native/node/render_node.cpp",
+        "create_node": "interfaces/native/node/render_node.cpp",
+        "render_node_struct": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp",
+        "create_render_node_struct": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp",
+        "delete_inner": "frameworks/core/interfaces/native/node/node_render_node_modifier.cpp"
+      },
+      "status": "active",
+      "last_verified": "2026-08-04"
+    },
+    {
+      "id": "RenderTreeSync",
+      "name": "Render Tree Sync",
+      "name_cn": "渲染树同步",
+      "kind": "architecture",
+      "category": "system",
+      "keywords": [
+        "RenderTreeSync",
+        "渲染树同步",
+        "RebuildRenderContextTree",
+        "ProcessRenderTreeDiff",
+        "AttachToRenderTree",
+        "DetachFromRenderTree",
+        "isPendingState_",
+        "MarkNeedSyncRenderTree",
+        "frameChildren_",
+        "ZIndexComparator",
+        "CleanRenderTreeLifeCycle",
+        "OnAttachToMainRenderTree",
+        "OnDetachFromMainRenderTree"
+      ],
+      "aliases": [
+        "渲染树同步机制",
+        "RenderContext同步",
+        "RS节点树重建"
+      ],
+      "kb": "docs/kb/architecture/render-tree-sync.md",
+      "spec_domain": "specs/03-engine-framework/01-render-pipeline/01-basic-render-pipeline",
+      "func_id": "03-01-01",
+      "spec_status": "active",
+      "source_paths": {
+        "frame_node_cpp": "frameworks/core/components_ng/base/frame_node.cpp",
+        "frame_node_h": "frameworks/core/components_ng/base/frame_node.h",
+        "ui_node_cpp": "frameworks/core/components_ng/base/ui_node.cpp",
+        "rosen_render_context_cpp": "frameworks/core/components_ng/render/adapter/rosen_render_context.cpp",
+        "pattern_h": "frameworks/core/components_ng/pattern/pattern.h",
+        "image_pattern_cpp": "frameworks/core/components_ng/pattern/image/image_pattern.cpp",
+        "node_render_status_monitor_cpp": "frameworks/core/components_ng/base/node_render_status_monitor.cpp",
+        "frame_node_multi_thread_cpp": "frameworks/core/components_ng/base/frame_node_multi_thread.cpp"
+      },
+      "test_paths": [
+        "test/unittest/core/base/frame_node_test_ng_coverage.cpp",
+        "test/unittest/core/base/frame_node_test_ng.cpp",
+        "test/unittest/core/base/node_render_status_monitor_test_ng.cpp",
+        "test/unittest/core/pattern/image/image_pattern_test_ng.cpp"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-04"
+    },
+    {
+      "id": "UIContextInstanceIdLeak",
+      "name": "UIContext Instance ID Leak",
+      "name_cn": "UIContext 实例 ID 泄漏",
+      "kind": "issue",
+      "category": "lifecycle",
+      "keywords": [
+        "UIContextInstanceIdLeak",
+        "实例ID泄漏",
+        "syncInstanceId",
+        "restoreInstanceId",
+        "withInstanceId",
+        "jsUIContext",
+        "实例管理异常",
+        "多实例错乱",
+        "ContainerScope",
+        "restoreInstanceIds"
+      ],
+      "aliases": [
+        "实例ID栈错位",
+        "UIContext实例泄漏",
+        "实例ID不配对"
+      ],
+      "kb": "docs/kb/issues/lifecycle/uicontext-instance-id-leak.md",
+      "func_ids": [
+        "04-12-01"
+      ],
+      "source_paths": {
+        "js_uicontext": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "with_instance_id": "frameworks/bridge/declarative_frontend/engine/jsUIContext.js",
+        "scope_util_cpp": "frameworks/bridge/declarative_frontend/jsview/js_scope_util.cpp",
+        "scope_util_h": "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h",
+        "ani_modifier": "frameworks/core/interfaces/native/ani/common_ani_modifier.cpp",
+        "system_ops_accessor": "frameworks/core/interfaces/native/implementation/system_ops_accessor.cpp"
+      },
+      "status": "active",
+      "last_verified": "2026-08-04"
+    },
+    {
+      "id": "ScrollEndNotifyOnDetach",
+      "name": "Scroll End Notify On Detach",
+      "name_cn": "滚动组件下树误触发父组件onScrollEnd",
+      "kind": "issue",
+      "category": "interaction",
+      "keywords": [
+        "ScrollEndNotifyOnDetach",
+        "滚动组件下树误触发父组件onScrollEnd",
+        "OnDetachFromMainTree",
+        "OnScrollEndRecursive",
+        "scrollStop_",
+        "isScrolling_",
+        "嵌套滚动",
+        "onScrollEnd",
+        "下树通知",
+        "RefreshPattern",
+        "05-03-01",
+        "05-03-06"
+      ],
+      "aliases": [
+        "下树误通知滚动结束",
+        "滚动结束通知误触发",
+        "onScrollEnd误触发"
+      ],
+      "kb": "docs/kb/issues/interaction/scroll-end-notify-on-detach.md",
+      "func_ids": [
+        "05-03-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-03",
+      "source_paths": {
+        "on_detach_from_main_tree": "frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp",
+        "scrollable_pattern_header": "frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.h",
+        "ut": "test/unittest/core/pattern/scrollable/scrollable_pattern_test_ng.cpp"
+      }
+    },
+    {
+      "id": "IgnoreLayoutSafeAreaDirtyStateMismatch",
+      "name": "ignoreLayoutSafeArea Layout Dirty State Mismatch",
+      "name_cn": "ignoreLayoutSafeArea 布局脏状态异常",
+      "kind": "issue",
+      "category": "layout",
+      "keywords": [
+        "IgnoreLayoutSafeAreaDirtyStateMismatch",
+        "ignoreLayoutSafeArea",
+        "布局脏状态异常",
+        "LayoutDirty",
+        "LayoutDirtyMarked",
+        "TraverseForIgnore",
+        "TRAVERSE_FOR_IGNORE",
+        "FlushPostponedLayoutTask",
+        "PreMeasure",
+        "NavigationContent",
+        "Navigation 白屏",
+        "Swiper 白屏",
+        "延迟布局任务",
+        "安全区布局"
+      ],
+      "aliases": [
+        "ignoreLayoutSafeArea 白屏",
+        "安全区延迟布局异常",
+        "布局脏位未清理",
+        "TraverseForIgnore 布局异常"
+      ],
+      "kb": "docs/kb/issues/layout/ignore-layout-safe-area-dirty-state-mismatch.md",
+      "func_ids": [
+        "04-02-01",
+        "05-02-01",
+        "05-03-08"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08"
+    },
+    {
+      "id": "CanvasDrawingTaskBacklogAppFreeze",
+      "name": "Canvas Drawing Task Backlog AppFreeze",
+      "name_cn": "Canvas 绘制任务堆积导致 AppFreeze",
+      "kind": "issue",
+      "category": "performance",
+      "keywords": [
+        "CanvasDrawingTaskBacklogAppFreeze",
+        "Canvas",
+        "CanvasRenderingContext2D",
+        "AppFreeze",
+        "FlushTask",
+        "UpdateContentModifier",
+        "绘制任务堆积",
+        "单帧绘制过多",
+        "后台持续绘制",
+        "UI_BLOCK_6S"
+      ],
+      "aliases": [
+        "Canvas绘制卡死",
+        "Canvas后台绘制堆积",
+        "Canvas FlushTask冻结"
+      ],
+      "kb": "docs/kb/issues/performance/canvas-drawing-task-backlog-appfreeze.md",
+      "func_ids": [
+        "05-14-02"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-08"
     }
   ]
 }

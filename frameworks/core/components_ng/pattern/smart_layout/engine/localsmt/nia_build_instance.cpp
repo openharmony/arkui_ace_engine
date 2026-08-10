@@ -433,6 +433,10 @@ void LsSolver::BuildLits(std::string& inString)
             ParseSimpleTerm(*this, l, vec);
         }
     } else {
+        if (vec.size() < 2) {
+            l->litsIndex = litIndex;
+            return;
+        }
         l->delta = static_cast<int>(TransferNameToVar(vec[1], false));
         if (vec[1].find("feasible") != std::string::npos || vec[1].find("softVar") != std::string::npos) {
             feasible2litidx[vec[1]] = litIndex;

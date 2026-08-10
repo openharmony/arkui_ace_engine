@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-07-31
-> 主题数：228
+> 更新时间：2026-08-08
+> 主题数：233
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -224,10 +224,7 @@ docs/kb/
 | InspectorLayoutCallback | 布局回调(inspector) | `docs/kb/capabilities/inspector-layout-callback.md` | 新建（Spec 待补） |
 | WindowToolbar | 窗口工具栏 | `docs/kb/capabilities/window-toolbar.md` | 新建（Spec 待补） |
 | AtomicServiceAppBar | 元服务 AppBar | `docs/kb/capabilities/atomic-service-appbar.md` | 新建（Spec 待补） |
-| AccessibilityAttributes | 通用无障碍属性 | `docs/kb/capabilities/accessibility-attributes.md` | 新建（Spec 待补） |
-| UIExtension | UIExtension机制 | `docs/kb/capabilities/ui-extension.md` | 新建（Spec 待补） |
-| IsolatedComponentMechanism | IsolateComponent机制 | `docs/kb/capabilities/isolate-component.md` | 新建（Spec 待补） |
-| DynamicComponentMechanism | DynamicComponent机制 | `docs/kb/capabilities/dynamic-component.md` | 新建（Spec active） |
+| RenderTreeSync | 渲染树同步 | `docs/kb/architecture/render-tree-sync.md` | 新建 |
 
 | TouchEvents | 触摸事件 | `docs/kb/capabilities/touch-events.md` | 新建 |
 | KeyEvents | 按键事件 | `docs/kb/capabilities/key-events.md` | 新建 |
@@ -245,10 +242,19 @@ docs/kb/
 | NestedScrollOffsetNoResponse | 嵌套滚动偏移量不响应 | `docs/kb/issues/interaction/nested-scroll-offset-no-response.md` | 新建 |
 | ScrollerNaNOffsetValidation | Scroller 非法数值偏移校验 | `docs/kb/issues/compatibility/scroller-nan-offset-validation.md` | 新建 |
 | CustomSpanControllerLifecycle | CustomSpan 控制器生命周期 | `docs/kb/issues/text/custom-span-controller-lifecycle.md` | 新建 |
+| AccessibilityCustomActionsStale | 无障碍自定义 Action 动态刷新失效 | `docs/kb/issues/accessibility/accessibility-custom-actions-stale.md` | 新建 |
+| DynamicComponentAvoidanceIncorrect | DynamicComponent 弹窗避让不正确 | `docs/kb/issues/layout/dynamic-component-avoidance-incorrect.md` | 新建 |
+| UIExtensionWindowStateRegistration | UIExtension 窗口状态回调注册时机不正确 | `docs/kb/issues/lifecycle/ui-extension-window-state-registration.md` | 新建 |
 | KeyboardAvoidTimingChange | 键盘避让执行顺序变化 | `docs/kb/issues/layout/keyboard-avoid-timing-change.md` | 新建 |
 | ResourceAdapterInstanceIdMismatch | 资源适配器实例ID缓存不匹配 | `docs/kb/issues/rendering/resource-adapter-instance-id-mismatch.md` | 新建 |
 | AboutToDisappearUnmountBlockedOnReuse | aboutToDisappear下树屏蔽与组件复用冲突 | `docs/kb/issues/lifecycle/about-to-disappear-unmount-blocked-on-reuse.md` | 新建 |
 | MenuSwipeMisrecognizedAsClick | Menu滑动误判为点击关闭 | `docs/kb/issues/interaction/menu-swipe-misrecognized-as-click.md` | 新建 |
+| ScrollEndNotifyOnDetach | 滚动组件下树误触发父组件onScrollEnd | `docs/kb/issues/interaction/scroll-end-notify-on-detach.md` | 新建 |
+| UIContextInstanceIdLeak | UIContext 实例 ID 泄漏 | `docs/kb/issues/lifecycle/uicontext-instance-id-leak.md` | 新建 |
+| RenderNodeMemoryLeak | RenderNode 内存泄漏 | `docs/kb/issues/performance/rendernode-memory-leak.md` | 新建 |
+| IsPendingStateRenderTreeDiff | 同帧下树重新上树 isPendingState_ 状态错乱 | `docs/kb/issues/lifecycle/ispending-state-render-tree-diff.md` | 新建 |
+| IgnoreLayoutSafeAreaDirtyStateMismatch | ignoreLayoutSafeArea 布局脏状态异常 | `docs/kb/issues/layout/ignore-layout-safe-area-dirty-state-mismatch.md` | 新建 |
+| CanvasDrawingTaskBacklogAppFreeze | Canvas 绘制任务堆积导致 AppFreeze | `docs/kb/issues/performance/canvas-drawing-task-backlog-appfreeze.md` | 新建 |
 
 ## 检索
 

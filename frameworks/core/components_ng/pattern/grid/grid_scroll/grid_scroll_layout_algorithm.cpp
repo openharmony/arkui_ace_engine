@@ -417,8 +417,20 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheStart, cacheEnd, showCached);
         info_.times_ = (info_.times_ + 1) % GRID_CHECK_INTERVAL;
-        if (info_.times_ == 0) {
-            info_.CheckGridMatrix(cacheCount);
+        if (info_.times_ == 0 && !info_.CheckGridMatrix(cacheCount)) {
+            // TODO: this is a fallback workaround. When CheckGridMatrix detects matrix inconsistency,
+            // the current solution triggers a full data reload on the next frame to recover.
+            // The root cause of the inconsistency should be investigated and fixed at the source.
+            // The ideal solution is to pinpoint the exact scenario that corrupts the matrix and prevent it,
+            // rather than relying on a periodic self-check + full reload to recover.
+            TAG_LOGW(AceLogTag::ACE_GRID, "CheckGridMatrix failed, trigger data reload");
+            auto host = layoutWrapper->GetHostNode();
+            CHECK_NULL_VOID(host);
+            UpdateOverlay(layoutWrapper);
+            isLayouted_ = true;
+            host->ChildrenUpdatedFrom(0);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            return;
         }
     }
     UpdateOverlay(layoutWrapper);
@@ -2365,8 +2377,13 @@ int32_t GridScrollLayoutAlgorithm::MeasureCachedChild(const SizeF& frameSize, in
 void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
     LayoutWrapper* layoutWrapper, const std::map<int32_t, int32_t>& items)
 {
-    for (auto&& item : items) {
+    for (const auto& item : items) {
         auto currentIndex = item.second;
+        auto [positionIter, inserted] = itemsCrossPosition_.try_emplace(currentIndex);
+        if (!inserted) {
+            continue;
+        }
+        positionIter->second = ComputeItemCrossPosition(item.first);
         auto itemWrapper = layoutWrapper->GetChildByIndex(currentIndex, true);
         if (!itemWrapper) {
             if (predictBuildList_.back().idx < currentIndex) {
@@ -2375,7 +2392,6 @@ void GridScrollLayoutAlgorithm::CompleteItemCrossPosition(
                 predictBuildList_.emplace_back(currentIndex);
             }
         }
-        itemsCrossPosition_.try_emplace(currentIndex, ComputeItemCrossPosition(item.first));
     }
 }
 

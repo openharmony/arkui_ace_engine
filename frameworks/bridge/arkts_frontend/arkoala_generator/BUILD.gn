@@ -132,7 +132,7 @@ action("runner_gen_code") {
     # bridges output
     "$idlize_gen_bridges_output_path/arkoala_api_generated.h",
     "$idlize_gen_bridges_output_path/Serializers.h",
-    "$idlize_gen_bridges_output_path/callback_kind.cc",
+    "$idlize_gen_bridges_output_path/callback_kind.h",
     "$idlize_gen_bridges_output_path/bridge_generated.cc",
     "$idlize_gen_bridges_output_path/callback_deserialize_call.cc",
     "$idlize_gen_bridges_output_path/callback_managed_caller.cc",

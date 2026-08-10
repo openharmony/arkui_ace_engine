@@ -214,6 +214,12 @@ public:
         slideFinishedCallback_ = std::move(callback);
     }
 
+    using BoardColorAnimateCallback = std::function<void(bool isSelect)>;
+    void SetBoardColorAnimateCallback(BoardColorAnimateCallback&& callback)
+    {
+        boardColorAnimateCallback_ = std::move(callback);
+    }
+
     void SetFocusPointColor(Color color)
     {
         pointColor_ = color;
@@ -333,17 +339,22 @@ private:
         const LinearColor& finalPointColor);
     void AnimateBoardColor(const RefPtr<FrameNode>& host)
     {
+        bool isSelect = isSelect_->Get();
+        auto applyTrackColor = [&]() {
+            animatableBoardColor_->Set(isSelect ?
+                LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
+            if (boardColorAnimateCallback_) {
+                boardColorAnimateCallback_(isSelect);
+            }
+        };
         if (!isCancelAnimation_ || !isFocusOrBlur_) {
             AnimationOption colorOption = AnimationOption();
             colorOption.SetDuration(colorAnimationDuration_);
             colorOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
-            AnimationUtils::Animate(colorOption, [&]() {
-                animatableBoardColor_->Set(isSelect_->Get() ?
-                    LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
-            }, nullptr, nullptr, host->GetContextRefPtr());
+            AnimationUtils::Animate(colorOption, applyTrackColor, nullptr, nullptr,
+                host->GetContextRefPtr());
         } else {
-            animatableBoardColor_->Set(isSelect_->Get() ?
-                LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
+            applyTrackColor();
         }
     }
     float CalcPointOffset(bool isRtl, float halfHeight)
@@ -423,6 +434,7 @@ private:
     bool hasSystemMaterial_ = false;
     MaterialNodePositionCallback materialNodePositionCallback_;
     SlideFinishedCallback slideFinishedCallback_;
+    BoardColorAnimateCallback boardColorAnimateCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SwitchModifier);
 };

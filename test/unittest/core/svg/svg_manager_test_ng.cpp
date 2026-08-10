@@ -1091,6 +1091,116 @@ HWTEST_F(SvgManagerTestNg, SvgUse003, TestSize.Level1)
     use->SetAttr("y", "100");
 }
 
+/**
+ * @tc.name: SvgUseCircularRef001
+ * @tc.desc: test that circular use href references do not cause infinite recursion
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgManagerTestNg, SvgUseCircularRef001, TestSize.Level1)
+{
+    const std::string circularUseSvg =
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">"
+        "<g id=\"a\"><use xlink:href=\"#b\"/></g>"
+        "<g id=\"b\"><use xlink:href=\"#a\"/></g>"
+        "<rect clip-path=\"url(#a)\" width=\"10\" height=\"10\"/>"
+        "</svg>";
+    auto svgStream = SkMemoryStream::MakeCopy(circularUseSvg.c_str(), circularUseSvg.length());
+    ImageSourceInfo src;
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_NE(svg, nullptr);
+}
+
+/**
+ * @tc.name: SvgUseCircularRef002
+ * @tc.desc: test that self-referencing use href does not cause infinite recursion
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgManagerTestNg, SvgUseCircularRef002, TestSize.Level1)
+{
+    const std::string selfRefSvg =
+        "<svg xmlns=\"http://www.w3.org/2000/svg\">"
+        "<g id=\"self\"><use href=\"#self\"/></g>"
+        "</svg>";
+    auto svgStream = SkMemoryStream::MakeCopy(selfRefSvg.c_str(), selfRefSvg.length());
+    ImageSourceInfo src;
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+}
+
+/**
+ * @tc.name: SvgUseExponentialExpand001
+ * @tc.desc: test that exponentially expanding use references are limited
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgManagerTestNg, SvgUseExponentialExpand001, TestSize.Level1)
+{
+    const std::string exponentialSvg =
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">"
+        "<rect id=\"l0\" width=\"1\" height=\"1\"/>"
+        "<g id=\"l1\"><use xlink:href=\"#l0\"/><use xlink:href=\"#l0\"/></g>"
+        "<g id=\"l2\"><use xlink:href=\"#l1\"/><use xlink:href=\"#l1\"/></g>"
+        "<g id=\"l3\"><use xlink:href=\"#l2\"/><use xlink:href=\"#l2\"/></g>"
+        "<g id=\"l4\"><use xlink:href=\"#l3\"/><use xlink:href=\"#l3\"/></g>"
+        "<g id=\"l5\"><use xlink:href=\"#l4\"/><use xlink:href=\"#l4\"/></g>"
+        "<g id=\"l6\"><use xlink:href=\"#l5\"/><use xlink:href=\"#l5\"/></g>"
+        "<g id=\"l7\"><use xlink:href=\"#l6\"/><use xlink:href=\"#l6\"/></g>"
+        "<g id=\"l8\"><use xlink:href=\"#l7\"/><use xlink:href=\"#l7\"/></g>"
+        "<g id=\"l9\"><use xlink:href=\"#l8\"/><use xlink:href=\"#l8\"/></g>"
+        "<g id=\"l10\"><use xlink:href=\"#l9\"/><use xlink:href=\"#l9\"/></g>"
+        "<g id=\"l11\"><use xlink:href=\"#l10\"/><use xlink:href=\"#l10\"/></g>"
+        "<g id=\"l12\"><use xlink:href=\"#l11\"/><use xlink:href=\"#l11\"/></g>"
+        "<g id=\"l13\"><use xlink:href=\"#l12\"/><use xlink:href=\"#l12\"/></g>"
+        "<g id=\"l14\"><use xlink:href=\"#l13\"/><use xlink:href=\"#l13\"/></g>"
+        "<g id=\"l15\"><use xlink:href=\"#l14\"/><use xlink:href=\"#l14\"/></g>"
+        "<g id=\"l16\"><use xlink:href=\"#l15\"/><use xlink:href=\"#l15\"/></g>"
+        "<g id=\"l17\"><use xlink:href=\"#l16\"/><use xlink:href=\"#l16\"/></g>"
+        "<g id=\"l18\"><use xlink:href=\"#l17\"/><use xlink:href=\"#l17\"/></g>"
+        "<g id=\"l19\"><use xlink:href=\"#l18\"/><use xlink:href=\"#l18\"/></g>"
+        "<g id=\"l20\"><use xlink:href=\"#l19\"/><use xlink:href=\"#l19\"/></g>"
+        "<g id=\"l21\"><use xlink:href=\"#l20\"/><use xlink:href=\"#l20\"/></g>"
+        "<g id=\"l22\"><use xlink:href=\"#l21\"/><use xlink:href=\"#l21\"/></g>"
+        "<g id=\"l23\"><use xlink:href=\"#l22\"/><use xlink:href=\"#l22\"/></g>"
+        "<g id=\"l24\"><use xlink:href=\"#l23\"/><use xlink:href=\"#l23\"/></g>"
+        "<g id=\"l25\"><use xlink:href=\"#l24\"/><use xlink:href=\"#l24\"/></g>"
+        "<g id=\"l26\"><use xlink:href=\"#l25\"/><use xlink:href=\"#l25\"/></g>"
+        "<g id=\"l27\"><use xlink:href=\"#l26\"/><use xlink:href=\"#l26\"/></g>"
+        "<g id=\"l28\"><use xlink:href=\"#l27\"/><use xlink:href=\"#l27\"/></g>"
+        "<g id=\"l29\"><use xlink:href=\"#l28\"/><use xlink:href=\"#l28\"/></g>"
+        "<g id=\"l30\"><use xlink:href=\"#l29\"/><use xlink:href=\"#l29\"/></g>"
+        "<use xlink:href=\"#l30\"/>"
+        "</svg>";
+    auto svgStream = SkMemoryStream::MakeCopy(exponentialSvg.c_str(), exponentialSvg.length());
+    ImageSourceInfo src;
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_NE(svg, nullptr);
+}
+
+/**
+ * @tc.name: SvgDeepNesting001
+ * @tc.desc: test that deeply nested g elements do not cause stack overflow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SvgManagerTestNg, SvgDeepNesting001, TestSize.Level1)
+{
+    std::string deepNestingSvg = "<svg xmlns=\"http://www.w3.org/2000/svg\">";
+    for (int i = 0; i < 10000; ++i) {
+        deepNestingSvg += "<g>";
+    }
+    deepNestingSvg += "<rect width=\"10\" height=\"10\"/>";
+    for (int i = 0; i < 10000; ++i) {
+        deepNestingSvg += "</g>";
+    }
+    deepNestingSvg += "</svg>";
+    auto svgStream = SkMemoryStream::MakeCopy(deepNestingSvg.c_str(), deepNestingSvg.length());
+    ImageSourceInfo src;
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+}
+
 // ========== SVG ClipPath Tests (001-003) ==========
 
 /**

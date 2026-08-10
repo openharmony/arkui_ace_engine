@@ -89,12 +89,15 @@ void DigitalCrownSensitivityImpl(Ark_NativePointer node, const Opt_CrownSensitiv
     ScrollableModelStatic::SetDigitalCrownSensitivity(frameNode, convValue);
 #endif
 }
-void SpaceImpl(Ark_NativePointer node, const Opt_LengthMetrics* space)
+void SpaceImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* space)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto spaceOpt = Converter::OptConvert<Dimension>(*space);
     ListModelStatic::SetListSpace(frameNode, spaceOpt);
+    if (!spaceOpt) {
+        ListModelNG::CreateWithResourceObjSpace(frameNode, nullptr);
+    }
 }
 void ScrollBarImpl(Ark_NativePointer node, const Opt_BarState* status)
 {
@@ -110,8 +113,11 @@ void ScrollBarColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     std::optional<Color> barColor = color ? Converter::OptConvert<Color>(*color) : std::nullopt;
     ScrollableModelStatic::SetScrollBarColor(frameNode, barColor);
+    if (!barColor) {
+        ListModelNG::CreateWithResourceObjScrollBarColor(frameNode, nullptr);
+    }
 }
-void ScrollBarWidthImpl(Ark_NativePointer node, const Opt_LengthMetrics* width)
+void ScrollBarWidthImpl(Ark_NativePointer node, const Opt_LengthMetricsProxy* width)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -119,6 +125,9 @@ void ScrollBarWidthImpl(Ark_NativePointer node, const Opt_LengthMetrics* width)
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
     ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
+    if (!convValue) {
+        ListModelNG::CreateWithResourceObjScrollBarWidth(frameNode, nullptr);
+    }
 }
 void CachedCountImpl(Ark_NativePointer node, const Opt_Int32* count)
 {
@@ -135,10 +144,7 @@ void ChainAnimationImpl(Ark_NativePointer node, const Opt_Boolean* enable)
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*enable);
-    if (!convValue) {
-        return;
-    }
-    ListModelStatic::SetChainAnimation(frameNode, *convValue);
+    ListModelStatic::SetChainAnimation(frameNode, convValue);
 }
 void EnableScrollInteractionImpl(Ark_NativePointer node,
                                  const Opt_Boolean* enable)
@@ -146,10 +152,7 @@ void EnableScrollInteractionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*enable);
-    if (!convValue) {
-        return;
-    }
-    ListModelStatic::SetScrollEnabled(frameNode, *convValue);
+    ListModelStatic::SetScrollEnabled(frameNode, convValue);
 }
 void FadingEdgeImpl(Ark_NativePointer node, const Opt_Boolean* enable)
 {

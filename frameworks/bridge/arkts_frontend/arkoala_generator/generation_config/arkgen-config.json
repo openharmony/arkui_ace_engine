@@ -98,6 +98,10 @@
         {
             "from": "arkui.component.xcomponent.XComponentController",
             "to": "arkui.component.idlize.XComponentControllerWrapper"
+        },
+        {
+            "from": "arkui.Graphics.LengthMetrics",
+            "to": "arkui.component.idlize.LengthMetricsProxy"
         }
     ],
     "forceMaterialized": [
@@ -733,7 +737,8 @@
             "ContentSlotAttribute",
             "ContentSlotInterface",
             "PanGestureOptions",
-            "ShaderStyle"
+            "ShaderStyle",
+            "LengthMetrics"
         ],
         "ignoreEntry": [
             "Optional",

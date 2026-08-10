@@ -85,7 +85,7 @@ public:
 }; // namespace OHOS::Ace::NG
 
 FrameNode::FrameNode(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
+    std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot, bool isLayoutNode)
     : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern), isLayoutNode_(isLayoutNode)
 {
     uiNodeType_ = UINodeType::FRAME_NODE;
@@ -94,7 +94,7 @@ FrameNode::FrameNode(
 FrameNode::~FrameNode() = default;
 
 RefPtr<FrameNode> FrameNode::GetOrCreateFrameNode(
-    const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
+    std::string_view tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = ElementRegister::GetInstance()->GetSpecificItemById<FrameNode>(nodeId);
     if (frameNode) {
@@ -249,7 +249,7 @@ void FrameNode::ReportSelectedText(bool isRegister)
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+    std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
     ElementRegister::GetInstance()->AddUINode(frameNode);
@@ -470,7 +470,7 @@ void FrameNode::NotifyWebPattern(bool) {}
 void FrameNode::OnGenerateOneDepthAllFrame(std::list<RefPtr<FrameNode>>&) {}
 void FrameNode::OnGenerateOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>&) {}
 void FrameNode::OnGenerateOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>&, OffsetF&) {}
-void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNode>>&) {}
+void FrameNode::OnGenerateOneDepthVisibleFrameWithTransition(std::vector<RefPtr<FrameNode>>& visibleNode) {}
 bool FrameNode::OnRemoveFromParent(bool)
 {
     return false;
@@ -625,7 +625,7 @@ FocusType FrameNode::GetFocusType() const
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
-    const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
+    std::string_view tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {
     return CreateFrameNode(tag, nodeId, pattern, true);
 }

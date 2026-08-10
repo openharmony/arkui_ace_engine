@@ -13,19 +13,25 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("text_timer_test_ng") {
-  type = "new"
-  module_name = "InfoShowSet-TextTimer"
+test_sources = [
+  "text_timer_builder_test_ng.cpp",
+  "text_timer_test_core.cpp",
+  "text_timer_test_ng.cpp",
+]
 
-  sources = [
-    "text_timer_builder_test_ng.cpp",
-    "text_timer_test_ng.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "text_timer_test_core.cpp" ]
-  } else {
-    sources += [ "text_timer_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("text_timer_test_ng") {
+    type = "host_components"
+    module_name = "InfoShowSet-TextTimer"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("text_timer_test_ng") {
+    type = "new"
+    module_name = "InfoShowSet-TextTimer"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [ "text_timer_test_core.cpp" ]
+    }
   }
 }

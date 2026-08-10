@@ -195,7 +195,7 @@ class ParticleToParticleInnerHelper {
         if (input === undefined) {
             return input;
         }
-        if (input instanceof ParticleColorOptions) {
+        if ((input as Object).hasOwnProperty('r')) {
             return (input as ParticleColorOptions);
         }
         return ParticleToParticleInnerHelper.ConvertParticlePropertyAnimationColor(input as Array<ParticlePropertyAnimation<ResourceColor>>);
@@ -437,9 +437,27 @@ export function ParticleImpl(
     const receiver = remember<ArkParticleComponent>((): ArkParticleComponent => {
         return new ArkParticleComponent()
     })
-    NodeAttach<ArkParticlePeer>((): ArkParticlePeer => ArkParticlePeer.create(receiver), (peer: ArkParticlePeer): void => {
-        receiver.setPeer(peer)
-        style?.(receiver)
-        receiver.setPeer(undefined)
+    NodeAttach<ArkParticlePeer>(
+        (): ArkParticlePeer => ArkParticlePeer.create(receiver), 
+        (peer: ArkParticlePeer): void => {
+            receiver.setPeer(peer)
+            style?.(receiver)
+            receiver.setPeer(undefined)
+    })
+}
+@memo
+export function Particle(
+    @memo
+    style: ((attributes: ParticleAttribute) => void) | undefined
+) {
+    const receiver = remember<ArkParticleComponent>((): ArkParticleComponent => {
+        return new ArkParticleComponent()
+    })
+    NodeAttach<ArkParticlePeer>(
+        (): ArkParticlePeer => ArkParticlePeer.create(receiver), 
+        (peer: ArkParticlePeer): void => {
+            receiver.setPeer(peer)
+            style?.(receiver)
+            receiver.setPeer(undefined)
     })
 }

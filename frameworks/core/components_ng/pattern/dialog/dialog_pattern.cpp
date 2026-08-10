@@ -86,6 +86,7 @@ constexpr int32_t SHEET_INFO_IDX = -2;
 constexpr Dimension SHEET_IMAGE_MARGIN = 16.0_vp;
 constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
 constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
+constexpr Dimension DIALOG_BUTTON_PADDING = 16.0_vp;
 constexpr Color DEFAULT_BUTTON_COLOR = Color(0xff007dff);
 const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
 constexpr int32_t THREE_BUTTON_MODE = 3;
@@ -93,20 +94,17 @@ constexpr int32_t TWO_BUTTON_MODE = 2;
 constexpr int32_t ONE_BUTTON_MODE = 1;
 constexpr int32_t START_CHILD_INDEX = 0;
 constexpr uint32_t DIALOG_TITLE_MAXLINES = 1;
-constexpr Dimension DIALOG_ONE_TITLE_ALL_HEIGHT = 56.0_vp;
-constexpr Dimension DIALOG_TITLE_CONTENT_HEIGHT = 35.0_px;
-constexpr int32_t DIALOG_TITLE_AVE_BY_2 = 2;
 constexpr Dimension DIALOG_CONTENT_PADDING_TOP = 0.0_vp;
 constexpr Dimension DIALOG_SUBTITLE_PADDING_LEFT = 24.0_vp;
 constexpr Dimension DIALOG_SUBTITLE_PADDING_RIGHT = 24.0_vp;
-constexpr Dimension DIALOG_TWO_TITLE_ZERO_SPACE = 0.0_vp;
+constexpr Dimension DIALOG_TWO_TITLE_TWO_SPACE = 2.0_vp;
 constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
 constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr int32_t BUTTON_TYPE_NORMAL = 1;
 constexpr float EDGELIGHT_THICKNESS = 250.0f;
 constexpr float EDGELIGHT_LENGTH_RATIO = 0.4f;
-constexpr float EDGELIGHT_INTENSITY = 0.5f;
+constexpr float EDGELIGHT_INTENSITY = 0.2f;
 constexpr float BUTTON_MIN_FONTSIZE = 9.0f;
 constexpr float TRANSLATEY_RATIO = 0.5f;
 constexpr float INITIAL_ZOOM_FACTOR = 0.2f;
@@ -274,6 +272,29 @@ void DialogPattern::OnFontConfigurationUpdate()
         CheckScrollHeightIsNegative(contentColumn_, dialogProperties_);
         UpdateTextFontScale();
     }
+}
+
+void DialogPattern::RebuildButtons(const LayoutConstraintF layoutConstraint)
+{
+    // Only rebuild for AUTO direction with two buttons, not menu or elderly mode
+    if (dialogProperties_.isMenu || isSuitableForElderly_ ||
+        dialogProperties_.buttonDirection != DialogButtonDirection::AUTO ||
+        dialogProperties_.buttons.size() != TWO_BUTTON_MODE) {
+        return;
+    }
+    bool needVertical = IsVerticalAlignButtonNeeded(dialogProperties_.buttons, layoutConstraint);
+    if (needVertical == isVertical_) {
+        return;
+    }
+    CHECK_NULL_VOID(contentColumn_);
+    CHECK_NULL_VOID(buttonContainer_);
+    contentColumn_->RemoveChild(buttonContainer_);
+    auto buttonContainerNew = BuildButtons(
+        dialogProperties_.buttons, needVertical ? DialogButtonDirection::VERTICAL : DialogButtonDirection::HORIZONTAL);
+    CHECK_NULL_VOID(buttonContainerNew);
+    buttonContainerNew->MountToParent(contentColumn_);
+    buttonContainer_ = buttonContainerNew;
+    contentColumn_->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
 }
 
 void DialogPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -650,6 +671,14 @@ RefPtr<FrameNode> DialogPattern::CreateDialogScroll(const DialogProperties& dial
         scrollFlexAlign = FlexAlign::CENTER;
     }
     props->UpdateAlignSelf(scrollFlexAlign);
+    // Set nested scroll mode to parallel for inner scroll
+    NestedScrollOptions nestedOpt = {
+        .forward = NestedScrollMode::PARALLEL,
+        .backward = NestedScrollMode::PARALLEL
+    };
+    auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(scrollPattern, scroll);
+    scrollPattern->SetNestedScroll(nestedOpt);
     return scroll;
 }
 
@@ -665,15 +694,23 @@ void DialogPattern::BuildChild(const DialogProperties& props)
     // Make dialog Content Column
     auto contentColumn = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    auto contentColumnWrapper = contentColumn;
-    if (NeedDistortion()) {
-        SetHasExtraNodeForDistortion(true);
-        contentColumnWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        contentColumn->MountToParent(contentColumnWrapper);
-    }
     CHECK_NULL_VOID(contentColumn);
     ACE_UINODE_TRACE(contentColumn);
+    auto contentColumnWrapper = contentColumn;
+    if (!props.isMask) {
+        // Create an outer scroll wrapper for non-mask dialogs
+        auto contentScroll = FrameNode::CreateFrameNode(
+            V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+        CHECK_NULL_VOID(contentScroll);
+        auto scrollProps = contentScroll->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_VOID(scrollProps);
+        scrollProps->UpdateAxis(Axis::VERTICAL);
+        contentColumn->MountToParent(contentScroll);
+        contentScroll->MarkModifyDone();
+        contentColumnWrapper = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        contentScroll->MountToParent(contentColumnWrapper);
+    }
     if (!props.title.empty() || !props.subtitle.empty()) {
         auto title = BuildTitle(props);
         CHECK_NULL_VOID(title);
@@ -811,7 +848,7 @@ void DialogPattern::BuildCustomChild(const DialogProperties& props, const RefPtr
 
 bool IsAlertDialog(const DialogProperties& props)
 {
-    return props.type == DialogType::ALERT_DIALOG && props.isAlertDialog;
+    return props.type == DialogType::ALERT_DIALOG;
 }
 
 RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogProperties)
@@ -847,16 +884,11 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     titlePadding.left = CalcLength(paddingInTheme.Left());
     titlePadding.right = CalcLength(paddingInTheme.Right());
     if (!dialogProperties.title.empty() && !dialogProperties.subtitle.empty()) {
-        titlePadding.top = CalcLength(dialogTheme_->GetPaddingTopTitle());
-        titlePadding.bottom = CalcLength(DIALOG_TWO_TITLE_ZERO_SPACE);
+        titlePadding.top = CalcLength(dialogTheme_->GetTitlePaddingTop());
     } else {
-        auto padding =
-            DIALOG_ONE_TITLE_ALL_HEIGHT - Dimension(DIALOG_TITLE_CONTENT_HEIGHT.ConvertToVp(), DimensionUnit::VP);
-        if (dialogTheme_->GetPaddingSingleTitle().ConvertToVp() > 0) {
-            padding = dialogTheme_->GetPaddingSingleTitle();
-        }
-        titlePadding.top = CalcLength(padding / DIALOG_TITLE_AVE_BY_2);
-        titlePadding.bottom = CalcLength(padding / DIALOG_TITLE_AVE_BY_2);
+        // Single title: use resource value, consistent with ETS
+        titlePadding.top = CalcLength(dialogTheme_->GetTitlePaddingTop());
+        titlePadding.bottom = CalcLength(dialogTheme_->GetTitlePaddingBottom());
     }
     titleProp->UpdatePadding(titlePadding);
     // XTS inspector value
@@ -871,9 +903,7 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     titleProp->UpdateFontWeight(FontWeight::BOLD);
     titleProp->UpdateTextAlign(TextAlign::CENTER);
-    if (IsAlertDialog(dialogProperties)) {
-        titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
-    }
+    titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
     title->MountToParent(titleRow);
     title->MarkModifyDone();
     contentNodeMap_[dialogProperties.title.empty() ? DialogContentNode::SUBTITLE : DialogContentNode::TITLE] = title;
@@ -911,8 +941,8 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     PaddingProperty titlePadding;
     titlePadding.left = CalcLength(DIALOG_SUBTITLE_PADDING_LEFT);
     titlePadding.right = CalcLength(DIALOG_SUBTITLE_PADDING_RIGHT);
-    titlePadding.top = CalcLength(DIALOG_TWO_TITLE_ZERO_SPACE);
-    titlePadding.bottom = CalcLength(dialogTheme_->GetPaddingTopTitle());
+    titlePadding.top = CalcLength(DIALOG_TWO_TITLE_TWO_SPACE);
+    titlePadding.bottom = CalcLength(dialogTheme_->GetTitlePaddingBottom());
     titleProp->UpdatePadding(titlePadding);
 
     // XTS inspector value
@@ -927,9 +957,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     subtitleRowProps->UpdateMainAxisAlign(FlexAlign::CENTER);
     titleProp->UpdateTextAlign(TextAlign::CENTER);
     subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (IsAlertDialog(dialogProperties)) {
-        titleProp->UpdateAdaptMinFontSize(titleStyle.GetFontSize());
-    }
+    titleProp->UpdateAdaptMinFontSize(titleStyle.GetFontSize());
     subtitle->MountToParent(subtitleRow);
     subtitle->MarkModifyDone();
     contentNodeMap_[DialogContentNode::SUBTITLE] = subtitle;
@@ -945,12 +973,18 @@ RefPtr<FrameNode> DialogPattern::BuildTitle(const DialogProperties& dialogProper
         CHECK_NULL_RETURN(titleColumn, nullptr);
         auto columnProps = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_RETURN(columnProps, nullptr);
-        columnProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+        columnProps->UpdateMainAxisAlign(FlexAlign::CENTER);
         columnProps->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+        columnProps->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(dialogTheme_->GetTitleSecondaryMinHeight())));
         auto subtitleRow = BuildSubTitle(dialogProperties);
         titleColumn->AddChild(titleRow);
         titleColumn->AddChild(subtitleRow);
         return titleColumn;
+    }
+    // Set min height for single title
+    auto titleRowProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    if (titleRowProps) {
+        titleRowProps->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(dialogTheme_->GetTitlePrimaryMinHeight())));
     }
     return titleRow;
 }
@@ -1241,8 +1275,8 @@ void DialogPattern::UpdateDialogButtonProperty(
         buttonModifier->updateButtonStyleToLayoutProp(buttonHandle, ButtonStyleMode::NORMAL);
     }
     PaddingProperty buttonPadding;
-    buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
-    buttonPadding.right = CalcLength(SHEET_LIST_PADDING);
+    buttonPadding.left = CalcLength(DIALOG_BUTTON_PADDING);
+    buttonPadding.right = CalcLength(DIALOG_BUTTON_PADDING);
     buttonProp->UpdatePadding(buttonPadding);
     if (!isVertical) {
         // set flex grow to fill horizontal space
@@ -1280,8 +1314,8 @@ RefPtr<FrameNode> DialogPattern::CreateDivider(
     dividerPaintProps->UpdateDividerColor(color);
     // add divider margin
     MarginProperty margin = {
-        .left = CalcLength((space - dividerWidth) / 2),
-        .right = CalcLength((space - dividerWidth) / 2),
+        .left = CalcLength((space.ConvertToPx() * 2 - dividerWidth.ConvertToPx()) / 2),
+        .right = CalcLength((space.ConvertToPx() * 2 - dividerWidth.ConvertToPx()) / 2)
     };
     dividerProps->UpdateMargin(margin);
     return dividerNode;
@@ -1295,19 +1329,23 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
     RefPtr<FrameNode> container;
     bool isVertical;
     if (direction == DialogButtonDirection::HORIZONTAL ||
-        (direction == DialogButtonDirection::AUTO && buttons.size() == TWO_BUTTON_MODE)) {
+        (direction == DialogButtonDirection::AUTO && buttons.size() == TWO_BUTTON_MODE) ||
+        buttons.size() == ONE_BUTTON_MODE) {
         // use horizontal layout
         isVertical = false;
         container = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(false));
         CHECK_NULL_RETURN(container, nullptr);
         auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
         layoutProps->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
         layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     } else {
         // use vertical layout
         isVertical = true;
         container = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, Id, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        CHECK_NULL_RETURN(container, nullptr);
         auto layoutProps = container->GetLayoutProperty<LinearLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProps, nullptr);
         layoutProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
         layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     }
@@ -1323,11 +1361,13 @@ RefPtr<FrameNode> DialogPattern::BuildButtons(
     }
     auto padding = dialogTheme_->GetActionsPadding();
     actionPadding.top = CalcLength(dialogTheme_->GetButtonWithContentPadding());
-    actionPadding.bottom = CalcLength(dialogTheme_->GetButtonPaddingBottom());
+    actionPadding.bottom = isVertical ? CalcLength(dialogTheme_->GetButtonPaddingBottomVertical())
+                                      : CalcLength(dialogTheme_->GetButtonPaddingBottom());
     container->GetLayoutProperty()->UpdatePadding(actionPadding);
     AddButtonAndDivider(buttons, container, isVertical);
     container->MarkModifyDone();
     buttonContainer_ = container;
+    isVertical_ = isVertical;
     return container;
 }
 
@@ -1546,24 +1586,22 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
         ACE_UINODE_TRACE(button);
         uint32_t val = size > 0 ? size - 1 : 0;
         if (i != val) {
-            button = CreateButton(buttons[i], i, false, isSuitableForElderly_, size);
+            button = CreateButton(buttons[i], i, false, true, size);
         } else {
-            button = CreateButton(buttons[i], i, true, isSuitableForElderly_, size);
+            button = CreateButton(buttons[i], i, true, true, size);
         }
         CHECK_NULL_RETURN(button, nullptr);
-        auto props = DynamicCast<FrameNode>(button)->GetLayoutProperty();
+        auto buttonFrameNode = DynamicCast<FrameNode>(button);
+        CHECK_NULL_RETURN(buttonFrameNode, nullptr);
+        auto props = buttonFrameNode->GetLayoutProperty();
+        CHECK_NULL_RETURN(props, nullptr);
         auto buttonRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-            AceType::MakeRefPtr<LinearLayoutPattern>(isSuitableForElderly_));
+            AceType::MakeRefPtr<LinearLayoutPattern>(true));
         CHECK_NULL_RETURN(buttonRow, nullptr);
         auto buttonRowProps = buttonRow->GetLayoutProperty<LinearLayoutProperty>();
         CHECK_NULL_RETURN(buttonRowProps, nullptr);
-        if (isSuitableForElderly_) {
-            buttonRowProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
-            buttonRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
-        } else {
-            buttonRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-            buttonRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-        }
+        buttonRowProps->UpdateCrossAxisAlign(FlexAlign::STRETCH);
+        buttonRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
 
         button->MountToParent(buttonRow);
         button->MarkModifyDone();
@@ -1577,7 +1615,7 @@ RefPtr<FrameNode> DialogPattern::BuildMenu(const std::vector<ButtonInfo>& button
     }
     menuPadding.left = CalcLength(dialogTheme_->GetDefaultPadding().Left());
     menuPadding.right = CalcLength(dialogTheme_->GetDefaultPadding().Right());
-    menuPadding.bottom = CalcLength(dialogTheme_->GetButtonPaddingBottom());
+    menuPadding.bottom = CalcLength(dialogTheme_->GetButtonPaddingBottomVertical());
     menuProps->UpdatePadding(menuPadding);
     return menu;
 }
@@ -2037,6 +2075,48 @@ void DialogPattern::UpdatePropertyForElderly(const std::vector<ButtonInfo>& butt
         isSuitableForElderly_ = true;
         notAdapationAging_ = false;
     }
+}
+
+bool DialogPattern::IsVerticalAlignButtonNeeded(
+    const std::vector<ButtonInfo>& buttons, const LayoutConstraintF& layoutConstraint)
+{
+    if (buttons.size() != TWO_BUTTON_MODE) {
+        return false;
+    }
+    CHECK_NULL_RETURN(dialogTheme_, false);
+
+    // Calculate available width for each button:
+    // Available width =
+    // (total width - left padding - right padding - button space) / button count - button inner padding
+    auto leftPadding = dialogTheme_->GetMutiButtonPaddingStart();
+    auto rightPadding = dialogTheme_->GetMutiButtonPaddingEnd();
+    auto buttonSpace = dialogTheme_->GetMutiButtonPaddingHorizontal();
+
+    auto maxWidth = Dimension(layoutConstraint.maxSize.Width());
+    double maxWidthPerButton = (maxWidth.ConvertToVp() - leftPadding.ConvertToVp() - rightPadding.ConvertToVp() -
+        2 * buttonSpace.ConvertToVp() * (buttons.size() - 1)) / buttons.size() -
+        DIALOG_BUTTON_PADDING.ConvertToVp() * 2;
+
+    for (const auto& button : buttons) {
+        MeasureContext measureContext;
+        measureContext.textContent = button.text;
+        measureContext.fontSize = dialogTheme_->GetButtonTextSize().IsValid()
+            ? dialogTheme_->GetButtonTextSize()
+            : dialogTheme_->GetNormalButtonFontSize();
+        measureContext.fontWeight = StringUtils::FontWeightToString(FontWeight::MEDIUM);
+
+        Size measureSize = MeasureUtil::MeasureTextSize(measureContext);
+
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        if (GreatNotEqual(measureSize.Width(), maxWidthPerButton * pipelineContext->GetDipScale())) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool DialogPattern::NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons)
@@ -3607,7 +3687,12 @@ void DialogPattern::PlayDistortion()
 
     AnimationOption option;
     option.SetDuration(1000);
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 322, 27)); // Spring curve
+    TrailOptimization trailOptimization = {
+        .progressThreshold = 0.98f,
+        .responseDecayFactor = 0.9f
+    };
+    option.SetCurve(
+        AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0, 1, 322, 27, trailOptimization)); // Spring curve
     PerfMonitor::GetPerfMonitor()->Start(PerfConstants::DIALOG_LIGHT_SENSE_ANIMATION, PerfActionType::LAST_UP, "");
     renderContext->ScaleAnimation(option, INITIAL_ZOOM_FACTOR, 1);
     renderContext->UpdateTranslateInXY(
@@ -3630,7 +3715,8 @@ void DialogPattern::PlayDistortion()
         .rbCorner = { 1, 1 },   // Right-bottom corner stays in place
         .barrelDistortion = {  0, 0, 0, 0 },  // Add barrel distortion Left-Right-Top-Bottom
     };
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 235, 23));
+    option.SetCurve(
+        AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0, 1, 235, 23, trailOptimization));
     AnimationUtils::Animate(option, [renderContext, param2, childContexts]() {
         renderContext->UpdateDistortionParam(param2);
         for (const auto& childContext : childContexts) {
@@ -3650,7 +3736,8 @@ void DialogPattern::PlayDistortion()
         .rbCorner = { 1, 1 },   // Right-bottom corner stays in place
         .barrelDistortion = { 0.1, 0.1, -0.1, 0 },  // Add barrel distortion Left-Right-Top-Bottom
     };
-    option.SetCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 158, 17));
+    option.SetCurve(
+        AceType::MakeRefPtr<TrailOptimizedInterpolatingSpring>(0, 1, 158, 17, trailOptimization));
     AnimationUtils::Animate(option, [renderContext, param3, childContexts]() {
         renderContext->UpdateDistortionParam(param3);
         for (const auto& childContext : childContexts) {

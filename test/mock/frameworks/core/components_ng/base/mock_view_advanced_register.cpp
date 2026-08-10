@@ -14,6 +14,12 @@
  */
 
 #include "core/components_ng/base/view_advanced_register.h"
+#include "core/components_ng/pattern/root/root_pattern.h"
+#ifdef ENABLE_SPLIT_MODE
+#include "core/components_ng/pattern/stage/force_split/parallel_page_pattern.h"
+#include "core/components_ng/pattern/stage/force_split/parallel_stage_manager.h"
+#include "core/components_ng/pattern/stage/force_split/parallel_stage_pattern.h"
+#endif
 
 namespace OHOS::Ace::NG {
 thread_local std::shared_ptr<ViewAdvancedRegister> ViewAdvancedRegister::instance_ = nullptr;
@@ -28,19 +34,43 @@ std::shared_ptr<ViewAdvancedRegister> ViewAdvancedRegister::GetInstance()
 
 RefPtr<PagePattern> ViewAdvancedRegister::CreatePagePattern(const RefPtr<PageInfo>& pageInfo)
 {
-    (void)pageInfo;
-    return nullptr;
+#ifdef ENABLE_SPLIT_MODE
+    if (SystemProperties::GetDeviceType() == DeviceType::TABLET ||
+        SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE ||
+        SystemProperties::IsForcibleLandscapeEnabled()) {
+        return AceType::MakeRefPtr<ParallelPagePattern>(pageInfo);
+    }
+#endif
+    return AceType::MakeRefPtr<PagePattern>(pageInfo);
 }
 
 RefPtr<Pattern> ViewAdvancedRegister::GeneratePattern(const std::string& patternName)
 {
-    (void)patternName;
+    if (patternName == V2::STAGE_ETS_TAG) {
+#ifdef ENABLE_SPLIT_MODE
+        if (SystemProperties::GetDeviceType() == DeviceType::TABLET ||
+            SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE ||
+            SystemProperties::IsForcibleLandscapeEnabled()) {
+            return AceType::MakeRefPtr<ParallelStagePattern>();
+        }
+#endif
+        return AceType::MakeRefPtr<StagePattern>();
+    }
+    if (patternName == V2::ROOT_ETS_TAG) {
+        return AceType::MakeRefPtr<RootPattern>();
+    }
     return nullptr;
 }
 
 RefPtr<StageManager> ViewAdvancedRegister::GenerateStageManager(const RefPtr<FrameNode>& stage)
 {
-    (void)stage;
-    return nullptr;
+#ifdef ENABLE_SPLIT_MODE
+    if (SystemProperties::GetDeviceType() == DeviceType::TABLET ||
+        SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE ||
+        SystemProperties::IsForcibleLandscapeEnabled()) {
+        return AceType::MakeRefPtr<ParallelStageManager>(stage);
+    }
+#endif
+    return AceType::MakeRefPtr<StageManager>(stage);
 }
 } // namespace OHOS::Ace::NG

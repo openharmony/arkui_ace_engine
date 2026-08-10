@@ -187,7 +187,7 @@ public:
         return dragBackgroundColor_;
     }
 
-    TextStyle GetTextStyle() const
+    const TextStyle& GetTextStyle() const
     {
         return textStyle_;
     }

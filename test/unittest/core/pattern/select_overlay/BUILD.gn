@@ -13,32 +13,38 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("select_overlay_test_ng") {
-  module_name = "TextSet-TextSelection"
-  type = "new"
+test_sources = [
+  "select_overlay_content_modifier_test_ng.cpp",
+  "select_overlay_layout_algorithm_test_tdd.cpp",
+  "select_overlay_magnifier_velocity_tdd.cpp",
+  "select_overlay_node_test_tdd.cpp",
+  "select_overlay_paint_method_test_ng.cpp",
+  "select_overlay_pattern_test_tdd.cpp",
+  "select_overlay_test_core.cpp",
+  "select_overlay_test_ng.cpp",
+  "select_overlay_testeight_ng.cpp",
+  "select_overlay_testfive_ng.cpp",
+  "select_overlay_testfour_ng.cpp",
+  "select_overlay_testnine_ng.cpp",
+  "select_overlay_testseven_ng.cpp",
+  "select_overlay_testsix_ng.cpp",
+  "select_overlay_testthree_ng.cpp",
+  "select_overlay_testtwo_ng.cpp",
+]
 
-  sources = [
-    "select_overlay_content_modifier_test_ng.cpp",
-    "select_overlay_paint_method_test_ng.cpp",
-    "select_overlay_test_ng.cpp",
-    "select_overlay_testeight_ng.cpp",
-    "select_overlay_testfive_ng.cpp",
-    "select_overlay_testfour_ng.cpp",
-    "select_overlay_testnine_ng.cpp",
-    "select_overlay_testseven_ng.cpp",
-    "select_overlay_testsix_ng.cpp",
-    "select_overlay_magnifier_velocity_tdd.cpp",
-    "select_overlay_testthree_ng.cpp",
-    "select_overlay_testtwo_ng.cpp",
-    "select_overlay_layout_algorithm_test_tdd.cpp",
-    "select_overlay_node_test_tdd.cpp",
-    "select_overlay_pattern_test_tdd.cpp",
-  ]
-
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [ "select_overlay_test_core.cpp" ]
-  } else {
-    sources += [ "select_overlay_test_core.cpp" ]
+if (is_host_product) {
+  ace_unittest("select_overlay_test_ng") {
+    type = "host_components"
+    module_name = "TextSet-TextSelection"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("select_overlay_test_ng") {
+    module_name = "TextSet-TextSelection"
+    type = "new"
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = [ "select_overlay_test_core.cpp" ]
+    }
   }
 }

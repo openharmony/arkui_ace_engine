@@ -82,6 +82,9 @@ ArkUI_ErrorCode OH_ArkUI_NativeModule_ImmersiveMaterial_GetMaterialColor(ArkUI_I
     uint32_t* color)
 {
     CHECK_NULL_RETURN(material && color, ARKUI_ERROR_CODE_PARAM_INVALID);
+    if (!material->materialColorByUser) {
+        return ARKUI_ERROR_CODE_PARAM_ERROR;
+    }
     *color = material->materialColor;
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

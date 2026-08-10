@@ -245,3 +245,4 @@ UIContext 功能域：`specs/04-common-capability/12-ui-context/`
 - Frame 帧回调：`docs/kb/capabilities/frame-callback.md`
 - 窗口机制：`docs/kb/architecture/window-mechanism.md`
 - 布局框架：`docs/kb/architecture/layout-framework.md`
+- [UIContext 实例 ID 泄漏](../issues/lifecycle/uicontext-instance-id-leak.md) — JS 前端历史配对问题（已修复）与 ANI/C API 路径排查要点

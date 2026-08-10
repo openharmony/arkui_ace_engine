@@ -2959,6 +2959,133 @@ HWTEST_F(SpanStringTestNg, SpanStringGetLayoutInfo008, TestSize.Level1)
 }
 
 /**
+ * Test SpanString subclass that allows injecting nullptr into spansMap_,
+ * simulating the state after GetSubSpan returns nullptr (before Fix 1).
+ */
+class TestSpanStringWithNullptr : public SpanString {
+public:
+    explicit TestSpanStringWithNullptr(const std::u16string& text) : SpanString(text) {}
+    void InjectNullptrToSpansMap(SpanType type)
+    {
+        spansMap_[type].emplace_back(nullptr);
+    }
+};
+
+/**
+ * Test MutableSpanString subclass that allows injecting spans directly into spansMap_,
+ */
+class TestMutableSpanString : public MutableSpanString {
+public:
+    explicit TestMutableSpanString(const std::u16string& text) : MutableSpanString(text) {}
+    void InjectSpanToSpansMap(const RefPtr<SpanBase>& span)
+    {
+        spansMap_[span->GetSpanType()].emplace_back(span);
+    }
+};
+
+/**
+ * @tc.name: SpanStringGetSubSpanNullptrFilter001
+ * @tc.desc: Test GetSubSpanList filters nullptr from GetSubSpan (CustomSpan length>=2)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanStringGetSubSpanNullptrFilter001, TestSize.Level1)
+{
+    // CustomSpan with length=2: GetSubSpan returns nullptr when end-start > 1
+    auto src = AceType::MakeRefPtr<MutableSpanString>(u"AB");
+    auto customSpan = AceType::MakeRefPtr<CustomSpan>(std::nullopt, std::nullopt, 0, 2);
+    src->AddSpan(customSpan);
+    ASSERT_EQ(src->GetLength(), 3); // " AB" after AddSpecialSpan inserts a space
+
+    // GetSubSpanString → GetSubSpanList → GetSubSpan(0, 2) → end-start=2>1 → nullptr
+    // Fix 1: nullptr is filtered, not added to sub-span-string's spansMap_
+    auto sub = src->GetSubSpanString(0, src->GetLength());
+    ASSERT_NE(sub, nullptr);
+    const auto& subMap = sub->GetSpansMap();
+    EXPECT_EQ(subMap.find(SpanType::CustomSpan), subMap.end());
+
+    // AppendSpanString → ApplyInsertSpanStringToSpanBase — no crash
+    auto dst = AceType::MakeRefPtr<MutableSpanString>(u"");
+    dst->AppendSpanString(sub);
+    EXPECT_EQ(dst->GetLength(), 3);
+}
+
+/**
+ * @tc.name: MutableSpanStringAppendNullptrGuard001
+ * @tc.desc: Test ApplyInsertSpanStringToSpanBase skips nullptr in otherSpansMap (defensive guard)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanStringAppendNullptrGuard001, TestSize.Level1)
+{
+    // Inject nullptr into spansMap_, simulating state before Fix 1
+    auto poisoned = AceType::MakeRefPtr<TestSpanStringWithNullptr>(u"AB");
+    poisoned->InjectNullptrToSpansMap(SpanType::CustomSpan);
+
+    // AppendSpanString → ApplyInsertSpanStringToSpanBase
+    // Fix 2: spanBase nullptr is skipped, no crash
+    auto dst = AceType::MakeRefPtr<MutableSpanString>(u"");
+    dst->AppendSpanString(poisoned);
+    EXPECT_EQ(dst->GetLength(), 2);
+}
+
+/**
+ * @tc.name: SpanStringGetSubSpanListNullElementSkip001
+ * @tc.desc: Test GetSubSpanList skips null span element in list (defensive guard)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanStringGetSubSpanListNullElementSkip001, TestSize.Level1)
+{
+    // Inject nullptr as a list element into spansMap_
+    auto poisoned = AceType::MakeRefPtr<TestSpanStringWithNullptr>(u"AB");
+    poisoned->InjectNullptrToSpansMap(SpanType::CustomSpan);
+
+    // GetSubSpanString → GetSubSpanList encounters nullptr span element
+    // Fix: if (!span) { continue; } skips it — no crash
+    auto sub = poisoned->GetSubSpanString(0, 2);
+    ASSERT_NE(sub, nullptr);
+    const auto& subMap = sub->GetSpansMap();
+    EXPECT_EQ(subMap.find(SpanType::CustomSpan), subMap.end());
+}
+
+/**
+ * @tc.name: MutableSpanStringGetSubSpanNullptrGuard001
+ * @tc.desc: Test ProcessSpanBaseList and ApplyInsertSpanStringToSpanBase skip nullptr from GetSubSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, MutableSpanStringGetSubSpanNullptrGuard001, TestSize.Level1)
+{
+    // --- ProcessSpanBaseList: RemoveString triggers GetSubSpan returning nullptr ---
+    // Inject CustomSpan(0, 4) directly into spansMap_ (not spans_) to avoid
+    // pre-existing HandleSpanOperation crash (content u" " vs interval [0,4] mismatch).
+    auto src1 = AceType::MakeRefPtr<TestMutableSpanString>(u"ABCD");
+    auto customSpan1 = AceType::MakeRefPtr<CustomSpan>(std::nullopt, std::nullopt, 0, 4);
+    src1->InjectSpanToSpansMap(customSpan1);
+    ASSERT_EQ(src1->GetLength(), 4); // "ABCD", no space added (bypassed AddSpecialSpan)
+
+    // RemoveString(1, 1) → ReplaceString → ApplyReplaceStringToSpanBase → ProcessSpanBaseList
+    // Condition: spanStart(0) < intersection.first(1) && intersection.second(2) < spanEnd(4) && REMOVE
+    // GetSubSpan(end=2, spanEnd=4) → 4-2=2>1 → nullptr
+    // Fix: if (newSpan) prevents nullptr insertion into spans list
+    src1->RemoveString(1, 1);
+    EXPECT_EQ(src1->GetLength(), 3); // "ACD"
+
+    // --- ApplyInsertSpanStringToSpanBase first loop: InsertSpanString triggers GetSubSpan returning nullptr ---
+    // Use AddSpan here: InsertSpanString's ApplyInsertSpanStringToSpans uses GetWideStringSubstr
+    // (safe wrapper that returns u"" when pos >= size), so no crash in SpanItem processing.
+    auto src2 = AceType::MakeRefPtr<MutableSpanString>(u"ABCD");
+    auto customSpan2 = AceType::MakeRefPtr<CustomSpan>(std::nullopt, std::nullopt, 0, 4);
+    src2->AddSpan(customSpan2);
+    ASSERT_EQ(src2->GetLength(), 5); // " ABCD"
+
+    // InsertSpanString(1, "X") → ApplyInsertSpanStringToSpanBase first loop
+    // Condition: spanItemStart(0) < start(1) && start(1) < spanItemEnd(4)
+    // GetSubSpan(1+offset, 4+offset) = GetSubSpan(2, 5) → 5-2=3>1 → nullptr
+    // Fix: if (newSpanItem) prevents nullptr insertion into spans list
+    auto insertStr = AceType::MakeRefPtr<MutableSpanString>(u"X");
+    src2->InsertSpanString(1, insertStr);
+    EXPECT_EQ(src2->GetLength(), 6); // " XABCD"
+}
+
+/**
  * @tc.name: MutableSpanString022
  * @tc.desc: Test for fontColor
  * @tc.type: FUNC

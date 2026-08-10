@@ -716,11 +716,11 @@ void FocusHub::RemoveChild(const RefPtr<FocusHub>& focusNode, BlurReason reason)
 
 void FocusHub::CheckScopeFocusDependence()
 {
-    if (GetLastWeakFocusNode().Upgrade()) {
-        return;
-    }
     auto current = AceType::Claim(this);
     while (current) {
+        if (current->GetLastWeakFocusNode().Upgrade()) {
+            return;
+        }
         auto frameNode = current->GetFrameNode();
         auto focusView = frameNode ? frameNode->GetPattern<FocusView>() : nullptr;
         if (focusView) {

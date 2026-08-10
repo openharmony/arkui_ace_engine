@@ -424,6 +424,12 @@ public:
     bool NeedDistortion();
     bool NeedEdgeLight();
     bool ShouldApplySystemMaterialShadow() const;
+    // Rebuild button layout based on constraint (may switch between horizontal/vertical)
+    void RebuildButtons(const LayoutConstraintF layoutConstraint);
+    RefPtr<FrameNode> GetContentColumn()
+    {
+        return contentColumn_;
+    }
 
 private:
     bool AvoidKeyboard() const override
@@ -516,6 +522,9 @@ private:
     void DumpSimplifyBorderProperty(std::unique_ptr<JsonValue>& json);
     void DumpSimplifySizeProperty(std::unique_ptr<JsonValue>& json);
     void UpdatePropertyForElderly(const std::vector<ButtonInfo>& buttons);
+    // Check if buttons should be laid out vertically based on available width
+    bool IsVerticalAlignButtonNeeded(const std::vector<ButtonInfo>& buttons,
+        const LayoutConstraintF& layoutConstraint);
     bool NeedsButtonDirectionChange(const std::vector<ButtonInfo>& buttons);
     void OnFontConfigurationUpdate() override;
     void UpdateTextFontScale();
@@ -610,8 +619,9 @@ private:
     bool refreshOnWindowShow_ = false;
     RectF hostWindowRect_;
     RectF parentWindowRect_;
-    bool hasExtraNodeForDistortion_ = false;
     bool isDialogShow_ = true;
+    bool hasExtraNodeForDistortion_ = false;
+    bool isVertical_ = false;
     std::function<void()> onFinishEvent_ = nullptr;
 };
 } // namespace OHOS::Ace::NG

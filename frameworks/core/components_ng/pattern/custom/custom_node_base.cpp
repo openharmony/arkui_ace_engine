@@ -248,11 +248,8 @@ ReusableMemOptStrategy CustomNodeBase::GetReusableMemOptStrategy()
         return reusableMemOptStrategy_;
     }
     auto systemStrategy = SystemProperties::GetSyntaxMemOptStrategy();
-    if (systemStrategy >= 0) {
-        reusableMemOptStrategy_ = static_cast<ReusableMemOptStrategy>(systemStrategy);
-        return reusableMemOptStrategy_;
-    }
-    reusableMemOptStrategy_ = ReusableMemOptStrategy::DEFAULT;
+    reusableMemOptStrategy_ = systemStrategy == 1 ?
+        ReusableMemOptStrategy::ENABLE_AUTO_CACHE_OPTIMIZATION : ReusableMemOptStrategy::DEFAULT;
     return reusableMemOptStrategy_;
 }
 

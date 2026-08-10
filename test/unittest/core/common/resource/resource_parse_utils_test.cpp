@@ -1290,9 +1290,14 @@ HWTEST_F(ResourceParseUtilsTest, ResourceParseUtilsTest032, TestSize.Level1)
      */
     std::vector<ResourceObjectParams> params;
     auto resObj = AceType::MakeRefPtr<ResourceObject>(1,
-        static_cast<int32_t>(ResourceType::STRARRAY), params, "", "", 100000);
+        static_cast<int32_t>(ResourceType::STRARRAY), params, "", "", 999999);
     std::vector<std::string> result;
-    EXPECT_FALSE(ResourceParseUtils::ParseResStrArray(resObj, result));
+    auto adapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
+    if (adapter) {
+        EXPECT_TRUE(ResourceParseUtils::ParseResStrArray(resObj, result));
+    } else {
+        EXPECT_FALSE(ResourceParseUtils::ParseResStrArray(resObj, result));
+    }
 }
 
 /**

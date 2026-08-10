@@ -1107,6 +1107,9 @@ void AssignArkValue(Ark_TouchType& dst, const TouchType& src)
         case TouchType::UP: dst = Ark_TouchType::ARK_TOUCH_TYPE_UP; break;
         case TouchType::MOVE: dst = Ark_TouchType::ARK_TOUCH_TYPE_MOVE; break;
         case TouchType::CANCEL: dst = Ark_TouchType::ARK_TOUCH_TYPE_CANCEL; break;
+        case TouchType::LEVITATE_MOVE: dst = Ark_TouchType::ARK_TOUCH_TYPE_DOWN; break;
+        case TouchType::LEVITATE_IN_WINDOW: dst = Ark_TouchType::ARK_TOUCH_TYPE_DOWN; break;
+        case TouchType::LEVITATE_OUT_WINDOW: dst = Ark_TouchType::ARK_TOUCH_TYPE_DOWN; break;
         default: dst = static_cast<Ark_TouchType>(-1);
             LOGE("Unexpected enum value in TouchType: %{public}zu", src);
     }

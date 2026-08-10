@@ -110,7 +110,7 @@ export class UIUtils {
     static makeObserved<T extends object | null | undefined>(source: T, allowDeep: boolean): T {
         return uiUtils.makeObserved(source, allowDeep) as T;
     }
-    static getTarget<T extends Object>(source: T): T {
+    static getTarget<T>(source: T): T {
         return uiUtils.getTarget(source) as T;
     }
     static makeBinding<T>(getter: () => T): Binding<T> {
@@ -152,7 +152,7 @@ export class UIUtils {
             const errorMessage: string = 'options.owner is not a component decorated with @ComponentV2 which is not supported by UIUtils.addMonitor.';
             throw new BusinessError(errorCode, new Error(errorMessage));
         }
-
+ 
         const callbackArray = UIUtils.unionToArray(valueCallback);
         const pathArray = UIUtils.pathToArray(options?.path);
 
@@ -167,7 +167,7 @@ export class UIUtils {
         }
         return monitor;
     }
-
+ 
     static clearMonitor(monitor: IMonitorDecoratedVariable): void {
         (monitor as MonitorFunctionDecorator).unbindAllInternalValues();
         UIUtils.unownedMonitors_?.delete(monitor);
@@ -205,10 +205,10 @@ export class UIUtils {
         if (!path) {
             return [];
         }
-
+ 
         return UIUtils.unionToArray(path);
     }
-
+ 
     private static unionToArray<T>(input: T | T[]): T[] {
         if (Array.isArray(input)) {
             return input as T[];
@@ -313,10 +313,6 @@ export class Binding<T> {
     public get value(): T {
         return this.getter_();
     }
-
-    get getter(): () => T {
-        return this.getter_;
-    }
 }
 
 /**
@@ -356,14 +352,6 @@ export class MutableBinding<T> {
     get value(): T {
         return this.getter_();
     }
-
-    get getter(): () => T {
-        return this.getter_;
-    }
-
-    get setter(): (newValue: T) => void {
-        return this.setter_;
-    }
 }
 
 /**
@@ -401,11 +389,11 @@ export interface CustomComponentContext {
      * @since 26.0.0 static
      */
     registerActiveAndInactiveCallback(active?: ActiveAndInactiveCallbackType,
-    inactive?: ActiveAndInactiveCallbackType): void;
+      inactive?: ActiveAndInactiveCallbackType): void;
 
 }
 
- /**
+/**
  * Defines active and inactive function callback.
  *
  * @typedef { function }

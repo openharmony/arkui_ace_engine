@@ -18,9 +18,7 @@
 
 #include <mutex>
 #include <string>
-#include <unordered_map>
 #include <unordered_set>
-#include <vector>
 
 #include "base/utils/singleton.h"
 #include "base/utils/noncopyable.h"
@@ -55,15 +53,12 @@ public:
     bool IsDialogCorrectionEnabled();
     bool IsRnOverflowEnable();
     bool IsSmartLayoutEnabled() const;
-    bool IsSmartLayoutEnabledForBundle(const std::string& bundleName) const;
     void SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled);
     void SetUiCorrectionRnEnableParam(bool rnOverflowEnabled);
     std::string GetArkWebAutoLayoutConfig();
     void ParseArkUICorrectionConfigFromUIContent();
     void ParseArkWebAutoLayoutConfigFromUIContent();
     void SetSmartLayoutEnabled(bool enabled);
-    // Form(card) per-bundle config parse entry
-    void UICorrectionParamParseEntryForForm(const std::string& bundleName);
     bool IsSmartLayoutPageOverflowFixEnabled(const std::string& pathHash = "") const;
     bool IsSmartLayoutWidgetSplitEnabled(const std::string& pageUrl = "") const;
 private:
@@ -78,13 +73,9 @@ private:
     static constexpr uint32_t MS_TO_NS = 1000000; // 1000000 change time form ms to ns
     static std::mutex arkui_cloud_config_mutex_;
     static std::mutex arkweb_cloud_config_mutex_;
-    static std::mutex formConfigMutex_;
 
     std::shared_ptr<ConfigParserBase> featureParser_ = nullptr;
     std::shared_ptr<ConfigParserBase> uiCorrectionParser_ = nullptr;
-    // Per-bundle form config isolation, guarded by formConfigMutex_
-    std::unordered_set<std::string> parsedFormBundles_;
-    std::unordered_map<std::string, bool> smartLayoutEnabledMap_;
     // SyncLoadParser
     bool syncLoadEnabled_ = false;
     uint32_t syncloadResponseDeadline_ = DEFAULT_SYNCLOAD_DEADLINE * MS_TO_NS;

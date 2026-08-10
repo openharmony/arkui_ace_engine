@@ -36,6 +36,7 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/system_properties.h"
 #include "core/common/platform_bridge.h"
+#include "core/common/platform_window.h"
 #include "core/common/thread_checker.h"
 #include "core/common/window_animation_config.h"
 #include "core/components/common/properties/animation_option.h"
@@ -1446,7 +1447,7 @@ public:
     void SetTHPExtraManager(const RefPtr<NG::THPExtraManager>& thpExtraMgr);
     const RefPtr<NG::THPExtraManager>& GetTHPExtraManager() const;
 
-    void SetUiDvsyncSwitch(bool on);
+    void SetUiDvsyncSwitch(bool on, FromWhom fromWhom = FromWhom::INNER);
     virtual bool GetOnShow() const = 0;
     bool IsDestroyed();
 
@@ -1491,6 +1492,11 @@ public:
     {
         return true;
     }
+
+    void SetInfiniteAnimationFlushExceeded(bool exceeded);
+    bool IsInfiniteAnimationFlushExceeded() const;
+    void PushInfiniteAnimationFlushExceeded();
+    void PopInfiniteAnimationFlushExceeded();
 
     virtual void SetFlushTSUpdates(std::function<bool(int32_t)>&& flushTSUpdates)
     {
@@ -1686,6 +1692,7 @@ protected:
 
     bool isJsPlugin_ = false;
     bool isOpenInvisibleFreeze_ = false;
+    bool infiniteAnimationFlushExceeded_ = false;
     PixelRoundMode pixelRoundMode_ = PixelRoundMode::PIXEL_ROUND_ON_LAYOUT_FINISH;
 
     std::unordered_map<int32_t, AceVsyncCallback> subWindowVsyncCallbacks_;
@@ -1722,6 +1729,7 @@ protected:
     std::stack<bool> pendingImplicitLayout_;
     std::stack<bool> pendingImplicitRender_;
     std::stack<bool> pendingFrontendAnimation_;
+    std::stack<bool> infiniteAnimationFlushExceededStack_;
     std::shared_ptr<Window> window_;
     RefPtr<TaskExecutor> taskExecutor_;
     RefPtr<AssetManager> assetManager_;

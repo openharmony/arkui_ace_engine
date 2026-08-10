@@ -16,6 +16,7 @@
 #include "core/components_ng/manager/gesture/active_recognizer_manager.h"
 
 #include "base/log/log.h"
+#include "core/components_ng/gestures/gesture_referee.h"
 
 namespace OHOS::Ace::NG {
 void ActiveRecognizerManager::RegisterRecognizer(
@@ -151,27 +152,61 @@ void ActiveRecognizerManager::DumpRecognizerStates() const
 }
 
 void ActiveRecognizerManager::CleanFinishedRecognizersWithStaleFingers(
-    int32_t currentFingerId, const std::unordered_map<int32_t, int32_t>& downFingerIds)
+    const std::unordered_map<int32_t, int32_t>& downFingerIds,
+    const RefPtr<NG::GestureReferee>& currentReferee)
 {
-    auto snapshot = activeRecognizers_;
-    for (auto& [weakKey, info] : snapshot) {
+    CHECK_NULL_VOID(currentReferee);
+    std::unordered_set<int32_t> allFingerIds;
+    for (auto& [weakKey, info] : activeRecognizers_) {
         auto recognizer = weakKey.Upgrade();
         if (!recognizer) {
             continue;
         }
-        auto state = recognizer->GetRefereeState();
-        if (state != RefereeState::SUCCEED && state != RefereeState::FAIL) {
+        auto touchPoints = recognizer->GetTouchPoints();
+        for (const auto& [fingerId, touchEvent] : touchPoints) {
+            allFingerIds.insert(fingerId);
+        }
+    }
+    for (auto fingerId : allFingerIds) {
+        if (downFingerIds.find(fingerId) != downFingerIds.end()) {
+            continue;
+        }
+        if (currentReferee->QueryAllDone(static_cast<size_t>(fingerId))) {
+            TAG_LOGD(AceLogTag::ACE_GESTURE,
+                "CleanFinishedRecognizers: CleanGestureScope finger %{public}d", fingerId);
+            currentReferee->CleanGestureScope(static_cast<size_t>(fingerId));
+        }
+    }
+}
+
+void ActiveRecognizerManager::CleanFinishedRecognizersWithStaleFingersForPost(
+    const std::unordered_map<int32_t, int32_t>& downFingerIds,
+    const RefPtr<NG::GestureReferee>& currentReferee)
+{
+    CHECK_NULL_VOID(currentReferee);
+    std::unordered_set<int32_t> allFingerIds;
+    for (auto& [weakKey, info] : activeRecognizers_) {
+        auto recognizer = weakKey.Upgrade();
+        if (!recognizer) {
+            continue;
+        }
+        auto recognizerReferee = recognizer->GetRefereeWithStrategy().Upgrade();
+        if (recognizerReferee != currentReferee) {
             continue;
         }
         auto touchPoints = recognizer->GetTouchPoints();
         for (const auto& [fingerId, touchEvent] : touchPoints) {
-            if (downFingerIds.find(fingerId) != downFingerIds.end()) {
-                continue;
-            }
+            allFingerIds.insert(fingerId);
+        }
+    }
+    for (auto fingerId : allFingerIds) {
+        if (downFingerIds.find(fingerId) != downFingerIds.end()) {
+            continue;
+        }
+        if (currentReferee->QueryAllDone(static_cast<size_t>(fingerId))) {
             TAG_LOGD(AceLogTag::ACE_GESTURE,
-                "CleanFinishedRecognizers: finishReferee finger %{public}d for %{public}s recognizer",
-                fingerId, info.recognizerType.c_str());
-            recognizer->FinishReferee(fingerId);
+                "CleanFinishedRecognizersForPost: CleanGestureScope finger %{public}d", fingerId);
+            currentReferee->CleanGestureScope(static_cast<size_t>(fingerId));
         }
     }
 }

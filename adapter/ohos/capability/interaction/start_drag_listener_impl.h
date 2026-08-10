@@ -25,7 +25,6 @@
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "base/thread/task_executor.h"
 
 using DragEndingCallback = std::function<void(const OHOS::Msdp::DeviceStatus::DragNotifyMsg&)>;
 
@@ -36,28 +35,24 @@ public:
     explicit StartDragListenerImpl(DragEndingCallback callback, int32_t instanceId = -1)
         : callback_(std::move(callback)),
           instanceId_(instanceId >= 0 ? instanceId : ContainerScope::CurrentId())
-    {
-        auto container = AceEngine::Get().GetContainer(instanceId_);
-        taskExecutor_ = container != nullptr ? container->GetTaskExecutor() : nullptr;
-    }
+    {}
 
     ~StartDragListenerImpl() override
     {
         if (callback_ == nullptr) {
             return;
         }
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        auto taskExecutor = container != nullptr ? container->GetTaskExecutor() : nullptr;
         // Already on the JS thread — callback_ destroyed here directly.
-        if (taskExecutor_ && taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
-            return;
-        }
-        if (!taskExecutor_) {
+        if (!taskExecutor || taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::JS)) {
             return;
         }
         // Not on JS thread — post callback destruction to the JS thread with mutex to ensure
         // the posted task waits for this destructor to complete before destroying the callback.
         auto mutex = std::make_shared<std::mutex>();
         std::lock_guard lock(*mutex);
-        taskExecutor_->PostTask(
+        taskExecutor->PostTask(
             [callback = callback_, mutex]() mutable {
                 std::lock_guard lock(*mutex);
                 // callback destroyed here on the JS thread.
@@ -78,7 +73,6 @@ public:
 private:
     DragEndingCallback callback_;
     int32_t instanceId_ = -1;
-    RefPtr<TaskExecutor> taskExecutor_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_INTERACTION_START_DRAG_LISTENER_IMPL_H

@@ -644,9 +644,9 @@ void JSFontSpan::GetFontConfigs(const JSCallbackInfo& info)
 }
 
 void JSFontSpan::SetFontConfigs(const JSCallbackInfo& info) {}
- 
+
 void JSFontSpan::SetStrokeJoinStyle(const JSCallbackInfo& info) {}
- 
+
 void JSFontSpan::GetStrokeJoinStyle(const JSCallbackInfo& info)
 {
     CHECK_NULL_VOID(fontSpan_);
@@ -2077,6 +2077,7 @@ SpanParagraphStyle JSParagraphStyleSpan::ParseJsParagraphStyleSpan(
     ParseJsTailIndents(obj, paragraphStyle);
     return paragraphStyle;
 }
+
 void JSParagraphStyleSpan::ParseJsTextAlign(const JSRef<JSObject>& obj, SpanParagraphStyle& paragraphStyle)
 {
     if (!obj->HasProperty("textAlign")) {
@@ -2636,7 +2637,7 @@ void JSParagraphStyleSpan::GetTextDirection(const JSCallbackInfo& info)
 }
 
 void JSParagraphStyleSpan::SetTextDirection(const JSCallbackInfo& info) {}
- 
+
 void JSParagraphStyleSpan::GetShaderStyle(const JSCallbackInfo& info)
 {
     auto finalObj = JSRef<JSObject>::New();
@@ -2644,7 +2645,7 @@ void JSParagraphStyleSpan::GetShaderStyle(const JSCallbackInfo& info)
         GetParagraphStyle().colorShaderStyle, finalObj);
     info.SetReturnValue(finalObj);
 }
- 
+
 void JSParagraphStyleSpan::SetShaderStyle(const JSCallbackInfo& info) {}
 
 void JSParagraphStyleSpan::GetTailIndents(const JSCallbackInfo& info)
@@ -2694,7 +2695,6 @@ bool JSExtSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
         ->GetLocalHandle()
         ->IsStrictEquals(extSpanObj_->GetEcmaVM(), extSpanObj_->GetLocalHandle());
 }
-
 void JSExtSpan::SetJsExtSpanObject(const JSRef<JSObject>& extSpanObj)
 {
     extSpanObj_ = extSpanObj;

@@ -44,6 +44,7 @@ public:
     MOCK_METHOD0(GetAlphabeticBaseline, float());
     MOCK_METHOD0(GetDumpInfo, std::string());
     MOCK_METHOD0(GetParagraphText, std::u16string());
+    MOCK_CONST_METHOD0(GetParagraphTextLength, size_t());
     MOCK_METHOD0(GetEllipsisTextRange, std::pair<size_t, size_t>());
     MOCK_CONST_METHOD0(empty, bool());
     MOCK_METHOD1(PushStyle, void(const TextStyle& style));
@@ -61,9 +62,12 @@ public:
     MOCK_METHOD1(SetParagraphId, void(uint32_t id));
     MOCK_METHOD1(GetLineMetrics, TextLineMetrics(size_t lineNumber));
     MOCK_METHOD1(GetGlyphPositionAtCoordinate, PositionWithAffinity(const Offset& offset));
-    MOCK_METHOD1(GetCharacterPositionAtCoordinate, PositionWithAffinity(const Offset& offset));
-    MOCK_METHOD2(GetGlyphRangeForCharacterRange, std::pair<TextRange, TextRange>(int32_t start, int32_t end));
-    MOCK_METHOD2(GetCharacterRangeForGlyphRange, std::pair<TextRange, TextRange>(int32_t start, int32_t end));
+    MOCK_METHOD2(GetCharacterPositionAtCoordinate,
+        PositionWithAffinity(const Offset& offset, TextEncoding encoding));
+    MOCK_METHOD3(GetGlyphRangeForCharacterRange,
+        std::pair<TextRange, TextRange>(int32_t start, int32_t end, TextEncoding encoding));
+    MOCK_METHOD3(GetCharacterRangeForGlyphRange,
+        std::pair<TextRange, TextRange>(int32_t start, int32_t end, TextEncoding encoding));
     MOCK_METHOD2(GetGlyphIndexByCoordinate, int32_t(const Offset& offset, bool isSelectionPos));
     MOCK_METHOD3(ComputeOffsetForCaretDownstream, bool(int32_t extent, CaretMetricsF& result,
         bool needLineHighest));

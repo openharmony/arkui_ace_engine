@@ -104,3 +104,4 @@ OH 平台适配功能域：`specs/02-cross-platform/01-platform-adapter/01-oh-pl
 - 窗口机制：`docs/kb/architecture/window-mechanism.md`（Rosen Window 窗口管理）
 - DFX 日志：`docs/kb/architecture/dfx/logging.md`（HiLog/HiSysEvent OSAL 桥接）
 - DFX Trace：`docs/kb/architecture/dfx/trace.md`（HiTrace/PerfMonitor OSAL 桥接）
+- UISession：`docs/kb/architecture/uisession-service.md`（UIContentImpl 回调注册与 IPC 通道）

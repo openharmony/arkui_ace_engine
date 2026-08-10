@@ -1286,6 +1286,12 @@ void MenuManager::ShowMenuInSubWindow(const RefPtr<OverlayManager>& overlayManag
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
+    auto frameRoot = AceType::DynamicCast<FrameNode>(rootNode);
+    // If the root node has a residual layout dirty mark, subsequent dirty marking will be skipped.
+    if (frameRoot && frameRoot->IsLayoutDirtyMarked()) {
+        TAG_LOGW(AceLogTag::ACE_OVERLAY, "root node has residual layout dirty mark");
+        frameRoot->SetLayoutDirtyMarked(false);
+    }
     auto pipeline = rootNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     RemoveMenuWrapperNode(rootNode, pipeline);

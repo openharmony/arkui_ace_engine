@@ -1485,63 +1485,6 @@ void PanRecognizer::SetEscapeModeForPan(const std::unordered_set<int32_t>& exist
     }
 }
 
-void PanRecognizer::FilterCoexistingGestureFingers()
-{
-    if (canCoexistWithScroll_ && escapeRequested_) {
-        return;
-    }
-    auto referee = referee_.Upgrade();
-    if (!referee) {
-        // Fallback: referee_ weak pointer is only populated through
-        // NGGestureRecognizer::UpdateGestureReferee, which EventManager calls
-        // only for post-event / sub-pipeline paths (see
-        // event_manager.cpp:162 "eventHandleId / EVENT_HANDLE > 0"). For
-        // regular touch events the weak pointer stays empty, so this function
-        // would silently no-op. Use the same lookup BatchAdjudicate does
-        // (gesture_recognizer.cpp:351) to reach the active referee.
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        if (pipeline) {
-            auto eventMgr = pipeline->GetEventManager();
-            if (eventMgr) {
-                referee = eventMgr->GetGestureRefereeNG(Claim(this));
-            }
-        }
-    }
-    if (!referee) {
-        return;
-    }
-    auto fingers = GetCurrentFingerIds();
-    if (fingers.empty()) {
-        return;
-    }
-    int32_t affected = 0;
-    referee->ForEachRecognizer(
-        [&affected, &fingers, this](
-            const RefPtr<NGGestureRecognizer>& other) {
-            if (other == this) {
-                return true;
-            }
-            auto otherPan = AceType::DynamicCast<PanRecognizer>(other);
-            if (!otherPan) {
-                return true;
-            }
-            // For co-existing gestures filter fingers in normal ones
-            // and vice versa
-            if (otherPan->CanCoexistWithScroll() != canCoexistWithScroll_) {
-                otherPan->SetEscapeModeForPan(fingers);
-                ++affected;
-            }
-            return true;
-        });
-    if (canCoexistWithScroll_) {
-        escapeRequested_ = (affected > 0);
-    }
-    TAG_LOGI(AceLogTag::ACE_GESTURE,
-        "PanRecognizer: escaped %{public}d parallel Pan(s) for %{public}zu finger(s)",
-        affected, fingers.size());
-    return;
-}
-
 void PanRecognizer::SetScrollEscapeForPan()
 {
     auto fingers = GetCurrentFingerIds();

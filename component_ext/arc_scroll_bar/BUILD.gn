@@ -59,10 +59,12 @@ ohos_shared_library("arcscrollbar") {
   ]
 
   external_deps = [
-    "bounds_checking_function:libsec_static",
+    "bounds_checking_function:libsec_shared",
     "ets_runtime:libark_jsruntime",
     "hilog:libhilog",
+    "libuv:uv",
     "napi:ace_napi",
+    "node:node_header_notice",
   ]
 
   if (!use_mac) {

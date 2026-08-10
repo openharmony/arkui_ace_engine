@@ -1736,11 +1736,37 @@ bool NG::PipelineContext::CatchInteractiveAnimations(const std::function<void()>
     return false;
 }
 
-void PipelineBase::SetUiDvsyncSwitch(bool on) {}
+void PipelineBase::SetUiDvsyncSwitch(bool on, FromWhom fromWhom) {}
 
 RefPtr<ThemeManager> PipelineBase::CurrentThemeManager()
 {
     return nullptr;
+}
+
+void PipelineBase::SetInfiniteAnimationFlushExceeded(bool exceeded)
+{
+    infiniteAnimationFlushExceeded_ = exceeded;
+}
+
+bool PipelineBase::IsInfiniteAnimationFlushExceeded() const
+{
+    return infiniteAnimationFlushExceeded_;
+}
+
+void PipelineBase::PushInfiniteAnimationFlushExceeded()
+{
+    infiniteAnimationFlushExceededStack_.push(infiniteAnimationFlushExceeded_);
+}
+
+void PipelineBase::PopInfiniteAnimationFlushExceeded()
+{
+    if (!infiniteAnimationFlushExceededStack_.empty()) {
+        infiniteAnimationFlushExceededStack_.pop();
+        infiniteAnimationFlushExceeded_ = infiniteAnimationFlushExceededStack_.empty()
+            ? false : infiniteAnimationFlushExceededStack_.top();
+    } else {
+        infiniteAnimationFlushExceeded_ = false;
+    }
 }
 
 bool PipelineBase::CheckThreadSafe()
@@ -2063,10 +2089,17 @@ void PipelineContext::UnRegisterFoldStatusChangedCallback(int32_t callbackId) {}
 
 int32_t PipelineContext::RegisterHalfFoldHoverChangedCallback(std::function<void(bool)>&& callback)
 {
+    if (callback) {
+        halfFoldHoverChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+        return callbackId_;
+    }
     return 0;
 }
 
-void PipelineContext::UnRegisterHalfFoldHoverChangedCallback(int32_t callbackId) {}
+void PipelineContext::UnRegisterHalfFoldHoverChangedCallback(int32_t callbackId)
+{
+    halfFoldHoverChangedCallbackMap_.erase(callbackId);
+}
 
 int32_t PipelineContext::RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
 {

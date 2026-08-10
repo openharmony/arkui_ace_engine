@@ -323,6 +323,11 @@ public:
         return recycleImageEnabled_;
     }
 
+    static bool GetNavigationImageRecycleEnabled()
+    {
+        return navigationImageRecycleEnabled_;
+    }
+
     static bool GetImageReleaseManageObjectEnabled()
     {
         return imageReleaseManageObjectEnabled_;
@@ -877,6 +882,7 @@ private:
     static bool debugOffsetLogEnabled_;
     static bool downloadByNetworkEnabled_;
     static bool recycleImageEnabled_;
+    static bool navigationImageRecycleEnabled_;
     static bool imageReleaseManageObjectEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;

@@ -91,6 +91,7 @@ void ButtonModelNG::SetButtonStyle(const std::optional<ButtonStyleMode>& buttonS
 {
     if (buttonStyle.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyleSetByUser, true);
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
         auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
@@ -109,6 +110,7 @@ void ButtonModelNG::SetButtonStyleOnly(const std::optional<ButtonStyleMode>& but
 {
     if (buttonStyle.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value());
+        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyleSetByUser, true);
     }
 }
 
@@ -116,6 +118,7 @@ void ButtonModelNG::SetButtonStyleOnly(FrameNode* frameNode, const std::optional
 {
     if (buttonStyle.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyleSetByUser, true, frameNode);
     }
 }
 
@@ -502,6 +505,7 @@ void ButtonModelNG::SetButtonStyle(FrameNode* frameNode, const std::optional<But
 {
     if (buttonStyle.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyle, buttonStyle.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, ButtonStyleSetByUser, true, frameNode);
         auto buttonTheme = frameNode->GetTheme<ButtonTheme>(true);
         CHECK_NULL_VOID(buttonTheme);
         auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
