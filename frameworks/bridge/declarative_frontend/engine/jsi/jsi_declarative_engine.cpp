@@ -1052,6 +1052,12 @@ void JsiDeclarativeEngineInstance::UnloadAceModule()
 #endif
 }
 
+void JsiDeclarativeEngineInstance::CleanupWorkerResource()
+{
+    validCustomRuntime_.clear();
+    localRuntime_.reset();
+}
+
 void JsiDeclarativeEngineInstance::InitConsoleModule()
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::InitConsoleModule");
