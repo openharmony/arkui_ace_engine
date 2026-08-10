@@ -15,7 +15,8 @@
 
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 
-#include "napi/native_node_api.h"
+#include <cmath>
+#include <limits>
 
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
