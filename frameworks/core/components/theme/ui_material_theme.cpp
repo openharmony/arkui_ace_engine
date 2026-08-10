@@ -46,72 +46,9 @@ void UiMaterialTheme::SetInstanceId(int32_t instanceId)
     instanceId_ = instanceId;
 }
 
-bool UiMaterialTheme::ParseUiMaterialParam(
-    MaterialType type, NG::PipelineContext* pipeline, ColorMode colorMode, UiMaterialParam& result)
-{
-    if (type == MaterialType::NONE) {
-        // MaterialType::NONE
-        result.backgroundColor = Color::TRANSPARENT;
-        result.borderColor.SetColor(Color::TRANSPARENT);
-        result.borderWidth.SetBorderWidth(Dimension(0));
-        return true;
-    }
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, false);
-    auto themeConstants = themeManager->GetThemeConstants();
-    CHECK_NULL_RETURN(themeConstants, false);
-    if (type == MaterialType::SEMI_TRANSPARENT) {
-        auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
-        CHECK_NULL_RETURN(shadowTheme, false);
-        auto resId = TokenColors::GetSystemColorResIdByIndex(TokenColors::COMP_FOREGROUND_PRIMARY);
-        auto color = themeConstants->GetColor(resId);
-        color = color.ChangeOpacity(MATERIAL_SEMI_TRANSPARENT_BORDER_ALPHA);
-        result.borderColor.SetColor(color);
-        result.borderWidth.SetBorderWidth(MATERIAL_SEMI_TRANSPARENT_BORDER_WIDTH);
-        result.backgroundColor =
-            colorMode == ColorMode::DARK ? MATERIAL_SEMI_TRANSPARENT_COLOR_DARK : MATERIAL_SEMI_TRANSPARENT_COLOR_LIGHT;
-        result.shadow = shadowTheme->GetShadow(MATERIAL_SEMI_TRANSPARENT_SHADOW_STYLE, colorMode);
-        return true;
-    }
-    if (type == MaterialType::IMMERSIVE) {
-        // MaterialType::IMMERSIVE
-        auto dipScale = pipeline->GetDipScale();
-        auto resId = TokenColors::GetSystemColorResIdByIndex(TokenColors::COMP_FOREGROUND_PRIMARY);
-        auto color = themeConstants->GetColor(resId);
-        color = color.ChangeOpacity(MATERIAL_SEMI_TRANSPARENT_BORDER_ALPHA);
-        result.borderColor.SetColor(color);
-        result.borderWidth.SetBorderWidth(MATERIAL_SEMI_TRANSPARENT_BORDER_WIDTH);
-        result.backgroundColor =
-            colorMode == ColorMode::DARK ? MATERIAL_SEMI_TRANSPARENT_COLOR_DARK : MATERIAL_SEMI_TRANSPARENT_COLOR_LIGHT;
-        result.shadow = MaterialUtils::GetImmersiveShadow(dipScale);
-        return true;
-    }
-    return false;
-}
-
 uint32_t UiMaterialTheme::GetKeyOfUiMaterial(MaterialType type, ColorMode colorMode)
 {
     return (static_cast<uint32_t>(colorMode) << 16) + static_cast<uint32_t>(type); // can hold 2^16 blurStyle enums
-}
-
-std::optional<UiMaterialParam> UiMaterialTheme::GetUiMaterialParam(MaterialType type, NG::PipelineContext* pipeline)
-{
-    if (type > MaterialType::MAX || type < MaterialType::NONE || !pipeline) {
-        return std::nullopt;
-    }
-    auto colorMode = MaterialUtils::GetResourceColorMode(pipeline);
-    auto key = GetKeyOfUiMaterial(type, colorMode);
-    auto iter = materialParams_.find(key);
-    if (iter != materialParams_.end()) {
-        return std::optional<UiMaterialParam>(iter->second);
-    }
-    UiMaterialParam param;
-    auto success = ParseUiMaterialParam(type, pipeline, colorMode, param);
-    if (success) {
-        materialParams_.emplace(key, param);
-        return param;
-    }
-    return std::nullopt;
 }
 
 bool UiMaterialTheme::GetThemeColor(
@@ -168,10 +105,12 @@ bool UiMaterialTheme::ParseUiMaterialParam(
         return true;
     }
     if (type == MaterialType::IMMERSIVE) {
-        // MaterialType::IMMERSIVE
         auto dipScale = pipeline->GetDipScale();
         auto resId = TokenColors::GetSystemColorResIdByIndex(TokenColors::COMP_FOREGROUND_PRIMARY);
-        auto color = themeConstants->GetColor(resId);
+        Color color;
+        if (!GetThemeColor(node, colorMode, resId, color)) {
+            return false;
+        }
         color = color.ChangeOpacity(MATERIAL_SEMI_TRANSPARENT_BORDER_ALPHA);
         result.borderColor.SetColor(color);
         result.borderWidth.SetBorderWidth(MATERIAL_SEMI_TRANSPARENT_BORDER_WIDTH);
@@ -183,12 +122,15 @@ bool UiMaterialTheme::ParseUiMaterialParam(
     return false;
 }
 
-std::optional<UiMaterialParam> UiMaterialTheme::GetUiMaterialParam(MaterialType type, const RefPtr<NG::FrameNode>& node)
+std::optional<UiMaterialParam> UiMaterialTheme::GetUiMaterialParam(
+    MaterialType type, const RefPtr<NG::FrameNode>& node, ColorMode colorMode)
 {
     if (!node || type > MaterialType::MAX || type < MaterialType::NONE) {
         return std::nullopt;
     }
-    auto colorMode = MaterialUtils::GetNodeColorMode(node);
+    if (colorMode == ColorMode::COLOR_MODE_UNDEFINED) {
+        colorMode = MaterialUtils::GetNodeColorMode(node);
+    }
     auto key = GetKeyOfUiMaterial(type, colorMode);
     auto iter = materialParams_.find(key);
     if (iter != materialParams_.end()) {
