@@ -1,7 +1,7 @@
 # ArkUI KB
 
-> 更新时间：2026-08-08
-> 主题数：233
+> 更新时间：2026-08-10
+> 主题数：236
 > 适用范围：`OpenHarmony/foundation/arkui/ace_engine/docs/kb`
 
 `docs/kb/` 是新版知识库专区。新版 KB 只作为 Agent 上下文导航页，行为事实以源码、SDK/API 声明、测试和 Spec 为准。
@@ -255,6 +255,9 @@ docs/kb/
 | IsPendingStateRenderTreeDiff | 同帧下树重新上树 isPendingState_ 状态错乱 | `docs/kb/issues/lifecycle/ispending-state-render-tree-diff.md` | 新建 |
 | IgnoreLayoutSafeAreaDirtyStateMismatch | ignoreLayoutSafeArea 布局脏状态异常 | `docs/kb/issues/layout/ignore-layout-safe-area-dirty-state-mismatch.md` | 新建 |
 | CanvasDrawingTaskBacklogAppFreeze | Canvas 绘制任务堆积导致 AppFreeze | `docs/kb/issues/performance/canvas-drawing-task-backlog-appfreeze.md` | 新建 |
+| MonitorUndefinedOptionsGuard | @Monitor 传 undefined 误判为 Options 模式 | `docs/kb/issues/state-management/monitor-undefined-options-guard.md` | 新建 |
+| ResetStateVarsOnReuseWithoutGlobalPool | 未启用全局复用仍调用 resetStateVarsOnReuse | `docs/kb/issues/state-management/reset-state-vars-on-reuse-without-global-pool.md` | 新建 |
+| CustomDelegateUIContextNullOnCreate | CustomDelegate 创建时 UIContext 为空 | `docs/kb/issues/custom-component/custom-delegate-uicontext-null-on-create.md` | 新建 |
 
 ## 检索
 
