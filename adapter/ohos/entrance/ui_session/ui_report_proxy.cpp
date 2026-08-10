@@ -589,7 +589,7 @@ void UiReportProxy::ReportGetStateMgmtInfo(std::vector<std::string> results)
     }
 }
 
-void UiReportProxy::ReportPageSceneEvent(const std::string& sceneJson)
+void UiReportProxy::ReportPageSceneEvent(const std::string& sceneJson, bool isGetResult)
 {
     MessageParcel messageData;
     MessageParcel reply;
@@ -600,6 +600,10 @@ void UiReportProxy::ReportPageSceneEvent(const std::string& sceneJson)
     }
     if (!messageData.WriteString(sceneJson)) {
         LOGW("ReportPageSceneEvent write scene json failed");
+        return;
+    }
+    if (!messageData.WriteBool(isGetResult)) {
+        LOGW("ReportPageSceneEvent write isGetResult failed");
         return;
     }
     int32_t sendRequestErrorCode = Remote()->SendRequest(REPORT_PAGE_SCENE_EVENT, messageData, reply, option);
