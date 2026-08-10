@@ -2321,6 +2321,7 @@ export class SegmentButton extends ViewPU {
       'hoverColorArray'
     );
     this.doSelectedChangeAnimate = false;
+    this.isTapGesture = false;
     this.isCurrentPositionSelected = false;
     this.isCurrentPositionPressed = false;
     this.panGestureStartPoint = { x: 0, y: 0 };
@@ -2865,6 +2866,7 @@ export class SegmentButton extends ViewPU {
           }
           this.doSelectedChangeAnimate =
             this.selectedIndexes[0] > Math.min(this.options.buttons.length, this.buttonItemsSize.length) ? false : true;
+          this.isTapGesture = true;
           let realClickIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
           if (this.onItemClicked) {
             this.onItemClicked(realClickIndex);
@@ -3551,8 +3553,18 @@ export class SegmentButton extends ViewPU {
           : (this.options.fontColor ?? segmentButtonTheme.FONT_COLOR);
       });
     };
-    if (curve) {
-      if (this.options.backgroundSystemMaterial) {
+    if (!curve) {
+      setAnimatedPropertyFunc();
+      this.updateButtonFont();
+      this.isTapGesture = false;
+      return;
+    }
+    if (this.options.backgroundSystemMaterial) {
+      if (this.isTapGesture) {
+        this.openSelectedItemSystemMaterial = true;
+        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
+        this.openSelectedItemSystemMaterial = false;
+      } else {
         this.getUIContext().animateTo(
           {
             curve: curves.interpolatingSpring(0, 1, 195, 14),
@@ -3572,13 +3584,12 @@ export class SegmentButton extends ViewPU {
             this.openSelectedItemSystemMaterial = false;
           }
         );
-      } else {
-        this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
       }
     } else {
-      setAnimatedPropertyFunc();
+      this.getUIContext().animateTo({ curve: curve }, setAnimatedPropertyFunc);
     }
     this.updateButtonFont();
+    this.isTapGesture = false;
   }
   updateButtonFont() {
     this.buttonItemsSelected.forEach((selected, index) => {
