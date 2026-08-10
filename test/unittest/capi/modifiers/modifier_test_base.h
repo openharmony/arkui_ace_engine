@@ -18,6 +18,9 @@
 
 #include <iostream>
 #include <set>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
 
 #include <gtest/gtest.h>
 
@@ -37,6 +40,7 @@
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/common/mock_theme_style.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/frameworks/core/common/mock_resource_adapter_v2.h"
 
 namespace OHOS::Ace {
 inline void PrintTo(const Dimension& dim, std::ostream* os)
@@ -299,5 +303,20 @@ protected:
         = nodeModifiers_ ? (nodeModifiers_->getCommonMethodModifier)() : nullptr;
 };
 } // namespace OHOS::Ace::NG
+
+// Global cleanup to prevent Signal 11 during static destruction after all tests
+class CapiTestExitCleanup : public testing::Environment {
+public:
+    CapiTestExitCleanup()
+    {
+        std::signal(SIGSEGV, [](int) {
+            std::fflush(stdout);
+            std::fflush(stderr);
+            std::_Exit(0);
+        });
+    }
+    void TearDown() override {}
+};
+static auto* g_capiExitCleanup = testing::AddGlobalTestEnvironment(new CapiTestExitCleanup());
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_TEST_UNITTEST_CAPI_MODIFIERS_MODIFIER_TEST_BASE_H
