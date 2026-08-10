@@ -394,6 +394,43 @@ bool SmartLayoutAlgorithm::InitializeLayoutContext(LayoutWrapper* layoutWrapper)
     return true;
 }
 
+bool SmartLayoutAlgorithm::PerformSmartLayoutScaleUp(LayoutWrapper* layoutWrapper)
+{
+    ACE_SCOPED_TRACE("PerformSmartLayoutScaleUp");
+    auto layoutType = GetLayoutTypeFromWrapper(layoutWrapper);
+    CHECK_EQUAL_RETURN(layoutType, SmartLayoutType::UNKNOWN, false);
+    LOGD("SmartLayout: Detected layout %{public}s content underutilized, scaling up",
+        layoutWrapper->GetHostTag().c_str());
+
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    auto* engine = SmartLayoutEngineLoader::GetInstance().GetEngine();
+    CHECK_NULL_RETURN(engine, false);
+
+    rootNode_ = engine->CreateRootNode();
+    CHECK_NULL_RETURN(rootNode_, false);
+    rootNode_->SetLayoutType(layoutType);
+
+    if (!InitializeLayoutContext(layoutWrapper)) {
+        return false;
+    }
+    ProcessLayoutChildren(layoutWrapper);
+
+    // Calculate bounding box
+    auto boundingBox = rootNode_->GetChildrenBoundingBox();
+    if (!boundingBox.IsValid()) {
+        return false;
+    }
+    rootNode_->SetBoundingBox(boundingBox);
+
+    // Apply scale-up constraints
+    rootNode_->ApplyScaleUpConstraints();
+
+    if (!rootNode_->SolveLayout()) {
+        return false;
+    }
+    return ApplyLayoutResults(layoutWrapper);
+}
+
 bool SmartLayoutAlgorithm::HandleTextContentOverflow(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
@@ -473,43 +510,6 @@ bool SmartLayoutAlgorithm::RemeasureText(LayoutWrapper* layoutWrapper)
     }
     layoutAlgorithm->Layout(layoutWrapper);
     return true;
-}
-
-bool SmartLayoutAlgorithm::PerformSmartLayoutScaleUp(LayoutWrapper* layoutWrapper)
-{
-    ACE_SCOPED_TRACE("PerformSmartLayoutScaleUp");
-    auto layoutType = GetLayoutTypeFromWrapper(layoutWrapper);
-    CHECK_EQUAL_RETURN(layoutType, SmartLayoutType::UNKNOWN, false);
-    LOGD("SmartLayout: Detected layout %{public}s content underutilized, scaling up",
-        layoutWrapper->GetHostTag().c_str());
-
-    CHECK_NULL_RETURN(layoutWrapper, false);
-    auto* engine = SmartLayoutEngineLoader::GetInstance().GetEngine();
-    CHECK_NULL_RETURN(engine, false);
-
-    rootNode_ = engine->CreateRootNode();
-    CHECK_NULL_RETURN(rootNode_, false);
-    rootNode_->SetLayoutType(layoutType);
-
-    if (!InitializeLayoutContext(layoutWrapper)) {
-        return false;
-    }
-    ProcessLayoutChildren(layoutWrapper);
-
-    // Calculate bounding box
-    auto boundingBox = rootNode_->GetChildrenBoundingBox();
-    if (!boundingBox.IsValid()) {
-        return false;
-    }
-    rootNode_->SetBoundingBox(boundingBox);
-
-    // Apply scale-up constraints
-    rootNode_->ApplyScaleUpConstraints();
-
-    if (!rootNode_->SolveLayout()) {
-        return false;
-    }
-    return ApplyLayoutResults(layoutWrapper);
 }
 
 } // namespace OHOS::Ace::NG

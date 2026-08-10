@@ -141,7 +141,7 @@ public:
 
     /**
      * @brief Apply scale-up constraints for underutilized containers
-     * @param emptyRatioThreshold Empty ratio threshold (defaults to SMART_LAYOUT_EMPTY_RATIO_THRESHOLD)
+     * @param emptyRatioThreshold Empty ratio threshold (default SMART_LAYOUT_EMPTY_RATIO_THRESHOLD)
      */
     void ApplyScaleUpConstraints(double emptyRatioThreshold = SMART_LAYOUT_EMPTY_RATIO_THRESHOLD);
 
