@@ -38,6 +38,8 @@ import { CustomComponentContextImpl } from './customComponent.ets';
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ExtendableComponentDFX } from './extendableComponentDFX';
 import { GlobalReusePool } from '../stateManagement/tools/globalReusePool';
+import { ConsumeDecoratedVariable } from '../stateManagement';
+import { ConsumerDecoratedVariable } from '../stateManagement/decoratorImpl/decoratorConsumer';
 export class ExtendableComponentInternal {
     public static fromPtr(ptr: KPointer): ExtendableComponent {
         throw new Error("TBD");
@@ -130,6 +132,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private activeChangeListenerForInterop_: Set<(active: boolean, isReuse: boolean) => void> = new Set<(active: boolean, isReuse: boolean) => void>();
     private hasBeenRecycled_: boolean = false;
     private ownedStateVariables_: Array<IDecoratorBaseRegistry> | undefined = undefined;
+    private ownedConsumerStateVariables_: Array<IDecoratorBaseRegistry> | undefined = undefined;
     private envPropertySet: Set<IEnvVariable> = new Set<IEnvVariable>();
     private envInstanceId: int32 | undefined;
     protected memopt_: int32 = 0;
@@ -233,6 +236,13 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     }
 
     __registerStateVariables__Internal(stateVariable: IDecoratorBaseRegistry): void {
+        if ((stateVariable instanceof ConsumerDecoratedVariable)
+            || (stateVariable instanceof ConsumeDecoratedVariable)) {
+            if (!this.ownedConsumerStateVariables_) {
+                this.ownedConsumerStateVariables_ = new Array<IDecoratorBaseRegistry>();
+            }
+            this.ownedConsumerStateVariables_!.push(stateVariable);
+        }
         if (!this.ownedStateVariables_) {
             this.ownedStateVariables_ = new Array<IDecoratorBaseRegistry>();
         }
@@ -240,6 +250,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     }
 
     __clearStateVariables__Internal(): void {
+        this.ownedConsumerStateVariables_ = undefined;
         if (!this.ownedStateVariables_?.length) {
             return;
         }
@@ -249,6 +260,34 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
             }
         });
         this.ownedStateVariables_ = undefined;
+    }
+
+    public connectConsumers(): void {
+        if (this.ownedConsumerStateVariables_) {
+            this.ownedConsumerStateVariables_!.forEach((state: IDecoratorBaseRegistry) => {
+                if (state instanceof DecoratedVariableBase) {
+                    (state as DecoratedVariableBase).connect();
+                }
+            });
+        }
+        this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+            const child = weak.deref();
+            child?.connectConsumers();
+        });
+    }
+
+    public disconnectConsumers(): void {
+        if (this.ownedConsumerStateVariables_) {
+            this.ownedConsumerStateVariables_!.forEach((state: IDecoratorBaseRegistry) => {
+                if (state instanceof DecoratedVariableBase) {
+                    (state as DecoratedVariableBase).disconnect();
+                }
+            });
+        }
+        this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
+            const child = weak.deref();
+            child?.disconnectConsumers();
+        });
     }
 
     __aboutToReuse_Internal(param?: RecordData): void {

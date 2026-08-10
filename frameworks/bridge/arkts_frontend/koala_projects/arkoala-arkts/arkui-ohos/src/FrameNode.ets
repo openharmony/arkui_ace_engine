@@ -121,6 +121,7 @@ import { extractors } from "#handwritten";
 import { PeerNode } from './PeerNode';
 import hilog from '@ohos.hilog';
 import { Vector2 } from "./Graphics.ets"
+import { ObserveSingleton } from 'arkui/stateManagement/base/observeSingleton';
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
@@ -342,8 +343,10 @@ export class FrameNode implements MaterializedBase {
             const error = Error("The parameter 'node' is invalid: the node has already been adopted.");
             throw new BusinessError(100025, error);
         }
+        node_casted.__updateViewTree_Internal();
         return
     }
+    public __updateViewTree_Internal(): void { }
     public addComponentContent<T = undefined>(content: ComponentContent<T>) {
         if (content === undefined || content === null || content.getFrameNode() == undefined ||
             content.getFrameNode() == null || content.getNodePtr() == undefined) {
@@ -418,6 +421,7 @@ export class FrameNode implements MaterializedBase {
     public removeChild(node: FrameNode): void {
         const node_casted = node as (FrameNode)
         FrameNodeExtender.removeChild(this, node_casted)
+        node_casted.__updateViewTree_Internal();
         return
     }
     public clearChildren(): void {
@@ -1199,6 +1203,15 @@ export class BuilderRootFrameNode<T> extends ImmutableFrameNode {
         this.__BuilderNodeOpt?.disposeNode();
         this.__BuilderNodeOpt = undefined;
         this._nodeId = -1;
+    }
+    public __updateViewTree_Internal(): void {
+        try {
+            ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                this.__BuilderNodeOpt?.__handleTreeUpdateInternal();
+            });
+        } catch(e) {
+            InteropNativeModule._NativeLog('BuilderRootNode update view tree message: ' + e.message);
+        }
     }
 }
 export class BuilderRootWeakFrameNode<T> extends BuilderRootFrameNode<T> {

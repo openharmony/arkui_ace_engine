@@ -33,9 +33,13 @@ import { ContextRecord } from "./base/UIContextImpl"
 import { RecordData } from "@ohos.base"
 import { ParallelizeUI } from "../@ohos.arkui.Parallelize"
 import { CustomBuilder } from "./component/builder";
+import { ArkCustomComponentRootPeer } from "./component/staticComponents";
 import { ExtendableComponent } from "./component/extendableComponent";
 import { CustomDelegate } from "./component/customComponent";
 import { LocalStorage, IProvideDecoratedVariable, IProviderDecoratedVariable } from "@ohos.arkui.stateManagement";
+import { ConsumeDecoratedVariable, DecoratedVariableBase } from './stateManagement';
+import { ConsumerDecoratedVariable } from './stateManagement/decoratorImpl/decoratorConsumer';
+import { ObserveSingleton } from 'arkui/stateManagement/base/observeSingleton';
 
 export enum NodeRenderType {
     RENDER_TYPE_DISPLAY = 0,
@@ -236,6 +240,9 @@ export class ReactiveBuilderNode {
     public getFrameNodeWithoutCheck(): FrameNode | null | undefined {
         return this._JSBuilderNode.getFrameNodeWithoutCheck();
     }
+    public __disableTreeUpdateInternal(): void {
+        this._JSBuilderNode.disableTreeUpdate();
+    }
 }
 
 export class BuilderNode<T = undefined> {
@@ -312,6 +319,9 @@ export class BuilderNode<T = undefined> {
     public isDisposed(): boolean {
         return this._JSBuilderNode.isDisposed();
     }
+    public __disableTreeUpdateInternal(): void {
+        this._JSBuilderNode.disableTreeUpdate();
+    }
 }
 
 export class JSBuilderNode<T> extends BuilderNodeOps {
@@ -335,6 +345,8 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
     private __isWeak: boolean = false;
     private __extendableComponent?: BuilderNodeExtendableComponent;
     private __delegate?: BuilderNodeCustomDelegate;
+    private __treeUpdatable: boolean = true;
+    public __isOnMainTree: boolean = false;
 
     private reset(): void {
         this.__root = undefined;
@@ -358,6 +370,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this._instanceId = (uiContext as UIContext).instanceId_;
         if (options !== undefined) {
             this.__isWeak = options?.enableMinimized ?? false;
+            this.__treeUpdatable = this.__treeUpdatable && (!this.__isWeak);
             let buildOptions: BuilderNodeOptions = {};
             if (options?.selfIdealSize !== undefined) {
                 buildOptions.selfIdealSize = options.selfIdealSize;
@@ -471,6 +484,30 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         } else {
             this.__builderRootNode = findPeerNode(this.__root!);
         }
+        if (this.__treeUpdatable) {
+            this.__builderProxyNode?.setOnAttach(() => {
+                try {
+                    ObserveSingleton.instance.applyTaskDelayMutableStateChange(
+                        () => {
+                            this.__handleTreeUpdateInternal();
+                        })
+                } catch (e) {
+                    InteropNativeModule._NativeLog("BuilderNode on attach update tree message: " + e.message);
+                }
+                this.__isOnMainTree = true;
+            });
+            this.__builderProxyNode?.setOnDetach(() => {
+                try {
+                    ObserveSingleton.instance.applyTaskDelayMutableStateChange(
+                        () => {
+                            this.__handleTreeUpdateInternal();
+                        })
+                } catch (e) {
+                    InteropNativeModule._NativeLog("BuilderNode on detach update tree message: " + e.message);
+                }
+                this.__isOnMainTree = false;
+            })
+        }
         this.__frameNode = null;
         if (this.__builderRootNode?.getPeerPtr() !== undefined && this.__builderRootNode?.getPeerPtr() !== nullptr) {
             if (this.__uiContext === undefined) {
@@ -485,6 +522,39 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         if (this.__extendableComponent && this.__builderRootNode) {
             this.__extendableComponent!.setPeerNode(this.__builderRootNode!);
         }
+    }
+
+    public disableTreeUpdate(): void {
+        this.__treeUpdatable = false;
+    }
+
+    public __handleTreeUpdateInternal(): void {
+        if (!(this.__extendableComponent?.hasConsumer) || !this.__treeUpdatable || !this.__builderProxyNode) {
+            return;
+        }
+        const currentParentNode = this.__extendableComponent!.__getParentNode__Internal();
+        const currentId: number = currentParentNode?.getId() ?? -1;
+        const updateId = this.__builderProxyNode!.getParentViewId();
+        if (currentId == updateId) {
+            return;
+        }
+        this.__extendableComponent!.detachFromParent();
+        if (currentId != -1) {
+            this.__extendableComponent!.disconnectConsumers();
+        }
+        if (updateId < 0) {
+            return;
+        }
+        const rootPeer = PeerNode.findPeerByNativeId(updateId);
+        if (!(rootPeer instanceof ArkCustomComponentRootPeer)) {
+            return;
+        }
+        const delegate = (rootPeer as ArkCustomComponentRootPeer)!.getComponent();
+        if (!(delegate instanceof CustomDelegate)) {
+            return;
+        }
+        this.__extendableComponent!.attachToParent(delegate!.getInstance());
+        this.__extendableComponent!.connectConsumers();
     }
 
     public getNodeWithoutProxy(): pointer | undefined {
@@ -509,6 +579,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builder0 = undefined;
         this.__arg = arg;
         this.__buildOptions = options;
+        this.__treeUpdatable = this.__treeUpdatable && (!(options?.useParallel));
         const storage = options?.localStorage;
         if (storage) {
             this.__extendableComponent?.setLocalStorage(storage!);
@@ -527,6 +598,7 @@ export class JSBuilderNode<T> extends BuilderNodeOps {
         this.__builder = undefined;
         this.__arg = undefined;
         this.__buildOptions = options;
+        this.__treeUpdatable = this.__treeUpdatable && (!(options?.useParallel));
         const storage = options?.localStorage;
         if (storage) {
             this.__extendableComponent?.setLocalStorage(storage!);
@@ -742,6 +814,7 @@ class BuilderNodeExtendableComponent extends ExtendableComponent {
     private uniqueId_: int32;
     private uiContext_: UIContext;
     public localStorage_: LocalStorage | undefined;
+    public hasConsumer: boolean = false;
 
     constructor(uiContext: UIContext) {
         super();
@@ -780,6 +853,16 @@ class BuilderNodeExtendableComponent extends ExtendableComponent {
             return this.localStorage_!;
         }
         return super.__localStorage__Internal;
+    }
+
+    override __findProvide__Internal<T>(providedPropName: string): IProvideDecoratedVariable<T> | undefined {
+        this.hasConsumer = true;
+        return super.__findProvide__Internal<T>(providedPropName);
+    }
+
+    override __findProvidedVarV2__Internal<T>(providedPropName: string): IProviderDecoratedVariable<T> | undefined {
+        this.hasConsumer = true;
+        return super.__findProvidedVarV2__Internal<T>(providedPropName);
     }
 
     override getUIContext(): UIContext {

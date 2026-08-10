@@ -78,6 +78,8 @@ export class DecoratedVariableBase implements IDecoratorBaseRegistry {
     get owningComponent(): IVariableOwner | undefined {
         return this.owningComponent_;
     }
+    public disconnect(): void { }
+    public connect(): void { }
 
     public getTraceInfo(): string {
         return `get: ${this.varName} ${Class.ofAny(this.owningComponent_)} ${this.shouldAddRef()} ${ObserveSingleton.instance.renderingComponent}`
