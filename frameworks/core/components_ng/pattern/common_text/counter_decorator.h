@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_COMPONENT_DECORATOR_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_COMPONENT_DECORATOR_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_COMMON_TEXT_COUNTER_DECORATOR_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_COMMON_TEXT_COUNTER_DECORATOR_H
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/common_text/counter_host.h"
 
 namespace OHOS::Ace::NG {
 
@@ -53,6 +54,9 @@ public:
     void LayoutDecorator() override;
     float GetBoundHeight() const override;
     bool HasContent() const;
+    void UpdateCounterContent();
+    void SetCounterHost(const WeakPtr<ICounterHost>& host) { counterHost_ = host; }
+    RefPtr<ICounterHost> GetCounterHost() const;
 private:
     void UpdateCounterContentAndStyle(uint32_t textLength, uint32_t maxLength, bool isVisible = true);
     float MeasureTextNodeHeight();
@@ -61,26 +65,12 @@ private:
     void HandleNonTextArea();
     void HandleTextArea();
     std::string GetAccessibilityText(uint32_t textLength, uint32_t maxLength);
+    std::string GetCounterFormatString(uint32_t textLength, uint32_t maxLength) const;
     void ProcessCounterColor(RefPtr<FrameNode>& decoratedNode, TextStyle& countTextStyle);
-    void UpdateBottomMargin(const std::unique_ptr<MarginProperty>& marginProp, Dimension& bottom);
-};
-
-class ACE_EXPORT ErrorDecorator : public TextComponentDecorator {
-    DECLARE_ACE_TYPE(ErrorDecorator, TextComponentDecorator);
-public:
-    explicit ErrorDecorator(const RefPtr<FrameNode>& decoratedNode): TextComponentDecorator(decoratedNode) {}
-    ~ErrorDecorator() override = default;
-    void UpdateTextFieldMargin() override;
-    float MeasureDecorator(float contentWidth, const std::u16string& textContent, bool showPlaceHolder) override;
-    void LayoutDecorator() override;
-    float GetBoundHeight() const override;
-private:
-    void BeforeLayout();
-    void UpdateLayoutProperty();
-    void UpdateErrorStyle();
-
+    void UpdateBottomMargin(std::optional<MarginProperty>& marginProp, Dimension& bottom);
+    WeakPtr<ICounterHost> counterHost_;
 };
 
 }
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_COMPONENT_DECORATOR_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_COMMON_TEXT_COUNTER_DECORATOR_H

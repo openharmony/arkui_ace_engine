@@ -19,7 +19,7 @@ build_component_ng("text_field_pattern_ng") {
 
   sources = [
     "content_controller.cpp",
-    "text_component_decorator.cpp",
+    "error_decorator.cpp",
     "text_field_accessibility_property.cpp",
     "text_field_content_modifier.cpp",
     "text_field_controller.cpp",
@@ -41,6 +41,11 @@ build_component_ng("text_field_pattern_ng") {
     "text_field_layout_algorithm.cpp",
   ]
 
+  component_ng_deps = [
+    "common_text",
+    "search",
+  ]
+
   ark_sources = [
     "../text_input/bridge/arkts_native_text_input_bridge.cpp",
     "../text_input/bridge/text_input_dynamic_modifier.cpp",
@@ -50,10 +55,6 @@ build_component_ng("text_field_pattern_ng") {
     "../text_area/bridge/text_area_dynamic_module.cpp",
     "../text_input/text_input_layout_algorithm.cpp",
     "../text_area/text_area_layout_algorithm.cpp",
-  ]
-
-  component_ng_deps = [
-    "search",
   ]
 
   standard_input_sources = [ "on_text_changed_listener_impl.cpp" ]
