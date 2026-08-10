@@ -1,6 +1,6 @@
 {
   "schema_version": "0.1.0",
-  "last_updated": "2026-08-08",
+  "last_updated": "2026-08-10",
   "contexts": [
     {
       "id": "LayoutFramework",
@@ -12578,6 +12578,101 @@
       ],
       "status": "active",
       "last_verified": "2026-08-08"
+    },
+    {
+      "id": "MonitorUndefinedOptionsGuard",
+      "name": "Monitor Pass Undefined Options Guard",
+      "name_cn": "@Monitor 传 undefined 误判为 Options 模式",
+      "kind": "issue",
+      "category": "state-management",
+      "keywords": [
+        "MonitorUndefinedOptionsGuard",
+        "Monitor传undefined",
+        "@Monitor",
+        "v2_decorators",
+        "monitorWithOptionsMode",
+        "enableWildcard",
+        "MonitorDecoratorOptions",
+        "装饰器参数守卫",
+        "typeof object守卫",
+        "状态管理V2",
+        "MonitorV2"
+      ],
+      "aliases": [
+        "Monitor pass undefined",
+        "@Monitor 无参误判",
+        "Monitor options 模式误判"
+      ],
+      "kb": "docs/kb/issues/state-management/monitor-undefined-options-guard.md",
+      "func_ids": [
+        "07-02-04"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-10"
+    },
+    {
+      "id": "ResetStateVarsOnReuseWithoutGlobalPool",
+      "name": "Reset State Vars On Reuse Without Global Pool",
+      "name_cn": "未启用全局复用仍调用 resetStateVarsOnReuse",
+      "kind": "issue",
+      "category": "state-management",
+      "keywords": [
+        "ResetStateVarsOnReuseWithoutGlobalPool",
+        "resetStateVarsOnReuse",
+        "全局复用",
+        "global reuse",
+        "ViewPU",
+        "aboutToReuseInternal",
+        "组件复用",
+        "reuse pool",
+        "isGlobalPoolActive",
+        "状态变量重置",
+        "复用生命周期"
+      ],
+      "aliases": [
+        "resetStateVarsOnReuse 误调用",
+        "非全局复用重置状态",
+        "forbid resetStateVarsOnReuse"
+      ],
+      "kb": "docs/kb/issues/state-management/reset-state-vars-on-reuse-without-global-pool.md",
+      "func_ids": [
+        "07-03-03",
+        "04-19-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-10"
+    },
+    {
+      "id": "CustomDelegateUIContextNullOnCreate",
+      "name": "Custom Delegate UIContext Null On Create",
+      "name_cn": "CustomDelegate 创建时 UIContext 为空",
+      "kind": "issue",
+      "category": "custom-component",
+      "keywords": [
+        "CustomDelegateUIContextNullOnCreate",
+        "UIContext null",
+        "CustomDelegate",
+        "uiContext 为空",
+        "getOrCreateCurrentUIContext",
+        "UIContextUtil",
+        "静态前端",
+        "arkoala",
+        "customComponent",
+        "创建时空指针",
+        "getUIContext"
+      ],
+      "aliases": [
+        "uicontext null when create",
+        "CustomDelegate UIContext 缺失",
+        "静态前端 UIContext 空指针"
+      ],
+      "kb": "docs/kb/issues/custom-component/custom-delegate-uicontext-null-on-create.md",
+      "func_ids": [
+        "04-12-01",
+        "07-03-01"
+      ],
+      "status": "active",
+      "last_verified": "2026-08-10"
     }
   ]
 }
