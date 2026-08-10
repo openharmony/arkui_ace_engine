@@ -185,9 +185,6 @@ Before editing any file, the agent MUST state:
 | Path | Purpose |
 |---|---|
 | `.claude/agents/openharmony-build-fix.md` | Build error diagnosis and fix loop |
-| `.claude/skills/arkui-api-design/` | ArkUI API design conventions and review rules |
-| `.claude/skills/capi-test-fixer/` | C API test failure diagnosis and fix |
-| `.claude/skills/capi-test-naming-verifier/` | C API test naming convention verification |
 
 ## 6. Component Development Guidance
 
@@ -239,11 +236,6 @@ Do not (without explicit user confirmation):
 - Manually edit generated files under `**/generated/`.
 - Add dependencies on other OpenHarmony system modules outside `adapter/` (including `BUILD.gn` `deps/public_deps/data_deps` dependency entries).
 - Run destructive or hard-to-recover commands (for example `rm -rf`, `git reset --hard`).
-- Change permission checks or trust boundaries without security review.
-- Modify logging, DFX instrumentation, or fault attribution behavior without DFX owner review.
-- Change persistent data formats, serialization, or cross-version protocol behavior without compatibility review.
-- Introduce third-party dependencies without license review (including copying source code snippets from third-party projects).
-- Change syscap definitions or API version in `bundle.json` without compatibility review.
 
 Ask before:
 
