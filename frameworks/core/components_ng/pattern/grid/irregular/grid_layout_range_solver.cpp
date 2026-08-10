@@ -101,6 +101,12 @@ Result GridLayoutRangeSolver::SolveForward(float mainGap, float targetLen, const
     }
     auto [startRow, startIdx] = CheckMultiRow(it->first);
     for (int32_t i = it->first; i > startRow; --i) {
+        if (it == info_->lineHeightMap_.begin()) {
+            TAG_LOGW(AceLogTag::ACE_GRID,
+                "lineHeightMap_ front rows cleared before row %{public}d, startRow %{public}d, stop backtracking",
+                it->first, startRow);
+            break;
+        }
         --it;
         len -= it->second + mainGap;
     }
