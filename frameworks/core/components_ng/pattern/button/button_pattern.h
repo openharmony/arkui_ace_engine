@@ -329,6 +329,7 @@ private:
     void HandleShadowStyle(ButtonStyleMode buttonStyle, ShadowStyle shadowStyle,
         RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
     Shadow GetShadowFromTheme(ShadowStyle shadowStyle);
+    bool IsSystemMaterialLightEffectActive(const RefPtr<RenderContext>& renderContext);
     void ProcessImmersiveOptions(const std::shared_ptr<ImmersiveOptions>& options);
     void ReapplyImmersiveMaterial();
     Color GetDefaultThemeBgColor();
