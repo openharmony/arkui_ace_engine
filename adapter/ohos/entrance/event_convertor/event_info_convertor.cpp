@@ -39,7 +39,7 @@ EventInfoConvertor::Mouse2TouchEventModeResult EventInfoConvertor::IsCompatibleF
         return Mouse2TouchEventModeResult::NOT_FOUND;
     }
     auto configJson = JsonUtil::ParseJsonString(config);
-    if(!configJson || configJson->IsNull() || !configJson->IsObject()) {
+    if (!configJson || configJson->IsNull() || !configJson->IsObject()) {
         TAG_LOGI(AceLogTag::AceLogTag::ACE_UIEVENT,
             "key multiModalInputOptions, value is not a valid json string： %{public}s", config.c_str());
         return Mouse2TouchEventModeResult::NOT_FOUND;
