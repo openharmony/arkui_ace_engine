@@ -4755,6 +4755,10 @@ void ProcessPreviewMenu(const JSRef<JSObject>& menuOptions,
     std::shared_ptr<WebPreviewSelectionMenuParam>& selectMenuParam,
     const WeakPtr<NG::FrameNode>& frameNode, const JSCallbackInfo& info)
 {
+    auto preview = menuOptions->GetProperty("preview");
+    if (preview->IsFunction()) {
+        return;
+    }
     NG::MenuParam& menuParam = selectMenuParam->menuParam;
     auto menuType = menuOptions->GetProperty("menuType");
     bool isPreviewMenu = menuType->IsNumber() && menuType->ToNumber<int32_t>() == 1;
@@ -4763,8 +4767,7 @@ void ProcessPreviewMenu(const JSRef<JSObject>& menuOptions,
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         UpdateHapticFeedbackMode(menuOptions, menuParam);
 
-        RefPtr<JsFunction> previewBuilderFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(menuOptions->GetProperty("preview")));
+        RefPtr<JsFunction> previewBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(preview));
         CHECK_NULL_VOID(previewBuilderFunc);
         selectMenuParam->previewBuilder = JsWebNoArgNodeCallback(info.GetExecutionContext(),
             std::move(previewBuilderFunc), frameNode, "BindSelectionMenuPreviwer");
@@ -4780,11 +4783,7 @@ void ParseBindSelectionMenuOptionParam(const JSCallbackInfo& info, const JSRef<J
     selectMenuParam->menuParam.onAppear = ParseMenuCallback(frameNode, menuOptions, info, "onAppear");
     selectMenuParam->onMenuShow = ParseMenuCallback(frameNode, menuOptions, info, "onMenuShow");
     selectMenuParam->onMenuHide = ParseMenuCallback(frameNode, menuOptions, info, "onMenuHide");
-
-    auto preview = menuOptions->GetProperty("preview");
-    if (preview->IsFunction()) {
-        ProcessPreviewMenu(menuOptions, selectMenuParam, frameNode, info);
-    }
+    ProcessPreviewMenu(menuOptions, selectMenuParam, frameNode, info);
 }
 
 void GetSelectionMenuParam(const JSCallbackInfo &info, std::shared_ptr<WebPreviewSelectionMenuParam>& selectMenuParam)
