@@ -21,6 +21,7 @@
 #include "arkoala_api_generated.h"
 
 const int32_t DEFAULT_LONG_PRESS_DURATION = 500;
+constexpr double DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT = 15.0;
 const bool DEFAULT_REPEAT = false;
 
 struct LongPressRecognizerPeer : public MultiFingerRecognizerPeer {
@@ -31,6 +32,7 @@ public:
         MultiFingerRecognizerPeer::Update(recognizer);
         duration_ = recognizer->GetDuration();
         repeat = recognizer->GetIsRepeat();
+        allowableMovement = recognizer->GetAllowableMovement();
     }
     int32_t GetDuration()
     {
@@ -39,6 +41,14 @@ public:
             return duration_;
         }
         return DEFAULT_LONG_PRESS_DURATION;
+    }
+    double GetAllowableMovement()
+    {
+        auto recognizer = GestureRecognizerPeer::GetRecognizer().Upgrade();
+        if (recognizer) {
+            return allowableMovement;
+        }
+        return DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
     }
     bool GetRepeat()
     {
@@ -61,4 +71,5 @@ protected:
 private:
     int32_t duration_ = DEFAULT_LONG_PRESS_DURATION;
     bool repeat = DEFAULT_REPEAT;
+    double allowableMovement = DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT;
 };

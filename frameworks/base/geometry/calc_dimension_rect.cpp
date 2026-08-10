@@ -70,6 +70,15 @@ void CalcDimensionRect::SetY(const CalcDimension& y)
     y_ = y;
 }
 
+CalcDimensionRect& CalcDimensionRect::operator=(const DimensionRect& newDimension)
+{
+    SetWidth(newDimension.GetWidth());
+    SetHeight(newDimension.GetHeight());
+    SetX(newDimension.GetOffset().GetX());
+    SetY(newDimension.GetOffset().GetY());
+    return *this;
+}
+
 std::string CalcDimensionRect::ToString() const
 {
     static const int32_t precision = 2;
@@ -94,12 +103,4 @@ std::string CalcDimensionRect::ToJsonString() const
     return jsonValue->ToString();
 }
 
-CalcDimensionRect& CalcDimensionRect::operator=(const DimensionRect& newDimension)
-{
-    SetWidth(newDimension.GetWidth());
-    SetHeight(newDimension.GetHeight());
-    SetX(newDimension.GetOffset().GetX());
-    SetY(newDimension.GetOffset().GetY());
-    return *this;
-}
 } // namespace OHOS::Ace

@@ -47,7 +47,9 @@ Ark_Int32 GetDurationImpl(Ark_LongPressRecognizer peer)
 }
 Ark_Float64 GetAllowableMovementImpl(Ark_LongPressRecognizer peer)
 {
-    return {};
+    auto errorValue = Converter::ArkValue<Ark_Float64>(DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT);
+    CHECK_NULL_RETURN(peer, errorValue);
+    return Converter::ArkValue<Ark_Float64>(peer->GetAllowableMovement());
 }
 } // LongPressRecognizerAccessor
 const GENERATED_ArkUILongPressRecognizerAccessor* GetLongPressRecognizerAccessor()

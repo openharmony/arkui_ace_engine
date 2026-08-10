@@ -172,8 +172,8 @@ void RegisterNodeRenderStateCallback(
             env, "register node render state change callback exceed limit.", NODE_RENDER_STATE_REGISTER_ERR_CODE);
         return;
     }
-
     info.nodeId = nodeInfo.second;
+
     bool isCached = false;
     std::lock_guard<std::mutex> lock(g_nodeRenderStateMutex);
     for (auto& item : onNodeRenderStateCallbackMap) {
@@ -197,8 +197,8 @@ void RegisterNodeRenderStateCallback(
         std::map<int32_t, CallbackResourceNodeInfo> map;
         map[info.nodeId] = info;
         onNodeRenderStateCallbackMap[callback] = map;
-        modifier->getArkUIAniGestureEventUIObserverModifier()->triggerNodeRenderStateForFirstRegister(
-            info.instanceId, info.resourceId, info.nodeId);
+        modifier->getArkUIAniGestureEventUIObserverModifier()->triggerNodeRenderStateForFirstRegister(info.instanceId,
+            info.resourceId, info.nodeId);
     }
 }
 
@@ -493,6 +493,7 @@ void UnregisterNodeRenderStateCallback(
         info.instanceId, info.nodeId, info.nodeKey, isStr, isInt);
     CHECK_NULL_VOID(nodeInfo.first);
 
+    std::lock_guard<std::mutex> lock(g_nodeRenderStateMutex);
     ani_boolean isUndef = false;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef || !callback) {
@@ -514,14 +515,13 @@ void UnregisterNodeRenderStateCallback(
         return;
     }
 
-    std::lock_guard<std::mutex> lock(g_nodeRenderStateMutex);
     for (auto it = onNodeRenderStateCallbackMap.begin(); it != onNodeRenderStateCallbackMap.end();) {
         ani_boolean isEquals = false;
         env->Reference_StrictEquals(callback, it->first, &isEquals);
         auto iter = it->second.find(nodeInfo.second);
         if (isEquals && iter != it->second.end()) {
             modifier->getArkUIAniGestureEventUIObserverModifier()->removeNodeRenderStateCallback(
-                info.instanceId, iter->second.resourceId, nodeInfo.second, false);
+                iter->second.instanceId, iter->second.resourceId, nodeInfo.second, false);
             it->second.erase(iter);
             if (it->second.empty()) {
                 it = onNodeRenderStateCallbackMap.erase(it);
@@ -718,7 +718,6 @@ void RemovePanListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClas
 }
 
 void SetOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass,
-
     ani_int instanceId, ani_int resourceId, ani_object nodeIdentity, ani_fn_object fnObj)
 {
     CHECK_NULL_VOID(env);
@@ -749,8 +748,8 @@ void SetOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass,
     RegisterNodeRenderStateCallback(env, info, isStr, isInt, fnObjGlobalRef);
 }
 
-void RemoveOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int instanceId,
-    ani_object nodeIdentity, ani_fn_object fnObj)
+void RemoveOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_int instanceId, ani_object nodeIdentity, ani_fn_object fnObj)
 {
     CHECK_NULL_VOID(env);
     ani_ref fnObjGlobalRef = nullptr;
