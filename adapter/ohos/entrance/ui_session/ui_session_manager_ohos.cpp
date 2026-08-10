@@ -315,6 +315,7 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
         if (reportService != nullptr) {
             auto data = InspectorJsonUtil::Create();
             data->Put(key.data(), value.data());
+            UI_SESSION_SCOPED_TRACE("[UiSessionManagerOhos] ReportComponentChangeEvent eventType:%u", eventType);
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
             LOGW("report component change event failed, process id:%{public}d", pair.first);
@@ -335,6 +336,8 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
             data->Put(key.data(), value.data());
+            UI_SESSION_SCOPED_TRACE("[UiSessionManagerOhos] ReportComponentChangeEvent eventType:%u nodeId:%d",
+                eventType, nodeId);
             reportService->ReportComponentChangeEvent(data->ToString());
         } else {
             LOGW("report component event failed, process id:%{public}d", pair.first);
@@ -937,14 +940,17 @@ void UiSessionManagerOhos::SetComponentChangeEventRegistered(bool status)
 {
     if (status) {
         componentChangeEventRegisterProcesses_.fetch_add(1);
+        LOGI("SetComponentChangeEventRegistered register component change event");
     } else {
         componentChangeEventRegisterProcesses_.fetch_sub(1);
+        LOGI("SetComponentChangeEventRegistered unregister component change event");
     }
 }
 
 void UiSessionManagerOhos::SetComponentChangeEventMask(uint32_t mask)
 {
     componentChangeEventMask_ = mask;
+    LOGI("SetComponentChangeEventMask mask:%{public}u", mask);
 }
 
 void UiSessionManagerOhos::SetScrollEventRegistered(bool status)
