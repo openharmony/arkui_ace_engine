@@ -124,6 +124,18 @@
 
 **取舍理由：** 统一的存储格式降低新增键的代码量。type-safe 的泛型在 TS 层保证，C++ 层用统一的 `EnvironmentQueryResult` 承载不同类型值。
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| EnvironmentManager | UI任务多线程检查 | UI任务不允许在非主线程执行 | UI任务误用在非主线程执行 | 严重 | 可以通过系统参数开启该检查第一时间拦截问题 | "CheckThread fail: expected [%{public}s]" | 不涉及 |
+| EnvironmentManager | WeakPtr裸指针使用 | UAF问题 cppcrash | 内部业务通过WeakPtr获取已销毁对象的裸指针使用，WeakPtr的Upgrade应先于裸指针访问 | 严重 | 排查代码中直接使用WeakPtr裸指针的地方并整改为安全的Upgrade方法 | 不涉及 | 不涉及 |
+| EnvironmentManager | 节点上树成环 | 触发遍历时成环，无限递归导致爆栈可能导致cpp_crash | 递归遍历无限循环 | 严重 | 给开发者提供开关遍历测试中检测修复；崩溃时有堆栈和Fatal日志 | "LoopDetected: child[%{public}.*s] vs current[%{public}.*s]" | 不涉及 |
+
 ### 对象关系
 
 ```

@@ -86,6 +86,16 @@ proposal.md 中所有维度均标记为 N/A，无需要展开设计的维度。
 |---------|------|----------|-----------------|------|------|
 | ADR-3 | ETS 层的调用路径应该是什么 | **仅通过 ANI Bridge → C++ PipelineContext**，不额外调用 JS Proxy | 备选1：双路通知（C++ PipelineContext + 直接调用 ArkUIObjectFinalizationRegisterProxy.call()）。**放弃原因**：动态语言路径的命令式节点只走 C++ PipelineContext，不直接调用 JS Proxy（仅 pu_view/v2_view 的自定义节点才直接调用 Proxy）。保持一致必须走单路。 | 动态语言命令式节点（FrameNode/RenderNode/BuilderNode/ComponentContent）只通过 C++ PipelineContext 通知，不直接调用 JS Proxy。静态语言应保持一致。 | ETS 层每次 dispose 仅增加一次 ANI 函数调用 |
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| PipelineContext::FireArkUIObjectLifecycleCallback（新增 ANI Bridge `_FireArkUIObjectLifecycleCallback` 触发路径） | 底座回调应用代码时候，触发应用回调内部的稳定性问题 | 应用crash | 应用内部回调逻辑异常 | 严重 | 无 | "[%{public}s] crash occured on callback: %{public}" | 不涉及 |
+
 ## 设计骨架
 
 ### 数据流/控制流

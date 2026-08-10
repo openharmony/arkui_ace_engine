@@ -138,6 +138,14 @@ AppendLit(buf, " +0x");   // 由 "+0x" 改为 " +0x"，与 Android 统一
 
 ---
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+不涉及
+
+> 不涉及理由：仓无 DFX 知识（涉及仓：arkui_for_android、arkui_for_ios）
+
 ## Performance & Memory Budget
 
 - 常态零开销：handler 仅崩溃时执行，不在正常渲染/布局路径。

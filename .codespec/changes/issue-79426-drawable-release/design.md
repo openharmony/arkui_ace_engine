@@ -97,6 +97,16 @@
 | ADR-4 | release 后其他 native 访问 API 如何处理？ | SDK 标记错误码的访问型 API（`getPixelMap/getForeground/getBackground/getMask/loadSync/load`）读取 `_isReleased` 并返回 `111002`；未标错误码的 `invalidate/setHdrComposition/getAnimationController/setBlendMode` 不额外读取 `_isReleased`，通过 `napi_unwrap` 获取 native，取不到 native 即无操作返回。 | A: 所有方法都抛 `111002`；B: 所有方法都显式读取 `_isReleased` 后静默返回。 | 用户已确认分组语义；SDK 已列举的访问型 API 必须按 `111002`；未标错误码的控制/刷新型 API release 后不应增加开发者处理负担，native 绑定已移除时自然无操作即可。 | 需要访问型 guard 支持 throw/reject；控制/刷新类保持 native 空返回防御，不新增 release 状态分支。 |
 | ADR-5 | Static 和 C API 是否同步改动？ | Static 不动，C API 不动；仅通过 design/spec 记录兼容边界。 | A: Static 改成 Dynamic 的 `111002`；B: 新增 C API release/isReleased。 | 用户已确认 Static 不动；C API 已有 Dispose，新增 API 有 ABI/API 风险且超出范围。 | 实现计划不得修改 SDK Static 文件和 C API 头文件。 |
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| release() (js_drawable_descriptor.cpp) | 使用中的对象非法销毁检查 | 可能导致cpp_crash | RefPtr智能指针在被使用时，如果被重新赋值将可能导致所管理的对象被析构失效，进而造成UAF问题 | 严重 | 识别是不是有对象使用中被销毁的问题，避免程序带着问题继续运行进而出现难以定位的问题现场 | "this object is still in use" | 不涉及 |
+
 ## 设计骨架
 
 ### 骨架范围

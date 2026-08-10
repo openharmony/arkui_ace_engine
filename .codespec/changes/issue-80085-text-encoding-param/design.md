@@ -585,6 +585,16 @@ PositionWithAffinity ParagraphManager::GetCharacterPositionAtCoordinate(
 - 修复前：`result.position_(0) + info.start(3)` = 3 ✗（UTF-16 码元混入）
 - 修复后：`result.position_(0) + charLength(6+1=7)` = 7 ✓（UTF-8 字节偏移）
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| ParagraphManager | 文本编辑类控件光标位置错误 | 无法正确的移动光标和深处插入字符 | 应用传入的参数有误 | 一般 | 上传大数据 | 不涉及 | RICH_EDITOR_ERROR |
+
 ## 风险和开放问题
 
 | 项 | 类型 | 影响 | 处理方式 | Owner |
