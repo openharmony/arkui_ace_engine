@@ -34,7 +34,6 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 
@@ -56,12 +55,10 @@ MenuItemModel* MenuItemModel::GetInstance()
 MenuModel* MenuModel::GetInstance()
 {
 #ifdef NG_BUILD
-    static NG::MenuModelNG instance;
-    return &instance;
+    return NG::NodeModifier::GetMenuModel();
 #else
     if (Container::IsCurrentUseNewPipeline()) {
-        static NG::MenuModelNG instance;
-        return &instance;
+        return NG::NodeModifier::GetMenuModel();
     } else {
         static Framework::MenuModelImpl instance;
         return &instance;

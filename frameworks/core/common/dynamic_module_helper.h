@@ -22,7 +22,7 @@
 #include <unordered_map>
 
 #include "compatible/components/component_loader.h"
-
+#include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/dynamic_module.h"
@@ -60,6 +60,42 @@ public:
 #ifdef ENABLE_PRELOAD_DYNAMIC_MODULE
     void TriggerPageFaultForPreLoad();
 #endif
+
+    template<typename T>
+    T* GetModel(const char* moduleName)
+    {
+        static std::once_flag flag;
+        static T* model = nullptr;
+        std::call_once(flag, [this, moduleName]() {
+            auto* module = GetDynamicModule(moduleName);
+            if (module == nullptr) {
+                LOGF_ABORT("Can't find %{public}s dynamic module", moduleName);
+            }
+            model = static_cast<T*>(module->GetModel());
+            if (model == nullptr) {
+                LOGF_ABORT("%{public}s model is null after loading", moduleName);
+            }
+        });
+        return model;
+    }
+
+    template<typename T>
+    T* GetModel(const char* moduleName, const char* modelName)
+    {
+        static std::once_flag flag;
+        static T* model = nullptr;
+        std::call_once(flag, [this, moduleName, modelName]() {
+            auto* module = GetDynamicModule(moduleName);
+            if (module == nullptr) {
+                LOGF_ABORT("Can't find %{public}s dynamic module", moduleName);
+            }
+            model = static_cast<T*>(module->GetModel(modelName));
+            if (model == nullptr) {
+                LOGF_ABORT("%{public}s model %{public}s is null after loading", moduleName, modelName);
+            }
+        });
+        return model;
+    }
 
 private:
     DynamicModuleHelper() = default;

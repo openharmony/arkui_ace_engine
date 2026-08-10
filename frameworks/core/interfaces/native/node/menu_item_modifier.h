@@ -25,7 +25,7 @@ namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIMenuItemModifier* GetMenuItemModifier();
 const CJUIMenuItemModifier* GetCJUIMenuItemModifier();
 ACE_FORCE_EXPORT const ArkUIMenuItemInnerModifier* GetMenuItemInnerModifier();
-ACE_FORCE_EXPORT MenuItemModelNG* GetMenuItemModel();
+ACE_FORCE_EXPORT MenuItemModel* GetMenuItemModel();
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_MENU_ITEM_MODIFIER_H
