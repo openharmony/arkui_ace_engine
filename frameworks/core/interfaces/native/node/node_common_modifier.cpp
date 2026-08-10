@@ -9604,6 +9604,9 @@ ArkUI_Int32 PostTouchEventWithStrategy(
     touchEvent.force = arkUITouchEvent->actionTouchPoint.pressure;
     touchEvent.operatingHand = arkUITouchEvent->actionTouchPoint.operatingHand;
     touchEvent.deviceId = arkUITouchEvent->deviceId;
+    touchEvent.tiltX = static_cast<float>(arkUITouchEvent->actionTouchPoint.tiltX);
+    touchEvent.tiltY = static_cast<float>(arkUITouchEvent->actionTouchPoint.tiltY);
+    touchEvent.rollAngle = static_cast<float>(arkUITouchEvent->actionTouchPoint.rollAngle);
     std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUITouchEvent->timeStamp));
     TimeStamp time(nanoseconds);
     touchEvent.time = time;
@@ -9626,6 +9629,9 @@ ArkUI_Int32 PostTouchEventWithStrategy(
         TimeStamp downTime(downNanoseconds);
         point.downTime = downTime;
         point.force = touchPointes[index].pressure;
+        point.tiltX = static_cast<float>(touchPointes[index].tiltX);
+        point.tiltY = static_cast<float>(touchPointes[index].tiltY);
+        point.rollAngle = static_cast<float>(touchPointes[index].rollAngle);
         touchEvent.pointers.emplace_back(point);
     }
     touchEvent.id = arkUITouchEvent->actionTouchPoint.id;
