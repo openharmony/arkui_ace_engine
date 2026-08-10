@@ -225,6 +225,7 @@ HWTEST_F(BuilderUtilsTest, BuilderUtilsTest003, TestSize.Level1)
     BuilderUtils::GetBuilderNodes(firstNode, nodes);
     EXPECT_EQ(nodes.size(), 2);
     EXPECT_CALL(*frontend, BuilderNodeFunc("__deleteBuilderNode__", _)).Times(1);
+    Mock::AllowLeak(AceType::RawPtr(frontend));
     BuilderUtils::ClearChildInBuilderContainer(firstNode->GetId(), nodes);
 
     /**
@@ -305,6 +306,7 @@ HWTEST_F(BuilderUtilsTest, BuilderUtilsTest004, TestSize.Level1)
      * @tc.steps: step3. Call AddBuilderToParent or RemoveBuilderFromParent without valid parent.
      */
     EXPECT_CALL(*frontend, BuilderNodeFunc("__addBuilderNode__", _)).Times(0);
+    Mock::AllowLeak(AceType::RawPtr(frontend));
     EXPECT_CALL(*frontend, BuilderNodeFunc("__addBuilderNodeToBuilder__", _)).Times(0);
     BuilderUtils::AddBuilderToParent(secondedNode, thirdNode);
     BuilderUtils::AddBuilderToParent(nullptr, thirdNode);

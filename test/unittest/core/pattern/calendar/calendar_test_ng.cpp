@@ -149,6 +149,50 @@ RefPtr<FrameNode> CalendarTestNg::CreateCalendarNode(TestProperty& testProperty)
     return nullptr;
 }
 
+static RefPtr<FrameNode> CreateCalendarNodeTree(const RefPtr<CalendarControllerNg>& controller)
+{
+    auto calendarFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto calendarPattern = calendarFrameNode->GetPattern<CalendarPattern>();
+    CHECK_NULL_RETURN(calendarPattern, nullptr);
+
+    auto swiperFrameNode = FrameNode::GetOrCreateFrameNode(
+        V2::SWIPER_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
+    if (swiperPaintProperty) {
+        swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
+    }
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    if (swiperLayoutProperty) {
+        swiperLayoutProperty->UpdateLoop(true);
+        swiperLayoutProperty->UpdateIndex(1);
+        swiperLayoutProperty->UpdateShowIndicator(false);
+        swiperLayoutProperty->UpdateDisableSwipe(true);
+    }
+
+    auto currentMonthNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto preMonthNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto nextMonthNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+
+    preMonthNode->MountToParent(swiperFrameNode);
+    currentMonthNode->MountToParent(swiperFrameNode);
+    nextMonthNode->MountToParent(swiperFrameNode);
+    swiperFrameNode->MountToParent(calendarFrameNode);
+
+    if (controller) {
+        calendarPattern->SetCalendarControllerNg(controller);
+    }
+    return calendarFrameNode;
+}
+
 /**
  * @tc.name: CalendarModelNGTest001
  * @tc.desc: Create Calendar.
@@ -163,7 +207,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNGTest001, TestSize.Level1)
      */
     CalendarModelData calendarData;
     CalendarModelNG calendarModelNG;
-    calendarModelNG.Create(calendarData);
+    auto calendarNode1 = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode1);
     CurrentDayStyleData dayStyle;
     calendarModelNG.SetCurrentDayStyle(dayStyle, dayStyle);
     NonCurrentDayStyleData nonCurrentDayStyle;
@@ -175,9 +220,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNGTest001, TestSize.Level1)
     WorkStateStyleData workStateStyle;
     calendarModelNG.SetWorkStateStyle(workStateStyle);
 
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
-    auto frameNode1 = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_EQ(calendarNode1->GetTag(), V2::CALENDAR_ETS_TAG);
+    auto frameNode1 = calendarNode1;
     auto calendarPattern = frameNode1->GetPattern<CalendarPattern>();
     EXPECT_TRUE(calendarPattern);
     EXPECT_FALSE(calendarPattern->calendarControllerNg_);
@@ -242,16 +286,15 @@ HWTEST_F(CalendarTestNg, CalendarModelNGTest001, TestSize.Level1)
     // case: controller is not null
     auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
     calendarData.controller = calendarControllerNg;
-    calendarModelNG.Create(calendarData);
+    auto calendarNode2 = CreateCalendarNodeTree(calendarControllerNg);
+    ViewStackProcessor::GetInstance()->Push(calendarNode2);
     calendarModelNG.SetCurrentDayStyle(dayStyle, dayStyle);
     calendarModelNG.SetNonCurrentDayStyle(nonCurrentDayStyle);
     calendarModelNG.SetTodayStyle(todayStyle);
     calendarModelNG.SetWeekStyle(weekStyle);
     calendarModelNG.SetWorkStateStyle(workStateStyle);
-    element = ViewStackProcessor::GetInstance()->Finish();
-
-    EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_EQ(calendarNode2->GetTag(), V2::CALENDAR_ETS_TAG);
+    auto frameNode = calendarNode2;
     ASSERT_TRUE(frameNode);
     calendarPattern = frameNode->GetPattern<CalendarPattern>();
     EXPECT_TRUE(calendarPattern);
@@ -682,13 +725,12 @@ HWTEST_F(CalendarTestNg, CalendarTest008, TestSize.Level1)
     auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
     calendarData.controller = calendarControllerNg;
     CalendarModelNG calendarModel;
-    calendarModel.Create(calendarData);
+    auto calendarNode = CreateCalendarNodeTree(calendarControllerNg);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     calendarModel.SetTodayStyle(todayStyle);
     calendarModel.SetCurrentDayStyle(dayStyle);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-
-    EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_EQ(calendarNode->GetTag(), V2::CALENDAR_ETS_TAG);
+    auto frameNode = calendarNode;
     auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
     auto swiperNode = frameNode->GetChildren().front();
     auto calendarFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
@@ -934,13 +976,12 @@ HWTEST_F(CalendarTestNg, CalendarPaintMethodTest005, TestSize.Level1)
     CalendarData calendarData;
     auto calendarControllerNg = AceType::MakeRefPtr<CalendarControllerNg>();
     calendarData.controller = calendarControllerNg;
-    calendarModelNG.Create(calendarData);
+    auto calendarNode = CreateCalendarNodeTree(calendarControllerNg);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     calendarModelNG.SetTodayStyle(todayStyle);
     calendarModelNG.SetCurrentDayStyle(dayStyle);
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-
-    EXPECT_EQ(element->GetTag(), V2::CALENDAR_ETS_TAG);
-    auto frameNode = AceType::DynamicCast<FrameNode>(element);
+    EXPECT_EQ(calendarNode->GetTag(), V2::CALENDAR_ETS_TAG);
+    auto frameNode = calendarNode;
     auto calendarPattern = frameNode->GetPattern<CalendarPattern>();
     auto swiperNode = frameNode->GetChildren().front();
     auto calendarFrameNode = AceType::DynamicCast<FrameNode>(swiperNode->GetChildren().front());
@@ -1079,6 +1120,8 @@ HWTEST_F(CalendarTestNg, CalendarPaintMethodTest006, TestSize.Level1)
  */
 HWTEST_F(CalendarTestNg, CalendarModelNG_SetOptions001, TestSize.Level1)
 {
+    auto calendarNode = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
@@ -1103,6 +1146,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNG_SetOptions001, TestSize.Level1)
  */
 HWTEST_F(CalendarTestNg, CalendarModelNG_SetOptions002, TestSize.Level1)
 {
+    auto calendarNode = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
@@ -1125,6 +1170,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNG_SetOptions002, TestSize.Level1)
  */
 HWTEST_F(CalendarTestNg, CalendarModelNG_SetOptions003, TestSize.Level1)
 {
+    auto calendarNode = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
@@ -1149,6 +1196,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNG_SetOptions003, TestSize.Level1)
  */
 HWTEST_F(CalendarTestNg, CalendarModelNG_SetCurrentData001, TestSize.Level1)
 {
+    auto calendarNode = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
@@ -1169,6 +1218,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNG_SetCurrentData001, TestSize.Level1)
  */
 HWTEST_F(CalendarTestNg, CalendarModelNG_SetCurrentData002, TestSize.Level1)
 {
+    auto calendarNode = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
@@ -1189,6 +1240,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNG_SetCurrentData002, TestSize.Level1)
  */
 HWTEST_F(CalendarTestNg, CalendarModelNG_SetPreData001, TestSize.Level1)
 {
+    auto calendarNode = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
@@ -1212,6 +1265,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNG_SetPreData001, TestSize.Level1)
  */
 HWTEST_F(CalendarTestNg, CalendarModelNG_SetNextData001, TestSize.Level1)
 {
+    auto calendarNode = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
@@ -1230,6 +1285,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNG_SetNextData001, TestSize.Level1)
  */
 HWTEST_F(CalendarTestNg, CalendarModelNG_SetCalendarDay001, TestSize.Level1)
 {
+    auto calendarNode = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
@@ -1253,6 +1310,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNG_SetCalendarDay001, TestSize.Level1)
  */
 HWTEST_F(CalendarTestNg, CalendarModelNG_SetCalendarDay002, TestSize.Level1)
 {
+    auto calendarNode = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
@@ -1276,6 +1335,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNG_SetCalendarDay002, TestSize.Level1)
  */
 HWTEST_F(CalendarTestNg, CalendarModelNG_SetCalendarDay003, TestSize.Level1)
 {
+    auto calendarNode = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 
@@ -1299,6 +1360,8 @@ HWTEST_F(CalendarTestNg, CalendarModelNG_SetCalendarDay003, TestSize.Level1)
  */
 HWTEST_F(CalendarTestNg, CalendarModelNG_SetCalendarDay004, TestSize.Level1)
 {
+    auto calendarNode = CreateCalendarNodeTree(nullptr);
+    ViewStackProcessor::GetInstance()->Push(calendarNode);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
 

@@ -114,6 +114,15 @@ group("core_pattern_unittest") {
       "tabs:tabs_test_ng",
       "view_context:view_context_test_ng",
       "withtheme:withtheme_test_ng",
+      "calendar:calendar_test_ng",
+      "calendar_picker:calendar_picker_test_ng",
+      "container_picker:container_picker_test",
+      "picker:date_picker_test_ng",
+      "text_picker:text_picker_test_ng",
+      "text_picker:text_picker_extend_test_ng",
+      "text_picker:text_picker_column_test_ng",
+      "time_picker:time_picker_test_ng",
+      "time_picker:time_picker_dialog_test_ng",
     ]
   } else {
     deps += [
@@ -125,8 +134,8 @@ group("core_pattern_unittest") {
       "blank:blank_test_ng",
       "bubble:bubble_test_ng",
       "button:button_test_ng",
-      #"calendar:calendar_test_ng",
-      #"calendar_picker:calendar_picker_test_ng",
+      "calendar:calendar_test_ng",
+      "calendar_picker:calendar_picker_test_ng",
       "canvas:canvas_test_ng",
       "checkbox:checkbox_test_ng",
       "checkboxgroup:checkboxgroup_test_ng",
@@ -237,8 +246,11 @@ group("core_pattern_unittest") {
       "text_input:text_input_pattern_test",
       "text_input:text_input_test",
       "text_picker:text_picker_test_ng",
+      "text_picker:text_picker_extend_test_ng",
+      "text_picker:text_picker_column_test_ng",
       "text_timer:text_timer_test_ng",
       "time_picker:time_picker_test_ng",
+      "time_picker:time_picker_dialog_test_ng",
       "toggle:toggle_test_ng",
       "ui_extension:ui_extension_component_test_ng",
 

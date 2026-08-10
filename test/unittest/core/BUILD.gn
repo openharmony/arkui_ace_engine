@@ -18,6 +18,7 @@ group("core_unittest") {
   deps = []
   if (is_host_product) {
     deps += [
+      "common:common_test",
       "manager:content_change_manager_test_ng",
       "manager:display_sync_manager_test_ng",
       "manager:full_screen_manager_test_ng",
