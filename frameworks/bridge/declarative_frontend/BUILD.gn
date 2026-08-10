@@ -568,6 +568,10 @@ template("declarative_js_engine") {
         "jsview/js_form_menu_item.cpp",
         "jsview/models/form_model_impl.cpp",
       ]
+      external_deps += [
+        "libuv:uv",
+        "node:node_header_notice",
+      ]
     }
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
@@ -997,6 +1001,10 @@ template("declarative_js_engine_ng") {
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       sources += [ "jsview/js_form.cpp" ]
+      external_deps += [
+        "libuv:uv",
+        "node:node_header_notice",
+      ]
     }
 
     if (defined(config.plugin_components_support) &&
