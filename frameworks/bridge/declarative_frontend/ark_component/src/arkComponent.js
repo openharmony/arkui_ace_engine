@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-var CommonGestureType;
+let CommonGestureType;
 (function (CommonGestureType) {
     CommonGestureType[CommonGestureType['TAP_GESTURE'] = 0] = 'TAP_GESTURE';
     CommonGestureType[CommonGestureType['LONG_PRESS_GESTURE'] = 1] = 'LONG_PRESS_GESTURE';
