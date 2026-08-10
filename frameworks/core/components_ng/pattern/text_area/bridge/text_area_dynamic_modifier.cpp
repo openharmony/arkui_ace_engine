@@ -3736,6 +3736,11 @@ void SetTextAreaFocusableAndFocusNodeImpl()
 {
     GetTextFieldModelImpl()->SetFocusableAndFocusNode();
 }
+
+void SetTextAreaEnablePreviewTextImpl(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    return;
+}
 #endif
 } // namespace
 namespace NodeModifier {
@@ -3955,7 +3960,7 @@ const ArkUITextAreaModifier* GetTextAreaDynamicModifier()
             .resetTextAreaOnWillDelete = nullptr,
             .setTextAreaOnDidDelete = nullptr,
             .resetTextAreaOnDidDelete = nullptr,
-            .setTextAreaEnablePreviewText = nullptr,
+            .setTextAreaEnablePreviewText = SetTextAreaEnablePreviewTextImpl,
             .resetTextAreaEnablePreviewText = nullptr,
             .getTextAreaPadding = nullptr,
             .setTextAreaSelectionMenuOptions = nullptr,

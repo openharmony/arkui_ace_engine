@@ -3788,6 +3788,10 @@ void SetTextInputOnChangeEventImpl(void* callback)
     return;
 }
 
+void SetTextInputEnablePreviewTextImpl(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    return;
+}
 #endif
 } // namespace
 
@@ -4036,7 +4040,7 @@ CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
             .getTextInputMargin = nullptr,
             .setTextInputCaret = nullptr,
             .getTextInputController = nullptr,
-            .setTextInputEnablePreviewText = nullptr,
+            .setTextInputEnablePreviewText = SetTextInputEnablePreviewTextImpl,
             .resetTextInputEnablePreviewText = nullptr,
             .setTextInputSelectionMenuOptions = nullptr,
             .resetTextInputSelectionMenuOptions = nullptr,
