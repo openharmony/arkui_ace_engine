@@ -253,6 +253,7 @@ template("ace_osal_ohos_source_set") {
       "background_task_mgr:bgtaskmgr_innerkits",
       "bundle_framework:appexecfwk_core",
       "graphic_2d:2d_graphics",
+      "graphic_2d:color_manager",
       "graphic_2d:librender_service_client",
       "graphic_surface:surface",
       "hicollie:libhicollie",
