@@ -13,29 +13,36 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
-ace_unittest("union_effect_container_test") {
-  module_name = "DrawingSet-XComponent"
-  type = "new"
-  render = true
-  sources = [
-    "$ace_root/frameworks/core/components_ng/pattern/union_effect_container/union_effect_container_model_ng.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/union_effect_container/union_effect_container_pattern.cpp",
-    "union_effect_container_model_ng_test.cpp",
-  ]
-  if (!ace_enable_full_test_suite) {
-    sources = []
-    sources = [
-      "union_effect_container_test_min.cpp",
-      "union_effect_container_test_core.cpp",
-    ]
-  } else {
-    sources += [
-      "union_effect_container_test_min.cpp",
-      "union_effect_container_test_core.cpp",
-    ]
-  }
+test_sources = [
+  "$ace_root/frameworks/core/components_ng/pattern/union_effect_container/union_effect_container_model_ng.cpp",
+  "$ace_root/frameworks/core/components_ng/pattern/union_effect_container/union_effect_container_pattern.cpp",
+  "union_effect_container_model_ng_test.cpp",
+]
 
-  external_deps = [
-    "hilog:libhilog",
-  ]
+core_min_sources = [
+  "union_effect_container_test_min.cpp",
+  "union_effect_container_test_core.cpp",
+]
+
+if (is_host_product) {
+  ace_unittest("union_effect_container_test") {
+    type = "host_components"
+    module_name = "DrawingSet-XComponent"
+    sources = test_sources + core_min_sources
+    external_deps = [ "hilog:libhilog" ]
+  }
+} else {
+  ace_unittest("union_effect_container_test") {
+    module_name = "DrawingSet-XComponent"
+    type = "new"
+    render = true
+    sources = test_sources
+    if (!ace_enable_full_test_suite) {
+      sources = []
+      sources = core_min_sources
+    } else {
+      sources += core_min_sources
+    }
+    external_deps = [ "hilog:libhilog" ]
+  }
 }
