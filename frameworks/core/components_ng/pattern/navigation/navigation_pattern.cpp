@@ -341,6 +341,7 @@ void NavigationPattern::RestoreNodeFromProxyNodeIfNeeded(const RefPtr<FrameNode>
 
     node->SetIndex(proxyNode->GetIndex());
     primaryContentNode->RemoveChildSilently(node);
+	primaryContentNode->MarkNeedSyncRenderTree(true);
     primaryContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     navContentNode->RemoveChildSilently(proxyNode);
@@ -7508,6 +7509,16 @@ void NavigationPattern::UpdateSplitDisplayVisibility(const RefPtr<NavigationGrou
         CHECK_NULL_VOID(navProperty);
         bool hideNavBar = navProperty->GetHideNavBarValue(false);
         navBarProperty->UpdateVisibility(hideNavBar ? VisibleType::INVISIBLE : VisibleType::VISIBLE);
+        if (!hideNavBar) {
+            auto navBar = AceType::DynamicCast<NavBarNode>(navNode->GetNavBarNode());
+            if (navBar) {
+                navBar->SetJSViewActive(true);
+                auto eventHub = navBar->GetEventHub<EventHub>();
+                if (eventHub) {
+                    eventHub->SetEnabledInternal(true);
+                }
+            }
+        }
     } else if (!isSecondaryPushToPrimaryScene_) {
         navBarProperty->UpdateVisibility(VisibleType::INVISIBLE);
     } else {
