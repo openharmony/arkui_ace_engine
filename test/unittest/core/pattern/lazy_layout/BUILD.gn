@@ -27,6 +27,7 @@ if (is_host_product) {
       "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_info.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.cpp",
+      "lazy_layout_test_utils.cpp",
       "lazy_layout_test_min.cpp",
       "lazy_layout_test_core.cpp",
     ]
@@ -44,6 +45,7 @@ if (is_host_product) {
       "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_info.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_pattern.cpp",
+      "lazy_layout_test_utils.cpp",
     ]
 
     if (!ace_enable_full_test_suite) {
@@ -107,6 +109,7 @@ if (is_host_product) {
       "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_info.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_model.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_pattern.cpp",
+      "lazy_layout_test_utils.cpp",
       "lazy_layout_test_min.cpp",
       "lazy_layout_test_core.cpp",
     ]
@@ -122,6 +125,7 @@ if (is_host_product) {
       "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_info.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_model.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/lazy_column_layout/lazy_column_layout_pattern.cpp",
+      "lazy_layout_test_utils.cpp",
     ]
 
     if (!ace_enable_full_test_suite) {

@@ -21,6 +21,7 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "test/mock/frameworks/core/common/mock_theme_manager.h"
 #include "test/mock/frameworks/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/lazy_layout/lazy_layout_test_utils.h"
 
 #include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_model.h"
 #include "core/components_ng/pattern/lazy_grid_layout/lazy_grid_layout_property.h"
@@ -2690,83 +2691,123 @@ HWTEST_F(LazyGridLayoutTest, FirstFrameWindowSeedsWithUnknownBody001, TestSize.L
 }
 
 /**
- * @tc.name: SkipLayoutWhenNotOnMainTree001
- * @tc.desc: Test LazyGridLayoutAlgorithm UpdateReferencePos logic when conditions for skip layout are met.
+ * @tc.name: EstimateLayoutWhenDetached001
+ * @tc.desc: Test fresh, reused and short detached LazyVGrid hosts select the correct measure mode.
  * @tc.type: FUNC
  */
-HWTEST_F(LazyGridLayoutTest, SkipLayoutWhenNotOnMainTree001, TestSize.Level1)
+HWTEST_F(LazyGridLayoutTest, EstimateLayoutWhenDetached001, TestSize.Level1)
 {
     auto layoutInfo = AceType::MakeRefPtr<LazyGridLayoutInfo>();
     auto algorithm = AceType::MakeRefPtr<LazyGridLayoutAlgorithm>(layoutInfo);
     algorithm->SetAxis(Axis::VERTICAL);
-    
-    // Test case 1: totalItemCount > lanes, conditions should trigger skip layout
     algorithm->totalItemCount_ = 10;
     algorithm->lanes_ = 2;
-    algorithm->needSkipLayout_ = false;
-    algorithm->needAllLayout_ = true;
-    
-    // Create minimal test node structure
-    auto parentPattern = AceType::MakeRefPtr<WaterFlowPattern>();
-    parentPattern->SetAxis(Axis::VERTICAL);
-    auto parentLayoutProperty = AceType::MakeRefPtr<WaterFlowLayoutProperty>();
-    auto parentGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    parentGeometryNode->SetFrameSize(SizeF(SCROLL_WIDTH, SCROLL_HEIGHT));
-    
-    auto parentFrameNode =
-        FrameNode::CreateFrameNode(V2::WATERFLOW_ETS_TAG, -1, parentPattern, parentLayoutProperty);
-    parentFrameNode->geometryNode_ = parentGeometryNode;
-    parentFrameNode->onMainTree_ = true;
-    
-    LayoutConstraintF parentConstraint;
-    parentConstraint.maxSize = SizeF(SCROLL_WIDTH, SCROLL_HEIGHT);
-    parentConstraint.percentReference = SizeF(SCROLL_WIDTH, SCROLL_HEIGHT);
-    parentLayoutProperty->layoutConstraint_ = parentConstraint;
-    
-    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 0, AceType::MakeRefPtr<LazyGridLayoutPattern>());
-    auto layoutProperty = AceType::MakeRefPtr<LazyGridLayoutProperty>();
-    frameNode->layoutProperty_ = layoutProperty;
-    frameNode->onMainTree_ = false;
-    frameNode->MountToParent(parentFrameNode, DEFAULT_NODE_SLOT, true); // silently = true to avoid AttachToMainTree
-    
-    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    geometryNode->SetFrameSize(SizeF(SCROLL_WIDTH, SCROLL_HEIGHT));
-    geometryNode->SetParentLayoutConstraint(parentConstraint);
-    frameNode->geometryNode_ = geometryNode;
-    
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
-    auto algorithmWrapper = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(algorithm);
-    layoutWrapper->SetLayoutAlgorithm(algorithmWrapper);
-    
-    // Verify all preconditions
-    EXPECT_TRUE(algorithm->totalItemCount_ > algorithm->lanes_);
-    EXPECT_FALSE(frameNode->IsOnMainTree());
-    EXPECT_FALSE(frameNode->IsNeedLazyLayout());
-    
-    auto parent = frameNode->GetParentFrameNode();
-    ASSERT_NE(parent, nullptr);
-    EXPECT_EQ(parent->GetTag(), V2::WATERFLOW_ETS_TAG);
-    
+    algorithm->hadMeasuredItems_ = false;
+    auto context = CreateCachedLazyLayoutTestContext(V2::COLUMN_ETS_TAG,
+        AceType::MakeRefPtr<LazyGridLayoutPattern>(), algorithm, SizeF(SCROLL_WIDTH, SCROLL_HEIGHT));
+    ASSERT_NE(context.host, nullptr);
+    ASSERT_NE(context.wrapper, nullptr);
+    EXPECT_FALSE(context.host->IsOnMainTree());
+    EXPECT_TRUE(context.host->IsNeedLazyLayout());
+    ASSERT_NE(context.host->GetParentFrameNode(), nullptr);
+    EXPECT_EQ(context.host->GetParentFrameNode()->GetTag(), V2::WATERFLOW_ETS_TAG);
+
     std::optional<ViewPosReference> posRef;
-    algorithm->UpdateReferencePos(AceType::RawPtr(layoutWrapper), posRef);
-    
-    // After calling ValidateAndSetLazyLayoutParent, isNeedLazyLayout should be set to true
-    EXPECT_TRUE(frameNode->IsNeedLazyLayout());
-    
-    // With all conditions met, needSkipLayout should be true and posMap should be empty
-    EXPECT_TRUE(algorithm->needSkipLayout_);
-    EXPECT_TRUE(layoutInfo->posMap_.empty());
-    
-    // Test case 2: totalItemCount <= lanes, should NOT skip layout
-    algorithm->needSkipLayout_ = true;
-    algorithm->totalItemCount_ = 2;
-    algorithm->lanes_ = 2;
-    frameNode->layoutProperty_->needLazyLayout_ = false; // reset for test
-    
-    posRef.reset();
-    algorithm->UpdateReferencePos(AceType::RawPtr(layoutWrapper), posRef);
-    
-    // When totalItemCount <= lanes, skip condition should not be triggered
+    algorithm->UpdateReferencePos(AceType::RawPtr(context.wrapper), posRef);
+    EXPECT_TRUE(algorithm->isEstimatePass_);
     EXPECT_FALSE(algorithm->needSkipLayout_);
+    EXPECT_TRUE(layoutInfo->posMap_.empty());
+
+    layoutInfo->posMap_[0] = { 0, 0.0f, 40.0f };
+    layoutInfo->posMap_[1] = { 1, 0.0f, 60.0f };
+    layoutInfo->totalMainSize_ = 500.0f;
+    algorithm->hadMeasuredItems_ = true;
+    const auto previousFirstItem = layoutInfo->posMap_.at(0);
+    context.host->AttachToMainTree();
+    context.host->DetachFromMainTree();
+    algorithm->UpdateReferencePos(AceType::RawPtr(context.wrapper), posRef);
+    EXPECT_FALSE(algorithm->isEstimatePass_);
+    EXPECT_TRUE(algorithm->needSkipLayout_);
+    EXPECT_FALSE(algorithm->needAllLayout_);
+    EXPECT_EQ(layoutInfo->posMap_.at(0).laneIdx, previousFirstItem.laneIdx);
+    EXPECT_FLOAT_EQ(layoutInfo->posMap_.at(0).startPos, previousFirstItem.startPos);
+    EXPECT_FLOAT_EQ(layoutInfo->posMap_.at(0).endPos, previousFirstItem.endPos);
+    EXPECT_FLOAT_EQ(layoutInfo->totalMainSize_, 500.0f);
+
+    algorithm->totalItemCount_ = 2;
+    algorithm->UpdateReferencePos(AceType::RawPtr(context.wrapper), posRef);
+    EXPECT_FALSE(algorithm->isEstimatePass_);
+    EXPECT_FALSE(algorithm->needSkipLayout_);
+}
+
+/**
+ * @tc.name: EstimateLayoutWithParentReference001
+ * @tc.desc: Test LazyVGrid estimates only fresh hosts inside the parent predictive range.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, EstimateLayoutWithParentReference001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyGridLayoutInfo>();
+    auto algorithm = AceType::MakeRefPtr<LazyGridLayoutAlgorithm>(layoutInfo);
+    algorithm->SetAxis(Axis::VERTICAL);
+    algorithm->totalItemCount_ = 10;
+    algorithm->lanes_ = 2;
+    algorithm->hadMeasuredItems_ = false;
+    auto context = CreateCachedLazyLayoutTestContext(V2::COLUMN_ETS_TAG,
+        AceType::MakeRefPtr<LazyGridLayoutPattern>(), algorithm, SizeF(SCROLL_WIDTH, SCROLL_HEIGHT));
+    ASSERT_NE(context.wrapper, nullptr);
+    std::optional<ViewPosReference> posRef = ViewPosReference {
+        .viewPosStart = 0.0f,
+        .viewPosEnd = SCROLL_HEIGHT,
+        .referencePos = SCROLL_HEIGHT,
+        .referenceEdge = ReferenceEdge::START,
+        .axis = Axis::VERTICAL,
+        .deadline = 1,
+    };
+
+    algorithm->UpdateReferencePos(AceType::RawPtr(context.wrapper), posRef);
+    EXPECT_TRUE(algorithm->isEstimatePass_);
+    algorithm->hadMeasuredItems_ = true;
+    algorithm->UpdateReferencePos(AceType::RawPtr(context.wrapper), posRef);
+    EXPECT_FALSE(algorithm->isEstimatePass_);
+    EXPECT_TRUE(layoutInfo->deadline_.has_value());
+
+    algorithm->hadMeasuredItems_ = false;
+    posRef->referencePos = SCROLL_HEIGHT * 2.0f;
+    algorithm->UpdateReferencePos(AceType::RawPtr(context.wrapper), posRef);
+    EXPECT_FALSE(algorithm->isEstimatePass_);
+}
+
+/**
+ * @tc.name: EstimateLinesTotalHeight001
+ * @tc.desc: Test LazyVGrid samples two complete lines and extrapolates the complete detached host height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyGridLayoutTest, EstimateLinesTotalHeight001, TestSize.Level1)
+{
+    auto layoutInfo = AceType::MakeRefPtr<LazyGridLayoutInfo>();
+    LazyGridLayoutAlgorithm algorithm(layoutInfo);
+    algorithm.totalItemCount_ = 10;
+    algorithm.lanes_ = 2;
+    algorithm.spaceWidth_ = 4.0f;
+    algorithm.childLayoutConstraints_.resize(2);
+
+    auto host = FrameNode::CreateFrameNode(
+        V2::LAZY_V_GRID_LAYOUT_ETS_TAG, -2100, AceType::MakeRefPtr<LazyGridLayoutPattern>());
+    auto wrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        host, AceType::MakeRefPtr<GeometryNode>(), host->GetLayoutProperty());
+    int32_t measureCount = 0;
+    AppendFixedHeightChild(wrapper, -2101, 40.0f, measureCount);
+    AppendFixedHeightChild(wrapper, -2102, 60.0f, measureCount);
+    AppendFixedHeightChild(wrapper, -2103, 80.0f, measureCount);
+    AppendFixedHeightChild(wrapper, -2104, 70.0f, measureCount);
+    AppendFixedHeightChild(wrapper, -2105, 200.0f, measureCount);
+
+    algorithm.MeasureEstimateItems(AceType::RawPtr(wrapper));
+
+    EXPECT_EQ(measureCount, 4);
+    EXPECT_EQ(layoutInfo->posMap_.size(), 4);
+    EXPECT_FLOAT_EQ(layoutInfo->totalMainSize_, 366.0f);
+    EXPECT_FLOAT_EQ(layoutInfo->estimateItemSize_, -1.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 
 class FrameNode;
+enum class LazyLayoutMeasureMode;
 
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT LazyGridLayoutAlgorithm : public LayoutAlgorithm {
@@ -88,8 +89,12 @@ private:
     // DynamicLayout branch of Measure: measure all items (non-lazy) and finalize the frame size.
     void MeasureDynamicLayout(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize,
         const PaddingPropertyF& padding);
+    void MeasureItemsByMode(LayoutWrapper* layoutWrapper, const PaddingPropertyF& padding);
     void SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize, const PaddingPropertyF& padding);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t laneIdx) const;
+    // Returns true when a non-NORMAL mode was applied and normal reference handling should stop.
+    bool ApplyMeasureMode(LazyLayoutMeasureMode measureMode);
+    void UpdateViewRange(const ViewPosReference& posRef);
     void UpdateGridItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
     void UpdateGap(const RefPtr<LazyGridLayoutProperty>& layoutProperty, const OptionalSizeF& selfIdealSize);
     void UpdateReferencePos(LayoutWrapper* layoutWrapper, std::optional<ViewPosReference>& posRef);
@@ -111,6 +116,9 @@ private:
     // Apply the item active range to content (non-header/footer) children only.
     void ActivateContentItemRange(LayoutWrapper* layoutWrapper, int32_t rawStart, int32_t rawEnd) const;
     void MeasureGridItemAll(LayoutWrapper* layoutWrapper);
+    std::optional<float> MeasureEstimateLine(
+        LayoutWrapper* layoutWrapper, int32_t lineStart, int32_t lineEnd, float currentPos);
+    void MeasureEstimateItems(LayoutWrapper* layoutWrapper);
     void MeasureGridItemLazy(LayoutWrapper* layoutWrapper);
     void ShiftLayoutWindow(float delta);
     void ResolveContentCrossSize(const LayoutConstraintF& contentConstraint, OptionalSizeF& contentIdealSize) const;
@@ -125,6 +133,7 @@ private:
     void CalculateVisibleEndIndex();
     void MeasureForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos);
     void MeasureBackward(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos);
+    void LayoutContent(LayoutWrapper* layoutWrapper, const OffsetF& paddingOffset, float crossSize);
     void LayoutGridItems(LayoutWrapper* layoutWrapper, float crossSize, const OffsetF& paddingOffset);
     void SetItemOffset(RefPtr<LayoutWrapper>& wrapper, const GridItemMainPos& pos,
         float crossSize, const OffsetF& paddingOffset,
@@ -161,6 +170,7 @@ private:
     float realMainSize_ = 0.0f;
     bool needAllLayout_ = true;
     bool needSkipLayout_ = false;
+    bool isEstimatePass_ = false;
     int32_t lanes_ = 1;
 
     float viewStart_ = 0.0f;
@@ -197,9 +207,7 @@ private:
     // Header / footer FrameNode weak refs to avoid retain cycles.
     WeakPtr<FrameNode> header_;
     WeakPtr<FrameNode> footer_;
-    // Raw indices of header / footer in the child sequence; -1 means not mounted.
-    // Raw host-child index of the mounted header / footer (-1 when absent). These live only in raw space —
-    // header and footer are not content items and have no item-space counterpart.
+    // Raw host-child indices of the mounted header / footer; -1 means absent. These are not content-item indices.
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
 

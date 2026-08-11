@@ -28,6 +28,8 @@
 
 namespace OHOS::Ace::NG {
 
+enum class LazyLayoutMeasureMode;
+
 // Sliding-window layout for LazyVWaterFlow. Cross-frame state lives in layoutInfo_.
 class ACE_EXPORT LazyWaterFlowLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(LazyWaterFlowLayoutAlgorithm, LayoutAlgorithm);
@@ -73,11 +75,17 @@ private:
     };
 
     void SetFrameSize(LayoutWrapper* layoutWrapper, OptionalSizeF& contentIdealSize, const PaddingPropertyF& padding);
+    void UpdateMeasureState(LayoutWrapper* layoutWrapper,
+        const RefPtr<LazyWaterFlowLayoutProperty>& layoutProperty, const OptionalSizeF& contentIdealSize,
+        std::optional<ViewPosReference>& posRef);
     /**
      * @brief Project the parent viewport into self-local content coords, including parent viewExt and this
      * component's cache expansion.
      */
     void UpdateReferencePos(LayoutWrapper* layoutWrapper, std::optional<ViewPosReference>& posRef);
+    // Returns true when a non-NORMAL mode was applied and normal reference handling should stop.
+    bool ApplyMeasureMode(LazyLayoutMeasureMode measureMode);
+    void UpdateViewRange(const ViewPosReference& posRef);
     // Fallback viewport when there is no usable (vertical) parent reference.
     void ApplyFallbackReferencePos(LayoutWrapper* layoutWrapper, const std::optional<ViewPosReference>& posRef);
     void UpdateGap(const RefPtr<LazyWaterFlowLayoutProperty>& layoutProperty, const OptionalSizeF& selfIdealSize);
@@ -94,6 +102,7 @@ private:
     bool IsDeadlineReached() const;
 
     void MeasureItems(LayoutWrapper* layoutWrapper);
+    void MeasureEstimateItems(LayoutWrapper* layoutWrapper);
     /**
      * @brief Refill the lane window from the front/back boundaries.
      *
@@ -154,6 +163,7 @@ private:
     void UpdateMeasuredLaneItem(int32_t index, int32_t laneIdx, const RefPtr<LayoutWrapper>& child,
         float childMainSize, const std::optional<float>& cachedSize);
     bool IsChildMaybeVisible(float startPos, float endPos, bool sizeKnown, ReferenceEdge referenceEdge) const;
+    // Estimate sampling creates bounded seed items; probing creates unknown-height items just beyond the viewport.
     bool AllowProbeCacheCreate(float startPos, bool sizeKnown, ReferenceEdge referenceEdge) const;
     std::optional<float> MeasureChild(
         LayoutWrapper* layoutWrapper, int32_t index, int32_t laneIdx, float referencePos, ReferenceEdge referenceEdge);
@@ -257,6 +267,7 @@ private:
     // skip the anchor diff so the pure internal coord re-base does not leak as a parent scroll shift.
     bool topAnchorRebased_ = false;
     bool needSkipLayout_ = false;
+    bool isEstimatePass_ = false;
     // Viewport is fully outside known content; keep the visible window empty and preserve last total height.
     bool keepEmptyLanesOutsideContent_ = false;
 };
