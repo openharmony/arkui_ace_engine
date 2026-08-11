@@ -2619,7 +2619,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
         auto wrapper = GetChildByIndex(layoutWrapper, curIndex + itemStartIndex_, !show);
         bool forceCache = cachedCount <= minCacheCount;
         if (!wrapper) {
-            predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, currPos });
+            predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, true, currPos });
             return curIndex - 1;
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
@@ -2628,7 +2628,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
         bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
         if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, true)) &&
             !wrapper->CheckHasPreMeasured()) {
-            predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, currPos });
+            predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, false, currPos });
         }
         if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete() && !wrapper->CheckHasPreMeasured()) {
             return curIndex - 1;
@@ -2644,7 +2644,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
             auto res = GetLayoutGroupCachedCount(
                 layoutWrapper, wrapper, cacheCount - cachedCount, -1, curIndex, true);
             if (res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount - cachedCount) {
-                predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, currPos });
+                predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, false, currPos });
                 cachedItemPosition_[curIndex] = pos;
                 ExpandWithSafeAreaPadding(wrapper);
                 wrapper->SetActive(show);
@@ -2680,7 +2680,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         auto wrapper = GetChildByIndex(layoutWrapper, curIndex + itemStartIndex_, !show);
         bool forceCache = cachedCount <= minCacheCount;
         if (!wrapper) {
-            predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, currPos });
+            predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, true, currPos });
             return curIndex + 1;
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
@@ -2689,7 +2689,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
         if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, false)) &&
             !wrapper->CheckHasPreMeasured()) {
-            predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, currPos });
+            predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, false, currPos });
         }
         if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete() && !wrapper->CheckHasPreMeasured()) {
             return curIndex + 1;
@@ -2705,7 +2705,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
             auto res = GetLayoutGroupCachedCount(
                 layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount - cachedCount) {
-                predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, currPos });
+                predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, false, currPos });
                 cachedItemPosition_[curIndex] = pos;
                 ExpandWithSafeAreaPadding(wrapper);
                 wrapper->SetActive(show);
@@ -2886,7 +2886,8 @@ void ListLayoutAlgorithm::ProcessPredictBuildLazyChild(
     const PredictLayoutItem& item,
     const RefPtr<ListPattern>& pattern,
     const ListPredictLayoutParamV2& param,
-    int64_t deadline)
+    int64_t deadline,
+    bool show)
 {
     auto frameNode = wrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
@@ -2920,7 +2921,7 @@ void ListLayoutAlgorithm::ProcessPredictBuildLazyChild(
                                                              param.listMainSizeValues.contentEndOffset;
     LazyLayoutUtils::SetStickyInsets(constraint, stickyInsetStart, stickyInsetEnd);
     frameNode->GetGeometryNode()->SetParentLayoutConstraint(constraint);
-    FrameNode::ProcessOffscreenNode(frameNode, param.show);
+    FrameNode::ProcessOffscreenNode(frameNode, show);
 }
 
 void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline)
@@ -2929,14 +2930,14 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    if (!pattern->GetPredictLayoutParamV2().has_value()) {
+    auto predictParam = pattern->GetPredictLayoutParamV2();
+    if (!predictParam.has_value()) {
         return;
     }
     bool needMarkDirty = false;
-    auto param = pattern->GetPredictLayoutParamV2().value();
-    bool show = param.show;
+    auto& param = predictParam.value();
     bool isMainThreadBusy = ScrollableUtils::IsMainThreadBusy(frameNode);
-    
+
     for (auto it = param.items.begin(); it != param.items.end();) {
         if (isMainThreadBusy && !(*it).forceCache) {
             ++it;
@@ -2947,8 +2948,9 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
         }
         ACE_SCOPED_TRACE("predict Item:%d", (*it).index);
         auto index = !pattern->IsStackFromEnd() ? (*it).index : frameNode->GetTotalChildCount() - (*it).index - 1;
-        auto wrapper =
-            GetListItemWithEmptyBranch(AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), show, !show);
+        const bool showPredictItem = param.show && !(*it).needParentLayout;
+        auto wrapper = GetListItemWithEmptyBranch(
+            AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), showPredictItem, !showPredictItem);
         if (!wrapper) {
             it = param.items.erase(it);
             continue;
@@ -2958,13 +2960,13 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         if (CanSupportNestedLazy(wrapper->GetHostNode(), frameNode, pattern->GetLanes())) {
-            ProcessPredictBuildLazyChild(wrapper, *it, pattern, param, deadline);
+            ProcessPredictBuildLazyChild(wrapper, *it, pattern, param, deadline, showPredictItem);
         } else if (!isGroup) {
             UpdateListItemEditModeCheckBoxSpaceForPredictBuild(wrapper, frameNode);
             auto itemNode = wrapper->GetHostNode();
             CHECK_NULL_VOID(itemNode);
             itemNode->GetGeometryNode()->SetParentLayoutConstraint(param.layoutConstraint);
-            FrameNode::ProcessOffscreenNode(itemNode, show);
+            FrameNode::ProcessOffscreenNode(itemNode, showPredictItem);
         } else {
             param.listMainSizeValues.forward = (*it).forwardCacheCount > -1;
             param.listMainSizeValues.backward = (*it).backwardCacheCount > -1;
@@ -2974,6 +2976,12 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
         needMarkDirty = true;
         it = param.items.erase(it);
     }
+    FinishPredictBuildV2(frameNode, pattern, param, needMarkDirty);
+}
+
+void ListLayoutAlgorithm::FinishPredictBuildV2(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<ListPattern>& pattern, ListPredictLayoutParamV2& param, bool needMarkDirty)
+{
     if (needMarkDirty) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }

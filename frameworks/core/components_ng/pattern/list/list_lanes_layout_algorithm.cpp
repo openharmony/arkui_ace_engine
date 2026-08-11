@@ -541,7 +541,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
             wrapper = GetChildByIndex(layoutWrapper, curIndex + i, !show);
             auto [needBreak, needPredict] = CheckACachedItem(wrapper, cnt, isGroup, startPos, true);
             if (needPredict) {
-                predictList.emplace_back(PredictLayoutItem { curIndex + i, cachedCount, -1, forceCache, startPos });
+                predictList.emplace_back(
+                    PredictLayoutItem { curIndex + i, cachedCount, -1, forceCache, !wrapper, startPos });
             }
             if (needBreak) {
                 break;
@@ -558,7 +559,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount - cachedCount, -1, curIndex, true);
             if (res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount - cachedCount) {
                 LayoutItem(wrapper, posMap.begin()->first, posMap.begin()->second, startIndex, crossSize);
-                PredictLayoutItem predictItem = { posMap.begin()->first, cachedCount, -1, forceCache, startPos };
+                PredictLayoutItem predictItem = {
+                    posMap.begin()->first, cachedCount, -1, forceCache, false, startPos };
                 predictList.emplace_back(predictItem);
                 return res.forwardCachedCount > 0 ? curIndex : curIndex - 1;
             }
@@ -607,7 +609,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             wrapper = GetChildByIndex(layoutWrapper, idx, !show);
             auto [needBreak, needPredict] = CheckACachedItem(wrapper, cnt, isGroup, endPos, false);
             if (needPredict) {
-                predictList.emplace_back(PredictLayoutItem { idx, -1, cachedCount, forceCache, endPos });
+                predictList.emplace_back(PredictLayoutItem { idx, -1, cachedCount, forceCache, !wrapper, endPos });
             }
             if (needBreak) {
                 break;
@@ -627,7 +629,8 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount - cachedCount, curIndex, true);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount - cachedCount) {
                 LayoutItem(wrapper, posMap.begin()->first, posMap.begin()->second, startIndex, crossSize);
-                PredictLayoutItem predictItem = { posMap.begin()->first, -1, cachedCount, forceCache, endPos };
+                PredictLayoutItem predictItem = {
+                    posMap.begin()->first, -1, cachedCount, forceCache, false, endPos };
                 predictList.emplace_back(predictItem);
                 return res.backwardCachedCount > 0 ? curIndex : curIndex + 1;
             }

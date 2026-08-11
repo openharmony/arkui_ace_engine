@@ -67,6 +67,7 @@ struct PredictLayoutItem {
     int32_t forwardCacheCount;
     int32_t backwardCacheCount;
     bool forceCache = true;
+    bool needParentLayout = false;
     float referencePos = 0.0f;
 };
 
@@ -741,7 +742,10 @@ private:
         const PredictLayoutItem& item,
         const RefPtr<ListPattern>& pattern,
         const ListPredictLayoutParamV2& param,
-        int64_t deadline);
+        int64_t deadline,
+        bool show);
+    static void FinishPredictBuildV2(const RefPtr<FrameNode>& frameNode, const RefPtr<ListPattern>& pattern,
+        ListPredictLayoutParamV2& param, bool needMarkDirty);
     std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 

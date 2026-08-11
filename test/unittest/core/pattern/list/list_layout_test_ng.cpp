@@ -57,10 +57,35 @@ public:
     void UpdateDividerMap();
     void PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber, bool isClip = false);
     void GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber);
+    RefPtr<FrameNode> GetLazyForEachItemFromCache(int32_t index);
     ListItemDisableEventTestContext CreateCardListItemForDisableEvent();
     void UpdateDisableEventState(
         const ListItemDisableEventTestContext& testContext, bool enabled, const std::optional<double>& opacity);
 };
+
+RefPtr<FrameNode> ListLayoutTestNg::GetLazyForEachItemFromCache(int32_t index)
+{
+    auto lazyForEach = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(lazyForEach, nullptr);
+    auto builder = lazyForEach->GetBuilder();
+    CHECK_NULL_RETURN(builder, nullptr);
+    const auto& children = builder->cachedItems_;
+    auto childIter = children.find(index);
+    if (childIter == children.end()) {
+        return nullptr;
+    }
+    auto syntaxNode = childIter->second.second;
+    if (!syntaxNode) {
+        const auto& cachedNodes = builder->GetCachedUINodeMap();
+        auto cachedIter = cachedNodes.find(childIter->second.first);
+        if (cachedIter == cachedNodes.end()) {
+            return nullptr;
+        }
+        syntaxNode = cachedIter->second.second;
+    }
+    CHECK_NULL_RETURN(syntaxNode, nullptr);
+    return AceType::DynamicCast<FrameNode>(syntaxNode);
+}
 
 void ListLayoutTestNg::CreateGroupWithSettingWithComponentContent(
     int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
@@ -3399,8 +3424,11 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
     pipeline->OnIdle(time + 16 * 1000000); // 16 * 1000000: 16ms
     int32_t childrenCount = repeat->GetChildren().size();
     EXPECT_EQ(childrenCount, 5);
-    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
-    EXPECT_EQ(cachedItem->IsActive(), true);
+    auto cachedNode = repeat->GetFromCaches(4);
+    ASSERT_NE(cachedNode, nullptr);
+    auto cachedItem = AceType::DynamicCast<FrameNode>(cachedNode);
+    ASSERT_NE(cachedItem, nullptr);
+    EXPECT_FALSE(cachedItem->IsActive());
 
     /**
      * @tc.steps: step2. Update item4 size
@@ -3417,6 +3445,69 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount005, TestSize.Level1)
     EXPECT_EQ(sizeChanged, true);
     EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameOffset().GetY(), 400);
     EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameSize().Height(), 150);
+}
+
+/**
+ * @tc.name: ListShowCachePredictItemWaitsForParentLayout001
+ * @tc.desc: A predicted item remains hidden until List assigns its position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListShowCachePredictItemWaitsForParentLayout001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(1, true);
+    CreateItemsInLazyForEach(10, 100.0f); // 10: item count, 100.0f: item height
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto predictParam = listPattern->GetPredictLayoutParamV2();
+    ASSERT_TRUE(predictParam.has_value());
+    ASSERT_FALSE(predictParam->items.empty());
+    EXPECT_TRUE(predictParam->items.front().needParentLayout);
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    auto cachedItem = GetLazyForEachItemFromCache(4);
+    ASSERT_NE(cachedItem, nullptr);
+    EXPECT_FALSE(cachedItem->IsActive());
+    EXPECT_FALSE(cachedItem->IsOnMainTree());
+
+    FlushUITasks();
+    EXPECT_TRUE(cachedItem->IsActive());
+    EXPECT_TRUE(cachedItem->IsOnMainTree());
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameOffset().GetY(), HEIGHT);
+}
+
+/**
+ * @tc.name: ListShowCachePredictItemWaitsForParentLayout002
+ * @tc.desc: A predicted item in a multi-lane List remains hidden until positioned
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListShowCachePredictItemWaitsForParentLayout002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetCachedCount(1, true);
+    CreateItemsInLazyForEach(20, 100.0f); // 20: item count, 100.0f: item height
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto predictParam = listPattern->GetPredictLayoutParamV2();
+    ASSERT_TRUE(predictParam.has_value());
+    ASSERT_FALSE(predictParam->items.empty());
+    EXPECT_TRUE(predictParam->items.front().needParentLayout);
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    auto cachedItem = GetLazyForEachItemFromCache(8);
+    ASSERT_NE(cachedItem, nullptr);
+    EXPECT_FALSE(cachedItem->IsActive());
+    EXPECT_FALSE(cachedItem->IsOnMainTree());
+
+    FlushUITasks();
+    EXPECT_TRUE(cachedItem->IsActive());
+    EXPECT_TRUE(cachedItem->IsOnMainTree());
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameOffset().GetY(), HEIGHT);
 }
 
 /**
