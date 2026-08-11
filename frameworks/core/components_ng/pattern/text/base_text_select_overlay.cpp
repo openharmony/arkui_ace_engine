@@ -899,9 +899,7 @@ void BaseTextSelectOverlay::UpdateMenuWhileAncestorNodeChanged(
         return;
     }
     if ((extraFlag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG && !GetIsHandleDragging()) {
-        if (ShouldShowMenuAfterKeyboardAvoid()) {
-            manager->ShowOptionMenu(UseNewAnimation());
-        }
+        manager->ShowOptionMenu(UseNewAnimation());
         return;
     }
     if (shouldShowMenu && originalMenuIsShow_ && !GetIsHandleDragging() && !GetSelectArea().IsEmpty()) {

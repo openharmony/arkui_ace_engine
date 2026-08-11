@@ -29,7 +29,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float BOX_EPSILON = 0.5f;
-constexpr FrameNodeChangeInfoFlag AVOID_KEYBOARD_END_FALG = 1 << 8;
 
 OffsetF GetHandleAnchorPoint(const RectF& rect)
 {
@@ -134,12 +133,6 @@ bool SelectionSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(pattern, false);
     SetUsingMouse(pattern->IsUsingMouse());
     SetEnableHandleLevel(true);
-    // Register the avoid-keyboard callback so AVOID_KEYBOARD_END_FALG is delivered to this
-    // overlay (mirrors TextField); base OnAncestorNodeChanged then switches back to overlay on
-    // avoid-end. Register both system (false) and custom (true) channels: the keyboard type of
-    // the input that later triggers the avoid isn't known here. Re-registered at each avoid-end.
-    AddAvoidKeyboardCallback(false);
-    AddAvoidKeyboardCallback(true);
     SetEnableSubWindowMenu(true);
     SetMenuTranslateIsSupport(IsShowTranslate());
     SetIsSupportMenuSearch(IsShowSearch());
@@ -259,16 +252,28 @@ std::optional<RectF> SelectionSelectOverlay::GetAncestorNodeViewPort()
     if (startViewPorts.empty() || endViewPorts.empty()) {
         return BaseTextSelectOverlay::GetAncestorNodeViewPort();
     }
+    // Both the nearest and outer common ancestors constrain cross-node handles.
+    std::optional<RectF> commonViewPort;
     for (const auto& startViewPort : startViewPorts) {
         auto startAncestor = startViewPort.ancestorNode.Upgrade();
         CHECK_NULL_CONTINUE(startAncestor);
+        bool isCommonAncestor = false;
         for (const auto& endViewPort : endViewPorts) {
             auto endAncestor = endViewPort.ancestorNode.Upgrade();
             CHECK_NULL_CONTINUE(endAncestor);
             if (startAncestor == endAncestor) {
-                return startViewPort.viewPort;
+                isCommonAncestor = true;
+                break;
             }
         }
+        if (!isCommonAncestor) {
+            continue;
+        }
+        commonViewPort = commonViewPort.has_value()
+            ? commonViewPort->Constrain(startViewPort.viewPort) : startViewPort.viewPort;
+    }
+    if (commonViewPort.has_value()) {
+        return commonViewPort;
     }
     return BaseTextSelectOverlay::GetAncestorNodeViewPort();
 }
@@ -495,14 +500,6 @@ void SelectionSelectOverlay::OnAncestorNodeChanged(
     if (isDragging) {
         return;
     }
-    // Avoid-end: the avoid-keyboard callback is one-shot (its map is cleared on fire), so
-    // re-register both channels here to re-arm for the next cycle. AVOID_KEYBOARD_END_FALG is
-    // injected only by the avoid callback (not by translate/other animations) => precise, no
-    // spurious registration.
-    if ((flag & AVOID_KEYBOARD_END_FALG) == AVOID_KEYBOARD_END_FALG) {
-        AddAvoidKeyboardCallback(false);
-        AddAvoidKeyboardCallback(true);
-    }
     // Delegate menu visibility + embed/overlay switching + content-clip to the base. The container
     // pattern calls this with scrollTriggersEmbed=false: the single handle node embeds under the
     // container on keyboard-avoid / ancestor transform / transition (rigid container motion) but
@@ -627,7 +624,6 @@ void SelectionSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
 
 void SelectionSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
-    RemoveAvoidKeyboardCallback();
     auto isDragging = GetIsHandleDragging();
     if (isDragging) {
         auto pattern = pattern_.Upgrade();
