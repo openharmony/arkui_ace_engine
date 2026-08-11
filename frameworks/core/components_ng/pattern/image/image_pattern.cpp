@@ -1004,6 +1004,8 @@ RefPtr<NodePaintMethod> ImagePattern::CreateNodePaintMethod()
         CHECK_NULL_VOID(pattern);
         // Mark the rendering as successful on the instance.
         pattern->SetRenderedImageInfo(std::move(renderedImageInfo));
+        pattern->lastDrawTime_ = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
     };
     if (image_ && !loadFailed_) {
         image_->SetDrawCompleteCallback(std::move(drawCompleteCallback));
@@ -2231,15 +2233,41 @@ void ImagePattern::DumpImageSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutPr
     DumpLog::GetInstance().AddDesc(
         std::string("SrcType: ").append(std::to_string(static_cast<int32_t>(src.GetSrcType()))));
     DumpLog::GetInstance().AddDesc(
-        std::string("AbilityName: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
+        std::string("AbilityName: ").append(AceApplicationInfo::GetInstance().GetAbilityName()));
     DumpLog::GetInstance().AddDesc(std::string("BundleName: ").append(src.GetBundleName()));
     DumpLog::GetInstance().AddDesc(std::string("ModuleName: ").append(src.GetModuleName()));
     DumpLog::GetInstance().AddDesc(
-        std::string("ColorMode: ").append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode()))));
+        std::string("cacheKey: ").append(src.GetKey()));
     DumpLog::GetInstance().AddDesc(
-        std::string("LocalColorMode: ").append(std::to_string(static_cast<int32_t>(src.GetLocalColorMode()))));
+        std::string("containerId: ").append(std::to_string(src.GetContainerId())));
+    auto timePoint = std::chrono::system_clock::time_point(std::chrono::milliseconds(lastDrawTime_));
+    auto timeT = std::chrono::system_clock::to_time_t(timePoint);
+    std::tm tm {};
+#ifdef WINDOWS_PLATFORM
+    errno_t err = localtime_s(&tm, &timeT);
+    if (err != 0) {
+        DumpLog::GetInstance().AddDesc(std::string("lastDrawTime: N/A"));
+    } else {
+        char timeBuf[32];
+        std::strftime(timeBuf, sizeof(timeBuf), "%H:%M:%S", &tm);
+        DumpLog::GetInstance().AddDesc(std::string("lastDrawTime: ").append(timeBuf));
+    }
+#else
+    localtime_r(&timeT, &tm);
+    char timeBuf[32];
+    std::strftime(timeBuf, sizeof(timeBuf), "%H:%M:%S", &tm);
+    DumpLog::GetInstance().AddDesc(std::string("lastDrawTime: ").append(timeBuf));
+#endif
+    auto containerColorMode = static_cast<int32_t>(Container::CurrentColorMode());
+    auto localColorMode = static_cast<int32_t>(src.GetLocalColorMode());
+    DumpLog::GetInstance().AddDesc(std::string("ColorMode: ").append(std::to_string(containerColorMode)));
+    DumpLog::GetInstance().AddDesc(std::string("LocalColorMode: ").append(std::to_string(localColorMode)));
+    auto effectiveColorMode = (src.GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED)
+                                  ? src.GetLocalColorMode()
+                                  : Container::CurrentColorMode();
     DumpLog::GetInstance().AddDesc(
-        std::string("reloadKey: ").append(src.GetReloadKey().value_or("N/A")));
+        std::string("effectiveColorMode: ").append(std::to_string(static_cast<int32_t>(effectiveColorMode))));
+    DumpLog::GetInstance().AddDesc(std::string("reloadKey: ").append(src.GetReloadKey().value_or("N/A")));
 }
 
 inline void ImagePattern::DumpAltSourceInfo(const RefPtr<OHOS::Ace::NG::ImageLayoutProperty>& layoutProp)
