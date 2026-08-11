@@ -214,26 +214,4 @@ void QRCodeModelNG::CreateWithResourceObj(
             break;
     }
 }
-
-void QRCodeModelNG::CreateQRCodeModelNG(const std::string& value)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", QRCODE_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        QRCODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<QRCodePattern>(); });
-    ViewStackProcessor::GetInstance()->Push(frameNode);
-
-    auto pros = frameNode->GetPaintProperty<QRCodePaintProperty>();
-    if (pros) {
-        pros->ResetQRCodeColorSetByUser();
-        pros->ResetQRBackgroundColorSetByUser();
-    }
-    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
-    if (frameNode->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_SIX)) {
-        auto qrcodeTheme = frameNode->GetTheme<QrcodeTheme>(true);
-        CHECK_NULL_VOID(qrcodeTheme);
-        ACE_UPDATE_RENDER_CONTEXT(BackgroundColor, qrcodeTheme->GetBackgroundColor());
-    }
-}
 } // namespace OHOS::Ace::NG

@@ -48,7 +48,8 @@ FrameNode* GetFrameNode(ArkUINodeHandle node)
 
 void CreateModel(ArkUI_CharPtr value)
 {
-    QRCodeModelNG::CreateQRCodeModelNG(value);
+    static QRCodeModelNG model;
+    model.Create(value);
 }
 
 void SetQRColor(ArkUINodeHandle node, uint32_t color)

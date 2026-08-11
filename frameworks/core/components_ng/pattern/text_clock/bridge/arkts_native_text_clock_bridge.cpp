@@ -16,8 +16,10 @@
 
 #include <string_view>
 
+#include "base/log/ace_scoring_log.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -28,6 +30,7 @@
 #include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_clock_theme.h"
 
@@ -51,24 +54,6 @@ constexpr std::string_view TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL = "2-digit"
 constexpr std::string_view TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL = "numeric";
 constexpr std::string_view DEFAULT_FORMAT_API_TEN = "hms";
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
-
-bool IsJsView(const Local<JSValueRef>& jsVal, panda::ecmascript::EcmaVM* vm)
-{
-    return jsVal->IsBoolean() && jsVal->ToBoolean(vm)->Value();
-}
-
-bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& jsVal, panda::ecmascript::EcmaVM* vm)
-{
-    if (jsVal->IsNativePointer(vm)) {
-        nativeNode = nodePtr(jsVal->ToNativePointer(vm)->Value());
-        return true;
-    }
-    if (IsJsView(jsVal, vm)) {
-        nativeNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        return true;
-    }
-    return false;
-}
 
 bool HoursWestIsValid(int32_t hoursWest)
 {
@@ -141,12 +126,12 @@ ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> formatArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     std::string format;
     RefPtr<ResourceObject> formatResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (IsJsView(nodeArg, vm)) {
+    if (ArkTSUtils::IsJsView(nodeArg, vm)) {
         if (!formatArg->IsString(vm) && !formatArg->IsObject(vm)) {
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
                 nodeModifiers->getTextClockModifier()->setFormat(nativeNode, "");
@@ -204,7 +189,7 @@ ArkUINativeModuleValue TextClockBridge::SetFontColor(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> fontColorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     Color color;
     RefPtr<ResourceObject> fontColorResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
@@ -212,7 +197,7 @@ ArkUINativeModuleValue TextClockBridge::SetFontColor(ArkUIRuntimeCallInfo* runti
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
     auto colorParsed = ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, color, fontColorResObj, nodeInfo);
     auto fontColorRawPtr = AceType::RawPtr(fontColorResObj);
-    auto isJsView = IsJsView(nodeArg, vm);
+    auto isJsView = ArkTSUtils::IsJsView(nodeArg, vm);
     if (isJsView && SystemProperties::ConfigChangePerform()) {
         nodeModifiers->getTextClockModifier()->createWithTextColorResourceObj(nativeNode, fontColorRawPtr);
     }
@@ -260,14 +245,14 @@ ArkUINativeModuleValue TextClockBridge::SetFontSize(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     CalcDimension fontSize;
     RefPtr<ResourceObject> fontSizeResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, fontSize, DimensionUnit::FP, fontSizeResObj, false) ||
         fontSize.Value() < 0 || fontSize.Unit() == DimensionUnit::PERCENT) {
-        if (IsJsView(nodeArg, vm)) {
+        if (ArkTSUtils::IsJsView(nodeArg, vm)) {
             auto pipelineContext = PipelineContext::GetCurrentContext();
             CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
             auto theme = pipelineContext->GetTheme<TextTheme>();
@@ -305,10 +290,10 @@ ArkUINativeModuleValue TextClockBridge::SetFontStyle(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (IsJsView(nodeArg, vm)) {
+    if (ArkTSUtils::IsJsView(nodeArg, vm)) {
         if (fontStyleArg->IsNumber()) {
             int32_t fontStyle = fontStyleArg->Int32Value(vm);
             if (fontStyle < 0 || fontStyle >= 2) {
@@ -353,12 +338,12 @@ ArkUINativeModuleValue TextClockBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     std::string fontWeight;
     RefPtr<ResourceObject> fontWeightResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if ((fontWeightArg->IsUndefined() || fontWeightArg->IsNull()) && IsJsView(nodeArg, vm)) {
+    if ((fontWeightArg->IsUndefined() || fontWeightArg->IsNull()) && ArkTSUtils::IsJsView(nodeArg, vm)) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
         auto theme = pipelineContext->GetTheme<TextTheme>();
@@ -399,14 +384,14 @@ ArkUINativeModuleValue TextClockBridge::SetFontFamily(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
 
     std::string fontFamilyStr;
     RefPtr<ResourceObject> fontFamilyResObj;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamilyStr, fontFamilyResObj)) {
-        if (!IsJsView(nodeArg, vm)) {
+        if (!ArkTSUtils::IsJsView(nodeArg, vm)) {
             nodeModifiers->getTextClockModifier()->resetFontFamily(nativeNode);
         }
         return panda::JSValueRef::Undefined(vm);
@@ -437,13 +422,13 @@ ArkUINativeModuleValue TextClockBridge::SetFontFeature(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (secondArg->IsString(vm)) {
         auto value = secondArg->ToString(vm)->ToString(vm);
         nodeModifiers->getTextClockModifier()->setFontFeature(nativeNode, value.c_str());
-    } else if (!IsJsView(firstArg, vm)) {
+    } else if (!ArkTSUtils::IsJsView(firstArg, vm)) {
         nodeModifiers->getTextClockModifier()->resetFontFeature(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
@@ -467,7 +452,7 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    if (IsJsView(firstArg, vm)) {
+    if (ArkTSUtils::IsJsView(firstArg, vm)) {
         std::vector<Shadow> shadows;
         ParseTextShadowFromShadowObject(runtimeCallInfo, shadows);
         auto nodeModifiers = GetArkUINodeModifiers();
@@ -597,11 +582,11 @@ ArkUINativeModuleValue TextClockBridge::SetDateTimeOptions(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> hourArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     ZeroPrefixType hourType = ZeroPrefixType::AUTO;
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
-    if (IsJsView(firstArg, vm) && !hourArg->IsObject(vm)) {
+    if (ArkTSUtils::IsJsView(firstArg, vm) && !hourArg->IsObject(vm)) {
         nodeModifiers->getTextClockModifier()->setDateTimeOptions(nativeNode, static_cast<ArkUI_Int32>(hourType));
         return panda::JSValueRef::Undefined(vm);
     }
@@ -702,23 +687,33 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockOnDateChange(ArkUIRuntimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
     ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    CHECK_NE_RETURN(ArkTSUtils::GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
-        if (!IsJsView(firstArg, vm)) {
+        if (!ArkTSUtils::IsJsView(firstArg, vm)) {
             GetArkUINodeModifiers()->getTextClockModifier()->resetTextClockOnDateChange(nativeNode);
         }
         return panda::JSValueRef::Undefined(vm);
     }
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    if (!IsJsView(firstArg, vm)) {
+    bool isJsView = ArkTSUtils::IsJsView(firstArg, vm);
+    if (!isJsView) {
         CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     }
-    std::function<void(const std::string&)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+
+    auto weakNode = AceType::WeakClaim(frameNode);
+    std::function<void(const std::string&)> callback = [execCtx = Framework::JsiExecutionContext(vm), isJsView,
+                                                           weakNode, func = panda::CopyableGlobal(vm, func)](
                                                            const std::string& value) {
+        auto vm = func.GetEcmaVM();
+        CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
+        if (isJsView) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("TextClock.onDateChange");
+        }
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(weakNode);
 
         panda::Local<panda::JSValueRef> params[1] = { panda::StringRef::NewFromUtf8(vm, value.c_str()) };
         func->Call(vm, func.ToLocal(), params, 1);
