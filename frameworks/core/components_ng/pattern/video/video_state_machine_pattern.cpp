@@ -1305,7 +1305,7 @@ void VideoStateMachinePattern::HandleSetPlaybackRateResult(double progress, int3
     std::string newMsg = "";
     switch (static_cast<PlayBackRate>(errorCode)) {
         case PlayBackRate::SUCCESS:
-            TAG_LOGI(
+            TAG_LOGD(
                 AceLogTag::ACE_VIDEO, "Video[%{public}d] currentProgressRate is set as %{public}f", hostId_, progress);
             break;
         case PlayBackRate::MSERR_INVALID_VAL:
@@ -1761,7 +1761,7 @@ void VideoStateMachinePattern::UpdatePreviewImage()
         posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
         UpdateBackgroundColor();
         image->MarkModifyDone();
-        TAG_LOGI(AceLogTag::ACE_VIDEO, "Src image is not valid.");
+        TAG_LOGD(AceLogTag::ACE_VIDEO, "Src image is not valid.");
         return;
     }
 
@@ -1863,7 +1863,7 @@ void VideoStateMachinePattern::AddChild()
 void VideoStateMachinePattern::OnRebuildFrame()
 {
     if (!renderSurface_ || !renderSurface_->IsSurfaceValid()) {
-        TAG_LOGW(AceLogTag::ACE_VIDEO, "MediaPlayer surface is not valid");
+        TAG_LOGD(AceLogTag::ACE_VIDEO, "MediaPlayer surface is not valid");
         return;
     }
     AddChild();
