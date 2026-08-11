@@ -21,7 +21,7 @@
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT AceChecker final {
+class ACE_FORCE_EXPORT AceChecker final {
 public:
     static bool IsPerformanceCheckEnabled();
 

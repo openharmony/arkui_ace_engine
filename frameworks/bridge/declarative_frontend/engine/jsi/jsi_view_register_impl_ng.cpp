@@ -80,7 +80,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_navigator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navrouter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_page_transition.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_particle.h"
@@ -107,10 +106,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_histogram.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_tab_content.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_tabs.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_tabs_controller_binding.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_swiper_controller_binding.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_indicator_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_clock_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textarea.h"
@@ -354,9 +352,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSLineSpacingSpan::JSBind(globalObj);
     JSUrlSpan::JSBind(globalObj);
     JSTextLayout::JSBind(globalObj);
-    JSTabs::JSBind(globalObj);
-    JSTabContent::JSBind(globalObj);
-    JSTabsController::JSBind(globalObj);
+    JSTabsControllerBinding::JSBind(globalObj);
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
     JSRepeatVirtualScroll::JSBind(globalObj);
@@ -364,7 +360,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSIfElse::JSBind(globalObj);
     JSDivider::JSBind(globalObj);
     JSScroll::JSBind(globalObj);
-    JSNavigator::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
     JSWithTheme::JSBind(globalObj);
     JSRichEditorController::JSBind(globalObj);
@@ -419,7 +414,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
 #endif
     JSGrid::JSBind(globalObj);
     JSGridItem::JSBind(globalObj);
-    JSSwiper::JSBind(globalObj);
     JSScrollerBinding::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSScrollBar::JSBind(globalObj);
@@ -451,7 +445,8 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSMagnifierController::JSBind(globalObj);
     JSGesture::JSBind(globalObj);
     JSPanGestureOption::JSBind(globalObj);
-    JSSwiperController::JSBind(globalObj);
+    JSSwiperControllerBinding::JSBind(globalObj);
+    JSIndicatorControllerBinding::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
     JSRenderImage::JSBind(globalObj, nativeEngine);

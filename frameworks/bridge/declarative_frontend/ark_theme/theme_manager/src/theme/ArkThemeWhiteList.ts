@@ -34,11 +34,11 @@ class ArkThemeWhiteList {
         'JSQRCode',
         'JSRadio',
         'JSSearch',
+        'JSSwiper',
         'JSTextClock',
         'JSTextPicker',
         'JSTimePicker',
         'Scroll',
-        'Swiper',
         'Text',
     ];
 

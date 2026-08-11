@@ -13,11 +13,48 @@
  * limitations under the License.
  */
 
-class NavigatorModifier extends ArkNavigatorComponent implements AttributeModifier<NavigatorAttribute> {
+class LazyArkNavigatorComponent extends ArkComponent {
+  static module: NavigatorComponentModule | undefined = undefined;
+
+  constructor(nativePtr: KNode, classType: ModifierType) {
+    super(nativePtr, classType);
+    if (LazyArkNavigatorComponent.module === undefined) {
+      LazyArkNavigatorComponent.module = globalThis.requireNapi('arkui.components.arknavigator');
+    }
+    this.lazyComponent = LazyArkNavigatorComponent.module.createComponent(nativePtr, classType);
+  }
+
+  setMap(): void {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+
+  active(value: boolean): this {
+    this.lazyComponent.active(value);
+    return this;
+  }
+
+  type(value: NavigationType): this {
+    this.lazyComponent.type(value);
+    return this;
+  }
+
+  target(value: string): this {
+    this.lazyComponent.target(value);
+    return this;
+  }
+
+  params(value: object): this {
+    this.lazyComponent.params(value);
+    return this;
+  }
+}
+
+class NavigatorModifier extends LazyArkNavigatorComponent implements AttributeModifier<NavigatorAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
 
   applyNormalAttribute(instance: NavigatorAttribute): void {

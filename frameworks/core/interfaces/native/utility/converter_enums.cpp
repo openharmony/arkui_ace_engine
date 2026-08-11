@@ -728,7 +728,7 @@ void AssignCast(std::optional<V2::ListItemStyle>& dst, const Ark_ListItemStyle& 
 }
 
 template<>
-void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<EdgeEffect>& dst, const Ark_EdgeEffect& src)
 {
     switch (src) {
         case ARK_EDGE_EFFECT_SPRING: dst = EdgeEffect::SPRING; break;
@@ -1153,7 +1153,7 @@ void AssignCast(std::optional<SharedTransitionEffectType>& dst, const Ark_Shared
 }
 
 template<>
-void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src)
 {
     switch (src) {
         case ARK_ANIMATION_MODE_CONTENT_FIRST: dst = TabAnimateMode::CONTENT_FIRST; break;
@@ -1166,7 +1166,7 @@ void AssignCast(std::optional<TabAnimateMode>& dst, const Ark_AnimationMode& src
 }
 
 template<>
-void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src)
 {
     switch (src) {
         case ARK_BAR_POSITION_START: dst = BarPosition::START; break;
@@ -1176,7 +1176,7 @@ void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src)
 }
 
 template<>
-void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src)
 {
     switch (src) {
         case ARK_BAR_MODE_SCROLLABLE: dst = TabBarMode::SCROLLABLE; break;
@@ -1245,7 +1245,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<KeyboardAppearance>& dst, const A
 }
 
 template<>
-void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
 {
     switch (src) {
         case ARK_LAYOUT_STYLE_ALWAYS_CENTER: dst = LayoutStyle::ALWAYS_CENTER; break;
@@ -2360,7 +2360,7 @@ void AssignCast(std::optional<GestureMode>& dst, const Ark_GestureMode& src)
 }
 
 template<>
-void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src)
 {
     dst = std::nullopt;
     switch (src) {
@@ -2506,7 +2506,7 @@ void AssignCast(std::optional<PickerIndicatorType>& dst, const Ark_PickerIndicat
 }
 
 template<>
-void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_curves_Curve& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<RefPtr<Curve>>& dst, const Ark_curves_Curve& src)
 {
     switch (src) {
         case ARK_CURVES_CURVE_LINEAR: dst = Curves::LINEAR; break;

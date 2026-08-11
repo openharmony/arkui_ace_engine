@@ -21,7 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
-class FormVisibleManager : public virtual AceType {
+class ACE_FORCE_EXPORT FormVisibleManager : public virtual AceType {
     DECLARE_ACE_TYPE(FormVisibleManager, AceType);
 public:
     FormVisibleManager() = default;

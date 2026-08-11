@@ -20,7 +20,7 @@
 #include "modifier_test_base.h"
 
 #include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
-#include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
+#include "core/components_ng/pattern/swiper/bridge/swiper_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

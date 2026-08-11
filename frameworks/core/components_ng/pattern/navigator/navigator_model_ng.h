@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/navigator/navigator_model.h"
 
 namespace OHOS::Ace::NG {
+inline constexpr char NAVIGATOR_ETS_TAG[] = "Navigator";
 
 class ACE_EXPORT NavigatorModelNG : public OHOS::Ace::NavigatorModel {
 public:

@@ -4758,10 +4758,8 @@ void ScrollablePattern::SearchAndSetParentNestedScroll(const RefPtr<FrameNode>& 
             continue;
         }
 
-        if (AceType::InstanceOf<SwiperPattern>(parentPattern)) {
-            auto swiper = AceType::DynamicCast<SwiperPattern>(parentPattern);
-            CHECK_NULL_VOID(swiper);
-            auto direction = swiper->GetDirection();
+        if (frameNode->GetTag() == V2::SWIPER_ETS_TAG) {
+            auto direction = parentPattern->GetAxis();
             CHECK_EQUAL_VOID(scrollBarAxis, direction);
         }
         auto ScrollPattern = AceType::DynamicCast<ScrollablePattern>(parentPattern);
@@ -4815,10 +4813,8 @@ void ScrollablePattern::SearchAndUnsetParentNestedScroll(const RefPtr<FrameNode>
             continue;
         }
 
-        if (AceType::InstanceOf<SwiperPattern>(parentPattern)) {
-            auto swiper = AceType::DynamicCast<SwiperPattern>(parentPattern);
-            CHECK_NULL_VOID(swiper);
-            auto direction = swiper->GetDirection();
+        if (frameNode->GetTag() == V2::SWIPER_ETS_TAG) {
+            auto direction = parentPattern->GetAxis();
             CHECK_EQUAL_VOID(scrollBarAxis, direction);
         }
 

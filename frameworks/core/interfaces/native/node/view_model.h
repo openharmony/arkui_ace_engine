@@ -51,7 +51,7 @@ void SetCustomCallback(ArkUIVMContext context, void* nodePtr, ArkUI_Int32 callba
 
 void SetCallbackMethod(ArkUIAPICallbackMethod* method);
 
-ArkUIAPICallbackMethod* GetCallbackMethod();
+ACE_FORCE_EXPORT ArkUIAPICallbackMethod* GetCallbackMethod();
 
 ArkUI_Int32 MeasureNode(ArkUIVMContext context, ArkUINodeHandle nodePtr, ArkUI_Float32* data);
 

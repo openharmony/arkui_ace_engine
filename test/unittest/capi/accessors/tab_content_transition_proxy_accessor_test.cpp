@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/interfaces/native/implementation/tab_content_transition_proxy_peer_impl.h"
+#include "core/components_ng/pattern/tabs/bridge/tab_content_transition_proxy_peer_impl.h"
 #include "accessor_test_base.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"

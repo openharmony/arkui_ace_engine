@@ -301,7 +301,7 @@ ArkUI_ErrorCode OH_ArkUI_InitModuleForArkTSEnv(napi_env env)
             "arkui.components.arktabs",
             "arkui.components.arktabcontent",
             "arkui.components.arkswiper",
-            "arkui.components.arkswiperindicator",
+            "arkui.components.arkindicatorcomponent",
             "arkui.components.arkimageanimator",
             "arkui.components.arkprogress",
             "arkui.components.arktexttimer",

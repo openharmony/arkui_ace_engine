@@ -17,6 +17,8 @@
 
 #include "cj_lambda.h"
 
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "bridge/cj_frontend/cppview/swiper_controller.h"
 #include "bridge/cj_frontend/cppview/view_abstract.h"
 #include "bridge/common/utils/utils.h"
@@ -30,6 +32,22 @@
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
+
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::SwiperModelNG* GetSwiperModel()
+{
+    static NG::SwiperModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Swiper");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find swiper dynamic module");
+        }
+        model = reinterpret_cast<NG::SwiperModelNG*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
 
 namespace {
 const int32_t INVALID_UNIT = -1;
@@ -83,7 +101,7 @@ SwiperParameters GetDotIndicatorInfo(CJDotIndicator& value)
     bool isSelectedHeightPercent = value.selectedItemHeightUnit == static_cast<int32_t>(DimensionUnit::PERCENT);
     swiperParameters.selectedItemHeight =
         (!isSelectedHeightPercent && selectedItemHeight > 0.0_vp) ? selectedItemHeight : defaultSize;
-    SwiperModel::GetInstance()->SetIsIndicatorCustomSize(
+    GetSwiperModel()->SetIsIndicatorCustomSize(
         isWidthPercent || isHeightPercent || isSelectedWidthPercent || isSelectedHeightPercent);
     swiperParameters.maskValue = value.mask;
     swiperParameters.colorVal = Color(value.color);
@@ -177,13 +195,13 @@ void FfiOHOSAceFrameworkSwiperCreate(int64_t controllerId)
         LOGE("Swiper create error, Cannot get NativeSwiperController by id: %{public}" PRId64, controllerId);
         return;
     }
-    auto controller = SwiperModel::GetInstance()->Create();
+    auto controller = GetSwiperModel()->Create();
     nativeSwiperController->SetController(controller);
 }
 
 void FfiOHOSAceFrameworkSwiperSetAutoplay(bool autoPlay)
 {
-    SwiperModel::GetInstance()->SetAutoPlay(autoPlay);
+    GetSwiperModel()->SetAutoPlay(autoPlay);
 }
 
 void FfiOHOSAceFrameworkSwiperSetDigital(bool digitalIndicator)
@@ -193,46 +211,46 @@ void FfiOHOSAceFrameworkSwiperSetDigital(bool digitalIndicator)
 
 void FfiOHOSAceFrameworkSwiperSetDuration(uint32_t duration)
 {
-    SwiperModel::GetInstance()->SetDuration(duration);
+    GetSwiperModel()->SetDuration(duration);
 }
 
 void FfiOHOSAceFrameworkSwiperSetIndex(uint32_t index)
 {
-    SwiperModel::GetInstance()->SetIndex(index);
+    GetSwiperModel()->SetIndex(index);
 }
 
 void FfiOHOSAceFrameworkSwiperSetInterval(uint32_t interval)
 {
-    SwiperModel::GetInstance()->SetAutoPlayInterval(interval);
+    GetSwiperModel()->SetAutoPlayInterval(interval);
 }
 
 void FfiOHOSAceFrameworkSwiperSetLoop(bool loop)
 {
-    SwiperModel::GetInstance()->SetLoop(loop);
+    GetSwiperModel()->SetLoop(loop);
 }
 
 void FfiOHOSAceFrameworkSwiperSetVertical(bool isVertical)
 {
-    SwiperModel::GetInstance()->SetDirection(isVertical ? Axis::VERTICAL : Axis::HORIZONTAL);
+    GetSwiperModel()->SetDirection(isVertical ? Axis::VERTICAL : Axis::HORIZONTAL);
 }
 
 void FfiOHOSAceFrameworkSwiperSetIndicator(bool showIndicator)
 {
-    SwiperModel::GetInstance()->SetShowIndicator(showIndicator);
+    GetSwiperModel()->SetShowIndicator(showIndicator);
 }
 
 void FfiOHOSAceFrameworkSwiperSetWidth(double width, int32_t unit)
 {
     Dimension value(width, static_cast<DimensionUnit>(unit));
     ViewAbstractModel::GetInstance()->SetWidth(value);
-    SwiperModel::GetInstance()->SetMainSwiperSizeWidth();
+    GetSwiperModel()->SetMainSwiperSizeWidth();
 }
 
 void FfiOHOSAceFrameworkSwiperSetHeight(double height, int32_t unit)
 {
     Dimension value(height, static_cast<DimensionUnit>(unit));
     ViewAbstractModel::GetInstance()->SetHeight(value);
-    SwiperModel::GetInstance()->SetMainSwiperSizeHeight();
+    GetSwiperModel()->SetMainSwiperSizeHeight();
 }
 
 void FfiOHOSAceFrameworkSwiperSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)
@@ -257,7 +275,7 @@ void FfiOHOSAceFrameworkSwiperSetIndicatorStyle(CJIndicatorStyle value)
         .maskValue = value.mask,
         .colorVal = Color(value.color),
         .selectedColorVal = Color(value.selectedColor) };
-    SwiperModel::GetInstance()->SetIndicatorStyle(swiperParameters);
+    GetSwiperModel()->SetIndicatorStyle(swiperParameters);
 }
 
 void FfiOHOSAceFrameworkSwiperSetItemSpace(double itemSpace, int32_t unit)
@@ -266,7 +284,7 @@ void FfiOHOSAceFrameworkSwiperSetItemSpace(double itemSpace, int32_t unit)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
-    SwiperModel::GetInstance()->SetItemSpace(value);
+    GetSwiperModel()->SetItemSpace(value);
 }
 
 void FfiOHOSAceFrameworkSwiperSetDisplayMode(int32_t modeValue)
@@ -275,7 +293,7 @@ void FfiOHOSAceFrameworkSwiperSetDisplayMode(int32_t modeValue)
         LOGE("invalid value for swiper display mode");
         return;
     }
-    SwiperModel::GetInstance()->SetDisplayMode(SWIPER_DISPLAY_MODES[modeValue]);
+    GetSwiperModel()->SetDisplayMode(SWIPER_DISPLAY_MODES[modeValue]);
 }
 
 void FfiOHOSAceFrameworkSwiperSetEffectMode(int32_t modeValue)
@@ -284,34 +302,34 @@ void FfiOHOSAceFrameworkSwiperSetEffectMode(int32_t modeValue)
         LOGE("invalid value for effect mode");
         return;
     }
-    SwiperModel::GetInstance()->SetEdgeEffect(EDGE_EFFECTS[modeValue]);
+    GetSwiperModel()->SetEdgeEffect(EDGE_EFFECTS[modeValue]);
 }
 
 void FfiOHOSAceFrameworkSwiperSetDisplayCount(int32_t count)
 {
-    SwiperModel::GetInstance()->SetDisplayCount(count);
+    GetSwiperModel()->SetDisplayCount(count);
 }
 
 void FfiOHOSAceFrameworkSwiperSetCachedCount(int32_t cachedCount)
 {
-    SwiperModel::GetInstance()->SetCachedCount(cachedCount);
+    GetSwiperModel()->SetCachedCount(cachedCount);
 }
 
 void FfiOHOSAceFrameworkSwiperSetEnabled(bool value)
 {
     ViewAbstract::CjEnabled(value);
-    SwiperModel::GetInstance()->SetEnabled(value);
+    GetSwiperModel()->SetEnabled(value);
 }
 
 void FfiOHOSAceFrameworkSwiperSetDisableSwipe(bool disable)
 {
-    SwiperModel::GetInstance()->SetDisableSwipe(disable);
+    GetSwiperModel()->SetDisableSwipe(disable);
 }
 
 void FfiOHOSAceFrameworkSwiperSetCurve(const char* curveStr)
 {
     RefPtr<Curve> curve = CreateCurve(curveStr);
-    SwiperModel::GetInstance()->SetCurve(curve);
+    GetSwiperModel()->SetCurve(curve);
 }
 
 void FfiOHOSAceFrameworkSwiperSetOnChange(void (*callback)(int32_t index))
@@ -324,7 +342,7 @@ void FfiOHOSAceFrameworkSwiperSetOnChange(void (*callback)(int32_t index))
         }
         lambda(swiperInfo->GetIndex());
     };
-    SwiperModel::GetInstance()->SetOnChange(std::move(onChange));
+    GetSwiperModel()->SetOnChange(std::move(onChange));
 }
 
 int64_t FfiOHOSAceFrameworkSwiperControllerCtor()
@@ -371,28 +389,28 @@ void FfiOHOSAceFrameworkSwiperControllerFinishAnimationWithCallback(int64_t self
 void FfiOHOSAceFrameworkSwiperSetIndicatorWithDot(CJDotIndicator value)
 {
     SwiperParameters swiperParameters = GetDotIndicatorInfo(value);
-    SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
-    SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
+    GetSwiperModel()->SetDotIndicatorStyle(swiperParameters);
+    GetSwiperModel()->SetIndicatorType(SwiperIndicatorType::DOT);
 }
 
 void FfiOHOSAceFrameworkSwiperSetIndicatorWithDit(CJDigitIndicator value)
 {
     SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(value);
-    SwiperModel::GetInstance()->SetDigitIndicatorStyle(digitalParameters);
-    SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DIGIT);
+    GetSwiperModel()->SetDigitIndicatorStyle(digitalParameters);
+    GetSwiperModel()->SetIndicatorType(SwiperIndicatorType::DIGIT);
 }
 
 void FfiOHOSAceFrameworkSwiperSetDisplayCountWithObj(CJSwiperAutoFill value, bool swipeByGroup)
 {
-    SwiperModel::GetInstance()->SetSwipeByGroup(swipeByGroup);
+    GetSwiperModel()->SetSwipeByGroup(swipeByGroup);
     CalcDimension minSizeValue(value.minSize, static_cast<DimensionUnit>(value.minSizeUnit));
-    SwiperModel::GetInstance()->SetMinSize(minSizeValue);
+    GetSwiperModel()->SetMinSize(minSizeValue);
 }
 
 void FfiOHOSAceFrameworkSwiperSetDisplayCountByGroup(int32_t count, bool swipeByGroup)
 {
-    SwiperModel::GetInstance()->SetSwipeByGroup(swipeByGroup);
-    SwiperModel::GetInstance()->SetDisplayCount(count);
+    GetSwiperModel()->SetSwipeByGroup(swipeByGroup);
+    GetSwiperModel()->SetDisplayCount(count);
 }
 
 void FfiOHOSAceFrameworkSwiperSetDisplayArrowWithBool(bool value, bool isHoverShow)
@@ -409,33 +427,33 @@ void FfiOHOSAceFrameworkSwiperSetDisplayArrowWithBool(bool value, bool isHoverSh
         swiperArrowParameters.backgroundColor = swiperIndicatorTheme->GetSmallArrowBackgroundColor();
         swiperArrowParameters.arrowSize = swiperIndicatorTheme->GetSmallArrowSize();
         swiperArrowParameters.arrowColor = swiperIndicatorTheme->GetSmallArrowColor();
-        SwiperModel::GetInstance()->SetArrowStyle(swiperArrowParameters);
-        SwiperModel::GetInstance()->SetDisplayArrow(true);
+        GetSwiperModel()->SetArrowStyle(swiperArrowParameters);
+        GetSwiperModel()->SetDisplayArrow(true);
     } else {
-        SwiperModel::GetInstance()->SetDisplayArrow(false);
+        GetSwiperModel()->SetDisplayArrow(false);
         return;
     }
-    SwiperModel::GetInstance()->SetHoverShow(isHoverShow);
+    GetSwiperModel()->SetHoverShow(isHoverShow);
 }
 
 void FfiOHOSAceFrameworkSwiperSetDisplayArrowWithObj(CJArrowStyle value, bool isHoverShow)
 {
     SwiperArrowParameters swiperArrowParameters = GetArrowInfo(value);
-    SwiperModel::GetInstance()->SetArrowStyle(swiperArrowParameters);
-    SwiperModel::GetInstance()->SetDisplayArrow(true);
-    SwiperModel::GetInstance()->SetHoverShow(isHoverShow);
+    GetSwiperModel()->SetArrowStyle(swiperArrowParameters);
+    GetSwiperModel()->SetDisplayArrow(true);
+    GetSwiperModel()->SetHoverShow(isHoverShow);
 }
 
 void FfiOHOSAceFrameworkSwiperNextMargin(double value, int32_t unit, bool ignoreBlank)
 {
     CalcDimension margin(value, static_cast<DimensionUnit>(unit));
-    SwiperModel::GetInstance()->SetNextMargin(margin, ignoreBlank);
+    GetSwiperModel()->SetNextMargin(margin, ignoreBlank);
 }
 
 void FfiOHOSAceFrameworkSwiperPrevMargin(double value, int32_t unit, bool ignoreBlank)
 {
     CalcDimension margin(value, static_cast<DimensionUnit>(unit));
-    SwiperModel::GetInstance()->SetPreviousMargin(margin, ignoreBlank);
+    GetSwiperModel()->SetPreviousMargin(margin, ignoreBlank);
 }
 
 void FfiOHOSAceFrameworkSwiperNestedScroll(int32_t value)
@@ -446,17 +464,17 @@ void FfiOHOSAceFrameworkSwiperNestedScroll(int32_t value)
     };
     auto mode = static_cast<NestedScrollMode>(value);
     if (mode < NestedScrollMode::SELF_ONLY || mode > NestedScrollMode::SELF_FIRST) {
-        SwiperModel::GetInstance()->SetNestedScroll(nestedOpt);
+        GetSwiperModel()->SetNestedScroll(nestedOpt);
         return;
     }
     nestedOpt.forward = mode;
     nestedOpt.backward = mode;
-    SwiperModel::GetInstance()->SetNestedScroll(nestedOpt);
+    GetSwiperModel()->SetNestedScroll(nestedOpt);
 }
 
 void FfiOHOSAceFrameworkSwiperIndicatorInteractive(bool value)
 {
-    SwiperModel::GetInstance()->SetIndicatorInteractive(value);
+    GetSwiperModel()->SetIndicatorInteractive(value);
 }
 
 void FfiOHOSAceFrameworkSwiperOnAnimationStart(
@@ -475,7 +493,7 @@ void FfiOHOSAceFrameworkSwiperOnAnimationStart(
         };
         lambda(index, targetIndex, event);
     };
-    SwiperModel::GetInstance()->SetOnAnimationStart(std::move(onAnimationStart));
+    GetSwiperModel()->SetOnAnimationStart(std::move(onAnimationStart));
 }
 
 void FfiOHOSAceFrameworkSwiperOnAnimationEnd(void (*callback)(int32_t index, CJSwiperAnimationEvent event))
@@ -492,7 +510,7 @@ void FfiOHOSAceFrameworkSwiperOnAnimationEnd(void (*callback)(int32_t index, CJS
         };
         lambda(index, event);
     };
-    SwiperModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
+    GetSwiperModel()->SetOnAnimationEnd(std::move(onAnimationEnd));
 }
 
 void FfiOHOSAceFrameworkSwiperOnGestureSwipe(void (*callback)(int32_t index, CJSwiperAnimationEvent event))
@@ -509,7 +527,7 @@ void FfiOHOSAceFrameworkSwiperOnGestureSwipe(void (*callback)(int32_t index, CJS
         };
         lambda(index, event);
     };
-    SwiperModel::GetInstance()->SetOnGestureSwipe(std::move(onGestureSwipe));
+    GetSwiperModel()->SetOnGestureSwipe(std::move(onGestureSwipe));
 }
 
 void FfiOHOSAceFrameworkSwiperOnContentDidScroll(
@@ -519,7 +537,7 @@ void FfiOHOSAceFrameworkSwiperOnContentDidScroll(
     auto onContentDidScroll = [lambda](int32_t selectedIndex, int32_t index, float position, float mainAxisLength) {
         lambda(selectedIndex, index, position, mainAxisLength);
     };
-    SwiperModel::GetInstance()->SetOnContentDidScroll(std::move(onContentDidScroll));
+    GetSwiperModel()->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
 void FfiOHOSAceFrameworkSwiperCustomContentTransition(
@@ -542,7 +560,7 @@ void FfiOHOSAceFrameworkSwiperCustomContentTransition(
         lambda(swiperProxy);
     };
     transitionInfo.transition = std::move(onTransition);
-    SwiperModel::GetInstance()->SetCustomContentTransition(transitionInfo);
+    GetSwiperModel()->SetCustomContentTransition(transitionInfo);
 }
 
 void FfiOHOSAceFrameworkSwiperControllerChangeIndex(int32_t index, bool useAnimation, int64_t id)
