@@ -301,7 +301,12 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
     }
     void* nativeObj = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_unwrap(env, renderImage, &nativeObj));
-    auto jsImage = (JSRenderImage*)nativeObj;
+    bool isTypeMatch = false;
+    napi_status tagStatus = napi_check_object_type_tag(env, renderImage, &JS_RENDER_IMAGE_TYPE_TAG, &isTypeMatch);
+    if (tagStatus != napi_ok || !isTypeMatch) {
+        return;
+    }
+    auto jsImage = static_cast<JSRenderImage*>(nativeObj);
     CHECK_NULL_VOID(jsImage);
 #ifndef PIXEL_MAP_SUPPORTED
     auto imageData = GetImageData(offscreenCanvasPattern, 0, 0, width_, height_);

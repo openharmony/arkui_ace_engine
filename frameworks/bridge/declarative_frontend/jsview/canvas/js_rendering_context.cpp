@@ -20,6 +20,7 @@
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "js_native_api.h"
 #include "js_native_api_types.h"
+#include "napi/native_node_api.h"
 
 #include "base/error/error_code.h"
 #include "base/log/ace_scoring_log.h"
@@ -382,7 +383,11 @@ void JSRenderingContext::JsGetCanvas(const JSCallbackInfo& info)
     CHECK_NULL_VOID(nodeId >= 0);
 
     auto vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
     auto globalObj = JSNApi::GetGlobalObject(vm);
+    if (globalObj.IsEmpty()) {
+        return;
+    }
     auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "__getFrameNodeByNodeId__"));
     JsiValue jsiValue(globalFunc);
     JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
@@ -462,7 +467,12 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
     napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
     void* nativeObj = nullptr;
     NAPI_CALL_RETURN_VOID(env, napi_unwrap(env, napiValue, &nativeObj));
-    auto jsImage = (JSRenderImage*)nativeObj;
+    bool isTypeMatch = false;
+    napi_status tagStatus = napi_check_object_type_tag(env, napiValue, &JS_RENDER_IMAGE_TYPE_TAG, &isTypeMatch);
+    if (tagStatus != napi_ok || !isTypeMatch) {
+        return;
+    }
+    auto jsImage = static_cast<JSRenderImage*>(nativeObj);
     CHECK_NULL_VOID(jsImage);
 #ifdef PIXEL_MAP_SUPPORTED
     auto pixelMap = jsImage->GetPixelMap();
