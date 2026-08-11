@@ -39,6 +39,8 @@ group("core_unittest") {
       "render:render_context_test_ng",
       "render:render_property_test_ng",
       "syntax:core_syntax_unittest",
+      "animation:core_animation_unittest",
+      "property:core_property_unittest",
       "animation:callback_thread_wrapper_test",
       "common/resource:resource_manager_test",
       "common/resource:resource_parse_utils_test_ng",

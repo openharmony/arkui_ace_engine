@@ -30,10 +30,12 @@ void AnimatorModelNG::Create(const std::string& animatorId) {}
 RefPtr<AnimatorInfo> AnimatorModelNG::GetAnimatorInfo(const std::string& animatorId)
 {
     auto animatorInfo = AceType::MakeRefPtr<AnimatorInfo>();
-    auto animator = AceType::MakeRefPtr<Animator>();
-    animatorInfo->SetAnimator(animator);
     return animatorInfo;
 }
+
+void AnimatorModelNG::AddEventListener(
+    std::function<void()>&& callback, EventOperation operation, const std::string& animatorId) {}
+
 } // namespace OHOS::Ace::Framework
 
 namespace OHOS::Ace::NG {
