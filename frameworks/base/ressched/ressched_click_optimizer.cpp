@@ -86,7 +86,7 @@ void ResSchedClickOptimizer::Init()
 
 void ResSchedClickOptimizer::ReportClick(const WeakPtr<NG::FrameNode> weakNode, const GestureEvent& gestureEvent)
 {
-    auto currentTimestamp = gestureEvent.GetTimeStamp().time_since_epoch().count();
+    auto currentTimestamp = static_cast<uint64_t>(gestureEvent.GetTimeStamp().time_since_epoch().count());
     CHECK_EQUAL_VOID(currentTimestamp, lastClickReportedTimestamp_.load(std::memory_order_relaxed));
     lastClickReportedTimestamp_.store(currentTimestamp, std::memory_order_relaxed);
 
