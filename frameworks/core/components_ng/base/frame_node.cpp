@@ -3972,7 +3972,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
 
     HitTestMode onTouchInterceptresult = HitTestMode::HTMDEFAULT;
     if (touchRestrict.inputEventType != InputEventType::MOUSE_BUTTON &&
-        touchRestrict.touchEvent.type != TouchType::HOVER_ENTER) {
+        !IsHoverEventType(touchRestrict.touchEvent.type)) {
         onTouchInterceptresult = TriggerOnTouchIntercept(touchRestrict.touchEvent);
     }
     TouchResult touchRes;
@@ -7391,6 +7391,14 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     auto result = onTouchIntercept(event);
     SetHitTestMode(result);
     return result;
+}
+
+bool FrameNode::IsHoverEventType(TouchType type) const
+{
+    return type == TouchType::HOVER_ENTER || type == TouchType::HOVER_MOVE || type == TouchType::HOVER_EXIT ||
+           type == TouchType::HOVER_CANCEL || type == TouchType::LEVITATE_IN_WINDOW ||
+           type == TouchType::LEVITATE_MOVE || type == TouchType::LEVITATE_OUT_WINDOW ||
+           type == TouchType::PROXIMITY_IN || type == TouchType::PROXIMITY_OUT;
 }
 
 void FrameNode::AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent)

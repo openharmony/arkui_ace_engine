@@ -1779,6 +1779,8 @@ private:
 
     HitTestMode TriggerOnTouchIntercept(const TouchEvent& touchEvent);
 
+    bool IsHoverEventType(TouchType type) const;
+
     void TriggerRsProfilerNodeMountCallbackIfExist();
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
