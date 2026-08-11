@@ -341,7 +341,7 @@ void NavigationPattern::RestoreNodeFromProxyNodeIfNeeded(const RefPtr<FrameNode>
 
     node->SetIndex(proxyNode->GetIndex());
     primaryContentNode->RemoveChildSilently(node);
-    primaryContentNode->MarkNeedSyncRenderTree(true);	
+    primaryContentNode->MarkNeedSyncRenderTree(true);
     primaryContentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
     navContentNode->RemoveChildSilently(proxyNode);
