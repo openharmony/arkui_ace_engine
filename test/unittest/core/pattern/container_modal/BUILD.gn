@@ -32,18 +32,27 @@ if (is_host_product) {
 ace_unittest("container_modal_pattern_enhance_test_ng") {
   module_name = "PickerSet-Picker"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "container_modal_pattern_enhance_test_ng.cpp" ]
 }
 
 ace_unittest("container_modal_toolbar_test_ng") {
   module_name = "Layout-Row"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "container_modal_toolbar_test_ng.cpp" ]
 }
 
 ace_unittest("container_modal_static_pattern_test") {
   module_name = "FormAndSelection-Button"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "container_modal_static_pattern_test.cpp" ]
 }
 

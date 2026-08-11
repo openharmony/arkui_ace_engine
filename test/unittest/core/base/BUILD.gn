@@ -33,7 +33,11 @@ ace_unittest("distributed_ui_test_ng") {
 ace_unittest("frame_node_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
-  include_dirs = [ "$ace_root/test/mock/ohos_mock/ipc_single" ]
+  if (is_host_product) {
+    type = "host_components"
+  } else {
+    include_dirs = [ "$ace_root/test/mock/ohos_mock/ipc_single" ]
+  }
   sources = [
     "frame_node_test_ng.cpp",
     "frame_node_test_ng_coverage.cpp",
@@ -62,24 +66,36 @@ ace_unittest("geometry_node_test_ng") {
 ace_unittest("inspector_test_ng") {
   module_name = "Debugger-inspector"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "inspector_test_ng.cpp" ]
 }
 
 ace_unittest("simplified_inspector_test_ng") {
   module_name = "Debugger-inspector"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "simplified_inspector_test_ng.cpp" ]
 }
 
 ace_unittest("ui_node_gc_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "ui_node_gc_test_ng.cpp" ]
 }
 
 ace_unittest("ui_node_test_ng") {
   module_name = "Animation-Frame"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [
     "ui_node_multi_thread_test.cpp",
     "ui_node_test_ng.cpp",
@@ -91,6 +107,9 @@ ace_unittest("ui_node_test_ng") {
 ace_unittest("view_abstract_test_ng") {
   module_name = "DialogSet-OverlayManager"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [
     "view_abstract_test_five_ng.cpp",
     "view_abstract_test_four_ng.cpp",
@@ -234,12 +253,18 @@ group("core_base_unittest") {
     deps = [
       ":distributed_ui_test_ng",
       ":extension_handler_test_ng",
+      ":frame_node_test_ng",
       ":geometry_node_test_ng",
+      ":inspector_test_ng",
       ":modifier_test_ng",
       ":node_render_status_monitor_test_ng",
       ":observer_test_ng",
+      ":simplified_inspector_test_ng",
       ":thread_safe_node_test_ng",
+      ":ui_node_gc_test_ng",
+      ":ui_node_test_ng",
       ":view_abstract_model_static_test_ng",
+      ":view_abstract_test_ng",
     ]
   } else {
     deps = [

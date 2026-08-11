@@ -16,6 +16,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("interfaces_test") {
   module_name = "UIEngine-Mainprocess"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [
     "$ace_root/frameworks/core/interfaces/native/node/node_adapter_impl.cpp",
     "$ace_root/test/mock/frameworks/core/interfaces/native/utility/mock_error_message_manager.cpp",

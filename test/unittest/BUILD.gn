@@ -97,6 +97,10 @@ config("ace_unittest_config") {
     "$root_out_dir/arkui/framework",
   ]
 
+  if (is_host_product) {
+    include_dirs += [ "//third_party/bounds_checking_function/include" ]
+  }
+
   if (current_os == "linux") {
     include_dirs += [
       "$ace_root/test/mock/external_mock",

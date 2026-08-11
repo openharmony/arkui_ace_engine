@@ -47,6 +47,9 @@ ace_unittest("geometry_test") {
 ace_unittest("util_test") {
   module_name = "CommonEvent-Input"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [
     "base_utils_test.cpp",
     "delay_task_test.cpp",

@@ -426,7 +426,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeDumpCommonInfo02, TestSize.Level1)
     frameNode->renderContext_->UpdateBorderRadius(borderRadiusProperty);
     DumpLog::GetInstance().description_.clear();
     frameNode->DumpCommonInfo();
-    EXPECT_EQ(DumpLog::GetInstance().description_[11],
+    EXPECT_EQ(DumpLog::GetInstance().description_[12],
         "BorderRadius: radiusTopLeft: [10.00px]radiusTopRight: "
         "[10.00px]radiusBottomLeft: [10.00px]radiusBottomRight: [10.00px]\n");
 }

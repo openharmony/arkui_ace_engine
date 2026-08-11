@@ -60,6 +60,9 @@ ohos_unittest("ace_engine_common_test") {
 ace_unittest("color_inverter_test") {
   module_name = "ScrollingSet-Refresh"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
 
   sources = [ "color_inverter_test.cpp" ]
 
