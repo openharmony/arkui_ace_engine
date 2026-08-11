@@ -511,6 +511,18 @@ static std::optional<std::string> GetCustomProperty(ani_env* env, ArkUINodeHandl
     }
 }
 
+static std::string GetIdString(ArkUINodeHandle node)
+{
+    auto* frameNodePeer = reinterpret_cast<FrameNodePeer*>(node);
+    CHECK_NULL_RETURN(frameNodePeer, "");
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
+    CHECK_NULL_RETURN(frameNode, "");
+    if (!MultiThreadBuildManager::CheckNodeOnValidThread(AceType::RawPtr(frameNode))) {
+        return "";
+    }
+    return frameNode->GetInspectorId().value_or("");
+}
+
 Alignment ParseAlignment(int32_t align)
 {
     Alignment alignment = Alignment::CENTER;
@@ -1356,6 +1368,7 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getBuilderNodeParentViewId = OHOS::Ace::NG::GetBuilderNodeParentViewId,
         .setOnNodeDestroyEvent = OHOS::Ace::NG::SetOnNodeDestroyEvent,
         .fireArkUIObjectLifecycleCallback = OHOS::Ace::NG::FireArkUIObjectLifecycleCallbackImpl,
+        .GetIdString = OHOS::Ace::NG::GetIdString,
     };
     return &impl;
 }

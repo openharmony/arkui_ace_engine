@@ -2043,4 +2043,19 @@ ani_int BuilderNodeGetParentViewId(ani_env* env, [[maybe_unused]] ani_object obj
     CHECK_NULL_RETURN(common->getBuilderNodeParentViewId, NUM_NEG_1);
     return common->getBuilderNodeParentViewId(ptr);
 }
+ani_string ArkTSFrameNodeGetId(ani_env* env, ani_object aniClass, ani_long node)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        auto defaultRet = AniUtils::StdStringToANIString(env, "");
+        return defaultRet.value_or(nullptr);
+    }
+    ArkUINodeHandle frameNodePeer = reinterpret_cast<ArkUINodeHandle>(node);
+    std::string id = modifier->getCommonAniModifier()->GetIdString(frameNodePeer);
+    auto retValue = AniUtils::StdStringToANIString(env, id);
+    if (retValue) {
+        return *retValue;
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace::Ani

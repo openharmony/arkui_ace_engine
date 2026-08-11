@@ -627,7 +627,7 @@ export class FrameNode implements MaterializedBase {
         return { width: size.width, height: size.height }
     }
     public getId(): string {
-        return FrameNodeExtender.getId(this);
+        return ArkUIAniModule._ArkTSFrameNode_GetId(this.peer?.ptr ?? nullptr);
     }
     public getUniqueId(): int {
         return FrameNodeExtender.getUniqueId(this);
