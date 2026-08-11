@@ -403,11 +403,11 @@ export class ArkVideoPeer extends ArkCommonMethodPeer {
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue = value!
-            if (valueTmpValue instanceof VoidCallback) {
+            if (valueTmpValue instanceof (() => never)) {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0 = valueTmpValue as VoidCallback
                 thisSerializer.holdAndWriteCallback(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof ErrorCallback<BusinessError>) {
+            } else if (valueTmpValue instanceof ((p0: Any) => never)) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1 = valueTmpValue as ErrorCallback<BusinessError<void>>
                 thisSerializer.holdAndWriteCallback(valueTmpValueForIdx1)

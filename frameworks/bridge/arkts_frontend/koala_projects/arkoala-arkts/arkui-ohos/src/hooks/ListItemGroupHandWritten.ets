@@ -39,7 +39,7 @@ export class ListItemGroupHandWritten {
                 node.getPeer().peer.ptr, options.headerComponent!.getNodePtr()!)
         } else if (options.header !== undefined) {
             let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
-            if (options.header instanceof CustomBuilder) {
+            if (options.header instanceof ((memoContext: Any, memoId: Any) => never)) {
                 const valueBuilder = options.header as CustomBuilder
                 const old = GlobalStateManager.instance;
                 let manager: StateManager = createStateManager()!;
@@ -64,7 +64,7 @@ export class ListItemGroupHandWritten {
                 node.getPeer().peer.ptr, options.footerComponent!.getNodePtr()!)
         } else if (options.footer !== undefined) {
             let context = UIContextUtil.getOrCreateCurrentUIContext() as UIContext;
-            if (options.footer instanceof CustomBuilder) {
+            if (options.footer instanceof ((memoContext: Any, memoId: Any) => never)) {
                 const valueBuilder = options.footer as CustomBuilder
                 const old = GlobalStateManager.instance;
                 let manager: StateManager = createStateManager()!;
