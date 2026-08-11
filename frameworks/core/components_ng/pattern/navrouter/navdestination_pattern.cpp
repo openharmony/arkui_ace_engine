@@ -22,6 +22,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/theme/app_theme.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
@@ -628,6 +629,18 @@ void NavDestinationPattern::OnDetachFromMainTree()
     if (pendingToClean_) {
         SetPendingToClean(false);
     }
+}
+
+void NavDestinationPattern::ContentChangeByDetaching(PipelineContext* pipeline)
+{
+#ifndef CROSS_PLATFORM
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    mgr->OnTransitionRemoved(host->GetId());
+#endif
 }
 
 void NavDestinationPattern::DumpInfo(std::unique_ptr<JsonValue>& json)

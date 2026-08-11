@@ -29,6 +29,7 @@
 #include "core/common/agingadapation/aging_adapation_dialog_util.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/force_split/force_split_manager.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
@@ -658,6 +659,95 @@ HWTEST_F(NavigationPatternTestFiveNg, StartTransition002, TestSize.Level1)
 
     pattern->StartTransition(preTop, curTop, true, false, true);
     EXPECT_TRUE(pattern->prePrimaryNodes_.empty());
+}
+
+/**
+ * @tc.name: ContentChangeTransitionDetach001
+ * @tc.desc: Verify each NavDestination clears its own transition id when detaching.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, ContentChangeTransitionDetach001, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = navNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto contentChangeManager = pipeline->GetContentChangeManager();
+    ASSERT_NE(contentChangeManager, nullptr);
+    contentChangeManager->currentContentChangeConfig_ = ContentChangeConfig();
+    contentChangeManager->transitioningNodes_.clear();
+
+    auto firstDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(firstDestination, nullptr);
+    auto firstPattern = firstDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(firstPattern, nullptr);
+    firstPattern->SetNavigationNode(AceType::Claim(navNode));
+    auto secondDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(secondDestination, nullptr);
+    auto secondPattern = secondDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(secondPattern, nullptr);
+    secondPattern->SetNavigationNode(AceType::Claim(navNode));
+
+    pattern->ContentChangeOnTransitionStart(firstDestination);
+    pattern->ContentChangeOnTransitionStart(secondDestination);
+    ASSERT_TRUE(contentChangeManager->IsTransitioning());
+    ASSERT_EQ(contentChangeManager->transitioningNodes_.size(), 2u);
+
+    firstPattern->ContentChangeByDetaching(AceType::RawPtr(pipeline));
+    EXPECT_EQ(contentChangeManager->transitioningNodes_.count(firstDestination->GetId()), 0u);
+    EXPECT_EQ(contentChangeManager->transitioningNodes_.count(secondDestination->GetId()), 1u);
+
+    secondPattern->ContentChangeByDetaching(AceType::RawPtr(pipeline));
+    EXPECT_FALSE(contentChangeManager->IsTransitioning());
+    contentChangeManager->currentContentChangeConfig_.reset();
+    contentChangeManager->transitioningNodes_.clear();
+}
+
+/**
+ * @tc.name: ContentChangeTransitionReport001
+ * @tc.desc: Verify normal transition completion clears the tracked destination transition id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestFiveNg, ContentChangeTransitionReport001, TestSize.Level1)
+{
+    NavigationPatternTestFiveNg::SetUpTestSuite();
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(navNode, nullptr);
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = navNode->GetContextRefPtr();
+    ASSERT_NE(pipeline, nullptr);
+    auto contentChangeManager = pipeline->GetContentChangeManager();
+    ASSERT_NE(contentChangeManager, nullptr);
+    contentChangeManager->currentContentChangeConfig_ = ContentChangeConfig();
+    contentChangeManager->transitioningNodes_.clear();
+
+    auto destination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(destination, nullptr);
+    pattern->ContentChangeOnTransitionStart(destination);
+    ASSERT_TRUE(contentChangeManager->IsTransitioning());
+
+    navNode->ContentChangeReport(destination);
+    EXPECT_FALSE(contentChangeManager->IsTransitioning());
+    contentChangeManager->currentContentChangeConfig_.reset();
+    contentChangeManager->transitioningNodes_.clear();
 }
 
 /**

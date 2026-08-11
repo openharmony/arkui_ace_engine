@@ -165,6 +165,8 @@ public:
     void ReportPageSceneEvent(int32_t processId, const std::string& sceneJson, bool isGetResult) override;
     void CompleteGetPageScene(int32_t processId) override;
     void NotifyPageSceneNodeChanged(const std::string& nodeTag, bool isAttach) override;
+    void NotifyPageSceneNodeStateChanged(
+        const std::string& nodeTag, PageSceneNodeStateChange stateChange) override;
     void NotifyPageSceneContentChanged() override;
     void FlushPageSceneNodeChanged() override;
     void SavePageSceneDetectFunction(PageSceneDetectFunction&& function) override;
@@ -188,6 +190,7 @@ private:
         bool supported = false;
         bool enabled = true;
         bool reportOnRegister = true;
+        bool onlyVisible = true;
     };
 
     struct PageSceneRuleSetInfo {
@@ -196,6 +199,7 @@ private:
         std::string ruleJson;
         bool arkuiEnabled = true;
         bool webEnabled = false;
+        bool includeUnfocusableTextInput = false;
         std::vector<PageSceneRuleInfo> rules;
     };
 
@@ -212,6 +216,11 @@ private:
     bool HasRegisteredPageSceneRuleLocked(const std::string& sceneType) const;
     std::vector<std::pair<int32_t, std::string>> GetPageSceneRuleJsonsForNodeChange(
         const std::string& nodeTag, const std::string& sceneType);
+    std::vector<std::pair<int32_t, std::string>> GetPageSceneRuleJsonsForNodeStateChange(
+        const std::string& nodeTag, const std::string& sceneType, PageSceneNodeStateChange stateChange);
+    bool IsPageSceneRuleAffectedByNodeStateChange(
+        const PageSceneRuleSetInfo& ruleSetInfo, const PageSceneRuleInfo& rule,
+        PageSceneNodeStateChange stateChange) const;
     void ErasePendingPageSceneRulesLocked(int32_t processId);
     void TriggerPageSceneDetect(int32_t processId, const std::string& ruleJson, bool isGetResult);
     int32_t ExtractRuleJsonAndWebEnabled(int32_t processId,

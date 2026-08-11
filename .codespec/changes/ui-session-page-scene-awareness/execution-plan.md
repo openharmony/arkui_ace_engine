@@ -10,6 +10,7 @@ host toolchain 单元测试，覆盖 ruleJson、TEXT_EDITOR matcher 和注册/Ge
 2026-07-09 追加命中态退出规格：同一规则已上报过 `TEXT_EDITOR` 命中后，后续稳定点检查不再命中时上报一次 `TEXT_EDITOR_EXIT`，连续未命中不重复上报。
 2026-07-13 对齐最终交付规格：`ruleJson` 顶层新增 `version=1`，文本输入类控件变化不再由 `reportOnTextInputAttached` 控制，补充独立反注册用户故事和接口级错误码测试规格。
 2026-07-21 Owner 收缩本阶段范围：回退候选快照、增量计数、多 UIContext 路由和延迟构造等性能优化；上下树仅挂起待检测规则，稳定点全量扫描当前页面树。保留 `onlyVisible` 页面窗口过滤和按节点 ID 列表去重。
+2026-08-07 补充 Navigation 转场状态恢复缺陷修复：按实际登记的 NavDestination ID 跟踪活跃转场，并覆盖正常完成、节点提前下树、Navigation 整体下树及交互取消的 ID 释放。
 
 ## 初始任务草案
 
@@ -21,7 +22,7 @@ host toolchain 单元测试，覆盖 ruleJson、TEXT_EDITOR matcher 和注册/Ge
 | TASK-004 | Web 规则透传通路：注册时透传 `webRules`，反注册和查询请求透传 | Ready |
 | TASK-005 | UIExtension 规则透传通路：透传注册、反注册、查询请求 | Ready |
 | TASK-006 | sample/hidumper 验证命令：补注册、查询、反注册命令和摘要日志 | Ready |
-| TASK-007 | 单测和回归验证：覆盖 ruleJson、matcher、IPC、重复注册、Get pending busy、反注册/死亡清理、Web/UIExtension 透传入口、隐私日志 | In Progress |
+| TASK-007 | 单测和回归验证：覆盖 ruleJson、matcher、IPC、重复注册、Get pending busy、反注册/死亡清理、Web/UIExtension 透传入口、隐私日志，以及 Navigation 转场 ID 在正常完成、提前下树和交互取消后的释放 | In Progress |
 
 ## AC 到 Task 追溯
 
@@ -49,7 +50,15 @@ host toolchain 单元测试，覆盖 ruleJson、TEXT_EDITOR matcher 和注册/Ge
 - `adapter/ohos/entrance/ui_session/ui_session_manager_ohos.cpp`
 - `frameworks/core/components_ng/manager/page_scene/page_scene_rule_manager.h`
 - `frameworks/core/components_ng/manager/page_scene/page_scene_rule_manager.cpp`
+- `frameworks/core/components_ng/pattern/navigation/navigation_pattern.h`
+- `frameworks/core/components_ng/pattern/navigation/navigation_pattern.cpp`
+- `frameworks/core/components_ng/pattern/navigation/navigation_group_node.cpp`
+- `frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.h`
+- `frameworks/core/components_ng/pattern/navrouter/navdestination_pattern.cpp`
+- `test/mock/frameworks/core/components_ng/pattern/navigation/mock_navigation_pattern.cpp`
 - `test/unittest/core/manager/page_scene_rule_manager_test_ng.cpp`
+- `test/unittest/core/pattern/navigation/navigation_pattern_test_five_ng.cpp`
+- `test/unittest/core/pattern/navigation/navigation_animation_test_ng.cpp`
 
 ## Stage 3 当前验证记录
 
@@ -65,6 +74,7 @@ host toolchain 单元测试，覆盖 ruleJson、TEXT_EDITOR matcher 和注册/Ge
 | 2026-07-13 | 补充 `ruleJson.version` 解析校验，移除 `reportOnTextInputAttached` 规则字段依赖；补充 SDD unregister 故事、输出示例和接口错误码测试规格；`page_scene_rule_manager_test_ng --gtest_filter=PageSceneRuleManagerTestNg.*` 8 条用例通过；`ohos-sdd validate --level all` 33 项通过 | Pass |
 | 2026-07-21 | 回退候选索引、多 UIContext 路由和延迟构造等性能优化；保留页面窗口范围过滤、节点 ID 列表去重、上下树触发稳定点全量重检。Host `page_scene_rule_manager_test_ng` 11/11、`content_change_manager_test_ng` 45/45 通过，产物均为 x86-64 ELF | Pass |
 | 2026-07-21 | 从 OpenHarmony 根目录执行完整 `./build.sh --product-name rk3568 --build-target ace_engine --ccache`，Ninja 5888/5888 完成，`libace_compatible.z.so` 和最终 `ace_engine.stamp` 生成，构建输出 `rk3568 build success` / `build successful` | Pass |
+| 2026-08-07 | 修复 Navigation 转场登记 NavDestination ID、整体下树却按 Navigation host ID 清理的不一致；补充正常完成、单 NavDestination 下树、Navigation 整体下树、多个 ID 独立清理及交互取消回归用例 | Code/UT Ready；编译与用例执行由 Owner 手工验证 |
 
 验证命令：
 
@@ -87,6 +97,10 @@ prebuilts/build-tools/linux-x86/bin/ninja -w dupbuild=warn -C out/standard/src a
 `Connect -> RegisterPageSceneRules -> GetPageScene -> UnregisterPageSceneRules`。当前仍待补充
 IPC、SA 死亡清理和 Web/UIExtension 规则透传入口验证。
 
+2026-08-07 Navigation 转场 ID 清理代码和定向 UT 已补齐；本轮不在 Agent 侧执行编译或
+测试，Owner 手工验证命令和预期结果记录在
+`evidence/checks/check-navigation-transition-id-cleanup.md`。在手工结果回填前，不将该项标记为 Pass。
+
 ## Stage 3 验证门槛
 
 - `git diff --check`
@@ -95,7 +109,7 @@ IPC、SA 死亡清理和 Web/UIExtension 规则透传入口验证。
 - `ruleJson.version` 缺失或不支持版本返回参数错误，`version=1` 合法规则注册和查询通过
 - `PageSceneInputCountTracker` 全量扫描、`onlyVisible` 屏内/屏外过滤、坐标变化去重、上下树节点 ID 变化后重检和退出事件测试通过
 - `TEXT_EDITOR` 已命中后跌出阈值时只上报一次 `TEXT_EDITOR_EXIT`，未曾命中和连续未命中均不补发退出事件，主动 `GetPageScene` 未命中仍使用 `TEXT_EDITOR`
-- `ContentChangeManager` 稳定点调度测试通过：PageScene-only 注册、Page/Scroll/Dialog 稳定点、Swiper 延迟、滚动/转场/Swiper 滚动中不 flush
+- `ContentChangeManager` 稳定点调度测试通过：PageScene-only 注册、Page/Scroll/Dialog 稳定点、Swiper 延迟、滚动/转场/Swiper 滚动中不 flush；Navigation 转场在正常完成、NavDestination/Navigation 提前下树和交互取消后释放对应 destination ID，最后一个 ID 释放后 `IsTransitioning()` 为 false
 - 代码检查确认 Pipeline 不直接调用 `UiSessionManager::FlushPageSceneNodeChanged`
 - 代码检查确认 Text/Image 具体 ContentChange 路径不触发 PageScene-only 检测
 - 重复注册、Get pending busy、反注册并发、SA 死亡清理测试通过

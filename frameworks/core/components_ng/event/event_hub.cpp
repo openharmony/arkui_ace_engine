@@ -1080,21 +1080,44 @@ bool EventHub::IsDeveloperEnabled() const
     return developerEnabled_;
 }
 
+void EventHub::NotifyPageSceneFocusabilityChanged(bool previousFocusable)
+{
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    bool currentFocusable = focusHub != nullptr && focusHub->IsFocusable();
+    if (previousFocusable != currentFocusable) {
+        host->NotifyPageSceneFocusabilityChanged();
+    }
+}
+
 void EventHub::SetEnabled(bool enabled)
 {
+    auto host = GetFrameNode();
+    auto focusHub = host ? host->GetFocusHub() : nullptr;
+    bool previousFocusable = focusHub != nullptr && focusHub->IsFocusable();
     enabled_ = enabled;
     developerEnabled_ = enabled;
+    NotifyPageSceneFocusabilityChanged(previousFocusable);
 }
 
 void EventHub::SetEnabledInternal(bool enabled)
 {
+    auto host = GetFrameNode();
+    auto focusHub = host ? host->GetFocusHub() : nullptr;
+    bool previousFocusable = focusHub != nullptr && focusHub->IsFocusable();
     enabled_ = enabled;
+    NotifyPageSceneFocusabilityChanged(previousFocusable);
 }
 
 // restore enabled value to what developer sets
 void EventHub::RestoreEnabled()
 {
+    auto host = GetFrameNode();
+    auto focusHub = host ? host->GetFocusHub() : nullptr;
+    bool previousFocusable = focusHub != nullptr && focusHub->IsFocusable();
     enabled_ = developerEnabled_;
+    NotifyPageSceneFocusabilityChanged(previousFocusable);
 }
 
 void EventHub::UpdateCurrentUIState(UIState state)

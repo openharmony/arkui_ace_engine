@@ -27,11 +27,6 @@ void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     (void)frameNode;
 }
 
-void NavigationPattern::ContentChangeByDetaching(PipelineContext* pipeline)
-{
-    (void)pipeline;
-}
-
 void NavigationPattern::OnModifyDone() {}
 
 void NavigationPattern::OnWindowHide() {}

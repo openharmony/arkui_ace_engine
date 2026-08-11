@@ -66,6 +66,8 @@ public:
 
     void OnActive() override;
 
+    void ContentChangeByDetaching(PipelineContext* pipeline) override;
+
     void OnModifyDone() override;
 
     void NotifyFullScreenOverlayRequestChange(std::optional<bool> previousRequest, std::optional<bool> currentRequest);

@@ -2965,6 +2965,9 @@ void NavigationPattern::TransitionWithAnimation(RefPtr<NavDestinationGroupNode> 
         navigationNode->RemoveDialogDestination();
         ClearRecoveryList();
         OnStartOneTransitionAnimation();
+        if (newTopNavDestination) {
+            ContentChangeReport(newTopNavDestination);
+        }
         OnFinishOneTransitionAnimation();
         if (newTopNavDestination) {
             navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE,
@@ -4115,6 +4118,7 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
     auto homeDestination = AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavBarOrHomeDestinationNode());
     proxy->SetPreDestination(preTopNavDestination ? preTopNavDestination : homeDestination);
     proxy->SetTopDestination(newTopNavDestination ? newTopNavDestination : homeDestination);
+    auto contentChangeTransitionId = newTopNavDestination ? newTopNavDestination->GetId() : -1;
     auto proxyId = proxy->GetProxyId();
     proxyList_.emplace_back(proxy);
     auto navigationTransition = ExecuteTransition(preTopNavDestination, newTopNavDestination, isPopPage);
@@ -4138,7 +4142,7 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
         std::function<void()> onFinish = [weakNavigation = WeakClaim(this),
                                   weakPreNavDestination = WeakPtr<NavDestinationGroupNode>(preTopNavDestination),
                                   weakNewNavDestination = WeakPtr<NavDestinationGroupNode>(newTopNavDestination),
-                                  isPopPage, proxyId]() {
+                                  isPopPage, proxyId, contentChangeTransitionId]() {
             auto preDestination = weakPreNavDestination.Upgrade();
             auto topDestination = weakNewNavDestination.Upgrade();
             if (preDestination) {
@@ -4172,6 +4176,17 @@ bool NavigationPattern::TriggerCustomAnimation(RefPtr<NavDestinationGroupNode> p
             } else {
                 // fire page cancel transition
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "interactive animation canceled");
+#ifndef CROSS_PLATFORM
+                if (contentChangeTransitionId >= 0) {
+                    auto pipeline = pattern->GetContext();
+                    auto mgr = pipeline ? pipeline->GetContentChangeManager() : nullptr;
+                    if (mgr) {
+                        mgr->OnTransitionRemoved(contentChangeTransitionId);
+                    }
+                }
+#else
+                (void)contentChangeTransitionId;
+#endif
                 pattern->RecoveryToLastStack(preDestination, topDestination);
                 pattern->SyncWithJsStackIfNeeded();
             }
@@ -8415,18 +8430,6 @@ void NavigationPattern::ContentChangeOnTransitionStart(const RefPtr<FrameNode>& 
     CHECK_NULL_VOID(mgr);
     CHECK_NULL_VOID(keyNode);
     mgr->OnTransitionAdded(keyNode->GetId());
-#endif
-}
-
-void NavigationPattern::ContentChangeByDetaching(PipelineContext* pipeline)
-{
-#ifndef CROSS_PLATFORM
-    CHECK_NULL_VOID(pipeline);
-    auto mgr = pipeline->GetContentChangeManager();
-    CHECK_NULL_VOID(mgr);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    mgr->OnTransitionRemoved(host->GetId());
 #endif
 }
 

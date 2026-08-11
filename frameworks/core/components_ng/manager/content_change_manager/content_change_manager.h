@@ -95,6 +95,7 @@ private:
     void ReportSwiperEvent(const RefPtr<FrameNode>& node, bool hasTabsAncestor);
     void StartTextAABBCollecting();
     void StopTextAABBCollecting(const RectF& rootRect);
+    bool IsContentChanging() const;
     bool NeedPageSceneDetect() const;
     bool NeedContentChangeReportOrPageSceneDetect() const;
     void NotifyPageSceneContentChanged(bool flushNow);
