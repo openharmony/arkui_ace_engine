@@ -32,6 +32,12 @@ public:
         taskExecutor_->PostTask(std::move(task), "DestructorInterceptor", PriorityType::IDLE);
     }
 
+    bool IsRunOnMainThread()
+    {
+        // taskExecutor_ alaways posts task to main thread.
+        return taskExecutor_->RunsTasksOnCurrentThread();
+    }
+
 private:
     RefPtr<TaskRunnerAdapter> taskExecutor_ = TaskRunnerAdapterFactory::Create(false, "");
 };
