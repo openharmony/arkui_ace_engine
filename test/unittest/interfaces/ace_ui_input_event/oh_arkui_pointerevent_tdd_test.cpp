@@ -1013,6 +1013,34 @@ HWTEST_F(UIInputEventTest, SetPressedButtons_UnsupportedType, TestSize.Level0)
     EXPECT_EQ(OH_ArkUI_ClonedEvent_SetPressedButtons(&event, buttons, 1), ARKUI_ERROR_INPUT_EVENT_TYPE_NOT_SUPPORT);
 }
 
+HWTEST_F(UIInputEventTest, SetPressedButtons_GetRoundtrip, TestSize.Level1)
+{
+    ArkUIMouseEvent mouseEvent = {};
+    ArkUI_UIInputEvent event = { ARKUI_UIINPUTEVENT_TYPE_MOUSE, C_MOUSE_EVENT_ID, &mouseEvent, true };
+
+    int32_t inputButtons[] = { UI_MOUSE_EVENT_BUTTON_MIDDLE, UI_MOUSE_EVENT_BUTTON_FORWARD };
+    int32_t inputLength = 2;
+    EXPECT_EQ(OH_ArkUI_ClonedEvent_SetPressedButtons(&event, inputButtons, inputLength),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(mouseEvent.pressedButtonsLength, 2);
+    ASSERT_NE(mouseEvent.pressedButtons, nullptr);
+    EXPECT_EQ(mouseEvent.pressedButtons[0], 4);
+    EXPECT_EQ(mouseEvent.pressedButtons[1], 16);
+
+    int32_t outputButtons[2] = { 0 };
+    int32_t outputLength = 2;
+    auto result = OH_ArkUI_MouseEvent_GetPressedButtons(&event, outputButtons, &outputLength);
+    EXPECT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(outputLength, 2);
+    EXPECT_EQ(outputButtons[0], UI_MOUSE_EVENT_BUTTON_MIDDLE);
+    EXPECT_EQ(outputButtons[1], UI_MOUSE_EVENT_BUTTON_FORWARD);
+
+    if (mouseEvent.pressedButtons) {
+        delete[] mouseEvent.pressedButtons;
+        mouseEvent.pressedButtons = nullptr;
+    }
+}
+
 HWTEST_F(UIInputEventTest, PostClonedEventWithStrategy_NullEvent, TestSize.Level0)
 {
     ArkUI_NodeHandle node = reinterpret_cast<ArkUI_NodeHandle>(0x1234);
