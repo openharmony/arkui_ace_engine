@@ -19,6 +19,7 @@ group("core_pattern_unittest") {
   deps = []
   if (is_host_product) {
     deps += [
+      "animator:animator_test_ng",
       "arc_list:arc_list_test_ng",
       "blank:blank_test_ng",
       "custom_frame_node:custom_frame_node_test",
@@ -69,7 +70,6 @@ group("core_pattern_unittest") {
       "slider:slider_test_ng",
       "badge:badge_test_ng",
       "counter:counter_test_ng",
-      "custom_frame_node:custom_frame_node_test",
       "data_panel:data_panel_test_ng",
       "gauge:gauge_test_ng",
       "hyperlink:hyperlink_test_ng",
@@ -87,6 +87,9 @@ group("core_pattern_unittest") {
       "stack:stack_test_ng",
       "text:text_test_ng",
       "text:text_test_ng_addition",
+      "panel:panel_test_ng",
+      "particle:particle_test_ng",
+      "union_effect_container:union_effect_container_test",
       "text:text_test_nullptr",
       "text_clock:text_clock_test_ng",
       "text_drag:text_drag_test_ng",
@@ -137,6 +140,7 @@ group("core_pattern_unittest") {
       "blank:blank_test_ng",
       "bubble:bubble_test_ng",
       "button:button_test_ng",
+
       "calendar:calendar_test_ng",
       "calendar_picker:calendar_picker_test_ng",
       "canvas:canvas_test_ng",
@@ -256,7 +260,6 @@ group("core_pattern_unittest") {
       "time_picker:time_picker_dialog_test_ng",
       "toggle:toggle_test_ng",
       "ui_extension:ui_extension_component_test_ng",
-
       "union_effect_container:union_effect_container_test",
       "video:video_test_ng",
       "view_context:view_context_test_ng",
@@ -264,7 +267,6 @@ group("core_pattern_unittest") {
       "waterflow:water_flow_test_original",
       "waterflow:water_flow_test_segmented",
       "waterflow:water_flow_test_sw",
-
       "window_scene:window_scene_test",
       "withtheme:withtheme_test_ng",
       "xcomponent:xcomponent_test_ng",

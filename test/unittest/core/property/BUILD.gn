@@ -82,10 +82,20 @@ if (is_host_product) {
   }
 }
 
-ace_unittest("gradient_property_test_ng") {
-  module_name = "DrawingSet-Line"
-  type = "new"
-  sources = [ "gradient_property_test_ng.cpp" ]
+test_sources = [ "gradient_property_test_ng.cpp" ]
+
+if (is_host_product) {
+  ace_unittest("gradient_property_test_ng") {
+    type = "host_components"
+    module_name = "DrawingSet-Line"
+    sources = test_sources
+  }
+} else {
+  ace_unittest("gradient_property_test_ng") {
+    module_name = "DrawingSet-Line"
+    type = "new"
+    sources = test_sources
+  }
 }
 
 ace_unittest("measure_utils_test_ng") {
@@ -98,18 +108,18 @@ ace_unittest("property_test_ng") {
   type = "new"
   module_name = "CommonEvent-Input"
   sources = [ "property_test_ng.cpp" ]
-   if (!ace_enable_full_test_suite) {
+  if (!ace_enable_full_test_suite) {
     sources = []
-    sources = [ 
+    sources = [
       "property_test_min.cpp",
       "property_test_core.cpp",
     ]
   } else {
-    sources += [ 
+    sources += [
       "property_test_min.cpp",
       "property_test_core.cpp",
     ]
-   }
+  }
 }
 
 layout_constraint_sources = [ "layout_constraint_test_ng.cpp" ]
