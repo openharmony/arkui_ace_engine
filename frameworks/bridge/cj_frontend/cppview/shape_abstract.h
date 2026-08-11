@@ -22,6 +22,7 @@
 namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT NativeShapeAbstract : public OHOS::FFI::FFIData {
+    DECL_TYPE(NativeShapeAbstract, OHOS::FFI::FFIData)
 public:
     NativeShapeAbstract();
     ~NativeShapeAbstract() override;
@@ -46,18 +47,21 @@ protected:
 };
 
 class ACE_EXPORT NativeCircle : public NativeShapeAbstract {
+    DECL_TYPE(NativeCircle, NativeShapeAbstract)
 public:
     NativeCircle(const Dimension& width, const Dimension& height);
     ~NativeCircle() override;
 };
 
 class ACE_EXPORT NativeEllipse : public NativeShapeAbstract {
+    DECL_TYPE(NativeEllipse, NativeShapeAbstract)
 public:
     NativeEllipse(const Dimension& width, const Dimension& height);
     ~NativeEllipse() override;
 };
 
 class ACE_EXPORT NativeRect : public NativeShapeAbstract {
+    DECL_TYPE(NativeRect, NativeShapeAbstract)
 public:
     NativeRect(const Dimension& width, const Dimension& height);
     ~NativeRect() override;
@@ -67,6 +71,7 @@ public:
 };
 
 class ACE_EXPORT NativePath : public NativeShapeAbstract {
+    DECL_TYPE(NativePath, NativeShapeAbstract)
 public:
     explicit NativePath(const std::string& pathCmd);
     ~NativePath() override;

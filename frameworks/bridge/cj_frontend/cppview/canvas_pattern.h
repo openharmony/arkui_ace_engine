@@ -26,6 +26,7 @@
 namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT NativeCanvasPattern : public OHOS::FFI::FFIData, public Referenced {
+    DECL_TYPE(NativeCanvasPattern, OHOS::FFI::FFIData)
 public:
     NativeCanvasPattern();
     ~NativeCanvasPattern() override;

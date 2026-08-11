@@ -25,6 +25,7 @@
 namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT CJRenderImage : public OHOS::FFI::FFIData, public Referenced {
+    DECL_TYPE(CJRenderImage, OHOS::FFI::FFIData)
 public:
     CJRenderImage();
     explicit CJRenderImage(const int32_t unit);
