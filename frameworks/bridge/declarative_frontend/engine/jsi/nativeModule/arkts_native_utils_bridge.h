@@ -68,6 +68,16 @@ void DestructorInterceptor(void* env, void* nativePtr, void* data)
     NativeRefManager::GetInstance().PostDestructorInterceptorTask([typePtr]() { delete typePtr; });
 }
 
+// Only used by NativeStrongRef.
+template<typename T>
+void SyncDestructorInterceptor(void* env, void* nativePtr, void* data)
+{
+    auto* typePtr = reinterpret_cast<T*>(nativePtr);
+    if (typePtr) {
+        delete typePtr;
+    }
+}
+
 template<typename T>
 T* GetPointerField(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
