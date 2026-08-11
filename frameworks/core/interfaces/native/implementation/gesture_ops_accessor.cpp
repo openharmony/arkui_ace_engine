@@ -45,6 +45,7 @@ constexpr int32_t DEFAULT_TAP_FINGER = 1;
 constexpr int32_t DEFAULT_TAP_COUNT = 1;
 constexpr double DEFAULT_TAP_DISTANCE = std::numeric_limits<double>::infinity();
 constexpr int32_t DEFAULT_LONG_PRESS_FINGER = 1;
+constexpr double DEFAULT_LONG_PRESS_ALLOWABLE_MOVEMENT = 15.0;
 constexpr int32_t DEFAULT_LONG_PRESS_DURATION = 500;
 constexpr int32_t DEFAULT_PINCH_FINGER = 2;
 constexpr int32_t DEFAULT_MAX_PINCH_FINGER = 5;

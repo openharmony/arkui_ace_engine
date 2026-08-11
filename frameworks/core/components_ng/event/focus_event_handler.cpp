@@ -113,8 +113,6 @@ bool FocusEventHandler::OnFocusEvent(const FocusEvent& event)
     }
 
     if (HasCustomKeyEventDispatch(event)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "node: %{public}s/%{public}d hasCustomKeyEventDispatch",
-            GetFrameName().c_str(), GetFrameId());
         return HandleCustomEventDispatch(event);
     }
 
@@ -308,18 +306,16 @@ bool FocusEventHandler::OnClick(const KeyEvent& event)
     if (onClickCallback) {
         auto info = GestureEvent();
         info.SetTimeStamp(event.timeStamp);
-        auto geometryNode = GetGeometryNode();
-        CHECK_NULL_RETURN(geometryNode, false);
-        auto rect = geometryNode->GetFrameRect();
-        auto centerToWindow = Offset((rect.Left() + rect.Right()) / 2, (rect.Top() + rect.Bottom()) / 2);
-        auto centerToNode = Offset((rect.Right() - rect.Left()) / 2, (rect.Bottom() - rect.Top()) / 2);
+        auto node = GetFrameNode();
+        CHECK_NULL_RETURN(node, false);
+        auto rectToWindow = node->GetTransformRectRelativeToWindow();
+        auto centerToNode = Offset(rectToWindow.Width() / 2, rectToWindow.Height() / 2);
+        auto centerToWindow = Offset(rectToWindow.Center().GetX(), rectToWindow.Center().GetY());
         info.SetGlobalLocation(centerToWindow);
         info.SetLocalLocation(centerToNode);
         info.SetSourceDevice(event.sourceType);
         info.SetDeviceId(event.deviceId);
         info.SetInputEventType(InputEventType::KEYBOARD);
-        auto node = GetFrameNode();
-        CHECK_NULL_RETURN(node, false);
         auto pipelineContext = node->GetContextRefPtr();
         if (pipelineContext) {
             auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset() + centerToWindow;

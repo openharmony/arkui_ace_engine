@@ -172,8 +172,8 @@ void RegisterNodeRenderStateCallback(
             env, "register node render state change callback exceed limit.", NODE_RENDER_STATE_REGISTER_ERR_CODE);
         return;
     }
-
     info.nodeId = nodeInfo.second;
+
     bool isCached = false;
     std::lock_guard<std::mutex> lock(g_nodeRenderStateMutex);
     for (auto& item : onNodeRenderStateCallbackMap) {
@@ -197,8 +197,8 @@ void RegisterNodeRenderStateCallback(
         std::map<int32_t, CallbackResourceNodeInfo> map;
         map[info.nodeId] = info;
         onNodeRenderStateCallbackMap[callback] = map;
-        modifier->getArkUIAniGestureEventUIObserverModifier()->triggerNodeRenderStateForFirstRegister(
-            info.instanceId, info.resourceId, info.nodeId);
+        modifier->getArkUIAniGestureEventUIObserverModifier()->triggerNodeRenderStateForFirstRegister(info.instanceId,
+            info.resourceId, info.nodeId);
     }
 }
 
@@ -718,7 +718,6 @@ void RemovePanListenerCallback(ani_env* env, [[maybe_unused]] ani_object aniClas
 }
 
 void SetOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass,
-
     ani_int instanceId, ani_int resourceId, ani_object nodeIdentity, ani_fn_object fnObj)
 {
     CHECK_NULL_VOID(env);
@@ -749,8 +748,8 @@ void SetOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass,
     RegisterNodeRenderStateCallback(env, info, isStr, isInt, fnObjGlobalRef);
 }
 
-void RemoveOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int instanceId,
-    ani_object nodeIdentity, ani_fn_object fnObj)
+void RemoveOnNodeRenderState(ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_int instanceId, ani_object nodeIdentity, ani_fn_object fnObj)
 {
     CHECK_NULL_VOID(env);
     ani_ref fnObjGlobalRef = nullptr;

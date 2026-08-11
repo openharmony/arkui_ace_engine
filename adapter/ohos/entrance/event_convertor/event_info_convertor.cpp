@@ -17,10 +17,13 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "core/common/transform/input_compatible_manager.h"
 #include "adapter/ohos/entrance/event_compatible/compatible_interface.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/feature_manager.h"
+#include "base/utils/system_properties.h"
 namespace OHOS::Ace::NG {
 const int32_t COMPATIBLE_INPUT_MODE = 1;
 const int32_t DISABLE_TRANSFORM = 8;
+const char MULTI_MODAL_INPUT_OPTIONS[] = "multiModalInputOptions";
 const char MOUSE_2_TOUCH_EVENT_MODE[] = "mouse2TouchEventMode";
 const char MOUSE_2_TOUCH_EVENT_MODE_XCOMPONENT_AND_WEB_ONLY[] = "xcomponentAndWebOnly";
 
@@ -28,14 +31,21 @@ EventInfoConvertor::Mouse2TouchEventModeResult EventInfoConvertor::IsCompatibleF
     const std::string& matchedMode)
 {
     std::string config;
-    auto ret = FeatureManager::GetInstance().GetFeatureParam(MOUSE_2_TOUCH_EVENT_MODE, config);
+    auto ret = FeatureManager::GetInstance().GetFeatureParam(MULTI_MODAL_INPUT_OPTIONS, config);
     if (ret == FeatureManager::INIT_FAILED) {
         return Mouse2TouchEventModeResult::INIT_FAILED;
     }
     if (ret != FeatureManager::SUCCESS) {
         return Mouse2TouchEventModeResult::NOT_FOUND;
     }
-    if (config == matchedMode) {
+    auto configJson = JsonUtil::ParseJsonString(config);
+    if (!configJson || configJson->IsNull() || !configJson->IsObject()) {
+        TAG_LOGI(AceLogTag::AceLogTag::ACE_UIEVENT,
+            "key multiModalInputOptions, value is not a valid json string： %{public}s", config.c_str());
+        return Mouse2TouchEventModeResult::NOT_FOUND;
+    }
+    auto value = configJson->GetString(MOUSE_2_TOUCH_EVENT_MODE);
+    if (value == matchedMode) {
         return Mouse2TouchEventModeResult::MATCHED;
     }
     return Mouse2TouchEventModeResult::UNMATCHED;
