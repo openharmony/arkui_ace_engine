@@ -45,7 +45,7 @@ public:
     {
         node_->CreateChildrenFromInfos(infos);
     }
-    const std::vector<std::shared_ptr<ISmartLayoutNode>>& GetChildren() const override;
+    std::vector<std::shared_ptr<ISmartLayoutNode>> GetChildren() const override;
 
     void ApplyColumnConstraints() override { node_->ApplyColumnConstraints(); }
     void ApplyRowConstraints() override { node_->ApplyRowConstraints(); }
@@ -71,7 +71,6 @@ public:
 
 private:
     std::shared_ptr<SmartLayoutNode> node_;
-    mutable std::vector<std::shared_ptr<ISmartLayoutNode>> childrenCache_;
 };
 
 /**

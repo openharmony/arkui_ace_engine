@@ -217,7 +217,7 @@ public:
         }
     }
 
-    const std::vector<std::shared_ptr<ISmartLayoutNode>>& GetChildren() const override
+    std::vector<std::shared_ptr<ISmartLayoutNode>> GetChildren() const override
     {
         return children_;
     }
