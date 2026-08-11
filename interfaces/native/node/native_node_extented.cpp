@@ -2056,7 +2056,7 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinate(
     ArkUI_NodeHandle node = layoutManager->node;
     CHECK_NULL_RETURN_WITH_MESSAGE(node, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "node is null");
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    auto encoding = static_cast<ArkUI_Int32>(ARKUI_TEXT_ENCODING_UTF8);
+    auto encoding = static_cast<ArkUI_Int32>(OH_ARKUI_TEXT_ENCODING_UTF8);
     if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
             fullImpl->getNodeModifiers()->getRichEditorModifier()->
@@ -2081,7 +2081,7 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRange(ArkUI_
     int32_t start = static_cast<int32_t>(OH_Drawing_GetStartFromRange(charRange));
     int32_t end = static_cast<int32_t>(OH_Drawing_GetEndFromRange(charRange));
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    auto encoding = static_cast<ArkUI_Int32>(ARKUI_TEXT_ENCODING_UTF8);
+    auto encoding = static_cast<ArkUI_Int32>(OH_ARKUI_TEXT_ENCODING_UTF8);
     GlyphCharacterRange range;
     if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorGlyphRangeForCharacterRange(
@@ -2117,7 +2117,7 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_
     int32_t start = static_cast<int32_t>(OH_Drawing_GetStartFromRange(glyphRange));
     int32_t end = static_cast<int32_t>(OH_Drawing_GetEndFromRange(glyphRange));
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    auto encoding = static_cast<ArkUI_Int32>(ARKUI_TEXT_ENCODING_UTF8);
+    auto encoding = static_cast<ArkUI_Int32>(OH_ARKUI_TEXT_ENCODING_UTF8);
     GlyphCharacterRange range;
     if (node->type == ARKUI_NODE_TEXT_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorCharacterRangeForGlyphRange(
@@ -2143,7 +2143,7 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRange(ArkUI_
 
 ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinateWithEncoding(
     ArkUI_TextLayoutManager* layoutManager, double dx, double dy,
-    ArkUI_TextEncoding encoding, OH_Drawing_PositionAndAffinity** outPos)
+    OH_ArkUI_TextEncoding encoding, OH_Drawing_PositionAndAffinity** outPos)
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(
         layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID, __FUNCTION__, "layoutManager is null");
@@ -2165,7 +2165,7 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterPositionAtCoordinateWithE
 
 ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEncoding(
     ArkUI_TextLayoutManager* layoutManager, OH_Drawing_Range* charRange,
-    ArkUI_TextEncoding encoding,
+    OH_ArkUI_TextEncoding encoding,
     OH_Drawing_Range** outGlyphRange, OH_Drawing_Range** outActualCharRange)
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(
@@ -2203,7 +2203,7 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphRangeForCharacterRangeWithEnc
 
 ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetCharacterRangeForGlyphRangeWithEncoding(
     ArkUI_TextLayoutManager* layoutManager, OH_Drawing_Range* glyphRange,
-    ArkUI_TextEncoding encoding,
+    OH_ArkUI_TextEncoding encoding,
     OH_Drawing_Range** outCharRange, OH_Drawing_Range** outActualGlyphRange)
 {
     CHECK_NULL_RETURN_WITH_MESSAGE(

@@ -1019,4 +1019,141 @@ HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeThreeParagraphsUt
     EXPECT_EQ(result.second.start, 0);
     EXPECT_EQ(result.second.end, 47);
 }
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRangeCrossStartBoundary001
+ * @tc.desc: Test cross-paragraph query where glyph start falls exactly at the paragraph
+ *           boundary (stripped newline region). The paragraph engine returns -1 for the
+ *           degenerate empty range; the manager must set the boundary directly instead
+ *           of propagating -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeCrossStartBoundary001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    // Simulate a paragraph engine that returns -1 for degenerate (start == end) ranges,
+    // matching the real Rosen behavior that caused the bug.
+    EXPECT_CALL(*paragraph, GetCharacterRangeForGlyphRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, TextEncoding)
+            -> std::pair<TextRange, TextRange> {
+            if (start >= end) {
+                return std::make_pair(TextRange { -1, -1 }, TextRange { -1, -1 });
+            }
+            return std::make_pair(TextRange { 0, end }, TextRange { 0, end });
+        }));
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 20, .end = 40 });
+
+    // start=20 falls exactly at the boundary: actualGlyphEnd=20, effectiveGlyphLength=21.
+    auto result = manager->GetCharacterRangeForGlyphRange(20, 25, TextEncoding::UTF8);
+    EXPECT_NE(result.first.start, -1);
+    EXPECT_NE(result.second.start, -1);
+    EXPECT_EQ(result.first.start, 20);
+    EXPECT_EQ(result.second.start, 20);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRangeCrossStartBoundary001
+ * @tc.desc: Test cross-paragraph query where char start falls exactly at the paragraph
+ *           boundary (stripped newline region). The paragraph engine returns -1 for the
+ *           degenerate empty range; the manager must set the boundary directly instead
+ *           of propagating -1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeCrossStartBoundary001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetCharacterRangeForGlyphRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, TextEncoding)
+            -> std::pair<TextRange, TextRange> {
+            if (start >= end) {
+                return std::make_pair(TextRange { -1, -1 }, TextRange { -1, -1 });
+            }
+            return std::make_pair(TextRange { 0, end }, TextRange { 0, end });
+        }));
+    EXPECT_CALL(*paragraph, GetGlyphRangeForCharacterRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, TextEncoding)
+            -> std::pair<TextRange, TextRange> {
+            if (start >= end) {
+                return std::make_pair(TextRange { -1, -1 }, TextRange { -1, -1 });
+            }
+            return std::make_pair(TextRange { 0, end }, TextRange { 0, end });
+        }));
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 20, .end = 40 });
+
+    // start=20 falls exactly at the boundary: actualCharEnd=20, effectiveCharLength=21.
+    auto result = manager->GetGlyphRangeForCharacterRange(20, 25, TextEncoding::UTF8);
+    EXPECT_NE(result.first.start, -1);
+    EXPECT_NE(result.second.start, -1);
+    EXPECT_EQ(result.first.start, 20);
+    EXPECT_EQ(result.second.start, 20);
+}
+
+/**
+ * @tc.name: GetCharacterRangeForGlyphRangeSameParagraphEndExtension001
+ * @tc.desc: Test same-paragraph query where glyph end extends into the stripped
+ *           newline region (end == effectiveGlyphLength). The localEnd is clamped to
+ *           actualGlyphEnd, but the result must be extended to include the newline.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetCharacterRangeForGlyphRangeSameParagraphEndExtension001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetCharacterRangeForGlyphRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, TextEncoding)
+            -> std::pair<TextRange, TextRange> {
+            if (start >= end) {
+                return std::make_pair(TextRange { -1, -1 }, TextRange { -1, -1 });
+            }
+            return std::make_pair(TextRange { 0, end }, TextRange { 0, end });
+        }));
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 20, .end = 40 });
+
+    // end=21 == effectiveGlyphLength (actualGlyphEnd=20 + strippedNewLineCount=1).
+    // localEnd is clamped to 20, but result must extend to include the newline.
+    auto result = manager->GetCharacterRangeForGlyphRange(10, 21, TextEncoding::UTF8);
+    EXPECT_EQ(result.first.end, 21);
+    EXPECT_EQ(result.second.end, 21);
+}
+
+/**
+ * @tc.name: GetGlyphRangeForCharacterRangeSameParagraphEndExtension001
+ * @tc.desc: Test same-paragraph query where char end extends into the stripped
+ *           newline region (end == effectiveCharLength). The localEnd is clamped to
+ *           actualCharEnd, but the result must be extended to include the newline.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParagraphManagerTestNg, GetGlyphRangeForCharacterRangeSameParagraphEndExtension001, TestSize.Level1)
+{
+    auto manager = AceType::MakeRefPtr<ParagraphManager>();
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*paragraph, GetCharacterRangeForGlyphRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, TextEncoding)
+            -> std::pair<TextRange, TextRange> {
+            if (start >= end) {
+                return std::make_pair(TextRange { -1, -1 }, TextRange { -1, -1 });
+            }
+            return std::make_pair(TextRange { 0, end }, TextRange { 0, end });
+        }));
+    EXPECT_CALL(*paragraph, GetGlyphRangeForCharacterRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, TextEncoding)
+            -> std::pair<TextRange, TextRange> {
+            if (start >= end) {
+                return std::make_pair(TextRange { -1, -1 }, TextRange { -1, -1 });
+            }
+            return std::make_pair(TextRange { 0, end }, TextRange { 0, end });
+        }));
+    manager->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 20 });
+    manager->AddParagraph({ .paragraph = paragraph, .start = 20, .end = 40 });
+
+    // end=21 == effectiveCharLength (actualCharEnd=20 + strippedNewLineCount=1).
+    auto result = manager->GetGlyphRangeForCharacterRange(10, 21, TextEncoding::UTF8);
+    EXPECT_EQ(result.first.end, 21);
+    EXPECT_EQ(result.second.end, 21);
+}
 } // namespace OHOS::Ace::NG
