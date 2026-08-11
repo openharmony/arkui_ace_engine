@@ -21,4 +21,5 @@ build_component_ng("common_text_pattern_ng") {
     "counter_decorator.cpp",
     "counter_foreground_modifier.cpp",
   ]
+  ark_sources = []
 }
