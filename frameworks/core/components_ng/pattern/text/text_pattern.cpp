@@ -236,7 +236,18 @@ void TextPattern::OnAttachToMainTree()
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);  // call OnAttachToMainTreeMultiThread() by multi thread
     isDetachFromMainTree_ = false;
+    auto oldSelectionChild = selectionChild_;
     UpdateSelectionChildRegistration();
+    // Text in a custom component may finish OnModifyDone before it is mounted to the SelectionContainer.
+    // Sync container properties after the child is newly registered, and avoid repeating the sync for an
+    // already registered child.
+    if (selectionChild_ && selectionChild_ != oldSelectionChild) {
+        constexpr uint32_t containerPropertyFlags =
+            static_cast<uint32_t>(SelectionContainerPropertyChange::COPY_OPTION) |
+            static_cast<uint32_t>(SelectionContainerPropertyChange::ENABLE_HAPTIC_FEEDBACK) |
+            static_cast<uint32_t>(SelectionContainerPropertyChange::SELECTED_BACKGROUND_COLOR);
+        selectionChild_->OnContainerPropertyUpdate(containerPropertyFlags);
+    }
 }
 
 void TextPattern::OnDetachFromMainTree()

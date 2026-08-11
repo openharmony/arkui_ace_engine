@@ -432,6 +432,8 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     auto child = builder_->GetChildByIndex(index, needBuild, isCache);
     CHECK_NULL_RETURN(child.second, nullptr);
     child.second->UpdateThemeScopeId(GetThemeScopeId());
+    // Builder-created items bypass UINode::DoAddChild, so propagate the selection container ID explicitly.
+    child.second->UpdateSelectionContainerId(GetSelectionContainerId());
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
         if (!addToRenderTree) {
