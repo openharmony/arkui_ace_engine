@@ -63,6 +63,7 @@ ace_unittest("gestures_test_ng") {
 
   defines = [ "GESTURE_DEBUG_BOUNDARY_SUPPORTED" ]
 
-  include_dirs = [ "//third_party/bounds_checking_function/include" ]
-  deps = [ "//third_party/bounds_checking_function:libsec_static" ]
+  if (is_host_product) {
+    external_deps = [ "bounds_checking_function:libsec_static" ]
+  }
 }
