@@ -69,6 +69,8 @@ public:
 
     void SetDynamicLayoutOptions(bool isDynamic)
     {
+        // needLazyLayout is a monotonic marker set when the Pattern attaches to its FrameNode. DynamicLayout must
+        // set this option on the Pattern before CreateFrameNode/ReplacePattern attaches it.
         isDynamicLayout_ = isDynamic;
     }
 
@@ -117,6 +119,12 @@ public:
     }
 
 private:
+    bool IsLazyLayoutEnabled() const override
+    {
+        // DynamicLayout reuses LazyGridLayoutPattern but does not participate in nested lazy prediction.
+        return !isDynamicLayout_;
+    }
+
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     // Validate a header / footer candidate. isHeader picks which side is the peerEdge.
     bool IsValidHeaderFooter(const RefPtr<UINode>& edge, bool isHeader) const;

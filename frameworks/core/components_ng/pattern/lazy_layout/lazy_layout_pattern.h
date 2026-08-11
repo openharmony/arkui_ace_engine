@@ -26,6 +26,10 @@ namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT LazyLayoutPattern : public Pattern {
     DECLARE_ACE_TYPE(LazyLayoutPattern, Pattern);
 public:
+    void OnAttachToFrameNode() override;
+
+    void AfterMountToParent() override;
+
     virtual AdjustOffset GetAdjustOffset() const = 0;
     virtual AdjustOffset GetAndResetAdjustOffset() = 0;
     virtual bool HasStickyHeader() const
@@ -46,6 +50,13 @@ public:
     void OnDetachFromMainTree() override;
 
 protected:
+    // Called while the Pattern is attached to its FrameNode. Derived patterns that reuse LazyLayoutPattern without
+    // participating in nested lazy prediction must opt out before attachment.
+    virtual bool IsLazyLayoutEnabled() const
+    {
+        return true;
+    }
+
     void DumpStickyHeaderHandoffInfo() const;
     void DumpStickyHeaderHandoffInfo(std::unique_ptr<JsonValue>& json) const;
 

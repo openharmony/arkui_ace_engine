@@ -83,36 +83,46 @@ void LazyWaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     auto contentIdealSize = CreateIdealSize(contentConstraint, Axis::VERTICAL, layoutProperty->GetMeasureType());
     LazyWaterFlowLayoutUtils::ResolveContentCrossSize(contentConstraint, contentIdealSize);
+    UpdateMeasureState(layoutWrapper, layoutProperty, contentIdealSize, contentConstraint.viewPosRef);
+    if (fullRangeMeasure) {
+        LazyWaterFlowLayoutUtils::ExpandMeasureWindowToFullRange(viewStart_, viewEnd_, cacheStartPos_, cacheEndPos_);
+        extendedViewStart_ = viewStart_;
+        extendedViewEnd_ = viewEnd_;
+    }
+    if (isEstimatePass_) {
+        MeasureEstimateItems(layoutWrapper);
+    } else if (!needSkipLayout_) {
+        MeasureItems(layoutWrapper);
+    }
+    SetFrameSize(layoutWrapper, contentIdealSize, padding);
+}
 
-    realMainSize_ = geometryNode->GetPaddingSize().MainSize(Axis::VERTICAL);
+void LazyWaterFlowLayoutAlgorithm::UpdateMeasureState(LayoutWrapper* layoutWrapper,
+    const RefPtr<LazyWaterFlowLayoutProperty>& layoutProperty, const OptionalSizeF& contentIdealSize,
+    std::optional<ViewPosReference>& posRef)
+{
+    realMainSize_ = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(Axis::VERTICAL);
     totalMainSize_ = layoutInfo_->totalMainSize_;
     keepEmptyLanesOutsideContent_ = false;
     UpdateHeaderFooterIndexes(layoutWrapper);
     totalItemCount_ = CalculateItemCount(layoutWrapper);
     UpdateGap(layoutProperty, contentIdealSize);
-
     auto childConstraint = layoutProperty->CreateChildConstraint();
     UpdateItemConstraints(contentIdealSize, childConstraint);
     // Edge sizes still hold last frame's values here.
     prevBodyMainSize_ = std::max(0.0f, totalMainSize_ - layoutInfo_->headerMainSize_ - layoutInfo_->footerMainSize_);
     MeasureHeader(layoutWrapper);
     MeasureFooter(layoutWrapper);
-    UpdateReferencePos(layoutWrapper, contentConstraint.viewPosRef);
+    UpdateReferencePos(layoutWrapper, posRef);
     isPredictPass_ = layoutInfo_->deadline_.has_value();
     ComposeChildStickyInsets(layoutWrapper);
-    if (fullRangeMeasure) {
-        LazyWaterFlowLayoutUtils::ExpandMeasureWindowToFullRange(viewStart_, viewEnd_, cacheStartPos_, cacheEndPos_);
-        extendedViewStart_ = viewStart_;
-        extendedViewEnd_ = viewEnd_;
-    }
-    if (!needSkipLayout_) {
-        MeasureItems(layoutWrapper);
-    }
-    SetFrameSize(layoutWrapper, contentIdealSize, padding);
 }
 
 void LazyWaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    if (isEstimatePass_) {
+        return;
+    }
     CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<LazyWaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -361,18 +371,18 @@ void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
     CHECK_NULL_VOID(layoutWrapper);
     headerAdjustOffset_ = 0.0f;
     startReferenceViewportOffset_ = 0.0f;
+    isEstimatePass_ = false;
+    auto host = layoutWrapper->GetHostNode();
+    const int32_t lanesCount = static_cast<int32_t>(crossLens_.size());
+    const bool hasMeasuredBaseline =
+        Positive(prevBodyMainSize_) || Positive(layoutInfo_->GetAverageItemHeight());
+    // Sample two complete lane sets. LazyWaterFlowLayoutInfo estimates the unmeasured suffix from them.
+    const auto measureMode = LazyLayoutUtils::ResolveMeasureMode(
+        host, Axis::VERTICAL, posRef, totalItemCount_, lanesCount, hasMeasuredBaseline);
+    if (ApplyMeasureMode(measureMode)) {
+        return;
+    }
     if (!posRef.has_value()) {
-        auto host = layoutWrapper->GetHostNode();
-        // When LazyWaterFlowLayout is used under LazyForEach, cached nodes from LazyForEach are not mounted on the
-        // component tree. LazyWaterFlowLayout has not executed onAttachToMainTree, so isNeedLazyLayout flag is not set.
-        // In this scenario, skip layout first to avoid full loading which would break lazy loading.
-        // However, if total item count is less than 1 row, load all items directly.
-        int32_t lanesCount = static_cast<int32_t>(crossLens_.size());
-        if ((totalItemCount_ > lanesCount) && host && !host->IsOnMainTree() && !host->IsNeedLazyLayout() &&
-            LazyLayoutUtils::ValidateAndSetLazyLayoutParent(host, Axis::VERTICAL)) {
-            needSkipLayout_ = true;
-            return;
-        }
         posRef = GetReferencePos(host);
     }
     if (!posRef.has_value() || posRef.value().axis != Axis::VERTICAL) {
@@ -380,30 +390,56 @@ void LazyWaterFlowLayoutAlgorithm::UpdateReferencePos(
         needSkipLayout_ = false;
         return;
     }
+    UpdateViewRange(posRef.value());
+}
 
-    referenceEdge_ = posRef.value().referenceEdge;
+bool LazyWaterFlowLayoutAlgorithm::ApplyMeasureMode(LazyLayoutMeasureMode measureMode)
+{
+    if (measureMode == LazyLayoutMeasureMode::NORMAL) {
+        return false;
+    }
+    needSkipLayout_ = measureMode == LazyLayoutMeasureMode::SKIP;
+    isEstimatePass_ = measureMode == LazyLayoutMeasureMode::ESTIMATE;
+    layoutInfo_->deadline_.reset();
+    if (needSkipLayout_) {
+        return true;
+    }
+    const auto estimateReference = LazyLayoutUtils::CreateEstimateViewPosReference(Axis::VERTICAL);
+    referenceEdge_ = estimateReference.referenceEdge;
+    viewStart_ = estimateReference.viewPosStart;
+    viewEnd_ = estimateReference.viewPosEnd;
+    extendedViewStart_ = viewStart_;
+    extendedViewEnd_ = viewEnd_;
+    cacheStartPos_ = viewStart_;
+    cacheEndPos_ = viewEnd_;
+    return true;
+}
+
+void LazyWaterFlowLayoutAlgorithm::UpdateViewRange(const ViewPosReference& posRef)
+{
+    referenceEdge_ = posRef.referenceEdge;
     if (!layoutInfo_->deadline_.has_value()) {
-        layoutInfo_->deadline_ = posRef.value().deadline;
+        layoutInfo_->deadline_ = posRef.deadline;
     }
-    float referencePos = posRef.value().referencePos;
-    viewExtStart_ = posRef.value().viewExtStart;
-    viewExtEnd_ = posRef.value().viewExtEnd;
-    if (posRef.value().referenceEdge == ReferenceEdge::START) {
-        startReferenceViewportOffset_ = referencePos - posRef.value().viewPosStart;
+    float referencePos = posRef.referencePos;
+    viewExtStart_ = posRef.viewExtStart;
+    viewExtEnd_ = posRef.viewExtEnd;
+    if (posRef.referenceEdge == ReferenceEdge::START) {
+        startReferenceViewportOffset_ = referencePos - posRef.viewPosStart;
     }
-    stickyTopInset_ = posRef.value().stickyInsetStart;
-    stickyBottomInset_ = posRef.value().stickyInsetEnd;
-    if (posRef.value().referenceEdge == ReferenceEdge::START) {
-        viewStart_ = posRef.value().viewPosStart - viewExtStart_ - referencePos;
-        viewEnd_ = posRef.value().viewPosEnd + viewExtEnd_ - referencePos;
+    stickyTopInset_ = posRef.stickyInsetStart;
+    stickyBottomInset_ = posRef.stickyInsetEnd;
+    if (posRef.referenceEdge == ReferenceEdge::START) {
+        viewStart_ = posRef.viewPosStart - viewExtStart_ - referencePos;
+        viewEnd_ = posRef.viewPosEnd + viewExtEnd_ - referencePos;
     } else {
         referencePos += totalMainSize_ - realMainSize_;
-        viewStart_ = posRef.value().viewPosStart - viewExtStart_ - (referencePos - totalMainSize_);
-        viewEnd_ = posRef.value().viewPosEnd + viewExtEnd_ - (referencePos - totalMainSize_);
+        viewStart_ = posRef.viewPosStart - viewExtStart_ - (referencePos - totalMainSize_);
+        viewEnd_ = posRef.viewPosEnd + viewExtEnd_ - (referencePos - totalMainSize_);
     }
     extendedViewStart_ = viewStart_;
     extendedViewEnd_ = viewEnd_;
-    const auto viewSize = posRef.value().viewPosEnd - posRef.value().viewPosStart;
+    const auto viewSize = posRef.viewPosEnd - posRef.viewPosStart;
     const auto cacheExtent = viewSize * cacheSize_;
     cacheStartPos_ = viewStart_ - cacheExtent;
     cacheEndPos_ = viewEnd_ + cacheExtent;
@@ -590,6 +626,27 @@ void LazyWaterFlowLayoutAlgorithm::MeasureItems(LayoutWrapper* layoutWrapper)
         layoutInfo_->prevItemEnd_ = layoutInfo_->itemEnd_;
     }
 
+    FinishMeasureItems(layoutWrapper, prevFrameSnapshot, maxMainSize);
+}
+
+void LazyWaterFlowLayoutAlgorithm::MeasureEstimateItems(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    CHECK_NULL_VOID(layoutInfo_);
+    laneTopologyChanged_ = false;
+    PrevFrameSnapshot prevFrameSnapshot;
+    if (!PrepareMeasureItems(layoutWrapper, prevFrameSnapshot)) {
+        return;
+    }
+    SyncLaneGeometry();
+    float maxMainSize = CollectMaxMainSize(layoutInfo_->lanes_, 0.0f);
+    if (!Positive(layoutInfo_->GetAverageItemHeight())) {
+        const int32_t sampleCount = LazyLayoutUtils::CalculateEstimateSampleCount(
+            totalItemCount_, static_cast<int32_t>(layoutInfo_->lanes_.size()));
+        FillBack(layoutWrapper, Infinity<float>(), 0, sampleCount - 1, maxMainSize);
+    }
+    ReMeasureItems(layoutWrapper);
+    maxMainSize = CollectMaxMainSize(layoutInfo_->lanes_, 0.0f);
     FinishMeasureItems(layoutWrapper, prevFrameSnapshot, maxMainSize);
 }
 
@@ -1187,12 +1244,13 @@ bool LazyWaterFlowLayoutAlgorithm::IsChildMaybeVisible(
                                                  : GreatNotEqual(endPos, viewStart_);
 }
 
-// Only unmeasured probe-row items need a real node; known heights fill the lane without one.
+// Estimate passes create bounded seed items regardless of the viewport. Normal probing creates only unknown-height
+// items immediately beyond the viewport; known heights can fill the probe row without a real node.
 bool LazyWaterFlowLayoutAlgorithm::AllowProbeCacheCreate(
     float startPos, bool sizeKnown, ReferenceEdge referenceEdge) const
 {
-    return !sizeKnown && referenceEdge == ReferenceEdge::START && ShouldProbeBodyBelowViewport() &&
-        LessOrEqual(startPos, ProbeBackBoundary());
+    return isEstimatePass_ || (!sizeKnown && referenceEdge == ReferenceEdge::START &&
+        ShouldProbeBodyBelowViewport() && LessOrEqual(startPos, ProbeBackBoundary()));
 }
 
 RefPtr<LayoutWrapper> LazyWaterFlowLayoutAlgorithm::GetExistingChildWrapper(

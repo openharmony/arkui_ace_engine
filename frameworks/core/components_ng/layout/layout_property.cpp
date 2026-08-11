@@ -476,6 +476,11 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
         ignoreLayoutSafeAreaOpts_ =
             std::make_unique<IgnoreLayoutSafeAreaOpts>(*layoutProperty->ignoreLayoutSafeAreaOpts_);
     }
+    UpdateLayoutPropertyValues(layoutProperty);
+}
+
+void LayoutProperty::UpdateLayoutPropertyValues(const LayoutProperty* layoutProperty)
+{
     geometryTransition_ = layoutProperty->geometryTransition_;
     propVisibility_ = layoutProperty->GetVisibility();
     measureType_ = layoutProperty->measureType_;
@@ -490,6 +495,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
         layoutProperty->localizedBackgroundIgnoresLayoutSafeAreaEdges_;
     isUserSetBackgroundColor_ = layoutProperty->isUserSetBackgroundColor_;
     userDefinedHeightConfigured_ = layoutProperty->userDefinedHeightConfigured_;
+    needLazyLayout_ = layoutProperty->needLazyLayout_;
 }
 
 void LayoutProperty::UpdateCalcLayoutProperty(const MeasureProperty& constraint)

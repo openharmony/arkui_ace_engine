@@ -23,6 +23,7 @@
 #include "utils/ani_utils.h"
 #include "common/common_module.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/interfaces/ani/ani_api.h"
 #include "ani.h"
 
@@ -85,16 +86,9 @@ ani_object CreateLazyLayoutInfo(ani_env* env, const NG::ViewPosReference& viewPo
     ANI_CALL(env, Class_FindMethod(lazyLayoutInfoClass, "<ctor>",
         "iiC{arkui.LazyLayoutAlgorithm.LazyLayoutDirection}:", &lazyLayoutInfoCtor), return nullptr);
     
-    float viewStart = viewPosRef.viewPosStart - viewPosRef.viewExtStart;
-    float viewEnd = viewPosRef.viewPosEnd + viewPosRef.viewExtEnd;
-    
-    if (viewPosRef.referenceEdge == NG::ReferenceEdge::START) {
-        viewStart -= viewPosRef.referencePos;
-        viewEnd -= viewPosRef.referencePos;
-    } else {
-        viewStart -= (viewPosRef.referencePos - mainSize);
-        viewEnd -= (viewPosRef.referencePos - mainSize);
-    }
+    auto viewRange = NG::LazyLayoutUtils::CalculateViewRange(viewPosRef, mainSize);
+    float viewStart = viewRange.start;
+    float viewEnd = viewRange.end;
 
     // Clamp values to valid int32 range to prevent RangeError
     float clampedViewStart = std::clamp(viewStart, static_cast<float>(INT32_MIN), static_cast<float>(INT32_MAX));

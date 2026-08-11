@@ -20,9 +20,47 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/lazy_layout/lazy_layout_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+
+void LazyLayoutPattern::OnAttachToFrameNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    if (IsLazyLayoutEnabled()) {
+        // needLazyLayout is a monotonic capability marker. Publish it before OnAttachToMainTree so a
+        // scrollable parent can recognize cached LazyForEach hosts during its first prediction pass.
+        layoutProperty->SetNeedLazyLayout(true);
+    }
+}
+
+void LazyLayoutPattern::AfterMountToParent()
+{
+    if (!IsLazyLayoutEnabled()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetParent();
+    while (parent) {
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!parentFrameNode) {
+            parent = parent->GetParent();
+            continue;
+        }
+        if (!LazyLayoutUtils::IsAllowedIntermediateNode(parentFrameNode)) {
+            return;
+        }
+        auto layoutProperty = parentFrameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->SetNeedLazyLayout(true);
+        parent = parent->GetParent();
+    }
+}
 
 bool LazyLayoutPattern::SetNextStickyHeaderGap(const std::optional<float>& gap)
 {

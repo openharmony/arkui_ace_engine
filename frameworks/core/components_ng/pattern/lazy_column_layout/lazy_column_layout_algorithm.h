@@ -26,6 +26,8 @@
 
 namespace OHOS::Ace::NG {
 
+enum class LazyLayoutMeasureMode;
+
 class ACE_EXPORT LazyColumnLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(LazyColumnLayoutAlgorithm, LayoutAlgorithm);
 public:
@@ -55,10 +57,16 @@ private:
     void UpdatePosReference(LayoutWrapper* layoutWrapper, std::optional<ViewPosReference>& posRef);
     void UpdateAttribute(const RefPtr<LazyColumnLayoutProperty>& layoutProperty,
         const LayoutConstraintF& contentConstraint);
+    OptionalSizeF ResolveContentIdealSize(const LayoutConstraintF& contentConstraint,
+        const RefPtr<LazyColumnLayoutProperty>& layoutProperty) const;
     void UpdateChildConstraint(const RefPtr<LazyColumnLayoutProperty>& layoutProperty,
         const OptionalSizeF& contentIdealSize);
     bool CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const;
+    // Returns true when a non-NORMAL mode was applied and normal reference handling should stop.
+    bool ApplyMeasureMode(LazyLayoutMeasureMode measureMode);
+    bool UpdateViewRange(LayoutWrapper* layoutWrapper, const ViewPosReference& posRef);
     void MeasureAllItems(LayoutWrapper* layoutWrapper);
+    void MeasureEstimateItems(LayoutWrapper* layoutWrapper);
     void GetStartIndexInfo(int32_t& index, float& pos);
     void GetEndIndexInfo(int32_t& index, float& pos);
     bool NeedLazyLayout(const RefPtr<LayoutWrapper>& childWrapper);
@@ -80,6 +88,8 @@ private:
     void ShiftLayoutWindow(float delta);
     void CaptureFrameBaseline();
     void MeasurePredictItems(LayoutWrapper* layoutWrapper, const RefPtr<LazyColumnLayoutProperty>& layoutProperty,
+        const OptionalSizeF& contentIdealSize);
+    void MeasureItemsByMode(LayoutWrapper* layoutWrapper, const RefPtr<LazyColumnLayoutProperty>& layoutProperty,
         const OptionalSizeF& contentIdealSize);
     void MeasureHeader(LayoutWrapper* layoutWrapper);
     // Resolve the parent-scroll compensation for a header resize; rationale in
@@ -127,6 +137,7 @@ private:
     bool hadMeasuredItems_ = true;
     bool needAllLayout_ = true;
     bool needSkipLayout_ = false;
+    bool isEstimatePass_ = false;
     bool forwardLayout_ = true;
     float referencePos_ = 0.0f;
     float startPos_ = 0.0f;
@@ -152,9 +163,7 @@ private:
     // Header / footer FrameNode weak refs to avoid retain cycles.
     WeakPtr<FrameNode> header_;
     WeakPtr<FrameNode> footer_;
-    // Raw indices of header / footer in the child sequence; -1 means not mounted.
-    // Raw host-child index of the mounted header / footer (-1 when absent). These live only in raw space —
-    // header and footer are not content items and have no item-space counterpart.
+    // Raw host-child indices of the mounted header / footer; -1 means absent. These are not content-item indices.
     int32_t headerIndex_ = -1;
     int32_t footerIndex_ = -1;
 
