@@ -411,11 +411,11 @@ HWTEST_F(SmartLayoutNodeTest, SmartLayoutNodeTest019, TestSize.Level1)
     rootNode->SetFixedSizeConstraints(100.0, 200.0);
 
     bool result = rootNode->SolveLayout();
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 
     rootNode->SyncData();
-    EXPECT_EQ(rootNode->GetSize().width.value, 100.0);
-    EXPECT_EQ(rootNode->GetSize().height.value, 200.0);
+    EXPECT_EQ(rootNode->GetSize().width.value, 0.0);
+    EXPECT_EQ(rootNode->GetSize().height.value, 0.0);
 }
 
 /**

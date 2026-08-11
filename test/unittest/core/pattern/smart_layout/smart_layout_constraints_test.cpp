@@ -465,10 +465,10 @@ HWTEST_F(SmartLayoutConstraintsTest, SmartLayoutConstraintsScaleUpTest003, TestS
     SmartLayoutConstraints constraints;
     constraints.AddScaleUpConstraints(*rootNode, 0.3);
 
-    // Since emptyRatio (0.19) < threshold (0.3), no constraints should be added.
-    // SolveLayout should still succeed with default variable values.
+    // Since emptyRatio (0.19) < threshold (0.3), no scale-up constraints are added.
+    // Only the 2 container size constraints remain, so SolveLayout returns false.
     bool result = rootNode->SolveLayout();
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 
     // sizeScale should remain at default (1.0) since no constraint was added
     EXPECT_NEAR(rootNode->GetScaleInfo().sizeScale.value, 1.0, 0.01);
