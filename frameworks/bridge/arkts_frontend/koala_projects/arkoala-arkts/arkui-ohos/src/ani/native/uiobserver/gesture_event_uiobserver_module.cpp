@@ -493,7 +493,6 @@ void UnregisterNodeRenderStateCallback(
         info.instanceId, info.nodeId, info.nodeKey, isStr, isInt);
     CHECK_NULL_VOID(nodeInfo.first);
 
-    std::lock_guard<std::mutex> lock(g_nodeRenderStateMutex);
     ani_boolean isUndef = false;
     env->Reference_IsUndefined(callback, &isUndef);
     if (isUndef || !callback) {
@@ -515,13 +514,14 @@ void UnregisterNodeRenderStateCallback(
         return;
     }
 
+    std::lock_guard<std::mutex> lock(g_nodeRenderStateMutex);
     for (auto it = onNodeRenderStateCallbackMap.begin(); it != onNodeRenderStateCallbackMap.end();) {
         ani_boolean isEquals = false;
         env->Reference_StrictEquals(callback, it->first, &isEquals);
         auto iter = it->second.find(nodeInfo.second);
         if (isEquals && iter != it->second.end()) {
             modifier->getArkUIAniGestureEventUIObserverModifier()->removeNodeRenderStateCallback(
-                iter->second.instanceId, iter->second.resourceId, nodeInfo.second, false);
+                info.instanceId, iter->second.resourceId, nodeInfo.second, false);
             it->second.erase(iter);
             if (it->second.empty()) {
                 it = onNodeRenderStateCallbackMap.erase(it);
