@@ -542,7 +542,7 @@ export class ArkTabContentPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((4).toByte())
                 const valueTmpValueForIdx4 = valueTmpValue as arkui_component_units_Resource
                 global_resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx4)
-            } else if (valueTmpValue instanceof CustomBuilder) {
+            } else if (valueTmpValue instanceof ((__memo_context: Any, __memo_id: Any) => never)) {
                 thisSerializer.writeInt8((5).toByte())
                 const valueTmpValueForIdx5 = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx5))

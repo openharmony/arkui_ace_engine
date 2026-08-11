@@ -65,6 +65,14 @@ scan_sources("arkui_extra_idl") {
   input_dir = "arkui_extra_idl"
 }
 
+scan_sources("arkgen_local_files") {
+  input_dir = "../arkui_idlize/arkgen-local"
+}
+
+scan_sources("libohos_resource_files") {
+  input_dir = "../arkui_idlize/libohos-resources"
+}
+
 patched_sdk_path = "$target_gen_dir/sdk-patched"
 
 action("patch_sdk") {
@@ -114,7 +122,7 @@ action("runner_gen_code") {
     "generation_config/etsgen-config.json",
     "generation_config/instructive-config.json",
     "generation_config/scraper-config.json",
-    "../arkui_idlize/idlizer-arkgen-2.1.140-panda-1.5.0-dev.58082.tgz",
+    "package.json",
     "../arkui_idlize/idlizer-core-2.1.140-panda-1.5.0-dev.58082.tgz",
     "../arkui_idlize/idlizer-etsgen-2.1.140-panda-1.5.0-dev.58082.tgz",
     "../arkui_idlize/idlizer-interfaces-2.1.140-panda-1.5.0-dev.58082.tgz",
@@ -122,7 +130,9 @@ action("runner_gen_code") {
     "../arkui_idlize/idlizer-runner-2.1.140-panda-1.5.0-dev.58082.tgz",
   ]
   deps = [
+    ":arkgen_local_files",
     ":arkui_extra_idl",
+    ":libohos_resource_files",
     ":patch_sdk",
   ]
   external_deps = [

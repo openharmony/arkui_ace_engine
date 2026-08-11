@@ -8,7 +8,7 @@
         "commander": "10.0.0",
         "rimraf": "^3.0.2",
         "@koalaui/libarkts": "./libarkts/libarkts.tgz",
-        "@idlizer/arkgen": "../arkui_idlize/idlizer-arkgen-2.1.140-panda-1.5.0-dev.58082.tgz",
+        "@idlizer/arkgen": "../arkui_idlize/arkgen-local",
         "@idlizer/core": "../arkui_idlize/idlizer-core-2.1.140-panda-1.5.0-dev.58082.tgz",
         "@idlizer/etsgen": "../arkui_idlize/idlizer-etsgen-2.1.140-panda-1.5.0-dev.58082.tgz",
         "@idlizer/libohos": "../arkui_idlize/idlizer-libohos-2.1.140-panda-1.5.0-dev.58082.tgz",
