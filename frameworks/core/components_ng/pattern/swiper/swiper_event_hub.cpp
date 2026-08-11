@@ -23,8 +23,8 @@
 #ifndef CROSS_PLATFORM
 #include "core/common/recorder/node_data_cache.h"
 #endif
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 namespace OHOS::Ace::NG {
 void SwiperEventHub::FireUnselectedEvent(int32_t index)
@@ -141,6 +141,15 @@ void SwiperEventHub::FireAnimationStartEvent(int32_t index, int32_t targetIndex,
     }
 }
 
+void SwiperEventHub::ContentChangeOnTransitionEnd() const
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto swiperPattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->ContentChangeOnTransitionEnd(frameNode);
+}
+
 void SwiperEventHub::FireAnimationEndEvent(int32_t index, const AnimationCallbackInfo& info)
 {
     if (aniStartCalledCount_ <= 0) {
@@ -169,6 +178,9 @@ void SwiperEventHub::FireAnimationEndEvent(int32_t index, const AnimationCallbac
             });
     }
     --aniStartCalledCount_;
+    if (aniStartCalledCount_ == 0) {
+        ContentChangeOnTransitionEnd();
+    }
 }
 
 void SwiperEventHub::FireAnimationEndOnForceEvent(int32_t index, const AnimationCallbackInfo& info)
@@ -185,25 +197,26 @@ void SwiperEventHub::FireAnimationEndOnForceEvent(int32_t index, const Animation
         return;
     }
     ReportComponentChangeEvent("onAnimationEnd", index, info.currentOffset.value_or(0.0f));
-    if (animationEndEvents_.empty()) {
-        --aniStartCalledCount_;
-        return;
-    }
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    context->AddBuildFinishCallBack([this, index, info]() {
-        std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
-            [index, info](const AnimationEndEventPtr& animationEndEvent) {
-                if (!animationEndEvent || !(*animationEndEvent)) {
-                    return;
-                }
-                auto event = *animationEndEvent;
-                event(index, info);
+    if (!animationEndEvents_.empty()) {
+        auto frameNode = GetFrameNode();
+        auto context = frameNode ? frameNode->GetContext() : nullptr;
+        if (context) {
+            context->AddBuildFinishCallBack([this, index, info]() {
+                std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
+                    [index, info](const AnimationEndEventPtr& animationEndEvent) {
+                        if (!animationEndEvent || !(*animationEndEvent)) {
+                            return;
+                        }
+                        auto event = *animationEndEvent;
+                        event(index, info);
+                    });
             });
-    });
+        }
+    }
     --aniStartCalledCount_;
+    if (aniStartCalledCount_ == 0) {
+        ContentChangeOnTransitionEnd();
+    }
 }
 
 void SwiperEventHub::FireGestureSwipeEvent(int32_t index, const AnimationCallbackInfo& info) const

@@ -2140,6 +2140,9 @@ void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType curre
     }
     pattern_->OnVisibleChange(currentVisibility == VisibleType::VISIBLE);
     UpdateChildrenVisible(preVisibility, currentVisibility);
+    if (preVisibility != currentVisibility) {
+        NotifyPageSceneVisibilityChanged();
+    }
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto colorMode = pipeline->GetColorMode() == ColorMode::DARK ? 1 : 0;
@@ -2151,6 +2154,39 @@ void FrameNode::NotifyVisibleChange(VisibleType preVisibility, VisibleType curre
             NotifyColorModeChange(colorMode);
         }
     }
+}
+
+void FrameNode::NotifyPageSceneVisibilityChanged()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
+    if (!IsOnMainTree()) {
+        return;
+    }
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeStateChanged(
+        tag_, UiSessionManager::PageSceneNodeStateChange::VISIBILITY);
+#endif
+}
+
+void FrameNode::NotifyPageSceneActiveChanged()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
+    if (!IsOnMainTree()) {
+        return;
+    }
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeStateChanged(
+        tag_, UiSessionManager::PageSceneNodeStateChange::ACTIVE);
+#endif
+}
+
+void FrameNode::NotifyPageSceneFocusabilityChanged()
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM) && defined(WEB_SUPPORTED)
+    if (!IsOnMainTree()) {
+        return;
+    }
+    UiSessionManager::GetInstance()->NotifyPageSceneNodeStateChanged(
+        tag_, UiSessionManager::PageSceneNodeStateChange::FOCUSABILITY);
+#endif
 }
 
 void FrameNode::TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility)
@@ -2956,6 +2992,7 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
         NotifyLazyChildren();
     }
     CHECK_NULL_VOID(activeChanged);
+    NotifyPageSceneActiveChanged();
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);

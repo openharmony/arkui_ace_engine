@@ -658,7 +658,7 @@ void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, b
 void ContentChangeManager::OnTextChangeEnd(const RectF& rect, const RectF& rootRect)
 {
     if (!IsContentChangeDetectEnable() || !textCollecting_ || rect.IsEmpty() ||
-        !rootRect.IsIntersectWith(rect) || IsScrolling() || IsTransitioning()) {
+        !rootRect.IsIntersectWith(rect) || IsContentChanging()) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OntextChange {%s}", rect.ToString().c_str());
@@ -773,7 +773,7 @@ bool ContentChangeManager::IsTextAABBCollecting() const
 
 void ContentChangeManager::StartTextAABBCollecting()
 {
-    if (!IsContentChangeDetectEnable() || textCollecting_ || IsScrolling() || IsTransitioning()) {
+    if (!IsContentChangeDetectEnable() || textCollecting_ || IsContentChanging()) {
         return;
     }
 
@@ -786,7 +786,7 @@ void ContentChangeManager::StartTextAABBCollecting()
 
 void ContentChangeManager::StopTextAABBCollecting(const RectF& rootRect)
 {
-    if (!IsContentChangeDetectEnable() || textAABB_.IsEmpty() || IsScrolling() || IsTransitioning()) {
+    if (!IsContentChangeDetectEnable() || textAABB_.IsEmpty() || IsContentChanging()) {
         return;
     }
     if (rootRect.IsIntersectWith(textAABB_) && !IsInTransitionDelayWindow()) {
@@ -834,7 +834,7 @@ void ContentChangeManager::NotifyPageSceneContentChanged(bool flushNow)
 
 void ContentChangeManager::FlushPageSceneNodeChanged()
 {
-    if (IsScrolling() || IsTransitioning() || IsSwiperScrolling()) {
+    if (IsContentChanging()) {
         return;
     }
     auto uiSessionManager = UiSessionManager::GetInstance();
@@ -909,6 +909,11 @@ bool ContentChangeManager::IsTransitioning() const
     return !transitioningNodes_.empty();
 }
 
+bool ContentChangeManager::IsContentChanging() const
+{
+    return IsScrolling() || IsTransitioning() || IsSwiperScrolling();
+}
+
 uint32_t ContentChangeManager::ConvertEventStringToEnum(const std::string& type) const
 {
     std::map<std::string, uint32_t> eventMap = {
@@ -949,7 +954,7 @@ bool ContentChangeManager::IsIgnoringEventType(uint32_t type) const
 void ContentChangeManager::OnImageChangeEnd(const WeakPtr<FrameNode>& keyNode, const std::string& sourceType,
     const RectF& rootRect)
 {
-    if (!IsContentChangeDetectEnable() || IsScrolling() || IsTransitioning()) {
+    if (!IsContentChangeDetectEnable() || IsContentChanging()) {
         return;
     }
 

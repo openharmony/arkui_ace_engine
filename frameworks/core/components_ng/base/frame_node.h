@@ -837,6 +837,9 @@ public:
     bool RenderCustomChild(int64_t deadline) override;
     void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility) override;
     void NotifyVisibleChange(VisibleType preVisibility, VisibleType currentVisibility);
+    void NotifyPageSceneVisibilityChanged();
+    void NotifyPageSceneActiveChanged();
+    void NotifyPageSceneFocusabilityChanged();
 
     void PushDestroyCallbackWithTag(std::function<void()>&& callback, const std::string& tag)
     {

@@ -363,6 +363,7 @@ HWTEST_F(NavigationPatternTestSevenNg, ReplaceNodeWithProxyNodeIfNeeded002, Test
     ASSERT_NE(destProperty, nullptr);
     dest->layoutProperty_ = nullptr;
     destProperty->UpdateVisibility(VisibleType::INVISIBLE);
+    dest->focusHub_ = nullptr;
 
     pattern->ReplaceNodeWithProxyNodeIfNeeded(navContentNode, dest);
     EXPECT_EQ(destProperty->GetVisibilityValue(VisibleType::VISIBLE), VisibleType::INVISIBLE);
