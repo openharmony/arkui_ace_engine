@@ -1564,8 +1564,9 @@ public:
     {
         return IsTextArea();
     }
+    TextDirection GetLayoutDirection() const override;
     TextDirection GetNonAutoLayoutDirection() const override;
-    float GetFontScaleFromEnv() const override;
+    float GetFontScaleFromEnv(const RefPtr<FrameNode>& hostNode) const override;
     std::optional<MarginProperty> GetMarginProperty() const override;
     void UpdateMargin(const MarginProperty& margin) override;
     bool HasMarginByUser() const override;

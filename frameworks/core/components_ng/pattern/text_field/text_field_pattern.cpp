@@ -8906,6 +8906,13 @@ Color TextFieldPattern::GetCounterTextOverflowColor() const
     return layoutProperty->GetCounterTextOverflowColorValue(Color::RED);
 }
 
+TextDirection TextFieldPattern::GetLayoutDirection() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, TextDirection::LTR);
+    return layoutProperty->GetLayoutDirection();
+}
+
 TextDirection TextFieldPattern::GetNonAutoLayoutDirection() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -8913,13 +8920,13 @@ TextDirection TextFieldPattern::GetNonAutoLayoutDirection() const
     return layoutProperty->GetNonAutoLayoutDirection();
 }
 
-float TextFieldPattern::GetFontScaleFromEnv() const
+float TextFieldPattern::GetFontScaleFromEnv(const RefPtr<FrameNode>& hostNode) const
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 1.0f);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, 1.0f);
-    return pipeline->GetFontScaleFromEnv(host);
+    return pipeline->GetFontScaleFromEnv(hostNode);
 }
 
 std::optional<MarginProperty> TextFieldPattern::GetMarginProperty() const
