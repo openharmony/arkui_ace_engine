@@ -2829,6 +2829,9 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
         navBarRenderContext->UpdateClipEdge(true);
         navigationGroupNode->AddChild(navBarNode);
         navigationGroupNode->SetNavBarNode(navBarNode);
+        auto navBarPattern = navBarNode->GetPattern<NavBarPattern>();
+        CHECK_NULL_RETURN(navBarPattern, nullptr);
+        navBarPattern->SetNavigationNode(navigationGroupNode);
 
         // titleBar node
         if (!navBarNode->GetTitleBarNode()) {
