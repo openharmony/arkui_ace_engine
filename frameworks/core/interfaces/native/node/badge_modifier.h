@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,9 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_BADGE_MODIFIER_H
 
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/badge/bridge/badge_custom_modifier.h"
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIBadgeModifier* GetBadgeModifier();
+ACE_FORCE_EXPORT const ArkUIBadgeCustomModifier* GetBadgeCustomModifier();
 }
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_BADGE_MODIFIER_H

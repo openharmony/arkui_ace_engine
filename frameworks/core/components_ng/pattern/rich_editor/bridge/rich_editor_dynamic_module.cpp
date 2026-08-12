@@ -18,6 +18,7 @@
 #include "arkoala_api_generated.h"
 
 #include "core/components_ng/pattern/rich_editor/bridge/arkts_native_rich_editor_bridge.h"
+#include "core/components_ng/pattern/rich_editor/bridge/rich_editor_custom_modifier.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 #ifdef INCLUDE_GENERATED_SOURCES
@@ -35,6 +36,7 @@ namespace NG {
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorDynamicModifier();
 const CJUIRichEditorModifier* GetCJUIRichEditorDynamicModifier();
+const ArkUIRichEditorCustomModifier* GetRichEditorCustomModifier();
 }
 
 #ifdef INCLUDE_GENERATED_SOURCES
@@ -76,7 +78,7 @@ void* RichEditorDynamicModule::GetModel()
 
 const void* RichEditorDynamicModule::GetCustomModifier(const std::string& name)
 {
-    return nullptr;
+    return NG::NodeModifier::GetRichEditorCustomModifier();
 }
 
 } // namespace OHOS::Ace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,31 +15,48 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_loading_progress_ffi.h"
 
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 
 using namespace OHOS::Ace;
 
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::LoadingProgressModelNG* GetLoadingProgressModel()
+{
+    static NG::LoadingProgressModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("LoadingProgress");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find loading progress dynamic module");
+        }
+        model = reinterpret_cast<NG::LoadingProgressModelNG*>(module->GetModel());
+    }
+    return model;
+}
+}
 extern "C" {
 void FfiOHOSAceFrameworkLoadingProgressCreate()
 {
-    LoadingProgressModel::GetInstance()->Create();
+    GetLoadingProgressModel()->Create();
 }
 
 void FfiOHOSAceFrameworkLoadingProgressSetColor(uint32_t progressColor)
 {
-    LoadingProgressModel::GetInstance()->SetColor(Color(progressColor));
+    GetLoadingProgressModel()->SetColor(Color(progressColor));
 }
 
 void FfiOHOSAceFrameworkLoadingProgressSetEnableLoading(bool enable)
 {
-    LoadingProgressModel::GetInstance()->SetEnableLoading(enable);
+    GetLoadingProgressModel()->SetEnableLoading(enable);
 }
 
 void FfiOHOSAceFrameworkLoadingProgressForegroundColor(uint32_t color)
 {
-    LoadingProgressModel::GetInstance()->SetForegroundColorParseFailed(false);
-    LoadingProgressModel::GetInstance()->SetColor(Color(color));
+    GetLoadingProgressModel()->SetForegroundColorParseFailed(false);
+    GetLoadingProgressModel()->SetColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkLoadingProgressForegroundColorStrategy(char* strategy)

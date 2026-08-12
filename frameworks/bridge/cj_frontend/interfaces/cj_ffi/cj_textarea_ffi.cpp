@@ -16,10 +16,28 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textarea_ffi.h"
 
 #include "base/utils/utf_helper.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
+
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::TextFieldModelNG* GetTextAreaTextFieldModel()
+{
+    static NG::TextFieldModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TextArea");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find textarea dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::TextFieldModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -95,7 +113,7 @@ void FfiOHOSAceFrameworkTextAreaCreate(const char* placeholder, const char* text
     }
     std::string placeholderStr8(placeholder);
     std::string textStr8(text);
-    auto nativeController = TextFieldModel::GetInstance()->CreateTextArea(UtfUtils::Str8DebugToStr16(placeholderStr8),
+    auto nativeController = GetTextAreaTextFieldModel()->CreateTextArea(UtfUtils::Str8DebugToStr16(placeholderStr8),
         UtfUtils::Str8DebugToStr16(textStr8));
     controller->SetController(nativeController);
 }

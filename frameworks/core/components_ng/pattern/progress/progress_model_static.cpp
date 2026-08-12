@@ -436,7 +436,7 @@ void ProgressModelStatic::SetTextDefaultStyle(FrameNode* frameNode, const RefPtr
     ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, Text, number, frameNode);
 }
 
-void ProgressModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value)
+ACE_FORCE_EXPORT void ProgressModelStatic::SetBackgroundColor(FrameNode* frameNode, const std::optional<Color>& value)
 {
     CHECK_NULL_VOID(frameNode);
     if (value) {

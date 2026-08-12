@@ -121,6 +121,7 @@
 #include "core/components_ng/pattern/indexer/indexer_theme_wrapper.h"
 #include "core/components_ng/pattern/swiper/swiper_theme_wrapper.h"
 #include "core/components_ng/pattern/tabs/tab_theme_wrapper.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -128,6 +129,13 @@ template<class T>
 RefPtr<Theme> ThemeBuildFunc(const RefPtr<ThemeConstants>& themeConstants)
 {
     return T().Build(themeConstants);
+}
+
+RefPtr<Theme> RichEditorThemeBuildFunc(const RefPtr<ThemeConstants>& themeConstants)
+{
+    auto* customModifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_RETURN(customModifier, nullptr);
+    return customModifier->buildRichEditorTheme(themeConstants);
 }
 
 const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants>& themeConstants)> THEME_BUILDERS = {
@@ -185,7 +193,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::FormTheme::TypeId(), &ThemeBuildFunc<NG::FormTheme::Builder> },
     { CloseIconTheme::TypeId(), &ThemeBuildFunc<CloseIconTheme::Builder> },
     { NG::SideBarTheme::TypeId(), &ThemeBuildFunc<NG::SideBarTheme::Builder> },
-    { NG::RichEditorTheme::TypeId(), &ThemeBuildFunc<NG::RichEditorTheme::Builder> },
+    { NG::RichEditorTheme::TypeId(), &RichEditorThemeBuildFunc },
     { NG::GridItemTheme::TypeId(), &ThemeBuildFunc<NG::GridItemTheme::Builder> },
     { NG::MenuTheme::TypeId(), &ThemeBuildFunc<NG::MenuTheme::Builder> },
     { NG::GaugeTheme::TypeId(), &ThemeBuildFunc<NG::GaugeTheme::Builder> },
@@ -210,6 +218,13 @@ RefPtr<TokenThemeWrapper> ThemeWrapperBuildFunc(const RefPtr<ThemeConstants>& th
     return T().BuildWrapper(themeConstants);
 }
 
+RefPtr<TokenThemeWrapper> RichEditorThemeWrapperBuildFunc(const RefPtr<ThemeConstants>& themeConstants)
+{
+    auto* customModifier = NG::NodeModifier::GetRichEditorCustomModifier();
+    CHECK_NULL_RETURN(customModifier, nullptr);
+    return customModifier->buildRichEditorThemeWrapper(themeConstants);
+}
+
 const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<ThemeConstants>&)>
     TOKEN_THEME_WRAPPER_BUILDERS = {
         { ButtonTheme::TypeId(), &ThemeWrapperBuildFunc<NG::ButtonThemeWrapper::WrapperBuilder> },
@@ -219,7 +234,7 @@ const std::unordered_map<ThemeType, RefPtr<TokenThemeWrapper>(*)(const RefPtr<Th
         { CounterTheme::TypeId(), &ThemeWrapperBuildFunc<NG::CounterThemeWrapper::WrapperBuilder> },
         { DividerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DividerThemeWrapper::WrapperBuilder> },
         { DialogTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DialogThemeWrapper::WrapperBuilder> },
-        { NG::RichEditorTheme::TypeId(), &ThemeWrapperBuildFunc<NG::RichEditorThemeWrapper::WrapperBuilder> },
+        { NG::RichEditorTheme::TypeId(), &RichEditorThemeWrapperBuildFunc },
         { SearchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SearchThemeWrapper::WrapperBuilder> },
         { SliderTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SliderThemeWrapper::WrapperBuilder> },
         { V2::PatternLockTheme::TypeId(), &ThemeWrapperBuildFunc<NG::PatternLockThemeWrapper::WrapperBuilder> },

@@ -26,6 +26,7 @@ build_component_ng("search_pattern_ng") {
     "search_node.cpp",
     "search_pattern_multi_thread.cpp",
     "search_pattern.cpp",
+    "search_text_field.cpp",
   ]
 
   ark_sources = [

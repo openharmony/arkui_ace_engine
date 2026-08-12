@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/rich_editor/bridge/arkts_native_rich_editor_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.h"
+#include "core/components_ng/pattern/text_input/bridge/arkts_native_text_input_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_richeditor.h"
 #include "core/common/ace_application_info.h"
@@ -21,9 +21,11 @@
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/components/common/properties/text_style_gradient.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text/selection_info.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/interfaces/native/node/rich_editor_modifier.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "interfaces/inner_api/drawable_descriptor/image_source_preview.h"
@@ -2879,7 +2881,9 @@ ArkUINativeModuleValue RichEditorBridge::SetOnWillAttachIME(ArkUIRuntimeCallInfo
         nodeModifiers->getRichEditorModifier()->resetRichEditorOnWillAttachIME(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    IMEAttachCallback callback = TextInputBridge::ParseAndCreateIMEAttachCallback(vm, callbackArg, frameNode, isJsView);
+    auto* customModifier = NodeModifier::GetTextInputCustomModifier();
+    CHECK_NULL_RETURN(customModifier, panda::JSValueRef::Undefined(vm));
+    IMEAttachCallback callback = customModifier->parseAndCreateIMEAttachCallback(vm, callbackArg, frameNode, isJsView);
     CHECK_NULL_RETURN(callback, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getRichEditorModifier()->setRichEditorOnWillAttachIME(
         nativeNode, reinterpret_cast<void*>(&callback));

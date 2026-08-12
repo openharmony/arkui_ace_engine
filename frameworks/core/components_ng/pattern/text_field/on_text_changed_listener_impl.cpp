@@ -20,7 +20,7 @@
 #include "base/input_manager/input_manager.h"
 #include "base/log/ace_trace.h"
 #include "base/memory/ace_type.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {

@@ -37,6 +37,8 @@ constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MIN_LINES = 1;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr int32_t DEFAULT_ALPHA = 255;
+constexpr char TEXTAREA_ETS_TAG[] = "TextArea";
+constexpr char TEXTINPUT_ETS_TAG[] = "TextInput";
 
 RefPtr<FrameNode> NormalizeShowUnitNode(const RefPtr<UINode>& unitNode)
 {
@@ -57,7 +59,7 @@ RefPtr<FrameNode> NormalizeShowUnitNode(const RefPtr<UINode>& unitNode)
 RefPtr<FrameNode> TextFieldModelStatic::CreateTextInputNode(
     int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
     ACE_UINODE_TRACE(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
@@ -76,7 +78,7 @@ RefPtr<FrameNode> TextFieldModelStatic::CreateTextInputNode(
 RefPtr<FrameNode> TextFieldModelStatic::CreateTextAreaNode(
     int32_t nodeId, const std::optional<std::u16string>& placeholder, const std::optional<std::u16string>& value)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTAREA_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    auto frameNode = FrameNode::CreateFrameNode(TEXTAREA_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
     ACE_UINODE_TRACE(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);

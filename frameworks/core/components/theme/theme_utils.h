@@ -32,7 +32,7 @@ struct IdParseResult {
     std::string refAttr = "";
 };
 
-class ACE_EXPORT ThemeUtils {
+class ACE_FORCE_EXPORT ThemeUtils {
 public:
     ThemeUtils() = delete;
     ~ThemeUtils() = delete;

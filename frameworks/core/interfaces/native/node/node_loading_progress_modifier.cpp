@@ -12,165 +12,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "node_loading_progress_modifier.h"
+#include "core/interfaces/native/node/node_loading_progress_modifier.h"
 
-#include "base/error/error_code.h"
-#include "base/utils/multi_thread.h"
-#include "core/common/resource/resource_parse_utils.h"
-#include "core/components/progress/progress_theme.h"
-#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
-#include "core/interfaces/native/node/node_loading_progress_modifier_multi_thread.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "ui/base/utils/utils.h"
+
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-ArkUI_Uint32 GetLoadingProgressColor(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, 0x0);
-    return LoadingProgressModelNG::GetColor(frameNode);
-}
-
-void SetLoadingProgressColor(ArkUINodeHandle node, uint32_t colorValue)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetColorByUser(frameNode, true);
-    LoadingProgressModelNG::SetColor(frameNode, Color(colorValue));
-}
-
-void SetLoadingProgressColorPtr(ArkUINodeHandle node, uint32_t colorValue, void* colorRawPtr)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetColorByUser(frameNode, true);
-    Color setColor = Color(colorValue);
-
-    if (SystemProperties::ConfigChangePerform()) {
-        RefPtr<ResourceObject> colorResObj;
-        if (!colorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(
-                colorResObj, setColor, ResourceParseUtils::MakeNativeNodeInfo(frameNode));
-        } else {
-            auto* color = static_cast<ResourceObject*>(colorRawPtr);
-            colorResObj = AceType::Claim(color);
-        }
-        LoadingProgressModelNG::CreateWithResourceObj(frameNode, LoadingProgressResourceType::COLOR, colorResObj);
-    }
-    LoadingProgressModelNG::SetColor(frameNode, setColor);
-}
-
-void ResetLoadingProgressColor(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    // This function has a mirror function (XxxMultiThread) and needs to be modified synchronously.
-    FREE_NODE_CHECK(frameNode, ResetLoadingProgressColor, node);
-    CHECK_NULL_VOID(frameNode);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        LoadingProgressModelNG::ResetColor(frameNode);
-    }
-    if (SystemProperties::ConfigChangePerform()) {
-        LoadingProgressModelNG::SetColorByUser(frameNode, false);
-        LoadingProgressModelNG::CreateWithResourceObj(frameNode, LoadingProgressResourceType::COLOR, nullptr);
-    }
-}
-
-ArkUI_Bool GetEnableLoading(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
-    return LoadingProgressModelNG::GetEnableLoading(frameNode);
-}
-
-void SetEnableLoading(ArkUINodeHandle node, ArkUI_Bool enableLoadingValue)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetEnableLoading(frameNode, enableLoadingValue);
-}
-
-void ResetEnableLoading(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetEnableLoading(frameNode, true);
-}
-
-void SetLoadingProgressForegroundColor(ArkUINodeHandle node, ArkUI_Uint32 colorValue)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetForegroundColorParseFailed(frameNode, false);
-    LoadingProgressModelNG::SetForegroundColor(frameNode, Color(colorValue));
-}
-
-void SetLoadingProgressForegroundColorPtr(ArkUINodeHandle node, ArkUI_Uint32 colorValue, void* foregroundColorRawPtr)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetForegroundColorParseFailed(frameNode, false);
-    LoadingProgressModelNG::SetForegroundColor(frameNode, Color(colorValue));
-
-    if (SystemProperties::ConfigChangePerform()) {
-        auto* color = reinterpret_cast<ResourceObject*>(foregroundColorRawPtr);
-        auto colorResObj = AceType::Claim(color);
-        LoadingProgressModelNG::CreateWithResourceObj(
-            frameNode, LoadingProgressResourceType::FOREGROUNDCOLOR, colorResObj);
-    }
-}
-
-void ResetLoadingProgressForegroundColor(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    LoadingProgressModelNG::SetForegroundColorParseFailed(frameNode, true);
-    LoadingProgressModelNG::ResetForegroundColor(frameNode);
-    if (SystemProperties::ConfigChangePerform()) {
-        LoadingProgressModelNG::CreateWithResourceObj(
-            frameNode, LoadingProgressResourceType::FOREGROUNDCOLOR, nullptr);
-    }
-}
-} // namespace
-
 namespace NodeModifier {
 const ArkUILoadingProgressModifier* GetLoadingProgressModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUILoadingProgressModifier modifier = {
-        .getColor = GetLoadingProgressColor,
-        .setColor = SetLoadingProgressColor,
-        .setColorPtr = SetLoadingProgressColorPtr,
-        .resetColor = ResetLoadingProgressColor,
-        .getEnableLoading = GetEnableLoading,
-        .setEnableLoading = SetEnableLoading,
-        .resetEnableLoading = ResetEnableLoading,
-        .setForegroundColor = SetLoadingProgressForegroundColor,
-        .setForegroundColorPtr = SetLoadingProgressForegroundColorPtr,
-        .resetForegroundColor = ResetLoadingProgressForegroundColor,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const ArkUILoadingProgressModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("LoadingProgress");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUILoadingProgressModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
 
 const CJUILoadingProgressModifier* GetCJUILoadingProgressModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUILoadingProgressModifier modifier = {
-        .getColor = GetLoadingProgressColor,
-        .setColor = SetLoadingProgressColor,
-        .setColorPtr = SetLoadingProgressColorPtr,
-        .resetColor = ResetLoadingProgressColor,
-        .getEnableLoading = GetEnableLoading,
-        .setEnableLoading = SetEnableLoading,
-        .resetEnableLoading = ResetEnableLoading,
-        .setForegroundColor = SetLoadingProgressForegroundColor,
-        .setForegroundColorPtr = SetLoadingProgressForegroundColorPtr,
-        .resetForegroundColor = ResetLoadingProgressForegroundColor,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const CJUILoadingProgressModifier*  cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("LoadingProgress");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUILoadingProgressModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
 }
-} // namespace NodeModifier
+
+}
 } // namespace OHOS::Ace::NG

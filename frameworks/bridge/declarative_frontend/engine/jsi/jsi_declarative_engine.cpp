@@ -807,6 +807,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
 void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime)
 {
     static const std::vector<std::pair<std::string, std::string>> componentToAbcName = {
+        { "Badge", "arkui.components.arkbadge" },
         { "Button", "arkui.components.arkbutton" },
         { "CalendarPicker", "arkui.components.arkcalendarpicker" },
         { "CalendarPickerDialog", "arkui.components.arkcalendarpicker" },
@@ -819,6 +820,7 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
 #endif
         { "Gauge", "arkui.components.arkgauge" },
         { "Hyperlink", "arkui.components.arkhyperlink" },
+        { "ImageSpan", "arkui.components.arkimagespan" },
         { "Indexer", "arkui.components.arkalphabetindexer" },
         { "Marquee", "arkui.components.arkmarquee" },
         { "Menu", "arkui.components.arkmenu" },
@@ -827,13 +829,17 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "Radio", "arkui.components.arkradio" },
         { "Rating", "arkui.components.arkrating" },
         { "Richeditor", "arkui.components.arkricheditor" },
+        { "SymbolSpan", "arkui.components.arksymbolspan" },
         { "RowSplit", "arkui.components.arkrowsplit" },
         { "Search", "arkui.components.arksearch" },
         { "Sidebar", "arkui.components.arksidebarcontainer" },
         { "Slider", "arkui.components.arkslider" },
+        { "LoadingProgress", "arkui.components.arkloadingprogress" },
         { "Stepper", "arkui.components.arkstepper" },
         { "StepperItem", "arkui.components.arkstepperitem" },
         { "SymbolGlyph", "arkui.components.arksymbolglyph" },
+        { "TextArea", "arkui.components.arktextarea" },
+        { "TextInput", "arkui.components.arktextinput" },
         { "TimePicker", "arkui.components.arktimepicker" },
         { "TimePickerDialog", "arkui.components.arktimepicker" },
         { "Toggle", "arkui.components.arktoggle" },
@@ -845,6 +851,8 @@ void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRunti
         { "DatePickerDialog", "arkui.components.arkdatepicker" },
         { "TextPicker", "arkui.components.arktextpicker" },
         { "TextPickerDialog", "arkui.components.arktextpicker" },
+        { "Progress", "arkui.components.arkprogress" },
+        { "TextTimer", "arkui.components.arktexttimer" },
         { "Select", "arkui.components.arkselect" },
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();

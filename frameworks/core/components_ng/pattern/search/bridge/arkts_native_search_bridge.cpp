@@ -26,7 +26,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.h"
+#include "core/components_ng/pattern/text_input/bridge/arkts_native_text_input_bridge.h"
 #include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/search/search_theme.h"
@@ -1509,7 +1509,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchHeight(ArkUIRuntimeCallInfo* runti
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, nodeArg, vm), true, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
-    if (TextInputBridge::ParseLayoutPolicy(vm, valueArg, false)) {
+    if (TextInputBridge::ParseLayoutPolicy(vm, nativeNode, valueArg, false)) {
         GetArkUINodeModifiers()->getCommonModifier()->resetHeight(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }

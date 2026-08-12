@@ -22,7 +22,7 @@
 #include "test/mock/frameworks/base/thread/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/common/text_field_manager_ng.h"
 #include "test/unittest/core/pattern/rich_editor/rich_editor_styled_string_common_test_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 

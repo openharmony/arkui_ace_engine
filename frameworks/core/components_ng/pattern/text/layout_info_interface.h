@@ -18,7 +18,7 @@
  
 #include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/render/paragraph.h"
-#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
+#include "core/components_ng/pattern/text/paragraph_manager.h"
 
 namespace OHOS::Ace::NG  {
 class LayoutInfoInterface : public virtual AceType {

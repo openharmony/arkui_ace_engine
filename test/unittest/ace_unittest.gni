@@ -144,8 +144,21 @@ template("ace_unittest") {
       sources += invoker.sources
       include_dirs = []
       include_dirs += include_dir
-      deps = []
-      deps += ace_unittest_deps
+      deps = ace_unittest_deps
+      deps += [
+        "$ace_root/test/unittest:ace_base",
+        "$ace_root/test/unittest:ace_components_base",
+        "$ace_root/test/unittest:ace_components_event",
+        "$ace_root/test/unittest:ace_components_gestures",
+        "$ace_root/test/unittest:ace_components_layout",
+        "$ace_root/test/unittest:ace_components_manager",
+        "$ace_root/test/unittest:ace_components_pattern",
+        "$ace_root/test/unittest:ace_components_property",
+        "$ace_root/test/unittest:ace_components_render",
+        "$ace_root/test/unittest:ace_components_syntax",
+        "$ace_root/test/unittest:ace_core_animation",
+        "$ace_root/test/unittest:ace_core_extra",
+      ]
 
       configs = []
       configs = ace_unittest_config

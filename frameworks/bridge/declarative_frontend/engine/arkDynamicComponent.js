@@ -367,6 +367,33 @@ if (globalThis.TextPickerDialog === undefined) {
   }
 }
 
+if (globalThis.TextInput === undefined) {
+  globalThis.TextInput = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('TextInput');
+      let module = globalThis.requireNapi('arkui.components.arktextinput');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().textInput.create(params);
+    },
+    name: 'JSTextInput'
+  }
+}
+
+// @ts-ignore
+if (globalThis.TextArea === undefined) {
+  globalThis.TextArea = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('TextArea');
+      let module = globalThis.requireNapi('arkui.components.arktextarea');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().textArea.create(params);
+    },
+    name: 'JSTextArea'
+  }
+}
+
 // @ts-ignore
 if (globalThis.DataPanel === undefined) {
   globalThis.DataPanel = {
@@ -392,6 +419,20 @@ if (globalThis.SymbolGlyph === undefined) {
       getUINativeModule().symbolGlyph.create(params);
     },
     name: 'JSSymbolGlyph'
+  };
+}
+
+// @ts-ignore
+if (globalThis.SymbolSpan === undefined) {
+  globalThis.SymbolSpan = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('SymbolSpan');
+      let module = globalThis.requireNapi('arkui.components.arksymbolspan');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().symbolSpan.jsCreate(params);
+    },
+    name: 'JSSymbolSpan'
   };
 }
 
@@ -526,6 +567,66 @@ if (globalThis.Search === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.Badge === undefined) {
+  globalThis.Badge = {
+    create: function (params) {
+      getUINativeModule().loadNativeModule("Badge");
+      let module = globalThis.requireNapi('arkui.components.arkbadge');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().badge.create(params);
+    },
+    name: 'JSBadge'
+  };
+}
+
+// @ts-ignore
+if (globalThis.ImageSpan === undefined) {
+  globalThis.ImageSpan = {
+    create: function (params) {
+      getUINativeModule().loadNativeModule("ImageSpan");
+      var module = globalThis.requireNapi('arkui.components.arkimagespan');
+      module.exportView();
+      module.loadComponent();
+      if (!ViewStackProcessor.UsesNewPipeline()) {
+        return;
+      }
+      Image.createImageSpan(params);
+      getUINativeModule().imageSpan.create();
+    },
+    name: 'JSImageSpan'
+  };
+}
+
+// @ts-ignore
+if (globalThis.TextTimer === undefined) {
+  globalThis.TextTimer = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('TextTimer');
+      let module = globalThis.requireNapi('arkui.components.arktexttimer');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().texttimer.create(params?.isCountDown, params?.count, params?.controller, params?.startTime);
+    },
+    name: 'JSTextTimer'
+  }
+}
+
+// @ts-ignore
+if (globalThis.Progress === undefined) {
+  globalThis.Progress = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule('Progress');
+      let module = globalThis.requireNapi('arkui.components.arkprogress');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().progress.create(value?.value, value?.total, value?.style, value?.type);
+    },
+    name: 'JSProgress'
+  }
+}
+
+// @ts-ignore
 if (globalThis.TextClock === undefined) {
   globalThis.TextClock = {
     create: function (params) {
@@ -564,6 +665,20 @@ if (globalThis.LazyColumnLayout === undefined) {
       getUINativeModule().lazyColumnLayout.create();
     }
   }
+}
+
+// @ts-ignore
+if (globalThis.LoadingProgress === undefined) {
+  globalThis.LoadingProgress = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('LoadingProgress');
+      let module = globalThis.requireNapi('arkui.components.arkloadingprogress');
+      module.exportView();
+      module.loadComponent();
+      getUINativeModule().loadingProgress.create(params);
+    },
+ 	name: 'JSLoadingProgress'
+  };
 }
 
 // @ts-ignore

@@ -39,7 +39,10 @@ public:
     void UpdateParagraphStyle(int32_t start, int32_t end, const struct UpdateParagraphStyle& style) override;
     RefPtr<SpanStringBase> ToStyledString(int32_t start, int32_t end) override;
     SelectionInfo FromStyledString(RefPtr<SpanStringBase> value) override;
-    WeakPtr<RichEditorPattern> GetPattern() const;
+    WeakPtr<RichEditorPattern> GetPattern() const
+    {
+        return pattern_;
+    }
 
 private:
     struct UpdateSpanStyle updateSpanStyle_;

@@ -17,6 +17,8 @@
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_abstract_span_result.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_value.h"
 
 #include "cj_lambda.h"
 #include "securec.h"

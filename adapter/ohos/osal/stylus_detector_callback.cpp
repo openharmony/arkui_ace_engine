@@ -17,12 +17,19 @@
 
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/components_ng/pattern/search/search_text_field.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 
 namespace OHOS::Ace {
 
 namespace {
 constexpr int32_t INDEX_S = 1;
 constexpr int32_t INDEX_E = 2;
+
+bool IsTextCategoryComponent(const std::string& frameTag)
+{
+    return frameTag == V2::TEXTAREA_ETS_TAG || frameTag == V2::TEXTINPUT_ETS_TAG ||
+        frameTag == V2::SEARCH_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG;
+}
 } // namespace
 
 int32_t StylusDetectorCallBack::RequestFocus(int32_t nodeId, const RefPtr<TaskExecutor>& taskScheduler)
@@ -36,9 +43,9 @@ int32_t StylusDetectorCallBack::RequestFocus(int32_t nodeId, const RefPtr<TaskEx
             auto focusHub = frameNode->GetFocusHub();
             CHECK_NULL_VOID(focusHub);
             if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
-                auto searchTextFieldPattern = frameNode->GetPattern<NG::SearchTextFieldPattern>();
-                CHECK_NULL_VOID(searchTextFieldPattern);
-                focusHub = searchTextFieldPattern->GetFocusHub();
+                auto* customModifier = NG::NodeModifier::GetTextInputCustomModifier();
+                CHECK_NULL_VOID(customModifier);
+                focusHub = customModifier->getSearchTextFieldFocusHub(frameNode);
                 CHECK_NULL_VOID(focusHub);
             }
             if (!focusHub->IsCurrentFocus()) {
@@ -48,13 +55,11 @@ int32_t StylusDetectorCallBack::RequestFocus(int32_t nodeId, const RefPtr<TaskEx
                 resultCode = 0;
                 return;
             }
-            auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
-            CHECK_NULL_VOID(pattern);
-            bool needToRequestKeyBoardOnFocus = pattern->NeedToRequestKeyboardOnFocus();
-            if (!needToRequestKeyBoardOnFocus) {
-                pattern->RequestKeyboardNotByFocusSwitch(NG::RequestKeyboardReason::STYLUS_DETECTOR);
+            if (IsTextCategoryComponent(frameNode->GetTag())) {
+                auto* customModifier = NG::NodeModifier::GetTextInputCustomModifier();
+                CHECK_NULL_VOID(customModifier);
+                customModifier->requestTextFieldKeyboardForStylus(frameNode, resultCode);
             }
-            resultCode = 0;
         },
         TaskExecutor::TaskType::UI, "ArkUIDetectorSyncStylusAction");
     return resultCode;
@@ -73,14 +78,10 @@ int32_t StylusDetectorCallBack::SetText(int32_t nodeId, void* data,
             if (frameNode->GetTag() == V2::RICH_EDITOR_ETS_TAG) {
                 return;
             }
-            auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
-            CHECK_NULL_VOID(pattern);
-            if (!text.empty()) {
-                pattern->UpdateEditingValue(text, text.size());
-                frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
-            }
-            if (callback) {
-                callback->Callback(res);
+            if (IsTextCategoryComponent(frameNode->GetTag())) {
+                auto* customModifier = NG::NodeModifier::GetTextInputCustomModifier();
+                CHECK_NULL_VOID(customModifier);
+                customModifier->setTextFieldTextForStylus(frameNode, text, callback, res);
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction");
@@ -105,13 +106,11 @@ int32_t StylusDetectorCallBack::GetText(int32_t nodeId, const RefPtr<TaskExecuto
                 callback->Callback(res);
                 return;
             }
-            auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
-            if (!pattern) {
-                callback->Callback(res);
-                return;
+            if (IsTextCategoryComponent(frameNode->GetTag())) {
+                auto* customModifier = NG::NodeModifier::GetTextInputCustomModifier();
+                CHECK_NULL_VOID(customModifier);
+                customModifier->getText(frameNode, callback, res);
             }
-            res.resultData = pattern->GetTextValue();
-            callback->Callback(res);
         },
         TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction");
     return 0;
@@ -125,11 +124,11 @@ int32_t StylusDetectorCallBack::Redo(int32_t nodeId, const RefPtr<TaskExecutor>&
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
             CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
-            auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
-            CHECK_NULL_VOID(pattern);
-            pattern->CloseSelectOverlay(true);
-            pattern->HandleOnRedoAction();
-            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+            if (IsTextCategoryComponent(frameNode->GetTag())) {
+                auto* customModifier = NG::NodeModifier::GetTextInputCustomModifier();
+                CHECK_NULL_VOID(customModifier);
+                customModifier->redoTextField(frameNode);
+            }
         },
         TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction");
     return 0;
@@ -143,11 +142,11 @@ int32_t StylusDetectorCallBack::Undo(int32_t nodeId, const RefPtr<TaskExecutor>&
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
             CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
-            auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
-            CHECK_NULL_VOID(pattern);
-            pattern->CloseSelectOverlay(true);
-            pattern->HandleOnUndoAction();
-            frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+            if (IsTextCategoryComponent(frameNode->GetTag())) {
+                auto* customModifier = NG::NodeModifier::GetTextInputCustomModifier();
+                CHECK_NULL_VOID(customModifier);
+                customModifier->undoTextField(frameNode);
+            }
         },
         TaskExecutor::TaskType::UI, "ArkUIDetectorStylusAction");
     return 0;
@@ -384,27 +383,27 @@ int32_t StylusDetectorCallBack::OnDetector(
     int32_t resultCode = -1;
     ResultData res;
     switch (command) {
-        case COMMAND_REQUEST_FOCUS:
+        case CommandType::COMMAND_REQUEST_FOCUS:
             return StylusDetectorCallBack::RequestFocus(nodeId, taskScheduler);
-        case COMMAND_MOVE_CURSOR:
+        case CommandType::COMMAND_MOVE_CURSOR:
             return StylusDetectorCallBack::MoveCursor(nodeId, data, taskScheduler);
-        case COMMAND_DELETE_TEXT:
+        case CommandType::COMMAND_DELETE_TEXT:
             return StylusDetectorCallBack::DeleteText(nodeId, data, taskScheduler);
-        case COMMAND_CHOICE_TEXT:
+        case CommandType::COMMAND_CHOICE_TEXT:
             return StylusDetectorCallBack::ChoiceText(nodeId, data, taskScheduler);
-        case COMMAND_INSERT_SPACE:
+        case CommandType::COMMAND_INSERT_SPACE:
             return StylusDetectorCallBack::InsertSpace(nodeId, data, taskScheduler);
-        case COMMAND_CLEAR_HIT:
+        case CommandType::COMMAND_CLEAR_HIT:
             return resultCode;
-        case COMMAND_SET_TEXT:
+        case CommandType::COMMAND_SET_TEXT:
             return StylusDetectorCallBack::SetText(nodeId, data, taskScheduler, callback);
-        case COMMAND_GET_TEXT:
+        case CommandType::COMMAND_GET_TEXT:
             return StylusDetectorCallBack::GetText(nodeId, taskScheduler, callback);
-        case COMMAND_UNDO:
+        case CommandType::COMMAND_UNDO:
             return StylusDetectorCallBack::Undo(nodeId, taskScheduler);
-        case COMMAND_REDO:
+        case CommandType::COMMAND_REDO:
             return StylusDetectorCallBack::Redo(nodeId, taskScheduler);
-        case COMMAND_INVALID:
+        case CommandType::COMMAND_INVALID:
             TAG_LOGE(AceLogTag::ACE_STYLUS, "StylusDetector received error command.");
             return resultCode;
         default:
@@ -431,18 +430,10 @@ bool StylusDetectorCallBack::OnDetectorSync(const CommandType& command)
             auto frameNode = AceType::DynamicCast<NG::FrameNode>(UiNode);
             CHECK_NULL_VOID(frameNode);
             CHECK_EQUAL_VOID(frameNode->GetTag(), V2::RICH_EDITOR_ETS_TAG);
-            auto pattern = frameNode->GetPattern<NG::TextFieldPattern>();
-            CHECK_NULL_VOID(pattern);
-
-            switch (command) {
-                case COMMAND_CANUNDO:
-                    result = pattern->CanUndo();
-                    break;
-                case COMMAND_CANREDO:
-                    result = pattern->CanRedo();
-                    break;
-                default:
-                    break;
+            if (IsTextCategoryComponent(frameNode->GetTag())) {
+                auto* customModifier = NG::NodeModifier::GetTextInputCustomModifier();
+                CHECK_NULL_VOID(customModifier);
+                customModifier->onDetectorSync(frameNode, result, command);
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIDetectorSyncStylusAction");

@@ -20,7 +20,23 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/progress/progress_model.h"
+#include "core/common/dynamic_module_helper.h"
 
+namespace OHOS::Ace {
+
+inline NG::ProgressModelNG* GetProgressModel()
+{
+    static NG::ProgressModelNG* cachedModel = nullptr;
+    if (cachedModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Progress");
+        if (module == nullptr) {
+            LOGF_ABORT("Can't find progress dynamic module");
+        }
+        cachedModel = reinterpret_cast<NG::ProgressModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
+} // namespace OHOS::Ace
 namespace OHOS::Ace::Framework {
 class JSProgressTheme {
 public:
@@ -35,7 +51,7 @@ public:
             return;
         }
         if (style != ProgressStyle::Capsule) {
-            ProgressModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary());
+            GetProgressModel()->SetBackgroundColor(themeColors->CompBackgroundTertiary());
         }
         if (style == ProgressStyle::Capsule) {
             NG::GradientColor endSideColor;
@@ -47,8 +63,8 @@ public:
             beginSideColor.SetDimension(Dimension(1.0f));
             gradient.AddColor(endSideColor);
             gradient.AddColor(beginSideColor);
-            ProgressModel::GetInstance()->SetGradientColor(gradient);
-            ProgressModel::GetInstance()->SetColor(themeColors->CompEmphasizeSecondary());
+            GetProgressModel()->SetGradientColor(gradient);
+            GetProgressModel()->SetColor(themeColors->CompEmphasizeSecondary());
             // normal
             ViewStackModel::GetInstance()->SetVisualState(VisualState::NORMAL);
             auto borderColor = themeColors->CompEmphasizeSecondary();
@@ -66,8 +82,8 @@ public:
             beginSideColor.SetDimension(Dimension(1.0f));
             gradient.AddColor(endSideColor);
             gradient.AddColor(beginSideColor);
-            ProgressModel::GetInstance()->SetGradientColor(gradient);
-            ProgressModel::GetInstance()->SetColor(themeColors->BackgroundEmphasize());
+            GetProgressModel()->SetGradientColor(gradient);
+            GetProgressModel()->SetColor(themeColors->BackgroundEmphasize());
         }
     }
 };
