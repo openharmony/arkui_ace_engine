@@ -99,6 +99,7 @@ void TextPickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 
     if (hapticController_) {
         hapticController_->Stop();
+        hapticController_ = nullptr;
     }
     UnregisterWindowStateChangedCallback(frameNode);
 }
