@@ -231,7 +231,7 @@ public:
     void MoveIndexToTop(size_t index, const std::optional<bool>& animated);
     void MoveToTopInternal(std::vector<PathInfo>::iterator it, const std::optional<bool>& animated);
     void Clear(const std::optional<bool>& animated);
-    int RemoveByIndexes(const std::vector<int>& indexes);
+    int RemoveByIndexes(const std::vector<int32_t>& indexes);
     int RemoveByName(const std::string& name);
     bool RemoveByNavDestinationId(const std::string& navDestinationId);
     void RemoveIndex(size_t index);
@@ -401,6 +401,8 @@ public:
         pushDestinationInnerCallback_ = std::move(callback);
     }
     void PushIntentNavDestination(const std::string& name, const std::string& params, bool needTransition) override;
+
+    void RemoveByIndexes(const std::vector<int32_t>& indexes) override;
 
 protected:
     RefPtr<PathStack> dataSourceObj_;

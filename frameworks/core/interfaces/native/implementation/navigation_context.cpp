@@ -521,7 +521,7 @@ void PathStack::Clear(const std::optional<bool>& animated)
     InvokeOnStateChanged();
 }
 
-int PathStack::RemoveByIndexes(const std::vector<int>& indexes)
+int PathStack::RemoveByIndexes(const std::vector<int32_t>& indexes)
 {
     if (indexes.empty()) {
         return 0;
@@ -1353,5 +1353,10 @@ void NavigationStack::PushIntentNavDestination(
     if (pushDestinationInnerCallback_) {
         pushDestinationInnerCallback_(name, params, needTransition);
     }
+}
+
+void NavigationStack::RemoveByIndexes(const std::vector<int32_t>& indexes)
+{
+    PathStack::RemoveByIndexes(indexes);
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier::NavigationContext

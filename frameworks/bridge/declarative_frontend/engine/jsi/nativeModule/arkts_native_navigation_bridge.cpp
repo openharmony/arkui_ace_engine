@@ -1195,12 +1195,18 @@ ArkUINativeModuleValue NavigationBridge::SetNavigationConfiguration(ArkUIRuntime
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     int32_t stackSizeLimit = 0;
+    bool clearContentStackOnPrimaryNavigation = false;
     bool recyclePagesOnLowMemory = false;
     if (configArg->IsObject(vm)) {
         auto configObj = configArg->ToObject(vm);
         auto stackSizeLimitArg = configObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "stackSizeLimit"));
         if (stackSizeLimitArg->IsNumber()) {
             stackSizeLimit = stackSizeLimitArg->Int32Value(vm);
+        }
+        auto clearContentStackOnPrimaryNavigationArg =
+            configObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "clearContentStackOnPrimaryNavigation"));
+        if (clearContentStackOnPrimaryNavigationArg->IsBoolean()) {
+            clearContentStackOnPrimaryNavigation = clearContentStackOnPrimaryNavigationArg->ToBoolean(vm)->Value();
         }
         auto recyclePagesOnLowMemoryArg =
             configObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "recyclePagesOnLowMemory"));
@@ -1211,7 +1217,7 @@ ArkUINativeModuleValue NavigationBridge::SetNavigationConfiguration(ArkUIRuntime
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getNavigationModifier()->setNavigationConfiguration(
-        nativeNode, stackSizeLimit, recyclePagesOnLowMemory);
+        nativeNode, stackSizeLimit, clearContentStackOnPrimaryNavigation, recyclePagesOnLowMemory);
     return panda::JSValueRef::Undefined(vm);
 }
 

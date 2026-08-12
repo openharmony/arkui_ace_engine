@@ -437,6 +437,11 @@ void SetConfigurationImpl(Ark_NativePointer node,
         config.stackSizeLimit = Converter::Convert<int32_t>(value->value.stackSizeLimit.value);
     }
     if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
+        value->value.clearContentStackOnPrimaryNavigation.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        config.needClearContentStack =
+            Converter::Convert<bool>(value->value.clearContentStackOnPrimaryNavigation.value);
+    }
+    if (value->tag != InteropTag::INTEROP_TAG_UNDEFINED &&
         value->value.recyclePagesOnLowMemory.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
         config.recyclePagesOnLowMemory = Converter::Convert<bool>(value->value.recyclePagesOnLowMemory.value);
     }

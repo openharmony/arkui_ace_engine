@@ -362,7 +362,7 @@ Ark_Int32 RemoveByIndexesImpl(Ark_NavPathStack peer,
     auto invalidVal = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, invalidVal);
     CHECK_NULL_RETURN(indexes, invalidVal);
-    auto removeIndexes = Converter::Convert<std::vector<int>>(*indexes);
+    auto removeIndexes = Converter::Convert<std::vector<int32_t>>(*indexes);
     auto navStack = peer->GetNavPathStack();
     CHECK_NULL_RETURN(navStack, invalidVal);
     auto size = navStack->PathStack::RemoveByIndexes(removeIndexes);

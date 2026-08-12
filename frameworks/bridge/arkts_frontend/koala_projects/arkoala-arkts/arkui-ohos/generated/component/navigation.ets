@@ -1884,6 +1884,7 @@ export interface NavigationModuleInfo {
 }
 export interface NavigationConfiguration {
     stackSizeLimit?: int32;
+    clearContentStackOnPrimaryNavigation?: boolean;
     recyclePagesOnLowMemory?: boolean;
 }
 export interface NavigationAttribute extends CommonMethod {
@@ -2410,6 +2411,14 @@ export class NavigationConfiguration_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForClearContentStackOnPrimaryNavigation = value.clearContentStackOnPrimaryNavigation
+        if (valueHolderForClearContentStackOnPrimaryNavigation !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForClearContentStackOnPrimaryNavigationTmpValue = valueHolderForClearContentStackOnPrimaryNavigation!
+            valueSerializer.writeBoolean(valueHolderForClearContentStackOnPrimaryNavigationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForRecyclePagesOnLowMemory = value.recyclePagesOnLowMemory
         if (valueHolderForRecyclePagesOnLowMemory !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -2427,13 +2436,19 @@ export class NavigationConfiguration_serializer {
             stackSizeLimitTmpBuf = valueDeserializer.readInt32()
         }
         const stackSizeLimitTmpResult: int32 | undefined = stackSizeLimitTmpBuf
+        const clearContentStackOnPrimaryNavigationTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
+        let clearContentStackOnPrimaryNavigationTmpBuf: boolean | undefined = undefined
+        if ((clearContentStackOnPrimaryNavigationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            clearContentStackOnPrimaryNavigationTmpBuf = valueDeserializer.readBoolean()
+        }
+        const clearContentStackOnPrimaryNavigationTmpResult: boolean | undefined = clearContentStackOnPrimaryNavigationTmpBuf
         const recyclePagesOnLowMemoryTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let recyclePagesOnLowMemoryTmpBuf: boolean | undefined = undefined
         if ((recyclePagesOnLowMemoryTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             recyclePagesOnLowMemoryTmpBuf = valueDeserializer.readBoolean()
         }
         const recyclePagesOnLowMemoryTmpResult: boolean | undefined = recyclePagesOnLowMemoryTmpBuf
-        let value: NavigationConfiguration = ({stackSizeLimit: stackSizeLimitTmpResult, recyclePagesOnLowMemory: recyclePagesOnLowMemoryTmpResult} as NavigationConfiguration)
+        let value: NavigationConfiguration = ({stackSizeLimit: stackSizeLimitTmpResult, clearContentStackOnPrimaryNavigation: clearContentStackOnPrimaryNavigationTmpResult, recyclePagesOnLowMemory: recyclePagesOnLowMemoryTmpResult} as NavigationConfiguration)
         return value
     }
 }

@@ -1159,6 +1159,20 @@ int32_t NavigationPattern::GetFirstNewDestinationIndex(const NavPathList& preLis
     return firstNewNodeIndex;
 }
 
+bool NavigationPattern::CheckIfLastDestWillBeFullScreenOverlay(
+    const std::vector<RefPtr<NavDestinationGroupNode>>& destList)
+{
+    for (auto it = destList.rbegin(); it != destList.rend(); ++it) {
+        auto dest = *it;
+        CHECK_NULL_CONTINUE(dest);
+        auto userSetFullScreenOverlay = dest->GetUserSetFullScreenOverlay();
+        if (userSetFullScreenOverlay.has_value()) {
+            return userSetFullScreenOverlay.value();
+        }
+    }
+    return false;
+}
+
 void NavigationPattern::ClearContentStackIfNeeded(NavPathList&& preList)
 {
     /**
@@ -1176,9 +1190,16 @@ void NavigationPattern::ClearContentStackIfNeeded(NavPathList&& preList)
     }
     const auto& curTopNode = curList.back().second;
     bool homeTouched = homeNodeTouched_.has_value() && homeNodeTouched_.value();
-    auto topDest = AceType::DynamicCast<NavDestinationGroupNode>(
-            NavigationGroupNode::GetNavDestinationNode(curTopNode));
-    if (forceSplitSuccess_ || IsRealStackDisplay() || !topDest || topDest->IsFullScreenOverlay() || !homeTouched) {
+    auto preTopIsFullScreenOverlay = [&preList]() {
+        if (preList.empty()) {
+            return false;
+        }
+        auto preTopDest = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(preList.front().second));
+        CHECK_NULL_RETURN(preTopDest, false);
+        return preTopDest->IsFullScreenOverlay();
+    };
+    if (forceSplitSuccess_ || !homeTouched || IsRealStackDisplay() || preTopIsFullScreenOverlay()) {
         return;
     }
     homeNodeTouched_ = std::nullopt;
@@ -1188,7 +1209,6 @@ void NavigationPattern::ClearContentStackIfNeeded(NavPathList&& preList)
     if (it != preList.end()) {
         return;
     }
-
     std::vector<int32_t> removeIndexes;
     int32_t firstNewNodeIndex = GetFirstNewDestinationIndex(preList, curList);
     for (int32_t index = firstNewNodeIndex - 1; index >= 0; --index) {
@@ -1197,6 +1217,19 @@ void NavigationPattern::ClearContentStackIfNeeded(NavPathList&& preList)
     if (removeIndexes.empty()) {
         return;
     }
+    std::vector<RefPtr<NavDestinationGroupNode>> remainDestList;
+    for (int32_t index = std::max(firstNewNodeIndex, 0); index < static_cast<int32_t>(curList.size()); ++index) {
+        auto node = curList[index].second;
+        CHECK_NULL_CONTINUE(node);
+        auto dest = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(node));
+        CHECK_NULL_CONTINUE(dest);
+        remainDestList.push_back(dest);
+    }
+    if (CheckIfLastDestWillBeFullScreenOverlay(remainDestList)) {
+        return;
+    }
+    remainDestList.clear();
 
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Remove content NavDestinationNodes, count:%{public}d",
         static_cast<int32_t>(removeIndexes.size()));
@@ -1221,6 +1254,10 @@ void NavigationPattern::ClearSecondaryNodesIfNeeded(NavPathList&& preList)
      * This will trigger the following logic:
      * The NavDestination between the primary-side anchor and the first newly added NavDestination will be removed.
      */
+    if (!forceSplitSuccess_ && config_.needClearContentStack) {
+        ClearContentStackIfNeeded(std::move(preList));
+        return;
+    }
     auto homeNode = forceSplitHomeDest_.Upgrade();
     auto touchedPrimaryNode = touchedPrimaryColumnDest_.Upgrade();
     bool homeTouched = homeNodeTouched_.has_value() && homeNodeTouched_.value();
