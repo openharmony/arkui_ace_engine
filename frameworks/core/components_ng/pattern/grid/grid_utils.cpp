@@ -14,13 +14,10 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_utils.h"
-
-#include <string_view>
-
 namespace OHOS::Ace::NG {
 namespace {
 
-constexpr std::string_view UNIT_AUTO = "auto";
+const std::string UNIT_AUTO = "auto";
 
 } // namespace
 
@@ -73,5 +70,4 @@ bool GridUtils::CheckNeedCacheLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
 {
     return !layoutWrapper || (layoutWrapper->CheckNeedForceMeasureAndLayout() && !layoutWrapper->CheckHasPreMeasured());
 }
-
 } // namespace OHOS::Ace::NG

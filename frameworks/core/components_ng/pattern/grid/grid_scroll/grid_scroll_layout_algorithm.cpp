@@ -121,6 +121,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // update cache info.
     auto cache = CalculateCachedCount(layoutWrapper, gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_));
     const int32_t cacheCnt = std::max(cache.first, cache.second);
+    cacheEnd_ = std::max(info_.GetChildrenCount(), cache.second + info_.endIndex_ + 1);
     layoutWrapper->SetCacheCount(cacheCnt);
 
     info_.lastMainSize_ = mainSize;
@@ -248,10 +249,8 @@ void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrappe
     idealSize.SetMainSize(gridMainSize, info_.axis_);
     AddPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
-    if (!NearEqual(info_.lastMainSize_, gridMainSize)) {
-        info_.lastMainSize_ = gridMainSize;
-        TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
-    }
+    info_.lastMainSize_ = gridMainSize;
+    TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
 }
 
 void GridScrollLayoutAlgorithm::UpdateOffsetOnHeightChangeDuringAnimation(LayoutWrapper* layoutWrapper, float mainSize)
@@ -1334,9 +1333,6 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     auto isScrollableSpringMotionRunning = pattern->IsScrollableSpringMotionRunning();
     while (LessNotEqual(mainLength, mainSize) ||
                 (NearEqual(mainLength, mainSize) && IsNextExistLineHeightZero(currentMainLineIndex_))) {
-        if (NearEqual(mainLength, mainSize)) {
-            TAG_LOGI(AceLogTag::ACE_GRID, "Measure next grid item with height zero.");
-        }
         if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, isScrollableSpringMotionRunning)) {
             runOutOfRecord = true;
             break;

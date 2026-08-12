@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
+#include "compatible/components/list_v2/list_component.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "core/common/window_size_breakpoint.h"
 
@@ -444,8 +445,6 @@ public:
     void ResetLayoutItem(LayoutWrapper* layoutWrapper);
 
     void ResetUnLayoutedItems(LayoutWrapper* layoutWrapper, PositionMap& positionMap);
-
-    void ResetUnLayoutedItem(const RefPtr<LayoutWrapper>& layoutWrapper, ListItemInfo& info);
 
     std::pair<int32_t, float> GetSnapStartIndexAndPos();
 
