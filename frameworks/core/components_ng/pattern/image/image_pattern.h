@@ -455,6 +455,7 @@ private:
     ContentTransitionType contentTransitionType_ = ContentTransitionType::IDENTITY;
     std::shared_ptr<CancelableCallback<void()>> navDestRecycleCallback_;
     static constexpr uint32_t NAV_DEST_RECYCLE_DELAY_MS = 500;
+    int64_t lastDrawTime_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImagePattern);
 };
