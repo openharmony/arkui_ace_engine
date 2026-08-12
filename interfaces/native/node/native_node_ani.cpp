@@ -251,6 +251,16 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
         SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Env parameter is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
+    if (nodeContent == nullptr) {
+        LOGE("nodeContent is nullptr");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Node content parameter is null");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    if (content == nullptr) {
+        LOGE("content is nullptr");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Content output parameter is null");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     ani_ref nodeContentPeerRef;
     if (env->Object_GetFieldByName_Ref(nodeContent, "nativePtr_", &nodeContentPeerRef) != ANI_OK) {
         LOGE("fail to get nativePtr_ from nodeContent");
@@ -259,8 +269,12 @@ int32_t OH_ArkUI_NativeModule_GetNodeContentFromAniValue(
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
     ani_object nodeContentPeerObj = static_cast<ani_object>(nodeContentPeerRef);
-    ani_class pointerClass;
-    env->FindClass("std.core.Long", &pointerClass);
+    ani_class pointerClass = nullptr;
+    if (env->FindClass("std.core.Long", &pointerClass) != ANI_OK || pointerClass == nullptr) {
+        LOGE("fail to find std.core.Long class");
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__, "Failed to find std.core.Long class");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     ani_boolean isPointer;
     ani_status status = env->Object_InstanceOf(nodeContentPeerObj, pointerClass, &isPointer);
     if (status != ANI_OK || !isPointer) {

@@ -144,6 +144,10 @@ ArkUI_NodeHandle CreateNodeSafely(ArkUI_NodeType type)
     // already check in entry point.
     uint32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     const auto* impl = GetFullImpl();
+    if (!impl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Native node implementation is not initialized");
+        return nullptr;
+    }
     if (nodeType >= sizeof(nodes) / sizeof(ArkUINodeType) || nodes[nodeType] == ARKUI_UNDEFINED) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d NOT IMPLEMENT", type);
         return nullptr;

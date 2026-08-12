@@ -129,7 +129,14 @@ int32_t OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(ArkUI_NodeHandle nod
             "node parameter is null");
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
+    if (translateOffset == nullptr) {
+        SET_ERROR_MESSAGE(OHOS::Ace::ERROR_CODE_PARAM_INVALID, __FUNCTION__,
+            "translateOffset parameter is null");
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN_WITH_MESSAGE(impl, OHOS::Ace::ERROR_CODE_CAPI_INIT_ERROR,
+        __FUNCTION__, "Native module not initialized");
     ArkUI_Float32 tempOffset[2];
     impl->getNodeModifiers()->getFrameNodeModifier()->getPositionToScreenWithTransform(
         node->uiNodeHandle, &tempOffset, false);
