@@ -22,6 +22,18 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ForEachOpsAccessor {
+void SyncImpl(Ark_NativePointer node, const Callback_RangeUpdate* updater)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode && updater);
+    ArkoalaForEachNode* forEachNode = AceType::DynamicCast<ArkoalaForEachNode>(uiNode);
+    CHECK_NULL_VOID(forEachNode);
+    forEachNode->SetUpdateRange([cb = CallbackHelper(*updater)](
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool isLoop) {
+        cb.InvokeSync(start, end, cacheStart, cacheEnd, isLoop);
+    });
+}
+
 void SyncItemDragEvent(
     ArkoalaForEachNode* forEachNode, const Opt_ItemDragEventHandler* onMoveDragEventOps)
 {
@@ -101,6 +113,7 @@ void SyncOnMoveOpsImpl(Ark_NativePointer node,
 const GENERATED_ArkUIForEachOpsAccessor* GetForEachOpsAccessor()
 {
     static const GENERATED_ArkUIForEachOpsAccessor ForEachOpsAccessorImpl {
+        ForEachOpsAccessor::SyncImpl,
         ForEachOpsAccessor::SyncOnMoveOpsImpl,
     };
     return &ForEachOpsAccessorImpl;

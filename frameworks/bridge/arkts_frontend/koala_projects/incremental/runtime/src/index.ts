@@ -153,6 +153,7 @@ export {
     ControlledScope,
     createStateManager,
     Equivalent,
+    GetReusableScopeNode,
     IncrementalScopeEx,
     InternalScope,
     MutableState,

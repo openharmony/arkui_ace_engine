@@ -28,6 +28,9 @@ import { CustomComponent } from '../component/customComponent'
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 import { ExtendableComponent } from '../component/extendableComponent'
 import { STATE_MGMT_FACTORY } from '../stateManagement/decorator'
+import { KoalaCallsiteKey } from '@koalaui/common'
+import { getRepeatReuseKey } from './RepeatImpl.ets'
+import { RepeatArray, RepeatItemBuilder, TemplateTypedFunc } from '../component/repeat'
 
 let globalLazyItems = new Map<ComputableState<LazyItemNode>, int32>() // V: age
 
@@ -51,8 +54,17 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     options?: LazyForEachOptions,
     isRepeat: boolean = false,
     repeatMemoryOptimizationStrategy: int32 = 0,
+    onNodeCreated?: (node: LazyNodePeer) => void,
+    onUpdateActiveRange?: (node: LazyNodePeer, activeIndices: int32[], missingActiveIndices: int32[]) => void,
+    arr?: RepeatArray<T>,
+    itemGenFuncs?: Map<string, RepeatItemBuilder<T>>,
+    ttypeGenFunc?: TemplateTypedFunc<T>,
+    repeatId?: KoalaCallsiteKey
 ) {
     const node = createLazyNode(isRepeat)
+    if (node instanceof LazyNodePeer) {
+        onNodeCreated?.(node)
+    }
 
     let pool = rememberDisposable(
         () => new LazyItemPool(node, ExtendableComponent.current),
@@ -73,10 +85,15 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     }) 
     listener.version.get() // subscribe 
     // first item index that's affected by DataChange 
-    const changeIndex = listener.flush(node.getPeerPtr(), pool.activeStart) 
-    if (changeIndex < Number.POSITIVE_INFINITY) { 
+    const changeIndex = listener.flush(node.getPeerPtr(), pool.activeStart)
+    let needPruneBy: boolean = false;
+    if (changeIndex < Number.POSITIVE_INFINITY.toInt()) { 
+        needPruneBy = true;
         scheduleCallback(() => { 
-            pool.pruneBy((index: int32) => index >= changeIndex) 
+            if (needPruneBy) {
+                pool.pruneBy((index: int32) => index >= changeIndex) 
+            }
+            needPruneBy = false;
         }) 
     }
 
@@ -85,7 +102,14 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     /**
      * provide totalCount and callbacks to the backend
      */
-    let createCallback = (index: int32) => {
+    let createCallback = (index: int32, skipCreate: boolean = false) => {
+        if (isRepeat && skipCreate && arr && repeatId && itemGenFuncs && ttypeGenFunc) {
+            const key = getRepeatReuseKey(arr![index], index, repeatId!, itemGenFuncs!, ttypeGenFunc!, keyGenerator)
+            const hasReusableCandidate = (node as LazyNodePeer).hasReusableCandidate(key)
+            if (!hasReusableCandidate) {
+                return nullptr
+            }
+        }
         const lastRenderingComponent = ObserveSingleton.instance.renderingComponent
         const lastExtendableComponent = ExtendableComponent.current
         ObserveSingleton.instance.renderingComponent = currentRenderingComponent
@@ -105,8 +129,21 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
     if (options !== undefined) {
         LazyForEachOps.SetOptions(node.getPeerPtr(), options as LazyForEachOptions)
     }
-    LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback, pool.updateActiveRange,
-        node.clearReusePool, repeatMemoryOptimizationStrategy as int32, pool.releaseItemByIndex)
+    LazyForEachOps.Sync(node.getPeerPtr(), dataSource.totalCount() as int32, createCallback,
+        (start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) => {
+            pool.updateActiveRange(start, end, cacheStart, cacheEnd, isLoop)
+            if (node instanceof LazyNodePeer) {
+                if (needPruneBy && isRepeat) {
+                    pool.pruneBy((index: int32) => index >= changeIndex)
+                }
+                needPruneBy = false;
+                onUpdateActiveRange?.(
+                    node,
+                    pool.getActiveRangeIndices(start, end, isLoop),
+                    pool.getMissingActiveRangeIndices(start, end, isLoop)
+                )
+            }
+        }, node.clearReusePool, repeatMemoryOptimizationStrategy as int32, pool.releaseItemByIndex)
 
     /**
      * provide onMove callbacks to the backend if onMove is set，and reset callbacks if onMove is unset
@@ -151,6 +188,7 @@ class LazyItemPool implements Disposable {
     private _moveFromTo?: [int32, int32] = undefined // used to track moveFromTo in onMove event
     public activeStart?: int32
     public total: int32 = 0 // total count of data source
+    private _lastRange?: [int32, int32, int32, int32, boolean]
     disposed: boolean = false
 
     /**
@@ -263,6 +301,7 @@ class LazyItemPool implements Disposable {
      * @param end 
      */
     updateActiveRange(start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) {
+        this._lastRange = [start, end, cacheStart, cacheEnd, isLoop]
         // update activeStart from backend call
         let activeStart: int32 = Math.max(0, start - cacheStart).toInt()
         this.activeStart = activeStart
@@ -282,6 +321,51 @@ class LazyItemPool implements Disposable {
         } catch (error) {
             InteropNativeModule._NativeLog(`error during LazyItem pruning: ${error}`)
         }
+    }
+
+    getActiveRangeIndices(start: int32, end: int32, isLoop: boolean): int32[] {
+        const indices: int32[] = []
+        for (let index = 0; index < this.total; index++) {
+            const indexMapped = this.convertFromToIndexRevert(index)
+            if (this.isInActiveRange(indexMapped, start, end, isLoop, this.total)) {
+                indices.push(index)
+            }
+        }
+        return indices
+    }
+
+    getActiveRangeIndicesInCurrentRange(): int32[] {
+        if (!this._lastRange) {
+            return []
+        }
+        return this.getActiveRangeIndices(
+            this._lastRange![0],
+            this._lastRange![1],
+            this._lastRange![4]
+        )
+    }
+
+    getMissingActiveRangeIndices(start: int32, end: int32, isLoop: boolean): int32[] {
+        const indices: int32[] = []
+        for (let index = 0; index < this.total; index++) {
+            const indexMapped = this.convertFromToIndexRevert(index)
+            if (this.isInActiveRange(indexMapped, start, end, isLoop, this.total) &&
+                !this._activeItems.has(index)) {
+                indices.push(index)
+            }
+        }
+        return indices
+    }
+
+    getMissingActiveRangeIndicesInCurrentRange(): int32[] {
+        if (!this._lastRange) {
+            return []
+        }
+        return this.getMissingActiveRangeIndices(
+            this._lastRange![0],
+            this._lastRange![1],
+            this._lastRange![4]
+        )
     }
 
     /**
@@ -427,5 +511,30 @@ class LazyItemPool implements Disposable {
                 return normIndex <= normCacheEnd || normIndex >= normCacheStart;
             }
         }
+    }
+
+    private isInActiveRange(index: int32, start: int32, end: int32, isLoop: boolean, total: int32): boolean {
+        if (total <= 0 || index < 0 || index >= total) {
+            return false;
+        }
+        if (!isLoop) {
+            const actualStart = Math.max(0, start);
+            const actualEnd = Math.min(total - 1, end);
+            return index >= actualStart && index <= actualEnd;
+        }
+
+        const normalize = (idx: int32): int32 => {
+            return ((idx % total) + total) % total;
+        };
+        if (end - start + 1 >= total) {
+            return true;
+        }
+        const normIndex = normalize(index);
+        const normStart = normalize(start);
+        const normEnd = normalize(end);
+        if (normStart <= normEnd) {
+            return normIndex >= normStart && normIndex <= normEnd;
+        }
+        return normIndex >= normStart || normIndex <= normEnd;
     }
 }

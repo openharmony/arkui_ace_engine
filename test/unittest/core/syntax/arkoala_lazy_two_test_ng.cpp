@@ -93,7 +93,7 @@ public:
 
     int32_t nodeId_ = 0;
 
-    ArkoalaLazyNode::CreateItemCb createItemCb_ = [this](int32_t idx) {
+    ArkoalaLazyNode::CreateItemCb createItemCb_ = [this](int32_t idx, bool skipCreate) {
         RefPtr<TestUINode> uiNode = CreateTestUINode(GetNextId());
         auto columnNode = ColumnModelNG::CreateFrameNode(GetNextId());
         uiNode->AddChild(columnNode);

@@ -80,8 +80,12 @@ export class PeerNode extends IncrementalNode {
     * intermediate peers are detached before all descendant recycles complete.
     */
     private _recycleParentRef: PeerNode | undefined = undefined;
+    private readonly _allowSiblingReorder: boolean
     getPeerPtr(): pointer {
         return this.peer.ptr
+    }
+    public override get allowSiblingReorder(): boolean {
+        return this._allowSiblingReorder
     }
     public getStateStyleMutable(): MutableState<int32> | undefined {
         return this._uiStateStyle;
@@ -392,9 +396,11 @@ export class PeerNode extends IncrementalNode {
         this.insertDirection = upDirection ? 0 : 1
     }
 
-    constructor(peerPtr: pointer, id: int32, name: string, flags: int32, derivedNodeType?: int32) {
+    constructor(peerPtr: pointer, id: int32, name: string, flags: int32, derivedNodeType?: int32,
+        allowSiblingReorder: boolean = false) {
         super(derivedNodeType ?? PeerNodeType)
         this.id = id
+        this._allowSiblingReorder = allowSiblingReorder
         this.peer = NativePeerNode.create(this, peerPtr, flags)
         PeerNode.staticLock.lock()
         PeerNode.peerNodeRawTail.push(this)
@@ -438,6 +444,22 @@ export class PeerNode extends IncrementalNode {
                 const peer = child as PeerNode;
                 peer.onRecycle();
                 this.peer.removeChild(peer.peer.ptr);
+            }
+        }
+        this.onChildMoved = (child: IncrementalNode) => {
+            const peer = findPeerNode(child)
+            if (!peer) {
+                return
+            }
+            const peerPtr = peer.peer.ptr
+            const nextSibling = findSiblingPeerNode(child, true)
+            if (nextSibling !== undefined) {
+                this.peer.insertChildBefore(peerPtr, nextSibling.peer.ptr)
+                return
+            }
+            const previousSibling = findSiblingPeerNode(child, false)
+            if (previousSibling !== undefined) {
+                this.peer.insertChildAfter(peerPtr, previousSibling.peer.ptr)
             }
         }
         this.name = name

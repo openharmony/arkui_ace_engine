@@ -25,12 +25,25 @@ export class ReusablePool implements Disposable {
         return this._disposed
     }
 
+    get size(): int32 {
+        return this._cache.length.toInt()
+    }
+
     /**
      * Returns and removes the first available item from the pool
      */
     get(): Disposable | undefined {
         if (this.disposed) return undefined;
         return this._cache.shift();
+    }
+
+    getLastNode(): Disposable | undefined {
+        if (this.disposed) {
+            return undefined;
+        }
+        const value = this._cache.pop();
+        // need function this.touch();
+        return value;
     }
 
     /**

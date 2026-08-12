@@ -38,5 +38,13 @@ void ForEachFinishRender(ani_env* env, [[maybe_unused]] ani_object aniClass, ani
     modifier->getForEachNodeAniModifier()->finishRender(ptr);
 }
 
+ani_boolean ForEachIsImplicitAnimationOpen([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, ani_boolean(false));
+
+    return modifier->getForEachNodeAniModifier()->isImplicitAnimationOpen();
+}
+
 } // namespace OHOS::Ace::Ani
 #endif // KOALA_PROJECTS_ARKOALA_ARKTS_ARKUI_OHOS_ANI_NATIVE_FOR_EACH_MODULE_H

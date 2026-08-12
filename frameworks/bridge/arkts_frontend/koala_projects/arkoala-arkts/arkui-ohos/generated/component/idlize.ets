@@ -2383,6 +2383,12 @@ export class FocusController {
     }
 }
 export class ForEachOps {
+    public static Sync(node: KPointer, updater: Callback_RangeUpdate): void {
+        const node_casted = node as (KPointer)
+        const updater_casted = updater as (Callback_RangeUpdate)
+        ForEachOps.Sync_serialize(node_casted, updater_casted)
+        return
+    }
     public static SyncOnMoveOps(node: KPointer, additionalChild: Array<KPointer>, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
         const node_casted = node as (KPointer)
         const additionalChild_casted = additionalChild as (Array<KPointer>)
@@ -2390,6 +2396,12 @@ export class ForEachOps {
         const onMoveDragEventOps_casted = onMoveDragEventOps as (ItemDragEventHandler | undefined)
         ForEachOps.SyncOnMoveOps_serialize(node_casted, additionalChild_casted, onMoveOps_casted, onMoveDragEventOps_casted)
         return
+    }
+    private static Sync_serialize(node: KPointer, updater: Callback_RangeUpdate): void {
+        const thisSerializer: SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(updater)
+        ArkUIGeneratedNativeModule._ForEachOps_Sync(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     private static SyncOnMoveOps_serialize(node: KPointer, additionalChild: Array<KPointer>, onMoveOps: OnMoveHandler | undefined, onMoveDragEventOps: ItemDragEventHandler | undefined): void {
         const thisSerializer: SerializerBase = SerializerBase.hold()
@@ -7759,7 +7771,7 @@ export interface CustomDialogControllerExternalOptionsExtender {
     customStyle?: boolean;
 }
 export type Callback_RangeUpdate = (start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) => void;
-export type Callback_CreateItem = (index: int32) => KPointer;
+export type Callback_CreateItem = (index: int32, skipCreate: boolean) => KPointer;
 export type Callback_OnMoveFromTo = (from: int32, to: int32) => void;
 export type Callback_ClearCache = () => void;
 export type Callback_ReleaseItemByIndex = (index: int32) => void;
