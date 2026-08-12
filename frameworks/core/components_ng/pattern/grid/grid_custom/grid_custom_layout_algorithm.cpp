@@ -359,6 +359,7 @@ void GridCustomLayoutAlgorithm::FillBackward(float mainSize)
     info_.endIndex_ = endIdx;
     info_.totalOffset_ -= info_.currentDelta_;
 }
+
 namespace {
 constexpr float SKIP_THRESHOLD = 2.0f;
 }
@@ -433,10 +434,10 @@ void GridCustomLayoutAlgorithm::MeasureOnJump(float mainSize)
         }
     }
 
-    // Not in cache, perform jump
+    // 2. perform jump
     float itemHeight = JumpToTargetIndex(mainSize, info_.jumpIndex_);
 
-    // 4. Adjust currentOffset_ based on scrollAlign, extraOffset and contentStartOffset or contentEndOffset
+    // 3. Adjust currentOffset_ based on scrollAlign, extraOffset and contentStartOffset or contentEndOffset
     info_.prevOffset_ = info_.currentOffset_;
 
     // Handle scrollAlign
@@ -471,7 +472,7 @@ void GridCustomLayoutAlgorithm::MeasureOnJump(float mainSize)
     }
 
     info_.currentDelta_ = info_.currentOffset_ - info_.prevOffset_;
-    // 5. Call MeasureOnOffset for layout
+    // 4. Call MeasureOnOffset for layout
     MeasureOnOffset(mainSize);
     // Reset jumpIndex_
     info_.jumpIndex_ = EMPTY_JUMP_INDEX;
@@ -657,7 +658,6 @@ void GridCustomLayoutAlgorithm::MeasureToTarget(float mainSize)
     if (info_.scrollAlign_ == ScrollAlign::AUTO) {
         info_.scrollAlign_ = info_.TransformAutoScrollAlign(info_.targetIndex_.value(), height, mainSize, mainGap_);
         if (info_.scrollAlign_ == ScrollAlign::NONE) {
-            info_.targetIndex_.reset();
             return;
         }
     }
@@ -696,7 +696,6 @@ void GridCustomLayoutAlgorithm::MeasureToTarget(float mainSize)
             break;
     }
     info_.targetPos_ = targetOffset;
-    info_.targetIndex_.reset();
 }
 
 bool GridCustomLayoutAlgorithm::IsIrregularLine(int32_t lineIndex) const
@@ -771,9 +770,8 @@ void GridCustomLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             if (pos.first < 0) {
                 return false;
             }
-            auto constraint =
-                filler.MeasureItem(GetFillParameters(host, info, originalWidth), itemIdx, pos.first, pos.second, true)
-                    .second;
+            auto constraint = filler.MeasureItem(GetFillParameters(host, info, originalWidth),
+                itemIdx, pos.first, pos.second, true).second;
 
             auto item = GetGridItem(&(*host), itemIdx, false, true);
             CHECK_NULL_RETURN(item, false);

@@ -799,9 +799,7 @@ void GridIrregularLayoutAlgorithm::AdaptToChildMainSize(
     idealSize.SetMainSize(gridMainSize, info_.axis_);
     AddPaddingToSize(gridLayoutProperty->CreatePaddingAndBorder(), idealSize);
     wrapper_->GetGeometryNode()->SetFrameSize(idealSize);
-    if (!NearEqual(gridMainSize, info_.lastMainSize_)) {
-        info_.lastMainSize_ = gridMainSize;
-        TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
-    }
+    info_.lastMainSize_ = gridMainSize;
+    TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
 }
 } // namespace OHOS::Ace::NG

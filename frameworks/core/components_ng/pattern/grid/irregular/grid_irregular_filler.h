@@ -160,15 +160,6 @@ public:
     std::pair<float, LayoutConstraintF> MeasureItem(
         const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache);
 
-    /**
-     * @brief Measures the current row, fills the matrix and measures all items in the row.
-     *
-     * @param params The FillParameters object containing the fill parameters.
-     * @param itemIdx The index of the target GridItem.
-     * @return The total height of the startIndex item.
-     */
-    float MeasureCurrentRow(const FillParameters& params, int32_t itemIdx);
-
 private:
     /**
      * @brief Fills one GridItem into the Grid.

@@ -22,7 +22,6 @@
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/system_properties.h"
-#include "core/common/container.h"
 #include "core/animation/curves.h"
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/manager/focus/focus_manager.h"
@@ -214,7 +213,6 @@ void GridPattern::OnModifyDone()
         scrollable->SetIsAllowMouse(GetIsAllowMouse());
     }
     SetEdgeEffect();
-
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     if (paintProperty->GetScrollBarProperty()) {
@@ -2032,8 +2030,8 @@ void GridPattern::ReportOnItemGridEvent(const std::string& event)
     auto result = JsonUtil::Create();
     CHECK_NULL_VOID(result);
     result->Put("result", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
-        ComponentEventType::COMPONENT_EVENT_SCROLL);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
 
 std::string GridPattern::GetLayoutMode() const

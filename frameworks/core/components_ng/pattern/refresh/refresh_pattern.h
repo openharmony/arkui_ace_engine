@@ -23,6 +23,7 @@
 #include "frameworks/base/memory/referenced.h"
 #include "frameworks/base/utils/noncopyable.h"
 #include "frameworks/core/components_ng/base/frame_scene_status.h"
+#include "frameworks/core/components_ng/pattern/list/list_layout_property.h"
 #include "frameworks/core/components_ng/pattern/pattern.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_accessibility_property.h"
 #include "frameworks/core/components_ng/pattern/refresh/refresh_animation_state.h"
@@ -36,8 +37,6 @@
 #include "frameworks/core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-const char LOADING_PROGRESS_ETS_TAG[] = "LoadingProgress";
-const char REFRESH_ETS_TAG[] = "Refresh";
 
 class RefreshPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(RefreshPattern, NestableScrollContainer);
@@ -177,6 +176,8 @@ private:
     void FireOnStepOffsetChange(float value, bool isDrag);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
     void InitProgressColumn();
+    void UpdateLoadingTextStyle(const RefPtr<FrameNode>& host,
+        const RefPtr<TextLayoutProperty>& loadingTextLayoutProperty);
     void UpdateLoadingTextOpacity(float opacity);
     void BeginTrailingTrace();
     void EndTrailingTrace();
