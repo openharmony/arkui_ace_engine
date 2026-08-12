@@ -21,7 +21,7 @@
 #include <cmath>
 #include <filesystem>
 #include <iomanip>
-#include <iostream>
+
 #include <string>
 #include <string_view>
 #include <sstream>
@@ -10081,6 +10081,14 @@ int WebPattern::SendCommandToNWeb(std::unique_ptr<JsonValue> comJson)
         return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
     }
 
+    // Batch command: {"command":"inputAutoFill","params":{...}}
+    // Uses "command" key for routing, separate from single-command "event_type" format
+    auto commandValue = comJson->GetValue("command");
+    if (commandValue && commandValue->IsString() && commandValue->GetString() == "inputAutoFill") {
+        return ExecuteAutoFillCommand(comJson);
+    }
+
+    // Single commands: {"event_type":"...","xpath":"...",...}
     auto eventTypeValue = comJson->GetValue("event_type");
     if (!eventTypeValue || !eventTypeValue->IsString()) {
         TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] CommandError: event_type is missing or not string type");
@@ -10202,6 +10210,40 @@ int WebPattern::ExecuteGestureCommand(const std::unique_ptr<JsonValue>& comJson,
             actionInfo->GetX(), actionInfo->GetY(), actionInfo->GetScale(), actionInfo->GetSpeed());
     }
     return static_cast<int>(WebCommandResult::JSON_INVALID_EVENT_TYPE);
+}
+
+int WebPattern::ExecuteAutoFillCommand(const std::unique_ptr<JsonValue>& comJson)
+{
+    if (!delegate_) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteAutoFillCommand: delegate_ is nullptr");
+        return static_cast<int>(WebCommandResult::DELEGATE_NULL);
+    }
+    auto manager = delegate_->GetNWebCommandActionManager();
+    if (!manager) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteAutoFillCommand: CommandActionManager is nullptr");
+        return static_cast<int>(WebCommandResult::FAILED);
+    }
+
+    // Batch command format: {"command":"inputAutoFill","params":{...}}
+    // "params" is required, containing defaultMode and items array
+    auto paramsValue = comJson->GetValue("params");
+    if (!paramsValue || !paramsValue->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+            "[WebCommandAction] ExecuteAutoFillCommand: params is missing or not an object");
+        return static_cast<int>(WebCommandResult::JSON_IS_INVALID);
+    }
+
+    std::shared_ptr<OHOS::NWeb::NWebCommandActionInfo> actionInfo;
+    int result = WebCommandWrapper::BuildAutoFillActionInfo(paramsValue, actionInfo);
+    if (result != WEB_COMMAND_BUILD_SUCCESS) {
+        TAG_LOGE(AceLogTag::ACE_WEB,
+            "[WebCommandAction] ExecuteAutoFillCommand: BuildAutoFillActionInfo failed, result=%{public}d", result);
+        return result;
+    }
+
+    result = manager->HandleAutoFillCommand(actionInfo);
+    TAG_LOGI(AceLogTag::ACE_WEB, "[WebCommandAction] ExecuteAutoFillCommand done, result=%{public}d", result);
+    return result;
 }
 
 int WebPattern::CheckGestureCoordinatesInWebBounds(double screenX, double screenY)

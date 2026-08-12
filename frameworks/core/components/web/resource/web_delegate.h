@@ -1111,6 +1111,14 @@ public:
             new NWebCommandActionInfoImpl(event_type, x, y, distanceX, distanceY, scale, duration, tapCount, speed));
     }
 
+    static std::shared_ptr<NWebCommandActionInfoImpl> CreateAutoFillInfo(
+        const std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>>& items,
+        OHOS::NWeb::AutoFillMode defaultMode = OHOS::NWeb::AutoFillMode::Overwrite)
+    {
+        return std::shared_ptr<NWebCommandActionInfoImpl>(
+            new NWebCommandActionInfoImpl(items, defaultMode));
+    }
+
     ~NWebCommandActionInfoImpl() override = default;
 
     std::string GetEventType() const override { return event_type_; }
@@ -1126,6 +1134,10 @@ public:
     int32_t GetDuration() const override { return duration_; }
     int32_t GetTapCount() const override { return tapCount_; }
     int32_t GetSpeed() const override { return speed_; }
+
+    // inputAutoFill getters
+    std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>> GetAutoFillItems() const override { return autofill_items_; }
+    OHOS::NWeb::AutoFillMode GetDefaultMode() const override { return default_mode_; }
 private:
     NWebCommandActionInfoImpl(const std::string& event_type,
                               const std::string& value,
@@ -1145,6 +1157,10 @@ private:
         : event_type_(event_type), x_(x), y_(y), distanceX_(distanceX), distanceY_(distanceY),
           scale_(scale), duration_(duration), tapCount_(tapCount), speed_(speed) {}
 
+    NWebCommandActionInfoImpl(const std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>>& items,
+        OHOS::NWeb::AutoFillMode defaultMode)
+        : event_type_("inputAutoFill"), autofill_items_(items), default_mode_(defaultMode) {}
+
     std::string event_type_ = "";
     std::string input_value_ = "";
     std::string xpath_ = "";
@@ -1158,6 +1174,8 @@ private:
     int32_t duration_ = 0;
     int32_t tapCount_ = 1;
     int32_t speed_ = 0;
+    std::vector<std::shared_ptr<OHOS::NWeb::AutoFillItem>> autofill_items_;
+    OHOS::NWeb::AutoFillMode default_mode_ = OHOS::NWeb::AutoFillMode::Overwrite;
 };
 
 // ===== PageScene Rule-Based Perception Data Structures =====
