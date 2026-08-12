@@ -43,6 +43,7 @@ import {
   MouseAction,
   Padding,
   PanGesture,
+  PanDirection,
   Position,
   Repeat,
   RepeatItem,
@@ -659,7 +660,7 @@ struct SimpleSegmentButtonV2 {
           }
           this.isPressing = false;
         }),
-      PanGesture()
+      PanGesture({ direction: PanDirection.Horizontal })
         .onActionStart((event) => {
           const finger = event.fingerList.find((element) => Boolean(element));
           if (!finger) {

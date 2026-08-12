@@ -1385,7 +1385,7 @@ class SimpleSegmentButtonV2 extends ViewV2 {
           this.isPressing = false;
         });
         LongPressGesture.pop();
-        PanGesture.create();
+        PanGesture.create({ direction: PanDirection.Horizontal });
         PanGesture.onActionStart(event => {
           const finger = event.fingerList.find(Boolean);
           if (!finger) {

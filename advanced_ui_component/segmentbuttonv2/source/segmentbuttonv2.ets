@@ -749,7 +749,7 @@ struct SimpleSegmentButtonV2 {
           }
           this.isPressing = false;
         }),
-      PanGesture()
+      PanGesture({ direction: PanDirection.Horizontal })
         .onActionStart((event) => {
           const finger = event.fingerList.find(Boolean);
           if (!finger) {
