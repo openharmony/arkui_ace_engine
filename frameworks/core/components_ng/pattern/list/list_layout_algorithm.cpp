@@ -2976,12 +2976,6 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
         needMarkDirty = true;
         it = param.items.erase(it);
     }
-    FinishPredictBuildV2(frameNode, pattern, param, needMarkDirty);
-}
-
-void ListLayoutAlgorithm::FinishPredictBuildV2(const RefPtr<FrameNode>& frameNode,
-    const RefPtr<ListPattern>& pattern, ListPredictLayoutParamV2& param, bool needMarkDirty)
-{
     if (needMarkDirty) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }

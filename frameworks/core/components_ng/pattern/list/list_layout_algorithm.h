@@ -744,8 +744,6 @@ private:
         const ListPredictLayoutParamV2& param,
         int64_t deadline,
         bool show);
-    static void FinishPredictBuildV2(const RefPtr<FrameNode>& frameNode, const RefPtr<ListPattern>& pattern,
-        ListPredictLayoutParamV2& param, bool needMarkDirty);
     std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
