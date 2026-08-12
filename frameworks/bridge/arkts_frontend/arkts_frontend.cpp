@@ -619,23 +619,38 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
         return UIContentErrorCode::INVALID_URL;
     }
 
-    ani_string aniUrl;
-    env->String_NewUTF8(url.c_str(), url.size(), &aniUrl);
-    ani_string aniParams;
-    env->String_NewUTF8(params.c_str(), params.size(), &aniParams);
-    ani_string aniName;
-    env->String_NewUTF8("", 0, &aniName);
+    ani_string aniUrl = nullptr;
+    if (env->String_NewUTF8(url.c_str(), url.size(), &aniUrl) != ANI_OK) {
+        LOGE("Failed to create aniUrl string");
+        return UIContentErrorCode::INVALID_URL;
+    }
+    ani_string aniParams = nullptr;
+    if (env->String_NewUTF8(params.c_str(), params.size(), &aniParams) != ANI_OK) {
+        LOGE("Failed to create aniParams string");
+        return UIContentErrorCode::INVALID_URL;
+    }
+    ani_string aniName = nullptr;
+    if (env->String_NewUTF8("", 0, &aniName) != ANI_OK) {
+        LOGE("Failed to create aniName string");
+        return UIContentErrorCode::INVALID_URL;
+    }
 
     ani_ref appLocal;
-    ani_ref optionalEntry;
-    env->GetUndefined(&optionalEntry);
+    ani_ref optionalEntry = nullptr;
+    if (env->GetUndefined(&optionalEntry) != ANI_OK) {
+        LOGE("Failed to get undefined reference");
+        return UIContentErrorCode::NULL_POINTER;
+    }
     auto entryPointObj = url == "__INTEROP__" ? nullptr : entryLoader.GetPageEntryObj();
     auto legacyEntryPointObj = url == "__INTEROP__" ? nullptr : LegacyLoadPage(env);
     auto currentContainer = Container::Current();
     CHECK_NULL_RETURN(currentContainer, UIContentErrorCode::NULL_POINTER);
     std::string moduleName = currentContainer->GetModuleName();
-    ani_string module;
-    env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
+    ani_string module = nullptr;
+    if (env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module) != ANI_OK) {
+        LOGE("Failed to create module string");
+        return UIContentErrorCode::INVALID_URL;
+    }
     ani_boolean enableDebug = ani_boolean(SystemProperties::GetDebugEnabled());
     ani_class appConstructorParamClass;
     if (env->FindClass(KOALA_APP_INFO.constructorParamClassName, &appConstructorParamClass) != ANI_OK) {
@@ -660,7 +675,10 @@ UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::str
         return UIContentErrorCode::INVALID_URL;
     }
 
-    env->GlobalReference_Create(appLocal, &app_);
+    if (env->GlobalReference_Create(appLocal, &app_) != ANI_OK) {
+        LOGE("Failed to create global reference for app");
+        return UIContentErrorCode::NULL_POINTER;
+    }
 
     if (taskExecutor_ == nullptr) {
         LOGE("taskExecutor is nullptr");

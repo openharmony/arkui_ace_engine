@@ -108,3 +108,16 @@ HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetPositionWithTranslateInScreen_NullNode
     int32_t result = OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(nullptr, &translateOffset);
     EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
 }
+
+/**
+ * @tc.name: NodeUtilsErrorTest_NodeUtils_GetPositionWithTranslateInScreen_NullTranslateOffset
+ * @tc.desc: Test OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen with null translateOffset parameter.
+ *           Verifies SET_ERROR_MESSAGE triggers and returns ERROR_CODE_PARAM_INVALID.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeUtilsErrorTest, NodeUtils_GetPositionWithTranslateInScreen_NullTranslateOffset, TestSize.Level1)
+{
+    ArkUI_Node node = {};
+    int32_t result = OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen(&node, nullptr);
+    EXPECT_EQ(result, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+}
