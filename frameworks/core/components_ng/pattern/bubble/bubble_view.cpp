@@ -29,6 +29,12 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/components/theme/shadow_theme.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "ui/properties/ui_material_structs.h"
+#include "core/components_ng/render/adapter/rosen_effect_converter.h"
+#include "core/components_ng/render/ui_material_filter_creator.h"
+#include "render_service_client/core/ui_effect/property/include/rs_ui_filter_to_para.h"
+#endif
 #include "interfaces/inner_api/ace_kit/include/ui/view/theme/token_colors.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -194,6 +200,27 @@ bool BubbleView::SetBubbleSystemMaterial(const RefPtr<FrameNode>& bubbleNode, co
     // Normal processing for other cases
     return ApplySystemMaterialForBubble(bubbleNode, systemMaterial, renderContext);
 }
+
+#if defined(ENABLE_ROSEN_BACKEND)
+void BubbleView::ApplyBubbleRefractParam(const RefPtr<FrameNode>& bubbleNode)
+{
+    CHECK_NULL_VOID(bubbleNode);
+    auto renderContext = bubbleNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto immersiveConfig = renderContext->GetImmersiveMaterialConfig();
+    if (!immersiveConfig.has_value()) {
+        return;
+    }
+    auto filter = UiMaterialFilterCreator::ConvertToUiMaterialFilter(immersiveConfig.value());
+    CHECK_NULL_VOID(filter);
+    auto glassFilter = std::static_pointer_cast<Rosen::RSNGFrostedGlassFilter>(filter);
+    CHECK_NULL_VOID(glassFilter);
+    auto refractParams = glassFilter->Getter<Rosen::FrostedGlassRefractParamsTag>()->Get();
+    refractParams[1] = 0.3f;
+    glassFilter->Setter<Rosen::FrostedGlassRefractParamsTag>(refractParams);
+    renderContext->SetMaterialWithQualityLevel(filter, UiMaterialFilterQuality::DEFAULT);
+}
+#endif
 
 bool BubbleView::ShouldHandleLowEndImmersiveMaterial(const RefPtr<UiMaterial>& systemMaterial)
 {
@@ -438,6 +465,9 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(const std::string& targetTag, int
         // Set SystemMaterial first, before updating background color, blur style and shadow
         bool isUserSetMaterial = BubbleView::SetBubbleSystemMaterial(child, param);
         bubblePattern->SetIsUserSetMaterial(isUserSetMaterial);
+#if defined(ENABLE_ROSEN_BACKEND)
+        ApplyBubbleRefractParam(child);
+#endif
 
         // Update background color and blur style only if SystemMaterial is not set
         UpdateBubbleBackgroundAndBlur(
@@ -557,6 +587,9 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
         // Set SystemMaterial first, before updating background color, blur style and shadow
         bool isUserSetMaterial = BubbleView::SetBubbleSystemMaterial(columnNode, param);
         popupPattern->SetIsUserSetMaterial(isUserSetMaterial);
+#if defined(ENABLE_ROSEN_BACKEND)
+        ApplyBubbleRefractParam(columnNode);
+#endif
 
         // Update background color and blur style only if SystemMaterial is not set
         UpdateBubbleBackgroundAndBlur(
@@ -893,6 +926,9 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     bool isUserSetMaterial = BubbleView::SetBubbleSystemMaterial(childNode, param);
     bubblePattern->SetIsUserSetMaterial(isUserSetMaterial);
+#if defined(ENABLE_ROSEN_BACKEND)
+    ApplyBubbleRefractParam(childNode);
+#endif
     // Clear SystemMaterial when transitioning from having material to no material
     if (wasUserSetMaterial && !isUserSetMaterial) {
         ViewAbstract::SetSystemMaterial(AceType::RawPtr(childNode), nullptr);
