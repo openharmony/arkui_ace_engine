@@ -131,6 +131,11 @@ public:
         return "";
     }
 
+    std::string GetNavDestinationJSViewName(const RefPtr<NG::PageInfo>& pageInfo) const
+    {
+        return "";
+    }
+
     std::string GetCurrentPageName()
     {
         return "";

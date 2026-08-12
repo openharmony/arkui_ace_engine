@@ -142,6 +142,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/navigation/mock_navigation_layout_algorithm.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/navigation/mock_navigation_pattern.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/navigation/mock_navigation_stack.cpp",
+    "$ace_root/test/mock/frameworks/core/components_ng/pattern/navrouter/mock_navdestination_pattern.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/overlay/mock_overlay_manager.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/recycle_view/mock_recycle_manager.cpp",
     "$ace_root/test/mock/frameworks/core/components_ng/pattern/stage/mock_content_root_pattern.cpp",
