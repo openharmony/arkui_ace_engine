@@ -13109,6 +13109,7 @@ std::function<bool()> ParseJsFunc(const JSCallbackInfo& info, int32_t nodeId)
         auto obj = setCustomProperty->ToObject(vm);
         panda::Local<panda::FunctionRef> func = obj;
         auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
+        CHECK_NULL_RETURN(frameNode, false);
         auto nodeId = frameNode->GetId();
         auto function = panda::CopyableGlobal(vm, func);
         auto customPropertyExisted = function->Call(vm, function.ToLocal(), params3, 3)->ToBoolean(vm)->Value();
@@ -13142,6 +13143,7 @@ void JSViewAbstract::JsCustomProperty(const JSCallbackInfo& info)
     auto* vm = info.GetVm();
     CHECK_NULL_VOID(vm);
     auto frameNode = static_cast<NG::FrameNode*>(ViewAbstractModel::GetInstance()->GetFrameNode());
+    CHECK_NULL_VOID(frameNode);
     auto nodeId = frameNode->GetId();
     auto getFunc = ParseJsGetFunc(info, nodeId);
     auto func = ParseJsFunc(info, nodeId);
