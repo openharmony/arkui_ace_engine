@@ -8668,7 +8668,8 @@ std::optional<float> PipelineContext::ResolveFontScaleFromEnv(const RefPtr<Frame
     }
 
     if (auto fontScale = envValue.GetDouble()) {
-        return static_cast<float>(*fontScale);
+        auto scale = static_cast<float>(*fontScale);
+        return LessNotEqual(scale, 0.0f) ? 1.0f : scale;
     }
     return std::nullopt;
 }

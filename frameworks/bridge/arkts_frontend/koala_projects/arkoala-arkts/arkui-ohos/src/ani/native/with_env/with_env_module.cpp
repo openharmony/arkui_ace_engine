@@ -276,6 +276,17 @@ std::optional<ani_ref> ConvertCustomUpdateValueToAniRef(ani_env* env,
     return ConvertQueryResultToAniRef(env, *value);
 }
 
+float GetSystemFontScale()
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, 1.0f);
+    CHECK_NULL_RETURN(modifier->getStateMgmtAniModifier, 1.0f);
+    const auto* stateMgmt = modifier->getStateMgmtAniModifier();
+    CHECK_NULL_RETURN(stateMgmt, 1.0f);
+    CHECK_NULL_RETURN(stateMgmt->getFontScale, 1.0f);
+    return stateMgmt->getFontScale();
+}
+
 std::optional<ani_ref> ConvertSystemValueToAniRef(ani_env* env,
     const std::string& key, const std::optional<ArkUIAniEnvironmentQueryResult>& value)
 {
@@ -293,7 +304,13 @@ std::optional<ani_ref> ConvertSystemValueToAniRef(ani_env* env,
         return ConvertQueryResultToAniRef(env, result);
     }
     if (key == NG::ENV_KEY_FONT_SCALE) {
-        CHECK_NULL_RETURN(value, std::nullopt);
+        if (!value) {
+            auto fontScale = GetSystemFontScale();
+            ArkUIAniEnvironmentQueryResult result;
+            result.type = ARKUI_ANI_ENV_VALUE_TYPE_DOUBLE;
+            result.doubleValue = static_cast<double>(fontScale);
+            return ConvertQueryResultToAniRef(env, result);
+        }
         if (value->type != ARKUI_ANI_ENV_VALUE_TYPE_DOUBLE) {
             return GetUndefinedRef(env);
         }
