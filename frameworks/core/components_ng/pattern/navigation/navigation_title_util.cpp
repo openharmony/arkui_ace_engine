@@ -25,6 +25,7 @@
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -331,24 +332,23 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItemButton(const RefPtr<Navigat
 {
     auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
     CHECK_NULL_RETURN(buttonModifier, nullptr);
-    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
-    CHECK_NULL_RETURN(rawPattern, nullptr);
+    auto* buttonPattern = reinterpret_cast<ButtonPattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_RETURN(buttonPattern, nullptr);
+    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonPattern->SetNavMenuItemNeedFocus(SystemProperties::GetDeviceType() == DeviceType::TV);
+        buttonPattern->SetNavigationFocusBlendBgColor(theme->GetNavigationFocusBlendBgColor());
+        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+    } else {
+        buttonPattern->SetFocusBorderColor(theme->GetToolBarItemFocusColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetToolBarItemFocusBorderWidth());
+    }
     auto menuItemNode = FrameNode::CreateFrameNode(
-        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(rawPattern));
+        V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(buttonPattern));
     CHECK_NULL_RETURN(menuItemNode, nullptr);
     auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(menuItemNode));
-    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        buttonModifier->setBlendColor(
-            nodeHandle, theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
-        buttonModifier->setNavMenuItemNeedFocus(nodeHandle, SystemProperties::GetDeviceType() == DeviceType::TV);
-        buttonModifier->setNavigationFocusBlendBgColor(nodeHandle, theme->GetNavigationFocusBlendBgColor());
-        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetBackgroundFocusOutlineColor());
-        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetBackgroundFocusOutlineWeight());
-    } else {
-        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetToolBarItemFocusColor());
-        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetToolBarItemFocusBorderWidth());
-    }
     auto focusHub = menuItemNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);
     focusHub->SetFocusDependence(FocusDependence::SELF);

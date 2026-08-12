@@ -20,6 +20,7 @@
 #include "base/i18n/localization.h"
 #include "core/components/common/layout/constants.h"
 #include "core/interfaces/native/node/node_swiper_custom_modifier.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -191,12 +192,14 @@ void StepperPattern::CreateLeftButtonNode()
     CHECK_NULL_VOID(buttonModifier);
     // Create buttonNode
     auto buttonId = hostNode->GetLeftButtonId();
-    auto buttonHandle = buttonModifier->createFrameNode(buttonId);
-    CHECK_NULL_VOID(buttonHandle);
-    auto buttonNode = AceType::Claim(reinterpret_cast<FrameNode*>(buttonHandle));
+    auto* buttonPattern = reinterpret_cast<ButtonPattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_VOID(buttonPattern);
+    buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
+    buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
+    auto buttonNode = FrameNode::CreateFrameNode(BUTTON_ETS_TAG, buttonId, AceType::Claim(buttonPattern));
     CHECK_NULL_VOID(buttonNode);
-    buttonModifier->setComponentButtonType(buttonHandle, ComponentButtonType::STEPPER);
-    buttonModifier->setFocusBorderColor(buttonHandle, stepperTheme->GetFocusColor());
+    auto buttonHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(buttonNode));
+    CHECK_NULL_VOID(buttonHandle);
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusDependence(FocusDependence::SELF);

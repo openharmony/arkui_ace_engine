@@ -18,6 +18,7 @@
 #include "base/i18n/localization.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/divider/divider_layout_property.h"
 #include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -817,21 +818,22 @@ bool NavigationModelStatic::CreateBackButtonNode(RefPtr<FrameNode>& backButtonNo
 {
     auto* buttonModifier = NodeModifier::GetButtonCustomModifier();
     CHECK_NULL_RETURN(buttonModifier, false);
-    auto* rawPattern = reinterpret_cast<Pattern*>(buttonModifier->createButtonPattern());
-    CHECK_NULL_RETURN(rawPattern, false);
+    auto* buttonPattern = reinterpret_cast<ButtonPattern*>(buttonModifier->createButtonPattern());
+    CHECK_NULL_RETURN(buttonPattern, false);
+
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, false);
-    backButtonNode = FrameNode::CreateFrameNode(
-        V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(rawPattern));
-    auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(backButtonNode));
-    buttonModifier->setSkipColorConfigurationUpdate(nodeHandle);
-    buttonModifier->setComponentButtonType(nodeHandle, ComponentButtonType::NAVIGATION);
+    buttonPattern->SetSkipColorConfigurationUpdate();
+    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        buttonModifier->setBlendColor(
-            nodeHandle, theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
-        buttonModifier->setFocusBorderColor(nodeHandle, theme->GetBackgroundFocusOutlineColor());
-        buttonModifier->setFocusBorderWidth(nodeHandle, theme->GetBackgroundFocusOutlineWeight());
+        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
     }
+    backButtonNode = FrameNode::CreateFrameNode(
+        V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::Claim(buttonPattern));
+    CHECK_NULL_RETURN(backButtonNode, false);
+
     auto focusHub = backButtonNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, false);
     focusHub->SetFocusDependence(FocusDependence::SELF);

@@ -47,6 +47,7 @@
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/bubble/bubble_render_property.h"
 #include "core/components_ng/pattern/bubble/bubble_view.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/overlay/level_mode.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -1661,5 +1662,51 @@ HWTEST_F(BubbleTestNg, BubblePatternTest026, TestSize.Level1)
      * @tc.expected: No crash occurs when node parameter is null.
      */
     EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CreateButton001
+ * @tc.desc: Test BubbleView::CreateButton.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, CreateButton001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set value to popupParam and button properties.
+     */
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(BUBBLE_PROPERTY_SHOW);
+    ButtonProperties buttonProperties { true, "Button" };
+    buttonProperties.action = AceType::MakeRefPtr<ClickEvent>(nullptr);
+    popupParam->SetPrimaryButtonProperties(buttonProperties);
+    popupParam->SetSecondaryButtonProperties(buttonProperties);
+
+    /**
+     * @tc.steps: step2. create bubble node (registers the popup node in ElementRegister).
+     */
+    auto targetNode = CreateTargetNode();
+    ASSERT_NE(targetNode, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<MockBubbleTheme>()));
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+
+    /**
+     * @tc.steps: step3. call BubbleView::CreateButton.
+     * @tc.expected: the returned button node is not null.
+     */
+    auto buttonNode = BubbleView::CreateButton(
+        buttonProperties, popupNode->GetId(), targetNode->GetId(), popupParam);
+    ASSERT_NE(buttonNode, nullptr);
+
+    /**
+     * @tc.steps: step4. get the FocusHub of the created button node.
+     * @tc.expected: the focus styleType is FocusStyleType::INNER_BORDER.
+     */
+    auto focusHub = buttonNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->GetFocusStyleType(), FocusStyleType::INNER_BORDER);
 }
 } // namespace OHOS::Ace::NG

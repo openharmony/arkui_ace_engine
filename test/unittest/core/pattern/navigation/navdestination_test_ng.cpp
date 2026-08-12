@@ -28,6 +28,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -2493,7 +2494,41 @@ HWTEST_F(NavdestinationTestNg, GetFullTitleWidth005, TestSize.Level1)
     ui.titleBarLayoutAlgorithm->menuCompPadding_ = menuCompPadding;
     
     ui.titleBarLayoutAlgorithm->GetFullTitleWidth(true, occupiedWidth);
-    
+
     EXPECT_EQ(occupiedWidth, 0.0f);
+}
+
+/**
+ * @tc.name: CreateMenuItemButtonFocusStyle001
+ * @tc.desc: Test NavigationTitleUtil::CreateMenuItemButton returns a node whose
+ *           FocusHub focusStyleType_ is FocusStyleType::INNER_BORDER.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, CreateMenuItemButtonFocusStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. prepare theme manager and NavigationBarTheme.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto theme = AceType::MakeRefPtr<NavigationBarTheme>();
+    ASSERT_NE(theme, nullptr);
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    /**
+     * @tc.steps: step2. call NavigationTitleUtil::CreateMenuItemButton.
+     * @tc.expected: the returned node is not null.
+     */
+    auto menuItemNode = NavigationTitleUtil::CreateMenuItemButton(theme);
+    ASSERT_NE(menuItemNode, nullptr);
+
+    /**
+     * @tc.steps: step3. get the FocusHub and check its focusStyleType_.
+     * @tc.expected: focusStyleType_ is FocusStyleType::INNER_BORDER.
+     */
+    auto focusHub = menuItemNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    EXPECT_EQ(focusHub->GetFocusStyleType(), FocusStyleType::INNER_BORDER);
 }
 } // namespace OHOS::Ace::NG
