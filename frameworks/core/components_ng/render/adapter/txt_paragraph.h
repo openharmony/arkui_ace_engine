@@ -96,9 +96,12 @@ public:
     // interfaces for calculate the the specified paragraph position
     int32_t GetGlyphIndexByCoordinate(const Offset& offset, bool isSelectionPos = false) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(const Offset& offset) override;
-    PositionWithAffinity GetCharacterPositionAtCoordinate(const Offset& offset) override;
-    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end) override;
-    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end) override;
+    PositionWithAffinity GetCharacterPositionAtCoordinate(
+        const Offset& offset, TextEncoding encoding = TextEncoding::UTF8) override;
+    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8) override;
+    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8) override;
     void AdjustIndexForward(const Offset& offset, bool compareOffset, int32_t& index);
     void GetRectsForRange(int32_t start, int32_t end, std::vector<RectF>& selectedRects) override;
     std::pair<size_t, size_t> GetEllipsisTextRange() override;

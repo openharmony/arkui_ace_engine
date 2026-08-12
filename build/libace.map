@@ -2306,8 +2306,8 @@
       "OHOS::Ace::NG::TextPattern::GetAIItemOption() const";
       "OHOS::Ace::NG::TextPattern::GetAISpanMap()";
       "OHOS::Ace::NG::TextPattern::GetBindSelectionMenuInJson() const";
-      "OHOS::Ace::NG::TextPattern::GetCharacterPositionAtCoordinate(int, int)";
-      "OHOS::Ace::NG::TextPattern::GetCharacterRangeForGlyphRange(int, int)";
+      "OHOS::Ace::NG::TextPattern::GetCharacterPositionAtCoordinate(int, int, OHOS::Ace::NG::TextEncoding)";
+      "OHOS::Ace::NG::TextPattern::GetCharacterRangeForGlyphRange(int, int, OHOS::Ace::NG::TextEncoding)";
       "OHOS::Ace::NG::TextPattern::GetChildByIndex(int) const";
       "OHOS::Ace::NG::TextPattern::GetClickedSpanPosition()";
       "OHOS::Ace::NG::TextPattern::GetContentHost() const";
@@ -2323,7 +2323,7 @@
       "OHOS::Ace::NG::TextPattern::GetFontSizeWithThemeInJson(std::__h::optional<OHOS::Ace::Dimension> const&) const";
       "OHOS::Ace::NG::TextPattern::GetFocusPattern() const";
       "OHOS::Ace::NG::TextPattern::GetGlyphPositionAtCoordinate(int, int)";
-      "OHOS::Ace::NG::TextPattern::GetGlyphRangeForCharacterRange(int, int)";
+      "OHOS::Ace::NG::TextPattern::GetGlyphRangeForCharacterRange(int, int, OHOS::Ace::NG::TextEncoding)";
       "OHOS::Ace::NG::TextPattern::GetHandleIndex(OHOS::Ace::Offset const&) const";
       "OHOS::Ace::NG::TextPattern::GetIsCustomFont()";
       "OHOS::Ace::NG::TextPattern::GetLineCount() const";

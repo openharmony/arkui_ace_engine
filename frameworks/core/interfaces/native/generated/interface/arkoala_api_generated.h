@@ -7651,6 +7651,14 @@ typedef struct Opt_TextDirection {
     Ark_Tag tag;
     Ark_TextDirection value;
 } Opt_TextDirection;
+typedef enum Ark_TextEncoding {
+    ARK_TEXT_ENCODING_TEXT_ENCODING_UTF8 = 0,
+    ARK_TEXT_ENCODING_TEXT_ENCODING_UTF16 = 1,
+} Ark_TextEncoding;
+typedef struct Opt_TextEncoding {
+    Ark_Tag tag;
+    Ark_TextEncoding value;
+} Opt_TextEncoding;
 typedef enum Ark_TextHeightAdaptivePolicy {
     ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MAX_LINES_FIRST = 0,
     ARK_TEXT_HEIGHT_ADAPTIVE_POLICY_MIN_FONT_SIZE_FIRST = 1,
@@ -30604,13 +30612,23 @@ typedef struct GENERATED_ArkUILayoutManagerAccessor {
     Opt_PositionWithAffinity (*getGlyphPositionAtCoordinate)(Ark_LayoutManager peer,
                                                              Ark_Float64 x,
                                                              Ark_Float64 y);
-    Opt_PositionWithAffinity (*getCharacterPositionAtCoordinate)(Ark_LayoutManager peer,
-                                                                 Ark_Float64 x,
-                                                                 Ark_Float64 y);
-    Opt_Array_TextRange (*getGlyphRangeForCharacterRange)(Ark_LayoutManager peer,
-                                                          const Ark_TextRange* charRange);
-    Opt_Array_TextRange (*getCharacterRangeForGlyphRange)(Ark_LayoutManager peer,
-                                                          const Ark_TextRange* glyphRange);
+    Opt_PositionWithAffinity (*getCharacterPositionAtCoordinate0)(Ark_LayoutManager peer,
+                                                                  Ark_Float64 x,
+                                                                  Ark_Float64 y);
+    Opt_PositionWithAffinity (*getCharacterPositionAtCoordinate1)(Ark_LayoutManager peer,
+                                                                  Ark_Float64 x,
+                                                                  Ark_Float64 y,
+                                                                  const Opt_TextEncoding* encoding);
+    Opt_Array_TextRange (*getGlyphRangeForCharacterRange0)(Ark_LayoutManager peer,
+                                                           const Ark_TextRange* charRange);
+    Opt_Array_TextRange (*getGlyphRangeForCharacterRange1)(Ark_LayoutManager peer,
+                                                           const Ark_TextRange* charRange,
+                                                           const Opt_TextEncoding* encoding);
+    Opt_Array_TextRange (*getCharacterRangeForGlyphRange0)(Ark_LayoutManager peer,
+                                                           const Ark_TextRange* glyphRange);
+    Opt_Array_TextRange (*getCharacterRangeForGlyphRange1)(Ark_LayoutManager peer,
+                                                           const Ark_TextRange* glyphRange,
+                                                           const Opt_TextEncoding* encoding);
     Opt_text_LineMetrics (*getLineMetrics)(Ark_LayoutManager peer,
                                            Ark_Int32 lineNumber);
     Opt_Array_text_TextBox (*getRectsForRange)(Ark_LayoutManager peer,

@@ -5430,11 +5430,17 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _LayoutManager_getGlyphPositionAtCoordinate(ptr: KPointer, x: KDouble, y: KDouble): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _LayoutManager_getCharacterPositionAtCoordinate(ptr: KPointer, x: KDouble, y: KDouble): KInteropReturnBuffer
+    native static _LayoutManager_getCharacterPositionAtCoordinate0(ptr: KPointer, x: KDouble, y: KDouble): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _LayoutManager_getGlyphRangeForCharacterRange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    native static _LayoutManager_getCharacterPositionAtCoordinate1(ptr: KPointer, x: KDouble, y: KDouble, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick
-    native static _LayoutManager_getCharacterRangeForGlyphRange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    native static _LayoutManager_getGlyphRangeForCharacterRange0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _LayoutManager_getGlyphRangeForCharacterRange1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _LayoutManager_getCharacterRangeForGlyphRange0(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _LayoutManager_getCharacterRangeForGlyphRange1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _LayoutManager_getLineMetrics(ptr: KPointer, lineNumber: KInt): KInteropReturnBuffer
     @ani.unsafe.Quick

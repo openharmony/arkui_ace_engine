@@ -42,6 +42,11 @@ enum RectHeightPolicy {
     COVER_LINE
 };
 
+enum class TextEncoding : int32_t {
+    UTF8 = 0,
+    UTF16 = 1,
+};
+
 class LeadingMarginSize {
 public:
     LeadingMarginSize() = default;
@@ -318,17 +323,20 @@ public:
         PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
         return finalResult;
     }
-    virtual PositionWithAffinity GetCharacterPositionAtCoordinate(const Offset& offset)
+    virtual PositionWithAffinity GetCharacterPositionAtCoordinate(
+        const Offset& offset, TextEncoding encoding = TextEncoding::UTF8)
     {
         PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
         return finalResult;
     }
-    virtual std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end)
+    virtual std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8)
     {
         std::pair<TextRange, TextRange> ranges;
         return ranges;
     }
-    virtual std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end)
+    virtual std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        int32_t start, int32_t end, TextEncoding encoding = TextEncoding::UTF8)
     {
         std::pair<TextRange, TextRange> ranges;
         return ranges;
