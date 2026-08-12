@@ -16,6 +16,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("app_bar_test_ng") {
   module_name = "AppBar"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/app_bar_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.cpp",

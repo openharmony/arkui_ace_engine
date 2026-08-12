@@ -16,14 +16,21 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("ressched_report_test") {
   type = "pipeline"
+  if (is_host_product) {
+    type = "host_components"
+    flutter_skia = false
+  } else {
+    flutter_skia = true
+  }
   module_name = "DrawingSet-Rect"
-  flutter_skia = true
 
-  external_deps = [
-    "c_utils:utils",
-    "graphic_2d:2d_graphics",
-    "napi:ace_napi",
-  ]
+  if (!is_host_product) {
+    external_deps = [
+      "c_utils:utils",
+      "graphic_2d:2d_graphics",
+      "napi:ace_napi",
+    ]
+  }
 
   sources = [
     "$ace_root/test/mock/adapter/ohos/osal/mock_dynamic_module_helper.cpp",

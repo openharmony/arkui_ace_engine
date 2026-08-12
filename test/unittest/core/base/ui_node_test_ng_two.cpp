@@ -1228,6 +1228,8 @@ HWTEST_F(UINodeTestNgTwo, CollectCleanedChildren, TestSize.Level1)
      */
     int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: step2. create FrameNode with child
@@ -1242,6 +1244,8 @@ HWTEST_F(UINodeTestNgTwo, CollectCleanedChildren, TestSize.Level1)
         FrameNode::CreateFrameNode("testNode4", 4, AceType::MakeRefPtr<Pattern>(), true);
     const RefPtr<FrameNode> testNode5 =
         FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
+    testNode1->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    testNode2->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
 
     /**
      * @tc.steps: step3. add child
@@ -1265,6 +1269,7 @@ HWTEST_F(UINodeTestNgTwo, CollectCleanedChildren, TestSize.Level1)
     /**
      * @tc.steps: step5. revert to the origin API.
      */
+    pipeline->SetApiTargetVersion(originApiVersion);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
 
@@ -1331,6 +1336,8 @@ HWTEST_F(UINodeTestNgTwo, CollectRemovedChildren002, TestSize.Level1)
      */
     int originApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: step2. create FrameNode with child
@@ -1345,6 +1352,8 @@ HWTEST_F(UINodeTestNgTwo, CollectRemovedChildren002, TestSize.Level1)
         FrameNode::CreateFrameNode("testNode4", 4, AceType::MakeRefPtr<Pattern>(), true);
     const RefPtr<FrameNode> testNode5 =
         FrameNode::CreateFrameNode("testNode5", 5, AceType::MakeRefPtr<Pattern>(), true);
+    testNode1->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
+    testNode2->apiVersion_ = static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN);
 
     /**
      * @tc.steps: step3. add child
@@ -1367,6 +1376,7 @@ HWTEST_F(UINodeTestNgTwo, CollectRemovedChildren002, TestSize.Level1)
     /**
      * @tc.steps: step5. revert to the origin API.
      */
+    pipeline->SetApiTargetVersion(originApiVersion);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
 }
 
@@ -1535,6 +1545,7 @@ HWTEST_F(UINodeTestNgTwo, UINodeTestNgTwo075, TestSize.Level1)
      * @tc.steps: step2. verify nodeId string matching and invalid input branch
      * @tc.expected: node id string finds target frame node; empty id returns nullptr
      */
+    targetFrameNode->UpdateInspectorId(std::to_string(targetFrameNode->GetId()));
     auto byNodeId = root->GetFrameNodeByIdInSubTree(std::to_string(targetFrameNode->GetId()));
     ASSERT_NE(byNodeId, nullptr);
     EXPECT_EQ(byNodeId->GetId(), targetFrameNode->GetId());

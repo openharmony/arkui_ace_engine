@@ -49,11 +49,7 @@ HWTEST_F(ViewAbstractTestNg, OpenMenuTest001, TestSize.Level1)
         FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, "Text", MenuType::MENU));
     ASSERT_NE(menuNode, nullptr);
     menuNode->MountToParent(selectNode);
-    selectNode->MountToParent(rootNode);
-    rootNode->MarkDirtyNode();
     ViewStackProcessor::GetInstance()->Push(menuNode);
-    menuNode->onMainTree_ = true;
-    menuNode->AttachToMainTree(false, AceType::RawPtr(pipelineContext));
     MenuParam menuParam;
     menuParam.isShowInSubWindow = true;
 
@@ -64,6 +60,7 @@ HWTEST_F(ViewAbstractTestNg, OpenMenuTest001, TestSize.Level1)
     int32_t targetId = menuNode->GetId();
     auto result = ViewAbstract::OpenMenu(menuParam, selectNode, targetId);
     EXPECT_EQ(result, ERROR_CODE_TARGET_NOT_ON_COMPONENT_TREE);
+    ViewStackProcessor::GetInstance()->ClearStack();
 }
 
 /**

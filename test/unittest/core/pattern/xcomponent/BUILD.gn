@@ -16,6 +16,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("xcomponent_test_ng") {
   module_name = "DrawingSet-Path"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [
     "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
     "$ace_root/frameworks/core/interfaces/native/node/node_xcomponent_modifier.cpp",
@@ -39,15 +42,20 @@ ace_unittest("xcomponent_test_ng") {
     sources += [ "xcomponent_test_core.cpp" ]
   }
 
-  external_deps = [
-    "bounds_checking_function:libsec_shared",
-    "napi:ace_napi",
-  ]
+  if (!is_host_product) {
+    external_deps = [
+      "bounds_checking_function:libsec_shared",
+      "napi:ace_napi",
+    ]
+  }
 }
 
 ace_unittest("xcomponent_test_set_rate_range") {
   module_name = "CommonEvent-VisiableAreaChange"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
 
   sources = [
     "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
@@ -61,9 +69,11 @@ ace_unittest("xcomponent_test_set_rate_range") {
     sources += [ "xcomponent_test_set_rate_range_core.cpp" ]
   }
 
-  external_deps = [ "bounds_checking_function:libsec_shared" ]
   defines = [ "ENABLE_ROSEN_BACKEND" ]
-  if (current_os == "ohos") {
-    external_deps += [ "napi:ace_napi" ]
+  if (!is_host_product) {
+    external_deps = [ "bounds_checking_function:libsec_shared" ]
+    if (current_os == "ohos") {
+      external_deps += [ "napi:ace_napi" ]
+    }
   }
 }

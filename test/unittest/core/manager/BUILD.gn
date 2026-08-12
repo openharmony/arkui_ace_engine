@@ -204,6 +204,9 @@ if (!is_host_product) {
 ace_unittest("frame_rate_manager_test_ng") {
   module_name = "StateManagement-InComponent"
   type = "new"
+  if (is_host_product) {
+    type = "host_components"
+  }
   sources = [ "frame_rate_manager_test.cpp" ]
 }
 

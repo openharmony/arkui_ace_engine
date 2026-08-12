@@ -1467,7 +1467,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashGap003, TestSize.Level1)
     lpxProp.leftDimen = lpxDim;
     lpxProp.rightDimen = lpxDim;
     ViewAbstract::SetDashGap(lpxProp);
-    EXPECT_EQ(frameNode->lpxAttributes_.size(), 4);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 
     NG::BorderWidthProperty vpProp;
     vpProp.topDimen = vpDim;
@@ -1549,7 +1549,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractLpxDashWidth003, TestSize.Level1)
     lpxProp.leftDimen = lpxDim;
     lpxProp.rightDimen = lpxDim;
     ViewAbstract::SetDashWidth(lpxProp);
-    EXPECT_EQ(frameNode->lpxAttributes_.size(), 4);
+    EXPECT_EQ(frameNode->lpxAttributes_.size(), 1);
 
     NG::BorderWidthProperty vpProp;
     vpProp.topDimen = vpDim;
