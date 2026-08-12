@@ -452,7 +452,14 @@ bool SmartLayoutAlgorithm::RemeasureText(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = layoutAlgorithmWrapper->GetLayoutAlgorithm();
     CHECK_NULL_RETURN(layoutAlgorithm, false);
-
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(layoutAlgorithm);
+    CHECK_NULL_RETURN(textLayoutAlgorithm, false);
+    auto textPattern = hostNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    auto content = UtfUtils::Str16DebugToStr8(textPattern->GetTextForDisplay());
+    const auto& previousTextStyle = textLayoutAlgorithm->GetTextStyle();
+    auto previousFontSize = Dimension(previousTextStyle.GetFontSize().ConvertToFpWithEnv(
+        previousTextStyle.GetEnvFontScale()), DimensionUnit::FP);
     auto parentNode = hostNode->GetParentFrameNode();
     bool isButtonLabel = hostNode->IsInternal() && parentNode && parentNode->GetTag() == V2::BUTTON_ETS_TAG;
     OffsetF previousCenter;
@@ -466,6 +473,13 @@ bool SmartLayoutAlgorithm::RemeasureText(LayoutWrapper* layoutWrapper)
         geometryNode->SetContentSize(contentSize.value());
     }
     layoutAlgorithm->Measure(layoutWrapper);
+    const auto& currentTextStyle = textLayoutAlgorithm->GetTextStyle();
+    auto currentFontSize = Dimension(currentTextStyle.GetFontSize().ConvertToFpWithEnv(
+        currentTextStyle.GetEnvFontScale()), DimensionUnit::FP);
+    LOGD("SmartLayout: Applied layout for text [id:%{public}d]: content=%{public}s, "
+         "fontSize=(%{public}s -> %{public}s)",
+        hostNode->GetId(), content.c_str(), previousFontSize.ToString().c_str(),
+        currentFontSize.ToString().c_str());
     if (isButtonLabel) {
         auto marginFrameSize = geometryNode->GetMarginFrameSize();
         geometryNode->SetMarginFrameOffset(OffsetF(previousCenter.GetX() - marginFrameSize.Width() / 2.0f,
