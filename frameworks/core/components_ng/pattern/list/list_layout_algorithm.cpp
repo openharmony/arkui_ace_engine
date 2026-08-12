@@ -2886,8 +2886,7 @@ void ListLayoutAlgorithm::ProcessPredictBuildLazyChild(
     const PredictLayoutItem& item,
     const RefPtr<ListPattern>& pattern,
     const ListPredictLayoutParamV2& param,
-    int64_t deadline,
-    bool show)
+    int64_t deadline)
 {
     auto frameNode = wrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
@@ -2921,7 +2920,7 @@ void ListLayoutAlgorithm::ProcessPredictBuildLazyChild(
                                                              param.listMainSizeValues.contentEndOffset;
     LazyLayoutUtils::SetStickyInsets(constraint, stickyInsetStart, stickyInsetEnd);
     frameNode->GetGeometryNode()->SetParentLayoutConstraint(constraint);
-    FrameNode::ProcessOffscreenNode(frameNode, show);
+    FrameNode::ProcessOffscreenNode(frameNode, param.show);
 }
 
 void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline)
@@ -2948,9 +2947,9 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
         }
         ACE_SCOPED_TRACE("predict Item:%d", (*it).index);
         auto index = !pattern->IsStackFromEnd() ? (*it).index : frameNode->GetTotalChildCount() - (*it).index - 1;
-        const bool showPredictItem = param.show && !(*it).needParentLayout;
+        const bool addToRenderTree = param.show && !(*it).needParentLayout;
         auto wrapper = GetListItemWithEmptyBranch(
-            AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), showPredictItem, !showPredictItem);
+            AceType::RawPtr(frameNode), index + pattern->GetItemStartIndex(), addToRenderTree, !addToRenderTree);
         if (!wrapper) {
             it = param.items.erase(it);
             continue;
@@ -2960,13 +2959,13 @@ void ListLayoutAlgorithm::PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t de
         }
         bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
         if (CanSupportNestedLazy(wrapper->GetHostNode(), frameNode, pattern->GetLanes())) {
-            ProcessPredictBuildLazyChild(wrapper, *it, pattern, param, deadline, showPredictItem);
+            ProcessPredictBuildLazyChild(wrapper, *it, pattern, param, deadline);
         } else if (!isGroup) {
             UpdateListItemEditModeCheckBoxSpaceForPredictBuild(wrapper, frameNode);
             auto itemNode = wrapper->GetHostNode();
             CHECK_NULL_VOID(itemNode);
             itemNode->GetGeometryNode()->SetParentLayoutConstraint(param.layoutConstraint);
-            FrameNode::ProcessOffscreenNode(itemNode, showPredictItem);
+            FrameNode::ProcessOffscreenNode(itemNode, param.show);
         } else {
             param.listMainSizeValues.forward = (*it).forwardCacheCount > -1;
             param.listMainSizeValues.backward = (*it).backwardCacheCount > -1;
