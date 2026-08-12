@@ -253,14 +253,7 @@ Opt_Int32 GetScrollStepImpl(Ark_AxisEvent peer)
 void SetScrollStepImpl(Ark_AxisEvent peer,
                        const Opt_Int32* scrollStep)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(scrollStep);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    auto value = Converter::OptConvertPtr<int32_t>(scrollStep);
-    if (value) {
-        info->SetScrollStep(value.value());
-    }
+    LOGE("Arkoala method AxisEventAccessor.SetScrollStep doesn't have sense. Not implemented...");
 }
 Opt_Int32 GetEventHandleIdImpl(Ark_AxisEvent peer)
 {
