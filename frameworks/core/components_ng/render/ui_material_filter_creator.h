@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_UI_MATERIAL_FILTER_CREATOR_H
 
 #include <memory>
+#include "base/utils/macros.h"
 
 namespace OHOS::Rosen {
 class Filter;
@@ -38,7 +39,8 @@ namespace OHOS::Ace::NG {
 
 class UiMaterialFilterCreator {
 public:
-    static std::shared_ptr<Rosen::RSNGFilterBase> ConvertToUiMaterialFilter(const ImmersiveMaterialConfig& params);
+    static ACE_FORCE_EXPORT std::shared_ptr<Rosen::RSNGFilterBase> ConvertToUiMaterialFilter(
+        const ImmersiveMaterialConfig& params);
     static std::shared_ptr<Rosen::RSNGFilterBase> ConvertToUiMaterialECFilter(const ImmersiveMaterialConfig& params);
     static std::shared_ptr<Rosen::RSNGShaderBase> ConvertToUiMaterialECSubShader(const ImmersiveMaterialConfig& params);
     static std::shared_ptr<OHOS::Rosen::Filter> CreateRosenFilter(const ImmersiveMaterialConfig& params);

@@ -2696,6 +2696,7 @@
       "OHOS::Ace::NG::ToolbarManager::SetSideBarDividerInfo(OHOS::Ace::NG::ToolbarInfo const&)";
       "OHOS::Ace::NG::ToolbarManager::SetSideBarInfo(OHOS::Ace::NG::ToolbarInfo const&)";
       "OHOS::Ace::NG::TossAnimationController::StopTossAnimation()";
+      "OHOS::Ace::NG::UiMaterialFilterCreator::ConvertToUiMaterialFilter(OHOS::Ace::ImmersiveMaterialConfig const&)";
       "OHOS::Ace::NG::UINode::~UINode()";
       "OHOS::Ace::NG::UINode::AddChild(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&, int, bool, bool, bool)";
       "OHOS::Ace::NG::UINode::AdjustLayoutWrapperTree(OHOS::Ace::RefPtr<OHOS::Ace::NG::LayoutWrapperNode> const&, bool, bool)";

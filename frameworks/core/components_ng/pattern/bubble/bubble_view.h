@@ -69,6 +69,9 @@ public:
     static bool SetBubbleSystemMaterial(const RefPtr<FrameNode>& bubbleNode, const RefPtr<PopupParam>& param);
 
 private:
+#if defined(ENABLE_ROSEN_BACKEND)
+    static void ApplyBubbleRefractParam(const RefPtr<FrameNode>& bubbleNode);
+#endif
     static bool ShouldHandleLowEndImmersiveMaterial(const RefPtr<UiMaterial>& systemMaterial);
     static bool HandleLowEndImmersiveMaterialForBubble(
         const RefPtr<FrameNode>& bubbleNode,
