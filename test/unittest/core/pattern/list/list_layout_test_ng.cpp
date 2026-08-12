@@ -3511,6 +3511,77 @@ HWTEST_F(ListLayoutTestNg, ListShowCachePredictItemWaitsForParentLayout002, Test
 }
 
 /**
+ * @tc.name: ListShowCachePredictItemWaitsForParentLayout003
+ * @tc.desc: A prebuilt item remains inactive until List assigns its position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListShowCachePredictItemWaitsForParentLayout003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(1, true);
+    CreateItemsInLazyForEach(10, 100.0f); // 10: item count, 100.0f: item height
+    auto lazyForEach =
+        AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(lazyForEach, nullptr);
+    auto cachedItem = AceType::DynamicCast<FrameNode>(lazyForEach->GetFrameChildByIndex(4, true, true, false));
+    ASSERT_NE(cachedItem, nullptr);
+    EXPECT_FALSE(cachedItem->IsLayoutComplete());
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto predictParam = listPattern->GetPredictLayoutParamV2();
+    ASSERT_TRUE(predictParam.has_value());
+    ASSERT_FALSE(predictParam->items.empty());
+    EXPECT_TRUE(predictParam->items.front().needParentLayout);
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(GetLazyForEachItemFromCache(4), cachedItem);
+    EXPECT_FALSE(cachedItem->IsActive());
+    EXPECT_TRUE(cachedItem->IsOnMainTree());
+
+    FlushUITasks();
+    EXPECT_TRUE(cachedItem->IsActive());
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameOffset().GetY(), HEIGHT);
+}
+
+/**
+ * @tc.name: ListShowCachePredictItemWaitsForParentLayout004
+ * @tc.desc: A prebuilt item in a multi-lane List remains inactive until positioned
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListShowCachePredictItemWaitsForParentLayout004, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetCachedCount(1, true);
+    CreateItemsInLazyForEach(20, 100.0f); // 20: item count, 100.0f: item height
+    auto lazyForEach =
+        AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(lazyForEach, nullptr);
+    auto cachedItem = AceType::DynamicCast<FrameNode>(lazyForEach->GetFrameChildByIndex(8, true, true, false));
+    ASSERT_NE(cachedItem, nullptr);
+    EXPECT_FALSE(cachedItem->IsLayoutComplete());
+    CreateDone();
+
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto predictParam = listPattern->GetPredictLayoutParamV2();
+    ASSERT_TRUE(predictParam.has_value());
+    ASSERT_FALSE(predictParam->items.empty());
+    EXPECT_TRUE(predictParam->items.front().needParentLayout);
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_EQ(GetLazyForEachItemFromCache(8), cachedItem);
+    EXPECT_FALSE(cachedItem->IsActive());
+    EXPECT_TRUE(cachedItem->IsOnMainTree());
+
+    FlushUITasks();
+    EXPECT_TRUE(cachedItem->IsActive());
+    EXPECT_EQ(cachedItem->GetGeometryNode()->GetFrameOffset().GetY(), HEIGHT);
+}
+
+/**
  * @tc.name: ListRepeatCacheCount006
  * @tc.desc: List cacheCount
  * @tc.type: FUNC

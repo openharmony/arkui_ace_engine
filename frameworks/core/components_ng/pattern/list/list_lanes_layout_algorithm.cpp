@@ -542,7 +542,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapp
             auto [needBreak, needPredict] = CheckACachedItem(wrapper, cnt, isGroup, startPos, true);
             if (needPredict) {
                 predictList.emplace_back(
-                    PredictLayoutItem { curIndex + i, cachedCount, -1, forceCache, !wrapper, startPos });
+                    PredictLayoutItem { curIndex + i, cachedCount, -1, forceCache, needBreak, startPos });
             }
             if (needBreak) {
                 break;
@@ -609,7 +609,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrap
             wrapper = GetChildByIndex(layoutWrapper, idx, !show);
             auto [needBreak, needPredict] = CheckACachedItem(wrapper, cnt, isGroup, endPos, false);
             if (needPredict) {
-                predictList.emplace_back(PredictLayoutItem { idx, -1, cachedCount, forceCache, !wrapper, endPos });
+                predictList.emplace_back(PredictLayoutItem { idx, -1, cachedCount, forceCache, needBreak, endPos });
             }
             if (needBreak) {
                 break;

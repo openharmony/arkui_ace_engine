@@ -2626,12 +2626,15 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
         auto childNode = wrapper->GetHostNode();
         bool isLazyChild = !isGroup && CanSupportNestedLazy(childNode, layoutWrapper->GetHostNode(), GetLanes());
         bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
-        if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, true)) &&
-            !wrapper->CheckHasPreMeasured()) {
-            predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1, forceCache, false, currPos });
-        }
-        if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete() && !wrapper->CheckHasPreMeasured()) {
-            return curIndex - 1;
+        bool needPredict = !isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, true)) &&
+                           !wrapper->CheckHasPreMeasured();
+        if (needPredict) {
+            bool needParentLayout = isDirty && !childNode->IsLayoutComplete();
+            predictList.emplace_back(
+                PredictLayoutItem { curIndex, cachedCount, -1, forceCache, needParentLayout, currPos });
+            if (needParentLayout) {
+                return curIndex - 1;
+            }
         }
         int32_t currCache = 1;
         auto mainLen = GetChildMainSize(wrapper, curIndex);
@@ -2687,12 +2690,15 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
         auto childNode = wrapper->GetHostNode();
         bool isLazyChild = !isGroup && CanSupportNestedLazy(childNode, layoutWrapper->GetHostNode(), GetLanes());
         bool isDirty = wrapper->CheckNeedForceMeasureAndLayout() || !IsListLanesEqual(wrapper);
-        if (!isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, false)) &&
-            !wrapper->CheckHasPreMeasured()) {
-            predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount, forceCache, false, currPos });
-        }
-        if (!isGroup && isDirty && !wrapper->GetHostNode()->IsLayoutComplete() && !wrapper->CheckHasPreMeasured()) {
-            return curIndex + 1;
+        bool needPredict = !isGroup && (isDirty || CheckLayoutConstraintChanged(wrapper, currPos, false)) &&
+                           !wrapper->CheckHasPreMeasured();
+        if (needPredict) {
+            bool needParentLayout = isDirty && !childNode->IsLayoutComplete();
+            predictList.emplace_back(
+                PredictLayoutItem { curIndex, -1, cachedCount, forceCache, needParentLayout, currPos });
+            if (needParentLayout) {
+                return curIndex + 1;
+            }
         }
         int32_t currCache = 1;
         auto mainLen = GetChildMainSize(wrapper, curIndex);
