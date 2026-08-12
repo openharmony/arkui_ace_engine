@@ -16,10 +16,16 @@
 import { int32 } from "@koalaui/common";
 import { Disposable, scheduleCallback, callScheduledCallbacks } from "@koalaui/runtime";
 
+const DEFAULT_IDLE_TRIM_KEEP_SIZE: int32 = 8;
+const DEFAULT_IDLE_TRIM_DELAY_MS: int32 = 300000;
+
 export class ReusablePool implements Disposable {
     private _maxSize: int32 = Number.POSITIVE_INFINITY.toInt()
     private _cache: Disposable[] = []
     private _disposed: boolean = false;
+    private _idleTrimEnabled: boolean = false;
+    private _lastOperateTime: number = 0;
+    private _idleTrimTaskPending: boolean = false;
 
     get disposed(): boolean {
         return this._disposed
@@ -34,7 +40,10 @@ export class ReusablePool implements Disposable {
      */
     get(): Disposable | undefined {
         if (this.disposed) return undefined;
-        return this._cache.shift();
+        const value = this._cache.shift();
+        this.touch();
+        return value;
+        
     }
 
     getLastNode(): Disposable | undefined {
@@ -42,7 +51,7 @@ export class ReusablePool implements Disposable {
             return undefined;
         }
         const value = this._cache.pop();
-        // need function this.touch();
+        this.touch();
         return value;
     }
 
@@ -52,6 +61,7 @@ export class ReusablePool implements Disposable {
     put(value: Disposable): void {
         if (this.disposed || this._cache.length >= this._maxSize) return;
         this._cache.push(value);
+        this.touch();
     }
 
     dispose(): void {
@@ -72,6 +82,49 @@ export class ReusablePool implements Disposable {
                 for (const value of removed)
                     value.dispose();
             })
+        }
+    }
+
+    enableIdleTrim(): void {
+        this._idleTrimEnabled = true;
+        this.touch();
+    }
+
+    private touch(): void {
+        if (!this._idleTrimEnabled || this.disposed) {
+            return;
+        }
+        this._lastOperateTime = Date.now();
+        if (this._idleTrimTaskPending) {
+            return;
+        }
+        this._idleTrimTaskPending = true;
+        this.scheduleIdleTrim(DEFAULT_IDLE_TRIM_DELAY_MS);
+    }
+
+    private scheduleIdleTrim(delayMs: int32): void {
+        setTimeout(() => {
+            this.handleIdleTrim();
+        }, delayMs);
+    }
+
+    private handleIdleTrim(): void {
+        if (this.disposed) {
+            this._idleTrimTaskPending = false;
+            return;
+        }
+        const idleTime = Date.now() - this._lastOperateTime;
+        if (idleTime < DEFAULT_IDLE_TRIM_DELAY_MS) {
+            this.scheduleIdleTrim((DEFAULT_IDLE_TRIM_DELAY_MS - idleTime).toInt());
+            return;
+        }
+        this._idleTrimTaskPending = false;
+        if (this._cache.length > DEFAULT_IDLE_TRIM_KEEP_SIZE) {
+            const removed = this._cache.splice(DEFAULT_IDLE_TRIM_KEEP_SIZE.toInt());
+            for (const value of removed) {
+                value.dispose();
+            }
+            callScheduledCallbacks();
         }
     }
 }

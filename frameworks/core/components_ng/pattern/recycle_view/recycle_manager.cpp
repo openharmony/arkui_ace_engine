@@ -69,15 +69,18 @@ void RecycleManager::PopNode(int32_t elmtId)
 {
     auto it = recyclePool_.find(elmtId);
     CHECK_EQUAL_VOID(it, recyclePool_.end());
-    auto node = it->second->node.Upgrade();
+    auto state = std::move(it->second);
+    recyclePool_.erase(it);
+    auto node = state->node.Upgrade();
     if (!node) {
-        recyclePool_.erase(it);
         return;
     }
-    if (it->second->config.IsNeedUpdate()) {
-        AceType::DynamicCast<UINode>(node)->UpdateConfigurationUpdate(it->second->config);
+    if (state->config.IsNeedUpdate()) {
+        auto uiNode = AceType::DynamicCast<UINode>(node);
+        if (uiNode) {
+            uiNode->UpdateConfigurationUpdate(state->config);
+        }
     }
-    recyclePool_.erase(it);
 }
 
 void RecycleManager::EraseNode(int32_t elmtId)

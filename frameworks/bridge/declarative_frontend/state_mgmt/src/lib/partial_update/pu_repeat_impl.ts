@@ -63,7 +63,11 @@ class __RepeatImpl<T> {
             stateMgmtConsole.warn('__RepeatImpl: Duplicates detected, fallback to index-based keyGen.');
             // Causes all items to be re-rendered
             this.keyGenFunction_ = __RepeatDefaultKeyGen.funcWithIndex;
-            return this.genKeys();
+            key2Item.clear();
+            this.arr_.forEach((item, index) => {
+                const key = this.keyGenFunction_(item, index);
+                key2Item.set(key, { key, index });
+            });
         }
         return key2Item;
     }
