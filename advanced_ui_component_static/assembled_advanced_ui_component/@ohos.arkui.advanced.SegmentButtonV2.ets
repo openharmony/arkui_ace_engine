@@ -1760,10 +1760,6 @@ function normalizeInt(value: int, min: int, max: int): int {
 
 function generateUniqueKye(groupId: string) {
   return (item: SegmentButtonV2Item, index: int): string => {
-    // index must be part of the key. Otherwise items that share the same
-    // text/icon/symbol (e.g. "手机 手机 手机") produce identical Repeat keys,
-    // which breaks Repeat reconciliation and makes the buttons collapse to one
-    // point during the selected-index switch animation.
     let key: string = `${groupId}_${index}`;
     if (item.text) {
       if (typeof item.text === 'string') {
