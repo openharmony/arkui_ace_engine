@@ -93,6 +93,16 @@
 | ADR-003 | Modifier 文件组织 | **新建 `node_arc_swiper_modifier.cpp/h`**，ArcAlphabetIndexer 复用既有 `alphabet_indexer_modifier` 并扩展 | B：合并进 `node_swiper_modifier.cpp`（放弃：职责混杂、diff 膨胀）；C：单一 arc modifier 文件（放弃：两组件语义不同） | ArcSwiper 控制函数/事件与 Swiper 同源但独立类型，独立文件清晰；ArcAlphabetIndexer 已有 modifier 注册（node_modifiers.cpp:222），仅需扩展属性与暴露节点类型 | 影响文件清单与 Task 拆分 |
 | ADR-004 | 头文件源头归属 | **ace_engine `interfaces/native/native_node.h` 为源头**，interface_sdk_c 同步 | B：以 interface_sdk_c 为源头（放弃：ace_engine 才是子系统实现主仓，头文件随实现演进） | 符合"子系统拥有其接口"的 OpenHarmony 约定；避免双源头漂移 | 决定同步方向与 ABI 复核范围 |
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| OH_ArkUI_ArcSwiper_* 控制函数及 NODE_ARC_* 属性/事件接口（NDK C ABI） | 命令式节点相关接口使用错误 | 应用crash | 命令式节点接口使用错误 | 严重 | 输出LOG_FATAL并cppcrash，第一时间告知开发者使用错误 | "AddCustomProperty input params name or value is nullptr" / "RemoveCustomProperty input params name is nullptr" | 不涉及 |
+
 ## 设计骨架
 
 ### 骨架范围

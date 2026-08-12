@@ -340,6 +340,17 @@ void GetPageSceneForSubSource(const std::string& ruleJsonOrRuleSetId);
 | Web / UIExtension 透传失败 | 记录来源级摘要错误，不影响 ArkUI 宿主来源匹配。 |
 | 节流命中 | 不上报重复事件，保留最近命中状态用于后续差异判断。 |
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| PageSceneInputCountTracker | 节点上树成环 | 触发遍历时成环，无限递归导致爆栈可能导致cpp_crash | 递归遍历无限循环 | 严重 | 给开发者提供开关遍历测试中检测修复；崩溃时有堆栈和Fatal日志 | "LoopDetected: child[%{public}.*s] vs current[%{public}.*s]" | 不涉及 |
+| PageSceneInputCountTracker | 遍历期间移除子节点 | 可能导致cpp_crash | 在子节点遍历过程中执行移除操作，破坏遍历状态 | 严重 | 输出LOGF_ABORT，第一现场崩溃 | "Try to remove the child([%{public}s][%{public}d]) of " | 不涉及 |
+
 ## 测试与验证设计
 
 | 类型 | 覆盖点 |

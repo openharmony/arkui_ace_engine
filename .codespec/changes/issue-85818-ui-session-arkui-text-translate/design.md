@@ -477,6 +477,17 @@ Stage 3 实现应减少重复代码。翻译节点和纯 content change 共享�
 
 ## DFX 设计
 
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| PageTranslateNode | 分离期间访问宿主FrameNode | 可能导致UAF问题cpp_crash | Pattern在OnDetachFromMainTree期间仍尝试通过GetHost访问宿主节点 | 严重 | 输出LOGF_ABORT，第一现场崩溃 | "fatal: can't GetHost at detaching period" | 不涉及 |
+| ContentChangeManager | 遍历期间移除子节点 | 可能导致cpp_crash | 在子节点遍历过程中执行移除操作，破坏遍历状态 | 严重 | 输出LOGF_ABORT，第一现场崩溃 | "Try to remove the child([%{public}s][%{public}d]) of " | 不涉及 |
+| TextPattern | 文字绘制指令为空 | 文本不显示 | 字体引擎或开发者代码问题 | 一般 | 上报大数据 | 不涉及 | COMPONENT_EXCEPTION |
+| ContentChangeManager | WeakPtr裸指针使用 | UAF问题 cppcrash | 内部业务通过WeakPtr获取已销毁对象的裸指针使用，WeakPtr的Upgrade应先于裸指针访问 | 严重 | 排查代码中直接使用WeakPtr裸指针的地方并整改为安全的Upgrade方法 | 不涉及 | 不涉及 |
+
 现有 `UIContentServiceProxy::Connect` 在连接时创建 `UiReportStub`，并通过 `report_->SetEventHandler(eventHandler)` 保存 SA 传入的 `EventHandler`。`GetInspectorTree` 已在注册回调后调用 `PostGetInspectorTreeCallbackRemoveTask(timeout)`，通过 EventHandler 投递超时任务；超时后 `HandleInspectorTreeCallbackTimeout` 清理 callback。统一翻译接口沿用该 DFX 模式。
 
 大文本 IPC 统一复用现有 `LargeStringAshmem` 共享内存封装：`adapter/ohos/entrance/ui_session/include/large_string_ashmem.h` 定义 `WriteToAshmem`/`ReadFromAshmem`，`ui_report_proxy.cpp` 已用于 inspector/webInfo 大字符串写入 parcelable ashmem，`ui_report_stub.cpp` 已通过 `ReadParcelable<LargeStringAshmem>()` 读取。统一翻译文本 payload 遇到大文本时必须走该共享内存路径，不新增自定义分片协议。

@@ -191,6 +191,19 @@ graph TD
     K --> L
 ```
 
+## DFX 设计
+
+### DFX 故障模式分析
+
+> 知识来源：`docs/DFX/fmea.yaml`（仓 `arkui_ace_engine`，状态：READ）
+
+| 分析对象 | 故障模式 | 故障影响 | 故障原因 | 严酷度 | 恢复措施 | 关键日志 | 大数据打点事件 |
+|---------|----------|----------|-------------|---------|---------|---------|---------|
+| SetPixelMapPath (drawable_modifier.cpp) | 图片数据损坏 | 无法正确渲染图片 | 文件头宽高数据和实际图源不一致 | 一般 | 上报大数据 | 不涉及 | COMPONENT_EXCEPTION |
+| SetPixelMapResource (drawable_modifier.cpp) | 图片数据损坏 | 无法正确渲染图片 | 文件头宽高数据和实际图源不一致 | 一般 | 上报大数据 | 不涉及 | COMPONENT_EXCEPTION |
+| SetPixelMapResource (drawable_modifier.cpp) | 死亡对象非法Claim | 可能导致cpp_crash | 当对象的强引用计数为0时将触发对象析构，此时对象处于即将死亡状态，不能再通过Claim操作增加对象强引用计数，否则将获得野指针导致UAF问题 | 严重 | 通过在Claim操作时检测对象的强引用计数是否为0，让非法Claim操作在第一现场暴露 | "invalid claim: refCount=%{public}d, isNewOrRecycle=%{public}d" | 不涉及 |
+| PixelMapConstructor (js_drawable_descriptor.cpp) | UI对象类型转换错误 | 类型转换时C++编译器不能在编译期进行检查，需要开发者在运行期使用IsXxx方法检查JS对象类型，确保类型转换的安全 | 类型转换错误 | 严重 | 通过开关开启主动检查，提前拦截问题 | "bad type conversion" | 不涉及 |
+
 ## 风险和开放问题（增量）
 
 | 项 | 类型 | 影响 | 处理方式 | Owner |
