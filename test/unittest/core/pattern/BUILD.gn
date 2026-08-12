@@ -243,7 +243,7 @@ group("core_pattern_unittest") {
       "smart_layout:smart_layout_test_ng",
       "stack:stack_test_ng",
       "stage:stage_test_ng",
-      #"stepper:stepper_test_ng",
+      "stepper:stepper_test_ng",
 
       "swiper:swiper_test_ng",
       "symbol:symbol_test_ng",
